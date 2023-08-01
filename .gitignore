@@ -14,3 +14,6 @@ pgdata
 static/collected
 static/compiled
 node_modules
+
+# compiled
+staticfiles

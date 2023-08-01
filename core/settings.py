@@ -185,7 +185,7 @@ sentry_sdk.init(
     # environment variable, or infer a git commit
     # SHA as release, however you may want to set
     # something more human-readable.
-    # release="myapp@1.0.0",
+    # release="qfdmo@1.0.0",
 )
 
 # Default primary key field type
