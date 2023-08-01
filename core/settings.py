@@ -24,19 +24,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = decouple.config("SECRET_KEY")
 
-DEBUG = False
-try:
-    # SECURITY WARNING: don't run with debug turned on in production!
-    DEBUG = decouple.config("DEBUG")
-except decouple.UndefinedValueError:
-    pass
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = decouple.config("DEBUG", default=False, cast=bool)
 
-ALLOWED_HOSTS = []
-try:
-    ALLOWED_HOSTS = decouple.config("ALLOWED_HOSTS").split(",")
-except decouple.UndefinedValueError:
-    pass
-# ALLOWED_HOSTS = ["localhost"] + ALLOWED_HOSTS
+ALLOWED_HOSTS = decouple.config("ALLOWED_HOSTS", default="localhost", cast=str).split(
+    ","
+)
 
 # Application definition
 
@@ -80,6 +73,31 @@ with suppress(ModuleNotFoundError):
         "SHOW_TOOLBAR_CALLBACK": "operator.truth",
         "HIDE_IN_STACKTRACES": CONFIG_DEFAULTS["HIDE_IN_STACKTRACES"] + ("sentry_sdk",),
     }
+
+LOGLEVEL = decouple.config("LOGLEVEL", default="error", cast=str).upper()
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "default",
+        }
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": LOGLEVEL,
+        },
+    },
+    "formatters": {
+        "default": {
+            # exact format is not important, this is the minimum information
+            "format": "[%(asctime)s] %(name)-12s] %(levelname)-8s : %(message)s",
+        },
+    },
+}
 
 ROOT_URLCONF = "core.urls"
 
@@ -158,7 +176,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_ROOT = "staticfiles"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 STATIC_URL = "static/"
 STATICFILES_DIRS = [
     BASE_DIR / "static" / "to_collect",
@@ -166,8 +184,8 @@ STATICFILES_DIRS = [
 ]
 STORAGES = {
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"
-    }
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
 }
 WHITENOISE_KEEP_ONLY_HASHED_FILES = True
 
