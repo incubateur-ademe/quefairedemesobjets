@@ -1,0 +1,41 @@
+{
+    "scripts": {
+        "build": "parcel build",
+        "watch": "parcel watch",
+        "lint": "prettier --check static/to_compile"
+    },
+    "source": [
+        "static/to_compile/entrypoints/myapp.css",
+        "static/to_compile/entrypoints/myapp.ts"
+    ],
+    "targets": {
+        "default": {
+            "distDir": "./static/compiled"
+        }
+    },
+    "@parcel/transformer-css": {
+        "errorRecovery": true
+    },
+    "prettier": {
+        "trailingComma": "all",
+        "printWidth": 88,
+        "tabWidth": 4,
+        "semi": false,
+        "overrides": [
+            {
+                "files": "*yml",
+                "options": {
+                    "tabWidth": 2
+                }
+            }
+        ]
+    },
+    "dependencies": {
+        "@gouvfr/dsfr": "^1.10",
+        "tailwindcss": "^3.3.1"
+    },
+    "devDependencies": {
+        "prettier": "^2.8.7",
+        "parcel": "^2.8.3"
+    }
+}

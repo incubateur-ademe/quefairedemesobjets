@@ -1,0 +1,75 @@
+name: Build and test
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15.2-alpine
+        env:
+          POSTGRES_USER: myapp
+          POSTGRES_PASSWORD: myapp
+          POSTGRES_DB: myapp
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 1s
+          --health-timeout 1s
+          --health-retries 50
+        ports:
+          - 5435:5432
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          cache: "pip"
+          python-version: "3.11.2"
+      - name: Install Dependencies
+        run: pip install --require-hashes --no-deps -r requirements.txt -r dev-requirements.txt
+
+      - name: Run unit tests
+        run: pytest unit_tests
+
+      - name: Check code formatting
+        run: black --check --diff .
+
+  node:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: ".tool-versions"
+          cache: "npm"
+
+      - name: Build assets
+        run: |
+          npm ci
+          npm run build
+
+      - name: Check code formatting
+        run: npm run lint
+
+  # deploy:
+  #   needs: [python, node]
+  #   runs-on: ubuntu-latest
+  #   if: github.ref == 'refs/heads/main'
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: kolok/deploy-to-scalingo@v1
+  #       with:
+  #         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+  #         known-host: ssh.osc-fr1.scalingo.com
+  #         app-name: be-cause

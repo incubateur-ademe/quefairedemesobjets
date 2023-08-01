@@ -1,0 +1,13 @@
+version: "3"
+services:
+  postgres:
+    image: postgis/postgis:14-3.3-alpine
+    environment:
+      - POSTGRES_USER=myapp
+      - POSTGRES_PASSWORD=myapp
+      - POSTGRES_DB=myapp
+      - POSTGRES_MULTIPLE_EXTENSIONS=postgis
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data:delegated
+    ports:
+      - 6543:5432

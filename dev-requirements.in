@@ -1,0 +1,8 @@
+--constraint=requirements.txt
+
+black
+django-debug-toolbar
+honcho
+pytest
+pytest-django
+pytest-dotenv

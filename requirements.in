@@ -1,0 +1,8 @@
+dj-database-url
+dj-static
+Django
+gunicorn
+Jinja2
+psycopg2
+python-decouple
+whitenoise
