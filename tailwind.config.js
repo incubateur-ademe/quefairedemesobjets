@@ -1,7 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
     content: ["jinja2/**/*html", "static/to_compile/**/*{j,t}s"],
-    prefix: "myapp-",
+    prefix: "qfdmo-",
     corePlugins: {
         preflight: false,
     },

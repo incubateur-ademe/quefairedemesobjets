@@ -3,9 +3,9 @@ services:
   postgres:
     image: postgis/postgis:14-3.3-alpine
     environment:
-      - POSTGRES_USER=myapp
-      - POSTGRES_PASSWORD=myapp
-      - POSTGRES_DB=myapp
+      - POSTGRES_USER=qfdmo
+      - POSTGRES_PASSWORD=qfdmo
+      - POSTGRES_DB=qfdmo
       - POSTGRES_MULTIPLE_EXTENSIONS=postgis
     volumes:
       - ./pgdata:/var/lib/postgresql/data:delegated

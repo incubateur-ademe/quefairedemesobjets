@@ -5,8 +5,8 @@
         "lint": "prettier --check static/to_compile"
     },
     "source": [
-        "static/to_compile/entrypoints/myapp.css",
-        "static/to_compile/entrypoints/myapp.ts"
+        "static/to_compile/entrypoints/qfdmo.css",
+        "static/to_compile/entrypoints/qfdmo.ts"
     ],
     "targets": {
         "default": {

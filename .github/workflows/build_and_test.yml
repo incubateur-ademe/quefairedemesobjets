@@ -17,9 +17,9 @@ jobs:
       postgres:
         image: postgres:15.2-alpine
         env:
-          POSTGRES_USER: myapp
-          POSTGRES_PASSWORD: myapp
-          POSTGRES_DB: myapp
+          POSTGRES_USER: qfdmo
+          POSTGRES_PASSWORD: qfdmo
+          POSTGRES_DB: qfdmo
         options: >-
           --health-cmd pg_isready
           --health-interval 1s
@@ -62,14 +62,14 @@ jobs:
       - name: Check code formatting
         run: npm run lint
 
-  # deploy:
-  #   needs: [python, node]
-  #   runs-on: ubuntu-latest
-  #   if: github.ref == 'refs/heads/main'
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: kolok/deploy-to-scalingo@v1
-  #       with:
-  #         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-  #         known-host: ssh.osc-fr1.scalingo.com
-  #         app-name: be-cause
+  deploy:
+    needs: [python, node]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: kolok/deploy-to-scalingo@v1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known-host: ssh.osc-fr1.scalingo.com
+          app-name: quefairedemesobjets
