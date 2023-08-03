@@ -3,6 +3,7 @@
 black
 django-debug-toolbar
 honcho
+pre-commit
 ptpython
 pytest
 pytest-django
