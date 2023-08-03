@@ -51,3 +51,7 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
 # Assume Python 3.10.
 target-version = "py310"
+
+[tool.mypy]
+exclude = [ "migrations/" ]
+ignore_missing_imports = true
