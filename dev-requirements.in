@@ -3,6 +3,7 @@
 black
 django-debug-toolbar
 honcho
+ptpython
 pytest
 pytest-django
 pytest-dotenv
