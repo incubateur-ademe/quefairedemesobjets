@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
+    "qfdmo",
 ]
 
 if DEBUG:
