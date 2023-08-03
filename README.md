@@ -81,7 +81,15 @@ Ajouter les dépendances aux fichiers `requirements.in` et `dev-requirements.in`
 
 Compiler les dépendances:
 
-```
+```sh
 pip-compile dev-requirements.in --generate-hashes
 pip-compile requirements.in --generate-hashes
+```
+
+### Installer les hooks de pre-commit
+
+Pour installer les git hook de pre-commit, installer le package precommit et installer les hooks en executant pre-commit
+
+```sh
+pre-commit install
 ```
