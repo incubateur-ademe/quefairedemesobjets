@@ -55,3 +55,4 @@ target-version = "py310"
 [tool.mypy]
 exclude = [ "migrations/" ]
 ignore_missing_imports = true
+warn_return_any = false
