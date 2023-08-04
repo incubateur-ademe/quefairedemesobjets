@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from qfdmo.models import Action, Activity, Category, SubCategory
+from qfdmo.models import Action, Activity, Category, EntityType, SubCategory
 
 
 class SubCategoryAdmin(admin.ModelAdmin):
@@ -16,3 +16,4 @@ admin.site.register(SubCategory, SubCategoryAdmin)
 admin.site.register(Category)
 admin.site.register(Action)
 admin.site.register(Activity)
+admin.site.register(EntityType)
