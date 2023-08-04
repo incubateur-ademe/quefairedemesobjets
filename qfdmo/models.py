@@ -72,3 +72,12 @@ class Activity(NameAsNaturalKeyModel):
 
     def __str__(self) -> str:
         return self.name
+
+
+class EntityType(NameAsNaturalKeyModel):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    lvao_id = models.IntegerField(blank=True, null=True)
+
+    def __str__(self) -> str:
+        return self.name
