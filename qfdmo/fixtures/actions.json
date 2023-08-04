@@ -1,65 +1,65 @@
 [
-{
-    "model": "qfdmo.action",
-    "fields": {
-        "name": "réparer",
-        "lvao_id": 9
+    {
+        "model": "qfdmo.action",
+        "fields": {
+            "name": "réparer",
+            "lvao_id": 9
+        }
+    },
+    {
+        "model": "qfdmo.action",
+        "fields": {
+            "name": "acheter d'occasion",
+            "lvao_id": 44
+        }
+    },
+    {
+        "model": "qfdmo.action",
+        "fields": {
+            "name": "revendre",
+            "lvao_id": 6
+        }
+    },
+    {
+        "model": "qfdmo.action",
+        "fields": {
+            "name": "donner",
+            "lvao_id": 7
+        }
+    },
+    {
+        "model": "qfdmo.action",
+        "fields": {
+            "name": "louer",
+            "lvao_id": 4
+        }
+    },
+    {
+        "model": "qfdmo.action",
+        "fields": {
+            "name": "mettre en location",
+            "lvao_id": 50
+        }
+    },
+    {
+        "model": "qfdmo.action",
+        "fields": {
+            "name": "emprunter",
+            "lvao_id": 51
+        }
+    },
+    {
+        "model": "qfdmo.action",
+        "fields": {
+            "name": "prêter",
+            "lvao_id": 5
+        }
+    },
+    {
+        "model": "qfdmo.action",
+        "fields": {
+            "name": "échanger",
+            "lvao_id": 8
+        }
     }
-},
-{
-    "model": "qfdmo.action",
-    "fields": {
-        "name": "acheter d'occasion",
-        "lvao_id": 44
-    }
-},
-{
-    "model": "qfdmo.action",
-    "fields": {
-        "name": "revendre",
-        "lvao_id": 6
-    }
-},
-{
-    "model": "qfdmo.action",
-    "fields": {
-        "name": "donner",
-        "lvao_id": 7
-    }
-},
-{
-    "model": "qfdmo.action",
-    "fields": {
-        "name": "louer",
-        "lvao_id": 4
-    }
-},
-{
-    "model": "qfdmo.action",
-    "fields": {
-        "name": "mettre en location",
-        "lvao_id": 50
-    }
-},
-{
-    "model": "qfdmo.action",
-    "fields": {
-        "name": "emprunter",
-        "lvao_id": 51
-    }
-},
-{
-    "model": "qfdmo.action",
-    "fields": {
-        "name": "prêter",
-        "lvao_id": 5
-    }
-},
-{
-    "model": "qfdmo.action",
-    "fields": {
-        "name": "échanger",
-        "lvao_id": 8
-    }
-}
 ]
