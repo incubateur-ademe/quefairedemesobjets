@@ -1,19 +1,25 @@
 from django.contrib import admin
 
-from qfdmo.models import Action, Activity, Category, EntityType, SubCategory
+from qfdmo.models import (
+    Action,
+    CategorieObjet,
+    EntiteService,
+    EntiteType,
+    SousCategorieObjet,
+)
 
 
-class SubCategoryAdmin(admin.ModelAdmin):
-    list_display = ("name", "category", "code")
+class SousCategorieAdmin(admin.ModelAdmin):
+    list_display = ("nom", "categorie", "code")
     search_fields = [
-        "category__name",
+        "categorie__nom",
         "code",
-        "name",
+        "nom",
     ]
 
 
-admin.site.register(SubCategory, SubCategoryAdmin)
-admin.site.register(Category)
+admin.site.register(SousCategorieObjet, SousCategorieAdmin)
+admin.site.register(CategorieObjet)
 admin.site.register(Action)
-admin.site.register(Activity)
-admin.site.register(EntityType)
+admin.site.register(EntiteService)
+admin.site.register(EntiteType)
