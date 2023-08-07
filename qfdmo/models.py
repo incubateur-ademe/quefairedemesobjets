@@ -2,82 +2,74 @@ from django.db import models
 from unidecode import unidecode
 
 
-class NameAsNaturalKeyManager(models.Manager):
-    def get_by_natural_key(self, name: str) -> models.Model:
-        return self.get(name=name)
+class NomAsNaturalKeyManager(models.Manager):
+    def get_by_natural_key(self, nom: str) -> models.Model:
+        return self.get(nom=nom)
 
 
-class NameAsNaturalKeyModel(models.Model):
+class NomAsNaturalKeyModel(models.Model):
     class Meta:
         abstract = True
 
-    objects = NameAsNaturalKeyManager()
+    objects = NomAsNaturalKeyManager()
 
-    name = models.CharField()
+    nom = models.CharField()
 
     def natural_key(self) -> tuple[str]:
-        return (self.name,)
+        return (self.nom,)
 
     def __str__(self) -> str:
-        return self.name
+        return self.nom
 
 
-class Category(NameAsNaturalKeyModel):
+class CategorieObjet(NomAsNaturalKeyModel):
     class Meta:
-        verbose_name = "Category"
-        verbose_name_plural = "Categories"
-
-    objects = NameAsNaturalKeyManager()
+        verbose_name = "Catégorie d'objets"
+        verbose_name_plural = "Catégories d'objets"
 
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
 
 
-class SubCategory(NameAsNaturalKeyModel):
+class SousCategorieObjet(NomAsNaturalKeyModel):
     class Meta:
-        verbose_name = "Subcategory"
-        verbose_name_plural = "Subcategories"
-
-    objects = NameAsNaturalKeyManager()
+        verbose_name = "Sous catégorie d'objets"
+        verbose_name_plural = "Sous catégories d'objets"
 
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
     lvao_id = models.IntegerField(blank=True, null=True)
-    category = models.ForeignKey(
-        Category, on_delete=models.CASCADE, blank=True, null=True
+    categorie = models.ForeignKey(
+        CategorieObjet, on_delete=models.CASCADE, blank=True, null=True
     )
     code = models.CharField(max_length=10, unique=True, blank=False, null=False)
 
     @property
-    def sanitized_name(self) -> str:
-        return unidecode(self.name).upper()
+    def sanitized_nom(self) -> str:
+        return unidecode(self.nom).upper()
 
 
-class Action(NameAsNaturalKeyModel):
+class Action(NomAsNaturalKeyModel):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
     lvao_id = models.IntegerField(blank=True, null=True)
 
-    def __str__(self) -> str:
-        return self.name
 
-
-class Activity(NameAsNaturalKeyModel):
+class EntiteService(NomAsNaturalKeyModel):
     class Meta:
-        verbose_name_plural = "Activities"
+        verbose_name = "Service proposé par l'entité"
+        verbose_name_plural = "Services proposés par l'entité"
 
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
     lvao_id = models.IntegerField(blank=True, null=True)
 
-    def __str__(self) -> str:
-        return self.name
 
+class EntiteType(NomAsNaturalKeyModel):
+    class Meta:
+        verbose_name = "Type d'entité"
+        verbose_name_plural = "Types d'entité"
 
-class EntityType(NameAsNaturalKeyModel):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
     lvao_id = models.IntegerField(blank=True, null=True)
-
-    def __str__(self) -> str:
-        return self.name
