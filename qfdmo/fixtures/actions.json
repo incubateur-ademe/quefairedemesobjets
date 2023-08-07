@@ -2,63 +2,63 @@
     {
         "model": "qfdmo.action",
         "fields": {
-            "name": "réparer",
+            "nom": "réparer",
             "lvao_id": 9
         }
     },
     {
         "model": "qfdmo.action",
         "fields": {
-            "name": "acheter d'occasion",
+            "nom": "acheter d'occasion",
             "lvao_id": 44
         }
     },
     {
         "model": "qfdmo.action",
         "fields": {
-            "name": "revendre",
+            "nom": "revendre",
             "lvao_id": 6
         }
     },
     {
         "model": "qfdmo.action",
         "fields": {
-            "name": "donner",
+            "nom": "donner",
             "lvao_id": 7
         }
     },
     {
         "model": "qfdmo.action",
         "fields": {
-            "name": "louer",
+            "nom": "louer",
             "lvao_id": 4
         }
     },
     {
         "model": "qfdmo.action",
         "fields": {
-            "name": "mettre en location",
+            "nom": "mettre en location",
             "lvao_id": 50
         }
     },
     {
         "model": "qfdmo.action",
         "fields": {
-            "name": "emprunter",
+            "nom": "emprunter",
             "lvao_id": 51
         }
     },
     {
         "model": "qfdmo.action",
         "fields": {
-            "name": "prêter",
+            "nom": "prêter",
             "lvao_id": 5
         }
     },
     {
         "model": "qfdmo.action",
         "fields": {
-            "name": "échanger",
+            "nom": "échanger",
             "lvao_id": 8
         }
     }

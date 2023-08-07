@@ -1,0 +1,323 @@
+[
+    {
+        "model": "qfdmo.categorieobjet",
+        "fields": {
+            "nom": "Electroménager"
+        }
+    },
+    {
+        "model": "qfdmo.categorieobjet",
+        "fields": {
+            "nom": "Image & son & Informatique"
+        }
+    },
+    {
+        "model": "qfdmo.categorieobjet",
+        "fields": {
+            "nom": "Livres & Multimedia"
+        }
+    },
+    {
+        "model": "qfdmo.categorieobjet",
+        "fields": {
+            "nom": "Equipements de loisir"
+        }
+    },
+    {
+        "model": "qfdmo.categorieobjet",
+        "fields": {
+            "nom": "Bricolage / Jardinage"
+        }
+    },
+    {
+        "model": "qfdmo.categorieobjet",
+        "fields": {
+            "nom": "Mobilier et décoration"
+        }
+    },
+    {
+        "model": "qfdmo.categorieobjet",
+        "fields": {
+            "nom": "Vêtements & Accessoires"
+        }
+    },
+    {
+        "model": "qfdmo.categorieobjet",
+        "fields": {
+            "nom": "Produits divers"
+        }
+    },
+    {
+        "model": "qfdmo.categorieobjet",
+        "fields": {
+            "nom": "Bijou, montre, horlogerie"
+        }
+    },
+    {
+        "model": "qfdmo.categorieobjet",
+        "fields": {
+            "nom": "Tout type"
+        }
+    },
+    {
+        "model": "qfdmo.souscategorieobjet",
+        "fields": {
+            "nom": "Gros électroménager (froid)",
+            "lvao_id": 171,
+            "categorie": ["Electroménager"],
+            "code": "C_01"
+        }
+    },
+    {
+        "model": "qfdmo.souscategorieobjet",
+        "fields": {
+            "nom": "Gros électroménager (hors froid)",
+            "lvao_id": 172,
+            "categorie": ["Electroménager"],
+            "code": "C_02"
+        }
+    },
+    {
+        "model": "qfdmo.souscategorieobjet",
+        "fields": {
+            "nom": "Petit électroménager",
+            "lvao_id": 173,
+            "categorie": ["Electroménager"],
+            "code": "C_03"
+        }
+    },
+    {
+        "model": "qfdmo.souscategorieobjet",
+        "fields": {
+            "nom": "Écrans",
+            "lvao_id": 174,
+            "categorie": ["Image & son & Informatique"],
+            "code": "C_04"
+        }
+    },
+    {
+        "model": "qfdmo.souscategorieobjet",
+        "fields": {
+            "nom": "Matériel informatique",
+            "lvao_id": 176,
+            "categorie": ["Image & son & Informatique"],
+            "code": "C_05"
+        }
+    },
+    {
+        "model": "qfdmo.souscategorieobjet",
+        "fields": {
+            "nom": "Hifi/vidéo (hors écrans)",
+            "lvao_id": 177,
+            "categorie": ["Image & son & Informatique"],
+            "code": "C_06"
+        }
+    },
+    {
+        "model": "qfdmo.souscategorieobjet",
+        "fields": {
+            "nom": "Smartphones/tablettes/consoles",
+            "lvao_id": 175,
+            "categorie": ["Image & son & Informatique"],
+            "code": "C_07"
+        }
+    },
+    {
+        "model": "qfdmo.souscategorieobjet",
+        "fields": {
+            "nom": "Photo/ciné",
+            "lvao_id": 178,
+            "categorie": ["Image & son & Informatique"],
+            "code": "C_08"
+        }
+    },
+    {
+        "model": "qfdmo.souscategorieobjet",
+        "fields": {
+            "nom": "Autres équipements électroniques",
+            "lvao_id": 179,
+            "categorie": ["Image & son & Informatique"],
+            "code": "C_09"
+        }
+    },
+    {
+        "model": "qfdmo.souscategorieobjet",
+        "fields": {
+            "nom": "CD/DVD/jeux vidéo",
+            "lvao_id": 180,
+            "categorie": ["Livres & Multimedia"],
+            "code": "C_10"
+        }
+    },
+    {
+        "model": "qfdmo.souscategorieobjet",
+        "fields": {
+            "nom": "Livres",
+            "lvao_id": 181,
+            "categorie": ["Livres & Multimedia"],
+            "code": "C_11"
+        }
+    },
+    {
+        "model": "qfdmo.souscategorieobjet",
+        "fields": {
+            "nom": "Instruments de musique",
+            "lvao_id": 182,
+            "categorie": ["Equipements de loisir"],
+            "code": "C_12"
+        }
+    },
+    {
+        "model": "qfdmo.souscategorieobjet",
+        "fields": {
+            "nom": "Outillage (bricolage/jardinage)",
+            "lvao_id": 183,
+            "categorie": ["Bricolage / Jardinage"],
+            "code": "C_13"
+        }
+    },
+    {
+        "model": "qfdmo.souscategorieobjet",
+        "fields": {
+            "nom": "Jardin (mobilier, accessoires)",
+            "lvao_id": 184,
+            "categorie": ["Equipements de loisir"],
+            "code": "C_14"
+        }
+    },
+    {
+        "model": "qfdmo.souscategorieobjet",
+        "fields": {
+            "nom": "Mobilier",
+            "lvao_id": 185,
+            "categorie": ["Mobilier et décoration"],
+            "code": "C_15"
+        }
+    },
+    {
+        "model": "qfdmo.souscategorieobjet",
+        "fields": {
+            "nom": "Décoration",
+            "lvao_id": 186,
+            "categorie": ["Mobilier et décoration"],
+            "code": "C_16"
+        }
+    },
+    {
+        "model": "qfdmo.souscategorieobjet",
+        "fields": {
+            "nom": "Luminaires",
+            "lvao_id": 187,
+            "categorie": ["Mobilier et décoration"],
+            "code": "C_17"
+        }
+    },
+    {
+        "model": "qfdmo.souscategorieobjet",
+        "fields": {
+            "nom": "Vaisselle",
+            "lvao_id": 189,
+            "categorie": ["Mobilier et décoration"],
+            "code": "C_18"
+        }
+    },
+    {
+        "model": "qfdmo.souscategorieobjet",
+        "fields": {
+            "nom": "Linge de maison",
+            "lvao_id": 190,
+            "categorie": ["Vêtements & Accessoires"],
+            "code": "C_19"
+        }
+    },
+    {
+        "model": "qfdmo.souscategorieobjet",
+        "fields": {
+            "nom": "Puériculture",
+            "lvao_id": 191,
+            "categorie": ["Produits divers"],
+            "code": "C_20"
+        }
+    },
+    {
+        "model": "qfdmo.souscategorieobjet",
+        "fields": {
+            "nom": "Jouets",
+            "lvao_id": 192,
+            "categorie": ["Equipements de loisir"],
+            "code": "C_21"
+        }
+    },
+    {
+        "model": "qfdmo.souscategorieobjet",
+        "fields": {
+            "nom": "Vêtements",
+            "lvao_id": 193,
+            "categorie": ["Vêtements & Accessoires"],
+            "code": "C_22"
+        }
+    },
+    {
+        "model": "qfdmo.souscategorieobjet",
+        "fields": {
+            "nom": "Maroquinerie",
+            "lvao_id": 194,
+            "categorie": ["Vêtements & Accessoires"],
+            "code": "C_23"
+        }
+    },
+    {
+        "model": "qfdmo.souscategorieobjet",
+        "fields": {
+            "nom": "Chaussures",
+            "lvao_id": 195,
+            "categorie": ["Vêtements & Accessoires"],
+            "code": "C_24"
+        }
+    },
+    {
+        "model": "qfdmo.souscategorieobjet",
+        "fields": {
+            "nom": "Bijou, montre, horlogerie",
+            "lvao_id": 196,
+            "categorie": ["Bijou, montre, horlogerie"],
+            "code": "C_25"
+        }
+    },
+    {
+        "model": "qfdmo.souscategorieobjet",
+        "fields": {
+            "nom": "Vélos",
+            "lvao_id": 197,
+            "categorie": ["Equipements de loisir"],
+            "code": "C_26"
+        }
+    },
+    {
+        "model": "qfdmo.souscategorieobjet",
+        "fields": {
+            "nom": "Autre matériel de sport",
+            "lvao_id": 198,
+            "categorie": ["Equipements de loisir"],
+            "code": "C_27"
+        }
+    },
+    {
+        "model": "qfdmo.souscategorieobjet",
+        "fields": {
+            "nom": "Matériel médical",
+            "lvao_id": 199,
+            "categorie": ["Produits divers"],
+            "code": "C_28"
+        }
+    },
+    {
+        "model": "qfdmo.souscategorieobjet",
+        "fields": {
+            "nom": "Tout type",
+            "lvao_id": null,
+            "categorie": ["Tout type"],
+            "code": ""
+        }
+    }
+]
