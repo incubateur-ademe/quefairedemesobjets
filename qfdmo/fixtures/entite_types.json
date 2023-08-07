@@ -1,0 +1,37 @@
+[
+    {
+        "model": "qfdmo.entitetype",
+        "fields": {
+            "nom": "Association, entreprise de l'économie sociale et solidaire",
+            "lvao_id": 151
+        }
+    },
+    {
+        "model": "qfdmo.entitetype",
+        "fields": {
+            "nom": "Collectivité, établissement public",
+            "lvao_id": 152
+        }
+    },
+    {
+        "model": "qfdmo.entitetype",
+        "fields": {
+            "nom": "Artisan, commerce indépendant",
+            "lvao_id": 153
+        }
+    },
+    {
+        "model": "qfdmo.entitetype",
+        "fields": {
+            "nom": "Franchise, enseigne commerciale",
+            "lvao_id": 154
+        }
+    },
+    {
+        "model": "qfdmo.entitetype",
+        "fields": {
+            "nom": "Acteur digital (site web, app. mobile)",
+            "lvao_id": 155
+        }
+    }
+]
