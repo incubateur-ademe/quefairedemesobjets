@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
+    "explorer",
     "qfdmo",
 ]
 
@@ -137,8 +138,22 @@ WSGI_APPLICATION = "core.wsgi.application"
 DATABASE_URL = decouple.config("DATABASE_URL")
 default_settings = dj_database_url.parse(DATABASE_URL)
 
+# EXPLORER settings
+# from https://django-sql-explorer.readthedocs.io/en/latest/install.html
+# The readonly access is configured with fake access when DB_READONLY env
+# variable is not set.
+DB_READONLY = decouple.config(
+    "DB_READONLY",
+    cast=str,
+    default="postgres://fakeusername:fakepassword@postgres:5432/database",
+)
+readonly_settings = dj_database_url.parse(DB_READONLY)
 
-DATABASES = {"default": default_settings}
+DATABASES = {"default": default_settings, "readonly": readonly_settings}
+
+EXPLORER_CONNECTIONS = {"Default": "readonly"}
+EXPLORER_DEFAULT_CONNECTION = "readonly"
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
