@@ -1,6 +1,7 @@
 dj-database-url
 dj-static
 Django
+django-sql-explorer
 gunicorn
 Jinja2
 psycopg2
