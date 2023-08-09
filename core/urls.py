@@ -23,6 +23,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/login/", auth_views.LoginView.as_view(), name="login"),
     path("accounts/logout/", auth_views.logout_then_login, name="logout"),
+    path("explorer/", include("explorer.urls")),
     path("", include(("qfdmo.urls", "qfdmo"), namespace="qfdmo")),
 ]
 

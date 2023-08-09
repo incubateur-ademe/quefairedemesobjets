@@ -25,6 +25,11 @@ django==4.2.4 \
     # via
     #   -r requirements.in
     #   dj-database-url
+    #   django-sql-explorer
+django-sql-explorer==3.2.1 \
+    --hash=sha256:35e05f40eff91eead10c553cce2ee63033a19ac39c99b9ccdf87552c52784d63 \
+    --hash=sha256:735cc39e4ae2629049571229e2f7a8c8a54af4a988fcad12a333597724adaad7
+    # via -r requirements.in
 gunicorn==21.2.0 \
     --hash=sha256:3213aa5e8c24949e792bcacfc176fef362e7aac80b76c56f6b5122bf350722f0 \
     --hash=sha256:88ec8bff1d634f98e61b9f65bc4bf3cd918a90806c6f5c48bc5603849ec81033
@@ -113,7 +118,9 @@ sentry-sdk==1.29.2 \
 sqlparse==0.4.4 \
     --hash=sha256:5430a4fe2ac7d0f93e66f1efc6e1338a41884b7ddf2a350cedd20ccc4d9d28f3 \
     --hash=sha256:d446183e84b8349fa3061f0fe7f06ca94ba65b426946ffebe6e3e8295332420c
-    # via django
+    # via
+    #   django
+    #   django-sql-explorer
 static3==0.7.0 \
     --hash=sha256:674641c64bc75507af2eb20bef7e7e3593dca993dec6674be108fa15b42f47c8
     # via dj-static
