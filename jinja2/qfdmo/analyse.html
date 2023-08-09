@@ -1,0 +1,14 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+    <div class="qfdmo-content-center">
+        <h1>Analyse de la base de données LVAO</h1>
+        <p>
+            Nb d'acteurs avec plusieurs revisions: {{acteur_reemplois.count()}}
+        </p>
+        {% for acteur_reemploi in acteur_reemplois %}
+            <h2><a href="{{ reverse('qfdmo:analyse_acteur_reemploi', args=[acteur_reemploi.id]) }}">{{ acteur_reemploi.nom }}</a></h2>
+            <p>Nb révision : {{ acteur_reemploi.acteur_reemploi_revision_count }}</p>
+        {% endfor %}
+    </div>
+{% endblock %}
