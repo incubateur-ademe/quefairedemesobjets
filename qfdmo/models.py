@@ -73,3 +73,68 @@ class EntiteType(NomAsNaturalKeyModel):
     id = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
     lvao_id = models.IntegerField(blank=True, null=True)
+
+
+class ActeurReemploi(NomAsNaturalKeyModel):
+    class Meta:
+        verbose_name = "Acteur du réemploi"
+        verbose_name_plural = "Acteurs du réemploi"
+
+    id = models.AutoField(primary_key=True)
+    nom = models.CharField(max_length=255, blank=False, null=False)  # title
+    identifiant_unique = models.CharField(
+        max_length=255, blank=True, null=True, unique=True
+    )  # UniqueId
+
+
+class ActeurReemploiRevision(NomAsNaturalKeyModel):
+    class Meta:
+        verbose_name = "Acteur du réemploi révision"
+        verbose_name_plural = "Acteurs du réemploi révision"
+
+    id = models.AutoField(primary_key=True)
+    acteur_reemploi = models.ForeignKey(
+        ActeurReemploi,
+        on_delete=models.CASCADE,
+        null=False,
+        related_name="acteur_reemploi_revisions",
+    )
+    lvao_node_id = models.IntegerField(null=False)  # node_id
+    lvao_revision_id = models.IntegerField(null=True, unique=True)  # revision_id
+    nom = models.CharField(max_length=255, blank=False, null=False)  # title
+    entite_type = models.ForeignKey(
+        EntiteType, on_delete=models.CASCADE, blank=True, null=True
+    )  # TypeActeur
+    adresse = models.CharField(max_length=255, blank=True, null=True)  # Adresse1
+    adresse_complement = models.CharField(
+        max_length=255, blank=True, null=True
+    )  # Adresse2
+    code_postal = models.CharField(max_length=10, blank=True, null=True)  # CodePostal
+    ville = models.CharField(max_length=255, blank=True, null=True)  # Ville
+    url = models.CharField(max_length=2048, blank=True, null=True)  # url
+    email = models.EmailField(blank=True, null=True)  # email
+    latitude = models.FloatField(blank=True, null=True)  # latitude
+    longitude = models.FloatField(blank=True, null=True)  # longitude
+    telephone = models.CharField(max_length=255, blank=True, null=True)  # Telephone
+    multi_base = models.BooleanField(default=False)  # MultiBase
+    nom_commercial = models.CharField(max_length=255, blank=True, null=True)  # NomCial
+    nom_officiel = models.CharField(
+        max_length=255, blank=True, null=True
+    )  # RaisonSociale
+    publie = models.BooleanField(default=False)  # Published
+    manuel = models.BooleanField(default=False)  # Manuel
+    label_reparacteur = models.BooleanField(default=False)  # Reparacteur
+    siret = models.CharField(max_length=14, blank=True, null=True)  # Siret
+    source_donnee = models.CharField(
+        max_length=255, blank=True, null=True
+    )  # BDD # todo: choice field
+    identifiant_externe = models.CharField(
+        max_length=255, blank=True, null=True
+    )  # ActeurId
+    actions = models.ManyToManyField(Action, related_name="actions")  # Geste
+    services = models.ManyToManyField(
+        EntiteService, related_name="services"
+    )  # Activite
+    sous_categories = models.ManyToManyField(
+        SousCategorieObjet, related_name="sous_categories"
+    )  # Objets
