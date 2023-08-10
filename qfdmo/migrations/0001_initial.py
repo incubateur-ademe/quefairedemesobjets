@@ -55,6 +55,8 @@ class Migration(migrations.Migration):
             ],
             options={
                 "abstract": False,
+                "verbose_name": "Type d'entité",
+                "verbose_name_plural": "Types d'entité",
             },
         ),
         migrations.CreateModel(

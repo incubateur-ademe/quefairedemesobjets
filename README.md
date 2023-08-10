@@ -93,3 +93,27 @@ Pour installer les git hook de pre-commit, installer le package precommit et ins
 ```sh
 pre-commit install
 ```
+
+### populate Acteur Réemploi from LVAO Base file
+
+Create a one-off contanier and download LVAO base file from your local using --file option.
+
+```sh
+scalingo --region osc-fr1 --app quefairedemesobjets run --file backup_db.bak/Base_20221218_Depart.csv bash
+```
+
+following message should be display in prompt:
+
+```txt
+-----> Starting container one-off-1576  Done in 0.224 seconds
+ Upload /Users/nicolasoudard/workspace/beta.gouv.fr/quefairedemesobjets/backup_db.bak/Base_20221218_Depart.csv to container.
+…
+```
+
+uploaded file is stored in `/tmp/uploads` folder
+
+Launch import :
+
+```sh
+python manage.py populate_lvao_base /tmp/uploads/Base_20221218_Depart.csv
+```

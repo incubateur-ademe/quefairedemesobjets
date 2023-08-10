@@ -1,12 +1,12 @@
 from django.contrib import admin
 
 from qfdmo.models import (
-    ActeurReemploi,
-    ActeurReemploiRevision,
     Action,
     CategorieObjet,
     EntiteService,
     EntiteType,
+    LVAOBase,
+    LVAOBaseRevision,
     SousCategorieObjet,
 )
 
@@ -20,7 +20,7 @@ class SousCategorieAdmin(admin.ModelAdmin):
     ]
 
 
-class ActeurReemploiRevisionAdmin(admin.ModelAdmin):
+class LVAOBaseRevisionAdmin(admin.ModelAdmin):
     list_display = ("nom", "url")
     search_fields = [
         "nom",
@@ -32,7 +32,7 @@ class ActeurReemploiRevisionAdmin(admin.ModelAdmin):
     ]
 
 
-class ActeurReemploiAdmin(admin.ModelAdmin):
+class LVAOBaseAdmin(admin.ModelAdmin):
     list_display = ("nom", "identifiant_unique")
     search_fields = [
         "nom",
@@ -45,5 +45,5 @@ admin.site.register(CategorieObjet)
 admin.site.register(Action)
 admin.site.register(EntiteService)
 admin.site.register(EntiteType)
-admin.site.register(ActeurReemploi, ActeurReemploiAdmin)
-admin.site.register(ActeurReemploiRevision, ActeurReemploiRevisionAdmin)
+admin.site.register(LVAOBase, LVAOBaseAdmin)
+admin.site.register(LVAOBaseRevision, LVAOBaseRevisionAdmin)

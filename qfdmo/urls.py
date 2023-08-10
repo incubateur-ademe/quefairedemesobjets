@@ -7,7 +7,7 @@ urlpatterns = [
     path("analyse", views.analyse, name="analyse"),
     path(
         "analyse/<int:id>",
-        views.analyse_acteur_reemploi,
-        name="analyse_acteur_reemploi",
+        views.analyse_lvao_base,
+        name="analyse_lvao_base",
     ),
 ]
