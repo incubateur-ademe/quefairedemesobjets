@@ -78,9 +78,19 @@
                         {% endfor %}
                     </tr>
                     <tr>
+                        <td>Services</td>
+                        {% for lvao_base_revision in lvao_base_revisions %}
+                            <td scope="col">
+                                {% for service in lvao_base_revision.acteur_services.all() %}
+                                    {{ service }}<br>
+                                {% endfor %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
                         <td>Type d'entité</td>
                         {% for lvao_base_revision in lvao_base_revisions %}
-                            <td scope="col">{{ lvao_base_revision.entite_type }} </td>
+                            <td scope="col">{{ lvao_base_revision.acteur_type }} </td>
                         {% endfor %}
                     </tr>
                     <tr>
