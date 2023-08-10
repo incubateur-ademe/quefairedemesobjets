@@ -6,9 +6,9 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from qfdmo.models import (
+    ActeurService,
+    ActeurType,
     Action,
-    EntiteService,
-    EntiteType,
     LVAOBase,
     LVAOBaseRevision,
     SousCategorieObjet,
@@ -18,7 +18,7 @@ mapping_fields_base_db = {
     "revision_id": "lvao_revision_id",
     "node_id": "lvao_node_id",
     "title": "nom",
-    "TypeActeur": "entite_type",
+    "TypeActeur": "acteur_type",
     "Adresse1": "adresse",
     "Adresse2": "adresse_complement",
     "CodePostal": "code_postal",
@@ -42,7 +42,7 @@ mapping_fields_base_db = {
 
 mapping_many_to_many_base_db = {
     "Geste": "actions",
-    "Activite": "services",
+    "Activite": "acteur_services",
     "Objets": "sous_categories",
 }
 
@@ -88,8 +88,8 @@ class Command(BaseCommand):
                     )
                     del new_entite["identifiant_unique"]
                     new_entite["lvao_base"] = lvao_base
-                    new_entite["entite_type"] = EntiteType.objects.get(
-                        lvao_id=new_entite["entite_type"]
+                    new_entite["acteur_type"] = ActeurType.objects.get(
+                        lvao_id=new_entite["acteur_type"]
                     )
                     new_entite["longitude"] = (
                         float(new_entite["longitude"])
@@ -115,9 +115,9 @@ class Command(BaseCommand):
                             lvao_id__in=new_entite_relationships["actions"]
                         )
                     )
-                    lvao_base_revision.services.set(
-                        EntiteService.objects.filter(
-                            lvao_id__in=new_entite_relationships["services"]
+                    lvao_base_revision.acteur_services.set(
+                        ActeurService.objects.filter(
+                            lvao_id__in=new_entite_relationships["acteur_services"]
                         )
                     )
                     lvao_base_revision.sous_categories.set(

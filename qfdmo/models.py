@@ -55,20 +55,21 @@ class Action(NomAsNaturalKeyModel):
     lvao_id = models.IntegerField(blank=True, null=True)
 
 
-class EntiteService(NomAsNaturalKeyModel):
+class ActeurService(NomAsNaturalKeyModel):
     class Meta:
-        verbose_name = "Service proposé par l'entité"
-        verbose_name_plural = "Services proposés par l'entité"
+        verbose_name = "Service proposé"
+        verbose_name_plural = "Services proposés"
 
     id = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
     lvao_id = models.IntegerField(blank=True, null=True)
+    actions = models.ManyToManyField(Action)
 
 
-class EntiteType(NomAsNaturalKeyModel):
+class ActeurType(NomAsNaturalKeyModel):
     class Meta:
-        verbose_name = "Type d'entité"
-        verbose_name_plural = "Types d'entité"
+        verbose_name = "Type d'acteur"
+        verbose_name_plural = "Types d'acteur"
 
     id = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
@@ -102,8 +103,8 @@ class LVAOBaseRevision(NomAsNaturalKeyModel):
     lvao_node_id = models.IntegerField(null=False)  # node_id
     lvao_revision_id = models.IntegerField(null=True, unique=True)  # revision_id
     nom = models.CharField(max_length=255, blank=False, null=False)  # title
-    entite_type = models.ForeignKey(
-        EntiteType, on_delete=models.CASCADE, blank=True, null=True
+    acteur_type = models.ForeignKey(
+        ActeurType, on_delete=models.CASCADE, blank=True, null=True
     )  # TypeActeur
     adresse = models.CharField(max_length=255, blank=True, null=True)  # Adresse1
     adresse_complement = models.CharField(
@@ -132,8 +133,8 @@ class LVAOBaseRevision(NomAsNaturalKeyModel):
         max_length=255, blank=True, null=True
     )  # ActeurId
     actions = models.ManyToManyField(Action, related_name="actions")  # Geste
-    services = models.ManyToManyField(
-        EntiteService, related_name="services"
+    acteur_services = models.ManyToManyField(
+        ActeurService, related_name="acteur_services"
     )  # Activite
     sous_categories = models.ManyToManyField(
         SousCategorieObjet, related_name="sous_categories"
