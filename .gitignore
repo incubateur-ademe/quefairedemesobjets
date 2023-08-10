@@ -6,6 +6,7 @@ __pycache__
 .parcel-cache
 .venv
 *.bak
+*.swp
 
 # DB
 pgdata

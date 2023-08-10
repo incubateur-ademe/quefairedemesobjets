@@ -4,11 +4,28 @@
     <div class="qfdmo-content-center">
         <h1>Analyse de la base de données LVAO</h1>
         <p>
-            Nb d'acteurs avec plusieurs revisions: {{acteur_reemplois.count()}}
+            Nb d'acteurs avec plusieurs revisions pour les mêmes actions: {{lvao_bases.count()}}
         </p>
-        {% for acteur_reemploi in acteur_reemplois %}
-            <h2><a href="{{ reverse('qfdmo:analyse_acteur_reemploi', args=[acteur_reemploi.id]) }}">{{ acteur_reemploi.nom }}</a></h2>
-            <p>Nb révision : {{ acteur_reemploi.acteur_reemploi_revision_count }}</p>
-        {% endfor %}
+        <div class="fr-table">
+            <table>
+                <caption>Acteur du réemploi ayant plusieurs occurences</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Acteur du Réemploi</th>
+                        <th scope="col">Nb Révisions</th>
+                        <th scope="col">Nb Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lvao_base in lvao_bases %}
+                        <tr>
+                            <td><a href="{{ reverse('qfdmo:analyse_lvao_base', args=[lvao_base.id]) }}">{{ lvao_base.nom }}</a></td>
+                            <td>{{ lvao_base.lvao_base_revision_count }}</td>
+                            <td>{{ lvao_base.action_count }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 {% endblock %}
