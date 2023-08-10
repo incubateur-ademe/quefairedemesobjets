@@ -75,10 +75,10 @@ class EntiteType(NomAsNaturalKeyModel):
     lvao_id = models.IntegerField(blank=True, null=True)
 
 
-class ActeurReemploi(NomAsNaturalKeyModel):
+class LVAOBase(NomAsNaturalKeyModel):
     class Meta:
-        verbose_name = "Acteur du réemploi"
-        verbose_name_plural = "Acteurs du réemploi"
+        verbose_name = "Acteur LVAO"
+        verbose_name_plural = "Acteurs LVAO"
 
     id = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=255, blank=False, null=False)  # title
@@ -87,17 +87,17 @@ class ActeurReemploi(NomAsNaturalKeyModel):
     )  # UniqueId
 
 
-class ActeurReemploiRevision(NomAsNaturalKeyModel):
+class LVAOBaseRevision(NomAsNaturalKeyModel):
     class Meta:
-        verbose_name = "Acteur du réemploi révision"
-        verbose_name_plural = "Acteurs du réemploi révision"
+        verbose_name = "Révision Acteur LVAO"
+        verbose_name_plural = "Révision Acteurs LVAO"
 
     id = models.AutoField(primary_key=True)
-    acteur_reemploi = models.ForeignKey(
-        ActeurReemploi,
+    lvao_base = models.ForeignKey(
+        LVAOBase,
         on_delete=models.CASCADE,
         null=False,
-        related_name="acteur_reemploi_revisions",
+        related_name="lvao_base_revisions",
     )
     lvao_node_id = models.IntegerField(null=False)  # node_id
     lvao_revision_id = models.IntegerField(null=True, unique=True)  # revision_id
