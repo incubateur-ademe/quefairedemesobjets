@@ -1,10 +1,10 @@
 from django.contrib import admin
 
 from qfdmo.models import (
+    ActeurService,
+    ActeurType,
     Action,
     CategorieObjet,
-    EntiteService,
-    EntiteType,
     LVAOBase,
     LVAOBaseRevision,
     SousCategorieObjet,
@@ -43,7 +43,7 @@ class LVAOBaseAdmin(admin.ModelAdmin):
 admin.site.register(SousCategorieObjet, SousCategorieAdmin)
 admin.site.register(CategorieObjet)
 admin.site.register(Action)
-admin.site.register(EntiteService)
-admin.site.register(EntiteType)
+admin.site.register(ActeurService)
+admin.site.register(ActeurType)
 admin.site.register(LVAOBase, LVAOBaseAdmin)
 admin.site.register(LVAOBaseRevision, LVAOBaseRevisionAdmin)

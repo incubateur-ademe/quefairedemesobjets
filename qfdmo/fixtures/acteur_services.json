@@ -1,0 +1,140 @@
+[
+    {
+        "model": "qfdmo.acteurservice",
+        "fields": {
+            "nom": "Achat, revente entre particuliers",
+            "lvao_id": 163,
+            "actions": [["acheter d'occasion"], ["revendre"]]
+        }
+    },
+    {
+        "model": "qfdmo.acteurservice",
+        "fields": {
+            "nom": "Achat, revente par un professionnel",
+            "lvao_id": 162,
+            "actions": [["acheter d'occasion"], ["revendre"]]
+        }
+    },
+    {
+        "model": "qfdmo.acteurservice",
+        "fields": {
+            "nom": "Atelier d'auto-réparation",
+            "lvao_id": 157,
+            "actions": [["réparer"]]
+        }
+    },
+    {
+        "model": "qfdmo.acteurservice",
+        "fields": {
+            "nom": "Collecte par une structure spécialisée",
+            "lvao_id": 164,
+            "actions": [["donner"]]
+        }
+    },
+    {
+        "model": "qfdmo.acteurservice",
+        "fields": {
+            "nom": "Depôt-vente",
+            "lvao_id": 161,
+            "actions": [["acheter d'occasion"], ["revendre"]]
+        }
+    },
+    {
+        "model": "qfdmo.acteurservice",
+        "fields": {
+            "nom": "Don entre particuliers",
+            "lvao_id": 165,
+            "actions": [["donner"]]
+        }
+    },
+    {
+        "model": "qfdmo.acteurservice",
+        "fields": {
+            "nom": "Echanges entre particuliers",
+            "lvao_id": 188,
+            "actions": [["échanger"]]
+        }
+    },
+    {
+        "model": "qfdmo.acteurservice",
+        "fields": {
+            "nom": "Hub de partage",
+            "lvao_id": 168,
+            "actions": [["emprunter"], ["prêter"], ["échanger"]]
+        }
+    },
+    {
+        "model": "qfdmo.acteurservice",
+        "fields": {
+            "nom": "Location entre particuliers",
+            "lvao_id": 167,
+            "actions": [["louer"], ["mettre en location"]]
+        }
+    },
+    {
+        "model": "qfdmo.acteurservice",
+        "fields": {
+            "nom": "Location par un professionnel",
+            "lvao_id": 166,
+            "actions": [["louer"], ["mettre en location"]]
+        }
+    },
+    {
+        "model": "qfdmo.acteurservice",
+        "fields": {
+            "nom": "Partage entre particuliers",
+            "lvao_id": 169,
+            "actions": [["emprunter"], ["prêter"]]
+        }
+    },
+    {
+        "model": "qfdmo.acteurservice",
+        "fields": {
+            "nom": "Pièces détachées",
+            "lvao_id": 158,
+            "actions": [["réparer"]]
+        }
+    },
+    {
+        "model": "qfdmo.acteurservice",
+        "fields": {
+            "nom": "Relai d'acteurs et d'événements",
+            "lvao_id": 170,
+            "actions": [
+                ["acheter d'occasion"],
+                ["donner"],
+                ["emprunter"],
+                ["louer"],
+                ["mettre en location"],
+                ["prêter"],
+                ["revendre"],
+                ["réparer"],
+                ["échanger"]
+            ]
+        }
+    },
+    {
+        "model": "qfdmo.acteurservice",
+        "fields": {
+            "nom": "Ressourcerie, recyclerie",
+            "lvao_id": 160,
+            "actions": [["acheter d'occasion"]]
+        }
+    },
+    {
+        "model": "qfdmo.acteurservice",
+        "fields": {
+            "nom": "Service de réparation",
+            "lvao_id": 156,
+            "actions": [["réparer"]]
+        }
+    },
+    {
+        "model": "qfdmo.acteurservice",
+        "fields": {
+            "nom": "Tutoriels et diagnostics en ligne",
+            "lvao_id": 159,
+            "actions": [["réparer"]]
+        }
+    }
+]

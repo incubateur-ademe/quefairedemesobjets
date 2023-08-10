@@ -1,6 +1,6 @@
-from qfdmo.models import EntiteType, NomAsNaturalKeyModel
+from qfdmo.models import ActeurType, NomAsNaturalKeyModel
 
 
 class TestEntiteTypeNomAsNaturalKeyHeritage:
     def test_natural(self):
-        assert NomAsNaturalKeyModel in EntiteType.mro()
+        assert NomAsNaturalKeyModel in ActeurType.mro()
