@@ -36,7 +36,8 @@ def analyse_lvao_base(request, id):
     lvao_base_revisions = lvao_base.lvao_base_revisions.prefetch_related(
         "actions",
         "sous_categories__categorie",
-        "entite_type",
+        "acteur_type",
+        "acteur_services",
     ).all()
 
     return render(
