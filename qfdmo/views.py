@@ -1,7 +1,7 @@
-from django.db.models import Count
+from django.db.models import Count, F
 from django.shortcuts import render
 
-from qfdmo.models import ActeurReemploi
+from qfdmo.models import LVAOBase
 
 
 # Create your views here.
@@ -13,37 +13,37 @@ def homepage(request):
 
 
 def analyse(request):
-    acteur_reemplois = (
-        ActeurReemploi.objects.all()
-        .annotate(acteur_reemploi_revision_count=Count("acteur_reemploi_revisions"))
-        .filter(acteur_reemploi_revision_count__gt=1)
-        .order_by("-acteur_reemploi_revision_count")
+    lvao_bases = (
+        LVAOBase.objects.all()
+        .annotate(lvao_base_revision_count=Count("lvao_base_revisions"))
+        .annotate(action_count=Count("lvao_base_revisions__actions", distinct=True))
+        .filter(lvao_base_revision_count__gt=1)
+        .exclude(lvao_base_revision_count=F("action_count"))
+        .order_by("-lvao_base_revision_count")
     )
 
     return render(
         request,
         "qfdmo/analyse.html",
         {
-            "acteur_reemplois": acteur_reemplois,
+            "lvao_bases": lvao_bases,
         },
     )
 
 
-def analyse_acteur_reemploi(request, id):
-    acteur_reemploi = ActeurReemploi.objects.get(id=id)
-    acteur_reemploi_revisions = (
-        acteur_reemploi.acteur_reemploi_revisions.prefetch_related(
-            "actions",
-            "sous_categories__categorie",
-            "entite_type",
-        ).all()
-    )
+def analyse_lvao_base(request, id):
+    lvao_base = LVAOBase.objects.get(id=id)
+    lvao_base_revisions = lvao_base.lvao_base_revisions.prefetch_related(
+        "actions",
+        "sous_categories__categorie",
+        "entite_type",
+    ).all()
 
     return render(
         request,
-        "qfdmo/analyse_acteur_reemploi.html",
+        "qfdmo/analyse_lvao_base.html",
         {
-            "acteur_reemploi": acteur_reemploi,
-            "acteur_reemploi_revisions": acteur_reemploi_revisions,
+            "lvao_base": lvao_base,
+            "lvao_base_revisions": lvao_base_revisions,
         },
     )

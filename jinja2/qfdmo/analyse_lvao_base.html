@@ -5,8 +5,8 @@
         <h1>Analyse de la base de données LVAO</h1>
         <a href="{{ reverse('qfdmo:analyse') }}">retour à la page d'analyse</a>
 
-        <h2>{{ acteur_reemploi.nom }} ({{ acteur_reemploi.identifiant_unique }})</h2>
-        <p>Nb occurences : {{ acteur_reemploi_revisions.count() }}</p>
+        <h2>{{ lvao_base.nom }} ({{ lvao_base.identifiant_unique }})</h2>
+        <p>Nb occurences : {{ lvao_base_revisions.count() }}</p>
 
 
         <div class="fr-table">
@@ -15,8 +15,8 @@
                 <thead>
                     <tr>
                         <th scope="col"></th>
-                        {% for acteur_reemploi_revision in acteur_reemploi_revisions %}
-                            <th scope="col">{{ acteur_reemploi_revision.lvao_revision_id }}</th>
+                        {% for lvao_base_revision in lvao_base_revisions %}
+                            <th scope="col">{{ lvao_base_revision.lvao_revision_id }}</th>
                         {% endfor %}
                     </tr>
                 </thead>
@@ -28,40 +28,40 @@
                             Nom commercial<br>
                             Raison social
                         </td>
-                        {% for acteur_reemploi_revision in acteur_reemploi_revisions %}
+                        {% for lvao_base_revision in lvao_base_revisions %}
                             <td scope="col">
-                                {{ acteur_reemploi_revision.nom }}<br>
-                                {{ acteur_reemploi_revision.siret }}<br>
-                                {{ acteur_reemploi_revision.nom_commercial }}<br>
-                                {{ acteur_reemploi_revision.nom_officiel }}
+                                {{ lvao_base_revision.nom }}<br>
+                                {{ lvao_base_revision.siret }}<br>
+                                {{ lvao_base_revision.nom_commercial }}<br>
+                                {{ lvao_base_revision.nom_officiel }}
                             </td>
                         {% endfor %}
                     </tr>
                     <tr>
                         <td>Adresse</td>
-                        {% for acteur_reemploi_revision in acteur_reemploi_revisions %}
+                        {% for lvao_base_revision in lvao_base_revisions %}
                             <td scope="col">
-                                {{ acteur_reemploi_revision.adresse }}<br>
-                                {{ acteur_reemploi_revision.adresse_complement }}<br>
-                                {{ acteur_reemploi_revision.code_postal }} {{ acteur_reemploi_revision.ville }}
+                                {{ lvao_base_revision.adresse }}<br>
+                                {{ lvao_base_revision.adresse_complement }}<br>
+                                {{ lvao_base_revision.code_postal }} {{ lvao_base_revision.ville }}
                             </td>
                         {% endfor %}
                     </tr>
                     <tr>
                         <td>latitude / longitude</td>
-                        {% for acteur_reemploi_revision in acteur_reemploi_revisions %}
+                        {% for lvao_base_revision in lvao_base_revisions %}
                             <td scope="col">
-                                lat {{ acteur_reemploi_revision.latitude }}<br>
-                                long {{ acteur_reemploi_revision.longitude }}<br>
-                                <a href="https://maps.google.com/maps?z=12&t=m&q=loc:{{ acteur_reemploi_revision.latitude }}+{{ acteur_reemploi_revision.longitude }}" target='blank'>GMap</a>
+                                lat {{ lvao_base_revision.latitude }}<br>
+                                long {{ lvao_base_revision.longitude }}<br>
+                                <a href="https://maps.google.com/maps?z=12&t=m&q=loc:{{ lvao_base_revision.latitude }}+{{ lvao_base_revision.longitude }}" target='blank'>GMap</a>
                             </td>
                         {% endfor %}
                     </tr>
                     <tr>
                         <td>Action</td>
-                        {% for acteur_reemploi_revision in acteur_reemploi_revisions %}
+                        {% for lvao_base_revision in lvao_base_revisions %}
                             <td scope="col">
-                                {% for action in acteur_reemploi_revision.actions.all() %}
+                                {% for action in lvao_base_revision.actions.all() %}
                                     {{ action }}<br>
                                 {% endfor %}
                             </td>
@@ -69,9 +69,9 @@
                     </tr>
                     <tr>
                         <td>Categories / Sous-categories</td>
-                        {% for acteur_reemploi_revision in acteur_reemploi_revisions %}
+                        {% for lvao_base_revision in lvao_base_revisions %}
                             <td scope="col">
-                                {% for sous_categories in acteur_reemploi_revision.sous_categories.all() %}
+                                {% for sous_categories in lvao_base_revision.sous_categories.all() %}
                                     {{ sous_categories.categorie }} / {{ sous_categories }}<br>
                                 {% endfor %}
                             </td>
@@ -79,15 +79,15 @@
                     </tr>
                     <tr>
                         <td>Type d'entité</td>
-                        {% for acteur_reemploi_revision in acteur_reemploi_revisions %}
-                            <td scope="col">{{ acteur_reemploi_revision.entite_type }} </td>
+                        {% for lvao_base_revision in lvao_base_revisions %}
+                            <td scope="col">{{ lvao_base_revision.entite_type }} </td>
                         {% endfor %}
                     </tr>
                     <tr>
                         <td>identifiant externe</td>
-                        {% for acteur_reemploi_revision in acteur_reemploi_revisions %}
+                        {% for lvao_base_revision in lvao_base_revisions %}
                             <td scope="col">
-                                {{ acteur_reemploi_revision.identifiant_externe }}<br>
+                                {{ lvao_base_revision.identifiant_externe }}<br>
                             </td>
                         {% endfor %}
                     </tr>
