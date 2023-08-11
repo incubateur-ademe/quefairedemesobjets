@@ -1,5 +1,6 @@
 from collections import defaultdict
 
+from django.contrib.gis.geos import Point
 from django.core.management.base import BaseCommand
 from django.forms import model_to_dict
 from tqdm import tqdm
@@ -57,8 +58,14 @@ class Command(BaseCommand):
                 reemploi_acteur_fields["acteur_type_id"] = reemploi_acteur_fields[
                     "acteur_type"
                 ]
+                reemploi_acteur_fields["location"] = Point(
+                    reemploi_acteur_fields["longitude"],
+                    reemploi_acteur_fields["latitude"],
+                )
+                del reemploi_acteur_fields["longitude"]
+                del reemploi_acteur_fields["latitude"]
                 del reemploi_acteur_fields["acteur_type"]
-                reemploi_acteur, created = ReemploiActeur.objects.get_or_create(
+                reemploi_acteur, _ = ReemploiActeur.objects.get_or_create(
                     identifiant_unique=lvao_base.identifiant_unique,
                     defaults=reemploi_acteur_fields,
                 )
@@ -78,7 +85,7 @@ class Command(BaseCommand):
                     for action_acteurservice in action.values():
                         (
                             proposition_service,
-                            created,
+                            _,
                         ) = PropositionService.objects.get_or_create(
                             action=action_acteurservice["action"],
                             acteur_service=action_acteurservice["acteur_service"],

@@ -1,4 +1,4 @@
-from django.db import models
+from django.contrib.gis.db import models
 from unidecode import unidecode
 
 
@@ -160,8 +160,7 @@ class ReemploiActeur(NomAsNaturalKeyModel):
     ville = models.CharField(max_length=255, blank=True, null=True)
     url = models.CharField(max_length=2048, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
-    latitude = models.FloatField(blank=True, null=True)
-    longitude = models.FloatField(blank=True, null=True)
+    location = models.PointField(null=False)
     telephone = models.CharField(max_length=255, blank=True, null=True)
     multi_base = models.BooleanField(default=False)
     nom_commercial = models.CharField(max_length=255, blank=True, null=True)
@@ -171,6 +170,14 @@ class ReemploiActeur(NomAsNaturalKeyModel):
     siret = models.CharField(max_length=14, blank=True, null=True)
     source_donnee = models.CharField(max_length=255, blank=True, null=True)
     identifiant_externe = models.CharField(max_length=255, blank=True, null=True)
+
+    @property
+    def latitude(self):
+        return self.location.y
+
+    @property
+    def longitude(self):
+        return self.location.x
 
 
 class PropositionService(models.Model):

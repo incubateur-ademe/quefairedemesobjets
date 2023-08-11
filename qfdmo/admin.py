@@ -1,4 +1,4 @@
-from django.contrib import admin
+from django.contrib.gis import admin
 
 from qfdmo.models import (
     ActeurService,
@@ -55,7 +55,7 @@ class PropositionServiceInline(admin.TabularInline):
     extra = 0
 
 
-class ReemploiActeurAdmin(admin.ModelAdmin):
+class ReemploiActeurAdmin(admin.GISModelAdmin):
     inlines = [
         PropositionServiceInline,
     ]
