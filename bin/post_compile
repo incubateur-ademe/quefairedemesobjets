@@ -1,0 +1,4 @@
+#!/bin/env bash
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/app/.apt/usr/lib:/app/.apt/usr/lib/x86_64-linux-gnu/atlas:/app/.apt/usr/lib/x86_64-linux-gnu/blas
+python manage.py collectstatic --noinput
