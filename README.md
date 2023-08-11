@@ -135,3 +135,7 @@ Launch import :
 ```sh
 python manage.py populate_lvao_base /tmp/uploads/Base_20221218_Depart.csv
 ```
+
+## Deploy in Scalingo
+
+we need to install GDAL as explain in doc : https://doc.scalingo.com/platform/app/app-with-gdal
