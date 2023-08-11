@@ -1,6 +1,24 @@
-# Nom de la startup d'état
+# Que faire de mes objets
 
-Description de la Startup d'état
+Que faire de mes objets propose des solutions pour promouvoir les gestes de consomation responsable:
+
+- Mise à disposition d'un annuaire d'Acteur du ré-emploi et du re-cyclage en France (disponible aussi via une iframe)
+- Mise à disposition de l'annuaire via une API
+- Promotion des gestes de consomation responsable tel que le don et le partage local
+
+## Modèle de donnée
+
+Chaque acteur du ré-emploi et recyclage explose des propositions de service associée à un geste et une liste de catégorie d'objet
+
+```mermaid
+flowchart TD
+    actor["`**Acteur du Réemploi**`"]
+    service_offer["`**Proposition de Service**
+    - Action -
+    - Service -
+    - Categories d'objet -`"]
+    actor --> service_offer
+```
 
 ## Environnement de développement
 

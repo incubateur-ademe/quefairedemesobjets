@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
+    "django.contrib.gis",
     "explorer",
     "qfdmo",
 ]
@@ -137,6 +138,7 @@ WSGI_APPLICATION = "core.wsgi.application"
 
 DATABASE_URL = decouple.config("DATABASE_URL")
 default_settings = dj_database_url.parse(DATABASE_URL)
+default_settings["ENGINE"] = "django.contrib.gis.db.backends.postgis"
 
 # EXPLORER settings
 # from https://django-sql-explorer.readthedocs.io/en/latest/install.html
