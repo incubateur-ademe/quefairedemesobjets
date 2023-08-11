@@ -304,7 +304,7 @@ class CMSPage(models.Model):
 
         try:
             wagtail_response = requests.get(
-                f"{settings.CMS_BASE_URL}/api/v2/pages/{self.id}"
+                f"{settings.CMS.get('BASE_URL')}/api/v2/pages/{self.id}"
             )
             wagtail_response.raise_for_status()
             wagtail_page_as_json = wagtail_response.json()

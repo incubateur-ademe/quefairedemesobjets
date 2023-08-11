@@ -22,25 +22,77 @@ from sentry_sdk.integrations.django import DjangoIntegration
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = decouple.config("SECRET_KEY")
 
-BASE_URL = decouple.config("BASE_URL", default="http://localhost:8000")
-CMS_BASE_URL = decouple.config(
-    "CMS_BASE_URL", default="https://longuevieauxobjets.ademe.fr"
+
+# Assistant settings
+# ------------------
+ASSISTANT = {
+    "MATOMO_ID": decouple.config("ASSISTANT_MATOMO_ID", default=82, cast=int),
+    "HOSTS": decouple.config(
+        "ASSISTANT_HOSTS",
+        default="assistant.dev",
+        cast=str,
+    ).split(","),
+    "BASE_URL": decouple.config(
+        "ASSISTANT_BASE_URL", default="https://assistant.ademe.local"
+    ),
+    "POSTHOG_KEY": decouple.config(
+        "ASSISTANT_POSTHOG_KEY",
+        default="phc_fSfhoWDOUxZdKWty16Z3XfRiAoWd1qdJK0N0z9kQHJr",  # pragma: allowlist secret  # noqa: E501
+        cast=str,
+    ),
+}
+
+# Carte settings
+# --------------
+LVAO = {
+    "BASE_URL": decouple.config("LVAO_BASE_URL", default="https://lvao.ademe.local"),
+    "GOOGLE_SEARCH_CONSOLE": "google9dfbbc61adbe3888.html"
+}
+DEFAULT_MAX_SOLUTION_DISPLAYED = decouple.config(
+    "DEFAULT_MAX_SOLUTION_DISPLAYED", cast=int, default=10
+)
+CARTE_MAX_SOLUTION_DISPLAYED = decouple.config(
+    "CARTE_MAX_SOLUTION_DISPLAYED", cast=int, default=100
+)
+DISTANCE_MAX = decouple.config("DISTANCE_MAX", cast=int, default=30000)
+
+
+NB_CORRECTION_DISPLAYED = decouple.config(
+    "NB_CORRECTION_DISPLAYED", cast=int, default=100
 )
 
+# CMS settings
+# ------------
+CMS = {
+    "BASE_URL": decouple.config(
+        "CMS_BASE_URL", default="https://longuevieauxobjets.ademe.fr"
+    )
+}
+
+# Common settings
+# --------------
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = decouple.config("SECRET_KEY")
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = decouple.config("DEBUG", default=False, cast=bool)
 STIMULUS_DEBUG = decouple.config("STIMULUS_DEBUG", default=False, cast=bool)
 POSTHOG_DEBUG = decouple.config("POSTHOG_DEBUG", default=False, cast=bool)
-ALLOWED_HOSTS = decouple.config(
-    "ALLOWED_HOSTS", default="127.0.0.1,localhost", cast=str
-).split(",")
 BLOCK_ROBOTS = decouple.config("BLOCK_ROBOTS", default=False, cast=bool)
+ENVIRONMENT = decouple.config("ENVIRONMENT", default="development", cast=str)
+BASE_URL = LVAO.get("BASE_URL")
+BASE_ALLOWED_HOSTS = [
+    config.get("BASE_URL").split("://")[1] for config in [ASSISTANT, LVAO]
+]
+
+ALLOWED_HOSTS = [
+    *BASE_ALLOWED_HOSTS,
+    *decouple.config("ALLOWED_HOSTS", default="", cast=str).split(","),
+]
 
 # Application definition
-
+# ----------------------
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -68,7 +120,6 @@ INSTALLED_APPS = [
 
 FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 
-
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
@@ -94,14 +145,18 @@ CACHES = {
 
 X_FRAME_OPTIONS = "ALLOWALL"
 
-CORS_ALLOWED_ORIGINS = decouple.config(
-    "CORS_ALLOWED_ORIGINS", default="https://quefairedemesdechets.ademe.fr", cast=str
-).split(",")
+if DEBUG:
+    INSTALLED_APPS.extend(["debug_toolbar", "django_browser_reload"])
+    MEDIA_ROOT = "media"
+    MEDIA_URL = "/media/"
+    MIDDLEWARE.extend(
+        [
+            "debug_toolbar.middleware.DebugToolbarMiddleware",
+            "django_browser_reload.middleware.BrowserReloadMiddleware",
+        ]
+    )
 
-CORS_ALLOWED_ORIGIN_REGEXES = [
-    r"^https:\/\/deploy-preview-\d*--quefairedemesdechets\.netlify\.app$",
-]
-
+    CORS_ALLOW_ALL_ORIGINS = DEBUG
 
 with suppress(ModuleNotFoundError):
     from debug_toolbar.settings import CONFIG_DEFAULTS
@@ -194,13 +249,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "core.wsgi.application"
 
+# Default primary key field type
+# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
 
 # Database
+# --------
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
-# Database
-# https://docs.djangoproject.com/en/4.1/ref/settings/#databases
-
 DATABASE_URL = decouple.config(
     "DATABASE_URL",
     default="postgis://qfdmo:qfdmo@localhost:6543/qfdmo",  # pragma: allowlist secret  # noqa: E501
@@ -208,8 +266,6 @@ DATABASE_URL = decouple.config(
 default_settings = dj_database_url.parse(DATABASE_URL)
 default_settings["ENGINE"] = "django.contrib.gis.db.backends.postgis"
 
-# EXPLORER settings
-# from https://django-sql-explorer.readthedocs.io/en/latest/install.html
 # The readonly access is configured with fake access when DB_READONLY env
 # variable is not set.
 DB_READONLY = decouple.config(
@@ -224,15 +280,19 @@ DATABASES = {
     "readonly": readonly_settings,
 }
 
-EXPLORER_CONNECTIONS = {"Default": "readonly"}
-EXPLORER_DEFAULT_CONNECTION = "readonly"
-
 CONN_HEALTH_CHECKS = True
 CONN_MAX_AGE = decouple.config("CONN_MAX_AGE", cast=int, default=0)
 
-# Password validation
-# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
+# EXPLORER settings
+# -----------------
+# from https://django-sql-explorer.readthedocs.io/en/latest/install.html
+EXPLORER_CONNECTIONS = {"Default": "readonly"}
+EXPLORER_DEFAULT_CONNECTION = "readonly"
+
+# Password validation
+# -------------------
+# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation"
@@ -249,24 +309,24 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Redirects settings
+# ------------------
 # Redirect to home URL after login
-# Renvoyer vers l'admin'
 LOGOUT_REDIRECT_URL = "qfdmo:login"
 LOGIN_URL = "qfdmo:login"
 
 # Internationalization
+# --------------------
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
-
 TIME_ZONE = "UTC"
-
 USE_I18N = True
-
 USE_TZ = True
+LANGUAGE_CODE = "fr-fr"
 
 
 # Static files (CSS, JavaScript, Images)
+# --------------------------------------
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
@@ -279,10 +339,9 @@ STATICFILES_DIRS = [
 
 WHITENOISE_KEEP_ONLY_HASHED_FILES = True
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-ENVIRONMENT = decouple.config("ENVIRONMENT", default="development", cast=str)
-
+# Sentry
+# ------
 sentry_sdk.init(
     dsn=decouple.config("SENTRY_DSN", cast=str, default=""),
     integrations=[DjangoIntegration()],
@@ -299,35 +358,19 @@ sentry_sdk.init(
     # release="qfdmo@1.0.0",
 )
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 DEFAULT_ACTION_DIRECTION = "jai"
 
+# Insee
+# -----
 INSEE_KEY = decouple.config("INSEE_KEY", cast=str, default="")
 INSEE_SECRET = decouple.config("INSEE_SECRET", cast=str, default="")
 
 
-DEFAULT_MAX_SOLUTION_DISPLAYED = decouple.config(
-    "DEFAULT_MAX_SOLUTION_DISPLAYED", cast=int, default=10
-)
-CARTE_MAX_SOLUTION_DISPLAYED = decouple.config(
-    "CARTE_MAX_SOLUTION_DISPLAYED", cast=int, default=100
-)
-DISTANCE_MAX = decouple.config("DISTANCE_MAX", cast=int, default=30000)
-
-DJANGO_IMPORT_EXPORT_LIMIT = decouple.config(
-    "DJANGO_IMPORT_EXPORT_LIMIT", cast=int, default=1000
-)
-
-NB_CORRECTION_DISPLAYED = decouple.config(
-    "NB_CORRECTION_DISPLAYED", cast=int, default=100
-)
-
 SHELL_PLUS_PRINT_SQL = True
 
+# S3 bucket settings
+# ------------------
 AWS_ACCESS_KEY_ID = decouple.config("AWS_ACCESS_KEY_ID", default="")
 AWS_SECRET_ACCESS_KEY = decouple.config("AWS_SECRET_ACCESS_KEY", default="")
 AWS_STORAGE_BUCKET_NAME = decouple.config("AWS_STORAGE_BUCKET_NAME", default="")
@@ -347,15 +390,23 @@ STORAGES = {
     },
 }
 
+# Airflow settings
+# ----------------
 AIRFLOW_WEBSERVER_REFRESHACTEUR_URL = decouple.config(
-    "AIRFLOW_WEBSERVER_REFRESHACTEUR_URL", cast=str, default="http://localhost:8080"
+    "AIRFLOW_WEBSERVER_REFRESHACTEUR_URL", cast=str, default="https://lvao.dev"
 )
 
-USE_I18N = True
-LANGUAGE_CODE = "fr-fr"
-
+# Import / export settings
+# ------------------------
 IMPORT_EXPORT_TMP_STORAGE_CLASS = "import_export.tmp_storages.MediaStorage"
 IMPORT_FORMATS = [CSV, XLSX, XLS]
+DJANGO_IMPORT_EXPORT_LIMIT = decouple.config(
+    "DJANGO_IMPORT_EXPORT_LIMIT", cast=int, default=1000
+)
+
+
+# Tally form ids
+# --------------
 ADDRESS_SUGGESTION_FORM = decouple.config(
     "ADDRESS_SUGGESTION_FORM", default="https://tally.so/r/wzy9ZZ", cast=str
 )
@@ -373,23 +424,8 @@ ASSISTANT_SURVEY_FORM = decouple.config(
     "ASSISTANT_SURVEY_FORM", default="https://tally.so/r/wvNgx0", cast=str
 )
 
-QFDMO_GOOGLE_SEARCH_CONSOLE = "google9dfbbc61adbe3888.html"
-SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
-ASSISTANT = {
-    "MATOMO_ID": decouple.config("ASSISTANT_MATOMO_ID", default=82, cast=int),
-    "HOSTS": decouple.config(
-        "ASSISTANT_HOSTS",
-        default="127.0.0.1:8000,0.0.0.0:8000,localhost:8000",
-        cast=str,
-    ).split(","),
-    "BASE_URL": decouple.config("ASSISTANT_BASE_URL", default="http://localhost:8000"),
-    "POSTHOG_KEY": decouple.config(
-        "ASSISTANT_POSTHOG_KEY",
-        default="phc_fSfhoWDOUxZdKWty16Z3XfRiAoWd1qdJK0N0z9kQHJr",  # pragma: allowlist secret  # noqa: E501
-        cast=str,
-    ),
-}
-
+# Notion settings
+# --------------
 NOTION = {
     "TOKEN": decouple.config("NOTION_TOKEN", default=""),
     "CONTACT_FORM_DATABASE_ID": decouple.config(
