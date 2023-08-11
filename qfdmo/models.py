@@ -139,3 +139,70 @@ class LVAOBaseRevision(NomAsNaturalKeyModel):
     sous_categories = models.ManyToManyField(
         SousCategorieObjet, related_name="sous_categories"
     )  # Objets
+
+
+class ReemploiActeur(NomAsNaturalKeyModel):
+    class Meta:
+        verbose_name = "Acteur du Réemploi"
+        verbose_name_plural = "Acteurs du Réemploi"
+
+    id = models.AutoField(primary_key=True)
+    nom = models.CharField(max_length=255, blank=False, null=False)
+    identifiant_unique = models.CharField(
+        max_length=255, blank=True, null=True, unique=True
+    )
+    acteur_type = models.ForeignKey(
+        ActeurType, on_delete=models.CASCADE, blank=True, null=True
+    )
+    adresse = models.CharField(max_length=255, blank=True, null=True)
+    adresse_complement = models.CharField(max_length=255, blank=True, null=True)
+    code_postal = models.CharField(max_length=10, blank=True, null=True)
+    ville = models.CharField(max_length=255, blank=True, null=True)
+    url = models.CharField(max_length=2048, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    latitude = models.FloatField(blank=True, null=True)
+    longitude = models.FloatField(blank=True, null=True)
+    telephone = models.CharField(max_length=255, blank=True, null=True)
+    multi_base = models.BooleanField(default=False)
+    nom_commercial = models.CharField(max_length=255, blank=True, null=True)
+    nom_officiel = models.CharField(max_length=255, blank=True, null=True)
+    manuel = models.BooleanField(default=False)
+    label_reparacteur = models.BooleanField(default=False)
+    siret = models.CharField(max_length=14, blank=True, null=True)
+    source_donnee = models.CharField(max_length=255, blank=True, null=True)
+    identifiant_externe = models.CharField(max_length=255, blank=True, null=True)
+
+
+class PropositionService(models.Model):
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["reemploi_acteur", "action", "acteur_service"],
+                name="unique_by_acteur_action_service",
+            )
+        ]
+        verbose_name = "Proposition de service"
+        verbose_name_plural = "Proposition de service"
+
+    id = models.AutoField(primary_key=True)
+    reemploi_acteur = models.ForeignKey(
+        ReemploiActeur,
+        on_delete=models.CASCADE,
+        null=False,
+        related_name="proposition_services",
+    )
+    action = models.ForeignKey(
+        Action,
+        on_delete=models.CASCADE,
+        null=False,
+        related_name="proposition_services",
+    )
+    acteur_service = models.ForeignKey(
+        ActeurService,
+        on_delete=models.CASCADE,
+        null=False,
+        related_name="proposition_services",
+    )
+    sous_categories = models.ManyToManyField(
+        SousCategorieObjet, related_name="proposition_services"
+    )
