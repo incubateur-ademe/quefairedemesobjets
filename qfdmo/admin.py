@@ -1,4 +1,4 @@
-from django.contrib import admin
+from django.contrib.gis import admin
 
 from qfdmo.models import (
     ActeurService,
@@ -7,6 +7,8 @@ from qfdmo.models import (
     CategorieObjet,
     LVAOBase,
     LVAOBaseRevision,
+    PropositionService,
+    ReemploiActeur,
     SousCategorieObjet,
 )
 
@@ -32,11 +34,30 @@ class LVAOBaseRevisionAdmin(admin.ModelAdmin):
     ]
 
 
+class LVAOBaseRevisionInline(admin.StackedInline):
+    model = LVAOBaseRevision
+    extra = 0
+
+
 class LVAOBaseAdmin(admin.ModelAdmin):
     list_display = ("nom", "identifiant_unique")
     search_fields = [
         "nom",
         "identifiant_unique",
+    ]
+    inlines = [
+        LVAOBaseRevisionInline,
+    ]
+
+
+class PropositionServiceInline(admin.TabularInline):
+    model = PropositionService
+    extra = 0
+
+
+class ReemploiActeurAdmin(admin.GISModelAdmin):
+    inlines = [
+        PropositionServiceInline,
     ]
 
 
@@ -47,3 +68,4 @@ admin.site.register(ActeurService)
 admin.site.register(ActeurType)
 admin.site.register(LVAOBase, LVAOBaseAdmin)
 admin.site.register(LVAOBaseRevision, LVAOBaseRevisionAdmin)
+admin.site.register(ReemploiActeur, ReemploiActeurAdmin)

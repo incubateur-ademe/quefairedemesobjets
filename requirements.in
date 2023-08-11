@@ -7,5 +7,6 @@ Jinja2
 psycopg2
 python-decouple
 sentry-sdk
+tqdm
 unidecode
 whitenoise
