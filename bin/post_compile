@@ -1,4 +1,8 @@
-#!/bin/env bash
+#!/bin/sh
 
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/app/.apt/usr/lib:/app/.apt/usr/lib/x86_64-linux-gnu/atlas:/app/.apt/usr/lib/x86_64-linux-gnu/blas
+
+export PYTHONPATH=/build/${REQUEST_ID}/.apt/usr/lib/python3/dist-packages/:{PYTHONPATH}
+export LD_LIBRARY_PATH=/build/${REQUEST_ID}/.apt/usr/lib/x86_64-linux-gnu/blas/:/build/${REQUEST_ID}/.apt/usr/lib/x86_64-linux-gnu/lapack/:${LD_LIBRARY_PATH}
+export PROJ_LIB=/build/${REQUEST_ID}/.apt/usr/share/proj
+
 python manage.py collectstatic --noinput
