@@ -1,3 +1,3 @@
-libblas3
+libatlas-base-dev
 gdal-bin
 libgdal-dev
