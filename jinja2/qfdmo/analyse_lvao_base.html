@@ -18,6 +18,7 @@
                         {% for lvao_base_revision in lvao_base_revisions %}
                             <th scope="col">{{ lvao_base_revision.lvao_revision_id }}</th>
                         {% endfor %}
+                        <th scope="col">Acteur du réemploi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -36,6 +37,15 @@
                                 {{ lvao_base_revision.nom_officiel }}
                             </td>
                         {% endfor %}
+                        <td scope="col">
+                            {% if reemploi_acteur %}
+                                {{ reemploi_acteur.nom }}<br>
+                                {{ reemploi_acteur.siret }}<br>
+                                {{ reemploi_acteur.nom_commercial }}<br>
+                                {{ reemploi_acteur.nom_officiel }}
+                            {% endif %}
+                        </td>
+
                     </tr>
                     <tr>
                         <td>Adresse</td>
@@ -46,6 +56,13 @@
                                 {{ lvao_base_revision.code_postal }} {{ lvao_base_revision.ville }}
                             </td>
                         {% endfor %}
+                        <td scope="col">
+                            {% if reemploi_acteur %}
+                                {{ reemploi_acteur.adresse }}<br>
+                                {{ reemploi_acteur.adresse_complement }}<br>
+                                {{ reemploi_acteur.code_postal }} {{ reemploi_acteur.ville }}
+                            {% endif %}
+                        </td>
                     </tr>
                     <tr>
                         <td>latitude / longitude</td>
@@ -56,6 +73,13 @@
                                 <a href="https://maps.google.com/maps?z=12&t=m&q=loc:{{ lvao_base_revision.latitude }}+{{ lvao_base_revision.longitude }}" target='blank'>GMap</a>
                             </td>
                         {% endfor %}
+                        <td scope="col">
+                            {% if reemploi_acteur %}
+                                lat {{ reemploi_acteur.latitude }}<br>
+                                long {{ reemploi_acteur.longitude }}<br>
+                                <a href="https://maps.google.com/maps?z=12&t=m&q=loc:{{ reemploi_acteur.latitude }}+{{ reemploi_acteur.longitude }}" target='blank'>GMap</a>
+                            {% endif %}
+                        </td>
                     </tr>
                     <tr>
                         <td>Action</td>
@@ -66,6 +90,9 @@
                                 {% endfor %}
                             </td>
                         {% endfor %}
+                        <td scope="col">
+                            …
+                        </td>
                     </tr>
                     <tr>
                         <td>Categories / Sous-categories</td>
@@ -76,6 +103,9 @@
                                 {% endfor %}
                             </td>
                         {% endfor %}
+                        <td scope="col">
+                            …
+                        </td>
                     </tr>
                     <tr>
                         <td>Services</td>
@@ -86,13 +116,33 @@
                                 {% endfor %}
                             </td>
                         {% endfor %}
+                        <td scope="col">
+                            …
+                        </td>
                     </tr>
                     <tr>
                         <td>Type d'entité</td>
                         {% for lvao_base_revision in lvao_base_revisions %}
-                            <td scope="col">{{ lvao_base_revision.acteur_type }} </td>
+                            <td scope="col">{{ lvao_base_revision.acteur_type }}</td>
                         {% endfor %}
+                        <td scope="col">
+                            {% if reemploi_acteur %}
+                                {{ reemploi_acteur.acteur_type }}
+                            {% endif %}
+                        </td>
                     </tr>
+                    <tr>
+                        <td>Source des donnée (BDD)</td>
+                        {% for lvao_base_revision in lvao_base_revisions %}
+                            <td scope="col">{{ lvao_base_revision.source_donnee }} </td>
+                        {% endfor %}
+                        <td scope="col">
+                            {% if reemploi_acteur %}
+                                {{ reemploi_acteur.source_donnee }}
+                            {% endif %}
+                        </td>
+                    </tr>
+
                     <tr>
                         <td>identifiant externe</td>
                         {% for lvao_base_revision in lvao_base_revisions %}
@@ -100,6 +150,11 @@
                                 {{ lvao_base_revision.identifiant_externe }}<br>
                             </td>
                         {% endfor %}
+                        <td scope="col">
+                            {% if reemploi_acteur %}
+                                {{ reemploi_acteur.identifiant_externe }}
+                            {% endif %}
+                        </td>
                     </tr>
                 </tbody>
             </table>

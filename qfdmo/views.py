@@ -1,7 +1,7 @@
 from django.db.models import Count, F
 from django.shortcuts import render
 
-from qfdmo.models import LVAOBase
+from qfdmo.models import LVAOBase, ReemploiActeur
 
 
 # Create your views here.
@@ -39,6 +39,9 @@ def analyse_lvao_base(request, id):
         "acteur_type",
         "acteur_services",
     ).all()
+    reemploi_acteur = ReemploiActeur.objects.filter(
+        identifiant_unique=lvao_base.identifiant_unique
+    ).first()
 
     return render(
         request,
@@ -46,5 +49,6 @@ def analyse_lvao_base(request, id):
         {
             "lvao_base": lvao_base,
             "lvao_base_revisions": lvao_base_revisions,
+            "reemploi_acteur": reemploi_acteur,
         },
     )
