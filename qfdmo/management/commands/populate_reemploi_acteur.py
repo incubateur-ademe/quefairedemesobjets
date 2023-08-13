@@ -16,13 +16,17 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         total_lvao_bases = LVAOBase.objects.count()
         progress = tqdm(total=total_lvao_bases)
-        lvao_bases = LVAOBase.objects.prefetch_related(
-            "lvao_base_revisions",
-            "lvao_base_revisions__acteur_services",
-            "lvao_base_revisions__acteur_type",
-            "lvao_base_revisions__actions",
-            "lvao_base_revisions__sous_categories",
-        ).all()
+        lvao_bases = (
+            LVAOBase.objects.prefetch_related(
+                "lvao_base_revisions",
+                "lvao_base_revisions__acteur_services",
+                "lvao_base_revisions__acteur_type",
+                "lvao_base_revisions__actions",
+                "lvao_base_revisions__sous_categories",
+            )
+            .order_by("identifiant_unique")
+            .all()
+        )
         count = 0
         offset = 0
         limit = STEP
