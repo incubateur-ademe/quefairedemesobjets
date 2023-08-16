@@ -1,6 +1,4 @@
 from django.contrib.gis import admin
-from django.urls import reverse
-from django.utils.html import format_html
 
 from qfdmo.models import (
     ActeurService,
@@ -56,22 +54,16 @@ class PropositionServiceInline(admin.TabularInline):
     model = PropositionService
     extra = 0
 
-    @admin.display(description="Sous Categorie")
-    def sous_categories_links(self, instance):
-        links = []
-        for sous_category in instance.sous_categories.all():
-            url = reverse(
-                "admin:qfdmo_souscategorieobjet_change", args=[sous_category.id]
-            )
-            links.append(format_html('<a href="{}">{}</a>', url, sous_category))
-        return format_html(", ".join(links))
-
-    exclude = ("sous_categories",)
-    readonly_fields = (
+    fields = (
         "action",
         "acteur_service",
-        "sous_categories_links",
+        "sous_categories",
     )
+
+    def has_change_permission(self, request, obj=None):
+        if obj is not None:
+            return False
+        return super().has_change_permission(request, obj)
 
 
 class ReemploiActeurAdmin(admin.GISModelAdmin):
