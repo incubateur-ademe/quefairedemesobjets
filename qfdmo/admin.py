@@ -53,11 +53,17 @@ class LVAOBaseAdmin(admin.ModelAdmin):
 class PropositionServiceInline(admin.TabularInline):
     model = PropositionService
     extra = 0
-    readonly_fields = (
+
+    fields = (
         "action",
         "acteur_service",
         "sous_categories",
     )
+
+    def has_change_permission(self, request, obj=None):
+        if obj is not None:
+            return False
+        return super().has_change_permission(request, obj)
 
 
 class ReemploiActeurAdmin(admin.GISModelAdmin):
