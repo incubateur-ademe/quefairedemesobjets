@@ -26,7 +26,7 @@
     </head>
 
     <body class="h-full m-0 font-default ">
-        {% if request.GET.get('iframe') != '1' %}
+        {% if not is_iframe(request) %}
             {% block header %}
                 {% include "layout/header.html" %}
             {% endblock %}
@@ -36,7 +36,7 @@
                 {% block content %}{% endblock %}
             </div>
         </main>
-        {% if request.GET.get('iframe') != '1' %}
+        {% if not is_iframe(request) %}
             {% block footer %}
                 {% include "layout/footer.html" %}
             {% endblock %}
