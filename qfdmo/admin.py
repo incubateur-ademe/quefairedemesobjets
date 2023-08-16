@@ -53,12 +53,26 @@ class LVAOBaseAdmin(admin.ModelAdmin):
 class PropositionServiceInline(admin.TabularInline):
     model = PropositionService
     extra = 0
+    readonly_fields = (
+        "action",
+        "acteur_service",
+        "sous_categories",
+    )
 
 
 class ReemploiActeurAdmin(admin.GISModelAdmin):
     inlines = [
         PropositionServiceInline,
     ]
+    list_display = ("nom", "siret", "identifiant_unique", "code_postal", "ville")
+    search_fields = [
+        "code_postal",
+        "identifiant_unique",
+        "nom",
+        "siret",
+        "ville",
+    ]
+    ordering = ("nom",)
 
 
 admin.site.register(SousCategorieObjet, SousCategorieAdmin)
