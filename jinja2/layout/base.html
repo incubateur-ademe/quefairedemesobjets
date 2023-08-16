@@ -26,17 +26,21 @@
     </head>
 
     <body class="h-full m-0 font-default ">
-        {% block header %}
-            {% include "layout/header.html" %}
-        {% endblock %}
+        {% if not is_iframe(request) %}
+            {% block header %}
+                {% include "layout/header.html" %}
+            {% endblock %}
+        {% endif %}
         <main role="main" class="bg-white shadow">
             <div class="fr-container">
                 {% block content %}{% endblock %}
             </div>
         </main>
-        {% block footer %}
-            {% include "layout/footer.html" %}
-        {% endblock %}
+        {% if not is_iframe(request) %}
+            {% block footer %}
+                {% include "layout/footer.html" %}
+            {% endblock %}
+        {% endif %}
         {% block js %}{% endblock %}
     </body>
 </html>
