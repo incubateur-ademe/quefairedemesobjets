@@ -55,7 +55,12 @@ django==4.2.4 \
     --hash=sha256:860ae6a138a238fc4f22c99b52f3ead982bb4b1aad8c0122bcd8c8a3a02e409d
     # via
     #   -c requirements.txt
+    #   django-browser-reload
     #   django-debug-toolbar
+django-browser-reload==1.11.0 \
+    --hash=sha256:ce9576bd31562fda01dd8fca73e07696a9a1c7138d2aee084abfb7315dc633a4 \
+    --hash=sha256:fe232478a58e9e5d8b703537651d5a76b017d2208d1da5dfbe013937b5cca065
+    # via -r dev-requirements.in
 django-debug-toolbar==4.2.0 \
     --hash=sha256:af99128c06e8e794479e65ab62cc6c7d1e74e1c19beb44dcbf9bad7a9c017327 \
     --hash=sha256:bc7fdaafafcdedefcc67a4a5ad9dac96efd6e41db15bc74d402a54a2ba4854dc

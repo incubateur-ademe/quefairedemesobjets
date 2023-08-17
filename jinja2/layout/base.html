@@ -17,10 +17,14 @@
         <!--Css-->
 
         <link rel="stylesheet" href="{{ static('qfdmo.css') }}">
+        <!-- an be remove when the marker issue will be handle in js lib -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+            integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+            crossorigin=""/>
         {% block css_extras %}{% endblock %}
 
         <!--Js-->
-
+        <script src="{{ static('qfdmo.js') }}"></script>
         {% block javascript_extras %}{% endblock %}
 
     </head>

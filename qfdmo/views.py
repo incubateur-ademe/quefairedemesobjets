@@ -1,7 +1,50 @@
+import logging
+
+import requests
+from django.contrib.gis.db.models.functions import Distance
+from django.contrib.gis.geos import Point
 from django.db.models import Count, F
 from django.shortcuts import render
+from django.views.generic.edit import FormView
 
+from qfdmo.forms import FooForm
 from qfdmo.models import LVAOBase, ReemploiActeur
+
+
+class FooFormView(FormView):
+    form_class = FooForm
+    template_name = "qfdmo/homepage.html"
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial["sous_categorie_objet"] = self.request.GET.get("sous_categorie_objet")
+        initial["adresse"] = self.request.GET.get("adresse")
+        logging.warning(initial)
+        return initial
+
+    def get_context_data(self, **kwargs):
+        adresse = self.request.GET.get("adresse", "")
+        adresse = adresse.replace(" ", "+")
+        if adresse:
+            response = requests.get(
+                f"https://api-adresse.data.gouv.fr/search/?q={adresse}"
+            )
+            data = response.json()
+            logging.warning(data)
+            if data["features"] and (geo := data["features"][0]["geometry"]):
+                kwargs["longitude"] = geo["coordinates"][0]
+                kwargs["latitude"] = geo["coordinates"][1]
+                reference_point = Point(
+                    kwargs["longitude"], kwargs["latitude"], srid=4326
+                )
+
+                # Obtenez les X acteurs les plus proches du point de référence
+                X = 10  # Remplacez par le nombre d'acteurs que vous voulez obtenir
+                kwargs["reemploi_acteurs"] = ReemploiActeur.objects.annotate(
+                    distance=Distance("location", reference_point)
+                ).order_by("distance")[:X]
+        logging.warning(kwargs)
+        return super().get_context_data(**kwargs)
 
 
 # Create your views here.

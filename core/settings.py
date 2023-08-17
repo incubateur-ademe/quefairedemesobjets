@@ -50,6 +50,7 @@ if DEBUG:
     INSTALLED_APPS.extend(
         [
             "debug_toolbar",
+            "django_browser_reload",
         ]
     )
 
@@ -67,6 +68,7 @@ if DEBUG:
     MIDDLEWARE.extend(
         [
             "debug_toolbar.middleware.DebugToolbarMiddleware",
+            "django_browser_reload.middleware.BrowserReloadMiddleware",
         ]
     )
 with suppress(ModuleNotFoundError):
