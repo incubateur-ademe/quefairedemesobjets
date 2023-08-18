@@ -1,6 +1,7 @@
 --constraint=requirements.txt
 
 black
+django-browser-reload
 django-debug-toolbar
 honcho
 pre-commit

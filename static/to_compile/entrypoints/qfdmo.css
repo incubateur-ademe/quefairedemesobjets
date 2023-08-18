@@ -1,6 +1,20 @@
 @import "npm:@gouvfr/dsfr/dist/dsfr.css";
 @import "npm:@gouvfr/dsfr/dist/utility/utility.css";
+@import "npm:leaflet/dist/leaflet.css";
+@import "npm:leaflet-extra-markers/dist/css/leaflet.extra-markers.min.css";
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+#map {
+    height: 500px;
+}
+
+.leaflet-control-zoom a {
+    background-image: none;
+}
+
+.leaflet-marker-icon i.qfdmo-icon {
+    margin-top: 5px;
+}

@@ -1,4 +1,7 @@
+import json
+
 from django.contrib.gis.db import models
+from django.forms import model_to_dict
 from unidecode import unidecode
 
 
@@ -178,6 +181,11 @@ class ReemploiActeur(NomAsNaturalKeyModel):
     @property
     def longitude(self):
         return self.location.x
+
+    def serialize(self):
+        self_as_dict = model_to_dict(self, exclude=["location", "proposition_services"])
+        self_as_dict["location"] = json.loads(self.location.geojson)
+        return json.dumps(self_as_dict)
 
 
 class PropositionService(models.Model):

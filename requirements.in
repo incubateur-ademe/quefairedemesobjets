@@ -6,6 +6,7 @@ gunicorn
 Jinja2
 psycopg2
 python-decouple
+requests
 sentry-sdk
 tqdm
 unidecode
