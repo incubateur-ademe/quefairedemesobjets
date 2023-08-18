@@ -7,16 +7,16 @@ from django.db.models import Count, F
 from django.shortcuts import render
 from django.views.generic.edit import FormView
 
-from qfdmo.forms import FooForm
+from qfdmo.forms import GetReemploiSolutionForm
 from qfdmo.models import LVAOBase, ReemploiActeur
 
 DEFAULT_LIMIT = 10
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
 
 
-class FooFormView(FormView):
-    form_class = FooForm
-    template_name = "qfdmo/homepage.html"
+class ReemploiSolutionView(FormView):
+    form_class = GetReemploiSolutionForm
+    template_name = "qfdmo/reemploi_solution.html"
 
     def get_initial(self):
         initial = super().get_initial()
@@ -48,14 +48,6 @@ class FooFormView(FormView):
                 ).order_by("distance")[:DEFAULT_LIMIT]
 
         return super().get_context_data(**kwargs)
-
-
-# Create your views here.
-def homepage(request):
-    return render(
-        request,
-        "qfdmo/homepage.html",
-    )
 
 
 def analyse(request):

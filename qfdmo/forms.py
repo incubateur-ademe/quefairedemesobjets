@@ -3,7 +3,7 @@ from django import forms
 # from qfdmo.models import SousCategorieObjet
 
 
-class FooForm(forms.Form):
+class GetReemploiSolutionForm(forms.Form):
     # sous_categorie_objet = forms.ModelChoiceField(
     #     queryset=SousCategorieObjet.objects.all(),
     #     widget=forms.Select(attrs={"class": "fr-select"}),
