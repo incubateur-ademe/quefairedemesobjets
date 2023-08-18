@@ -6,31 +6,17 @@
             {{ form.as_p() }}
             <button class="fr-mt-1w fr-btn">Search</button>
         </form>
-        <div data-controller="map">
+        <div
+            data-controller="map"
+            data-map-location-value="{{ location }}"
+            data-map-reemploiacteurs-value="{{ reemploiacteurs }}"
+        >
             <div id="map" data-map-target="map"></div>
-            <input type="hidden" data-map-target="latitude" value="{{ latitude }}">
-            <input type="hidden" data-map-target="longitude" value="{{ longitude }}">
-        </div>
-        {{ latitude }} ; {{ longitude }}
-        <a href="#" style="text-decoration:none">Voir la carte</a>
-        <!--
-        <script>
-            var map = L.map('map').setView([2.349521, 48.940158], 13);
-            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '© OpenStreetMap'
-            }).addTo(map);
-            var marker = L.marker([{{latitude}}, {{longitude}}]).addTo(map);
-            marker.bindPopup("<p><strong>Vous êtes ici !</strong></b>").openPopup();
-            var arrayOfLatLngs = []
             {% for reemploi_acteur in reemploi_acteurs %}
-                var markerPoint = L.marker([{{reemploi_acteur.location.y}}, {{reemploi_acteur.location.x}}]).addTo(map);
-                markerPoint.bindPopup("<p><strong>{{reemploi_acteur.nom}}</strong></p><p>{{reemploi_acteur.adresse}}<br>{{reemploi_acteur.code_postal}}&nbsp;{{reemploi_acteur.ville}}</p>");
-                arrayOfLatLngs.push(L.latLng({{reemploi_acteur.location.y}}, {{reemploi_acteur.location.x}}))
-                {% endfor %}
-            var bounds = new L.LatLngBounds(arrayOfLatLngs);
-            map.fitBounds(bounds);
-        </script>
-        -->
+                <script type="application/json" data-map-target="reemploiacteur">
+                    {{ reemploi_acteur.serialize() | safe }}
+                </script>
+            {% endfor %}
+        </div>
     </div>
 {% endblock %}
