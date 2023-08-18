@@ -20,7 +20,7 @@ class FooFormView(FormView):
 
     def get_initial(self):
         initial = super().get_initial()
-        initial["sous_categorie_objet"] = self.request.GET.get("sous_categorie_objet")
+        # initial["sous_categorie_objet"] = self.request.GET.get("sous_categorie_objet")
         initial["adresse"] = self.request.GET.get("adresse")
         return initial
 
@@ -31,7 +31,11 @@ class FooFormView(FormView):
         if adresse := self.request.GET.get("adresse", "").strip().replace(" ", "+"):
             response = requests.get(BAN_API_URL.format(adresse))
             data = response.json()
-            if data["features"] and (geo := data["features"][0]["geometry"]):
+            if (
+                response.status_code < 400
+                and data["features"]
+                and (geo := data["features"][0]["geometry"])
+            ):
                 kwargs["location"] = json.dumps(data["features"][0])
 
                 reference_point = Point(
