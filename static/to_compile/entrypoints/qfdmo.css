@@ -7,12 +7,14 @@
 @tailwind components;
 @tailwind utilities;
 
-#map { height: 500px; }
+#map {
+    height: 500px;
+}
 
 .leaflet-control-zoom a {
-     background-image: none;
+    background-image: none;
 }
 
 .leaflet-marker-icon i.qfdmo-icon {
-     margin-top: 5px;
+    margin-top: 5px;
 }

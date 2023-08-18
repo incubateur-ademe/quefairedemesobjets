@@ -2,7 +2,8 @@
     "scripts": {
         "build": "parcel build",
         "watch": "parcel watch",
-        "lint": "prettier --check static/to_compile"
+        "lint-check": "prettier --check static/to_compile",
+        "lint": "prettier static/to_compile --write"
     },
     "source": [
         "static/to_compile/entrypoints/qfdmo.css",
