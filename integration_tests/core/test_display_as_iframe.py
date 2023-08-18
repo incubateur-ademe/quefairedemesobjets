@@ -12,6 +12,7 @@ class TestDisplayAsIframe:
         assert 'class="fr-header' not in str(response.content)
         assert 'class="fr-footer' not in str(response.content)
 
+    @pytest.mark.django_db
     def test_display_as_no_iframe(self, client):
         url = ""
 

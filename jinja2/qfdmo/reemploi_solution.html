@@ -1,0 +1,23 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+    <div class="qfdmo-content-center">
+        <form class="fr-my-3w">
+            {{ form.as_p() }}
+            <button class="fr-mt-1w fr-btn">Search</button>
+        </form>
+        <div
+            class="fr-mb-3w"
+            data-controller="map"
+            data-map-location-value="{{ location }}"
+            data-map-reemploiacteurs-value="{{ reemploiacteurs }}"
+        >
+            <div id="map" data-map-target="map"></div>
+            {% for reemploi_acteur in reemploi_acteurs %}
+                <script type="application/json" data-map-target="reemploiacteur">
+                    {{ reemploi_acteur.serialize() | safe }}
+                </script>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

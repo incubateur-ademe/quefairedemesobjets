@@ -50,6 +50,7 @@ if DEBUG:
     INSTALLED_APPS.extend(
         [
             "debug_toolbar",
+            "django_browser_reload",
         ]
     )
 
@@ -67,6 +68,7 @@ if DEBUG:
     MIDDLEWARE.extend(
         [
             "debug_toolbar.middleware.DebugToolbarMiddleware",
+            "django_browser_reload.middleware.BrowserReloadMiddleware",
         ]
     )
 with suppress(ModuleNotFoundError):
@@ -178,7 +180,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Redirect to home URL after login
 LOGIN_REDIRECT_URL = "home:index"
-LOGOUT_REDIRECT_URL = "home:homepage"
+LOGOUT_REDIRECT_URL = "home:reemploi_solution"
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
