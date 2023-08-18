@@ -3,10 +3,10 @@ import { ReemploiActeurMap } from "./reemploi_acteur_map";
 
 export default class extends Controller<HTMLElement> {
     static targets = ["reemploiacteur"];
-    readonly reemploiacteurTargets: Array<HTMLScriptElement>
+    declare readonly reemploiacteurTargets: Array<HTMLScriptElement>
 
     static values = {location: {type: Object, default: {}}}
-    readonly locationValue: object
+    declare readonly locationValue: object
 
     initialize() {
         new ReemploiActeurMap({
