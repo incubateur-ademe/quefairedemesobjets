@@ -12,7 +12,7 @@ export interface Location {
     }
 }
 
-export class ReemploiActeurMap {
+export class ReemploiSolutionMap {
     #map: L.Map
     constructor({
         location,

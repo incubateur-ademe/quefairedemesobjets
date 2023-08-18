@@ -1,5 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
-import { ReemploiActeurMap } from "./reemploi_acteur_map"
+import { ReemploiSolutionMap } from "./reemploi_acteur_map"
 
 export default class extends Controller<HTMLElement> {
     static targets = ["reemploiacteur"]
@@ -9,7 +9,7 @@ export default class extends Controller<HTMLElement> {
     declare readonly locationValue: object
 
     initialize() {
-        new ReemploiActeurMap({
+        new ReemploiSolutionMap({
             location: this.locationValue,
             reemploiacteurs: this.reemploiacteurTargets,
         })
