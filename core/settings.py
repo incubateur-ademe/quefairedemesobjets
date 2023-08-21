@@ -42,9 +42,14 @@ INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "django.contrib.gis",
+    "django.forms",
     "explorer",
+    "core",
     "qfdmo",
 ]
+
+# FIXME : check if we can manage django forms templating with jinja2
+FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 
 if DEBUG:
     INSTALLED_APPS.extend(

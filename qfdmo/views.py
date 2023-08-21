@@ -20,7 +20,7 @@ class ReemploiSolutionView(FormView):
 
     def get_initial(self):
         initial = super().get_initial()
-        # initial["sous_categorie_objet"] = self.request.GET.get("sous_categorie_objet")
+        initial["sous_categorie_objet"] = self.request.GET.get("sous_categorie_objet")
         initial["adresse"] = self.request.GET.get("adresse")
         return initial
 
