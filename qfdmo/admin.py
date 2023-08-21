@@ -5,10 +5,10 @@ from qfdmo.models import (
     ActeurType,
     Action,
     CategorieObjet,
+    EconomieCirculaireActeur,
     LVAOBase,
     LVAOBaseRevision,
     PropositionService,
-    ReemploiActeur,
     SousCategorieObjet,
 )
 
@@ -66,7 +66,7 @@ class PropositionServiceInline(admin.TabularInline):
         return super().has_change_permission(request, obj)
 
 
-class ReemploiActeurAdmin(admin.GISModelAdmin):
+class EconomieCirculaireActeurAdmin(admin.GISModelAdmin):
     inlines = [
         PropositionServiceInline,
     ]
@@ -88,4 +88,4 @@ admin.site.register(ActeurService)
 admin.site.register(ActeurType)
 admin.site.register(LVAOBase, LVAOBaseAdmin)
 admin.site.register(LVAOBaseRevision, LVAOBaseRevisionAdmin)
-admin.site.register(ReemploiActeur, ReemploiActeurAdmin)
+admin.site.register(EconomieCirculaireActeur, EconomieCirculaireActeurAdmin)

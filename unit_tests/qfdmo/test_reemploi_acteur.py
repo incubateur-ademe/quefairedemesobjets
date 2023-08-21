@@ -1,15 +1,15 @@
 from django.contrib.gis.geos import Point
 
-from qfdmo.models import NomAsNaturalKeyModel, ReemploiActeur
+from qfdmo.models import EconomieCirculaireActeur, NomAsNaturalKeyModel
 
 
-class TestReemploiActeurNomAsNaturalKeyHeritage:
+class TestEconomieCirculaireNomAsNaturalKeyHeritage:
     def test_natural(self):
-        assert NomAsNaturalKeyModel in ReemploiActeur.mro()
+        assert NomAsNaturalKeyModel in EconomieCirculaireActeur.mro()
 
 
-class TestReemploiActeurPoint:
+class TestEconomieCirculairePoint:
     def test_longitude_Latitude(self):
-        reemploi_acteur = ReemploiActeur(location=Point(1.1, 2.2))
-        assert reemploi_acteur.longitude == 1.1
-        assert reemploi_acteur.latitude == 2.2
+        economie_circulaire_acteur = EconomieCirculaireActeur(location=Point(1.1, 2.2))
+        assert economie_circulaire_acteur.longitude == 1.1
+        assert economie_circulaire_acteur.latitude == 2.2

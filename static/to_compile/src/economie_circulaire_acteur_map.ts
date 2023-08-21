@@ -12,14 +12,14 @@ export interface Location {
     }
 }
 
-export class ReemploiSolutionMap {
+export class EconomieCirculaireSolutionMap {
     #map: L.Map
     constructor({
         location,
-        reemploiacteurs,
+        economiecirculaireacteurs,
     }: {
         location: Location
-        reemploiacteurs: Array<HTMLScriptElement>
+        economiecirculaireacteurs: Array<HTMLScriptElement>
     }) {
         this.#map = L.map("map", {
             preferCanvas: true,
@@ -40,23 +40,29 @@ export class ReemploiSolutionMap {
                 .bindPopup("<p><strong>Vous êtes ici !</strong></b>")
                 .openPopup()
         }
-        reemploiacteurs.forEach(function (reemploiacteur: HTMLScriptElement) {
-            if (reemploiacteur.textContent !== null) {
-                const reemploiacteur_fields = JSON.parse(reemploiacteur.textContent)
+        economiecirculaireacteurs.forEach(function (
+            economiecirculaireacteur: HTMLScriptElement,
+        ) {
+            if (economiecirculaireacteur.textContent !== null) {
+                const economiecirculaireacteur_fields = JSON.parse(
+                    economiecirculaireacteur.textContent,
+                )
                 L.marker(
                     [
-                        reemploiacteur_fields.location.coordinates[1],
-                        reemploiacteur_fields.location.coordinates[0],
+                        economiecirculaireacteur_fields.location.coordinates[1],
+                        economiecirculaireacteur_fields.location.coordinates[0],
                     ],
                     { icon: redMarker },
                 )
                     .addTo(this.#map)
                     .bindPopup(
-                        "<p><strong>" + reemploiacteur_fields.nom + "</strong></b>",
+                        "<p><strong>" +
+                            economiecirculaireacteur_fields.nom +
+                            "</strong></b>",
                     )
                 points.push([
-                    reemploiacteur_fields.location.coordinates[1],
-                    reemploiacteur_fields.location.coordinates[0],
+                    economiecirculaireacteur_fields.location.coordinates[1],
+                    economiecirculaireacteur_fields.location.coordinates[0],
                 ])
             }
         }, this)
