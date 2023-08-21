@@ -5,13 +5,15 @@ from django.core.management.base import BaseCommand
 from django.forms import model_to_dict
 from tqdm import tqdm
 
-from qfdmo.models import LVAOBase, PropositionService, ReemploiActeur
+from qfdmo.models import EconomieCirculaireActeur, LVAOBase, PropositionService
 
 STEP = 1000
 
 
 class Command(BaseCommand):
-    help = "From LVAO BASE, populate ReemploiActeur and its PropositionServices"
+    help = (
+        "From LVAO BASE, populate EconomieCirculaireActeur and its PropositionServices"
+    )
 
     def handle(self, *args, **options):
         total_lvao_bases = LVAOBase.objects.count()
@@ -35,7 +37,7 @@ class Command(BaseCommand):
                 last_lvao_base_revision = lvao_base.lvao_base_revisions.order_by(
                     "lvao_revision_id"
                 ).last()
-                reemploi_acteur_fields = model_to_dict(
+                ec_acteur_fields = model_to_dict(
                     last_lvao_base_revision,
                     fields=[
                         "nom",
@@ -59,19 +61,17 @@ class Command(BaseCommand):
                         "identifiant_externe",
                     ],
                 )
-                reemploi_acteur_fields["acteur_type_id"] = reemploi_acteur_fields[
-                    "acteur_type"
-                ]
-                reemploi_acteur_fields["location"] = Point(
-                    reemploi_acteur_fields["longitude"],
-                    reemploi_acteur_fields["latitude"],
+                ec_acteur_fields["acteur_type_id"] = ec_acteur_fields["acteur_type"]
+                ec_acteur_fields["location"] = Point(
+                    ec_acteur_fields["longitude"],
+                    ec_acteur_fields["latitude"],
                 )
-                del reemploi_acteur_fields["longitude"]
-                del reemploi_acteur_fields["latitude"]
-                del reemploi_acteur_fields["acteur_type"]
-                reemploi_acteur, _ = ReemploiActeur.objects.get_or_create(
+                del ec_acteur_fields["longitude"]
+                del ec_acteur_fields["latitude"]
+                del ec_acteur_fields["acteur_type"]
+                (ec_acteur, _) = EconomieCirculaireActeur.objects.get_or_create(
                     identifiant_unique=lvao_base.identifiant_unique,
-                    defaults=reemploi_acteur_fields,
+                    defaults=ec_acteur_fields,
                 )
                 action_acteurservice_set = defaultdict(defaultdict)
                 for revision in lvao_base.lvao_base_revisions.all().order_by(
@@ -83,7 +83,7 @@ class Command(BaseCommand):
                                 "action": action,
                                 "acteur_service": acteur_service,
                                 "sous-categories": revision.sous_categories.all(),
-                                "reemploi_acteur": reemploi_acteur,
+                                "ec_acteur": ec_acteur,
                             }
                 for action in action_acteurservice_set.values():
                     for action_acteurservice in action.values():
@@ -93,7 +93,9 @@ class Command(BaseCommand):
                         ) = PropositionService.objects.get_or_create(
                             action=action_acteurservice["action"],
                             acteur_service=action_acteurservice["acteur_service"],
-                            reemploi_acteur=action_acteurservice["reemploi_acteur"],
+                            economie_circulaire_acteur=action_acteurservice[
+                                "ec_acteur"
+                            ],
                         )
                         proposition_service.sous_categories.all().delete()
                         for sous_categories in action_acteurservice["sous-categories"]:
