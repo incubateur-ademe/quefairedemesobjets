@@ -26,6 +26,7 @@ class Command(BaseCommand):
                 "lvao_base_revisions__actions",
                 "lvao_base_revisions__sous_categories",
             )
+            .filter(lvao_base_revisions__publie=True)
             .order_by("identifiant_unique")
             .all()
         )
@@ -34,9 +35,13 @@ class Command(BaseCommand):
         limit = STEP
         while offset < total_lvao_bases:
             for lvao_base in lvao_bases[offset:limit]:
-                last_lvao_base_revision = lvao_base.lvao_base_revisions.order_by(
-                    "lvao_revision_id"
-                ).last()
+                last_lvao_base_revision = (
+                    lvao_base.lvao_base_revisions.filter(publie=True)
+                    .order_by("lvao_revision_id")
+                    .last()
+                )
+                if last_lvao_base_revision is None:
+                    continue
                 ec_acteur_fields = model_to_dict(
                     last_lvao_base_revision,
                     fields=[
@@ -74,9 +79,9 @@ class Command(BaseCommand):
                     defaults=ec_acteur_fields,
                 )
                 action_acteurservice_set = defaultdict(defaultdict)
-                for revision in lvao_base.lvao_base_revisions.all().order_by(
-                    "lvao_revision_id"
-                ):
+                for revision in lvao_base.lvao_base_revisions.filter(
+                    publie=True
+                ).order_by("lvao_revision_id"):
                     for action in revision.actions.all():
                         for acteur_service in revision.acteur_services.all():
                             action_acteurservice_set[action.id][acteur_service.id] = {
