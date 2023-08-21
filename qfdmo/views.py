@@ -8,7 +8,7 @@ from django.shortcuts import render
 from django.views.generic.edit import FormView
 
 from qfdmo.forms import GetReemploiSolutionForm
-from qfdmo.models import LVAOBase, ReemploiActeur
+from qfdmo.models import EconomieCirculaireActeur, LVAOBase
 
 DEFAULT_LIMIT = 10
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
@@ -26,7 +26,7 @@ class ReemploiSolutionView(FormView):
 
     def get_context_data(self, **kwargs):
         kwargs["location"] = "{}"
-        kwargs["reemploiacteurs"] = "{}"
+        kwargs["economiecirculaireacteurs"] = "{}"
 
         if adresse := self.request.GET.get("adresse", "").strip().replace(" ", "+"):
             response = requests.get(BAN_API_URL.format(adresse))
@@ -43,9 +43,15 @@ class ReemploiSolutionView(FormView):
                 )
 
                 # Remplacez par le nombre d'acteurs que vous voulez obtenir
-                kwargs["reemploi_acteurs"] = ReemploiActeur.objects.annotate(
+                kwargs[
+                    "economie_circulaire_acteurs"
+                ] = EconomieCirculaireActeur.objects.annotate(
                     distance=Distance("location", reference_point)
-                ).order_by("distance")[:DEFAULT_LIMIT]
+                ).order_by(
+                    "distance"
+                )[
+                    :DEFAULT_LIMIT
+                ]
 
         return super().get_context_data(**kwargs)
 
@@ -77,7 +83,7 @@ def analyse_lvao_base(request, id):
         "acteur_type",
         "acteur_services",
     ).all()
-    reemploi_acteur = ReemploiActeur.objects.filter(
+    economie_circulaire_acteur = EconomieCirculaireActeur.objects.filter(
         identifiant_unique=lvao_base.identifiant_unique
     ).first()
 
@@ -87,6 +93,6 @@ def analyse_lvao_base(request, id):
         {
             "lvao_base": lvao_base,
             "lvao_base_revisions": lvao_base_revisions,
-            "reemploi_acteur": reemploi_acteur,
+            "economie_circulaire_acteur": economie_circulaire_acteur,
         },
     )

@@ -10,12 +10,12 @@
             class="fr-mb-3w"
             data-controller="map"
             data-map-location-value="{{ location }}"
-            data-map-reemploiacteurs-value="{{ reemploiacteurs }}"
+            data-map-economiecirculaireacteurs-value="{{ economiecirculaireacteurs }}"
         >
             <div id="map" data-map-target="map"></div>
-            {% for reemploi_acteur in reemploi_acteurs %}
-                <script type="application/json" data-map-target="reemploiacteur">
-                    {{ reemploi_acteur.serialize() | safe }}
+            {% for economie_circulaire_acteur in economie_circulaire_acteurs %}
+                <script type="application/json" data-map-target="economiecirculaireacteur">
+                    {{ economie_circulaire_acteur.serialize() | safe }}
                 </script>
             {% endfor %}
         </div>

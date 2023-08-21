@@ -144,10 +144,10 @@ class LVAOBaseRevision(NomAsNaturalKeyModel):
     )  # Objets
 
 
-class ReemploiActeur(NomAsNaturalKeyModel):
+class EconomieCirculaireActeur(NomAsNaturalKeyModel):
     class Meta:
-        verbose_name = "Acteur du Réemploi"
-        verbose_name_plural = "Acteurs du Réemploi"
+        verbose_name = "Acteur de l'économie circulaire"
+        verbose_name_plural = "Acteurs de l'économie circulaire"
 
     id = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=255, blank=False, null=False)
@@ -192,7 +192,7 @@ class PropositionService(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["reemploi_acteur", "action", "acteur_service"],
+                fields=["economie_circulaire_acteur", "action", "acteur_service"],
                 name="unique_by_acteur_action_service",
             )
         ]
@@ -200,8 +200,8 @@ class PropositionService(models.Model):
         verbose_name_plural = "Proposition de service"
 
     id = models.AutoField(primary_key=True)
-    reemploi_acteur = models.ForeignKey(
-        ReemploiActeur,
+    economie_circulaire_acteur = models.ForeignKey(
+        EconomieCirculaireActeur,
         on_delete=models.CASCADE,
         null=False,
         related_name="proposition_services",
