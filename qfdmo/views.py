@@ -8,7 +8,7 @@ from django.shortcuts import render
 from django.views.generic.edit import FormView
 
 from qfdmo.forms import GetReemploiSolutionForm
-from qfdmo.models import EconomieCirculaireActeur, LVAOBase
+from qfdmo.models import EconomieCirculaireActeur, LVAOBase, SousCategorieObjet
 
 DEFAULT_LIMIT = 10
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
@@ -20,7 +20,7 @@ class ReemploiSolutionView(FormView):
 
     def get_initial(self):
         initial = super().get_initial()
-        # initial["sous_categorie_objet"] = self.request.GET.get("sous_categorie_objet")
+        initial["sous_categorie_objet"] = self.request.GET.get("sous_categorie_objet")
         initial["adresse"] = self.request.GET.get("adresse")
         return initial
 
@@ -28,6 +28,9 @@ class ReemploiSolutionView(FormView):
         kwargs["location"] = "{}"
         kwargs["economiecirculaireacteurs"] = "{}"
 
+        sous_categories_objets = SousCategorieObjet.objects.filter(
+            nom=self.request.GET.get("sous_categorie_objet", "")
+        )
         if adresse := self.request.GET.get("adresse", "").strip().replace(" ", "+"):
             response = requests.get(BAN_API_URL.format(adresse))
             data = response.json()
@@ -42,16 +45,21 @@ class ReemploiSolutionView(FormView):
                     geo["coordinates"][0], geo["coordinates"][1], srid=4326
                 )
 
-                # Remplacez par le nombre d'acteurs que vous voulez obtenir
+                economie_circulaire_acteurs = EconomieCirculaireActeur.objects.annotate(
+                    distance=Distance("location", reference_point)
+                ).prefetch_related(
+                    "proposition_services__sous_categories",
+                    "proposition_services__sous_categories__categorie",
+                    "proposition_services__action",
+                    "proposition_services__acteur_service",
+                )
+                if sous_categories_objets:
+                    economie_circulaire_acteurs = economie_circulaire_acteurs.filter(
+                        proposition_services__sous_categories__in=sous_categories_objets
+                    )
                 kwargs[
                     "economie_circulaire_acteurs"
-                ] = EconomieCirculaireActeur.objects.annotate(
-                    distance=Distance("location", reference_point)
-                ).order_by(
-                    "distance"
-                )[
-                    :DEFAULT_LIMIT
-                ]
+                ] = economie_circulaire_acteurs.order_by("distance")[:DEFAULT_LIMIT]
 
         return super().get_context_data(**kwargs)
 

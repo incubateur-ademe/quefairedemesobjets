@@ -1,0 +1,21 @@
+{% load custom_filters %}
+
+<p class="autocomplete" data-controller="autocomplete">
+    <input
+        data-action="
+        input->autocomplete#complete
+    keydown.down->autocomplete#keydownDown
+    keydown.up->autocomplete#keydownUp
+    keydown.enter->autocomplete#keydownEnter
+    "
+    data-autocomplete-target="input"
+    autocomplete="off"
+    type="{{ widget.type }}"
+    name="{{ widget.name }}"
+    {% if widget.value != None %} value="{{ widget.value.0|stringformat:'s' }}"{% endif %}
+    {% include "django/forms/widgets/attrs.html" %}
+    >
+    <script type="application/json" data-autocomplete-target="allAvailableOptions">
+        {{ widget.optgroups|options_in_json }}
+    </script>
+</ps>
