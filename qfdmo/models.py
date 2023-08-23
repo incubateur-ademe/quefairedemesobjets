@@ -57,7 +57,7 @@ class SousCategorieObjet(NomAsNaturalKeyModel):
     def serialize(self):
         sous_categorie = model_to_dict(self, exclude=["categorie"])
         sous_categorie["categorie"] = self.categorie.serialize()
-        return model_to_dict(self)
+        return sous_categorie
 
 
 class Action(NomAsNaturalKeyModel):
@@ -200,7 +200,10 @@ class EconomieCirculaireActeur(NomAsNaturalKeyModel):
         return self.location.x
 
     def serialize(self, format=None):
-        self_as_dict = model_to_dict(self, exclude=["location", "proposition_services"])
+        self_as_dict = model_to_dict(
+            self, exclude=["location", "proposition_services", "acteur_type"]
+        )
+        self_as_dict["acteur_type"] = self.acteur_type.serialize()
         self_as_dict["location"] = json.loads(self.location.geojson)
         proposition_services = self.proposition_services.all()
         self_as_dict["proposition_services"] = []
