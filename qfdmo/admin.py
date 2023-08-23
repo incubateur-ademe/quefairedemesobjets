@@ -23,15 +23,18 @@ class SousCategorieAdmin(admin.ModelAdmin):
 
 
 class LVAOBaseRevisionAdmin(admin.ModelAdmin):
-    list_display = ("nom", "url")
-    search_fields = [
+    list_display = ("nom", "url", "lvao_revision_id")
+    ordering = ("lvao_revision_id",)
+    search_fields = (
         "nom",
         "url",
+        "lvao_revision_id",
         "nom_commercial",
         "nom_officiel",
         "siret",
         "identifiant_externe",
-    ]
+    )
+    readonly_fields = ("lvao_base",)
 
 
 class LVAOBaseRevisionInline(admin.StackedInline):
