@@ -47,6 +47,23 @@ export class EconomieCirculaireSolutionMap {
                 const economiecirculaireacteur_fields = JSON.parse(
                     economiecirculaireacteur.textContent,
                 )
+                let popupContent =
+                    "<p><strong>" +
+                    economiecirculaireacteur_fields.nom +
+                    "</strong></b><br>"
+                let proposition_services =
+                    economiecirculaireacteur_fields.proposition_services
+                for (let i = 0; i < proposition_services.length; i++) {
+                    let action = proposition_services[i].action.nom
+                    popupContent = popupContent + action + "<br>"
+                    let acteur_service = proposition_services[i].acteur_service.nom
+                    popupContent = popupContent + acteur_service + "<br>"
+                    let sous_categories = proposition_services[i].sous_categories
+                    for (var j = 0; j < sous_categories.length; j++) {
+                        popupContent = popupContent + sous_categories[j].nom + ", "
+                    }
+                }
+
                 L.marker(
                     [
                         economiecirculaireacteur_fields.location.coordinates[1],
@@ -55,11 +72,7 @@ export class EconomieCirculaireSolutionMap {
                     { icon: redMarker },
                 )
                     .addTo(this.#map)
-                    .bindPopup(
-                        "<p><strong>" +
-                            economiecirculaireacteur_fields.nom +
-                            "</strong></b>",
-                    )
+                    .bindPopup(popupContent)
                 points.push([
                     economiecirculaireacteur_fields.location.coordinates[1],
                     economiecirculaireacteur_fields.location.coordinates[0],

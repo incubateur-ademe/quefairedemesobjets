@@ -15,7 +15,7 @@
             <div id="map" data-map-target="map"></div>
             {% for economie_circulaire_acteur in economie_circulaire_acteurs %}
                 <script type="application/json" data-map-target="economiecirculaireacteur">
-                    {{ economie_circulaire_acteur.serialize() | safe }}
+                    {{ economie_circulaire_acteur.serialize(format='json') | safe }}
                 </script>
             {% endfor %}
         </div>
