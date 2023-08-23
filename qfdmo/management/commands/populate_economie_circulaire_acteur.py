@@ -16,7 +16,9 @@ class Command(BaseCommand):
     )
 
     def handle(self, *args, **options):
-        total_lvao_bases = LVAOBase.objects.count()
+        total_lvao_bases = LVAOBase.objects.filter(
+            lvao_base_revisions__publie=True
+        ).count()
         progress = tqdm(total=total_lvao_bases)
         lvao_bases = (
             LVAOBase.objects.prefetch_related(
@@ -102,7 +104,7 @@ class Command(BaseCommand):
                                 "ec_acteur"
                             ],
                         )
-                        proposition_service.sous_categories.all().delete()
+                        proposition_service.sous_categories.clear()
                         for sous_categories in action_acteurservice["sous-categories"]:
                             proposition_service.sous_categories.add(sous_categories)
 
