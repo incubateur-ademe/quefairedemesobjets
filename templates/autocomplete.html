@@ -1,6 +1,6 @@
 {% load custom_filters %}
 
-<div class="autocomplete" data-controller="autocomplete">
+<p class="autocomplete" data-controller="autocomplete">
     <input
         data-action="
         input->autocomplete#complete
@@ -18,4 +18,4 @@
     <script type="application/json" data-autocomplete-target="allAvailableOptions">
         {{ widget.optgroups|options_in_json }}
     </script>
-</div>
+</ps>

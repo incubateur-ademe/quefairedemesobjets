@@ -33,6 +33,9 @@ class CategorieObjet(NomAsNaturalKeyModel):
     id = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
 
+    def serialize(self):
+        return model_to_dict(self)
+
 
 class SousCategorieObjet(NomAsNaturalKeyModel):
     class Meta:
@@ -51,11 +54,19 @@ class SousCategorieObjet(NomAsNaturalKeyModel):
     def sanitized_nom(self) -> str:
         return unidecode(self.nom).upper()
 
+    def serialize(self):
+        sous_categorie = model_to_dict(self, exclude=["categorie"])
+        sous_categorie["categorie"] = self.categorie.serialize()
+        return model_to_dict(self)
+
 
 class Action(NomAsNaturalKeyModel):
     id = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
     lvao_id = models.IntegerField(blank=True, null=True)
+
+    def serialize(self):
+        return model_to_dict(self)
 
 
 class ActeurService(NomAsNaturalKeyModel):
@@ -68,6 +79,9 @@ class ActeurService(NomAsNaturalKeyModel):
     lvao_id = models.IntegerField(blank=True, null=True)
     actions = models.ManyToManyField(Action)
 
+    def serialize(self):
+        return model_to_dict(self, exclude=["actions"])
+
 
 class ActeurType(NomAsNaturalKeyModel):
     class Meta:
@@ -77,6 +91,9 @@ class ActeurType(NomAsNaturalKeyModel):
     id = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
     lvao_id = models.IntegerField(blank=True, null=True)
+
+    def serialize(self):
+        return model_to_dict(self)
 
 
 class LVAOBase(NomAsNaturalKeyModel):
@@ -182,10 +199,16 @@ class EconomieCirculaireActeur(NomAsNaturalKeyModel):
     def longitude(self):
         return self.location.x
 
-    def serialize(self):
+    def serialize(self, format=None):
         self_as_dict = model_to_dict(self, exclude=["location", "proposition_services"])
         self_as_dict["location"] = json.loads(self.location.geojson)
-        return json.dumps(self_as_dict)
+        proposition_services = self.proposition_services.all()
+        self_as_dict["proposition_services"] = []
+        for proposition_service in proposition_services:
+            self_as_dict["proposition_services"].append(proposition_service.serialize())
+        if format == "json":
+            return json.dumps(self_as_dict)
+        return self_as_dict
 
 
 class PropositionService(models.Model):
@@ -221,3 +244,13 @@ class PropositionService(models.Model):
     sous_categories = models.ManyToManyField(
         SousCategorieObjet, related_name="proposition_services"
     )
+
+    def serialize(self):
+        return {
+            "action": self.action.serialize(),
+            "acteur_service": self.acteur_service.serialize(),
+            "sous_categories": [
+                sous_categorie.serialize()
+                for sous_categorie in self.sous_categories.all()
+            ],
+        }
