@@ -29,7 +29,7 @@ class ReemploiSolutionView(FormView):
         kwargs["economiecirculaireacteurs"] = "{}"
 
         sous_categories_objets = SousCategorieObjet.objects.filter(
-            nom=self.request.GET.get("sous_categorie_objet", "")
+            nom__icontains=self.request.GET.get("sous_categorie_objet", "")
         )
         if adresse := self.request.GET.get("adresse", "").strip().replace(" ", "+"):
             response = requests.get(BAN_API_URL.format(adresse))

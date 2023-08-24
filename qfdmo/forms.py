@@ -29,6 +29,7 @@ class GetReemploiSolutionForm(forms.Form):
         ),
         label="",
         empty_label="",
+        required=False,
     )
     adresse = forms.CharField(
         label="Adresse",
