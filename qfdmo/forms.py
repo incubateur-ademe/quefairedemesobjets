@@ -6,6 +6,15 @@ from qfdmo.models import SousCategorieObjet
 class AutoCompleteInput(forms.Select):
     template_name = "autocomplete.html"
 
+    def __init__(self, attrs=None, max_options_displayed=10, **kwargs):
+        self.max_options_displayed = max_options_displayed
+        super().__init__(attrs=attrs, **kwargs)
+
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        context["widget"]["max_options_displayed"] = self.max_options_displayed
+        return context
+
 
 class GetReemploiSolutionForm(forms.Form):
     sous_categorie_objet = forms.ModelChoiceField(
