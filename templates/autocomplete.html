@@ -1,5 +1,10 @@
 {% load custom_filters %}
-<p class="autocomplete" data-controller="autocomplete" data-autocomplete-max-option-displayed-value={{widget.max_options_displayed}}>
+<p
+    class="autocomplete"
+    data-controller="autocomplete"
+    data-autocomplete-max-option-displayed-value={{ widget.max_options_displayed }}
+    data-autocomplete-search-callback-value={{ widget.search_callback|default_if_none:"" }}
+>
     <input
         data-action="
         input->autocomplete#complete
@@ -11,6 +16,7 @@
     autocomplete="off"
     type="{{ widget.type }}"
     name="{{ widget.name }}"
+    id="{{ widget.name }}"
     {% if widget.value != None %} value="{{ widget.value.0|stringformat:'s' }}"{% endif %}
     {% include "django/forms/widgets/attrs.html" %}
     >

@@ -1,15 +1,17 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
-    #allAvailableOptions: Array<String> = []
+    #allAvailableOptions: Array<string> = []
     #currentFocus: number = 0
+    #autocompleteList: HTMLElement
 
     static targets = ["allAvailableOptions", "input", "option"]
     declare readonly allAvailableOptionsTarget: HTMLScriptElement
     declare readonly inputTarget: HTMLInputElement
     declare readonly optionTargets: Array<HTMLElement>
 
-    static values = { maxOptionDisplayed: Number }
+    static values = { maxOptionDisplayed: Number, searchCallback: String }
+    declare readonly searchCallbackValue: string
     declare readonly maxOptionDisplayedValue: number
 
     connect() {
@@ -18,56 +20,73 @@ export default class extends Controller<HTMLElement> {
                 this.allAvailableOptionsTarget.textContent,
             )
         }
+
+        if (
+            this.searchCallbackValue == "true" &&
+            "geolocation" in navigator &&
+            this.inputTarget.value == ""
+        ) {
+            if (this.inputTarget.value == "") {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    fetch(
+                        `https://api-adresse.data.gouv.fr/reverse/?lon=${position.coords.longitude}&lat=${position.coords.latitude}`,
+                    )
+                        .then((response) => response.json())
+                        .then((data) => {
+                            this.inputTarget.value = data.features[0].properties.label
+                            /* FIXME : Check if we can partially refresh the page using Turbo */
+                            document.getElementById("search_form")?.submit()
+                        })
+                })
+            }
+        }
     }
 
-    complete(events: Event) {
-        let val = this.inputTarget.value
-        val = this.#addAccents(val)
+    async complete(events: Event) {
+        const inputTargetValue = this.inputTarget.value
+        const val = this.#addAccents(inputTargetValue)
         const regexPattern = new RegExp(val, "gi")
 
-        //clear previous option list
-        var x = document.getElementsByClassName("autocomplete-items")
-        for (var i = 0; i < x.length; i++) {
-            x[i].remove()
-        }
         if (!val) {
+            this.#closeAllLists()
             return false
         }
 
-        /*create a DIV element that will contain the items (values):*/
-        let a = document.createElement("DIV")
-        a.setAttribute("id", this.inputTarget.id + "autocomplete-list")
-        a.setAttribute("class", "autocomplete-items")
-        /*append the DIV element as a child of the autocomplete container:*/
-        if (this.inputTarget.parentNode != null) {
-            this.inputTarget.parentNode.appendChild(a)
-        }
-        /*for each item in the array...*/
         let countResult = 0
-        for (let i = 0; i < this.#allAvailableOptions.length; i++) {
-            if (countResult >= this.maxOptionDisplayedValue) break
-            /*check if the item starts with the same letters as the text field value:*/
-            if (this.#allAvailableOptions[i].match(regexPattern) !== null) {
-                countResult++
-                /*create a DIV element for each matching element:*/
-                let b = document.createElement("DIV")
-                /*make the matching letters bold:*/
-                const newText = this.#allAvailableOptions[i].replace(
-                    regexPattern,
-                    "<strong>$&</strong>",
-                )
-                b.innerHTML = newText
-                // FIXME : better way to do this
-                b.innerHTML +=
-                    "<input type='hidden' value='" + this.#allAvailableOptions[i] + "'>"
-                b.setAttribute("data-action", "click->autocomplete#selectOption")
-                a.appendChild(b)
+
+        if (this.searchCallbackValue) {
+            this.#searchAddressCallback(inputTargetValue).then((data) => {
+                this.#closeAllLists()
+                this.#autocompleteList = this.#createAutocompleteList()
+                this.#allAvailableOptions = data
+                for (let i = 0; i < this.#allAvailableOptions.length; i++) {
+                    if (countResult >= this.maxOptionDisplayedValue) break
+                    countResult++
+                    this.#addoption(regexPattern, this.#allAvailableOptions[i])
+                }
+                if (this.#autocompleteList.childElementCount > 0) {
+                    this.#currentFocus = 0
+                    this.#addActive()
+                }
+            })
+        } else {
+            /*for each item in the array...*/
+            this.#closeAllLists()
+            this.#autocompleteList = this.#createAutocompleteList()
+
+            for (let i = 0; i < this.#allAvailableOptions.length; i++) {
+                if (countResult >= this.maxOptionDisplayedValue) break
+                /*check if the item starts with the same letters as the text field value:*/
+                if (this.#allAvailableOptions[i].match(regexPattern) !== null) {
+                    countResult++
+                    this.#addoption(regexPattern, this.#allAvailableOptions[i])
+                }
+                // FIXME : check if list is empty
+                if (this.#autocompleteList.childElementCount > 0) {
+                    this.#currentFocus = 0
+                    this.#addActive()
+                }
             }
-        }
-        // FIXME : check if list is empty
-        if (a.childElementCount > 0) {
-            this.#currentFocus = 0
-            this.#addActive()
         }
     }
 
@@ -131,7 +150,7 @@ export default class extends Controller<HTMLElement> {
         optionDiv[this.#currentFocus].classList.add("autocomplete-active")
     }
 
-    #removeActive(optionDiv: Array<HTMLDivElement>) {
+    #removeActive(optionDiv: HTMLCollectionOf<HTMLElement>) {
         for (var i = 0; i < optionDiv.length; i++) {
             optionDiv[i].classList.remove("autocomplete-active")
         }
@@ -149,5 +168,45 @@ export default class extends Controller<HTMLElement> {
         retval = retval.replace(/a/gi, "([aàâä]|ae)")
         retval = retval.replace(/o/gi, "([oôö]|oe)")
         return retval
+    }
+
+    async #searchAddressCallback(value: string): Promise<string[]> {
+        if (value.trim().length < 3) return []
+        return await fetch(`https://api-adresse.data.gouv.fr/search/?q=${value}`)
+            .then((response) => response.json())
+            .then((data) => {
+                let labels = data.features.map((feature: any) => {
+                    return feature.properties.label
+                })
+                return labels
+            })
+            .catch((error) => {
+                console.error("error catched : ", error)
+                return []
+            })
+    }
+
+    #addoption(regexPattern: RegExp, option: string) {
+        //option : this.#allAvailableOptions[i]
+        /*create a DIV element for each matching element:*/
+        let b = document.createElement("DIV")
+        /*make the matching letters bold:*/
+        const newText = option.replace(regexPattern, "<strong>$&</strong>")
+        b.innerHTML = newText
+        // FIXME : better way to do this
+        b.innerHTML += "<input type='hidden' value='" + option + "'>"
+        b.setAttribute("data-action", "click->autocomplete#selectOption")
+        this.#autocompleteList.appendChild(b)
+    }
+
+    #createAutocompleteList() {
+        /*create a DIV element that will contain the items (values):*/
+        let a = document.createElement("DIV")
+        a.setAttribute("id", this.inputTarget.id + "autocomplete-list")
+        a.setAttribute("class", "autocomplete-items")
+        /*append the DIV element as a child of the autocomplete container:*/
+        if (this.inputTarget.parentNode != null)
+            this.inputTarget.parentNode.appendChild(a)
+        return a
     }
 }
