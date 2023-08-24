@@ -1,6 +1,5 @@
 {% load custom_filters %}
-
-<p class="autocomplete" data-controller="autocomplete">
+<p class="autocomplete" data-controller="autocomplete" data-autocomplete-max-option-displayed-value={{widget.max_options_displayed}}>
     <input
         data-action="
         input->autocomplete#complete
