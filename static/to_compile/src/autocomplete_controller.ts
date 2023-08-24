@@ -22,6 +22,8 @@ export default class extends Controller<HTMLElement> {
 
     complete(events: Event) {
         let val = this.inputTarget.value
+        val = this.#addAccents(val)
+        const regexPattern = new RegExp(val, "gi")
 
         //clear previous option list
         var x = document.getElementsByClassName("autocomplete-items")
@@ -45,14 +47,11 @@ export default class extends Controller<HTMLElement> {
         for (let i = 0; i < this.#allAvailableOptions.length; i++) {
             if (countResult >= this.maxOptionDisplayedValue) break
             /*check if the item starts with the same letters as the text field value:*/
-            if (
-                this.#allAvailableOptions[i].toLowerCase().includes(val.toLowerCase())
-            ) {
+            if (this.#allAvailableOptions[i].match(regexPattern) !== null) {
                 countResult++
                 /*create a DIV element for each matching element:*/
                 let b = document.createElement("DIV")
                 /*make the matching letters bold:*/
-                const regexPattern = new RegExp(val, "gi")
                 const newText = this.#allAvailableOptions[i].replace(
                     regexPattern,
                     "<strong>$&</strong>",
@@ -74,6 +73,7 @@ export default class extends Controller<HTMLElement> {
 
     selectOption(event: Event) {
         let target = event.target as HTMLElement
+        // FIXME : perhaps we can call a callback which will submit the form
         this.inputTarget.value = target.getElementsByTagName("input")[0].value
         this.#closeAllLists()
     }
@@ -131,9 +131,23 @@ export default class extends Controller<HTMLElement> {
         optionDiv[this.#currentFocus].classList.add("autocomplete-active")
     }
 
-    #removeActive(optionDiv) {
+    #removeActive(optionDiv: Array<HTMLDivElement>) {
         for (var i = 0; i < optionDiv.length; i++) {
             optionDiv[i].classList.remove("autocomplete-active")
         }
+    }
+
+    #addAccents(input: string) {
+        let retval = input
+        retval = retval.replace(/([ao])e/gi, "$1")
+        retval = retval.replace(/e/gi, "[eèéêë]")
+        retval = retval.replace(/c/gi, "[cç]")
+        retval = retval.replace(/i/gi, "[iîï]")
+        retval = retval.replace(/u/gi, "[uùûü]")
+        retval = retval.replace(/y/gi, "[yÿ]")
+        retval = retval.replace(/s/gi, "(ss|[sß])")
+        retval = retval.replace(/a/gi, "([aàâä]|ae)")
+        retval = retval.replace(/o/gi, "([oôö]|oe)")
+        return retval
     }
 }
