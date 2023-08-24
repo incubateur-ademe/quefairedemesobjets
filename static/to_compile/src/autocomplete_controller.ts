@@ -9,6 +9,9 @@ export default class extends Controller<HTMLElement> {
     declare readonly inputTarget: HTMLInputElement
     declare readonly optionTargets: Array<HTMLElement>
 
+    static values = { maxOptionDisplayed: Number }
+    declare readonly maxOptionDisplayedValue: number
+
     connect() {
         if (this.allAvailableOptionsTarget.textContent != null) {
             this.#allAvailableOptions = JSON.parse(
@@ -38,11 +41,14 @@ export default class extends Controller<HTMLElement> {
             this.inputTarget.parentNode.appendChild(a)
         }
         /*for each item in the array...*/
+        let countResult = 0
         for (let i = 0; i < this.#allAvailableOptions.length; i++) {
+            if (countResult >= this.maxOptionDisplayedValue) break
             /*check if the item starts with the same letters as the text field value:*/
             if (
                 this.#allAvailableOptions[i].toLowerCase().includes(val.toLowerCase())
             ) {
+                countResult++
                 /*create a DIV element for each matching element:*/
                 let b = document.createElement("DIV")
                 /*make the matching letters bold:*/
