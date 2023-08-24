@@ -2,25 +2,9 @@
 
 {% block content %}
     <div class="qfdmo-content-center">
-        <form class="fr-my-3w" id='my_form'>
+        <form class="fr-my-3w" id='search_form'>
             {{ form.as_p() }}
             <button class="fr-mt-1w fr-btn">Search</button>
-            <script>
-                /* FIXME : shouldn't be here, to set to Stimulus */
-                if ("geolocation" in navigator) {
-                    if (document.getElementById('id_adresse').value == '') {
-                        navigator.geolocation.getCurrentPosition((position) => {
-                            fetch(`https://api-adresse.data.gouv.fr/reverse/?lon=${position.coords.longitude}&lat=${position.coords.latitude}`)
-                                .then(response => response.json())
-                                .then(data => {
-                                document.getElementById('id_adresse').value = data.features[0].properties.label;
-                                /* FIXME : Check if we can partially refresh the page using Turbo */
-                                my_form.submit();
-                            })
-                        });
-                    }
-                }
-            </script>
         </form>
         <div
             class="fr-mb-3w"
