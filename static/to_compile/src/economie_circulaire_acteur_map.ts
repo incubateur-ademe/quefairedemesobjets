@@ -6,6 +6,10 @@ const DEFAULT_MAX_ZOOM: Number = 19
 
 import { homeIconMarker, redMarker } from "./icon_marker"
 
+function capitalizeFirstLetter(str: string) {
+    return str.charAt(0).toUpperCase() + str.slice(1)
+}
+
 export interface Location {
     geometry?: {
         coordinates: number[]
@@ -54,14 +58,13 @@ export class EconomieCirculaireSolutionMap {
                 let proposition_services =
                     economiecirculaireacteur_fields.proposition_services
                 for (let i = 0; i < proposition_services.length; i++) {
-                    let action = proposition_services[i].action.nom
-                    popupContent = popupContent + action + "<br>"
                     let acteur_service = proposition_services[i].acteur_service.nom
-                    popupContent = popupContent + acteur_service + "<br>"
-                    let sous_categories = proposition_services[i].sous_categories
-                    for (var j = 0; j < sous_categories.length; j++) {
-                        popupContent = popupContent + sous_categories[j].nom + ", "
-                    }
+                    let action =
+                        capitalizeFirstLetter(proposition_services[i].action.nom) +
+                        " (" +
+                        acteur_service +
+                        ")<br>"
+                    popupContent = popupContent + action
                 }
 
                 L.marker(
