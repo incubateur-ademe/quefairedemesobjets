@@ -8,7 +8,7 @@ export default class extends Controller<HTMLElement> {
     static values = { location: { type: Object, default: {} } }
     declare readonly locationValue: object
 
-    initialize() {
+    connect() {
         new EconomieCirculaireSolutionMap({
             location: this.locationValue,
             economiecirculaireacteurs: this.economiecirculaireacteurTargets,
