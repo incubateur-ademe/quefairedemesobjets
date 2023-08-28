@@ -93,6 +93,8 @@ python manage.py createsuperuser
 honcho start -f Procfile.dev
 ```
 
+Honcho démarrera les containers Docker s'ils ne sont pas déjà démarrés
+
 ### Ajout et modification de package pip-tools
 
 Ajouter les dépendances aux fichiers `requirements.in` et `dev-requirements.in`

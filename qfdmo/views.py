@@ -3,7 +3,7 @@ import json
 import requests
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
-from django.db.models import Count, F
+from django.db.models import Count, F, QuerySet
 from django.shortcuts import render
 from django.views.generic.edit import FormView
 
@@ -28,9 +28,11 @@ class ReemploiSolutionView(FormView):
         kwargs["location"] = "{}"
         kwargs["economiecirculaireacteurs"] = "{}"
 
-        sous_categories_objets = SousCategorieObjet.objects.filter(
-            nom__icontains=self.request.GET.get("sous_categorie_objet", "")
-        )
+        sous_categories_objets: QuerySet | None = None
+        if sous_categorie_objet := self.request.GET.get("sous_categorie_objet", None):
+            sous_categories_objets = SousCategorieObjet.objects.filter(
+                nom__icontains=sous_categorie_objet
+            )
         if adresse := self.request.GET.get("adresse", "").strip().replace(" ", "+"):
             response = requests.get(BAN_API_URL.format(adresse))
             data = response.json()
@@ -45,15 +47,19 @@ class ReemploiSolutionView(FormView):
                     geo["coordinates"][0], geo["coordinates"][1], srid=4326
                 )
 
-                economie_circulaire_acteurs = EconomieCirculaireActeur.objects.annotate(
-                    distance=Distance("location", reference_point)
-                ).prefetch_related(
-                    "proposition_services__sous_categories",
-                    "proposition_services__sous_categories__categorie",
-                    "proposition_services__action",
-                    "proposition_services__acteur_service",
+                economie_circulaire_acteurs = (
+                    EconomieCirculaireActeur.objects.annotate(
+                        distance=Distance("location", reference_point)
+                    )
+                    .prefetch_related(
+                        "proposition_services__sous_categories",
+                        "proposition_services__sous_categories__categorie",
+                        "proposition_services__action",
+                        "proposition_services__acteur_service",
+                    )
+                    .distinct()
                 )
-                if sous_categories_objets:
+                if sous_categories_objets is not None:
                     economie_circulaire_acteurs = economie_circulaire_acteurs.filter(
                         proposition_services__sous_categories__in=sous_categories_objets
                     )
