@@ -1,2 +1,3 @@
+services: docker compose up
 web: python manage.py runserver
 npm: npm run watch
