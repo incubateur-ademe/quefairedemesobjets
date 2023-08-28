@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import { EconomieCirculaireSolutionMap } from "./economie_circulaire_acteur_map"
+import { Actor } from "./types"
 
 export default class extends Controller<HTMLElement> {
     static targets = ["economiecirculaireacteur"]
@@ -9,9 +10,18 @@ export default class extends Controller<HTMLElement> {
     declare readonly locationValue: object
 
     connect() {
-        new EconomieCirculaireSolutionMap({
+        const actorsMap = new EconomieCirculaireSolutionMap({
             location: this.locationValue,
-            economiecirculaireacteurs: this.economiecirculaireacteurTargets,
         })
+        const actors: Array<Actor> = this.economiecirculaireacteurTargets.map(
+            (ecoCirTarget: HTMLScriptElement) => {
+                if (ecoCirTarget.textContent !== null) {
+                    const actor_fields = JSON.parse(ecoCirTarget.textContent)
+                    return new Actor(actor_fields)
+                }
+            },
+        )
+
+        actorsMap.display_actor(actors)
     }
 }

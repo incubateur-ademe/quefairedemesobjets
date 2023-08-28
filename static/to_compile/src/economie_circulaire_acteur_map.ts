@@ -1,4 +1,5 @@
 import L from "leaflet"
+import { Actor, Location } from "./types"
 
 const DEFAULT_LOACTION: Array<Number> = [46.227638, 2.213749]
 const DEFAULT_ZOOM: Number = 5
@@ -6,30 +7,13 @@ const DEFAULT_MAX_ZOOM: Number = 19
 
 import { homeIconMarker, redMarker } from "./icon_marker"
 
-function capitalizeFirstLetter(str: string) {
-    return str.charAt(0).toUpperCase() + str.slice(1)
-}
-
-export interface Location {
-    geometry?: {
-        coordinates: number[]
-    }
-}
-
 export class EconomieCirculaireSolutionMap {
     #map: L.Map
-    constructor({
-        location,
-        economiecirculaireacteurs,
-    }: {
-        location: Location
-        economiecirculaireacteurs: Array<HTMLScriptElement>
-    }) {
+    constructor({ location }: { location: Location }) {
         this.#map = L.map("map", {
             preferCanvas: true,
         })
 
-        let points: Array<Array<Number>> = []
         this.#map.setView(DEFAULT_LOACTION, DEFAULT_ZOOM)
         L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
             maxZoom: DEFAULT_MAX_ZOOM,
@@ -44,43 +28,20 @@ export class EconomieCirculaireSolutionMap {
                 .bindPopup("<p><strong>Vous êtes ici !</strong></b>")
                 .openPopup()
         }
-        economiecirculaireacteurs.forEach(function (
-            economiecirculaireacteur: HTMLScriptElement,
-        ) {
-            if (economiecirculaireacteur.textContent !== null) {
-                const economiecirculaireacteur_fields = JSON.parse(
-                    economiecirculaireacteur.textContent,
-                )
-                let popupContent =
-                    "<p><strong>" +
-                    economiecirculaireacteur_fields.nom +
-                    "</strong></b><br>"
-                let proposition_services =
-                    economiecirculaireacteur_fields.proposition_services
-                for (let i = 0; i < proposition_services.length; i++) {
-                    let acteur_service = proposition_services[i].acteur_service.nom
-                    let action =
-                        capitalizeFirstLetter(proposition_services[i].action.nom) +
-                        " (" +
-                        acteur_service +
-                        ")<br>"
-                    popupContent = popupContent + action
-                }
+    }
 
-                L.marker(
-                    [
-                        economiecirculaireacteur_fields.location.coordinates[1],
-                        economiecirculaireacteur_fields.location.coordinates[0],
-                    ],
-                    { icon: redMarker },
-                )
-                    .addTo(this.#map)
-                    .bindPopup(popupContent)
-                points.push([
-                    economiecirculaireacteur_fields.location.coordinates[1],
-                    economiecirculaireacteur_fields.location.coordinates[0],
-                ])
-            }
+    display_actor(actors: Array<Actor>): void {
+        let points: Array<Array<Number>> = []
+
+        actors.forEach(function (actor: Actor) {
+            let popupContent = actor.popupTitle() + actor.popupContent()
+
+            L.marker([actor.location.coordinates[1], actor.location.coordinates[0]], {
+                icon: redMarker,
+            })
+                .addTo(this.#map)
+                .bindPopup(popupContent)
+            points.push([actor.location.coordinates[1], actor.location.coordinates[0]])
         }, this)
         if (points.length > 0) {
             this.#map.fitBounds(points)
