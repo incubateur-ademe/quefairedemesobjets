@@ -46,7 +46,7 @@ class ReemploiSolutionView(FormView):
                 reference_point = Point(
                     geo["coordinates"][0], geo["coordinates"][1], srid=4326
                 )
-
+                # FIXME : add a test to check distinct point
                 economie_circulaire_acteurs = (
                     EconomieCirculaireActeur.objects.annotate(
                         distance=Distance("location", reference_point)

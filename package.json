@@ -3,7 +3,8 @@
         "build": "parcel build",
         "watch": "parcel watch",
         "lint-check": "prettier --check static/to_compile",
-        "lint": "prettier static/to_compile --write"
+        "lint": "prettier static/to_compile --write",
+        "test": "jest"
     },
     "source": [
         "static/to_compile/entrypoints/qfdmo.css",
@@ -39,7 +40,11 @@
         "tailwindcss": "^3.3.1"
     },
     "devDependencies": {
+        "@types/jest": "^29.5.4",
+        "jest": "^29.6.4",
         "parcel": "^2.8.3",
-        "prettier": "^3.0.2"
+        "prettier": "^3.0.2",
+        "ts-jest": "^29.1.1",
+        "typescript": "^5.2.2"
     }
 }
