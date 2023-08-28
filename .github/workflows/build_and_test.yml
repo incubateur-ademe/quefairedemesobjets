@@ -64,6 +64,9 @@ jobs:
       - name: Check code formatting
         run: npm run lint
 
+      - name: Run tests
+        run: npm run test
+
   deploy:
     needs: [python, node]
     runs-on: ubuntu-latest
