@@ -13,14 +13,15 @@ export default class extends Controller<HTMLElement> {
         const actorsMap = new EconomieCirculaireSolutionMap({
             location: this.locationValue,
         })
-        const actors: Array<Actor> = this.economiecirculaireacteurTargets.map(
-            (ecoCirTarget: HTMLScriptElement) => {
+        //fixme : find how do not allow undefined from map
+        const actors: Array<Actor> = this.economiecirculaireacteurTargets
+            .map((ecoCirTarget: HTMLScriptElement) => {
                 if (ecoCirTarget.textContent !== null) {
                     const actor_fields = JSON.parse(ecoCirTarget.textContent)
                     return new Actor(actor_fields)
                 }
-            },
-        )
+            })
+            .filter((actor) => actor !== undefined)
 
         actorsMap.display_actor(actors)
     }
