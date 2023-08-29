@@ -5,6 +5,61 @@
         <form class="fr-my-3w" id='search_form'>
             {% include "qfdmo/partials/iframe_input.html" %}
             {{ form.as_p() }}
+            <div class="fr-grid-row fr-grid-row--gutters">
+                <div class="fr-col-12 fr-col-md-3">
+                    <fieldset class="fr-fieldset fr-mb-0 fr-mt-1v" id="radio-inline" aria-labelledby="radio-inline-legend radio-inline-messages">
+                        <div class="fr-fieldset__element fr-fieldset__element--inline fr-mb-0">
+                            <div class="fr-radio-group">
+                                <input type="radio" id="radio-inline-1" name="radio-inline" onchange="handleChange(this);" value="jai" checked>
+                                <label class="fr-label" for="radio-inline-1">
+                                    J'ai
+                                </label>
+                            </div>
+                        </div>
+                        <div class="fr-fieldset__element fr-fieldset__element--inline fr-mb-0">
+                            <div class="fr-radio-group">
+                                <input type="radio" id="radio-inline-2" name="radio-inline" onchange="handleChange(this);" value="jerecherche">
+                                <label class="fr-label" for="radio-inline-2">
+                                    Je recherche
+                                </label>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+
+                <script>
+                    function handleChange(src) {
+                        var value = src.value;
+                        var jecherche = document.getElementById("jecherche");
+                        var jai = document.getElementById("jai");
+                        if (value === "jai") {
+                            jai.style.display = "block";
+                            jecherche.style.display = "none";
+                        } else {
+                            jai.style.display = "none";
+                            jecherche.style.display = "block";
+                        }
+                    }
+                </script>
+                <div class="fr-col-12 fr-col-md-9">
+                    <div id="jecherche" style="display:none;">
+                        <button type="button" class="fr-tag qfdmo-m-1v" aria-pressed="true">emprunter</button>
+                        <button type="button" class="fr-tag qfdmo-m-1v" aria-pressed="true">louer</button>
+                        <button type="button" class="fr-tag qfdmo-m-1v" aria-pressed="true">acheter d'occasion</button>
+                        <button type="button" class="fr-tag qfdmo-m-1v" aria-pressed="true">échanger</button>
+                    </div>
+
+                    <div id="jai">
+                        <button type="button" class="fr-tag qfdmo-m-1v" aria-pressed="true">revendre</button>
+                        <button type="button" class="fr-tag qfdmo-m-1v" aria-pressed="true">donner</button>
+                        <button type="button" class="fr-tag qfdmo-m-1v" aria-pressed="true">prêter</button>
+                        <button type="button" class="fr-tag qfdmo-m-1v" aria-pressed="true">échanger</button>
+                        <button type="button" class="fr-tag qfdmo-m-1v" title="mettre en location" aria-pressed="true">louer</button>
+                        <button type="button" class="fr-tag qfdmo-m-1v" aria-pressed="true">réparer</button>
+                    </div>
+                </div>
+            </div>
         </form>
         <div
             class="fr-mb-3w"
