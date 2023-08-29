@@ -35,7 +35,7 @@ export default class extends Controller<HTMLElement> {
                         .then((data) => {
                             this.inputTarget.value = data.features[0].properties.label
                             /* FIXME : Check if we can partially refresh the page using Turbo */
-                            document.getElementById("search_form")?.submit()
+                            this.inputTarget.form.submit()
                         })
                 })
             }
@@ -92,8 +92,8 @@ export default class extends Controller<HTMLElement> {
 
     selectOption(event: Event) {
         let target = event.target as HTMLElement
-        // FIXME : perhaps we can call a callback which will submit the form
         this.inputTarget.value = target.getElementsByTagName("input")[0].value
+        this.inputTarget.form.submit()
         this.#closeAllLists()
     }
 
