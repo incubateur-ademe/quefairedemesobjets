@@ -22,12 +22,12 @@ class ReemploiSolutionView(FormView):
         initial = super().get_initial()
         initial["sous_categorie_objet"] = self.request.GET.get("sous_categorie_objet")
         initial["adresse"] = self.request.GET.get("adresse")
+        initial["direction"] = self.request.GET.get("direction", "jai")
         return initial
 
     def get_context_data(self, **kwargs):
         kwargs["location"] = "{}"
         kwargs["economiecirculaireacteurs"] = "{}"
-
         sous_categories_objets: QuerySet | None = None
         if sous_categorie_objet := self.request.GET.get("sous_categorie_objet", None):
             sous_categories_objets = SousCategorieObjet.objects.filter(
@@ -56,6 +56,7 @@ class ReemploiSolutionView(FormView):
                         "proposition_services__sous_categories__categorie",
                         "proposition_services__action",
                         "proposition_services__acteur_service",
+                        "acteur_type",
                     )
                     .distinct()
                 )
@@ -63,6 +64,28 @@ class ReemploiSolutionView(FormView):
                     economie_circulaire_acteurs = economie_circulaire_acteurs.filter(
                         proposition_services__sous_categories__in=sous_categories_objets
                     )
+                direction = self.request.GET.get("direction", "jai")
+                if direction == "jecherche":
+                    economie_circulaire_acteurs = economie_circulaire_acteurs.filter(
+                        proposition_services__action__nom__in=[
+                            "emprunter",
+                            "louer",
+                            "acheter d'occasion",
+                            "échanger",
+                        ]
+                    )
+                if direction == "jai":
+                    economie_circulaire_acteurs = economie_circulaire_acteurs.filter(
+                        proposition_services__action__nom__in=[
+                            "revendre",
+                            "donner",
+                            "prêter",
+                            "échanger",
+                            "mettre en location",
+                            "réparer",
+                        ]
+                    )
+
                 kwargs[
                     "economie_circulaire_acteurs"
                 ] = economie_circulaire_acteurs.order_by("distance")[:DEFAULT_LIMIT]

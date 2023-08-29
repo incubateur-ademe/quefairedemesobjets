@@ -21,6 +21,11 @@ class AutoCompleteInput(forms.Select):
         return context
 
 
+class InlineRadioSelect(forms.RadioSelect):
+    template_name = "inline_radio.html"
+    option_template_name = "inline_radio_option.html"
+
+
 class GetReemploiSolutionForm(forms.Form):
     sous_categorie_objet = forms.ModelChoiceField(
         queryset=SousCategorieObjet.objects.all(),
@@ -45,4 +50,15 @@ class GetReemploiSolutionForm(forms.Form):
         ),
         label="",
         required=False,
+    )
+
+    direction = forms.ChoiceField(
+        widget=InlineRadioSelect(
+            attrs={
+                "class": "fr-radio",
+                "onchange": "this.form.submit();",
+            }
+        ),
+        choices=[("jai", "J'ai"), ("jecherche", "Je cherche")],
+        label="",
     )
