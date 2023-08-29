@@ -3,6 +3,7 @@
 {% block content %}
     <div>
         <form class="fr-my-3w" id='search_form'>
+            {% include "qfdmo/partials/iframe_input.html" %}
             {{ form.as_p() }}
         </form>
         <div
