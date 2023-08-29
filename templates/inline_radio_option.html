@@ -1,0 +1,6 @@
+<div class="fr-fieldset__element fr-fieldset__element--inline fr-mb-0">
+    <div class="fr-radio-group">
+        {% include "inline_input.html" %}
+        <label{% if widget.attrs.id %} for="{{ widget.attrs.id }}"{% endif %}>{{ widget.label }}</label>
+    </div>
+</div>
