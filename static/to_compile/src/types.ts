@@ -66,13 +66,14 @@ export class Actor {
 
     popupContent(): string {
         let popupContent = ""
-        let services = [
-            ...new Set(
+        let services = Array.from(
+            new Set(
                 this.proposition_services.map((proposition_service) => {
                     return proposition_service.acteur_service.nom
                 }),
             ),
-        ]
+        )
+
         popupContent += services.join("<br>")
         popupContent += "<br><br>"
         if (this.adresse !== "") {
@@ -88,7 +89,8 @@ export class Actor {
             popupContent += this.ville + "<br>"
         }
         if (this.url !== "") {
-            popupContent += "<a href='" + this.url + "'>" + this.url + "</a><br>"
+            popupContent +=
+                "<a href='" + this.url + "' target='_blank'>" + this.url + "</a><br>"
         }
 
         return popupContent
