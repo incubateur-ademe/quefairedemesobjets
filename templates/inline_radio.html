@@ -1,0 +1,7 @@
+<fieldset class="fr-fieldset fr-mb-0 fr-mt-1v" id="radio-inline" aria-labelledby="radio-inline-legend radio-inline-messages">
+    {% for group, options, index in widget.optgroups %}
+        {% for option in options %}
+            {% include option.template_name with widget=option %}
+        {% endfor %}
+    {% endfor %}
+</fieldset>
