@@ -6,6 +6,22 @@ Que faire de mes objets propose des solutions pour promouvoir les gestes de cons
 - Mise à disposition de l'annuaire via une API
 - Promotion des gestes de consomation responsable tel que le don et le partage local
 
+## iframe et parametres
+
+Le site "Que faire de mes objets" est disponible à l'URL : [https://quefairedemesobjets.osc-fr1.scalingo.io/](https://quefairedemesobjets.osc-fr1.scalingo.io/)
+
+Attention, l'URL et le nom de l'application sont temporaires.
+
+Le site est disponible en iframe en ajoutant le parametre `iframe` à l'URL, quelque soit sa valeur, ex : [https://quefairedemesobjets.osc-fr1.scalingo.io/?iframe](https://quefairedemesobjets.osc-fr1.scalingo.io/?iframe)
+
+Dans le cas de l'iframe, l'entête et le pied de page n'est pas affiché 
+
+Les autres paramètres disponibles pour afficher la page principale de l'application et permettant d'interagir avec les champs de recherche sont :
+
+- `sous_categorie_objet`, parmi les sous-categories suivantes : `Matériel médical`, `Autre matériel de sport`, `Vélos`, `Bijou`, `montre`, `horlogerie`, `Chaussures`, `Maroquinerie`, `Vêtements`, `Jouets`, `Puériculture`, `Linge de maison`, `Vaisselle`, `Luminaires`, `Décoration`, `Mobilier`, `Jardin (mobilier`, `accessoires)`, `Outillage (bricolage/jardinage)`, `Instruments de musique`, `Livres`, `CD/DVD/jeux vidéo`, `Autres équipements électroniques`, `Photo/ciné`, `Smartphones/tablettes/consoles`, `Hifi/vidéo (hors écrans)`
+- `adresse`, par exemple : 145+Avenue+Pierre+Brossolette+92120+Montrouge
+- `direction`, option `jai` ou `jecherche`
+
 ## Modèle de donnée
 
 Chaque acteur du ré-emploi et recyclage explose des propositions de service associée à un geste et une liste de catégorie d'objet
