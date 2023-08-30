@@ -24,7 +24,7 @@ Les autres paramètres disponibles pour afficher la page principale de l'applica
 
 ## Modèle de donnée
 
-Chaque acteur du ré-emploi et recyclage explose des propositions de service associée à un geste et une liste de catégorie d'objet
+Chaque acteur du ré-emploi et recyclage expose des propositions de service associées à un geste et une liste de catégorie d'objet
 
 ```mermaid
 flowchart TD
