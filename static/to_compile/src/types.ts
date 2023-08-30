@@ -93,7 +93,7 @@ export class Actor {
         if (this.ville !== "") {
             popupContent += this.ville + "<br>"
         }
-        if (this.url !== "") {
+        if (this.url) {
             popupContent +=
                 "<a href='" + this.url + "' target='_blank'>" + this.url + "</a><br>"
         }
