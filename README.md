@@ -14,7 +14,7 @@ Attention, l'URL et le nom de l'application sont temporaires.
 
 Le site est disponible en iframe en ajoutant le parametre `iframe` à l'URL, quelque soit sa valeur, ex : [https://quefairedemesobjets.osc-fr1.scalingo.io/?iframe](https://quefairedemesobjets.osc-fr1.scalingo.io/?iframe)
 
-Dans le cas de l'iframe, l'entête et le pied de page n'est pas affiché 
+Dans le cas de l'iframe, l'entête et le pied de page ne sont pas affichés 
 
 Les autres paramètres disponibles pour afficher la page principale de l'application et permettant d'interagir avec les champs de recherche sont :
 
