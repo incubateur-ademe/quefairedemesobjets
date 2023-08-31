@@ -1,18 +1,18 @@
 # Que faire de mes objets
 
-Que faire de mes objets propose des solutions pour promouvoir les gestes de consomation responsable:
+Que faire de mes objets propose des solutions pour promouvoir les gestes de consommation responsable:
 
-- Mise à disposition d'un annuaire d'Acteur du ré-emploi et du re-cyclage en France (disponible aussi via une iframe)
+- Mise à disposition d'un annuaire d'Acteurs du ré-emploi et du re-cyclage en France (disponible aussi via une iframe)
 - Mise à disposition de l'annuaire via une API
-- Promotion des gestes de consomation responsable tel que le don et le partage local
+- Promotion des gestes de consommation responsable tels que le don et le partage local
 
-## iframe et parametres
+## iframe et paramètres
 
 Le site "Que faire de mes objets" est disponible à l'URL : [https://quefairedemesobjets.osc-fr1.scalingo.io/](https://quefairedemesobjets.osc-fr1.scalingo.io/)
 
 Attention, l'URL et le nom de l'application sont temporaires.
 
-Le site est disponible en iframe en ajoutant le parametre `iframe` à l'URL, quelque soit sa valeur, ex : [https://quefairedemesobjets.osc-fr1.scalingo.io/?iframe](https://quefairedemesobjets.osc-fr1.scalingo.io/?iframe)
+Le site est disponible en iframe en ajoutant le paramètre `iframe` à l'URL, quelque soit sa valeur, ex : [https://quefairedemesobjets.osc-fr1.scalingo.io/?iframe](https://quefairedemesobjets.osc-fr1.scalingo.io/?iframe)
 
 Dans le cas de l'iframe, l'entête et le pied de page ne sont pas affichés 
 
@@ -24,7 +24,7 @@ Les autres paramètres disponibles pour afficher la page principale de l'applica
 
 ## Modèle de donnée
 
-Chaque acteur du ré-emploi et recyclage expose des propositions de service associées à un geste et une liste de catégorie d'objet
+Chaque acteur du ré-emploi et recyclage expose des propositions de service associées à un geste et une liste de catégories d'objet
 
 ```mermaid
 flowchart TD
@@ -61,7 +61,7 @@ flowchart TD
 - Dependabot
 - Django-debug-toolbar
 
-### installation & execution
+### installation & exécution
 
 Les bases de données source `MySQL` et cible `Postgres + Postgis` sont executées et mises à disposition par le gestionnaire de conteneur Docker
 
