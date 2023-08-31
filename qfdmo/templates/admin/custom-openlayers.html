@@ -1,0 +1,9 @@
+{% extends "gis/openlayers-osm.html" %}
+
+{% block options %}
+    {{ block.super }}
+    options['map_epsg'] = '{{ map_epsg }}';
+    options['dataset_epsg'] = '{{ dataset_epsg }}';
+
+{% endblock options %}
+
