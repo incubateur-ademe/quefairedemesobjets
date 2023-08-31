@@ -4,7 +4,7 @@ from qfdmo.models import SousCategorieObjet
 
 
 class AutoCompleteInput(forms.Select):
-    template_name = "autocomplete.html"
+    template_name = "django/forms/widgets/autocomplete.html"
 
     def __init__(
         self, attrs=None, max_options_displayed=10, search_callback=False, **kwargs
@@ -22,8 +22,8 @@ class AutoCompleteInput(forms.Select):
 
 
 class InlineRadioSelect(forms.RadioSelect):
-    template_name = "inline_radio.html"
-    option_template_name = "inline_radio_option.html"
+    template_name = "django/forms/widgets/inline_radio.html"
+    option_template_name = "django/forms/widgets/inline_radio_option.html"
 
 
 class GetReemploiSolutionForm(forms.Form):
