@@ -33,7 +33,7 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           cache: "pip"
-          python-version: "3.11.2"
+          python-version: "3.11.4"
       - name: Install GIS Packages
         run: sudo apt-get install gdal-bin
       - name: Install Dependencies
