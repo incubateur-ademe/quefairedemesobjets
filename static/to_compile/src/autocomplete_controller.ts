@@ -5,9 +5,11 @@ export default class extends Controller<HTMLElement> {
     #currentFocus: number = 0
     #autocompleteList: HTMLElement
 
-    static targets = ["allAvailableOptions", "input", "option"]
+    static targets = ["allAvailableOptions", "input", "option", "long", "lat"]
     declare readonly allAvailableOptionsTarget: HTMLScriptElement
     declare readonly inputTarget: HTMLInputElement
+    declare readonly latTarget: HTMLInputElement
+    declare readonly longTarget: HTMLInputElement
     declare readonly optionTargets: Array<HTMLElement>
 
     static values = { maxOptionDisplayed: Number, searchCallback: String }
@@ -34,6 +36,10 @@ export default class extends Controller<HTMLElement> {
                         .then((response) => response.json())
                         .then((data) => {
                             this.inputTarget.value = data.features[0].properties.label
+                            this.latTarget.value =
+                                data.features[0].geometry.coordinates[1]
+                            this.longTarget.value =
+                                data.features[0].geometry.coordinates[0]
                             /* FIXME : Check if we can partially refresh the page using Turbo */
                             this.inputTarget.form.submit()
                         })
@@ -92,7 +98,12 @@ export default class extends Controller<HTMLElement> {
 
     selectOption(event: Event) {
         let target = event.target as HTMLElement
-        this.inputTarget.value = target.getElementsByTagName("input")[0].value
+        const [label, lat, long] = target
+            .getElementsByTagName("input")[0]
+            .value.split("||")
+        this.inputTarget.value = label
+        if (long) this.longTarget.value = long
+        if (lat) this.latTarget.value = lat
         this.inputTarget.form.submit()
         this.#closeAllLists()
     }
@@ -176,7 +187,11 @@ export default class extends Controller<HTMLElement> {
             .then((response) => response.json())
             .then((data) => {
                 let labels = data.features.map((feature: any) => {
-                    return feature.properties.label
+                    return [
+                        feature.properties.label,
+                        feature.geometry.coordinates[1],
+                        feature.geometry.coordinates[0],
+                    ].join("||")
                 })
                 return labels
             })
@@ -191,7 +206,8 @@ export default class extends Controller<HTMLElement> {
         /*create a DIV element for each matching element:*/
         let b = document.createElement("DIV")
         /*make the matching letters bold:*/
-        const newText = option.replace(regexPattern, "<strong>$&</strong>")
+        const [data, long, lat] = option.split("||")
+        const newText = data.replace(regexPattern, "<strong>$&</strong>")
         b.innerHTML = newText
         // FIXME : better way to do this
         b.innerHTML += "<input type='hidden' value='" + option + "'>"
