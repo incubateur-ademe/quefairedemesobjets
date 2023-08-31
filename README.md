@@ -20,7 +20,7 @@ Les autres paramètres disponibles pour afficher la page principale de l'applica
 
 - `sous_categorie_objet`, parmi les sous-categories suivantes : `Matériel médical`, `Autre matériel de sport`, `Vélos`, `Bijou`, `montre`, `horlogerie`, `Chaussures`, `Maroquinerie`, `Vêtements`, `Jouets`, `Puériculture`, `Linge de maison`, `Vaisselle`, `Luminaires`, `Décoration`, `Mobilier`, `Jardin (mobilier`, `accessoires)`, `Outillage (bricolage/jardinage)`, `Instruments de musique`, `Livres`, `CD/DVD/jeux vidéo`, `Autres équipements électroniques`, `Photo/ciné`, `Smartphones/tablettes/consoles`, `Hifi/vidéo (hors écrans)`
 - `adresse`, par exemple : 145+Avenue+Pierre+Brossolette+92120+Montrouge
-- `direction`, option `jai` ou `je cherche`
+- `direction`, option `jai` ou `jecherche`
 
 ## Modèle de donnée
 
