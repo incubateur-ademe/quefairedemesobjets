@@ -1,4 +1,4 @@
-from django.contrib.gis import admin
+from django.contrib.gis import admin, forms
 
 from qfdmo.models import (
     ActeurService,
@@ -69,7 +69,12 @@ class PropositionServiceInline(admin.TabularInline):
         return super().has_change_permission(request, obj)
 
 
+class RawOSMWidget(forms.OSMWidget):
+    display_raw = True
+
+
 class EconomieCirculaireActeurAdmin(admin.GISModelAdmin):
+    gis_widget = RawOSMWidget
     inlines = [
         PropositionServiceInline,
     ]
