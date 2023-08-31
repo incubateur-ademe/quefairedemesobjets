@@ -8,7 +8,8 @@
     },
     "source": [
         "static/to_compile/entrypoints/qfdmo.css",
-        "static/to_compile/entrypoints/qfdmo.ts"
+        "static/to_compile/entrypoints/qfdmo.ts",
+        "static/to_compile/entrypoints/admin-map-widget.ts"
     ],
     "targets": {
         "default": {

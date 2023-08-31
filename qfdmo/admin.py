@@ -11,6 +11,7 @@ from qfdmo.models import (
     PropositionService,
     SousCategorieObjet,
 )
+from qfdmo.widget import CustomOSMWidget
 
 
 class SousCategorieAdmin(admin.ModelAdmin):
@@ -70,6 +71,7 @@ class PropositionServiceInline(admin.TabularInline):
 
 
 class EconomieCirculaireActeurAdmin(admin.GISModelAdmin):
+    gis_widget = CustomOSMWidget
     inlines = [
         PropositionServiceInline,
     ]
