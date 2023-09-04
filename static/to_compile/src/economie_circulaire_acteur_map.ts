@@ -1,7 +1,7 @@
 import L from "leaflet"
 import { Actor, Location } from "./types"
 
-const DEFAULT_LOACTION: Array<Number> = [46.227638, 2.213749]
+const DEFAULT_LOCATION: Array<Number> = [46.227638, 2.213749]
 const DEFAULT_ZOOM: Number = 5
 const DEFAULT_MAX_ZOOM: Number = 19
 
@@ -14,14 +14,15 @@ export class EconomieCirculaireSolutionMap {
             preferCanvas: true,
         })
 
-        this.#map.setView(DEFAULT_LOACTION, DEFAULT_ZOOM)
+        this.#map.setView(DEFAULT_LOCATION, DEFAULT_ZOOM)
         L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
             maxZoom: DEFAULT_MAX_ZOOM,
             attribution: "© OpenStreetMap",
         }).addTo(this.#map)
-        if (location.hasOwnProperty("geometry")) {
+        if (location.latitude !== undefined && location.longitude !== undefined) {
             L.marker(
-                [location.geometry?.coordinates[1], location.geometry?.coordinates[0]],
+                [location.latitude, location.longitude],
+                // [location.geometry?.coordinates[1], location.geometry?.coordinates[0]],
                 { icon: homeIconMarker },
             )
                 .addTo(this.#map)
