@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    </head>
+    <body>
+        <iframe id="myiframe" src="https://quefairedemesobjets.osc-fr1.scalingo.io/?iframe" style="width: 100%;border: none;" allow="geolocation"></iframe>
+    </body>
+    <script>
+        function receiveSize(e){
+            console.error(e);
+            if(e.origin === "https://quefairedemesobjets.osc-fr1.scalingo.io"){
+                var newHeight = e.data + 40;
+                document.getElementById("myiframe").style.height = newHeight + "px";
+            }
+        }
+
+        window.addEventListener("message", receiveSize, false);
+    </script>
+</html>
