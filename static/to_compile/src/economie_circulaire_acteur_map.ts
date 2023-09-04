@@ -19,16 +19,16 @@ export class EconomieCirculaireSolutionMap {
             maxZoom: DEFAULT_MAX_ZOOM,
             attribution: "© OpenStreetMap",
         }).addTo(this.#map)
-        // if (location.hasOwnProperty("geometry")) {
-        L.marker(
-            [location.lat, location.long],
-            // [location.geometry?.coordinates[1], location.geometry?.coordinates[0]],
-            { icon: homeIconMarker },
-        )
-            .addTo(this.#map)
-            .bindPopup("<p><strong>Vous êtes ici !</strong></b>")
-            .openPopup()
-        // }
+        if (location.latitude !== undefined && location.longitude !== undefined) {
+            L.marker(
+                [location.latitude, location.longitude],
+                // [location.geometry?.coordinates[1], location.geometry?.coordinates[0]],
+                { icon: homeIconMarker },
+            )
+                .addTo(this.#map)
+                .bindPopup("<p><strong>Vous êtes ici !</strong></b>")
+                .openPopup()
+        }
     }
 
     display_actor(actors: Array<Actor>): void {

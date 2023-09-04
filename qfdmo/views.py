@@ -22,8 +22,8 @@ class ReemploiSolutionView(FormView):
         initial["sous_categorie_objet"] = self.request.GET.get("sous_categorie_objet")
         initial["adresse"] = self.request.GET.get("adresse")
         initial["direction"] = self.request.GET.get("direction", "jai")
-        initial["lat"] = self.request.GET.get("lat")
-        initial["long"] = self.request.GET.get("long")
+        initial["latitude"] = self.request.GET.get("latitude")
+        initial["longitude"] = self.request.GET.get("longitude")
         return initial
 
     def get_context_data(self, **kwargs):
@@ -34,11 +34,13 @@ class ReemploiSolutionView(FormView):
             sous_categories_objets = SousCategorieObjet.objects.filter(
                 nom__icontains=sous_categorie_objet
             )
-        if (lat := self.request.GET.get("lat", None)) and (
-            long := self.request.GET.get("long", None)
+        if (latitude := self.request.GET.get("latitude", None)) and (
+            longitude := self.request.GET.get("longitude", None)
         ):
-            kwargs["location"] = json.dumps({"lat": lat, "long": long})
-            reference_point = Point(float(long), float(lat), srid=4326)
+            kwargs["location"] = json.dumps(
+                {"latitude": latitude, "longitude": longitude}
+            )
+            reference_point = Point(float(longitude), float(latitude), srid=4326)
             # FIXME : add a test to check distinct point
             economie_circulaire_acteurs = (
                 EconomieCirculaireActeur.objects.annotate(

@@ -1,8 +1,8 @@
 export interface Location {
-    geometry?: {
-        coordinates: number[]
-    }
+    latitude?: number
+    longitude?: number
 }
+
 export interface ActorLocation {
     coordinates: number[]
 }

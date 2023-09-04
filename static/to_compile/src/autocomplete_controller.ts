@@ -5,11 +5,11 @@ export default class extends Controller<HTMLElement> {
     #currentFocus: number = 0
     #autocompleteList: HTMLElement
 
-    static targets = ["allAvailableOptions", "input", "option", "long", "lat"]
+    static targets = ["allAvailableOptions", "input", "option", "longitude", "latitude"]
     declare readonly allAvailableOptionsTarget: HTMLScriptElement
     declare readonly inputTarget: HTMLInputElement
-    declare readonly latTarget: HTMLInputElement
-    declare readonly longTarget: HTMLInputElement
+    declare readonly latitudeTarget: HTMLInputElement
+    declare readonly longitudeTarget: HTMLInputElement
     declare readonly optionTargets: Array<HTMLElement>
 
     static values = { maxOptionDisplayed: Number, searchCallback: String }
@@ -36,9 +36,9 @@ export default class extends Controller<HTMLElement> {
                         .then((response) => response.json())
                         .then((data) => {
                             this.inputTarget.value = data.features[0].properties.label
-                            this.latTarget.value =
+                            this.latitudeTarget.value =
                                 data.features[0].geometry.coordinates[1]
-                            this.longTarget.value =
+                            this.longitudeTarget.value =
                                 data.features[0].geometry.coordinates[0]
                             /* FIXME : Check if we can partially refresh the page using Turbo */
                             this.inputTarget.form.submit()
@@ -98,12 +98,12 @@ export default class extends Controller<HTMLElement> {
 
     selectOption(event: Event) {
         let target = event.target as HTMLElement
-        const [label, lat, long] = target
+        const [label, latitude, longitude] = target
             .getElementsByTagName("input")[0]
             .value.split("||")
         this.inputTarget.value = label
-        if (long) this.longTarget.value = long
-        if (lat) this.latTarget.value = lat
+        if (longitude) this.longitudeTarget.value = longitude
+        if (latitude) this.latitudeTarget.value = latitude
         this.inputTarget.form.submit()
         this.#closeAllLists()
     }
@@ -206,7 +206,7 @@ export default class extends Controller<HTMLElement> {
         /*create a DIV element for each matching element:*/
         let b = document.createElement("DIV")
         /*make the matching letters bold:*/
-        const [data, long, lat] = option.split("||")
+        const [data, longitude, latitude] = option.split("||")
         const newText = data.replace(regexPattern, "<strong>$&</strong>")
         b.innerHTML = newText
         // FIXME : better way to do this

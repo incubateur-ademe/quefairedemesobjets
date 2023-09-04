@@ -7,7 +7,6 @@
     </body>
     <script>
         function receiveSize(e){
-            console.error(e);
             if(e.origin === "https://quefairedemesobjets.osc-fr1.scalingo.io"){
                 var newHeight = e.data + 40;
                 document.getElementById("myiframe").style.height = newHeight + "px";
