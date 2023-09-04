@@ -23,6 +23,10 @@
         <script src="{{ static('qfdmo.js') }}"></script>
         {% block javascript_extras %}{% endblock %}
 
+        {% if is_iframe(request) %}
+            <script src="{{ static('iframe.js') }}"></script>
+        {% endif %}
+
     </head>
 
     <body class="h-full m-0 font-default ">
