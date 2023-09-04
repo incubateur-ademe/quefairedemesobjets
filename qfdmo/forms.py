@@ -51,6 +51,14 @@ class GetReemploiSolutionForm(forms.Form):
         label="",
         required=False,
     )
+    latitude = forms.FloatField(
+        widget=forms.HiddenInput(attrs={"data-autocomplete-target": "latitude"}),
+        required=False,
+    )
+    longitude = forms.FloatField(
+        widget=forms.HiddenInput(attrs={"data-autocomplete-target": "longitude"}),
+        required=False,
+    )
 
     direction = forms.ChoiceField(
         widget=InlineRadioSelect(

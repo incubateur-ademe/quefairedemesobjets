@@ -1,6 +1,5 @@
 import json
 
-import requests
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
 from django.db.models import Count, F, QuerySet
@@ -23,6 +22,8 @@ class ReemploiSolutionView(FormView):
         initial["sous_categorie_objet"] = self.request.GET.get("sous_categorie_objet")
         initial["adresse"] = self.request.GET.get("adresse")
         initial["direction"] = self.request.GET.get("direction", "jai")
+        initial["latitude"] = self.request.GET.get("latitude")
+        initial["longitude"] = self.request.GET.get("longitude")
         return initial
 
     def get_context_data(self, **kwargs):
@@ -33,62 +34,56 @@ class ReemploiSolutionView(FormView):
             sous_categories_objets = SousCategorieObjet.objects.filter(
                 nom__icontains=sous_categorie_objet
             )
-        if adresse := self.request.GET.get("adresse", "").strip().replace(" ", "+"):
-            response = requests.get(BAN_API_URL.format(adresse))
-            data = response.json()
-            if (
-                response.status_code < 400
-                and data["features"]
-                and (geo := data["features"][0]["geometry"])
-            ):
-                kwargs["location"] = json.dumps(data["features"][0])
-
-                reference_point = Point(
-                    geo["coordinates"][0], geo["coordinates"][1], srid=4326
+        if (latitude := self.request.GET.get("latitude", None)) and (
+            longitude := self.request.GET.get("longitude", None)
+        ):
+            kwargs["location"] = json.dumps(
+                {"latitude": latitude, "longitude": longitude}
+            )
+            reference_point = Point(float(longitude), float(latitude), srid=4326)
+            # FIXME : add a test to check distinct point
+            economie_circulaire_acteurs = (
+                EconomieCirculaireActeur.objects.annotate(
+                    distance=Distance("location", reference_point)
                 )
-                # FIXME : add a test to check distinct point
-                economie_circulaire_acteurs = (
-                    EconomieCirculaireActeur.objects.annotate(
-                        distance=Distance("location", reference_point)
-                    )
-                    .prefetch_related(
-                        "proposition_services__sous_categories",
-                        "proposition_services__sous_categories__categorie",
-                        "proposition_services__action",
-                        "proposition_services__acteur_service",
-                        "acteur_type",
-                    )
-                    .distinct()
+                .prefetch_related(
+                    "proposition_services__sous_categories",
+                    "proposition_services__sous_categories__categorie",
+                    "proposition_services__action",
+                    "proposition_services__acteur_service",
+                    "acteur_type",
                 )
-                if sous_categories_objets is not None:
-                    economie_circulaire_acteurs = economie_circulaire_acteurs.filter(
-                        proposition_services__sous_categories__in=sous_categories_objets
-                    )
-                direction = self.request.GET.get("direction", "jai")
-                if direction == "jecherche":
-                    economie_circulaire_acteurs = economie_circulaire_acteurs.filter(
-                        proposition_services__action__nom__in=[
-                            "emprunter",
-                            "louer",
-                            "acheter d'occasion",
-                            "échanger",
-                        ]
-                    )
-                if direction == "jai":
-                    economie_circulaire_acteurs = economie_circulaire_acteurs.filter(
-                        proposition_services__action__nom__in=[
-                            "revendre",
-                            "donner",
-                            "prêter",
-                            "échanger",
-                            "mettre en location",
-                            "réparer",
-                        ]
-                    )
+                .distinct()
+            )
+            if sous_categories_objets is not None:
+                economie_circulaire_acteurs = economie_circulaire_acteurs.filter(
+                    proposition_services__sous_categories__in=sous_categories_objets
+                )
+            direction = self.request.GET.get("direction", "jai")
+            if direction == "jecherche":
+                economie_circulaire_acteurs = economie_circulaire_acteurs.filter(
+                    proposition_services__action__nom__in=[
+                        "emprunter",
+                        "louer",
+                        "acheter d'occasion",
+                        "échanger",
+                    ]
+                )
+            if direction == "jai":
+                economie_circulaire_acteurs = economie_circulaire_acteurs.filter(
+                    proposition_services__action__nom__in=[
+                        "revendre",
+                        "donner",
+                        "prêter",
+                        "échanger",
+                        "mettre en location",
+                        "réparer",
+                    ]
+                )
 
-                kwargs[
-                    "economie_circulaire_acteurs"
-                ] = economie_circulaire_acteurs.order_by("distance")[:DEFAULT_LIMIT]
+            kwargs[
+                "economie_circulaire_acteurs"
+            ] = economie_circulaire_acteurs.order_by("distance")[:DEFAULT_LIMIT]
 
         return super().get_context_data(**kwargs)
 
