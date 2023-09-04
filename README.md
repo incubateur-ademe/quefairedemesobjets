@@ -14,13 +14,20 @@ Attention, l'URL et le nom de l'application sont temporaires.
 
 Le site est disponible en iframe en ajoutant le paramètre `iframe` à l'URL, quelque soit sa valeur, ex : [https://quefairedemesobjets.osc-fr1.scalingo.io/?iframe](https://quefairedemesobjets.osc-fr1.scalingo.io/?iframe)
 
-Dans le cas de l'iframe, l'entête et le pied de page ne sont pas affichés 
+Dans le cas de l'iframe, l'entête et le pied de page ne sont pas affichés
 
 Les autres paramètres disponibles pour afficher la page principale de l'application et permettant d'interagir avec les champs de recherche sont :
 
 - `sous_categorie_objet`, parmi les sous-categories suivantes : `Matériel médical`, `Autre matériel de sport`, `Vélos`, `Bijou`, `montre`, `horlogerie`, `Chaussures`, `Maroquinerie`, `Vêtements`, `Jouets`, `Puériculture`, `Linge de maison`, `Vaisselle`, `Luminaires`, `Décoration`, `Mobilier`, `Jardin (mobilier`, `accessoires)`, `Outillage (bricolage/jardinage)`, `Instruments de musique`, `Livres`, `CD/DVD/jeux vidéo`, `Autres équipements électroniques`, `Photo/ciné`, `Smartphones/tablettes/consoles`, `Hifi/vidéo (hors écrans)`
 - `adresse`, par exemple : 145+Avenue+Pierre+Brossolette+92120+Montrouge
 - `direction`, option `jai` ou `jecherche`
+
+### Afficher l'iframe en totalité dynamiquement
+
+Pour afficher l'iframe dans toute sa hauteur, le site, lorsqu'il est utilisé avec le paramètre iframe, publie un message qui est la hauteur de la page.
+A l"appel de la page en mode iframe, il est possible d'utiliser ce message pour adapter la taille de l'iframe.
+
+Voir l'exemple de code [iframe.html](./iframe.html)
 
 ## Modèle de donnée
 
