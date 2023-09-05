@@ -29,6 +29,7 @@ export class Actor {
     code_postal: string
     ville: string
     url: string
+    telephone: string
     proposition_services: Array<PropositionService>
     location: ActorLocation
     /*
@@ -56,20 +57,21 @@ export class Actor {
         this.adresse_complement = actor_fields["adresse_complement"]
         this.code_postal = actor_fields["code_postal"]
         this.ville = actor_fields["ville"]
+        this.telephone = actor_fields["telephone"]
         this.proposition_services = actor_fields["proposition_services"]
         this.location = actor_fields["location"]
     }
 
     popupTitle(): string {
-        // FIXME display nom commercial if exists
-        let title: string = this.nom
-        if (this.nom_commercial) {
-            title = this.nom_commercial
-        }
-        return "<p><strong>" + title + "</strong></b><br>"
+        let title: string = this.nom_commercial || this.nom
+        let title_html = document.createElement("h5")
+        title_html.className = "fr-mb-0"
+        title_html.innerHTML = title
+        return title_html.outerHTML
     }
 
     popupContent(): string {
+        let popup = document.createElement("div")
         let popupContent = ""
         let services = Array.from(
             new Set(
@@ -93,11 +95,18 @@ export class Actor {
         if (this.ville !== "") {
             popupContent += this.ville + "<br>"
         }
+        if (this.telephone !== "") {
+            popupContent += this.telephone + "<br>"
+        }
+        popup.innerHTML = popupContent
         if (this.url) {
-            popupContent +=
-                "<a href='" + this.url + "' target='_blank'>" + this.url + "</a><br>"
+            let url = document.createElement("a")
+            url.href = this.url
+            url.target = "_blank"
+            url.innerHTML = this.url
+            popup.appendChild(url)
         }
 
-        return popupContent
+        return popup.outerHTML
     }
 }
