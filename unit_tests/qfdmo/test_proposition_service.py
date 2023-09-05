@@ -2,10 +2,10 @@ import pytest
 from django.contrib.gis.geos import Point
 
 from qfdmo.models import (
+    Acteur,
     ActeurService,
     Action,
     CategorieObjet,
-    EconomieCirculaireActeur,
     PropositionService,
     SousCategorieObjet,
 )
@@ -16,13 +16,11 @@ class TestActionNomAsNaturalKeyHeritage:
     def test_serialize(self):
         acteur_service = ActeurService.objects.create(nom="Test Object", lvao_id=123)
         action = Action.objects.create(nom="Test Object", lvao_id=123)
-        economie_circulaire_acteur = EconomieCirculaireActeur.objects.create(
-            nom="Test Object", location=Point(0, 0)
-        )
+        acteur = Acteur.objects.create(nom="Test Object", location=Point(0, 0))
         proposition_service = PropositionService.objects.create(
             acteur_service=acteur_service,
             action=action,
-            economie_circulaire_acteur=economie_circulaire_acteur,
+            acteur=acteur,
         )
         categorie = CategorieObjet.objects.create(nom="Test Category")
         sous_categorie1 = SousCategorieObjet.objects.create(

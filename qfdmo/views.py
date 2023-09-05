@@ -7,7 +7,7 @@ from django.shortcuts import render
 from django.views.generic.edit import FormView
 
 from qfdmo.forms import GetReemploiSolutionForm
-from qfdmo.models import EconomieCirculaireActeur, LVAOBase, SousCategorieObjet
+from qfdmo.models import Acteur, LVAOBase, SousCategorieObjet
 
 DEFAULT_LIMIT = 10
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
@@ -28,7 +28,7 @@ class ReemploiSolutionView(FormView):
 
     def get_context_data(self, **kwargs):
         kwargs["location"] = "{}"
-        kwargs["economiecirculaireacteurs"] = "{}"
+        kwargs["acteurs"] = Acteur.objects.none()
         sous_categories_objets: QuerySet | None = None
         if sous_categorie_objet := self.request.GET.get("sous_categorie_objet", None):
             sous_categories_objets = SousCategorieObjet.objects.filter(
@@ -42,10 +42,8 @@ class ReemploiSolutionView(FormView):
             )
             reference_point = Point(float(longitude), float(latitude), srid=4326)
             # FIXME : add a test to check distinct point
-            economie_circulaire_acteurs = (
-                EconomieCirculaireActeur.objects.annotate(
-                    distance=Distance("location", reference_point)
-                )
+            acteurs = (
+                Acteur.objects.annotate(distance=Distance("location", reference_point))
                 .prefetch_related(
                     "proposition_services__sous_categories",
                     "proposition_services__sous_categories__categorie",
@@ -56,12 +54,12 @@ class ReemploiSolutionView(FormView):
                 .distinct()
             )
             if sous_categories_objets is not None:
-                economie_circulaire_acteurs = economie_circulaire_acteurs.filter(
+                acteurs = acteurs.filter(
                     proposition_services__sous_categories__in=sous_categories_objets
                 )
             direction = self.request.GET.get("direction", "jai")
             if direction == "jecherche":
-                economie_circulaire_acteurs = economie_circulaire_acteurs.filter(
+                acteurs = acteurs.filter(
                     proposition_services__action__nom__in=[
                         "emprunter",
                         "louer",
@@ -70,7 +68,7 @@ class ReemploiSolutionView(FormView):
                     ]
                 )
             if direction == "jai":
-                economie_circulaire_acteurs = economie_circulaire_acteurs.filter(
+                acteurs = acteurs.filter(
                     proposition_services__action__nom__in=[
                         "revendre",
                         "donner",
@@ -81,9 +79,7 @@ class ReemploiSolutionView(FormView):
                     ]
                 )
 
-            kwargs[
-                "economie_circulaire_acteurs"
-            ] = economie_circulaire_acteurs.order_by("distance")[:DEFAULT_LIMIT]
+            kwargs["acteurs"] = acteurs.order_by("distance")[:DEFAULT_LIMIT]
 
         return super().get_context_data(**kwargs)
 
@@ -115,7 +111,7 @@ def analyse_lvao_base(request, id):
         "acteur_type",
         "acteur_services",
     ).all()
-    economie_circulaire_acteur = EconomieCirculaireActeur.objects.filter(
+    acteur = Acteur.objects.filter(
         identifiant_unique=lvao_base.identifiant_unique
     ).first()
 
@@ -125,6 +121,6 @@ def analyse_lvao_base(request, id):
         {
             "lvao_base": lvao_base,
             "lvao_base_revisions": lvao_base_revisions,
-            "economie_circulaire_acteur": economie_circulaire_acteur,
+            "acteur": acteur,
         },
     )

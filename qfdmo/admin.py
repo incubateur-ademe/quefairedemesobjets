@@ -1,11 +1,11 @@
 from django.contrib.gis import admin
 
 from qfdmo.models import (
+    Acteur,
     ActeurService,
     ActeurType,
     Action,
     CategorieObjet,
-    EconomieCirculaireActeur,
     LVAOBase,
     LVAOBaseRevision,
     PropositionService,
@@ -70,7 +70,7 @@ class PropositionServiceInline(admin.TabularInline):
         return super().has_change_permission(request, obj)
 
 
-class EconomieCirculaireActeurAdmin(admin.GISModelAdmin):
+class ActeurAdmin(admin.GISModelAdmin):
     gis_widget = CustomOSMWidget
     inlines = [
         PropositionServiceInline,
@@ -93,4 +93,4 @@ admin.site.register(ActeurService)
 admin.site.register(ActeurType)
 admin.site.register(LVAOBase, LVAOBaseAdmin)
 admin.site.register(LVAOBaseRevision, LVAOBaseRevisionAdmin)
-admin.site.register(EconomieCirculaireActeur, EconomieCirculaireActeurAdmin)
+admin.site.register(Acteur, ActeurAdmin)
