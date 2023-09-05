@@ -7,7 +7,7 @@ const DEFAULT_MAX_ZOOM: Number = 19
 
 import { homeIconMarker, redMarker } from "./icon_marker"
 
-export class EconomieCirculaireSolutionMap {
+export class SolutionMap {
     #map: L.Map
     constructor({ location }: { location: Location }) {
         this.#map = L.map("map", {
