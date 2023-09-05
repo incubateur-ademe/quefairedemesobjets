@@ -38,11 +38,11 @@
                             </td>
                         {% endfor %}
                         <td scope="col">
-                            {% if economie_circulaire_acteur %}
-                                {{ economie_circulaire_acteur.nom }}<br>
-                                {{ economie_circulaire_acteur.siret }}<br>
-                                {{ economie_circulaire_acteur.nom_commercial }}<br>
-                                {{ economie_circulaire_acteur.nom_officiel }}
+                            {% if acteur %}
+                                {{ acteur.nom }}<br>
+                                {{ acteur.siret }}<br>
+                                {{ acteur.nom_commercial }}<br>
+                                {{ acteur.nom_officiel }}
                             {% endif %}
                         </td>
 
@@ -57,10 +57,10 @@
                             </td>
                         {% endfor %}
                         <td scope="col">
-                            {% if economie_circulaire_acteur %}
-                                {{ economie_circulaire_acteur.adresse }}<br>
-                                {{ economie_circulaire_acteur.adresse_complement }}<br>
-                                {{ economie_circulaire_acteur.code_postal }} {{ economie_circulaire_acteur.ville }}
+                            {% if acteur %}
+                                {{ acteur.adresse }}<br>
+                                {{ acteur.adresse_complement }}<br>
+                                {{ acteur.code_postal }} {{ acteur.ville }}
                             {% endif %}
                         </td>
                     </tr>
@@ -74,10 +74,10 @@
                             </td>
                         {% endfor %}
                         <td scope="col">
-                            {% if economie_circulaire_acteur %}
-                                lat {{ economie_circulaire_acteur.latitude }}<br>
-                                long {{ economie_circulaire_acteur.longitude }}<br>
-                                <a href="https://maps.google.com/maps?z=12&t=m&q=loc:{{ economie_circulaire_acteur.latitude }}+{{ economie_circulaire_acteur.longitude }}" target='blank'>GMap</a>
+                            {% if acteur %}
+                                lat {{ acteur.latitude }}<br>
+                                long {{ acteur.longitude }}<br>
+                                <a href="https://maps.google.com/maps?z=12&t=m&q=loc:{{ acteur.latitude }}+{{ acteur.longitude }}" target='blank'>GMap</a>
                             {% endif %}
                         </td>
                     </tr>
@@ -126,8 +126,8 @@
                             <td scope="col">{{ lvao_base_revision.acteur_type }}</td>
                         {% endfor %}
                         <td scope="col">
-                            {% if economie_circulaire_acteur %}
-                                {{ economie_circulaire_acteur.acteur_type }}
+                            {% if acteur %}
+                                {{ acteur.acteur_type }}
                             {% endif %}
                         </td>
                     </tr>
@@ -137,8 +137,8 @@
                             <td scope="col">{{ lvao_base_revision.source_donnee }} </td>
                         {% endfor %}
                         <td scope="col">
-                            {% if economie_circulaire_acteur %}
-                                {{ economie_circulaire_acteur.source_donnee }}
+                            {% if acteur %}
+                                {{ acteur.source_donnee }}
                             {% endif %}
                         </td>
                     </tr>
@@ -151,8 +151,8 @@
                             </td>
                         {% endfor %}
                         <td scope="col">
-                            {% if economie_circulaire_acteur %}
-                                {{ economie_circulaire_acteur.identifiant_externe }}
+                            {% if acteur %}
+                                {{ acteur.identifiant_externe }}
                             {% endif %}
                         </td>
                     </tr>

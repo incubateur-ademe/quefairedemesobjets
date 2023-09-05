@@ -5,15 +5,13 @@ from django.core.management.base import BaseCommand
 from django.forms import model_to_dict
 from tqdm import tqdm
 
-from qfdmo.models import EconomieCirculaireActeur, LVAOBase, PropositionService
+from qfdmo.models import Acteur, LVAOBase, PropositionService
 
 STEP = 1000
 
 
 class Command(BaseCommand):
-    help = (
-        "From LVAO BASE, populate EconomieCirculaireActeur and its PropositionServices"
-    )
+    help = "From LVAO BASE, populate Acteur and its PropositionServices"
 
     def handle(self, *args, **options):
         total_lvao_bases = LVAOBase.objects.filter(
@@ -76,7 +74,7 @@ class Command(BaseCommand):
                 del ec_acteur_fields["longitude"]
                 del ec_acteur_fields["latitude"]
                 del ec_acteur_fields["acteur_type"]
-                (ec_acteur, _) = EconomieCirculaireActeur.objects.get_or_create(
+                (ec_acteur, _) = Acteur.objects.get_or_create(
                     identifiant_unique=lvao_base.identifiant_unique,
                     defaults=ec_acteur_fields,
                 )
@@ -100,9 +98,7 @@ class Command(BaseCommand):
                         ) = PropositionService.objects.get_or_create(
                             action=action_acteurservice["action"],
                             acteur_service=action_acteurservice["acteur_service"],
-                            economie_circulaire_acteur=action_acteurservice[
-                                "ec_acteur"
-                            ],
+                            acteur=action_acteurservice["ec_acteur"],
                         )
                         proposition_service.sous_categories.clear()
                         for sous_categories in action_acteurservice["sous-categories"]:

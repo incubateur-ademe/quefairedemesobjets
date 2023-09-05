@@ -2,32 +2,32 @@ import pytest
 from django.contrib.gis.geos import Point
 
 from qfdmo.models import (
+    Acteur,
     ActeurService,
     ActeurType,
     Action,
-    EconomieCirculaireActeur,
     NomAsNaturalKeyModel,
     PropositionService,
 )
 
 
-class TestEconomieCirculaireNomAsNaturalKeyHeritage:
+class TestNomAsNaturalKeyHeritage:
     def test_natural(self):
-        assert NomAsNaturalKeyModel in EconomieCirculaireActeur.mro()
+        assert NomAsNaturalKeyModel in Acteur.mro()
 
 
-class TestEconomieCirculairePoint:
+class TestPoint:
     def test_longitude_Latitude(self):
-        economie_circulaire_acteur = EconomieCirculaireActeur(location=Point(1.1, 2.2))
-        assert economie_circulaire_acteur.longitude == 1.1
-        assert economie_circulaire_acteur.latitude == 2.2
+        acteur = Acteur(location=Point(1.1, 2.2))
+        assert acteur.longitude == 1.1
+        assert acteur.latitude == 2.2
 
 
 class TestSerialize:
     @pytest.mark.django_db
     def test_serialize(self):
         acteur_type = ActeurType.objects.create(nom="Test Object", lvao_id=123)
-        economie_circulaire_acteur = EconomieCirculaireActeur.objects.create(
+        acteur = Acteur.objects.create(
             nom="Test Object", location=Point(0, 0), acteur_type=acteur_type
         )
         acteur_service = ActeurService.objects.create(nom="Test Object", lvao_id=123)
@@ -35,10 +35,10 @@ class TestSerialize:
         proposition_service = PropositionService.objects.create(
             acteur_service=acteur_service,
             action=action,
-            economie_circulaire_acteur=economie_circulaire_acteur,
+            acteur=acteur,
         )
-        assert economie_circulaire_acteur.serialize() == {
-            "id": economie_circulaire_acteur.id,
+        assert acteur.serialize() == {
+            "id": acteur.id,
             "nom": "Test Object",
             "identifiant_unique": None,
             "acteur_type": acteur_type.serialize(),
