@@ -1,18 +1,34 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4.3.6/iframeResizer.min.js"
+            integrity="sha512-f0wd6UIvZbsjPNebGx+uMzHmg6KXr1jWvumJDYSEDmwYJYOptZ0dTka/wBJu7Tj80tnCYMKoKicqvZiIc9GJgw=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        ></script>
     </head>
     <body>
-        <iframe id="myiframe" src="https://quefairedemesobjets.osc-fr1.scalingo.io/?iframe" style="width: 100%;border: none;" allow="geolocation"></iframe>
+        <div>
+            <h1>Page d'affichage dynamique de l'iframe de l'application</h1>
+            <p>Ci-dessous s'affiche l'iframe de l'application</p>
+        </div>
+        <iframe
+            id="myiframe"
+            src="https://quefairedemesobjets.osc-fr1.scalingo.io/?iframe"
+            style="width: 100%;border: none;"
+            allow="geolocation"
+        ></iframe>
+        <div>
+            <p>Fin de l'affichage de l'iframe de l'application</p>
+        </div>
+        <script>
+            document.getElementById('myiframe').addEventListener('load', function () {
+                iFrameResize({
+                    heightCalculationMethod: 'documentElementOffset',
+                    maxWidth: 800,
+                }, '#myiframe')
+            })
+        </script>
     </body>
-    <script>
-        function receiveSize(e){
-            if(e.origin === "https://quefairedemesobjets.osc-fr1.scalingo.io"){
-                var newHeight = e.data + 40;
-                document.getElementById("myiframe").style.height = newHeight + "px";
-            }
-        }
-
-        window.addEventListener("message", receiveSize, false);
-    </script>
 </html>

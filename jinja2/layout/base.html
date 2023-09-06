@@ -45,6 +45,16 @@
                 {% include "layout/footer.html" %}
             {% endblock %}
         {% endif %}
-        {% block js %}{% endblock %}
+        {% block js %}
+        {% endblock %}
+        {% if is_iframe(request) %}
+            <script
+                src="https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4.3.6/iframeResizer.contentWindow.js"
+                integrity="sha512-hBWsS94l8+snzSPo759jDKZ3z3jn3WT4snJZTBaeMPbrCGzDrYdl2pN9EaXjh6IqEZC7wF10qcmp42TPRVgAYQ=="
+                crossorigin="anonymous"
+                referrerpolicy="no-referrer"
+                defer
+            ></script>
+        {% endif %}
     </body>
 </html>
