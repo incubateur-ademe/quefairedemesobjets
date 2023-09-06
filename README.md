@@ -24,8 +24,8 @@ Les autres paramètres disponibles pour afficher la page principale de l'applica
 
 ### Afficher l'iframe en totalité dynamiquement
 
-Pour afficher l'iframe dans toute sa hauteur, le site, lorsqu'il est utilisé avec le paramètre iframe, publie un message qui est la hauteur de la page.
-A l'appel de la page en mode iframe, il est possible d'utiliser ce message pour adapter la taille de l'iframe.
+Pour afficher l'iframe dans toute sa hauteur, le site, lorsqu'il est utilisé avec le paramètre iframe, embarque la librairie [iframe-resizer](https://github.com/davidjbradshaw/iframe-resizer)
+Dans la page affichant l'iframe, il suffit de charge cette même librairie et d'appeler la fonction `iFrameResize` avec les bons paramètres (voir la documentation de la librairie)
 
 Voir l'exemple de code [iframe.html](./iframe.html)
 
