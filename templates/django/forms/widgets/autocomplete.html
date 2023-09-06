@@ -1,18 +1,18 @@
 {% load custom_filters %}
 <p
     class="autocomplete"
-    data-controller="autocomplete"
-    data-autocomplete-max-option-displayed-value={{ widget.max_options_displayed }}
-    data-autocomplete-search-callback-value={{ widget.search_callback|default_if_none:"" }}
+    data-controller="{{ widget.data_controller }}"
+    data-{{ widget.data_controller }}-max-option-displayed-value={{ widget.max_options_displayed }}
+    data-{{ widget.data_controller }}-is-ban-address-value={{ widget.is_ban_address|default_if_none:"" }}
 >
     <input
         data-action="
-        input->autocomplete#complete
-    keydown.down->autocomplete#keydownDown
-    keydown.up->autocomplete#keydownUp
-    keydown.enter->autocomplete#keydownEnter
+        input->{{ widget.data_controller }}#complete
+    keydown.down->{{ widget.data_controller }}#keydownDown
+    keydown.up->{{ widget.data_controller }}#keydownUp
+    keydown.enter->{{ widget.data_controller }}#keydownEnter
     "
-    data-autocomplete-target="input"
+    data-{{ widget.data_controller }}-target="input"
     autocomplete="off"
     type="{{ widget.type }}"
     name="{{ widget.name }}"
@@ -20,7 +20,7 @@
     {% if widget.value != None %} value="{{ widget.value.0|stringformat:'s' }}"{% endif %}
     {% include "django/forms/widgets/attrs.html" %}
     >
-    <script type="application/json" data-autocomplete-target="allAvailableOptions">
+    <script type="application/json" data-{{ widget.data_controller }}-target="allAvailableOptions">
         {{ widget.optgroups|options_in_json }}
     </script>
 </ps>
