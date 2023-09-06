@@ -1,3 +1,4 @@
+import "@gouvfr/dsfr/dist/dsfr.nomodule.js"
 import { Application } from "@hotwired/stimulus"
 
 import AddressAutocompleteController from "../src/address_autocomplete_controller"
