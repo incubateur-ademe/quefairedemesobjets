@@ -22,6 +22,7 @@ class ReemploiSolutionView(FormView):
         initial["sous_categorie_objet"] = self.request.GET.get("sous_categorie_objet")
         initial["adresse"] = self.request.GET.get("adresse")
         initial["direction"] = self.request.GET.get("direction", "jai")
+        initial["overwritten_direction"] = self.request.GET.get("direction", "jai")
         initial["latitude"] = self.request.GET.get("latitude")
         initial["longitude"] = self.request.GET.get("longitude")
         return initial
