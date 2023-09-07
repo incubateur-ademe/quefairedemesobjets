@@ -1,3 +1,5 @@
+import logging
+
 from django import forms
 
 from qfdmo.models import SousCategorieObjet
@@ -31,6 +33,16 @@ class AutoCompleteInput(forms.Select):
 class InlineRadioSelect(forms.RadioSelect):
     template_name = "django/forms/widgets/inline_radio.html"
     option_template_name = "django/forms/widgets/inline_radio_option.html"
+
+    def __init__(self, attrs=None, fieldset_attrs=None, choices=()):
+        logging.warning(fieldset_attrs)
+        self.fieldset_attrs = {} if fieldset_attrs is None else fieldset_attrs.copy()
+        super().__init__(attrs)
+
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        context["widget"]["fieldset_attrs"] = self.build_attrs(self.fieldset_attrs)
+        return context
 
 
 class GetReemploiSolutionForm(forms.Form):
@@ -77,8 +89,24 @@ class GetReemploiSolutionForm(forms.Form):
             attrs={
                 "class": "fr-radio",
                 "onchange": "this.form.submit();",
-            }
+            },
+            fieldset_attrs={"class": "fr-fieldset fr-mb-0"},
         ),
         choices=[("jai", "J'ai"), ("jecherche", "Je cherche")],
         label="",
+        required=False,
+    )
+
+    overwritten_direction = forms.ChoiceField(
+        widget=InlineRadioSelect(
+            attrs={
+                "class": "fr-radio",
+            },
+            fieldset_attrs={
+                "class": "fr-fieldset",
+            },
+        ),
+        choices=[("jai", "J'ai"), ("jecherche", "Je cherche")],
+        label="",
+        required=False,
     )
