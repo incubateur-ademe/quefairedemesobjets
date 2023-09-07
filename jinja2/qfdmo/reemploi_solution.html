@@ -5,8 +5,72 @@
         <form class="fr-my-3w" id='search_form'>
             {% include "qfdmo/partials/iframe_input.html" %}
             <div class="fr-grid-row fr-grid-row--gutters">
-                <div class="fr-col-12 fr-col-md-3">
-                    {{ form.direction }}
+                <div class="fr-col-12">
+
+
+
+                    <!-- Bouton d'ouverture de la modale -->
+
+                    <button type="button" class="qfdmo-flex qfdmo-items-center fr-link fr-mb-1w" data-fr-opened="false" aria-controls="fr-modal-actions">
+                        <span class="fr-icon-equalizer-line" aria-hidden="true"></span>
+                        <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-start fr-ml-1w">
+                            <span>J'ai un objet, je peux :</span><br>
+                            <span class="qfdmo-text-xs">
+                                revendre, donner, prêter, échanger, louer, réparer
+                            </span>
+                        </div>
+                    </button>
+
+                    <!-- Modale avec zone d'action
+     La balise <dialog> peut être placée n'importe où sur la page, toutefois
+     nous vous conseillons, si vous en avez la possibilité,
+     d'en faire un enfant direct de la balise <body>
+                    -->
+
+                    <dialog aria-labelledby="action_modal" id="fr-modal-actions" class="fr-modal" role="dialog" >
+                        <div class="fr-container fr-container--fluid fr-container-md">
+                            <div class="fr-grid-row fr-grid-row--center">
+                                <div class="fr-col-12 fr-col-md-8 fr-col-lg-6">
+                                    <div class="fr-modal__body">
+                                        <div class="fr-modal__header">
+                                            <button class="fr-btn--close fr-btn" aria-controls="fr-modal-2">Fermer</button>
+                                        </div>
+                                        <div class="fr-modal__content">
+                                            <h1 id="fr-modal-2-title" class="fr-modal__title">
+                                                <span class="fr-icon-arrow-right-line fr-icon--lg"></span>
+                                                Que souhaites-tu faire ?
+                                            </h1>
+                                            {{ form.direction }}
+                                            <div id="jai">
+                                                <button type="button" class="fr-tag qfdmo-m-1v" aria-pressed="true">revendre</button>
+                                                <button type="button" class="fr-tag qfdmo-m-1v" aria-pressed="true">donner</button>
+                                                <button type="button" class="fr-tag qfdmo-m-1v" aria-pressed="true">prêter</button>
+                                                <button type="button" class="fr-tag qfdmo-m-1v" aria-pressed="true">échanger</button>
+                                                <button type="button" class="fr-tag qfdmo-m-1v" title="mettre en location" aria-pressed="true">louer</button>
+                                                <button type="button" class="fr-tag qfdmo-m-1v" aria-pressed="true">réparer</button>
+                                            </div>
+
+                                        </div>
+                                        <div class="fr-modal__footer">
+                                            <ul class="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg fr-btns-group--icon-left">
+                                                <li>
+                                                    <button class="fr-btn fr-icon-checkbox-line" >
+                                                        Appliquez ces gestes
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </dialog>
+
+
+
+
+
+
                 </div>
                 {% if request.GET.get("geste",None) %}
                     <input type="hidden" name="geste" id="geste" value=1>
