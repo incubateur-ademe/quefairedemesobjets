@@ -3,63 +3,90 @@
         "model": "qfdmo.action",
         "fields": {
             "nom": "réparer",
-            "lvao_id": 9
+            "nom_affiche": "Réparer",
+            "order": 1,
+            "lvao_id": 9,
+            "directions": [["jai"]]
         }
     },
     {
         "model": "qfdmo.action",
         "fields": {
             "nom": "acheter d'occasion",
-            "lvao_id": 44
+            "nom_affiche": "Acheter",
+            "order": 16,
+            "lvao_id": 44,
+            "directions": [["jecherche"]]
         }
     },
     {
         "model": "qfdmo.action",
         "fields": {
             "nom": "revendre",
-            "lvao_id": 6
+            "nom_affiche": "Vendre",
+            "order": 16,
+            "lvao_id": 6,
+            "directions": [["jai"]]
         }
     },
     {
         "model": "qfdmo.action",
         "fields": {
             "nom": "donner",
-            "lvao_id": 7
+            "nom_affiche": "Donner",
+            "order": 7,
+            "lvao_id": 7,
+            "directions": [["jai"]]
         }
     },
     {
         "model": "qfdmo.action",
         "fields": {
             "nom": "louer",
-            "lvao_id": 4
+            "nom_affiche": "Louer",
+            "order": 13,
+            "lvao_id": 4,
+            "directions": [["jecherche"]]
         }
     },
     {
         "model": "qfdmo.action",
         "fields": {
             "nom": "mettre en location",
-            "lvao_id": 50
+            "nom_affiche": "Louer",
+            "order": 13,
+            "lvao_id": 50,
+            "directions": [["jai"]]
         }
     },
     {
         "model": "qfdmo.action",
         "fields": {
             "nom": "emprunter",
-            "lvao_id": 51
+            "nom_affiche": "Emprunter",
+            "order": 7,
+            "lvao_id": 51,
+            "directions": [["jecherche"]]
         }
     },
     {
         "model": "qfdmo.action",
         "fields": {
             "nom": "prêter",
-            "lvao_id": 5
+            "nom_affiche": "Prêter",
+            "order": 4,
+            "lvao_id": 5,
+            "directions": [["jai"]]
         }
     },
     {
         "model": "qfdmo.action",
         "fields": {
             "nom": "échanger",
-            "lvao_id": 8
+            "nom_affiche": "Èchanger",
+            "order": 10,
+            "lvao_id": 8,
+            "directions": [["jai"], ["jecherche"]]
         }
     }
 ]

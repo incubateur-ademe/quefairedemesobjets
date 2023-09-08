@@ -1,5 +1,3 @@
-import logging
-
 from django import forms
 
 from qfdmo.models import SousCategorieObjet
@@ -35,7 +33,6 @@ class InlineRadioSelect(forms.RadioSelect):
     option_template_name = "django/forms/widgets/inline_radio_option.html"
 
     def __init__(self, attrs=None, fieldset_attrs=None, choices=()):
-        logging.warning(fieldset_attrs)
         self.fieldset_attrs = {} if fieldset_attrs is None else fieldset_attrs.copy()
         super().__init__(attrs)
 
@@ -88,9 +85,12 @@ class GetReemploiSolutionForm(forms.Form):
         widget=InlineRadioSelect(
             attrs={
                 "class": "fr-radio",
-                "onchange": "this.form.submit();",
+                "data-action": "click -> choose-action#changeDirection",
             },
-            fieldset_attrs={"class": "fr-fieldset fr-mb-0"},
+            fieldset_attrs={
+                "class": "fr-fieldset fr-mb-0",
+                "data-choose-action-target": "direction",
+            },
         ),
         choices=[("jai", "J'ai"), ("jecherche", "Je cherche")],
         label="",
@@ -101,12 +101,21 @@ class GetReemploiSolutionForm(forms.Form):
         widget=InlineRadioSelect(
             attrs={
                 "class": "fr-radio",
+                "data-action": "click->choose-action#displayActionList",
             },
             fieldset_attrs={
                 "class": "fr-fieldset",
+                "data-choose-action-target": "overwrittenDirection",
             },
         ),
         choices=[("jai", "J'ai"), ("jecherche", "Je cherche")],
         label="",
+        required=False,
+    )
+
+    action_list = forms.CharField(
+        widget=forms.HiddenInput(
+            attrs={"data-choose-action-target": "actionList"},
+        ),
         required=False,
     )
