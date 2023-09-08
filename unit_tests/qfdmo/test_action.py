@@ -9,9 +9,16 @@ class TestActionNomAsNaturalKeyHeritage:
 
     @pytest.mark.django_db
     def test_serialize(self):
-        action = Action.objects.create(nom="Test Object", lvao_id=123)
+        action = Action.objects.create(
+            nom="Test Object",
+            lvao_id=123,
+            nom_affiche="Test Objet Displayed",
+            order=1,
+        )
         assert action.serialize() == {
             "id": action.id,
             "nom": "Test Object",
+            "nom_affiche": "Test Objet Displayed",
+            "order": 1,
             "lvao_id": 123,
         }
