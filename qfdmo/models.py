@@ -37,10 +37,17 @@ class CategorieObjet(NomAsNaturalKeyModel):
         return model_to_dict(self)
 
 
-class SousCategorieObjet(NomAsNaturalKeyModel):
+class CodeAsNaturalKeyManager(models.Manager):
+    def get_by_natural_key(self, code: str) -> models.Model:
+        return self.get(code=code)
+
+
+class SousCategorieObjet(models.Model):
     class Meta:
         verbose_name = "Sous catégorie d'objets"
         verbose_name_plural = "Sous catégories d'objets"
+
+    objects = CodeAsNaturalKeyManager()
 
     id = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
@@ -49,6 +56,12 @@ class SousCategorieObjet(NomAsNaturalKeyModel):
         CategorieObjet, on_delete=models.CASCADE, blank=True, null=True
     )
     code = models.CharField(max_length=10, unique=True, blank=False, null=False)
+
+    def __str__(self) -> str:
+        return self.nom
+
+    def natural_key(self) -> tuple[str]:
+        return (self.code,)
 
     @property
     def sanitized_nom(self) -> str:
