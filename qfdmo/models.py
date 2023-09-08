@@ -60,13 +60,26 @@ class SousCategorieObjet(NomAsNaturalKeyModel):
         return sous_categorie
 
 
+class ActionDirection(NomAsNaturalKeyModel):
+    class Meta:
+        verbose_name = "Direction de l'action"
+        verbose_name_plural = "Directions de l'action"
+
+    id = models.AutoField(primary_key=True)
+    nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    nom_affiche = models.CharField(max_length=255, unique=True, blank=False, null=False)
+
+
 class Action(NomAsNaturalKeyModel):
     id = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    nom_affiche = models.CharField(max_length=255, null=False, default="")
+    order = models.IntegerField(blank=False, null=False, default=0)
     lvao_id = models.IntegerField(blank=True, null=True)
+    directions = models.ManyToManyField(ActionDirection)
 
     def serialize(self):
-        return model_to_dict(self)
+        return model_to_dict(self, exclude=["directions"])
 
 
 class ActeurService(NomAsNaturalKeyModel):
@@ -204,7 +217,8 @@ class Acteur(NomAsNaturalKeyModel):
             self, exclude=["location", "proposition_services", "acteur_type"]
         )
         self_as_dict["acteur_type"] = self.acteur_type.serialize()
-        self_as_dict["location"] = json.loads(self.location.geojson)
+        if self.location:
+            self_as_dict["location"] = json.loads(self.location.geojson)
         proposition_services = self.proposition_services.all()
         self_as_dict["proposition_services"] = []
         for proposition_service in proposition_services:

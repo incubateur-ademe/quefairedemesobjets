@@ -37,12 +37,20 @@ export class SolutionMap {
         actors.forEach(function (actor: Actor) {
             let popupContent = actor.popupTitle() + actor.popupContent()
 
-            L.marker([actor.location.coordinates[1], actor.location.coordinates[0]], {
-                icon: redMarker,
-            })
-                .addTo(this.#map)
-                .bindPopup(popupContent)
-            points.push([actor.location.coordinates[1], actor.location.coordinates[0]])
+            if (actor.location) {
+                L.marker(
+                    [actor.location.coordinates[1], actor.location.coordinates[0]],
+                    {
+                        icon: redMarker,
+                    },
+                )
+                    .addTo(this.#map)
+                    .bindPopup(popupContent)
+                points.push([
+                    actor.location.coordinates[1],
+                    actor.location.coordinates[0],
+                ])
+            }
         }, this)
         if (points.length > 0) {
             this.#map.fitBounds(points)

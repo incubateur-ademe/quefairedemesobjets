@@ -1,0 +1,16 @@
+[
+{
+    "model": "qfdmo.actiondirection",
+    "fields": {
+        "nom": "jai",
+        "nom_affiche": "J'ai"
+    }
+},
+{
+    "model": "qfdmo.actiondirection",
+    "fields": {
+        "nom": "jecherche",
+        "nom_affiche": "Je cherche"
+    }
+}
+]

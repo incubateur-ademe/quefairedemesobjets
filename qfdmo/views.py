@@ -7,7 +7,7 @@ from django.shortcuts import render
 from django.views.generic.edit import FormView
 
 from qfdmo.forms import GetReemploiSolutionForm
-from qfdmo.models import Acteur, LVAOBase, SousCategorieObjet
+from qfdmo.models import Acteur, Action, LVAOBase, SousCategorieObjet
 
 DEFAULT_LIMIT = 10
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
@@ -23,6 +23,7 @@ class ReemploiSolutionView(FormView):
         initial["adresse"] = self.request.GET.get("adresse")
         initial["direction"] = self.request.GET.get("direction", "jai")
         initial["overwritten_direction"] = self.request.GET.get("direction", "jai")
+        initial["action_list"] = self.request.GET.get("action_list")
         initial["latitude"] = self.request.GET.get("latitude")
         initial["longitude"] = self.request.GET.get("longitude")
         return initial
@@ -59,26 +60,22 @@ class ReemploiSolutionView(FormView):
                     proposition_services__sous_categories__in=sous_categories_objets
                 )
             direction = self.request.GET.get("direction", "jai")
-            if direction == "jecherche":
-                acteurs = acteurs.filter(
-                    proposition_services__action__nom__in=[
-                        "emprunter",
-                        "louer",
-                        "acheter d'occasion",
-                        "échanger",
-                    ]
-                )
-            if direction == "jai":
-                acteurs = acteurs.filter(
-                    proposition_services__action__nom__in=[
-                        "revendre",
-                        "donner",
-                        "prêter",
-                        "échanger",
-                        "mettre en location",
-                        "réparer",
-                    ]
-                )
+
+            action_list = self.request.GET.get("action_list", None)
+            if action_list:
+                action_list = [
+                    action.nom
+                    for action in Action.objects.filter(nom__in=action_list.split("|"))
+                ]
+            else:
+                action_list = [
+                    action.nom
+                    for action in Action.objects.filter(
+                        directions__nom=direction
+                    ).order_by("order")
+                ]
+
+            acteurs = acteurs.filter(proposition_services__action__nom__in=action_list)
 
             kwargs["acteurs"] = acteurs.order_by("distance")[:DEFAULT_LIMIT]
 
