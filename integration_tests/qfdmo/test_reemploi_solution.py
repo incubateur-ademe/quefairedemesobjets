@@ -1,4 +1,5 @@
 import pytest
+from django.conf import settings
 from django.core.management import call_command
 
 
@@ -28,8 +29,8 @@ class TestReemploiSolutionView:
         assert response.context_data["form"].initial == {
             "sous_categorie_objet": None,
             "adresse": None,
-            "direction": "jai",
-            "overwritten_direction": "jai",
+            "direction": settings.DEFAULT_ACTION_DIRECTION,
+            "overwritten_direction": settings.DEFAULT_ACTION_DIRECTION,
             "action_list": None,
             "latitude": None,
             "longitude": None,
