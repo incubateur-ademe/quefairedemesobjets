@@ -1,5 +1,7 @@
 from typing import List
 
+from django.conf import settings
+from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.templatetags.static import static
 from django.urls import reverse
@@ -12,18 +14,23 @@ def is_iframe(request: HttpRequest) -> bool:
     return "iframe" in request.GET
 
 
-def action_list_display(request: HttpRequest) -> List[str]:
+def get_action_list(request: HttpRequest) -> QuerySet[Action]:
     if action_list := request.GET.get("action_list"):
-        actions = Action.objects.filter(nom__in=action_list.split("|"))
+        return Action.objects.filter(nom__in=action_list.split("|")).order_by("order")
     else:
-        direction = request.GET.get("direction", "jai")
-        actions = Action.objects.filter(directions__nom=direction)
-    return [action.nom_affiche for action in actions.order_by("order")]
+        direction = request.GET.get("direction", settings.DEFAULT_ACTION_DIRECTION)
+        return Action.objects.filter(directions__nom=direction).order_by("order")
+
+
+def action_list_display(request: HttpRequest) -> List[str]:
+    return [action.nom_affiche for action in get_action_list(request)]
 
 
 def action_by_direction(request: HttpRequest, direction: str):
-    action_list = request.GET.get("action_list", "").split("|")
-    all_active = request.GET.get("direction") != direction or action_list == [""]
+    action_list = [
+        action for action in request.GET.get("action_list", "").split("|") if action
+    ]
+    all_active = request.GET.get("direction") != direction or action_list == []
 
     return [
         {

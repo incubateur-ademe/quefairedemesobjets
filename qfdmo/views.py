@@ -6,8 +6,9 @@ from django.db.models import Count, F, QuerySet
 from django.shortcuts import render
 from django.views.generic.edit import FormView
 
+from core.jinja2_handler import get_action_list
 from qfdmo.forms import GetReemploiSolutionForm
-from qfdmo.models import Acteur, Action, LVAOBase, SousCategorieObjet
+from qfdmo.models import Acteur, LVAOBase, SousCategorieObjet
 
 DEFAULT_LIMIT = 10
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
@@ -59,23 +60,9 @@ class ReemploiSolutionView(FormView):
                 acteurs = acteurs.filter(
                     proposition_services__sous_categories__in=sous_categories_objets
                 )
-            direction = self.request.GET.get("direction", "jai")
+            action_selection = get_action_list(self.request)
 
-            action_list = self.request.GET.get("action_list", None)
-            if action_list:
-                action_list = [
-                    action.nom
-                    for action in Action.objects.filter(nom__in=action_list.split("|"))
-                ]
-            else:
-                action_list = [
-                    action.nom
-                    for action in Action.objects.filter(
-                        directions__nom=direction
-                    ).order_by("order")
-                ]
-
-            acteurs = acteurs.filter(proposition_services__action__nom__in=action_list)
+            acteurs = acteurs.filter(proposition_services__action__in=action_selection)
 
             kwargs["acteurs"] = acteurs.order_by("distance")[:DEFAULT_LIMIT]
 
