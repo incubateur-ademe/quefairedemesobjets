@@ -33,12 +33,10 @@ class TestActionDisplayList:
         request.GET = {}
 
         assert action_list_display(request) == [
-            "Réparer",
-            "Prêter",
-            "Donner",
+            "Emprunter",
             "Èchanger",
             "Louer",
-            "Vendre",
+            "Acheter",
         ]
 
     @pytest.mark.django_db

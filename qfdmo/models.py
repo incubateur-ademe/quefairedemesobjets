@@ -80,7 +80,11 @@ class ActionDirection(NomAsNaturalKeyModel):
 
     id = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    order = models.IntegerField(blank=False, null=False, default=0)
     nom_affiche = models.CharField(max_length=255, unique=True, blank=False, null=False)
+
+    def __str__(self):
+        return self.nom_affiche
 
 
 class Action(NomAsNaturalKeyModel):

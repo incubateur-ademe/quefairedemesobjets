@@ -1,6 +1,6 @@
 from django import forms
 
-from qfdmo.models import SousCategorieObjet
+from qfdmo.models import ActionDirection, SousCategorieObjet
 
 
 class AutoCompleteInput(forms.Select):
@@ -81,7 +81,7 @@ class GetReemploiSolutionForm(forms.Form):
         required=False,
     )
 
-    direction = forms.ChoiceField(
+    direction = forms.ModelChoiceField(
         widget=InlineRadioSelect(
             attrs={
                 "class": "fr-radio",
@@ -92,12 +92,13 @@ class GetReemploiSolutionForm(forms.Form):
                 "data-choose-action-target": "direction",
             },
         ),
-        choices=[("jai", "J'ai"), ("jecherche", "Je cherche")],
+        queryset=ActionDirection.objects.all().order_by("order"),
+        to_field_name="nom",
         label="",
         required=False,
     )
 
-    overwritten_direction = forms.ChoiceField(
+    overwritten_direction = forms.ModelChoiceField(
         widget=InlineRadioSelect(
             attrs={
                 "class": "fr-radio",
@@ -108,7 +109,8 @@ class GetReemploiSolutionForm(forms.Form):
                 "data-choose-action-target": "overwrittenDirection",
             },
         ),
-        choices=[("jai", "J'ai"), ("jecherche", "Je cherche")],
+        queryset=ActionDirection.objects.all().order_by("order"),
+        to_field_name="nom",
         label="",
         required=False,
     )

@@ -1,5 +1,6 @@
 import json
 
+from django.conf import settings
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
 from django.db.models import Count, F, QuerySet
@@ -22,8 +23,12 @@ class ReemploiSolutionView(FormView):
         initial = super().get_initial()
         initial["sous_categorie_objet"] = self.request.GET.get("sous_categorie_objet")
         initial["adresse"] = self.request.GET.get("adresse")
-        initial["direction"] = self.request.GET.get("direction", "jai")
-        initial["overwritten_direction"] = self.request.GET.get("direction", "jai")
+        initial["direction"] = self.request.GET.get(
+            "direction", settings.DEFAULT_ACTION_DIRECTION
+        )
+        initial["overwritten_direction"] = self.request.GET.get(
+            "direction", settings.DEFAULT_ACTION_DIRECTION
+        )
         initial["action_list"] = self.request.GET.get("action_list")
         initial["latitude"] = self.request.GET.get("latitude")
         initial["longitude"] = self.request.GET.get("longitude")
