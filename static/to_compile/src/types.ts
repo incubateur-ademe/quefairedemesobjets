@@ -58,6 +58,7 @@ export class Actor {
         this.code_postal = actor_fields["code_postal"]
         this.ville = actor_fields["ville"]
         this.telephone = actor_fields["telephone"]
+        this.url = actor_fields["url"]
         this.proposition_services = actor_fields["proposition_services"]
         this.location = actor_fields["location"]
     }
@@ -73,29 +74,32 @@ export class Actor {
     popupContent(): string {
         let popup = document.createElement("div")
         let popupContent = ""
-        let services = Array.from(
-            new Set(
-                this.proposition_services.map((proposition_service) => {
-                    return proposition_service.acteur_service.nom
-                }),
-            ),
-        )
+        console.log(this.proposition_services)
+        if (this.proposition_services !== undefined) {
+            let services = Array.from(
+                new Set(
+                    this.proposition_services.map((proposition_service) => {
+                        return proposition_service.acteur_service.nom
+                    }),
+                ),
+            )
 
-        popupContent += services.join("<br>")
-        popupContent += "<br><br>"
-        if (this.adresse !== "") {
+            popupContent += services.join("<br>")
+            popupContent += "<br><br>"
+        }
+        if (this.adresse) {
             popupContent += this.adresse + "<br>"
         }
-        if (this.adresse_complement !== "") {
+        if (this.adresse_complement) {
             popupContent += this.adresse_complement + "<br>"
         }
-        if (this.code_postal !== "") {
+        if (this.code_postal) {
             popupContent += this.code_postal + " "
         }
-        if (this.ville !== "") {
+        if (this.ville) {
             popupContent += this.ville + "<br>"
         }
-        if (this.telephone !== "") {
+        if (this.telephone) {
             popupContent += this.telephone + "<br>"
         }
         popup.innerHTML = popupContent
