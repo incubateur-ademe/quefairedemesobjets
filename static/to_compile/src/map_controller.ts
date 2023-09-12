@@ -1,5 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
-import { SolutionMap } from "./acteur_map"
+import { SolutionMap } from "./solution_map"
 import { Actor } from "./types"
 
 export default class extends Controller<HTMLElement> {

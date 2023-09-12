@@ -14,6 +14,7 @@ def is_iframe(request: HttpRequest) -> bool:
     return "iframe" in request.GET
 
 
+# FIXME : perhaps it is better in util list ?
 def get_action_list(request: HttpRequest) -> QuerySet[Action]:
     if action_list := request.GET.get("action_list"):
         return Action.objects.filter(nom__in=action_list.split("|")).order_by("order")
