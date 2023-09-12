@@ -6,7 +6,12 @@ from django.core.management import call_command
 def django_db_setup(django_db_setup, django_db_blocker):
     with django_db_blocker.unblock():
         call_command(
-            "loaddata", "categories", "actions", "acteur_services", "acteur_types"
+            "loaddata",
+            "categories",
+            "action_directions",
+            "actions",
+            "acteur_services",
+            "acteur_types",
         )
 
 
@@ -24,6 +29,8 @@ class TestReemploiSolutionView:
             "sous_categorie_objet": None,
             "adresse": None,
             "direction": "jai",
+            "overwritten_direction": "jai",
+            "action_list": None,
             "latitude": None,
             "longitude": None,
         }

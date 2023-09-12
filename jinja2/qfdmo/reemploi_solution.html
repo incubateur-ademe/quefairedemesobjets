@@ -1,54 +1,83 @@
 {% extends 'layout/base.html' %}
 
 {% block content %}
-    <div>
+    <div data-controller="choose-action">
         <form class="fr-my-3w" id='search_form'>
             {% include "qfdmo/partials/iframe_input.html" %}
             <div class="fr-grid-row fr-grid-row--gutters">
-                <div class="fr-col-12 fr-col-md-3">
-                    {{ form.direction }}
-                </div>
-                {% if request.GET.get("geste",None) %}
-                    <input type="hidden" name="geste" id="geste" value=1>
-
-                    <script>
-                        function handleChange(src) {
-                            var value = src.value;
-                            var jecherche = document.getElementById("jecherche");
-                            var jai = document.getElementById("jai");
-                            if (value === "jai") {
-                                jai.style.display = "block";
-                                jecherche.style.display = "none";
-                            } else {
-                                jai.style.display = "none";
-                                jecherche.style.display = "block";
-                            }
-                        }
-                    </script>
-                    <div class="fr-col-12 fr-col-md-9">
-                        <div id="jecherche" style="display:none;">
-                            <button type="button" class="fr-tag qfdmo-m-1v" aria-pressed="true">emprunter</button>
-                            <button type="button" class="fr-tag qfdmo-m-1v" aria-pressed="true">louer</button>
-                            <button type="button" class="fr-tag qfdmo-m-1v" aria-pressed="true">acheter d'occasion</button>
-                            <button type="button" class="fr-tag qfdmo-m-1v" aria-pressed="true">échanger</button>
+                <div class="fr-col-12">
+                    <div class="qfdmo-flex qfdmo-justify-between qfdmo-items-center fr-mb-1v">
+                        <div>
+                            {{ form.direction }}
+                            {{ form.action_list }}
                         </div>
-
-                        <div id="jai">
-                            <button type="button" class="fr-tag qfdmo-m-1v" aria-pressed="true">revendre</button>
-                            <button type="button" class="fr-tag qfdmo-m-1v" aria-pressed="true">donner</button>
-                            <button type="button" class="fr-tag qfdmo-m-1v" aria-pressed="true">prêter</button>
-                            <button type="button" class="fr-tag qfdmo-m-1v" aria-pressed="true">échanger</button>
-                            <button type="button" class="fr-tag qfdmo-m-1v" title="mettre en location" aria-pressed="true">louer</button>
-                            <button type="button" class="fr-tag qfdmo-m-1v" aria-pressed="true">réparer</button>
+                        <div>
+                            <button type="button" class="fr-btn fr-btn__secondary" data-fr-opened="false" aria-controls="fr-modal-actions">
+                                <span class="fr-icon-equalizer-line" aria-hidden="true"></span>
+                                Affinez
+                            </button>
                         </div>
                     </div>
-                {% endif %}
+                    <div class="qfdmo-text-xs qfdmo-flex qfdmo-justify-start fr-mb-2w">
+                        <div class="qfdmo-whitespace-nowrap">Je peux :&nbsp;</div>
+                        <div class="qfdmo-truncate">
+                            {{ ", ".join(action_list_display(request)) }}
+                        </div>
+                    </div>
+                </div>
             </div>
+
             {{ form.sous_categorie_objet }}
             {{ form.adresse }}
             {{ form.latitude }}
             {{ form.longitude }}
+
+            <dialog aria-labelledby="action_modal" id="fr-modal-actions" class="fr-modal" role="dialog" >
+                <div class="fr-container fr-container--fluid fr-container-md qfdmo-h-full">
+                    <div class="fr-grid-row fr-grid-row--center qfdmo-h-full">
+                        <div class="fr-col-12 fr-col-md-8">
+                            <div class="fr-modal__body qfdmo-h-full">
+                                <div class="qfdmo-h-full qfdmo-flex qfdmo-flex-col qfdmo-justify-between">
+                                    <div class="fr-modal__header">
+                                        <button type="button" class="fr-btn--close fr-btn" aria-controls="fr-modal-actions">Fermer</button>
+                                    </div>
+                                    <div class="fr-modal__content">
+                                        <h1 id="fr-modal-2-title" class="fr-modal__title">
+                                            <span class="fr-icon-arrow-right-line fr-icon--lg"></span>
+                                            Que souhaitez-vous faire ?
+                                        </h1>
+                                        <div class="fr-mb-3w">
+                                            {{ form.overwritten_direction }}
+                                        </div>
+                                        <div id="jai" data-choose-action-target='jai'>
+                                            {% for action in action_by_direction(request, 'jai') %}
+                                                <button type="button" class="fr-tag fr-m-1v" name="{{action.nom}}" title="{{ action.nom.capitalize() }}" aria-pressed="{{ 'true' if action.active else 'false' }}">{{ action.nom_affiche }}</button>
+                                            {% endfor %}
+                                        </div>
+                                        <div id="jecherche" data-choose-action-target="jecherche">
+                                            {% for action in action_by_direction(request, 'jecherche') %}
+                                                <button type="button" class="fr-tag fr-m-1v" name="{{action.nom}}" title="{{ action.nom.capitalize() }}" aria-pressed="{{ 'true' if action.active else 'false' }}">{{ action.nom_affiche }}</button>
+                                            {% endfor %}
+                                        </div>
+
+                                    </div>
+                                    <div class="fr-modal__footer">
+                                        <ul class="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg fr-btns-group--icon-left">
+                                            <li>
+                                                <button type="button" class="fr-btn fr-icon-checkbox-line" data-action="click->choose-action#apply">
+                                                    Appliquez ces gestes
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </dialog>
         </form>
+
         <div
             class="fr-mb-3w"
             data-controller="map"

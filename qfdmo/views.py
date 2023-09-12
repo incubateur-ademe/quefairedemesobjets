@@ -6,6 +6,7 @@ from django.db.models import Count, F, QuerySet
 from django.shortcuts import render
 from django.views.generic.edit import FormView
 
+from core.jinja2_handler import get_action_list
 from qfdmo.forms import GetReemploiSolutionForm
 from qfdmo.models import Acteur, LVAOBase, SousCategorieObjet
 
@@ -22,6 +23,8 @@ class ReemploiSolutionView(FormView):
         initial["sous_categorie_objet"] = self.request.GET.get("sous_categorie_objet")
         initial["adresse"] = self.request.GET.get("adresse")
         initial["direction"] = self.request.GET.get("direction", "jai")
+        initial["overwritten_direction"] = self.request.GET.get("direction", "jai")
+        initial["action_list"] = self.request.GET.get("action_list")
         initial["latitude"] = self.request.GET.get("latitude")
         initial["longitude"] = self.request.GET.get("longitude")
         return initial
@@ -57,27 +60,9 @@ class ReemploiSolutionView(FormView):
                 acteurs = acteurs.filter(
                     proposition_services__sous_categories__in=sous_categories_objets
                 )
-            direction = self.request.GET.get("direction", "jai")
-            if direction == "jecherche":
-                acteurs = acteurs.filter(
-                    proposition_services__action__nom__in=[
-                        "emprunter",
-                        "louer",
-                        "acheter d'occasion",
-                        "échanger",
-                    ]
-                )
-            if direction == "jai":
-                acteurs = acteurs.filter(
-                    proposition_services__action__nom__in=[
-                        "revendre",
-                        "donner",
-                        "prêter",
-                        "échanger",
-                        "mettre en location",
-                        "réparer",
-                    ]
-                )
+            action_selection = get_action_list(self.request)
+
+            acteurs = acteurs.filter(proposition_services__action__in=action_selection)
 
             kwargs["acteurs"] = acteurs.order_by("distance")[:DEFAULT_LIMIT]
 

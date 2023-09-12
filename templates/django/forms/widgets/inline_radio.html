@@ -1,4 +1,6 @@
-<fieldset class="fr-fieldset" id="radio-inline" aria-labelledby="radio-inline-legend radio-inline-messages">
+<fieldset  id="radio-inline" aria-labelledby="radio-inline-legend radio-inline-messages"
+    {% for name, value in widget.fieldset_attrs.items %}{% if value is not False %} {{ name }}{% if value is not True %}="{{ value|stringformat:'s' }}"{% endif %}{% endif %}{% endfor %}
+>
     {% for group, options, index in widget.optgroups %}
         {% for option in options %}
             {% include option.template_name with widget=option %}
