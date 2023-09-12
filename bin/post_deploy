@@ -1,5 +1,4 @@
 #!/bin/env bash
 
 python manage.py migrate
-python manage.py loaddata categories actions acteur_services acteur_types
 python manage.py clearsessions

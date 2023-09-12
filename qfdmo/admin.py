@@ -5,6 +5,7 @@ from qfdmo.models import (
     ActeurService,
     ActeurType,
     Action,
+    ActionDirection,
     CategorieObjet,
     LVAOBase,
     LVAOBaseRevision,
@@ -86,9 +87,18 @@ class ActeurAdmin(admin.GISModelAdmin):
     ordering = ("nom",)
 
 
+class ActionAdmin(admin.ModelAdmin):
+    def get_directions(self, obj):
+        return ", ".join([d.nom for d in obj.directions.all()])
+
+    list_display = ("nom", "nom_affiche", "order", "get_directions")
+    search_fields = ["nom", "nom_affiche"]
+
+
 admin.site.register(SousCategorieObjet, SousCategorieAdmin)
 admin.site.register(CategorieObjet)
-admin.site.register(Action)
+admin.site.register(Action, ActionAdmin)
+admin.site.register(ActionDirection)
 admin.site.register(ActeurService)
 admin.site.register(ActeurType)
 admin.site.register(LVAOBase, LVAOBaseAdmin)
