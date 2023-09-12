@@ -240,4 +240,4 @@ sentry_sdk.init(
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-DEFAULT_ACTION_DIRECTION = "jai"
+DEFAULT_ACTION_DIRECTION = "jecherche"
