@@ -18,7 +18,7 @@ Dans le cas de l'iframe, l'entête et le pied de page ne sont pas affichés
 
 Les autres paramètres disponibles pour afficher la page principale de l'application et permettant d'interagir avec les champs de recherche sont :
 
-- `sous_categorie_objet`, parmi les sous-categories disponibles en base de donnée
+- `sous_categorie_objet`, parmi les sous-catégories disponibles en base de données
 - `adresse`, par exemple : 145+Avenue+Pierre+Brossolette+92120+Montrouge
 - `latitude` et `longitude` récupéré dpuis l'API BAN avec l'adresse ci-dessus
 - `direction`, option `jai` ou `jecherche`, par défaut la direction `jecherche` est appliquée
@@ -41,7 +41,7 @@ Dans la page affichant l'iframe, il suffit de charge cette même librairie et d'
 
 Voir l'exemple de code [iframe.html](./iframe.html)
 
-## Modèle de donnée
+## Modèle de données
 
 Chaque acteur du ré-emploi et recyclage expose des propositions de service associées à un geste et une liste de catégories d'objet
 
@@ -51,7 +51,7 @@ flowchart TD
     service_offer["`**Proposition de Service**
     - Action -
     - Service -
-    - Categories d'objet -`"]
+    - Catégories d'objet -`"]
     actor --> service_offer
 ```
 
