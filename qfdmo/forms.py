@@ -47,11 +47,11 @@ class GetReemploiSolutionForm(forms.Form):
         queryset=SousCategorieObjet.objects.all(),
         widget=AutoCompleteInput(
             attrs={
-                "class": "fr-input",
-                "placeholder": "Vêtement, Meuble, Smartphone, etc.",
+                "class": "fr-input fr-icon-search-line",
+                "placeholder": "ex : Vêtement, Meuble, Smartphone, etc.",
             }
         ),
-        label="",
+        label="Indiquer une famille d'objet",
         empty_label="",
         required=False,
     )
@@ -59,13 +59,13 @@ class GetReemploiSolutionForm(forms.Form):
         widget=AutoCompleteInput(
             attrs={
                 "class": "fr-input",
-                "placeholder": "Quelle est votre adresse ?",
+                "placeholder": "ex : 20 Av. du Grésillé, 49000 Angers",
             },
             data_controller="address-autocomplete",
             is_ban_address=True,
             max_options_displayed=5,
         ),
-        label="",
+        label="Autour de l'adresse suivante",
         required=False,
     )
     latitude = forms.FloatField(
@@ -88,25 +88,8 @@ class GetReemploiSolutionForm(forms.Form):
                 "data-action": "click -> choose-action#changeDirection",
             },
             fieldset_attrs={
-                "class": "fr-fieldset fr-mb-0",
+                "class": "fr-fieldset fr-mb-1w",
                 "data-choose-action-target": "direction",
-            },
-        ),
-        queryset=ActionDirection.objects.all().order_by("order"),
-        to_field_name="nom",
-        label="",
-        required=False,
-    )
-
-    overwritten_direction = forms.ModelChoiceField(
-        widget=InlineRadioSelect(
-            attrs={
-                "class": "fr-radio",
-                "data-action": "click->choose-action#displayActionList",
-            },
-            fieldset_attrs={
-                "class": "fr-fieldset",
-                "data-choose-action-target": "overwrittenDirection",
             },
         ),
         queryset=ActionDirection.objects.all().order_by("order"),

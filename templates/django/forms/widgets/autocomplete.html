@@ -1,7 +1,6 @@
 {% load custom_filters %}
 <p
-    class="autocomplete"
-    data-controller="{{ widget.data_controller }}"
+    class="autocomplete fr-mb-1w"
     data-{{ widget.data_controller }}-max-option-displayed-value={{ widget.max_options_displayed }}
     data-{{ widget.data_controller }}-is-ban-address-value={{ widget.is_ban_address|default_if_none:"" }}
 >
@@ -23,4 +22,9 @@
     <script type="application/json" data-{{ widget.data_controller }}-target="allAvailableOptions">
         {{ widget.optgroups|options_in_json }}
     </script>
-</ps>
+    {% if widget.data_controller == 'address-autocomplete'%}
+        {{ form.longitude }}
+        {{ form.latitude }}
+    {% endif %}
+
+</p>

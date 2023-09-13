@@ -30,7 +30,7 @@ Les autres paramètres disponibles pour afficher la page principale de l'applica
 Exemple:
 
 ```txt
-http://localhost:8000/?direction=jecherche&action_list=emprunter%7Cechanger%7Clouer%7Cacheter+d%27occasion&sous_categorie_objet=&adresse=145+Avenue+Pierre+Brossolette+92120+Montrouge&latitude=48.815679&longitude=2.305116&overwritten_direction=jecherche
+http://localhost:8000/?direction=jecherche&action_list=emprunter%7Cechanger%7Clouer%7Cacheter+d%27occasion&sous_categorie_objet=&adresse=145+Avenue+Pierre+Brossolette+92120+Montrouge&latitude=48.815679&longitude=2.305116
 
 ```
 
