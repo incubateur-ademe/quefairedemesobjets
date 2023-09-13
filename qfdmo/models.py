@@ -91,6 +91,7 @@ class Action(NomAsNaturalKeyModel):
     id = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
     nom_affiche = models.CharField(max_length=255, null=False, default="")
+    description = models.CharField(max_length=255, null=True, blank=True)
     order = models.IntegerField(blank=False, null=False, default=0)
     lvao_id = models.IntegerField(blank=True, null=True)
     directions = models.ManyToManyField(ActionDirection)
