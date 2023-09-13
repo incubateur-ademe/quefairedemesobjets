@@ -1,12 +1,11 @@
 {% load custom_filters %}
 <p
     class="autocomplete fr-mb-1w"
-    data-{{ widget.data_controller }}-max-option-displayed-value={{ widget.max_options_displayed }}
-    data-{{ widget.data_controller }}-is-ban-address-value={{ widget.is_ban_address|default_if_none:"" }}
 >
     <input
         data-action="
         input->{{ widget.data_controller }}#complete
+    focus->{{ widget.data_controller }}#complete
     keydown.down->{{ widget.data_controller }}#keydownDown
     keydown.up->{{ widget.data_controller }}#keydownUp
     keydown.enter->{{ widget.data_controller }}#keydownEnter
@@ -22,9 +21,5 @@
     <script type="application/json" data-{{ widget.data_controller }}-target="allAvailableOptions">
         {{ widget.optgroups|options_in_json }}
     </script>
-    {% if widget.data_controller == 'address-autocomplete'%}
-        {{ form.longitude }}
-        {{ form.latitude }}
-    {% endif %}
 
 </p>

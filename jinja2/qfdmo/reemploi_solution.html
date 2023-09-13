@@ -7,7 +7,9 @@
                 {% include "qfdmo/partials/iframe_input.html" %}
                 {{ form.direction }}
                 {{ form.action_list }}
-                <div data-controller='autocomplete' data-autocomplete-max-option-displayed-value=5>
+                <div data-controller='autocomplete'
+                    data-autocomplete-max-option-displayed-value=5
+                >
                     {{ form.sous_categorie_objet.label }}
                     {{ form.sous_categorie_objet }}
                 </div>
@@ -43,7 +45,7 @@
             id="map" data-map-target="map"
         >
             {% if not form.initial.adresse %}
-                <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-black qfdmo-opacity-70 qfdmo-font-black" style="z-index:10000;background-color:gray">
+                <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-black qfdmo-opacity-70 qfdmo-font-black qfdmo-z-[1000]" style="background-color:gray">
                     <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
                         Préciser une adresse pour afficher la carte
                     </div>

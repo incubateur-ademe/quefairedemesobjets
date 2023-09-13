@@ -23,7 +23,6 @@ export default class extends AutocompleteController {
 
         if (!val) {
             this.closeAllLists()
-            return false
         }
 
         let countResult = 0
@@ -50,23 +49,62 @@ export default class extends AutocompleteController {
             .getElementsByTagName("input")[0]
             .value.split(SEPARATOR)
         this.inputTarget.value = label
-        if (longitude) this.longitudeTarget.value = longitude
-        if (latitude) this.latitudeTarget.value = latitude
+        if (longitude == "9999" && latitude == "9999") {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        fetch(
+                            `https://api-adresse.data.gouv.fr/reverse/?lon=${position.coords.longitude}&lat=${position.coords.latitude}`,
+                        )
+                            .then((response) => response.json())
+                            .then((data) => {
+                                this.inputTarget.value =
+                                    data.features[0].properties.label
+                                this.latitudeTarget.value =
+                                    data.features[0].geometry.coordinates[1]
+                                this.longitudeTarget.value =
+                                    data.features[0].geometry.coordinates[0]
+                                /* FIXME : Check if we can partially refresh the page using Turbo */
+                                this.inputTarget.form.submit()
+                            })
+                            .catch((error) => {
+                                console.error("error catched : ", error)
+                            })
+                    },
+                    () => this.geolocatisationRefused(),
+                )
+            } else {
+                console.error("geolocation is not available")
+            }
+        } else {
+            if (longitude) this.longitudeTarget.value = longitude
+            if (latitude) this.latitudeTarget.value = latitude
+        }
         this.closeAllLists()
     }
 
+    geolocatisationRefused() {
+        console.error("geolocation is refused")
+        this.inputTarget.value = ""
+        this.longitudeTarget.value = ""
+        this.latitudeTarget.value = ""
+    }
+
     async #searchAddressCallback(value: string): Promise<string[]> {
-        if (value.trim().length < 3) return []
+        if (value.trim().length < 3)
+            return [["Autour de moi", 9999, 9999].join(SEPARATOR)]
         return await fetch(`https://api-adresse.data.gouv.fr/search/?q=${value}`)
             .then((response) => response.json())
             .then((data) => {
-                let labels = data.features.map((feature: any) => {
-                    return [
-                        feature.properties.label,
-                        feature.geometry.coordinates[1],
-                        feature.geometry.coordinates[0],
-                    ].join(SEPARATOR)
-                })
+                let labels = [["Autour de moi", 9999, 9999].join(SEPARATOR)].concat(
+                    data.features.map((feature: any) => {
+                        return [
+                            feature.properties.label,
+                            feature.geometry.coordinates[1],
+                            feature.geometry.coordinates[0],
+                        ].join(SEPARATOR)
+                    }),
+                )
                 return labels
             })
             .catch((error) => {

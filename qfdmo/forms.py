@@ -6,25 +6,13 @@ from qfdmo.models import ActionDirection, SousCategorieObjet
 class AutoCompleteInput(forms.Select):
     template_name = "django/forms/widgets/autocomplete.html"
 
-    def __init__(
-        self,
-        attrs=None,
-        max_options_displayed=10,
-        is_ban_address=False,
-        data_controller="autocomplete",
-        **kwargs
-    ):
+    def __init__(self, attrs=None, data_controller="autocomplete", **kwargs):
         self.data_controller = data_controller
-        self.max_options_displayed = max_options_displayed
-        self.is_ban_address = is_ban_address
         super().__init__(attrs=attrs, **kwargs)
 
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)
         context["widget"]["data_controller"] = self.data_controller
-        context["widget"]["max_options_displayed"] = self.max_options_displayed
-        if self.is_ban_address:
-            context["widget"]["is_ban_address"] = "true"
         return context
 
 
@@ -62,8 +50,6 @@ class GetReemploiSolutionForm(forms.Form):
                 "placeholder": "ex : 20 Av. du Grésillé, 49000 Angers",
             },
             data_controller="address-autocomplete",
-            is_ban_address=True,
-            max_options_displayed=5,
         ),
         label="Autour de l'adresse suivante",
         required=False,
