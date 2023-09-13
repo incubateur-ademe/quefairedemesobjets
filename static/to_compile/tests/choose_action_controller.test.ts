@@ -13,10 +13,6 @@ describe("ChooseActionController", () => {
                     <input type="radio" name="direction" value="jai" data-action="click->choose-action#changeDirection" id="id_direction_0" checked="">
                     <input type="radio" name="direction" value="jecherche" data-action="click->choose-action#changeDirection" id="id_direction_1">
                 </fieldset>
-                <fieldset data-choose-action-target="overwrittenDirection">
-                    <input type="radio" name="direction" value="jai" data-action="click->choose-action#changeDirection" id="id_direction_2" checked="">
-                    <input type="radio" name="direction" value="jecherche" data-action="click->choose-action#changeDirection" id="id_direction_3">
-                </fieldset>
                 <div data-choose-action-target="jai"></div>
                 <div data-choose-action-target="jecherche"></div>
                 <div data-choose-action-target="apply"></div>

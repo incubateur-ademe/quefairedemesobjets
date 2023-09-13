@@ -7,10 +7,6 @@
 @tailwind components;
 @tailwind utilities;
 
-#map {
-    height: 500px;
-}
-
 .leaflet-control-zoom a {
     background-image: none;
 }

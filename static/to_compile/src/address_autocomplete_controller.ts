@@ -1,5 +1,6 @@
 import AutocompleteController from "../src/autocomplete_controller"
 
+const SEPARATOR = "||"
 export default class extends AutocompleteController {
     controllerName: string = "address-autocomplete"
 
@@ -12,26 +13,6 @@ export default class extends AutocompleteController {
             this.allAvailableOptions = JSON.parse(
                 this.allAvailableOptionsTarget.textContent,
             )
-        }
-
-        if ("geolocation" in navigator && this.inputTarget.value == "") {
-            if (this.inputTarget.value == "") {
-                navigator.geolocation.getCurrentPosition((position) => {
-                    fetch(
-                        `https://api-adresse.data.gouv.fr/reverse/?lon=${position.coords.longitude}&lat=${position.coords.latitude}`,
-                    )
-                        .then((response) => response.json())
-                        .then((data) => {
-                            this.inputTarget.value = data.features[0].properties.label
-                            this.latitudeTarget.value =
-                                data.features[0].geometry.coordinates[1]
-                            this.longitudeTarget.value =
-                                data.features[0].geometry.coordinates[0]
-                            /* FIXME : Check if we can partially refresh the page using Turbo */
-                            this.inputTarget.form.submit()
-                        })
-                })
-            }
         }
     }
 
@@ -67,11 +48,10 @@ export default class extends AutocompleteController {
         let target = event.target as HTMLElement
         const [label, latitude, longitude] = target
             .getElementsByTagName("input")[0]
-            .value.split("||")
+            .value.split(SEPARATOR)
         this.inputTarget.value = label
         if (longitude) this.longitudeTarget.value = longitude
         if (latitude) this.latitudeTarget.value = latitude
-        this.inputTarget.form.submit()
         this.closeAllLists()
     }
 
@@ -85,7 +65,7 @@ export default class extends AutocompleteController {
                         feature.properties.label,
                         feature.geometry.coordinates[1],
                         feature.geometry.coordinates[0],
-                    ].join("||")
+                    ].join(SEPARATOR)
                 })
                 return labels
             })

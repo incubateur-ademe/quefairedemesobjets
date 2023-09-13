@@ -1,90 +1,54 @@
 {% extends 'layout/base.html' %}
 
 {% block content %}
-    <div data-controller="choose-action">
-        <form class="fr-my-3w" id='search_form'>
-            {% include "qfdmo/partials/iframe_input.html" %}
-            <div class="fr-grid-row fr-grid-row--gutters">
-                <div class="fr-col-12">
-                    <div class="qfdmo-flex qfdmo-justify-between qfdmo-items-center fr-mb-1v">
-                        <div>
-                            {{ form.direction }}
-                            {{ form.action_list }}
-                        </div>
-                        <div>
-                            <button type="button" class="fr-btn fr-btn__secondary" data-fr-opened="false" aria-controls="fr-modal-actions">
-                                <span class="fr-icon-equalizer-line" aria-hidden="true"></span>
-                                Affinez
-                            </button>
-                        </div>
+    <div class="fr-container qfdmo-min-h-screen md:qfdmo-min-h-fit md:qfdmo-flex-auto qfdmo-flex qfdmo-flex-col" >
+        <div data-controller="choose-action">
+            <form class="fr-my-3w" id='search_form' action='#solutions'>
+                {% include "qfdmo/partials/iframe_input.html" %}
+                {{ form.direction }}
+                {{ form.action_list }}
+                <div data-controller='autocomplete' data-autocomplete-max-option-displayed-value=5>
+                    {{ form.sous_categorie_objet.label }}
+                    {{ form.sous_categorie_objet }}
+                </div>
+                <div data-controller='address-autocomplete'
+                    data-address-autocomplete-max-option-displayed-value=5
+                    data-address-autocomplete-is-ban-address-value='true'
+                >
+                    {{ form.adresse.label }}
+                    {{ form.adresse }}
+                    {{ form.longitude }}
+                    {{ form.latitude }}
+                </div>
+                <div class="fr-grid-row fr-grid-row--bottom">
+                    <div class="fr-col-12 fr-col-md-9">
+                        <label>Je souhaite</label>
+                        {% with action_direction='jai' %}
+                            {% include "qfdmo/partials/action_list_by_direction.html"  %}
+                        {% endwith %}
+                        {% with action_direction='jecherche' %}
+                            {% include "qfdmo/partials/action_list_by_direction.html"  %}
+                        {% endwith %}
                     </div>
-                    <div class="qfdmo-text-xs qfdmo-flex qfdmo-justify-start fr-mb-2w">
-                        <div class="qfdmo-whitespace-nowrap">Je peux :&nbsp;</div>
-                        <div class="qfdmo-truncate">
-                            {{ ", ".join(action_list_display(request)) }}
-                        </div>
+                    <div class="fr-col-12 fr-col-md-3">
+                        <button class="fr-btn fr-icon-search-line fr-btn--icon-left qfdmo-float-right">Rechercher</button>
                     </div>
                 </div>
-            </div>
-
-            {{ form.sous_categorie_objet }}
-            {{ form.adresse }}
-            {{ form.latitude }}
-            {{ form.longitude }}
-
-            <dialog aria-labelledby="action_modal" id="fr-modal-actions" class="fr-modal" role="dialog" >
-                <div class="fr-container fr-container--fluid fr-container-md qfdmo-h-full">
-                    <div class="fr-grid-row fr-grid-row--center qfdmo-h-full">
-                        <div class="fr-col-12 fr-col-md-8">
-                            <div class="fr-modal__body qfdmo-h-full">
-                                <div class="qfdmo-h-full qfdmo-flex qfdmo-flex-col qfdmo-justify-between">
-                                    <div class="fr-modal__header">
-                                        <button type="button" class="fr-btn--close fr-btn" aria-controls="fr-modal-actions">Fermer</button>
-                                    </div>
-                                    <div class="fr-modal__content">
-                                        <h1 id="fr-modal-2-title" class="fr-modal__title">
-                                            <span class="fr-icon-arrow-right-line fr-icon--lg"></span>
-                                            Que souhaitez-vous faire ?
-                                        </h1>
-                                        <div class="fr-mb-3w">
-                                            {{ form.overwritten_direction }}
-                                        </div>
-                                        <div id="jai" data-choose-action-target='jai'>
-                                            {% for action in action_by_direction(request, 'jai') %}
-                                                <button type="button" class="fr-tag fr-m-1v" name="{{action.nom}}"{% if action.description %} title="{{ action.description }}"{% endif %} aria-pressed="{{ 'true' if action.active else 'false' }}">{{ action.nom_affiche }}</button>
-                                            {% endfor %}
-                                        </div>
-                                        <div id="jecherche" data-choose-action-target="jecherche">
-                                            {% for action in action_by_direction(request, 'jecherche') %}
-                                                <button type="button" class="fr-tag fr-m-1v" name="{{action.nom}}"{% if action.description %} title="{{ action.description }}"{% endif %} aria-pressed="{{ 'true' if action.active else 'false' }}">{{ action.nom_affiche }}</button>
-                                            {% endfor %}
-                                        </div>
-
-                                    </div>
-                                    <div class="fr-modal__footer">
-                                        <ul class="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg fr-btns-group--icon-left">
-                                            <li>
-                                                <button type="button" class="fr-btn fr-icon-checkbox-line" data-action="click->choose-action#apply">
-                                                    Appliquez ces gestes
-                                                </button>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </dialog>
-        </form>
-
+            </form>
+        </div>
         <div
-            class="fr-mb-3w"
+            class="fr-mb-3w qfdmo-flex-auto qfdmo-relative qfdmo-min-h-[50vh]"
             data-controller="map"
             data-map-location-value="{{ location }}"
-            data-map-acteurs-value="{{ acteurs }}"
+            id="map" data-map-target="map"
         >
-            <div id="map" data-map-target="map"></div>
+            {% if not form.initial.adresse %}
+                <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-black qfdmo-opacity-70 qfdmo-font-black" style="z-index:10000;background-color:gray">
+                    <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
+                        Préciser une adresse pour afficher la carte
+                    </div>
+                </div>
+            {% endif %}
             {% for acteur in acteurs %}
                 <script type="application/json" data-map-target="acteur">
                     {{ acteur.serialize(format='json') | safe }}
