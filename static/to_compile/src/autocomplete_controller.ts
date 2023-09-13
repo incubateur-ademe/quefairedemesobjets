@@ -57,7 +57,6 @@ export default class extends Controller<HTMLElement> {
         let target = event.target as HTMLElement
         const label = target.getElementsByTagName("input")[0].value
         this.inputTarget.value = label
-        this.inputTarget.form.submit()
         this.closeAllLists()
     }
 
