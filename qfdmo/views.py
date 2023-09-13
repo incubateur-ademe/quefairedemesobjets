@@ -26,9 +26,6 @@ class ReemploiSolutionView(FormView):
         initial["direction"] = self.request.GET.get(
             "direction", settings.DEFAULT_ACTION_DIRECTION
         )
-        initial["overwritten_direction"] = self.request.GET.get(
-            "direction", settings.DEFAULT_ACTION_DIRECTION
-        )
         initial["action_list"] = self.request.GET.get("action_list")
         initial["latitude"] = self.request.GET.get("latitude")
         initial["longitude"] = self.request.GET.get("longitude")

@@ -29,16 +29,14 @@
 
     </head>
 
-    <body class="h-full m-0 font-default ">
+    <body class="qfdmo-flex qfdmo-flex-col">
         {% if not is_iframe(request) %}
             {% block header %}
                 {% include "layout/header.html" %}
             {% endblock %}
         {% endif %}
-        <main role="main" class="bg-white shadow">
-            <div class="fr-container">
-                {% block content %}{% endblock %}
-            </div>
+        <main role="main" id="solutions">
+            {% block content %}{% endblock %}
         </main>
         {% if not is_iframe(request) %}
             {% block footer %}

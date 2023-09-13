@@ -74,7 +74,6 @@ export class Actor {
     popupContent(): string {
         let popup = document.createElement("div")
         let popupContent = ""
-        console.log(this.proposition_services)
         if (this.proposition_services !== undefined) {
             let services = Array.from(
                 new Set(
