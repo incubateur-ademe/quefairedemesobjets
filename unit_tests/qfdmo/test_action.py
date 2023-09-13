@@ -17,6 +17,7 @@ class TestActionNomAsNaturalKeyHeritage:
         )
         assert action.serialize() == {
             "id": action.id,
+            "description": None,
             "nom": "Test Object",
             "nom_affiche": "Test Objet Displayed",
             "order": 1,

@@ -51,12 +51,12 @@
                                         </div>
                                         <div id="jai" data-choose-action-target='jai'>
                                             {% for action in action_by_direction(request, 'jai') %}
-                                                <button type="button" class="fr-tag fr-m-1v" name="{{action.nom}}" title="{{ action.nom.capitalize() }}" aria-pressed="{{ 'true' if action.active else 'false' }}">{{ action.nom_affiche }}</button>
+                                                <button type="button" class="fr-tag fr-m-1v" name="{{action.nom}}"{% if action.description %} title="{{ action.description }}"{% endif %} aria-pressed="{{ 'true' if action.active else 'false' }}">{{ action.nom_affiche }}</button>
                                             {% endfor %}
                                         </div>
                                         <div id="jecherche" data-choose-action-target="jecherche">
                                             {% for action in action_by_direction(request, 'jecherche') %}
-                                                <button type="button" class="fr-tag fr-m-1v" name="{{action.nom}}" title="{{ action.nom.capitalize() }}" aria-pressed="{{ 'true' if action.active else 'false' }}">{{ action.nom_affiche }}</button>
+                                                <button type="button" class="fr-tag fr-m-1v" name="{{action.nom}}"{% if action.description %} title="{{ action.description }}"{% endif %} aria-pressed="{{ 'true' if action.active else 'false' }}">{{ action.nom_affiche }}</button>
                                             {% endfor %}
                                         </div>
 

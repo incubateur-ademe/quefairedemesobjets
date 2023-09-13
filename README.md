@@ -18,9 +18,21 @@ Dans le cas de l'iframe, l'entête et le pied de page ne sont pas affichés
 
 Les autres paramètres disponibles pour afficher la page principale de l'application et permettant d'interagir avec les champs de recherche sont :
 
-- `sous_categorie_objet`, parmi les sous-categories suivantes : `Matériel médical`, `Autre matériel de sport`, `Vélos`, `Bijou`, `montre`, `horlogerie`, `Chaussures`, `Maroquinerie`, `Vêtements`, `Jouets`, `Puériculture`, `Linge de maison`, `Vaisselle`, `Luminaires`, `Décoration`, `Mobilier`, `Jardin (mobilier`, `accessoires)`, `Outillage (bricolage/jardinage)`, `Instruments de musique`, `Livres`, `CD/DVD/jeux vidéo`, `Autres équipements électroniques`, `Photo/ciné`, `Smartphones/tablettes/consoles`, `Hifi/vidéo (hors écrans)`
+- `sous_categorie_objet`, parmi les sous-catégories disponibles en base de données
 - `adresse`, par exemple : 145+Avenue+Pierre+Brossolette+92120+Montrouge
-- `direction`, option `jai` ou `jecherche`
+- `latitude` et `longitude` récupéré dpuis l'API BAN avec l'adresse ci-dessus
+- `direction`, option `jai` ou `jecherche`, par défaut la direction `jecherche` est appliquée
+- `action_list`, liste des actions possibles selon la direction séparées par le caractère `|` :
+  - pour la direction `jecherche` les actions possibles sont : `emprunter`, `echanger`, `louer`, `acheter`
+  - pour la direction `jai` les actions possibles sont : `reparer`, `preter`, `donner`, `echanger`, `mettreenlocation`, `revendre`
+  - si le paramètre `action_list` n'est pas renseigné ou est vide, toutes les actions éligibles à la direction sont affichées
+
+Exemple:
+
+```txt
+http://localhost:8000/?direction=jecherche&action_list=emprunter%7Cechanger%7Clouer%7Cacheter+d%27occasion&sous_categorie_objet=&adresse=145+Avenue+Pierre+Brossolette+92120+Montrouge&latitude=48.815679&longitude=2.305116&overwritten_direction=jecherche
+
+```
 
 ### Afficher l'iframe en totalité dynamiquement
 
@@ -29,7 +41,7 @@ Dans la page affichant l'iframe, il suffit de charge cette même librairie et d'
 
 Voir l'exemple de code [iframe.html](./iframe.html)
 
-## Modèle de donnée
+## Modèle de données
 
 Chaque acteur du ré-emploi et recyclage expose des propositions de service associées à un geste et une liste de catégories d'objet
 
@@ -39,7 +51,7 @@ flowchart TD
     service_offer["`**Proposition de Service**
     - Action -
     - Service -
-    - Categories d'objet -`"]
+    - Catégories d'objet -`"]
     actor --> service_offer
 ```
 
