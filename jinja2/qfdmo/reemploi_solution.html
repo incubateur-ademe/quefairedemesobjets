@@ -39,7 +39,7 @@
             </form>
         </div>
         <div
-            class="fr-mb-3w qfdmo-relative{% if not is_iframe(request) or form.initial.adresse %} qfdmo-flex-auto md:qfdmo-min-h-[50vh]{% else %} qfdmo-min-h-[200px]{% endif %}"
+            class="fr-mb-3w qfdmo-relative{% if is_iframe(request) %}{% if form.initial.adresse %} qfdmo-min-h-[400px]{% else %} qfdmo-min-h-[200px]{% endif %}{% else %} qfdmo-flex-auto md:qfdmo-min-h-[50vh]{% endif %}"
             data-controller="map"
             data-map-location-value="{{ location }}"
             id="map" data-map-target="map"
