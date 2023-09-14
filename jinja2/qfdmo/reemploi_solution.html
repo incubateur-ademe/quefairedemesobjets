@@ -1,7 +1,7 @@
 {% extends 'layout/base.html' %}
 
 {% block content %}
-    <div class="fr-container qfdmo-min-h-screen md:qfdmo-min-h-fit md:qfdmo-flex-auto qfdmo-flex qfdmo-flex-col" >
+    <div class="fr-container qfdmo-flex qfdmo-flex-col{% if not is_iframe(request) or form.initial.adresse %} qfdmo-min-h-screen md:qfdmo-min-h-fit md:qfdmo-flex-auto{% endif %}" >
         <div data-controller="choose-action">
             <form class="fr-my-3w" id='search_form' action='#solutions'>
                 {% include "qfdmo/partials/iframe_input.html" %}
@@ -39,7 +39,7 @@
             </form>
         </div>
         <div
-            class="fr-mb-3w qfdmo-flex-auto qfdmo-relative qfdmo-min-h-[50vh]"
+            class="fr-mb-3w qfdmo-relative{% if not is_iframe(request) or form.initial.adresse %} qfdmo-flex-auto md:qfdmo-min-h-[50vh]{% else %} qfdmo-min-h-[200px]{% endif %}"
             data-controller="map"
             data-map-location-value="{{ location }}"
             id="map" data-map-target="map"
