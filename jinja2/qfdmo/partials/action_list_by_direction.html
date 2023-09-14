@@ -3,7 +3,7 @@
     {% for action in action_by_direction(request, action_direction) %}
         <button
             type="button"
-            class="fr-tag fr-m-1v"
+            class="fr-tag fr-mb-1v fr-ml-1v"
             name="{{action.nom}}"
             data-action="click->choose-action#apply"
             {% if action.description %} title="{{ action.description }}"{% endif %}

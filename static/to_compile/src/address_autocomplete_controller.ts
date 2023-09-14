@@ -4,9 +4,14 @@ const SEPARATOR = "||"
 export default class extends AutocompleteController {
     controllerName: string = "address-autocomplete"
 
-    static targets = AutocompleteController.targets.concat(["longitude", "latitude"])
+    static targets = AutocompleteController.targets.concat([
+        "longitude",
+        "latitude",
+        "displayError",
+    ])
     declare readonly latitudeTarget: HTMLInputElement
     declare readonly longitudeTarget: HTMLInputElement
+    declare readonly displayErrorTarget: HTMLElement
 
     connect() {
         if (this.allAvailableOptionsTarget.textContent != null) {
@@ -64,8 +69,7 @@ export default class extends AutocompleteController {
                                     data.features[0].geometry.coordinates[1]
                                 this.longitudeTarget.value =
                                     data.features[0].geometry.coordinates[0]
-                                /* FIXME : Check if we can partially refresh the page using Turbo */
-                                this.inputTarget.form.submit()
+                                this.#hideInputError()
                             })
                             .catch((error) => {
                                 console.error("error catched : ", error)
@@ -84,10 +88,26 @@ export default class extends AutocompleteController {
     }
 
     geolocatisationRefused() {
-        console.error("geolocation is refused")
+        this.#displayInputError(
+            "La géolocalisation est inaccessible sur votre appareil",
+        )
         this.inputTarget.value = ""
         this.longitudeTarget.value = ""
         this.latitudeTarget.value = ""
+    }
+
+    #displayInputError(errorText: string): void {
+        console.error(errorText)
+        this.inputTarget.classList.add("fr-input--error")
+        this.inputTarget.parentElement.classList.add("fr-input-group--error")
+        this.displayErrorTarget.innerHTML = errorText
+        this.displayErrorTarget.style.display = "block"
+    }
+
+    #hideInputError() {
+        this.inputTarget.classList.remove("fr-input--error")
+        this.inputTarget.parentElement.classList.remove("fr-input-group--error")
+        this.displayErrorTarget.style.display = "none"
     }
 
     async #searchAddressCallback(value: string): Promise<string[]> {

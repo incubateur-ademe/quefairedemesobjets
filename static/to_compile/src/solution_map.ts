@@ -27,7 +27,6 @@ export class SolutionMap {
             )
                 .addTo(this.#map)
                 .bindPopup("<p><strong>Vous êtes ici !</strong></b>")
-                .openPopup()
         }
     }
 
