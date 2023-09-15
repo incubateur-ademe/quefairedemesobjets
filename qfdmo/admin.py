@@ -1,4 +1,5 @@
 from django.contrib.gis import admin
+from django.http.request import HttpRequest
 
 from qfdmo.models import (
     Acteur,
@@ -7,9 +8,13 @@ from qfdmo.models import (
     Action,
     ActionDirection,
     CategorieObjet,
+    FinalActeur,
+    FinalPropositionService,
     LVAOBase,
     LVAOBaseRevision,
     PropositionService,
+    RevisionActeur,
+    RevisionPropositionService,
     SousCategorieObjet,
 )
 from qfdmo.widget import CustomOSMWidget
@@ -55,8 +60,7 @@ class LVAOBaseAdmin(admin.ModelAdmin):
     ]
 
 
-class PropositionServiceInline(admin.TabularInline):
-    model = PropositionService
+class BasePropositionServiceInline(admin.TabularInline):
     extra = 0
 
     fields = (
@@ -69,6 +73,30 @@ class PropositionServiceInline(admin.TabularInline):
         if obj is not None:
             return False
         return super().has_change_permission(request, obj)
+
+
+class PropositionServiceInline(BasePropositionServiceInline):
+    model = PropositionService
+
+    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+
+class RevisionPropositionServiceInline(BasePropositionServiceInline):
+    model = RevisionPropositionService
+
+
+class FinalPropositionServiceInline(BasePropositionServiceInline):
+    model = FinalPropositionService
+
+    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
 
 
 class ActeurAdmin(admin.GISModelAdmin):
@@ -84,7 +112,43 @@ class ActeurAdmin(admin.GISModelAdmin):
         "siret",
         "ville",
     ]
+    readonly_fields = [
+        "nom",
+        "identifiant_unique",
+        "acteur_type",
+        "adresse",
+        "adresse_complement",
+        "code_postal",
+        "ville",
+        "url",
+        "email",
+        "location",
+        "telephone",
+        "multi_base",
+        "nom_commercial",
+        "nom_officiel",
+        "manuel",
+        "label_reparacteur",
+        "siret",
+        "source_donnee",
+        "identifiant_externe",
+    ]
     ordering = ("nom",)
+
+
+class RevisionActeurAdmin(ActeurAdmin):
+    gis_widget = CustomOSMWidget
+    inlines = [
+        RevisionPropositionServiceInline,
+    ]
+    readonly_fields = []
+
+
+class FinalActeurAdmin(ActeurAdmin):
+    gis_widget = CustomOSMWidget
+    inlines = [
+        FinalPropositionServiceInline,
+    ]
 
 
 class ActionAdmin(admin.ModelAdmin):
@@ -104,3 +168,5 @@ admin.site.register(ActeurType)
 admin.site.register(LVAOBase, LVAOBaseAdmin)
 admin.site.register(LVAOBaseRevision, LVAOBaseRevisionAdmin)
 admin.site.register(Acteur, ActeurAdmin)
+admin.site.register(RevisionActeur, RevisionActeurAdmin)
+admin.site.register(FinalActeur, FinalActeurAdmin)
