@@ -1,6 +1,7 @@
 import json
 
 from django.contrib.gis.db import models
+from django.db import connection
 from django.forms import model_to_dict
 from unidecode import unidecode
 
@@ -293,6 +294,17 @@ class FinalActeur(BaseActeur):
         verbose_name_plural = "Versions finales des Acteurs"
 
     id = models.IntegerField(primary_key=True)
+
+    @classmethod
+    def refresh_view(cls):
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+REFRESH MATERIALIZED VIEW CONCURRENTLY qfdmo_finalacteur;
+REFRESH MATERIALIZED VIEW CONCURRENTLY qfdmo_finalpropositionservice;
+REFRESH MATERIALIZED VIEW CONCURRENTLY qfdmo_finalpropositionservice_sous_categories;
+                """
+            )
 
 
 class BasePropositionService(models.Model):
