@@ -99,7 +99,18 @@ class FinalPropositionServiceInline(BasePropositionServiceInline):
         return False
 
 
-class ActeurAdmin(admin.GISModelAdmin):
+class NotEditableMixin(admin.GISModelAdmin):
+    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+    def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+
+class BaseActeurAdmin(admin.GISModelAdmin):
     gis_widget = CustomOSMWidget
     inlines = [
         PropositionServiceInline,
@@ -112,31 +123,15 @@ class ActeurAdmin(admin.GISModelAdmin):
         "siret",
         "ville",
     ]
-    readonly_fields = [
-        "nom",
-        "identifiant_unique",
-        "acteur_type",
-        "adresse",
-        "adresse_complement",
-        "code_postal",
-        "ville",
-        "url",
-        "email",
-        "location",
-        "telephone",
-        "multi_base",
-        "nom_commercial",
-        "nom_officiel",
-        "manuel",
-        "label_reparacteur",
-        "siret",
-        "source_donnee",
-        "identifiant_externe",
-    ]
+
+
+class ActeurAdmin(BaseActeurAdmin, NotEditableMixin):
+    change_form_template = "admin/acteur/change_form.html"
+
     ordering = ("nom",)
 
 
-class RevisionActeurAdmin(ActeurAdmin):
+class RevisionActeurAdmin(BaseActeurAdmin):
     gis_widget = CustomOSMWidget
     inlines = [
         RevisionPropositionServiceInline,
@@ -144,7 +139,7 @@ class RevisionActeurAdmin(ActeurAdmin):
     readonly_fields = []
 
 
-class FinalActeurAdmin(ActeurAdmin):
+class FinalActeurAdmin(BaseActeurAdmin, NotEditableMixin):
     gis_widget = CustomOSMWidget
     inlines = [
         FinalPropositionServiceInline,

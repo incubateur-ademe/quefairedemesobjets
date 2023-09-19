@@ -10,4 +10,14 @@ urlpatterns = [
         views.analyse_lvao_base,
         name="analyse_lvao_base",
     ),
+    path(
+        "qfdmo/getorcreate_revisionacteur/<int:acteur_id>",
+        views.getorcreate_revision_acteur,
+        name="getorcreate_revisionacteur",
+    ),
+    path(
+        "qfdmo/refresh_acteur_view",
+        views.refresh_acteur_view,
+        name="refresh_acteur_view",
+    ),
 ]

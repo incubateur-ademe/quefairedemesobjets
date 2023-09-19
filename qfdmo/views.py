@@ -1,10 +1,12 @@
 import json
+import threading
 
 from django.conf import settings
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
+from django.core.management import call_command
 from django.db.models import Count, F, QuerySet
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.views.generic.edit import FormView
 
 from core.jinja2_handler import get_action_list
@@ -111,3 +113,22 @@ def analyse_lvao_base(request, id):
             "acteur": acteur,
         },
     )
+
+
+def getorcreate_revision_acteur(request, acteur_id):
+    acteur = Acteur.objects.get(id=acteur_id)
+    revision_acteur = acteur.get_or_create_revision()
+    return redirect("admin:qfdmo_revisionacteur_change", revision_acteur.id)
+
+
+class RefreshMateriazedViewThread(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+
+    def run(self):
+        call_command("refresh_materialized_view")
+
+
+def refresh_acteur_view(request):
+    RefreshMateriazedViewThread().start()
+    return redirect(request.META["HTTP_REFERER"])
