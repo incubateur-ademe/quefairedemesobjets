@@ -1,4 +1,5 @@
 from django.contrib.gis import admin
+from django.http.request import HttpRequest
 
 from qfdmo.models import (
     Acteur,
@@ -7,9 +8,13 @@ from qfdmo.models import (
     Action,
     ActionDirection,
     CategorieObjet,
+    FinalActeur,
+    FinalPropositionService,
     LVAOBase,
     LVAOBaseRevision,
     PropositionService,
+    RevisionActeur,
+    RevisionPropositionService,
     SousCategorieObjet,
 )
 from qfdmo.widget import CustomOSMWidget
@@ -55,8 +60,7 @@ class LVAOBaseAdmin(admin.ModelAdmin):
     ]
 
 
-class PropositionServiceInline(admin.TabularInline):
-    model = PropositionService
+class BasePropositionServiceInline(admin.TabularInline):
     extra = 0
 
     fields = (
@@ -71,7 +75,42 @@ class PropositionServiceInline(admin.TabularInline):
         return super().has_change_permission(request, obj)
 
 
-class ActeurAdmin(admin.GISModelAdmin):
+class PropositionServiceInline(BasePropositionServiceInline):
+    model = PropositionService
+
+    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+
+class RevisionPropositionServiceInline(BasePropositionServiceInline):
+    model = RevisionPropositionService
+
+
+class FinalPropositionServiceInline(BasePropositionServiceInline):
+    model = FinalPropositionService
+
+    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+
+class NotEditableMixin(admin.GISModelAdmin):
+    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+    def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+
+class BaseActeurAdmin(admin.GISModelAdmin):
     gis_widget = CustomOSMWidget
     inlines = [
         PropositionServiceInline,
@@ -84,7 +123,27 @@ class ActeurAdmin(admin.GISModelAdmin):
         "siret",
         "ville",
     ]
+
+
+class ActeurAdmin(BaseActeurAdmin, NotEditableMixin):
+    change_form_template = "admin/acteur/change_form.html"
+
     ordering = ("nom",)
+
+
+class RevisionActeurAdmin(BaseActeurAdmin):
+    gis_widget = CustomOSMWidget
+    inlines = [
+        RevisionPropositionServiceInline,
+    ]
+    exclude = ["id"]
+
+
+class FinalActeurAdmin(BaseActeurAdmin, NotEditableMixin):
+    gis_widget = CustomOSMWidget
+    inlines = [
+        FinalPropositionServiceInline,
+    ]
 
 
 class ActionAdmin(admin.ModelAdmin):
@@ -104,3 +163,5 @@ admin.site.register(ActeurType)
 admin.site.register(LVAOBase, LVAOBaseAdmin)
 admin.site.register(LVAOBaseRevision, LVAOBaseRevisionAdmin)
 admin.site.register(Acteur, ActeurAdmin)
+admin.site.register(RevisionActeur, RevisionActeurAdmin)
+admin.site.register(FinalActeur, FinalActeurAdmin)
