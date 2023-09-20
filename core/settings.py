@@ -220,12 +220,15 @@ WHITENOISE_KEEP_ONLY_HASHED_FILES = True
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
+ENVIRONMENT = decouple.config("ENVIRONMENT", default="development", cast=str)
+
 sentry_sdk.init(
-    dsn=decouple.config("SENTRY_DSN"),
+    dsn=decouple.config("SENTRY_DSN", cast=str, default=""),
     integrations=[DjangoIntegration()],
+    environment=ENVIRONMENT,
     # If you wish to associate users to errors (assuming you are using
     # django.contrib.auth) you may enable sending PII data.
-    send_default_pii=True,
+    send_default_pii=False,
     # trace only 1% of requests to get performance statistics
     traces_sample_rate=0.01,
     # By default the SDK will try to use the SENTRY_RELEASE
