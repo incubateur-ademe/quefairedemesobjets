@@ -247,8 +247,8 @@ class BaseActeur(NomAsNaturalKeyModel):
 
 class Acteur(BaseActeur):
     class Meta:
-        verbose_name = "Acteur de l'économie circulaire"
-        verbose_name_plural = "Acteurs de l'économie circulaire"
+        verbose_name = "ACTEUR de l'EC - IMPORTÉ"
+        verbose_name_plural = "ACTEURS de l'EC - IMPORTÉ"
 
     id = models.AutoField(primary_key=True)
 
@@ -280,8 +280,8 @@ class Acteur(BaseActeur):
 
 class RevisionActeur(BaseActeur):
     class Meta:
-        verbose_name = "Révision de l'Acteur"
-        verbose_name_plural = "Révisions des Acteurs"
+        verbose_name = "ACTEUR de l'EC - CORRIGÉ"
+        verbose_name_plural = "ACTEURS de l'EC - CORRIGÉ"
 
     id = models.IntegerField(primary_key=True)
 
@@ -290,8 +290,8 @@ class FinalActeur(BaseActeur):
     class Meta:
         managed = False
         db_table = "qfdmo_finalacteur"
-        verbose_name = "Version finale de l'Acteur"
-        verbose_name_plural = "Versions finales des Acteurs"
+        verbose_name = "ACTEUR de l'EC - AFFICHÉ"
+        verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ"
 
     id = models.IntegerField(primary_key=True)
 
