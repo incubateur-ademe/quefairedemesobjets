@@ -1,6 +1,9 @@
 import json
 
 from django.contrib.gis.db import models
+from django.db import connection
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 from django.forms import model_to_dict
 from unidecode import unidecode
 
@@ -192,12 +195,10 @@ class LVAOBaseRevision(NomAsNaturalKeyModel):
     )  # Objets
 
 
-class Acteur(NomAsNaturalKeyModel):
+class BaseActeur(NomAsNaturalKeyModel):
     class Meta:
-        verbose_name = "Acteur de l'économie circulaire"
-        verbose_name_plural = "Acteurs de l'économie circulaire"
+        abstract = True
 
-    id = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=255, blank=False, null=False)
     identifiant_unique = models.CharField(
         max_length=255, blank=True, null=True, unique=True
@@ -246,38 +247,102 @@ class Acteur(NomAsNaturalKeyModel):
         return self_as_dict
 
 
-class PropositionService(models.Model):
+class Acteur(BaseActeur):
     class Meta:
+        verbose_name = "ACTEUR de l'EC - IMPORTÉ"
+        verbose_name_plural = "ACTEURS de l'EC - IMPORTÉ"
+
+    id = models.AutoField(primary_key=True)
+
+    def get_or_create_revision(self):
+        fields = model_to_dict(
+            self,
+            exclude=["proposition_services", "id"],
+        )
+        fields["acteur_type_id"] = fields.pop("acteur_type")
+        (revision_acteur, created) = RevisionActeur.objects.get_or_create(
+            id=self.id, defaults=fields
+        )
+        if created:
+            for proposition_service in self.proposition_services.all():
+                revision_proposition_service = (
+                    RevisionPropositionService.objects.create(
+                        revision_acteur=revision_acteur,
+                        action_id=proposition_service.action_id,
+                        acteur_service_id=proposition_service.acteur_service_id,
+                    )
+                )
+                revision_proposition_service.sous_categories.add(
+                    *proposition_service.sous_categories.all()
+                )
+
+        return revision_acteur
+
+
+class RevisionActeur(BaseActeur):
+    class Meta:
+        verbose_name = "ACTEUR de l'EC - CORRIGÉ"
+        verbose_name_plural = "ACTEURS de l'EC - CORRIGÉ"
+
+    id = models.IntegerField(primary_key=True)
+
+
+@receiver(pre_save, sender=RevisionActeur)
+def create_acteur_if_not_exists(sender, instance, *args, **kwargs):
+    if instance.id is None:
+        acteur = Acteur.objects.create(
+            **model_to_dict(
+                instance, exclude=["id", "acteur_type", "proposition_services"]
+            ),
+            acteur_type=instance.acteur_type,
+        )
+        instance.id = acteur.id
+
+
+class FinalActeur(BaseActeur):
+    class Meta:
+        managed = False
+        db_table = "qfdmo_finalacteur"
+        verbose_name = "ACTEUR de l'EC - AFFICHÉ"
+        verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ"
+
+    id = models.IntegerField(primary_key=True)
+
+    @classmethod
+    def refresh_view(cls):
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+REFRESH MATERIALIZED VIEW CONCURRENTLY qfdmo_finalacteur;
+REFRESH MATERIALIZED VIEW CONCURRENTLY qfdmo_finalpropositionservice;
+REFRESH MATERIALIZED VIEW CONCURRENTLY qfdmo_finalpropositionservice_sous_categories;
+                """
+            )
+
+
+class BasePropositionService(models.Model):
+    class Meta:
+        abstract = True
         constraints = [
             models.UniqueConstraint(
                 fields=["acteur", "action", "acteur_service"],
                 name="unique_by_acteur_action_service",
             )
         ]
-        verbose_name = "Proposition de service"
-        verbose_name_plural = "Proposition de service"
 
     id = models.AutoField(primary_key=True)
-    acteur = models.ForeignKey(
-        Acteur,
-        on_delete=models.CASCADE,
-        null=False,
-        related_name="proposition_services",
-    )
     action = models.ForeignKey(
         Action,
         on_delete=models.CASCADE,
         null=False,
-        related_name="proposition_services",
     )
     acteur_service = models.ForeignKey(
         ActeurService,
         on_delete=models.CASCADE,
         null=False,
-        related_name="proposition_services",
     )
     sous_categories = models.ManyToManyField(
-        SousCategorieObjet, related_name="proposition_services"
+        SousCategorieObjet,
     )
 
     def serialize(self):
@@ -289,3 +354,44 @@ class PropositionService(models.Model):
                 for sous_categorie in self.sous_categories.all()
             ],
         }
+
+
+class PropositionService(BasePropositionService):
+    class Meta:
+        verbose_name = "Proposition de service"
+        verbose_name_plural = "Proposition de service"
+
+    acteur = models.ForeignKey(
+        Acteur,
+        on_delete=models.CASCADE,
+        null=False,
+        related_name="proposition_services",
+    )
+
+
+class RevisionPropositionService(BasePropositionService):
+    class Meta:
+        verbose_name = "Proposition de service"
+        verbose_name_plural = "Proposition de service"
+
+    revision_acteur = models.ForeignKey(
+        RevisionActeur,
+        on_delete=models.CASCADE,
+        null=False,
+        related_name="proposition_services",
+    )
+
+
+class FinalPropositionService(BasePropositionService):
+    class Meta:
+        managed = False
+        db_table = "qfdmo_finalpropositionservice"
+        verbose_name = "Proposition de service"
+        verbose_name_plural = "Proposition de service"
+
+    acteur = models.ForeignKey(
+        FinalActeur,
+        on_delete=models.CASCADE,
+        null=False,
+        related_name="proposition_services",
+    )
