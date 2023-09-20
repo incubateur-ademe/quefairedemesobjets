@@ -136,7 +136,7 @@ class RevisionActeurAdmin(BaseActeurAdmin):
     inlines = [
         RevisionPropositionServiceInline,
     ]
-    readonly_fields = []
+    exclude = ["id"]
 
 
 class FinalActeurAdmin(BaseActeurAdmin, NotEditableMixin):

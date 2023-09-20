@@ -2,6 +2,8 @@ import json
 
 from django.contrib.gis.db import models
 from django.db import connection
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 from django.forms import model_to_dict
 from unidecode import unidecode
 
@@ -252,7 +254,6 @@ class Acteur(BaseActeur):
 
     id = models.AutoField(primary_key=True)
 
-    # FIXME : should be unit tested
     def get_or_create_revision(self):
         fields = model_to_dict(
             self,
@@ -284,6 +285,18 @@ class RevisionActeur(BaseActeur):
         verbose_name_plural = "ACTEURS de l'EC - CORRIGÉ"
 
     id = models.IntegerField(primary_key=True)
+
+
+@receiver(pre_save, sender=RevisionActeur)
+def create_acteur_if_not_exists(sender, instance, *args, **kwargs):
+    if instance.id is None:
+        acteur = Acteur.objects.create(
+            **model_to_dict(
+                instance, exclude=["id", "acteur_type", "proposition_services"]
+            ),
+            acteur_type=instance.acteur_type,
+        )
+        instance.id = acteur.id
 
 
 class FinalActeur(BaseActeur):
