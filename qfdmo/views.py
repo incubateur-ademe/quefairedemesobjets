@@ -5,13 +5,13 @@ from django.conf import settings
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
 from django.core.management import call_command
-from django.db.models import Count, F, QuerySet
-from django.shortcuts import redirect, render
+from django.db.models import QuerySet
+from django.shortcuts import redirect
 from django.views.generic.edit import FormView
 
 from core.jinja2_handler import get_action_list
 from qfdmo.forms import GetReemploiSolutionForm
-from qfdmo.models import Acteur, LVAOBase, SousCategorieObjet
+from qfdmo.models import Acteur, SousCategorieObjet
 
 DEFAULT_LIMIT = 10
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
@@ -71,48 +71,6 @@ class ReemploiSolutionView(FormView):
             kwargs["acteurs"] = acteurs.order_by("distance")[:DEFAULT_LIMIT]
 
         return super().get_context_data(**kwargs)
-
-
-def analyse(request):
-    lvao_bases = (
-        LVAOBase.objects.all()
-        .annotate(lvao_base_revision_count=Count("lvao_base_revisions"))
-        .annotate(action_count=Count("lvao_base_revisions__actions", distinct=True))
-        .filter(lvao_base_revision_count__gt=1)
-        .exclude(lvao_base_revision_count=F("action_count"))
-        .order_by("-lvao_base_revision_count")
-    )
-
-    return render(
-        request,
-        "qfdmo/analyse.html",
-        {
-            "lvao_bases": lvao_bases,
-        },
-    )
-
-
-def analyse_lvao_base(request, id):
-    lvao_base = LVAOBase.objects.get(id=id)
-    lvao_base_revisions = lvao_base.lvao_base_revisions.prefetch_related(
-        "actions",
-        "sous_categories__categorie",
-        "acteur_type",
-        "acteur_services",
-    ).all()
-    acteur = Acteur.objects.filter(
-        identifiant_unique=lvao_base.identifiant_unique
-    ).first()
-
-    return render(
-        request,
-        "qfdmo/analyse_lvao_base.html",
-        {
-            "lvao_base": lvao_base,
-            "lvao_base_revisions": lvao_base_revisions,
-            "acteur": acteur,
-        },
-    )
 
 
 def getorcreate_revision_acteur(request, acteur_id):
