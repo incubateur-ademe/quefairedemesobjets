@@ -11,7 +11,7 @@ from django.views.generic.edit import FormView
 
 from core.jinja2_handler import get_action_list
 from qfdmo.forms import GetReemploiSolutionForm
-from qfdmo.models import Acteur, SousCategorieObjet
+from qfdmo.models import Acteur, FinalActeur, SousCategorieObjet
 
 DEFAULT_LIMIT = 10
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
@@ -35,7 +35,7 @@ class ReemploiSolutionView(FormView):
 
     def get_context_data(self, **kwargs):
         kwargs["location"] = "{}"
-        kwargs["acteurs"] = Acteur.objects.none()
+        kwargs["acteurs"] = FinalActeur.objects.none()
         sous_categories_objets: QuerySet | None = None
         if sous_categorie_objet := self.request.GET.get("sous_categorie_objet", None):
             sous_categories_objets = SousCategorieObjet.objects.filter(
@@ -50,7 +50,9 @@ class ReemploiSolutionView(FormView):
             reference_point = Point(float(longitude), float(latitude), srid=4326)
             # FIXME : add a test to check distinct point
             acteurs = (
-                Acteur.objects.annotate(distance=Distance("location", reference_point))
+                FinalActeur.objects.annotate(
+                    distance=Distance("location", reference_point)
+                )
                 .prefetch_related(
                     "proposition_services__sous_categories",
                     "proposition_services__sous_categories__categorie",
