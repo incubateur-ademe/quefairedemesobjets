@@ -10,15 +10,19 @@
                 <div data-controller='autocomplete'
                     data-autocomplete-max-option-displayed-value=5
                 >
-                    {{ form.sous_categorie_objet.label }}
-                    {{ form.sous_categorie_objet }}
+                    <div class="form-group">
+                        {{ form.sous_categorie_objet.label_tag() }}
+                        {{ form.sous_categorie_objet }}
+                    </div>
                 </div>
                 <div data-controller='address-autocomplete'
                     data-address-autocomplete-max-option-displayed-value=5
                     data-address-autocomplete-is-ban-address-value='true'
                 >
-                    {{ form.adresse.label }}
-                    {{ form.adresse }}
+                    <div class="form-group">
+                        {{ form.adresse.label_tag() }}
+                        {{ form.adresse }}
+                    </div>
                     {{ form.longitude }}
                     {{ form.latitude }}
                 </div>
