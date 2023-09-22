@@ -39,7 +39,7 @@ class GetReemploiSolutionForm(forms.Form):
                 "placeholder": "ex : Vêtement, Meuble, Smartphone, etc.",
             }
         ),
-        label="Indiquez une famille d'objets",
+        label="",
         empty_label="",
         required=False,
     )
