@@ -54,6 +54,12 @@
                         Précisez une adresse pour afficher la carte
                     </div>
                 </div>
+            {% elif not acteurs %}
+                <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-black qfdmo-opacity-70 qfdmo-font-black qfdmo-z-[1000]" style="background-color:gray">
+                    <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
+                        Il n'existe pas de solution localisée proche de chez vous (<30 km), avez vous envigagé une solution en ligne ?
+                            </div>
+                        </div>
             {% endif %}
             {% for acteur in acteurs %}
                 <script type="application/json" data-map-target="acteur">
