@@ -14,7 +14,6 @@ from qfdmo.forms import GetReemploiSolutionForm
 from qfdmo.models import Acteur, SousCategorieObjet
 
 DEFAULT_LIMIT = 10
-BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
 
 
 class ReemploiSolutionView(FormView):
