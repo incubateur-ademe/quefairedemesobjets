@@ -231,6 +231,16 @@ class BaseActeur(NomAsNaturalKeyModel):
     def longitude(self):
         return self.location.x
 
+    def get_address_for_ban(self):
+        return (
+            (
+                f"{self.adresse} {self.adresse_complement}"
+                f" {self.code_postal} {self.ville}"
+            )
+            .replace(" ", "+")
+            .lower()
+        )
+
     def serialize(self, format=None):
         self_as_dict = model_to_dict(
             self, exclude=["location", "proposition_services", "acteur_type"]
