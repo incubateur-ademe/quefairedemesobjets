@@ -15,6 +15,7 @@ from qfdmo.models import Acteur, FinalActeur, SousCategorieObjet
 
 DEFAULT_LIMIT = 10
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
+DISTANCE_MAX = 30000
 
 
 class ReemploiSolutionView(FormView):
@@ -70,7 +71,9 @@ class ReemploiSolutionView(FormView):
 
             acteurs = acteurs.filter(proposition_services__action__in=action_selection)
 
-            kwargs["acteurs"] = acteurs.order_by("distance")[:DEFAULT_LIMIT]
+            kwargs["acteurs"] = acteurs.filter(distance__lte=DISTANCE_MAX).order_by(
+                "distance"
+            )[:DEFAULT_LIMIT]
 
         return super().get_context_data(**kwargs)
 

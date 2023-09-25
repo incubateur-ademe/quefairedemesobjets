@@ -9,7 +9,9 @@ import { homeIconMarker, redMarker } from "./icon_marker"
 
 export class SolutionMap {
     #map: L.Map
+    #location: Location
     constructor({ location }: { location: Location }) {
+        this.#location = location
         this.#map = L.map("map", {
             preferCanvas: true,
         })
@@ -19,12 +21,14 @@ export class SolutionMap {
             maxZoom: DEFAULT_MAX_ZOOM,
             attribution: "© OpenStreetMap",
         }).addTo(this.#map)
-        if (location.latitude !== undefined && location.longitude !== undefined) {
-            L.marker(
-                [location.latitude, location.longitude],
-                // [location.geometry?.coordinates[1], location.geometry?.coordinates[0]],
-                { icon: homeIconMarker },
-            )
+        L.control.scale({ imperial: false }).addTo(this.#map)
+        if (
+            this.#location.latitude !== undefined &&
+            this.#location.longitude !== undefined
+        ) {
+            L.marker([this.#location.latitude, this.#location.longitude], {
+                icon: homeIconMarker,
+            })
                 .addTo(this.#map)
                 .bindPopup("<p><strong>Vous êtes ici !</strong></b>")
         }
@@ -51,8 +55,19 @@ export class SolutionMap {
                 ])
             }
         }, this)
+        if (
+            this.#location.latitude !== undefined &&
+            this.#location.longitude !== undefined
+        ) {
+            points.push([this.#location.latitude, this.#location.longitude])
+        }
+
         if (points.length > 0) {
             this.#map.fitBounds(points)
         }
+    }
+
+    get_map(): L.Map {
+        return this.#map
     }
 }
