@@ -1,6 +1,7 @@
 import L from "leaflet"
 import "leaflet-extra-markers/dist/js/leaflet.extra-markers.min.js"
 
+console.log(L)
 export const homeIconMarker = L.ExtraMarkers.icon({
     icon: "fr-icon-home-4-line",
     markerColor: "blue",
