@@ -1,17 +1,23 @@
 import json
 import threading
 
+import unidecode
 from django.conf import settings
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
+from django.contrib.postgres.lookups import Unaccent
+from django.contrib.postgres.search import TrigramWordDistance
 from django.core.management import call_command
 from django.db.models import QuerySet
+from django.db.models.functions import Length, Lower
+from django.http import JsonResponse
 from django.shortcuts import redirect
+from django.views.decorators.http import require_GET
 from django.views.generic.edit import FormView
 
 from core.jinja2_handler import get_action_list
 from qfdmo.forms import GetReemploiSolutionForm
-from qfdmo.models import Acteur, FinalActeur, SousCategorieObjet
+from qfdmo.models import Acteur, FinalActeur, Objet, SousCategorieObjet
 
 DEFAULT_LIMIT = 10
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
@@ -38,9 +44,9 @@ class ReemploiSolutionView(FormView):
         kwargs["location"] = "{}"
         kwargs["acteurs"] = FinalActeur.objects.none()
         sous_categories_objets: QuerySet | None = None
-        if sous_categorie_objet := self.request.GET.get("sous_categorie_objet", None):
+        if objet_q := self.request.GET.get("sous_categorie_objet", None):
             sous_categories_objets = SousCategorieObjet.objects.filter(
-                nom__icontains=sous_categorie_objet
+                objets__nom__icontains=objet_q
             )
         if (latitude := self.request.GET.get("latitude", None)) and (
             longitude := self.request.GET.get("longitude", None)
@@ -95,3 +101,19 @@ class RefreshMateriazedViewThread(threading.Thread):
 def refresh_acteur_view(request):
     RefreshMateriazedViewThread().start()
     return redirect(request.META["HTTP_REFERER"])
+
+
+@require_GET
+def get_object_list(request):
+    query = unidecode.unidecode(request.GET.get("q"))
+    objets = (
+        Objet.objects.annotate(
+            nom_unaccent=Unaccent(Lower("nom")),
+        )
+        .annotate(
+            distance=TrigramWordDistance(query, "nom_unaccent"),
+            length=Length("nom"),
+        )
+        .order_by("distance", "length")[:10]
+    )
+    return JsonResponse([objet.nom for objet in objets], safe=False)

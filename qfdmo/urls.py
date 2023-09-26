@@ -14,4 +14,9 @@ urlpatterns = [
         views.refresh_acteur_view,
         name="refresh_acteur_view",
     ),
+    path(
+        "qfdmo/get_object_list",
+        views.get_object_list,
+        name="get_object_list",
+    ),
 ]
