@@ -12,6 +12,7 @@ from qfdmo.models import (
     FinalPropositionService,
     LVAOBase,
     LVAOBaseRevision,
+    Objet,
     PropositionService,
     RevisionActeur,
     RevisionPropositionService,
@@ -154,8 +155,9 @@ class ActionAdmin(admin.ModelAdmin):
     search_fields = ["nom", "nom_affiche"]
 
 
-admin.site.register(SousCategorieObjet, SousCategorieAdmin)
 admin.site.register(CategorieObjet)
+admin.site.register(SousCategorieObjet, SousCategorieAdmin)
+admin.site.register(Objet)
 admin.site.register(Action, ActionAdmin)
 admin.site.register(ActionDirection)
 admin.site.register(ActeurService)

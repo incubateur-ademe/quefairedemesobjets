@@ -76,6 +76,14 @@ class SousCategorieObjet(models.Model):
         return sous_categorie
 
 
+class Objet(NomAsNaturalKeyModel):
+    id = models.AutoField(primary_key=True)
+    nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    sous_categorie = models.ForeignKey(
+        SousCategorieObjet, on_delete=models.CASCADE, blank=True, null=True
+    )
+
+
 class ActionDirection(NomAsNaturalKeyModel):
     class Meta:
         verbose_name = "Direction de l'action"
