@@ -13,15 +13,7 @@ export default class extends AutocompleteController {
     declare readonly longitudeTarget: HTMLInputElement
     declare readonly displayErrorTarget: HTMLElement
 
-    connect() {
-        if (this.allAvailableOptionsTarget.textContent != null) {
-            this.allAvailableOptions = JSON.parse(
-                this.allAvailableOptionsTarget.textContent,
-            )
-        }
-    }
-
-    async complete(events: Event) {
+    async complete(events: Event): Promise<boolean> {
         const inputTargetValue = this.inputTarget.value
         const val = this.addAccents(inputTargetValue)
         const regexPattern = new RegExp(val, "gi")
@@ -32,7 +24,7 @@ export default class extends AutocompleteController {
 
         let countResult = 0
 
-        this.#searchAddressCallback(inputTargetValue).then((data) => {
+        this.#getOptionCallback(inputTargetValue).then((data) => {
             this.closeAllLists()
             this.autocompleteList = this.createAutocompleteList()
             this.allAvailableOptions = data
@@ -46,6 +38,7 @@ export default class extends AutocompleteController {
                 this.addActive()
             }
         })
+        return true
     }
 
     selectOption(event: Event) {
@@ -53,7 +46,6 @@ export default class extends AutocompleteController {
         const [label, latitude, longitude] = target
             .getElementsByTagName("input")[0]
             .value.split(SEPARATOR)
-        this.inputTarget.value = label
         if (longitude == "9999" && latitude == "9999") {
             if ("geolocation" in navigator) {
                 navigator.geolocation.getCurrentPosition(
@@ -81,6 +73,7 @@ export default class extends AutocompleteController {
                 console.error("geolocation is not available")
             }
         } else {
+            this.inputTarget.value = label
             if (longitude) this.longitudeTarget.value = longitude
             if (latitude) this.latitudeTarget.value = latitude
         }
@@ -110,7 +103,7 @@ export default class extends AutocompleteController {
         this.displayErrorTarget.style.display = "none"
     }
 
-    async #searchAddressCallback(value: string): Promise<string[]> {
+    async #getOptionCallback(value: string): Promise<string[]> {
         if (value.trim().length < 3)
             return [["Autour de moi", 9999, 9999].join(SEPARATOR)]
         return await fetch(`https://api-adresse.data.gouv.fr/search/?q=${value}`)

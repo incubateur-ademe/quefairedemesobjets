@@ -45,7 +45,6 @@ export default class extends Controller<HTMLElement> {
                 countResult++
                 this.addoption(regexPattern, this.allAvailableOptions[i])
             }
-            // FIXME : check if list is empty
             if (this.autocompleteList.childElementCount > 0) {
                 this.currentFocus = 0
                 this.addActive()
@@ -94,6 +93,12 @@ export default class extends Controller<HTMLElement> {
         }
     }
 
+    closeListsOnFocusOut(event: Event) {
+        const target = event.target as Element
+        if (target.getAttribute("data-on-focus")) return
+        this.closeAllLists()
+    }
+
     addActive() {
         var x: HTMLElement | null = document.getElementById(
             this.inputTarget.id + "autocomplete-list",
@@ -138,6 +143,7 @@ export default class extends Controller<HTMLElement> {
         // FIXME : better way to do this
         b.innerHTML += "<input type='hidden' value='" + option + "'>"
         b.setAttribute("data-action", "click->" + this.controllerName + "#selectOption")
+        b.setAttribute("data-on-focus", "true")
         this.autocompleteList.appendChild(b)
     }
 
@@ -147,8 +153,7 @@ export default class extends Controller<HTMLElement> {
         a.setAttribute("id", this.inputTarget.id + "autocomplete-list")
         a.setAttribute("class", "autocomplete-items")
         /*append the DIV element as a child of the autocomplete container:*/
-        if (this.inputTarget.parentNode != null)
-            this.inputTarget.parentNode.appendChild(a)
+        this.inputTarget.after(a)
         return a
     }
 

@@ -1,28 +1,33 @@
 {% load custom_filters %}
 <div
-    class="autocomplete fr-mb-1w"
+    class="fr-mb-1w"
 >
-    <input
-        data-action="
-        input->{{ widget.data_controller }}#complete
-    focus->{{ widget.data_controller }}#complete
-    keydown.down->{{ widget.data_controller }}#keydownDown
-    keydown.up->{{ widget.data_controller }}#keydownUp
-    keydown.enter->{{ widget.data_controller }}#keydownEnter
-    "
-    data-{{ widget.data_controller }}-target="input"
-    autocomplete="off"
-    type="{{ widget.type }}"
-    name="{{ widget.name }}"
-    id="{{ widget.name }}"
-    {% if widget.value != None %} value="{{ widget.value.0|stringformat:'s' }}"{% endif %}
-    {% include "django/forms/widgets/attrs.html" %}
+    <div
+        class="autocomplete"
     >
+        <input
+            data-action="
+            input->{{ widget.data_controller }}#complete
+        focus->{{ widget.data_controller }}#complete
+        keydown.down->{{ widget.data_controller }}#keydownDown
+        keydown.up->{{ widget.data_controller }}#keydownUp
+        keydown.enter->{{ widget.data_controller }}#keydownEnter
+        click@window->{{ widget.data_controller }}#closeListsOnFocusOut
+        "
+        data-{{ widget.data_controller }}-target="input"
+        data-on-focus=true
+        autocomplete="off"
+        type="{{ widget.type }}"
+        name="{{ widget.name }}"
+        id="{{ widget.name }}"
+        {% if widget.value != None %} value="{{ widget.value.0|stringformat:'s' }}"{% endif %}
+        {% include "django/forms/widgets/attrs.html" %}
+        >
+    </div>
     <p data-address-autocomplete-target="displayError" class="fr-error-text fr-mt-1w" style="display:none;">
         Texte d’erreur obligatoire
     </p>
     <script type="application/json" data-{{ widget.data_controller }}-target="allAvailableOptions">
         {{ widget.optgroups|options_in_json }}
     </script>
-
 </div>
