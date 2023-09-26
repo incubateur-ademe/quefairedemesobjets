@@ -6372,8 +6372,148 @@
     {
         "model": "qfdmo.objet",
         "fields": {
+            "nom": "Gros appareil électroménager (froid)",
+            "sous_categorie": ["C_01"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Gros appareil électroménager (hors froid)",
+            "sous_categorie": ["C_02"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Smartphone, tablette, console",
+            "sous_categorie": ["C_07"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Matériel informatique (ordinateur)",
+            "sous_categorie": ["C_05"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Matériel hifi, vidéo",
+            "sous_categorie": ["C_06"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Matériel photo, cinéma",
+            "sous_categorie": ["C_08"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Autre équipement électronique",
+            "sous_categorie": ["C_09"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "CD, DVD, jeu vidéo",
+            "sous_categorie": ["C_10"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Instrument de musique",
+            "sous_categorie": ["C_12"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
             "nom": "Arrosoir",
             "sous_categorie": ["C_13"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Outil de bricolage, jardinage",
+            "sous_categorie": ["C_13"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Accessoire, meuble de jardin",
+            "sous_categorie": ["C_14"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Décoration",
+            "sous_categorie": ["C_16"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Luminaire",
+            "sous_categorie": ["C_17"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Puériculture",
+            "sous_categorie": ["C_20"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Jouet",
+            "sous_categorie": ["C_21"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Vêtement",
+            "sous_categorie": ["C_22"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Bijou, montre",
+            "sous_categorie": ["C_25"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Vélo",
+            "sous_categorie": ["C_26"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Autre matériel de sport",
+            "sous_categorie": ["C_27"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Matériel médical",
+            "sous_categorie": ["C_28"]
         }
     }
 ]

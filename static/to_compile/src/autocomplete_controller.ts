@@ -22,26 +22,25 @@ export default class extends Controller<HTMLElement> {
         }
     }
 
-    async complete(events: Event) {
+    async complete(events: Event): Promise<boolean> {
         const inputTargetValue = this.inputTarget.value
         const val = this.addAccents(inputTargetValue)
         const regexPattern = new RegExp(val, "gi")
 
         if (!val) {
             this.closeAllLists()
-            return false
         }
 
         let countResult = 0
 
-        /*for each item in the array...*/
-        this.closeAllLists()
-        this.autocompleteList = this.createAutocompleteList()
+        this.#getOptionCallback(inputTargetValue).then((data) => {
+            this.closeAllLists()
+            this.allAvailableOptions = data
+            if (this.allAvailableOptions.length == 0) return
 
-        for (let i = 0; i < this.allAvailableOptions.length; i++) {
-            if (countResult >= this.maxOptionDisplayedValue) break
-            /*check if the item starts with the same letters as the text field value:*/
-            if (this.allAvailableOptions[i].match(regexPattern) !== null) {
+            this.autocompleteList = this.createAutocompleteList()
+            for (let i = 0; i < this.allAvailableOptions.length; i++) {
+                if (countResult >= this.maxOptionDisplayedValue) break
                 countResult++
                 this.addoption(regexPattern, this.allAvailableOptions[i])
             }
@@ -49,12 +48,14 @@ export default class extends Controller<HTMLElement> {
                 this.currentFocus = 0
                 this.addActive()
             }
-        }
+        })
+        return true
     }
 
     selectOption(event: Event) {
         let target = event.target as HTMLElement
         const label = target.getElementsByTagName("input")[0].value
+
         this.inputTarget.value = label
         this.closeAllLists()
     }
@@ -141,7 +142,10 @@ export default class extends Controller<HTMLElement> {
         const newText = data.replace(regexPattern, "<strong>$&</strong>")
         b.innerHTML = newText
         // FIXME : better way to do this
-        b.innerHTML += "<input type='hidden' value='" + option + "'>"
+        const input = document.createElement("input")
+        input.setAttribute("type", "hidden")
+        input.setAttribute("value", option)
+        b.appendChild(input)
         b.setAttribute("data-action", "click->" + this.controllerName + "#selectOption")
         b.setAttribute("data-on-focus", "true")
         this.autocompleteList.appendChild(b)
@@ -161,5 +165,18 @@ export default class extends Controller<HTMLElement> {
         for (var i = 0; i < optionDiv.length; i++) {
             optionDiv[i].classList.remove("autocomplete-active")
         }
+    }
+
+    async #getOptionCallback(value: string): Promise<string[]> {
+        if (value.trim().length < 3) return []
+        return await fetch(`/qfdmo/get_object_list?q=${value}`)
+            .then((response) => response.json())
+            .then((data) => {
+                return data
+            })
+            .catch((error) => {
+                console.error("error catched : ", error)
+                return []
+            })
     }
 }

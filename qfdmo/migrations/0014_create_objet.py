@@ -2,7 +2,7 @@
 
 import django.contrib.gis.db.models.fields
 import django.db.models.deletion
-from django.contrib.postgres.operations import TrigramExtension
+from django.contrib.postgres.operations import TrigramExtension, UnaccentExtension
 from django.db import migrations, models
 
 
@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
 
     operations = [
         TrigramExtension(),
+        UnaccentExtension(),
         migrations.CreateModel(
             name="Objet",
             fields=[
@@ -25,6 +26,7 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         to="qfdmo.souscategorieobjet",
+                        related_name="objets",
                     ),
                 ),
             ],
