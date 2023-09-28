@@ -21,12 +21,43 @@ from qfdmo.models import (
 from qfdmo.widget import CustomOSMWidget
 
 
+class SousCategorieInline(admin.TabularInline):
+    model = SousCategorieObjet
+    extra = 0
+
+    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+    def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+
+class CategorieAdmin(admin.ModelAdmin):
+    search_fields = [
+        "nom",
+    ]
+    inlines = [
+        SousCategorieInline,
+    ]
+
+
 class SousCategorieAdmin(admin.ModelAdmin):
     list_display = ("nom", "categorie", "code")
     search_fields = [
         "categorie__nom",
         "code",
         "nom",
+    ]
+
+
+class ObjetAdmin(admin.ModelAdmin):
+    list_display = ("nom", "sous_categorie")
+    search_fields = [
+        "nom",
+        "sous_categorie__nom",
     ]
 
 
@@ -155,9 +186,9 @@ class ActionAdmin(admin.ModelAdmin):
     search_fields = ["nom", "nom_affiche"]
 
 
-admin.site.register(CategorieObjet)
+admin.site.register(CategorieObjet, CategorieAdmin)
 admin.site.register(SousCategorieObjet, SousCategorieAdmin)
-admin.site.register(Objet)
+admin.site.register(Objet, ObjetAdmin)
 admin.site.register(Action, ActionAdmin)
 admin.site.register(ActionDirection)
 admin.site.register(ActeurService)
