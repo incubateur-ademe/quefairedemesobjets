@@ -1,0 +1,79 @@
+<div class="fr-mb-3w qfdmo-relative{% if is_iframe(request) %}{% if form.initial.adresse %} qfdmo-min-h-[400px]{% else %} qfdmo-min-h-[200px]{% endif %}{% else %} qfdmo-flex-grow md:qfdmo-min-h-[62vh]{% endif %}">
+    <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-flex qfdmo-flex-col">
+        <div
+            class="qfdmo-flex-grow qfdmo-relative"
+            data-controller="map"
+            data-map-location-value="{{ location }}"
+            id="map" data-map-target="map"
+        >
+            {% if not form.initial.adresse %}
+                <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-black qfdmo-opacity-70 qfdmo-font-black qfdmo-z-[1000]" style="background-color:gray">
+                    <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
+                        Précisez une adresse pour afficher la carte
+                    </div>
+                </div>
+            {% elif not acteurs %}
+                <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-black qfdmo-opacity-70 qfdmo-font-black qfdmo-z-[1000]" style="background-color:gray">
+                    <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
+                        Il n'existe pas de solution localisée proche de chez vous (<30 km), avez vous envigagé une solution en ligne ?
+                            </div>
+                        </div>
+            {% endif %}
+            {% for acteur in acteurs %}
+                <script type="application/json" data-map-target="acteur">
+                    {{ acteur.serialize(format='json') | safe }}
+                </script>
+            {% endfor %}
+        </div>
+
+        <button type='button' class="fr-btn fr-btn--tertiary-no-outline" onclick="toggleSlideover()">
+            Afficher les solutions en ligne
+        </button>
+    </div>
+    <div id='slideover-container' class="qfdmo-absolute qfdmo-inset-0 qfdmo-z-[1000] sqfdmo-w-full qfdmo-h-full qfdmo-invisible">
+        <div id="slideover" class="qfdmo-w-full qfdmo-bg-white qfdmo-h-full qfdmo-fixed qfdmo-duration-300 qfdmo-ease-out qfdmo-transition-all qfdmo-translate-x-full">
+            <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-flex qfdmo-flex-col">
+                <div class="qfdmo-flex-grow qfdmo-relative">
+                    ICI LES SOLUTIONS DIGITALES
+                </div>
+                <button type='button' class="fr-btn fr-btn--tertiary-no-outline" onclick="toggleSlideover()">
+                    Retour à la carte
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- Transform it as a Stimulus contoller -->
+    <script>
+        function toggleSlideover(){
+            const slideoverContainer = document.getElementById('slideover-container')
+            if (slideoverContainer.classList.contains('qfdmo-invisible')) {
+                // A faire apparaitre
+                document.getElementById('slideover').classList.toggle('qfdmo-fixed');
+                document.getElementById('slideover').classList.toggle('qfdmo-absolute');
+                slideoverContainer.classList.remove('qfdmo-invisible')
+            } else {
+                // A faire disparaitre
+                document.getElementById('slideover').classList.toggle('qfdmo-absolute');
+                setTimeout(function(){
+                    document.getElementById('slideover').classList.toggle('qfdmo-fixed');
+                }, 300);
+                slideoverContainer.classList.add('qfdmo-invisible')
+            }
+            document.getElementById('slideover').classList.toggle('qfdmo-translate-x-full');
+        }
+    </script>
+</div>
+
+
+<!--
+
+<div class="w-screen h-screen flex items-center justify-center bg-black">
+    <div onclick="toggleSlideover()" class="cursor-pointer px-5 py-2 text-sm border text-gray-500 hover:bg-gray-100 rounded border-gray-300">Toggle Slide-over</div>
+
+    <div id="slideover-container" class="w-full h-full fixed inset-0 invisible">
+      <div onclick="toggleSlideover()" id="slideover" class="w-96 bg-white h-full absolute right-0 duration-300 ease-out transition-all translate-x-full">
+      </div>
+    </div>
+  </div>
+
+-->
