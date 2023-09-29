@@ -56,6 +56,7 @@ if DEBUG:
         [
             "debug_toolbar",
             "django_browser_reload",
+            "django_extensions",
         ]
     )
 
