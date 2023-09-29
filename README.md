@@ -132,14 +132,13 @@ Certains objets de la base de données sont des objets d'administration qui n'on
 
 **Type d'acteur** (qfdmo_acteurtype)
 
-|nom|
-|---|
-| Association, entreprise de l'économie sociale et solidaire |
-| Collectivité, établissement public |
-| Artisan, commerce indépendant |
-| Franchise, enseigne commerciale |
-| Acteur digital (site web, app. mobile) |
-
+|nom|nom affiché|
+|---|---|
+| acteur digital | Acteur digital (site web, app. mobile) |
+| commerce | Franchise, enseigne commerciale |
+| artisan | Artisan, commerce indépendant |
+| collectivité | Collectivité, établissement public |
+| ess | Association, entreprise de l'économie sociale et solidaire |
 
 ## Environnement de développement
 

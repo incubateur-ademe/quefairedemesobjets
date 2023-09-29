@@ -136,6 +136,7 @@ class ActeurType(NomAsNaturalKeyModel):
 
     id = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    nom_affiche = models.CharField(max_length=255, blank=False, null=False, default="?")
     lvao_id = models.IntegerField(blank=True, null=True)
 
     def serialize(self):

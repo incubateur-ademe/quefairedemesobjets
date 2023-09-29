@@ -25,23 +25,30 @@
                 </script>
             {% endfor %}
         </div>
-
-        <button type='button' class="fr-btn fr-btn--tertiary-no-outline" onclick="toggleSlideover()">
-            Afficher les solutions en ligne
-        </button>
+        {% if nb_acteurs_digitaux %}
+            <button type='button' class="fr-btn fr-btn--tertiary-no-outline" onclick="toggleSlideover()">
+                Afficher les {{ nb_acteurs_digitaux }} solutions en ligne
+            </button>
+        {% endif %}
     </div>
-    <div id='slideover-container' class="qfdmo-absolute qfdmo-inset-0 qfdmo-z-[1000] sqfdmo-w-full qfdmo-h-full qfdmo-invisible">
-        <div id="slideover" class="qfdmo-w-full qfdmo-bg-white qfdmo-h-full qfdmo-fixed qfdmo-duration-300 qfdmo-ease-out qfdmo-transition-all qfdmo-translate-x-full">
-            <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-flex qfdmo-flex-col">
-                <div class="qfdmo-flex-grow qfdmo-relative">
-                    ICI LES SOLUTIONS DIGITALES
+    {% if nb_acteurs_digitaux %}
+        <div id='slideover-container' class="qfdmo-absolute qfdmo-inset-0 qfdmo-z-[1000] sqfdmo-w-full qfdmo-h-full qfdmo-invisible">
+            <div id="slideover" class="qfdmo-w-full qfdmo-bg-white qfdmo-h-full qfdmo-fixed qfdmo-duration-300 qfdmo-ease-out qfdmo-transition-all qfdmo-translate-x-full">
+                <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-flex qfdmo-flex-col">
+                    <div class="qfdmo-flex-grow qfdmo-relative qfdmo-overflow-auto">
+                        {% for acteur_digital in acteurs_digitaux.all() %}
+                            <div>
+                                <h3>{{ acteur_digital.nom }}</h3>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type='button' class="fr-btn fr-btn--tertiary-no-outline" onclick="toggleSlideover()">
+                        Retour à la carte
+                    </button>
                 </div>
-                <button type='button' class="fr-btn fr-btn--tertiary-no-outline" onclick="toggleSlideover()">
-                    Retour à la carte
-                </button>
             </div>
         </div>
-    </div>
+    {% endif %}
     <!-- Transform it as a Stimulus contoller -->
     <script>
         function toggleSlideover(){
@@ -63,17 +70,3 @@
         }
     </script>
 </div>
-
-
-<!--
-
-<div class="w-screen h-screen flex items-center justify-center bg-black">
-    <div onclick="toggleSlideover()" class="cursor-pointer px-5 py-2 text-sm border text-gray-500 hover:bg-gray-100 rounded border-gray-300">Toggle Slide-over</div>
-
-    <div id="slideover-container" class="w-full h-full fixed inset-0 invisible">
-      <div onclick="toggleSlideover()" id="slideover" class="w-96 bg-white h-full absolute right-0 duration-300 ease-out transition-all translate-x-full">
-      </div>
-    </div>
-  </div>
-
--->
