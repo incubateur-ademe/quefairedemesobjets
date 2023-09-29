@@ -44,29 +44,42 @@
             </form>
         </div>
         <div
-            class="fr-mb-3w qfdmo-relative{% if is_iframe(request) %}{% if form.initial.adresse %} qfdmo-min-h-[400px]{% else %} qfdmo-min-h-[200px]{% endif %}{% else %} qfdmo-flex-auto md:qfdmo-min-h-[62vh]{% endif %}"
-            data-controller="map"
-            data-map-location-value="{{ location }}"
-            id="map" data-map-target="map"
+            class="fr-mb-3w qfdmo-relative{% if is_iframe(request) %}{% if form.initial.adresse %} qfdmo-min-h-[400px]{% else %} qfdmo-min-h-[200px]{% endif %}{% else %} qfdmo-flex-grow md:qfdmo-min-h-[62vh]{% endif %}"
         >
-            {% if not form.initial.adresse %}
-                <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-black qfdmo-opacity-70 qfdmo-font-black qfdmo-z-[1000]" style="background-color:gray">
-                    <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
-                        Précisez une adresse pour afficher la carte
-                    </div>
-                </div>
-            {% elif not acteurs %}
-                <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-black qfdmo-opacity-70 qfdmo-font-black qfdmo-z-[1000]" style="background-color:gray">
-                    <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
-                        Il n'existe pas de solution localisée proche de chez vous (<30 km), avez vous envigagé une solution en ligne ?
+            <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-flex qfdmo-flex-col">
+
+                <div
+                    class="qfdmo-flex-grow qfdmo-relative"
+                    data-controller="map"
+                    data-map-location-value="{{ location }}"
+                    id="map" data-map-target="map"
+                >
+                    {% if not form.initial.adresse %}
+                        <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-black qfdmo-opacity-70 qfdmo-font-black qfdmo-z-[1000]" style="background-color:gray">
+                            <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
+                                Précisez une adresse pour afficher la carte
                             </div>
                         </div>
-            {% endif %}
-            {% for acteur in acteurs %}
-                <script type="application/json" data-map-target="acteur">
-                    {{ acteur.serialize(format='json') | safe }}
-                </script>
-            {% endfor %}
+                    {% elif not acteurs %}
+                        <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-black qfdmo-opacity-70 qfdmo-font-black qfdmo-z-[1000]" style="background-color:gray">
+                            <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
+                                Il n'existe pas de solution localisée proche de chez vous (<30 km), avez vous envigagé une solution en ligne ?
+                                    </div>
+                                </div>
+                    {% endif %}
+                    {% for acteur in acteurs %}
+                        <script type="application/json" data-map-target="acteur">
+                            {{ acteur.serialize(format='json') | safe }}
+                        </script>
+                    {% endfor %}
+                </div>
+                <div>Afficher les solutions en ligne</div>
+            </div>
+
+
+
+
+
         </div>
     </div>
 {% endblock %}
