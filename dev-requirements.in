@@ -3,6 +3,7 @@
 black
 django-browser-reload
 django-debug-toolbar
+django-extensions
 honcho
 pre-commit
 ptpython
