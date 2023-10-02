@@ -5,14 +5,16 @@ export default class extends Controller<HTMLElement> {
     allAvailableOptions: Array<string> = []
     currentFocus: number = 0
     autocompleteList: HTMLElement
+    nbCharToSearchDefault: number = 3
 
     static targets = ["allAvailableOptions", "input", "option"]
     declare readonly allAvailableOptionsTarget: HTMLScriptElement
     declare readonly inputTarget: HTMLInputElement
     declare readonly optionTargets: Array<HTMLElement>
 
-    static values = { maxOptionDisplayed: Number }
+    static values = { maxOptionDisplayed: Number, nbCharToSearch: Number }
     declare readonly maxOptionDisplayedValue: number
+    declare nbCharToSearchValue: number
 
     connect() {
         if (this.allAvailableOptionsTarget.textContent != null) {
@@ -20,6 +22,8 @@ export default class extends Controller<HTMLElement> {
                 this.allAvailableOptionsTarget.textContent,
             )
         }
+        if (!this.nbCharToSearchValue)
+            this.nbCharToSearchValue = this.nbCharToSearchDefault
     }
 
     async complete(events: Event): Promise<boolean> {
@@ -168,7 +172,7 @@ export default class extends Controller<HTMLElement> {
     }
 
     async #getOptionCallback(value: string): Promise<string[]> {
-        if (value.trim().length < 3) return []
+        if (value.trim().length < this.nbCharToSearchValue) return []
         return await fetch(`/qfdmo/get_object_list?q=${value}`)
             .then((response) => response.json())
             .then((data) => {
