@@ -1,5 +1,7 @@
 from django.contrib.gis import admin
 from django.http.request import HttpRequest
+from import_export import admin as import_export_admin
+from import_export import fields, resources, widgets
 
 from qfdmo.models import (
     Acteur,
@@ -53,12 +55,23 @@ class SousCategorieAdmin(admin.ModelAdmin):
     ]
 
 
-class ObjetAdmin(admin.ModelAdmin):
+class ObjetResource(resources.ModelResource):
+    delete = fields.Field(widget=widgets.BooleanWidget())
+
+    def for_delete(self, row, instance):
+        return self.fields["delete"].clean(row)
+
+    class Meta:
+        model = Objet
+
+
+class ObjetAdmin(import_export_admin.ImportExportModelAdmin):
     list_display = ("nom", "sous_categorie")
     search_fields = [
         "nom",
         "sous_categorie__nom",
     ]
+    resource_classes = [ObjetResource]
 
 
 class LVAOBaseRevisionAdmin(admin.ModelAdmin):
