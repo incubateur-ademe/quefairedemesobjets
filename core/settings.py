@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "django.contrib.gis",
     "django.forms",
     "explorer",
+    "import_export",
     "core",
     "qfdmo",
 ]

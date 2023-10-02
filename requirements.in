@@ -1,6 +1,7 @@
 dj-database-url
 dj-static
 Django
+django-import-export
 django-sql-explorer
 gunicorn
 Jinja2
