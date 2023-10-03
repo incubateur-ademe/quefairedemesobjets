@@ -26,47 +26,48 @@
             {% endfor %}
         </div>
         {% if nb_acteurs_digitaux %}
-            <button type='button' class="fr-btn fr-btn--tertiary-no-outline" onclick="toggleSlideover()">
+            <button type='button' class="fr-btn fr-btn--tertiary-no-outline" data-action="click->choose-action#toggleSideover">
                 Afficher les {{ nb_acteurs_digitaux }} solutions en ligne
             </button>
         {% endif %}
     </div>
     {% if nb_acteurs_digitaux %}
-        <div id='slideover-container' class="qfdmo-absolute qfdmo-inset-0 qfdmo-z-[1000] sqfdmo-w-full qfdmo-h-full qfdmo-invisible">
-            <div id="slideover" class="qfdmo-w-full qfdmo-bg-white qfdmo-h-full qfdmo-fixed qfdmo-duration-300 qfdmo-ease-out qfdmo-transition-all qfdmo-translate-x-full">
+        <div id='slideover-container' data-choose-action-target="sideoverContainer" class="qfdmo-absolute qfdmo-inset-0 qfdmo-z-[1000] sqfdmo-w-full qfdmo-h-full{% if not form.initial.digital %} qfdmo-invisible{% endif %}">
+            <div id="slideover" class="qfdmo-w-full qfdmo-bg-white qfdmo-h-full qfdmo-absolute">
                 <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-flex qfdmo-flex-col">
                     <div class="qfdmo-flex-grow qfdmo-relative qfdmo-overflow-auto">
                         {% for acteur_digital in acteurs_digitaux.all() %}
-                            <div>
-                                <h3>{{ acteur_digital.nom }}</h3>
+
+                            <div class="fr-tile fr-tile--sm fr-tile--horizontal fr-enlarge-link" id="tile-6661">
+                                <div class="fr-tile__body">
+                                    <div class="fr-tile__content">
+                                        <h3 class="fr-tile__title">
+                                            <a href="{{ acteur_digital.url }}" target="_blank">{{ acteur_digital.nom }}</a>
+                                        </h3>
+                                        <p class="fr-tile__detail">description du service</p>
+                                        <div class="fr-tile__start">
+                                            {% for action in acteur_digital.acteur_actions(direction=form.initial.direction) %}
+                                                <p class="fr-badge fr-badge--sm fr-badge--yellow-tournesol">{{action.nom}}</p>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
+
                         {% endfor %}
                     </div>
-                    <button type='button' class="fr-btn fr-btn--tertiary-no-outline" onclick="toggleSlideover()">
+                    <button type='button' class="fr-btn fr-btn--tertiary-no-outline" data-action="click->choose-action#toggleSideover">
                         Retour à la carte
                     </button>
                 </div>
             </div>
         </div>
     {% endif %}
-    <!-- Transform it as a Stimulus contoller -->
+    <!-- Transform it as a Stimulus contoller
     <script>
         function toggleSlideover(){
-            const slideoverContainer = document.getElementById('slideover-container')
-            if (slideoverContainer.classList.contains('qfdmo-invisible')) {
-                // A faire apparaitre
-                document.getElementById('slideover').classList.toggle('qfdmo-fixed');
-                document.getElementById('slideover').classList.toggle('qfdmo-absolute');
-                slideoverContainer.classList.remove('qfdmo-invisible')
-            } else {
-                // A faire disparaitre
-                document.getElementById('slideover').classList.toggle('qfdmo-absolute');
-                setTimeout(function(){
-                    document.getElementById('slideover').classList.toggle('qfdmo-fixed');
-                }, 300);
-                slideoverContainer.classList.add('qfdmo-invisible')
-            }
-            document.getElementById('slideover').classList.toggle('qfdmo-translate-x-full');
+            document.getElementById('slideover-container').classList.toggle('qfdmo-invisible')
         }
     </script>
+    -->
 </div>

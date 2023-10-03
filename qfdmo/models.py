@@ -332,6 +332,26 @@ REFRESH MATERIALIZED VIEW CONCURRENTLY qfdmo_finalpropositionservice_sous_catego
                 """
             )
 
+    def acteur_actions(self, direction=None):
+        action = [
+            ps.action
+            for ps in self.proposition_services.all()
+            if direction is None
+            or direction in [d.nom for d in ps.action.directions.all()]
+        ]
+        action = list(set(action))
+        action.sort(key=lambda x: x.order)
+        return action
+        # ps = self.proposition_services.all()
+        # actions = (
+        #     Action.objects.filter(finalpropositionservice__in=ps)
+        #     .distinct()
+        #     .order_by("order")
+        # )
+        # if direction:
+        #     actions = actions.filter(directions__nom=direction)
+        # return actions
+
 
 class BasePropositionService(models.Model):
     class Meta:

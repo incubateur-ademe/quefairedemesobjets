@@ -38,6 +38,7 @@ class ReemploiSolutionView(FormView):
         initial["action_list"] = self.request.GET.get("action_list")
         initial["latitude"] = self.request.GET.get("latitude")
         initial["longitude"] = self.request.GET.get("longitude")
+        initial["digital"] = self.request.GET.get("digital")
         return initial
 
     def get_context_data(self, **kwargs):
@@ -58,6 +59,7 @@ class ReemploiSolutionView(FormView):
                 "proposition_services__sous_categories",
                 "proposition_services__sous_categories__categorie",
                 "proposition_services__action",
+                "proposition_services__action__directions",
                 "proposition_services__acteur_service",
                 "acteur_type",
             )
