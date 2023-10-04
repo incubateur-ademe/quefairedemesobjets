@@ -38,7 +38,7 @@ export class SolutionMap {
         let points: Array<Array<Number>> = []
 
         actors.forEach(function (actor: Actor) {
-            let popupContent = actor.popupTitle() + actor.popupContent()
+            let popupContent = actor.render_as_card //actor.popupTitle() + actor.popupContent()
 
             if (actor.location) {
                 L.marker(

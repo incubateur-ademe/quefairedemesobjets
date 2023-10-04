@@ -32,6 +32,7 @@ export class Actor {
     telephone: string
     proposition_services: Array<PropositionService>
     location: ActorLocation
+    render_as_card: string
     /*
         Other fields:
             identifiant_unique
@@ -61,6 +62,7 @@ export class Actor {
         this.url = actor_fields["url"]
         this.proposition_services = actor_fields["proposition_services"]
         this.location = actor_fields["location"]
+        this.render_as_card = actor_fields["render_as_card"]
     }
 
     popupTitle(): string {
@@ -74,6 +76,9 @@ export class Actor {
     popupContent(): string {
         let popup = document.createElement("div")
         let popupContent = ""
+        popupContent +=
+            '<div class="fr-tile__start"><p class="fr-badge fr-badge--sm fr-badge--yellow-tournesol"><span class="fr-icon-settings-5-line" aria-hidden="true"></span>&nbsp;Réparer</p></div>'
+
         if (this.proposition_services !== undefined) {
             let services = Array.from(
                 new Set(
@@ -101,6 +106,7 @@ export class Actor {
         if (this.telephone) {
             popupContent += this.telephone + "<br>"
         }
+
         popup.innerHTML = popupContent
         if (this.url) {
             let url = document.createElement("a")

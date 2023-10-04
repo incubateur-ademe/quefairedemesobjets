@@ -12,6 +12,8 @@ module.exports = {
             info: {
                 "975-active": "#c2cfff",
             },
+            bluefrance: "#2323ff",
+            lightgray: "#e5e5e5",
         },
         maxWidth: {
             readable: "80ch",

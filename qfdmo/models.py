@@ -5,6 +5,7 @@ from django.db import connection
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.forms import model_to_dict
+from django.template.loader import render_to_string
 from unidecode import unidecode
 
 
@@ -242,7 +243,18 @@ class BaseActeur(NomAsNaturalKeyModel):
     def longitude(self):
         return self.location.x
 
-    def serialize(self, format=None) -> dict | str:
+    @property
+    def nom_affiche(self):
+        return self.nom_commercial or self.nom
+
+    @property
+    def is_digital(self) -> bool:
+        return bool(self.acteur_type and self.acteur_type.nom == "acteur digital")
+
+    def serialize(
+        self,
+        format: None | str = None,
+    ) -> dict | str:
         self_as_dict = model_to_dict(
             self, exclude=["location", "proposition_services", "acteur_type"]
         )
@@ -258,7 +270,7 @@ class BaseActeur(NomAsNaturalKeyModel):
             return json.dumps(self_as_dict)
         return self_as_dict
 
-    def acteur_services(self):
+    def acteur_services(self) -> list[ActeurService]:
         return list(set([ps.acteur_service for ps in self.proposition_services.all()]))
 
 
@@ -345,11 +357,26 @@ REFRESH MATERIALIZED VIEW CONCURRENTLY qfdmo_finalpropositionservice_sous_catego
         collected_action.sort(key=lambda x: x.order)
         return collected_action
 
-    def serialize(self, format=None) -> dict | str:
+    def render_as_card(self, direction: str | None = None) -> str:
+        return render_to_string(
+            "acteur_as_card.html", {"acteur": self, "direction": direction}
+        )
+
+    def serialize(
+        self,
+        format: None | str = None,
+        render_as_card: bool = False,
+        direction: str | None = None,
+    ) -> dict | str:
         super_serialized = super().serialize(format=None)
         super_serialized["actions"] = [  # type: ignore
             action.serialize() for action in self.acteur_actions()
         ]
+        if render_as_card:
+            super_serialized["render_as_card"] = self.render_as_card(  # type: ignore
+                direction=direction
+            )
+
         if format == "json":
             return json.dumps(super_serialized)
         return super_serialized
