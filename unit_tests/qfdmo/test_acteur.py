@@ -140,9 +140,11 @@ class TestActeurMaterializedView:
     def test_materialized_view_with_acteur(self, new_acteur):
         FinalActeur.refresh_view()
         final_acteur = FinalActeur.objects.first()
+        serialized_final_acteur = final_acteur.serialize()
+        serialized_final_acteur.pop("actions")
 
         assert FinalActeur.objects.count() == 1
-        assert final_acteur.serialize() == new_acteur.serialize()
+        assert serialized_final_acteur == new_acteur.serialize()
 
     def test_materialized_view_with_acteur_even_if_revision(self, new_acteur):
         FinalActeur.refresh_view()
@@ -152,9 +154,11 @@ class TestActeurMaterializedView:
         revision_acteur.nom = "Test Object 2"
         revision_acteur.save()
         final_acteur.refresh_from_db()
+        serialized_final_acteur = final_acteur.serialize()
+        serialized_final_acteur.pop("actions")
 
-        assert final_acteur.serialize() == new_acteur.serialize()
-        assert final_acteur.serialize() != revision_acteur.serialize()
+        assert serialized_final_acteur == new_acteur.serialize()
+        assert serialized_final_acteur != revision_acteur.serialize()
 
     def test_materialized_view_with_revisionacteur(self, new_acteur):
         revision_acteur = new_acteur.get_or_create_revision()
@@ -162,9 +166,11 @@ class TestActeurMaterializedView:
         revision_acteur.save()
         FinalActeur.refresh_view()
         final_acteur = FinalActeur.objects.first()
+        serialized_final_acteur = final_acteur.serialize()
+        serialized_final_acteur.pop("actions")
 
-        assert final_acteur.serialize() == revision_acteur.serialize()
-        assert final_acteur.serialize() != new_acteur.serialize()
+        assert serialized_final_acteur == revision_acteur.serialize()
+        assert serialized_final_acteur != new_acteur.serialize()
 
 
 @pytest.mark.django_db
@@ -176,3 +182,41 @@ class TestCreateRevisionActeur:
             acteur_type=ActeurType.objects.first(),
         )
         assert revision_acteur.serialize() == Acteur.objects.first().serialize()
+
+
+@pytest.mark.django_db
+class TestFinalActeurActions:
+    @pytest.fixture()
+    def final_acteur_with_ps(db, populate_admin_object):
+        action1 = Action.objects.get(nom="reparer")
+        action2 = Action.objects.get(nom="echanger")
+        action3 = Action.objects.get(nom="louer")
+        acteur_service = ActeurService.objects.first()
+        acteur = Acteur.objects.create(nom="Acteur 1", location=Point(0, 0))
+        PropositionService.objects.create(
+            acteur=acteur, acteur_service=acteur_service, action=action1
+        )
+        PropositionService.objects.create(
+            acteur=acteur, acteur_service=acteur_service, action=action2
+        )
+        PropositionService.objects.create(
+            acteur=acteur, acteur_service=acteur_service, action=action3
+        )
+        FinalActeur.refresh_view()
+        final_acteur_with_ps = FinalActeur.objects.get(id=acteur.id)
+        yield final_acteur_with_ps
+
+    def test_acteur_actions_basic(self, final_acteur_with_ps):
+        actions = final_acteur_with_ps.acteur_actions()
+        assert [action.nom for action in actions] == ["reparer", "echanger", "louer"]
+
+    def test_acteur_actions_with_direction(self, final_acteur_with_ps):
+        actions = final_acteur_with_ps.acteur_actions(direction="jai")
+        assert [action.nom for action in actions] == ["reparer", "echanger"]
+
+    def test_acteur_actions_order(self, final_acteur_with_ps):
+        Action.objects.filter(nom="reparer").update(order=3)
+        Action.objects.filter(nom="echanger").update(order=2)
+        Action.objects.filter(nom="louer").update(order=1)
+        actions = final_acteur_with_ps.acteur_actions()
+        assert [action.nom for action in actions] == ["louer", "echanger", "reparer"]

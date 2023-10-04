@@ -9,9 +9,13 @@ class TestEntiteTypeNomAsNaturalKeyHeritage:
 
     @pytest.mark.django_db
     def test_serialize(self):
-        acteur_type = ActeurType.objects.create(nom="Test Object", lvao_id=123)
+        acteur_type = ActeurType.objects.create(
+            nom="Test Object", nom_affiche="Test Object Affiche", lvao_id=123
+        )
+        print(acteur_type.serialize())
         assert acteur_type.serialize() == {
             "id": acteur_type.id,
             "nom": "Test Object",
+            "nom_affiche": "Test Object Affiche",
             "lvao_id": 123,
         }

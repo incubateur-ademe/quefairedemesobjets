@@ -33,4 +33,5 @@ class TestReemploiSolutionView:
             "action_list": None,
             "latitude": None,
             "longitude": None,
+            "digital": None,
         }

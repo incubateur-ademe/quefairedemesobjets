@@ -55,9 +55,7 @@ class SousCategorieObjet(models.Model):
     id = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
     lvao_id = models.IntegerField(blank=True, null=True)
-    categorie = models.ForeignKey(
-        CategorieObjet, on_delete=models.CASCADE, blank=True, null=True
-    )
+    categorie = models.ForeignKey(CategorieObjet, on_delete=models.CASCADE)
     code = models.CharField(max_length=10, unique=True, blank=False, null=False)
 
     def __str__(self) -> str:
@@ -244,14 +242,15 @@ class BaseActeur(NomAsNaturalKeyModel):
     def longitude(self):
         return self.location.x
 
-    def serialize(self, format=None):
+    def serialize(self, format=None) -> dict | str:
         self_as_dict = model_to_dict(
             self, exclude=["location", "proposition_services", "acteur_type"]
         )
-        self_as_dict["acteur_type"] = self.acteur_type.serialize()
+        if self.acteur_type:
+            self_as_dict["acteur_type"] = self.acteur_type.serialize()
         if self.location:
             self_as_dict["location"] = json.loads(self.location.geojson)
-        proposition_services = self.proposition_services.all()
+        proposition_services = self.proposition_services.all()  # type: ignore
         self_as_dict["proposition_services"] = []
         for proposition_service in proposition_services:
             self_as_dict["proposition_services"].append(proposition_service.serialize())
@@ -277,7 +276,7 @@ class Acteur(BaseActeur):
             id=self.id, defaults=fields
         )
         if created:
-            for proposition_service in self.proposition_services.all():
+            for proposition_service in self.proposition_services.all():  # type: ignore
                 revision_proposition_service = (
                     RevisionPropositionService.objects.create(
                         revision_acteur=revision_acteur,
@@ -333,24 +332,22 @@ REFRESH MATERIALIZED VIEW CONCURRENTLY qfdmo_finalpropositionservice_sous_catego
             )
 
     def acteur_actions(self, direction=None):
-        action = [
+        collected_action = [
             ps.action
-            for ps in self.proposition_services.all()
+            for ps in self.proposition_services.all()  # type: ignore
             if direction is None
             or direction in [d.nom for d in ps.action.directions.all()]
         ]
-        action = list(set(action))
-        action.sort(key=lambda x: x.order)
-        return action
-        # ps = self.proposition_services.all()
-        # actions = (
-        #     Action.objects.filter(finalpropositionservice__in=ps)
-        #     .distinct()
-        #     .order_by("order")
-        # )
-        # if direction:
-        #     actions = actions.filter(directions__nom=direction)
-        # return actions
+        collected_action = list(set(collected_action))
+        collected_action.sort(key=lambda x: x.order)
+        return collected_action
+
+    def serialize(self, format=None) -> dict | str:
+        super_serialized = super().serialize(format=None)
+        super_serialized["actions"] = self.acteur_actions()  # type: ignore
+        if format == "json":
+            return json.dumps(super_serialized)
+        return super_serialized
 
 
 class BasePropositionService(models.Model):
