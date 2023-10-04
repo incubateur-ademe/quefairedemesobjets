@@ -8,7 +8,7 @@ from django.contrib.gis.geos import Point
 from django.contrib.postgres.lookups import Unaccent
 from django.contrib.postgres.search import TrigramWordDistance
 from django.core.management import call_command
-from django.db.models import QuerySet
+from django.db.models import Min, QuerySet
 from django.db.models.functions import Length, Lower
 from django.http import JsonResponse
 from django.shortcuts import redirect
@@ -69,7 +69,11 @@ class ReemploiSolutionView(FormView):
             acteurs = acteurs.filter(
                 proposition_services__sous_categories__in=sous_categories_objets
             )
-        kwargs["acteurs_digitaux"] = acteurs.filter(acteur_type__nom="acteur digital")
+        kwargs["acteurs_digitaux"] = (
+            acteurs.filter(acteur_type__nom="acteur digital")
+            .annotate(min_action_order=Min("proposition_services__action__order"))
+            .order_by("min_action_order")
+        )
         kwargs["nb_acteurs_digitaux"] = acteurs.filter(
             acteur_type__nom="acteur digital"
         ).count()

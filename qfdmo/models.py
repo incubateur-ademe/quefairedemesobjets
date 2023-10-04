@@ -258,6 +258,9 @@ class BaseActeur(NomAsNaturalKeyModel):
             return json.dumps(self_as_dict)
         return self_as_dict
 
+    def acteur_services(self):
+        return list(set([ps.acteur_service for ps in self.proposition_services.all()]))
+
 
 class Acteur(BaseActeur):
     class Meta:
@@ -344,7 +347,9 @@ REFRESH MATERIALIZED VIEW CONCURRENTLY qfdmo_finalpropositionservice_sous_catego
 
     def serialize(self, format=None) -> dict | str:
         super_serialized = super().serialize(format=None)
-        super_serialized["actions"] = self.acteur_actions()  # type: ignore
+        super_serialized["actions"] = [  # type: ignore
+            action.serialize() for action in self.acteur_actions()
+        ]
         if format == "json":
             return json.dumps(super_serialized)
         return super_serialized

@@ -220,3 +220,60 @@ class TestFinalActeurActions:
         Action.objects.filter(nom="louer").update(order=1)
         actions = final_acteur_with_ps.acteur_actions()
         assert [action.nom for action in actions] == ["louer", "echanger", "reparer"]
+
+
+@pytest.mark.django_db
+class TestActeurService:
+    def test_acteur_actions_basic(self):
+        action1 = Action.objects.get(nom="reparer")
+        acteur_service = ActeurService.objects.get(
+            nom="Achat, revente par un professionnel"
+        )
+        acteur = Acteur.objects.create(nom="Acteur 1", location=Point(0, 0))
+        PropositionService.objects.create(
+            acteur=acteur, acteur_service=acteur_service, action=action1
+        )
+
+        services = acteur.acteur_services()
+        assert [str(service) for service in services] == [
+            "Achat, revente par un professionnel"
+        ]
+
+    def test_acteur_actions_distinct(self):
+        action1 = Action.objects.get(nom="reparer")
+        acteur_service = ActeurService.objects.get(
+            nom="Achat, revente par un professionnel"
+        )
+        action2 = Action.objects.get(nom="echanger")
+        acteur = Acteur.objects.create(nom="Acteur 1", location=Point(0, 0))
+        PropositionService.objects.create(
+            acteur=acteur, acteur_service=acteur_service, action=action1
+        )
+        PropositionService.objects.create(
+            acteur=acteur, acteur_service=acteur_service, action=action2
+        )
+
+        services = acteur.acteur_services()
+        assert [str(service) for service in services] == [
+            "Achat, revente par un professionnel"
+        ]
+
+    def test_acteur_actions_multiple(self):
+        action = Action.objects.get(nom="reparer")
+        acteur_service1 = ActeurService.objects.get(
+            nom="Achat, revente par un professionnel"
+        )
+        acteur_service2 = ActeurService.objects.get(nom="Atelier d'auto-réparation")
+        acteur = Acteur.objects.create(nom="Acteur 1", location=Point(0, 0))
+        PropositionService.objects.create(
+            acteur=acteur, acteur_service=acteur_service1, action=action
+        )
+        PropositionService.objects.create(
+            acteur=acteur, acteur_service=acteur_service2, action=action
+        )
+
+        services = acteur.acteur_services()
+        assert [str(service) for service in services] == [
+            "Achat, revente par un professionnel",
+            "Atelier d'auto-réparation",
+        ]
