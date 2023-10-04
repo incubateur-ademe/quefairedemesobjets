@@ -109,6 +109,19 @@ class Action(NomAsNaturalKeyModel):
     order = models.IntegerField(blank=False, null=False, default=0)
     lvao_id = models.IntegerField(blank=True, null=True)
     directions = models.ManyToManyField(ActionDirection)
+    couleur = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        default="yellow-tournesol",
+        help_text="Couleur du badge à choisir dans le DSFR",
+    )
+    icon = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        help_text="Icône du badge à choisir dans le DSFR",
+    )
 
     def serialize(self):
         return model_to_dict(self, exclude=["directions"])
