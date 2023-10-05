@@ -7,9 +7,10 @@ export const homeIconMarker = L.ExtraMarkers.icon({
     prefix: "qfdmo-icon",
 })
 
-export const redMarker = L.ExtraMarkers.icon({
+export const defaultMarker = L.ExtraMarkers.icon({
     icon: "fr-icon-checkbox-circle-line",
-    markerColor: "red",
+    markerColor: "#000",
     shape: "square",
     prefix: "qfdmo-icon",
+    svg: true,
 })

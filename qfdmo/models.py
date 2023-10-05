@@ -114,13 +114,17 @@ class Action(NomAsNaturalKeyModel):
         null=True,
         blank=True,
         default="yellow-tournesol",
-        help_text="Couleur du badge à choisir dans le DSFR",
+        help_text="""Couleur du badge à choisir dans le DSFR
+Couleur dispoible : blue-france, green-tilleul-verveine, green-bourgeon, green-emeraude,
+green-menthe, green-archipel, blue-ecume, blue-cumulus, purple-glycine, pink-macaron,
+pink-tuile, yellow-tournesol, yellow-moutarde, orange-terre-battue, brown-cafe-creme,
+brown-caramel, brown-opera, beige-gris-galet""",
     )
     icon = models.CharField(
         max_length=255,
         null=True,
         blank=True,
-        help_text="Icône du badge à choisir dans le DSFR",
+        help_text="Icône du badge à choisir dans le <a href='https://www.systeme-de-design.gouv.fr/elements-d-interface/fondamentaux-techniques/icones' target='_blank'>DSFR</a>",  # noqa E501
     )
 
     def serialize(self):
@@ -380,7 +384,7 @@ REFRESH MATERIALIZED VIEW CONCURRENTLY qfdmo_finalpropositionservice_sous_catego
     ) -> dict | str:
         super_serialized = super().serialize(format=None)
         super_serialized["actions"] = [  # type: ignore
-            action.serialize() for action in self.acteur_actions()
+            action.serialize() for action in self.acteur_actions(direction=direction)
         ]
         if render_as_card:
             super_serialized["render_as_card"] = self.render_as_card(  # type: ignore

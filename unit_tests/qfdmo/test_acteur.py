@@ -318,7 +318,8 @@ class TestFinalActeurSerialize:
                 for proposition_service in finalacteur.proposition_services.all()
             ],
             "actions": [  # type: ignore
-                action.serialize() for action in finalacteur.acteur_actions()
+                action.serialize()
+                for action in finalacteur.acteur_actions(direction="jai")
             ],
             "render_as_card": finalacteur.render_as_card(direction="jai"),
         }
