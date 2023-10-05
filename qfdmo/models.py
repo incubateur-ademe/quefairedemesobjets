@@ -264,10 +264,7 @@ class BaseActeur(NomAsNaturalKeyModel):
     def is_digital(self) -> bool:
         return bool(self.acteur_type and self.acteur_type.nom == "acteur digital")
 
-    def serialize(
-        self,
-        format: None | str = None,
-    ) -> dict | str:
+    def serialize(self, format: None | str = None) -> dict | str:
         self_as_dict = model_to_dict(
             self, exclude=["location", "proposition_services", "acteur_type"]
         )

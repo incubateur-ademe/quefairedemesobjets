@@ -67,14 +67,12 @@ export default class extends Controller<HTMLElement> {
     }
 
     changeDirection() {
-        console.log("changeDirection")
         this.actionListTarget.value = ""
         this.displayActionList()
         this.apply()
     }
 
     toggleSideover() {
-        console.log("toggleSideover")
         this.sideoverContainerTarget.classList.toggle("qfdmo-invisible")
         this.digitalTarget.value = this.digitalTarget.value ? "" : "1"
     }

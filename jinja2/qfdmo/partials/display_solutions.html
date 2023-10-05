@@ -39,7 +39,7 @@
                 <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-flex qfdmo-flex-col">
                     <div class="qfdmo-flex-grow qfdmo-relative qfdmo-overflow-auto qfdmo-shadow-md ">
                         {% for acteur_digital in acteurs_digitaux.all() %}
-                            <div class="qfdmo-rounded-t qfdmo-border-solid qfdmo-border qfdmo-border-b-2 qfdmo-border-lightgray qfdmo-border-b-bluefrance qfdmo-content-start qfdmo-p-1w{% if not loop.last %} qfdmo-mb-1w{% endif %}">
+                            <div class="qfdmo-rounded-t qfdmo-border-solid qfdmo-border qfdmo-border-b-2 qfdmo-border-light-gray qfdmo-border-b-blue-france qfdmo-content-start qfdmo-p-1w{% if not loop.last %} qfdmo-mb-1w{% endif %}">
                                 {{acteur_digital.render_as_card(direction=form.initial.direction)|safe}}
                             </div>
                         {% endfor %}
