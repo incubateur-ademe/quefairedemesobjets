@@ -66,7 +66,7 @@ export class SolutionMap {
         }
     }
 
-    display_actor(actors: Array<Actor>): void {
+    displayActor(actors: Array<Actor>): void {
         let points: Array<Array<Number>> = []
 
         actors.forEach(function (actor: Actor) {
@@ -85,7 +85,7 @@ export class SolutionMap {
                 } else {
                     customMarker = defaultMarker
                 }
-                L.marker(
+                var marker = L.marker(
                     [actor.location.coordinates[1], actor.location.coordinates[0]],
                     {
                         icon: customMarker,
@@ -94,6 +94,8 @@ export class SolutionMap {
                 )
                     .addTo(this.#map)
                     .bindPopup(actor.render_as_card)
+                    .on("click", this.markerOnClick, this)
+                marker.prop = { id: actor.id }
                 points.push([
                     actor.location.coordinates[1],
                     actor.location.coordinates[0],
@@ -125,5 +127,50 @@ export class SolutionMap {
         this.#map.on("popupclose", () => {
             this.#zoomControl.addTo(this.#map)
         })
+    }
+
+    #dispatch(type: string, detail: unknown) {
+        console.log("dispatch", type, detail)
+        this.#map.getTargetElement().dispatchEvent(
+            new CustomEvent(type, {
+                detail,
+                bubbles: true,
+            }),
+        )
+    }
+
+    initEventListener(): void {
+        this.#map.on("moveend", function (e) {
+            this.#dispatch(
+                "leaflet:mapChange",
+                {
+                    center: e.target.getBounds().getCenter(),
+                    southWest: e.target.getBounds().getSouthWest(),
+                    northEast: e.target.getBounds().getNorthEast(),
+                },
+                this,
+            )
+            // console.log(
+            //     "Map move end",
+            //     e.target.getBounds().getCenter(),
+            //     e.target.getBounds().getSouthWest(),
+            //     e.target.getBounds().getNorthEast(),
+            // )
+        })
+    }
+
+    #dispatchBboxChanged = (mapBrowserEvent) => {
+        const view = this.#map.getView()
+        this.#dispatch("leaf:changed", {
+            bbox: view.calculateExtent().map((a) => a.toFixed(2)),
+            zoom: view.getZoom()?.toFixed(2),
+        })
+    }
+
+    markerOnClick(event: Event): void {
+        console.log("markerOnClick", event.target.prop)
+        console.log(event.target.getLatLng())
+        console.log("this", this)
+        this.#map.setView(event.target.getLatLng(), this.#map.getZoom())
     }
 }

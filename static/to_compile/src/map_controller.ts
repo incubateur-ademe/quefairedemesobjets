@@ -23,6 +23,7 @@ export default class extends Controller<HTMLElement> {
             })
             .filter((actor) => actor !== undefined)
 
-        actorsMap.display_actor(actors)
+        actorsMap.displayActor(actors)
+        actorsMap.initEventListener()
     }
 }
