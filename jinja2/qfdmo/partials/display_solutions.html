@@ -28,8 +28,8 @@
             {% endfor %}
         </div>
         {% if nb_acteurs_digitaux %}
-            <button type='button' class="fr-btn fr-btn--tertiary-no-outline" data-action="click->choose-action#toggleSideover">
-                Afficher les {{ nb_acteurs_digitaux }} solutions en ligne
+            <button type='button' class="fr-btn fr-btn--secondary qfdmo-w-full md:qfdmo-w-max" data-action="click->choose-action#toggleSideover">
+                <span class="fr-icon-global-line" aria-hidden="true"></span>&nbsp;Voir aussi les {{ nb_acteurs_digitaux }} solutions Internet
             </button>
         {% endif %}
     </div>
@@ -44,8 +44,8 @@
                             </div>
                         {% endfor %}
                     </div>
-                    <button type='button' class="fr-btn fr-btn--tertiary-no-outline" data-action="click->choose-action#toggleSideover">
-                        Retour à la carte
+                    <button type='button' class="fr-btn fr-btn--secondary" data-action="click->choose-action#toggleSideover">
+                        <span class="fr-icon-road-map-fill" aria-hidden="true"></span>&nbsp;Retour à la carte
                     </button>
                 </div>
             </div>
