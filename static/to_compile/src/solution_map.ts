@@ -38,8 +38,6 @@ export class SolutionMap {
         let points: Array<Array<Number>> = []
 
         actors.forEach(function (actor: Actor) {
-            let popupContent = actor.popupTitle() + actor.popupContent()
-
             if (actor.location) {
                 L.marker(
                     [actor.location.coordinates[1], actor.location.coordinates[0]],
@@ -48,7 +46,7 @@ export class SolutionMap {
                     },
                 )
                     .addTo(this.#map)
-                    .bindPopup(popupContent)
+                    .bindPopup(actor.render_as_card)
                 points.push([
                     actor.location.coordinates[1],
                     actor.location.coordinates[0],

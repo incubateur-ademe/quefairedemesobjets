@@ -1,140 +1,119 @@
 [
-{
-    "model": "qfdmo.action",
-    "fields": {
-        "nom": "reparer",
-        "nom_affiche": "Réparer",
-        "description": null,
-        "order": 1,
-        "lvao_id": 9,
-        "directions": [
-            [
-                "jai"
-            ]
-        ]
+    {
+        "model": "qfdmo.action",
+        "fields": {
+            "nom": "reparer",
+            "nom_affiche": "Réparer",
+            "description": null,
+            "order": 1,
+            "lvao_id": 9,
+            "couleur": "green-menthe",
+            "icon": "fr-icon-bug-line",
+            "directions": [["jai"]]
+        }
+    },
+    {
+        "model": "qfdmo.action",
+        "fields": {
+            "nom": "acheter",
+            "nom_affiche": "Acheter",
+            "description": "Acheter d'occasion",
+            "order": 16,
+            "lvao_id": 44,
+            "couleur": "yellow-tournesol",
+            "icon": "fr-icon-shopping-cart-2-line",
+            "directions": [["jecherche"]]
+        }
+    },
+    {
+        "model": "qfdmo.action",
+        "fields": {
+            "nom": "revendre",
+            "nom_affiche": "Vendre",
+            "description": null,
+            "order": 16,
+            "lvao_id": 6,
+            "couleur": "yellow-tournesol",
+            "icon": "fr-icon-shopping-cart-2-line",
+            "directions": [["jai"]]
+        }
+    },
+    {
+        "model": "qfdmo.action",
+        "fields": {
+            "nom": "donner",
+            "nom_affiche": "Donner",
+            "description": null,
+            "order": 7,
+            "lvao_id": 7,
+            "couleur": "blue-cumulus",
+            "icon": "fr-icon-links-line",
+            "directions": [["jai"]]
+        }
+    },
+    {
+        "model": "qfdmo.action",
+        "fields": {
+            "nom": "louer",
+            "nom_affiche": "Louer",
+            "description": null,
+            "order": 13,
+            "lvao_id": 4,
+            "couleur": "purple-glycine",
+            "icon": "fr-icon-send-plane-line",
+            "directions": [["jecherche"]]
+        }
+    },
+    {
+        "model": "qfdmo.action",
+        "fields": {
+            "nom": "mettreenlocation",
+            "nom_affiche": "Louer",
+            "description": "Mettre en location",
+            "order": 13,
+            "lvao_id": 50,
+            "couleur": "purple-glycine",
+            "icon": "fr-icon-send-plane-line",
+            "directions": [["jai"]]
+        }
+    },
+    {
+        "model": "qfdmo.action",
+        "fields": {
+            "nom": "emprunter",
+            "nom_affiche": "Emprunter",
+            "description": null,
+            "order": 7,
+            "lvao_id": 51,
+            "couleur": "blue-cumulus",
+            "icon": "fr-icon-links-line",
+            "directions": [["jecherche"]]
+        }
+    },
+    {
+        "model": "qfdmo.action",
+        "fields": {
+            "nom": "preter",
+            "nom_affiche": "Prêter",
+            "description": null,
+            "order": 4,
+            "lvao_id": 5,
+            "couleur": "blue-cumulus",
+            "icon": "fr-icon-links-line",
+            "directions": [["jai"]]
+        }
+    },
+    {
+        "model": "qfdmo.action",
+        "fields": {
+            "nom": "echanger",
+            "nom_affiche": "Èchanger",
+            "description": null,
+            "order": 10,
+            "lvao_id": 8,
+            "couleur": "purple-glycine",
+            "icon": "fr-icon-send-plane-line",
+            "directions": [["jai"], ["jecherche"]]
+        }
     }
-},
-{
-    "model": "qfdmo.action",
-    "fields": {
-        "nom": "acheter",
-        "nom_affiche": "Acheter",
-        "description": "Acheter d'occasion",
-        "order": 16,
-        "lvao_id": 44,
-        "directions": [
-            [
-                "jecherche"
-            ]
-        ]
-    }
-},
-{
-    "model": "qfdmo.action",
-    "fields": {
-        "nom": "revendre",
-        "nom_affiche": "Vendre",
-        "description": null,
-        "order": 16,
-        "lvao_id": 6,
-        "directions": [
-            [
-                "jai"
-            ]
-        ]
-    }
-},
-{
-    "model": "qfdmo.action",
-    "fields": {
-        "nom": "donner",
-        "nom_affiche": "Donner",
-        "description": null,
-        "order": 7,
-        "lvao_id": 7,
-        "directions": [
-            [
-                "jai"
-            ]
-        ]
-    }
-},
-{
-    "model": "qfdmo.action",
-    "fields": {
-        "nom": "louer",
-        "nom_affiche": "Louer",
-        "description": null,
-        "order": 13,
-        "lvao_id": 4,
-        "directions": [
-            [
-                "jecherche"
-            ]
-        ]
-    }
-},
-{
-    "model": "qfdmo.action",
-    "fields": {
-        "nom": "mettreenlocation",
-        "nom_affiche": "Louer",
-        "description": "Mettre en location",
-        "order": 13,
-        "lvao_id": 50,
-        "directions": [
-            [
-                "jai"
-            ]
-        ]
-    }
-},
-{
-    "model": "qfdmo.action",
-    "fields": {
-        "nom": "emprunter",
-        "nom_affiche": "Emprunter",
-        "description": null,
-        "order": 7,
-        "lvao_id": 51,
-        "directions": [
-            [
-                "jecherche"
-            ]
-        ]
-    }
-},
-{
-    "model": "qfdmo.action",
-    "fields": {
-        "nom": "preter",
-        "nom_affiche": "Prêter",
-        "description": null,
-        "order": 4,
-        "lvao_id": 5,
-        "directions": [
-            [
-                "jai"
-            ]
-        ]
-    }
-},
-{
-    "model": "qfdmo.action",
-    "fields": {
-        "nom": "echanger",
-        "nom_affiche": "Èchanger",
-        "description": null,
-        "order": 10,
-        "lvao_id": 8,
-        "directions": [
-            [
-                "jai"
-            ],
-            [
-                "jecherche"
-            ]
-        ]
-    }
-}
 ]

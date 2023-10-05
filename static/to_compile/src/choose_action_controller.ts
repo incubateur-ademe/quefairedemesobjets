@@ -2,12 +2,22 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
     #selectedOption: string = "jecherche"
-    static targets = ["jai", "jecherche", "direction", "apply", "actionList"]
+    static targets = [
+        "jai",
+        "jecherche",
+        "direction",
+        "apply",
+        "actionList",
+        "sideoverContainer",
+        "digital",
+    ]
     declare readonly jaiTarget: HTMLElement
     declare readonly jechercheTarget: HTMLElement
     declare readonly directionTarget: HTMLElement
     declare readonly applyTarget: HTMLElement
     declare readonly actionListTarget: HTMLInputElement
+    declare readonly sideoverContainerTarget: HTMLDivElement
+    declare readonly digitalTarget: HTMLInputElement
 
     connect() {
         this.displayActionList()
@@ -60,5 +70,10 @@ export default class extends Controller<HTMLElement> {
         this.actionListTarget.value = ""
         this.displayActionList()
         this.apply()
+    }
+
+    toggleSideover() {
+        this.sideoverContainerTarget.classList.toggle("qfdmo-invisible")
+        this.digitalTarget.value = this.digitalTarget.value ? "" : "1"
     }
 }

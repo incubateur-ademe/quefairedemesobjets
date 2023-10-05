@@ -22,4 +22,6 @@ class TestActionNomAsNaturalKeyHeritage:
             "nom_affiche": "Test Objet Displayed",
             "order": 1,
             "lvao_id": 123,
+            "couleur": "yellow-tournesol",
+            "icon": None,
         }

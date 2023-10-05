@@ -1,0 +1,42 @@
+<div>
+    <form class="fr-my-3w" id='search_form' action='#solutions'>
+        {% include "qfdmo/partials/iframe_input.html" %}
+        {{ form.direction }}
+        {{ form.action_list }}
+        <div data-controller='autocomplete'
+            data-autocomplete-max-option-displayed-value=5
+            data-autocomplete-nb-char-to-search-value=2
+        >
+            <div class="form-group">
+                {{ form.sous_categorie_objet.label_tag() }}
+                {{ form.sous_categorie_objet }}
+            </div>
+        </div>
+        <div data-controller='address-autocomplete'
+            data-address-autocomplete-max-option-displayed-value=5
+            data-address-autocomplete-is-ban-address-value='true'
+        >
+            <div class="form-group">
+                {{ form.adresse.label_tag() }}
+                {{ form.adresse }}
+            </div>
+            {{ form.longitude }}
+            {{ form.latitude }}
+        </div>
+        {{ form.digital }}
+        <div class="fr-grid-row fr-grid-row--bottom">
+            <div class="fr-col-12 fr-col-md-9">
+                <label>Je souhaite</label>
+                {% with action_direction='jai' %}
+                    {% include "qfdmo/partials/action_list_by_direction.html"  %}
+                {% endwith %}
+                {% with action_direction='jecherche' %}
+                    {% include "qfdmo/partials/action_list_by_direction.html"  %}
+                {% endwith %}
+            </div>
+            <div class="fr-col-12 fr-col-md-3">
+                <button class="fr-btn fr-icon-search-line fr-btn--icon-left qfdmo-float-right">Rechercher</button>
+            </div>
+        </div>
+    </form>
+</div>

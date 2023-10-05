@@ -1,72 +1,8 @@
 {% extends 'layout/base.html' %}
 
 {% block content %}
-    <div class="fr-container qfdmo-flex qfdmo-flex-col{% if not is_iframe(request) or form.initial.adresse %} qfdmo-min-h-screen md:qfdmo-min-h-fit md:qfdmo-flex-auto{% endif %}" >
-        <div data-controller="choose-action">
-            <form class="fr-my-3w" id='search_form' action='#solutions'>
-                {% include "qfdmo/partials/iframe_input.html" %}
-                {{ form.direction }}
-                {{ form.action_list }}
-                <div data-controller='autocomplete'
-                    data-autocomplete-max-option-displayed-value=5
-                    data-autocomplete-nb-char-to-search-value=2
-                >
-                    <div class="form-group">
-                        {{ form.sous_categorie_objet.label_tag() }}
-                        {{ form.sous_categorie_objet }}
-                    </div>
-                </div>
-                <div data-controller='address-autocomplete'
-                    data-address-autocomplete-max-option-displayed-value=5
-                    data-address-autocomplete-is-ban-address-value='true'
-                >
-                    <div class="form-group">
-                        {{ form.adresse.label_tag() }}
-                        {{ form.adresse }}
-                    </div>
-                    {{ form.longitude }}
-                    {{ form.latitude }}
-                </div>
-                <div class="fr-grid-row fr-grid-row--bottom">
-                    <div class="fr-col-12 fr-col-md-9">
-                        <label>Je souhaite</label>
-                        {% with action_direction='jai' %}
-                            {% include "qfdmo/partials/action_list_by_direction.html"  %}
-                        {% endwith %}
-                        {% with action_direction='jecherche' %}
-                            {% include "qfdmo/partials/action_list_by_direction.html"  %}
-                        {% endwith %}
-                    </div>
-                    <div class="fr-col-12 fr-col-md-3">
-                        <button class="fr-btn fr-icon-search-line fr-btn--icon-left qfdmo-float-right">Rechercher</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-        <div
-            class="fr-mb-3w qfdmo-relative{% if is_iframe(request) %}{% if form.initial.adresse %} qfdmo-min-h-[400px]{% else %} qfdmo-min-h-[200px]{% endif %}{% else %} qfdmo-flex-auto md:qfdmo-min-h-[62vh]{% endif %}"
-            data-controller="map"
-            data-map-location-value="{{ location }}"
-            id="map" data-map-target="map"
-        >
-            {% if not form.initial.adresse %}
-                <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-black qfdmo-opacity-70 qfdmo-font-black qfdmo-z-[1000]" style="background-color:gray">
-                    <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
-                        Précisez une adresse pour afficher la carte
-                    </div>
-                </div>
-            {% elif not acteurs %}
-                <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-black qfdmo-opacity-70 qfdmo-font-black qfdmo-z-[1000]" style="background-color:gray">
-                    <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
-                        Il n'existe pas de solution localisée proche de chez vous (<30 km), avez vous envigagé une solution en ligne ?
-                            </div>
-                        </div>
-            {% endif %}
-            {% for acteur in acteurs %}
-                <script type="application/json" data-map-target="acteur">
-                    {{ acteur.serialize(format='json') | safe }}
-                </script>
-            {% endfor %}
-        </div>
+    <div data-controller="choose-action" class="fr-container qfdmo-flex qfdmo-flex-col{% if not is_iframe(request) or form.initial.adresse %} qfdmo-min-h-screen md:qfdmo-min-h-fit md:qfdmo-flex-auto{% endif %}" >
+        {% include 'qfdmo/partials/search_solution.html' %}
+        {% include 'qfdmo/partials/display_solutions.html' %}
     </div>
 {% endblock %}

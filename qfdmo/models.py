@@ -5,6 +5,7 @@ from django.db import connection
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.forms import model_to_dict
+from django.template.loader import render_to_string
 from unidecode import unidecode
 
 
@@ -55,9 +56,7 @@ class SousCategorieObjet(models.Model):
     id = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
     lvao_id = models.IntegerField(blank=True, null=True)
-    categorie = models.ForeignKey(
-        CategorieObjet, on_delete=models.CASCADE, blank=True, null=True
-    )
+    categorie = models.ForeignKey(CategorieObjet, on_delete=models.CASCADE)
     code = models.CharField(max_length=10, unique=True, blank=False, null=False)
 
     def __str__(self) -> str:
@@ -110,6 +109,19 @@ class Action(NomAsNaturalKeyModel):
     order = models.IntegerField(blank=False, null=False, default=0)
     lvao_id = models.IntegerField(blank=True, null=True)
     directions = models.ManyToManyField(ActionDirection)
+    couleur = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        default="yellow-tournesol",
+        help_text="Couleur du badge à choisir dans le DSFR",
+    )
+    icon = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        help_text="Icône du badge à choisir dans le DSFR",
+    )
 
     def serialize(self):
         return model_to_dict(self, exclude=["directions"])
@@ -136,6 +148,7 @@ class ActeurType(NomAsNaturalKeyModel):
 
     id = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    nom_affiche = models.CharField(max_length=255, blank=False, null=False, default="?")
     lvao_id = models.IntegerField(blank=True, null=True)
 
     def serialize(self):
@@ -243,20 +256,32 @@ class BaseActeur(NomAsNaturalKeyModel):
     def longitude(self):
         return self.location.x
 
-    def serialize(self, format=None):
+    @property
+    def nom_affiche(self):
+        return self.nom_commercial or self.nom
+
+    @property
+    def is_digital(self) -> bool:
+        return bool(self.acteur_type and self.acteur_type.nom == "acteur digital")
+
+    def serialize(self, format: None | str = None) -> dict | str:
         self_as_dict = model_to_dict(
             self, exclude=["location", "proposition_services", "acteur_type"]
         )
-        self_as_dict["acteur_type"] = self.acteur_type.serialize()
+        if self.acteur_type:
+            self_as_dict["acteur_type"] = self.acteur_type.serialize()
         if self.location:
             self_as_dict["location"] = json.loads(self.location.geojson)
-        proposition_services = self.proposition_services.all()
+        proposition_services = self.proposition_services.all()  # type: ignore
         self_as_dict["proposition_services"] = []
         for proposition_service in proposition_services:
             self_as_dict["proposition_services"].append(proposition_service.serialize())
         if format == "json":
             return json.dumps(self_as_dict)
         return self_as_dict
+
+    def acteur_services(self) -> list[ActeurService]:
+        return list(set([ps.acteur_service for ps in self.proposition_services.all()]))
 
 
 class Acteur(BaseActeur):
@@ -276,7 +301,7 @@ class Acteur(BaseActeur):
             id=self.id, defaults=fields
         )
         if created:
-            for proposition_service in self.proposition_services.all():
+            for proposition_service in self.proposition_services.all():  # type: ignore
                 revision_proposition_service = (
                     RevisionPropositionService.objects.create(
                         revision_acteur=revision_acteur,
@@ -330,6 +355,41 @@ REFRESH MATERIALIZED VIEW CONCURRENTLY qfdmo_finalpropositionservice;
 REFRESH MATERIALIZED VIEW CONCURRENTLY qfdmo_finalpropositionservice_sous_categories;
                 """
             )
+
+    def acteur_actions(self, direction=None):
+        collected_action = [
+            ps.action
+            for ps in self.proposition_services.all()  # type: ignore
+            if direction is None
+            or direction in [d.nom for d in ps.action.directions.all()]
+        ]
+        collected_action = list(set(collected_action))
+        collected_action.sort(key=lambda x: x.order)
+        return collected_action
+
+    def render_as_card(self, direction: str | None = None) -> str:
+        return render_to_string(
+            "acteur_as_card.html", {"acteur": self, "direction": direction}
+        )
+
+    def serialize(
+        self,
+        format: None | str = None,
+        render_as_card: bool = False,
+        direction: str | None = None,
+    ) -> dict | str:
+        super_serialized = super().serialize(format=None)
+        super_serialized["actions"] = [  # type: ignore
+            action.serialize() for action in self.acteur_actions()
+        ]
+        if render_as_card:
+            super_serialized["render_as_card"] = self.render_as_card(  # type: ignore
+                direction=direction
+            )
+
+        if format == "json":
+            return json.dumps(super_serialized)
+        return super_serialized
 
 
 class BasePropositionService(models.Model):
