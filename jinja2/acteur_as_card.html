@@ -1,7 +1,7 @@
 <div>
     <div class="fr-mb-1w">
         {% for action in acteur.acteur_actions(direction=direction) %}
-            <p class="fr-badge fr-badge--sm fr-badge--{{action.couleur}}">
+            <p class="fr-badge fr-badge--sm fr-badge--{{action.couleur}} fr-my-0">
                 {% if action.icon %}
                     <span class="{{action.icon}}" aria-hidden="true"></span>&nbsp;
                 {% endif %}
@@ -13,17 +13,17 @@
         {{ acteur.nom_affiche }}
     </h3>
     {% if acteur.url %}
-        <p class="qfdmo-text-sm fr-mb-2w">
+        <p class="qfdmo-text-sm fr-mb-2w fr-mt-0">
             <a href="{{ acteur.url }}" target="_blank">{{ acteur.url }}</a>
         </p>
     {% endif %}
-    <p class="qfdmo-text-sm fr-mb-2w">
+    <p class="qfdmo-text-sm fr-mb-2w fr-mt-0">
         {% for acteur_service in acteur.acteur_services() %}
             {{ acteur_service }}{% if not loop.last %}<br>{% endif %}
         {% endfor %}
     </p>
     {% if not acteur.is_digital %}
-        <p class="qfdmo-text-sm">
+        <p class="qfdmo-text-sm fr-mb-2w fr-mt-0">
             {{ acteur.adresse }}<br>
             {% if acteur.adresse_complement %}
                 {{ acteur.adresse_complement }}<br>
