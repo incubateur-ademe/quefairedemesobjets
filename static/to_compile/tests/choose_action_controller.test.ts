@@ -32,16 +32,16 @@ describe("ChooseActionController", () => {
         expect(jaiTarget).toBeVisible()
     })
 
-    // FIXME: doesn't work because it submit the form
-    // it("click jecherche option display jecherche target", () => {
-    //     const jechercheOption = document.getElementById("id_direction_1")
-    //     jechercheOption.click()
+    it("click jecherche option display jecherche target", async () => {
+        const jechercheOption = document.getElementById("id_direction_1")
+        jechercheOption.click()
+        await new Promise((r) => setTimeout(r, 0))
 
-    //     const jechercheTarget = document.querySelector(
-    //         '[data-choose-action-target="jecherche"]',
-    //     )
-    //     const jaiTarget = document.querySelector('[data-choose-action-target="jai"]')
-    //     expect(jechercheTarget).toBeVisible()
-    //     expect(jaiTarget).not.toBeVisible()
-    // })
+        const jechercheTarget = document.querySelector(
+            '[data-choose-action-target="jecherche"]',
+        )
+        const jaiTarget = document.querySelector('[data-choose-action-target="jai"]')
+        expect(jechercheTarget).toBeVisible()
+        expect(jaiTarget).not.toBeVisible()
+    })
 })

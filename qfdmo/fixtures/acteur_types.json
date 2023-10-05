@@ -2,35 +2,40 @@
     {
         "model": "qfdmo.acteurtype",
         "fields": {
-            "nom": "Association, entreprise de l'économie sociale et solidaire",
+            "nom": "ess",
+            "nom_affiche": "Association, entreprise de l'économie sociale et solidaire",
             "lvao_id": 151
         }
     },
     {
         "model": "qfdmo.acteurtype",
         "fields": {
-            "nom": "Collectivité, établissement public",
+            "nom": "collectivité",
+            "nom_affiche": "Collectivité, établissement public",
             "lvao_id": 152
         }
     },
     {
         "model": "qfdmo.acteurtype",
         "fields": {
-            "nom": "Artisan, commerce indépendant",
+            "nom": "artisan",
+            "nom_affiche": "Artisan, commerce indépendant",
             "lvao_id": 153
         }
     },
     {
         "model": "qfdmo.acteurtype",
         "fields": {
-            "nom": "Franchise, enseigne commerciale",
+            "nom": "commerce",
+            "nom_affiche": "Franchise, enseigne commerciale",
             "lvao_id": 154
         }
     },
     {
         "model": "qfdmo.acteurtype",
         "fields": {
-            "nom": "Acteur digital (site web, app. mobile)",
+            "nom": "acteur digital",
+            "nom_affiche": "Acteur digital (site web, app. mobile)",
             "lvao_id": 155
         }
     }

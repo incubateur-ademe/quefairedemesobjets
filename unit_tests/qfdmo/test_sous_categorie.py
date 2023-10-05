@@ -19,7 +19,7 @@ class TestActionNaturalKey:
 
     @pytest.mark.django_db()
     def test_get_natural_key(self):
-        action = SousCategorieObjet(nom="Natural key", code="C_00")
+        action = SousCategorieObjet(nom="Natural key", code="C_00", categorie_id=1)
         action.save()
         assert (
             SousCategorieObjet.objects.get_by_natural_key("C_00").__str__()

@@ -90,3 +90,10 @@ class GetReemploiSolutionForm(forms.Form):
         ),
         required=False,
     )
+
+    digital = forms.BooleanField(
+        widget=forms.HiddenInput(
+            attrs={"data-choose-action-target": "digital"},
+        ),
+        required=False,
+    )

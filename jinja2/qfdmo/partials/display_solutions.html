@@ -1,0 +1,54 @@
+<div class="fr-mb-3w qfdmo-relative{% if is_iframe(request) %}{% if form.initial.adresse %} qfdmo-min-h-[400px]{% else %} qfdmo-min-h-[200px]{% endif %}{% else %} qfdmo-flex-grow md:qfdmo-min-h-[62vh]{% endif %}">
+    <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-flex qfdmo-flex-col">
+        <div
+            class="qfdmo-flex-grow qfdmo-relative qfdmo-shadow"
+            data-controller="map"
+            data-map-location-value="{{ location }}"
+            id="map" data-map-target="map"
+        >
+            {% if not form.initial.adresse %}
+                <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-80 qfdmo-font-black qfdmo-text-black qfdmo-z-[1000]" >
+                    <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
+                        Précisez une adresse pour afficher la carte
+                    </div>
+                </div>
+            {% elif not acteurs %}
+                <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-80 qfdmo-font-black qfdmo-z-[1000]{% if nb_acteurs_digitaux %} qfdmo-cursor-pointer{% endif %}"
+                    {% if nb_acteurs_digitaux %}data-action="click->choose-action#toggleSideover"{% endif %}
+                    >
+                    <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
+                        Il n'existe pas de solution localisée proche de chez vous (<30 km), avez vous envigagé une solution en ligne ?
+                            </div>
+                        </div>
+            {% endif %}
+            {% for acteur in acteurs %}
+                <script type="application/json" data-map-target="acteur">
+                    {{ acteur.serialize(format='json', render_as_card=True, direction=form.initial.direction) | safe }}
+                </script>
+            {% endfor %}
+        </div>
+        {% if nb_acteurs_digitaux %}
+            <button type='button' class="fr-btn fr-btn--tertiary-no-outline" data-action="click->choose-action#toggleSideover">
+                Afficher les {{ nb_acteurs_digitaux }} solutions en ligne
+            </button>
+        {% endif %}
+    </div>
+    {% if nb_acteurs_digitaux %}
+        <div id='slideover-container' data-choose-action-target="sideoverContainer" class="qfdmo-absolute qfdmo-inset-0 qfdmo-z-[1000] sqfdmo-w-full qfdmo-h-full{% if not form.initial.digital %} qfdmo-invisible{% endif %}">
+            <div id="slideover" class="qfdmo-w-full qfdmo-bg-white qfdmo-h-full qfdmo-absolute">
+                <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-flex qfdmo-flex-col">
+                    <div class="qfdmo-flex-grow qfdmo-relative qfdmo-overflow-auto qfdmo-shadow-md ">
+                        {% for acteur_digital in acteurs_digitaux.all() %}
+                            <div class="qfdmo-rounded-t qfdmo-border-solid qfdmo-border qfdmo-border-b-2 qfdmo-border-light-gray qfdmo-border-b-blue-france qfdmo-content-start qfdmo-p-1w{% if not loop.last %} qfdmo-mb-1w{% endif %}">
+                                {{acteur_digital.render_as_card(direction=form.initial.direction)|safe}}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type='button' class="fr-btn fr-btn--tertiary-no-outline" data-action="click->choose-action#toggleSideover">
+                        Retour à la carte
+                    </button>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>

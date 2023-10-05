@@ -8,7 +8,7 @@ from django.contrib.gis.geos import Point
 from django.contrib.postgres.lookups import Unaccent
 from django.contrib.postgres.search import TrigramWordDistance
 from django.core.management import call_command
-from django.db.models import QuerySet
+from django.db.models import Min, QuerySet
 from django.db.models.functions import Length, Lower
 from django.http import JsonResponse
 from django.shortcuts import redirect
@@ -38,16 +38,46 @@ class ReemploiSolutionView(FormView):
         initial["action_list"] = self.request.GET.get("action_list")
         initial["latitude"] = self.request.GET.get("latitude")
         initial["longitude"] = self.request.GET.get("longitude")
+        initial["digital"] = self.request.GET.get("digital")
         return initial
 
     def get_context_data(self, **kwargs):
         kwargs["location"] = "{}"
         kwargs["acteurs"] = FinalActeur.objects.none()
+
         sous_categories_objets: QuerySet | None = None
         if objet_q := self.request.GET.get("sous_categorie_objet", None):
             sous_categories_objets = SousCategorieObjet.objects.filter(
                 objets__nom__icontains=objet_q
             )
+        action_selection = get_action_list(self.request)
+        acteurs = (
+            FinalActeur.objects.filter(
+                proposition_services__action__in=action_selection
+            )
+            .prefetch_related(
+                "proposition_services__sous_categories",
+                "proposition_services__sous_categories__categorie",
+                "proposition_services__action",
+                "proposition_services__action__directions",
+                "proposition_services__acteur_service",
+                "acteur_type",
+            )
+            .distinct()
+        )
+        if sous_categories_objets is not None:
+            acteurs = acteurs.filter(
+                proposition_services__sous_categories__in=sous_categories_objets
+            )
+        kwargs["acteurs_digitaux"] = (
+            acteurs.filter(acteur_type__nom="acteur digital")
+            .annotate(min_action_order=Min("proposition_services__action__order"))
+            .order_by("min_action_order")
+        )
+        kwargs["nb_acteurs_digitaux"] = acteurs.filter(
+            acteur_type__nom="acteur digital"
+        ).count()
+
         if (latitude := self.request.GET.get("latitude", None)) and (
             longitude := self.request.GET.get("longitude", None)
         ):
@@ -56,30 +86,13 @@ class ReemploiSolutionView(FormView):
             )
             reference_point = Point(float(longitude), float(latitude), srid=4326)
             # FIXME : add a test to check distinct point
-            acteurs = (
-                FinalActeur.objects.annotate(
-                    distance=Distance("location", reference_point)
-                )
-                .prefetch_related(
-                    "proposition_services__sous_categories",
-                    "proposition_services__sous_categories__categorie",
-                    "proposition_services__action",
-                    "proposition_services__acteur_service",
-                    "acteur_type",
-                )
-                .distinct()
-            )
-            if sous_categories_objets is not None:
-                acteurs = acteurs.filter(
-                    proposition_services__sous_categories__in=sous_categories_objets
-                )
-            action_selection = get_action_list(self.request)
+            acteurs_phisique = acteurs.annotate(
+                distance=Distance("location", reference_point)
+            ).exclude(acteur_type__nom="acteur digital")
 
-            acteurs = acteurs.filter(proposition_services__action__in=action_selection)
-
-            kwargs["acteurs"] = acteurs.filter(distance__lte=DISTANCE_MAX).order_by(
-                "distance"
-            )[:DEFAULT_LIMIT]
+            kwargs["acteurs"] = acteurs_phisique.filter(
+                distance__lte=DISTANCE_MAX
+            ).order_by("distance")[:DEFAULT_LIMIT]
 
         return super().get_context_data(**kwargs)
 

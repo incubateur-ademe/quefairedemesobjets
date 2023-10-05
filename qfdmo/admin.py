@@ -74,6 +74,14 @@ class ObjetAdmin(import_export_admin.ImportExportModelAdmin):
     resource_classes = [ObjetResource]
 
 
+class ActeurTypeAdmin(admin.ModelAdmin):
+    list_display = ("nom", "nom_affiche")
+    search_fields = [
+        "nom",
+        "nom_affiche",
+    ]
+
+
 class LVAOBaseRevisionAdmin(admin.ModelAdmin):
     list_display = ("nom", "url", "lvao_revision_id")
     ordering = ("lvao_revision_id",)
@@ -205,7 +213,7 @@ admin.site.register(Objet, ObjetAdmin)
 admin.site.register(Action, ActionAdmin)
 admin.site.register(ActionDirection)
 admin.site.register(ActeurService)
-admin.site.register(ActeurType)
+admin.site.register(ActeurType, ActeurTypeAdmin)
 admin.site.register(LVAOBase, LVAOBaseAdmin)
 admin.site.register(LVAOBaseRevision, LVAOBaseRevisionAdmin)
 admin.site.register(Acteur, ActeurAdmin)

@@ -15,6 +15,56 @@ from qfdmo.models import (
 )
 
 
+@pytest.fixture(scope="session")
+def populate_admin_object(django_db_blocker):
+    with django_db_blocker.unblock():
+        call_command(
+            "loaddata",
+            "categories",
+            "action_directions",
+            "actions",
+            "acteur_services",
+            "acteur_types",
+        )
+
+
+@pytest.fixture()
+def acteur(db, populate_admin_object):
+    acteur_type = ActeurType.objects.first()
+    acteur = Acteur.objects.create(
+        nom="Test Object 1", location=Point(0, 0), acteur_type=acteur_type
+    )
+    acteur_service = ActeurService.objects.first()
+    action = Action.objects.first()
+    PropositionService.objects.create(
+        acteur_service=acteur_service,
+        action=action,
+        acteur=acteur,
+    )
+    yield acteur
+
+
+@pytest.fixture()
+def finalacteur(db, populate_admin_object):
+    action1 = Action.objects.get(nom="reparer")
+    action2 = Action.objects.get(nom="echanger")
+    action3 = Action.objects.get(nom="louer")
+    acteur_service = ActeurService.objects.first()
+    acteur = Acteur.objects.create(nom="Acteur 1", location=Point(0, 0))
+    PropositionService.objects.create(
+        acteur=acteur, acteur_service=acteur_service, action=action1
+    )
+    PropositionService.objects.create(
+        acteur=acteur, acteur_service=acteur_service, action=action2
+    )
+    PropositionService.objects.create(
+        acteur=acteur, acteur_service=acteur_service, action=action3
+    )
+    FinalActeur.refresh_view()
+    finalacteur = FinalActeur.objects.get(id=acteur.id)
+    yield finalacteur
+
+
 class TestNomAsNaturalKeyHeritage:
     def test_natural(self):
         assert NomAsNaturalKeyModel in Acteur.mro()
@@ -27,25 +77,48 @@ class TestPoint:
         assert acteur.latitude == 2.2
 
 
+class TestActeurNomAffiche:
+    def test_nom(self):
+        assert (
+            Acteur(nom="Test Object 1", location=Point(0, 0)).nom_affiche
+            == "Test Object 1"
+        )
+
+    def test_nom_commercial(self):
+        assert (
+            Acteur(
+                nom="Test Object 1",
+                location=Point(0, 0),
+                nom_commercial="Nom commercial",
+            ).nom_affiche
+            == "Nom commercial"
+        )
+
+
+@pytest.mark.django_db
+class TestActeurIsdigital:
+    def test_isdigital_false(self, populate_admin_object):
+        acteur_type = ActeurType.objects.exclude(nom="acteur digital").first()
+        assert not Acteur(
+            nom="Test Object 1", location=Point(0, 0), acteur_type=acteur_type
+        ).is_digital
+
+    def test_isdigital_true(self, populate_admin_object):
+        acteur_type = ActeurType.objects.get(nom="acteur digital")
+        assert Acteur(
+            nom="Test Object 1", location=Point(0, 0), acteur_type=acteur_type
+        ).is_digital
+
+
+@pytest.mark.django_db
 class TestSerialize:
-    @pytest.mark.django_db
-    def test_serialize(self):
-        acteur_type = ActeurType.objects.create(nom="Test Object", lvao_id=123)
-        acteur = Acteur.objects.create(
-            nom="Test Object", location=Point(0, 0), acteur_type=acteur_type
-        )
-        acteur_service = ActeurService.objects.create(nom="Test Object", lvao_id=123)
-        action = Action.objects.create(nom="Test Object", lvao_id=123)
-        proposition_service = PropositionService.objects.create(
-            acteur_service=acteur_service,
-            action=action,
-            acteur=acteur,
-        )
-        assert acteur.serialize() == {
+    def test_serialize(self, acteur):
+        proposition_service = PropositionService.objects.last()
+        expected_serialized_acteur = {
             "id": acteur.id,
-            "nom": "Test Object",
+            "nom": "Test Object 1",
             "identifiant_unique": None,
-            "acteur_type": acteur_type.serialize(),
+            "acteur_type": acteur.acteur_type.serialize(),
             "adresse": None,
             "adresse_complement": None,
             "code_postal": None,
@@ -64,56 +137,28 @@ class TestSerialize:
             "location": {"type": "Point", "coordinates": [0.0, 0.0]},
             "proposition_services": [proposition_service.serialize()],
         }
-
-
-@pytest.fixture(scope="session")
-def populate_admin_object(django_db_blocker):
-    with django_db_blocker.unblock():
-        call_command(
-            "loaddata",
-            "categories",
-            "action_directions",
-            "actions",
-            "acteur_services",
-            "acteur_types",
-        )
-
-
-@pytest.fixture()
-def new_acteur(db, populate_admin_object):
-    acteur_type = ActeurType.objects.first()
-    acteur = Acteur.objects.create(
-        nom="Test Object 1", location=Point(0, 0), acteur_type=acteur_type
-    )
-    acteur_service = ActeurService.objects.first()
-    action = Action.objects.first()
-    PropositionService.objects.create(
-        acteur_service=acteur_service,
-        action=action,
-        acteur=acteur,
-    )
-    yield acteur
+        assert acteur.serialize() == expected_serialized_acteur
 
 
 @pytest.mark.django_db
 class TestActeurGetOrCreateRevisionActeur:
-    def test_create_revisionacteur_copy1(self, populate_admin_object, new_acteur):
-        revision_acteur = new_acteur.get_or_create_revision()
+    def test_create_revisionacteur_copy1(self, populate_admin_object, acteur):
+        revision_acteur = acteur.get_or_create_revision()
 
-        assert revision_acteur.serialize() == new_acteur.serialize()
+        assert revision_acteur.serialize() == acteur.serialize()
 
-    def test_create_revisionacteur_copy2(self, populate_admin_object, new_acteur):
-        revision_acteur = new_acteur.get_or_create_revision()
+    def test_create_revisionacteur_copy2(self, populate_admin_object, acteur):
+        revision_acteur = acteur.get_or_create_revision()
         revision_acteur.nom = "Test Object 2"
         revision_acteur.save()
-        revision_acteur2 = new_acteur.get_or_create_revision()
+        revision_acteur2 = acteur.get_or_create_revision()
 
         assert revision_acteur2.serialize() == revision_acteur.serialize()
         assert revision_acteur2.nom == "Test Object 2"
-        assert revision_acteur2.nom != new_acteur.nom
+        assert revision_acteur2.nom != acteur.nom
 
-    def test_create_revisionacteur(self, populate_admin_object, new_acteur):
-        revision_acteur = new_acteur.get_or_create_revision()
+    def test_create_revisionacteur(self, populate_admin_object, acteur):
+        revision_acteur = acteur.get_or_create_revision()
         acteur_service = ActeurService.objects.last()
         action = Action.objects.last()
         proposition_service = RevisionPropositionService.objects.create(
@@ -122,49 +167,55 @@ class TestActeurGetOrCreateRevisionActeur:
             revision_acteur=revision_acteur,
         )
         revision_acteur.proposition_services.add(proposition_service)
-        revision_acteur2 = new_acteur.get_or_create_revision()
+        revision_acteur2 = acteur.get_or_create_revision()
 
         assert revision_acteur2.serialize() == revision_acteur.serialize()
-        assert revision_acteur2.nom == new_acteur.nom
+        assert revision_acteur2.nom == acteur.nom
         assert (
             revision_acteur2.proposition_services.all()
-            != new_acteur.proposition_services.all()
+            != acteur.proposition_services.all()
         )
 
 
 @pytest.mark.django_db
 class TestActeurMaterializedView:
-    def test_materialized_view_empty(self, new_acteur):
+    def test_materialized_view_empty(self, acteur):
         assert FinalActeur.objects.count() == 0
 
-    def test_materialized_view_with_acteur(self, new_acteur):
+    def test_materialized_view_with_acteur(self, acteur):
         FinalActeur.refresh_view()
         final_acteur = FinalActeur.objects.first()
+        serialized_final_acteur = final_acteur.serialize()
+        serialized_final_acteur.pop("actions")
 
         assert FinalActeur.objects.count() == 1
-        assert final_acteur.serialize() == new_acteur.serialize()
+        assert serialized_final_acteur == acteur.serialize()
 
-    def test_materialized_view_with_acteur_even_if_revision(self, new_acteur):
+    def test_materialized_view_with_acteur_even_if_revision(self, acteur):
         FinalActeur.refresh_view()
         final_acteur = FinalActeur.objects.first()
 
-        revision_acteur = new_acteur.get_or_create_revision()
+        revision_acteur = acteur.get_or_create_revision()
         revision_acteur.nom = "Test Object 2"
         revision_acteur.save()
         final_acteur.refresh_from_db()
+        serialized_final_acteur = final_acteur.serialize()
+        serialized_final_acteur.pop("actions")
 
-        assert final_acteur.serialize() == new_acteur.serialize()
-        assert final_acteur.serialize() != revision_acteur.serialize()
+        assert serialized_final_acteur == acteur.serialize()
+        assert serialized_final_acteur != revision_acteur.serialize()
 
-    def test_materialized_view_with_revisionacteur(self, new_acteur):
-        revision_acteur = new_acteur.get_or_create_revision()
+    def test_materialized_view_with_revisionacteur(self, acteur):
+        revision_acteur = acteur.get_or_create_revision()
         revision_acteur.nom = "Test Object 2"
         revision_acteur.save()
         FinalActeur.refresh_view()
         final_acteur = FinalActeur.objects.first()
+        serialized_final_acteur = final_acteur.serialize()
+        serialized_final_acteur.pop("actions")
 
-        assert final_acteur.serialize() == revision_acteur.serialize()
-        assert final_acteur.serialize() != new_acteur.serialize()
+        assert serialized_final_acteur == revision_acteur.serialize()
+        assert serialized_final_acteur != acteur.serialize()
 
 
 @pytest.mark.django_db
@@ -176,3 +227,210 @@ class TestCreateRevisionActeur:
             acteur_type=ActeurType.objects.first(),
         )
         assert revision_acteur.serialize() == Acteur.objects.first().serialize()
+
+
+@pytest.mark.django_db
+class TestFinalActeurSerialize:
+    def test_finalacteur_serialize_basic(self, finalacteur):
+        assert finalacteur.serialize() == {
+            "nom": "Acteur 1",
+            "identifiant_unique": None,
+            "adresse": None,
+            "adresse_complement": None,
+            "code_postal": None,
+            "ville": None,
+            "url": None,
+            "email": None,
+            "telephone": None,
+            "multi_base": False,
+            "nom_commercial": None,
+            "nom_officiel": None,
+            "manuel": False,
+            "label_reparacteur": False,
+            "siret": None,
+            "source_donnee": None,
+            "identifiant_externe": None,
+            "id": finalacteur.id,
+            "location": {"type": "Point", "coordinates": [0.0, 0.0]},
+            "proposition_services": [
+                proposition_service.serialize()
+                for proposition_service in finalacteur.proposition_services.all()
+            ],
+            "actions": [  # type: ignore
+                action.serialize() for action in finalacteur.acteur_actions()
+            ],
+        }
+
+    def test_finalacteur_serialize_render_as_card(self, finalacteur):
+        assert finalacteur.serialize(render_as_card=True) == {
+            "nom": "Acteur 1",
+            "identifiant_unique": None,
+            "adresse": None,
+            "adresse_complement": None,
+            "code_postal": None,
+            "ville": None,
+            "url": None,
+            "email": None,
+            "telephone": None,
+            "multi_base": False,
+            "nom_commercial": None,
+            "nom_officiel": None,
+            "manuel": False,
+            "label_reparacteur": False,
+            "siret": None,
+            "source_donnee": None,
+            "identifiant_externe": None,
+            "id": finalacteur.id,
+            "location": {"type": "Point", "coordinates": [0.0, 0.0]},
+            "proposition_services": [
+                proposition_service.serialize()
+                for proposition_service in finalacteur.proposition_services.all()
+            ],
+            "actions": [  # type: ignore
+                action.serialize() for action in finalacteur.acteur_actions()
+            ],
+            "render_as_card": finalacteur.render_as_card(),
+        }
+
+    def test_finalacteur_serialize_render_as_card_with_direction(self, finalacteur):
+        assert finalacteur.serialize(render_as_card=True, direction="jai") == {
+            "nom": "Acteur 1",
+            "identifiant_unique": None,
+            "adresse": None,
+            "adresse_complement": None,
+            "code_postal": None,
+            "ville": None,
+            "url": None,
+            "email": None,
+            "telephone": None,
+            "multi_base": False,
+            "nom_commercial": None,
+            "nom_officiel": None,
+            "manuel": False,
+            "label_reparacteur": False,
+            "siret": None,
+            "source_donnee": None,
+            "identifiant_externe": None,
+            "id": finalacteur.id,
+            "location": {"type": "Point", "coordinates": [0.0, 0.0]},
+            "proposition_services": [
+                proposition_service.serialize()
+                for proposition_service in finalacteur.proposition_services.all()
+            ],
+            "actions": [  # type: ignore
+                action.serialize() for action in finalacteur.acteur_actions()
+            ],
+            "render_as_card": finalacteur.render_as_card(direction="jai"),
+        }
+
+
+@pytest.mark.django_db
+class TestFinalActeurRenderascard:
+    def test_finalacteur_renderascard_basic(self, finalacteur):
+        finalacteur.adresse = "77 av Segur"
+        finalacteur.code_postal = "75007"
+        finalacteur.ville = "Paris"
+
+        html = finalacteur.render_as_card()
+
+        for action in finalacteur.acteur_actions():
+            assert action.nom_affiche in html
+        for acteur_service in finalacteur.acteur_services():
+            assert str(acteur_service) in html
+
+        assert finalacteur.nom_affiche in html
+        assert finalacteur.adresse in html
+        assert finalacteur.code_postal in html
+        assert finalacteur.ville in html
+        assert "href" not in html
+        assert "None" not in html
+
+    def test_finalacteur_renderascard_detailed(self, finalacteur):
+        finalacteur.adresse = "77 av Segur"
+        finalacteur.adresse_complement = "DINUM"
+        finalacteur.code_postal = "75007"
+        finalacteur.ville = "Paris"
+        finalacteur.telephone = "01 02 03 04 05"
+        finalacteur.url = "quefairedemesobjets.ademe.fr"
+
+        html = finalacteur.render_as_card()
+
+        assert finalacteur.adresse_complement in html
+        assert finalacteur.telephone in html
+        assert f'href="{finalacteur.url}"' in html
+        assert "None" not in html
+
+
+@pytest.mark.django_db
+class TestFinalActeurActions:
+    def test_acteur_actions_basic(self, finalacteur):
+        actions = finalacteur.acteur_actions()
+        assert [action.nom for action in actions] == ["reparer", "echanger", "louer"]
+
+    def test_acteur_actions_with_direction(self, finalacteur):
+        actions = finalacteur.acteur_actions(direction="jai")
+        assert [action.nom for action in actions] == ["reparer", "echanger"]
+
+    def test_acteur_actions_order(self, finalacteur):
+        Action.objects.filter(nom="reparer").update(order=3)
+        Action.objects.filter(nom="echanger").update(order=2)
+        Action.objects.filter(nom="louer").update(order=1)
+        actions = finalacteur.acteur_actions()
+        assert [action.nom for action in actions] == ["louer", "echanger", "reparer"]
+
+
+@pytest.mark.django_db
+class TestActeurService:
+    def test_acteur_actions_basic(self):
+        action1 = Action.objects.get(nom="reparer")
+        acteur_service = ActeurService.objects.get(
+            nom="Achat, revente par un professionnel"
+        )
+        acteur = Acteur.objects.create(nom="Acteur 1", location=Point(0, 0))
+        PropositionService.objects.create(
+            acteur=acteur, acteur_service=acteur_service, action=action1
+        )
+
+        services = acteur.acteur_services()
+        assert [str(service) for service in services] == [
+            "Achat, revente par un professionnel"
+        ]
+
+    def test_acteur_actions_distinct(self):
+        action1 = Action.objects.get(nom="reparer")
+        acteur_service = ActeurService.objects.get(
+            nom="Achat, revente par un professionnel"
+        )
+        action2 = Action.objects.get(nom="echanger")
+        acteur = Acteur.objects.create(nom="Acteur 1", location=Point(0, 0))
+        PropositionService.objects.create(
+            acteur=acteur, acteur_service=acteur_service, action=action1
+        )
+        PropositionService.objects.create(
+            acteur=acteur, acteur_service=acteur_service, action=action2
+        )
+
+        services = acteur.acteur_services()
+        assert [str(service) for service in services] == [
+            "Achat, revente par un professionnel"
+        ]
+
+    def test_acteur_actions_multiple(self):
+        action = Action.objects.get(nom="reparer")
+        acteur_service1 = ActeurService.objects.get(
+            nom="Achat, revente par un professionnel"
+        )
+        acteur_service2 = ActeurService.objects.get(nom="Atelier d'auto-réparation")
+        acteur = Acteur.objects.create(nom="Acteur 1", location=Point(0, 0))
+        PropositionService.objects.create(
+            acteur=acteur, acteur_service=acteur_service1, action=action
+        )
+        PropositionService.objects.create(
+            acteur=acteur, acteur_service=acteur_service2, action=action
+        )
+
+        services = acteur.acteur_services()
+        assert [str(service) for service in services] == [
+            "Achat, revente par un professionnel",
+            "Atelier d'auto-réparation",
+        ]
