@@ -57,12 +57,23 @@ class SousCategorieAdmin(admin.ModelAdmin):
 
 class ObjetResource(resources.ModelResource):
     delete = fields.Field(widget=widgets.BooleanWidget())
+    sous_categorie = fields.Field(
+        column_name="sous_categorie_id",
+        attribute="sous_categorie",
+        widget=widgets.ForeignKeyWidget(SousCategorieObjet, field="nom"),
+    )
 
     def for_delete(self, row, instance):
         return self.fields["delete"].clean(row)
 
     class Meta:
         model = Objet
+        fields = (
+            "id",
+            "nom",
+            "sous_categorie",
+            "delete",
+        )
 
 
 class ObjetAdmin(import_export_admin.ImportExportModelAdmin):
