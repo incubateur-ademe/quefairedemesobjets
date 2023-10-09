@@ -10,7 +10,7 @@
         {% endfor %}
     </div>
     <h3 class="fr-mb-1w">
-        {{ acteur.nom_affiche }}
+        {{ acteur.nom_affiche|title }}
     </h3>
     {% if acteur.url %}
         <p class="qfdmo-text-sm fr-mb-2w fr-mt-0">
@@ -24,11 +24,11 @@
     </p>
     {% if not acteur.is_digital %}
         <p class="qfdmo-text-sm fr-mb-2w fr-mt-0">
-            {{ acteur.adresse }}<br>
+            {{ acteur.adresse|title }}<br>
             {% if acteur.adresse_complement %}
-                {{ acteur.adresse_complement }}<br>
+                {{ acteur.adresse_complement|title }}<br>
             {% endif %}
-            {{ acteur.code_postal }} {{ acteur.ville }}
+            {{ acteur.code_postal }} {{ acteur.ville|title }}
             {% if acteur.telephone %}
                 <br> {{ acteur.telephone }}
             {% endif %}
