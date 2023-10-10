@@ -1,14 +1,33 @@
 
 <div id="{{action_direction}}" data-choose-action-target='{{action_direction}}'>
-    {% for action in action_by_direction(request, action_direction) %}
-        <button
-            type="button"
-            class="fr-tag fr-mb-1v fr-ml-1v"
-            name="{{action.nom}}"
-            data-action="click->choose-action#apply"
-            {% if action.description %} title="{{ action.description }}"{% endif %}
-            aria-pressed="{{ 'true' if action.active else 'false' }}">
-            {{ action.nom_affiche }}
-        </button>
-    {% endfor %}
+    {% if is_checkbox(request) %}
+        <fieldset class="fr-fieldset fr-mb-1w" id="checkboxes-inline" aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages">
+            {% for action in action_by_direction(request, action_direction) %}
+                <div class="fr-fieldset__element fr-fieldset__element--inline fr-mb-1w">
+                    <div
+                        class="fr-checkbox-group fr-p-1v"
+                        data-action="click->choose-action#apply"
+                        style="background-color:var(--background-action-low-{{action.couleur}})"
+                        >
+                        <input name="{{action.nom}}" id="{{action.nom}}" type="checkbox" aria-describedby="{{action.nom}}-messages" {% if action.active %} checked{% endif %}>
+                        <label class="fr-label before:qfdmo-bg-white" for="{{action.nom}}">
+                            {{action.nom_affiche}}
+                        </label>
+                    </div>
+                </div>
+            {% endfor %}
+        </fieldset>
+    {% else %}
+        {% for action in action_by_direction(request, action_direction) %}
+            <button
+                type="button"
+                class="fr-tag fr-mb-1v fr-ml-1v"
+                name="{{action.nom}}"
+                data-action="click->choose-action#apply"
+                {% if action.description %} title="{{ action.description }}"{% endif %}
+                aria-pressed="{{ 'true' if action.active else 'false' }}">
+                {{ action.nom_affiche }}
+            </button>
+        {% endfor %}
+    {% endif %}
 </div>

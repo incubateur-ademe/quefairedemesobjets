@@ -14,6 +14,10 @@ def is_iframe(request: HttpRequest) -> bool:
     return "iframe" in request.GET
 
 
+def is_checkbox(request: HttpRequest) -> bool:
+    return "checkbox" in request.GET
+
+
 # FIXME : perhaps it is better in util list ?
 def get_action_list(request: HttpRequest) -> QuerySet[Action]:
     if action_list := request.GET.get("action_list"):
@@ -49,6 +53,7 @@ def environment(**options):
             "static": static,
             "reverse": reverse,
             "is_iframe": is_iframe,
+            "is_checkbox": is_checkbox,
             "action_by_direction": action_by_direction,
             "action_list_display": action_list_display,
         }
