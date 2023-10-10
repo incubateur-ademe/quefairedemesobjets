@@ -36,7 +36,7 @@ class GetReemploiSolutionForm(forms.Form):
         widget=AutoCompleteInput(
             attrs={
                 "class": "fr-input fr-icon-search-line",
-                "placeholder": "ex : Vêtement, Meuble, Smartphone, etc.",
+                "placeholder": "vêtement, smartphone, meuble...",
             }
         ),
         label="",
@@ -47,7 +47,7 @@ class GetReemploiSolutionForm(forms.Form):
         widget=AutoCompleteInput(
             attrs={
                 "class": "fr-input",
-                "placeholder": "ex : 20 Av. du Grésillé, 49000 Angers",
+                "placeholder": "20 av. du Grésillé 49000 Angers",
             },
             data_controller="address-autocomplete",
         ),
