@@ -328,7 +328,7 @@ class TestFinalActeurSerialize:
 @pytest.mark.django_db
 class TestFinalActeurRenderascard:
     def test_finalacteur_renderascard_basic(self, finalacteur):
-        finalacteur.adresse = "77 av Segur"
+        finalacteur.adresse = "77 Av Segur"
         finalacteur.code_postal = "75007"
         finalacteur.ville = "Paris"
 
@@ -347,8 +347,8 @@ class TestFinalActeurRenderascard:
         assert "None" not in html
 
     def test_finalacteur_renderascard_detailed(self, finalacteur):
-        finalacteur.adresse = "77 av Segur"
-        finalacteur.adresse_complement = "DINUM"
+        finalacteur.adresse = "77 Av Segur"
+        finalacteur.adresse_complement = "Dinum"
         finalacteur.code_postal = "75007"
         finalacteur.ville = "Paris"
         finalacteur.telephone = "01 02 03 04 05"
