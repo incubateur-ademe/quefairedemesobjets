@@ -373,7 +373,7 @@ REFRESH MATERIALIZED VIEW CONCURRENTLY qfdmo_finalpropositionservice_sous_catego
 
     def render_as_card(self, direction: str | None = None) -> str:
         return render_to_string(
-            "acteur_as_card.html", {"acteur": self, "direction": direction}
+            "qfdmo/acteur_as_card.html", {"acteur": self, "direction": direction}
         )
 
     def serialize(
