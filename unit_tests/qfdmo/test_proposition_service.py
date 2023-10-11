@@ -7,35 +7,92 @@ from qfdmo.models import (
     Action,
     CategorieObjet,
     PropositionService,
+    RevisionActeur,
+    RevisionPropositionService,
     SousCategorieObjet,
 )
 
 
 class TestActionNomAsNaturalKeyHeritage:
-    @pytest.mark.django_db
-    def test_serialize(self):
-        acteur_service = ActeurService.objects.create(nom="Test Object", lvao_id=123)
-        action = Action.objects.create(nom="Test Object", lvao_id=123)
-        acteur = Acteur.objects.create(nom="Test Object", location=Point(0, 0))
+    @pytest.fixture
+    def acteur_service(self):
+        return ActeurService.objects.create(nom="fake acteur service", lvao_id=123)
+
+    @pytest.fixture
+    def action(self):
+        return Action.objects.create(nom="fake action", lvao_id=123)
+
+    @pytest.fixture
+    def acteur(self):
+        return Acteur.objects.create(nom="fake acteur", location=Point(0, 0))
+
+    @pytest.fixture
+    def categorie(self):
+        return CategorieObjet.objects.create(nom="fake categorie")
+
+    @pytest.fixture
+    def sous_categories(self, categorie):
+        sous_categorie1 = SousCategorieObjet.objects.create(
+            nom="fake sous-categorie 1", categorie=categorie, lvao_id=123, code="C1"
+        )
+        sous_categorie2 = SousCategorieObjet.objects.create(
+            nom="fake sous-categorie 2", categorie=categorie, lvao_id=123, code="C2"
+        )
+        return [sous_categorie1, sous_categorie2]
+
+    @pytest.fixture
+    def proposition_service(self, acteur_service, action, acteur, sous_categories):
         proposition_service = PropositionService.objects.create(
             acteur_service=acteur_service,
             action=action,
             acteur=acteur,
         )
-        categorie = CategorieObjet.objects.create(nom="Test Category")
-        sous_categorie1 = SousCategorieObjet.objects.create(
-            nom="Test Sous-Categorie 1", categorie=categorie, lvao_id=123, code="C1"
-        )
-        sous_categorie2 = SousCategorieObjet.objects.create(
-            nom="Test Sous-Categorie 2", categorie=categorie, lvao_id=123, code="C2"
-        )
-        proposition_service.sous_categories.add(sous_categorie1, sous_categorie2)
+        proposition_service.sous_categories.add(sous_categories[0], sous_categories[1])
+        return proposition_service
 
+    @pytest.fixture
+    def revision_acteur(self):
+        return RevisionActeur.objects.create(
+            nom="fake revision acteur", location=Point(0, 0)
+        )
+
+    @pytest.fixture
+    def revision_proposition_service(
+        self, acteur_service, action, revision_acteur, sous_categories
+    ):
+        revision_proposition_service = RevisionPropositionService.objects.create(
+            acteur_service=acteur_service,
+            action=action,
+            revision_acteur=revision_acteur,
+        )
+        revision_proposition_service.sous_categories.add(
+            sous_categories[0], sous_categories[1]
+        )
+        return revision_proposition_service
+
+    @pytest.mark.django_db
+    def test_serialize(
+        self, proposition_service, acteur_service, action, sous_categories, acteur
+    ):
         assert proposition_service.serialize() == {
             "action": action.serialize(),
             "acteur_service": acteur_service.serialize(),
             "sous_categories": [
-                sous_categorie1.serialize(),
-                sous_categorie2.serialize(),
+                sous_categories[0].serialize(),
+                sous_categories[1].serialize(),
             ],
         }
+
+    @pytest.mark.django_db
+    def test_proposition_service_str(self, proposition_service):
+        assert str(proposition_service) == (
+            "fake acteur - fake action - fake acteur service -"
+            " fake sous-categorie 1, fake sous-categorie 2"
+        )
+
+    @pytest.mark.django_db
+    def test_revision_proposition_service_str(self, revision_proposition_service):
+        assert str(revision_proposition_service) == (
+            "fake revision acteur - fake action - fake acteur service -"
+            " fake sous-categorie 1, fake sous-categorie 2"
+        )

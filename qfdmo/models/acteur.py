@@ -6,129 +6,10 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.forms import model_to_dict
 from django.template.loader import render_to_string
-from unidecode import unidecode
 
-
-class NomAsNaturalKeyManager(models.Manager):
-    def get_by_natural_key(self, nom: str) -> models.Model:
-        return self.get(nom=nom)
-
-
-class NomAsNaturalKeyModel(models.Model):
-    class Meta:
-        abstract = True
-
-    objects = NomAsNaturalKeyManager()
-
-    nom = models.CharField()
-
-    def natural_key(self) -> tuple[str]:
-        return (self.nom,)
-
-    def __str__(self) -> str:
-        return self.nom
-
-
-class CategorieObjet(NomAsNaturalKeyModel):
-    class Meta:
-        verbose_name = "Catégorie d'objets"
-        verbose_name_plural = "Catégories d'objets"
-
-    id = models.AutoField(primary_key=True)
-    nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
-
-    def serialize(self):
-        return model_to_dict(self)
-
-
-class CodeAsNaturalKeyManager(models.Manager):
-    def get_by_natural_key(self, code: str) -> models.Model:
-        return self.get(code=code)
-
-
-class SousCategorieObjet(models.Model):
-    class Meta:
-        verbose_name = "Sous catégorie d'objets"
-        verbose_name_plural = "Sous catégories d'objets"
-
-    objects = CodeAsNaturalKeyManager()
-
-    id = models.AutoField(primary_key=True)
-    nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
-    lvao_id = models.IntegerField(blank=True, null=True)
-    categorie = models.ForeignKey(CategorieObjet, on_delete=models.CASCADE)
-    code = models.CharField(max_length=10, unique=True, blank=False, null=False)
-
-    def __str__(self) -> str:
-        return self.nom
-
-    def natural_key(self) -> tuple[str]:
-        return (self.code,)
-
-    @property
-    def sanitized_nom(self) -> str:
-        return unidecode(self.nom).upper()
-
-    def serialize(self):
-        sous_categorie = model_to_dict(self, exclude=["categorie"])
-        sous_categorie["categorie"] = self.categorie.serialize()
-        return sous_categorie
-
-
-class Objet(NomAsNaturalKeyModel):
-    id = models.AutoField(primary_key=True)
-    nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
-    sous_categorie = models.ForeignKey(
-        SousCategorieObjet,
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True,
-        related_name="objets",
-    )
-
-
-class ActionDirection(NomAsNaturalKeyModel):
-    class Meta:
-        verbose_name = "Direction de l'action"
-        verbose_name_plural = "Directions de l'action"
-
-    id = models.AutoField(primary_key=True)
-    nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
-    order = models.IntegerField(blank=False, null=False, default=0)
-    nom_affiche = models.CharField(max_length=255, unique=True, blank=False, null=False)
-
-    def __str__(self):
-        return self.nom_affiche
-
-
-class Action(NomAsNaturalKeyModel):
-    id = models.AutoField(primary_key=True)
-    nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
-    nom_affiche = models.CharField(max_length=255, null=False, default="")
-    description = models.CharField(max_length=255, null=True, blank=True)
-    order = models.IntegerField(blank=False, null=False, default=0)
-    lvao_id = models.IntegerField(blank=True, null=True)
-    directions = models.ManyToManyField(ActionDirection)
-    couleur = models.CharField(
-        max_length=255,
-        null=True,
-        blank=True,
-        default="yellow-tournesol",
-        help_text="""Couleur du badge à choisir dans le DSFR
-Couleur dispoible : blue-france, green-tilleul-verveine, green-bourgeon, green-emeraude,
-green-menthe, green-archipel, blue-ecume, blue-cumulus, purple-glycine, pink-macaron,
-pink-tuile, yellow-tournesol, yellow-moutarde, orange-terre-battue, brown-cafe-creme,
-brown-caramel, brown-opera, beige-gris-galet""",
-    )
-    icon = models.CharField(
-        max_length=255,
-        null=True,
-        blank=True,
-        help_text="Icône du badge à choisir dans le <a href='https://www.systeme-de-design.gouv.fr/elements-d-interface/fondamentaux-techniques/icones' target='_blank'>DSFR</a>",  # noqa E501
-    )
-
-    def serialize(self):
-        return model_to_dict(self, exclude=["directions"])
+from qfdmo.models.action import Action
+from qfdmo.models.categorie_objet import SousCategorieObjet
+from qfdmo.models.utils import NomAsNaturalKeyModel
 
 
 class ActeurService(NomAsNaturalKeyModel):
@@ -157,71 +38,6 @@ class ActeurType(NomAsNaturalKeyModel):
 
     def serialize(self):
         return model_to_dict(self)
-
-
-class LVAOBase(NomAsNaturalKeyModel):
-    class Meta:
-        verbose_name = "Acteur LVAO"
-        verbose_name_plural = "Acteurs LVAO"
-
-    id = models.AutoField(primary_key=True)
-    nom = models.CharField(max_length=255, blank=False, null=False)  # title
-    identifiant_unique = models.CharField(
-        max_length=255, blank=True, null=True, unique=True
-    )  # UniqueId
-
-
-class LVAOBaseRevision(NomAsNaturalKeyModel):
-    class Meta:
-        verbose_name = "Révision Acteur LVAO"
-        verbose_name_plural = "Révision Acteurs LVAO"
-
-    id = models.AutoField(primary_key=True)
-    lvao_base = models.ForeignKey(
-        LVAOBase,
-        on_delete=models.CASCADE,
-        null=False,
-        related_name="lvao_base_revisions",
-    )
-    lvao_node_id = models.IntegerField(null=False)  # node_id
-    lvao_revision_id = models.IntegerField(null=True, unique=True)  # revision_id
-    nom = models.CharField(max_length=255, blank=False, null=False)  # title
-    acteur_type = models.ForeignKey(
-        ActeurType, on_delete=models.CASCADE, blank=True, null=True
-    )  # TypeActeur
-    adresse = models.CharField(max_length=255, blank=True, null=True)  # Adresse1
-    adresse_complement = models.CharField(
-        max_length=255, blank=True, null=True
-    )  # Adresse2
-    code_postal = models.CharField(max_length=10, blank=True, null=True)  # CodePostal
-    ville = models.CharField(max_length=255, blank=True, null=True)  # Ville
-    url = models.CharField(max_length=2048, blank=True, null=True)  # url
-    email = models.EmailField(blank=True, null=True)  # email
-    latitude = models.FloatField(blank=True, null=True)  # latitude
-    longitude = models.FloatField(blank=True, null=True)  # longitude
-    telephone = models.CharField(max_length=255, blank=True, null=True)  # Telephone
-    multi_base = models.BooleanField(default=False)  # MultiBase
-    nom_commercial = models.CharField(max_length=255, blank=True, null=True)  # NomCial
-    nom_officiel = models.CharField(
-        max_length=255, blank=True, null=True
-    )  # RaisonSociale
-    publie = models.BooleanField(default=False)  # Published
-    manuel = models.BooleanField(default=False)  # Manuel
-    label_reparacteur = models.BooleanField(default=False)  # Reparacteur
-    siret = models.CharField(max_length=14, blank=True, null=True)  # Siret
-    source_donnee = models.CharField(
-        max_length=255, blank=True, null=True
-    )  # BDD # todo: choice field
-    identifiant_externe = models.CharField(
-        max_length=255, blank=True, null=True
-    )  # ActeurId
-    actions = models.ManyToManyField(Action, related_name="actions")  # Geste
-    acteur_services = models.ManyToManyField(
-        ActeurService, related_name="acteur_services"
-    )  # Activite
-    sous_categories = models.ManyToManyField(
-        SousCategorieObjet, related_name="sous_categories"
-    )  # Objets
 
 
 class BaseActeur(NomAsNaturalKeyModel):
@@ -421,6 +237,13 @@ class BasePropositionService(models.Model):
         SousCategorieObjet,
     )
 
+    # FIXME: test me please !!!
+    def __str__(self):
+        return (
+            f"{self.action.nom} - {self.acteur_service.nom} -"
+            f" { ', '.join([ str(sc) for sc in self.sous_categories.all()]) }"
+        )
+
     def serialize(self):
         return {
             "action": self.action.serialize(),
@@ -434,8 +257,8 @@ class BasePropositionService(models.Model):
 
 class PropositionService(BasePropositionService):
     class Meta:
-        verbose_name = "Proposition de service"
-        verbose_name_plural = "Proposition de service"
+        verbose_name = "PROPOSITION DE SERVICE - IMPORTÉ"
+        verbose_name_plural = "PROPOSITIONS DE SERVICE - IMPORTÉ"
 
     acteur = models.ForeignKey(
         Acteur,
@@ -444,11 +267,15 @@ class PropositionService(BasePropositionService):
         related_name="proposition_services",
     )
 
+    # FIXME: test me please !!!
+    def __str__(self):
+        return f"{self.acteur} - {super().__str__()}"
+
 
 class RevisionPropositionService(BasePropositionService):
     class Meta:
-        verbose_name = "Proposition de service"
-        verbose_name_plural = "Proposition de service"
+        verbose_name = "PROPOSITION DE SERVICE - CORRIGÉ"
+        verbose_name_plural = "PROPOSITIONS DE SERVICE - CORRIGÉ"
 
     revision_acteur = models.ForeignKey(
         RevisionActeur,
@@ -456,6 +283,10 @@ class RevisionPropositionService(BasePropositionService):
         null=False,
         related_name="proposition_services",
     )
+
+    # FIXME: test me please !!!
+    def __str__(self):
+        return f"{self.revision_acteur} - {super().__str__()}"
 
 
 class FinalPropositionService(BasePropositionService):
