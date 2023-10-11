@@ -13,6 +13,8 @@ from qfdmo.models import (
     RevisionActeur,
     RevisionPropositionService,
 )
+from qfdmo.models.action import Action
+from qfdmo.models.categorie_objet import SousCategorieObjet
 from qfdmo.widget import CustomOSMWidget
 
 
@@ -91,23 +93,17 @@ class BaseActeurAdmin(admin.GISModelAdmin):
 
 class ActeurResource(resources.ModelResource):
     delete = fields.Field(widget=widgets.BooleanWidget())
-    # sous_categorie = fields.Field(
-    #     column_name="sous_categorie_id",
-    #     attribute="sous_categorie",
-    #     widget=widgets.ForeignKeyWidget(SousCategorieObjet, field="nom"),
-    # )
+    acteur_type = fields.Field(
+        column_name="acteur_type_id",
+        attribute="acteur_type",
+        widget=widgets.ForeignKeyWidget(ActeurType, field="nom"),
+    )
 
     def for_delete(self, row, instance):
         return self.fields["delete"].clean(row)
 
     class Meta:
         model = Acteur
-        # fields = (
-        #     "id",
-        #     "nom",
-        #     "sous_categorie",
-        #     "delete",
-        # )
 
 
 class ActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin, NotEditableMixin):
@@ -117,13 +113,85 @@ class ActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin, NotEditableM
     resource_classes = [ActeurResource]
 
 
+class RevisionActeurResource(ActeurResource):
+    class Meta:
+        model = RevisionActeur
+
+
 class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin):
     gis_widget = CustomOSMWidget
     inlines = [
         RevisionPropositionServiceInline,
     ]
     exclude = ["id"]
-    resource_classes = [ActeurResource]
+    resource_classes = [RevisionActeurResource]
+
+
+class BasePropositionServiceAdmin(admin.GISModelAdmin):
+    search_fields = [
+        "acteur__nom",
+        "acteur__siret",
+    ]
+
+
+class BasePropositionServiceResource(resources.ModelResource):
+    delete = fields.Field(widget=widgets.BooleanWidget())
+
+    action = fields.Field(
+        column_name="action_id",
+        attribute="action",
+        widget=widgets.ForeignKeyWidget(Action, field="nom"),
+    )
+    acteur_service = fields.Field(
+        column_name="acteur_service_id",
+        attribute="acteur_service",
+        widget=widgets.ForeignKeyWidget(ActeurService, field="nom"),
+    )
+    # sous_categories = models.ManyToManyField(
+    #     SousCategorieObjet,
+    # )
+    sous_categories = fields.Field(
+        column_name="sous_categories",
+        attribute="sous_categories",
+        widget=widgets.ManyToManyWidget(SousCategorieObjet, field="nom", separator="|"),
+    )
+
+    def for_delete(self, row, instance):
+        return self.fields["delete"].clean(row)
+
+
+class PropositionServiceResource(BasePropositionServiceResource):
+    acteur = fields.Field(
+        column_name="acteur",
+        attribute="acteur",
+        widget=widgets.ForeignKeyWidget(Acteur, field="identifiant_unique"),
+    )
+
+    class Meta:
+        model = PropositionService
+
+
+class PropositionServiceAdmin(
+    import_export_admin.ExportMixin, BasePropositionServiceAdmin, NotEditableMixin
+):
+    resource_classes = [PropositionServiceResource]
+
+
+class RevisionPropositionServiceResource(BasePropositionServiceResource):
+    revision_acteur = fields.Field(
+        column_name="acteur",
+        attribute="revision_acteur",
+        widget=widgets.ForeignKeyWidget(RevisionActeur, field="identifiant_unique"),
+    )
+
+    class Meta:
+        model = RevisionPropositionService
+
+
+class RevisionPropositionServiceAdmin(
+    import_export_admin.ImportExportMixin, BasePropositionServiceAdmin
+):
+    resource_classes = [RevisionPropositionServiceResource]
 
 
 class FinalActeurAdmin(BaseActeurAdmin, NotEditableMixin):
@@ -133,8 +201,10 @@ class FinalActeurAdmin(BaseActeurAdmin, NotEditableMixin):
     ]
 
 
-admin.site.register(ActeurType, ActeurTypeAdmin)
 admin.site.register(Acteur, ActeurAdmin)
-admin.site.register(RevisionActeur, RevisionActeurAdmin)
-admin.site.register(FinalActeur, FinalActeurAdmin)
 admin.site.register(ActeurService)
+admin.site.register(ActeurType, ActeurTypeAdmin)
+admin.site.register(FinalActeur, FinalActeurAdmin)
+admin.site.register(PropositionService, PropositionServiceAdmin)
+admin.site.register(RevisionActeur, RevisionActeurAdmin)
+admin.site.register(RevisionPropositionService, RevisionPropositionServiceAdmin)

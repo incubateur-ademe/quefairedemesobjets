@@ -237,6 +237,13 @@ class BasePropositionService(models.Model):
         SousCategorieObjet,
     )
 
+    # FIXME: test me please !!!
+    def __str__(self):
+        return (
+            f"{self.action.nom} - {self.acteur_service.nom} -"
+            f" { ', '.join([ str(sc) for sc in self.sous_categories.all()]) }"
+        )
+
     def serialize(self):
         return {
             "action": self.action.serialize(),
@@ -250,8 +257,8 @@ class BasePropositionService(models.Model):
 
 class PropositionService(BasePropositionService):
     class Meta:
-        verbose_name = "Proposition de service"
-        verbose_name_plural = "Proposition de service"
+        verbose_name = "PROPOSITION DE SERVICE - IMPORTÉ"
+        verbose_name_plural = "PROPOSITIONS DE SERVICE - IMPORTÉ"
 
     acteur = models.ForeignKey(
         Acteur,
@@ -260,11 +267,15 @@ class PropositionService(BasePropositionService):
         related_name="proposition_services",
     )
 
+    # FIXME: test me please !!!
+    def __str__(self):
+        return f"{self.acteur} - {super().__str__()}"
+
 
 class RevisionPropositionService(BasePropositionService):
     class Meta:
-        verbose_name = "Proposition de service"
-        verbose_name_plural = "Proposition de service"
+        verbose_name = "PROPOSITION DE SERVICE - CORRIGÉ"
+        verbose_name_plural = "PROPOSITIONS DE SERVICE - CORRIGÉ"
 
     revision_acteur = models.ForeignKey(
         RevisionActeur,
@@ -272,6 +283,10 @@ class RevisionPropositionService(BasePropositionService):
         null=False,
         related_name="proposition_services",
     )
+
+    # FIXME: test me please !!!
+    def __str__(self):
+        return f"{self.revision_acteur} - {super().__str__()}"
 
 
 class FinalPropositionService(BasePropositionService):
