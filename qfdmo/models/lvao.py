@@ -1,9 +1,12 @@
 from django.contrib.gis.db import models
 
-from qfdmo.models.acteur import ActeurService, ActeurType
-from qfdmo.models.action import Action
-from qfdmo.models.categorie_objet import SousCategorieObjet
-from qfdmo.models.utils import NomAsNaturalKeyModel
+from qfdmo.models import (
+    ActeurService,
+    ActeurType,
+    Action,
+    NomAsNaturalKeyModel,
+    SousCategorieObjet,
+)
 
 
 class LVAOBase(NomAsNaturalKeyModel):

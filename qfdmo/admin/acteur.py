@@ -7,14 +7,14 @@ from qfdmo.models import (
     Acteur,
     ActeurService,
     ActeurType,
+    Action,
     FinalActeur,
     FinalPropositionService,
     PropositionService,
     RevisionActeur,
     RevisionPropositionService,
+    SousCategorieObjet,
 )
-from qfdmo.models.action import Action
-from qfdmo.models.categorie_objet import SousCategorieObjet
 from qfdmo.widget import CustomOSMWidget
 
 
