@@ -24,7 +24,9 @@ class TestActionNomAsNaturalKeyHeritage:
 
     @pytest.fixture
     def acteur(self):
-        return Acteur.objects.create(nom="fake acteur", location=Point(0, 0))
+        return Acteur.objects.create(
+            nom="fake acteur", location=Point(0, 0), identifiant_unique="1"
+        )
 
     @pytest.fixture
     def categorie(self):
@@ -53,7 +55,7 @@ class TestActionNomAsNaturalKeyHeritage:
     @pytest.fixture
     def revision_acteur(self):
         return RevisionActeur.objects.create(
-            nom="fake revision acteur", location=Point(0, 0)
+            nom="fake revision acteur", location=Point(0, 0), identifiant_unique="1"
         )
 
     @pytest.fixture

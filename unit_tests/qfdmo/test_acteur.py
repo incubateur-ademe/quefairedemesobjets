@@ -32,7 +32,10 @@ def populate_admin_object(django_db_blocker):
 def acteur(db, populate_admin_object):
     acteur_type = ActeurType.objects.first()
     acteur = Acteur.objects.create(
-        nom="Test Object 1", location=Point(0, 0), acteur_type=acteur_type
+        nom="Test Object 1",
+        location=Point(0, 0),
+        acteur_type=acteur_type,
+        identifiant_unique="1",
     )
     acteur_service = ActeurService.objects.first()
     action = Action.objects.first()
@@ -50,7 +53,9 @@ def finalacteur(db, populate_admin_object):
     action2 = Action.objects.get(nom="echanger")
     action3 = Action.objects.get(nom="louer")
     acteur_service = ActeurService.objects.first()
-    acteur = Acteur.objects.create(nom="Acteur 1", location=Point(0, 0))
+    acteur = Acteur.objects.create(
+        nom="Acteur 1", location=Point(0, 0), identifiant_unique="1"
+    )
     PropositionService.objects.create(
         acteur=acteur, acteur_service=acteur_service, action=action1
     )
@@ -117,7 +122,7 @@ class TestSerialize:
         expected_serialized_acteur = {
             "id": acteur.id,
             "nom": "Test Object 1",
-            "identifiant_unique": None,
+            "identifiant_unique": "1",
             "acteur_type": acteur.acteur_type.serialize(),
             "adresse": None,
             "adresse_complement": None,
@@ -133,6 +138,8 @@ class TestSerialize:
             "label_reparacteur": False,
             "siret": None,
             "source_donnee": None,
+            "source": None,
+            "statut": "ACTIF",
             "identifiant_externe": None,
             "location": {"type": "Point", "coordinates": [0.0, 0.0]},
             "proposition_services": [proposition_service.serialize()],
@@ -225,6 +232,7 @@ class TestCreateRevisionActeur:
             nom="Test Object 1",
             location=Point(0, 0),
             acteur_type=ActeurType.objects.first(),
+            identifiant_unique="1",
         )
         assert revision_acteur.serialize() == Acteur.objects.first().serialize()
 
@@ -234,7 +242,7 @@ class TestFinalActeurSerialize:
     def test_finalacteur_serialize_basic(self, finalacteur):
         assert finalacteur.serialize() == {
             "nom": "Acteur 1",
-            "identifiant_unique": None,
+            "identifiant_unique": "1",
             "adresse": None,
             "adresse_complement": None,
             "code_postal": None,
@@ -248,7 +256,9 @@ class TestFinalActeurSerialize:
             "manuel": False,
             "label_reparacteur": False,
             "siret": None,
+            "source": None,
             "source_donnee": None,
+            "statut": "ACTIF",
             "identifiant_externe": None,
             "id": finalacteur.id,
             "location": {"type": "Point", "coordinates": [0.0, 0.0]},
@@ -264,7 +274,7 @@ class TestFinalActeurSerialize:
     def test_finalacteur_serialize_render_as_card(self, finalacteur):
         assert finalacteur.serialize(render_as_card=True) == {
             "nom": "Acteur 1",
-            "identifiant_unique": None,
+            "identifiant_unique": "1",
             "adresse": None,
             "adresse_complement": None,
             "code_postal": None,
@@ -278,7 +288,9 @@ class TestFinalActeurSerialize:
             "manuel": False,
             "label_reparacteur": False,
             "siret": None,
+            "source": None,
             "source_donnee": None,
+            "statut": "ACTIF",
             "identifiant_externe": None,
             "id": finalacteur.id,
             "location": {"type": "Point", "coordinates": [0.0, 0.0]},
@@ -295,7 +307,7 @@ class TestFinalActeurSerialize:
     def test_finalacteur_serialize_render_as_card_with_direction(self, finalacteur):
         assert finalacteur.serialize(render_as_card=True, direction="jai") == {
             "nom": "Acteur 1",
-            "identifiant_unique": None,
+            "identifiant_unique": "1",
             "adresse": None,
             "adresse_complement": None,
             "code_postal": None,
@@ -309,7 +321,9 @@ class TestFinalActeurSerialize:
             "manuel": False,
             "label_reparacteur": False,
             "siret": None,
+            "source": None,
             "source_donnee": None,
+            "statut": "ACTIF",
             "identifiant_externe": None,
             "id": finalacteur.id,
             "location": {"type": "Point", "coordinates": [0.0, 0.0]},

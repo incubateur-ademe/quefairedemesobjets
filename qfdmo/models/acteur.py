@@ -79,6 +79,7 @@ class BaseActeur(NomAsNaturalKeyModel):
     email = models.EmailField(blank=True, null=True)
     # FIXME : not mandatory if digital
     # FIXME : lat long for import export
+    # FIXME : export more than x lines should be forbidden
     location = models.PointField(null=False)
     telephone = models.CharField(max_length=255, blank=True, null=True)
     multi_base = models.BooleanField(default=False)
@@ -88,6 +89,7 @@ class BaseActeur(NomAsNaturalKeyModel):
     label_reparacteur = models.BooleanField(default=False)
     siret = models.CharField(max_length=14, blank=True, null=True)
     source_donnee = models.CharField(max_length=255, blank=True, null=True)
+    # FIXME : serialize source
     source = models.ForeignKey(
         SourceDonnee, on_delete=models.CASCADE, blank=True, null=True
     )
@@ -274,6 +276,7 @@ class BasePropositionService(models.Model):
         on_delete=models.CASCADE,
         null=False,
     )
+    # FIXME : alphabetic order in admin
     sous_categories = models.ManyToManyField(
         SousCategorieObjet,
     )
