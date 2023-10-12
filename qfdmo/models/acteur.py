@@ -26,6 +26,12 @@ class ActeurService(NomAsNaturalKeyModel):
         return model_to_dict(self, exclude=["actions"])
 
 
+class ActeurStatus(models.TextChoices):
+    ACTIF = "ACTIF", "actif"
+    INACTIF = "INACTIF", "inactif"
+    SUPPRIME = "SUPPRIME", "supprimé"
+
+
 class ActeurType(NomAsNaturalKeyModel):
     class Meta:
         verbose_name = "Type d'acteur"
@@ -40,14 +46,28 @@ class ActeurType(NomAsNaturalKeyModel):
         return model_to_dict(self)
 
 
+class SourceDonnee(NomAsNaturalKeyModel):
+    class Meta:
+        verbose_name = "Source de données"
+        verbose_name_plural = "Sources de données"
+
+    id = models.AutoField(primary_key=True)
+    nom = models.CharField(max_length=255, unique=True)
+    logo = models.CharField(max_length=255, blank=True, null=True)
+    afficher = models.BooleanField(default=True)
+    url = models.CharField(max_length=2048, blank=True, null=True)
+
+    def serialize(self):
+        return model_to_dict(self)
+
+
 class BaseActeur(NomAsNaturalKeyModel):
     class Meta:
         abstract = True
 
     nom = models.CharField(max_length=255, blank=False, null=False)
-    identifiant_unique = models.CharField(
-        max_length=255, blank=True, null=True, unique=True
-    )
+    # FIXME : use identifiant_unique as primary in import export
+    identifiant_unique = models.CharField(max_length=255, unique=True)
     acteur_type = models.ForeignKey(
         ActeurType, on_delete=models.CASCADE, blank=True, null=True
     )
@@ -57,6 +77,8 @@ class BaseActeur(NomAsNaturalKeyModel):
     ville = models.CharField(max_length=255, blank=True, null=True)
     url = models.CharField(max_length=2048, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
+    # FIXME : not mandatory if digital
+    # FIXME : lat long for import export
     location = models.PointField(null=False)
     telephone = models.CharField(max_length=255, blank=True, null=True)
     multi_base = models.BooleanField(default=False)
@@ -66,7 +88,13 @@ class BaseActeur(NomAsNaturalKeyModel):
     label_reparacteur = models.BooleanField(default=False)
     siret = models.CharField(max_length=14, blank=True, null=True)
     source_donnee = models.CharField(max_length=255, blank=True, null=True)
+    source = models.ForeignKey(
+        SourceDonnee, on_delete=models.CASCADE, blank=True, null=True
+    )
     identifiant_externe = models.CharField(max_length=255, blank=True, null=True)
+    statut = models.CharField(
+        max_length=255, default=ActeurStatus.ACTIF, choices=ActeurStatus.choices
+    )
 
     @property
     def latitude(self):
