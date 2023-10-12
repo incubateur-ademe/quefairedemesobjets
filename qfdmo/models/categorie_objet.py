@@ -21,6 +21,7 @@ class SousCategorieObjet(models.Model):
     class Meta:
         verbose_name = "Sous catégorie d'objets"
         verbose_name_plural = "Sous catégories d'objets"
+        ordering = ["nom"]
 
     objects = CodeAsNaturalKeyManager()
 
