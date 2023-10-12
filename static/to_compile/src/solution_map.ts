@@ -18,7 +18,7 @@ const COLOR_MAPPING: object = {
     "purple-glycine": "#A558A0",
     "pink-macaron": "#E18B76",
     "pink-tuile": "#CE614A",
-    "yellow-tournesol": "#C8AA39",
+    "yellow-tournesol": "#e9c53b",
     "yellow-moutarde": "#C3992A",
     "orange-terre-battue": "#E4794A",
     "brown-cafe-creme": "#D1B781",
