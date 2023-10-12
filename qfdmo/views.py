@@ -48,12 +48,12 @@ class ReemploiSolutionView(FormView):
         sous_categories_objets: QuerySet | None = None
         if objet_q := self.request.GET.get("sous_categorie_objet", None):
             sous_categories_objets = SousCategorieObjet.objects.filter(
-                objets__nom__icontains=objet_q
+                objets__nom=objet_q
             )
         action_selection = get_action_list(self.request)
         acteurs = (
             FinalActeur.objects.filter(
-                proposition_services__action__in=action_selection
+                proposition_services__action__in=action_selection,
             )
             .prefetch_related(
                 "proposition_services__sous_categories",
@@ -65,7 +65,7 @@ class ReemploiSolutionView(FormView):
             )
             .distinct()
         )
-        if sous_categories_objets is not None:
+        if sous_categories_objets:
             acteurs = acteurs.filter(
                 proposition_services__sous_categories__in=sous_categories_objets
             )
