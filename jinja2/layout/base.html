@@ -7,15 +7,13 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
         <!--Title and desc-->
-
         <title>{% block page_title %}Que faire de mes objets{% endblock%}</title>
-        <meta name="description" content="{% block page_description %}Donner une nouvelle vie à vos objets{% endblock %}">
+        <meta name="description" content="{% block page_description %}Donner une nouvelle vie aux objets{% endblock %}">
 
         <!--Favicon-->
         <link rel="shortcut icon" href="{{ static('favicon-16x16.png') }}" type="image/x-icon"><!-- 32×32 -->
 
         <!--Css-->
-
         <link rel="stylesheet" href="{{ static('qfdmo.css') }}">
         {% block css_extras %}{% endblock %}
 
@@ -26,7 +24,6 @@
         {% if is_iframe(request) %}
             <script src="{{ static('iframe.js') }}"></script>
         {% endif %}
-
     </head>
 
     <body class="qfdmo-flex qfdmo-flex-col">
