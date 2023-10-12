@@ -128,10 +128,7 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
 
 
 class BasePropositionServiceAdmin(admin.GISModelAdmin):
-    search_fields = [
-        "acteur__nom",
-        "acteur__siret",
-    ]
+    pass
 
 
 class BasePropositionServiceResource(resources.ModelResource):
@@ -175,6 +172,10 @@ class PropositionServiceAdmin(
     import_export_admin.ExportMixin, BasePropositionServiceAdmin, NotEditableMixin
 ):
     resource_classes = [PropositionServiceResource]
+    search_fields = [
+        "acteur__nom",
+        "acteur__siret",
+    ]
 
 
 class RevisionPropositionServiceResource(BasePropositionServiceResource):
@@ -192,6 +193,10 @@ class RevisionPropositionServiceAdmin(
     import_export_admin.ImportExportMixin, BasePropositionServiceAdmin
 ):
     resource_classes = [RevisionPropositionServiceResource]
+    search_fields = [
+        "revision_acteur__nom",
+        "revision_acteur__siret",
+    ]
 
 
 class FinalActeurAdmin(BaseActeurAdmin, NotEditableMixin):
