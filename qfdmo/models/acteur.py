@@ -109,12 +109,25 @@ class Acteur(BaseActeur):
         verbose_name = "ACTEUR de l'EC - IMPORTÉ"
         verbose_name_plural = "ACTEURS de l'EC - IMPORTÉ"
 
+    # FIXME : could be remove if we use identifiant_unique as primary key
     id = models.AutoField(primary_key=True)
 
     def get_or_create_revision(self):
         fields = model_to_dict(
             self,
-            exclude=["proposition_services", "id"],
+            fields=[
+                "identifiant_unique",
+                "nom",
+                "adresse",
+                "adresse_complement",
+                "code_postal",
+                "ville",
+                "location",
+                "acteur_type",
+                "multi_base",
+                "label_reparacteur",
+                "manuel",
+            ],
         )
         fields["acteur_type_id"] = fields.pop("acteur_type")
         (revision_acteur, created) = RevisionActeur.objects.get_or_create(
