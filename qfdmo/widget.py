@@ -6,7 +6,8 @@ class CustomOSMWidget(forms.widgets.BaseGeometryWidget):
     # but the SRID manipulation in geodjango breaks our implementation because the
     # raw coordinates displayed are in the wrong system, hence the partial rewrite
     # instead of inheritance.
-    template_name = "admin/custom-openlayers.html"
+    template_name = "admin/custom-openlayers-with-search.html"
+
     default_lon = 2.213749
     default_lat = 46.227638
     default_zoom = 5
