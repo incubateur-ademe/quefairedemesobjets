@@ -14,6 +14,7 @@ from qfdmo.models import (
     RevisionActeur,
     RevisionPropositionService,
 )
+from qfdmo.models.acteur import SourceDonnee
 
 
 @pytest.fixture(scope="session")
@@ -31,6 +32,7 @@ def populate_admin_object(django_db_blocker):
 
 @pytest.fixture()
 def acteur(db, populate_admin_object):
+    source = SourceDonnee.objects.create(nom="Equipe")
     acteur_type = ActeurType.objects.first()
     acteur = Acteur.objects.create(
         nom="Test Object 1",
@@ -38,6 +40,7 @@ def acteur(db, populate_admin_object):
         acteur_type=acteur_type,
         identifiant_unique="1",
         acteur_type_id=1,
+        source=source,
     )
     acteur_service = ActeurService.objects.first()
     action = Action.objects.first()
@@ -51,12 +54,17 @@ def acteur(db, populate_admin_object):
 
 @pytest.fixture()
 def finalacteur(db, populate_admin_object):
+    source = SourceDonnee.objects.create(nom="Equipe")
     action1 = Action.objects.get(nom="reparer")
     action2 = Action.objects.get(nom="echanger")
     action3 = Action.objects.get(nom="louer")
     acteur_service = ActeurService.objects.first()
     acteur = Acteur.objects.create(
-        nom="Acteur 1", location=Point(0, 0), identifiant_unique="1", acteur_type_id=1
+        nom="Acteur 1",
+        location=Point(0, 0),
+        identifiant_unique="1",
+        acteur_type_id=1,
+        source=source,
     )
     PropositionService.objects.create(
         acteur=acteur, acteur_service=acteur_service, action=action1
@@ -140,7 +148,7 @@ class TestSerialize:
             "label_reparacteur": False,
             "siret": None,
             "source_donnee": None,
-            "source": None,
+            "source": acteur.source.serialize(),
             "statut": "ACTIF",
             "identifiant_externe": None,
             "location": {"type": "Point", "coordinates": [0.0, 0.0]},
@@ -279,7 +287,7 @@ class TestFinalActeurSerialize:
             "manuel": False,
             "label_reparacteur": False,
             "siret": None,
-            "source": None,
+            "source": finalacteur.source.serialize(),
             "source_donnee": None,
             "statut": "ACTIF",
             "identifiant_externe": None,
@@ -312,7 +320,7 @@ class TestFinalActeurSerialize:
             "manuel": False,
             "label_reparacteur": False,
             "siret": None,
-            "source": None,
+            "source": finalacteur.source.serialize(),
             "source_donnee": None,
             "statut": "ACTIF",
             "identifiant_externe": None,
@@ -346,7 +354,7 @@ class TestFinalActeurSerialize:
             "manuel": False,
             "label_reparacteur": False,
             "siret": None,
-            "source": None,
+            "source": finalacteur.source.serialize(),
             "source_donnee": None,
             "statut": "ACTIF",
             "identifiant_externe": None,

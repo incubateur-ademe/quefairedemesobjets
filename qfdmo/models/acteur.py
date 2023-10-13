@@ -75,9 +75,6 @@ class BaseActeur(NomAsNaturalKeyModel):
     ville = models.CharField(max_length=255, blank=True, null=True)
     url = models.CharField(max_length=2048, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
-    # FIXME : not mandatory if digital
-    # FIXME : lat long for import export
-    # FIXME : export more than x lines should be forbidden
     location = models.PointField(blank=True, null=True)
     telephone = models.CharField(max_length=255, blank=True, null=True)
     multi_base = models.BooleanField(default=False)
@@ -98,11 +95,11 @@ class BaseActeur(NomAsNaturalKeyModel):
 
     @property
     def latitude(self):
-        return self.location.y
+        return self.location.y if self.location else None
 
     @property
     def longitude(self):
-        return self.location.x
+        return self.location.x if self.location else None
 
     @property
     def nom_affiche(self):
@@ -114,10 +111,12 @@ class BaseActeur(NomAsNaturalKeyModel):
 
     def serialize(self, format: None | str = None) -> dict | str:
         self_as_dict = model_to_dict(
-            self, exclude=["location", "proposition_services", "acteur_type"]
+            self, exclude=["location", "proposition_services", "acteur_type", "source"]
         )
         if self.acteur_type:
             self_as_dict["acteur_type"] = self.acteur_type.serialize()
+        if self.source:
+            self_as_dict["source"] = self.source.serialize()
         if self.location:
             self_as_dict["location"] = json.loads(self.location.geojson)
         proposition_services = self.proposition_services.all()  # type: ignore
@@ -158,6 +157,7 @@ class Acteur(BaseActeur):
             ],
         )
         fields["acteur_type_id"] = fields.pop("acteur_type")
+        fields["source_id"] = fields.pop("source")
         (revision_acteur, created) = RevisionActeur.objects.get_or_create(
             id=self.id, defaults=fields
         )
@@ -287,12 +287,10 @@ class BasePropositionService(models.Model):
         on_delete=models.CASCADE,
         null=False,
     )
-    # FIXME : alphabetic order in admin
     sous_categories = models.ManyToManyField(
         SousCategorieObjet,
     )
 
-    # FIXME: test me please !!!
     def __str__(self):
         return (
             f"{self.action.nom} - {self.acteur_service.nom} -"
@@ -322,7 +320,6 @@ class PropositionService(BasePropositionService):
         related_name="proposition_services",
     )
 
-    # FIXME: test me please !!!
     def __str__(self):
         return f"{self.acteur} - {super().__str__()}"
 
@@ -339,7 +336,6 @@ class RevisionPropositionService(BasePropositionService):
         related_name="proposition_services",
     )
 
-    # FIXME: test me please !!!
     def __str__(self):
         return f"{self.revision_acteur} - {super().__str__()}"
 
