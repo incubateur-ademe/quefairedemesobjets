@@ -18,6 +18,28 @@ from qfdmo.models import (
 from qfdmo.widget import CustomOSMWidget
 
 
+class NotEditableMixin(admin.GISModelAdmin):
+    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+    def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+
+class NotEditableInlineMixin:
+    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+    def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+
 class ActeurTypeAdmin(admin.ModelAdmin):
     list_display = ("nom", "nom_affiche")
     search_fields = [
@@ -35,44 +57,24 @@ class BasePropositionServiceInline(admin.TabularInline):
         "sous_categories",
     )
 
-    def has_change_permission(self, request, obj=None):
-        if obj is not None:
-            return False
-        return super().has_change_permission(request, obj)
 
-
-class PropositionServiceInline(BasePropositionServiceInline):
+class PropositionServiceInline(BasePropositionServiceInline, NotEditableInlineMixin):
     model = PropositionService
-
-    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
-
-    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
 
 
 class RevisionPropositionServiceInline(BasePropositionServiceInline):
     model = RevisionPropositionService
 
 
-class FinalPropositionServiceInline(BasePropositionServiceInline):
+class FinalPropositionServiceInline(
+    BasePropositionServiceInline, NotEditableInlineMixin
+):
     model = FinalPropositionService
 
     def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
         return False
 
     def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
-
-
-class NotEditableMixin(admin.GISModelAdmin):
-    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
-
-    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
-
-    def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
         return False
 
 
