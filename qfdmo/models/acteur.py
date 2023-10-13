@@ -154,6 +154,8 @@ class Acteur(BaseActeur):
                 "multi_base",
                 "label_reparacteur",
                 "manuel",
+                "statut",
+                "source",
             ],
         )
         fields["acteur_type_id"] = fields.pop("acteur_type")
