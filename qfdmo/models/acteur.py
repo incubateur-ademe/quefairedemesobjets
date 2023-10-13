@@ -4,7 +4,7 @@ from django.contrib.gis.db import models
 from django.db import connection
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
-from django.forms import model_to_dict
+from django.forms import ValidationError, model_to_dict
 from django.template.loader import render_to_string
 
 from qfdmo.models.action import Action
@@ -68,9 +68,7 @@ class BaseActeur(NomAsNaturalKeyModel):
     nom = models.CharField(max_length=255, blank=False, null=False)
     # FIXME : use identifiant_unique as primary in import export
     identifiant_unique = models.CharField(max_length=255, unique=True)
-    acteur_type = models.ForeignKey(
-        ActeurType, on_delete=models.CASCADE, blank=True, null=True
-    )
+    acteur_type = models.ForeignKey(ActeurType, on_delete=models.CASCADE)
     adresse = models.CharField(max_length=255, blank=True, null=True)
     adresse_complement = models.CharField(max_length=255, blank=True, null=True)
     code_postal = models.CharField(max_length=10, blank=True, null=True)
@@ -80,7 +78,7 @@ class BaseActeur(NomAsNaturalKeyModel):
     # FIXME : not mandatory if digital
     # FIXME : lat long for import export
     # FIXME : export more than x lines should be forbidden
-    location = models.PointField(null=False)
+    location = models.PointField(blank=True, null=True)
     telephone = models.CharField(max_length=255, blank=True, null=True)
     multi_base = models.BooleanField(default=False)
     nom_commercial = models.CharField(max_length=255, blank=True, null=True)
@@ -178,6 +176,16 @@ class Acteur(BaseActeur):
 
         return revision_acteur
 
+    def clean_location(self):
+        if self.location is None and self.acteur_type.nom != "acteur digital":
+            raise ValidationError(
+                {"location": "Location is mandatory when the actor is not digital"}
+            )
+
+    def save(self, *args, **kwargs):
+        self.clean_location()
+        return super().save(*args, **kwargs)
+
 
 class RevisionActeur(BaseActeur):
     class Meta:
@@ -185,6 +193,9 @@ class RevisionActeur(BaseActeur):
         verbose_name_plural = "ACTEURS de l'EC - CORRIGÉ"
 
     id = models.IntegerField(primary_key=True)
+    acteur_type = models.ForeignKey(
+        ActeurType, on_delete=models.CASCADE, blank=True, null=True
+    )
 
 
 @receiver(pre_save, sender=RevisionActeur)

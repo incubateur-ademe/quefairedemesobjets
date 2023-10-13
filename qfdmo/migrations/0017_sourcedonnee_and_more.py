@@ -159,7 +159,27 @@ class Migration(migrations.Migration):
                 to="qfdmo.sourcedonnee",
             ),
         ),
-        # FIXME : run a migration to update Materialized view
+        migrations.AlterField(
+            model_name="acteur",
+            name="acteur_type",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="qfdmo.acteurtype"
+            ),
+        ),
+        migrations.AlterField(
+            model_name="acteur",
+            name="location",
+            field=django.contrib.gis.db.models.fields.PointField(
+                blank=True, null=True, srid=4326
+            ),
+        ),
+        migrations.AlterField(
+            model_name="revisionacteur",
+            name="location",
+            field=django.contrib.gis.db.models.fields.PointField(
+                blank=True, null=True, srid=4326
+            ),
+        ),
         migrations.RunSQL(
             """
             DROP MATERIALIZED VIEW qfdmo_finalacteur;

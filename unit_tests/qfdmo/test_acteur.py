@@ -1,6 +1,7 @@
 import pytest
 from django.contrib.gis.geos import Point
 from django.core.management import call_command
+from django.forms import ValidationError
 
 from qfdmo.models import (
     Acteur,
@@ -36,6 +37,7 @@ def acteur(db, populate_admin_object):
         location=Point(0, 0),
         acteur_type=acteur_type,
         identifiant_unique="1",
+        acteur_type_id=1,
     )
     acteur_service = ActeurService.objects.first()
     action = Action.objects.first()
@@ -54,7 +56,7 @@ def finalacteur(db, populate_admin_object):
     action3 = Action.objects.get(nom="louer")
     acteur_service = ActeurService.objects.first()
     acteur = Acteur.objects.create(
-        nom="Acteur 1", location=Point(0, 0), identifiant_unique="1"
+        nom="Acteur 1", location=Point(0, 0), identifiant_unique="1", acteur_type_id=1
     )
     PropositionService.objects.create(
         acteur=acteur, acteur_service=acteur_service, action=action1
@@ -148,6 +150,26 @@ class TestSerialize:
 
 
 @pytest.mark.django_db
+class TestLocationValidation:
+    def test_location_validation_raise(self):
+        acteur_type = ActeurType.objects.exclude(nom="acteur digital").first()
+        acteur = Acteur(
+            nom="Test Object 1", identifiant_unique="123", acteur_type=acteur_type
+        )
+        with pytest.raises(ValidationError):
+            acteur.save()
+
+    def test_location_validation_dont_raise(self):
+        acteur_type = ActeurType.objects.get(nom="acteur digital")
+        acteur = Acteur(
+            nom="Test Object 1", identifiant_unique="123", acteur_type=acteur_type
+        )
+        acteur.save()
+        assert acteur.id
+        assert acteur.location is None
+
+
+@pytest.mark.django_db
 class TestActeurGetOrCreateRevisionActeur:
     def test_create_revisionacteur_copy1(self, populate_admin_object, acteur):
         revision_acteur = acteur.get_or_create_revision()
@@ -233,6 +255,7 @@ class TestCreateRevisionActeur:
             location=Point(0, 0),
             acteur_type=ActeurType.objects.first(),
             identifiant_unique="1",
+            acteur_type_id=1,
         )
         assert revision_acteur.serialize() == Acteur.objects.first().serialize()
 
@@ -269,6 +292,7 @@ class TestFinalActeurSerialize:
             "actions": [  # type: ignore
                 action.serialize() for action in finalacteur.acteur_actions()
             ],
+            "acteur_type": finalacteur.acteur_type.serialize(),
         }
 
     def test_finalacteur_serialize_render_as_card(self, finalacteur):
@@ -301,6 +325,7 @@ class TestFinalActeurSerialize:
             "actions": [  # type: ignore
                 action.serialize() for action in finalacteur.acteur_actions()
             ],
+            "acteur_type": finalacteur.acteur_type.serialize(),
             "render_as_card": finalacteur.render_as_card(),
         }
 
@@ -335,6 +360,7 @@ class TestFinalActeurSerialize:
                 action.serialize()
                 for action in finalacteur.acteur_actions(direction="jai")
             ],
+            "acteur_type": finalacteur.acteur_type.serialize(),
             "render_as_card": finalacteur.render_as_card(direction="jai"),
         }
 
@@ -401,7 +427,9 @@ class TestActeurService:
         acteur_service = ActeurService.objects.get(
             nom="Achat, revente par un professionnel"
         )
-        acteur = Acteur.objects.create(nom="Acteur 1", location=Point(0, 0))
+        acteur = Acteur.objects.create(
+            nom="Acteur 1", location=Point(0, 0), acteur_type_id=1
+        )
         PropositionService.objects.create(
             acteur=acteur, acteur_service=acteur_service, action=action1
         )
@@ -417,7 +445,11 @@ class TestActeurService:
             nom="Achat, revente par un professionnel"
         )
         action2 = Action.objects.get(nom="echanger")
-        acteur = Acteur.objects.create(nom="Acteur 1", location=Point(0, 0))
+        acteur = Acteur.objects.create(
+            nom="Acteur 1",
+            location=Point(0, 0),
+            acteur_type_id=1,
+        )
         PropositionService.objects.create(
             acteur=acteur, acteur_service=acteur_service, action=action1
         )
@@ -436,7 +468,9 @@ class TestActeurService:
             nom="Achat, revente par un professionnel"
         )
         acteur_service2 = ActeurService.objects.get(nom="Atelier d'auto-réparation")
-        acteur = Acteur.objects.create(nom="Acteur 1", location=Point(0, 0))
+        acteur = Acteur.objects.create(
+            nom="Acteur 1", location=Point(0, 0), acteur_type_id=1
+        )
         PropositionService.objects.create(
             acteur=acteur, acteur_service=acteur_service1, action=action
         )
