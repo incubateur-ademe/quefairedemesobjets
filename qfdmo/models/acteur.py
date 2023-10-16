@@ -85,7 +85,6 @@ class BaseActeur(NomAsNaturalKeyModel):
     manuel = models.BooleanField(default=False)
     label_reparacteur = models.BooleanField(default=False)
     siret = models.CharField(max_length=14, blank=True, null=True)
-    source_donnee = models.CharField(max_length=255, blank=True, null=True)
     source = models.ForeignKey(Source, on_delete=models.CASCADE, blank=True, null=True)
     identifiant_externe = models.CharField(max_length=255, blank=True, null=True)
     statut = models.CharField(

@@ -14,6 +14,7 @@ from qfdmo.models import (
     PropositionService,
     RevisionActeur,
     RevisionPropositionService,
+    Source,
     SousCategorieObjet,
 )
 from qfdmo.widget import CustomOSMWidget
@@ -97,9 +98,14 @@ class BaseActeurAdmin(admin.GISModelAdmin):
 class ActeurResource(resources.ModelResource):
     delete = fields.Field(widget=widgets.BooleanWidget())
     acteur_type = fields.Field(
-        column_name="acteur_type_id",
+        column_name="acteur_type",
         attribute="acteur_type",
         widget=widgets.ForeignKeyWidget(ActeurType, field="nom"),
+    )
+    source = fields.Field(
+        column_name="source",
+        attribute="source",
+        widget=widgets.ForeignKeyWidget(Source, field="nom"),
     )
     latitude = fields.Field(column_name="latitude", attribute="latitude", readonly=True)
     longitude = fields.Field(
@@ -118,7 +124,7 @@ class ActeurResource(resources.ModelResource):
             )
         else:
             row_result.instance.location = None
-        # Recompute the diff onc the location changed
+        # Recompute the diff about changing location
         new = not bool(row_result.original)
         if not new:
             diff = self.get_diff_class()(self, row_result.original, new)
@@ -243,3 +249,4 @@ admin.site.register(FinalActeur, FinalActeurAdmin)
 admin.site.register(PropositionService, PropositionServiceAdmin)
 admin.site.register(RevisionActeur, RevisionActeurAdmin)
 admin.site.register(RevisionPropositionService, RevisionPropositionServiceAdmin)
+admin.site.register(Source)

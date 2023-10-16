@@ -147,7 +147,7 @@ class Migration(migrations.Migration):
         ),
         migrations.RunSQL(
             """
-            DROP MATERIALIZED VIEW qfdmo_finalacteur;
+            DROP MATERIALIZED VIEW IF EXISTS qfdmo_finalacteur;
             CREATE MATERIALIZED VIEW qfdmo_finalacteur AS
                 SELECT
                       COALESCE(ra.id, a.id) as id
@@ -177,7 +177,7 @@ class Migration(migrations.Migration):
                 CREATE UNIQUE INDEX ON qfdmo_finalacteur(id);
             """,
             """
-            DROP MATERIALIZED VIEW qfdmo_finalacteur;
+            DROP MATERIALIZED VIEW IF EXISTS qfdmo_finalacteur;
             CREATE MATERIALIZED VIEW qfdmo_finalacteur AS
                 SELECT
                       COALESCE(ra.id, a.id) as id
