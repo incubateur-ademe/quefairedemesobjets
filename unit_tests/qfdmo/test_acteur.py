@@ -1,6 +1,7 @@
 import pytest
 from django.contrib.gis.geos import Point
 from django.core.management import call_command
+from django.forms import ValidationError
 
 from qfdmo.models import (
     Acteur,
@@ -13,6 +14,7 @@ from qfdmo.models import (
     RevisionActeur,
     RevisionPropositionService,
 )
+from qfdmo.models.acteur import Source
 
 
 @pytest.fixture(scope="session")
@@ -30,9 +32,16 @@ def populate_admin_object(django_db_blocker):
 
 @pytest.fixture()
 def acteur(db, populate_admin_object):
+    source = Source.objects.create(nom="Equipe")
     acteur_type = ActeurType.objects.first()
     acteur = Acteur.objects.create(
-        nom="Test Object 1", location=Point(0, 0), acteur_type=acteur_type
+        nom="Test Object 1",
+        location=Point(0, 0),
+        acteur_type=acteur_type,
+        identifiant_unique="1",
+        identifiant_externe="456",
+        acteur_type_id=1,
+        source=source,
     )
     acteur_service = ActeurService.objects.first()
     action = Action.objects.first()
@@ -46,11 +55,18 @@ def acteur(db, populate_admin_object):
 
 @pytest.fixture()
 def finalacteur(db, populate_admin_object):
+    source = Source.objects.create(nom="Equipe")
     action1 = Action.objects.get(nom="reparer")
     action2 = Action.objects.get(nom="echanger")
     action3 = Action.objects.get(nom="louer")
     acteur_service = ActeurService.objects.first()
-    acteur = Acteur.objects.create(nom="Acteur 1", location=Point(0, 0))
+    acteur = Acteur.objects.create(
+        nom="Acteur 1",
+        location=Point(0, 0),
+        identifiant_unique="1",
+        acteur_type_id=1,
+        source=source,
+    )
     PropositionService.objects.create(
         acteur=acteur, acteur_service=acteur_service, action=action1
     )
@@ -111,13 +127,13 @@ class TestActeurIsdigital:
 
 
 @pytest.mark.django_db
-class TestSerialize:
+class TestActeurSerialize:
     def test_serialize(self, acteur):
         proposition_service = PropositionService.objects.last()
         expected_serialized_acteur = {
             "id": acteur.id,
             "nom": "Test Object 1",
-            "identifiant_unique": None,
+            "identifiant_unique": "1",
             "acteur_type": acteur.acteur_type.serialize(),
             "adresse": None,
             "adresse_complement": None,
@@ -132,8 +148,9 @@ class TestSerialize:
             "manuel": False,
             "label_reparacteur": False,
             "siret": None,
-            "source_donnee": None,
-            "identifiant_externe": None,
+            "source": acteur.source.serialize(),
+            "statut": "ACTIF",
+            "identifiant_externe": "456",
             "location": {"type": "Point", "coordinates": [0.0, 0.0]},
             "proposition_services": [proposition_service.serialize()],
         }
@@ -141,11 +158,67 @@ class TestSerialize:
 
 
 @pytest.mark.django_db
+class TestActeurDefaultOnSave:
+    def test_empty(self):
+        acteur = Acteur.objects.create(
+            nom="Test Object 1",
+            acteur_type_id=1,
+            location=Point(0, 0),
+        )
+        assert len(acteur.identifiant_externe) == 12
+        assert acteur.identifiant_unique == "equipe_" + acteur.identifiant_externe
+        assert acteur.source.nom == "equipe"
+
+    def test_default_identifiantunique(self):
+        source = Source.objects.get_or_create(nom="Source")[0]
+        acteur = Acteur.objects.create(
+            nom="Test Object 1",
+            acteur_type_id=1,
+            location=Point(0, 0),
+            source=source,
+            identifiant_externe="123ABC",
+        )
+        assert acteur.identifiant_unique == "source_123ABC"
+
+    def test_set_identifiantunique(self):
+        acteur = Acteur.objects.create(
+            nom="Test Object 1",
+            acteur_type_id=1,
+            location=Point(0, 0),
+            identifiant_unique="Unique",
+        )
+        assert acteur.identifiant_unique == "Unique"
+
+
+@pytest.mark.django_db
+class TestLocationValidation:
+    def test_location_validation_raise(self):
+        acteur_type = ActeurType.objects.exclude(nom="acteur digital").first()
+        acteur = Acteur(
+            nom="Test Object 1", identifiant_unique="123", acteur_type=acteur_type
+        )
+        with pytest.raises(ValidationError):
+            acteur.save()
+
+    def test_location_validation_dont_raise(self):
+        acteur_type = ActeurType.objects.get(nom="acteur digital")
+        acteur = Acteur(
+            nom="Test Object 1", identifiant_unique="123", acteur_type=acteur_type
+        )
+        acteur.save()
+        assert acteur.id
+        assert acteur.location is None
+
+
+@pytest.mark.django_db
 class TestActeurGetOrCreateRevisionActeur:
     def test_create_revisionacteur_copy1(self, populate_admin_object, acteur):
         revision_acteur = acteur.get_or_create_revision()
 
-        assert revision_acteur.serialize() == acteur.serialize()
+        assert (
+            revision_acteur.serialize()["identifiant_unique"]
+            == acteur.serialize()["identifiant_unique"]
+        )
 
     def test_create_revisionacteur_copy2(self, populate_admin_object, acteur):
         revision_acteur = acteur.get_or_create_revision()
@@ -208,6 +281,7 @@ class TestActeurMaterializedView:
     def test_materialized_view_with_revisionacteur(self, acteur):
         revision_acteur = acteur.get_or_create_revision()
         revision_acteur.nom = "Test Object 2"
+        revision_acteur.identifiant_externe = "789"
         revision_acteur.save()
         FinalActeur.refresh_view()
         final_acteur = FinalActeur.objects.first()
@@ -225,8 +299,13 @@ class TestCreateRevisionActeur:
             nom="Test Object 1",
             location=Point(0, 0),
             acteur_type=ActeurType.objects.first(),
+            acteur_type_id=1,
         )
-        assert revision_acteur.serialize() == Acteur.objects.first().serialize()
+        acteur = Acteur.objects.get(
+            identifiant_unique=revision_acteur.identifiant_unique
+        )
+        assert revision_acteur.source == acteur.source
+        assert revision_acteur.acteur_type == acteur.acteur_type
 
 
 @pytest.mark.django_db
@@ -234,7 +313,7 @@ class TestFinalActeurSerialize:
     def test_finalacteur_serialize_basic(self, finalacteur):
         assert finalacteur.serialize() == {
             "nom": "Acteur 1",
-            "identifiant_unique": None,
+            "identifiant_unique": "1",
             "adresse": None,
             "adresse_complement": None,
             "code_postal": None,
@@ -248,8 +327,9 @@ class TestFinalActeurSerialize:
             "manuel": False,
             "label_reparacteur": False,
             "siret": None,
-            "source_donnee": None,
-            "identifiant_externe": None,
+            "source": finalacteur.source.serialize(),
+            "statut": "ACTIF",
+            "identifiant_externe": finalacteur.identifiant_externe,
             "id": finalacteur.id,
             "location": {"type": "Point", "coordinates": [0.0, 0.0]},
             "proposition_services": [
@@ -259,12 +339,13 @@ class TestFinalActeurSerialize:
             "actions": [  # type: ignore
                 action.serialize() for action in finalacteur.acteur_actions()
             ],
+            "acteur_type": finalacteur.acteur_type.serialize(),
         }
 
     def test_finalacteur_serialize_render_as_card(self, finalacteur):
         assert finalacteur.serialize(render_as_card=True) == {
             "nom": "Acteur 1",
-            "identifiant_unique": None,
+            "identifiant_unique": "1",
             "adresse": None,
             "adresse_complement": None,
             "code_postal": None,
@@ -278,8 +359,9 @@ class TestFinalActeurSerialize:
             "manuel": False,
             "label_reparacteur": False,
             "siret": None,
-            "source_donnee": None,
-            "identifiant_externe": None,
+            "source": finalacteur.source.serialize(),
+            "statut": "ACTIF",
+            "identifiant_externe": finalacteur.identifiant_externe,
             "id": finalacteur.id,
             "location": {"type": "Point", "coordinates": [0.0, 0.0]},
             "proposition_services": [
@@ -289,13 +371,14 @@ class TestFinalActeurSerialize:
             "actions": [  # type: ignore
                 action.serialize() for action in finalacteur.acteur_actions()
             ],
+            "acteur_type": finalacteur.acteur_type.serialize(),
             "render_as_card": finalacteur.render_as_card(),
         }
 
     def test_finalacteur_serialize_render_as_card_with_direction(self, finalacteur):
         assert finalacteur.serialize(render_as_card=True, direction="jai") == {
             "nom": "Acteur 1",
-            "identifiant_unique": None,
+            "identifiant_unique": "1",
             "adresse": None,
             "adresse_complement": None,
             "code_postal": None,
@@ -309,8 +392,9 @@ class TestFinalActeurSerialize:
             "manuel": False,
             "label_reparacteur": False,
             "siret": None,
-            "source_donnee": None,
-            "identifiant_externe": None,
+            "source": finalacteur.source.serialize(),
+            "statut": "ACTIF",
+            "identifiant_externe": finalacteur.identifiant_externe,
             "id": finalacteur.id,
             "location": {"type": "Point", "coordinates": [0.0, 0.0]},
             "proposition_services": [
@@ -321,6 +405,7 @@ class TestFinalActeurSerialize:
                 action.serialize()
                 for action in finalacteur.acteur_actions(direction="jai")
             ],
+            "acteur_type": finalacteur.acteur_type.serialize(),
             "render_as_card": finalacteur.render_as_card(direction="jai"),
         }
 
@@ -387,7 +472,9 @@ class TestActeurService:
         acteur_service = ActeurService.objects.get(
             nom="Achat, revente par un professionnel"
         )
-        acteur = Acteur.objects.create(nom="Acteur 1", location=Point(0, 0))
+        acteur = Acteur.objects.create(
+            nom="Acteur 1", location=Point(0, 0), acteur_type_id=1
+        )
         PropositionService.objects.create(
             acteur=acteur, acteur_service=acteur_service, action=action1
         )
@@ -403,7 +490,11 @@ class TestActeurService:
             nom="Achat, revente par un professionnel"
         )
         action2 = Action.objects.get(nom="echanger")
-        acteur = Acteur.objects.create(nom="Acteur 1", location=Point(0, 0))
+        acteur = Acteur.objects.create(
+            nom="Acteur 1",
+            location=Point(0, 0),
+            acteur_type_id=1,
+        )
         PropositionService.objects.create(
             acteur=acteur, acteur_service=acteur_service, action=action1
         )
@@ -422,7 +513,9 @@ class TestActeurService:
             nom="Achat, revente par un professionnel"
         )
         acteur_service2 = ActeurService.objects.get(nom="Atelier d'auto-réparation")
-        acteur = Acteur.objects.create(nom="Acteur 1", location=Point(0, 0))
+        acteur = Acteur.objects.create(
+            nom="Acteur 1", location=Point(0, 0), acteur_type_id=1
+        )
         PropositionService.objects.create(
             acteur=acteur, acteur_service=acteur_service1, action=action
         )
