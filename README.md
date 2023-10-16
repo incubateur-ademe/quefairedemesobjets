@@ -262,7 +262,7 @@ python manage.py populate_lvao_base /tmp/uploads/Base_20221218_Depart.csv
 
 ```bash
 DUMP_FILE=</path/to/dump/file.pgsql>
-DATABASE_URL=postgis://qfdmo:qfdmo@localhost:6543/qfdmo
+DATABASE_URL=postgres://qfdmo:qfdmo@localhost:6543/qfdmo
 
 for table in $(psql "${DATABASE_URL}" -t -c "SELECT \"tablename\" FROM pg_tables WHERE schemaname='public'"); do
      psql "${DATABASE_URL}" -c "DROP TABLE IF EXISTS \"${table}\" CASCADE;"
