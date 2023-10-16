@@ -50,12 +50,6 @@ export default class extends Controller<HTMLElement> {
 
         let actionList = []
         if (this.#selectedOption == "jai") {
-            // Buttons option
-            const actionButtons = this.jaiTarget.getElementsByTagName("button")
-            for (let i = 0; i < actionButtons.length; i++) {
-                if (actionButtons[i].getAttribute("aria-pressed") == "true")
-                    actionList.push(actionButtons[i].getAttribute("name"))
-            }
             // Checkboxes option
             const actionInput = this.jaiTarget.getElementsByTagName("input")
             for (let i = 0; i < actionInput.length; i++) {
@@ -64,12 +58,6 @@ export default class extends Controller<HTMLElement> {
             }
         }
         if (this.#selectedOption == "jecherche") {
-            // Buttons option
-            const actionButtons = this.jechercheTarget.getElementsByTagName("button")
-            for (let i = 0; i < actionButtons.length; i++) {
-                if (actionButtons[i].getAttribute("aria-pressed") == "true")
-                    actionList.push(actionButtons[i].getAttribute("name"))
-            }
             // Checkboxes option
             const actionInput = this.jechercheTarget.getElementsByTagName("input")
             for (let i = 0; i < actionInput.length; i++) {
