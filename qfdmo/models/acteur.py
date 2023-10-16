@@ -1,4 +1,6 @@
 import json
+import random
+import string
 
 from django.contrib.gis.db import models
 from django.db import connection
@@ -46,7 +48,7 @@ class ActeurType(NomAsNaturalKeyModel):
         return model_to_dict(self)
 
 
-class SourceDonnee(NomAsNaturalKeyModel):
+class Source(NomAsNaturalKeyModel):
     class Meta:
         verbose_name = "Source de données"
         verbose_name_plural = "Sources de données"
@@ -84,10 +86,7 @@ class BaseActeur(NomAsNaturalKeyModel):
     label_reparacteur = models.BooleanField(default=False)
     siret = models.CharField(max_length=14, blank=True, null=True)
     source_donnee = models.CharField(max_length=255, blank=True, null=True)
-    # FIXME : serialize source
-    source = models.ForeignKey(
-        SourceDonnee, on_delete=models.CASCADE, blank=True, null=True
-    )
+    source = models.ForeignKey(Source, on_delete=models.CASCADE, blank=True, null=True)
     identifiant_externe = models.CharField(max_length=255, blank=True, null=True)
     statut = models.CharField(
         max_length=255, default=ActeurStatus.ACTIF, choices=ActeurStatus.choices
@@ -189,6 +188,20 @@ class Acteur(BaseActeur):
         return super().save(*args, **kwargs)
 
 
+@receiver(pre_save, sender=Acteur)
+def set_default_fields(sender, instance, *args, **kwargs):
+    if not instance.identifiant_externe:
+        instance.identifiant_externe = "".join(
+            random.choices(string.ascii_uppercase, k=12)
+        )
+    if instance.source is None:
+        instance.source = Source.objects.get_or_create(nom="equipe")[0]
+    if not instance.identifiant_unique:
+        instance.identifiant_unique = (
+            instance.source.nom.lower() + "_" + instance.identifiant_externe
+        )
+
+
 class RevisionActeur(BaseActeur):
     class Meta:
         verbose_name = "ACTEUR de l'EC - CORRIGÉ"
@@ -205,11 +218,16 @@ def create_acteur_if_not_exists(sender, instance, *args, **kwargs):
     if instance.id is None:
         acteur = Acteur.objects.create(
             **model_to_dict(
-                instance, exclude=["id", "acteur_type", "proposition_services"]
+                instance,
+                exclude=["id", "acteur_type", "source", "proposition_services"],
             ),
             acteur_type=instance.acteur_type,
+            source=instance.source,
         )
         instance.id = acteur.id
+        instance.identifiant_unique = acteur.identifiant_unique
+        instance.identifiant_externe = acteur.identifiant_externe
+        instance.source = acteur.source
 
 
 class FinalActeur(BaseActeur):

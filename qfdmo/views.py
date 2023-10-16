@@ -88,11 +88,11 @@ class ReemploiSolutionView(FormView):
             )
             reference_point = Point(float(longitude), float(latitude), srid=4326)
             # FIXME : add a test to check distinct point
-            acteurs_phisique = acteurs.annotate(
+            acteurs_physique = acteurs.annotate(
                 distance=Distance("location", reference_point)
             ).exclude(acteur_type__nom="acteur digital")
 
-            kwargs["acteurs"] = acteurs_phisique.filter(
+            kwargs["acteurs"] = acteurs_physique.filter(
                 distance__lte=DISTANCE_MAX
             ).order_by("distance")[:DEFAULT_LIMIT]
 
