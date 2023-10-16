@@ -1,4 +1,5 @@
 from django.contrib.gis import admin
+from django.contrib.gis.geos import Point
 from django.http import HttpRequest
 from import_export import admin as import_export_admin
 from import_export import fields, resources, widgets
@@ -13,6 +14,7 @@ from qfdmo.models import (
     PropositionService,
     RevisionActeur,
     RevisionPropositionService,
+    Source,
     SousCategorieObjet,
 )
 from qfdmo.widget import CustomOSMWidget
@@ -96,16 +98,48 @@ class BaseActeurAdmin(admin.GISModelAdmin):
 class ActeurResource(resources.ModelResource):
     delete = fields.Field(widget=widgets.BooleanWidget())
     acteur_type = fields.Field(
-        column_name="acteur_type_id",
+        column_name="acteur_type",
         attribute="acteur_type",
         widget=widgets.ForeignKeyWidget(ActeurType, field="nom"),
+    )
+    source = fields.Field(
+        column_name="source",
+        attribute="source",
+        widget=widgets.ForeignKeyWidget(Source, field="nom"),
+    )
+    latitude = fields.Field(column_name="latitude", attribute="latitude", readonly=True)
+    longitude = fields.Field(
+        column_name="longitude", attribute="longitude", readonly=True
     )
 
     def for_delete(self, row, instance):
         return self.fields["delete"].clean(row)
 
+    def after_import_row(self, row, row_result, **kwargs):
+        latitude = row.get("latitude")
+        longitude = row.get("longitude")
+        if latitude and longitude:
+            row_result.instance.location = Point(
+                float(longitude), float(latitude), srid=4326
+            )
+        else:
+            row_result.instance.location = None
+        # Recompute the diff about changing location
+        new = not bool(row_result.original)
+        if not new:
+            diff = self.get_diff_class()(self, row_result.original, new)
+            diff.compare_with(self, row_result.instance)
+            row_result.diff = diff.as_html()
+        row_result.instance.save()
+
+    def before_export(self, queryset, *args, **kwargs):
+        if queryset.count() > 1000:
+            raise Exception("Export is limited to 1000 rows")
+
     class Meta:
         model = Acteur
+        exclude = ["location"]
+        store_instance = True
 
 
 class ActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin, NotEditableMixin):
@@ -215,3 +249,4 @@ admin.site.register(FinalActeur, FinalActeurAdmin)
 admin.site.register(PropositionService, PropositionServiceAdmin)
 admin.site.register(RevisionActeur, RevisionActeurAdmin)
 admin.site.register(RevisionPropositionService, RevisionPropositionServiceAdmin)
+admin.site.register(Source)

@@ -1,10 +1,12 @@
 import json
+import random
+import string
 
 from django.contrib.gis.db import models
 from django.db import connection
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
-from django.forms import model_to_dict
+from django.forms import ValidationError, model_to_dict
 from django.template.loader import render_to_string
 
 from qfdmo.models.action import Action
@@ -26,6 +28,12 @@ class ActeurService(NomAsNaturalKeyModel):
         return model_to_dict(self, exclude=["actions"])
 
 
+class ActeurStatus(models.TextChoices):
+    ACTIF = "ACTIF", "actif"
+    INACTIF = "INACTIF", "inactif"
+    SUPPRIME = "SUPPRIME", "supprimé"
+
+
 class ActeurType(NomAsNaturalKeyModel):
     class Meta:
         verbose_name = "Type d'acteur"
@@ -40,24 +48,36 @@ class ActeurType(NomAsNaturalKeyModel):
         return model_to_dict(self)
 
 
+class Source(NomAsNaturalKeyModel):
+    class Meta:
+        verbose_name = "Source de données"
+        verbose_name_plural = "Sources de données"
+
+    id = models.AutoField(primary_key=True)
+    nom = models.CharField(max_length=255, unique=True)
+    logo = models.CharField(max_length=255, blank=True, null=True)
+    afficher = models.BooleanField(default=True)
+    url = models.CharField(max_length=2048, blank=True, null=True)
+
+    def serialize(self):
+        return model_to_dict(self)
+
+
 class BaseActeur(NomAsNaturalKeyModel):
     class Meta:
         abstract = True
 
     nom = models.CharField(max_length=255, blank=False, null=False)
-    identifiant_unique = models.CharField(
-        max_length=255, blank=True, null=True, unique=True
-    )
-    acteur_type = models.ForeignKey(
-        ActeurType, on_delete=models.CASCADE, blank=True, null=True
-    )
+    # FIXME : use identifiant_unique as primary in import export
+    identifiant_unique = models.CharField(max_length=255, unique=True)
+    acteur_type = models.ForeignKey(ActeurType, on_delete=models.CASCADE)
     adresse = models.CharField(max_length=255, blank=True, null=True)
     adresse_complement = models.CharField(max_length=255, blank=True, null=True)
     code_postal = models.CharField(max_length=10, blank=True, null=True)
     ville = models.CharField(max_length=255, blank=True, null=True)
     url = models.CharField(max_length=2048, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
-    location = models.PointField(null=False)
+    location = models.PointField(blank=True, null=True)
     telephone = models.CharField(max_length=255, blank=True, null=True)
     multi_base = models.BooleanField(default=False)
     nom_commercial = models.CharField(max_length=255, blank=True, null=True)
@@ -65,16 +85,19 @@ class BaseActeur(NomAsNaturalKeyModel):
     manuel = models.BooleanField(default=False)
     label_reparacteur = models.BooleanField(default=False)
     siret = models.CharField(max_length=14, blank=True, null=True)
-    source_donnee = models.CharField(max_length=255, blank=True, null=True)
+    source = models.ForeignKey(Source, on_delete=models.CASCADE, blank=True, null=True)
     identifiant_externe = models.CharField(max_length=255, blank=True, null=True)
+    statut = models.CharField(
+        max_length=255, default=ActeurStatus.ACTIF, choices=ActeurStatus.choices
+    )
 
     @property
     def latitude(self):
-        return self.location.y
+        return self.location.y if self.location else None
 
     @property
     def longitude(self):
-        return self.location.x
+        return self.location.x if self.location else None
 
     @property
     def nom_affiche(self):
@@ -86,10 +109,12 @@ class BaseActeur(NomAsNaturalKeyModel):
 
     def serialize(self, format: None | str = None) -> dict | str:
         self_as_dict = model_to_dict(
-            self, exclude=["location", "proposition_services", "acteur_type"]
+            self, exclude=["location", "proposition_services", "acteur_type", "source"]
         )
         if self.acteur_type:
             self_as_dict["acteur_type"] = self.acteur_type.serialize()
+        if self.source:
+            self_as_dict["source"] = self.source.serialize()
         if self.location:
             self_as_dict["location"] = json.loads(self.location.geojson)
         proposition_services = self.proposition_services.all()  # type: ignore
@@ -127,9 +152,12 @@ class Acteur(BaseActeur):
                 "multi_base",
                 "label_reparacteur",
                 "manuel",
+                "statut",
+                "source",
             ],
         )
         fields["acteur_type_id"] = fields.pop("acteur_type")
+        fields["source_id"] = fields.pop("source")
         (revision_acteur, created) = RevisionActeur.objects.get_or_create(
             id=self.id, defaults=fields
         )
@@ -148,6 +176,30 @@ class Acteur(BaseActeur):
 
         return revision_acteur
 
+    def clean_location(self):
+        if self.location is None and self.acteur_type.nom != "acteur digital":
+            raise ValidationError(
+                {"location": "Location is mandatory when the actor is not digital"}
+            )
+
+    def save(self, *args, **kwargs):
+        self.clean_location()
+        return super().save(*args, **kwargs)
+
+
+@receiver(pre_save, sender=Acteur)
+def set_default_fields(sender, instance, *args, **kwargs):
+    if not instance.identifiant_externe:
+        instance.identifiant_externe = "".join(
+            random.choices(string.ascii_uppercase, k=12)
+        )
+    if instance.source is None:
+        instance.source = Source.objects.get_or_create(nom="equipe")[0]
+    if not instance.identifiant_unique:
+        instance.identifiant_unique = (
+            instance.source.nom.lower() + "_" + instance.identifiant_externe
+        )
+
 
 class RevisionActeur(BaseActeur):
     class Meta:
@@ -155,6 +207,9 @@ class RevisionActeur(BaseActeur):
         verbose_name_plural = "ACTEURS de l'EC - CORRIGÉ"
 
     id = models.IntegerField(primary_key=True)
+    acteur_type = models.ForeignKey(
+        ActeurType, on_delete=models.CASCADE, blank=True, null=True
+    )
 
 
 @receiver(pre_save, sender=RevisionActeur)
@@ -162,11 +217,16 @@ def create_acteur_if_not_exists(sender, instance, *args, **kwargs):
     if instance.id is None:
         acteur = Acteur.objects.create(
             **model_to_dict(
-                instance, exclude=["id", "acteur_type", "proposition_services"]
+                instance,
+                exclude=["id", "acteur_type", "source", "proposition_services"],
             ),
             acteur_type=instance.acteur_type,
+            source=instance.source,
         )
         instance.id = acteur.id
+        instance.identifiant_unique = acteur.identifiant_unique
+        instance.identifiant_externe = acteur.identifiant_externe
+        instance.source = acteur.source
 
 
 class FinalActeur(BaseActeur):
@@ -250,7 +310,6 @@ class BasePropositionService(models.Model):
         SousCategorieObjet,
     )
 
-    # FIXME: test me please !!!
     def __str__(self):
         return (
             f"{self.action.nom} - {self.acteur_service.nom} -"
@@ -280,7 +339,6 @@ class PropositionService(BasePropositionService):
         related_name="proposition_services",
     )
 
-    # FIXME: test me please !!!
     def __str__(self):
         return f"{self.acteur} - {super().__str__()}"
 
@@ -297,7 +355,6 @@ class RevisionPropositionService(BasePropositionService):
         related_name="proposition_services",
     )
 
-    # FIXME: test me please !!!
     def __str__(self):
         return f"{self.revision_acteur} - {super().__str__()}"
 

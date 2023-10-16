@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
 from django.contrib.postgres.lookups import Unaccent
-from django.contrib.postgres.search import TrigramWordDistance
+from django.contrib.postgres.search import TrigramWordDistance  # type: ignore
 from django.core.management import call_command
 from django.db.models import Min, QuerySet
 from django.db.models.functions import Length, Lower
@@ -18,6 +18,7 @@ from django.views.generic.edit import FormView
 from core.jinja2_handler import get_action_list
 from qfdmo.forms import GetReemploiSolutionForm
 from qfdmo.models import Acteur, FinalActeur, Objet, SousCategorieObjet
+from qfdmo.models.acteur import ActeurStatus
 
 DEFAULT_LIMIT = 10
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
@@ -54,6 +55,7 @@ class ReemploiSolutionView(FormView):
         acteurs = (
             FinalActeur.objects.filter(
                 proposition_services__action__in=action_selection,
+                statut=ActeurStatus.ACTIF,
             )
             .prefetch_related(
                 "proposition_services__sous_categories",
@@ -86,11 +88,11 @@ class ReemploiSolutionView(FormView):
             )
             reference_point = Point(float(longitude), float(latitude), srid=4326)
             # FIXME : add a test to check distinct point
-            acteurs_phisique = acteurs.annotate(
+            acteurs_physique = acteurs.annotate(
                 distance=Distance("location", reference_point)
             ).exclude(acteur_type__nom="acteur digital")
 
-            kwargs["acteurs"] = acteurs_phisique.filter(
+            kwargs["acteurs"] = acteurs_physique.filter(
                 distance__lte=DISTANCE_MAX
             ).order_by("distance")[:DEFAULT_LIMIT]
 
