@@ -68,7 +68,6 @@ export class SolutionMap {
             if (actor.location) {
                 var customMarker = undefined
                 if (actor.actions.length > 0) {
-                    console.log(actor.actions[0])
                     customMarker = L.ExtraMarkers.icon({
                         icon: actor.actions[0].icon,
                         markerColor: get_color_code(actor.actions[0].couleur),
