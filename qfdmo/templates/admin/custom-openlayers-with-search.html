@@ -19,7 +19,6 @@
                 fetch(url)
                     .then(response => response.json())
                     .then(data => {
-                    console.log(data);
                     var lon = data.features[0].geometry.coordinates[0];
                     var lat = data.features[0].geometry.coordinates[1];
                     var map = geodjango_location.map;
