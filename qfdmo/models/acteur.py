@@ -311,10 +311,7 @@ class BasePropositionService(models.Model):
     )
 
     def __str__(self):
-        return (
-            f"{self.action.nom} - {self.acteur_service.nom} -"
-            f" { ', '.join([ str(sc) for sc in self.sous_categories.all()]) }"
-        )
+        return f"{self.action.nom} - {self.acteur_service.nom}"
 
     def serialize(self):
         return {
