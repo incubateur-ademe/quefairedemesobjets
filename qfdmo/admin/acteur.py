@@ -115,22 +115,13 @@ class ActeurResource(resources.ModelResource):
     def for_delete(self, row, instance):
         return self.fields["delete"].clean(row)
 
-    def after_import_row(self, row, row_result, **kwargs):
+    def before_import_row(self, row, row_number=None, **kwargs):
         latitude = row.get("latitude")
         longitude = row.get("longitude")
         if latitude and longitude:
-            row_result.instance.location = Point(
-                float(longitude), float(latitude), srid=4326
-            )
+            row["location"] = Point(float(longitude), float(latitude), srid=4326)
         else:
-            row_result.instance.location = None
-        # Recompute the diff about changing location
-        new = not bool(row_result.original)
-        if not new:
-            diff = self.get_diff_class()(self, row_result.original, new)
-            diff.compare_with(self, row_result.instance)
-            row_result.diff = diff.as_html()
-        row_result.instance.save()
+            row["location"] = None
 
     def before_export(self, queryset, *args, **kwargs):
         if queryset.count() > 1000:
@@ -138,7 +129,8 @@ class ActeurResource(resources.ModelResource):
 
     class Meta:
         model = Acteur
-        exclude = ["location"]
+        #        exclude = ["location"]
+
         store_instance = True
 
 
