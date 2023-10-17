@@ -94,13 +94,11 @@ class TestActionNomAsNaturalKeyHeritage:
     @pytest.mark.django_db
     def test_proposition_service_str(self, proposition_service):
         assert str(proposition_service) == (
-            "fake acteur - fake action - fake acteur service -"
-            " fake sous-categorie 1, fake sous-categorie 2"
+            "fake acteur - fake action - fake acteur service"
         )
 
     @pytest.mark.django_db
     def test_revision_proposition_service_str(self, revision_proposition_service):
         assert str(revision_proposition_service) == (
-            "fake revision acteur - fake action - fake acteur service -"
-            " fake sous-categorie 1, fake sous-categorie 2"
+            "fake revision acteur - fake action - fake acteur service"
         )
