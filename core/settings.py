@@ -246,3 +246,5 @@ sentry_sdk.init(
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 DEFAULT_ACTION_DIRECTION = "jecherche"
+
+GOOGLE_API_KEY = decouple.config("GOOGLE_API_KEY", cast=str, default="")
