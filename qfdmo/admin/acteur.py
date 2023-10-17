@@ -228,7 +228,11 @@ class RevisionPropositionServiceResource(BasePropositionServiceResource):
 class RevisionPropositionServiceAdmin(
     import_export_admin.ImportExportMixin, BasePropositionServiceAdmin
 ):
+    def sous_categorie_list(self, obj):
+        return ", ".join([str(sc) for sc in obj.sous_categories.all()])
+
     resource_classes = [RevisionPropositionServiceResource]
+    list_display = ["__str__", "sous_categorie_list"]
     search_fields = [
         "revision_acteur__nom",
         "revision_acteur__siret",
