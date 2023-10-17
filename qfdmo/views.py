@@ -17,8 +17,14 @@ from django.views.generic.edit import FormView
 
 from core.jinja2_handler import get_action_list
 from qfdmo.forms import GetReemploiSolutionForm
-from qfdmo.models import Acteur, FinalActeur, Objet, SousCategorieObjet
-from qfdmo.models.acteur import ActeurStatus
+from qfdmo.models import (
+    Acteur,
+    ActeurStatus,
+    FinalActeur,
+    FinalPropositionService,
+    Objet,
+    SousCategorieObjet,
+)
 
 DEFAULT_LIMIT = 10
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
@@ -52,21 +58,28 @@ class ReemploiSolutionView(FormView):
                 objets__nom=objet_q
             )
         action_selection = get_action_list(self.request)
-        acteurs = (
-            FinalActeur.objects.filter(
+        if sous_categories_objets:
+            acteurs = FinalActeur.objects.filter(
+                proposition_services__in=FinalPropositionService.objects.filter(
+                    action__in=action_selection,
+                    sous_categories__in=sous_categories_objets,
+                ),
+                statut=ActeurStatus.ACTIF,
+            )
+        else:
+            acteurs = FinalActeur.objects.filter(
                 proposition_services__action__in=action_selection,
                 statut=ActeurStatus.ACTIF,
             )
-            .prefetch_related(
-                "proposition_services__sous_categories",
-                "proposition_services__sous_categories__categorie",
-                "proposition_services__action",
-                "proposition_services__action__directions",
-                "proposition_services__acteur_service",
-                "acteur_type",
-            )
-            .distinct()
-        )
+        acteurs = acteurs.prefetch_related(
+            "proposition_services__sous_categories",
+            "proposition_services__sous_categories__categorie",
+            "proposition_services__action",
+            "proposition_services__action__directions",
+            "proposition_services__acteur_service",
+            "acteur_type",
+        ).distinct()
+
         if sous_categories_objets:
             acteurs = acteurs.filter(
                 proposition_services__sous_categories__in=sous_categories_objets
