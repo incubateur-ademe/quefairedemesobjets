@@ -1,5 +1,4 @@
 import json
-import logging
 import threading
 
 import unidecode
@@ -58,43 +57,29 @@ class ReemploiSolutionView(FormView):
             sous_categories_objets = SousCategorieObjet.objects.filter(
                 objets__nom=objet_q
             )
-            logging.warning(sous_categories_objets)
         action_selection = get_action_list(self.request)
         if sous_categories_objets:
-            acteurs = (
-                FinalActeur.objects.filter(
-                    proposition_services__in=FinalPropositionService.objects.filter(
-                        action__in=action_selection,
-                        sous_categories__in=sous_categories_objets,
-                    ),
-                    statut=ActeurStatus.ACTIF,
-                )
-                .prefetch_related(
-                    "proposition_services__sous_categories",
-                    "proposition_services__sous_categories__categorie",
-                    "proposition_services__action",
-                    "proposition_services__action__directions",
-                    "proposition_services__acteur_service",
-                    "acteur_type",
-                )
-                .distinct()
+            acteurs = FinalActeur.objects.filter(
+                proposition_services__in=FinalPropositionService.objects.filter(
+                    action__in=action_selection,
+                    sous_categories__in=sous_categories_objets,
+                ),
+                statut=ActeurStatus.ACTIF,
             )
         else:
-            acteurs = (
-                FinalActeur.objects.filter(
-                    proposition_services__action__in=action_selection,
-                    statut=ActeurStatus.ACTIF,
-                )
-                .prefetch_related(
-                    "proposition_services__sous_categories",
-                    "proposition_services__sous_categories__categorie",
-                    "proposition_services__action",
-                    "proposition_services__action__directions",
-                    "proposition_services__acteur_service",
-                    "acteur_type",
-                )
-                .distinct()
+            acteurs = FinalActeur.objects.filter(
+                proposition_services__action__in=action_selection,
+                statut=ActeurStatus.ACTIF,
             )
+        acteurs = acteurs.prefetch_related(
+            "proposition_services__sous_categories",
+            "proposition_services__sous_categories__categorie",
+            "proposition_services__action",
+            "proposition_services__action__directions",
+            "proposition_services__acteur_service",
+            "acteur_type",
+        ).distinct()
+
         if sous_categories_objets:
             acteurs = acteurs.filter(
                 proposition_services__sous_categories__in=sous_categories_objets
