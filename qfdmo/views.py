@@ -87,7 +87,7 @@ class ReemploiSolutionView(FormView):
         kwargs["acteurs_digitaux"] = (
             acteurs.filter(acteur_type__nom="acteur digital")
             .annotate(min_action_order=Min("proposition_services__action__order"))
-            .order_by("min_action_order")
+            .order_by("min_action_order", "?")
         )
         kwargs["nb_acteurs_digitaux"] = acteurs.filter(
             acteur_type__nom="acteur digital"
