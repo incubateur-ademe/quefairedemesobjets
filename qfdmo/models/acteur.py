@@ -79,10 +79,13 @@ class BaseActeur(NomAsNaturalKeyModel):
     email = models.EmailField(blank=True, null=True)
     location = models.PointField(blank=True, null=True)
     telephone = models.CharField(max_length=255, blank=True, null=True)
+    # FIXME : multi_base could be removed ?
     multi_base = models.BooleanField(default=False)
     nom_commercial = models.CharField(max_length=255, blank=True, null=True)
     nom_officiel = models.CharField(max_length=255, blank=True, null=True)
+    # FIXME : manuel could be removed ?
     manuel = models.BooleanField(default=False)
+    # FIXME : Could be replace to a many-to-many relationship with a label table ?
     label_reparacteur = models.BooleanField(default=False)
     siret = models.CharField(max_length=14, blank=True, null=True)
     source = models.ForeignKey(Source, on_delete=models.CASCADE, blank=True, null=True)
@@ -90,6 +93,9 @@ class BaseActeur(NomAsNaturalKeyModel):
     statut = models.CharField(
         max_length=255, default=ActeurStatus.ACTIF, choices=ActeurStatus.choices
     )
+    naf_principal = models.CharField(max_length=255, blank=True, null=True)
+    cree_le = models.DateTimeField(auto_now_add=True)
+    modifie_le = models.DateTimeField(auto_now=True)
 
     @property
     def latitude(self):
@@ -283,6 +289,26 @@ REFRESH MATERIALIZED VIEW CONCURRENTLY qfdmo_finalpropositionservice_sous_catego
         if format == "json":
             return json.dumps(super_serialized)
         return super_serialized
+
+
+class CorrectionActeur(BaseActeur):
+    class Meta:
+        verbose_name = "Proposition de correction d'un acteur"
+        verbose_name_plural = "Propositions de correction des acteurs"
+
+    identifiant_unique = models.CharField(max_length=255)
+    source = models.CharField(max_length=255)
+    resultat_brute_source = models.JSONField()
+    acteur = models.ForeignKey(
+        Acteur,
+        on_delete=models.CASCADE,
+        null=False,
+        related_name="corrections",
+        to_field="identifiant_unique",
+    )
+    acteur_type = models.ForeignKey(
+        ActeurType, on_delete=models.CASCADE, null=True, blank=True, default=None
+    )
 
 
 class BasePropositionService(models.Model):
