@@ -299,15 +299,16 @@ class CorrectionActeur(BaseActeur):
     identifiant_unique = models.CharField(max_length=255)
     source = models.CharField(max_length=255)
     resultat_brute_source = models.JSONField()
-    acteur = models.ForeignKey(
-        Acteur,
-        on_delete=models.CASCADE,
-        null=False,
-        related_name="corrections",
-        to_field="identifiant_unique",
-    )
     acteur_type = models.ForeignKey(
         ActeurType, on_delete=models.CASCADE, null=True, blank=True, default=None
+    )
+    final_acteur = models.ForeignKey(
+        FinalActeur,
+        db_constraint=False,
+        on_delete=models.DO_NOTHING,
+        null=True,
+        related_name="corrections",
+        to_field="identifiant_unique",
     )
 
 

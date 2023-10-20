@@ -91,6 +91,11 @@ class Command(BaseCommand):
                 acteur = Acteur.objects.get(
                     identifiant_unique=final_acteur.identifiant_unique
                 )
+                nom_officiel = insee_data["uniteLegale"]["periodesUniteLegale"][0][
+                    "denominationUniteLegale"
+                ]
+                if not acteur.nom_officiel:
+                    acteur.nom_officiel = nom_officiel
                 naf_principal = insee_data["uniteLegale"]["periodesUniteLegale"][0][
                     "activitePrincipaleUniteLegale"
                 ]
@@ -104,9 +109,6 @@ class Command(BaseCommand):
                         "nicSiegeUniteLegale"
                     ]
                 )
-                nom_officiel = insee_data["uniteLegale"]["periodesUniteLegale"][0][
-                    "denominationUniteLegale"
-                ]
                 CorrectionActeur.objects.create(
                     source="INSEE",
                     siret=siret,
@@ -114,7 +116,7 @@ class Command(BaseCommand):
                     nom_officiel=nom_officiel,
                     resultat_brute_source=insee_data,
                     identifiant_unique=final_acteur.identifiant_unique,
-                    acteur_id=final_acteur.identifiant_unique,
+                    final_acteur_id=final_acteur.identifiant_unique,
                 )
             else:
                 CorrectionActeur.objects.create(
@@ -122,7 +124,7 @@ class Command(BaseCommand):
                     siret=None,
                     resultat_brute_source="{}",
                     identifiant_unique=final_acteur.identifiant_unique,
-                    acteur_id=final_acteur.identifiant_unique,
+                    final_acteur_id=final_acteur.identifiant_unique,
                 )
 
 
