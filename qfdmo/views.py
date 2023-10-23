@@ -26,7 +26,7 @@ from qfdmo.models import (
     Objet,
     SousCategorieObjet,
 )
-from qfdmo.models.acteur import CorrectionActeur
+from qfdmo.models.acteur import CorrecteurActeurStatus, CorrectionActeur
 
 DEFAULT_LIMIT = 10
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
@@ -154,7 +154,7 @@ def display_corrections(request):
     # Can be paginate
     corrections_insee = (
         CorrectionActeur.objects.prefetch_related("final_acteur")
-        .filter(source="INSEE")
+        .filter(source="INSEE", correction_statut=CorrecteurActeurStatus.ACTIF)
         .exclude(
             final_acteur__siret=F("siret"),
         )
