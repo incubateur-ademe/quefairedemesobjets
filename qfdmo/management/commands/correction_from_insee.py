@@ -7,6 +7,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from qfdmo.models import Acteur, CorrectionActeur, FinalActeur
+from qfdmo.models.acteur import RevisionActeur
 
 client = ApiInsee(key=settings.INSEE_KEY, secret=settings.INSEE_SECRET)
 
@@ -87,21 +88,18 @@ class Command(BaseCommand):
                 and "periodesUniteLegale" in insee_data["uniteLegale"]
                 and len(insee_data["uniteLegale"]["periodesUniteLegale"]) > 0
             ):
-                # special case for NAF
                 acteur = Acteur.objects.get(
                     identifiant_unique=final_acteur.identifiant_unique
                 )
                 nom_officiel = insee_data["uniteLegale"]["periodesUniteLegale"][0][
                     "denominationUniteLegale"
                 ]
-                if not acteur.nom_officiel:
-                    acteur.nom_officiel = nom_officiel
+                acteur.nom_officiel = nom_officiel
+
                 naf_principal = insee_data["uniteLegale"]["periodesUniteLegale"][0][
                     "activitePrincipaleUniteLegale"
                 ]
                 acteur.naf_principal = naf_principal
-                acteur.save()
-
                 siren = insee_data["uniteLegale"]["siren"]
                 siret = (
                     siren
@@ -109,15 +107,23 @@ class Command(BaseCommand):
                         "nicSiegeUniteLegale"
                     ]
                 )
-                CorrectionActeur.objects.create(
-                    source="INSEE",
-                    siret=siret,
-                    naf_principal=naf_principal,
-                    nom_officiel=nom_officiel,
-                    resultat_brute_source=insee_data,
-                    identifiant_unique=final_acteur.identifiant_unique,
-                    final_acteur_id=final_acteur.identifiant_unique,
+                acteur.siret = siret
+                acteur.save()
+                revision_acteurs = RevisionActeur.objects.filter(
+                    identifiant_unique=final_acteur.identifiant_unique
                 )
+                if len(revision_acteurs) == 1:
+                    if acteur.nom_officiel != nom_officiel:
+                        revision_acteur = revision_acteurs[0]
+                        revision_acteur.nom_officiel = nom_officiel
+                    revision_acteur = revision_acteurs[0]
+                    revision_acteur.siret = None
+                    revision_acteur.save()
+                elif len(revision_acteurs) == 0 and acteur.nom_officiel != nom_officiel:
+                    RevisionActeur.objects.create(
+                        identifiant_unique=final_acteur.identifiant_unique,
+                        nom_officiel=nom_officiel,
+                    )
             else:
                 CorrectionActeur.objects.create(
                     source="INSEE",

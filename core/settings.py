@@ -249,3 +249,6 @@ DEFAULT_ACTION_DIRECTION = "jecherche"
 
 INSEE_KEY = decouple.config("INSEE_KEY", cast=str, default="")
 INSEE_SECRET = decouple.config("INSEE_SECRET", cast=str, default="")
+
+LOGOUT_REDIRECT_URL = "qfdmo:reemploi_solution"
+LOGIN_URL = "admin:login"

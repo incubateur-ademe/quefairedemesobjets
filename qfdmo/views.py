@@ -3,6 +3,7 @@ import threading
 
 import unidecode
 from django.conf import settings
+from django.contrib.auth.decorators import user_passes_test
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
 from django.contrib.postgres.lookups import Unaccent
@@ -148,6 +149,7 @@ def get_object_list(request):
     return JsonResponse([objet.nom for objet in objets], safe=False)
 
 
+@user_passes_test(lambda user: user.is_staff)
 def display_corrections(request):
     # Can be paginate
     corrections_insee = (

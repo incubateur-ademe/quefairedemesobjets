@@ -34,6 +34,13 @@ class ActeurStatus(models.TextChoices):
     SUPPRIME = "SUPPRIME", "supprimé"
 
 
+class CorrecteurActeurStatus(models.TextChoices):
+    ACTIF = "ACTIF", "actif"
+    IGNORE = "IGNORE", "ignoré"
+    ACCEPTE = "ACCEPTE", "accepté"
+    REJETE = "REJETE", "rejeté"
+
+
 class ActeurType(NomAsNaturalKeyModel):
     class Meta:
         verbose_name = "Type d'acteur"
@@ -69,7 +76,9 @@ class BaseActeur(NomAsNaturalKeyModel):
 
     nom = models.CharField(max_length=255, blank=False, null=False)
     # FIXME : use identifiant_unique as primary in import export
-    identifiant_unique = models.CharField(max_length=255, unique=True)
+    identifiant_unique = models.CharField(
+        max_length=255, unique=True, null=True, blank=True
+    )
     acteur_type = models.ForeignKey(ActeurType, on_delete=models.CASCADE)
     adresse = models.CharField(max_length=255, blank=True, null=True)
     adresse_complement = models.CharField(max_length=255, blank=True, null=True)
@@ -309,6 +318,11 @@ class CorrectionActeur(BaseActeur):
         null=True,
         related_name="corrections",
         to_field="identifiant_unique",
+    )
+    correction_statut = models.CharField(
+        max_length=255,
+        default=CorrecteurActeurStatus.ACTIF,
+        choices=CorrecteurActeurStatus.choices,
     )
 
 
