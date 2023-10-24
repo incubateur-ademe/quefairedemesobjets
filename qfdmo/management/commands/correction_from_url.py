@@ -1,7 +1,11 @@
+import datetime
+
 import requests
 from django.core.management.base import BaseCommand
 
-from qfdmo.models import CorrectionActeur, FinalActeur
+from qfdmo.models import CorrecteurActeurStatus, CorrectionActeur, FinalActeur
+
+SOURCE = "URL_SCRIPT"
 
 
 class Command(BaseCommand):
@@ -30,7 +34,17 @@ class Command(BaseCommand):
         nb_acteur_limit = options.get("limit")
 
         final_acteurs = (
-            FinalActeur.objects.exclude(url__isnull=True).exclude(url="").order_by("?")
+            FinalActeur.objects.exclude(
+                identifiant_unique__in=CorrectionActeur.objects.values_list(
+                    "identifiant_unique", flat=True
+                ).filter(
+                    source=SOURCE,
+                    cree_le__gte=datetime.datetime.now() - datetime.timedelta(days=31),
+                ),
+            )
+            .exclude(url__isnull=True)
+            .exclude(url="")
+            .order_by("?")
         )
 
         if nb_acteur_limit is not None:
@@ -39,10 +53,10 @@ class Command(BaseCommand):
         for final_acteur in final_acteurs:
             try:
                 response = requests.head(final_acteur.url, timeout=30)
-            except:  # noqa: E722
+            except requests.exceptions.ConnectionError:
                 print(f"Connection error for {final_acteur.url}")
                 CorrectionActeur.objects.create(
-                    source="URL",
+                    source=SOURCE,
                     url=None,
                     identifiant_unique=final_acteur.identifiant_unique,
                     final_acteur_id=final_acteur.identifiant_unique,
@@ -51,7 +65,7 @@ class Command(BaseCommand):
                 continue
             if response.status_code >= 400:
                 CorrectionActeur.objects.create(
-                    source="URL",
+                    source=SOURCE,
                     url=None,
                     identifiant_unique=final_acteur.identifiant_unique,
                     final_acteur_id=final_acteur.identifiant_unique,
@@ -59,3 +73,10 @@ class Command(BaseCommand):
                 )
             else:
                 print(f"Processing {final_acteur.url} : {response.status_code}")
+                CorrectionActeur.objects.create(
+                    source=SOURCE,
+                    resultat_brute_source="{}",
+                    identifiant_unique=final_acteur.identifiant_unique,
+                    final_acteur_id=final_acteur.identifiant_unique,
+                    statut=CorrecteurActeurStatus.NOT_CHANGED,
+                )

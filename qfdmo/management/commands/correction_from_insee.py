@@ -6,10 +6,17 @@ from api_insee import ApiInsee
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from qfdmo.models import Acteur, CorrectionActeur, FinalActeur
-from qfdmo.models.acteur import RevisionActeur
+from qfdmo.models import (
+    Acteur,
+    CorrecteurActeurStatus,
+    CorrectionActeur,
+    FinalActeur,
+    RevisionActeur,
+)
 
 client = ApiInsee(key=settings.INSEE_KEY, secret=settings.INSEE_SECRET)
+
+SOURCE = "INSEE"
 
 
 def call_api_insee(siren: str) -> dict | None:
@@ -64,7 +71,7 @@ class Command(BaseCommand):
                 identifiant_unique__in=CorrectionActeur.objects.values_list(
                     "identifiant_unique", flat=True
                 ).filter(
-                    source="INSEE",
+                    source=SOURCE,
                     cree_le__gte=datetime.datetime.now() - datetime.timedelta(days=31),
                 ),
             )
@@ -124,9 +131,16 @@ class Command(BaseCommand):
                         identifiant_unique=final_acteur.identifiant_unique,
                         nom_officiel=nom_officiel,
                     )
+                CorrectionActeur.objects.create(
+                    source=SOURCE,
+                    resultat_brute_source=insee_data,
+                    identifiant_unique=final_acteur.identifiant_unique,
+                    final_acteur_id=final_acteur.identifiant_unique,
+                    statut=CorrecteurActeurStatus.NOT_CHANGED,
+                )
             else:
                 CorrectionActeur.objects.create(
-                    source="INSEE",
+                    source=SOURCE,
                     siret=None,
                     resultat_brute_source="{}",
                     identifiant_unique=final_acteur.identifiant_unique,

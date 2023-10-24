@@ -119,7 +119,7 @@ class Migration(migrations.Migration):
                     models.CharField(
                         choices=[
                             ("ACTIF", "actif"),
-                            ("IGNORE", "ignoré"),
+                            ("NOT_CHANGED", "non modifié"),
                             ("ACCEPTE", "accepté"),
                             ("REJETE", "rejeté"),
                         ],

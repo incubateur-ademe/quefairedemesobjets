@@ -36,7 +36,7 @@ class ActeurStatus(models.TextChoices):
 
 class CorrecteurActeurStatus(models.TextChoices):
     ACTIF = "ACTIF", "actif"
-    IGNORE = "IGNORE", "ignoré"
+    NOT_CHANGED = "NOT_CHANGED", "non modifié"
     ACCEPTE = "ACCEPTE", "accepté"
     REJETE = "REJETE", "rejeté"
 
