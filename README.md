@@ -1,14 +1,14 @@
-# Que faire de mes objets
+# Longue vie aux objets
 
-Que faire de mes objets propose des solutions pour promouvoir les gestes de consommation responsable:
+Longue vie aux objets propose des solutions pour promouvoir les gestes de consommation responsable:
 
-- Mise à disposition d'un annuaire d'Acteurs du ré-emploi et du re-cyclage en France (disponible aussi via une iframe)
-- Mise à disposition de l'annuaire via une API
-- Promotion des gestes de consommation responsable tels que le don et le partage local
+-   Mise à disposition d'un annuaire d'Acteurs du ré-emploi et du re-cyclage en France (disponible aussi via une iframe)
+-   Mise à disposition de l'annuaire via une API
+-   Promotion des gestes de consommation responsable tels que le don et le partage local
 
 ## Afficher l'application dans une Iframe
 
-Le site "Que faire de mes objets" est disponible à l'URL : [https://quefairedemesobjets.osc-fr1.scalingo.io/](https://quefairedemesobjets.osc-fr1.scalingo.io/)
+Le site "Longue vie aux objets" est disponible à l'URL : [https://quefairedemesobjets.osc-fr1.scalingo.io/](https://quefairedemesobjets.osc-fr1.scalingo.io/)
 
 Attention, l'URL et le nom de l'application sont temporaires.
 
@@ -20,14 +20,14 @@ Dans le cas de l'iframe, l'entête et le pied de page ne sont pas affichés
 
 Les autres paramètres disponibles pour afficher la page principale de l'application et permettant d'interagir avec les champs de recherche sont :
 
-- `sous_categorie_objet`, parmi les sous-catégories disponibles en base de données
-- `adresse`, par exemple : 145+Avenue+Pierre+Brossolette+92120+Montrouge
-- `latitude` et `longitude` récupéré dpuis l'API BAN avec l'adresse ci-dessus
-- `direction`, option `jai` ou `jecherche`, par défaut la direction `jecherche` est appliquée
-- `action_list`, liste des actions possibles selon la direction séparées par le caractère `|` :
-  - pour la direction `jecherche` les actions possibles sont : `emprunter`, `echanger`, `louer`, `acheter`
-  - pour la direction `jai` les actions possibles sont : `reparer`, `preter`, `donner`, `echanger`, `mettreenlocation`, `revendre`
-  - si le paramètre `action_list` n'est pas renseigné ou est vide, toutes les actions éligibles à la direction sont affichées
+-   `sous_categorie_objet`, parmi les sous-catégories disponibles en base de données
+-   `adresse`, par exemple : 145+Avenue+Pierre+Brossolette+92120+Montrouge
+-   `latitude` et `longitude` récupéré dpuis l'API BAN avec l'adresse ci-dessus
+-   `direction`, option `jai` ou `jecherche`, par défaut la direction `jecherche` est appliquée
+-   `action_list`, liste des actions possibles selon la direction séparées par le caractère `|` :
+    -   pour la direction `jecherche` les actions possibles sont : `emprunter`, `echanger`, `louer`, `acheter`
+    -   pour la direction `jai` les actions possibles sont : `reparer`, `preter`, `donner`, `echanger`, `mettreenlocation`, `revendre`
+    -   si le paramètre `action_list` n'est pas renseigné ou est vide, toutes les actions éligibles à la direction sont affichées
 
 Exemple:
 
@@ -49,7 +49,7 @@ Chaque acteur du ré-emploi et recyclage expose des propositions de service asso
 
 ### Base de données simplifiée
 
-![Essentiel de la base de données de l'application « Que faire de mes objets »](./static/documentation_files/qdfmo-db.png)
+![Essentiel de la base de données de l'application « Longue vie aux objets »](./static/documentation_files/qdfmo-db.png)
 
 ### Objets d'administration en base de données
 
@@ -57,113 +57,113 @@ Certains objets de la base de données sont des objets d'administration qui n'on
 
 **Direction de l'action** (qfdmo_actiondirection):
 
-| nom | nom_affiche |
-|---|---|
+| nom       | nom_affiche  |
+| --------- | ------------ |
 | jecherche | Je recherche |
-| jai | J'ai |
+| jai       | J'ai         |
 
 **Action** (qfdmo_action):
 
-| nom | nom_affiche | description | directions |
-|---|---|---|---|
-| preter | Prêter | NULL| jai |
-| reparer | Réparer | NULL| jai |
-| mettreenlocation | Louer | Mettre en location| jai |
-| echanger | Èchanger | NULL| jai, jerecherche |
-| acheter | Acheter | Acheter d'occasion| jerecherche |
-| revendre | Vendre | NULL| jai |
-| donner | Donner | NULL| jai |
-| louer | Louer | NULL| jerecherche |
-| emprunter | Emprunter | NULL| jerecherche |
+| nom              | nom_affiche | description        | directions       |
+| ---------------- | ----------- | ------------------ | ---------------- |
+| preter           | Prêter      | NULL               | jai              |
+| reparer          | Réparer     | NULL               | jai              |
+| mettreenlocation | Louer       | Mettre en location | jai              |
+| echanger         | Èchanger    | NULL               | jai, jerecherche |
+| acheter          | Acheter     | Acheter d'occasion | jerecherche      |
+| revendre         | Vendre      | NULL               | jai              |
+| donner           | Donner      | NULL               | jai              |
+| louer            | Louer       | NULL               | jerecherche      |
+| emprunter        | Emprunter   | NULL               | jerecherche      |
 
 **Catégories/Sous-catégories** (qfdmo_categorieobjet, qfdmo_souscategorieobjet)
 
-| Catégories | Sous-catégorie |
-|---|---|
-| Bijou, montre, horlogerie | Bijou, montre, horlogerie |
-| Bricolage / Jardinage | Outillage (bricolage/jardinage) |
-| Electroménager | Gros électroménager (froid) |
-| Electroménager | Gros électroménager (hors froid) |
-| Electroménager | Petit électroménager |
-| Equipements de loisir | "Jardin (mobilier| accessoires)" |
-| Equipements de loisir | Autre matériel de sport |
-| Equipements de loisir | Instruments de musique |
-| Equipements de loisir | Jouets |
-| Equipements de loisir | Vélos |
+| Catégories                 | Sous-catégorie                   |
+| -------------------------- | -------------------------------- | ------------- |
+| Bijou, montre, horlogerie  | Bijou, montre, horlogerie        |
+| Bricolage / Jardinage      | Outillage (bricolage/jardinage)  |
+| Electroménager             | Gros électroménager (froid)      |
+| Electroménager             | Gros électroménager (hors froid) |
+| Electroménager             | Petit électroménager             |
+| Equipements de loisir      | "Jardin (mobilier                | accessoires)" |
+| Equipements de loisir      | Autre matériel de sport          |
+| Equipements de loisir      | Instruments de musique           |
+| Equipements de loisir      | Jouets                           |
+| Equipements de loisir      | Vélos                            |
 | Image & son & Informatique | Autres équipements électroniques |
-| Image & son & Informatique | Écrans |
-| Image & son & Informatique | Hifi/vidéo (hors écrans) |
-| Image & son & Informatique | Matériel informatique |
-| Image & son & Informatique | Photo/ciné |
-| Image & son & Informatique | Smartphones/tablettes/consoles |
-| Livres & Multimedia | CD/DVD/jeux vidéo |
-| Livres & Multimedia | Livres |
-| Mobilier et décoration | Décoration |
-| Mobilier et décoration | Luminaires |
-| Mobilier et décoration | Mobilier |
-| Mobilier et décoration | Vaisselle |
-| Produits divers | Matériel médical |
-| Produits divers | Puériculture |
-| Vêtements & Accessoires | Chaussures |
-| Vêtements & Accessoires | Linge de maison |
-| Vêtements & Accessoires | Maroquinerie |
-| Vêtements & Accessoires | Vêtements |
+| Image & son & Informatique | Écrans                           |
+| Image & son & Informatique | Hifi/vidéo (hors écrans)         |
+| Image & son & Informatique | Matériel informatique            |
+| Image & son & Informatique | Photo/ciné                       |
+| Image & son & Informatique | Smartphones/tablettes/consoles   |
+| Livres & Multimedia        | CD/DVD/jeux vidéo                |
+| Livres & Multimedia        | Livres                           |
+| Mobilier et décoration     | Décoration                       |
+| Mobilier et décoration     | Luminaires                       |
+| Mobilier et décoration     | Mobilier                         |
+| Mobilier et décoration     | Vaisselle                        |
+| Produits divers            | Matériel médical                 |
+| Produits divers            | Puériculture                     |
+| Vêtements & Accessoires    | Chaussures                       |
+| Vêtements & Accessoires    | Linge de maison                  |
+| Vêtements & Accessoires    | Maroquinerie                     |
+| Vêtements & Accessoires    | Vêtements                        |
 
 **Type de service** (qfdmo_acteurservice)
 
-|nom|
-|---|
-|Achat, revente entre particuliers|
-|Achat, revente par un professionnel|
-|Atelier d'auto-réparation|
-|Collecte par une structure spécialisée|
-|Depôt-vente|
-|Don entre particuliers|
-|Echanges entre particuliers|
-|Hub de partage|
-|Location entre particuliers|
-|Location par un professionnel|
-|Partage entre particuliers|
-|Pièces détachées|
-|Relai d'acteurs et d'événements|
-|Ressourcerie, recyclerie|
-|Service de réparation|
-|Tutoriels et diagnostics en ligne|
+| nom                                    |
+| -------------------------------------- |
+| Achat, revente entre particuliers      |
+| Achat, revente par un professionnel    |
+| Atelier d'auto-réparation              |
+| Collecte par une structure spécialisée |
+| Depôt-vente                            |
+| Don entre particuliers                 |
+| Echanges entre particuliers            |
+| Hub de partage                         |
+| Location entre particuliers            |
+| Location par un professionnel          |
+| Partage entre particuliers             |
+| Pièces détachées                       |
+| Relai d'acteurs et d'événements        |
+| Ressourcerie, recyclerie               |
+| Service de réparation                  |
+| Tutoriels et diagnostics en ligne      |
 
 **Type d'acteur** (qfdmo_acteurtype)
 
-|nom|nom affiché|
-|---|---|
-| acteur digital | Acteur digital (site web, app. mobile) |
-| commerce | Franchise, enseigne commerciale |
-| artisan | Artisan, commerce indépendant |
-| collectivité | Collectivité, établissement public |
-| ess | Association, entreprise de l'économie sociale et solidaire |
+| nom            | nom affiché                                                |
+| -------------- | ---------------------------------------------------------- |
+| acteur digital | Acteur digital (site web, app. mobile)                     |
+| commerce       | Franchise, enseigne commerciale                            |
+| artisan        | Artisan, commerce indépendant                              |
+| collectivité   | Collectivité, établissement public                         |
+| ess            | Association, entreprise de l'économie sociale et solidaire |
 
 ## Environnement de développement
 
 ### Prérequis
 
-- docker-compose
-- python 3.11
+-   docker-compose
+-   python 3.11
 
 ### Technologies
 
-- Python
-- Django
-- github
-- Licence MIT
-- Node
-- Parcel
-- DSFR
-- honcho
-- Scalingo
-- Sentry
-- Pytest
-- Whitnoise
-- Tailwind
-- Dependabot
-- Django-debug-toolbar
+-   Python
+-   Django
+-   github
+-   Licence MIT
+-   Node
+-   Parcel
+-   DSFR
+-   honcho
+-   Scalingo
+-   Sentry
+-   Pytest
+-   Whitnoise
+-   Tailwind
+-   Dependabot
+-   Django-debug-toolbar
 
 ### installation & exécution
 
