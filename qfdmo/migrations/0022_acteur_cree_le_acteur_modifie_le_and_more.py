@@ -31,6 +31,11 @@ class Migration(migrations.Migration):
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
         migrations.AddField(
+            model_name="acteur",
+            name="commentaires",
+            field=models.TextField(blank=True, null=True),
+        ),
+        migrations.AddField(
             model_name="revisionacteur",
             name="cree_le",
             field=models.DateTimeField(
@@ -47,6 +52,11 @@ class Migration(migrations.Migration):
             model_name="revisionacteur",
             name="naf_principal",
             field=models.CharField(blank=True, max_length=255, null=True),
+        ),
+        migrations.AddField(
+            model_name="revisionacteur",
+            name="commentaires",
+            field=models.TextField(blank=True, null=True),
         ),
         migrations.CreateModel(
             name="CorrectionActeur",
@@ -108,6 +118,10 @@ class Migration(migrations.Migration):
                 (
                     "naf_principal",
                     models.CharField(blank=True, max_length=255, null=True),
+                ),
+                (
+                    "commentaires",
+                    models.TextField(blank=True, null=True),
                 ),
                 ("cree_le", models.DateTimeField(auto_now_add=True)),
                 ("modifie_le", models.DateTimeField(auto_now=True)),
@@ -183,6 +197,7 @@ class Migration(migrations.Migration):
                     , COALESCE(ra.cree_le, a.cree_le) as cree_le
                     , COALESCE(ra.modifie_le, a.modifie_le) as modifie_le
                     , COALESCE(ra.naf_principal, a.naf_principal) as naf_principal
+                    , COALESCE(ra.commentaires, a.commentaires) as commentaires
                 FROM qfdmo_acteur a
                 LEFT OUTER JOIN qfdmo_revisionacteur AS ra ON ra.id = a.id;
                 CREATE UNIQUE INDEX ON qfdmo_finalacteur(id);

@@ -5,6 +5,7 @@ import urllib
 from api_insee import ApiInsee
 from django.conf import settings
 from django.core.management.base import BaseCommand
+from django.db.models.functions import Length
 
 from qfdmo.models import (
     Acteur,
@@ -65,8 +66,8 @@ class Command(BaseCommand):
         nb_acteur_limit = options.get("limit")
 
         final_acteurs = (
-            FinalActeur.objects.exclude(siret__isnull=True)
-            .exclude(siret="")
+            FinalActeur.objects.annotate(siret_length=Length("siret"))
+            .filter(siret_length=14)
             .exclude(
                 identifiant_unique__in=CorrectionActeur.objects.values_list(
                     "identifiant_unique", flat=True
@@ -81,32 +82,21 @@ class Command(BaseCommand):
         if nb_acteur_limit is not None:
             final_acteurs = final_acteurs[:nb_acteur_limit]
 
-        counter = 0
         for final_acteur in final_acteurs:
-            counter += 1
-            if counter % 10 == 0:
-                time.sleep(3)
             print(final_acteur, " : ", final_acteur.siret)
             insee_data = call_api_insee(final_acteur.siret[:9])
-
             if (
                 insee_data is not None
                 and "uniteLegale" in insee_data
                 and "periodesUniteLegale" in insee_data["uniteLegale"]
                 and len(insee_data["uniteLegale"]["periodesUniteLegale"]) > 0
             ):
-                acteur = Acteur.objects.get(
-                    identifiant_unique=final_acteur.identifiant_unique
-                )
                 nom_officiel = insee_data["uniteLegale"]["periodesUniteLegale"][0][
                     "denominationUniteLegale"
                 ]
-                acteur.nom_officiel = nom_officiel
-
                 naf_principal = insee_data["uniteLegale"]["periodesUniteLegale"][0][
                     "activitePrincipaleUniteLegale"
                 ]
-                acteur.naf_principal = naf_principal
                 siren = insee_data["uniteLegale"]["siren"]
                 siret = (
                     siren
@@ -114,29 +104,23 @@ class Command(BaseCommand):
                         "nicSiegeUniteLegale"
                     ]
                 )
-                acteur.siret = siret
-                acteur.save()
-                revision_acteurs = RevisionActeur.objects.filter(
-                    identifiant_unique=final_acteur.identifiant_unique
+                acteurfields_to_update = {
+                    "nom_officiel": nom_officiel,
+                    "naf_principal": naf_principal,
+                    "siret": siret,
+                }
+                _update_acteur(
+                    final_acteur.identifiant_unique,
+                    acteurfields_to_update,
                 )
-                if len(revision_acteurs) == 1:
-                    if acteur.nom_officiel != nom_officiel:
-                        revision_acteur = revision_acteurs[0]
-                        revision_acteur.nom_officiel = nom_officiel
-                    revision_acteur = revision_acteurs[0]
-                    revision_acteur.siret = None
-                    revision_acteur.save()
-                elif len(revision_acteurs) == 0 and acteur.nom_officiel != nom_officiel:
-                    RevisionActeur.objects.create(
-                        identifiant_unique=final_acteur.identifiant_unique,
-                        nom_officiel=nom_officiel,
-                    )
+
                 CorrectionActeur.objects.create(
+                    **acteurfields_to_update,
                     source=SOURCE,
                     resultat_brute_source=insee_data,
                     identifiant_unique=final_acteur.identifiant_unique,
                     final_acteur_id=final_acteur.identifiant_unique,
-                    statut=CorrecteurActeurStatus.NOT_CHANGED,
+                    correction_statut=CorrecteurActeurStatus.NOT_CHANGED,
                 )
             else:
                 CorrectionActeur.objects.create(
@@ -146,6 +130,16 @@ class Command(BaseCommand):
                     identifiant_unique=final_acteur.identifiant_unique,
                     final_acteur_id=final_acteur.identifiant_unique,
                 )
+
+
+def _update_acteur(identifiant_unique: str, actorfields_to_update: dict):
+    acteur = Acteur.objects.get(identifiant_unique=identifiant_unique)
+    for field, value in actorfields_to_update.items():
+        setattr(acteur, field, value)
+    acteur.save()
+    RevisionActeur.objects.filter(identifiant_unique=identifiant_unique).update(
+        **{field: None for field, _ in actorfields_to_update.items()}
+    )
 
 
 ###

@@ -103,6 +103,7 @@ class BaseActeur(NomAsNaturalKeyModel):
         max_length=255, default=ActeurStatus.ACTIF, choices=ActeurStatus.choices
     )
     naf_principal = models.CharField(max_length=255, blank=True, null=True)
+    commentaires = models.TextField(blank=True, null=True)
     cree_le = models.DateTimeField(auto_now_add=True)
     modifie_le = models.DateTimeField(auto_now=True)
 
@@ -324,6 +325,9 @@ class CorrectionActeur(BaseActeur):
         default=CorrecteurActeurStatus.ACTIF,
         choices=CorrecteurActeurStatus.choices,
     )
+
+    def __str__(self):
+        return self.identifiant_unique
 
 
 class BasePropositionService(models.Model):
