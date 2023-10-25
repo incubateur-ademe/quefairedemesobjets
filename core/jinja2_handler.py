@@ -11,6 +11,7 @@ from jinja2 import Environment
 from qfdmo.models import Action
 
 
+# FIXME : could be tested
 def str_diff(s1: str | None, s2: str | None) -> str:
     s1 = s1 or ""
     s2 = s2 or ""

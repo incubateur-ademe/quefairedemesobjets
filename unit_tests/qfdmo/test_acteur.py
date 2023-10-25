@@ -152,6 +152,8 @@ class TestActeurSerialize:
             "statut": "ACTIF",
             "identifiant_externe": "456",
             "location": {"type": "Point", "coordinates": [0.0, 0.0]},
+            "naf_principal": None,
+            "commentaires": None,
             "proposition_services": [proposition_service.serialize()],
         }
         assert acteur.serialize() == expected_serialized_acteur
@@ -332,6 +334,8 @@ class TestFinalActeurSerialize:
             "identifiant_externe": finalacteur.identifiant_externe,
             "id": finalacteur.id,
             "location": {"type": "Point", "coordinates": [0.0, 0.0]},
+            "naf_principal": None,
+            "commentaires": None,
             "proposition_services": [
                 proposition_service.serialize()
                 for proposition_service in finalacteur.proposition_services.all()
@@ -364,6 +368,8 @@ class TestFinalActeurSerialize:
             "identifiant_externe": finalacteur.identifiant_externe,
             "id": finalacteur.id,
             "location": {"type": "Point", "coordinates": [0.0, 0.0]},
+            "naf_principal": None,
+            "commentaires": None,
             "proposition_services": [
                 proposition_service.serialize()
                 for proposition_service in finalacteur.proposition_services.all()
@@ -397,6 +403,8 @@ class TestFinalActeurSerialize:
             "identifiant_externe": finalacteur.identifiant_externe,
             "id": finalacteur.id,
             "location": {"type": "Point", "coordinates": [0.0, 0.0]},
+            "naf_principal": None,
+            "commentaires": None,
             "proposition_services": [
                 proposition_service.serialize()
                 for proposition_service in finalacteur.proposition_services.all()

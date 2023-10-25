@@ -326,6 +326,7 @@ class CorrectionActeur(BaseActeur):
         choices=CorrecteurActeurStatus.choices,
     )
 
+    # FIXME : could be tested
     def __str__(self):
         return self.identifiant_unique
 
