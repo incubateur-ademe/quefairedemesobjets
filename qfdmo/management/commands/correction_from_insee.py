@@ -1,5 +1,4 @@
 import datetime
-import http
 import time
 import urllib
 
@@ -30,7 +29,7 @@ def call_api_insee(siren: str) -> dict | None:
             siren,
             date=datetime.date.today().strftime("%Y-%m-%d"),
         ).get()
-    except urllib.error.HTTPError | http.client.RemoteDisconnected as e:
+    except urllib.error.HTTPError as e:
         if "404" in str(e):
             pass
         if "429" in str(e):
