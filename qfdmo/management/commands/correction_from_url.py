@@ -19,20 +19,27 @@ class Command(BaseCommand):
             type=int,
             default=None,
         )
+        parser.add_argument(
+            "--quiet",
+            help="limit the number of acteurs to process",
+            type=bool,
+            default=False,
+        )
 
     def handle(self, *args, **options):
-        result = input(
-            "Avant de commencer, avez vous bien mis à jour les vues matérialisées ?"
-            " (y/N)"
-        )
-        if result.lower() != "y":
-            print(
-                "Veuillez mettre à jour les vues matérialisées avant de lancer ce"
-                " script"
-            )
-            return
-
+        quiet = options.get("quiet")
         nb_acteur_limit = options.get("limit")
+        if not quiet:
+            result = input(
+                "Avant de commencer, avez vous bien mis à jour les vues matérialisées ?"
+                " (y/N)"
+            )
+            if result.lower() != "y":
+                print(
+                    "Veuillez mettre à jour les vues matérialisées avant de lancer ce"
+                    " script"
+                )
+                return
 
         final_acteurs = (
             FinalActeur.objects.annotate(url_length=Length("url"))
@@ -60,7 +67,10 @@ class Command(BaseCommand):
                 " Safari/537.36"
             }
             try:
-                response = requests.head(final_acteur.url, timeout=30, headers=headers)
+                response = requests.head(final_acteur.url, timeout=60, headers=headers)
+                print(f"Processing {final_acteur.url} : {response.status_code}")
+            except requests.exceptions.MissingSchema:
+                response = requests.get(final_acteur.url, timeout=60, headers=headers)
                 print(f"Processing {final_acteur.url} : {response.status_code}")
             except requests.exceptions.ConnectionError:
                 print(f"Connection error for {final_acteur.url}")

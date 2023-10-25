@@ -1,4 +1,5 @@
 import datetime
+import http
 import time
 import urllib
 
@@ -29,7 +30,7 @@ def call_api_insee(siren: str) -> dict | None:
             siren,
             date=datetime.date.today().strftime("%Y-%m-%d"),
         ).get()
-    except urllib.error.HTTPError as e:
+    except urllib.error.HTTPError | http.client.RemoteDisconnected as e:
         if "404" in str(e):
             pass
         if "429" in str(e):
@@ -51,19 +52,27 @@ class Command(BaseCommand):
             type=int,
             default=None,
         )
+        parser.add_argument(
+            "--quiet",
+            help="limit the number of acteurs to process",
+            type=bool,
+            default=False,
+        )
 
     def handle(self, *args, **options):
-        result = input(
-            "Avant de commencer, avez vous bien mis à jour les vues matérialisées ?"
-            " (y/N)"
-        )
-        if result.lower() != "y":
-            print(
-                "Veuillez mettre à jour les vues matérialisées avant de lancer ce"
-                " script"
-            )
-            return
+        quiet = options.get("quiet")
         nb_acteur_limit = options.get("limit")
+        if not quiet:
+            result = input(
+                "Avant de commencer, avez vous bien mis à jour les vues matérialisées ?"
+                " (y/N)"
+            )
+            if result.lower() != "y":
+                print(
+                    "Veuillez mettre à jour les vues matérialisées avant de lancer ce"
+                    " script"
+                )
+                return
 
         final_acteurs = (
             FinalActeur.objects.annotate(siret_length=Length("siret"))
