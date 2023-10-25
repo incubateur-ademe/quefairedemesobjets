@@ -9,6 +9,7 @@ from qfdmo.models import (
     ActeurService,
     ActeurType,
     Action,
+    CorrectionActeur,
     FinalActeur,
     FinalPropositionService,
     PropositionService,
@@ -238,9 +239,17 @@ class FinalActeurAdmin(BaseActeurAdmin, NotEditableMixin):
     ]
 
 
+class CorrectionActeurAdmin(BaseActeurAdmin):
+    gis_widget = CustomOSMWidget
+    inlines = []
+    list_display = ["__str__", "source", "correction_statut"]
+    readonly_fields = ["final_acteur"]
+
+
 admin.site.register(Acteur, ActeurAdmin)
 admin.site.register(ActeurService)
 admin.site.register(ActeurType, ActeurTypeAdmin)
+admin.site.register(CorrectionActeur, CorrectionActeurAdmin)
 admin.site.register(FinalActeur, FinalActeurAdmin)
 admin.site.register(PropositionService, PropositionServiceAdmin)
 admin.site.register(RevisionActeur, RevisionActeurAdmin)

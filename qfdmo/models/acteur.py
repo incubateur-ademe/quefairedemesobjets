@@ -34,6 +34,13 @@ class ActeurStatus(models.TextChoices):
     SUPPRIME = "SUPPRIME", "supprimé"
 
 
+class CorrecteurActeurStatus(models.TextChoices):
+    ACTIF = "ACTIF", "actif"
+    NOT_CHANGED = "NOT_CHANGED", "non modifié"
+    ACCEPTE = "ACCEPTE", "accepté"
+    REJETE = "REJETE", "rejeté"
+
+
 class ActeurType(NomAsNaturalKeyModel):
     class Meta:
         verbose_name = "Type d'acteur"
@@ -69,7 +76,9 @@ class BaseActeur(NomAsNaturalKeyModel):
 
     nom = models.CharField(max_length=255, blank=False, null=False)
     # FIXME : use identifiant_unique as primary in import export
-    identifiant_unique = models.CharField(max_length=255, unique=True)
+    identifiant_unique = models.CharField(
+        max_length=255, unique=True, null=True, blank=True
+    )
     acteur_type = models.ForeignKey(ActeurType, on_delete=models.CASCADE)
     adresse = models.CharField(max_length=255, blank=True, null=True)
     adresse_complement = models.CharField(max_length=255, blank=True, null=True)
@@ -79,10 +88,13 @@ class BaseActeur(NomAsNaturalKeyModel):
     email = models.EmailField(blank=True, null=True)
     location = models.PointField(blank=True, null=True)
     telephone = models.CharField(max_length=255, blank=True, null=True)
+    # FIXME : multi_base could be removed ?
     multi_base = models.BooleanField(default=False)
     nom_commercial = models.CharField(max_length=255, blank=True, null=True)
     nom_officiel = models.CharField(max_length=255, blank=True, null=True)
+    # FIXME : manuel could be removed ?
     manuel = models.BooleanField(default=False)
+    # FIXME : Could be replace to a many-to-many relationship with a label table ?
     label_reparacteur = models.BooleanField(default=False)
     siret = models.CharField(max_length=14, blank=True, null=True)
     source = models.ForeignKey(Source, on_delete=models.CASCADE, blank=True, null=True)
@@ -90,6 +102,10 @@ class BaseActeur(NomAsNaturalKeyModel):
     statut = models.CharField(
         max_length=255, default=ActeurStatus.ACTIF, choices=ActeurStatus.choices
     )
+    naf_principal = models.CharField(max_length=255, blank=True, null=True)
+    commentaires = models.TextField(blank=True, null=True)
+    cree_le = models.DateTimeField(auto_now_add=True)
+    modifie_le = models.DateTimeField(auto_now=True)
 
     @property
     def latitude(self):
@@ -283,6 +299,36 @@ REFRESH MATERIALIZED VIEW CONCURRENTLY qfdmo_finalpropositionservice_sous_catego
         if format == "json":
             return json.dumps(super_serialized)
         return super_serialized
+
+
+class CorrectionActeur(BaseActeur):
+    class Meta:
+        verbose_name = "Proposition de correction d'un acteur"
+        verbose_name_plural = "Propositions de correction des acteurs"
+
+    identifiant_unique = models.CharField(max_length=255)
+    source = models.CharField(max_length=255)
+    resultat_brute_source = models.JSONField()
+    acteur_type = models.ForeignKey(
+        ActeurType, on_delete=models.CASCADE, null=True, blank=True, default=None
+    )
+    final_acteur = models.ForeignKey(
+        FinalActeur,
+        db_constraint=False,
+        on_delete=models.DO_NOTHING,
+        null=True,
+        related_name="corrections",
+        to_field="identifiant_unique",
+    )
+    correction_statut = models.CharField(
+        max_length=255,
+        default=CorrecteurActeurStatus.ACTIF,
+        choices=CorrecteurActeurStatus.choices,
+    )
+
+    # FIXME : could be tested
+    def __str__(self):
+        return self.identifiant_unique
 
 
 class BasePropositionService(models.Model):

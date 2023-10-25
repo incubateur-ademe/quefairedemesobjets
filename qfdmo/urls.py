@@ -19,4 +19,9 @@ urlpatterns = [
         views.get_object_list,
         name="get_object_list",
     ),
+    path(
+        "qfdmo/corrections",
+        views.display_corrections,
+        name="display_corrections",
+    ),
 ]
