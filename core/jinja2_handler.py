@@ -1,3 +1,4 @@
+import difflib
 from typing import List
 
 from django.conf import settings
@@ -8,6 +9,25 @@ from django.urls import reverse
 
 from jinja2 import Environment
 from qfdmo.models import Action
+
+
+# FIXME : could be tested
+def str_diff(s1: str | None, s2: str | None) -> str:
+    s1 = s1 or ""
+    s2 = s2 or ""
+    d = difflib.Differ().compare(s1, s2)
+    list_diff = []
+    for letter in list(d):
+        if letter[0] == "+":
+            list_diff.append(f'<span class="qfdmo-bg-red-500" >{letter[-1]}</span>')
+        elif letter[0] == "-":
+            list_diff.append(
+                f'<span class="qfdmo-bg-green-500"'
+                f' style="background-color:greenyellow;">{letter[-1]}</span>'
+            )
+        else:
+            list_diff.append(letter[-1])
+    return "".join(list_diff)
 
 
 def is_iframe(request: HttpRequest) -> bool:
@@ -51,6 +71,7 @@ def environment(**options):
             "is_iframe": is_iframe,
             "action_by_direction": action_by_direction,
             "action_list_display": action_list_display,
+            "str_diff": str_diff,
         }
     )
     return env

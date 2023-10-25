@@ -23,6 +23,8 @@ module.exports = {
         "qfdmo-bg-brown-caramel",
         "qfdmo-bg-brown-opera",
         "qfdmo-bg-beige-gris-galet",
+        "qfdmo-bg-green-500",
+        "qfdmo-bg-red-500",
     ],
     theme: {
         colors: {
@@ -50,6 +52,7 @@ module.exports = {
             "brown-caramel": "#C08C65",
             "brown-opera": "#BD987A",
             "beige-gris-galet": "#AEA397",
+            "red-500": "#EB4444",
         },
         maxWidth: {
             readable: "80ch",

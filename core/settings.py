@@ -247,4 +247,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 DEFAULT_ACTION_DIRECTION = "jecherche"
 
-GOOGLE_API_KEY = decouple.config("GOOGLE_API_KEY", cast=str, default="")
+INSEE_KEY = decouple.config("INSEE_KEY", cast=str, default="")
+INSEE_SECRET = decouple.config("INSEE_SECRET", cast=str, default="")
+
+LOGOUT_REDIRECT_URL = "qfdmo:reemploi_solution"
+LOGIN_URL = "admin:login"
