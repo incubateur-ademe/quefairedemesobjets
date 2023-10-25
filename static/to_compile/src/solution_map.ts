@@ -36,11 +36,14 @@ function get_color_code(colorName: string): string {
 
 export class SolutionMap {
     #map: L.Map
+    #zoomControl: L.Control.Zoom
     #location: Location
+
     constructor({ location }: { location: Location }) {
         this.#location = location
         this.#map = L.map("map", {
             preferCanvas: true,
+            zoomControl: false,
         })
 
         this.#map.setView(DEFAULT_LOCATION, DEFAULT_ZOOM)
@@ -49,6 +52,8 @@ export class SolutionMap {
             attribution: "© OSM",
         }).addTo(this.#map)
         L.control.scale({ imperial: false }).addTo(this.#map)
+        this.#manageZoomControl()
+
         if (
             this.#location.latitude !== undefined &&
             this.#location.longitude !== undefined
@@ -107,5 +112,16 @@ export class SolutionMap {
 
     get_map(): L.Map {
         return this.#map
+    }
+
+    #manageZoomControl() {
+        this.#zoomControl = L.control.zoom({ position: "topleft" })
+        this.#zoomControl.addTo(this.#map)
+        this.#map.on("popupopen", () => {
+            this.#map.removeControl(this.#zoomControl)
+        })
+        this.#map.on("popupclose", () => {
+            this.#zoomControl.addTo(this.#map)
+        })
     }
 }
