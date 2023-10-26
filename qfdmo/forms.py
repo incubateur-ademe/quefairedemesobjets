@@ -51,7 +51,7 @@ class GetReemploiSolutionForm(forms.Form):
             },
             data_controller="address-autocomplete",
         ),
-        label="Autour de l'adresse suivante",
+        label="Autour de l'adresse suivante ",
         required=False,
     )
     latitude = forms.FloatField(
