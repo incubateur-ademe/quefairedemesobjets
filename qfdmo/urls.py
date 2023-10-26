@@ -24,4 +24,14 @@ urlpatterns = [
         corrections.CorrectionsView.as_view(),
         name="display_corrections",
     ),
+    path(
+        "solution/<str:identifiant_unique>",
+        main_map.solution_detail,
+        name="solution_detail",
+    ),
+    path(
+        "solution_admin/<str:identifiant_unique>",
+        main_map.solution_admin,
+        name="solution_admin",
+    ),
 ]

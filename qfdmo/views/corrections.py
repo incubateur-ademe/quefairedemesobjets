@@ -7,6 +7,8 @@ from django.views.generic.edit import FormView
 
 from qfdmo.forms import GetCorrectionsForm
 from qfdmo.models import CorrecteurActeurStatus, CorrectionActeur
+from qfdmo.models.acteur import Acteur
+from qfdmo.thread.materialized_view import RefreshMateriazedViewThread
 
 
 class CorrectionsView(FormView):
@@ -35,7 +37,8 @@ class CorrectionsView(FormView):
             )
             .distinct()
             .filter(
-                source=kwargs["source"], correction_statut=CorrecteurActeurStatus.ACTIF
+                source=kwargs["source"],
+                correction_statut=CorrecteurActeurStatus.NOT_CHANGED,
             )
         )
         return super().get_context_data(**kwargs)
@@ -45,9 +48,25 @@ class CorrectionsView(FormView):
         accepted = [key for key, value in request.POST.items() if value == "accept"]
         ignored = [key for key, value in request.POST.items() if value == "ignore"]
         rejected = [key for key, value in request.POST.items() if value == "reject"]
-        logging.warning(accepted)
-        logging.warning(ignored)
-        logging.warning(rejected)
+        source = request.POST.get("source", None)
+        if source == "URL_SCRIPT":
+            for correction_id in accepted:
+                correction = CorrectionActeur.objects.get(id=correction_id)
+                acteur = Acteur.objects.get(
+                    identifiant_unique=correction.identifiant_unique
+                )
+                revision_acteur = acteur.get_or_create_revision()
+                revision_acteur.url = correction.url if correction.url else "__nourl__"
+                revision_acteur.save()
+                correction.correction_statut = CorrecteurActeurStatus.ACCEPTE
+                correction.save()
+            CorrectionActeur.objects.filter(id__in=ignored).update(
+                correction_statut=CorrecteurActeurStatus.NOT_CHANGED
+            )
+            CorrectionActeur.objects.filter(id__in=rejected).update(
+                correction_statut=CorrecteurActeurStatus.REJETE
+            )
+        RefreshMateriazedViewThread().start()
         return super().post(request, *args, **kwargs)
 
 

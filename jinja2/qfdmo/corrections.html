@@ -11,9 +11,10 @@
                 <a class="fr-btn{% if source != 'URL_SCRIPT' %} fr-btn--secondary{% endif %}" href="{{ reverse('qfdmo:display_corrections') }}?source=URL_SCRIPT">URL</a>
             </li>
         </ul>
-        {{ form }}
         <!-- action pour valider tous les choix -->
         <form action="" method='POST'>
+            {{ form }}
+            {{ csrf_input }}
             <div class="fr-table">
                 <table>
                     <thead>
@@ -34,7 +35,6 @@
                     </tbody>
                 </table>
             </div>
-            {{ csrf_input }}
             <button class='fr-btn fr-mb-3w'>
                 Valider tous les choix ci-dessus
             </button>

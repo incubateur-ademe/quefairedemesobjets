@@ -1,5 +1,4 @@
 import json
-import threading
 
 import unidecode
 from django.conf import settings
@@ -7,11 +6,10 @@ from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
 from django.contrib.postgres.lookups import Unaccent
 from django.contrib.postgres.search import TrigramWordDistance  # type: ignore
-from django.core.management import call_command
 from django.db.models import Min, QuerySet
 from django.db.models.functions import Length, Lower
 from django.http import JsonResponse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.views.decorators.http import require_GET
 from django.views.generic.edit import FormView
 
@@ -25,6 +23,8 @@ from qfdmo.models import (
     Objet,
     SousCategorieObjet,
 )
+from qfdmo.models.acteur import RevisionActeur
+from qfdmo.thread.materialized_view import RefreshMateriazedViewThread
 
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
 
@@ -117,14 +117,6 @@ def getorcreate_revision_acteur(request, acteur_id):
     return redirect("admin:qfdmo_revisionacteur_change", revision_acteur.id)
 
 
-class RefreshMateriazedViewThread(threading.Thread):
-    def __init__(self):
-        threading.Thread.__init__(self)
-
-    def run(self):
-        call_command("refresh_materialized_view")
-
-
 def refresh_acteur_view(request):
     RefreshMateriazedViewThread().start()
     return redirect(request.META["HTTP_REFERER"])
@@ -144,3 +136,18 @@ def get_object_list(request):
         .order_by("distance", "length")[:10]
     )
     return JsonResponse([objet.nom for objet in objets], safe=False)
+
+
+def solution_detail(request, identifiant_unique):
+    final_acteur = FinalActeur.objects.get(identifiant_unique=identifiant_unique)
+    return render(request, "qfdmo/solution_detail.html", {"final_acteur": final_acteur})
+
+
+def solution_admin(request, identifiant_unique):
+    acteur = RevisionActeur.objects.filter(
+        identifiant_unique=identifiant_unique
+    ).first()
+    if acteur:
+        return redirect("admin:qfdmo_revisionacteur_change", acteur.id)
+    acteur = Acteur.objects.get(identifiant_unique=identifiant_unique)
+    return redirect("admin:qfdmo_acteur_change", acteur.id)
