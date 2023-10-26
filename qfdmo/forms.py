@@ -1,6 +1,7 @@
 from django import forms
 
 from qfdmo.models import ActionDirection, SousCategorieObjet
+from qfdmo.models.acteur import CorrecteurActeurStatus
 
 
 class AutoCompleteInput(forms.Select):
@@ -95,5 +96,24 @@ class GetReemploiSolutionForm(forms.Form):
         widget=forms.HiddenInput(
             attrs={"data-choose-action-target": "digital"},
         ),
+        required=False,
+    )
+
+
+class GetCorrectionsForm(forms.Form):
+    source = forms.CharField(
+        widget=forms.HiddenInput(),
+        required=False,
+    )
+    correction_statut = forms.MultipleChoiceField(
+        widget=forms.CheckboxSelectMultiple(),
+        # choices=(
+        #     ("ACTIF", "Actif"),
+        #     ("ACCEPTE", "Accepté"),
+        #     ("REJETE", "Rejeté"),
+        #     ("NOT_CHANGED", "Non modifié"),
+        # ),
+        choices=CorrecteurActeurStatus.choices,
+        label="Statut de la correction",
         required=False,
     )

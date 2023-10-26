@@ -25,7 +25,7 @@
             {{ acteur.nom_affiche|title }}
         </h3>
     </div>
-    {% if acteur.url %}
+    {% if acteur.url and acteur.url != '__nourl__'%}
         <p class="qfdmo-text-sm fr-mb-2w fr-mt-0">
             <a href="{{ acteur.url }}" target="_blank">{{ acteur.url }}</a>
         </p>
