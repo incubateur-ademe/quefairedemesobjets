@@ -28,9 +28,7 @@ from qfdmo.models import (
 )
 from qfdmo.models.acteur import CorrecteurActeurStatus, CorrectionActeur
 
-DEFAULT_LIMIT = 10
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
-DISTANCE_MAX = 30000
 
 
 class ReemploiSolutionView(FormView):
@@ -80,6 +78,7 @@ class ReemploiSolutionView(FormView):
             "proposition_services__action__directions",
             "proposition_services__acteur_service",
             "acteur_type",
+            "source",
         ).distinct()
 
         if sous_categories_objets:
@@ -108,8 +107,8 @@ class ReemploiSolutionView(FormView):
             ).exclude(acteur_type__nom="acteur digital")
 
             kwargs["acteurs"] = acteurs_physique.filter(
-                distance__lte=DISTANCE_MAX
-            ).order_by("distance")[:DEFAULT_LIMIT]
+                distance__lte=settings.DISTANCE_MAX
+            ).order_by("distance")[: settings.MAX_SOLUTION_DISPLAYED_ON_MAP]
 
         return super().get_context_data(**kwargs)
 
