@@ -8,5 +8,4 @@ class RefreshMateriazedViewThread(threading.Thread):
         threading.Thread.__init__(self)
 
     def run(self):
-        print("coucou")
         call_command("refresh_materialized_view")

@@ -1,4 +1,4 @@
-import logging
+from urllib.parse import urlencode
 
 from django.contrib.auth.decorators import user_passes_test
 from django.db.models import F
@@ -13,20 +13,29 @@ from qfdmo.thread.materialized_view import RefreshMateriazedViewThread
 NB_CORRECTION_DISPLAYED = 100
 
 
+# FIXME : to be tested
 class CorrectionsView(FormView):
     form_class = GetCorrectionsForm
     template_name = "qfdmo/corrections.html"
 
     def get_success_url(self):
-        return self.request.path
+        query_params = urlencode(self.request.GET)
+        return f"{self.request.path}?{query_params}"
 
     def get_initial(self):
         initial = super().get_initial()
         initial["source"] = self.request.GET.get("source", "URL_SCRIPT")
+        initial["correction_statut"] = self.request.GET.getlist(
+            "correction_statut", ["ACTIF"]
+        )
+
         return initial
 
     def get_context_data(self, **kwargs):
         kwargs["source"] = self.request.GET.get("source", "URL_SCRIPT")
+        correction_statut_list = self.request.GET.getlist(
+            "correction_statut", ["ACTIF"]
+        )
         kwargs["corrections"] = (
             CorrectionActeur.objects.prefetch_related(
                 "final_acteur",
@@ -40,13 +49,12 @@ class CorrectionsView(FormView):
             .distinct()
             .filter(
                 source=kwargs["source"],
-                correction_statut=CorrecteurActeurStatus.NOT_CHANGED,
+                correction_statut__in=correction_statut_list,
             )
         )
         return super().get_context_data(**kwargs)
 
     def post(self, request, *args, **kwargs):
-        logging.warning(request.POST)
         accepted = [key for key, value in request.POST.items() if value == "accept"]
         ignored = [key for key, value in request.POST.items() if value == "ignore"]
         rejected = [key for key, value in request.POST.items() if value == "reject"]
@@ -63,7 +71,7 @@ class CorrectionsView(FormView):
                 correction.correction_statut = CorrecteurActeurStatus.ACCEPTE
                 correction.save()
             CorrectionActeur.objects.filter(id__in=ignored).update(
-                correction_statut=CorrecteurActeurStatus.NOT_CHANGED
+                correction_statut=CorrecteurActeurStatus.IGNORE
             )
             CorrectionActeur.objects.filter(id__in=rejected).update(
                 correction_statut=CorrecteurActeurStatus.REJETE

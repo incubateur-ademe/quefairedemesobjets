@@ -117,5 +117,5 @@ class Command(BaseCommand):
                 resultat_brute_source="{}",
                 correction_statut=CorrecteurActeurStatus.ACTIF
                 if failed
-                else CorrecteurActeurStatus.NOT_CHANGED,
+                else CorrecteurActeurStatus.PAS_DE_MODIF,
             )

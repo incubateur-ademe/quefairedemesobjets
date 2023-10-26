@@ -35,10 +35,11 @@ class ActeurStatus(models.TextChoices):
 
 
 class CorrecteurActeurStatus(models.TextChoices):
-    ACTIF = "ACTIF", "actif"
-    NOT_CHANGED = "NOT_CHANGED", "non modifié"
-    ACCEPTE = "ACCEPTE", "accepté"
-    REJETE = "REJETE", "rejeté"
+    ACTIF = "ACTIF", "Actif"
+    IGNORE = "IGNORE", "Ignoré"
+    PAS_DE_MODIF = "PAS_DE_MODIF", "Pas de modification"
+    ACCEPTE = "ACCEPTE", "Accepté"
+    REJETE = "REJETE", "Rejeté"
 
 
 class ActeurType(NomAsNaturalKeyModel):
@@ -329,6 +330,18 @@ class CorrectionActeur(BaseActeur):
     # FIXME : could be tested
     def __str__(self):
         return self.identifiant_unique
+
+    def accepted_by_default(self):
+        return self.correction_statut in [
+            CorrecteurActeurStatus.ACCEPTE,
+            CorrecteurActeurStatus.ACTIF,
+        ]
+
+    def rejected_by_default(self):
+        return self.correction_statut in [CorrecteurActeurStatus.REJETE]
+
+    def ignored_by_default(self):
+        return self.correction_statut in [CorrecteurActeurStatus.IGNORE]
 
 
 class BasePropositionService(models.Model):
