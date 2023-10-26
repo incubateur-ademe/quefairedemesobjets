@@ -10,6 +10,8 @@ from qfdmo.models import CorrecteurActeurStatus, CorrectionActeur
 from qfdmo.models.acteur import Acteur
 from qfdmo.thread.materialized_view import RefreshMateriazedViewThread
 
+NB_CORRECTION_DISPLAYED = 100
+
 
 class CorrectionsView(FormView):
     form_class = GetCorrectionsForm
@@ -79,7 +81,7 @@ def display_corrections(request):
         .exclude(
             final_acteur__siret=F("siret"),
         )
-    )[:1000]
+    )[:NB_CORRECTION_DISPLAYED]
     return render(
         request,
         "qfdmo/corrections.html",
