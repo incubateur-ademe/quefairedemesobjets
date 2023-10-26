@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.gis import admin
 from django.contrib.gis.geos import Point
 from django.http import HttpRequest
@@ -124,9 +125,14 @@ class ActeurResource(resources.ModelResource):
         else:
             row["location"] = None
 
-    def before_export(self, queryset, *args, **kwargs):
-        if queryset.count() > 1000:
-            raise Exception("Export is limited to 1000 rows")
+    def export(self, *args, queryset=None, **kwargs):
+        if queryset is not None:
+            queryset = queryset[: settings.DJANGO_IMPORT_EXPORT_LIMIT]
+        return super().export(*args, queryset=queryset, **kwargs)
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset[: settings.DJANGO_IMPORT_EXPORT_LIMIT]
 
     class Meta:
         model = Acteur
