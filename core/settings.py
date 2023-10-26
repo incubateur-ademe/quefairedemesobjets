@@ -253,5 +253,7 @@ INSEE_SECRET = decouple.config("INSEE_SECRET", cast=str, default="")
 LOGOUT_REDIRECT_URL = "qfdmo:reemploi_solution"
 LOGIN_URL = "admin:login"
 
-DEFAULT_LIMIT = decouple.config("DEFAULT_LIMIT", cast=int, default=10)
+MAX_SOLUTION_DISPLAYED_ON_MAP = decouple.config(
+    "MAX_SOLUTION_DISPLAYED_ON_MAP", cast=int, default=10
+)
 DISTANCE_MAX = decouple.config("DISTANCE_MAX", cast=int, default=30000)

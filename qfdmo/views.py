@@ -108,7 +108,7 @@ class ReemploiSolutionView(FormView):
 
             kwargs["acteurs"] = acteurs_physique.filter(
                 distance__lte=settings.DISTANCE_MAX
-            ).order_by("distance")[: settings.DEFAULT_LIMIT]
+            ).order_by("distance")[: settings.MAX_SOLUTION_DISPLAYED_ON_MAP]
 
         return super().get_context_data(**kwargs)
 
