@@ -1,8 +1,6 @@
 from urllib.parse import urlencode
 
-from django.contrib.auth.decorators import user_passes_test
-from django.db.models import F
-from django.shortcuts import render
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import FormView
 
 from qfdmo.forms import GetCorrectionsForm
@@ -13,8 +11,15 @@ from qfdmo.thread.materialized_view import RefreshMateriazedViewThread
 NB_CORRECTION_DISPLAYED = 100
 
 
+class IsStaffMixin(LoginRequiredMixin):
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_staff:
+            return self.handle_no_permission()
+        return super().dispatch(request, *args, **kwargs)
+
+
 # FIXME : to be tested
-class CorrectionsView(FormView):
+class CorrectionsView(IsStaffMixin, FormView):
     form_class = GetCorrectionsForm
     template_name = "qfdmo/corrections.html"
 
@@ -28,7 +33,6 @@ class CorrectionsView(FormView):
         initial["correction_statut"] = self.request.GET.getlist(
             "correction_statut", ["ACTIF"]
         )
-
         return initial
 
     def get_context_data(self, **kwargs):
@@ -78,22 +82,3 @@ class CorrectionsView(FormView):
             )
         RefreshMateriazedViewThread().start()
         return super().post(request, *args, **kwargs)
-
-
-@user_passes_test(lambda user: user.is_staff)
-def display_corrections(request):
-    # Can be paginate
-    corrections_insee = (
-        CorrectionActeur.objects.prefetch_related("final_acteur")
-        .filter(source="INSEE", correction_statut=CorrecteurActeurStatus.ACTIF)
-        .exclude(
-            final_acteur__siret=F("siret"),
-        )
-    )[:NB_CORRECTION_DISPLAYED]
-    return render(
-        request,
-        "qfdmo/corrections.html",
-        {
-            "corrections": corrections_insee,
-        },
-    )
