@@ -97,8 +97,8 @@ class Command(BaseCommand):
                             print(f"Connection error for {final_acteur.url}")
 
                 print(f"Processing {url} : {response.status_code}")
-            except requests.exceptions.ConnectionError:
-                print(f"Connection error for {final_acteur.url}")
+            except:  # noqa ruff: E722
+                print(f"Error for {final_acteur.url}")
             if response is None or response.status_code >= 400:
                 failed = True
                 url = None
