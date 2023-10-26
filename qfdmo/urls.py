@@ -22,7 +22,7 @@ urlpatterns = [
         name="get_object_list",
     ),
     path(
-        "qfdmo/corrections",
+        "corrections",
         corrections.CorrectionsView.as_view(),
         name="display_corrections",
     ),
