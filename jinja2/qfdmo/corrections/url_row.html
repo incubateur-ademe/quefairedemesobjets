@@ -1,0 +1,46 @@
+<tr>
+    <td>
+        {{ correction.final_acteur.render_as_card()|safe }}
+    </td>
+    <td>
+        BEFORE <a href="{{ correction.final_acteur.url }}" target="_blank">
+            {{ correction.final_acteur.url }}
+        </a><br><br>
+        AFTER {% if correction.url %}
+            <a href="{{ correction.url }}" target="_blank">
+                {{ correction.url }}
+            </a>
+        {% else %}
+            <span class="qfdmo-font-bold">Aucune URL</span>
+        {% endif %}<br><br>
+        DIFF {{ str_diff(correction.url, correction.final_acteur.url)|safe }}
+    </td>
+    <td>
+        <fieldset class="fr-fieldset" id="{{correction.id}}" aria-labelledby="radio-hint-legend radio-hint-messages">
+            <div class="fr-fieldset__element fr-py-1w qfdmo-bg-green-emeraude qfdmo-bg-opacity-30">
+                <div class="fr-radio-group">
+                    <input type="radio" id="accept-{{correction.id}}" name="{{correction.id}}" value="accept" checked>
+                    <label class="fr-label" for="accept-{{correction.id}}">
+                        Accepter
+                    </label>
+                </div>
+            </div>
+            <div class="fr-fieldset__element fr-py-1w qfdmo-bg-red-500 qfdmo-bg-opacity-30">
+                <div class="fr-radio-group">
+                    <input type="radio" id="reject-{{correction.id}}" name="{{correction.id}}" value="reject">
+                    <label class="fr-label" for="reject-{{correction.id}}">
+                        Refuser
+                    </label>
+                </div>
+            </div>
+            <div class="fr-fieldset__element fr-py-1w">
+                <div class="fr-radio-group">
+                    <input type="radio" id="ignore-{{correction.id}}" name="{{correction.id}}" value="ignore">
+                    <label class="fr-label" for="ignore-{{correction.id}}">
+                        Ignorer
+                    </label>
+                </div>
+            </div>
+        </fieldset>
+    </td>
+</tr>

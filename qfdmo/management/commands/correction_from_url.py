@@ -66,20 +66,52 @@ class Command(BaseCommand):
                 " AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110"
                 " Safari/537.36"
             }
+            url = final_acteur.url
             try:
-                response = requests.head(final_acteur.url, timeout=60, headers=headers)
-                print(f"Processing {final_acteur.url} : {response.status_code}")
+                response = requests.head(
+                    url, timeout=60, headers=headers, allow_redirects=True
+                )
+                url = response.url
+                print(
+                    f"Processing {final_acteur.url} -> {url} : {response.status_code}"
+                )
             except requests.exceptions.MissingSchema:
-                response = requests.get(final_acteur.url, timeout=60, headers=headers)
-                print(f"Processing {final_acteur.url} : {response.status_code}")
+                if not url.startswith("http"):
+                    https_url = "https://" + url
+                    try:
+                        response = requests.head(
+                            https_url, timeout=60, headers=headers, allow_redirects=True
+                        )
+                        url = https_url
+                    except requests.exceptions.SSLError:
+                        http_url = "http://" + url
+                        try:
+                            response = requests.head(
+                                http_url,
+                                timeout=60,
+                                headers=headers,
+                                allow_redirects=True,
+                            )
+                            url = http_url
+                        except requests.exceptions.ConnectionError:
+                            print(f"Connection error for {final_acteur.url}")
+
+                print(f"Processing {url} : {response.status_code}")
             except requests.exceptions.ConnectionError:
                 print(f"Connection error for {final_acteur.url}")
             if response is None or response.status_code >= 400:
                 failed = True
+                url = None
+            if response and response.status_code == 301:
+                url = response.headers["Location"]
+                print(f"Redirected to {url}")
+
+            if url != final_acteur.url:
+                failed = True
 
             CorrectionActeur.objects.create(
                 source=SOURCE,
-                url=None if failed else final_acteur.url,
+                url=url,
                 identifiant_unique=final_acteur.identifiant_unique,
                 final_acteur_id=final_acteur.identifiant_unique,
                 resultat_brute_source="{}",

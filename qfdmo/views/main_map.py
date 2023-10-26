@@ -3,16 +3,15 @@ import threading
 
 import unidecode
 from django.conf import settings
-from django.contrib.auth.decorators import user_passes_test
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
 from django.contrib.postgres.lookups import Unaccent
 from django.contrib.postgres.search import TrigramWordDistance  # type: ignore
 from django.core.management import call_command
-from django.db.models import F, Min, QuerySet
+from django.db.models import Min, QuerySet
 from django.db.models.functions import Length, Lower
 from django.http import JsonResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect
 from django.views.decorators.http import require_GET
 from django.views.generic.edit import FormView
 
@@ -26,7 +25,6 @@ from qfdmo.models import (
     Objet,
     SousCategorieObjet,
 )
-from qfdmo.models.acteur import CorrecteurActeurStatus, CorrectionActeur
 
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
 
@@ -146,22 +144,3 @@ def get_object_list(request):
         .order_by("distance", "length")[:10]
     )
     return JsonResponse([objet.nom for objet in objets], safe=False)
-
-
-@user_passes_test(lambda user: user.is_staff)
-def display_corrections(request):
-    # Can be paginate
-    corrections_insee = (
-        CorrectionActeur.objects.prefetch_related("final_acteur")
-        .filter(source="INSEE", correction_statut=CorrecteurActeurStatus.ACTIF)
-        .exclude(
-            final_acteur__siret=F("siret"),
-        )
-    )[:1000]
-    return render(
-        request,
-        "qfdmo/corrections.html",
-        {
-            "corrections": corrections_insee,
-        },
-    )

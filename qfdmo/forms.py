@@ -97,3 +97,10 @@ class GetReemploiSolutionForm(forms.Form):
         ),
         required=False,
     )
+
+
+class GetCorrectionsForm(forms.Form):
+    source = forms.CharField(
+        widget=forms.HiddenInput(),
+        required=False,
+    )
