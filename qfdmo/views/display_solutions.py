@@ -147,11 +147,12 @@ def solution_detail(request, identifiant_unique):
     return render(request, "qfdmo/solution_detail.html", {"final_acteur": final_acteur})
 
 
+# FIXME : should be tested
 def solution_admin(request, identifiant_unique):
     acteur = RevisionActeur.objects.filter(
         identifiant_unique=identifiant_unique
     ).first()
     if acteur:
-        return redirect("admin:qfdmo_revisionacteur_change", acteur.id)
+        return redirect("admin:qfdmo_revisionacteur_change", acteur.identifiant_unique)
     acteur = Acteur.objects.get(identifiant_unique=identifiant_unique)
-    return redirect("admin:qfdmo_acteur_change", acteur.id)
+    return redirect("admin:qfdmo_acteur_change", acteur.identifiant_unique)
