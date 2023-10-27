@@ -97,6 +97,8 @@ class Command(BaseCommand):
                             print(f"Connection error for {final_acteur.url}")
 
                 print(f"Processing {url} : {response.status_code}")
+            except KeyboardInterrupt:
+                return
             except:  # noqa ruff: E722
                 print(f"Error for {final_acteur.url}")
             if response is None or response.status_code >= 400:
