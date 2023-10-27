@@ -130,14 +130,9 @@ class ActeurResource(resources.ModelResource):
             queryset = queryset[: settings.DJANGO_IMPORT_EXPORT_LIMIT]
         return super().export(*args, queryset=queryset, **kwargs)
 
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        return queryset[: settings.DJANGO_IMPORT_EXPORT_LIMIT]
-
     class Meta:
         model = Acteur
-        #        exclude = ["location"]
-
+        import_id_fields = ["identifiant_unique"]
         store_instance = True
 
 

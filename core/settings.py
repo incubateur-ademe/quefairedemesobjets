@@ -261,3 +261,5 @@ DISTANCE_MAX = decouple.config("DISTANCE_MAX", cast=int, default=30000)
 DJANGO_IMPORT_EXPORT_LIMIT = decouple.config(
     "DJANGO_IMPORT_EXPORT_LIMIT", cast=int, default=1000
 )
+
+SHELL_PLUS_PRINT_SQL = True

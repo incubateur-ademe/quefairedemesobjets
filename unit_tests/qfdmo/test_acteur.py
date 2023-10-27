@@ -77,7 +77,7 @@ def finalacteur(db, populate_admin_object):
         acteur=acteur, acteur_service=acteur_service, action=action3
     )
     FinalActeur.refresh_view()
-    finalacteur = FinalActeur.objects.get(id=acteur.id)
+    finalacteur = FinalActeur.objects.get(identifiant_unique=acteur.identifiant_unique)
     yield finalacteur
 
 
@@ -131,7 +131,6 @@ class TestActeurSerialize:
     def test_serialize(self, acteur):
         proposition_service = PropositionService.objects.last()
         expected_serialized_acteur = {
-            "id": acteur.id,
             "nom": "Test Object 1",
             "identifiant_unique": "1",
             "acteur_type": acteur.acteur_type.serialize(),
@@ -208,7 +207,7 @@ class TestLocationValidation:
             nom="Test Object 1", identifiant_unique="123", acteur_type=acteur_type
         )
         acteur.save()
-        assert acteur.id
+        assert acteur.identifiant_unique
         assert acteur.location is None
 
 
@@ -332,7 +331,6 @@ class TestFinalActeurSerialize:
             "source": finalacteur.source.serialize(),
             "statut": "ACTIF",
             "identifiant_externe": finalacteur.identifiant_externe,
-            "id": finalacteur.id,
             "location": {"type": "Point", "coordinates": [0.0, 0.0]},
             "naf_principal": None,
             "commentaires": None,
@@ -366,7 +364,6 @@ class TestFinalActeurSerialize:
             "source": finalacteur.source.serialize(),
             "statut": "ACTIF",
             "identifiant_externe": finalacteur.identifiant_externe,
-            "id": finalacteur.id,
             "location": {"type": "Point", "coordinates": [0.0, 0.0]},
             "naf_principal": None,
             "commentaires": None,
@@ -401,7 +398,6 @@ class TestFinalActeurSerialize:
             "source": finalacteur.source.serialize(),
             "statut": "ACTIF",
             "identifiant_externe": finalacteur.identifiant_externe,
-            "id": finalacteur.id,
             "location": {"type": "Point", "coordinates": [0.0, 0.0]},
             "naf_principal": None,
             "commentaires": None,

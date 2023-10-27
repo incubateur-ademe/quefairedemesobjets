@@ -4,8 +4,6 @@ import string
 
 from django.contrib.gis.db import models
 from django.db import connection
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
 from django.forms import ValidationError, model_to_dict
 from django.template.loader import render_to_string
 
@@ -76,9 +74,8 @@ class BaseActeur(NomAsNaturalKeyModel):
         abstract = True
 
     nom = models.CharField(max_length=255, blank=False, null=False)
-    # FIXME : use identifiant_unique as primary in import export
     identifiant_unique = models.CharField(
-        max_length=255, unique=True, null=True, blank=True
+        max_length=255, unique=True, primary_key=True, blank=True
     )
     acteur_type = models.ForeignKey(ActeurType, on_delete=models.CASCADE)
     adresse = models.CharField(max_length=255, blank=True, null=True)
@@ -151,14 +148,10 @@ class Acteur(BaseActeur):
         verbose_name = "ACTEUR de l'EC - IMPORTÉ"
         verbose_name_plural = "ACTEURS de l'EC - IMPORTÉ"
 
-    # FIXME : could be remove if we use identifiant_unique as primary key
-    id = models.AutoField(primary_key=True)
-
     def get_or_create_revision(self):
         fields = model_to_dict(
             self,
             fields=[
-                "identifiant_unique",
                 "nom",
                 "adresse",
                 "adresse_complement",
@@ -176,7 +169,7 @@ class Acteur(BaseActeur):
         fields["acteur_type_id"] = fields.pop("acteur_type")
         fields["source_id"] = fields.pop("source")
         (revision_acteur, created) = RevisionActeur.objects.get_or_create(
-            id=self.id, defaults=fields
+            identifiant_unique=self.identifiant_unique, defaults=fields
         )
         if created:
             for proposition_service in self.proposition_services.all():  # type: ignore
@@ -200,22 +193,21 @@ class Acteur(BaseActeur):
             )
 
     def save(self, *args, **kwargs):
+        self.set_default_field_before_save()
         self.clean_location()
         return super().save(*args, **kwargs)
 
-
-@receiver(pre_save, sender=Acteur)
-def set_default_fields(sender, instance, *args, **kwargs):
-    if not instance.identifiant_externe:
-        instance.identifiant_externe = "".join(
-            random.choices(string.ascii_uppercase, k=12)
-        )
-    if instance.source is None:
-        instance.source = Source.objects.get_or_create(nom="equipe")[0]
-    if not instance.identifiant_unique:
-        instance.identifiant_unique = (
-            instance.source.nom.lower() + "_" + instance.identifiant_externe
-        )
+    def set_default_field_before_save(self):
+        if not self.identifiant_externe:
+            self.identifiant_externe = "".join(
+                random.choices(string.ascii_uppercase, k=12)
+            )
+        if self.source is None:
+            self.source = Source.objects.get_or_create(nom="equipe")[0]
+        if not self.identifiant_unique:
+            self.identifiant_unique = (
+                self.source.nom.lower() + "_" + str(self.identifiant_externe)
+            )
 
 
 class RevisionActeur(BaseActeur):
@@ -223,27 +215,29 @@ class RevisionActeur(BaseActeur):
         verbose_name = "ACTEUR de l'EC - CORRIGÉ"
         verbose_name_plural = "ACTEURS de l'EC - CORRIGÉ"
 
-    id = models.IntegerField(primary_key=True)
     acteur_type = models.ForeignKey(
         ActeurType, on_delete=models.CASCADE, blank=True, null=True
     )
 
+    def save(self, *args, **kwargs):
+        self.set_default_fields_and_objects_before_save()
+        return super().save(*args, **kwargs)
 
-@receiver(pre_save, sender=RevisionActeur)
-def create_acteur_if_not_exists(sender, instance, *args, **kwargs):
-    if instance.id is None:
-        acteur = Acteur.objects.create(
-            **model_to_dict(
-                instance,
-                exclude=["id", "acteur_type", "source", "proposition_services"],
-            ),
-            acteur_type=instance.acteur_type,
-            source=instance.source,
-        )
-        instance.id = acteur.id
-        instance.identifiant_unique = acteur.identifiant_unique
-        instance.identifiant_externe = acteur.identifiant_externe
-        instance.source = acteur.source
+    def set_default_fields_and_objects_before_save(self):
+        if not self.identifiant_unique:
+            acteur = Acteur.objects.create(
+                **model_to_dict(
+                    self,
+                    exclude=["id", "acteur_type", "source", "proposition_services"],
+                ),
+                acteur_type=self.acteur_type
+                if self.acteur_type
+                else ActeurType.objects.get(nom="commerce"),
+                source=self.source,
+            )
+            self.identifiant_unique = acteur.identifiant_unique
+            self.identifiant_externe = acteur.identifiant_externe
+            self.source = acteur.source
 
 
 class FinalActeur(BaseActeur):
@@ -252,8 +246,6 @@ class FinalActeur(BaseActeur):
         db_table = "qfdmo_finalacteur"
         verbose_name = "ACTEUR de l'EC - AFFICHÉ"
         verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ"
-
-    id = models.IntegerField(primary_key=True)
 
     @classmethod
     def refresh_view(cls):
@@ -307,6 +299,7 @@ class CorrectionActeur(BaseActeur):
         verbose_name = "Proposition de correction d'un acteur"
         verbose_name_plural = "Propositions de correction des acteurs"
 
+    id = models.IntegerField(primary_key=True)
     identifiant_unique = models.CharField(max_length=255)
     source = models.CharField(max_length=255)
     resultat_brute_source = models.JSONField()
@@ -390,6 +383,7 @@ class PropositionService(BasePropositionService):
 
     acteur = models.ForeignKey(
         Acteur,
+        to_field="identifiant_unique",
         on_delete=models.CASCADE,
         null=False,
         related_name="proposition_services",
@@ -406,6 +400,7 @@ class RevisionPropositionService(BasePropositionService):
 
     revision_acteur = models.ForeignKey(
         RevisionActeur,
+        to_field="identifiant_unique",
         on_delete=models.CASCADE,
         null=False,
         related_name="proposition_services",
