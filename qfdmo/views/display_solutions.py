@@ -112,9 +112,11 @@ class ReemploiSolutionView(FormView):
 
 
 def getorcreate_revision_acteur(request, acteur_id):
-    acteur = Acteur.objects.get(id=acteur_id)
+    acteur = Acteur.objects.get(identifiant_unique=acteur_id)
     revision_acteur = acteur.get_or_create_revision()
-    return redirect("admin:qfdmo_revisionacteur_change", revision_acteur.id)
+    return redirect(
+        "admin:qfdmo_revisionacteur_change", revision_acteur.identifiant_unique
+    )
 
 
 def refresh_acteur_view(request):
@@ -138,16 +140,18 @@ def get_object_list(request):
     return JsonResponse([objet.nom for objet in objets], safe=False)
 
 
+# FIXME : should be tested
 def solution_detail(request, identifiant_unique):
     final_acteur = FinalActeur.objects.get(identifiant_unique=identifiant_unique)
     return render(request, "qfdmo/solution_detail.html", {"final_acteur": final_acteur})
 
 
+# FIXME : should be tested
 def solution_admin(request, identifiant_unique):
     acteur = RevisionActeur.objects.filter(
         identifiant_unique=identifiant_unique
     ).first()
     if acteur:
-        return redirect("admin:qfdmo_revisionacteur_change", acteur.id)
+        return redirect("admin:qfdmo_revisionacteur_change", acteur.identifiant_unique)
     acteur = Acteur.objects.get(identifiant_unique=identifiant_unique)
-    return redirect("admin:qfdmo_acteur_change", acteur.id)
+    return redirect("admin:qfdmo_acteur_change", acteur.identifiant_unique)
