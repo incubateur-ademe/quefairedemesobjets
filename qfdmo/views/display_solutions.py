@@ -1,4 +1,5 @@
 import json
+import logging
 
 import unidecode
 from django.conf import settings
@@ -112,9 +113,12 @@ class ReemploiSolutionView(FormView):
 
 
 def getorcreate_revision_acteur(request, acteur_id):
-    acteur = Acteur.objects.get(id=acteur_id)
+    logging.warning("getorcreate_revision_acteur : %s", acteur_id)
+    acteur = Acteur.objects.get(identifiant_unique=acteur_id)
     revision_acteur = acteur.get_or_create_revision()
-    return redirect("admin:qfdmo_revisionacteur_change", revision_acteur.id)
+    return redirect(
+        "admin:qfdmo_revisionacteur_change", revision_acteur.identifiant_unique
+    )
 
 
 def refresh_acteur_view(request):

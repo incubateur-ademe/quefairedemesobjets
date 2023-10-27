@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.conf import settings
 from django.contrib.gis import admin
 from django.contrib.gis.geos import Point
@@ -130,14 +132,14 @@ class ActeurResource(resources.ModelResource):
             queryset = queryset[: settings.DJANGO_IMPORT_EXPORT_LIMIT]
         return super().export(*args, queryset=queryset, **kwargs)
 
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        return queryset[: settings.DJANGO_IMPORT_EXPORT_LIMIT]
+    # def get_queryset(self):
+    #     queryset = super().get_queryset()
+    #     return queryset[: settings.DJANGO_IMPORT_EXPORT_LIMIT]
 
     class Meta:
         model = Acteur
         #        exclude = ["location"]
-
+        import_id_fields = ["identifiant_unique"]
         store_instance = True
 
 
@@ -160,6 +162,14 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
     ]
     exclude = ["id"]
     resource_classes = [RevisionActeurResource]
+
+    def save_model(self, request: Any, obj: Any, form: Any, change: Any) -> None:
+        # logging.warning("save_model %s : %s", type(obj), obj)
+        # logging.warning("save_model identifiant_unique : %s", obj.identifiant_unique)
+        # obj.pre_save()
+        # logging.warning("save_model %s : %s", type(obj), obj)
+        # logging.warning("save_model identifiant_unique : %s", obj.identifiant_unique)
+        return super().save_model(request, obj, form, change)
 
 
 class BasePropositionServiceAdmin(admin.GISModelAdmin):

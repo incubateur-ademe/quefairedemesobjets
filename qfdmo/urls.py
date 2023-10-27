@@ -7,7 +7,7 @@ urlpatterns = [
         "", display_solutions.ReemploiSolutionView.as_view(), name="reemploi_solution"
     ),
     path(
-        "qfdmo/getorcreate_revisionacteur/<int:acteur_id>",
+        "qfdmo/getorcreate_revisionacteur/<str:acteur_id>",
         display_solutions.getorcreate_revision_acteur,
         name="getorcreate_revisionacteur",
     ),
