@@ -74,7 +74,6 @@ class BaseActeur(NomAsNaturalKeyModel):
         abstract = True
 
     nom = models.CharField(max_length=255, blank=False, null=False)
-    # FIXME : use identifiant_unique as primary in import export
     identifiant_unique = models.CharField(
         max_length=255, unique=True, primary_key=True, blank=True
     )
@@ -194,11 +193,11 @@ class Acteur(BaseActeur):
             )
 
     def save(self, *args, **kwargs):
-        self.pre_save()
+        self.set_default_field_before_save()
         self.clean_location()
         return super().save(*args, **kwargs)
 
-    def pre_save(self):
+    def set_default_field_before_save(self):
         if not self.identifiant_externe:
             self.identifiant_externe = "".join(
                 random.choices(string.ascii_uppercase, k=12)
@@ -211,23 +210,6 @@ class Acteur(BaseActeur):
             )
 
 
-# @receiver(pre_save, sender=Acteur)
-# def set_default_fields(sender, instance, *args, **kwargs):
-#     logging.warning("pre_save")
-#     if not instance.identifiant_externe:
-#         instance.identifiant_externe = "".join(
-#             random.choices(string.ascii_uppercase, k=12)
-#         )
-#         logging.warning(instance.identifiant_externe)
-#     if instance.source is None:
-#         instance.source = Source.objects.get_or_create(nom="equipe")[0]
-#     if not instance.identifiant_unique:
-#         instance.identifiant_unique = (
-#             instance.source.nom.lower() + "_" + str(instance.identifiant_externe)
-#         )
-#         logging.warning(instance.identifiant_unique)
-
-
 class RevisionActeur(BaseActeur):
     class Meta:
         verbose_name = "ACTEUR de l'EC - CORRIGÉ"
@@ -238,10 +220,10 @@ class RevisionActeur(BaseActeur):
     )
 
     def save(self, *args, **kwargs):
-        self.pre_save()
+        self.set_default_fields_and_objects_before_save()
         return super().save(*args, **kwargs)
 
-    def pre_save(self):
+    def set_default_fields_and_objects_before_save(self):
         if not self.identifiant_unique:
             acteur = Acteur.objects.create(
                 **model_to_dict(
@@ -256,22 +238,6 @@ class RevisionActeur(BaseActeur):
             self.identifiant_unique = acteur.identifiant_unique
             self.identifiant_externe = acteur.identifiant_externe
             self.source = acteur.source
-
-
-# @receiver(pre_save, sender=RevisionActeur)
-# def create_acteur_if_not_exists(sender, instance, *args, **kwargs):
-#     if instance.identifiant_unique is None:
-#         acteur = Acteur.objects.create(
-#             **model_to_dict(
-#                 instance,
-#                 exclude=["id", "acteur_type", "source", "proposition_services"],
-#             ),
-#             acteur_type=instance.acteur_type,
-#             source=instance.source,
-#         )
-#         instance.identifiant_unique = acteur.identifiant_unique
-#         instance.identifiant_externe = acteur.identifiant_externe
-#         instance.source = acteur.source
 
 
 class FinalActeur(BaseActeur):

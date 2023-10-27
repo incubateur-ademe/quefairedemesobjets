@@ -1,5 +1,4 @@
 import json
-import logging
 
 import unidecode
 from django.conf import settings
@@ -113,7 +112,6 @@ class ReemploiSolutionView(FormView):
 
 
 def getorcreate_revision_acteur(request, acteur_id):
-    logging.warning("getorcreate_revision_acteur : %s", acteur_id)
     acteur = Acteur.objects.get(identifiant_unique=acteur_id)
     revision_acteur = acteur.get_or_create_revision()
     return redirect(
@@ -142,6 +140,7 @@ def get_object_list(request):
     return JsonResponse([objet.nom for objet in objets], safe=False)
 
 
+# FIXME : should be tested
 def solution_detail(request, identifiant_unique):
     final_acteur = FinalActeur.objects.get(identifiant_unique=identifiant_unique)
     return render(request, "qfdmo/solution_detail.html", {"final_acteur": final_acteur})
