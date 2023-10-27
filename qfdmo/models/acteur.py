@@ -299,7 +299,7 @@ class CorrectionActeur(BaseActeur):
         verbose_name = "Proposition de correction d'un acteur"
         verbose_name_plural = "Propositions de correction des acteurs"
 
-    id = models.IntegerField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     identifiant_unique = models.CharField(max_length=255)
     source = models.CharField(max_length=255)
     resultat_brute_source = models.JSONField()
