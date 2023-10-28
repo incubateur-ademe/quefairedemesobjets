@@ -1,6 +1,7 @@
 import datetime
 
 import requests
+import urllib3
 from django.core.management.base import BaseCommand
 from django.db.models.functions import Length
 
@@ -68,6 +69,7 @@ class Command(BaseCommand):
             }
             url = final_acteur.url
             try:
+                print(f"Staring with url {final_acteur.url}")
                 response = requests.head(
                     url, timeout=60, headers=headers, allow_redirects=True
                 )
@@ -99,6 +101,12 @@ class Command(BaseCommand):
                 print(f"Processing {url} : {response.status_code}")
             except KeyboardInterrupt:
                 return
+            except (
+                urllib3.exceptions.NewConnectionError,
+                requests.exceptions.ConnectionError,
+                requests.exceptions.TooManyRedirects,
+            ) as e:
+                print(f"Error for {final_acteur.url} : {e}")
             except:  # noqa ruff: E722
                 print(f"Error for {final_acteur.url}")
             if response is None or response.status_code >= 400:
