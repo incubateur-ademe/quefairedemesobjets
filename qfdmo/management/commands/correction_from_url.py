@@ -20,17 +20,18 @@ def call_url(url):
     }
 
     if not url.startswith("http"):
-        url = "https://" + url
-        response, url = call_url(url)
+        response, url = call_url("https://" + url)
 
     try:
         print(f"Starting with url {url}")
         response = requests.head(url, timeout=60, headers=headers, allow_redirects=True)
         url = response.url
         print(f"Processing {url} -> {url} : {response.status_code}")
-    except requests.exceptions.SSLError:
-        url = url.replace("https://", "http://")
-        response, url = call_url(url)
+    except requests.exceptions.SSLError as e:
+        if url.startswith("https://"):
+            response, url = call_url(url.replace("https://", "http://"))
+        else:
+            print(f"Error for {url} : {e}")
     except KeyboardInterrupt:
         raise KeyboardInterrupt()
     except (
