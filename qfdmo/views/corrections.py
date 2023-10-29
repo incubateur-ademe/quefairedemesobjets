@@ -1,5 +1,6 @@
 from urllib.parse import urlencode
 
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import FormView
 
@@ -7,8 +8,6 @@ from qfdmo.forms import GetCorrectionsForm
 from qfdmo.models import CorrecteurActeurStatus, CorrectionActeur
 from qfdmo.models.acteur import Acteur
 from qfdmo.thread.materialized_view import RefreshMateriazedViewThread
-
-NB_CORRECTION_DISPLAYED = 100
 
 
 class IsStaffMixin(LoginRequiredMixin):
@@ -54,7 +53,7 @@ class CorrectionsView(IsStaffMixin, FormView):
             .filter(
                 source=kwargs["source"],
                 correction_statut__in=correction_statut_list,
-            )
+            )[: settings.NB_CORRECTION_DISPLAYED]
         )
         return super().get_context_data(**kwargs)
 
