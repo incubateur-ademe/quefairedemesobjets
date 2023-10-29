@@ -262,4 +262,8 @@ DJANGO_IMPORT_EXPORT_LIMIT = decouple.config(
     "DJANGO_IMPORT_EXPORT_LIMIT", cast=int, default=1000
 )
 
+NB_CORRECTION_DISPLAYED = decouple.config(
+    "NB_CORRECTION_DISPLAYED", cast=int, default=100
+)
+
 SHELL_PLUS_PRINT_SQL = True
