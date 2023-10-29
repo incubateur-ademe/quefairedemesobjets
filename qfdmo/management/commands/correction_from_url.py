@@ -10,6 +10,41 @@ from qfdmo.models import CorrecteurActeurStatus, CorrectionActeur, FinalActeur
 SOURCE = "URL_SCRIPT"
 
 
+def call_url(url):
+    response = None
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+        " AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110"
+        " Safari/537.36"
+    }
+
+    if not url.startswith("http"):
+        url = "https://" + url
+        response, url = call_url(url)
+
+    try:
+        print(f"Starting with url {url}")
+        response = requests.head(url, timeout=60, headers=headers, allow_redirects=True)
+        url = response.url
+        print(f"Processing {url} -> {url} : {response.status_code}")
+    except requests.exceptions.SSLError:
+        url = url.replace("https://", "http://")
+        response, url = call_url(url)
+    except KeyboardInterrupt:
+        raise KeyboardInterrupt()
+    except (
+        urllib3.exceptions.NewConnectionError,
+        requests.exceptions.ConnectionError,
+        requests.exceptions.TooManyRedirects,
+        requests.exceptions.MissingSchema,
+    ) as e:
+        print(f"Error for {url} : {e}")
+    except:  # noqa ruff: E722
+        print(f"Error for {url}")
+    return response, url
+
+
 class Command(BaseCommand):
     help = "Test url availability and save proposition of correction"
 
@@ -60,61 +95,12 @@ class Command(BaseCommand):
             final_acteurs = final_acteurs[:nb_acteur_limit]
 
         for final_acteur in final_acteurs:
-            response = None
-            failed = False
-            headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
-                " AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110"
-                " Safari/537.36"
-            }
-            url = final_acteur.url
-            try:
-                print(f"Staring with url {final_acteur.url}")
-                response = requests.head(
-                    url, timeout=60, headers=headers, allow_redirects=True
-                )
-                url = response.url
-                print(
-                    f"Processing {final_acteur.url} -> {url} : {response.status_code}"
-                )
-            except requests.exceptions.MissingSchema:
-                if not url.startswith("http"):
-                    https_url = "https://" + url
-                    try:
-                        response = requests.head(
-                            https_url, timeout=60, headers=headers, allow_redirects=True
-                        )
-                        url = https_url
-                    except requests.exceptions.SSLError:
-                        http_url = "http://" + url
-                        try:
-                            response = requests.head(
-                                http_url,
-                                timeout=60,
-                                headers=headers,
-                                allow_redirects=True,
-                            )
-                            url = http_url
-                        except requests.exceptions.ConnectionError:
-                            print(f"Connection error for {final_acteur.url}")
+            response, url = call_url(final_acteur.url)
 
-                print(f"Processing {url} : {response.status_code}")
-            except KeyboardInterrupt:
-                return
-            except (
-                urllib3.exceptions.NewConnectionError,
-                requests.exceptions.ConnectionError,
-                requests.exceptions.TooManyRedirects,
-            ) as e:
-                print(f"Error for {final_acteur.url} : {e}")
-            except:  # noqa ruff: E722
-                print(f"Error for {final_acteur.url}")
+            failed = False
             if response is None or response.status_code >= 400:
                 failed = True
                 url = None
-            if response and response.status_code == 301:
-                url = response.headers["Location"]
-                print(f"Redirected to {url}")
 
             if url != final_acteur.url:
                 failed = True
