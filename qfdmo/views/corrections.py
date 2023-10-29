@@ -6,7 +6,7 @@ from django.views.generic.edit import FormView
 
 from qfdmo.forms import GetCorrectionsForm
 from qfdmo.models import CorrecteurActeurStatus, CorrectionActeur
-from qfdmo.models.acteur import Acteur
+from qfdmo.models.acteur import Acteur, ActeurStatus
 from qfdmo.thread.materialized_view import RefreshMateriazedViewThread
 
 
@@ -61,23 +61,36 @@ class CorrectionsView(IsStaffMixin, FormView):
         accepted = [key for key, value in request.POST.items() if value == "accept"]
         ignored = [key for key, value in request.POST.items() if value == "ignore"]
         rejected = [key for key, value in request.POST.items() if value == "reject"]
-        source = request.POST.get("source", None)
-        if source == "URL_SCRIPT":
-            for correction_id in accepted:
-                correction = CorrectionActeur.objects.get(id=correction_id)
-                acteur = Acteur.objects.get(
-                    identifiant_unique=correction.identifiant_unique
-                )
-                revision_acteur = acteur.get_or_create_revision()
+        for correction_id in accepted:
+            correction = CorrectionActeur.objects.get(id=correction_id)
+            acteur = Acteur.objects.get(
+                identifiant_unique=correction.identifiant_unique
+            )
+            revision_acteur = acteur.get_or_create_revision()
+            if correction.source == "URL_SCRIPT":
                 revision_acteur.url = correction.url if correction.url else "__nourl__"
                 revision_acteur.save()
-                correction.correction_statut = CorrecteurActeurStatus.ACCEPTE
-                correction.save()
-            CorrectionActeur.objects.filter(id__in=ignored).update(
-                correction_statut=CorrecteurActeurStatus.IGNORE
-            )
-            CorrectionActeur.objects.filter(id__in=rejected).update(
-                correction_statut=CorrecteurActeurStatus.REJETE
-            )
+            if correction.source == "INSEE":
+                if (
+                    correction.siret is None
+                    and correction.naf_principal is None
+                    and correction.nom_officiel is None
+                ):
+                    revision_acteur.statut = ActeurStatus.INACTIF
+                else:
+                    revision_acteur.siret = correction.siret
+                    revision_acteur.naf_principal = correction.naf_principal
+                    revision_acteur.nom_officiel = correction.nom_officiel
+                revision_acteur.save()
+
+            correction.correction_statut = CorrecteurActeurStatus.ACCEPTE
+            correction.save()
+        CorrectionActeur.objects.filter(id__in=ignored).update(
+            correction_statut=CorrecteurActeurStatus.IGNORE
+        )
+        CorrectionActeur.objects.filter(id__in=rejected).update(
+            correction_statut=CorrecteurActeurStatus.REJETE
+        )
+
         RefreshMateriazedViewThread().start()
         return super().post(request, *args, **kwargs)

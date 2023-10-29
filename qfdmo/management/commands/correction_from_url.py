@@ -21,7 +21,6 @@ def call_url(url):
 
     if not url.startswith("http"):
         response, url = call_url("https://" + url)
-
     try:
         print(f"Starting with url {url}")
         response = requests.head(url, timeout=60, headers=headers, allow_redirects=True)
@@ -80,7 +79,7 @@ class Command(BaseCommand):
 
         final_acteurs = (
             FinalActeur.objects.annotate(url_length=Length("url"))
-            .filter(url_length__gt=3)
+            .filter(url_length__gte=1)
             .exclude(
                 identifiant_unique__in=CorrectionActeur.objects.values_list(
                     "identifiant_unique", flat=True

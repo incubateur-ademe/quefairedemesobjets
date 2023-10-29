@@ -7,13 +7,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.models.functions import Length
 
-from qfdmo.models import (
-    Acteur,
-    CorrecteurActeurStatus,
-    CorrectionActeur,
-    FinalActeur,
-    RevisionActeur,
-)
+from qfdmo.models import CorrecteurActeurStatus, CorrectionActeur, FinalActeur
 
 client = ApiInsee(key=settings.INSEE_KEY, secret=settings.INSEE_SECRET)
 
@@ -33,8 +27,8 @@ def call_api_insee(siren: str) -> dict | None:
         if "404" in str(e):
             pass
         if "429" in str(e):
-            print("Too many requests, waiting 3 seconds")
-            time.sleep(3)
+            print("Too many requests, waiting 1 seconds")
+            time.sleep(1)
             insee_data = call_api_insee(siren)
         else:
             raise e
@@ -112,39 +106,33 @@ class Command(BaseCommand):
                         "nicSiegeUniteLegale"
                     ]
                 )
-                acteurfields_to_update = {
-                    "nom_officiel": nom_officiel,
-                    "naf_principal": naf_principal,
-                    "siret": siret,
-                }
-                _update_acteur(
-                    final_acteur.identifiant_unique,
-                    acteurfields_to_update,
-                )
 
+                changed = False
+                acteurfields_to_update = {}
+                if nom_officiel != final_acteur.nom_officiel:
+                    acteurfields_to_update["nom_officiel"] = nom_officiel
+                    changed = True
+                if naf_principal != final_acteur.naf_principal:
+                    acteurfields_to_update["naf_principal"] = naf_principal
+                    changed = True
+                if siret != final_acteur.siret:
+                    acteurfields_to_update["siret"] = siret
+                    changed = True
                 CorrectionActeur.objects.create(
                     **acteurfields_to_update,
                     source=SOURCE,
                     resultat_brute_source=insee_data,
                     identifiant_unique=final_acteur.identifiant_unique,
                     final_acteur_id=final_acteur.identifiant_unique,
-                    correction_statut=CorrecteurActeurStatus.NOT_CHANGED,
+                    correction_statut=CorrecteurActeurStatus.ACTIF
+                    if changed
+                    else CorrecteurActeurStatus.PAS_DE_MODIF,
                 )
             else:
                 CorrectionActeur.objects.create(
                     source=SOURCE,
-                    siret=None,
                     resultat_brute_source="{}",
                     identifiant_unique=final_acteur.identifiant_unique,
                     final_acteur_id=final_acteur.identifiant_unique,
+                    correction_statut=CorrecteurActeurStatus.ACTIF,
                 )
-
-
-def _update_acteur(identifiant_unique: str, actorfields_to_update: dict):
-    acteur = Acteur.objects.get(identifiant_unique=identifiant_unique)
-    for field, value in actorfields_to_update.items():
-        setattr(acteur, field, value)
-    acteur.save()
-    RevisionActeur.objects.filter(identifiant_unique=identifiant_unique).update(
-        **{field: None for field, _ in actorfields_to_update.items()}
-    )
