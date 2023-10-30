@@ -1,7 +1,6 @@
 from django import forms
 
-from qfdmo.models import ActionDirection, SousCategorieObjet
-from qfdmo.models.acteur import CorrecteurActeurStatus
+from qfdmo.models import ActionDirection, CorrecteurActeurStatus, SousCategorieObjet
 
 
 class AutoCompleteInput(forms.Select):

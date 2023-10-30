@@ -5,8 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import FormView
 
 from qfdmo.forms import GetCorrectionsForm
-from qfdmo.models import CorrecteurActeurStatus, CorrectionActeur
-from qfdmo.models.acteur import Acteur, ActeurStatus
+from qfdmo.models import Acteur, ActeurStatus, CorrecteurActeurStatus, CorrectionActeur
 from qfdmo.thread.materialized_view import RefreshMateriazedViewThread
 
 

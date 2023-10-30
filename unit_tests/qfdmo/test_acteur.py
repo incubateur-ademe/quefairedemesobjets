@@ -13,8 +13,8 @@ from qfdmo.models import (
     PropositionService,
     RevisionActeur,
     RevisionPropositionService,
+    Source,
 )
-from qfdmo.models.acteur import Source
 
 
 @pytest.fixture(scope="session")

@@ -3,8 +3,6 @@
 import django.db.models.deletion
 from django.db import migrations, models
 
-from qfdmo.models.acteur import FinalActeur
-
 
 def update_identifiant_unique_as_pk(apps, schema_editor):
     Acteur = apps.get_model("qfdmo", "Acteur")

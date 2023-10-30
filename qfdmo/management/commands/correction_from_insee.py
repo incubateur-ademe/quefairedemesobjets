@@ -7,7 +7,12 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.models.functions import Length
 
-from qfdmo.models import CorrecteurActeurStatus, CorrectionActeur, FinalActeur
+from qfdmo.models import (
+    ActeurStatus,
+    CorrecteurActeurStatus,
+    CorrectionActeur,
+    FinalActeur,
+)
 
 client = ApiInsee(key=settings.INSEE_KEY, secret=settings.INSEE_SECRET)
 
@@ -69,7 +74,7 @@ class Command(BaseCommand):
 
         final_acteurs = (
             FinalActeur.objects.annotate(siret_length=Length("siret"))
-            .filter(siret_length=14)
+            .filter(siret_length=14, statut=ActeurStatus.ACTIF)
             .exclude(
                 identifiant_unique__in=CorrectionActeur.objects.values_list(
                     "identifiant_unique", flat=True
