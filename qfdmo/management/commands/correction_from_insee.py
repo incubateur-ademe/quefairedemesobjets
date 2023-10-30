@@ -9,32 +9,42 @@ from django.db.models.functions import Length
 
 from qfdmo.models import (
     ActeurStatus,
-    CorrecteurActeurStatus,
     CorrectionActeur,
+    CorrectionActeurStatus,
     FinalActeur,
 )
 
-client = ApiInsee(key=settings.INSEE_KEY, secret=settings.INSEE_SECRET)
+CLIENT = ApiInsee(key=settings.INSEE_KEY, secret=settings.INSEE_SECRET)
 
 SOURCE = "INSEE"
 
 
-def call_api_insee(siren: str, nb_retry=0) -> dict | None:
+def refresh_client():
+    global CLIENT
+    CLIENT = ApiInsee(key=settings.INSEE_KEY, secret=settings.INSEE_SECRET)
+
+
+def call_api_insee(siren: str) -> dict | None:
     insee_data = None
     if len(siren) != 9:
         return insee_data
     try:
-        insee_data = client.siren(
+        insee_data = CLIENT.siren(
             siren,
             date=datetime.date.today().strftime("%Y-%m-%d"),
         ).get()
     except urllib.error.HTTPError as e:
         if "404" in str(e):
             return insee_data
-        if ("429" in str(e) or "403" in str(e)) and nb_retry < 10:
-            print("Too many requests or forbidden, waiting 1 seconds")
-            time.sleep(1)
-            insee_data = call_api_insee(siren, nb_retry=nb_retry + 1)
+        if "403" in str(e):
+            print("Forbidden, waiting 60 seconds")
+            time.sleep(10)
+            refresh_client()
+            insee_data = call_api_insee(siren)
+        if "429" in str(e):
+            print("Too many requests, waiting 1 seconds")
+            time.sleep(10)
+            insee_data = call_api_insee(siren)
         else:
             raise e
     return insee_data
@@ -129,9 +139,9 @@ class Command(BaseCommand):
                     resultat_brute_source=insee_data,
                     identifiant_unique=final_acteur.identifiant_unique,
                     final_acteur_id=final_acteur.identifiant_unique,
-                    correction_statut=CorrecteurActeurStatus.ACTIF
+                    correction_statut=CorrectionActeurStatus.ACTIF
                     if changed
-                    else CorrecteurActeurStatus.PAS_DE_MODIF,
+                    else CorrectionActeurStatus.PAS_DE_MODIF,
                 )
             else:
                 CorrectionActeur.objects.create(
@@ -139,5 +149,5 @@ class Command(BaseCommand):
                     resultat_brute_source="{}",
                     identifiant_unique=final_acteur.identifiant_unique,
                     final_acteur_id=final_acteur.identifiant_unique,
-                    correction_statut=CorrecteurActeurStatus.ACTIF,
+                    correction_statut=CorrectionActeurStatus.ACTIF,
                 )

@@ -1,6 +1,6 @@
 from django import forms
 
-from qfdmo.models import ActionDirection, CorrecteurActeurStatus, SousCategorieObjet
+from qfdmo.models import ActionDirection, CorrectionActeurStatus, SousCategorieObjet
 
 
 class AutoCompleteInput(forms.Select):
@@ -112,7 +112,7 @@ class GetCorrectionsForm(forms.Form):
         #     ("REJETE", "Rejeté"),
         #     ("NOT_CHANGED", "Non modifié"),
         # ),
-        choices=CorrecteurActeurStatus.choices,
+        choices=CorrectionActeurStatus.choices,
         label="Statut de la correction",
         required=False,
     )

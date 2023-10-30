@@ -7,8 +7,8 @@ from django.db.models.functions import Length
 
 from qfdmo.models import (
     ActeurStatus,
-    CorrecteurActeurStatus,
     CorrectionActeur,
+    CorrectionActeurStatus,
     FinalActeur,
 )
 
@@ -116,7 +116,7 @@ class Command(BaseCommand):
                 identifiant_unique=final_acteur.identifiant_unique,
                 final_acteur_id=final_acteur.identifiant_unique,
                 resultat_brute_source="{}",
-                correction_statut=CorrecteurActeurStatus.ACTIF
+                correction_statut=CorrectionActeurStatus.ACTIF
                 if failed
-                else CorrecteurActeurStatus.PAS_DE_MODIF,
+                else CorrectionActeurStatus.PAS_DE_MODIF,
             )
