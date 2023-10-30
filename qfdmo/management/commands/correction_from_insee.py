@@ -25,7 +25,7 @@ def call_api_insee(siren: str) -> dict | None:
         ).get()
     except urllib.error.HTTPError as e:
         if "404" in str(e):
-            pass
+            return insee_data
         if "429" in str(e):
             print("Too many requests, waiting 1 seconds")
             time.sleep(1)
