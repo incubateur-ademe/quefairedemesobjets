@@ -19,7 +19,7 @@ client = ApiInsee(key=settings.INSEE_KEY, secret=settings.INSEE_SECRET)
 SOURCE = "INSEE"
 
 
-def call_api_insee(siren: str) -> dict | None:
+def call_api_insee(siren: str, nb_retry=0) -> dict | None:
     insee_data = None
     if len(siren) != 9:
         return insee_data
@@ -31,10 +31,10 @@ def call_api_insee(siren: str) -> dict | None:
     except urllib.error.HTTPError as e:
         if "404" in str(e):
             return insee_data
-        if "429" in str(e):
-            print("Too many requests, waiting 1 seconds")
+        if ("429" in str(e) or "403" in str(e)) and nb_retry < 10:
+            print("Too many requests or forbidden, waiting 1 seconds")
             time.sleep(1)
-            insee_data = call_api_insee(siren)
+            insee_data = call_api_insee(siren, nb_retry=nb_retry + 1)
         else:
             raise e
     return insee_data
