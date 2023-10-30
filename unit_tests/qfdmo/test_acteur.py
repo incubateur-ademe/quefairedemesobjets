@@ -244,7 +244,7 @@ class TestActeurGetOrCreateRevisionActeur:
         revision_acteur2 = acteur.get_or_create_revision()
 
         assert revision_acteur2.serialize() == revision_acteur.serialize()
-        assert revision_acteur2.nom == acteur.nom
+        assert revision_acteur2.nom is None
         assert (
             revision_acteur2.proposition_services.all()
             != acteur.proposition_services.all()
@@ -285,12 +285,16 @@ class TestActeurMaterializedView:
         revision_acteur.identifiant_externe = "789"
         revision_acteur.save()
         FinalActeur.refresh_view()
-        final_acteur = FinalActeur.objects.first()
-        serialized_final_acteur = final_acteur.serialize()
-        serialized_final_acteur.pop("actions")
+        final_acteur = FinalActeur.objects.get(
+            identifiant_unique=acteur.identifiant_unique
+        )
 
-        assert serialized_final_acteur == revision_acteur.serialize()
-        assert serialized_final_acteur != acteur.serialize()
+        assert final_acteur.nom == revision_acteur.nom
+        assert final_acteur.nom != acteur.nom
+        assert final_acteur.identifiant_externe == revision_acteur.identifiant_externe
+        assert final_acteur.identifiant_externe != acteur.identifiant_externe
+        assert final_acteur.source != revision_acteur.source
+        assert final_acteur.source == acteur.source
 
 
 @pytest.mark.django_db

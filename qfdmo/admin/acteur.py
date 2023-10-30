@@ -95,6 +95,43 @@ class BaseActeurAdmin(admin.GISModelAdmin):
         "siret",
         "ville",
     ]
+    fields = (
+        "identifiant_unique",
+        "source",
+        "identifiant_externe",
+        "nom",
+        "nom_commercial",
+        "nom_officiel",
+        "siret",
+        "naf_principal",
+        "acteur_type",
+        "url",
+        "email",
+        "telephone",
+        "adresse",
+        "adresse_complement",
+        "code_postal",
+        "ville",
+        "location",
+        "multi_base",
+        "manuel",
+        "label_reparacteur",
+        "statut",
+        "commentaires",
+        "cree_le",
+        "modifie_le",
+    )
+
+    readonly_fields = [
+        "cree_le",
+        "modifie_le",
+    ]
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = list(super().get_readonly_fields(request, obj))
+        if obj and "identifiant_unique" not in readonly_fields:
+            readonly_fields += ["identifiant_unique"]
+        return readonly_fields
 
 
 class ActeurResource(resources.ModelResource):
@@ -134,6 +171,10 @@ class ActeurResource(resources.ModelResource):
         model = Acteur
         import_id_fields = ["identifiant_unique"]
         store_instance = True
+        exclude = [
+            "cree_le",
+            "modifie_le",
+        ]
 
 
 class ActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin, NotEditableMixin):
@@ -234,6 +275,7 @@ class RevisionPropositionServiceAdmin(
 
 
 class FinalActeurAdmin(BaseActeurAdmin, NotEditableMixin):
+    change_form_template = "admin/final_acteur/change_form.html"
     gis_widget = CustomOSMWidget
     inlines = [
         FinalPropositionServiceInline,

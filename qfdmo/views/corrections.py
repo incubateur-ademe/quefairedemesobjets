@@ -5,7 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import FormView
 
 from qfdmo.forms import GetCorrectionsForm
-from qfdmo.models import Acteur, ActeurStatus, CorrecteurActeurStatus, CorrectionActeur
+from qfdmo.models import Acteur, ActeurStatus, CorrectionActeur, CorrectionActeurStatus
 from qfdmo.thread.materialized_view import RefreshMateriazedViewThread
 
 
@@ -82,13 +82,13 @@ class CorrectionsView(IsStaffMixin, FormView):
                     revision_acteur.nom_officiel = correction.nom_officiel
                 revision_acteur.save()
 
-            correction.correction_statut = CorrecteurActeurStatus.ACCEPTE
+            correction.correction_statut = CorrectionActeurStatus.ACCEPTE
             correction.save()
         CorrectionActeur.objects.filter(id__in=ignored).update(
-            correction_statut=CorrecteurActeurStatus.IGNORE
+            correction_statut=CorrectionActeurStatus.IGNORE
         )
         CorrectionActeur.objects.filter(id__in=rejected).update(
-            correction_statut=CorrecteurActeurStatus.REJETE
+            correction_statut=CorrectionActeurStatus.REJETE
         )
 
         RefreshMateriazedViewThread().start()
