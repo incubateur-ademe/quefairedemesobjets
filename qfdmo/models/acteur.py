@@ -236,7 +236,7 @@ class RevisionActeur(BaseActeur):
             self.source = acteur.source
 
     def __str__(self):
-        return self.identifiant_unique
+        return self.nom or self.identifiant_unique
 
 
 class FinalActeur(BaseActeur):
