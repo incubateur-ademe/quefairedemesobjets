@@ -111,8 +111,8 @@ class ReemploiSolutionView(FormView):
         return super().get_context_data(**kwargs)
 
 
-def getorcreate_revision_acteur(request, acteur_id):
-    acteur = Acteur.objects.get(identifiant_unique=acteur_id)
+def getorcreate_revision_acteur(request, acteur_identifiant):
+    acteur = Acteur.objects.get(identifiant_unique=acteur_identifiant)
     revision_acteur = acteur.get_or_create_revision()
     return redirect(
         "admin:qfdmo_revisionacteur_change", revision_acteur.identifiant_unique
