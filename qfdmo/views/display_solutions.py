@@ -21,9 +21,9 @@ from qfdmo.models import (
     FinalActeur,
     FinalPropositionService,
     Objet,
+    RevisionActeur,
     SousCategorieObjet,
 )
-from qfdmo.models.acteur import RevisionActeur
 from qfdmo.thread.materialized_view import RefreshMateriazedViewThread
 
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
