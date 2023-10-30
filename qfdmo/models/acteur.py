@@ -32,7 +32,7 @@ class ActeurStatus(models.TextChoices):
     SUPPRIME = "SUPPRIME", "supprimé"
 
 
-class CorrecteurActeurStatus(models.TextChoices):
+class CorrectionActeurStatus(models.TextChoices):
     ACTIF = "ACTIF", "Actif"
     IGNORE = "IGNORE", "Ignoré"
     PAS_DE_MODIF = "PAS_DE_MODIF", "Pas de modification"
@@ -152,22 +152,12 @@ class Acteur(BaseActeur):
         fields = model_to_dict(
             self,
             fields=[
-                "nom",
-                "adresse",
-                "adresse_complement",
-                "code_postal",
-                "ville",
-                "location",
-                "acteur_type",
                 "multi_base",
                 "label_reparacteur",
                 "manuel",
                 "statut",
-                "source",
             ],
         )
-        fields["acteur_type_id"] = fields.pop("acteur_type")
-        fields["source_id"] = fields.pop("source")
         (revision_acteur, created) = RevisionActeur.objects.get_or_create(
             identifiant_unique=self.identifiant_unique, defaults=fields
         )
@@ -215,6 +205,7 @@ class RevisionActeur(BaseActeur):
         verbose_name = "ACTEUR de l'EC - CORRIGÉ"
         verbose_name_plural = "ACTEURS de l'EC - CORRIGÉ"
 
+    nom = models.CharField(max_length=255, blank=True, null=True)
     acteur_type = models.ForeignKey(
         ActeurType, on_delete=models.CASCADE, blank=True, null=True
     )
@@ -224,7 +215,12 @@ class RevisionActeur(BaseActeur):
         return super().save(*args, **kwargs)
 
     def set_default_fields_and_objects_before_save(self):
-        if not self.identifiant_unique:
+        acteur_exists = True
+        if not self.identifiant_unique or not Acteur.objects.filter(
+            identifiant_unique=self.identifiant_unique
+        ):
+            acteur_exists = False
+        if not acteur_exists:
             acteur = Acteur.objects.create(
                 **model_to_dict(
                     self,
@@ -238,6 +234,9 @@ class RevisionActeur(BaseActeur):
             self.identifiant_unique = acteur.identifiant_unique
             self.identifiant_externe = acteur.identifiant_externe
             self.source = acteur.source
+
+    def __str__(self):
+        return self.nom or self.identifiant_unique
 
 
 class FinalActeur(BaseActeur):
@@ -316,8 +315,8 @@ class CorrectionActeur(BaseActeur):
     )
     correction_statut = models.CharField(
         max_length=255,
-        default=CorrecteurActeurStatus.ACTIF,
-        choices=CorrecteurActeurStatus.choices,
+        default=CorrectionActeurStatus.ACTIF,
+        choices=CorrectionActeurStatus.choices,
     )
 
     # FIXME : could be tested
@@ -326,15 +325,15 @@ class CorrectionActeur(BaseActeur):
 
     def accepted_by_default(self):
         return self.correction_statut in [
-            CorrecteurActeurStatus.ACCEPTE,
-            CorrecteurActeurStatus.ACTIF,
+            CorrectionActeurStatus.ACCEPTE,
+            CorrectionActeurStatus.ACTIF,
         ]
 
     def rejected_by_default(self):
-        return self.correction_statut in [CorrecteurActeurStatus.REJETE]
+        return self.correction_statut in [CorrectionActeurStatus.REJETE]
 
     def ignored_by_default(self):
-        return self.correction_statut in [CorrecteurActeurStatus.IGNORE]
+        return self.correction_statut in [CorrectionActeurStatus.IGNORE]
 
 
 class BasePropositionService(models.Model):
