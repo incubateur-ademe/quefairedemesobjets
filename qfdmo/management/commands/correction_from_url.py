@@ -5,7 +5,12 @@ import urllib3
 from django.core.management.base import BaseCommand
 from django.db.models.functions import Length
 
-from qfdmo.models import CorrecteurActeurStatus, CorrectionActeur, FinalActeur
+from qfdmo.models import (
+    ActeurStatus,
+    CorrecteurActeurStatus,
+    CorrectionActeur,
+    FinalActeur,
+)
 
 SOURCE = "URL_SCRIPT"
 
@@ -79,7 +84,7 @@ class Command(BaseCommand):
 
         final_acteurs = (
             FinalActeur.objects.annotate(url_length=Length("url"))
-            .filter(url_length__gte=1)
+            .filter(url_length__gte=1, statut=ActeurStatus.ACTIF)
             .exclude(
                 identifiant_unique__in=CorrectionActeur.objects.values_list(
                     "identifiant_unique", flat=True
