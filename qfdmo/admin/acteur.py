@@ -1,6 +1,10 @@
+from typing import Any
+
 from django.conf import settings
 from django.contrib.gis import admin
+from django.contrib.gis.forms.fields import PointField
 from django.contrib.gis.geos import Point
+from django.forms import CharField
 from django.http import HttpRequest
 from import_export import admin as import_export_admin
 from import_export import fields, resources, widgets
@@ -20,17 +24,6 @@ from qfdmo.models import (
     SousCategorieObjet,
 )
 from qfdmo.widget import CustomOSMWidget
-
-
-class NotEditableMixin(admin.GISModelAdmin):
-    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
-
-    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
-
-    def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
 
 
 class NotEditableInlineMixin:
@@ -64,6 +57,15 @@ class BasePropositionServiceInline(admin.TabularInline):
 
 class PropositionServiceInline(BasePropositionServiceInline, NotEditableInlineMixin):
     model = PropositionService
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 class RevisionPropositionServiceInline(BasePropositionServiceInline):
@@ -177,11 +179,17 @@ class ActeurResource(resources.ModelResource):
         ]
 
 
-class ActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin, NotEditableMixin):
+class ActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
     change_form_template = "admin/acteur/change_form.html"
-
+    modifiable = False
     ordering = ("nom",)
     resource_classes = [ActeurResource]
+
+    def get_readonly_fields(self, request, obj=None):
+        return [f.name for f in self.model._meta.fields if f.name != "location"]
+
+    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
 
 
 class RevisionActeurResource(ActeurResource):
@@ -191,11 +199,43 @@ class RevisionActeurResource(ActeurResource):
 
 class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin):
     gis_widget = CustomOSMWidget
-    inlines = [
-        RevisionPropositionServiceInline,
-    ]
+    inlines = [RevisionPropositionServiceInline]
     exclude = ["id"]
     resource_classes = [RevisionActeurResource]
+
+    def get_form(
+        self, request: Any, obj: Any | None = None, change: bool = False, **kwargs: Any
+    ) -> Any:
+        """
+        Display Acteur fields value as help_text
+        """
+        revision_acteur_form = super().get_form(request, obj, change, **kwargs)
+        if obj and obj.identifiant_unique:
+            acteur = Acteur.objects.get(identifiant_unique=obj.identifiant_unique)
+            for field_name, form_field in revision_acteur_form.base_fields.items():
+                acteur_value = getattr(acteur, field_name)
+                if isinstance(form_field, PointField):
+                    (lon, lat) = acteur_value.coords
+                    acteur_value = {
+                        "type": "Point",
+                        "coordinates": [lon, lat],
+                    }
+                form_field.help_text = str(acteur_value)
+                acteur_value_js = str(acteur_value).replace("'", "\\'")
+
+                if acteur_value and (
+                    isinstance(form_field, CharField)
+                    or isinstance(form_field, PointField)
+                ):
+                    form_field.help_text += (
+                        '&nbsp;<button type="button" onclick="document.getElementById('
+                        f"'id_{field_name}').value = '{acteur_value_js}'"
+                        '">copy</button>'
+                        '&nbsp;<button type="button" onclick="'
+                        f"document.getElementById('id_{field_name}').value = ''"
+                        '">reset</button>'
+                    )
+        return revision_acteur_form
 
 
 class BasePropositionServiceAdmin(admin.GISModelAdmin):
@@ -215,9 +255,6 @@ class BasePropositionServiceResource(resources.ModelResource):
         attribute="acteur_service",
         widget=widgets.ForeignKeyWidget(ActeurService, field="nom"),
     )
-    # sous_categories = models.ManyToManyField(
-    #     SousCategorieObjet,
-    # )
     sous_categories = fields.Field(
         column_name="sous_categories",
         attribute="sous_categories",
@@ -240,13 +277,22 @@ class PropositionServiceResource(BasePropositionServiceResource):
 
 
 class PropositionServiceAdmin(
-    import_export_admin.ExportMixin, BasePropositionServiceAdmin, NotEditableMixin
+    import_export_admin.ExportMixin, BasePropositionServiceAdmin
 ):
     resource_classes = [PropositionServiceResource]
     search_fields = [
         "acteur__nom",
         "acteur__siret",
     ]
+
+    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+    def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
 
 
 class RevisionPropositionServiceResource(BasePropositionServiceResource):
@@ -274,12 +320,19 @@ class RevisionPropositionServiceAdmin(
     ]
 
 
-class FinalActeurAdmin(BaseActeurAdmin, NotEditableMixin):
+class FinalActeurAdmin(BaseActeurAdmin):
     change_form_template = "admin/final_acteur/change_form.html"
     gis_widget = CustomOSMWidget
     inlines = [
         FinalPropositionServiceInline,
     ]
+    modifiable = False
+
+    def get_readonly_fields(self, request, obj=None):
+        return [f.name for f in self.model._meta.fields if f.name != "location"]
+
+    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
 
 
 class CorrectionActeurAdmin(BaseActeurAdmin):
