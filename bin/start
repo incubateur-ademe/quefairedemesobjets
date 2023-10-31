@@ -1,3 +1,4 @@
 #!/bin/bash
 
-gunicorn --timeout 300 --workers 20 --chdir core core.wsgi --log-file -
+#gunicorn --timeout 300 --workers 20 --chdir core core.wsgi --log-file -
+gunicorn core.asgi --worker-class=uvicorn.workers.UvicornWorker --workers 20 --log-file -
