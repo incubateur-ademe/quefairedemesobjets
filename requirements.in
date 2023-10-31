@@ -12,4 +12,5 @@ requests
 sentry-sdk
 tqdm
 unidecode
+uvicorn
 whitenoise
