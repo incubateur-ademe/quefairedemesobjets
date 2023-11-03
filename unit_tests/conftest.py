@@ -10,11 +10,6 @@ def disable_whitenoise(settings):
             "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
         }
     }
-    settings.MIDDLEWARE = [
-        middleware
-        for middleware in settings.MIDDLEWARE
-        if middleware != "whitenoise.middleware.WhiteNoiseMiddleware"
-    ]
 
 
 @pytest.fixture(autouse=True)
