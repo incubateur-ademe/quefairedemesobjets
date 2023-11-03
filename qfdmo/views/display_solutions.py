@@ -2,6 +2,7 @@ import json
 
 import unidecode
 from django.conf import settings
+from django.contrib.admin.utils import quote
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
 from django.contrib.postgres.lookups import Unaccent
@@ -115,7 +116,7 @@ def getorcreate_revision_acteur(request, acteur_identifiant):
     acteur = Acteur.objects.get(identifiant_unique=acteur_identifiant)
     revision_acteur = acteur.get_or_create_revision()
     return redirect(
-        "admin:qfdmo_revisionacteur_change", revision_acteur.identifiant_unique
+        "admin:qfdmo_revisionacteur_change", quote(revision_acteur.identifiant_unique)
     )
 
 
@@ -151,7 +152,10 @@ def solution_admin(request, identifiant_unique):
     acteur = RevisionActeur.objects.filter(
         identifiant_unique=identifiant_unique
     ).first()
+
     if acteur:
-        return redirect("admin:qfdmo_revisionacteur_change", acteur.identifiant_unique)
+        return redirect(
+            "admin:qfdmo_revisionacteur_change", quote(acteur.identifiant_unique)
+        )
     acteur = Acteur.objects.get(identifiant_unique=identifiant_unique)
-    return redirect("admin:qfdmo_acteur_change", acteur.identifiant_unique)
+    return redirect("admin:qfdmo_acteur_change", quote(acteur.identifiant_unique))
