@@ -39,8 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    # "whitenoise.runserver_nostatic",
-    # Whitenoise is not compatible with asgi server
+    "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "django.contrib.gis",
     "django.forms",
@@ -64,8 +63,7 @@ if DEBUG:
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    # "whitenoise.middleware.WhiteNoiseMiddleware",
-    # Whitenoise is not compatible with asgi server
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -217,9 +215,7 @@ STATICFILES_DIRS = [
 ]
 STORAGES = {
     "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
-        # Whitenoise is not compatible with asgi server
-        # "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
 WHITENOISE_KEEP_ONLY_HASHED_FILES = True
