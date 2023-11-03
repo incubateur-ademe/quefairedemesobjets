@@ -214,7 +214,7 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
             acteur = Acteur.objects.get(identifiant_unique=obj.identifiant_unique)
             for field_name, form_field in revision_acteur_form.base_fields.items():
                 acteur_value = getattr(acteur, field_name)
-                if isinstance(form_field, PointField):
+                if acteur_value and isinstance(form_field, PointField):
                     (lon, lat) = acteur_value.coords
                     acteur_value = {
                         "type": "Point",
