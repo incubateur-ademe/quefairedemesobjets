@@ -100,13 +100,20 @@ class ReemploiSolutionView(FormView):
                 {"latitude": latitude, "longitude": longitude}
             )
             reference_point = Point(float(longitude), float(latitude), srid=4326)
+            distance_in_degrees = settings.DISTANCE_MAX / 111320
+
             # FIXME : add a test to check distinct point
             acteurs_physique = acteurs.annotate(
                 distance=Distance("location", reference_point)
             ).exclude(acteur_type__nom="acteur digital")
 
+            # FIXME : ecrire quelques part qu'il faut utiliser dwithin
+            # pour utiliser l'index
             kwargs["acteurs"] = acteurs_physique.filter(
-                distance__lte=settings.DISTANCE_MAX
+                location__dwithin=(
+                    reference_point,
+                    distance_in_degrees,
+                )
             ).order_by("distance")[: settings.MAX_SOLUTION_DISPLAYED_ON_MAP]
 
         return super().get_context_data(**kwargs)
