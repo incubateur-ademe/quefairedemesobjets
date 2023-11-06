@@ -15,6 +15,10 @@
     background-image: none;
 }
 
+.leaflet-popup {
+    max-width: 80vw;
+}
+
 .leaflet-marker-icon i.qfdmo-icon {
     margin-top: 5px;
 }
