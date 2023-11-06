@@ -168,6 +168,8 @@ DATABASES = {"default": default_settings, "readonly": readonly_settings}
 EXPLORER_CONNECTIONS = {"Default": "readonly"}
 EXPLORER_DEFAULT_CONNECTION = "readonly"
 
+CONN_HEALTH_CHECKS = True
+CONN_MAX_AGE = None
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
