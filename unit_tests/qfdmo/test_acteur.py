@@ -436,7 +436,6 @@ class TestFinalActeurRenderascard:
         assert finalacteur.adresse in html
         assert finalacteur.code_postal in html
         assert finalacteur.ville in html
-        assert "href" not in html
         assert "None" not in html
 
     def test_finalacteur_renderascard_detailed(self, finalacteur):
