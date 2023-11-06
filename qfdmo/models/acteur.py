@@ -339,12 +339,6 @@ class CorrectionActeur(BaseActeur):
 class BasePropositionService(models.Model):
     class Meta:
         abstract = True
-        constraints = [
-            models.UniqueConstraint(
-                fields=["acteur", "action", "acteur_service"],
-                name="unique_by_acteur_action_service",
-            )
-        ]
 
     id = models.AutoField(primary_key=True)
     action = models.ForeignKey(
@@ -379,6 +373,7 @@ class PropositionService(BasePropositionService):
     class Meta:
         verbose_name = "PROPOSITION DE SERVICE - IMPORTÉ"
         verbose_name_plural = "PROPOSITIONS DE SERVICE - IMPORTÉ"
+        # FIXME missing unique constraint
 
     acteur = models.ForeignKey(
         Acteur,
