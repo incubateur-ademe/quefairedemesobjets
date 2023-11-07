@@ -27,11 +27,19 @@
                 </script>
             {% endfor %}
         </div>
-        {% if nb_acteurs_digitaux %}
-            <button type='button' class="fr-btn fr-btn--secondary qfdmo-w-full md:qfdmo-w-max fr-mt-1v" data-action="click->choose-action#toggleSideover">
-                <div class='qfdmo-w-full qfdmo-text-center'><span class="fr-icon-global-line" aria-hidden="true"></span>&nbsp;Voir les {{ nb_acteurs_digitaux }} solutions en ligne</div>
-            </button>
-        {% endif %}
+        <div>
+            {% if nb_acteurs_digitaux %}
+                <button type='button' class="fr-btn fr-btn--secondary qfdmo-w-full md:qfdmo-w-max fr-mt-1v" data-action="click->choose-action#toggleSideover">
+                    <div class='qfdmo-w-full qfdmo-text-center'><span class="fr-icon-global-line" aria-hidden="true"></span>&nbsp;Voir les {{ nb_acteurs_digitaux }} solutions en ligne</div>
+                </button>
+            {% endif %}
+            <a class="fr-mb-1w fr-ml-1w fr-btn fr-btn--tertiary qfdmo-whitespace-nowrap qfdmo-float-right qfdmo-w-full md:qfdmo-w-max fr-mt-1v"
+                href="https://tally.so/r/wzy9ZZ"
+                target="_blank"
+            >
+                <div class='qfdmo-w-full qfdmo-text-center'>Proposer une solution</div>
+            </a>
+        </div>
     </div>
     {% if nb_acteurs_digitaux %}
         <div id='slideover-container' data-choose-action-target="sideoverContainer" class="qfdmo-absolute qfdmo-inset-0 qfdmo-z-[1000] sqfdmo-w-full qfdmo-h-full{% if not form.initial.digital %} qfdmo-invisible{% endif %}">
@@ -44,9 +52,17 @@
                             </div>
                         {% endfor %}
                     </div>
-                    <button type='button' class="fr-btn fr-btn--secondary qfdmo-w-full md:qfdmo-w-max fr-mt-1v" data-action="click->choose-action#toggleSideover">
-                        <div class='qfdmo-w-full qfdmo-text-center'><span class="fr-icon-road-map-fill" aria-hidden="true"></span>&nbsp;Retour à la carte</div>
-                    </button>
+                    <div>
+                        <button type='button' class="fr-btn fr-btn--secondary qfdmo-w-full md:qfdmo-w-max fr-mt-1v" data-action="click->choose-action#toggleSideover">
+                            <div class='qfdmo-w-full qfdmo-text-center'><span class="fr-icon-road-map-fill" aria-hidden="true"></span>&nbsp;Retour à la carte</div>
+                        </button>
+                        <a class="fr-mb-1w fr-ml-1w fr-btn fr-btn--tertiary qfdmo-whitespace-nowrap qfdmo-float-right qfdmo-w-full md:qfdmo-w-max fr-mt-1v"
+                            href="https://tally.so/r/wzy9ZZ"
+                            target="_blank"
+                        >
+                            Proposer une solution
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
