@@ -7,6 +7,10 @@
 @tailwind components;
 @tailwind utilities;
 
+.fr-enlarge-link a::before {
+    position: relative !important;
+}
+
 .leaflet-container a {
     color: var(--text-action-high-blue-france);
 }
