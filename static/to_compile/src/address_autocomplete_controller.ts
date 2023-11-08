@@ -43,6 +43,9 @@ export default class extends AutocompleteController {
 
     selectOption(event: Event) {
         let target = event.target as HTMLElement
+        while (target && target.nodeName !== "DIV") {
+            target = target.parentNode as HTMLElement
+        }
         const [label, latitude, longitude] = target
             .getElementsByTagName("input")[0]
             .value.split(SEPARATOR)
