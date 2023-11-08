@@ -6,11 +6,8 @@ export const options = {
     // vus: 10,
     // duration: "30s",
     stages: [
-        { duration: "1m", target: 20 },
-        { duration: "1m", target: 40 },
-        { duration: "1m", target: 80 },
-        { duration: "1m", target: 40 },
-        { duration: "1m", target: 20 },
+        { duration: "1m", target: 100 },
+        { duration: "5m", target: 100 },
         { duration: "1m", target: 0 },
     ],
 }
@@ -27,7 +24,9 @@ export default function () {
         Math.random() * 100,
     )}&direction=${direction}&longitude=${longitude}&latitude=${latitude}&adresse=fake+adresse`
 
-    const res = http.get(myUrlWithParams)
+    const res = http.get(myUrlWithParams, {
+        tags: { name: "GetSolutions" },
+    })
 
     check(res, { "status was 200": (r) => r.status == 200 })
     sleep(10 * Math.random())
