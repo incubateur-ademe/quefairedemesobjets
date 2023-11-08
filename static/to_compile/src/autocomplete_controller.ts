@@ -58,6 +58,9 @@ export default class extends Controller<HTMLElement> {
 
     selectOption(event: Event) {
         let target = event.target as HTMLElement
+        while (target && target.nodeName !== "DIV") {
+            target = target.parentNode as HTMLElement
+        }
         const label = target.getElementsByTagName("input")[0].value
 
         this.inputTarget.value = label
