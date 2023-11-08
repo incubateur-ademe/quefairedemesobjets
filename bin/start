@@ -1,4 +1,4 @@
 #!/bin/bash
 
 #gunicorn --timeout 300 --workers 20 --chdir core core.wsgi --log-file -
-gunicorn core.asgi --worker-class=uvicorn.workers.UvicornWorker --max_requests 100 --max_requests_jitter 20 --workers 5 --log-file -
+gunicorn core.asgi --worker-class=uvicorn.workers.UvicornWorker --max_requests 50 --max_requests_jitter 10 --workers 5 --log-file -
