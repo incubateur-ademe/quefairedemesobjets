@@ -140,6 +140,8 @@ class BaseActeurAdmin(admin.GISModelAdmin):
 
 
 class ActeurResource(resources.ModelResource):
+    nb_object_max = settings.DJANGO_IMPORT_EXPORT_LIMIT
+
     delete = fields.Field(widget=widgets.BooleanWidget())
     acteur_type = fields.Field(
         column_name="acteur_type",
@@ -156,6 +158,11 @@ class ActeurResource(resources.ModelResource):
         column_name="longitude", attribute="longitude", readonly=True
     )
 
+    def __init__(self, **kwargs):
+        if "nb_object_max" in kwargs:
+            self.nb_object_max = kwargs["nb_object_max"]
+        super().__init__(**kwargs)
+
     def for_delete(self, row, instance):
         return self.fields["delete"].clean(row)
 
@@ -167,10 +174,10 @@ class ActeurResource(resources.ModelResource):
         else:
             row["location"] = None
 
-    def export(self, *args, queryset=None, **kwargs):
-        if queryset is not None:
-            queryset = queryset[: settings.DJANGO_IMPORT_EXPORT_LIMIT]
-        return super().export(*args, queryset=queryset, **kwargs)
+    def get_queryset(self):
+        if self.nb_object_max:
+            return super().get_queryset()[: self.nb_object_max]
+        return super().get_queryset()
 
     class Meta:
         model = Acteur
@@ -323,13 +330,19 @@ class RevisionPropositionServiceAdmin(
     ]
 
 
-class FinalActeurAdmin(BaseActeurAdmin):
+class FinalActeurResource(ActeurResource):
+    class Meta:
+        model = FinalActeur
+
+
+class FinalActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
     change_form_template = "admin/final_acteur/change_form.html"
     gis_widget = CustomOSMWidget
     inlines = [
         FinalPropositionServiceInline,
     ]
     modifiable = False
+    resource_classes = [FinalActeurResource]
 
     def get_readonly_fields(self, request, obj=None):
         return [f.name for f in self.model._meta.fields if f.name != "location"]
