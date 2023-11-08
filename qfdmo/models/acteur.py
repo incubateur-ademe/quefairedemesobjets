@@ -126,9 +126,11 @@ class BaseActeur(NomAsNaturalKeyModel):
             self, exclude=["location", "proposition_services", "acteur_type", "source"]
         )
         if self.acteur_type:
-            self_as_dict["acteur_type"] = self.acteur_type.serialize()
+            self_as_dict[
+                "acteur_type"
+            ] = self.acteur_type.serialize()  # FIXME: to be cached or get only the name
         if self.source:
-            self_as_dict["source"] = self.source.serialize()
+            self_as_dict["source"] = self.source.serialize()  # FIXME: to be cached
         if self.location:
             self_as_dict["location"] = json.loads(self.location.geojson)
         proposition_services = self.proposition_services.all()  # type: ignore

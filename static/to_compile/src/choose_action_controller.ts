@@ -74,8 +74,19 @@ export default class extends Controller<HTMLElement> {
         this.apply()
     }
 
-    toggleSideover() {
-        this.sideoverContainerTarget.classList.toggle("qfdmo-invisible")
-        this.digitalTarget.value = this.digitalTarget.value ? "" : "1"
+    searchSolution(event: Event) {
+        event.preventDefault()
+        let target = event.target as HTMLButtonElement
+        while (target && target.nodeName !== "BUTTON") {
+            target = target.parentNode as HTMLButtonElement
+        }
+
+        if (target.value == "proximity") {
+            this.digitalTarget.value = ""
+        }
+        if (target.value == "online") {
+            this.digitalTarget.value = "1"
+        }
+        this.digitalTarget.form.dispatchEvent(new Event("submit"))
     }
 }

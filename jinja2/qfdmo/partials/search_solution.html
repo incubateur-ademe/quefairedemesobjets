@@ -1,5 +1,5 @@
 <div>
-    <form class="fr-my-3w" id='search_form' action='#solutions'>
+    <form class="qfdmo-mt-2w fr-mb-1v" id='search_form' action='#solutions'>
         {% include "qfdmo/partials/featureflip_inputs.html" %}
         {{ form.direction }}
         {{ form.action_list }}
@@ -34,8 +34,29 @@
                     {% include "qfdmo/partials/action_list_by_direction.html"  %}
                 {% endwith %}
             </div>
-            <div class="fr-col-12 fr-col-md-3">
-                <button class="fr-btn fr-icon-search-line fr-btn--icon-left qfdmo-float-right">Rechercher</button>
+            <div class="qfdmo-w-full qfdmo-flex qfdmo-flex-row qfdmo-justify-stretch">
+                <button
+                    type='button'
+                    name='submit'
+                    value='online'
+                    class="fr-btn{% if not form.initial.digital %} fr-btn--secondary{% endif %} qfdmo-w-1/2"
+                    data-action="click->choose-action#searchSolution"
+                    >
+                    <div class='qfdmo-w-full qfdmo-flex qfdmo-items-center qfdmo-justify-center'>
+                        <span class="fr-icon-global-line" aria-hidden="true"></span><span>Rechercher en ligne</span>
+                    </div>
+                </button>
+                <button
+                    type='button'
+                    name='submit'
+                    value='proximity'
+                    class="fr-btn{% if form.initial.digital %} fr-btn--secondary{% endif %} qfdmo-w-1/2"
+                    data-action="click->choose-action#searchSolution"
+                    >
+                    <div class='qfdmo-w-full qfdmo-flex qfdmo-items-center qfdmo-justify-center'>
+                        <span class="fr-icon-road-map-line" aria-hidden="true"></span><span>Rechercher à proximité</span>
+                    </div>
+                </button>
             </div>
         </div>
     </form>
