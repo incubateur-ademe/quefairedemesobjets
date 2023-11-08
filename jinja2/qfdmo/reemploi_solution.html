@@ -1,7 +1,8 @@
 {% extends 'layout/base.html' %}
 
 {% block content %}
-    <div data-controller="choose-action" class="fr-container fr-mb-1w qfdmo-flex qfdmo-flex-col{% if not is_iframe(request) or form.initial.adresse %} qfdmo-min-h-screen md:qfdmo-min-h-fit md:qfdmo-flex-auto{% endif %}" >
+    <div data-controller="choose-action"
+        class="fr-container fr-mb-1w qfdmo-flex qfdmo-flex-col{% if is_iframe(request) %} fr-p-0{% endif %}{% if not is_iframe(request) %} qfdmo-min-h-screen{%endif%}{% if not is_iframe(request) or form.initial.adresse %} md:qfdmo-min-h-fit md:qfdmo-flex-auto{% endif %}" >
         {% include 'qfdmo/partials/search_solution.html' %}
         {% include 'qfdmo/partials/display_solutions.html' %}
     </div>
