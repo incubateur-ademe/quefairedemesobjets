@@ -1,7 +1,8 @@
 from django.core.management.base import BaseCommand
 
-from qfdmo.admin import ActeurResource
-from qfdmo.admin.acteur import (
+from qfdmo.admin import (
+    ActeurResource,
+    FinalActeurResource,
     PropositionServiceResource,
     RevisionActeurResource,
     RevisionPropositionServiceResource,
@@ -18,9 +19,10 @@ class Command(BaseCommand):
             help="object to export",
             choices=[
                 "acteur",
-                "revision_acteur",
+                "final_acteur",
                 "objet",
                 "proposition_service",
+                "revision_acteur",
                 "revision_proposition_service",
             ],
         )
@@ -29,12 +31,13 @@ class Command(BaseCommand):
         object = options.get("object")
         ressource_by_object: dict = {
             "acteur": ActeurResource,
-            "revision_acteur": RevisionActeurResource,
+            "final_acteur": FinalActeurResource,
             "objet": ObjetResource,
             "proposition_service": PropositionServiceResource,
+            "revision_acteur": RevisionActeurResource,
             "revision_proposition_service": RevisionPropositionServiceResource,
         }
         ressource_class = ressource_by_object[object]
-        dataset = ressource_class().export()
+        dataset = ressource_class(nb_object_max=0).export()
 
         print(dataset.csv)
