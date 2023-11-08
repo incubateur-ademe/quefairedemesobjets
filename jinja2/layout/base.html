@@ -18,12 +18,7 @@
         {% block css_extras %}{% endblock %}
 
         <!--Js-->
-        <script src="{{ static('qfdmo.js') }}"></script>
-        {% block javascript_extras %}{% endblock %}
 
-        {% if is_iframe(request) %}
-            <script src="{{ static('iframe.js') }}"></script>
-        {% endif %}
         <!-- Matomo -->
         {% if not DEBUG %}
             <script>
@@ -45,6 +40,13 @@
             </script>
         {% endif %}
         <!-- End Matomo Code -->
+
+        <script src="{{ static('qfdmo.js') }}"></script>
+        {% block javascript_extras %}{% endblock %}
+
+        {% if is_iframe(request) %}
+            <script src="{{ static('iframe.js') }}"></script>
+        {% endif %}
     </head>
 
     <body class="qfdmo-flex qfdmo-flex-col">
