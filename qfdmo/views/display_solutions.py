@@ -70,6 +70,7 @@ class ReemploiSolutionView(FormView):
                 proposition_services__action__in=action_selection,
                 statut=ActeurStatus.ACTIF,
             )
+
         acteurs = acteurs.prefetch_related(
             "proposition_services__sous_categories",
             "proposition_services__sous_categories__categorie",
@@ -84,38 +85,38 @@ class ReemploiSolutionView(FormView):
             acteurs = acteurs.filter(
                 proposition_services__sous_categories__in=sous_categories_objets
             )
-        kwargs["acteurs_digitaux"] = (
-            acteurs.filter(acteur_type__nom="acteur digital")
-            .annotate(min_action_order=Min("proposition_services__action__order"))
-            .order_by("min_action_order", "?")
-        )
-        kwargs["nb_acteurs_digitaux"] = acteurs.filter(
-            acteur_type__nom="acteur digital"
-        ).count()
 
-        if (latitude := self.request.GET.get("latitude", None)) and (
-            longitude := self.request.GET.get("longitude", None)
-        ):
-            kwargs["location"] = json.dumps(
-                {"latitude": latitude, "longitude": longitude}
+        if self.request.GET.get("digital"):
+            acteurs = (
+                acteurs.filter(acteur_type__nom="acteur digital")
+                .annotate(min_action_order=Min("proposition_services__action__order"))
+                .order_by("min_action_order", "?")
             )
-            reference_point = Point(float(longitude), float(latitude), srid=4326)
-            distance_in_degrees = settings.DISTANCE_MAX / 111320
-
-            # FIXME : add a test to check distinct point
-            acteurs_physique = acteurs.annotate(
-                distance=Distance("location", reference_point)
-            ).exclude(acteur_type__nom="acteur digital")
-
-            # FIXME : ecrire quelques part qu'il faut utiliser dwithin
-            # pour utiliser l'index
-            kwargs["acteurs"] = acteurs_physique.filter(
-                location__dwithin=(
-                    reference_point,
-                    distance_in_degrees,
+            kwargs["acteurs"] = acteurs
+        else:
+            if (latitude := self.request.GET.get("latitude", None)) and (
+                longitude := self.request.GET.get("longitude", None)
+            ):
+                kwargs["location"] = json.dumps(
+                    {"latitude": latitude, "longitude": longitude}
                 )
-            ).order_by("distance")[: settings.MAX_SOLUTION_DISPLAYED_ON_MAP]
+                reference_point = Point(float(longitude), float(latitude), srid=4326)
+                distance_in_degrees = settings.DISTANCE_MAX / 111320
 
+                # FIXME : add a test to check distinct point
+                acteurs_physique = acteurs.annotate(
+                    distance=Distance("location", reference_point)
+                ).exclude(acteur_type__nom="acteur digital")
+
+                # FIXME : ecrire quelques part qu'il faut utiliser dwithin
+                # pour utiliser l'index
+                acteurs = acteurs_physique.filter(
+                    location__dwithin=(
+                        reference_point,
+                        distance_in_degrees,
+                    )
+                ).order_by("distance")[: settings.MAX_SOLUTION_DISPLAYED_ON_MAP]
+                kwargs["acteurs"] = acteurs
         return super().get_context_data(**kwargs)
 
 

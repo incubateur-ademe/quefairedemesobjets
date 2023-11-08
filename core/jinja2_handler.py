@@ -35,6 +35,7 @@ def is_iframe(request: HttpRequest) -> bool:
 
 
 # FIXME : perhaps it is better in util list ?
+# FIXME : could be cached ?
 def get_action_list(request: HttpRequest) -> QuerySet[Action]:
     if action_list := request.GET.get("action_list"):
         return Action.objects.filter(nom__in=action_list.split("|")).order_by("order")
