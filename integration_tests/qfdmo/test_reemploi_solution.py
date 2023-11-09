@@ -2,6 +2,8 @@ import pytest
 from django.conf import settings
 from django.core.management import call_command
 
+from qfdmo.models.action import CachedDirectionAction
+
 
 @pytest.fixture(scope="session")
 def django_db_setup(django_db_setup, django_db_blocker):
@@ -14,6 +16,7 @@ def django_db_setup(django_db_setup, django_db_blocker):
             "acteur_services",
             "acteur_types",
         )
+        CachedDirectionAction.reload_cache()
 
 
 class TestReemploiSolutionView:

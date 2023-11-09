@@ -29,6 +29,7 @@ def populate_admin_object(django_db_blocker):
             "acteur_services",
             "acteur_types",
         )
+        CachedDirectionAction.reload_cache()
 
 
 @pytest.fixture()
@@ -459,7 +460,7 @@ class TestFinalActeurActions:
         assert [action["nom"] for action in actions] == ["reparer", "echanger"]
 
     def test_acteur_actions_order(self, finalacteur):
-        CachedDirectionAction.remove_cache()
+        CachedDirectionAction.reload_cache()
         Action.objects.filter(nom="reparer").update(order=3)
         Action.objects.filter(nom="echanger").update(order=2)
         Action.objects.filter(nom="louer").update(order=1)

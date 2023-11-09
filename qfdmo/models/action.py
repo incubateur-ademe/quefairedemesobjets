@@ -1,3 +1,5 @@
+from typing import List
+
 from django.contrib.gis.db import models
 from django.forms import model_to_dict
 
@@ -8,7 +10,6 @@ class CachedDirectionAction:
     _cached_actions_by_direction = None
     _cached_actions = None
     _cached_direction = None
-    _cached_time = None
 
     @classmethod
     def get_actions(cls) -> dict:
@@ -37,17 +38,17 @@ class CachedDirectionAction:
         return cls._cached_actions_by_direction
 
     @classmethod
-    def get_directions(cls) -> dict:
+    def get_directions(cls) -> List[dict]:
         if cls._cached_direction is None:
+            directions = ActionDirection.objects.all()
             cls._cached_direction = sorted(
-                [model_to_dict(d) for d in ActionDirection.objects.all()],
+                [model_to_dict(d) for d in directions],
                 key=lambda x: x["order"],
             )
-
         return cls._cached_direction
 
     @classmethod
-    def remove_cache(cls):
+    def reload_cache(cls):
         cls._cached_actions_by_direction = None
         cls._cached_actions = None
         cls._cached_direction = None
