@@ -2,13 +2,12 @@ import difflib
 from typing import List
 
 from django.conf import settings
-from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.templatetags.static import static
 from django.urls import reverse
 
 from jinja2 import Environment
-from qfdmo.models import Action
+from qfdmo.models import CachedDirectionAction
 
 
 # FIXME : could be tested
@@ -35,31 +34,40 @@ def is_iframe(request: HttpRequest) -> bool:
 
 
 # FIXME : perhaps it is better in util list ?
-# FIXME : could be cached ?
-def get_action_list(request: HttpRequest) -> QuerySet[Action]:
+def get_action_list(request: HttpRequest) -> List[dict]:
+    direction = request.GET.get("direction", settings.DEFAULT_ACTION_DIRECTION)
     if action_list := request.GET.get("action_list"):
-        return Action.objects.filter(nom__in=action_list.split("|")).order_by("order")
+        return [
+            a
+            for a in CachedDirectionAction.get_actions_by_direction()[direction]
+            if a["nom"] in action_list.split("|")
+        ]
     else:
-        direction = request.GET.get("direction", settings.DEFAULT_ACTION_DIRECTION)
-        return Action.objects.filter(directions__nom=direction).order_by("order")
+        return CachedDirectionAction.get_actions_by_direction()[direction]
 
 
 def action_list_display(request: HttpRequest) -> List[str]:
-    return [action.nom_affiche for action in get_action_list(request)]
+    return [action["nom_affiche"] for action in get_action_list(request)]
 
 
 def action_by_direction(request: HttpRequest, direction: str):
-    action_list = [
-        action for action in request.GET.get("action_list", "").split("|") if action
-    ]
-    all_active = request.GET.get("direction") != direction or action_list == []
-
+    action_list = request.GET.get("action_list")
+    if request.GET.get("direction") != direction:
+        action_list = None
+    if action_list:
+        return [
+            {
+                **a,
+                "active": bool(a["nom"] in action_list),
+            }
+            for a in CachedDirectionAction.get_actions_by_direction()[direction]
+        ]
     return [
         {
-            **action.serialize(),
-            "active": True if all_active else action.nom in action_list,
+            **a,
+            "active": True,
         }
-        for action in Action.objects.filter(directions__nom=direction).order_by("order")
+        for a in CachedDirectionAction.get_actions_by_direction()[direction]
     ]
 
 

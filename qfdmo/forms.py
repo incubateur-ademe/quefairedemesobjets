@@ -1,6 +1,10 @@
 from django import forms
 
-from qfdmo.models import ActionDirection, CorrectionActeurStatus, SousCategorieObjet
+from qfdmo.models import (
+    CachedDirectionAction,
+    CorrectionActeurStatus,
+    SousCategorieObjet,
+)
 
 
 class AutoCompleteInput(forms.Select):
@@ -67,7 +71,7 @@ class GetReemploiSolutionForm(forms.Form):
         required=False,
     )
 
-    direction = forms.ModelChoiceField(
+    direction = forms.ChoiceField(
         widget=InlineRadioSelect(
             attrs={
                 "class": "fr-radio",
@@ -78,8 +82,10 @@ class GetReemploiSolutionForm(forms.Form):
                 "data-choose-action-target": "direction",
             },
         ),
-        queryset=ActionDirection.objects.all().order_by("order"),
-        to_field_name="nom",
+        choices=[
+            [direction["nom"], direction["nom_affiche"]]
+            for direction in CachedDirectionAction.get_directions()
+        ],
         label="",
         required=False,
     )

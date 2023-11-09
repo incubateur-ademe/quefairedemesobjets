@@ -15,6 +15,7 @@ from qfdmo.models import (
     RevisionPropositionService,
     Source,
 )
+from qfdmo.models.action import CachedDirectionAction
 
 
 @pytest.fixture(scope="session")
@@ -342,9 +343,7 @@ class TestFinalActeurSerialize:
                 proposition_service.serialize()
                 for proposition_service in finalacteur.proposition_services.all()
             ],
-            "actions": [  # type: ignore
-                action.serialize() for action in finalacteur.acteur_actions()
-            ],
+            "actions": finalacteur.acteur_actions(),
             "acteur_type": finalacteur.acteur_type.serialize(),
         }
 
@@ -375,9 +374,7 @@ class TestFinalActeurSerialize:
                 proposition_service.serialize()
                 for proposition_service in finalacteur.proposition_services.all()
             ],
-            "actions": [  # type: ignore
-                action.serialize() for action in finalacteur.acteur_actions()
-            ],
+            "actions": finalacteur.acteur_actions(),
             "acteur_type": finalacteur.acteur_type.serialize(),
             "render_as_card": finalacteur.render_as_card(),
         }
@@ -409,10 +406,7 @@ class TestFinalActeurSerialize:
                 proposition_service.serialize()
                 for proposition_service in finalacteur.proposition_services.all()
             ],
-            "actions": [  # type: ignore
-                action.serialize()
-                for action in finalacteur.acteur_actions(direction="jai")
-            ],
+            "actions": finalacteur.acteur_actions(direction="jai"),
             "acteur_type": finalacteur.acteur_type.serialize(),
             "render_as_card": finalacteur.render_as_card(direction="jai"),
         }
@@ -428,7 +422,7 @@ class TestFinalActeurRenderascard:
         html = finalacteur.render_as_card()
 
         for action in finalacteur.acteur_actions():
-            assert action.nom_affiche in html
+            assert action["nom_affiche"] in html
         for acteur_service in finalacteur.acteur_services():
             assert str(acteur_service) in html
 
@@ -458,18 +452,19 @@ class TestFinalActeurRenderascard:
 class TestFinalActeurActions:
     def test_acteur_actions_basic(self, finalacteur):
         actions = finalacteur.acteur_actions()
-        assert [action.nom for action in actions] == ["reparer", "echanger", "louer"]
+        assert [action["nom"] for action in actions] == ["reparer", "echanger", "louer"]
 
     def test_acteur_actions_with_direction(self, finalacteur):
         actions = finalacteur.acteur_actions(direction="jai")
-        assert [action.nom for action in actions] == ["reparer", "echanger"]
+        assert [action["nom"] for action in actions] == ["reparer", "echanger"]
 
     def test_acteur_actions_order(self, finalacteur):
+        CachedDirectionAction.remove_cache()
         Action.objects.filter(nom="reparer").update(order=3)
         Action.objects.filter(nom="echanger").update(order=2)
         Action.objects.filter(nom="louer").update(order=1)
         actions = finalacteur.acteur_actions()
-        assert [action.nom for action in actions] == ["louer", "echanger", "reparer"]
+        assert [action["nom"] for action in actions] == ["louer", "echanger", "reparer"]
 
 
 @pytest.mark.django_db

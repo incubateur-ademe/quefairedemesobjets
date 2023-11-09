@@ -6,6 +6,7 @@ django-import-export
 django-sql-explorer
 gunicorn
 Jinja2
+orjson
 psycopg2
 python-decouple
 requests
