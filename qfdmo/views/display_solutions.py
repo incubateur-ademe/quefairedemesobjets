@@ -46,6 +46,8 @@ class ReemploiSolutionView(FormView):
         initial["action_list"] = self.request.GET.get("action_list")
         initial["latitude"] = self.request.GET.get("latitude")
         initial["longitude"] = self.request.GET.get("longitude")
+        initial["label_reparacteur"] = self.request.GET.get("label_reparacteur")
+
         return initial
 
     def get_form(self, form_class: type | None = GetReemploiSolutionForm) -> BaseForm:

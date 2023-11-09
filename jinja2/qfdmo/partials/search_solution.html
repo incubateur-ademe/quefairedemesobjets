@@ -1,7 +1,26 @@
 <div>
     <form class="qfdmo-mt-2w fr-mb-1v" id='search_form' action='#solutions'>
         {% include "qfdmo/partials/featureflip_inputs.html" %}
-        {{ form.direction }}
+        <div class="fr-mb-1v qfdmo-flex qfdmo-flex-row qfdmo-justify-between">
+            {{ form.direction }}
+            <button type="button" class="fr-btn fr-btn--secondary" onclick="document.getElementById('advanced_filters').classList.toggle('qfdmo-hidden')">
+                <span class="fr-icon--sm fr-icon-equalizer-line"></span>
+                <div class="qfdmo-hidden md:qfdmo-block">&nbsp;filtres avancés</div>
+                <span class="qfdmo-bg-blue-france qfdmo-rounded-xl qfdmo-text-white qfdmo-text-xs fr-ml-1w fr-py-1v fr-px-1w">1</span>
+            </button>
+        </div>
+        <div class="qfdmo-hidden qfdmo-border qfdmo-border-light-grey qfdmo-border-solid qfdmo-rounded fr-mb-1v fr-p-1w" id="advanced_filters">
+            <fieldset class="fr-fieldset fr-m-0" aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages">
+                <div class="fr-fieldset__element fr-fieldset__element--inline fr-m-0">
+                    <div
+                        class="fr-checkbox-group"
+                    >
+                        {{ form.label_reparacteur }}
+                        {{ form.label_reparacteur.label_tag() }}
+                    </div>
+                </div>
+            </fieldset>
+        </div>
         {{ form.action_list }}
         <div data-controller='autocomplete'
             data-autocomplete-max-option-displayed-value=5

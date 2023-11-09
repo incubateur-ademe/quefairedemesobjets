@@ -94,6 +94,19 @@ class GetReemploiSolutionForm(forms.Form):
             for direction in CachedDirectionAction.get_directions()
         ]
 
+    label_reparacteur = forms.BooleanField(
+        widget=forms.CheckboxInput(
+            attrs={
+                "class": "fr-checkbox",
+                "data-choose-action-target": "advancedField",
+                "data-action": "click -> choose-action#updateAdvancedField",
+            }
+        ),
+        label="Label Répar'Acteurs",
+        label_suffix="",
+        required=False,
+    )
+
     action_list = forms.CharField(
         widget=forms.HiddenInput(
             attrs={"data-choose-action-target": "actionList"},
