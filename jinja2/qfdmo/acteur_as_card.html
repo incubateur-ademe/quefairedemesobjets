@@ -3,9 +3,9 @@
         {% for action in acteur.acteur_actions(direction=direction) %}
             <p class="fr-badge fr-badge--sm  qfdmo-bg-{{action.couleur}} qfdmo-bg-opacity-30 fr-my-0">
                 {% if action.icon %}
-                    <span class="{{action.icon}}" aria-hidden="true"></span>&nbsp;
+                    <span class="{{ action.icon }}" aria-hidden="true"></span>&nbsp;
                 {% endif %}
-                {{action.nom_affiche}}
+                {{ action.nom_affiche }}
             </p>
         {% endfor %}
     </div>

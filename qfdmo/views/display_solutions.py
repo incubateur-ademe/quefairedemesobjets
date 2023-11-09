@@ -19,6 +19,7 @@ from qfdmo.forms import GetReemploiSolutionForm
 from qfdmo.models import (
     Acteur,
     ActeurStatus,
+    ActeurType,
     FinalActeur,
     FinalPropositionService,
     Objet,
@@ -56,18 +57,18 @@ class ReemploiSolutionView(FormView):
             sous_categories_objets = SousCategorieObjet.objects.filter(
                 objets__nom=objet_q
             )
-        action_selection = get_action_list(self.request)
+        action_selection_ids = [a["id"] for a in get_action_list(self.request)]
         if sous_categories_objets:
             acteurs = FinalActeur.objects.filter(
                 proposition_services__in=FinalPropositionService.objects.filter(
-                    action__in=action_selection,
+                    action_id__in=action_selection_ids,
                     sous_categories__in=sous_categories_objets,
                 ),
                 statut=ActeurStatus.ACTIF,
             )
         else:
             acteurs = FinalActeur.objects.filter(
-                proposition_services__action__in=action_selection,
+                proposition_services__action_id__in=action_selection_ids,
                 statut=ActeurStatus.ACTIF,
             )
 
@@ -75,10 +76,7 @@ class ReemploiSolutionView(FormView):
             "proposition_services__sous_categories",
             "proposition_services__sous_categories__categorie",
             "proposition_services__action",
-            "proposition_services__action__directions",
             "proposition_services__acteur_service",
-            "acteur_type",
-            "source",
         ).distinct()
 
         if sous_categories_objets:
@@ -88,7 +86,7 @@ class ReemploiSolutionView(FormView):
 
         if self.request.GET.get("digital"):
             acteurs = (
-                acteurs.filter(acteur_type__nom="acteur digital")
+                acteurs.filter(acteur_type_id=ActeurType.get_digital_acteur_type_id())
                 .annotate(min_action_order=Min("proposition_services__action__order"))
                 .order_by("min_action_order", "?")
             )
@@ -106,7 +104,7 @@ class ReemploiSolutionView(FormView):
                 # FIXME : add a test to check distinct point
                 acteurs_physique = acteurs.annotate(
                     distance=Distance("location", reference_point)
-                ).exclude(acteur_type__nom="acteur digital")
+                ).exclude(acteur_type_id=ActeurType.get_digital_acteur_type_id())
 
                 # FIXME : ecrire quelques part qu'il faut utiliser dwithin
                 # pour utiliser l'index

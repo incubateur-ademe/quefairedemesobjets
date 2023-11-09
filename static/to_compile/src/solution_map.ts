@@ -74,8 +74,10 @@ export class SolutionMap {
                 var customMarker = undefined
                 if (actor.actions.length > 0) {
                     customMarker = L.ExtraMarkers.icon({
-                        icon: actor.actions[0].icon,
-                        markerColor: get_color_code(actor.actions[0].couleur),
+                        icon: actor.acteur_selected_action.icon,
+                        markerColor: get_color_code(
+                            actor.acteur_selected_action.couleur,
+                        ),
                         shape: "square",
                         prefix: "qfdmo-icon",
                         svg: true,

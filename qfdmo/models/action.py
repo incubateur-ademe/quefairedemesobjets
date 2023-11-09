@@ -4,6 +4,55 @@ from django.forms import model_to_dict
 from qfdmo.models.utils import NomAsNaturalKeyModel
 
 
+class CachedDirectionAction:
+    _cached_actions_by_direction = None
+    _cached_actions = None
+    _cached_direction = None
+    _cached_time = None
+
+    @classmethod
+    def get_actions(cls) -> dict:
+        if cls._cached_actions is None:
+            cls._cached_actions = {
+                a.nom: {
+                    **model_to_dict(a, exclude=["directions"]),
+                    "directions": [d.nom for d in a.directions.all()],
+                }
+                for a in Action.objects.all()
+            }
+
+        return cls._cached_actions
+
+    @classmethod
+    def get_actions_by_direction(cls) -> dict:
+        if cls._cached_actions_by_direction is None:
+            cls._cached_actions_by_direction = {
+                d.nom: sorted(
+                    [model_to_dict(a, exclude=["directions"]) for a in d.actions.all()],
+                    key=lambda x: x["order"],
+                )
+                for d in ActionDirection.objects.all()
+            }
+
+        return cls._cached_actions_by_direction
+
+    @classmethod
+    def get_directions(cls) -> dict:
+        if cls._cached_direction is None:
+            cls._cached_direction = sorted(
+                [model_to_dict(d) for d in ActionDirection.objects.all()],
+                key=lambda x: x["order"],
+            )
+
+        return cls._cached_direction
+
+    @classmethod
+    def remove_cache(cls):
+        cls._cached_actions_by_direction = None
+        cls._cached_actions = None
+        cls._cached_direction = None
+
+
 class ActionDirection(NomAsNaturalKeyModel):
     class Meta:
         verbose_name = "Direction de l'action"
@@ -25,7 +74,7 @@ class Action(NomAsNaturalKeyModel):
     description = models.CharField(max_length=255, null=True, blank=True)
     order = models.IntegerField(blank=False, null=False, default=0)
     lvao_id = models.IntegerField(blank=True, null=True)
-    directions = models.ManyToManyField(ActionDirection)
+    directions = models.ManyToManyField(ActionDirection, related_name="actions")
     couleur = models.CharField(
         max_length=255,
         null=True,

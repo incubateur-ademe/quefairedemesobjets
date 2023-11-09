@@ -30,7 +30,7 @@
                 {% endif %}
                 {% for acteur in acteurs %}
                     <script type="application/json" data-map-target="acteur">
-                        {{ acteur.serialize(format='json', render_as_card=True, direction=form.initial.direction) | safe }}
+                        {{ acteur.json_acteur_for_display(direction=form.initial.direction, action_list=form.initial.action_list) | safe }}
                     </script>
                 {% endfor %}
             </div>
