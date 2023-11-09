@@ -1,6 +1,6 @@
 <div class="qfdmo-relative{% if is_iframe(request) %}{% if form.initial.adresse %} qfdmo-min-h-[400px]{% else %} qfdmo-min-h-[200px]{% endif %}{% else %} qfdmo-flex-grow md:qfdmo-min-h-[62vh]{% endif %}">
     <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-flex qfdmo-flex-col">
-        {% if request.GET["digital"] %}
+        {% if request.GET["digital"] == "1" %}
             <div class="qfdmo-flex-grow qfdmo-relative qfdmo-overflow-auto qfdmo-shadow-md ">
                 {% for acteur in acteurs.all() %}
                     <div class="qfdmo-rounded-t qfdmo-border-solid qfdmo-border qfdmo-border-b-2 qfdmo-border-light-gray qfdmo-border-b-blue-france qfdmo-content-start qfdmo-p-1w{% if not loop.last %} qfdmo-mb-1w{% endif %}">

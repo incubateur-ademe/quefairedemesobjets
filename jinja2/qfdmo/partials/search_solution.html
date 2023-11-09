@@ -23,7 +23,6 @@
             {{ form.longitude }}
             {{ form.latitude }}
         </div>
-        {{ form.digital }}
         <div class="fr-grid-row fr-grid-row--bottom">
             <div class="fr-col-12 fr-col-md-9">
                 <label>Je souhaite</label>
@@ -36,23 +35,19 @@
             </div>
             <div class="qfdmo-w-full qfdmo-flex qfdmo-flex-row qfdmo-justify-stretch">
                 <button
-                    type='button'
-                    name='submit'
-                    value='online'
+                    name='digital'
+                    value='1'
                     class="fr-btn{% if not form.initial.digital %} fr-btn--secondary{% endif %} qfdmo-w-1/2"
-                    data-action="click->choose-action#searchSolution"
-                    >
+                >
                     <div class='qfdmo-w-full qfdmo-flex qfdmo-items-center qfdmo-justify-center'>
                         <span class="fr-icon-global-line" aria-hidden="true"></span><span>Rechercher en ligne</span>
                     </div>
                 </button>
                 <button
-                    type='button'
-                    name='submit'
-                    value='proximity'
+                    name='digital'
+                    value='0'
                     class="fr-btn{% if form.initial.digital %} fr-btn--secondary{% endif %} qfdmo-w-1/2"
-                    data-action="click->choose-action#searchSolution"
-                    >
+                >
                     <div class='qfdmo-w-full qfdmo-flex qfdmo-items-center qfdmo-justify-center'>
                         <span class="fr-icon-road-map-line" aria-hidden="true"></span><span>Rechercher à proximité</span>
                     </div>

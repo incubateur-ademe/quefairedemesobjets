@@ -44,7 +44,6 @@ class ReemploiSolutionView(FormView):
         initial["action_list"] = self.request.GET.get("action_list")
         initial["latitude"] = self.request.GET.get("latitude")
         initial["longitude"] = self.request.GET.get("longitude")
-        initial["digital"] = self.request.GET.get("digital")
         return initial
 
     def get_context_data(self, **kwargs):
@@ -86,7 +85,7 @@ class ReemploiSolutionView(FormView):
                 proposition_services__sous_categories__in=sous_categories_objets
             )
 
-        if self.request.GET.get("digital"):
+        if self.request.GET.get("digital") and int(self.request.GET.get("digital")):
             acteurs = (
                 acteurs.filter(acteur_type__nom="acteur digital")
                 .annotate(min_action_order=Min("proposition_services__action__order"))
