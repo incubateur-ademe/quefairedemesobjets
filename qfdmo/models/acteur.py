@@ -2,12 +2,13 @@ import json
 import random
 import string
 
+import orjson
 from django.contrib.gis.db import models
 from django.db import connection
 from django.forms import ValidationError, model_to_dict
 from django.template.loader import render_to_string
 
-from qfdmo.models.action import Action
+from qfdmo.models.action import Action, CachedDirectionAction
 from qfdmo.models.categorie_objet import SousCategorieObjet
 from qfdmo.models.utils import NomAsNaturalKeyModel
 
@@ -41,6 +42,8 @@ class CorrectionActeurStatus(models.TextChoices):
 
 
 class ActeurType(NomAsNaturalKeyModel):
+    _digital_acteur_type_id: int = 0
+
     class Meta:
         verbose_name = "Type d'acteur"
         verbose_name_plural = "Types d'acteur"
@@ -52,6 +55,12 @@ class ActeurType(NomAsNaturalKeyModel):
 
     def serialize(self):
         return model_to_dict(self)
+
+    @classmethod
+    def get_digital_acteur_type_id(cls) -> int:
+        if not cls._digital_acteur_type_id:
+            cls._digital_acteur_type_id = cls.objects.get(nom="acteur digital").id
+        return cls._digital_acteur_type_id
 
 
 class Source(NomAsNaturalKeyModel):
@@ -119,7 +128,7 @@ class BaseActeur(NomAsNaturalKeyModel):
 
     @property
     def is_digital(self) -> bool:
-        return bool(self.acteur_type and self.acteur_type.nom == "acteur digital")
+        return self.acteur_type_id == ActeurType.get_digital_acteur_type_id()
 
     def serialize(self, format: None | str = None) -> dict | str:
         self_as_dict = model_to_dict(
@@ -260,15 +269,30 @@ REFRESH MATERIALIZED VIEW CONCURRENTLY qfdmo_finalpropositionservice_sous_catego
             )
 
     def acteur_actions(self, direction=None):
-        collected_action = [
-            ps.action
-            for ps in self.proposition_services.all()  # type: ignore
-            if direction is None
-            or direction in [d.nom for d in ps.action.directions.all()]
+        acteur_actions_by_direction = {}
+        ps_action_ids = [
+            ps.action_id for ps in self.proposition_services.all()  # type: ignore
         ]
-        collected_action = list(set(collected_action))
-        collected_action.sort(key=lambda x: x.order)
-        return collected_action
+        for d, actions in CachedDirectionAction.get_actions_by_direction().items():
+            acteur_actions_by_direction[d] = sorted(
+                [action for action in actions if action["id"] in ps_action_ids],
+                key=lambda x: x["order"],
+            )
+        if direction:
+            return acteur_actions_by_direction[direction]
+
+        deduplicated_actions = {
+            a["id"]: a
+            for a in (
+                acteur_actions_by_direction["jai"]
+                + acteur_actions_by_direction["jecherche"]
+            )
+        }.values()
+        sorted_actions = sorted(
+            deduplicated_actions,
+            key=lambda x: x["order"],
+        )
+        return sorted_actions
 
     def render_as_card(self, direction: str | None = None) -> str:
         return render_to_string(
@@ -282,9 +306,8 @@ REFRESH MATERIALIZED VIEW CONCURRENTLY qfdmo_finalpropositionservice_sous_catego
         direction: str | None = None,
     ) -> dict | str:
         super_serialized = super().serialize(format=None)
-        super_serialized["actions"] = [  # type: ignore
-            action.serialize() for action in self.acteur_actions(direction=direction)
-        ]
+        super_serialized["actions"] = self.acteur_actions(direction=direction)
+
         if render_as_card:
             super_serialized["render_as_card"] = self.render_as_card(  # type: ignore
                 direction=direction
@@ -293,6 +316,27 @@ REFRESH MATERIALIZED VIEW CONCURRENTLY qfdmo_finalpropositionservice_sous_catego
         if format == "json":
             return json.dumps(super_serialized)
         return super_serialized
+
+    def json_acteur_for_display(
+        self, direction: str | None = None, action_list: str | None = None
+    ) -> str:
+        actions = self.acteur_actions(direction=direction)
+        acteur_selected_actions = None
+        if action_list:
+            acteur_selected_actions = [
+                a for a in actions if a["nom"] in action_list.split("|")
+            ]
+
+        return orjson.dumps(
+            {
+                "location": orjson.loads(self.location.geojson),
+                "actions": actions,
+                "acteur_selected_action": acteur_selected_actions[0]
+                if acteur_selected_actions
+                else actions[0],
+                "render_as_card": self.render_as_card(direction=direction),
+            }
+        ).decode("utf-8")
 
 
 class CorrectionActeur(BaseActeur):
