@@ -33,26 +33,25 @@
                     {% include "qfdmo/partials/action_list_by_direction.html"  %}
                 {% endwith %}
             </div>
-            <div class="qfdmo-w-full qfdmo-flex qfdmo-flex-row qfdmo-justify-stretch">
-                <button
-                    name='digital'
-                    value='1'
-                    class="fr-btn{% if not form.initial.digital %} fr-btn--secondary{% endif %} qfdmo-w-1/2"
-                >
-                    <div class='qfdmo-w-full qfdmo-flex qfdmo-items-center qfdmo-justify-center'>
-                        <span class="fr-icon-global-line" aria-hidden="true"></span><span>Rechercher en ligne</span>
-                    </div>
-                </button>
-                <button
-                    name='digital'
-                    value='0'
-                    class="fr-btn{% if form.initial.digital %} fr-btn--secondary{% endif %} qfdmo-w-1/2"
-                >
-                    <div class='qfdmo-w-full qfdmo-flex qfdmo-items-center qfdmo-justify-center'>
-                        <span class="fr-icon-road-map-line" aria-hidden="true"></span><span>Rechercher à proximité</span>
-                    </div>
-                </button>
-            </div>
+        </div>
+        <div class="qfdmo-float-left qfdmo-w-full qfdmo-whitespace-nowrap qfdmo-text-ellipsis qfdmo-overflow-hidden">
+            Rechercher les bonnes adresses …
+        </div>
+        <div class="qfdmo-w-full qfdmo-flex qfdmo-flex-row ">
+            <button
+                name='digital'
+                value='0'
+                class="fr-btn fr-btn--icon-left fr-icon-road-map-line"
+            >
+                … à proximité
+            </button>
+            <button
+                name='digital'
+                value='1'
+                class="fr-btn fr-btn--secondary fr-ml-1v fr-btn--icon-left fr-icon-global-line"
+            >
+                … en ligne
+            </button>
         </div>
     </form>
 </div>
