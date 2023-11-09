@@ -13,7 +13,7 @@ class TestDisplayAsIframe:
         assert 'class="fr-footer' not in str(response.content)
         assert (
             "Retrouver les bonnes adresses sur <a "
-            'href="https://longuevieauxobjets.ademe.fr/" target="_blank">'
+            'href="https://longuevieauxobjets.ademe.fr/?mtm_campaign=iFrame" target="_blank">'
             "longuevieauxobjets.ademe.fr</a>" in str(response.content)
         )
 
