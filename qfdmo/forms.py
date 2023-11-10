@@ -78,7 +78,7 @@ class GetReemploiSolutionForm(forms.Form):
                 "data-action": "click -> choose-action#changeDirection",
             },
             fieldset_attrs={
-                "class": "fr-fieldset fr-mb-1w",
+                "class": "fr-fieldset fr-my-1w",
                 "data-choose-action-target": "direction",
             },
         ),

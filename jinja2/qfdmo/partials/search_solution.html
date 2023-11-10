@@ -3,10 +3,14 @@
         {% include "qfdmo/partials/featureflip_inputs.html" %}
         <div class="fr-mb-1v qfdmo-flex qfdmo-flex-row qfdmo-justify-between">
             {{ form.direction }}
-            <button type="button" class="fr-btn fr-btn--secondary" data-action="click -> choose-action#toggleAdvancedFilters">
+            <button
+                type="button"
+                class="fr-btn fr-btn--secondary"
+                data-action="click -> choose-action#toggleAdvancedFilters"
+                data-choose-action-target="advancedFiltersButton"
+                >
                 <span class="fr-icon--sm fr-icon-equalizer-line"></span>
                 <div class="qfdmo-hidden md:qfdmo-block">&nbsp;filtres avancés</div>
-                <!--qfdmo-hidden -->
                 <span
                     class="qfdmo-hidden qfdmo-bg-blue-france qfdmo-rounded-xl qfdmo-text-white qfdmo-text-xs fr-ml-1w fr-py-1v fr-px-1w"
                     data-choose-action-target="advancedFieldsCounter"
@@ -15,39 +19,36 @@
                 </span>
             </button>
         </div>
-        <!--qfdmo-hidden -->
-        <div class="qfdmo-relative qfdmo-border qfdmo-border-light-grey qfdmo-border-solid qfdmo-rounded fr-mb-1w fr-p-1w" data-choose-action-target="advancedFilters">
+        <div class="qfdmo-hidden qfdmo-relative qfdmo-border qfdmo-border-light-grey qfdmo-border-solid qfdmo-rounded fr-mb-1w fr-p-1w" data-choose-action-target="advancedFilters">
             <button type='button' class="fr-p-1w qfdmo-absolute qfdmo-z-20 qfdmo-text-right qfdmo-top-0 qfdmo-right-0 qfdmo-cursor-pointer" data-action="click -> choose-action#toggleAdvancedFilters">
                 <span class="fr-icon--sm fr-icon-close-line"></span>
             </button>
 
-            <fieldset class="fr-fieldset fr-m-0 " aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages">
-                <div class="fr-fieldset__element fr-fieldset__element--inline fr-m-0">
-                    <div
-                        class="fr-checkbox-group qfdmo-flex qfdmo-flex-row qfdmo-items-center"
-                    >
-                        <img
-                            src="{{ static('reparacteurs_small.png') }}"
-                            alt="Repar'Acteur"
-                            class="fr-mr-1w qfdmo-cursor-pointer"
-                            width=32
-                            height=32
-                            data-fr-opened="false"
-                            aria-controls="fr-modal-reparacteur"
+            <div
+                class="qfdmo-flex qfdmo-flex-row qfdmo-items-center"
+            >
+                <img
+                    src="{{ static('reparacteurs_small.png') }}"
+                    alt="Repar'Acteur"
+                    class="qfdmo-cursor-pointer"
+                    width=32
+                    height=32
+                    data-fr-opened="false"
+                    aria-controls="fr-modal-reparacteur"
+                >
+                <fieldset class="fr-fieldset fr-m-0 " aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages">
+                    <div class="fr-fieldset__element fr-fieldset__element--inline fr-m-0">
+                        <div
+                            class="fr-checkbox-group qfdmo-flex qfdmo-flex-row qfdmo-items-center"
                         >
-                        {{ form.label_reparacteur }}
-                        {{ form.label_reparacteur.label_tag() }}
+                            {{ form.label_reparacteur }}
+                            {{ form.label_reparacteur.label_tag() }}
+                        </div>
+                        <span class="fr-hint-text">{{ form.label_reparacteur.help_text }}</span>
                     </div>
-                    <span class="fr-hint-text">{{ form.label_reparacteur.help_text }}</span>
-
-                </div>
-            </fieldset>
+                </fieldset>
+            </div>
         </div>
-
-
-
-
-
 
         {{ form.action_list }}
         <div data-controller='autocomplete'
@@ -70,17 +71,13 @@
             {{ form.longitude }}
             {{ form.latitude }}
         </div>
-        <div class="fr-grid-row fr-grid-row--bottom">
-            <div class="fr-col-12 fr-col-md-9">
-                <label>Je souhaite</label>
-                {% with action_direction='jai' %}
-                    {% include "qfdmo/partials/action_list_by_direction.html"  %}
-                {% endwith %}
-                {% with action_direction='jecherche' %}
-                    {% include "qfdmo/partials/action_list_by_direction.html"  %}
-                {% endwith %}
-            </div>
-        </div>
+        <label>Je souhaite</label>
+        {% with action_direction='jai' %}
+            {% include "qfdmo/partials/action_list_by_direction.html" %}
+        {% endwith %}
+        {% with action_direction='jecherche' %}
+            {% include "qfdmo/partials/action_list_by_direction.html"  %}
+        {% endwith %}
         <div class="qfdmo-float-left qfdmo-w-full qfdmo-whitespace-nowrap qfdmo-text-ellipsis qfdmo-overflow-hidden">
             Rechercher les bonnes adresses …
         </div>

@@ -1,4 +1,3 @@
-
 <div id="{{action_direction}}" data-choose-action-target='{{action_direction}}'>
     <fieldset class="fr-fieldset fr-mb-1w" id="checkboxes-inline" aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages">
         {% for action in action_by_direction(request, action_direction) %}
@@ -7,9 +6,9 @@
                     class="fr-checkbox-group fr-p-1v qfdmo-bg-{{action.couleur}} qfdmo-bg-opacity-30"
                     data-action="click->choose-action#apply"
                     >
-                    <input name="{{action.nom}}" id="{{action_direction}}_{{action.nom}}" type="checkbox" aria-describedby="{{action.nom}}-messages" {% if action.active %} checked{% endif %}>
-                    <label class="fr-label before:qfdmo-bg-white" for="{{action_direction}}_{{action.nom}}">
-                        {{action.nom_affiche}}
+                    <input name="{{action.nom}}" id="{{action_direction}}_{{action.nom}}" data-choose-action-target="action" type="checkbox" aria-describedby="{{action.nom}}-messages" {% if action.active %} checked{% endif %} data-action="click -> choose-action#changeForm">
+                    <label class="fr-label before:qfdmo-bg-white fr-text--sm fr-mb-0" for="{{action_direction}}_{{action.nom}}">
+                        {{ action.nom_affiche }}
                     </label>
                 </div>
             </div>

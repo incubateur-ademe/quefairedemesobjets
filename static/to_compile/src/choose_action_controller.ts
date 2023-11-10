@@ -11,6 +11,8 @@ export default class extends Controller<HTMLElement> {
         "advancedFilters",
         "advancedField",
         "advancedFieldsCounter",
+        "action",
+        "advancedFiltersButton",
     ]
     declare readonly jaiTarget: HTMLElement
     declare readonly jechercheTarget: HTMLElement
@@ -19,11 +21,14 @@ export default class extends Controller<HTMLElement> {
     declare readonly actionListTarget: HTMLInputElement
     declare readonly advancedFiltersTarget: HTMLElement
     declare readonly advancedFieldTargets: HTMLInputElement[]
+    declare readonly actionTargets: HTMLInputElement[]
     declare readonly advancedFieldsCounterTarget: HTMLElement
+    declare readonly advancedFiltersButtonTarget: HTMLElement
 
     connect() {
         this.displayActionList()
         this.updateAdvancedFiltersCounter()
+        this.changeForm()
     }
 
     displayActionList() {
@@ -75,14 +80,11 @@ export default class extends Controller<HTMLElement> {
         this.actionListTarget.value = ""
         this.displayActionList()
         this.apply()
+        this.changeForm()
     }
 
     toggleAdvancedFilters() {
         this.advancedFiltersTarget.classList.toggle("qfdmo-hidden")
-        const advancedFields = this.advancedFieldTargets
-        for (let i = 0; i < advancedFields.length; i++) {
-            console.log(advancedFields[i].value)
-        }
     }
 
     updateAdvancedFiltersCounter() {
@@ -98,5 +100,16 @@ export default class extends Controller<HTMLElement> {
         }
         this.advancedFieldsCounterTarget.innerText = counter.toString()
         this.advancedFieldsCounterTarget.classList.remove("qfdmo-hidden")
+    }
+    changeForm() {
+        const reparer = this.actionTargets.find(
+            (element) => element.id == "jai_reparer",
+        )
+        if (this.#selectedOption == "jai" && reparer.checked) {
+            this.advancedFiltersButtonTarget.classList.remove("qfdmo-hidden")
+        } else {
+            this.advancedFiltersButtonTarget.classList.add("qfdmo-hidden")
+            this.advancedFiltersTarget.classList.add("qfdmo-hidden")
+        }
     }
 }

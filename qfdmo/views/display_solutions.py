@@ -7,7 +7,7 @@ from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
 from django.contrib.postgres.lookups import Unaccent
 from django.contrib.postgres.search import TrigramWordDistance  # type: ignore
-from django.db.models import Min, QuerySet
+from django.db.models import Min, Q, QuerySet
 from django.db.models.functions import Length, Lower
 from django.forms.forms import BaseForm
 from django.http import JsonResponse
@@ -27,6 +27,7 @@ from qfdmo.models import (
     RevisionActeur,
     SousCategorieObjet,
 )
+from qfdmo.models.action import CachedDirectionAction
 from qfdmo.thread.materialized_view import RefreshMateriazedViewThread
 
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
@@ -68,19 +69,9 @@ class ReemploiSolutionView(FormView):
             )
         action_selection_ids = [a["id"] for a in get_action_list(self.request)]
 
-        if sous_categories_objets:
-            acteurs = FinalActeur.objects.filter(
-                proposition_services__in=FinalPropositionService.objects.filter(
-                    action_id__in=action_selection_ids,
-                    sous_categories__in=sous_categories_objets,
-                ),
-                statut=ActeurStatus.ACTIF,
-            )
-        else:
-            acteurs = FinalActeur.objects.filter(
-                proposition_services__action_id__in=action_selection_ids,
-                statut=ActeurStatus.ACTIF,
-            )
+        ps_filter = self._build_ps_filter(action_selection_ids, sous_categories_objets)
+
+        acteurs = FinalActeur.objects.filter(ps_filter)
 
         acteurs = acteurs.prefetch_related(
             "proposition_services__sous_categories",
@@ -126,6 +117,50 @@ class ReemploiSolutionView(FormView):
                 ).order_by("distance")[: settings.MAX_SOLUTION_DISPLAYED_ON_MAP]
                 kwargs["acteurs"] = acteurs
         return super().get_context_data(**kwargs)
+
+    def _build_ps_filter(self, action_selection_ids, sous_categories_objets):
+        reparer_action_id = None
+        if (
+            self.request.GET.get("label_reparacteur")
+            and CachedDirectionAction.get_reparer_action_id() in action_selection_ids
+        ):
+            reparer_action_id = CachedDirectionAction.get_reparer_action_id()
+            action_selection_ids = [
+                a for a in action_selection_ids if a != reparer_action_id
+            ]
+
+        ps_filter = Q()
+        if sous_categories_objets:
+            if action_selection_ids:
+                ps_filter = ps_filter | Q(
+                    proposition_services__in=FinalPropositionService.objects.filter(
+                        action_id__in=action_selection_ids,
+                        sous_categories__in=sous_categories_objets,
+                    ),
+                    statut=ActeurStatus.ACTIF,
+                )
+            if reparer_action_id:
+                ps_filter = ps_filter | Q(
+                    proposition_services__in=FinalPropositionService.objects.filter(
+                        action_id=reparer_action_id,
+                        sous_categories__in=sous_categories_objets,
+                    ),
+                    label_reparacteur=True,
+                    statut=ActeurStatus.ACTIF,
+                )
+        else:
+            if action_selection_ids:
+                ps_filter = ps_filter | Q(
+                    proposition_services__action_id__in=action_selection_ids,
+                    statut=ActeurStatus.ACTIF,
+                )
+            if reparer_action_id:
+                ps_filter = ps_filter | Q(
+                    proposition_services__action_id=reparer_action_id,
+                    label_reparacteur=True,
+                    statut=ActeurStatus.ACTIF,
+                )
+        return ps_filter
 
 
 def getorcreate_revision_acteur(request, acteur_identifiant):
