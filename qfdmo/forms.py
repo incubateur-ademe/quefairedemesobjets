@@ -82,13 +82,17 @@ class GetReemploiSolutionForm(forms.Form):
                 "data-choose-action-target": "direction",
             },
         ),
-        choices=[
-            [direction["nom"], direction["nom_affiche"]]
-            for direction in CachedDirectionAction.get_directions()
-        ],
+        # FIXME: I guess async error comes from here
+        choices=[],
         label="",
         required=False,
     )
+
+    def load_choices(self):
+        self.fields["direction"].choices = [
+            [direction["nom"], direction["nom_affiche"]]
+            for direction in CachedDirectionAction.get_directions()
+        ]
 
     action_list = forms.CharField(
         widget=forms.HiddenInput(

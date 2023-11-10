@@ -9,6 +9,7 @@ from django.contrib.postgres.lookups import Unaccent
 from django.contrib.postgres.search import TrigramWordDistance  # type: ignore
 from django.db.models import Min, QuerySet
 from django.db.models.functions import Length, Lower
+from django.forms.forms import BaseForm
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_GET
@@ -46,6 +47,11 @@ class ReemploiSolutionView(FormView):
         initial["latitude"] = self.request.GET.get("latitude")
         initial["longitude"] = self.request.GET.get("longitude")
         return initial
+
+    def get_form(self, form_class: type | None = GetReemploiSolutionForm) -> BaseForm:
+        my_form = super().get_form(form_class)
+        my_form.load_choices()
+        return my_form
 
     def get_context_data(self, **kwargs):
         kwargs["location"] = "{}"
