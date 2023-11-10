@@ -97,12 +97,13 @@ class GetReemploiSolutionForm(forms.Form):
     label_reparacteur = forms.BooleanField(
         widget=forms.CheckboxInput(
             attrs={
-                "class": "fr-checkbox",
+                "class": "fr-checkbox fr-m-1v",
                 "data-choose-action-target": "advancedField",
-                "data-action": "click -> choose-action#updateAdvancedField",
+                "data-action": "click -> choose-action#updateAdvancedFiltersCounter",
             }
         ),
-        label="Label Répar'Acteurs",
+        label="Label Répar’Acteurs",
+        help_text="Afficher uniquement les artisans labellisés",
         label_suffix="",
         required=False,
     )

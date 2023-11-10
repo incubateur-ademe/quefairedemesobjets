@@ -8,19 +8,22 @@ export default class extends Controller<HTMLElement> {
         "direction",
         "apply",
         "actionList",
-        "sideoverContainer",
-        "digital",
+        "advancedFilters",
+        "advancedField",
+        "advancedFieldsCounter",
     ]
     declare readonly jaiTarget: HTMLElement
     declare readonly jechercheTarget: HTMLElement
     declare readonly directionTarget: HTMLElement
     declare readonly applyTarget: HTMLElement
     declare readonly actionListTarget: HTMLInputElement
-    declare readonly sideoverContainerTarget: HTMLDivElement
-    declare readonly digitalTarget: HTMLInputElement
+    declare readonly advancedFiltersTarget: HTMLElement
+    declare readonly advancedFieldTargets: HTMLInputElement[]
+    declare readonly advancedFieldsCounterTarget: HTMLElement
 
     connect() {
         this.displayActionList()
+        this.updateAdvancedFiltersCounter()
     }
 
     displayActionList() {
@@ -72,5 +75,28 @@ export default class extends Controller<HTMLElement> {
         this.actionListTarget.value = ""
         this.displayActionList()
         this.apply()
+    }
+
+    toggleAdvancedFilters() {
+        this.advancedFiltersTarget.classList.toggle("qfdmo-hidden")
+        const advancedFields = this.advancedFieldTargets
+        for (let i = 0; i < advancedFields.length; i++) {
+            console.log(advancedFields[i].value)
+        }
+    }
+
+    updateAdvancedFiltersCounter() {
+        const advancedFields = this.advancedFieldTargets
+        let counter = 0
+        for (let i = 0; i < advancedFields.length; i++) {
+            if (advancedFields[i].checked) counter++
+        }
+        if (counter == 0) {
+            this.advancedFieldsCounterTarget.innerText = ""
+            this.advancedFieldsCounterTarget.classList.add("qfdmo-hidden")
+            return
+        }
+        this.advancedFieldsCounterTarget.innerText = counter.toString()
+        this.advancedFieldsCounterTarget.classList.remove("qfdmo-hidden")
     }
 }

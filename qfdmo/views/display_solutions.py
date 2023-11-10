@@ -52,6 +52,8 @@ class ReemploiSolutionView(FormView):
 
     def get_form(self, form_class: type | None = GetReemploiSolutionForm) -> BaseForm:
         my_form = super().get_form(form_class)
+        # Here we need to load choices after initialisation because of async management
+        # in prod + cache
         my_form.load_choices()
         return my_form
 
@@ -65,6 +67,7 @@ class ReemploiSolutionView(FormView):
                 objets__nom=objet_q
             )
         action_selection_ids = [a["id"] for a in get_action_list(self.request)]
+
         if sous_categories_objets:
             acteurs = FinalActeur.objects.filter(
                 proposition_services__in=FinalPropositionService.objects.filter(
