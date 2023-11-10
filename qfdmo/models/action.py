@@ -41,10 +41,9 @@ class CachedDirectionAction:
     def get_directions(cls) -> List[dict]:
         if cls._cached_direction is None:
             directions = ActionDirection.objects.all()
-            cls._cached_direction = sorted(
-                [model_to_dict(d) for d in directions],
-                key=lambda x: x["order"],
-            )
+            directions_list = [model_to_dict(d) for d in directions]
+            sorted_directions = sorted(directions_list, key=lambda x: x["order"])
+            cls._cached_direction = sorted_directions
         return cls._cached_direction
 
     @classmethod
