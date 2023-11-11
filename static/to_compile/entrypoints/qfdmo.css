@@ -61,3 +61,61 @@ Style the autocomplete container:
     background-color: DodgerBlue !important;
     color: #ffffff;
 }
+
+/*
+    Action icones
+*/
+
+.fr-icon-action-acheter::before,
+.fr-icon-action-acheter::after {
+    -webkit-mask-image: url("svg/acheter.svg");
+    mask-image: url("svg/acheter.svg");
+}
+
+.fr-icon-action-donner::before,
+.fr-icon-action-donner::after {
+    -webkit-mask-image: url("svg/donner.svg");
+    mask-image: url("svg/donner.svg");
+}
+
+.fr-icon-action-echanger::before,
+.fr-icon-action-echanger::after {
+    -webkit-mask-image: url("svg/echanger.svg");
+    mask-image: url("svg/echanger.svg");
+}
+
+.fr-icon-action-emprunter::before,
+.fr-icon-action-emprunter::after {
+    -webkit-mask-image: url("svg/emprunter.svg");
+    mask-image: url("svg/emprunter.svg");
+}
+
+.fr-icon-action-louer::before,
+.fr-icon-action-louer::after {
+    -webkit-mask-image: url("svg/louer.svg");
+    mask-image: url("svg/louer.svg");
+}
+
+.fr-icon-action-mettreenlocation::before,
+.fr-icon-action-mettreenlocation::after {
+    -webkit-mask-image: url("svg/mettreenlocation.svg");
+    mask-image: url("svg/mettreenlocation.svg");
+}
+
+.fr-icon-action-preter::before,
+.fr-icon-action-preter::after {
+    -webkit-mask-image: url("svg/preter.svg");
+    mask-image: url("svg/preter.svg");
+}
+
+.fr-icon-action-reparer::before,
+.fr-icon-action-reparer::after {
+    -webkit-mask-image: url("svg/reparer.svg");
+    mask-image: url("svg/reparer.svg");
+}
+
+.fr-icon-action-vendre::before,
+.fr-icon-action-vendre::after {
+    -webkit-mask-image: url("svg/vendre.svg");
+    mask-image: url("svg/vendre.svg");
+}
