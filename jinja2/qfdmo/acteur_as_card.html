@@ -11,15 +11,7 @@
     </div>
     <div class="qfdmo-flex qfdmo-flex-row qfdmo-justify-start qfdmo-items-center fr-mb-1w">
         {% if acteur.label_reparacteur %}
-            <img
-                src="{{ static('reparacteurs_small.png') }}"
-                alt="Repar'Acteur"
-                class="fr-mr-1w"
-                width=32
-                height=32
-                data-fr-opened="false"
-                aria-controls="fr-modal-reparacteur"
-            >
+            {% include "qfdmo/partials/label_reparacteur_icon.html" %}
         {% endif %}
         <h3 class='fr-mb-0'>
             {{ acteur.nom_affiche|title }}

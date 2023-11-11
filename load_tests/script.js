@@ -6,8 +6,8 @@ export const options = {
     // vus: 10,
     // duration: "30s",
     stages: [
-        { duration: "1m", target: 100 },
-        { duration: "5m", target: 100 },
+        { duration: "1m", target: 200 },
+        { duration: "5m", target: 200 },
         { duration: "1m", target: 0 },
     ],
 }
@@ -22,8 +22,9 @@ export default function () {
     let latitude = 44 + 5 * Math.random()
     let myUrlWithParams = `https://longuevieauxobjets.ademe.fr/?r=${Math.floor(
         Math.random() * 100,
-    )}&direction=${direction}&longitude=${longitude}&latitude=${latitude}&adresse=fake+adresse`
-
+    )}&direction=${direction}&longitude=${longitude}&latitude=${latitude}&adresse=fake+adresse&digital=${Math.round(
+        Math.random(),
+    )}`
     const res = http.get(myUrlWithParams, {
         tags: { name: "GetSolutions" },
     })
