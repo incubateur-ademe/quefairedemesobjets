@@ -6,7 +6,6 @@ export default class extends Controller<HTMLElement> {
         "jai",
         "jecherche",
         "direction",
-        "apply",
         "actionList",
         "advancedFiltersDiv",
         "advancedFiltersField",
@@ -17,9 +16,8 @@ export default class extends Controller<HTMLElement> {
     declare readonly jaiTarget: HTMLElement
     declare readonly jechercheTarget: HTMLElement
     declare readonly directionTarget: HTMLElement
-    declare readonly applyTarget: HTMLElement
     declare readonly actionListTarget: HTMLInputElement
-    declare readonly advancedFiltersTarget: HTMLElement
+    declare readonly advancedFiltersDivTarget: HTMLElement
     declare readonly advancedFiltersFieldTargets: HTMLInputElement[]
     declare readonly actionTargets: HTMLInputElement[]
     declare readonly advancedFiltersCounterTarget: HTMLElement
@@ -101,6 +99,7 @@ export default class extends Controller<HTMLElement> {
         this.advancedFiltersCounterTarget.innerText = counter.toString()
         this.advancedFiltersCounterTarget.classList.remove("qfdmo-hidden")
     }
+
     updateSearchSolutionForm() {
         const reparer = this.actionTargets.find(
             (element) => element.id == "jai_reparer",
