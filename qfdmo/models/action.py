@@ -10,6 +10,7 @@ class CachedDirectionAction:
     _cached_actions_by_direction = None
     _cached_actions = None
     _cached_direction = None
+    _reparer_action_id = None
 
     @classmethod
     def get_actions(cls) -> dict:
@@ -45,6 +46,12 @@ class CachedDirectionAction:
             sorted_directions = sorted(directions_list, key=lambda x: x["order"])
             cls._cached_direction = sorted_directions
         return cls._cached_direction
+
+    @classmethod
+    def get_reparer_action_id(cls):
+        if cls._reparer_action_id is None:
+            cls._reparer_action_id = Action.objects.get(nom="reparer").id
+        return cls._reparer_action_id
 
     @classmethod
     def reload_cache(cls):

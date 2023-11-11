@@ -6,21 +6,27 @@ export default class extends Controller<HTMLElement> {
         "jai",
         "jecherche",
         "direction",
-        "apply",
         "actionList",
-        "sideoverContainer",
-        "digital",
+        "advancedFiltersDiv",
+        "advancedFiltersField",
+        "advancedFiltersCounter",
+        "action",
+        "advancedFiltersButton",
     ]
     declare readonly jaiTarget: HTMLElement
     declare readonly jechercheTarget: HTMLElement
     declare readonly directionTarget: HTMLElement
-    declare readonly applyTarget: HTMLElement
     declare readonly actionListTarget: HTMLInputElement
-    declare readonly sideoverContainerTarget: HTMLDivElement
-    declare readonly digitalTarget: HTMLInputElement
+    declare readonly advancedFiltersDivTarget: HTMLElement
+    declare readonly advancedFiltersFieldTargets: HTMLInputElement[]
+    declare readonly actionTargets: HTMLInputElement[]
+    declare readonly advancedFiltersCounterTarget: HTMLElement
+    declare readonly advancedFiltersButtonTarget: HTMLElement
 
     connect() {
         this.displayActionList()
+        this.updateAdvancedFiltersCounter()
+        this.updateSearchSolutionForm()
     }
 
     displayActionList() {
@@ -72,5 +78,37 @@ export default class extends Controller<HTMLElement> {
         this.actionListTarget.value = ""
         this.displayActionList()
         this.apply()
+        this.updateSearchSolutionForm()
+    }
+
+    toggleadvancedFiltersDiv() {
+        this.advancedFiltersDivTarget.classList.toggle("qfdmo-hidden")
+    }
+
+    updateAdvancedFiltersCounter() {
+        const advancedFiltersFields = this.advancedFiltersFieldTargets
+        let counter = 0
+        for (let i = 0; i < advancedFiltersFields.length; i++) {
+            if (advancedFiltersFields[i].checked) counter++
+        }
+        if (counter == 0) {
+            this.advancedFiltersCounterTarget.innerText = ""
+            this.advancedFiltersCounterTarget.classList.add("qfdmo-hidden")
+            return
+        }
+        this.advancedFiltersCounterTarget.innerText = counter.toString()
+        this.advancedFiltersCounterTarget.classList.remove("qfdmo-hidden")
+    }
+
+    updateSearchSolutionForm() {
+        const reparer = this.actionTargets.find(
+            (element) => element.id == "jai_reparer",
+        )
+        if (this.#selectedOption == "jai" && reparer.checked) {
+            this.advancedFiltersButtonTarget.classList.remove("qfdmo-hidden")
+        } else {
+            this.advancedFiltersButtonTarget.classList.add("qfdmo-hidden")
+            this.advancedFiltersDivTarget.classList.add("qfdmo-hidden")
+        }
     }
 }
