@@ -6,36 +6,28 @@
             <button
                 type="button"
                 class="fr-btn fr-btn--secondary"
-                data-action="click -> choose-action#toggleAdvancedFilters"
-                data-choose-action-target="advancedFiltersButton"
+                data-action="click -> search-solution-form#toggleadvancedFiltersDiv"
+                data-search-solution-form-target="advancedFiltersButton"
                 >
                 <span class="fr-icon--sm fr-icon-equalizer-line"></span>
                 <div class="qfdmo-hidden md:qfdmo-block">&nbsp;filtres avancés</div>
                 <span
                     class="qfdmo-hidden qfdmo-bg-blue-france qfdmo-rounded-xl qfdmo-text-white qfdmo-text-xs fr-ml-1w fr-py-1v fr-px-1w"
-                    data-choose-action-target="advancedFieldsCounter"
+                    data-search-solution-form-target="advancedFiltersCounter"
                 >
                     1
                 </span>
             </button>
         </div>
-        <div class="qfdmo-hidden qfdmo-relative qfdmo-border qfdmo-border-light-grey qfdmo-border-solid qfdmo-rounded fr-mb-1w fr-p-1w" data-choose-action-target="advancedFilters">
-            <button type='button' class="fr-p-1w qfdmo-absolute qfdmo-z-20 qfdmo-text-right qfdmo-top-0 qfdmo-right-0 qfdmo-cursor-pointer" data-action="click -> choose-action#toggleAdvancedFilters">
+        <div class="qfdmo-hidden qfdmo-relative qfdmo-border qfdmo-border-light-grey qfdmo-border-solid qfdmo-rounded fr-mb-1w fr-p-1w" data-search-solution-form-target="advancedFiltersDiv">
+            <button type='button' class="fr-p-1w qfdmo-absolute qfdmo-z-20 qfdmo-text-right qfdmo-top-0 qfdmo-right-0 qfdmo-cursor-pointer" data-action="click -> search-solution-form#toggleadvancedFiltersDiv">
                 <span class="fr-icon--sm fr-icon-close-line"></span>
             </button>
 
             <div
                 class="qfdmo-flex qfdmo-flex-row qfdmo-items-center"
             >
-                <img
-                    src="{{ static('reparacteurs_small.png') }}"
-                    alt="Repar'Acteur"
-                    class="qfdmo-cursor-pointer"
-                    width=32
-                    height=32
-                    data-fr-opened="false"
-                    aria-controls="fr-modal-reparacteur"
-                >
+                {% include "qfdmo/partials/label_reparacteur_icon.html" %}
                 <fieldset class="fr-fieldset fr-m-0 " aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages">
                     <div class="fr-fieldset__element fr-fieldset__element--inline fr-m-0">
                         <div

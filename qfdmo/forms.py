@@ -75,11 +75,11 @@ class GetReemploiSolutionForm(forms.Form):
         widget=InlineRadioSelect(
             attrs={
                 "class": "fr-radio",
-                "data-action": "click -> choose-action#changeDirection",
+                "data-action": "click -> search-solution-form#changeDirection",
             },
             fieldset_attrs={
                 "class": "fr-fieldset fr-my-1w",
-                "data-choose-action-target": "direction",
+                "data-search-solution-form-target": "direction",
             },
         ),
         # FIXME: I guess async error comes from here
@@ -98,8 +98,8 @@ class GetReemploiSolutionForm(forms.Form):
         widget=forms.CheckboxInput(
             attrs={
                 "class": "fr-checkbox fr-m-1v",
-                "data-choose-action-target": "advancedField",
-                "data-action": "click -> choose-action#updateAdvancedFiltersCounter",
+                "data-search-solution-form-target": "advancedFiltersField",
+                "data-action": "click -> search-solution-form#updateAdvancedFiltersCounter",  # noqa E501
             }
         ),
         label="Label Répar’Acteurs",
@@ -110,14 +110,14 @@ class GetReemploiSolutionForm(forms.Form):
 
     action_list = forms.CharField(
         widget=forms.HiddenInput(
-            attrs={"data-choose-action-target": "actionList"},
+            attrs={"data-search-solution-form-target": "actionList"},
         ),
         required=False,
     )
 
     digital = forms.BooleanField(
         widget=forms.HiddenInput(
-            attrs={"data-choose-action-target": "digital"},
+            attrs={"data-search-solution-form-target": "digital"},
         ),
         required=False,
     )
