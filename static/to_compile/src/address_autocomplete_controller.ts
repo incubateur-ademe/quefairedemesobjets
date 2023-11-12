@@ -3,6 +3,7 @@ import AutocompleteController from "../src/autocomplete_controller"
 const SEPARATOR = "||"
 export default class extends AutocompleteController {
     controllerName: string = "address-autocomplete"
+    allAvailableOptions: Array<string> = []
 
     static targets = AutocompleteController.targets.concat([
         "longitude",
@@ -31,7 +32,7 @@ export default class extends AutocompleteController {
             for (let i = 0; i < this.allAvailableOptions.length; i++) {
                 if (countResult >= this.maxOptionDisplayedValue) break
                 countResult++
-                this.addoption(regexPattern, this.allAvailableOptions[i])
+                this.addOption(regexPattern, this.allAvailableOptions[i])
             }
             if (this.autocompleteList.childElementCount > 0) {
                 this.currentFocus = 0
@@ -81,6 +82,24 @@ export default class extends AutocompleteController {
             if (latitude) this.latitudeTarget.value = latitude
         }
         this.closeAllLists()
+    }
+
+    addOption(regexPattern: RegExp, option: any) {
+        //option : this.#allAvailableOptions[i]
+        /*create a DIV element for each matching element:*/
+        let b = document.createElement("DIV")
+        /*make the matching letters bold:*/
+        const [data, longitude, latitude] = option.split("||")
+        const newText = data.replace(regexPattern, "<strong>$&</strong>")
+        b.innerHTML = newText
+        // FIXME : better way to do this
+        const input = document.createElement("input")
+        input.setAttribute("type", "hidden")
+        input.setAttribute("value", option)
+        b.appendChild(input)
+        b.setAttribute("data-action", "click->" + this.controllerName + "#selectOption")
+        b.setAttribute("data-on-focus", "true")
+        this.autocompleteList.appendChild(b)
     }
 
     geolocatisationRefused() {
