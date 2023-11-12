@@ -117,7 +117,6 @@ describe("SearchSolutionFormController", () => {
             '[data-search-solution-form-target="advancedFiltersCounter"]',
         ) as HTMLElement
 
-        console.log(advancedFiltersCounterTarget)
         expect(advancedFiltersCounterTarget.innerText).toEqual("1")
         expect(advancedFiltersCounterTarget).not.toHaveClass("qfdmo-hidden")
     })

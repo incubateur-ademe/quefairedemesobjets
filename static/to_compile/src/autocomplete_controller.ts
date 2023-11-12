@@ -1,8 +1,8 @@
 import { Controller } from "@hotwired/stimulus"
 
-export default class extends Controller<HTMLElement> {
+export default abstract class extends Controller<HTMLElement> {
     controllerName: string = "autocomplete"
-    allAvailableOptions: Array<string> = []
+    allAvailableOptions = []
     currentFocus: number = 0
     autocompleteList: HTMLElement
     nbCharToSearchDefault: number = 3
@@ -140,40 +140,8 @@ export default class extends Controller<HTMLElement> {
         return retval
     }
 
-    addoption(regexPattern: RegExp, option: object) {
-        //option : this.#allAvailableOptions[i]
-        /*create a DIV element for each matching element:*/
-        let b = document.createElement("DIV")
-        b.classList.add(
-            "qfdmo-flex",
-            "qfdmo-flex-col",
-            "md:qfdmo-flex-row",
-            "md:qfdmo-justify-between",
-        )
-        /*make the matching letters bold:*/
-        // const [data, longitude, latitude] = option.split("||")
-
-        let label = document.createElement("span")
-        const data = option.label
-        const newText = data.replace(regexPattern, "<strong>$&</strong>")
-        label.innerHTML = newText
-        b.appendChild(label)
-
-        if (option.sub_label != null) {
-            const sub_label = document.createElement("span")
-            sub_label.classList.add("fr-text--sm", "fr-m-0", "qfdmo-italic")
-            sub_label.innerHTML = option.sub_label
-            b.appendChild(sub_label)
-        }
-
-        // Input hidden
-        const input = document.createElement("input")
-        input.setAttribute("type", "hidden")
-        input.setAttribute("value", option.label)
-        b.appendChild(input)
-        b.setAttribute("data-action", "click->" + this.controllerName + "#selectOption")
-        b.setAttribute("data-on-focus", "true")
-        this.autocompleteList.appendChild(b)
+    addoption(regexPattern: RegExp, option: any) {
+        // Implement this method in your controller
     }
 
     createAutocompleteList() {
@@ -193,15 +161,7 @@ export default class extends Controller<HTMLElement> {
     }
 
     async #getOptionCallback(value: string): Promise<string[]> {
-        if (value.trim().length < this.nbCharToSearchValue) return []
-        return await fetch(`/qfdmo/get_object_list?q=${value}`)
-            .then((response) => response.json())
-            .then((data) => {
-                return data
-            })
-            .catch((error) => {
-                console.error("error catched : ", error)
-                return []
-            })
+        // Implement this method in your controller
+        return []
     }
 }

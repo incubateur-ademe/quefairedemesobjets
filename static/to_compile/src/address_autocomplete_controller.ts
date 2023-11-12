@@ -3,6 +3,7 @@ import AutocompleteController from "../src/autocomplete_controller"
 const SEPARATOR = "||"
 export default class extends AutocompleteController {
     controllerName: string = "address-autocomplete"
+    allAvailableOptions: Array<string> = []
 
     static targets = AutocompleteController.targets.concat([
         "longitude",
@@ -83,7 +84,7 @@ export default class extends AutocompleteController {
         this.closeAllLists()
     }
 
-    addoption(regexPattern: RegExp, option: string) {
+    addoption(regexPattern: RegExp, option: any) {
         //option : this.#allAvailableOptions[i]
         /*create a DIV element for each matching element:*/
         let b = document.createElement("DIV")
