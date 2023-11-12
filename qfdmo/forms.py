@@ -41,12 +41,20 @@ class GetReemploiSolutionForm(forms.Form):
             attrs={
                 "class": "fr-input fr-icon-search-line",
                 "placeholder": "vêtement, smartphone, meuble...",
-            }
+            },
+            data_controller="ss-cat-object-autocomplete",
         ),
         label="",
         empty_label="",
         required=False,
     )
+    ss_cat = forms.IntegerField(
+        widget=forms.HiddenInput(
+            attrs={"data-ss-cat-object-autocomplete-target": "ssCat"}
+        ),
+        required=False,
+    )
+
     adresse = forms.CharField(
         widget=AutoCompleteInput(
             attrs={

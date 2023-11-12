@@ -7,7 +7,7 @@ from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
 from django.contrib.postgres.lookups import Unaccent
 from django.contrib.postgres.search import TrigramWordDistance  # type: ignore
-from django.db.models import Min, Q, QuerySet
+from django.db.models import Min, Q
 from django.db.models.functions import Length, Lower
 from django.forms.forms import BaseForm
 from django.http import JsonResponse
@@ -25,7 +25,6 @@ from qfdmo.models import (
     FinalPropositionService,
     Objet,
     RevisionActeur,
-    SousCategorieObjet,
 )
 from qfdmo.models.action import CachedDirectionAction
 from qfdmo.thread.materialized_view import RefreshMateriazedViewThread
@@ -48,6 +47,9 @@ class ReemploiSolutionView(FormView):
         initial["latitude"] = self.request.GET.get("latitude")
         initial["longitude"] = self.request.GET.get("longitude")
         initial["label_reparacteur"] = self.request.GET.get("label_reparacteur")
+        initial["ss_cat"] = (
+            self.request.GET.get("ss_cat") if initial["sous_categorie_objet"] else None
+        )
 
         return initial
 
@@ -62,14 +64,14 @@ class ReemploiSolutionView(FormView):
         kwargs["location"] = "{}"
         kwargs["acteurs"] = FinalActeur.objects.none()
 
-        sous_categories_objets: QuerySet | None = None
-        if objet_q := self.request.GET.get("sous_categorie_objet", None):
-            sous_categories_objets = SousCategorieObjet.objects.filter(
-                objets__nom=objet_q
-            )
+        sous_categorie_id = (
+            int(self.request.GET.get("ss_cat", 0))
+            if self.request.GET.get("sous_categorie_objet")
+            else None
+        )
         action_selection_ids = [a["id"] for a in get_action_list(self.request)]
 
-        ps_filter = self._build_ps_filter(action_selection_ids, sous_categories_objets)
+        ps_filter = self._build_ps_filter(action_selection_ids, sous_categorie_id)
 
         acteurs = FinalActeur.objects.filter(ps_filter)
 
@@ -80,9 +82,9 @@ class ReemploiSolutionView(FormView):
             "proposition_services__acteur_service",
         ).distinct()
 
-        if sous_categories_objets:
+        if sous_categorie_id:
             acteurs = acteurs.filter(
-                proposition_services__sous_categories__in=sous_categories_objets
+                proposition_services__sous_categories__id=sous_categorie_id
             )
 
         if self.request.GET.get("digital") and int(self.request.GET.get("digital")):
@@ -118,7 +120,7 @@ class ReemploiSolutionView(FormView):
                 kwargs["acteurs"] = acteurs
         return super().get_context_data(**kwargs)
 
-    def _build_ps_filter(self, action_selection_ids, sous_categories_objets):
+    def _build_ps_filter(self, action_selection_ids, sous_categorie_id: int | None):
         reparer_action_id = None
         if (
             self.request.GET.get("label_reparacteur")
@@ -130,12 +132,12 @@ class ReemploiSolutionView(FormView):
             ]
 
         ps_filter = Q()
-        if sous_categories_objets:
+        if sous_categorie_id:
             if action_selection_ids:
                 ps_filter = ps_filter | Q(
                     proposition_services__in=FinalPropositionService.objects.filter(
                         action_id__in=action_selection_ids,
-                        sous_categories__in=sous_categories_objets,
+                        sous_categories__id=sous_categorie_id,
                     ),
                     statut=ActeurStatus.ACTIF,
                 )
@@ -143,7 +145,7 @@ class ReemploiSolutionView(FormView):
                 ps_filter = ps_filter | Q(
                     proposition_services__in=FinalPropositionService.objects.filter(
                         action_id=reparer_action_id,
-                        sous_categories__in=sous_categories_objets,
+                        sous_categories__id=sous_categorie_id,
                     ),
                     label_reparacteur=True,
                     statut=ActeurStatus.ACTIF,
@@ -183,13 +185,24 @@ def get_object_list(request):
         Objet.objects.annotate(
             nom_unaccent=Unaccent(Lower("nom")),
         )
+        .prefetch_related("sous_categorie")
         .annotate(
             distance=TrigramWordDistance(query, "nom_unaccent"),
             length=Length("nom"),
         )
         .order_by("distance", "length")[:10]
     )
-    return JsonResponse([objet.nom for objet in objets], safe=False)
+    return JsonResponse(
+        [
+            {
+                "label": objet.nom,
+                "sub_label": objet.sous_categorie.nom,
+                "identifier": objet.sous_categorie_id,
+            }
+            for objet in objets
+        ],
+        safe=False,
+    )
 
 
 # FIXME : should be tested

@@ -43,13 +43,14 @@
         </div>
 
         {{ form.action_list }}
-        <div data-controller='autocomplete'
-            data-autocomplete-max-option-displayed-value=5
-            data-autocomplete-nb-char-to-search-value=2
+        <div data-controller='ss-cat-object-autocomplete'
+            data-ss-cat-object-autocomplete-max-option-displayed-value=5
+            data-ss-cat-object-autocomplete-nb-char-to-search-value=2
         >
             <div class="form-group">
                 {{ form.sous_categorie_objet.label_tag() }}
                 {{ form.sous_categorie_objet }}
+                {{ form.ss_cat }}
             </div>
         </div>
         <div data-controller='address-autocomplete'

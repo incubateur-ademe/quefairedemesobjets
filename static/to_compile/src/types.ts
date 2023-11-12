@@ -24,3 +24,9 @@ export class Actor {
         this.acteur_selected_action = actor_fields["acteur_selected_action"]
     }
 }
+
+export class SSCatObject {
+    label: string
+    sub_label: string
+    identifier: int
+}
