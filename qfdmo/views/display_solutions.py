@@ -145,7 +145,7 @@ class ReemploiSolutionView(FormView):
                 ps_filter = ps_filter | Q(
                     proposition_services__in=FinalPropositionService.objects.filter(
                         action_id=reparer_action_id,
-                        sous_categories__in=sous_categorie_id,
+                        sous_categories__id=sous_categorie_id,
                     ),
                     label_reparacteur=True,
                     statut=ActeurStatus.ACTIF,

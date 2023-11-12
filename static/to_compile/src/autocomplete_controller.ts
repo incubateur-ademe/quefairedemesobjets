@@ -46,7 +46,7 @@ export default abstract class extends Controller<HTMLElement> {
             for (let i = 0; i < this.allAvailableOptions.length; i++) {
                 if (countResult >= this.maxOptionDisplayedValue) break
                 countResult++
-                this.addoption(regexPattern, this.allAvailableOptions[i])
+                this.addOption(regexPattern, this.allAvailableOptions[i])
             }
             if (this.autocompleteList.childElementCount > 0) {
                 this.currentFocus = 0
@@ -140,7 +140,7 @@ export default abstract class extends Controller<HTMLElement> {
         return retval
     }
 
-    addoption(regexPattern: RegExp, option: any) {
+    addOption(regexPattern: RegExp, option: any) {
         // Implement this method in your controller
     }
 
