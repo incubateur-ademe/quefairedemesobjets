@@ -83,6 +83,24 @@ export default class extends AutocompleteController {
         this.closeAllLists()
     }
 
+    addoption(regexPattern: RegExp, option: string) {
+        //option : this.#allAvailableOptions[i]
+        /*create a DIV element for each matching element:*/
+        let b = document.createElement("DIV")
+        /*make the matching letters bold:*/
+        const [data, longitude, latitude] = option.split("||")
+        const newText = data.replace(regexPattern, "<strong>$&</strong>")
+        b.innerHTML = newText
+        // FIXME : better way to do this
+        const input = document.createElement("input")
+        input.setAttribute("type", "hidden")
+        input.setAttribute("value", option)
+        b.appendChild(input)
+        b.setAttribute("data-action", "click->" + this.controllerName + "#selectOption")
+        b.setAttribute("data-on-focus", "true")
+        this.autocompleteList.appendChild(b)
+    }
+
     geolocatisationRefused() {
         this.#displayInputError(
             "La géolocalisation est inaccessible sur votre appareil",

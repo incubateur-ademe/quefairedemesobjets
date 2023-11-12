@@ -183,13 +183,24 @@ def get_object_list(request):
         Objet.objects.annotate(
             nom_unaccent=Unaccent(Lower("nom")),
         )
+        .prefetch_related("sous_categorie")
         .annotate(
             distance=TrigramWordDistance(query, "nom_unaccent"),
             length=Length("nom"),
         )
         .order_by("distance", "length")[:10]
     )
-    return JsonResponse([objet.nom for objet in objets], safe=False)
+    return JsonResponse(
+        [
+            {
+                "label": objet.nom,
+                "sub_label": objet.sous_categorie.nom,
+                "selection_id": objet.sous_categorie_id,
+            }
+            for objet in objets
+        ],
+        safe=False,
+    )
 
 
 # FIXME : should be tested

@@ -140,18 +140,36 @@ export default class extends Controller<HTMLElement> {
         return retval
     }
 
-    addoption(regexPattern: RegExp, option: string) {
+    addoption(regexPattern: RegExp, option: object) {
         //option : this.#allAvailableOptions[i]
         /*create a DIV element for each matching element:*/
         let b = document.createElement("DIV")
+        b.classList.add(
+            "qfdmo-flex",
+            "qfdmo-flex-col",
+            "md:qfdmo-flex-row",
+            "md:qfdmo-justify-between",
+        )
         /*make the matching letters bold:*/
-        const [data, longitude, latitude] = option.split("||")
+        // const [data, longitude, latitude] = option.split("||")
+
+        let label = document.createElement("span")
+        const data = option.label
         const newText = data.replace(regexPattern, "<strong>$&</strong>")
-        b.innerHTML = newText
-        // FIXME : better way to do this
+        label.innerHTML = newText
+        b.appendChild(label)
+
+        if (option.sub_label != null) {
+            const sub_label = document.createElement("span")
+            sub_label.classList.add("fr-text--sm", "fr-m-0", "qfdmo-italic")
+            sub_label.innerHTML = option.sub_label
+            b.appendChild(sub_label)
+        }
+
+        // Input hidden
         const input = document.createElement("input")
         input.setAttribute("type", "hidden")
-        input.setAttribute("value", option)
+        input.setAttribute("value", option.label)
         b.appendChild(input)
         b.setAttribute("data-action", "click->" + this.controllerName + "#selectOption")
         b.setAttribute("data-on-focus", "true")

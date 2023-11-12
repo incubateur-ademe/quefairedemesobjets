@@ -25,6 +25,10 @@ module.exports = {
         "qfdmo-bg-beige-gris-galet",
         "qfdmo-bg-green-500",
         "qfdmo-bg-red-500",
+        "qfdmo-italic",
+        "qfdmo-flex-col",
+        "qfdmo-flex-row",
+        "qfdmo-justify-between",
     ],
     theme: {
         colors: {
