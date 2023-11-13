@@ -152,13 +152,15 @@ class BaseActeur(NomAsNaturalKeyModel):
         return self_as_dict
 
     def acteur_services(self) -> list[str]:
-        return list(
-            set(
-                [
-                    ps.acteur_service.nom_affiche
-                    for ps in self.proposition_services.all()
-                    if ps.acteur_service.nom_affiche
-                ]
+        return sorted(
+            list(
+                set(
+                    [
+                        ps.acteur_service.nom_affiche
+                        for ps in self.proposition_services.all()
+                        if ps.acteur_service.nom_affiche
+                    ]
+                )
             )
         )
 

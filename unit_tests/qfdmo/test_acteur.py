@@ -482,10 +482,7 @@ class TestActeurService:
             acteur=acteur, acteur_service=acteur_service, action=action1
         )
 
-        services = acteur.acteur_services()
-        assert [str(service) for service in services] == [
-            "Achat, revente par un professionnel"
-        ]
+        assert acteur.acteur_services() == ["Achat, revente par un professionnel"]
 
     def test_acteur_actions_distinct(self):
         action1 = Action.objects.get(nom="reparer")
@@ -505,10 +502,7 @@ class TestActeurService:
             acteur=acteur, acteur_service=acteur_service, action=action2
         )
 
-        services = acteur.acteur_services()
-        assert [str(service) for service in services] == [
-            "Achat, revente par un professionnel"
-        ]
+        assert acteur.acteur_services() == ["Achat, revente par un professionnel"]
 
     def test_acteur_actions_multiple(self):
         action = Action.objects.get(nom="reparer")
@@ -526,8 +520,7 @@ class TestActeurService:
             acteur=acteur, acteur_service=acteur_service2, action=action
         )
 
-        services = acteur.acteur_services()
-        assert [str(service) for service in services] == [
+        assert acteur.acteur_services() == [
             "Achat, revente par un professionnel",
             "Atelier d'auto-réparation",
         ]
@@ -550,7 +543,6 @@ class TestActeurService:
             acteur=acteur, acteur_service=acteur_service2, action=action
         )
 
-        services = acteur.acteur_services()
-        assert [str(service) for service in services] == [
+        assert acteur.acteur_services() == [
             "Achat, revente par un professionnel",
         ]
