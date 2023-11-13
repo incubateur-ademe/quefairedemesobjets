@@ -3,6 +3,7 @@
         "model": "qfdmo.acteurservice",
         "fields": {
             "nom": "Achat, revente entre particuliers",
+            "nom_affiche": "Achat, revente entre particuliers",
             "lvao_id": 163,
             "actions": [["acheter"], ["revendre"]]
         }
@@ -11,6 +12,7 @@
         "model": "qfdmo.acteurservice",
         "fields": {
             "nom": "Achat, revente par un professionnel",
+            "nom_affiche": "Achat, revente par un professionnel",
             "lvao_id": 162,
             "actions": [["acheter"], ["revendre"]]
         }
@@ -19,6 +21,7 @@
         "model": "qfdmo.acteurservice",
         "fields": {
             "nom": "Atelier d'auto-réparation",
+            "nom_affiche": "Atelier d'auto-réparation",
             "lvao_id": 157,
             "actions": [["reparer"]]
         }
@@ -27,6 +30,7 @@
         "model": "qfdmo.acteurservice",
         "fields": {
             "nom": "Collecte par une structure spécialisée",
+            "nom_affiche": "Collecte par une structure spécialisée",
             "lvao_id": 164,
             "actions": [["donner"]]
         }
@@ -35,6 +39,7 @@
         "model": "qfdmo.acteurservice",
         "fields": {
             "nom": "Depôt-vente",
+            "nom_affiche": "Depôt-vente",
             "lvao_id": 161,
             "actions": [["acheter"], ["revendre"]]
         }
@@ -43,6 +48,7 @@
         "model": "qfdmo.acteurservice",
         "fields": {
             "nom": "Don entre particuliers",
+            "nom_affiche": "Don entre particuliers",
             "lvao_id": 165,
             "actions": [["donner"]]
         }
@@ -51,6 +57,7 @@
         "model": "qfdmo.acteurservice",
         "fields": {
             "nom": "Echanges entre particuliers",
+            "nom_affiche": "Echanges entre particuliers",
             "lvao_id": 188,
             "actions": [["echanger"]]
         }
@@ -59,6 +66,7 @@
         "model": "qfdmo.acteurservice",
         "fields": {
             "nom": "Hub de partage",
+            "nom_affiche": "Hub de partage",
             "lvao_id": 168,
             "actions": [["emprunter"], ["preter"], ["echanger"]]
         }
@@ -67,6 +75,7 @@
         "model": "qfdmo.acteurservice",
         "fields": {
             "nom": "Location entre particuliers",
+            "nom_affiche": "Location entre particuliers",
             "lvao_id": 167,
             "actions": [["louer"], ["mettreenlocation"]]
         }
@@ -75,6 +84,7 @@
         "model": "qfdmo.acteurservice",
         "fields": {
             "nom": "Location par un professionnel",
+            "nom_affiche": "Location par un professionnel",
             "lvao_id": 166,
             "actions": [["louer"], ["mettreenlocation"]]
         }
@@ -83,6 +93,7 @@
         "model": "qfdmo.acteurservice",
         "fields": {
             "nom": "Partage entre particuliers",
+            "nom_affiche": "Partage entre particuliers",
             "lvao_id": 169,
             "actions": [["emprunter"], ["preter"]]
         }
@@ -91,6 +102,7 @@
         "model": "qfdmo.acteurservice",
         "fields": {
             "nom": "Pièces détachées",
+            "nom_affiche": "Pièces détachées",
             "lvao_id": 158,
             "actions": [["reparer"]]
         }
@@ -99,6 +111,7 @@
         "model": "qfdmo.acteurservice",
         "fields": {
             "nom": "Relai d'acteurs et d'événements",
+            "nom_affiche": "Relai d'acteurs et d'événements",
             "lvao_id": 170,
             "actions": [
                 ["acheter"],
@@ -117,6 +130,7 @@
         "model": "qfdmo.acteurservice",
         "fields": {
             "nom": "Ressourcerie, recyclerie",
+            "nom_affiche": "Ressourcerie, recyclerie",
             "lvao_id": 160,
             "actions": [["acheter"]]
         }
@@ -125,6 +139,7 @@
         "model": "qfdmo.acteurservice",
         "fields": {
             "nom": "Service de réparation",
+            "nom_affiche": "Service de réparation",
             "lvao_id": 156,
             "actions": [["reparer"]]
         }
@@ -133,6 +148,7 @@
         "model": "qfdmo.acteurservice",
         "fields": {
             "nom": "Tutoriels et diagnostics en ligne",
+            "nom_affiche": "Tutoriels et diagnostics en ligne",
             "lvao_id": 159,
             "actions": [["reparer"]]
         }

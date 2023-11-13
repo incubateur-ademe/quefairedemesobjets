@@ -20,6 +20,7 @@ class ActeurService(NomAsNaturalKeyModel):
 
     id = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    nom_affiche = models.CharField(max_length=255, blank=True, null=True)
     lvao_id = models.IntegerField(blank=True, null=True)
     actions = models.ManyToManyField(Action)
 
@@ -150,8 +151,18 @@ class BaseActeur(NomAsNaturalKeyModel):
             return json.dumps(self_as_dict)
         return self_as_dict
 
-    def acteur_services(self) -> list[ActeurService]:
-        return list(set([ps.acteur_service for ps in self.proposition_services.all()]))
+    def acteur_services(self) -> list[str]:
+        return sorted(
+            list(
+                set(
+                    [
+                        ps.acteur_service.nom_affiche
+                        for ps in self.proposition_services.all()
+                        if ps.acteur_service.nom_affiche
+                    ]
+                )
+            )
+        )
 
 
 class Acteur(BaseActeur):
