@@ -482,10 +482,7 @@ class TestActeurService:
             acteur=acteur, acteur_service=acteur_service, action=action1
         )
 
-        services = acteur.acteur_services()
-        assert [str(service) for service in services] == [
-            "Achat, revente par un professionnel"
-        ]
+        assert acteur.acteur_services() == ["Achat, revente par un professionnel"]
 
     def test_acteur_actions_distinct(self):
         action1 = Action.objects.get(nom="reparer")
@@ -505,10 +502,7 @@ class TestActeurService:
             acteur=acteur, acteur_service=acteur_service, action=action2
         )
 
-        services = acteur.acteur_services()
-        assert [str(service) for service in services] == [
-            "Achat, revente par un professionnel"
-        ]
+        assert acteur.acteur_services() == ["Achat, revente par un professionnel"]
 
     def test_acteur_actions_multiple(self):
         action = Action.objects.get(nom="reparer")
@@ -526,8 +520,29 @@ class TestActeurService:
             acteur=acteur, acteur_service=acteur_service2, action=action
         )
 
-        services = acteur.acteur_services()
-        assert [str(service) for service in services] == [
+        assert acteur.acteur_services() == [
             "Achat, revente par un professionnel",
             "Atelier d'auto-réparation",
+        ]
+
+    def test_acteur_actions_multiple_with_same_nom_affiche(self):
+        action = Action.objects.get(nom="reparer")
+        acteur_service1 = ActeurService.objects.get(
+            nom="Achat, revente par un professionnel"
+        )
+        acteur_service2 = ActeurService.objects.get(nom="Atelier d'auto-réparation")
+        acteur_service2.nom_affiche = acteur_service1.nom_affiche
+        acteur_service2.save()
+        acteur = Acteur.objects.create(
+            nom="Acteur 1", location=Point(0, 0), acteur_type_id=1
+        )
+        PropositionService.objects.create(
+            acteur=acteur, acteur_service=acteur_service1, action=action
+        )
+        PropositionService.objects.create(
+            acteur=acteur, acteur_service=acteur_service2, action=action
+        )
+
+        assert acteur.acteur_services() == [
+            "Achat, revente par un professionnel",
         ]
