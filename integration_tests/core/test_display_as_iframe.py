@@ -26,7 +26,7 @@ class TestDisplayAsIframe:
         assert 'class="fr-header' not in str(response.content)
         assert 'class="fr-footer' not in str(response.content)
         assert (
-            "Retrouver les bonnes adresses sur <a "
+            "Retrouvez les bonnes adresses sur <a "
             'href="https://longuevieauxobjets.ademe.fr/" target="_blank">'
             "longuevieauxobjets.ademe.fr</a>" in str(response.content)
         )
@@ -41,7 +41,7 @@ class TestDisplayAsIframe:
         assert 'class="fr-header' in str(response.content)
         assert 'class="fr-footer' in str(response.content)
         assert (
-            "Retrouver les bonnes adresses sur <a "
+            "Retrouvez les bonnes adresses sur <a "
             'href="https://longuevieauxobjets.ademe.fr/" target="_blank">'
             "longuevieauxobjets.ademe.fr</a>" not in str(response.content)
         )
