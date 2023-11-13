@@ -85,11 +85,11 @@ class Command(BaseCommand):
             insee_data = call_api_recherche_entreprise(final_acteur.siret)
 
             if insee_data is not None:
-                if "activitePrincipaleUniteLegale" in insee_data:
+                if "activitePrincipaleEtablissement" in insee_data:
                     acteur = Acteur.objects.get(
                         identifiant_unique=final_acteur.identifiant_unique
                     )
-                    acteur.naf_principal = insee_data["activitePrincipaleUniteLegale"]
+                    acteur.naf_principal = insee_data["activitePrincipaleEtablissement"]
                     acteur.save()
 
                 CorrectionActeur.objects.create(
