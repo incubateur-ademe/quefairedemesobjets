@@ -81,6 +81,12 @@ class CorrectionsView(IsStaffMixin, FormView):
                     revision_acteur.naf_principal = correction.naf_principal
                     revision_acteur.nom_officiel = correction.nom_officiel
                 revision_acteur.save()
+            if (
+                correction.source == "Recherche entreprise"
+                and correction.resultat_brute_source == "{}"
+            ):
+                revision_acteur.statut = ActeurStatus.INACTIF
+                revision_acteur.save()
 
             correction.correction_statut = CorrectionActeurStatus.ACCEPTE
             correction.save()

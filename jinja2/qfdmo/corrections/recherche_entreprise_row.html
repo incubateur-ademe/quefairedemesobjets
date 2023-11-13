@@ -1,0 +1,48 @@
+<tr>
+    <td>
+        {{ correction.final_acteur.render_as_card()|safe }}
+        <a class='fr-btn' href="{{ reverse('qfdmo:solution_detail', kwargs={'identifiant_unique': correction.identifiant_unique}) }}" target="_blank">
+            Details
+        </a>
+        <a class='fr-btn' href="{{ reverse('qfdmo:solution_admin', kwargs={'identifiant_unique': correction.identifiant_unique}) }}" target="_blank">
+            Admin
+        </a>
+    </td>
+    <td>
+        {% if correction.resultat_brute_source == '{}' %}
+            SIRET : {{correction.final_acteur.siret}}<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="qfdmo-bg-red-500">SIRET non trouvé - INACTIF</span><br>
+        {% endif %}
+    </td>
+    <td>
+        <p class="fr-py-1w">
+            Statut de la correction : {{correction.correction_statut}}
+        </p>
+        <fieldset class="fr-fieldset" id="{{correction.id}}" aria-labelledby="radio-hint-legend radio-hint-messages">
+            <div class="fr-fieldset__element fr-py-1w qfdmo-bg-green-emeraude qfdmo-bg-opacity-30">
+                <div class="fr-radio-group">
+                    <input type="radio" id="accept-{{correction.id}}" name="{{correction.id}}" value="accept" {% if correction.accepted_by_default() %}checked{% endif %}>
+                    <label class="fr-label" for="accept-{{correction.id}}">
+                        Accepter
+                    </label>
+                </div>
+            </div>
+            <div class="fr-fieldset__element fr-py-1w qfdmo-bg-red-500 qfdmo-bg-opacity-30">
+                <div class="fr-radio-group">
+                    <input type="radio" id="reject-{{correction.id}}" name="{{correction.id}}" value="reject" {% if correction.rejected_by_default() %}checked{% endif %}>
+                    <label class="fr-label" for="reject-{{correction.id}}">
+                        Refuser
+                    </label>
+                </div>
+            </div>
+            <div class="fr-fieldset__element fr-py-1w">
+                <div class="fr-radio-group">
+                    <input type="radio" id="ignore-{{correction.id}}" name="{{correction.id}}" value="ignore" {% if correction.ignored_by_default() %}checked{% endif %}>
+                    <label class="fr-label" for="ignore-{{correction.id}}">
+                        Ignorer
+                    </label>
+                </div>
+            </div>
+        </fieldset>
+    </td>
+</tr>

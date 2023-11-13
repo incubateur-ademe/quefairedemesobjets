@@ -10,6 +10,9 @@
             <li class="fr-ml-1w">
                 <a class="fr-btn{% if source != 'URL_SCRIPT' %} fr-btn--secondary{% endif %}" href="{{ reverse('qfdmo:display_corrections') }}?source=URL_SCRIPT">URL</a>
             </li>
+            <li class="fr-ml-1w">
+                <a class="fr-btn{% if source != 'Recherche entreprise' %} fr-btn--secondary{% endif %}" href="{{ reverse('qfdmo:display_corrections') }}?source=Recherche+entreprise">Recherche entreprise</a>
+            </li>
         </ul>
         <hr>
         <form action="">
@@ -37,7 +40,10 @@
                                 {% include 'qfdmo/corrections/url_row.html' %}
                             {% elif source == 'INSEE' %}
                                 {% include 'qfdmo/corrections/insee_row.html' %}
+                            {% elif source == 'Recherche entreprise' %}
+                                {% include 'qfdmo/corrections/recherche_entreprise_row.html' %}
                             {% endif %}
+
                         {% endfor %}
                     </tbody>
                 </table>
