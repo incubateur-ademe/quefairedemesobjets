@@ -2,6 +2,7 @@ import datetime
 
 import requests
 from django.core.management.base import BaseCommand
+from django.db.models import Exists, OuterRef
 from django.db.models.functions import Length
 
 from qfdmo.models import (
@@ -25,6 +26,8 @@ def call_api_recherche_entreprise(entreprise_id: str) -> dict | None:
         if response.status_code == 404:
             # Should be removed
             return insee_data
+        if response.status_code != 200:
+            print(f"error {response.status_code} : {entreprise_id}")
         return response.json()
 
     print(f"not the right length : {entreprise_id}")
@@ -63,17 +66,17 @@ class Command(BaseCommand):
                 )
                 return
 
+        correction_subquery = CorrectionActeur.objects.filter(
+            final_acteur_id=OuterRef("identifiant_unique"),
+            source=SOURCE,
+            cree_le__gte=datetime.datetime.now() - datetime.timedelta(days=31),
+        )
+
         final_acteurs = (
-            FinalActeur.objects.annotate(siret_length=Length("siret"))
-            .filter(siret_length=14, statut=ActeurStatus.ACTIF)
-            .exclude(
-                identifiant_unique__in=CorrectionActeur.objects.values_list(
-                    "identifiant_unique", flat=True
-                ).filter(
-                    source=SOURCE,
-                    cree_le__gte=datetime.datetime.now() - datetime.timedelta(days=31),
-                ),
+            FinalActeur.objects.annotate(
+                siret_length=Length("siret"), has_correction=Exists(correction_subquery)
             )
+            .filter(siret_length=14, statut=ActeurStatus.ACTIF, has_correction=False)
             .order_by("?")
         )
 
