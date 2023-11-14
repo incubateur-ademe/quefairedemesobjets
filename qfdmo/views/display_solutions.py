@@ -64,11 +64,13 @@ class ReemploiSolutionView(FormView):
         kwargs["location"] = "{}"
         kwargs["acteurs"] = FinalActeur.objects.none()
 
-        sous_categorie_id = (
-            int(self.request.GET.get("ss_cat", 0))
-            if self.request.GET.get("sous_categorie_objet")
-            else None
-        )
+        sous_categorie_id = None
+        if (
+            self.request.GET.get("sous_categorie_objet")
+            and self.request.GET.get("ss_cat", "").isnumeric()
+        ):
+            sous_categorie_id = int(self.request.GET.get("ss_cat", "0"))
+
         action_selection_ids = [a["id"] for a in get_action_list(self.request)]
 
         ps_filter = self._build_ps_filter(action_selection_ids, sous_categorie_id)
