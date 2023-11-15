@@ -1,0 +1,26 @@
+name: Build and test
+
+on:
+  push:
+    branches:
+      - main
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  run_test:
+    uses: ./.github/workflows/run_tests.yml
+
+  deploy:
+    name: Deploy to Preprod
+    needs: [run_test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: kolok/deploy-to-scalingo@v1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known-host: ssh.osc-fr1.scalingo.com
+          app-name: quefairedemesobjets-preprod

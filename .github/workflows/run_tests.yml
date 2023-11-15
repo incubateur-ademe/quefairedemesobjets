@@ -1,10 +1,5 @@
-name: Build and test
-
 on:
-  pull_request:
-  push:
-    branches:
-      - main
+  workflow_call:
 
 defaults:
   run:
@@ -66,15 +61,3 @@ jobs:
 
       - name: Run tests
         run: npm run test
-
-  deploy:
-    needs: [python, node]
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - uses: actions/checkout@v4
-      - uses: kolok/deploy-to-scalingo@v1
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          known-host: ssh.osc-fr1.scalingo.com
-          app-name: quefairedemesobjets
