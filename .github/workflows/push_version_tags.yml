@@ -17,7 +17,6 @@ jobs:
     name: Deploy to Production
     needs: [run_test]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
       - uses: kolok/deploy-to-scalingo@v1
