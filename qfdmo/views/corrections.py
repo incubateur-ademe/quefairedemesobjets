@@ -55,6 +55,7 @@ class CorrectionsView(IsStaffMixin, FormView):
         ).filter(
             source=kwargs["source"],
             correction_statut__in=correction_statut_list,
+            final_acteur__statut=ActeurStatus.ACTIF,
         )
         if search_query := self.request.GET.get("search_query"):
             corrections = corrections.filter(
