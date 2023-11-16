@@ -2,6 +2,7 @@ from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
 from django.views.generic.edit import FormView
 
 from qfdmo.forms import GetCorrectionsForm
@@ -31,29 +32,40 @@ class CorrectionsView(IsStaffMixin, FormView):
         initial["correction_statut"] = self.request.GET.getlist(
             "correction_statut", ["ACTIF"]
         )
+        initial["search_query"] = self.request.GET.get("search_query", "")
+        initial["nb_lines"] = self.request.GET.get(
+            "nb_lines", settings.NB_CORRECTION_DISPLAYED
+        )
         return initial
 
     def get_context_data(self, **kwargs):
         kwargs["source"] = self.request.GET.get("source", "URL_SCRIPT")
+        nb_lines = self.request.GET.get("nb_lines", settings.NB_CORRECTION_DISPLAYED)
         correction_statut_list = self.request.GET.getlist(
             "correction_statut", ["ACTIF"]
         )
-        kwargs["corrections"] = (
-            CorrectionActeur.objects.prefetch_related(
-                "final_acteur",
-                "final_acteur__proposition_services__sous_categories",
-                "final_acteur__proposition_services__sous_categories__categorie",
-                "final_acteur__proposition_services__action",
-                "final_acteur__proposition_services__action__directions",
-                "final_acteur__proposition_services__acteur_service",
-                "final_acteur__acteur_type",
-            )
-            .distinct()
-            .filter(
-                source=kwargs["source"],
-                correction_statut__in=correction_statut_list,
-            )[: settings.NB_CORRECTION_DISPLAYED]
+        corrections = CorrectionActeur.objects.prefetch_related(
+            "final_acteur",
+            "final_acteur__proposition_services__sous_categories",
+            "final_acteur__proposition_services__sous_categories__categorie",
+            "final_acteur__proposition_services__action",
+            "final_acteur__proposition_services__action__directions",
+            "final_acteur__proposition_services__acteur_service",
+            "final_acteur__acteur_type",
+        ).filter(
+            source=kwargs["source"],
+            correction_statut__in=correction_statut_list,
         )
+        if search_query := self.request.GET.get("search_query"):
+            corrections = corrections.filter(
+                Q(final_acteur__nom__icontains=search_query)
+                | Q(final_acteur__nom_officiel__icontains=search_query)
+                | Q(final_acteur__adresse__icontains=search_query)
+                | Q(final_acteur__code_postal__icontains=search_query)
+                | Q(final_acteur__ville__icontains=search_query)
+            )
+
+        kwargs["corrections"] = corrections.distinct()[: int(nb_lines)]
         return super().get_context_data(**kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -81,10 +93,7 @@ class CorrectionsView(IsStaffMixin, FormView):
                     revision_acteur.naf_principal = correction.naf_principal
                     revision_acteur.nom_officiel = correction.nom_officiel
                 revision_acteur.save()
-            if (
-                correction.source == "Recherche entreprise"
-                and correction.resultat_brute_source == "{}"
-            ):
+            if correction.source == "RechercheSiret":
                 revision_acteur.statut = ActeurStatus.INACTIF
                 revision_acteur.save()
 

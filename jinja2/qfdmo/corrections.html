@@ -11,13 +11,25 @@
                 <a class="fr-btn{% if source != 'URL_SCRIPT' %} fr-btn--secondary{% endif %}" href="{{ reverse('qfdmo:display_corrections') }}?source=URL_SCRIPT">URL</a>
             </li>
             <li class="fr-ml-1w">
-                <a class="fr-btn{% if source != 'Recherche entreprise' %} fr-btn--secondary{% endif %}" href="{{ reverse('qfdmo:display_corrections') }}?source=Recherche+entreprise">Recherche entreprise</a>
+                <a class="fr-btn{% if source != 'RechercheSiret' %} fr-btn--secondary{% endif %}" href="{{ reverse('qfdmo:display_corrections') }}?source=RechercheSiret">Recherche Entreprise</a>
             </li>
         </ul>
         <hr>
         <form action="">
-            {{ form }}
-            <button class='fr-btn fr-mb-3w'>
+            {{ form.source }}
+            <div class="fr-grid-row fr-grid-row--gutters">
+                <div class="fr-col-6">
+                    {{ form.correction_statut.label_tag() }}
+                    {{ form.correction_statut }}
+                </div>
+                <div class="fr-col-6">
+                    {{ form.search_query.label_tag() }}
+                    {{ form.search_query }}
+                    {{ form.nb_lines.label_tag() }}
+                    {{ form.nb_lines }}
+                </div>
+            </div>
+            <button class='fr-btn fr-m-3w'>
                 Rechercher
             </button>
         </form>
@@ -40,7 +52,7 @@
                                 {% include 'qfdmo/corrections/url_row.html' %}
                             {% elif source == 'INSEE' %}
                                 {% include 'qfdmo/corrections/insee_row.html' %}
-                            {% elif source == 'Recherche entreprise' %}
+                            {% elif source == 'RechercheSiret' %}
                                 {% include 'qfdmo/corrections/recherche_entreprise_row.html' %}
                             {% endif %}
 
