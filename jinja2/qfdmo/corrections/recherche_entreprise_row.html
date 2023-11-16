@@ -9,10 +9,30 @@
         </a>
     </td>
     <td>
-        {% if correction.resultat_brute_source == '{}' %}
-            SIRET : {{correction.final_acteur.siret}}<br>
-            &nbsp;&nbsp;&nbsp;&nbsp;<span class="qfdmo-bg-red-500">SIRET non trouvé - INACTIF</span><br>
+        {% if correction.resultat_brute_source.error %}
+            {{ correction.resultat_brute_source.message }}<br>
+        {% else %}
+            <a href="https://annuaire-entreprises.data.gouv.fr/entreprise/{{ correction.resultat_brute_source.raw_result.siren }}" target="_blank">{{ correction.resultat_brute_source.raw_result.siren }} - Entreprise active</a> :
+            {% if correction.resultat_brute_source.entreprise_active %}
+                <span class="qfdmo-bg-green-emeraude qfdmo-bg-opacity-30"> Oui </span>
+            {% else %}
+                <span class="qfdmo-bg-red-500 qfdmo-bg-opacity-30"> Non </span>
+            {% endif %}
+            <br>
+            <a href="https://annuaire-entreprises.data.gouv.fr/etablissement/{{ correction.resultat_brute_source.raw_result.siret }}" target="_blank">{{ correction.resultat_brute_source.raw_result.siret }} - Etablissement actif</a> :
+            {% if correction.resultat_brute_source.etablissement_actif %}
+                <span class="qfdmo-bg-green-emeraude qfdmo-bg-opacity-30"> Oui </span>
+            {% else %}
+                <span class="qfdmo-bg-red-500 qfdmo-bg-opacity-30"> Non </span>
+            {% endif %}
+            <br>
+            Nb Etablissements : {{ correction.resultat_brute_source.nb_etablissements }}<br>
+            {% if correction.resultat_brute_source.raw_result.dateCessation %}
+                <br>Date de cessation : {{ correction.resultat_brute_source.raw_result.dateCessation }}<br>
+            {% endif %}
+
         {% endif %}
+        <br><span class="qfdmo-bg-red-500">Etablissement à INACTIVER ?</span>
     </td>
     <td>
         <p class="fr-py-1w">
