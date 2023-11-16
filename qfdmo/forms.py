@@ -1,4 +1,5 @@
 from django import forms
+from django.conf import settings
 
 from qfdmo.models import (
     CachedDirectionAction,
@@ -138,13 +139,28 @@ class GetCorrectionsForm(forms.Form):
     )
     correction_statut = forms.MultipleChoiceField(
         widget=forms.CheckboxSelectMultiple(),
-        # choices=(
-        #     ("ACTIF", "Actif"),
-        #     ("ACCEPTE", "Accepté"),
-        #     ("REJETE", "Rejeté"),
-        #     ("NOT_CHANGED", "Non modifié"),
-        # ),
         choices=CorrectionActeurStatus.choices,
         label="Statut de la correction",
+        required=False,
+    )
+    nb_lines = forms.IntegerField(
+        initial=settings.NB_CORRECTION_DISPLAYED,
+        widget=forms.NumberInput(
+            attrs={
+                "class": "fr-input",
+            }
+        ),
+        label="Nombre de corrections à afficher",
+        min_value=1,
+        max_value=100,
+    )
+    search_query = forms.CharField(
+        widget=forms.TextInput(
+            attrs={
+                "class": "fr-input",
+                "placeholder": "Nom, Ville, Code postal, Siret…",
+            }
+        ),
+        label="Recherche textuelle",
         required=False,
     )
