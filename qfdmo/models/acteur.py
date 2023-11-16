@@ -7,6 +7,7 @@ from django.contrib.gis.db import models
 from django.db import connection
 from django.forms import ValidationError, model_to_dict
 from django.template.loader import render_to_string
+from unidecode import unidecode
 
 from qfdmo.models.action import Action, CachedDirectionAction
 from qfdmo.models.categorie_objet import SousCategorieObjet
@@ -217,9 +218,8 @@ class Acteur(BaseActeur):
         if self.source is None:
             self.source = Source.objects.get_or_create(nom="equipe")[0]
         if not self.identifiant_unique:
-            self.identifiant_unique = (
-                self.source.nom.lower() + "_" + str(self.identifiant_externe)
-            )
+            source_stub = unidecode(self.source.nom.lower()).replace(" ", "_")
+            self.identifiant_unique = source_stub + "_" + str(self.identifiant_externe)
 
 
 class RevisionActeur(BaseActeur):

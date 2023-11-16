@@ -173,7 +173,7 @@ class TestActeurDefaultOnSave:
         assert acteur.source.nom == "equipe"
 
     def test_default_identifiantunique(self):
-        source = Source.objects.get_or_create(nom="Source")[0]
+        source = Source.objects.get_or_create(nom="Source Équipe")[0]
         acteur = Acteur.objects.create(
             nom="Test Object 1",
             acteur_type_id=1,
@@ -181,7 +181,7 @@ class TestActeurDefaultOnSave:
             source=source,
             identifiant_externe="123ABC",
         )
-        assert acteur.identifiant_unique == "source_123ABC"
+        assert acteur.identifiant_unique == "source_equipe_123ABC"
 
     def test_set_identifiantunique(self):
         acteur = Acteur.objects.create(
