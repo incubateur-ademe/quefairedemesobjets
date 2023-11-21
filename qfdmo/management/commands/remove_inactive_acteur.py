@@ -50,9 +50,9 @@ Browse acteur correction and remov the acteur which doesn't have activity anymor
             if (
                 correction.resultat_brute_source["entreprise_active"] is False
                 and correction.resultat_brute_source["etablissement_actif"] is False
-                and "dateCessation" in correction.resultat_brute_source["raw_result"]
-                and correction.resultat_brute_source["raw_result"]["dateCessation"]
-                is not None
+            ) or (
+                correction.resultat_brute_source["etablissement_actif"] is False
+                and correction.resultat_brute_source["nb_etablissements"] == 1
             ):
                 print(f"inactive {correction.identifiant_unique}")
                 acteur = Acteur.objects.get(
