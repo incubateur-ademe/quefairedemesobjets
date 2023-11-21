@@ -15,12 +15,7 @@ export default class extends AutocompleteController {
     declare readonly longitudeTarget: HTMLInputElement
     declare readonly displayErrorTarget: HTMLElement
 
-    initialize() {
-        // display spinner
-        this.complete = debounce(this.complete, 300).bind(this)
-    }
-
-    async complete(events: Event): Promise<boolean> {
+    async search_to_complete(events: Event): Promise<boolean> {
         const inputTargetValue = this.inputTarget.value
         const val = this.addAccents(inputTargetValue)
         const regexPattern = new RegExp(val, "gi")
@@ -31,21 +26,26 @@ export default class extends AutocompleteController {
 
         let countResult = 0
 
-        this.#getOptionCallback(inputTargetValue).then((data) => {
-            this.closeAllLists()
-            this.autocompleteList = this.createAutocompleteList()
-            this.allAvailableOptions = data
-            for (let i = 0; i < this.allAvailableOptions.length; i++) {
-                if (countResult >= this.maxOptionDisplayedValue) break
-                countResult++
-                this.addOption(regexPattern, this.allAvailableOptions[i])
-            }
-            if (this.autocompleteList.childElementCount > 0) {
-                this.currentFocus = 0
-                this.addActive()
-            }
-        })
-        return true
+        return this.#getOptionCallback(inputTargetValue)
+            .then((data) => {
+                this.closeAllLists()
+                this.autocompleteList = this.createAutocompleteList()
+                this.allAvailableOptions = data
+                for (let i = 0; i < this.allAvailableOptions.length; i++) {
+                    if (countResult >= this.maxOptionDisplayedValue) break
+                    countResult++
+                    this.addOption(regexPattern, this.allAvailableOptions[i])
+                }
+                if (this.autocompleteList.childElementCount > 0) {
+                    this.currentFocus = 0
+                    this.addActive()
+                }
+                return true
+            })
+            .then(() => {
+                this.spinnerTarget.classList.add("qfdmo-hidden")
+                return true
+            })
     }
 
     selectOption(event: Event) {
