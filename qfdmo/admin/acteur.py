@@ -43,6 +43,7 @@ class ActeurTypeAdmin(admin.ModelAdmin):
         "nom",
         "nom_affiche",
     ]
+    search_help_text = "Recherche sur le nom ou le nom affiché"
 
 
 class BasePropositionServiceInline(admin.TabularInline):
@@ -100,6 +101,11 @@ class BaseActeurAdmin(admin.GISModelAdmin):
         "siret",
         "ville",
     ]
+    search_help_text = (
+        "Recherche sur le nom, le code postal, la ville, le siret ou"
+        " l'identifiant unique"
+    )
+    list_filter = ["statut"]
     fields = (
         "identifiant_unique",
         "source",
@@ -294,6 +300,7 @@ class PropositionServiceAdmin(
         "acteur__nom",
         "acteur__siret",
     ]
+    search_help_text = "Recherche sur le nom ou le siret de l'acteur"
 
     def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
         return False
@@ -328,6 +335,7 @@ class RevisionPropositionServiceAdmin(
         "revision_acteur__nom",
         "revision_acteur__siret",
     ]
+    search_help_text = "Recherche sur le nom ou le siret de l'acteur"
 
 
 class FinalActeurResource(ActeurResource):
