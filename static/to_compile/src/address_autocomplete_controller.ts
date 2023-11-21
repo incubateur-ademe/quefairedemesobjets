@@ -1,4 +1,5 @@
 import AutocompleteController from "../src/autocomplete_controller"
+const debounce = require("lodash/debounce")
 
 const SEPARATOR = "||"
 export default class extends AutocompleteController {
@@ -13,6 +14,11 @@ export default class extends AutocompleteController {
     declare readonly latitudeTarget: HTMLInputElement
     declare readonly longitudeTarget: HTMLInputElement
     declare readonly displayErrorTarget: HTMLElement
+
+    initialize() {
+        // display spinner
+        this.complete = debounce(this.complete, 300).bind(this)
+    }
 
     async complete(events: Event): Promise<boolean> {
         const inputTargetValue = this.inputTarget.value
