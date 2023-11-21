@@ -66,6 +66,7 @@ class CorrectionsView(IsStaffMixin, FormView):
                 | Q(final_acteur__ville__icontains=search_query)
             )
 
+        kwargs["nb_corrections"] = corrections.distinct().count()
         kwargs["corrections"] = corrections.distinct()[: int(nb_lines)]
         return super().get_context_data(**kwargs)
 
