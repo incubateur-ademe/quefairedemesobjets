@@ -5,6 +5,7 @@ Longue vie aux objets propose des solutions pour promouvoir les gestes de consom
 -   Mise à disposition d'un annuaire d'Acteurs du ré-emploi et du re-cyclage en France (disponible aussi via une iframe)
 -   Mise à disposition de l'annuaire via une API
 -   Promotion des gestes de consommation responsable tels que le don et le partage local
+-   something else
 
 ## Afficher l'application dans une Iframe
 
