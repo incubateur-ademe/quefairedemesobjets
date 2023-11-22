@@ -13,6 +13,16 @@ jobs:
   run_test:
     uses: ./.github/workflows/run_tests.yml
 
+  create-release:
+    name: "Create Release"
+    needs: [run_test]
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "marvinpinto/action-automatic-releases@v1.2.1"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
+
   deploy:
     name: Deploy to Production
     needs: [run_test]
