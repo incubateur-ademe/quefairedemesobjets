@@ -146,6 +146,14 @@ Certains objets de la base de données sont des objets d'administration qui n'on
 
 -   docker-compose
 -   python 3.11
+-   node 18.17
+-   gdal (librairie nécessaire à l'utilisation de GeoDjango)
+
+Conseil: utiliser `asdf` pour la gestion des environnement virtuel `node` et `python`
+
+#### Spécificité d'installation pour les processeur Mx de Mac
+
+[https://gist.github.com/codingjoe/a31405952ec936beba99b059e665491e](https://gist.github.com/codingjoe/a31405952ec936beba99b059e665491e)
 
 ### Technologies
 
@@ -199,6 +207,12 @@ Migration
 
 ```sh
 python manage.py migrate
+```
+
+Population de la base (optionel, si la base de données de production est chargée sur l'environnement de développement)
+
+```sh
+python manage.py loaddata categories action_directions actions acteur_services acteur_types
 ```
 
 ### Create superuser
