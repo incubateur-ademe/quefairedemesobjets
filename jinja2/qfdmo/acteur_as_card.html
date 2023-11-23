@@ -14,7 +14,7 @@
             {% include "qfdmo/partials/label_reparacteur_icon.html" %}
         {% endif %}
         <h3 class='fr-mb-0'>
-            {{ acteur.nom_affiche|title }}
+            {{ acteur.nom_affiche }}
         </h3>
     </div>
     {% if acteur.url and acteur.url != '__nourl__'%}
@@ -31,7 +31,7 @@
         <p class="qfdmo-text-sm fr-mb-2w fr-mt-0">
             {{ acteur.adresse|title }}<br>
             {% if acteur.adresse_complement %}
-                {{ acteur.adresse_complement|title }}<br>
+                {{ acteur.adresse_complement }}<br>
             {% endif %}
             {{ acteur.code_postal }} {{ acteur.ville|title }}
             {% if acteur.telephone %}
