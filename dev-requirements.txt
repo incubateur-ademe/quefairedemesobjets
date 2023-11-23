@@ -14,6 +14,7 @@ asgiref==3.7.2 \
     # via
     #   -c requirements.txt
     #   django
+    #   django-browser-reload
 black==23.11.0 \
     --hash=sha256:250d7e60f323fcfc8ea6c800d5eba12f7967400eb6c2d21ae85ad31c204fb1f4 \
     --hash=sha256:2a9acad1451632021ee0d146c8765782a0c3846e0e0ea46659d7c4f89d9b212b \
@@ -56,9 +57,9 @@ django==4.2.7 \
     #   django-browser-reload
     #   django-debug-toolbar
     #   django-extensions
-django-browser-reload==1.12.0 \
-    --hash=sha256:2dc98c752b55d22db9c11fbc0274c16160ce4dcd67ef0ef294135ab57d711435 \
-    --hash=sha256:6c10b4b59a5aa7a412284d7c909fb5b80199e98a488f5b24da5c49b090d1ef3f
+django-browser-reload==1.12.1 \
+    --hash=sha256:08b457f1b6599bf782d4d2ecdfb0897d6fc936ac4035060d0269c2af5ef4ef7a \
+    --hash=sha256:875b6bd01db13380522ccb4ae75871a2edeae74bb5ac92bf32eb76763d575d86
     # via -r dev-requirements.in
 django-debug-toolbar==4.2.0 \
     --hash=sha256:af99128c06e8e794479e65ab62cc6c7d1e74e1c19beb44dcbf9bad7a9c017327 \
