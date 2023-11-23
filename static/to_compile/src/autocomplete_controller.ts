@@ -29,23 +29,20 @@ export default abstract class extends Controller<HTMLElement> {
     }
 
     initialize() {
-        this.search_to_complete = debounce(this.search_to_complete, 2000).bind(this)
+        this.search_to_complete = debounce(this.search_to_complete, 300).bind(this)
     }
 
-    async complete(events: Event): Promise<boolean> {
-        // display spinner
-        this.spinnerTarget.classList.remove("qfdmo-hidden")
+    async complete(events: Event): Promise<void> {
+        if (this.inputTarget.value) this.spinnerTarget.classList.remove("qfdmo-hidden")
         return this.search_to_complete(events)
     }
 
-    async search_to_complete(events: Event): Promise<boolean> {
+    async search_to_complete(events: Event): Promise<void> {
         const inputTargetValue = this.inputTarget.value
         const val = this.addAccents(inputTargetValue)
         const regexPattern = new RegExp(val, "gi")
 
-        if (!val) {
-            this.closeAllLists()
-        }
+        if (!val) this.closeAllLists()
 
         let countResult = 0
 
@@ -65,12 +62,11 @@ export default abstract class extends Controller<HTMLElement> {
                     this.currentFocus = 0
                     this.addActive()
                 }
-
-                return true
+                return
             })
             .then(() => {
                 this.spinnerTarget.classList.add("qfdmo-hidden")
-                return true
+                return
             })
     }
 

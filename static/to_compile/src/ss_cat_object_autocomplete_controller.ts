@@ -8,14 +8,12 @@ export default class extends AutocompleteController {
     static targets = AutocompleteController.targets.concat(["ssCat"])
     declare readonly ssCatTarget: HTMLInputElement
 
-    async search_to_complete(events: Event): Promise<boolean> {
+    async search_to_complete(events: Event): Promise<void> {
         const inputTargetValue = this.inputTarget.value
         const val = this.addAccents(inputTargetValue)
         const regexPattern = new RegExp(val, "gi")
 
-        if (!val) {
-            this.closeAllLists()
-        }
+        if (!val) this.closeAllLists()
 
         let countResult = 0
 
@@ -38,7 +36,7 @@ export default class extends AutocompleteController {
             })
             .then(() => {
                 this.spinnerTarget.classList.add("qfdmo-hidden")
-                return true
+                return
             })
     }
 

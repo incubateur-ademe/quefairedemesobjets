@@ -15,14 +15,12 @@ export default class extends AutocompleteController {
     declare readonly longitudeTarget: HTMLInputElement
     declare readonly displayErrorTarget: HTMLElement
 
-    async search_to_complete(events: Event): Promise<boolean> {
+    async search_to_complete(events: Event): Promise<void> {
         const inputTargetValue = this.inputTarget.value
         const val = this.addAccents(inputTargetValue)
         const regexPattern = new RegExp(val, "gi")
 
-        if (!val) {
-            this.closeAllLists()
-        }
+        if (!val) this.closeAllLists()
 
         let countResult = 0
 
@@ -40,11 +38,11 @@ export default class extends AutocompleteController {
                     this.currentFocus = 0
                     this.addActive()
                 }
-                return true
+                return
             })
             .then(() => {
                 this.spinnerTarget.classList.add("qfdmo-hidden")
-                return true
+                return
             })
     }
 
