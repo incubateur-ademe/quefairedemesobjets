@@ -1,4 +1,5 @@
 import AutocompleteController from "../src/autocomplete_controller"
+const debounce = require("lodash/debounce")
 
 const SEPARATOR = "||"
 export default class extends AutocompleteController {
@@ -14,32 +15,35 @@ export default class extends AutocompleteController {
     declare readonly longitudeTarget: HTMLInputElement
     declare readonly displayErrorTarget: HTMLElement
 
-    async complete(events: Event): Promise<boolean> {
+    async search_to_complete(events: Event): Promise<void> {
         const inputTargetValue = this.inputTarget.value
         const val = this.addAccents(inputTargetValue)
         const regexPattern = new RegExp(val, "gi")
 
-        if (!val) {
-            this.closeAllLists()
-        }
+        if (!val) this.closeAllLists()
 
         let countResult = 0
 
-        this.#getOptionCallback(inputTargetValue).then((data) => {
-            this.closeAllLists()
-            this.autocompleteList = this.createAutocompleteList()
-            this.allAvailableOptions = data
-            for (let i = 0; i < this.allAvailableOptions.length; i++) {
-                if (countResult >= this.maxOptionDisplayedValue) break
-                countResult++
-                this.addOption(regexPattern, this.allAvailableOptions[i])
-            }
-            if (this.autocompleteList.childElementCount > 0) {
-                this.currentFocus = 0
-                this.addActive()
-            }
-        })
-        return true
+        return this.#getOptionCallback(inputTargetValue)
+            .then((data) => {
+                this.closeAllLists()
+                this.autocompleteList = this.createAutocompleteList()
+                this.allAvailableOptions = data
+                for (let i = 0; i < this.allAvailableOptions.length; i++) {
+                    if (countResult >= this.maxOptionDisplayedValue) break
+                    countResult++
+                    this.addOption(regexPattern, this.allAvailableOptions[i])
+                }
+                if (this.autocompleteList.childElementCount > 0) {
+                    this.currentFocus = 0
+                    this.addActive()
+                }
+                return
+            })
+            .then(() => {
+                this.spinnerTarget.classList.add("qfdmo-hidden")
+                return
+            })
     }
 
     selectOption(event: Event) {

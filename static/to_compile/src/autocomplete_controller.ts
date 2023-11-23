@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import debounce from "lodash/debounce"
 
 export default abstract class extends Controller<HTMLElement> {
     controllerName: string = "autocomplete"
@@ -7,10 +8,11 @@ export default abstract class extends Controller<HTMLElement> {
     autocompleteList: HTMLElement
     nbCharToSearchDefault: number = 3
 
-    static targets = ["allAvailableOptions", "input", "option"]
+    static targets = ["allAvailableOptions", "input", "option", "spinner"]
     declare readonly allAvailableOptionsTarget: HTMLScriptElement
     declare readonly inputTarget: HTMLInputElement
     declare readonly optionTargets: Array<HTMLElement>
+    declare readonly spinnerTarget: HTMLElement
 
     static values = { maxOptionDisplayed: Number, nbCharToSearch: Number }
     declare readonly maxOptionDisplayedValue: number
@@ -26,34 +28,46 @@ export default abstract class extends Controller<HTMLElement> {
             this.nbCharToSearchValue = this.nbCharToSearchDefault
     }
 
-    async complete(events: Event): Promise<boolean> {
+    initialize() {
+        this.search_to_complete = debounce(this.search_to_complete, 300).bind(this)
+    }
+
+    async complete(events: Event): Promise<void> {
+        if (this.inputTarget.value) this.spinnerTarget.classList.remove("qfdmo-hidden")
+        return this.search_to_complete(events)
+    }
+
+    async search_to_complete(events: Event): Promise<void> {
         const inputTargetValue = this.inputTarget.value
         const val = this.addAccents(inputTargetValue)
         const regexPattern = new RegExp(val, "gi")
 
-        if (!val) {
-            this.closeAllLists()
-        }
+        if (!val) this.closeAllLists()
 
         let countResult = 0
 
-        this.#getOptionCallback(inputTargetValue).then((data) => {
-            this.closeAllLists()
-            this.allAvailableOptions = data
-            if (this.allAvailableOptions.length == 0) return
+        return this.#getOptionCallback(inputTargetValue)
+            .then((data) => {
+                this.closeAllLists()
+                this.allAvailableOptions = data
+                if (this.allAvailableOptions.length == 0) return
 
-            this.autocompleteList = this.createAutocompleteList()
-            for (let i = 0; i < this.allAvailableOptions.length; i++) {
-                if (countResult >= this.maxOptionDisplayedValue) break
-                countResult++
-                this.addOption(regexPattern, this.allAvailableOptions[i])
-            }
-            if (this.autocompleteList.childElementCount > 0) {
-                this.currentFocus = 0
-                this.addActive()
-            }
-        })
-        return true
+                this.autocompleteList = this.createAutocompleteList()
+                for (let i = 0; i < this.allAvailableOptions.length; i++) {
+                    if (countResult >= this.maxOptionDisplayedValue) break
+                    countResult++
+                    this.addOption(regexPattern, this.allAvailableOptions[i])
+                }
+                if (this.autocompleteList.childElementCount > 0) {
+                    this.currentFocus = 0
+                    this.addActive()
+                }
+                return
+            })
+            .then(() => {
+                this.spinnerTarget.classList.add("qfdmo-hidden")
+                return
+            })
     }
 
     selectOption(event: Event) {
