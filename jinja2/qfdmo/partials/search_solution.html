@@ -77,24 +77,30 @@
         {% with action_direction='jecherche' %}
             {% include "qfdmo/partials/action_list_by_direction.html"  %}
         {% endwith %}
-        <div class="qfdmo-float-left qfdmo-w-full qfdmo-whitespace-nowrap qfdmo-text-ellipsis qfdmo-overflow-hidden">
-            Rechercher les bonnes adresses …
-        </div>
-        <div class="qfdmo-w-full qfdmo-flex qfdmo-flex-row ">
+        <div class="qfdmo-w-full qfdmo-flex qfdmo-flex-row qfdmo-items-center">
             <button
                 name='digital'
                 value='0'
                 class="fr-btn fr-btn--icon-left fr-icon-road-map-line"
             >
-                à proximité
+                Rechercher
             </button>
-            <button
-                name='digital'
-                value='1'
-                class="fr-btn fr-btn--secondary fr-ml-1v fr-btn--icon-left fr-icon-global-line"
-            >
-                en ligne
-            </button>
+
+
+            <div class="qfdmo-flex qfdmo-bg-gray-200/[.5] hover:qfdmo-bg-gray-200 qfdmo-rounded-xl qfdmo-transition qfdmo-p-1">
+                <nav class="qfdmo-flex qfdmo-space-x-1" aria-label="Tabs" role="tablist">
+                    <button type="button" class="hs-tab-active:qfdmo-bg-white hs-tab-active:qfdmo-text-gray-700 hs-tab-active:qfdmo-shadow-sm qfdmo-text-xs qfdmo-text-gray-500 hover:qfdmo-text-gray-700 qfdmo-font-medium qfdmo-rounded-lg qfdmo-py-2 qfdmo-px-3  qfdmo-active" id="ctc-component-1-tab-1-item" data-hs-tab="#ctc-component-1-tab-1" aria-controls="ctc-component-1-tab-1" role="tab">
+                        Preview
+                    </button>
+                    <button type="button" class="hs-tab-active:qfdmo-bg-white hs-tab-active:qfdmo-text-gray-700 hs-tab-active:qfdmo-shadow-sm qfdmo-text-xs qfdmo-text-gray-500 hover:qfdmo-text-gray-700 qfdmo-font-medium qfdmo-rounded-lg qfdmo-py-2 qfdmo-px-3 " id="ctc-component-1-tab-2-item" data-hs-tab="#ctc-component-1-tab-2" aria-controls="ctc-component-1-tab-2" role="tab">
+                        HTML
+                    </button>
+                </nav>
+            </div>
+
+
+
+
         </div>
     </form>
 </div>

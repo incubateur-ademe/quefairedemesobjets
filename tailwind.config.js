@@ -79,6 +79,11 @@ module.exports = {
             "12w": "6rem",
             "15w": "7.5rem",
         },
+
+        screens: {
+            xs: "320px",
+        },
+
         extend: {
             aria: {
                 // Remove when https://github.com/tailwindlabs/tailwindcss/pull/10966 in a release
