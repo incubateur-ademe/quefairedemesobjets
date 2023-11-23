@@ -49,7 +49,10 @@
         >
             <div class="form-group">
                 {{ form.sous_categorie_objet.label_tag() }}
-                {{ form.sous_categorie_objet }}
+                <div class="qfdmo-relative">
+                    {{ form.sous_categorie_objet }}
+                    <span data-ss-cat-object-autocomplete-target="spinner" class="fr-icon-refresh-line qfdmo-absolute qfdmo-right-0 qfdmo-top-0 qfdmo-m-1w qfdmo-animate-spin qfdmo-hidden"></span>
+                </div>
                 {{ form.ss_cat }}
             </div>
         </div>
@@ -59,7 +62,10 @@
         >
             <div class="form-group">
                 {{ form.adresse.label_tag() }}
-                {{ form.adresse }}
+                <div class="qfdmo-relative">
+                    {{ form.adresse }}
+                    <span data-address-autocomplete-target="spinner" class="fr-icon-refresh-line qfdmo-absolute qfdmo-right-0 qfdmo-top-0 qfdmo-m-1w qfdmo-animate-spin qfdmo-hidden"></span>
+                </div>
             </div>
             {{ form.longitude }}
             {{ form.latitude }}
