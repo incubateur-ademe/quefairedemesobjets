@@ -1,106 +1,110 @@
 <div>
-    <form class="qfdmo-mt-2w fr-mb-1v" id='search_form' action='#solutions'>
-        {% include "qfdmo/partials/featureflip_inputs.html" %}
-        <div class="fr-mb-1v qfdmo-flex qfdmo-flex-row qfdmo-justify-between">
-            {{ form.direction }}
-            <button
-                type="button"
-                class="fr-btn fr-btn--tertiary"
-                data-action="click -> search-solution-form#toggleadvancedFiltersDiv"
-                data-search-solution-form-target="advancedFiltersButton"
-                >
-                <span class="fr-icon--sm fr-icon-equalizer-line"></span>
-                <div class="qfdmo-hidden md:qfdmo-block">&nbsp;filtres avancés</div>
-                <span
-                    class="qfdmo-hidden qfdmo-bg-blue-france qfdmo-rounded-xl qfdmo-text-white qfdmo-text-xs fr-ml-1w fr-py-1v fr-px-1w"
-                    data-search-solution-form-target="advancedFiltersCounter"
-                >
-                    1
-                </span>
-            </button>
-        </div>
-        <div class="qfdmo-hidden qfdmo-relative qfdmo-border qfdmo-border-light-grey qfdmo-border-solid qfdmo-rounded fr-mb-1w fr-p-1w" data-search-solution-form-target="advancedFiltersDiv">
-            <button type='button' class="fr-p-1w qfdmo-absolute qfdmo-z-20 qfdmo-text-right qfdmo-top-0 qfdmo-right-0 qfdmo-cursor-pointer" data-action="click -> search-solution-form#toggleadvancedFiltersDiv">
-                <span class="fr-icon--sm fr-icon-close-line"></span>
-            </button>
+    <turbo-frame id="turboform">
+        <form class="qfdmo-mt-2w fr-mb-1v" id='search_form' action='#solutions' >
+            {% include "qfdmo/partials/featureflip_inputs.html" %}
+            <div class="fr-mb-1v qfdmo-flex qfdmo-flex-row qfdmo-justify-between">
+                {{ form.direction }}
+                <button
+                    type="button"
+                    class="fr-btn fr-btn--tertiary"
+                    data-action="click -> search-solution-form#toggleadvancedFiltersDiv"
+                    data-search-solution-form-target="advancedFiltersButton"
+                    >
+                    <span class="fr-icon--sm fr-icon-equalizer-line"></span>
+                    <div class="qfdmo-hidden md:qfdmo-block">&nbsp;filtres avancés</div>
+                    <span
+                        class="qfdmo-hidden qfdmo-bg-blue-france qfdmo-rounded-xl qfdmo-text-white qfdmo-text-xs fr-ml-1w fr-py-1v fr-px-1w"
+                        data-search-solution-form-target="advancedFiltersCounter"
+                    >
+                        1
+                    </span>
+                </button>
+            </div>
+            <div class="qfdmo-hidden qfdmo-relative qfdmo-border qfdmo-border-light-grey qfdmo-border-solid qfdmo-rounded fr-mb-1w fr-p-1w" data-search-solution-form-target="advancedFiltersDiv">
+                <button type='button' class="fr-p-1w qfdmo-absolute qfdmo-z-20 qfdmo-text-right qfdmo-top-0 qfdmo-right-0 qfdmo-cursor-pointer" data-action="click -> search-solution-form#toggleadvancedFiltersDiv">
+                    <span class="fr-icon--sm fr-icon-close-line"></span>
+                </button>
 
-            <div
-                class="qfdmo-flex qfdmo-flex-row qfdmo-items-center"
-            >
-                {% include "qfdmo/partials/label_reparacteur_icon.html" %}
-                <fieldset class="fr-fieldset fr-m-0 " aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages">
-                    <div class="fr-fieldset__element fr-fieldset__element--inline fr-m-0">
-                        <div
-                            class="fr-checkbox-group qfdmo-flex qfdmo-flex-row qfdmo-items-center"
-                        >
-                            {{ form.label_reparacteur }}
-                            {{ form.label_reparacteur.label_tag() }}
+                <div
+                    class="qfdmo-flex qfdmo-flex-row qfdmo-items-center"
+                >
+                    {% include "qfdmo/partials/label_reparacteur_icon.html" %}
+                    <fieldset class="fr-fieldset fr-m-0 " aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages">
+                        <div class="fr-fieldset__element fr-fieldset__element--inline fr-m-0">
+                            <div
+                                class="fr-checkbox-group qfdmo-flex qfdmo-flex-row qfdmo-items-center"
+                            >
+                                {{ form.label_reparacteur }}
+                                {{ form.label_reparacteur.label_tag() }}
+                            </div>
+                            <span class="fr-hint-text">{{ form.label_reparacteur.help_text }}</span>
                         </div>
-                        <span class="fr-hint-text">{{ form.label_reparacteur.help_text }}</span>
-                    </div>
-                </fieldset>
+                    </fieldset>
+                </div>
             </div>
-        </div>
 
-        {{ form.action_list }}
-        <div data-controller='ss-cat-object-autocomplete'
-            data-ss-cat-object-autocomplete-max-option-displayed-value=5
-            data-ss-cat-object-autocomplete-nb-char-to-search-value=2
-        >
-            <div class="form-group">
-                {{ form.sous_categorie_objet.label_tag() }}
-                <div class="qfdmo-relative">
-                    {{ form.sous_categorie_objet }}
-                    <span data-ss-cat-object-autocomplete-target="spinner" class="fr-icon-refresh-line qfdmo-absolute qfdmo-right-0 qfdmo-top-0 qfdmo-m-1w qfdmo-animate-spin qfdmo-hidden"></span>
-                </div>
-                {{ form.ss_cat }}
-            </div>
-        </div>
-        <div data-controller='address-autocomplete'
-            data-address-autocomplete-max-option-displayed-value=5
-            data-address-autocomplete-is-ban-address-value='true'
-        >
-            <div class="form-group">
-                {{ form.adresse.label_tag() }}
-                <div class="qfdmo-relative">
-                    {{ form.adresse }}
-                    <span data-address-autocomplete-target="spinner" class="fr-icon-refresh-line qfdmo-absolute qfdmo-right-0 qfdmo-top-0 qfdmo-m-1w qfdmo-animate-spin qfdmo-hidden"></span>
-                </div>
-            </div>
-            {{ form.longitude }}
-            {{ form.latitude }}
-        </div>
-        <label>Je souhaite</label>
-        {% with action_direction='jai' %}
-            {% include "qfdmo/partials/action_list_by_direction.html" %}
-        {% endwith %}
-        {% with action_direction='jecherche' %}
-            {% include "qfdmo/partials/action_list_by_direction.html"  %}
-        {% endwith %}
-        <div class="qfdmo-w-full qfdmo-flex qfdmo-flex-row qfdmo-items-center">
-            <button
-                name='digital'
-                value='0'
-                class="fr-btn fr-btn--icon-left fr-icon-road-map-line"
+            {{ form.action_list }}
+            <div data-controller='ss-cat-object-autocomplete'
+                data-ss-cat-object-autocomplete-max-option-displayed-value=5
+                data-ss-cat-object-autocomplete-nb-char-to-search-value=2
             >
-                Rechercher
-            </button>
-
-
-            <div class="qfdmo-flex qfdmo-bg-gray-200/[.5] hover:qfdmo-bg-gray-200 qfdmo-rounded-xl qfdmo-transition qfdmo-p-1">
-                <nav class="qfdmo-flex qfdmo-space-x-1" aria-label="Tabs" role="tablist">
-                    <button type="button" class="hs-tab-active:qfdmo-bg-white hs-tab-active:qfdmo-text-gray-700 hs-tab-active:qfdmo-shadow-sm qfdmo-text-xs qfdmo-text-gray-500 hover:qfdmo-text-gray-700 qfdmo-font-medium qfdmo-rounded-lg qfdmo-py-2 qfdmo-px-3  qfdmo-active" id="ctc-component-1-tab-1-item" data-hs-tab="#ctc-component-1-tab-1" aria-controls="ctc-component-1-tab-1" role="tab">
-                        Preview
-                    </button>
-                    <button type="button" class="hs-tab-active:qfdmo-bg-white hs-tab-active:qfdmo-text-gray-700 hs-tab-active:qfdmo-shadow-sm qfdmo-text-xs qfdmo-text-gray-500 hover:qfdmo-text-gray-700 qfdmo-font-medium qfdmo-rounded-lg qfdmo-py-2 qfdmo-px-3 " id="ctc-component-1-tab-2-item" data-hs-tab="#ctc-component-1-tab-2" aria-controls="ctc-component-1-tab-2" role="tab">
-                        HTML
-                    </button>
-                </nav>
+                <div class="form-group">
+                    {{ form.sous_categorie_objet.label_tag() }}
+                    <div class="qfdmo-relative">
+                        {{ form.sous_categorie_objet }}
+                        <span data-ss-cat-object-autocomplete-target="spinner" class="fr-icon-refresh-line qfdmo-absolute qfdmo-right-0 qfdmo-top-0 qfdmo-m-1w qfdmo-animate-spin qfdmo-hidden"></span>
+                    </div>
+                    {{ form.ss_cat }}
+                </div>
             </div>
+            <div data-controller='address-autocomplete'
+                data-address-autocomplete-max-option-displayed-value=5
+                data-address-autocomplete-is-ban-address-value='true'
+            >
+                <div class="form-group">
+                    {{ form.adresse.label_tag() }}
+                    <div class="qfdmo-relative">
+                        {{ form.adresse }}
+                        <span data-address-autocomplete-target="spinner" class="fr-icon-refresh-line qfdmo-absolute qfdmo-right-0 qfdmo-top-0 qfdmo-m-1w qfdmo-animate-spin qfdmo-hidden"></span>
+                    </div>
+                </div>
+                {{ form.longitude }}
+                {{ form.latitude }}
+            </div>
+            <label>Je souhaite</label>
+            {% with action_direction='jai' %}
+                {% include "qfdmo/partials/action_list_by_direction.html" %}
+            {% endwith %}
+            {% with action_direction='jecherche' %}
+                {% include "qfdmo/partials/action_list_by_direction.html"  %}
+            {% endwith %}
+            {% with digital = request.GET.get('digital', '0')|int %}
+                <div class="qfdmo-w-full qfdmo-flex qfdmo-flex-row qfdmo-items-center">
+                    <button
+                        name='digital'
+                        value='{{digital}}'
+                        class="fr-btn"
+                        data-turbo-frame="turboplop"
+                    >
+                        Rechercher
+                    </button>
 
-
-
-
-        </div>
-    </form>
+                    <button
+                        name='digital'
+                        value='{% if digital %}0{% else %}1{% endif %}'
+                        data-turbo-frame="turboplop"
+                    >
+                        <div class="qfdmo-flex qfdmo-rounded-xl fr-p-1w fr-ml-1v qfdmo-bg-blue-france-850 hover:qfdmo-bg-blue-france-850-hover">
+                            <div class="{% if not digital %}qfdmo-bg-white{% endif %} qfdmo-rounded-lg qfdmo-whitespace-nowrap fr-px-1v qfdmo-text-xs">
+                                <span class="fr-icon-road-map-line"></span> {% if not digital %}à proximité{% endif %}
+                            </div>
+                            <div class="{% if digital %}qfdmo-bg-white{% endif %} qfdmo-rounded-lg qfdmo-whitespace-nowrap fr-px-1v">
+                                <span class="fr-icon-global-line"></span> {% if digital %}en ligne{% endif %}
+                            </div>
+                        </div>
+                    </button>
+                </div>
+            {% endwith %}
+        </form>
+    </turbo-frame>
 </div>

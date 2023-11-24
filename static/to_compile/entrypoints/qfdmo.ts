@@ -1,5 +1,6 @@
 import "@gouvfr/dsfr/dist/dsfr.module.js"
 import { Application } from "@hotwired/stimulus"
+import * as Turbo from "@hotwired/turbo"
 
 import AddressAutocompleteController from "../src/address_autocomplete_controller"
 import MapController from "../src/map_controller"
@@ -11,3 +12,5 @@ stimulus.register("map", MapController)
 stimulus.register("ss-cat-object-autocomplete", SsCatObjectAutocompleteController)
 stimulus.register("address-autocomplete", AddressAutocompleteController)
 stimulus.register("search-solution-form", SearchSolutionFormController)
+
+Turbo.session.drive = false
