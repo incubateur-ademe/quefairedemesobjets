@@ -84,7 +84,7 @@
                         name='digital'
                         value='{{digital}}'
                         class="fr-btn"
-                        data-turbo-frame="turboplop"
+                        data-turbo="false"
                     >
                         Rechercher
                     </button>
@@ -92,14 +92,14 @@
                     <button
                         name='digital'
                         value='{% if digital %}0{% else %}1{% endif %}'
-                        data-turbo-frame="turboplop"
+                        data-turbo-frame="solutionFrame"
                     >
                         <div class="qfdmo-flex qfdmo-rounded-xl fr-p-1w fr-ml-1v qfdmo-bg-blue-france-850 hover:qfdmo-bg-blue-france-850-hover">
                             <div class="{% if not digital %}qfdmo-bg-white{% endif %} qfdmo-rounded-lg qfdmo-whitespace-nowrap fr-px-1v qfdmo-text-xs">
-                                <span class="fr-icon-road-map-line"></span> {% if not digital %}à proximité{% endif %}
+                                <span class="fr-icon-road-map-line"></span> à proximité
                             </div>
                             <div class="{% if digital %}qfdmo-bg-white{% endif %} qfdmo-rounded-lg qfdmo-whitespace-nowrap fr-px-1v">
-                                <span class="fr-icon-global-line"></span> {% if digital %}en ligne{% endif %}
+                                <span class="fr-icon-global-line"></span> en ligne
                             </div>
                         </div>
                     </button>
