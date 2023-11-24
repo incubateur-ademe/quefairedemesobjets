@@ -30,7 +30,9 @@ jobs:
           cache: "pip"
           python-version: "3.11.4"
       - name: Install GIS Packages
-        run: sudo apt-get install gdal-bin
+        run: |
+          sudo apt-get update
+          sudo apt-get install gdal-bin
       - name: Install Dependencies
         run: pip install --require-hashes --no-deps -r requirements.txt -r dev-requirements.txt
       - name: Run unit tests
