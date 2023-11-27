@@ -64,6 +64,12 @@ export default class extends AutocompleteController {
                         )
                             .then((response) => response.json())
                             .then((data) => {
+                                if (data.features.length == 0) {
+                                    this.geolocatisationRefused(
+                                        "Votre adresse n'a pas pu être déterminée. Vous pouvez ré-essayer ou saisir votre adresse manuellement",
+                                    )
+                                    return
+                                }
                                 this.inputTarget.value =
                                     data.features[0].properties.label
                                 this.latitudeTarget.value =
@@ -71,8 +77,6 @@ export default class extends AutocompleteController {
                                 this.longitudeTarget.value =
                                     data.features[0].geometry.coordinates[0]
                                 this.#hideInputError()
-                            })
-                            .then(() => {
                                 this.hideSpinner()
                             })
                             .catch((error) => {
@@ -111,13 +115,13 @@ export default class extends AutocompleteController {
         this.autocompleteList.appendChild(b)
     }
 
-    geolocatisationRefused() {
-        this.#displayInputError(
-            "La géolocalisation est inaccessible sur votre appareil",
-        )
+    geolocatisationRefused(message?: string) {
+        message = message || "La géolocalisation est inaccessible sur votre appareil"
+        this.#displayInputError(message)
         this.inputTarget.value = ""
         this.longitudeTarget.value = ""
         this.latitudeTarget.value = ""
+        this.hideSpinner()
     }
 
     #displayInputError(errorText: string): void {
