@@ -8,11 +8,11 @@ Longue vie aux objets propose des solutions pour promouvoir les gestes de consom
 
 ## Afficher l'application dans une Iframe
 
-Le site "Longue vie aux objets" est disponible à l'URL : [https://quefairedemesobjets.osc-fr1.scalingo.io/](https://quefairedemesobjets.osc-fr1.scalingo.io/)
+Le site "Longue vie aux objets" est disponible à l'URL : [https://longuevieauxobjets.ademe.fr/](https://longuevieauxobjets.ademe.fr/)
 
 Attention, l'URL et le nom de l'application sont temporaires.
 
-Le site est disponible en iframe en ajoutant le paramètre `iframe` à l'URL, quelque soit sa valeur, ex : [https://quefairedemesobjets.osc-fr1.scalingo.io/?iframe](https://quefairedemesobjets.osc-fr1.scalingo.io/?iframe)
+Le site est disponible en iframe en ajoutant le paramètre `iframe` à l'URL, quelque soit sa valeur, ex : [https://longuevieauxobjets.ademe.fr/?iframe](https://longuevieauxobjets.ademe.fr/?iframe)
 
 Dans le cas de l'iframe, l'entête et le pied de page ne sont pas affichés
 
@@ -32,7 +32,7 @@ Les autres paramètres disponibles pour afficher la page principale de l'applica
 Exemple:
 
 ```txt
-http://localhost:8000/?direction=jecherche&action_list=emprunter%7Cechanger%7Clouer%7Cacheter+d%27occasion&sous_categorie_objet=&adresse=145+Avenue+Pierre+Brossolette+92120+Montrouge&latitude=48.815679&longitude=2.305116
+https://longuevieauxobjets.ademe.fr/?direction=jecherche&action_list=emprunter%7Cechanger%7Clouer%7Cacheter+d%27occasion&sous_categorie_objet=&adresse=145+Avenue+Pierre+Brossolette+92120+Montrouge&latitude=48.815679&longitude=2.305116
 
 ```
 
