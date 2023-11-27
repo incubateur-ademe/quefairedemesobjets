@@ -56,6 +56,7 @@ export default class extends AutocompleteController {
             .value.split(SEPARATOR)
         if (longitude == "9999" && latitude == "9999") {
             if ("geolocation" in navigator) {
+                this.displaySpinner()
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
                         fetch(
@@ -71,8 +72,12 @@ export default class extends AutocompleteController {
                                     data.features[0].geometry.coordinates[0]
                                 this.#hideInputError()
                             })
+                            .then(() => {
+                                this.hideSpinner()
+                            })
                             .catch((error) => {
                                 console.error("error catched : ", error)
+                                this.hideSpinner()
                             })
                     },
                     () => this.geolocatisationRefused(),
