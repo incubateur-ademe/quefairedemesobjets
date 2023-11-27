@@ -66,7 +66,7 @@ export default class extends AutocompleteController {
                             .then((data) => {
                                 if (data.features.length == 0) {
                                     this.geolocatisationRefused(
-                                        "Votre adresse n'a pas pu être déterminée, vous pouvez ré-essayer ou saisir votre adresse manuellement",
+                                        "Votre adresse n'a pas pu être déterminée. Vous pouvez ré-essayer ou saisir votre adresse manuellement",
                                     )
                                     return
                                 }
