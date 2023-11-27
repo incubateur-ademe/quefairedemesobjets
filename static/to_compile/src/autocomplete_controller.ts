@@ -33,7 +33,7 @@ export default abstract class extends Controller<HTMLElement> {
     }
 
     async complete(events: Event): Promise<void> {
-        if (this.inputTarget.value) this.spinnerTarget.classList.remove("qfdmo-hidden")
+        if (this.inputTarget.value) this.displaySpinner()
         return this.search_to_complete(events)
     }
 
@@ -65,12 +65,13 @@ export default abstract class extends Controller<HTMLElement> {
                 return
             })
             .then(() => {
-                this.spinnerTarget.classList.add("qfdmo-hidden")
+                this.hideSpinner()
                 return
             })
     }
 
     selectOption(event: Event) {
+        this.displaySpinner()
         let target = event.target as HTMLElement
         while (target && target.nodeName !== "DIV") {
             target = target.parentNode as HTMLElement
@@ -79,6 +80,7 @@ export default abstract class extends Controller<HTMLElement> {
 
         this.inputTarget.value = label
         this.closeAllLists()
+        this.hideSpinner()
     }
 
     keydownDown(event: KeyboardEvent) {
@@ -177,5 +179,13 @@ export default abstract class extends Controller<HTMLElement> {
     async #getOptionCallback(value: string): Promise<string[]> {
         // Implement this method in your controller
         return []
+    }
+
+    displaySpinner(): void {
+        this.spinnerTarget.classList.remove("qfdmo-hidden")
+    }
+
+    hideSpinner(): void {
+        this.spinnerTarget.classList.add("qfdmo-hidden")
     }
 }
