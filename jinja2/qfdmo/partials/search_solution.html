@@ -1,5 +1,5 @@
 <div>
-    <turbo-frame id="turboform">
+    <turbo-frame id="turboForm">
         <form class="qfdmo-mt-2w fr-mb-1v" id='search_form' action='#solutions' >
             {% include "qfdmo/partials/featureflip_inputs.html" %}
             <div class="fr-mb-1v qfdmo-flex qfdmo-flex-row qfdmo-justify-between">
@@ -24,7 +24,6 @@
                 <button type='button' class="fr-p-1w qfdmo-absolute qfdmo-z-20 qfdmo-text-right qfdmo-top-0 qfdmo-right-0 qfdmo-cursor-pointer" data-action="click -> search-solution-form#toggleadvancedFiltersDiv">
                     <span class="fr-icon--sm fr-icon-close-line"></span>
                 </button>
-
                 <div
                     class="qfdmo-flex qfdmo-flex-row qfdmo-items-center"
                 >
@@ -42,7 +41,6 @@
                     </fieldset>
                 </div>
             </div>
-
             {{ form.action_list }}
             <div data-controller='ss-cat-object-autocomplete'
                 data-ss-cat-object-autocomplete-max-option-displayed-value=5
@@ -79,30 +77,41 @@
                 {% include "qfdmo/partials/action_list_by_direction.html"  %}
             {% endwith %}
             {% with digital = request.GET.get('digital', '0')|int %}
-                <div class="qfdmo-w-full qfdmo-flex qfdmo-flex-row qfdmo-items-center">
+                <div class="qfdmo-w-full qfdmo-flex qfdmo-flex-col xsm:qfdmo-flex-row xsm:qfdmo-justify-between">
                     <button
                         name='digital'
                         value='{{digital}}'
-                        class="fr-btn"
+                        class="fr-btn qfdmo-mb-1w xsm:qfdmo-mb-0"
                         data-turbo="false"
                     >
                         Rechercher
                     </button>
-
-                    <button
+                    <div
                         name='digital'
                         value='{% if digital %}0{% else %}1{% endif %}'
-                        data-turbo-frame="solutionFrame"
+                        class="fr-p-1w fr-ml-1v qfdmo-flex qfdmo-rounded-xl qfdmo-bg-blue-france-925 hover:qfdmo-bg-blue-france-925-hover"
                     >
-                        <div class="qfdmo-flex qfdmo-rounded-xl fr-p-1w fr-ml-1v qfdmo-bg-blue-france-850 hover:qfdmo-bg-blue-france-850-hover">
-                            <div class="{% if not digital %}qfdmo-bg-white{% endif %} qfdmo-rounded-lg qfdmo-whitespace-nowrap fr-px-1v qfdmo-text-xs">
-                                <span class="fr-icon-road-map-line"></span> à proximité
-                            </div>
-                            <div class="{% if digital %}qfdmo-bg-white{% endif %} qfdmo-rounded-lg qfdmo-whitespace-nowrap fr-px-1v">
-                                <span class="fr-icon-global-line"></span> en ligne
-                            </div>
-                        </div>
-                    </button>
+                        <button
+                            class="{% if not digital %}qfdmo-bg-white{% endif %} qfdmo-basis-1/2 qfdmo-rounded-lg qfdmo-whitespace-nowrap fr-px-1v qfdmo-text-xs"
+                            name='digital'
+                            value='0'
+                            data-turbo-frame="solutionFrame"
+                            data-action="click -> search-solution-form#toggleSolutionButtonView"
+                            data-search-solution-form-target="nearbyButton"
+                            >
+                            <span class="fr-icon-road-map-line"></span> à proximité
+                        </button>
+                        <button
+                            class="{% if digital %}qfdmo-bg-white{% endif %} qfdmo-basis-1/2 qfdmo-rounded-lg qfdmo-whitespace-nowrap fr-px-1v qfdmo-text-xs"
+                            name='digital'
+                            value='1'
+                            data-turbo-frame="solutionFrame"
+                            data-action="click -> search-solution-form#toggleSolutionButtonView"
+                            data-search-solution-form-target="onlineButton"
+                            >
+                            <span class="fr-icon-global-line"></span> en ligne
+                        </button>
+                    </div>
                 </div>
             {% endwith %}
         </form>

@@ -90,6 +90,7 @@ module.exports = {
 
         screens: {
             xs: "320px",
+            xsm: "360px",
         },
 
         extend: {

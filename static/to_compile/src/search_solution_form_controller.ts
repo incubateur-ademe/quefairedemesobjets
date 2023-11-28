@@ -12,6 +12,8 @@ export default class extends Controller<HTMLElement> {
         "advancedFiltersCounter",
         "action",
         "advancedFiltersButton",
+        "nearbyButton",
+        "onlineButton",
     ]
     declare readonly jaiTarget: HTMLElement
     declare readonly jechercheTarget: HTMLElement
@@ -22,6 +24,8 @@ export default class extends Controller<HTMLElement> {
     declare readonly actionTargets: HTMLInputElement[]
     declare readonly advancedFiltersCounterTarget: HTMLElement
     declare readonly advancedFiltersButtonTarget: HTMLElement
+    declare readonly nearbyButtonTarget: HTMLButtonElement
+    declare readonly onlineButtonTarget: HTMLButtonElement
 
     connect() {
         this.displayActionList()
@@ -109,6 +113,16 @@ export default class extends Controller<HTMLElement> {
         } else {
             this.advancedFiltersButtonTarget.classList.add("qfdmo-hidden")
             this.advancedFiltersDivTarget.classList.add("qfdmo-hidden")
+        }
+    }
+    toggleSolutionButtonView(event: Event) {
+        if (event.target == this.nearbyButtonTarget) {
+            this.nearbyButtonTarget.classList.add("qfdmo-bg-white")
+            this.onlineButtonTarget.classList.remove("qfdmo-bg-white")
+        }
+        if (event.target == this.onlineButtonTarget) {
+            this.onlineButtonTarget.classList.add("qfdmo-bg-white")
+            this.nearbyButtonTarget.classList.remove("qfdmo-bg-white")
         }
     }
 }
