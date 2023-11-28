@@ -1,4 +1,8 @@
-<div class="qfdmo-relative{% if is_iframe(request) %}{% if form.initial.adresse or request.GET["digital"] == "1" %} qfdmo-min-h-[400px]{% else %} qfdmo-min-h-[200px]{% endif %}{% else %} qfdmo-flex-grow md:qfdmo-min-h-[62vh]{% endif %}">
+<div
+    class="qfdmo-relative{% if is_iframe(request) %}{% if form.initial.adresse or request.GET["digital"] == "1" %} qfdmo-min-h-[400px]{% else %} qfdmo-min-h-[200px]{% endif %}{% else %} qfdmo-flex-grow md:qfdmo-min-h-[62vh]{% endif %}"
+    data-controller="display-solutions"
+    data-action="search-solution-form:loadingSolutions@window->display-solutions#loadingSolutions"
+    >
     <turbo-frame id="solutionFrame">
         <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-flex qfdmo-flex-col">
             {% if request.GET["digital"] == "1" %}
@@ -46,5 +50,14 @@
                 </a>
             </div>
         </div>
-    </turbo-frame>
-</div>
+        <div
+            data-display-solutions-target="loadingSolutions"
+            id="loadingSolutions"
+            class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-80 qfdmo-font-black qfdmo-z-[1000] qfdmo-hidden"
+        >
+            <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl ">
+                <span class="fr-icon-refresh-line qfdmo-animate-spin"></span>
+                <span >Chargement des solutions...</span>
+            </div>
+        </turbo-frame>
+    </div>
