@@ -2,15 +2,12 @@
 
 Longue vie aux objets propose des solutions pour promouvoir les gestes de consommation responsable:
 
--   Mise à disposition d'un annuaire d'Acteurs du ré-emploi et du re-cyclage en France (disponible aussi via une iframe)
--   Mise à disposition de l'annuaire via une API
--   Promotion des gestes de consommation responsable tels que le don et le partage local
+-   Mise à disposition d'une cartographie d'Acteurs du ré-emploi et de la réparation en France (disponible aussi via une iframe)
+-   Promotion des gestes de consommation responsable tels que le don, le partage local et la réparation
 
 ## Afficher l'application dans une Iframe
 
 Le site "Longue vie aux objets" est disponible à l'URL : [https://longuevieauxobjets.ademe.fr/](https://longuevieauxobjets.ademe.fr/)
-
-Attention, l'URL et le nom de l'application sont temporaires.
 
 Le site est disponible en iframe en ajoutant le paramètre `iframe` à l'URL, quelque soit sa valeur, ex : [https://longuevieauxobjets.ademe.fr/?iframe](https://longuevieauxobjets.ademe.fr/?iframe)
 
