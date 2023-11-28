@@ -475,7 +475,8 @@ class FinalPropositionService(BasePropositionService):
 
     acteur = models.ForeignKey(
         FinalActeur,
-        on_delete=models.CASCADE,
+        to_field="identifiant_unique",
+        on_delete=models.DO_NOTHING,
         null=False,
         related_name="proposition_services",
     )
