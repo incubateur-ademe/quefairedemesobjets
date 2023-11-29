@@ -97,7 +97,7 @@ brown-caramel, brown-opera, beige-gris-galet""",
         max_length=255,
         null=True,
         blank=True,
-        help_text="Icône du badge à choisir dans le <a href='https://www.systeme-de-design.gouv.fr/elements-d-interface/fondamentaux-techniques/icones' target='_blank'>DSFR</a>",  # noqa E501
+        help_text="Icône du badge à choisir dans le <a href='https://www.systeme-de-design.gouv.fr/elements-d-interface/fondamentaux-techniques/icones' rel='noopener' target='_blank'>DSFR</a>",  # noqa E501
     )
 
     def serialize(self):

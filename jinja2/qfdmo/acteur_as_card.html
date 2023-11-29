@@ -19,7 +19,7 @@
     </div>
     {% if acteur.url and acteur.url != '__nourl__'%}
         <p class="qfdmo-text-sm fr-mb-2w fr-mt-0">
-            <a class="qfdmo-inline-block qfdmo-max-w-[100%] qfdmo-whitespace-nowrap qfdmo-text-ellipsis qfdmo-overflow-hidden" href="{{ acteur.url }}" target="_blank">{{ acteur.url }}</a>
+            <a class="qfdmo-inline-block qfdmo-max-w-[100%] qfdmo-whitespace-nowrap qfdmo-text-ellipsis qfdmo-overflow-hidden" href="{{ acteur.url }}" target="_blank" rel="noopener">{{ acteur.url }}</a>
         </p>
     {% endif %}
     <p class="qfdmo-text-sm fr-mb-1w fr-mt-0">
@@ -42,7 +42,7 @@
     <p class="qfdmo-text-sm fr-mb-1w fr-mt-0">
         <a class="qfdmo-text-sm"
             href="https://tally.so/r/3xMqd9?Nom={{acteur.nom}}&Ville={{acteur.ville}}"
-            target="_blank"
+            target="_blank" rel="noopener"
         >
             Proposer une modification
         </a>

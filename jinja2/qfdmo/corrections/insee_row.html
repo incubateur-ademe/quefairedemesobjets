@@ -1,10 +1,10 @@
 <tr>
     <td>
         {{ correction.final_acteur.render_as_card()|safe }}
-        <a class='fr-btn' href="{{ reverse('qfdmo:solution_detail', kwargs={'identifiant_unique': correction.identifiant_unique}) }}" target="_blank">
+        <a class='fr-btn' href="{{ reverse('qfdmo:solution_detail', kwargs={'identifiant_unique': correction.identifiant_unique}) }}" target="_blank" rel="noopener">
             Details
         </a>
-        <a class='fr-btn' href="{{ reverse('qfdmo:solution_admin', kwargs={'identifiant_unique': correction.identifiant_unique}) }}" target="_blank">
+        <a class='fr-btn' href="{{ reverse('qfdmo:solution_admin', kwargs={'identifiant_unique': correction.identifiant_unique}) }}" target="_blank" rel="noopener">
             Admin
         </a>
     </td>
