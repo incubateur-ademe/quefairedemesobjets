@@ -88,12 +88,11 @@ module.exports = {
             "15w": "7.5rem",
         },
 
-        screens: {
-            xs: "320px",
-            xsm: "360px",
-        },
-
         extend: {
+            screens: {
+                xs: "320px",
+                xsm: "360px",
+            },
             aria: {
                 // Remove when https://github.com/tailwindlabs/tailwindcss/pull/10966 in a release
                 busy: "busy=true",

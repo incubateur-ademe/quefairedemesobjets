@@ -119,12 +119,17 @@ export default class extends Controller<HTMLElement> {
     }
 
     toggleSolutionButtonView(event: Event) {
-        if (event.target == this.nearbyButtonTarget) {
+        let target = event.target as HTMLElement
+        while (target && target.nodeName !== "BUTTON") {
+            target = target.parentNode as HTMLElement
+        }
+
+        if (target == this.nearbyButtonTarget) {
             this.nearbyButtonTarget.classList.add("qfdmo-bg-white")
             this.onlineButtonTarget.classList.remove("qfdmo-bg-white")
             this.submitButtonTarget.value = "0"
         }
-        if (event.target == this.onlineButtonTarget) {
+        if (target == this.onlineButtonTarget) {
             this.onlineButtonTarget.classList.add("qfdmo-bg-white")
             this.nearbyButtonTarget.classList.remove("qfdmo-bg-white")
             this.submitButtonTarget.value = "1"

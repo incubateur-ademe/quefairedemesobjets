@@ -6,6 +6,5 @@ export default class extends Controller<HTMLElement> {
 
     loadingSolutions() {
         this.loadingSolutionsTarget.classList.remove("qfdmo-hidden")
-        console.log("loading solutions...")
     }
 }
