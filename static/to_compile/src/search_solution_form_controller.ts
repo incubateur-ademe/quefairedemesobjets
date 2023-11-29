@@ -12,6 +12,9 @@ export default class extends Controller<HTMLElement> {
         "advancedFiltersCounter",
         "action",
         "advancedFiltersButton",
+        "nearbyButton",
+        "onlineButton",
+        "submitButton",
     ]
     declare readonly jaiTarget: HTMLElement
     declare readonly jechercheTarget: HTMLElement
@@ -22,6 +25,9 @@ export default class extends Controller<HTMLElement> {
     declare readonly actionTargets: HTMLInputElement[]
     declare readonly advancedFiltersCounterTarget: HTMLElement
     declare readonly advancedFiltersButtonTarget: HTMLElement
+    declare readonly nearbyButtonTarget: HTMLButtonElement
+    declare readonly onlineButtonTarget: HTMLButtonElement
+    declare readonly submitButtonTarget: HTMLButtonElement
 
     connect() {
         this.displayActionList()
@@ -110,5 +116,28 @@ export default class extends Controller<HTMLElement> {
             this.advancedFiltersButtonTarget.classList.add("qfdmo-hidden")
             this.advancedFiltersDivTarget.classList.add("qfdmo-hidden")
         }
+    }
+
+    toggleSolutionButtonView(event: Event) {
+        let target = event.target as HTMLElement
+        while (target && target.nodeName !== "BUTTON") {
+            target = target.parentNode as HTMLElement
+        }
+
+        if (target == this.nearbyButtonTarget) {
+            this.nearbyButtonTarget.classList.add("qfdmo-bg-white")
+            this.onlineButtonTarget.classList.remove("qfdmo-bg-white")
+            this.submitButtonTarget.value = "0"
+        }
+        if (target == this.onlineButtonTarget) {
+            this.onlineButtonTarget.classList.add("qfdmo-bg-white")
+            this.nearbyButtonTarget.classList.remove("qfdmo-bg-white")
+            this.submitButtonTarget.value = "1"
+        }
+        this.loadingSolutions()
+    }
+
+    loadingSolutions() {
+        this.dispatch("loadingSolutions", { detail: {} })
     }
 }

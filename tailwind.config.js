@@ -38,6 +38,14 @@ module.exports = {
                 "975-active": "#c2cfff",
             },
             "blue-france": "#2323ff",
+            "blue-france-975": "#f5f5fe",
+            "blue-france-975-hover": "#dcdcfc",
+            "blue-france-950": "#ececfe",
+            "blue-france-950-hover": "#cecefc",
+            "blue-france-925": "#e3e3fd",
+            "blue-france-925-hover": "#c1c1fb",
+            "blue-france-850": "#cacafb",
+            "blue-france-850-hover": "#a1a1f8",
             "light-gray": "#e5e5e5",
             "green-tilleul-verveine": "#B7A73F",
             "green-bourgeon": "#68A532",
@@ -79,7 +87,12 @@ module.exports = {
             "12w": "6rem",
             "15w": "7.5rem",
         },
+
         extend: {
+            screens: {
+                xs: "320px",
+                xsm: "360px",
+            },
             aria: {
                 // Remove when https://github.com/tailwindlabs/tailwindcss/pull/10966 in a release
                 busy: "busy=true",
