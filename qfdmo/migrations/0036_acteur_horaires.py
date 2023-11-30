@@ -8,7 +8,7 @@ import qfdmo.models.acteur
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("qfdmo", "0034_directions_actions_related_name"),
+        ("qfdmo", "0035_alter_action_icon_and_more"),
     ]
 
     operations = [
