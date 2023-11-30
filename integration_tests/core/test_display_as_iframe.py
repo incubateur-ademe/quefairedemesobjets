@@ -27,8 +27,8 @@ class TestDisplayAsIframe:
         assert 'class="fr-footer' not in str(response.content)
         assert (
             "Retrouvez les bonnes adresses sur <a "
-            'href="https://longuevieauxobjets.ademe.fr/" target="_blank">'
-            "longuevieauxobjets.ademe.fr</a>" in str(response.content)
+            'href="https://longuevieauxobjets.ademe.fr/" target="_blank" rel="noopener"'
+            ">longuevieauxobjets.ademe.fr</a>" in str(response.content)
         )
 
     @pytest.mark.django_db
@@ -42,6 +42,6 @@ class TestDisplayAsIframe:
         assert 'class="fr-footer' in str(response.content)
         assert (
             "Retrouvez les bonnes adresses sur <a "
-            'href="https://longuevieauxobjets.ademe.fr/" target="_blank">'
-            "longuevieauxobjets.ademe.fr</a>" not in str(response.content)
+            'href="https://longuevieauxobjets.ademe.fr/" target="_blank" rel="noopener"'
+            ">longuevieauxobjets.ademe.fr</a>" not in str(response.content)
         )
