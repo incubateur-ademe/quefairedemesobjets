@@ -363,7 +363,7 @@ class CorrectionActeurAdmin(BaseActeurAdmin):
     gis_widget = CustomOSMWidget
     inlines = []
     list_display = ["__str__", "source", "correction_statut"]
-    readonly_fields = ["final_acteur"]
+    readonly_fields = ["final_acteur", "cree_le", "modifie_le"]
 
 
 admin.site.register(Acteur, ActeurAdmin)
