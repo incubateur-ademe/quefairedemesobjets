@@ -155,6 +155,7 @@ class TestActeurSerialize:
             "location": {"type": "Point", "coordinates": [0.0, 0.0]},
             "naf_principal": None,
             "commentaires": None,
+            "horaires": None,
             "proposition_services": [proposition_service.serialize()],
         }
         assert acteur.serialize() == expected_serialized_acteur
@@ -191,6 +192,33 @@ class TestActeurDefaultOnSave:
             identifiant_unique="Unique",
         )
         assert acteur.identifiant_unique == "Unique"
+
+
+@pytest.mark.django_db
+class TestActeurOpeningHours:
+    def test_horaires_ok(self):
+        acteur = Acteur(
+            nom="Test Object 1",
+            acteur_type_id=1,
+            location=Point(0, 0),
+        )
+        assert acteur.full_clean() is None
+        acteur.horaires = ""
+        assert acteur.full_clean() is None
+        acteur.horaires = "24/7"
+        assert acteur.full_clean() is None
+        acteur.horaires = "Mo-Fr 09:00-12:00,13:00-18:00; Sa 09:00-12:00"
+        assert acteur.full_clean() is None
+
+    def test_horaires_ko(self):
+        acteur = Acteur(
+            nom="Test Object 1",
+            acteur_type_id=1,
+            location=Point(0, 0),
+        )
+        acteur.horaires = "24/24"
+        with pytest.raises(ValidationError):
+            acteur.full_clean()
 
 
 @pytest.mark.django_db
@@ -340,6 +368,7 @@ class TestFinalActeurSerialize:
             "location": {"type": "Point", "coordinates": [0.0, 0.0]},
             "naf_principal": None,
             "commentaires": None,
+            "horaires": None,
             "proposition_services": [
                 proposition_service.serialize()
                 for proposition_service in finalacteur.proposition_services.all()
@@ -371,6 +400,7 @@ class TestFinalActeurSerialize:
             "location": {"type": "Point", "coordinates": [0.0, 0.0]},
             "naf_principal": None,
             "commentaires": None,
+            "horaires": None,
             "proposition_services": [
                 proposition_service.serialize()
                 for proposition_service in finalacteur.proposition_services.all()
@@ -403,6 +433,7 @@ class TestFinalActeurSerialize:
             "location": {"type": "Point", "coordinates": [0.0, 0.0]},
             "naf_principal": None,
             "commentaires": None,
+            "horaires": None,
             "proposition_services": [
                 proposition_service.serialize()
                 for proposition_service in finalacteur.proposition_services.all()

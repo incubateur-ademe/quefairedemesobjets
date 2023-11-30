@@ -124,6 +124,7 @@ class BaseActeurAdmin(admin.GISModelAdmin):
         "code_postal",
         "ville",
         "location",
+        "horaires",
         "multi_base",
         "manuel",
         "label_reparacteur",

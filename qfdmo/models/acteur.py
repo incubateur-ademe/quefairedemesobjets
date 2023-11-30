@@ -2,6 +2,7 @@ import json
 import random
 import string
 
+import opening_hours
 import orjson
 from django.contrib.gis.db import models
 from django.db import connection
@@ -80,6 +81,14 @@ class Source(NomAsNaturalKeyModel):
         return model_to_dict(self)
 
 
+def validate_opening_hours(value):
+    if value and not opening_hours.validate(value):
+        raise ValidationError(
+            ("%(value)s is not an valid opening hours"),
+            params={"value": value},
+        )
+
+
 class BaseActeur(NomAsNaturalKeyModel):
     class Meta:
         abstract = True
@@ -115,6 +124,9 @@ class BaseActeur(NomAsNaturalKeyModel):
     commentaires = models.TextField(blank=True, null=True)
     cree_le = models.DateTimeField(auto_now_add=True)
     modifie_le = models.DateTimeField(auto_now=True)
+    horaires = models.CharField(
+        blank=True, null=True, validators=[validate_opening_hours]
+    )
 
     @property
     def latitude(self):
