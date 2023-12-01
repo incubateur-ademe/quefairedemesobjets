@@ -3,8 +3,9 @@ import { SolutionMap } from "./solution_map"
 import { Actor } from "./types"
 
 export default class extends Controller<HTMLElement> {
-    static targets = ["acteur"]
+    static targets = ["acteur", "searchInZone"]
     declare readonly acteurTargets: Array<HTMLScriptElement>
+    declare readonly searchInZoneTarget: HTMLElement
 
     static values = { location: { type: Object, default: {} } }
     declare readonly locationValue: object
@@ -12,6 +13,7 @@ export default class extends Controller<HTMLElement> {
     connect() {
         const actorsMap = new SolutionMap({
             location: this.locationValue,
+            controller: this,
         })
         //fixme : find how do not allow undefined from map
         const actors: Array<Actor> = this.acteurTargets
@@ -25,5 +27,10 @@ export default class extends Controller<HTMLElement> {
 
         actorsMap.displayActor(actors)
         actorsMap.initEventListener()
+    }
+
+    mapChanged(event: CustomEvent) {
+        console.log("mapChanged !!!", event.detail)
+        //        this.searchInZoneTarget.classList.remove("qfdmo-hidden")
     }
 }

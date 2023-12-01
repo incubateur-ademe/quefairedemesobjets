@@ -1,3 +1,4 @@
+import { Controller } from "@hotwired/stimulus"
 import L from "leaflet"
 import "leaflet-extra-markers/dist/js/leaflet.extra-markers.min.js"
 import { defaultMarker, homeIconMarker } from "./icon_marker"
@@ -38,9 +39,18 @@ export class SolutionMap {
     #map: L.Map
     #zoomControl: L.Control.Zoom
     #location: Location
+    #controller: Controller
+    #markerClicked: boolean = false
 
-    constructor({ location }: { location: Location }) {
+    constructor({
+        location,
+        controller,
+    }: {
+        location: Location
+        controller: Controller
+    }) {
         this.#location = location
+        this.#controller = controller
         this.#map = L.map("map", {
             preferCanvas: true,
             zoomControl: false,
@@ -49,10 +59,10 @@ export class SolutionMap {
         this.#map.setView(DEFAULT_LOCATION, DEFAULT_ZOOM)
         L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
             maxZoom: DEFAULT_MAX_ZOOM,
-            attribution: "© OSM",
+            attribution: "© OpenStreetMap",
         }).addTo(this.#map)
-        L.control.scale({ imperial: false }).addTo(this.#map)
-        this.#manageZoomControl()
+
+        this.#manageControlDisplay()
 
         if (
             this.#location.latitude !== undefined &&
@@ -85,7 +95,7 @@ export class SolutionMap {
                 } else {
                     customMarker = defaultMarker
                 }
-                var marker = L.marker(
+                L.marker(
                     [actor.location.coordinates[1], actor.location.coordinates[0]],
                     {
                         icon: customMarker,
@@ -95,7 +105,6 @@ export class SolutionMap {
                     .addTo(this.#map)
                     .bindPopup(actor.render_as_card)
                     .on("click", this.markerOnClick, this)
-                marker.prop = { id: actor.id }
                 points.push([
                     actor.location.coordinates[1],
                     actor.location.coordinates[0],
@@ -118,7 +127,7 @@ export class SolutionMap {
         return this.#map
     }
 
-    #manageZoomControl() {
+    #manageControlDisplay() {
         this.#zoomControl = L.control.zoom({ position: "topleft" })
         this.#zoomControl.addTo(this.#map)
         this.#map.on("popupopen", () => {
@@ -130,47 +139,36 @@ export class SolutionMap {
     }
 
     #dispatch(type: string, detail: unknown) {
-        console.log("dispatch", type, detail)
-        this.#map.getTargetElement().dispatchEvent(
-            new CustomEvent(type, {
-                detail,
-                bubbles: true,
-            }),
-        )
+        this.#controller.dispatch(type, {
+            detail,
+            bubbles: true,
+        })
     }
 
     initEventListener(): void {
-        this.#map.on("moveend", function (e) {
-            this.#dispatch(
-                "leaflet:mapChange",
-                {
+        if (this.#markerClicked) {
+            this.#markerClicked = false
+        } else {
+            this.#map.on("moveend", (e) => {
+                this.#dispatch("mapChanged", {
                     center: e.target.getBounds().getCenter(),
                     southWest: e.target.getBounds().getSouthWest(),
                     northEast: e.target.getBounds().getNorthEast(),
-                },
-                this,
-            )
-            // console.log(
-            //     "Map move end",
-            //     e.target.getBounds().getCenter(),
-            //     e.target.getBounds().getSouthWest(),
-            //     e.target.getBounds().getNorthEast(),
-            // )
-        })
+                })
+            })
+        }
     }
 
-    #dispatchBboxChanged = (mapBrowserEvent) => {
-        const view = this.#map.getView()
-        this.#dispatch("leaf:changed", {
-            bbox: view.calculateExtent().map((a) => a.toFixed(2)),
-            zoom: view.getZoom()?.toFixed(2),
-        })
-    }
+    // #dispatchBboxChanged = (mapBrowserEvent) => {
+    //     const view = this.#map.getView()
+    //     this.#dispatch("leaf:changed", {
+    //         bbox: view.calculateExtent().map((a) => a.toFixed(2)),
+    //         zoom: view.getZoom()?.toFixed(2),
+    //     })
+    // }
 
     markerOnClick(event: Event): void {
-        console.log("markerOnClick", event.target.prop)
-        console.log(event.target.getLatLng())
-        console.log("this", this)
+        this.#markerClicked = true
         this.#map.setView(event.target.getLatLng(), this.#map.getZoom())
     }
 }
