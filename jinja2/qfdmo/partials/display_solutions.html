@@ -3,7 +3,7 @@
     data-controller="display-solutions"
     data-action="
     search-solution-form:loadingSolutions@window->display-solutions#loadingSolutions
-    map:mapChanged@window->map#mapChanged"
+    leaflet:mapChanged->map#mapChanged"
     >
     <turbo-frame id="solutionFrame">
         <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-flex qfdmo-flex-col">
@@ -20,9 +20,10 @@
                     class="qfdmo-flex-grow qfdmo-relative qfdmo-shadow"
                     data-controller="map"
                     data-map-location-value="{{ location }}"
-                    id="map" data-map-target="map"
+                    id="map"
+                    data-map-target="map"
                 >
-                    <div data-map-target="searchInZone" class="qfdmo-absolute qfdmo-z-[500] qfdmo-flex qfdmo-justify-end qfdmo-hidden" >
+                    <div data-map-target="searchInZone" class="qfdmo-absolute qfdmo-z-[500] qfdmo-right-0 qfdmo-hidden" >
                         <button class="fr-btn fr-btn--secondary fr-m-1w qfdmo-bg-white qfdmo-opacity-80 qfdmo-rounded fr-py-1v fr-px-1v">Rechercher dans cette zone
                         </button>
                     </div>

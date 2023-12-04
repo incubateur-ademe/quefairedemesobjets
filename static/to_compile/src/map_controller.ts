@@ -1,6 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 import { SolutionMap } from "./solution_map"
 import { Actor } from "./types"
+const debounce = require("lodash/debounce")
 
 export default class extends Controller<HTMLElement> {
     static targets = ["acteur", "searchInZone"]
@@ -28,9 +29,12 @@ export default class extends Controller<HTMLElement> {
         actorsMap.displayActor(actors)
         actorsMap.initEventListener()
     }
+    initialize() {
+        this.mapChanged = debounce(this.mapChanged, 300).bind(this)
+    }
 
     mapChanged(event: CustomEvent) {
         console.log("mapChanged !!!", event.detail)
-        //        this.searchInZoneTarget.classList.remove("qfdmo-hidden")
+        this.searchInZoneTarget.classList.remove("qfdmo-hidden")
     }
 }
