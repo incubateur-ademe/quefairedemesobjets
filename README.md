@@ -13,6 +13,8 @@ Le site est disponible en iframe en ajoutant le paramètre `iframe` à l'URL, qu
 
 Dans le cas de l'iframe, l'entête et le pied de page ne sont pas affichés
 
+⚠️ le tag iframe de votre page doit avoir l'attribut `allow="geolocation"` pour permettre à l'iframe d'accéder aux fonctionnalités de géolocalisation du navigateur (cf. [https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy/geolocation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy/geolocation))
+
 ### Les paramètres disponibles pour customiser l'Iframe
 
 Les autres paramètres disponibles pour afficher la page principale de l'application et permettant d'interagir avec les champs de recherche sont :
