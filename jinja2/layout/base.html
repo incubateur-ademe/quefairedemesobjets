@@ -6,12 +6,17 @@
         <meta name="robots" content="{% block robots %}index, follow{% endblock %}">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+        <!--Meta for linkedin-->
+        <meta prefix="og: http://ogp.me/ns#" property="og:title" content="{% block shared_page_title %}Longue vie aux objets{% endblock %}">
+        <meta prefix="og: http://ogp.me/ns#" property="og:description" content="{% block shared_page_description %}Donnons une nouvelle vie aux objets. Longue vie aux objets met en avant toutes les bonnes adresses pour réparer, partager, donner, vendre... afin de prolonger la vie des objets du quotidien.{% endblock %}">
+        <meta prefix="og: http://ogp.me/ns#" property="og:image" content="{% block shared_page_image %}{{ request.build_absolute_uri()|trim('/') }}{{ static('lvao-hompage.jpg') }}{% endblock %}">
+
         <!--Title and desc-->
-        <title>{% block page_title %}Longue vie aux objets{% endblock%}</title>
+        <title>{% block page_title %}Longue vie aux objets{% endblock %}</title>
         <meta name="description" content="{% block page_description %}Donnons une nouvelle vie aux objets{% endblock %}">
 
         <!--Favicon-->
-        <link rel="shortcut icon" href="{{ static('favicon-16x16.png') }}" type="image/x-icon"><!-- 32×32 -->
+        <link rel="shortcut icon" href="{{ static('favicon-16x16.png') }}" type="image/x-icon"><!-- 16×16 -->
 
         <!--Css-->
         <link rel="stylesheet" href="{{ static('qfdmo.css') }}">
