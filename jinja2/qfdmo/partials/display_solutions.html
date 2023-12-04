@@ -23,10 +23,9 @@
                     id="map"
                     data-map-target="map"
                 >
-                    <div data-map-target="searchInZone" class="qfdmo-absolute qfdmo-z-[500] qfdmo-right-0 qfdmo-hidden" >
-                        <button class="fr-btn fr-btn--secondary fr-m-1w qfdmo-bg-white qfdmo-opacity-80 qfdmo-rounded fr-py-1v fr-px-1v">Rechercher dans cette zone
-                        </button>
-                    </div>
+                    <button data-map-target="searchInZone" data-turbo-frame="_self" class="qfdmo-absolute qfdmo-z-[500] qfdmo-right-0 qfdmo-hidden fr-btn fr-btn--secondary fr-m-1w qfdmo-bg-white qfdmo-opacity-80 qfdmo-rounded fr-py-1v fr-px-1v">
+                        Rechercher dans cette zone
+                    </button>
                     <div
                         class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-80 qfdmo-font-black qfdmo-z-[1000]{% if form.initial.adresse %} qfdmo-hidden{% endif %}"
                         data-display-solutions-target="addressMissing"
@@ -42,14 +41,14 @@
                     >
                         <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
                             Il n'existe pas de solution localisée proche de chez vous (<30 km), avez-vous envigagé une solution en ligne ?
+                                </div>
+                            </div>
+                            {% for acteur in acteurs %}
+                                <script type="application/json" data-map-target="acteur">
+                                    {{ acteur.json_acteur_for_display(direction=form.initial.direction, action_list=form.initial.action_list) | safe }}
+                                </script>
+                            {% endfor %}
                         </div>
-                    </div>
-                    {% for acteur in acteurs %}
-                        <script type="application/json" data-map-target="acteur">
-                            {{ acteur.json_acteur_for_display(direction=form.initial.direction, action_list=form.initial.action_list) | safe }}
-                        </script>
-                    {% endfor %}
-                </div>
             {% endif %}
             <div>
                 <a class="fr-mb-1w fr-ml-1w fr-btn fr-btn--tertiary qfdmo-whitespace-nowrap qfdmo-float-right qfdmo-w-full md:qfdmo-w-max fr-mt-1v"

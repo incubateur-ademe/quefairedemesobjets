@@ -3,8 +3,10 @@
 {% block content %}
     <div data-controller="search-solution-form"
         class="fr-container fr-mb-1w qfdmo-flex qfdmo-flex-col{% if not is_iframe(request) %} qfdmo-min-h-screen{%endif%}{% if not is_iframe(request) or form.initial.adresse %} md:qfdmo-min-h-fit md:qfdmo-flex-auto{% endif %}" >
-        {% include 'qfdmo/partials/search_solution.html' %}
-        {% include 'qfdmo/partials/display_solutions.html' %}
+        <form id='search_form' action='#solutions' >
+            {% include 'qfdmo/partials/search_solution.html' %}
+            {% include 'qfdmo/partials/display_solutions.html' %}
+        </form>
     </div>
     {% if is_iframe(request) %}
         <div class="fr-container fr-mb-1w qfdmo-text-center fr-text--sm">

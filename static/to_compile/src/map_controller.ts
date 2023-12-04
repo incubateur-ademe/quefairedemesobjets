@@ -6,7 +6,7 @@ const debounce = require("lodash/debounce")
 export default class extends Controller<HTMLElement> {
     static targets = ["acteur", "searchInZone"]
     declare readonly acteurTargets: Array<HTMLScriptElement>
-    declare readonly searchInZoneTarget: HTMLElement
+    declare readonly searchInZoneTarget: HTMLButtonElement
 
     static values = { location: { type: Object, default: {} } }
     declare readonly locationValue: object
@@ -35,6 +35,16 @@ export default class extends Controller<HTMLElement> {
 
     mapChanged(event: CustomEvent) {
         console.log("mapChanged !!!", event.detail)
+        this.searchInZoneTarget.name = "search_in_zone"
+        this.searchInZoneTarget.value = JSON.stringify(event.detail)
+        this.displaySearchInZoneButton()
+    }
+
+    displaySearchInZoneButton() {
         this.searchInZoneTarget.classList.remove("qfdmo-hidden")
+    }
+
+    hideSearchInZoneButton() {
+        this.searchInZoneTarget.classList.add("qfdmo-hidden")
     }
 }
