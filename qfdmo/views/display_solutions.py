@@ -97,12 +97,41 @@ class ReemploiSolutionView(FormView):
             )
             kwargs["acteurs"] = acteurs
         else:
+            # latitude = None
+            # longitude = None
+
+            # search_in_zone = self.request.GET.get("search_in_zone", None)
+            # if search_in_zone:
+            #     search_in_zone = json.loads(search_in_zone)
+            #     if (
+            #         "center" in search_in_zone
+            #         and "lat" in search_in_zone["center"]
+            #         and "lng" in search_in_zone["center"]
+            #     ):
+            #         latitude = search_in_zone["center"]["lat"]
+            #         longitude = search_in_zone["center"]["lng"]
+            # else:
+            #     latitude = self.request.GET.get("latitude", None)
+            #     longitude = self.request.GET.get("longitude", None)
+
             if (latitude := self.request.GET.get("latitude", None)) and (
                 longitude := self.request.GET.get("longitude", None)
             ):
                 kwargs["location"] = json.dumps(
                     {"latitude": latitude, "longitude": longitude}
                 )
+
+                search_in_zone = self.request.GET.get("search_in_zone", None)
+                if search_in_zone:
+                    search_in_zone = json.loads(search_in_zone)
+                    if (
+                        "center" in search_in_zone
+                        and "lat" in search_in_zone["center"]
+                        and "lng" in search_in_zone["center"]
+                    ):
+                        latitude = search_in_zone["center"]["lat"]
+                        longitude = search_in_zone["center"]["lng"]
+
                 reference_point = Point(float(longitude), float(latitude), srid=4326)
                 distance_in_degrees = settings.DISTANCE_MAX / 111320
 

@@ -23,7 +23,13 @@
                     id="map"
                     data-map-target="map"
                 >
-                    <button data-map-target="searchInZone" data-turbo-frame="_self" class="qfdmo-absolute qfdmo-z-[500] qfdmo-right-0 qfdmo-hidden fr-btn fr-btn--secondary fr-m-1w qfdmo-bg-white qfdmo-opacity-80 qfdmo-rounded fr-py-1v fr-px-1v">
+                    <button
+                        data-map-target="searchInZone"
+                        data-turbo-frame="solutionFrame"
+                        data-action="click -> search-solution-form#loadingSolutions"
+                        class="fr-m-1w fr-p-1v qfdmo-absolute qfdmo-z-[500] qfdmo-right-0 qfdmo-hidden qfdmo-bg-white qfdmo-opacity-80 qfdmo-rounded qfdmo-border-solid qfdmo-border-2 qfdmo-border-blue-france"
+                        form="search_form"
+                        >
                         Rechercher dans cette zone
                     </button>
                     <div
