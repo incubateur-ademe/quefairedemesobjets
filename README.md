@@ -78,13 +78,13 @@ Certains objets de la base de données sont des objets d'administration qui n'on
 **Catégories/Sous-catégories** (qfdmo_categorieobjet, qfdmo_souscategorieobjet)
 
 | Catégories                 | Sous-catégorie                   |
-| -------------------------- | -------------------------------- | ------------- |
+| -------------------------- |----------------------------------|
 | Bijou, montre, horlogerie  | Bijou, montre, horlogerie        |
 | Bricolage / Jardinage      | Outillage (bricolage/jardinage)  |
 | Electroménager             | Gros électroménager (froid)      |
 | Electroménager             | Gros électroménager (hors froid) |
 | Electroménager             | Petit électroménager             |
-| Equipements de loisir      | "Jardin (mobilier                | accessoires)" |
+| Equipements de loisir      | "Jardin (mobilier accessoires)"  |
 | Equipements de loisir      | Autre matériel de sport          |
 | Equipements de loisir      | Instruments de musique           |
 | Equipements de loisir      | Jouets                           |
