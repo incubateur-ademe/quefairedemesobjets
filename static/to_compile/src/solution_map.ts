@@ -76,7 +76,7 @@ export class SolutionMap {
         }
     }
 
-    displayActor(actors: Array<Actor>): void {
+    displayActor(actors: Array<Actor>, bbox?: Array<Number>): void {
         let points: Array<Array<Number>> = []
 
         actors.forEach(function (actor: Actor) {
@@ -116,8 +116,12 @@ export class SolutionMap {
         ) {
             points.push([this.#location.latitude, this.#location.longitude])
         }
-
-        if (points.length > 0) {
+        if (bbox !== undefined) {
+            this.#map.fitBounds([
+                [bbox[1], bbox[0]],
+                [bbox[3], bbox[2]],
+            ])
+        } else if (points.length > 0) {
             this.#map.fitBounds(points)
         }
     }

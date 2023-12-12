@@ -4,9 +4,10 @@ import { Actor } from "./types"
 const debounce = require("lodash/debounce")
 
 export default class extends Controller<HTMLElement> {
-    static targets = ["acteur", "searchInZone"]
+    static targets = ["acteur", "searchInZone", "bBox"]
     declare readonly acteurTargets: Array<HTMLScriptElement>
     declare readonly searchInZoneTarget: HTMLButtonElement
+    declare readonly bBoxTarget?: HTMLScriptElement
 
     static values = { location: { type: Object, default: {} } }
     declare readonly locationValue: object
@@ -25,8 +26,13 @@ export default class extends Controller<HTMLElement> {
                 }
             })
             .filter((actor) => actor !== undefined)
+        if (this.hasBBoxTarget) {
+            const bbox = JSON.parse(this.bBoxTarget.textContent)
+            actorsMap.displayActor(actors, bbox)
+        } else {
+            actorsMap.displayActor(actors)
+        }
 
-        actorsMap.displayActor(actors)
         actorsMap.initEventListener()
     }
     initialize() {
