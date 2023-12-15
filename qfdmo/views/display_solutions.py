@@ -4,7 +4,7 @@ import unidecode
 from django.conf import settings
 from django.contrib.admin.utils import quote
 from django.contrib.gis.db.models.functions import Distance
-from django.contrib.gis.geos import Point
+from django.contrib.gis.geos import Point, Polygon
 from django.contrib.postgres.lookups import Unaccent
 from django.contrib.postgres.search import TrigramWordDistance  # type: ignore
 from django.db.models import Min, Q
@@ -35,6 +35,38 @@ BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
 class ReemploiSolutionView(FormView):
     form_class = GetReemploiSolutionForm
     template_name = "qfdmo/reemploi_solution.html"
+
+    def _get_search_in_zone_params(self):
+        search_in_zone = self.request.GET.get("search_in_zone", None)
+        center = []
+        my_bbox_polygon = []
+        if search_in_zone:
+            search_in_zone = json.loads(search_in_zone)
+            if (
+                "center" in search_in_zone
+                and "lat" in search_in_zone["center"]
+                and "lng" in search_in_zone["center"]
+            ):
+                center = [
+                    search_in_zone["center"]["lng"],
+                    search_in_zone["center"]["lat"],
+                ]
+
+            if (
+                "southWest" in search_in_zone
+                and "lat" in search_in_zone["southWest"]
+                and "lng" in search_in_zone["southWest"]
+                and "northEast" in search_in_zone
+                and "lat" in search_in_zone["northEast"]
+                and "lng" in search_in_zone["northEast"]
+            ):
+                my_bbox_polygon = [
+                    search_in_zone["southWest"]["lng"],
+                    search_in_zone["southWest"]["lat"],
+                    search_in_zone["northEast"]["lng"],
+                    search_in_zone["northEast"]["lat"],
+                ]  # [xmin, ymin, xmax, ymax]
+        return center, my_bbox_polygon
 
     def get_initial(self):
         initial = super().get_initial()
@@ -103,6 +135,12 @@ class ReemploiSolutionView(FormView):
                 kwargs["location"] = json.dumps(
                     {"latitude": latitude, "longitude": longitude}
                 )
+
+                center, my_bbox_polygon = self._get_search_in_zone_params()
+                if center:
+                    longitude = center[0]
+                    latitude = center[1]
+
                 reference_point = Point(float(longitude), float(latitude), srid=4326)
                 distance_in_degrees = settings.DISTANCE_MAX / 111320
 
@@ -118,8 +156,27 @@ class ReemploiSolutionView(FormView):
                         reference_point,
                         distance_in_degrees,
                     )
-                ).order_by("distance")[: settings.MAX_SOLUTION_DISPLAYED_ON_MAP]
-                kwargs["acteurs"] = acteurs
+                ).order_by("distance")
+                bbox_acteurs = None
+                if my_bbox_polygon:
+                    bbox_acteurs = acteurs.filter(
+                        location__within=Polygon.from_bbox(my_bbox_polygon)
+                    )[: settings.MAX_SOLUTION_DISPLAYED_ON_MAP]
+                    kwargs["bbox"] = my_bbox_polygon
+
+                kwargs["acteurs"] = (
+                    bbox_acteurs or acteurs[: settings.MAX_SOLUTION_DISPLAYED_ON_MAP]
+                )
+
+                # Display 30 km around the center if no result in bbox
+                if not bbox_acteurs and my_bbox_polygon:
+                    kwargs["bbox"] = [
+                        longitude - distance_in_degrees,
+                        latitude - distance_in_degrees,
+                        longitude + distance_in_degrees,
+                        latitude + distance_in_degrees,
+                    ]
+
         return super().get_context_data(**kwargs)
 
     def _build_ps_filter(self, action_selection_ids, sous_categorie_id: int | None):
