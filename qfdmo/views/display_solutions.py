@@ -177,7 +177,7 @@ def getorcreate_revision_acteur(request, acteur_identifiant):
 
 def refresh_acteur_view(request):
     RefreshMateriazedViewThread().start()
-    return redirect(request.META["HTTP_REFERER"])
+    return redirect("admin:index")
 
 
 @require_GET
