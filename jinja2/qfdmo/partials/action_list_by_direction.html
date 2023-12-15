@@ -1,17 +1,28 @@
 <div id="{{action_direction}}" data-search-solution-form-target='{{action_direction}}'>
-    <fieldset class="fr-fieldset fr-mb-1w" id="checkboxes-inline" aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages">
+    <div class="qfdmo-flex qfdmo-flex-row qfdmo-flex-wrap">
         {% for action in action_by_direction(request, action_direction) %}
-            <div class="fr-fieldset__element fr-fieldset__element--inline fr-mb-1w">
-                <div
-                    class="fr-checkbox-group fr-p-1v qfdmo-bg-{{action.couleur}} qfdmo-bg-opacity-30"
-                    data-action="click->search-solution-form#apply"
-                    >
-                    <input name="{{action.nom}}" id="{{action_direction}}_{{action.nom}}" data-search-solution-form-target="action" type="checkbox" aria-describedby="{{action.nom}}-messages" {% if action.active %} checked{% endif %} data-action="click -> search-solution-form#updateSearchSolutionForm">
-                    <label class="fr-label before:qfdmo-bg-white fr-text--sm fr-mb-0" for="{{action_direction}}_{{action.nom}}">
-                        {{ action.nom_affiche }}
-                    </label>
-                </div>
+            <div
+                class="fr-mr-1v fr-mb-1w fr-p-1v qfdmo-bg-{{action.couleur}} qfdmo-rounded qfdmo-bg-opacity-20 qfdmo-flex qfdmo-flex-row qfdmo-items-center qfdmo-justify-center"
+                data-action="click->search-solution-form#apply"
+                >
+                <input
+                    name="{{action.nom}}"
+                    class="qfdmo-bg-opacity-100 qfdmo-accent-{{action.couleur}} qfdmo-border-0 qfdmo-w-2w qfdmo-h-2w qfdmo-rounded focus:qfdmo-ring-{{action.couleur}} focus:qfdmo-ring-2"
+                    id="{{action_direction}}_{{action.nom}}"
+                    data-search-solution-form-target="action"
+                    type="checkbox"
+                    aria-describedby="{{action.nom}}-messages"
+                    {% if action.active %} checked{% endif %}
+                    data-action="click -> search-solution-form#updateSearchSolutionForm"
+                >
+                <label class="fr-ml-1v before:qfdmo-bg-white fr-text--sm fr-mb-0" for="{{action_direction}}_{{action.nom}}">
+                    {{ action.nom_affiche }}
+                </label>
             </div>
+
+
+
+
         {% endfor %}
-    </fieldset>
+    </div>
 </div>
