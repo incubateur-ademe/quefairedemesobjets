@@ -1,5 +1,4 @@
 import AutocompleteController from "../src/autocomplete_controller"
-const debounce = require("lodash/debounce")
 
 const SEPARATOR = "||"
 export default class extends AutocompleteController {

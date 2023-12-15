@@ -1,6 +1,7 @@
 import L from "leaflet"
 import "leaflet-extra-markers/dist/js/leaflet.extra-markers.min.js"
 import { defaultMarker, homeIconMarker } from "./icon_marker"
+import MapController from "./map_controller"
 import { Actor, Location } from "./types"
 
 const DEFAULT_LOCATION: Array<Number> = [46.227638, 2.213749]
@@ -38,9 +39,18 @@ export class SolutionMap {
     #map: L.Map
     #zoomControl: L.Control.Zoom
     #location: Location
+    #controller: MapController
+    #isPopupOpen: boolean = false
 
-    constructor({ location }: { location: Location }) {
+    constructor({
+        location,
+        controller,
+    }: {
+        location: Location
+        controller: MapController
+    }) {
         this.#location = location
+        this.#controller = controller
         this.#map = L.map("map", {
             preferCanvas: true,
             zoomControl: false,
@@ -66,7 +76,7 @@ export class SolutionMap {
         }
     }
 
-    display_actor(actors: Array<Actor>): void {
+    displayActor(actors: Array<Actor>, bbox?: Array<Number>): void {
         let points: Array<Array<Number>> = []
 
         actors.forEach(function (actor: Actor) {
@@ -106,8 +116,12 @@ export class SolutionMap {
         ) {
             points.push([this.#location.latitude, this.#location.longitude])
         }
-
-        if (points.length > 0) {
+        if (bbox !== undefined) {
+            this.#map.fitBounds([
+                [bbox[1], bbox[0]],
+                [bbox[3], bbox[2]],
+            ])
+        } else if (points.length > 0) {
             this.#map.fitBounds(points)
         }
     }
@@ -120,10 +134,33 @@ export class SolutionMap {
         this.#zoomControl = L.control.zoom({ position: "topleft" })
         this.#zoomControl.addTo(this.#map)
         this.#map.on("popupopen", () => {
+            this.#isPopupOpen = true
             this.#map.removeControl(this.#zoomControl)
+            this.#controller.hideSearchInZoneButton()
         })
         this.#map.on("popupclose", () => {
+            this.#isPopupOpen = false
             this.#zoomControl.addTo(this.#map)
         })
+    }
+
+    #dispatchMapChangedEvent(e: L.LeafletEvent): void {
+        const bounds = e.target.getBounds()
+        const detail = {
+            center: bounds.getCenter(),
+            southWest: bounds.getSouthWest(),
+            northEast: bounds.getNorthEast(),
+        }
+        const event = new CustomEvent("leaflet:mapChanged", {
+            detail,
+            bubbles: true,
+        })
+        if (!this.#isPopupOpen) {
+            this.#controller.mapChanged(event)
+        }
+    }
+
+    initEventListener(): void {
+        this.#map.on("moveend", this.#dispatchMapChangedEvent.bind(this))
     }
 }
