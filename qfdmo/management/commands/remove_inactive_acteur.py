@@ -1,7 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from qfdmo.models import ActeurStatus, CorrectionActeur, CorrectionActeurStatus
-from qfdmo.models.acteur import Acteur
+from qfdmo.models import Acteur, ActeurStatus, CorrectionActeur, CorrectionActeurStatus
 
 
 class Command(BaseCommand):

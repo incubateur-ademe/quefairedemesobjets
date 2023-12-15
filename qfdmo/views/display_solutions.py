@@ -21,12 +21,12 @@ from qfdmo.models import (
     Acteur,
     ActeurStatus,
     ActeurType,
+    CachedDirectionAction,
     FinalActeur,
     FinalPropositionService,
     Objet,
     RevisionActeur,
 )
-from qfdmo.models.action import CachedDirectionAction
 from qfdmo.thread.materialized_view import RefreshMateriazedViewThread
 
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
