@@ -168,6 +168,7 @@ class ReemploiSolutionView(FormView):
                     bbox_acteurs or acteurs[: settings.MAX_SOLUTION_DISPLAYED_ON_MAP]
                 )
 
+                # Display 30 km around the center if no result in bbox
                 if not bbox_acteurs and my_bbox_polygon:
                     kwargs["bbox"] = [
                         longitude - distance_in_degrees,

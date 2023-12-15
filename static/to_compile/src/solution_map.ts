@@ -144,7 +144,7 @@ export class SolutionMap {
         })
     }
 
-    private dispatchMapChangedEvent(e: L.LeafletEvent): void {
+    #dispatchMapChangedEvent(e: L.LeafletEvent): void {
         const bounds = e.target.getBounds()
         const detail = {
             center: bounds.getCenter(),
@@ -161,24 +161,6 @@ export class SolutionMap {
     }
 
     initEventListener(): void {
-        // if (this.#markerClicked) {
-        //     this.#markerClicked = false
-        // } else {
-        this.#map.on("moveend", this.dispatchMapChangedEvent.bind(this))
-        // }
+        this.#map.on("moveend", this.#dispatchMapChangedEvent.bind(this))
     }
-
-    // #dispatch(type: string, detail: unknown) {
-    //     console.log("dispatch", type, detail)
-    //     const event = new CustomEvent(type, {
-    //         detail,
-    //         bubbles: true,
-    //     })
-    //     const divElement = document.querySelector(
-    //         'div[data-controller="display-solutions"]',
-    //     )
-    //     if (divElement) {
-    //         divElement.dispatchEvent(event)
-    //     }
-    // }
 }

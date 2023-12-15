@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
+import debounce from "lodash/debounce"
 import { SolutionMap } from "./solution_map"
 import { Actor } from "./types"
-const debounce = require("lodash/debounce")
 
 export default class extends Controller<HTMLElement> {
     static targets = ["acteur", "searchInZone", "bBox"]
@@ -40,7 +40,6 @@ export default class extends Controller<HTMLElement> {
     }
 
     mapChanged(event: CustomEvent) {
-        console.log("mapChanged !!!", event.detail)
         this.searchInZoneTarget.name = "search_in_zone"
         this.searchInZoneTarget.value = JSON.stringify(event.detail)
         this.displaySearchInZoneButton()
