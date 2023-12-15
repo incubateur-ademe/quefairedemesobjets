@@ -49,7 +49,8 @@ export class SolutionMap {
         this.#map.setView(DEFAULT_LOCATION, DEFAULT_ZOOM)
         L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
             maxZoom: DEFAULT_MAX_ZOOM,
-            attribution: "© OSM",
+            attribution:
+                "© <a href='https://www.openstreetmap.org' rel='noopener'>OpenStreetMap</a>",
         }).addTo(this.#map)
         L.control.scale({ imperial: false }).addTo(this.#map)
         this.#manageZoomControl()
