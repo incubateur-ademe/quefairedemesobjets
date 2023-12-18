@@ -21,9 +21,6 @@
                 </button>
             </div>
             <div class="qfdmo-hidden qfdmo-relative qfdmo-border qfdmo-border-light-grey qfdmo-border-solid qfdmo-rounded fr-mb-1w fr-p-1w" data-search-solution-form-target="advancedFiltersDiv">
-                <button type='button' class="fr-p-1w qfdmo-absolute qfdmo-z-20 qfdmo-text-right qfdmo-top-0 qfdmo-right-0 qfdmo-cursor-pointer" data-action="click -> search-solution-form#toggleadvancedFiltersDiv">
-                    <span class="fr-icon--sm fr-icon-close-line"></span>
-                </button>
                 <div
                     class="qfdmo-flex qfdmo-flex-row qfdmo-items-center"
                 >
@@ -40,6 +37,9 @@
                         </div>
                     </fieldset>
                 </div>
+                <button type='button' class="fr-p-1w qfdmo-absolute qfdmo-z-20 qfdmo-text-right qfdmo-top-0 qfdmo-right-0 qfdmo-cursor-pointer" data-action="click -> search-solution-form#toggleadvancedFiltersDiv">
+                    <span class="fr-icon--sm fr-icon-close-line"></span>
+                </button>
             </div>
             {{ form.action_list }}
             <div data-controller='ss-cat-object-autocomplete'
