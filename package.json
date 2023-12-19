@@ -1,10 +1,11 @@
 {
     "scripts": {
         "build": "parcel build",
-        "watch": "parcel watch",
+        "eslint": "eslint . --fix",
         "lint-check": "prettier --check static/to_compile",
         "lint": "prettier static/to_compile --write",
-        "test": "jest"
+        "test": "jest",
+        "watch": "parcel watch"
     },
     "source": [
         "static/to_compile/entrypoints/qfdmo.css",
