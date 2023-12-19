@@ -162,20 +162,12 @@ class ReemploiSolutionView(FormView):
                     bbox_acteurs = acteurs.filter(
                         location__within=Polygon.from_bbox(my_bbox_polygon)
                     )[: settings.MAX_SOLUTION_DISPLAYED_ON_MAP]
-                    kwargs["bbox"] = my_bbox_polygon
+                    if bbox_acteurs:
+                        kwargs["bbox"] = my_bbox_polygon
 
                 kwargs["acteurs"] = (
                     bbox_acteurs or acteurs[: settings.MAX_SOLUTION_DISPLAYED_ON_MAP]
                 )
-
-                # Display 30 km around the center if no result in bbox
-                if not bbox_acteurs and my_bbox_polygon:
-                    kwargs["bbox"] = [
-                        longitude - distance_in_degrees,
-                        latitude - distance_in_degrees,
-                        longitude + distance_in_degrees,
-                        latitude + distance_in_degrees,
-                    ]
 
         return super().get_context_data(**kwargs)
 
