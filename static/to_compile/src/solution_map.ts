@@ -60,7 +60,7 @@ export class SolutionMap {
         L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
             maxZoom: DEFAULT_MAX_ZOOM,
             attribution:
-                "© <a href='https://www.openstreetmap.org' rel='noopener'>OpenStreetMap</a>",
+                "© <a href='https://www.openstreetmap.org/copyright' rel='noopener'>OpenStreetMap</a>",
         }).addTo(this.#map)
         L.control.scale({ imperial: false }).addTo(this.#map)
         this.#manageZoomControl()
