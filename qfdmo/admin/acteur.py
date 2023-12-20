@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 
 from django.conf import settings
@@ -23,6 +24,7 @@ from qfdmo.models import (
     Source,
     SousCategorieObjet,
 )
+from qfdmo.models.acteur import ActeurStatus
 from qfdmo.widget import CustomOSMWidget
 
 
@@ -182,9 +184,33 @@ class ActeurResource(resources.ModelResource):
             row["location"] = None
 
     def get_queryset(self):
+        # Fixme : this avoid the capacity to import more than 1000 object
         if self.nb_object_max:
             return super().get_queryset()[: self.nb_object_max]
         return super().get_queryset()
+
+    def before_import(self, dataset, using_transactions, dry_run, **kwargs):
+        # Raise import all the row in dataset are all the same
+        unique_srcs = set(dataset["source"])
+        if len(unique_srcs) > 1:
+            raise Exception(
+                f"Les lignes de ce fichier ont des sources différentes: {unique_srcs}"
+            )
+
+        # Add source rows to inactive if not in dataset
+        acteurs_to_inactive = Acteur.objects.filter(
+            source__nom=unique_srcs.pop()
+        ).exclude(identifiant_unique__in=dataset["identifiant_unique"])
+        logging.warning(
+            f"Les acteurs suivants vont être désactivés: {acteurs_to_inactive.count()}"
+        )
+        for acteur in acteurs_to_inactive:
+            row = []
+            for h in dataset.headers:
+                row.append(getattr(acteur, h))
+                if h == "statut":
+                    row[-1] = ActeurStatus.INACTIF
+            dataset.append(row)
 
     class Meta:
         model = Acteur
@@ -196,7 +222,7 @@ class ActeurResource(resources.ModelResource):
         ]
 
 
-class ActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
+class ActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin):
     change_form_template = "admin/acteur/change_form.html"
     modifiable = False
     ordering = ("nom",)
@@ -294,7 +320,7 @@ class PropositionServiceResource(BasePropositionServiceResource):
 
 
 class PropositionServiceAdmin(
-    import_export_admin.ExportMixin, BasePropositionServiceAdmin
+    import_export_admin.ImportExportMixin, BasePropositionServiceAdmin
 ):
     resource_classes = [PropositionServiceResource]
     search_fields = [
