@@ -5,7 +5,7 @@ from django.core.management import call_command
 from django.http import HttpRequest
 
 from core.jinja2_handler import action_by_direction, action_list_display, is_iframe
-from qfdmo.models.action import CachedDirectionAction
+from qfdmo.models import CachedDirectionAction
 
 
 @pytest.fixture(scope="session")
