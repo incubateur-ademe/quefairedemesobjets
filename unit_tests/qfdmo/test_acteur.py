@@ -8,6 +8,7 @@ from qfdmo.models import (
     ActeurService,
     ActeurType,
     Action,
+    CachedDirectionAction,
     FinalActeur,
     NomAsNaturalKeyModel,
     PropositionService,
@@ -15,7 +16,11 @@ from qfdmo.models import (
     RevisionPropositionService,
     Source,
 )
-from qfdmo.models.action import CachedDirectionAction
+from unit_tests.qfdmo.acteur_factory import (
+    ActeurFactory,
+    ActeurServiceFactory,
+    PropositionServiceFactory,
+)
 
 
 @pytest.fixture(scope="session")
@@ -34,53 +39,28 @@ def populate_admin_object(django_db_blocker):
 
 @pytest.fixture()
 def acteur(db, populate_admin_object):
-    source = Source.objects.create(nom="Equipe")
-    acteur_type = ActeurType.objects.first()
-    acteur = Acteur.objects.create(
-        nom="Test Object 1",
-        location=Point(0, 0),
-        acteur_type=acteur_type,
-        identifiant_unique="1",
-        identifiant_externe="456",
-        acteur_type_id=1,
-        source=source,
-    )
-    acteur_service = ActeurService.objects.first()
-    action = Action.objects.first()
-    PropositionService.objects.create(
-        acteur_service=acteur_service,
-        action=action,
-        acteur=acteur,
-    )
-    yield acteur
+    ps = PropositionServiceFactory.create()
+    yield ps.acteur
 
 
 @pytest.fixture()
 def finalacteur(db, populate_admin_object):
-    source = Source.objects.create(nom="Equipe")
     action1 = Action.objects.get(nom="reparer")
     action2 = Action.objects.get(nom="echanger")
     action3 = Action.objects.get(nom="louer")
-    acteur_service = ActeurService.objects.first()
-    acteur = Acteur.objects.create(
-        nom="Acteur 1",
-        location=Point(0, 0),
-        identifiant_unique="1",
-        acteur_type_id=1,
-        source=source,
-    )
-    PropositionService.objects.create(
+    acteur_service = ActeurServiceFactory.create()
+    acteur = ActeurFactory.create()
+    PropositionServiceFactory(
         acteur=acteur, acteur_service=acteur_service, action=action1
     )
-    PropositionService.objects.create(
+    PropositionServiceFactory(
         acteur=acteur, acteur_service=acteur_service, action=action2
     )
-    PropositionService.objects.create(
+    PropositionServiceFactory(
         acteur=acteur, acteur_service=acteur_service, action=action3
     )
     FinalActeur.refresh_view()
-    finalacteur = FinalActeur.objects.get(identifiant_unique=acteur.identifiant_unique)
-    yield finalacteur
+    yield FinalActeur.objects.get(identifiant_unique=acteur.identifiant_unique)
 
 
 class TestNomAsNaturalKeyHeritage:
@@ -134,7 +114,7 @@ class TestActeurSerialize:
         proposition_service = PropositionService.objects.last()
         expected_serialized_acteur = {
             "nom": "Test Object 1",
-            "identifiant_unique": "1",
+            "identifiant_unique": acteur.identifiant_unique,
             "acteur_type": acteur.acteur_type.serialize(),
             "adresse": None,
             "adresse_complement": None,
@@ -151,7 +131,7 @@ class TestActeurSerialize:
             "siret": None,
             "source": acteur.source.serialize(),
             "statut": "ACTIF",
-            "identifiant_externe": "456",
+            "identifiant_externe": acteur.identifiant_externe,
             "location": {"type": "Point", "coordinates": [0.0, 0.0]},
             "naf_principal": None,
             "commentaires": None,
@@ -347,8 +327,8 @@ class TestCreateRevisionActeur:
 class TestFinalActeurSerialize:
     def test_finalacteur_serialize_basic(self, finalacteur):
         assert finalacteur.serialize() == {
-            "nom": "Acteur 1",
-            "identifiant_unique": "1",
+            "nom": finalacteur.nom,
+            "identifiant_unique": finalacteur.identifiant_unique,
             "adresse": None,
             "adresse_complement": None,
             "code_postal": None,
@@ -379,8 +359,8 @@ class TestFinalActeurSerialize:
 
     def test_finalacteur_serialize_render_as_card(self, finalacteur):
         assert finalacteur.serialize(render_as_card=True) == {
-            "nom": "Acteur 1",
-            "identifiant_unique": "1",
+            "nom": finalacteur.nom,
+            "identifiant_unique": finalacteur.identifiant_unique,
             "adresse": None,
             "adresse_complement": None,
             "code_postal": None,
@@ -412,8 +392,8 @@ class TestFinalActeurSerialize:
 
     def test_finalacteur_serialize_render_as_card_with_direction(self, finalacteur):
         assert finalacteur.serialize(render_as_card=True, direction="jai") == {
-            "nom": "Acteur 1",
-            "identifiant_unique": "1",
+            "nom": finalacteur.nom,
+            "identifiant_unique": finalacteur.identifiant_unique,
             "adresse": None,
             "adresse_complement": None,
             "code_postal": None,

@@ -4,6 +4,7 @@ black
 django-browser-reload
 django-debug-toolbar
 django-extensions
+factory_boy
 honcho
 pre-commit
 ptpython

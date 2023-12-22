@@ -1,7 +1,7 @@
 import pytest
 from django.core.management import call_command
 
-from qfdmo.models.action import CachedDirectionAction
+from qfdmo.models import CachedDirectionAction
 
 
 @pytest.fixture(scope="session")

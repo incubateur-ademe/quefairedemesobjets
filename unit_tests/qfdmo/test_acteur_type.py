@@ -1,6 +1,7 @@
 import pytest
 
 from qfdmo.models import ActeurType, NomAsNaturalKeyModel
+from unit_tests.qfdmo.acteur_factory import ActeurTypeFactory
 
 
 class TestEntiteTypeNomAsNaturalKeyHeritage:
@@ -9,10 +10,11 @@ class TestEntiteTypeNomAsNaturalKeyHeritage:
 
     @pytest.mark.django_db
     def test_serialize(self):
-        acteur_type = ActeurType.objects.create(
-            nom="Test Object", nom_affiche="Test Object Affiche", lvao_id=123
+        acteur_type = ActeurTypeFactory.build(
+            nom="Test Object",
+            nom_affiche="Test Object Affiche",
+            lvao_id=123,
         )
-        print(acteur_type.serialize())
         assert acteur_type.serialize() == {
             "id": acteur_type.id,
             "nom": "Test Object",
