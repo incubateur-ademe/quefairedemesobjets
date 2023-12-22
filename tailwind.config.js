@@ -1,4 +1,5 @@
-/** @type {import('tailwindcss').Config} */
+/** @type {import('tailwindcss').Config | null} */
+
 module.exports = {
     content: ["jinja2/**/*html", "templates/**/*html", "static/to_compile/**/*{j,t}s"],
     prefix: "qfdmo-",
