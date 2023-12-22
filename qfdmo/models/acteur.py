@@ -408,12 +408,6 @@ class CorrectionActeur(BaseActeur):
 class BasePropositionService(models.Model):
     class Meta:
         abstract = True
-        constraints = [
-            models.UniqueConstraint(
-                fields=["acteur", "action", "acteur_service"],
-                name="unique_by_acteur_action_service",
-            )
-        ]
 
     id = models.AutoField(primary_key=True)
     action = models.ForeignKey(
@@ -448,6 +442,12 @@ class PropositionService(BasePropositionService):
     class Meta:
         verbose_name = "PROPOSITION DE SERVICE - IMPORTÉ"
         verbose_name_plural = "PROPOSITIONS DE SERVICE - IMPORTÉ"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["acteur", "action", "acteur_service"],
+                name="ps_unique_by_acteur_action_service",
+            )
+        ]
 
     acteur = models.ForeignKey(
         Acteur,
@@ -465,6 +465,12 @@ class RevisionPropositionService(BasePropositionService):
     class Meta:
         verbose_name = "PROPOSITION DE SERVICE - CORRIGÉ"
         verbose_name_plural = "PROPOSITIONS DE SERVICE - CORRIGÉ"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["revision_acteur", "action", "acteur_service"],
+                name="rps_unique_by_revisionacteur_action_service",
+            )
+        ]
 
     revision_acteur = models.ForeignKey(
         RevisionActeur,
