@@ -19,6 +19,7 @@ from qfdmo.models import (
 from unit_tests.qfdmo.acteur_factory import (
     ActeurFactory,
     ActeurServiceFactory,
+    ActionFactory,
     PropositionServiceFactory,
 )
 
@@ -243,8 +244,9 @@ class TestActeurGetOrCreateRevisionActeur:
 
     def test_create_revisionacteur(self, populate_admin_object, acteur):
         revision_acteur = acteur.get_or_create_revision()
-        acteur_service = ActeurService.objects.last()
-        action = Action.objects.last()
+        revision_acteur.proposition_services.all().delete()
+        acteur_service = ActeurServiceFactory.create(nom="service 2")
+        action = ActionFactory.create(nom="action 2")
         proposition_service = RevisionPropositionService.objects.create(
             acteur_service=acteur_service,
             action=action,
@@ -256,8 +258,12 @@ class TestActeurGetOrCreateRevisionActeur:
         assert revision_acteur2.serialize() == revision_acteur.serialize()
         assert revision_acteur2.nom is None
         assert (
-            revision_acteur2.proposition_services.all()
-            != acteur.proposition_services.all()
+            revision_acteur2.proposition_services.values_list(
+                "acteur_service__nom", "action__nom"
+            ).all()
+            != acteur.proposition_services.values_list(
+                "acteur_service__nom", "action__nom"
+            ).all()
         )
 
 

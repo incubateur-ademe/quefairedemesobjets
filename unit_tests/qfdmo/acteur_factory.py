@@ -33,10 +33,14 @@ class ActeurServiceFactory(Factory):
     class Meta:
         model = ActeurService
 
+    nom = "service"
+
 
 class ActionFactory(Factory):
     class Meta:
         model = Action
+
+    nom = "action"
 
 
 class PropositionServiceFactory(Factory):
