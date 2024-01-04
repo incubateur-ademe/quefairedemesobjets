@@ -268,6 +268,7 @@ NB_CORRECTION_DISPLAYED = decouple.config(
     "NB_CORRECTION_DISPLAYED", cast=int, default=100
 )
 
-POSTHOG_APIKEY = decouple.config("POSTHOG_APIKEY")
+POSTHOG_PROJECT_API_KEY = decouple.config("POSTHOG_PROJECT_API_KEY")
+POSTHOG_HOST = decouple.config("POSTHOG_HOST")
 
 SHELL_PLUS_PRINT_SQL = True
