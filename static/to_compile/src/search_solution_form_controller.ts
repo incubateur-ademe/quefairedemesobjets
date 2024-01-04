@@ -124,14 +124,20 @@ export default class extends Controller<HTMLElement> {
             target = target.parentNode as HTMLElement
         }
 
+        const activeBtnClasses = [
+            "qfdmo-bg-white",
+            "qfdmo-border",
+            "qfdmo-border-solid",
+            "qfdmo-border-blue-france-sun-113",
+        ]
         if (target == this.nearbyButtonTarget) {
-            this.nearbyButtonTarget.classList.add("qfdmo-bg-white")
-            this.onlineButtonTarget.classList.remove("qfdmo-bg-white")
+            this.nearbyButtonTarget.classList.add(...activeBtnClasses)
+            this.onlineButtonTarget.classList.remove(...activeBtnClasses)
             this.submitButtonTarget.value = "0"
         }
         if (target == this.onlineButtonTarget) {
-            this.onlineButtonTarget.classList.add("qfdmo-bg-white")
-            this.nearbyButtonTarget.classList.remove("qfdmo-bg-white")
+            this.onlineButtonTarget.classList.add(...activeBtnClasses)
+            this.nearbyButtonTarget.classList.remove(...activeBtnClasses)
             this.submitButtonTarget.value = "1"
         }
         this.loadingSolutions()
