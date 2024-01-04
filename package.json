@@ -41,12 +41,14 @@
         "@hotwired/turbo": "^7.3.0",
         "leaflet": "^1.9.4",
         "leaflet-extra-markers": "^1.2.2",
+        "posthog-js": "^1.97.1",
         "tailwindcss": "^3.3.7"
     },
     "devDependencies": {
         "@testing-library/jest-dom": "^6.1.5",
         "@types/jest": "^29.5.11",
         "@typescript-eslint/eslint-plugin": "^6.15.0",
+        "buffer": "^6.0.3",
         "eslint": "^8.56.0",
         "eslint-config-standard-with-typescript": "^43.0.0",
         "eslint-plugin-import": "^2.29.1",
