@@ -19,7 +19,14 @@
     </div>
     {% if acteur.url and acteur.url != '__nourl__'%}
         <p class="qfdmo-text-sm fr-mb-2w fr-mt-0">
-            <a class="qfdmo-inline-block qfdmo-max-w-[100%] qfdmo-whitespace-nowrap qfdmo-text-ellipsis qfdmo-overflow-hidden" href="{{ acteur.url }}" target="_blank" rel="noopener">{{ acteur.url }}</a>
+            <a class="qfdmo-inline-block qfdmo-max-w-[100%] qfdmo-whitespace-nowrap qfdmo-text-ellipsis qfdmo-overflow-hidden"
+                href="{{ acteur.url }}"
+                target="_blank"
+                rel="noopener"
+                aria-label='{{ acteur.url }} - Nouvelle fenêtre'
+            >
+                {{ acteur.url }}
+            </a>
         </p>
     {% endif %}
     <p class="qfdmo-text-sm fr-mb-1w fr-mt-0">
