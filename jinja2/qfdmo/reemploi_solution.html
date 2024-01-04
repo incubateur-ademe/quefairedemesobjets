@@ -8,7 +8,14 @@
     </div>
     {% if is_iframe(request) %}
         <div class="fr-container fr-mb-1w qfdmo-text-center fr-text--sm">
-            Retrouvez les bonnes adresses sur <a href="https://longuevieauxobjets.ademe.fr/" target="_blank" rel="noopener">longuevieauxobjets.ademe.fr</a>
+            Retrouvez les bonnes adresses sur
+            <a href="https://longuevieauxobjets.ademe.fr/"
+                target="_blank"
+                rel="noopener"
+                aria-label="Lien vers le site Longue vie aux objets - Nouvelle fenêtre"
+            >
+                longuevieauxobjets.ademe.fr
+            </a>
         </div>
     {% endif %}
     {% include 'qfdmo/reparacteur_modale.html' %}
