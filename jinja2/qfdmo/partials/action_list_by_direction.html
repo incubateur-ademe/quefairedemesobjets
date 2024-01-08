@@ -1,5 +1,6 @@
 <div id="{{action_direction}}" data-search-solution-form-target='{{action_direction}}'>
     <fieldset class="fr-fieldset fr-mb-1w" aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages">
+        <legend class="fr-ml-1w">Je souhaite</legend>
         {% for action in action_by_direction(request, action_direction) %}
             <div class="fr-fieldset__element fr-fieldset__element--inline fr-mb-1w">
                 <div
