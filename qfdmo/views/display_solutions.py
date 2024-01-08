@@ -15,6 +15,7 @@ from django.shortcuts import redirect, render
 from django.views.decorators.http import require_GET
 from django.views.generic.edit import FormView
 
+from core.event_tracker import track_event
 from core.jinja2_handler import get_action_list
 from qfdmo.forms import GetReemploiSolutionForm
 from qfdmo.models import (
@@ -243,15 +244,25 @@ def get_object_list(request):
         )
         .order_by("distance", "length")[:10]
     )
+    object_list = [
+        {
+            "label": objet.nom,
+            "sub_label": objet.sous_categorie.nom,
+            "identifier": objet.sous_categorie_id,
+        }
+        for objet in objets
+    ]
+    track_event(
+        "sous_categorie_objet_input",
+        {
+            "object_requested": query,
+            "object_list": object_list,
+            "main_object": object_list[0]["label"] if object_list else None,
+            "main_sous_categorie": object_list[0]["sub_label"] if object_list else None,
+        },
+    )
     return JsonResponse(
-        [
-            {
-                "label": objet.nom,
-                "sub_label": objet.sous_categorie.nom,
-                "identifier": objet.sous_categorie_id,
-            }
-            for objet in objets
-        ],
+        object_list,
         safe=False,
     )
 

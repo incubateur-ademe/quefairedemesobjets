@@ -82,6 +82,7 @@ def environment(**options):
             "action_list_display": action_list_display,
             "str_diff": str_diff,
             "DEBUG": settings.DEBUG,
+            "POSTHOG_HOST": settings.POSTHOG_HOST,
         }
     )
     return env

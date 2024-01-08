@@ -8,6 +8,7 @@ gunicorn
 Jinja2
 opening-hours-py
 orjson
+posthog
 psycopg2
 python-decouple
 requests
