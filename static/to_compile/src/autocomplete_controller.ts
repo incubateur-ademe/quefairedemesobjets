@@ -30,6 +30,8 @@ export default abstract class extends Controller<HTMLElement> {
 
     initialize() {
         this.search_to_complete = debounce(this.search_to_complete, 300).bind(this)
+        // Delay blur event to allow click an option
+        this.blurInput = debounce(this.blurInput, 300).bind(this)
     }
 
     async complete(events: Event): Promise<void> {
@@ -110,17 +112,15 @@ export default abstract class extends Controller<HTMLElement> {
         }
     }
 
-    closeAllLists() {
+    blurInput(event: Event) {
+        this.closeAllLists()
+    }
+
+    closeAllLists(event?: Event) {
         var x = document.getElementsByClassName("autocomplete-items")
         for (var i = 0; i < x.length; i++) {
             x[i].remove()
         }
-    }
-
-    closeListsOnFocusOut(event: Event) {
-        const target = event.target as Element
-        if (target.getAttribute("data-on-focus")) return
-        this.closeAllLists()
     }
 
     addActive() {
