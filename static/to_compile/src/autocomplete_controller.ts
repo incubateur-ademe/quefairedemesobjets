@@ -144,6 +144,9 @@ export default abstract class extends Controller<HTMLElement> {
 
     addAccents(input: string) {
         let retval = input
+        // Escape special characters first
+        retval = retval.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+        // List all accentuated characters possible
         retval = retval.replace(/([ao])e/gi, "$1")
         retval = retval.replace(/e/gi, "[eèéêë]")
         retval = retval.replace(/c/gi, "[cç]")
