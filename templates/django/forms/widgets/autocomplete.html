@@ -12,6 +12,7 @@
         keydown.down->{{ widget.data_controller }}#keydownDown
         keydown.up->{{ widget.data_controller }}#keydownUp
         keydown.enter->{{ widget.data_controller }}#keydownEnter
+        keydown.esc->{{ widget.data_controller }}#closeListsOnFocusOut
         click@window->{{ widget.data_controller }}#closeListsOnFocusOut
         "
         data-{{ widget.data_controller }}-target="input"
