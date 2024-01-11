@@ -243,15 +243,17 @@ def get_object_list(request):
         )
         .order_by("distance", "length")[:10]
     )
+    object_list = [
+        {
+            "label": objet.nom,
+            "sub_label": objet.sous_categorie.nom,
+            "identifier": objet.sous_categorie_id,
+        }
+        for objet in objets
+    ]
+
     return JsonResponse(
-        [
-            {
-                "label": objet.nom,
-                "sub_label": objet.sous_categorie.nom,
-                "identifier": objet.sous_categorie_id,
-            }
-            for objet in objets
-        ],
+        object_list,
         safe=False,
     )
 

@@ -1,4 +1,5 @@
 import AutocompleteController from "../src/autocomplete_controller"
+import posthog from "./analytics"
 import { SSCatObject } from "./types"
 
 export default class extends AutocompleteController {
@@ -33,6 +34,17 @@ export default class extends AutocompleteController {
                     this.currentFocus = 0
                     this.addActive()
                 }
+
+                posthog.capture("sous_categorie_objet_research", {
+                    object_requested: inputTargetValue,
+                    object_list: this.allAvailableOptions,
+                    main_object: this.allAvailableOptions
+                        ? this.allAvailableOptions[0]["label"]
+                        : undefined,
+                    main_sous_categorie: this.allAvailableOptions
+                        ? this.allAvailableOptions[0]["sub_label"]
+                        : undefined,
+                })
             })
             .then(() => {
                 this.spinnerTarget.classList.add("qfdmo-hidden")
@@ -41,6 +53,8 @@ export default class extends AutocompleteController {
     }
 
     selectOption(event: Event) {
+        const inputTargetValue = this.inputTarget.value
+
         let target = event.target as HTMLElement
         while (target && target.nodeName !== "DIV") {
             target = target.parentNode as HTMLElement
@@ -52,11 +66,24 @@ export default class extends AutocompleteController {
         const labelValue = labelElement ? labelElement.value : ""
         this.inputTarget.value = labelValue
 
+        const subLabelElement = target.querySelector(
+            '[data-type-name="subLabel"]',
+        ) as HTMLInputElement
+        const subLabelValue = subLabelElement ? subLabelElement.value : ""
+
         const identifierElement = target.querySelector(
             '[data-type-name="identifier"]',
         ) as HTMLInputElement
         const identifierValue = identifierElement ? identifierElement.value : ""
         this.ssCatTarget.value = identifierValue
+
+        posthog.capture("sous_categorie_objet_select", {
+            object_requested: inputTargetValue,
+            object_list: this.allAvailableOptions,
+            object_selected: labelValue,
+            sous_categorie_selected: subLabelValue,
+            identifier_selected: identifierValue,
+        })
 
         this.closeAllLists()
     }
@@ -100,8 +127,8 @@ export default class extends AutocompleteController {
         b.appendChild(identifierInput)
         const input = document.createElement("input")
         input.setAttribute("type", "hidden")
-        input.setAttribute("data-type-name", "label")
-        input.setAttribute("value", option.label)
+        input.setAttribute("data-type-name", "subLabel")
+        input.setAttribute("value", option.sub_label ? option.sub_label : "")
         b.appendChild(input)
         b.setAttribute("data-action", "click->" + this.controllerName + "#selectOption")
         b.setAttribute("data-on-focus", "true")
