@@ -121,7 +121,7 @@ class ReemploiSolutionView(FormView):
                 proposition_services__sous_categories__id=sous_categorie_id
             )
 
-        if self.request.GET.get("digital") and int(self.request.GET.get("digital")):
+        if self.request.GET.get("digital") and self.request.GET.get("digital") == "1":
             acteurs = (
                 acteurs.filter(acteur_type_id=ActeurType.get_digital_acteur_type_id())
                 .annotate(min_action_order=Min("proposition_services__action__order"))
