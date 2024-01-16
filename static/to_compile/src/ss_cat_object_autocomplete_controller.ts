@@ -35,13 +35,18 @@ export default class extends AutocompleteController {
                     this.addActive()
                 }
 
-                posthog.capture("sous_categorie_objet_research", {
+                posthog.capture("object_input", {
                     object_requested: inputTargetValue,
-                    object_list: this.allAvailableOptions,
-                    main_object: this.allAvailableOptions
+                    object_list: this.allAvailableOptions
+                        ? this.allAvailableOptions.slice(
+                              0,
+                              this.maxOptionDisplayedValue,
+                          )
+                        : undefined,
+                    first_object: this.allAvailableOptions
                         ? this.allAvailableOptions[0]["label"]
                         : undefined,
-                    main_sous_categorie: this.allAvailableOptions
+                    first_subcategory: this.allAvailableOptions
                         ? this.allAvailableOptions[0]["sub_label"]
                         : undefined,
                 })
@@ -77,11 +82,10 @@ export default class extends AutocompleteController {
         const identifierValue = identifierElement ? identifierElement.value : ""
         this.ssCatTarget.value = identifierValue
 
-        posthog.capture("sous_categorie_objet_select", {
+        posthog.capture("object_select", {
             object_requested: inputTargetValue,
-            object_list: this.allAvailableOptions,
             object_selected: labelValue,
-            sous_categorie_selected: subLabelValue,
+            subcategory_selected: subLabelValue,
             identifier_selected: identifierValue,
         })
 
