@@ -97,10 +97,12 @@ class GetReemploiSolutionForm(forms.Form):
         required=False,
     )
 
-    def load_choices(self):
+    def load_choices(self, first_direction=None):
         self.fields["direction"].choices = [
             [direction["nom"], direction["nom_affiche"]]
-            for direction in CachedDirectionAction.get_directions()
+            for direction in CachedDirectionAction.get_directions(
+                first_direction=first_direction
+            )
         ]
 
     label_reparacteur = forms.BooleanField(

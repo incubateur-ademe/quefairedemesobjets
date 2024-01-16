@@ -89,7 +89,7 @@ class ReemploiSolutionView(FormView):
         my_form = super().get_form(form_class)
         # Here we need to load choices after initialisation because of async management
         # in prod + cache
-        my_form.load_choices()
+        my_form.load_choices(first_direction=self.request.GET.get("fd", None))
         return my_form
 
     def get_context_data(self, **kwargs):
