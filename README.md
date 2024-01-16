@@ -226,7 +226,8 @@ python manage.py createsuperuser
 honcho start -f Procfile.dev
 ```
 
-Honcho démarrera les containers Docker s'ils ne sont pas déjà démarrés
+Honcho démarrera les containers Docker s'ils ne sont pas déjà démarrés.
+Une fois les processus démarrés, le serveur web sera accessible à l'adresse http://localhost:8000, écoutant sur le port 8000.
 
 ### Ajout et modification de package pip-tools
 
