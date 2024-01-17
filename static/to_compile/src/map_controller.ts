@@ -40,7 +40,6 @@ export default class extends Controller<HTMLElement> {
     }
 
     mapChanged(event: CustomEvent) {
-        this.searchInZoneTarget.name = "search_in_zone"
         this.searchInZoneTarget.value = JSON.stringify(event.detail)
         this.displaySearchInZoneButton()
     }

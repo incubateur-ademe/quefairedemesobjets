@@ -31,7 +31,7 @@ class TestReemploiSolutionView:
         assert response.context_data["acteurs"].count() == 0
         assert response.context_data["form"].initial == {
             "sous_categorie_objet": None,
-            "ss_cat": None,
+            "sc_id": None,
             "adresse": None,
             "direction": settings.DEFAULT_ACTION_DIRECTION,
             "action_list": None,

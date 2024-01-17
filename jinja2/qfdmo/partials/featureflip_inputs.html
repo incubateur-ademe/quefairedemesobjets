@@ -2,6 +2,6 @@
     <input type="hidden" name="iframe">
 {% endif %}
 <input type="hidden" name="r" value="{{ range(1000) | random }}">
-{% if request.GET.get("fd") %}
-    <input type="hidden" name="fd" value="{{ request.GET.get("fd") }}">
+{% if request.GET.get("first_dir") %}
+    <input type="hidden" name="first_dir" value="{{ request.GET.get("first_dir") }}">
 {% endif %}

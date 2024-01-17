@@ -49,7 +49,7 @@ class GetReemploiSolutionForm(forms.Form):
         empty_label="",
         required=False,
     )
-    ss_cat = forms.IntegerField(
+    sc_id = forms.IntegerField(
         widget=forms.HiddenInput(
             attrs={"data-ss-cat-object-autocomplete-target": "ssCat"}
         ),
