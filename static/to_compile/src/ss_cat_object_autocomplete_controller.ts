@@ -79,14 +79,14 @@ export default class extends AutocompleteController {
         const identifierElement = target.querySelector(
             '[data-type-name="identifier"]',
         ) as HTMLInputElement
-        const identifierValue = identifierElement ? identifierElement.value : ""
+        const identifierValue = identifierElement ? identifierElement.value : undefined
         this.ssCatTarget.value = identifierValue
 
         posthog.capture("object_select", {
             object_requested: inputTargetValue,
             object_selected: labelValue,
             subcategory_selected: subLabelValue,
-            identifier_selected: identifierValue,
+            identifier_selected: Number(identifierValue),
         })
 
         this.closeAllLists()
