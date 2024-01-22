@@ -4,9 +4,7 @@ from factory.django import DjangoModelFactory as Factory
 
 from qfdmo.models import Acteur, ActeurType, Source
 from qfdmo.models.acteur import ActeurService, PropositionService
-from qfdmo.models.action import Action
-
-# from factory import Factory as Factory
+from unit_tests.qfdmo.action_factory import ActionFactory
 
 
 class SourceFactory(Factory):
@@ -34,13 +32,6 @@ class ActeurServiceFactory(Factory):
         model = ActeurService
 
     nom = "service"
-
-
-class ActionFactory(Factory):
-    class Meta:
-        model = Action
-
-    nom = "action"
 
 
 class PropositionServiceFactory(Factory):

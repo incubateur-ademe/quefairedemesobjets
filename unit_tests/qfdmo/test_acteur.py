@@ -19,9 +19,9 @@ from qfdmo.models import (
 from unit_tests.qfdmo.acteur_factory import (
     ActeurFactory,
     ActeurServiceFactory,
-    ActionFactory,
     PropositionServiceFactory,
 )
+from unit_tests.qfdmo.action_factory import ActionFactory
 
 
 @pytest.fixture(scope="session")
