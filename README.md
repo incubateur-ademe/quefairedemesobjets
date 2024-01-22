@@ -288,3 +288,31 @@ pg_restore -d "${DATABASE_URL}" --clean --no-acl --no-owner --no-privileges "${D
 ## Deploy in Scalingo
 
 we need to install GDAL as explain in doc : [https://techilearned.com/configure-geodjango-in-scalingo/](https://techilearned.com/configure-geodjango-in-scalingo/) form [https://doc.scalingo.com/platform/app/app-with-gdal](https://doc.scalingo.com/platform/app/app-with-gdal) and mattermost discussion in beta.gouv.fr community
+
+## Mise à jour du script iframe.js
+
+installer le compilateur et minimifieur
+
+```sh
+npm install -g typescript terser
+```
+
+compiler le fichier iframe.ts
+
+```sh
+tsc static/to_compile/src/iframe.ts --outDir static/to_collect
+```
+
+minimifier le fichier iframe.js
+
+```sh
+terser static/to_collect/iframe.js -o static/to_collect/iframe.min.js -c -m
+```
+
+après déploiement, le fichier sera disponible à l'adresse : `https://longuevieauxobjets.ademe.fr/static/iframe.min.js`
+
+Pour intégrer l'iframe, il n'y a plus qu'à appeler le script
+
+```html
+<script src="https://longuevieauxobjets.ademe.fr/static/iframe.min.js" id="lvao_script"></script>
+```
