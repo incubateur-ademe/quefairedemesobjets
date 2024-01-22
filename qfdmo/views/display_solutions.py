@@ -37,10 +37,9 @@ class ReemploiSolutionView(FormView):
     template_name = "qfdmo/reemploi_solution.html"
 
     def _get_search_in_zone_params(self):
-        search_in_zone = self.request.GET.get("search_in_zone", None)
         center = []
         my_bbox_polygon = []
-        if search_in_zone:
+        if search_in_zone := self.request.GET.get("search_in_zone"):
             search_in_zone = json.loads(search_in_zone)
             if (
                 "center" in search_in_zone
@@ -79,8 +78,8 @@ class ReemploiSolutionView(FormView):
         initial["latitude"] = self.request.GET.get("latitude")
         initial["longitude"] = self.request.GET.get("longitude")
         initial["label_reparacteur"] = self.request.GET.get("label_reparacteur")
-        initial["ss_cat"] = (
-            self.request.GET.get("ss_cat") if initial["sous_categorie_objet"] else None
+        initial["sc_id"] = (
+            self.request.GET.get("sc_id") if initial["sous_categorie_objet"] else None
         )
 
         return initial
@@ -89,7 +88,7 @@ class ReemploiSolutionView(FormView):
         my_form = super().get_form(form_class)
         # Here we need to load choices after initialisation because of async management
         # in prod + cache
-        my_form.load_choices()
+        my_form.load_choices(first_direction=self.request.GET.get("first_dir"))
         return my_form
 
     def get_context_data(self, **kwargs):
@@ -99,9 +98,9 @@ class ReemploiSolutionView(FormView):
         sous_categorie_id = None
         if (
             self.request.GET.get("sous_categorie_objet")
-            and self.request.GET.get("ss_cat", "").isnumeric()
+            and self.request.GET.get("sc_id", "").isnumeric()
         ):
-            sous_categorie_id = int(self.request.GET.get("ss_cat", "0"))
+            sous_categorie_id = int(self.request.GET.get("sc_id", "0"))
 
         action_selection_ids = [a["id"] for a in get_action_list(self.request)]
 

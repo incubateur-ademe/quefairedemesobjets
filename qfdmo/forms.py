@@ -49,7 +49,7 @@ class GetReemploiSolutionForm(forms.Form):
         empty_label="",
         required=False,
     )
-    ss_cat = forms.IntegerField(
+    sc_id = forms.IntegerField(
         widget=forms.HiddenInput(
             attrs={"data-ss-cat-object-autocomplete-target": "ssCat"}
         ),
@@ -97,10 +97,12 @@ class GetReemploiSolutionForm(forms.Form):
         required=False,
     )
 
-    def load_choices(self):
+    def load_choices(self, first_direction=None):
         self.fields["direction"].choices = [
             [direction["nom"], direction["nom_affiche"]]
-            for direction in CachedDirectionAction.get_directions()
+            for direction in CachedDirectionAction.get_directions(
+                first_direction=first_direction
+            )
         ]
 
     label_reparacteur = forms.BooleanField(

@@ -1,4 +1,7 @@
 {% if is_iframe(request) %}
-    <input type="hidden" name="iframe" id="iframe">
+    <input type="hidden" name="iframe">
 {% endif %}
-<input type="hidden" name="r" id="r" value="{{ range(100) | random }}">
+<input type="hidden" name="r" value="{{ range(1000) | random }}">
+{% if request.GET.get("first_dir") %}
+    <input type="hidden" name="first_dir" value="{{ request.GET.get("first_dir") }}">
+{% endif %}

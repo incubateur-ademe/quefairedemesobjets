@@ -2,8 +2,8 @@
 
 Longue vie aux objets propose des solutions pour promouvoir les gestes de consommation responsable:
 
--   Mise à disposition d'une cartographie d'Acteurs du ré-emploi et de la réparation en France (disponible aussi via une iframe)
--   Promotion des gestes de consommation responsable tels que le don, le partage local et la réparation
+- Mise à disposition d'une cartographie d'Acteurs du ré-emploi et de la réparation en France (disponible aussi via une iframe)
+- Promotion des gestes de consommation responsable tels que le don, le partage local et la réparation
 
 ## Afficher l'application dans une Iframe
 
@@ -19,14 +19,15 @@ Dans le cas de l'iframe, l'entête et le pied de page ne sont pas affichés
 
 Les autres paramètres disponibles pour afficher la page principale de l'application et permettant d'interagir avec les champs de recherche sont :
 
--   `sous_categorie_objet`, parmi les sous-catégories disponibles en base de données
--   `adresse`, par exemple : 145+Avenue+Pierre+Brossolette+92120+Montrouge
--   `latitude` et `longitude` récupéré dpuis l'API BAN avec l'adresse ci-dessus
--   `direction`, option `jai` ou `jecherche`, par défaut la direction `jecherche` est appliquée
--   `action_list`, liste des actions possibles selon la direction séparées par le caractère `|` :
-    -   pour la direction `jecherche` les actions possibles sont : `emprunter`, `echanger`, `louer`, `acheter`
-    -   pour la direction `jai` les actions possibles sont : `reparer`, `preter`, `donner`, `echanger`, `mettreenlocation`, `revendre`
-    -   si le paramètre `action_list` n'est pas renseigné ou est vide, toutes les actions éligibles à la direction sont affichées
+- `sous_categorie_objet`, parmi les sous-catégories disponibles en base de données
+- `adresse`, par exemple : 145+Avenue+Pierre+Brossolette+92120+Montrouge
+- `latitude` et `longitude` récupéré dpuis l'API BAN avec l'adresse ci-dessus
+- `direction`, option `jai` ou `jecherche`, par défaut l'option de direction « Je cherche » est active
+- `first_dir`, option `jai` ou `jecherche`, par défaut l'option de direction « Je cherche » est affiché en premier dans la liste des options de direction
+- `action_list`, liste des actions possibles selon la direction séparées par le caractère `|` :
+  - pour la direction `jecherche` les actions possibles sont : `emprunter`, `echanger`, `louer`, `acheter`
+  - pour la direction `jai` les actions possibles sont : `reparer`, `preter`, `donner`, `echanger`, `mettreenlocation`, `revendre`
+  - si le paramètre `action_list` n'est pas renseigné ou est vide, toutes les actions éligibles à la direction sont affichées
 
 Exemple:
 
@@ -143,10 +144,10 @@ Certains objets de la base de données sont des objets d'administration qui n'on
 
 ### Prérequis
 
--   docker-compose
--   python 3.11
--   node 18.17
--   gdal (librairie nécessaire à l'utilisation de GeoDjango)
+- docker-compose
+- python 3.11
+- node 18.17
+- gdal (librairie nécessaire à l'utilisation de GeoDjango)
 
 Conseil: utiliser `asdf` pour la gestion des environnement virtuel `node` et `python`
 
@@ -156,21 +157,21 @@ Conseil: utiliser `asdf` pour la gestion des environnement virtuel `node` et `py
 
 ### Technologies
 
--   Python
--   Django
--   github
--   Licence MIT
--   Node
--   Parcel
--   DSFR
--   honcho
--   Scalingo
--   Sentry
--   Pytest
--   Whitnoise
--   Tailwind
--   Dependabot
--   Django-debug-toolbar
+- Python
+- Django
+- github
+- Licence MIT
+- Node
+- Parcel
+- DSFR
+- honcho
+- Scalingo
+- Sentry
+- Pytest
+- Whitnoise
+- Tailwind
+- Dependabot
+- Django-debug-toolbar
 
 ### installation & exécution
 
