@@ -4,7 +4,7 @@
         {% for action in action_by_direction(request, action_direction) %}
             <div class="fr-fieldset__element fr-fieldset__element--inline fr-mb-1w">
                 <div
-                    class="fr-checkbox-group fr-p-1v qfdmo-bg-{{action.couleur}} qfdmo-bg-opacity-30"
+                    class="fr-checkbox-group fr-checkbox-group--sm fr-p-1v qfdmo-bg-{{action.couleur}} qfdmo-bg-opacity-30"
                     data-action="click->search-solution-form#apply"
                     >
                     <input name="{{action.nom}}" id="{{action_direction}}_{{action.nom}}" data-search-solution-form-target="action" type="checkbox" aria-describedby="{{action.nom}}-messages" {% if action.active %} checked{% endif %} data-action="click -> search-solution-form#updateSearchSolutionForm">
