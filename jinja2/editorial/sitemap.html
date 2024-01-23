@@ -1,0 +1,26 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+    <div class="fr-container fr-my-3w">
+        <h1>Plan du site</h1>
+        <div>
+            <ul>
+                <li>
+                    <a href="/">Page d’accueil</a>
+                </li>
+                <li>
+                    <a href="https://tally.so/r/wzy9ZZ">Proposer une adresse</a>
+                </li>
+                <li>
+                    <a href="https://tally.so/r/3xMqd9">Proposer une modification</a>
+                </li>
+                <li><a href="{{ reverse('qfdmo:legal_notices') }}">Mentions légales</a></li>
+                <li><a href="{{ reverse('qfdmo:cgu') }}">Conditions générales d'utilisation</a></li>
+                <li><a href="{{ reverse('qfdmo:cookies') }}">Politiques des cookies</a></li>
+                <li><a href="{{ reverse('qfdmo:personal_data') }}">Données personnelles</a></li>
+                <li><a href="{{ reverse('qfdmo:accessibility') }}">Accessibilité : non conforme</a></li>
+                <li><a href="https://tally.so/r/wzME61">Nous contacter</a></li>
+            </ul>
+        </div>
+    </div>
+{% endblock %}

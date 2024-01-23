@@ -1,4 +1,5 @@
 from django.urls import path
+from django.views.generic import TemplateView
 
 from qfdmo.views import corrections, display_solutions
 
@@ -35,5 +36,35 @@ urlpatterns = [
         "solution_admin/<str:identifiant_unique>",
         display_solutions.solution_admin,
         name="solution_admin",
+    ),
+    path(
+        "plandusite",
+        TemplateView.as_view(template_name="editorial/sitemap.html"),
+        name="sitemap",
+    ),
+    path(
+        "accessibilite",
+        TemplateView.as_view(template_name="editorial/accessibility.html"),
+        name="accessibility",
+    ),
+    path(
+        "mentionslegales",
+        TemplateView.as_view(template_name="editorial/legal_notices.html"),
+        name="legal_notices",
+    ),
+    path(
+        "donneespersonnelles",
+        TemplateView.as_view(template_name="editorial/personal_data.html"),
+        name="personal_data",
+    ),
+    path(
+        "cookies",
+        TemplateView.as_view(template_name="editorial/cookies.html"),
+        name="cookies",
+    ),
+    path(
+        "cgu",
+        TemplateView.as_view(template_name="editorial/cgu.html"),
+        name="cgu",
     ),
 ]
