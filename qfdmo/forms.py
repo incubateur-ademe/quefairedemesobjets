@@ -42,6 +42,7 @@ class GetReemploiSolutionForm(forms.Form):
             attrs={
                 "class": "fr-input fr-icon-search-line",
                 "placeholder": "vêtement, smartphone, meuble...",
+                "autocomplete": "off",
             },
             data_controller="ss-cat-object-autocomplete",
         ),
@@ -61,6 +62,7 @@ class GetReemploiSolutionForm(forms.Form):
             attrs={
                 "class": "fr-input",
                 "placeholder": "20 av. du Grésillé 49000 Angers",
+                "autocomplete": "off",
             },
             data_controller="address-autocomplete",
         ),
