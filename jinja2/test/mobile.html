@@ -1,0 +1,64 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+    <div class="fr-container qfdmo-min-h-screen qfdmo-bg-blue-france qfdmo-flex qfdmo-flex-col qfdmo-flex-auto">
+        <div class="qfdmo-bg-green-emeraude qfdmo-relative qfdmo-h-6w qfdmo-flex-grow qfdmo-duration-300" id="search">
+            <p>Search</p>
+            <p>here ismy search, I have a lot to say !!!</p>
+            <p>Many inputs</p>
+        </div>
+        <div class="qfdmo-bg-yellow-tournesol qfdmo-relative qfdmo-h-6w qfdmo-duration-300 qfdmo-z-1" id="solution">
+            <button
+                type="button"
+                class="fr-btn fr-icon-search-line qfdmo-rounded-full qfdmo-absolute qfdmo--top-5 qfdmo-right-2 qfdmo-z-2"
+                onclick="toggleSearch()"
+            >Search</button>
+            <p>Carte des solutions</p>
+            <button
+                type="button"
+                class="fr-btn"
+                onclick="displayDetail()"
+            >Afficher le detail d'une fiche</button>
+            <div class="qfdmo-bg-purple-glycine qfdmo-absolute qfdmo-w-full qfdmo-h-0 qfdmo-duration-300 qfdmo--bottom-0 qfdmo-overflow-hidden" id="detail">
+                <p>detail de l'adresse</p>
+                <button class="fr-btn" onclick="displayFullDetail()">Full</button>
+                <button class="fr-btn" onclick="displayDetail()">Collapse</button>
+                <button class="fr-btn" onclick="hideDetail()">Close</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        let searchView = true
+        function toggleSearch() {
+            var search = document.getElementById("search");
+            var solution = document.getElementById("solution");
+            if (searchView) {
+                searchView = false
+                solution.classList.add("qfdmo-flex-grow");
+                search.classList.remove("qfdmo-flex-grow");
+            } else {
+                searchView = true
+                search.classList.add("qfdmo-flex-grow");
+                solution.classList.remove("qfdmo-flex-grow");
+            }
+        }
+        function displayDetail() {
+            var detail = document.getElementById("detail");
+            detail.classList.remove("qfdmo-h-0");
+            detail.classList.remove("qfdmo-h-full");
+            detail.classList.add("qfdmo-h-12w");
+        }
+        function displayFullDetail() {
+            var detail = document.getElementById("detail");
+            detail.classList.remove("qfdmo-h-0");
+            detail.classList.remove("qfdmo-h-12w");
+            detail.classList.add("qfdmo-h-full");
+        }
+        function hideDetail() {
+            var detail = document.getElementById("detail");
+            detail.classList.add("qfdmo-h-0");
+            detail.classList.remove("qfdmo-h-full");
+            detail.classList.remove("qfdmo-h-12w");
+        }
+    </script>
+{% endblock %}

@@ -119,3 +119,19 @@ Style the autocomplete container:
     -webkit-mask-image: url("svg/vendre.svg");
     mask-image: url("svg/vendre.svg");
 }
+
+/*
+ * Failed to load some tailwind classes with parcel
+ */
+
+.qfdmo--bottom-5 {
+    bottom: -1.25rem;
+}
+
+.qfdmo-right-2 {
+    right: 0.5rem;
+}
+
+.qfdmo--top-5 {
+    top: -1.25rem;
+}

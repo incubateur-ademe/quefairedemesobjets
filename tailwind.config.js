@@ -1,7 +1,12 @@
 /** @type {import('tailwindcss').Config | null} */
 
 module.exports = {
-    content: ["jinja2/**/*html", "templates/**/*html", "static/to_compile/**/*{j,t}s"],
+    content: [
+        "jinja2/**/*html",
+        "jinja2/*.html",
+        "templates/**/*html",
+        "static/to_compile/**/*{j,t}s",
+    ],
     prefix: "qfdmo-",
     corePlugins: {
         preflight: false,
@@ -30,6 +35,8 @@ module.exports = {
         "qfdmo-flex-row",
         "qfdmo-italic",
         "qfdmo-justify-between",
+        "qfdmo-h-10",
+        "qfdmo-bottom-5",
     ],
     theme: {
         colors: {

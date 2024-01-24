@@ -68,4 +68,14 @@ urlpatterns = [
         TemplateView.as_view(template_name="editorial/cgu.html"),
         name="cgu",
     ),
+    path(
+        "mobile",
+        TemplateView.as_view(template_name="test/mobile.html"),
+        name="cgu",
+    ),
+    path(
+        "web",
+        TemplateView.as_view(template_name="test/web.html"),
+        name="cgu",
+    ),
 ]
