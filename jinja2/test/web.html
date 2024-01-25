@@ -6,20 +6,24 @@
             <p>Search</p>
             <p>here ismy search, I have a lot to say !!!</p>
             <p>Many inputs</p>
-        </div>
-        <div class="qfdmo-bg-yellow-tournesol qfdmo-relative qfdmo-h-6w qfdmo-duration-300 qfdmo-overflow-hidden qfdmo-z-1" id="solution">
             <button
                 type="button"
-                class="fr-btn fr-icon-search-line qfdmo-rounded-full qfdmo-absolute qfdmo--top-5 qfdmo-right-2 qfdmo-z-2"
+                class="fr-btn fr-icon-search-line qfdmo-rounded-full qfdmo-absolute qfdmo-bottom-2 qfdmo-right-2 qfdmo-z-2"
                 onclick="toggleSearch()"
             >Search</button>
+        </div>
+        <div class="qfdmo-bg-yellow-tournesol qfdmo-relative qfdmo-h-6w qfdmo-duration-300 qfdmo-overflow-hidden qfdmo-z-1" id="solution">
             <p>Carte des solutions</p>
             <button
                 type="button"
                 class="fr-btn"
                 onclick="displayDetail()"
             >Afficher le detail d'une fiche</button>
-            <div class="qfdmo-bg-purple-glycine qfdmo-absolute md:qfdmo-h-full md:qfdmo-w-0 qfdmo-duration-300 qfdmo--right-0 md:qfdmo-overflow-hidden md:qfdmo-top-0" id="detail">
+            <div class="
+                qfdmo-bg-purple-glycine qfdmo-absolute qfdmo-duration-300 qfdmo-overflow-hidden
+                qfdmo-w-full qfdmo-h-0 qfdmo--bottom-0
+                md:qfdmo-h-full md:qfdmo-w-0 md:qfdmo--right-0 md:qfdmo-top-0"
+                id="detail">
                 <p>detail de l'adresse</p>
                 <button class="fr-btn" onclick="displayFullDetail()">Full</button>
                 <button class="fr-btn" onclick="displayDetail()">Collapse</button>
@@ -32,6 +36,7 @@
         function toggleSearch() {
             var search = document.getElementById("search");
             var solution = document.getElementById("solution");
+            hideDetail()
             if (searchView) {
                 searchView = false
                 solution.classList.add("qfdmo-flex-grow");
