@@ -1,10 +1,10 @@
 import { iframeResize } from "iframe-resizer"
 
-const PUBLIC_WEBSITE_URL = process.env.PUBLIC_WEBSITE_URL || "http://localhost:8000"
-
 const setupIframe = () => {
     // Add iFrame just after the script tag
     const scriptTag = document.currentScript as HTMLScriptElement
+    const BASE_URL = new URL(scriptTag.getAttribute("src")!).origin
+
     const urlParams = new URLSearchParams()
     urlParams.append("iframe", "1")
     let maxWidth = 800
@@ -18,7 +18,7 @@ const setupIframe = () => {
 
     const iframe = document.createElement("iframe")
     const iframeAttributes = {
-        src: `${PUBLIC_WEBSITE_URL}?${urlParams.toString()}`,
+        src: `${BASE_URL}?${urlParams.toString()}`,
         id: "lvao_iframe",
         frameborder: "0",
         scrolling: "no",
@@ -37,7 +37,7 @@ const setupIframe = () => {
         {
             heightCalculationMethod: "bodyScroll",
             maxWidth: maxWidth,
-            checkOrigin: [PUBLIC_WEBSITE_URL],
+            checkOrigin: [BASE_URL],
         },
         iframe,
     )
