@@ -5,43 +5,40 @@ Longue vie aux objets propose des solutions pour promouvoir les gestes de consom
 - Mise à disposition d'une cartographie d'Acteurs du ré-emploi et de la réparation en France (disponible aussi via une iframe)
 - Promotion des gestes de consommation responsable tels que le don, le partage local et la réparation
 
-## Afficher l'application dans une Iframe
-
 Le site "Longue vie aux objets" est disponible à l'URL : [https://longuevieauxobjets.ademe.fr/](https://longuevieauxobjets.ademe.fr/)
 
-Le site est disponible en iframe en ajoutant le paramètre `iframe` à l'URL, quelque soit sa valeur, ex : [https://longuevieauxobjets.ademe.fr/?iframe](https://longuevieauxobjets.ademe.fr/?iframe)
+## Afficher l'application dans une Iframe
 
-Dans le cas de l'iframe, l'entête et le pied de page ne sont pas affichés
+il suffit d'ajouter le script js suivant:
 
-⚠️ le tag iframe de votre page doit avoir l'attribut `allow="geolocation"` pour permettre à l'iframe d'accéder aux fonctionnalités de géolocalisation du navigateur (cf. [https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy/geolocation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy/geolocation))
+```html
+<script src="http://localhost:8000/static/iframe.js"
+  data-max_width="800"
+  data-direction="jai"
+  data-first_dir="jai"
+  data-action_list="preter|donner|reparer|echanger|mettreenlocation|revendre"
+></script>
+```
 
-### Les paramètres disponibles pour customiser l'Iframe
+les paramètres de l'iframe sont passés dans le dataset : en tant qu'attribut préfixé par `data-`
 
-Les autres paramètres disponibles pour afficher la page principale de l'application et permettant d'interagir avec les champs de recherche sont :
+Les paramètres disponibles pour customiser l'affichage de l'iframe sont:
 
-- `sous_categorie_objet`, parmi les sous-catégories disponibles en base de données
-- `adresse`, par exemple : 145+Avenue+Pierre+Brossolette+92120+Montrouge
-- `latitude` et `longitude` récupéré dpuis l'API BAN avec l'adresse ci-dessus
-- `direction`, option `jai` ou `jecherche`, par défaut l'option de direction « Je cherche » est active
-- `first_dir`, option `jai` ou `jecherche`, par défaut l'option de direction « Je cherche » est affiché en premier dans la liste des options de direction
-- `action_list`, liste des actions possibles selon la direction séparées par le caractère `|` :
+- `data-direction`, option `jai` ou `jecherche`, par défaut l'option de direction « Je cherche » est active
+- `data-first_dir`, option `jai` ou `jecherche`, par défaut l'option de direction « Je cherche » est affiché en premier dans la liste des options de direction
+- `data-action_list`, liste des actions possibles selon la direction séparées par le caractère `|` :
   - pour la direction `jecherche` les actions possibles sont : `emprunter`, `echanger`, `louer`, `acheter`
   - pour la direction `jai` les actions possibles sont : `reparer`, `preter`, `donner`, `echanger`, `mettreenlocation`, `revendre`
   - si le paramètre `action_list` n'est pas renseigné ou est vide, toutes les actions éligibles à la direction sont affichées
+- `data-max_width`, largeur maximum de l'iframe en pixel, la valeur par défaut est 800
 
-Exemple:
+Voir l'exemple d'integration de l'iframe « Longue vie aux objets » dans une page html : [iframe.html](./iframe.html)
 
-```txt
-https://longuevieauxobjets.ademe.fr/?direction=jecherche&action_list=emprunter%7Cechanger%7Clouer%7Cacheter+d%27occasion&sous_categorie_objet=&adresse=145+Avenue+Pierre+Brossolette+92120+Montrouge&latitude=48.815679&longitude=2.305116
+### Alternative d'intégration de l'application
 
-```
+Il est aussi possible d'intégrer directement l'iframe à votre site sans l'appel au script `iframe.js`. Dans ce cas, vous devrez passer les paramètres de l'iframe dans l'url (sans le préfix `data-``), configurer les appels à la librairie iframe-resizer et passer les bons attributs à l'iframe.
 
-### Afficher l'Iframe en totalité dynamiquement
-
-Pour afficher l'iframe dans toute sa hauteur, le site, lorsqu'il est utilisé avec le paramètre iframe, embarque la librairie [iframe-resizer](https://github.com/davidjbradshaw/iframe-resizer)
-Dans la page affichant l'iframe, il suffit de charge cette même librairie et d'appeler la fonction `iFrameResize` avec les bons paramètres (voir la documentation de la librairie)
-
-Voir l'exemple de code [iframe.html](./iframe.html)
+Vous trouverez un exemple d'intégration ici : [iframe_without_js.html](./iframe_without_js.html)
 
 ## Modèle de données
 
@@ -109,6 +106,8 @@ Certains objets de la base de données sont des objets d'administration qui n'on
 | Vêtements & Accessoires    | Maroquinerie                     |
 | Vêtements & Accessoires    | Vêtements                        |
 
+Cette liste est amenée à évoluer et est probablement non exhaustive
+
 **Type de service** (qfdmo_acteurservice)
 
 | nom                                    |
@@ -130,6 +129,8 @@ Certains objets de la base de données sont des objets d'administration qui n'on
 | Service de réparation                  |
 | Tutoriels et diagnostics en ligne      |
 
+Cette liste est amenée à évoluer et est probablement non exhaustive
+
 **Type d'acteur** (qfdmo_acteurtype)
 
 | nom            | nom affiché                                                |
@@ -139,6 +140,8 @@ Certains objets de la base de données sont des objets d'administration qui n'on
 | artisan        | Artisan, commerce indépendant                              |
 | collectivité   | Collectivité, établissement public                         |
 | ess            | Association, entreprise de l'économie sociale et solidaire |
+
+Cette liste est amenée à évoluer et est probablement non exhaustive
 
 ## Environnement de développement
 
@@ -288,31 +291,3 @@ pg_restore -d "${DATABASE_URL}" --clean --no-acl --no-owner --no-privileges "${D
 ## Deploy in Scalingo
 
 we need to install GDAL as explain in doc : [https://techilearned.com/configure-geodjango-in-scalingo/](https://techilearned.com/configure-geodjango-in-scalingo/) form [https://doc.scalingo.com/platform/app/app-with-gdal](https://doc.scalingo.com/platform/app/app-with-gdal) and mattermost discussion in beta.gouv.fr community
-
-## Mise à jour du script iframe.js
-
-installer le compilateur et minimifieur
-
-```sh
-npm install -g typescript terser
-```
-
-compiler le fichier iframe.ts
-
-```sh
-tsc static/to_compile/src/iframe.ts --outDir static/to_collect
-```
-
-minimifier le fichier iframe.js
-
-```sh
-terser static/to_collect/iframe.js -o static/to_collect/iframe.min.js -c -m
-```
-
-après déploiement, le fichier sera disponible à l'adresse : `https://longuevieauxobjets.ademe.fr/static/iframe.min.js`
-
-Pour intégrer l'iframe, il n'y a plus qu'à appeler le script
-
-```html
-<script src="https://longuevieauxobjets.ademe.fr/static/iframe.min.js" id="lvao_script"></script>
-```
