@@ -14,7 +14,6 @@ const setupIframe = () => {
             continue
         }
         urlParams.append(param, scriptTag.dataset[param])
-        console.log(param, scriptTag.dataset[param])
     }
 
     const iframe = document.createElement("iframe")

@@ -36,7 +36,7 @@ Voir l'exemple d'integration de l'iframe « Longue vie aux objets » dans une pa
 
 ### Alternative d'intégration de l'application
 
-Il est aussi possible d'intégrer directement l'iframe à votre site sans l'appel au script `iframe.js`. Dans ce cas, vous devrez passer les paramètres de l'iframe dans l'url (sans le préfix `data-``), configurer les appels à la librairie iframe-resizer et passer les bons attributs à l'iframe.
+Il est aussi possible d'intégrer directement l'iframe à votre site sans l'appel au script `iframe.js`. Dans ce cas, vous devrez passer les paramètres de l'iframe dans l'url (sans le préfix `data-`), configurer les appels à la librairie `iframe-resizer` et passer les bons attributs à l'iframe.
 
 Vous trouverez un exemple d'intégration ici : [iframe_without_js.html](./iframe_without_js.html)
 
