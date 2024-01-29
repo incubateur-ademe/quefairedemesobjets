@@ -10,6 +10,7 @@
     "source": [
         "static/to_compile/entrypoints/qfdmo.css",
         "static/to_compile/entrypoints/qfdmo.ts",
+        "static/to_compile/entrypoints/iframe_resizer.ts",
         "static/to_compile/entrypoints/iframe.ts",
         "static/to_compile/entrypoints/admin-map-widget.ts"
     ],
@@ -39,14 +40,17 @@
         "@gouvfr/dsfr": "^1.11",
         "@hotwired/stimulus": "^3.2.1",
         "@hotwired/turbo": "^7.3.0",
+        "iframe-resizer": "^4.3.9",
         "leaflet": "^1.9.4",
         "leaflet-extra-markers": "^1.2.2",
         "posthog-js": "^1.100.0",
         "tailwindcss": "^3.4.1"
     },
     "devDependencies": {
+        "@playwright/test": "^1.41.1",
         "@testing-library/jest-dom": "^6.2.1",
         "@types/jest": "^29.5.11",
+        "@types/node": "^20.11.7",
         "@typescript-eslint/eslint-plugin": "^6.19.0",
         "buffer": "^6.0.3",
         "eslint": "^8.56.0",
