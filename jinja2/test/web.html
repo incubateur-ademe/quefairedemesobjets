@@ -1,26 +1,37 @@
 {% extends 'layout/base.html' %}
 
 {% block content %}
-    <div class="fr-container qfdmo-min-h-screen qfdmo-bg-blue-france qfdmo-flex qfdmo-flex-col qfdmo-flex-auto">
-        <div class="qfdmo-bg-green-emeraude qfdmo-relative qfdmo-h-6w qfdmo-flex-grow qfdmo-duration-300 qfdmo-overflow-hidden" id="search">
+    <div class="fr-container qfdmo-bg-blue-france qfdmo-min-h-screen qfdmo-flex qfdmo-flex-col qfdmo-flex-auto">
+        <div class="qfdmo-bg-orange-terre-battue qfdmo-relative qfdmo-h-0 qfdmo-duration-700 qfdmo-overflow-hidden"
+            id="search_summary"
+        >
+            <button
+                type="button"
+                class="fr-btn fr-m-1w fr-btn--icon-left fr-icon-search-line"
+                onclick="toggleSearch()"
+            >Retour à la recherche</button>
+        </div>
+        <div class="qfdmo-bg-green-emeraude qfdmo-relative qfdmo-h-0 qfdmo-flex-grow qfdmo-duration-700 qfdmo-overflow-hidden"
+            id="search_form"
+        >
             <p>Search</p>
-            <p>here ismy search, I have a lot to say !!!</p>
+            <p>here is my search, I have a lot to say !!!</p>
             <p>Many inputs</p>
             <button
                 type="button"
-                class="fr-btn fr-icon-search-line qfdmo-rounded-full qfdmo-absolute qfdmo-bottom-2 qfdmo-right-2 qfdmo-z-2"
+                class="fr-btn fr-m-1w fr-btn--icon-left fr-icon-search-line"
                 onclick="toggleSearch()"
-            >Search</button>
+            >Rechercher les adresses</button>
         </div>
-        <div class="qfdmo-bg-yellow-tournesol qfdmo-relative qfdmo-h-6w qfdmo-duration-300 qfdmo-overflow-hidden qfdmo-z-1" id="solution">
-            <p>Carte des solutions</p>
+        <div class="qfdmo-bg-yellow-tournesol qfdmo-relative qfdmo-h-0 qfdmo-duration-700 qfdmo-overflow-hidden qfdmo-z-1" id="adresses">
+            <p>Adresse : Carte / En ligne / A domicile</p>
             <button
                 type="button"
                 class="fr-btn"
                 onclick="displayDetail()"
             >Afficher le detail d'une fiche</button>
             <div class="
-                qfdmo-bg-purple-glycine qfdmo-absolute qfdmo-duration-300 qfdmo-overflow-hidden
+                qfdmo-bg-purple-glycine qfdmo-absolute qfdmo-duration-700 qfdmo-overflow-hidden
                 qfdmo-w-full qfdmo-h-0 qfdmo--bottom-0
                 md:qfdmo-h-full md:qfdmo-w-0 md:qfdmo--right-0 md:qfdmo-top-0"
                 id="detail">
@@ -34,17 +45,20 @@
     <script>
         let searchView = true
         function toggleSearch() {
-            var search = document.getElementById("search");
-            var solution = document.getElementById("solution");
+            var search_form = document.getElementById("search_form");
+            var adresses = document.getElementById("adresses");
+            let search_summary = document.getElementById("search_summary");
             hideDetail()
             if (searchView) {
                 searchView = false
-                solution.classList.add("qfdmo-flex-grow");
-                search.classList.remove("qfdmo-flex-grow");
+                adresses.classList.add("qfdmo-flex-grow");
+                search_summary.classList.remove("qfdmo-h-0");
+                search_form.classList.remove("qfdmo-flex-grow");
             } else {
                 searchView = true
-                search.classList.add("qfdmo-flex-grow");
-                solution.classList.remove("qfdmo-flex-grow");
+                search_form.classList.add("qfdmo-flex-grow");
+                search_summary.classList.add("qfdmo-h-0");
+                adresses.classList.remove("qfdmo-flex-grow");
             }
         }
         function displayDetail() {
@@ -53,7 +67,7 @@
             // mobile
             detail.classList.remove("qfdmo-h-0");
             detail.classList.remove("qfdmo-h-full");
-            detail.classList.add("qfdmo-h-12w");
+            detail.classList.add("qfdmo-h-1/3");
 
             // desktop
             detail.classList.add("md:qfdmo-w-2/5");
@@ -65,7 +79,7 @@
 
             // mobile
             detail.classList.remove("qfdmo-h-0");
-            detail.classList.remove("qfdmo-h-12w");
+            detail.classList.remove("qfdmo-h-1/3");
             detail.classList.add("qfdmo-h-full");
 
             // desktop
@@ -80,7 +94,7 @@
             // mobile
             detail.classList.add("qfdmo-h-0");
             detail.classList.remove("qfdmo-h-full");
-            detail.classList.remove("qfdmo-h-12w");
+            detail.classList.remove("qfdmo-h-1/3");
 
             // desktop
             detail.classList.add("md:qfdmo-w-0");
