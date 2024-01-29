@@ -115,6 +115,7 @@ class TestActeurSerialize:
         proposition_service = PropositionService.objects.last()
         expected_serialized_acteur = {
             "nom": "Test Object 1",
+            "description": None,
             "identifiant_unique": acteur.identifiant_unique,
             "acteur_type": acteur.acteur_type.serialize(),
             "adresse": None,
@@ -334,6 +335,7 @@ class TestFinalActeurSerialize:
     def test_finalacteur_serialize_basic(self, finalacteur):
         assert finalacteur.serialize() == {
             "nom": finalacteur.nom,
+            "description": None,
             "identifiant_unique": finalacteur.identifiant_unique,
             "adresse": None,
             "adresse_complement": None,
@@ -366,6 +368,7 @@ class TestFinalActeurSerialize:
     def test_finalacteur_serialize_render_as_card(self, finalacteur):
         assert finalacteur.serialize(render_as_card=True) == {
             "nom": finalacteur.nom,
+            "description": None,
             "identifiant_unique": finalacteur.identifiant_unique,
             "adresse": None,
             "adresse_complement": None,
@@ -399,6 +402,7 @@ class TestFinalActeurSerialize:
     def test_finalacteur_serialize_render_as_card_with_direction(self, finalacteur):
         assert finalacteur.serialize(render_as_card=True, direction="jai") == {
             "nom": finalacteur.nom,
+            "description": None,
             "identifiant_unique": finalacteur.identifiant_unique,
             "adresse": None,
             "adresse_complement": None,
