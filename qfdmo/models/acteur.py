@@ -94,6 +94,7 @@ class BaseActeur(NomAsNaturalKeyModel):
         abstract = True
 
     nom = models.CharField(max_length=255, blank=False, null=False)
+    description = models.TextField(blank=True, null=True)
     identifiant_unique = models.CharField(
         max_length=255, unique=True, primary_key=True, blank=True
     )
