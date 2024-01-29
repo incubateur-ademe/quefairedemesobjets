@@ -18,3 +18,8 @@ node_modules
 
 # compiled
 staticfiles
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/tests-examples/

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <title>IFrame test : QFDMO</title>
+        <meta name="description" content="IFrame test : QFDMO">
+
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4.3.6/iframeResizer.min.js"
+            integrity="sha512-f0wd6UIvZbsjPNebGx+uMzHmg6KXr1jWvumJDYSEDmwYJYOptZ0dTka/wBJu7Tj80tnCYMKoKicqvZiIc9GJgw=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        ></script>
+    </head>
+    <body>
+        <div>
+            <h1>Page d'affichage dynamique de l'iframe de l'application</h1>
+            <p>Ci-dessous s'affiche l'iframe de l'application</p>
+        </div>
+        <iframe
+            src="https://longuevieauxobjets.ademe.fr?iframe=1&direction=jai&first_dir=jai&action_list=reparer|echanger|mettreenlocation|revendre"
+            id="myiframe"
+            frameborder="0"
+            scrolling="no"
+            allow="geolocation"
+            style="width: 100%; overflow: hidden; max-width: 800px; height: 579px;"
+            allowfullscreen="true"
+            webkitallowfullscreen="true"
+            mozallowfullscreen="true"
+        ></iframe>
+        <div>
+            <p>Fin de l'affichage de l'iframe de l'application</p>
+        </div>
+        <script>
+            document.getElementById('myiframe').addEventListener('load', function () {
+                iFrameResize({
+                    heightCalculationMethod: 'bodyScroll',
+                    maxWidth: 800,
+                }, '#myiframe')
+            })
+        </script>
+    </body>
+</html>

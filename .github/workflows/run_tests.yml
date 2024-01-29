@@ -47,6 +47,38 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".tool-versions"
+          cache: "npm"
+      - name: Build assets
+        run: |
+          npm ci
+          npm run build
+      - name: Check code formatting
+        run: npm run lint
+      - name: Run tests
+        run: npm run test static
+
+  e2e:
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:15-3.3-alpine
+        env:
+          POSTGRES_USER: qfdmo
+          POSTGRES_PASSWORD: qfdmo
+          POSTGRES_DB: qfdmo
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 1s
+          --health-timeout 1s
+          --health-retries 50
+        ports:
+          - 6543:5432
+    steps:
+      - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
@@ -58,8 +90,35 @@ jobs:
           npm ci
           npm run build
 
-      - name: Check code formatting
-        run: npm run lint
+      - uses: actions/setup-python@v5
+        with:
+          cache: "pip"
+          python-version: "3.12.1"
 
-      - name: Run tests
-        run: npm run test
+      - name: Install GIS Packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install gdal-bin
+
+      - name: Install Dependencies
+        run: pip install --require-hashes --no-deps -r requirements.txt -r dev-requirements.txt
+
+      - name: Set env variables
+        run: cp .env.template .env
+
+      - name: Run serveur
+        run: |
+          python manage.py runserver &
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Run Playwright tests
+        run: npx playwright test
+
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
