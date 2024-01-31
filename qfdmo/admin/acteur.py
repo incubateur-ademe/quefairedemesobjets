@@ -115,6 +115,7 @@ class BaseActeurAdmin(admin.GISModelAdmin):
         "nom_officiel",
         "siret",
         "naf_principal",
+        "description",
         "acteur_type",
         "url",
         "email",
