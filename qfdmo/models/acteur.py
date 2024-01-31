@@ -150,9 +150,9 @@ class BaseActeur(NomAsNaturalKeyModel):
             self, exclude=["location", "proposition_services", "acteur_type", "source"]
         )
         if self.acteur_type:
-            self_as_dict[
-                "acteur_type"
-            ] = self.acteur_type.serialize()  # FIXME: to be cached or get only the name
+            self_as_dict["acteur_type"] = (
+                self.acteur_type.serialize()
+            )  # FIXME: to be cached or get only the name
         if self.source:
             self_as_dict["source"] = self.source.serialize()  # FIXME: to be cached
         if self.location:
@@ -261,9 +261,11 @@ class RevisionActeur(BaseActeur):
                     self,
                     exclude=["id", "acteur_type", "source", "proposition_services"],
                 ),
-                acteur_type=self.acteur_type
-                if self.acteur_type
-                else ActeurType.objects.get(nom="commerce"),
+                acteur_type=(
+                    self.acteur_type
+                    if self.acteur_type
+                    else ActeurType.objects.get(nom="commerce")
+                ),
                 source=self.source,
             )
             self.identifiant_unique = acteur.identifiant_unique
@@ -355,9 +357,11 @@ REFRESH MATERIALIZED VIEW CONCURRENTLY qfdmo_finalpropositionservice_sous_catego
             {
                 "location": orjson.loads(self.location.geojson),
                 "actions": actions,
-                "acteur_selected_action": acteur_selected_actions[0]
-                if acteur_selected_actions
-                else actions[0],
+                "acteur_selected_action": (
+                    acteur_selected_actions[0]
+                    if acteur_selected_actions
+                    else actions[0]
+                ),
                 "render_as_card": self.render_as_card(direction=direction),
             }
         ).decode("utf-8")
