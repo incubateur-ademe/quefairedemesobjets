@@ -34,6 +34,11 @@ urlpatterns = [
         name="solution_detail",
     ),
     path(
+        "adresse/<str:identifiant_unique>",
+        display_solutions.adresse_detail,
+        name="adresse_detail",
+    ),
+    path(
         "solution_admin/<str:identifiant_unique>",
         display_solutions.solution_admin,
         name="solution_admin",

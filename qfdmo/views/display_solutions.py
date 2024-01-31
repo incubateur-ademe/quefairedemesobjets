@@ -265,13 +265,16 @@ def get_object_list(request):
     )
 
 
-# FIXME : should be tested
 def solution_detail(request, identifiant_unique):
     final_acteur = FinalActeur.objects.get(identifiant_unique=identifiant_unique)
     return render(request, "qfdmo/solution_detail.html", {"final_acteur": final_acteur})
 
 
-# FIXME : should be tested
+def adresse_detail(request, identifiant_unique):
+    final_acteur = FinalActeur.objects.get(identifiant_unique=identifiant_unique)
+    return render(request, "qfdmo/adresse/detail.html", {"adresse": final_acteur})
+
+
 def solution_admin(request, identifiant_unique):
     acteur = RevisionActeur.objects.filter(
         identifiant_unique=identifiant_unique

@@ -2,8 +2,9 @@
 
 module.exports = {
     content: [
-        "jinja2/**/*html",
         "jinja2/*.html",
+        "jinja2/**/*html",
+        "jinja2/**/**/*html",
         "templates/**/*html",
         "static/to_compile/**/*{j,t}s",
     ],
