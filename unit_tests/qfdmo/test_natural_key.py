@@ -1,6 +1,7 @@
 """
 We will use Action model to test NomAsNaturalKeyModel because we need a model in DB
 """
+
 import pytest
 
 from qfdmo.models import Action

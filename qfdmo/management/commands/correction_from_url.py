@@ -116,7 +116,9 @@ class Command(BaseCommand):
                 identifiant_unique=final_acteur.identifiant_unique,
                 final_acteur_id=final_acteur.identifiant_unique,
                 resultat_brute_source="{}",
-                correction_statut=CorrectionActeurStatus.ACTIF
-                if failed
-                else CorrectionActeurStatus.PAS_DE_MODIF,
+                correction_statut=(
+                    CorrectionActeurStatus.ACTIF
+                    if failed
+                    else CorrectionActeurStatus.PAS_DE_MODIF
+                ),
             )

@@ -139,9 +139,11 @@ class Command(BaseCommand):
                     resultat_brute_source=insee_data,
                     identifiant_unique=final_acteur.identifiant_unique,
                     final_acteur_id=final_acteur.identifiant_unique,
-                    correction_statut=CorrectionActeurStatus.ACTIF
-                    if changed
-                    else CorrectionActeurStatus.PAS_DE_MODIF,
+                    correction_statut=(
+                        CorrectionActeurStatus.ACTIF
+                        if changed
+                        else CorrectionActeurStatus.PAS_DE_MODIF
+                    ),
                 )
             else:
                 CorrectionActeur.objects.create(
