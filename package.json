@@ -43,7 +43,7 @@
         "iframe-resizer": "^4.3.9",
         "leaflet": "^1.9.4",
         "leaflet-extra-markers": "^1.2.2",
-        "posthog-js": "^1.100.0",
+        "posthog-js": "^1.103.1",
         "tailwindcss": "^3.4.1"
     },
     "devDependencies": {
