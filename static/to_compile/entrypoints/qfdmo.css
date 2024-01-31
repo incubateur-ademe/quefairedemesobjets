@@ -139,3 +139,7 @@ Style the autocomplete container:
 .qfdmo--top-5 {
     top: -1.25rem;
 }
+
+.qfdmo-adresse-hr {
+    padding:4px !important;
+}

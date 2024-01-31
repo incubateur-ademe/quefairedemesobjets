@@ -166,6 +166,8 @@ class BaseActeur(NomAsNaturalKeyModel):
         return self_as_dict
 
     def acteur_services(self) -> list[str]:
+        # FIXME: just for test (to be removed)
+        # return ["relai d'acteur", "lieu trop cool", "ressourcerie", "boutique"]
         return sorted(
             list(
                 set(
