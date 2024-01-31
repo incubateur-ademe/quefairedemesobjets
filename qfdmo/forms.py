@@ -41,7 +41,7 @@ class GetReemploiSolutionForm(forms.Form):
         widget=AutoCompleteInput(
             attrs={
                 "class": "fr-input fr-icon-search-line",
-                "placeholder": "vêtement, smartphone, meuble...",
+                "placeholder": "chaussures, perceuse, canapé...",
                 "autocomplete": "off",
             },
             data_controller="ss-cat-object-autocomplete",
