@@ -2,6 +2,3 @@
 
 python manage.py migrate
 python manage.py clearsessions
-
-# iframe.js file should be collected without hashing
-cp static/compiled/iframe.js staticfiles/
