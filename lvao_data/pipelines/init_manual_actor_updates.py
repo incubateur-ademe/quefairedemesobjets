@@ -63,8 +63,7 @@ class LVAOActorsDAO:
 
                 # Create masks for non-empty and differing values
                 mask_non_empty = (
-                    df_merged[col_act].notnull()
-                    & df_merged[col_rev_act].notnull()
+                    df_merged[col_rev_act].notnull()
                     & (df_merged[col_act] != "")
                     & (df_merged[col_rev_act] != "")
                 )
