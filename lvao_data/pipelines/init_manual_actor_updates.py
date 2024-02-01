@@ -14,6 +14,17 @@ class LVAOActorsDAO:
     def load_table(self, table_name):
         return pd.read_sql_table(table_name, self.engine)
 
+    def apply_normalization(self, df, normalization_map):
+        """
+        Apply normalization functions to the specified columns of a DataFrame.
+        """
+        for column, normalize_func in normalization_map.items():
+            if column in df.columns:
+                df[column] = df[column].apply(normalize_func)
+            else:
+                print(f"Column {column} not found in DataFrame.")
+        return df
+
     def find_differences(
         self, df_act, df_rev_act, columns_to_exclude, normalization_map
     ):
@@ -179,6 +190,9 @@ if __name__ == "__main__":
         df_act, df_rev_act, columns_to_exclude, normalization_map
     )
 
+    df_act_cleaned = handler.apply_normalization(df_act, normalization_map)
+
     print(df_differences.count())
 
     handler.save_to_database(df_differences, "lvao_manual_actors_updates")
+    handler.save_to_database(df_act_cleaned, "lvao_actors_processed")
