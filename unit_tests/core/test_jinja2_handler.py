@@ -53,6 +53,19 @@ class TestActionDisplayList:
         ]
 
     @pytest.mark.django_db
+    def test_action_list_fake_dir(self):
+        request = HttpRequest()
+
+        request.GET = {"direction": "fake"}
+
+        assert action_list_display(request) == [
+            "Emprunter",
+            "Èchanger",
+            "Louer",
+            "Acheter",
+        ]
+
+    @pytest.mark.django_db
     def test_action_list_jai(self):
         request = HttpRequest()
 
