@@ -51,4 +51,8 @@ export default class extends Controller<HTMLElement> {
     hideSearchInZoneButton() {
         this.searchInZoneTarget.classList.add("qfdmo-hidden")
     }
+
+    displayActorDetail(identifiantUnique: string) {
+        console.log("display actor detail:", identifiantUnique)
+    }
 }

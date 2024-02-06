@@ -96,7 +96,7 @@ export class SolutionMap {
                 } else {
                     customMarker = defaultMarker
                 }
-                L.marker(
+                let marker = L.marker(
                     [actor.location.coordinates[1], actor.location.coordinates[0]],
                     {
                         icon: customMarker,
@@ -105,6 +105,10 @@ export class SolutionMap {
                 )
                     .addTo(this.#map)
                     .bindPopup(actor.render_as_card)
+                marker._identifiant_unique = actor.identifiant_unique
+                marker.on("click", (e) => {
+                    this.#onClickMarker(e)
+                })
                 points.push([
                     actor.location.coordinates[1],
                     actor.location.coordinates[0],
@@ -129,6 +133,11 @@ export class SolutionMap {
 
     get_map(): L.Map {
         return this.#map
+    }
+
+    #onClickMarker(event: L.LeafletEvent) {
+        console.log("Marker ID:", event.target._identifiant_unique)
+        this.#controller.displayActorDetail(event.target._identifiant_unique)
     }
 
     #manageZoomControl() {

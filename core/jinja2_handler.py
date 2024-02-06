@@ -73,15 +73,22 @@ def action_by_direction(request: HttpRequest, direction: str):
     ]
 
 
+def display_search(request: HttpRequest) -> bool:
+    if request.GET.get("r"):
+        return False
+    return True
+
+
 def environment(**options):
     env = Environment(**options)
     env.globals.update(
         {
-            "static": static,
-            "reverse": reverse,
-            "is_iframe": is_iframe,
             "action_by_direction": action_by_direction,
             "action_list_display": action_list_display,
+            "display_search": display_search,
+            "is_iframe": is_iframe,
+            "reverse": reverse,
+            "static": static,
             "str_diff": str_diff,
             "ENVIRONMENT": settings.ENVIRONMENT,
         }

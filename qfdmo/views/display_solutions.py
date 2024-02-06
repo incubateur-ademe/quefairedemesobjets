@@ -35,7 +35,7 @@ BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
 
 class ReemploiSolutionView(FormView):
     form_class = GetReemploiSolutionForm
-    template_name = "qfdmo/reemploi_solution.html"
+    template_name = "qfdmo/adresses.html"
 
     def _get_search_in_zone_params(self):
         center = []
@@ -272,7 +272,7 @@ def solution_detail(request, identifiant_unique):
 
 def adresse_detail(request, identifiant_unique):
     final_acteur = FinalActeur.objects.get(identifiant_unique=identifiant_unique)
-    return render(request, "qfdmo/adresse/detail.html", {"adresse": final_acteur})
+    return render(request, "qfdmo/adresse_detail.html", {"adresse": final_acteur})
 
 
 def solution_admin(request, identifiant_unique):

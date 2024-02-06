@@ -46,7 +46,7 @@ class GetReemploiSolutionForm(forms.Form):
             },
             data_controller="ss-cat-object-autocomplete",
         ),
-        label="",
+        label="Choisir un objet dans la liste (obligatoire)",
         empty_label="",
         required=False,
     )
@@ -66,7 +66,7 @@ class GetReemploiSolutionForm(forms.Form):
             },
             data_controller="address-autocomplete",
         ),
-        label="Autour de l'adresse suivante ",
+        label="Autour de l'adresse suivante (obligatoire)",
         required=False,
     )
     latitude = forms.FloatField(

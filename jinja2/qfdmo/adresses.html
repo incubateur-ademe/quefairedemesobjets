@@ -1,0 +1,392 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+
+    <turbo-frame id="turboForm">
+        <form id='search_form' action='#solutions' >
+
+            <div data-controller="search-solution-form"
+                class="fr-container qfdmo-h-screen qfdmo-flex qfdmo-flex-col qfdmo-flex-auto" >
+
+                <div class="qfdmo-relative qfdmo-duration-700 qfdmo-overflow-hidden
+                    {% if display_search(request) %}qfdmo-h-0{% endif %}"
+                    id="search_summary"
+                >
+                    <button
+                        type="button"
+                        class="fr-btn fr-m-1w fr-btn--icon-left fr-icon-search-line"
+                        onclick="toggleSearch()"
+                    >Modifier ma recherche</button>
+                </div>
+
+                <div class="qfdmo-relative qfdmo-duration-700 qfdmo-overflow-hidden
+                    qfdmo-h-0 {% if display_search(request) %}qfdmo-flex-grow{% endif %}"
+                    id="search_form_div"
+                >
+                    <!-- start 'qfdmo/partials/search_solution.html' -->
+                    <h1 class="fr-h2 md:fr-h2 fr-mt-3w qfdmo-text-center">Longue vie aux objets !</h1>
+                    {% include "qfdmo/partials/featureflip_inputs.html" %}
+
+                    <!-- Option J'ai ou Je cherche -->
+                    {{ form.direction }}
+
+
+                    {{ form.action_list }}
+                    <div data-controller='ss-cat-object-autocomplete'
+                        data-ss-cat-object-autocomplete-max-option-displayed-value=5
+                        data-ss-cat-object-autocomplete-nb-char-to-search-value=2
+                    >
+                        <div class="form-group">
+                            {{ form.sous_categorie_objet.label_tag() }}
+                            <div class="qfdmo-relative">
+                                {{ form.sous_categorie_objet }}
+                                <span data-ss-cat-object-autocomplete-target="spinner" class="fr-icon-refresh-line qfdmo-absolute qfdmo-right-0 qfdmo-top-0 qfdmo-m-1w qfdmo-animate-spin qfdmo-hidden"></span>
+                            </div>
+                            {{ form.sc_id }}
+                        </div>
+                    </div>
+                    <div data-controller='address-autocomplete'
+                        data-address-autocomplete-max-option-displayed-value=5
+                        data-address-autocomplete-is-ban-address-value='true'
+                    >
+                        <div class="form-group">
+                            {{ form.adresse.label_tag() }}
+                            <div class="qfdmo-relative">
+                                {{ form.adresse }}
+                                <span data-address-autocomplete-target="spinner" class="fr-icon-refresh-line qfdmo-absolute qfdmo-right-0 qfdmo-top-0 qfdmo-m-1w qfdmo-animate-spin qfdmo-hidden"></span>
+                            </div>
+                        </div>
+                        {{ form.longitude }}
+                        {{ form.latitude }}
+                    </div>
+                    {% with action_direction='jai' %}
+                        {% include "qfdmo/partials/action_list_by_direction.html" %}
+                    {% endwith %}
+                    {% with action_direction='jecherche' %}
+                        {% include "qfdmo/partials/action_list_by_direction.html"  %}
+                    {% endwith %}
+
+
+                    <div class="qfdmo-w-full qfdmo-flex qfdmo-flex-col xsm:qfdmo-flex-row xsm:qfdmo-justify-between">
+                        <button
+                            name='digital'
+                            value='{{digital}}'
+                            class="fr-btn qfdmo-whitespace-nowrap qfdmo-float-left qfdmo-w-full md:qfdmo-w-max qfdmo-flex qfdmo-justify-center"
+                            data-turbo-frame="solutionFrame"
+                            data-action="click -> search-solution-form#loadingSolutions"
+                            data-search-solution-form-target="submitButton"
+                            onclick="toggleSearch()"
+                            >
+                            Rechercher des adresses
+                        </button>
+                    </div>
+
+                    <!-- Advanced filter : only reparacteur for now -->
+                    <div class="fr-mb-1v qfdmo-flex qfdmo-flex-row">
+                        <button
+                            type="button"
+                            class="fr-btn fr-btn--tertiary"
+                            data-action="click -> search-solution-form#toggleadvancedFiltersDiv"
+                            data-search-solution-form-target="advancedFiltersButton"
+                            >
+                            <span class="fr-icon--sm fr-icon-equalizer-line"></span>
+                            <div class="qfdmo-hidden md:qfdmo-block">&nbsp;filtres avancés</div>
+                            <span
+                                class="qfdmo-hidden qfdmo-bg-blue-france qfdmo-rounded-xl qfdmo-text-white qfdmo-text-xs fr-ml-1w fr-py-1v fr-px-1w"
+                                data-search-solution-form-target="advancedFiltersCounter"
+                            >
+                                1
+                            </span>
+                        </button>
+                    </div>
+                    <div class="qfdmo-hidden qfdmo-relative qfdmo-border qfdmo-border-light-grey qfdmo-border-solid qfdmo-rounded fr-mb-1w fr-p-1w" data-search-solution-form-target="advancedFiltersDiv">
+                        <div
+                            class="qfdmo-flex qfdmo-flex-row qfdmo-items-center"
+                        >
+                            {% include "qfdmo/partials/label_reparacteur_icon.html" %}
+                            <fieldset class="fr-fieldset fr-m-0 " aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages">
+                                <div class="fr-fieldset__element fr-fieldset__element--inline fr-m-0">
+                                    <div
+                                        class="fr-checkbox-group fr-checkbox-group--sm qfdmo-flex qfdmo-flex-row qfdmo-items-center"
+                                    >
+                                        {{ form.label_reparacteur }}
+                                        {{ form.label_reparacteur.label_tag() }}
+                                    </div>
+                                    <span class="fr-hint-text">{{ form.label_reparacteur.help_text }}</span>
+                                </div>
+                            </fieldset>
+                        </div>
+                        <button type='button' class="fr-p-1w qfdmo-absolute qfdmo-z-20 qfdmo-text-right qfdmo-top-0 qfdmo-right-0 qfdmo-cursor-pointer" data-action="click -> search-solution-form#toggleadvancedFiltersDiv">
+                            <span class="fr-icon--sm fr-icon-close-line"></span>
+                        </button>
+                    </div>
+
+
+                </div>
+                <!-- end 'qfdmo/partials/search_solution.html' -->
+
+                <div id="adresses"
+                    class="qfdmo-relative qfdmo-h-0 qfdmo-duration-700 qfdmo-overflow-hidden qfdmo-z-1
+                    qfdmo-flex qfdmo-flex-col
+                    {% if not display_search(request) %}qfdmo-flex-grow{% endif %}"
+                >
+
+                    {% with digital = request.GET.get('digital', '0')|int %}
+
+                        <div
+                            name='digital'
+                            value='{% if digital %}0{% else %}1{% endif %}'
+                            class="fr-p-1w fr-ml-1v qfdmo-flex qfdmo-rounded-xl qfdmo-bg-blue-france-925 hover:qfdmo-bg-blue-france-925-hover"
+                        >
+                            <button
+                                class="{% if not digital %}qfdmo-bg-white qfdmo-border qfdmo-border-solid qfdmo-border-blue-france-sun-113{% endif %} qfdmo-basis-1/2 qfdmo-rounded-lg qfdmo-whitespace-nowrap fr-px-1v qfdmo-text-xs"
+                                name='digital'
+                                value='0'
+                                data-turbo-frame="solutionFrame"
+                                data-action="click -> search-solution-form#toggleSolutionButtonView"
+                                data-search-solution-form-target="nearbyButton"
+                                role="tab"
+                                form="search_form"
+                                >
+                                <span class="fr-icon-road-map-line md:qfdmo-mx-1w"> à proximité</span>
+                            </button>
+                            <button
+                                class="{% if digital %}qfdmo-bg-white qfdmo-border qfdmo-border-solid qfdmo-border-blue-france-sun-113{% endif %} qfdmo-basis-1/2 qfdmo-rounded-lg qfdmo-whitespace-nowrap fr-px-1v qfdmo-text-xs qfdmo-ml-1v"
+                                name='digital'
+                                value='1'
+                                data-turbo-frame="solutionFrame"
+                                data-action="click -> search-solution-form#toggleSolutionButtonView"
+                                data-search-solution-form-target="onlineButton"
+                                role="tab"
+                                form="search_form"
+                                >
+                                <span class="fr-icon-global-line md:qfdmo-mx-1w"> en ligne</span>
+                            </button>
+                        </div>
+                    {% endwith %}
+
+                    <!-- start 'qfdmo/partials/display_solutions.html' -->
+                    <div
+                        class="qfdmo-relative qfdmo-flex-grow  qfdmo-flex qfdmo-flex-col md:qfdmo-flex-row"
+                        data-controller="display-solutions"
+                        data-action="search-solution-form:loadingSolutions@window->display-solutions#loadingSolutions"
+                        >
+                        <div class="qfdmo-flex-grow ">
+                            <turbo-frame id="solutionFrame">
+                                <div class="qfdmo-h-full qfdmo-w-full qfdmo-flex qfdmo-flex-col">
+                                    {% if request.GET["digital"] == "1" %}
+                                        <div class="qfdmo-flex-grow qfdmo-relative qfdmo-overflow-auto qfdmo-shadow-md ">
+                                            {% for acteur in acteurs.all() %}
+                                                <div class="qfdmo-rounded-t qfdmo-border-solid qfdmo-border qfdmo-border-b-2 qfdmo-border-light-gray qfdmo-border-b-blue-france qfdmo-content-start qfdmo-p-1w{% if not loop.last %} qfdmo-mb-1w{% endif %}">
+                                                    {{acteur.render_as_card(direction=form.initial.direction)|safe}}
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        <div
+                                            class="qfdmo-flex-grow qfdmo-relative qfdmo-shadow"
+                                            data-controller="map"
+                                            data-map-location-value="{{ location }}"
+                                            id="map"
+                                            data-map-target="map"
+                                        >
+                                            <button
+                                                name="search_in_zone"
+                                                data-map-target="searchInZone"
+                                                data-turbo-frame="solutionFrame"
+                                                data-action="click -> search-solution-form#loadingSolutions"
+                                                class="fr-m-1w fr-p-1v qfdmo-absolute qfdmo-z-[10000] qfdmo-right-0 qfdmo-hidden qfdmo-bg-white qfdmo-opacity-80 qfdmo-rounded qfdmo-border-solid qfdmo-border-2 qfdmo-border-blue-france-sun-113"
+                                                form="search_form"
+                                                >
+                                                Rechercher dans cette zone
+                                            </button>
+                                            <div
+                                                class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-80 qfdmo-font-black qfdmo-z-[1000]{% if form.initial.adresse %} qfdmo-hidden{% endif %}"
+                                                data-display-solutions-target="addressMissing"
+                                            >
+                                                <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
+                                                    Précisez une adresse pour afficher la carte
+                                                </div>
+                                            </div>
+                                            <div
+                                                class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-80 qfdmo-font-black qfdmo-z-[1000]{% if not(form.initial.adresse) or acteurs %} qfdmo-hidden{% endif %}"
+                                                data-display-solutions-target="NoLocalSolution"
+                                            >
+                                                <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
+                                                    Il n'existe pas de solution {% if bbox %}dans cette zone{% else %}localisée proche de chez vous (<30 km){% endif %}, avez-vous envigagé une solution en ligne ?
+                                                    </div>
+                                                </div>
+                                                {% for acteur in acteurs %}
+                                                    <script type="application/json" data-map-target="acteur">
+                                                        {{ acteur.json_acteur_for_display(direction=form.initial.direction, action_list=form.initial.action_list) | safe }}
+                                                    </script>
+                                                {% endfor %}
+                                                {% if bbox %}
+                                                    <script type="application/json" data-map-target="bBox">
+                                                        {{ bbox|tojson() }}
+                                                    </script>
+                                                {% endif %}
+                                            </div>
+                                    {% endif %}
+                                </div>
+                                <div
+                                    data-display-solutions-target="loadingSolutions"
+                                    class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-90 qfdmo-font-black qfdmo-z-[1000] qfdmo-hidden"
+                                >
+                                    <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl ">
+                                        <span class="fr-icon-refresh-line qfdmo-animate-spin"></span>
+                                        <span class="fr-ml-1w">Chargement des adresses...</span>
+                                    </div>
+                                </div>
+                            </turbo-frame>
+                        </div>
+                        <div id="detail"
+                            class="qfdmo-duration-700 qfdmo-relative
+                            qfdmo-w-full {% if request.GET.get('detail') %} qfdmo-h-1/3 {% else %} qfdmo-h-0 {% endif %}
+                            md:qfdmo-h-full {% if request.GET.get('detail') %} md:qfdmo-w-[480] {% else %} md:qfdmo-w-0 {% endif %}"
+                        >
+                            <div id="in" class="qfdmo-absolute qfdmo-top-0 qfdmo-bottom-0 qfdmo-overflow-y-scroll qfdmo-w-full md:qfdmo-w-[480]">
+                                <div class="md:qfdmo-mx-3w md:qfdmo-mt-3w">
+                                    <div class="qfdmo-flex qfdmo-justify-between">
+                                        <button class="fr-btn fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-arrow-up-s-line md:qfdmo-hidden"
+                                            type='button'
+                                            onclick="displayFullDetail()"
+                                        >
+                                            E
+                                        </button>
+                                        <button class="fr-btn fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-arrow-down-s-line md:qfdmo-hidden"
+                                            type='button'
+                                            onclick="displayDetail()"
+                                        >
+                                            C
+                                        </button>
+                                        <button class="fr-btn fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-close-line"
+                                            type='button'
+                                            onclick="hideDetail()"
+                                        >
+                                            Fermer
+                                        </button>
+                                    </div>
+                                    <turbo-frame id="adr_detail"
+                                        {% if request.GET.get('detail') %}
+                                            src="{{ reverse('qfdmo:adresse_detail', args=[request.GET.get('detail')])}}"
+                                        {% endif %}
+                                    >
+                                    </turbo-frame>
+
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div>
+                        <a class="fr-mb-1w fr-ml-1w fr-mt-1v fr-btn fr-btn--tertiary qfdmo-whitespace-nowrap qfdmo-float-right qfdmo-w-full md:qfdmo-w-max qfdmo-flex qfdmo-justify-center"
+                            href="https://tally.so/r/wzy9ZZ"
+                            target="_blank"
+                            rel="noopener"
+                            aria-label="Proposer une adresse - Nouvelle fenêtre"
+                        >
+                            Proposer une adresse
+                        </a>
+                        <button
+                            type="button"
+                            class="fr-btn"
+                            onclick="displayDetail()"
+                        >Afficher le detail d'une fiche</button>
+                    </div>
+                    <!-- end  'qfdmo/partials/display_solutions.html' -->
+                </div>
+
+
+                {% if is_iframe(request) %}
+                    <div class="fr-container fr-mb-1w fr-text--sm qfdmo-text-center">
+                        Retrouvez les bonnes adresses sur
+                        <a href="https://longuevieauxobjets.ademe.fr/"
+                            target="_blank"
+                            rel="noopener"
+                            aria-label="Lien vers le site Longue vie aux objets - Nouvelle fenêtre"
+                        >
+                            longuevieauxobjets.ademe.fr
+                        </a>
+                    </div>
+                {% endif %}
+
+            </div>
+        </form>
+    </turbo-frame>
+
+    <script>
+        let searchView = {% if display_search(request) %}true{% else %} false {% endif %};
+        function toggleSearch() {
+            var search_form_div = document.getElementById("search_form_div");
+            var adresses = document.getElementById("adresses");
+            let search_summary = document.getElementById("search_summary");
+            hideDetail()
+            if (searchView) {
+                searchView = false
+                adresses.classList.add("qfdmo-flex-grow");
+                search_summary.classList.remove("qfdmo-h-0");
+                search_form_div.classList.remove("qfdmo-flex-grow");
+            } else {
+                searchView = true
+                search_form_div.classList.add("qfdmo-flex-grow");
+                search_summary.classList.add("qfdmo-h-0");
+                adresses.classList.remove("qfdmo-flex-grow");
+            }
+        }
+        function displayDetail() {
+            // test update src of turbo frame
+            // rien_de_neuf_location_partage_echange_drupal_m0546
+            var adr_detail = document.getElementById("adr_detail");
+            adr_detail.src = "/adresse/rien_de_neuf_location_partage_echange_drupal_m0546";
+
+
+
+            var detail = document.getElementById("detail");
+
+            // mobile
+            detail.classList.remove("qfdmo-h-0");
+            detail.classList.remove("qfdmo-h-full");
+            detail.classList.add("qfdmo-h-1/3");
+
+            // desktop
+            detail.classList.add("md:qfdmo-w-[480]");
+            detail.classList.remove("md:qfdmo-w-full");
+            detail.classList.remove("md:qfdmo-w-0");
+        }
+        function displayFullDetail() {
+            var detail = document.getElementById("detail");
+
+            // mobile
+            detail.classList.remove("qfdmo-h-0");
+            detail.classList.remove("qfdmo-h-1/3");
+            detail.classList.add("qfdmo-h-full");
+
+            // desktop
+            detail.classList.add("md:qfdmo-w-full");
+            detail.classList.remove("md:qfdmo-w-0");
+            detail.classList.remove("md:qfdmo-w-[480]");
+
+        }
+        function hideDetail() {
+            var detail = document.getElementById("detail");
+
+            // mobile
+            detail.classList.add("qfdmo-h-0");
+            detail.classList.remove("qfdmo-h-full");
+            detail.classList.remove("qfdmo-h-1/3");
+
+            // desktop
+            detail.classList.add("md:qfdmo-w-0");
+            detail.classList.remove("md:qfdmo-w-full");
+            detail.classList.remove("md:qfdmo-w-[480]");
+
+        }
+    </script>
+
+
+
+    {% include 'qfdmo/reparacteur_modale.html' %}
+{% endblock %}
