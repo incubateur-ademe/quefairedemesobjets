@@ -12,7 +12,7 @@ Le site "Longue vie aux objets" est disponible à l'URL : [https://longuevieauxo
 il suffit d'ajouter le script js suivant:
 
 ```html
-<script src="http://localhost:8000/static/iframe.js"
+<script src="https://lvao.ademe.fr/static/iframe.js"
   data-max_width="800"
   data-direction="jai"
   data-first_dir="jai"
