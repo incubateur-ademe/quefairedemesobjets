@@ -26,10 +26,10 @@ Les paramètres disponibles pour customiser l'affichage de l'iframe sont:
 
 - `data-direction`, option `jai` ou `jecherche`, par défaut l'option de direction « Je cherche » est active
 - `data-first_dir`, option `jai` ou `jecherche`, par défaut l'option de direction « Je cherche » est affiché en premier dans la liste des options de direction
-- `data-action_list`, liste des actions possibles selon la direction séparées par le caractère `|` :
+- `data-action_list`, liste des actions cochées selon la direction séparées par le caractère `|` :
   - pour la direction `jecherche` les actions possibles sont : `emprunter`, `echanger`, `louer`, `acheter`
   - pour la direction `jai` les actions possibles sont : `reparer`, `preter`, `donner`, `echanger`, `mettreenlocation`, `revendre`
-  - si le paramètre `action_list` n'est pas renseigné ou est vide, toutes les actions éligibles à la direction sont affichées
+  - si le paramètre `action_list` n'est pas renseigné ou est vide, toutes les actions éligibles à la direction sont cochées
 - `data-max_width`, largeur maximum de l'iframe en pixel, la valeur par défaut est 800
 
 Voir l'exemple d'integration de l'iframe « Longue vie aux objets » dans une page html : [iframe.html](./iframe.html)
