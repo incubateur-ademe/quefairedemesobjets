@@ -25,7 +25,7 @@ class TestDisplayAsIframe:
         assert response.status_code == 200
         assert 'class="fr-header' not in str(response.content)
         assert 'class="fr-footer' not in str(response.content)
-        assert "Retrouvez les bonnes adresses sur" in str(response.content)
+        assert "Pour en savoir plus :" in str(response.content)
         assert "longuevieauxobjets.ademe.fr" in str(response.content)
 
     @pytest.mark.django_db
@@ -37,4 +37,4 @@ class TestDisplayAsIframe:
         assert response.status_code == 200
         assert 'class="fr-header' in str(response.content)
         assert 'class="fr-footer' in str(response.content)
-        assert "Retrouvez les bonnes adresses sur" not in str(response.content)
+        assert "Pour en savoir plus :" not in str(response.content)

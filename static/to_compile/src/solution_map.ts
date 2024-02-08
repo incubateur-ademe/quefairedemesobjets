@@ -57,7 +57,7 @@ export class SolutionMap {
         })
 
         this.#map.setView(DEFAULT_LOCATION, DEFAULT_ZOOM)
-        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        L.tileLayer("http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png", {
             maxZoom: DEFAULT_MAX_ZOOM,
             attribution:
                 "© <a href='https://www.openstreetmap.org/copyright' rel='noopener'>OpenStreetMap</a>",
@@ -82,6 +82,7 @@ export class SolutionMap {
 
         actors.forEach(function (actor: Actor) {
             if (actor.location) {
+                // Create the marker look and feel : pin + icon
                 var customMarker = undefined
                 if (actor.actions.length > 0) {
                     customMarker = L.ExtraMarkers.icon({
@@ -96,6 +97,8 @@ export class SolutionMap {
                 } else {
                     customMarker = defaultMarker
                 }
+
+                // create the marker on map
                 let marker = L.marker(
                     [actor.location.coordinates[1], actor.location.coordinates[0]],
                     {
@@ -103,12 +106,12 @@ export class SolutionMap {
                         riseOnHover: true,
                     },
                 )
-                    .addTo(this.#map)
-                    .bindPopup(actor.render_as_card)
                 marker._identifiant_unique = actor.identifiant_unique
                 marker.on("click", (e) => {
                     this.#onClickMarker(e)
                 })
+                marker.addTo(this.#map)
+
                 points.push([
                     actor.location.coordinates[1],
                     actor.location.coordinates[0],

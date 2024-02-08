@@ -11,9 +11,9 @@
     </div>
 </div>
 
-<h4 class='fr-mb-0'>
+<h2 class='fr-my-1w fr-h6'>
     {{ adresse.nom_affiche }}
-</h4>
+</h2>
 
 <p class="qfdmo-text-sm fr-mb-1w fr-mt-0">
     {% for acteur_service in adresse.acteur_services() %}
@@ -34,7 +34,7 @@
 {% endif %}
 
 <hr class="fr-pb-1v">
-<div class="fr-m-3w qfdmo-flex qfdmo-justify-around">
+<div class="fr-my-1w qfdmo-flex qfdmo-justify-around">
     {% if True %} <!-- FIXME: if lat long src and dest -->
         <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
             <a class="fr-btn fr-icon-road-map-line qfdmo-rounded-full" href="#" target="_blank" title="itinéraire" rel='noopener'></a>

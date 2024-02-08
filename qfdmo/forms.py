@@ -116,7 +116,10 @@ class GetReemploiSolutionForm(forms.Form):
             }
         ),
         label="Label Répar’Acteurs",
-        help_text="Afficher uniquement les artisans labellisés",
+        help_text=(
+            "Afficher uniquement les artisans labellisés"
+            " (uniquement valable lorsque le geste réparé est sélectionné)"
+        ),
         label_suffix="",
         required=False,
     )
