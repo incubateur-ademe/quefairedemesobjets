@@ -37,30 +37,30 @@
 <div class="fr-m-3w qfdmo-flex qfdmo-justify-around">
     {% if True %} <!-- FIXME: if lat long src and dest -->
         <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
-            <a class="fr-btn fr-icon-road-map-line qfdmo-rounded-full" href="#" target="_blank" title="itinéraire"></a>
+            <a class="fr-btn fr-icon-road-map-line qfdmo-rounded-full" href="#" target="_blank" title="itinéraire" rel='noopener'></a>
             <span class="fr-text--xs fr-mb-0">Itinéraire</span>
         </div>
     {% endif %}
     {% if adresse.url %}
         <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
-            <a class="fr-btn fr-icon-global-line qfdmo-rounded-full" href="{{ adresse.url }}" target="_blank" title="Site Internet"></a>
+            <a class="fr-btn fr-icon-global-line qfdmo-rounded-full" href="{{ adresse.url }}" target="_blank" title="Site Internet" rel='noopener'></a>
             <span class="fr-text--xs fr-mb-0">Site Internet</span>
         </div>
     {% endif %}
     {% if adresse.email %}
         <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
-            <a class="fr-btn fr-icon-mail-line qfdmo-rounded-full" href="mailto:{{ adresse.email }}" target="_blank" title="Courriel"></a>
+            <a class="fr-btn fr-icon-mail-line qfdmo-rounded-full" href="mailto:{{ adresse.email }}" target="_blank" title="Courriel" rel='noopener'></a>
             <span class="fr-text--xs fr-mb-0">Courriel</span>
         </div>
     {% endif %}
     {% if adresse.telephone or True %}
         <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
-            <a class="fr-btn fr-icon-phone-line qfdmo-rounded-full" href="tel:{{ adresse.telephone }}" target="_blank" title="Téléphone"></a>
+            <a class="fr-btn fr-icon-phone-line qfdmo-rounded-full" href="tel:{{ adresse.telephone }}" target="_blank" title="Téléphone" rel='noopener'></a>
             <span class="fr-text--xs fr-mb-0">Téléphone</span>
         </div>
     {% endif %}
     <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
-        <a class="fr-btn fr-icon-git-branch-line qfdmo-rounded-full" href="#" target="_blank" title="Partager"></a>
+        <a class="fr-btn fr-icon-git-branch-line qfdmo-rounded-full" href="#" target="_blank" title="Partager" rel='noopener'></a>
         <span class="fr-text--xs fr-mb-0">Partager</span>
     </div>
 </div>
