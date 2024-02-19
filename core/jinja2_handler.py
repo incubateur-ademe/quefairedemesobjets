@@ -6,6 +6,7 @@ from django.http import HttpRequest
 from django.templatetags.static import static
 from django.urls import reverse
 
+from core.utils import get_direction
 from jinja2 import Environment
 from qfdmo.models import CachedDirectionAction
 
@@ -35,7 +36,7 @@ def is_iframe(request: HttpRequest) -> bool:
 
 # FIXME : perhaps it is better in util list ?
 def get_action_list(request: HttpRequest) -> List[dict]:
-    direction = request.GET.get("direction", settings.DEFAULT_ACTION_DIRECTION)
+    direction = get_direction(request)
     if action_list := request.GET.get("action_list"):
         return [
             a
@@ -52,7 +53,8 @@ def action_list_display(request: HttpRequest) -> List[str]:
 
 def action_by_direction(request: HttpRequest, direction: str):
     action_list = request.GET.get("action_list")
-    if request.GET.get("direction") != direction:
+    requested_direction = get_direction(request)
+    if requested_direction != direction:
         action_list = None
     if action_list:
         return [
