@@ -39,75 +39,29 @@ class TestIsIframe:
 
 
 class TestActionDisplayList:
+
+    @pytest.mark.parametrize(
+        "params,action_list",
+        [
+            ({}, ["Emprunter", "Èchanger", "Louer", "Acheter"]),
+            ({"direction": "fake"}, ["Emprunter", "Èchanger", "Louer", "Acheter"]),
+            (
+                {"direction": "jai"},
+                ["Réparer", "Prêter", "Donner", "Èchanger", "Louer", "Vendre"],
+            ),
+            ({"direction": "jecherche"}, ["Emprunter", "Èchanger", "Louer", "Acheter"]),
+            ({"action_list": "fake"}, []),
+            ({"action_list": "emprunter"}, ["Emprunter"]),
+            ({"action_list": "emprunter|louer"}, ["Emprunter", "Louer"]),
+        ],
+    )
     @pytest.mark.django_db
-    def test_action_list_default(self):
+    def test_action_list(self, params, action_list):
         request = HttpRequest()
 
-        request.GET = {}
+        request.GET = params
 
-        assert action_list_display(request) == [
-            "Emprunter",
-            "Èchanger",
-            "Louer",
-            "Acheter",
-        ]
-
-    @pytest.mark.django_db
-    def test_action_list_fake_dir(self):
-        request = HttpRequest()
-
-        request.GET = {"direction": "fake"}
-
-        assert action_list_display(request) == [
-            "Emprunter",
-            "Èchanger",
-            "Louer",
-            "Acheter",
-        ]
-
-    @pytest.mark.django_db
-    def test_action_list_jai(self):
-        request = HttpRequest()
-
-        request.GET = {"direction": "jai"}
-
-        assert action_list_display(request) == [
-            "Réparer",
-            "Prêter",
-            "Donner",
-            "Èchanger",
-            "Louer",
-            "Vendre",
-        ]
-
-    @pytest.mark.django_db
-    def test_action_list_jecherche(self):
-        request = HttpRequest()
-
-        request.GET = {"direction": "jecherche"}
-
-        assert action_list_display(request) == [
-            "Emprunter",
-            "Èchanger",
-            "Louer",
-            "Acheter",
-        ]
-
-    @pytest.mark.django_db
-    def test_action_list_fake(self):
-        request = HttpRequest()
-
-        request.GET = {"action_list": "fake"}
-
-        assert action_list_display(request) == []
-
-    @pytest.mark.django_db
-    def test_action_list_good(self):
-        request = HttpRequest()
-
-        request.GET = {"action_list": "emprunter"}
-
-        assert action_list_display(request) == ["Emprunter"]
+        assert action_list_display(request) == action_list
 
 
 class TestActionByDirection:
