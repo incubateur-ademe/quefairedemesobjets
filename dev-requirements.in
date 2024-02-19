@@ -1,5 +1,6 @@
 --constraint=requirements.txt
 
+beautifulsoup4
 black
 django-browser-reload
 django-debug-toolbar
