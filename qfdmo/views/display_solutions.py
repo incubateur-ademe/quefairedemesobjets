@@ -16,6 +16,7 @@ from django.views.decorators.http import require_GET
 from django.views.generic.edit import FormView
 
 from core.jinja2_handler import get_action_list
+from core.utils import get_direction
 from qfdmo.forms import GetReemploiSolutionForm
 from qfdmo.models import (
     Acteur,
@@ -71,9 +72,7 @@ class ReemploiSolutionView(FormView):
         initial = super().get_initial()
         initial["sous_categorie_objet"] = self.request.GET.get("sous_categorie_objet")
         initial["adresse"] = self.request.GET.get("adresse")
-        initial["direction"] = self.request.GET.get(
-            "direction", settings.DEFAULT_ACTION_DIRECTION
-        )
+        initial["direction"] = get_direction(self.request)
         initial["action_list"] = self.request.GET.get("action_list")
         initial["latitude"] = self.request.GET.get("latitude")
         initial["longitude"] = self.request.GET.get("longitude")
