@@ -3,37 +3,28 @@
 {% block content %}
 
     <turbo-frame id="turboForm">
-        <form id='search_form' action='#solutions' >
-
-            <div data-controller="search-solution-form"
+        <form data-controller="search-solution-form" id='search_form' action='#solutions' >
+            <div
                 class="fr-container qfdmo-h-screen qfdmo-flex qfdmo-flex-col qfdmo-flex-auto" >
-
                 <div class="qfdmo-relative qfdmo-duration-700 qfdmo-overflow-hidden
                     {% if display_search(request) %}qfdmo-h-0{% endif %}"
                     id="search_summary"
                 >
                     <button
                         type="button"
-                        class="fr-btn fr-btn--secondary fr-m-1w fr-btn--icon-left fr-icon-search-line"
+                        class="fr-mb-1w fr-ml-1w fr-mt-1v fr-btn fr-btn--tertiary qfdmo-whitespace-nowrap qfdmo-w-full md:qfdmo-w-max qfdmo-flex qfdmo-justify-center fr-btn--icon-left fr-icon-search-line"
                         onclick="toggleSearch()"
                     >Modifier ma recherche</button>
-                    <!-- Bouton filtre tertiary avec bordure -->
                 </div>
 
                 <div class="qfdmo-relative qfdmo-duration-700 qfdmo-overflow-hidden
                     qfdmo-h-0 {% if display_search(request) %}qfdmo-flex-grow{% endif %}"
                     id="search_form_div"
                 >
-                    <!-- start 'qfdmo/partials/search_solution.html'
-                    FIXME : Ajout prochain d'un logo -->
                     <h1 class="fr-h2 md:fr-h2 fr-mt-3w qfdmo-text-center">Longue vie aux objets</h1>
                     {% include "qfdmo/partials/featureflip_inputs.html" %}
 
-                    <!-- Option J'ai ou Je cherche -->
-                    <!-- TODO : https://www.systeme-de-design.gouv.fr/elements-d-interface/composants/controle-segmente -->
-
-
-                    <fieldset class="fr-segmented fr-segmented--sm">
+                    <fieldset class="fr-segmented fr-segmented--sm qfdmo-w-full ">
                         <legend class="fr-segmented__legend fr-mb-0">
                             {{ form.direction.label_tag() }}
                         </legend>

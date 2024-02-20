@@ -25,7 +25,7 @@ class SegmentedControlSelect(forms.RadioSelect):
     template_name = "django/forms/widgets/segmented_control.html"
     option_template_name = "django/forms/widgets/segmented_control_option.html"
 
-    def __init__(self, attrs=None, fieldset_attrs=None, choices=()):
+    def __init__(self, attrs=None, fieldset_attrs=None, option_attrs=None, choices=()):
         self.fieldset_attrs = {} if fieldset_attrs is None else fieldset_attrs.copy()
         super().__init__(attrs)
 
@@ -101,9 +101,9 @@ class GetReemploiSolutionForm(forms.Form):
         widget=SegmentedControlSelect(
             attrs={
                 "data-action": "click -> search-solution-form#changeDirection",
+                "class": " qfdmo-w-full md:qfdmo-w-fit",
             },
             fieldset_attrs={
-                "class": "fr-fieldset fr-my-1w",
                 "data-search-solution-form-target": "direction",
             },
         ),
