@@ -82,16 +82,17 @@
                         </div>
 
                         <!-- Advanced filters -->
+                        <!-- FIXME : should we keep the modal or should we manage such behaviour as a panel : not obvious -->
                         <button class="fr-link qfdmo-text-center md:qfdmo-text-left" data-fr-opened="false" aria-controls="fr-modal-2" type="button">
                             Advanced filters
                         </button>
                         <dialog aria-labelledby="fr-modal-2-title" id="fr-modal-2" class='fr-modal' role="dialog" >
                             <div class="fr-container fr-container--fluid qfdmo-h-full">
-                                <div class="fr-modal__body qfdmo-h-full">
+                                <div class="fr-modal__body qfdmo-h-full qfdmo-flex qfdmo-flex-col">
                                     <div class="fr-modal__header">
                                         <button class="fr-btn fr-btn--close fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-close-line" type="button" aria-controls="fr-modal-2">Fermer</button>
                                     </div>
-                                    <div class="fr-modal__content">
+                                    <div class="fr-modal__content qfdmo-flex-grow">
                                         <h1 id="fr-modal-2-title" class="fr-h4 fr-mt-3w qfdmo-text-center">
                                             Filtres avancés
                                         </h1>
@@ -142,6 +143,13 @@
                 </div>
                 <!-- end 'qfdmo/partials/search_solution.html' -->
 
+
+
+
+
+
+
+
                 <div id="adresses"
                     class="qfdmo-relative qfdmo-h-0 qfdmo-duration-700 qfdmo-overflow-hidden qfdmo-z-1
                     qfdmo-flex qfdmo-flex-col
@@ -189,11 +197,11 @@
 
                     <!-- start 'qfdmo/partials/display_solutions.html' -->
                     <div
-                        class="qfdmo-relative qfdmo-flex-grow  qfdmo-flex qfdmo-flex-col md:qfdmo-flex-row"
+                        class="qfdmo-relative qfdmo-flex-grow qfdmo-flex qfdmo-flex-col md:qfdmo-flex-row"
                         data-controller="display-solutions"
                         data-action="search-solution-form:loadingSolutions@window->display-solutions#loadingSolutions"
                         >
-                        <div class="qfdmo-flex-grow ">
+                        <div class="qfdmo-flex-grow">
                             <turbo-frame id="solutionFrame">
                                 <div class="qfdmo-h-full qfdmo-w-full qfdmo-flex qfdmo-flex-col">
                                     {% if request.GET["digital"] == "1" %}
@@ -310,16 +318,15 @@
                     <!-- end  'qfdmo/partials/display_solutions.html' -->
                 </div>
 
-
                 {% if is_iframe(request) %}
-                    <div class="fr-container fr-mb-1w fr-text--sm qfdmo-text-center">
+                    <div class="fr-container fr-mb-1w fr-text--xs qfdmo-text-center">
                         Pour en savoir plus :
                         <a href="https://longuevieauxobjets.ademe.fr/"
                             target="_blank"
                             rel="noopener"
                             aria-label="Lien vers le site Longue vie aux objets - Nouvelle fenêtre"
                         >
-                            longuevieauxobjets.ademe.fr
+                            longue vie aux objets
                         </a>
                     </div>
                 {% endif %}
