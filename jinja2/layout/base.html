@@ -65,11 +65,19 @@
             <noscript>
                 <div class="fr-container fr-my-3w">
                     <div class="fr-alert fr-alert--error">
-                        <h3 class="fr-alert__title">L'application nécessite javascript pour être exécutée correctement</h3>
+                        <h3 class="fr-alert__title">L'application nécessite JavaScript pour être exécutée correctement</h3>
                         <p>JavaScript est désactivé dans votre navigateur. Veuillez l'activer pour une meilleure expérience.</p>
+                        <p>Comment activer JavaScript dans votre navigateur : <a href="https://www.enable-javascript.com/fr/" target="_blank" rel="noopener">https://www.enable-javascript.com/fr/</a></p>
                     </div>
                 </div>
             </noscript>
+            <div class="fr-container fr-my-3w qfdmo-hidden" id='obsolete_browser_message'>
+                <div class="fr-alert fr-alert--warning">
+                    <h3 class="fr-alert__title">Mettez à jour votre navigateur</h3>
+                    <p>La version de votre navigateur est trop ancienne pour garantir que l'application fonctionne correctement.</p>
+                    <p>Nous vous prions de mettre à jour votre navigateur ou d'en utiliser un autre</p>
+                </div>
+            </div>
             {% block content %}{% endblock %}
         </main>
         {% if not is_iframe(request) %}
