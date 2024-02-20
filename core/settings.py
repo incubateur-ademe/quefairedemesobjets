@@ -244,7 +244,7 @@ sentry_sdk.init(
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-DEFAULT_ACTION_DIRECTION = "jecherche"
+DEFAULT_ACTION_DIRECTION = "jai"
 
 INSEE_KEY = decouple.config("INSEE_KEY", cast=str, default="")
 INSEE_SECRET = decouple.config("INSEE_SECRET", cast=str, default="")
