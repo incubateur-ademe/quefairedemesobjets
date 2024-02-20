@@ -1,5 +1,6 @@
 from django import forms
 from django.conf import settings
+from django.utils.safestring import mark_safe
 
 from qfdmo.models import (
     CachedDirectionAction,
@@ -26,21 +27,6 @@ class SegmentedControlSelect(forms.RadioSelect):
     option_template_name = "django/forms/widgets/segmented_control_option.html"
 
     def __init__(self, attrs=None, fieldset_attrs=None, option_attrs=None, choices=()):
-        self.fieldset_attrs = {} if fieldset_attrs is None else fieldset_attrs.copy()
-        super().__init__(attrs)
-
-    def get_context(self, name, value, attrs):
-        context = super().get_context(name, value, attrs)
-        context["widget"]["fieldset_attrs"] = self.build_attrs(self.fieldset_attrs)
-        return context
-
-
-# FIXME : To be deprecated ?
-class InlineRadioSelect(forms.RadioSelect):
-    template_name = "django/forms/widgets/inline_radio.html"
-    option_template_name = "django/forms/widgets/inline_radio_option.html"
-
-    def __init__(self, attrs=None, fieldset_attrs=None, choices=()):
         self.fieldset_attrs = {} if fieldset_attrs is None else fieldset_attrs.copy()
         super().__init__(attrs)
 
@@ -126,7 +112,6 @@ class GetReemploiSolutionForm(forms.Form):
             attrs={
                 "class": "fr-checkbox fr-m-1v",
                 "data-search-solution-form-target": "advancedFiltersField",
-                "data-action": "click -> search-solution-form#updateAdvancedFiltersCounter",  # noqa E501
             }
         ),
         label="Label Répar’Acteurs",
@@ -145,10 +130,29 @@ class GetReemploiSolutionForm(forms.Form):
         required=False,
     )
 
-    digital = forms.BooleanField(
-        widget=forms.HiddenInput(
-            attrs={"data-search-solution-form-target": "digital"},
+    digital = forms.ChoiceField(
+        widget=SegmentedControlSelect(
+            attrs={
+                "class": "qfdmo-w-full md:qfdmo-w-fit",
+                "data-action": "click -> search-solution-form#submitForm",
+            },
         ),
+        choices=[
+            (
+                "0",
+                mark_safe(
+                    '<span class="fr-icon-road-map-line md:qfdmo-mx-1w">'
+                    " à proximité</span>"
+                ),
+            ),
+            (
+                "1",
+                mark_safe(
+                    '<span class="fr-icon-global-line md:qfdmo-mx-1w"> en ligne</span>'
+                ),
+            ),
+        ],
+        label="Adresses à proximité ou solutions digitales",
         required=False,
     )
 

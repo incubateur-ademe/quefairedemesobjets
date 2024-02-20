@@ -3,7 +3,9 @@
 {% block content %}
 
     <turbo-frame id="turboForm">
-        <form data-controller="search-solution-form" id='search_form' action='#solutions' >
+        <form data-controller="search-solution-form" id='search_form'
+            data-search-solution-form-target="searchForm"
+        >
             <div class="fr-container qfdmo-h-screen qfdmo-flex qfdmo-flex-col qfdmo-flex-auto">
                 <div class="qfdmo-relative qfdmo-duration-700 qfdmo-overflow-hidden
                     {% if display_search(request) %}qfdmo-h-0{% endif %}"
@@ -29,7 +31,7 @@
 
                         <!-- Direction -->
                         <fieldset class="fr-segmented fr-segmented--sm qfdmo-w-full ">
-                            <legend class="fr-segmented__legend fr-mb-0 qfdmo-hidden">
+                            <legend class="fr-segmented__legend qfdmo-hidden">
                                 {{ form.direction.label_tag() }}
                             </legend>
                             {{ form.direction }}
@@ -128,12 +130,9 @@
                     </div>
                     <div class="fr-my-1w qfdmo-w-full qfdmo-flex qfdmo-flex-col xsm:qfdmo-flex-row xsm:qfdmo-justify-between">
                         <button
-                            name='digital'
-                            value='{{digital}}'
                             class="fr-btn qfdmo-whitespace-nowrap qfdmo-float-left qfdmo-w-full md:qfdmo-w-max qfdmo-flex qfdmo-justify-center"
                             data-turbo-frame="solutionFrame"
                             data-action="click -> search-solution-form#loadingSolutions"
-                            data-search-solution-form-target="submitButton"
                             onclick="toggleSearch()"
                             >
                             Rechercher des adresses
@@ -156,39 +155,13 @@
                     {% if not display_search(request) %}qfdmo-flex-grow{% endif %}"
                 >
 
-                    {% with digital = request.GET.get('digital', '0')|int %}
-                        <!-- TODO https://www.systeme-de-design.gouv.fr/elements-d-interface/composants/controle-segmente -->
-                        <div
-                            name='digital'
-                            value='{% if digital %}0{% else %}1{% endif %}'
-                            class="fr-p-1w fr-ml-1v qfdmo-flex qfdmo-rounded-xl qfdmo-bg-blue-france-925 hover:qfdmo-bg-blue-france-925-hover"
-                        >
-                            <button
-                                class="{% if not digital %}qfdmo-bg-white qfdmo-border qfdmo-border-solid qfdmo-border-blue-france-sun-113{% endif %} qfdmo-basis-1/2 qfdmo-rounded-lg qfdmo-whitespace-nowrap fr-px-1v qfdmo-text-xs"
-                                name='digital'
-                                value='0'
-                                data-turbo-frame="solutionFrame"
-                                data-action="click -> search-solution-form#toggleSolutionButtonView"
-                                data-search-solution-form-target="nearbyButton"
-                                role="tab"
-                                form="search_form"
-                                >
-                                <span class="fr-icon-road-map-line md:qfdmo-mx-1w"> à proximité</span>
-                            </button>
-                            <button
-                                class="{% if digital %}qfdmo-bg-white qfdmo-border qfdmo-border-solid qfdmo-border-blue-france-sun-113{% endif %} qfdmo-basis-1/2 qfdmo-rounded-lg qfdmo-whitespace-nowrap fr-px-1v qfdmo-text-xs qfdmo-ml-1v"
-                                name='digital'
-                                value='1'
-                                data-turbo-frame="solutionFrame"
-                                data-action="click -> search-solution-form#toggleSolutionButtonView"
-                                data-search-solution-form-target="onlineButton"
-                                role="tab"
-                                form="search_form"
-                                >
-                                <span class="fr-icon-global-line md:qfdmo-mx-1w"> en ligne</span>
-                            </button>
-                        </div>
-                    {% endwith %}
+                    <!-- Direction -->
+                    <fieldset class="fr-segmented fr-segmented--sm qfdmo-w-full ">
+                        <legend class="fr-segmented__legend qfdmo-hidden">
+                            {{ form.digital.label_tag() }}
+                        </legend>
+                        {{ form.digital }}
+                    </fieldset>
 
                     <p class="fr-my-1w fr-h6">
                         <!-- mettre l'objet que tu cherches -->
@@ -201,75 +174,87 @@
                         data-controller="display-solutions"
                         data-action="search-solution-form:loadingSolutions@window->display-solutions#loadingSolutions"
                         >
-                        <div class="qfdmo-flex-grow">
-                            <turbo-frame id="solutionFrame">
-                                <div class="qfdmo-h-full qfdmo-w-full qfdmo-flex qfdmo-flex-col">
-                                    {% if request.GET["digital"] == "1" %}
-                                        <div class="qfdmo-flex-grow qfdmo-relative qfdmo-overflow-auto qfdmo-shadow-md ">
-                                            {% for acteur in acteurs.all() %}
-                                                <div class="qfdmo-rounded-t qfdmo-border-solid qfdmo-border qfdmo-border-b-2 qfdmo-border-light-gray qfdmo-border-b-blue-france qfdmo-content-start qfdmo-p-1w{% if not loop.last %} qfdmo-mb-1w{% endif %}">
-                                                    {{acteur.render_as_card(direction=form.initial.direction)|safe}}
-                                                </div>
-                                            {% endfor %}
-                                        </div>
-                                    {% else %}
-                                        <div
-                                            class="qfdmo-flex-grow qfdmo-relative qfdmo-shadow"
-                                            data-controller="map"
-                                            data-map-location-value="{{ location }}"
-                                            id="map"
-                                            data-map-target="map"
-                                        >
-                                            <button
-                                                name="search_in_zone"
-                                                data-map-target="searchInZone"
-                                                data-turbo-frame="solutionFrame"
-                                                data-action="click -> search-solution-form#loadingSolutions"
-                                                class="fr-m-1w fr-p-1v qfdmo-absolute qfdmo-z-[10000] qfdmo-right-0 qfdmo-hidden qfdmo-bg-white qfdmo-opacity-80 qfdmo-rounded qfdmo-border-solid qfdmo-border-2 qfdmo-border-blue-france-sun-113"
-                                                form="search_form"
-                                                >
-                                                Rechercher dans cette zone
-                                            </button>
-                                            <div
-                                                class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-80 qfdmo-font-black qfdmo-z-[1000]{% if form.initial.adresse %} qfdmo-hidden{% endif %}"
-                                                data-display-solutions-target="addressMissing"
-                                            >
-                                                <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
-                                                    Précisez une adresse pour afficher la carte
-                                                </div>
+                        <div class="qfdmo-flex-grow qfdmo-flex qfdmo-flex-col">
+                            <div class="qfdmo-flex-grow">
+                                <turbo-frame id="solutionFrame">
+                                    <div class="qfdmo-h-full qfdmo-w-full qfdmo-flex qfdmo-flex-col">
+                                        {% if request.GET["digital"] == "1" %}
+                                            <div class="qfdmo-flex-grow qfdmo-relative qfdmo-overflow-auto qfdmo-shadow-md ">
+                                                {% for acteur in acteurs.all() %}
+                                                    <div class="qfdmo-rounded-t qfdmo-border-solid qfdmo-border qfdmo-border-b-2 qfdmo-border-light-gray qfdmo-border-b-blue-france qfdmo-content-start qfdmo-p-1w{% if not loop.last %} qfdmo-mb-1w{% endif %}">
+                                                        {{acteur.render_as_card(direction=form.initial.direction)|safe}}
+                                                    </div>
+                                                {% endfor %}
                                             </div>
+                                        {% else %}
                                             <div
-                                                class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-80 qfdmo-font-black qfdmo-z-[1000]{% if not(form.initial.adresse) or acteurs %} qfdmo-hidden{% endif %}"
-                                                data-display-solutions-target="NoLocalSolution"
+                                                class="qfdmo-flex-grow qfdmo-relative qfdmo-shadow"
+                                                data-controller="map"
+                                                data-map-location-value="{{ location }}"
+                                                id="map"
+                                                data-map-target="map"
                                             >
-                                                <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
-                                                    Il n'existe pas de solution {% if bbox %}dans cette zone{% else %}localisée proche de chez vous (<30 km){% endif %}, avez-vous envigagé une solution en ligne ?
+                                                <button
+                                                    name="search_in_zone"
+                                                    data-map-target="searchInZone"
+                                                    data-turbo-frame="solutionFrame"
+                                                    data-action="click -> search-solution-form#loadingSolutions"
+                                                    class="fr-m-1w fr-p-1v qfdmo-absolute qfdmo-z-[10000] qfdmo-right-0 qfdmo-hidden qfdmo-bg-white qfdmo-opacity-80 qfdmo-rounded qfdmo-border-solid qfdmo-border-2 qfdmo-border-blue-france-sun-113"
+                                                    >
+                                                    Rechercher dans cette zone
+                                                </button>
+                                                <div
+                                                    class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-80 qfdmo-font-black qfdmo-z-[1000]{% if form.initial.adresse %} qfdmo-hidden{% endif %}"
+                                                    data-display-solutions-target="addressMissing"
+                                                >
+                                                    <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
+                                                        Précisez une adresse pour afficher la carte
                                                     </div>
                                                 </div>
-                                                {% for acteur in acteurs %}
-                                                    <script type="application/json" data-map-target="acteur">
-                                                        {{ acteur.json_acteur_for_display(direction=form.initial.direction, action_list=form.initial.action_list) | safe }}
-                                                    </script>
-                                                {% endfor %}
-                                                {% if bbox %}
-                                                    <script type="application/json" data-map-target="bBox">
-                                                        {{ bbox|tojson() }}
-                                                    </script>
-                                                {% endif %}
-                                            </div>
-                                    {% endif %}
-                                </div>
-                                <div
-                                    data-display-solutions-target="loadingSolutions"
-                                    class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-90 qfdmo-font-black qfdmo-z-[1000] qfdmo-hidden"
-                                >
-                                    <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl ">
-                                        <span class="fr-icon-refresh-line qfdmo-animate-spin"></span>
-                                        <span class="fr-ml-1w">Chargement des adresses...</span>
+                                                <div
+                                                    class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-80 qfdmo-font-black qfdmo-z-[1000]{% if not(form.initial.adresse) or acteurs %} qfdmo-hidden{% endif %}"
+                                                    data-display-solutions-target="NoLocalSolution"
+                                                >
+                                                    <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
+                                                        Il n'existe pas de solution {% if bbox %}dans cette zone{% else %}localisée proche de chez vous (<30 km){% endif %}, avez-vous envigagé une solution en ligne ?
+                                                        </div>
+                                                    </div>
+                                                    {% for acteur in acteurs %}
+                                                        <script type="application/json" data-map-target="acteur">
+                                                            {{ acteur.json_acteur_for_display(direction=form.initial.direction, action_list=form.initial.action_list) | safe }}
+                                                        </script>
+                                                    {% endfor %}
+                                                    {% if bbox %}
+                                                        <script type="application/json" data-map-target="bBox">
+                                                            {{ bbox|tojson() }}
+                                                        </script>
+                                                    {% endif %}
+                                                </div>
+                                        {% endif %}
                                     </div>
-                                </div>
-                            </turbo-frame>
+                                    <div
+                                        data-display-solutions-target="loadingSolutions"
+                                        class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-90 qfdmo-font-black qfdmo-z-[1000] qfdmo-hidden"
+                                    >
+                                        <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl ">
+                                            <span class="fr-icon-refresh-line qfdmo-animate-spin"></span>
+                                            <span class="fr-ml-1w">Chargement des adresses...</span>
+                                        </div>
+                                    </div>
+                                </turbo-frame>
+                            </div>
+                            <div>
+                                <a class="fr-my-1w fr-btn fr-btn--tertiary qfdmo-whitespace-nowrap qfdmo-float-right qfdmo-w-full md:qfdmo-w-max qfdmo-flex qfdmo-justify-center"
+                                    href="https://tally.so/r/wzy9ZZ"
+                                    target="_blank"
+                                    rel="noopener"
+                                    aria-label="Proposer une adresse - Nouvelle fenêtre"
+                                >
+                                    Proposer une adresse
+                                </a>
+                            </div>
                         </div>
+
                         <div id="detail"
                             class="qfdmo-duration-700 qfdmo-relative
                             qfdmo-w-full {% if request.GET.get('detail') %} qfdmo-h-1/2 {% else %} qfdmo-h-0 {% endif %}
@@ -305,18 +290,9 @@
                     </div>
 
 
-                    <div>
-                        <a class="fr-my-1w fr-btn fr-btn--tertiary qfdmo-whitespace-nowrap qfdmo-float-right qfdmo-w-full md:qfdmo-w-max qfdmo-flex qfdmo-justify-center"
-                            href="https://tally.so/r/wzy9ZZ"
-                            target="_blank"
-                            rel="noopener"
-                            aria-label="Proposer une adresse - Nouvelle fenêtre"
-                        >
-                            Proposer une adresse
-                        </a>
-                    </div>
                     <!-- end  'qfdmo/partials/display_solutions.html' -->
                 </div>
+
 
                 {% if is_iframe(request) %}
                     <div class="fr-container fr-mb-1w fr-text--xs qfdmo-text-center">

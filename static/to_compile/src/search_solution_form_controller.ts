@@ -2,37 +2,15 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
     #selectedOption: string = "jecherche"
-    static targets = [
-        "jai",
-        "jecherche",
-        "direction",
-        "actionList",
-        "advancedFiltersDiv",
-        "advancedFiltersField",
-        "advancedFiltersCounter",
-        "action",
-        "advancedFiltersButton",
-        "nearbyButton",
-        "onlineButton",
-        "submitButton",
-    ]
+    static targets = ["jai", "jecherche", "direction", "actionList", "searchForm"]
     declare readonly jaiTarget: HTMLElement
     declare readonly jechercheTarget: HTMLElement
     declare readonly directionTarget: HTMLElement
     declare readonly actionListTarget: HTMLInputElement
-    declare readonly advancedFiltersDivTarget: HTMLElement
-    declare readonly advancedFiltersFieldTargets: HTMLInputElement[]
-    declare readonly actionTargets: HTMLInputElement[]
-    declare readonly advancedFiltersCounterTarget: HTMLElement
-    declare readonly advancedFiltersButtonTarget: HTMLElement
-    declare readonly nearbyButtonTarget: HTMLButtonElement
-    declare readonly onlineButtonTarget: HTMLButtonElement
-    declare readonly submitButtonTarget: HTMLButtonElement
+    declare readonly searchFormTarget: HTMLFormElement
 
     connect() {
         this.displayActionList()
-        this.updateAdvancedFiltersCounter()
-        this.updateSearchSolutionForm()
     }
 
     displayActionList() {
@@ -84,63 +62,11 @@ export default class extends Controller<HTMLElement> {
         this.actionListTarget.value = ""
         this.displayActionList()
         this.apply()
-        this.updateSearchSolutionForm()
     }
 
-    toggleadvancedFiltersDiv() {
-        this.advancedFiltersDivTarget.classList.toggle("qfdmo-hidden")
-    }
-
-    updateAdvancedFiltersCounter() {
-        const advancedFiltersFields = this.advancedFiltersFieldTargets
-        let counter = 0
-        for (let i = 0; i < advancedFiltersFields.length; i++) {
-            if (advancedFiltersFields[i].checked) counter++
-        }
-        if (counter == 0) {
-            this.advancedFiltersCounterTarget.innerText = ""
-            this.advancedFiltersCounterTarget.classList.add("qfdmo-hidden")
-            return
-        }
-        this.advancedFiltersCounterTarget.innerText = counter.toString()
-        this.advancedFiltersCounterTarget.classList.remove("qfdmo-hidden")
-    }
-
-    updateSearchSolutionForm() {
-        const reparer = this.actionTargets.find(
-            (element) => element.id == "jai_reparer",
-        )
-        if (this.#selectedOption == "jai" && reparer.checked) {
-            this.advancedFiltersButtonTarget.classList.remove("qfdmo-hidden")
-        } else {
-            this.advancedFiltersButtonTarget.classList.add("qfdmo-hidden")
-            this.advancedFiltersDivTarget.classList.add("qfdmo-hidden")
-        }
-    }
-
-    toggleSolutionButtonView(event: Event) {
-        let target = event.target as HTMLElement
-        while (target && target.nodeName !== "BUTTON") {
-            target = target.parentNode as HTMLElement
-        }
-
-        const activeBtnClasses = [
-            "qfdmo-bg-white",
-            "qfdmo-border",
-            "qfdmo-border-solid",
-            "qfdmo-border-blue-france-sun-113",
-        ]
-        if (target == this.nearbyButtonTarget) {
-            this.nearbyButtonTarget.classList.add(...activeBtnClasses)
-            this.onlineButtonTarget.classList.remove(...activeBtnClasses)
-            this.submitButtonTarget.value = "0"
-        }
-        if (target == this.onlineButtonTarget) {
-            this.onlineButtonTarget.classList.add(...activeBtnClasses)
-            this.nearbyButtonTarget.classList.remove(...activeBtnClasses)
-            this.submitButtonTarget.value = "1"
-        }
-        this.loadingSolutions()
+    submitForm() {
+        this.dispatch("loadingSolutions", { detail: {} })
+        this.searchFormTarget.submit()
     }
 
     loadingSolutions() {
