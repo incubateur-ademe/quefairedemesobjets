@@ -45,11 +45,25 @@ class TestActionDisplayList:
         [
             (
                 {},
-                ["emprunter", "louer", "échanger", "acheter de seconde main"],
+                [
+                    "prêter",
+                    "mettre en location",
+                    "réparer",
+                    "donner",
+                    "échanger",
+                    "vendre",
+                ],
             ),
             (
                 {"direction": "fake"},
-                ["emprunter", "louer", "échanger", "acheter de seconde main"],
+                [
+                    "prêter",
+                    "mettre en location",
+                    "réparer",
+                    "donner",
+                    "échanger",
+                    "vendre",
+                ],
             ),
             (
                 {"direction": "jai"},
@@ -67,8 +81,8 @@ class TestActionDisplayList:
                 ["emprunter", "louer", "échanger", "acheter de seconde main"],
             ),
             ({"action_list": "fake"}, []),
-            ({"action_list": "emprunter"}, ["emprunter"]),
-            ({"action_list": "emprunter|louer"}, ["emprunter", "louer"]),
+            ({"action_list": "preter"}, ["prêter"]),
+            ({"action_list": "preter|reparer"}, ["prêter", "réparer"]),
         ],
     )
     @pytest.mark.django_db
