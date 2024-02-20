@@ -21,6 +21,21 @@ class AutoCompleteInput(forms.Select):
         return context
 
 
+class SegmentedControlSelect(forms.RadioSelect):
+    template_name = "django/forms/widgets/segmented_control.html"
+    option_template_name = "django/forms/widgets/segmented_control_option.html"
+
+    def __init__(self, attrs=None, fieldset_attrs=None, choices=()):
+        self.fieldset_attrs = {} if fieldset_attrs is None else fieldset_attrs.copy()
+        super().__init__(attrs)
+
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        context["widget"]["fieldset_attrs"] = self.build_attrs(self.fieldset_attrs)
+        return context
+
+
+# FIXME : To be deprecated ?
 class InlineRadioSelect(forms.RadioSelect):
     template_name = "django/forms/widgets/inline_radio.html"
     option_template_name = "django/forms/widgets/inline_radio_option.html"
@@ -83,9 +98,8 @@ class GetReemploiSolutionForm(forms.Form):
     )
 
     direction = forms.ChoiceField(
-        widget=InlineRadioSelect(
+        widget=SegmentedControlSelect(
             attrs={
-                "class": "fr-radio",
                 "data-action": "click -> search-solution-form#changeDirection",
             },
             fieldset_attrs={

@@ -31,10 +31,15 @@
 
                     <!-- Option J'ai ou Je cherche -->
                     <!-- TODO : https://www.systeme-de-design.gouv.fr/elements-d-interface/composants/controle-segmente -->
-                    <div class="">
+
+
+                    <fieldset class="fr-segmented fr-segmented--sm">
+                        <legend class="fr-segmented__legend fr-mb-0">
+                            {{ form.direction.label_tag() }}
+                        </legend>
                         {{ form.direction }}
-                        {{ form.action_list }}
-                    </div>
+                    </fieldset>
+                    {{ form.action_list }}
 
                     <!-- Recherche Objet -->
                     <div class="fr-mt-3w">

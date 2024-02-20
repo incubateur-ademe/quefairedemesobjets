@@ -1,0 +1,13 @@
+<div class="fr-segmented__element">
+    <input
+        {% if widget.value != None %} value="{{ widget.value|stringformat:'s' }}"{% endif %}
+        type="radio"
+        id="{{ widget.value }}" name="{{ widget.name }}"
+        {% include "django/forms/widgets/attrs.html" %}>
+    <label class="fr-label" for="{{ widget.value }}">
+        {{ widget.label }}
+    </label>
+</div>
+
+
+
