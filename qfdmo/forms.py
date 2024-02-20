@@ -101,7 +101,7 @@ class GetReemploiSolutionForm(forms.Form):
         widget=SegmentedControlSelect(
             attrs={
                 "data-action": "click -> search-solution-form#changeDirection",
-                "class": " qfdmo-w-full md:qfdmo-w-fit",
+                "class": "qfdmo-w-full md:qfdmo-w-fit",
             },
             fieldset_attrs={
                 "data-search-solution-form-target": "direction",
@@ -109,7 +109,7 @@ class GetReemploiSolutionForm(forms.Form):
         ),
         # FIXME: I guess async error comes from here
         choices=[],
-        label="",
+        label="Direction des actions",
         required=False,
     )
 

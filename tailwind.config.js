@@ -38,6 +38,7 @@ module.exports = {
         "qfdmo-justify-between",
         "qfdmo-h-10",
         "qfdmo-bottom-5",
+        "md:qfdmo-w-fit",
     ],
     theme: {
         colors: {
