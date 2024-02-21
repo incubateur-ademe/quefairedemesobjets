@@ -32,6 +32,10 @@ export default class extends Controller<HTMLElement> {
 
     connect() {
         this.displayActionList()
+        this.scrollToContent()
+    }
+
+    scrollToContent() {
         this.searchFormTarget.scrollIntoView()
     }
 
@@ -43,6 +47,7 @@ export default class extends Controller<HTMLElement> {
         this.searchFormPanelTarget.classList.remove("qfdmo-flex-grow")
         this.backToSearchPanelTarget.classList.remove("qfdmo-h-0")
         this.adressesPanelTarget.classList.add("qfdmo-flex-grow")
+        this.scrollToContent()
     }
 
     backToSearch() {
@@ -53,6 +58,7 @@ export default class extends Controller<HTMLElement> {
         this.searchFormPanelTarget.classList.add("qfdmo-flex-grow")
         this.backToSearchPanelTarget.classList.add("qfdmo-h-0")
         this.adressesPanelTarget.classList.remove("qfdmo-flex-grow")
+        this.scrollToContent()
     }
 
     displayDetail() {
