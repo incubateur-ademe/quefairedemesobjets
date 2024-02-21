@@ -53,11 +53,8 @@ export default class extends Controller<HTMLElement> {
     }
 
     displayActorDetail(identifiantUnique: string) {
-        console.log("display actor detail:", identifiantUnique)
-        // test update src of turbo frame
-        // rien_de_neuf_location_partage_echange_drupal_m0546
-        const test = `/adresse/${identifiantUnique}`
-        setBoo(test)
-        displayDetail()
+        const srcDetailsAddress = `/adresse/${identifiantUnique}`
+        this.dispatch("displayDetail", { detail: {} })
+        this.dispatch("setSrcDetailsAddress", { detail: { src: srcDetailsAddress } })
     }
 }
