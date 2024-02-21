@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 
+// FIXME : To be removed and set on search-solution-form controller
 export default class extends Controller<HTMLElement> {
     static targets = ["loadingSolutions", "addressMissing", "NoLocalSolution"]
     declare readonly loadingSolutionsTarget: HTMLElement

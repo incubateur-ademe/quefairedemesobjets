@@ -9,7 +9,7 @@ export default class extends Controller<HTMLElement> {
         "actionList",
         "searchForm",
         "searchFormPanel",
-        "adressesPanel",
+        "addressesPanel",
         "backToSearchPanel",
         "detailsAddressPanel",
         "srcDetailsAddress",
@@ -24,7 +24,7 @@ export default class extends Controller<HTMLElement> {
     // var search_form_div = document.getElementById("search_form_div"); // searchFormPanel
     // var adresses = document.getElementById("adresses");
     // let search_summary = document.getElementById("search_summary");
-    declare readonly adressesPanelTarget: HTMLElement
+    declare readonly addressesPanelTarget: HTMLElement
     declare readonly backToSearchPanelTarget: HTMLElement
     declare readonly searchFormTarget: HTMLFormElement
     declare readonly detailsAddressPanelTarget: HTMLElement
@@ -46,7 +46,7 @@ export default class extends Controller<HTMLElement> {
         this.loadingSolutions()
         this.searchFormPanelTarget.classList.remove("qfdmo-flex-grow")
         this.backToSearchPanelTarget.classList.remove("qfdmo-h-0")
-        this.adressesPanelTarget.classList.add("qfdmo-flex-grow")
+        this.addressesPanelTarget.classList.add("qfdmo-flex-grow")
         this.scrollToContent()
     }
 
@@ -57,7 +57,7 @@ export default class extends Controller<HTMLElement> {
         this.hideDetails()
         this.searchFormPanelTarget.classList.add("qfdmo-flex-grow")
         this.backToSearchPanelTarget.classList.add("qfdmo-h-0")
-        this.adressesPanelTarget.classList.remove("qfdmo-flex-grow")
+        this.addressesPanelTarget.classList.remove("qfdmo-flex-grow")
         this.scrollToContent()
     }
 
