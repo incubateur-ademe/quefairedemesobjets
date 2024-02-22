@@ -13,6 +13,10 @@ export default class extends Controller<HTMLElement> {
         "backToSearchPanel",
         "detailsAddressPanel",
         "srcDetailsAddress",
+        "proposeAddressPanel",
+        "headerAddressPanel",
+        "expandDetailsButton",
+        "collapseDetailsButton",
     ]
 
     declare readonly jaiTarget: HTMLElement
@@ -21,14 +25,15 @@ export default class extends Controller<HTMLElement> {
     declare readonly actionListTarget: HTMLInputElement
 
     declare readonly searchFormPanelTarget: HTMLElement
-    // var search_form_div = document.getElementById("search_form_div"); // searchFormPanel
-    // var adresses = document.getElementById("adresses");
-    // let search_summary = document.getElementById("search_summary");
     declare readonly addressesPanelTarget: HTMLElement
     declare readonly backToSearchPanelTarget: HTMLElement
     declare readonly searchFormTarget: HTMLFormElement
     declare readonly detailsAddressPanelTarget: HTMLElement
     declare readonly srcDetailsAddressTarget: HTMLElement
+    declare readonly proposeAddressPanelTarget: HTMLElement
+    declare readonly headerAddressPanelTarget: HTMLElement
+    declare readonly expandDetailsButtonTarget: HTMLElement
+    declare readonly collapseDetailsButtonTarget: HTMLElement
 
     connect() {
         this.displayActionList()
@@ -61,11 +66,15 @@ export default class extends Controller<HTMLElement> {
         this.scrollToContent()
     }
 
-    displayDetail() {
+    displayDetails() {
         // mobile
         this.detailsAddressPanelTarget.classList.remove("qfdmo-h-0")
         this.detailsAddressPanelTarget.classList.remove("qfdmo-h-full")
         this.detailsAddressPanelTarget.classList.add("qfdmo-h-1/2")
+        this.proposeAddressPanelTarget.classList.add("qfdmo-h-0")
+        this.headerAddressPanelTarget.classList.remove("qfdmo-h-0")
+        this.collapseDetailsButtonTarget.classList.add("qfdmo-hidden")
+        this.expandDetailsButtonTarget.classList.remove("qfdmo-hidden")
         // desktop
         this.detailsAddressPanelTarget.classList.add("md:qfdmo-w-[480]")
         this.detailsAddressPanelTarget.classList.remove("md:qfdmo-w-full")
@@ -77,6 +86,8 @@ export default class extends Controller<HTMLElement> {
         this.detailsAddressPanelTarget.classList.add("qfdmo-h-0")
         this.detailsAddressPanelTarget.classList.remove("qfdmo-h-full")
         this.detailsAddressPanelTarget.classList.remove("qfdmo-h-1/2")
+        this.proposeAddressPanelTarget.classList.remove("qfdmo-h-0")
+        this.headerAddressPanelTarget.classList.remove("qfdmo-h-0")
         // desktop
         this.detailsAddressPanelTarget.classList.add("md:qfdmo-w-0")
         this.detailsAddressPanelTarget.classList.remove("md:qfdmo-w-full")
@@ -88,6 +99,10 @@ export default class extends Controller<HTMLElement> {
         this.detailsAddressPanelTarget.classList.remove("qfdmo-h-0")
         this.detailsAddressPanelTarget.classList.remove("qfdmo-h-1/2")
         this.detailsAddressPanelTarget.classList.add("qfdmo-h-full")
+        this.proposeAddressPanelTarget.classList.add("qfdmo-h-0")
+        this.headerAddressPanelTarget.classList.add("qfdmo-h-0")
+        this.collapseDetailsButtonTarget.classList.remove("qfdmo-hidden")
+        this.expandDetailsButtonTarget.classList.add("qfdmo-hidden")
         // desktop
         this.detailsAddressPanelTarget.classList.add("md:qfdmo-w-full")
         this.detailsAddressPanelTarget.classList.remove("md:qfdmo-w-0")
