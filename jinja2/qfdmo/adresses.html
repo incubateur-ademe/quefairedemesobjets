@@ -144,7 +144,6 @@
                 <div class="fr-my-1w qfdmo-w-full qfdmo-flex qfdmo-flex-col xsm:qfdmo-flex-row xsm:qfdmo-justify-between">
                     <button
                         class="fr-btn qfdmo-whitespace-nowrap qfdmo-float-left qfdmo-w-full md:qfdmo-w-max qfdmo-flex qfdmo-justify-center"
-                        data-turbo-frame="addressesPanel"
                         data-action="click -> search-solution-form#searchAdresses"
                         >
                         Rechercher des adresses
@@ -181,9 +180,7 @@
                 <!-- start 'qfdmo/partials/display_solutions.html' -->
                 <div
                     class="qfdmo-relative qfdmo-flex-grow qfdmo-flex qfdmo-flex-col md:qfdmo-flex-row"
-                    data-controller="display-solutions"
-                    data-action="search-solution-form:loadingSolutions@window->display-solutions#loadingSolutions"
-                    >
+                >
                     <div class="qfdmo-flex-grow qfdmo-flex qfdmo-flex-col">
                         <div class="qfdmo-flex-grow">
                             <turbo-frame id="solutionFrame">
@@ -215,7 +212,7 @@
                                             </button>
                                             <div
                                                 class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-80 qfdmo-font-black qfdmo-z-[1000]{% if form.initial.adresse %} qfdmo-hidden{% endif %}"
-                                                data-display-solutions-target="addressMissing"
+                                                data-search-solution-form-target="addressMissing"
                                             >
                                                 <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
                                                     Précisez une adresse pour afficher la carte
@@ -223,7 +220,7 @@
                                             </div>
                                             <div
                                                 class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-80 qfdmo-font-black qfdmo-z-[1000]{% if not(form.initial.adresse) or acteurs %} qfdmo-hidden{% endif %}"
-                                                data-display-solutions-target="NoLocalSolution"
+                                                data-search-solution-form-target="NoLocalSolution"
                                             >
                                                 <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
                                                     Il n'existe pas de solution {% if bbox %}dans cette zone{% else %}localisée proche de chez vous (<30 km){% endif %}, avez-vous envigagé une solution en ligne ?
@@ -243,7 +240,7 @@
                                     {% endif %}
                                 </div>
                                 <div
-                                    data-display-solutions-target="loadingSolutions"
+                                    data-search-solution-form-target="loadingSolutions"
                                     class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-90 qfdmo-font-black qfdmo-z-[1000] qfdmo-hidden"
                                 >
                                     <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl ">

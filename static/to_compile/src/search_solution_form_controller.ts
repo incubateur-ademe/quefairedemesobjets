@@ -17,6 +17,9 @@ export default class extends Controller<HTMLElement> {
         "headerAddressPanel",
         "expandDetailsButton",
         "collapseDetailsButton",
+        "loadingSolutions",
+        "addressMissing",
+        "NoLocalSolution",
     ]
 
     declare readonly jaiTarget: HTMLElement
@@ -34,6 +37,15 @@ export default class extends Controller<HTMLElement> {
     declare readonly headerAddressPanelTarget: HTMLElement
     declare readonly expandDetailsButtonTarget: HTMLElement
     declare readonly collapseDetailsButtonTarget: HTMLElement
+    declare readonly loadingSolutionsTarget: HTMLElement
+    declare readonly addressMissingTarget: HTMLElement
+    declare readonly NoLocalSolutionTarget: HTMLElement
+
+    loadingSolutions() {
+        this.loadingSolutionsTarget.classList.remove("qfdmo-hidden")
+        this.addressMissingTarget.classList.add("qfdmo-hidden")
+        this.NoLocalSolutionTarget.classList.add("qfdmo-hidden")
+    }
 
     connect() {
         this.displayActionList()
@@ -166,10 +178,7 @@ export default class extends Controller<HTMLElement> {
 
     submitForm() {
         this.dispatch("loadingSolutions", { detail: {} })
-        this.searchFormTarget.submit()
-    }
-
-    loadingSolutions() {
-        this.dispatch("loadingSolutions", { detail: {} })
+        let event = new Event("submit", { bubbles: true, cancelable: true })
+        this.searchFormTarget.dispatchEvent(event)
     }
 }
