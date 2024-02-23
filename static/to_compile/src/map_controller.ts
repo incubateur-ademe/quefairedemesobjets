@@ -53,8 +53,9 @@ export default class extends Controller<HTMLElement> {
     }
 
     displayActorDetail(identifiantUnique: string) {
-        const srcDetailsAddress = `/adresse/${identifiantUnique}`
         this.dispatch("displayDetails", { detail: {} })
-        this.dispatch("setSrcDetailsAddress", { detail: { src: srcDetailsAddress } })
+        this.dispatch("setSrcDetailsAddress", {
+            detail: { identifiantUnique: identifiantUnique },
+        })
     }
 }

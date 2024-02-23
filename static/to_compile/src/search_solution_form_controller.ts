@@ -79,6 +79,7 @@ export default class extends Controller<HTMLElement> {
     }
 
     displayDetails() {
+        console.log("displayDetails")
         // mobile
         this.detailsAddressPanelTarget.classList.remove("qfdmo-h-0")
         this.detailsAddressPanelTarget.classList.remove("qfdmo-h-full")
@@ -121,8 +122,14 @@ export default class extends Controller<HTMLElement> {
         this.detailsAddressPanelTarget.classList.remove("md:qfdmo-w-[480]")
     }
 
-    setSrcDetailsAddress({ detail: { src } }) {
-        this.srcDetailsAddressTarget.setAttribute("src", src)
+    displayActeurDetails(event) {
+        let identifiantUnique = event.currentTarget.dataset.identifiantUnique
+        this.setSrcDetailsAddress({ detail: { identifiantUnique } })
+        this.displayDetails()
+    }
+    setSrcDetailsAddress({ detail: { identifiantUnique } }) {
+        const srcDetailsAddress = `/adresse/${identifiantUnique}`
+        this.srcDetailsAddressTarget.setAttribute("src", srcDetailsAddress)
     }
 
     displayActionList() {
