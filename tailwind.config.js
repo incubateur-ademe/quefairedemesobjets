@@ -39,6 +39,8 @@ module.exports = {
         "qfdmo-h-10",
         "qfdmo-bottom-5",
         "md:qfdmo-w-fit",
+        "md:qfdmo-w-[300px]",
+        "md:qfdmo-w-[400px]",
     ],
     theme: {
         colors: {
@@ -84,6 +86,7 @@ module.exports = {
             "grey-925": "#e5e5e5",
             "grey-900": "#dddddd",
             "grey-850": "#cecece",
+            "grey-200": "#3a3a3a",
         },
         maxWidth: {
             readable: "80ch",

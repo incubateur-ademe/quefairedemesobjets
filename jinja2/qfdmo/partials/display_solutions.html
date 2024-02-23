@@ -8,7 +8,7 @@
             {% if request.GET["digital"] == "1" %}
                 <div class="qfdmo-flex-grow qfdmo-relative qfdmo-overflow-auto qfdmo-shadow-md ">
                     {% for acteur in acteurs.all() %}
-                        <div class="qfdmo-rounded-t qfdmo-border-solid qfdmo-border qfdmo-border-b-2 qfdmo-border-light-gray qfdmo-border-b-blue-france qfdmo-content-start qfdmo-p-1w{% if not loop.last %} qfdmo-mb-1w{% endif %}">
+                        <div class="qfdmo-rounded-t qfdmo-border-solid qfdmo-border qfdmo-border-b-2 qfdmo-border-light-gray qfdmo-border-b-blue-france qfdmo-content-start fr-p-1w{% if not loop.last %} qfdmo-mb-1w{% endif %}">
                             {{acteur.render_as_card(direction=form.initial.direction)|safe}}
                         </div>
                     {% endfor %}

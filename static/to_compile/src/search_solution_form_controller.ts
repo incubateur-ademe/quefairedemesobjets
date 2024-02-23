@@ -43,7 +43,8 @@ export default class extends Controller<HTMLElement> {
 
     loadingSolutions() {
         this.loadingSolutionsTarget.classList.remove("qfdmo-hidden")
-        this.addressMissingTarget.classList.add("qfdmo-hidden")
+        if (this.addressMissingTarget !== undefined)
+            this.addressMissingTarget.classList.add("qfdmo-hidden")
         this.NoLocalSolutionTarget.classList.add("qfdmo-hidden")
     }
 
@@ -184,6 +185,7 @@ export default class extends Controller<HTMLElement> {
     }
 
     submitForm() {
+        this.loadingSolutionsTarget.classList.remove("qfdmo-hidden")
         this.dispatch("loadingSolutions", { detail: {} })
         let event = new Event("submit", { bubbles: true, cancelable: true })
         this.searchFormTarget.dispatchEvent(event)
