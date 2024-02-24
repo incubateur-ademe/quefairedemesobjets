@@ -148,3 +148,14 @@ Style the autocomplete container:
 .qfdmo-adresse-hr {
     padding:4px !important;
 }
+
+.fr-tabs--noborder {
+    box-shadow: none !important;
+    border: none;
+    height: fit-content;
+}
+
+.fr-tabs__tab--noborder {
+    background-image: none !important;
+    background-color: white !important;
+}

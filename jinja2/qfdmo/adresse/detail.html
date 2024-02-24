@@ -91,12 +91,92 @@
 
 </div>
 
-<hr class="fr-pb-1w">
 
-<div class="fr-my-1w">
-    To be continued…
+<div class="fr-tabs fr-tabs--noborder">
+    <ul class="fr-tabs__list" role="tablist" aria-label="[A modifier | nom du système d'onglet]">
+        <li role="presentation">
+            <button class="fr-tabs__tab fr-tabs__tab--noborder"
+                tabindex="0"
+                role="tab"
+                aria-selected="true"
+                aria-controls="aboutPanel"
+            >
+                À propos
+            </button>
+        </li>
+        <li role="presentation">
+            <button class="fr-tabs__tab fr-tabs__tab--noborder"
+                tabindex="-1"
+                role="tab"
+                aria-selected="false"
+                aria-controls="infosPanel"
+            >
+                Infos
+            </button>
+        </li>
+        <li role="presentation">
+            <button class="fr-tabs__tab fr-tabs__tab--noborder"
+                tabindex="-1"
+                role="tab"
+                aria-selected="false"
+                aria-controls="labelsPanel"
+            >
+                Labels
+            </button>
+        </li>
+        <li role="presentation">
+            <button class="fr-tabs__tab fr-tabs__tab--noborder"
+                tabindex="-1"
+                role="tab"
+                aria-selected="false"
+                aria-controls="sourcesPanel"
+            >
+                Sources
+            </button>
+        </li>
+    </ul>
+    <div id="aboutPanel"
+        class="fr-tabs__panel fr-tabs__panel--selected fr-p-0"
+        role="tabpanel"
+        aria-labelledby="aboutPanel"
+        tabindex="0"
+    >
+        <!-- données de test -->
+        <p>à propos</p>
+        <p>à propos</p>
+        <p>à propos</p>
+        <p>à propos</p>
+        <p>à propos</p>
+        <p>à propos</p>
+    </div>
+    <div id="infosPanel"
+        class="fr-tabs__panel fr-p-0"
+        role="tabpanel"
+        aria-labelledby="infosPanel"
+        tabindex="0"
+    >
+        <!-- données de test -->
+        <p>Infos</p>
+    </div>
+    <div id="labelsPanel"
+        class="fr-tabs__panel fr-p-0"
+        role="tabpanel"
+        aria-labelledby="labelsPanel"
+        tabindex="0"
+    >
+        <!-- données de test -->
+        <p>Labels</p>
+    </div>
+    <div id="sourcesPanel"
+        class="fr-tabs__panel fr-p-0"
+        role="tabpanel"
+        aria-labelledby="sourcesPanel"
+        tabindex="0"
+    >
+        <!-- données de test -->
+        <p>Sources</p>
+    </div>
 </div>
-
 <div class="qfdmo-flex qfdmo-flex-row-reverse">
     <div class="fr-m-0 fr-ml-1w fr-text--xs">
         Mis à jour le {{ adresse.modifie_le.strftime('%d/%m/%Y') }}
