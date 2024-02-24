@@ -272,8 +272,20 @@ def solution_detail(request, identifiant_unique):
 
 
 def adresse_detail(request, identifiant_unique):
+    latitude = request.GET.get("latitude")
+    longitude = request.GET.get("longitude")
+    direction = request.GET.get("direction")
     final_acteur = FinalActeur.objects.get(identifiant_unique=identifiant_unique)
-    return render(request, "qfdmo/adresse_detail.html", {"adresse": final_acteur})
+    return render(
+        request,
+        "qfdmo/adresse_detail.html",
+        {
+            "adresse": final_acteur,
+            "latitude": latitude,
+            "longitude": longitude,
+            "direction": direction,
+        },
+    )
 
 
 def solution_admin(request, identifiant_unique):

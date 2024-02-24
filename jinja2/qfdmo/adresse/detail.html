@@ -24,15 +24,15 @@
 
 <hr class="fr-pb-1v">
 <div class="fr-my-1w qfdmo-flex qfdmo-justify-around">
-    {% if True %} <!-- FIXME: if lat long src and dest -->
+    {% if latitude and longitude %}
         <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
-            <a class="fr-btn fr-icon-road-map-line qfdmo-rounded-full" href="#" target="_blank" title="itinéraire" rel='noopener'></a>
+            <a class="fr-btn fr-icon-send-plane-line qfdmo-rounded-full" href="https://www.google.com/maps/dir/?api=1&origin={{latitude}},{{longitude}}&destination={{adresse.latitude}},{{adresse.longitude}}&travelMode=WALKING" target="_blank" title="itinéraire" rel='noopener'></a>
             <span class="fr-text--xs fr-mb-0">Itinéraire</span>
         </div>
     {% endif %}
     {% if adresse.url %}
         <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
-            <a class="fr-btn fr-icon-global-line qfdmo-rounded-full" href="{{ adresse.url }}" target="_blank" title="Site Internet" rel='noopener'></a>
+            <a class="fr-btn fr-icon-computer-line qfdmo-rounded-full" href="{{ adresse.url }}" target="_blank" title="Site Internet" rel='noopener'></a>
             <span class="fr-text--xs fr-mb-0">Site Internet</span>
         </div>
     {% endif %}
@@ -42,16 +42,53 @@
             <span class="fr-text--xs fr-mb-0">Courriel</span>
         </div>
     {% endif %}
-    {% if adresse.telephone or True %}
+    {% if adresse.telephone %}
         <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
-            <a class="fr-btn fr-icon-phone-line qfdmo-rounded-full" href="tel:{{ adresse.telephone }}" target="_blank" title="Téléphone" rel='noopener'></a>
+            <a class="fr-btn fr-icon-phone-line qfdmo-rounded-full" href="tel:{{ adresse.telephone }}" title="Téléphone" rel='noopener'></a>
             <span class="fr-text--xs fr-mb-0">Téléphone</span>
         </div>
     {% endif %}
+
     <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
-        <a class="fr-btn fr-icon-git-branch-line qfdmo-rounded-full" href="#" target="_blank" title="Partager" rel='noopener'></a>
+        <button class="fr-btn fr-icon-share-line qfdmo-rounded-full" aria-describedby="shareTooltip" type="button"></button>
+        <span class="fr-tooltip fr-placement" id="shareTooltip" role="tooltip" aria-hidden="true">
+            <div class="fr-share">
+                {% with sharing_url=adresse.share_url(request) %}
+                    <ul class="fr-btns-group">
+                        <li>
+                            <a class="fr-btn--facebook fr-btn" target="_blank" rel="noopener" title="partager {{ adresse }} sur Facebook - nouvelle fenêtre" onclick="window.open(this.href,'Partager sur Facebook','toolbar=no,location=yes,status=no,menubar=no,scrollbars=yes,resizable=yes,width=600,height=450'); event.preventDefault();" href="https://www.facebook.com/sharer.php?u={{ quote_plus(sharing_url) }}">
+                                Partager sur Facebook
+                            </a>
+                        </li>
+                        <li>
+                            <!-- Les paramètres de la reqûete doivent être URI-encodés (ex: encodeURIComponent() en js) -->
+                            <a class="fr-btn--twitter-x fr-btn" target="_blank" rel="noopener" title="partager {{ adresse }} sur X - nouvelle fenêtre" onclick="window.open(this.href,'Partager sur X (anciennement Twitter)','toolbar=no,location=yes,status=no,menubar=no,scrollbars=yes,resizable=yes,width=600,height=420'); event.preventDefault();" href="https://twitter.com/intent/tweet?url={{ quote_plus(sharing_url) }}&text=[À MODIFIER - titre ou texte descriptif de la page]&via=[À MODIFIER - via]&hashtags=[À MODIFIER - hashtags]">
+                                Partager sur X (anciennement Twitter)
+                            </a>
+                        </li>
+                        <li>
+                            <a class="fr-btn--linkedin fr-btn" target="_blank" rel="noopener" title="partager {{ adresse }} sur LinkedIn - nouvelle fenêtre" onclick="window.open(this.href,'Partager sur LinkedIn','toolbar=no,location=yes,status=no,menubar=no,scrollbars=yes,resizable=yes,width=550,height=550'); event.preventDefault();" href="https://www.linkedin.com/shareArticle?url={{ quote_plus(sharing_url) }}&title=[À MODIFIER - titre ou texte descriptif de la page]">
+                                Partager sur LinkedIn
+                            </a>
+                        </li>
+                        <li>
+                            <a class="fr-btn--mail fr-btn" target="_blank" rel="noopener external" title="partager {{ adresse }} par courriel - nouvelle fenêtre" href="mailto:?subject=[À MODIFIER - objet du mail]&body=[À MODIFIER - titre ou texte descriptif de la page] {{ quote_plus(sharing_url) }}">
+                                Partager par email
+                            </a>
+                        </li>
+                        <li>
+                            <button class="fr-btn--copy fr-btn" onclick="navigator.clipboard.writeText('{{sharing_url}}').then(function() {alert('Adresse copiée dans le presse papier.')});">
+                                Copier dans le presse-papier
+                            </button>
+                        </li>
+                    </ul>
+                {% endwith %}
+            </div>
+        </span>
         <span class="fr-text--xs fr-mb-0">Partager</span>
     </div>
+
+
 </div>
 
 <hr class="fr-pb-1w">

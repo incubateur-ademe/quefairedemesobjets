@@ -120,6 +120,11 @@ Style the autocomplete container:
     mask-image: url("svg/vendre.svg");
 }
 
+.fr-icon-share-line::before,
+.fr-icon-share-line::after {
+  -webkit-mask-image: url("svg/share-line.svg");
+  mask-image: url("svg/share-line.svg");
+}
 /*
  * Failed to load some tailwind classes with parcel
  */

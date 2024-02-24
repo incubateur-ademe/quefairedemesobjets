@@ -6,8 +6,11 @@ export default class extends Controller<HTMLElement> {
         "jai",
         "jecherche",
         "direction",
+        "latitudeInput",
+        "longitudeInput",
         "actionList",
         "searchForm",
+
         "searchFormPanel",
         "addressesPanel",
         "backToSearchPanel",
@@ -15,8 +18,11 @@ export default class extends Controller<HTMLElement> {
         "srcDetailsAddress",
         "proposeAddressPanel",
         "headerAddressPanel",
+
         "expandDetailsButton",
         "collapseDetailsButton",
+
+        //FIXME: should be renamed
         "loadingSolutions",
         "addressMissing",
         "NoLocalSolution",
@@ -26,6 +32,8 @@ export default class extends Controller<HTMLElement> {
     declare readonly jechercheTarget: HTMLElement
     declare readonly directionTarget: HTMLElement
     declare readonly actionListTarget: HTMLInputElement
+    declare readonly latitudeInputTarget: HTMLInputElement
+    declare readonly longitudeInputTarget: HTMLInputElement
 
     declare readonly searchFormPanelTarget: HTMLElement
     declare readonly addressesPanelTarget: HTMLElement
@@ -129,7 +137,15 @@ export default class extends Controller<HTMLElement> {
         this.displayDetails()
     }
     setSrcDetailsAddress({ detail: { identifiantUnique } }) {
-        const srcDetailsAddress = `/adresse/${identifiantUnique}`
+        const latitude = this.latitudeInputTarget.value
+        const longitude = this.longitudeInputTarget.value
+
+        const params = new URLSearchParams()
+        params.set("direction", this.#selectedOption)
+        params.set("latitude", latitude)
+        params.set("longitude", longitude)
+        const srcDetailsAddress = `/adresse/${identifiantUnique}?${params.toString()}`
+
         this.srcDetailsAddressTarget.setAttribute("src", srcDetailsAddress)
     }
 

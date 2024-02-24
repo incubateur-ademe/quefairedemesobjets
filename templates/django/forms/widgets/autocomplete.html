@@ -1,9 +1,9 @@
 {% load custom_filters %}
 <div
-    class="fr-mb-1w"
+    class="fr-mb-1w qfdmo-flex-grow"
 >
     <div
-        class="autocomplete"
+        class="autocomplete qfdmo-relative"
     >
         <input
             data-action="
@@ -24,6 +24,7 @@
         {% if widget.value != None %} value="{{ widget.value.0|stringformat:'s' }}"{% endif %}
         {% include "django/forms/widgets/attrs.html" %}
         >
+        <span data-{{ widget.data_controller }}-target="spinner" class="fr-icon-refresh-line qfdmo-absolute qfdmo-right-0 qfdmo-top-0 qfdmo-m-1w qfdmo-animate-spin qfdmo-hidden"></span>
     </div>
     <p data-address-autocomplete-target="displayError" class="fr-error-text fr-mt-1w" style="display:none;">
         Texte d’erreur obligatoire

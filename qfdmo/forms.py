@@ -74,13 +74,19 @@ class GetReemploiSolutionForm(forms.Form):
     )
     latitude = forms.FloatField(
         widget=forms.HiddenInput(
-            attrs={"data-address-autocomplete-target": "latitude"}
+            attrs={
+                "data-address-autocomplete-target": "latitude",
+                "data-search-solution-form-target": "latitudeInput",
+            }
         ),
         required=False,
     )
     longitude = forms.FloatField(
         widget=forms.HiddenInput(
-            attrs={"data-address-autocomplete-target": "longitude"}
+            attrs={
+                "data-address-autocomplete-target": "longitude",
+                "data-search-solution-form-target": "longitudeInput",
+            }
         ),
         required=False,
     )

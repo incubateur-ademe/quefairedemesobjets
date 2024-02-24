@@ -56,10 +56,7 @@
                         >
                             <div class="form-group">
                                 {{ form.sous_categorie_objet.label_tag() }}
-                                <div class="qfdmo-relative">
-                                    {{ form.sous_categorie_objet }}
-                                    <span data-ss-cat-object-autocomplete-target="spinner" class="fr-icon-refresh-line qfdmo-absolute qfdmo-right-0 qfdmo-top-0 qfdmo-m-1w qfdmo-animate-spin qfdmo-hidden"></span>
-                                </div>
+                                {{ form.sous_categorie_objet }}
                                 {{ form.sc_id }}
                             </div>
                         </div>
@@ -73,10 +70,7 @@
                         >
                             <div class="form-group">
                                 {{ form.adresse.label_tag() }}
-                                <div class="qfdmo-relative">
-                                    {{ form.adresse }}
-                                    <span data-address-autocomplete-target="spinner" class="fr-icon-refresh-line qfdmo-absolute qfdmo-right-0 qfdmo-top-0 qfdmo-m-1w qfdmo-animate-spin qfdmo-hidden"></span>
-                                </div>
+                                {{ form.adresse }}
                             </div>
                             {{ form.longitude }}
                             {{ form.latitude }}
@@ -174,7 +168,7 @@
                     </fieldset>
 
                     <p class="fr-my-1w fr-h6">
-                        Vos {% if form.digital == "1" %}resultats{% else %}adresses{% endif %} {% if form.sous_categorie_objet.value() %}pour «{{ form.sous_categorie_objet.value() }}»{% endif %}:
+                        Vos {% if form.digital.value() == "1" %}résultats{% else %}adresses{% endif %} {% if form.sous_categorie_objet.value() %}pour «{{ form.sous_categorie_objet.value() }}»{% endif %}:
                     </p>
                 </div>
 
@@ -307,13 +301,15 @@
                                 </div>
                                 <!-- passer la direction en paramètre  -->
 
-                                <turbo-frame id="adr_detail"
-                                    data-search-solution-form-target="srcDetailsAddress"
-                                    {% if request.GET.get('detail') %}
-                                        src="{{ reverse('qfdmo:adresse_detail', args=[request.GET.get('detail')])}}"
-                                    {% endif %}
-                                >
-                                </turbo-frame>
+                                {% with direction=form.direction.value(), latitude=form.latitude.value(), longitude=form.longitude.value() %}
+                                    <turbo-frame id="adr_detail"
+                                        data-search-solution-form-target="srcDetailsAddress"
+                                        {% if request.GET.get('detail') %}
+                                            src="{{ reverse('qfdmo:adresse_detail', args=[request.GET.get('detail')])}}?direction={{ direction }}&latitude={{ latitude }}&longitude={{ longitude }}"
+                                        {% endif %}
+                                    >
+                                    </turbo-frame>
+                                {% endwith %}
                             </div>
                         </div>
                     </div>

@@ -7,7 +7,9 @@ import orjson
 from django.contrib.gis.db import models
 from django.db import connection
 from django.forms import ValidationError, model_to_dict
+from django.http import HttpRequest
 from django.template.loader import render_to_string
+from django.urls import reverse
 from unidecode import unidecode
 
 from qfdmo.models.action import Action, CachedDirectionAction
@@ -128,6 +130,17 @@ class BaseActeur(NomAsNaturalKeyModel):
     horaires = models.CharField(
         blank=True, null=True, validators=[validate_opening_hours]
     )
+
+    def share_url(self, request: HttpRequest, direction: str | None = None):
+        # url = request.build_absolute_uri("")
+        url = "http"
+        if request.is_secure():
+            url += "s"
+        url += "://" + request.get_host()
+        url += reverse("qfdmo:adresse_detail", args=[self.identifiant_unique])
+        if direction:
+            url += f"?direction={direction}"
+        return url
 
     @property
     def latitude(self):

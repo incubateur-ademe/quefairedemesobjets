@@ -1,5 +1,6 @@
 import difflib
 from typing import List
+from urllib.parse import quote_plus
 
 from django.conf import settings
 from django.http import HttpRequest
@@ -90,6 +91,7 @@ def environment(**options):
             "reverse": reverse,
             "static": static,
             "str_diff": str_diff,
+            "quote_plus": lambda u: quote_plus(u),
             "ENVIRONMENT": settings.ENVIRONMENT,
         }
     )
