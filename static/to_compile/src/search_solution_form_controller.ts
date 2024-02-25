@@ -197,6 +197,9 @@ export default class extends Controller<HTMLElement> {
         this.loadingSolutionsTarget.classList.remove("qfdmo-hidden")
         this.dispatch("loadingSolutions", { detail: {} })
         let event = new Event("submit", { bubbles: true, cancelable: true })
-        this.searchFormTarget.dispatchEvent(event)
+
+        setTimeout(() => {
+            this.searchFormTarget.dispatchEvent(event)
+        }, 300)
     }
 }
