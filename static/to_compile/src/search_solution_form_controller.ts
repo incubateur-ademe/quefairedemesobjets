@@ -49,13 +49,6 @@ export default class extends Controller<HTMLElement> {
     declare readonly addressMissingTarget: HTMLElement
     declare readonly NoLocalSolutionTarget: HTMLElement
 
-    loadingSolutions() {
-        this.loadingSolutionsTarget.classList.remove("qfdmo-hidden")
-        if (this.addressMissingTarget !== undefined)
-            this.addressMissingTarget.classList.add("qfdmo-hidden")
-        this.NoLocalSolutionTarget.classList.add("qfdmo-hidden")
-    }
-
     connect() {
         this.displayActionList()
         this.scrollToContent()
@@ -63,14 +56,6 @@ export default class extends Controller<HTMLElement> {
 
     scrollToContent() {
         this.searchFormTarget.scrollIntoView()
-    }
-
-    searchAdresses() {
-        this.loadingSolutions()
-        this.searchFormPanelTarget.classList.remove("qfdmo-flex-grow")
-        this.backToSearchPanelTarget.classList.remove("qfdmo-h-0")
-        this.addressesPanelTarget.classList.add("qfdmo-flex-grow")
-        this.scrollToContent()
     }
 
     backToSearch() {
@@ -195,9 +180,15 @@ export default class extends Controller<HTMLElement> {
 
     submitForm() {
         this.loadingSolutionsTarget.classList.remove("qfdmo-hidden")
-        this.dispatch("loadingSolutions", { detail: {} })
-        let event = new Event("submit", { bubbles: true, cancelable: true })
+        this.addressMissingTarget.classList.add("qfdmo-hidden")
+        this.NoLocalSolutionTarget.classList.add("qfdmo-hidden")
 
+        this.searchFormPanelTarget.classList.remove("qfdmo-flex-grow")
+        this.backToSearchPanelTarget.classList.remove("qfdmo-h-0")
+        this.addressesPanelTarget.classList.add("qfdmo-flex-grow")
+        this.scrollToContent()
+
+        let event = new Event("submit", { bubbles: true, cancelable: true })
         setTimeout(() => {
             this.searchFormTarget.dispatchEvent(event)
         }, 300)
