@@ -139,7 +139,6 @@ export class SolutionMap {
     }
 
     #onClickMarker(event: L.LeafletEvent) {
-        console.log("Marker ID:", event.target._identifiant_unique)
         this.#controller.displayActorDetail(event.target._identifiant_unique)
     }
 

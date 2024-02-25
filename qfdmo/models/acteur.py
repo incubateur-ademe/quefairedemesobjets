@@ -193,6 +193,12 @@ class BaseActeur(NomAsNaturalKeyModel):
             )
         )
 
+    def proposition_services_by_direction(self, direction: str | None = None):
+
+        if direction:
+            return self.proposition_services.filter(action__directions__nom=direction)
+        return self.proposition_services.all()
+
 
 class Acteur(BaseActeur):
     class Meta:

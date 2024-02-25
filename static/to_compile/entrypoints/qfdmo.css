@@ -159,3 +159,7 @@ Style the autocomplete container:
     background-image: none !important;
     background-color: white !important;
 }
+
+.fr-link--no-underline {
+    background-image: none !important;
+}

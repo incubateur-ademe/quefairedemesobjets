@@ -26,7 +26,12 @@
 <div class="fr-my-1w qfdmo-flex qfdmo-justify-around">
     {% if latitude and longitude %}
         <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
-            <a class="fr-btn fr-icon-send-plane-line qfdmo-rounded-full" href="https://www.google.com/maps/dir/?api=1&origin={{latitude}},{{longitude}}&destination={{adresse.latitude}},{{adresse.longitude}}&travelMode=WALKING" target="_blank" title="itinéraire" rel='noopener'></a>
+            <a  class="fr-btn fr-icon-send-plane-line qfdmo-rounded-full"
+                href="https://www.google.com/maps/dir/?api=1&origin={{latitude}},{{longitude}}&destination={{adresse.latitude}},{{adresse.longitude}}&travelMode=WALKING"
+                target="_blank"
+                title="itinéraire"
+                rel='noopener'
+            ></a>
             <span class="fr-text--xs fr-mb-0">Itinéraire</span>
         </div>
     {% endif %}
@@ -56,28 +61,54 @@
                 {% with sharing_url=adresse.share_url(request) %}
                     <ul class="fr-btns-group">
                         <li>
-                            <a class="fr-btn--facebook fr-btn" target="_blank" rel="noopener" title="partager {{ adresse }} sur Facebook - nouvelle fenêtre" onclick="window.open(this.href,'Partager sur Facebook','toolbar=no,location=yes,status=no,menubar=no,scrollbars=yes,resizable=yes,width=600,height=450'); event.preventDefault();" href="https://www.facebook.com/sharer.php?u={{ quote_plus(sharing_url) }}">
+                            <a  class="fr-btn--facebook fr-btn"
+                                target="_blank"
+                                rel="noopener"
+                                title="partager {{ adresse }} sur Facebook - nouvelle fenêtre"
+                                onclick="window.open(this.href,'Partager sur Facebook','toolbar=no,location=yes,status=no,menubar=no,scrollbars=yes,resizable=yes,width=600,height=450'); event.preventDefault();"
+                                href="https://www.facebook.com/sharer.php?u={{ quote_plus(sharing_url) }}"
+                            >
                                 Partager sur Facebook
                             </a>
                         </li>
                         <li>
                             <!-- Les paramètres de la reqûete doivent être URI-encodés (ex: encodeURIComponent() en js) -->
-                            <a class="fr-btn--twitter-x fr-btn" target="_blank" rel="noopener" title="partager {{ adresse }} sur X - nouvelle fenêtre" onclick="window.open(this.href,'Partager sur X (anciennement Twitter)','toolbar=no,location=yes,status=no,menubar=no,scrollbars=yes,resizable=yes,width=600,height=420'); event.preventDefault();" href="https://twitter.com/intent/tweet?url={{ quote_plus(sharing_url) }}&text=[À MODIFIER - titre ou texte descriptif de la page]&via=[À MODIFIER - via]&hashtags=[À MODIFIER - hashtags]">
+                            <a  class="fr-btn--twitter-x fr-btn"
+                                target="_blank"
+                                rel="noopener"
+                                title="partager {{ adresse }} sur X - nouvelle fenêtre"
+                                onclick="window.open(this.href,'Partager sur X (anciennement Twitter)','toolbar=no,location=yes,status=no,menubar=no,scrollbars=yes,resizable=yes,width=600,height=420'); event.preventDefault();"
+                                href="https://twitter.com/intent/tweet?url={{ quote_plus(sharing_url) }}&text=[À MODIFIER - titre ou texte descriptif de la page]&via=[À MODIFIER - via]&hashtags=[À MODIFIER - hashtags]"
+                            >
                                 Partager sur X (anciennement Twitter)
                             </a>
                         </li>
                         <li>
-                            <a class="fr-btn--linkedin fr-btn" target="_blank" rel="noopener" title="partager {{ adresse }} sur LinkedIn - nouvelle fenêtre" onclick="window.open(this.href,'Partager sur LinkedIn','toolbar=no,location=yes,status=no,menubar=no,scrollbars=yes,resizable=yes,width=550,height=550'); event.preventDefault();" href="https://www.linkedin.com/shareArticle?url={{ quote_plus(sharing_url) }}&title=[À MODIFIER - titre ou texte descriptif de la page]">
+                            <a  class="fr-btn--linkedin fr-btn"
+                                target="_blank"
+                                rel="noopener"
+                                title="partager {{ adresse }} sur LinkedIn - nouvelle fenêtre"
+                                onclick="window.open(this.href,'Partager sur LinkedIn','toolbar=no,location=yes,status=no,menubar=no,scrollbars=yes,resizable=yes,width=550,height=550'); event.preventDefault();"
+                                href="https://www.linkedin.com/shareArticle?url={{ quote_plus(sharing_url) }}&title=[À MODIFIER - titre ou texte descriptif de la page]"
+                            >
                                 Partager sur LinkedIn
                             </a>
                         </li>
                         <li>
-                            <a class="fr-btn--mail fr-btn" target="_blank" rel="noopener external" title="partager {{ adresse }} par courriel - nouvelle fenêtre" href="mailto:?subject=[À MODIFIER - objet du mail]&body=[À MODIFIER - titre ou texte descriptif de la page] {{ quote_plus(sharing_url) }}">
+                            <a  class="fr-btn--mail fr-btn"
+                                target="_blank"
+                                rel="noopener external"
+                                title="partager {{ adresse }} par courriel - nouvelle fenêtre"
+                                href="mailto:?subject=[À MODIFIER - objet du mail]&body=[À MODIFIER - titre ou texte descriptif de la page] {{ quote_plus(sharing_url) }}"
+                            >
                                 Partager par email
                             </a>
                         </li>
                         <li>
-                            <button class="fr-btn--copy fr-btn" onclick="navigator.clipboard.writeText('{{sharing_url}}').then(function() {alert('Adresse copiée dans le presse papier.')});">
+                            <button class="fr-btn--copy fr-btn"
+                                onclick="navigator.clipboard.writeText('{{sharing_url}}').then(function() {alert('Adresse copiée dans le presse papier.')});"
+                                type="button"
+                            >
                                 Copier dans le presse-papier
                             </button>
                         </li>
@@ -100,6 +131,7 @@
                 role="tab"
                 aria-selected="true"
                 aria-controls="aboutPanel"
+                type="button"
             >
                 À propos
             </button>
@@ -110,6 +142,7 @@
                 role="tab"
                 aria-selected="false"
                 aria-controls="infosPanel"
+                type="button"
             >
                 Infos
             </button>
@@ -120,20 +153,24 @@
                 role="tab"
                 aria-selected="false"
                 aria-controls="labelsPanel"
+                type="button"
             >
                 Labels
             </button>
         </li>
+        <!-- TODO : Sources
         <li role="presentation">
             <button class="fr-tabs__tab fr-tabs__tab--noborder"
                 tabindex="-1"
                 role="tab"
                 aria-selected="false"
                 aria-controls="sourcesPanel"
+                type="button"
             >
                 Sources
             </button>
         </li>
+        -->
     </ul>
     <div id="aboutPanel"
         class="fr-tabs__panel fr-tabs__panel--selected fr-p-0"
@@ -141,13 +178,29 @@
         aria-labelledby="aboutPanel"
         tabindex="0"
     >
-        <!-- données de test -->
-        <p>à propos</p>
-        <p>à propos</p>
-        <p>à propos</p>
-        <p>à propos</p>
-        <p>à propos</p>
-        <p>à propos</p>
+
+        {% if adresse.description %}
+            <h3 class="fr-text--sm fr-m-0 qfdmo-text-grey-850">Description</h3>
+            <p class="fr-mb-1w">{{adresse.description}}</p>
+        {% endif %}
+
+        <h3 class="fr-text--sm fr-m-0 qfdmo-text-grey-850">Services disponibles</h3>
+        {% for service_proposition in  adresse.proposition_services_by_direction(direction) %}
+            <div class="fr-px-1w fr-my-1w qfdmo-bg-grey-975">
+                <p class="fr-my-1w fr-mr-1v fr-badge fr-badge--sm qfdmo-bg-{{service_proposition.action.couleur}} qfdmo-bg-opacity-30">
+                    {% if service_proposition.action.icon %}
+                        <span class="{{ service_proposition.action.icon }}" aria-hidden="true"></span>&nbsp;
+                    {% endif %}
+                    {{ service_proposition.action.nom_affiche }}
+                </p>
+                <p class="fr-ml-3w fr-mb-1w qfdmo-line-clamp-3">
+                    {% for sous_categorie in service_proposition.sous_categories.all() %}
+                        {{ sous_categorie }}{% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                </p>
+            </div>
+        {% endfor %}
+
     </div>
     <div id="infosPanel"
         class="fr-tabs__panel fr-p-0"
@@ -155,8 +208,29 @@
         aria-labelledby="infosPanel"
         tabindex="0"
     >
-        <!-- données de test -->
-        <p>Infos</p>
+        {% if not adresse.horaires and not adresse.adresse %}
+            <p class="qfdmo-italic">Pas d'information complémentaire à partager</p>
+        {% endif %}
+        {% if adresse.horaires %}
+            <h3 class="fr-text--sm fr-m-0 qfdmo-text-grey-850">Horaires d'ouverture</h3>
+            <div class="fr-px-1w fr-my-1w qfdmo-bg-grey-975">
+                <p>{{adresse.horaires}}</p>
+            </div>
+        {% endif %}
+
+        {% if adresse.adresse %}
+            <h3 class="fr-text--sm fr-m-0 qfdmo-text-grey-850">Adresse</h3>
+            <div class="fr-px-1w fr-my-1w qfdmo-bg-grey-975">
+                {{ adresse.adresse|title }}<br>
+                {% if adresse.adresse_complement %}
+                    {{ adresse.adresse_complement }}<br>
+                {% endif %}
+                {{ adresse.code_postal }} {{ adresse.ville|title }}
+            </div>
+        {% endif %}
+
+        <!-- TODO : Accessibilité -->
+
     </div>
     <div id="labelsPanel"
         class="fr-tabs__panel fr-p-0"
@@ -164,18 +238,29 @@
         aria-labelledby="labelsPanel"
         tabindex="0"
     >
-        <!-- données de test -->
-        <p>Labels</p>
+        {% if not adresse.label_reparacteur %}
+            <p class="qfdmo-italic">Pas labels pour ce lieu</p>
+        {% endif %}
+        {% if adresse.label_reparacteur %}
+            <div class="fr-px-1w fr-my-1w qfdmo-bg-grey-975">
+                <a class="fr-px-1w fr-py-2w fr-my-1w fr-link fr-link--lg fr-link--no-underline qfdmo-w-full qfdmo-flex" href="https://www.artisanat.fr/nous-connaitre/vous-accompagner/reparacteurs" target="_blank" rel="noopener">
+                    {% include "qfdmo/partials/label_reparacteur_icon.html" %}
+                    <span class="fr-ml-1w qfdmo-grow">Répar'Acteurs</span>
+                </a>
+            </div>
+        {% endif %}
     </div>
+    <!-- TODO : Sources -->
+    <!--
     <div id="sourcesPanel"
         class="fr-tabs__panel fr-p-0"
         role="tabpanel"
         aria-labelledby="sourcesPanel"
         tabindex="0"
     >
-        <!-- données de test -->
         <p>Sources</p>
     </div>
+    -->
 </div>
 <div class="qfdmo-flex qfdmo-flex-row-reverse">
     <div class="fr-m-0 fr-ml-1w fr-text--xs">

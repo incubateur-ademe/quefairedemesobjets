@@ -66,9 +66,6 @@ export default class extends Controller<HTMLElement> {
     }
 
     searchAdresses() {
-        // adresses.classList.add("qfdmo-flex-grow");
-        // search_summary.classList.remove("qfdmo-h-0");
-        // search_form_div.classList.remove("qfdmo-flex-grow");
         this.loadingSolutions()
         this.searchFormPanelTarget.classList.remove("qfdmo-flex-grow")
         this.backToSearchPanelTarget.classList.remove("qfdmo-h-0")
@@ -77,9 +74,6 @@ export default class extends Controller<HTMLElement> {
     }
 
     backToSearch() {
-        // adresses.classList.remove("qfdmo-flex-grow");
-        // search_summary.classList.add("qfdmo-h-0");
-        // search_form_div.classList.add("qfdmo-flex-grow");
         this.hideDetails()
         this.searchFormPanelTarget.classList.add("qfdmo-flex-grow")
         this.backToSearchPanelTarget.classList.add("qfdmo-h-0")
@@ -88,7 +82,6 @@ export default class extends Controller<HTMLElement> {
     }
 
     displayDetails() {
-        console.log("displayDetails")
         // mobile
         this.detailsAddressPanelTarget.classList.remove("qfdmo-h-0")
         this.detailsAddressPanelTarget.classList.remove("qfdmo-h-full")
