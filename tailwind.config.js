@@ -59,6 +59,7 @@ module.exports = {
             "blue-france-950": "#ececfe",
             "blue-france-950-hover": "#cecefc",
             "blue-france-925": "#e3e3fd",
+            "blue-france-925-active": "#adadf9",
             "blue-france-925-hover": "#c1c1fb",
             "blue-france-850": "#cacafb",
             "blue-france-850-hover": "#a1a1f8",

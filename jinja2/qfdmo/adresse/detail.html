@@ -37,25 +37,25 @@
     {% endif %}
     {% if adresse.url %}
         <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
-            <a class="fr-btn fr-icon-computer-line qfdmo-rounded-full" href="{{ adresse.url }}" target="_blank" title="Site Internet" rel='noopener'></a>
-            <span class="fr-text--xs fr-mb-0">Site Internet</span>
+            <a class="fr-btn fr-btn--secondary-light fr-icon-computer-line qfdmo-rounded-full" href="{{ adresse.url }}" target="_blank" title="Site Internet" rel='noopener'></a>
+            <span class="fr-text--xs fr-mb-0">Site web</span>
         </div>
     {% endif %}
     {% if adresse.email %}
         <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
-            <a class="fr-btn fr-icon-mail-line qfdmo-rounded-full" href="mailto:{{ adresse.email }}" target="_blank" title="Courriel" rel='noopener'></a>
-            <span class="fr-text--xs fr-mb-0">Courriel</span>
+            <a class="fr-btn fr-btn--secondary-light fr-icon-mail-line qfdmo-rounded-full" href="mailto:{{ adresse.email }}" target="_blank" title="Courriel" rel='noopener'></a>
+            <span class="fr-text--xs fr-mb-0">E-mail</span>
         </div>
     {% endif %}
     {% if adresse.telephone %}
         <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
-            <a class="fr-btn fr-icon-phone-line qfdmo-rounded-full" href="tel:{{ adresse.telephone }}" title="Téléphone" rel='noopener'></a>
+            <a class="fr-btn fr-btn--secondary-light fr-icon-phone-line qfdmo-rounded-full" href="tel:{{ adresse.telephone }}" title="Téléphone" rel='noopener'></a>
             <span class="fr-text--xs fr-mb-0">Téléphone</span>
         </div>
     {% endif %}
 
     <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
-        <button class="fr-btn fr-icon-share-line qfdmo-rounded-full" aria-describedby="shareTooltip" type="button"></button>
+        <button class="fr-btn fr-btn--secondary-light fr-icon-share-line qfdmo-rounded-full" aria-describedby="shareTooltip" type="button"></button>
         <span class="fr-tooltip fr-placement" id="shareTooltip" role="tooltip" aria-hidden="true">
             <div class="fr-share">
                 {% with sharing_url=adresse.share_url(request) %}
@@ -186,7 +186,7 @@
 
         <h3 class="fr-text--sm fr-m-0 qfdmo-text-grey-850">Services disponibles</h3>
         {% for service_proposition in  adresse.proposition_services_by_direction(direction) %}
-            <div class="fr-px-1w fr-my-1w qfdmo-bg-grey-975">
+            <div class="fr-px-1w fr-pb-1w fr-my-1w qfdmo-bg-grey-975">
                 <p class="fr-my-1w fr-mr-1v fr-badge fr-badge--sm qfdmo-bg-{{service_proposition.action.couleur}} qfdmo-bg-opacity-30">
                     {% if service_proposition.action.icon %}
                         <span class="{{ service_proposition.action.icon }}" aria-hidden="true"></span>&nbsp;
@@ -208,19 +208,22 @@
         aria-labelledby="infosPanel"
         tabindex="0"
     >
-        {% if not adresse.horaires and not adresse.adresse %}
+        {% if not adresse.adresse %}
+            <!-- not adresse.horaires and -->
             <p class="qfdmo-italic">Pas d'information complémentaire à partager</p>
         {% endif %}
-        {% if adresse.horaires %}
+
+        {% if adresse.horaires and False %}
+            <!-- TODO : Display horaires -->
             <h3 class="fr-text--sm fr-m-0 qfdmo-text-grey-850">Horaires d'ouverture</h3>
-            <div class="fr-px-1w fr-my-1w qfdmo-bg-grey-975">
+            <div class="fr-p-1w fr-my-1w qfdmo-bg-grey-975">
                 <p>{{adresse.horaires}}</p>
             </div>
         {% endif %}
 
         {% if adresse.adresse %}
             <h3 class="fr-text--sm fr-m-0 qfdmo-text-grey-850">Adresse</h3>
-            <div class="fr-px-1w fr-my-1w qfdmo-bg-grey-975">
+            <div class="fr-p-1w fr-my-1w qfdmo-bg-grey-975">
                 {{ adresse.adresse|title }}<br>
                 {% if adresse.adresse_complement %}
                     {{ adresse.adresse_complement }}<br>

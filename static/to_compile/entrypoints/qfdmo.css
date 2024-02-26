@@ -163,3 +163,13 @@ Style the autocomplete container:
 .fr-link--no-underline {
     background-image: none !important;
 }
+
+.fr-btn--secondary-light {
+    background-color: #f5f5fe !important;
+    color: var(--text-active-blue-france) !important;
+    border-style: none !important;
+}
+
+.fr-btn--secondary-light:hover {
+    background-color: #dcdcfc !important;
+}
