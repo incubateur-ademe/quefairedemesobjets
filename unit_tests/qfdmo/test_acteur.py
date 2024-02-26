@@ -270,6 +270,7 @@ class TestActeurGetOrCreateRevisionActeur:
 
 @pytest.mark.django_db
 class TestActeurMaterializedView:
+    # TODO : to be deprecated
     def test_materialized_view_empty(self, acteur):
         assert FinalActeur.objects.count() == 0
 

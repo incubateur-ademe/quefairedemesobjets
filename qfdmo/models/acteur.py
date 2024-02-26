@@ -184,6 +184,35 @@ class Acteur(BaseActeur):
         verbose_name = "ACTEUR de l'EC - IMPORTÉ"
         verbose_name_plural = "ACTEURS de l'EC - IMPORTÉ"
 
+    def get_or_create_revision(self):
+        # TODO : to be deprecated
+        fields = model_to_dict(
+            self,
+            fields=[
+                "multi_base",
+                "label_reparacteur",
+                "manuel",
+                "statut",
+            ],
+        )
+        (revision_acteur, created) = RevisionActeur.objects.get_or_create(
+            identifiant_unique=self.identifiant_unique, defaults=fields
+        )
+        if created:
+            for proposition_service in self.proposition_services.all():  # type: ignore
+                revision_proposition_service = (
+                    RevisionPropositionService.objects.create(
+                        revision_acteur=revision_acteur,
+                        action_id=proposition_service.action_id,
+                        acteur_service_id=proposition_service.acteur_service_id,
+                    )
+                )
+                revision_proposition_service.sous_categories.add(
+                    *proposition_service.sous_categories.all()
+                )
+
+        return revision_acteur
+
     def get_or_create_correctionequipe(self):
         fields = model_to_dict(
             self,
