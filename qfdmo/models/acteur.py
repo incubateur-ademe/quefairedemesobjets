@@ -185,6 +185,7 @@ class Acteur(BaseActeur):
         verbose_name_plural = "ACTEURS de l'EC - IMPORTÉ"
 
     def get_or_create_revision(self):
+        # TODO : to be deprecated
         fields = model_to_dict(
             self,
             fields=[
@@ -201,6 +202,34 @@ class Acteur(BaseActeur):
             for proposition_service in self.proposition_services.all():  # type: ignore
                 revision_proposition_service = (
                     RevisionPropositionService.objects.create(
+                        revision_acteur=revision_acteur,
+                        action_id=proposition_service.action_id,
+                        acteur_service_id=proposition_service.acteur_service_id,
+                    )
+                )
+                revision_proposition_service.sous_categories.add(
+                    *proposition_service.sous_categories.all()
+                )
+
+        return revision_acteur
+
+    def get_or_create_correctionequipe(self):
+        fields = model_to_dict(
+            self,
+            fields=[
+                "multi_base",
+                "label_reparacteur",
+                "manuel",
+                "statut",
+            ],
+        )
+        (revision_acteur, created) = CorrectionEquipeActeur.objects.get_or_create(
+            identifiant_unique=self.identifiant_unique, defaults=fields
+        )
+        if created:
+            for proposition_service in self.proposition_services.all():  # type: ignore
+                revision_proposition_service = (
+                    CorrectionEquipePropositionService.objects.create(
                         revision_acteur=revision_acteur,
                         action_id=proposition_service.action_id,
                         acteur_service_id=proposition_service.acteur_service_id,
@@ -236,6 +265,47 @@ class Acteur(BaseActeur):
 
 
 class RevisionActeur(BaseActeur):
+    class Meta:
+        verbose_name = "ACTEUR de l'EC - DEPRECATED"
+        verbose_name_plural = "ACTEURS de l'EC - DEPRECATED"
+
+    nom = models.CharField(max_length=255, blank=True, null=True)
+    acteur_type = models.ForeignKey(
+        ActeurType, on_delete=models.CASCADE, blank=True, null=True
+    )
+
+    def save(self, *args, **kwargs):
+        self.set_default_fields_and_objects_before_save()
+        return super().save(*args, **kwargs)
+
+    def set_default_fields_and_objects_before_save(self):
+        acteur_exists = True
+        if not self.identifiant_unique or not Acteur.objects.filter(
+            identifiant_unique=self.identifiant_unique
+        ):
+            acteur_exists = False
+        if not acteur_exists:
+            acteur = Acteur.objects.create(
+                **model_to_dict(
+                    self,
+                    exclude=["id", "acteur_type", "source", "proposition_services"],
+                ),
+                acteur_type=(
+                    self.acteur_type
+                    if self.acteur_type
+                    else ActeurType.objects.get(nom="commerce")
+                ),
+                source=self.source,
+            )
+            self.identifiant_unique = acteur.identifiant_unique
+            self.identifiant_externe = acteur.identifiant_externe
+            self.source = acteur.source
+
+    def __str__(self):
+        return self.nom or self.identifiant_unique
+
+
+class CorrectionEquipeActeur(BaseActeur):
     class Meta:
         verbose_name = "ACTEUR de l'EC - CORRIGÉ"
         verbose_name_plural = "ACTEURS de l'EC - CORRIGÉ"
@@ -280,8 +350,8 @@ class FinalActeur(BaseActeur):
     class Meta:
         managed = False
         db_table = "qfdmo_finalacteur"
-        verbose_name = "ACTEUR de l'EC - AFFICHÉ"
-        verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ"
+        verbose_name = "ACTEUR de l'EC - DECRECATED"
+        verbose_name_plural = "ACTEURS de l'EC - DECRECATED"
 
     @classmethod
     def refresh_view(cls):
@@ -355,6 +425,86 @@ REFRESH MATERIALIZED VIEW CONCURRENTLY qfdmo_finalpropositionservice_sous_catego
 
         return orjson.dumps(
             {
+                "identifiant_unique": self.identifiant_unique,
+                "location": orjson.loads(self.location.geojson),
+                "actions": actions,
+                "acteur_selected_action": (
+                    acteur_selected_actions[0]
+                    if acteur_selected_actions
+                    else actions[0]
+                ),
+                "render_as_card": self.render_as_card(direction=direction),
+            }
+        ).decode("utf-8")
+
+
+class DisplayedActeur(BaseActeur):
+    class Meta:
+        verbose_name = "ACTEUR de l'EC - AFFICHÉ"
+        verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ"
+
+    def acteur_actions(self, direction=None):
+        acteur_actions_by_direction = {}
+        ps_action_ids = [
+            ps.action_id for ps in self.proposition_services.all()  # type: ignore
+        ]
+        for d, actions in CachedDirectionAction.get_actions_by_direction().items():
+            acteur_actions_by_direction[d] = sorted(
+                [action for action in actions if action["id"] in ps_action_ids],
+                key=lambda x: x["order"],
+            )
+        if direction:
+            return acteur_actions_by_direction[direction]
+
+        deduplicated_actions = {
+            a["id"]: a
+            for a in (
+                acteur_actions_by_direction["jai"]
+                + acteur_actions_by_direction["jecherche"]
+            )
+        }.values()
+        sorted_actions = sorted(
+            deduplicated_actions,
+            key=lambda x: x["order"],
+        )
+        return sorted_actions
+
+    def render_as_card(self, direction: str | None = None) -> str:
+        return render_to_string(
+            "qfdmo/acteur_as_card.html", {"acteur": self, "direction": direction}
+        )
+
+    def serialize(
+        self,
+        format: None | str = None,
+        render_as_card: bool = False,
+        direction: str | None = None,
+    ) -> dict | str:
+        super_serialized = super().serialize(format=None)
+        super_serialized["actions"] = self.acteur_actions(direction=direction)
+
+        if render_as_card:
+            super_serialized["render_as_card"] = self.render_as_card(  # type: ignore
+                direction=direction
+            )
+
+        if format == "json":
+            return json.dumps(super_serialized)
+        return super_serialized
+
+    def json_acteur_for_display(
+        self, direction: str | None = None, action_list: str | None = None
+    ) -> str:
+        actions = self.acteur_actions(direction=direction)
+        acteur_selected_actions = None
+        if action_list:
+            acteur_selected_actions = [
+                a for a in actions if a["nom"] in action_list.split("|")
+            ]
+
+        return orjson.dumps(
+            {
+                "identifiant_unique": self.identifiant_unique,
                 "location": orjson.loads(self.location.geojson),
                 "actions": actions,
                 "acteur_selected_action": (
@@ -468,8 +618,8 @@ class PropositionService(BasePropositionService):
 
 class RevisionPropositionService(BasePropositionService):
     class Meta:
-        verbose_name = "PROPOSITION DE SERVICE - CORRIGÉ"
-        verbose_name_plural = "PROPOSITIONS DE SERVICE - CORRIGÉ"
+        verbose_name = "PROPOSITION DE SERVICE - DEPRECATED"
+        verbose_name_plural = "PROPOSITIONS DE SERVICE - DEPRECATED"
         constraints = [
             models.UniqueConstraint(
                 fields=["revision_acteur", "action", "acteur_service"],
@@ -489,15 +639,51 @@ class RevisionPropositionService(BasePropositionService):
         return f"{self.revision_acteur} - {super().__str__()}"
 
 
+class CorrectionEquipePropositionService(BasePropositionService):
+    class Meta:
+        verbose_name = "PROPOSITION DE SERVICE - CORRIGÉ"
+        verbose_name_plural = "PROPOSITIONS DE SERVICE - CORRIGÉ"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["revision_acteur", "action", "acteur_service"],
+                name="rps_unique_by_correctionequipeacteur_action_service",
+            )
+        ]
+
+    revision_acteur = models.ForeignKey(
+        CorrectionEquipeActeur,
+        to_field="identifiant_unique",
+        on_delete=models.CASCADE,
+        null=False,
+        related_name="proposition_services",
+    )
+
+    def __str__(self):
+        return f"{self.revision_acteur} - {super().__str__()}"
+
+
 class FinalPropositionService(BasePropositionService):
     class Meta:
         managed = False
         db_table = "qfdmo_finalpropositionservice"
-        verbose_name = "Proposition de service"
-        verbose_name_plural = "Proposition de service"
+        verbose_name = "Proposition de service - DECRECATED"
+        verbose_name_plural = "Propositions de service - DECRECATED"
 
     acteur = models.ForeignKey(
         FinalActeur,
+        on_delete=models.CASCADE,
+        null=False,
+        related_name="proposition_services",
+    )
+
+
+class DisplayedPropositionService(BasePropositionService):
+    class Meta:
+        verbose_name = "Proposition de service - AFFICHÉ"
+        verbose_name_plural = "Proposition de service - AFFICHÉ"
+
+    acteur = models.ForeignKey(
+        DisplayedActeur,
         on_delete=models.CASCADE,
         null=False,
         related_name="proposition_services",

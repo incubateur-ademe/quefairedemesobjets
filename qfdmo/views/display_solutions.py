@@ -214,9 +214,9 @@ class ReemploiSolutionView(FormView):
         return ps_filter
 
 
-def getorcreate_revision_acteur(request, acteur_identifiant):
+def getorcreate_correctionequipeacteur(request, acteur_identifiant):
     acteur = Acteur.objects.get(identifiant_unique=acteur_identifiant)
-    revision_acteur = acteur.get_or_create_revision()
+    revision_acteur = acteur.get_or_create_correctionequipe()
     return redirect(
         "admin:qfdmo_revisionacteur_change", quote(revision_acteur.identifiant_unique)
     )

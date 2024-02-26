@@ -23,6 +23,12 @@ from qfdmo.models import (
     Source,
     SousCategorieObjet,
 )
+from qfdmo.models.acteur import (
+    CorrectionEquipeActeur,
+    CorrectionEquipePropositionService,
+    DisplayedActeur,
+    DisplayedPropositionService,
+)
 from qfdmo.widget import CustomOSMWidget
 
 
@@ -73,10 +79,29 @@ class RevisionPropositionServiceInline(BasePropositionServiceInline):
     model = RevisionPropositionService
 
 
+class CorrectionEquipePropositionServiceInline(BasePropositionServiceInline):
+    model = CorrectionEquipePropositionService
+
+
 class FinalPropositionServiceInline(
     BasePropositionServiceInline, NotEditableInlineMixin
 ):
     model = FinalPropositionService
+
+    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+
+class DisplayedPropositionServiceInline(
+    BasePropositionServiceInline, NotEditableInlineMixin
+):
+    model = DisplayedPropositionService
 
     def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
         return False
@@ -256,6 +281,57 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
         return revision_acteur_form
 
 
+class CorrectionEquipeActeurResource(ActeurResource):
+    class Meta:
+        model = CorrectionEquipeActeur
+
+
+class CorrectionEquipeActeurAdmin(
+    import_export_admin.ImportExportMixin, BaseActeurAdmin
+):
+    gis_widget = CustomOSMWidget
+    inlines = [CorrectionEquipePropositionServiceInline]
+    exclude = ["id"]
+    resource_classes = [CorrectionEquipeActeurResource]
+
+    def get_form(
+        self, request: Any, obj: Any | None = None, change: bool = False, **kwargs: Any
+    ) -> Any:
+        """
+        Display Acteur fields value as help_text
+        """
+        correction_equipe_acteur_form = super().get_form(request, obj, change, **kwargs)
+        if obj and obj.identifiant_unique:
+            acteur = Acteur.objects.get(identifiant_unique=obj.identifiant_unique)
+            for (
+                field_name,
+                form_field,
+            ) in correction_equipe_acteur_form.base_fields.items():
+                acteur_value = getattr(acteur, field_name)
+                if acteur_value and isinstance(form_field, PointField):
+                    (lon, lat) = acteur_value.coords
+                    acteur_value = {
+                        "type": "Point",
+                        "coordinates": [lon, lat],
+                    }
+                form_field.help_text = str(acteur_value)
+                acteur_value_js = str(acteur_value).replace("'", "\\'")
+
+                if acteur_value and (
+                    isinstance(form_field, CharField)
+                    or isinstance(form_field, PointField)
+                ):
+                    form_field.help_text += (
+                        '&nbsp;<button type="button" onclick="document.getElementById('
+                        f"'id_{field_name}').value = '{acteur_value_js}'"
+                        '">copy</button>'
+                        '&nbsp;<button type="button" onclick="'
+                        f"document.getElementById('id_{field_name}').value = ''"
+                        '">reset</button>'
+                    )
+        return correction_equipe_acteur_form
+
+
 class BasePropositionServiceAdmin(admin.GISModelAdmin):
     pass
 
@@ -325,6 +401,19 @@ class RevisionPropositionServiceResource(BasePropositionServiceResource):
         model = RevisionPropositionService
 
 
+class CorrectionEquipePropositionServiceResource(BasePropositionServiceResource):
+    correction_equipe_acteur = fields.Field(
+        column_name="acteur",
+        attribute="correction_equipe_acteur",
+        widget=widgets.ForeignKeyWidget(
+            CorrectionEquipeActeur, field="identifiant_unique"
+        ),
+    )
+
+    class Meta:
+        model = CorrectionEquipePropositionService
+
+
 class RevisionPropositionServiceAdmin(
     import_export_admin.ImportExportMixin, BasePropositionServiceAdmin
 ):
@@ -336,6 +425,21 @@ class RevisionPropositionServiceAdmin(
     search_fields = [
         "revision_acteur__nom",
         "revision_acteur__siret",
+    ]
+    search_help_text = "Recherche sur le nom ou le siret de l'acteur"
+
+
+class CorrectionEquipePropositionServiceAdmin(
+    import_export_admin.ImportExportMixin, BasePropositionServiceAdmin
+):
+    def sous_categorie_list(self, obj):
+        return ", ".join([str(sc) for sc in obj.sous_categories.all()])
+
+    resource_classes = [CorrectionEquipePropositionServiceResource]
+    list_display = ["__str__", "sous_categorie_list"]
+    search_fields = [
+        "correction_equipe_acteur__nom",
+        "correction_equipe_acteur__siret",
     ]
     search_help_text = "Recherche sur le nom ou le siret de l'acteur"
 
@@ -361,6 +465,27 @@ class FinalActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
         return False
 
 
+class DisplayedActeurResource(ActeurResource):
+    class Meta:
+        model = DisplayedActeur
+
+
+class DisplayedActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
+    change_form_template = "admin/final_acteur/change_form.html"
+    gis_widget = CustomOSMWidget
+    inlines = [
+        DisplayedPropositionServiceInline,
+    ]
+    modifiable = False
+    resource_classes = [DisplayedActeurResource]
+
+    def get_readonly_fields(self, request, obj=None):
+        return [f.name for f in self.model._meta.fields if f.name != "location"]
+
+    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+
 class CorrectionActeurAdmin(BaseActeurAdmin):
     gis_widget = CustomOSMWidget
     inlines = []
@@ -373,7 +498,12 @@ admin.site.register(ActeurService)
 admin.site.register(ActeurType, ActeurTypeAdmin)
 admin.site.register(CorrectionActeur, CorrectionActeurAdmin)
 admin.site.register(FinalActeur, FinalActeurAdmin)
+admin.site.register(DisplayedActeur, DisplayedActeurAdmin)
 admin.site.register(PropositionService, PropositionServiceAdmin)
 admin.site.register(RevisionActeur, RevisionActeurAdmin)
 admin.site.register(RevisionPropositionService, RevisionPropositionServiceAdmin)
+admin.site.register(CorrectionEquipeActeur, CorrectionEquipeActeurAdmin)
+admin.site.register(
+    CorrectionEquipePropositionService, CorrectionEquipePropositionServiceAdmin
+)
 admin.site.register(Source)
