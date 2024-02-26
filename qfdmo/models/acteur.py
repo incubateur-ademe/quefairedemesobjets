@@ -447,7 +447,6 @@ REFRESH MATERIALIZED VIEW CONCURRENTLY qfdmo_finalpropositionservice_sous_catego
         return orjson.dumps(
             {
                 "identifiant_unique": self.identifiant_unique,
-<<<<<<< HEAD
                 "location": orjson.loads(self.location.geojson),
                 "actions": actions,
                 "acteur_selected_action": (
@@ -527,8 +526,6 @@ class DisplayedActeur(BaseActeur):
         return orjson.dumps(
             {
                 "identifiant_unique": self.identifiant_unique,
-=======
->>>>>>> 575ee88 (implement navigation with search)
                 "location": orjson.loads(self.location.geojson),
                 "actions": actions,
                 "acteur_selected_action": (
