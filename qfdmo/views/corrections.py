@@ -79,7 +79,7 @@ class CorrectionsView(IsStaffMixin, FormView):
             acteur = Acteur.objects.get(
                 identifiant_unique=correction.identifiant_unique
             )
-            revision_acteur = acteur.get_or_create_revision()
+            revision_acteur = acteur.get_or_create_correctionequipe()
             if correction.source == "URL_SCRIPT":
                 revision_acteur.url = correction.url if correction.url else "__nourl__"
                 revision_acteur.save()

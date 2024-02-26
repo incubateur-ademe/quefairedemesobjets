@@ -104,7 +104,7 @@ class Command(BaseCommand):
             acteur = Acteur.objects.get(
                 identifiant_unique=final_acteur.identifiant_unique
             )
-            revision_acteur = acteur.get_or_create_revision()
+            revision_acteur = acteur.get_or_create_correctionequipe()
             revision_acteur.nom = formatted_nom
             revision_acteur.nom_commercial = formatted_nom_commercial
             revision_acteur.save()
