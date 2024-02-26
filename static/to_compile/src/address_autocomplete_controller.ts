@@ -78,6 +78,9 @@ export default class extends AutocompleteController {
                                 this.#hideInputError()
                                 this.hideSpinner()
                             })
+                            .then(() => {
+                                this.dispatch("optionSelected")
+                            })
                             .catch((error) => {
                                 console.error("error catched : ", error)
                                 this.hideSpinner()
@@ -92,6 +95,7 @@ export default class extends AutocompleteController {
             this.inputTarget.value = label
             if (longitude) this.longitudeTarget.value = longitude
             if (latitude) this.latitudeTarget.value = latitude
+            this.dispatch("optionSelected")
         }
         this.closeAllLists()
     }
@@ -139,7 +143,8 @@ export default class extends AutocompleteController {
 
     async #getOptionCallback(value: string): Promise<string[]> {
         if (value.trim().length < 3)
-            return [["Autour de moi", 9999, 9999].join(SEPARATOR)]
+            this.latitudeTarget.value = this.longitudeTarget.value = ""
+        return [["Autour de moi", 9999, 9999].join(SEPARATOR)]
         return await fetch(`https://api-adresse.data.gouv.fr/search/?q=${value}`)
             .then((response) => response.json())
             .then((data) => {

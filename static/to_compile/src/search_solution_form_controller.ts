@@ -200,13 +200,20 @@ export default class extends Controller<HTMLElement> {
             this.sousCategoryObjetGroupTarget.classList.add("fr-input-group--error")
             this.sousCategoryObjetErrorTarget.classList.remove("qfdmo-hidden")
             errorExists = true
+        } else {
+            this.sousCategoryObjetGroupTarget.classList.remove("fr-input-group--error")
+            this.sousCategoryObjetErrorTarget.classList.add("qfdmo-hidden")
         }
 
         if (!this.latitudeInputTarget.value || !this.longitudeInputTarget.value) {
             this.adresseGroupTarget.classList.add("fr-input-group--error")
             this.adresseErrorTarget.classList.remove("qfdmo-hidden")
             errorExists = true
+        } else {
+            this.adresseGroupTarget.classList.remove("fr-input-group--error")
+            this.adresseErrorTarget.classList.add("qfdmo-hidden")
         }
+
         return errorExists
     }
 
