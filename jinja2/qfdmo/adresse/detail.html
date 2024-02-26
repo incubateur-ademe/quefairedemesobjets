@@ -11,7 +11,7 @@
     {% if adresse.distance %}
         &nbsp;({{adresse.distance}}km) <!-- FIXME: to be display smartly as a distance in m or km-->
     {% endif %}
-    &nbsp;(13 km)<!-- FIXME: to be removed -->
+    <!-- TODO: &nbsp;(13 km) -->
 </p>
 
 {% if not adresse.is_digital %}
@@ -118,8 +118,6 @@
         </span>
         <span class="fr-text--xs fr-mb-0">Partager</span>
     </div>
-
-
 </div>
 
 

@@ -49,7 +49,7 @@
                     {{ form.action_list }}
 
                     <!-- Recherche Objet -->
-                    <div class="fr-mt-3w fr-px-1v">
+                    <div data-search-solution-form-target="sousCategoryObjetGroup" class="fr-mt-3w fr-px-1v fr-input-group">
                         <div data-controller='ss-cat-object-autocomplete'
                             data-ss-cat-object-autocomplete-max-option-displayed-value=5
                             data-ss-cat-object-autocomplete-nb-char-to-search-value=2
@@ -60,10 +60,13 @@
                                 {{ form.sc_id }}
                             </div>
                         </div>
+                        <p class="fr-error-text fr-mt-1v qfdmo-hidden" data-search-solution-form-target="sousCategoryObjetError">
+                            Veuillez sélectionner un objet dans la liste déroulante
+                        </p>
                     </div>
 
                     <!-- Recherche adresse -->
-                    <div class="fr-mt-3w fr-px-1v">
+                    <div data-search-solution-form-target="adresseGroup" class="fr-mt-3w fr-px-1v fr-input-group">
                         <div data-controller='address-autocomplete'
                             data-address-autocomplete-max-option-displayed-value=5
                             data-address-autocomplete-is-ban-address-value='true'
@@ -75,6 +78,9 @@
                             {{ form.longitude }}
                             {{ form.latitude }}
                         </div>
+                        <p class="fr-error-text fr-mt-1v qfdmo-hidden" data-search-solution-form-target="adresseError">
+                            Veuillez saisir une adresse
+                        </p>
                     </div>
 
                     <!-- Gestes -->

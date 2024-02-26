@@ -22,6 +22,13 @@ export default class extends Controller<HTMLElement> {
         "expandDetailsButton",
         "collapseDetailsButton",
 
+        "sousCategoryObjetGroup",
+        "sousCategoryObjetID",
+        "sousCategoryObjetError",
+
+        "adresseGroup",
+        "adresseError",
+
         //FIXME: should be renamed
         "loadingSolutions",
         "addressMissing",
@@ -31,20 +38,29 @@ export default class extends Controller<HTMLElement> {
     declare readonly jaiTarget: HTMLElement
     declare readonly jechercheTarget: HTMLElement
     declare readonly directionTarget: HTMLElement
-    declare readonly actionListTarget: HTMLInputElement
     declare readonly latitudeInputTarget: HTMLInputElement
     declare readonly longitudeInputTarget: HTMLInputElement
+    declare readonly actionListTarget: HTMLInputElement
+    declare readonly searchFormTarget: HTMLFormElement
 
     declare readonly searchFormPanelTarget: HTMLElement
     declare readonly addressesPanelTarget: HTMLElement
     declare readonly backToSearchPanelTarget: HTMLElement
-    declare readonly searchFormTarget: HTMLFormElement
     declare readonly detailsAddressPanelTarget: HTMLElement
     declare readonly srcDetailsAddressTarget: HTMLElement
     declare readonly proposeAddressPanelTarget: HTMLElement
     declare readonly headerAddressPanelTarget: HTMLElement
+
     declare readonly expandDetailsButtonTarget: HTMLElement
     declare readonly collapseDetailsButtonTarget: HTMLElement
+
+    declare readonly sousCategoryObjetGroupTarget: HTMLElement
+    declare readonly sousCategoryObjetIDTarget: HTMLInputElement
+    declare readonly sousCategoryObjetErrorTarget: HTMLElement
+
+    declare readonly adresseGroupTarget: HTMLElement
+    declare readonly adresseErrorTarget: HTMLElement
+
     declare readonly loadingSolutionsTarget: HTMLElement
     declare readonly addressMissingTarget: HTMLElement
     declare readonly NoLocalSolutionTarget: HTMLElement
@@ -178,7 +194,25 @@ export default class extends Controller<HTMLElement> {
         this.apply()
     }
 
+    checkErrorForm(): boolean {
+        let errorExists = false
+        if (!this.sousCategoryObjetIDTarget.value) {
+            this.sousCategoryObjetGroupTarget.classList.add("fr-input-group--error")
+            this.sousCategoryObjetErrorTarget.classList.remove("qfdmo-hidden")
+            errorExists = true
+        }
+
+        if (!this.latitudeInputTarget.value || !this.longitudeInputTarget.value) {
+            this.adresseGroupTarget.classList.add("fr-input-group--error")
+            this.adresseErrorTarget.classList.remove("qfdmo-hidden")
+            errorExists = true
+        }
+        return errorExists
+    }
+
     submitForm() {
+        if (this.checkErrorForm()) return
+
         this.loadingSolutionsTarget.classList.remove("qfdmo-hidden")
         this.addressMissingTarget.classList.add("qfdmo-hidden")
         this.NoLocalSolutionTarget.classList.add("qfdmo-hidden")
