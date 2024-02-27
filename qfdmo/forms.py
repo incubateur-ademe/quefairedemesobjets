@@ -41,7 +41,7 @@ class GetReemploiSolutionForm(forms.Form):
         queryset=SousCategorieObjet.objects.all(),
         widget=AutoCompleteInput(
             attrs={
-                "class": "fr-input fr-icon-search-line md:qfdmo-w-[300px]",
+                "class": "fr-input fr-icon-search-line md:qfdmo-w-[400px]",
                 "placeholder": "chaussures, perceuse, canapé...",
                 "autocomplete": "off",
                 "aria-label": "Choisir un objet dans la liste - obligatoire",

@@ -41,7 +41,8 @@
             <span class="fr-text--xs fr-mb-0">Site web</span>
         </div>
     {% endif %}
-    {% if adresse.email %}
+    <!-- TODO hidden until we figue about RGPD rules -->
+    {% if adresse.email and False %}
         <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
             <a class="fr-btn fr-btn--secondary-light fr-icon-mail-line qfdmo-rounded-full" href="mailto:{{ adresse.email }}" target="_blank" title="Courriel" rel='noopener'></a>
             <span class="fr-text--xs fr-mb-0">E-mail</span>
@@ -178,11 +179,11 @@
     >
 
         {% if adresse.description %}
-            <h3 class="fr-text--sm fr-m-0 qfdmo-text-grey-850">Description</h3>
+            <h3 class="fr-text--sm fr-m-0 qfdmo-text-grey-625">Description</h3>
             <p class="fr-mb-1w">{{adresse.description}}</p>
         {% endif %}
 
-        <h3 class="fr-text--sm fr-m-0 qfdmo-text-grey-850">Services disponibles</h3>
+        <h3 class="fr-text--sm fr-m-0 qfdmo-text-grey-625">Services disponibles</h3>
         {% for service_proposition in  adresse.proposition_services_by_direction(direction) %}
             <div class="fr-px-1w fr-pb-1w fr-my-1w qfdmo-bg-grey-975">
                 <p class="fr-my-1w fr-mr-1v fr-badge fr-badge--sm qfdmo-bg-{{service_proposition.action.couleur}} qfdmo-bg-opacity-30">
@@ -213,14 +214,14 @@
 
         {% if adresse.horaires and False %}
             <!-- TODO : Display horaires -->
-            <h3 class="fr-text--sm fr-m-0 qfdmo-text-grey-850">Horaires d'ouverture</h3>
+            <h3 class="fr-text--sm fr-m-0 qfdmo-text-grey-625">Horaires d'ouverture</h3>
             <div class="fr-p-1w fr-my-1w qfdmo-bg-grey-975">
                 <p>{{adresse.horaires}}</p>
             </div>
         {% endif %}
 
         {% if adresse.adresse %}
-            <h3 class="fr-text--sm fr-m-0 qfdmo-text-grey-850">Adresse</h3>
+            <h3 class="fr-text--sm fr-m-0 qfdmo-text-grey-625">Adresse</h3>
             <div class="fr-p-1w fr-my-1w qfdmo-bg-grey-975">
                 {{ adresse.adresse|title }}<br>
                 {% if adresse.adresse_complement %}

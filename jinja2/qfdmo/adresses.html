@@ -7,12 +7,12 @@
         <form data-controller="search-solution-form" id='search_form'
             data-search-solution-form-target="searchForm"
             data-turbo-frame="addressesPanel"
-            class="fr-container qfdmo-min-h-[700px] qfdmo-h-screen qfdmo-flex qfdmo-flex-col qfdmo-flex-auto"
+            class="fr-container qfdmo-min-h-[700px] qfdmo-h-screen md:qfdmo-h-svh qfdmo-flex qfdmo-flex-col qfdmo-flex-auto"
             data-action="
             map:displayDetails->search-solution-form#displayDetails
             map:setSrcDetailsAddress->search-solution-form#setSrcDetailsAddress
-            ss-cat-object-autocomplete:optionSelected->search-solution-form#checkErrorForm
-            address-autocomplete:optionSelected->search-solution-form#checkErrorForm
+            ss-cat-object-autocomplete:optionSelected->search-solution-form#checkSsCatObjetErrorForm
+            address-autocomplete:optionSelected->search-solution-form#checkAdresseErrorForm
             "
             >
             <!-- Panel «Modifier ma recherche» -->
@@ -193,7 +193,7 @@
                                         {% for adresse in acteurs.all() %}
                                             <div data-action="click->search-solution-form#displayActeurDetails"
                                                 data-identifiant-unique="{{ adresse.identifiant_unique }}"
-                                                class="qfdmo-cursor-pointer qfdmo-rounded-t qfdmo-border-solid qfdmo-border qfdmo-border-b-2 qfdmo-border-light-gray qfdmo-border-b-grey-200 qfdmo-content-start fr-p-1w{% if not loop.last %} fr-mb-1w{% endif %}
+                                                class="qfdmo-cursor-pointer qfdmo-rounded-t qfdmo-border-solid qfdmo-border qfdmo-border-b-2 qfdmo-border-light-gray qfdmo-border-b-grey-200 qfdmo-content-start fr-p-1w fr-mb-1w qfdmo-bg-grey-975
                                                 qfdmo-flex qfdmo-flex-col">
                                                 {% with direction=form.direction.value() %}
                                                     {% include 'qfdmo/_address_partials/address_actions.html'%}
@@ -287,46 +287,48 @@
                     <!-- Détail de l'adresse -->
                     <div
                         data-search-solution-form-target="detailsAddressPanel"
-                        class="qfdmo-duration-300 qfdmo-relative qfdmo-bg-white qfdmo-z-10
+                        class="qfdmo-duration-300 qfdmo-bg-white qfdmo-z-10
                         qfdmo-w-full {% if request.GET.get('detail') %} qfdmo-h-1/2 {% else %} qfdmo-h-0 {% endif %}
                         md:qfdmo-h-full {% if request.GET.get('detail') %} md:qfdmo-w-[480] {% else %} md:qfdmo-w-0 {% endif %}"
                     >
                         <div class="qfdmo-border-solid qfdmo-border-t md:qfdmo-border-t-0 qfdmo-border-0 qfdmo-border-light-gray
-                            qfdmo-h-full qfdmo-overflow-y-scroll qfdmo-w-full md:qfdmo-w-[480]">
-                            <div class="qfdmo-m-1w md:qfdmo-m-3w">
-                                <div class="qfdmo-flex qfdmo-flex-row-reverse qfdmo-justify-between">
-                                    <button class="fr-btn fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-close-line"
-                                        type='button'
-                                        data-action="click -> search-solution-form#hideDetails"
-                                        >
-                                        Fermer
-                                    </button>
-                                    <button class="fr-btn fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-arrow-up-s-line md:qfdmo-hidden"
-                                        type='button'
-                                        data-action="click -> search-solution-form#displayFullDetails"
-                                        data-search-solution-form-target="expandDetailsButton"
-                                        >
-                                        Ouvrir
-                                    </button>
-                                    <button class="fr-btn fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-arrow-down-s-line md:qfdmo-hidden qfdmo-hidden"
-                                        type='button'
-                                        data-action="click -> search-solution-form#displayDetails"
-                                        data-search-solution-form-target="collapseDetailsButton"
-                                        >
-                                        Réduire
-                                    </button>
-                                </div>
-                                <!-- passer la direction en paramètre  -->
-
-                                {% with direction=form.direction.value(), latitude=form.latitude.value(), longitude=form.longitude.value() %}
-                                    <turbo-frame id="adr_detail"
-                                        data-search-solution-form-target="srcDetailsAddress"
-                                        {% if request.GET.get('detail') %}
-                                            src="{{ reverse('qfdmo:adresse_detail', args=[request.GET.get('detail')])}}?direction={{ direction }}&latitude={{ latitude }}&longitude={{ longitude }}"
-                                        {% endif %}
+                            qfdmo-py-1w md:qfdmo-px-3w qfdmo-h-full qfdmo-flex qfdmo-flex-col">
+                            <div class="qfdmo-flex qfdmo-flex-row-reverse qfdmo-justify-between">
+                                <button class="fr-btn fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-close-line"
+                                    type='button'
+                                    data-action="click -> search-solution-form#hideDetails"
                                     >
-                                    </turbo-frame>
-                                {% endwith %}
+                                    Fermer
+                                </button>
+                                <button class="fr-btn fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-arrow-up-s-line md:qfdmo-hidden"
+                                    type='button'
+                                    data-action="click -> search-solution-form#displayFullDetails"
+                                    data-search-solution-form-target="expandDetailsButton"
+                                    >
+                                    Ouvrir
+                                </button>
+                                <button class="fr-btn fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-arrow-down-s-line md:qfdmo-hidden qfdmo-hidden"
+                                    type='button'
+                                    data-action="click -> search-solution-form#displayDetails"
+                                    data-search-solution-form-target="collapseDetailsButton"
+                                    >
+                                    Réduire
+                                </button>
+                            </div>
+                            <!-- passer la direction en paramètre  -->
+                            <div class="qfdmo-flex-grow qfdmo-relative">
+                                <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-overflow-y-scroll">
+                                    {% with direction=form.direction.value(), latitude=form.latitude.value(), longitude=form.longitude.value() %}
+                                        <turbo-frame id="adr_detail"
+                                            data-search-solution-form-target="srcDetailsAddress"
+                                            {% if request.GET.get('detail') %}
+                                                src="{{ reverse('qfdmo:adresse_detail', args=[request.GET.get('detail')])}}?direction={{ direction }}&latitude={{ latitude }}&longitude={{ longitude }}"
+                                            {% endif %}
+
+                                        >
+                                        </turbo-frame>
+                                    {% endwith %}
+                                </div>
                             </div>
                         </div>
                     </div>

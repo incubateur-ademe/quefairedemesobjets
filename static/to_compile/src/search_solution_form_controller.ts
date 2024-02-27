@@ -194,7 +194,7 @@ export default class extends Controller<HTMLElement> {
         this.apply()
     }
 
-    checkErrorForm(): boolean {
+    checkSsCatObjetErrorForm(): boolean {
         let errorExists = false
         if (!this.sousCategoryObjetIDTarget.value) {
             this.sousCategoryObjetGroupTarget.classList.add("fr-input-group--error")
@@ -204,7 +204,11 @@ export default class extends Controller<HTMLElement> {
             this.sousCategoryObjetGroupTarget.classList.remove("fr-input-group--error")
             this.sousCategoryObjetErrorTarget.classList.add("qfdmo-hidden")
         }
+        return errorExists
+    }
 
+    checkAdresseErrorForm(): boolean {
+        let errorExists = false
         if (!this.latitudeInputTarget.value || !this.longitudeInputTarget.value) {
             this.adresseGroupTarget.classList.add("fr-input-group--error")
             this.adresseErrorTarget.classList.remove("qfdmo-hidden")
@@ -213,7 +217,13 @@ export default class extends Controller<HTMLElement> {
             this.adresseGroupTarget.classList.remove("fr-input-group--error")
             this.adresseErrorTarget.classList.add("qfdmo-hidden")
         }
+        return errorExists
+    }
 
+    checkErrorForm(): boolean {
+        let errorExists = false
+        if (this.checkSsCatObjetErrorForm()) errorExists ||= true
+        if (this.checkAdresseErrorForm()) errorExists ||= true
         return errorExists
     }
 

@@ -89,6 +89,7 @@ module.exports = {
             "grey-925": "#e5e5e5",
             "grey-900": "#dddddd",
             "grey-850": "#cecece",
+            "grey-625": "#929292",
             "grey-200": "#3a3a3a",
         },
         maxWidth: {
