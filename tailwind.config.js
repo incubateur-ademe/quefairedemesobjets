@@ -40,9 +40,9 @@ module.exports = {
         "qfdmo-bottom-5",
         "qfdmo-w-full",
         "md:qfdmo-w-fit",
-        "md:qfdmo-w-[300px]",
-        "md:qfdmo-w-[400px]",
         "md:qfdmo-min-w-[600px]",
+        "md:qfdmo-w-[250px]",
+        "md:qfdmo-w-[400px]",
     ],
     theme: {
         colors: {
@@ -89,7 +89,7 @@ module.exports = {
             "grey-925": "#e5e5e5",
             "grey-900": "#dddddd",
             "grey-850": "#cecece",
-            "grey-625": "#929292",
+            "grey-425": "#666666",
             "grey-200": "#3a3a3a",
         },
         maxWidth: {

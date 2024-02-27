@@ -138,8 +138,9 @@ class BaseActeur(NomAsNaturalKeyModel):
             url += "s"
         url += "://" + request.get_host()
         url += reverse("qfdmo:adresse_detail", args=[self.identifiant_unique])
+        url += "?iframe"
         if direction:
-            url += f"?direction={direction}"
+            url += f"&direction={direction}"
         return url
 
     @property

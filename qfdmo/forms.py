@@ -44,11 +44,11 @@ class GetReemploiSolutionForm(forms.Form):
                 "class": "fr-input fr-icon-search-line md:qfdmo-w-[400px]",
                 "placeholder": "chaussures, perceuse, canapé...",
                 "autocomplete": "off",
-                "aria-label": "Choisir un objet dans la liste - obligatoire",
+                "aria-label": "Indiquer un objet - obligatoire",
             },
             data_controller="ss-cat-object-autocomplete",
         ),
-        label="Choisir un objet dans la liste ",
+        label="Indiquer un objet ",
         empty_label="",
         required=False,
     )
@@ -98,7 +98,7 @@ class GetReemploiSolutionForm(forms.Form):
         widget=SegmentedControlSelect(
             attrs={
                 "data-action": "click -> search-solution-form#changeDirection",
-                "class": "qfdmo-w-full md:qfdmo-w-fit",
+                "class": "qfdmo-w-full md:qfdmo-w-[250px]",
             },
             fieldset_attrs={
                 "data-search-solution-form-target": "direction",

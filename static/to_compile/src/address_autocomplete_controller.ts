@@ -142,9 +142,10 @@ export default class extends AutocompleteController {
     }
 
     async #getOptionCallback(value: string): Promise<string[]> {
-        if (value.trim().length < 3)
+        if (value.trim().length < 3) {
             this.latitudeTarget.value = this.longitudeTarget.value = ""
-        return [["Autour de moi", 9999, 9999].join(SEPARATOR)]
+            return [["Autour de moi", 9999, 9999].join(SEPARATOR)]
+        }
         return await fetch(`https://api-adresse.data.gouv.fr/search/?q=${value}`)
             .then((response) => response.json())
             .then((data) => {

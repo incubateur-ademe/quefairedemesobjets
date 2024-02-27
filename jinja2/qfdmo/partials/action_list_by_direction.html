@@ -10,6 +10,9 @@
                     >
                     <input name="{{action.nom}}" id="{{action_direction}}_{{action.nom}}" data-search-solution-form-target="action" type="checkbox" aria-describedby="{{action.nom}}-messages" {% if action.active %} checked{% endif %}>
                     <label class="fr-label before:qfdmo-bg-white fr-text--sm fr-mb-0" for="{{action_direction}}_{{action.nom}}">
+                        {% if action.icon %}
+                            <span class="{{ action.icon }}" aria-hidden="true"></span>&nbsp;
+                        {% endif %}
                         {{ action.nom_affiche }}
                     </label>
                 </div>

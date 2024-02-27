@@ -36,6 +36,11 @@ Les paramètres disponibles pour customiser l'affichage de l'iframe sont:
 
 La hauteur et la largeur de l'iframe peuvent être exprimées dans toutes les unités interprétées par les navigateurs ex: px, %, vh, rem…
 
+- `data-height` TODOs
+https://dev.to/frehner/css-vh-dvh-lvh-svh-and-vw-units-27k4
+
+
+
 Voir l'exemple d'integration de l'iframe « Longue vie aux objets » dans une page html : [iframe.html](./iframe.html)
 
 ### Alternative d'intégration de l'application
