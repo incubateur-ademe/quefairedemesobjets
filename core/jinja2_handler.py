@@ -75,8 +75,6 @@ def action_by_direction(request: HttpRequest, direction: str):
 
 
 def display_search(request: HttpRequest) -> bool:
-    if request.GET.get("r"):
-        return False
     return True
 
 
