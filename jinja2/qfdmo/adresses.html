@@ -191,7 +191,8 @@
                                         {% for adresse in acteurs.all() %}
                                             <div data-action="click->search-solution-form#displayActeurDetails"
                                                 data-identifiant-unique="{{ adresse.identifiant_unique }}"
-                                                class="qfdmo-cursor-pointer qfdmo-rounded-t qfdmo-border-solid qfdmo-border qfdmo-border-b-2 qfdmo-border-light-gray qfdmo-border-b-grey-200 qfdmo-content-start fr-p-1w fr-mb-1w qfdmo-bg-grey-975
+                                                class="qfdmo-cursor-pointer qfdmo-rounded qfdmo-border-solid qfdmo-border qfdmo-border-light-gray qfdmo-content-start fr-p-1w fr-mb-1w
+                                                {{ loop.cycle('qfdmo-bg-grey-975','qfdmo-bg-grey-950') }}
                                                 qfdmo-flex qfdmo-flex-col">
                                                 {% with direction=form.direction.value() %}
                                                     {% include 'qfdmo/_address_partials/address_actions.html'%}
