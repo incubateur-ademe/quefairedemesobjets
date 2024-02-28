@@ -19,6 +19,9 @@
             "distDir": "./static/compiled"
         }
     },
+    "browserslist": [
+        "defaults"
+    ],
     "@parcel/transformer-css": {
         "errorRecovery": true
     },
