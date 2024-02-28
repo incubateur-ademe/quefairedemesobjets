@@ -20,7 +20,7 @@
         }
     },
     "browserslist": [
-        "defaults"
+        "defaults", "iOS 14"
     ],
     "@parcel/transformer-css": {
         "errorRecovery": true
