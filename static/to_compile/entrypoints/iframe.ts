@@ -1,5 +1,3 @@
-import { iframeResize } from "iframe-resizer"
-
 const setupIframe = () => {
     // Add iFrame just after the script tag
     const scriptTag = document.currentScript as HTMLScriptElement
@@ -7,12 +5,23 @@ const setupIframe = () => {
 
     const urlParams = new URLSearchParams()
     urlParams.append("iframe", "1")
-    let maxWidth = 800
+    let maxWidth = "800px"
+    let height = "700px"
+    let iframeExtraAttributes = {}
     for (const param in scriptTag.dataset) {
         if (param === "max_width") {
-            maxWidth = parseInt(scriptTag.dataset[param])
+            maxWidth = scriptTag.dataset[param]
             continue
         }
+        if (param === "height") {
+            height = scriptTag.dataset[param]
+            continue
+        }
+        if (param === "iframe_attributes") {
+            iframeExtraAttributes = JSON.parse(scriptTag.dataset[param])
+            continue
+        }
+
         urlParams.append(param, scriptTag.dataset[param])
     }
 
@@ -23,24 +32,18 @@ const setupIframe = () => {
         frameborder: "0",
         scrolling: "no",
         allow: "geolocation",
-        style: "width: 100%",
         allowfullscreen: true,
         webkitallowfullscreen: true,
         mozallowfullscreen: true,
+        style: `overflow: hidden; max-width: ${maxWidth}; width: 100%; height: ${height};`,
     }
     for (var key in iframeAttributes) {
         iframe.setAttribute(key, iframeAttributes[key])
     }
+    for (var key in iframeExtraAttributes) {
+        iframe.setAttribute(key, iframeExtraAttributes[key])
+    }
     scriptTag.insertAdjacentElement("afterend", iframe)
-
-    iframeResize(
-        {
-            heightCalculationMethod: "bodyScroll",
-            maxWidth: maxWidth,
-            checkOrigin: [BASE_URL],
-        },
-        iframe,
-    )
 }
 
 //addIframeResizer()

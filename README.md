@@ -30,7 +30,11 @@ Les paramètres disponibles pour customiser l'affichage de l'iframe sont:
   - pour la direction `jecherche` les actions possibles sont : `emprunter`, `echanger`, `louer`, `acheter`
   - pour la direction `jai` les actions possibles sont : `reparer`, `preter`, `donner`, `echanger`, `mettreenlocation`, `revendre`
   - si le paramètre `action_list` n'est pas renseigné ou est vide, toutes les actions éligibles à la direction sont cochées
-- `data-max_width`, largeur maximum de l'iframe en pixel, la valeur par défaut est 800
+- `data-max_width`, largeur maximum de l'iframe, la valeur par défaut est 800px
+- `data-height`, hauteur allouée à l'iframe cette hauteur doit être de 700px minimum, la valeur par défaut est 100vh
+- `data-iframe_attributes`, liste d'attributs au format JSON à ajouter à l'iframe
+
+La hauteur et la largeur de l'iframe peuvent être exprimées dans toutes les unités interprétées par les navigateurs ex: px, %, vh, rem…
 
 Voir l'exemple d'integration de l'iframe « Longue vie aux objets » dans une page html : [iframe.html](./iframe.html)
 
@@ -232,6 +236,27 @@ honcho start -f Procfile.dev
 
 Honcho démarrera les containers Docker s'ils ne sont pas déjà démarrés.
 Une fois les processus démarrés, le serveur web sera accessible à l'adresse http://localhost:8000, écoutant sur le port 8000.
+
+### Test
+
+python avec pytest
+
+```sh
+pytest
+```
+
+Test Js unitaire
+
+```sh
+npm run test static
+```
+
+End to end avec Playwright
+
+```sh
+npx playwright install --with-deps
+npx playwright test
+```
 
 ### Ajout et modification de package pip-tools
 
