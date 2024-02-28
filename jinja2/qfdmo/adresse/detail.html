@@ -1,8 +1,13 @@
 {% include 'qfdmo/_address_partials/address_actions.html'%}
 
-<h2 class='fr-my-1w fr-h6'>
-    {{ adresse.nom_affiche }}
-</h2>
+<div class="qfdmo-flex qfdmo-justify-between qfdmo-items-center">
+    <h2 class='fr-my-1w fr-h6'>
+        {{ adresse.nom_affiche }}
+    </h2>
+    {% if adresse.label_reparacteur %}
+        {% include "qfdmo/partials/label_reparacteur_icon.html" %}
+    {% endif %}
+</div>
 
 <p class="qfdmo-text-sm fr-mb-1w fr-mt-0">
     {% for acteur_service in adresse.acteur_services() %}
