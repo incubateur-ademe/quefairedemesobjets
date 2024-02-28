@@ -8,6 +8,8 @@ import MapController from "../src/map_controller"
 import SearchSolutionFormController from "../src/search_solution_form_controller"
 import SsCatObjectAutocompleteController from "../src/ss_cat_object_autocomplete_controller"
 
+import "../src/browser_check"
+
 window.stimulus = Application.start()
 stimulus.register("map", MapController)
 stimulus.register("ss-cat-object-autocomplete", SsCatObjectAutocompleteController)

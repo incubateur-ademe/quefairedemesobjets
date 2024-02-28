@@ -62,6 +62,21 @@
             {% endblock %}
         {% endif %}
         <main role="main" id="solutions">
+            <noscript>
+                <div class="fr-container fr-my-3w">
+                    <div class="fr-alert fr-alert--error">
+                        <h3 class="fr-alert__title">L'application nécessite Javascript pour être exécutée correctement</h3>
+                        <p>Javascript est désactivé dans votre navigateur. Veuillez l'activer pour une meilleure expérience.</p>
+                        <p>Vous trouverez sur le lien suivant comment activer Javascript dans votre navigateur : <a href="https://www.enable-javascript.com/fr/" target="_blank" rel="noopener">https://www.enable-javascript.com/fr/</a></p>
+                    </div>
+                </div>
+            </noscript>
+            <div class="fr-container fr-my-3w qfdmo-hidden" id='obsolete_browser_message'>
+                <div class="fr-alert fr-alert--warning">
+                    <h3 class="fr-alert__title">Une mise à jour de votre navigateur est nécessaire</h3>
+                    <p>La version de votre navigateur étant trop ancienne, nous ne pouvons vous garantir une expérience optimale sur la carte Longue vie aux objets. Si vous le souhaitez, vous pouvez aussi essayer de vous connecter sur un autre navigateur.</p>
+                </div>
+            </div>
             {% block content %}{% endblock %}
         </main>
         {% if not is_iframe(request) %}
