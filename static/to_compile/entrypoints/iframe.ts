@@ -6,7 +6,7 @@ const setupIframe = () => {
     const urlParams = new URLSearchParams()
     urlParams.append("iframe", "1")
     let maxWidth = "800px"
-    let height = "100vh"
+    let height = "700px"
     let iframeExtraAttributes = {}
     for (const param in scriptTag.dataset) {
         if (param === "max_width") {
