@@ -517,6 +517,10 @@ class DisplayedActeur(BaseActeur):
         ).decode("utf-8")
 
 
+class DisplayedActeurTemp(BaseActeur):
+    pass
+
+
 class CorrectionActeur(BaseActeur):
     class Meta:
         verbose_name = "Proposition de correction d'un acteur"
@@ -684,6 +688,15 @@ class DisplayedPropositionService(BasePropositionService):
 
     acteur = models.ForeignKey(
         DisplayedActeur,
+        on_delete=models.CASCADE,
+        null=False,
+        related_name="proposition_services",
+    )
+
+
+class DisplayedPropositionServiceTemp(BasePropositionService):
+    acteur = models.ForeignKey(
+        DisplayedActeurTemp,
         on_delete=models.CASCADE,
         null=False,
         related_name="proposition_services",
