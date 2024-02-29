@@ -83,7 +83,7 @@ def environment(**options):
             "action_by_direction": action_by_direction,
             "action_list_display": action_list_display,
             "str_diff": str_diff,
-            "DEBUG": settings.DEBUG,
+            "ENVIRONMENT": settings.ENVIRONMENT,
         }
     )
     return env
