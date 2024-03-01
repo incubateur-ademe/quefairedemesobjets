@@ -154,9 +154,9 @@ pygments==2.15.1 \
     --hash=sha256:8ace4d3c1dd481894b2005f560ead0f9f19ee64fe983366be1a21e171d12775c \
     --hash=sha256:db2db3deb4b4179f399a09054b023b6a586b76499d36965813c71aa8ed7b5fd1
     # via ptpython
-pytest==8.0.1 \
-    --hash=sha256:267f6563751877d772019b13aacbe4e860d73fe8f651f28112e9ac37de7513ae \
-    --hash=sha256:3e4f16fe1c0a9dc9d9389161c127c3edc5d810c38d6793042fb81d9f48a59fca
+pytest==8.0.2 \
+    --hash=sha256:d4051d623a2e0b7e51960ba963193b09ce6daeb9759a451844a21e4ddedfc1bd \
+    --hash=sha256:edfaaef32ce5172d5466b5127b42e0d6d35ebbe4453f0e3505d96afd93f6b096
     # via
     #   -r dev-requirements.in
     #   pytest-django
