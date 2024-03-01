@@ -43,6 +43,7 @@ module.exports = {
         "md:qfdmo-min-w-[600px]",
         "md:qfdmo-w-[250px]",
         "md:qfdmo-w-[400px]",
+        "md:qfdmo-w-[596px]",
     ],
     theme: {
         colors: {

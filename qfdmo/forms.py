@@ -41,7 +41,7 @@ class GetReemploiSolutionForm(forms.Form):
         queryset=SousCategorieObjet.objects.all(),
         widget=AutoCompleteInput(
             attrs={
-                "class": "fr-input fr-icon-search-line md:qfdmo-w-[400px]",
+                "class": "fr-input fr-icon-search-line md:qfdmo-w-[596px]",
                 "placeholder": "chaussures, perceuse, canapé...",
                 "autocomplete": "off",
                 "aria-label": "Indiquer un objet - obligatoire",
@@ -65,7 +65,7 @@ class GetReemploiSolutionForm(forms.Form):
     adresse = forms.CharField(
         widget=AutoCompleteInput(
             attrs={
-                "class": "fr-input md:qfdmo-w-[400px]",
+                "class": "fr-input md:qfdmo-w-[596px]",
                 "placeholder": "20 av. du Grésillé 49000 Angers",
                 "autocomplete": "off",
                 "aria-label": "Autour de l'adresse suivante - obligatoire",
