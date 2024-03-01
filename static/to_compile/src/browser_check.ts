@@ -16,7 +16,7 @@ function isBrowserSupported(): boolean {
         ie: "none",
     })
 
-    return isValidBrowser
+    return isValidBrowser !== false
 }
 
 document.addEventListener("DOMContentLoaded", function () {
