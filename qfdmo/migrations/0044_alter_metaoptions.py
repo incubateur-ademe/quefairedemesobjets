@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("qfdmo", "0042_displayedacteurtemp_and_more"),
+        ("qfdmo", "0043_source_logo_file"),
     ]
 
     operations = [
