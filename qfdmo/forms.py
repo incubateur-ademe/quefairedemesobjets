@@ -1,5 +1,6 @@
 from django import forms
 from django.conf import settings
+from django.utils.safestring import mark_safe
 
 from qfdmo.models import (
     CachedDirectionAction,
@@ -21,11 +22,11 @@ class AutoCompleteInput(forms.Select):
         return context
 
 
-class InlineRadioSelect(forms.RadioSelect):
-    template_name = "django/forms/widgets/inline_radio.html"
-    option_template_name = "django/forms/widgets/inline_radio_option.html"
+class SegmentedControlSelect(forms.RadioSelect):
+    template_name = "django/forms/widgets/segmented_control.html"
+    option_template_name = "django/forms/widgets/segmented_control_option.html"
 
-    def __init__(self, attrs=None, fieldset_attrs=None, choices=()):
+    def __init__(self, attrs=None, fieldset_attrs=None, option_attrs=None, choices=()):
         self.fieldset_attrs = {} if fieldset_attrs is None else fieldset_attrs.copy()
         super().__init__(attrs)
 
@@ -40,19 +41,23 @@ class GetReemploiSolutionForm(forms.Form):
         queryset=SousCategorieObjet.objects.all(),
         widget=AutoCompleteInput(
             attrs={
-                "class": "fr-input fr-icon-search-line",
+                "class": "fr-input fr-icon-search-line md:qfdmo-w-[596px]",
                 "placeholder": "chaussures, perceuse, canapé...",
                 "autocomplete": "off",
+                "aria-label": "Indiquer un objet - obligatoire",
             },
             data_controller="ss-cat-object-autocomplete",
         ),
-        label="",
+        label="Indiquer un objet ",
         empty_label="",
         required=False,
     )
     sc_id = forms.IntegerField(
         widget=forms.HiddenInput(
-            attrs={"data-ss-cat-object-autocomplete-target": "ssCat"}
+            attrs={
+                "data-ss-cat-object-autocomplete-target": "ssCat",
+                "data-search-solution-form-target": "sousCategoryObjetID",
+            }
         ),
         required=False,
     )
@@ -60,42 +65,48 @@ class GetReemploiSolutionForm(forms.Form):
     adresse = forms.CharField(
         widget=AutoCompleteInput(
             attrs={
-                "class": "fr-input",
+                "class": "fr-input md:qfdmo-w-[596px]",
                 "placeholder": "20 av. du Grésillé 49000 Angers",
                 "autocomplete": "off",
+                "aria-label": "Autour de l'adresse suivante - obligatoire",
             },
             data_controller="address-autocomplete",
         ),
-        label="Autour de l'adresse suivante ",
+        label="Autour de l'adresse suivante ",
         required=False,
     )
     latitude = forms.FloatField(
         widget=forms.HiddenInput(
-            attrs={"data-address-autocomplete-target": "latitude"}
+            attrs={
+                "data-address-autocomplete-target": "latitude",
+                "data-search-solution-form-target": "latitudeInput",
+            }
         ),
         required=False,
     )
     longitude = forms.FloatField(
         widget=forms.HiddenInput(
-            attrs={"data-address-autocomplete-target": "longitude"}
+            attrs={
+                "data-address-autocomplete-target": "longitude",
+                "data-search-solution-form-target": "longitudeInput",
+            }
         ),
         required=False,
     )
 
     direction = forms.ChoiceField(
-        widget=InlineRadioSelect(
+        widget=SegmentedControlSelect(
             attrs={
-                "class": "fr-radio",
                 "data-action": "click -> search-solution-form#changeDirection",
+                "class": "qfdmo-w-full md:qfdmo-w-[250px]",
             },
             fieldset_attrs={
-                "class": "fr-fieldset fr-my-1w",
                 "data-search-solution-form-target": "direction",
             },
         ),
         # FIXME: I guess async error comes from here
         choices=[],
-        label="",
+        label="Direction des actions",
         required=False,
     )
 
@@ -112,11 +123,13 @@ class GetReemploiSolutionForm(forms.Form):
             attrs={
                 "class": "fr-checkbox fr-m-1v",
                 "data-search-solution-form-target": "advancedFiltersField",
-                "data-action": "click -> search-solution-form#updateAdvancedFiltersCounter",  # noqa E501
             }
         ),
         label="Label Répar’Acteurs",
-        help_text="Afficher uniquement les artisans labellisés",
+        help_text=(
+            "Afficher uniquement les artisans labellisés"
+            " (uniquement valable lorsque le geste réparé est sélectionné)"
+        ),
         label_suffix="",
         required=False,
     )
@@ -128,10 +141,29 @@ class GetReemploiSolutionForm(forms.Form):
         required=False,
     )
 
-    digital = forms.BooleanField(
-        widget=forms.HiddenInput(
-            attrs={"data-search-solution-form-target": "digital"},
+    digital = forms.ChoiceField(
+        widget=SegmentedControlSelect(
+            attrs={
+                "class": "qfdmo-w-full md:qfdmo-w-fit",
+                "data-action": "click -> search-solution-form#submitForm",
+            },
         ),
+        choices=[
+            (
+                "0",
+                mark_safe(
+                    '<span class="fr-icon-road-map-line md:qfdmo-mx-1w">'
+                    " à proximité</span>"
+                ),
+            ),
+            (
+                "1",
+                mark_safe(
+                    '<span class="fr-icon-global-line md:qfdmo-mx-1w"> en ligne</span>'
+                ),
+            ),
+        ],
+        label="Adresses à proximité ou solutions digitales",
         required=False,
     )
 

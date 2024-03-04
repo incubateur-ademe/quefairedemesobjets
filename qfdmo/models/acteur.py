@@ -1,13 +1,17 @@
 import json
 import random
 import string
+from typing import Any
 
 import opening_hours
 import orjson
 from django.contrib.gis.db import models
+from django.core.files.images import get_image_dimensions
 from django.db import connection
 from django.forms import ValidationError, model_to_dict
+from django.http import HttpRequest
 from django.template.loader import render_to_string
+from django.urls import reverse
 from unidecode import unidecode
 
 from qfdmo.models.action import Action, CachedDirectionAction
@@ -66,6 +70,18 @@ class ActeurType(NomAsNaturalKeyModel):
         return cls._digital_acteur_type_id
 
 
+def validate_logo(value: Any):
+    if value:
+        # Check file size
+        if value.size > 50 * 1024:
+            raise ValidationError("Logo size should be less than 50 KB.")
+
+        # Check file format
+        width, height = get_image_dimensions(value)
+        if width != 32 or height != 32:
+            raise ValidationError("Logo dimensions should be 32x32 pixels.")
+
+
 class Source(NomAsNaturalKeyModel):
     class Meta:
         verbose_name = "Source de données"
@@ -76,6 +92,9 @@ class Source(NomAsNaturalKeyModel):
     logo = models.CharField(max_length=255, blank=True, null=True)
     afficher = models.BooleanField(default=True)
     url = models.CharField(max_length=2048, blank=True, null=True)
+    logo_file = models.ImageField(
+        upload_to="logos", blank=True, null=True, validators=[validate_logo]
+    )
 
     def serialize(self):
         return model_to_dict(self)
@@ -129,6 +148,18 @@ class BaseActeur(NomAsNaturalKeyModel):
         blank=True, null=True, validators=[validate_opening_hours]
     )
 
+    def share_url(self, request: HttpRequest, direction: str | None = None):
+        # url = request.build_absolute_uri("")
+        url = "http"
+        if request.is_secure():
+            url += "s"
+        url += "://" + request.get_host()
+        url += reverse("qfdmo:adresse_detail", args=[self.identifiant_unique])
+        url += "?iframe"
+        if direction:
+            url += f"&direction={direction}"
+        return url
+
     @property
     def latitude(self):
         return self.location.y if self.location else None
@@ -166,6 +197,8 @@ class BaseActeur(NomAsNaturalKeyModel):
         return self_as_dict
 
     def acteur_services(self) -> list[str]:
+        # FIXME: just for test (to be removed)
+        # return ["relai d'acteur", "lieu trop cool", "ressourcerie", "boutique"]
         return sorted(
             list(
                 set(
@@ -177,6 +210,12 @@ class BaseActeur(NomAsNaturalKeyModel):
                 )
             )
         )
+
+    def proposition_services_by_direction(self, direction: str | None = None):
+
+        if direction:
+            return self.proposition_services.filter(action__directions__nom=direction)
+        return self.proposition_services.all()
 
 
 class Acteur(BaseActeur):

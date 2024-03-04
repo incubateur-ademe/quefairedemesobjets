@@ -1,7 +1,13 @@
 /** @type {import('tailwindcss').Config | null} */
 
 module.exports = {
-    content: ["jinja2/**/*html", "templates/**/*html", "static/to_compile/**/*{j,t}s"],
+    content: [
+        "jinja2/*.html",
+        "jinja2/**/*html",
+        "jinja2/**/**/*html",
+        "templates/**/*html",
+        "static/to_compile/**/*{j,t}s",
+    ],
     prefix: "qfdmo-",
     corePlugins: {
         preflight: false,
@@ -30,6 +36,14 @@ module.exports = {
         "qfdmo-flex-row",
         "qfdmo-italic",
         "qfdmo-justify-between",
+        "qfdmo-h-10",
+        "qfdmo-bottom-5",
+        "qfdmo-w-full",
+        "md:qfdmo-w-fit",
+        "md:qfdmo-min-w-[600px]",
+        "md:qfdmo-w-[250px]",
+        "md:qfdmo-w-[400px]",
+        "md:qfdmo-w-[596px]",
     ],
     theme: {
         colors: {
@@ -40,11 +54,15 @@ module.exports = {
             },
             "blue-france-sun-113": "#000091",
             "blue-france": "#2323ff",
+            "blue-france-main-525": "#6a6af4",
+            "blue-france-main-525-hover": "#9898f8",
+            "blue-france-main-525-active": "#aeaef9",
             "blue-france-975": "#f5f5fe",
             "blue-france-975-hover": "#dcdcfc",
             "blue-france-950": "#ececfe",
             "blue-france-950-hover": "#cecefc",
             "blue-france-925": "#e3e3fd",
+            "blue-france-925-active": "#adadf9",
             "blue-france-925-hover": "#c1c1fb",
             "blue-france-850": "#cacafb",
             "blue-france-850-hover": "#a1a1f8",
@@ -67,6 +85,13 @@ module.exports = {
             "brown-opera": "#BD987A",
             "beige-gris-galet": "#AEA397",
             "red-500": "#EB4444",
+            "grey-975": "#f6f6f6",
+            "grey-950": "#eeeeee",
+            "grey-925": "#e5e5e5",
+            "grey-900": "#dddddd",
+            "grey-850": "#cecece",
+            "grey-425": "#666666",
+            "grey-200": "#3a3a3a",
         },
         maxWidth: {
             readable: "80ch",

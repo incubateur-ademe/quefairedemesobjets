@@ -44,7 +44,6 @@ Style the autocomplete container:
     /*position the autocomplete items to be the same width as the container:*/
     top: 100%;
     left: 0;
-    right: 0;
     z-index: 10001;
 }
 
@@ -118,4 +117,58 @@ Style the autocomplete container:
 .fr-icon-action-vendre::after {
     -webkit-mask-image: url("svg/vendre.svg");
     mask-image: url("svg/vendre.svg");
+}
+
+.fr-icon-share-line::before,
+.fr-icon-share-line::after {
+  -webkit-mask-image: url("svg/share-line.svg");
+  mask-image: url("svg/share-line.svg");
+}
+/*
+ * Failed to load some tailwind classes with parcel
+ */
+
+.qfdmo--bottom-5 {
+    bottom: -1.25rem;
+}
+
+.qfdmo-bottom-2 {
+    bottom: 0.5rem;
+}
+
+.qfdmo-right-2 {
+    right: 0.5rem;
+}
+
+.qfdmo--top-5 {
+    top: -1.25rem;
+}
+
+.qfdmo-adresse-hr {
+    padding:4px !important;
+}
+
+.fr-tabs--noborder {
+    box-shadow: none !important;
+    border: none;
+    height: fit-content;
+}
+
+.fr-tabs__tab--noborder {
+    background-image: none !important;
+    background-color: white !important;
+}
+
+.fr-link--no-underline {
+    background-image: none !important;
+}
+
+.fr-btn--secondary-light {
+    background-color: #f5f5fe !important;
+    color: var(--text-active-blue-france) !important;
+    border-style: none !important;
+}
+
+.fr-btn--secondary-light:hover {
+    background-color: #dcdcfc !important;
 }

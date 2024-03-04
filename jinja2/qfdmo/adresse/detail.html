@@ -1,0 +1,296 @@
+{% include 'qfdmo/_address_partials/address_actions.html'%}
+
+<div class="qfdmo-flex qfdmo-justify-between qfdmo-items-center">
+    <h2 class='fr-my-1w fr-h6'>
+        {{ adresse.nom_affiche }}
+    </h2>
+    {% if adresse.label_reparacteur %}
+        {% include "qfdmo/partials/label_reparacteur_icon.html" %}
+    {% endif %}
+</div>
+
+<p class="qfdmo-text-sm fr-mb-1w fr-mt-0">
+    {% for acteur_service in adresse.acteur_services() %}
+        {{ acteur_service }}{% if not loop.last %},&nbsp;{% endif %}
+    {% endfor %}
+    {% if adresse.distance %}
+        &nbsp;({{adresse.distance}}km) <!-- FIXME: to be display smartly as a distance in m or km-->
+    {% endif %}
+    <!-- TODO: &nbsp;(13 km) -->
+</p>
+
+{% if not adresse.is_digital %}
+    <hr class="fr-pb-1v">
+    <div class="fr-text--sm fr-my-1w"> {{ adresse.adresse|title }}
+        {% if adresse.adresse_complement %},&nbsp;{{ adresse.adresse_complement }}{% endif %}
+        {{ adresse.code_postal }}&nbsp;{{ adresse.ville|title }}
+    </div>
+{% endif %}
+
+<hr class="fr-pb-1v">
+<div class="fr-my-1w qfdmo-flex qfdmo-justify-around">
+    {% if latitude and longitude %}
+        <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
+            <a  class="fr-btn fr-icon-send-plane-line qfdmo-rounded-full"
+                href="https://www.google.com/maps/dir/?api=1&origin={{latitude}},{{longitude}}&destination={{adresse.latitude}},{{adresse.longitude}}&travelMode=WALKING"
+                target="_blank"
+                title="itinéraire"
+                rel='noopener'
+            ></a>
+            <span class="fr-text--xs fr-mb-0">Itinéraire</span>
+        </div>
+    {% endif %}
+    {% if adresse.url %}
+        <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
+            <a class="fr-btn fr-btn--secondary-light fr-icon-global-line qfdmo-rounded-full" href="{{ adresse.url }}" target="_blank" title="Site Internet" rel='noopener'></a>
+            <span class="fr-text--xs fr-mb-0">Site web</span>
+        </div>
+    {% endif %}
+    <!-- TODO hidden until we figue about RGPD rules -->
+    {% if adresse.email and False %}
+        <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
+            <a class="fr-btn fr-btn--secondary-light fr-icon-mail-line qfdmo-rounded-full" href="mailto:{{ adresse.email }}" target="_blank" title="Courriel" rel='noopener'></a>
+            <span class="fr-text--xs fr-mb-0">E-mail</span>
+        </div>
+    {% endif %}
+    {% if adresse.telephone %}
+        <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
+            <a class="fr-btn fr-btn--secondary-light fr-icon-phone-line qfdmo-rounded-full" href="tel:{{ adresse.telephone }}" title="Téléphone" rel='noopener'></a>
+            <span class="fr-text--xs fr-mb-0">Téléphone</span>
+        </div>
+    {% endif %}
+
+    <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
+        <button class="fr-btn fr-btn--secondary-light fr-icon-share-line qfdmo-rounded-full" aria-describedby="shareTooltip" type="button"></button>
+        <span class="fr-tooltip fr-placement" id="shareTooltip" role="tooltip" aria-hidden="true">
+            <div class="fr-share">
+                {% with sharing_url=adresse.share_url(request) %}
+                    <ul class="fr-btns-group">
+                        <li>
+                            <a  class="fr-btn--facebook fr-btn"
+                                target="_blank"
+                                rel="noopener"
+                                title="partager {{ adresse }} sur Facebook - nouvelle fenêtre"
+                                onclick="window.open(this.href,'Partager sur Facebook','toolbar=no,location=yes,status=no,menubar=no,scrollbars=yes,resizable=yes,width=600,height=450'); event.preventDefault();"
+                                href="https://www.facebook.com/sharer.php?u={{ quote_plus(sharing_url) }}"
+                            >
+                                Partager sur Facebook
+                            </a>
+                        </li>
+                        <li>
+                            <!-- Les paramètres de la reqûete doivent être URI-encodés (ex: encodeURIComponent() en js) -->
+                            <a  class="fr-btn--twitter-x fr-btn"
+                                target="_blank"
+                                rel="noopener"
+                                title="partager {{ adresse }} sur X - nouvelle fenêtre"
+                                onclick="window.open(this.href,'Partager sur X (anciennement Twitter)','toolbar=no,location=yes,status=no,menubar=no,scrollbars=yes,resizable=yes,width=600,height=420'); event.preventDefault();"
+                                href="https://twitter.com/intent/tweet?url={{ quote_plus(sharing_url) }}&text=Super adresse trouvée grâce à l'ADEME&via=Longue+vie+aux+objets&hashtags=longuevieauxobjets,ademe"
+                            >
+                                Partager sur X (anciennement Twitter)
+                            </a>
+                        </li>
+                        <li>
+                            <a  class="fr-btn--linkedin fr-btn"
+                                target="_blank"
+                                rel="noopener"
+                                title="partager {{ adresse }} sur LinkedIn - nouvelle fenêtre"
+                                onclick="window.open(this.href,'Partager sur LinkedIn','toolbar=no,location=yes,status=no,menubar=no,scrollbars=yes,resizable=yes,width=550,height=550'); event.preventDefault();"
+                                href="https://www.linkedin.com/shareArticle?url={{ quote_plus(sharing_url) }}&title=Super adresse trouvée grâce à l'ADEME"
+                            >
+                                Partager sur LinkedIn
+                            </a>
+                        </li>
+                        <li>
+                            <a  class="fr-btn--mail fr-btn"
+                                target="_blank"
+                                rel="noopener external"
+                                title="partager {{ adresse }} par courriel - nouvelle fenêtre"
+                                href="mailto:?subject=Super adresse trouvée grâce à l'ADEME&body=Super adresse trouvée grâce à l'ADEME : {{ quote_plus(sharing_url) }}"
+                            >
+                                Partager par email
+                            </a>
+                        </li>
+                        <li>
+                            <button class="fr-btn--copy fr-btn"
+                                onclick="navigator.clipboard.writeText('{{sharing_url}}').then(function() {alert('Adresse copiée dans le presse papier.')});"
+                                type="button"
+                            >
+                                Copier dans le presse-papier
+                            </button>
+                        </li>
+                    </ul>
+                {% endwith %}
+            </div>
+        </span>
+        <span class="fr-text--xs fr-mb-0">Partager</span>
+    </div>
+</div>
+
+
+<div class="fr-tabs fr-tabs--noborder">
+    <ul class="fr-tabs__list" role="tablist" aria-label="[A modifier | nom du système d'onglet]">
+        <li role="presentation">
+            <button class="fr-tabs__tab fr-tabs__tab--noborder"
+                tabindex="0"
+                role="tab"
+                aria-selected="true"
+                aria-controls="aboutPanel"
+                type="button"
+            >
+                À propos
+            </button>
+        </li>
+        <li role="presentation">
+            <button class="fr-tabs__tab fr-tabs__tab--noborder"
+                tabindex="-1"
+                role="tab"
+                aria-selected="false"
+                aria-controls="infosPanel"
+                type="button"
+            >
+                Infos
+            </button>
+        </li>
+        <li role="presentation">
+            <button class="fr-tabs__tab fr-tabs__tab--noborder"
+                tabindex="-1"
+                role="tab"
+                aria-selected="false"
+                aria-controls="labelsPanel"
+                type="button"
+            >
+                Labels
+            </button>
+        </li>
+        <li role="presentation">
+            <button class="fr-tabs__tab fr-tabs__tab--noborder"
+                tabindex="-1"
+                role="tab"
+                aria-selected="false"
+                aria-controls="sourcesPanel"
+                type="button"
+            >
+                Sources
+            </button>
+        </li>
+    </ul>
+    <div id="aboutPanel"
+        class="fr-tabs__panel fr-tabs__panel--selected fr-p-0"
+        role="tabpanel"
+        aria-labelledby="aboutPanel"
+        tabindex="0"
+    >
+
+        {% if adresse.description %}
+            <h3 class="fr-text--sm fr-m-0 qfdmo-text-grey-425">Description</h3>
+            <p class="fr-mb-1w">{{adresse.description}}</p>
+        {% endif %}
+
+        <h3 class="fr-text--sm fr-m-0 qfdmo-text-grey-425">Services disponibles</h3>
+        {% for service_proposition in  adresse.proposition_services_by_direction(direction) %}
+            <div class="fr-px-1w fr-pb-1w fr-my-1w qfdmo-bg-grey-975">
+                <p class="fr-my-1w fr-mr-1v fr-badge fr-badge--sm qfdmo-bg-{{service_proposition.action.couleur}} qfdmo-bg-opacity-30">
+                    {% if service_proposition.action.icon %}
+                        <span class="{{ service_proposition.action.icon }}" aria-hidden="true"></span>&nbsp;
+                    {% endif %}
+                    {{ service_proposition.action.nom_affiche }}
+                </p>
+                <p class="fr-ml-3w fr-mb-1w qfdmo-line-clamp-3">
+                    {% for sous_categorie in service_proposition.sous_categories.all() %}
+                        {{ sous_categorie }}{% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                </p>
+            </div>
+        {% endfor %}
+
+    </div>
+    <div id="infosPanel"
+        class="fr-tabs__panel fr-p-0"
+        role="tabpanel"
+        aria-labelledby="infosPanel"
+        tabindex="0"
+    >
+        {% if not adresse.adresse %}
+            <!-- not adresse.horaires and -->
+            <p class="qfdmo-italic">Pas d'information complémentaire à partager</p>
+        {% endif %}
+
+        {% if adresse.horaires and False %}
+            <!-- TODO : Display horaires -->
+            <h3 class="fr-text--sm fr-m-0 qfdmo-text-grey-425">Horaires d'ouverture</h3>
+            <div class="fr-p-1w fr-my-1w qfdmo-bg-grey-975">
+                <p>{{adresse.horaires}}</p>
+            </div>
+        {% endif %}
+
+        {% if adresse.adresse %}
+            <h3 class="fr-text--sm fr-m-0 qfdmo-text-grey-425">Adresse</h3>
+            <div class="fr-p-1w fr-my-1w qfdmo-bg-grey-975">
+                {{ adresse.adresse|title }}<br>
+                {% if adresse.adresse_complement %}
+                    {{ adresse.adresse_complement }}<br>
+                {% endif %}
+                {{ adresse.code_postal }} {{ adresse.ville|title }}
+            </div>
+        {% endif %}
+
+        <!-- TODO : Accessibilité -->
+
+    </div>
+    <div id="labelsPanel"
+        class="fr-tabs__panel fr-p-0"
+        role="tabpanel"
+        aria-labelledby="labelsPanel"
+        tabindex="0"
+    >
+        {% if adresse.label_reparacteur %}
+            <div class="fr-px-1w fr-my-1w qfdmo-bg-grey-975">
+                <a class="fr-px-1w fr-py-2w fr-my-1w fr-link fr-link--lg fr-link--no-underline qfdmo-w-full qfdmo-flex" href="https://www.artisanat.fr/nous-connaitre/vous-accompagner/reparacteurs" target="_blank" rel="noopener">
+                    {% include "qfdmo/partials/label_reparacteur_icon.html" %}
+                    <span class="fr-ml-1w qfdmo-grow">Répar'Acteurs</span>
+                </a>
+            </div>
+        {% else %}
+            <p class="qfdmo-italic">Pas de label connu pour ce lieu</p>
+        {% endif %}
+    </div>
+    <div id="sourcesPanel"
+        class="fr-tabs__panel fr-p-0"
+        role="tabpanel"
+        aria-labelledby="sourcesPanel"
+        tabindex="0"
+    >
+        {% if adresse.source.afficher %}
+            <div class="fr-px-1w fr-my-1w qfdmo-bg-grey-975">
+                <a class="fr-px-1w fr-py-2w fr-my-1w fr-link fr-link--lg fr-link--no-underline qfdmo-w-full qfdmo-flex" href="{{ adresse.source.url if adresse.source.url else '#' }}" target="_blank" rel="noopener">
+                    {% if adresse.source.logo_file %}
+                        <img
+                            src="{{ adresse.source.logo_file.url }}"
+                            alt="{{ adresse.source.nom }}"
+                            class="qfdmo-cursor-pointer"
+                            width=32
+                            height=32
+                            onclick="document.getElementById('display_modale_reparacteur').setAttribute('data-fr-opened', 'true');"
+                        >
+                    {% endif %}
+                    <span class="fr-ml-1w qfdmo-grow">{{ adresse.source.nom }}</span>
+                </a>
+            </div>
+        {% else %}
+            <p class="qfdmo-italic">Pas de contributeur spécifique pour ce lieu</p>
+        {% endif %}
+
+    </div>
+</div>
+<div class="qfdmo-flex qfdmo-flex-row-reverse">
+    <div class="fr-m-0 fr-ml-1w fr-text--xs">
+        Mis à jour le {{ adresse.modifie_le.strftime('%d/%m/%Y') }}
+    </div>
+</div>
+
+<a class="fr-my-1w fr-btn fr-btn--tertiary qfdmo-whitespace-nowrap qfdmo-w-full qfdmo-justify-center"
+    href="https://tally.so/r/3xMqd9?Nom={{adresse.nom}}&Ville={{adresse.ville}}"
+    target="_blank" rel="noopener"
+>
+    Proposer une modification
+</a>

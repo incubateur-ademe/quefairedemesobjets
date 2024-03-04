@@ -35,7 +35,7 @@ BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
 
 class ReemploiSolutionView(FormView):
     form_class = GetReemploiSolutionForm
-    template_name = "qfdmo/reemploi_solution.html"
+    template_name = "qfdmo/adresses.html"
 
     def _get_search_in_zone_params(self):
         center = []
@@ -72,6 +72,7 @@ class ReemploiSolutionView(FormView):
         initial = super().get_initial()
         initial["sous_categorie_objet"] = self.request.GET.get("sous_categorie_objet")
         initial["adresse"] = self.request.GET.get("adresse")
+        initial["digital"] = self.request.GET.get("digital", "0")
         initial["direction"] = get_direction(self.request)
         initial["action_list"] = self.request.GET.get("action_list")
         initial["latitude"] = self.request.GET.get("latitude")
@@ -265,13 +266,28 @@ def get_object_list(request):
     )
 
 
-# FIXME : should be tested
 def solution_detail(request, identifiant_unique):
     final_acteur = FinalActeur.objects.get(identifiant_unique=identifiant_unique)
     return render(request, "qfdmo/solution_detail.html", {"final_acteur": final_acteur})
 
 
-# FIXME : should be tested
+def adresse_detail(request, identifiant_unique):
+    latitude = request.GET.get("latitude")
+    longitude = request.GET.get("longitude")
+    direction = request.GET.get("direction")
+    final_acteur = FinalActeur.objects.get(identifiant_unique=identifiant_unique)
+    return render(
+        request,
+        "qfdmo/adresse_detail.html",
+        {
+            "adresse": final_acteur,
+            "latitude": latitude,
+            "longitude": longitude,
+            "direction": direction,
+        },
+    )
+
+
 def solution_admin(request, identifiant_unique):
     acteur = RevisionActeur.objects.filter(
         identifiant_unique=identifiant_unique

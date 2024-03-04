@@ -18,4 +18,5 @@ class TestSourceNomAsNaturalKeyHeritage:
             "logo": "path/to/logo",
             "afficher": True,
             "url": "path/to/source",
+            "logo_file": None,
         }
