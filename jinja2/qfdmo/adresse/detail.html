@@ -162,7 +162,6 @@
                 Labels
             </button>
         </li>
-        <!-- TODO : Sources
         <li role="presentation">
             <button class="fr-tabs__tab fr-tabs__tab--noborder"
                 tabindex="-1"
@@ -174,7 +173,6 @@
                 Sources
             </button>
         </li>
-        -->
     </ul>
     <div id="aboutPanel"
         class="fr-tabs__panel fr-tabs__panel--selected fr-p-0"
@@ -245,9 +243,6 @@
         aria-labelledby="labelsPanel"
         tabindex="0"
     >
-        {% if not adresse.label_reparacteur %}
-            <p class="qfdmo-italic">Pas de label connu pour ce lieu</p>
-        {% endif %}
         {% if adresse.label_reparacteur %}
             <div class="fr-px-1w fr-my-1w qfdmo-bg-grey-975">
                 <a class="fr-px-1w fr-py-2w fr-my-1w fr-link fr-link--lg fr-link--no-underline qfdmo-w-full qfdmo-flex" href="https://www.artisanat.fr/nous-connaitre/vous-accompagner/reparacteurs" target="_blank" rel="noopener">
@@ -255,19 +250,37 @@
                     <span class="fr-ml-1w qfdmo-grow">Répar'Acteurs</span>
                 </a>
             </div>
+        {% else %}
+            <p class="qfdmo-italic">Pas de label connu pour ce lieu</p>
         {% endif %}
     </div>
-    <!-- TODO : Sources -->
-    <!--
     <div id="sourcesPanel"
         class="fr-tabs__panel fr-p-0"
         role="tabpanel"
         aria-labelledby="sourcesPanel"
         tabindex="0"
     >
-        <p>Sources</p>
+        {% if adresse.source.afficher %}
+            <div class="fr-px-1w fr-my-1w qfdmo-bg-grey-975">
+                <a class="fr-px-1w fr-py-2w fr-my-1w fr-link fr-link--lg fr-link--no-underline qfdmo-w-full qfdmo-flex" href="{{ adresse.source.url if adresse.source.url else '#' }}" target="_blank" rel="noopener">
+                    {% if adresse.source.logo_file %}
+                        <img
+                            src="{{ adresse.source.logo_file.url }}"
+                            alt="{{ adresse.source.nom }}"
+                            class="qfdmo-cursor-pointer"
+                            width=32
+                            height=32
+                            onclick="document.getElementById('display_modale_reparacteur').setAttribute('data-fr-opened', 'true');"
+                        >
+                    {% endif %}
+                    <span class="fr-ml-1w qfdmo-grow">{{ adresse.source.nom }}</span>
+                </a>
+            </div>
+        {% else %}
+            <p class="qfdmo-italic">Pas de contributeur spécifique pour ce lieu</p>
+        {% endif %}
+
     </div>
-    -->
 </div>
 <div class="qfdmo-flex qfdmo-flex-row-reverse">
     <div class="fr-m-0 fr-ml-1w fr-text--xs">

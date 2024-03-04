@@ -215,11 +215,8 @@ STATICFILES_DIRS = [
     BASE_DIR / "static" / "to_collect",
     BASE_DIR / "static" / "compiled",
 ]
-STORAGES = {
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
-}
+
+
 WHITENOISE_KEEP_ONLY_HASHED_FILES = True
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
@@ -269,3 +266,30 @@ NB_CORRECTION_DISPLAYED = decouple.config(
 )
 
 SHELL_PLUS_PRINT_SQL = True
+
+# Object storage with Scaleway
+AWS_ACCESS_KEY_ID = decouple.config("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = decouple.config("AWS_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = decouple.config("AWS_STORAGE_BUCKET_NAME")
+AWS_S3_REGION_NAME = decouple.config("AWS_S3_REGION_NAME")
+AWS_S3_ENDPOINT_URL = decouple.config("AWS_S3_ENDPOINT_URL")
+
+STORAGES = {
+    "default": {
+        "BACKEND": (
+            "storages.backends.s3.S3Storage"
+            if AWS_ACCESS_KEY_ID
+            else "django.core.files.storage.FileSystemStorage"
+        ),
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
+
+# if AWS_ACCESS_KEY_ID:
+#     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+
+# else:
+#     DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"

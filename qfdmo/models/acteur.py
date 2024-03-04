@@ -1,10 +1,12 @@
 import json
 import random
 import string
+from typing import Any
 
 import opening_hours
 import orjson
 from django.contrib.gis.db import models
+from django.core.files.images import get_image_dimensions
 from django.db import connection
 from django.forms import ValidationError, model_to_dict
 from django.http import HttpRequest
@@ -68,6 +70,18 @@ class ActeurType(NomAsNaturalKeyModel):
         return cls._digital_acteur_type_id
 
 
+def validate_logo(value: Any):
+    if value:
+        # Check file size
+        if value.size > 50 * 1024:
+            raise ValidationError("Logo size should be less than 50 KB.")
+
+        # Check file format
+        width, height = get_image_dimensions(value)
+        if width != 32 or height != 32:
+            raise ValidationError("Logo dimensions should be 32x32 pixels.")
+
+
 class Source(NomAsNaturalKeyModel):
     class Meta:
         verbose_name = "Source de données"
@@ -78,6 +92,9 @@ class Source(NomAsNaturalKeyModel):
     logo = models.CharField(max_length=255, blank=True, null=True)
     afficher = models.BooleanField(default=True)
     url = models.CharField(max_length=2048, blank=True, null=True)
+    logo_file = models.ImageField(
+        upload_to="logos", blank=True, null=True, validators=[validate_logo]
+    )
 
     def serialize(self):
         return model_to_dict(self)

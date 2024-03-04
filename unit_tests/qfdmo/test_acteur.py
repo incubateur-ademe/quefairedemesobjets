@@ -275,6 +275,7 @@ class TestActeurMaterializedView:
         assert FinalActeur.objects.count() == 0
 
     def test_materialized_view_with_acteur(self, acteur):
+        acteur.refresh_from_db()
         FinalActeur.refresh_view()
         final_acteur = FinalActeur.objects.first()
         serialized_final_acteur = final_acteur.serialize()
@@ -290,6 +291,7 @@ class TestActeurMaterializedView:
         revision_acteur = acteur.get_or_create_revision()
         revision_acteur.nom = "Test Object 2"
         revision_acteur.save()
+        acteur.refresh_from_db()
         final_acteur.refresh_from_db()
         serialized_final_acteur = final_acteur.serialize()
         serialized_final_acteur.pop("actions")
