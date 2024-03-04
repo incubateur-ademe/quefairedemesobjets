@@ -9,7 +9,8 @@ urlpatterns = [
     ),
     path(
         "qfdmo/getorcreate_revisionacteur/<str:acteur_identifiant>",
-        display_solutions.getorcreate_correctionequipeacteur,
+        #        display_solutions.getorcreate_correctionequipeacteur,
+        display_solutions.getorcreate_revisionacteur,
         name="getorcreate_revisionacteur",
     ),
     path(
