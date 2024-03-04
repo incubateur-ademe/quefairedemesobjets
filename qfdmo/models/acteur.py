@@ -266,8 +266,8 @@ class Acteur(BaseActeur):
 
 class RevisionActeur(BaseActeur):
     class Meta:
-        verbose_name = "ACTEUR de l'EC - DEPRECATED"
-        verbose_name_plural = "ACTEURS de l'EC - DEPRECATED"
+        verbose_name = "ACTEUR de l'EC - CORRIGÉ"
+        verbose_name_plural = "ACTEURS de l'EC - CORRIGÉ"
 
     nom = models.CharField(max_length=255, blank=True, null=True)
     acteur_type = models.ForeignKey(
@@ -307,8 +307,8 @@ class RevisionActeur(BaseActeur):
 
 class CorrectionEquipeActeur(BaseActeur):
     class Meta:
-        verbose_name = "ACTEUR de l'EC - CORRIGÉ"
-        verbose_name_plural = "ACTEURS de l'EC - CORRIGÉ"
+        verbose_name = "ACTEUR de l'EC - CORRIGÉ (NOUVEAU À IGNORER)"
+        verbose_name_plural = "ACTEURS de l'EC - CORRIGÉ (NOUVEAU À IGNORER)"
 
     nom = models.CharField(max_length=255, blank=True, null=True)
     acteur_type = models.ForeignKey(
@@ -350,8 +350,8 @@ class FinalActeur(BaseActeur):
     class Meta:
         managed = False
         db_table = "qfdmo_finalacteur"
-        verbose_name = "ACTEUR de l'EC - DECRECATED"
-        verbose_name_plural = "ACTEURS de l'EC - DECRECATED"
+        verbose_name = "ACTEUR de l'EC - AFFICHÉ"
+        verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ"
 
     @classmethod
     def refresh_view(cls):
@@ -440,8 +440,8 @@ REFRESH MATERIALIZED VIEW CONCURRENTLY qfdmo_finalpropositionservice_sous_catego
 
 class DisplayedActeur(BaseActeur):
     class Meta:
-        verbose_name = "ACTEUR de l'EC - AFFICHÉ"
-        verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ"
+        verbose_name = "ACTEUR de l'EC - AFFICHÉ (NOUVEAU À IGNORER)"
+        verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ (NOUVEAU À IGNORER)"
 
     def acteur_actions(self, direction=None):
         acteur_actions_by_direction = {}
@@ -622,8 +622,8 @@ class PropositionService(BasePropositionService):
 
 class RevisionPropositionService(BasePropositionService):
     class Meta:
-        verbose_name = "PROPOSITION DE SERVICE - DEPRECATED"
-        verbose_name_plural = "PROPOSITIONS DE SERVICE - DEPRECATED"
+        verbose_name = "PROPOSITION DE SERVICE - CORRIGÉ"
+        verbose_name_plural = "PROPOSITIONS DE SERVICE - CORRIGÉ"
         constraints = [
             models.UniqueConstraint(
                 fields=["revision_acteur", "action", "acteur_service"],
@@ -645,8 +645,8 @@ class RevisionPropositionService(BasePropositionService):
 
 class CorrectionEquipePropositionService(BasePropositionService):
     class Meta:
-        verbose_name = "PROPOSITION DE SERVICE - CORRIGÉ"
-        verbose_name_plural = "PROPOSITIONS DE SERVICE - CORRIGÉ"
+        verbose_name = "PROPOSITION DE SERVICE - CORRIGÉ (NOUVEAU À IGNORER)"
+        verbose_name_plural = "PROPOSITIONS DE SERVICE - CORRIGÉ (NOUVEAU À IGNORER)"
         constraints = [
             models.UniqueConstraint(
                 fields=["revision_acteur", "action", "acteur_service"],
@@ -670,8 +670,8 @@ class FinalPropositionService(BasePropositionService):
     class Meta:
         managed = False
         db_table = "qfdmo_finalpropositionservice"
-        verbose_name = "Proposition de service - DECRECATED"
-        verbose_name_plural = "Propositions de service - DECRECATED"
+        verbose_name = "Proposition de service - AFFICHÉ"
+        verbose_name_plural = "Propositions de service - AFFICHÉ"
 
     acteur = models.ForeignKey(
         FinalActeur,
@@ -683,8 +683,8 @@ class FinalPropositionService(BasePropositionService):
 
 class DisplayedPropositionService(BasePropositionService):
     class Meta:
-        verbose_name = "Proposition de service - AFFICHÉ"
-        verbose_name_plural = "Proposition de service - AFFICHÉ"
+        verbose_name = "Proposition de service - AFFICHÉ (NOUVEAU À IGNORER)"
+        verbose_name_plural = "Proposition de service - AFFICHÉ (NOUVEAU À IGNORER)"
 
     acteur = models.ForeignKey(
         DisplayedActeur,

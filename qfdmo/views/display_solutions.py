@@ -214,6 +214,15 @@ class ReemploiSolutionView(FormView):
         return ps_filter
 
 
+# TODO : should be deprecated once all is moved to the displayed acteur
+def getorcreate_revisionacteur(request, acteur_identifiant):
+    acteur = Acteur.objects.get(identifiant_unique=acteur_identifiant)
+    revision_acteur = acteur.get_or_create_revision()
+    return redirect(
+        "admin:qfdmo_revisionacteur_change", quote(revision_acteur.identifiant_unique)
+    )
+
+
 def getorcreate_correctionequipeacteur(request, acteur_identifiant):
     acteur = Acteur.objects.get(identifiant_unique=acteur_identifiant)
     revision_acteur = acteur.get_or_create_correctionequipe()
