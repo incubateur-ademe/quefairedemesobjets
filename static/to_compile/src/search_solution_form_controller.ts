@@ -6,33 +6,141 @@ export default class extends Controller<HTMLElement> {
         "jai",
         "jecherche",
         "direction",
+        "latitudeInput",
+        "longitudeInput",
         "actionList",
-        "advancedFiltersDiv",
-        "advancedFiltersField",
-        "advancedFiltersCounter",
-        "action",
-        "advancedFiltersButton",
-        "nearbyButton",
-        "onlineButton",
-        "submitButton",
+        "searchForm",
+
+        "searchFormPanel",
+        "addressesPanel",
+        "backToSearchPanel",
+        "detailsAddressPanel",
+        "srcDetailsAddress",
+        "proposeAddressPanel",
+        "headerAddressPanel",
+
+        "expandDetailsButton",
+        "collapseDetailsButton",
+
+        "sousCategoryObjetGroup",
+        "sousCategoryObjetID",
+        "sousCategoryObjetError",
+
+        "adresseGroup",
+        "adresseError",
+
+        //FIXME: should be renamed
+        "loadingSolutions",
+        "addressMissing",
+        "NoLocalSolution",
     ]
+
     declare readonly jaiTarget: HTMLElement
     declare readonly jechercheTarget: HTMLElement
     declare readonly directionTarget: HTMLElement
+    declare readonly latitudeInputTarget: HTMLInputElement
+    declare readonly longitudeInputTarget: HTMLInputElement
     declare readonly actionListTarget: HTMLInputElement
-    declare readonly advancedFiltersDivTarget: HTMLElement
-    declare readonly advancedFiltersFieldTargets: HTMLInputElement[]
-    declare readonly actionTargets: HTMLInputElement[]
-    declare readonly advancedFiltersCounterTarget: HTMLElement
-    declare readonly advancedFiltersButtonTarget: HTMLElement
-    declare readonly nearbyButtonTarget: HTMLButtonElement
-    declare readonly onlineButtonTarget: HTMLButtonElement
-    declare readonly submitButtonTarget: HTMLButtonElement
+    declare readonly searchFormTarget: HTMLFormElement
+
+    declare readonly searchFormPanelTarget: HTMLElement
+    declare readonly addressesPanelTarget: HTMLElement
+    declare readonly backToSearchPanelTarget: HTMLElement
+    declare readonly detailsAddressPanelTarget: HTMLElement
+    declare readonly srcDetailsAddressTarget: HTMLElement
+    declare readonly proposeAddressPanelTarget: HTMLElement
+    declare readonly headerAddressPanelTarget: HTMLElement
+
+    declare readonly expandDetailsButtonTarget: HTMLElement
+    declare readonly collapseDetailsButtonTarget: HTMLElement
+
+    declare readonly sousCategoryObjetGroupTarget: HTMLElement
+    declare readonly sousCategoryObjetIDTarget: HTMLInputElement
+    declare readonly sousCategoryObjetErrorTarget: HTMLElement
+
+    declare readonly adresseGroupTarget: HTMLElement
+    declare readonly adresseErrorTarget: HTMLElement
+
+    declare readonly loadingSolutionsTarget: HTMLElement
+    declare readonly addressMissingTarget: HTMLElement
+    declare readonly NoLocalSolutionTarget: HTMLElement
 
     connect() {
         this.displayActionList()
-        this.updateAdvancedFiltersCounter()
-        this.updateSearchSolutionForm()
+        this.scrollToContent()
+    }
+
+    scrollToContent() {
+        this.searchFormTarget.scrollIntoView()
+    }
+
+    backToSearch() {
+        this.hideDetails()
+        this.searchFormPanelTarget.classList.add("qfdmo-flex-grow")
+        this.backToSearchPanelTarget.classList.add("qfdmo-h-0")
+        this.addressesPanelTarget.classList.remove("qfdmo-flex-grow")
+        this.scrollToContent()
+    }
+
+    displayDetails() {
+        // mobile
+        this.detailsAddressPanelTarget.classList.remove("qfdmo-h-0")
+        this.detailsAddressPanelTarget.classList.remove("qfdmo-h-full")
+        this.detailsAddressPanelTarget.classList.add("qfdmo-h-1/2")
+        this.proposeAddressPanelTarget.classList.add("qfdmo-h-0")
+        this.headerAddressPanelTarget.classList.remove("qfdmo-h-0")
+        this.collapseDetailsButtonTarget.classList.add("qfdmo-hidden")
+        this.expandDetailsButtonTarget.classList.remove("qfdmo-hidden")
+        // desktop
+        this.detailsAddressPanelTarget.classList.add("md:qfdmo-w-[480]")
+        this.detailsAddressPanelTarget.classList.remove("md:qfdmo-w-full")
+        this.detailsAddressPanelTarget.classList.remove("md:qfdmo-w-0")
+    }
+
+    hideDetails() {
+        // mobile
+        this.detailsAddressPanelTarget.classList.add("qfdmo-h-0")
+        this.detailsAddressPanelTarget.classList.remove("qfdmo-h-full")
+        this.detailsAddressPanelTarget.classList.remove("qfdmo-h-1/2")
+        this.proposeAddressPanelTarget.classList.remove("qfdmo-h-0")
+        this.headerAddressPanelTarget.classList.remove("qfdmo-h-0")
+        // desktop
+        this.detailsAddressPanelTarget.classList.add("md:qfdmo-w-0")
+        this.detailsAddressPanelTarget.classList.remove("md:qfdmo-w-full")
+        this.detailsAddressPanelTarget.classList.remove("md:qfdmo-w-[480]")
+    }
+
+    displayFullDetails() {
+        // mobile
+        this.detailsAddressPanelTarget.classList.remove("qfdmo-h-0")
+        this.detailsAddressPanelTarget.classList.remove("qfdmo-h-1/2")
+        this.detailsAddressPanelTarget.classList.add("qfdmo-h-full")
+        this.proposeAddressPanelTarget.classList.add("qfdmo-h-0")
+        this.headerAddressPanelTarget.classList.add("qfdmo-h-0")
+        this.collapseDetailsButtonTarget.classList.remove("qfdmo-hidden")
+        this.expandDetailsButtonTarget.classList.add("qfdmo-hidden")
+        // desktop
+        this.detailsAddressPanelTarget.classList.add("md:qfdmo-w-full")
+        this.detailsAddressPanelTarget.classList.remove("md:qfdmo-w-0")
+        this.detailsAddressPanelTarget.classList.remove("md:qfdmo-w-[480]")
+    }
+
+    displayActeurDetails(event) {
+        let identifiantUnique = event.currentTarget.dataset.identifiantUnique
+        this.setSrcDetailsAddress({ detail: { identifiantUnique } })
+        this.displayDetails()
+    }
+    setSrcDetailsAddress({ detail: { identifiantUnique } }) {
+        const latitude = this.latitudeInputTarget.value
+        const longitude = this.longitudeInputTarget.value
+
+        const params = new URLSearchParams()
+        params.set("direction", this.#selectedOption)
+        params.set("latitude", latitude)
+        params.set("longitude", longitude)
+        const srcDetailsAddress = `/adresse/${identifiantUnique}?${params.toString()}`
+
+        this.srcDetailsAddressTarget.setAttribute("src", srcDetailsAddress)
     }
 
     displayActionList() {
@@ -84,66 +192,56 @@ export default class extends Controller<HTMLElement> {
         this.actionListTarget.value = ""
         this.displayActionList()
         this.apply()
-        this.updateSearchSolutionForm()
     }
 
-    toggleadvancedFiltersDiv() {
-        this.advancedFiltersDivTarget.classList.toggle("qfdmo-hidden")
-    }
-
-    updateAdvancedFiltersCounter() {
-        const advancedFiltersFields = this.advancedFiltersFieldTargets
-        let counter = 0
-        for (let i = 0; i < advancedFiltersFields.length; i++) {
-            if (advancedFiltersFields[i].checked) counter++
-        }
-        if (counter == 0) {
-            this.advancedFiltersCounterTarget.innerText = ""
-            this.advancedFiltersCounterTarget.classList.add("qfdmo-hidden")
-            return
-        }
-        this.advancedFiltersCounterTarget.innerText = counter.toString()
-        this.advancedFiltersCounterTarget.classList.remove("qfdmo-hidden")
-    }
-
-    updateSearchSolutionForm() {
-        const reparer = this.actionTargets.find(
-            (element) => element.id == "jai_reparer",
-        )
-        if (this.#selectedOption == "jai" && reparer.checked) {
-            this.advancedFiltersButtonTarget.classList.remove("qfdmo-hidden")
+    checkSsCatObjetErrorForm(): boolean {
+        let errorExists = false
+        if (!this.sousCategoryObjetIDTarget.value) {
+            this.sousCategoryObjetGroupTarget.classList.add("fr-input-group--error")
+            this.sousCategoryObjetErrorTarget.classList.remove("qfdmo-hidden")
+            errorExists = true
         } else {
-            this.advancedFiltersButtonTarget.classList.add("qfdmo-hidden")
-            this.advancedFiltersDivTarget.classList.add("qfdmo-hidden")
+            this.sousCategoryObjetGroupTarget.classList.remove("fr-input-group--error")
+            this.sousCategoryObjetErrorTarget.classList.add("qfdmo-hidden")
         }
+        return errorExists
     }
 
-    toggleSolutionButtonView(event: Event) {
-        let target = event.target as HTMLElement
-        while (target && target.nodeName !== "BUTTON") {
-            target = target.parentNode as HTMLElement
+    checkAdresseErrorForm(): boolean {
+        let errorExists = false
+        if (!this.latitudeInputTarget.value || !this.longitudeInputTarget.value) {
+            this.adresseGroupTarget.classList.add("fr-input-group--error")
+            this.adresseErrorTarget.classList.remove("qfdmo-hidden")
+            errorExists = true
+        } else {
+            this.adresseGroupTarget.classList.remove("fr-input-group--error")
+            this.adresseErrorTarget.classList.add("qfdmo-hidden")
         }
-
-        const activeBtnClasses = [
-            "qfdmo-bg-white",
-            "qfdmo-border",
-            "qfdmo-border-solid",
-            "qfdmo-border-blue-france-sun-113",
-        ]
-        if (target == this.nearbyButtonTarget) {
-            this.nearbyButtonTarget.classList.add(...activeBtnClasses)
-            this.onlineButtonTarget.classList.remove(...activeBtnClasses)
-            this.submitButtonTarget.value = "0"
-        }
-        if (target == this.onlineButtonTarget) {
-            this.onlineButtonTarget.classList.add(...activeBtnClasses)
-            this.nearbyButtonTarget.classList.remove(...activeBtnClasses)
-            this.submitButtonTarget.value = "1"
-        }
-        this.loadingSolutions()
+        return errorExists
     }
 
-    loadingSolutions() {
-        this.dispatch("loadingSolutions", { detail: {} })
+    checkErrorForm(): boolean {
+        let errorExists = false
+        if (this.checkSsCatObjetErrorForm()) errorExists ||= true
+        if (this.checkAdresseErrorForm()) errorExists ||= true
+        return errorExists
+    }
+
+    submitForm() {
+        if (this.checkErrorForm()) return
+
+        this.loadingSolutionsTarget.classList.remove("qfdmo-hidden")
+        this.addressMissingTarget.classList.add("qfdmo-hidden")
+        this.NoLocalSolutionTarget.classList.add("qfdmo-hidden")
+
+        this.searchFormPanelTarget.classList.remove("qfdmo-flex-grow")
+        this.backToSearchPanelTarget.classList.remove("qfdmo-h-0")
+        this.addressesPanelTarget.classList.add("qfdmo-flex-grow")
+        this.scrollToContent()
+
+        let event = new Event("submit", { bubbles: true, cancelable: true })
+        setTimeout(() => {
+            this.searchFormTarget.dispatchEvent(event)
+        }, 300)
     }
 }

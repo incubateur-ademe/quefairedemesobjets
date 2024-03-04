@@ -90,6 +90,7 @@ export default class extends AutocompleteController {
         })
 
         this.closeAllLists()
+        this.dispatch("optionSelected")
     }
 
     addOption(regexPattern: RegExp, option: SSCatObject) {
@@ -140,7 +141,10 @@ export default class extends AutocompleteController {
     }
 
     async #getOptionCallback(value: string): Promise<SSCatObject[]> {
-        if (value.trim().length < this.nbCharToSearchValue) return []
+        if (value.trim().length < this.nbCharToSearchValue) {
+            this.ssCatTarget.value = ""
+            return []
+        }
         return await fetch(`/qfdmo/get_object_list?q=${value}`)
             .then((response) => response.json())
             .then((data) => {

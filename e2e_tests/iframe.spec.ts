@@ -37,7 +37,7 @@ test("iframe is loaded with correct parameter", async ({ page }) => {
     expect(iframeMozallowfullscreenAttribute).toBe("true")
     const iframeStyleAttribute = await iframeElement.getAttribute("style")
     expect(iframeStyleAttribute).toContain("width: 100%;")
-    expect(iframeStyleAttribute).toContain("overflow: hidden;")
+    expect(iframeStyleAttribute).toContain("height: 100vh;")
     expect(iframeStyleAttribute).toContain("max-width: 800px;")
 })
 

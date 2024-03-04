@@ -1,5 +1,3 @@
-import { iframeResize } from "iframe-resizer"
-
 const setupIframe = () => {
     // Add iFrame just after the script tag
     const scriptTag = document.currentScript as HTMLScriptElement
@@ -46,15 +44,6 @@ const setupIframe = () => {
         iframe.setAttribute(key, iframeExtraAttributes[key])
     }
     scriptTag.insertAdjacentElement("afterend", iframe)
-
-    iframeResize(
-        {
-            heightCalculationMethod: "bodyScroll",
-            maxWidth: maxWidth,
-            checkOrigin: [BASE_URL],
-        },
-        iframe,
-    )
 }
 
 //addIframeResizer()

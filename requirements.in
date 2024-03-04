@@ -1,13 +1,16 @@
 api-insee
+boto3
 dj-database-url
 dj-static
 Django
 django-import-export
 django-sql-explorer
+django-storages
 gunicorn
 Jinja2
 opening-hours-py
 orjson
+Pillow
 psycopg2
 python-decouple
 requests

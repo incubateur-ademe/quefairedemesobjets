@@ -1,0 +1,20 @@
+<div
+    {% if widget.attrs.id %} id="{{ widget.attrs.id }}"{% endif %}
+    class="fr-segmented__elements{% if widget.attrs.class %} {{ widget.attrs.class }}{% endif %}"
+    {% for name, value in widget.fieldset_attrs.items %}
+        {% if value is not False %}
+            {{ name }} {% if value is not True %}="{{ value|stringformat:'s' }}"{% endif %}
+        {% endif %}
+    {% endfor %}
+>
+    {% for group, options, index in widget.optgroups %}
+        {% if group %}
+            <label>
+                {{ group }}
+            </label>
+        {% endif %}
+        {% for option in options %}
+            {% include option.template_name with widget=option %}
+        {% endfor %}
+    {% endfor %}
+</div>

@@ -34,6 +34,7 @@ class TestReemploiSolutionView:
             "sc_id": None,
             "adresse": None,
             "direction": settings.DEFAULT_ACTION_DIRECTION,
+            "digital": "0",
             "action_list": None,
             "latitude": None,
             "longitude": None,

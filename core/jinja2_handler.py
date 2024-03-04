@@ -1,5 +1,6 @@
 import difflib
 from typing import List
+from urllib.parse import quote_plus
 
 from django.conf import settings
 from django.http import HttpRequest
@@ -73,16 +74,22 @@ def action_by_direction(request: HttpRequest, direction: str):
     ]
 
 
+def display_search(request: HttpRequest) -> bool:
+    return True
+
+
 def environment(**options):
     env = Environment(**options)
     env.globals.update(
         {
-            "static": static,
-            "reverse": reverse,
-            "is_iframe": is_iframe,
             "action_by_direction": action_by_direction,
             "action_list_display": action_list_display,
+            "display_search": display_search,
+            "is_iframe": is_iframe,
+            "reverse": reverse,
+            "static": static,
             "str_diff": str_diff,
+            "quote_plus": lambda u: quote_plus(u),
             "ENVIRONMENT": settings.ENVIRONMENT,
         }
     )
