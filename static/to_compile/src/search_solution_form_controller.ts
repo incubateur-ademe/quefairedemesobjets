@@ -67,7 +67,7 @@ export default class extends Controller<HTMLElement> {
 
     connect() {
         this.displayActionList()
-        this.scrollToContent()
+        // TODO : this.scrollToContent() only if it is not an iframe
     }
 
     scrollToContent() {
