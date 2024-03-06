@@ -1,3 +1,4 @@
+import time
 from typing import List
 
 from django.contrib.gis.db import models
@@ -11,9 +12,11 @@ class CachedDirectionAction:
     _cached_actions = None
     _cached_direction = None
     _reparer_action_id = None
+    _last_cache_update = None
 
     @classmethod
     def get_actions(cls) -> dict:
+        cls._manage_cache_expiration()
         if cls._cached_actions is None:
             cls._cached_actions = {
                 a.nom: {
@@ -27,10 +30,14 @@ class CachedDirectionAction:
 
     @classmethod
     def get_actions_by_direction(cls) -> dict:
+        cls._manage_cache_expiration()
         if cls._cached_actions_by_direction is None:
             cls._cached_actions_by_direction = {
                 d.nom: sorted(
-                    [model_to_dict(a, exclude=["directions"]) for a in d.actions.all()],
+                    [
+                        model_to_dict(a, exclude=["directions"])
+                        for a in d.actions.filter(afficher=True)
+                    ],
                     key=lambda x: x["order"],
                 )
                 for d in ActionDirection.objects.all()
@@ -40,6 +47,7 @@ class CachedDirectionAction:
 
     @classmethod
     def get_directions(cls, first_direction=None) -> List[dict]:
+        cls._manage_cache_expiration()
         if cls._cached_direction is None:
             directions = ActionDirection.objects.all()
             directions_list = [model_to_dict(d) for d in directions]
@@ -54,6 +62,7 @@ class CachedDirectionAction:
 
     @classmethod
     def get_reparer_action_id(cls):
+        cls._manage_cache_expiration()
         if cls._reparer_action_id is None:
             cls._reparer_action_id = Action.objects.get(nom="reparer").id
         return cls._reparer_action_id
@@ -63,6 +72,18 @@ class CachedDirectionAction:
         cls._cached_actions_by_direction = None
         cls._cached_actions = None
         cls._cached_direction = None
+        cls._reparer_action_id = None
+
+    @classmethod
+    def _manage_cache_expiration(cls):
+        if cls._last_cache_update is None:
+            cls._last_cache_update = time.time()
+            return
+
+        current_time = time.time()
+        if current_time - cls._last_cache_update > 300:
+            cls.reload_cache()
+            cls._last_cache_update = current_time
 
 
 class ActionDirection(NomAsNaturalKeyModel):
@@ -83,6 +104,7 @@ class Action(NomAsNaturalKeyModel):
     id = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
     nom_affiche = models.CharField(max_length=255, null=False, default="")
+    afficher = models.BooleanField(default=True)
     description = models.CharField(max_length=255, null=True, blank=True)
     order = models.IntegerField(blank=False, null=False, default=0)
     lvao_id = models.IntegerField(blank=True, null=True)
