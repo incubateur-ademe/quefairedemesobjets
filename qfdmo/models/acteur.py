@@ -57,6 +57,16 @@ class ActeurType(NomAsNaturalKeyModel):
 
     id = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    code_import = models.CharField(
+        max_length=255,
+        unique=True,
+        blank=True,
+        null=True,
+        help_text=(
+            "This field is used to manage the import of data."
+            " Any update can break the import data process"
+        ),
+    )
     nom_affiche = models.CharField(max_length=255, blank=False, null=False, default="?")
     lvao_id = models.IntegerField(blank=True, null=True)
 
@@ -89,7 +99,22 @@ class Source(NomAsNaturalKeyModel):
 
     id = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=255, unique=True)
-    logo = models.CharField(max_length=255, blank=True, null=True)
+    code_import = models.CharField(
+        max_length=255,
+        unique=True,
+        blank=True,
+        null=True,
+        help_text=(
+            "This field is used to manage the import of data."
+            " Any update can break the import data process"
+        ),
+    )
+    logo = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="DEPRECATED : please use logo_file",
+    )
     afficher = models.BooleanField(default=True)
     url = models.CharField(max_length=2048, blank=True, null=True)
     logo_file = models.ImageField(
