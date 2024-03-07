@@ -15,6 +15,7 @@ class TestSourceNomAsNaturalKeyHeritage:
         assert source.serialize() == {
             "id": source.id,
             "nom": "Test Object",
+            "code_import": None,
             "logo": "path/to/logo",
             "afficher": True,
             "url": "path/to/source",
