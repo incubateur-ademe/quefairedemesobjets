@@ -316,3 +316,159 @@ pg_restore -d "${DATABASE_URL}" --clean --no-acl --no-owner --no-privileges "${D
 ## Deploy in Scalingo
 
 we need to install GDAL as explain in doc : [https://techilearned.com/configure-geodjango-in-scalingo/](https://techilearned.com/configure-geodjango-in-scalingo/) form [https://doc.scalingo.com/platform/app/app-with-gdal](https://doc.scalingo.com/platform/app/app-with-gdal) and mattermost discussion in beta.gouv.fr community
+
+# Schema simplifié de base de données
+
+```mermaid
+---
+title: Schéma simplifié les acteurs
+---
+
+classDiagram
+    class ActeurService {
+        - id: int
+        - nom: str
+        - nom_affiche: str
+        - lvao_id: int
+        - actions: List[Action]
+        + serialize(): dict
+    }
+
+    class ActeurType {
+        - id: int
+        - nom: str
+        - nom_affiche: str
+        - lvao_id: int
+        + serialize(): dict
+        + get_digital_acteur_type_id(): int
+    }
+
+    class Source {
+        - id: int
+        - nom: str
+        - logo: str
+        - afficher: bool
+        - url: str
+        - logo_file: str
+        + serialize(): dict
+    }
+
+    class DisplayedActeur {
+        - nom: str
+        - description: str
+        - identifiant_unique: str
+        - acteur_type: ActeurType
+        - adresse: str
+        - adresse_complement: str
+        - code_postal: str
+        - ville: str
+        - url: str
+        - email: str
+        - location: Point
+        - telephone: str
+        - multi_base: bool
+        - nom_commercial: str
+        - nom_officiel: str
+        - manuel: bool
+        - label_reparacteur: bool
+        - siret: str
+        - source: Source
+        - identifiant_externe: str
+        - statut: ActeurStatus
+        - naf_principal: str
+        - commentaires: str
+        - cree_le: datetime
+        - modifie_le: datetime
+        - horaires: str
+        + share_url(request: HttpRequest, direction: str | None): str
+        + latitude: float
+        + longitude: float
+        + nom_affiche: str
+        + is_digital(): bool
+        + serialize(format: None | str): dict | str
+        + acteur_services(): List[str]
+        + proposition_services_by_direction(direction: str | None): List[PropositionService]
+        + get_or_create_revision(): RevisionActeur
+        + get_or_create_correctionequipe(): CorrectionEquipeActeur
+        + clean_location()
+        + save(*args, **kwargs)
+        + set_default_field_before_save()
+    }
+
+    class DisplayedPropositionService {
+        - action: Action
+        - acteur_service: ActeurService
+        - sous_categories: List[SousCategorieObjet]
+        - acteur: Acteur
+    }
+
+    class Action {
+        - id: int
+        - nom: str
+        - directions: List[Direction]
+        - order: int
+        + serialize(): dict
+    }
+
+    class Direction {
+        - nom: str
+        - order: int
+    }
+
+    class SousCategorieObjet {
+        - id: int
+        - nom: str
+        - nom_affiche: str
+        - lvao_id: int
+        + serialize(): dict
+    }
+
+    Direction --> Action
+    DisplayedActeur --> DisplayedPropositionService
+    ActeurType --> DisplayedActeur
+    Source --> DisplayedActeur
+    DisplayedPropositionService <-- Action
+    DisplayedPropositionService <-- ActeurService
+    DisplayedPropositionService <--> SousCategorieObjet
+```
+
+```mermaid
+---
+title: Schéma simplifié des relations autour des acteurs
+---
+
+erDiagram
+    Direction ||--|{ Action : un-n
+    DisplayedActeur ||--|{ DisplayedPropositionService : un-n
+    ActeurType ||--|{ DisplayedActeur : un-n
+    Source ||--|{ DisplayedActeur : un-n
+    Action ||--|{ DisplayedPropositionService : un-n
+    ActeurService ||--|{ DisplayedPropositionService : un-n
+    DisplayedPropositionService }|--|{ SousCategorieObjet : n-m
+
+```
+
+```mermaid
+---
+title: Schéma de l'application des corrections des acteurs
+---
+
+flowchart TB
+    subgraph Acteur importé
+        direction LR
+        Acteur --> PropositionService
+    end
+    subgraph Acteur Corrigé
+        direction LR
+        CorrectionEquipeActeur --> CorrectionEquipePropositionService
+    end
+    subgraph Acteur Affiché
+        direction LR
+        DisplayedActeur --> DisplayedPropositionService
+    end
+
+    Acteur --> CorrectionEquipeActeur --> DisplayedActeur
+    Acteur --> DisplayedActeur
+    PropositionService --> CorrectionEquipePropositionService --> DisplayedPropositionService
+    PropositionService --> DisplayedPropositionService
+```
