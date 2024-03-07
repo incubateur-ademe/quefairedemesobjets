@@ -18,6 +18,7 @@ class TestEntiteTypeNomAsNaturalKeyHeritage:
         assert acteur_type.serialize() == {
             "id": acteur_type.id,
             "nom": "Test Object",
+            "code_import": None,
             "nom_affiche": "Test Object Affiche",
             "lvao_id": 123,
         }
