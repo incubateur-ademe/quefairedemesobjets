@@ -259,14 +259,14 @@ class Acteur(BaseActeur):
                 "statut",
             ],
         )
-        (revision_acteur, created) = RevisionActeur.objects.get_or_create(
+        (acteur, created) = RevisionActeur.objects.get_or_create(
             identifiant_unique=self.identifiant_unique, defaults=fields
         )
         if created:
             for proposition_service in self.proposition_services.all():  # type: ignore
                 revision_proposition_service = (
                     RevisionPropositionService.objects.create(
-                        revision_acteur=revision_acteur,
+                        acteur=acteur,
                         action_id=proposition_service.action_id,
                         acteur_service_id=proposition_service.acteur_service_id,
                     )
@@ -275,7 +275,7 @@ class Acteur(BaseActeur):
                     *proposition_service.sous_categories.all()
                 )
 
-        return revision_acteur
+        return acteur
 
     def get_or_create_correctionequipe(self):
         fields = model_to_dict(
@@ -287,14 +287,14 @@ class Acteur(BaseActeur):
                 "statut",
             ],
         )
-        (revision_acteur, created) = CorrectionEquipeActeur.objects.get_or_create(
+        (acteur, created) = CorrectionEquipeActeur.objects.get_or_create(
             identifiant_unique=self.identifiant_unique, defaults=fields
         )
         if created:
             for proposition_service in self.proposition_services.all():  # type: ignore
                 revision_proposition_service = (
                     CorrectionEquipePropositionService.objects.create(
-                        revision_acteur=revision_acteur,
+                        acteur=acteur,
                         action_id=proposition_service.action_id,
                         acteur_service_id=proposition_service.acteur_service_id,
                     )
@@ -303,7 +303,7 @@ class Acteur(BaseActeur):
                     *proposition_service.sous_categories.all()
                 )
 
-        return revision_acteur
+        return acteur
 
     def clean_location(self):
         if self.location is None and self.acteur_type.nom != "acteur digital":
@@ -690,12 +690,12 @@ class RevisionPropositionService(BasePropositionService):
         verbose_name_plural = "PROPOSITIONS DE SERVICE - CORRIGÉ"
         constraints = [
             models.UniqueConstraint(
-                fields=["revision_acteur", "action", "acteur_service"],
+                fields=["acteur", "action", "acteur_service"],
                 name="rps_unique_by_revisionacteur_action_service",
             )
         ]
 
-    revision_acteur = models.ForeignKey(
+    acteur = models.ForeignKey(
         RevisionActeur,
         to_field="identifiant_unique",
         on_delete=models.CASCADE,
@@ -704,7 +704,7 @@ class RevisionPropositionService(BasePropositionService):
     )
 
     def __str__(self):
-        return f"{self.revision_acteur} - {super().__str__()}"
+        return f"{self.acteur} - {super().__str__()}"
 
 
 class CorrectionEquipePropositionService(BasePropositionService):
@@ -713,12 +713,12 @@ class CorrectionEquipePropositionService(BasePropositionService):
         verbose_name_plural = "PROPOSITIONS DE SERVICE - CORRIGÉ (NOUVEAU À IGNORER)"
         constraints = [
             models.UniqueConstraint(
-                fields=["revision_acteur", "action", "acteur_service"],
+                fields=["acteur", "action", "acteur_service"],
                 name="rps_unique_by_correctionequipeacteur_action_service",
             )
         ]
 
-    revision_acteur = models.ForeignKey(
+    acteur = models.ForeignKey(
         CorrectionEquipeActeur,
         to_field="identifiant_unique",
         on_delete=models.CASCADE,
@@ -727,7 +727,7 @@ class CorrectionEquipePropositionService(BasePropositionService):
     )
 
     def __str__(self):
-        return f"{self.revision_acteur} - {super().__str__()}"
+        return f"{self.acteur} - {super().__str__()}"
 
 
 class FinalPropositionService(BasePropositionService):
