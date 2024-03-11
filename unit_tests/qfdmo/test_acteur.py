@@ -251,7 +251,7 @@ class TestActeurGetOrCreateRevisionActeur:
         proposition_service = RevisionPropositionService.objects.create(
             acteur_service=acteur_service,
             action=action,
-            revision_acteur=revision_acteur,
+            acteur=revision_acteur,
         )
         revision_acteur.proposition_services.add(proposition_service)
         revision_acteur2 = acteur.get_or_create_revision()

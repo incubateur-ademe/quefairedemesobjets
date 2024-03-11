@@ -391,9 +391,9 @@ class PropositionServiceAdmin(
 
 
 class RevisionPropositionServiceResource(BasePropositionServiceResource):
-    revision_acteur = fields.Field(
+    acteur = fields.Field(
         column_name="acteur",
-        attribute="revision_acteur",
+        attribute="acteur",
         widget=widgets.ForeignKeyWidget(RevisionActeur, field="identifiant_unique"),
     )
 
@@ -423,8 +423,8 @@ class RevisionPropositionServiceAdmin(
     resource_classes = [RevisionPropositionServiceResource]
     list_display = ["__str__", "sous_categorie_list"]
     search_fields = [
-        "revision_acteur__nom",
-        "revision_acteur__siret",
+        "acteur__nom",
+        "acteur__siret",
     ]
     search_help_text = "Recherche sur le nom ou le siret de l'acteur"
 
