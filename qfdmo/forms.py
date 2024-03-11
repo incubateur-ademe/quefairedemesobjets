@@ -98,7 +98,7 @@ class GetReemploiSolutionForm(forms.Form):
         widget=SegmentedControlSelect(
             attrs={
                 "data-action": "click -> search-solution-form#changeDirection",
-                "class": "qfdmo-w-full md:qfdmo-w-[auto]",
+                "class": "qfdmo-w-full md:qfdmo-w-fit",
             },
             fieldset_attrs={
                 "data-search-solution-form-target": "direction",
