@@ -4,10 +4,12 @@
 
     <turbo-frame id="turboForm">
         <!-- Controleur général de gestion de la navigation et du formulaire -->
+
+
         <form data-controller="search-solution-form" id='search_form'
             data-search-solution-form-target="searchForm"
             data-turbo-frame="addressesPanel"
-            class="fr-container qfdmo-min-h-[700px] qfdmo-max-h-[1000px]{%if not is_iframe(request) %} qfdmo-h-svh{% endif %} md:qfdmo-h-screen qfdmo-flex qfdmo-flex-col qfdmo-flex-auto"
+            class="fr-container qfdmo-min-h-[700px] qfdmo-max-h-[900px] md:qfdmo-h-screen qfdmo-flex qfdmo-flex-col qfdmo-flex-auto"
             data-action="
             map:displayDetails->search-solution-form#displayDetails
             map:setSrcDetailsAddress->search-solution-form#setSrcDetailsAddress
@@ -29,131 +31,144 @@
             </div>
 
             <!-- Panel «Formulaire de recherche» -->
-            <div class="qfdmo-relative qfdmo-duration-300 qfdmo-overflow-hidden
+            <div class="qfdmo-duration-300 qfdmo-overflow-hidden
                 qfdmo-h-0 {% if display_search(request) %}qfdmo-flex-grow{% endif %}
-                qfdmo-flex qfdmo-flex-col"
+                "
                 data-search-solution-form-target="searchFormPanel"
             >
                 <h1 class="qfdmo-hidden">Longue vie aux objets</h1>
 
-                <div class="qfdmo-overflow-y-auto qfdmo-overflow-x-hidden md:qfdmo-max-w-[604px] qfdmo-mx-auto">
+                <div class="qfdmo-h-full qfdmo-flex qfdmo-flex-row">
 
-                    {% include "qfdmo/partials/featureflip_inputs.html" %}
+                    <div class="qfdmo-flex qfdmo-flex-col qfdmo-w-full md:qfdmo-w-[604px] qfdmo-h-full">
 
-                    <!-- Direction -->
-                    <fieldset class="fr-segmented fr-segmented--sm qfdmo-w-full fr-mt-3w">
-                        <legend class="fr-segmented__legend qfdmo-hidden">
-                            {{ form.direction.label_tag() }}
-                        </legend>
-                        {{ form.direction }}
-                    </fieldset>
-                    {{ form.action_list }}
+                        <div class="qfdmo-flex-grow qfdmo-overflow-y-auto qfdmo-overflow-x-hidden">
 
-                    <!-- Recherche Objet -->
-                    <div data-search-solution-form-target="sousCategoryObjetGroup" class="fr-mt-3w fr-px-1v fr-input-group">
-                        <div data-controller='ss-cat-object-autocomplete'
-                            data-ss-cat-object-autocomplete-max-option-displayed-value=5
-                            data-ss-cat-object-autocomplete-nb-char-to-search-value=2
-                        >
-                            <div class="form-group">
-                                {{ form.sous_categorie_objet.label_tag() }}
-                                {{ form.sous_categorie_objet }}
-                                {{ form.sc_id }}
-                            </div>
-                        </div>
-                        <p class="fr-error-text fr-mt-1v qfdmo-hidden" data-search-solution-form-target="sousCategoryObjetError">
-                            Veuillez indiquer puis sélectionner un objet dans la liste déroulante
-                        </p>
-                    </div>
+                            {% include "qfdmo/partials/featureflip_inputs.html" %}
 
-                    <!-- Recherche adresse -->
-                    <div data-search-solution-form-target="adresseGroup" class="fr-mt-3w fr-px-1v fr-input-group">
-                        <div data-controller='address-autocomplete'
-                            data-address-autocomplete-max-option-displayed-value=5
-                            data-address-autocomplete-is-ban-address-value='true'
-                        >
-                            <div class="form-group">
-                                {{ form.adresse.label_tag() }}
-                                {{ form.adresse }}
-                            </div>
-                            {{ form.longitude }}
-                            {{ form.latitude }}
-                        </div>
-                        <p class="fr-error-text fr-mt-1v qfdmo-hidden" data-search-solution-form-target="adresseError">
-                            Veuillez saisir une adresse
-                        </p>
-                    </div>
+                            <!-- Direction -->
+                            <fieldset class="fr-segmented fr-segmented--sm qfdmo-w-full fr-mt-3w">
+                                <legend class="fr-segmented__legend qfdmo-hidden">
+                                    {{ form.direction.label_tag() }}
+                                </legend>
+                                {{ form.direction }}
+                            </fieldset>
+                            {{ form.action_list }}
 
-                    <!-- Gestes -->
-                    <div class="fr-mt-3w fr-px-1v">
-                        {% with action_direction='jai' %}
-                            {% include "qfdmo/partials/action_list_by_direction.html" %}
-                        {% endwith %}
-                        {% with action_direction='jecherche' %}
-                            {% include "qfdmo/partials/action_list_by_direction.html"  %}
-                        {% endwith %}
-                    </div>
-
-
-                </div>
-                <div class="fr-my-1w qfdmo-w-full qfdmo-flex qfdmo-flex-col md:qfdmo-max-w-[604px] qfdmo-mx-auto">
-
-                    <!-- Advanced filters -->
-                    <!-- FIXME : should we keep the modal or should we manage such behaviour as a panel : not obvious -->
-                    <button class="fr-my-1w qfdmo-w-full md:qfdmo-w-fit fr-btn fr-btn--tertiary-no-outline qfdmo-flex qfdmo-justify-center md:qfdmo-text-left" data-fr-opened="false" aria-controls="modalAdvancedFilters" type="button">
-                        Filtres avancés
-                    </button>
-
-                    <button
-                        class="fr-btn qfdmo-whitespace-nowrap qfdmo-float-left qfdmo-w-full md:qfdmo-w-max qfdmo-flex qfdmo-justify-center"
-                        data-action="click -> search-solution-form#submitForm"
-                        type="button"
-                        >
-                        Rechercher des adresses
-                    </button>
-                </div>
-                <dialog aria-labelledby="modalAdvancedFilters-title" id="modalAdvancedFilters" class='fr-modal' role="dialog" >
-                    <div class="fr-container fr-container--fluid qfdmo-h-full">
-                        <div class="fr-modal__body qfdmo-h-full qfdmo-flex qfdmo-flex-col">
-                            <div class="fr-modal__header">
-                                <button class="fr-btn fr-btn--close fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-close-line" type="button" aria-controls="modalAdvancedFilters">Fermer</button>
-                            </div>
-                            <div class="fr-modal__content qfdmo-flex-grow">
-                                <h1 class="fr-h4 fr-mt-3w qfdmo-text-center">
-                                    Filtres avancés
-                                </h1>
-                                <hr>
-                                <div
-                                    class="qfdmo-flex qfdmo-flex-row qfdmo-items-center"
+                            <!-- Recherche Objet -->
+                            <div data-search-solution-form-target="sousCategoryObjetGroup" class="fr-mt-3w fr-px-1v fr-input-group">
+                                <div data-controller='ss-cat-object-autocomplete'
+                                    data-ss-cat-object-autocomplete-max-option-displayed-value=5
+                                    data-ss-cat-object-autocomplete-nb-char-to-search-value=2
                                 >
-                                    {% include "qfdmo/partials/label_reparacteur_icon.html" %}
-                                    <fieldset class="fr-fieldset fr-m-0 " aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages">
-                                        <legend class="qfdmo-hidden">
-                                            Labels
-                                        </legend>
-                                        <div class="fr-fieldset__element fr-fieldset__element--inline fr-m-0">
-                                            <div
-                                                class="fr-checkbox-group fr-checkbox-group--sm qfdmo-flex qfdmo-flex-row qfdmo-items-center"
-                                            >
-                                                {{ form.label_reparacteur }}
-                                                {{ form.label_reparacteur.label_tag() }}
-                                            </div>
-                                            <span class="fr-hint-text">{{ form.label_reparacteur.help_text }}</span>
-                                        </div>
-                                    </fieldset>
+                                    <div class="form-group">
+                                        {{ form.sous_categorie_objet.label_tag() }}
+                                        {{ form.sous_categorie_objet }}
+                                        {{ form.sc_id }}
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="fr-modal__footer">
-                                <div class="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg fr-btns-group--icon-left">
-                                    <button class="fr-btn" type="button" aria-controls="modalAdvancedFilters">
-                                        Enregistrer
-                                    </button>
-                                </div>
+                                <p class="fr-error-text fr-mt-1v qfdmo-hidden" data-search-solution-form-target="sousCategoryObjetError">
+                                    Veuillez indiquer puis sélectionner un objet dans la liste déroulante
+                                </p>
                             </div>
 
+                            <!-- Recherche adresse -->
+                            <div data-search-solution-form-target="adresseGroup" class="fr-mt-3w fr-px-1v fr-input-group">
+                                <div data-controller='address-autocomplete'
+                                    data-address-autocomplete-max-option-displayed-value=5
+                                    data-address-autocomplete-is-ban-address-value='true'
+                                >
+                                    <div class="form-group">
+                                        {{ form.adresse.label_tag() }}
+                                        {{ form.adresse }}
+                                    </div>
+                                    {{ form.longitude }}
+                                    {{ form.latitude }}
+                                </div>
+                                <p class="fr-error-text fr-mt-1v qfdmo-hidden" data-search-solution-form-target="adresseError">
+                                    Veuillez saisir une adresse
+                                </p>
+                            </div>
+
+                            <!-- Gestes -->
+                            <div class="fr-mt-3w fr-px-1v">
+                                {% with action_direction='jai' %}
+                                    {% include "qfdmo/partials/action_list_by_direction.html" %}
+                                {% endwith %}
+                                {% with action_direction='jecherche' %}
+                                    {% include "qfdmo/partials/action_list_by_direction.html"  %}
+                                {% endwith %}
+                            </div>
+
+
                         </div>
+                        <div class="fr-my-1w qfdmo-w-full qfdmo-flex qfdmo-flex-col md:qfdmo-max-w-[604px] qfdmo-mx-auto">
+
+                            <!-- Advanced filters -->
+                            <!-- FIXME : should we keep the modal or should we manage such behaviour as a panel : not obvious -->
+                            <button class="fr-my-1w qfdmo-w-full md:qfdmo-w-fit fr-btn fr-btn--tertiary-no-outline qfdmo-flex qfdmo-justify-center md:qfdmo-text-left" data-fr-opened="false" aria-controls="modalAdvancedFilters" type="button">
+                                Filtres avancés
+                            </button>
+
+                            <button
+                                class="fr-btn qfdmo-whitespace-nowrap qfdmo-float-left qfdmo-w-full md:qfdmo-w-max qfdmo-flex qfdmo-justify-center"
+                                data-action="click -> search-solution-form#submitForm"
+                                type="button"
+                                >
+                                Rechercher des adresses
+                            </button>
+                        </div>
+                        <dialog aria-labelledby="modalAdvancedFilters-title" id="modalAdvancedFilters" class='fr-modal' role="dialog" >
+                            <div class="fr-container fr-container--fluid qfdmo-h-full">
+                                <div class="fr-modal__body qfdmo-h-full qfdmo-flex qfdmo-flex-col">
+                                    <div class="fr-modal__header">
+                                        <button class="fr-btn fr-btn--close fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-close-line" type="button" aria-controls="modalAdvancedFilters">Fermer</button>
+                                    </div>
+                                    <div class="fr-modal__content qfdmo-flex-grow">
+                                        <h1 class="fr-h4 fr-mt-3w qfdmo-text-center">
+                                            Filtres avancés
+                                        </h1>
+                                        <hr>
+                                        <div
+                                            class="qfdmo-flex qfdmo-flex-row qfdmo-items-center"
+                                        >
+                                            {% include "qfdmo/partials/label_reparacteur_icon.html" %}
+                                            <fieldset class="fr-fieldset fr-m-0 " aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages">
+                                                <legend class="qfdmo-hidden">
+                                                    Labels
+                                                </legend>
+                                                <div class="fr-fieldset__element fr-fieldset__element--inline fr-m-0">
+                                                    <div
+                                                        class="fr-checkbox-group fr-checkbox-group--sm qfdmo-flex qfdmo-flex-row qfdmo-items-center"
+                                                    >
+                                                        {{ form.label_reparacteur }}
+                                                        {{ form.label_reparacteur.label_tag() }}
+                                                    </div>
+                                                    <span class="fr-hint-text">{{ form.label_reparacteur.help_text }}</span>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+                                    </div>
+                                    <div class="fr-modal__footer">
+                                        <div class="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg fr-btns-group--icon-left">
+                                            <button class="fr-btn" type="button" aria-controls="modalAdvancedFilters">
+                                                Enregistrer
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </dialog>
                     </div>
-                </dialog>
+                    <div class="fr-p-3w qfdmo-my-auto qfdmo-flex-grow qfdmo-hidden md:qfdmo-block">
+                        <img
+                            src="{{ static('france_map.png') }}"
+                            alt="Repar'Acteur"
+                            class="qfdmo-max-w-[100%]"
+                        >
+                    </div>
+                </div>
             </div>
 
             <!-- Panel «Résultats de la recherche» -->
