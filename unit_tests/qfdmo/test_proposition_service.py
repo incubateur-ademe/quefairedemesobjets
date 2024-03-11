@@ -71,7 +71,7 @@ class TestActionNomAsNaturalKeyHeritage:
         revision_proposition_service = RevisionPropositionService.objects.create(
             acteur_service=acteur_service,
             action=action,
-            revision_acteur=revision_acteur,
+            acteur=revision_acteur,
         )
         revision_proposition_service.sous_categories.add(
             sous_categories[0], sous_categories[1]
