@@ -128,7 +128,7 @@ class GetReemploiSolutionForm(forms.Form):
         label="Label Répar’Acteurs",
         help_text=mark_safe(
             "Afficher uniquement les artisans labellisés (uniquement valable lorsque le"
-            " geste réparé est sélectionné). En savoir plus <a href="
+            " geste « réparer » est sélectionné). En savoir plus <a href="
             '"https://www.artisanat.fr/nous-connaitre/vous-accompagner/reparacteurs"'
             ' target="_blank" rel="noopener"> sur le site de la CMA</a>'
         ),
