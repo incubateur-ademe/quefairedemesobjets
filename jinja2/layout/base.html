@@ -9,7 +9,7 @@
         <!--Meta for linkedin-->
         <meta prefix="og: http://ogp.me/ns#" property="og:title" content="{% block shared_page_title %}Longue vie aux objets{% endblock %}">
         <meta prefix="og: http://ogp.me/ns#" property="og:description" content="{% block shared_page_description %}Donnons une nouvelle vie aux objets. Longue vie aux objets met en avant toutes les bonnes adresses pour réparer, partager, donner, vendre... afin de prolonger la vie des objets du quotidien.{% endblock %}">
-        <meta prefix="og: http://ogp.me/ns#" property="og:image" content="{% block shared_page_image %}{{ request.build_absolute_uri()|trim('/') }}{{ static('lvao-hompage.jpg') }}{% endblock %}">
+        <meta prefix="og: http://ogp.me/ns#" property="og:image" content="{% block shared_page_image %}{{ request.scheme }}://{{ request.get_host() }}{{ static('lvao-homepage.jpg') }}{% endblock %}">
 
         <!--Title and desc-->
         <title>{% block page_title %}Longue vie aux objets{% endblock %}</title>
