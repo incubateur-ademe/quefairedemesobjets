@@ -2,9 +2,7 @@ import { expect, test } from "@playwright/test"
 import exp = require("constants")
 
 test("iframe is loaded with correct parameter", async ({ page }) => {
-    const path = require("path")
-    const filePath = path.join(__dirname, "iframe_test_pages", "iframe.html")
-    await page.goto(`file://${filePath}`, { waitUntil: "networkidle" })
+    await page.goto(`http://localhost:8000/test_iframe`, { waitUntil: "networkidle" })
 
     const titlePage = await page.title()
     expect(titlePage).toBe("IFrame test : QFDMO")
@@ -43,19 +41,16 @@ test("iframe is loaded with correct parameter", async ({ page }) => {
 })
 
 test("the form is visible in the iframe", async ({ page }) => {
-    const path = require("path")
-    const filePath = path.join(__dirname, "iframe_test_pages", "iframe.html")
-    await page.goto(`file://${filePath}`, { waitUntil: "networkidle" })
+    await page.goto(`http://localhost:8000/test_iframe`, { waitUntil: "networkidle" })
 
     const iframeElement = await page.$("iframe")
     const iframe = await iframeElement.contentFrame()
     const form = await iframe.$("#search_form")
     expect(form).not.toBeNull()
 
-    const formContent = await iframe.$("#bar")
-    expect(formContent).not.toBeNull()
-
-    const height = await iframe.$eval("#bar", (el) => (el as HTMLElement).offsetHeight)
-    console.log(height)
-    expect(height).toBeGreaterThan(0)
+    const height = await iframe.$eval(
+        "[data-test-id='form-content']",
+        (el) => (el as HTMLElement).offsetHeight,
+    )
+    expect(height).toBeGreaterThan(600)
 })
