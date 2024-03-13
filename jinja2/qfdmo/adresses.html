@@ -8,8 +8,9 @@
 
         <form data-controller="search-solution-form" id='search_form'
             data-search-solution-form-target="searchForm"
+            data-search-solution-form-is-iframe-value="{{ is_iframe(request) }}"
             data-turbo-frame="addressesPanel"
-            class="fr-container qfdmo-min-h-[700px] qfdmo-max-h-[900px]{%if not is_iframe(request) %} qfdmo-h-svh{% endif %} md:qfdmo-h-screen qfdmo-flex qfdmo-flex-col qfdmo-flex-auto"
+            class="fr-container qfdmo-min-h-[700px] qfdmo-max-h-[800px]{%if is_iframe(request) %} qfdmo-h-screen{% else %} qfdmo-h-svh{% endif %} qfdmo-flex qfdmo-flex-col qfdmo-flex-auto"
             data-action="
             map:displayDetails->search-solution-form#displayDetails
             map:setSrcDetailsAddress->search-solution-form#setSrcDetailsAddress
