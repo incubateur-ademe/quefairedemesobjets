@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test"
+import exp = require("constants")
 
 test("iframe is loaded with correct parameter", async ({ page }) => {
     const path = require("path")
@@ -41,27 +42,20 @@ test("iframe is loaded with correct parameter", async ({ page }) => {
     expect(iframeStyleAttribute).toContain("max-width: 800px;")
 })
 
-// doesn't work on CI
-// test("iframe is well resized", async ({ page }) => {
-//     const path = require("path")
-//     const filePath = path.join(__dirname, "iframe_test_pages", "iframe.html")
-//     await page.goto(`file://${filePath}`, { waitUntil: "networkidle" })
+test("the form is visible in the iframe", async ({ page }) => {
+    const path = require("path")
+    const filePath = path.join(__dirname, "iframe_test_pages", "iframe.html")
+    await page.goto(`file://${filePath}`, { waitUntil: "networkidle" })
 
-//     // Check if the iframe is loaded
-//     const iframeElement = await page.$("iframe")
+    const iframeElement = await page.$("iframe")
+    const iframe = await iframeElement.contentFrame()
+    const form = await iframe.$("#search_form")
+    expect(form).not.toBeNull()
 
-//     // Get the style height and width of the iframe
-//     const iframeStyleHeight = await iframeElement.evaluate((element) => {
-//         return parseInt(getComputedStyle(element).height)
-//     })
-//     const iframeStyleWidth = await iframeElement.evaluate((element) => {
-//         return parseInt(getComputedStyle(element).width)
-//     })
+    const formContent = await iframe.$("#bar")
+    expect(formContent).not.toBeNull()
 
-//     // wait 5 secondes
-//     await page.waitForTimeout(5000)
-
-//     // Assert that the style height of the iframe is greater than 500
-//     expect(iframeStyleHeight).toBeGreaterThan(500)
-//     expect(iframeStyleWidth).toBe(800)
-// })
+    const height = await iframe.$eval("#bar", (el) => (el as HTMLElement).offsetHeight)
+    console.log(height)
+    expect(height).toBeGreaterThan(0)
+})
