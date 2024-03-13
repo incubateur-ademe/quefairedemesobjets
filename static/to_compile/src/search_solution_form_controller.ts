@@ -65,9 +65,14 @@ export default class extends Controller<HTMLElement> {
     declare readonly addressMissingTarget: HTMLElement
     declare readonly NoLocalSolutionTarget: HTMLElement
 
+    static values = { isIframe: Boolean }
+    declare readonly isIframeValue: boolean
+
     connect() {
         this.displayActionList()
-        // TODO : this.scrollToContent() only if it is not an iframe
+        if (!this.isIframeValue) {
+            this.scrollToContent()
+        }
     }
 
     scrollToContent() {
