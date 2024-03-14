@@ -53,7 +53,9 @@ class CachedDirectionAction:
             directions_list = [model_to_dict(d) for d in directions]
             sorted_directions = sorted(directions_list, key=lambda x: x["order"])
             cls._cached_direction = sorted_directions
-        if first_direction is not None:
+        if first_direction is not None and first_direction in [
+            d["nom"] for d in cls._cached_direction
+        ]:
             return sorted(
                 cls._cached_direction,
                 key=lambda x: (x["nom"] != first_direction, x["nom"]),

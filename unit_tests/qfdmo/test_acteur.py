@@ -477,7 +477,7 @@ class TestFinalActeurRenderascard:
 class TestFinalActeurActions:
     def test_acteur_actions_basic(self, finalacteur):
         actions = finalacteur.acteur_actions()
-        assert [action["nom"] for action in actions] == ["reparer", "echanger", "louer"]
+        assert [action["nom"] for action in actions] == ["louer", "reparer", "echanger"]
 
     def test_acteur_actions_with_direction(self, finalacteur):
         actions = finalacteur.acteur_actions(direction="jai")
@@ -506,7 +506,7 @@ class TestActeurService:
             acteur=acteur, acteur_service=acteur_service, action=action1
         )
 
-        assert acteur.acteur_services() == ["Achat, revente par un professionnel"]
+        assert acteur.acteur_services() == ["Par un professionnel"]
 
     def test_acteur_actions_distinct(self):
         action1 = Action.objects.get(nom="reparer")
@@ -526,14 +526,14 @@ class TestActeurService:
             acteur=acteur, acteur_service=acteur_service, action=action2
         )
 
-        assert acteur.acteur_services() == ["Achat, revente par un professionnel"]
+        assert acteur.acteur_services() == ["Par un professionnel"]
 
     def test_acteur_actions_multiple(self):
         action = Action.objects.get(nom="reparer")
         acteur_service1 = ActeurService.objects.get(
             nom="Achat, revente par un professionnel"
         )
-        acteur_service2 = ActeurService.objects.get(nom="Atelier d'auto-réparation")
+        acteur_service2 = ActeurService.objects.get(nom="Atelier pour réparer soi-même")
         acteur = Acteur.objects.create(
             nom="Acteur 1", location=Point(0, 0), acteur_type_id=1
         )
@@ -545,8 +545,8 @@ class TestActeurService:
         )
 
         assert acteur.acteur_services() == [
-            "Achat, revente par un professionnel",
-            "Atelier d'auto-réparation",
+            "Atelier pour réparer soi-même",
+            "Par un professionnel",
         ]
 
     def test_acteur_actions_multiple_with_same_nom_affiche(self):
@@ -554,7 +554,7 @@ class TestActeurService:
         acteur_service1 = ActeurService.objects.get(
             nom="Achat, revente par un professionnel"
         )
-        acteur_service2 = ActeurService.objects.get(nom="Atelier d'auto-réparation")
+        acteur_service2 = ActeurService.objects.get(nom="Atelier pour réparer soi-même")
         acteur_service2.nom_affiche = acteur_service1.nom_affiche
         acteur_service2.save()
         acteur = Acteur.objects.create(
@@ -568,5 +568,5 @@ class TestActeurService:
         )
 
         assert acteur.acteur_services() == [
-            "Achat, revente par un professionnel",
+            "Par un professionnel",
         ]
