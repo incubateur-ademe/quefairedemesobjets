@@ -106,6 +106,14 @@ jobs:
       - name: Set env variables
         run: cp .env.template .env
 
+      - name: Migrate database
+        run: |
+          python manage.py migrate
+
+      - name: Populate database
+        run: |
+          python manage.py loaddata action_directions actions acteur_services acteur_types categories objets
+
       - name: Run serveur
         run: |
           python manage.py runserver &

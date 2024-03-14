@@ -1,16 +1,18 @@
 [
-{
-    "model": "qfdmo.actiondirection",
-    "fields": {
-        "nom": "jai",
-        "nom_affiche": "J'ai"
+    {
+        "model": "qfdmo.actiondirection",
+        "fields": {
+            "nom": "jai",
+            "order": 2,
+            "nom_affiche": "J'ai un objet"
+        }
+    },
+    {
+        "model": "qfdmo.actiondirection",
+        "fields": {
+            "nom": "jecherche",
+            "order": 1,
+            "nom_affiche": "Je recherche un objet"
+        }
     }
-},
-{
-    "model": "qfdmo.actiondirection",
-    "fields": {
-        "nom": "jecherche",
-        "nom_affiche": "Je cherche"
-    }
-}
 ]
