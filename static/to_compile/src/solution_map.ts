@@ -57,7 +57,7 @@ export class SolutionMap {
         })
 
         this.#map.setView(DEFAULT_LOCATION, DEFAULT_ZOOM)
-        L.tileLayer("http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png", {
+        L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png", {
             maxZoom: DEFAULT_MAX_ZOOM,
             attribution:
                 "© <a href='https://www.openstreetmap.org/copyright' rel='noopener'>OpenStreetMap</a>",
