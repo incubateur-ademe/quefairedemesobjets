@@ -785,4 +785,5 @@ class DisplayedPropositionServiceTemp(BasePropositionService):
         sous_categorie_objet = models.ForeignKey(
             SousCategorieObjet,
             on_delete=models.CASCADE,
+            db_column="souscategorieobjet_id",
         )

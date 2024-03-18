@@ -16,5 +16,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunSQL(
             "ALTER TABLE qfdmo_displayedpropositionservicetemp_sous_categories RENAME displayedpropositionservicetemp_id to displayedpropositionservice_id",
+            "ALTER TABLE qfdmo_displayedpropositionservicetemp_sous_categories RENAME displayedpropositionservice_id to displayedpropositionservicetemp_id",
         ),
     ]
