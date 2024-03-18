@@ -42,7 +42,7 @@
     "dependencies": {
         "@gouvfr/dsfr": "^1.11",
         "@hotwired/stimulus": "^3.2.1",
-        "@hotwired/turbo": "^8.0.3",
+        "@hotwired/turbo": "^8.0.4",
         "bowser": "^2.11.0",
         "iframe-resizer": "^4.3.9",
         "leaflet": "^1.9.4",
