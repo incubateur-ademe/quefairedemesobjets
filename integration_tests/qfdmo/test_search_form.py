@@ -24,8 +24,8 @@ class TestDirectionOrder:
     @pytest.mark.parametrize(
         "params,expected_order",
         [
-            ("", ["jai", "jecherche"]),
-            ("?first_dir=fake", ["jai", "jecherche"]),
+            ("", ["jecherche", "jai"]),
+            ("?first_dir=fake", ["jecherche", "jai"]),
             ("?first_dir=jai", ["jai", "jecherche"]),
             ("?first_dir=jecherche", ["jecherche", "jai"]),
         ],

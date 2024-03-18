@@ -43,16 +43,32 @@ class TestActionDisplayList:
     @pytest.mark.parametrize(
         "params,action_list",
         [
-            ({}, ["Emprunter", "Èchanger", "Louer", "Acheter"]),
-            ({"direction": "fake"}, ["Emprunter", "Èchanger", "Louer", "Acheter"]),
+            (
+                {},
+                ["emprunter", "louer", "échanger", "acheter de seconde main"],
+            ),
+            (
+                {"direction": "fake"},
+                ["emprunter", "louer", "échanger", "acheter de seconde main"],
+            ),
             (
                 {"direction": "jai"},
-                ["Réparer", "Prêter", "Donner", "Èchanger", "Louer", "Vendre"],
+                [
+                    "prêter",
+                    "mettre en location",
+                    "réparer",
+                    "donner",
+                    "échanger",
+                    "vendre",
+                ],
             ),
-            ({"direction": "jecherche"}, ["Emprunter", "Èchanger", "Louer", "Acheter"]),
+            (
+                {"direction": "jecherche"},
+                ["emprunter", "louer", "échanger", "acheter de seconde main"],
+            ),
             ({"action_list": "fake"}, []),
-            ({"action_list": "emprunter"}, ["Emprunter"]),
-            ({"action_list": "emprunter|louer"}, ["Emprunter", "Louer"]),
+            ({"action_list": "emprunter"}, ["emprunter"]),
+            ({"action_list": "emprunter|louer"}, ["emprunter", "louer"]),
         ],
     )
     @pytest.mark.django_db
@@ -74,44 +90,44 @@ class TestActionByDirection:
         assert [
             action["nom_affiche"] for action in action_by_direction(request, "jai")
         ] == [
-            "Réparer",
-            "Prêter",
-            "Donner",
-            "Èchanger",
-            "Louer",
-            "Vendre",
+            "prêter",
+            "mettre en location",
+            "réparer",
+            "donner",
+            "échanger",
+            "vendre",
         ]
         assert [
             action["nom_affiche"]
             for action in action_by_direction(request, "jai")
             if action["active"]
         ] == [
-            "Réparer",
-            "Prêter",
-            "Donner",
-            "Èchanger",
-            "Louer",
-            "Vendre",
+            "prêter",
+            "mettre en location",
+            "réparer",
+            "donner",
+            "échanger",
+            "vendre",
         ]
 
         assert [
             action["nom_affiche"]
             for action in action_by_direction(request, "jecherche")
         ] == [
-            "Emprunter",
-            "Èchanger",
-            "Louer",
-            "Acheter",
+            "emprunter",
+            "louer",
+            "échanger",
+            "acheter de seconde main",
         ]
         assert [
             action["nom_affiche"]
             for action in action_by_direction(request, "jecherche")
             if action["active"]
         ] == [
-            "Emprunter",
-            "Èchanger",
-            "Louer",
-            "Acheter",
+            "emprunter",
+            "louer",
+            "échanger",
+            "acheter de seconde main",
         ]
 
     @pytest.mark.django_db
@@ -123,40 +139,40 @@ class TestActionByDirection:
         assert [
             action["nom_affiche"] for action in action_by_direction(request, "jai")
         ] == [
-            "Réparer",
-            "Prêter",
-            "Donner",
-            "Èchanger",
-            "Louer",
-            "Vendre",
+            "prêter",
+            "mettre en location",
+            "réparer",
+            "donner",
+            "échanger",
+            "vendre",
         ]
         assert [
             action["nom_affiche"]
             for action in action_by_direction(request, "jai")
             if action["active"]
         ] == [
-            "Réparer",
-            "Prêter",
-            "Donner",
-            "Èchanger",
-            "Louer",
-            "Vendre",
+            "prêter",
+            "mettre en location",
+            "réparer",
+            "donner",
+            "échanger",
+            "vendre",
         ]
 
         assert [
             action["nom_affiche"]
             for action in action_by_direction(request, "jecherche")
         ] == [
-            "Emprunter",
-            "Èchanger",
-            "Louer",
-            "Acheter",
+            "emprunter",
+            "louer",
+            "échanger",
+            "acheter de seconde main",
         ]
         assert [
             action["nom_affiche"]
             for action in action_by_direction(request, "jecherche")
             if action["active"]
         ] == [
-            "Emprunter",
-            "Louer",
+            "emprunter",
+            "louer",
         ]

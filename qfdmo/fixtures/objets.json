@@ -1,5 +1,83 @@
 [
     {
+        "model": "qfdmo.categorieobjet",
+        "fields": {
+            "nom": "électroménager"
+        }
+    },
+    {
+        "model": "qfdmo.categorieobjet",
+        "fields": {
+            "nom": "livres et multimédia"
+        }
+    },
+    {
+        "model": "qfdmo.categorieobjet",
+        "fields": {
+            "nom": "équipements de loisir"
+        }
+    },
+    {
+        "model": "qfdmo.categorieobjet",
+        "fields": {
+            "nom": "bricolage et jardinage"
+        }
+    },
+    {
+        "model": "qfdmo.categorieobjet",
+        "fields": {
+            "nom": "mobilier et décoration"
+        }
+    },
+    {
+        "model": "qfdmo.categorieobjet",
+        "fields": {
+            "nom": "produits divers"
+        }
+    },
+    {
+        "model": "qfdmo.categorieobjet",
+        "fields": {
+            "nom": "bijou, montre et horlogerie"
+        }
+    },
+    {
+        "model": "qfdmo.categorieobjet",
+        "fields": {
+            "nom": "image, son & Informatique"
+        }
+    },
+    {
+        "model": "qfdmo.categorieobjet",
+        "fields": {
+            "nom": "livres & multimedia"
+        }
+    },
+    {
+        "model": "qfdmo.categorieobjet",
+        "fields": {
+            "nom": "bricolage & jardinage"
+        }
+    },
+    {
+        "model": "qfdmo.categorieobjet",
+        "fields": {
+            "nom": "vêtements & accessoires"
+        }
+    },
+    {
+        "model": "qfdmo.categorieobjet",
+        "fields": {
+            "nom": "bijou, montre, horlogerie"
+        }
+    },
+    {
+        "model": "qfdmo.categorieobjet",
+        "fields": {
+            "nom": "matériau de construction / du bâtiment réemployable"
+        }
+    },
+    {
         "model": "qfdmo.objet",
         "fields": {
             "nom": "Accessoire automobile (et deux-roues) électronique",
@@ -30,49 +108,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Aiguille usagée (médicale)",
-            "sous_categorie": ["C_28"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Aiguille à stylo",
-            "sous_categorie": ["C_28"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Aiguille de transfert",
-            "sous_categorie": ["C_28"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Aiguille seule (médicale)",
-            "sous_categorie": ["C_28"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Appareil photo jetable",
-            "sous_categorie": ["C_08"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Appareil photo",
-            "sous_categorie": ["C_08"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Appareil photo numérique",
             "sous_categorie": ["C_08"]
         }
     },
@@ -212,22 +248,8 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Biberon en plastique",
-            "sous_categorie": ["C_18"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Biberon",
             "sous_categorie": ["C_18"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Bijou fantaisie (accessoires de mode)",
-            "sous_categorie": ["C_25"]
         }
     },
     {
@@ -242,34 +264,6 @@
         "fields": {
             "nom": "Surf",
             "sous_categorie": ["C_27"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Bottes en caoutchouc",
-            "sous_categorie": ["C_24"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Bottes de pluie",
-            "sous_categorie": ["C_24"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Bottes de pêche",
-            "sous_categorie": ["C_24"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Bougie en cire",
-            "sous_categorie": ["C_16"]
         }
     },
     {
@@ -310,13 +304,6 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Canapé-lit",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Carte RFID",
             "sous_categorie": ["C_03"]
         }
@@ -338,13 +325,6 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Cartouche d'impression (à jet d'encre, laser)",
-            "sous_categorie": ["C_03"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Casque",
             "sous_categorie": ["C_27"]
         }
@@ -359,14 +339,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Cathéter tout en un",
-            "sous_categorie": ["C_28"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "CD/DVD, cassette (avec ou sans boîtier)",
+            "nom": "Cassette",
             "sous_categorie": ["C_10"]
         }
     },
@@ -402,13 +375,6 @@
         "model": "qfdmo.objet",
         "fields": {
             "nom": "DVD",
-            "sous_categorie": ["C_10"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "CDRom",
             "sous_categorie": ["C_10"]
         }
     },
@@ -576,7 +542,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "puff",
+            "nom": "Puff",
             "sous_categorie": ["C_09"]
         }
     },
@@ -590,7 +556,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Corde usée",
+            "nom": "Cordelette pour le sport",
             "sous_categorie": ["C_27"]
         }
     },
@@ -619,20 +585,13 @@
         "model": "qfdmo.objet",
         "fields": {
             "nom": "Cuisinière électrique",
-            "sous_categorie": ["C_01"]
+            "sous_categorie": ["C_02"]
         }
     },
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Écran informatique",
-            "sous_categorie": ["C_04"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "écran",
+            "nom": "Ecran",
             "sous_categorie": ["C_04"]
         }
     },
@@ -723,7 +682,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Jouet électrique",
+            "nom": "Jouet électronique",
             "sous_categorie": ["C_03"]
         }
     },
@@ -765,14 +724,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Fourrure naturelle",
-            "sous_categorie": ["C_22"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Fourrure synthétique",
+            "nom": "Fourrure",
             "sous_categorie": ["C_22"]
         }
     },
@@ -814,13 +766,6 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Gros électroménager",
-            "sous_categorie": ["C_01"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Congélateur",
             "sous_categorie": ["C_01"]
         }
@@ -836,28 +781,28 @@
         "model": "qfdmo.objet",
         "fields": {
             "nom": "Lave-vaisselle",
-            "sous_categorie": ["C_01"]
+            "sous_categorie": ["C_02"]
         }
     },
     {
         "model": "qfdmo.objet",
         "fields": {
             "nom": "Sèche-linge",
-            "sous_categorie": ["C_01"]
+            "sous_categorie": ["C_02"]
         }
     },
     {
         "model": "qfdmo.objet",
         "fields": {
             "nom": "Hotte",
-            "sous_categorie": ["C_01"]
+            "sous_categorie": ["C_02"]
         }
     },
     {
         "model": "qfdmo.objet",
         "fields": {
             "nom": "Plaque de cuisson",
-            "sous_categorie": ["C_01"]
+            "sous_categorie": ["C_02"]
         }
     },
     {
@@ -891,13 +836,6 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Enceintes",
-            "sous_categorie": ["C_06"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Baffles",
             "sous_categorie": ["C_06"]
         }
@@ -907,20 +845,6 @@
         "fields": {
             "nom": "Imprimante",
             "sous_categorie": ["C_05"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Instrument de musique électrique",
-            "sous_categorie": ["C_12"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Instrument de musique électronique",
-            "sous_categorie": ["C_12"]
         }
     },
     {
@@ -968,14 +892,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Jeu de société",
-            "sous_categorie": ["C_21"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Jeu (non électrique)",
+            "nom": "Jeu",
             "sous_categorie": ["C_21"]
         }
     },
@@ -983,13 +900,6 @@
         "model": "qfdmo.objet",
         "fields": {
             "nom": "Figurine",
-            "sous_categorie": ["C_21"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Jeu de construction",
             "sous_categorie": ["C_21"]
         }
     },
@@ -1059,62 +969,6 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "marionnette",
-            "sous_categorie": ["C_21"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Décor de marionnettes",
-            "sous_categorie": ["C_21"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Jouet premier âge",
-            "sous_categorie": ["C_21"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Jeu d'imitation",
-            "sous_categorie": ["C_21"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Jouet à promener",
-            "sous_categorie": ["C_21"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Jouet à pousser",
-            "sous_categorie": ["C_21"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Jouet de bain",
-            "sous_categorie": ["C_21"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Jouet éducatif",
-            "sous_categorie": ["C_21"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Mobile",
             "sous_categorie": ["C_21"]
         }
@@ -1129,7 +983,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Voiture non motorisé",
+            "nom": "Voiture (jouet)",
             "sous_categorie": ["C_21"]
         }
     },
@@ -1143,14 +997,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Avion non motorisé",
-            "sous_categorie": ["C_21"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Bateau non motorisé",
+            "nom": "Bateau (jouet)",
             "sous_categorie": ["C_21"]
         }
     },
@@ -1171,7 +1018,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Ballon de baudruche",
+            "nom": "Ballon (jouet)",
             "sous_categorie": ["C_21"]
         }
     },
@@ -1192,14 +1039,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Costume d'enfant (- de 14 ans)",
-            "sous_categorie": ["C_21"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Décor pour figurines",
+            "nom": "Costume d'enfant",
             "sous_categorie": ["C_21"]
         }
     },
@@ -1214,27 +1054,6 @@
         "model": "qfdmo.objet",
         "fields": {
             "nom": "Farces et attrapes",
-            "sous_categorie": ["C_21"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Jeu de magie",
-            "sous_categorie": ["C_21"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Jeu scientifique",
-            "sous_categorie": ["C_21"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Jeu de chimiste",
             "sous_categorie": ["C_21"]
         }
     },
@@ -1304,13 +1123,6 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Ballon sauteur",
-            "sous_categorie": ["C_21"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Pelle à neige (luge)",
             "sous_categorie": ["C_21"]
         }
@@ -1325,14 +1137,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "J'eu d'eau",
-            "sous_categorie": ["C_21"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Pistolet à eau",
+            "nom": "Pistolet à eau (jouet)",
             "sous_categorie": ["C_21"]
         }
     },
@@ -1340,13 +1145,6 @@
         "model": "qfdmo.objet",
         "fields": {
             "nom": "Maison de jardin pour enfant",
-            "sous_categorie": ["C_21"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Trampoline (jouet)",
             "sous_categorie": ["C_21"]
         }
     },
@@ -1367,41 +1165,6 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Jeu de cartes",
-            "sous_categorie": ["C_21"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Jeu de dés",
-            "sous_categorie": ["C_21"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Jeu de plateau",
-            "sous_categorie": ["C_21"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Jeu de stratégie",
-            "sous_categorie": ["C_21"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Jeu de voyage",
-            "sous_categorie": ["C_21"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Puzzle",
             "sous_categorie": ["C_21"]
         }
@@ -1410,13 +1173,6 @@
         "model": "qfdmo.objet",
         "fields": {
             "nom": "Maquette",
-            "sous_categorie": ["C_21"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Jeu (non électronique)",
             "sous_categorie": ["C_21"]
         }
     },
@@ -1465,13 +1221,6 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Lampe (ou luminaire) sans ampoule",
-            "sous_categorie": ["C_17"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Lustre",
             "sous_categorie": ["C_17"]
         }
@@ -1487,13 +1236,6 @@
         "model": "qfdmo.objet",
         "fields": {
             "nom": "LED",
-            "sous_categorie": ["C_17"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Lampe à LED",
             "sous_categorie": ["C_17"]
         }
     },
@@ -1522,13 +1264,6 @@
         "model": "qfdmo.objet",
         "fields": {
             "nom": "Serviette de bain",
-            "sous_categorie": ["C_16"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Rideaux",
             "sous_categorie": ["C_16"]
         }
     },
@@ -1627,7 +1362,7 @@
         "model": "qfdmo.objet",
         "fields": {
             "nom": "Torchon",
-            "sous_categorie": ["C_16"]
+            "sous_categorie": ["C_19"]
         }
     },
     {
@@ -1647,29 +1382,8 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Housse",
+            "nom": "Housse (décoration)",
             "sous_categorie": ["C_16"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Lit (hors matelas)",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Lit pliant",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Lit de camp",
-            "sous_categorie": ["C_15"]
         }
     },
     {
@@ -1731,7 +1445,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Rallonge",
+            "nom": "Rallonge électrique",
             "sous_categorie": ["C_03"]
         }
     },
@@ -1815,13 +1529,6 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Table",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Eléments de cuisine",
             "sous_categorie": ["C_15"]
         }
@@ -1851,13 +1558,6 @@
         "model": "qfdmo.objet",
         "fields": {
             "nom": "Table de jardin",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Chaise de jardin",
             "sous_categorie": ["C_15"]
         }
     },
@@ -1962,14 +1662,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Caisson de meuble",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "rallonge et extension de table",
+            "nom": "Rallonge et extension de table",
             "sous_categorie": ["C_15"]
         }
     },
@@ -1977,20 +1670,6 @@
         "model": "qfdmo.objet",
         "fields": {
             "nom": "Console murale",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Façade de porte",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Façade de tiroir",
             "sous_categorie": ["C_15"]
         }
     },
@@ -2137,13 +1816,6 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Etagère  (caisson, murale, de bureau, à épices, à vin, à chapeaux…)",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Filet de rangement",
             "sous_categorie": ["C_15"]
         }
@@ -2200,7 +1872,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Rangement coulissant pour caisson",
+            "nom": "Rangement",
             "sous_categorie": ["C_15"]
         }
     },
@@ -2222,13 +1894,6 @@
         "model": "qfdmo.objet",
         "fields": {
             "nom": "Tiroir motorisé",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Tourillon",
             "sous_categorie": ["C_15"]
         }
     },
@@ -2284,7 +1949,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Housse de dosseret",
+            "nom": "Housse pour meuble",
             "sous_categorie": ["C_15"]
         }
     },
@@ -2340,21 +2005,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Armoire-lit",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Bac de rangement",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Bac de rangement à roulettes",
             "sous_categorie": ["C_15"]
         }
     },
@@ -2383,41 +2034,6 @@
         "model": "qfdmo.objet",
         "fields": {
             "nom": "Dressing",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Lit d'appoint",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Lit évolutif",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Lit pont",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Lit relevable",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Lit rétractable",
             "sous_categorie": ["C_15"]
         }
     },
@@ -2529,13 +2145,6 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Lit superposé",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Tapis à chat ou chien",
             "sous_categorie": ["C_15"]
         }
@@ -2627,14 +2236,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Façade de placard (coulissante, pliante ou pivotante)",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Façade de lave-vasselle",
+            "nom": "Façade de meuble",
             "sous_categorie": ["C_15"]
         }
     },
@@ -2648,7 +2250,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Poubelle (indépendante ou intégrée)",
+            "nom": "Poubelle",
             "sous_categorie": ["C_15"]
         }
     },
@@ -2739,20 +2341,6 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Armoire de toilette",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Crédence adhésive",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "revêtement de meuble (portes de placard, plan de travail...)",
             "sous_categorie": ["C_15"]
         }
@@ -2781,13 +2369,6 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Caisson à tiroirs (y compris à roulettes)",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Colonne de rangement",
             "sous_categorie": ["C_15"]
         }
@@ -2796,13 +2377,6 @@
         "model": "qfdmo.objet",
         "fields": {
             "nom": "Meuble sous vasque",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Rangement sous lavabo",
             "sous_categorie": ["C_15"]
         }
     },
@@ -2851,13 +2425,6 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Caisson de rangement pour bureau (y compris à roulettes)",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Chariot d'imprimante",
             "sous_categorie": ["C_15"]
         }
@@ -2887,13 +2454,6 @@
         "model": "qfdmo.objet",
         "fields": {
             "nom": "Piétement de meuble (bureau, siège, table...)",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Cloisonnette de séparation amovible de jardon (visuelle ou phonique)",
             "sous_categorie": ["C_15"]
         }
     },
@@ -2942,7 +2502,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Meuble de ragement",
+            "nom": "Meuble de rangement",
             "sous_categorie": ["C_15"]
         }
     },
@@ -3005,28 +2565,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Table pour ordinateur portable",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Voile de fond de bureau",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Table de camping pique-nique pliante portable avec 4 sieges",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Table et ses 4 sièges solidaires pliables dans une valisette",
             "sous_categorie": ["C_15"]
         }
     },
@@ -3061,13 +2600,6 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Housse de protection de meuble",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Assise médicale (non électrique, non motorisée)",
             "sous_categorie": ["C_15"]
         }
@@ -3082,14 +2614,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "bain de soleil",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "chaise longue",
+            "nom": "Bain de soleil",
             "sous_categorie": ["C_15"]
         }
     },
@@ -3097,13 +2622,6 @@
         "model": "qfdmo.objet",
         "fields": {
             "nom": "Balancelle de jardin",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Banc-coffre",
             "sous_categorie": ["C_15"]
         }
     },
@@ -3132,27 +2650,6 @@
         "model": "qfdmo.objet",
         "fields": {
             "nom": "Mobilier de bureau",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Caisson",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Chaise de bureau",
-            "sous_categorie": ["C_15"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Desserte informatique",
             "sous_categorie": ["C_15"]
         }
     },
@@ -3194,28 +2691,14 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Ordinateur fixe",
+            "nom": "Ordinateur",
             "sous_categorie": ["C_05"]
         }
     },
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "PC fixe",
-            "sous_categorie": ["C_05"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Ordinateur portable",
-            "sous_categorie": ["C_05"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "PC portable",
+            "nom": "PC",
             "sous_categorie": ["C_05"]
         }
     },
@@ -3411,7 +2894,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Robot",
+            "nom": "Robot de cuisine",
             "sous_categorie": ["C_03"]
         }
     },
@@ -3488,7 +2971,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Raclette",
+            "nom": "Appareil à raclette",
             "sous_categorie": ["C_03"]
         }
     },
@@ -3593,7 +3076,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Patins",
+            "nom": "Patins de sport (à glace, de hockey sur glace, de curling)",
             "sous_categorie": ["C_27"]
         }
     },
@@ -3663,13 +3146,6 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Skate",
-            "sous_categorie": ["C_27"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Table à repasser",
             "sous_categorie": ["C_15"]
         }
@@ -3698,7 +3174,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Tablette",
+            "nom": "Tablette (tactile)",
             "sous_categorie": ["C_07"]
         }
     },
@@ -3721,13 +3197,6 @@
         "fields": {
             "nom": "Smartphone",
             "sous_categorie": ["C_07"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Téléviseur",
-            "sous_categorie": ["C_04"]
         }
     },
     {
@@ -3782,21 +3251,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Tondeuse à gazon électrique",
-            "sous_categorie": ["C_13"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Tondeuse à gazon mécanique",
-            "sous_categorie": ["C_13"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Tondeuse à gazon thermique",
+            "nom": "Tondeuse à gazon",
             "sous_categorie": ["C_13"]
         }
     },
@@ -3839,20 +3294,6 @@
         "model": "qfdmo.objet",
         "fields": {
             "nom": "Pulvérisateur thermique,  Atomiseur thermique à dos",
-            "sous_categorie": ["C_13"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Taille-haie thermique",
-            "sous_categorie": ["C_13"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Tronçonneuse thermique",
             "sous_categorie": ["C_13"]
         }
     },
@@ -3909,13 +3350,6 @@
         "model": "qfdmo.objet",
         "fields": {
             "nom": "Pompe à eau thermique",
-            "sous_categorie": ["C_13"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Outil multifonctions thermique combisystème ou multisystème",
             "sous_categorie": ["C_13"]
         }
     },
@@ -4048,13 +3482,6 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Vélo (hors vélo électrique)",
-            "sous_categorie": ["C_26"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Cycle",
             "sous_categorie": ["C_26"]
         }
@@ -4083,20 +3510,6 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Vélo électrique",
-            "sous_categorie": ["C_26"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Vélo à assistance électrique (VAE)",
-            "sous_categorie": ["C_26"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Verre (ayant contenu une bougie)",
             "sous_categorie": ["C_16"]
         }
@@ -4106,13 +3519,6 @@
         "fields": {
             "nom": "Verre à boire",
             "sous_categorie": ["C_18"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Vêtement souillé",
-            "sous_categorie": ["C_22"]
         }
     },
     {
@@ -4188,7 +3594,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Gant",
+            "nom": "Gants",
             "sous_categorie": ["C_22"]
         }
     },
@@ -4440,7 +3846,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "ballon",
+            "nom": "Ballon de sport",
             "sous_categorie": ["C_27"]
         }
     },
@@ -4489,7 +3895,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "club de golf",
+            "nom": "Club de golf",
             "sous_categorie": ["C_27"]
         }
     },
@@ -4524,14 +3930,14 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "hameçon",
+            "nom": "Hameçon",
             "sous_categorie": ["C_27"]
         }
     },
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "kimono",
+            "nom": "Kimono",
             "sous_categorie": ["C_27"]
         }
     },
@@ -4552,13 +3958,6 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Matériel de voile (Dérive, gouvernail < 2,5 m)",
-            "sous_categorie": ["C_27"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Matériel d'entraînement sportif (mini-haie, marquage au sol, plot, cône de sport…)",
             "sous_categorie": ["C_27"]
         }
@@ -4566,7 +3965,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "pantalon d'escrime",
+            "nom": "Pantalon de sport",
             "sous_categorie": ["C_27"]
         }
     },
@@ -4601,7 +4000,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Poteau, mini poteau de foot",
+            "nom": "Poteau, mini poteau de sport (foot, rugby)",
             "sous_categorie": ["C_27"]
         }
     },
@@ -4650,7 +4049,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Stand-up paddle (gonflable ou rigide)",
+            "nom": "Stand-up paddle",
             "sous_categorie": ["C_27"]
         }
     },
@@ -4664,21 +4063,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Vélo adulte hors vélo à assistance électrique",
-            "sous_categorie": ["C_27"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Vélo enfant",
-            "sous_categorie": ["C_27"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Volant",
+            "nom": "Volant (badminton)",
             "sous_categorie": ["C_27"]
         }
     },
@@ -4692,7 +4077,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Wishbone de windsurf",
+            "nom": "Windsurf",
             "sous_categorie": ["C_27"]
         }
     },
@@ -4713,7 +4098,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "pince-nez (piscine)",
+            "nom": "Pince-nez (piscine)",
             "sous_categorie": ["C_27"]
         }
     },
@@ -4811,7 +4196,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Filet (football, volley-ball, badminton, tennis, tennis de table...)",
+            "nom": "Filet et poteaux de sport",
             "sous_categorie": ["C_27"]
         }
     },
@@ -4819,13 +4204,6 @@
         "model": "qfdmo.objet",
         "fields": {
             "nom": "Etui de raquette (tennis, badminton, squash, tennis de table...)",
-            "sous_categorie": ["C_27"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Filet de mini-tennis (filet + pieds)",
             "sous_categorie": ["C_27"]
         }
     },
@@ -4847,13 +4225,6 @@
         "model": "qfdmo.objet",
         "fields": {
             "nom": "Jeu de quilles",
-            "sous_categorie": ["C_27"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Masque de ski ou de snowboard",
             "sous_categorie": ["C_27"]
         }
     },
@@ -4951,7 +4322,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Shorty, veste, combinaison en néoprène enfant",
+            "nom": "Combinaison en néoprène enfant",
             "sous_categorie": ["C_27"]
         }
     },
@@ -4986,13 +4357,6 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Poteau, mini poteau de rugby",
-            "sous_categorie": ["C_27"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Mini poteau gonflable de rugby",
             "sous_categorie": ["C_27"]
         }
@@ -5000,7 +4364,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Equipement d'équitation (hors équipement de protection individuelle, chaussants et vêtements)",
+            "nom": "Equipement d'équitation (hors protection individuelle, chaussants et vêtements)",
             "sous_categorie": ["C_27"]
         }
     },
@@ -5084,7 +4448,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Combinaison (triathlon, nage eau libre, plongée, surf)",
+            "nom": "Combinaison de sport",
             "sous_categorie": ["C_27"]
         }
     },
@@ -5168,7 +4532,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Palme",
+            "nom": "Palmes",
             "sous_categorie": ["C_27"]
         }
     },
@@ -5176,27 +4540,6 @@
         "model": "qfdmo.objet",
         "fields": {
             "nom": "Pièce détachée skate-board",
-            "sous_categorie": ["C_27"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Planche de bodyboard",
-            "sous_categorie": ["C_27"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Planche de kite-surf",
-            "sous_categorie": ["C_27"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Planche de surf (en mousse ou rigide)",
             "sous_categorie": ["C_27"]
         }
     },
@@ -5217,7 +4560,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Rame",
+            "nom": "Rames",
             "sous_categorie": ["C_27"]
         }
     },
@@ -5266,13 +4609,6 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Trottinette non électrique",
-            "sous_categorie": ["C_27"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Veste d'escrime",
             "sous_categorie": ["C_27"]
         }
@@ -5287,14 +4623,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Housse de sac",
-            "sous_categorie": ["C_27"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Corde pour canicross",
+            "nom": "Corde pour le sport",
             "sous_categorie": ["C_27"]
         }
     },
@@ -5308,28 +4637,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Housse de skis",
-            "sous_categorie": ["C_27"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Housse de chaussures de ski",
-            "sous_categorie": ["C_27"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Housse de snowboard",
-            "sous_categorie": ["C_27"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Housse de surf",
+            "nom": "Housse de sport",
             "sous_categorie": ["C_27"]
         }
     },
@@ -5385,14 +4693,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Planche de sport nautique (surf, kitesurf, windsurf, bodyboard)",
-            "sous_categorie": ["C_27"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Pompe (vélo, sports nautiques...)",
+            "nom": "Planche de sport nautique (voile, surf, kitesurf, windsurf, bodyboard)",
             "sous_categorie": ["C_27"]
         }
     },
@@ -5420,20 +4721,6 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Chaussures à crampons",
-            "sous_categorie": ["C_27"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Chaussures de cyclisme",
-            "sous_categorie": ["C_27"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Chaussures de ski",
             "sous_categorie": ["C_27"]
         }
@@ -5441,28 +4728,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Chaussures de surf",
-            "sous_categorie": ["C_27"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Filets et poteaux  (tennis, badminton, squash, ping-pong, volley)",
-            "sous_categorie": ["C_27"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Guètres de sport",
-            "sous_categorie": ["C_27"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Patins à glace, de hockey sur glace, de curling",
             "sous_categorie": ["C_27"]
         }
     },
@@ -5483,13 +4749,6 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Skis",
-            "sous_categorie": ["C_27"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Skis nautiques",
             "sous_categorie": ["C_27"]
         }
@@ -5504,7 +4763,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "chaussons de danse",
+            "nom": "Chaussons de danse",
             "sous_categorie": ["C_27"]
         }
     },
@@ -5532,14 +4791,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "palmes",
-            "sous_categorie": ["C_27"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "plaquettes (natation)",
+            "nom": "Plaquettes (natation)",
             "sous_categorie": ["C_27"]
         }
     },
@@ -5602,14 +4854,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Coquille de protection",
-            "sous_categorie": ["C_27"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Corde, cordelette, harnais et longe de canicrosse",
+            "nom": "Coquille de protection (sport)",
             "sous_categorie": ["C_27"]
         }
     },
@@ -5637,7 +4882,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Gants (gardien de foot, vélo, voile, golf, escrime, boxe…)",
+            "nom": "Gants de sport",
             "sous_categorie": ["C_27"]
         }
     },
@@ -5665,14 +4910,14 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Matériel de voile (harnais de rappel, trapèze, accastillage, poulie, manille, mousqueton, drisse, cordage…) < 2,5 m,",
+            "nom": "Matériel de voile (dérive, gouvernail, harnais de rappel, trapèze, accastillage, poulie, manille, mousqueton, drisse, cordage…)",
             "sous_categorie": ["C_27"]
         }
     },
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Piolet",
+            "nom": "Piolet de sport",
             "sous_categorie": ["C_27"]
         }
     },
@@ -5707,14 +4952,14 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Coque de protection de handball",
+            "nom": "Coque de protection (sport)",
             "sous_categorie": ["C_27"]
         }
     },
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Corde, cordelette et longe d'escalade",
+            "nom": "Longe pour le sport (escalade, canicrosse)",
             "sous_categorie": ["C_27"]
         }
     },
@@ -5729,13 +4974,6 @@
         "model": "qfdmo.objet",
         "fields": {
             "nom": "Dorsale",
-            "sous_categorie": ["C_27"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Equipement de ski de randonnée (pelle, sonde)",
             "sous_categorie": ["C_27"]
         }
     },
@@ -5770,7 +5008,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Masque d'escrime",
+            "nom": "Masque de sport",
             "sous_categorie": ["C_27"]
         }
     },
@@ -5889,20 +5127,6 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Ecran plat",
-            "sous_categorie": ["C_04"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Ecran à tube cathodique",
-            "sous_categorie": ["C_04"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Produit d'ameublement rembourré",
             "sous_categorie": ["C_16"]
         }
@@ -5966,13 +5190,6 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Housse rembourrée (chaise, canapé)",
-            "sous_categorie": ["C_16"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Tapis d'éveil",
             "sous_categorie": ["C_16"]
         }
@@ -5981,41 +5198,6 @@
         "model": "qfdmo.objet",
         "fields": {
             "nom": "Turbulette",
-            "sous_categorie": ["C_16"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Tour de lit rembourré",
-            "sous_categorie": ["C_16"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Coussin d'allaitement",
-            "sous_categorie": ["C_16"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Oreiller ergonomique",
-            "sous_categorie": ["C_16"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Coussin d'assise ou de dossier",
-            "sous_categorie": ["C_16"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Coussin pour animaux",
             "sous_categorie": ["C_16"]
         }
     },
@@ -6036,7 +5218,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "lampes",
+            "nom": "Lampe",
             "sous_categorie": ["C_17"]
         }
     },
@@ -6078,13 +5260,6 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Rideaux et leurs accessoires",
-            "sous_categorie": ["C_16"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Bande d'accrochage de rideau",
             "sous_categorie": ["C_16"]
         }
@@ -6100,13 +5275,6 @@
         "model": "qfdmo.objet",
         "fields": {
             "nom": "Bouton de tringle à rideau",
-            "sous_categorie": ["C_16"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Décoration textile à suspendre",
             "sous_categorie": ["C_16"]
         }
     },
@@ -6148,41 +5316,6 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Rideau obscurcissant",
-            "sous_categorie": ["C_16"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Rideau occultant",
-            "sous_categorie": ["C_16"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Rideau phonique",
-            "sous_categorie": ["C_16"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Rideau tamisant",
-            "sous_categorie": ["C_16"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Rideau thermique",
-            "sous_categorie": ["C_16"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Rideau",
             "sous_categorie": ["C_16"]
         }
@@ -6190,7 +5323,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Rideau moustiquaire",
+            "nom": "Moustiquaire",
             "sous_categorie": ["C_16"]
         }
     },
@@ -6204,63 +5337,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Store alvéolaire",
-            "sous_categorie": ["C_16"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Store bateau",
-            "sous_categorie": ["C_16"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Store californien",
-            "sous_categorie": ["C_16"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Store enrouleur",
-            "sous_categorie": ["C_16"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Store japonais",
-            "sous_categorie": ["C_16"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Store occultant",
-            "sous_categorie": ["C_16"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Store plissé",
-            "sous_categorie": ["C_16"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Store pour fenêtre de toit",
-            "sous_categorie": ["C_16"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Store vénitien",
+            "nom": "Store",
             "sous_categorie": ["C_16"]
         }
     },
@@ -6275,13 +5352,6 @@
         "model": "qfdmo.objet",
         "fields": {
             "nom": "Support de fixation (rideau, penderie)",
-            "sous_categorie": ["C_16"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Tissage mural macramé",
             "sous_categorie": ["C_16"]
         }
     },
@@ -6309,28 +5379,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Tringle à vêtement",
-            "sous_categorie": ["C_16"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Tringle à rideau",
-            "sous_categorie": ["C_16"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Voilage tamisant",
-            "sous_categorie": ["C_16"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Voilage transparent",
             "sous_categorie": ["C_16"]
         }
     },
@@ -6351,14 +5400,7 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Paillassonextérieur",
-            "sous_categorie": ["C_16"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Paillasson intérieur",
+            "nom": "Paillasson",
             "sous_categorie": ["C_16"]
         }
     },
@@ -6386,29 +5428,8 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Smartphone, tablette, console",
-            "sous_categorie": ["C_07"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Matériel informatique (ordinateur)",
+            "nom": "Matériel informatique",
             "sous_categorie": ["C_05"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Matériel hifi, vidéo",
-            "sous_categorie": ["C_06"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Matériel photo, cinéma",
-            "sous_categorie": ["C_08"]
         }
     },
     {
@@ -6416,13 +5437,6 @@
         "fields": {
             "nom": "Autre équipement électronique",
             "sous_categorie": ["C_09"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "CD, DVD, jeu vidéo",
-            "sous_categorie": ["C_10"]
         }
     },
     {
@@ -6437,20 +5451,6 @@
         "fields": {
             "nom": "Arrosoir",
             "sous_categorie": ["C_13"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Outil de bricolage, jardinage",
-            "sous_categorie": ["C_13"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Accessoire, meuble de jardin",
-            "sous_categorie": ["C_14"]
         }
     },
     {
@@ -6477,22 +5477,8 @@
     {
         "model": "qfdmo.objet",
         "fields": {
-            "nom": "Jouet",
-            "sous_categorie": ["C_21"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
             "nom": "Vêtement",
             "sous_categorie": ["C_22"]
-        }
-    },
-    {
-        "model": "qfdmo.objet",
-        "fields": {
-            "nom": "Bijou, montre",
-            "sous_categorie": ["C_25"]
         }
     },
     {
@@ -6514,6 +5500,279 @@
         "fields": {
             "nom": "Matériel médical",
             "sous_categorie": ["C_28"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Ecrin à bijoux",
+            "sous_categorie": ["C_25"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Boîte à bijoux",
+            "sous_categorie": ["C_25"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Chaussures de marche",
+            "sous_categorie": ["C_27"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Chaussures de randonnée",
+            "sous_categorie": ["C_27"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Sac à dos",
+            "sous_categorie": ["C_27"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Appareil électronique",
+            "sous_categorie": ["C_09"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Outil de bricolage",
+            "sous_categorie": ["C_13"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Outil de jardinage",
+            "sous_categorie": ["C_13"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Accessoire de jardin",
+            "sous_categorie": ["C_14"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Meuble de jardin",
+            "sous_categorie": ["C_14"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Matériel hifi",
+            "sous_categorie": ["C_06"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Matériel vidéo",
+            "sous_categorie": ["C_06"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Bijou",
+            "sous_categorie": ["C_25"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Montre",
+            "sous_categorie": ["C_25"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Matériel photo",
+            "sous_categorie": ["C_08"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Matériel cinéma",
+            "sous_categorie": ["C_08"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Chaussures de sport",
+            "sous_categorie": ["C_27"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Bracelet (bijou)",
+            "sous_categorie": ["C_25"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "skis",
+            "sous_categorie": ["C_27"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Accessoire de baseball",
+            "sous_categorie": ["C_27"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Plafonnier",
+            "sous_categorie": ["C_17"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Casque audio",
+            "sous_categorie": ["C_06"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Matériau de construction réemployable",
+            "sous_categorie": ["C_29"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Matériau du bâtiment réemployable",
+            "sous_categorie": ["C_29"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Jouet",
+            "sous_categorie": ["C_21"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Jeu de société",
+            "sous_categorie": ["C_21"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Parasol",
+            "sous_categorie": ["C_14"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Poussette",
+            "sous_categorie": ["C_20"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Réhausseur",
+            "sous_categorie": ["C_20"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Siège Auto",
+            "sous_categorie": ["C_20"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Robinet, mitigeur, robinetterie",
+            "sous_categorie": ["C_29"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "fenêtre, huisserie, porte, volet",
+            "sous_categorie": ["C_29"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Parpaings",
+            "sous_categorie": ["C_29"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Carrelage",
+            "sous_categorie": ["C_29"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Parquet, lambri",
+            "sous_categorie": ["C_29"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Cloison, BA13, Plaque de plâtre, Placo",
+            "sous_categorie": ["C_29"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "WC toilette, Bidet, Cabine de douche, Baignoire, Lavabo, Évier, Sanitaires",
+            "sous_categorie": ["C_29"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Fauteuil roulant, béquilles, brancard, lit médicalisé, déambulateur",
+            "sous_categorie": ["C_28"]
+        }
+    },
+    {
+        "model": "qfdmo.objet",
+        "fields": {
+            "nom": "Collier",
+            "sous_categorie": ["C_25"]
         }
     }
 ]

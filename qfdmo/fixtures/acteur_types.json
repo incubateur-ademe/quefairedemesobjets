@@ -3,7 +3,8 @@
         "model": "qfdmo.acteurtype",
         "fields": {
             "nom": "ess",
-            "nom_affiche": "Association, entreprise de l'économie sociale et solidaire",
+            "code_import": null,
+            "nom_affiche": "Association, entreprise de l'ESS",
             "lvao_id": 151
         }
     },
@@ -11,7 +12,8 @@
         "model": "qfdmo.acteurtype",
         "fields": {
             "nom": "collectivité",
-            "nom_affiche": "Collectivité, établissement public",
+            "code_import": null,
+            "nom_affiche": "collectivité, établissement public",
             "lvao_id": 152
         }
     },
@@ -19,7 +21,8 @@
         "model": "qfdmo.acteurtype",
         "fields": {
             "nom": "artisan",
-            "nom_affiche": "Artisan, commerce indépendant",
+            "code_import": null,
+            "nom_affiche": "artisan, commerce indépendant",
             "lvao_id": 153
         }
     },
@@ -27,7 +30,8 @@
         "model": "qfdmo.acteurtype",
         "fields": {
             "nom": "commerce",
-            "nom_affiche": "Franchise, enseigne commerciale",
+            "code_import": null,
+            "nom_affiche": "commerce",
             "lvao_id": 154
         }
     },
@@ -35,8 +39,63 @@
         "model": "qfdmo.acteurtype",
         "fields": {
             "nom": "acteur digital",
-            "nom_affiche": "Acteur digital (site web, app. mobile)",
+            "code_import": null,
+            "nom_affiche": "en ligne (web, mobile)",
             "lvao_id": 155
+        }
+    },
+    {
+        "model": "qfdmo.acteurtype",
+        "fields": {
+            "nom": "déchèterie",
+            "code_import": null,
+            "nom_affiche": "déchèterie",
+            "lvao_id": null
+        }
+    },
+    {
+        "model": "qfdmo.acteurtype",
+        "fields": {
+            "nom": "établissement de santé",
+            "code_import": null,
+            "nom_affiche": "établissement de santé",
+            "lvao_id": null
+        }
+    },
+    {
+        "model": "qfdmo.acteurtype",
+        "fields": {
+            "nom": "plateforme inertes",
+            "code_import": null,
+            "nom_affiche": "plateforme de valorisation des inertes",
+            "lvao_id": null
+        }
+    },
+    {
+        "model": "qfdmo.acteurtype",
+        "fields": {
+            "nom": "point d'apport volontaire public",
+            "code_import": null,
+            "nom_affiche": "point d'apport volontaire public",
+            "lvao_id": null
+        }
+    },
+    {
+        "model": "qfdmo.acteurtype",
+        "fields": {
+            "nom": "point d'apport volontaire privé",
+            "code_import": null,
+            "nom_affiche": "point d'apport volontaire privé",
+            "lvao_id": null
+        }
+    },
+    {
+        "model": "qfdmo.acteurtype",
+        "fields": {
+            "nom": "point d'apport volontaire ponctuel",
+            "code_import": null,
+            "nom_affiche": "point d'apport volontaire ponctuel",
+            "lvao_id": null
         }
     }
 ]

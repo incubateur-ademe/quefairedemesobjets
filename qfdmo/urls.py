@@ -73,4 +73,9 @@ urlpatterns = [
         TemplateView.as_view(template_name="editorial/cgu.html"),
         name="cgu",
     ),
+    path(
+        "test_iframe",
+        TemplateView.as_view(template_name="tests/iframe.html"),
+        name="test_iframe",
+    ),
 ]
