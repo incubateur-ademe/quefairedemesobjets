@@ -54,7 +54,7 @@
         "@playwright/test": "^1.42.1",
         "@testing-library/jest-dom": "^6.4.2",
         "@types/jest": "^29.5.12",
-        "@types/node": "^20.11.24",
+        "@types/node": "^20.11.26",
         "@typescript-eslint/eslint-plugin": "^6.21.0",
         "buffer": "^6.0.3",
         "eslint": "^8.57.0",
