@@ -765,3 +765,24 @@ class DisplayedPropositionServiceTemp(BasePropositionService):
         null=False,
         related_name="proposition_services",
     )
+
+    sous_categories = models.ManyToManyField(
+        SousCategorieObjet,
+        through="DisplayedPropositionServiceTempSousCategorie",
+    )
+
+    class DisplayedPropositionServiceTempSousCategorie(models.Model):
+
+        class Meta:
+            db_table = "qfdmo_displayedpropositionservicetemp_sous_categories"
+
+        id = models.BigAutoField(primary_key=True)
+        proposition_service = models.ForeignKey(
+            "DisplayedPropositionServiceTemp",
+            on_delete=models.CASCADE,
+            db_column="displayedpropositionservice_id",
+        )
+        sous_categorie_objet = models.ForeignKey(
+            SousCategorieObjet,
+            on_delete=models.CASCADE,
+        )
