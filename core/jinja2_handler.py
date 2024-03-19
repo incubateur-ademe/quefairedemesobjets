@@ -1,4 +1,5 @@
 import difflib
+from math import sqrt
 from typing import List
 from urllib.parse import quote_plus
 
@@ -9,7 +10,7 @@ from django.urls import reverse
 
 from core.utils import get_direction
 from jinja2 import Environment
-from qfdmo.models import CachedDirectionAction
+from qfdmo.models import CachedDirectionAction, DisplayedActeur
 
 
 # FIXME : could be tested
@@ -78,6 +79,31 @@ def display_search(request: HttpRequest) -> bool:
     return True
 
 
+def display_infos_panel(adresse: DisplayedActeur) -> bool:
+    return bool(adresse.adresse and not adresse.is_digital)
+
+
+def display_labels_panel(adresse: DisplayedActeur) -> bool:
+    return bool(adresse.label_reparacteur)
+
+
+def display_sources_panel(adresse: DisplayedActeur) -> bool:
+    return bool(adresse.source and adresse.source.afficher)
+
+
+def distance_to_acteur(request, adresse):
+    long = request.GET.get("longitude")
+    lat = request.GET.get("latitude")
+    point = adresse.location
+
+    if long and lat and point:
+        dist = sqrt((point.y - float(lat)) ** 2 + (point.x - float(long)) ** 2) * 111320
+        return (
+            f"( {round(dist/1000,2)} km )" if dist >= 1000 else f"( {round(dist)} m )"
+        )
+    return ""
+
+
 def environment(**options):
     env = Environment(**options)
     env.globals.update(
@@ -85,6 +111,10 @@ def environment(**options):
             "action_by_direction": action_by_direction,
             "action_list_display": action_list_display,
             "display_search": display_search,
+            "display_infos_panel": display_infos_panel,
+            "display_sources_panel": display_sources_panel,
+            "display_labels_panel": display_labels_panel,
+            "distance_to_acteur": distance_to_acteur,
             "is_iframe": is_iframe,
             "reverse": reverse,
             "static": static,
