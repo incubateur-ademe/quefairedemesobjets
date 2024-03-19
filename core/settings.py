@@ -268,11 +268,11 @@ NB_CORRECTION_DISPLAYED = decouple.config(
 SHELL_PLUS_PRINT_SQL = True
 
 # Object storage with Scaleway
-AWS_ACCESS_KEY_ID = decouple.config("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = decouple.config("AWS_SECRET_ACCESS_KEY")
-AWS_STORAGE_BUCKET_NAME = decouple.config("AWS_STORAGE_BUCKET_NAME")
-AWS_S3_REGION_NAME = decouple.config("AWS_S3_REGION_NAME")
-AWS_S3_ENDPOINT_URL = decouple.config("AWS_S3_ENDPOINT_URL")
+AWS_ACCESS_KEY_ID = decouple.config("AWS_ACCESS_KEY_ID", default="")
+AWS_SECRET_ACCESS_KEY = decouple.config("AWS_SECRET_ACCESS_KEY", default="")
+AWS_STORAGE_BUCKET_NAME = decouple.config("AWS_STORAGE_BUCKET_NAME", default="")
+AWS_S3_REGION_NAME = decouple.config("AWS_S3_REGION_NAME", default="")
+AWS_S3_ENDPOINT_URL = decouple.config("AWS_S3_ENDPOINT_URL", default="")
 
 STORAGES = {
     "default": {
@@ -287,9 +287,6 @@ STORAGES = {
     },
 }
 
-
-# if AWS_ACCESS_KEY_ID:
-#     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-
-# else:
-#     DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
+AIRFLOW_WEBSERVER_REFRESHACTEUR_URL = decouple.config(
+    "AIRFLOW_WEBSERVER_REFRESHACTEUR_URL", cast=str, default="http://localhost:8080"
+)

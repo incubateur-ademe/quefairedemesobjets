@@ -23,8 +23,8 @@ from qfdmo.models import (
     ActeurStatus,
     ActeurType,
     CachedDirectionAction,
-    FinalActeur,
-    FinalPropositionService,
+    DisplayedActeur,
+    DisplayedPropositionService,
     Objet,
     RevisionActeur,
 )
@@ -93,7 +93,7 @@ class ReemploiSolutionView(FormView):
 
     def get_context_data(self, **kwargs):
         kwargs["location"] = "{}"
-        kwargs["acteurs"] = FinalActeur.objects.none()
+        kwargs["acteurs"] = DisplayedActeur.objects.none()
 
         sous_categorie_id = None
         if (
@@ -106,7 +106,7 @@ class ReemploiSolutionView(FormView):
 
         ps_filter = self._build_ps_filter(action_selection_ids, sous_categorie_id)
 
-        acteurs = FinalActeur.objects.filter(ps_filter)
+        acteurs = DisplayedActeur.objects.filter(ps_filter)
 
         acteurs = acteurs.prefetch_related(
             "proposition_services__sous_categories",
@@ -185,7 +185,7 @@ class ReemploiSolutionView(FormView):
         if sous_categorie_id:
             if action_selection_ids:
                 ps_filter = ps_filter | Q(
-                    proposition_services__in=FinalPropositionService.objects.filter(
+                    proposition_services__in=DisplayedPropositionService.objects.filter(
                         action_id__in=action_selection_ids,
                         sous_categories__id=sous_categorie_id,
                     ),
@@ -193,7 +193,7 @@ class ReemploiSolutionView(FormView):
                 )
             if reparer_action_id:
                 ps_filter = ps_filter | Q(
-                    proposition_services__in=FinalPropositionService.objects.filter(
+                    proposition_services__in=DisplayedPropositionService.objects.filter(
                         action_id=reparer_action_id,
                         sous_categories__id=sous_categorie_id,
                     ),
@@ -267,7 +267,7 @@ def get_object_list(request):
 
 
 def solution_detail(request, identifiant_unique):
-    final_acteur = FinalActeur.objects.get(identifiant_unique=identifiant_unique)
+    final_acteur = DisplayedActeur.objects.get(identifiant_unique=identifiant_unique)
     return render(request, "qfdmo/solution_detail.html", {"final_acteur": final_acteur})
 
 
@@ -275,7 +275,7 @@ def adresse_detail(request, identifiant_unique):
     latitude = request.GET.get("latitude")
     longitude = request.GET.get("longitude")
     direction = request.GET.get("direction")
-    final_acteur = FinalActeur.objects.get(identifiant_unique=identifiant_unique)
+    final_acteur = DisplayedActeur.objects.get(identifiant_unique=identifiant_unique)
     return render(
         request,
         "qfdmo/adresse_detail.html",
