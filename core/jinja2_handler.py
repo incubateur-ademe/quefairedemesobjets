@@ -91,6 +91,9 @@ def environment(**options):
             "str_diff": str_diff,
             "quote_plus": lambda u: quote_plus(u),
             "ENVIRONMENT": settings.ENVIRONMENT,
+            "AIRFLOW_WEBSERVER_REFRESHACTEUR_URL": (
+                settings.AIRFLOW_WEBSERVER_REFRESHACTEUR_URL
+            ),
         }
     )
     return env

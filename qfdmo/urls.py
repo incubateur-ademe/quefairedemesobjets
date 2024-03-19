@@ -1,5 +1,7 @@
+from django.conf import settings
 from django.urls import path
 from django.views.generic import TemplateView
+from django.views.generic.base import RedirectView
 
 from qfdmo.views import corrections, display_solutions
 
@@ -15,7 +17,7 @@ urlpatterns = [
     ),
     path(
         "qfdmo/refresh_acteur_view",
-        display_solutions.refresh_acteur_view,
+        RedirectView.as_view(url=settings.AIRFLOW_WEBSERVER_REFRESHACTEUR_URL),
         name="refresh_acteur_view",
     ),
     path(
