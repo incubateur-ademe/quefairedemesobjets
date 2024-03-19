@@ -1,9 +1,17 @@
+import factory.fuzzy
 from django.contrib.gis.geos import Point
 from factory import SubFactory
 from factory.django import DjangoModelFactory as Factory
 
-from qfdmo.models import Acteur, ActeurType, Source
-from qfdmo.models.acteur import ActeurService, PropositionService
+from qfdmo.models import (
+    Acteur,
+    ActeurService,
+    ActeurType,
+    DisplayedActeur,
+    DisplayedPropositionService,
+    PropositionService,
+    Source,
+)
 from unit_tests.qfdmo.action_factory import ActionFactory
 
 
@@ -27,6 +35,17 @@ class ActeurFactory(Factory):
     source = SubFactory(SourceFactory)
 
 
+class DisplayedActeurFactory(Factory):
+    class Meta:
+        model = DisplayedActeur
+
+    identifiant_unique = factory.fuzzy.FuzzyText(length=10)
+    nom = "Test Object 1"
+    location = Point(0, 0)
+    acteur_type = SubFactory(ActeurTypeFactory)
+    source = SubFactory(SourceFactory)
+
+
 class ActeurServiceFactory(Factory):
     class Meta:
         model = ActeurService
@@ -41,3 +60,12 @@ class PropositionServiceFactory(Factory):
     acteur_service = SubFactory(ActeurServiceFactory)
     action = SubFactory(ActionFactory)
     acteur = SubFactory(ActeurFactory)
+
+
+class DisplayedPropositionServiceFactory(Factory):
+    class Meta:
+        model = DisplayedPropositionService
+
+    acteur_service = SubFactory(ActeurServiceFactory)
+    action = SubFactory(ActionFactory)
+    acteur = SubFactory(DisplayedActeurFactory)

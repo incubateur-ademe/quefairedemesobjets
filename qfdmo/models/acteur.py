@@ -277,34 +277,6 @@ class Acteur(BaseActeur):
 
         return acteur
 
-    def get_or_create_correctionequipe(self):
-        fields = model_to_dict(
-            self,
-            fields=[
-                "multi_base",
-                "label_reparacteur",
-                "manuel",
-                "statut",
-            ],
-        )
-        (acteur, created) = CorrectionEquipeActeur.objects.get_or_create(
-            identifiant_unique=self.identifiant_unique, defaults=fields
-        )
-        if created:
-            for proposition_service in self.proposition_services.all():  # type: ignore
-                revision_proposition_service = (
-                    CorrectionEquipePropositionService.objects.create(
-                        acteur=acteur,
-                        action_id=proposition_service.action_id,
-                        acteur_service_id=proposition_service.acteur_service_id,
-                    )
-                )
-                revision_proposition_service.sous_categories.add(
-                    *proposition_service.sous_categories.all()
-                )
-
-        return acteur
-
     def clean_location(self):
         if self.location is None and self.acteur_type.nom != "acteur digital":
             raise ValidationError(
@@ -369,53 +341,12 @@ class RevisionActeur(BaseActeur):
         return self.nom or self.identifiant_unique
 
 
-class CorrectionEquipeActeur(BaseActeur):
-    class Meta:
-        verbose_name = "ACTEUR de l'EC - CORRIGÉ (NOUVEAU À IGNORER)"
-        verbose_name_plural = "ACTEURS de l'EC - CORRIGÉ (NOUVEAU À IGNORER)"
-
-    nom = models.CharField(max_length=255, blank=True, null=True)
-    acteur_type = models.ForeignKey(
-        ActeurType, on_delete=models.CASCADE, blank=True, null=True
-    )
-
-    def save(self, *args, **kwargs):
-        self.set_default_fields_and_objects_before_save()
-        return super().save(*args, **kwargs)
-
-    def set_default_fields_and_objects_before_save(self):
-        acteur_exists = True
-        if not self.identifiant_unique or not Acteur.objects.filter(
-            identifiant_unique=self.identifiant_unique
-        ):
-            acteur_exists = False
-        if not acteur_exists:
-            acteur = Acteur.objects.create(
-                **model_to_dict(
-                    self,
-                    exclude=["id", "acteur_type", "source", "proposition_services"],
-                ),
-                acteur_type=(
-                    self.acteur_type
-                    if self.acteur_type
-                    else ActeurType.objects.get(nom="commerce")
-                ),
-                source=self.source,
-            )
-            self.identifiant_unique = acteur.identifiant_unique
-            self.identifiant_externe = acteur.identifiant_externe
-            self.source = acteur.source
-
-    def __str__(self):
-        return self.nom or self.identifiant_unique
-
-
 class FinalActeur(BaseActeur):
     class Meta:
         managed = False
         db_table = "qfdmo_finalacteur"
-        verbose_name = "ACTEUR de l'EC - AFFICHÉ"
-        verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ"
+        verbose_name = "ACTEUR de l'EC - AFFICHÉ (DEPRECATED)"
+        verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ (DEPRECATED)"
 
     @classmethod
     def refresh_view(cls):
@@ -504,8 +435,8 @@ REFRESH MATERIALIZED VIEW CONCURRENTLY qfdmo_finalpropositionservice_sous_catego
 
 class DisplayedActeur(BaseActeur):
     class Meta:
-        verbose_name = "ACTEUR de l'EC - AFFICHÉ (NOUVEAU À IGNORER)"
-        verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ (NOUVEAU À IGNORER)"
+        verbose_name = "ACTEUR de l'EC - AFFICHÉ"
+        verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ"
 
     def acteur_actions(self, direction=None):
         acteur_actions_by_direction = {}
@@ -707,29 +638,6 @@ class RevisionPropositionService(BasePropositionService):
         return f"{self.acteur} - {super().__str__()}"
 
 
-class CorrectionEquipePropositionService(BasePropositionService):
-    class Meta:
-        verbose_name = "PROPOSITION DE SERVICE - CORRIGÉ (NOUVEAU À IGNORER)"
-        verbose_name_plural = "PROPOSITIONS DE SERVICE - CORRIGÉ (NOUVEAU À IGNORER)"
-        constraints = [
-            models.UniqueConstraint(
-                fields=["acteur", "action", "acteur_service"],
-                name="rps_unique_by_correctionequipeacteur_action_service",
-            )
-        ]
-
-    acteur = models.ForeignKey(
-        CorrectionEquipeActeur,
-        to_field="identifiant_unique",
-        on_delete=models.CASCADE,
-        null=False,
-        related_name="proposition_services",
-    )
-
-    def __str__(self):
-        return f"{self.acteur} - {super().__str__()}"
-
-
 class FinalPropositionService(BasePropositionService):
     class Meta:
         managed = False
@@ -747,8 +655,8 @@ class FinalPropositionService(BasePropositionService):
 
 class DisplayedPropositionService(BasePropositionService):
     class Meta:
-        verbose_name = "Proposition de service - AFFICHÉ (NOUVEAU À IGNORER)"
-        verbose_name_plural = "Proposition de service - AFFICHÉ (NOUVEAU À IGNORER)"
+        verbose_name = "Proposition de service - AFFICHÉ"
+        verbose_name_plural = "Proposition de service - AFFICHÉ"
 
     acteur = models.ForeignKey(
         DisplayedActeur,
@@ -772,7 +680,6 @@ class DisplayedPropositionServiceTemp(BasePropositionService):
     )
 
     class DisplayedPropositionServiceTempSousCategorie(models.Model):
-
         class Meta:
             db_table = "qfdmo_displayedpropositionservicetemp_sous_categories"
 
