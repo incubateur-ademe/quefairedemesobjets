@@ -14,14 +14,12 @@ export interface Action {
 export class Actor {
     identifiant_unique: string
     location: ActorLocation
-    render_as_card: string
     actions: Action[]
     acteur_selected_action: Action
 
     constructor(actor_fields: object) {
         this.identifiant_unique = actor_fields["identifiant_unique"]
         this.location = actor_fields["location"]
-        this.render_as_card = actor_fields["render_as_card"]
         this.actions = actor_fields["actions"]
         this.acteur_selected_action = actor_fields["acteur_selected_action"]
     }

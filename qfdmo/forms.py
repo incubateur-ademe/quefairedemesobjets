@@ -1,12 +1,7 @@
 from django import forms
-from django.conf import settings
 from django.utils.safestring import mark_safe
 
-from qfdmo.models import (
-    CachedDirectionAction,
-    CorrectionActeurStatus,
-    SousCategorieObjet,
-)
+from qfdmo.models import CachedDirectionAction, SousCategorieObjet
 
 
 class AutoCompleteInput(forms.Select):
@@ -166,39 +161,5 @@ class GetReemploiSolutionForm(forms.Form):
             ),
         ],
         label="Adresses à proximité ou solutions digitales",
-        required=False,
-    )
-
-
-class GetCorrectionsForm(forms.Form):
-    source = forms.CharField(
-        widget=forms.HiddenInput(),
-        required=False,
-    )
-    correction_statut = forms.MultipleChoiceField(
-        widget=forms.CheckboxSelectMultiple(),
-        choices=CorrectionActeurStatus.choices,
-        label="Statut de la correction",
-        required=False,
-    )
-    nb_lines = forms.IntegerField(
-        initial=settings.NB_CORRECTION_DISPLAYED,
-        widget=forms.NumberInput(
-            attrs={
-                "class": "fr-input",
-            }
-        ),
-        label="Nombre de corrections à afficher",
-        min_value=1,
-        max_value=100,
-    )
-    search_query = forms.CharField(
-        widget=forms.TextInput(
-            attrs={
-                "class": "fr-input",
-                "placeholder": "Nom, Ville, Code postal, Siret…",
-            }
-        ),
-        label="Recherche textuelle",
         required=False,
     )

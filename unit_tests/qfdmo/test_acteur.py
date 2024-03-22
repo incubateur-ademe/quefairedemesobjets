@@ -9,7 +9,6 @@ from qfdmo.models import (
     ActeurType,
     Action,
     CachedDirectionAction,
-    FinalActeur,
     NomAsNaturalKeyModel,
     PropositionService,
     RevisionActeur,
@@ -17,7 +16,6 @@ from qfdmo.models import (
     Source,
 )
 from unit_tests.qfdmo.acteur_factory import (
-    ActeurFactory,
     ActeurServiceFactory,
     PropositionServiceFactory,
 )
@@ -42,26 +40,6 @@ def populate_admin_object(django_db_blocker):
 def acteur(db, populate_admin_object):
     ps = PropositionServiceFactory.create()
     yield ps.acteur
-
-
-@pytest.fixture()
-def finalacteur(db, populate_admin_object):
-    action1 = Action.objects.get(nom="reparer")
-    action2 = Action.objects.get(nom="echanger")
-    action3 = Action.objects.get(nom="louer")
-    acteur_service = ActeurServiceFactory.create()
-    acteur = ActeurFactory.create()
-    PropositionServiceFactory(
-        acteur=acteur, acteur_service=acteur_service, action=action1
-    )
-    PropositionServiceFactory(
-        acteur=acteur, acteur_service=acteur_service, action=action2
-    )
-    PropositionServiceFactory(
-        acteur=acteur, acteur_service=acteur_service, action=action3
-    )
-    FinalActeur.refresh_view()
-    yield FinalActeur.objects.get(identifiant_unique=acteur.identifiant_unique)
 
 
 class TestNomAsNaturalKeyHeritage:
@@ -125,10 +103,8 @@ class TestActeurSerialize:
             "url": None,
             "email": None,
             "telephone": None,
-            "multi_base": False,
             "nom_commercial": None,
             "nom_officiel": None,
-            "manuel": False,
             "label_reparacteur": False,
             "siret": None,
             "source": acteur.source.serialize(),
@@ -269,55 +245,6 @@ class TestActeurGetOrCreateRevisionActeur:
 
 
 @pytest.mark.django_db
-class TestActeurMaterializedView:
-    # TODO : to be deprecated
-    def test_materialized_view_empty(self, acteur):
-        assert FinalActeur.objects.count() == 0
-
-    def test_materialized_view_with_acteur(self, acteur):
-        acteur.refresh_from_db()
-        FinalActeur.refresh_view()
-        final_acteur = FinalActeur.objects.first()
-        serialized_final_acteur = final_acteur.serialize()
-        serialized_final_acteur.pop("actions")
-
-        assert FinalActeur.objects.count() == 1
-        assert serialized_final_acteur == acteur.serialize()
-
-    def test_materialized_view_with_acteur_even_if_revision(self, acteur):
-        FinalActeur.refresh_view()
-        final_acteur = FinalActeur.objects.first()
-
-        revision_acteur = acteur.get_or_create_revision()
-        revision_acteur.nom = "Test Object 2"
-        revision_acteur.save()
-        acteur.refresh_from_db()
-        final_acteur.refresh_from_db()
-        serialized_final_acteur = final_acteur.serialize()
-        serialized_final_acteur.pop("actions")
-
-        assert serialized_final_acteur == acteur.serialize()
-        assert serialized_final_acteur != revision_acteur.serialize()
-
-    def test_materialized_view_with_revisionacteur(self, acteur):
-        revision_acteur = acteur.get_or_create_revision()
-        revision_acteur.nom = "Test Object 2"
-        revision_acteur.identifiant_externe = "789"
-        revision_acteur.save()
-        FinalActeur.refresh_view()
-        final_acteur = FinalActeur.objects.get(
-            identifiant_unique=acteur.identifiant_unique
-        )
-
-        assert final_acteur.nom == revision_acteur.nom
-        assert final_acteur.nom != acteur.nom
-        assert final_acteur.identifiant_externe == revision_acteur.identifiant_externe
-        assert final_acteur.identifiant_externe != acteur.identifiant_externe
-        assert final_acteur.source != revision_acteur.source
-        assert final_acteur.source == acteur.source
-
-
-@pytest.mark.django_db
 class TestCreateRevisionActeur:
     def test_new_revision_acteur(self, populate_admin_object):
         revision_acteur = RevisionActeur.objects.create(
@@ -331,165 +258,6 @@ class TestCreateRevisionActeur:
         )
         assert revision_acteur.source == acteur.source
         assert revision_acteur.acteur_type == acteur.acteur_type
-
-
-@pytest.mark.django_db
-class TestFinalActeurSerialize:
-    def test_finalacteur_serialize_basic(self, finalacteur):
-        assert finalacteur.serialize() == {
-            "nom": finalacteur.nom,
-            "description": None,
-            "identifiant_unique": finalacteur.identifiant_unique,
-            "adresse": None,
-            "adresse_complement": None,
-            "code_postal": None,
-            "ville": None,
-            "url": None,
-            "email": None,
-            "telephone": None,
-            "multi_base": False,
-            "nom_commercial": None,
-            "nom_officiel": None,
-            "manuel": False,
-            "label_reparacteur": False,
-            "siret": None,
-            "source": finalacteur.source.serialize(),
-            "statut": "ACTIF",
-            "identifiant_externe": finalacteur.identifiant_externe,
-            "location": {"type": "Point", "coordinates": [0.0, 0.0]},
-            "naf_principal": None,
-            "commentaires": None,
-            "horaires": None,
-            "proposition_services": [
-                proposition_service.serialize()
-                for proposition_service in finalacteur.proposition_services.all()
-            ],
-            "actions": finalacteur.acteur_actions(),
-            "acteur_type": finalacteur.acteur_type.serialize(),
-        }
-
-    def test_finalacteur_serialize_render_as_card(self, finalacteur):
-        assert finalacteur.serialize(render_as_card=True) == {
-            "nom": finalacteur.nom,
-            "description": None,
-            "identifiant_unique": finalacteur.identifiant_unique,
-            "adresse": None,
-            "adresse_complement": None,
-            "code_postal": None,
-            "ville": None,
-            "url": None,
-            "email": None,
-            "telephone": None,
-            "multi_base": False,
-            "nom_commercial": None,
-            "nom_officiel": None,
-            "manuel": False,
-            "label_reparacteur": False,
-            "siret": None,
-            "source": finalacteur.source.serialize(),
-            "statut": "ACTIF",
-            "identifiant_externe": finalacteur.identifiant_externe,
-            "location": {"type": "Point", "coordinates": [0.0, 0.0]},
-            "naf_principal": None,
-            "commentaires": None,
-            "horaires": None,
-            "proposition_services": [
-                proposition_service.serialize()
-                for proposition_service in finalacteur.proposition_services.all()
-            ],
-            "actions": finalacteur.acteur_actions(),
-            "acteur_type": finalacteur.acteur_type.serialize(),
-            "render_as_card": finalacteur.render_as_card(),
-        }
-
-    def test_finalacteur_serialize_render_as_card_with_direction(self, finalacteur):
-        assert finalacteur.serialize(render_as_card=True, direction="jai") == {
-            "nom": finalacteur.nom,
-            "description": None,
-            "identifiant_unique": finalacteur.identifiant_unique,
-            "adresse": None,
-            "adresse_complement": None,
-            "code_postal": None,
-            "ville": None,
-            "url": None,
-            "email": None,
-            "telephone": None,
-            "multi_base": False,
-            "nom_commercial": None,
-            "nom_officiel": None,
-            "manuel": False,
-            "label_reparacteur": False,
-            "siret": None,
-            "source": finalacteur.source.serialize(),
-            "statut": "ACTIF",
-            "identifiant_externe": finalacteur.identifiant_externe,
-            "location": {"type": "Point", "coordinates": [0.0, 0.0]},
-            "naf_principal": None,
-            "commentaires": None,
-            "horaires": None,
-            "proposition_services": [
-                proposition_service.serialize()
-                for proposition_service in finalacteur.proposition_services.all()
-            ],
-            "actions": finalacteur.acteur_actions(direction="jai"),
-            "acteur_type": finalacteur.acteur_type.serialize(),
-            "render_as_card": finalacteur.render_as_card(direction="jai"),
-        }
-
-
-@pytest.mark.django_db
-class TestFinalActeurRenderascard:
-    def test_finalacteur_renderascard_basic(self, finalacteur):
-        finalacteur.adresse = "77 Av Segur"
-        finalacteur.code_postal = "75007"
-        finalacteur.ville = "Paris"
-
-        html = finalacteur.render_as_card()
-
-        for action in finalacteur.acteur_actions():
-            assert action["nom_affiche"] in html
-        for acteur_service in finalacteur.acteur_services():
-            assert str(acteur_service) in html
-
-        assert finalacteur.nom_affiche in html
-        assert finalacteur.adresse in html
-        assert finalacteur.code_postal in html
-        assert finalacteur.ville in html
-        assert "None" not in html
-
-    def test_finalacteur_renderascard_detailed(self, finalacteur):
-        finalacteur.adresse = "77 Av Segur"
-        finalacteur.adresse_complement = "Dinum"
-        finalacteur.code_postal = "75007"
-        finalacteur.ville = "Paris"
-        finalacteur.telephone = "01 02 03 04 05"
-        finalacteur.url = "quefairedemesobjets.ademe.fr"
-
-        html = finalacteur.render_as_card()
-
-        assert finalacteur.adresse_complement in html
-        assert finalacteur.telephone in html
-        assert f'href="{finalacteur.url}"' in html
-        assert "None" not in html
-
-
-@pytest.mark.django_db
-class TestFinalActeurActions:
-    def test_acteur_actions_basic(self, finalacteur):
-        actions = finalacteur.acteur_actions()
-        assert [action["nom"] for action in actions] == ["louer", "reparer", "echanger"]
-
-    def test_acteur_actions_with_direction(self, finalacteur):
-        actions = finalacteur.acteur_actions(direction="jai")
-        assert [action["nom"] for action in actions] == ["reparer", "echanger"]
-
-    def test_acteur_actions_order(self, finalacteur):
-        CachedDirectionAction.reload_cache()
-        Action.objects.filter(nom="reparer").update(order=3)
-        Action.objects.filter(nom="echanger").update(order=2)
-        Action.objects.filter(nom="louer").update(order=1)
-        actions = finalacteur.acteur_actions()
-        assert [action["nom"] for action in actions] == ["louer", "echanger", "reparer"]
 
 
 @pytest.mark.django_db
