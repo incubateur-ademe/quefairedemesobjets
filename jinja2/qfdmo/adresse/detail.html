@@ -16,6 +16,7 @@
     {% if adresse.distance %}
         &nbsp;({{adresse.distance}}km) <!-- FIXME: to be display smartly as a distance in m or km-->
     {% endif %}
+    {{ distance_to_acteur(request, adresse) }}
     <!-- TODO: &nbsp;(13 km) -->
 </p>
 
@@ -29,7 +30,7 @@
 
 <hr class="fr-pb-1v">
 <div class="fr-my-1w qfdmo-flex qfdmo-justify-around">
-    {% if latitude and longitude %}
+    {% if latitude and longitude and not adresse.is_digital %}
         <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
             <a  class="fr-btn fr-icon-send-plane-line qfdmo-rounded-full"
                 href="https://www.google.com/maps/dir/?api=1&origin={{latitude}},{{longitude}}&destination={{adresse.latitude}},{{adresse.longitude}}&travelMode=WALKING"
@@ -46,7 +47,6 @@
             <span class="fr-text--xs fr-mb-0">Site web</span>
         </div>
     {% endif %}
-    <!-- TODO hidden until we figue about RGPD rules -->
     {% if adresse.email and False %}
         <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
             <a class="fr-btn fr-btn--secondary-light fr-icon-mail-line qfdmo-rounded-full" href="mailto:{{ adresse.email }}" target="_blank" title="Courriel" rel='noopener'></a>
@@ -140,39 +140,45 @@
                 À propos
             </button>
         </li>
-        <li role="presentation">
-            <button class="fr-tabs__tab fr-tabs__tab--noborder"
-                tabindex="-1"
-                role="tab"
-                aria-selected="false"
-                aria-controls="infosPanel"
-                type="button"
-            >
-                Infos
-            </button>
-        </li>
-        <li role="presentation">
-            <button class="fr-tabs__tab fr-tabs__tab--noborder"
-                tabindex="-1"
-                role="tab"
-                aria-selected="false"
-                aria-controls="labelsPanel"
-                type="button"
-            >
-                Labels
-            </button>
-        </li>
-        <li role="presentation">
-            <button class="fr-tabs__tab fr-tabs__tab--noborder"
-                tabindex="-1"
-                role="tab"
-                aria-selected="false"
-                aria-controls="sourcesPanel"
-                type="button"
-            >
-                Sources
-            </button>
-        </li>
+        {% if display_infos_panel(adresse) %}
+            <li role="presentation">
+                <button class="fr-tabs__tab fr-tabs__tab--noborder"
+                    tabindex="-1"
+                    role="tab"
+                    aria-selected="false"
+                    aria-controls="infosPanel"
+                    type="button"
+                >
+                    Infos
+                </button>
+            </li>
+        {% endif %}
+        {% if display_labels_panel(adresse) %}
+            <li role="presentation">
+                <button class="fr-tabs__tab fr-tabs__tab--noborder"
+                    tabindex="-1"
+                    role="tab"
+                    aria-selected="false"
+                    aria-controls="labelsPanel"
+                    type="button"
+                >
+                    Labels
+                </button>
+            </li>
+        {% endif %}
+        {% if display_sources_panel(adresse) %}
+            <li role="presentation">
+                <button class="fr-tabs__tab fr-tabs__tab--noborder"
+                    tabindex="-1"
+                    role="tab"
+                    aria-selected="false"
+                    aria-controls="sourcesPanel"
+                    type="button"
+                >
+                    Sources
+                </button>
+            </li>
+        {% endif %}
     </ul>
     <div id="aboutPanel"
         class="fr-tabs__panel fr-tabs__panel--selected fr-p-0"
@@ -202,65 +208,66 @@
                 </p>
             </div>
         {% endfor %}
-
     </div>
-    <div id="infosPanel"
-        class="fr-tabs__panel fr-p-0"
-        role="tabpanel"
-        aria-labelledby="infosPanel"
-        tabindex="0"
-    >
-        {% if not adresse.adresse %}
-            <!-- not adresse.horaires and -->
-            <p class="qfdmo-italic">Pas d'information complémentaire à partager</p>
-        {% endif %}
 
-        {% if adresse.horaires and False %}
-            <!-- TODO : Display horaires -->
-            <h3 class="fr-text--sm fr-m-0 qfdmo-text-grey-425">Horaires d'ouverture</h3>
-            <div class="fr-p-1w fr-my-1w qfdmo-bg-grey-975">
-                <p>{{adresse.horaires}}</p>
-            </div>
-        {% endif %}
+    {% if display_infos_panel(adresse) %}
+        <div id="infosPanel"
+            class="fr-tabs__panel fr-p-0"
+            role="tabpanel"
+            aria-labelledby="infosPanel"
+            tabindex="0"
+        >
+            {% if adresse.horaires and False %}
+                <!-- TODO : Display horaires -->
+                <h3 class="fr-text--sm fr-m-0 qfdmo-text-grey-425">Horaires d'ouverture</h3>
+                <div class="fr-p-1w fr-my-1w qfdmo-bg-grey-975">
+                    <p>{{adresse.horaires}}</p>
+                </div>
+            {% endif %}
 
-        {% if adresse.adresse %}
-            <h3 class="fr-text--sm fr-m-0 qfdmo-text-grey-425">Adresse</h3>
-            <div class="fr-p-1w fr-my-1w qfdmo-bg-grey-975">
-                {{ adresse.adresse|title }}<br>
-                {% if adresse.adresse_complement %}
-                    {{ adresse.adresse_complement }}<br>
-                {% endif %}
-                {{ adresse.code_postal }} {{ adresse.ville|title }}
-            </div>
-        {% endif %}
+            {% if adresse.adresse %}
+                <h3 class="fr-text--sm fr-m-0 qfdmo-text-grey-425">Adresse</h3>
+                <div class="fr-p-1w fr-my-1w qfdmo-bg-grey-975">
+                    {{ adresse.adresse|title }}<br>
+                    {% if adresse.adresse_complement %}
+                        {{ adresse.adresse_complement }}<br>
+                    {% endif %}
+                    {{ adresse.code_postal }} {{ adresse.ville|title }}
+                </div>
+            {% endif %}
 
-        <!-- TODO : Accessibilité -->
+            <!-- TODO : Accessibilité -->
 
-    </div>
-    <div id="labelsPanel"
-        class="fr-tabs__panel fr-p-0"
-        role="tabpanel"
-        aria-labelledby="labelsPanel"
-        tabindex="0"
-    >
-        {% if adresse.label_reparacteur %}
-            <div class="fr-px-1w fr-my-1w qfdmo-bg-grey-975">
-                <a class="fr-px-1w fr-py-2w fr-my-1w fr-link fr-link--lg fr-link--no-underline qfdmo-w-full qfdmo-flex" href="https://www.artisanat.fr/nous-connaitre/vous-accompagner/reparacteurs" target="_blank" rel="noopener">
-                    {% include "qfdmo/partials/label_reparacteur_icon.html" %}
-                    <span class="fr-ml-1w qfdmo-grow">Répar'Acteurs</span>
-                </a>
-            </div>
-        {% else %}
-            <p class="qfdmo-italic">Pas de label connu pour ce lieu</p>
-        {% endif %}
-    </div>
-    <div id="sourcesPanel"
-        class="fr-tabs__panel fr-p-0"
-        role="tabpanel"
-        aria-labelledby="sourcesPanel"
-        tabindex="0"
-    >
-        {% if adresse.source.afficher %}
+        </div>
+    {% endif %}
+
+    {% if display_labels_panel(adresse) %}
+        <div id="labelsPanel"
+            class="fr-tabs__panel fr-p-0"
+            role="tabpanel"
+            aria-labelledby="labelsPanel"
+            tabindex="0"
+        >
+            {% if adresse.label_reparacteur %}
+                <div class="fr-px-1w fr-my-1w qfdmo-bg-grey-975">
+                    <a class="fr-px-1w fr-py-2w fr-my-1w fr-link fr-link--lg fr-link--no-underline qfdmo-w-full qfdmo-flex" href="https://www.artisanat.fr/nous-connaitre/vous-accompagner/reparacteurs" target="_blank" rel="noopener">
+                        {% include "qfdmo/partials/label_reparacteur_icon.html" %}
+                        <span class="fr-ml-1w qfdmo-grow">Répar'Acteurs</span>
+                    </a>
+                </div>
+            {% else %}
+                <p class="qfdmo-italic">Pas de label connu pour ce lieu</p>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {% if display_sources_panel(adresse) %}
+        <div id="sourcesPanel"
+            class="fr-tabs__panel fr-p-0"
+            role="tabpanel"
+            aria-labelledby="sourcesPanel"
+            tabindex="0"
+        >
             <div class="fr-px-1w fr-my-1w qfdmo-bg-grey-975">
                 <a class="fr-px-1w fr-py-2w fr-my-1w fr-link fr-link--lg fr-link--no-underline qfdmo-w-full qfdmo-flex" href="{{ adresse.source.url if adresse.source.url else '#' }}" target="_blank" rel="noopener">
                     {% if adresse.source.logo_file %}
@@ -276,11 +283,8 @@
                     <span class="fr-ml-1w qfdmo-grow">{{ adresse.source.nom }}</span>
                 </a>
             </div>
-        {% else %}
-            <p class="qfdmo-italic">Pas de contributeur spécifique pour ce lieu</p>
-        {% endif %}
-
-    </div>
+        </div>
+    {% endif %}
 </div>
 <div class="qfdmo-flex qfdmo-flex-row-reverse">
     <div class="fr-m-0 fr-ml-1w fr-text--xs">
