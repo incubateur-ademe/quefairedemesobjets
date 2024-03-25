@@ -266,21 +266,18 @@ def get_object_list(request):
     )
 
 
-def solution_detail(request, identifiant_unique):
-    final_acteur = DisplayedActeur.objects.get(identifiant_unique=identifiant_unique)
-    return render(request, "qfdmo/solution_detail.html", {"final_acteur": final_acteur})
-
-
 def adresse_detail(request, identifiant_unique):
     latitude = request.GET.get("latitude")
     longitude = request.GET.get("longitude")
     direction = request.GET.get("direction")
-    final_acteur = DisplayedActeur.objects.get(identifiant_unique=identifiant_unique)
+    displayed_acteur = DisplayedActeur.objects.get(
+        identifiant_unique=identifiant_unique
+    )
     return render(
         request,
         "qfdmo/adresse_detail.html",
         {
-            "adresse": final_acteur,
+            "adresse": displayed_acteur,
             "latitude": latitude,
             "longitude": longitude,
             "direction": direction,

@@ -1,3 +1,6 @@
+## DEPRECATED
+## Won't be use anymore, Correction as it is known in the project is not used anymore
+
 import datetime
 
 import requests
@@ -9,7 +12,7 @@ from qfdmo.models import (
     ActeurStatus,
     CorrectionActeur,
     CorrectionActeurStatus,
-    FinalActeur,
+    DisplayedActeur,
 )
 
 SOURCE = "URL_SCRIPT"
@@ -83,7 +86,7 @@ class Command(BaseCommand):
                 return
 
         final_acteurs = (
-            FinalActeur.objects.annotate(url_length=Length("url"))
+            DisplayedActeur.objects.annotate(url_length=Length("url"))
             .filter(url_length__gte=1, statut=ActeurStatus.ACTIF)
             .exclude(
                 identifiant_unique__in=CorrectionActeur.objects.values_list(

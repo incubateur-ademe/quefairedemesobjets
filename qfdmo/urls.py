@@ -3,7 +3,7 @@ from django.urls import path
 from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 
-from qfdmo.views import corrections, display_solutions
+from qfdmo.views import display_solutions
 
 urlpatterns = [
     path(
@@ -24,16 +24,6 @@ urlpatterns = [
         "qfdmo/get_object_list",
         display_solutions.get_object_list,
         name="get_object_list",
-    ),
-    path(
-        "corrections",
-        corrections.CorrectionsView.as_view(),
-        name="display_corrections",
-    ),
-    path(
-        "solution/<str:identifiant_unique>",
-        display_solutions.solution_detail,
-        name="solution_detail",
     ),
     path(
         "adresse/<str:identifiant_unique>",

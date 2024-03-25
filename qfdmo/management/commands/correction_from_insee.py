@@ -1,3 +1,6 @@
+## DEPRECATED
+## Won't be use anymore, Correction as it is known in the project is not used anymore
+
 import datetime
 import time
 import urllib
@@ -11,7 +14,7 @@ from qfdmo.models import (
     ActeurStatus,
     CorrectionActeur,
     CorrectionActeurStatus,
-    FinalActeur,
+    DisplayedActeur,
 )
 
 CLIENT = ApiInsee(key=settings.INSEE_KEY, secret=settings.INSEE_SECRET)
@@ -83,7 +86,7 @@ class Command(BaseCommand):
                 return
 
         final_acteurs = (
-            FinalActeur.objects.annotate(siret_length=Length("siret"))
+            DisplayedActeur.objects.annotate(siret_length=Length("siret"))
             .filter(siret_length=14, statut=ActeurStatus.ACTIF)
             .exclude(
                 identifiant_unique__in=CorrectionActeur.objects.values_list(

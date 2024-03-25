@@ -2,7 +2,7 @@ import re
 
 from django.core.management.base import BaseCommand
 
-from qfdmo.models import Acteur, FinalActeur
+from qfdmo.models import Acteur, DisplayedActeur
 
 
 def formatted_string(string: str) -> str:
@@ -80,7 +80,7 @@ class Command(BaseCommand):
                 )
                 return
 
-        final_acteurs = FinalActeur.objects.all().order_by("?")
+        final_acteurs = DisplayedActeur.objects.all().order_by("?")
 
         if nb_acteur_limit is not None:
             final_acteurs = final_acteurs[:nb_acteur_limit]
