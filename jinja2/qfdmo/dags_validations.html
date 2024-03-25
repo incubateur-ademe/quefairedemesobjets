@@ -1,0 +1,17 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+
+    <div class="fr-container">
+        <h1>Validations des «DAGs»</h1>
+
+        <p>
+            Cette page permet de valider les données des «DAGs».
+        </p>
+
+        {% for dag in dag_runs %}
+            <p>{{dag}}</p>
+        {% endfor %}
+    </div>
+
+{% endblock %}

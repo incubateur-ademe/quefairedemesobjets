@@ -3,7 +3,7 @@ from django.urls import path
 from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 
-from qfdmo.views import display_solutions
+from qfdmo.views import dags, display_solutions
 
 urlpatterns = [
     path(
@@ -69,5 +69,10 @@ urlpatterns = [
         "test_iframe",
         TemplateView.as_view(template_name="tests/iframe.html"),
         name="test_iframe",
+    ),
+    path(
+        "dags/validations",
+        dags.dags_validations,
+        name="get_object_list",
     ),
 ]
