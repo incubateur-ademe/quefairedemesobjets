@@ -1,3 +1,6 @@
+## DEPRECATED
+## Won't be use anymore, Correction as it is known in the project is not used anymore
+
 import datetime
 
 import requests
@@ -9,7 +12,7 @@ from qfdmo.models import (
     ActeurStatus,
     CorrectionActeur,
     CorrectionActeurStatus,
-    FinalActeur,
+    DisplayedActeur,
 )
 
 SOURCE = "RechercheSiret"
@@ -100,7 +103,7 @@ class Command(BaseCommand):
         )
 
         final_acteurs = (
-            FinalActeur.objects.annotate(
+            DisplayedActeur.objects.annotate(
                 siret_length=Length("siret"), has_correction=Exists(correction_subquery)
             )
             .filter(siret_length=14, statut=ActeurStatus.ACTIF, has_correction=False)

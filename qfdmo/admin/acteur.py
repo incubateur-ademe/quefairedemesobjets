@@ -14,9 +14,6 @@ from qfdmo.models import (
     ActeurService,
     ActeurType,
     Action,
-    CorrectionActeur,
-    FinalActeur,
-    FinalPropositionService,
     PropositionService,
     RevisionActeur,
     RevisionPropositionService,
@@ -72,21 +69,6 @@ class PropositionServiceInline(BasePropositionServiceInline, NotEditableInlineMi
 
 class RevisionPropositionServiceInline(BasePropositionServiceInline):
     model = RevisionPropositionService
-
-
-class FinalPropositionServiceInline(
-    BasePropositionServiceInline, NotEditableInlineMixin
-):
-    model = FinalPropositionService
-
-    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
 
 
 class DisplayedPropositionServiceInline(
@@ -356,34 +338,13 @@ class RevisionPropositionServiceAdmin(
     search_help_text = "Recherche sur le nom ou le siret de l'acteur"
 
 
-class FinalActeurResource(ActeurResource):
-    class Meta:
-        model = FinalActeur
-
-
-class FinalActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
-    change_form_template = "admin/final_acteur/change_form.html"
-    gis_widget = CustomOSMWidget
-    inlines = [
-        FinalPropositionServiceInline,
-    ]
-    modifiable = False
-    resource_classes = [FinalActeurResource]
-
-    def get_readonly_fields(self, request, obj=None):
-        return [f.name for f in self.model._meta.fields if f.name != "location"]
-
-    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
-
-
 class DisplayedActeurResource(ActeurResource):
     class Meta:
         model = DisplayedActeur
 
 
 class DisplayedActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
-    change_form_template = "admin/final_acteur/change_form.html"
+    change_form_template = "admin/displayed_acteur/change_form.html"
     gis_widget = CustomOSMWidget
     inlines = [
         DisplayedPropositionServiceInline,
@@ -398,18 +359,9 @@ class DisplayedActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
         return False
 
 
-class CorrectionActeurAdmin(BaseActeurAdmin):
-    gis_widget = CustomOSMWidget
-    inlines = []
-    list_display = ["__str__", "source", "correction_statut"]
-    readonly_fields = ["final_acteur", "cree_le", "modifie_le"]
-
-
 admin.site.register(Acteur, ActeurAdmin)
 admin.site.register(ActeurService)
 admin.site.register(ActeurType, ActeurTypeAdmin)
-admin.site.register(CorrectionActeur, CorrectionActeurAdmin)
-admin.site.register(FinalActeur, FinalActeurAdmin)
 admin.site.register(DisplayedActeur, DisplayedActeurAdmin)
 admin.site.register(PropositionService, PropositionServiceAdmin)
 admin.site.register(RevisionActeur, RevisionActeurAdmin)

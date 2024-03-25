@@ -7,10 +7,8 @@ import opening_hours
 import orjson
 from django.contrib.gis.db import models
 from django.core.files.images import get_image_dimensions
-from django.db import connection
 from django.forms import ValidationError, model_to_dict
 from django.http import HttpRequest
-from django.template.loader import render_to_string
 from django.urls import reverse
 from unidecode import unidecode
 
@@ -38,14 +36,6 @@ class ActeurStatus(models.TextChoices):
     ACTIF = "ACTIF", "actif"
     INACTIF = "INACTIF", "inactif"
     SUPPRIME = "SUPPRIME", "supprimé"
-
-
-class CorrectionActeurStatus(models.TextChoices):
-    ACTIF = "ACTIF", "Actif"
-    IGNORE = "IGNORE", "Ignoré"
-    PAS_DE_MODIF = "PAS_DE_MODIF", "Pas de modification"
-    ACCEPTE = "ACCEPTE", "Accepté"
-    REJETE = "REJETE", "Rejeté"
 
 
 class ActeurType(NomAsNaturalKeyModel):
@@ -151,12 +141,8 @@ class BaseActeur(NomAsNaturalKeyModel):
     email = models.EmailField(blank=True, null=True)
     location = models.PointField(blank=True, null=True)
     telephone = models.CharField(max_length=255, blank=True, null=True)
-    # FIXME : multi_base could be removed ?
-    multi_base = models.BooleanField(default=False)
     nom_commercial = models.CharField(max_length=255, blank=True, null=True)
     nom_officiel = models.CharField(max_length=255, blank=True, null=True)
-    # FIXME : manuel could be removed ?
-    manuel = models.BooleanField(default=False)
     # FIXME : Could be replace to a many-to-many relationship with a label table ?
     label_reparacteur = models.BooleanField(default=False)
     siret = models.CharField(max_length=14, blank=True, null=True)
@@ -341,98 +327,6 @@ class RevisionActeur(BaseActeur):
         return self.nom or self.identifiant_unique
 
 
-class FinalActeur(BaseActeur):
-    class Meta:
-        managed = False
-        db_table = "qfdmo_finalacteur"
-        verbose_name = "ACTEUR de l'EC - AFFICHÉ (DEPRECATED)"
-        verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ (DEPRECATED)"
-
-    @classmethod
-    def refresh_view(cls):
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-REFRESH MATERIALIZED VIEW CONCURRENTLY qfdmo_finalacteur;
-REFRESH MATERIALIZED VIEW CONCURRENTLY qfdmo_finalpropositionservice;
-REFRESH MATERIALIZED VIEW CONCURRENTLY qfdmo_finalpropositionservice_sous_categories;
-                """
-            )
-
-    def acteur_actions(self, direction=None):
-        acteur_actions_by_direction = {}
-        ps_action_ids = [
-            ps.action_id for ps in self.proposition_services.all()  # type: ignore
-        ]
-        for d, actions in CachedDirectionAction.get_actions_by_direction().items():
-            acteur_actions_by_direction[d] = sorted(
-                [action for action in actions if action["id"] in ps_action_ids],
-                key=lambda x: x["order"],
-            )
-        if direction:
-            return acteur_actions_by_direction[direction]
-
-        deduplicated_actions = {
-            a["id"]: a
-            for a in (
-                acteur_actions_by_direction["jai"]
-                + acteur_actions_by_direction["jecherche"]
-            )
-        }.values()
-        sorted_actions = sorted(
-            deduplicated_actions,
-            key=lambda x: x["order"],
-        )
-        return sorted_actions
-
-    def render_as_card(self, direction: str | None = None) -> str:
-        return render_to_string(
-            "qfdmo/acteur_as_card.html", {"acteur": self, "direction": direction}
-        )
-
-    def serialize(
-        self,
-        format: None | str = None,
-        render_as_card: bool = False,
-        direction: str | None = None,
-    ) -> dict | str:
-        super_serialized = super().serialize(format=None)
-        super_serialized["actions"] = self.acteur_actions(direction=direction)
-
-        if render_as_card:
-            super_serialized["render_as_card"] = self.render_as_card(  # type: ignore
-                direction=direction
-            )
-
-        if format == "json":
-            return json.dumps(super_serialized)
-        return super_serialized
-
-    def json_acteur_for_display(
-        self, direction: str | None = None, action_list: str | None = None
-    ) -> str:
-        actions = self.acteur_actions(direction=direction)
-        acteur_selected_actions = None
-        if action_list:
-            acteur_selected_actions = [
-                a for a in actions if a["nom"] in action_list.split("|")
-            ]
-
-        return orjson.dumps(
-            {
-                "identifiant_unique": self.identifiant_unique,
-                "location": orjson.loads(self.location.geojson),
-                "actions": actions,
-                "acteur_selected_action": (
-                    acteur_selected_actions[0]
-                    if acteur_selected_actions
-                    else actions[0]
-                ),
-                "render_as_card": self.render_as_card(direction=direction),
-            }
-        ).decode("utf-8")
-
-
 class DisplayedActeur(BaseActeur):
     class Meta:
         verbose_name = "ACTEUR de l'EC - AFFICHÉ"
@@ -464,24 +358,13 @@ class DisplayedActeur(BaseActeur):
         )
         return sorted_actions
 
-    def render_as_card(self, direction: str | None = None) -> str:
-        return render_to_string(
-            "qfdmo/acteur_as_card.html", {"acteur": self, "direction": direction}
-        )
-
     def serialize(
         self,
         format: None | str = None,
-        render_as_card: bool = False,
         direction: str | None = None,
     ) -> dict | str:
         super_serialized = super().serialize(format=None)
         super_serialized["actions"] = self.acteur_actions(direction=direction)
-
-        if render_as_card:
-            super_serialized["render_as_card"] = self.render_as_card(  # type: ignore
-                direction=direction
-            )
 
         if format == "json":
             return json.dumps(super_serialized)
@@ -507,56 +390,12 @@ class DisplayedActeur(BaseActeur):
                     if acteur_selected_actions
                     else actions[0]
                 ),
-                "render_as_card": self.render_as_card(direction=direction),
             }
         ).decode("utf-8")
 
 
 class DisplayedActeurTemp(BaseActeur):
     pass
-
-
-class CorrectionActeur(BaseActeur):
-    class Meta:
-        verbose_name = "Proposition de correction d'un acteur"
-        verbose_name_plural = "Propositions de correction des acteurs"
-
-    id = models.AutoField(primary_key=True)
-    identifiant_unique = models.CharField(max_length=255)
-    source = models.CharField(max_length=255)
-    resultat_brute_source = models.JSONField()
-    acteur_type = models.ForeignKey(
-        ActeurType, on_delete=models.CASCADE, null=True, blank=True, default=None
-    )
-    final_acteur = models.ForeignKey(
-        FinalActeur,
-        db_constraint=False,
-        on_delete=models.DO_NOTHING,
-        null=True,
-        related_name="corrections",
-        to_field="identifiant_unique",
-    )
-    correction_statut = models.CharField(
-        max_length=255,
-        default=CorrectionActeurStatus.ACTIF,
-        choices=CorrectionActeurStatus.choices,
-    )
-
-    # FIXME : could be tested
-    def __str__(self):
-        return self.identifiant_unique
-
-    def accepted_by_default(self):
-        return self.correction_statut in [
-            CorrectionActeurStatus.ACCEPTE,
-            CorrectionActeurStatus.ACTIF,
-        ]
-
-    def rejected_by_default(self):
-        return self.correction_statut in [CorrectionActeurStatus.REJETE]
-
-    def ignored_by_default(self):
-        return self.correction_statut in [CorrectionActeurStatus.IGNORE]
 
 
 class BasePropositionService(models.Model):
@@ -638,21 +477,6 @@ class RevisionPropositionService(BasePropositionService):
         return f"{self.acteur} - {super().__str__()}"
 
 
-class FinalPropositionService(BasePropositionService):
-    class Meta:
-        managed = False
-        db_table = "qfdmo_finalpropositionservice"
-        verbose_name = "Proposition de service - AFFICHÉ"
-        verbose_name_plural = "Propositions de service - AFFICHÉ"
-
-    acteur = models.ForeignKey(
-        FinalActeur,
-        on_delete=models.CASCADE,
-        null=False,
-        related_name="proposition_services",
-    )
-
-
 class DisplayedPropositionService(BasePropositionService):
     class Meta:
         verbose_name = "Proposition de service - AFFICHÉ"
@@ -682,6 +506,7 @@ class DisplayedPropositionServiceTemp(BasePropositionService):
     class DisplayedPropositionServiceTempSousCategorie(models.Model):
         class Meta:
             db_table = "qfdmo_displayedpropositionservicetemp_sous_categories"
+            managed = False
 
         id = models.BigAutoField(primary_key=True)
         proposition_service = models.ForeignKey(

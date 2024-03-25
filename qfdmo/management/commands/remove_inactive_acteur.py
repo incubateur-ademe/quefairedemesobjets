@@ -1,3 +1,6 @@
+## DEPRECATED
+## Won't be use anymore
+
 from django.core.management.base import BaseCommand
 
 from qfdmo.models import Acteur, ActeurStatus, CorrectionActeur, CorrectionActeurStatus
