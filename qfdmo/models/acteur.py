@@ -239,9 +239,7 @@ class Acteur(BaseActeur):
         fields = model_to_dict(
             self,
             fields=[
-                "multi_base",
                 "label_reparacteur",
-                "manuel",
                 "statut",
             ],
         )
