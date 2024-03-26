@@ -132,6 +132,7 @@ django==4.2.9 \
     #   django-import-export
     #   django-sql-explorer
     #   django-storages
+    #   djangorestframework
 django-import-export==3.3.6 \
     --hash=sha256:12edb7ba1f7f9b392d0257a2ae68086020e53ab2c7bd2b21a56ec17fbb83826b \
     --hash=sha256:b1b7385627ed61063cd9764e8c19cce3ce8945626f7953262df8162b0feec376
@@ -143,6 +144,10 @@ django-sql-explorer==3.2.1 \
 django-storages==1.14.2 \
     --hash=sha256:1db759346b52ada6c2efd9f23d8241ecf518813eb31db9e2589207174f58f6ad \
     --hash=sha256:51b36af28cc5813b98d5f3dfe7459af638d84428c8df4a03990c7d74d1bea4e5
+    # via -r requirements.in
+djangorestframework==3.15.1 \
+    --hash=sha256:3ccc0475bce968608cf30d07fb17d8e52d1d7fc8bfe779c905463200750cbca6 \
+    --hash=sha256:f88fad74183dfc7144b2756d0d2ac716ea5b4c7c9840995ac3bfd8ec034333c1
     # via -r requirements.in
 et-xmlfile==1.1.0 \
     --hash=sha256:8eb9e2bc2f8c97e37a2dc85a09ecdcdec9d8a396530a6d5a33b30b9a92da0c5c \
