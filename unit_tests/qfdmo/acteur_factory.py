@@ -19,6 +19,8 @@ class SourceFactory(Factory):
     class Meta:
         model = Source
 
+    afficher = True
+
 
 class ActeurTypeFactory(Factory):
     class Meta:
