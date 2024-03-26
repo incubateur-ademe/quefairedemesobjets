@@ -99,7 +99,9 @@ def distance_to_acteur(request, adresse):
     if long and lat and point and not adresse.is_digital:
         dist = sqrt((point.y - float(lat)) ** 2 + (point.x - float(long)) ** 2) * 111320
         return (
-            f"( {round(dist/1000,2)} km )" if dist >= 1000 else f"( {round(dist)} m )"
+            f"({str(round(dist/1000,1)).replace('.',',')} km)"
+            if dist >= 1000
+            else f"({round(dist/10)*10} m)"
         )
     return ""
 
