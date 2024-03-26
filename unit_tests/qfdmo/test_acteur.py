@@ -23,7 +23,7 @@ from unit_tests.qfdmo.action_factory import ActionFactory
 
 
 @pytest.fixture(scope="session")
-def populate_admin_object(django_db_blocker):
+def django_db_setup(django_db_setup, django_db_blocker):
     with django_db_blocker.unblock():
         call_command(
             "loaddata",
@@ -37,7 +37,7 @@ def populate_admin_object(django_db_blocker):
 
 
 @pytest.fixture()
-def acteur(db, populate_admin_object):
+def acteur(db):
     ps = PropositionServiceFactory.create()
     yield ps.acteur
 
@@ -74,13 +74,13 @@ class TestActeurNomAffiche:
 
 @pytest.mark.django_db
 class TestActeurIsdigital:
-    def test_isdigital_false(self, populate_admin_object):
+    def test_isdigital_false(self):
         acteur_type = ActeurType.objects.exclude(nom="acteur digital").first()
         assert not Acteur(
             nom="Test Object 1", location=Point(0, 0), acteur_type=acteur_type
         ).is_digital
 
-    def test_isdigital_true(self, populate_admin_object):
+    def test_isdigital_true(self):
         acteur_type = ActeurType.objects.get(nom="acteur digital")
         assert Acteur(
             nom="Test Object 1", location=Point(0, 0), acteur_type=acteur_type
@@ -201,7 +201,7 @@ class TestLocationValidation:
 
 @pytest.mark.django_db
 class TestActeurGetOrCreateRevisionActeur:
-    def test_create_revisionacteur_copy1(self, populate_admin_object, acteur):
+    def test_create_revisionacteur_copy1(self, acteur):
         revision_acteur = acteur.get_or_create_revision()
 
         assert (
@@ -209,7 +209,7 @@ class TestActeurGetOrCreateRevisionActeur:
             == acteur.serialize()["identifiant_unique"]
         )
 
-    def test_create_revisionacteur_copy2(self, populate_admin_object, acteur):
+    def test_create_revisionacteur_copy2(self, acteur):
         revision_acteur = acteur.get_or_create_revision()
         revision_acteur.nom = "Test Object 2"
         revision_acteur.save()
@@ -219,7 +219,7 @@ class TestActeurGetOrCreateRevisionActeur:
         assert revision_acteur2.nom == "Test Object 2"
         assert revision_acteur2.nom != acteur.nom
 
-    def test_create_revisionacteur(self, populate_admin_object, acteur):
+    def test_create_revisionacteur(self, acteur):
         revision_acteur = acteur.get_or_create_revision()
         revision_acteur.proposition_services.all().delete()
         acteur_service = ActeurServiceFactory.create(nom="service 2")
@@ -246,7 +246,7 @@ class TestActeurGetOrCreateRevisionActeur:
 
 @pytest.mark.django_db
 class TestCreateRevisionActeur:
-    def test_new_revision_acteur(self, populate_admin_object):
+    def test_new_revision_acteur(self):
         revision_acteur = RevisionActeur.objects.create(
             nom="Test Object 1",
             location=Point(0, 0),
