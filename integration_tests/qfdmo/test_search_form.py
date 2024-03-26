@@ -48,8 +48,8 @@ class TestDirectionChecked:
     @pytest.mark.parametrize(
         "params,checked_direction",
         [
-            ("", "jecherche"),
-            ("?direction=fake", "jecherche"),
+            ("", "jai"),
+            ("?direction=fake", "jai"),
             ("?direction=jai", "jai"),
             ("?direction=jecherche", "jecherche"),
         ],
