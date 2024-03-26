@@ -1,5 +1,6 @@
 import pytest
 from django.contrib.gis.geos import Point
+from django.core.management import call_command
 
 from qfdmo.models import (
     Acteur,
@@ -11,6 +12,15 @@ from qfdmo.models import (
     RevisionPropositionService,
     SousCategorieObjet,
 )
+
+
+@pytest.fixture(scope="session")
+def django_db_setup(django_db_setup, django_db_blocker):
+    with django_db_blocker.unblock():
+        call_command(
+            "loaddata",
+            "acteur_types",
+        )
 
 
 class TestActionNomAsNaturalKeyHeritage:

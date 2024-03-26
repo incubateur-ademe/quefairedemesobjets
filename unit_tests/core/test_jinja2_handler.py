@@ -4,8 +4,18 @@ import pytest
 from django.core.management import call_command
 from django.http import HttpRequest
 
-from core.jinja2_handler import action_by_direction, action_list_display, is_iframe
+from core.jinja2_handler import (
+    action_by_direction,
+    action_list_display,
+    display_infos_panel,
+    display_labels_panel,
+    display_sources_panel,
+    distance_to_acteur,
+    is_iframe,
+)
 from qfdmo.models import CachedDirectionAction
+from qfdmo.models.acteur import ActeurType
+from unit_tests.qfdmo.acteur_factory import DisplayedActeurFactory
 
 
 @pytest.fixture(scope="session")
@@ -15,6 +25,7 @@ def django_db_setup(django_db_setup, django_db_blocker):
             "loaddata",
             "action_directions",
             "actions",
+            "acteur_types",
         )
         CachedDirectionAction.reload_cache()
 
@@ -190,3 +201,77 @@ class TestActionByDirection:
             "emprunter",
             "louer",
         ]
+
+
+@pytest.fixture
+def adresse():
+    return DisplayedActeurFactory(
+        adresse="1 rue de la paix",
+        label_reparacteur=True,
+    )
+
+
+@pytest.mark.django_db
+class TestDisplayInfosPanel:
+
+    def test_display_infos_panel_not_digital(self, adresse):
+        assert display_infos_panel(adresse)
+
+        adresse.adresse = None
+        assert not display_infos_panel(adresse)
+
+    def test_display_infos_panel_digital(self, adresse):
+        adresse.acteur_type_id = ActeurType.get_digital_acteur_type_id()
+        assert not display_infos_panel(adresse)
+
+        adresse.adresse = None
+        assert not display_infos_panel(adresse)
+
+
+@pytest.mark.django_db
+class TestDisplayLabelsPanel:
+
+    def test_display_labels_panel(self, adresse):
+        assert display_labels_panel(adresse)
+        adresse.label_reparacteur = False
+        assert not display_labels_panel(adresse)
+
+
+@pytest.mark.django_db
+class TestDisplaySourcesPanel:
+
+    def test_display_sources_panel(self, adresse):
+        assert display_sources_panel(adresse)
+        adresse.source.afficher = False
+        assert not display_sources_panel(adresse)
+
+
+@pytest.mark.django_db
+class TestDistanceToActeur:
+
+    @pytest.mark.parametrize(
+        "request_params,expected",
+        [
+            ({"longitude": "0", "latitude": "0"}, "(0 m)"),
+            ({"longitude": str(954 / 111320), "latitude": "0"}, "(950 m)"),
+            ({"longitude": "0", "latitude": str(-954 / 111320)}, "(950 m)"),
+            ({"longitude": str(955 / 111320), "latitude": "0"}, "(960 m)"),
+            ({"longitude": str(1049 / 111320), "latitude": "0"}, "(1,0 km)"),
+            ({"longitude": str(1051 / 111320), "latitude": "0"}, "(1,1 km)"),
+            (
+                {"longitude": str(1000 / 111320), "latitude": str(1000 / 111320)},
+                "(1,4 km)",
+            ),
+            ({"longitude": str(99999 / 111320), "latitude": "0"}, "(100,0 km)"),
+        ],
+    )
+    def test_distance_to_acteur_not_digital(self, adresse, request_params, expected):
+        request = type("", (), {})()  # create a dummy object
+        request.GET = request_params
+        assert distance_to_acteur(request, adresse) == expected
+
+    def test_distance_to_acteur_digital(self, adresse):
+        adresse.acteur_type_id = ActeurType.get_digital_acteur_type_id()
+        request = type("", (), {})()
+        request.GET = {"longitude": str(1000 / 111320), "latitude": str(1000 / 111320)}
+        assert distance_to_acteur(request, adresse) == ""
