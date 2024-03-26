@@ -96,7 +96,7 @@ def distance_to_acteur(request, adresse):
     lat = request.GET.get("latitude")
     point = adresse.location
 
-    if long and lat and point:
+    if long and lat and point and not adresse.is_digital:
         dist = sqrt((point.y - float(lat)) ** 2 + (point.x - float(long)) ** 2) * 111320
         return (
             f"( {round(dist/1000,2)} km )" if dist >= 1000 else f"( {round(dist)} m )"

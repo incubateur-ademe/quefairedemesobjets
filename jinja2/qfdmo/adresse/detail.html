@@ -13,11 +13,7 @@
     {% for acteur_service in adresse.acteur_services() %}
         {{ acteur_service }}{% if not loop.last %},&nbsp;{% endif %}
     {% endfor %}
-    {% if adresse.distance %}
-        &nbsp;({{adresse.distance}}km) <!-- FIXME: to be display smartly as a distance in m or km-->
-    {% endif %}
     {{ distance_to_acteur(request, adresse) }}
-    <!-- TODO: &nbsp;(13 km) -->
 </p>
 
 {% if not adresse.is_digital %}
