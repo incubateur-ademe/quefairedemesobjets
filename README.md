@@ -377,7 +377,8 @@ classDiagram
         - commentaires: str
         - cree_le: datetime
         - modifie_le: datetime
-        - horaires: str
+        - horaires_osm: str
+        - horaires_description: str
         + share_url(request: HttpRequest, direction: str | None): str
         + latitude: float
         + longitude: float
