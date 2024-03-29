@@ -28,7 +28,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           cache: "pip"
-          python-version: "3.12.1"
+          python-version: "3.12.2"
       - name: Install GIS Packages
         run: |
           sudo apt-get update
@@ -93,7 +93,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           cache: "pip"
-          python-version: "3.12.1"
+          python-version: "3.12.2"
 
       - name: Install GIS Packages
         run: |
