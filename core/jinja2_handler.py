@@ -80,7 +80,9 @@ def display_search(request: HttpRequest) -> bool:
 
 
 def display_infos_panel(adresse: DisplayedActeur) -> bool:
-    return bool(adresse.adresse and not adresse.is_digital)
+    return (
+        bool(adresse.horaires_description or adresse.adresse) and not adresse.is_digital
+    )
 
 
 def display_labels_panel(adresse: DisplayedActeur) -> bool:

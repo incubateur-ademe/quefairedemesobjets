@@ -113,7 +113,8 @@ class TestActeurSerialize:
             "location": {"type": "Point", "coordinates": [0.0, 0.0]},
             "naf_principal": None,
             "commentaires": None,
-            "horaires": None,
+            "horaires_osm": None,
+            "horaires_description": None,
             "proposition_services": [proposition_service.serialize()],
         }
         assert acteur.serialize() == expected_serialized_acteur
@@ -174,7 +175,7 @@ class TestActeurOpeningHours:
             acteur_type_id=1,
             location=Point(0, 0),
         )
-        acteur.horaires = "24/24"
+        acteur.horaires_osm = "24/24"
         with pytest.raises(ValidationError):
             acteur.full_clean()
 
