@@ -155,9 +155,10 @@ class BaseActeur(NomAsNaturalKeyModel):
     commentaires = models.TextField(blank=True, null=True)
     cree_le = models.DateTimeField(auto_now_add=True)
     modifie_le = models.DateTimeField(auto_now=True)
-    horaires = models.CharField(
+    horaires_osm = models.CharField(
         blank=True, null=True, validators=[validate_opening_hours]
     )
+    horaires_description = models.TextField(blank=True, null=True)
 
     def share_url(self, request: HttpRequest, direction: str | None = None):
         # url = request.build_absolute_uri("")

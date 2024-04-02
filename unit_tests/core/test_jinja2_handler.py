@@ -214,10 +214,20 @@ def adresse():
 @pytest.mark.django_db
 class TestDisplayInfosPanel:
 
-    def test_display_infos_panel_not_digital(self, adresse):
+    def test_display_infos_panel_adresse_not_digital(self, adresse):
+        adresse.horaires_description = None
+        adresse.adresse = "something"
         assert display_infos_panel(adresse)
 
         adresse.adresse = None
+        assert not display_infos_panel(adresse)
+
+    def test_display_infos_panel_horaires_not_digital(self, adresse):
+        adresse.horaires_description = "something"
+        adresse.adresse = None
+        assert display_infos_panel(adresse)
+
+        adresse.horaires_description = None
         assert not display_infos_panel(adresse)
 
     def test_display_infos_panel_digital(self, adresse):
