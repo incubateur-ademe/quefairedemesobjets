@@ -6,6 +6,7 @@ Django
 django-import-export
 django-sql-explorer
 django-storages
+djangorestframework
 gunicorn
 Jinja2
 opening-hours-py
