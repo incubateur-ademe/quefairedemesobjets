@@ -44,14 +44,16 @@ module.exports = {
         "md:qfdmo-w-[250px]",
         "md:qfdmo-w-[400px]",
         "md:qfdmo-w-[596px]",
+        "qfdmo-h-[95%]",
     ],
     theme: {
         colors: {
             // https://www.systeme-de-design.gouv.fr/elements-d-interface/fondamentaux-de-l-identite-de-l-etat/couleurs-palette
-            white: "white",
             info: {
                 "975-active": "#c2cfff",
             },
+            black: "black",
+            white: "white",
             "blue-france-sun-113": "#000091",
             "blue-france": "#2323ff",
             "blue-france-main-525": "#6a6af4",

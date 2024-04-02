@@ -29,6 +29,12 @@ export default class extends Controller<HTMLElement> {
         "adresseGroup",
         "adresseError",
 
+        "advancedFilterMainPanel",
+        "advancedFilterFormPanel",
+
+        "advancedFilterSaveButton",
+        "advancedFilterSaveAndSubmitButton",
+
         //FIXME: should be renamed
         "loadingSolutions",
         "addressMissing",
@@ -60,6 +66,12 @@ export default class extends Controller<HTMLElement> {
 
     declare readonly adresseGroupTarget: HTMLElement
     declare readonly adresseErrorTarget: HTMLElement
+
+    declare readonly advancedFilterMainPanelTarget: HTMLElement
+    declare readonly advancedFilterFormPanelTarget: HTMLElement
+
+    declare readonly advancedFilterSaveButtonTarget: HTMLElement
+    declare readonly advancedFilterSaveAndSubmitButtonTarget: HTMLElement
 
     declare readonly loadingSolutionsTarget: HTMLElement
     declare readonly addressMissingTarget: HTMLElement
@@ -248,5 +260,39 @@ export default class extends Controller<HTMLElement> {
         setTimeout(() => {
             this.searchFormTarget.dispatchEvent(event)
         }, 300)
+    }
+
+    toggleAdvancedFiltersWithSubmit() {
+        this.advancedFilterSaveAndSubmitButtonTarget.classList.remove("qfdmo-hidden")
+        this.advancedFilterSaveButtonTarget.classList.add("qfdmo-hidden")
+        this.#toggleAdvancedFilters()
+    }
+
+    toggleAdvancedFiltersWithoutSubmit() {
+        this.advancedFilterSaveAndSubmitButtonTarget.classList.add("qfdmo-hidden")
+        this.advancedFilterSaveButtonTarget.classList.remove("qfdmo-hidden")
+        this.#toggleAdvancedFilters()
+    }
+
+    #toggleAdvancedFilters() {
+        if (this.advancedFilterMainPanelTarget.classList.contains("qfdmo-hidden")) {
+            this.advancedFilterMainPanelTarget.classList.remove("qfdmo-hidden")
+            setTimeout(() => {
+                this.advancedFilterFormPanelTarget.classList.remove("qfdmo-h-0")
+                this.advancedFilterFormPanelTarget.classList.add("qfdmo-h-[95%]")
+            }, 100)
+        } else {
+            this.advancedFilterFormPanelTarget.classList.remove("qfdmo-h-[95%]")
+            this.advancedFilterFormPanelTarget.classList.add("qfdmo-h-0")
+            setTimeout(() => {
+                this.advancedFilterMainPanelTarget.classList.add("qfdmo-hidden")
+            }, 300)
+        }
+        this.scrollToContent()
+    }
+
+    toggleAdvancedFiltersAndSubmitForm() {
+        this.#toggleAdvancedFilters()
+        this.submitForm()
     }
 }
