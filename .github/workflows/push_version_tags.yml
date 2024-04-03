@@ -5,6 +5,13 @@ on:
     tags:
       - v*
 
+env:
+  S3_HOST: https://cellar-c2.services.clever-cloud.com
+  FOLDER_SOURCE: dags
+  S3_BUCKET_DESTINATION: s3://qfdmo-airflow-dags/production/
+  AWS_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_KEY }}
+
 defaults:
   run:
     shell: bash
@@ -34,3 +41,16 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
           known-host: ssh.osc-fr1.scalingo.com
           app-name: quefairedemesobjets
+
+  deploy_dags:
+    name: Copy local folder to Production s3 bucket
+    needs: [run_test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install AWS CLI dependencies
+        run: |
+          pip install awscli
+      - name: Push to S3 bucket production
+        run: aws --endpoint-url ${{ env.S3_HOST }} s3 sync --delete --quiet ${{ env.FOLDER_SOURCE }} ${{ env.S3_BUCKET_DESTINATION }}
