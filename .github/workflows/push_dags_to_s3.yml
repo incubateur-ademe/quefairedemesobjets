@@ -11,10 +11,20 @@ on:
         required: true
         description: 'Folder source'
 
-env:
-  S3_HOST: https://cellar-c2.services.clever-cloud.com
-  AWS_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_KEY }}
+
+      s3_access_key:
+        type: string
+        required: true
+        description: 'to set AWS_ACCESS_KEY_ID'
+      s3_secret_key:
+        type: string
+        required: true
+        description: 'to set AWS_SECRET_ACCESS_KEY'
+      s3_host:
+        type: string
+        required: true
+        description: 's3 host'
+
 
 jobs:
   copy-dags-folder-to-s3:
@@ -26,5 +36,9 @@ jobs:
       - name: Install AWS CLI dependencies
         run: |
           pip install awscli
+      - name: env
+        run: |
+          export AWS_ACCESS_KEY_ID= ${{ inputs.s3_access_key }}
+          export AWS_SECRET_ACCESS_KEY= ${{ inputs.s3_secret_key }}
       - name: Backup
-        run: aws --endpoint-url ${{ env.S3_HOST }} s3 sync --quiet ${{ inputs.folder_source }} ${{ inputs.s3_bucket_destination }}
+        run: aws --endpoint-url ${{ inputs.s3_host }} s3 sync --quiet ${{ inputs.folder_source }} ${{ inputs.s3_bucket_destination }}

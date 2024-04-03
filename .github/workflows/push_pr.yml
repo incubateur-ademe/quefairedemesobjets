@@ -15,4 +15,6 @@ jobs:
     with:
       s3_bucket_destination: 's3://qfdmo-airflow-dags/ongoing_pr/'
       folder_source: 'dags/'
-    needs: [run_test]
+      s3_access_key: ${{ secrets.S3_ACCESS_KEY }}
+      s3_secret_key: ${{ secrets.S3_SECRET_KEY }}
+      s3_host: https://cellar-c2.services.clever-cloud.com
