@@ -10,7 +10,6 @@ def set_horaires(apps, schema_editor):
 
     for a in Acteur.objects.exclude(horaires_osm__isnull=True).exclude(horaires_osm=""):
         if not opening_hours.validate(a.horaires_osm):
-            print(a)
             a.horaires_description = a.horaires_osm
             a.horaires_osm = ""
             a.save()
