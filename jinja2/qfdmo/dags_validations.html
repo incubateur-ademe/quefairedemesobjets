@@ -2,77 +2,25 @@
 
 {% block content %}
 
-    <div class="fr-m-3w">
+    <div class="fr-container">
         <h1>Validations des «DAGs»</h1>
 
         <p>
             Cette page permet de valider les données des «DAGs».
         </p>
 
-        <form>
+        <form method="post">
+            <button type="submit" class="btn btn-primary">Valider</button>
             {{ csrf_input }}
             {{ form }}
-            <div class="fr-my-3w">
-                <button type="submit" class="fr-btn" method='GET'>Afficher le résumé du dag</button>
-            </div>
 
-            {% if dagrun_instance %}
-                <h2>Instance du DAG : {{ dagrun_instance }}</h2>
-                <h3>Meta données</h3>
-                {% for (meta_title, meta_data) in dagrun_instance.display_meta_data().items() %}
-                    <p><strong>{{ meta_title }}</strong> : {{meta_data}}</p>
-                {% endfor %}
-                <details>
-                    <summary>meta_data brutes</summary>
-                    <pre class="qfdmo-text-wrap">{{ dagrun_instance.meta_data }}</pre>
-                </details>
-                <h3>Exemples</h3>
-
-                <div class="fr-table">
-                    <table>
-                        <caption>Résumé du tableau (accessibilité)</caption>
-                        <thead>
-                            <tr>
-                                <th scope="col">change_type</th>
-                                <th scope="col">meta_data</th>
-                                <th scope="col">Acteur</th>
-                                <th scope="col">Proposition de service</th>
-                                <th scope="col">row_updates</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for dagrun_line in dagrun_lines %}
-                                <tr>
-                                    <td>{{ dagrun_line.get_change_type_display() }}</td>
-                                    <td>{{ dagrun_line.meta_data if dagrun_line.meta_data else "-" }}</td>
-                                    <td>
-                                        {% for key, value in dagrun_line.display_acteur_details().items() %}
-                                            <p><strong>{{ key }}</strong> : {{ value }}</p>
-                                        {% endfor %}
-                                    </td>
-                                    <td>
-                                        {{ dagrun_line.display_proposition_service() }}
-                                    </td>
-                                    <td>
-                                        <details>
-                                            <summary>Données brutes</summary>
-                                            <pre class="qfdmo-text-wrap">{{ dagrun_line.row_updates }}</pre>
-                                        </details>
-
-                                    </td>
-                                </tr>
-                            {% endfor %}
-
-                        </tbody>
-                    </table>
-                </div>
-                <div class="fr-my-3w">
-                    <button type="submit" class="fr-btn" name='dag_valid' value='1' formmethod='POST'>Valider ce dag</button>
-                    <button type="submit" class="fr-btn fr-btn--secondary" name='dag_valid' value='0' formmethod='POST'>Refuser ce dag</button>
-                </div>
-            {% endif %}
+            <button type="submit" class="fr-btn" name='dag_valid' value='1'>Valider ce dag</button>
+            <button type="submit" class="fr-btn fr-btn--secondary" name='dag_valid' value='0'>Refuser ce dag</button>
         </form>
 
+        {% for dag in dag_runs %}
+            <p>{{dag}}</p>
+        {% endfor %}
     </div>
 
 {% endblock %}
