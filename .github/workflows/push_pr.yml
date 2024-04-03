@@ -10,3 +10,9 @@ defaults:
 jobs:
   run_test:
     uses: ./.github/workflows/run_tests.yml
+  deploy_dags:
+    uses: ./.github/workflows/push_dags_to_s3.yml
+    with:
+      s3_bucket_destination: 's3://qfdmo-airflow-dags/ongoing_pr/'
+      folder_source: 'dags/'
+    needs: [run_test]
