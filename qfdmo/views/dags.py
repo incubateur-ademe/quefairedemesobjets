@@ -1,6 +1,8 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
+from django.views.generic.edit import FormView
 
+from qfdmo.forms import DagsForm
 from qfdmo.models.data import DagRun, DagRunStatus
 
 
@@ -21,3 +23,9 @@ def dags_validations(request):
             "dag_runs": dag_runs,
         },
     )
+
+
+class DagsValidation(FormView, IsStaffMixin):
+    form_class = DagsForm
+    template_name = "qfdmo/dags_validations.html"
+    success_url = "/dags/validations"

@@ -9,6 +9,15 @@
             Cette page permet de valider les données des «DAGs».
         </p>
 
+        <form method="post">
+            <button type="submit" class="btn btn-primary">Valider</button>
+            {{ csrf_input }}
+            {{ form }}
+
+            <button type="submit" class="fr-btn" name='dag_valid' value='1'>Valider ce dag</button>
+            <button type="submit" class="fr-btn fr-btn--secondary" name='dag_valid' value='0'>Refuser ce dag</button>
+        </form>
+
         {% for dag in dag_runs %}
             <p>{{dag}}</p>
         {% endfor %}
