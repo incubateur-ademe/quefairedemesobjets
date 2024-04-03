@@ -9,7 +9,7 @@ defaults:
 
 env:
   S3_HOST: https://cellar-c2.services.clever-cloud.com
-  FOLDER_SOURCE: development
+  FOLDER_SOURCE: dags
   S3_BUCKET_DESTINATION: s3://qfdmo-airflow-dags/preprod/
   AWS_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_KEY }}
