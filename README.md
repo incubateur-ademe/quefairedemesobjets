@@ -180,7 +180,7 @@ Conseil: utiliser `asdf` pour la gestion des environnement virtuel `node` et `py
 - Dependabot
 - Django-debug-toolbar
 
-### installation & exécution
+### Installation & Exécution
 
 Les bases de données source `MySQL` et cible `Postgres + Postgis` sont executées et mises à disposition par le gestionnaire de conteneur Docker
 
@@ -313,9 +313,21 @@ done
 pg_restore -d "${DATABASE_URL}" --clean --no-acl --no-owner --no-privileges "${DUMP_FILE}"
 ```
 
-## Deploy in Scalingo
+## Déploiement sur Scalingo
 
-we need to install GDAL as explain in doc : [https://techilearned.com/configure-geodjango-in-scalingo/](https://techilearned.com/configure-geodjango-in-scalingo/) form [https://doc.scalingo.com/platform/app/app-with-gdal](https://doc.scalingo.com/platform/app/app-with-gdal) and mattermost discussion in beta.gouv.fr community
+Nous avons besoin d'installer GDAL comme c'est expliqué dans la doc suivante : [https://techilearned.com/configure-geodjango-in-scalingo/](https://techilearned.com/configure-geodjango-in-scalingo/) cf. [https://doc.scalingo.com/platform/app/app-with-gdal](https://doc.scalingo.com/platform/app/app-with-gdal)
+
+le code est déployé en preprod lors de la mise à jour de la branche main
+
+et en production quand il est tagué avec en respectant le format de version semantique vX.Y.Z
+
+### Déploiement du code de l'interface
+
+le code de l'interface est déployé sur le repo git de scalingo à conditions que les tests soit passés avec succès via Github
+
+### Déploiement des dags Airflow sur s3
+
+le code des dags Airflow est déployé sur le repo s3 de clevercloud à conditions que les tests soit passés avec succès via Github
 
 # Schema simplifié de base de données
 
