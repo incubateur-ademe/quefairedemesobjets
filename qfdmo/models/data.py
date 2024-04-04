@@ -50,7 +50,7 @@ class DagRunChange(models.Model):
     #     "telephone": "…",
     #     "nom_commercial": "…",
     #     "nom_officiel": "…",
-    #     "label_reparacteur": false,
+    #     "labels": ['reparacteur],
     #     "siret": "49819433100019",
     #     "identifiant_externe": "144103",
     #     "statut": "ACTIF",

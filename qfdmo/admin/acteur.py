@@ -20,7 +20,11 @@ from qfdmo.models import (
     Source,
     SousCategorieObjet,
 )
-from qfdmo.models.acteur import DisplayedActeur, DisplayedPropositionService
+from qfdmo.models.acteur import (
+    DisplayedActeur,
+    DisplayedPropositionService,
+    LabelQualite,
+)
 from qfdmo.widget import CustomOSMWidget
 
 
@@ -42,6 +46,39 @@ class ActeurTypeAdmin(admin.ModelAdmin):
         "nom_affiche",
     ]
     search_help_text = "Recherche sur le nom ou le nom affiché"
+
+
+class ActeurLabelQualiteInline(admin.StackedInline):
+    model = Acteur.labels.through
+    extra = 0
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+class RevisionActeurLabelQualiteInline(admin.StackedInline):
+    model = RevisionActeur.labels.through
+    extra = 0
+
+
+class DisplayedActeurLabelQualiteInline(admin.StackedInline):
+    model = DisplayedActeur.labels.through
+    extra = 0
+
+    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
 
 
 class BasePropositionServiceInline(admin.TabularInline):
@@ -91,6 +128,7 @@ class BaseActeurAdmin(admin.GISModelAdmin):
     inlines = [
         PropositionServiceInline,
     ]
+    filter_horizontal = ("labels",)
     list_display = ("nom", "siret", "identifiant_unique", "code_postal", "ville")
     search_fields = [
         "code_postal",
@@ -125,7 +163,6 @@ class BaseActeurAdmin(admin.GISModelAdmin):
         "location",
         "horaires_osm",
         "horaires_description",
-        "label_reparacteur",
         "statut",
         "commentaires",
         "cree_le",
@@ -199,6 +236,7 @@ class ActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
     modifiable = False
     ordering = ("nom",)
     resource_classes = [ActeurResource]
+    inlines = list(BaseActeurAdmin.inlines) + [ActeurLabelQualiteInline]
 
     def get_readonly_fields(self, request, obj=None):
         return [f.name for f in self.model._meta.fields if f.name != "location"]
@@ -214,7 +252,8 @@ class RevisionActeurResource(ActeurResource):
 
 class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin):
     gis_widget = CustomOSMWidget
-    inlines = [RevisionPropositionServiceInline]
+    inlines = [RevisionPropositionServiceInline, RevisionActeurLabelQualiteInline]
+
     exclude = ["id"]
     resource_classes = [RevisionActeurResource]
 
@@ -347,6 +386,7 @@ class DisplayedActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
     gis_widget = CustomOSMWidget
     inlines = [
         DisplayedPropositionServiceInline,
+        DisplayedActeurLabelQualiteInline,
     ]
     modifiable = False
     resource_classes = [DisplayedActeurResource]
@@ -366,3 +406,4 @@ admin.site.register(PropositionService, PropositionServiceAdmin)
 admin.site.register(RevisionActeur, RevisionActeurAdmin)
 admin.site.register(RevisionPropositionService, RevisionPropositionServiceAdmin)
 admin.site.register(Source)
+admin.site.register(LabelQualite)

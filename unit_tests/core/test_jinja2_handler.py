@@ -15,7 +15,7 @@ from core.jinja2_handler import (
 )
 from qfdmo.models import CachedDirectionAction
 from qfdmo.models.acteur import ActeurType
-from unit_tests.qfdmo.acteur_factory import DisplayedActeurFactory
+from unit_tests.qfdmo.acteur_factory import DisplayedActeurFactory, LabelQualiteFactory
 
 
 @pytest.fixture(scope="session")
@@ -207,7 +207,6 @@ class TestActionByDirection:
 def adresse():
     return DisplayedActeurFactory(
         adresse="1 rue de la paix",
-        label_reparacteur=True,
     )
 
 
@@ -242,9 +241,10 @@ class TestDisplayInfosPanel:
 class TestDisplayLabelsPanel:
 
     def test_display_labels_panel(self, adresse):
-        assert display_labels_panel(adresse)
-        adresse.label_reparacteur = False
         assert not display_labels_panel(adresse)
+        label = LabelQualiteFactory()
+        adresse.labels.add(label)
+        assert display_labels_panel(adresse)
 
 
 @pytest.mark.django_db

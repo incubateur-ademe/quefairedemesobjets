@@ -358,7 +358,15 @@ classDiagram
     class Source {
         - id: int
         - nom: str
-        - logo: str
+        - afficher: bool
+        - url: str
+        - logo_file: str
+        + serialize(): dict
+    }
+
+    class LabelQualite {
+        - id: int
+        - nom: str
         - afficher: bool
         - url: str
         - logo_file: str
@@ -380,7 +388,6 @@ classDiagram
         - telephone: str
         - nom_commercial: str
         - nom_officiel: str
-        - label_reparacteur: bool
         - siret: str
         - source: Source
         - identifiant_externe: str
@@ -438,6 +445,7 @@ classDiagram
     DisplayedActeur --> DisplayedPropositionService
     ActeurType --> DisplayedActeur
     Source --> DisplayedActeur
+    LabelQualite <--> DisplayedActeur
     DisplayedPropositionService <-- Action
     DisplayedPropositionService <-- ActeurService
     DisplayedPropositionService <--> SousCategorieObjet

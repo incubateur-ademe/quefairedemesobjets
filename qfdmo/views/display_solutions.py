@@ -197,7 +197,7 @@ class ReemploiSolutionView(FormView):
                         action_id=reparer_action_id,
                         sous_categories__id=sous_categorie_id,
                     ),
-                    label_reparacteur=True,
+                    labels__code="reparacteur",
                     statut=ActeurStatus.ACTIF,
                 )
         else:
@@ -209,7 +209,7 @@ class ReemploiSolutionView(FormView):
             if reparer_action_id:
                 ps_filter = ps_filter | Q(
                     proposition_services__action_id=reparer_action_id,
-                    label_reparacteur=True,
+                    labels__code="reparacteur",
                     statut=ActeurStatus.ACTIF,
                 )
         return ps_filter
