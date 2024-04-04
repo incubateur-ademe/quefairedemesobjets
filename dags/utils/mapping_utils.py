@@ -30,3 +30,19 @@ def generate_unique_id(row, selected_columns):
         + "_"
         + hashlib.sha256(unique_str.encode()).hexdigest()
     )
+
+
+def create_identifiant_unique(row):
+    unique_str = row["identifiant_externe"].lower()
+    if row["service_a_domicile"] == "service à domicile uniquement":
+        unique_str = unique_str + "_d"
+    return unique_str
+
+
+def get_id_from_code(value, df_mapping, code="nom"):
+    id_value = (
+        df_mapping.loc[df_mapping[code].str.lower() == value.lower(), "id"].values[0]
+        if any(df_mapping[code].str.lower() == value.lower())
+        else None
+    )
+    return id_value

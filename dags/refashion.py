@@ -48,6 +48,8 @@ def create_proposition_services(**kwargs):
     df = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
     data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
     idx_max = data_dict["max_pds_idx"]
+    df_actions = data_dict["actions"]
+    df_acteur_services = data_dict["acteur_services"]
 
     rows_list = []
 
@@ -55,24 +57,26 @@ def create_proposition_services(**kwargs):
         acteur_id = row["identifiant_unique"]
         sous_categories = row["produitsdechets_acceptes"]
         if row["point_dapport_de_service_reparation"]:
-            acteur_service_id = 17
-            action_id = 1
+            acteur_service_name = "Service de réparation"
+            action_name = "reparer"
         elif row["point_dapport_pour_reemploi"]:
-            acteur_service_id = 4
-            action_id = 4
+            acteur_service_name = "Collecte par une structure spécialisée"
+            action_name = "donner"
         elif row["point_de_reparation"]:
-            acteur_service_id = 15
-            action_id = 1
+            acteur_service_name = "Service de réparation"
+            action_name = "reparer"
         elif row["point_de_collecte_ou_de_reprise_des_dechets"]:
-            acteur_service_id = 4
-            action_id = 11
+            acteur_service_name = "Collecte par une structure spécialisée"
+            action_name = "trier"
         else:
             continue
 
         rows_list.append(
             {
-                "acteur_service_id": acteur_service_id,
-                "action_id": action_id,
+                "acteur_service_id": mapping_utils.get_id_from_code(
+                    acteur_service_name, df_acteur_services
+                ),
+                "action_id": mapping_utils.get_id_from_code(action_name, df_actions),
                 "acteur_id": acteur_id,
                 "sous_categories": sous_categories,
             }
@@ -178,12 +182,18 @@ def load_data_from_postgresql(**kwargs):
 
     df_acteurtype = pd.read_sql_table("qfdmo_acteurtype", engine)
     df_sources = pd.read_sql_table("qfdmo_source", engine)
-    df_ps = pd.read_sql_table("qfdmo_propositionservice", engine)
+    df_actions = pd.read_sql_table("qfdmo_action", engine)
+    df_acteur_services = pd.read_sql_table("qfdmo_acteurservice", engine)
+    max_id_pds = pd.read_sql_query(
+        "SELECT max(id) FROM qfdmo_displayedpropositionservice", engine
+    )["max"][0]
 
     return {
         "acteurtype": df_acteurtype,
         "sources": df_sources,
-        "max_pds_idx": df_ps["id"].max(),
+        "actions": df_actions,
+        "acteur_services": df_acteur_services,
+        "max_pds_idx": max_id_pds,
     }
 
 
@@ -260,13 +270,6 @@ def create_actors(**kwargs):
         "consignes_dacces": "commentaires",
     }
 
-    selected_columns = [
-        "nom",
-        "adresse",
-        "type_de_point_de_collecte",
-        "id_point_apport_ou_reparation",
-    ]
-
     for old_col, new_col in column_mapping.items():
         if new_col:
             if old_col == "type_de_point_de_collecte":
@@ -284,7 +287,7 @@ def create_actors(**kwargs):
                 )
             elif old_col == "ecoorganisme":
                 df[new_col] = df[old_col].apply(
-                    lambda x: utils.transform_ecoorganisme(x, df_sources=df_sources)
+                    lambda x: mapping_utils.get_id_from_code(x, df_sources)
                 )
             elif old_col == "adresse_format_ban":
                 df[["adresse", "code_postal", "ville"]] = df.apply(
@@ -294,9 +297,7 @@ def create_actors(**kwargs):
                 df[new_col] = df[old_col]
     df["label_reparacteur"] = False
     df["identifiant_unique"] = df.apply(
-        lambda x: mapping_utils.generate_unique_id(
-            x, selected_columns=selected_columns
-        ),
+        lambda x: mapping_utils.create_identifiant_unique(x),
         axis=1,
     )
     df["statut"] = "ACTIF"
@@ -307,6 +308,9 @@ def create_actors(**kwargs):
         df["telephone"]
         .dropna()
         .apply(lambda x: "0" + x[2:] if x.startswith("33") else x)
+    )
+    df.loc[df["service_a_domicile"] == "service à domicile uniquement", "statut"] = (
+        "SUPPRIME"
     )
 
     duplicates_mask = df.duplicated("identifiant_unique", keep=False)

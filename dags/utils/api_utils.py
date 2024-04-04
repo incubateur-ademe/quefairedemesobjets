@@ -9,7 +9,6 @@ def fetch_dataset_from_point_apport(url):
             data = response.json()
             all_data.extend(data["results"])
             url = data.get("next", None)
-            print(url)
         else:
             print(f"Failed to fetch data: {response.status_code}")
             break

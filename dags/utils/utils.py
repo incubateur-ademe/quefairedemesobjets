@@ -10,15 +10,6 @@ from shapely import wkb
 from shapely.geometry import Point
 
 
-def transform_ecoorganisme(value, df_sources):
-    id_value = (
-        df_sources.loc[df_sources["nom"].str.lower() == value.lower(), "id"].values[0]
-        if any(df_sources["nom"].str.lower() == value.lower())
-        else None
-    )
-    return id_value
-
-
 def extract_details(row):
     pattern = re.compile(r"\b(\d{5})\s+(.*)")
 
