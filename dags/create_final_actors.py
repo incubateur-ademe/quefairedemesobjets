@@ -91,6 +91,7 @@ def write_data_to_postgres(**kwargs):
     df_normalized_corrected_actors = kwargs["ti"].xcom_pull(
         task_ids="apply_corrections_actors"
     )
+    df_labels_updated = kwargs["ti"].xcom_pull(task_ids="merge_labels")
     task_output = kwargs["ti"].xcom_pull(
         task_ids="apply_corrections_propositionservice"
     )
@@ -107,6 +108,9 @@ def write_data_to_postgres(**kwargs):
     original_table_name_actor = "qfdmo_displayedacteur"
     temp_table_name_actor = "qfdmo_displayedacteurtemp"
 
+    original_table_name_labels = "qfdmo_displayedacteur_labels"
+    temp_table_name_labels = "qfdmo_displayedacteurtemp_labels"
+
     original_table_name_ps = "qfdmo_displayedpropositionservice"
     temp_table_name_ps = "qfdmo_displayedpropositionservicetemp"
 
@@ -116,6 +120,7 @@ def write_data_to_postgres(**kwargs):
     with engine.connect() as conn:
         conn.execute(f"DELETE FROM {temp_table_name_pssc}")
         conn.execute(f"DELETE FROM {temp_table_name_ps}")
+        conn.execute(f"DELETE FROM {temp_table_name_labels}")
         conn.execute(f"DELETE FROM {temp_table_name_actor}")
 
         df_normalized_corrected_actors[
@@ -132,7 +137,6 @@ def write_data_to_postgres(**kwargs):
                 "telephone",
                 "nom_commercial",
                 "nom_officiel",
-                "label_reparacteur",
                 "siret",
                 "identifiant_externe",
                 "acteur_type_id",
@@ -148,6 +152,14 @@ def write_data_to_postgres(**kwargs):
             ]
         ].to_sql(
             temp_table_name_actor,
+            engine,
+            if_exists="append",
+            index=False,
+            method="multi",
+            chunksize=1000,
+        )
+        df_labels_updated[["displayedacteur_id", "labelqualite_id"]].to_sql(
+            temp_table_name_labels,
             engine,
             if_exists="append",
             index=False,
@@ -175,6 +187,7 @@ def write_data_to_postgres(**kwargs):
             chunksize=1000,
         )
 
+    with engine.begin() as conn:
         conn.execute(
             f"ALTER TABLE {original_table_name_actor} "
             f"RENAME TO {original_table_name_actor}_old"
@@ -186,6 +199,19 @@ def write_data_to_postgres(**kwargs):
         conn.execute(
             f"ALTER TABLE {original_table_name_actor}_old "
             f"RENAME TO {temp_table_name_actor}"
+        )
+
+        conn.execute(
+            f"ALTER TABLE {original_table_name_labels} "
+            f"RENAME TO {original_table_name_labels}_old"
+        )
+        conn.execute(
+            f"ALTER TABLE {temp_table_name_labels} "
+            f"RENAME TO {original_table_name_labels}"
+        )
+        conn.execute(
+            f"ALTER TABLE {original_table_name_labels}_old "
+            f"RENAME TO {temp_table_name_labels}"
         )
 
         conn.execute(
@@ -214,6 +240,21 @@ def write_data_to_postgres(**kwargs):
         )
 
     print("Table swap completed successfully.")
+
+
+def merge_actors_labels(**kwargs):
+    df_actor_labels = kwargs["ti"].xcom_pull(task_ids="load_actor_labels")
+    df_revision_labels = kwargs["ti"].xcom_pull(task_ids="load_revision_labels")
+    df_actor_labels = df_actor_labels.rename(
+        columns={"acteur_id": "displayedacteur_id"}
+    ).drop(columns=["id"])
+    df_revision_labels = df_revision_labels.rename(
+        columns={"acteur_id": "displayedacteur_id"}
+    ).drop(columns=["id"])
+    df_merged_labels = pd.concat(
+        [df_actor_labels, df_revision_labels]
+    ).drop_duplicates()
+    return df_merged_labels
 
 
 default_args = {
@@ -277,6 +318,27 @@ read_sc = PythonOperator(
     dag=dag,
 )
 
+read_actor_labels = PythonOperator(
+    task_id="load_actor_labels",
+    python_callable=read_data_from_postgres,
+    op_kwargs={"table_name": "qfdmo_acteur_labels"},
+    dag=dag,
+)
+
+read_revision_labels = PythonOperator(
+    task_id="load_revision_labels",
+    python_callable=read_data_from_postgres,
+    op_kwargs={"table_name": "qfdmo_revisionacteur_labels"},
+    dag=dag,
+)
+
+merge_labels = PythonOperator(
+    task_id="merge_labels",
+    python_callable=merge_actors_labels,
+    provide_context=True,
+    dag=dag,
+)
+
 apply_corr = PythonOperator(
     task_id="apply_corrections_actors",
     python_callable=apply_corrections,
@@ -300,4 +362,5 @@ write_pos = PythonOperator(
 
 [read_actors, read_revision_actor] >> apply_corr
 [read_ps, read_revision_ps, read_sc, read_revision_sc] >> apply_corr_ps
-[apply_corr, apply_corr_ps] >> write_pos
+[read_actor_labels, read_revision_labels] >> merge_labels
+[merge_labels, apply_corr, apply_corr_ps] >> write_pos

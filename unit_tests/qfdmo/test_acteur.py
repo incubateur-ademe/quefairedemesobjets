@@ -15,7 +15,9 @@ from qfdmo.models import (
     RevisionPropositionService,
     Source,
 )
+from qfdmo.models.acteur import LabelQualite
 from unit_tests.qfdmo.acteur_factory import (
+    ActeurFactory,
     ActeurServiceFactory,
     PropositionServiceFactory,
 )
@@ -105,7 +107,6 @@ class TestActeurSerialize:
             "telephone": None,
             "nom_commercial": None,
             "nom_officiel": None,
-            "label_reparacteur": False,
             "siret": None,
             "source": acteur.source.serialize(),
             "statut": "ACTIF",
@@ -116,6 +117,7 @@ class TestActeurSerialize:
             "horaires_osm": None,
             "horaires_description": None,
             "proposition_services": [proposition_service.serialize()],
+            "labels": [],
         }
         assert acteur.serialize() == expected_serialized_acteur
 
@@ -339,3 +341,12 @@ class TestActeurService:
         assert acteur.acteur_services() == [
             "Par un professionnel",
         ]
+
+
+class TestActeurLabel:
+    @pytest.mark.django_db
+    def test_has_label_reparacteur(self):
+        acteur = ActeurFactory()
+        label, _ = LabelQualite.objects.get_or_create(code="reparacteur")
+        acteur.labels.add(label)
+        assert acteur.has_label_reparacteur()
