@@ -12,13 +12,13 @@ class TestEntiteTypeNomAsNaturalKeyHeritage:
     def test_serialize(self):
         acteur_type = ActeurTypeFactory.build(
             nom="Test Object",
-            nom_affiche="Test Object Affiche",
+            libelle="Test Object Affiche",
             lvao_id=123,
         )
         assert acteur_type.serialize() == {
             "id": acteur_type.id,
             "nom": "Test Object",
             "code_import": None,
-            "nom_affiche": "Test Object Affiche",
+            "libelle": "Test Object Affiche",
             "lvao_id": 123,
         }

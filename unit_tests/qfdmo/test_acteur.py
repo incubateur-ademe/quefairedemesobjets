@@ -59,8 +59,7 @@ class TestPoint:
 class TestActeurNomAffiche:
     def test_nom(self):
         assert (
-            Acteur(nom="Test Object 1", location=Point(0, 0)).nom_affiche
-            == "Test Object 1"
+            Acteur(nom="Test Object 1", location=Point(0, 0)).libelle == "Test Object 1"
         )
 
     def test_nom_commercial(self):
@@ -69,7 +68,7 @@ class TestActeurNomAffiche:
                 nom="Test Object 1",
                 location=Point(0, 0),
                 nom_commercial="Nom commercial",
-            ).nom_affiche
+            ).libelle
             == "Nom commercial"
         )
 
@@ -320,13 +319,13 @@ class TestActeurService:
             "Par un professionnel",
         ]
 
-    def test_acteur_actions_multiple_with_same_nom_affiche(self):
+    def test_acteur_actions_multiple_with_same_libelle(self):
         action = Action.objects.get(nom="reparer")
         acteur_service1 = ActeurService.objects.get(
             nom="Achat, revente par un professionnel"
         )
         acteur_service2 = ActeurService.objects.get(nom="Atelier pour réparer soi-même")
-        acteur_service2.nom_affiche = acteur_service1.nom_affiche
+        acteur_service2.libelle = acteur_service1.libelle
         acteur_service2.save()
         acteur = Acteur.objects.create(
             nom="Acteur 1", location=Point(0, 0), acteur_type_id=1

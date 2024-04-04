@@ -3,7 +3,7 @@
         "model": "qfdmo.action",
         "fields": {
             "nom": "reparer",
-            "nom_affiche": "réparer",
+            "libelle": "réparer",
             "afficher": true,
             "description": null,
             "order": 5,
@@ -17,7 +17,7 @@
         "model": "qfdmo.action",
         "fields": {
             "nom": "acheter",
-            "nom_affiche": "acheter de seconde main",
+            "libelle": "acheter de seconde main",
             "afficher": true,
             "description": "acheter d'occasion",
             "order": 8,
@@ -31,7 +31,7 @@
         "model": "qfdmo.action",
         "fields": {
             "nom": "revendre",
-            "nom_affiche": "vendre",
+            "libelle": "vendre",
             "afficher": true,
             "description": null,
             "order": 9,
@@ -45,7 +45,7 @@
         "model": "qfdmo.action",
         "fields": {
             "nom": "donner",
-            "nom_affiche": "donner",
+            "libelle": "donner",
             "afficher": true,
             "description": null,
             "order": 6,
@@ -59,7 +59,7 @@
         "model": "qfdmo.action",
         "fields": {
             "nom": "louer",
-            "nom_affiche": "louer",
+            "libelle": "louer",
             "afficher": true,
             "description": null,
             "order": 3,
@@ -73,7 +73,7 @@
         "model": "qfdmo.action",
         "fields": {
             "nom": "mettreenlocation",
-            "nom_affiche": "mettre en location",
+            "libelle": "mettre en location",
             "afficher": true,
             "description": "Mettre en location",
             "order": 4,
@@ -87,7 +87,7 @@
         "model": "qfdmo.action",
         "fields": {
             "nom": "emprunter",
-            "nom_affiche": "emprunter",
+            "libelle": "emprunter",
             "afficher": true,
             "description": null,
             "order": 2,
@@ -101,7 +101,7 @@
         "model": "qfdmo.action",
         "fields": {
             "nom": "preter",
-            "nom_affiche": "prêter",
+            "libelle": "prêter",
             "afficher": true,
             "description": null,
             "order": 1,
@@ -115,7 +115,7 @@
         "model": "qfdmo.action",
         "fields": {
             "nom": "echanger",
-            "nom_affiche": "échanger",
+            "libelle": "échanger",
             "afficher": true,
             "description": null,
             "order": 7,

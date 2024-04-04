@@ -40,12 +40,12 @@ class NotEditableInlineMixin:
 
 
 class ActeurTypeAdmin(admin.ModelAdmin):
-    list_display = ("nom", "nom_affiche")
+    list_display = ("nom", "libelle")
     search_fields = [
         "nom",
-        "nom_affiche",
+        "libelle",
     ]
-    search_help_text = "Recherche sur le nom ou le nom affiché"
+    search_help_text = "Recherche sur le nom ou le libelle"
 
 
 class ActeurLabelQualiteInline(admin.StackedInline):

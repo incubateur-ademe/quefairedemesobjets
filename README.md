@@ -58,14 +58,14 @@ Certains objets de la base de données sont des objets d'administration qui n'on
 
 **Direction de l'action** (qfdmo_actiondirection):
 
-| nom       | nom_affiche  |
+| nom       | libelle  |
 | --------- | ------------ |
 | jecherche | Je recherche |
 | jai       | J'ai         |
 
 **Action** (qfdmo_action):
 
-| nom              | nom_affiche | description        | directions       |
+| nom              | libelle | description        | directions       |
 | ---------------- | ----------- | ------------------ | ---------------- |
 | preter           | Prêter      | NULL               | jai              |
 | reparer          | Réparer     | NULL               | jai              |
@@ -137,7 +137,7 @@ Cette liste est amenée à évoluer et est probablement non exhaustive
 
 **Type d'acteur** (qfdmo_acteurtype)
 
-| nom            | nom affiché                                                |
+| nom            | libelle                                                |
 | -------------- | ---------------------------------------------------------- |
 | acteur digital | Acteur digital (site web, app. mobile)                     |
 | commerce       | Franchise, enseigne commerciale                            |
@@ -340,7 +340,7 @@ classDiagram
     class ActeurService {
         - id: int
         - nom: str
-        - nom_affiche: str
+        - libelle: str
         - lvao_id: int
         - actions: List[Action]
         + serialize(): dict
@@ -349,7 +349,7 @@ classDiagram
     class ActeurType {
         - id: int
         - nom: str
-        - nom_affiche: str
+        - libelle: str
         - lvao_id: int
         + serialize(): dict
         + get_digital_acteur_type_id(): int
@@ -401,7 +401,7 @@ classDiagram
         + share_url(request: HttpRequest, direction: str | None): str
         + latitude: float
         + longitude: float
-        + nom_affiche: str
+        + libelle: str
         + is_digital(): bool
         + serialize(format: None | str): dict | str
         + acteur_services(): List[str]
@@ -436,7 +436,7 @@ classDiagram
     class SousCategorieObjet {
         - id: int
         - nom: str
-        - nom_affiche: str
+        - libelle: str
         - lvao_id: int
         + serialize(): dict
     }

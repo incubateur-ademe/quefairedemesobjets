@@ -4,7 +4,7 @@
         "fields": {
             "nom": "jai",
             "order": 2,
-            "nom_affiche": "J'ai un objet"
+            "libelle": "J'ai un objet"
         }
     },
     {
@@ -12,7 +12,7 @@
         "fields": {
             "nom": "jecherche",
             "order": 1,
-            "nom_affiche": "Je recherche un objet"
+            "libelle": "Je recherche un objet"
         }
     }
 ]

@@ -13,6 +13,6 @@ class TestEntiteServiceNomAsNaturalKeyHeritage:
         assert acteur_service.serialize() == {
             "id": acteur_service.id,
             "nom": "Test Object",
-            "nom_affiche": None,
+            "libelle": None,
             "lvao_id": 123,
         }

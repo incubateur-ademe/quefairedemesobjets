@@ -24,7 +24,7 @@ class ActeurService(NomAsNaturalKeyModel):
 
     id = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
-    nom_affiche = models.CharField(max_length=255, blank=True, null=True)
+    libelle = models.CharField(max_length=255, blank=True, null=True)
     lvao_id = models.IntegerField(blank=True, null=True)
     actions = models.ManyToManyField(Action)
 
@@ -57,7 +57,7 @@ class ActeurType(NomAsNaturalKeyModel):
             " Any update can break the import data process"
         ),
     )
-    nom_affiche = models.CharField(max_length=255, blank=False, null=False, default="?")
+    libelle = models.CharField(max_length=255, blank=False, null=False, default="?")
     lvao_id = models.IntegerField(blank=True, null=True)
 
     def serialize(self):
@@ -211,7 +211,7 @@ class BaseActeur(NomAsNaturalKeyModel):
         return self.location.x if self.location else None
 
     @property
-    def nom_affiche(self):
+    def libelle(self):
         return self.nom_commercial or self.nom
 
     @property
@@ -258,9 +258,9 @@ class BaseActeur(NomAsNaturalKeyModel):
             list(
                 set(
                     [
-                        ps.acteur_service.nom_affiche
+                        ps.acteur_service.libelle
                         for ps in self.proposition_services.all()
-                        if ps.acteur_service.nom_affiche
+                        if ps.acteur_service.libelle
                     ]
                 )
             )

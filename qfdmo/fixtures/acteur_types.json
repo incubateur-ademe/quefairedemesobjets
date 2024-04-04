@@ -4,7 +4,7 @@
         "fields": {
             "nom": "ess",
             "code_import": null,
-            "nom_affiche": "Association, entreprise de l'ESS",
+            "libelle": "Association, entreprise de l'ESS",
             "lvao_id": 151
         }
     },
@@ -13,7 +13,7 @@
         "fields": {
             "nom": "collectivité",
             "code_import": null,
-            "nom_affiche": "collectivité, établissement public",
+            "libelle": "collectivité, établissement public",
             "lvao_id": 152
         }
     },
@@ -22,7 +22,7 @@
         "fields": {
             "nom": "artisan",
             "code_import": null,
-            "nom_affiche": "artisan, commerce indépendant",
+            "libelle": "artisan, commerce indépendant",
             "lvao_id": 153
         }
     },
@@ -31,7 +31,7 @@
         "fields": {
             "nom": "commerce",
             "code_import": null,
-            "nom_affiche": "commerce",
+            "libelle": "commerce",
             "lvao_id": 154
         }
     },
@@ -40,7 +40,7 @@
         "fields": {
             "nom": "acteur digital",
             "code_import": null,
-            "nom_affiche": "en ligne (web, mobile)",
+            "libelle": "en ligne (web, mobile)",
             "lvao_id": 155
         }
     },
@@ -49,7 +49,7 @@
         "fields": {
             "nom": "déchèterie",
             "code_import": null,
-            "nom_affiche": "déchèterie",
+            "libelle": "déchèterie",
             "lvao_id": null
         }
     },
@@ -58,7 +58,7 @@
         "fields": {
             "nom": "établissement de santé",
             "code_import": null,
-            "nom_affiche": "établissement de santé",
+            "libelle": "établissement de santé",
             "lvao_id": null
         }
     },
@@ -67,7 +67,7 @@
         "fields": {
             "nom": "plateforme inertes",
             "code_import": null,
-            "nom_affiche": "plateforme de valorisation des inertes",
+            "libelle": "plateforme de valorisation des inertes",
             "lvao_id": null
         }
     },
@@ -76,7 +76,7 @@
         "fields": {
             "nom": "point d'apport volontaire public",
             "code_import": null,
-            "nom_affiche": "point d'apport volontaire public",
+            "libelle": "point d'apport volontaire public",
             "lvao_id": null
         }
     },
@@ -85,7 +85,7 @@
         "fields": {
             "nom": "point d'apport volontaire privé",
             "code_import": null,
-            "nom_affiche": "point d'apport volontaire privé",
+            "libelle": "point d'apport volontaire privé",
             "lvao_id": null
         }
     },
@@ -94,7 +94,7 @@
         "fields": {
             "nom": "point d'apport volontaire ponctuel",
             "code_import": null,
-            "nom_affiche": "point d'apport volontaire ponctuel",
+            "libelle": "point d'apport volontaire ponctuel",
             "lvao_id": null
         }
     }

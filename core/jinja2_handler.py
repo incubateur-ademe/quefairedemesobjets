@@ -50,7 +50,7 @@ def get_action_list(request: HttpRequest) -> List[dict]:
 
 
 def action_list_display(request: HttpRequest) -> List[str]:
-    return [action["nom_affiche"] for action in get_action_list(request)]
+    return [action["libelle"] for action in get_action_list(request)]
 
 
 def action_by_direction(request: HttpRequest, direction: str):

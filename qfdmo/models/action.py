@@ -96,16 +96,16 @@ class ActionDirection(NomAsNaturalKeyModel):
     id = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
     order = models.IntegerField(blank=False, null=False, default=0)
-    nom_affiche = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    libelle = models.CharField(max_length=255, unique=True, blank=False, null=False)
 
     def __str__(self):
-        return self.nom_affiche
+        return self.libelle
 
 
 class Action(NomAsNaturalKeyModel):
     id = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
-    nom_affiche = models.CharField(max_length=255, null=False, default="")
+    libelle = models.CharField(max_length=255, null=False, default="")
     afficher = models.BooleanField(default=True)
     description = models.CharField(max_length=255, null=True, blank=True)
     order = models.IntegerField(blank=False, null=False, default=0)

@@ -14,7 +14,7 @@ class TestActionNomAsNaturalKeyHeritage:
         action = Action.objects.create(
             nom="Test Object",
             lvao_id=123,
-            nom_affiche="Test Objet Displayed",
+            libelle="Test Objet Displayed",
             order=1,
         )
         assert action.serialize() == {
@@ -22,7 +22,7 @@ class TestActionNomAsNaturalKeyHeritage:
             "description": None,
             "afficher": True,
             "nom": "Test Object",
-            "nom_affiche": "Test Objet Displayed",
+            "libelle": "Test Objet Displayed",
             "order": 1,
             "lvao_id": 123,
             "couleur": "yellow-tournesol",
@@ -33,8 +33,8 @@ class TestActionNomAsNaturalKeyHeritage:
 @pytest.fixture
 def action_directions():
     ActionDirection.objects.all().delete()
-    ActionDirectionFactory(nom="first", nom_affiche="First", order=1)
-    ActionDirectionFactory(nom="second", nom_affiche="Second", order=2)
+    ActionDirectionFactory(nom="first", libelle="First", order=1)
+    ActionDirectionFactory(nom="second", libelle="Second", order=2)
 
 
 @pytest.fixture

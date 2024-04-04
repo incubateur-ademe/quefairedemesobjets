@@ -2,7 +2,7 @@
 
 <div class="qfdmo-flex qfdmo-justify-between qfdmo-items-center">
     <h2 class='fr-my-1w fr-h6'>
-        {{ adresse.nom_affiche }}
+        {{ adresse.libelle }}
     </h2>
     {% if adresse.has_label_reparacteur() %}
         {% include "qfdmo/partials/label_reparacteur_icon.html" %}
@@ -195,7 +195,7 @@
                     {% if service_proposition.action.icon %}
                         <span class="{{ service_proposition.action.icon }}" aria-hidden="true"></span>&nbsp;
                     {% endif %}
-                    {{ service_proposition.action.nom_affiche }}
+                    {{ service_proposition.action.libelle }}
                 </p>
                 <p class="fr-ml-3w fr-mb-1w qfdmo-line-clamp-3">
                     {% for sous_categorie in service_proposition.sous_categories.all() %}
