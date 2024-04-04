@@ -4,8 +4,7 @@
         "fields": {
             "nom": "ess",
             "code_import": null,
-            "libelle": "Association, entreprise de l'ESS",
-            "lvao_id": 151
+            "libelle": "Association, entreprise de l'ESS"
         }
     },
     {
@@ -13,8 +12,7 @@
         "fields": {
             "nom": "collectivité",
             "code_import": null,
-            "libelle": "collectivité, établissement public",
-            "lvao_id": 152
+            "libelle": "collectivité, établissement public"
         }
     },
     {
@@ -22,8 +20,7 @@
         "fields": {
             "nom": "artisan",
             "code_import": null,
-            "libelle": "artisan, commerce indépendant",
-            "lvao_id": 153
+            "libelle": "artisan, commerce indépendant"
         }
     },
     {
@@ -31,8 +28,7 @@
         "fields": {
             "nom": "commerce",
             "code_import": null,
-            "libelle": "commerce",
-            "lvao_id": 154
+            "libelle": "commerce"
         }
     },
     {
@@ -40,8 +36,7 @@
         "fields": {
             "nom": "acteur digital",
             "code_import": null,
-            "libelle": "en ligne (web, mobile)",
-            "lvao_id": 155
+            "libelle": "en ligne (web, mobile)"
         }
     },
     {
@@ -49,8 +44,7 @@
         "fields": {
             "nom": "déchèterie",
             "code_import": null,
-            "libelle": "déchèterie",
-            "lvao_id": null
+            "libelle": "déchèterie"
         }
     },
     {
@@ -58,8 +52,7 @@
         "fields": {
             "nom": "établissement de santé",
             "code_import": null,
-            "libelle": "établissement de santé",
-            "lvao_id": null
+            "libelle": "établissement de santé"
         }
     },
     {
@@ -67,8 +60,7 @@
         "fields": {
             "nom": "plateforme inertes",
             "code_import": null,
-            "libelle": "plateforme de valorisation des inertes",
-            "lvao_id": null
+            "libelle": "plateforme de valorisation des inertes"
         }
     },
     {
@@ -76,8 +68,7 @@
         "fields": {
             "nom": "point d'apport volontaire public",
             "code_import": null,
-            "libelle": "point d'apport volontaire public",
-            "lvao_id": null
+            "libelle": "point d'apport volontaire public"
         }
     },
     {
@@ -85,8 +76,7 @@
         "fields": {
             "nom": "point d'apport volontaire privé",
             "code_import": null,
-            "libelle": "point d'apport volontaire privé",
-            "lvao_id": null
+            "libelle": "point d'apport volontaire privé"
         }
     },
     {
@@ -94,8 +84,7 @@
         "fields": {
             "nom": "point d'apport volontaire ponctuel",
             "code_import": null,
-            "libelle": "point d'apport volontaire ponctuel",
-            "lvao_id": null
+            "libelle": "point d'apport volontaire ponctuel"
         }
     }
 ]

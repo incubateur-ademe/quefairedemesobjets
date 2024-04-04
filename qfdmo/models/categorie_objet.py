@@ -27,7 +27,6 @@ class SousCategorieObjet(models.Model):
 
     id = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
-    lvao_id = models.IntegerField(blank=True, null=True)
     categorie = models.ForeignKey(CategorieObjet, on_delete=models.CASCADE)
     code = models.CharField(max_length=10, unique=True, blank=False, null=False)
 

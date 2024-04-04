@@ -4,7 +4,6 @@
         "fields": {
             "nom": "Achat, revente entre particuliers",
             "libelle": "Entre particuliers",
-            "lvao_id": 163,
             "actions": [["acheter"], ["revendre"]]
         }
     },
@@ -13,7 +12,6 @@
         "fields": {
             "nom": "Achat, revente par un professionnel",
             "libelle": "Par un professionnel",
-            "lvao_id": 162,
             "actions": [["acheter"], ["revendre"]]
         }
     },
@@ -22,7 +20,6 @@
         "fields": {
             "nom": "Atelier pour réparer soi-même",
             "libelle": "Atelier pour réparer soi-même",
-            "lvao_id": 157,
             "actions": [["reparer"]]
         }
     },
@@ -31,7 +28,6 @@
         "fields": {
             "nom": "Collecte par une structure spécialisée",
             "libelle": "Structure de collecte",
-            "lvao_id": 164,
             "actions": [["donner"]]
         }
     },
@@ -40,7 +36,6 @@
         "fields": {
             "nom": "Depôt-vente",
             "libelle": "Depôt-vente",
-            "lvao_id": 161,
             "actions": [["acheter"], ["revendre"]]
         }
     },
@@ -49,7 +44,6 @@
         "fields": {
             "nom": "Don entre particuliers",
             "libelle": "Entre particuliers",
-            "lvao_id": 165,
             "actions": [["donner"]]
         }
     },
@@ -58,7 +52,6 @@
         "fields": {
             "nom": "Echanges entre particuliers",
             "libelle": "Entre particuliers",
-            "lvao_id": 188,
             "actions": [["echanger"]]
         }
     },
@@ -67,7 +60,6 @@
         "fields": {
             "nom": "Espace de partage",
             "libelle": "Espace de partage",
-            "lvao_id": 168,
             "actions": [["preter"], ["echanger"], ["emprunter"]]
         }
     },
@@ -76,7 +68,6 @@
         "fields": {
             "nom": "Location entre particuliers",
             "libelle": "Entre particuliers",
-            "lvao_id": 167,
             "actions": [["louer"], ["mettreenlocation"]]
         }
     },
@@ -85,7 +76,6 @@
         "fields": {
             "nom": "Location par un professionnel",
             "libelle": "Via un professionnel",
-            "lvao_id": 166,
             "actions": [["louer"], ["mettreenlocation"]]
         }
     },
@@ -94,7 +84,6 @@
         "fields": {
             "nom": "Partage entre particuliers",
             "libelle": "Entre particuliers",
-            "lvao_id": 169,
             "actions": [["preter"], ["emprunter"]]
         }
     },
@@ -103,7 +92,6 @@
         "fields": {
             "nom": "Pièces détachées",
             "libelle": "Pièces détachées",
-            "lvao_id": 158,
             "actions": [["reparer"]]
         }
     },
@@ -112,7 +100,6 @@
         "fields": {
             "nom": "Relai d'acteurs et d'événements",
             "libelle": "Actualités et informations",
-            "lvao_id": 170,
             "actions": [
                 ["reparer"],
                 ["acheter"],
@@ -131,7 +118,6 @@
         "fields": {
             "nom": "Recyclerie",
             "libelle": "Recyclerie",
-            "lvao_id": 160,
             "actions": [["acheter"]]
         }
     },
@@ -140,7 +126,6 @@
         "fields": {
             "nom": "Service de réparation",
             "libelle": "Service de réparation",
-            "lvao_id": 156,
             "actions": [["reparer"]]
         }
     },
@@ -149,7 +134,6 @@
         "fields": {
             "nom": "Tutoriels et diagnostics en ligne",
             "libelle": "Tutoriels et diagnostics en ligne",
-            "lvao_id": 159,
             "actions": [["reparer"]]
         }
     },
@@ -158,7 +142,6 @@
         "fields": {
             "nom": "Structure qui va sous-traiter la réparation",
             "libelle": "Structure qui va sous-traiter la réparation",
-            "lvao_id": null,
             "actions": [["reparer"]]
         }
     }

@@ -7,7 +7,6 @@
             "afficher": true,
             "description": null,
             "order": 5,
-            "lvao_id": 9,
             "couleur": "green-menthe",
             "icon": "fr-icon-action-reparer",
             "directions": [["jai"]]
@@ -21,7 +20,6 @@
             "afficher": true,
             "description": "acheter d'occasion",
             "order": 8,
-            "lvao_id": 44,
             "couleur": "brown-cafe-creme",
             "icon": "fr-icon-action-acheter",
             "directions": [["jecherche"]]
@@ -35,7 +33,6 @@
             "afficher": true,
             "description": null,
             "order": 9,
-            "lvao_id": 6,
             "couleur": "brown-cafe-creme",
             "icon": "fr-icon-action-vendre",
             "directions": [["jai"]]
@@ -49,7 +46,6 @@
             "afficher": true,
             "description": null,
             "order": 6,
-            "lvao_id": 7,
             "couleur": "yellow-tournesol",
             "icon": "fr-icon-action-donner",
             "directions": [["jai"]]
@@ -63,7 +59,6 @@
             "afficher": true,
             "description": null,
             "order": 3,
-            "lvao_id": 4,
             "couleur": "purple-glycine",
             "icon": "fr-icon-action-louer",
             "directions": [["jecherche"]]
@@ -77,7 +72,6 @@
             "afficher": true,
             "description": "Mettre en location",
             "order": 4,
-            "lvao_id": 50,
             "couleur": "purple-glycine",
             "icon": "fr-icon-action-mettreenlocation",
             "directions": [["jai"]]
@@ -91,7 +85,6 @@
             "afficher": true,
             "description": null,
             "order": 2,
-            "lvao_id": 51,
             "couleur": "orange-terre-battue",
             "icon": "fr-icon-action-emprunter",
             "directions": [["jecherche"]]
@@ -105,7 +98,6 @@
             "afficher": true,
             "description": null,
             "order": 1,
-            "lvao_id": 5,
             "couleur": "orange-terre-battue",
             "icon": "fr-icon-action-preter",
             "directions": [["jai"]]
@@ -119,7 +111,6 @@
             "afficher": true,
             "description": null,
             "order": 7,
-            "lvao_id": 8,
             "couleur": "blue-cumulus",
             "icon": "fr-icon-action-echanger",
             "directions": [["jai"], ["jecherche"]]

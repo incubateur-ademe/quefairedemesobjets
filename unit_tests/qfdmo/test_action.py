@@ -13,7 +13,6 @@ class TestActionNomAsNaturalKeyHeritage:
     def test_serialize(self):
         action = Action.objects.create(
             nom="Test Object",
-            lvao_id=123,
             libelle="Test Objet Displayed",
             order=1,
         )
@@ -24,7 +23,6 @@ class TestActionNomAsNaturalKeyHeritage:
             "nom": "Test Object",
             "libelle": "Test Objet Displayed",
             "order": 1,
-            "lvao_id": 123,
             "couleur": "yellow-tournesol",
             "icon": None,
         }

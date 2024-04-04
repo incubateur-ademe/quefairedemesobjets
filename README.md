@@ -341,7 +341,6 @@ classDiagram
         - id: int
         - nom: str
         - libelle: str
-        - lvao_id: int
         - actions: List[Action]
         + serialize(): dict
     }
@@ -350,7 +349,6 @@ classDiagram
         - id: int
         - nom: str
         - libelle: str
-        - lvao_id: int
         + serialize(): dict
         + get_digital_acteur_type_id(): int
     }
@@ -437,7 +435,6 @@ classDiagram
         - id: int
         - nom: str
         - libelle: str
-        - lvao_id: int
         + serialize(): dict
     }
 

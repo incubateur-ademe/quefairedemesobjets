@@ -25,7 +25,6 @@ class ActeurService(NomAsNaturalKeyModel):
     id = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
     libelle = models.CharField(max_length=255, blank=True, null=True)
-    lvao_id = models.IntegerField(blank=True, null=True)
     actions = models.ManyToManyField(Action)
 
     def serialize(self):
@@ -58,7 +57,6 @@ class ActeurType(NomAsNaturalKeyModel):
         ),
     )
     libelle = models.CharField(max_length=255, blank=False, null=False, default="?")
-    lvao_id = models.IntegerField(blank=True, null=True)
 
     def serialize(self):
         return model_to_dict(self)

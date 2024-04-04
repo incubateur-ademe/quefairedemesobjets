@@ -109,7 +109,6 @@ class Action(NomAsNaturalKeyModel):
     afficher = models.BooleanField(default=True)
     description = models.CharField(max_length=255, null=True, blank=True)
     order = models.IntegerField(blank=False, null=False, default=0)
-    lvao_id = models.IntegerField(blank=True, null=True)
     directions = models.ManyToManyField(ActionDirection, related_name="actions")
     couleur = models.CharField(
         max_length=255,

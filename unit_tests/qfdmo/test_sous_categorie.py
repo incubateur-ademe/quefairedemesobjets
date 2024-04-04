@@ -42,7 +42,7 @@ class TestSousCategorieObjetSanitizedName:
         # Create a test instance of CategorieObjet and SousCategorieObjet
         categorie = CategorieObjet.objects.create(nom="Test Category")
         sous_categorie = SousCategorieObjet.objects.create(
-            nom="Test Sous-Categorie", categorie=categorie, lvao_id=123, code="CODE"
+            nom="Test Sous-Categorie", categorie=categorie, code="CODE"
         )
 
         # Call the serialize function
@@ -52,7 +52,6 @@ class TestSousCategorieObjetSanitizedName:
         assert serialized_sous_categorie == {
             "id": sous_categorie.id,
             "nom": "Test Sous-Categorie",
-            "lvao_id": 123,
             "code": "CODE",
             "categorie": categorie.serialize(),
         }

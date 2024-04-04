@@ -81,7 +81,6 @@
         "model": "qfdmo.souscategorieobjet",
         "fields": {
             "nom": "gros électroménager (réfrigérant)",
-            "lvao_id": 171,
             "categorie": ["électroménager"],
             "code": "C_01"
         }
@@ -90,7 +89,6 @@
         "model": "qfdmo.souscategorieobjet",
         "fields": {
             "nom": "gros électroménager (hors réfrigérant)",
-            "lvao_id": 172,
             "categorie": ["électroménager"],
             "code": "C_02"
         }
@@ -99,7 +97,6 @@
         "model": "qfdmo.souscategorieobjet",
         "fields": {
             "nom": "petit électroménager",
-            "lvao_id": 173,
             "categorie": ["électroménager"],
             "code": "C_03"
         }
@@ -108,7 +105,6 @@
         "model": "qfdmo.souscategorieobjet",
         "fields": {
             "nom": "écran",
-            "lvao_id": 174,
             "categorie": ["image, son & Informatique"],
             "code": "C_04"
         }
@@ -117,7 +113,6 @@
         "model": "qfdmo.souscategorieobjet",
         "fields": {
             "nom": "matériel informatique",
-            "lvao_id": 176,
             "categorie": ["image, son & Informatique"],
             "code": "C_05"
         }
@@ -126,7 +121,6 @@
         "model": "qfdmo.souscategorieobjet",
         "fields": {
             "nom": "matériel hifi et vidéo",
-            "lvao_id": 177,
             "categorie": ["image, son & Informatique"],
             "code": "C_06"
         }
@@ -135,7 +129,6 @@
         "model": "qfdmo.souscategorieobjet",
         "fields": {
             "nom": "smartphone, tablette et console",
-            "lvao_id": 175,
             "categorie": ["image, son & Informatique"],
             "code": "C_07"
         }
@@ -144,7 +137,6 @@
         "model": "qfdmo.souscategorieobjet",
         "fields": {
             "nom": "matériel photo et cinéma",
-            "lvao_id": 178,
             "categorie": ["image, son & Informatique"],
             "code": "C_08"
         }
@@ -153,7 +145,6 @@
         "model": "qfdmo.souscategorieobjet",
         "fields": {
             "nom": "autre équipement électronique",
-            "lvao_id": 179,
             "categorie": ["image, son & Informatique"],
             "code": "C_09"
         }
@@ -162,7 +153,6 @@
         "model": "qfdmo.souscategorieobjet",
         "fields": {
             "nom": "CD, DVD et jeu vidéo",
-            "lvao_id": 180,
             "categorie": ["livres & multimedia"],
             "code": "C_10"
         }
@@ -171,7 +161,6 @@
         "model": "qfdmo.souscategorieobjet",
         "fields": {
             "nom": "livre",
-            "lvao_id": 181,
             "categorie": ["livres & multimedia"],
             "code": "C_11"
         }
@@ -180,7 +169,6 @@
         "model": "qfdmo.souscategorieobjet",
         "fields": {
             "nom": "instrument de musique",
-            "lvao_id": 182,
             "categorie": ["équipements de loisir"],
             "code": "C_12"
         }
@@ -189,7 +177,6 @@
         "model": "qfdmo.souscategorieobjet",
         "fields": {
             "nom": "outil de bricolage et jardinage",
-            "lvao_id": 183,
             "categorie": ["bricolage & jardinage"],
             "code": "C_13"
         }
@@ -198,7 +185,6 @@
         "model": "qfdmo.souscategorieobjet",
         "fields": {
             "nom": "accessoire et meuble de jardin",
-            "lvao_id": 184,
             "categorie": ["équipements de loisir"],
             "code": "C_14"
         }
@@ -207,7 +193,6 @@
         "model": "qfdmo.souscategorieobjet",
         "fields": {
             "nom": "meuble",
-            "lvao_id": 185,
             "categorie": ["mobilier et décoration"],
             "code": "C_15"
         }
@@ -216,7 +201,6 @@
         "model": "qfdmo.souscategorieobjet",
         "fields": {
             "nom": "décoration",
-            "lvao_id": 186,
             "categorie": ["mobilier et décoration"],
             "code": "C_16"
         }
@@ -225,7 +209,6 @@
         "model": "qfdmo.souscategorieobjet",
         "fields": {
             "nom": "luminaire",
-            "lvao_id": 187,
             "categorie": ["mobilier et décoration"],
             "code": "C_17"
         }
@@ -234,7 +217,6 @@
         "model": "qfdmo.souscategorieobjet",
         "fields": {
             "nom": "vaisselle",
-            "lvao_id": 189,
             "categorie": ["mobilier et décoration"],
             "code": "C_18"
         }
@@ -243,7 +225,6 @@
         "model": "qfdmo.souscategorieobjet",
         "fields": {
             "nom": "linge de maison",
-            "lvao_id": 190,
             "categorie": ["vêtements & accessoires"],
             "code": "C_19"
         }
@@ -252,7 +233,6 @@
         "model": "qfdmo.souscategorieobjet",
         "fields": {
             "nom": "puériculture",
-            "lvao_id": 191,
             "categorie": ["produits divers"],
             "code": "C_20"
         }
@@ -261,7 +241,6 @@
         "model": "qfdmo.souscategorieobjet",
         "fields": {
             "nom": "jouet",
-            "lvao_id": 192,
             "categorie": ["équipements de loisir"],
             "code": "C_21"
         }
@@ -270,7 +249,6 @@
         "model": "qfdmo.souscategorieobjet",
         "fields": {
             "nom": "vêtement",
-            "lvao_id": 193,
             "categorie": ["vêtements & accessoires"],
             "code": "C_22"
         }
@@ -279,7 +257,6 @@
         "model": "qfdmo.souscategorieobjet",
         "fields": {
             "nom": "maroquinerie",
-            "lvao_id": 194,
             "categorie": ["vêtements & accessoires"],
             "code": "C_23"
         }
@@ -288,7 +265,6 @@
         "model": "qfdmo.souscategorieobjet",
         "fields": {
             "nom": "chaussures",
-            "lvao_id": 195,
             "categorie": ["vêtements & accessoires"],
             "code": "C_24"
         }
@@ -297,7 +273,6 @@
         "model": "qfdmo.souscategorieobjet",
         "fields": {
             "nom": "bijou et montre",
-            "lvao_id": 196,
             "categorie": ["bijou, montre, horlogerie"],
             "code": "C_25"
         }
@@ -306,7 +281,6 @@
         "model": "qfdmo.souscategorieobjet",
         "fields": {
             "nom": "vélo",
-            "lvao_id": 197,
             "categorie": ["équipements de loisir"],
             "code": "C_26"
         }
@@ -315,7 +289,6 @@
         "model": "qfdmo.souscategorieobjet",
         "fields": {
             "nom": "matériel de sport (hors vélo)",
-            "lvao_id": 198,
             "categorie": ["équipements de loisir"],
             "code": "C_27"
         }
@@ -324,7 +297,6 @@
         "model": "qfdmo.souscategorieobjet",
         "fields": {
             "nom": "matériel médical",
-            "lvao_id": 199,
             "categorie": ["produits divers"],
             "code": "C_28"
         }
@@ -333,7 +305,6 @@
         "model": "qfdmo.souscategorieobjet",
         "fields": {
             "nom": "matériau du bâtiment réemployable",
-            "lvao_id": null,
             "categorie": ["matériau de construction / du bâtiment réemployable"],
             "code": "C_29"
         }

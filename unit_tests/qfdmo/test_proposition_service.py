@@ -26,11 +26,11 @@ def django_db_setup(django_db_setup, django_db_blocker):
 class TestActionNomAsNaturalKeyHeritage:
     @pytest.fixture
     def acteur_service(self):
-        return ActeurService.objects.create(nom="fake acteur service", lvao_id=123)
+        return ActeurService.objects.create(nom="fake acteur service")
 
     @pytest.fixture
     def action(self):
-        return Action.objects.create(nom="fake action", lvao_id=123)
+        return Action.objects.create(nom="fake action")
 
     @pytest.fixture
     def acteur(self):
@@ -48,10 +48,10 @@ class TestActionNomAsNaturalKeyHeritage:
     @pytest.fixture
     def sous_categories(self, categorie):
         sous_categorie1 = SousCategorieObjet.objects.create(
-            nom="fake sous-categorie 1", categorie=categorie, lvao_id=123, code="C1"
+            nom="fake sous-categorie 1", categorie=categorie, code="C1"
         )
         sous_categorie2 = SousCategorieObjet.objects.create(
-            nom="fake sous-categorie 2", categorie=categorie, lvao_id=123, code="C2"
+            nom="fake sous-categorie 2", categorie=categorie, code="C2"
         )
         return [sous_categorie1, sous_categorie2]
 
