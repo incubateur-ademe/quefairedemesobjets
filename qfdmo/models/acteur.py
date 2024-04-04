@@ -123,6 +123,36 @@ def validate_opening_hours(value):
         )
 
 
+class LabelQualite(models.Model):
+    class Meta:
+        verbose_name = "Label qualité"
+        verbose_name_plural = "Labels qualité"
+
+    id = models.AutoField(primary_key=True)
+    libelle = models.CharField(max_length=255, unique=True)
+    code = models.CharField(
+        max_length=255,
+        unique=True,
+        blank=True,
+        null=True,
+        help_text=(
+            "This field is used to manage the import of data."
+            " Any update can break the import data process"
+        ),
+    )
+    afficher = models.BooleanField(default=True)
+    bonus = models.BooleanField(
+        default=False, help_text="Ouvre les droits à un bonus financier"
+    )
+    url = models.CharField(max_length=2048, blank=True, null=True)
+    logo_file = models.ImageField(
+        upload_to="logos", blank=True, null=True, validators=[validate_logo]
+    )
+
+    def __str__(self):
+        return self.libelle
+
+
 class BaseActeur(NomAsNaturalKeyModel):
     class Meta:
         abstract = True
@@ -144,7 +174,7 @@ class BaseActeur(NomAsNaturalKeyModel):
     nom_commercial = models.CharField(max_length=255, blank=True, null=True)
     nom_officiel = models.CharField(max_length=255, blank=True, null=True)
     # FIXME : Could be replace to a many-to-many relationship with a label table ?
-    label_reparacteur = models.BooleanField(default=False)
+    labels = models.ManyToManyField(LabelQualite)
     siret = models.CharField(max_length=14, blank=True, null=True)
     source = models.ForeignKey(Source, on_delete=models.CASCADE, blank=True, null=True)
     identifiant_externe = models.CharField(max_length=255, blank=True, null=True)
@@ -190,7 +220,14 @@ class BaseActeur(NomAsNaturalKeyModel):
 
     def serialize(self, format: None | str = None) -> dict | str:
         self_as_dict = model_to_dict(
-            self, exclude=["location", "proposition_services", "acteur_type", "source"]
+            self,
+            exclude=[
+                "location",
+                "proposition_services",
+                "acteur_type",
+                "source",
+                "labels",
+            ],
         )
         if self.acteur_type:
             self_as_dict["acteur_type"] = (
@@ -204,6 +241,12 @@ class BaseActeur(NomAsNaturalKeyModel):
         self_as_dict["proposition_services"] = []
         for proposition_service in proposition_services:
             self_as_dict["proposition_services"].append(proposition_service.serialize())
+
+        labels = self.labels.all()  # type: ignore
+        self_as_dict["labels"] = []
+        for proposition_service in labels:
+            self_as_dict["labels"].append(proposition_service.serialize())
+
         if format == "json":
             return json.dumps(self_as_dict)
         return self_as_dict
@@ -229,6 +272,9 @@ class BaseActeur(NomAsNaturalKeyModel):
             return self.proposition_services.filter(action__directions__nom=direction)
         return self.proposition_services.all()
 
+    def has_label_reparacteur(self):
+        return self.labels.filter(code="reparacteur").exists()
+
 
 class Acteur(BaseActeur):
     class Meta:
@@ -240,7 +286,6 @@ class Acteur(BaseActeur):
         fields = model_to_dict(
             self,
             fields=[
-                "label_reparacteur",
                 "statut",
             ],
         )
@@ -309,7 +354,13 @@ class RevisionActeur(BaseActeur):
             acteur = Acteur.objects.create(
                 **model_to_dict(
                     self,
-                    exclude=["id", "acteur_type", "source", "proposition_services"],
+                    exclude=[
+                        "id",
+                        "acteur_type",
+                        "source",
+                        "proposition_services",
+                        "labels",
+                    ],
                 ),
                 acteur_type=(
                     self.acteur_type
@@ -394,7 +445,27 @@ class DisplayedActeur(BaseActeur):
 
 
 class DisplayedActeurTemp(BaseActeur):
-    pass
+
+    labels = models.ManyToManyField(
+        LabelQualite,
+        through="ActeurLabelQualite",
+    )
+
+    class ActeurLabelQualite(models.Model):
+        class Meta:
+            db_table = "qfdmo_displayedacteurtemp_labels"
+
+        id = models.BigAutoField(primary_key=True)
+        acteur = models.ForeignKey(
+            "DisplayedActeurTemp",
+            on_delete=models.CASCADE,
+            db_column="displayedacteur_id",
+        )
+        label = models.ForeignKey(
+            LabelQualite,
+            on_delete=models.CASCADE,
+            db_column="labelqualite_id",
+        )
 
 
 class BasePropositionService(models.Model):

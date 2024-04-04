@@ -9,6 +9,7 @@ from qfdmo.models import (
     ActeurType,
     DisplayedActeur,
     DisplayedPropositionService,
+    LabelQualite,
     PropositionService,
     Source,
 )
@@ -18,6 +19,13 @@ from unit_tests.qfdmo.action_factory import ActionFactory
 class SourceFactory(Factory):
     class Meta:
         model = Source
+
+    afficher = True
+
+
+class LabelQualiteFactory(Factory):
+    class Meta:
+        model = LabelQualite
 
     afficher = True
 
