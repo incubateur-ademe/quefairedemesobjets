@@ -76,13 +76,13 @@ class TestActeurNomAffiche:
 @pytest.mark.django_db
 class TestActeurIsdigital:
     def test_isdigital_false(self):
-        acteur_type = ActeurType.objects.exclude(nom="acteur digital").first()
+        acteur_type = ActeurType.objects.exclude(code="acteur digital").first()
         assert not Acteur(
             nom="Test Object 1", location=Point(0, 0), acteur_type=acteur_type
         ).is_digital
 
     def test_isdigital_true(self):
-        acteur_type = ActeurType.objects.get(nom="acteur digital")
+        acteur_type = ActeurType.objects.get(code="acteur digital")
         assert Acteur(
             nom="Test Object 1", location=Point(0, 0), acteur_type=acteur_type
         ).is_digital
@@ -186,7 +186,7 @@ class TestActeurOpeningHours:
 @pytest.mark.django_db
 class TestLocationValidation:
     def test_location_validation_raise(self):
-        acteur_type = ActeurType.objects.exclude(nom="acteur digital").first()
+        acteur_type = ActeurType.objects.exclude(code="acteur digital").first()
         acteur = Acteur(
             nom="Test Object 1", identifiant_unique="123", acteur_type=acteur_type
         )
@@ -194,7 +194,7 @@ class TestLocationValidation:
             acteur.save()
 
     def test_location_validation_dont_raise(self):
-        acteur_type = ActeurType.objects.get(nom="acteur digital")
+        acteur_type = ActeurType.objects.get(code="acteur digital")
         acteur = Acteur(
             nom="Test Object 1", identifiant_unique="123", acteur_type=acteur_type
         )
@@ -226,7 +226,7 @@ class TestActeurGetOrCreateRevisionActeur:
     def test_create_revisionacteur(self, acteur):
         revision_acteur = acteur.get_or_create_revision()
         revision_acteur.proposition_services.all().delete()
-        acteur_service = ActeurServiceFactory.create(nom="service 2")
+        acteur_service = ActeurServiceFactory.create(code="service 2")
         action = ActionFactory.create(nom="action 2")
         proposition_service = RevisionPropositionService.objects.create(
             acteur_service=acteur_service,
@@ -240,10 +240,10 @@ class TestActeurGetOrCreateRevisionActeur:
         assert revision_acteur2.nom is None
         assert (
             revision_acteur2.proposition_services.values_list(
-                "acteur_service__nom", "action__nom"
+                "acteur_service__code", "action__nom"
             ).all()
             != acteur.proposition_services.values_list(
-                "acteur_service__nom", "action__nom"
+                "acteur_service__code", "action__nom"
             ).all()
         )
 
@@ -269,7 +269,7 @@ class TestActeurService:
     def test_acteur_actions_basic(self):
         action1 = Action.objects.get(nom="reparer")
         acteur_service = ActeurService.objects.get(
-            nom="Achat, revente par un professionnel"
+            code="Achat, revente par un professionnel"
         )
         acteur = Acteur.objects.create(
             nom="Acteur 1", location=Point(0, 0), acteur_type_id=1
@@ -283,7 +283,7 @@ class TestActeurService:
     def test_acteur_actions_distinct(self):
         action1 = Action.objects.get(nom="reparer")
         acteur_service = ActeurService.objects.get(
-            nom="Achat, revente par un professionnel"
+            code="Achat, revente par un professionnel"
         )
         action2 = Action.objects.get(nom="echanger")
         acteur = Acteur.objects.create(
@@ -303,9 +303,11 @@ class TestActeurService:
     def test_acteur_actions_multiple(self):
         action = Action.objects.get(nom="reparer")
         acteur_service1 = ActeurService.objects.get(
-            nom="Achat, revente par un professionnel"
+            code="Achat, revente par un professionnel"
         )
-        acteur_service2 = ActeurService.objects.get(nom="Atelier pour réparer soi-même")
+        acteur_service2 = ActeurService.objects.get(
+            code="Atelier pour réparer soi-même"
+        )
         acteur = Acteur.objects.create(
             nom="Acteur 1", location=Point(0, 0), acteur_type_id=1
         )
@@ -324,9 +326,11 @@ class TestActeurService:
     def test_acteur_actions_multiple_with_same_libelle(self):
         action = Action.objects.get(nom="reparer")
         acteur_service1 = ActeurService.objects.get(
-            nom="Achat, revente par un professionnel"
+            code="Achat, revente par un professionnel"
         )
-        acteur_service2 = ActeurService.objects.get(nom="Atelier pour réparer soi-même")
+        acteur_service2 = ActeurService.objects.get(
+            code="Atelier pour réparer soi-même"
+        )
         acteur_service2.libelle = acteur_service1.libelle
         acteur_service2.save()
         acteur = Acteur.objects.create(

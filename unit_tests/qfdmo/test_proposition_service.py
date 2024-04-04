@@ -26,7 +26,7 @@ def django_db_setup(django_db_setup, django_db_blocker):
 class TestActionNomAsNaturalKeyHeritage:
     @pytest.fixture
     def acteur_service(self):
-        return ActeurService.objects.create(nom="fake acteur service")
+        return ActeurService.objects.create(code="fake acteur service")
 
     @pytest.fixture
     def action(self):
