@@ -275,14 +275,14 @@
                     {% if adresse.source.logo_file %}
                         <img
                             src="{{ adresse.source.logo_file.url }}"
-                            alt="{{ adresse.source.nom }}"
+                            alt="{{ adresse.source.libelle }}"
                             class="qfdmo-cursor-pointer"
                             width=32
                             height=32
                             onclick="document.getElementById('display_modale_reparacteur').setAttribute('data-fr-opened', 'true');"
                         >
                     {% endif %}
-                    <span class="fr-ml-1w qfdmo-grow">{{ adresse.source.nom }}</span>
+                    <span class="fr-ml-1w qfdmo-grow">{{ adresse.source.libelle }}</span>
                 </a>
             </div>
         </div>

@@ -398,6 +398,18 @@ class DisplayedActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
         return False
 
 
+class SourceAdmin(admin.ModelAdmin):
+    list_display = ("libelle", "code")
+    search_fields = ["libelle", "code"]
+    search_help_text = "Recherche sur le libellé ou le code"
+
+
+class LabelQualiteAdmin(admin.ModelAdmin):
+    list_display = ("libelle", "code")
+    search_fields = ["libelle", "code"]
+    search_help_text = "Recherche sur le libellé ou le code"
+
+
 admin.site.register(Acteur, ActeurAdmin)
 admin.site.register(ActeurService)
 admin.site.register(ActeurType, ActeurTypeAdmin)
@@ -405,5 +417,5 @@ admin.site.register(DisplayedActeur, DisplayedActeurAdmin)
 admin.site.register(PropositionService, PropositionServiceAdmin)
 admin.site.register(RevisionActeur, RevisionActeurAdmin)
 admin.site.register(RevisionPropositionService, RevisionPropositionServiceAdmin)
-admin.site.register(Source)
-admin.site.register(LabelQualite)
+admin.site.register(Source, SourceAdmin)
+admin.site.register(LabelQualite, LabelQualiteAdmin)

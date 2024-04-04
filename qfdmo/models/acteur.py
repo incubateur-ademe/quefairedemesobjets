@@ -14,7 +14,7 @@ from unidecode import unidecode
 
 from qfdmo.models.action import Action, CachedDirectionAction
 from qfdmo.models.categorie_objet import SousCategorieObjet
-from qfdmo.models.utils import NomAsNaturalKeyModel
+from qfdmo.models.utils import CodeAsNaturalKeyModel, NomAsNaturalKeyModel
 
 
 class ActeurService(NomAsNaturalKeyModel):
@@ -82,28 +82,20 @@ def validate_logo(value: Any):
             raise ValidationError("Logo dimensions should be 32x32 pixels.")
 
 
-class Source(NomAsNaturalKeyModel):
+class Source(CodeAsNaturalKeyModel):
     class Meta:
         verbose_name = "Source de données"
         verbose_name_plural = "Sources de données"
 
     id = models.AutoField(primary_key=True)
-    nom = models.CharField(max_length=255, unique=True)
-    code_import = models.CharField(
+    libelle = models.CharField(max_length=255, unique=True)
+    code = models.CharField(
         max_length=255,
         unique=True,
-        blank=True,
-        null=True,
         help_text=(
             "This field is used to manage the import of data."
             " Any update can break the import data process"
         ),
-    )
-    logo = models.CharField(
-        max_length=255,
-        blank=True,
-        null=True,
-        help_text="DEPRECATED : please use logo_file",
     )
     afficher = models.BooleanField(default=True)
     url = models.CharField(max_length=2048, blank=True, null=True)
@@ -324,9 +316,9 @@ class Acteur(BaseActeur):
                 random.choices(string.ascii_uppercase, k=12)
             )
         if self.source is None:
-            self.source = Source.objects.get_or_create(nom="equipe")[0]
+            self.source = Source.objects.get_or_create(code="equipe")[0]
         if not self.identifiant_unique:
-            source_stub = unidecode(self.source.nom.lower()).replace(" ", "_")
+            source_stub = unidecode(self.source.code.lower()).replace(" ", "_")
             self.identifiant_unique = source_stub + "_" + str(self.identifiant_externe)
 
 

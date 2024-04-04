@@ -131,10 +131,12 @@ class TestActeurDefaultOnSave:
         )
         assert len(acteur.identifiant_externe) == 12
         assert acteur.identifiant_unique == "equipe_" + acteur.identifiant_externe
-        assert acteur.source.nom == "equipe"
+        assert acteur.source.code == "equipe"
 
     def test_default_identifiantunique(self):
-        source = Source.objects.get_or_create(nom="Source Équipe")[0]
+        source = Source.objects.get_or_create(
+            libelle="Source Équipe", code="source_equipe"
+        )[0]
         acteur = Acteur.objects.create(
             nom="Test Object 1",
             acteur_type_id=1,
