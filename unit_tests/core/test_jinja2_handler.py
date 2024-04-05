@@ -113,7 +113,7 @@ class TestActionByDirection:
         request.GET = {}
 
         assert [
-            action["nom_affiche"] for action in action_by_direction(request, "jai")
+            action["libelle"] for action in action_by_direction(request, "jai")
         ] == [
             "prêter",
             "mettre en location",
@@ -123,7 +123,7 @@ class TestActionByDirection:
             "vendre",
         ]
         assert [
-            action["nom_affiche"]
+            action["libelle"]
             for action in action_by_direction(request, "jai")
             if action["active"]
         ] == [
@@ -136,8 +136,7 @@ class TestActionByDirection:
         ]
 
         assert [
-            action["nom_affiche"]
-            for action in action_by_direction(request, "jecherche")
+            action["libelle"] for action in action_by_direction(request, "jecherche")
         ] == [
             "emprunter",
             "louer",
@@ -145,7 +144,7 @@ class TestActionByDirection:
             "acheter de seconde main",
         ]
         assert [
-            action["nom_affiche"]
+            action["libelle"]
             for action in action_by_direction(request, "jecherche")
             if action["active"]
         ] == [
@@ -162,7 +161,7 @@ class TestActionByDirection:
         request.GET = {"direction": "jecherche", "action_list": "emprunter|louer"}
 
         assert [
-            action["nom_affiche"] for action in action_by_direction(request, "jai")
+            action["libelle"] for action in action_by_direction(request, "jai")
         ] == [
             "prêter",
             "mettre en location",
@@ -172,7 +171,7 @@ class TestActionByDirection:
             "vendre",
         ]
         assert [
-            action["nom_affiche"]
+            action["libelle"]
             for action in action_by_direction(request, "jai")
             if action["active"]
         ] == [
@@ -185,8 +184,7 @@ class TestActionByDirection:
         ]
 
         assert [
-            action["nom_affiche"]
-            for action in action_by_direction(request, "jecherche")
+            action["libelle"] for action in action_by_direction(request, "jecherche")
         ] == [
             "emprunter",
             "louer",
@@ -194,7 +192,7 @@ class TestActionByDirection:
             "acheter de seconde main",
         ]
         assert [
-            action["nom_affiche"]
+            action["libelle"]
             for action in action_by_direction(request, "jecherche")
             if action["active"]
         ] == [

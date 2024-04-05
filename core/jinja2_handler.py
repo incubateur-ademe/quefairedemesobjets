@@ -43,14 +43,14 @@ def get_action_list(request: HttpRequest) -> List[dict]:
         return [
             a
             for a in CachedDirectionAction.get_actions_by_direction()[direction]
-            if a["nom"] in action_list.split("|")
+            if a["code"] in action_list.split("|")
         ]
     else:
         return CachedDirectionAction.get_actions_by_direction()[direction]
 
 
 def action_list_display(request: HttpRequest) -> List[str]:
-    return [action["nom_affiche"] for action in get_action_list(request)]
+    return [action["libelle"] for action in get_action_list(request)]
 
 
 def action_by_direction(request: HttpRequest, direction: str):
@@ -62,7 +62,7 @@ def action_by_direction(request: HttpRequest, direction: str):
         return [
             {
                 **a,
-                "active": bool(a["nom"] in action_list),
+                "active": bool(a["code"] in action_list),
             }
             for a in CachedDirectionAction.get_actions_by_direction()[direction]
         ]

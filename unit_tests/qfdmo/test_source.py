@@ -1,22 +1,24 @@
 import pytest
 
-from qfdmo.models import NomAsNaturalKeyModel, Source
+from qfdmo.models import CodeAsNaturalKeyModel, Source
 
 
-class TestSourceNomAsNaturalKeyHeritage:
+class TestSourceCodeAsNaturalKeyHeritage:
     def test_natural(self):
-        assert NomAsNaturalKeyModel in Source.mro()
+        assert CodeAsNaturalKeyModel in Source.mro()
 
     @pytest.mark.django_db
     def test_serialize(self):
         source = Source.objects.create(
-            nom="Test Object", logo="path/to/logo", afficher=True, url="path/to/source"
+            libelle="Test Object",
+            afficher=True,
+            url="path/to/source",
+            code="code_source",
         )
         assert source.serialize() == {
             "id": source.id,
-            "nom": "Test Object",
-            "code_import": None,
-            "logo": "path/to/logo",
+            "libelle": "Test Object",
+            "code": "code_source",
             "afficher": True,
             "url": "path/to/source",
             "logo_file": None,

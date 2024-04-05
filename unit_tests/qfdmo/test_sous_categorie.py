@@ -1,48 +1,44 @@
 import pytest
 
 from qfdmo.models import CategorieObjet, SousCategorieObjet
+from unit_tests.qfdmo.sscatobj_factory import SousCategorieObjetFactory
 
 
-class TestActionStr:
+class TestSousCategorieObjetStr:
     def test_str_blank(self):
-        assert SousCategorieObjet(nom="").__str__() == ""
+        assert SousCategorieObjetFactory.build(libelle="").__str__() == ""
 
     def test_str_specialchar(self):
-        assert SousCategorieObjet(nom="Åctïôn").__str__() == "Åctïôn"
+        assert SousCategorieObjetFactory.build(libelle="Åctïôn").__str__() == "Åctïôn"
 
 
 class TestActionNaturalKey:
     def test_natural_key(self):
-        assert SousCategorieObjet(nom="Natural key", code="C_00").natural_key() == (
-            "C_00",
-        )
+        assert SousCategorieObjetFactory.build(
+            libelle="Natural key", code="natural_key"
+        ).natural_key() == ("natural_key",)
 
     @pytest.mark.django_db()
     def test_get_natural_key(self):
-        action = SousCategorieObjet(nom="Natural key", code="C_00", categorie_id=1)
-        action.save()
+
+        SousCategorieObjetFactory(libelle="Natural key", code="natural_key")
         assert (
-            SousCategorieObjet.objects.get_by_natural_key("C_00").__str__()
+            SousCategorieObjet.objects.get_by_natural_key("natural_key").__str__()
             == "Natural key"
         )
 
 
 class TestSousCategorieObjetSanitizedName:
-    def test_sanitized_nom_blank(self):
-        assert SousCategorieObjet(nom="").sanitized_nom == ""
-
-    def test_sanitized_nom_specialchar(self):
-        assert (
-            SousCategorieObjet(nom="Établissement Français (ááíãôç@._°)").sanitized_nom
-            == "ETABLISSEMENT FRANCAIS (AAIAOC@._DEG)"
-        )
-
     @pytest.mark.django_db
     def test_serialize(self):
         # Create a test instance of CategorieObjet and SousCategorieObjet
-        categorie = CategorieObjet.objects.create(nom="Test Category")
+        categorie = CategorieObjet.objects.create(
+            libelle="Test Category", code="code_category"
+        )
         sous_categorie = SousCategorieObjet.objects.create(
-            nom="Test Sous-Categorie", categorie=categorie, lvao_id=123, code="CODE"
+            libelle="Test Sous-Categorie",
+            categorie=categorie,
+            code="code_sous_categorie",
         )
 
         # Call the serialize function
@@ -51,8 +47,7 @@ class TestSousCategorieObjetSanitizedName:
         # Verify that the serialized object matches what we expect
         assert serialized_sous_categorie == {
             "id": sous_categorie.id,
-            "nom": "Test Sous-Categorie",
-            "lvao_id": 123,
-            "code": "CODE",
+            "libelle": "Test Sous-Categorie",
+            "code": "code_sous_categorie",
             "categorie": categorie.serialize(),
         }

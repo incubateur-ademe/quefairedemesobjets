@@ -242,19 +242,19 @@ def get_object_list(request):
     query = unidecode.unidecode(request.GET.get("q"))
     objets = (
         Objet.objects.annotate(
-            nom_unaccent=Unaccent(Lower("nom")),
+            libelle_unaccent=Unaccent(Lower("libelle")),
         )
         .prefetch_related("sous_categorie")
         .annotate(
-            distance=TrigramWordDistance(query, "nom_unaccent"),
-            length=Length("nom"),
+            distance=TrigramWordDistance(query, "libelle_unaccent"),
+            length=Length("libelle"),
         )
         .order_by("distance", "length")[:10]
     )
     object_list = [
         {
-            "label": objet.nom,
-            "sub_label": objet.sous_categorie.nom,
+            "label": objet.libelle,
+            "sub_label": objet.sous_categorie.libelle,
             "identifier": objet.sous_categorie_id,
         }
         for objet in objets

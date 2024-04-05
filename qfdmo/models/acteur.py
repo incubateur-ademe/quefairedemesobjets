@@ -14,18 +14,17 @@ from unidecode import unidecode
 
 from qfdmo.models.action import Action, CachedDirectionAction
 from qfdmo.models.categorie_objet import SousCategorieObjet
-from qfdmo.models.utils import NomAsNaturalKeyModel
+from qfdmo.models.utils import CodeAsNaturalKeyModel, NomAsNaturalKeyModel
 
 
-class ActeurService(NomAsNaturalKeyModel):
+class ActeurService(CodeAsNaturalKeyModel):
     class Meta:
         verbose_name = "Service proposé"
         verbose_name_plural = "Services proposés"
 
     id = models.AutoField(primary_key=True)
-    nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
-    nom_affiche = models.CharField(max_length=255, blank=True, null=True)
-    lvao_id = models.IntegerField(blank=True, null=True)
+    code = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    libelle = models.CharField(max_length=255, blank=True, null=True)
     actions = models.ManyToManyField(Action)
 
     def serialize(self):
@@ -38,7 +37,7 @@ class ActeurStatus(models.TextChoices):
     SUPPRIME = "SUPPRIME", "supprimé"
 
 
-class ActeurType(NomAsNaturalKeyModel):
+class ActeurType(CodeAsNaturalKeyModel):
     _digital_acteur_type_id: int = 0
 
     class Meta:
@@ -46,19 +45,8 @@ class ActeurType(NomAsNaturalKeyModel):
         verbose_name_plural = "Types d'acteur"
 
     id = models.AutoField(primary_key=True)
-    nom = models.CharField(max_length=255, unique=True, blank=False, null=False)
-    code_import = models.CharField(
-        max_length=255,
-        unique=True,
-        blank=True,
-        null=True,
-        help_text=(
-            "This field is used to manage the import of data."
-            " Any update can break the import data process"
-        ),
-    )
-    nom_affiche = models.CharField(max_length=255, blank=False, null=False, default="?")
-    lvao_id = models.IntegerField(blank=True, null=True)
+    code = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    libelle = models.CharField(max_length=255, blank=False, null=False, default="?")
 
     def serialize(self):
         return model_to_dict(self)
@@ -66,7 +54,7 @@ class ActeurType(NomAsNaturalKeyModel):
     @classmethod
     def get_digital_acteur_type_id(cls) -> int:
         if not cls._digital_acteur_type_id:
-            cls._digital_acteur_type_id = cls.objects.get(nom="acteur digital").id
+            cls._digital_acteur_type_id = cls.objects.get(code="acteur digital").id
         return cls._digital_acteur_type_id
 
 
@@ -82,28 +70,20 @@ def validate_logo(value: Any):
             raise ValidationError("Logo dimensions should be 32x32 pixels.")
 
 
-class Source(NomAsNaturalKeyModel):
+class Source(CodeAsNaturalKeyModel):
     class Meta:
         verbose_name = "Source de données"
         verbose_name_plural = "Sources de données"
 
     id = models.AutoField(primary_key=True)
-    nom = models.CharField(max_length=255, unique=True)
-    code_import = models.CharField(
+    libelle = models.CharField(max_length=255, unique=True)
+    code = models.CharField(
         max_length=255,
         unique=True,
-        blank=True,
-        null=True,
         help_text=(
             "This field is used to manage the import of data."
             " Any update can break the import data process"
         ),
-    )
-    logo = models.CharField(
-        max_length=255,
-        blank=True,
-        null=True,
-        help_text="DEPRECATED : please use logo_file",
     )
     afficher = models.BooleanField(default=True)
     url = models.CharField(max_length=2048, blank=True, null=True)
@@ -211,7 +191,7 @@ class BaseActeur(NomAsNaturalKeyModel):
         return self.location.x if self.location else None
 
     @property
-    def nom_affiche(self):
+    def libelle(self):
         return self.nom_commercial or self.nom
 
     @property
@@ -258,18 +238,17 @@ class BaseActeur(NomAsNaturalKeyModel):
             list(
                 set(
                     [
-                        ps.acteur_service.nom_affiche
+                        ps.acteur_service.libelle
                         for ps in self.proposition_services.all()
-                        if ps.acteur_service.nom_affiche
+                        if ps.acteur_service.libelle
                     ]
                 )
             )
         )
 
     def proposition_services_by_direction(self, direction: str | None = None):
-
         if direction:
-            return self.proposition_services.filter(action__directions__nom=direction)
+            return self.proposition_services.filter(action__directions__code=direction)
         return self.proposition_services.all()
 
     def has_label_reparacteur(self):
@@ -308,7 +287,7 @@ class Acteur(BaseActeur):
         return acteur
 
     def clean_location(self):
-        if self.location is None and self.acteur_type.nom != "acteur digital":
+        if self.location is None and self.acteur_type.code != "acteur digital":
             raise ValidationError(
                 {"location": "Location is mandatory when the actor is not digital"}
             )
@@ -324,9 +303,9 @@ class Acteur(BaseActeur):
                 random.choices(string.ascii_uppercase, k=12)
             )
         if self.source is None:
-            self.source = Source.objects.get_or_create(nom="equipe")[0]
+            self.source = Source.objects.get_or_create(code="equipe")[0]
         if not self.identifiant_unique:
-            source_stub = unidecode(self.source.nom.lower()).replace(" ", "_")
+            source_stub = unidecode(self.source.code.lower()).replace(" ", "_")
             self.identifiant_unique = source_stub + "_" + str(self.identifiant_externe)
 
 
@@ -365,7 +344,7 @@ class RevisionActeur(BaseActeur):
                 acteur_type=(
                     self.acteur_type
                     if self.acteur_type
-                    else ActeurType.objects.get(nom="commerce")
+                    else ActeurType.objects.get(code="commerce")
                 ),
                 source=self.source,
             )
@@ -488,7 +467,7 @@ class BasePropositionService(models.Model):
     )
 
     def __str__(self):
-        return f"{self.action.nom} - {self.acteur_service.nom}"
+        return f"{self.action.code} - {self.acteur_service.code}"
 
     def serialize(self):
         return {

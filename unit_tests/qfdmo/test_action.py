@@ -1,30 +1,28 @@
 import pytest
 
-from qfdmo.models import Action, NomAsNaturalKeyModel
+from qfdmo.models import Action, CodeAsNaturalKeyModel
 from qfdmo.models.action import ActionDirection, CachedDirectionAction
 from unit_tests.qfdmo.action_factory import ActionDirectionFactory, ActionFactory
 
 
 class TestActionNomAsNaturalKeyHeritage:
     def test_natural(self):
-        assert NomAsNaturalKeyModel in Action.mro()
+        assert CodeAsNaturalKeyModel in Action.mro()
 
     @pytest.mark.django_db
     def test_serialize(self):
         action = Action.objects.create(
-            nom="Test Object",
-            lvao_id=123,
-            nom_affiche="Test Objet Displayed",
+            code="Test Object",
+            libelle="Test Objet Displayed",
             order=1,
         )
         assert action.serialize() == {
             "id": action.id,
             "description": None,
             "afficher": True,
-            "nom": "Test Object",
-            "nom_affiche": "Test Objet Displayed",
+            "code": "Test Object",
+            "libelle": "Test Objet Displayed",
             "order": 1,
-            "lvao_id": 123,
             "couleur": "yellow-tournesol",
             "icon": None,
         }
@@ -33,22 +31,22 @@ class TestActionNomAsNaturalKeyHeritage:
 @pytest.fixture
 def action_directions():
     ActionDirection.objects.all().delete()
-    ActionDirectionFactory(nom="first", nom_affiche="First", order=1)
-    ActionDirectionFactory(nom="second", nom_affiche="Second", order=2)
+    ActionDirectionFactory(code="first", libelle="First", order=1)
+    ActionDirectionFactory(code="second", libelle="Second", order=2)
 
 
 @pytest.fixture
 def actions():
-    first = ActionDirection.objects.get(nom="first")
-    second = ActionDirection.objects.get(nom="second")
+    first = ActionDirection.objects.get(code="first")
+    second = ActionDirection.objects.get(code="second")
 
-    ActionFactory(nom="first_1").directions.add(first)
-    ActionFactory(nom="first_2").directions.add(first)
-    ActionFactory(nom="first_3").directions.add(first)
-    ActionFactory(nom="second_1").directions.add(second)
-    ActionFactory(nom="second_2").directions.add(second)
-    ActionFactory(nom="second_3").directions.add(second)
-    ActionFactory(nom="first_second").directions.add(first, second)
+    ActionFactory(code="first_1").directions.add(first)
+    ActionFactory(code="first_2").directions.add(first)
+    ActionFactory(code="first_3").directions.add(first)
+    ActionFactory(code="second_1").directions.add(second)
+    ActionFactory(code="second_2").directions.add(second)
+    ActionFactory(code="second_3").directions.add(second)
+    ActionFactory(code="first_second").directions.add(first, second)
 
 
 class TestCachedDirectionActionGetDirections:
@@ -57,17 +55,17 @@ class TestCachedDirectionActionGetDirections:
     @pytest.mark.parametrize(
         "first_direction,expected",
         [
-            ("first", [{"nom": "first", "order": 1}, {"nom": "second", "order": 2}]),
+            ("first", [{"code": "first", "order": 1}, {"code": "second", "order": 2}]),
             (
                 "second",
-                [{"nom": "second", "order": 2}, {"nom": "first", "order": 1}],
+                [{"code": "second", "order": 2}, {"code": "first", "order": 1}],
             ),
-            (None, [{"nom": "first", "order": 1}, {"nom": "second", "order": 2}]),
+            (None, [{"code": "first", "order": 1}, {"code": "second", "order": 2}]),
         ],
     )
     def test_get_directions(self, first_direction, expected, action_directions):
         assert [
-            {k: v for k, v in direction.items() if k in ["order", "nom"]}
+            {k: v for k, v in direction.items() if k in ["order", "code"]}
             for direction in CachedDirectionAction.get_directions(
                 first_direction=first_direction
             )
@@ -81,28 +79,29 @@ class TestCachedDirectionActionGetActionsByDirection:
         CachedDirectionAction.reload_cache()
 
         assert [
-            a["nom"] for a in CachedDirectionAction.get_actions_by_direction()["first"]
+            a["code"] for a in CachedDirectionAction.get_actions_by_direction()["first"]
         ] == ["first_1", "first_2", "first_3", "first_second"]
         assert [
-            a["nom"] for a in CachedDirectionAction.get_actions_by_direction()["second"]
+            a["code"]
+            for a in CachedDirectionAction.get_actions_by_direction()["second"]
         ] == ["second_1", "second_2", "second_3", "first_second"]
 
     @pytest.mark.django_db
     def test_get_actions_by_direction_order(self, action_directions, actions):
-        Action.objects.filter(nom="first_1").update(order=999)
+        Action.objects.filter(code="first_1").update(order=999)
         CachedDirectionAction.reload_cache()
 
         assert [
-            a["nom"] for a in CachedDirectionAction.get_actions_by_direction()["first"]
+            a["code"] for a in CachedDirectionAction.get_actions_by_direction()["first"]
         ] == ["first_2", "first_3", "first_second", "first_1"]
 
     @pytest.mark.django_db
     def test_get_actions_by_direction_hidden(self, action_directions, actions):
-        Action.objects.filter(nom="first_1").update(afficher=False)
+        Action.objects.filter(code="first_1").update(afficher=False)
         CachedDirectionAction.reload_cache()
 
         assert [
-            a["nom"] for a in CachedDirectionAction.get_actions_by_direction()["first"]
+            a["code"] for a in CachedDirectionAction.get_actions_by_direction()["first"]
         ] == ["first_2", "first_3", "first_second"]
 
 
