@@ -166,7 +166,13 @@ class GetReemploiSolutionForm(forms.Form):
 
 
 class DagsForm(forms.Form):
-    dags_runs = forms.ModelChoiceField(
-        queryset=DagRun.objects.filter(status=DagRunStatus.TO_VALIDATE),
+    dagrun = forms.ModelChoiceField(
+        label="Séléctionner l'execution d'un DAG",
+        widget=forms.Select(
+            attrs={
+                "class": "fr-select",
+            }
+        ),
+        queryset=DagRun.objects.filter(status=DagRunStatus.TO_VALIDATE.value),
         required=True,
     )
