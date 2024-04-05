@@ -35,12 +35,12 @@ class TestDataTransformations(unittest.TestCase):
 
     def test_with_service_a_domicile_only(self):
         self.assertEqual(
-            mapping_utils.create_identifiant_unique(self.row), "REFASHION_123_d"
+            mapping_utils.create_identifiant_unique(self.row), "refashion_123_d"
         )
 
     def test_without_service_a_domicile_only(self):
         self.assertEqual(
-            mapping_utils.create_identifiant_unique(self.row), "REFASHION_123"
+            mapping_utils.create_identifiant_unique(self.row), "refashion_123"
         )
 
 
