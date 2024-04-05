@@ -43,15 +43,15 @@ class TestActionNomAsNaturalKeyHeritage:
 
     @pytest.fixture
     def categorie(self):
-        return CategorieObjet.objects.create(nom="fake categorie")
+        return CategorieObjet.objects.create(libelle="fake categorie")
 
     @pytest.fixture
     def sous_categories(self, categorie):
         sous_categorie1 = SousCategorieObjet.objects.create(
-            nom="fake sous-categorie 1", categorie=categorie, code="C1"
+            libelle="fake sous-categorie 1", categorie=categorie, code="C1"
         )
         sous_categorie2 = SousCategorieObjet.objects.create(
-            nom="fake sous-categorie 2", categorie=categorie, code="C2"
+            libelle="fake sous-categorie 2", categorie=categorie, code="C2"
         )
         return [sous_categorie1, sous_categorie2]
 

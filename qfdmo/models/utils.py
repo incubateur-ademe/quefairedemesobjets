@@ -15,6 +15,9 @@ class CodeAsNaturalKeyModel(models.Model):
     def natural_key(self) -> tuple[str]:
         return (getattr(self, "code"),)
 
+    def __str__(self) -> str:
+        return getattr(self, "code")
+
 
 class NomAsNaturalKeyManager(models.Manager):
     def get_by_natural_key(self, nom: str) -> models.Model:
