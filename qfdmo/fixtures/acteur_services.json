@@ -2,117 +2,104 @@
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "nom": "Achat, revente entre particuliers",
-            "nom_affiche": "Entre particuliers",
-            "lvao_id": 163,
+            "code": "Achat, revente entre particuliers",
+            "libelle": "Entre particuliers",
             "actions": [["acheter"], ["revendre"]]
         }
     },
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "nom": "Achat, revente par un professionnel",
-            "nom_affiche": "Par un professionnel",
-            "lvao_id": 162,
+            "code": "Achat, revente par un professionnel",
+            "libelle": "Par un professionnel",
             "actions": [["acheter"], ["revendre"]]
         }
     },
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "nom": "Atelier pour réparer soi-même",
-            "nom_affiche": "Atelier pour réparer soi-même",
-            "lvao_id": 157,
+            "code": "Atelier pour réparer soi-même",
+            "libelle": "Atelier pour réparer soi-même",
             "actions": [["reparer"]]
         }
     },
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "nom": "Collecte par une structure spécialisée",
-            "nom_affiche": "Structure de collecte",
-            "lvao_id": 164,
+            "code": "Collecte par une structure spécialisée",
+            "libelle": "Structure de collecte",
             "actions": [["donner"]]
         }
     },
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "nom": "Depôt-vente",
-            "nom_affiche": "Depôt-vente",
-            "lvao_id": 161,
+            "code": "Depôt-vente",
+            "libelle": "Depôt-vente",
             "actions": [["acheter"], ["revendre"]]
         }
     },
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "nom": "Don entre particuliers",
-            "nom_affiche": "Entre particuliers",
-            "lvao_id": 165,
+            "code": "Don entre particuliers",
+            "libelle": "Entre particuliers",
             "actions": [["donner"]]
         }
     },
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "nom": "Echanges entre particuliers",
-            "nom_affiche": "Entre particuliers",
-            "lvao_id": 188,
+            "code": "Echanges entre particuliers",
+            "libelle": "Entre particuliers",
             "actions": [["echanger"]]
         }
     },
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "nom": "Espace de partage",
-            "nom_affiche": "Espace de partage",
-            "lvao_id": 168,
+            "code": "Espace de partage",
+            "libelle": "Espace de partage",
             "actions": [["preter"], ["echanger"], ["emprunter"]]
         }
     },
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "nom": "Location entre particuliers",
-            "nom_affiche": "Entre particuliers",
-            "lvao_id": 167,
+            "code": "Location entre particuliers",
+            "libelle": "Entre particuliers",
             "actions": [["louer"], ["mettreenlocation"]]
         }
     },
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "nom": "Location par un professionnel",
-            "nom_affiche": "Via un professionnel",
-            "lvao_id": 166,
+            "code": "Location par un professionnel",
+            "libelle": "Via un professionnel",
             "actions": [["louer"], ["mettreenlocation"]]
         }
     },
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "nom": "Partage entre particuliers",
-            "nom_affiche": "Entre particuliers",
-            "lvao_id": 169,
+            "code": "Partage entre particuliers",
+            "libelle": "Entre particuliers",
             "actions": [["preter"], ["emprunter"]]
         }
     },
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "nom": "Pièces détachées",
-            "nom_affiche": "Pièces détachées",
-            "lvao_id": 158,
+            "code": "Pièces détachées",
+            "libelle": "Pièces détachées",
             "actions": [["reparer"]]
         }
     },
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "nom": "Relai d'acteurs et d'événements",
-            "nom_affiche": "Actualités et informations",
-            "lvao_id": 170,
+            "code": "Relai d'acteurs et d'événements",
+            "libelle": "Actualités et informations",
             "actions": [
                 ["reparer"],
                 ["acheter"],
@@ -129,36 +116,32 @@
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "nom": "Recyclerie",
-            "nom_affiche": "Recyclerie",
-            "lvao_id": 160,
+            "code": "Recyclerie",
+            "libelle": "Recyclerie",
             "actions": [["acheter"]]
         }
     },
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "nom": "Service de réparation",
-            "nom_affiche": "Service de réparation",
-            "lvao_id": 156,
+            "code": "Service de réparation",
+            "libelle": "Service de réparation",
             "actions": [["reparer"]]
         }
     },
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "nom": "Tutoriels et diagnostics en ligne",
-            "nom_affiche": "Tutoriels et diagnostics en ligne",
-            "lvao_id": 159,
+            "code": "Tutoriels et diagnostics en ligne",
+            "libelle": "Tutoriels et diagnostics en ligne",
             "actions": [["reparer"]]
         }
     },
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "nom": "Structure qui va sous-traiter la réparation",
-            "nom_affiche": "Structure qui va sous-traiter la réparation",
-            "lvao_id": null,
+            "code": "Structure qui va sous-traiter la réparation",
+            "libelle": "Structure qui va sous-traiter la réparation",
             "actions": [["reparer"]]
         }
     }

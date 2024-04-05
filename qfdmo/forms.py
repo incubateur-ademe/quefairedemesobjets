@@ -107,7 +107,7 @@ class GetReemploiSolutionForm(forms.Form):
 
     def load_choices(self, first_direction=None):
         self.fields["direction"].choices = [
-            [direction["nom"], direction["nom_affiche"]]
+            [direction["code"], direction["libelle"]]
             for direction in CachedDirectionAction.get_directions(
                 first_direction=first_direction
             )

@@ -21,7 +21,7 @@ from unit_tests.qfdmo.acteur_factory import (
     ActeurServiceFactory,
     PropositionServiceFactory,
 )
-from unit_tests.qfdmo.action_factory import ActionFactory
+from unit_tests.qfdmo.action_factory import ActionDirectionFactory, ActionFactory
 
 
 @pytest.fixture(scope="session")
@@ -59,8 +59,7 @@ class TestPoint:
 class TestActeurNomAffiche:
     def test_nom(self):
         assert (
-            Acteur(nom="Test Object 1", location=Point(0, 0)).nom_affiche
-            == "Test Object 1"
+            Acteur(nom="Test Object 1", location=Point(0, 0)).libelle == "Test Object 1"
         )
 
     def test_nom_commercial(self):
@@ -69,7 +68,7 @@ class TestActeurNomAffiche:
                 nom="Test Object 1",
                 location=Point(0, 0),
                 nom_commercial="Nom commercial",
-            ).nom_affiche
+            ).libelle
             == "Nom commercial"
         )
 
@@ -77,13 +76,13 @@ class TestActeurNomAffiche:
 @pytest.mark.django_db
 class TestActeurIsdigital:
     def test_isdigital_false(self):
-        acteur_type = ActeurType.objects.exclude(nom="acteur digital").first()
+        acteur_type = ActeurType.objects.exclude(code="acteur digital").first()
         assert not Acteur(
             nom="Test Object 1", location=Point(0, 0), acteur_type=acteur_type
         ).is_digital
 
     def test_isdigital_true(self):
-        acteur_type = ActeurType.objects.get(nom="acteur digital")
+        acteur_type = ActeurType.objects.get(code="acteur digital")
         assert Acteur(
             nom="Test Object 1", location=Point(0, 0), acteur_type=acteur_type
         ).is_digital
@@ -132,10 +131,12 @@ class TestActeurDefaultOnSave:
         )
         assert len(acteur.identifiant_externe) == 12
         assert acteur.identifiant_unique == "equipe_" + acteur.identifiant_externe
-        assert acteur.source.nom == "equipe"
+        assert acteur.source.code == "equipe"
 
     def test_default_identifiantunique(self):
-        source = Source.objects.get_or_create(nom="Source Équipe")[0]
+        source = Source.objects.get_or_create(
+            libelle="Source Équipe", code="source_equipe"
+        )[0]
         acteur = Acteur.objects.create(
             nom="Test Object 1",
             acteur_type_id=1,
@@ -185,7 +186,7 @@ class TestActeurOpeningHours:
 @pytest.mark.django_db
 class TestLocationValidation:
     def test_location_validation_raise(self):
-        acteur_type = ActeurType.objects.exclude(nom="acteur digital").first()
+        acteur_type = ActeurType.objects.exclude(code="acteur digital").first()
         acteur = Acteur(
             nom="Test Object 1", identifiant_unique="123", acteur_type=acteur_type
         )
@@ -193,7 +194,7 @@ class TestLocationValidation:
             acteur.save()
 
     def test_location_validation_dont_raise(self):
-        acteur_type = ActeurType.objects.get(nom="acteur digital")
+        acteur_type = ActeurType.objects.get(code="acteur digital")
         acteur = Acteur(
             nom="Test Object 1", identifiant_unique="123", acteur_type=acteur_type
         )
@@ -225,8 +226,8 @@ class TestActeurGetOrCreateRevisionActeur:
     def test_create_revisionacteur(self, acteur):
         revision_acteur = acteur.get_or_create_revision()
         revision_acteur.proposition_services.all().delete()
-        acteur_service = ActeurServiceFactory.create(nom="service 2")
-        action = ActionFactory.create(nom="action 2")
+        acteur_service = ActeurServiceFactory.create(code="service 2")
+        action = ActionFactory.create(code="action 2")
         proposition_service = RevisionPropositionService.objects.create(
             acteur_service=acteur_service,
             action=action,
@@ -239,10 +240,10 @@ class TestActeurGetOrCreateRevisionActeur:
         assert revision_acteur2.nom is None
         assert (
             revision_acteur2.proposition_services.values_list(
-                "acteur_service__nom", "action__nom"
+                "acteur_service__code", "action__code"
             ).all()
             != acteur.proposition_services.values_list(
-                "acteur_service__nom", "action__nom"
+                "acteur_service__code", "action__code"
             ).all()
         )
 
@@ -266,9 +267,9 @@ class TestCreateRevisionActeur:
 @pytest.mark.django_db
 class TestActeurService:
     def test_acteur_actions_basic(self):
-        action1 = Action.objects.get(nom="reparer")
+        action1 = Action.objects.get(code="reparer")
         acteur_service = ActeurService.objects.get(
-            nom="Achat, revente par un professionnel"
+            code="Achat, revente par un professionnel"
         )
         acteur = Acteur.objects.create(
             nom="Acteur 1", location=Point(0, 0), acteur_type_id=1
@@ -280,11 +281,11 @@ class TestActeurService:
         assert acteur.acteur_services() == ["Par un professionnel"]
 
     def test_acteur_actions_distinct(self):
-        action1 = Action.objects.get(nom="reparer")
+        action1 = Action.objects.get(code="reparer")
         acteur_service = ActeurService.objects.get(
-            nom="Achat, revente par un professionnel"
+            code="Achat, revente par un professionnel"
         )
-        action2 = Action.objects.get(nom="echanger")
+        action2 = Action.objects.get(code="echanger")
         acteur = Acteur.objects.create(
             nom="Acteur 1",
             location=Point(0, 0),
@@ -300,11 +301,13 @@ class TestActeurService:
         assert acteur.acteur_services() == ["Par un professionnel"]
 
     def test_acteur_actions_multiple(self):
-        action = Action.objects.get(nom="reparer")
+        action = Action.objects.get(code="reparer")
         acteur_service1 = ActeurService.objects.get(
-            nom="Achat, revente par un professionnel"
+            code="Achat, revente par un professionnel"
         )
-        acteur_service2 = ActeurService.objects.get(nom="Atelier pour réparer soi-même")
+        acteur_service2 = ActeurService.objects.get(
+            code="Atelier pour réparer soi-même"
+        )
         acteur = Acteur.objects.create(
             nom="Acteur 1", location=Point(0, 0), acteur_type_id=1
         )
@@ -320,13 +323,15 @@ class TestActeurService:
             "Par un professionnel",
         ]
 
-    def test_acteur_actions_multiple_with_same_nom_affiche(self):
-        action = Action.objects.get(nom="reparer")
+    def test_acteur_actions_multiple_with_same_libelle(self):
+        action = Action.objects.get(code="reparer")
         acteur_service1 = ActeurService.objects.get(
-            nom="Achat, revente par un professionnel"
+            code="Achat, revente par un professionnel"
         )
-        acteur_service2 = ActeurService.objects.get(nom="Atelier pour réparer soi-même")
-        acteur_service2.nom_affiche = acteur_service1.nom_affiche
+        acteur_service2 = ActeurService.objects.get(
+            code="Atelier pour réparer soi-même"
+        )
+        acteur_service2.libelle = acteur_service1.libelle
         acteur_service2.save()
         acteur = Acteur.objects.create(
             nom="Acteur 1", location=Point(0, 0), acteur_type_id=1
@@ -341,6 +346,24 @@ class TestActeurService:
         assert acteur.acteur_services() == [
             "Par un professionnel",
         ]
+
+
+class TestActeurPropositionServicesByDirection:
+    @pytest.mark.django_db
+    def test_proposition_services_by_direction(self):
+        acteur = ActeurFactory()
+        acteur_service = ActeurServiceFactory()
+        direction_jai = ActionDirectionFactory(code="jai")
+        action = ActionFactory()
+        action.directions.add(direction_jai)
+        proposition_service = PropositionServiceFactory(
+            acteur=acteur, acteur_service=acteur_service, action=action
+        )
+        acteur.proposition_services.add(proposition_service)
+        assert list(acteur.proposition_services_by_direction("jai")) == [
+            proposition_service
+        ]
+        assert list(acteur.proposition_services_by_direction("jecherche")) == []
 
 
 class TestActeurLabel:

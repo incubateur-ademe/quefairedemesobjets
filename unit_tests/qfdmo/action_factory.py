@@ -7,18 +7,18 @@ from qfdmo.models.action import Action, ActionDirection
 class ActionDirectionFactory(Factory):
     class Meta:
         model = ActionDirection
-        django_get_or_create = ("nom",)
+        django_get_or_create = ("code",)
 
-    nom = Sequence(lambda n: "jai" if n % 2 == 0 else "jecherche")
-    nom_affiche = Sequence(lambda n: "J'ai" if n % 2 == 0 else "Je cherche")
+    code = Sequence(lambda n: "jai" if n % 2 == 0 else "jecherche")
+    libelle = Sequence(lambda n: "J'ai" if n % 2 == 0 else "Je cherche")
     order = Sequence(lambda n: n + 1)
 
 
 class ActionFactory(Factory):
     class Meta:
         model = Action
-        django_get_or_create = ("nom",)
+        django_get_or_create = ("code",)
 
-    nom = "action"
-    nom_affiche = "Action"
+    code = "action"
+    libelle = "Action"
     order = Sequence(lambda n: n + 1)

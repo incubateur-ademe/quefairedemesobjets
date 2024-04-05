@@ -39,15 +39,6 @@ class NotEditableInlineMixin:
         return False
 
 
-class ActeurTypeAdmin(admin.ModelAdmin):
-    list_display = ("nom", "nom_affiche")
-    search_fields = [
-        "nom",
-        "nom_affiche",
-    ]
-    search_help_text = "Recherche sur le nom ou le nom affiché"
-
-
 class ActeurLabelQualiteInline(admin.StackedInline):
     model = Acteur.labels.through
     extra = 0
@@ -398,12 +389,18 @@ class DisplayedActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
         return False
 
 
+class CodeLibelleModelAdmin(admin.ModelAdmin):
+    list_display = ("libelle", "code")
+    search_fields = ["libelle", "code"]
+    search_help_text = "Recherche sur le libellé ou le code"
+
+
 admin.site.register(Acteur, ActeurAdmin)
-admin.site.register(ActeurService)
-admin.site.register(ActeurType, ActeurTypeAdmin)
+admin.site.register(ActeurService, CodeLibelleModelAdmin)
+admin.site.register(ActeurType, CodeLibelleModelAdmin)
 admin.site.register(DisplayedActeur, DisplayedActeurAdmin)
 admin.site.register(PropositionService, PropositionServiceAdmin)
 admin.site.register(RevisionActeur, RevisionActeurAdmin)
 admin.site.register(RevisionPropositionService, RevisionPropositionServiceAdmin)
-admin.site.register(Source)
-admin.site.register(LabelQualite)
+admin.site.register(Source, CodeLibelleModelAdmin)
+admin.site.register(LabelQualite, CodeLibelleModelAdmin)

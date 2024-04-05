@@ -21,21 +21,13 @@ class SousCategorieInline(admin.TabularInline):
 
 
 class CategorieAdmin(admin.ModelAdmin):
-    search_fields = [
-        "nom",
-    ]
-    inlines = [
-        SousCategorieInline,
-    ]
+    search_fields = ["libelle", "code"]
+    inlines = [SousCategorieInline]
 
 
 class SousCategorieAdmin(admin.ModelAdmin):
-    list_display = ("nom", "categorie", "code")
-    search_fields = [
-        "categorie__nom",
-        "code",
-        "nom",
-    ]
+    list_display = ("libelle", "categorie", "code")
+    search_fields = ["categorie__libelle", "categorie__code", "code", "libelle"]
 
 
 class ObjetResource(resources.ModelResource):
@@ -43,7 +35,7 @@ class ObjetResource(resources.ModelResource):
     sous_categorie = fields.Field(
         column_name="sous_categorie_id",
         attribute="sous_categorie",
-        widget=widgets.ForeignKeyWidget(SousCategorieObjet, field="nom"),
+        widget=widgets.ForeignKeyWidget(SousCategorieObjet, field="libelle"),
     )
 
     def for_delete(self, row, instance):
@@ -53,17 +45,22 @@ class ObjetResource(resources.ModelResource):
         model = Objet
         fields = (
             "id",
-            "nom",
+            "libelle",
+            "code",
             "sous_categorie",
             "delete",
         )
 
 
 class ObjetAdmin(import_export_admin.ImportExportModelAdmin):
-    list_display = ("nom", "sous_categorie")
+    list_display = ("libelle", "sous_categorie")
     search_fields = [
-        "nom",
-        "sous_categorie__nom",
+        "code",
+        "libelle",
+        "sous_categorie__libelle",
+        "sous_categorie__code",
+        "sous_categorie__categorie__libelle",
+        "sous_categorie__categorie__code",
     ]
     resource_classes = [ObjetResource]
 

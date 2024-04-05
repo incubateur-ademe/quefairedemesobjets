@@ -2,17 +2,17 @@
     {
         "model": "qfdmo.actiondirection",
         "fields": {
-            "nom": "jai",
+            "code": "jai",
             "order": 2,
-            "nom_affiche": "J'ai un objet"
+            "libelle": "J'ai un objet"
         }
     },
     {
         "model": "qfdmo.actiondirection",
         "fields": {
-            "nom": "jecherche",
+            "code": "jecherche",
             "order": 1,
-            "nom_affiche": "Je recherche un objet"
+            "libelle": "Je recherche un objet"
         }
     }
 ]

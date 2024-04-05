@@ -60,7 +60,7 @@ class ActeurServiceFactory(Factory):
     class Meta:
         model = ActeurService
 
-    nom = "service"
+    code = "service"
 
 
 class PropositionServiceFactory(Factory):

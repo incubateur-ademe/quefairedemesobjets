@@ -1,13 +1,18 @@
 import pytest
 
-from qfdmo.models import CategorieObjet, NomAsNaturalKeyModel
+from qfdmo.models import CategorieObjet, CodeAsNaturalKeyModel
+from unit_tests.qfdmo.sscatobj_factory import CategorieObjetFactory
 
 
 class TestCategorieObjetNomAsNaturalKeyHeritage:
     def test_natural(self):
-        assert NomAsNaturalKeyModel in CategorieObjet.mro()
+        assert CodeAsNaturalKeyModel in CategorieObjet.mro()
 
     @pytest.mark.django_db
     def test_serialize(self):
-        category = CategorieObjet.objects.create(nom="Test Object")
-        assert category.serialize() == {"id": category.id, "nom": "Test Object"}
+        category = CategorieObjetFactory(libelle="Test Object", code="code_category")
+        assert category.serialize() == {
+            "id": category.id,
+            "libelle": "Test Object",
+            "code": "code_category",
+        }

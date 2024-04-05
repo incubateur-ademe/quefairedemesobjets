@@ -2,12 +2,11 @@
     {
         "model": "qfdmo.action",
         "fields": {
-            "nom": "reparer",
-            "nom_affiche": "réparer",
+            "code": "reparer",
+            "libelle": "réparer",
             "afficher": true,
             "description": null,
             "order": 5,
-            "lvao_id": 9,
             "couleur": "green-menthe",
             "icon": "fr-icon-action-reparer",
             "directions": [["jai"]]
@@ -16,12 +15,11 @@
     {
         "model": "qfdmo.action",
         "fields": {
-            "nom": "acheter",
-            "nom_affiche": "acheter de seconde main",
+            "code": "acheter",
+            "libelle": "acheter de seconde main",
             "afficher": true,
             "description": "acheter d'occasion",
             "order": 8,
-            "lvao_id": 44,
             "couleur": "brown-cafe-creme",
             "icon": "fr-icon-action-acheter",
             "directions": [["jecherche"]]
@@ -30,12 +28,11 @@
     {
         "model": "qfdmo.action",
         "fields": {
-            "nom": "revendre",
-            "nom_affiche": "vendre",
+            "code": "revendre",
+            "libelle": "vendre",
             "afficher": true,
             "description": null,
             "order": 9,
-            "lvao_id": 6,
             "couleur": "brown-cafe-creme",
             "icon": "fr-icon-action-vendre",
             "directions": [["jai"]]
@@ -44,12 +41,11 @@
     {
         "model": "qfdmo.action",
         "fields": {
-            "nom": "donner",
-            "nom_affiche": "donner",
+            "code": "donner",
+            "libelle": "donner",
             "afficher": true,
             "description": null,
             "order": 6,
-            "lvao_id": 7,
             "couleur": "yellow-tournesol",
             "icon": "fr-icon-action-donner",
             "directions": [["jai"]]
@@ -58,12 +54,11 @@
     {
         "model": "qfdmo.action",
         "fields": {
-            "nom": "louer",
-            "nom_affiche": "louer",
+            "code": "louer",
+            "libelle": "louer",
             "afficher": true,
             "description": null,
             "order": 3,
-            "lvao_id": 4,
             "couleur": "purple-glycine",
             "icon": "fr-icon-action-louer",
             "directions": [["jecherche"]]
@@ -72,12 +67,11 @@
     {
         "model": "qfdmo.action",
         "fields": {
-            "nom": "mettreenlocation",
-            "nom_affiche": "mettre en location",
+            "code": "mettreenlocation",
+            "libelle": "mettre en location",
             "afficher": true,
             "description": "Mettre en location",
             "order": 4,
-            "lvao_id": 50,
             "couleur": "purple-glycine",
             "icon": "fr-icon-action-mettreenlocation",
             "directions": [["jai"]]
@@ -86,12 +80,11 @@
     {
         "model": "qfdmo.action",
         "fields": {
-            "nom": "emprunter",
-            "nom_affiche": "emprunter",
+            "code": "emprunter",
+            "libelle": "emprunter",
             "afficher": true,
             "description": null,
             "order": 2,
-            "lvao_id": 51,
             "couleur": "orange-terre-battue",
             "icon": "fr-icon-action-emprunter",
             "directions": [["jecherche"]]
@@ -100,12 +93,11 @@
     {
         "model": "qfdmo.action",
         "fields": {
-            "nom": "preter",
-            "nom_affiche": "prêter",
+            "code": "preter",
+            "libelle": "prêter",
             "afficher": true,
             "description": null,
             "order": 1,
-            "lvao_id": 5,
             "couleur": "orange-terre-battue",
             "icon": "fr-icon-action-preter",
             "directions": [["jai"]]
@@ -114,12 +106,11 @@
     {
         "model": "qfdmo.action",
         "fields": {
-            "nom": "echanger",
-            "nom_affiche": "échanger",
+            "code": "echanger",
+            "libelle": "échanger",
             "afficher": true,
             "description": null,
             "order": 7,
-            "lvao_id": 8,
             "couleur": "blue-cumulus",
             "icon": "fr-icon-action-echanger",
             "directions": [["jai"], ["jecherche"]]
