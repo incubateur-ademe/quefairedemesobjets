@@ -12,7 +12,7 @@ class TestDataTransformations(unittest.TestCase):
                     "artisan, commerce indépendant",
                     "commerce",
                 ],
-                "id": [1, 2, 3, 4],
+                "id": [1, 2, 3],
             }
         )
         self.df_mapping = pd.DataFrame({"nom": ["donner", "preter"], "id": [1, 2]})
