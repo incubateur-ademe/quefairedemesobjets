@@ -1,9 +1,6 @@
-<<<<<<< HEAD
 import math
 
 
-=======
->>>>>>> 26a4ee3 (update with code and libelle)
 def transform_acteur_type_id(value, df_acteurtype):
     mapping_dict = {
         "Solution en ligne (site web, app. mobile)": "en ligne (web, mobile)",
