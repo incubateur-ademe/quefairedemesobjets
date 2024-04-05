@@ -406,7 +406,7 @@ class DisplayedActeur(BaseActeur):
         acteur_selected_actions = None
         if action_list:
             acteur_selected_actions = [
-                a for a in actions if a["nom"] in action_list.split("|")
+                a for a in actions if a["code"] in action_list.split("|")
             ]
 
         return orjson.dumps(
