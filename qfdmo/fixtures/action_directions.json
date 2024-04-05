@@ -2,7 +2,7 @@
     {
         "model": "qfdmo.actiondirection",
         "fields": {
-            "nom": "jai",
+            "code": "jai",
             "order": 2,
             "libelle": "J'ai un objet"
         }
@@ -10,7 +10,7 @@
     {
         "model": "qfdmo.actiondirection",
         "fields": {
-            "nom": "jecherche",
+            "code": "jecherche",
             "order": 1,
             "libelle": "Je recherche un objet"
         }

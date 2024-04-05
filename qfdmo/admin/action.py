@@ -7,14 +7,14 @@ class ActionAdmin(admin.ModelAdmin):
     def get_directions(self, obj):
         return ", ".join([d.code for d in obj.directions.all()])
 
-    list_display = ("nom", "libelle", "order", "get_directions")
-    search_fields = ["nom", "libelle"]
+    list_display = ("code", "libelle", "order", "get_directions")
+    search_fields = ["code", "libelle"]
 
 
 class ActionDirectionAdmin(admin.ModelAdmin):
 
-    list_display = ("nom", "libelle", "order")
-    search_fields = ["nom", "libelle"]
+    list_display = ("code", "libelle", "order")
+    search_fields = ["code", "libelle"]
 
 
 admin.site.register(Action, ActionAdmin)

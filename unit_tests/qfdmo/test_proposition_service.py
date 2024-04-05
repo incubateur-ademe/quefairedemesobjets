@@ -30,7 +30,7 @@ class TestActionNomAsNaturalKeyHeritage:
 
     @pytest.fixture
     def action(self):
-        return Action.objects.create(nom="fake action")
+        return Action.objects.create(code="fake action")
 
     @pytest.fixture
     def acteur(self):

@@ -247,9 +247,8 @@ class BaseActeur(NomAsNaturalKeyModel):
         )
 
     def proposition_services_by_direction(self, direction: str | None = None):
-
         if direction:
-            return self.proposition_services.filter(action__directions__nom=direction)
+            return self.proposition_services.filter(action__directions__code=direction)
         return self.proposition_services.all()
 
     def has_label_reparacteur(self):
@@ -468,7 +467,7 @@ class BasePropositionService(models.Model):
     )
 
     def __str__(self):
-        return f"{self.action.nom} - {self.acteur_service.code}"
+        return f"{self.action.code} - {self.acteur_service.code}"
 
     def serialize(self):
         return {

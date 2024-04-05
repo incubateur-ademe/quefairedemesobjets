@@ -21,7 +21,7 @@ from unit_tests.qfdmo.acteur_factory import (
     ActeurServiceFactory,
     PropositionServiceFactory,
 )
-from unit_tests.qfdmo.action_factory import ActionFactory
+from unit_tests.qfdmo.action_factory import ActionDirectionFactory, ActionFactory
 
 
 @pytest.fixture(scope="session")
@@ -227,7 +227,7 @@ class TestActeurGetOrCreateRevisionActeur:
         revision_acteur = acteur.get_or_create_revision()
         revision_acteur.proposition_services.all().delete()
         acteur_service = ActeurServiceFactory.create(code="service 2")
-        action = ActionFactory.create(nom="action 2")
+        action = ActionFactory.create(code="action 2")
         proposition_service = RevisionPropositionService.objects.create(
             acteur_service=acteur_service,
             action=action,
@@ -240,10 +240,10 @@ class TestActeurGetOrCreateRevisionActeur:
         assert revision_acteur2.nom is None
         assert (
             revision_acteur2.proposition_services.values_list(
-                "acteur_service__code", "action__nom"
+                "acteur_service__code", "action__code"
             ).all()
             != acteur.proposition_services.values_list(
-                "acteur_service__code", "action__nom"
+                "acteur_service__code", "action__code"
             ).all()
         )
 
@@ -267,7 +267,7 @@ class TestCreateRevisionActeur:
 @pytest.mark.django_db
 class TestActeurService:
     def test_acteur_actions_basic(self):
-        action1 = Action.objects.get(nom="reparer")
+        action1 = Action.objects.get(code="reparer")
         acteur_service = ActeurService.objects.get(
             code="Achat, revente par un professionnel"
         )
@@ -281,11 +281,11 @@ class TestActeurService:
         assert acteur.acteur_services() == ["Par un professionnel"]
 
     def test_acteur_actions_distinct(self):
-        action1 = Action.objects.get(nom="reparer")
+        action1 = Action.objects.get(code="reparer")
         acteur_service = ActeurService.objects.get(
             code="Achat, revente par un professionnel"
         )
-        action2 = Action.objects.get(nom="echanger")
+        action2 = Action.objects.get(code="echanger")
         acteur = Acteur.objects.create(
             nom="Acteur 1",
             location=Point(0, 0),
@@ -301,7 +301,7 @@ class TestActeurService:
         assert acteur.acteur_services() == ["Par un professionnel"]
 
     def test_acteur_actions_multiple(self):
-        action = Action.objects.get(nom="reparer")
+        action = Action.objects.get(code="reparer")
         acteur_service1 = ActeurService.objects.get(
             code="Achat, revente par un professionnel"
         )
@@ -324,7 +324,7 @@ class TestActeurService:
         ]
 
     def test_acteur_actions_multiple_with_same_libelle(self):
-        action = Action.objects.get(nom="reparer")
+        action = Action.objects.get(code="reparer")
         acteur_service1 = ActeurService.objects.get(
             code="Achat, revente par un professionnel"
         )
@@ -346,6 +346,24 @@ class TestActeurService:
         assert acteur.acteur_services() == [
             "Par un professionnel",
         ]
+
+
+class TestActeurPropositionServicesByDirection:
+    @pytest.mark.django_db
+    def test_proposition_services_by_direction(self):
+        acteur = ActeurFactory()
+        acteur_service = ActeurServiceFactory()
+        direction_jai = ActionDirectionFactory(code="jai")
+        action = ActionFactory()
+        action.directions.add(direction_jai)
+        proposition_service = PropositionServiceFactory(
+            acteur=acteur, acteur_service=acteur_service, action=action
+        )
+        acteur.proposition_services.add(proposition_service)
+        assert list(acteur.proposition_services_by_direction("jai")) == [
+            proposition_service
+        ]
+        assert list(acteur.proposition_services_by_direction("jecherche")) == []
 
 
 class TestActeurLabel:

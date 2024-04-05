@@ -2,7 +2,7 @@
     {
         "model": "qfdmo.action",
         "fields": {
-            "nom": "reparer",
+            "code": "reparer",
             "libelle": "réparer",
             "afficher": true,
             "description": null,
@@ -15,7 +15,7 @@
     {
         "model": "qfdmo.action",
         "fields": {
-            "nom": "acheter",
+            "code": "acheter",
             "libelle": "acheter de seconde main",
             "afficher": true,
             "description": "acheter d'occasion",
@@ -28,7 +28,7 @@
     {
         "model": "qfdmo.action",
         "fields": {
-            "nom": "revendre",
+            "code": "revendre",
             "libelle": "vendre",
             "afficher": true,
             "description": null,
@@ -41,7 +41,7 @@
     {
         "model": "qfdmo.action",
         "fields": {
-            "nom": "donner",
+            "code": "donner",
             "libelle": "donner",
             "afficher": true,
             "description": null,
@@ -54,7 +54,7 @@
     {
         "model": "qfdmo.action",
         "fields": {
-            "nom": "louer",
+            "code": "louer",
             "libelle": "louer",
             "afficher": true,
             "description": null,
@@ -67,7 +67,7 @@
     {
         "model": "qfdmo.action",
         "fields": {
-            "nom": "mettreenlocation",
+            "code": "mettreenlocation",
             "libelle": "mettre en location",
             "afficher": true,
             "description": "Mettre en location",
@@ -80,7 +80,7 @@
     {
         "model": "qfdmo.action",
         "fields": {
-            "nom": "emprunter",
+            "code": "emprunter",
             "libelle": "emprunter",
             "afficher": true,
             "description": null,
@@ -93,7 +93,7 @@
     {
         "model": "qfdmo.action",
         "fields": {
-            "nom": "preter",
+            "code": "preter",
             "libelle": "prêter",
             "afficher": true,
             "description": null,
@@ -106,7 +106,7 @@
     {
         "model": "qfdmo.action",
         "fields": {
-            "nom": "echanger",
+            "code": "echanger",
             "libelle": "échanger",
             "afficher": true,
             "description": null,
