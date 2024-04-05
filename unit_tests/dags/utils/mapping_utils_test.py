@@ -1,5 +1,7 @@
 import unittest
+
 import pandas as pd
+
 from dags.utils import mapping_utils
 
 
@@ -7,7 +9,7 @@ class TestDataTransformations(unittest.TestCase):
     def setUp(self):
         self.df_acteurtype = pd.DataFrame(
             {
-                "nom_affiche": [
+                "libelle": [
                     "en ligne (web, mobile)",
                     "artisan, commerce indépendant",
                     "commerce",
@@ -15,7 +17,7 @@ class TestDataTransformations(unittest.TestCase):
                 "id": [1, 2, 3],
             }
         )
-        self.df_mapping = pd.DataFrame({"nom": ["donner", "preter"], "id": [1, 2]})
+        self.df_mapping = pd.DataFrame({"code": ["donner", "preter"], "id": [1, 2]})
 
     def test_transform_acteur_type_id(self):
         value = "Solution en ligne (site web, app. mobile)"
