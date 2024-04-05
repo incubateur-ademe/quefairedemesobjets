@@ -168,7 +168,7 @@ def serialize_to_json(**kwargs):
             "cree_le",
             "modifie_le",
             "commentaires",
-            "horaires",
+            "horaires_description",
             "proposition_services",
         ]
     ].apply(lambda row: json.dumps(row.to_dict()), axis=1)
