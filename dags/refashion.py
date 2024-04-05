@@ -1,4 +1,5 @@
 import json
+import math
 from datetime import datetime
 from importlib import import_module
 from pathlib import Path
@@ -156,10 +157,10 @@ def serialize_to_json(**kwargs):
             "ville",
             "url",
             "email",
-            "location",
+            "latitude",
+            "longitude",
             "telephone",
             "nom_commercial",
-            "label_reparacteur",
             "siret",
             "identifiant_externe",
             "acteur_type_id",
@@ -278,6 +279,10 @@ def create_actors(**kwargs):
                         x, df_acteurtype=df_acteurtype
                     )
                 )
+            elif old_col in ["latitudewgs84", "longitudewgs84"]:
+                df[new_col] = df[old_col].apply(
+                    lambda x: mapping_utils.transform_float(x)
+                )
             elif old_col == "ecoorganisme":
                 df[new_col] = df[old_col].apply(
                     lambda x: mapping_utils.get_id_from_code(x, df_sources)
@@ -288,12 +293,13 @@ def create_actors(**kwargs):
                 )
             else:
                 df[new_col] = df[old_col]
-    df["label_reparacteur"] = False
     df["identifiant_unique"] = df.apply(
         lambda x: mapping_utils.create_identifiant_unique(x),
         axis=1,
     )
     df["statut"] = "ACTIF"
+    df["latitude"] = df["latitude"].replace(math.nan, None)
+    df["longitude"] = df["longitude"].replace(math.nan, None)
     df["modifie_le"] = df["cree_le"]
     df["siret"] = df["siret"].astype(str).apply(lambda x: x[:14])
     df["telephone"] = df["telephone"].dropna().apply(lambda x: x.replace(" ", ""))

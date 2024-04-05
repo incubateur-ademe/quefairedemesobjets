@@ -50,5 +50,21 @@ class TestDataTransformations(unittest.TestCase):
         self.assertEqual(mapping_utils.create_identifiant_unique(row), "ecoorg_123AbC")
 
 
+class TestTransformFloat(unittest.TestCase):
+    def test_float(self):
+        self.assertEqual(mapping_utils.transform_float(1.0), 1.0)
+
+    def test_string(self):
+        self.assertEqual(mapping_utils.transform_float("1,0"), 1.0)
+        self.assertEqual(mapping_utils.transform_float("1.0"), 1.0)
+
+    def test_invalid_string(self):
+        self.assertIsNone(mapping_utils.transform_float("1.0.0"))
+        self.assertIsNone(mapping_utils.transform_float("NaN"))
+
+    def test_invalid_type(self):
+        self.assertIsNone(mapping_utils.transform_float(None))
+
+
 if __name__ == "__main__":
     unittest.main()

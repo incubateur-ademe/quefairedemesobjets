@@ -1,3 +1,6 @@
+import math
+
+
 def transform_acteur_type_id(value, df_acteurtype):
     mapping_dict = {
         "Solution en ligne (site web, app. mobile)": "en ligne (web, mobile)",
@@ -34,3 +37,15 @@ def get_id_from_code(value, df_mapping, code="code"):
         else None
     )
     return id_value
+
+
+def transform_float(x):
+    if isinstance(x, float):
+        return None if math.isnan(x) else x
+    if not isinstance(x, str):
+        return None
+    try:
+        f = float(x.replace(",", "."))
+        return None if math.isnan(f) else f
+    except ValueError:
+        return None
