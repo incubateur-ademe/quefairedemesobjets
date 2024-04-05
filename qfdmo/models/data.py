@@ -102,7 +102,8 @@ class DagRunChange(models.Model):
             "ville": "Ville",
             "commentaires": "Commentaires",
             "horaires_description": "Horaires",
-            "location": "location",
+            "latitude": "latitude",
+            "longitude": "longitude",
             "identifiant_unique": "identifiant_unique",
             "identifiant_externe": "identifiant_externe",
         }.items():
