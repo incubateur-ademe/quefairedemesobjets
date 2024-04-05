@@ -6,6 +6,39 @@ from urllib.parse import urlparse
 
 import pandas as pd
 import requests
+from shapely import wkb
+from shapely.geometry import Point
+
+
+def extract_details(row):
+    pattern = re.compile(r"\b(\d{5})\s+(.*)")
+
+    address = None
+    postal_code = None
+    city = None
+    if pd.isnull(row["adresse_format_ban"]):
+        return pd.Series([None, None, None])
+
+    # Ensure adress_ban is treated as a string
+    adress_ban = str(row["adresse_format_ban"])
+
+    # Search for the pattern
+    match = pattern.search(adress_ban)
+    if match:
+        postal_code = match.group(1)
+        city = match.group(2)
+        address = adress_ban[: match.start()].strip()
+
+    return pd.Series([address, postal_code, city])
+
+
+def transform_location(longitude, latitude):
+    point = Point(longitude, latitude)
+
+    transformed_location_binary = wkb.dumps(point)
+    transformed_location_hex = transformed_location_binary.hex()
+
+    return transformed_location_hex
 
 
 def send_batch_to_api(batch):
