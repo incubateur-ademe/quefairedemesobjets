@@ -16,10 +16,6 @@ class TestDataTransformations(unittest.TestCase):
             }
         )
         self.df_mapping = pd.DataFrame({"nom": ["donner", "preter"], "id": [1, 2]})
-        self.row = {
-            "identifiant_externe": "REFASHION_123",
-            "service_a_domicile": "service à domicile uniquement",
-        }
 
     def test_transform_acteur_type_id(self):
         value = "Solution en ligne (site web, app. mobile)"
@@ -34,14 +30,20 @@ class TestDataTransformations(unittest.TestCase):
         self.assertEqual(result_id, expected_id)
 
     def test_with_service_a_domicile_only(self):
+        row = {
+            "identifiant_externe": "REFASHION_123",
+            "service_a_domicile": "service à domicile uniquement",
+        }
         self.assertEqual(
-            mapping_utils.create_identifiant_unique(self.row), "refashion_123_d"
+            mapping_utils.create_identifiant_unique(row), "refashion_123_d"
         )
 
     def test_without_service_a_domicile_only(self):
-        self.assertEqual(
-            mapping_utils.create_identifiant_unique(self.row), "refashion_123"
-        )
+        row = {
+            "identifiant_externe": "REFASHION_123",
+            "service_a_domicile": "Non",
+        }
+        self.assertEqual(mapping_utils.create_identifiant_unique(row), "refashion_123")
 
 
 if __name__ == "__main__":

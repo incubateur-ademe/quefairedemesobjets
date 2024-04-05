@@ -266,7 +266,7 @@ def create_actors(**kwargs):
         "perimetre_dintervention": "",
         "longitudewgs84": "location",
         "latitudewgs84": "location",
-        "horaires_douverture": "horaires",
+        "horaires_douverture": "horaires_description",
         "consignes_dacces": "commentaires",
     }
 
