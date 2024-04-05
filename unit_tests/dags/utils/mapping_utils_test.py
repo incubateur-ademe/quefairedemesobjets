@@ -33,19 +33,21 @@ class TestDataTransformations(unittest.TestCase):
 
     def test_with_service_a_domicile_only(self):
         row = {
-            "identifiant_externe": "REFASHION_123",
-            "service_a_domicile": "service à domicile uniquement",
+            "ecoorganisme": "ECOORG",
+            "identifiant_externe": "123AbC",
+            "type_de_point_de_collecte": "Solution en ligne (site web, app. mobile)",
         }
         self.assertEqual(
-            mapping_utils.create_identifiant_unique(row), "refashion_123_d"
+            mapping_utils.create_identifiant_unique(row), "ecoorg_123AbC_d"
         )
 
     def test_without_service_a_domicile_only(self):
         row = {
-            "identifiant_externe": "REFASHION_123",
-            "service_a_domicile": "Non",
+            "ecoorganisme": "ECOORG",
+            "identifiant_externe": "123AbC",
+            "type_de_point_de_collecte": "Artisan, commerce indépendant ",
         }
-        self.assertEqual(mapping_utils.create_identifiant_unique(row), "refashion_123")
+        self.assertEqual(mapping_utils.create_identifiant_unique(row), "ecoorg_123AbC")
 
 
 if __name__ == "__main__":

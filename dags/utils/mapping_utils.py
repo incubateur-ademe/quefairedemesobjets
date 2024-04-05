@@ -21,8 +21,8 @@ def transform_acteur_type_id(value, df_acteurtype):
 
 
 def create_identifiant_unique(row):
-    unique_str = row["identifiant_externe"].lower()
-    if row["service_a_domicile"] == "service à domicile uniquement":
+    unique_str = row["identifiant_externe"]
+    if row["type_de_point_de_collecte"] == "Solution en ligne (site web, app. mobile)":
         unique_str = unique_str + "_d"
     return row["ecoorganisme"].lower() + "_" + unique_str
 

@@ -264,8 +264,8 @@ def create_actors(**kwargs):
         "site_web": "url",
         "email": "email",
         "perimetre_dintervention": "",
-        "longitudewgs84": "location",
-        "latitudewgs84": "location",
+        "longitudewgs84": "longitude",
+        "latitudewgs84": "latitude",
         "horaires_douverture": "horaires_description",
         "consignes_dacces": "commentaires",
     }
@@ -277,13 +277,6 @@ def create_actors(**kwargs):
                     lambda x: mapping_utils.transform_acteur_type_id(
                         x, df_acteurtype=df_acteurtype
                     )
-                )
-            elif old_col in ("longitudewgs84", "latitudewgs84"):
-                df["location"] = df.apply(
-                    lambda row: utils.transform_location(
-                        row["longitudewgs84"], row["latitudewgs84"]
-                    ),
-                    axis=1,
                 )
             elif old_col == "ecoorganisme":
                 df[new_col] = df[old_col].apply(
