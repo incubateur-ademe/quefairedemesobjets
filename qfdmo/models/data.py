@@ -1,5 +1,7 @@
 from django.contrib.gis.db import models
 
+from qfdmo.models.acteur import ActeurType, Source
+
 
 class DagRunStatus(models.Choices):
     TO_VALIDATE = "TO_VALIDATE"
@@ -22,6 +24,19 @@ class DagRun(models.Model):
     # {to_create : 134, to_update : 0, to_delete : 0, to_ignore : 0, errors : 0}
     meta_data = models.JSONField(null=True, blank=True)
 
+    def __str__(self) -> str:
+        return f"{self.dag_id} - {self.run_id}"
+
+    def display_meta_data(self) -> dict:
+        displayed_metadata = {}
+        displayed_metadata["Nombre d'acteur à créer"] = self.meta_data.get(
+            "added_rows", 0
+        )
+        displayed_metadata["Nombre de duplicats"] = self.meta_data.get(
+            "number_of_duplicates", 0
+        )
+        return displayed_metadata
+
 
 class DagRunChangeType(models.Choices):
     CREATE = "CREATE"
@@ -31,11 +46,14 @@ class DagRunChangeType(models.Choices):
 
 class DagRunChange(models.Model):
     id = models.AutoField(primary_key=True)
-    dag_run = models.ForeignKey(DagRun, on_delete=models.CASCADE)
+    dag_run = models.ForeignKey(
+        DagRun, on_delete=models.CASCADE, related_name="dagrunchanges"
+    )
     change_type = models.CharField(max_length=50, choices=DagRunChangeType.choices)
     meta_data = models.JSONField(null=True, blank=True)
     # metadata : JSON of any error or information about the line to change
     row_updates = models.JSONField(null=True, blank=True)
+
     # row_updates : JSON of acteur to update or create to store on row_updates
     # {
     #     "nom": "NOM",
@@ -69,3 +87,36 @@ class DagRunChange(models.Model):
     #         }
     #     ]
     # }
+    def display_acteur_details(self) -> dict:
+        displayed_details = {}
+        for field, field_value in {
+            "nom": "Nom",
+            "nom_commercial": "Nom commercial",
+            "siret": "SIRET",
+            "url": "Site web",
+            "email": "Email",
+            "telephone": "Téléphone",
+            "adresse": "Adresse",
+            "adresse_complement": "Complement d'adresse",
+            "code_postal": "Code postal",
+            "ville": "Ville",
+            "commentaires": "Commentaires",
+            "horaires_description": "Horaires",
+            "latitude": "latitude",
+            "longitude": "longitude",
+            "identifiant_unique": "identifiant_unique",
+            "identifiant_externe": "identifiant_externe",
+        }.items():
+            if value := self.row_updates.get(field):
+                displayed_details[field_value] = value
+        if value := self.row_updates.get("acteur_type_id"):
+            displayed_details["Type d'acteur"] = ActeurType.objects.get(
+                pk=value
+            ).libelle
+        if value := self.row_updates.get("source_id"):
+            displayed_details["Source"] = Source.objects.get(pk=value).libelle
+
+        return displayed_details
+
+    def display_proposition_service(self):
+        return self.row_updates.get("proposition_services", [])
