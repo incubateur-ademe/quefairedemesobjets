@@ -72,7 +72,7 @@ urlpatterns = [
     ),
     path(
         "dags/validations",
-        dags.dags_validations,
-        name="get_object_list",
+        dags.DagsValidation.as_view(),
+        name="dags_validations",
     ),
 ]

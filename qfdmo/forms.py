@@ -1,7 +1,7 @@
 from django import forms
 from django.utils.safestring import mark_safe
 
-from qfdmo.models import CachedDirectionAction, SousCategorieObjet
+from qfdmo.models import CachedDirectionAction, DagRun, DagRunStatus, SousCategorieObjet
 
 
 class AutoCompleteInput(forms.Select):
@@ -162,4 +162,17 @@ class GetReemploiSolutionForm(forms.Form):
         ],
         label="Adresses à proximité ou solutions digitales",
         required=False,
+    )
+
+
+class DagsForm(forms.Form):
+    dagrun = forms.ModelChoiceField(
+        label="Séléctionner l'execution d'un DAG",
+        widget=forms.Select(
+            attrs={
+                "class": "fr-select",
+            }
+        ),
+        queryset=DagRun.objects.filter(status=DagRunStatus.TO_VALIDATE.value),
+        required=True,
     )
