@@ -11,7 +11,7 @@ from core.jinja2_handler import (
     display_labels_panel,
     display_sources_panel,
     distance_to_acteur,
-    is_iframe,
+    is_embedded,
 )
 from qfdmo.models import CachedDirectionAction
 from qfdmo.models.acteur import ActeurType
@@ -31,22 +31,22 @@ def django_db_setup(django_db_setup, django_db_blocker):
 
 
 class TestIsIframe:
-    def test_is_iframe_false(self):
+    def test_is_embedded_false(self):
         request = HttpRequest()
 
         request.GET = {}
-        assert is_iframe(request) is False
+        assert is_embedded(request) is False
 
-    def test_is_iframe_true(self):
+    def test_is_embedded_true(self):
         request = HttpRequest()
 
         request.GET = {"iframe": str(random.randint(0, 10))}
 
-        assert is_iframe(request) is True
+        assert is_embedded(request) is True
 
         request.GET = {"iframe": "anything"}
 
-        assert is_iframe(request) is True
+        assert is_embedded(request) is True
 
 
 class TestActionDisplayList:

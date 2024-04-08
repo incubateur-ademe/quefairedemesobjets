@@ -32,6 +32,14 @@ def str_diff(s1: str | None, s2: str | None) -> str:
     return "".join(list_diff)
 
 
+def is_embedded(request: HttpRequest) -> bool:
+    return "iframe" in request.GET or "carte" in request.GET
+
+
+def is_carte(request: HttpRequest) -> bool:
+    return "carte" in request.GET
+
+
 def is_iframe(request: HttpRequest) -> bool:
     return "iframe" in request.GET
 
@@ -119,7 +127,9 @@ def environment(**options):
             "display_sources_panel": display_sources_panel,
             "display_labels_panel": display_labels_panel,
             "distance_to_acteur": distance_to_acteur,
+            "is_embedded": is_embedded,
             "is_iframe": is_iframe,
+            "is_carte": is_carte,
             "reverse": reverse,
             "static": static,
             "str_diff": str_diff,
