@@ -7,7 +7,7 @@ from airflow.models import DAG
 from airflow.operators.python_operator import PythonOperator, BranchPythonOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.utils.dates import days_ago
-from sqlalchemy.exc import SQLAlchemyError
+from airflow.operators.dagrun_operator import TriggerDagRunOperator
 
 
 env = Path(__file__).parent.name
@@ -34,7 +34,8 @@ dag = DAG(
 def check_for_validation(**kwargs):
     hook = PostgresHook(postgres_conn_id=utils.get_db_conn_id(__file__))
     row = hook.get_records(
-        "SELECT EXISTS (SELECT 1 FROM qfdmo_dagrun WHERE status = 'TO_INSERT')"
+        "SELECT EXISTS "
+        "(SELECT 1 FROM qfdmo_dagrun WHERE status = 'DagRunStatus.TO_INSERT')"
     )
     return "fetch_and_parse_data" if row[0][0] else "skip_processing"
 
@@ -47,8 +48,9 @@ def fetch_and_parse_data(**context):
         "SELECT max(id) FROM qfdmo_displayedpropositionservice", engine
     )["max"][0]
     df_sql = pd.read_sql_query(
-        "SELECT * FROM qfdmo_dagrunchange WHERE dag_run_id IN "
-        "(SELECT run_id FROM qfdmo_dagrun WHERE status = 'TO_INSERT')",
+        "SELECT * FROM qfdmo_dagrunchange WHERE "
+        "dag_run_id IN "
+        "(SELECT id FROM qfdmo_dagrun WHERE status = 'DagRunStatus.TO_INSERT')",
         engine,
     )
     dag_run_id = df_sql["dag_run_id"].iloc[0]
@@ -88,74 +90,116 @@ def write_data_to_postgres(**kwargs):
     df_pds = data_dict["pds"]
     df_pdssc = data_dict["pds_sous_categories"]
     dag_run_id = data_dict["dag_run_id"]
-
     pg_hook = PostgresHook(postgres_conn_id=utils.get_db_conn_id(__file__))
     engine = pg_hook.get_sqlalchemy_engine()
+    # TODO: For now assuming all events are CREATE events,
+    #  so we remove the actors if they existe first
+    with engine.begin() as connection:
+        df_actors[
+            [
+                "identifiant_unique",
+                "nom",
+                "adresse",
+                "adresse_complement",
+                "code_postal",
+                "ville",
+                "url",
+                "email",
+                "location",
+                "telephone",
+                "nom_commercial",
+                "siret",
+                "identifiant_externe",
+                "acteur_type_id",
+                "statut",
+                "source_id",
+                "cree_le",
+                "horaires_description",
+                "modifie_le",
+                "commentaires",
+            ]
+        ].to_sql("temp_actors", connection, if_exists="replace")
 
-    try:
-        with engine.begin() as connection:
-            df_actors[
-                [
-                    "identifiant_unique",
-                    "nom",
-                    "adresse",
-                    "adresse_complement",
-                    "code_postal",
-                    "ville",
-                    "url",
-                    "email",
-                    "location",
-                    "telephone",
-                    "multi_base",
-                    "nom_commercial",
-                    "manuel",
-                    "label_reparacteur",
-                    "siret",
-                    "identifiant_externe",
-                    "acteur_type_id",
-                    "statut",
-                    "source_id",
-                    "cree_le",
-                    "modifie_le",
-                    "commentaires",
-                    "horaires",
-                ]
-            ].to_sql(
-                "qfdmo_sources_acteurs",
-                connection,
-                if_exists="append",
-                index=False,
-                method="multi",
-                chunksize=1000,
-            )
+        delete_queries = [
+            """
+            DELETE FROM qfdmo_sources_propositionservice_sous_categories
+            WHERE propositionservice_id IN (
+                SELECT id FROM qfdmo_propositionservice
+                WHERE acteur_id IN (
+                    SELECT identifiant_unique FROM temp_actors
+                )
+            );
+            """,
+            """
+            DELETE FROM qfdmo_sources_propositionservice
+            WHERE acteur_id IN (
+                SELECT identifiant_unique FROM temp_actors
+            );
+            """,
+            """
+            DELETE FROM qfdmo_sources_acteurs WHERE identifiant_unique
+            in ( select identifiant_unique from temp_actors);
+            """,
+        ]
 
-            df_pds[["id", "acteur_service_id", "action_id", "acteur_id"]].to_sql(
-                "qfdmo_sources_propositionservice",
-                connection,
-                if_exists="append",
-                index=False,
-                method="multi",
-                chunksize=1000,
-            )
+        for query in delete_queries:
+            connection.execute(query)
+        df_actors[
+            [
+                "identifiant_unique",
+                "nom",
+                "adresse",
+                "adresse_complement",
+                "code_postal",
+                "ville",
+                "url",
+                "email",
+                "location",
+                "telephone",
+                "nom_commercial",
+                "siret",
+                "identifiant_externe",
+                "acteur_type_id",
+                "statut",
+                "source_id",
+                "cree_le",
+                "horaires_description",
+                "modifie_le",
+                "commentaires",
+            ]
+        ].to_sql(
+            "qfdmo_sources_acteurs",
+            connection,
+            if_exists="append",
+            index=False,
+            method="multi",
+            chunksize=1000,
+        )
 
-            df_pdssc[["propositionservice_id", "souscategorieobjet_id"]].to_sql(
-                "qfdmo_sources_propositionservice_sous_categories",
-                connection,
-                if_exists="append",
-                index=False,
-                method="multi",
-                chunksize=1000,
-            )
+        df_pds[["id", "acteur_service_id", "action_id", "acteur_id"]].to_sql(
+            "qfdmo_sources_propositionservice",
+            connection,
+            if_exists="append",
+            index=False,
+            method="multi",
+            chunksize=1000,
+        )
 
-            update_query = f"""
-                UPDATE qfdmo_dagrun
-                SET status = 'DONE'
-                WHERE run_id = '{dag_run_id}'
-                """
-            connection.execute(update_query)
+        df_pdssc[["propositionservice_id", "souscategorieobjet_id"]].to_sql(
+            "qfdmo_sources_propositionservice_sous_categories",
+            connection,
+            if_exists="append",
+            index=False,
+            method="multi",
+            chunksize=1000,
+        )
 
-    except SQLAlchemyError as e:
-        print(f"The transaction was rolled back: {e}")
+        update_query = f"""
+            UPDATE qfdmo_dagrun
+            SET status = 'FINISHED'
+            WHERE id = {dag_run_id}
+            """
+        connection.execute(update_query)
 
 
 fetch_parse_task = PythonOperator(
@@ -191,6 +235,17 @@ write_to_postgres_task = PythonOperator(
     dag=dag,
 )
 
+trigger_create_final_actors_dag = TriggerDagRunOperator(
+    task_id="create_displayed_actors",
+    trigger_dag_id=utils.get_dag_name(__file__, "apply_adresse_corrections"),
+    dag=dag,
+)
+
 
 branch_task >> skip_processing_task
-branch_task >> fetch_parse_task >> write_to_postgres_task
+(
+    branch_task
+    >> fetch_parse_task
+    >> write_to_postgres_task
+    >> trigger_create_final_actors_dag
+)

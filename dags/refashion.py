@@ -1,9 +1,8 @@
 import json
-import math
 from datetime import datetime
 from importlib import import_module
 from pathlib import Path
-
+import numpy as np
 import pandas as pd
 from airflow import DAG
 from airflow.operators.python import PythonOperator
@@ -79,6 +78,8 @@ def create_proposition_services(**kwargs):
                 ),
                 "action_id": mapping_utils.get_id_from_code(action_name, df_actions),
                 "acteur_id": acteur_id,
+                "action": action_name,
+                "acteur_service": acteur_service_name,
                 "sous_categories": sous_categories,
             }
         )
@@ -102,11 +103,13 @@ def create_proposition_services_sous_categories(**kwargs):
                     {
                         "propositionservice_id": row["id"],
                         "souscategorieobjet_id": sous_categories[product.strip()],
+                        "souscategorie": product.strip(),
                     }
                 )
 
     df_sous_categories = pd.DataFrame(
-        rows_list, columns=["propositionservice_id", "souscategorieobjet_id"]
+        rows_list,
+        columns=["propositionservice_id", "souscategorieobjet_id", "souscategorie"],
     )
     return df_sous_categories
 
@@ -157,6 +160,7 @@ def serialize_to_json(**kwargs):
             "ville",
             "url",
             "email",
+            "location",
             "latitude",
             "longitude",
             "telephone",
@@ -265,8 +269,8 @@ def create_actors(**kwargs):
         "site_web": "url",
         "email": "email",
         "perimetre_dintervention": "",
-        "longitudewgs84": "longitude",
-        "latitudewgs84": "latitude",
+        "longitudewgs84": "location",
+        "latitudewgs84": "location",
         "horaires_douverture": "horaires_description",
         "consignes_dacces": "commentaires",
     }
@@ -280,8 +284,11 @@ def create_actors(**kwargs):
                     )
                 )
             elif old_col in ["latitudewgs84", "longitudewgs84"]:
-                df[new_col] = df[old_col].apply(
-                    lambda x: mapping_utils.transform_float(x)
+                df[new_col] = df.apply(
+                    lambda row: utils.transform_location(
+                        row["longitudewgs84"], row["latitudewgs84"]
+                    ),
+                    axis=1,
                 )
             elif old_col == "ecoorganisme":
                 df[new_col] = df[old_col].apply(
@@ -298,8 +305,8 @@ def create_actors(**kwargs):
         axis=1,
     )
     df["statut"] = "ACTIF"
-    df["latitude"] = df["latitude"].replace(math.nan, None)
-    df["longitude"] = df["longitude"].replace(math.nan, None)
+    df["latitude"] = df["latitudewgs84"].astype(float).replace({np.nan: None})
+    df["longitude"] = df["longitudewgs84"].astype(float).replace({np.nan: None})
     df["modifie_le"] = df["cree_le"]
     df["siret"] = df["siret"].astype(str).apply(lambda x: x[:14])
     df["telephone"] = df["telephone"].dropna().apply(lambda x: x.replace(" ", ""))
