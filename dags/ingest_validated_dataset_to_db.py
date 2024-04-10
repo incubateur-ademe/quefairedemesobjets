@@ -124,7 +124,7 @@ def write_data_to_postgres(**kwargs):
             """
             DELETE FROM qfdmo_sources_propositionservice_sous_categories
             WHERE propositionservice_id IN (
-                SELECT id FROM qfdmo_propositionservice
+                SELECT id FROM qfdmo_sources_propositionservice
                 WHERE acteur_id IN (
                     SELECT identifiant_unique FROM temp_actors
                 )
