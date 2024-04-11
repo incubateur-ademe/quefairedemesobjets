@@ -244,7 +244,13 @@ def write_data_to_postgres(**kwargs):
 
 def merge_actors_labels(**kwargs):
     df_actor_labels = kwargs["ti"].xcom_pull(task_ids="load_actor_labels")
+    df_actor_sources_labels = kwargs["ti"].xcom_pull(
+        task_ids="load_actor_sources_labels"
+    )
     df_revision_labels = kwargs["ti"].xcom_pull(task_ids="load_revision_labels")
+    df_actor_sources_labels = df_actor_sources_labels.rename(
+        columns={"acteur_id": "displayedacteur_id"}
+    )
     df_actor_labels = df_actor_labels.rename(
         columns={"acteur_id": "displayedacteur_id"}
     ).drop(columns=["id"])
@@ -252,7 +258,7 @@ def merge_actors_labels(**kwargs):
         columns={"acteur_id": "displayedacteur_id"}
     ).drop(columns=["id"])
     df_merged_labels = pd.concat(
-        [df_actor_labels, df_revision_labels]
+        [df_actor_labels, df_actor_sources_labels, df_revision_labels]
     ).drop_duplicates()
     return df_merged_labels
 
@@ -371,6 +377,13 @@ read_actor_labels = PythonOperator(
     dag=dag,
 )
 
+read_actor_sources_labels = PythonOperator(
+    task_id="load_actor_sources_labels",
+    python_callable=read_data_from_postgres,
+    op_kwargs={"table_name": "qfdmo_sources_acteurs_labels"},
+    dag=dag,
+)
+
 read_revision_labels = PythonOperator(
     task_id="load_revision_labels",
     python_callable=read_data_from_postgres,
@@ -439,6 +452,6 @@ write_pos = PythonOperator(
     concat_pds_sc_task,
     read_revision_sc,
 ] >> apply_corr_ps
-[read_actor_labels, read_revision_labels] >> merge_labels
+[read_actor_labels, read_revision_labels, read_actor_sources_labels] >> merge_labels
 
 [merge_labels, apply_corr, apply_corr_ps] >> write_pos

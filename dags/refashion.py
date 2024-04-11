@@ -90,6 +90,31 @@ def create_proposition_services(**kwargs):
     return df_pds
 
 
+def create_labels(**kwargs):
+    data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
+    labels = data_dict["labels"]
+    df_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
+    rows_list = []
+    for index, row in df_actors.iterrows():
+        label = str(row["labels_etou_bonus"])
+        if label == "Agréé Bonus Réparation":
+            rows_list.append(
+                {
+                    "acteur_id": row["identifiant_unique"],
+                    "labelqualite_id": 3,
+                    "labelqualite": labels.loc[labels["id"] == 3, "libelle"].tolist()[
+                        0
+                    ],
+                }
+            )
+
+    df_labels = pd.DataFrame(
+        rows_list, columns=["acteur_id", "labelqualite_id", "labelqualite"]
+    )
+
+    return df_labels
+
+
 def create_proposition_services_sous_categories(**kwargs):
     df = kwargs["ti"].xcom_pull(task_ids="create_proposition_services")
 
@@ -117,6 +142,7 @@ def create_proposition_services_sous_categories(**kwargs):
 def serialize_to_json(**kwargs):
     df_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
     df_pds = kwargs["ti"].xcom_pull(task_ids="create_proposition_services")
+    df_labels = kwargs["ti"].xcom_pull(task_ids="create_labels")
     df_pdsc = kwargs["ti"].xcom_pull(
         task_ids="create_proposition_services_sous_categories"
     )
@@ -140,9 +166,28 @@ def serialize_to_json(**kwargs):
         .reset_index(name="proposition_services")
     )
 
-    df_joined = pd.merge(
+    aggregated_labels = (
+        df_labels.groupby("acteur_id")
+        .apply(lambda x: x.to_dict("records"))
+        .reset_index(name="labels")
+    )
+    print(df_labels.columns)
+    print(aggregated_labels.columns)
+
+    print(aggregated_labels)
+
+    df_joined_pds = pd.merge(
         df_actors,
         aggregated_pds,
+        how="left",
+        left_on="identifiant_unique",
+        right_on="acteur_id",
+    )
+    df_joined_pds.drop("acteur_id", axis=1, inplace=True)
+
+    df_joined = pd.merge(
+        df_joined_pds,
+        aggregated_labels,
         how="left",
         left_on="identifiant_unique",
         right_on="acteur_id",
@@ -175,6 +220,7 @@ def serialize_to_json(**kwargs):
             "commentaires",
             "horaires_description",
             "proposition_services",
+            "labels",
         ]
     ].apply(lambda row: json.dumps(row.to_dict()), axis=1)
 
@@ -189,6 +235,7 @@ def load_data_from_postgresql(**kwargs):
     df_sources = pd.read_sql_table("qfdmo_source", engine)
     df_actions = pd.read_sql_table("qfdmo_action", engine)
     df_acteur_services = pd.read_sql_table("qfdmo_acteurservice", engine)
+    df_label = pd.read_sql_table("qfdmo_labelqualite", engine)
     max_id_pds = pd.read_sql_query(
         "SELECT max(id) FROM qfdmo_displayedpropositionservice", engine
     )["max"][0]
@@ -199,6 +246,7 @@ def load_data_from_postgresql(**kwargs):
         "actions": df_actions,
         "acteur_services": df_acteur_services,
         "max_pds_idx": max_id_pds,
+        "labels": df_label,
     }
 
 
@@ -354,6 +402,13 @@ create_actors_task = PythonOperator(
     dag=dag,
 )
 
+
+create_labels_task = PythonOperator(
+    task_id="create_labels",
+    python_callable=create_labels,
+    dag=dag,
+)
+
 create_proposition_services_task = PythonOperator(
     task_id="create_proposition_services",
     python_callable=create_proposition_services,
@@ -379,7 +434,7 @@ serialize_to_json_task = PythonOperator(
 (
     [fetch_data_task, load_data_task]
     >> create_actors_task
-    >> create_proposition_services_task
+    >> [create_proposition_services_task, create_labels_task]
     >> create_proposition_services_sous_categories_task
     >> serialize_to_json_task
     >> write_data_task
