@@ -289,9 +289,14 @@
                                     id="map"
                                     data-map-target="map"
                                 >
-                                    <button
+                                    <input
+                                        hidden
+                                        data-map-target="searchInZoneInput"
                                         name="search_in_zone"
-                                        data-map-target="searchInZone"
+                                        value=""
+                                    />
+                                    <button
+                                        data-map-target="searchInZoneButton"
                                         data-turbo-frame="adresses"
                                         data-action="click -> search-solution-form#submitForm"
                                         class="fr-m-1w fr-p-1v qfdmo-absolute qfdmo-z-[10000] qfdmo-right-0 qfdmo-hidden qfdmo-bg-white qfdmo-opacity-80 qfdmo-rounded qfdmo-border-solid qfdmo-border-2 qfdmo-border-blue-france-sun-113"

@@ -4,9 +4,10 @@ import { SolutionMap } from "./solution_map"
 import { Actor } from "./types"
 
 export default class extends Controller<HTMLElement> {
-    static targets = ["acteur", "searchInZone", "bBox"]
+    static targets = ["acteur", "searchInZoneButton", "searchInZoneInput", "bBox"]
     declare readonly acteurTargets: Array<HTMLScriptElement>
-    declare readonly searchInZoneTarget: HTMLButtonElement
+    declare readonly searchInZoneButtonTarget: HTMLButtonElement
+    declare readonly searchInZoneInputTarget: HTMLInputElement
     declare readonly bBoxTarget?: HTMLScriptElement
 
     static values = { location: { type: Object, default: {} } }
@@ -40,16 +41,16 @@ export default class extends Controller<HTMLElement> {
     }
 
     mapChanged(event: CustomEvent) {
-        this.searchInZoneTarget.value = JSON.stringify(event.detail)
+        this.searchInZoneInputTarget.value = JSON.stringify(event.detail)
         this.displaySearchInZoneButton()
     }
 
     displaySearchInZoneButton() {
-        this.searchInZoneTarget.classList.remove("qfdmo-hidden")
+        this.searchInZoneButtonTarget.classList.remove("qfdmo-hidden")
     }
 
     hideSearchInZoneButton() {
-        this.searchInZoneTarget.classList.add("qfdmo-hidden")
+        this.searchInZoneButtonTarget.classList.add("qfdmo-hidden")
     }
 
     displayActorDetail(identifiantUnique: string) {
