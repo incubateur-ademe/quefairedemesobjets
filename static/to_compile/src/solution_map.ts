@@ -40,7 +40,6 @@ export class SolutionMap {
     #zoomControl: L.Control.Zoom
     #location: Location
     #controller: MapController
-    #isPopupOpen: boolean = false
 
     constructor({
         location,
@@ -145,15 +144,6 @@ export class SolutionMap {
     #manageZoomControl() {
         this.#zoomControl = L.control.zoom({ position: "topleft" })
         this.#zoomControl.addTo(this.#map)
-        this.#map.on("popupopen", () => {
-            this.#isPopupOpen = true
-            this.#map.removeControl(this.#zoomControl)
-            this.#controller.hideSearchInZoneButton()
-        })
-        this.#map.on("popupclose", () => {
-            this.#isPopupOpen = false
-            this.#zoomControl.addTo(this.#map)
-        })
     }
 
     #dispatchMapChangedEvent(e: L.LeafletEvent): void {
@@ -167,9 +157,7 @@ export class SolutionMap {
             detail,
             bubbles: true,
         })
-        if (!this.#isPopupOpen) {
-            this.#controller.mapChanged(event)
-        }
+        this.#controller.mapChanged(event)
     }
 
     initEventListener(): void {
