@@ -58,13 +58,13 @@
         <script src="{{ static('qfdmo.js') }}"></script>
         {% block javascript_extras %}{% endblock %}
 
-        {% if is_iframe(request) %}
+        {% if is_embedded(request) %}
             <script src="{{ static('iframe_resizer.js') }}"></script>
         {% endif %}
     </head>
 
     <body class="qfdmo-flex qfdmo-flex-col">
-        {% if not is_iframe(request) %}
+        {% if not is_embedded(request) %}
             {% block header %}
                 {% include "layout/header.html" %}
             {% endblock %}
@@ -87,14 +87,14 @@
             </div>
             {% block content %}{% endblock %}
         </main>
-        {% if not is_iframe(request) %}
+        {% if not is_embedded(request) %}
             {% block footer %}
                 {% include "layout/footer.html" %}
             {% endblock %}
         {% endif %}
         {% block js %}
         {% endblock %}
-        {% if is_iframe(request) %}
+        {% if is_embedded(request) %}
             <script
                 src="https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4.3.6/iframeResizer.contentWindow.js"
                 integrity="sha512-hBWsS94l8+snzSPo759jDKZ3z3jn3WT4snJZTBaeMPbrCGzDrYdl2pN9EaXjh6IqEZC7wF10qcmp42TPRVgAYQ=="

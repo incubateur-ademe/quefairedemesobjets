@@ -1,0 +1,13 @@
+<!-- Liens de pieds de page pour iframe -->
+{% if is_embedded(request) %}
+    <div class="fr-container fr-mb-1w fr-text--xs qfdmo-text-center">
+        Pour en savoir plus :
+        <a href="https://longuevieauxobjets.ademe.fr/"
+            target="_blank"
+            rel="noopener"
+            aria-label="Lien vers le site Longue vie aux objets - Nouvelle fenêtre"
+        >
+            Longue vie aux objets
+        </a>
+    </div>
+{% endif %}

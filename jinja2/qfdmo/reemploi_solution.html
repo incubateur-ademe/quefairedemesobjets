@@ -2,11 +2,11 @@
 
 {% block content %}
     <div data-controller="search-solution-form"
-        class="fr-container fr-mb-1w qfdmo-flex qfdmo-flex-col{% if not is_iframe(request) %} qfdmo-min-h-screen{%endif%}{% if not is_iframe(request) or form.initial.adresse %} md:qfdmo-min-h-fit md:qfdmo-flex-auto{% endif %}" >
+        class="fr-container fr-mb-1w qfdmo-flex qfdmo-flex-col{% if not is_embedded(request) %} qfdmo-min-h-screen{%endif%}{% if not is_embedded(request) or form.initial.adresse %} md:qfdmo-min-h-fit md:qfdmo-flex-auto{% endif %}" >
         {% include 'qfdmo/partials/search_solution.html' %}
         {% include 'qfdmo/partials/display_solutions.html' %}
     </div>
-    {% if is_iframe(request) %}
+    {% if is_embedded(request) %}
         <div class="fr-container fr-mb-1w fr-text--sm qfdmo-text-center">
             Pour en savoir plus :
             <a href="https://longuevieauxobjets.ademe.fr/"

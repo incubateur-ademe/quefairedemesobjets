@@ -1,0 +1,17 @@
+<!-- Recherche adresse -->
+<div data-search-solution-form-target="adresseGroup" class="fr-px-1v fr-input-group">
+    <div data-controller='address-autocomplete'
+        data-address-autocomplete-max-option-displayed-value=5
+        data-address-autocomplete-is-ban-address-value='true'
+    >
+        <div class="form-group">
+            {{ form.adresse.label_tag() }}
+            {{ form.adresse }}
+        </div>
+        {{ form.longitude }}
+        {{ form.latitude }}
+    </div>
+    <p class="fr-error-text fr-mt-1v qfdmo-hidden" data-search-solution-form-target="adresseError">
+        Veuillez saisir une adresse
+    </p>
+</div>

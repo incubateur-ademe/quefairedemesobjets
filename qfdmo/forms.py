@@ -31,7 +31,7 @@ class SegmentedControlSelect(forms.RadioSelect):
         return context
 
 
-class GetReemploiSolutionForm(forms.Form):
+class IframeAddressesForm(forms.Form):
     sous_categorie_objet = forms.ModelChoiceField(
         queryset=SousCategorieObjet.objects.all(),
         widget=AutoCompleteInput(
@@ -161,6 +161,22 @@ class GetReemploiSolutionForm(forms.Form):
             ),
         ],
         label="Adresses à proximité ou solutions digitales",
+        required=False,
+    )
+
+
+class CarteAddressesForm(IframeAddressesForm):
+    adresse = forms.CharField(
+        widget=AutoCompleteInput(
+            attrs={
+                "class": "fr-input md:qfdmo-max-w-[596px]",
+                "placeholder": "20 av. du Grésillé 49000 Angers",
+                "autocomplete": "off",
+                "aria-label": "Saisir une adresse - obligatoire",
+            },
+            data_controller="address-autocomplete",
+        ),
+        label="Saisir une adresse ",
         required=False,
     )
 
