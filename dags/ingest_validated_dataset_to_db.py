@@ -139,9 +139,8 @@ def write_data_to_postgres(**kwargs):
                   WHERE acteur_id IN (
                          SELECT identifiant_unique FROM temp_actors
                       );
-                   """,
+            """,
             """
-
             DELETE FROM qfdmo_propositionservice
             WHERE acteur_id IN (
                 SELECT identifiant_unique FROM temp_actors

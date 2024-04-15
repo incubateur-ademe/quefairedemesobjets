@@ -171,10 +171,6 @@ def serialize_to_json(**kwargs):
         .apply(lambda x: x.to_dict("records"))
         .reset_index(name="labels")
     )
-    print(df_labels.columns)
-    print(aggregated_labels.columns)
-
-    print(aggregated_labels)
 
     df_joined_pds = pd.merge(
         df_actors,
