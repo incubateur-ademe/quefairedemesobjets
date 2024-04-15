@@ -13,7 +13,6 @@ env = Path(__file__).parent.name
 utils = import_module(f"{env}.utils.utils")
 api_utils = import_module(f"{env}.utils.api_utils")
 mapping_utils = import_module(f"{env}.utils.mapping_utils")
-
 default_args = {
     "owner": "airflow",
     "depends_on_past": False,
@@ -78,6 +77,8 @@ def create_proposition_services(**kwargs):
                     acteur_service_name, df_acteur_services
                 ),
                 "action_id": mapping_utils.get_id_from_code(action_name, df_actions),
+                "action": action_name,
+                "acteur_service": acteur_service_name,
                 "acteur_id": acteur_id,
                 "sous_categories": sous_categories,
             }
@@ -102,11 +103,13 @@ def create_proposition_services_sous_categories(**kwargs):
                     {
                         "propositionservice_id": row["id"],
                         "souscategorieobjet_id": sous_categories[product.strip()],
+                        "souscategorie": product.strip(),
                     }
                 )
 
     df_sous_categories = pd.DataFrame(
-        rows_list, columns=["propositionservice_id", "souscategorieobjet_id"]
+        rows_list,
+        columns=["propositionservice_id", "souscategorieobjet_id", "souscategorie"],
     )
     return df_sous_categories
 
