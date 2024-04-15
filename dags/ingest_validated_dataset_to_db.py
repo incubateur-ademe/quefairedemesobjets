@@ -127,28 +127,28 @@ def write_data_to_postgres(**kwargs):
 
         delete_queries = [
             """
-            DELETE FROM qfdmo_sources_propositionservice_sous_categories
+            DELETE FROM qfdmo_propositionservice_sous_categories
             WHERE propositionservice_id IN (
-                SELECT id FROM qfdmo_sources_propositionservice
+                SELECT id FROM qfdmo_propositionservice
                 WHERE acteur_id IN (
                     SELECT identifiant_unique FROM temp_actors
                 )
             );
             """,
-            #    """
-            #      DELETE FROM qfdmo_sources_acteurs_labels
-            #       WHERE acteur_id IN (
-            #             SELECT identifiant_unique FROM temp_actors
-            #          );
-            #       """,
             """
-            DELETE FROM qfdmo_sources_propositionservice
+                 DELETE FROM qfdmo_acteur_labels
+                  WHERE acteur_id IN (
+                         SELECT identifiant_unique FROM temp_actors
+                      );
+                   """,
+            """
+            DELETE FROM qfdmo_propositionservice
             WHERE acteur_id IN (
                 SELECT identifiant_unique FROM temp_actors
             );
             """,
             """
-            DELETE FROM qfdmo_sources_acteurs WHERE identifiant_unique
+            DELETE FROM qfdmo_acteur WHERE identifiant_unique
             in ( select identifiant_unique from temp_actors);
             """,
         ]
@@ -179,7 +179,7 @@ def write_data_to_postgres(**kwargs):
                 "commentaires",
             ]
         ].to_sql(
-            "qfdmo_sources_acteurs",
+            "qfdmo_acteur",
             connection,
             if_exists="append",
             index=False,
@@ -188,7 +188,7 @@ def write_data_to_postgres(**kwargs):
         )
 
         df_labels[["acteur_id", "labelqualite_id"]].to_sql(
-            "qfdmo_sources_acteurs_labels",
+            "qfdmo_acteur_labels",
             connection,
             if_exists="append",
             index=False,
@@ -197,7 +197,7 @@ def write_data_to_postgres(**kwargs):
         )
 
         df_pds[["id", "acteur_service_id", "action_id", "acteur_id"]].to_sql(
-            "qfdmo_sources_propositionservice",
+            "qfdmo_propositionservice",
             connection,
             if_exists="append",
             index=False,
@@ -206,7 +206,7 @@ def write_data_to_postgres(**kwargs):
         )
 
         df_pdssc[["propositionservice_id", "souscategorieobjet_id"]].to_sql(
-            "qfdmo_sources_propositionservice_sous_categories",
+            "qfdmo_propositionservice_sous_categories",
             connection,
             if_exists="append",
             index=False,
