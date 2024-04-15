@@ -4,11 +4,10 @@ from pathlib import Path
 
 import pandas as pd
 from airflow.models import DAG
+from airflow.operators.dagrun_operator import TriggerDagRunOperator
 from airflow.operators.python_operator import PythonOperator, BranchPythonOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.utils.dates import days_ago
-from airflow.operators.dagrun_operator import TriggerDagRunOperator
-
 
 env = Path(__file__).parent.name
 utils = import_module(f"{env}.utils.utils")
@@ -261,7 +260,6 @@ trigger_create_final_actors_dag = TriggerDagRunOperator(
     trigger_dag_id=utils.get_dag_name(__file__, "apply_adresse_corrections"),
     dag=dag,
 )
-
 
 branch_task >> skip_processing_task
 (
