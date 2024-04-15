@@ -21,7 +21,7 @@ default_args = {
 }
 
 dag = DAG(
-    "validate_and_process_dagruns",
+    utils.get_dag_name(__file__, "validate_and_process_dagruns"),
     default_args=default_args,
     description="Check for VALIDATE in qfdmo_dagrun and process qfdmo_dagrunchange",
     schedule_interval="*/5 * * * *",
