@@ -20,7 +20,7 @@ def read_data_from_postgres(**kwargs):
 
 
 def apply_corrections(**kwargs):
-    df_normalized_actors = kwargs["ti"].xcom_pull(task_ids="deduplicate_actors")
+    df_normalized_actors = kwargs["ti"].xcom_pull(task_ids="load_actors")
     df_manual_actor_updates = kwargs["ti"].xcom_pull(task_ids="load_revision_actors")
 
     df_normalized_actors = df_normalized_actors.set_index("identifiant_unique")
@@ -32,14 +32,14 @@ def apply_corrections(**kwargs):
 
 
 def apply_corrections_ps(**kwargs):
-    df_propositionservice = kwargs["ti"].xcom_pull(task_ids="concat_pds")
+    df_propositionservice = kwargs["ti"].xcom_pull(task_ids="load_propositionservice")
     df_manual_propositionservice_updates = kwargs["ti"].xcom_pull(
         task_ids="load_revision_propositionservice"
     )
     df_manual_propositionservice_updates = df_manual_propositionservice_updates.rename(
         columns={"revision_acteur_id": "acteur_id"}
     )
-    df_ps_sous_categories = kwargs["ti"].xcom_pull(task_ids="concat_pds_sc")
+    df_ps_sous_categories = kwargs["ti"].xcom_pull(task_ids="load_ps_sous_categories")
     df_manual_propositionservice_sous_categories_updates = kwargs["ti"].xcom_pull(
         task_ids="load_revision_ps_sous_categories"
     )
@@ -244,13 +244,7 @@ def write_data_to_postgres(**kwargs):
 
 def merge_actors_labels(**kwargs):
     df_actor_labels = kwargs["ti"].xcom_pull(task_ids="load_actor_labels")
-    df_actor_sources_labels = kwargs["ti"].xcom_pull(
-        task_ids="load_actor_sources_labels"
-    )
     df_revision_labels = kwargs["ti"].xcom_pull(task_ids="load_revision_labels")
-    df_actor_sources_labels = df_actor_sources_labels.rename(
-        columns={"acteur_id": "displayedacteur_id"}
-    )
     df_actor_labels = df_actor_labels.rename(
         columns={"acteur_id": "displayedacteur_id"}
     ).drop(columns=["id"])
@@ -258,33 +252,9 @@ def merge_actors_labels(**kwargs):
         columns={"acteur_id": "displayedacteur_id"}
     ).drop(columns=["id"])
     df_merged_labels = pd.concat(
-        [df_actor_labels, df_actor_sources_labels, df_revision_labels]
+        [df_actor_labels, df_revision_labels]
     ).drop_duplicates()
     return df_merged_labels
-
-
-def concat_actors(**kwargs):
-    # TODO : Add deduplication in future iterations, right now it's a simple concat
-    df_actors = kwargs["ti"].xcom_pull(task_ids="load_actors")
-    df_sources_actors = kwargs["ti"].xcom_pull(task_ids="load_actors_sources")
-
-    return pd.concat([df_actors, df_sources_actors])
-
-
-def concat_pds(**kwargs):
-    df_pds = kwargs["ti"].xcom_pull(task_ids="load_propositionservice")
-    df_sources_pds = kwargs["ti"].xcom_pull(task_ids="load_sources_propositionservice")
-
-    return pd.concat([df_pds, df_sources_pds])
-
-
-def concat_pds_sc(**kwargs):
-    df_pds_sc = kwargs["ti"].xcom_pull(task_ids="load_ps_sous_categories")
-    df_sources_pds_sc = kwargs["ti"].xcom_pull(
-        task_ids="load_sources_ps_sous_categories"
-    )
-
-    return pd.concat([df_pds_sc, df_sources_pds_sc])
 
 
 default_args = {
@@ -304,7 +274,6 @@ dag = DAG(
         "DAG for applying correction on normalized actors and propositionservice"
     ),
     schedule_interval=None,
-    max_active_runs=1,
 )
 
 read_actors = PythonOperator(
@@ -314,24 +283,10 @@ read_actors = PythonOperator(
     dag=dag,
 )
 
-read_actors_sources = PythonOperator(
-    task_id="load_actors_sources",
-    python_callable=read_data_from_postgres,
-    op_kwargs={"table_name": "qfdmo_sources_acteurs"},
-    dag=dag,
-)
-
 read_ps = PythonOperator(
     task_id="load_propositionservice",
     python_callable=read_data_from_postgres,
     op_kwargs={"table_name": "qfdmo_propositionservice"},
-    dag=dag,
-)
-
-read_ps_sources = PythonOperator(
-    task_id="load_sources_propositionservice",
-    python_callable=read_data_from_postgres,
-    op_kwargs={"table_name": "qfdmo_sources_propositionservice"},
     dag=dag,
 )
 
@@ -363,24 +318,10 @@ read_sc = PythonOperator(
     dag=dag,
 )
 
-read_sc_sources = PythonOperator(
-    task_id="load_sources_ps_sous_categories",
-    python_callable=read_data_from_postgres,
-    op_kwargs={"table_name": "qfdmo_sources_propositionservice_sous_categories"},
-    dag=dag,
-)
-
 read_actor_labels = PythonOperator(
     task_id="load_actor_labels",
     python_callable=read_data_from_postgres,
     op_kwargs={"table_name": "qfdmo_acteur_labels"},
-    dag=dag,
-)
-
-read_actor_sources_labels = PythonOperator(
-    task_id="load_actor_sources_labels",
-    python_callable=read_data_from_postgres,
-    op_kwargs={"table_name": "qfdmo_sources_acteurs_labels"},
     dag=dag,
 )
 
@@ -394,27 +335,6 @@ read_revision_labels = PythonOperator(
 merge_labels = PythonOperator(
     task_id="merge_labels",
     python_callable=merge_actors_labels,
-    provide_context=True,
-    dag=dag,
-)
-
-concat_actors_task = PythonOperator(
-    task_id="deduplicate_actors",
-    python_callable=concat_actors,
-    provide_context=True,
-    dag=dag,
-)
-
-concat_pds_task = PythonOperator(
-    task_id="concat_pds",
-    python_callable=concat_pds,
-    provide_context=True,
-    dag=dag,
-)
-
-concat_pds_sc_task = PythonOperator(
-    task_id="concat_pds_sc",
-    python_callable=concat_pds_sc,
     provide_context=True,
     dag=dag,
 )
@@ -440,18 +360,7 @@ write_pos = PythonOperator(
     dag=dag,
 )
 
-[read_actors, read_actors_sources] >> concat_actors_task
-[concat_actors_task, read_revision_actor] >> apply_corr
-
-[read_ps, read_ps_sources] >> concat_pds_task
-[read_sc, read_sc_sources] >> concat_pds_sc_task
-
-[
-    concat_pds_task,
-    read_revision_ps,
-    concat_pds_sc_task,
-    read_revision_sc,
-] >> apply_corr_ps
-[read_actor_labels, read_revision_labels, read_actor_sources_labels] >> merge_labels
-
+[read_actors, read_revision_actor] >> apply_corr
+[read_ps, read_revision_ps, read_sc, read_revision_sc] >> apply_corr_ps
+[read_actor_labels, read_revision_labels] >> merge_labels
 [merge_labels, apply_corr, apply_corr_ps] >> write_pos
