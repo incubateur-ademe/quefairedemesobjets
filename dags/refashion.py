@@ -1,9 +1,9 @@
 import json
-import math
 from datetime import datetime
 from importlib import import_module
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 from airflow import DAG
 from airflow.operators.python import PythonOperator
@@ -80,6 +80,8 @@ def create_proposition_services(**kwargs):
                 "action": action_name,
                 "acteur_service": acteur_service_name,
                 "acteur_id": acteur_id,
+                "action": action_name,  # noqa: F601
+                "acteur_service": acteur_service_name,  # noqa: F601
                 "sous_categories": sous_categories,
             }
         )
@@ -88,6 +90,31 @@ def create_proposition_services(**kwargs):
     df_pds.index = range(idx_max, idx_max + len(df_pds))
     df_pds["id"] = df_pds.index
     return df_pds
+
+
+def create_labels(**kwargs):
+    data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
+    labels = data_dict["labels"]
+    df_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
+    rows_list = []
+    for index, row in df_actors.iterrows():
+        label = str(row["labels_etou_bonus"])
+        if label == "Agréé Bonus Réparation":
+            rows_list.append(
+                {
+                    "acteur_id": row["identifiant_unique"],
+                    "labelqualite_id": 3,
+                    "labelqualite": labels.loc[labels["id"] == 3, "libelle"].tolist()[
+                        0
+                    ],
+                }
+            )
+
+    df_labels = pd.DataFrame(
+        rows_list, columns=["acteur_id", "labelqualite_id", "labelqualite"]
+    )
+
+    return df_labels
 
 
 def create_proposition_services_sous_categories(**kwargs):
@@ -117,6 +144,7 @@ def create_proposition_services_sous_categories(**kwargs):
 def serialize_to_json(**kwargs):
     df_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
     df_pds = kwargs["ti"].xcom_pull(task_ids="create_proposition_services")
+    df_labels = kwargs["ti"].xcom_pull(task_ids="create_labels")
     df_pdsc = kwargs["ti"].xcom_pull(
         task_ids="create_proposition_services_sous_categories"
     )
@@ -140,9 +168,24 @@ def serialize_to_json(**kwargs):
         .reset_index(name="proposition_services")
     )
 
-    df_joined = pd.merge(
+    aggregated_labels = (
+        df_labels.groupby("acteur_id")
+        .apply(lambda x: x.to_dict("records"))
+        .reset_index(name="labels")
+    )
+
+    df_joined_pds = pd.merge(
         df_actors,
         aggregated_pds,
+        how="left",
+        left_on="identifiant_unique",
+        right_on="acteur_id",
+    )
+    df_joined_pds.drop("acteur_id", axis=1, inplace=True)
+
+    df_joined = pd.merge(
+        df_joined_pds,
+        aggregated_labels,
         how="left",
         left_on="identifiant_unique",
         right_on="acteur_id",
@@ -160,6 +203,7 @@ def serialize_to_json(**kwargs):
             "ville",
             "url",
             "email",
+            "location",
             "latitude",
             "longitude",
             "telephone",
@@ -174,6 +218,7 @@ def serialize_to_json(**kwargs):
             "commentaires",
             "horaires_description",
             "proposition_services",
+            "labels",
         ]
     ].apply(lambda row: json.dumps(row.to_dict()), axis=1)
 
@@ -188,6 +233,7 @@ def load_data_from_postgresql(**kwargs):
     df_sources = pd.read_sql_table("qfdmo_source", engine)
     df_actions = pd.read_sql_table("qfdmo_action", engine)
     df_acteur_services = pd.read_sql_table("qfdmo_acteurservice", engine)
+    df_label = pd.read_sql_table("qfdmo_labelqualite", engine)
     max_id_pds = pd.read_sql_query(
         "SELECT max(id) FROM qfdmo_displayedpropositionservice", engine
     )["max"][0]
@@ -198,6 +244,7 @@ def load_data_from_postgresql(**kwargs):
         "actions": df_actions,
         "acteur_services": df_acteur_services,
         "max_pds_idx": max_id_pds,
+        "labels": df_label,
     }
 
 
@@ -268,8 +315,8 @@ def create_actors(**kwargs):
         "site_web": "url",
         "email": "email",
         "perimetre_dintervention": "",
-        "longitudewgs84": "longitude",
-        "latitudewgs84": "latitude",
+        "longitudewgs84": "location",
+        "latitudewgs84": "location",
         "horaires_douverture": "horaires_description",
         "consignes_dacces": "commentaires",
     }
@@ -283,8 +330,11 @@ def create_actors(**kwargs):
                     )
                 )
             elif old_col in ["latitudewgs84", "longitudewgs84"]:
-                df[new_col] = df[old_col].apply(
-                    lambda x: mapping_utils.transform_float(x)
+                df[new_col] = df.apply(
+                    lambda row: utils.transform_location(
+                        row["longitudewgs84"], row["latitudewgs84"]
+                    ),
+                    axis=1,
                 )
             elif old_col == "ecoorganisme":
                 df[new_col] = df[old_col].apply(
@@ -301,8 +351,8 @@ def create_actors(**kwargs):
         axis=1,
     )
     df["statut"] = "ACTIF"
-    df["latitude"] = df["latitude"].replace(math.nan, None)
-    df["longitude"] = df["longitude"].replace(math.nan, None)
+    df["latitude"] = df["latitudewgs84"].astype(float).replace({np.nan: None})
+    df["longitude"] = df["longitudewgs84"].astype(float).replace({np.nan: None})
     df["modifie_le"] = df["cree_le"]
     df["siret"] = df["siret"].astype(str).apply(lambda x: x[:14])
     df["telephone"] = df["telephone"].dropna().apply(lambda x: x.replace(" ", ""))
@@ -350,6 +400,13 @@ create_actors_task = PythonOperator(
     dag=dag,
 )
 
+
+create_labels_task = PythonOperator(
+    task_id="create_labels",
+    python_callable=create_labels,
+    dag=dag,
+)
+
 create_proposition_services_task = PythonOperator(
     task_id="create_proposition_services",
     python_callable=create_proposition_services,
@@ -375,7 +432,7 @@ serialize_to_json_task = PythonOperator(
 (
     [fetch_data_task, load_data_task]
     >> create_actors_task
-    >> create_proposition_services_task
+    >> [create_proposition_services_task, create_labels_task]
     >> create_proposition_services_sous_categories_task
     >> serialize_to_json_task
     >> write_data_task
