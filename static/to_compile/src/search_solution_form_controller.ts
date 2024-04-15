@@ -161,6 +161,9 @@ export default class extends Controller<HTMLElement> {
     }
 
     displayActionList() {
+        if (!this.hasDirectionTarget) {
+            return
+        }
         const direction = this.directionTarget
         const options = direction.getElementsByTagName("input")
         for (let i = 0; i < options.length; i++) {

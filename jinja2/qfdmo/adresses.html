@@ -26,10 +26,14 @@
                     <div class="qfdmo-items-center qfdmo-hidden md:qfdmo-flex qfdmo-flex-row">
                         {% include 'layout/_partials/header_logos.html' %}
                     </div>
+
+
+
+                    <!-- Recherche adresse -->
                     <div class="fr-mt-1w qfdmo-flex-grow qfdmo-max-w-[596px] qfdmo-items-center">
-                        {{ form.adresse.label_tag() }}
-                        {{ form.adresse }}
+                        {% include 'qfdmo/_addresses_partials/adresse_input_form.html' %}
                     </div>
+
                     <div class="fr-ml-1w md:qfdmo-mt-3w">
                         <button class="fr-btn qfdmo-float-right md:qfdmo-float-right">
                             Rechercher
