@@ -17,7 +17,7 @@ from django.views.generic.edit import FormView
 
 from core.jinja2_handler import get_action_list
 from core.utils import get_direction
-from qfdmo.forms import GetReemploiSolutionForm
+from qfdmo.forms import CarteAddressesForm, IframeAddressesForm
 from qfdmo.models import (
     Acteur,
     ActeurStatus,
@@ -33,9 +33,14 @@ from qfdmo.thread.materialized_view import RefreshMateriazedViewThread
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
 
 
-class ReemploiSolutionView(FormView):
-    form_class = GetReemploiSolutionForm
+class AddressesView(FormView):
+    form_class = IframeAddressesForm
     template_name = "qfdmo/adresses.html"
+
+    def get_form_class(self) -> type:
+        if self.request.GET.get("carte") is not None:
+            return CarteAddressesForm
+        return super().get_form_class()
 
     def _get_search_in_zone_params(self):
         center = []
@@ -84,7 +89,9 @@ class ReemploiSolutionView(FormView):
 
         return initial
 
-    def get_form(self, form_class: type | None = GetReemploiSolutionForm) -> BaseForm:
+    def get_form(self, form_class: type | None = None) -> BaseForm:
+        if form_class is None:
+            form_class = self.get_form_class()
         my_form = super().get_form(form_class)
         # Here we need to load choices after initialisation because of async management
         # in prod + cache

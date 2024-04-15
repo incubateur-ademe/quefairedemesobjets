@@ -44,6 +44,7 @@ module.exports = {
         "md:qfdmo-w-[250px]",
         "md:qfdmo-w-[400px]",
         "md:qfdmo-w-[596px]",
+        "md:qfdmo-max-w-[596px]",
         "qfdmo-h-[95%]",
     ],
     theme: {

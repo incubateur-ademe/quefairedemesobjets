@@ -49,6 +49,8 @@ export default class extends Controller<HTMLElement> {
     declare readonly actionListTarget: HTMLInputElement
     declare readonly searchFormTarget: HTMLFormElement
 
+    declare readonly hasDirectionTarget: boolean
+
     declare readonly searchFormPanelTarget: HTMLElement
     declare readonly addressesPanelTarget: HTMLElement
     declare readonly backToSearchPanelTarget: HTMLElement
@@ -161,6 +163,9 @@ export default class extends Controller<HTMLElement> {
     }
 
     displayActionList() {
+        if (!this.hasDirectionTarget) {
+            return
+        }
         const direction = this.directionTarget
         const options = direction.getElementsByTagName("input")
         for (let i = 0; i < options.length; i++) {

@@ -8,10 +8,10 @@
 
         <form data-controller="search-solution-form" id='search_form'
             data-search-solution-form-target="searchForm"
-            data-search-solution-form-is-iframe-value="{{ is_iframe(request) }}"
+            data-search-solution-form-is-iframe-value="{{ is_embedded(request) }}"
             data-turbo-frame="addressesPanel"
             class="fr-container
-            qfdmo-min-h-[700px] qfdmo-max-h-[800px]{%if is_iframe(request) %} qfdmo-h-screen{% else %} qfdmo-h-svh{% endif %}
+            qfdmo-min-h-[700px] qfdmo-max-h-[800px]{%if is_embedded(request) %} qfdmo-h-screen{% else %} qfdmo-h-svh{% endif %}
             qfdmo-flex qfdmo-flex-col qfdmo-flex-auto
             qfdmo-relative"
             data-action="
@@ -21,401 +21,37 @@
             address-autocomplete:optionSelected->search-solution-form#checkAdresseErrorForm
             "
             >
-            <div class='qfdmo-absolute qfdmo-inset-0 qfdmo-font-black qfdmo-z-[10001] qfdmo-flex qfdmo-flex-col qfdmo-hidden'
-                data-search-solution-form-target="advancedFilterMainPanel"
-            >
-                <div class="qfdmo-flex-grow qfdmo-bg-black qfdmo-opacity-20"></div>
-                <div class="qfdmo-bg-white qfdmo-duration-300 qfdmo-h-0" data-search-solution-form-target="advancedFilterFormPanel">
-                    <div class="fr-container fr-container--fluid qfdmo-h-full">
-                        <div class="qfdmo-h-full qfdmo-flex qfdmo-flex-col">
-                            <div class="fr-modal__header">
-                                <button
-                                    class="fr-btn fr-btn--close fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-close-line"
-                                    type="button"
-                                    data-action="click -> search-solution-form#toggleAdvancedFiltersWithoutSubmit"
-                                    >
-                                    Fermer
-                                </button>
-                            </div>
-                            <div class="fr-modal__content qfdmo-flex-grow">
-                                <h1 class="fr-h4 fr-mt-3w qfdmo-text-center">
-                                    Filtres avancés
-                                </h1>
-                                <hr>
-                                <div
-                                    class="qfdmo-flex qfdmo-flex-row qfdmo-items-center"
-                                >
-                                    {% include "qfdmo/partials/label_reparacteur_icon.html" %}
-                                    <fieldset class="fr-fieldset fr-m-0 " aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages">
-                                        <legend class="qfdmo-hidden">
-                                            Labels
-                                        </legend>
-                                        <div class="fr-fieldset__element fr-fieldset__element--inline fr-m-0 qfdmo-font-normal">
-                                            <div
-                                                class="fr-checkbox-group fr-checkbox-group--sm qfdmo-flex qfdmo-flex-row qfdmo-items-center"
-                                            >
-                                                {{ form.label_reparacteur }}
-                                                {{ form.label_reparacteur.label_tag() }}
-                                            </div>
-                                            <span class="fr-hint-text">{{ form.label_reparacteur.help_text }}</span>
-                                        </div>
-                                    </fieldset>
-                                </div>
-                            </div>
-                            <div class="fr-modal__footer">
-                                <div
-                                    class="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg fr-btns-group--icon-left"
-                                    data-search-solution-form-target="advancedFilterSaveButton"
-                                >
-                                    <button
-                                        class="fr-btn"
-                                        type="button"
-                                        data-action="click -> search-solution-form#toggleAdvancedFiltersWithoutSubmit"
-                                        >
-                                        Enregistrer
-                                    </button>
-                                </div>
-                                <div
-                                    class="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg fr-btns-group--icon-left"
-                                    data-search-solution-form-target="advancedFilterSaveAndSubmitButton"
-                                >
-                                    <button
-                                        class="fr-btn"
-                                        type="button"
-                                        data-action="click -> search-solution-form#toggleAdvancedFiltersAndSubmitForm"
-                                        >
-                                        Rechercher des adresses
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Panel «Modifier ma recherche» -->
-            <div class="qfdmo-relative qfdmo-duration-300 qfdmo-overflow-hidden
-                qfdmo-flex qfdmo-flex-row
-                {% if display_search(request) %}qfdmo-h-0{% endif %}"
-                id="search_summary"
-                data-search-solution-form-target="backToSearchPanel"
-            >
-                <button
-                    type="button"
-                    class="fr-my-1w
-                    qfdmo-flex-grow md:qfdmo-flex-grow-0
-                    fr-btn fr-btn--tertiary fr-btn--icon-left fr-icon-search-line
-                    qfdmo-whitespace-nowrap qfdmo-flex qfdmo-justify-center
-                    "
-                    data-action="click -> search-solution-form#backToSearch"
-                    >Modifier ma recherche</button>
-                <button
-                    class="fr-my-1w fr-ml-1w
-                    fr-btn fr-btn--tertiary"
-                    type="button"
-                    data-action="click -> search-solution-form#toggleAdvancedFiltersWithSubmit"
-                    >
-                    <span class="fr-icon-equalizer-line fr-icon--sm"></span>
-                    <span class="qfdmo-hidden md:qfdmo-block qfdmo-ml-1w">Filtres avancés</span>
-                </button>
-
-            </div>
-
-            <!-- Panel «Formulaire de recherche» -->
-            <div class="qfdmo-duration-300 qfdmo-overflow-hidden
-                qfdmo-h-0 {% if display_search(request) %}qfdmo-flex-grow{% endif %}
-                "
-                data-search-solution-form-target="searchFormPanel"
-            >
-                <h1 class="qfdmo-hidden">Longue vie aux objets</h1>
-
-                <div class="qfdmo-h-full qfdmo-flex qfdmo-flex-row" id='boo'>
-
-                    <div class="qfdmo-flex qfdmo-flex-col qfdmo-w-full md:qfdmo-w-[604px] qfdmo-h-full" data-test-id="form-content">
-
-                        <div class="qfdmo-flex-grow qfdmo-overflow-y-auto qfdmo-overflow-x-hidden">
-
-                            {% include "qfdmo/partials/featureflip_inputs.html" %}
-
-                            <!-- Direction -->
-                            <fieldset class="fr-segmented fr-segmented--sm qfdmo-w-full fr-mt-3w">
-                                <legend class="fr-segmented__legend qfdmo-hidden">
-                                    {{ form.direction.label_tag() }}
-                                </legend>
-                                {{ form.direction }}
-                            </fieldset>
-                            {{ form.action_list }}
-
-                            <!-- Recherche Objet -->
-                            <div data-search-solution-form-target="sousCategoryObjetGroup" class="fr-mt-3w fr-px-1v fr-input-group">
-                                <div data-controller='ss-cat-object-autocomplete'
-                                    data-ss-cat-object-autocomplete-max-option-displayed-value=5
-                                    data-ss-cat-object-autocomplete-nb-char-to-search-value=2
-                                >
-                                    <div class="form-group">
-                                        {{ form.sous_categorie_objet.label_tag() }}
-                                        {{ form.sous_categorie_objet }}
-                                        {{ form.sc_id }}
-                                    </div>
-                                </div>
-                                <p class="fr-error-text fr-mt-1v qfdmo-hidden" data-search-solution-form-target="sousCategoryObjetError">
-                                    Veuillez indiquer puis sélectionner un objet dans la liste déroulante
-                                </p>
-                            </div>
-
-                            <!-- Recherche adresse -->
-                            <div data-search-solution-form-target="adresseGroup" class="fr-mt-3w fr-px-1v fr-input-group">
-                                <div data-controller='address-autocomplete'
-                                    data-address-autocomplete-max-option-displayed-value=5
-                                    data-address-autocomplete-is-ban-address-value='true'
-                                >
-                                    <div class="form-group">
-                                        {{ form.adresse.label_tag() }}
-                                        {{ form.adresse }}
-                                    </div>
-                                    {{ form.longitude }}
-                                    {{ form.latitude }}
-                                </div>
-                                <p class="fr-error-text fr-mt-1v qfdmo-hidden" data-search-solution-form-target="adresseError">
-                                    Veuillez saisir une adresse
-                                </p>
-                            </div>
-
-                            <!-- Gestes -->
-                            <div class="fr-mt-3w fr-px-1v">
-                                {% with action_direction='jai' %}
-                                    {% include "qfdmo/partials/action_list_by_direction.html" %}
-                                {% endwith %}
-                                {% with action_direction='jecherche' %}
-                                    {% include "qfdmo/partials/action_list_by_direction.html"  %}
-                                {% endwith %}
-                            </div>
-
-
-                        </div>
-                        <div class="fr-my-1w qfdmo-w-full qfdmo-flex qfdmo-flex-col md:qfdmo-max-w-[604px] qfdmo-mx-auto">
-
-                            <!-- Advanced filters -->
-                            <button
-                                class="fr-my-1w qfdmo-w-full md:qfdmo-w-fit fr-btn fr-btn--tertiary-no-outline qfdmo-flex qfdmo-justify-center md:qfdmo-text-left"
-                                type="button"
-                                data-action="click -> search-solution-form#toggleAdvancedFiltersWithoutSubmit"
-                                >
-                                Filtres avancés
-                            </button>
-
-                            <button
-                                class="fr-btn qfdmo-whitespace-nowrap qfdmo-float-left qfdmo-w-full md:qfdmo-w-max qfdmo-flex qfdmo-justify-center"
-                                data-action="click -> search-solution-form#submitForm"
-                                type="button"
-                                >
-                                Rechercher des adresses
-                            </button>
-                        </div>
-                    </div>
-                    <div class="fr-p-3w qfdmo-my-auto qfdmo-flex-grow qfdmo-hidden md:qfdmo-block">
-                        <img
-                            src="{{ static('france_map.svg') }}"
-                            alt="Repar'Acteur"
-                            class="qfdmo-max-w-[100%]"
-                        >
-                    </div>
-                </div>
-            </div>
-
-            <!-- Panel «Résultats de la recherche» -->
-            <turbo-frame id="addressesPanel"
-                data-search-solution-form-target="addressesPanel"
-                class="qfdmo-relative qfdmo-h-0 qfdmo-duration-300 qfdmo-overflow-hidden qfdmo-z-1
-                qfdmo-flex qfdmo-flex-col
-                {% if not display_search(request) %}qfdmo-flex-grow{% endif %}"
-            >
-                <div data-search-solution-form-target="headerAddressPanel"
-                    class="qfdmo-duration-300">
-
-                    <!-- Digital -->
-                    <fieldset class="fr-segmented fr-segmented--sm qfdmo-w-full ">
-                        <legend class="fr-segmented__legend qfdmo-hidden">
-                            {{ form.digital.label_tag() }}
-                        </legend>
-                        {{ form.digital }}
-                    </fieldset>
-
-                    <p class="fr-my-1w fr-h6">
-                        Vos {% if form.digital.value() == "1" %}résultats{% else %}adresses{% endif %} {% if form.sous_categorie_objet.value() %}pour «{{ form.sous_categorie_objet.value() }}»{% endif %}&nbsp;:
-                    </p>
-                </div>
-
-                <div
-                    class="qfdmo-relative qfdmo-flex-grow qfdmo-flex qfdmo-flex-col md:qfdmo-flex-row"
-                >
-                    <div class="qfdmo-flex-grow qfdmo-flex qfdmo-flex-col">
-                        <div class="qfdmo-h-full qfdmo-w-full qfdmo-flex qfdmo-flex-col">
-                            {% if request.GET["digital"] == "1" %}
-                                <!-- On line addresses-->
-                                <div class="qfdmo-relative qfdmo-flex-grow qfdmo-shadow">
-                                    <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-overflow-y-auto">
-                                        {% for adresse in acteurs.all() %}
-                                            <div data-action="click->search-solution-form#displayActeurDetails"
-                                                data-identifiant-unique="{{ adresse.identifiant_unique }}"
-                                                class="qfdmo-cursor-pointer qfdmo-rounded qfdmo-border-solid qfdmo-border qfdmo-border-light-gray qfdmo-content-start fr-p-1w fr-mb-1w
-                                                {{ loop.cycle('qfdmo-bg-grey-975','qfdmo-bg-grey-950') }}
-                                                qfdmo-flex qfdmo-flex-col">
-                                                {% with direction=form.direction.value() %}
-                                                    {% include 'qfdmo/_address_partials/address_actions.html'%}
-                                                {% endwith %}
-                                                <span class="fr-text--xl fr-text--bold fr-mb-0">{{ adresse.nom }}</span>
-                                                <p class="qfdmo-text-sm fr-mb-1w fr-mt-0">
-                                                    {% for acteur_service in adresse.acteur_services() %}
-                                                        {{ acteur_service }}{% if not loop.last %}<br>{% endif %}
-                                                    {% endfor %}
-                                                </p>
-                                            </div>
-                                        {% endfor %}
-                                        {% if acteurs.count() == 0 %}
-                                            <p class="qfdmo-italic">
-                                                Aucune solution en ligne n'a été trouvée pour votre recherche.
-                                            </p>
-                                        {% endif %}
-                                        <div data-search-solution-form-target="addressMissing"></div>
-                                        <div data-search-solution-form-target="NoLocalSolution"></div>
-                                    </div>
-                                </div>
-                            {% else %}
-                                <!-- Near by addresses-->
-                                <div
-                                    class="qfdmo-flex-grow qfdmo-relative qfdmo-shadow"
-                                    data-controller="map"
-                                    data-map-location-value="{{ location }}"
-                                    id="map"
-                                    data-map-target="map"
-                                >
-                                    <input
-                                        hidden
-                                        data-map-target="searchInZoneInput"
-                                        name="search_in_zone"
-                                        value=""
-                                    />
-                                    <button
-                                        data-map-target="searchInZoneButton"
-                                        data-turbo-frame="adresses"
-                                        data-action="click -> search-solution-form#submitForm"
-                                        class="fr-m-1w fr-p-1v qfdmo-absolute qfdmo-z-[10000] qfdmo-right-0 qfdmo-hidden qfdmo-bg-white qfdmo-opacity-80 qfdmo-rounded qfdmo-border-solid qfdmo-border-2 qfdmo-border-blue-france-sun-113"
-                                        type="button"
-                                        >
-                                        Rechercher dans cette zone
-                                    </button>
-                                    <div
-                                        class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-80 qfdmo-font-black qfdmo-z-[1000]{% if form.initial.adresse %} qfdmo-hidden{% endif %}"
-                                        data-search-solution-form-target="addressMissing"
-                                    >
-                                        <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
-                                            Précisez une adresse pour afficher la carte
-                                        </div>
-                                    </div>
-                                    <div
-                                        class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-80 qfdmo-font-black qfdmo-z-[1000]{% if not(form.initial.adresse) or acteurs %} qfdmo-hidden{% endif %}"
-                                        data-search-solution-form-target="NoLocalSolution"
-                                    >
-                                        <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
-                                            Il n'existe pas de solution {% if bbox %}dans cette zone{% else %}localisée proche de chez vous (<30 km){% endif %}, avez-vous envigagé une solution en ligne ?
-                                            </div>
-                                        </div>
-                                        {% for acteur in acteurs %}
-                                            <script type="application/json" data-map-target="acteur">
-                                                {{ acteur.json_acteur_for_display(direction=form.initial.direction, action_list=form.initial.action_list) | safe }}
-                                            </script>
-                                        {% endfor %}
-                                        {% if bbox %}
-                                            <script type="application/json" data-map-target="bBox">
-                                                {{ bbox|tojson() }}
-                                            </script>
-                                        {% endif %}
-                                    </div>
-                            {% endif %}
-                        </div>
-                        <div
-                            data-search-solution-form-target="loadingSolutions"
-                            class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-90 qfdmo-font-black qfdmo-z-[1000] qfdmo-hidden"
-                        >
-                            <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl ">
-                                <span class="fr-icon-refresh-line qfdmo-animate-spin"></span>
-                                <span class="fr-ml-1w">Chargement des adresses...</span>
-                            </div>
-                        </div>
-                        <div class="qfdmo-duration-300 md:qfdmo-h-fit md:qfdmo-mr-1w" data-search-solution-form-target="proposeAddressPanel">
-                            <a class="fr-my-1w fr-btn fr-btn--tertiary qfdmo-whitespace-nowrap qfdmo-float-right qfdmo-w-full md:qfdmo-w-max qfdmo-flex qfdmo-justify-center"
-                                href="https://tally.so/r/wzy9ZZ"
-                                target="_blank"
-                                rel="noopener"
-                                aria-label="Proposer une adresse - Nouvelle fenêtre"
-                            >
-                                Proposer une adresse
-                            </a>
-                        </div>
+            {% if is_carte(request) %}
+                <div class="qfdmo-flex qfdmo-flex-col md:qfdmo-flex-row md:qfdmo-items-center">
+                    <div class="qfdmo-items-center qfdmo-hidden md:qfdmo-flex qfdmo-flex-row">
+                        {% include 'layout/_partials/header_logos.html' %}
                     </div>
 
-                    <!-- Détail de l'adresse -->
-                    <div
-                        data-search-solution-form-target="detailsAddressPanel"
-                        class="qfdmo-duration-300 qfdmo-bg-white qfdmo-z-10
-                        qfdmo-w-full {% if request.GET.get('detail') %} qfdmo-h-1/2 {% else %} qfdmo-h-0 {% endif %}
-                        md:qfdmo-h-full {% if request.GET.get('detail') %} md:qfdmo-w-[480] {% else %} md:qfdmo-w-0 {% endif %}"
-                    >
-                        <div class="qfdmo-border-solid qfdmo-border-t md:qfdmo-border-t-0 qfdmo-border-0 qfdmo-border-light-gray
-                            qfdmo-py-1w md:qfdmo-px-3w qfdmo-h-full qfdmo-flex qfdmo-flex-col">
-                            <div class="qfdmo-flex qfdmo-flex-row-reverse qfdmo-justify-between">
-                                <button class="fr-btn fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-close-line"
-                                    type='button'
-                                    data-action="click -> search-solution-form#hideDetails"
-                                    >
-                                    Fermer
-                                </button>
-                                <button class="fr-btn fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-arrow-up-s-line md:qfdmo-hidden"
-                                    type='button'
-                                    data-action="click -> search-solution-form#displayFullDetails"
-                                    data-search-solution-form-target="expandDetailsButton"
-                                    >
-                                    Ouvrir
-                                </button>
-                                <button class="fr-btn fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-arrow-down-s-line md:qfdmo-hidden qfdmo-hidden"
-                                    type='button'
-                                    data-action="click -> search-solution-form#displayDetails"
-                                    data-search-solution-form-target="collapseDetailsButton"
-                                    >
-                                    Réduire
-                                </button>
-                            </div>
-                            <!-- passer la direction en paramètre  -->
-                            <div class="qfdmo-flex-grow qfdmo-relative">
-                                <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-overflow-y-scroll">
-                                    {% with direction=form.direction.value(), latitude=form.latitude.value(), longitude=form.longitude.value() %}
-                                        <turbo-frame id="adr_detail"
-                                            data-search-solution-form-target="srcDetailsAddress"
-                                            {% if request.GET.get('detail') %}
-                                                src="{{ reverse('qfdmo:adresse_detail', args=[request.GET.get('detail')])}}?direction={{ direction }}&latitude={{ latitude }}&longitude={{ longitude }}"
-                                            {% endif %}
 
-                                        >
-                                        </turbo-frame>
-                                    {% endwith %}
-                                </div>
-                            </div>
-                        </div>
+                    {% include "qfdmo/partials/featureflip_inputs.html" %}
+
+                    <!-- Recherche adresse -->
+                    <div class="fr-mt-1w qfdmo-flex-grow qfdmo-max-w-[596px] qfdmo-items-center">
+                        {% include 'qfdmo/_addresses_partials/adresse_input_form.html' %}
+                    </div>
+
+                    <div class="fr-ml-1w md:qfdmo-mt-3w">
+                        <button class="fr-btn qfdmo-float-right md:qfdmo-float-right">
+                            Rechercher
+                        </button>
                     </div>
                 </div>
-            </turbo-frame>
-
-            {% if is_iframe(request) %}
-                <div class="fr-container fr-mb-1w fr-text--xs qfdmo-text-center">
-                    Pour en savoir plus :
-                    <a href="https://longuevieauxobjets.ademe.fr/"
-                        target="_blank"
-                        rel="noopener"
-                        aria-label="Lien vers le site Longue vie aux objets - Nouvelle fenêtre"
-                    >
-                        Longue vie aux objets
-                    </a>
-                </div>
+            {% else %}
+                <!-- Panel «Filtres avancés» -->
+                {% include 'qfdmo/_addresses_partials/iframe_advanced_filters.html' %}
+                <!-- Panel «Modifier ma recherche» -->
+                {% include 'qfdmo/_addresses_partials/iframe_back_to_form.html' %}
+                <!-- Panel «Formulaire de recherche» -->
+                {% include 'qfdmo/_addresses_partials/iframe_form.html' %}
+                <!-- Panel «Résultats de la recherche» -->
+                {% include 'qfdmo/_addresses_partials/iframe_result.html' %}
+                <!-- Liens de pieds de page pour iframe -->
+                {% include 'qfdmo/_addresses_partials/iframe_footer_links.html' %}
             {% endif %}
 
         </form>

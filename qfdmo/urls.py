@@ -3,16 +3,14 @@ from django.urls import path
 from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 
-from qfdmo.views import dags, display_solutions
+from qfdmo.views import adresses, dags
 
 urlpatterns = [
-    path(
-        "", display_solutions.ReemploiSolutionView.as_view(), name="reemploi_solution"
-    ),
+    path("", adresses.AddressesView.as_view(), name="reemploi_solution"),
     path(
         "qfdmo/getorcreate_revisionacteur/<str:acteur_identifiant>",
         #        display_solutions.getorcreate_correctionequipeacteur,
-        display_solutions.getorcreate_revisionacteur,
+        adresses.getorcreate_revisionacteur,
         name="getorcreate_revisionacteur",
     ),
     path(
@@ -22,17 +20,17 @@ urlpatterns = [
     ),
     path(
         "qfdmo/get_object_list",
-        display_solutions.get_object_list,
+        adresses.get_object_list,
         name="get_object_list",
     ),
     path(
         "adresse/<str:identifiant_unique>",
-        display_solutions.adresse_detail,
+        adresses.adresse_detail,
         name="adresse_detail",
     ),
     path(
         "solution_admin/<str:identifiant_unique>",
-        display_solutions.solution_admin,
+        adresses.solution_admin,
         name="solution_admin",
     ),
     path(
