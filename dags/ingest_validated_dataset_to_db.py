@@ -4,11 +4,10 @@ from pathlib import Path
 
 import pandas as pd
 from airflow.models import DAG
+from airflow.operators.dagrun_operator import TriggerDagRunOperator
 from airflow.operators.python_operator import PythonOperator, BranchPythonOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.utils.dates import days_ago
-from airflow.operators.dagrun_operator import TriggerDagRunOperator
-
 
 env = Path(__file__).parent.name
 utils = import_module(f"{env}.utils.utils")
@@ -58,6 +57,9 @@ def fetch_and_parse_data(**context):
     normalized_dfs = df_sql["row_updates"].apply(pd.json_normalize)
     df_actors = pd.concat(normalized_dfs.tolist(), ignore_index=True)
 
+    normalized_labels_dfs = df_actors["labels"].dropna().apply(pd.json_normalize)
+    df_labels = pd.concat(normalized_labels_dfs.tolist(), ignore_index=True)
+
     normalized_pds_dfs = df_actors["proposition_services"].apply(pd.json_normalize)
     df_pds = pd.concat(normalized_pds_dfs.tolist(), ignore_index=True)
     ids_range = range(max_id_pds + 1, max_id_pds + 1 + len(df_pds))
@@ -81,12 +83,14 @@ def fetch_and_parse_data(**context):
             ["propositionservice_id", "souscategorieobjet_id"]
         ],
         "dag_run_id": dag_run_id,
+        "labels": df_labels[["acteur_id", "labelqualite_id"]],
     }
 
 
 def write_data_to_postgres(**kwargs):
     data_dict = kwargs["ti"].xcom_pull(task_ids="fetch_and_parse_data")
     df_actors = data_dict["actors"]
+    df_labels = data_dict["labels"]
     df_pds = data_dict["pds"]
     df_pdssc = data_dict["pds_sous_categories"]
     dag_run_id = data_dict["dag_run_id"]
@@ -131,6 +135,13 @@ def write_data_to_postgres(**kwargs):
             );
             """,
             """
+                 DELETE FROM qfdmo_acteur_labels
+                  WHERE acteur_id IN (
+                         SELECT identifiant_unique FROM temp_actors
+                      );
+                   """,
+            """
+
             DELETE FROM qfdmo_propositionservice
             WHERE acteur_id IN (
                 SELECT identifiant_unique FROM temp_actors
@@ -169,6 +180,15 @@ def write_data_to_postgres(**kwargs):
             ]
         ].to_sql(
             "qfdmo_acteur",
+            connection,
+            if_exists="append",
+            index=False,
+            method="multi",
+            chunksize=1000,
+        )
+
+        df_labels[["acteur_id", "labelqualite_id"]].to_sql(
+            "qfdmo_acteur_labels",
             connection,
             if_exists="append",
             index=False,
@@ -240,7 +260,6 @@ trigger_create_final_actors_dag = TriggerDagRunOperator(
     trigger_dag_id=utils.get_dag_name(__file__, "apply_adresse_corrections"),
     dag=dag,
 )
-
 
 branch_task >> skip_processing_task
 (
