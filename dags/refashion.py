@@ -79,8 +79,8 @@ def create_proposition_services(**kwargs):
                 ),
                 "action_id": mapping_utils.get_id_from_code(action_name, df_actions),
                 "acteur_id": acteur_id,
-                "action": action_name,
-                "acteur_service": acteur_service_name,
+                "action": action_name,  # noqa: F601
+                "acteur_service": acteur_service_name,  # noqa: F601
                 "sous_categories": sous_categories,
             }
         )
