@@ -1,5 +1,8 @@
-{% if is_embedded(request) %}
+{% if is_iframe(request) %}
     <input type="hidden" name="iframe">
+{% endif %}
+{% if is_carte(request) %}
+    <input type="hidden" name="carte">
 {% endif %}
 <input type="hidden" name="r" value="{{ range(1000) | random }}">
 {% if request.GET.get("first_dir") %}
