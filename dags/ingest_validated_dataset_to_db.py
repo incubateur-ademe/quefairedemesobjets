@@ -137,7 +137,7 @@ def write_data_to_postgres(**kwargs):
             );
             """,
             """
-            DELETE FROM qfdmo_acteurs WHERE identifiant_unique
+            DELETE FROM qfdmo_acteur WHERE identifiant_unique
             in ( select identifiant_unique from temp_actors);
             """,
         ]
@@ -168,7 +168,7 @@ def write_data_to_postgres(**kwargs):
                 "commentaires",
             ]
         ].to_sql(
-            "qfdmo_sources_acteurs",
+            "qfdmo_acteur",
             connection,
             if_exists="append",
             index=False,
