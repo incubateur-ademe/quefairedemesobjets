@@ -20,15 +20,30 @@
                         Filtres avancés
                     </h1>
                     <hr>
+
+                    <fieldset class="fr-fieldset" aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages">
+                        <legend class="qfdmo-hidden">
+                            Type d'enseigne ESS
+                        </legend>
+                        <div class="fr-fieldset__element fr-fieldset__element--inline qfdmo-font-normal">
+                            <div
+                                class="fr-checkbox-group fr-checkbox-group--sm qfdmo-flex qfdmo-flex-row qfdmo-items-center"
+                            >
+                                {{ form.ess }}
+                                {{ form.ess.label_tag() }}
+                            </div>
+                            <span class="fr-hint-text">{{ form.ess.help_text }}</span>
+                        </div>
+                    </fieldset>
+
                     <div
                         class="qfdmo-flex qfdmo-flex-row qfdmo-items-center"
                     >
-                        {% include "qfdmo/partials/label_reparacteur_icon.html" %}
-                        <fieldset class="fr-fieldset fr-m-0 " aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages">
+                        <fieldset class="fr-fieldset" aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages">
                             <legend class="qfdmo-hidden">
-                                Labels
+                                Label Répar'acteur
                             </legend>
-                            <div class="fr-fieldset__element fr-fieldset__element--inline fr-m-0 qfdmo-font-normal">
+                            <div class="fr-fieldset__element fr-fieldset__element--inline qfdmo-font-normal">
                                 <div
                                     class="fr-checkbox-group fr-checkbox-group--sm qfdmo-flex qfdmo-flex-row qfdmo-items-center"
                                 >
@@ -38,6 +53,7 @@
                                 <span class="fr-hint-text">{{ form.label_reparacteur.help_text }}</span>
                             </div>
                         </fieldset>
+                        {% include "qfdmo/partials/label_reparacteur_icon.html" %}
                     </div>
                 </div>
                 <div class="fr-modal__footer">

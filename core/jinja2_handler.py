@@ -94,7 +94,7 @@ def display_infos_panel(adresse: DisplayedActeur) -> bool:
 
 
 def display_labels_panel(adresse: DisplayedActeur) -> bool:
-    return bool(adresse.labels.filter(afficher=True).count())
+    return bool(adresse.labels.filter(afficher=True, type_enseigne=False).count())
 
 
 def display_sources_panel(adresse: DisplayedActeur) -> bool:
