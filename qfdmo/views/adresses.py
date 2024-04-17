@@ -83,6 +83,7 @@ class AddressesView(FormView):
         initial["latitude"] = self.request.GET.get("latitude")
         initial["longitude"] = self.request.GET.get("longitude")
         initial["label_reparacteur"] = self.request.GET.get("label_reparacteur")
+        initial["ess"] = self.request.GET.get("ess")
         initial["sc_id"] = (
             self.request.GET.get("sc_id") if initial["sous_categorie_objet"] else None
         )
@@ -121,6 +122,9 @@ class AddressesView(FormView):
             "proposition_services__action",
             "proposition_services__acteur_service",
         ).distinct()
+
+        if self.request.GET.get("ess"):
+            acteurs = acteurs.filter(labels__code="ess")
 
         if sous_categorie_id:
             acteurs = acteurs.filter(
@@ -277,9 +281,14 @@ def adresse_detail(request, identifiant_unique):
     latitude = request.GET.get("latitude")
     longitude = request.GET.get("longitude")
     direction = request.GET.get("direction")
-    displayed_acteur = DisplayedActeur.objects.get(
-        identifiant_unique=identifiant_unique
-    )
+    displayed_acteur = DisplayedActeur.objects.prefetch_related(
+        "proposition_services__sous_categories",
+        "proposition_services__sous_categories__categorie",
+        "proposition_services__action",
+        "proposition_services__acteur_service",
+        "labels",
+        "source",
+    ).get(identifiant_unique=identifiant_unique)
     return render(
         request,
         "qfdmo/adresse_detail.html",

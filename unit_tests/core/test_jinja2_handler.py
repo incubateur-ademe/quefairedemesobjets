@@ -240,9 +240,19 @@ class TestDisplayLabelsPanel:
 
     def test_display_labels_panel(self, adresse):
         assert not display_labels_panel(adresse)
-        label = LabelQualiteFactory()
+        label = LabelQualiteFactory(
+            afficher=True,
+            type_enseigne=False,
+        )
         adresse.labels.add(label)
         assert display_labels_panel(adresse)
+        label.afficher = False
+        label.save()
+        assert not display_labels_panel(adresse)
+        label.afficher = True
+        label.type_enseigne = True
+        label.save()
+        assert not display_labels_panel(adresse)
 
 
 @pytest.mark.django_db
