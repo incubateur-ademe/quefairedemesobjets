@@ -231,7 +231,14 @@
                 </div>
             {% endif %}
 
-            <!-- TODO : Accessibilité -->
+            {% with source_or_label_list=adresse.labels.filter(afficher=True, type_enseigne=True) %}
+                {% if source_or_label_list %}
+                    <h3 class="fr-text--sm fr-m-0 qfdmo-text-grey-425">Type d'enseigne</h3>
+                    {% with source_or_label_list=adresse.labels.filter(afficher=True, type_enseigne=True) %}
+                        {% include "qfdmo/_address_card_partials/source_or_label_list.html" %}
+                    {% endwith %}
+                {% endif %}
+            {% endwith %}
 
         </div>
     {% endif %}
@@ -243,23 +250,11 @@
             aria-labelledby="labelsPanel"
             tabindex="0"
         >
-            {% for adresse_label in adresse.labels.filter(afficher=True) %}
-                <div class="fr-px-1w fr-my-1w qfdmo-bg-grey-975">
-                    <a class="fr-px-1w fr-py-2w fr-my-1w fr-link fr-link--lg fr-link--no-underline qfdmo-w-full qfdmo-flex" href="{{ adresse_label.url if adresse_label.url else '#' }}" target="_blank" rel="noopener">
-                        {% if adresse_label.logo_file %}
-                            <img
-                                src="{{ adresse_label.logo_file.url }}"
-                                alt="{{ adresse_label.libelle }}"
-                                class="qfdmo-cursor-pointer"
-                                width=32
-                                height=32
-                                onclick="document.getElementById('display_modale_reparacteur').setAttribute('data-fr-opened', 'true');"
-                            >
-                        {% endif %}
-                        <span class="fr-ml-1w qfdmo-grow">{{ adresse_label.libelle }}</span>
-                    </a>
-                </div>
-            {% endfor %}
+
+            {% with source_or_label_list=adresse.labels.filter(afficher=True, type_enseigne=False) %}
+                {% include "qfdmo/_address_card_partials/source_or_label_list.html" %}
+            {% endwith %}
+
         </div>
     {% endif %}
 
@@ -270,21 +265,9 @@
             aria-labelledby="sourcesPanel"
             tabindex="0"
         >
-            <div class="fr-px-1w fr-my-1w qfdmo-bg-grey-975">
-                <a class="fr-px-1w fr-py-2w fr-my-1w fr-link fr-link--lg fr-link--no-underline qfdmo-w-full qfdmo-flex" href="{{ adresse.source.url if adresse.source.url else '#' }}" target="_blank" rel="noopener">
-                    {% if adresse.source.logo_file %}
-                        <img
-                            src="{{ adresse.source.logo_file.url }}"
-                            alt="{{ adresse.source.libelle }}"
-                            class="qfdmo-cursor-pointer"
-                            width=32
-                            height=32
-                            onclick="document.getElementById('display_modale_reparacteur').setAttribute('data-fr-opened', 'true');"
-                        >
-                    {% endif %}
-                    <span class="fr-ml-1w qfdmo-grow">{{ adresse.source.libelle }}</span>
-                </a>
-            </div>
+            {% with source_or_label_list=[adresse.source] %}
+                {% include "qfdmo/_address_card_partials/source_or_label_list.html" %}
+            {% endwith %}
         </div>
     {% endif %}
 </div>

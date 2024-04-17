@@ -124,6 +124,10 @@ class LabelQualite(models.Model):
     bonus = models.BooleanField(
         default=False, help_text="Ouvre les droits à un bonus financier"
     )
+    type_enseigne = models.BooleanField(
+        default=False,
+        help_text="Ce label est affiché comme un type d'enseigne, ex : ESS",
+    )
     url = models.CharField(max_length=2048, blank=True, null=True)
     logo_file = models.ImageField(
         upload_to="logos", blank=True, null=True, validators=[validate_logo]

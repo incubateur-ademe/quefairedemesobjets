@@ -131,6 +131,24 @@ class IframeAddressesForm(forms.Form):
         required=False,
     )
 
+    ess = forms.BooleanField(
+        widget=forms.CheckboxInput(
+            attrs={
+                "class": "fr-checkbox fr-m-1v",
+                "data-search-solution-form-target": "advancedFiltersField",
+            }
+        ),
+        label="Enseignes de l'économie sociale et solidaire",
+        help_text=mark_safe(
+            "Afficher uniquement les adresses recensées comme relevant de l'économie"
+            " sociale et solidaire. En savoir plus sur le site <a href="
+            '"https://www.economie.gouv.fr/cedef/economie-sociale-et-solidaire"'
+            ' target="_blank" rel="noopener">economie.gouv.fr</a>'
+        ),
+        label_suffix="",
+        required=False,
+    )
+
     action_list = forms.CharField(
         widget=forms.HiddenInput(
             attrs={"data-search-solution-form-target": "actionList"},

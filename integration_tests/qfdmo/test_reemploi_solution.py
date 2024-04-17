@@ -39,4 +39,5 @@ class TestReemploiSolutionView:
             "latitude": None,
             "longitude": None,
             "label_reparacteur": None,
+            "ess": None,
         }
