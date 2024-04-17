@@ -1,6 +1,24 @@
 
-{% if adresse.labels.filter(afficher=True, bonus=True) %}
+{% if adresse.labels.filter(afficher=True, bonus=True, type_enseigne=False) %}
     <a href="#" class="fr-tag" target="_self">💶 Éligible au bonus réparation</a>
+{% elif adresse.labels.filter(afficher=True, type_enseigne=False).count() == 1 %}
+    {% with source_or_label=adresse.labels.filter(afficher=True, type_enseigne=False).first() %}
+        <a class="fr-link fr-link--no-underline qfdmo-w-full qfdmo-flex" href="{{ source_or_label.url if source_or_label.url else '#' }}" target="_blank" rel="noopener">
+            {% if source_or_label.logo_file %}
+                <img
+                    class="fr-mr-1w"
+                    src="{{ source_or_label.logo_file.url }}"
+                    alt="🏷️"
+                    class="qfdmo-cursor-pointer"
+                    width=16
+                    height=16
+                >
+            {% endif %}
+            <span class="qfdmo-grow">{{ source_or_label.libelle }}</span>
+        </a>
+    {% endwith %}
+{% elif adresse.labels.filter(afficher=True, type_enseigne=False).count() >= 1 %}
+    <a href="#" class="fr-tag" target="_self">🏷️ Cet établissement dispose de plusieurs labels</a>
 {% endif %}
 
 <h2 class='fr-my-1v fr-text--md'>

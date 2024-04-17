@@ -1,15 +1,14 @@
 {% for source_or_label in source_or_label_list %}
     <div class="fr-px-1w fr-my-1w fr-text--md qfdmo-bg-grey-975">
-        <a class="fr-px-1w fr-py-2w fr-my-1w fr-link fr-link--no-underline qfdmo-w-full qfdmo-flex" href="{{ source_or_label.url if source_or_label.url else '#' }}" target="_blank" rel="noopener">
+        <a class="fr-py-2w fr-my-1w fr-link fr-link--no-underline qfdmo-w-full qfdmo-flex" href="{{ source_or_label.url if source_or_label.url else '#' }}" target="_blank" rel="noopener">
             {% if source_or_label.logo_file %}
                 <img
                     class="fr-mr-1w"
                     src="{{ source_or_label.logo_file.url }}"
-                    alt="{{ source_or_label.libelle }}"
+                    alt="🏷️"
                     class="qfdmo-cursor-pointer"
                     width=32
                     height=32
-                    onclick="document.getElementById('display_modale_reparacteur').setAttribute('data-fr-opened', 'true');"
                 >
             {% endif %}
             <span class="qfdmo-grow">{{ source_or_label.libelle }}</span>
