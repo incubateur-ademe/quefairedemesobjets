@@ -114,7 +114,12 @@ class IframeAddressesForm(forms.Form):
         ]
 
     label_reparacteur = forms.BooleanField(
-        widget=forms.CheckboxInput(attrs={"class": "fr-checkbox fr-m-1v"}),
+        widget=forms.CheckboxInput(
+            attrs={
+                "class": "fr-checkbox fr-m-1v",
+                "data-search-solution-form-target": "reparerFilter",
+            }
+        ),
         label="Label Répar’Acteurs",
         help_text=mark_safe(
             "Afficher uniquement les artisans labellisés (uniquement valable lorsque le"
@@ -140,7 +145,12 @@ class IframeAddressesForm(forms.Form):
     )
 
     bonus = forms.BooleanField(
-        widget=forms.CheckboxInput(attrs={"class": "fr-checkbox fr-m-1v"}),
+        widget=forms.CheckboxInput(
+            attrs={
+                "class": "fr-checkbox fr-m-1v",
+                "data-search-solution-form-target": "reparerFilter",
+            }
+        ),
         label="💶 Éligible au bonus réparation",
         help_text=mark_safe(
             "Afficher uniquement les adresses éligibles (uniquemet valable lorsque le"
