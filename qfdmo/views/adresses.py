@@ -83,6 +83,7 @@ class AddressesView(FormView):
         initial["latitude"] = self.request.GET.get("latitude")
         initial["longitude"] = self.request.GET.get("longitude")
         initial["label_reparacteur"] = self.request.GET.get("label_reparacteur")
+        initial["bonus"] = self.request.GET.get("bonus")
         initial["ess"] = self.request.GET.get("ess")
         initial["sc_id"] = (
             self.request.GET.get("sc_id") if initial["sous_categorie_objet"] else None
@@ -125,6 +126,9 @@ class AddressesView(FormView):
 
         if self.request.GET.get("ess"):
             acteurs = acteurs.filter(labels__code="ess")
+
+        if self.request.GET.get("bonus"):
+            acteurs = acteurs.filter(labels__bonus=True)
 
         if sous_categorie_id:
             acteurs = acteurs.filter(

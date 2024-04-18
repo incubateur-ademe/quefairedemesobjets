@@ -40,4 +40,5 @@ class TestReemploiSolutionView:
             "longitude": None,
             "label_reparacteur": None,
             "ess": None,
+            "bonus": None,
         }

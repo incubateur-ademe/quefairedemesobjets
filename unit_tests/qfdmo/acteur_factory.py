@@ -26,13 +26,18 @@ class SourceFactory(Factory):
 class LabelQualiteFactory(Factory):
     class Meta:
         model = LabelQualite
+        django_get_or_create = ("code",)
 
     afficher = True
+    code = "a code"
 
 
 class ActeurTypeFactory(Factory):
     class Meta:
         model = ActeurType
+        django_get_or_create = ("code",)
+
+    code = "a code"
 
 
 class ActeurFactory(Factory):

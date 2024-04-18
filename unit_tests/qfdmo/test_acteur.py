@@ -19,6 +19,7 @@ from qfdmo.models.acteur import LabelQualite
 from unit_tests.qfdmo.acteur_factory import (
     ActeurFactory,
     ActeurServiceFactory,
+    ActeurTypeFactory,
     PropositionServiceFactory,
 )
 from unit_tests.qfdmo.action_factory import ActionDirectionFactory, ActionFactory
@@ -124,9 +125,10 @@ class TestActeurSerialize:
 @pytest.mark.django_db
 class TestActeurDefaultOnSave:
     def test_empty(self):
+        acteur_type = ActeurTypeFactory(code="fake")
         acteur = Acteur.objects.create(
             nom="Test Object 1",
-            acteur_type_id=1,
+            acteur_type_id=acteur_type.id,
             location=Point(0, 0),
         )
         assert len(acteur.identifiant_externe) == 12
@@ -137,9 +139,11 @@ class TestActeurDefaultOnSave:
         source = Source.objects.get_or_create(
             libelle="Source Équipe", code="source_equipe"
         )[0]
+        acteur_type = ActeurTypeFactory(code="fake")
+
         acteur = Acteur.objects.create(
             nom="Test Object 1",
-            acteur_type_id=1,
+            acteur_type_id=acteur_type.id,
             location=Point(0, 0),
             source=source,
             identifiant_externe="123ABC",
@@ -147,9 +151,10 @@ class TestActeurDefaultOnSave:
         assert acteur.identifiant_unique == "source_equipe_123ABC"
 
     def test_set_identifiantunique(self):
+        acteur_type = ActeurTypeFactory(code="fake")
         acteur = Acteur.objects.create(
             nom="Test Object 1",
-            acteur_type_id=1,
+            acteur_type_id=acteur_type.id,
             location=Point(0, 0),
             identifiant_unique="Unique",
         )
@@ -159,9 +164,10 @@ class TestActeurDefaultOnSave:
 @pytest.mark.django_db
 class TestActeurOpeningHours:
     def test_horaires_ok(self):
+        acteur_type = ActeurTypeFactory(code="fake")
         acteur = Acteur(
             nom="Test Object 1",
-            acteur_type_id=1,
+            acteur_type_id=acteur_type.id,
             location=Point(0, 0),
         )
         assert acteur.full_clean() is None
@@ -175,7 +181,6 @@ class TestActeurOpeningHours:
     def test_horaires_ko(self):
         acteur = Acteur(
             nom="Test Object 1",
-            acteur_type_id=1,
             location=Point(0, 0),
         )
         acteur.horaires_osm = "24/24"
@@ -251,11 +256,12 @@ class TestActeurGetOrCreateRevisionActeur:
 @pytest.mark.django_db
 class TestCreateRevisionActeur:
     def test_new_revision_acteur(self):
+        acteur_type = ActeurTypeFactory(code="fake")
         revision_acteur = RevisionActeur.objects.create(
             nom="Test Object 1",
             location=Point(0, 0),
             acteur_type=ActeurType.objects.first(),
-            acteur_type_id=1,
+            acteur_type_id=acteur_type.id,
         )
         acteur = Acteur.objects.get(
             identifiant_unique=revision_acteur.identifiant_unique
@@ -271,8 +277,9 @@ class TestActeurService:
         acteur_service = ActeurService.objects.get(
             code="Achat, revente par un professionnel"
         )
+        acteur_type = ActeurTypeFactory(code="fake")
         acteur = Acteur.objects.create(
-            nom="Acteur 1", location=Point(0, 0), acteur_type_id=1
+            nom="Acteur 1", location=Point(0, 0), acteur_type_id=acteur_type.id
         )
         PropositionService.objects.create(
             acteur=acteur, acteur_service=acteur_service, action=action1
@@ -286,10 +293,11 @@ class TestActeurService:
             code="Achat, revente par un professionnel"
         )
         action2 = Action.objects.get(code="echanger")
+        acteur_type = ActeurTypeFactory(code="fake")
         acteur = Acteur.objects.create(
             nom="Acteur 1",
             location=Point(0, 0),
-            acteur_type_id=1,
+            acteur_type_id=acteur_type.id,
         )
         PropositionService.objects.create(
             acteur=acteur, acteur_service=acteur_service, action=action1
@@ -308,8 +316,9 @@ class TestActeurService:
         acteur_service2 = ActeurService.objects.get(
             code="Atelier pour réparer soi-même"
         )
+        acteur_type = ActeurTypeFactory(code="fake")
         acteur = Acteur.objects.create(
-            nom="Acteur 1", location=Point(0, 0), acteur_type_id=1
+            nom="Acteur 1", location=Point(0, 0), acteur_type_id=acteur_type.id
         )
         PropositionService.objects.create(
             acteur=acteur, acteur_service=acteur_service1, action=action
@@ -333,8 +342,9 @@ class TestActeurService:
         )
         acteur_service2.libelle = acteur_service1.libelle
         acteur_service2.save()
+        acteur_type = ActeurTypeFactory(code="fake")
         acteur = Acteur.objects.create(
-            nom="Acteur 1", location=Point(0, 0), acteur_type_id=1
+            nom="Acteur 1", location=Point(0, 0), acteur_type_id=acteur_type.id
         )
         PropositionService.objects.create(
             acteur=acteur, acteur_service=acteur_service1, action=action
