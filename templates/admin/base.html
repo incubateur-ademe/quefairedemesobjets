@@ -1,0 +1,28 @@
+{% extends 'admin/base.html' %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <style>
+        #site-name::after {
+            content: " ({{ ENVIRONMENT }})";
+            font-size: 60%;
+        }
+    </style>
+    {% if ENVIRONMENT == 'production' %}
+        <style>
+            html[data-theme="light"],:root {
+                --primary: #aa0000;
+                --secondary: #810000;
+                --accent: yellow;
+            }
+        </style>
+    {% elif ENVIRONMENT == 'preprod' %}
+        <style>
+            html[data-theme="light"],:root {
+                --primary: #30b181;
+                --secondary: #1f7957;
+                --accent: #cdffea;
+            }
+        </style>
+    {% endif %}
+{% endblock %}
