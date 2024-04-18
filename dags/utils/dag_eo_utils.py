@@ -79,6 +79,7 @@ def create_proposition_services(**kwargs):
     rows_list = list(rows_dict.values())
 
     df_pds = pd.DataFrame(rows_list)
+    df_pds["sous_categories"] = df_pds["sous_categories"].replace(np.nan, None)
     df_pds.index = range(idx_max, idx_max + len(df_pds))
     df_pds["id"] = df_pds.index
     metadata = {
@@ -109,6 +110,10 @@ def create_proposition_services_sous_categories(**kwargs):
         "vêtement": "vetement",
         "linge": "linge de maison",
         "chaussure": "chaussures",
+        "cartouches": "cartouches",
+        "lampes": "luminaire",
+        "ecrans": "ecran",
+        "pae (petits appareils extincteurs)": "Petits appareils extincteurs",
     }
 
     for index, row in df.iterrows():
@@ -142,6 +147,7 @@ def serialize_to_json(**kwargs):
     df_pdsc.drop_duplicates(
         ["propositionservice_id", "souscategorieobjet_id"], keep="first", inplace=True
     )
+    df_pdsc = df_pdsc[df_pdsc["souscategorieobjet_id"].notna()]
 
     aggregated_pdsc = (
         df_pdsc.groupby("propositionservice_id")
