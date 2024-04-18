@@ -151,7 +151,10 @@ class IframeAddressesForm(forms.Form):
                 "data-search-solution-form-target": "reparerFilter",
             }
         ),
-        label="💶 Éligible au bonus réparation",
+        label=mark_safe(
+            "<span class='fr-icon--sm fr-icon-money-euro-box-line'></span>"
+            "&nbsp;Éligible au bonus réparation"
+        ),
         help_text=mark_safe(
             "Afficher uniquement les adresses éligibles (uniquemet valable lorsque le"
             " geste « réparer » est sélectioné). En svoir plus sur le site <a href="
