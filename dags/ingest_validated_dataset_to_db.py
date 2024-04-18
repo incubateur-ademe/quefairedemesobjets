@@ -39,7 +39,45 @@ def check_for_validation(**kwargs):
     return "fetch_and_parse_data" if row[0][0] else "skip_processing"
 
 
+def process_labels(df, column_name):
+    try:
+        # Attempt to process the 'labels' column if it exists and is not empty
+        normalized_labels = df[column_name].dropna().apply(pd.json_normalize)
+        if normalized_labels.empty:
+            return pd.DataFrame(
+                columns=["acteur_id", "labelqualite_id"]
+            )  # Return empty DataFrame if no data to process
+        else:
+            return pd.concat(normalized_labels.tolist(), ignore_index=True)
+    except KeyError:
+        # Handle the case where the specified column does not exist
+        return pd.DataFrame(columns=["acteur_id", "labelqualite_id"])
+
+
+# Usage
 def fetch_and_parse_data(**context):
+    required_columns = [
+        "identifiant_unique",
+        "nom",
+        "adresse",
+        "adresse_complement",
+        "code_postal",
+        "ville",
+        "url",
+        "email",
+        "location",
+        "telephone",
+        "nom_commercial",
+        "siret",
+        "identifiant_externe",
+        "acteur_type_id",
+        "statut",
+        "source_id",
+        "cree_le",
+        "horaires_description",
+        "modifie_le",
+        "commentaires",
+    ]
     pg_hook = PostgresHook(postgres_conn_id=utils.get_db_conn_id(__file__))
     engine = pg_hook.get_sqlalchemy_engine()
 
@@ -57,8 +95,11 @@ def fetch_and_parse_data(**context):
     normalized_dfs = df_sql["row_updates"].apply(pd.json_normalize)
     df_actors = pd.concat(normalized_dfs.tolist(), ignore_index=True)
 
-    normalized_labels_dfs = df_actors["labels"].dropna().apply(pd.json_normalize)
-    df_labels = pd.concat(normalized_labels_dfs.tolist(), ignore_index=True)
+    for column in required_columns:
+        if column not in df_actors.columns:
+            df_actors[column] = None  # or use pd.NA for pandas' NA values
+
+    df_labels = process_labels(df_actors, "labels")
 
     normalized_pds_dfs = df_actors["proposition_services"].apply(pd.json_normalize)
     df_pds = pd.concat(normalized_pds_dfs.tolist(), ignore_index=True)
