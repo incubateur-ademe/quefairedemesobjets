@@ -1,6 +1,6 @@
 
 {% if adresse.labels.filter(afficher=True, bonus=True, type_enseigne=False) %}
-    <a href="#" class="fr-tag" target="_self">💶 Éligible au bonus réparation</a>
+    <p class="fr-tag fr-tag--icon-left fr-fi-money-euro-box-line">Éligible au bonus réparation</p>
 {% elif adresse.labels.filter(afficher=True, type_enseigne=False).count() == 1 %}
     {% with source_or_label=adresse.labels.filter(afficher=True, type_enseigne=False).first() %}
         {% if source_or_label.logo_file %}
@@ -16,14 +16,31 @@
         <span class="qfdmo-grow">{{ source_or_label.libelle }}</span>
     {% endwith %}
 {% elif adresse.labels.filter(afficher=True, type_enseigne=False).count() >= 1 %}
-    <a href="#" class="fr-tag" target="_self">🏷️ Cet établissement dispose de plusieurs labels</a>
+    <p class="fr-tag fr-fi-shield-check-line">Cet établissement dispose de plusieurs labels</p>
+{% elif adresse.labels.filter(afficher=True, type_enseigne=True).count() >= 1 %}
+    {% with source_or_label=adresse.labels.filter(afficher=True, type_enseigne=True).first() %}
+        <p class="fr-tag">
+            {% if source_or_label.logo_file %}
+                <img
+                    class="fr-mr-1w"
+                    src="{{ source_or_label.logo_file.url }}"
+                    alt="🏷️"
+                    class="qfdmo-cursor-pointer"
+                    width=16
+                    height=16
+                >
+            {% endif %}
+            <span class="qfdmo-grow">{{ source_or_label.libelle }}</span>
+        </p>
+    {% endwith %}
 {% endif %}
 
-<h2 class='fr-my-1v fr-text--md'>
+<h2 class='fr-my-1v fr-h6'>
     {{ adresse.libelle }}
 </h2>
 
 <p class="qfdmo-text-sm fr-mb-1w fr-mt-0 fr-text--xs">
+    ervice de réparation,ervice de réparation ,ervice de réparation ,ervice de réparation
     {% for acteur_service in adresse.acteur_services() %}
         {{ acteur_service }}{% if not loop.last %},&nbsp;{% endif %}
     {% endfor %}
