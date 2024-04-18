@@ -243,17 +243,37 @@ def write_data_to_postgres(**kwargs):
 
 
 def merge_actors_labels(**kwargs):
+    # Pull dataframes
     df_actor_labels = kwargs["ti"].xcom_pull(task_ids="load_actor_labels")
     df_revision_labels = kwargs["ti"].xcom_pull(task_ids="load_revision_labels")
-    df_actor_labels = df_actor_labels.rename(
-        columns={"acteur_id": "displayedacteur_id"}
-    ).drop(columns=["id"])
-    df_revision_labels = df_revision_labels.rename(
-        columns={"acteur_id": "displayedacteur_id"}
-    ).drop(columns=["id"])
+
+    # Rename 'acteur_id' column to 'displayedacteur_id' and drop 'id' column
+    df_actor_labels.rename(columns={"acteur_id": "displayedacteur_id"}, inplace=True)
+    df_actor_labels.drop(columns=["id"], inplace=True)
+
+    # Rename 'revisionacteur_id' column to 'displayedacteur_id' and drop 'id' column
+    df_revision_labels.rename(
+        columns={"revisionacteur_id": "displayedacteur_id"}, inplace=True
+    )
+    df_revision_labels.drop(columns=["id"], inplace=True)
+
+    # Get common 'displayedacteur_id'
+    common_acteur_ids = df_actor_labels[
+        df_actor_labels["displayedacteur_id"].isin(
+            df_revision_labels["displayedacteur_id"]
+        )
+    ]["displayedacteur_id"].unique()
+
+    # Concatenate dataframes excluding common 'displayedacteur_id' in df_actor_labels
     df_merged_labels = pd.concat(
-        [df_actor_labels, df_revision_labels]
+        [
+            df_actor_labels[
+                ~df_actor_labels["displayedacteur_id"].isin(common_acteur_ids)
+            ],
+            df_revision_labels,
+        ]
     ).drop_duplicates()
+
     return df_merged_labels
 
 
