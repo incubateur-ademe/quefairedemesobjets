@@ -19,11 +19,11 @@ default_args = {
 }
 
 dag = DAG(
-    utils.get_dag_name(__file__, "ecosystem"),
+    utils.get_dag_name(__file__, "corepile"),
     default_args=default_args,
     description=(
         "A pipeline to fetch, process, and load to validate data into postgresql"
-        " for Ecosystem dataset"
+        " for Corepile dataset"
     ),
     schedule_interval=None,
 )
@@ -32,7 +32,7 @@ dag = DAG(
 fetch_data_task = PythonOperator(
     task_id="fetch_data_from_api",
     python_callable=dag_eo_utils.fetch_data_from_api,
-    op_kwargs={"dataset": "donnees-eo-ecosystem"},
+    op_kwargs={"dataset": "donnees-eo-corepile"},
     dag=dag,
 )
 
@@ -49,6 +49,7 @@ create_actors_task = PythonOperator(
         "column_mapping": {
             "id_point_apport_ou_reparation": "identifiant_externe",
             "type_de_point_de_collecte": "acteur_type_id",
+            "siret": "siret",
             "uniquement_sur_rdv": "",
             "exclusivite_de_reprisereparation": "",
             "filiere": "",
@@ -60,6 +61,7 @@ create_actors_task = PythonOperator(
             "ecoorganisme": "source_id",
             "adresse_format_ban": "adresse",
             "nom_de_lorganisme": "nom",
+            "enseigne_commerciale": "nom_commercial",
             "_updatedAt": "cree_le",
             "perimetre_dintervention": "",
             "longitudewgs84": "location",
