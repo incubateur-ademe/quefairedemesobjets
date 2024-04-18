@@ -35,6 +35,8 @@ export default class extends Controller<HTMLElement> {
         "advancedFilterSaveButton",
         "advancedFilterSaveAndSubmitButton",
 
+        "reparerFilter",
+
         //FIXME: should be renamed
         "loadingSolutions",
         "addressMissing",
@@ -75,6 +77,8 @@ export default class extends Controller<HTMLElement> {
     declare readonly advancedFilterSaveButtonTarget: HTMLElement
     declare readonly advancedFilterSaveAndSubmitButtonTarget: HTMLElement
 
+    declare readonly reparerFilterTargets: HTMLInputElement[]
+
     declare readonly loadingSolutionsTarget: HTMLElement
     declare readonly addressMissingTarget: HTMLElement
     declare readonly NoLocalSolutionTarget: HTMLElement
@@ -86,6 +90,18 @@ export default class extends Controller<HTMLElement> {
         this.displayActionList()
         if (!this.isIframeValue) {
             this.scrollToContent()
+        }
+        this.activeReparerFilters()
+    }
+
+    activeReparerFilters() {
+        const jaiReparerCheckbox = document.getElementById(
+            "jai_reparer",
+        ) as HTMLInputElement
+        if (!jaiReparerCheckbox?.checked) {
+            this.reparerFilterTargets.forEach((element: HTMLInputElement) => {
+                element.disabled = true
+            })
         }
     }
 
@@ -208,6 +224,12 @@ export default class extends Controller<HTMLElement> {
             }
         }
         this.actionListTarget.value = actionList.join("|")
+    }
+
+    toggleReparerFilter(event) {
+        this.reparerFilterTargets.forEach((element: HTMLInputElement) => {
+            element.disabled = !event.target.checked
+        })
     }
 
     changeDirection() {
