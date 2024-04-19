@@ -64,7 +64,8 @@ create_actors_task = PythonOperator(
             "perimetre_dintervention": "",
             "longitudewgs84": "location",
             "latitudewgs84": "location",
-        }
+        },
+        "column_to_drop": ["siret"],
     },
     dag=dag,
 )
