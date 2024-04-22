@@ -226,6 +226,23 @@
                 </p>
             </div>
         {% endfor %}
+
+        {% if adresse.labels.filter(afficher=True, bonus=True, type_enseigne=False) %}
+            <div class="fr-card fr-enlarge-link fr-card--horizontal">
+                <div class="fr-card__body">
+                    <div class="fr-card__content">
+                        <h3 class="fr-card__title fr-text--md">
+                            <a href="https://www.ecologie.gouv.fr/bonus-reparation" target="_blank" rel="noopener">
+                                <span class='fr-icon--sm fr-icon-money-euro-box-line'></span>&nbsp;Éligible au bonus réparation
+                            </a>
+                        </h3>
+                        <p class="fr-card__desc">Bénéficiez d'une aide pour la réparation de votre objet et faites des économies</p>
+
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
     </div>
 
     {% if display_infos_panel(adresse) %}
