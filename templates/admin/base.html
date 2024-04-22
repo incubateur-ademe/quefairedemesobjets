@@ -16,7 +16,7 @@
                 --accent: yellow;
             }
         </style>
-    {% elif ENVIRONMENT in ['staging','preprod'] %}
+    {% elif ENVIRONMENT == 'staging' %}
         <style>
             html[data-theme="light"],:root {
                 --primary: #30b181;
