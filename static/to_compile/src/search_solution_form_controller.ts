@@ -98,7 +98,6 @@ export default class extends Controller<HTMLElement> {
     }
 
     activeReparerFilters(activate: boolean = true) {
-        console.log("activeReparerFilters", this.#selectedOption)
         if (this.#selectedOption == "jai") {
             if (this.reparerInputTarget.checked) {
                 this.reparerFilterTargets.forEach((element: HTMLInputElement) => {
@@ -140,8 +139,6 @@ export default class extends Controller<HTMLElement> {
     }
 
     updateSearchInZone(event) {
-        console.log(typeof event)
-        console.log(event.detail)
         this.searchInZoneInputTarget.value = JSON.stringify(event.detail)
     }
 
