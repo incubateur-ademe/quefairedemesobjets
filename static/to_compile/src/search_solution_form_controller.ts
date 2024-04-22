@@ -10,6 +10,7 @@ export default class extends Controller<HTMLElement> {
         "longitudeInput",
         "actionList",
         "searchForm",
+        "reparerInput",
 
         "searchFormPanel",
         "addressesPanel",
@@ -50,6 +51,7 @@ export default class extends Controller<HTMLElement> {
     declare readonly longitudeInputTarget: HTMLInputElement
     declare readonly actionListTarget: HTMLInputElement
     declare readonly searchFormTarget: HTMLFormElement
+    declare readonly reparerInputTarget: HTMLInputElement
 
     declare readonly hasDirectionTarget: boolean
 
@@ -91,18 +93,21 @@ export default class extends Controller<HTMLElement> {
         if (!this.isIframeValue) {
             this.scrollToContent()
         }
-        this.activeReparerFilters()
     }
 
-    activeReparerFilters() {
-        const jaiReparerCheckbox = document.getElementById(
-            "jai_reparer",
-        ) as HTMLInputElement
-        if (!jaiReparerCheckbox?.checked) {
-            this.reparerFilterTargets.forEach((element: HTMLInputElement) => {
-                element.disabled = true
-            })
+    activeReparerFilters(activate: boolean = true) {
+        console.log("activeReparerFilters", this.#selectedOption)
+        if (this.#selectedOption == "jai") {
+            if (this.reparerInputTarget.checked) {
+                this.reparerFilterTargets.forEach((element: HTMLInputElement) => {
+                    element.disabled = false
+                })
+                return
+            }
         }
+        this.reparerFilterTargets.forEach((element: HTMLInputElement) => {
+            element.disabled = true
+        })
     }
 
     scrollToContent() {
@@ -196,6 +201,7 @@ export default class extends Controller<HTMLElement> {
                 this.jaiTarget.hidden = true
             }
         }
+        this.activeReparerFilters()
     }
 
     apply() {
@@ -224,12 +230,6 @@ export default class extends Controller<HTMLElement> {
             }
         }
         this.actionListTarget.value = actionList.join("|")
-    }
-
-    toggleReparerFilter(event) {
-        this.reparerFilterTargets.forEach((element: HTMLInputElement) => {
-            element.disabled = !event.target.checked
-        })
     }
 
     changeDirection() {
