@@ -8,6 +8,7 @@ export default class extends Controller<HTMLElement> {
         "direction",
         "latitudeInput",
         "longitudeInput",
+        "searchInZoneInput",
         "actionList",
         "searchForm",
 
@@ -48,6 +49,7 @@ export default class extends Controller<HTMLElement> {
     declare readonly directionTarget: HTMLElement
     declare readonly latitudeInputTarget: HTMLInputElement
     declare readonly longitudeInputTarget: HTMLInputElement
+    declare readonly searchInZoneInputTarget: HTMLInputElement
     declare readonly actionListTarget: HTMLInputElement
     declare readonly searchFormTarget: HTMLFormElement
 
@@ -130,6 +132,12 @@ export default class extends Controller<HTMLElement> {
         this.detailsAddressPanelTarget.classList.add("md:qfdmo-w-[480]")
         this.detailsAddressPanelTarget.classList.remove("md:qfdmo-w-full")
         this.detailsAddressPanelTarget.classList.remove("md:qfdmo-w-0")
+    }
+
+    updateSearchInZone(event) {
+        console.log(typeof event)
+        console.log(event.detail)
+        this.searchInZoneInputTarget.value = JSON.stringify(event.detail)
     }
 
     hideDetails() {
@@ -320,6 +328,11 @@ export default class extends Controller<HTMLElement> {
 
     toggleAdvancedFiltersAndSubmitForm() {
         this.#toggleAdvancedFilters()
+        this.submitForm()
+    }
+
+    submitFormWithoutZone() {
+        this.searchInZoneInputTarget.value = ""
         this.submitForm()
     }
 }
