@@ -176,7 +176,7 @@ class IframeAddressesForm(forms.Form):
         widget=SegmentedControlSelect(
             attrs={
                 "class": "qfdmo-w-full md:qfdmo-w-fit",
-                "data-action": "click -> search-solution-form#submitForm",
+                "data-action": "click -> search-solution-form#submitFormWithoutZone",
             },
         ),
         choices=[

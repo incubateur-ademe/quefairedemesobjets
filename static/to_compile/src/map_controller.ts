@@ -4,10 +4,9 @@ import { SolutionMap } from "./solution_map"
 import { Actor } from "./types"
 
 export default class extends Controller<HTMLElement> {
-    static targets = ["acteur", "searchInZoneButton", "searchInZoneInput", "bBox"]
+    static targets = ["acteur", "searchInZoneButton", "bBox"]
     declare readonly acteurTargets: Array<HTMLScriptElement>
     declare readonly searchInZoneButtonTarget: HTMLButtonElement
-    declare readonly searchInZoneInputTarget: HTMLInputElement
     declare readonly bBoxTarget?: HTMLScriptElement
 
     static values = { location: { type: Object, default: {} } }
@@ -41,7 +40,7 @@ export default class extends Controller<HTMLElement> {
     }
 
     mapChanged(event: CustomEvent) {
-        this.searchInZoneInputTarget.value = JSON.stringify(event.detail)
+        this.dispatch("searchInZone", { detail: event.detail })
         this.displaySearchInZoneButton()
     }
 
