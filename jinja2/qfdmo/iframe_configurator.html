@@ -1,0 +1,50 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+    <div class="fr-container fr-my-3w">
+        <form>
+            <h1>Configurateur d'Iframe</h1>
+            <fieldset class="fr-segmented fr-segmented--sm qfdmo-w-full fr-mt-3w">
+                <legend class="fr-segmented__legend">
+                    {{ form.iframe_mode.label_tag() }}
+                </legend>
+                {{ form.iframe_mode }}
+            </fieldset>
+            <fieldset class="fr-segmented fr-segmented--sm qfdmo-w-full fr-mt-3w">
+                <legend class="fr-segmented__legend">
+                    {{ form.direction.label_tag() }}
+                </legend>
+                {{ form.direction }}
+            </fieldset>
+            <fieldset class="fr-segmented fr-segmented--sm qfdmo-w-full fr-mt-3w">
+                <legend class="fr-segmented__legend">
+                    {{ form.first_dir.label_tag() }}
+                    <span class="qfdmo-italic">{{ form.first_dir.help_text }}</span>
+                </legend>
+                {{ form.first_dir }}
+            </fieldset>
+
+            <p>{{ form.action_list.label_tag() }}</p>
+            <span class="qfdmo-italic">{{ form.action_list.help_text }}</span>
+            {{ form.action_list }}
+
+            <p>{{ form.max_width.label_tag() }}</p>
+            <p>{{ form.max_width.help_text }}</p>
+            {{ form.max_width }}
+
+            <p>{{ form.height.label_tag() }}</p>
+            <p>{{ form.height.help_text }}</p>
+            {{ form.height }}
+
+            <button class="fr-btn fr-my-3w">
+                Visualiser l'iframe
+            </button>
+        </form>
+        <h2>Visualisation de l'Iframe</h2>
+        <pre class="qfdmo-w-full qfdmo-whitespace-pre-wrap" style="white-space: pre-wrap;">
+            {{iframe_script}}
+        </pre>
+        {{ iframe_script|safe }}
+
+    </div>
+{% endblock %}

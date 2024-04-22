@@ -1,4 +1,5 @@
 import json
+import logging
 
 import unidecode
 from django.conf import settings
@@ -17,7 +18,7 @@ from django.views.generic.edit import FormView
 
 from core.jinja2_handler import get_action_list
 from core.utils import get_direction
-from qfdmo.forms import CarteAddressesForm, IframeAddressesForm
+from qfdmo.forms import CarteAddressesForm, ConfiguratorForm, IframeAddressesForm
 from qfdmo.models import (
     Acteur,
     ActeurStatus,
@@ -31,6 +32,57 @@ from qfdmo.models import (
 from qfdmo.thread.materialized_view import RefreshMateriazedViewThread
 
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
+
+
+class ConfiguratorView(FormView):
+    form_class = ConfiguratorForm
+    template_name = "qfdmo/iframe_configurator.html"
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial["iframe_mode"] = self.request.GET.get("iframe_mode")
+        initial["direction"] = self.request.GET.get("direction")
+        initial["first_dir"] = self.request.GET.get("first_dir")
+        initial["action_list"] = self.request.GET.getlist("action_list")
+        initial["max_width"] = self.request.GET.get("max_width")
+        initial["height"] = self.request.GET.get("height")
+        return initial
+
+    def get_context_data(self, **kwargs):
+
+        iframe_mode = self.request.GET.get("iframe_mode")
+
+        iframe_host = (
+            "http"
+            + ("s" if self.request.is_secure() else "")
+            + "://"
+            + self.request.get_host()
+        )
+
+        if iframe_mode == "carte":
+            iframe_url = iframe_host + "/static/carte.js"
+        if iframe_mode == "form":
+            iframe_url = iframe_host + "/static/iframe.js"
+
+        attributes = {}
+        if direction := self.request.GET.get("direction"):
+            attributes["direction"] = direction
+        if first_dir := self.request.GET.get("first_dir"):
+            attributes["first_dir"] = first_dir.replace("first_", "")
+        if action_list := self.request.GET.getlist("action_list"):
+            attributes["action_list"] = "|".join(action_list)
+        if max_width := self.request.GET.get("max_width"):
+            attributes["max_width"] = max_width
+        if height := self.request.GET.get("height"):
+            attributes["height"] = height
+
+        if iframe_url:
+            kwargs["iframe_script"] = f'<script src="{ iframe_url }"'
+            for key, value in attributes.items():
+                kwargs["iframe_script"] += f' data-{key}="{value}"'
+            kwargs["iframe_script"] += "></script>"
+
+        return super().get_context_data(**kwargs)
 
 
 class AddressesView(FormView):

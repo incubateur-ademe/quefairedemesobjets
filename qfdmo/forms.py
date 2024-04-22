@@ -226,3 +226,115 @@ class DagsForm(forms.Form):
         queryset=DagRun.objects.filter(status=DagRunStatus.TO_VALIDATE.value),
         required=True,
     )
+
+
+class ConfiguratorForm(forms.Form):
+    iframe_mode = forms.ChoiceField(
+        widget=SegmentedControlSelect(
+            attrs={
+                "class": "qfdmo-w-full md:qfdmo-w-fit",
+            },
+            fieldset_attrs={
+                "data-search-solution-form-target": "direction",
+            },
+        ),
+        # FIXME: I guess async error comes from here
+        choices=[
+            ("carte", "Carte"),
+            ("form", "Formulaire"),
+        ],
+        label="Mode de l'Iframe",
+        required=False,
+    )
+
+    # - `data-direction`, option `jai` ou `jecherche`, par défaut l'option de direction « Je cherche » est active
+    direction = forms.ChoiceField(
+        widget=SegmentedControlSelect(
+            attrs={
+                "class": "qfdmo-w-full md:qfdmo-w-fit",
+            },
+            fieldset_attrs={},
+        ),
+        choices=[
+            (direction["code"], direction["libelle"])
+            for direction in CachedDirectionAction.get_directions()
+        ],
+        label="Direction des actions",
+        required=False,
+    )
+
+    # - `data-first_dir`, option `jai` ou `jecherche`, par défaut l'option de direction « Je cherche » est affiché en premier dans la liste des options de direction
+    first_dir = forms.ChoiceField(
+        widget=SegmentedControlSelect(
+            attrs={
+                "class": "qfdmo-w-full md:qfdmo-w-fit",
+            },
+            fieldset_attrs={},
+        ),
+        choices=[
+            ("first_" + direction["code"], direction["libelle"])
+            for direction in CachedDirectionAction.get_directions()
+        ],
+        label="Direction affichée en premier dans la liste des options de direction",
+        help_text="Cette option n'est disponible que dans la version formulaire",
+        required=False,
+    )
+
+    # - `data-action_list`, liste des actions cochées selon la direction séparées par le caractère `|` :
+    #   - pour la direction `jecherche` les actions possibles sont : `emprunter`, `echanger`, `louer`, `acheter`
+    #   - pour la direction `jai` les actions possibles sont : `reparer`, `preter`, `donner`, `echanger`, `mettreenlocation`, `revendre`
+    #   - si le paramètre `action_list` n'est pas renseigné ou est vide, toutes les actions éligibles à la direction sont cochées
+    action_list = forms.MultipleChoiceField(
+        widget=forms.CheckboxSelectMultiple(
+            attrs={
+                "class": "fr-checkbox",
+            },
+        ),
+        choices=[
+            (code, action["libelle"])
+            for code, action in CachedDirectionAction.get_actions().items()
+        ],
+        label="Liste des actions cochées selon la direction",
+        help_text=mark_safe(
+            "Pour la direction « Je cherche » les actions possibles"
+            " sont : « emprunter », « échanger », « louer », « acheter »<br>"
+            "Pour la direction « J'ai » les actions possibles"
+            " sont : « réparer », « prêter », « donner », « échanger », « mettre"
+            " en location », « revendre »<br>"
+            "Si le paramètre n'est pas renseigné ou est vide, toutes les actions"
+            " éligibles à la direction sont cochées"
+        ),
+        required=False,
+    )
+
+    # - `data-max_width`, largeur maximum de l'iframe, la valeur par défaut est 800px
+    max_width = forms.CharField(
+        widget=forms.TextInput(
+            attrs={
+                "class": "fr-input",
+            },
+        ),
+        label="Largeur maximum de l'iframe",
+        help_text=mark_safe(
+            "peut-être exprimé en px, %, em, rem, vw, …<br>"
+            "La valeur par défaut est 800px"
+        ),
+        required=False,
+    )
+
+    # - `data-height`, hauteur allouée à l'iframe cette hauteur doit être de 700px minimum, la valeur par défaut est 100vh
+    height = forms.CharField(
+        widget=forms.TextInput(
+            attrs={
+                "class": "fr-input",
+            },
+        ),
+        label="Hauteur de l'iframe",
+        help_text=mark_safe(
+            "peut-être exprimé en px, %, em, rem, vh, …<br>"
+            "La valeur par défaut est 100vh"
+        ),
+        required=False,
+    )
+
+    # - `data-iframe_attributes`, liste d'attributs au format JSON à ajouter à l'iframe
