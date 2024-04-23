@@ -44,7 +44,7 @@
         "@hotwired/stimulus": "^3.2.1",
         "@hotwired/turbo": "^8.0.4",
         "bowser": "^2.11.0",
-        "iframe-resizer": "^4.3.9",
+        "iframe-resizer": "^4.3.11",
         "leaflet": "^1.9.4",
         "leaflet-extra-markers": "^1.2.2",
         "posthog-js": "^1.122.0",
