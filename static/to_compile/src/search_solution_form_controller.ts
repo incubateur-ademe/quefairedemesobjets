@@ -56,6 +56,7 @@ export default class extends Controller<HTMLElement> {
     declare readonly reparerInputTarget: HTMLInputElement
 
     declare readonly hasDirectionTarget: boolean
+    declare readonly hasSearchInZoneInput: boolean
 
     declare readonly searchFormPanelTarget: HTMLElement
     declare readonly addressesPanelTarget: HTMLElement
@@ -329,7 +330,9 @@ export default class extends Controller<HTMLElement> {
     }
 
     submitFormWithoutZone() {
-        this.searchInZoneInputTarget.value = ""
+        if (this.hasSearchInZoneInput) {
+            this.searchInZoneInputTarget.value = ""
+        }
         this.submitForm()
     }
 }
