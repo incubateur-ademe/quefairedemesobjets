@@ -114,6 +114,7 @@ def create_proposition_services_sous_categories(**kwargs):
         "lampes": "luminaire",
         "ecrans": "ecran",
         "pae (petits appareils extincteurs)": "Petits appareils extincteurs",
+        "batteries & piles portables": "Batteries & piles portables",
     }
 
     for index, row in df.iterrows():
@@ -189,6 +190,10 @@ def serialize_to_json(**kwargs):
     df_joined["proposition_services"] = df_joined["proposition_services"].apply(
         lambda x: x if isinstance(x, list) else []
     )
+
+    df_joined.loc[
+        df_joined["proposition_services"].apply(lambda x: x == []), "status"
+    ] = "SUPPRIME"
 
     df_joined.drop("acteur_id", axis=1, inplace=True)
 
@@ -280,6 +285,7 @@ def create_actors(**kwargs):
     df_sources = data_dict["sources"]
     df_acteurtype = data_dict["acteurtype"]
     column_mapping = kwargs["column_mapping"]
+    column_to_drop = kwargs.get("column_to_drop", [])
 
     df["nom_de_lorganisme_std"] = df["nom_de_lorganisme"].str.replace("-", "")
     df["id_point_apport_ou_reparation"] = df["id_point_apport_ou_reparation"].fillna(
@@ -291,7 +297,8 @@ def create_actors(**kwargs):
         .str.replace("_-", "_")
         .str.replace("__", "_")
     )
-
+    df = df.drop(column_to_drop, axis=1)
+    df = df.replace({np.nan: None})
     for old_col, new_col in column_mapping.items():
         if new_col:
             if old_col == "type_de_point_de_collecte":
@@ -327,6 +334,7 @@ def create_actors(**kwargs):
     df = df.drop(["latitudewgs84", "longitudewgs84"], axis=1)
     df["modifie_le"] = df["cree_le"]
     if "siret" in df.columns:
+        df["siret"] = df["siret"].replace({np.nan: None})
         df["siret"] = df["siret"].astype(str).apply(lambda x: x[:14])
     if "telephone" in df.columns:
         df["telephone"] = df["telephone"].dropna().apply(lambda x: x.replace(" ", ""))
@@ -350,7 +358,6 @@ def create_actors(**kwargs):
         "duplicate_ids": list(duplicate_ids),
         "added_rows": len(df),
     }
-    print(df.columns)
 
     return {"df": df, "metadata": metadata}
 
