@@ -10,26 +10,33 @@ from shapely import wkb
 from shapely.geometry import Point
 
 
-def extract_details(row):
-    pattern = re.compile(r"\b(\d{5})\s+(.*)")
+def preprocess_address(address):
+    address = re.sub(r"[\r\n,]+", " ", address)
+    address = re.sub(r"\s+", " ", address).strip()
+    return address
 
-    address = None
-    postal_code = None
-    city = None
+
+def extract_details(row):
+    # Pattern pour capturer les codes postaux et les noms de ville optionnels
+    pattern = re.compile(r"(\d{2,3}\s?\d{2,3})\s*(.*)")
+
     if pd.isnull(row["adresse_format_ban"]):
         return pd.Series([None, None, None])
 
-    # Ensure adress_ban is treated as a string
-    adress_ban = str(row["adresse_format_ban"])
+    address_ban = preprocess_address(str(row["adresse_format_ban"]))
 
-    # Search for the pattern
-    match = pattern.search(adress_ban)
+    match = pattern.search(address_ban)
     if match:
-        postal_code = match.group(1)
-        city = match.group(2)
-        address = adress_ban[: match.start()].strip()
+        postal_code = match.group(1).replace(" ", "")
+        city = match.group(2) if match.group(2) else None
+        address = address_ban[: match.start()].strip()
 
-    return pd.Series([address, postal_code, city])
+        # Ajouter un zéro si le code postal a quatre chiffres
+        if len(postal_code) == 4:
+            postal_code += "0"
+        return pd.Series([address, postal_code, city])
+    else:
+        return pd.Series([None, None, None])
 
 
 def transform_location(longitude, latitude):
@@ -287,7 +294,9 @@ def find_differences(df_act, df_rev_act, columns_to_exclude, normalization_map):
     return df_differences
 
 
-def get_environment(dag_filepath):
+def get_environment(dag_filepath, parent_of_parent=False):
+    if parent_of_parent:
+        return Path(dag_filepath).parent.parent.name
     return Path(dag_filepath).parent.name
 
 
@@ -295,5 +304,5 @@ def get_dag_name(dag_filepath, dag_name):
     return get_environment(dag_filepath) + "_" + dag_name
 
 
-def get_db_conn_id(dag_filepath):
-    return "lvao-" + get_environment(dag_filepath)
+def get_db_conn_id(dag_filepath, parent_of_parent=False):
+    return "lvao-" + get_environment(dag_filepath, parent_of_parent=parent_of_parent)

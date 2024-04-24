@@ -9,10 +9,15 @@ def transform_acteur_type_id(value, df_acteurtype):
             "commerce"
         ),
         "Point d'Apport Volontaire Publique": "point d'apport volontaire public",
+        "Association, entreprise de l'économie sociale et solidaire (ESS)": (
+            "Association, entreprise de l'ESS"
+        ),
         "Association, entreprise de l’économie sociale et solidaire (ESS)": (
             "Association, entreprise de l'ESS"
         ),
+        "Établissement de santé": "établissement de santé",
         "Déchèterie": "déchèterie",
+        "Point d'Apport Volontaire Privé": "point d'apport volontaire privé",
     }
     libelle = mapping_dict.get(value)
     id_value = (
@@ -24,7 +29,7 @@ def transform_acteur_type_id(value, df_acteurtype):
 
 
 def create_identifiant_unique(row):
-    unique_str = row["identifiant_externe"]
+    unique_str = row["identifiant_externe"].replace("/", "-")
     if row["type_de_point_de_collecte"] == "Solution en ligne (site web, app. mobile)":
         unique_str = unique_str + "_d"
     return row["ecoorganisme"].lower() + "_" + unique_str
