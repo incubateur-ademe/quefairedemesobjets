@@ -82,7 +82,7 @@ def fetch_and_parse_data(**context):
     engine = pg_hook.get_sqlalchemy_engine()
 
     max_id_pds = pd.read_sql_query(
-        "SELECT max(id) FROM qfdmo_displayedpropositionservice", engine
+        "SELECT max(id) FROM qfdmo_propositionservice", engine
     )["max"][0]
     df_sql = pd.read_sql_query(
         "SELECT * FROM qfdmo_dagrunchange WHERE "
