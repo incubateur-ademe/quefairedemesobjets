@@ -34,57 +34,6 @@ from qfdmo.thread.materialized_view import RefreshMateriazedViewThread
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
 
 
-class ConfiguratorView(FormView):
-    form_class = ConfiguratorForm
-    template_name = "qfdmo/iframe_configurator.html"
-
-    def get_initial(self):
-        initial = super().get_initial()
-        initial["iframe_mode"] = self.request.GET.get("iframe_mode")
-        initial["direction"] = self.request.GET.get("direction")
-        initial["first_dir"] = self.request.GET.get("first_dir")
-        initial["action_list"] = self.request.GET.getlist("action_list")
-        initial["max_width"] = self.request.GET.get("max_width")
-        initial["height"] = self.request.GET.get("height")
-        return initial
-
-    def get_context_data(self, **kwargs):
-
-        iframe_mode = self.request.GET.get("iframe_mode")
-
-        iframe_host = (
-            "http"
-            + ("s" if self.request.is_secure() else "")
-            + "://"
-            + self.request.get_host()
-        )
-
-        if iframe_mode == "carte":
-            iframe_url = iframe_host + "/static/carte.js"
-        if iframe_mode == "form":
-            iframe_url = iframe_host + "/static/iframe.js"
-
-        attributes = {}
-        if direction := self.request.GET.get("direction"):
-            attributes["direction"] = direction
-        if first_dir := self.request.GET.get("first_dir"):
-            attributes["first_dir"] = first_dir.replace("first_", "")
-        if action_list := self.request.GET.getlist("action_list"):
-            attributes["action_list"] = "|".join(action_list)
-        if max_width := self.request.GET.get("max_width"):
-            attributes["max_width"] = max_width
-        if height := self.request.GET.get("height"):
-            attributes["height"] = height
-
-        if iframe_url:
-            kwargs["iframe_script"] = f'<script src="{ iframe_url }"'
-            for key, value in attributes.items():
-                kwargs["iframe_script"] += f' data-{key}="{value}"'
-            kwargs["iframe_script"] += "></script>"
-
-        return super().get_context_data(**kwargs)
-
-
 class AddressesView(FormView):
     form_class = IframeAddressesForm
     template_name = "qfdmo/adresses.html"
@@ -368,3 +317,71 @@ def solution_admin(request, identifiant_unique):
         )
     acteur = Acteur.objects.get(identifiant_unique=identifiant_unique)
     return redirect("admin:qfdmo_acteur_change", quote(acteur.identifiant_unique))
+
+
+class ConfiguratorView(FormView):
+    form_class = ConfiguratorForm
+    template_name = "qfdmo/iframe_configurator.html"
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial["iframe_mode"] = self.request.GET.get("iframe_mode")
+        initial["direction"] = self.request.GET.get("direction")
+        initial["first_dir"] = self.request.GET.get("first_dir")
+        initial["action_list"] = self.request.GET.getlist("action_list")
+        initial["max_width"] = self.request.GET.get("max_width")
+        initial["height"] = self.request.GET.get("height")
+        initial["iframe_attributes"] = self.request.GET.get("iframe_attributes")
+        initial["bbox"] = self.request.GET.get("bbox")
+        return initial
+
+    def get_context_data(self, **kwargs):
+
+        iframe_mode = self.request.GET.get("iframe_mode")
+
+        iframe_host = (
+            "http"
+            + ("s" if self.request.is_secure() else "")
+            + "://"
+            + self.request.get_host()
+        )
+
+        iframe_url = None
+        if iframe_mode == "carte":
+            iframe_url = iframe_host + "/static/carte.js"
+        if iframe_mode == "form":
+            iframe_url = iframe_host + "/static/iframe.js"
+
+        attributes = {}
+        if direction := self.request.GET.get("direction"):
+            attributes["direction"] = direction
+        if first_dir := self.request.GET.get("first_dir"):
+            attributes["first_dir"] = first_dir.replace("first_", "")
+        if action_list := self.request.GET.getlist("action_list"):
+            attributes["action_list"] = "|".join(action_list)
+        if max_width := self.request.GET.get("max_width"):
+            attributes["max_width"] = max_width
+        if height := self.request.GET.get("height"):
+            attributes["height"] = height
+        if iframe_attributes := self.request.GET.get("iframe_attributes"):
+            try:
+                json.loads(iframe_attributes)
+                attributes["iframe_attributes"] = json.dumps(
+                    json.loads(iframe_attributes)
+                )
+                logging.warning(attributes["iframe_attributes"])
+            except json.JSONDecodeError:
+                attributes["iframe_attributes"] = ""
+        if bbox := self.request.GET.get("bbox"):
+            try:
+                attributes["bbox"] = json.dumps(json.loads(bbox))
+            except json.JSONDecodeError:
+                attributes["bbox"] = ""
+
+        if iframe_url:
+            kwargs["iframe_script"] = f"<script src='{ iframe_url }'"
+            for key, value in attributes.items():
+                kwargs["iframe_script"] += f" data-{key}='{value}'"
+            kwargs["iframe_script"] += "></script>"
+
+        return super().get_context_data(**kwargs)

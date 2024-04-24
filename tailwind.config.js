@@ -46,6 +46,10 @@ module.exports = {
         "md:qfdmo-w-[596px]",
         "md:qfdmo-max-w-[596px]",
         "qfdmo-h-[95%]",
+        "qfdmo-inline-grid",
+        "qfdmo-grid-cols-4",
+        "qfdmo-gap-4",
+        "qfdmo-m-1w",
     ],
     theme: {
         colors: {

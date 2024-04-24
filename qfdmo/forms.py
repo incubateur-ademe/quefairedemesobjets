@@ -247,7 +247,7 @@ class ConfiguratorForm(forms.Form):
         required=False,
     )
 
-    # - `data-direction`, option `jai` ou `jecherche`, par défaut l'option de direction « Je cherche » est active
+    # - `data-direction`, option `jai` ou `jecherche`, par défaut l'option de direction « Je cherche » est active # noqa
     direction = forms.ChoiceField(
         widget=SegmentedControlSelect(
             attrs={
@@ -263,7 +263,7 @@ class ConfiguratorForm(forms.Form):
         required=False,
     )
 
-    # - `data-first_dir`, option `jai` ou `jecherche`, par défaut l'option de direction « Je cherche » est affiché en premier dans la liste des options de direction
+    # - `data-first_dir`, option `jai` ou `jecherche`, par défaut l'option de direction « Je cherche » est affiché en premier dans la liste des options de direction # noqa
     first_dir = forms.ChoiceField(
         widget=SegmentedControlSelect(
             attrs={
@@ -280,14 +280,17 @@ class ConfiguratorForm(forms.Form):
         required=False,
     )
 
-    # - `data-action_list`, liste des actions cochées selon la direction séparées par le caractère `|` :
-    #   - pour la direction `jecherche` les actions possibles sont : `emprunter`, `echanger`, `louer`, `acheter`
-    #   - pour la direction `jai` les actions possibles sont : `reparer`, `preter`, `donner`, `echanger`, `mettreenlocation`, `revendre`
-    #   - si le paramètre `action_list` n'est pas renseigné ou est vide, toutes les actions éligibles à la direction sont cochées
+    # - `data-action_list`, liste des actions cochées selon la direction séparées par le caractère `|` : # noqa
+    #   - pour la direction `jecherche` les actions possibles sont : `emprunter`, `echanger`, `louer`, `acheter` # noqa
+    #   - pour la direction `jai` les actions possibles sont : `reparer`, `preter`, `donner`, `echanger`, `mettreenlocation`, `revendre` # noqa
+    #   - si le paramètre `action_list` n'est pas renseigné ou est vide, toutes les actions éligibles à la direction sont cochées # noqa
     action_list = forms.MultipleChoiceField(
         widget=forms.CheckboxSelectMultiple(
             attrs={
-                "class": "fr-checkbox",
+                "class": (
+                    "fr-checkbox qfdmo-inline-grid qfdmo-grid-cols-4 qfdmo-gap-4"
+                    " qfdmo-m-1w"
+                ),
             },
         ),
         choices=[
@@ -322,7 +325,7 @@ class ConfiguratorForm(forms.Form):
         required=False,
     )
 
-    # - `data-height`, hauteur allouée à l'iframe cette hauteur doit être de 700px minimum, la valeur par défaut est 100vh
+    # - `data-height`, hauteur allouée à l'iframe cette hauteur doit être de 700px minimum, la valeur par défaut est 100vh # noqa
     height = forms.CharField(
         widget=forms.TextInput(
             attrs={
@@ -338,3 +341,28 @@ class ConfiguratorForm(forms.Form):
     )
 
     # - `data-iframe_attributes`, liste d'attributs au format JSON à ajouter à l'iframe
+    iframe_attributes = forms.CharField(
+        widget=forms.Textarea(
+            attrs={"class": "fr-input", "rows": "3"},
+        ),
+        label="Attrubuts à appliquer à l'iframe",
+        help_text=mark_safe("liste d'attributs au format JSON à ajouter à l'iframe"),
+        required=False,
+    )
+
+    # TODO : documentation
+    bbox = forms.CharField(
+        widget=forms.TextInput(
+            attrs={
+                "class": "fr-input",
+            },
+        ),
+        label="Bounding box",
+        help_text=mark_safe(
+            "Bounding box au format JSON, ex: <br>"
+            '{<br>&nbsp;&nbsp;"southWest":{"lat":48.916,"lng":2.298202514648438},'
+            '<br>&nbsp;&nbsp;"northEast":{"lat":48.98742568330284,'
+            '"lng":2.483596801757813}<br>}'
+        ),
+        required=False,
+    )
