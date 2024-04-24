@@ -84,7 +84,7 @@ def action_by_direction(request: HttpRequest, direction: str):
 
 
 def display_search(request: HttpRequest) -> bool:
-    return True
+    return not is_carte(request)
 
 
 def display_infos_panel(adresse: DisplayedActeur) -> bool:
