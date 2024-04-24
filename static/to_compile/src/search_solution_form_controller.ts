@@ -8,8 +8,10 @@ export default class extends Controller<HTMLElement> {
         "direction",
         "latitudeInput",
         "longitudeInput",
+        "searchInZoneInput",
         "actionList",
         "searchForm",
+        "reparerInput",
 
         "searchFormPanel",
         "addressesPanel",
@@ -35,6 +37,8 @@ export default class extends Controller<HTMLElement> {
         "advancedFilterSaveButton",
         "advancedFilterSaveAndSubmitButton",
 
+        "reparerFilter",
+
         //FIXME: should be renamed
         "loadingSolutions",
         "addressMissing",
@@ -46,10 +50,13 @@ export default class extends Controller<HTMLElement> {
     declare readonly directionTarget: HTMLElement
     declare readonly latitudeInputTarget: HTMLInputElement
     declare readonly longitudeInputTarget: HTMLInputElement
+    declare readonly searchInZoneInputTarget: HTMLInputElement
     declare readonly actionListTarget: HTMLInputElement
     declare readonly searchFormTarget: HTMLFormElement
+    declare readonly reparerInputTarget: HTMLInputElement
 
     declare readonly hasDirectionTarget: boolean
+    declare readonly hasSearchInZoneInput: boolean
 
     declare readonly searchFormPanelTarget: HTMLElement
     declare readonly addressesPanelTarget: HTMLElement
@@ -75,6 +82,8 @@ export default class extends Controller<HTMLElement> {
     declare readonly advancedFilterSaveButtonTarget: HTMLElement
     declare readonly advancedFilterSaveAndSubmitButtonTarget: HTMLElement
 
+    declare readonly reparerFilterTargets: HTMLInputElement[]
+
     declare readonly loadingSolutionsTarget: HTMLElement
     declare readonly addressMissingTarget: HTMLElement
     declare readonly NoLocalSolutionTarget: HTMLElement
@@ -87,6 +96,20 @@ export default class extends Controller<HTMLElement> {
         if (!this.isIframeValue) {
             this.scrollToContent()
         }
+    }
+
+    activeReparerFilters(activate: boolean = true) {
+        if (this.#selectedOption == "jai") {
+            if (this.reparerInputTarget.checked) {
+                this.reparerFilterTargets.forEach((element: HTMLInputElement) => {
+                    element.disabled = false
+                })
+                return
+            }
+        }
+        this.reparerFilterTargets.forEach((element: HTMLInputElement) => {
+            element.disabled = true
+        })
     }
 
     scrollToContent() {
@@ -114,6 +137,10 @@ export default class extends Controller<HTMLElement> {
         this.detailsAddressPanelTarget.classList.add("md:qfdmo-w-[480]")
         this.detailsAddressPanelTarget.classList.remove("md:qfdmo-w-full")
         this.detailsAddressPanelTarget.classList.remove("md:qfdmo-w-0")
+    }
+
+    updateSearchInZone(event) {
+        this.searchInZoneInputTarget.value = JSON.stringify(event.detail)
     }
 
     hideDetails() {
@@ -180,6 +207,7 @@ export default class extends Controller<HTMLElement> {
                 this.jaiTarget.hidden = true
             }
         }
+        this.activeReparerFilters()
     }
 
     apply() {
@@ -298,6 +326,13 @@ export default class extends Controller<HTMLElement> {
 
     toggleAdvancedFiltersAndSubmitForm() {
         this.#toggleAdvancedFilters()
+        this.submitForm()
+    }
+
+    submitFormWithoutZone() {
+        if (this.hasSearchInZoneInput) {
+            this.searchInZoneInputTarget.value = ""
+        }
         this.submitForm()
     }
 }

@@ -38,7 +38,7 @@
                                     {% with direction=form.direction.value() %}
                                         {% include 'qfdmo/_address_card_partials/address_actions.html'%}
                                     {% endwith %}
-                                    <span class="fr-text--xl fr-text--bold fr-mb-0">{{ adresse.nom }}</span>
+                                    <span class="fr-text--xl fr-text--bold fr-mb-0">{{ adresse.libelle }}</span>
                                     <p class="qfdmo-text-sm fr-mb-1w fr-mt-0">
                                         {% for acteur_service in adresse.acteur_services() %}
                                             {{ acteur_service }}{% if not loop.last %}<br>{% endif %}
@@ -67,6 +67,7 @@
                         <input
                             hidden
                             data-map-target="searchInZoneInput"
+                            data-search-solution-form-target="searchInZoneInput"
                             name="search_in_zone"
                             value=""
                         />

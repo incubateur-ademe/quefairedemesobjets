@@ -124,6 +124,19 @@ Style the autocomplete container:
   -webkit-mask-image: url("svg/share-line.svg");
   mask-image: url("svg/share-line.svg");
 }
+
+.fr-icon-shield-check-line::before,
+.fr-icon-shield-check-line::after {
+  -webkit-mask-image: url("svg/shield-check-line.svg");
+  mask-image: url("svg/shield-check-line.svg");
+}
+
+.fr-icon-money-euro-box-line::before,
+.fr-icon-money-euro-box-line::after {
+  -webkit-mask-image: url("svg/money-euro-box-line.svg");
+  mask-image: url("svg/money-euro-box-line.svg");
+}
+
 /*
  * Failed to load some tailwind classes with parcel
  */
