@@ -7,7 +7,7 @@ defaults:
 
 jobs:
   python:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     services:
       postgres:
         image: postgis/postgis:15-3.3-alpine
@@ -44,7 +44,7 @@ jobs:
       - uses: chartboost/ruff-action@v1
 
   node:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -62,7 +62,7 @@ jobs:
 
   e2e:
     timeout-minutes: 5
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     services:
       postgres:
         image: postgis/postgis:15-3.3-alpine
