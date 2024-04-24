@@ -298,6 +298,7 @@ def create_actors(**kwargs):
         .str.replace("__", "_")
     )
     df = df.drop(column_to_drop, axis=1)
+    df = df.dropna(subset=["latitudewgs84", "longitudewgs84"])
     df = df.replace({np.nan: None})
     for old_col, new_col in column_mapping.items():
         if new_col:
