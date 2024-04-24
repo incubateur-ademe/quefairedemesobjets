@@ -9,7 +9,7 @@ def transform_acteur_type_id(value, df_acteurtype):
             "commerce"
         ),
         "Point d'Apport Volontaire Publique": "point d'apport volontaire public",
-        "Association, entreprise de l’économie sociale et solidaire (ESS)": (
+        "Association, entreprise de l'économie sociale et solidaire (ESS)": (
             "Association, entreprise de l'ESS"
         ),
         "Déchèterie": "déchèterie",
