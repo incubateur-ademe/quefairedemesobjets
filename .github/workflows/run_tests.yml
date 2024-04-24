@@ -29,10 +29,10 @@ jobs:
         with:
           cache: "pip"
           python-version: "3.12.1"
-      - name: APT update
-        run: |
-          sudo apt-get clean
-          sudo apt-get update
+      # - name: APT update
+      #   run: |
+      #     sudo apt-get clean
+      #     sudo apt-get update
       - name: Install GIS Packages
         run: |
           sudo apt-get install gdal-bin
