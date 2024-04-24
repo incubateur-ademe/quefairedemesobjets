@@ -115,6 +115,18 @@ def create_proposition_services_sous_categories(**kwargs):
         "ecrans": "ecran",
         "pae (petits appareils extincteurs)": "Petits appareils extincteurs",
         "batteries & piles portables": "Batteries & piles portables",
+        "solvants": "Produits chimiques - Solvants",
+        "déchets de peintures, vernis,"
+        " encres et "
+        "colles": "Déchets de peintures, vernis, encres et colles - Produits chimiques",
+        "déchets de produits " "chimiques": "Déchets de produits chimiques",
+        "déchets de produits "
+        "chimiques acides": "Déchets de produits chimiques acides",
+        "déchets de produits "
+        "chimiques basiques": "Déchets de produits chimiques basiques",
+        "déchets phytosanitaires "
+        "ménagers": "Déchets phytosanitaires ménagers - Produits chimiques",
+        "outillage du peintre": "ABJ_Outillage du peintre usagé",
     }
 
     for index, row in df.iterrows():
@@ -298,6 +310,7 @@ def create_actors(**kwargs):
         .str.replace("__", "_")
     )
     df = df.drop(column_to_drop, axis=1)
+    df = df.dropna(subset=["latitudewgs84", "longitudewgs84"])
     df = df.replace({np.nan: None})
     for old_col, new_col in column_mapping.items():
         if new_col:
