@@ -127,6 +127,31 @@ def create_proposition_services_sous_categories(**kwargs):
         "déchets phytosanitaires "
         "ménagers": "Déchets phytosanitaires ménagers - Produits chimiques",
         "outillage du peintre": "ABJ_Outillage du peintre usagé",
+        "panneaux photovoltaïques": "Panneaux photovoltaïques",
+        "déchets dangereux de pmcb": "Déchets dangereux de PMCB",
+        "décoration textile": "Décoration textile - Éléments d'ameublement",
+        "huisseries": "Huisseries (produits et matériaux de construction du bâtiment)",
+        "laine de "
+        "roche": "Laine de roche (produits et matériaux de construction du bâtiment)",
+        "laine de"
+        " verre": "Laine de verre (produits et matériaux de construction du bâtiment)",
+        "literie": "Literie - Éléments d'ameublement",
+        "meubles": "meuble",
+        "mélange d’inertes": "Mélange"
+        " d’inertes (produits et matériaux de construction du bâtiment)",
+        "pmcb - "
+        "bois": "Bois - PMCB (produits et matériaux de construction du bâtiment)",
+        "pmcb - "
+        "métal": "Métal - PMCB (produits et matériaux de construction du bâtiment)",
+        "pmcb - "
+        "plastiques": "Plastiques"
+        " - PMCB (produits et matériaux de construction du bâtiment)",
+        "plâtre": "Plâtre"
+        " - PMCB (produits et matériaux de construction du bâtiment)",
+        "rembourrés "
+        "d'assise ou "
+        "de couchage": "Rembourrés d'assise ou de couchage - Éléments d'ameublement",
+        "sièges": "Sièges - Éléments d'ameublement",
     }
 
     for index, row in df.iterrows():

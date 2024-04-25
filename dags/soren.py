@@ -19,11 +19,11 @@ default_args = {
 }
 
 dag = DAG(
-    utils.get_dag_name(__file__, "ecosystem"),
+    utils.get_dag_name(__file__, "soren"),
     default_args=default_args,
     description=(
         "A pipeline to fetch, process, and load to validate data into postgresql"
-        " for Ecosystem dataset"
+        " for Soren dataset"
     ),
     schedule_interval=None,
 )
@@ -32,7 +32,7 @@ dag = DAG(
 fetch_data_task = PythonOperator(
     task_id="fetch_data_from_api",
     python_callable=dag_eo_utils.fetch_data_from_api,
-    op_kwargs={"dataset": "donnees-eo-ecosystem"},
+    op_kwargs={"dataset": "donnees-eo-soren"},
     dag=dag,
 )
 
@@ -64,8 +64,7 @@ create_actors_task = PythonOperator(
             "perimetre_dintervention": "",
             "longitudewgs84": "location",
             "latitudewgs84": "location",
-        },
-        "column_to_drop": ["siret"],
+        }
     },
     dag=dag,
 )

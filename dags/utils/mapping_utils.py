@@ -3,26 +3,26 @@ import math
 
 def transform_acteur_type_id(value, df_acteurtype):
     mapping_dict = {
-        "Solution en ligne (site web, app. mobile)": "en ligne (web, mobile)",
-        "Artisan, commerce indépendant": "artisan, commerce indépendant",
-        "Magasin / Franchise, Enseigne commerciale / Distributeur / Point de vente": (
-            "commerce"
-        ),
-        "Point d'Apport Volontaire Publique": "point d'apport volontaire public",
-        "Association, entreprise de l'économie sociale et solidaire (ESS)": (
-            "Association, entreprise de l'ESS"
-        ),
-        "Association, entreprise de l’économie sociale et solidaire (ESS)": (
-            "Association, entreprise de l'ESS"
-        ),
-        "Établissement de santé": "établissement de santé",
-        "Déchèterie": "déchèterie",
-        "Point d'Apport Volontaire Privé": "point d'apport volontaire privé",
+        "solution en ligne (site web, app. mobile)": "en ligne (web, mobile)",
+        "artisan, commerce indépendant": "artisan, commerce indépendant",
+        "magasin / franchise,"
+        " enseigne commerciale / distributeur / point de vente": "commerce",
+        "point d'apport volontaire publique": "point d'apport volontaire public",
+        "association, entreprise"
+        " de l'économie sociale et solidaire (ess)": "Association, entreprise de l'ESS",
+        "association, entreprise"
+        " de l’économie sociale et solidaire (ess)": "Association, entreprise de l'ESS",
+        "établissement de santé": "établissement de santé",
+        "déchèterie": "déchèterie",
+        "point d'apport volontaire privé": "point d'apport volontaire privé",
     }
-    libelle = mapping_dict.get(value)
+
+    libelle = mapping_dict.get(value.lower())
     id_value = (
-        df_acteurtype.loc[df_acteurtype["libelle"] == libelle, "id"].values[0]
-        if any(df_acteurtype["libelle"] == libelle)
+        df_acteurtype.loc[
+            df_acteurtype["libelle"].str.lower() == libelle.lower(), "id"
+        ].values[0]
+        if any(df_acteurtype["libelle"].str.lower() == libelle.lower())
         else None
     )
     return id_value
