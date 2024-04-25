@@ -1,6 +1,6 @@
 
 {% if adresse.labels.filter(afficher=True, bonus=True, type_enseigne=False) %}
-    <p class="fr-tag fr-tag--icon-left fr-icon-money-euro-box-line" data-testid='adresse_detail_header_tag'>Éligible au bonus réparation</p>
+    <p class="fr-tag fr-tag--icon-left fr-icon-money-euro-box-line" data-testid='adresse_detail_header_tag'>Éligibles au bonus réparation</p>
 {% elif adresse.labels.filter(afficher=True, type_enseigne=False).count() == 1 %}
     {% with source_or_label=adresse.labels.filter(afficher=True, type_enseigne=False).first() %}
         {% if source_or_label.logo_file %}
