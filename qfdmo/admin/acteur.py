@@ -252,6 +252,7 @@ class RevisionActeurResource(ActeurResource):
 
 
 class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin):
+    save_as = True
     gis_widget = CustomOSMWidget
     inlines = [RevisionPropositionServiceInline, RevisionActeurLabelQualiteInline]
 
@@ -290,6 +291,42 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
                         f"document.getElementById('id_{field_name}').value = ''"
                         '">reset</button>'
                     )
+                if field_name == "siret" and (
+                    siret := obj.siret or acteur.siret
+                ):  # and siret is not null
+                    siren = siret[:9]
+                    form_field.help_text += (
+                        '<br>ENTREPRISE : <a href="https://'
+                        f'annuaire-entreprises.data.gouv.fr/entreprise/{siren}"'
+                        ' target="_blank" rel="noopener" rel="noreferrer">'
+                        f"https://annuaire-entreprises.data.gouv.fr/entreprise/{siren}"
+                        '</a><br>ETABLISSEMENT : <a href="https://'
+                        f'annuaire-entreprises.data.gouv.fr/etablissement/{siret}"'
+                        ' target="_blank" rel="noopener" rel="noreferrer">'
+                        "https://annuaire-entreprises.data.gouv.fr/etablissement/"
+                        f"{siret}</a>"
+                    )
+                if field_name == "ville" and form_field:  # vill  est pas null
+                    google_adresse = [
+                        obj.nom_commercial
+                        or acteur.nom_commercial
+                        or obj.nom
+                        or acteur.nom
+                        or "",
+                        obj.adresse or acteur.adresse,
+                        obj.adresse_complement or acteur.adresse_complement,
+                        obj.code_postal or acteur.code_postal,
+                        obj.ville or acteur.ville,
+                    ]
+                    google_adresse = [
+                        g.strip() for g in google_adresse if g and g.strip()
+                    ]
+                    form_field.help_text += (
+                        '<br><a href="https://google.com/maps/search/'
+                        f'{"+".join(google_adresse)}" target="_blank" rel="noopener"'
+                        ' rel="noreferrer">Voir l\'adresse sur Google Maps</a>'
+                    )
+
         return revision_acteur_form
 
 
