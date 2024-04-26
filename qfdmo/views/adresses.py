@@ -1,5 +1,5 @@
 import json
-import logging
+from html import escape
 
 import unidecode
 from django.conf import settings
@@ -46,7 +46,9 @@ class AddressesView(FormView):
     def _get_search_in_zone_params(self):
         center = []
         my_bbox_polygon = []
-        if search_in_zone := self.request.GET.get("search_in_zone"):
+        if search_in_zone := self.request.GET.get(
+            "search_in_zone"
+        ) or self.request.GET.get("bbox"):
             search_in_zone = json.loads(search_in_zone)
             if (
                 "center" in search_in_zone
@@ -144,6 +146,12 @@ class AddressesView(FormView):
             )
             kwargs["acteurs"] = acteurs
         else:
+            center, my_bbox_polygon = self._get_search_in_zone_params()
+            if self.request.GET.get("bbox", None):
+                kwargs["acteurs"] = acteurs.filter(
+                    location__within=Polygon.from_bbox(my_bbox_polygon)
+                )
+
             if (latitude := self.request.GET.get("latitude", None)) and (
                 longitude := self.request.GET.get("longitude", None)
             ):
@@ -151,7 +159,6 @@ class AddressesView(FormView):
                     {"latitude": latitude, "longitude": longitude}
                 )
 
-                center, my_bbox_polygon = self._get_search_in_zone_params()
                 if center:
                     longitude = center[0]
                     latitude = center[1]
@@ -336,7 +343,7 @@ class ConfiguratorView(FormView):
         return initial
 
     def get_context_data(self, **kwargs):
-
+        # TODO : clean up input to avoid security issues
         iframe_mode = self.request.GET.get("iframe_mode")
 
         iframe_host = (
@@ -354,27 +361,27 @@ class ConfiguratorView(FormView):
 
         attributes = {}
         if direction := self.request.GET.get("direction"):
-            attributes["direction"] = direction
+            attributes["direction"] = escape(direction)
         if first_dir := self.request.GET.get("first_dir"):
-            attributes["first_dir"] = first_dir.replace("first_", "")
+            attributes["first_dir"] = escape(first_dir.replace("first_", ""))
         if action_list := self.request.GET.getlist("action_list"):
-            attributes["action_list"] = "|".join(action_list)
+            attributes["action_list"] = escape("|".join(action_list))
         if max_width := self.request.GET.get("max_width"):
-            attributes["max_width"] = max_width
+            attributes["max_width"] = escape(max_width)
         if height := self.request.GET.get("height"):
             attributes["height"] = height
         if iframe_attributes := self.request.GET.get("iframe_attributes"):
             try:
-                json.loads(iframe_attributes)
                 attributes["iframe_attributes"] = json.dumps(
-                    json.loads(iframe_attributes)
+                    json.loads(iframe_attributes.replace("\r\n", "").replace("\n", ""))
                 )
-                logging.warning(attributes["iframe_attributes"])
             except json.JSONDecodeError:
                 attributes["iframe_attributes"] = ""
         if bbox := self.request.GET.get("bbox"):
             try:
-                attributes["bbox"] = json.dumps(json.loads(bbox))
+                attributes["bbox"] = json.dumps(
+                    json.loads(bbox.replace("\r\n", "").replace("\n", ""))
+                )
             except json.JSONDecodeError:
                 attributes["bbox"] = ""
 

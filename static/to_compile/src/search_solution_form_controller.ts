@@ -41,7 +41,6 @@ export default class extends Controller<HTMLElement> {
 
         //FIXME: should be renamed
         "loadingSolutions",
-        "addressMissing",
         "NoLocalSolution",
     ]
 
@@ -66,6 +65,8 @@ export default class extends Controller<HTMLElement> {
     declare readonly proposeAddressPanelTarget: HTMLElement
     declare readonly headerAddressPanelTarget: HTMLElement
 
+    declare readonly hasHeaderAddressPanelTarget: boolean
+
     declare readonly expandDetailsButtonTarget: HTMLElement
     declare readonly collapseDetailsButtonTarget: HTMLElement
 
@@ -85,7 +86,6 @@ export default class extends Controller<HTMLElement> {
     declare readonly reparerFilterTargets: HTMLInputElement[]
 
     declare readonly loadingSolutionsTarget: HTMLElement
-    declare readonly addressMissingTarget: HTMLElement
     declare readonly NoLocalSolutionTarget: HTMLElement
 
     static values = { isIframe: Boolean }
@@ -130,7 +130,8 @@ export default class extends Controller<HTMLElement> {
         this.detailsAddressPanelTarget.classList.remove("qfdmo-h-full")
         this.detailsAddressPanelTarget.classList.add("qfdmo-h-1/2")
         this.proposeAddressPanelTarget.classList.add("qfdmo-h-0")
-        this.headerAddressPanelTarget.classList.remove("qfdmo-h-0")
+        if (this.hasHeaderAddressPanelTarget)
+            this.headerAddressPanelTarget.classList.remove("qfdmo-h-0")
         this.collapseDetailsButtonTarget.classList.add("qfdmo-hidden")
         this.expandDetailsButtonTarget.classList.remove("qfdmo-hidden")
         // desktop
@@ -149,7 +150,8 @@ export default class extends Controller<HTMLElement> {
         this.detailsAddressPanelTarget.classList.remove("qfdmo-h-full")
         this.detailsAddressPanelTarget.classList.remove("qfdmo-h-1/2")
         this.proposeAddressPanelTarget.classList.remove("qfdmo-h-0")
-        this.headerAddressPanelTarget.classList.remove("qfdmo-h-0")
+        if (this.hasHeaderAddressPanelTarget)
+            this.headerAddressPanelTarget.classList.remove("qfdmo-h-0")
         // desktop
         this.detailsAddressPanelTarget.classList.add("md:qfdmo-w-0")
         this.detailsAddressPanelTarget.classList.remove("md:qfdmo-w-full")
@@ -162,7 +164,8 @@ export default class extends Controller<HTMLElement> {
         this.detailsAddressPanelTarget.classList.remove("qfdmo-h-1/2")
         this.detailsAddressPanelTarget.classList.add("qfdmo-h-full")
         this.proposeAddressPanelTarget.classList.add("qfdmo-h-0")
-        this.headerAddressPanelTarget.classList.add("qfdmo-h-0")
+        if (this.hasHeaderAddressPanelTarget)
+            this.headerAddressPanelTarget.classList.add("qfdmo-h-0")
         this.collapseDetailsButtonTarget.classList.remove("qfdmo-hidden")
         this.expandDetailsButtonTarget.classList.add("qfdmo-hidden")
         // desktop
@@ -281,7 +284,6 @@ export default class extends Controller<HTMLElement> {
         if (this.checkErrorForm()) return
 
         this.loadingSolutionsTarget.classList.remove("qfdmo-hidden")
-        this.addressMissingTarget.classList.add("qfdmo-hidden")
         this.NoLocalSolutionTarget.classList.add("qfdmo-hidden")
 
         this.searchFormPanelTarget.classList.remove("qfdmo-flex-grow")

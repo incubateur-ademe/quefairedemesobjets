@@ -21,7 +21,6 @@ const setupIframe = () => {
             iframeExtraAttributes = JSON.parse(scriptTag.dataset[param])
             continue
         }
-
         urlParams.append(param, scriptTag.dataset[param])
     }
 

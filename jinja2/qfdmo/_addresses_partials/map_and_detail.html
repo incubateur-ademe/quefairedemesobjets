@@ -29,7 +29,6 @@
                                 Aucune solution en ligne n'a été trouvée pour votre recherche.
                             </p>
                         {% endif %}
-                        <div data-search-solution-form-target="addressMissing"></div>
                         <div data-search-solution-form-target="NoLocalSolution"></div>
                     </div>
                 </div>
@@ -58,14 +57,6 @@
                         >
                         Rechercher dans cette zone
                     </button>
-                    <div
-                        class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-80 qfdmo-font-black qfdmo-z-[1000]{% if form.initial.adresse %} qfdmo-hidden{% endif %}"
-                        data-search-solution-form-target="addressMissing"
-                    >
-                        <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
-                            Précisez une adresse pour afficher la carte
-                        </div>
-                    </div>
                     <div
                         class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-80 qfdmo-font-black qfdmo-z-[1000]{% if not(form.initial.adresse) or acteurs %} qfdmo-hidden{% endif %}"
                         data-search-solution-form-target="NoLocalSolution"
