@@ -15,6 +15,7 @@ def transform_acteur_type_id(value, df_acteurtype):
         "établissement de santé": "établissement de santé",
         "déchèterie": "déchèterie",
         "point d'apport volontaire privé": "point d'apport volontaire privé",
+        "plateforme inertes": "plateforme de valorisation des inertes",
     }
 
     libelle = mapping_dict.get(value.lower())
