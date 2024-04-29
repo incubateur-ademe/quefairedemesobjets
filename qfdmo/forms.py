@@ -117,7 +117,7 @@ class IframeAddressesForm(forms.Form):
         widget=forms.CheckboxInput(
             attrs={
                 "class": "fr-checkbox fr-m-1v",
-                "data-search-solution-form-target": "advancedFiltersField",
+                "data-search-solution-form-target": "reparerFilter",
             }
         ),
         label="Label Répar’Acteurs",
@@ -132,18 +132,34 @@ class IframeAddressesForm(forms.Form):
     )
 
     ess = forms.BooleanField(
-        widget=forms.CheckboxInput(
-            attrs={
-                "class": "fr-checkbox fr-m-1v",
-                "data-search-solution-form-target": "advancedFiltersField",
-            }
-        ),
+        widget=forms.CheckboxInput(attrs={"class": "fr-checkbox fr-m-1v"}),
         label="Enseignes de l'économie sociale et solidaire",
         help_text=mark_safe(
             "Afficher uniquement les adresses recensées comme relevant de l'économie"
             " sociale et solidaire. En savoir plus sur le site <a href="
             '"https://www.economie.gouv.fr/cedef/economie-sociale-et-solidaire"'
             ' target="_blank" rel="noopener">economie.gouv.fr</a>'
+        ),
+        label_suffix="",
+        required=False,
+    )
+
+    bonus = forms.BooleanField(
+        widget=forms.CheckboxInput(
+            attrs={
+                "class": "fr-checkbox fr-m-1v",
+                "data-search-solution-form-target": "reparerFilter",
+            }
+        ),
+        label=mark_safe(
+            "<span class='fr-icon--sm fr-icon-money-euro-box-line'></span>"
+            "&nbsp;Éligible au bonus réparation"
+        ),
+        help_text=mark_safe(
+            "Afficher uniquement les adresses éligibles (uniquemet valable lorsque le"
+            " geste « réparer » est sélectioné). En svoir plus sur le site <a href="
+            '"https://www.ecologie.gouv.fr/bonus-reparation" target="_blank"'
+            ' rel="noopener">Bonus réparation</a>'
         ),
         label_suffix="",
         required=False,

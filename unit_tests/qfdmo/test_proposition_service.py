@@ -12,6 +12,7 @@ from qfdmo.models import (
     RevisionPropositionService,
     SousCategorieObjet,
 )
+from unit_tests.qfdmo.acteur_factory import ActeurTypeFactory
 
 
 @pytest.fixture(scope="session")
@@ -34,11 +35,12 @@ class TestActionNomAsNaturalKeyHeritage:
 
     @pytest.fixture
     def acteur(self):
+        acteur_type = ActeurTypeFactory(code="fake")
         return Acteur.objects.create(
             nom="fake acteur",
             location=Point(0, 0),
             identifiant_unique="1",
-            acteur_type_id=1,
+            acteur_type_id=acteur_type.id,
         )
 
     @pytest.fixture
@@ -67,11 +69,12 @@ class TestActionNomAsNaturalKeyHeritage:
 
     @pytest.fixture
     def revision_acteur(self):
+        acteur_type = ActeurTypeFactory(code="fake")
         return RevisionActeur.objects.create(
             nom="fake revision acteur",
             location=Point(0, 0),
             identifiant_unique="1",
-            acteur_type_id=1,
+            acteur_type_id=acteur_type.id,
         )
 
     @pytest.fixture

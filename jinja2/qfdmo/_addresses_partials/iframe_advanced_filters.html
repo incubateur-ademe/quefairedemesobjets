@@ -23,6 +23,22 @@
 
                     <fieldset class="fr-fieldset" aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages">
                         <legend class="qfdmo-hidden">
+                            Éligible au bonus réparation
+                        </legend>
+                        <div class="fr-fieldset__element fr-fieldset__element--inline qfdmo-font-normal">
+                            <div
+                                class="fr-checkbox-group fr-checkbox-group--sm qfdmo-flex qfdmo-flex-row qfdmo-items-center"
+                            >
+                                {{ form.bonus }}
+                                {{ form.bonus.label_tag() }}
+                            </div>
+                            <span class="fr-hint-text">{{ form.bonus.help_text }}</span>
+                        </div>
+                    </fieldset>
+
+
+                    <fieldset class="fr-fieldset" aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages">
+                        <legend class="qfdmo-hidden">
                             Type d'enseigne ESS
                         </legend>
                         <div class="fr-fieldset__element fr-fieldset__element--inline qfdmo-font-normal">

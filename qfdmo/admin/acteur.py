@@ -120,7 +120,15 @@ class BaseActeurAdmin(admin.GISModelAdmin):
         PropositionServiceInline,
     ]
     filter_horizontal = ("labels",)
-    list_display = ("nom", "siret", "identifiant_unique", "code_postal", "ville")
+    list_display = (
+        "nom",
+        "siret",
+        "identifiant_unique",
+        "code_postal",
+        "ville",
+        "adresse",
+        "modifie_le",
+    )
     search_fields = [
         "code_postal",
         "identifiant_unique",
@@ -164,6 +172,8 @@ class BaseActeurAdmin(admin.GISModelAdmin):
         "cree_le",
         "modifie_le",
     ]
+
+    ordering = ("-modifie_le",)
 
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = list(super().get_readonly_fields(request, obj))
