@@ -27,6 +27,9 @@ class ActeurService(CodeAsNaturalKeyModel):
     libelle = models.CharField(max_length=255, blank=True, null=True)
     actions = models.ManyToManyField(Action)
 
+    def __str__(self):
+        return f"{self.libelle} ({self.code})"
+
     def serialize(self):
         return model_to_dict(self, exclude=["actions"])
 
