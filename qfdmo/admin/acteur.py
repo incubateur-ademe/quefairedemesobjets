@@ -1,9 +1,12 @@
 from typing import Any
 
+from django import forms
 from django.conf import settings
 from django.contrib.gis import admin
 from django.contrib.gis.forms.fields import PointField
 from django.contrib.gis.geos import Point
+from django.contrib.postgres.lookups import Unaccent
+from django.db.models.functions import Lower
 from django.forms import CharField
 from django.http import HttpRequest
 from import_export import admin as import_export_admin
@@ -72,7 +75,26 @@ class DisplayedActeurLabelQualiteInline(admin.StackedInline):
         return False
 
 
+class BasePropositionServiceForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["action"].queryset = Action.objects.annotate(
+            libelle_unaccent=Unaccent(Lower("libelle")),
+        ).order_by("libelle_unaccent")
+        self.fields["acteur_service"].queryset = ActeurService.objects.annotate(
+            libelle_unaccent=Unaccent(Lower("libelle")),
+        ).order_by("libelle_unaccent")
+        self.fields["sous_categories"].queryset = SousCategorieObjet.objects.annotate(
+            libelle_unaccent=Unaccent(Lower("libelle")),
+        ).order_by("libelle_unaccent")
+
+    filter_horizontal = [
+        "sous_categories",
+    ]
+
+
 class BasePropositionServiceInline(admin.TabularInline):
+    form = BasePropositionServiceForm
     extra = 0
 
     fields = (
@@ -114,7 +136,14 @@ class DisplayedPropositionServiceInline(
         return False
 
 
+class BaseActeurForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["source"].queryset = Source.objects.all().order_by("libelle")
+
+
 class BaseActeurAdmin(admin.GISModelAdmin):
+    form = BaseActeurForm
     gis_widget = CustomOSMWidget
     inlines = [
         PropositionServiceInline,
@@ -331,7 +360,7 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
 
 
 class BasePropositionServiceAdmin(admin.GISModelAdmin):
-    pass
+    form = BasePropositionServiceForm
 
 
 class BasePropositionServiceResource(resources.ModelResource):

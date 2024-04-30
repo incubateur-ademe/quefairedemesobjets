@@ -9,6 +9,10 @@ class TestActionNomAsNaturalKeyHeritage:
     def test_natural(self):
         assert CodeAsNaturalKeyModel in Action.mro()
 
+    def test_str(self):
+        action = ActionFactory.build(code="My Code", libelle="My Libelle")
+        assert str(action) == "My Libelle"
+
     @pytest.mark.django_db
     def test_serialize(self):
         action = Action.objects.create(
