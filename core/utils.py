@@ -4,7 +4,12 @@ from qfdmo.models import CachedDirectionAction
 
 
 def get_direction(request):
-    direction = request.GET.get("direction", settings.DEFAULT_ACTION_DIRECTION)
+    default_direction = (
+        None
+        if request.GET.get("carte") is not None
+        else settings.DEFAULT_ACTION_DIRECTION
+    )
+    direction = request.GET.get("direction", default_direction)
     if direction not in [d["code"] for d in CachedDirectionAction.get_directions()]:
-        direction = settings.DEFAULT_ACTION_DIRECTION
+        direction = default_direction
     return direction

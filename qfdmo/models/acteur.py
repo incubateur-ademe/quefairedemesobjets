@@ -412,7 +412,6 @@ class DisplayedActeur(BaseActeur):
             acteur_selected_actions = [
                 a for a in actions if a["code"] in action_list.split("|")
             ]
-
         return orjson.dumps(
             {
                 "identifiant_unique": self.identifiant_unique,
@@ -421,7 +420,7 @@ class DisplayedActeur(BaseActeur):
                 "acteur_selected_action": (
                     acteur_selected_actions[0]
                     if acteur_selected_actions
-                    else actions[0]
+                    else (actions[0] if actions else None)
                 ),
             }
         ).decode("utf-8")

@@ -295,7 +295,7 @@ class ConfiguratorForm(forms.Form):
         ),
         choices=[
             (code, action["libelle"])
-            for code, action in CachedDirectionAction.get_actions().items()
+            for code, action in CachedDirectionAction.get_actions_by_code().items()
         ],
         label="Liste des actions cochées selon la direction",
         help_text=mark_safe(

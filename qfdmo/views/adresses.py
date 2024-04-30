@@ -107,6 +107,9 @@ class AddressesView(FormView):
         kwargs["location"] = "{}"
         kwargs["acteurs"] = DisplayedActeur.objects.none()
 
+        if self.request.GET.get("carte"):
+            kwargs["has_bbox"] = bool(self.request.GET.get("bbox"))
+
         sous_categorie_id = None
         if (
             self.request.GET.get("sous_categorie_objet")

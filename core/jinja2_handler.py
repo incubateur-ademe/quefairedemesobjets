@@ -47,14 +47,15 @@ def is_iframe(request: HttpRequest) -> bool:
 # FIXME : perhaps it is better in util list ?
 def get_action_list(request: HttpRequest) -> List[dict]:
     direction = get_direction(request)
+    actions = (
+        CachedDirectionAction.get_actions_by_direction()[direction]
+        if direction
+        else CachedDirectionAction.get_actions()
+    )
     if action_list := request.GET.get("action_list"):
-        return [
-            a
-            for a in CachedDirectionAction.get_actions_by_direction()[direction]
-            if a["code"] in action_list.split("|")
-        ]
+        return [a for a in actions if a["code"] in action_list.split("|")]
     else:
-        return CachedDirectionAction.get_actions_by_direction()[direction]
+        return actions
 
 
 def action_list_display(request: HttpRequest) -> List[str]:
@@ -81,10 +82,6 @@ def action_by_direction(request: HttpRequest, direction: str):
         }
         for a in CachedDirectionAction.get_actions_by_direction()[direction]
     ]
-
-
-def display_search(request: HttpRequest) -> bool:
-    return not is_carte(request)
 
 
 def display_infos_panel(adresse: DisplayedActeur) -> bool:
@@ -122,7 +119,6 @@ def environment(**options):
         {
             "action_by_direction": action_by_direction,
             "action_list_display": action_list_display,
-            "display_search": display_search,
             "display_infos_panel": display_infos_panel,
             "display_sources_panel": display_sources_panel,
             "display_labels_panel": display_labels_panel,

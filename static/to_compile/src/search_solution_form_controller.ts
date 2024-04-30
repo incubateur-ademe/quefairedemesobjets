@@ -41,6 +41,7 @@ export default class extends Controller<HTMLElement> {
 
         //FIXME: should be renamed
         "loadingSolutions",
+        "addressMissing",
         "NoLocalSolution",
     ]
 
@@ -86,6 +87,7 @@ export default class extends Controller<HTMLElement> {
     declare readonly reparerFilterTargets: HTMLInputElement[]
 
     declare readonly loadingSolutionsTarget: HTMLElement
+    declare readonly addressMissingTarget: HTMLElement
     declare readonly NoLocalSolutionTarget: HTMLElement
 
     static values = { isIframe: Boolean }
@@ -284,6 +286,7 @@ export default class extends Controller<HTMLElement> {
         if (this.checkErrorForm()) return
 
         this.loadingSolutionsTarget.classList.remove("qfdmo-hidden")
+        this.addressMissingTarget.classList.add("qfdmo-hidden")
         this.NoLocalSolutionTarget.classList.add("qfdmo-hidden")
 
         this.searchFormPanelTarget.classList.remove("qfdmo-flex-grow")
