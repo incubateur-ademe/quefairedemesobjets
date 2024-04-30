@@ -66,6 +66,7 @@ export default class extends Controller<HTMLElement> {
     declare readonly proposeAddressPanelTarget: HTMLElement
     declare readonly headerAddressPanelTarget: HTMLElement
 
+    declare readonly hasProposeAddressPanelTarget: boolean
     declare readonly hasHeaderAddressPanelTarget: boolean
 
     declare readonly expandDetailsButtonTarget: HTMLElement
@@ -131,7 +132,9 @@ export default class extends Controller<HTMLElement> {
         this.detailsAddressPanelTarget.classList.remove("qfdmo-h-0")
         this.detailsAddressPanelTarget.classList.remove("qfdmo-h-full")
         this.detailsAddressPanelTarget.classList.add("qfdmo-h-1/2")
-        this.proposeAddressPanelTarget.classList.add("qfdmo-h-0")
+        if (this.hasProposeAddressPanelTarget) {
+            this.proposeAddressPanelTarget.classList.add("qfdmo-h-0")
+        }
         if (this.hasHeaderAddressPanelTarget)
             this.headerAddressPanelTarget.classList.remove("qfdmo-h-0")
         this.collapseDetailsButtonTarget.classList.add("qfdmo-hidden")
@@ -151,7 +154,9 @@ export default class extends Controller<HTMLElement> {
         this.detailsAddressPanelTarget.classList.add("qfdmo-h-0")
         this.detailsAddressPanelTarget.classList.remove("qfdmo-h-full")
         this.detailsAddressPanelTarget.classList.remove("qfdmo-h-1/2")
-        this.proposeAddressPanelTarget.classList.remove("qfdmo-h-0")
+        if (this.hasProposeAddressPanelTarget) {
+            this.proposeAddressPanelTarget.classList.remove("qfdmo-h-0")
+        }
         if (this.hasHeaderAddressPanelTarget)
             this.headerAddressPanelTarget.classList.remove("qfdmo-h-0")
         // desktop
@@ -165,7 +170,9 @@ export default class extends Controller<HTMLElement> {
         this.detailsAddressPanelTarget.classList.remove("qfdmo-h-0")
         this.detailsAddressPanelTarget.classList.remove("qfdmo-h-1/2")
         this.detailsAddressPanelTarget.classList.add("qfdmo-h-full")
-        this.proposeAddressPanelTarget.classList.add("qfdmo-h-0")
+        if (this.hasProposeAddressPanelTarget) {
+            this.proposeAddressPanelTarget.classList.add("qfdmo-h-0")
+        }
         if (this.hasHeaderAddressPanelTarget)
             this.headerAddressPanelTarget.classList.add("qfdmo-h-0")
         this.collapseDetailsButtonTarget.classList.remove("qfdmo-hidden")
