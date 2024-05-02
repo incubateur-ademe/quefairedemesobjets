@@ -1,0 +1,29 @@
+{% extends 'qfdmo/_addresses_partials/filters/panel_filters.html' %}
+
+{% block before_filters %}
+    <h1 class="fr-h4 fr-mt-3w qfdmo-text-center">
+        Actions possibles
+    </h1>
+    <hr>
+    <div class="fr-mt-3w fr-px-1v">
+        {% with action_direction='jai' %}
+            {% include "qfdmo/partials/action_list_by_direction.html" %}
+        {% endwith %}
+        {% with action_direction='jecherche' %}
+            {% include "qfdmo/partials/action_list_by_direction.html"  %}
+        {% endwith %}
+    </div>
+{% endblock %}
+
+
+{% block filters_title %}
+    <h1 class="fr-h4 fr-mt-3w qfdmo-text-center">
+        Filtres
+    </h1>
+{% endblock %}
+{% block filters_content %}
+
+    {% include 'qfdmo/_addresses_partials/filters/_object_filter.html' %}
+    {% include 'qfdmo/_addresses_partials/filters/_labels_filters.html' %}
+
+{% endblock %}

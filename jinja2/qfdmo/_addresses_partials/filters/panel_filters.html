@@ -15,62 +15,70 @@
                         Fermer
                     </button>
                 </div>
-                <div class="fr-modal__content qfdmo-flex-grow">
-                    <h1 class="fr-h4 fr-mt-3w qfdmo-text-center">
-                        Filtres avancés
-                    </h1>
+                <div class="fr-modal__content qfdmo-overflow-y-auto qfdmo-flex-grow">
+
+                    {% block before_filters %}
+                    {% endblock %}
+
+                    {% block filters_title %}
+                        <h1 class="fr-h4 fr-mt-3w qfdmo-text-center">
+                            Filtres avancés
+                        </h1>
+                    {% endblock %}
                     <hr>
 
-                    <fieldset class="fr-fieldset" aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages">
-                        <legend class="qfdmo-hidden">
-                            Éligibles au bonus réparation
-                        </legend>
-                        <div class="fr-fieldset__element fr-fieldset__element--inline qfdmo-font-normal">
-                            <div
-                                class="fr-checkbox-group fr-checkbox-group--sm qfdmo-flex qfdmo-flex-row qfdmo-items-center"
-                            >
-                                {{ form.bonus }}
-                                {{ form.bonus.label_tag() }}
-                            </div>
-                            <span class="fr-hint-text">{{ form.bonus.help_text }}</span>
-                        </div>
-                    </fieldset>
-
-
-                    <fieldset class="fr-fieldset" aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages">
-                        <legend class="qfdmo-hidden">
-                            Type d'enseigne ESS
-                        </legend>
-                        <div class="fr-fieldset__element fr-fieldset__element--inline qfdmo-font-normal">
-                            <div
-                                class="fr-checkbox-group fr-checkbox-group--sm qfdmo-flex qfdmo-flex-row qfdmo-items-center"
-                            >
-                                {{ form.ess }}
-                                {{ form.ess.label_tag() }}
-                            </div>
-                            <span class="fr-hint-text">{{ form.ess.help_text }}</span>
-                        </div>
-                    </fieldset>
-
-                    <div
-                        class="qfdmo-flex qfdmo-flex-row qfdmo-items-center"
-                    >
+                    {% block filters_content %}
                         <fieldset class="fr-fieldset" aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages">
                             <legend class="qfdmo-hidden">
-                                Enseignes labellisées Répar’Acteurs
+                                Éligibles au bonus réparation
                             </legend>
                             <div class="fr-fieldset__element fr-fieldset__element--inline qfdmo-font-normal">
                                 <div
                                     class="fr-checkbox-group fr-checkbox-group--sm qfdmo-flex qfdmo-flex-row qfdmo-items-center"
                                 >
-                                    {{ form.label_reparacteur }}
-                                    {{ form.label_reparacteur.label_tag() }}
+                                    {{ form.bonus }}
+                                    {{ form.bonus.label_tag() }}
                                 </div>
-                                <span class="fr-hint-text">{{ form.label_reparacteur.help_text }}</span>
+                                <span class="fr-hint-text">{{ form.bonus.help_text }}</span>
                             </div>
                         </fieldset>
-                        {% include "qfdmo/partials/label_reparacteur_icon.html" %}
-                    </div>
+
+
+                        <fieldset class="fr-fieldset" aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages">
+                            <legend class="qfdmo-hidden">
+                                Type d'enseigne ESS
+                            </legend>
+                            <div class="fr-fieldset__element fr-fieldset__element--inline qfdmo-font-normal">
+                                <div
+                                    class="fr-checkbox-group fr-checkbox-group--sm qfdmo-flex qfdmo-flex-row qfdmo-items-center"
+                                >
+                                    {{ form.ess }}
+                                    {{ form.ess.label_tag() }}
+                                </div>
+                                <span class="fr-hint-text">{{ form.ess.help_text }}</span>
+                            </div>
+                        </fieldset>
+
+                        <div
+                            class="qfdmo-flex qfdmo-flex-row qfdmo-items-center"
+                        >
+                            <fieldset class="fr-fieldset" aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages">
+                                <legend class="qfdmo-hidden">
+                                    Enseignes labellisées Répar’Acteurs
+                                </legend>
+                                <div class="fr-fieldset__element fr-fieldset__element--inline qfdmo-font-normal">
+                                    <div
+                                        class="fr-checkbox-group fr-checkbox-group--sm qfdmo-flex qfdmo-flex-row qfdmo-items-center"
+                                    >
+                                        {{ form.label_reparacteur }}
+                                        {{ form.label_reparacteur.label_tag() }}
+                                    </div>
+                                    <span class="fr-hint-text">{{ form.label_reparacteur.help_text }}</span>
+                                </div>
+                            </fieldset>
+                            {% include "qfdmo/partials/label_reparacteur_icon.html" %}
+                        </div>
+                    {% endblock %}
                 </div>
                 <div class="fr-modal__footer">
                     <div

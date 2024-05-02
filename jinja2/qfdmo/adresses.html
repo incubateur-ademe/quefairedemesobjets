@@ -36,9 +36,17 @@
                         {% include 'qfdmo/_addresses_partials/adresse_input_form.html' %}
                     </div>
 
-                    <div class="fr-ml-1w md:qfdmo-mt-3w">
-                        <button class="fr-btn qfdmo-float-right md:qfdmo-float-right">
+                    <div class="fr-mb-1w md:qfdmo-mt-4w qfdmo-float-right">
+
+                        <button class="fr-btn fr-ml-1w qfdmo-float-right">
                             Rechercher
+                        </button>
+                        <button
+                            class="fr-btn fr-btn--secondary fr-ml-1w fr-btn--icon-left fr-icon-equalizer-line qfdmo-float-right"
+                            type="button"
+                            data-action="click -> search-solution-form#toggleAdvancedFiltersWithSubmit"
+                            >
+                            Filtres
                         </button>
                     </div>
                 </div>
@@ -47,18 +55,17 @@
                     class="qfdmo-relative qfdmo-h-0 qfdmo-duration-300 qfdmo-overflow-hidden qfdmo-z-1
                     qfdmo-flex qfdmo-flex-col qfdmo-flex-grow"
                 >
-                    <turbo-frame id="addressesPanel"
-                        data-search-solution-form-target="addressesPanel"
-                        class="qfdmo-relative qfdmo-h-0 qfdmo-duration-300 qfdmo-overflow-hidden qfdmo-z-1
-                        qfdmo-flex qfdmo-flex-col qfdmo-flex-grow"
-                    >
-                        <!-- Panel «Map» -->
-                        {% include 'qfdmo/_addresses_partials/map_and_detail.html' %}
-                    </turbo-frame>
+                    <!-- Panel «Map» -->
+                    {% include 'qfdmo/_addresses_partials/map_and_detail.html' %}
+                </turbo-frame>
+
+                <!-- Panel «Filtres avancés»
+                TODO : update this panel with filters -->
+                {% include 'qfdmo/_addresses_partials/filters/carte_filters.html' %}
 
             {% else %}
                 <!-- Panel «Filtres avancés» -->
-                {% include 'qfdmo/_addresses_partials/iframe_advanced_filters.html' %}
+                {% include 'qfdmo/_addresses_partials/filters/iframe_advanced_filters.html' %}
                 <!-- Panel «Modifier ma recherche» -->
                 {% include 'qfdmo/_addresses_partials/iframe_back_to_form.html' %}
                 <!-- Panel «Formulaire de recherche» -->
