@@ -78,15 +78,20 @@ class DisplayedActeurLabelQualiteInline(admin.StackedInline):
 class BasePropositionServiceForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["action"].queryset = Action.objects.annotate(
-            libelle_unaccent=Unaccent(Lower("libelle")),
-        ).order_by("libelle_unaccent")
-        self.fields["acteur_service"].queryset = ActeurService.objects.annotate(
-            libelle_unaccent=Unaccent(Lower("libelle")),
-        ).order_by("libelle_unaccent")
-        self.fields["sous_categories"].queryset = SousCategorieObjet.objects.annotate(
-            libelle_unaccent=Unaccent(Lower("libelle")),
-        ).order_by("libelle_unaccent")
+        if "action" in self.fields:
+            self.fields["action"].queryset = Action.objects.annotate(
+                libelle_unaccent=Unaccent(Lower("libelle")),
+            ).order_by("libelle_unaccent")
+        if "acteur_service" in self.fields:
+            self.fields["acteur_service"].queryset = ActeurService.objects.annotate(
+                libelle_unaccent=Unaccent(Lower("libelle")),
+            ).order_by("libelle_unaccent")
+        if "sous_categories" in self.fields:
+            self.fields["sous_categories"].queryset = (
+                SousCategorieObjet.objects.annotate(
+                    libelle_unaccent=Unaccent(Lower("libelle")),
+                ).order_by("libelle_unaccent")
+            )
 
     filter_horizontal = [
         "sous_categories",
@@ -139,7 +144,8 @@ class DisplayedPropositionServiceInline(
 class BaseActeurForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["source"].queryset = Source.objects.all().order_by("libelle")
+        if "source" in self.fields:
+            self.fields["source"].queryset = Source.objects.all().order_by("libelle")
 
 
 class BaseActeurAdmin(admin.GISModelAdmin):
