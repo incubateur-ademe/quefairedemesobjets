@@ -4,6 +4,7 @@ from typing import List
 from urllib.parse import quote_plus
 
 from django.conf import settings
+from django.db.models.query import QuerySet
 from django.http import HttpRequest
 from django.templatetags.static import static
 from django.urls import reverse
@@ -11,6 +12,7 @@ from django.urls import reverse
 from core.utils import get_direction
 from jinja2 import Environment
 from qfdmo.models import CachedDirectionAction, DisplayedActeur
+from qfdmo.models.action import ActionGroup
 
 
 # FIXME : could be tested
@@ -56,6 +58,10 @@ def get_action_list(request: HttpRequest) -> List[dict]:
         return [a for a in actions if a["code"] in action_list.split("|")]
     else:
         return actions
+
+
+def action_groups(request: HttpRequest) -> QuerySet[ActionGroup]:
+    return ActionGroup.objects.all().order_by("order")
 
 
 def action_list_display(request: HttpRequest) -> List[str]:
@@ -119,6 +125,7 @@ def environment(**options):
         {
             "action_by_direction": action_by_direction,
             "action_list_display": action_list_display,
+            "action_groups": action_groups,
             "display_infos_panel": display_infos_panel,
             "display_sources_panel": display_sources_panel,
             "display_labels_panel": display_labels_panel,

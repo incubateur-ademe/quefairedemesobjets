@@ -26,6 +26,17 @@ const COLOR_MAPPING: object = {
     "brown-caramel": "#C08C65",
     "brown-opera": "#BD987A",
     "beige-gris-galet": "#AEA397",
+    "pink-tuile-850": "#fcbfb7",
+    "green-menthe-850": "#73e0cf",
+    "green-bourgeon-850": "#95e257",
+    "yellow-moutarde-850": "#fcc63a",
+    "blue-ecume-850": "#bfccfb",
+    "green-menthe-sun-373": "#37635f",
+    "blue-cumulus-sun-368": "#3558A2",
+    "orange-terre-battue-main-645": "#E4794A",
+    "brown-cafe-creme-main-782": "#D1B781",
+    "purple-glycine-main-494": "#A558A0",
+    "green-menthe-main-548": "#009081",
 }
 
 function get_color_code(colorName: string): string {

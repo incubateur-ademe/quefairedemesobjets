@@ -2,6 +2,7 @@ from django import forms
 from django.utils.safestring import mark_safe
 
 from qfdmo.models import CachedDirectionAction, DagRun, DagRunStatus, SousCategorieObjet
+from qfdmo.models.action import ActionGroup
 
 
 class AutoCompleteInput(forms.Select):
@@ -213,6 +214,17 @@ class CarteAddressesForm(IframeAddressesForm):
         label="Saisir une adresse ",
         required=False,
     )
+    action_group = forms.ModelMultipleChoiceField(
+        widget=forms.CheckboxSelectMultiple(
+            attrs={
+                "class": ("fr-checkbox"),
+                "data-search-solution-form-target": "actionGroup",
+            },
+        ),
+        queryset=ActionGroup.objects.all().order_by("order"),
+        label="Actions",
+        required=False,
+    )
 
 
 class DagsForm(forms.Form):
@@ -229,6 +241,25 @@ class DagsForm(forms.Form):
 
 
 class ConfiguratorForm(forms.Form):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.load_choices()
+
+    def load_choices(self, first_direction=None):
+        self.fields["direction"].choices = [
+            (direction["code"], direction["libelle"])
+            for direction in CachedDirectionAction.get_directions()
+        ]
+        self.fields["first_dir"].choices = [
+            ("first_" + direction["code"], direction["libelle"])
+            for direction in CachedDirectionAction.get_directions()
+        ]
+        self.fields["action_list"].choices = [
+            (code, action["libelle"])
+            for code, action in CachedDirectionAction.get_actions_by_code().items()
+        ]
+
     iframe_mode = forms.ChoiceField(
         widget=SegmentedControlSelect(
             attrs={
@@ -255,10 +286,6 @@ class ConfiguratorForm(forms.Form):
             },
             fieldset_attrs={},
         ),
-        choices=[
-            (direction["code"], direction["libelle"])
-            for direction in CachedDirectionAction.get_directions()
-        ],
         label="Direction des actions",
         required=False,
     )
@@ -271,10 +298,6 @@ class ConfiguratorForm(forms.Form):
             },
             fieldset_attrs={},
         ),
-        choices=[
-            ("first_" + direction["code"], direction["libelle"])
-            for direction in CachedDirectionAction.get_directions()
-        ],
         label="Direction affichée en premier dans la liste des options de direction",
         help_text="Cette option n'est disponible que dans la version formulaire",
         required=False,
@@ -293,10 +316,7 @@ class ConfiguratorForm(forms.Form):
                 ),
             },
         ),
-        choices=[
-            (code, action["libelle"])
-            for code, action in CachedDirectionAction.get_actions_by_code().items()
-        ],
+        choices=[],
         label="Liste des actions cochées selon la direction",
         help_text=mark_safe(
             "Pour la direction « Je cherche » les actions possibles"

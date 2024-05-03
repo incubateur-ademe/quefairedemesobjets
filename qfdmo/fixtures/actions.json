@@ -1,119 +1,286 @@
 [
-    {
-        "model": "qfdmo.action",
-        "fields": {
-            "code": "reparer",
-            "libelle": "réparer",
-            "afficher": true,
-            "description": null,
-            "order": 5,
-            "couleur": "green-menthe",
-            "icon": "fr-icon-action-reparer",
-            "directions": [["jai"]]
-        }
-    },
-    {
-        "model": "qfdmo.action",
-        "fields": {
-            "code": "acheter",
-            "libelle": "acheter de seconde main",
-            "afficher": true,
-            "description": "acheter d'occasion",
-            "order": 8,
-            "couleur": "brown-cafe-creme",
-            "icon": "fr-icon-action-acheter",
-            "directions": [["jecherche"]]
-        }
-    },
-    {
-        "model": "qfdmo.action",
-        "fields": {
-            "code": "revendre",
-            "libelle": "vendre",
-            "afficher": true,
-            "description": null,
-            "order": 9,
-            "couleur": "brown-cafe-creme",
-            "icon": "fr-icon-action-vendre",
-            "directions": [["jai"]]
-        }
-    },
-    {
-        "model": "qfdmo.action",
-        "fields": {
-            "code": "donner",
-            "libelle": "donner",
-            "afficher": true,
-            "description": null,
-            "order": 6,
-            "couleur": "yellow-tournesol",
-            "icon": "fr-icon-action-donner",
-            "directions": [["jai"]]
-        }
-    },
-    {
-        "model": "qfdmo.action",
-        "fields": {
-            "code": "louer",
-            "libelle": "louer",
-            "afficher": true,
-            "description": null,
-            "order": 3,
-            "couleur": "purple-glycine",
-            "icon": "fr-icon-action-louer",
-            "directions": [["jecherche"]]
-        }
-    },
-    {
-        "model": "qfdmo.action",
-        "fields": {
-            "code": "mettreenlocation",
-            "libelle": "mettre en location",
-            "afficher": true,
-            "description": "Mettre en location",
-            "order": 4,
-            "couleur": "purple-glycine",
-            "icon": "fr-icon-action-mettreenlocation",
-            "directions": [["jai"]]
-        }
-    },
-    {
-        "model": "qfdmo.action",
-        "fields": {
-            "code": "emprunter",
-            "libelle": "emprunter",
-            "afficher": true,
-            "description": null,
-            "order": 2,
-            "couleur": "orange-terre-battue",
-            "icon": "fr-icon-action-emprunter",
-            "directions": [["jecherche"]]
-        }
-    },
-    {
-        "model": "qfdmo.action",
-        "fields": {
-            "code": "preter",
-            "libelle": "prêter",
-            "afficher": true,
-            "description": null,
-            "order": 1,
-            "couleur": "orange-terre-battue",
-            "icon": "fr-icon-action-preter",
-            "directions": [["jai"]]
-        }
-    },
-    {
-        "model": "qfdmo.action",
-        "fields": {
-            "code": "echanger",
-            "libelle": "échanger",
-            "afficher": true,
-            "description": null,
-            "order": 7,
-            "couleur": "blue-cumulus",
-            "icon": "fr-icon-action-echanger",
-            "directions": [["jai"], ["jecherche"]]
-        }
+{
+    "model": "qfdmo.actiondirection",
+    "fields": {
+        "code": "jai",
+        "order": 1,
+        "libelle": "J'ai un objet"
     }
+},
+{
+    "model": "qfdmo.actiondirection",
+    "fields": {
+        "code": "jecherche",
+        "order": 2,
+        "libelle": "Je recherche un objet"
+    }
+},
+{
+    "model": "qfdmo.actiongroup",
+    "fields": {
+        "code": "reparer",
+        "afficher": true,
+        "description": null,
+        "order": 1,
+        "couleur": "green-menthe-main-548",
+        "icon": "fr-icon-tools-fill"
+    }
+},
+{
+    "model": "qfdmo.actiongroup",
+    "fields": {
+        "code": "donner_echanger",
+        "afficher": true,
+        "description": null,
+        "order": 2,
+        "couleur": "blue-cumulus-sun-368",
+        "icon": "fr-icon-hand-heart-line"
+    }
+},
+{
+    "model": "qfdmo.actiongroup",
+    "fields": {
+        "code": "emprunter_preter_louer",
+        "afficher": true,
+        "description": null,
+        "order": 3,
+        "couleur": "orange-terre-battue-main-645",
+        "icon": "fr-icon-arrow-go-back-line"
+    }
+},
+{
+    "model": "qfdmo.actiongroup",
+    "fields": {
+        "code": "vendre_acheter",
+        "afficher": true,
+        "description": null,
+        "order": 4,
+        "couleur": "brown-cafe-creme-main-782",
+        "icon": "fr-icon-money-euro-circle-line"
+    }
+},
+{
+    "model": "qfdmo.actiongroup",
+    "fields": {
+        "code": "trier",
+        "afficher": true,
+        "description": null,
+        "order": 5,
+        "couleur": "purple-glycine-main-494",
+        "icon": "fr-icon-recycle-line"
+    }
+},
+{
+    "model": "qfdmo.action",
+    "fields": {
+        "code": "reparer",
+        "libelle": "réparer",
+        "libelle_groupe": "Je répare",
+        "afficher": true,
+        "description": null,
+        "order": 5,
+        "couleur": "green-menthe",
+        "icon": "fr-icon-action-reparer",
+        "action_group": [
+            "reparer"
+        ],
+        "directions": [
+            [
+                "jai"
+            ]
+        ]
+    }
+},
+{
+    "model": "qfdmo.action",
+    "fields": {
+        "code": "acheter",
+        "libelle": "acheter de seconde main",
+        "libelle_groupe": "J'achête",
+        "afficher": true,
+        "description": "acheter d'occasion",
+        "order": 8,
+        "couleur": "brown-cafe-creme",
+        "icon": "fr-icon-action-acheter",
+        "action_group": [
+            "vendre_acheter"
+        ],
+        "directions": [
+            [
+                "jecherche"
+            ]
+        ]
+    }
+},
+{
+    "model": "qfdmo.action",
+    "fields": {
+        "code": "revendre",
+        "libelle": "vendre",
+        "libelle_groupe": "Je vends",
+        "afficher": true,
+        "description": null,
+        "order": 9,
+        "couleur": "brown-cafe-creme",
+        "icon": "fr-icon-action-vendre",
+        "action_group": [
+            "vendre_acheter"
+        ],
+        "directions": [
+            [
+                "jai"
+            ]
+        ]
+    }
+},
+{
+    "model": "qfdmo.action",
+    "fields": {
+        "code": "donner",
+        "libelle": "donner",
+        "libelle_groupe": "Je donne",
+        "afficher": true,
+        "description": null,
+        "order": 6,
+        "couleur": "yellow-tournesol",
+        "icon": "fr-icon-action-donner",
+        "action_group": [
+            "donner_echanger"
+        ],
+        "directions": [
+            [
+                "jai"
+            ]
+        ]
+    }
+},
+{
+    "model": "qfdmo.action",
+    "fields": {
+        "code": "louer",
+        "libelle": "louer",
+        "libelle_groupe": "Je loue",
+        "afficher": true,
+        "description": null,
+        "order": 3,
+        "couleur": "purple-glycine",
+        "icon": "fr-icon-action-louer",
+        "action_group": [
+            "emprunter_preter_louer"
+        ],
+        "directions": [
+            [
+                "jecherche"
+            ]
+        ]
+    }
+},
+{
+    "model": "qfdmo.action",
+    "fields": {
+        "code": "mettreenlocation",
+        "libelle": "mettre en location",
+        "libelle_groupe": "Je loue",
+        "afficher": true,
+        "description": "Mettre en location",
+        "order": 4,
+        "couleur": "purple-glycine",
+        "icon": "fr-icon-action-mettreenlocation",
+        "action_group": [
+            "emprunter_preter_louer"
+        ],
+        "directions": [
+            [
+                "jai"
+            ]
+        ]
+    }
+},
+{
+    "model": "qfdmo.action",
+    "fields": {
+        "code": "emprunter",
+        "libelle": "emprunter",
+        "libelle_groupe": "J'emprunte",
+        "afficher": true,
+        "description": null,
+        "order": 2,
+        "couleur": "orange-terre-battue",
+        "icon": "fr-icon-action-emprunter",
+        "action_group": [
+            "emprunter_preter_louer"
+        ],
+        "directions": [
+            [
+                "jecherche"
+            ]
+        ]
+    }
+},
+{
+    "model": "qfdmo.action",
+    "fields": {
+        "code": "preter",
+        "libelle": "prêter",
+        "libelle_groupe": "Je prête",
+        "afficher": true,
+        "description": null,
+        "order": 1,
+        "couleur": "orange-terre-battue",
+        "icon": "fr-icon-action-preter",
+        "action_group": [
+            "emprunter_preter_louer"
+        ],
+        "directions": [
+            [
+                "jai"
+            ]
+        ]
+    }
+},
+{
+    "model": "qfdmo.action",
+    "fields": {
+        "code": "echanger",
+        "libelle": "échanger",
+        "libelle_groupe": "J'échange",
+        "afficher": true,
+        "description": null,
+        "order": 7,
+        "couleur": "blue-cumulus",
+        "icon": "fr-icon-action-echanger",
+        "action_group": [
+            "donner_echanger"
+        ],
+        "directions": [
+            [
+                "jai"
+            ],
+            [
+                "jecherche"
+            ]
+        ]
+    }
+},
+{
+    "model": "qfdmo.action",
+    "fields": {
+        "code": "trier",
+        "libelle": "trier",
+        "libelle_groupe": "Je trie",
+        "afficher": false,
+        "description": "trier pour recycler",
+        "order": 10,
+        "couleur": "yellow-tournesol",
+        "icon": "fr-icon-recycle-line",
+        "action_group": [
+            "trier"
+        ],
+        "directions": [
+            [
+                "jai"
+            ]
+        ]
+    }
+}
 ]
