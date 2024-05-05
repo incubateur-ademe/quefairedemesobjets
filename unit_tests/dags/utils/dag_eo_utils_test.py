@@ -18,7 +18,7 @@ def mock_ti():
 
     df_api = pd.DataFrame(
         {
-            "nom_de_lorganisme": ["Org-A", "Org-B"],
+            "nom_de_lorganisme": ["Eco1", "Eco2"],
             "id_point_apport_ou_reparation": ["1", "2"],
             "acteur_type_id": [
                 "point d'apport volontaire privé",
@@ -36,6 +36,11 @@ def mock_ti():
                 "13 Rue Pierre et Marie Curie, 75005 Paris",
                 "Place Jeanne d'Arc, 75013 Paris",
             ],
+            "produitsdechets_acceptes": ["téléphones portables", "ecrans"],
+            "point_dapport_de_service_reparation": [False, True],
+            "point_dapport_pour_reemploi": [False, False],
+            "point_de_reparation": [True, True],
+            "point_de_collecte_ou_de_reprise_des_dechets": [True, True],
             "adresse_complement": ["", ""],
             "enseigne_commerciale": ["enseigne1", "enseigne2"],
             "siret": [None, "33079903400085"],
@@ -228,7 +233,6 @@ def test_create_actors(mock_ti, mock_config):
     result = create_actors(**kwargs)
     df_result = result["df"]
     metadata = result["metadata"]
-    df_result.to_csv("test_actors.csv")
 
     assert not df_result.empty
     assert len(df_result) == 2
@@ -242,7 +246,7 @@ def test_serialize_to_json(mock_ti):
 
     kwargs = {"ti": mock_ti}
     result_df = serialize_to_json(**kwargs)
-    assert not result_df.empty, "The DataFrame should not be empty"
+    assert len(result_df) == 2
     assert "row_updates" in result_df.columns, "DataFrame should contain 'row_updates'"
     assert isinstance(
         result_df["row_updates"].iloc[0], str
