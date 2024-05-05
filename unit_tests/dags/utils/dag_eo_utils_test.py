@@ -234,7 +234,7 @@ def test_create_actors(mock_ti, mock_config):
     assert len(df_result) == 2
     assert metadata["number_of_duplicates"] == 0
     assert metadata["added_rows"] == len(df_result)
-
+    assert "siren" not in df_result.columns
     assert "sous_categories" in result["config"]
 
 
