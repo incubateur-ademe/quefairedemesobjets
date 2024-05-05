@@ -353,6 +353,7 @@ def create_actors(**kwargs):
 def create_labels(**kwargs):
     data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
     labels = data_dict["labels"]
+    df_acteurtype = data_dict["acteurtype"]
     df_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
     rows_list = []
     for _, row in df_actors.iterrows():
@@ -363,23 +364,27 @@ def create_labels(**kwargs):
                     {
                         "acteur_id": row["identifiant_unique"],
                         "labelqualite_id": labels.loc[
-                            labels["code"].lower() == row["ecoorganisme"].lower(), "id"
+                            labels["code"].str.lower() == row["ecoorganisme"].lower(),
+                            "id",
                         ].tolist()[0],
                         "labelqualite": labels.loc[
-                            labels["code"].lower() == row["ecoorganisme"].lower(),
+                            labels["code"].str.lower() == row["ecoorganisme"].lower(),
                             "libelle",
                         ].tolist()[0],
                     }
                 )
-        if row["acteur_type_id"] == "Association, entreprise de l'ESS":
+        ess_acteur_type_id = df_acteurtype.loc[
+            df_acteurtype["code"].str.lower() == "ess", "id"
+        ].tolist()[0]
+        if row["acteur_type_id"] == ess_acteur_type_id:
             rows_list.append(
                 {
                     "acteur_id": row["identifiant_unique"],
                     "labelqualite_id": labels.loc[
-                        labels["code"].lower() == "ess", "id"
+                        labels["code"].str.lower() == "ess", "id"
                     ].tolist()[0],
                     "labelqualite": labels.loc[
-                        labels["code"].lower() == "ess", "libelle"
+                        labels["code"].str.lower() == "ess", "libelle"
                     ].tolist()[0],
                 }
             )
