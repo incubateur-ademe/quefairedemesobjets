@@ -351,7 +351,6 @@ def create_actors(**kwargs):
 
 
 def create_labels(**kwargs):
-    # TODO: ADD ESS and make labelqualite fetched from DB using code
     data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
     labels = data_dict["labels"]
     df_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
@@ -363,13 +362,27 @@ def create_labels(**kwargs):
                 rows_list.append(
                     {
                         "acteur_id": row["identifiant_unique"],
-                        "labelqualite_id": 3,
+                        "labelqualite_id": labels.loc[
+                            labels["code"].lower() == row["ecoorganisme"].lower(), "id"
+                        ].tolist()[0],
                         "labelqualite": labels.loc[
-                            labels["id"] == 3, "libelle"
+                            labels["code"].lower() == row["ecoorganisme"].lower(),
+                            "libelle",
                         ].tolist()[0],
                     }
                 )
-
+        if row["acteur_type_id"] == "Association, entreprise de l'ESS":
+            rows_list.append(
+                {
+                    "acteur_id": row["identifiant_unique"],
+                    "labelqualite_id": labels.loc[
+                        labels["code"].lower() == "ess", "id"
+                    ].tolist()[0],
+                    "labelqualite": labels.loc[
+                        labels["code"].lower() == "ess", "libelle"
+                    ].tolist()[0],
+                }
+            )
     df_labels = pd.DataFrame(
         rows_list, columns=["acteur_id", "labelqualite_id", "labelqualite"]
     )
