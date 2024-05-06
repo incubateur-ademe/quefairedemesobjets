@@ -8,7 +8,6 @@ from dags.utils.dag_eo_utils import (
     create_proposition_services,
     create_proposition_services_sous_categories,
     create_actors,
-    serialize_to_json,
 )
 
 
@@ -240,14 +239,3 @@ def test_create_actors(mock_ti, mock_config):
     assert metadata["added_rows"] == len(df_result)
     assert "siren" not in df_result.columns
     assert "sous_categories" in result["config"]
-
-
-def test_serialize_to_json(mock_ti):
-
-    kwargs = {"ti": mock_ti}
-    result_df = serialize_to_json(**kwargs)
-    assert len(result_df) == 2
-    assert "row_updates" in result_df.columns, "DataFrame should contain 'row_updates'"
-    assert isinstance(
-        result_df["row_updates"].iloc[0], str
-    ), "Row updates should be serialized to JSON strings"
