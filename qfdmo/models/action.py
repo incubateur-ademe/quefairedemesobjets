@@ -111,7 +111,7 @@ class ActionDirection(CodeAsNaturalKeyModel):
         return self.libelle
 
 
-class ActionGroup(CodeAsNaturalKeyModel):
+class GroupeAction(CodeAsNaturalKeyModel):
     class Meta:
         verbose_name = "Groupe d'actions"
         verbose_name_plural = "Groupes d'actions"
@@ -184,8 +184,8 @@ brown-cafe-creme-main-782, purple-glycine-main-494, green-menthe-main-548
         blank=True,
         help_text="Icône du badge à choisir dans le <a href='https://www.systeme-de-design.gouv.fr/elements-d-interface/fondamentaux-techniques/icones' rel='noopener' target='_blank'>DSFR</a>",  # noqa E501
     )
-    action_group = models.ForeignKey(
-        ActionGroup,
+    groupe_action = models.ForeignKey(
+        GroupeAction,
         on_delete=models.CASCADE,
         related_name="actions",
         null=True,

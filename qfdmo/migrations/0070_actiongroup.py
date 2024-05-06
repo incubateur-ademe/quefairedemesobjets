@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name="ActionGroup",
+            name="GroupeAction",
             fields=[
                 ("id", models.AutoField(primary_key=True, serialize=False)),
                 ("code", models.CharField(max_length=255, unique=True)),
@@ -58,13 +58,13 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name="action",
-            name="action_group",
+            name="groupe_action",
             field=models.ForeignKey(
                 blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="actions",
-                to="qfdmo.actiongroup",
+                to="qfdmo.GroupeAction",
             ),
         ),
     ]

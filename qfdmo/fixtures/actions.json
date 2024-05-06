@@ -16,7 +16,7 @@
         }
     },
     {
-        "model": "qfdmo.actiongroup",
+        "model": "qfdmo.GroupeAction",
         "fields": {
             "code": "reparer",
             "afficher": true,
@@ -27,7 +27,7 @@
         }
     },
     {
-        "model": "qfdmo.actiongroup",
+        "model": "qfdmo.GroupeAction",
         "fields": {
             "code": "donner_echanger",
             "afficher": true,
@@ -38,7 +38,7 @@
         }
     },
     {
-        "model": "qfdmo.actiongroup",
+        "model": "qfdmo.GroupeAction",
         "fields": {
             "code": "emprunter_preter_louer",
             "afficher": true,
@@ -49,7 +49,7 @@
         }
     },
     {
-        "model": "qfdmo.actiongroup",
+        "model": "qfdmo.GroupeAction",
         "fields": {
             "code": "vendre_acheter",
             "afficher": true,
@@ -60,7 +60,7 @@
         }
     },
     {
-        "model": "qfdmo.actiongroup",
+        "model": "qfdmo.GroupeAction",
         "fields": {
             "code": "trier",
             "afficher": true,
@@ -81,7 +81,7 @@
             "order": 5,
             "couleur": "green-menthe",
             "icon": "fr-icon-action-reparer",
-            "action_group": ["reparer"],
+            "groupe_action": ["reparer"],
             "directions": [["jai"]]
         }
     },
@@ -96,7 +96,7 @@
             "order": 8,
             "couleur": "brown-cafe-creme",
             "icon": "fr-icon-action-acheter",
-            "action_group": ["vendre_acheter"],
+            "groupe_action": ["vendre_acheter"],
             "directions": [["jecherche"]]
         }
     },
@@ -111,7 +111,7 @@
             "order": 9,
             "couleur": "brown-cafe-creme",
             "icon": "fr-icon-action-vendre",
-            "action_group": ["vendre_acheter"],
+            "groupe_action": ["vendre_acheter"],
             "directions": [["jai"]]
         }
     },
@@ -126,7 +126,7 @@
             "order": 6,
             "couleur": "yellow-tournesol",
             "icon": "fr-icon-action-donner",
-            "action_group": ["donner_echanger"],
+            "groupe_action": ["donner_echanger"],
             "directions": [["jai"]]
         }
     },
@@ -141,7 +141,7 @@
             "order": 3,
             "couleur": "purple-glycine",
             "icon": "fr-icon-action-louer",
-            "action_group": ["emprunter_preter_louer"],
+            "groupe_action": ["emprunter_preter_louer"],
             "directions": [["jecherche"]]
         }
     },
@@ -156,7 +156,7 @@
             "order": 4,
             "couleur": "purple-glycine",
             "icon": "fr-icon-action-mettreenlocation",
-            "action_group": ["emprunter_preter_louer"],
+            "groupe_action": ["emprunter_preter_louer"],
             "directions": [["jai"]]
         }
     },
@@ -171,7 +171,7 @@
             "order": 2,
             "couleur": "orange-terre-battue",
             "icon": "fr-icon-action-emprunter",
-            "action_group": ["emprunter_preter_louer"],
+            "groupe_action": ["emprunter_preter_louer"],
             "directions": [["jecherche"]]
         }
     },
@@ -186,7 +186,7 @@
             "order": 1,
             "couleur": "orange-terre-battue",
             "icon": "fr-icon-action-preter",
-            "action_group": ["emprunter_preter_louer"],
+            "groupe_action": ["emprunter_preter_louer"],
             "directions": [["jai"]]
         }
     },
@@ -201,7 +201,7 @@
             "order": 7,
             "couleur": "blue-cumulus",
             "icon": "fr-icon-action-echanger",
-            "action_group": ["donner_echanger"],
+            "groupe_action": ["donner_echanger"],
             "directions": [["jai"], ["jecherche"]]
         }
     },
@@ -216,7 +216,7 @@
             "order": 10,
             "couleur": "yellow-tournesol",
             "icon": "fr-icon-recycle-line",
-            "action_group": ["trier"],
+            "groupe_action": ["trier"],
             "directions": [["jai"]]
         }
     }

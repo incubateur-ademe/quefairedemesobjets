@@ -12,7 +12,7 @@ from django.urls import reverse
 from core.utils import get_direction
 from jinja2 import Environment
 from qfdmo.models import CachedDirectionAction, DisplayedActeur
-from qfdmo.models.action import ActionGroup
+from qfdmo.models.action import GroupeAction
 
 
 # FIXME : could be tested
@@ -60,8 +60,8 @@ def get_action_list(request: HttpRequest) -> List[dict]:
         return actions
 
 
-def action_groups(request: HttpRequest) -> QuerySet[ActionGroup]:
-    return ActionGroup.objects.all().order_by("order")
+def groupe_actions(request: HttpRequest) -> QuerySet[GroupeAction]:
+    return GroupeAction.objects.all().order_by("order")
 
 
 def action_list_display(request: HttpRequest) -> List[str]:
@@ -125,7 +125,7 @@ def environment(**options):
         {
             "action_by_direction": action_by_direction,
             "action_list_display": action_list_display,
-            "action_groups": action_groups,
+            "groupe_actions": groupe_actions,
             "display_infos_panel": display_infos_panel,
             "display_sources_panel": display_sources_panel,
             "display_labels_panel": display_labels_panel,

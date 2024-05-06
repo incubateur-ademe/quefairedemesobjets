@@ -2,7 +2,7 @@ from django import forms
 from django.utils.safestring import mark_safe
 
 from qfdmo.models import CachedDirectionAction, DagRun, DagRunStatus, SousCategorieObjet
-from qfdmo.models.action import ActionGroup
+from qfdmo.models.action import GroupeAction
 
 
 class AutoCompleteInput(forms.Select):
@@ -214,14 +214,14 @@ class CarteAddressesForm(IframeAddressesForm):
         label="Saisir une adresse ",
         required=False,
     )
-    action_group = forms.ModelMultipleChoiceField(
+    groupe_action = forms.ModelMultipleChoiceField(
         widget=forms.CheckboxSelectMultiple(
             attrs={
                 "class": ("fr-checkbox"),
-                "data-search-solution-form-target": "actionGroup",
+                "data-search-solution-form-target": "GroupeAction",
             },
         ),
-        queryset=ActionGroup.objects.all().order_by("order"),
+        queryset=GroupeAction.objects.all().order_by("order"),
         label="Actions",
         required=False,
     )

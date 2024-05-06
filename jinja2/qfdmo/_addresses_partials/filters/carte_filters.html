@@ -9,8 +9,8 @@
         class="fr-fieldset"
         aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages"
     >
-        <legend class="qfdmo-hidden">{{form.action_group.label_tag()}}</legend>
-        {% for action in action_groups(request) %}
+        <legend class="qfdmo-hidden">{{form.groupe_action.label_tag()}}</legend>
+        {% for action in groupe_actions(request) %}
             <div class="fr-fieldset__element">
                 <div
                     class="fr-checkbox-group fr-checkbox-group--sm"

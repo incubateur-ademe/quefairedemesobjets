@@ -23,7 +23,7 @@ class TestActionNomAsNaturalKeyHeritage:
             "code": "Test Object",
             "libelle": "Test Objet Displayed",
             "libelle_groupe": "",
-            "action_group": None,
+            "groupe_action": None,
             "order": 1,
             "couleur": "yellow-tournesol",
             "icon": None,
