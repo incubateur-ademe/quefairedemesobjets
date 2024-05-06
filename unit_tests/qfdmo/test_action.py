@@ -22,6 +22,8 @@ class TestActionNomAsNaturalKeyHeritage:
             "afficher": True,
             "code": "Test Object",
             "libelle": "Test Objet Displayed",
+            "libelle_groupe": "",
+            "action_group": None,
             "order": 1,
             "couleur": "yellow-tournesol",
             "icon": None,

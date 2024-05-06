@@ -31,7 +31,6 @@ def django_db_setup(django_db_setup, django_db_blocker):
         call_command(
             "loaddata",
             "categories",
-            "action_directions",
             "actions",
             "acteur_services",
             "acteur_types",

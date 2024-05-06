@@ -219,7 +219,7 @@ python manage.py migrate
 Population de la base (optionel, si la base de données de production est chargée sur l'environnement de développement)
 
 ```sh
-python manage.py loaddata categories action_directions actions acteur_services acteur_types
+python manage.py loaddata categories actions acteur_services acteur_types
 ```
 
 ### Create superuser
