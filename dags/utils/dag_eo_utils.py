@@ -265,7 +265,7 @@ def create_actors(**kwargs):
     df = kwargs["ti"].xcom_pull(task_ids="fetch_data_from_api")
     df_sources = data_dict["sources"]
     df_acteurtype = data_dict["acteurtype"]
-    config_path = Path(__file__).parent.parent / "config" / "eco_organisme.json"
+    config_path = Path(__file__).parent.parent / "config" / "db_mapping.json"
 
     with open(config_path, "r") as f:
         config = json.load(f)
