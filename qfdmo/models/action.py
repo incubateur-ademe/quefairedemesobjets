@@ -128,5 +128,8 @@ brown-caramel, brown-opera, beige-gris-galet""",
         help_text="Icône du badge à choisir dans le <a href='https://www.systeme-de-design.gouv.fr/elements-d-interface/fondamentaux-techniques/icones' rel='noopener' target='_blank'>DSFR</a>",  # noqa E501
     )
 
+    def __str__(self):
+        return self.libelle
+
     def serialize(self):
         return model_to_dict(self, exclude=["directions"])
