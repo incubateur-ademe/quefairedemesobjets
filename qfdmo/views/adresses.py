@@ -1,4 +1,5 @@
 import json
+from html import escape
 
 import unidecode
 from django.conf import settings
@@ -17,7 +18,7 @@ from django.views.generic.edit import FormView
 
 from core.jinja2_handler import get_action_list
 from core.utils import get_direction
-from qfdmo.forms import CarteAddressesForm, IframeAddressesForm
+from qfdmo.forms import CarteAddressesForm, ConfiguratorForm, IframeAddressesForm
 from qfdmo.models import (
     Acteur,
     ActeurStatus,
@@ -45,7 +46,9 @@ class AddressesView(FormView):
     def _get_search_in_zone_params(self):
         center = []
         my_bbox_polygon = []
-        if search_in_zone := self.request.GET.get("search_in_zone"):
+        if search_in_zone := self.request.GET.get(
+            "search_in_zone"
+        ) or self.request.GET.get("bbox"):
             search_in_zone = json.loads(search_in_zone)
             if (
                 "center" in search_in_zone
@@ -104,6 +107,9 @@ class AddressesView(FormView):
         kwargs["location"] = "{}"
         kwargs["acteurs"] = DisplayedActeur.objects.none()
 
+        if self.request.GET.get("carte"):
+            kwargs["has_bbox"] = bool(self.request.GET.get("bbox"))
+
         sous_categorie_id = None
         if (
             self.request.GET.get("sous_categorie_objet")
@@ -143,6 +149,12 @@ class AddressesView(FormView):
             )
             kwargs["acteurs"] = acteurs
         else:
+            center, my_bbox_polygon = self._get_search_in_zone_params()
+            if self.request.GET.get("bbox", None):
+                kwargs["acteurs"] = acteurs.filter(
+                    location__within=Polygon.from_bbox(my_bbox_polygon)
+                )
+
             if (latitude := self.request.GET.get("latitude", None)) and (
                 longitude := self.request.GET.get("longitude", None)
             ):
@@ -150,7 +162,6 @@ class AddressesView(FormView):
                     {"latitude": latitude, "longitude": longitude}
                 )
 
-                center, my_bbox_polygon = self._get_search_in_zone_params()
                 if center:
                     longitude = center[0]
                     latitude = center[1]
@@ -316,3 +327,71 @@ def solution_admin(request, identifiant_unique):
         )
     acteur = Acteur.objects.get(identifiant_unique=identifiant_unique)
     return redirect("admin:qfdmo_acteur_change", quote(acteur.identifiant_unique))
+
+
+class ConfiguratorView(FormView):
+    form_class = ConfiguratorForm
+    template_name = "qfdmo/iframe_configurator.html"
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial["iframe_mode"] = self.request.GET.get("iframe_mode")
+        initial["direction"] = self.request.GET.get("direction")
+        initial["first_dir"] = self.request.GET.get("first_dir")
+        initial["action_list"] = self.request.GET.getlist("action_list")
+        initial["max_width"] = self.request.GET.get("max_width")
+        initial["height"] = self.request.GET.get("height")
+        initial["iframe_attributes"] = self.request.GET.get("iframe_attributes")
+        initial["bbox"] = self.request.GET.get("bbox")
+        return initial
+
+    def get_context_data(self, **kwargs):
+        # TODO : clean up input to avoid security issues
+        iframe_mode = self.request.GET.get("iframe_mode")
+
+        iframe_host = (
+            "http"
+            + ("s" if self.request.is_secure() else "")
+            + "://"
+            + self.request.get_host()
+        )
+
+        iframe_url = None
+        if iframe_mode == "carte":
+            iframe_url = iframe_host + "/static/carte.js"
+        if iframe_mode == "form":
+            iframe_url = iframe_host + "/static/iframe.js"
+
+        attributes = {}
+        if direction := self.request.GET.get("direction"):
+            attributes["direction"] = escape(direction)
+        if first_dir := self.request.GET.get("first_dir"):
+            attributes["first_dir"] = escape(first_dir.replace("first_", ""))
+        if action_list := self.request.GET.getlist("action_list"):
+            attributes["action_list"] = escape("|".join(action_list))
+        if max_width := self.request.GET.get("max_width"):
+            attributes["max_width"] = escape(max_width)
+        if height := self.request.GET.get("height"):
+            attributes["height"] = height
+        if iframe_attributes := self.request.GET.get("iframe_attributes"):
+            try:
+                attributes["iframe_attributes"] = json.dumps(
+                    json.loads(iframe_attributes.replace("\r\n", "").replace("\n", ""))
+                )
+            except json.JSONDecodeError:
+                attributes["iframe_attributes"] = ""
+        if bbox := self.request.GET.get("bbox"):
+            try:
+                attributes["bbox"] = json.dumps(
+                    json.loads(bbox.replace("\r\n", "").replace("\n", ""))
+                )
+            except json.JSONDecodeError:
+                attributes["bbox"] = ""
+
+        if iframe_url:
+            kwargs["iframe_script"] = f"<script src='{ iframe_url }'"
+            for key, value in attributes.items():
+                kwargs["iframe_script"] += f" data-{key}='{value}'"
+            kwargs["iframe_script"] += "></script>"
+
+        return super().get_context_data(**kwargs)

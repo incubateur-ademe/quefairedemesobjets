@@ -1,0 +1,15 @@
+<div data-search-solution-form-target="sousCategoryObjetGroup" class="fr-mt-3w fr-px-1v fr-input-group">
+    <div data-controller='ss-cat-object-autocomplete'
+        data-ss-cat-object-autocomplete-max-option-displayed-value=5
+        data-ss-cat-object-autocomplete-nb-char-to-search-value=2
+    >
+        <div class="form-group">
+            {{ form.sous_categorie_objet.label_tag() }}
+            {{ form.sous_categorie_objet }}
+            {{ form.sc_id }}
+        </div>
+    </div>
+    <p class="fr-error-text fr-mt-1v qfdmo-hidden" data-search-solution-form-target="sousCategoryObjetError">
+        Veuillez indiquer puis sélectionner un objet dans la liste déroulante
+    </p>
+</div>
