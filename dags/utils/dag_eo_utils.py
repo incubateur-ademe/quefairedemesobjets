@@ -8,7 +8,6 @@ import pandas as pd
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 
 env = Path(__file__).parent.parent.name
-print(env)
 
 utils = import_module(f"{env}.utils.utils")
 api_utils = import_module(f"{env}.utils.api_utils")
@@ -93,29 +92,11 @@ def create_proposition_services(**kwargs):
 def create_proposition_services_sous_categories(**kwargs):
     df = kwargs["ti"].xcom_pull(task_ids="create_proposition_services")["df"]
     data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
+    config = kwargs["ti"].xcom_pull(task_ids="create_actors")["config"]
     df_sous_categories_map = data_dict["sous_categories"]
 
     rows_list = []
-    sous_categories = {
-        "gem hors froid": "gros electromenager (hors refrigerant)",
-        "pam (petits appareils ménagers)": "petit electromenager",
-        "articles de sport hors vélos": "materiel de sport (hors velo)",
-        "écrans": "ecran",
-        "téléphones portables": "smartphone, tablette et console",
-        "vélos non électriques,"
-        " trottinettes non électriques, skate-board, rollers": "velo",
-        "gem froid": "gros electromenager (refrigerant)",
-        "machines et "
-        "appareils motorisés thermiques": "machines et appareils motorises thermiques",
-        "vêtement": "vetement",
-        "linge": "linge de maison",
-        "chaussure": "chaussures",
-        "cartouches": "cartouches",
-        "lampes": "luminaire",
-        "ecrans": "ecran",
-        "pae (petits appareils extincteurs)": "Petits appareils extincteurs",
-        "batteries & piles portables": "Batteries & piles portables",
-    }
+    sous_categories = config["sous_categories"]
 
     for index, row in df.iterrows():
         products = str(row["sous_categories"]).split("|")
@@ -284,6 +265,11 @@ def create_actors(**kwargs):
     df = kwargs["ti"].xcom_pull(task_ids="fetch_data_from_api")
     df_sources = data_dict["sources"]
     df_acteurtype = data_dict["acteurtype"]
+    config_path = Path(__file__).parent.parent / "config" / "db_mapping.json"
+
+    with open(config_path, "r") as f:
+        config = json.load(f)
+
     column_mapping = kwargs["column_mapping"]
     column_to_drop = kwargs.get("column_to_drop", [])
 
@@ -360,7 +346,7 @@ def create_actors(**kwargs):
         "added_rows": len(df),
     }
 
-    return {"df": df, "metadata": metadata}
+    return {"df": df, "metadata": metadata, "config": config}
 
 
 def create_labels(**kwargs):
