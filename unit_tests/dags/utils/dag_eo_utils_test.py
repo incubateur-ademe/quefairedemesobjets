@@ -225,7 +225,6 @@ def test_create_proposition_services(mock_ti):
     result = create_proposition_services(**kwargs)
     df_result = result["df"]
     metadata = result["metadata"]
-    df_result.to_csv("test.csv")
     assert not df_result.empty
     assert len(df_result) == 4
     assert df_result["acteur_service_id"].tolist() == [10, 20, 10, 20]
@@ -239,7 +238,6 @@ def test_create_proposition_services_sous_categories(mock_ti):
     df_result = create_proposition_services_sous_categories(**kwargs)
 
     assert not df_result.empty
-    df_result.to_csv("test_pdsc.csv")
     assert df_result.columns.tolist() == [
         "propositionservice_id",
         "souscategorieobjet_id",
