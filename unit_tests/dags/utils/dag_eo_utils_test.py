@@ -1,18 +1,83 @@
 from unittest.mock import MagicMock
 
 import pandas as pd
-
 import pytest
 
 from dags.utils.dag_eo_utils import (
+    create_actors,
     create_proposition_services,
     create_proposition_services_sous_categories,
-    create_actors,
 )
 
 
 @pytest.fixture
-def mock_ti():
+def df_sources():
+    return pd.DataFrame({"code": ["source1", "source2"], "id": [101, 102]})
+
+
+@pytest.fixture
+def df_acteurtype():
+    return pd.DataFrame({"libelle": ["Type1", "Type2"], "id": [201, 202]})
+
+
+@pytest.fixture
+def df_actions():
+    return pd.DataFrame(
+        {
+            "action_name": ["reparer", "donner", "trier"],
+            "id": [1, 2, 3],
+            "code": ["reparer", "donner", "trier"],
+        }
+    )
+
+
+@pytest.fixture
+def df_acteur_services():
+    return pd.DataFrame(
+        {
+            "acteur_service_name": [
+                "Service de réparation",
+                "Collecte par une structure spécialisée",
+            ],
+            "id": [10, 20],
+            "code": ["Service de réparation", "Collecte par une structure spécialisée"],
+        }
+    )
+
+
+@pytest.fixture
+def df_sous_categories_map():
+    return pd.DataFrame(
+        {"code": ["ecran", "smartphone, tablette et console"], "id": [101, 102]}
+    )
+
+
+@pytest.fixture
+def db_mapping_config():
+    # Can read the mapping table from json instead
+    return {
+        "sous_categories": {
+            "écrans": "ecran",
+            "téléphones portables": "smartphone, tablette et console",
+            "vêtement": "vetement",
+            "linge": "linge de maison",
+            "chaussure": "chaussures",
+            "cartouches": "cartouches",
+            "lampes": "luminaire",
+            "ecrans": "ecran",
+        }
+    }
+
+
+@pytest.fixture
+def mock_ti(
+    df_sources,
+    df_acteurtype,
+    db_mapping_config,
+    df_actions,
+    df_acteur_services,
+    df_sous_categories_map,
+):
     mock = MagicMock()
 
     df_api = pd.DataFrame(
@@ -55,26 +120,6 @@ def mock_ti():
         }
     )
 
-    df_sources = pd.DataFrame({"code": ["source1", "source2"], "id": [101, 102]})
-    df_acteurtype = pd.DataFrame({"libelle": ["Type1", "Type2"], "id": [201, 202]})
-
-    actions_df = pd.DataFrame(
-        {
-            "action_name": ["reparer", "donner", "trier"],
-            "id": [1, 2, 3],
-            "code": ["reparer", "donner", "trier"],
-        }
-    )
-    acteur_services_df = pd.DataFrame(
-        {
-            "acteur_service_name": [
-                "Service de réparation",
-                "Collecte par une structure spécialisée",
-            ],
-            "id": [10, 20],
-            "code": ["Service de réparation", "Collecte par une structure spécialisée"],
-        }
-    )
     df_proposition_services = pd.DataFrame(
         {
             "acteur_service_id": [10, 20, 10, 20],
@@ -110,24 +155,7 @@ def mock_ti():
         }
     )
 
-    df_sous_categories_map = pd.DataFrame(
-        {"code": ["ecran", "smartphone, tablette et console"], "id": [101, 102]}
-    )
-
-    config = {
-        "sous_categories": {
-            "écrans": "ecran",
-            "téléphones portables": "smartphone, tablette et console",
-            "vêtement": "vetement",
-            "linge": "linge de maison",
-            "chaussure": "chaussures",
-            "cartouches": "cartouches",
-            "lampes": "luminaire",
-            "ecrans": "ecran",
-        }
-    }
-
-    mock.xcom_pull.side_effect = lambda task_ids=None: {
+    mock.xcom_pull.side_effect = lambda task_ids="": {
         "fetch_data_from_api": df_api,
         "create_actors": {
             "df": pd.DataFrame(
@@ -140,12 +168,12 @@ def mock_ti():
                     "point_de_collecte_ou_de_reprise_des_dechets": [True, True],
                 }
             ),
-            "config": config,
+            "config": db_mapping_config,
         },
         "load_data_from_postgresql": {
             "max_pds_idx": 1,
-            "actions": actions_df,
-            "acteur_services": acteur_services_df,
+            "actions": df_actions,
+            "acteur_services": df_acteur_services,
             "sous_categories": df_sous_categories_map,
             "sources": df_sources,
             "acteurtype": df_acteurtype,

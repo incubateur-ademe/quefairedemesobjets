@@ -34,7 +34,7 @@ def create_proposition_services(**kwargs):
     df_actions = data_dict["actions"]
     df_acteur_services = data_dict["acteur_services"]
 
-    for index, row in df.iterrows():
+    for _, row in df.iterrows():
         acteur_id = row["identifiant_unique"]
         sous_categories = row["produitsdechets_acceptes"]
 
