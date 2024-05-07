@@ -69,6 +69,340 @@ def db_mapping_config():
     }
 
 
+def get_mock_ti_ps(
+    db_mapping_config,
+    df_actions,
+    df_acteur_services,
+    df_sous_categories_map,
+    df_create_actors: pd.DataFrame = pd.DataFrame(),
+    max_pds_idx: int = 1,
+) -> MagicMock:
+    mock = MagicMock()
+
+    mock.xcom_pull.side_effect = lambda task_ids="": {
+        "create_actors": {
+            "df": df_create_actors,
+            "config": db_mapping_config,
+        },
+        "load_data_from_postgresql": {
+            "max_pds_idx": max_pds_idx,
+            "actions": df_actions,
+            "acteur_services": df_acteur_services,
+            "sous_categories": df_sous_categories_map,
+        },
+    }[task_ids]
+    return mock
+
+
+class TestCreatePropositionService:
+
+    @pytest.mark.parametrize(
+        "df_create_actors, expected_df, expected_metadata",
+        [
+            # No services
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1],
+                        "produitsdechets_acceptes": ["téléphones portables"],
+                        "point_dapport_de_service_reparation": [False],
+                        "point_dapport_pour_reemploi": [False],
+                        "point_de_reparation": [False],
+                        "point_de_collecte_ou_de_reprise_des_dechets": [False],
+                    }
+                ),
+                pd.DataFrame(),
+                {"number_of_merged_actors": 0, "number_of_propositionservices": 0},
+            ),
+            # Service Réparation
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1],
+                        "produitsdechets_acceptes": ["téléphones portables"],
+                        "point_dapport_de_service_reparation": [True],
+                        "point_dapport_pour_reemploi": [False],
+                        "point_de_reparation": [False],
+                        "point_de_collecte_ou_de_reprise_des_dechets": [False],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "acteur_service_id": [10],
+                        "action_id": [1],
+                        "acteur_id": [1],
+                        "action": ["reparer"],
+                        "acteur_service": ["Service de réparation"],
+                        "sous_categories": ["téléphones portables"],
+                        "id": [1],
+                    },
+                ),
+                {"number_of_merged_actors": 0, "number_of_propositionservices": 1},
+            ),
+            # Service Réemploi
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1],
+                        "produitsdechets_acceptes": ["téléphones portables"],
+                        "point_dapport_de_service_reparation": [False],
+                        "point_dapport_pour_reemploi": [True],
+                        "point_de_reparation": [False],
+                        "point_de_collecte_ou_de_reprise_des_dechets": [False],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "acteur_service_id": [20],
+                        "action_id": [2],
+                        "acteur_id": [1],
+                        "action": ["donner"],
+                        "acteur_service": ["Collecte par une structure spécialisée"],
+                        "sous_categories": ["téléphones portables"],
+                        "id": [1],
+                    },
+                ),
+                {"number_of_merged_actors": 0, "number_of_propositionservices": 1},
+            ),
+            # Point Réparation
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1],
+                        "produitsdechets_acceptes": ["téléphones portables"],
+                        "point_dapport_de_service_reparation": [False],
+                        "point_dapport_pour_reemploi": [False],
+                        "point_de_reparation": [True],
+                        "point_de_collecte_ou_de_reprise_des_dechets": [False],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "acteur_service_id": [10],
+                        "action_id": [1],
+                        "acteur_id": [1],
+                        "action": ["reparer"],
+                        "acteur_service": ["Service de réparation"],
+                        "sous_categories": ["téléphones portables"],
+                        "id": [1],
+                    },
+                ),
+                {"number_of_merged_actors": 0, "number_of_propositionservices": 1},
+            ),
+            # Point Collecte (tri)
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1],
+                        "produitsdechets_acceptes": ["téléphones portables"],
+                        "point_dapport_de_service_reparation": [False],
+                        "point_dapport_pour_reemploi": [False],
+                        "point_de_reparation": [False],
+                        "point_de_collecte_ou_de_reprise_des_dechets": [True],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "acteur_service_id": [20],
+                        "action_id": [3],
+                        "acteur_id": [1],
+                        "action": ["trier"],
+                        "acteur_service": ["Collecte par une structure spécialisée"],
+                        "sous_categories": ["téléphones portables"],
+                        "id": [1],
+                    },
+                ),
+                {"number_of_merged_actors": 0, "number_of_propositionservices": 1},
+            ),
+            # All services
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1],
+                        "produitsdechets_acceptes": ["téléphones portables"],
+                        "point_dapport_de_service_reparation": [True],
+                        "point_dapport_pour_reemploi": [True],
+                        "point_de_reparation": [True],
+                        "point_de_collecte_ou_de_reprise_des_dechets": [True],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "acteur_service_id": [10, 20, 20],
+                        "action_id": [1, 2, 3],
+                        "acteur_id": [1, 1, 1],
+                        "action": ["reparer", "donner", "trier"],
+                        "acteur_service": [
+                            "Service de réparation",
+                            "Collecte par une structure spécialisée",
+                            "Collecte par une structure spécialisée",
+                        ],
+                        "sous_categories": [
+                            "téléphones portables",
+                            "téléphones portables",
+                            "téléphones portables",
+                        ],
+                        "id": [1, 2, 3],
+                    },
+                ),
+                {"number_of_merged_actors": 0, "number_of_propositionservices": 3},
+            ),
+        ],
+    )
+    def test_create_proposition_services_services(
+        self,
+        df_create_actors,
+        expected_df,
+        expected_metadata,
+        db_mapping_config,
+        df_actions,
+        df_acteur_services,
+        df_sous_categories_map,
+    ):
+        mock = get_mock_ti_ps(
+            db_mapping_config,
+            df_actions,
+            df_acteur_services,
+            df_sous_categories_map,
+            df_create_actors=pd.DataFrame(df_create_actors),
+        )
+
+        kwargs = {"ti": mock}
+        result = create_proposition_services(**kwargs)
+
+        assert result["df"].equals(expected_df)
+        assert result["metadata"] == expected_metadata
+
+    def test_create_proposition_multiple_actor(
+        self,
+        db_mapping_config,
+        df_actions,
+        df_acteur_services,
+        df_sous_categories_map,
+    ):
+        mock = get_mock_ti_ps(
+            db_mapping_config,
+            df_actions,
+            df_acteur_services,
+            df_sous_categories_map,
+            df_create_actors=pd.DataFrame(
+                {
+                    "identifiant_unique": [1, 2],
+                    "produitsdechets_acceptes": [
+                        "téléphones portables",
+                        "téléphones portables",
+                    ],
+                    "point_dapport_de_service_reparation": [False, False],
+                    "point_dapport_pour_reemploi": [False, False],
+                    "point_de_reparation": [False, False],
+                    "point_de_collecte_ou_de_reprise_des_dechets": [True, True],
+                }
+            ),
+        )
+
+        expected_df = pd.DataFrame(
+            {
+                "acteur_service_id": [20, 20],
+                "action_id": [3, 3],
+                "acteur_id": [1, 2],
+                "action": ["trier", "trier"],
+                "acteur_service": [
+                    "Collecte par une structure spécialisée",
+                    "Collecte par une structure spécialisée",
+                ],
+                "sous_categories": ["téléphones portables", "téléphones portables"],
+                "id": [1, 2],
+            }
+        )
+        expected_metadata = {
+            "number_of_merged_actors": 0,
+            "number_of_propositionservices": 2,
+        }
+
+        kwargs = {"ti": mock}
+        result = create_proposition_services(**kwargs)
+
+        print(result["df"])
+        assert result["df"].equals(expected_df)
+        assert result["metadata"] == expected_metadata
+
+    def test_create_proposition_multiple_product(
+        self,
+        db_mapping_config,
+        df_actions,
+        df_acteur_services,
+        df_sous_categories_map,
+    ):
+        mock = get_mock_ti_ps(
+            db_mapping_config,
+            df_actions,
+            df_acteur_services,
+            df_sous_categories_map,
+            df_create_actors=pd.DataFrame(
+                {
+                    "identifiant_unique": [1, 1],
+                    "produitsdechets_acceptes": [
+                        "téléphones portables",
+                        "écrans",
+                    ],
+                    "point_dapport_de_service_reparation": [True, False],
+                    "point_dapport_pour_reemploi": [False, False],
+                    "point_de_reparation": [False, True],
+                    "point_de_collecte_ou_de_reprise_des_dechets": [False, False],
+                }
+            ),
+        )
+
+        df_expected = pd.DataFrame(
+            {
+                "acteur_service_id": [10],
+                "action_id": [1],
+                "acteur_id": [1],
+                "action": ["reparer"],
+                "acteur_service": ["Service de réparation"],
+                "sous_categories": ["téléphones portables | écrans"],
+                "id": [1],
+            }
+        )
+        expected_metadata = {
+            "number_of_merged_actors": 0,
+            "number_of_propositionservices": 1,
+        }
+
+        kwargs = {"ti": mock}
+        result = create_proposition_services(**kwargs)
+
+        print(result["df"])
+        assert result["df"].equals(df_expected)
+        assert result["metadata"] == expected_metadata
+
+    def test_create_proposition_services_increment_ids(
+        self, db_mapping_config, df_actions, df_acteur_services, df_sous_categories_map
+    ):
+        mock = get_mock_ti_ps(
+            db_mapping_config,
+            df_actions,
+            df_acteur_services,
+            df_sous_categories_map,
+            df_create_actors=pd.DataFrame(
+                {
+                    "identifiant_unique": [1],
+                    "produitsdechets_acceptes": ["téléphones portables"],
+                    "point_dapport_de_service_reparation": [False],
+                    "point_dapport_pour_reemploi": [False],
+                    "point_de_reparation": [False],
+                    "point_de_collecte_ou_de_reprise_des_dechets": [True],
+                }
+            ),
+            max_pds_idx=123,
+        )
+
+        kwargs = {"ti": mock}
+        result = create_proposition_services(**kwargs)
+
+        assert result["df"]["id"].tolist() == [123]
+
+
 @pytest.fixture
 def mock_ti(
     df_sources,
@@ -217,20 +551,6 @@ def mock_config():
         },
         "column_to_drop": ["siren"],
     }
-
-
-def test_create_proposition_services(mock_ti):
-
-    kwargs = {"ti": mock_ti}
-    result = create_proposition_services(**kwargs)
-    df_result = result["df"]
-    metadata = result["metadata"]
-    assert not df_result.empty
-    assert len(df_result) == 4
-    assert df_result["acteur_service_id"].tolist() == [10, 20, 10, 20]
-    assert df_result["action_id"].tolist() == [1, 3, 1, 3]
-    assert metadata["number_of_merged_actors"] == 0
-    assert metadata["number_of_propositionservices"] == 4
 
 
 def test_create_proposition_services_sous_categories(mock_ti):
