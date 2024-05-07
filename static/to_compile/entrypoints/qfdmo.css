@@ -137,6 +137,24 @@ Style the autocomplete container:
   mask-image: url("svg/money-euro-box-line.svg");
 }
 
+.fr-icon-tools-fill::before,
+.fr-icon-tools-fill::after {
+  -webkit-mask-image: url("svg/tools-fill.svg");
+  mask-image: url("svg/tools-fill.svg");
+}
+
+.fr-icon-hand-heart-line::before,
+.fr-icon-hand-heart-line::after {
+  -webkit-mask-image: url("svg/hand-heart-line.svg");
+  mask-image: url("svg/hand-heart-line.svg");
+}
+
+.fr-icon-money-euro-circle-line::before,
+.fr-icon-money-euro-circle-line::after {
+  -webkit-mask-image: url("svg/money-euro-circle-line.svg");
+  mask-image: url("svg/money-euro-circle-line.svg");
+}
+
 /*
  * Failed to load some tailwind classes with parcel
  */

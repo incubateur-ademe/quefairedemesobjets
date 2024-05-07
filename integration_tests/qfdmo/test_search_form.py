@@ -11,7 +11,6 @@ def populate_admin_object(django_db_blocker):
         call_command(
             "loaddata",
             "categories",
-            "action_directions",
             "actions",
             "acteur_services",
             "acteur_types",
@@ -24,8 +23,8 @@ class TestDirectionOrder:
     @pytest.mark.parametrize(
         "params,expected_order",
         [
-            ("", ["jecherche", "jai"]),
-            ("?first_dir=fake", ["jecherche", "jai"]),
+            ("", ["jai", "jecherche"]),
+            ("?first_dir=fake", ["jai", "jecherche"]),
             ("?first_dir=jai", ["jai", "jecherche"]),
             ("?first_dir=jecherche", ["jecherche", "jai"]),
         ],

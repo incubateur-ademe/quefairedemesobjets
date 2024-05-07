@@ -2,6 +2,7 @@ from django import forms
 from django.utils.safestring import mark_safe
 
 from qfdmo.models import CachedDirectionAction, DagRun, DagRunStatus, SousCategorieObjet
+from qfdmo.models.action import GroupeAction
 
 
 class AutoCompleteInput(forms.Select):
@@ -213,6 +214,17 @@ class CarteAddressesForm(IframeAddressesForm):
         label="Saisir une adresse ",
         required=False,
     )
+    groupe_action = forms.ModelMultipleChoiceField(
+        widget=forms.CheckboxSelectMultiple(
+            attrs={
+                "class": ("fr-checkbox"),
+                "data-search-solution-form-target": "GroupeAction",
+            },
+        ),
+        queryset=GroupeAction.objects.all().order_by("order"),
+        label="Actions",
+        required=False,
+    )
 
 
 class DagsForm(forms.Form):
@@ -225,4 +237,152 @@ class DagsForm(forms.Form):
         ),
         queryset=DagRun.objects.filter(status=DagRunStatus.TO_VALIDATE.value),
         required=True,
+    )
+
+
+class ConfiguratorForm(forms.Form):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.load_choices()
+
+    def load_choices(self, first_direction=None):
+        self.fields["direction"].choices = [
+            (direction["code"], direction["libelle"])
+            for direction in CachedDirectionAction.get_directions()
+        ]
+        self.fields["first_dir"].choices = [
+            ("first_" + direction["code"], direction["libelle"])
+            for direction in CachedDirectionAction.get_directions()
+        ]
+        self.fields["action_list"].choices = [
+            (code, action["libelle"])
+            for code, action in CachedDirectionAction.get_actions_by_code().items()
+        ]
+
+    iframe_mode = forms.ChoiceField(
+        widget=SegmentedControlSelect(
+            attrs={
+                "class": "qfdmo-w-full md:qfdmo-w-fit",
+            },
+            fieldset_attrs={
+                "data-search-solution-form-target": "direction",
+            },
+        ),
+        # FIXME: I guess async error comes from here
+        choices=[
+            ("carte", "Carte"),
+            ("form", "Formulaire"),
+        ],
+        label="Mode de l'Iframe",
+        required=False,
+    )
+
+    # - `data-direction`, option `jai` ou `jecherche`, par défaut l'option de direction « Je cherche » est active # noqa
+    direction = forms.ChoiceField(
+        widget=SegmentedControlSelect(
+            attrs={
+                "class": "qfdmo-w-full md:qfdmo-w-fit",
+            },
+            fieldset_attrs={},
+        ),
+        label="Direction des actions",
+        required=False,
+    )
+
+    # - `data-first_dir`, option `jai` ou `jecherche`, par défaut l'option de direction « Je cherche » est affiché en premier dans la liste des options de direction # noqa
+    first_dir = forms.ChoiceField(
+        widget=SegmentedControlSelect(
+            attrs={
+                "class": "qfdmo-w-full md:qfdmo-w-fit",
+            },
+            fieldset_attrs={},
+        ),
+        label="Direction affichée en premier dans la liste des options de direction",
+        help_text="Cette option n'est disponible que dans la version formulaire",
+        required=False,
+    )
+
+    # - `data-action_list`, liste des actions cochées selon la direction séparées par le caractère `|` : # noqa
+    #   - pour la direction `jecherche` les actions possibles sont : `emprunter`, `echanger`, `louer`, `acheter` # noqa
+    #   - pour la direction `jai` les actions possibles sont : `reparer`, `preter`, `donner`, `echanger`, `mettreenlocation`, `revendre` # noqa
+    #   - si le paramètre `action_list` n'est pas renseigné ou est vide, toutes les actions éligibles à la direction sont cochées # noqa
+    action_list = forms.MultipleChoiceField(
+        widget=forms.CheckboxSelectMultiple(
+            attrs={
+                "class": (
+                    "fr-checkbox qfdmo-inline-grid qfdmo-grid-cols-4 qfdmo-gap-4"
+                    " qfdmo-m-1w"
+                ),
+            },
+        ),
+        choices=[],
+        label="Liste des actions cochées selon la direction",
+        help_text=mark_safe(
+            "Pour la direction « Je cherche » les actions possibles"
+            " sont : « emprunter », « échanger », « louer », « acheter »<br>"
+            "Pour la direction « J'ai » les actions possibles"
+            " sont : « réparer », « prêter », « donner », « échanger », « mettre"
+            " en location », « revendre »<br>"
+            "Si le paramètre n'est pas renseigné ou est vide, toutes les actions"
+            " éligibles à la direction sont cochées"
+        ),
+        required=False,
+    )
+
+    # - `data-max_width`, largeur maximum de l'iframe, la valeur par défaut est 800px
+    max_width = forms.CharField(
+        widget=forms.TextInput(
+            attrs={
+                "class": "fr-input",
+            },
+        ),
+        label="Largeur maximum de l'iframe",
+        help_text=mark_safe(
+            "peut-être exprimé en px, %, em, rem, vw, …<br>"
+            "La valeur par défaut est 800px"
+        ),
+        required=False,
+    )
+
+    # - `data-height`, hauteur allouée à l'iframe cette hauteur doit être de 700px minimum, la valeur par défaut est 100vh # noqa
+    height = forms.CharField(
+        widget=forms.TextInput(
+            attrs={
+                "class": "fr-input",
+            },
+        ),
+        label="Hauteur de l'iframe",
+        help_text=mark_safe(
+            "peut-être exprimé en px, %, em, rem, vh, …<br>"
+            "La valeur par défaut est 100vh"
+        ),
+        required=False,
+    )
+
+    # - `data-iframe_attributes`, liste d'attributs au format JSON à ajouter à l'iframe
+    iframe_attributes = forms.CharField(
+        widget=forms.Textarea(
+            attrs={"class": "fr-input", "rows": "3"},
+        ),
+        label="Attrubuts à appliquer à l'iframe",
+        help_text=mark_safe("liste d'attributs au format JSON à ajouter à l'iframe"),
+        required=False,
+    )
+
+    # TODO : documentation
+    bbox = forms.CharField(
+        widget=forms.TextInput(
+            attrs={
+                "class": "fr-input",
+            },
+        ),
+        label="Bounding box",
+        help_text=mark_safe(
+            "Bounding box au format JSON, ex: <br>"
+            '{<br>&nbsp;&nbsp;"southWest":{"lat":48.916,"lng":2.298202514648438},'
+            '<br>&nbsp;&nbsp;"northEast":{"lat":48.98742568330284,'
+            '"lng":2.483596801757813}<br>}'
+        ),
+        required=False,
     )

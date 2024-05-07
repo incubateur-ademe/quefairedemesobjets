@@ -26,6 +26,8 @@ class TestActionNomAsNaturalKeyHeritage:
             "afficher": True,
             "code": "Test Object",
             "libelle": "Test Objet Displayed",
+            "libelle_groupe": "",
+            "groupe_action": None,
             "order": 1,
             "couleur": "yellow-tournesol",
             "icon": None,
@@ -145,23 +147,23 @@ class TestCachedDirectionActionReloadCache:
     def test__cached_actions(self, action_directions, actions):
         CachedDirectionAction.reload_cache()
 
-        assert CachedDirectionAction._cached_actions is None
+        assert CachedDirectionAction._cached_actions_by_code is None
 
-        CachedDirectionAction.get_actions()
+        CachedDirectionAction.get_actions_by_code()
 
-        assert CachedDirectionAction._cached_actions is not None
+        assert CachedDirectionAction._cached_actions_by_code is not None
 
     def test_reload_cache(self):
         CachedDirectionAction._cached_actions_by_direction = (
             "cached_actions_by_direction"
         )
-        CachedDirectionAction._cached_actions = "cached_actions"
+        CachedDirectionAction._cached_actions_by_code = "cached_actions"
         CachedDirectionAction._cached_direction = "cached_direction"
         CachedDirectionAction._reparer_action_id = "reparer_action_id"
 
         CachedDirectionAction.reload_cache()
 
         assert CachedDirectionAction._cached_actions_by_direction is None
-        assert CachedDirectionAction._cached_actions is None
+        assert CachedDirectionAction._cached_actions_by_code is None
         assert CachedDirectionAction._cached_direction is None
         assert CachedDirectionAction._reparer_action_id is None

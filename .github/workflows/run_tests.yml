@@ -112,7 +112,7 @@ jobs:
 
       - name: Populate database
         run: |
-          python manage.py loaddata action_directions actions acteur_services acteur_types categories objets
+          python manage.py loaddata actions acteur_services acteur_types categories objets
 
       - name: Run serveur
         run: |

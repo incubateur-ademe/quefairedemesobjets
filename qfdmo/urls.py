@@ -73,4 +73,9 @@ urlpatterns = [
         dags.DagsValidation.as_view(),
         name="dags_validations",
     ),
+    path(
+        "iframe/configurateur",
+        adresses.ConfiguratorView.as_view(),
+        name="iframe_configurator",
+    ),
 ]
