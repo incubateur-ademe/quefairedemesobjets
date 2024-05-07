@@ -12,3 +12,6 @@ ptpython
 pytest
 pytest-django
 pytest-dotenv
+apache-airflow
+apache-airflow-providers-postgres
+shapely

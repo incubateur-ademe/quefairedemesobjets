@@ -7,9 +7,8 @@ from airflow.operators.python import PythonOperator
 
 env = Path(__file__).parent.name
 utils = import_module(f"{env}.utils.utils")
-api_utils = import_module(f"{env}.utils.api_utils")
-mapping_utils = import_module(f"{env}.utils.mapping_utils")
 dag_eo_utils = import_module(f"{env}.utils.dag_eo_utils")
+
 default_args = {
     "owner": "airflow",
     "depends_on_past": False,
@@ -20,11 +19,11 @@ default_args = {
 }
 
 dag = DAG(
-    utils.get_dag_name(__file__, "refashion"),
+    utils.get_dag_name(__file__, "ecodds"),
     default_args=default_args,
     description=(
         "A pipeline to fetch, process, and load to validate data into postgresql"
-        " for Refashion dataset"
+        " for EcoDDS dataset"
     ),
     schedule_interval=None,
 )
@@ -33,7 +32,7 @@ dag = DAG(
 fetch_data_task = PythonOperator(
     task_id="fetch_data_from_api",
     python_callable=dag_eo_utils.fetch_data_from_api,
-    op_kwargs={"dataset": "donnees-eo-refashion"},
+    op_kwargs={"dataset": "donnees-eo-ecodds"},
     dag=dag,
 )
 
@@ -49,10 +48,7 @@ create_actors_task = PythonOperator(
     op_kwargs={
         "column_mapping": {
             "id_point_apport_ou_reparation": "identifiant_externe",
-            "adresse_complement": "adresse_complement",
             "type_de_point_de_collecte": "acteur_type_id",
-            "telephone": "telephone",
-            "siret": "siret",
             "uniquement_sur_rdv": "",
             "exclusivite_de_reprisereparation": "",
             "filiere": "",
@@ -66,22 +62,11 @@ create_actors_task = PythonOperator(
             "nom_de_lorganisme": "nom",
             "enseigne_commerciale": "nom_commercial",
             "_updatedAt": "cree_le",
-            "site_web": "url",
-            "email": "email",
             "perimetre_dintervention": "",
             "longitudewgs84": "location",
             "latitudewgs84": "location",
-            "horaires_douverture": "horaires_description",
-            "consignes_dacces": "commentaires",
         }
     },
-    dag=dag,
-)
-
-
-create_labels_task = PythonOperator(
-    task_id="create_labels",
-    python_callable=dag_eo_utils.create_labels,
     dag=dag,
 )
 
@@ -106,6 +91,12 @@ write_data_task = PythonOperator(
 serialize_to_json_task = PythonOperator(
     task_id="serialize_actors_to_records",
     python_callable=dag_eo_utils.serialize_to_json,
+    dag=dag,
+)
+
+create_labels_task = PythonOperator(
+    task_id="create_labels",
+    python_callable=dag_eo_utils.create_labels,
     dag=dag,
 )
 
