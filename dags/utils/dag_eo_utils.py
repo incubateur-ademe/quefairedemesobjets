@@ -354,6 +354,13 @@ def create_labels(**kwargs):
     data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
     labels = data_dict["labels"]
     df_acteurtype = data_dict["acteurtype"]
+    ess_acteur_type_id = df_acteurtype.loc[
+        df_acteurtype["code"].str.lower() == "ess", "id"
+    ].iloc[0]
+    ess_label_id = labels.loc[labels["code"].str.lower() == "ess", "id"].iloc[0]
+    ess_label_libelle = labels.loc[labels["code"].str.lower() == "ess", "libelle"].iloc[
+        0
+    ]
     df_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
     rows_list = []
     for _, row in df_actors.iterrows():
@@ -373,19 +380,13 @@ def create_labels(**kwargs):
                         ].tolist()[0],
                     }
                 )
-        ess_acteur_type_id = df_acteurtype.loc[
-            df_acteurtype["code"].str.lower() == "ess", "id"
-        ].tolist()[0]
+
         if row["acteur_type_id"] == ess_acteur_type_id:
             rows_list.append(
                 {
                     "acteur_id": row["identifiant_unique"],
-                    "labelqualite_id": labels.loc[
-                        labels["code"].str.lower() == "ess", "id"
-                    ].tolist()[0],
-                    "labelqualite": labels.loc[
-                        labels["code"].str.lower() == "ess", "libelle"
-                    ].tolist()[0],
+                    "labelqualite_id": ess_label_id,
+                    "labelqualite": ess_label_libelle,
                 }
             )
     df_labels = pd.DataFrame(
