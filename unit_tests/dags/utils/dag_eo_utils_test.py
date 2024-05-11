@@ -1,12 +1,15 @@
 from unittest.mock import MagicMock
 
 import pandas as pd
+
 import pytest
 
 from dags.utils.dag_eo_utils import (
     create_actors,
     create_proposition_services,
     create_proposition_services_sous_categories,
+    create_actors,
+    create_labels,
 )
 
 
@@ -413,7 +416,16 @@ def mock_ti(
     df_sous_categories_map,
 ):
     mock = MagicMock()
-
+    labels = pd.DataFrame(
+        {
+            "code": ["ess", "refashion"],
+            "id": [1, 2],
+            "libelle": [
+                "Enseigne de l'économie sociale et solidaire",
+                "Labellisé Bonus Réparation Re_fashion",
+            ],
+        }
+    )
     df_api = pd.DataFrame(
         {
             "nom_de_lorganisme": ["Eco1", "Eco2"],
@@ -585,3 +597,14 @@ def test_create_actors(mock_ti, mock_config):
     assert metadata["added_rows"] == len(df_result)
     assert "siren" not in df_result.columns
     assert "sous_categories" in result["config"]
+
+
+def test_create_labels(mock_ti):
+    kwargs = {"ti": mock_ti}
+    df_labels = create_labels(**kwargs)
+
+    assert len(df_labels) == 1
+    assert set(df_labels["labelqualite"].tolist()) == {
+        "Enseigne de l'économie sociale et solidaire"
+    }
+    assert df_labels["labelqualite_id"].tolist() == [1]
