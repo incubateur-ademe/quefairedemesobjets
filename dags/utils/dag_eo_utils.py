@@ -219,11 +219,25 @@ def write_to_dagruns(**kwargs):
     dag_id = kwargs["dag"].dag_id
     run_id = kwargs["run_id"]
     df = kwargs["ti"].xcom_pull(task_ids="serialize_actors_to_records")
-    metadata_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["metadata"]
-    metadata_pds = kwargs["ti"].xcom_pull(task_ids="create_proposition_services")[
-        "metadata"
-    ]
-    metadata = {**metadata_actors, **metadata_pds}
+    metadata_actors = (
+        kwargs["ti"]
+        .xcom_pull(task_ids="create_actors", key="return_value", default={})
+        .get("metadata", {})
+    )
+    metadata_pds = (
+        kwargs["ti"]
+        .xcom_pull(
+            task_ids="create_proposition_services", key="return_value", default={}
+        )
+        .get("metadata", {})
+    )
+
+    metadata = {}
+    if metadata_actors:
+        metadata.update(metadata_actors)
+    if metadata_pds:
+        metadata.update(metadata_pds)
+
     pg_hook = PostgresHook(
         postgres_conn_id=utils.get_db_conn_id(__file__, parent_of_parent=True)
     )
