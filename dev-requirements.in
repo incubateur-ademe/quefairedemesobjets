@@ -15,3 +15,4 @@ pytest-dotenv
 apache-airflow
 apache-airflow-providers-postgres
 shapely
+ratelimiter
