@@ -7,7 +7,9 @@ export default class extends Controller<HTMLElement> {
     static targets = ["acteur", "searchInZoneButton", "bBox"]
     declare readonly acteurTargets: Array<HTMLScriptElement>
     declare readonly searchInZoneButtonTarget: HTMLButtonElement
-    declare readonly bBoxTarget?: HTMLScriptElement
+    declare readonly bboxTarget: HTMLInputElement
+
+    declare readonly hasBboxTarget: boolean
 
     static values = { location: { type: Object, default: {} } }
     declare readonly locationValue: object
@@ -26,8 +28,8 @@ export default class extends Controller<HTMLElement> {
                 }
             })
             .filter((actor) => actor !== undefined)
-        if (this.hasBBoxTarget) {
-            const bbox = JSON.parse(this.bBoxTarget.textContent)
+        if (this.hasBboxTarget && this.bboxTarget.value !== "") {
+            const bbox = JSON.parse(this.bboxTarget.value)
             actorsMap.displayActor(actors, bbox)
         } else {
             actorsMap.displayActor(actors)

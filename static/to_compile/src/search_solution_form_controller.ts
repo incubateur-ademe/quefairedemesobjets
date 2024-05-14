@@ -13,6 +13,8 @@ export default class extends Controller<HTMLElement> {
         "searchForm",
         "reparerInput",
 
+        "bbox",
+
         "searchFormPanel",
         "addressesPanel",
         "backToSearchPanel",
@@ -50,13 +52,13 @@ export default class extends Controller<HTMLElement> {
     declare readonly directionTarget: HTMLElement
     declare readonly latitudeInputTarget: HTMLInputElement
     declare readonly longitudeInputTarget: HTMLInputElement
-    declare readonly searchInZoneInputTarget: HTMLInputElement
     declare readonly actionListTarget: HTMLInputElement
     declare readonly searchFormTarget: HTMLFormElement
     declare readonly reparerInputTarget: HTMLInputElement
+    declare readonly bboxTarget: HTMLInputElement
 
     declare readonly hasDirectionTarget: boolean
-    declare readonly hasSearchInZoneInputTarget: boolean
+    declare readonly hasBboxTarget: boolean
 
     declare readonly searchFormPanelTarget: HTMLElement
     declare readonly addressesPanelTarget: HTMLElement
@@ -145,8 +147,9 @@ export default class extends Controller<HTMLElement> {
         this.detailsAddressPanelTarget.classList.remove("md:qfdmo-w-0")
     }
 
+    // TODO rename it !
     updateSearchInZone(event) {
-        this.searchInZoneInputTarget.value = JSON.stringify(event.detail)
+        this.bboxTarget.value = JSON.stringify(event.detail)
     }
 
     hideDetails() {
@@ -336,8 +339,8 @@ export default class extends Controller<HTMLElement> {
         const withoutZone =
             (event.target as HTMLElement).dataset.withoutZone?.toLowerCase() === "true"
         if (withoutZone) {
-            if (this.hasSearchInZoneInputTarget) {
-                this.searchInZoneInputTarget.value = ""
+            if (this.hasBboxTarget) {
+                this.bboxTarget.value = ""
             }
         }
 

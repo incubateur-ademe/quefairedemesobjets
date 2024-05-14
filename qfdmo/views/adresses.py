@@ -88,6 +88,7 @@ class AddressesView(FormView):
         initial["label_reparacteur"] = self.request.GET.get("label_reparacteur")
         initial["bonus"] = self.request.GET.get("bonus")
         initial["ess"] = self.request.GET.get("ess")
+        initial["bbox"] = self.request.GET.get("bbox")
         initial["sc_id"] = (
             self.request.GET.get("sc_id") if initial["sous_categorie_objet"] else None
         )
@@ -107,8 +108,7 @@ class AddressesView(FormView):
         kwargs["location"] = "{}"
         kwargs["acteurs"] = DisplayedActeur.objects.none()
 
-        if self.request.GET.get("carte"):
-            kwargs["has_bbox"] = bool(self.request.GET.get("bbox"))
+        kwargs["has_bbox"] = bool(self.request.GET.get("bbox"))
 
         sous_categorie_id = None
         if (
