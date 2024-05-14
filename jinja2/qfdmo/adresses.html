@@ -38,13 +38,18 @@
 
                     <div class="fr-mb-1w md:qfdmo-mt-4w qfdmo-float-right">
 
-                        <button class="fr-btn fr-ml-1w qfdmo-float-right">
+                        <button
+                            class="fr-btn fr-ml-1w qfdmo-float-right"
+                            data-action="click -> search-solution-form#advancedSubmit"
+                            type="button"
+                            data-without-zone="true"
+                            >
                             Rechercher
                         </button>
                         <button
                             class="fr-btn fr-btn--secondary fr-ml-1w fr-btn--icon-left fr-icon-equalizer-line qfdmo-float-right"
                             type="button"
-                            data-action="click -> search-solution-form#toggleAdvancedFiltersWithSubmit"
+                            data-action="click -> search-solution-form#toggleAdvancedFiltersWithSubmitButton"
                             >
                             Filtres
                         </button>

@@ -52,9 +52,10 @@
                     <button
                         data-map-target="searchInZoneButton"
                         data-turbo-frame="adresses"
-                        data-action="click -> search-solution-form#submitForm"
+                        data-action="click -> search-solution-form#advancedSubmit"
                         class="fr-btn fr-btn--sm fr-btn--secondary fr-m-1w fr-p-1v qfdmo-absolute qfdmo-z-[10000] qfdmo-right-0 qfdmo-hidden qfdmo-bg-white qfdmo-opacity-60"
                         type="button"
+                        data-with-controls={{"false" if is_carte(request) else "true"}}
                         >
                         Rechercher dans cette zone
                     </button>

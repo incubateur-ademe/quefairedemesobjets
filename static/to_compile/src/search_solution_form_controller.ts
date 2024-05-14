@@ -56,7 +56,7 @@ export default class extends Controller<HTMLElement> {
     declare readonly reparerInputTarget: HTMLInputElement
 
     declare readonly hasDirectionTarget: boolean
-    declare readonly hasSearchInZoneInput: boolean
+    declare readonly hasSearchInZoneInputTarget: boolean
 
     declare readonly searchFormPanelTarget: HTMLElement
     declare readonly addressesPanelTarget: HTMLElement
@@ -282,38 +282,20 @@ export default class extends Controller<HTMLElement> {
         return errorExists
     }
 
-    checkErrorForm(): boolean {
+    #checkErrorForm(): boolean {
         let errorExists = false
         if (this.checkSsCatObjetErrorForm()) errorExists ||= true
         if (this.checkAdresseErrorForm()) errorExists ||= true
         return errorExists
     }
 
-    submitForm() {
-        if (this.checkErrorForm()) return
-
-        this.loadingSolutionsTarget.classList.remove("qfdmo-hidden")
-        this.addressMissingTarget.classList.add("qfdmo-hidden")
-        this.NoLocalSolutionTarget.classList.add("qfdmo-hidden")
-
-        this.searchFormPanelTarget.classList.remove("qfdmo-flex-grow")
-        this.backToSearchPanelTarget.classList.remove("qfdmo-h-0")
-        this.addressesPanelTarget.classList.add("qfdmo-flex-grow")
-        this.scrollToContent()
-
-        let event = new Event("submit", { bubbles: true, cancelable: true })
-        setTimeout(() => {
-            this.searchFormTarget.dispatchEvent(event)
-        }, 300)
-    }
-
-    toggleAdvancedFiltersWithSubmit() {
+    toggleAdvancedFiltersWithSubmitButton() {
         this.advancedFilterSaveAndSubmitButtonTarget.classList.remove("qfdmo-hidden")
         this.advancedFilterSaveButtonTarget.classList.add("qfdmo-hidden")
         this.#toggleAdvancedFilters()
     }
 
-    toggleAdvancedFiltersWithoutSubmit() {
+    toggleAdvancedFiltersWithoutSubmitButton() {
         this.advancedFilterSaveAndSubmitButtonTarget.classList.add("qfdmo-hidden")
         this.advancedFilterSaveButtonTarget.classList.remove("qfdmo-hidden")
         this.#toggleAdvancedFilters()
@@ -321,30 +303,63 @@ export default class extends Controller<HTMLElement> {
 
     #toggleAdvancedFilters() {
         if (this.advancedFilterMainPanelTarget.classList.contains("qfdmo-hidden")) {
-            this.advancedFilterMainPanelTarget.classList.remove("qfdmo-hidden")
-            setTimeout(() => {
-                this.advancedFilterFormPanelTarget.classList.remove("qfdmo-h-0")
-                this.advancedFilterFormPanelTarget.classList.add("qfdmo-h-[95%]")
-            }, 100)
+            this.#showAdvancedFilters()
         } else {
-            this.advancedFilterFormPanelTarget.classList.remove("qfdmo-h-[95%]")
-            this.advancedFilterFormPanelTarget.classList.add("qfdmo-h-0")
-            setTimeout(() => {
-                this.advancedFilterMainPanelTarget.classList.add("qfdmo-hidden")
-            }, 300)
+            this.#hideAdvancedFilters()
         }
         this.scrollToContent()
     }
 
-    toggleAdvancedFiltersAndSubmitForm() {
-        this.#toggleAdvancedFilters()
-        this.submitForm()
+    #showAdvancedFilters() {
+        this.advancedFilterMainPanelTarget.classList.remove("qfdmo-hidden")
+        setTimeout(() => {
+            this.advancedFilterFormPanelTarget.classList.remove("qfdmo-h-0")
+            this.advancedFilterFormPanelTarget.classList.add("qfdmo-h-[95%]")
+        }, 100)
     }
 
-    submitFormWithoutZone() {
-        if (this.hasSearchInZoneInput) {
-            this.searchInZoneInputTarget.value = ""
+    #hideAdvancedFilters() {
+        this.advancedFilterFormPanelTarget.classList.remove("qfdmo-h-[95%]")
+        this.advancedFilterFormPanelTarget.classList.add("qfdmo-h-0")
+        setTimeout(() => {
+            this.advancedFilterMainPanelTarget.classList.add("qfdmo-hidden")
+        }, 300)
+    }
+
+    advancedSubmit(event: Event) {
+        const withControls =
+            (event.target as HTMLElement).dataset.withControls?.toLowerCase() === "true"
+        if (withControls) {
+            if (this.#checkErrorForm()) return
         }
-        this.submitForm()
+
+        const withoutZone =
+            (event.target as HTMLElement).dataset.withoutZone?.toLowerCase() === "true"
+        if (withoutZone) {
+            if (this.hasSearchInZoneInputTarget) {
+                this.searchInZoneInputTarget.value = ""
+            }
+        }
+
+        const withDynamicFormPanel =
+            (
+                event.target as HTMLElement
+            ).dataset.withDynamicFormPanel?.toLowerCase() === "true"
+        if (withDynamicFormPanel) {
+            this.searchFormPanelTarget.classList.remove("qfdmo-flex-grow")
+            this.backToSearchPanelTarget.classList.remove("qfdmo-h-0")
+            this.addressesPanelTarget.classList.add("qfdmo-flex-grow")
+            this.scrollToContent()
+        }
+
+        this.loadingSolutionsTarget.classList.remove("qfdmo-hidden")
+        this.addressMissingTarget.classList.add("qfdmo-hidden")
+        this.NoLocalSolutionTarget.classList.add("qfdmo-hidden")
+        this.#hideAdvancedFilters()
+
+        let submitEvent = new Event("submit", { bubbles: true, cancelable: true })
+        setTimeout(() => {
+            this.searchFormTarget.dispatchEvent(submitEvent)
+        }, 300)
     }
 }
