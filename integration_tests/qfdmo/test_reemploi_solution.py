@@ -40,4 +40,5 @@ class TestReemploiSolutionView:
             "label_reparacteur": None,
             "ess": None,
             "bonus": None,
+            "bbox": None,
         }

@@ -1,4 +1,3 @@
-{{ form.bbox }}
 <div
     class="qfdmo-relative qfdmo-flex-grow qfdmo-flex qfdmo-flex-col md:qfdmo-flex-row"
 >
@@ -41,8 +40,8 @@
                     data-controller="map"
                     data-map-location-value="{{ location }}"
                     id="map"
-                    data-map-target="map"
                 >
+                    {{ form.bbox }}
                     <button
                         data-map-target="searchInZoneButton"
                         data-turbo-frame="adresses"

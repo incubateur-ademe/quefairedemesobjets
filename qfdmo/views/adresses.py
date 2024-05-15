@@ -46,9 +46,7 @@ class AddressesView(FormView):
     def _get_search_in_zone_params(self):
         center = []
         my_bbox_polygon = []
-        if search_in_zone := self.request.GET.get(
-            "search_in_zone"
-        ) or self.request.GET.get("bbox"):
+        if search_in_zone := self.request.GET.get("bbox"):
             search_in_zone = json.loads(search_in_zone)
             if (
                 "center" in search_in_zone

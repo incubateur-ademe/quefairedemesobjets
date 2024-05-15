@@ -8,7 +8,6 @@ export default class extends Controller<HTMLElement> {
         "direction",
         "latitudeInput",
         "longitudeInput",
-        "searchInZoneInput",
         "actionList",
         "searchForm",
         "reparerInput",
@@ -147,8 +146,7 @@ export default class extends Controller<HTMLElement> {
         this.detailsAddressPanelTarget.classList.remove("md:qfdmo-w-0")
     }
 
-    // TODO rename it !
-    updateSearchInZone(event) {
+    updateBboxInput(event) {
         this.bboxTarget.value = JSON.stringify(event.detail)
     }
 
