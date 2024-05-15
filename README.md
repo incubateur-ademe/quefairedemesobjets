@@ -248,7 +248,7 @@ pytest
 Test Js unitaire
 
 ```sh
-npm run test static
+npm run test
 ```
 
 End to end avec Playwright
