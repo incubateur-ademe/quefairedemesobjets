@@ -231,21 +231,27 @@ export default class extends Controller<HTMLElement> {
             else options[i].checked = false
         }
 
-        let actionList = []
+        let actionList: string[] = []
         if (this.#selectedOption == "jai") {
             // Checkboxes option
             const actionInput = this.jaiTarget.getElementsByTagName("input")
             for (let i = 0; i < actionInput.length; i++) {
-                if (actionInput[i].checked)
-                    actionList.push(actionInput[i].getAttribute("name"))
+                if (actionInput[i].checked) {
+                    const name = actionInput[i].getAttribute("name")
+                    if (name) {
+                        actionList.push(name)
+                    }
+                }
             }
         }
         if (this.#selectedOption == "jecherche") {
             // Checkboxes option
             const actionInput = this.jechercheTarget.getElementsByTagName("input")
             for (let i = 0; i < actionInput.length; i++) {
-                if (actionInput[i].checked)
-                    actionList.push(actionInput[i].getAttribute("name"))
+                const name = actionInput[i].getAttribute("name")
+                if (name) {
+                    actionList.push(name)
+                }
             }
         }
         this.actionListTarget.value = actionList.join("|")
