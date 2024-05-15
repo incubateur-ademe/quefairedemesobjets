@@ -40,21 +40,15 @@
                     data-controller="map"
                     data-map-location-value="{{ location }}"
                     id="map"
-                    data-map-target="map"
                 >
-                    <input
-                        hidden
-                        data-map-target="searchInZoneInput"
-                        data-search-solution-form-target="searchInZoneInput"
-                        name="search_in_zone"
-                        value=""
-                    />
+                    {{ form.bbox }}
                     <button
                         data-map-target="searchInZoneButton"
                         data-turbo-frame="adresses"
-                        data-action="click -> search-solution-form#submitForm"
+                        data-action="click -> search-solution-form#advancedSubmit"
                         class="fr-btn fr-btn--sm fr-btn--secondary fr-m-1w fr-p-1v qfdmo-absolute qfdmo-z-[10000] qfdmo-right-0 qfdmo-hidden qfdmo-bg-white qfdmo-opacity-60"
                         type="button"
+                        data-with-controls={{"false" if is_carte(request) else "true"}}
                         >
                         Rechercher dans cette zone
                     </button>
@@ -67,24 +61,19 @@
                         </div>
                     </div>
                     <div
-                        class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-80 qfdmo-font-black qfdmo-z-[1000]{% if not(form.initial.adresse) or acteurs %} qfdmo-hidden{% endif %}"
+                        class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-80 qfdmo-font-black qfdmo-z-[1000]{% if acteurs %} qfdmo-hidden{% endif %}"
                         data-search-solution-form-target="NoLocalSolution"
                     >
                         <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
-                            Il n'existe pas de solution {% if bbox %}dans cette zone{% else %}localisée proche de chez vous (<30 km){% endif %}, avez-vous envigagé une solution en ligne ?
-                            </div>
+                            Il n'existe pas de solution {% if bbox %}dans cette zone{% else %}localisée proche de chez vous (&lt;30 km){% endif %}, avez-vous envigagé une solution en ligne ?
                         </div>
-                        {% for acteur in acteurs %}
-                            <script type="application/json" data-map-target="acteur">
-                                {{ acteur.json_acteur_for_display(direction=form.initial.direction, action_list=form.initial.action_list) | safe }}
-                            </script>
-                        {% endfor %}
-                        {% if bbox %}
-                            <script type="application/json" data-map-target="bBox">
-                                {{ bbox|tojson() }}
-                            </script>
-                        {% endif %}
                     </div>
+                    {% for acteur in acteurs %}
+                        <script type="application/json" data-map-target="acteur">
+                            {{ acteur.json_acteur_for_display(direction=form.initial.direction, action_list=form.initial.action_list) | safe }}
+                        </script>
+                    {% endfor %}
+                </div>
             {% endif %}
         </div>
         <div

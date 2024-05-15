@@ -33,6 +33,15 @@ class SegmentedControlSelect(forms.RadioSelect):
 
 
 class IframeAddressesForm(forms.Form):
+    bbox = forms.CharField(
+        widget=forms.HiddenInput(
+            attrs={
+                "data-search-solution-form-target": "bbox",
+                "data-map-target": "bbox",
+            }
+        ),
+        required=False,
+    )
     sous_categorie_objet = forms.ModelChoiceField(
         queryset=SousCategorieObjet.objects.all(),
         widget=AutoCompleteInput(
@@ -177,7 +186,8 @@ class IframeAddressesForm(forms.Form):
         widget=SegmentedControlSelect(
             attrs={
                 "class": "qfdmo-w-full md:qfdmo-w-fit",
-                "data-action": "click -> search-solution-form#submitForm",
+                "data-action": "click -> search-solution-form#advancedSubmit",
+                "data-with-controls": "true",
             },
         ),
         choices=[

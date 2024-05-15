@@ -16,7 +16,7 @@
             qfdmo-relative"
             data-action="
             map:displayDetails->search-solution-form#displayDetails
-            map:searchInZone->search-solution-form#updateSearchInZone
+            map:updateBbox->search-solution-form#updateBboxInput
             map:setSrcDetailsAddress->search-solution-form#setSrcDetailsAddress
             ss-cat-object-autocomplete:optionSelected->search-solution-form#checkSsCatObjetErrorForm
             address-autocomplete:optionSelected->search-solution-form#checkAdresseErrorForm
@@ -28,7 +28,6 @@
                         {% include 'layout/_partials/header_logos.html' %}
                     </div>
 
-
                     {% include "qfdmo/partials/featureflip_inputs.html" %}
 
                     <!-- Recherche adresse -->
@@ -38,13 +37,18 @@
 
                     <div class="fr-mb-1w md:qfdmo-mt-4w qfdmo-float-right">
 
-                        <button class="fr-btn fr-ml-1w qfdmo-float-right">
+                        <button
+                            class="fr-btn fr-ml-1w qfdmo-float-right"
+                            data-action="click -> search-solution-form#advancedSubmit"
+                            type="button"
+                            data-without-zone="true"
+                            >
                             Rechercher
                         </button>
                         <button
                             class="fr-btn fr-btn--secondary fr-ml-1w fr-btn--icon-left fr-icon-equalizer-line qfdmo-float-right"
                             type="button"
-                            data-action="click -> search-solution-form#toggleAdvancedFiltersWithSubmit"
+                            data-action="click -> search-solution-form#toggleAdvancedFiltersWithSubmitButton"
                             >
                             Filtres
                         </button>

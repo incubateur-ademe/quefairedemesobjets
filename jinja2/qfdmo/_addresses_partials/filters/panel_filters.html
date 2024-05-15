@@ -10,7 +10,7 @@
                     <button
                         class="fr-btn fr-btn--close fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-close-line"
                         type="button"
-                        data-action="click -> search-solution-form#toggleAdvancedFiltersWithoutSubmit"
+                        data-action="click -> search-solution-form#toggleAdvancedFiltersWithoutSubmitButton"
                         >
                         Fermer
                     </button>
@@ -88,7 +88,7 @@
                         <button
                             class="fr-btn"
                             type="button"
-                            data-action="click -> search-solution-form#toggleAdvancedFiltersWithoutSubmit"
+                            data-action="click -> search-solution-form#toggleAdvancedFiltersWithoutSubmitButton"
                             >
                             Enregistrer
                         </button>
@@ -100,7 +100,10 @@
                         <button
                             class="fr-btn"
                             type="button"
-                            data-action="click -> search-solution-form#toggleAdvancedFiltersAndSubmitForm"
+                            data-action="click -> search-solution-form#advancedSubmit"
+                            data-without-zone="false"
+                            data-with-controls={{"false" if is_carte(request) else "true"}}
+                            data-toggle-advanced-filters="true"
                             >
                             Rechercher des adresses
                         </button>
