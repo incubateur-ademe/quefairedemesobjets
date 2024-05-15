@@ -34,7 +34,7 @@ def create_proposition_services(**kwargs):
     df_actions = data_dict["actions"]
     df_acteur_services = data_dict["acteur_services"]
 
-    for index, row in df.iterrows():
+    for _, row in df.iterrows():
         acteur_id = row["identifiant_unique"]
         sous_categories = row["produitsdechets_acceptes"]
 
@@ -78,9 +78,10 @@ def create_proposition_services(**kwargs):
     rows_list = list(rows_dict.values())
 
     df_pds = pd.DataFrame(rows_list)
-    df_pds["sous_categories"] = df_pds["sous_categories"].replace(np.nan, None)
-    df_pds.index = range(idx_max, idx_max + len(df_pds))
-    df_pds["id"] = df_pds.index
+    if "sous_categories" in df_pds.columns:
+        df_pds["sous_categories"] = df_pds["sous_categories"].replace(np.nan, None)
+    if indexes := range(idx_max, idx_max + len(df_pds)):
+        df_pds["id"] = indexes
     metadata = {
         "number_of_merged_actors": merged_count,
         "number_of_propositionservices": len(df_pds),
@@ -355,7 +356,7 @@ def create_labels(**kwargs):
     labels = data_dict["labels"]
     df_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
     rows_list = []
-    for index, row in df_actors.iterrows():
+    for _, row in df_actors.iterrows():
         if "labels_etou_bonus" in row:
             label = str(row["labels_etou_bonus"])
             if label == "Agréé Bonus Réparation":
