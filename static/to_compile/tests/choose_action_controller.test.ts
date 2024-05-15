@@ -39,7 +39,7 @@ describe("SearchSolutionFormController", () => {
 
     it("click jecherche option display jecherche target and hide advancedFilters", async () => {
         const jechercheOption = document.getElementById("id_direction_1")
-        jechercheOption.click()
+        jechercheOption?.click()
         await new Promise((r) => setTimeout(r, 0))
 
         const jechercheTarget = document.querySelector(

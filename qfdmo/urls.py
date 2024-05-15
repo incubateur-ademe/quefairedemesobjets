@@ -9,7 +9,6 @@ urlpatterns = [
     path("", adresses.AddressesView.as_view(), name="reemploi_solution"),
     path(
         "qfdmo/getorcreate_revisionacteur/<str:acteur_identifiant>",
-        #        display_solutions.getorcreate_correctionequipeacteur,
         adresses.getorcreate_revisionacteur,
         name="getorcreate_revisionacteur",
     ),
