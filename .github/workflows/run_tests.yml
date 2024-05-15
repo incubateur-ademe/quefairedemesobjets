@@ -58,7 +58,7 @@ jobs:
       - name: Check code formatting
         run: npm run lint
       - name: Run tests
-        run: npm run test static
+        run: npm run test
 
   e2e:
     timeout-minutes: 5
