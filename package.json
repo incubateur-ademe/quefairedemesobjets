@@ -4,7 +4,7 @@
         "eslint": "eslint . --fix",
         "lint-check": "prettier --check static/to_compile",
         "lint": "prettier static/to_compile --write",
-        "test": "jest",
+        "test": "jest ./static/to_compile",
         "watch": "parcel watch"
     },
     "source": [
