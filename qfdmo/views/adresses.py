@@ -1,4 +1,5 @@
 import json
+import logging
 from html import escape
 
 import unidecode
@@ -10,6 +11,7 @@ from django.contrib.postgres.lookups import Unaccent
 from django.contrib.postgres.search import TrigramWordDistance  # type: ignore
 from django.db.models import Min, Q
 from django.db.models.functions import Length, Lower
+from django.db.models.query import QuerySet
 from django.forms.forms import BaseForm
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
@@ -31,6 +33,8 @@ from qfdmo.models import (
 )
 from qfdmo.thread.materialized_view import RefreshMateriazedViewThread
 
+logger = logging.getLogger(__name__)
+
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
 
 
@@ -43,11 +47,21 @@ class AddressesView(FormView):
             return CarteAddressesForm
         return super().get_form_class()
 
+    def _get_max_displayed_acteurs(self):
+        if self.request.GET.get("carte") is not None:
+            return 100
+        return settings.MAX_SOLUTION_DISPLAYED_ON_MAP
+
     def _get_search_in_zone_params(self):
         center = []
         my_bbox_polygon = []
         if search_in_zone := self.request.GET.get("bbox"):
-            search_in_zone = json.loads(search_in_zone)
+            try:
+                search_in_zone = json.loads(search_in_zone)
+            except json.JSONDecodeError:
+                logger.error("Error while parsing bbox parameter")
+                return center, my_bbox_polygon
+
             if (
                 "center" in search_in_zone
                 and "lat" in search_in_zone["center"]
@@ -74,40 +88,7 @@ class AddressesView(FormView):
                 ]  # [xmin, ymin, xmax, ymax]
         return center, my_bbox_polygon
 
-    def get_initial(self):
-        initial = super().get_initial()
-        initial["sous_categorie_objet"] = self.request.GET.get("sous_categorie_objet")
-        initial["adresse"] = self.request.GET.get("adresse")
-        initial["digital"] = self.request.GET.get("digital", "0")
-        initial["direction"] = get_direction(self.request)
-        initial["action_list"] = self.request.GET.get("action_list")
-        initial["latitude"] = self.request.GET.get("latitude")
-        initial["longitude"] = self.request.GET.get("longitude")
-        initial["label_reparacteur"] = self.request.GET.get("label_reparacteur")
-        initial["bonus"] = self.request.GET.get("bonus")
-        initial["ess"] = self.request.GET.get("ess")
-        initial["bbox"] = self.request.GET.get("bbox")
-        initial["sc_id"] = (
-            self.request.GET.get("sc_id") if initial["sous_categorie_objet"] else None
-        )
-
-        return initial
-
-    def get_form(self, form_class: type | None = None) -> BaseForm:
-        if form_class is None:
-            form_class = self.get_form_class()
-        my_form = super().get_form(form_class)
-        # Here we need to load choices after initialisation because of async management
-        # in prod + cache
-        my_form.load_choices(first_direction=self.request.GET.get("first_dir"))
-        return my_form
-
-    def get_context_data(self, **kwargs):
-        kwargs["location"] = "{}"
-        kwargs["acteurs"] = DisplayedActeur.objects.none()
-
-        kwargs["has_bbox"] = bool(self.request.GET.get("bbox"))
-
+    def _manage_sous_categorie_objet_and_actions(self) -> QuerySet[DisplayedActeur]:
         sous_categorie_id = None
         if (
             self.request.GET.get("sous_categorie_objet")
@@ -115,6 +96,7 @@ class AddressesView(FormView):
         ):
             sous_categorie_id = int(self.request.GET.get("sc_id", "0"))
 
+        # FIXME : get_action_list should be updated to manage group of actions
         action_selection_ids = [a["id"] for a in get_action_list(self.request)]
 
         ps_filter = self._build_ps_filter(action_selection_ids, sous_categorie_id)
@@ -128,71 +110,12 @@ class AddressesView(FormView):
             "proposition_services__acteur_service",
         ).distinct()
 
-        if self.request.GET.get("ess"):
-            acteurs = acteurs.filter(labels__code="ess")
-
-        if self.request.GET.get("bonus"):
-            acteurs = acteurs.filter(labels__bonus=True)
-
         if sous_categorie_id:
             acteurs = acteurs.filter(
                 proposition_services__sous_categories__id=sous_categorie_id
             )
 
-        if self.request.GET.get("digital") and self.request.GET.get("digital") == "1":
-            acteurs = (
-                acteurs.filter(acteur_type_id=ActeurType.get_digital_acteur_type_id())
-                .annotate(min_action_order=Min("proposition_services__action__order"))
-                .order_by("min_action_order", "?")
-            )
-            kwargs["acteurs"] = acteurs
-        else:
-            center, my_bbox_polygon = self._get_search_in_zone_params()
-            if self.request.GET.get("bbox", None):
-                kwargs["acteurs"] = acteurs.filter(
-                    location__within=Polygon.from_bbox(my_bbox_polygon)
-                )
-
-            if (latitude := self.request.GET.get("latitude", None)) and (
-                longitude := self.request.GET.get("longitude", None)
-            ):
-                kwargs["location"] = json.dumps(
-                    {"latitude": latitude, "longitude": longitude}
-                )
-
-                if center:
-                    longitude = center[0]
-                    latitude = center[1]
-
-                reference_point = Point(float(longitude), float(latitude), srid=4326)
-                distance_in_degrees = settings.DISTANCE_MAX / 111320
-
-                # FIXME : add a test to check distinct point
-                acteurs_physique = acteurs.annotate(
-                    distance=Distance("location", reference_point)
-                ).exclude(acteur_type_id=ActeurType.get_digital_acteur_type_id())
-
-                # FIXME : ecrire quelques part qu'il faut utiliser dwithin
-                # pour utiliser l'index
-                acteurs = acteurs_physique.filter(
-                    location__dwithin=(
-                        reference_point,
-                        distance_in_degrees,
-                    )
-                ).order_by("distance")
-                bbox_acteurs = None
-                if my_bbox_polygon:
-                    bbox_acteurs = acteurs.filter(
-                        location__within=Polygon.from_bbox(my_bbox_polygon)
-                    )[: settings.MAX_SOLUTION_DISPLAYED_ON_MAP]
-                    if bbox_acteurs:
-                        kwargs["bbox"] = my_bbox_polygon
-
-                kwargs["acteurs"] = (
-                    bbox_acteurs or acteurs[: settings.MAX_SOLUTION_DISPLAYED_ON_MAP]
-                )
-
-        return super().get_context_data(**kwargs)
+        return acteurs
 
     def _build_ps_filter(self, action_selection_ids, sous_categorie_id: int | None):
         reparer_action_id = None
@@ -237,6 +160,120 @@ class AddressesView(FormView):
                     statut=ActeurStatus.ACTIF,
                 )
         return ps_filter
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial["sous_categorie_objet"] = self.request.GET.get("sous_categorie_objet")
+        initial["adresse"] = self.request.GET.get("adresse")
+        initial["digital"] = self.request.GET.get("digital", "0")
+        initial["direction"] = get_direction(self.request)
+        initial["action_list"] = self.request.GET.get("action_list")
+        initial["latitude"] = self.request.GET.get("latitude")
+        initial["longitude"] = self.request.GET.get("longitude")
+        initial["label_reparacteur"] = self.request.GET.get("label_reparacteur")
+        initial["bonus"] = self.request.GET.get("bonus")
+        initial["ess"] = self.request.GET.get("ess")
+        initial["bbox"] = self.request.GET.get("bbox")
+        initial["sc_id"] = (
+            self.request.GET.get("sc_id") if initial["sous_categorie_objet"] else None
+        )
+
+        return initial
+
+    def get_form(self, form_class: type | None = None) -> BaseForm:
+        if form_class is None:
+            form_class = self.get_form_class()
+        my_form = super().get_form(form_class)
+        # Here we need to load choices after initialisation because of async management
+        # in prod + cache
+        my_form.load_choices(first_direction=self.request.GET.get("first_dir"))
+        return my_form
+
+    def get_context_data(self, **kwargs):
+        kwargs["location"] = "{}"
+
+        # Manage the selection of sous_categorie_objet and actions
+        acteurs = self._manage_sous_categorie_objet_and_actions()
+
+        if self.request.GET.get("ess"):
+            acteurs = acteurs.filter(labels__code="ess")
+
+        if self.request.GET.get("bonus"):
+            acteurs = acteurs.filter(labels__bonus=True)
+
+        # Case of digital acteurs
+        if self.request.GET.get("digital") and self.request.GET.get("digital") == "1":
+            kwargs["acteurs"] = (
+                acteurs.filter(acteur_type_id=ActeurType.get_digital_acteur_type_id())
+                .annotate(min_action_order=Min("proposition_services__action__order"))
+                .order_by("min_action_order", "?")
+            )
+            return super().get_context_data(**kwargs)
+
+        # Case of physical acteurs
+        else:
+            # Exclude digital acteurs
+            acteurs = acteurs.exclude(
+                acteur_type_id=ActeurType.get_digital_acteur_type_id()
+            )
+
+            # Set Home location (address set as input)
+            # FIXME : can be manage in template using the form value ?
+            if (latitude := self.request.GET.get("latitude", None)) and (
+                longitude := self.request.GET.get("longitude", None)
+            ):
+                kwargs["location"] = json.dumps(
+                    {"latitude": latitude, "longitude": longitude}
+                )
+
+            # Manage bbox parameter
+            center, my_bbox_polygon = self._get_search_in_zone_params()
+
+            # With bbox parameter
+            if my_bbox_polygon:
+                if center:
+                    longitude = center[0]
+                    latitude = center[1]
+
+                # FIXME : manage the MAX_SOLUTION_DISPLAYED_ON_MAP depending of carte
+                # or iframe mode
+                bbox_acteurs = acteurs.filter(
+                    location__within=Polygon.from_bbox(my_bbox_polygon)
+                ).order_by("?")
+
+                if bbox_acteurs:
+                    bbox_acteurs = bbox_acteurs[: self._get_max_displayed_acteurs()]
+                    # FIXME : pas sure qu'on utilise encore ce paramètre
+                    # par contre on ne zoom plus out quand il n'a a pas d'acteurs
+                    # dans la périmètre
+                    kwargs["bbox"] = my_bbox_polygon
+                    kwargs["acteurs"] = bbox_acteurs
+                    return super().get_context_data(**kwargs)
+
+            # if not bbox or if no acteur in the bbox
+
+            if latitude and longitude:
+                reference_point = Point(float(longitude), float(latitude), srid=4326)
+                distance_in_degrees = settings.DISTANCE_MAX / 111320
+
+                kwargs["acteurs"] = (
+                    acteurs.annotate(distance=Distance("location", reference_point))
+                    .filter(
+                        location__dwithin=(
+                            reference_point,
+                            distance_in_degrees,
+                        )
+                    )
+                    .order_by("distance")[: self._get_max_displayed_acteurs()]
+                )
+
+                # Remove bbox parameter
+                context = super().get_context_data(**kwargs)
+                if kwargs["acteurs"]:
+                    context["form"].initial["bbox"] = None
+                return context
+
+        return super().get_context_data(**kwargs)
 
 
 # TODO : should be deprecated once all is moved to the displayed acteur

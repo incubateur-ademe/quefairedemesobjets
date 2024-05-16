@@ -53,7 +53,7 @@
                         Rechercher dans cette zone
                     </button>
                     <div
-                        class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-80 qfdmo-font-black qfdmo-z-[1000]{% if form.initial.adresse or has_bbox %} qfdmo-hidden{% endif %}"
+                        class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-80 qfdmo-font-black qfdmo-z-[1000]{% if form.initial.adresse or form.initial.bbox or acteurs %} qfdmo-hidden{% endif %}"
                         data-search-solution-form-target="addressMissing"
                     >
                         <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
