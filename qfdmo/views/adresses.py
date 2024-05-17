@@ -280,22 +280,13 @@ class AddressesView(FormView):
                     longitude = center[0]
                     latitude = center[1]
 
-                # FIXME : manage the MAX_SOLUTION_DISPLAYED_ON_MAP depending of carte
-                # or iframe mode
                 bbox_acteurs = acteurs.filter(
                     location__within=Polygon.from_bbox(my_bbox_polygon)
                 ).order_by("?")
-                logging.warning("Before")
-                if bbox_acteurs:
-                    logging.warning("After 0")
-                    bbox_acteurs = bbox_acteurs[: self._get_max_displayed_acteurs()]
-                    # FIXME : pas sure qu'on utilise encore ce paramètre
-                    # par contre on ne zoom plus out quand il n'a a pas d'acteurs
-                    # dans la périmètre
-                    logging.warning("After 1")
+                bbox_acteurs = bbox_acteurs[: self._get_max_displayed_acteurs()]
+                if bbox_acteurs.count() > 0:
                     kwargs["bbox"] = my_bbox_polygon
                     kwargs["acteurs"] = bbox_acteurs
-                    logging.warning("After 2")
                     return super().get_context_data(**kwargs)
 
             # if not bbox or if no acteur in the bbox
