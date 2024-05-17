@@ -3,7 +3,7 @@ from django.http import HttpRequest
 from django.utils.safestring import mark_safe
 
 from qfdmo.models import CachedDirectionAction, DagRun, DagRunStatus, SousCategorieObjet
-from qfdmo.models.action import GroupeAction
+from qfdmo.models.action import Action, GroupeAction
 
 
 class AutoCompleteInput(forms.Select):
@@ -232,9 +232,21 @@ class IframeAddressesForm(AddressesForm):
 
 class CarteAddressesForm(AddressesForm):
     def load_choices(self, request: HttpRequest) -> None:
-        # new_grouped_action
+        # get the actions to be displayed o use them as a prefilter
+        displayed_actions = (
+            displayed_action_list.split("|")
+            if (displayed_action_list := request.GET.get("displayed_action_list"))
+            else Action.objects.all().values_list("code", flat=True)
+        )
+        # get groupes of these actions
+        groupes = (
+            GroupeAction.objects.filter(actions__code__in=displayed_actions)
+            .order_by("order")
+            .distinct()
+        )
         result = []
-        for action_group in GroupeAction.objects.all().order_by("order"):
+        # set the choices by groupe with only the actions to be displayed
+        for action_group in groupes:
             libelle = ""
             if action_group.icon:
                 libelle = (
@@ -242,9 +254,13 @@ class CarteAddressesForm(AddressesForm):
                     f' fr-icon--sm qfdmo-rounded-full qfdmo-bg-{action_group.couleur}"'
                     ' aria-hidden="true"></span>&nbsp;'
                 )
-
-            libelle += action_group.libelle
-            result.append([action_group.code, mark_safe(libelle)])
+            actions = action_group.actions.filter(code__in=displayed_actions).order_by(
+                "order"
+            )
+            libelle += ", ".join({a.libelle_groupe for a in actions}).capitalize()
+            code = "|".join({a.code for a in actions})
+            result.append([code, mark_safe(libelle)])
+        # set the choice
         self.fields["new_grouped_action"].choices = result
 
     adresse = forms.CharField(

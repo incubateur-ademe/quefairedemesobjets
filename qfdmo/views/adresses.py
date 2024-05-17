@@ -97,17 +97,34 @@ class AddressesView(FormView):
         ):
             sous_categorie_id = int(self.request.GET.get("sc_id", "0"))
 
-        # FIXME : get_action_list should be updated to manage group of actions
-
-        # filters :
-        # if direction, remove action from direction
-        # if displayed_action_list
-        # if action_list (checked_action_list)
         action_selection_ids = []
-        if self.request.GET.get("carte"):
-            # TODO : get it from the displayed action list / action list
-            action_selection_ids = ["1", "2"]
-            action_selection_ids = [a["id"] for a in get_action_list(self.request)]
+
+        logging.warning("CARTE ? : ", self.request.GET.get("carte"))
+        if self.request.GET.get("carte") is not None:
+            if self.request.GET.get("new_grouped_action"):
+                action_selection_codes = [
+                    code
+                    for new_groupe_action in self.request.GET.getlist(
+                        "new_grouped_action"
+                    )
+                    for code in new_groupe_action.split("|")
+                ]
+            elif self.request.GET.get("action_list"):
+                action_selection_codes = self.request.GET.get("action_list").split("|")
+            elif self.request.GET.get("displayed_action_list"):
+                action_selection_codes = [
+                    code
+                    for new_groupe_action in self.request.GET.getlist(
+                        "displayed_action_list"
+                    )
+                    for code in new_groupe_action.split("|")
+                ]
+            action_selection_ids = [
+                a["id"]
+                for a in CachedDirectionAction.get_actions()
+                if a["code"] in action_selection_codes
+            ]
+            logging.warning(action_selection_ids)
         else:
             action_selection_ids = [a["id"] for a in get_action_list(self.request)]
 
@@ -268,18 +285,20 @@ class AddressesView(FormView):
                 bbox_acteurs = acteurs.filter(
                     location__within=Polygon.from_bbox(my_bbox_polygon)
                 ).order_by("?")
-
+                logging.warning("Before")
                 if bbox_acteurs:
+                    logging.warning("After 0")
                     bbox_acteurs = bbox_acteurs[: self._get_max_displayed_acteurs()]
                     # FIXME : pas sure qu'on utilise encore ce paramètre
                     # par contre on ne zoom plus out quand il n'a a pas d'acteurs
                     # dans la périmètre
+                    logging.warning("After 1")
                     kwargs["bbox"] = my_bbox_polygon
                     kwargs["acteurs"] = bbox_acteurs
+                    logging.warning("After 2")
                     return super().get_context_data(**kwargs)
 
             # if not bbox or if no acteur in the bbox
-
             if latitude and longitude:
                 reference_point = Point(float(longitude), float(latitude), srid=4326)
                 distance_in_degrees = settings.DISTANCE_MAX / 111320
