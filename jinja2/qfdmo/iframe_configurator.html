@@ -34,9 +34,30 @@
             <hr class="fr-my-1w">
 
             <p>
-                {{ form.action_list.label_tag() }}
-                <span class="qfdmo-italic">{{ form.action_list.help_text }}</span>
-                {{ form.action_list }}
+                <details>
+                    <summary>
+                        {{ form.displayed_action_list.label_tag() }}
+                        {% if not form.initial.displayed_action_list %}
+                            <br><span class="qfdmo-italic">Toutes les actions sont disponibles</span>
+                        {% endif %}
+                    </summary>
+                    <span class="qfdmo-italic">{{ form.displayed_action_list.help_text }}</span>
+                    {{ form.displayed_action_list }}
+                </details>
+            </p>
+            <hr class="fr-my-1w">
+
+            <p>
+                <details>
+                    <summary>
+                        {{ form.action_list.label_tag() }}
+                        {% if not form.initial.action_list %}
+                            <br><span class="qfdmo-italic">Toutes les actions disponibles sont cochées</span>
+                        {% endif %}
+                    </summary>
+                    <span class="qfdmo-italic">{{ form.action_list.help_text }}</span>
+                    {{ form.action_list }}
+                </details>
             </p>
             <hr class="fr-my-1w">
 

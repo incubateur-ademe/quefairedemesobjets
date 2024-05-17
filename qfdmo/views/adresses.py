@@ -31,6 +31,7 @@ from qfdmo.models import (
     Objet,
     RevisionActeur,
 )
+from qfdmo.models.action import GroupeAction
 from qfdmo.thread.materialized_view import RefreshMateriazedViewThread
 
 logger = logging.getLogger(__name__)
@@ -97,7 +98,18 @@ class AddressesView(FormView):
             sous_categorie_id = int(self.request.GET.get("sc_id", "0"))
 
         # FIXME : get_action_list should be updated to manage group of actions
-        action_selection_ids = [a["id"] for a in get_action_list(self.request)]
+
+        # filters :
+        # if direction, remove action from direction
+        # if displayed_action_list
+        # if action_list (checked_action_list)
+        action_selection_ids = []
+        if self.request.GET.get("carte"):
+            # TODO : get it from the displayed action list / action list
+            action_selection_ids = ["1", "2"]
+            action_selection_ids = [a["id"] for a in get_action_list(self.request)]
+        else:
+            action_selection_ids = [a["id"] for a in get_action_list(self.request)]
 
         ps_filter = self._build_ps_filter(action_selection_ids, sous_categorie_id)
 
@@ -161,13 +173,26 @@ class AddressesView(FormView):
                 )
         return ps_filter
 
+    def _initial_grouped_action(self):
+        if new_grouped_action := self.request.GET.getlist("new_grouped_action"):
+            return new_grouped_action
+        if self.request.GET.get("action_list"):
+            action_list = self.request.GET.get("action_list").split(",")
+            groupe_actions = GroupeAction.objects.filter(
+                actions__code__in=action_list
+            ).distinct()
+            grouped_action = [groupe_action.code for groupe_action in groupe_actions]
+            # get grouped action
+            return grouped_action
+        return [groupe_action.code for groupe_action in GroupeAction.objects.all()]
+
     def get_initial(self):
         initial = super().get_initial()
         initial["sous_categorie_objet"] = self.request.GET.get("sous_categorie_objet")
         initial["adresse"] = self.request.GET.get("adresse")
         initial["digital"] = self.request.GET.get("digital", "0")
         initial["direction"] = get_direction(self.request)
-        initial["action_list"] = self.request.GET.get("action_list")
+        initial["displayed_action_list"] = self.request.GET.get("displayed_action_list")
         initial["latitude"] = self.request.GET.get("latitude")
         initial["longitude"] = self.request.GET.get("longitude")
         initial["label_reparacteur"] = self.request.GET.get("label_reparacteur")
@@ -177,6 +202,8 @@ class AddressesView(FormView):
         initial["sc_id"] = (
             self.request.GET.get("sc_id") if initial["sous_categorie_objet"] else None
         )
+        initial["new_grouped_action"] = self._initial_grouped_action
+        initial["action_list"] = self.request.GET.get("action_list")
 
         return initial
 
@@ -186,7 +213,8 @@ class AddressesView(FormView):
         my_form = super().get_form(form_class)
         # Here we need to load choices after initialisation because of async management
         # in prod + cache
-        my_form.load_choices(first_direction=self.request.GET.get("first_dir"))
+        # TODO : displayed_action_list
+        my_form.load_choices(self.request)
         return my_form
 
     def get_context_data(self, **kwargs):
@@ -273,6 +301,7 @@ class AddressesView(FormView):
                     context["form"].initial["bbox"] = None
                 return context
 
+        kwargs["acteurs"] = DisplayedActeur.objects.none()
         return super().get_context_data(**kwargs)
 
 
@@ -373,7 +402,14 @@ class ConfiguratorView(FormView):
         initial["iframe_mode"] = self.request.GET.get("iframe_mode")
         initial["direction"] = self.request.GET.get("direction")
         initial["first_dir"] = self.request.GET.get("first_dir")
-        initial["action_list"] = self.request.GET.getlist("action_list")
+        initial["displayed_action_list"] = self.request.GET.getlist(
+            "displayed_action_list",
+            # [action["code"] for action in CachedDirectionAction.get_actions()],
+        )
+        initial["action_list"] = self.request.GET.getlist(
+            "action_list",
+            # [action["code"] for action in CachedDirectionAction.get_actions()],
+        )
         initial["max_width"] = self.request.GET.get("max_width")
         initial["height"] = self.request.GET.get("height")
         initial["iframe_attributes"] = self.request.GET.get("iframe_attributes")
@@ -404,6 +440,10 @@ class ConfiguratorView(FormView):
             attributes["first_dir"] = escape(first_dir.replace("first_", ""))
         if action_list := self.request.GET.getlist("action_list"):
             attributes["action_list"] = escape("|".join(action_list))
+        if displayed_action_list := self.request.GET.getlist("displayed_action_list"):
+            attributes["displayed_action_list"] = escape(
+                "|".join(displayed_action_list)
+            )
         if max_width := self.request.GET.get("max_width"):
             attributes["max_width"] = escape(max_width)
         if height := self.request.GET.get("height"):
