@@ -102,20 +102,26 @@ def handle_update_actor_event(df_actors, dag_run_id):
         "ville",
         "modifie_le",
         "cree_le",
+        "siret",
     ]
 
     current_time = datetime.now().astimezone().isoformat(timespec="microseconds")
 
     df_actors = df_actors.apply(flatten_ae_results, axis=1)
     df_actors["statut"] = df_actors.apply(
-        lambda row: "SUPPRIME" if row["ae_result.etat_admin_siege"] == "F" else "ACTIF",
+        lambda row: (
+            "SUPPRIME"
+            if row["ae_result.etat_admin"] == "F"
+            and (row["ae_result.etat_admin_siege"] in ["F", None])
+            else "ACTIF"
+        ),
         axis=1,
     )
     df_actors["siret"] = df_actors.apply(
         lambda row: (
             row["ae_result.siret_siege"]
             if row["ae_result.etat_admin_siege"] == "A"
-            else row["siret"]
+            else None
         ),
         axis=1,
     )
@@ -305,6 +311,14 @@ def handle_write_data_update_actor_event(connection, df_actors):
     temp_existing_actors_df = pd.read_sql_query(
         "SELECT * FROM temp_existing_actors", connection
     )
+
+    for column in temp_existing_actors_df.columns:
+        if column not in temp_actors_df.columns:
+            temp_actors_df[column] = None
+
+    for column in temp_actors_df.columns:
+        if column not in temp_existing_actors_df.columns:
+            temp_existing_actors_df[column] = None
 
     combined_actors_df = pd.merge(
         temp_existing_actors_df,
