@@ -25,9 +25,45 @@ def call_annuaire_entreprises(query):
         response = requests.get(url=f"{base_url}{endpoint}", params=params)
 
         if response.status_code == 200:
-            return response.json()
+            data = response.json()
+            if "results" in data and data["results"]:
+                data = data["results"][0]
+                (
+                    adresse,
+                    etat_admin,
+                    siret,
+                    categorie_naf,
+                    etat_admin_siege,
+                    categorie_naf_siege,
+                ) = (None, None, None, None, None, None)
+
+                if data.get("nombre_etablissements_ouverts") == 1:
+                    siege = data.get("siege", {})
+                    adresse = siege.get("adresse")
+                    etat_admin_siege = siege.get("etat_administratif")
+                    siret = siege.get("siret")
+                    categorie_naf_siege = siege.get("activite_principale")
+                matching_etablissements = data.get("matching_etablissements", [])
+                if matching_etablissements:
+                    premier_etablissement = matching_etablissements[0]
+                    etat_admin = premier_etablissement.get("etat_administratif")
+                    categorie_naf = premier_etablissement.get("activite_principale")
+
+                return {
+                    "adresse": adresse,
+                    "etat_admin": etat_admin,
+                    "etat_admin_siege": etat_admin_siege,
+                    "siret_siege": siret,
+                    "categorie_naf_siege": categorie_naf_siege,
+                    "categorie_naf": categorie_naf,
+                }
+            else:
+                # Si 'results' est vide ou n'existe pas, retourner un dictionnaire vide
+                return {}
+
         else:
-            return []
+            return {}
+
     except requests.exceptions.RequestException as e:
         print(f"Une erreur est survenue lors de la requête: {e}")
-        return ["Une erreur de requête est survenue"]
+        return {"error": "Une erreur de requête est survenue"}

@@ -20,14 +20,14 @@ def preprocess_address(address):
     return address
 
 
-def extract_details(row):
+def extract_details(row, col="adresse_format_ban"):
     # Pattern pour capturer les codes postaux et les noms de ville optionnels
     pattern = re.compile(r"(\d{2,3}\s?\d{2,3})\s*(.*)")
 
-    if pd.isnull(row["adresse_format_ban"]):
+    if pd.isnull(row[col]):
         return pd.Series([None, None, None])
 
-    address_ban = preprocess_address(str(row["adresse_format_ban"]))
+    address_ban = preprocess_address(str(row[col]))
 
     match = pattern.search(address_ban)
     if match:
@@ -313,17 +313,7 @@ def get_db_conn_id(dag_filepath, parent_of_parent=False):
 
 
 def check_siret_using_annuaire_entreprise(row):
-    data = api_utils.call_annuaire_entreprises(row["siret"])
-    if (
-        "results" in data
-        and data["results"]
-        and "matching_etablissements" in data["results"][0]
-        and data["results"][0]["matching_etablissements"]
-    ):
-        etat_admin = data["results"][0]["matching_etablissements"][0][
-            "etat_administratif"
-        ]
-        print(f"{etat_admin} {row['nom']} {row['siret']}")
-        return etat_admin
-    else:
-        return []
+    res = api_utils.call_annuaire_entreprises(row["siret"])
+    if "etat_admin" in res and res["etat_admin"] == "F":
+        return res
+    return {}
