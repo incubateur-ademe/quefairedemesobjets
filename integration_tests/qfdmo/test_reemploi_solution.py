@@ -41,4 +41,12 @@ class TestReemploiSolutionView:
             "ess": None,
             "bonus": None,
             "bbox": None,
+            "displayed_action_list": None,
+            "new_grouped_action": [
+                "reparer",
+                "donner_echanger",
+                "emprunter_preter_louer",
+                "vendre_acheter",
+                "trier",
+            ],
         }

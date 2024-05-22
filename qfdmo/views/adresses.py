@@ -99,7 +99,7 @@ class AddressesView(FormView):
 
         action_selection_ids = []
 
-        logging.warning("CARTE ? : ", self.request.GET.get("carte"))
+        logging.warning("CARTE ? : %s ", self.request.GET.get("carte"))
         if self.request.GET.get("carte") is not None:
             if self.request.GET.get("new_grouped_action"):
                 action_selection_codes = [
@@ -219,7 +219,7 @@ class AddressesView(FormView):
         initial["sc_id"] = (
             self.request.GET.get("sc_id") if initial["sous_categorie_objet"] else None
         )
-        initial["new_grouped_action"] = self._initial_grouped_action
+        initial["new_grouped_action"] = self._initial_grouped_action()
         initial["action_list"] = self.request.GET.get("action_list")
 
         return initial
