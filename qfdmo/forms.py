@@ -3,7 +3,7 @@ from django.http import HttpRequest
 from django.utils.safestring import mark_safe
 
 from qfdmo.models import CachedDirectionAction, DagRun, DagRunStatus, SousCategorieObjet
-from qfdmo.models.action import Action, GroupeAction
+from qfdmo.models.action import GroupeAction
 
 
 class AutoCompleteInput(forms.Select):
@@ -231,37 +231,10 @@ class IframeAddressesForm(AddressesForm):
 
 
 class CarteAddressesForm(AddressesForm):
-    def load_choices(self, request: HttpRequest) -> None:
-        # get the actions to be displayed o use them as a prefilter
-        displayed_actions = (
-            displayed_action_list.split("|")
-            if (displayed_action_list := request.GET.get("displayed_action_list"))
-            else Action.objects.all().values_list("code", flat=True)
-        )
-        # get groupes of these actions
-        groupes = (
-            GroupeAction.objects.filter(actions__code__in=displayed_actions)
-            .order_by("order")
-            .distinct()
-        )
-        result = []
-        # set the choices by groupe with only the actions to be displayed
-        for action_group in groupes:
-            libelle = ""
-            if action_group.icon:
-                libelle = (
-                    f'<span class="fr-px-1v qfdmo-text-white {action_group.icon}'
-                    f' fr-icon--sm qfdmo-rounded-full qfdmo-bg-{action_group.couleur}"'
-                    ' aria-hidden="true"></span>&nbsp;'
-                )
-            actions = action_group.actions.filter(code__in=displayed_actions).order_by(
-                "order"
-            )
-            libelle += ", ".join({a.libelle_groupe for a in actions}).capitalize()
-            code = "|".join({a.code for a in actions})
-            result.append([code, mark_safe(libelle)])
-        # set the choice
-        self.fields["new_grouped_action"].choices = result
+    def load_choices(
+        self, request: HttpRequest, groupe_options: list[list[str]] = []
+    ) -> None:
+        self.fields["grouped_action"].choices = groupe_options
 
     adresse = forms.CharField(
         widget=AutoCompleteInput(
@@ -289,7 +262,7 @@ class CarteAddressesForm(AddressesForm):
         required=False,
     )
 
-    new_grouped_action = forms.MultipleChoiceField(
+    grouped_action = forms.MultipleChoiceField(
         widget=DSFRCheckboxSelectMultiple(
             attrs={
                 "class": "fr-fieldset",
@@ -331,12 +304,12 @@ class ConfiguratorForm(forms.Form):
             for direction in CachedDirectionAction.get_directions()
         ]
         self.fields["action_list"].choices = [
-            (code, action["libelle"])
-            for code, action in CachedDirectionAction.get_actions_by_code().items()
+            (action.code, action.libelle_groupe.capitalize())
+            for action in CachedDirectionAction.get_action_instances()
         ]
         self.fields["displayed_action_list"].choices = [
-            (code, action["libelle"])
-            for code, action in CachedDirectionAction.get_actions_by_code().items()
+            (action.code, action.libelle_groupe.capitalize())
+            for action in CachedDirectionAction.get_action_instances()
         ]
 
     iframe_mode = forms.ChoiceField(

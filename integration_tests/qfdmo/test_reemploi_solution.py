@@ -18,10 +18,76 @@ def django_db_setup(django_db_setup, django_db_blocker):
         CachedDirectionAction.reload_cache()
 
 
-class TestReemploiSolutionView:
-    @pytest.mark.django_db
-    def test_without_parameters(self, client):
+@pytest.mark.django_db
+class TestInitialValue:
+    def test_no_parameters(self, client):
         url = ""
+        response = client.get(url)
+
+        assert response.status_code == 200
+        assert response.context_data["location"] == "{}"
+        assert response.context_data["acteurs"].count() == 0
+        assert response.context_data["form"].initial == {
+            "sous_categorie_objet": None,
+            "sc_id": None,
+            "adresse": None,
+            "direction": settings.DEFAULT_ACTION_DIRECTION,
+            "digital": "0",
+            "latitude": None,
+            "longitude": None,
+            "label_reparacteur": None,
+            "ess": None,
+            "bonus": None,
+            "bbox": None,
+            "displayed_action_list": (
+                "preter|emprunter|louer|mettreenlocation|reparer|donner|echanger"
+                "|acheter|revendre"
+            ),
+            "action_list": (
+                "preter|emprunter|louer|mettreenlocation|reparer|donner|echanger"
+                "|acheter|revendre"
+            ),
+        }
+
+    def test_carte(self, client):
+        url = "?carte"
+
+        response = client.get(url)
+
+        assert response.status_code == 200
+        assert response.context_data["location"] == "{}"
+        assert response.context_data["acteurs"].count() == 0
+        assert response.context_data["form"].initial == {
+            "sous_categorie_objet": None,
+            "sc_id": None,
+            "adresse": None,
+            "direction": None,
+            "digital": "0",
+            "latitude": None,
+            "longitude": None,
+            "label_reparacteur": None,
+            "ess": None,
+            "bonus": None,
+            "bbox": None,
+            "displayed_action_list": (
+                "preter|emprunter|louer|mettreenlocation|reparer|donner|echanger"
+                "|acheter|revendre|trier"
+            ),
+            "action_list": (
+                "preter|emprunter|louer|mettreenlocation|reparer|donner|echanger"
+                "|acheter|revendre|trier"
+            ),
+            "grouped_action": [
+                "reparer",
+                "donner|echanger",
+                "preter|emprunter|louer|mettreenlocation",
+                "acheter|revendre",
+                "trier",
+            ],
+        }
+
+    def test_iframe(self, client):
+        url = "?iframe"
 
         response = client.get(url)
 
@@ -34,19 +100,18 @@ class TestReemploiSolutionView:
             "adresse": None,
             "direction": settings.DEFAULT_ACTION_DIRECTION,
             "digital": "0",
-            "action_list": None,
             "latitude": None,
             "longitude": None,
             "label_reparacteur": None,
             "ess": None,
             "bonus": None,
             "bbox": None,
-            "displayed_action_list": None,
-            "new_grouped_action": [
-                "reparer",
-                "donner_echanger",
-                "emprunter_preter_louer",
-                "vendre_acheter",
-                "trier",
-            ],
+            "displayed_action_list": (
+                "preter|emprunter|louer|mettreenlocation|reparer|donner|echanger"
+                "|acheter|revendre"
+            ),
+            "action_list": (
+                "preter|emprunter|louer|mettreenlocation|reparer|donner|echanger"
+                "|acheter|revendre"
+            ),
         }
