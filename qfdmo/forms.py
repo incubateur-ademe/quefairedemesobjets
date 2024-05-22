@@ -3,7 +3,6 @@ from django.http import HttpRequest
 from django.utils.safestring import mark_safe
 
 from qfdmo.models import CachedDirectionAction, DagRun, DagRunStatus, SousCategorieObjet
-from qfdmo.models.action import GroupeAction
 
 
 class AutoCompleteInput(forms.Select):
@@ -149,7 +148,7 @@ class AddressesForm(forms.Form):
             attrs={
                 "class": "fr-checkbox fr-m-1v",
                 "data-search-solution-form-target": "reparerFilter",
-            }
+            },
         ),
         label=mark_safe(
             "<span class='fr-icon--sm fr-icon-money-euro-box-line'></span>"
@@ -232,9 +231,15 @@ class IframeAddressesForm(AddressesForm):
 
 class CarteAddressesForm(AddressesForm):
     def load_choices(
-        self, request: HttpRequest, groupe_options: list[list[str]] = []
+        self,
+        request: HttpRequest,
+        groupe_options: list[list[str]] = [],
+        disable_reparer_option: bool = False,
     ) -> None:
         self.fields["grouped_action"].choices = groupe_options
+        if disable_reparer_option:
+            self.fields["bonus"].widget.attrs["disabled"] = "true"
+            self.fields["label_reparacteur"].widget.attrs["disabled"] = "true"
 
     adresse = forms.CharField(
         widget=AutoCompleteInput(
@@ -250,23 +255,14 @@ class CarteAddressesForm(AddressesForm):
         required=False,
     )
 
-    groupe_action = forms.ModelMultipleChoiceField(
-        widget=forms.CheckboxSelectMultiple(
-            attrs={
-                "class": ("fr-checkbox"),
-                "data-search-solution-form-target": "GroupeAction",
-            },
-        ),
-        queryset=GroupeAction.objects.all().order_by("order"),
-        label="Actions",
-        required=False,
-    )
-
     grouped_action = forms.MultipleChoiceField(
         widget=DSFRCheckboxSelectMultiple(
             attrs={
                 "class": "fr-fieldset",
                 "data-search-solution-form-target": "GroupeAction",
+                "data-action": (
+                    "change -> search-solution-form#activeReparerFiltersCarte"
+                ),
             },
         ),
         choices=[],

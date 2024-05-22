@@ -87,8 +87,13 @@ class AddressesView(FormView):
         if form_class == CarteAddressesForm:
             displayed_action_list = self._set_displayed_action_list()
             groupe_options = self._get_groupe_options(displayed_action_list)
+
             my_form.load_choices(  # type: ignore
-                self.request, groupe_options=groupe_options
+                self.request,
+                groupe_options=groupe_options,
+                disable_reparer_option=(
+                    "reparer" not in my_form.initial["grouped_action"]
+                ),
             )
         else:
             my_form.load_choices(self.request)  # type: ignore
@@ -278,9 +283,9 @@ class AddressesView(FormView):
         if self.request.GET.get("carte") is not None:
             if action_selection_codes := self._get_selected_action_code():
                 action_selection_ids = [
-                    a["id"]
-                    for a in CachedDirectionAction.get_actions()
-                    if a["code"] in action_selection_codes
+                    a.id
+                    for a in CachedDirectionAction.get_action_instances()
+                    if a.code in action_selection_codes
                 ]
 
         else:

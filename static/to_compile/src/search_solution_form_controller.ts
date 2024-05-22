@@ -116,6 +116,16 @@ export default class extends Controller<HTMLElement> {
         })
     }
 
+    activeReparerFiltersCarte(event: Event) {
+        const target = event.target as HTMLInputElement
+        if (target.value == "reparer") {
+            console.log("reparer true")
+            this.reparerFilterTargets.forEach((element: HTMLInputElement) => {
+                element.disabled = !target.checked
+            })
+        }
+    }
+
     scrollToContent() {
         this.searchFormTarget.scrollIntoView()
     }
