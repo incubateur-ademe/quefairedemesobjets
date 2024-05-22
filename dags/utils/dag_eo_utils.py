@@ -185,7 +185,7 @@ def serialize_to_json(**kwargs):
     )
     df_joined.drop_duplicates("identifiant_unique", keep="first", inplace=True)
 
-    return df_joined
+    return {"all": {"df": df_joined}}
 
 
 def load_data_from_postgresql(**kwargs):
@@ -257,7 +257,7 @@ def write_to_dagruns(**kwargs):
     dag_id = kwargs["dag"].dag_id
     run_id = kwargs["run_id"]
     event = kwargs.get("event", "CREATE")
-    df_or_dfs = kwargs["ti"].xcom_pull(task_ids="serialize_actors_to_records")
+    dfs = kwargs["ti"].xcom_pull(task_ids="serialize_actors_to_records")
     metadata_actors = (
         kwargs["ti"]
         .xcom_pull(task_ids="create_actors", key="return_value", default={})
@@ -277,14 +277,11 @@ def write_to_dagruns(**kwargs):
     if metadata_pds:
         metadata.update(metadata_pds)
 
-    if isinstance(df_or_dfs, dict):
-        for key, data in df_or_dfs.items():
-            dag_id_suffixed = f"{dag_id}_{key}"
-            df = data["df"]
-            metadata.update(data["metadata"])
-            insert_dagrun_and_process_df(df, event, metadata, dag_id_suffixed, run_id)
-    else:
-        insert_dagrun_and_process_df(df_or_dfs, event, metadata, dag_id, run_id)
+    for key, data in dfs.items():
+        dag_id_suffixed = dag_id if "all" else f"{dag_id}_{key}"
+        df = data["df"]
+        metadata.update(data["metadata"])
+        insert_dagrun_and_process_df(df, event, metadata, dag_id_suffixed, run_id)
 
 
 def create_actors(**kwargs):
