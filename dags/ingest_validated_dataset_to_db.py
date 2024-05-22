@@ -71,11 +71,11 @@ def fetch_and_parse_data(**context):
 def write_data_to_postgres(**kwargs):
     data_dict = kwargs["ti"].xcom_pull(task_ids="fetch_and_parse_data")
     df_actors = data_dict["actors"]
-    df_labels = data_dict["labels"]
-    df_pds = data_dict["pds"]
-    df_pdssc = data_dict["pds_sous_categories"]
+    df_labels = data_dict.get("labels")
+    df_pds = data_dict.get("pds")
+    df_pdssc = data_dict.get("pds_sous_categories")
     dag_run_id = data_dict["dag_run_id"]
-    change_type = data_dict["change_type"]
+    change_type = data_dict.get("change_type", "CREATE")
     pg_hook = PostgresHook(postgres_conn_id=utils.get_db_conn_id(__file__))
     engine = pg_hook.get_sqlalchemy_engine()
 

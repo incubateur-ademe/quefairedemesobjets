@@ -108,11 +108,19 @@ def handle_update_actor_event(df_actors, dag_run_id):
 
     df_actors = df_actors.apply(flatten_ae_results, axis=1)
     df_actors["statut"] = df_actors.apply(
-        lambda row: "SUPPRIME" if row["ae_result_etat_admin"] == "F" else "ACTIF",
+        lambda row: "SUPPRIME" if row["ae_result.etat_admin_siege"] == "F" else "ACTIF",
+        axis=1,
+    )
+    df_actors["siret"] = df_actors.apply(
+        lambda row: (
+            row["ae_result.siret_siege"]
+            if row["ae_result.etat_admin_siege"] == "A"
+            else row["siret"]
+        ),
         axis=1,
     )
     df_actors[["adresse", "code_postal", "ville"]] = df_actors.apply(
-        utils.extract_details, axis=1
+        lambda row: utils.extract_details(row, col="ae_result.adresse"), axis=1
     )
 
     df_actors["modifie_le"] = current_time
@@ -269,20 +277,50 @@ def handle_write_data_update_actor_event(connection, df_actors):
 
         CREATE TEMP TABLE temp_existing_pdssc AS
         SELECT * FROM qfdmo_revisionpropositionservice_sous_categories
-        WHERE propositionservice_id IN (
+        WHERE revisionpropositionservice_id IN (
             SELECT id FROM temp_existing_pds
         );
     """
     connection.execute(temp_tables_creation_query)
+
+    delete_queries = """
+        DELETE FROM qfdmo_revisionpropositionservice_sous_categories
+        WHERE revisionpropositionservice_id IN (
+            SELECT id FROM temp_existing_pds
+        );
+
+        DELETE FROM qfdmo_revisionpropositionservice
+        WHERE acteur_id IN (
+            SELECT identifiant_unique FROM temp_actors
+        );
+
+        DELETE FROM qfdmo_revisionacteur
+        WHERE identifiant_unique IN (
+            SELECT identifiant_unique FROM temp_actors
+        );
+    """
+    connection.execute(delete_queries)
 
     temp_actors_df = pd.read_sql_query("SELECT * FROM temp_actors", connection)
     temp_existing_actors_df = pd.read_sql_query(
         "SELECT * FROM temp_existing_actors", connection
     )
 
-    combined_actors_df = pd.concat(
-        [temp_existing_actors_df, temp_actors_df]
-    ).drop_duplicates(subset="identifiant_unique", keep="last")
+    combined_actors_df = pd.merge(
+        temp_existing_actors_df,
+        temp_actors_df,
+        on="identifiant_unique",
+        how="outer",
+        suffixes=("_existing", "_new"),
+    )
+
+    for column in temp_existing_actors_df.columns:
+        if column != "identifiant_unique":
+            combined_actors_df[column] = combined_actors_df[
+                f"{column}_new"
+            ].combine_first(combined_actors_df[f"{column}_existing"])
+
+    combined_actors_df = combined_actors_df[temp_existing_actors_df.columns]
 
     combined_actors_df.to_sql(
         "qfdmo_revisionacteur",
@@ -292,30 +330,6 @@ def handle_write_data_update_actor_event(connection, df_actors):
         method="multi",
         chunksize=1000,
     )
-
-    delete_queries = [
-        """
-        DELETE FROM qfdmo_revisionpropositionservice_sous_categories
-        WHERE propositionservice_id IN (
-            SELECT id FROM temp_existing_pds
-        );
-        """,
-        """
-        DELETE FROM qfdmo_revisionpropositionservice
-        WHERE acteur_id IN (
-            SELECT identifiant_unique FROM temp_actors
-        );
-        """,
-        """
-        DELETE FROM qfdmo_revisionacteur
-        WHERE identifiant_unique IN (
-            SELECT identifiant_unique FROM temp_combined_actors
-        );
-        """,
-    ]
-
-    for query in delete_queries:
-        connection.execute(query)
 
     existing_pds_df = pd.read_sql_query("SELECT * FROM temp_existing_pds", connection)
     existing_pdssc_df = pd.read_sql_query(
