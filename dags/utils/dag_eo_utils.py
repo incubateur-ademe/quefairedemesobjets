@@ -231,34 +231,13 @@ def load_data_from_postgresql(**kwargs):
     }
 
 
-def write_to_dagruns(**kwargs):
-    dag_id = kwargs["dag"].dag_id
-    run_id = kwargs["run_id"]
-    df = kwargs["ti"].xcom_pull(task_ids="serialize_actors_to_records")
-    metadata_actors = (
-        kwargs["ti"]
-        .xcom_pull(task_ids="create_actors", key="return_value", default={})
-        .get("metadata", {})
-    )
-    metadata_pds = (
-        kwargs["ti"]
-        .xcom_pull(
-            task_ids="create_proposition_services", key="return_value", default={}
-        )
-        .get("metadata", {})
-    )
-
-    metadata = {}
-    if metadata_actors:
-        metadata.update(metadata_actors)
-    if metadata_pds:
-        metadata.update(metadata_pds)
-
+def insert_dagrun_and_process_df(df, event, metadata, dag_id, run_id):
     pg_hook = PostgresHook(
         postgres_conn_id=utils.get_db_conn_id(__file__, parent_of_parent=True)
     )
     engine = pg_hook.get_sqlalchemy_engine()
     current_date = datetime.now()
+
     with engine.connect() as conn:
         result = conn.execute(
             """
@@ -278,7 +257,7 @@ def write_to_dagruns(**kwargs):
         )
         dag_run_id = result.fetchone()[0]
 
-        df["change_type"] = "CREATE"
+        df["change_type"] = event
         df["dag_run_id"] = dag_run_id
         df[["row_updates", "dag_run_id", "change_type"]].to_sql(
             "qfdmo_dagrunchange",
@@ -288,6 +267,40 @@ def write_to_dagruns(**kwargs):
             method="multi",
             chunksize=1000,
         )
+
+
+def write_to_dagruns(**kwargs):
+    dag_id = kwargs["dag"].dag_id
+    run_id = kwargs["run_id"]
+    event = kwargs.get("event", "CREATE")
+    df_or_dfs = kwargs["ti"].xcom_pull(task_ids="serialize_actors_to_records")
+    metadata_actors = (
+        kwargs["ti"]
+        .xcom_pull(task_ids="create_actors", key="return_value", default={})
+        .get("metadata", {})
+    )
+    metadata_pds = (
+        kwargs["ti"]
+        .xcom_pull(
+            task_ids="create_proposition_services", key="return_value", default={}
+        )
+        .get("metadata", {})
+    )
+
+    metadata = {}
+    if metadata_actors:
+        metadata.update(metadata_actors)
+    if metadata_pds:
+        metadata.update(metadata_pds)
+
+    if isinstance(df_or_dfs, dict):
+        for key, data in df_or_dfs.items():
+            dag_id_suffixed = f"{dag_id}_{key}"
+            df = data["df"]
+            metadata.update(data["metadata"])
+            insert_dagrun_and_process_df(df, event, metadata, dag_id_suffixed, run_id)
+    else:
+        insert_dagrun_and_process_df(df_or_dfs, event, metadata, dag_id, run_id)
 
 
 def create_actors(**kwargs):

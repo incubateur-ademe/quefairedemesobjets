@@ -5,12 +5,13 @@ from pathlib import Path
 import pandas as pd
 from airflow.models import DAG
 from airflow.operators.dagrun_operator import TriggerDagRunOperator
-from airflow.operators.python_operator import PythonOperator, BranchPythonOperator
+from airflow.operators.python_operator import BranchPythonOperator, PythonOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.utils.dates import days_ago
 
 env = Path(__file__).parent.name
 utils = import_module(f"{env}.utils.utils")
+dag_ingest_validated_utils = import_module(f"{env}.utils.dag_ingest_validated_utils")
 
 default_args = {
     "owner": "airflow",
@@ -39,51 +40,11 @@ def check_for_validation(**kwargs):
     return "fetch_and_parse_data" if row[0][0] else "skip_processing"
 
 
-def process_labels(df, column_name):
-    try:
-        # Attempt to process the 'labels' column if it exists and is not empty
-        normalized_labels = df[column_name].dropna().apply(pd.json_normalize)
-        if normalized_labels.empty:
-            return pd.DataFrame(
-                columns=["acteur_id", "labelqualite_id"]
-            )  # Return empty DataFrame if no data to process
-        else:
-            return pd.concat(normalized_labels.tolist(), ignore_index=True)
-    except KeyError:
-        # Handle the case where the specified column does not exist
-        return pd.DataFrame(columns=["acteur_id", "labelqualite_id"])
-
-
 # Usage
 def fetch_and_parse_data(**context):
-    required_columns = [
-        "identifiant_unique",
-        "nom",
-        "adresse",
-        "adresse_complement",
-        "code_postal",
-        "ville",
-        "url",
-        "email",
-        "location",
-        "telephone",
-        "nom_commercial",
-        "siret",
-        "identifiant_externe",
-        "acteur_type_id",
-        "statut",
-        "source_id",
-        "cree_le",
-        "horaires_description",
-        "modifie_le",
-        "commentaires",
-    ]
     pg_hook = PostgresHook(postgres_conn_id=utils.get_db_conn_id(__file__))
     engine = pg_hook.get_sqlalchemy_engine()
 
-    max_id_pds = pd.read_sql_query(
-        "SELECT max(id) FROM qfdmo_propositionservice", engine
-    )["max"][0]
     df_sql = pd.read_sql_query(
         "SELECT * FROM qfdmo_dagrunchange WHERE "
         "dag_run_id IN "
@@ -92,40 +53,19 @@ def fetch_and_parse_data(**context):
     )
     dag_run_id = df_sql["dag_run_id"].iloc[0]
 
+    change_type = df_sql["change_type"].iloc[0]
+
     normalized_dfs = df_sql["row_updates"].apply(pd.json_normalize)
     df_actors = pd.concat(normalized_dfs.tolist(), ignore_index=True)
 
-    for column in required_columns:
-        if column not in df_actors.columns:
-            df_actors[column] = None  # or use pd.NA for pandas' NA values
-
-    df_labels = process_labels(df_actors, "labels")
-
-    normalized_pds_dfs = df_actors["proposition_services"].apply(pd.json_normalize)
-    df_pds = pd.concat(normalized_pds_dfs.tolist(), ignore_index=True)
-    ids_range = range(max_id_pds + 1, max_id_pds + 1 + len(df_pds))
-
-    df_pds["id"] = ids_range
-    df_pds["pds_sous_categories"] = df_pds.apply(
-        lambda row: [
-            {**d, "propositionservice_id": row["id"]}
-            for d in row["pds_sous_categories"]
-        ],
-        axis=1,
-    )
-
-    normalized_pdssc_dfs = df_pds["pds_sous_categories"].apply(pd.json_normalize)
-    df_pdssc = pd.concat(normalized_pdssc_dfs.tolist(), ignore_index=True)
-
-    return {
-        "actors": df_actors,
-        "pds": df_pds[["id", "acteur_service_id", "action_id", "acteur_id"]],
-        "pds_sous_categories": df_pdssc[
-            ["propositionservice_id", "souscategorieobjet_id"]
-        ],
-        "dag_run_id": dag_run_id,
-        "labels": df_labels[["acteur_id", "labelqualite_id"]],
-    }
+    if change_type == "CREATE":
+        return dag_ingest_validated_utils.handle_create_event(
+            df_actors, dag_run_id, engine
+        )
+    elif change_type == "UPDATE_ACTOR":
+        return dag_ingest_validated_utils.handle_update_actor_event(
+            df_actors, dag_run_id
+        )
 
 
 def write_data_to_postgres(**kwargs):
@@ -135,131 +75,20 @@ def write_data_to_postgres(**kwargs):
     df_pds = data_dict["pds"]
     df_pdssc = data_dict["pds_sous_categories"]
     dag_run_id = data_dict["dag_run_id"]
+    change_type = data_dict["change_type"]
     pg_hook = PostgresHook(postgres_conn_id=utils.get_db_conn_id(__file__))
     engine = pg_hook.get_sqlalchemy_engine()
-    # TODO: For now assuming all events are CREATE events,
-    #  so we remove the actors if they exist first
     with engine.begin() as connection:
-        df_actors[
-            [
-                "identifiant_unique",
-                "nom",
-                "adresse",
-                "adresse_complement",
-                "code_postal",
-                "ville",
-                "url",
-                "email",
-                "location",
-                "telephone",
-                "nom_commercial",
-                "siret",
-                "identifiant_externe",
-                "acteur_type_id",
-                "statut",
-                "source_id",
-                "cree_le",
-                "horaires_description",
-                "modifie_le",
-                "commentaires",
-            ]
-        ].to_sql("temp_actors", connection, if_exists="replace")
+        if change_type == "CREATE":
+            dag_ingest_validated_utils.handle_write_data_create_event(
+                connection, df_actors, df_labels, df_pds, df_pdssc
+            )
+        elif change_type == "UPDATE_ACTOR":
+            dag_ingest_validated_utils.handle_write_data_update_actor_event(
+                connection, df_actors
+            )
 
-        delete_queries = [
-            """
-            DELETE FROM qfdmo_propositionservice_sous_categories
-            WHERE propositionservice_id IN (
-                SELECT id FROM qfdmo_propositionservice
-                WHERE acteur_id IN (
-                    SELECT identifiant_unique FROM temp_actors
-                )
-            );
-            """,
-            """
-                 DELETE FROM qfdmo_acteur_labels
-                  WHERE acteur_id IN (
-                         SELECT identifiant_unique FROM temp_actors
-                      );
-            """,
-            """
-            DELETE FROM qfdmo_propositionservice
-            WHERE acteur_id IN (
-                SELECT identifiant_unique FROM temp_actors
-            );
-            """,
-            """
-            DELETE FROM qfdmo_acteur WHERE identifiant_unique
-            in ( select identifiant_unique from temp_actors);
-            """,
-        ]
-
-        for query in delete_queries:
-            connection.execute(query)
-        df_actors[
-            [
-                "identifiant_unique",
-                "nom",
-                "adresse",
-                "adresse_complement",
-                "code_postal",
-                "ville",
-                "url",
-                "email",
-                "location",
-                "telephone",
-                "nom_commercial",
-                "siret",
-                "identifiant_externe",
-                "acteur_type_id",
-                "statut",
-                "source_id",
-                "cree_le",
-                "horaires_description",
-                "modifie_le",
-                "commentaires",
-            ]
-        ].to_sql(
-            "qfdmo_acteur",
-            connection,
-            if_exists="append",
-            index=False,
-            method="multi",
-            chunksize=1000,
-        )
-
-        df_labels[["acteur_id", "labelqualite_id"]].to_sql(
-            "qfdmo_acteur_labels",
-            connection,
-            if_exists="append",
-            index=False,
-            method="multi",
-            chunksize=1000,
-        )
-
-        df_pds[["id", "acteur_service_id", "action_id", "acteur_id"]].to_sql(
-            "qfdmo_propositionservice",
-            connection,
-            if_exists="append",
-            index=False,
-            method="multi",
-            chunksize=1000,
-        )
-
-        df_pdssc[["propositionservice_id", "souscategorieobjet_id"]].to_sql(
-            "qfdmo_propositionservice_sous_categories",
-            connection,
-            if_exists="append",
-            index=False,
-            method="multi",
-            chunksize=1000,
-        )
-
-        update_query = f"""
-            UPDATE qfdmo_dagrun
-            SET status = 'FINISHED'
-            WHERE id = {dag_run_id}
-            """
-        connection.execute(update_query)
+        dag_ingest_validated_utils.update_dag_run_status(connection, dag_run_id)
 
 
 fetch_parse_task = PythonOperator(
