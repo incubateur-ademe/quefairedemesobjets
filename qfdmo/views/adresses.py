@@ -101,6 +101,7 @@ class AddressesView(FormView):
 
     def get_context_data(self, **kwargs):
         kwargs["location"] = "{}"
+        kwargs["carte"] = self.request.GET.get("carte") is not None
 
         # Manage the selection of sous_categorie_objet and actions
         acteurs = self._manage_sous_categorie_objet_and_actions()

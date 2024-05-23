@@ -94,12 +94,10 @@ export class SolutionMap {
             if (actor.location) {
                 // Create the marker look and feel : pin + icon
                 var customMarker = undefined
-                if (actor.actions.length > 0) {
+                if (actor.icon) {
                     customMarker = L.ExtraMarkers.icon({
-                        icon: actor.acteur_selected_action.icon,
-                        markerColor: get_color_code(
-                            actor.acteur_selected_action.couleur,
-                        ),
+                        icon: actor.icon,
+                        markerColor: get_color_code(actor.couleur),
                         shape: "square",
                         prefix: "qfdmo-icon",
                         svg: true,

@@ -127,7 +127,9 @@ class CachedDirectionAction:
     def get_action_instances(cls) -> QuerySet[Action]:
         cls._manage_cache_expiration()
         if cls._cached_action_instances is None:
-            cls._cached_action_instances = Action.objects.prefetch_related("directions")
+            cls._cached_action_instances = Action.objects.prefetch_related(
+                "directions", "groupe_action"
+            )
         return cls._cached_action_instances
 
     @classmethod
@@ -208,6 +210,8 @@ class CachedDirectionAction:
         cls._cached_actions = None
         cls._cached_direction = None
         cls._reparer_action_id = None
+        cls._cached_action_instances = None
+        cls._cached_groupe_action_instances = None
 
     @classmethod
     def _manage_cache_expiration(cls):
