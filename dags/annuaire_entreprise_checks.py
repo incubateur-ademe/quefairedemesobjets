@@ -82,7 +82,6 @@ def check_siret(**kwargs):
             else None
         )
     )
-    print(df[["matching_category_naf", "nombre_etablissements_ouverts"]])
 
     df_closed = df[df["nombre_etablissements_ouverts"] == 0]
     df_nb_etab_ouvert_1_matching_naf = df[
@@ -119,7 +118,6 @@ def enrich_lat_lon_ban_api(**kwargs):
             )
 
             df["location"] = df.apply(utils.get_location, axis=1)
-            print("done")
     return data
 
 
