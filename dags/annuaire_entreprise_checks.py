@@ -97,16 +97,13 @@ def check_siret(**kwargs):
     df_nb_etab_ouverts_2_plus_not_matching_naf = df[
         (df["nombre_etablissements_ouverts"] > 1) & (not df["matching_category_naf"])
     ]
-
+    # flake8: noqa: E501
     return {
         "df_closed": df_closed,
-        "df_nb_etab_ouvert_1_" "and_matching_naf": df_nb_etab_ouvert_1_matching_naf,
-        "df_nb_etab_ouverts_2_"
-        "plus_and_matching_naf": df_nb_etab_ouverts_2_plus_matching_naf,
-        "df_nb_etab_ouverts_1_a"
-        "nd_not_matching_naf": df_nb_etab_ouvert_1_not_matching_naf,
-        "df_nb_etab_ouverts_2_p"
-        "lus_and_not_matching_naf": df_nb_etab_ouverts_2_plus_not_matching_naf,
+        "df_nb_etab_ouvert_1_and_matching_naf": df_nb_etab_ouvert_1_matching_naf,
+        "df_nb_etab_ouverts_2_plus_and_matching_naf": df_nb_etab_ouverts_2_plus_matching_naf,
+        "df_nb_etab_ouverts_1_and_not_matching_naf": df_nb_etab_ouvert_1_not_matching_naf,
+        "df_nb_etab_ouverts_2_plus_and_not_matching_naf": df_nb_etab_ouverts_2_plus_not_matching_naf,
     }
 
 
