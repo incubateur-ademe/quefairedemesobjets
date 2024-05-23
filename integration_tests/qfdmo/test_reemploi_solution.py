@@ -38,7 +38,7 @@ class TestInitialValue:
             "label_reparacteur": None,
             "ess": None,
             "bonus": None,
-            "bbox": None,
+            "bounding_box": None,
             "action_displayed": (
                 "preter|emprunter|louer|mettreenlocation|reparer|donner|echanger"
                 "|acheter|revendre"
@@ -68,7 +68,7 @@ class TestInitialValue:
             "label_reparacteur": None,
             "ess": None,
             "bonus": None,
-            "bbox": None,
+            "bounding_box": None,
             "action_displayed": (
                 "preter|emprunter|louer|mettreenlocation|reparer|donner|echanger"
                 "|acheter|revendre|trier"
@@ -105,7 +105,7 @@ class TestInitialValue:
             "label_reparacteur": None,
             "ess": None,
             "bonus": None,
-            "bbox": None,
+            "bounding_box": None,
             "action_displayed": (
                 "preter|emprunter|louer|mettreenlocation|reparer|donner|echanger"
                 "|acheter|revendre"

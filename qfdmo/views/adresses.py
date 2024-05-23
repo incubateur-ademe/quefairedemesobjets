@@ -60,7 +60,7 @@ class AddressesView(FormView):
         initial["label_reparacteur"] = self.request.GET.get("label_reparacteur")
         initial["bonus"] = self.request.GET.get("bonus")
         initial["ess"] = self.request.GET.get("ess")
-        initial["bbox"] = self.request.GET.get("bbox")
+        initial["bounding_box"] = self.request.GET.get("bounding_box")
         initial["sc_id"] = (
             self.request.GET.get("sc_id") if initial["sous_categorie_objet"] else None
         )
@@ -138,25 +138,27 @@ class AddressesView(FormView):
                     {"latitude": latitude, "longitude": longitude}
                 )
 
-            # Manage bbox parameter
-            center, my_bbox_polygon = self._get_search_in_zone_params()
+            # Manage bounding_box parameter
+            center, my_bounding_box_polygon = self._get_search_in_zone_params()
 
-            # With bbox parameter
-            if my_bbox_polygon:
+            # With bounding_box parameter
+            if my_bounding_box_polygon:
                 if center:
                     longitude = center[0]
                     latitude = center[1]
 
-                bbox_acteurs = acteurs.filter(
-                    location__within=Polygon.from_bbox(my_bbox_polygon)
+                bounding_box_acteurs = acteurs.filter(
+                    location__within=Polygon.from_bbox(my_bounding_box_polygon)
                 ).order_by("?")
-                bbox_acteurs = bbox_acteurs[: self._get_max_displayed_acteurs()]
-                if bbox_acteurs.count() > 0:
-                    kwargs["bbox"] = my_bbox_polygon
-                    kwargs["acteurs"] = bbox_acteurs
+                bounding_box_acteurs = bounding_box_acteurs[
+                    : self._get_max_displayed_acteurs()
+                ]
+                if bounding_box_acteurs.count() > 0:
+                    kwargs["bounding_box"] = my_bounding_box_polygon
+                    kwargs["acteurs"] = bounding_box_acteurs
                     return super().get_context_data(**kwargs)
 
-            # if not bbox or if no acteur in the bbox
+            # if not bounding_box or if no acteur in the bounding_box
             if latitude and longitude:
                 reference_point = Point(float(longitude), float(latitude), srid=4326)
                 distance_in_degrees = settings.DISTANCE_MAX / 111320
@@ -172,29 +174,31 @@ class AddressesView(FormView):
                     .order_by("distance")[: self._get_max_displayed_acteurs()]
                 )
 
-                # Remove bbox parameter
+                # Remove bounding_box parameter
                 context = super().get_context_data(**kwargs)
                 if kwargs["acteurs"]:
-                    context["form"].initial["bbox"] = None
+                    context["form"].initial["bounding_box"] = None
                 return context
 
         kwargs["acteurs"] = DisplayedActeur.objects.none()
         return super().get_context_data(**kwargs)
 
     def _get_max_displayed_acteurs(self):
+        if self.request.GET.get("limit", "").isnumeric():
+            return int(self.request.GET.get("limit"))
         if self.request.GET.get("carte") is not None:
-            return 100
-        return settings.MAX_SOLUTION_DISPLAYED_ON_MAP
+            return settings.CARTE_MAX_SOLUTION_DISPLAYED
+        return settings.DEFAULT_MAX_SOLUTION_DISPLAYED
 
     def _get_search_in_zone_params(self):
         center = []
-        my_bbox_polygon = []
-        if search_in_zone := self.request.GET.get("bbox"):
+        my_bounding_box_polygon = []
+        if search_in_zone := self.request.GET.get("bounding_box"):
             try:
                 search_in_zone = json.loads(search_in_zone)
             except json.JSONDecodeError:
-                logger.error("Error while parsing bbox parameter")
-                return center, my_bbox_polygon
+                logger.error("Error while parsing bounding_box parameter")
+                return center, my_bounding_box_polygon
 
             if (
                 "center" in search_in_zone
@@ -214,13 +218,13 @@ class AddressesView(FormView):
                 and "lat" in search_in_zone["northEast"]
                 and "lng" in search_in_zone["northEast"]
             ):
-                my_bbox_polygon = [
+                my_bounding_box_polygon = [
                     search_in_zone["southWest"]["lng"],
                     search_in_zone["southWest"]["lat"],
                     search_in_zone["northEast"]["lng"],
                     search_in_zone["northEast"]["lat"],
                 ]  # [xmin, ymin, xmax, ymax]
-        return center, my_bbox_polygon
+        return center, my_bounding_box_polygon
 
     def _set_action_displayed(self) -> list[str]:
         cached_action_instances = CachedDirectionAction.get_action_instances()
@@ -530,6 +534,7 @@ class ConfiguratorView(FormView):
 
     def get_initial(self):
         initial = super().get_initial()
+        initial["limit"] = self.request.GET.get("limit")
         initial["iframe_mode"] = self.request.GET.get("iframe_mode")
         initial["direction"] = self.request.GET.get("direction")
         initial["first_dir"] = self.request.GET.get("first_dir")
@@ -542,7 +547,7 @@ class ConfiguratorView(FormView):
         initial["max_width"] = self.request.GET.get("max_width")
         initial["height"] = self.request.GET.get("height")
         initial["iframe_attributes"] = self.request.GET.get("iframe_attributes")
-        initial["bbox"] = self.request.GET.get("bbox")
+        initial["bounding_box"] = self.request.GET.get("bounding_box")
         return initial
 
     def get_context_data(self, **kwargs):
@@ -575,6 +580,8 @@ class ConfiguratorView(FormView):
             attributes["max_width"] = escape(max_width)
         if height := self.request.GET.get("height"):
             attributes["height"] = height
+        if limit := self.request.GET.get("limit"):
+            attributes["limit"] = limit
         if iframe_attributes := self.request.GET.get("iframe_attributes"):
             try:
                 attributes["iframe_attributes"] = json.dumps(
@@ -582,13 +589,13 @@ class ConfiguratorView(FormView):
                 )
             except json.JSONDecodeError:
                 attributes["iframe_attributes"] = ""
-        if bbox := self.request.GET.get("bbox"):
+        if bounding_box := self.request.GET.get("bounding_box"):
             try:
-                attributes["bbox"] = json.dumps(
-                    json.loads(bbox.replace("\r\n", "").replace("\n", ""))
+                attributes["bounding_box"] = json.dumps(
+                    json.loads(bounding_box.replace("\r\n", "").replace("\n", ""))
                 )
             except json.JSONDecodeError:
-                attributes["bbox"] = ""
+                attributes["bounding_box"] = ""
 
         if iframe_url:
             kwargs["iframe_script"] = f"<script src='{ iframe_url }'"

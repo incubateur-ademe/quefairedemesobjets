@@ -41,7 +41,7 @@ class AddressesForm(forms.Form):
     def load_choices(self, request: HttpRequest) -> None:
         pass
 
-    bbox = forms.CharField(
+    bounding_box = forms.CharField(
         widget=forms.HiddenInput(
             attrs={
                 "data-search-solution-form-target": "bbox",
@@ -308,6 +308,17 @@ class ConfiguratorForm(forms.Form):
             for action in CachedDirectionAction.get_action_instances()
         ]
 
+    limit = forms.IntegerField(
+        widget=forms.NumberInput(
+            attrs={
+                "class": "fr-input",
+            },
+        ),
+        label="Nombre de résultats",
+        help_text="Nombre de résultats affichés dans l'iframe",
+        required=False,
+    )
+
     iframe_mode = forms.ChoiceField(
         widget=SegmentedControlSelect(
             attrs={
@@ -446,7 +457,7 @@ class ConfiguratorForm(forms.Form):
     )
 
     # TODO : documentation
-    bbox = forms.CharField(
+    bounding_box = forms.CharField(
         widget=forms.TextInput(
             attrs={
                 "class": "fr-input",

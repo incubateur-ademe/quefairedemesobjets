@@ -41,7 +41,7 @@
                     data-map-location-value="{{ location }}"
                     id="map"
                 >
-                    {{ form.bbox }}
+                    {{ form.bounding_box }}
                     <button
                         data-map-target="searchInZoneButton"
                         data-turbo-frame="adresses"
@@ -53,7 +53,7 @@
                         Rechercher dans cette zone
                     </button>
                     <div
-                        class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-80 qfdmo-font-black qfdmo-z-[1000]{% if form.initial.adresse or form.initial.bbox or acteurs %} qfdmo-hidden{% endif %}"
+                        class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-80 qfdmo-font-black qfdmo-z-[1000]{% if form.initial.adresse or form.initial.bounding_box or acteurs %} qfdmo-hidden{% endif %}"
                         data-search-solution-form-target="addressMissing"
                     >
                         <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
@@ -65,7 +65,7 @@
                         data-search-solution-form-target="NoLocalSolution"
                     >
                         <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
-                            Il n'existe pas de solution {% if bbox %}dans cette zone{% else %}localisée proche de chez vous (&lt;30 km){% endif %}, essayez avec une autre combinaison de filtres.
+                            Il n'existe pas de solution {% if bounding_box %}dans cette zone{% else %}localisée proche de chez vous (&lt;30 km){% endif %}, essayez avec une autre combinaison de filtres.
                         </div>
                     </div>
                     {% for acteur in acteurs %}

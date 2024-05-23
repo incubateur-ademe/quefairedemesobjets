@@ -77,6 +77,12 @@
                     </p>
                 </div>
             </div>
+            <hr class="fr-my-1w">
+
+            {{ form.limit.label_tag() }}
+            <span class="qfdmo-italic">{{ form.limit.help_text }}</span>
+            {{ form.limit }}
+            <hr class="fr-my-1w">
 
             <p>
                 {{ form.iframe_attributes.label_tag() }}
@@ -86,9 +92,9 @@
             <hr class="fr-my-1w">
 
             <p>
-                {{ form.bbox.label_tag() }}
-                <span class="qfdmo-italic">{{ form.bbox.help_text }}</span>
-                {{ form.bbox }}
+                {{ form.bounding_box.label_tag() }}
+                <span class="qfdmo-italic">{{ form.bounding_box.help_text }}</span>
+                {{ form.bounding_box }}
             </p>
 
 
