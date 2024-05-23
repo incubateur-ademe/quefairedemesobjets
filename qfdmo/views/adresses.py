@@ -1,6 +1,7 @@
 import json
 import logging
 from html import escape
+from typing import List
 
 import unidecode
 from django.conf import settings
@@ -12,6 +13,7 @@ from django.contrib.postgres.search import TrigramWordDistance  # type: ignore
 from django.db.models import Min, Q
 from django.db.models.functions import Length, Lower
 from django.db.models.query import QuerySet
+from django.forms import model_to_dict
 from django.forms.forms import BaseForm
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
@@ -19,7 +21,6 @@ from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_GET
 from django.views.generic.edit import FormView
 
-from core.jinja2_handler import get_action_list
 from core.utils import get_direction
 from qfdmo.forms import CarteAddressesForm, ConfiguratorForm, IframeAddressesForm
 from qfdmo.models import (
@@ -271,6 +272,54 @@ class AddressesView(FormView):
         # return empty array, will search in all actions
         return []
 
+    def _get_selected_action_ids(self):
+        """
+        Get the action to include in the request
+        """
+        # FIXME : est-ce possible d'optimiser en accédant au valeur initial du form ?
+        codes = []
+        # selection from interface
+        if self.request.GET.get("grouped_action"):
+            codes = [
+                code
+                for new_groupe_action in self.request.GET.getlist("grouped_action")
+                for code in new_groupe_action.split("|")
+            ]
+        # Selection is not set in interface, get all available from
+        # (checked_)action_list
+        if self.request.GET.get("action_list"):
+            codes = self.request.GET.get("action_list", "").split("|")
+        # Selection is not set in interface, defeult checked action list is not set
+        # get all available from displayed_action_list
+        if self.request.GET.get("displayed_action_list"):
+            codes = self.request.GET.get("displayed_action_list", "").split("|")
+        # return empty array, will search in all actions
+        return (
+            [
+                a.id
+                for a in CachedDirectionAction.get_action_instances()
+                if a.code in codes
+            ]
+            if codes
+            else []
+        )
+
+    def get_action_list(self) -> List[dict]:
+        direction = get_direction(self.request)
+
+        displayed_action_list = self._set_displayed_action_list()
+        action_list = self._set_action_list(displayed_action_list)
+        actions = [
+            a
+            for a in CachedDirectionAction.get_action_instances()
+            if a.code in action_list
+        ]
+        if direction:
+            actions = [
+                a for a in actions if direction in [d.code for d in a.directions.all()]
+            ]
+        return [model_to_dict(a, exclude=["directions"]) for a in actions]
+
     def _manage_sous_categorie_objet_and_actions(self) -> QuerySet[DisplayedActeur]:
         sous_categorie_id = None
         if (
@@ -279,18 +328,11 @@ class AddressesView(FormView):
         ):
             sous_categorie_id = int(self.request.GET.get("sc_id", "0"))
 
-        action_selection_ids = []
-
-        if self.request.GET.get("carte") is not None:
-            if action_selection_codes := self._get_selected_action_code():
-                action_selection_ids = [
-                    a.id
-                    for a in CachedDirectionAction.get_action_instances()
-                    if a.code in action_selection_codes
-                ]
-
-        else:
-            action_selection_ids = [a["id"] for a in get_action_list(self.request)]
+        action_selection_ids = (
+            self._get_selected_action_ids()
+            if self.request.GET.get("carte") is not None
+            else [a["id"] for a in self.get_action_list()]
+        )
 
         ps_filter = self._build_ps_filter(action_selection_ids, sous_categorie_id)
 
@@ -447,6 +489,7 @@ def adresse_detail(request, identifiant_unique):
     latitude = request.GET.get("latitude")
     longitude = request.GET.get("longitude")
     direction = request.GET.get("direction")
+
     displayed_acteur = DisplayedActeur.objects.prefetch_related(
         "proposition_services__sous_categories",
         "proposition_services__sous_categories__categorie",
@@ -455,6 +498,7 @@ def adresse_detail(request, identifiant_unique):
         "labels",
         "source",
     ).get(identifiant_unique=identifiant_unique)
+
     return render(
         request,
         "qfdmo/adresse_detail.html",
@@ -491,11 +535,9 @@ class ConfiguratorView(FormView):
         initial["first_dir"] = self.request.GET.get("first_dir")
         initial["displayed_action_list"] = self.request.GET.getlist(
             "displayed_action_list",
-            # [action["code"] for action in CachedDirectionAction.get_actions()],
         )
         initial["action_list"] = self.request.GET.getlist(
             "action_list",
-            # [action["code"] for action in CachedDirectionAction.get_actions()],
         )
         initial["max_width"] = self.request.GET.get("max_width")
         initial["height"] = self.request.GET.get("height")

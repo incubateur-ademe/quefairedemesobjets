@@ -115,8 +115,6 @@ brown-cafe-creme-main-782, purple-glycine-main-494, green-menthe-main-548
 
 class CachedDirectionAction:
     _cached_actions_by_direction = None
-    _cached_actions_by_code = None
-    _cached_actions = None
     _cached_action_instances: QuerySet[Action] | None = None
     _cached_groupe_action_instances: QuerySet[GroupeAction] | None = None
     _cached_direction = None
@@ -141,27 +139,7 @@ class CachedDirectionAction:
             ).order_by("order")
         return cls._cached_groupe_action_instances
 
-    # TODO : to be tested
-    @classmethod
-    def get_actions(cls) -> List[dict]:
-        cls._manage_cache_expiration()
-        if cls._cached_actions is None:
-            cls._cached_actions = [
-                {
-                    **model_to_dict(a, exclude=["directions"]),
-                    "directions": [d.code for d in a.directions.all()],
-                }
-                for a in Action.objects.filter(afficher=True)
-            ]
-        return cls._cached_actions
-
-    @classmethod
-    def get_actions_by_code(cls) -> dict:
-        cls._manage_cache_expiration()
-        if cls._cached_actions_by_code is None:
-            cls._cached_actions_by_code = {a["code"]: a for a in cls.get_actions()}
-        return cls._cached_actions_by_code
-
+    # TODO : to be factorized
     @classmethod
     def get_actions_by_direction(cls) -> dict:
         cls._manage_cache_expiration()
@@ -206,8 +184,6 @@ class CachedDirectionAction:
     @classmethod
     def reload_cache(cls):
         cls._cached_actions_by_direction = None
-        cls._cached_actions_by_code = None
-        cls._cached_actions = None
         cls._cached_direction = None
         cls._reparer_action_id = None
         cls._cached_action_instances = None
