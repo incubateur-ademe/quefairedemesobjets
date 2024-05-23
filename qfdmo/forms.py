@@ -166,8 +166,8 @@ class IframeAddressesForm(forms.Form):
             "&nbsp;Éligible au bonus réparation"
         ),
         help_text=mark_safe(
-            "Afficher uniquement les adresses éligibles (uniquemet valable lorsque le"
-            " geste « réparer » est sélectioné). En svoir plus sur le site <a href="
+            "Afficher uniquement les adresses éligibles (uniquement valable lorsque le"
+            " geste « réparer » est sélectionné). En savoir plus sur le site <a href="
             '"https://www.ecologie.gouv.fr/bonus-reparation" target="_blank"'
             ' rel="noopener">Bonus réparation</a>'
         ),
