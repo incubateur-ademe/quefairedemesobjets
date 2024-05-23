@@ -4,6 +4,9 @@
 {% if is_carte(request) %}
     <input type="hidden" name="carte">
 {% endif %}
+{% if request.GET.get('limit') %}
+    <input type="hidden" name="limit" value="{{ request.GET.get('limit') }}">
+{% endif %}
 <input type="hidden" name="r" value="{{ range(1000) | random }}">
 {% if request.GET.get("first_dir") %}
     <input type="hidden" name="first_dir" value="{{ request.GET.get("first_dir") }}">

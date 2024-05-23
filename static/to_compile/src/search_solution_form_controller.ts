@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
-    #selectedOption: string = "jecherche"
+    #selectedOption: string = ""
     static targets = [
         "jai",
         "jecherche",
@@ -114,6 +114,15 @@ export default class extends Controller<HTMLElement> {
         this.reparerFilterTargets.forEach((element: HTMLInputElement) => {
             element.disabled = true
         })
+    }
+
+    activeReparerFiltersCarte(event: Event) {
+        const target = event.target as HTMLInputElement
+        if (target.value == "reparer") {
+            this.reparerFilterTargets.forEach((element: HTMLInputElement) => {
+                element.disabled = !target.checked
+            })
+        }
     }
 
     scrollToContent() {

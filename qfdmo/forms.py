@@ -1,8 +1,8 @@
 from django import forms
+from django.http import HttpRequest
 from django.utils.safestring import mark_safe
 
 from qfdmo.models import CachedDirectionAction, DagRun, DagRunStatus, SousCategorieObjet
-from qfdmo.models.action import GroupeAction
 
 
 class AutoCompleteInput(forms.Select):
@@ -32,8 +32,16 @@ class SegmentedControlSelect(forms.RadioSelect):
         return context
 
 
-class IframeAddressesForm(forms.Form):
-    bbox = forms.CharField(
+class DSFRCheckboxSelectMultiple(forms.CheckboxSelectMultiple):
+    template_name = "django/forms/widgets/checkbox_select.html"
+    option_template_name = "django/forms/widgets/checkbox_option.html"
+
+
+class AddressesForm(forms.Form):
+    def load_choices(self, request: HttpRequest) -> None:
+        pass
+
+    bounding_box = forms.CharField(
         widget=forms.HiddenInput(
             attrs={
                 "data-search-solution-form-target": "bbox",
@@ -42,6 +50,7 @@ class IframeAddressesForm(forms.Form):
         ),
         required=False,
     )
+
     sous_categorie_objet = forms.ModelChoiceField(
         queryset=SousCategorieObjet.objects.all(),
         widget=AutoCompleteInput(
@@ -57,6 +66,7 @@ class IframeAddressesForm(forms.Form):
         empty_label="",
         required=False,
     )
+
     sc_id = forms.IntegerField(
         widget=forms.HiddenInput(
             attrs={
@@ -67,19 +77,6 @@ class IframeAddressesForm(forms.Form):
         required=False,
     )
 
-    adresse = forms.CharField(
-        widget=AutoCompleteInput(
-            attrs={
-                "class": "fr-input md:qfdmo-w-[596px]",
-                "placeholder": "20 av. du Grésillé 49000 Angers",
-                "autocomplete": "off",
-                "aria-label": "Autour de l'adresse suivante - obligatoire",
-            },
-            data_controller="address-autocomplete",
-        ),
-        label="Autour de l'adresse suivante ",
-        required=False,
-    )
     latitude = forms.FloatField(
         widget=forms.HiddenInput(
             attrs={
@@ -89,6 +86,7 @@ class IframeAddressesForm(forms.Form):
         ),
         required=False,
     )
+
     longitude = forms.FloatField(
         widget=forms.HiddenInput(
             attrs={
@@ -109,19 +107,10 @@ class IframeAddressesForm(forms.Form):
                 "data-search-solution-form-target": "direction",
             },
         ),
-        # FIXME: I guess async error comes from here
         choices=[],
         label="Direction des actions",
         required=False,
     )
-
-    def load_choices(self, first_direction=None):
-        self.fields["direction"].choices = [
-            [direction["code"], direction["libelle"]]
-            for direction in CachedDirectionAction.get_directions(
-                first_direction=first_direction
-            )
-        ]
 
     label_reparacteur = forms.BooleanField(
         widget=forms.CheckboxInput(
@@ -159,7 +148,7 @@ class IframeAddressesForm(forms.Form):
             attrs={
                 "class": "fr-checkbox fr-m-1v",
                 "data-search-solution-form-target": "reparerFilter",
-            }
+            },
         ),
         label=mark_safe(
             "<span class='fr-icon--sm fr-icon-money-euro-box-line'></span>"
@@ -179,6 +168,11 @@ class IframeAddressesForm(forms.Form):
         widget=forms.HiddenInput(
             attrs={"data-search-solution-form-target": "actionList"},
         ),
+        required=False,
+    )
+
+    action_displayed = forms.CharField(
+        widget=forms.HiddenInput(),
         required=False,
     )
 
@@ -210,7 +204,43 @@ class IframeAddressesForm(forms.Form):
     )
 
 
-class CarteAddressesForm(IframeAddressesForm):
+class IframeAddressesForm(AddressesForm):
+    def load_choices(self, request: HttpRequest) -> None:
+        first_direction = request.GET.get("first_dir")
+        self.fields["direction"].choices = [
+            [direction["code"], direction["libelle"]]
+            for direction in CachedDirectionAction.get_directions(
+                first_direction=first_direction
+            )
+        ]
+
+    adresse = forms.CharField(
+        widget=AutoCompleteInput(
+            attrs={
+                "class": "fr-input md:qfdmo-w-[596px]",
+                "placeholder": "20 av. du Grésillé 49000 Angers",
+                "autocomplete": "off",
+                "aria-label": "Autour de l'adresse suivante - obligatoire",
+            },
+            data_controller="address-autocomplete",
+        ),
+        label="Autour de l'adresse suivante ",
+        required=False,
+    )
+
+
+class CarteAddressesForm(AddressesForm):
+    def load_choices(
+        self,
+        request: HttpRequest,
+        groupe_options: list[list[str]] = [],
+        disable_reparer_option: bool = False,
+    ) -> None:
+        self.fields["grouped_action"].choices = groupe_options
+        if disable_reparer_option:
+            self.fields["bonus"].widget.attrs["disabled"] = "true"
+            self.fields["label_reparacteur"].widget.attrs["disabled"] = "true"
+
     adresse = forms.CharField(
         widget=AutoCompleteInput(
             attrs={
@@ -224,14 +254,18 @@ class CarteAddressesForm(IframeAddressesForm):
         label="Saisir une adresse ",
         required=False,
     )
-    groupe_action = forms.ModelMultipleChoiceField(
-        widget=forms.CheckboxSelectMultiple(
+
+    grouped_action = forms.MultipleChoiceField(
+        widget=DSFRCheckboxSelectMultiple(
             attrs={
-                "class": ("fr-checkbox"),
+                "class": "fr-fieldset",
                 "data-search-solution-form-target": "GroupeAction",
+                "data-action": (
+                    "change -> search-solution-form#activeReparerFiltersCarte"
+                ),
             },
         ),
-        queryset=GroupeAction.objects.all().order_by("order"),
+        choices=[],
         label="Actions",
         required=False,
     )
@@ -256,7 +290,7 @@ class ConfiguratorForm(forms.Form):
         super().__init__(*args, **kwargs)
         self.load_choices()
 
-    def load_choices(self, first_direction=None):
+    def load_choices(self):
         self.fields["direction"].choices = [
             (direction["code"], direction["libelle"])
             for direction in CachedDirectionAction.get_directions()
@@ -266,9 +300,24 @@ class ConfiguratorForm(forms.Form):
             for direction in CachedDirectionAction.get_directions()
         ]
         self.fields["action_list"].choices = [
-            (code, action["libelle"])
-            for code, action in CachedDirectionAction.get_actions_by_code().items()
+            (action.code, action.libelle_groupe.capitalize())
+            for action in CachedDirectionAction.get_action_instances()
         ]
+        self.fields["action_displayed"].choices = [
+            (action.code, action.libelle_groupe.capitalize())
+            for action in CachedDirectionAction.get_action_instances()
+        ]
+
+    limit = forms.IntegerField(
+        widget=forms.NumberInput(
+            attrs={
+                "class": "fr-input",
+            },
+        ),
+        label="Nombre de résultats",
+        help_text="Nombre de résultats affichés dans l'iframe",
+        required=False,
+    )
 
     iframe_mode = forms.ChoiceField(
         widget=SegmentedControlSelect(
@@ -313,6 +362,31 @@ class ConfiguratorForm(forms.Form):
         required=False,
     )
 
+    action_displayed = forms.MultipleChoiceField(
+        widget=forms.CheckboxSelectMultiple(
+            attrs={
+                "class": (
+                    "fr-checkbox qfdmo-inline-grid qfdmo-grid-cols-4 qfdmo-gap-4"
+                    " qfdmo-m-1w"
+                ),
+            },
+        ),
+        choices=[],
+        label=mark_safe(
+            "Liste des actions <strong>displonibles</strong> (selon la direction)"
+        ),
+        help_text=mark_safe(
+            "Pour la direction « Je cherche » les actions possibles"
+            " sont : « emprunter », « échanger », « louer », « acheter »<br>"
+            "Pour la direction « J'ai » les actions possibles"
+            " sont : « réparer », « prêter », « donner », « échanger », « mettre"
+            " en location », « revendre »<br>"
+            "Si le paramètre n'est pas renseigné ou est vide, toutes les actions"
+            " éligibles à la direction sont disponibles"
+        ),
+        required=False,
+    )
+
     # - `data-action_list`, liste des actions cochées selon la direction séparées par le caractère `|` : # noqa
     #   - pour la direction `jecherche` les actions possibles sont : `emprunter`, `echanger`, `louer`, `acheter` # noqa
     #   - pour la direction `jai` les actions possibles sont : `reparer`, `preter`, `donner`, `echanger`, `mettreenlocation`, `revendre` # noqa
@@ -327,7 +401,9 @@ class ConfiguratorForm(forms.Form):
             },
         ),
         choices=[],
-        label="Liste des actions cochées selon la direction",
+        label=mark_safe(
+            "Liste des actions <strong>cochées</strong> (selon la direction)"
+        ),
         help_text=mark_safe(
             "Pour la direction « Je cherche » les actions possibles"
             " sont : « emprunter », « échanger », « louer », « acheter »<br>"
@@ -381,7 +457,7 @@ class ConfiguratorForm(forms.Form):
     )
 
     # TODO : documentation
-    bbox = forms.CharField(
+    bounding_box = forms.CharField(
         widget=forms.TextInput(
             attrs={
                 "class": "fr-input",

@@ -1,10 +1,7 @@
-import difflib
 from math import sqrt
-from typing import List
 from urllib.parse import quote_plus
 
 from django.conf import settings
-from django.db.models.query import QuerySet
 from django.http import HttpRequest
 from django.templatetags.static import static
 from django.urls import reverse
@@ -12,26 +9,6 @@ from django.urls import reverse
 from core.utils import get_direction
 from jinja2 import Environment
 from qfdmo.models import CachedDirectionAction, DisplayedActeur
-from qfdmo.models.action import GroupeAction
-
-
-# FIXME : could be tested
-def str_diff(s1: str | None, s2: str | None) -> str:
-    s1 = s1 or ""
-    s2 = s2 or ""
-    d = difflib.Differ().compare(s1, s2)
-    list_diff = []
-    for letter in list(d):
-        if letter[0] == "+":
-            list_diff.append(f'<span class="qfdmo-bg-red-500" >{letter[-1]}</span>')
-        elif letter[0] == "-":
-            list_diff.append(
-                f'<span class="qfdmo-bg-green-500"'
-                f' style="background-color:greenyellow;">{letter[-1]}</span>'
-            )
-        else:
-            list_diff.append(letter[-1])
-    return "".join(list_diff)
 
 
 def is_embedded(request: HttpRequest) -> bool:
@@ -44,28 +21,6 @@ def is_carte(request: HttpRequest) -> bool:
 
 def is_iframe(request: HttpRequest) -> bool:
     return "iframe" in request.GET
-
-
-# FIXME : perhaps it is better in util list ?
-def get_action_list(request: HttpRequest) -> List[dict]:
-    direction = get_direction(request)
-    actions = (
-        CachedDirectionAction.get_actions_by_direction()[direction]
-        if direction
-        else CachedDirectionAction.get_actions()
-    )
-    if action_list := request.GET.get("action_list"):
-        return [a for a in actions if a["code"] in action_list.split("|")]
-    else:
-        return actions
-
-
-def groupe_actions(request: HttpRequest) -> QuerySet[GroupeAction]:
-    return GroupeAction.objects.all().order_by("order")
-
-
-def action_list_display(request: HttpRequest) -> List[str]:
-    return [action["libelle"] for action in get_action_list(request)]
 
 
 def action_by_direction(request: HttpRequest, direction: str):
@@ -124,8 +79,6 @@ def environment(**options):
     env.globals.update(
         {
             "action_by_direction": action_by_direction,
-            "action_list_display": action_list_display,
-            "groupe_actions": groupe_actions,
             "display_infos_panel": display_infos_panel,
             "display_sources_panel": display_sources_panel,
             "display_labels_panel": display_labels_panel,
@@ -135,7 +88,6 @@ def environment(**options):
             "is_carte": is_carte,
             "reverse": reverse,
             "static": static,
-            "str_diff": str_diff,
             "quote_plus": lambda u: quote_plus(u),
             "ENVIRONMENT": settings.ENVIRONMENT,
             "AIRFLOW_WEBSERVER_REFRESHACTEUR_URL": (
