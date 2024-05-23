@@ -1,5 +1,5 @@
 import requests
-from ratelimiter import RateLimiter
+from ratelimit import limits
 
 
 def fetch_dataset_from_point_apport(url):
@@ -16,7 +16,7 @@ def fetch_dataset_from_point_apport(url):
     return all_data
 
 
-@RateLimiter(max_calls=7, period=1)
+@limits(calls=7, period=1)
 def call_annuaire_entreprises(query):
     params = {"q": query, "page": 1, "per_page": 1}
     base_url = "https://recherche-entreprises.api.gouv.fr"
@@ -35,9 +35,12 @@ def call_annuaire_entreprises(query):
                     categorie_naf,
                     etat_admin_siege,
                     categorie_naf_siege,
-                ) = (None, None, None, None, None, None)
-
-                if data.get("nombre_etablissements_ouverts") == 1:
+                    nombre_etablissements_ouverts,
+                ) = (None, None, None, None, None, None, None)
+                nombre_etablissements_ouverts = data.get(
+                    "nombre_etablissements_ouverts"
+                )
+                if data.get("nombre_etablissements_ouverts") >= 1:
                     siege = data.get("siege", {})
                     adresse = siege.get("adresse")
                     etat_admin_siege = siege.get("etat_administratif")
@@ -56,6 +59,7 @@ def call_annuaire_entreprises(query):
                     "siret_siege": siret,
                     "categorie_naf_siege": categorie_naf_siege,
                     "categorie_naf": categorie_naf,
+                    "nombre_etablissements_ouverts": nombre_etablissements_ouverts,
                 }
             else:
                 # Si 'results' est vide ou n'existe pas, retourner un dictionnaire vide

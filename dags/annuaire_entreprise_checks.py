@@ -44,7 +44,7 @@ def fetch_and_parse_data(**context):
         & (df_acteur["siret"] != "ZZZ")
         & (df_acteur["statut"] == "ACTIF")
     ]
-    return df_acteur.head(1000)
+    return df_acteur.head(100)
 
 
 def check_siret(**kwargs):
@@ -59,10 +59,23 @@ def check_siret(**kwargs):
         )
     )
 
-    df_closed = df[(df["etat_admin"] == "F") & (df["siret_siege"].isna())]
-    df_moved = df[(df["etat_admin"] == "F") & (df["siret_siege"].notna())]
+    df["nombre_etablissements_ouverts"] = df["ae_result"].apply(
+        lambda x: (
+            x["nombre_etablissements_ouverts"]
+            if isinstance(x, dict) and "nombre_etablissements_ouverts" in x
+            else None
+        )
+    )
 
-    return {"df_closed": df_closed, "df_moved": df_moved}
+    df_closed = df[df["nombre_etablissements_ouverts"] == 0]
+    df_nb_etab_ouvert_1 = df[df["nombre_etablissements_ouverts"] == 1]
+    df_nb_etab_ouverts_2_plus = df[df["nombre_etablissements_ouverts"] > 1]
+
+    return {
+        "df_closed": df_closed,
+        "df_nb_etab_ouvert_1": df_nb_etab_ouvert_1,
+        "df_nb_etab_ouverts_2_plus": df_nb_etab_ouverts_2_plus,
+    }
 
 
 def construct_url(identifiant):
@@ -74,23 +87,16 @@ def serialize_to_json(**kwargs):
     data = kwargs["ti"].xcom_pull(task_ids="check_siret")
     columns = ["identifiant_unique", "statut", "ae_result", "admin_link"]
 
-    df_closed = data["df_closed"]
-    df_moved = data["df_moved"]
+    serialized_data = {}
 
-    df_moved["admin_link"] = df_moved["identifiant_unique"].apply(construct_url)
-    df_closed["admin_link"] = df_closed["identifiant_unique"].apply(construct_url)
+    for key, df in data.items():
+        df["admin_link"] = df["identifiant_unique"].apply(construct_url)
+        df["row_updates"] = df[columns].apply(
+            lambda row: json.dumps(row.to_dict(), default=str), axis=1
+        )
+        serialized_data[key] = {"df": df, "metadata": {"added_rows": len(df)}}
 
-    df_closed["row_updates"] = df_closed[columns].apply(
-        lambda row: json.dumps(row.to_dict(), default=str), axis=1
-    )
-    df_moved["row_updates"] = df_moved[columns].apply(
-        lambda row: json.dumps(row.to_dict(), default=str), axis=1
-    )
-
-    return {
-        "closed": {"df": df_closed, "metadata": {"added_rows": len(df_closed)}},
-        "moved": {"df": df_moved, "metadata": {"added_rows": len(df_moved)}},
-    }
+    return serialized_data
 
 
 load_and_filter_data_task = PythonOperator(
