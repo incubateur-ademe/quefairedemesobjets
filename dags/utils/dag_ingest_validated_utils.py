@@ -97,6 +97,7 @@ def handle_update_actor_event(df_actors, dag_run_id):
     update_required_columns = [
         "identifiant_unique",
         "adresse",
+        "location",
         "statut",
         "code_postal",
         "ville",

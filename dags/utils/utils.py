@@ -317,3 +317,12 @@ def check_siret_using_annuaire_entreprise(row):
     if "etat_admin" in res and res["etat_admin"] == "F":
         return res
     return {}
+
+
+def get_location(row):
+    a = api_utils.get_lat_lon_from_address(row.get("adresse"))
+    print(a)
+    lat, lon = a
+    if lat is not None and lon is not None:
+        return transform_location(longitude=lon, latitude=lat)
+    return None

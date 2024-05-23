@@ -5,6 +5,7 @@ from pathlib import Path
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
+from airflow.models.param import Param
 import pandas as pd
 import json
 
@@ -25,6 +26,7 @@ default_args = {
 dag = DAG(
     utils.get_dag_name(__file__, "annuaire_entreprise_checks"),
     default_args=default_args,
+    params={"limit": Param(0, type="integer", description="Limit for data processed")},
     description=(
         "A pipeline to apply checks using annuaire entreprise "
         "API and output data to validation tool"
@@ -34,6 +36,7 @@ dag = DAG(
 
 
 def fetch_and_parse_data(**context):
+    limit = context["params"]["limit"]
     pg_hook = PostgresHook(postgres_conn_id=utils.get_db_conn_id(__file__))
     engine = pg_hook.get_sqlalchemy_engine()
     df_acteur = pd.read_sql("qfdmo_displayedacteur", engine)
@@ -44,7 +47,10 @@ def fetch_and_parse_data(**context):
         & (df_acteur["siret"] != "ZZZ")
         & (df_acteur["statut"] == "ACTIF")
     ]
-    return df_acteur.head(100)
+    if limit > 1:
+        df_acteur = df_acteur.head(limit)
+
+    return df_acteur
 
 
 def check_siret(**kwargs):
@@ -59,6 +65,16 @@ def check_siret(**kwargs):
         )
     )
 
+    df["matching_category_naf"] = df["ae_result"].apply(
+        lambda x: (
+            x["categorie_naf"] == x["categorie_naf_siege"]
+            if isinstance(x, dict)
+            and "categorie_naf" in x
+            and "categorie_naf_siege" in x
+            else None
+        )
+    )
+
     df["nombre_etablissements_ouverts"] = df["ae_result"].apply(
         lambda x: (
             x["nombre_etablissements_ouverts"]
@@ -66,16 +82,48 @@ def check_siret(**kwargs):
             else None
         )
     )
+    print(df[["matching_category_naf", "nombre_etablissements_ouverts"]])
 
     df_closed = df[df["nombre_etablissements_ouverts"] == 0]
-    df_nb_etab_ouvert_1 = df[df["nombre_etablissements_ouverts"] == 1]
-    df_nb_etab_ouverts_2_plus = df[df["nombre_etablissements_ouverts"] > 1]
+    df_nb_etab_ouvert_1_matching_naf = df[
+        (df["nombre_etablissements_ouverts"] == 1) & (df["matching_category_naf"])
+    ]
+    df_nb_etab_ouverts_2_plus_matching_naf = df[
+        (df["nombre_etablissements_ouverts"] > 1) & (df["matching_category_naf"])
+    ]
+    df_nb_etab_ouvert_1_not_matching_naf = df[
+        (df["nombre_etablissements_ouverts"] == 1) & (not df["matching_category_naf"])
+    ]
+    df_nb_etab_ouverts_2_plus_not_matching_naf = df[
+        (df["nombre_etablissements_ouverts"] > 1) & (not df["matching_category_naf"])
+    ]
 
     return {
         "df_closed": df_closed,
-        "df_nb_etab_ouvert_1": df_nb_etab_ouvert_1,
-        "df_nb_etab_ouverts_2_plus": df_nb_etab_ouverts_2_plus,
+        "df_nb_etab_ouvert_1_" "and_matching_naf": df_nb_etab_ouvert_1_matching_naf,
+        "df_nb_etab_ouverts_2_"
+        "plus_and_matching_naf": df_nb_etab_ouverts_2_plus_matching_naf,
+        "df_nb_etab_ouverts_1_a"
+        "nd_not_matching_naf": df_nb_etab_ouvert_1_not_matching_naf,
+        "df_nb_etab_ouverts_2_p"
+        "lus_and_not_matching_naf": df_nb_etab_ouverts_2_plus_not_matching_naf,
     }
+
+
+def enrich_lat_lon_ban_api(**kwargs):
+    data = kwargs["ti"].xcom_pull(task_ids="check_siret")
+
+    for key, df in data.items():
+        if len(df) > 0:
+            df["adresse"] = df["ae_result"].apply(
+                lambda x: (
+                    x["adresse"] if isinstance(x, dict) and "adresse" in x else None
+                )
+            )
+
+            df["location"] = df.apply(utils.get_location, axis=1)
+            print("done")
+    return data
 
 
 def construct_url(identifiant):
@@ -85,7 +133,7 @@ def construct_url(identifiant):
 
 def serialize_to_json(**kwargs):
     data = kwargs["ti"].xcom_pull(task_ids="check_siret")
-    columns = ["identifiant_unique", "statut", "ae_result", "admin_link"]
+    columns = ["identifiant_unique", "location", "statut", "ae_result", "admin_link"]
 
     serialized_data = {}
 
@@ -112,6 +160,12 @@ check_siret_task = PythonOperator(
     dag=dag,
 )
 
+get_lat_lon_using_ban_api = PythonOperator(
+    task_id="get_lat_lon_using_ban_api",
+    python_callable=enrich_lat_lon_ban_api,
+    op_kwargs={},
+    dag=dag,
+)
 
 write_data_task = PythonOperator(
     task_id="write_data_to_validate_into_dagruns",
@@ -129,6 +183,7 @@ serialize_to_json_task = PythonOperator(
 (
     load_and_filter_data_task
     >> check_siret_task
+    >> get_lat_lon_using_ban_api
     >> serialize_to_json_task
     >> write_data_task
 )
