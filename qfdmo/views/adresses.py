@@ -66,12 +66,12 @@ class AddressesView(FormView):
         )
 
         # Action to display and check
-        displayed_action_list = self._set_displayed_action_list()
-        initial["displayed_action_list"] = "|".join(displayed_action_list)
-        action_list = self._set_action_list(displayed_action_list)
+        action_displayed = self._set_action_displayed()
+        initial["action_displayed"] = "|".join(action_displayed)
+        action_list = self._set_action_list(action_displayed)
         initial["action_list"] = "|".join(action_list)
         if self.request.GET.get("carte") is not None:
-            groupe_options = self._get_groupe_options(displayed_action_list)
+            groupe_options = self._get_groupe_options(action_displayed)
             initial["grouped_action"] = self._set_grouped_action(
                 groupe_options, action_list
             )
@@ -86,8 +86,8 @@ class AddressesView(FormView):
         # in prod + cache
 
         if form_class == CarteAddressesForm:
-            displayed_action_list = self._set_displayed_action_list()
-            groupe_options = self._get_groupe_options(displayed_action_list)
+            action_displayed = self._set_action_displayed()
+            groupe_options = self._get_groupe_options(action_displayed)
 
             my_form.load_choices(  # type: ignore
                 self.request,
@@ -222,7 +222,7 @@ class AddressesView(FormView):
                 ]  # [xmin, ymin, xmax, ymax]
         return center, my_bbox_polygon
 
-    def _set_displayed_action_list(self) -> list[str]:
+    def _set_action_displayed(self) -> list[str]:
         cached_action_instances = CachedDirectionAction.get_action_instances()
         if self.request.GET.get("carte") is None:
             cached_action_instances = [
@@ -230,23 +230,23 @@ class AddressesView(FormView):
                 for action in CachedDirectionAction.get_action_instances()
                 if action.afficher
             ]
-        if displayed_action_list := self.request.GET.get("displayed_action_list", ""):
+        if action_displayed := self.request.GET.get("action_displayed", ""):
             return [
                 action.code
                 for action in cached_action_instances
-                if action.code in displayed_action_list.split("|")
+                if action.code in action_displayed.split("|")
             ]
         return [action.code for action in cached_action_instances]
 
-    def _set_action_list(self, displayed_action_list):
+    def _set_action_list(self, action_displayed):
         if action_list := self.request.GET.get("action_list", ""):
             return [
                 action.code
                 for action in CachedDirectionAction.get_action_instances()
                 if action.code in action_list.split("|")
-                and action.code in displayed_action_list
+                and action.code in action_displayed
             ]
-        return displayed_action_list
+        return action_displayed
 
     def _get_selected_action_code(self):
         """
@@ -266,9 +266,9 @@ class AddressesView(FormView):
         if self.request.GET.get("action_list"):
             return self.request.GET.get("action_list", "").split("|")
         # Selection is not set in interface, defeult checked action list is not set
-        # get all available from displayed_action_list
-        if self.request.GET.get("displayed_action_list"):
-            return self.request.GET.get("displayed_action_list", "").split("|")
+        # get all available from action_displayed
+        if self.request.GET.get("action_displayed"):
+            return self.request.GET.get("action_displayed", "").split("|")
         # return empty array, will search in all actions
         return []
 
@@ -290,9 +290,9 @@ class AddressesView(FormView):
         if self.request.GET.get("action_list"):
             codes = self.request.GET.get("action_list", "").split("|")
         # Selection is not set in interface, defeult checked action list is not set
-        # get all available from displayed_action_list
-        if self.request.GET.get("displayed_action_list"):
-            codes = self.request.GET.get("displayed_action_list", "").split("|")
+        # get all available from action_displayed
+        if self.request.GET.get("action_displayed"):
+            codes = self.request.GET.get("action_displayed", "").split("|")
         # return empty array, will search in all actions
         return (
             [
@@ -307,8 +307,8 @@ class AddressesView(FormView):
     def get_action_list(self) -> List[dict]:
         direction = get_direction(self.request)
 
-        displayed_action_list = self._set_displayed_action_list()
-        action_list = self._set_action_list(displayed_action_list)
+        action_displayed = self._set_action_displayed()
+        action_list = self._set_action_list(action_displayed)
         actions = [
             a
             for a in CachedDirectionAction.get_action_instances()
@@ -396,7 +396,7 @@ class AddressesView(FormView):
                 )
         return ps_filter
 
-    def _get_groupe_options(self, displayed_action_list: list[str]) -> list[list[str]]:
+    def _get_groupe_options(self, action_displayed: list[str]) -> list[list[str]]:
         groupe_with_displayed_actions = []
         for cached_groupe in CachedDirectionAction.get_groupe_action_instances():
             if groupe_actions := [
@@ -404,7 +404,7 @@ class AddressesView(FormView):
                 for action in cached_groupe.actions.all().order_by(  # type: ignore
                     "order"
                 )
-                if action.code in displayed_action_list
+                if action.code in action_displayed
             ]:
                 groupe_with_displayed_actions.append([cached_groupe, groupe_actions])
 
@@ -533,8 +533,8 @@ class ConfiguratorView(FormView):
         initial["iframe_mode"] = self.request.GET.get("iframe_mode")
         initial["direction"] = self.request.GET.get("direction")
         initial["first_dir"] = self.request.GET.get("first_dir")
-        initial["displayed_action_list"] = self.request.GET.getlist(
-            "displayed_action_list",
+        initial["action_displayed"] = self.request.GET.getlist(
+            "action_displayed",
         )
         initial["action_list"] = self.request.GET.getlist(
             "action_list",
@@ -569,10 +569,8 @@ class ConfiguratorView(FormView):
             attributes["first_dir"] = escape(first_dir.replace("first_", ""))
         if action_list := self.request.GET.getlist("action_list"):
             attributes["action_list"] = escape("|".join(action_list))
-        if displayed_action_list := self.request.GET.getlist("displayed_action_list"):
-            attributes["displayed_action_list"] = escape(
-                "|".join(displayed_action_list)
-            )
+        if action_displayed := self.request.GET.getlist("action_displayed"):
+            attributes["action_displayed"] = escape("|".join(action_displayed))
         if max_width := self.request.GET.get("max_width"):
             attributes["max_width"] = escape(max_width)
         if height := self.request.GET.get("height"):

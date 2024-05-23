@@ -171,7 +171,7 @@ class AddressesForm(forms.Form):
         required=False,
     )
 
-    displayed_action_list = forms.CharField(
+    action_displayed = forms.CharField(
         widget=forms.HiddenInput(),
         required=False,
     )
@@ -303,7 +303,7 @@ class ConfiguratorForm(forms.Form):
             (action.code, action.libelle_groupe.capitalize())
             for action in CachedDirectionAction.get_action_instances()
         ]
-        self.fields["displayed_action_list"].choices = [
+        self.fields["action_displayed"].choices = [
             (action.code, action.libelle_groupe.capitalize())
             for action in CachedDirectionAction.get_action_instances()
         ]
@@ -351,7 +351,7 @@ class ConfiguratorForm(forms.Form):
         required=False,
     )
 
-    displayed_action_list = forms.MultipleChoiceField(
+    action_displayed = forms.MultipleChoiceField(
         widget=forms.CheckboxSelectMultiple(
             attrs={
                 "class": (

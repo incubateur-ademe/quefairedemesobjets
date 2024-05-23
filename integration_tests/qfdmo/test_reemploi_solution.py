@@ -39,7 +39,7 @@ class TestInitialValue:
             "ess": None,
             "bonus": None,
             "bbox": None,
-            "displayed_action_list": (
+            "action_displayed": (
                 "preter|emprunter|louer|mettreenlocation|reparer|donner|echanger"
                 "|acheter|revendre"
             ),
@@ -69,7 +69,7 @@ class TestInitialValue:
             "ess": None,
             "bonus": None,
             "bbox": None,
-            "displayed_action_list": (
+            "action_displayed": (
                 "preter|emprunter|louer|mettreenlocation|reparer|donner|echanger"
                 "|acheter|revendre|trier"
             ),
@@ -106,7 +106,7 @@ class TestInitialValue:
             "ess": None,
             "bonus": None,
             "bbox": None,
-            "displayed_action_list": (
+            "action_displayed": (
                 "preter|emprunter|louer|mettreenlocation|reparer|donner|echanger"
                 "|acheter|revendre"
             ),

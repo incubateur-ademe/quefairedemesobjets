@@ -36,13 +36,13 @@
             <p>
                 <details>
                     <summary>
-                        {{ form.displayed_action_list.label_tag() }}
-                        {% if not form.initial.displayed_action_list %}
+                        {{ form.action_displayed.label_tag() }}
+                        {% if not form.initial.action_displayed %}
                             <br><span class="qfdmo-italic">Toutes les actions sont disponibles</span>
                         {% endif %}
                     </summary>
-                    <span class="qfdmo-italic">{{ form.displayed_action_list.help_text }}</span>
-                    {{ form.displayed_action_list }}
+                    <span class="qfdmo-italic">{{ form.action_displayed.help_text }}</span>
+                    {{ form.action_displayed }}
                 </details>
             </p>
             <hr class="fr-my-1w">
