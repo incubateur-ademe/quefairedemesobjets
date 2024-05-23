@@ -1603,9 +1603,8 @@ pyyaml==6.0.1 \
     #   clickclick
     #   connexion
     #   pre-commit
-ratelimiter==1.2.0.post0 \
-    --hash=sha256:5c395dcabdbbde2e5178ef3f89b568a3066454a6ddc223b76473dac22f89b4f7 \
-    --hash=sha256:a52be07bc0bb0b3674b4b304550f10c769bbb00fead3072e035904474259809f
+ratelimit==2.2.1 \
+    --hash=sha256:af8a9b64b821529aca09ebaf6d8d279100d766f19e90b5059ac6a718ca6dee42
     # via -r dev-requirements.in
 referencing==0.35.1 \
     --hash=sha256:25b42124a6c8b632a425174f24087783efb348a6f1e0008e63cd4466fedf703c \
