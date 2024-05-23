@@ -71,3 +71,19 @@ def call_annuaire_entreprises(query):
     except requests.exceptions.RequestException as e:
         print(f"Une erreur est survenue lors de la requête: {e}")
         return {"error": "Une erreur de requête est survenue"}
+
+
+@limits(calls=50, period=1)
+def get_lat_lon_from_address(address):
+    url = "https://api-adresse.data.gouv.fr/search/"
+    params = {"q": address, "limit": 1}
+    if address is None:
+        return None, None
+    response = requests.get(url, params=params)
+    if response.status_code == 200:
+        data = response.json()
+        if "features" in data and data["features"]:
+            coords = data["features"][0]["geometry"]["coordinates"]
+            return coords[1], coords[0]
+
+    return None, None
