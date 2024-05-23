@@ -1,0 +1,16 @@
+{% with id=widget.attrs.id %}
+    <fieldset{% if id %} id="{{ id }}"{% endif %}{% if widget.attrs.class %} class="{{ widget.attrs.class }}"{% endif %} aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages">
+        {% for group, options, index in widget.optgroups %}
+            {% if group %}<legend class="qfdmo-hidden"><label class="fr-label qfdmo-inline">{{ group }}</label></legend>{% endif %}
+            {% for widget in options %}
+                <div class="fr-fieldset__element">
+                    {% include widget.template_name %}
+
+                </div>
+            {% endfor %}
+
+        {% endfor %}
+
+    </fieldset>
+{% endwith %}
+

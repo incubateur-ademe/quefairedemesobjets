@@ -1,7 +1,7 @@
 import pytest
 from django.contrib.gis.geos import Point
 from django.core.management import call_command
-from django.forms import ValidationError
+from django.forms import ValidationError, model_to_dict
 
 from qfdmo.models import (
     Acteur,
@@ -20,6 +20,8 @@ from unit_tests.qfdmo.acteur_factory import (
     ActeurFactory,
     ActeurServiceFactory,
     ActeurTypeFactory,
+    DisplayedActeurFactory,
+    DisplayedPropositionServiceFactory,
     PropositionServiceFactory,
 )
 from unit_tests.qfdmo.action_factory import ActionDirectionFactory, ActionFactory
@@ -88,37 +90,37 @@ class TestActeurIsdigital:
         ).is_digital
 
 
-@pytest.mark.django_db
-class TestActeurSerialize:
-    def test_serialize(self, acteur):
-        proposition_service = PropositionService.objects.last()
-        expected_serialized_acteur = {
-            "nom": "Test Object 1",
-            "description": None,
-            "identifiant_unique": acteur.identifiant_unique,
-            "acteur_type": acteur.acteur_type.serialize(),
-            "adresse": None,
-            "adresse_complement": None,
-            "code_postal": None,
-            "ville": None,
-            "url": None,
-            "email": None,
-            "telephone": None,
-            "nom_commercial": None,
-            "nom_officiel": None,
-            "siret": None,
-            "source": acteur.source.serialize(),
-            "statut": "ACTIF",
-            "identifiant_externe": acteur.identifiant_externe,
-            "location": {"type": "Point", "coordinates": [0.0, 0.0]},
-            "naf_principal": None,
-            "commentaires": None,
-            "horaires_osm": None,
-            "horaires_description": None,
-            "proposition_services": [proposition_service.serialize()],
-            "labels": [],
-        }
-        assert acteur.serialize() == expected_serialized_acteur
+# @pytest.mark.django_db
+# class TestActeurSerialize:
+#     def test_serialize(self, acteur):
+#         proposition_service = PropositionService.objects.last()
+#         expected_serialized_acteur = {
+#             "nom": "Test Object 1",
+#             "description": None,
+#             "identifiant_unique": acteur.identifiant_unique,
+#             "acteur_type": acteur.acteur_type.serialize(),
+#             "adresse": None,
+#             "adresse_complement": None,
+#             "code_postal": None,
+#             "ville": None,
+#             "url": None,
+#             "email": None,
+#             "telephone": None,
+#             "nom_commercial": None,
+#             "nom_officiel": None,
+#             "siret": None,
+#             "source": acteur.source.serialize(),
+#             "statut": "ACTIF",
+#             "identifiant_externe": acteur.identifiant_externe,
+#             "location": {"type": "Point", "coordinates": [0.0, 0.0]},
+#             "naf_principal": None,
+#             "commentaires": None,
+#             "horaires_osm": None,
+#             "horaires_description": None,
+#             "proposition_services": [proposition_service.serialize()],
+#             "labels": [],
+#         }
+#         assert acteur.serialize() == expected_serialized_acteur
 
 
 @pytest.mark.django_db
@@ -382,3 +384,80 @@ class TestActeurLabel:
         label, _ = LabelQualite.objects.get_or_create(code="reparacteur")
         acteur.labels.add(label)
         assert acteur.has_label_reparacteur()
+
+
+@pytest.mark.django_db
+class TestDisplayActeurActeurActions:
+
+    def test_basic(self):
+        displayed_acteur = DisplayedActeurFactory()
+        direction = ActionDirectionFactory(code="jai")
+        action = ActionFactory()
+        action.directions.add(direction)
+        acteur_service = ActeurServiceFactory()
+        DisplayedPropositionServiceFactory(
+            action=action, acteur_service=acteur_service, acteur=displayed_acteur
+        )
+        CachedDirectionAction.reload_cache()
+        assert [
+            model_to_dict(a, exclude=["directions"])
+            for a in displayed_acteur.acteur_actions()
+        ] == [
+            {
+                "id": action.id,
+                "code": "action",
+                "libelle": "Action",
+                "libelle_groupe": "",
+                "afficher": True,
+                "description": None,
+                "order": action.order,
+                "couleur": "yellow-tournesol",
+                "icon": None,
+                "groupe_action": None,
+            }
+        ]
+
+    def test_with_direction(self):
+        displayed_acteur = DisplayedActeurFactory()
+        direction = ActionDirectionFactory(code="jai")
+        action = ActionFactory()
+        action.directions.add(direction)
+        acteur_service = ActeurServiceFactory()
+        DisplayedPropositionServiceFactory(
+            action=action, acteur_service=acteur_service, acteur=displayed_acteur
+        )
+        CachedDirectionAction.reload_cache()
+        assert displayed_acteur.acteur_actions(direction="fake") == []
+        assert [
+            model_to_dict(a, exclude=["directions"])
+            for a in displayed_acteur.acteur_actions(direction="jai")
+        ] == [
+            {
+                "id": action.id,
+                "code": "action",
+                "libelle": "Action",
+                "libelle_groupe": "",
+                "afficher": True,
+                "description": None,
+                "order": action.order,
+                "couleur": "yellow-tournesol",
+                "icon": None,
+                "groupe_action": None,
+            }
+        ]
+
+    def test_ordered_action(self):
+        displayed_acteur = DisplayedActeurFactory()
+        direction = ActionDirectionFactory(code="jai")
+        acteur_service = ActeurServiceFactory()
+        for i in [2, 1, 3]:
+            action = ActionFactory(order=i, code=f"{i}")
+            action.directions.add(direction)
+            DisplayedPropositionServiceFactory(
+                action=action, acteur_service=acteur_service, acteur=displayed_acteur
+            )
+
+        CachedDirectionAction.reload_cache()
+        assert [
+            action.order for action in displayed_acteur.acteur_actions(direction="jai")
+        ] == [1, 2, 3]

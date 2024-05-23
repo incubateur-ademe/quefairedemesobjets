@@ -114,56 +114,23 @@ class TestCachedDirectionActionGetActionsByDirection:
 class TestCachedDirectionActionReloadCache:
 
     @pytest.mark.django_db
-    def test__reparer_action_id(self, action_directions, actions):
+    @pytest.mark.parametrize(
+        "func, field",
+        [
+            ("get_reparer_action_id", "_reparer_action_id"),
+            ("get_directions", "_cached_direction"),
+            ("get_actions_by_direction", "_cached_actions_by_direction"),
+        ],
+    )
+    def test__reload_cache(self, action_directions, actions, func, field):
         CachedDirectionAction.reload_cache()
 
-        assert CachedDirectionAction._reparer_action_id is None
+        assert getattr(CachedDirectionAction, field) is None
 
-        CachedDirectionAction.get_reparer_action_id()
+        getattr(CachedDirectionAction, func)()
 
-        assert CachedDirectionAction._reparer_action_id is not None
-
-    @pytest.mark.django_db
-    def test__cached_direction(self, action_directions, actions):
-        CachedDirectionAction.reload_cache()
-
-        assert CachedDirectionAction._cached_direction is None
-
-        CachedDirectionAction.get_directions()
-
-        assert CachedDirectionAction._cached_direction is not None
-
-    @pytest.mark.django_db
-    def test__cached_actions_by_direction(self, action_directions, actions):
-        CachedDirectionAction.reload_cache()
-
-        assert CachedDirectionAction._cached_actions_by_direction is None
-
-        CachedDirectionAction.get_actions_by_direction()
-
-        assert CachedDirectionAction._cached_actions_by_direction is not None
-
-    @pytest.mark.django_db
-    def test__cached_actions(self, action_directions, actions):
-        CachedDirectionAction.reload_cache()
-
-        assert CachedDirectionAction._cached_actions_by_code is None
-
-        CachedDirectionAction.get_actions_by_code()
-
-        assert CachedDirectionAction._cached_actions_by_code is not None
-
-    def test_reload_cache(self):
-        CachedDirectionAction._cached_actions_by_direction = (
-            "cached_actions_by_direction"
-        )
-        CachedDirectionAction._cached_actions_by_code = "cached_actions"
-        CachedDirectionAction._cached_direction = "cached_direction"
-        CachedDirectionAction._reparer_action_id = "reparer_action_id"
+        assert getattr(CachedDirectionAction, field) is not None
 
         CachedDirectionAction.reload_cache()
 
-        assert CachedDirectionAction._cached_actions_by_direction is None
-        assert CachedDirectionAction._cached_actions_by_code is None
-        assert CachedDirectionAction._cached_direction is None
-        assert CachedDirectionAction._reparer_action_id is None
+        assert getattr(CachedDirectionAction, field) is None

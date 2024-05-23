@@ -6,22 +6,18 @@ export interface Location {
 export interface ActorLocation {
     coordinates: number[]
 }
-export interface Action {
-    couleur: string
-    icon: string
-}
 
 export class Actor {
     identifiant_unique: string
     location: ActorLocation
-    actions: Action[]
-    acteur_selected_action: Action
+    icon: string
+    couleur: string
 
     constructor(actor_fields: object) {
         this.identifiant_unique = actor_fields["identifiant_unique"]
         this.location = actor_fields["location"]
-        this.actions = actor_fields["actions"]
-        this.acteur_selected_action = actor_fields["acteur_selected_action"]
+        this.icon = actor_fields["icon"]
+        this.couleur = actor_fields["couleur"]
     }
 }
 
