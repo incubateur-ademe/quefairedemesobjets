@@ -2,6 +2,7 @@ import pandas as pd
 from importlib import import_module
 from pathlib import Path
 from datetime import datetime
+import json
 
 env = Path(__file__).parent.parent.name
 
@@ -262,6 +263,35 @@ def handle_write_data_create_event(connection, df_actors, df_labels, df_pds, df_
     )
 
 
+def combine_comments(existing_commentaires, new_commentaires):
+    def parse_json_or_default(json_str, default):
+        try:
+            parsed_json = json.loads(json_str)
+            return parsed_json if isinstance(parsed_json, list) else [default]
+        except (json.JSONDecodeError, TypeError):
+            return [default]
+
+    existing_commentaires_json = (
+        parse_json_or_default(existing_commentaires, {"message": existing_commentaires})
+        if existing_commentaires
+        else []
+    )
+
+    if new_commentaires:
+        try:
+            new_commentaires_json = json.loads(new_commentaires)
+            if not isinstance(new_commentaires_json, dict):
+                raise ValueError("New commentaires should be a JSON object")
+            new_commentaires_json = [new_commentaires_json]
+        except (json.JSONDecodeError, TypeError) as e:
+            raise ValueError("New commentaires should be a valid JSON object") from e
+    else:
+        new_commentaires_json = []
+
+    combined_commentaires = existing_commentaires_json + new_commentaires_json
+    return json.dumps(combined_commentaires)
+
+
 def handle_write_data_update_actor_event(connection, df_actors):
     df_actors.to_sql(
         "temp_actors",
@@ -332,9 +362,17 @@ def handle_write_data_update_actor_event(connection, df_actors):
 
     for column in temp_existing_actors_df.columns:
         if column != "identifiant_unique":
-            combined_actors_df[column] = combined_actors_df[
-                f"{column}_new"
-            ].combine_first(combined_actors_df[f"{column}_existing"])
+            if column == "commentaires":
+                combined_actors_df[column] = combined_actors_df.apply(
+                    lambda row: combine_comments(
+                        row[f"{column}_existing"], row[f"{column}_new"]
+                    ),
+                    axis=1,
+                )
+            else:
+                combined_actors_df[column] = combined_actors_df[
+                    f"{column}_new"
+                ].combine_first(combined_actors_df[f"{column}_existing"])
 
     combined_actors_df = combined_actors_df[temp_existing_actors_df.columns]
 

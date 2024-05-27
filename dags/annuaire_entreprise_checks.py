@@ -97,6 +97,7 @@ def check_siret(**kwargs):
     df_nb_etab_ouverts_2_plus_not_matching_naf = df[
         (df["nombre_etablissements_ouverts"] > 1) & (~df["matching_category_naf"])
     ]
+    df_closed["adresse"] = None
     # flake8: noqa: E501
     return {
         "df_closed": df_closed,
@@ -111,7 +112,7 @@ def enrich_lat_lon_ban_api(**kwargs):
     data = kwargs["ti"].xcom_pull(task_ids="check_siret")
 
     for key, df in data.items():
-        if len(df) > 0:
+        if len(df) > 0 and key != "df_closed":
             df["adresse"] = df["ae_result"].apply(
                 lambda x: (
                     x["adresse"] if isinstance(x, dict) and "adresse" in x else None
@@ -157,7 +158,7 @@ def serialize_to_json(**kwargs):
         df["row_updates"] = df[columns].apply(
             lambda row: json.dumps(row.to_dict(), default=str), axis=1
         )
-        serialized_data[key] = {"df": df, "metadata": {"added_rows": len(df)}}
+        serialized_data[key] = {"df": df, "metadata": {"updated_rows": len(df)}}
 
     return serialized_data
 
