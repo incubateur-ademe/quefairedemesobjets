@@ -13,17 +13,10 @@
         <tr>
             <td>{{ dagrun_line.get_change_type_display() }}</td>
             <td>{{ dagrun_line.meta_data if dagrun_line.meta_data else "-" }}</td>
-
             <td>
-                <a href="{{ dagrun_line.row_updates.admin_link }}">{{ dagrun_line.display_acteur_details().identifiant_unique
-                    }}</a>
+                <a href="{{ dagrun_line.row_updates.admin_link }}">{{ dagrun_line.display_acteur_details().identifiant_unique }}</a>
             </td>
-            <td>
-
-                {{ dagrun_line.row_updates.ae_result.categorie_naf }}
-            </td>
-
-
+            <td>{{ dagrun_line.row_updates.ae_result.categorie_naf }}</td>
             <td>
                 <table>
                     <tr>
@@ -37,7 +30,6 @@
                         <td>{{ dagrun_line.row_updates.ae_result.categorie_naf_siege }}</td>
                         <td>{{ dagrun_line.row_updates.ae_result.siret_siege }}</td>
                         <td>{{ dagrun_line.row_updates.ae_result.nombre_etablissements_ouverts }}</td>
-
                     </tr>
                 </table>
             </td>
@@ -50,3 +42,20 @@
         </tr>
     {% endfor %}
 </tbody>
+
+{% if dagrun_lines.has_other_pages %}
+    <form method="get" action="">
+        <label for="page-select">Go to page:</label>
+        <select id="page-select" class="fr-select" name="page" onchange="this.form.submit()">
+            {% for num in dagrun_lines.paginator.page_range %}
+                <option value="{{ num }}" {% if dagrun_lines.number == num %}selected{% endif %}>
+                    {{ num }}
+                </option>
+            {% endfor %}
+        </select>
+        <input type="hidden" name="dagrun" value="{{ request.GET.dagrun }}">
+        <noscript>
+            <input type="submit" value="Go">
+        </noscript>
+    </form>
+{% endif %}
