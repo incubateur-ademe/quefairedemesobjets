@@ -1,14 +1,15 @@
 <thead>
-    <tr>
-        {% if dagrun_lines|length > 0 and dagrun_lines[0].change_type == 'CREATE' %}
-            <th scope="col"><input type="checkbox" id="select-all"></th>
-        {% endif %}
-        <th scope="col">change_type</th>
-        <th scope="col">meta_data</th>
-        <th scope="col">Acteur</th>
-        <th scope="col">Proposition de service</th>
-        <th scope="col">row_updates</th>
-    </tr>
+    {% if dagrun_lines|length > 0 and dagrun_lines[0].change_type == 'CREATE' %}
+
+        <tr>
+            <th scope="col">change_type</th>
+            <th scope="col">meta_data</th>
+            <th scope="col">Acteur</th>
+            <th scope="col">Proposition de service</th>
+            <th scope="col">row_updates</th>
+        </tr>
+    {% endif %}
+
 </thead>
 <tbody>
     {% for dagrun_line in dagrun_lines if dagrun_line.change_type == 'CREATE'  %}
@@ -51,20 +52,22 @@
         </tr>
     {% endfor %}
 </tbody>
-
-{% if dagrun_lines.has_other_pages %}
-    <form method="get" action="">
-        <label for="page-select">Go to page:</label>
-        <select id="page-select" class="fr-select" name="page" onchange="this.form.submit()">
-            {% for num in dagrun_lines.paginator.page_range %}
-                <option value="{{ num }}" {% if dagrun_lines.number == num %}selected{% endif %}>
-                    {{ num }}
-                </option>
-            {% endfor %}
-        </select>
-        <input type="hidden" name="dagrun" value="{{ request.GET.dagrun }}">
-        <noscript>
-            <input type="submit" value="Go">
-        </noscript>
-    </form>
+{% if dagrun_lines|length > 0 and dagrun_lines[0].change_type == 'CREATE' %}
+    {% if dagrun_lines.has_other_pages %}
+        <form method="get" action="">
+            <label for="page-select">Go to page:</label>
+            <select id="page-select" class="fr-select" name="page" onchange="this.form.submit()">
+                {% for num in dagrun_lines.paginator.page_range %}
+                    <option value="{{ num }}" {% if dagrun_lines.number == num %}selected{% endif %}>
+                        {{ num }}
+                    </option>
+                {% endfor %}
+            </select>
+            <input type="hidden" name="dagrun" value="{{ request.GET.dagrun }}">
+            <noscript>
+                <input type="submit" value="Go">
+            </noscript>
+        </form>
+    {% endif %}
 {% endif %}
+
