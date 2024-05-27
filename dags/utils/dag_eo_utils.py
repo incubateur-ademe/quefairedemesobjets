@@ -280,7 +280,7 @@ def write_to_dagruns(**kwargs):
     for key, data in dfs.items():
         dag_id_suffixed = dag_id if key == "all" else f"{dag_id}_{key}"
         df = data["df"]
-        metadata.update(data["metadata"])
+        metadata.update(data.get("metadata", {}))
         insert_dagrun_and_process_df(df, event, metadata, dag_id_suffixed, run_id)
 
 
