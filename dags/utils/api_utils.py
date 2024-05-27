@@ -1,5 +1,5 @@
 import requests
-from ratelimit import limits
+from ratelimiter import RateLimiter
 
 
 def fetch_dataset_from_point_apport(url):
@@ -16,7 +16,7 @@ def fetch_dataset_from_point_apport(url):
     return all_data
 
 
-@limits(calls=7, period=1)
+@RateLimiter(max_calls=7, period=1)
 def call_annuaire_entreprises(query):
     params = {"q": query, "page": 1, "per_page": 1}
     base_url = "https://recherche-entreprises.api.gouv.fr"
@@ -73,7 +73,7 @@ def call_annuaire_entreprises(query):
         return {"error": "Une erreur de requête est survenue"}
 
 
-@limits(calls=50, period=1)
+@RateLimiter(max_calls=50, period=1)
 def get_lat_lon_from_address(address):
     url = "https://api-adresse.data.gouv.fr/search/"
     params = {"q": address, "limit": 1}

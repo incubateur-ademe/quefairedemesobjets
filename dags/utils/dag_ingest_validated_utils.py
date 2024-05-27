@@ -98,6 +98,7 @@ def handle_update_actor_event(df_actors, dag_run_id):
         "identifiant_unique",
         "adresse",
         "location",
+        "commentaires",
         "statut",
         "code_postal",
         "ville",

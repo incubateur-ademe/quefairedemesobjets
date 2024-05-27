@@ -44,6 +44,7 @@ def fetch_and_parse_data(**context):
         (df_acteur["siret"] != "None")
         & (df_acteur["siret"].notna())
         & (df_acteur["siret"] != "")
+        & (df_acteur["siret"] != " ")
         & (df_acteur["siret"] != "ZZZ")
         & (df_acteur["statut"] == "ACTIF")
     ]
@@ -71,7 +72,7 @@ def check_siret(**kwargs):
             if isinstance(x, dict)
             and "categorie_naf" in x
             and "categorie_naf_siege" in x
-            else None
+            else False
         )
     )
 
@@ -91,10 +92,10 @@ def check_siret(**kwargs):
         (df["nombre_etablissements_ouverts"] > 1) & (df["matching_category_naf"])
     ]
     df_nb_etab_ouvert_1_not_matching_naf = df[
-        (df["nombre_etablissements_ouverts"] == 1) & (not df["matching_category_naf"])
+        (df["nombre_etablissements_ouverts"] == 1) & (~df["matching_category_naf"])
     ]
     df_nb_etab_ouverts_2_plus_not_matching_naf = df[
-        (df["nombre_etablissements_ouverts"] > 1) & (not df["matching_category_naf"])
+        (df["nombre_etablissements_ouverts"] > 1) & (~df["matching_category_naf"])
     ]
     # flake8: noqa: E501
     return {
@@ -126,14 +127,33 @@ def construct_url(identifiant):
     return base_url.format(identifiant)
 
 
+def construct_change_log(dag_run):
+    change_log = {
+        "message": "Acteur supprimé après vérification sur annuaire entreprise",
+        "deleted_by": dag_run.run_id,
+        "dag_name": dag_run.dag_id,
+        "timestamp": datetime.utcnow().isoformat(),
+    }
+
+    return json.dumps(change_log, indent=2)
+
+
 def serialize_to_json(**kwargs):
     data = kwargs["ti"].xcom_pull(task_ids="check_siret")
-    columns = ["identifiant_unique", "location", "statut", "ae_result", "admin_link"]
-
+    columns = [
+        "identifiant_unique",
+        "location",
+        "statut",
+        "ae_result",
+        "admin_link",
+        "commentaires",
+    ]
+    dag_run = kwargs["dag_run"]
     serialized_data = {}
 
     for key, df in data.items():
         df["admin_link"] = df["identifiant_unique"].apply(construct_url)
+        df["commentaires"] = df.apply(lambda x: construct_change_log(dag_run), axis=1)
         df["row_updates"] = df[columns].apply(
             lambda row: json.dumps(row.to_dict(), default=str), axis=1
         )

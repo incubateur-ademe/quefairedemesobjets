@@ -1,0 +1,52 @@
+<thead>
+    <tr>
+        <th scope="col">change_type</th>
+        <th scope="col">meta_data</th>
+        <th scope="col">Identifiant Unique</th>
+        <th scope="col">Code NAF</th>
+        <th scope="col">Candidats</th>
+        <th scope="col">row_updates</th>
+    </tr>
+</thead>
+<tbody>
+    {% for dagrun_line in dagrun_lines if dagrun_line.change_type == 'UPDATE_ACTOR' %}
+        <tr>
+            <td>{{ dagrun_line.get_change_type_display() }}</td>
+            <td>{{ dagrun_line.meta_data if dagrun_line.meta_data else "-" }}</td>
+
+            <td>
+                <a href="{{ dagrun_line.row_updates.admin_link }}">{{ dagrun_line.display_acteur_details().identifiant_unique
+                    }}</a>
+            </td>
+            <td>
+
+                {{ dagrun_line.row_updates.ae_result.categorie_naf }}
+            </td>
+
+
+            <td>
+                <table>
+                    <tr>
+                        <th>Adresse Siege</th>
+                        <th>Code Naf Siege</th>
+                        <th>Siret Siege</th>
+                        <th>Nombre etablissements ouverts</th>
+                    </tr>
+                    <tr>
+                        <td>{{ dagrun_line.row_updates.ae_result.adresse }}</td>
+                        <td>{{ dagrun_line.row_updates.ae_result.categorie_naf_siege }}</td>
+                        <td>{{ dagrun_line.row_updates.ae_result.siret_siege }}</td>
+                        <td>{{ dagrun_line.row_updates.ae_result.nombre_etablissements_ouverts }}</td>
+
+                    </tr>
+                </table>
+            </td>
+            <td>
+                <details>
+                    <summary>Données brutes</summary>
+                    <pre class="qfdmo-text-wrap">{{ dagrun_line.row_updates }}</pre>
+                </details>
+            </td>
+        </tr>
+    {% endfor %}
+</tbody>
