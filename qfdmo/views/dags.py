@@ -2,6 +2,7 @@ import logging
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import FormView
+from django.core.paginator import Paginator
 
 from qfdmo.forms import DagsForm
 from qfdmo.models.data import DagRun, DagRunStatus
@@ -25,11 +26,19 @@ class DagsValidation(IsStaffMixin, FormView):
         return initial
 
     def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         if self.request.GET.get("dagrun"):
             dagrun = DagRun.objects.get(pk=self.request.GET.get("dagrun"))
-            kwargs["dagrun_instance"] = dagrun
-            kwargs["dagrun_lines"] = dagrun.dagrunchanges.all().order_by("?")[:10]
-        return super().get_context_data(**kwargs)
+            dagrun_lines = dagrun.dagrunchanges.all().order_by("id")
+            # Pagination
+            paginator = Paginator(dagrun_lines, 100)
+            page_number = self.request.GET.get("page")
+            page_obj = paginator.get_page(page_number)
+
+            context["dagrun_instance"] = dagrun
+            context["dagrun_lines"] = page_obj
+
+        return context
 
     def form_valid(self, form):
         dagrun = form.cleaned_data["dagrun"]
