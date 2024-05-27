@@ -97,7 +97,9 @@ def check_siret(**kwargs):
     df_nb_etab_ouverts_2_plus_not_matching_naf = df[
         (df["nombre_etablissements_ouverts"] > 1) & (~df["matching_category_naf"])
     ]
-    df_closed["adresse"] = None
+    df_closed["ae_result"] = df_closed["ae_result"].apply(
+        lambda x: {**x, "adresse": None} if isinstance(x, dict) else x
+    )
     # flake8: noqa: E501
     return {
         "df_closed": df_closed,
