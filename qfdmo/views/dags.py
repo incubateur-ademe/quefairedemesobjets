@@ -27,16 +27,20 @@ class DagsValidation(IsStaffMixin, FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
         if self.request.GET.get("dagrun"):
             dagrun = DagRun.objects.get(pk=self.request.GET.get("dagrun"))
-            dagrun_lines = dagrun.dagrunchanges.all().order_by("id")
-            # Pagination
-            paginator = Paginator(dagrun_lines, 100)
-            page_number = self.request.GET.get("page")
-            page_obj = paginator.get_page(page_number)
-
             context["dagrun_instance"] = dagrun
-            context["dagrun_lines"] = page_obj
+            dagrun_lines = dagrun.dagrunchanges.all().order_by("?")[:100]
+            context["dagrun_lines"] = dagrun_lines
+
+            if dagrun_lines and dagrun_lines[0].change_type == "UPDATE_ACTOR":
+                # Pagination
+                dagrun_lines = dagrun.dagrunchanges.all().order_by("id")
+                paginator = Paginator(dagrun_lines, 100)
+                page_number = self.request.GET.get("page")
+                page_obj = paginator.get_page(page_number)
+                context["dagrun_lines"] = page_obj
 
         return context
 

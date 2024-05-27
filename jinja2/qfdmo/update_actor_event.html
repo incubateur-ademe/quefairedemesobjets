@@ -46,21 +46,19 @@
         </tr>
     {% endfor %}
 </tbody>
-{% if dagrun_lines|length > 0 and dagrun_lines[0].change_type == 'UPDATE_ACTOR' %}
-    {% if dagrun_lines.has_other_pages %}
-        <form method="get" action="">
-            <label for="page-select">Go to page:</label>
-            <select id="page-select" class="fr-select" name="page" onchange="this.form.submit()">
-                {% for num in dagrun_lines.paginator.page_range %}
-                    <option value="{{ num }}" {% if dagrun_lines.number == num %}selected{% endif %}>
-                        {{ num }}
-                    </option>
-                {% endfor %}
-            </select>
-            <input type="hidden" name="dagrun" value="{{ request.GET.dagrun }}">
-            <noscript>
-                <input type="submit" value="Go">
-            </noscript>
-        </form>
-    {% endif %}
+{% if dagrun_lines.has_other_pages %}
+    <form method="get" action="">
+        <label for="page-select">Go to page:</label>
+        <select id="page-select" class="fr-select" name="page" onchange="this.form.submit()">
+            {% for num in dagrun_lines.paginator.page_range %}
+                <option value="{{ num }}" {% if dagrun_lines.number == num %}selected{% endif %}>
+                    {{ num }}
+                </option>
+            {% endfor %}
+        </select>
+        <input type="hidden" name="dagrun" value="{{ request.GET.dagrun }}">
+        <noscript>
+            <input type="submit" value="Go">
+        </noscript>
+    </form>
 {% endif %}
