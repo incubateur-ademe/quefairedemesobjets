@@ -13,6 +13,7 @@ env = Path(__file__).parent.name
 utils = import_module(f"{env}.utils.utils")
 dag_eo_utils = import_module(f"{env}.utils.dag_eo_utils")
 api_utils = import_module(f"{env}.utils.api_utils")
+mapping_utils = import_module(f"{env}.utils.mapping_utils")
 
 default_args = {
     "owner": "airflow",
@@ -125,22 +126,6 @@ def enrich_lat_lon_ban_api(**kwargs):
     return data
 
 
-def construct_url(identifiant):
-    base_url = "https://quefairedemesobjets-preprod.osc-fr1.scalingo.io/admin/qfdmo/displayedacteur/{}/change/"
-    return base_url.format(identifiant)
-
-
-def construct_change_log(dag_run):
-    change_log = {
-        "message": "Acteur supprimé après vérification sur annuaire entreprise",
-        "deleted_by": dag_run.run_id,
-        "dag_name": dag_run.dag_id,
-        "timestamp": datetime.utcnow().isoformat(),
-    }
-
-    return json.dumps(change_log, indent=2)
-
-
 def serialize_to_json(**kwargs):
     data = kwargs["ti"].xcom_pull(task_ids="check_siret")
     columns = [
@@ -155,8 +140,10 @@ def serialize_to_json(**kwargs):
     serialized_data = {}
 
     for key, df in data.items():
-        df["admin_link"] = df["identifiant_unique"].apply(construct_url)
-        df["commentaires"] = df.apply(lambda x: construct_change_log(dag_run), axis=1)
+        df["admin_link"] = df["identifiant_unique"].apply(mapping_utils.construct_url)
+        df["commentaires"] = df.apply(
+            lambda x: mapping_utils.construct_change_log(dag_run), axis=1
+        )
         df["row_updates"] = df[columns].apply(
             lambda row: json.dumps(row.to_dict(), default=str), axis=1
         )

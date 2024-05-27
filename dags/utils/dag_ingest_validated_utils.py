@@ -2,11 +2,11 @@ import pandas as pd
 from importlib import import_module
 from pathlib import Path
 from datetime import datetime
-import json
 
 env = Path(__file__).parent.parent.name
 
 utils = import_module(f"{env}.utils.utils")
+mapping_utils = import_module(f"{env}.utils.mapping_utils")
 
 
 def process_labels(df, column_name):
@@ -85,15 +85,6 @@ def handle_create_event(df_actors, dag_run_id, engine):
     }
 
 
-def flatten_ae_results(row):
-    if "ae_result" in row and pd.notna(row["ae_result"]):
-        ae_result = row["ae_result"]
-        for key, value in ae_result.items():
-            row[f"{key}"] = value
-        row = row.drop(labels=["ae_result"])
-    return row
-
-
 def handle_update_actor_event(df_actors, dag_run_id):
     update_required_columns = [
         "identifiant_unique",
@@ -110,7 +101,7 @@ def handle_update_actor_event(df_actors, dag_run_id):
 
     current_time = datetime.now().astimezone().isoformat(timespec="microseconds")
 
-    df_actors = df_actors.apply(flatten_ae_results, axis=1)
+    df_actors = df_actors.apply(mapping_utils.flatten_ae_results, axis=1)
     df_actors["statut"] = df_actors.apply(
         lambda row: (
             "SUPPRIME"
@@ -263,35 +254,6 @@ def handle_write_data_create_event(connection, df_actors, df_labels, df_pds, df_
     )
 
 
-def combine_comments(existing_commentaires, new_commentaires):
-    def parse_json_or_default(json_str, default):
-        try:
-            parsed_json = json.loads(json_str)
-            return parsed_json if isinstance(parsed_json, list) else [default]
-        except (json.JSONDecodeError, TypeError):
-            return [default]
-
-    existing_commentaires_json = (
-        parse_json_or_default(existing_commentaires, {"message": existing_commentaires})
-        if existing_commentaires
-        else []
-    )
-
-    if new_commentaires:
-        try:
-            new_commentaires_json = json.loads(new_commentaires)
-            if not isinstance(new_commentaires_json, dict):
-                raise ValueError("New commentaires should be a JSON object")
-            new_commentaires_json = [new_commentaires_json]
-        except (json.JSONDecodeError, TypeError) as e:
-            raise ValueError("New commentaires should be a valid JSON object") from e
-    else:
-        new_commentaires_json = []
-
-    combined_commentaires = existing_commentaires_json + new_commentaires_json
-    return json.dumps(combined_commentaires)
-
-
 def handle_write_data_update_actor_event(connection, df_actors):
     df_actors.to_sql(
         "temp_actors",
@@ -364,7 +326,7 @@ def handle_write_data_update_actor_event(connection, df_actors):
         if column != "identifiant_unique":
             if column == "commentaires":
                 combined_actors_df[column] = combined_actors_df.apply(
-                    lambda row: combine_comments(
+                    lambda row: mapping_utils.combine_comments(
                         row[f"{column}_existing"], row[f"{column}_new"]
                     ),
                     axis=1,
