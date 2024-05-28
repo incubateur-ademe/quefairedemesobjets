@@ -50,7 +50,7 @@
         "iframe-resizer": "^4.3.11",
         "leaflet": "^1.9.4",
         "leaflet-extra-markers": "^1.2.2",
-        "posthog-js": "^1.131.4",
+        "posthog-js": "^1.135.2",
         "tailwindcss": "^3.4.3"
     },
     "devDependencies": {
