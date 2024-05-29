@@ -536,6 +536,7 @@ class ConfiguratorView(FormView):
     def get_initial(self):
         initial = super().get_initial()
         initial["limit"] = self.request.GET.get("limit")
+        initial["address_placeholder"] = self.request.GET.get("address_placeholder")
         initial["iframe_mode"] = self.request.GET.get("iframe_mode")
         initial["direction"] = self.request.GET.get("direction")
         initial["first_dir"] = self.request.GET.get("first_dir")
@@ -583,6 +584,8 @@ class ConfiguratorView(FormView):
             attributes["height"] = height
         if limit := self.request.GET.get("limit"):
             attributes["limit"] = limit
+        if address_placeholder := self.request.GET.get("address_placeholder"):
+            attributes["address_placeholder"] = address_placeholder
         if iframe_attributes := self.request.GET.get("iframe_attributes"):
             try:
                 attributes["iframe_attributes"] = json.dumps(
