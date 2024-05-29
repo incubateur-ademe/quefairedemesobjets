@@ -380,13 +380,14 @@ def create_labels(**kwargs):
     ]
 
     label_mapping = labels.set_index(labels["code"].str.lower()).to_dict(orient="index")
-
     rows_list = []
     for _, row in df_actors.iterrows():
         if "labels_etou_bonus" in row:
             label = str(row["labels_etou_bonus"])
+            print(label)
             if label == "Agréé Bonus Réparation":
                 eco_code = row["ecoorganisme"].lower()
+                print(eco_code)
                 if eco_code in label_mapping:
                     rows_list.append(
                         {
