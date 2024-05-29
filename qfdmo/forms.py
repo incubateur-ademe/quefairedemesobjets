@@ -213,6 +213,8 @@ class IframeAddressesForm(AddressesForm):
                 first_direction=first_direction
             )
         ]
+        if address_placeholder := request.GET.get("address_placeholder"):
+            self.fields["adresse"].widget.attrs["placeholder"] = address_placeholder
 
     adresse = forms.CharField(
         widget=AutoCompleteInput(
@@ -240,6 +242,8 @@ class CarteAddressesForm(AddressesForm):
         if disable_reparer_option:
             self.fields["bonus"].widget.attrs["disabled"] = "true"
             self.fields["label_reparacteur"].widget.attrs["disabled"] = "true"
+        if address_placeholder := request.GET.get("address_placeholder"):
+            self.fields["adresse"].widget.attrs["placeholder"] = address_placeholder
 
     adresse = forms.CharField(
         widget=AutoCompleteInput(
@@ -316,6 +320,17 @@ class ConfiguratorForm(forms.Form):
         ),
         label="Nombre de résultats",
         help_text="Nombre de résultats affichés dans l'iframe",
+        required=False,
+    )
+
+    address_placeholder = forms.CharField(
+        widget=forms.TextInput(
+            attrs={
+                "class": "fr-input",
+            },
+        ),
+        label="Placeholder de l'adresse",
+        help_text="Texte affiché dans le champ d'adresse",
         required=False,
     )
 
