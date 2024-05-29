@@ -422,7 +422,7 @@ class AddressesView(FormView):
                     ' aria-hidden="true"></span>&nbsp;'
                 )
             libelle += ", ".join(
-                [a.libelle_groupe for a in groupe_displayed_actions]
+                {a.libelle_groupe for a in groupe_displayed_actions}
             ).capitalize()
             code = "|".join([a.code for a in groupe_displayed_actions])
             groupe_options.append([code, mark_safe(libelle)])
