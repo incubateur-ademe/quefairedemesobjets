@@ -24,25 +24,24 @@ def is_iframe(request: HttpRequest) -> bool:
 
 
 def action_by_direction(request: HttpRequest, direction: str):
-    action_list = request.GET.get("action_list")
     requested_direction = get_direction(request)
-    if requested_direction != direction:
-        action_list = None
-    if action_list:
+    action_displayed = request.GET.get("action_displayed", "")
+    actions_to_display = CachedDirectionAction.get_actions_by_direction()[direction]
+    if action_displayed:
+        actions_to_display = [
+            a for a in actions_to_display if a["code"] in action_displayed.split("|")
+        ]
+    if action_list := (
+        None if requested_direction != direction else request.GET.get("action_list")
+    ):
         return [
             {
                 **a,
                 "active": bool(a["code"] in action_list),
             }
-            for a in CachedDirectionAction.get_actions_by_direction()[direction]
+            for a in actions_to_display
         ]
-    return [
-        {
-            **a,
-            "active": True,
-        }
-        for a in CachedDirectionAction.get_actions_by_direction()[direction]
-    ]
+    return [{**a, "active": True} for a in actions_to_display]
 
 
 def display_infos_panel(adresse: DisplayedActeur) -> bool:
