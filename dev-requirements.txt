@@ -1373,9 +1373,9 @@ prison==0.2.1 \
     --hash=sha256:e6cd724044afcb1a8a69340cad2f1e3151a5839fd3a8027fd1357571e797c599 \
     --hash=sha256:f90bab63fca497aa0819a852f64fb21a4e181ed9f6114deaa5dc04001a7555c5
     # via flask-appbuilder
-prompt-toolkit==3.0.39 \
-    --hash=sha256:04505ade687dc26dc4284b1ad19a83be2f2afe83e7a828ace0c72f3a1df72aac \
-    --hash=sha256:9dffbe1d8acf91e3de75f3b544e4842382fc06c6babe903ac9acb74dc6e08d88
+prompt-toolkit==3.0.44 \
+    --hash=sha256:205a20669633d042d3722a528b8e7cd3f4dbd9e1450935f596c2cc61166762dd \
+    --hash=sha256:c1dfd082c4259964bc8bcce1f8460d9dbeb5d4a37bfc25b8082bc02cd41c8af6
     # via ptpython
 protobuf==4.25.3 \
     --hash=sha256:19b270aeaa0099f16d3ca02628546b8baefe2955bbe23224aaf856134eccf1e4 \
@@ -1484,9 +1484,9 @@ psycopg2-binary==2.9.9 \
     --hash=sha256:f7fc5a5acafb7d6ccca13bfa8c90f8c51f13d8fb87d95656d3950f0158d3ce53 \
     --hash=sha256:f9b5571d33660d5009a8b3c25dc1db560206e2d2f89d3df1cb32d72c0d117d52
     # via apache-airflow-providers-postgres
-ptpython==3.0.26 \
-    --hash=sha256:3dc4c066d049e16d8b181e995a568d36697d04d9acc2724732f3ff6686c5da57 \
-    --hash=sha256:c8fb1406502dc349d99c57eaf06e7116f3b2deac94f02f342bae68708909f743
+ptpython==3.0.27 \
+    --hash=sha256:24b0fda94b73d1c99a27e6fd0d08be6f2e7cda79a2db995c7e3c7b8b1254bad9 \
+    --hash=sha256:549870d537ab3244243cfb92d36347072bb8be823a121fb2fd95297af0fb42bb
     # via -r dev-requirements.in
 pycparser==2.22 \
     --hash=sha256:491c8be9c040f5390f5bf44a5b07752bd07f56edf992381b05c701439eec10f6 \
