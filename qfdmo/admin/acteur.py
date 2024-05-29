@@ -224,12 +224,12 @@ class ActeurResource(resources.ModelResource):
     acteur_type = fields.Field(
         column_name="acteur_type",
         attribute="acteur_type",
-        widget=widgets.ForeignKeyWidget(ActeurType, field="nom"),
+        widget=widgets.ForeignKeyWidget(ActeurType, field="code"),
     )
     source = fields.Field(
         column_name="source",
         attribute="source",
-        widget=widgets.ForeignKeyWidget(Source, field="nom"),
+        widget=widgets.ForeignKeyWidget(Source, field="code"),
     )
     latitude = fields.Field(column_name="latitude", attribute="latitude", readonly=True)
     longitude = fields.Field(
@@ -375,17 +375,19 @@ class BasePropositionServiceResource(resources.ModelResource):
     action = fields.Field(
         column_name="action_id",
         attribute="action",
-        widget=widgets.ForeignKeyWidget(Action, field="nom"),
+        widget=widgets.ForeignKeyWidget(Action, field="code"),
     )
     acteur_service = fields.Field(
         column_name="acteur_service_id",
         attribute="acteur_service",
-        widget=widgets.ForeignKeyWidget(ActeurService, field="nom"),
+        widget=widgets.ForeignKeyWidget(ActeurService, field="code"),
     )
     sous_categories = fields.Field(
         column_name="sous_categories",
         attribute="sous_categories",
-        widget=widgets.ManyToManyWidget(SousCategorieObjet, field="nom", separator="|"),
+        widget=widgets.ManyToManyWidget(
+            SousCategorieObjet, field="code", separator="|"
+        ),
     )
 
     def for_delete(self, row, instance):
