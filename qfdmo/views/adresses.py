@@ -310,7 +310,6 @@ class AddressesView(FormView):
 
     def get_action_list(self) -> List[dict]:
         direction = get_direction(self.request)
-
         action_displayed = self._set_action_displayed()
         action_list = self._set_action_list(action_displayed)
         actions = [
@@ -421,9 +420,11 @@ class AddressesView(FormView):
                     f' fr-icon--sm qfdmo-rounded-full qfdmo-bg-{groupe.couleur}"'
                     ' aria-hidden="true"></span>&nbsp;'
                 )
-            libelle += ", ".join(
-                [a.libelle_groupe for a in groupe_displayed_actions]
-            ).capitalize()
+            libelles: List[str] = []
+            for gda in groupe_displayed_actions:
+                if gda.libelle_groupe not in libelles:
+                    libelles.append(gda.libelle_groupe)
+            libelle += ", ".join(libelles).capitalize()
             code = "|".join([a.code for a in groupe_displayed_actions])
             groupe_options.append([code, mark_safe(libelle)])
         return groupe_options
