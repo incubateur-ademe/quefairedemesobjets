@@ -1,12 +1,14 @@
 from unittest.mock import MagicMock
 
 import pandas as pd
+
 import pytest
 
 from dags.utils.dag_eo_utils import (
-    create_actors,
     create_proposition_services,
     create_proposition_services_sous_categories,
+    create_actors,
+    create_labels,
 )
 
 
@@ -17,7 +19,23 @@ def df_sources():
 
 @pytest.fixture
 def df_acteurtype():
-    return pd.DataFrame({"libelle": ["Type1", "Type2"], "id": [201, 202]})
+    return pd.DataFrame(
+        {"libelle": ["Type1", "Type2"], "code": ["ess", "code2"], "id": [201, 202]}
+    )
+
+
+@pytest.fixture
+def df_labels():
+    return pd.DataFrame(
+        {
+            "code": ["ess", "refashion"],
+            "id": [1, 2],
+            "libelle": [
+                "Enseigne de l'économie sociale et solidaire",
+                "Labellisé Bonus Réparation Re_fashion",
+            ],
+        }
+    )
 
 
 @pytest.fixture
@@ -89,6 +107,35 @@ def get_mock_ti_ps(
             "actions": df_actions,
             "acteur_services": df_acteur_services,
             "sous_categories": df_sous_categories_map,
+        },
+    }[task_ids]
+    return mock
+
+
+def get_mock_ti_label(
+    db_mapping_config,
+    df_actions,
+    df_acteurtype,
+    df_acteur_services,
+    df_sous_categories_map,
+    df_labels=pd.DataFrame(),
+    df_create_actors: pd.DataFrame = pd.DataFrame(),
+    max_pds_idx: int = 1,
+) -> MagicMock:
+    mock = MagicMock()
+
+    mock.xcom_pull.side_effect = lambda task_ids="": {
+        "create_actors": {
+            "df": df_create_actors,
+            "config": db_mapping_config,
+        },
+        "load_data_from_postgresql": {
+            "max_pds_idx": max_pds_idx,
+            "actions": df_actions,
+            "acteur_services": df_acteur_services,
+            "sous_categories": df_sous_categories_map,
+            "labels": df_labels,
+            "acteurtype": df_acteurtype,
         },
     }[task_ids]
     return mock
@@ -322,7 +369,6 @@ class TestCreatePropositionService:
         kwargs = {"ti": mock}
         result = create_proposition_services(**kwargs)
 
-        print(result["df"])
         assert result["df"].equals(expected_df)
         assert result["metadata"] == expected_metadata
 
@@ -411,6 +457,7 @@ def mock_ti(
     df_actions,
     df_acteur_services,
     df_sous_categories_map,
+    df_labels,
 ):
     mock = MagicMock()
 
@@ -496,6 +543,7 @@ def mock_ti(
                 {
                     "identifiant_unique": [1, 2],
                     "produitsdechets_acceptes": ["téléphones portables", "ecrans"],
+                    "acteur_type_id": [201, 202],
                     "point_dapport_de_service_reparation": [False, True],
                     "point_dapport_pour_reemploi": [False, False],
                     "point_de_reparation": [True, True],
@@ -511,6 +559,7 @@ def mock_ti(
             "sous_categories": df_sous_categories_map,
             "sources": df_sources,
             "acteurtype": df_acteurtype,
+            "labels": df_labels,
         },
         "create_proposition_services": {"df": df_proposition_services},
         "create_proposition_"
@@ -585,3 +634,46 @@ def test_create_actors(mock_ti, mock_config):
     assert metadata["added_rows"] == len(df_result)
     assert "siren" not in df_result.columns
     assert "sous_categories" in result["config"]
+
+
+def test_create_labels(
+    db_mapping_config,
+    df_actions,
+    df_acteurtype,
+    df_acteur_services,
+    df_sous_categories_map,
+    df_labels,
+):
+
+    mock = get_mock_ti_label(
+        db_mapping_config,
+        df_actions,
+        df_acteurtype,
+        df_acteur_services,
+        df_sous_categories_map,
+        df_labels,
+        df_create_actors=pd.DataFrame(
+            {
+                "identifiant_unique": [1, 2],
+                "labels_etou_bonus": [None, "Agréé Bonus Réparation"],
+                "produitsdechets_acceptes": ["téléphones portables", "ecrans"],
+                "ecoorganisme": ["source1", "refashion"],
+                "acteur_type_id": [201, 202],
+                "point_dapport_de_service_reparation": [False, True],
+                "point_dapport_pour_reemploi": [False, False],
+                "point_de_reparation": [True, True],
+                "point_de_collecte_ou_de_reprise_des_dechets": [True, True],
+            }
+        ),
+        max_pds_idx=123,
+    )
+
+    kwargs = {"ti": mock}
+
+    df = create_labels(**kwargs)
+    assert len(df) == 2
+    assert set(df["labelqualite"].tolist()) == {
+        "Enseigne de l'économie sociale et solidaire",
+        "Labellisé Bonus Réparation Re_fashion",
+    }
+    assert df["labelqualite_id"].tolist() == [1, 2]

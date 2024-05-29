@@ -138,7 +138,7 @@ def write_data_to_postgres(**kwargs):
     pg_hook = PostgresHook(postgres_conn_id=utils.get_db_conn_id(__file__))
     engine = pg_hook.get_sqlalchemy_engine()
     # TODO: For now assuming all events are CREATE events,
-    #  so we remove the actors if they existe first
+    #  so we remove the actors if they exist first
     with engine.begin() as connection:
         df_actors[
             [
