@@ -570,36 +570,32 @@ class ConfiguratorView(FormView):
             iframe_url = iframe_host + "/static/iframe.js"
 
         attributes = {}
-        if direction := self.request.GET.get("direction"):
-            attributes["direction"] = escape(direction)
+
         if first_dir := self.request.GET.get("first_dir"):
             attributes["first_dir"] = escape(first_dir.replace("first_", ""))
-        if action_list := self.request.GET.getlist("action_list"):
-            attributes["action_list"] = escape("|".join(action_list))
-        if action_displayed := self.request.GET.getlist("action_displayed"):
-            attributes["action_displayed"] = escape("|".join(action_displayed))
-        if max_width := self.request.GET.get("max_width"):
-            attributes["max_width"] = escape(max_width)
-        if height := self.request.GET.get("height"):
-            attributes["height"] = height
-        if limit := self.request.GET.get("limit"):
-            attributes["limit"] = limit
-        if address_placeholder := self.request.GET.get("address_placeholder"):
-            attributes["address_placeholder"] = address_placeholder
-        if iframe_attributes := self.request.GET.get("iframe_attributes"):
-            try:
-                attributes["iframe_attributes"] = json.dumps(
-                    json.loads(iframe_attributes.replace("\r\n", "").replace("\n", ""))
-                )
-            except json.JSONDecodeError:
-                attributes["iframe_attributes"] = ""
-        if bounding_box := self.request.GET.get("bounding_box"):
-            try:
-                attributes["bounding_box"] = json.dumps(
-                    json.loads(bounding_box.replace("\r\n", "").replace("\n", ""))
-                )
-            except json.JSONDecodeError:
-                attributes["bounding_box"] = ""
+
+        for key in [
+            "direction",
+            "max_width",
+            "height",
+            "limit",
+            "address_placeholder",
+        ]:
+            if value := self.request.GET.get(key):
+                attributes[key] = escape(value)
+
+        for key in ["action_displayed", "action_list"]:
+            if value := self.request.GET.getlist(key):
+                attributes[key] = escape("|".join(value))
+
+        for key in ["iframe_attributes", "bounding_box"]:
+            if value := self.request.GET.get(key):
+                try:
+                    attributes[key] = json.dumps(
+                        json.loads(value.replace("\r\n", "").replace("\n", ""))
+                    )
+                except json.JSONDecodeError:
+                    attributes[key] = ""
 
         if iframe_url:
             kwargs["iframe_script"] = f"<script src='{ iframe_url }'"
