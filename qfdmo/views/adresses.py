@@ -305,7 +305,7 @@ class AddressesView(FormView):
                 if a.code in codes
             ]
             if codes
-            else []
+            else [a.id for a in CachedDirectionAction.get_action_instances()]
         )
 
     def get_action_list(self) -> List[dict]:
