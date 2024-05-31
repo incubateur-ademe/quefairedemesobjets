@@ -177,17 +177,20 @@ class BaseActeur(NomAsNaturalKeyModel):
     )
     horaires_description = models.TextField(blank=True, null=True)
 
-    def share_url(self, request: HttpRequest, direction: str | None = None):
-        # url = request.build_absolute_uri("")
-        url = "http"
-        if request.is_secure():
-            url += "s"
-        url += "://" + request.get_host()
-        url += reverse("qfdmo:adresse_detail", args=[self.identifiant_unique])
-        url += "?iframe"
+    def get_share_url(self, request: HttpRequest, direction: str | None = None) -> str:
+        protocol = "https" if request.is_secure() else "http"
+        host = request.get_host()
+        base_url = f"{protocol}://{host}"
+        base_url += reverse("qfdmo:adresse_detail", args=[self.identifiant_unique])
+
+        params = []
+        if "carte" in request.GET:
+            params.append("carte=1")
+        elif "iframe" in request.GET:
+            params.append("iframe=1")
         if direction:
-            url += f"&direction={direction}"
-        return url
+            params.append(f"direction={direction}")
+        return f"{base_url}?{'&'.join(params)}"
 
     @property
     def latitude(self):

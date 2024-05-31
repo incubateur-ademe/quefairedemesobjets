@@ -115,18 +115,18 @@ brown-cafe-creme-main-782, purple-glycine-main-494, green-menthe-main-548
 
 class CachedDirectionAction:
     _cached_actions_by_direction = None
-    _cached_action_instances: QuerySet[Action] | None = None
+    _cached_action_instances: List[Action] | None = None
     _cached_groupe_action_instances: QuerySet[GroupeAction] | None = None
     _cached_direction = None
     _reparer_action_id = None
     _last_cache_update = None
 
     @classmethod
-    def get_action_instances(cls) -> QuerySet[Action]:
+    def get_action_instances(cls) -> List[Action]:
         cls._manage_cache_expiration()
         if cls._cached_action_instances is None:
-            cls._cached_action_instances = Action.objects.prefetch_related(
-                "directions", "groupe_action"
+            cls._cached_action_instances = list(
+                Action.objects.prefetch_related("directions", "groupe_action")
             )
         return cls._cached_action_instances
 

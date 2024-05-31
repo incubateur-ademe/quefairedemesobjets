@@ -28,6 +28,7 @@ from qfdmo.models import (
     Acteur,
     ActeurStatus,
     ActeurType,
+    Action,
     CachedDirectionAction,
     DisplayedActeur,
     DisplayedPropositionService,
@@ -68,13 +69,19 @@ class AddressesView(FormView):
 
         # Action to display and check
         action_displayed = self._set_action_displayed()
-        initial["action_displayed"] = "|".join(action_displayed)
+        initial["action_displayed"] = "|".join([a.code for a in action_displayed])
+
         action_list = self._set_action_list(action_displayed)
-        initial["action_list"] = "|".join(action_list)
+        initial["action_list"] = "|".join([a.code for a in action_list])
+
         if self.request.GET.get("carte") is not None:
             groupe_options = self._get_groupe_options(action_displayed)
+            actions_to_select = self._get_selected_action()
             initial["grouped_action"] = self._set_grouped_action(
-                groupe_options, action_list
+                groupe_options, actions_to_select
+            )
+            initial["action_list"] = "|".join(
+                [a for ga in initial["grouped_action"] for a in ga.split("|")]
             )
 
         return initial
@@ -227,29 +234,29 @@ class AddressesView(FormView):
                 ]  # [xmin, ymin, xmax, ymax]
         return center, my_bounding_box_polygon
 
-    def _set_action_displayed(self) -> list[str]:
+    def _set_action_displayed(self) -> List[Action]:
         cached_action_instances = CachedDirectionAction.get_action_instances()
-        if self.request.GET.get("carte") is None:
+        if action_displayed := self.request.GET.get("action_displayed", ""):
             cached_action_instances = [
                 action
-                for action in CachedDirectionAction.get_action_instances()
-                if action.afficher
-            ]
-        if action_displayed := self.request.GET.get("action_displayed", ""):
-            return [
-                action.code
                 for action in cached_action_instances
                 if action.code in action_displayed.split("|")
             ]
-        return [action.code for action in cached_action_instances]
+        # In form mode, only display actions with afficher=True
+        # TODO : discuss with epargnonsnosressources if we can remove this condition
+        # or set it in get_action_instances
+        if self.request.GET.get("carte") is None:
+            cached_action_instances = [
+                action for action in cached_action_instances if action.afficher
+            ]
+        return cached_action_instances
 
-    def _set_action_list(self, action_displayed):
+    def _set_action_list(self, action_displayed: List[Action]) -> List[Action]:
         if action_list := self.request.GET.get("action_list", ""):
             return [
-                action.code
-                for action in CachedDirectionAction.get_action_instances()
+                action
+                for action in action_displayed
                 if action.code in action_list.split("|")
-                and action.code in action_displayed
             ]
         return action_displayed
 
@@ -278,10 +285,13 @@ class AddressesView(FormView):
         return []
 
     def _get_selected_action_ids(self):
+        return [a.id for a in self._get_selected_action()]
+
+    def _get_selected_action(self) -> List[Action]:
         """
         Get the action to include in the request
         """
-        # FIXME : est-ce possible d'optimiser en accédant au valeur initial du form ?
+
         codes = []
         # selection from interface
         if self.request.GET.get("grouped_action"):
@@ -293,6 +303,9 @@ class AddressesView(FormView):
         # Selection is not set in interface, get all available from
         # (checked_)action_list
         if self.request.GET.get("action_list"):
+            # TODO : effet de bord si la list des action n'est pas cohérente avec
+            # les actions affichées
+            # il faut collecté les actions coché selon les groupes d'action
             codes = self.request.GET.get("action_list", "").split("|")
         # Selection is not set in interface, defeult checked action list is not set
         # get all available from action_displayed
@@ -300,24 +313,15 @@ class AddressesView(FormView):
             codes = self.request.GET.get("action_displayed", "").split("|")
         # return empty array, will search in all actions
         return (
-            [
-                a.id
-                for a in CachedDirectionAction.get_action_instances()
-                if a.code in codes
-            ]
+            [a for a in CachedDirectionAction.get_action_instances() if a.code in codes]
             if codes
-            else [a.id for a in CachedDirectionAction.get_action_instances()]
+            else CachedDirectionAction.get_action_instances()
         )
 
     def get_action_list(self) -> List[dict]:
         direction = get_direction(self.request)
         action_displayed = self._set_action_displayed()
-        action_list = self._set_action_list(action_displayed)
-        actions = [
-            a
-            for a in CachedDirectionAction.get_action_instances()
-            if a.code in action_list
-        ]
+        actions = self._set_action_list(action_displayed)
         if direction:
             actions = [
                 a for a in actions if direction in [d.code for d in a.directions.all()]
@@ -400,7 +404,7 @@ class AddressesView(FormView):
                 )
         return ps_filter
 
-    def _get_groupe_options(self, action_displayed: list[str]) -> list[list[str]]:
+    def _get_groupe_options(self, action_displayed: list[Action]) -> list[list[str]]:
         groupe_with_displayed_actions = []
         for cached_groupe in CachedDirectionAction.get_groupe_action_instances():
             if groupe_actions := [
@@ -408,7 +412,7 @@ class AddressesView(FormView):
                 for action in cached_groupe.actions.all().order_by(  # type: ignore
                     "order"
                 )
-                if action.code in action_displayed
+                if action in action_displayed
             ]:
                 groupe_with_displayed_actions.append([cached_groupe, groupe_actions])
 
@@ -431,12 +435,12 @@ class AddressesView(FormView):
         return groupe_options
 
     def _set_grouped_action(
-        self, groupe_options: list[list[str]], action_list: list[str]
+        self, groupe_options: list[list[str]], action_list: list[Action]
     ) -> list[str]:
         return [
             groupe_option[0]
             for groupe_option in groupe_options
-            if set(groupe_option[0].split("|")) & set(action_list)
+            if set(groupe_option[0].split("|")) & set([a.code for a in action_list])
         ]
 
 
@@ -500,7 +504,7 @@ def adresse_detail(request, identifiant_unique):
     displayed_acteur = DisplayedActeur.objects.prefetch_related(
         "proposition_services__sous_categories",
         "proposition_services__sous_categories__categorie",
-        "proposition_services__action",
+        "proposition_services__action__groupe_action",
         "proposition_services__acteur_service",
         "labels",
         "source",
