@@ -388,7 +388,7 @@ class ConfiguratorForm(forms.Form):
         ),
         choices=[],
         label=mark_safe(
-            "Liste des actions <strong>displonibles</strong> (selon la direction)"
+            "Liste des actions <strong>disponibles</strong> (selon la direction)"
         ),
         help_text=mark_safe(
             "Pour la direction « Je cherche » les actions possibles"
@@ -440,7 +440,7 @@ class ConfiguratorForm(forms.Form):
         ),
         label="Largeur maximum de l'iframe",
         help_text=mark_safe(
-            "peut-être exprimé en px, %, em, rem, vw, …<br>"
+            "peut être exprimé en px, %, em, rem, vw, …<br>"
             "La valeur par défaut est 800px"
         ),
         required=False,
@@ -455,7 +455,7 @@ class ConfiguratorForm(forms.Form):
         ),
         label="Hauteur de l'iframe",
         help_text=mark_safe(
-            "peut-être exprimé en px, %, em, rem, vh, …<br>"
+            "peut être exprimé en px, %, em, rem, vh, …<br>"
             "La valeur par défaut est 100vh"
         ),
         required=False,
@@ -466,7 +466,7 @@ class ConfiguratorForm(forms.Form):
         widget=forms.Textarea(
             attrs={"class": "fr-input", "rows": "3"},
         ),
-        label="Attrubuts à appliquer à l'iframe",
+        label="Attributs à appliquer à l'iframe",
         help_text=mark_safe("liste d'attributs au format JSON à ajouter à l'iframe"),
         required=False,
     )
