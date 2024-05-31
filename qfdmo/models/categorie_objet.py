@@ -27,6 +27,7 @@ class SousCategorieObjet(CodeAsNaturalKeyModel):
     libelle = models.CharField(max_length=255, blank=False, null=False)
     categorie = models.ForeignKey(CategorieObjet, on_delete=models.CASCADE)
     code = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    afficher = models.BooleanField(default=True)
 
     def __str__(self) -> str:
         return self.libelle

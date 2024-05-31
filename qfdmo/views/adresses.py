@@ -474,6 +474,7 @@ def get_object_list(request):
             distance=TrigramWordDistance(query, "libelle_unaccent"),
             length=Length("libelle"),
         )
+        .filter(sous_categorie__afficher=True)
         .order_by("distance", "length")[:10]
     )
     object_list = [

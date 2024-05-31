@@ -10,6 +10,7 @@ class CategorieObjetFactory(Factory):
         django_get_or_create = ("code",)
 
     code = Faker("word")
+    libelle = Faker("word")
 
 
 class SousCategorieObjetFactory(Factory):
@@ -17,6 +18,8 @@ class SousCategorieObjetFactory(Factory):
         model = SousCategorieObjet
         django_get_or_create = ("code",)
 
+    code = Faker("word")
+    libelle = Faker("word")
     categorie = SubFactory(CategorieObjetFactory)
 
 
@@ -25,4 +28,6 @@ class ObjetFactory(Factory):
         model = Objet
         django_get_or_create = ("code",)
 
+    code = Faker("word")
+    libelle = Faker("word")
     sous_categorie = SubFactory(SousCategorieObjetFactory)
