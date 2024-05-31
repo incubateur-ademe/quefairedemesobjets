@@ -1,5 +1,4 @@
 import json
-import logging
 import random
 import string
 from typing import Any
@@ -386,7 +385,6 @@ class DisplayedActeur(BaseActeur):
         action_list: str | None = None,
         carte: bool = False,
     ) -> str:
-        logging.warning(action_list)
         actions = self.acteur_actions(direction=direction)
 
         acteur_selected_actions = None
