@@ -73,7 +73,6 @@ class AddressesView(FormView):
 
         action_list = self._set_action_list(action_displayed)
         initial["action_list"] = "|".join([a.code for a in action_list])
-        logging.warning(action_list)
 
         if self.request.GET.get("carte") is not None:
             groupe_options = self._get_groupe_options(action_displayed)
@@ -505,7 +504,7 @@ def adresse_detail(request, identifiant_unique):
     displayed_acteur = DisplayedActeur.objects.prefetch_related(
         "proposition_services__sous_categories",
         "proposition_services__sous_categories__categorie",
-        "proposition_services__action",
+        "proposition_services__action__groupe_action",
         "proposition_services__acteur_service",
         "labels",
         "source",
