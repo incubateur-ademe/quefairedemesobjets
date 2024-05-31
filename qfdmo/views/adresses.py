@@ -6,6 +6,7 @@ from typing import List
 import unidecode
 from django.conf import settings
 from django.contrib.admin.utils import quote
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point, Polygon
 from django.contrib.postgres.lookups import Unaccent
@@ -529,7 +530,7 @@ def solution_admin(request, identifiant_unique):
     return redirect("admin:qfdmo_acteur_change", quote(acteur.identifiant_unique))
 
 
-class ConfiguratorView(FormView):
+class ConfiguratorView(LoginRequiredMixin, FormView):
     form_class = ConfiguratorForm
     template_name = "qfdmo/iframe_configurator.html"
 
@@ -540,12 +541,8 @@ class ConfiguratorView(FormView):
         initial["iframe_mode"] = self.request.GET.get("iframe_mode")
         initial["direction"] = self.request.GET.get("direction")
         initial["first_dir"] = self.request.GET.get("first_dir")
-        initial["action_displayed"] = self.request.GET.getlist(
-            "action_displayed",
-        )
-        initial["action_list"] = self.request.GET.getlist(
-            "action_list",
-        )
+        initial["action_displayed"] = self.request.GET.getlist("action_displayed")
+        initial["action_list"] = self.request.GET.getlist("action_list")
         initial["max_width"] = self.request.GET.get("max_width")
         initial["height"] = self.request.GET.get("height")
         initial["iframe_attributes"] = self.request.GET.get("iframe_attributes")
