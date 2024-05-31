@@ -50,4 +50,5 @@ class TestSousCategorieObjetSanitizedName:
             "libelle": "Test Sous-Categorie",
             "code": "code_sous_categorie",
             "categorie": categorie.serialize(),
+            "afficher": True,
         }
