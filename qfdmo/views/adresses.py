@@ -70,6 +70,7 @@ class AddressesView(FormView):
         action_displayed = self._set_action_displayed()
         initial["action_displayed"] = "|".join(action_displayed)
         action_list = self._set_action_list(action_displayed)
+        logging.warning("action_list: %s", action_list)
         initial["action_list"] = "|".join(action_list)
         if self.request.GET.get("carte") is not None:
             groupe_options = self._get_groupe_options(action_displayed)
