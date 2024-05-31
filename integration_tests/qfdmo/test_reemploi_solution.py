@@ -74,8 +74,8 @@ class TestInitialValue:
                 "|acheter|revendre|trier"
             ),
             "action_list": (
-                "preter|emprunter|louer|mettreenlocation|reparer|donner|echanger"
-                "|acheter|revendre|trier"
+                "reparer|donner|echanger|preter|emprunter|louer|mettreenlocation|"
+                "acheter|revendre|trier"
             ),
             "grouped_action": [
                 "reparer",

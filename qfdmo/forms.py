@@ -304,11 +304,17 @@ class ConfiguratorForm(forms.Form):
             for direction in CachedDirectionAction.get_directions()
         ]
         self.fields["action_list"].choices = [
-            (action.code, action.libelle_groupe.capitalize())
+            (
+                action.code,
+                f"{action.libelle} ({action.libelle_groupe.capitalize()})",
+            )
             for action in CachedDirectionAction.get_action_instances()
         ]
         self.fields["action_displayed"].choices = [
-            (action.code, action.libelle_groupe.capitalize())
+            (
+                action.code,
+                f"{action.libelle} ({action.libelle_groupe.capitalize()})",
+            )
             for action in CachedDirectionAction.get_action_instances()
         ]
 

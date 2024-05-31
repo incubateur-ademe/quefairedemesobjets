@@ -40,6 +40,8 @@ export default class extends Controller<HTMLElement> {
 
         "reparerFilter",
 
+        "carte",
+
         //FIXME: should be renamed
         "loadingSolutions",
         "addressMissing",
@@ -87,6 +89,8 @@ export default class extends Controller<HTMLElement> {
     declare readonly advancedFilterSaveAndSubmitButtonTarget: HTMLElement
 
     declare readonly reparerFilterTargets: HTMLInputElement[]
+
+    declare readonly hasCarteTarget: boolean
 
     declare readonly loadingSolutionsTarget: HTMLElement
     declare readonly addressMissingTarget: HTMLElement
@@ -206,6 +210,9 @@ export default class extends Controller<HTMLElement> {
         params.set("direction", this.#selectedOption)
         params.set("latitude", latitude)
         params.set("longitude", longitude)
+        if (this.hasCarteTarget) {
+            params.set("carte", "1")
+        }
         const srcDetailsAddress = `/adresse/${identifiantUnique}?${params.toString()}`
 
         this.srcDetailsAddressTarget.setAttribute("src", srcDetailsAddress)
