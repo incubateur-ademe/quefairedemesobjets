@@ -135,9 +135,9 @@ apache-airflow-providers-imap==3.6.0 \
     --hash=sha256:123d6d935f5a723e5e7d56d22be12157f47cebae84b3201271e7c53126ca2b42 \
     --hash=sha256:6ee329f521084e1e09ccffe68c68b810ee26c6af63a48bd83300a21fd4eaf9e2
     # via apache-airflow
-apache-airflow-providers-postgres==5.11.0 \
-    --hash=sha256:537368c4d5258ca03c65e7b3e50aa9f76061717e9a28dd0016d3e5939bfe5ea4 \
-    --hash=sha256:80083f6c46b142ed9cc3e862f4a0898d6855ea37b774ea2b26719995438cc29b
+apache-airflow-providers-postgres==5.11.1 \
+    --hash=sha256:ed6fdaf7921044a611c34b029e3488cd9486324ed54ebe995cbcfa9e28266d27 \
+    --hash=sha256:fd29c1bcf2a4eb996eba09d45c3ffb95f97a69842321527fedb1eeb8811c11fb
     # via -r dev-requirements.in
 apache-airflow-providers-smtp==1.7.0 \
     --hash=sha256:4a1c5d82f8d99a4dd8da530758c42ab031b2ecb3e40a3141e36b7bfa8370ea37 \
