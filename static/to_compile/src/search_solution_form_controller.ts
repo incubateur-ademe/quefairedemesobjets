@@ -39,8 +39,6 @@ export default class extends Controller<HTMLElement> {
 
         "legendMainPanel",
         "legendFormPanel",
-        "legendSaveButton",
-        "legendSaveAndSubmitButton",
 
         "reparerFilter",
 
@@ -93,8 +91,6 @@ export default class extends Controller<HTMLElement> {
 
     declare readonly legendMainPanelTarget: HTMLElement
     declare readonly legendFormPanelTarget: HTMLElement
-    declare readonly legendSaveButtonTarget: HTMLElement
-    declare readonly legendSaveAndSubmitButtonTarget: HTMLElement
     declare readonly hasLegendFormPanelTarget: boolean
 
     declare readonly reparerFilterTargets: HTMLInputElement[]
@@ -358,19 +354,7 @@ export default class extends Controller<HTMLElement> {
         }, 300)
     }
 
-    toggleLegendWithSubmitButton() {
-        this.legendSaveAndSubmitButtonTarget.classList.remove("qfdmo-hidden")
-        this.legendSaveButtonTarget.classList.add("qfdmo-hidden")
-        this.#toggleLegend()
-    }
-
-    toggleLegendWithoutSubmitButton() {
-        this.legendSaveAndSubmitButtonTarget.classList.add("qfdmo-hidden")
-        this.legendSaveButtonTarget.classList.remove("qfdmo-hidden")
-        this.#toggleLegend()
-    }
-
-    #toggleLegend() {
+    toggleLegend() {
         if (this.legendMainPanelTarget.classList.contains("qfdmo-hidden")) {
             this.#showLegend()
         } else {
