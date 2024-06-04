@@ -5,12 +5,12 @@ from django.views.generic.base import RedirectView
 
 from qfdmo.views.adresses import (
     AddressesView,
-    ConfiguratorView,
     adresse_detail,
     get_object_list,
     getorcreate_revisionacteur,
     solution_admin,
 )
+from qfdmo.views.configurator import ConfiguratorView
 from qfdmo.views.dags import DagsValidation
 
 urlpatterns = [
