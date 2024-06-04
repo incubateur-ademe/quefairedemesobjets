@@ -20,7 +20,7 @@ class TestDisplayAsIframe:
         url = "?iframe"
 
         response = client.get(url)
-        print(response.content)
+
         assert response.status_code == 200
         assert 'class="fr-header' not in str(response.content)
         assert 'class="fr-footer' not in str(response.content)
