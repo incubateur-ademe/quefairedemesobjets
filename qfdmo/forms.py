@@ -316,11 +316,11 @@ class ConfiguratorForm(forms.Form):
         self.fields["direction"].choices = [
             (direction["code"], direction["libelle"])
             for direction in CachedDirectionAction.get_directions()
-        ]
+        ] + [("no_dir", "Par défaut")]
         self.fields["first_dir"].choices = [
             ("first_" + direction["code"], direction["libelle"])
             for direction in CachedDirectionAction.get_directions()
-        ]
+        ] + [("first_no_dir", "Par défaut")]
         self.fields["action_list"].choices = [
             (
                 action.code,
