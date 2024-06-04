@@ -18,6 +18,19 @@ class AutoCompleteInput(forms.Select):
         return context
 
 
+class AutoCompleteAndSearchInput(AutoCompleteInput):
+    template_name = "django/forms/widgets/autocomplete_and_search.html"
+
+    def __init__(self, attrs=None, btn_attrs={}, **kwargs):
+        self.btn_attrs = btn_attrs
+        super().__init__(attrs=attrs, **kwargs)
+
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        context["widget"]["btn_attrs"] = self.btn_attrs
+        return context
+
+
 class SegmentedControlSelect(forms.RadioSelect):
     template_name = "django/forms/widgets/segmented_control.html"
     option_template_name = "django/forms/widgets/segmented_control_option.html"
@@ -246,16 +259,21 @@ class CarteAddressesForm(AddressesForm):
             self.fields["adresse"].widget.attrs["placeholder"] = address_placeholder
 
     adresse = forms.CharField(
-        widget=AutoCompleteInput(
+        widget=AutoCompleteAndSearchInput(
             attrs={
-                "class": "fr-input md:qfdmo-max-w-[596px]",
-                "placeholder": "20 av. du Grésillé 49000 Angers",
+                "class": "fr-input",
+                "placeholder": "Recherche autour d'une adresse",
                 "autocomplete": "off",
                 "aria-label": "Saisir une adresse - obligatoire",
             },
             data_controller="address-autocomplete",
+            btn_attrs={
+                "data-action": "click -> search-solution-form#advancedSubmit",
+                "type": "button",
+                "data-without-zone": "true",
+            },
         ),
-        label="Saisir une adresse ",
+        label="",
         required=False,
     )
 
