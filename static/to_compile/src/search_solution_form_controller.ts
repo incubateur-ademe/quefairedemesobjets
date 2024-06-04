@@ -32,11 +32,15 @@ export default class extends Controller<HTMLElement> {
         "adresseGroup",
         "adresseError",
 
-        "advancedFilterMainPanel",
-        "advancedFilterFormPanel",
+        "advancedFiltersMainPanel",
+        "advancedFiltersFormPanel",
+        "advancedFiltersSaveButton",
+        "advancedFiltersSaveAndSubmitButton",
 
-        "advancedFilterSaveButton",
-        "advancedFilterSaveAndSubmitButton",
+        "legendMainPanel",
+        "legendFormPanel",
+        "legendSaveButton",
+        "legendSaveAndSubmitButton",
 
         "reparerFilter",
 
@@ -82,11 +86,16 @@ export default class extends Controller<HTMLElement> {
     declare readonly adresseGroupTarget: HTMLElement
     declare readonly adresseErrorTarget: HTMLElement
 
-    declare readonly advancedFilterMainPanelTarget: HTMLElement
-    declare readonly advancedFilterFormPanelTarget: HTMLElement
+    declare readonly advancedFiltersMainPanelTarget: HTMLElement
+    declare readonly advancedFiltersFormPanelTarget: HTMLElement
+    declare readonly advancedFiltersSaveButtonTarget: HTMLElement
+    declare readonly advancedFiltersSaveAndSubmitButtonTarget: HTMLElement
 
-    declare readonly advancedFilterSaveButtonTarget: HTMLElement
-    declare readonly advancedFilterSaveAndSubmitButtonTarget: HTMLElement
+    declare readonly legendMainPanelTarget: HTMLElement
+    declare readonly legendFormPanelTarget: HTMLElement
+    declare readonly legendSaveButtonTarget: HTMLElement
+    declare readonly legendSaveAndSubmitButtonTarget: HTMLElement
+    declare readonly hasLegendFormPanelTarget: boolean
 
     declare readonly reparerFilterTargets: HTMLInputElement[]
 
@@ -313,19 +322,19 @@ export default class extends Controller<HTMLElement> {
     }
 
     toggleAdvancedFiltersWithSubmitButton() {
-        this.advancedFilterSaveAndSubmitButtonTarget.classList.remove("qfdmo-hidden")
-        this.advancedFilterSaveButtonTarget.classList.add("qfdmo-hidden")
+        this.advancedFiltersSaveAndSubmitButtonTarget.classList.remove("qfdmo-hidden")
+        this.advancedFiltersSaveButtonTarget.classList.add("qfdmo-hidden")
         this.#toggleAdvancedFilters()
     }
 
     toggleAdvancedFiltersWithoutSubmitButton() {
-        this.advancedFilterSaveAndSubmitButtonTarget.classList.add("qfdmo-hidden")
-        this.advancedFilterSaveButtonTarget.classList.remove("qfdmo-hidden")
+        this.advancedFiltersSaveAndSubmitButtonTarget.classList.add("qfdmo-hidden")
+        this.advancedFiltersSaveButtonTarget.classList.remove("qfdmo-hidden")
         this.#toggleAdvancedFilters()
     }
 
     #toggleAdvancedFilters() {
-        if (this.advancedFilterMainPanelTarget.classList.contains("qfdmo-hidden")) {
+        if (this.advancedFiltersMainPanelTarget.classList.contains("qfdmo-hidden")) {
             this.#showAdvancedFilters()
         } else {
             this.#hideAdvancedFilters()
@@ -334,19 +343,58 @@ export default class extends Controller<HTMLElement> {
     }
 
     #showAdvancedFilters() {
-        this.advancedFilterMainPanelTarget.classList.remove("qfdmo-hidden")
+        this.advancedFiltersMainPanelTarget.classList.remove("qfdmo-hidden")
         setTimeout(() => {
-            this.advancedFilterFormPanelTarget.classList.remove("qfdmo-h-0")
-            this.advancedFilterFormPanelTarget.classList.add("qfdmo-h-[95%]")
+            this.advancedFiltersFormPanelTarget.classList.remove("qfdmo-h-0")
+            this.advancedFiltersFormPanelTarget.classList.add("qfdmo-h-[95%]")
         }, 100)
     }
 
     #hideAdvancedFilters() {
-        this.advancedFilterFormPanelTarget.classList.remove("qfdmo-h-[95%]")
-        this.advancedFilterFormPanelTarget.classList.add("qfdmo-h-0")
+        this.advancedFiltersFormPanelTarget.classList.remove("qfdmo-h-[95%]")
+        this.advancedFiltersFormPanelTarget.classList.add("qfdmo-h-0")
         setTimeout(() => {
-            this.advancedFilterMainPanelTarget.classList.add("qfdmo-hidden")
+            this.advancedFiltersMainPanelTarget.classList.add("qfdmo-hidden")
         }, 300)
+    }
+
+    toggleLegendWithSubmitButton() {
+        this.legendSaveAndSubmitButtonTarget.classList.remove("qfdmo-hidden")
+        this.legendSaveButtonTarget.classList.add("qfdmo-hidden")
+        this.#toggleLegend()
+    }
+
+    toggleLegendWithoutSubmitButton() {
+        this.legendSaveAndSubmitButtonTarget.classList.add("qfdmo-hidden")
+        this.legendSaveButtonTarget.classList.remove("qfdmo-hidden")
+        this.#toggleLegend()
+    }
+
+    #toggleLegend() {
+        if (this.legendMainPanelTarget.classList.contains("qfdmo-hidden")) {
+            this.#showLegend()
+        } else {
+            this.#hideLegend()
+        }
+        this.scrollToContent()
+    }
+
+    #showLegend() {
+        this.legendMainPanelTarget.classList.remove("qfdmo-hidden")
+        setTimeout(() => {
+            this.legendFormPanelTarget.classList.remove("qfdmo-h-0")
+            this.legendFormPanelTarget.classList.add("qfdmo-h-[95%]")
+        }, 100)
+    }
+
+    #hideLegend() {
+        if (this.hasLegendFormPanelTarget) {
+            this.legendFormPanelTarget.classList.remove("qfdmo-h-[95%]")
+            this.legendFormPanelTarget.classList.add("qfdmo-h-0")
+            setTimeout(() => {
+                this.legendMainPanelTarget.classList.add("qfdmo-hidden")
+            }, 300)
+        }
     }
 
     advancedSubmit(event: Event) {
@@ -379,6 +427,7 @@ export default class extends Controller<HTMLElement> {
         this.addressMissingTarget.classList.add("qfdmo-hidden")
         this.NoLocalSolutionTarget.classList.add("qfdmo-hidden")
         this.#hideAdvancedFilters()
+        this.#hideLegend()
 
         let submitEvent = new Event("submit", { bubbles: true, cancelable: true })
         setTimeout(() => {

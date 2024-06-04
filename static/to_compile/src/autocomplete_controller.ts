@@ -95,7 +95,7 @@ export default abstract class extends Controller<HTMLElement> {
         this.addActive()
     }
 
-    keydownEnter(event: KeyboardEvent) {
+    keydownEnter(event: KeyboardEvent): boolean {
         var x = document.getElementById(this.inputTarget.id + "autocomplete-list")
         let optionDiv: HTMLCollectionOf<HTMLElement> | undefined
         if (x) {
@@ -105,11 +105,13 @@ export default abstract class extends Controller<HTMLElement> {
         /*If the ENTER key is pressed, prevent the form from being submitted when select an option */
         if (optionDiv !== undefined && optionDiv?.length > 0) {
             event.preventDefault()
+            if (this.currentFocus > -1) {
+                if (optionDiv) optionDiv[this.currentFocus].click()
+            }
+        } else {
+            return true
         }
-        if (this.currentFocus > -1) {
-            /*and simulate a click on the "active" item:*/
-            if (optionDiv) optionDiv[this.currentFocus].click()
-        }
+        return false
     }
 
     blurInput(event: Event) {
