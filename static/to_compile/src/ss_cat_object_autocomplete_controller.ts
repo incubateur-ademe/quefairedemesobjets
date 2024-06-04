@@ -140,6 +140,15 @@ export default class extends AutocompleteController {
         this.autocompleteList.appendChild(b)
     }
 
+    keydownEnter(event: KeyboardEvent): boolean {
+        console.log("keydown")
+        let toSubmit = super.keydownEnter(event)
+        if (toSubmit) {
+            this.dispatch("formSubmit")
+        }
+        return toSubmit
+    }
+
     async #getOptionCallback(value: string): Promise<SSCatObject[]> {
         if (value.trim().length < this.nbCharToSearchValue) {
             this.ssCatTarget.value = ""

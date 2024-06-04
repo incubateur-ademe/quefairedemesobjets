@@ -118,6 +118,14 @@ export default class extends AutocompleteController {
         this.autocompleteList.appendChild(b)
     }
 
+    keydownEnter(event: KeyboardEvent): boolean {
+        let toSubmit = super.keydownEnter(event)
+        if (toSubmit) {
+            this.dispatch("formSubmit")
+        }
+        return toSubmit
+    }
+
     geolocatisationRefused(message?: string) {
         message = message || "La géolocalisation est inaccessible sur votre appareil"
         this.#displayInputError(message)
