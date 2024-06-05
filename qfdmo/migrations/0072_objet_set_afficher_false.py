@@ -7,11 +7,16 @@ def set_sscat_afficher_false(apps, schema_editor):
     SousCategorieObjet = apps.get_model("qfdmo", "SousCategorieObjet")
 
     for sous_categorie_objet in SousCategorieObjet.objects.all():
-        if not sous_categorie_objet.propositionservice_set.filter(
+        if not sous_categorie_objet.displayedpropositionservice_set.filter(
             action__afficher=True
         ).exists():
             sous_categorie_objet.afficher = False
             sous_categorie_objet.save()
+
+
+def set_sscat_afficher_true(apps, schema_editor):
+    SousCategorieObjet = apps.get_model("qfdmo", "SousCategorieObjet")
+    SousCategorieObjet.objects.all().update(afficher=True)
 
 
 class Migration(migrations.Migration):
@@ -21,5 +26,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(set_sscat_afficher_false, migrations.RunPython.noop),
+        migrations.RunPython(set_sscat_afficher_false, set_sscat_afficher_true),
     ]
