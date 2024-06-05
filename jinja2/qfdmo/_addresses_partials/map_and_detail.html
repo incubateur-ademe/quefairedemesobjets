@@ -1,12 +1,12 @@
 <div
-    class="qfdmo-relative qfdmo-flex-grow qfdmo-flex qfdmo-flex-col md:qfdmo-flex-row"
+    class="fr-container qfdmo-px-0 md:qfdmo-px-2w lg:qfdmo-px-3w qfdmo-relative qfdmo-flex-grow qfdmo-flex qfdmo-flex-col md:qfdmo-flex-row"
 >
     <div class="qfdmo-flex-grow qfdmo-flex qfdmo-flex-col">
         <div class="qfdmo-h-full qfdmo-w-full qfdmo-flex qfdmo-flex-col">
             {% if request.GET["digital"] == "1" %}
                 <!-- On line addresses-->
                 <div class="qfdmo-relative qfdmo-flex-grow qfdmo-shadow">
-                    <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-overflow-y-auto">
+                    <div class="qfdmo-px-2w md:qfdmo-px-0 lg:qfdmo-px-0 qfdmo-absolute qfdmo-inset-0 qfdmo-overflow-y-auto">
                         {% for adresse in acteurs.all() %}
                             <div data-action="click->search-solution-form#displayActeurDetails"
                                 data-identifiant-unique="{{ adresse.identifiant_unique }}"
@@ -104,7 +104,7 @@
     <!-- Détail de l'adresse -->
     <div
         data-search-solution-form-target="detailsAddressPanel"
-        class="qfdmo-duration-300 qfdmo-bg-white qfdmo-z-10
+        class="qfdmo-overflow-hidden qfdmo-duration-300 qfdmo-bg-white qfdmo-z-10
         qfdmo-w-full {% if request.GET.get('detail') %} qfdmo-h-1/2 {% else %} qfdmo-h-0 {% endif %}
         md:qfdmo-h-full {% if request.GET.get('detail') %} md:qfdmo-w-[480] {% else %} md:qfdmo-w-0 {% endif %}"
     >
