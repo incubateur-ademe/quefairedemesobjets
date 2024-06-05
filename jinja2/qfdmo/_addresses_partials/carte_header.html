@@ -1,0 +1,27 @@
+<div class="qfdmo-flex qfdmo-flex-row md:qfdmo-items-center">
+    <div class="qfdmo-items-center qfdmo-hidden md:qfdmo-flex qfdmo-flex-row">
+        {% include 'layout/_partials/header_logos.html' %}
+    </div>
+
+    <!-- Recherche adresse -->
+    <div class="fr-my-1w qfdmo-flex-grow qfdmo-flex qfdmo-flex-col md:qfdmo-mr-3w">
+        {% include 'qfdmo/_addresses_partials/adresse_input_form.html' %}
+
+        <div class="fr-mt-1w qfdmo-float-right">
+            <button
+                class="fr-btn fr-btn--secondary fr-ml-1w fr-btn--icon-left fr-icon-eye-line qfdmo-float-right"
+                type="button"
+                data-action="click -> search-solution-form#toggleLegend"
+                >
+                Légende
+            </button>
+            <button
+                class="fr-btn fr-btn--secondary fr-ml-1w fr-btn--icon-left fr-icon-equalizer-line qfdmo-float-right"
+                type="button"
+                data-action="click -> search-solution-form#toggleAdvancedFiltersWithSubmitButton"
+                >
+                Filtres
+            </button>
+        </div>
+    </div>
+</div>
