@@ -234,12 +234,16 @@ class AddressesView(FormView):
 
     def _set_action_displayed(self) -> List[Action]:
         cached_action_instances = CachedDirectionAction.get_action_instances()
+        """
+        Limit to actions of the direction only in Carte mode
+        """
         if direction := self.request.GET.get("direction"):
-            cached_action_instances = [
-                action
-                for action in cached_action_instances
-                if direction in [d.code for d in action.directions.all()]
-            ]
+            if self.request.GET.get("carte") is not None:
+                cached_action_instances = [
+                    action
+                    for action in cached_action_instances
+                    if direction in [d.code for d in action.directions.all()]
+                ]
         if action_displayed := self.request.GET.get("action_displayed", ""):
             cached_action_instances = [
                 action
