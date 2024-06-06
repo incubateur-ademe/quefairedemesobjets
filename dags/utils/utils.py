@@ -312,15 +312,15 @@ def get_db_conn_id(dag_filepath, parent_of_parent=False):
     return "lvao-" + get_environment(dag_filepath, parent_of_parent=parent_of_parent)
 
 
-def check_siret_using_annuaire_entreprise(row):
-    res = api_utils.call_annuaire_entreprises(row["siret"])
-    if "etat_admin" in res and res["etat_admin"] == "F":
-        return res
-    return {}
+def check_siret_using_annuaire_entreprise(row, adresse_query_flag=False, col="siret"):
+    res = api_utils.call_annuaire_entreprises(
+        row[col], adresse_query_flag=adresse_query_flag
+    )
+    return res
 
 
 def get_location(row):
-    lat, lon = api_utils.get_lat_lon_from_address(row.get("adresse"))
+    lat, lon = row.get("latitude"), row.get("longitude")
     if lat is not None and lon is not None:
         return transform_location(longitude=lon, latitude=lat)
     return None

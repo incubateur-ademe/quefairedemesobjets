@@ -25,6 +25,12 @@ class DagsValidation(IsStaffMixin, FormView):
         initial["dagrun"] = self.request.GET.get("dagrun")
         return initial
 
+    def post(self, request, *args, **kwargs):
+        logging.info("im here ")
+        if "siret" in request.POST:
+            return None
+        return super().post(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
@@ -41,6 +47,7 @@ class DagsValidation(IsStaffMixin, FormView):
                 page_number = self.request.GET.get("page")
                 page_obj = paginator.get_page(page_number)
                 context["dagrun_lines"] = page_obj
+                # Generate URLs for each candidate
 
         return context
 
