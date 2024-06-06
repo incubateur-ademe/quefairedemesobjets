@@ -22,7 +22,14 @@ class TestAdessesViewGetActionList:
             ),
             (
                 {"direction": "fake"},
-                [],
+                [
+                    "prêter",
+                    "mettre en location",
+                    "réparer",
+                    "donner",
+                    "échanger",
+                    "vendre",
+                ],
             ),
             (
                 {"direction": "jai"},
