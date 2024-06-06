@@ -5,7 +5,6 @@
             <th scope="col">change_type</th>
             <th scope="col">meta_data</th>
             <th scope="col">Identifiant Unique</th>
-            <th scope="col">Code NAF</th>
             <th scope="col">Candidats</th>
             <th scope="col">row_updates</th>
         </tr>
@@ -18,23 +17,50 @@
             <td>{{ dagrun_line.get_change_type_display() }}</td>
             <td>{{ dagrun_line.meta_data if dagrun_line.meta_data else "-" }}</td>
             <td>
-                <a href="{{ dagrun_line.row_updates.admin_link }}">{{ dagrun_line.display_acteur_details().identifiant_unique }}</a>
+                <a href="{{ dagrun_line.row_updates.admin_link }}">{{ dagrun_line.display_acteur_details().identifiant_unique
+                    }}</a>
             </td>
-            <td>{{ dagrun_line.row_updates.ae_result.categorie_naf }}</td>
             <td>
                 <table>
                     <tr>
-                        <th>Adresse Siege</th>
-                        <th>Code Naf Siege</th>
-                        <th>Siret Siege</th>
+                        <th>Nom</th>
+                        <th>Adresse</th>
+                        <th>Code Naf</th>
+                        <th>Siret</th>
+                        <th>Etat</th>
                         <th>Nombre etablissements ouverts</th>
+                        <th>Est Siège</th>
+                        <th>latitude</th>
+                        <th>longitude</th>
+
+
+
                     </tr>
-                    <tr>
-                        <td>{{ dagrun_line.row_updates.ae_result.adresse }}</td>
-                        <td>{{ dagrun_line.row_updates.ae_result.categorie_naf_siege }}</td>
-                        <td>{{ dagrun_line.row_updates.ae_result.siret_siege }}</td>
-                        <td>{{ dagrun_line.row_updates.ae_result.nombre_etablissements_ouverts }}</td>
-                    </tr>
+                    {% for candidat in dagrun_line.row_updates.ae_result  %}
+                        <tr>
+                            <td>{{ candidat.nom_candidat }}</td>
+                            <td>{{ candidat.adresse_candidat }}</td>
+                            <td>{{ candidat.categorie_naf_candidat }}</td>
+                            <td>{{ candidat.siret_candidat }}</td>
+                            <td>
+                                <turbo-frame id="candidat-{{ candidat.siret_candidat }}-{{loop.index}}">
+                                    <form method="post" action="{{ request.path }}">
+                                        <input type="hidden" name="siret" value="{{ candidat.siret_candidat }}">
+                                        <input type="hidden" name="index" value="{{loop.index}}">
+                                        <button type="submit">
+                                            {{ candidat.etat_admin_candidat }}
+                                        </button>
+                                    </form>
+                                </turbo-frame>
+                            </td>
+                            <td>{{ candidat.nombre_etablissements_ouverts }}</td>
+                            <td>{{ candidat.siege_flag }}</td>
+                            <td>{{ candidat.latitude_candidat }}</td>
+                            <td>{{ candidat.longitude_candidat }}</td>
+
+                        </tr>
+                    {% endfor %}
+
                 </table>
             </td>
             <td>
@@ -51,7 +77,7 @@
         <label for="page-select">Go to page:</label>
         <select id="page-select" class="fr-select" name="page" onchange="this.form.submit()">
             {% for num in dagrun_lines.paginator.page_range %}
-                <option value="{{ num }}" {% if dagrun_lines.number == num %}selected{% endif %}>
+                <option value="{{ num }}" {% if dagrun_lines.number== num %}selected{% endif %}>
                     {{ num }}
                 </option>
             {% endfor %}
