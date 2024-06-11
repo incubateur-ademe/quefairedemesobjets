@@ -1,7 +1,11 @@
+import logging
+
 import pandas as pd
 from importlib import import_module
 from pathlib import Path
 from datetime import datetime
+
+logging.basicConfig(level=logging.INFO)
 
 env = Path(__file__).parent.parent.name
 
@@ -100,27 +104,10 @@ def handle_update_actor_event(df_actors, dag_run_id):
     ]
 
     current_time = datetime.now().astimezone().isoformat(timespec="microseconds")
-
-    df_actors = df_actors.apply(mapping_utils.flatten_ae_results, axis=1)
-    df_actors["statut"] = df_actors.apply(
-        lambda row: (
-            "SUPPRIME"
-            if row["ae_result.etat_admin"] == "F"
-            and (row["ae_result.etat_admin_siege"] in ["F", None])
-            else "ACTIF"
-        ),
-        axis=1,
-    )
-    df_actors["siret"] = df_actors.apply(
-        lambda row: (
-            row["ae_result.siret_siege"]
-            if row["ae_result.etat_admin_siege"] == "A"
-            else None
-        ),
-        axis=1,
-    )
+    df_actors = df_actors[df_actors["row_status"] == "DagRunStatus.TO_INSERT"]
+    df_actors = df_actors.apply(mapping_utils.replace_with_selected_candidat, axis=1)
     df_actors[["adresse", "code_postal", "ville"]] = df_actors.apply(
-        lambda row: utils.extract_details(row, col="ae_result.adresse"), axis=1
+        lambda row: utils.extract_details(row, col="adresse_candidat"), axis=1
     )
 
     df_actors["modifie_le"] = current_time
@@ -129,6 +116,7 @@ def handle_update_actor_event(df_actors, dag_run_id):
     for column in update_required_columns:
         if column not in df_actors.columns:
             df_actors[column] = None
+    logging.info("DataFrame df_actors:\n%s", df_actors.to_string(index=False))
 
     return {
         "actors": df_actors[update_required_columns],

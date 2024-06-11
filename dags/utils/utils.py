@@ -8,6 +8,7 @@ import pandas as pd
 import requests
 from shapely import wkb
 from shapely.geometry import Point
+from pyproj import Proj, transform
 
 env = Path(__file__).parent.parent.name
 
@@ -319,8 +320,14 @@ def check_siret_using_annuaire_entreprise(row, adresse_query_flag=False, col="si
     return res
 
 
-def get_location(row):
-    lat, lon = row.get("latitude"), row.get("longitude")
-    if lat is not None and lon is not None:
-        return transform_location(longitude=lon, latitude=lat)
+def get_location(easting, northing):
+    if easting is not None and northing is not None:
+        lambert_proj = Proj(init="epsg:2154")
+
+        latlon_proj = Proj(proj="latlong", datum="WGS84")
+
+        lon, lat = transform(lambert_proj, latlon_proj, easting, northing)
+        location = transform_location(longitude=lon, latitude=lat)
+
+        return {"latitude": lat, "longitude": lon, "location": location}
     return None

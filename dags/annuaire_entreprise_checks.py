@@ -167,7 +167,7 @@ def set_cohort_id(row):
 
     best_outcome = "closed"
     highest_priority_level = 1
-    best_candidate_index = -1  # Initialize with a non-valid index
+    best_candidate_index = -1
     nb_candidats_ouvert = len(
         [res for res in row["ae_result"] if res["etat_admin_candidat"] == "A"]
     )
@@ -305,15 +305,32 @@ def combine_actors(**kwargs):
     for cohort_id in df["cohort_id"].unique():
         cohort_dfs[cohort_id] = df[df["cohort_id"] == cohort_id]
 
-    # flake8: noqa: E501
     return cohort_dfs
+
+
+def enrich_row(row):
+    enriched_ae_result = []
+    for item in row["ae_result"]:
+        latitude = item.get("latitude_candidat")
+        longitude = item.get("longitude_candidat")
+        if latitude is not None and longitude is not None:
+            location = utils.get_location(latitude, longitude)
+            if location:
+                item["latitude_candidat"] = location["latitude"]
+                item["longitude_candidat"] = location["longitude"]
+                item["location_candidat"] = location["location"]
+        enriched_ae_result.append(item)
+    row["ae_result"] = enriched_ae_result
+    return row
 
 
 def enrich_location(**kwargs):
     data = kwargs["ti"].xcom_pull(task_ids="combine_actors")
 
     for key, df in data.items():
-        df["location"] = df.apply(utils.get_location, axis=1)
+        df = df.apply(enrich_row, axis=1)
+        data[key] = df
+
     return data
 
 

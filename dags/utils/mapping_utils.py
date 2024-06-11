@@ -1,7 +1,9 @@
+import logging
 import math
 import json
-import pandas as pd
 from datetime import datetime
+
+import pandas as pd
 
 
 def transform_acteur_type_id(value, df_acteurtype):
@@ -89,12 +91,35 @@ def combine_comments(existing_commentaires, new_commentaires):
     return json.dumps(combined_commentaires)
 
 
-def flatten_ae_results(row):
-    if "ae_result" in row and pd.notna(row["ae_result"]):
+def replace_with_selected_candidat(row):
+    row["adresse_candidat"] = None
+    if "ae_result" in row:
         ae_result = row["ae_result"]
-        for key, value in ae_result.items():
-            row[f"{key}"] = value
+        best_candidat_index = row.get("best_candidat_index", None)
+        print(best_candidat_index)
+        if best_candidat_index is not None and pd.notna(best_candidat_index):
+            selected_candidat = ae_result[int(best_candidat_index) - 1]
+            row["statut"] = "ACTIF"
+            row["adresse_candidat"] = selected_candidat.get("adresse_candidat")
+            row["siret"] = selected_candidat.get("siret_candidat")
+            row["nom"] = selected_candidat.get("nom_candidat")
+            row["location"] = selected_candidat.get("location_candidat")
+            logging.info(
+                f"Selected candidat details - SIRET:"
+                f" {row['siret']}, "
+                f"NOM: {row['nom']},"
+                f" LOCATION: {row['location']},"
+                f" ADRESSE: {row['adresse_candidat']}"
+            )
+        else:
+            row["statut"] = "SUPPRIME"
+            row["adresse_candidat"] = None
+            row["siret"] = None
+            row["nom"] = None
+            row["location"] = None
+
         row = row.drop(labels=["ae_result"])
+
     return row
 
 

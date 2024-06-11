@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib.gis.db import models
 
 from qfdmo.models.acteur import ActeurType, Source
@@ -120,3 +122,13 @@ class DagRunChange(models.Model):
 
     def display_proposition_service(self):
         return self.row_updates.get("proposition_services", [])
+
+    def update_row_update_field(self, field_name, value):
+        if self.row_updates is None:
+            self.row_updates = {}
+        self.row_updates[field_name] = value
+        self.save()
+
+    def get_candidat(self, index):
+        logging.warning(self.row_updates["ae_result"])
+        return self.row_updates["ae_result"][int(index) - 1]

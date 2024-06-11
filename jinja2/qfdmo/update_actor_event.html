@@ -21,56 +21,20 @@
                     }}</a>
             </td>
             <td>
-                <table>
-                    <tr>
-                        <th>Nom</th>
-                        <th>Adresse</th>
-                        <th>Code Naf</th>
-                        <th>Siret</th>
-                        <th>Etat</th>
-                        <th>Nombre etablissements ouverts</th>
-                        <th>Est Siège</th>
-                        <th>latitude</th>
-                        <th>longitude</th>
+                {% with candidat=candidat, index=loop.index, dagrun=request.GET.dagrun,
+                identifiant_unique=dagrun_line.display_acteur_details().identifiant_unique %}
+                {% include 'qfdmo/partials/candidat_row.html' %}
 
-
-
-                    </tr>
-                    {% for candidat in dagrun_line.row_updates.ae_result  %}
-                        <tr>
-                            <td>{{ candidat.nom_candidat }}</td>
-                            <td>{{ candidat.adresse_candidat }}</td>
-                            <td>{{ candidat.categorie_naf_candidat }}</td>
-                            <td>{{ candidat.siret_candidat }}</td>
-                            <td>
-                                <turbo-frame id="candidat-{{ candidat.siret_candidat }}-{{loop.index}}">
-                                    <form method="post" action="{{ request.path }}">
-                                        <input type="hidden" name="siret" value="{{ candidat.siret_candidat }}">
-                                        <input type="hidden" name="index" value="{{loop.index}}">
-                                        <button type="submit">
-                                            {{ candidat.etat_admin_candidat }}
-                                        </button>
-                                    </form>
-                                </turbo-frame>
-                            </td>
-                            <td>{{ candidat.nombre_etablissements_ouverts }}</td>
-                            <td>{{ candidat.siege_flag }}</td>
-                            <td>{{ candidat.latitude_candidat }}</td>
-                            <td>{{ candidat.longitude_candidat }}</td>
-
-                        </tr>
-                    {% endfor %}
-
-                </table>
-            </td>
-            <td>
-                <details>
-                    <summary>Données brutes</summary>
-                    <pre class="qfdmo-text-wrap">{{ dagrun_line.row_updates }}</pre>
-                </details>
-            </td>
-        </tr>
-    {% endfor %}
+    {% endwith %}
+</td>
+<td>
+    <details>
+        <summary>Données brutes</summary>
+        <pre class="qfdmo-text-wrap">{{ dagrun_line.row_updates }}</pre>
+    </details>
+</td>
+</tr>
+{% endfor %}
 </tbody>
 {% if dagrun_lines.has_other_pages %}
     <form method="get" action="">
