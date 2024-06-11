@@ -16,7 +16,7 @@ def fetch_dataset_from_point_apport(url):
     return all_data
 
 
-@limits(calls=1, period=1)
+@limits(calls=3, period=1)
 def call_annuaire_entreprises(query, adresse_query_flag=False):
     params = {"q": query, "page": 1, "per_page": 1, "etat_administratif": "A"}
     base_url = "https://recherche-entreprises.api.gouv.fr"
