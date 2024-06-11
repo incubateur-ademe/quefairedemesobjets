@@ -1,12 +1,12 @@
 <div
-    class="qfdmo-relative qfdmo-flex-grow qfdmo-flex qfdmo-flex-col md:qfdmo-flex-row"
+    class="fr-container qfdmo-px-0 md:qfdmo-px-2w lg:qfdmo-px-3w qfdmo-relative qfdmo-flex-grow qfdmo-flex qfdmo-flex-col md:qfdmo-flex-row"
 >
     <div class="qfdmo-flex-grow qfdmo-flex qfdmo-flex-col">
         <div class="qfdmo-h-full qfdmo-w-full qfdmo-flex qfdmo-flex-col">
             {% if request.GET["digital"] == "1" %}
                 <!-- On line addresses-->
                 <div class="qfdmo-relative qfdmo-flex-grow qfdmo-shadow">
-                    <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-overflow-y-auto">
+                    <div class="qfdmo-px-2w md:qfdmo-px-0 lg:qfdmo-px-0 qfdmo-absolute qfdmo-inset-0 qfdmo-overflow-y-auto">
                         {% for adresse in acteurs.all() %}
                             <div data-action="click->search-solution-form#displayActeurDetails"
                                 data-identifiant-unique="{{ adresse.identifiant_unique }}"
@@ -40,51 +40,42 @@
                     data-controller="map"
                     data-map-location-value="{{ location }}"
                     id="map"
-                    data-map-target="map"
                 >
-                    <input
-                        hidden
-                        data-map-target="searchInZoneInput"
-                        data-search-solution-form-target="searchInZoneInput"
-                        name="search_in_zone"
-                        value=""
-                    />
+                    {{ form.bounding_box }}
                     <button
                         data-map-target="searchInZoneButton"
                         data-turbo-frame="adresses"
-                        data-action="click -> search-solution-form#submitForm"
+                        data-action="click -> search-solution-form#advancedSubmit"
                         class="fr-btn fr-btn--sm fr-btn--secondary fr-m-1w fr-p-1v qfdmo-absolute qfdmo-z-[10000] qfdmo-right-0 qfdmo-hidden qfdmo-bg-white qfdmo-opacity-60"
                         type="button"
+                        data-with-controls={{"false" if is_carte(request) else "true"}}
                         >
                         Rechercher dans cette zone
                     </button>
-                    <div
-                        class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-80 qfdmo-font-black qfdmo-z-[1000]{% if form.initial.adresse or has_bbox %} qfdmo-hidden{% endif %}"
-                        data-search-solution-form-target="addressMissing"
-                    >
-                        <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
-                            Précisez une adresse pour afficher la carte
-                        </div>
-                    </div>
-                    <div
-                        class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-80 qfdmo-font-black qfdmo-z-[1000]{% if not(form.initial.adresse) or acteurs %} qfdmo-hidden{% endif %}"
-                        data-search-solution-form-target="NoLocalSolution"
-                    >
-                        <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
-                            Il n'existe pas de solution {% if bbox %}dans cette zone{% else %}localisée proche de chez vous (<30 km){% endif %}, avez-vous envigagé une solution en ligne ?
+                    {% with address_ok=(form.initial.adresse or form.initial.bounding_box or acteurs) %}
+                        <div
+                            class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-80 qfdmo-font-black qfdmo-z-[1000]{% if address_ok %} qfdmo-hidden{% endif %}"
+                            data-search-solution-form-target="addressMissing"
+                        >
+                            <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
+                                Précisez une adresse pour afficher la carte
                             </div>
                         </div>
-                        {% for acteur in acteurs %}
-                            <script type="application/json" data-map-target="acteur">
-                                {{ acteur.json_acteur_for_display(direction=form.initial.direction, action_list=form.initial.action_list) | safe }}
-                            </script>
-                        {% endfor %}
-                        {% if bbox %}
-                            <script type="application/json" data-map-target="bBox">
-                                {{ bbox|tojson() }}
-                            </script>
-                        {% endif %}
-                    </div>
+                        <div
+                            class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-80 qfdmo-font-black qfdmo-z-[1000] {% if acteurs or not address_ok %} qfdmo-hidden{% endif %}"
+                            data-search-solution-form-target="NoLocalSolution"
+                        >
+                            <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl md:qfdmo-text-4xl qfdmo-text-center">
+                                Il n'existe pas de solution {% if bounding_box %}dans cette zone{% else %}localisée proche de chez vous (&lt;30 km){% endif %}, essayez avec une autre combinaison de filtres.
+                            </div>
+                        </div>
+                    {% endwith %}
+                    {% for acteur in acteurs %}
+                        <script type="application/json" data-map-target="acteur">
+                            {{ acteur.json_acteur_for_display(direction=form.initial.direction, action_list=form.initial.action_list, carte=carte) | safe }}
+                        </script>
+                    {% endfor %}
+                </div>
             {% endif %}
         </div>
         <div
@@ -97,7 +88,7 @@
             </div>
         </div>
         {% if not is_carte(request) %}
-            <div class="qfdmo-duration-300 md:qfdmo-h-fit md:qfdmo-mr-1w" data-search-solution-form-target="proposeAddressPanel">
+            <div class="qfdmo-px-2w md:qfdmo-px-0 qfdmo-duration-300 md:qfdmo-h-fit md:qfdmo-mr-1w" data-search-solution-form-target="proposeAddressPanel">
                 <a class="fr-my-1w fr-btn fr-btn--tertiary qfdmo-whitespace-nowrap qfdmo-float-right qfdmo-w-full md:qfdmo-w-max qfdmo-flex qfdmo-justify-center"
                     href="https://tally.so/r/wzy9ZZ"
                     target="_blank"
@@ -113,7 +104,7 @@
     <!-- Détail de l'adresse -->
     <div
         data-search-solution-form-target="detailsAddressPanel"
-        class="qfdmo-duration-300 qfdmo-bg-white qfdmo-z-10
+        class="qfdmo-overflow-hidden qfdmo-duration-300 qfdmo-bg-white qfdmo-z-10
         qfdmo-w-full {% if request.GET.get('detail') %} qfdmo-h-1/2 {% else %} qfdmo-h-0 {% endif %}
         md:qfdmo-h-full {% if request.GET.get('detail') %} md:qfdmo-w-[480] {% else %} md:qfdmo-w-0 {% endif %}"
     >
@@ -148,9 +139,8 @@
                         <turbo-frame id="adr_detail"
                             data-search-solution-form-target="srcDetailsAddress"
                             {% if request.GET.get('detail') %}
-                                src="{{ reverse('qfdmo:adresse_detail', args=[request.GET.get('detail')])}}?direction={{ direction }}&latitude={{ latitude }}&longitude={{ longitude }}"
+                                src="{{ reverse('qfdmo:adresse_detail', args=[request.GET.get('detail')])}}?{% if is_carte(request) %}carte=1&{% endif %}direction={{ direction }}&latitude={{ latitude }}&longitude={{ longitude }}"
                             {% endif %}
-
                         >
                         </turbo-frame>
                     {% endwith %}

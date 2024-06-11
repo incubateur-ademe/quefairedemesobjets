@@ -82,7 +82,7 @@
         <button class="fr-btn fr-btn--secondary-light fr-icon-share-line qfdmo-rounded-full" aria-describedby="shareTooltip" type="button"></button>
         <span class="fr-tooltip fr-placement" id="shareTooltip" role="tooltip" aria-hidden="true">
             <div class="fr-share">
-                {% with sharing_url=adresse.share_url(request) %}
+                {% with address_url=adresse.get_share_url(request) %}
                     <ul class="fr-btns-group">
                         <li>
                             <a  class="fr-btn--facebook fr-btn"
@@ -90,7 +90,7 @@
                                 rel="noopener"
                                 title="partager {{ adresse }} sur Facebook - nouvelle fenêtre"
                                 onclick="window.open(this.href,'Partager sur Facebook','toolbar=no,location=yes,status=no,menubar=no,scrollbars=yes,resizable=yes,width=600,height=450'); event.preventDefault();"
-                                href="https://www.facebook.com/sharer.php?u={{ quote_plus(sharing_url) }}"
+                                href="https://www.facebook.com/sharer.php?u={{ quote_plus(address_url) }}"
                             >
                                 Partager sur Facebook
                             </a>
@@ -102,7 +102,7 @@
                                 rel="noopener"
                                 title="partager {{ adresse }} sur X - nouvelle fenêtre"
                                 onclick="window.open(this.href,'Partager sur X (anciennement Twitter)','toolbar=no,location=yes,status=no,menubar=no,scrollbars=yes,resizable=yes,width=600,height=420'); event.preventDefault();"
-                                href="https://twitter.com/intent/tweet?url={{ quote_plus(sharing_url) }}&text=Super adresse trouvée grâce à l'ADEME&via=Longue+vie+aux+objets&hashtags=longuevieauxobjets,ademe"
+                                href="https://twitter.com/intent/tweet?url={{ quote_plus(address_url) }}&text=Super adresse trouvée grâce à l'ADEME&via=Longue+vie+aux+objets&hashtags=longuevieauxobjets,ademe"
                             >
                                 Partager sur X (anciennement Twitter)
                             </a>
@@ -113,7 +113,7 @@
                                 rel="noopener"
                                 title="partager {{ adresse }} sur LinkedIn - nouvelle fenêtre"
                                 onclick="window.open(this.href,'Partager sur LinkedIn','toolbar=no,location=yes,status=no,menubar=no,scrollbars=yes,resizable=yes,width=550,height=550'); event.preventDefault();"
-                                href="https://www.linkedin.com/shareArticle?url={{ quote_plus(sharing_url) }}&title=Super adresse trouvée grâce à l'ADEME"
+                                href="https://www.linkedin.com/shareArticle?url={{ quote_plus(address_url) }}&title=Super adresse trouvée grâce à l'ADEME"
                             >
                                 Partager sur LinkedIn
                             </a>
@@ -123,14 +123,14 @@
                                 target="_blank"
                                 rel="noopener external"
                                 title="partager {{ adresse }} par courriel - nouvelle fenêtre"
-                                href="mailto:?subject=Super adresse trouvée grâce à l'ADEME&body=Super adresse trouvée grâce à l'ADEME : {{ quote_plus(sharing_url) }}"
+                                href="mailto:?subject=Super adresse trouvée grâce à l'ADEME&body=Super adresse trouvée grâce à l'ADEME : {{ quote_plus(address_url) }}"
                             >
                                 Partager par email
                             </a>
                         </li>
                         <li>
                             <button class="fr-btn--copy fr-btn"
-                                onclick="navigator.clipboard.writeText('{{sharing_url}}').then(function() {alert('Adresse copiée dans le presse papier.')});"
+                                onclick="navigator.clipboard.writeText('{{address_url}}').then(function() {alert('Adresse copiée dans le presse papier.')});"
                                 type="button"
                             >
                                 Copier dans le presse-papier
@@ -167,7 +167,7 @@
                     aria-controls="infosPanel"
                     type="button"
                 >
-                    Infos
+                    Adresse
                 </button>
             </li>
         {% endif %}
@@ -199,7 +199,7 @@
         {% endif %}
     </ul>
     <div id="aboutPanel"
-        class="fr-tabs__panel fr-tabs__panel--selected fr-p-0"
+        class="fr-tabs__panel fr-tabs__panel--selected"
         role="tabpanel"
         aria-labelledby="aboutPanel"
         tabindex="0"
@@ -213,9 +213,9 @@
         <h3 class="fr-text--sm fr-m-0 qfdmo-text-grey-425">Services disponibles</h3>
         {% for service_proposition in  adresse.proposition_services_by_direction(direction) %}
             <div class="fr-px-1w fr-pb-1w fr-my-1w qfdmo-bg-grey-975">
-                <p class="fr-my-1w fr-mr-1v fr-badge fr-badge--sm qfdmo-bg-{{service_proposition.action.couleur}} qfdmo-bg-opacity-30">
+                <p class="fr-my-1w fr-mr-1v fr-badge fr-badge--sm qfdmo-bg-{{ service_proposition.action.groupe_action.couleur if is_carte(request) else service_proposition.action.couleur }} qfdmo-bg-opacity-30">
                     {% if service_proposition.action.icon %}
-                        <span class="{{ service_proposition.action.icon }}" aria-hidden="true"></span>&nbsp;
+                        <span class="{{ service_proposition.action.groupe_action.icon if is_carte(request) else service_proposition.action.icon }}" aria-hidden="true"></span>&nbsp;
                     {% endif %}
                     {{ service_proposition.action.libelle }}
                 </p>
@@ -247,7 +247,7 @@
 
     {% if display_infos_panel(adresse) %}
         <div id="infosPanel"
-            class="fr-tabs__panel fr-p-0"
+            class="fr-tabs__panel"
             role="tabpanel"
             aria-labelledby="infosPanel"
             tabindex="0"
@@ -284,7 +284,7 @@
 
     {% if display_labels_panel(adresse) %}
         <div id="labelsPanel"
-            class="fr-tabs__panel fr-p-0"
+            class="fr-tabs__panel"
             role="tabpanel"
             aria-labelledby="labelsPanel"
             tabindex="0"
@@ -299,7 +299,7 @@
 
     {% if display_sources_panel(adresse) %}
         <div id="sourcesPanel"
-            class="fr-tabs__panel fr-p-0"
+            class="fr-tabs__panel"
             role="tabpanel"
             aria-labelledby="sourcesPanel"
             tabindex="0"

@@ -4,10 +4,12 @@ import { SolutionMap } from "./solution_map"
 import { Actor } from "./types"
 
 export default class extends Controller<HTMLElement> {
-    static targets = ["acteur", "searchInZoneButton", "bBox"]
+    static targets = ["acteur", "searchInZoneButton", "bbox"]
     declare readonly acteurTargets: Array<HTMLScriptElement>
     declare readonly searchInZoneButtonTarget: HTMLButtonElement
-    declare readonly bBoxTarget?: HTMLScriptElement
+    declare readonly bboxTarget: HTMLInputElement
+
+    declare readonly hasBboxTarget: boolean
 
     static values = { location: { type: Object, default: {} } }
     declare readonly locationValue: object
@@ -26,8 +28,8 @@ export default class extends Controller<HTMLElement> {
                 }
             })
             .filter((actor) => actor !== undefined)
-        if (this.hasBBoxTarget) {
-            const bbox = JSON.parse(this.bBoxTarget.textContent)
+        if (this.hasBboxTarget && this.bboxTarget.value !== "") {
+            const bbox = JSON.parse(this.bboxTarget.value)
             actorsMap.displayActor(actors, bbox)
         } else {
             actorsMap.displayActor(actors)
@@ -40,7 +42,7 @@ export default class extends Controller<HTMLElement> {
     }
 
     mapChanged(event: CustomEvent) {
-        this.dispatch("searchInZone", { detail: event.detail })
+        this.dispatch("updateBbox", { detail: event.detail })
         this.displaySearchInZoneButton()
     }
 

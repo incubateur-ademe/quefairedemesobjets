@@ -1,17 +1,18 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
-    #selectedOption: string = "jecherche"
+    #selectedOption: string = ""
     static targets = [
         "jai",
         "jecherche",
         "direction",
         "latitudeInput",
         "longitudeInput",
-        "searchInZoneInput",
         "actionList",
         "searchForm",
         "reparerInput",
+
+        "bbox",
 
         "searchFormPanel",
         "addressesPanel",
@@ -31,13 +32,17 @@ export default class extends Controller<HTMLElement> {
         "adresseGroup",
         "adresseError",
 
-        "advancedFilterMainPanel",
-        "advancedFilterFormPanel",
+        "advancedFiltersMainPanel",
+        "advancedFiltersFormPanel",
+        "advancedFiltersSaveButton",
+        "advancedFiltersSaveAndSubmitButton",
 
-        "advancedFilterSaveButton",
-        "advancedFilterSaveAndSubmitButton",
+        "legendMainPanel",
+        "legendFormPanel",
 
         "reparerFilter",
+
+        "carte",
 
         //FIXME: should be renamed
         "loadingSolutions",
@@ -50,13 +55,13 @@ export default class extends Controller<HTMLElement> {
     declare readonly directionTarget: HTMLElement
     declare readonly latitudeInputTarget: HTMLInputElement
     declare readonly longitudeInputTarget: HTMLInputElement
-    declare readonly searchInZoneInputTarget: HTMLInputElement
     declare readonly actionListTarget: HTMLInputElement
     declare readonly searchFormTarget: HTMLFormElement
     declare readonly reparerInputTarget: HTMLInputElement
+    declare readonly bboxTarget: HTMLInputElement
 
     declare readonly hasDirectionTarget: boolean
-    declare readonly hasSearchInZoneInput: boolean
+    declare readonly hasBboxTarget: boolean
 
     declare readonly searchFormPanelTarget: HTMLElement
     declare readonly addressesPanelTarget: HTMLElement
@@ -79,13 +84,18 @@ export default class extends Controller<HTMLElement> {
     declare readonly adresseGroupTarget: HTMLElement
     declare readonly adresseErrorTarget: HTMLElement
 
-    declare readonly advancedFilterMainPanelTarget: HTMLElement
-    declare readonly advancedFilterFormPanelTarget: HTMLElement
+    declare readonly advancedFiltersMainPanelTarget: HTMLElement
+    declare readonly advancedFiltersFormPanelTarget: HTMLElement
+    declare readonly advancedFiltersSaveButtonTarget: HTMLElement
+    declare readonly advancedFiltersSaveAndSubmitButtonTarget: HTMLElement
 
-    declare readonly advancedFilterSaveButtonTarget: HTMLElement
-    declare readonly advancedFilterSaveAndSubmitButtonTarget: HTMLElement
+    declare readonly legendMainPanelTarget: HTMLElement
+    declare readonly legendFormPanelTarget: HTMLElement
+    declare readonly hasLegendFormPanelTarget: boolean
 
     declare readonly reparerFilterTargets: HTMLInputElement[]
+
+    declare readonly hasCarteTarget: boolean
 
     declare readonly loadingSolutionsTarget: HTMLElement
     declare readonly addressMissingTarget: HTMLElement
@@ -113,6 +123,15 @@ export default class extends Controller<HTMLElement> {
         this.reparerFilterTargets.forEach((element: HTMLInputElement) => {
             element.disabled = true
         })
+    }
+
+    activeReparerFiltersCarte(event: Event) {
+        const target = event.target as HTMLInputElement
+        if (target.value == "reparer") {
+            this.reparerFilterTargets.forEach((element: HTMLInputElement) => {
+                element.disabled = !target.checked
+            })
+        }
     }
 
     scrollToContent() {
@@ -145,8 +164,8 @@ export default class extends Controller<HTMLElement> {
         this.detailsAddressPanelTarget.classList.remove("md:qfdmo-w-0")
     }
 
-    updateSearchInZone(event) {
-        this.searchInZoneInputTarget.value = JSON.stringify(event.detail)
+    updateBboxInput(event) {
+        this.bboxTarget.value = JSON.stringify(event.detail)
     }
 
     hideDetails() {
@@ -196,6 +215,9 @@ export default class extends Controller<HTMLElement> {
         params.set("direction", this.#selectedOption)
         params.set("latitude", latitude)
         params.set("longitude", longitude)
+        if (this.hasCarteTarget) {
+            params.set("carte", "1")
+        }
         const srcDetailsAddress = `/adresse/${identifiantUnique}?${params.toString()}`
 
         this.srcDetailsAddressTarget.setAttribute("src", srcDetailsAddress)
@@ -230,21 +252,27 @@ export default class extends Controller<HTMLElement> {
             else options[i].checked = false
         }
 
-        let actionList = []
+        let actionList: string[] = []
         if (this.#selectedOption == "jai") {
             // Checkboxes option
             const actionInput = this.jaiTarget.getElementsByTagName("input")
             for (let i = 0; i < actionInput.length; i++) {
-                if (actionInput[i].checked)
-                    actionList.push(actionInput[i].getAttribute("name"))
+                if (actionInput[i].checked) {
+                    const name = actionInput[i].getAttribute("name")
+                    if (name) {
+                        actionList.push(name)
+                    }
+                }
             }
         }
         if (this.#selectedOption == "jecherche") {
             // Checkboxes option
             const actionInput = this.jechercheTarget.getElementsByTagName("input")
             for (let i = 0; i < actionInput.length; i++) {
-                if (actionInput[i].checked)
-                    actionList.push(actionInput[i].getAttribute("name"))
+                const name = actionInput[i].getAttribute("name")
+                if (name) {
+                    actionList.push(name)
+                }
             }
         }
         this.actionListTarget.value = actionList.join("|")
@@ -282,69 +310,112 @@ export default class extends Controller<HTMLElement> {
         return errorExists
     }
 
-    checkErrorForm(): boolean {
+    #checkErrorForm(): boolean {
         let errorExists = false
         if (this.checkSsCatObjetErrorForm()) errorExists ||= true
         if (this.checkAdresseErrorForm()) errorExists ||= true
         return errorExists
     }
 
-    submitForm() {
-        if (this.checkErrorForm()) return
-
-        this.loadingSolutionsTarget.classList.remove("qfdmo-hidden")
-        this.addressMissingTarget.classList.add("qfdmo-hidden")
-        this.NoLocalSolutionTarget.classList.add("qfdmo-hidden")
-
-        this.searchFormPanelTarget.classList.remove("qfdmo-flex-grow")
-        this.backToSearchPanelTarget.classList.remove("qfdmo-h-0")
-        this.addressesPanelTarget.classList.add("qfdmo-flex-grow")
-        this.scrollToContent()
-
-        let event = new Event("submit", { bubbles: true, cancelable: true })
-        setTimeout(() => {
-            this.searchFormTarget.dispatchEvent(event)
-        }, 300)
-    }
-
-    toggleAdvancedFiltersWithSubmit() {
-        this.advancedFilterSaveAndSubmitButtonTarget.classList.remove("qfdmo-hidden")
-        this.advancedFilterSaveButtonTarget.classList.add("qfdmo-hidden")
+    toggleAdvancedFiltersWithSubmitButton() {
+        this.advancedFiltersSaveAndSubmitButtonTarget.classList.remove("qfdmo-hidden")
+        this.advancedFiltersSaveButtonTarget.classList.add("qfdmo-hidden")
         this.#toggleAdvancedFilters()
     }
 
-    toggleAdvancedFiltersWithoutSubmit() {
-        this.advancedFilterSaveAndSubmitButtonTarget.classList.add("qfdmo-hidden")
-        this.advancedFilterSaveButtonTarget.classList.remove("qfdmo-hidden")
+    toggleAdvancedFiltersWithoutSubmitButton() {
+        this.advancedFiltersSaveAndSubmitButtonTarget.classList.add("qfdmo-hidden")
+        this.advancedFiltersSaveButtonTarget.classList.remove("qfdmo-hidden")
         this.#toggleAdvancedFilters()
     }
 
     #toggleAdvancedFilters() {
-        if (this.advancedFilterMainPanelTarget.classList.contains("qfdmo-hidden")) {
-            this.advancedFilterMainPanelTarget.classList.remove("qfdmo-hidden")
-            setTimeout(() => {
-                this.advancedFilterFormPanelTarget.classList.remove("qfdmo-h-0")
-                this.advancedFilterFormPanelTarget.classList.add("qfdmo-h-[95%]")
-            }, 100)
+        if (this.advancedFiltersMainPanelTarget.classList.contains("qfdmo-hidden")) {
+            this.#showAdvancedFilters()
         } else {
-            this.advancedFilterFormPanelTarget.classList.remove("qfdmo-h-[95%]")
-            this.advancedFilterFormPanelTarget.classList.add("qfdmo-h-0")
-            setTimeout(() => {
-                this.advancedFilterMainPanelTarget.classList.add("qfdmo-hidden")
-            }, 300)
+            this.#hideAdvancedFilters()
         }
         this.scrollToContent()
     }
 
-    toggleAdvancedFiltersAndSubmitForm() {
-        this.#toggleAdvancedFilters()
-        this.submitForm()
+    #showAdvancedFilters() {
+        this.advancedFiltersMainPanelTarget.classList.remove("qfdmo-hidden")
+        setTimeout(() => {
+            this.advancedFiltersFormPanelTarget.classList.remove("qfdmo-h-0")
+            this.advancedFiltersFormPanelTarget.classList.add("qfdmo-h-[95%]")
+        }, 100)
     }
 
-    submitFormWithoutZone() {
-        if (this.hasSearchInZoneInput) {
-            this.searchInZoneInputTarget.value = ""
+    #hideAdvancedFilters() {
+        this.advancedFiltersFormPanelTarget.classList.remove("qfdmo-h-[95%]")
+        this.advancedFiltersFormPanelTarget.classList.add("qfdmo-h-0")
+        setTimeout(() => {
+            this.advancedFiltersMainPanelTarget.classList.add("qfdmo-hidden")
+        }, 300)
+    }
+
+    toggleLegend() {
+        if (this.legendMainPanelTarget.classList.contains("qfdmo-hidden")) {
+            this.#showLegend()
+        } else {
+            this.#hideLegend()
         }
-        this.submitForm()
+        this.scrollToContent()
+    }
+
+    #showLegend() {
+        this.legendMainPanelTarget.classList.remove("qfdmo-hidden")
+        setTimeout(() => {
+            this.legendFormPanelTarget.classList.remove("qfdmo-h-0")
+            this.legendFormPanelTarget.classList.add("qfdmo-h-[95%]")
+        }, 100)
+    }
+
+    #hideLegend() {
+        if (this.hasLegendFormPanelTarget) {
+            this.legendFormPanelTarget.classList.remove("qfdmo-h-[95%]")
+            this.legendFormPanelTarget.classList.add("qfdmo-h-0")
+            setTimeout(() => {
+                this.legendMainPanelTarget.classList.add("qfdmo-hidden")
+            }, 300)
+        }
+    }
+
+    advancedSubmit(event: Event) {
+        const withControls =
+            (event.target as HTMLElement).dataset.withControls?.toLowerCase() === "true"
+        if (withControls) {
+            if (this.#checkErrorForm()) return
+        }
+
+        const withoutZone =
+            (event.target as HTMLElement).dataset.withoutZone?.toLowerCase() === "true"
+        if (withoutZone) {
+            if (this.hasBboxTarget) {
+                this.bboxTarget.value = ""
+            }
+        }
+
+        const withDynamicFormPanel =
+            (
+                event.target as HTMLElement
+            ).dataset.withDynamicFormPanel?.toLowerCase() === "true"
+        if (withDynamicFormPanel) {
+            this.searchFormPanelTarget.classList.remove("qfdmo-flex-grow")
+            this.backToSearchPanelTarget.classList.remove("qfdmo-h-0")
+            this.addressesPanelTarget.classList.add("qfdmo-flex-grow")
+            this.scrollToContent()
+        }
+
+        this.loadingSolutionsTarget.classList.remove("qfdmo-hidden")
+        this.addressMissingTarget.classList.add("qfdmo-hidden")
+        this.NoLocalSolutionTarget.classList.add("qfdmo-hidden")
+        this.#hideAdvancedFilters()
+        this.#hideLegend()
+
+        let submitEvent = new Event("submit", { bubbles: true, cancelable: true })
+        setTimeout(() => {
+            this.searchFormTarget.dispatchEvent(submitEvent)
+        }, 300)
     }
 }

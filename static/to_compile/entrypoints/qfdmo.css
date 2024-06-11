@@ -179,17 +179,6 @@ Style the autocomplete container:
     padding:4px !important;
 }
 
-.fr-tabs--noborder {
-    box-shadow: none !important;
-    border: none;
-    height: fit-content;
-}
-
-.fr-tabs__tab--noborder {
-    background-image: none !important;
-    background-color: white !important;
-}
-
 .fr-link--no-underline {
     background-image: none !important;
 }

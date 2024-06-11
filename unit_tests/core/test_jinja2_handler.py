@@ -6,7 +6,6 @@ from django.http import HttpRequest
 
 from core.jinja2_handler import (
     action_by_direction,
-    action_list_display,
     display_infos_panel,
     display_labels_panel,
     display_sources_panel,
@@ -46,62 +45,6 @@ class TestIsIframe:
         request.GET = {"iframe": "anything"}
 
         assert is_embedded(request) is True
-
-
-class TestActionDisplayList:
-
-    @pytest.mark.parametrize(
-        "params,action_list",
-        [
-            (
-                {},
-                [
-                    "prêter",
-                    "mettre en location",
-                    "réparer",
-                    "donner",
-                    "échanger",
-                    "vendre",
-                ],
-            ),
-            (
-                {"direction": "fake"},
-                [
-                    "prêter",
-                    "mettre en location",
-                    "réparer",
-                    "donner",
-                    "échanger",
-                    "vendre",
-                ],
-            ),
-            (
-                {"direction": "jai"},
-                [
-                    "prêter",
-                    "mettre en location",
-                    "réparer",
-                    "donner",
-                    "échanger",
-                    "vendre",
-                ],
-            ),
-            (
-                {"direction": "jecherche"},
-                ["emprunter", "louer", "échanger", "acheter de seconde main"],
-            ),
-            ({"action_list": "fake"}, []),
-            ({"action_list": "preter"}, ["prêter"]),
-            ({"action_list": "preter|reparer"}, ["prêter", "réparer"]),
-        ],
-    )
-    @pytest.mark.django_db
-    def test_action_list(self, params, action_list):
-        request = HttpRequest()
-
-        request.GET = params
-
-        assert action_list_display(request) == action_list
 
 
 class TestActionByDirection:

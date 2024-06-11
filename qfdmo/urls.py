@@ -3,14 +3,21 @@ from django.urls import path
 from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 
-from qfdmo.views import adresses, dags
+from qfdmo.views.adresses import (
+    AddressesView,
+    adresse_detail,
+    get_object_list,
+    getorcreate_revisionacteur,
+    solution_admin,
+)
+from qfdmo.views.configurator import ConfiguratorView
+from qfdmo.views.dags import DagsValidation
 
 urlpatterns = [
-    path("", adresses.AddressesView.as_view(), name="reemploi_solution"),
+    path("", AddressesView.as_view(), name="reemploi_solution"),
     path(
         "qfdmo/getorcreate_revisionacteur/<str:acteur_identifiant>",
-        #        display_solutions.getorcreate_correctionequipeacteur,
-        adresses.getorcreate_revisionacteur,
+        getorcreate_revisionacteur,
         name="getorcreate_revisionacteur",
     ),
     path(
@@ -20,17 +27,17 @@ urlpatterns = [
     ),
     path(
         "qfdmo/get_object_list",
-        adresses.get_object_list,
+        get_object_list,
         name="get_object_list",
     ),
     path(
         "adresse/<str:identifiant_unique>",
-        adresses.adresse_detail,
+        adresse_detail,
         name="adresse_detail",
     ),
     path(
         "solution_admin/<str:identifiant_unique>",
-        adresses.solution_admin,
+        solution_admin,
         name="solution_admin",
     ),
     path(
@@ -70,12 +77,12 @@ urlpatterns = [
     ),
     path(
         "dags/validations",
-        dags.DagsValidation.as_view(),
+        DagsValidation.as_view(),
         name="dags_validations",
     ),
     path(
         "iframe/configurateur",
-        adresses.ConfiguratorView.as_view(),
+        ConfiguratorView.as_view(),
         name="iframe_configurator",
     ),
 ]

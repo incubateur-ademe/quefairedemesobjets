@@ -1,53 +1,19 @@
 {% extends 'qfdmo/_addresses_partials/filters/panel_filters.html' %}
 
-{% block before_filters %}
-    <h1 class="fr-h4 fr-mt-3w qfdmo-text-center">
-        Actions possibles
-    </h1>
-    <hr>
-    <fieldset
-        class="fr-fieldset"
-        aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages"
-    >
-        <legend class="qfdmo-hidden">{{form.groupe_action.label_tag()}}</legend>
-        {% for action in groupe_actions(request) %}
-            <div class="fr-fieldset__element">
-                <div
-                    class="fr-checkbox-group fr-checkbox-group--sm"
-                    data-action="click->search-solution-form#apply"
-                    >
-                    <input
-                        name="{{action.code}}"
-                        {% if action.code == 'reparer' %}
-                            data-action="change -> search-solution-form#activeReparerFilters"
-                            data-search-solution-form-target="reparerInput"
-                        {% endif %}
-                        id="{{action_direction}}_{{action.code}}"
-                        type="checkbox"
-                        aria-describedby="{{action.code}}-messages"
-                        {% if action.active %} checked{% endif %}
-                        >
-                        <label class="fr-label" for="{{action_direction}}_{{action.code}}">
-                            {% if action.icon %}
-                                <span class="fr-px-1v qfdmo-text-white {{ action.icon }} fr-icon--sm qfdmo-rounded-full qfdmo-bg-{{action.couleur}}" aria-hidden="true"></span>&nbsp;
-                            {% endif %}
-                            {{ action.libelle }}
-                        </label>
-                    </div>
-                </div>
-        {% endfor %}
-    </fieldset>
-{% endblock %}
-
-
 {% block filters_title %}
     <h1 class="fr-h4 fr-mt-3w qfdmo-text-center">
         Filtres
     </h1>
 {% endblock %}
+
 {% block filters_content %}
 
     {% include 'qfdmo/_addresses_partials/filters/_object_filter.html' %}
     {% include 'qfdmo/_addresses_partials/filters/_labels_filters.html' %}
 
+{% endblock %}
+
+{% block filters_footer_links %}
+    <!-- Liens de pieds de page pour iframe -->
+    {% include 'qfdmo/_addresses_partials/iframe_footer_links.html' %}
 {% endblock %}

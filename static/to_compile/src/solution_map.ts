@@ -87,19 +87,17 @@ export class SolutionMap {
         }
     }
 
-    displayActor(actors: Array<Actor>, bbox?: Array<Number>): void {
+    displayActor(actors: Array<Actor>, bboxValue?: Array<Number>): void {
         let points: Array<Array<Number>> = []
 
         actors.forEach(function (actor: Actor) {
             if (actor.location) {
                 // Create the marker look and feel : pin + icon
                 var customMarker = undefined
-                if (actor.actions.length > 0) {
+                if (actor.icon) {
                     customMarker = L.ExtraMarkers.icon({
-                        icon: actor.acteur_selected_action.icon,
-                        markerColor: get_color_code(
-                            actor.acteur_selected_action.couleur,
-                        ),
+                        icon: actor.icon,
+                        markerColor: get_color_code(actor.couleur),
                         shape: "square",
                         prefix: "qfdmo-icon",
                         svg: true,
@@ -134,10 +132,11 @@ export class SolutionMap {
         ) {
             points.push([this.#location.latitude, this.#location.longitude])
         }
-        if (bbox !== undefined) {
+
+        if (bboxValue !== undefined) {
             this.#map.fitBounds([
-                [bbox[1], bbox[0]],
-                [bbox[3], bbox[2]],
+                [bboxValue.southWest.lat, bboxValue.southWest.lng],
+                [bboxValue.northEast.lat, bboxValue.northEast.lng],
             ])
         } else if (points.length > 0) {
             this.#map.fitBounds(points)

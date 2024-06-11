@@ -248,7 +248,7 @@ pytest
 Test Js unitaire
 
 ```sh
-npm run test static
+npm run test
 ```
 
 End to end avec Playwright
@@ -396,7 +396,7 @@ classDiagram
         - modifie_le: datetime
         - horaires_osm: str
         - horaires_description: str
-        + share_url(request: HttpRequest, direction: str | None): str
+        + get_share_url(request: HttpRequest, direction: str | None): str
         + latitude: float
         + longitude: float
         + libelle: str

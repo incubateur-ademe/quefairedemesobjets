@@ -135,9 +135,9 @@ apache-airflow-providers-imap==3.6.0 \
     --hash=sha256:123d6d935f5a723e5e7d56d22be12157f47cebae84b3201271e7c53126ca2b42 \
     --hash=sha256:6ee329f521084e1e09ccffe68c68b810ee26c6af63a48bd83300a21fd4eaf9e2
     # via apache-airflow
-apache-airflow-providers-postgres==5.11.0 \
-    --hash=sha256:537368c4d5258ca03c65e7b3e50aa9f76061717e9a28dd0016d3e5939bfe5ea4 \
-    --hash=sha256:80083f6c46b142ed9cc3e862f4a0898d6855ea37b774ea2b26719995438cc29b
+apache-airflow-providers-postgres==5.11.1 \
+    --hash=sha256:ed6fdaf7921044a611c34b029e3488cd9486324ed54ebe995cbcfa9e28266d27 \
+    --hash=sha256:fd29c1bcf2a4eb996eba09d45c3ffb95f97a69842321527fedb1eeb8811c11fb
     # via -r dev-requirements.in
 apache-airflow-providers-smtp==1.7.0 \
     --hash=sha256:4a1c5d82f8d99a4dd8da530758c42ab031b2ecb3e40a3141e36b7bfa8370ea37 \
@@ -463,9 +463,9 @@ django-browser-reload==1.12.1 \
     --hash=sha256:08b457f1b6599bf782d4d2ecdfb0897d6fc936ac4035060d0269c2af5ef4ef7a \
     --hash=sha256:875b6bd01db13380522ccb4ae75871a2edeae74bb5ac92bf32eb76763d575d86
     # via -r dev-requirements.in
-django-debug-toolbar==4.3.0 \
-    --hash=sha256:0b0dddee5ea29b9cb678593bc0d7a6d76b21d7799cb68e091a2148341a80f3c4 \
-    --hash=sha256:e09b7dcb8417b743234dfc57c95a7c1d1d87a88844abd13b4c5387f807b31bf6
+django-debug-toolbar==4.4.2 \
+    --hash=sha256:5d7afb2ea5f8730241e5b0735396e16cd1fd8c6b53a2f3e1e30bbab9abb23728 \
+    --hash=sha256:9204050fcb1e4f74216c5b024bc76081451926a6303993d6c513f5e142675927
     # via -r dev-requirements.in
 django-extensions==3.2.3 \
     --hash=sha256:44d27919d04e23b3f40231c4ab7af4e61ce832ef46d610cc650d53e68328410a \
@@ -1359,23 +1359,23 @@ platformdirs==3.10.0 \
     # via
     #   black
     #   virtualenv
-pluggy==1.4.0 \
-    --hash=sha256:7db9f7b503d67d1c5b95f59773ebb58a8c1c288129a88665838012cfb07b8981 \
-    --hash=sha256:8c85c2876142a764e5b7548e7d9a0e0ddb46f5185161049a79b7e974454223be
+pluggy==1.5.0 \
+    --hash=sha256:2cffa88e94fdc978c4c574f15f9e59b7f4201d439195c3715ca9e2486f1d0cf1 \
+    --hash=sha256:44e1ad92c8ca002de6377e165f3e0f1be63266ab4d554740532335b9d75ea669
     # via
     #   apache-airflow
     #   pytest
-pre-commit==3.7.0 \
-    --hash=sha256:5eae9e10c2b5ac51577c3452ec0a490455c45a0533f7960f993a0d01e59decab \
-    --hash=sha256:e209d61b8acdcf742404408531f0c37d49d2c734fd7cff2d6076083d191cb060
+pre-commit==3.7.1 \
+    --hash=sha256:8ca3ad567bc78a4972a3f1a477e94a79d4597e8140a6e0b651c5e33899c3654a \
+    --hash=sha256:fae36fd1d7ad7d6a5a1c0b0d5adb2ed1a3bda5a21bf6c3e5372073d7a11cd4c5
     # via -r dev-requirements.in
 prison==0.2.1 \
     --hash=sha256:e6cd724044afcb1a8a69340cad2f1e3151a5839fd3a8027fd1357571e797c599 \
     --hash=sha256:f90bab63fca497aa0819a852f64fb21a4e181ed9f6114deaa5dc04001a7555c5
     # via flask-appbuilder
-prompt-toolkit==3.0.39 \
-    --hash=sha256:04505ade687dc26dc4284b1ad19a83be2f2afe83e7a828ace0c72f3a1df72aac \
-    --hash=sha256:9dffbe1d8acf91e3de75f3b544e4842382fc06c6babe903ac9acb74dc6e08d88
+prompt-toolkit==3.0.44 \
+    --hash=sha256:205a20669633d042d3722a528b8e7cd3f4dbd9e1450935f596c2cc61166762dd \
+    --hash=sha256:c1dfd082c4259964bc8bcce1f8460d9dbeb5d4a37bfc25b8082bc02cd41c8af6
     # via ptpython
 protobuf==4.25.3 \
     --hash=sha256:19b270aeaa0099f16d3ca02628546b8baefe2955bbe23224aaf856134eccf1e4 \
@@ -1484,9 +1484,9 @@ psycopg2-binary==2.9.9 \
     --hash=sha256:f7fc5a5acafb7d6ccca13bfa8c90f8c51f13d8fb87d95656d3950f0158d3ce53 \
     --hash=sha256:f9b5571d33660d5009a8b3c25dc1db560206e2d2f89d3df1cb32d72c0d117d52
     # via apache-airflow-providers-postgres
-ptpython==3.0.26 \
-    --hash=sha256:3dc4c066d049e16d8b181e995a568d36697d04d9acc2724732f3ff6686c5da57 \
-    --hash=sha256:c8fb1406502dc349d99c57eaf06e7116f3b2deac94f02f342bae68708909f743
+ptpython==3.0.27 \
+    --hash=sha256:24b0fda94b73d1c99a27e6fd0d08be6f2e7cda79a2db995c7e3c7b8b1254bad9 \
+    --hash=sha256:549870d537ab3244243cfb92d36347072bb8be823a121fb2fd95297af0fb42bb
     # via -r dev-requirements.in
 pycparser==2.22 \
     --hash=sha256:491c8be9c040f5390f5bf44a5b07752bd07f56edf992381b05c701439eec10f6 \
@@ -1506,9 +1506,9 @@ pyjwt==2.8.0 \
     #   apache-airflow
     #   flask-appbuilder
     #   flask-jwt-extended
-pytest==8.1.1 \
-    --hash=sha256:2a8386cfc11fa9d2c50ee7b2a57e7d898ef90470a7a34c4b949ff59662bb78b7 \
-    --hash=sha256:ac978141a75948948817d360297b7aae0fcb9d6ff6bc9ec6d514b85d5a65c044
+pytest==8.2.1 \
+    --hash=sha256:5046e5b46d8e4cac199c373041f26be56fdb81eb4e67dc11d4e10811fc3408fd \
+    --hash=sha256:faccc5d332b8c3719f40283d0d44aa5cf101cec36f88cde9ed8f2bc0538612b1
     # via
     #   -r dev-requirements.in
     #   pytest-django

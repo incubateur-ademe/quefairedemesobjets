@@ -177,17 +177,20 @@ class BaseActeur(NomAsNaturalKeyModel):
     )
     horaires_description = models.TextField(blank=True, null=True)
 
-    def share_url(self, request: HttpRequest, direction: str | None = None):
-        # url = request.build_absolute_uri("")
-        url = "http"
-        if request.is_secure():
-            url += "s"
-        url += "://" + request.get_host()
-        url += reverse("qfdmo:adresse_detail", args=[self.identifiant_unique])
-        url += "?iframe"
+    def get_share_url(self, request: HttpRequest, direction: str | None = None) -> str:
+        protocol = "https" if request.is_secure() else "http"
+        host = request.get_host()
+        base_url = f"{protocol}://{host}"
+        base_url += reverse("qfdmo:adresse_detail", args=[self.identifiant_unique])
+
+        params = []
+        if "carte" in request.GET:
+            params.append("carte=1")
+        elif "iframe" in request.GET:
+            params.append("iframe=1")
         if direction:
-            url += f"&direction={direction}"
-        return url
+            params.append(f"direction={direction}")
+        return f"{base_url}?{'&'.join(params)}"
 
     @property
     def latitude(self):
@@ -369,64 +372,51 @@ class DisplayedActeur(BaseActeur):
         verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ"
 
     def acteur_actions(self, direction=None):
-        acteur_actions_by_direction = {}
-        ps_action_ids = [
-            ps.action_id for ps in self.proposition_services.all()  # type: ignore
-        ]
-        for d, actions in CachedDirectionAction.get_actions_by_direction().items():
-            acteur_actions_by_direction[d] = sorted(
-                [action for action in actions if action["id"] in ps_action_ids],
-                key=lambda x: x["order"],
-            )
-        if direction:
-            return acteur_actions_by_direction[direction]
-
-        deduplicated_actions = {
-            a["id"]: a
-            for a in (
-                acteur_actions_by_direction["jai"]
-                + acteur_actions_by_direction["jecherche"]
-            )
-        }.values()
-        sorted_actions = sorted(
-            deduplicated_actions,
-            key=lambda x: x["order"],
+        ps_action_ids = list(
+            {ps.action_id for ps in self.proposition_services.all()}  # type: ignore
         )
-        return sorted_actions
-
-    def serialize(
-        self,
-        format: None | str = None,
-        direction: str | None = None,
-    ) -> dict | str:
-        super_serialized = super().serialize(format=None)
-        super_serialized["actions"] = self.acteur_actions(direction=direction)
-
-        if format == "json":
-            return json.dumps(super_serialized)
-        return super_serialized
+        return [
+            action
+            for action in CachedDirectionAction.get_action_instances()
+            if (not direction or direction in [d.code for d in action.directions.all()])
+            and action.id in ps_action_ids
+        ]
 
     def json_acteur_for_display(
-        self, direction: str | None = None, action_list: str | None = None
+        self,
+        direction: str | None = None,
+        action_list: str | None = None,
+        carte: bool = False,
     ) -> str:
         actions = self.acteur_actions(direction=direction)
+
         acteur_selected_actions = None
         if action_list:
             acteur_selected_actions = [
-                a for a in actions if a["code"] in action_list.split("|")
+                a for a in actions if a.code in action_list.split("|")
             ]
-        return orjson.dumps(
-            {
-                "identifiant_unique": self.identifiant_unique,
-                "location": orjson.loads(self.location.geojson),
-                "actions": actions,
-                "acteur_selected_action": (
-                    acteur_selected_actions[0]
-                    if acteur_selected_actions
-                    else (actions[0] if actions else None)
-                ),
-            }
-        ).decode("utf-8")
+        main_action = (
+            acteur_selected_actions[0]
+            if acteur_selected_actions
+            else (actions[0] if actions else None)
+        )
+        acteur_dict = {
+            "identifiant_unique": self.identifiant_unique,
+            "location": orjson.loads(self.location.geojson),
+        }
+        if main_action := (
+            acteur_selected_actions[0]
+            if acteur_selected_actions
+            else (actions[0] if actions else None)
+        ):
+            if carte and main_action.groupe_action:
+                acteur_dict["icon"] = main_action.groupe_action.icon
+                acteur_dict["couleur"] = main_action.groupe_action.couleur
+            else:
+                acteur_dict["icon"] = main_action.icon
+                acteur_dict["couleur"] = main_action.couleur
+
+        return orjson.dumps(acteur_dict).decode("utf-8")
 
 
 class DisplayedActeurTemp(BaseActeur):

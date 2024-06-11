@@ -34,7 +34,7 @@ def create_proposition_services(**kwargs):
     df_actions = data_dict["actions"]
     df_acteur_services = data_dict["acteur_services"]
 
-    for index, row in df.iterrows():
+    for _, row in df.iterrows():
         acteur_id = row["identifiant_unique"]
         sous_categories = row["produitsdechets_acceptes"]
 
@@ -78,9 +78,10 @@ def create_proposition_services(**kwargs):
     rows_list = list(rows_dict.values())
 
     df_pds = pd.DataFrame(rows_list)
-    df_pds["sous_categories"] = df_pds["sous_categories"].replace(np.nan, None)
-    df_pds.index = range(idx_max, idx_max + len(df_pds))
-    df_pds["id"] = df_pds.index
+    if "sous_categories" in df_pds.columns:
+        df_pds["sous_categories"] = df_pds["sous_categories"].replace(np.nan, None)
+    if indexes := range(idx_max, idx_max + len(df_pds)):
+        df_pds["id"] = indexes
     metadata = {
         "number_of_merged_actors": merged_count,
         "number_of_propositionservices": len(df_pds),
@@ -130,6 +131,7 @@ def serialize_to_json(**kwargs):
         ["propositionservice_id", "souscategorieobjet_id"], keep="first", inplace=True
     )
     df_pdsc = df_pdsc[df_pdsc["souscategorieobjet_id"].notna()]
+    df_labels = kwargs["ti"].xcom_pull(task_ids="create_labels")
 
     aggregated_pdsc = (
         df_pdsc.groupby("propositionservice_id")
@@ -160,11 +162,25 @@ def serialize_to_json(**kwargs):
         .reset_index(name="proposition_services")
     )
 
-    df_joined = pd.merge(
+    aggregated_labels = (
+        df_labels.groupby("acteur_id")
+        .apply(lambda x: x.to_dict("records") if not x.empty else [])
+        .reset_index(name="labels")
+    )
+
+    df_joined_with_pds = pd.merge(
         df_actors,
         aggregated_pds,
         how="left",
         left_on="identifiant_unique",
+        right_on="acteur_id",
+    )
+
+    df_joined = pd.merge(
+        df_joined_with_pds,
+        aggregated_labels,
+        how="left",
+        left_on="acteur_id",
         right_on="acteur_id",
     )
 
@@ -374,27 +390,48 @@ def create_actors(**kwargs):
 
 
 def create_labels(**kwargs):
-    # TODO: ADD ESS and make labelqualite fetched from DB using code
     data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
     labels = data_dict["labels"]
+    df_acteurtype = data_dict["acteurtype"]
     df_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
+
+    ess_acteur_type_id = df_acteurtype.loc[
+        df_acteurtype["code"].str.lower() == "ess", "id"
+    ].iloc[0]
+    ess_label_id = labels.loc[labels["code"].str.lower() == "ess", "id"].iloc[0]
+    ess_label_libelle = labels.loc[labels["code"].str.lower() == "ess", "libelle"].iloc[
+        0
+    ]
+
+    label_mapping = labels.set_index(labels["code"].str.lower()).to_dict(orient="index")
     rows_list = []
-    for index, row in df_actors.iterrows():
+    for _, row in df_actors.iterrows():
         if "labels_etou_bonus" in row:
             label = str(row["labels_etou_bonus"])
             if label == "Agréé Bonus Réparation":
-                rows_list.append(
-                    {
-                        "acteur_id": row["identifiant_unique"],
-                        "labelqualite_id": 3,
-                        "labelqualite": labels.loc[
-                            labels["id"] == 3, "libelle"
-                        ].tolist()[0],
-                    }
-                )
+                eco_code = row["ecoorganisme"].lower()
+                if eco_code in label_mapping:
+                    rows_list.append(
+                        {
+                            "acteur_id": row["identifiant_unique"],
+                            "labelqualite_id": label_mapping[eco_code]["id"],
+                            "labelqualite": label_mapping[eco_code]["libelle"],
+                        }
+                    )
+
+        if row["acteur_type_id"] == ess_acteur_type_id:
+            rows_list.append(
+                {
+                    "acteur_id": row["identifiant_unique"],
+                    "labelqualite_id": ess_label_id,
+                    "labelqualite": ess_label_libelle,
+                }
+            )
 
     df_labels = pd.DataFrame(
         rows_list, columns=["acteur_id", "labelqualite_id", "labelqualite"]
     )
-
+    df_labels.drop_duplicates(
+        ["acteur_id", "labelqualite_id"], keep="first", inplace=True
+    )
     return df_labels
