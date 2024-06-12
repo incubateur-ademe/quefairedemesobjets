@@ -1,13 +1,19 @@
 import csv
 import io
 import re
-from pathlib import Path
 from urllib.parse import urlparse
-
+from importlib import import_module
+from pathlib import Path
 import pandas as pd
 import requests
 from shapely import wkb
 from shapely.geometry import Point
+import math
+from pyproj import Transformer
+
+env = Path(__file__).parent.parent.name
+
+api_utils = import_module(f"{env}.utils.api_utils")
 
 
 def preprocess_address(address):
@@ -16,14 +22,14 @@ def preprocess_address(address):
     return address
 
 
-def extract_details(row):
+def extract_details(row, col="adresse_format_ban"):
     # Pattern pour capturer les codes postaux et les noms de ville optionnels
     pattern = re.compile(r"(\d{2,3}\s?\d{2,3})\s*(.*)")
 
-    if pd.isnull(row["adresse_format_ban"]):
+    if pd.isnull(row[col]):
         return pd.Series([None, None, None])
 
-    address_ban = preprocess_address(str(row["adresse_format_ban"]))
+    address_ban = preprocess_address(str(row[col]))
 
     match = pattern.search(address_ban)
     if match:
@@ -306,3 +312,31 @@ def get_dag_name(dag_filepath, dag_name):
 
 def get_db_conn_id(dag_filepath, parent_of_parent=False):
     return "lvao-" + get_environment(dag_filepath, parent_of_parent=parent_of_parent)
+
+
+def check_siret_using_annuaire_entreprise(row, adresse_query_flag=False, col="siret"):
+    res = api_utils.call_annuaire_entreprises(
+        row[col], adresse_query_flag=adresse_query_flag
+    )
+    return res
+
+
+transformer = Transformer.from_crs("EPSG:2154", "EPSG:4326")
+
+
+def get_location(easting, northing):
+    try:
+        easting = float(easting)
+        northing = float(northing)
+
+        if math.isnan(easting) or math.isnan(northing):
+            return None
+
+        lon, lat = transformer.transform(easting, northing)
+        location = transform_location(longitude=lon, latitude=lat)
+
+        return {"latitude": lat, "longitude": lon, "location": location}
+
+    except (ValueError, TypeError, Exception):
+        return None
+    return None
