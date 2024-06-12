@@ -1,5 +1,5 @@
 import requests
-from ratelimit import limits
+from ratelimit import limits, sleep_and_retry
 
 
 def fetch_dataset_from_point_apport(url):
@@ -16,6 +16,7 @@ def fetch_dataset_from_point_apport(url):
     return all_data
 
 
+@sleep_and_retry
 @limits(calls=3, period=1)
 def call_annuaire_entreprises(query, adresse_query_flag=False):
     params = {"q": query, "page": 1, "per_page": 1, "etat_administratif": "A"}
@@ -108,7 +109,8 @@ def call_annuaire_entreprises(query, adresse_query_flag=False):
         return [{"error": "Une erreur de requête est survenue"}]
 
 
-@limits(calls=50, period=1)
+@sleep_and_retry
+@limits(calls=40, period=1)
 def get_lat_lon_from_address(address):
     url = "https://api-adresse.data.gouv.fr/search/"
     params = {"q": address, "limit": 1}

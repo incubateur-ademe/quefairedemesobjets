@@ -17,7 +17,7 @@
             <td>{{ dagrun_line.get_change_type_display() }}</td>
             <td>{{ dagrun_line.meta_data if dagrun_line.meta_data else "-" }}</td>
             <td>
-                <a href="{{ dagrun_line.row_updates.admin_link }}">{{ dagrun_line.display_acteur_details().identifiant_unique
+                <a href="{{ dagrun_line.row_updates.admin_link }}" target="_blank" >{{ dagrun_line.display_acteur_details().identifiant_unique
                     }}</a>
             </td>
             <td>
@@ -41,7 +41,7 @@
         <label for="page-select">Go to page:</label>
         <select id="page-select" class="fr-select" name="page" onchange="this.form.submit()">
             {% for num in dagrun_lines.paginator.page_range %}
-                <option value="{{ num }}" {% if dagrun_lines.number== num %}selected{% endif %}>
+                <option value="{{ num }}" {% if dagrun_lines.number == num %}selected{% endif %}>
                     {{ num }}
                 </option>
             {% endfor %}

@@ -295,13 +295,16 @@ def combine_actors(**kwargs):
         how="inner",
         suffixes=("_siret", "_adresse"),
     )
+    cohort_dfs = {}
 
     df["ae_result"] = df.apply(combine_ae_result_dicts, axis=1)
     df[["statut", "categorie_naf", "ae_adresse"]] = df.apply(update_statut, axis=1)
     df = df[df["statut"] == "SUPPRIME"]
-    df["cohort_id"] = df.apply(set_cohort_id, axis=1)
+    if len(df) > 0:
+        df["cohort_id"] = df.apply(set_cohort_id, axis=1)
+    else:
+        return cohort_dfs
 
-    cohort_dfs = {}
     for cohort_id in df["cohort_id"].unique():
         cohort_dfs[cohort_id] = df[df["cohort_id"] == cohort_id]
 
@@ -338,7 +341,6 @@ def serialize_to_json(**kwargs):
     data = kwargs["ti"].xcom_pull(task_ids="get_location")
     columns = [
         "identifiant_unique",
-        "location",
         "statut",
         "ae_result",
         "admin_link",

@@ -37,6 +37,9 @@ class DagRun(models.Model):
         displayed_metadata["Nombre de duplicats"] = self.meta_data.get(
             "number_of_duplicates", 0
         )
+        displayed_metadata["Nombre d'acteur MAJ"] = self.meta_data.get(
+            "updated_rows", 0
+        )
         return displayed_metadata
 
 

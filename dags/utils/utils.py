@@ -8,7 +8,8 @@ import pandas as pd
 import requests
 from shapely import wkb
 from shapely.geometry import Point
-from pyproj import Proj, transform
+import math
+from pyproj import Transformer
 
 env = Path(__file__).parent.parent.name
 
@@ -320,14 +321,22 @@ def check_siret_using_annuaire_entreprise(row, adresse_query_flag=False, col="si
     return res
 
 
+transformer = Transformer.from_crs("EPSG:2154", "EPSG:4326")
+
+
 def get_location(easting, northing):
-    if easting is not None and northing is not None:
-        lambert_proj = Proj(init="epsg:2154")
+    try:
+        easting = float(easting)
+        northing = float(northing)
 
-        latlon_proj = Proj(proj="latlong", datum="WGS84")
+        if math.isnan(easting) or math.isnan(northing):
+            return None
 
-        lon, lat = transform(lambert_proj, latlon_proj, easting, northing)
+        lon, lat = transformer.transform(easting, northing)
         location = transform_location(longitude=lon, latitude=lat)
 
         return {"latitude": lat, "longitude": lon, "location": location}
+
+    except (ValueError, TypeError, Exception):
+        return None
     return None
