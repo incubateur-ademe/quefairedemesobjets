@@ -1,0 +1,54 @@
+<thead>
+    {% if dagrun_lines|length > 0 and dagrun_lines[0].change_type == 'UPDATE_ACTOR' %}
+
+        <tr>
+            <th scope="col">change_type</th>
+            <th scope="col">meta_data</th>
+            <th scope="col">Identifiant Unique</th>
+            <th scope="col">Candidats</th>
+            <th scope="col">row_updates</th>
+        </tr>
+    {% endif %}
+
+</thead>
+<tbody>
+    {% for dagrun_line in dagrun_lines if dagrun_line.change_type == 'UPDATE_ACTOR' %}
+        <tr>
+            <td>{{ dagrun_line.get_change_type_display() }}</td>
+            <td>{{ dagrun_line.meta_data if dagrun_line.meta_data else "-" }}</td>
+            <td>
+                <a href="{{ dagrun_line.row_updates.admin_link }}" target="_blank" >{{ dagrun_line.display_acteur_details().identifiant_unique
+                    }}</a>
+            </td>
+            <td>
+                {% with candidat=candidat, index=loop.index, dagrun=request.GET.dagrun,
+                identifiant_unique=dagrun_line.display_acteur_details().identifiant_unique %}
+                {% include 'qfdmo/partials/candidat_row.html' %}
+
+    {% endwith %}
+</td>
+<td>
+    <details>
+        <summary>Données brutes</summary>
+        <pre class="qfdmo-text-wrap">{{ dagrun_line.row_updates }}</pre>
+    </details>
+</td>
+</tr>
+{% endfor %}
+</tbody>
+{% if dagrun_lines.has_other_pages %}
+    <form method="get" action="">
+        <label for="page-select">Go to page:</label>
+        <select id="page-select" class="fr-select" name="page" onchange="this.form.submit()">
+            {% for num in dagrun_lines.paginator.page_range %}
+                <option value="{{ num }}" {% if dagrun_lines.number == num %}selected{% endif %}>
+                    {{ num }}
+                </option>
+            {% endfor %}
+        </select>
+        <input type="hidden" name="dagrun" value="{{ request.GET.dagrun }}">
+        <noscript>
+            <input type="submit" value="Go">
+        </noscript>
+    </form>
+{% endif %}

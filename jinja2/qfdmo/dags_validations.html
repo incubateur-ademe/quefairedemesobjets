@@ -31,71 +31,18 @@
                 <div class="fr-table">
                     <table>
                         <caption>Résumé du tableau (accessibilité)</caption>
-                        <thead>
-                            <tr>
-                                <th scope="col">change_type</th>
-                                <th scope="col">meta_data</th>
-                                <th scope="col">Acteur</th>
-                                <th scope="col">Proposition de service</th>
-                                <th scope="col">row_updates</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for dagrun_line in dagrun_lines %}
-                                <tr>
-                                    <td>{{ dagrun_line.get_change_type_display() }}</td>
-                                    <td>{{ dagrun_line.meta_data if dagrun_line.meta_data else "-" }}</td>
-                                    <td>
-                                        {% for key, value in dagrun_line.display_acteur_details().items() %}
-                                            <p><strong>{{ key }}</strong> : {{ value }}</p>
-                                        {% endfor %}
-                                    </td>
-                                    <td>
-                                        <table>
-                                            <tr>
-                                                <th>Action</th>
-                                                <th>Acteur Service</th>
-                                                <th>Sous-Catégories</th>
-                                            </tr>
-                                            {% for service in dagrun_line.display_proposition_service() %}
-                                                <tr>
-                                                    <td>{{ service.action }}</td>
-                                                    <td>{{ service.acteur_service }}</td>
-                                                    <td>
-                                                        <ul>
-                                                            {% for sous_cat in service.pds_sous_categories %}
-                                                                <li>{{ sous_cat.souscategorie }}</li>
-                                                            {% endfor %}
-                                                        </ul>
-                                                    </td>
-                                                </tr>
-                                            {% endfor %}
-                                        </table>
-                                    </td>
-                                    <td>
-                                        <details>
-                                            <summary>Données brutes</summary>
-                                            <pre class="qfdmo-text-wrap">{{ dagrun_line.row_updates }}</pre>
-                                        </details>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
+                        {% include 'qfdmo/update_actor_event.html' %}
+                        {% include 'qfdmo/create_actor_event.html' %}
+
                     </table>
                 </div>
                 <div class="fr-my-3w">
-                    <button type="submit" class="fr-btn" name='dag_valid' value='1' formmethod='POST'>Valider ce dag</button>
-                    <button type="submit" class="fr-btn fr-btn--secondary" name='dag_valid' value='0' formmethod='POST'>Refuser
-                        ce dag
-                    </button>
+                    <button type="submit" class="fr-btn" name='dag_valid' value='1' formmethod='POST'>Valider les modifications</button>
+                    <button type="submit" class="fr-btn fr-btn--secondary" name='dag_valid' value='0' formmethod='POST'>Refuser</button>
                 </div>
             {% endif %}
         </form>
 
     </div>
 
-
-
 {% endblock %}
-
-
