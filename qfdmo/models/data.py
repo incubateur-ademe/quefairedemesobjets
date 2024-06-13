@@ -137,6 +137,25 @@ class DagRunChange(models.Model):
 
         self.save()
 
+    def update_row_update_candidate(self, status, index):
+        if self.row_updates is None:
+            self.row_updates = {}
+
+        if (
+            "row_status" in self.row_updates
+            and self.row_updates["row_status"] == status
+            and "best_candidat_index" in self.row_updates
+            and self.row_updates["best_candidat_index"] == index
+        ):
+            del self.row_updates["row_status"]
+            del self.row_updates["best_candidat_index"]
+
+        else:
+            self.row_updates["row_status"] = status
+            self.row_updates["best_candidat_index"] = index
+
+        self.save()
+
     def get_candidat(self, index):
         logging.warning(self.row_updates["ae_result"])
         return self.row_updates["ae_result"][int(index) - 1]
