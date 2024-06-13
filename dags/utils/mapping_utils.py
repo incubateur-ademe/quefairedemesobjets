@@ -1,4 +1,3 @@
-import logging
 import math
 import json
 from datetime import datetime
@@ -96,7 +95,6 @@ def replace_with_selected_candidat(row):
     if "ae_result" in row:
         ae_result = row["ae_result"]
         best_candidat_index = row.get("best_candidat_index", None)
-        print(best_candidat_index)
         if best_candidat_index is not None and pd.notna(best_candidat_index):
             selected_candidat = ae_result[int(best_candidat_index) - 1]
             row["statut"] = "ACTIF"
@@ -104,12 +102,8 @@ def replace_with_selected_candidat(row):
             row["siret"] = selected_candidat.get("siret_candidat")
             row["nom"] = selected_candidat.get("nom_candidat")
             row["location"] = selected_candidat.get("location_candidat")
-            logging.info(
-                f"Selected candidat details - SIRET:"
-                f" {row['siret']}, "
-                f"NOM: {row['nom']},"
-                f" LOCATION: {row['location']},"
-                f" ADRESSE: {row['adresse_candidat']}"
+            row["commentaires"] = construct_change_log(
+                "Actor replaced after verification on annuaire entreprise"
             )
         else:
             row["statut"] = "SUPPRIME"
@@ -117,22 +111,26 @@ def replace_with_selected_candidat(row):
             row["siret"] = None
             row["nom"] = None
             row["location"] = None
+            row["commentaires"] = construct_change_log(
+                "Actor removed after verification on annuaire entreprise"
+            )
 
         row = row.drop(labels=["ae_result"])
 
     return row
 
 
-def construct_url(identifiant):
-    base_url = "https://quefairedemesobjets-preprod.osc-fr1.scalingo.io/admin/qfdmo/displayedacteur/{}/change/"
+def construct_url(identifiant, env):
+    if env == "production":
+        base_url = "https://lvao.ademe.fr/admin/qfdmo/displayedacteur/{}/change/"
+    else:
+        base_url = "https://quefairedemesobjets-preprod.osc-fr1.scalingo.io/admin/qfdmo/displayedacteur/{}/change/"
     return base_url.format(identifiant)
 
 
-def construct_change_log(dag_run):
+def construct_change_log(message):
     change_log = {
-        "message": "Acteur supprimé après vérification sur annuaire entreprise",
-        "deleted_by": dag_run.run_id,
-        "dag_name": dag_run.dag_id,
+        "message": message,
         "timestamp": datetime.utcnow().isoformat(),
     }
 
