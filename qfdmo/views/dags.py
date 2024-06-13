@@ -39,13 +39,12 @@ class DagsValidation(IsStaffMixin, FormView):
             action = request.POST.get("action")
 
             if action == "validate":
-                dagrun_line.update_row_update_field("best_candidat_index", index)
-                dagrun_line.update_row_update_field(
-                    "row_status", str(DagRunStatus.TO_INSERT)
+                dagrun_line.update_row_update_candidate(
+                    str(DagRunStatus.TO_INSERT), index
                 )
             elif action == "reject":
-                dagrun_line.update_row_update_field(
-                    "row_status", str(DagRunStatus.REJECTED)
+                dagrun_line.update_row_update_candidate(
+                    str(DagRunStatus.REJECTED), index
                 )
 
             updated_candidat = dagrun_line.get_candidat(index)
