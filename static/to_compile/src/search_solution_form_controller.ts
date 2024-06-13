@@ -159,9 +159,9 @@ export default class extends Controller<HTMLElement> {
         this.collapseDetailsButtonTarget.classList.add("qfdmo-hidden")
         this.expandDetailsButtonTarget.classList.remove("qfdmo-hidden")
         // desktop
-        this.detailsAddressPanelTarget.classList.add("md:qfdmo-w-[480]")
-        this.detailsAddressPanelTarget.classList.remove("md:qfdmo-w-full")
-        this.detailsAddressPanelTarget.classList.remove("md:qfdmo-w-0")
+        this.detailsAddressPanelTarget.classList.add("sm:qfdmo-w-[480]")
+        this.detailsAddressPanelTarget.classList.remove("sm:qfdmo-w-full")
+        this.detailsAddressPanelTarget.classList.remove("sm:qfdmo-w-0")
     }
 
     updateBboxInput(event) {
@@ -179,9 +179,9 @@ export default class extends Controller<HTMLElement> {
         if (this.hasHeaderAddressPanelTarget)
             this.headerAddressPanelTarget.classList.remove("qfdmo-h-0")
         // desktop
-        this.detailsAddressPanelTarget.classList.add("md:qfdmo-w-0")
-        this.detailsAddressPanelTarget.classList.remove("md:qfdmo-w-full")
-        this.detailsAddressPanelTarget.classList.remove("md:qfdmo-w-[480]")
+        this.detailsAddressPanelTarget.classList.add("sm:qfdmo-w-0")
+        this.detailsAddressPanelTarget.classList.remove("sm:qfdmo-w-full")
+        this.detailsAddressPanelTarget.classList.remove("sm:qfdmo-w-[480]")
     }
 
     displayFullDetails() {
@@ -197,9 +197,9 @@ export default class extends Controller<HTMLElement> {
         this.collapseDetailsButtonTarget.classList.remove("qfdmo-hidden")
         this.expandDetailsButtonTarget.classList.add("qfdmo-hidden")
         // desktop
-        this.detailsAddressPanelTarget.classList.add("md:qfdmo-w-full")
-        this.detailsAddressPanelTarget.classList.remove("md:qfdmo-w-0")
-        this.detailsAddressPanelTarget.classList.remove("md:qfdmo-w-[480]")
+        this.detailsAddressPanelTarget.classList.add("sm:qfdmo-w-full")
+        this.detailsAddressPanelTarget.classList.remove("sm:qfdmo-w-0")
+        this.detailsAddressPanelTarget.classList.remove("sm:qfdmo-w-[480]")
     }
 
     displayActeurDetails(event) {
