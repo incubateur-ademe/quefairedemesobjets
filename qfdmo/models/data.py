@@ -129,7 +129,12 @@ class DagRunChange(models.Model):
     def update_row_update_field(self, field_name, value):
         if self.row_updates is None:
             self.row_updates = {}
-        self.row_updates[field_name] = value
+
+        if field_name in self.row_updates and self.row_updates[field_name] == value:
+            del self.row_updates[field_name]
+        else:
+            self.row_updates[field_name] = value
+
         self.save()
 
     def get_candidat(self, index):

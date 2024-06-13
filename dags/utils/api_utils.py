@@ -27,10 +27,8 @@ def call_annuaire_entreprises(query, adresse_query_flag=False):
         res = []
         if response.status_code == 200:
             data = response.json()
-            # Vérifier que 'results' existe et n'est pas vide
             if "results" in data and data["results"]:
                 data = data["results"][0]
-                # Initialiser les variables pour les résultats
                 nombre_etablissements_ouverts = data.get(
                     "nombre_etablissements_ouverts"
                 )
@@ -98,7 +96,6 @@ def call_annuaire_entreprises(query, adresse_query_flag=False):
 
                 return res
             else:
-                # Si 'results' est vide ou n'existe pas, retourner un dictionnaire vide
                 return []
 
         else:
@@ -106,7 +103,7 @@ def call_annuaire_entreprises(query, adresse_query_flag=False):
 
     except requests.exceptions.RequestException as e:
         print(f"Une erreur est survenue lors de la requête: {e}")
-        return [{"error": "Une erreur de requête est survenue"}]
+        return []
 
 
 @sleep_and_retry

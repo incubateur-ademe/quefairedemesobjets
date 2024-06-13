@@ -34,7 +34,7 @@ dag = DAG(
         "A pipeline to apply checks using annuaire entreprise "
         "API and output data to validation tool"
     ),
-    schedule_interval=None,
+    schedule_interval="0 0 1 * *",
 )
 
 
@@ -123,7 +123,7 @@ def combine_ae_result_dicts(row):
 def update_statut(row):
     for result in row["ae_result"]:
         if (
-            row["siret"] == result["siret_candidat"]
+            row["siret"] == result.get("siret_candidat")
             and result["search_by_siret_candidat"]
         ):
             if result["etat_admin_candidat"] == "A":
@@ -152,15 +152,17 @@ def set_cohort_id(row):
     current_naf = row["categorie_naf"]
     current_siret = row["siret"]
     current_siren = current_siret[:9]
+    current_siret_size = len(current_siret.strip())
     priorities = {
-        "ownership_transferred_matching_category_lvao_address": 10,
-        "ownership_transferred_matching_category_ae_address": 9,
-        "ownership_transferred_different_category": 8,
-        "ownership_transferred_different_names": 7,
-        "relocation_same_siren_matching_name_and_naf": 6,
-        "relocation_same_siren_matching_name_only": 5,
-        "relocation_same_siren_not_matching_name": 4,
-        "relocation": 3,
+        "ownership_transferred_matching_category_lvao_address": 11,
+        "ownership_transferred_matching_category_ae_address": 10,
+        "ownership_transferred_different_category": 9,
+        "ownership_transferred_different_names": 8,
+        "relocation_same_siren_matching_name_and_naf": 7,
+        "relocation_same_siren_matching_name_only": 6,
+        "relocation_same_siren_not_matching_name": 5,
+        "relocation": 4,
+        "closed_0_open_candidates_address_result_included": 3,
         "closed_0_open_candidates": 2,
         "closed": 1,
     }
@@ -168,8 +170,9 @@ def set_cohort_id(row):
     best_outcome = "closed"
     highest_priority_level = 1
     best_candidate_index = -1
-    nb_candidats_ouvert = len(
-        [res for res in row["ae_result"] if res["etat_admin_candidat"] == "A"]
+    total_nb_etablissements_ouverts = sum(
+        candidate.get("nombre_etablissements_ouverts", 0)
+        for candidate in row["ae_result"]
     )
 
     for index, candidate in enumerate(row["ae_result"]):
@@ -271,10 +274,21 @@ def set_cohort_id(row):
             best_candidate_index = index
 
         elif (
-            nb_candidats_ouvert == 0
+            total_nb_etablissements_ouverts == 0
+            and current_siret_size == 14
+            and priorities["closed_0_open_candidates_address_result_included"]
+            > highest_priority_level
+        ):
+            best_outcome = "closed_0_open_candidates_address_result_included"
+            highest_priority_level = priorities[best_outcome]
+            best_candidate_index = index
+        elif (
+            candidate["nombre_etablissements_ouverts"] == 0
+            and candidate["search_by_siret_candidat"]
+            and current_siret_size == 14
             and priorities["closed_0_open_candidates"] > highest_priority_level
         ):
-            best_outcome = "closed_0_open_candidates"
+            best_outcome = "closed_0_open_candidates_address_result_included"
             highest_priority_level = priorities[best_outcome]
             best_candidate_index = index
 
@@ -339,19 +353,11 @@ def enrich_location(**kwargs):
 
 def serialize_to_json(**kwargs):
     data = kwargs["ti"].xcom_pull(task_ids="get_location")
-    columns = [
-        "identifiant_unique",
-        "statut",
-        "ae_result",
-        "admin_link",
-        "commentaires",
-    ]
-    dag_run = kwargs["dag_run"]
+    columns = ["identifiant_unique", "statut", "ae_result", "admin_link"]
     serialized_data = {}
     for key, df in data.items():
-        df["admin_link"] = df["identifiant_unique"].apply(mapping_utils.construct_url)
-        df["commentaires"] = df.apply(
-            lambda x: mapping_utils.construct_change_log(dag_run), axis=1
+        df["admin_link"] = df["identifiant_unique"].apply(
+            lambda x: mapping_utils.construct_url(env)
         )
         df["row_updates"] = df[columns].apply(
             lambda row: json.dumps(row.to_dict(), default=str), axis=1
