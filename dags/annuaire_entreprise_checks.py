@@ -357,7 +357,7 @@ def serialize_to_json(**kwargs):
     serialized_data = {}
     for key, df in data.items():
         df["admin_link"] = df["identifiant_unique"].apply(
-            lambda x: mapping_utils.construct_url(env)
+            lambda x: mapping_utils.construct_url(x, env)
         )
         df["row_updates"] = df[columns].apply(
             lambda row: json.dumps(row.to_dict(), default=str), axis=1
