@@ -68,7 +68,7 @@ class AddressesForm(forms.Form):
         queryset=SousCategorieObjet.objects.all(),
         widget=AutoCompleteInput(
             attrs={
-                "class": "fr-input fr-icon-search-line md:qfdmo-w-[596px]",
+                "class": "fr-input fr-icon-search-line sm:qfdmo-w-[596px]",
                 "placeholder": "chaussures, perceuse, canapé...",
                 "autocomplete": "off",
                 "aria-label": "Indiquer un objet - obligatoire",
@@ -114,7 +114,7 @@ class AddressesForm(forms.Form):
         widget=SegmentedControlSelect(
             attrs={
                 "data-action": "click -> search-solution-form#changeDirection",
-                "class": "qfdmo-w-full md:qfdmo-w-fit",
+                "class": "qfdmo-w-full sm:qfdmo-w-fit",
             },
             fieldset_attrs={
                 "data-search-solution-form-target": "direction",
@@ -192,7 +192,7 @@ class AddressesForm(forms.Form):
     digital = forms.ChoiceField(
         widget=SegmentedControlSelect(
             attrs={
-                "class": "qfdmo-w-full md:qfdmo-w-fit",
+                "class": "qfdmo-w-full sm:qfdmo-w-fit",
                 "data-action": "click -> search-solution-form#advancedSubmit",
                 "data-with-controls": "true",
             },
@@ -201,14 +201,14 @@ class AddressesForm(forms.Form):
             (
                 "0",
                 mark_safe(
-                    '<span class="fr-icon-road-map-line md:qfdmo-mx-1w">'
+                    '<span class="fr-icon-road-map-line sm:qfdmo-mx-1w">'
                     " à proximité</span>"
                 ),
             ),
             (
                 "1",
                 mark_safe(
-                    '<span class="fr-icon-global-line md:qfdmo-mx-1w"> en ligne</span>'
+                    '<span class="fr-icon-global-line sm:qfdmo-mx-1w"> en ligne</span>'
                 ),
             ),
         ],
@@ -232,7 +232,7 @@ class IframeAddressesForm(AddressesForm):
     adresse = forms.CharField(
         widget=AutoCompleteInput(
             attrs={
-                "class": "fr-input md:qfdmo-w-[596px]",
+                "class": "fr-input sm:qfdmo-w-[596px]",
                 "placeholder": "20 av. du Grésillé 49000 Angers",
                 "autocomplete": "off",
                 "aria-label": "Autour de l'adresse suivante - obligatoire",
@@ -361,7 +361,7 @@ class ConfiguratorForm(forms.Form):
     iframe_mode = forms.ChoiceField(
         widget=SegmentedControlSelect(
             attrs={
-                "class": "qfdmo-w-full md:qfdmo-w-fit",
+                "class": "qfdmo-w-full sm:qfdmo-w-fit",
             },
             fieldset_attrs={
                 "data-search-solution-form-target": "direction",
@@ -380,7 +380,7 @@ class ConfiguratorForm(forms.Form):
     direction = forms.ChoiceField(
         widget=SegmentedControlSelect(
             attrs={
-                "class": "qfdmo-w-full md:qfdmo-w-fit",
+                "class": "qfdmo-w-full sm:qfdmo-w-fit",
             },
             fieldset_attrs={},
         ),
@@ -392,7 +392,7 @@ class ConfiguratorForm(forms.Form):
     first_dir = forms.ChoiceField(
         widget=SegmentedControlSelect(
             attrs={
-                "class": "qfdmo-w-full md:qfdmo-w-fit",
+                "class": "qfdmo-w-full sm:qfdmo-w-fit",
             },
             fieldset_attrs={},
         ),
