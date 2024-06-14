@@ -162,10 +162,13 @@ def serialize_to_json(**kwargs):
         .reset_index(name="proposition_services")
     )
 
+    aggregated_labels = df_labels.groupby("acteur_id").apply(
+        lambda x: x.to_dict("records") if not x.empty else []
+    )
     aggregated_labels = (
-        df_labels.groupby("acteur_id")
-        .apply(lambda x: x.to_dict("records") if not x.empty else [])
-        .reset_index(name="labels")
+        aggregated_labels.reset_index(name="labels")
+        if len(aggregated_labels) > 0
+        else pd.DataFrame(columns=["acteur_id", "labels"])
     )
 
     df_joined_with_pds = pd.merge(
@@ -312,6 +315,9 @@ def create_actors(**kwargs):
 
     column_mapping = kwargs["column_mapping"]
     column_to_drop = kwargs.get("column_to_drop", [])
+    column_to_replace = kwargs.get("default_column_value", {})
+    for k, val in column_to_replace.items():
+        df[k] = val
 
     df["nom_de_lorganisme_std"] = df["nom_de_lorganisme"].str.replace("-", "")
     df["id_point_apport_ou_reparation"] = df["id_point_apport_ou_reparation"].fillna(
