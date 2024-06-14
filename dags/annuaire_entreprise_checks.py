@@ -288,7 +288,7 @@ def set_cohort_id(row):
             and current_siret_size == 14
             and priorities["closed_0_open_candidates"] > highest_priority_level
         ):
-            best_outcome = "closed_0_open_candidates_address_result_included"
+            best_outcome = "closed_0_open_candidates"
             highest_priority_level = priorities[best_outcome]
             best_candidate_index = index
 
@@ -357,7 +357,7 @@ def serialize_to_json(**kwargs):
     serialized_data = {}
     for key, df in data.items():
         df["admin_link"] = df["identifiant_unique"].apply(
-            lambda x: mapping_utils.construct_url(env)
+            lambda x: mapping_utils.construct_url(x, env)
         )
         df["row_updates"] = df[columns].apply(
             lambda row: json.dumps(row.to_dict(), default=str), axis=1
