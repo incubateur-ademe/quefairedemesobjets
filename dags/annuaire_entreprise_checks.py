@@ -288,7 +288,7 @@ def set_cohort_id(row):
             and current_siret_size == 14
             and priorities["closed_0_open_candidates"] > highest_priority_level
         ):
-            best_outcome = "closed_0_open_candidates_address_result_included"
+            best_outcome = "closed_0_open_candidates"
             highest_priority_level = priorities[best_outcome]
             best_candidate_index = index
 
