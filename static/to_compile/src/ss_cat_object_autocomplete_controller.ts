@@ -100,8 +100,8 @@ export default class extends AutocompleteController {
         b.classList.add(
             "qfdmo-flex",
             "qfdmo-flex-col",
-            "md:qfdmo-flex-row",
-            "md:qfdmo-justify-between",
+            "sm:qfdmo-flex-row",
+            "sm:qfdmo-justify-between",
         )
         /*make the matching letters bold:*/
         // const [data, longitude, latitude] = option.split("||")
