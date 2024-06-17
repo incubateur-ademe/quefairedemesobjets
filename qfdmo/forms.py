@@ -71,11 +71,11 @@ class AddressesForm(forms.Form):
                 "class": "fr-input fr-icon-search-line sm:qfdmo-w-[596px]",
                 "placeholder": "chaussures, perceuse, canapé...",
                 "autocomplete": "off",
-                "aria-label": "Indiquer un objet - obligatoire",
+                "aria-label": "Indiquer un objet (obligatoire)",
             },
             data_controller="ss-cat-object-autocomplete",
         ),
-        label="Indiquer un objet ",
+        label="Indiquer un objet (obligatoire)",
         empty_label="",
         required=False,
     )
@@ -235,11 +235,11 @@ class IframeAddressesForm(AddressesForm):
                 "class": "fr-input sm:qfdmo-w-[596px]",
                 "placeholder": "20 av. du Grésillé 49000 Angers",
                 "autocomplete": "off",
-                "aria-label": "Autour de l'adresse suivante - obligatoire",
+                "aria-label": "Autour de l'adresse suivante (obligatoire)",
             },
             data_controller="address-autocomplete",
         ),
-        label="Autour de l'adresse suivante ",
+        label="Autour de l'adresse suivante (obligatoire)",
         required=False,
     )
 
