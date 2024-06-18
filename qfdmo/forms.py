@@ -252,6 +252,7 @@ class CarteAddressesForm(AddressesForm):
         disable_reparer_option: bool = False,
     ) -> None:
         self.fields["grouped_action"].choices = groupe_options
+        self.fields["legend_grouped_action"].choices = groupe_options
         if disable_reparer_option:
             self.fields["bonus"].widget.attrs["disabled"] = "true"
             self.fields["label_reparacteur"].widget.attrs["disabled"] = "true"
@@ -281,9 +282,23 @@ class CarteAddressesForm(AddressesForm):
         widget=DSFRCheckboxSelectMultiple(
             attrs={
                 "class": "fr-fieldset",
-                "data-search-solution-form-target": "GroupeAction",
+                "data-search-solution-form-target": "groupeActionInput",
                 "data-action": (
                     "change -> search-solution-form#activeReparerFiltersCarte"
+                ),
+            },
+        ),
+        choices=[],
+        label="Actions",
+        required=False,
+    )
+
+    legend_grouped_action = forms.MultipleChoiceField(
+        widget=DSFRCheckboxSelectMultiple(
+            attrs={
+                "class": "fr-fieldset",
+                "data-action": (
+                    "click -> search-solution-form#applyLegendGroupeAction"
                 ),
             },
         ),
