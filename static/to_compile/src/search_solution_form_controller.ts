@@ -248,34 +248,30 @@ export default class extends Controller<HTMLElement> {
         const direction = this.directionTarget
         const options = direction.getElementsByTagName("input")
         for (let i = 0; i < options.length; i++) {
-            if (options[i].value == this.#selectedOption) options[i].checked = true
-            else options[i].checked = false
+            options[i].checked = options[i].value == this.#selectedOption
         }
 
         let actionList: string[] = []
-        if (this.#selectedOption == "jai") {
-            // Checkboxes option
-            const actionInput = this.jaiTarget.getElementsByTagName("input")
-            for (let i = 0; i < actionInput.length; i++) {
-                if (actionInput[i].checked) {
-                    const name = actionInput[i].getAttribute("name")
-                    if (name) {
-                        actionList.push(name)
-                    }
-                }
-            }
+        if (this.#selectedOption == "jai" || this.#selectedOption == "jecherche") {
+            const target =
+                this.#selectedOption == "jai" ? this.jaiTarget : this.jechercheTarget
+            actionList = this.#setActionList(target)
         }
-        if (this.#selectedOption == "jecherche") {
-            // Checkboxes option
-            const actionInput = this.jechercheTarget.getElementsByTagName("input")
-            for (let i = 0; i < actionInput.length; i++) {
+        this.actionListTarget.value = actionList.join("|")
+    }
+
+    #setActionList(target: HTMLElement): string[] {
+        const actionInput = target.getElementsByTagName("input")
+        let actionList: string[] = []
+        for (let i = 0; i < actionInput.length; i++) {
+            if (actionInput[i].checked) {
                 const name = actionInput[i].getAttribute("name")
                 if (name) {
                     actionList.push(name)
                 }
             }
         }
-        this.actionListTarget.value = actionList.join("|")
+        return actionList
     }
 
     changeDirection() {
