@@ -141,7 +141,6 @@ export default class extends AutocompleteController {
     }
 
     keydownEnter(event: KeyboardEvent): boolean {
-        console.log("keydown")
         let toSubmit = super.keydownEnter(event)
         if (toSubmit) {
             this.dispatch("formSubmit")
