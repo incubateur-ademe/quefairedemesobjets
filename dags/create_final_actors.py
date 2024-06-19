@@ -23,6 +23,9 @@ def apply_corrections(**kwargs):
     df_normalized_actors = kwargs["ti"].xcom_pull(task_ids="load_actors")
     df_manual_actor_updates = kwargs["ti"].xcom_pull(task_ids="load_revision_actors")
 
+    if "cree_le" in df_manual_actor_updates.columns:
+        df_manual_actor_updates = df_manual_actor_updates.drop(columns=["cree_le"])
+
     df_normalized_actors = df_normalized_actors.set_index("identifiant_unique")
     df_manual_actor_updates = df_manual_actor_updates.set_index("identifiant_unique")
 
