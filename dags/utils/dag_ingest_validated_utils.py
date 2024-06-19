@@ -116,7 +116,6 @@ def handle_update_actor_event(df_actors, dag_run_id):
     for column in update_required_columns:
         if column not in df_actors.columns:
             df_actors[column] = None
-    logging.info("DataFrame df_actors:\n%s", df_actors.to_string(index=False))
 
     return {
         "actors": df_actors[update_required_columns],
