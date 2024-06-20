@@ -248,11 +248,11 @@ class CarteAddressesForm(AddressesForm):
     def load_choices(
         self,
         request: HttpRequest,
-        groupe_options: list[list[str]] = [],
+        grouped_action_choices: list[list[str]] = [],
         disable_reparer_option: bool = False,
     ) -> None:
-        self.fields["grouped_action"].choices = groupe_options
-        self.fields["legend_grouped_action"].choices = groupe_options
+        self.fields["grouped_action"].choices = grouped_action_choices
+        self.fields["legend_grouped_action"].choices = grouped_action_choices
         if disable_reparer_option:
             self.fields["bonus"].widget.attrs["disabled"] = "true"
             self.fields["label_reparacteur"].widget.attrs["disabled"] = "true"
@@ -282,7 +282,7 @@ class CarteAddressesForm(AddressesForm):
         widget=DSFRCheckboxSelectMultiple(
             attrs={
                 "class": "fr-fieldset",
-                "data-search-solution-form-target": "groupeActionInput",
+                "data-search-solution-form-target": "groupedActionInput",
                 "data-action": (
                     "change -> search-solution-form#activeReparerFiltersCarte"
                 ),
@@ -298,7 +298,7 @@ class CarteAddressesForm(AddressesForm):
             attrs={
                 "class": "fr-fieldset",
                 "data-action": (
-                    "click -> search-solution-form#applyLegendGroupeAction"
+                    "click -> search-solution-form#applyLegendGroupedAction"
                 ),
             },
         ),

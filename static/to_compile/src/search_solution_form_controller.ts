@@ -11,7 +11,7 @@ export default class extends Controller<HTMLElement> {
         "actionList",
         "searchForm",
         "reparerInput",
-        "groupeActionInput",
+        "groupedActionInput",
 
         "bbox",
 
@@ -59,7 +59,7 @@ export default class extends Controller<HTMLElement> {
     declare readonly actionListTarget: HTMLInputElement
     declare readonly searchFormTarget: HTMLFormElement
     declare readonly reparerInputTarget: HTMLInputElement
-    declare readonly groupeActionInputTargets: HTMLInputElement[]
+    declare readonly groupedActionInputTargets: HTMLInputElement[]
 
     declare readonly bboxTarget: HTMLInputElement
 
@@ -277,11 +277,11 @@ export default class extends Controller<HTMLElement> {
         return actionList
     }
 
-    applyLegendGroupeAction(event: Event) {
+    applyLegendGroupedAction(event: Event) {
         const eventTarget = event.target as HTMLInputElement
-        this.groupeActionInputTargets.forEach((groupeActionInput) => {
-            if (groupeActionInput.value === eventTarget.value) {
-                groupeActionInput.checked = eventTarget.checked
+        this.groupedActionInputTargets.forEach((groupedActionInput) => {
+            if (groupedActionInput.value === eventTarget.value) {
+                groupedActionInput.checked = eventTarget.checked
             }
         })
         this.advancedSubmit(event)
