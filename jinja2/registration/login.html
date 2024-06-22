@@ -1,22 +1,31 @@
 {% extends 'layout/base.html' %}
 
 {% block content %}
-    <div class="fr-container fr-container--fluid fr-mb-md-14v fr-pt-4w">
+    <div class="fr-container fr-mb-md-14v fr-pt-4w">
         <div class="fr-grid-row fr-grid-row--gutters fr-grid-row--center">
             <h1>Connexion à Que Faire de mes objets</h1>
-            {% if form.errors %}
-                <p>Votre nom d'utilisateur et mot de passe ne correspondent pas. Merci de réessayer.</p>
-            {% endif %}
 
-            {% if next %}
-                {% if user.is_authenticated %}
-                    <p>Votre compte utilisateur n'a pas accès à cette page. Pour continuer, merci de vous identifier avec un compte ayant les droits suffisants.</p>
-                {% else %}
-                    <p>Merci de vous connecter pour voir cette page.</p>
-                {% endif %}
-            {% endif %}
 
             <form method="post" action="{{ url('qfdmo:login') }}">
+                {% if next %}
+                    <div class="fr-alert fr-alert--warning fr-my-2w">
+                        <p class="fr-alert__title">
+                            {% if request.user.is_authenticated %}
+                                Votre compte utilisateur n'a pas accès à cette page. Pour continuer, merci de vous identifier avec un compte ayant les droits suffisants.
+                            {% else %}
+                                Merci de vous connecter pour voir cette page.
+                            {% endif %}
+                        </p>
+                    </div>
+                {% endif %}
+
+                {% if form.errors %}
+                    <div class="fr-alert fr-alert--error fr-my-2w">
+                        <p class="fr-alert__title">
+                            Votre nom d'utilisateur et mot de passe ne correspondent pas. Merci de réessayer.</p>
+                    </div>
+                {% endif %}
+
                 {{ csrf_input }}
                 <input type="hidden" name="next" value="{{ next }}">
                 <fieldset class="fr-fieldset">
@@ -46,13 +55,9 @@
                         </fieldset>
                     </div>
                     <div class="fr-fieldset__element">
-                        <ul class="fr-btns-group">
-                            <li>
-                                <button class="fr-mt-2v fr-btn">
-                                    Se connecter
-                                </button>
-                            </li>
-                        </ul>
+                        <button class="fr-btn">
+                            Se connecter
+                        </button>
                     </div>
                 </fieldset>
             </form>
