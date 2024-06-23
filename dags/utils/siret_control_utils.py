@@ -163,7 +163,7 @@ def combine_actors(**kwargs):
         df_acteur_with_siret,
         df_acteur_with_adresse,
         on=["identifiant_unique", "nom", "statut", "siret", "full_adresse"],
-        how="inner",
+        how="outer",
         suffixes=("_siret", "_adresse"),
     )
     cohort_dfs = {}
