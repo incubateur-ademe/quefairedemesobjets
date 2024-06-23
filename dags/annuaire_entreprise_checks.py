@@ -76,22 +76,18 @@ def fetch_and_parse_data(**context):
     df2 = df_acteur[~good_siret_condition & good_address_condition]
     df3 = df_acteur[good_siret_condition & ~good_address_condition]
 
-    df4 = df_acteur[
-        ~df_acteur.index.isin(df1.index)
-        & ~df_acteur.index.isin(df2.index)
-        & ~df_acteur.index.isin(df3.index)
-    ]
-
     return {
         "ok_siret_ok_adresse": df1,
         "nok_siret_ok_adresse": df2,
         "ok_siret_nok_adresse": df3,
-        "nok_siret_nok_adresse": df4,
     }
 
 
 def check_actor_with_adresse(**kwargs):
-    df = kwargs["ti"].xcom_pull(task_ids="load_and_filter_actors_data")
+    data = kwargs["ti"].xcom_pull(task_ids="load_and_filter_actors_data")
+    df_ok_siret_ok_adresse = data["ok_siret_ok_adresse"]
+    df_nok_siret_ok_adresse = data["nok_siret_ok_adresse"]
+    df = pd.concat([df_ok_siret_ok_adresse, df_nok_siret_ok_adresse])
 
     df["ae_result"] = df.apply(
         lambda x: utils.check_siret_using_annuaire_entreprise(
@@ -106,7 +102,10 @@ def check_actor_with_adresse(**kwargs):
 
 
 def check_actor_with_siret(**kwargs):
-    df_acteur = kwargs["ti"].xcom_pull(task_ids="load_and_filter_actors_data")
+    data = kwargs["ti"].xcom_pull(task_ids="load_and_filter_actors_data")
+    df_ok_siret_ok_adresse = data["ok_siret_ok_adresse"]
+    df_ok_siret_nok_adresse = data["ok_siret_nok_adresse"]
+    df_acteur = pd.concat([df_ok_siret_ok_adresse, df_ok_siret_nok_adresse])
 
     df_acteur["ae_result"] = df_acteur.apply(
         utils.check_siret_using_annuaire_entreprise, axis=1
