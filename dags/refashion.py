@@ -26,7 +26,7 @@ dag = DAG(
         "A pipeline to fetch, process, and load to validate data into postgresql"
         " for Refashion dataset"
     ),
-    schedule_interval=None,
+    schedule=None,
 )
 
 
