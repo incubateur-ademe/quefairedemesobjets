@@ -1,4 +1,5 @@
 import json
+import logging
 from datetime import datetime
 from importlib import import_module
 from pathlib import Path
@@ -6,6 +7,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from airflow.providers.postgres.hooks.postgres import PostgresHook
+
+logger = logging.getLogger(__name__)
 
 env = Path(__file__).parent.parent.name
 
@@ -15,11 +18,9 @@ mapping_utils = import_module(f"{env}.utils.mapping_utils")
 
 
 def fetch_data_from_api(**kwargs):
-    dataset = kwargs["dataset"]
-    api_url = (
-        "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
-        f"{dataset}/lines?size=10000"
-    )
+    params = kwargs["params"]
+    api_url = params["endpoint"]
+    logger.info(f"Fetching data from API : {api_url}")
     data = api_utils.fetch_dataset_from_point_apport(api_url)
     df = pd.DataFrame(data)
     return df
@@ -313,9 +314,10 @@ def create_actors(**kwargs):
     with open(config_path, "r") as f:
         config = json.load(f)
 
-    column_mapping = kwargs["column_mapping"]
-    column_to_drop = kwargs.get("column_to_drop", [])
-    column_to_replace = kwargs.get("default_column_value", {})
+    params = kwargs["params"]
+    column_mapping = params["column_mapping"]
+    column_to_drop = params.get("column_to_drop", [])
+    column_to_replace = params.get("default_column_value", {})
     for k, val in column_to_replace.items():
         df[k] = val
 
