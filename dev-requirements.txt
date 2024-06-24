@@ -639,6 +639,10 @@ fsspec==2024.3.1 \
     # via
     #   apache-airflow
     #   universal-pathlib
+fuzzywuzzy==0.18.0 \
+    --hash=sha256:45016e92264780e58972dca1b3d939ac864b78437422beecebb3095f8efd00e8 \
+    --hash=sha256:928244b28db720d1e0ee7587acf660ea49d7e4c632569cad4f1cd7e68a5f0993
+    # via -r dev-requirements.in
 google-re2==1.1.20240501 \
     --hash=sha256:000aba6721c53485736bc8d9c4584bf62207aed1669658deea527f7a6cc919b6 \
     --hash=sha256:01d1adb2e1c1cea3c481acff439ffc3a1aedc8c7094c691df23150846bf87e7a \
