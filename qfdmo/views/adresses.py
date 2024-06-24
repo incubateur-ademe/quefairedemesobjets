@@ -73,11 +73,12 @@ class AddressesView(FormView):
         initial["action_list"] = "|".join([a.code for a in action_list])
 
         if self.request.GET.get("carte") is not None:
-            groupe_options = self._get_groupe_options(action_displayed)
+            grouped_action_choices = self._get_grouped_action_choices(action_displayed)
             actions_to_select = self._get_selected_action()
             initial["grouped_action"] = self._set_grouped_action(
-                groupe_options, actions_to_select
+                grouped_action_choices, actions_to_select
             )
+            initial["legend_grouped_action"] = initial["grouped_action"]
             initial["action_list"] = "|".join(
                 [a for ga in initial["grouped_action"] for a in ga.split("|")]
             )
@@ -93,11 +94,11 @@ class AddressesView(FormView):
 
         if form_class == CarteAddressesForm:
             action_displayed = self._set_action_displayed()
-            groupe_options = self._get_groupe_options(action_displayed)
+            grouped_action_choices = self._get_grouped_action_choices(action_displayed)
 
             my_form.load_choices(  # type: ignore
                 self.request,
-                groupe_options=groupe_options,
+                grouped_action_choices=grouped_action_choices,
                 disable_reparer_option=(
                     "reparer" not in my_form.initial["grouped_action"]
                 ),
@@ -419,7 +420,9 @@ class AddressesView(FormView):
                 )
         return ps_filter
 
-    def _get_groupe_options(self, action_displayed: list[Action]) -> list[list[str]]:
+    def _get_grouped_action_choices(
+        self, action_displayed: list[Action]
+    ) -> list[list[str]]:
         groupe_with_displayed_actions = []
         for cached_groupe in CachedDirectionAction.get_groupe_action_instances():
             if groupe_actions := [
@@ -431,7 +434,7 @@ class AddressesView(FormView):
             ]:
                 groupe_with_displayed_actions.append([cached_groupe, groupe_actions])
 
-        groupe_options = []
+        grouped_action_choices = []
         for [groupe, groupe_displayed_actions] in groupe_with_displayed_actions:
             libelle = ""
             if groupe.icon:
@@ -446,15 +449,15 @@ class AddressesView(FormView):
                     libelles.append(gda.libelle_groupe)
             libelle += ", ".join(libelles).capitalize()
             code = "|".join([a.code for a in groupe_displayed_actions])
-            groupe_options.append([code, mark_safe(libelle)])
-        return groupe_options
+            grouped_action_choices.append([code, mark_safe(libelle)])
+        return grouped_action_choices
 
     def _set_grouped_action(
-        self, groupe_options: list[list[str]], action_list: list[Action]
+        self, grouped_action_choices: list[list[str]], action_list: list[Action]
     ) -> list[str]:
         return [
             groupe_option[0]
-            for groupe_option in groupe_options
+            for groupe_option in grouped_action_choices
             if set(groupe_option[0].split("|")) & set([a.code for a in action_list])
         ]
 

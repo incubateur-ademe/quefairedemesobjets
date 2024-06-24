@@ -84,6 +84,13 @@ class TestInitialValue:
                 "acheter|revendre",
                 "trier",
             ],
+            "legend_grouped_action": [
+                "reparer",
+                "donner|echanger",
+                "preter|emprunter|louer|mettreenlocation",
+                "acheter|revendre",
+                "trier",
+            ],
         }
 
     def test_iframe(self, client):
