@@ -1,14 +1,13 @@
 from unittest.mock import MagicMock
 
 import pandas as pd
-
 import pytest
 
 from dags.utils.dag_eo_utils import (
-    create_proposition_services,
-    create_proposition_services_sous_categories,
     create_actors,
     create_labels,
+    create_proposition_services,
+    create_proposition_services_sous_categories,
 )
 
 
@@ -623,7 +622,7 @@ def test_create_proposition_services_sous_categories(mock_ti):
 
 
 def test_create_actors(mock_ti, mock_config):
-    kwargs = {"ti": mock_ti, **mock_config}
+    kwargs = {"ti": mock_ti, "params": mock_config}
     result = create_actors(**kwargs)
     df_result = result["df"]
     metadata = result["metadata"]
