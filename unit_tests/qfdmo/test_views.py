@@ -4,7 +4,7 @@ class TestConfigurateur:
         assert response.status_code == 302
         assert response.url.startswith("/connexion")
 
-    def test_authenticated_user_can_access_to_configurateur(
+    def test_authenticated_user_can_access_configurateur(
         self, client, django_user_model
     ):
         user = django_user_model.objects.create_user(
