@@ -17,3 +17,5 @@ apache-airflow-providers-postgres
 shapely
 ratelimit
 pyproj
+fuzzywuzzy
+python-Levenshtein
