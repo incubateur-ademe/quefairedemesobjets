@@ -25,7 +25,7 @@ dag = DAG(
         "A pipeline to fetch, process, and load to validate data into postgresql"
         " for Ecologic dataset"
     ),
-    schedule_interval=None,
+    schedule=None,
 )
 
 

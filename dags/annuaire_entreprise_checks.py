@@ -34,7 +34,7 @@ dag = DAG(
         "A pipeline to apply checks using annuaire entreprise "
         "API and output data to validation tool"
     ),
-    schedule_interval="0 0 1 * *",
+    schedule="0 0 1 * *",
 )
 
 

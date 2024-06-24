@@ -296,7 +296,7 @@ dag = DAG(
     description=(
         "DAG for applying correction on normalized actors and propositionservice"
     ),
-    schedule_interval=None,
+    schedule=None,
 )
 
 read_actors = PythonOperator(
@@ -358,28 +358,24 @@ read_revision_labels = PythonOperator(
 merge_labels = PythonOperator(
     task_id="merge_labels",
     python_callable=merge_actors_labels,
-    provide_context=True,
     dag=dag,
 )
 
 apply_corr = PythonOperator(
     task_id="apply_corrections_actors",
     python_callable=apply_corrections,
-    provide_context=True,
     dag=dag,
 )
 
 apply_corr_ps = PythonOperator(
     task_id="apply_corrections_propositionservice",
     python_callable=apply_corrections_ps,
-    provide_context=True,
     dag=dag,
 )
 
 write_pos = PythonOperator(
     task_id="write_data_to_postgres",
     python_callable=write_data_to_postgres,
-    provide_context=True,
     dag=dag,
 )
 

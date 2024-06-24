@@ -5,7 +5,7 @@ from pathlib import Path
 import pandas as pd
 from airflow.models import DAG
 from airflow.operators.dagrun_operator import TriggerDagRunOperator
-from airflow.operators.python_operator import PythonOperator, BranchPythonOperator
+from airflow.operators.python_operator import BranchPythonOperator, PythonOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.utils.dates import days_ago
 
@@ -25,7 +25,7 @@ dag = DAG(
     utils.get_dag_name(__file__, "validate_and_process_dagruns"),
     default_args=default_args,
     description="Check for VALIDATE in qfdmo_dagrun and process qfdmo_dagrunchange",
-    schedule_interval="*/5 * * * *",
+    schedule="*/5 * * * *",
     catchup=False,
     max_active_runs=1,
 )
@@ -95,7 +95,6 @@ def write_data_to_postgres(**kwargs):
 fetch_parse_task = PythonOperator(
     task_id="fetch_and_parse_data",
     python_callable=fetch_and_parse_data,
-    provide_context=True,
     dag=dag,
 )
 
@@ -107,21 +106,18 @@ def skip_processing(**kwargs):
 skip_processing_task = PythonOperator(
     task_id="skip_processing",
     python_callable=skip_processing,
-    provide_context=True,
     dag=dag,
 )
 
 branch_task = BranchPythonOperator(
     task_id="branch_processing",
     python_callable=check_for_validation,
-    provide_context=True,
     dag=dag,
 )
 
 write_to_postgres_task = PythonOperator(
     task_id="write_to_postgres",
     python_callable=write_data_to_postgres,
-    provide_context=True,
     dag=dag,
 )
 
