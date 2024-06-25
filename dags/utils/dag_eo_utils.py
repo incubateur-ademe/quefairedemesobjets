@@ -3,6 +3,7 @@ import logging
 from datetime import datetime
 from importlib import import_module
 from pathlib import Path
+from typing import Union
 
 import numpy as np
 import pandas as pd
@@ -304,6 +305,18 @@ def write_to_dagruns(**kwargs):
         insert_dagrun_and_process_df(df, event, metadata, dag_id_suffixed, run_id)
 
 
+def _force_column_value(
+    df_column: pd.Series, values_mapping: dict, default_value: Union[str, bool]
+) -> pd.Series:
+    # set to default value if column is not one of keys or values in values_mapping
+    return (
+        df_column.str.lower()
+        .replace(values_mapping)
+        .apply(lambda x: (default_value if x not in values_mapping.values() else x))
+        .fillna(default_value)
+    )
+
+
 def create_actors(**kwargs):
     data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
     df = kwargs["ti"].xcom_pull(task_ids="fetch_data_from_api")
@@ -356,6 +369,30 @@ def create_actors(**kwargs):
             elif old_col == "adresse_format_ban":
                 df[["adresse", "code_postal", "ville"]] = df.apply(
                     utils.get_address, axis=1
+                )
+            elif old_col == "public_accueilli":
+                df[new_col] = _force_column_value(
+                    df[old_col],
+                    {
+                        "particuliers et professionnels": (
+                            "Particuliers et professionnels"
+                        ),
+                        "professionnels": "Professionnels",
+                        "particuliers": "Particuliers",
+                        "aucun": "Aucun",
+                    },
+                    "Particuliers et professionnels",
+                )
+
+            elif old_col == "reprise":
+                df[new_col] = _force_column_value(
+                    df[old_col],
+                    {"1 pour 0": "1 pour 0", "1 pour 1": "1 pour 1"},
+                    "1 pour 0",
+                )
+            elif old_col == "exclusivite_de_reprisereparation":
+                df[new_col] = _force_column_value(
+                    df[old_col], {"oui": True, "non": False}, False
                 )
             else:
                 df[new_col] = df[old_col]

@@ -40,6 +40,21 @@ class ActeurStatus(models.TextChoices):
     SUPPRIME = "SUPPRIME", "supprimé"
 
 
+class ActeurPublicAccueilli(models.TextChoices):
+    PROFESSIONNELS_ET_PARTICULIERS = (
+        "Particuliers et professionnels",
+        "Particuliers et professionnels",
+    )
+    PROFESSIONNELS = "Professionnels", "Professionnels"
+    PARTICULIERS = "Particuliers", "Particuliers"
+    AUCUN = "Aucun", "Aucun"
+
+
+class ActeurReprise(models.TextChoices):
+    UN_POUR_ZERO = "1 pour 0", "1 pour 0"
+    UN_POUR_UN = "1 pour 1", "1 pour 1"
+
+
 class ActeurType(CodeAsNaturalKeyModel):
     _digital_acteur_type_id: int = 0
 
@@ -176,6 +191,21 @@ class BaseActeur(NomAsNaturalKeyModel):
         blank=True, null=True, validators=[validate_opening_hours]
     )
     horaires_description = models.TextField(blank=True, null=True)
+
+    public_accueilli = models.CharField(
+        max_length=255,
+        default=ActeurPublicAccueilli.PROFESSIONNELS_ET_PARTICULIERS,
+        choices=ActeurPublicAccueilli.choices,
+        null=False,
+    )
+    reprise = models.CharField(
+        max_length=255,
+        default=ActeurReprise.UN_POUR_ZERO,
+        choices=ActeurReprise.choices,
+        null=False,
+    )
+    exclusivite_de_reprisereparation = models.BooleanField(default=False)
+    uniquement_sur_rdv = models.BooleanField(default=False)
 
     def get_share_url(self, request: HttpRequest, direction: str | None = None) -> str:
         protocol = "https" if request.is_secure() else "http"
