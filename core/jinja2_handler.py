@@ -85,7 +85,7 @@ def environment(**options):
             "is_embedded": is_embedded,
             "is_iframe": is_iframe,
             "is_carte": is_carte,
-            "reverse": reverse,
+            "url": reverse,
             "static": static,
             "quote_plus": lambda u: quote_plus(u),
             "ENVIRONMENT": settings.ENVIRONMENT,
