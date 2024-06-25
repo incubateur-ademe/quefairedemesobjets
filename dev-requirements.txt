@@ -460,9 +460,9 @@ django==5.0.4 \
     #   django-browser-reload
     #   django-debug-toolbar
     #   django-extensions
-django-browser-reload==1.12.1 \
-    --hash=sha256:08b457f1b6599bf782d4d2ecdfb0897d6fc936ac4035060d0269c2af5ef4ef7a \
-    --hash=sha256:875b6bd01db13380522ccb4ae75871a2edeae74bb5ac92bf32eb76763d575d86
+django-browser-reload==1.13.0 \
+    --hash=sha256:4e3507c10518f4c7439588aaed2f0c21b503878ecea7b18893f1e635e0cbe3ab \
+    --hash=sha256:5c1705eb29f0b72808b702484f10a8d5da9cd9243e55ab81446cb697e96b3e8c
     # via -r dev-requirements.in
 django-debug-toolbar==4.4.2 \
     --hash=sha256:5d7afb2ea5f8730241e5b0735396e16cd1fd8c6b53a2f3e1e30bbab9abb23728 \
