@@ -55,7 +55,7 @@
     },
     "devDependencies": {
         "@playwright/test": "^1.44.1",
-        "@testing-library/jest-dom": "^6.4.5",
+        "@testing-library/jest-dom": "^6.4.6",
         "@types/jest": "^29.5.12",
         "@types/node": "^20.14.4",
         "@typescript-eslint/eslint-plugin": "^7.0.1",
