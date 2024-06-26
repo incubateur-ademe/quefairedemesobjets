@@ -79,7 +79,7 @@
     {% endif %}
 
     <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
-        <button class="fr-btn fr-btn--secondary-light fr-icon-share-line qfdmo-rounded-full" aria-describedby="shareTooltip" type="button"></button>
+        <button class="fr-btn fr-btn--secondary-light fr-icon-share-line qfdmo-rounded-full" type="button"><span>partager</span></button>
         <span class="fr-tooltip fr-placement" id="shareTooltip" role="tooltip" aria-hidden="true">
             <div class="fr-share">
                 {% with address_url=adresse.get_share_url(request) %}
