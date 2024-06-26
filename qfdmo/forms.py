@@ -251,8 +251,18 @@ class CarteAddressesForm(AddressesForm):
         grouped_action_choices: list[list[str]] = [],
         disable_reparer_option: bool = False,
     ) -> None:
-        self.fields["grouped_action"].choices = grouped_action_choices
-        self.fields["legend_grouped_action"].choices = grouped_action_choices
+        self.fields["grouped_action"].choices = [
+            (
+                self.fields["grouped_action"].label,
+                grouped_action_choices,
+            )
+        ]
+        self.fields["legend_grouped_action"].choices = [
+            (
+                self.fields["legend_grouped_action"].label,
+                grouped_action_choices,
+            )
+        ]
         if disable_reparer_option:
             self.fields["bonus"].widget.attrs["disabled"] = "true"
             self.fields["label_reparacteur"].widget.attrs["disabled"] = "true"
@@ -289,7 +299,7 @@ class CarteAddressesForm(AddressesForm):
             },
         ),
         choices=[],
-        label="Actions",
+        label="Groupes d'actions",
         required=False,
     )
 
@@ -303,7 +313,7 @@ class CarteAddressesForm(AddressesForm):
             },
         ),
         choices=[],
-        label="Actions",
+        label="Groupes d'actions",
         required=False,
     )
 

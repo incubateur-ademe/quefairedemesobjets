@@ -39,21 +39,23 @@
                     class="qfdmo-flex-grow qfdmo-relative qfdmo-shadow"
                     data-controller="map"
                     data-map-location-value="{{ location }}"
-                    id="map"
                 >
                     {{ form.bounding_box }}
+                    <div id="map" class="qfdmo-absolute qfdmo-inset-0">
+                    </div>
                     <button
                         data-map-target="searchInZoneButton"
                         data-turbo-frame="adresses"
                         data-action="click -> search-solution-form#advancedSubmit"
-                        class="fr-btn fr-btn--sm fr-btn--secondary fr-m-1w fr-p-1v qfdmo-absolute qfdmo-z-[2000] qfdmo-right-0 qfdmo-hidden qfdmo-bg-white qfdmo-opacity-60"
+                        class="fr-btn fr-btn--sm fr-btn--secondary fr-m-1w fr-p-1v
+                        qfdmo-absolute qfdmo-z-[2000] qfdmo-right-0 qfdmo-hidden qfdmo-bg-white qfdmo-opacity-60"
                         type="button"
                         data-with-controls={{"false" if is_carte(request) else "true"}}
                         >
                         Rechercher dans cette zone
                     </button>
                     {% if is_carte(request) %}
-                        <div class="fr-px-3w qfdmo-hidden sm:qfdmo-block qfdmo-absolute qfdmo-bottom-0 qfdmo-left-0 qfdmo-bg-white qfdmo-z-[2000] qfdmo-max-w-[20rem]">
+                        <div class="fr-px-3w qfdmo-hidden sm:qfdmo-block qfdmo-absolute qfdmo-bottom-0 qfdmo-left-0 qfdmo-bg-white qfdmo-z-[2000] qfdmo-max-w-[21rem]">
                             <h2 class="fr-h4 fr-mt-3w">
                                 Actions possibles
                             </h2>
