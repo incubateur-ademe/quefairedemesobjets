@@ -8,9 +8,13 @@ def set_cohort_id(row):
     current_adresse_lvao = row["full_adresse"]
     current_naf = row["categorie_naf"]
     current_siret = row["siret"]
-    current_siren = current_siret[:9]
-    current_siret_size = len(current_siret.strip())
+    current_siren = None
+    current_siret_size = None
+    if current_siret is not None:
+        current_siret_size = len(current_siret.strip())
+        current_siren = current_siret[:9]
     priorities = {
+        "empty_siret": 12,
         "ownership_transferred_matching_category_lvao_address": 11,
         "ownership_transferred_matching_category_ae_address": 10,
         "ownership_transferred_different_category": 9,
@@ -41,7 +45,11 @@ def set_cohort_id(row):
             candidate["adresse_candidat"], current_adresse_ae
         )
         candidate_siren = candidate["siret_candidat"][:9]
-        if (
+        if current_siret is None:
+            best_outcome = "empty_siret"
+            best_candidate_index = index
+            break
+        elif (
             adresse_lvao_match_ratio > 80
             and candidate["categorie_naf_candidat"] == current_naf
             and candidate["etat_admin_candidat"] == "A"
@@ -153,33 +161,6 @@ def set_cohort_id(row):
         row["ae_result"][best_candidate_index]["used_for_decision"] = True
 
     return best_outcome
-
-
-def combine_actors(**kwargs):
-    df_acteur_with_siret = kwargs["ti"].xcom_pull(task_ids="check_with_siret")
-    df_acteur_with_adresse = kwargs["ti"].xcom_pull(task_ids="check_with_adresse")
-
-    df = pd.merge(
-        df_acteur_with_siret,
-        df_acteur_with_adresse,
-        on=["identifiant_unique", "nom", "statut", "siret", "full_adresse"],
-        how="outer",
-        suffixes=("_siret", "_adresse"),
-    )
-    cohort_dfs = {}
-
-    df["ae_result"] = df.apply(combine_ae_result_dicts, axis=1)
-    df[["statut", "categorie_naf", "ae_adresse"]] = df.apply(update_statut, axis=1)
-    df = df[df["statut"] == "SUPPRIME"]
-    if len(df) > 0:
-        df["cohort_id"] = df.apply(set_cohort_id, axis=1)
-    else:
-        return cohort_dfs
-
-    for cohort_id in df["cohort_id"].unique():
-        cohort_dfs[cohort_id] = df[df["cohort_id"] == cohort_id]
-
-    return cohort_dfs
 
 
 def combine_ae_result_dicts(row):

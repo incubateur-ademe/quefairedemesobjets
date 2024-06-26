@@ -131,6 +131,36 @@ def enrich_row(row):
     return row
 
 
+def combine_actors(**kwargs):
+    df_acteur_with_siret = kwargs["ti"].xcom_pull(task_ids="check_with_siret")
+    df_acteur_with_adresse = kwargs["ti"].xcom_pull(task_ids="check_with_adresse")
+
+    df = pd.merge(
+        df_acteur_with_siret,
+        df_acteur_with_adresse,
+        on=["identifiant_unique", "nom", "statut", "siret", "full_adresse"],
+        how="outer",
+        suffixes=("_siret", "_adresse"),
+    )
+
+    cohort_dfs = {}
+
+    df["ae_result"] = df.apply(siret_control_utils.combine_ae_result_dicts, axis=1)
+    df[["statut", "categorie_naf", "ae_adresse"]] = df.apply(
+        siret_control_utils.update_statut, axis=1
+    )
+    df = df[df["statut"] == "SUPPRIME"]
+    if len(df) > 0:
+        df["cohort_id"] = df.apply(siret_control_utils.set_cohort_id, axis=1)
+    else:
+        return cohort_dfs
+
+    for cohort_id in df["cohort_id"].unique():
+        cohort_dfs[cohort_id] = df[df["cohort_id"] == cohort_id]
+
+    return cohort_dfs
+
+
 def enrich_location(**kwargs):
     data = kwargs["ti"].xcom_pull(task_ids="combine_actors")
 
@@ -199,7 +229,7 @@ serialize_to_json_task = PythonOperator(
 
 combine_candidates = PythonOperator(
     task_id="combine_actors",
-    python_callable=siret_control_utils.combine_actors,
+    python_callable=combine_actors,
     dag=dag,
 )
 
