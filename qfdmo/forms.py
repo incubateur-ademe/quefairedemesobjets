@@ -171,7 +171,7 @@ class AddressesForm(forms.Form):
             "Afficher uniquement les adresses éligibles (uniquement valable lorsque le"
             " geste « réparer » est sélectionné). En savoir plus sur le site <a href="
             '"https://www.ecologie.gouv.fr/bonus-reparation" target="_blank"'
-            ' rel="noopener">Bonus réparation</a>'
+            ' rel="noopener" title="Bonus réparation - Nouvelle fenêtre">Bonus réparation</a>'
         ),
         label_suffix="",
         required=False,
