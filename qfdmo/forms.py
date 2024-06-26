@@ -137,7 +137,7 @@ class AddressesForm(forms.Form):
             "Afficher uniquement les artisans labellisés (uniquement valable lorsque le"
             " geste « réparer » est sélectionné). En savoir plus <a href="
             '"https://www.artisanat.fr/nous-connaitre/vous-accompagner/reparacteurs"'
-            ' target="_blank" rel="noopener"> sur le site de la CMA</a>'
+            ' target="_blank" rel="noopener" title="sur le site de la CMA - Nouvelle fenêtre"> sur le site de la CMA</a>'
         ),
         label_suffix="",
         required=False,
