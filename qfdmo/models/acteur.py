@@ -194,15 +194,13 @@ class BaseActeur(NomAsNaturalKeyModel):
 
     public_accueilli = models.CharField(
         max_length=255,
-        default=ActeurPublicAccueilli.PROFESSIONNELS_ET_PARTICULIERS,
         choices=ActeurPublicAccueilli.choices,
-        null=False,
+        null=True,
     )
     reprise = models.CharField(
         max_length=255,
-        default=ActeurReprise.UN_POUR_ZERO,
         choices=ActeurReprise.choices,
-        null=False,
+        null=True,
     )
     exclusivite_de_reprisereparation = models.BooleanField(default=False)
     uniquement_sur_rdv = models.BooleanField(default=False)

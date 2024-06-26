@@ -1,9 +1,9 @@
 import logging
-
-import pandas as pd
+from datetime import datetime
 from importlib import import_module
 from pathlib import Path
-from datetime import datetime
+
+import pandas as pd
 
 logging.basicConfig(level=logging.INFO)
 
@@ -29,6 +29,7 @@ def process_labels(df, column_name):
 
 
 def handle_create_event(df_actors, dag_run_id, engine):
+
     create_required_columns = [
         "identifiant_unique",
         "nom",
@@ -125,30 +126,9 @@ def handle_update_actor_event(df_actors, dag_run_id):
 
 
 def handle_write_data_create_event(connection, df_actors, df_labels, df_pds, df_pdssc):
-    df_actors[
-        [
-            "identifiant_unique",
-            "nom",
-            "adresse",
-            "adresse_complement",
-            "code_postal",
-            "ville",
-            "url",
-            "email",
-            "location",
-            "telephone",
-            "nom_commercial",
-            "siret",
-            "identifiant_externe",
-            "acteur_type_id",
-            "statut",
-            "source_id",
-            "cree_le",
-            "horaires_description",
-            "modifie_le",
-            "commentaires",
-        ]
-    ].to_sql("temp_actors", connection, if_exists="replace")
+    df_actors[["identifiant_unique"]].to_sql(
+        "temp_actors", connection, if_exists="replace"
+    )
 
     delete_queries = [
         """
@@ -181,30 +161,40 @@ def handle_write_data_create_event(connection, df_actors, df_labels, df_pds, df_
     for query in delete_queries:
         connection.execute(query)
 
-    df_actors[
-        [
-            "identifiant_unique",
-            "nom",
-            "adresse",
-            "adresse_complement",
-            "code_postal",
-            "ville",
-            "url",
-            "email",
-            "location",
-            "telephone",
-            "nom_commercial",
-            "siret",
-            "identifiant_externe",
-            "acteur_type_id",
-            "statut",
-            "source_id",
-            "cree_le",
-            "horaires_description",
-            "modifie_le",
-            "commentaires",
-        ]
-    ].to_sql(
+    # Liste des colonnes souhaitées
+    colonnes_souhaitees = [
+        "identifiant_unique",
+        "nom",
+        "adresse",
+        "adresse_complement",
+        "code_postal",
+        "ville",
+        "url",
+        "email",
+        "location",
+        "telephone",
+        "nom_commercial",
+        "siret",
+        "identifiant_externe",
+        "acteur_type_id",
+        "statut",
+        "source_id",
+        "cree_le",
+        "horaires_description",
+        "modifie_le",
+        "commentaires",
+        "public_accueilli",
+        "reprise",
+        "uniquement_sur_rdv",
+        "exclusivite_de_reprisereparation",
+    ]
+
+    # Filtrer les colonnes qui existent dans le DataFrame
+    colonnes_existantes = [
+        col for col in colonnes_souhaitees if col in df_actors.columns
+    ]
+
+    df_actors[colonnes_existantes].to_sql(
         "qfdmo_acteur",
         connection,
         if_exists="append",
