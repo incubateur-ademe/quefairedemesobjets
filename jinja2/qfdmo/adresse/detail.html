@@ -67,8 +67,7 @@
     {% endif %}
     {% if adresse.email and False %}
         <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
-            <a class="fr-btn fr-btn--secondary-light fr-icon-mail-line qfdmo-rounded-full" href="mailto:{{ adresse.email }}" target="_blank" title="Courriel" rel='noopener'></a>
-            <span class="fr-text--xs fr-mb-0">E-mail</span>
+            <a class="fr-btn fr-btn--secondary-light fr-icon-mail-line qfdmo-rounded-full" href="mailto:{{ adresse.email }}" target="_blank" title="Courriel" rel='noopener'><span class="fr-text--xs fr-mb-0">E-mail</span></a>
         </div>
     {% endif %}
     {% if adresse.telephone %}
