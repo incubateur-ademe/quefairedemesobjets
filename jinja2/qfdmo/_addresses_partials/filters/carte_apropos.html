@@ -1,0 +1,68 @@
+<!-- Panel «Légende» -->
+<div class='fr-container qfdmo-px-0 qfdmo-absolute qfdmo-inset-0 qfdmo-font-black qfdmo-z-[10001] qfdmo-flex qfdmo-flex-col qfdmo-hidden'
+    data-search-solution-form-target="aProposMainPanel"
+>
+    <div class="qfdmo-flex-grow qfdmo-bg-black qfdmo-opacity-20"></div>
+    <div class="qfdmo-bg-white qfdmo-duration-300 qfdmo-h-0" data-search-solution-form-target="aProposFormPanel">
+        <div class="fr-container fr-container--fluid qfdmo-h-full">
+            <div class="qfdmo-h-full qfdmo-flex qfdmo-flex-col">
+                <div class="fr-modal__header">
+                    <button
+                        class="fr-btn fr-btn--close fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-close-line"
+                        type="button"
+                        data-action="click -> search-solution-form#toggleAPropos"
+                        >
+                        Fermer
+                    </button>
+                </div>
+                <div class="fr-modal__content fr-text--normal qfdmo-overflow-y-auto qfdmo-flex-grow  qfdmo-font-normal">
+                    <h2 class="fr-h4 fr-mt-3w qfdmo-text-center">
+                        À propos de La Carte
+                    </h2>
+                    <hr>
+                    <div class="fr-card fr-enlarge-link fr-card--horizontal">
+                        <div class="fr-card__body">
+                            <div class="fr-card__content">
+                                <h3 class="fr-card__title">
+                                    <a
+                                        href="https://longuevieauxobjets.ademe.fr/reutiliser-nos-outils/?mtm_campaign=widget"
+                                        target="_blank"
+                                        rel="noopener"
+                                        aria-label="Réutiliser La Carte - Nouvelle fenêtre"
+                                    >
+                                        Réutiliser La Carte
+                                    </a>
+                                </h3>
+                                <p class="fr-card__desc">
+                                    Et si vous ajoutiez cette carte à votre site ? Pour utiliser notre widget, c'est par ici !
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fr-card fr-enlarge-link fr-card--horizontal fr-mt-2w">
+                        <div class="fr-card__body">
+                            <div class="fr-card__content">
+                                <h3 class="fr-card__title">
+                                    <a
+                                        href="#"
+                                        target="_blank"
+                                        rel="noopener"
+                                        aria-label="Donnez votre avis - Nouvelle fenêtre"
+                                    >
+                                        Donnez votre avis
+                                    </a>
+                                </h3>
+                                <p class="fr-card__desc">Cette carte doit-être la vôtre ! Si vous avez des idées pour l'améliorer, on vous écoute.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="fr-modal__footer qfdmo-flex qfdmo-flex-col">
+                    <div class="qfdmo-flex qfdmo-justify-center">
+                        {% include 'layout/_partials/header_logos.html' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

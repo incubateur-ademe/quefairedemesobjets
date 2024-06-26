@@ -41,6 +41,9 @@ export default class extends Controller<HTMLElement> {
         "legendMainPanel",
         "legendFormPanel",
 
+        "aProposMainPanel",
+        "aProposFormPanel",
+
         "reparerFilter",
 
         "carte",
@@ -95,6 +98,9 @@ export default class extends Controller<HTMLElement> {
     declare readonly legendMainPanelTarget: HTMLElement
     declare readonly legendFormPanelTarget: HTMLElement
     declare readonly hasLegendFormPanelTarget: boolean
+
+    declare readonly aProposMainPanelTarget: HTMLElement
+    declare readonly aProposFormPanelTarget: HTMLElement
 
     declare readonly reparerFilterTargets: HTMLInputElement[]
 
@@ -425,6 +431,31 @@ export default class extends Controller<HTMLElement> {
         let submitEvent = new Event("submit", { bubbles: true, cancelable: true })
         setTimeout(() => {
             this.searchFormTarget.dispatchEvent(submitEvent)
+        }, 300)
+    }
+
+    toggleAPropos() {
+        if (this.aProposMainPanelTarget.classList.contains("qfdmo-hidden")) {
+            this.#showAPropos()
+        } else {
+            this.#hideAPropos()
+        }
+        this.scrollToContent()
+    }
+
+    #showAPropos() {
+        this.aProposMainPanelTarget.classList.remove("qfdmo-hidden")
+        setTimeout(() => {
+            this.aProposFormPanelTarget.classList.remove("qfdmo-h-0")
+            this.aProposFormPanelTarget.classList.add("qfdmo-h-[95%]")
+        }, 100)
+    }
+
+    #hideAPropos() {
+        this.aProposFormPanelTarget.classList.remove("qfdmo-h-[95%]")
+        this.aProposFormPanelTarget.classList.add("qfdmo-h-0")
+        setTimeout(() => {
+            this.aProposMainPanelTarget.classList.add("qfdmo-hidden")
         }, 300)
     }
 }
