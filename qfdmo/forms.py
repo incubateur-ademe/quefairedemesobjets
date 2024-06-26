@@ -150,7 +150,7 @@ class AddressesForm(forms.Form):
             "Afficher uniquement les adresses recensées comme relevant de l'économie"
             " sociale et solidaire. En savoir plus sur le site <a href="
             '"https://www.economie.gouv.fr/cedef/economie-sociale-et-solidaire"'
-            ' target="_blank" rel="noopener">economie.gouv.fr</a>'
+            ' target="_blank" rel="noopener" title="economie.gouv.fr - Nouvelle fenêtre">economie.gouv.fr</a>'
         ),
         label_suffix="",
         required=False,
