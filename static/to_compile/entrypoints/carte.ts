@@ -5,7 +5,7 @@ const setupIframe = () => {
 
     const urlParams = new URLSearchParams()
     urlParams.append("carte", "1")
-    let maxWidth = "800px"
+    let maxWidth = "100%"
     let height = "700px"
     let iframeExtraAttributes = {}
     for (const param in scriptTag.dataset) {
