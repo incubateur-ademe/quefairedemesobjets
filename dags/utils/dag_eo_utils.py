@@ -306,14 +306,16 @@ def write_to_dagruns(**kwargs):
 
 
 def _force_column_value(
-    df_column: pd.Series, values_mapping: dict, default_value: Union[str, bool]
+    df_column: pd.Series,
+    values_mapping: dict,
+    default_value: Union[str, bool, None] = None,
 ) -> pd.Series:
     # set to default value if column is not one of keys or values in values_mapping
     return (
-        df_column.str.lower()
+        df_column.str.strip()
+        .str.lower()
         .replace(values_mapping)
         .apply(lambda x: (default_value if x not in values_mapping.values() else x))
-        .fillna(default_value)
     )
 
 
@@ -381,14 +383,17 @@ def create_actors(**kwargs):
                         "particuliers": "Particuliers",
                         "aucun": "Aucun",
                     },
-                    "Particuliers et professionnels",
                 )
 
             elif old_col == "reprise":
                 df[new_col] = _force_column_value(
                     df[old_col],
-                    {"1 pour 0": "1 pour 0", "1 pour 1": "1 pour 1"},
-                    "1 pour 0",
+                    {
+                        "1 pour 0": "1 pour 0",
+                        "1 pour 1": "1 pour 1",
+                        "non": "1 pour 0",
+                        "oui": "1 pour 1",
+                    },
                 )
             elif old_col == "exclusivite_de_reprisereparation":
                 df[new_col] = _force_column_value(
