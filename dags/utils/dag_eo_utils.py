@@ -355,7 +355,7 @@ def create_actors(**kwargs):
                 )
             elif old_col == "adresse_format_ban":
                 df[["adresse", "code_postal", "ville"]] = df.apply(
-                    utils.extract_details, axis=1
+                    utils.get_address, axis=1
                 )
             else:
                 df[new_col] = df[old_col]
