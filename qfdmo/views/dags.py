@@ -93,7 +93,7 @@ class DagsValidation(IsStaffMixin, FormView):
         )
 
         for dagrun_line in dagrun_lines:
-            if not hasattr(dagrun_line, "row_status"):
+            if "row_status" not in dagrun_line.row_updates:
                 dagrun_line.update_row_update_field("row_status", new_status)
 
         logging.info(f"{dagrun_id} - {self.request.user}")
