@@ -10,32 +10,70 @@ from shapely import wkb
 from shapely.geometry import Point
 import math
 from pyproj import Transformer
+from fuzzywuzzy import fuzz
 
 env = Path(__file__).parent.parent.name
 
 api_utils = import_module(f"{env}.utils.api_utils")
 
 
-def preprocess_address(address):
-    address = re.sub(r"[\r\n,]+", " ", address)
-    address = re.sub(r"\s+", " ", address).strip()
-    return address
+def get_address(row, col="adresse_format_ban"):
+    if pd.isnull(row[col]):
+        return pd.Series([None, None, None])
+
+    res = get_address_from_ban(str(row[col]))
+    match_percentage = res.get("match_percentage", 0)
+    threshold = 80
+    if match_percentage >= threshold:
+        address, postal_code, city = res["address"], res["postal_code"], res["city"]
+    else:
+        address, postal_code, city = extract_details(row, col)
+
+    return pd.Series([address, postal_code, city])
+
+
+def get_address_from_ban(address):
+    url = "https://api-adresse.data.gouv.fr/search/"
+    params = {"q": address, "limit": 1}
+    if address is None:
+        return {}
+    response = requests.get(url, params=params)
+    if response.status_code == 200:
+        data = response.json()
+        if "features" in data and data["features"]:
+            properties = data["features"][0]["properties"]
+            label = properties["label"]
+            query = data["query"]
+            address = properties["name"]
+            postal_code = properties["postcode"]
+            city = properties["city"]
+            match_percentage = fuzz.ratio(query.lower(), label.lower())
+            coords = data["features"][0]["geometry"]["coordinates"]
+            return {
+                "latitude": coords[1],
+                "longitude": coords[0],
+                "query": query,
+                "label": label,
+                "address": address,
+                "postal_code": postal_code,
+                "city": city,
+                "match_percentage": match_percentage,
+            }
+    return {}
 
 
 def extract_details(row, col="adresse_format_ban"):
     # Pattern pour capturer les codes postaux et les noms de ville optionnels
-    pattern = re.compile(r"(\d{2,3}\s?\d{2,3})\s*(.*)")
+    pattern = re.compile(r"(.*?)\s+(\d{4,5})\s+(.*)")
 
     if pd.isnull(row[col]):
         return pd.Series([None, None, None])
 
-    address_ban = preprocess_address(str(row[col]))
-
-    match = pattern.search(address_ban)
+    match = pattern.search(str(row[col]))
     if match:
-        postal_code = match.group(1).replace(" ", "")
-        city = match.group(2) if match.group(2) else None
-        address = address_ban[: match.start()].strip()
+        address = match.group(1).strip()
+        postal_code = match.group(2).strip()
+        city = match.group(3).strip() if match.group(3) else None
 
         # Ajouter un zéro si le code postal a quatre chiffres
         if len(postal_code) == 4:
