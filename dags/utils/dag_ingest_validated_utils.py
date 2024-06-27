@@ -105,14 +105,23 @@ def handle_write_data_create_event(connection, df_actors, df_labels, df_pds, df_
 
     delete_queries = [
         """
-        DELETE FROM qfdmo_acteur_labels
-        WHERE acteur_id IN (
-            SELECT identifiant_unique FROM temp_actors
+        DELETE FROM qfdmo_propositionservice_sous_categories
+        WHERE propositionservice_id IN (
+            SELECT id FROM qfdmo_propositionservice
+            WHERE acteur_id IN ( SELECT identifiant_unique FROM temp_actors )
         );
         """,
         """
+        DELETE FROM qfdmo_acteur_labels
+        WHERE acteur_id IN ( SELECT identifiant_unique FROM temp_actors );
+        """,
+        """
+        DELETE FROM qfdmo_propositionservice
+        WHERE acteur_id IN ( SELECT identifiant_unique FROM temp_actors );
+        """,
+        """
         DELETE FROM qfdmo_acteur WHERE identifiant_unique
-        in ( select identifiant_unique from temp_actors);
+        IN ( SELECT identifiant_unique FROM temp_actors);
         """,
     ]
 

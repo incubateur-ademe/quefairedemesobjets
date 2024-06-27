@@ -417,7 +417,6 @@ class TestCreatePropositionService:
         kwargs = {"ti": mock}
         result = create_proposition_services(**kwargs)
 
-        print(result["df"])
         assert result["df"].equals(df_expected)
         assert result["metadata"] == expected_metadata
 
@@ -497,6 +496,7 @@ def mock_ti(
             "email": ["contact@eco1.com", "contact@eco2.com"],
             "horaires_douverture": ["9-5 Mon-Fri", "10-6 Mon-Fri"],
             "consignes_dacces": ["", ""],
+            "public_accueilli": [None, None],
         }
     )
 
@@ -599,6 +599,38 @@ def mock_config():
         },
         "column_to_drop": ["siren"],
     }
+
+
+class TestCreateActorPublicAccueilli:
+
+    def test_public_accueilli_empty(self, mock_ti, mock_config):
+        kwargs = {
+            "ti": mock_ti,
+            "params": {
+                "column_mapping": {
+                    "id_point_apport_ou_reparation": "identifiant_externe",
+                    "adresse_complement": "adresse_complement",
+                    "type_de_point_de_collecte": "acteur_type_id",
+                    "telephone": "telephone",
+                    "siret": "siret",
+                    "public_accueilli": "public_accueilli",
+                    "ecoorganisme": "source_id",
+                    "adresse_format_ban": "adresse",
+                    "nom_de_lorganisme": "nom",
+                    "enseigne_commerciale": "nom_commercial",
+                    "_updatedAt": "cree_le",
+                    "site_web": "url",
+                    "email": "email",
+                    "longitudewgs84": "location",
+                    "latitudewgs84": "location",
+                    "horaires_douverture": "horaires_description",
+                    "consignes_dacces": "commentaires",
+                },
+            },
+        }
+        result = create_actors(**kwargs)
+        print(result)
+        assert "public_accueilli" in result["df"]
 
 
 def test_create_proposition_services_sous_categories(mock_ti):
