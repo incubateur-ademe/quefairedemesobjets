@@ -1,23 +1,6 @@
-<!--
-{% if widget.wrap_label %}<label{% if widget.attrs.id %} for="{{ widget.attrs.id }}"{% endif %}>{% endif %}{% include "django/forms/widgets/input.html" %}{% if widget.wrap_label %} {{ widget.label }}</label>{% endif %}
--->
-<!-- FIXME : add the attributes -->
 <div class="fr-checkbox-group">
     {% include "django/forms/widgets/input.html" %}
-
     <label class="fr-label" for="{{ widget.attrs.id }}">
         {{ widget.label }}
     </label>
 </div>
-
-<!--
-<div class="fr-checkbox-group" data-action="click->search-solution-form#apply">
-    <input name="reparer" data-action="change -> search-solution-form#activeReparerFilters" data-search-solution-form-target="reparerInput" id="{{ action_direction }}_reparer" type="checkbox" aria-describedby="reparer-messages">
-        <label class="fr-label" for="{{ action_direction }}_reparer">
-
-                <span class="fr-px-1v qfdmo-text-white fr-icon-tools-fill fr-icon--sm qfdmo-rounded-full qfdmo-bg-green-menthe-main-548" aria-hidden="true"></span>&nbsp;
-
-            Je répare
-        </label>
-    </div>
--->
