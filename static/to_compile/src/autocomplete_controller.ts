@@ -170,7 +170,9 @@ export default abstract class extends Controller<HTMLElement> {
         let a = document.createElement("DIV")
         a.setAttribute("id", this.inputTarget.id + "autocomplete-list")
         a.classList.add("autocomplete-items")
-        a.classList.add("qfdmo-w-full", "sm:qfdmo-w-fit", "sm:qfdmo-min-w-[600px]")
+        let inputTargetWidth = this.inputTarget.offsetWidth
+        a.classList.add("qfdmo-w-full")
+        a.style.width = `${inputTargetWidth}px`
         /*append the DIV element as a child of the autocomplete container:*/
         this.inputTarget.after(a)
         return a
