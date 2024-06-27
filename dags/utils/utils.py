@@ -358,7 +358,7 @@ def check_siret_using_annuaire_entreprise(row, adresse_query_flag=False, col="si
     return res
 
 
-def get_location(lon, lat):
+def get_location(lon : float, lat : float) -> dict:
     try:
 
         if math.isnan(float(lon)) or math.isnan(float(lat)):
