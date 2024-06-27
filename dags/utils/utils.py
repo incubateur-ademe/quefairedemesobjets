@@ -1,16 +1,16 @@
 import csv
 import io
+import math
 import re
-from urllib.parse import urlparse
 from importlib import import_module
 from pathlib import Path
+from urllib.parse import urlparse
+
 import pandas as pd
 import requests
+from fuzzywuzzy import fuzz
 from shapely import wkb
 from shapely.geometry import Point
-import math
-from pyproj import Transformer
-from fuzzywuzzy import fuzz
 
 env = Path(__file__).parent.parent.name
 
@@ -359,18 +359,12 @@ def check_siret_using_annuaire_entreprise(row, adresse_query_flag=False, col="si
     return res
 
 
-transformer = Transformer.from_crs("EPSG:2154", "EPSG:4326")
-
-
-def get_location(easting, northing):
+def get_location(lon: float, lat: float) -> dict:
     try:
-        easting = float(easting)
-        northing = float(northing)
 
-        if math.isnan(easting) or math.isnan(northing):
+        if math.isnan(float(lon)) or math.isnan(float(lat)):
             return None
 
-        lon, lat = transformer.transform(easting, northing)
         location = transform_location(longitude=lon, latitude=lat)
 
         return {"latitude": lat, "longitude": lon, "location": location}
