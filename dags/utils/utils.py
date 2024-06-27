@@ -1,15 +1,16 @@
 import csv
 import io
+import math
 import re
-from urllib.parse import urlparse
 from importlib import import_module
 from pathlib import Path
+from urllib.parse import urlparse
+
 import pandas as pd
 import requests
+from fuzzywuzzy import fuzz
 from shapely import wkb
 from shapely.geometry import Point
-import math
-from fuzzywuzzy import fuzz
 
 env = Path(__file__).parent.parent.name
 
@@ -358,7 +359,7 @@ def check_siret_using_annuaire_entreprise(row, adresse_query_flag=False, col="si
     return res
 
 
-def get_location(lon : float, lat : float) -> dict:
+def get_location(lon: float, lat: float) -> dict:
     try:
 
         if math.isnan(float(lon)) or math.isnan(float(lat)):
