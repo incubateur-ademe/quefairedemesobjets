@@ -154,4 +154,64 @@ class Migration(migrations.Migration):
             name="uniquement_sur_rdv",
             field=models.BooleanField(default=False),
         ),
+        migrations.RunSQL(
+            (
+                "alter table qfdmo_acteur alter column uniquement_sur_rdv"
+                " SET DEFAULT false;"
+                "alter table qfdmo_acteur alter column exclusivite_de_reprisereparation"
+                " SET DEFAULT false;"
+                "alter table qfdmo_acteur alter column cree_le"
+                " SET DEFAULT NOW();"
+                "alter table qfdmo_acteur alter column modifie_le"
+                " SET DEFAULT NOW();"
+                "alter table qfdmo_acteur alter column statut"
+                " SET DEFAULT 'ACTIF';"
+            ),
+            migrations.RunSQL.noop,
+        ),
+        migrations.RunSQL(
+            (
+                "alter table qfdmo_revisionacteur alter column uniquement_sur_rdv"
+                " SET DEFAULT false;"
+                "alter table qfdmo_revisionacteur alter column exclusivite_de_reprisereparation"
+                " SET DEFAULT false;"
+                "alter table qfdmo_revisionacteur alter column cree_le"
+                " SET DEFAULT NOW();"
+                "alter table qfdmo_revisionacteur alter column modifie_le"
+                " SET DEFAULT NOW();"
+                "alter table qfdmo_revisionacteur alter column statut"
+                " SET DEFAULT 'ACTIF';"
+            ),
+            migrations.RunSQL.noop,
+        ),
+        migrations.RunSQL(
+            (
+                "alter table qfdmo_displayedacteur alter column uniquement_sur_rdv"
+                " SET DEFAULT false;"
+                "alter table qfdmo_displayedacteur alter column exclusivite_de_reprisereparation"
+                " SET DEFAULT false;"
+                "alter table qfdmo_displayedacteur alter column cree_le"
+                " SET DEFAULT NOW();"
+                "alter table qfdmo_displayedacteur alter column modifie_le"
+                " SET DEFAULT NOW();"
+                "alter table qfdmo_displayedacteur alter column statut"
+                " SET DEFAULT 'ACTIF';"
+            ),
+            migrations.RunSQL.noop,
+        ),
+        migrations.RunSQL(
+            (
+                "alter table qfdmo_displayedacteurtemp alter column uniquement_sur_rdv"
+                " SET DEFAULT false;"
+                "alter table qfdmo_displayedacteurtemp alter column exclusivite_de_reprisereparation"
+                " SET DEFAULT false;"
+                "alter table qfdmo_displayedacteurtemp alter column cree_le"
+                " SET DEFAULT NOW();"
+                "alter table qfdmo_displayedacteurtemp alter column modifie_le"
+                " SET DEFAULT NOW();"
+                "alter table qfdmo_displayedacteurtemp alter column statut"
+                " SET DEFAULT 'ACTIF';"
+            ),
+            migrations.RunSQL.noop,
+        ),
     ]

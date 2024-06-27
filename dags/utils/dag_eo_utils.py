@@ -384,7 +384,8 @@ def create_actors(**kwargs):
                         "aucun": "Aucun",
                     },
                 )
-
+            elif old_col == "uniquement_sur_rdv":
+                df[new_col] = df[old_col].fillna(False)
             elif old_col == "reprise":
                 df[new_col] = _force_column_value(
                     df[old_col],
