@@ -3,7 +3,7 @@
 {% block content %}
 
     <turbo-frame id="turboForm">
-        <!-- Controleur général de gestion de la navigation et du formulaire -->
+        {# Controleur général de gestion de la navigation et du formulaire #}
 
 
         <form data-controller="search-solution-form" id='search_form'
@@ -27,27 +27,27 @@
             {% include "qfdmo/partials/featureflip_inputs.html" %}
             {% if is_carte(request) %}
 
-                <!-- Panel Header -->
+                {# Panel Header #}
                 {% include 'qfdmo/_addresses_partials/carte_header.html' %}
-                <!-- Panel Result -->
+                {# Panel Result #}
                 {% include 'qfdmo/_addresses_partials/carte_result.html' %}
-                <!-- Panel «Filtres» -->
+                {# Panel «Filtres» #}
                 {% include 'qfdmo/_addresses_partials/filters/carte_filters.html' %}
-                <!-- Panel «Legend» -->
+                {# Panel «Legend» #}
                 {% include 'qfdmo/_addresses_partials/filters/carte_legend.html' %}
-                <!-- Panel À propos -->
+                {# Panel À propos #}
                 {% include 'qfdmo/_addresses_partials/filters/carte_apropos.html' %}
 
             {% else %}
-                <!-- Panel «Filtres avancés» -->
+                {# Panel «Filtres avancés» #}
                 {% include 'qfdmo/_addresses_partials/filters/iframe_advanced_filters.html' %}
-                <!-- Panel «Modifier ma recherche» -->
+                {# Panel «Modifier ma recherche» #}
                 {% include 'qfdmo/_addresses_partials/iframe_back_to_form.html' %}
-                <!-- Panel «Formulaire de recherche» -->
+                {# Panel «Formulaire de recherche» #}
                 {% include 'qfdmo/_addresses_partials/iframe_form.html' %}
-                <!-- Panel «Résultats de la recherche» -->
+                {# Panel «Résultats de la recherche» #}
                 {% include 'qfdmo/_addresses_partials/iframe_result.html' %}
-                <!-- Liens de pieds de page pour iframe -->
+                {# Liens de pieds de page pour iframe #}
                 {% include 'qfdmo/_addresses_partials/iframe_footer_links.html' %}
             {% endif %}
 
