@@ -30,33 +30,6 @@ def process_labels(df, column_name):
 
 def handle_create_event(df_actors, dag_run_id, engine):
 
-    create_required_columns = [
-        "identifiant_unique",
-        "nom",
-        "adresse",
-        "adresse_complement",
-        "code_postal",
-        "ville",
-        "url",
-        "email",
-        "location",
-        "telephone",
-        "nom_commercial",
-        "siret",
-        "identifiant_externe",
-        "acteur_type_id",
-        "statut",
-        "source_id",
-        "cree_le",
-        "horaires_description",
-        "modifie_le",
-        "commentaires",
-    ]
-
-    for column in create_required_columns:
-        if column not in df_actors.columns:
-            df_actors[column] = None
-
     df_labels = process_labels(df_actors, "labels")
 
     max_id_pds = pd.read_sql_query(
@@ -132,22 +105,7 @@ def handle_write_data_create_event(connection, df_actors, df_labels, df_pds, df_
 
     delete_queries = [
         """
-        DELETE FROM qfdmo_propositionservice_sous_categories
-        WHERE propositionservice_id IN (
-            SELECT id FROM qfdmo_propositionservice
-            WHERE acteur_id IN (
-                SELECT identifiant_unique FROM temp_actors
-            )
-        );
-        """,
-        """
-             DELETE FROM qfdmo_acteur_labels
-              WHERE acteur_id IN (
-                     SELECT identifiant_unique FROM temp_actors
-                  );
-        """,
-        """
-        DELETE FROM qfdmo_propositionservice
+        DELETE FROM qfdmo_acteur_labels
         WHERE acteur_id IN (
             SELECT identifiant_unique FROM temp_actors
         );
@@ -162,32 +120,11 @@ def handle_write_data_create_event(connection, df_actors, df_labels, df_pds, df_
         connection.execute(query)
 
     # Liste des colonnes souhaitées
-    colonnes_souhaitees = [
-        "identifiant_unique",
-        "nom",
-        "adresse",
-        "adresse_complement",
-        "code_postal",
-        "ville",
-        "url",
-        "email",
-        "location",
-        "telephone",
-        "nom_commercial",
-        "siret",
-        "identifiant_externe",
-        "acteur_type_id",
-        "statut",
-        "source_id",
-        "cree_le",
-        "horaires_description",
-        "modifie_le",
-        "commentaires",
-        "public_accueilli",
-        "reprise",
-        "uniquement_sur_rdv",
-        "exclusivite_de_reprisereparation",
-    ]
+    collection = connection.execute(
+        "SELECT column_name FROM information_schema.columns WHERE table_name ="
+        " 'qfdmo_acteur';"
+    )
+    colonnes_souhaitees = [col[0] for col in collection]
 
     # Filtrer les colonnes qui existent dans le DataFrame
     colonnes_existantes = [

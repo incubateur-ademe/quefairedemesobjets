@@ -40,7 +40,6 @@ def check_for_validation(**kwargs):
     return "fetch_and_parse_data" if row[0][0] else "skip_processing"
 
 
-# Usage
 def fetch_and_parse_data(**context):
     pg_hook = PostgresHook(postgres_conn_id=utils.get_db_conn_id(__file__))
     engine = pg_hook.get_sqlalchemy_engine()
@@ -51,6 +50,8 @@ def fetch_and_parse_data(**context):
         "(SELECT id FROM qfdmo_dagrun WHERE status = 'DagRunStatus.TO_INSERT')",
         engine,
     )
+
+    # Pourquoi on ne prend que le premier élément de la liste ?
     dag_run_id = df_sql["dag_run_id"].iloc[0]
 
     change_type = df_sql["change_type"].iloc[0]
