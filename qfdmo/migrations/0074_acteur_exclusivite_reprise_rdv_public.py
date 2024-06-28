@@ -30,6 +30,7 @@ class Migration(migrations.Migration):
                 ],
                 max_length=255,
                 null=True,
+                blank=True,
             ),
         ),
         migrations.AddField(
@@ -39,6 +40,7 @@ class Migration(migrations.Migration):
                 choices=[("1 pour 0", "1 pour 0"), ("1 pour 1", "1 pour 1")],
                 max_length=255,
                 null=True,
+                blank=True,
             ),
         ),
         migrations.AddField(
@@ -66,6 +68,7 @@ class Migration(migrations.Migration):
                 ],
                 max_length=255,
                 null=True,
+                blank=True,
             ),
         ),
         migrations.AddField(
@@ -75,6 +78,7 @@ class Migration(migrations.Migration):
                 choices=[("1 pour 0", "1 pour 0"), ("1 pour 1", "1 pour 1")],
                 max_length=255,
                 null=True,
+                blank=True,
             ),
         ),
         migrations.AddField(
@@ -102,6 +106,7 @@ class Migration(migrations.Migration):
                 ],
                 max_length=255,
                 null=True,
+                blank=True,
             ),
         ),
         migrations.AddField(
@@ -111,6 +116,7 @@ class Migration(migrations.Migration):
                 choices=[("1 pour 0", "1 pour 0"), ("1 pour 1", "1 pour 1")],
                 max_length=255,
                 null=True,
+                blank=True,
             ),
         ),
         migrations.AddField(
@@ -138,6 +144,7 @@ class Migration(migrations.Migration):
                 ],
                 max_length=255,
                 null=True,
+                blank=True,
             ),
         ),
         migrations.AddField(
@@ -147,6 +154,7 @@ class Migration(migrations.Migration):
                 choices=[("1 pour 0", "1 pour 0"), ("1 pour 1", "1 pour 1")],
                 max_length=255,
                 null=True,
+                blank=True,
             ),
         ),
         migrations.AddField(

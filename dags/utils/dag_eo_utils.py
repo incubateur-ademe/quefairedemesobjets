@@ -374,7 +374,6 @@ def create_actors(**kwargs):
                     utils.get_address, axis=1
                 )
             elif old_col == "public_accueilli":
-                print(df[old_col])
                 df[new_col] = _force_column_value(
                     df[old_col],
                     {
@@ -386,9 +385,8 @@ def create_actors(**kwargs):
                         "aucun": "Aucun",
                     },
                 )
-                print(df[new_col])
             elif old_col == "uniquement_sur_rdv":
-                df[new_col] = df[old_col].fillna(False)
+                df[new_col] = df[old_col].astype(bool)
             elif old_col == "reprise":
                 df[new_col] = _force_column_value(
                     df[old_col],
@@ -400,12 +398,9 @@ def create_actors(**kwargs):
                     },
                 )
             elif old_col == "exclusivite_de_reprisereparation":
-                df[new_col] = _force_column_value(
-                    df[old_col], {"oui": True, "non": False}, False
-                )
+                df[new_col] = df[old_col].apply(lambda x: True if x == "oui" else False)
             else:
                 df[new_col] = df[old_col]
-    print("BOO 1")
     df["identifiant_unique"] = df.apply(
         lambda x: mapping_utils.create_identifiant_unique(x),
         axis=1,
@@ -415,7 +410,6 @@ def create_actors(**kwargs):
     df["longitude"] = df["longitudewgs84"].astype(float).replace({np.nan: None})
     df = df.drop(["latitudewgs84", "longitudewgs84"], axis=1)
     df["modifie_le"] = df["cree_le"]
-    print("BOO 2")
 
     if "siret" in df.columns:
         df["siret"] = df["siret"].replace({np.nan: None})
@@ -431,7 +425,6 @@ def create_actors(**kwargs):
         df.loc[
             df["service_a_domicile"] == "service à domicile uniquement", "statut"
         ] = "SUPPRIME"
-    print("BOO 3")
 
     duplicates_mask = df.duplicated("identifiant_unique", keep=False)
     duplicate_ids = df.loc[duplicates_mask, "identifiant_unique"].unique()
@@ -443,7 +436,6 @@ def create_actors(**kwargs):
         "duplicate_ids": list(duplicate_ids),
         "added_rows": len(df),
     }
-    print("DF", df)
 
     return {"df": df, "metadata": metadata, "config": config}
 
