@@ -417,7 +417,6 @@ class TestCreatePropositionService:
         kwargs = {"ti": mock}
         result = create_proposition_services(**kwargs)
 
-        print(result["df"])
         assert result["df"].equals(df_expected)
         assert result["metadata"] == expected_metadata
 
@@ -497,6 +496,7 @@ def mock_ti(
             "email": ["contact@eco1.com", "contact@eco2.com"],
             "horaires_douverture": ["9-5 Mon-Fri", "10-6 Mon-Fri"],
             "consignes_dacces": ["", ""],
+            "public_accueilli": [None, None],
         }
     )
 
@@ -599,6 +599,241 @@ def mock_config():
         },
         "column_to_drop": ["siren"],
     }
+
+
+class TestCreateActorSeriesTransformations:
+
+    @pytest.mark.parametrize(
+        "public_accueilli,expected_public_accueilli",
+        [
+            (None, None),
+            ("fake", None),
+            ("Particuliers", "Particuliers"),
+            ("PARTICULIERS", "Particuliers"),
+        ],
+    )
+    def test_create_actor_public_accueilli(
+        self, public_accueilli, expected_public_accueilli
+    ):
+        mock = MagicMock()
+        mock.xcom_pull.side_effect = lambda task_ids="": {
+            "load_data_from_postgresql": {
+                "sources": None,
+                "acteurtype": None,
+            },
+            "fetch_data_from_api": pd.DataFrame(
+                {
+                    "nom_de_lorganisme": ["Eco1"],
+                    "id_point_apport_ou_reparation": ["1"],
+                    "latitudewgs84": ["3.8566"],
+                    "longitudewgs84": ["50.8566"],
+                    "type_de_point_de_collecte": [
+                        "artisan, commerce indépendant",
+                    ],
+                    "ecoorganisme": [
+                        "source1",
+                    ],
+                    "produitsdechets_acceptes": ["téléphones portables"],
+                    "point_dapport_de_service_reparation": [True],
+                    "point_dapport_pour_reemploi": [False],
+                    "point_de_reparation": [True],
+                    "point_de_collecte_ou_de_reprise_des_dechets": [True],
+                    "_updatedAt": ["2023-01-01 20:10:10"],
+                    "cree_le": ["2021-01-01"],
+                    "public_accueilli": [public_accueilli],
+                }
+            ),
+        }[task_ids]
+
+        kwargs = {
+            "ti": mock,
+            "params": {
+                "column_mapping": {
+                    "id_point_apport_ou_reparation": "identifiant_externe",
+                    "public_accueilli": "public_accueilli",
+                    "nom_de_lorganisme": "nom",
+                },
+            },
+        }
+        result = create_actors(**kwargs)
+
+        assert result["df"]["public_accueilli"][0] == expected_public_accueilli
+
+    @pytest.mark.parametrize(
+        "uniquement_sur_rdv,expected_uniquement_sur_rdv",
+        [
+            (None, False),
+            (False, False),
+            (True, True),
+        ],
+    )
+    def test_create_actor_uniquement_sur_rdv(
+        self, uniquement_sur_rdv, expected_uniquement_sur_rdv
+    ):
+        mock = MagicMock()
+        mock.xcom_pull.side_effect = lambda task_ids="": {
+            "load_data_from_postgresql": {
+                "sources": None,
+                "acteurtype": None,
+            },
+            "fetch_data_from_api": pd.DataFrame(
+                {
+                    "nom_de_lorganisme": ["Eco1"],
+                    "id_point_apport_ou_reparation": ["1"],
+                    "latitudewgs84": ["3.8566"],
+                    "longitudewgs84": ["50.8566"],
+                    "type_de_point_de_collecte": [
+                        "artisan, commerce indépendant",
+                    ],
+                    "ecoorganisme": [
+                        "source1",
+                    ],
+                    "produitsdechets_acceptes": ["téléphones portables"],
+                    "point_dapport_de_service_reparation": [True],
+                    "point_dapport_pour_reemploi": [False],
+                    "point_de_reparation": [True],
+                    "point_de_collecte_ou_de_reprise_des_dechets": [True],
+                    "_updatedAt": ["2023-01-01 20:10:10"],
+                    "cree_le": ["2021-01-01"],
+                    "uniquement_sur_rdv": [uniquement_sur_rdv],
+                }
+            ),
+        }[task_ids]
+
+        kwargs = {
+            "ti": mock,
+            "params": {
+                "column_mapping": {
+                    "id_point_apport_ou_reparation": "identifiant_externe",
+                    "uniquement_sur_rdv": "uniquement_sur_rdv",
+                    "nom_de_lorganisme": "nom",
+                },
+            },
+        }
+        result = create_actors(**kwargs)
+
+        assert result["df"]["uniquement_sur_rdv"][0] == expected_uniquement_sur_rdv
+
+    @pytest.mark.parametrize(
+        "reprise,expected_reprise",
+        [
+            (None, None),
+            ("1 pour 0", "1 pour 0"),
+            ("1 pour 1", "1 pour 1"),
+            ("non", "1 pour 0"),
+            ("oui", "1 pour 1"),
+            ("fake", None),
+        ],
+    )
+    def test_create_actor_reprise(self, reprise, expected_reprise):
+        mock = MagicMock()
+        mock.xcom_pull.side_effect = lambda task_ids="": {
+            "load_data_from_postgresql": {
+                "sources": None,
+                "acteurtype": None,
+            },
+            "fetch_data_from_api": pd.DataFrame(
+                {
+                    "nom_de_lorganisme": ["Eco1"],
+                    "id_point_apport_ou_reparation": ["1"],
+                    "latitudewgs84": ["3.8566"],
+                    "longitudewgs84": ["50.8566"],
+                    "type_de_point_de_collecte": [
+                        "artisan, commerce indépendant",
+                    ],
+                    "ecoorganisme": [
+                        "source1",
+                    ],
+                    "produitsdechets_acceptes": ["téléphones portables"],
+                    "point_dapport_de_service_reparation": [True],
+                    "point_dapport_pour_reemploi": [False],
+                    "point_de_reparation": [True],
+                    "point_de_collecte_ou_de_reprise_des_dechets": [True],
+                    "_updatedAt": ["2023-01-01 20:10:10"],
+                    "cree_le": ["2021-01-01"],
+                    "reprise": [reprise],
+                }
+            ),
+        }[task_ids]
+
+        kwargs = {
+            "ti": mock,
+            "params": {
+                "column_mapping": {
+                    "id_point_apport_ou_reparation": "identifiant_externe",
+                    "reprise": "reprise",
+                    "nom_de_lorganisme": "nom",
+                },
+            },
+        }
+        result = create_actors(**kwargs)
+
+        assert result["df"]["reprise"][0] == expected_reprise
+
+    @pytest.mark.parametrize(
+        "exclusivite_de_reprisereparation, expected_exclusivite_de_reprisereparation",
+        [
+            (None, False),
+            ("non", False),
+            ("oui", True),
+            ("fake", False),
+        ],
+    )
+    def test_create_actor_exclusivite_de_reprisereparation(
+        self,
+        exclusivite_de_reprisereparation,
+        expected_exclusivite_de_reprisereparation,
+    ):
+        mock = MagicMock()
+        mock.xcom_pull.side_effect = lambda task_ids="": {
+            "load_data_from_postgresql": {
+                "sources": None,
+                "acteurtype": None,
+            },
+            "fetch_data_from_api": pd.DataFrame(
+                {
+                    "nom_de_lorganisme": ["Eco1"],
+                    "id_point_apport_ou_reparation": ["1"],
+                    "latitudewgs84": ["3.8566"],
+                    "longitudewgs84": ["50.8566"],
+                    "type_de_point_de_collecte": [
+                        "artisan, commerce indépendant",
+                    ],
+                    "ecoorganisme": [
+                        "source1",
+                    ],
+                    "produitsdechets_acceptes": ["téléphones portables"],
+                    "point_dapport_de_service_reparation": [True],
+                    "point_dapport_pour_reemploi": [False],
+                    "point_de_reparation": [True],
+                    "point_de_collecte_ou_de_reprise_des_dechets": [True],
+                    "_updatedAt": ["2023-01-01 20:10:10"],
+                    "cree_le": ["2021-01-01"],
+                    "exclusivite_de_reprisereparation": [
+                        exclusivite_de_reprisereparation
+                    ],
+                }
+            ),
+        }[task_ids]
+
+        kwargs = {
+            "ti": mock,
+            "params": {
+                "column_mapping": {
+                    "id_point_apport_ou_reparation": "identifiant_externe",
+                    "exclusivite_de_reprisereparation": (
+                        "exclusivite_de_reprisereparation"
+                    ),
+                    "nom_de_lorganisme": "nom",
+                },
+            },
+        }
+        result = create_actors(**kwargs)
+
+        assert (
+            result["df"]["exclusivite_de_reprisereparation"][0]
+            == expected_exclusivite_de_reprisereparation
+        )
 
 
 def test_create_proposition_services_sous_categories(mock_ti):

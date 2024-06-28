@@ -1,9 +1,9 @@
 import logging
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic.edit import FormView
 from django.core.paginator import Paginator
 from django.shortcuts import render
+from django.views.generic.edit import FormView
 
 from qfdmo.forms import DagsForm
 from qfdmo.models.data import DagRun, DagRunStatus
