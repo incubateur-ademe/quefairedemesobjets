@@ -483,7 +483,7 @@ class ConfiguratorForm(forms.Form):
         required=False,
     )
 
-    # - `data-max_width`, largeur maximum de l'iframe, la valeur par défaut est 800px
+    # - `data-max_width`, largeur maximum de l'iframe, la valeur par défaut est 100%
     max_width = forms.CharField(
         widget=forms.TextInput(
             attrs={
@@ -493,7 +493,7 @@ class ConfiguratorForm(forms.Form):
         label="Largeur maximum de l'iframe",
         help_text=mark_safe(
             "peut être exprimé en px, %, em, rem, vw, …<br>"
-            "La valeur par défaut est 800px"
+            "La valeur par défaut est 100%"
         ),
         required=False,
     )
