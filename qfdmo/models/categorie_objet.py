@@ -33,12 +33,19 @@ class SousCategorieObjet(CodeAsNaturalKeyModel):
         related_name="sous_categories",
         verbose_name="Produits Que Faire De Mes Déchets & Objets",
     )
-    qfdmd_afficher_carte = models.BooleanField(
+    afficher_carte = models.BooleanField(
         default=False,
         verbose_name="Afficher la carte dans l’assistant",
         help_text="afficher la carte LVAO dans les fiches produits "
         "“Que faire de mes objets et déchets” avec les identifiants "
         "indiqués au niveau de la sous-catégorie",
+    )
+    url_carte = models.URLField(
+        verbose_name="URL de la carte",
+        blank=True,
+        help_text="La carte est affichée dans l'assistant si la "
+        "case ci-dessus est cochée",
+        max_length=255,
     )
 
     def __str__(self) -> str:
