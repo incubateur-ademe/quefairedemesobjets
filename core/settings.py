@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "explorer",
     "import_export",
     "core",
+    "qfdmd",
     "qfdmo",
 ]
 
