@@ -20,7 +20,6 @@ class TestActionNaturalKey:
 
     @pytest.mark.django_db()
     def test_get_natural_key(self):
-
         SousCategorieObjetFactory(libelle="Natural key", code="natural_key")
         assert (
             SousCategorieObjet.objects.get_by_natural_key("natural_key").__str__()
@@ -46,6 +45,9 @@ class TestSousCategorieObjetSanitizedName:
 
         # Verify that the serialized object matches what we expect
         assert serialized_sous_categorie == {
+            "afficher_carte": False,
+            "qfdmd_produits": [],
+            "url_carte": "",
             "id": sous_categorie.id,
             "libelle": "Test Sous-Categorie",
             "code": "code_sous_categorie",

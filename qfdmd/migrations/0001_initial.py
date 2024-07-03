@@ -7,7 +7,9 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = []
+    dependencies = [
+        ("qfdmo", "0073_alter_action_and_groupeaction"),
+    ]
 
     operations = [
         migrations.CreateModel(
