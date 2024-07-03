@@ -1,11 +1,12 @@
 from django.contrib.gis.db import models
 
-from qfdmo.models.categorie_objet import SousCategorieObjet
-
 
 class Produit(models.Model):
+    titre = models.CharField(unique=True, blank=True)
     id = models.IntegerField(primary_key=True)
-    sous_categorie = models.ForeignKey(SousCategorieObjet, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return "%s %s" % (self.id, self.titre)
 
     class Meta:
         verbose_name = "Produit"

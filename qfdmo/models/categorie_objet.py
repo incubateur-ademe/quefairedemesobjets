@@ -28,6 +28,18 @@ class SousCategorieObjet(CodeAsNaturalKeyModel):
     categorie = models.ForeignKey(CategorieObjet, on_delete=models.CASCADE)
     code = models.CharField(max_length=255, unique=True, blank=False, null=False)
     afficher = models.BooleanField(default=True)
+    qfdmd_produits = models.ManyToManyField(
+        "qfdmd.produit",
+        related_name="sous_categories",
+        verbose_name="Produits Que Faire De Mes Déchets & Objets",
+    )
+    qfdmd_afficher_carte = models.BooleanField(
+        default=False,
+        verbose_name="Afficher la carte dans l’assistant",
+        help_text="afficher la carte LVAO dans les fiches produits "
+        "“Que faire de mes objets et déchets” avec les identifiants "
+        "indiqués au niveau de la sous-catégorie",
+    )
 
     def __str__(self) -> str:
         return self.libelle
