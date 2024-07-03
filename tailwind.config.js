@@ -61,6 +61,8 @@ module.exports = {
         "qfdmo-justify-between",
         "qfdmo-m-1w",
         "qfdmo-w-full",
+        "qfdmo-text-white",
+        "qfdmo-rounded-full",
     ],
     theme: {
         colors: {

@@ -438,6 +438,8 @@ class AddressesView(FormView):
         for [groupe, groupe_displayed_actions] in groupe_with_displayed_actions:
             libelle = ""
             if groupe.icon:
+                # Les classes qfdmo- ci-dessous doivent être ajoutées à la safelist
+                # Tailwind dans tailwind.config.js
                 libelle = (
                     f'<span class="fr-px-1v qfdmo-text-white {groupe.icon}'
                     f' fr-icon--sm qfdmo-rounded-full qfdmo-bg-{groupe.couleur}"'
