@@ -14,9 +14,10 @@ class SousCategorieSchema(ModelSchema):
         fields = ["id"]
 
 
-@router.get("/afficher_carte", response=SousCategorieSchema)
-def afficher_carte(request, id: int):
+@router.get("/produit", response=SousCategorieSchema)
+def sous_categorie_from_product(request, id: str):
     try:
+        id = id.split("_")[0]
         return (
             Produit.objects.get(
                 id=id,
