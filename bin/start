@@ -2,4 +2,4 @@
 
 #gunicorn --timeout 300 --workers 20 --chdir core core.wsgi --log-file -
 #gunicorn core.asgi --worker-class=uvicorn.workers.UvicornWorker --max-requests 10000 --max-requests-jitter 20 --workers 5 --log-file -
-gunicorn core.asgi --timeout 300 --worker-class=core.custom_uvicorn_worker.CustomUvicornWorker --max-requests 2000 --max-requests-jitter 200 --workers 3 --log-file -
+gunicorn core.asgi --timeout 300 --worker-class=core.custom_uvicorn_worker.CustomUvicornWorker --max-requests 2000 --max-requests-jitter 200 --workers 1 --log-file -

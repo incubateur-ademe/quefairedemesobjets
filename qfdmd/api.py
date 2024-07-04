@@ -1,16 +1,32 @@
-from ninja import Router
+from ninja import ModelSchema, Router
+
+from qfdmo.models.categorie_objet import SousCategorieObjet
 from .models import Produit
 
 router = Router()
 
 
-@router.get("/afficher_carte")
+class SousCategorieSchema(ModelSchema):
+    url_carte: str
+
+    class Meta:
+        model = SousCategorieObjet
+        fields = ["id"]
+
+
+@router.get("/afficher_carte", response=SousCategorieSchema)
 def afficher_carte(request, id: int):
     try:
         return (
-            Produit.objects.get(id=id)
-            .sous_categories.filter(qfdmd_afficher_carte=True)
-            .exists()
+            Produit.objects.get(
+                id=id,
+            )
+            .sous_categories.filter(afficher_carte=True)
+            .first()
         )
-    except Produit.DoesNotExist:
+
+    except (
+        AttributeError,
+        Produit.DoesNotExist,
+    ):
         return None

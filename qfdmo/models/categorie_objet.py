@@ -1,4 +1,7 @@
+from django.conf import settings
+from urllib.parse import quote_plus
 from django.contrib.gis.db import models
+from django.db.utils import cached_property
 from django.forms import model_to_dict
 
 from qfdmo.models.utils import CodeAsNaturalKeyModel
@@ -32,6 +35,7 @@ class SousCategorieObjet(CodeAsNaturalKeyModel):
         "qfdmd.produit",
         related_name="sous_categories",
         verbose_name="Produits Que Faire De Mes Déchets & Objets",
+        blank=True,
     )
     afficher_carte = models.BooleanField(
         default=False,
@@ -40,16 +44,17 @@ class SousCategorieObjet(CodeAsNaturalKeyModel):
         "“Que faire de mes objets et déchets” avec les identifiants "
         "indiqués au niveau de la sous-catégorie",
     )
-    url_carte = models.URLField(
-        verbose_name="URL de la carte",
-        blank=True,
-        help_text="La carte est affichée dans l'assistant si la "
-        "case ci-dessus est cochée",
-        max_length=255,
-    )
 
     def __str__(self) -> str:
         return self.libelle
+
+    @cached_property
+    def url_carte(self):
+        if self.afficher_carte:
+            return (
+                f"{settings.BASE_URL}/?carte&sous_categorie_objet="
+                f"{quote_plus(self.libelle)}&sc_id={self.id}&limit=25"
+            )
 
     def natural_key(self) -> tuple[str]:
         return (self.code,)
