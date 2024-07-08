@@ -129,6 +129,7 @@ class AddressesForm(forms.Form):
         widget=forms.CheckboxInput(
             attrs={
                 "class": "fr-checkbox fr-m-1v",
+                "data-search-solution-form-target": "reparerFilter",
             }
         ),
         label="Pas d'exclusivité de réparation",
@@ -264,13 +265,9 @@ class CarteAddressesForm(AddressesForm):
     def load_choices(
         self,
         request: HttpRequest,
-        # grouped_action_choices: list[list[str]] = [],
-        # disable_reparer_option: bool = False,
+        grouped_action_choices: list[list[str]] = [],
+        disable_reparer_option: bool = False,
     ) -> None:
-        action_displayed = self._set_action_displayed()
-        grouped_action_choices = self._get_grouped_action_choices(action_displayed)
-        disable_reparer_option = "reparer" not in self.initial["grouped_action"]
-
         self.fields["grouped_action"].choices = [
             (
                 self.fields["grouped_action"].label,
