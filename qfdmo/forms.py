@@ -125,6 +125,19 @@ class AddressesForm(forms.Form):
         required=False,
     )
 
+    pas_exclusivite_reparation = forms.BooleanField(
+        widget=forms.CheckboxInput(
+            attrs={
+                "class": "fr-checkbox fr-m-1v",
+            }
+        ),
+        label="Pas d'exclusivité de réparation",
+        help_text="Masquer les adresses qui réparent uniquement les produits de leurs marques",
+        label_suffix="",
+        required=False,
+        initial=True,
+    )
+
     label_reparacteur = forms.BooleanField(
         widget=forms.CheckboxInput(
             attrs={

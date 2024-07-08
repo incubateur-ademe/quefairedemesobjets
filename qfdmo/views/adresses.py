@@ -58,6 +58,9 @@ class AddressesView(FormView):
         initial["latitude"] = self.request.GET.get("latitude")
         initial["longitude"] = self.request.GET.get("longitude")
         initial["label_reparacteur"] = self.request.GET.get("label_reparacteur")
+        initial["pas_exclusivite_reparation"] = self.request.GET.get(
+            "pas_exclusivite_reparation", True
+        )
         initial["bonus"] = self.request.GET.get("bonus")
         initial["ess"] = self.request.GET.get("ess")
         initial["bounding_box"] = self.request.GET.get("bounding_box")
@@ -71,6 +74,8 @@ class AddressesView(FormView):
 
         action_list = self._set_action_list(action_displayed)
         initial["action_list"] = "|".join([a.code for a in action_list])
+
+        print("COUCOU", f"{self.request.GET.get("action_displayed")=}")
 
         if self.request.GET.get("carte") is not None:
             grouped_action_choices = self._get_grouped_action_choices(action_displayed)
@@ -105,6 +110,7 @@ class AddressesView(FormView):
             )
         else:
             my_form.load_choices(self.request)  # type: ignore
+
         return my_form
 
     def get_context_data(self, **kwargs):
