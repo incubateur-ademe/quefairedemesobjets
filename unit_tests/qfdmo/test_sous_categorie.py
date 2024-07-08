@@ -47,7 +47,6 @@ class TestSousCategorieObjetSanitizedName:
         assert serialized_sous_categorie == {
             "afficher_carte": False,
             "qfdmd_produits": [],
-            "url_carte": "",
             "id": sous_categorie.id,
             "libelle": "Test Sous-Categorie",
             "code": "code_sous_categorie",
