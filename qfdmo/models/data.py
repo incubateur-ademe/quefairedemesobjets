@@ -5,7 +5,7 @@ from django.contrib.gis.db import models
 from qfdmo.models.acteur import ActeurType, Source
 
 
-class DagRunStatus(models.Choices):
+class DagRunStatus(models.TextChoices):
     TO_VALIDATE = "TO_VALIDATE"
     TO_INSERT = "TO_INSERT"
     REJECTED = "REJECTED"

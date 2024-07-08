@@ -42,6 +42,11 @@ jobs:
       - name: Check code formatting
         run: black --check --diff .
       - uses: chartboost/ruff-action@v1
+      - name: Check for mising migrations
+        run: python manage.py makemigrations --check --no-input
+        env:
+          SECRET_KEY: votre_blanquette_est_bonne
+          DATABASE_URL: "postgres://fakeusername:fakepassword@postgres:5432/database"
 
   node:
     runs-on: ubuntu-latest
