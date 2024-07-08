@@ -71,11 +71,9 @@ class AddressesView(FormView):
         # Action to display and check
         action_displayed = self._set_action_displayed()
         initial["action_displayed"] = "|".join([a.code for a in action_displayed])
-
         action_list = self._set_action_list(action_displayed)
-        initial["action_list"] = "|".join([a.code for a in action_list])
 
-        print("COUCOU", f"{self.request.GET.get("action_displayed")=}")
+        initial["action_list"] = "|".join([a.code for a in action_list])
 
         if self.request.GET.get("carte") is not None:
             grouped_action_choices = self._get_grouped_action_choices(action_displayed)
@@ -96,20 +94,7 @@ class AddressesView(FormView):
         my_form = super().get_form(form_class)
         # Here we need to load choices after initialisation because of async management
         # in prod + cache
-
-        if form_class == CarteAddressesForm:
-            action_displayed = self._set_action_displayed()
-            grouped_action_choices = self._get_grouped_action_choices(action_displayed)
-
-            my_form.load_choices(  # type: ignore
-                self.request,
-                grouped_action_choices=grouped_action_choices,
-                disable_reparer_option=(
-                    "reparer" not in my_form.initial["grouped_action"]
-                ),
-            )
-        else:
-            my_form.load_choices(self.request)  # type: ignore
+        my_form.load_choices(self.request)  # type: ignore
 
         return my_form
 

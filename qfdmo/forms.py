@@ -132,10 +132,10 @@ class AddressesForm(forms.Form):
             }
         ),
         label="Pas d'exclusivité de réparation",
-        help_text="Masquer les adresses qui réparent uniquement les produits de leurs marques",
+        help_text="Masquer les adresses qui réparent "
+        "uniquement les produits de leurs marques",
         label_suffix="",
         required=False,
-        initial=True,
     )
 
     label_reparacteur = forms.BooleanField(
@@ -264,9 +264,13 @@ class CarteAddressesForm(AddressesForm):
     def load_choices(
         self,
         request: HttpRequest,
-        grouped_action_choices: list[list[str]] = [],
-        disable_reparer_option: bool = False,
+        # grouped_action_choices: list[list[str]] = [],
+        # disable_reparer_option: bool = False,
     ) -> None:
+        action_displayed = self._set_action_displayed()
+        grouped_action_choices = self._get_grouped_action_choices(action_displayed)
+        disable_reparer_option = "reparer" not in self.initial["grouped_action"]
+
         self.fields["grouped_action"].choices = [
             (
                 self.fields["grouped_action"].label,
@@ -279,9 +283,11 @@ class CarteAddressesForm(AddressesForm):
                 grouped_action_choices,
             )
         ]
+
         if disable_reparer_option:
-            self.fields["bonus"].widget.attrs["disabled"] = "true"
-            self.fields["label_reparacteur"].widget.attrs["disabled"] = "true"
+            for field in ["bonus", "label_reparacteur", "pas_exclusivite_reparation"]:
+                self.fields[field].widget.attrs["disabled"] = "true"
+
         if address_placeholder := request.GET.get("address_placeholder"):
             self.fields["adresse"].widget.attrs["placeholder"] = address_placeholder
 
