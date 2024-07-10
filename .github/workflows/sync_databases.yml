@@ -21,15 +21,17 @@ jobs:
       - name: Install Scalingo CLI
         run: |
           curl -O https://cli-dl.scalingo.com/install && bash install
+
+      - name: Login to Scalingo
+        run: |
+          # Login to Scalingo, using the token stored in `DUPLICATE_API_TOKEN`:
+          scalingo login --api-token "${DUPLICATE_API_TOKEN}"
       - name: Generate database archive
         run: |
           archive_name="backup.tar.gz"
 
           # Install additional tools to interact with the database:
           scalingo --app "${DUPLICATE_SOURCE_APP}" run dbclient-fetcher "${DUPLICATE_ADDON_KIND}"
-
-          # Login to Scalingo, using the token stored in `DUPLICATE_API_TOKEN`:
-          scalingo login --api-token "${DUPLICATE_API_TOKEN}"
 
           # Retrieve the addon id:
           addon_id="$( scalingo --app "${DUPLICATE_SOURCE_APP}" addons \
