@@ -3,6 +3,7 @@ import logging
 from datetime import datetime
 from importlib import import_module
 from pathlib import Path
+from typing import Union
 
 import numpy as np
 import pandas as pd
@@ -304,6 +305,20 @@ def write_to_dagruns(**kwargs):
         insert_dagrun_and_process_df(df, event, metadata, dag_id_suffixed, run_id)
 
 
+def _force_column_value(
+    df_column: pd.Series,
+    values_mapping: dict,
+    default_value: Union[str, bool, None] = None,
+) -> pd.Series:
+    # set to default value if column is not one of keys or values in values_mapping
+    return (
+        df_column.str.strip()
+        .str.lower()
+        .replace(values_mapping)
+        .apply(lambda x: (default_value if x not in values_mapping.values() else x))
+    )
+
+
 def create_actors(**kwargs):
     data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
     df = kwargs["ti"].xcom_pull(task_ids="fetch_data_from_api")
@@ -334,6 +349,7 @@ def create_actors(**kwargs):
     df = df.drop(column_to_drop, axis=1)
     df = df.dropna(subset=["latitudewgs84", "longitudewgs84"])
     df = df.replace({np.nan: None})
+
     for old_col, new_col in column_mapping.items():
         if new_col:
             if old_col == "type_de_point_de_collecte":
@@ -357,6 +373,32 @@ def create_actors(**kwargs):
                 df[["adresse", "code_postal", "ville"]] = df.apply(
                     utils.get_address, axis=1
                 )
+            elif old_col == "public_accueilli":
+                df[new_col] = _force_column_value(
+                    df[old_col],
+                    {
+                        "particuliers et professionnels": (
+                            "Particuliers et professionnels"
+                        ),
+                        "professionnels": "Professionnels",
+                        "particuliers": "Particuliers",
+                        "aucun": "Aucun",
+                    },
+                )
+            elif old_col == "uniquement_sur_rdv":
+                df[new_col] = df[old_col].astype(bool)
+            elif old_col == "reprise":
+                df[new_col] = _force_column_value(
+                    df[old_col],
+                    {
+                        "1 pour 0": "1 pour 0",
+                        "1 pour 1": "1 pour 1",
+                        "non": "1 pour 0",
+                        "oui": "1 pour 1",
+                    },
+                )
+            elif old_col == "exclusivite_de_reprisereparation":
+                df[new_col] = df[old_col].apply(lambda x: True if x == "oui" else False)
             else:
                 df[new_col] = df[old_col]
     df["identifiant_unique"] = df.apply(
@@ -368,6 +410,7 @@ def create_actors(**kwargs):
     df["longitude"] = df["longitudewgs84"].astype(float).replace({np.nan: None})
     df = df.drop(["latitudewgs84", "longitudewgs84"], axis=1)
     df["modifie_le"] = df["cree_le"]
+
     if "siret" in df.columns:
         df["siret"] = df["siret"].replace({np.nan: None})
         df["siret"] = df["siret"].astype(str).apply(lambda x: x[:14])
