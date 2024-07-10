@@ -18,7 +18,7 @@ default_args = {
 }
 
 with DAG(
-    utils.get_dag_name(__file__, "pyreo"),
+    utils.get_dag_name(__file__, "aliapur"),
     default_args=default_args,
     description=(
         "A pipeline to fetch, process, and load to validate data into postgresql"
