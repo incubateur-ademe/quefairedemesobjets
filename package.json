@@ -47,7 +47,7 @@
         "@hotwired/turbo": "^8.0.4",
         "bowser": "^2.11.0",
         "eslint-config-prettier": "^9.1.0",
-        "iframe-resizer": "^4.4.2",
+        "iframe-resizer": "^4.4.4",
         "leaflet": "^1.9.4",
         "leaflet-extra-markers": "^1.2.2",
         "posthog-js": "^1.142.1",
