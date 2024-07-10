@@ -20,3 +20,4 @@ unidecode
 uvicorn
 whitenoise
 pandas
+django-ninja

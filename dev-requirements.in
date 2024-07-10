@@ -18,3 +18,5 @@ shapely
 ratelimit
 fuzzywuzzy
 python-Levenshtein
+django-stubs
+django-cors-headers
