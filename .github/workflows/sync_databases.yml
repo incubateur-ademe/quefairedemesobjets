@@ -5,8 +5,8 @@ on:
 
 env:
   DUPLICATE_API_TOKEN: ${{ secrets.DUPLICATE_API_TOKEN }}
-  DUPLICATE_SOURCE_APP: ${{ secrets.DUPLICATE_SOURCE_APP }}
-  DUPLICATE_ADDON_KIND: postgresql
+  PRODUCTION_APP: ${{ secrets.SCALINGO_PRODUCTION_APP }}
+  PREPROD_APP: ${{ secrets.SCALINGO_PREPROD_APP }}
   PREPROD_DATABASE_URL: ${{ secrets.PREPROD_DATABASE_URL }}
 
 defaults:
@@ -15,44 +15,22 @@ defaults:
 
 jobs:
   sync_prod_to_preprod:
-    name: Sync production databse to preprod
+    name: Sync production databsse to preprod
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
       - name: Install Scalingo CLI
         run: |
           curl -O https://cli-dl.scalingo.com/install && bash install
-
-      - name: Login to Scalingo
+      - name: Login Scalingo CLI
+        run: scalingo login --api-token "${DUPLICATE_API_TOKEN}"
+      - name: Execute sync script in one-off container
         run: |
-          # Login to Scalingo, using the token stored in `DUPLICATE_API_TOKEN`:
-          scalingo login --api-token "${DUPLICATE_API_TOKEN}"
-      - name: Generate database archive
-        run: |
-          archive_name="backup.tar.gz"
+          scalingo --app ${PREPROD_APP} run \
+          --env DUPLICATE_API_TOKEN="${DUPLICATE_API_TOKEN}" \
+          --env PREPROD_DATABASE_URL="${PREPROD_DATABASE_URL}" \
+          --env PRODUCTION_APP="${PRODUCTION_APP}" \
+          --file ./scripts/restore_prod_to_preprod.sh \
+          /tmp/uploads/restore_prod_to_preprod.sh
 
-          # Install additional tools to interact with the database:
-          scalingo --app "${DUPLICATE_SOURCE_APP}" run dbclient-fetcher "${DUPLICATE_ADDON_KIND}"
-
-          # Retrieve the addon id:
-          addon_id="$( scalingo --app "${DUPLICATE_SOURCE_APP}" addons \
-                       | grep "${DUPLICATE_ADDON_KIND}" \
-                       | cut -d "|" -f 3 \
-                       | tr -d " " )"
-
-          # Download the latest backup available for the specified addon:
-          scalingo --app "${DUPLICATE_SOURCE_APP}" --addon "${addon_id}" \
-              backups-download --output "${archive_name}"
-
-      - name: Restore the database
-        run: |
-          # Get the name of the backup file:
-          backup_file_name="$( tar --list --file="${archive_name}" \
-                               | tail -n 1 \
-                               | cut -d "/" -f 2 )"
-
-          # Extract the archive containing the downloaded backup:
-          scalingo run --app "${DUPLICATE_SOURCE_APP}" tar --extract --verbose --file="${archive_name}" --directory="/app/"
-
-          # Restore the data:
-          scalingo run --app "${DUPLICATE_SOURCE_APP}" pg_restore --clean --if-exists --no-owner --no-privileges --no-comments \
-          --dbname "${DATABASE_URL}" "/app/${backup_file_name}"
