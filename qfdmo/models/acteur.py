@@ -420,7 +420,6 @@ class DisplayedActeur(BaseActeur):
 
 
 class DisplayedActeurTemp(BaseActeur):
-
     labels = models.ManyToManyField(
         LabelQualite,
         through="ActeurLabelQualite",
@@ -551,7 +550,6 @@ class DisplayedPropositionServiceTemp(BasePropositionService):
     class DisplayedPropositionServiceTempSousCategorie(models.Model):
         class Meta:
             db_table = "qfdmo_displayedpropositionservicetemp_sous_categories"
-            managed = False
 
         id = models.BigAutoField(primary_key=True)
         proposition_service = models.ForeignKey(

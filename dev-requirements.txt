@@ -135,9 +135,9 @@ apache-airflow-providers-imap==3.6.0 \
     --hash=sha256:123d6d935f5a723e5e7d56d22be12157f47cebae84b3201271e7c53126ca2b42 \
     --hash=sha256:6ee329f521084e1e09ccffe68c68b810ee26c6af63a48bd83300a21fd4eaf9e2
     # via apache-airflow
-apache-airflow-providers-postgres==5.11.1 \
-    --hash=sha256:ed6fdaf7921044a611c34b029e3488cd9486324ed54ebe995cbcfa9e28266d27 \
-    --hash=sha256:fd29c1bcf2a4eb996eba09d45c3ffb95f97a69842321527fedb1eeb8811c11fb
+apache-airflow-providers-postgres==5.11.2 \
+    --hash=sha256:07698b96b1de2e9dee26de9296c404e6c8b5f86c7c32dcbb3c8107b8e218fdb2 \
+    --hash=sha256:7f1dce7abaf36f9fdb3a5153bdfbc6e325202c4b573e58041815d32fac431549
     # via -r dev-requirements.in
 apache-airflow-providers-smtp==1.7.0 \
     --hash=sha256:4a1c5d82f8d99a4dd8da530758c42ab031b2ecb3e40a3141e36b7bfa8370ea37 \
@@ -463,9 +463,9 @@ django-browser-reload==1.13.0 \
     --hash=sha256:4e3507c10518f4c7439588aaed2f0c21b503878ecea7b18893f1e635e0cbe3ab \
     --hash=sha256:5c1705eb29f0b72808b702484f10a8d5da9cd9243e55ab81446cb697e96b3e8c
     # via -r dev-requirements.in
-django-debug-toolbar==4.4.2 \
-    --hash=sha256:5d7afb2ea5f8730241e5b0735396e16cd1fd8c6b53a2f3e1e30bbab9abb23728 \
-    --hash=sha256:9204050fcb1e4f74216c5b024bc76081451926a6303993d6c513f5e142675927
+django-debug-toolbar==4.4.5 \
+    --hash=sha256:8298ce966b4c8fc71430082dd4739ef2badb5f867734e1973a413c4ab2ea81b7 \
+    --hash=sha256:91425606673ee674d780f7aeedf3595c264eb382dcf41f55c6779577900904c0
     # via -r dev-requirements.in
 django-extensions==3.2.3 \
     --hash=sha256:44d27919d04e23b3f40231c4ab7af4e61ce832ef46d610cc650d53e68328410a \
