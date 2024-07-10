@@ -124,6 +124,10 @@ class AddressesView(FormView):
         if self.request.GET.get("bonus"):
             acteurs = acteurs.filter(labels__bonus=True)
 
+        if self.request.GET.get("pas_exclusivite_reparation"):
+            # TODO
+            pass
+
         # Case of digital acteurs
         if self.request.GET.get("digital") and self.request.GET.get("digital") == "1":
             kwargs["acteurs"] = (
