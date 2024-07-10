@@ -32,7 +32,6 @@ def get_address(row, col="adresse_format_ban"):
         if not address or not postal_code or not city:
             address, postal_code, city = extract_details(row, col)
     else:
-        print("llol")
         address, postal_code, city = extract_details(row, col)
 
     return pd.Series([address, postal_code, city])
@@ -75,13 +74,10 @@ def extract_details(row, col="adresse_format_ban"):
     pattern = re.compile(r"(.*?)\s+(\d{4,5})\s+(.*)")
 
     if pd.isnull(row[col]):
-        print("lolpp")
         return pd.Series([None, None, None])
 
     match = pattern.search(str(row[col]))
-    print(match)
     if match:
-        print("in ")
         address = match.group(1).strip()
         postal_code = match.group(2).strip()
         city = match.group(3).strip() if match.group(3) else None
