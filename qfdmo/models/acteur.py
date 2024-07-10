@@ -1,4 +1,5 @@
 import json
+from django.db.models.functions import Now
 import random
 import string
 from typing import Any
@@ -181,12 +182,15 @@ class BaseActeur(NomAsNaturalKeyModel):
     source = models.ForeignKey(Source, on_delete=models.CASCADE, blank=True, null=True)
     identifiant_externe = models.CharField(max_length=255, blank=True, null=True)
     statut = models.CharField(
-        max_length=255, default=ActeurStatus.ACTIF, choices=ActeurStatus.choices
+        max_length=255,
+        default=ActeurStatus.ACTIF,
+        choices=ActeurStatus.choices,
+        db_default=ActeurStatus.ACTIF,
     )
     naf_principal = models.CharField(max_length=255, blank=True, null=True)
     commentaires = models.TextField(blank=True, null=True)
-    cree_le = models.DateTimeField(auto_now_add=True)
-    modifie_le = models.DateTimeField(auto_now=True)
+    cree_le = models.DateTimeField(auto_now_add=True, db_default=Now())
+    modifie_le = models.DateTimeField(auto_now=True, db_default=Now())
     horaires_osm = models.CharField(
         blank=True, null=True, validators=[validate_opening_hours]
     )
@@ -204,8 +208,10 @@ class BaseActeur(NomAsNaturalKeyModel):
         null=True,
         blank=True,
     )
-    exclusivite_de_reprisereparation = models.BooleanField(default=False)
-    uniquement_sur_rdv = models.BooleanField(default=False)
+    exclusivite_de_reprisereparation = models.BooleanField(
+        default=False, db_default=False
+    )
+    uniquement_sur_rdv = models.BooleanField(default=False, db_default=False)
 
     def get_share_url(self, request: HttpRequest, direction: str | None = None) -> str:
         protocol = "https" if request.is_secure() else "http"
