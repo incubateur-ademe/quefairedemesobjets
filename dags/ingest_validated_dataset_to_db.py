@@ -51,7 +51,6 @@ def fetch_and_parse_data(**context):
         engine,
     )
 
-    # Pourquoi on ne prend que le premier élément de la liste ?
     dag_run_id = df_sql["dag_run_id"].iloc[0]
 
     change_type = df_sql["change_type"].iloc[0]
