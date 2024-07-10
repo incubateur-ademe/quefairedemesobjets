@@ -33,4 +33,4 @@ tar --extract --verbose --file="${ARCHIVE_NAME}"
 for table in $(psql "${PREPROD_DATABASE_URL}" -t -c "SELECT \"tablename\" FROM pg_tables WHERE schemaname='public'"); do
      psql "${PREPROD_DATABASE_URL}" -c "DROP TABLE IF EXISTS \"${table}\" CASCADE;"
 done
-pg_restore --clean --if-exists --no-owner --no-privileges --no-comments --dbname "${PREPROD_DATABASE_URL}" ${backup_file_name}
+pg_restore --clean --if-exists --no-acl --no-owner --no-privileges --no-comments --dbname "${PREPROD_DATABASE_URL}" ${backup_file_name}
