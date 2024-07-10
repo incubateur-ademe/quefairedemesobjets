@@ -33,7 +33,7 @@ with DAG(
             "id_point_apport_ou_reparation": "identifiant_externe",
             "type_de_point_de_collecte": "acteur_type_id",
             "uniquement_sur_rdv": "",
-            "exclusivite_de_reprisereparation": "",
+            "exclusivite_de_reprisereparation": "exclusivite_de_reprisereparation",
             "filiere": "",
             "public_accueilli": "",
             "produitsdechets_acceptes": "",
