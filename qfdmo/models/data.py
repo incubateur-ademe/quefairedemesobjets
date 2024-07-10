@@ -1,5 +1,3 @@
-import logging
-
 from django.contrib.gis.db import models
 
 from qfdmo.models.acteur import ActeurType, Source
@@ -157,5 +155,4 @@ class DagRunChange(models.Model):
         self.save()
 
     def get_candidat(self, index):
-        logging.warning(self.row_updates["ae_result"])
         return self.row_updates["ae_result"][int(index) - 1]
