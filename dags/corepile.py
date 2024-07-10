@@ -34,7 +34,7 @@ with DAG(
             "type_de_point_de_collecte": "acteur_type_id",
             "siret": "siret",
             "uniquement_sur_rdv": "",
-            "exclusivite_de_reprisereparation": "exclusivite_de_reprisereparation",
+            "exclusivite_de_reprisereparation": "",
             "filiere": "",
             "public_accueilli": "",
             "produitsdechets_acceptes": "",
