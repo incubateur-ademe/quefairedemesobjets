@@ -35,4 +35,5 @@ jobs:
           --env PRODUCTION_APP="${PRODUCTION_APP}" \
           --file ./scripts/restore_prod_to_preprod.sh \
           /tmp/uploads/restore_prod_to_preprod.sh
+        continue-on-error: true
 
