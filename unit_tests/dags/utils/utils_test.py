@@ -58,7 +58,3 @@ class TestGetAddress(unittest.TestCase):
             expected_output = pd.Series(["10 passage saint ambroise", "75011", "Paris"])
             result = get_address(df.iloc[0])
             pd.testing.assert_series_equal(result, expected_output)
-
-
-if __name__ == "__main__":
-    unittest.main()
