@@ -25,8 +25,14 @@ def get_address(row, col="adresse_format_ban"):
     match_percentage = res.get("match_percentage", 0)
     threshold = 80
     if match_percentage >= threshold:
-        address, postal_code, city = res["address"], res["postal_code"], res["city"]
+        address = res.get("address")
+        postal_code = res.get("postal_code")
+        city = res.get("city")
+
+        if not address or not postal_code or not city:
+            address, postal_code, city = extract_details(row, col)
     else:
+        print("llol")
         address, postal_code, city = extract_details(row, col)
 
     return pd.Series([address, postal_code, city])
@@ -42,13 +48,15 @@ def get_address_from_ban(address):
         data = response.json()
         if "features" in data and data["features"]:
             properties = data["features"][0]["properties"]
-            label = properties["label"]
+            label = properties.get("label")
             query = data["query"]
-            address = properties["name"]
-            postal_code = properties["postcode"]
-            city = properties["city"]
+            address = properties.get("name")
+            postal_code = properties.get("postcode")
+            city = properties.get("city")
             match_percentage = fuzz.ratio(query.lower(), label.lower())
-            coords = data["features"][0]["geometry"]["coordinates"]
+            coords = (
+                data["features"][0].get("geometry", {}).get("coordinates", [None, None])
+            )
             return {
                 "latitude": coords[1],
                 "longitude": coords[0],
@@ -67,10 +75,13 @@ def extract_details(row, col="adresse_format_ban"):
     pattern = re.compile(r"(.*?)\s+(\d{4,5})\s+(.*)")
 
     if pd.isnull(row[col]):
+        print("lolpp")
         return pd.Series([None, None, None])
 
     match = pattern.search(str(row[col]))
+    print(match)
     if match:
+        print("in ")
         address = match.group(1).strip()
         postal_code = match.group(2).strip()
         city = match.group(3).strip() if match.group(3) else None
@@ -371,4 +382,3 @@ def get_location(lon: float, lat: float) -> dict:
 
     except (ValueError, TypeError, Exception):
         return None
-    return None
