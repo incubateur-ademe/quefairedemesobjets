@@ -24,6 +24,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = decouple.config("SECRET_KEY")
 
+BASE_URL = decouple.config("BASE_URL", default="http://localhost:8000")
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = decouple.config("DEBUG", default=False, cast=bool)
 
@@ -46,6 +48,7 @@ INSTALLED_APPS = [
     "explorer",
     "import_export",
     "core",
+    "qfdmd",
     "qfdmo",
 ]
 
@@ -54,11 +57,7 @@ FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 
 if DEBUG:
     INSTALLED_APPS.extend(
-        [
-            "debug_toolbar",
-            "django_browser_reload",
-            "django_extensions",
-        ]
+        ["debug_toolbar", "django_browser_reload", "django_extensions", "corsheaders"]
     )
 
 MIDDLEWARE = [
@@ -75,12 +74,21 @@ MIDDLEWARE = [
 X_FRAME_OPTIONS = "ALLOWALL"
 
 if DEBUG:
+    # Le middleware corsheaders doit être ajouté le plus haut possible. On ne peut donc
+    # pas l'ajouter via extend comme plus bas.
+    MIDDLEWARE = [
+        "corsheaders.middleware.CorsMiddleware",
+    ] + MIDDLEWARE
+
     MIDDLEWARE.extend(
         [
             "debug_toolbar.middleware.DebugToolbarMiddleware",
             "django_browser_reload.middleware.BrowserReloadMiddleware",
         ]
     )
+
+    CORS_ALLOW_ALL_ORIGINS = DEBUG
+
 with suppress(ModuleNotFoundError):
     from debug_toolbar.settings import CONFIG_DEFAULTS
 
@@ -164,7 +172,10 @@ DB_READONLY = decouple.config(
 )
 readonly_settings = dj_database_url.parse(DB_READONLY)
 
-DATABASES = {"default": default_settings, "readonly": readonly_settings}
+DATABASES = {
+    "default": {**default_settings, "CONN_MAX_AGE": None, "CONN_HEALTH_CHECKS": True},
+    "readonly": readonly_settings,
+}
 
 EXPLORER_CONNECTIONS = {"Default": "readonly"}
 EXPLORER_DEFAULT_CONNECTION = "readonly"
