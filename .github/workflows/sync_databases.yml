@@ -17,7 +17,7 @@ defaults:
 
 jobs:
   sync_prod_to_preprod:
-    name: Sync production databsse to preprod
+    name: Sync production database to preprod
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
