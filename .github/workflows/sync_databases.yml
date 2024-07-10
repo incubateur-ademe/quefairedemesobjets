@@ -1,0 +1,56 @@
+name: Sync databases
+
+on:
+  workflow_dispatch:
+
+env:
+  DUPLICATE_API_TOKEN: ${{ secrets.DUPLICATE_API_TOKEN }}
+  DUPLICATE_SOURCE_APP: ${{ secrets.DUPLICATE_SOURCE_APP }}
+  DUPLICATE_ADDON_KIND: postgresql
+  PREPROD_DATABASE_URL: ${{ secrets.PREPROD_DATABASE_URL }}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  sync_prod_to_preprod:
+    name: Sync production databse to preprod
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Scalingo CLI
+        run: |
+          curl -O https://cli-dl.scalingo.com/install && bash install
+      - name: Generate database archive
+        run: |
+          archive_name="backup.tar.gz"
+
+          # Install additional tools to interact with the database:
+          scalingo --app "${DUPLICATE_SOURCE_APP}" -preprod run dbclient-fetcher "${DUPLICATE_ADDON_KIND}"
+
+          # Login to Scalingo, using the token stored in `DUPLICATE_API_TOKEN`:
+          scalingo login --api-token "${DUPLICATE_API_TOKEN}"
+
+          # Retrieve the addon id:
+          addon_id="$( scalingo --app "${DUPLICATE_SOURCE_APP}" addons \
+                       | grep "${DUPLICATE_ADDON_KIND}" \
+                       | cut -d "|" -f 3 \
+                       | tr -d " " )"
+
+          # Download the latest backup available for the specified addon:
+          scalingo --app "${DUPLICATE_SOURCE_APP}" --addon "${addon_id}" \
+              backups-download --output "${archive_name}"
+
+      - name: Restore the database
+        run: |
+          # Get the name of the backup file:
+          backup_file_name="$( tar --list --file="${archive_name}" \
+                               | tail -n 1 \
+                               | cut -d "/" -f 2 )"
+
+          # Extract the archive containing the downloaded backup:
+          tar --extract --verbose --file="${archive_name}" --directory="/app/"
+
+          # Restore the data:
+          pg_restore --clean --if-exists --no-owner --no-privileges --no-comments \
+          --dbname "${DATABASE_URL}" "/app/${backup_file_name}"
