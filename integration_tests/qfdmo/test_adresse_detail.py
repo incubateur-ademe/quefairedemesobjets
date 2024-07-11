@@ -155,3 +155,18 @@ class TestUniquementSurRDV:
         assert (
             "Les services sont disponibles uniquement sur rendez-vous" in wrapper.text
         )
+
+    def test_uniquement_sur_rdv_is_not_displayed(self, client):
+        adresse = DisplayedActeurFactory(uniquement_sur_rdv=False)
+        url = f"/adresse/{adresse.identifiant_unique}"
+
+        response = client.get(url)
+        assert response.status_code == 200
+
+        soup = BeautifulSoup(response.content, "html.parser")
+        wrapper = soup.find(attrs={"id": "aboutPanel"})
+        assert wrapper is not None
+        assert (
+            "Les services sont disponibles uniquement sur rendez-vous"
+            not in wrapper.text
+        )
