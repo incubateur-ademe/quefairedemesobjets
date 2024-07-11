@@ -1,4 +1,5 @@
 from unittest.mock import patch
+from django.http.request import QueryDict, MultiValueDict
 
 import pytest
 from django.test import RequestFactory, override_settings
@@ -41,3 +42,10 @@ class TestGetDirection:
 
         request = request_factory.get("/?direction=south")
         assert utils.get_direction(request) == "south"
+
+
+def query_dict_from(dictionary):
+    query_dict = QueryDict("", mutable=True)
+    query_dict.update(MultiValueDict(dictionary))
+    print(f"{query_dict=}")
+    return query_dict

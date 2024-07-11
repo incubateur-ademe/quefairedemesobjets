@@ -21,7 +21,7 @@ from django.views.decorators.http import require_GET
 from django.views.generic.edit import FormView
 
 from core.utils import get_direction
-from qfdmo.forms import AddressesForm, CarteAddressesForm, IframeAddressesForm
+from qfdmo.forms import CarteAddressesForm, IframeAddressesForm
 from qfdmo.models import (
     Acteur,
     ActeurStatus,
@@ -114,7 +114,7 @@ class AddressesView(FormView):
     def get_context_data(self, **kwargs):
         kwargs["location"] = "{}"
         kwargs["carte"] = self.request.GET.get("carte") is not None
-        form = AddressesForm(self.request.GET)
+        form = self.get_form_class()(self.request.GET)
         form.is_valid()
 
         # Manage the selection of sous_categorie_objet and actions

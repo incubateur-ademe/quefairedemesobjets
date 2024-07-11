@@ -60,15 +60,6 @@ class LVAOBaseRevision(NomAsNaturalKeyModel):
     publie = models.BooleanField(default=False)  # Published
     manuel = models.BooleanField(default=False)  # Manuel
     label_reparacteur = models.BooleanField(default=False)  # Reparacteur
-    exclusivite_de_reprisereparation = models.BooleanField(
-        verbose_name="Exclusivité de réparation",
-        default=False,
-        help_text="Ce champ correspond dans les données des éco-organisme "
-        "à exclusivite_de_reprisereparation. "
-        "Cette notion n'étant pas encore présente dans l'application, "
-        "il est considéré comme exclusivité de réparation uniquement.",
-    )
-
     siret = models.CharField(max_length=14, blank=True, null=True)  # Siret
     source_donnee = models.CharField(
         max_length=255, blank=True, null=True
