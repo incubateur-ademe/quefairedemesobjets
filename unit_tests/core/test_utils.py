@@ -47,5 +47,4 @@ class TestGetDirection:
 def query_dict_from(dictionary):
     query_dict = QueryDict("", mutable=True)
     query_dict.update(MultiValueDict(dictionary))
-    print(f"{query_dict=}")
     return query_dict
