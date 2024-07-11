@@ -276,7 +276,7 @@ class CarteAddressesForm(AddressesForm):
         widget=AutoCompleteAndSearchInput(
             attrs={
                 "class": "fr-input",
-                "placeholder": "Recherche autour d'une adresse",
+                "placeholder": "Rechercher autour d'une adresse",
                 "autocomplete": "off",
                 "aria-label": "Saisir une adresse - obligatoire",
             },
@@ -335,7 +335,6 @@ class DagsForm(forms.Form):
 
 
 class ConfiguratorForm(forms.Form):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.load_choices()
