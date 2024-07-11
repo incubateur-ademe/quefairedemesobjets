@@ -7,7 +7,6 @@ from unit_tests.qfdmo.acteur_factory import DisplayedActeurFactory, LabelQualite
 @pytest.mark.django_db
 class TestDisplayLabel:
     def test_display_ess_label(self, client):
-
         adresse = DisplayedActeurFactory()
         label_ess = LabelQualiteFactory(
             code="ess",
@@ -27,7 +26,6 @@ class TestDisplayLabel:
         assert "Enseigne de l'économie sociale et solidaire" in label_tag.text
 
     def test_display_one_label(self, client):
-
         adresse = DisplayedActeurFactory()
         label = LabelQualiteFactory(
             code="label",
@@ -46,7 +44,6 @@ class TestDisplayLabel:
         assert "Mon label" in label_tag.text
 
     def test_display_two_label(self, client):
-
         adresse = DisplayedActeurFactory()
         label1 = LabelQualiteFactory(
             code="label1",
@@ -69,7 +66,6 @@ class TestDisplayLabel:
         assert "Cet établissement dispose de plusieurs labels" in label_tag.text
 
     def test_display_bonus_label(self, client):
-
         adresse = DisplayedActeurFactory()
         label = LabelQualiteFactory(
             code="label",
@@ -121,7 +117,6 @@ class TestDisplayLabel:
         assert "Éligible au bonus réparation" in label_tag.text
 
     def test_display_label_before_ess(self, client):
-
         adresse = DisplayedActeurFactory()
         label = LabelQualiteFactory(
             code="label",
@@ -143,3 +138,20 @@ class TestDisplayLabel:
         label_tag = soup.find(attrs={"data-testid": "adresse_detail_header_tag"})
         assert label_tag is not None
         assert "Mon label" in label_tag.text
+
+
+@pytest.mark.django_db
+class TestUniquementSurRDV:
+    def test_uniquement_sur_rdv_is_displayed(self, client):
+        adresse = DisplayedActeurFactory(uniquement_sur_rdv=True)
+        url = f"/adresse/{adresse.identifiant_unique}"
+
+        response = client.get(url)
+        assert response.status_code == 200
+
+        soup = BeautifulSoup(response.content, "html.parser")
+        wrapper = soup.find(attrs={"id": "aboutPanel"})
+        assert wrapper is not None
+        assert (
+            "Les services sont disponibles uniquement sur rendez-vous" in wrapper.text
+        )
