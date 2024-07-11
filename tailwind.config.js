@@ -118,6 +118,7 @@ module.exports = {
             "green-menthe-sun-373": "#37635f",
             "green-menthe": "#009081",
             "green-tilleul-verveine": "#B7A73F",
+            "grey-50": "#161616",
             "grey-200": "#3a3a3a",
             "grey-425": "#666666",
             "grey-850": "#cecece",
@@ -146,29 +147,29 @@ module.exports = {
             "yellow-moutarde": "#C3992A",
             "yellow-tournesol": "#cab300",
         },
-        maxWidth: {
-            readable: "80ch",
-            "120w": "60rem",
-        },
-        spacing: {
-            // https://www.systeme-de-design.gouv.fr/elements-d-interface/fondamentaux-techniques/espacements
-            0: 0,
-            "1v": "0.25rem",
-            "1w": "0.5rem",
-            "3v": "0.75rem",
-            "2w": "1rem",
-            "3w": "1.5rem",
-            "4w": "2rem",
-            "5w": "2.5rem",
-            "6w": "3rem",
-            "7w": "3.5rem",
-            "8w": "4rem",
-            "9w": "4.5rem",
-            "12w": "6rem",
-            "15w": "7.5rem",
-        },
-
         extend: {
+            spacing: {
+                // https://www.systeme-de-design.gouv.fr/elements-d-interface/fondamentaux-techniques/espacements
+                0: 0,
+                "1v": "0.25rem",
+                "1w": "0.5rem",
+                "3v": "0.75rem",
+                "2w": "1rem",
+                "3w": "1.5rem",
+                "4w": "2rem",
+                "5w": "2.5rem",
+                "6w": "3rem",
+                "7w": "3.5rem",
+                "8w": "4rem",
+                "9w": "4.5rem",
+                "12w": "6rem",
+                "15w": "7.5rem",
+            },
+
+            maxWidth: {
+                readable: "80ch",
+                "120w": "60rem",
+            },
             screens: {
                 xs: "320px",
                 xsm: "360px",
