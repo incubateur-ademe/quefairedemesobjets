@@ -8,6 +8,7 @@ import SearchSolutionFormController from "../src/search_solution_form_controller
 import SsCatObjectAutocompleteController from "../src/ss_cat_object_autocomplete_controller"
 
 import "../src/browser_check"
+import "../src/iframe"
 
 window.stimulus = Application.start()
 stimulus.register("map", MapController)
