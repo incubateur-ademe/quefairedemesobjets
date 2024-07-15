@@ -209,7 +209,9 @@ class BaseActeur(NomAsNaturalKeyModel):
         blank=True,
     )
     exclusivite_de_reprisereparation = models.BooleanField(
-        default=False, db_default=False
+        default=False,
+        db_default=False,
+        verbose_name="Exclusivité de reprise/réparation",
     )
     uniquement_sur_rdv = models.BooleanField(default=False, db_default=False)
 
