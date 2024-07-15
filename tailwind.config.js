@@ -118,6 +118,7 @@ module.exports = {
             "green-menthe-sun-373": "#37635f",
             "green-menthe": "#009081",
             "green-tilleul-verveine": "#B7A73F",
+            "grey-50": "#161616",
             "grey-200": "#3a3a3a",
             "grey-425": "#666666",
             "grey-850": "#cecece",
@@ -146,10 +147,6 @@ module.exports = {
             "yellow-moutarde": "#C3992A",
             "yellow-tournesol": "#cab300",
         },
-        maxWidth: {
-            readable: "80ch",
-            "120w": "60rem",
-        },
         spacing: {
             // https://www.systeme-de-design.gouv.fr/elements-d-interface/fondamentaux-techniques/espacements
             0: 0,
@@ -167,8 +164,11 @@ module.exports = {
             "12w": "6rem",
             "15w": "7.5rem",
         },
-
         extend: {
+            maxWidth: {
+                readable: "80ch",
+                "120w": "60rem",
+            },
             screens: {
                 xs: "320px",
                 xsm: "360px",
