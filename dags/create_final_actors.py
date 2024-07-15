@@ -152,6 +152,10 @@ def write_data_to_postgres(**kwargs):
                 "horaires_osm",
                 "horaires_description",
                 "description",
+                "public_accueilli",
+                "reprise",
+                "exclusivite_de_reprisereparation",
+                "uniquement_sur_rdv",
             ]
         ].to_sql(
             temp_table_name_actor,
