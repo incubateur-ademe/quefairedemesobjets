@@ -1,5 +1,5 @@
 from django.conf import settings
-from urllib.parse import quote_plus
+from urllib.parse import urlencode
 from django.contrib.gis.db import models
 from django.db.utils import cached_property
 from django.forms import model_to_dict
@@ -51,10 +51,18 @@ class SousCategorieObjet(CodeAsNaturalKeyModel):
     @cached_property
     def url_carte(self):
         if self.afficher_carte:
-            return (
-                f"{settings.BASE_URL}/?carte&sous_categorie_objet="
-                f"{quote_plus(self.libelle)}&sc_id={self.id}&limit=25"
+            params = urlencode(
+                {
+                    "carte": 1,
+                    "direction": "jai",
+                    "first_dir": "jai",
+                    "sous_categorie_objet": self.libelle,
+                    "sc_id": self.id,
+                    "limit": 25,
+                }
             )
+
+            return f"{settings.BASE_URL}/?{params}"
 
     def natural_key(self) -> tuple[str]:
         return (self.code,)
