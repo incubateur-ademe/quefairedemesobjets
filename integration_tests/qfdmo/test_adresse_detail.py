@@ -170,3 +170,30 @@ class TestUniquementSurRDV:
             "Les services sont disponibles uniquement sur rendez-vous"
             not in wrapper.text
         )
+
+
+@pytest.mark.django_db
+class TestExclusiviteReparation:
+    def test_exclusivite_reparation_is_displayed(self, client):
+        adresse = DisplayedActeurFactory(exclusivite_de_reprisereparation=True)
+        url = f"/adresse/{adresse.identifiant_unique}"
+
+        response = client.get(url)
+        assert response.status_code == 200
+
+        soup = BeautifulSoup(response.content, "html.parser")
+        wrapper = soup.find(attrs={"id": "aboutPanel"})
+        assert wrapper is not None
+        assert "Répare uniquement les produits de ses marques" in wrapper.text
+
+    def test_exclusivite_reparation_is_not_displayed(self, client):
+        adresse = DisplayedActeurFactory(exclusivite_de_reprisereparation=False)
+        url = f"/adresse/{adresse.identifiant_unique}"
+
+        response = client.get(url)
+        assert response.status_code == 200
+
+        soup = BeautifulSoup(response.content, "html.parser")
+        wrapper = soup.find(attrs={"id": "aboutPanel"})
+        assert wrapper is not None
+        assert "Répare uniquement les produits de ses marques" not in wrapper.text

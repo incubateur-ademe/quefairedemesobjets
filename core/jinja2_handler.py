@@ -50,6 +50,10 @@ def display_infos_panel(adresse: DisplayedActeur) -> bool:
     )
 
 
+def display_exclusivite_reparation(acteur: DisplayedActeur) -> bool:
+    return acteur.exclusivite_de_reprisereparation
+
+
 def display_labels_panel(adresse: DisplayedActeur) -> bool:
     return bool(adresse.labels.filter(afficher=True, type_enseigne=False).count())
 
@@ -87,6 +91,7 @@ def environment(**options):
             "display_labels_panel": display_labels_panel,
             "display_object_filter": display_object_filter,
             "distance_to_acteur": distance_to_acteur,
+            "display_exclusivite_reparation": display_exclusivite_reparation,
             "is_embedded": is_embedded,
             "is_iframe": is_iframe,
             "is_carte": is_carte,

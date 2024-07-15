@@ -58,6 +58,9 @@ class AddressesView(FormView):
         initial["latitude"] = self.request.GET.get("latitude")
         initial["longitude"] = self.request.GET.get("longitude")
         initial["label_reparacteur"] = self.request.GET.get("label_reparacteur")
+        initial["pas_exclusivite_reparation"] = self.request.GET.get(
+            "pas_exclusivite_reparation", True
+        )
         initial["bonus"] = self.request.GET.get("bonus")
         initial["ess"] = self.request.GET.get("ess")
         initial["bounding_box"] = self.request.GET.get("bounding_box")
@@ -105,11 +108,14 @@ class AddressesView(FormView):
             )
         else:
             my_form.load_choices(self.request)  # type: ignore
+
         return my_form
 
     def get_context_data(self, **kwargs):
         kwargs["location"] = "{}"
         kwargs["carte"] = self.request.GET.get("carte") is not None
+        form = self.get_form_class()(self.request.GET)
+        form.is_valid()
 
         # Manage the selection of sous_categorie_objet and actions
         acteurs = self._manage_sous_categorie_objet_and_actions()
@@ -119,6 +125,12 @@ class AddressesView(FormView):
 
         if self.request.GET.get("bonus"):
             acteurs = acteurs.filter(labels__bonus=True)
+
+        if (
+            "reparer" not in form.cleaned_data["action_list"]
+            or form.cleaned_data["pas_exclusivite_reparation"]
+        ):
+            acteurs = acteurs.exclude(exclusivite_de_reprisereparation=True)
 
         # Case of digital acteurs
         if self.request.GET.get("digital") and self.request.GET.get("digital") == "1":
