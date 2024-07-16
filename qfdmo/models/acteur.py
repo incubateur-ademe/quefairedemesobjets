@@ -210,9 +210,10 @@ class BaseActeur(NomAsNaturalKeyModel):
     )
     exclusivite_de_reprisereparation = models.BooleanField(
         null=True,
+        blank=True,
         verbose_name="Exclusivité de reprise/réparation",
     )
-    uniquement_sur_rdv = models.BooleanField(null=True)
+    uniquement_sur_rdv = models.BooleanField(null=True, blank=True)
 
     def get_share_url(self, request: HttpRequest, direction: str | None = None) -> str:
         protocol = "https" if request.is_secure() else "http"
