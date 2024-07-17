@@ -2,7 +2,6 @@ import logging
 from datetime import datetime
 from importlib import import_module
 from pathlib import Path
-from qfdmo.models import DagRunStatus
 
 import pandas as pd
 
@@ -12,6 +11,7 @@ env = Path(__file__).parent.parent.name
 
 utils = import_module(f"{env}.utils.utils")
 mapping_utils = import_module(f"{env}.utils.mapping_utils")
+qfdmd = import_module(f"{env}.utils.qfdmd")
 
 
 def process_labels(df, column_name):
@@ -78,7 +78,7 @@ def handle_update_actor_event(df_actors, dag_run_id):
     ]
 
     current_time = datetime.now().astimezone().isoformat(timespec="microseconds")
-    df_actors = df_actors[df_actors["row_status"] == DagRunStatus.TO_INSERT.value]
+    df_actors = df_actors[df_actors["row_status"] == qfdmd.TO_INSERT]
     df_actors = df_actors.apply(mapping_utils.replace_with_selected_candidat, axis=1)
     df_actors[["adresse", "code_postal", "ville"]] = df_actors.apply(
         lambda row: utils.extract_details(row, col="adresse_candidat"), axis=1

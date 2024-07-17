@@ -1,13 +1,14 @@
 from django.contrib.gis.db import models
 
 from qfdmo.models.acteur import ActeurType, Source
+from dags.utils.qfdmd import TO_VALIDATE, TO_INSERT, REJECTED, FINISHED
 
 
 class DagRunStatus(models.TextChoices):
-    TO_VALIDATE = "TO_VALIDATE"
-    TO_INSERT = "TO_INSERT"
-    REJECTED = "REJECTED"
-    FINISHED = "FINISHED"
+    TO_VALIDATE = TO_VALIDATE
+    TO_INSERT = TO_INSERT
+    REJECTED = REJECTED
+    FINISHED = FINISHED
 
 
 class DagRun(models.Model):
