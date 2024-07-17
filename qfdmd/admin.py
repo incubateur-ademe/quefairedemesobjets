@@ -3,7 +3,7 @@ from qfdmd.models import Produit
 
 
 class ProduitAdmin(admin.ModelAdmin):
-    list_display = ("id",)
+    list_display = ("id", "libelle")
     search_fields = [
         "id",
     ]
