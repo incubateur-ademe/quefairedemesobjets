@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 from importlib import import_module
 from pathlib import Path
+from qfdmo.models import DagRunStatus
 
 import pandas as pd
 
@@ -29,7 +30,6 @@ def process_labels(df, column_name):
 
 
 def handle_create_event(df_actors, dag_run_id, engine):
-
     df_labels = process_labels(df_actors, "labels")
 
     max_id_pds = pd.read_sql_query(
@@ -78,7 +78,7 @@ def handle_update_actor_event(df_actors, dag_run_id):
     ]
 
     current_time = datetime.now().astimezone().isoformat(timespec="microseconds")
-    df_actors = df_actors[df_actors["row_status"] == "DagRunStatus.TO_INSERT"]
+    df_actors = df_actors[df_actors["row_status"] == DagRunStatus.TO_INSERT.value]
     df_actors = df_actors.apply(mapping_utils.replace_with_selected_candidat, axis=1)
     df_actors[["adresse", "code_postal", "ville"]] = df_actors.apply(
         lambda row: utils.extract_details(row, col="adresse_candidat"), axis=1
