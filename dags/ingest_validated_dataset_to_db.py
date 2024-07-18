@@ -9,9 +9,11 @@ from airflow.operators.python_operator import BranchPythonOperator, PythonOperat
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.utils.dates import days_ago
 
+
 env = Path(__file__).parent.name
 utils = import_module(f"{env}.utils.utils")
 dag_ingest_validated_utils = import_module(f"{env}.utils.dag_ingest_validated_utils")
+qfdmd = import_module(f"{env}.utils.shared_constants")
 
 default_args = {
     "owner": "airflow",
@@ -35,7 +37,7 @@ def check_for_validation(**kwargs):
     hook = PostgresHook(postgres_conn_id=utils.get_db_conn_id(__file__))
     row = hook.get_records(
         "SELECT EXISTS "
-        "(SELECT 1 FROM qfdmo_dagrun WHERE status = 'DagRunStatus.TO_INSERT')"
+        f"(SELECT 1 FROM qfdmo_dagrun WHERE status = '{qfdmd.TO_INSERT}')"
     )
     return "fetch_and_parse_data" if row[0][0] else "skip_processing"
 
@@ -47,7 +49,8 @@ def fetch_and_parse_data(**context):
     df_sql = pd.read_sql_query(
         "SELECT * FROM qfdmo_dagrunchange WHERE "
         "dag_run_id IN "
-        "(SELECT id FROM qfdmo_dagrun WHERE status = 'DagRunStatus.TO_INSERT')",
+        "(SELECT id FROM qfdmo_dagrun WHERE status = "
+        f"'{qfdmd.TO_INSERT}')",
         engine,
     )
 
