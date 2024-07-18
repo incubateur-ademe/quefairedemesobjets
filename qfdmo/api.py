@@ -14,7 +14,7 @@ class ActeurSchema(ModelSchema):
         fields = ["nom", "nom_commercial"]
 
 
-@router.get("/acteurs", response=List[ActeurSchema])
+@router.get("/acteurs", response=List[ActeurSchema], summary="Liste des acteurs actifs")
 @paginate
 def acteurs(request):
     return DisplayedActeur.objects.filter(
@@ -22,6 +22,10 @@ def acteurs(request):
     )
 
 
-@router.get("/acteur", response=ActeurSchema)
+@router.get(
+    "/acteur",
+    response=ActeurSchema,
+    summary="Retrouver un acteur actif",
+)
 def acteur(request, identifiant_unique: str):
     return get_object_or_404(DisplayedActeur, pk=id, statut=ActeurStatus.ACTIF)
