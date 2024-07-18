@@ -1,4 +1,4 @@
-name: Build and test
+name: "[Preprod] Déploiement continu"
 
 on:
   workflow_dispatch:
