@@ -115,18 +115,19 @@ class AddressesView(FormView):
         kwargs["location"] = "{}"
         kwargs["carte"] = self.request.GET.get("carte") is not None
 
-        # TODO : voir pour utiliser davantage le form plus bas
+        # TODO : voir pour utiliser davantage le form dans cette vue
         form = self.get_form_class()(self.request.GET)
         form.is_valid()
         self.cleaned_data = form.cleaned_data
 
         # Manage the selection of sous_categorie_objet and actions
         acteurs = self._manage_sous_categorie_objet_and_actions()
+        acteurs = acteurs.exclude(exclusivite_de_reprisereparation=True)
 
-        if self.request.GET.get("ess"):
+        if self.cleaned_data["ess"]:
             acteurs = acteurs.filter(labels__code="ess")
 
-        if self.request.GET.get("bonus"):
+        if self.cleaned_data["bonus"]:
             acteurs = acteurs.filter(labels__bonus=True)
 
         # Case of digital acteurs
@@ -354,25 +355,8 @@ class AddressesView(FormView):
         return [model_to_dict(a, exclude=["directions"]) for a in actions]
 
     def _manage_sous_categorie_objet_and_actions(self) -> QuerySet[DisplayedActeur]:
-        sous_categorie_id = None
-        if (
-            self.request.GET.get("sous_categorie_objet")
-            and self.request.GET.get("sc_id", "").isnumeric()
-        ):
-            sous_categorie_id = int(self.request.GET.get("sc_id", "0"))
-
-        selected_actions_ids = (
-            self._get_selected_action_ids()
-            if self.request.GET.get("carte") is not None
-            else [a["id"] for a in self.get_action_list()]
-        )
-
-        qs_filters = self._build_queryset_filter(
-            selected_actions_ids, sous_categorie_id
-        )
-
-        acteurs = DisplayedActeur.objects.filter(qs_filters)
-
+        filters, excludes = self._compile_acteurs_queryset()
+        acteurs = DisplayedActeur.objects.filter(filters).exclude(excludes)
         acteurs = acteurs.prefetch_related(
             "proposition_services__sous_categories",
             "proposition_services__sous_categories__categorie",
@@ -380,32 +364,36 @@ class AddressesView(FormView):
             "proposition_services__acteur_service",
         ).distinct()
 
-        if sous_categorie_id:
-            acteurs = acteurs.filter(
-                proposition_services__sous_categories__id=sous_categorie_id
-            )
-
         return acteurs
 
-    def _build_queryset_filter(
-        self, selected_actions_ids, sous_categorie_id: int | None
-    ):
-        reparer_action_id = None
-        qs_filters = Q()
+    def _compile_acteurs_queryset(self):
+        filters = Q()
+        excludes = Q()
+
+        selected_actions_ids = (
+            self._get_selected_action_ids()
+            if self.request.GET.get("carte") is not None
+            else [a["id"] for a in self.get_action_list()]
+        )
         reparer_action_id = CachedDirectionAction.get_reparer_action_id()
         reparer_is_checked = reparer_action_id in selected_actions_ids
 
-        if self.cleaned_data["pas_exclusivite_reparation"] or not reparer_is_checked:
-            qs_filters |= Q(exclusivite_de_reprisereparation=False)
+        if self.cleaned_data["pas_exclusivite_reparation"]:
+            excludes |= Q(exclusivite_de_reprisereparation=True)
 
-        if self.request.GET.get("label_reparacteur") and reparer_is_checked:
+        if self.cleaned_data["label_reparacteur"] and reparer_is_checked:
             selected_actions_ids = [
                 a for a in selected_actions_ids if a != reparer_action_id
             ]
 
-        if sous_categorie_id:
+        if self.cleaned_data.get("sous_categorie_objet") and self.cleaned_data.get(
+            "sc_id"
+        ):
+            sous_categorie_id = self.cleaned_data.get("sc_id", 0)
+            filters |= Q(proposition_services__sous_categories__id=sous_categorie_id)
+
             if selected_actions_ids:
-                qs_filters = qs_filters | Q(
+                filters |= Q(
                     proposition_services__in=DisplayedPropositionService.objects.filter(
                         action_id__in=selected_actions_ids,
                         sous_categories__id=sous_categorie_id,
@@ -413,7 +401,7 @@ class AddressesView(FormView):
                     statut=ActeurStatus.ACTIF,
                 )
             if reparer_action_id:
-                qs_filters = qs_filters | Q(
+                filters |= Q(
                     proposition_services__in=DisplayedPropositionService.objects.filter(
                         action_id=reparer_action_id,
                         sous_categories__id=sous_categorie_id,
@@ -423,17 +411,18 @@ class AddressesView(FormView):
                 )
         else:
             if selected_actions_ids:
-                qs_filters = qs_filters | Q(
+                filters |= Q(
                     proposition_services__action_id__in=selected_actions_ids,
                     statut=ActeurStatus.ACTIF,
                 )
             if reparer_action_id:
-                qs_filters = qs_filters | Q(
+                filters |= Q(
                     proposition_services__action_id=reparer_action_id,
                     labels__code="reparacteur",
                     statut=ActeurStatus.ACTIF,
                 )
-        return qs_filters
+
+        return filters, excludes
 
     def _get_grouped_action_choices(
         self, action_displayed: list[Action]
