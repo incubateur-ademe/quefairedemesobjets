@@ -8,8 +8,8 @@ from qfdmo.views.adresses import AddressesView
 from unit_tests.core.test_utils import query_dict_from
 from unit_tests.qfdmo.acteur_factory import (
     DisplayedActeurFactory,
+    DisplayedPropositionServiceFactory,
     LabelQualiteFactory,
-    PropositionServiceFactory,
 )
 from unit_tests.qfdmo.action_factory import ActionFactory
 
@@ -76,18 +76,19 @@ class TestAdessesViewGetActionList:
 def adresses_view():
     reparacteur = LabelQualiteFactory(code="reparacteur")
     action = ActionFactory()
-    proposition_service = PropositionServiceFactory(action=action)
 
-    acteur = DisplayedActeurFactory(
+    displayed_acteur = DisplayedActeurFactory(
         exclusivite_de_reprisereparation=True,
         location=Point(1, 1),
         statut=ActeurStatus.ACTIF,
     )
-    acteur.labels.add(reparacteur)
-    acteur.proposition_service.add(proposition_service)
+    display_proposition_service = DisplayedPropositionServiceFactory(action=action)
+    displayed_acteur.labels.add(reparacteur)
+    displayed_acteur.proposition_services.add(display_proposition_service)
+
     adresses_view = AddressesView()
     adresses_view._get_reparer_action_id = MagicMock(return_value=action.id)
-    # adresses_view._get_selected_action_ids = MagicMock(return_value=["reparer"])
+    adresses_view._get_selected_action_ids = MagicMock(return_value=[action.id])
     return adresses_view
 
 
@@ -140,6 +141,4 @@ class TestExclusiviteReparation:
         adresses_view.request = request
         context = adresses_view.get_context_data()
 
-        # TODO: comprendre pourquoi c'est pas bon ici...
-        # je pense que ca vient du else ligne 413 de views/adresses.py
         assert context["acteurs"].count() == 1
