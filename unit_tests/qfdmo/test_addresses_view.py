@@ -1,12 +1,17 @@
 from django.contrib.gis.geos import Point
-import pytest
 from unittest.mock import MagicMock
+import pytest
 from django.http import HttpRequest
 
-from qfdmo.models.acteur import DisplayedActeur
+from qfdmo.models.acteur import ActeurStatus
 from qfdmo.views.adresses import AddressesView
 from unit_tests.core.test_utils import query_dict_from
-from unit_tests.qfdmo.acteur_factory import DisplayedActeurFactory
+from unit_tests.qfdmo.acteur_factory import (
+    DisplayedActeurFactory,
+    DisplayedPropositionServiceFactory,
+    LabelQualiteFactory,
+)
+from unit_tests.qfdmo.action_factory import ActionFactory
 
 
 class TestAdessesViewGetActionList:
@@ -69,14 +74,21 @@ class TestAdessesViewGetActionList:
 
 @pytest.fixture
 def adresses_view():
-    DisplayedActeurFactory(
+    reparacteur = LabelQualiteFactory(code="reparacteur")
+    action = ActionFactory()
+
+    displayed_acteur = DisplayedActeurFactory(
         exclusivite_de_reprisereparation=True,
         location=Point(1, 1),
+        statut=ActeurStatus.ACTIF,
     )
+    display_proposition_service = DisplayedPropositionServiceFactory(action=action)
+    displayed_acteur.labels.add(reparacteur)
+    displayed_acteur.proposition_services.add(display_proposition_service)
+
     adresses_view = AddressesView()
-    adresses_view._manage_sous_categorie_objet_and_actions = MagicMock(
-        return_value=DisplayedActeur.objects.all()
-    )
+    adresses_view._get_reparer_action_id = MagicMock(return_value=action.id)
+    adresses_view._get_selected_action_ids = MagicMock(return_value=[action.id])
     return adresses_view
 
 
@@ -89,7 +101,7 @@ class TestExclusiviteReparation:
                 "action_list": ["preter"],
                 "latitude": [1],
                 "longitude": [1],
-                "pas_exclusivite_reparation": ["on"],
+                "pas_exclusivite_reparation": ["true"],
             }
         )
         adresses_view.request = request
@@ -104,9 +116,9 @@ class TestExclusiviteReparation:
         request.GET = query_dict_from(
             {
                 "action_list": ["preter|reparer"],
-                "pas_exclusivite_reparation": ["on"],
                 "latitude": [1],
                 "longitude": [1],
+                "pas_exclusivite_reparation": ["true"],
             }
         )
         adresses_view.request = request
@@ -123,6 +135,7 @@ class TestExclusiviteReparation:
                 "action_list": ["preter|reparer"],
                 "latitude": [1],
                 "longitude": [1],
+                "pas_exclusivite_reparation": ["false"],
             }
         )
         adresses_view.request = request
