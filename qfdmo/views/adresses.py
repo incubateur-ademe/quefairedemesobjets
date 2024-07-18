@@ -122,13 +122,6 @@ class AddressesView(FormView):
 
         # Manage the selection of sous_categorie_objet and actions
         acteurs = self._manage_sous_categorie_objet_and_actions()
-        acteurs = acteurs.exclude(exclusivite_de_reprisereparation=True)
-
-        if self.cleaned_data["ess"]:
-            acteurs = acteurs.filter(labels__code="ess")
-
-        if self.cleaned_data["bonus"]:
-            acteurs = acteurs.filter(labels__bonus=True)
 
         # Case of digital acteurs
         if self.request.GET.get("digital") and self.request.GET.get("digital") == "1":
@@ -140,6 +133,8 @@ class AddressesView(FormView):
             return super().get_context_data(**kwargs)
 
         # Case of physical acteurs
+        # TODO : refactoriser ci-dessous pour passer dans
+        # _manage_sous_categorie_objet_and_actions ou autre
         else:
             # Exclude digital acteurs
             acteurs = acteurs.exclude(
@@ -385,6 +380,12 @@ class AddressesView(FormView):
             selected_actions_ids = [
                 a for a in selected_actions_ids if a != reparer_action_id
             ]
+
+        if self.cleaned_data["ess"]:
+            filters |= Q(labels__code="ess")
+
+        if self.cleaned_data["bonus"]:
+            filters |= Q(labels__bonus=True)
 
         if self.cleaned_data.get("sous_categorie_objet") and self.cleaned_data.get(
             "sc_id"
