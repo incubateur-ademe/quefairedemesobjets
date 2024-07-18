@@ -373,7 +373,10 @@ class AddressesView(FormView):
         reparer_action_id = CachedDirectionAction.get_reparer_action_id()
         reparer_is_checked = reparer_action_id in selected_actions_ids
 
-        if self.cleaned_data["pas_exclusivite_reparation"]:
+        if (
+            self.cleaned_data["pas_exclusivite_reparation"] is not False
+            or reparer_is_checked
+        ):
             excludes |= Q(exclusivite_de_reprisereparation=True)
 
         if self.cleaned_data["label_reparacteur"] and reparer_is_checked:
