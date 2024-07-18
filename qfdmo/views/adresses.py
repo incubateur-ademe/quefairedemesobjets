@@ -114,23 +114,14 @@ class AddressesView(FormView):
     def get_context_data(self, **kwargs):
         kwargs["location"] = "{}"
         kwargs["carte"] = self.request.GET.get("carte") is not None
+
+        # TODO : voir pour utiliser davantage le form dans cette vue
         form = self.get_form_class()(self.request.GET)
         form.is_valid()
+        self.cleaned_data = form.cleaned_data
 
         # Manage the selection of sous_categorie_objet and actions
         acteurs = self._manage_sous_categorie_objet_and_actions()
-
-        if self.request.GET.get("ess"):
-            acteurs = acteurs.filter(labels__code="ess")
-
-        if self.request.GET.get("bonus"):
-            acteurs = acteurs.filter(labels__bonus=True)
-
-        if (
-            "reparer" not in form.cleaned_data["action_list"]
-            or form.cleaned_data["pas_exclusivite_reparation"]
-        ):
-            acteurs = acteurs.exclude(exclusivite_de_reprisereparation=True)
 
         # Case of digital acteurs
         if self.request.GET.get("digital") and self.request.GET.get("digital") == "1":
@@ -142,6 +133,8 @@ class AddressesView(FormView):
             return super().get_context_data(**kwargs)
 
         # Case of physical acteurs
+        # TODO : refactoriser ci-dessous pour passer dans
+        # _manage_sous_categorie_objet_and_actions ou autre
         else:
             # Exclude digital acteurs
             acteurs = acteurs.exclude(
@@ -306,7 +299,14 @@ class AddressesView(FormView):
         return []
 
     def _get_selected_action_ids(self):
-        return [a.id for a in self._get_selected_action()]
+        if self.request.GET.get("carte") is not None:
+            return [a.id for a in self._get_selected_action()]
+
+        return [a["id"] for a in self.get_action_list()]
+
+    def _get_reparer_action_id(self):
+        """Sert essentiellement à faciliter le teste de AddressesView"""
+        return CachedDirectionAction.get_reparer_action_id()
 
     def _get_selected_action(self) -> List[Action]:
         """
@@ -357,23 +357,8 @@ class AddressesView(FormView):
         return [model_to_dict(a, exclude=["directions"]) for a in actions]
 
     def _manage_sous_categorie_objet_and_actions(self) -> QuerySet[DisplayedActeur]:
-        sous_categorie_id = None
-        if (
-            self.request.GET.get("sous_categorie_objet")
-            and self.request.GET.get("sc_id", "").isnumeric()
-        ):
-            sous_categorie_id = int(self.request.GET.get("sc_id", "0"))
-
-        action_selection_ids = (
-            self._get_selected_action_ids()
-            if self.request.GET.get("carte") is not None
-            else [a["id"] for a in self.get_action_list()]
-        )
-
-        ps_filter = self._build_ps_filter(action_selection_ids, sous_categorie_id)
-
-        acteurs = DisplayedActeur.objects.filter(ps_filter)
-
+        filters, excludes = self._compile_acteurs_queryset()
+        acteurs = DisplayedActeur.objects.filter(filters).exclude(excludes)
         acteurs = acteurs.prefetch_related(
             "proposition_services__sous_categories",
             "proposition_services__sous_categories__categorie",
@@ -381,36 +366,49 @@ class AddressesView(FormView):
             "proposition_services__acteur_service",
         ).distinct()
 
-        if sous_categorie_id:
-            acteurs = acteurs.filter(
-                proposition_services__sous_categories__id=sous_categorie_id
-            )
-
         return acteurs
 
-    def _build_ps_filter(self, action_selection_ids, sous_categorie_id: int | None):
-        reparer_action_id = None
+    def _compile_acteurs_queryset(self):
+        filters = Q()
+        excludes = Q()
+
+        selected_actions_ids = self._get_selected_action_ids()
+        reparer_action_id = self._get_reparer_action_id()
+        reparer_is_checked = reparer_action_id in selected_actions_ids
+
         if (
-            self.request.GET.get("label_reparacteur")
-            and CachedDirectionAction.get_reparer_action_id() in action_selection_ids
+            self.cleaned_data["pas_exclusivite_reparation"] is not False
+            or not reparer_is_checked
         ):
-            reparer_action_id = CachedDirectionAction.get_reparer_action_id()
-            action_selection_ids = [
-                a for a in action_selection_ids if a != reparer_action_id
+            excludes |= Q(exclusivite_de_reprisereparation=True)
+
+        if self.cleaned_data["label_reparacteur"] and reparer_is_checked:
+            selected_actions_ids = [
+                a for a in selected_actions_ids if a != reparer_action_id
             ]
 
-        ps_filter = Q()
-        if sous_categorie_id:
-            if action_selection_ids:
-                ps_filter = ps_filter | Q(
+        if self.cleaned_data["ess"]:
+            filters |= Q(labels__code="ess")
+
+        if self.cleaned_data["bonus"]:
+            filters |= Q(labels__bonus=True)
+
+        if self.cleaned_data.get("sous_categorie_objet") and self.cleaned_data.get(
+            "sc_id"
+        ):
+            sous_categorie_id = self.cleaned_data.get("sc_id", 0)
+            filters |= Q(proposition_services__sous_categories__id=sous_categorie_id)
+
+            if selected_actions_ids:
+                filters |= Q(
                     proposition_services__in=DisplayedPropositionService.objects.filter(
-                        action_id__in=action_selection_ids,
+                        action_id__in=selected_actions_ids,
                         sous_categories__id=sous_categorie_id,
                     ),
                     statut=ActeurStatus.ACTIF,
                 )
             if reparer_action_id:
-                ps_filter = ps_filter | Q(
+                filters |= Q(
                     proposition_services__in=DisplayedPropositionService.objects.filter(
                         action_id=reparer_action_id,
                         sous_categories__id=sous_categorie_id,
@@ -419,18 +417,19 @@ class AddressesView(FormView):
                     statut=ActeurStatus.ACTIF,
                 )
         else:
-            if action_selection_ids:
-                ps_filter = ps_filter | Q(
-                    proposition_services__action_id__in=action_selection_ids,
+            if selected_actions_ids:
+                filters |= Q(
+                    proposition_services__action_id__in=selected_actions_ids,
                     statut=ActeurStatus.ACTIF,
                 )
             if reparer_action_id:
-                ps_filter = ps_filter | Q(
+                filters |= Q(
                     proposition_services__action_id=reparer_action_id,
                     labels__code="reparacteur",
                     statut=ActeurStatus.ACTIF,
                 )
-        return ps_filter
+
+        return filters, excludes
 
     def _get_grouped_action_choices(
         self, action_displayed: list[Action]
