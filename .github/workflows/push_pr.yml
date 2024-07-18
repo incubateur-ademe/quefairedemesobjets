@@ -1,4 +1,4 @@
-name: Build and test
+name: Intégration continue
 
 on:
   pull_request:
