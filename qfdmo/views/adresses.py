@@ -299,7 +299,14 @@ class AddressesView(FormView):
         return []
 
     def _get_selected_action_ids(self):
-        return [a.id for a in self._get_selected_action()]
+        if self.request.GET.get("carte") is not None:
+            return [a.id for a in self._get_selected_action()]
+
+        return [a["id"] for a in self.get_action_list()]
+
+    def _get_reparer_action_id(self):
+        """Sert essentiellement à faciliter le teste de AddressesView"""
+        return CachedDirectionAction.get_reparer_action_id()
 
     def _get_selected_action(self) -> List[Action]:
         """
@@ -365,17 +372,13 @@ class AddressesView(FormView):
         filters = Q()
         excludes = Q()
 
-        selected_actions_ids = (
-            self._get_selected_action_ids()
-            if self.request.GET.get("carte") is not None
-            else [a["id"] for a in self.get_action_list()]
-        )
-        reparer_action_id = CachedDirectionAction.get_reparer_action_id()
+        selected_actions_ids = self._get_selected_action_ids()
+        reparer_action_id = self._get_reparer_action_id()
         reparer_is_checked = reparer_action_id in selected_actions_ids
 
         if (
             self.cleaned_data["pas_exclusivite_reparation"] is not False
-            or reparer_is_checked
+            or not reparer_is_checked
         ):
             excludes |= Q(exclusivite_de_reprisereparation=True)
 

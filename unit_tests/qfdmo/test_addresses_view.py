@@ -1,10 +1,17 @@
 from django.contrib.gis.geos import Point
+from unittest.mock import MagicMock
 import pytest
 from django.http import HttpRequest
 
+from qfdmo.models.acteur import ActeurStatus
 from qfdmo.views.adresses import AddressesView
 from unit_tests.core.test_utils import query_dict_from
-from unit_tests.qfdmo.acteur_factory import DisplayedActeurFactory
+from unit_tests.qfdmo.acteur_factory import (
+    DisplayedActeurFactory,
+    LabelQualiteFactory,
+    PropositionServiceFactory,
+)
+from unit_tests.qfdmo.action_factory import ActionFactory
 
 
 class TestAdessesViewGetActionList:
@@ -67,11 +74,20 @@ class TestAdessesViewGetActionList:
 
 @pytest.fixture
 def adresses_view():
-    DisplayedActeurFactory(
+    reparacteur = LabelQualiteFactory(code="reparacteur")
+    action = ActionFactory()
+    proposition_service = PropositionServiceFactory(action=action)
+
+    acteur = DisplayedActeurFactory(
         exclusivite_de_reprisereparation=True,
         location=Point(1, 1),
+        statut=ActeurStatus.ACTIF,
     )
+    acteur.labels.add(reparacteur)
+    acteur.proposition_service.add(proposition_service)
     adresses_view = AddressesView()
+    adresses_view._get_reparer_action_id = MagicMock(return_value=action.id)
+    # adresses_view._get_selected_action_ids = MagicMock(return_value=["reparer"])
     return adresses_view
 
 
