@@ -1,7 +1,7 @@
 from django.contrib.gis.db import models
 
 from qfdmo.models.acteur import ActeurType, Source
-from dags.utils.qfdmd import TO_VALIDATE, TO_INSERT, REJECTED, FINISHED
+from dags.utils.shared_constants import TO_VALIDATE, TO_INSERT, REJECTED, FINISHED
 
 
 class DagRunStatus(models.TextChoices):

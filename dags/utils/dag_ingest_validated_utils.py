@@ -11,7 +11,7 @@ env = Path(__file__).parent.parent.name
 
 utils = import_module(f"{env}.utils.utils")
 mapping_utils = import_module(f"{env}.utils.mapping_utils")
-qfdmd = import_module(f"{env}.utils.qfdmd")
+qfdmd = import_module(f"{env}.utils.shared_constants")
 
 
 def process_labels(df, column_name):
@@ -297,7 +297,7 @@ def handle_write_data_update_actor_event(connection, df_actors):
 def update_dag_run_status(connection, dag_run_id):
     update_query = f"""
         UPDATE qfdmo_dagrun
-        SET status = 'FINISHED'
+        SET status = '{qfdmd.FINISHED}'
         WHERE id = {dag_run_id}
         """
     connection.execute(update_query)

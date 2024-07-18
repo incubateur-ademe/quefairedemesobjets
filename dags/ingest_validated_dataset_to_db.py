@@ -13,7 +13,7 @@ from airflow.utils.dates import days_ago
 env = Path(__file__).parent.name
 utils = import_module(f"{env}.utils.utils")
 dag_ingest_validated_utils = import_module(f"{env}.utils.dag_ingest_validated_utils")
-qfdmd = import_module(f"{env}.utils.qfdmd")
+qfdmd = import_module(f"{env}.utils.shared_constants")
 
 default_args = {
     "owner": "airflow",
