@@ -4,6 +4,7 @@ import pytest
 from django.http import HttpRequest
 
 from qfdmo.models.acteur import ActeurStatus
+from qfdmo.models.categorie_objet import SousCategorieObjet
 from qfdmo.views.adresses import AddressesView
 from unit_tests.core.test_utils import query_dict_from
 from unit_tests.qfdmo.acteur_factory import (
@@ -135,6 +136,23 @@ class TestExclusiviteReparation:
                 "action_list": ["preter|reparer"],
                 "latitude": [1],
                 "longitude": [1],
+                "pas_exclusivite_reparation": ["false"],
+            }
+        )
+        adresses_view.request = request
+        context = adresses_view.get_context_data()
+
+        assert context["acteurs"].count() == 1
+
+    def test_sous_categorie_filter_works_with_exclu_reparation(self, adresses_view):
+        request = HttpRequest()
+        sous_categorie_id = SousCategorieObjet.objects.first().id
+        request.GET = query_dict_from(
+            {
+                "action_list": ["reparer"],
+                "latitude": [1],
+                "longitude": [1],
+                "sc_id": [str(sous_categorie_id)],
                 "pas_exclusivite_reparation": ["false"],
             }
         )

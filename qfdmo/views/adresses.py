@@ -29,7 +29,6 @@ from qfdmo.models import (
     Action,
     CachedDirectionAction,
     DisplayedActeur,
-    DisplayedPropositionService,
     Objet,
     RevisionActeur,
 )
@@ -393,42 +392,38 @@ class AddressesView(FormView):
         if self.cleaned_data["bonus"]:
             filters |= Q(labels__bonus=True)
 
-        if self.cleaned_data.get("sous_categorie_objet") and self.cleaned_data.get(
-            "sc_id"
-        ):
+        if self.cleaned_data.get("sc_id"):
             sous_categorie_id = self.cleaned_data.get("sc_id", 0)
-            filters |= Q(proposition_services__sous_categories__id=sous_categorie_id)
+            filters = (
+                Q(proposition_services__sous_categories__id=sous_categorie_id) & filters
+            )
 
             if selected_actions_ids:
                 filters |= Q(
-                    proposition_services__in=DisplayedPropositionService.objects.filter(
-                        action_id__in=selected_actions_ids,
-                        sous_categories__id=sous_categorie_id,
-                    ),
-                    statut=ActeurStatus.ACTIF,
-                )
-            if reparer_action_id:
-                filters |= Q(
-                    proposition_services__in=DisplayedPropositionService.objects.filter(
-                        action_id=reparer_action_id,
-                        sous_categories__id=sous_categorie_id,
-                    ),
-                    labels__code="reparacteur",
-                    statut=ActeurStatus.ACTIF,
-                )
-        else:
-            if selected_actions_ids:
-                filters |= Q(
                     proposition_services__action_id__in=selected_actions_ids,
+                    proposition_services__sous_categories__id=sous_categorie_id,
                     statut=ActeurStatus.ACTIF,
                 )
             if reparer_action_id:
                 filters |= Q(
                     proposition_services__action_id=reparer_action_id,
+                    proposition_services__sous_categories__id=sous_categorie_id,
                     labels__code="reparacteur",
                     statut=ActeurStatus.ACTIF,
                 )
-
+        else:
+            if selected_actions_ids:
+                filters &= Q(
+                    proposition_services__action_id__in=selected_actions_ids,
+                    statut=ActeurStatus.ACTIF,
+                )
+            if reparer_action_id:
+                filters &= Q(
+                    proposition_services__action_id=reparer_action_id,
+                    labels__code="reparacteur",
+                    statut=ActeurStatus.ACTIF,
+                )
+        print(f"{filters=} {self.cleaned_data=}")
         return filters, excludes
 
     def _get_grouped_action_choices(
