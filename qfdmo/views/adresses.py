@@ -323,15 +323,15 @@ class AddressesView(FormView):
 
         # Selection is not set in interface, get all available from
         # (checked_)action_list
-        elif self.request.GET.get("action_list"):
+        elif action_list := self.cleaned_data.get("action_list"):
             # TODO : effet de bord si la list des action n'est pas cohérente avec
             # les actions affichées
             # il faut collecté les actions coché selon les groupes d'action
-            codes = self.request.GET.get("action_list", "").split("|")
+            codes = action_list.split("|")
         # Selection is not set in interface, defeult checked action list is not set
         # get all available from action_displayed
-        elif self.request.GET.get("action_displayed"):
-            codes = self.request.GET.get("action_displayed", "").split("|")
+        elif action_displayed := self.cleaned_data.get("action_displayed"):
+            codes = action_displayed.split("|")
         # return empty array, will search in all actions
 
         actions = (
@@ -353,6 +353,7 @@ class AddressesView(FormView):
             actions = [
                 a for a in actions if direction in [d.code for d in a.directions.all()]
             ]
+        print(f"{actions=} {action_displayed=} {direction=}")
         return [model_to_dict(a, exclude=["directions"]) for a in actions]
 
     def _manage_sous_categorie_objet_and_actions(self) -> QuerySet[DisplayedActeur]:

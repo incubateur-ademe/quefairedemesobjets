@@ -67,7 +67,7 @@ class ActeurServiceFactory(Factory):
     class Meta:
         model = ActeurService
 
-    code = "service"
+    code = Faker("word")
 
 
 class PropositionServiceFactory(Factory):

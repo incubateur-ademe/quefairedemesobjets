@@ -1,10 +1,8 @@
 from django.contrib.gis.geos import Point
-from unittest.mock import MagicMock
 import pytest
 from django.http import HttpRequest
 
 from qfdmo.models.acteur import ActeurStatus
-from qfdmo.models.categorie_objet import SousCategorieObjet
 from qfdmo.views.adresses import AddressesView
 from unit_tests.core.test_utils import query_dict_from
 from unit_tests.qfdmo.acteur_factory import (
@@ -13,6 +11,7 @@ from unit_tests.qfdmo.acteur_factory import (
     LabelQualiteFactory,
 )
 from unit_tests.qfdmo.action_factory import ActionFactory
+from unit_tests.qfdmo.sscatobj_factory import SousCategorieObjetFactory
 
 
 class TestAdessesViewGetActionList:
@@ -74,32 +73,57 @@ class TestAdessesViewGetActionList:
 
 
 @pytest.fixture
-def adresses_view():
+def action_reparer():
+    action = ActionFactory(code="reparer")
+    return action
+
+
+@pytest.fixture
+def action_preter():
+    action = ActionFactory(code="preter")
+    return action
+
+
+@pytest.fixture
+def sous_categorie():
+    sous_categorie = SousCategorieObjetFactory()
+    return sous_categorie
+
+
+@pytest.fixture
+def proposition_service(action_reparer, sous_categorie):
+    proposition_service = DisplayedPropositionServiceFactory(
+        action=action_reparer,
+    )
+    proposition_service.sous_categories.add(sous_categorie)
+    return proposition_service
+
+
+@pytest.fixture
+def adresses_view(proposition_service):
     reparacteur = LabelQualiteFactory(code="reparacteur")
-    action = ActionFactory()
 
     displayed_acteur = DisplayedActeurFactory(
         exclusivite_de_reprisereparation=True,
         location=Point(1, 1),
         statut=ActeurStatus.ACTIF,
     )
-    display_proposition_service = DisplayedPropositionServiceFactory(action=action)
     displayed_acteur.labels.add(reparacteur)
-    displayed_acteur.proposition_services.add(display_proposition_service)
+    displayed_acteur.proposition_services.add(proposition_service)
 
     adresses_view = AddressesView()
-    adresses_view._get_reparer_action_id = MagicMock(return_value=action.id)
-    adresses_view._get_selected_action_ids = MagicMock(return_value=[action.id])
     return adresses_view
 
 
 @pytest.mark.django_db
 class TestExclusiviteReparation:
-    def test_pas_action_reparer_exclut_acteurs_avec_exclusivite(self, adresses_view):
+    def test_pas_action_reparer_exclut_acteurs_avec_exclusivite(
+        self, adresses_view, action_preter
+    ):
         request = HttpRequest()
         request.GET = query_dict_from(
             {
-                "action_list": ["preter"],
+                "action_list": [action_preter.code],
                 "latitude": [1],
                 "longitude": [1],
                 "pas_exclusivite_reparation": ["true"],
@@ -111,12 +135,12 @@ class TestExclusiviteReparation:
         assert context["acteurs"].count() == 0
 
     def test_action_reparer_exclut_par_defaut_acteurs_avec_exclusivite(
-        self, adresses_view
+        self, adresses_view, action_reparer, action_preter
     ):
         request = HttpRequest()
         request.GET = query_dict_from(
             {
-                "action_list": ["preter|reparer"],
+                "action_list": [f"{action_reparer.code}|{action_preter.code}"],
                 "latitude": [1],
                 "longitude": [1],
                 "pas_exclusivite_reparation": ["true"],
@@ -128,12 +152,12 @@ class TestExclusiviteReparation:
         assert context["acteurs"].count() == 0
 
     def test_action_reparer_et_exclusivite_inclut_acteurs_avec_exclusivite(
-        self, adresses_view
+        self, adresses_view, action_reparer
     ):
         request = HttpRequest()
         request.GET = query_dict_from(
             {
-                "action_list": ["preter|reparer"],
+                "action_list": [action_reparer.code],
                 "latitude": [1],
                 "longitude": [1],
                 "pas_exclusivite_reparation": ["false"],
@@ -144,12 +168,14 @@ class TestExclusiviteReparation:
 
         assert context["acteurs"].count() == 1
 
-    def test_sous_categorie_filter_works_with_exclu_reparation(self, adresses_view):
+    def test_sous_categorie_filter_works_with_exclu_reparation(
+        self, adresses_view, sous_categorie, action_reparer
+    ):
         request = HttpRequest()
-        sous_categorie_id = SousCategorieObjet.objects.first().id
+        sous_categorie_id = sous_categorie.id
         request.GET = query_dict_from(
             {
-                "action_list": ["reparer"],
+                "action_list": [action_reparer.code],
                 "latitude": [1],
                 "longitude": [1],
                 "sc_id": [str(sous_categorie_id)],
@@ -160,3 +186,31 @@ class TestExclusiviteReparation:
         context = adresses_view.get_context_data()
 
         assert context["acteurs"].count() == 1
+
+    def test_action_filter_works_with_exclu_reparation(
+        self, adresses_view, action_reparer, action_preter, sous_categorie
+    ):
+        proposition_service_preter = DisplayedPropositionServiceFactory(
+            action=action_preter,
+        )
+        proposition_service_preter.sous_categories.add(sous_categorie)
+        displayed_acteur_preter = DisplayedActeurFactory(
+            nom="Un acteur preter",
+            location=Point(1, 1),
+            statut=ActeurStatus.ACTIF,
+        )
+        displayed_acteur_preter.proposition_services.add(proposition_service_preter)
+
+        request = HttpRequest()
+        request.GET = query_dict_from(
+            {
+                "action_list": [f"{action_reparer.code}|{action_preter.code}"],
+                "latitude": [1],
+                "longitude": [1],
+                "pas_exclusivite_reparation": ["false"],
+            }
+        )
+        adresses_view.request = request
+        context = adresses_view.get_context_data()
+
+        assert context["acteurs"].count() == 2
