@@ -353,7 +353,6 @@ class AddressesView(FormView):
             actions = [
                 a for a in actions if direction in [d.code for d in a.directions.all()]
             ]
-        print(f"{actions=} {action_displayed=} {direction=}")
         return [model_to_dict(a, exclude=["directions"]) for a in actions]
 
     def _manage_sous_categorie_objet_and_actions(self) -> QuerySet[DisplayedActeur]:
@@ -369,7 +368,7 @@ class AddressesView(FormView):
         return acteurs
 
     def _compile_acteurs_queryset(self):
-        filters = Q()
+        filters = Q(statut=ActeurStatus.ACTIF)
         excludes = Q()
 
         selected_actions_ids = self._get_selected_action_ids()
@@ -393,38 +392,23 @@ class AddressesView(FormView):
         if self.cleaned_data["bonus"]:
             filters |= Q(labels__bonus=True)
 
-        if self.cleaned_data.get("sc_id"):
-            sous_categorie_id = self.cleaned_data.get("sc_id", 0)
-            filters = (
-                Q(proposition_services__sous_categories__id=sous_categorie_id) & filters
+        if sous_categorie_id := self.cleaned_data.get("sc_id", 0):
+            filters &= Q(
+                statut=ActeurStatus.ACTIF,
+                proposition_services__sous_categories__id=sous_categorie_id,
             )
 
-            if selected_actions_ids:
-                filters |= Q(
-                    proposition_services__action_id__in=selected_actions_ids,
-                    proposition_services__sous_categories__id=sous_categorie_id,
-                    statut=ActeurStatus.ACTIF,
-                )
-            if reparer_action_id:
-                filters |= Q(
-                    proposition_services__action_id=reparer_action_id,
-                    proposition_services__sous_categories__id=sous_categorie_id,
-                    labels__code="reparacteur",
-                    statut=ActeurStatus.ACTIF,
-                )
-        else:
-            if selected_actions_ids:
-                filters &= Q(
-                    proposition_services__action_id__in=selected_actions_ids,
-                    statut=ActeurStatus.ACTIF,
-                )
-            if reparer_action_id:
-                filters &= Q(
-                    proposition_services__action_id=reparer_action_id,
-                    labels__code="reparacteur",
-                    statut=ActeurStatus.ACTIF,
-                )
-        print(f"{filters=} {self.cleaned_data=}")
+        if selected_actions_ids:
+            filters &= Q(
+                proposition_services__action_id__in=selected_actions_ids,
+            )
+
+        if reparer_action_id:
+            filters |= Q(
+                proposition_services__action_id=reparer_action_id,
+                labels__code="reparacteur",
+            )
+
         return filters, excludes
 
     def _get_grouped_action_choices(
