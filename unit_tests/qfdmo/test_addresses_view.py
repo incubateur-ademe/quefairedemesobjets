@@ -92,11 +92,11 @@ def sous_categorie():
 
 @pytest.fixture
 def proposition_service(action_reparer, sous_categorie):
-    proposition_service = DisplayedPropositionServiceFactory(
+    proposition_service_reparer = DisplayedPropositionServiceFactory(
         action=action_reparer,
     )
-    proposition_service.sous_categories.add(sous_categorie)
-    return proposition_service
+    proposition_service_reparer.sous_categories.add(sous_categorie)
+    return proposition_service_reparer
 
 
 @pytest.fixture
@@ -222,6 +222,7 @@ class TestExclusiviteReparation:
                 "action_list": [f"{action_reparer.code}|{action_preter.code}"],
                 "latitude": [1],
                 "longitude": [1],
+                "sc_id": [sous_categorie.id],
                 "pas_exclusivite_reparation": ["false"],
             }
         )
