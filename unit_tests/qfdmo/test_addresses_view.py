@@ -85,6 +85,12 @@ def action_preter():
 
 
 @pytest.fixture
+def action_donner():
+    action = ActionFactory(code="donner")
+    return action
+
+
+@pytest.fixture
 def sous_categorie():
     sous_categorie = SousCategorieObjetFactory()
     return sous_categorie
@@ -192,10 +198,14 @@ class TestExclusiviteReparation:
 class TestFilters:
     @pytest.mark.parametrize("carte", [[True], [None]])
     def test_action_filters(
-        self, carte, adresses_view, action_reparer, action_preter, sous_categorie
+        self,
+        carte,
+        adresses_view,
+        action_reparer,
+        action_preter,
+        action_donner,
+        sous_categorie,
     ):
-        action_donner = ActionFactory(code="donner")
-
         proposition_service_preter = DisplayedPropositionServiceFactory(
             action=action_preter,
         )
