@@ -2,7 +2,7 @@ from django.contrib.gis.geos import Point
 import pytest
 from django.http import HttpRequest
 
-from qfdmo.models.acteur import ActeurStatus
+from qfdmo.models.acteur import ActeurStatus, DisplayedActeur
 from qfdmo.views.adresses import AddressesView
 from unit_tests.core.test_utils import query_dict_from
 from unit_tests.qfdmo.acteur_factory import (
@@ -106,6 +106,24 @@ def proposition_service(action_reparer, sous_categorie):
 
 
 @pytest.fixture
+def proposition_service_preter(action_preter, sous_categorie):
+    proposition_service_preter = DisplayedPropositionServiceFactory(
+        action=action_preter,
+    )
+    proposition_service_preter.sous_categories.add(sous_categorie)
+    return proposition_service_preter
+
+
+@pytest.fixture
+def proposition_service_donner(action_donner, sous_categorie):
+    proposition_service_donner = DisplayedPropositionServiceFactory(
+        action=action_donner,
+    )
+    proposition_service_donner.sous_categories.add(sous_categorie)
+    return proposition_service_donner
+
+
+@pytest.fixture
 def adresses_view(proposition_service):
     reparacteur = LabelQualiteFactory(code="reparacteur")
 
@@ -119,6 +137,29 @@ def adresses_view(proposition_service):
 
     adresses_view = AddressesView()
     return adresses_view
+
+
+@pytest.fixture
+def displayed_acteur_preter(proposition_service_preter):
+    displayed_acteur_preter = DisplayedActeurFactory(
+        nom="Un acteur preter",
+        location=Point(1, 1),
+        statut=ActeurStatus.ACTIF,
+    )
+
+    displayed_acteur_preter.proposition_services.add(proposition_service_preter)
+    return displayed_acteur_preter
+
+
+@pytest.fixture
+def displayed_acteur_donner(proposition_service_donner):
+    displayed_acteur_donner = DisplayedActeurFactory(
+        nom="Un acteur donner",
+        location=Point(1, 1),
+        statut=ActeurStatus.ACTIF,
+    )
+    displayed_acteur_donner.proposition_services.add(proposition_service_donner)
+    return displayed_acteur_donner
 
 
 @pytest.mark.django_db
@@ -203,32 +244,14 @@ class TestFilters:
         adresses_view,
         action_reparer,
         action_preter,
-        action_donner,
+        proposition_service_preter,
+        proposition_service_donner,
+        displayed_acteur_donner,
+        displayed_acteur_preter,
         sous_categorie,
     ):
-        proposition_service_preter = DisplayedPropositionServiceFactory(
-            action=action_preter,
-        )
-        proposition_service_donner = DisplayedPropositionServiceFactory(
-            action=action_donner,
-        )
-
         proposition_service_preter.sous_categories.add(sous_categorie)
         proposition_service_donner.sous_categories.add(sous_categorie)
-
-        displayed_acteur_preter = DisplayedActeurFactory(
-            nom="Un acteur preter",
-            location=Point(1, 1),
-            statut=ActeurStatus.ACTIF,
-        )
-        displayed_acteur_donner = DisplayedActeurFactory(
-            nom="Un acteur donner",
-            location=Point(1, 1),
-            statut=ActeurStatus.ACTIF,
-        )
-
-        displayed_acteur_preter.proposition_services.add(proposition_service_preter)
-        displayed_acteur_donner.proposition_services.add(proposition_service_donner)
 
         request = HttpRequest()
         request.GET = query_dict_from(
@@ -244,3 +267,25 @@ class TestFilters:
         context = adresses_view.get_context_data()
 
         assert context["acteurs"].count() == 2
+
+    def test_sous_categorie_filter(
+        self,
+        adresses_view,
+        sous_categorie,
+        displayed_acteur_donner,
+        displayed_acteur_preter,
+    ):
+        request = HttpRequest()
+        sous_categorie_id = sous_categorie.id
+        request.GET = query_dict_from(
+            {
+                "latitude": [1],
+                "longitude": [1],
+                "sc_id": [str(sous_categorie_id)],
+            }
+        )
+        adresses_view.request = request
+        context = adresses_view.get_context_data()
+
+        assert DisplayedActeur.objects.count() > 1
+        assert context["acteurs"].count() == 3
