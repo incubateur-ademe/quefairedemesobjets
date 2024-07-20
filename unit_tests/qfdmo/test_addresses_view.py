@@ -187,8 +187,11 @@ class TestExclusiviteReparation:
 
         assert context["acteurs"].count() == 1
 
+
+@pytest.mark.django_db
+class TestFilters:
     @pytest.mark.parametrize("carte", [[True], [None]])
-    def test_action_filter_works_with_exclu_reparation(
+    def test_action_filters(
         self, carte, adresses_view, action_reparer, action_preter, sous_categorie
     ):
         action_donner = ActionFactory(code="donner")
@@ -224,7 +227,6 @@ class TestExclusiviteReparation:
                 "latitude": [1],
                 "longitude": [1],
                 "sc_id": [sous_categorie.id],
-                "pas_exclusivite_reparation": ["false"],
                 "carte": carte,
             }
         )
