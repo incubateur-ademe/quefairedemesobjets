@@ -190,16 +190,31 @@ class TestExclusiviteReparation:
     def test_action_filter_works_with_exclu_reparation(
         self, adresses_view, action_reparer, action_preter, sous_categorie
     ):
+        action_donner = ActionFactory(code="donner")
+
         proposition_service_preter = DisplayedPropositionServiceFactory(
             action=action_preter,
         )
+        proposition_service_donner = DisplayedPropositionServiceFactory(
+            action=action_donner,
+        )
+
         proposition_service_preter.sous_categories.add(sous_categorie)
+        proposition_service_donner.sous_categories.add(sous_categorie)
+
         displayed_acteur_preter = DisplayedActeurFactory(
             nom="Un acteur preter",
             location=Point(1, 1),
             statut=ActeurStatus.ACTIF,
         )
+        displayed_acteur_donner = DisplayedActeurFactory(
+            nom="Un acteur donner",
+            location=Point(1, 1),
+            statut=ActeurStatus.ACTIF,
+        )
+
         displayed_acteur_preter.proposition_services.add(proposition_service_preter)
+        displayed_acteur_donner.proposition_services.add(proposition_service_donner)
 
         request = HttpRequest()
         request.GET = query_dict_from(

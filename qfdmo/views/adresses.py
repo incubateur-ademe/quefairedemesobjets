@@ -392,22 +392,23 @@ class AddressesView(FormView):
         if self.cleaned_data["bonus"]:
             filters &= Q(labels__bonus=True)
 
-        if sous_categorie_id := self.cleaned_data.get("sc_id", 0):
-            filters &= Q(
-                proposition_services__sous_categories__id=sous_categorie_id,
-            )
+        ps_filters = Q()
 
-        if selected_actions_ids:
-            filters &= Q(
-                proposition_services__action_id__in=selected_actions_ids,
-            )
-        elif reparer_action_id:
-            filters &= Q(
-                proposition_services__action_id=reparer_action_id,
-                labels__code="reparacteur",
-            ) | Q(
-                proposition_services__action_id__in=selected_actions_ids,
-            )
+        if sous_categorie_id := self.cleaned_data.get("sc_id", 0):
+            if selected_actions_ids:
+                ps_filters |= Q(
+                    proposition_services__action_id__in=selected_actions_ids,
+                    proposition_services__sous_categories__id=sous_categorie_id,
+                )
+
+            if reparer_is_checked:
+                ps_filters |= Q(
+                    proposition_services__sous_categories__id=sous_categorie_id,
+                    proposition_services__action_id=reparer_action_id,
+                    labels__code="reparacteur",
+                )
+
+        filters &= ps_filters
 
         return filters, excludes
 
