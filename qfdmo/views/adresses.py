@@ -387,14 +387,13 @@ class AddressesView(FormView):
             ]
 
         if self.cleaned_data["ess"]:
-            filters |= Q(labels__code="ess")
+            filters &= Q(labels__code="ess")
 
         if self.cleaned_data["bonus"]:
-            filters |= Q(labels__bonus=True)
+            filters &= Q(labels__bonus=True)
 
         if sous_categorie_id := self.cleaned_data.get("sc_id", 0):
             filters &= Q(
-                statut=ActeurStatus.ACTIF,
                 proposition_services__sous_categories__id=sous_categorie_id,
             )
 
@@ -402,11 +401,12 @@ class AddressesView(FormView):
             filters &= Q(
                 proposition_services__action_id__in=selected_actions_ids,
             )
-
-        if reparer_action_id:
-            filters |= Q(
+        elif reparer_action_id:
+            filters &= Q(
                 proposition_services__action_id=reparer_action_id,
                 labels__code="reparacteur",
+            ) | Q(
+                proposition_services__action_id__in=selected_actions_ids,
             )
 
         return filters, excludes
