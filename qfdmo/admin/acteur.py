@@ -93,13 +93,21 @@ class BasePropositionServiceForm(forms.ModelForm):
                 ).order_by("libelle_unaccent")
             )
 
-    filter_horizontal = [
-        "sous_categories",
-    ]
+
+class InlinePropositionServiceForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if "sous_categories" in self.fields:
+            self.fields["sous_categories"].queryset = (
+                SousCategorieObjet.objects.annotate(
+                    libelle_unaccent=Unaccent(Lower("libelle")),
+                    categorie_libelle_unaccent=Unaccent(Lower("categorie__libelle")),
+                ).order_by("categorie_libelle_unaccent", "libelle_unaccent")
+            )
 
 
 class BasePropositionServiceInline(admin.TabularInline):
-    form = BasePropositionServiceForm
+    form = InlinePropositionServiceForm
     extra = 0
 
     fields = (
@@ -107,6 +115,8 @@ class BasePropositionServiceInline(admin.TabularInline):
         "acteur_service",
         "sous_categories",
     )
+
+    filter_vertical = ("sous_categories",)
 
 
 class PropositionServiceInline(BasePropositionServiceInline, NotEditableInlineMixin):
