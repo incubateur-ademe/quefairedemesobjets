@@ -6,10 +6,14 @@ from unit_tests.qfdmo.sscatobj_factory import SousCategorieObjetFactory
 
 class TestSousCategorieObjetStr:
     def test_str_blank(self):
-        assert SousCategorieObjetFactory.build(libelle="").__str__() == ""
+        assert SousCategorieObjetFactory.build(libelle="").__str__().endswith("| ")
 
     def test_str_specialchar(self):
-        assert SousCategorieObjetFactory.build(libelle="Åctïôn").__str__() == "Åctïôn"
+        assert (
+            SousCategorieObjetFactory.build(libelle="Åctïôn")
+            .__str__()
+            .endswith("| Åctïôn")
+        )
 
 
 class TestActionNaturalKey:
@@ -22,8 +26,9 @@ class TestActionNaturalKey:
     def test_get_natural_key(self):
         SousCategorieObjetFactory(libelle="Natural key", code="natural_key")
         assert (
-            SousCategorieObjet.objects.get_by_natural_key("natural_key").__str__()
-            == "Natural key"
+            SousCategorieObjet.objects.get_by_natural_key("natural_key")
+            .__str__()
+            .endswith("| Natural key")
         )
 
 
