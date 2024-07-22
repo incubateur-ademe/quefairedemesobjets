@@ -10,6 +10,4 @@ test("iFrame is WCAG compliant", async ({ page }) => {
     .analyze()
 
   expect(accessibilityScanResults.violations).toEqual([])
-
-  await browser.close();
 })
