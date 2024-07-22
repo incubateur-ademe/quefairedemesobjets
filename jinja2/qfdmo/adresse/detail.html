@@ -79,8 +79,9 @@
     {% endif %}
 
     <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
-        <button class="fr-btn fr-btn--secondary-light fr-icon-share-line qfdmo-rounded-full" aria-describedby="shareTooltip" type="button"></button>
-        <span class="fr-tooltip fr-placement" id="shareTooltip" role="tooltip" aria-hidden="true">
+        <button class="fr-btn fr-btn--secondary-light fr-icon-share-line qfdmo-rounded-full" type="button" aria-labelledby="detail-share-tooltip-label">
+        </button>
+        <div class="fr-tooltip fr-placement" id="shareTooltip" role="tooltip" aria-hidden="true">
             <div class="fr-share">
                 {% with address_url=adresse.get_share_url(request) %}
                     <ul class="fr-btns-group">
@@ -139,8 +140,8 @@
                     </ul>
                 {% endwith %}
             </div>
-        </span>
-        <span class="fr-text--xs fr-mb-0">Partager</span>
+        </div>
+        <span class="fr-text--xs fr-mb-0" id="detail-share-tooltip-label">Partager</span>
     </div>
 </div>
 
