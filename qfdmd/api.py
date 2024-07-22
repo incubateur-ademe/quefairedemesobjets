@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from ninja import ModelSchema, Router
 
 from qfdmo.models.categorie_objet import SousCategorieObjet
@@ -23,7 +24,8 @@ def sous_categorie_from_product(request, id: str):
         # correspondant à la partie avant l'underscore
         id = id.split("_")[0]
         return (
-            Produit.objects.get(
+            get_object_or_404(
+                Produit,
                 id=id,
             )
             .sous_categories.filter(afficher_carte=True)
