@@ -1,8 +1,9 @@
 
-<fieldset class="fr-fieldset" aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages">
+<fieldset class="fr-fieldset qfdmo-gap-y-2w" aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages">
     <legend class="qfdmo-hidden">
-        Éligibles au bonus réparation
+        Choisir le(s) filtre(s)
     </legend>
+
     <div class="fr-fieldset__element fr-fieldset__element--inline qfdmo-font-normal">
         <div
             class="fr-checkbox-group qfdmo-flex qfdmo-flex-row qfdmo-items-center"
@@ -12,12 +13,6 @@
         </div>
         <span class="fr-hint-text">{{ form.bonus.help_text }}</span>
     </div>
-</fieldset>
-
-<fieldset class="fr-fieldset" aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages">
-    <legend class="qfdmo-hidden">
-        Type d'enseigne ESS
-    </legend>
     <div class="fr-fieldset__element fr-fieldset__element--inline qfdmo-font-normal">
         <div
             class="fr-checkbox-group qfdmo-flex qfdmo-flex-row qfdmo-items-center"
@@ -27,15 +22,10 @@
         </div>
         <span class="fr-hint-text">{{ form.ess.help_text }}</span>
     </div>
-</fieldset>
 
-<div
-    class="qfdmo-flex qfdmo-flex-row qfdmo-items-center"
->
-    <fieldset class="fr-fieldset" aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages">
-        <legend class="qfdmo-hidden">
-            Enseignes labellisées Répar’Acteurs
-        </legend>
+    <div
+        class="qfdmo-flex qfdmo-flex-row qfdmo-items-center"
+    >
         <div class="fr-fieldset__element fr-fieldset__element--inline qfdmo-font-normal">
             <div
                 class="fr-checkbox-group qfdmo-flex qfdmo-flex-row qfdmo-items-center"
@@ -45,14 +35,9 @@
             </div>
             <span class="fr-hint-text">{{ form.label_reparacteur.help_text }}</span>
         </div>
-    </fieldset>
-    {% include "qfdmo/partials/label_reparacteur_icon.html" %}
-</div>
+        {% include "qfdmo/partials/label_reparacteur_icon.html" %}
+    </div>
 
-<fieldset class="fr-fieldset" aria-labelledby="checkboxes-inline-legend checkboxes-inline-messages">
-    <legend class="qfdmo-hidden">
-        Enseignes n'ayant pas d'exclusivité de réparation
-    </legend>
     <div class="fr-fieldset__element fr-fieldset__element--inline qfdmo-font-normal">
         <div
             class="fr-checkbox-group qfdmo-flex qfdmo-flex-row qfdmo-items-center"
