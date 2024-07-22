@@ -20,7 +20,7 @@
         autocomplete="off"
         type="{{ widget.type }}"
         name="{{ widget.name }}"
-        id="{{ widget.name }}"
+        id="{{ widget.id }}"
         {% if widget.value != None %} value="{{ widget.value.0|stringformat:'s' }}"{% endif %}
         {% include "django/forms/widgets/attrs.html" %}
         >

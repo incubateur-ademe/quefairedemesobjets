@@ -5,7 +5,7 @@ from django.utils.safestring import mark_safe
 from qfdmo.models import CachedDirectionAction, DagRun, DagRunStatus, SousCategorieObjet
 
 
-class AutoCompleteInput(forms.Select):
+class AutoCompleteInput(forms.TextInput):
     template_name = "django/forms/widgets/autocomplete.html"
 
     def __init__(self, attrs=None, data_controller="autocomplete", **kwargs):
@@ -72,7 +72,6 @@ class AddressesForm(forms.Form):
                 "placeholder": "chaussures, perceuse, canapé...",
                 "autocomplete": "off",
                 "aria-label": "Indiquer un objet - obligatoire",
-                "id": "sous_categorie_objet",
             },
             data_controller="ss-cat-object-autocomplete",
         ),
@@ -254,7 +253,6 @@ class IframeAddressesForm(AddressesForm):
                 "placeholder": "20 av. du Grésillé 49000 Angers",
                 "autocomplete": "off",
                 "aria-label": "Autour de l'adresse suivante - obligatoire",
-                "id": "adresse",
             },
             data_controller="address-autocomplete",
         ),
