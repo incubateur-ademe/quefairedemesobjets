@@ -73,7 +73,12 @@ class ActeurType(CodeAsNaturalKeyModel):
     @classmethod
     def get_digital_acteur_type_id(cls) -> int:
         if not cls._digital_acteur_type_id:
-            cls._digital_acteur_type_id = cls.objects.get(code="acteur digital").id
+            (digital_acteur_type, _) = cls.objects.get_or_create(code="acteur digital")
+            print(
+                f"digital_acteur_type : {digital_acteur_type.id}"
+                f" - {digital_acteur_type.code} - {digital_acteur_type}"
+            )
+            cls._digital_acteur_type_id = digital_acteur_type.id
         return cls._digital_acteur_type_id
 
 
@@ -245,6 +250,8 @@ class BaseActeur(NomAsNaturalKeyModel):
 
     @property
     def is_digital(self) -> bool:
+        print(f"acteur_type : {self.acteur_type_id} - {self.acteur_type}")
+        print(f"get_digital_acteur_type_id : {ActeurType.get_digital_acteur_type_id()}")
         return self.acteur_type_id == ActeurType.get_digital_acteur_type_id()
 
     def serialize(self, format: None | str = None) -> dict | str:
@@ -505,7 +512,6 @@ class BasePropositionService(models.Model):
     def serialize(self):
         return {
             "action": self.action.serialize(),
-            "acteur_service": self.acteur_service.serialize(),
             "sous_categories": [
                 sous_categorie.serialize()
                 for sous_categorie in self.sous_categories.all()
