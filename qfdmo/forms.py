@@ -5,7 +5,7 @@ from django.utils.safestring import mark_safe
 from qfdmo.models import CachedDirectionAction, DagRun, DagRunStatus, SousCategorieObjet
 
 
-class AutoCompleteInput(forms.Select):
+class AutoCompleteInput(forms.TextInput):
     template_name = "django/forms/widgets/autocomplete.html"
 
     def __init__(self, attrs=None, data_controller="autocomplete", **kwargs):

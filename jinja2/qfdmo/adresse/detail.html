@@ -49,39 +49,50 @@
 <hr class="fr-pb-1v">
 <div class="fr-my-1w qfdmo-flex qfdmo-justify-around">
     {% if latitude and longitude and not adresse.is_digital %}
-        <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
-            <a  class="fr-btn fr-icon-send-plane-line qfdmo-rounded-full"
-                href="https://www.google.com/maps/dir/?api=1&origin={{latitude}},{{longitude}}&destination={{adresse.latitude}},{{adresse.longitude}}&travelMode=WALKING"
-                target="_blank"
-                title="itinéraire"
-                rel='noopener'
-            ></a>
+        <a class="qfdmo-flex qfdmo-flex-col qfdmo-items-center qfdmo-bg-none qfdmo-no-external-link-icon"
+            href="https://www.google.com/maps/dir/?api=1&origin={{latitude}},{{longitude}}&destination={{adresse.latitude}},{{adresse.longitude}}&travelMode=WALKING"
+            target="_blank"
+            title="itinéraire"
+            rel='noopener'
+        >
+            <span  class="fr-btn fr-icon-send-plane-line qfdmo-rounded-full"
+            ></span>
             <span class="fr-text--xs fr-mb-0">Itinéraire</span>
-        </div>
+        </a>
     {% endif %}
     {% if adresse.url %}
-        <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
-            <a class="fr-btn fr-btn--secondary-light fr-icon-global-line qfdmo-rounded-full" href="{{ adresse.url }}" target="_blank" title="Site Internet" rel='noopener'></a>
+        <a class="qfdmo-flex qfdmo-flex-col qfdmo-items-center qfdmo-no-underline qfdmo-bg-none qfdmo-no-external-link-icon"
+            href="{{ adresse.url }}" target="_blank" title="Site Internet" rel='noopener'
+        >
+            <span class="fr-btn fr-btn--secondary-light fr-icon-global-line qfdmo-rounded-full">
+            </span>
             <span class="fr-text--xs fr-mb-0">Site web</span>
-        </div>
+        </a>
     {% endif %}
     {% if adresse.email and False %}
-        <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
-            <a class="fr-btn fr-btn--secondary-light fr-icon-mail-line qfdmo-rounded-full" href="mailto:{{ adresse.email }}" target="_blank" title="Courriel" rel='noopener'></a>
+        <a class="qfdmo-flex qfdmo-flex-col qfdmo-items-center qfdmo-bg-none qfdmo-no-external-link-icon"
+            href="mailto:{{ adresse.email }}" target="_blank" title="Courriel" rel='noopener'
+        >
+            <span class="fr-btn fr-btn--secondary-light fr-icon-mail-line qfdmo-rounded-full"
+            ></span>
             <span class="fr-text--xs fr-mb-0">E-mail</span>
-        </div>
+        </a>
     {% endif %}
     {% if adresse.telephone %}
-        <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
-            <a class="fr-btn fr-btn--secondary-light fr-icon-phone-line qfdmo-rounded-full" href="tel:{{ adresse.telephone }}" title="Téléphone" rel='noopener'></a>
+        <a class="qfdmo-flex qfdmo-flex-col qfdmo-items-center qfdmo-bg-none qfdmo-no-external-link-icon"
+            href="tel:{{ adresse.telephone }}" title="Téléphone" rel='noopener'
+        >
+            <span class="fr-btn fr-btn--secondary-light fr-icon-phone-line qfdmo-rounded-full"
+            ></span>
             <span class="fr-text--xs fr-mb-0">Téléphone</span>
-        </div>
+        </a>
     {% endif %}
 
     <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
-        <button class="fr-btn fr-btn--secondary-light fr-icon-share-line qfdmo-rounded-full" aria-describedby="shareTooltip" type="button"></button>
+        <button class="fr-btn fr-btn--secondary-light fr-icon-share-line qfdmo-rounded-full" type="button" aria-describedby="shareTooltip" aria-labelledby="detail-share-tooltip-label">
+        </button>
         <span class="fr-tooltip fr-placement" id="shareTooltip" role="tooltip" aria-hidden="true">
-            <div class="fr-share">
+            <span class="fr-share">
                 {% with address_url=adresse.get_share_url(request) %}
                     <ul class="fr-btns-group">
                         <li>
@@ -138,9 +149,9 @@
                         </li>
                     </ul>
                 {% endwith %}
-            </div>
+            </span>
         </span>
-        <span class="fr-text--xs fr-mb-0">Partager</span>
+        <span class="fr-text--xs fr-mb-0" id="detail-share-tooltip-label">Partager</span>
     </div>
 </div>
 
