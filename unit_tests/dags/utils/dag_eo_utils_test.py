@@ -4,6 +4,7 @@ import pandas as pd
 import pytest
 
 from dags.utils.dag_eo_utils import (
+    create_acteur_services,
     create_actors,
     create_labels,
     create_proposition_services,
@@ -834,6 +835,109 @@ class TestCreateActorSeriesTransformations:
             result["df"]["exclusivite_de_reprisereparation"][0]
             == expected_exclusivite_de_reprisereparation
         )
+
+
+class TestCreateActeurServices:
+
+    def test_create_acteur_services_empty(self, df_acteur_services):
+
+        mock = MagicMock()
+        mock.xcom_pull.side_effect = lambda task_ids="": {
+            "load_data_from_postgresql": {
+                "acteur_services": df_acteur_services,
+            },
+            "create_actors": {
+                "df": pd.DataFrame(
+                    {
+                        "identifiant_unique": [1, 2],
+                        "point_dapport_de_service_reparation": [False, False],
+                        "point_dapport_pour_reemploi": [False, False],
+                        "point_de_reparation": [False, False],
+                        "point_de_collecte_ou_de_reprise_des_dechets": [False, False],
+                    }
+                ),
+            },
+        }[task_ids]
+
+        kwargs = {"ti": mock}
+
+        df_result = create_acteur_services(**kwargs)
+
+        assert df_result.empty
+
+    def test_create_acteur_services_full(self, df_acteur_services):
+
+        mock = MagicMock()
+        mock.xcom_pull.side_effect = lambda task_ids="": {
+            "load_data_from_postgresql": {
+                "acteur_services": df_acteur_services,
+            },
+            "create_actors": {
+                "df": pd.DataFrame(
+                    {
+                        "identifiant_unique": [1, 2],
+                        "point_dapport_de_service_reparation": [True, True],
+                        "point_dapport_pour_reemploi": [True, True],
+                        "point_de_reparation": [True, True],
+                        "point_de_collecte_ou_de_reprise_des_dechets": [True, True],
+                    }
+                ),
+            },
+        }[task_ids]
+
+        kwargs = {"ti": mock}
+
+        df_result = create_acteur_services(**kwargs)
+
+        # test acteur_id 1 have acteur_service_id 10 and 20
+        assert sorted(
+            df_result.loc[df_result["acteur_id"] == 1, "acteur_service_id"].tolist()
+        ) == [
+            10,
+            20,
+        ]
+        assert sorted(
+            df_result.loc[df_result["acteur_id"] == 2, "acteur_service_id"].tolist()
+        ) == [
+            10,
+            20,
+        ]
+
+    def test_create_acteur_services_only_one(self, df_acteur_services):
+
+        mock = MagicMock()
+        mock.xcom_pull.side_effect = lambda task_ids="": {
+            "load_data_from_postgresql": {
+                "acteur_services": df_acteur_services,
+            },
+            "create_actors": {
+                "df": pd.DataFrame(
+                    {
+                        "identifiant_unique": [1, 2],
+                        "point_dapport_de_service_reparation": [True, False],
+                        "point_dapport_pour_reemploi": [False, True],
+                        "point_de_reparation": [False, False],
+                        "point_de_collecte_ou_de_reprise_des_dechets": [False, False],
+                    }
+                ),
+            },
+        }[task_ids]
+
+        kwargs = {"ti": mock}
+
+        df_result = create_acteur_services(**kwargs)
+
+        # test acteur_id 1 have acteur_service_id 10 and 20
+        assert sorted(
+            df_result.loc[df_result["acteur_id"] == 1, "acteur_service_id"].tolist()
+        ) == [
+            10,
+        ]
+        assert sorted(
+            df_result.loc[df_result["acteur_id"] == 2, "acteur_service_id"].tolist()
+        ) == [
+            20,
+        ]
 
 
 def test_create_proposition_services_sous_categories(mock_ti):

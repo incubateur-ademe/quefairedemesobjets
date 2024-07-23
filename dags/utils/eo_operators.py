@@ -71,3 +71,11 @@ def create_labels_task(dag: DAG) -> PythonOperator:
         python_callable=dag_eo_utils.create_labels,
         dag=dag,
     )
+
+
+def create_acteur_services_task(dag: DAG) -> PythonOperator:
+    return PythonOperator(
+        task_id="create_acteur_services",
+        python_callable=dag_eo_utils.create_acteur_services,
+        dag=dag,
+    )

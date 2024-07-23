@@ -36,24 +36,24 @@ def create_proposition_services(**kwargs):
     df_actions = data_dict["actions"]
     df_acteur_services = data_dict["acteur_services"]
 
+    conditions = [
+        ("point_dapport_de_service_reparation", "Service de réparation", "reparer"),
+        (
+            "point_dapport_pour_reemploi",
+            "Collecte par une structure spécialisée",
+            "donner",
+        ),
+        ("point_de_reparation", "Service de réparation", "reparer"),
+        (
+            "point_de_collecte_ou_de_reprise_des_dechets",
+            "Collecte par une structure spécialisée",
+            "trier",
+        ),
+    ]
+
     for _, row in df.iterrows():
         acteur_id = row["identifiant_unique"]
         sous_categories = row["produitsdechets_acceptes"]
-
-        conditions = [
-            ("point_dapport_de_service_reparation", "Service de réparation", "reparer"),
-            (
-                "point_dapport_pour_reemploi",
-                "Collecte par une structure spécialisée",
-                "donner",
-            ),
-            ("point_de_reparation", "Service de réparation", "reparer"),
-            (
-                "point_de_collecte_ou_de_reprise_des_dechets",
-                "Collecte par une structure spécialisée",
-                "trier",
-            ),
-        ]
 
         for condition, acteur_service_name, action_name in conditions:
             if row.get(condition):
@@ -486,3 +486,35 @@ def create_labels(**kwargs):
         ["acteur_id", "labelqualite_id"], keep="first", inplace=True
     )
     return df_labels
+
+
+def create_acteur_services(**kwargs):
+    data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
+    df_acteur_services = data_dict["acteur_services"]
+    df_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
+
+    acteurserviceid_eovalues = {
+        mapping_utils.get_id_from_code("Service de réparation", df_acteur_services): [
+            "point_dapport_de_service_reparation",
+            "point_de_reparation",
+        ],
+        mapping_utils.get_id_from_code(
+            "Collecte par une structure spécialisée", df_acteur_services
+        ): [
+            "point_dapport_pour_reemploi",
+            "point_de_collecte_ou_de_reprise_des_dechets",
+        ],
+    }
+    acteur_acteurservice_list = []
+    for _, eo_acteur in df_actors.iterrows():
+        for acteur_service_id, eo_values in acteurserviceid_eovalues.items():
+            if any(eo_acteur.get(eo_value) for eo_value in eo_values):
+                acteur_acteurservice_list.append(
+                    {
+                        "acteur_id": eo_acteur["identifiant_unique"],
+                        "acteur_service_id": acteur_service_id,
+                    }
+                )
+
+    df_acteur_services = pd.DataFrame(acteur_acteurservice_list)
+    return df_acteur_services
