@@ -1,5 +1,4 @@
 import json
-from django.db.models.functions import Now
 import random
 import string
 from typing import Any
@@ -8,6 +7,7 @@ import opening_hours
 import orjson
 from django.contrib.gis.db import models
 from django.core.files.images import get_image_dimensions
+from django.db.models.functions import Now
 from django.forms import ValidationError, model_to_dict
 from django.http import HttpRequest
 from django.urls import reverse
@@ -178,6 +178,7 @@ class BaseActeur(NomAsNaturalKeyModel):
     nom_officiel = models.CharField(max_length=255, blank=True, null=True)
     # FIXME : Could be replace to a many-to-many relationship with a label table ?
     labels = models.ManyToManyField(LabelQualite)
+    acteur_services = models.ManyToManyField(ActeurService, blank=True)
     siret = models.CharField(max_length=14, blank=True, null=True)
     source = models.ForeignKey(Source, on_delete=models.CASCADE, blank=True, null=True)
     identifiant_externe = models.CharField(max_length=255, blank=True, null=True)
@@ -279,16 +280,14 @@ class BaseActeur(NomAsNaturalKeyModel):
             return json.dumps(self_as_dict)
         return self_as_dict
 
-    def acteur_services(self) -> list[str]:
-        # FIXME: just for test (to be removed)
-        # return ["relai d'acteur", "lieu trop cool", "ressourcerie", "boutique"]
+    def get_acteur_services(self) -> list[str]:
         return sorted(
             list(
                 set(
                     [
-                        ps.acteur_service.libelle
-                        for ps in self.proposition_services.all()
-                        if ps.acteur_service.libelle
+                        acteur_service.libelle
+                        for acteur_service in self.acteur_services.all()
+                        if acteur_service.libelle
                     ]
                 )
             )
@@ -386,6 +385,7 @@ class RevisionActeur(BaseActeur):
                         "acteur_type",
                         "source",
                         "proposition_services",
+                        "acteur_services",
                         "labels",
                     ],
                 ),
@@ -493,14 +493,14 @@ class BasePropositionService(models.Model):
     acteur_service = models.ForeignKey(
         ActeurService,
         on_delete=models.CASCADE,
-        null=False,
+        null=True,
     )
     sous_categories = models.ManyToManyField(
         SousCategorieObjet,
     )
 
     def __str__(self):
-        return f"{self.action.code} - {self.acteur_service.code}"
+        return f"{self.action.code}"
 
     def serialize(self):
         return {

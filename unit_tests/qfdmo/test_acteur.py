@@ -5,12 +5,9 @@ from django.forms import ValidationError, model_to_dict
 
 from qfdmo.models import (
     Acteur,
-    ActeurService,
     ActeurType,
-    Action,
     CachedDirectionAction,
     NomAsNaturalKeyModel,
-    PropositionService,
     RevisionActeur,
     RevisionPropositionService,
     Source,
@@ -261,8 +258,7 @@ class TestCreateRevisionActeur:
         revision_acteur = RevisionActeur.objects.create(
             nom="Test Object 1",
             location=Point(0, 0),
-            acteur_type=ActeurType.objects.first(),
-            acteur_type_id=acteur_type.id,
+            acteur_type=acteur_type,
         )
         acteur = Acteur.objects.get(
             identifiant_unique=revision_acteur.identifiant_unique
@@ -273,88 +269,26 @@ class TestCreateRevisionActeur:
 
 @pytest.mark.django_db
 class TestActeurService:
-    def test_acteur_actions_basic(self):
-        action1 = Action.objects.get(code="reparer")
-        acteur_service = ActeurService.objects.get(
-            code="Achat, revente par un professionnel"
-        )
-        acteur_type = ActeurTypeFactory(code="fake")
-        acteur = Acteur.objects.create(
-            nom="Acteur 1", location=Point(0, 0), acteur_type_id=acteur_type.id
-        )
-        PropositionService.objects.create(
-            acteur=acteur, acteur_service=acteur_service, action=action1
+
+    @pytest.fixture
+    def displayed_acteur(self):
+        return DisplayedActeurFactory()
+
+    def test_acteur_actions_basic(self, displayed_acteur):
+        displayed_acteur.acteur_services.add(
+            ActeurServiceFactory(libelle="Par un professionnel")
         )
 
-        assert acteur.acteur_services() == ["Par un professionnel"]
+        assert displayed_acteur.get_acteur_services() == ["Par un professionnel"]
 
-    def test_acteur_actions_distinct(self):
-        action1 = Action.objects.get(code="reparer")
-        acteur_service = ActeurService.objects.get(
-            code="Achat, revente par un professionnel"
-        )
-        action2 = Action.objects.get(code="echanger")
-        acteur_type = ActeurTypeFactory(code="fake")
-        acteur = Acteur.objects.create(
-            nom="Acteur 1",
-            location=Point(0, 0),
-            acteur_type_id=acteur_type.id,
-        )
-        PropositionService.objects.create(
-            acteur=acteur, acteur_service=acteur_service, action=action1
-        )
-        PropositionService.objects.create(
-            acteur=acteur, acteur_service=acteur_service, action=action2
+    def test_acteur_actions_multiple(self, displayed_acteur):
+        displayed_acteur.acteur_services.add(
+            ActeurServiceFactory(libelle="Par un professionnel"),
+            ActeurServiceFactory(libelle="Atelier pour réparer soi-même"),
         )
 
-        assert acteur.acteur_services() == ["Par un professionnel"]
-
-    def test_acteur_actions_multiple(self):
-        action = Action.objects.get(code="reparer")
-        acteur_service1 = ActeurService.objects.get(
-            code="Achat, revente par un professionnel"
-        )
-        acteur_service2 = ActeurService.objects.get(
-            code="Atelier pour réparer soi-même"
-        )
-        acteur_type = ActeurTypeFactory(code="fake")
-        acteur = Acteur.objects.create(
-            nom="Acteur 1", location=Point(0, 0), acteur_type_id=acteur_type.id
-        )
-        PropositionService.objects.create(
-            acteur=acteur, acteur_service=acteur_service1, action=action
-        )
-        PropositionService.objects.create(
-            acteur=acteur, acteur_service=acteur_service2, action=action
-        )
-
-        assert acteur.acteur_services() == [
+        assert displayed_acteur.get_acteur_services() == [
             "Atelier pour réparer soi-même",
-            "Par un professionnel",
-        ]
-
-    def test_acteur_actions_multiple_with_same_libelle(self):
-        action = Action.objects.get(code="reparer")
-        acteur_service1 = ActeurService.objects.get(
-            code="Achat, revente par un professionnel"
-        )
-        acteur_service2 = ActeurService.objects.get(
-            code="Atelier pour réparer soi-même"
-        )
-        acteur_service2.libelle = acteur_service1.libelle
-        acteur_service2.save()
-        acteur_type = ActeurTypeFactory(code="fake")
-        acteur = Acteur.objects.create(
-            nom="Acteur 1", location=Point(0, 0), acteur_type_id=acteur_type.id
-        )
-        PropositionService.objects.create(
-            acteur=acteur, acteur_service=acteur_service1, action=action
-        )
-        PropositionService.objects.create(
-            acteur=acteur, acteur_service=acteur_service2, action=action
-        )
-
-        assert acteur.acteur_services() == [
             "Par un professionnel",
         ]
 

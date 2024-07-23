@@ -82,10 +82,6 @@ class BasePropositionServiceForm(forms.ModelForm):
             self.fields["action"].queryset = Action.objects.annotate(
                 libelle_unaccent=Unaccent(Lower("libelle")),
             ).order_by("libelle_unaccent")
-        if "acteur_service" in self.fields:
-            self.fields["acteur_service"].queryset = ActeurService.objects.annotate(
-                libelle_unaccent=Unaccent(Lower("libelle")),
-            ).order_by("libelle_unaccent")
         if "sous_categories" in self.fields:
             self.fields["sous_categories"].queryset = (
                 SousCategorieObjet.objects.annotate(
@@ -104,7 +100,6 @@ class BasePropositionServiceInline(admin.TabularInline):
 
     fields = (
         "action",
-        "acteur_service",
         "sous_categories",
     )
 
@@ -205,6 +200,7 @@ class BaseActeurAdmin(admin.GISModelAdmin):
         "commentaires",
         "cree_le",
         "modifie_le",
+        "acteur_services",
     )
 
     readonly_fields = [
