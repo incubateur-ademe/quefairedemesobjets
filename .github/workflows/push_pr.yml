@@ -1,7 +1,8 @@
-name: Build and test
+name: Intégration continue
 
 on:
   pull_request:
+  workflow_dispatch:
 
 defaults:
   run:

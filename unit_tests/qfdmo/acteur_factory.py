@@ -1,6 +1,6 @@
 import factory.fuzzy
 from django.contrib.gis.geos import Point
-from factory import SubFactory
+from factory import SubFactory, Faker
 from factory.django import DjangoModelFactory as Factory
 
 from qfdmo.models import (
@@ -20,6 +20,8 @@ class SourceFactory(Factory):
     class Meta:
         model = Source
 
+    libelle = Faker("word")
+    code = Faker("word")
     afficher = True
 
 
@@ -65,7 +67,7 @@ class ActeurServiceFactory(Factory):
     class Meta:
         model = ActeurService
 
-    code = "service"
+    code = Faker("word")
 
 
 class PropositionServiceFactory(Factory):
