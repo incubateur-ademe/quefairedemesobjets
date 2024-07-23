@@ -39,5 +39,18 @@
   "sièges": "Sièges - Éléments d'ameublement",
   "produits pyrotechniques": "produits pyrotechniques",
   "pneu": "pneu"
+},
+  "sous_categories_cma":{
+    "articles d’ameublement (meubles, chaises, fauteuils, canapés, tapis, etc)": ["meuble"],
+    "articles de sport, cycles": ["materiel de sport (hors velo)", "velo"],
+    "bijoux, montre, horlogerie": ["bijou et montre"],
+    "chaussures, maroquinerie": ["chaussures", "maroquinerie"],
+    "electroménager": ["gros electromenager (hors refrigerant)", "petit electromenager"],
+    "equipements du jardin et de bricolage (tondeuses, taille haies, perceuses, etc)": ["outil de bricolage et jardinage", "Machines et appareils motorises thermiques"],
+    "instruments de musique": ["instrument de musique"],
+    "multimédia : image et son (télés, hifi, etc)": ["ecran", "materiel hifi et video"],
+    "ordinateurs fixes, portables, tablettes, objets connectés": ["materiel informatique"],
+    "téléphones, smartphones": ["smartphone", "tablette et console"],
+    "vêtements, textiles": ["vetement", "linge de maison"]
 }
 }

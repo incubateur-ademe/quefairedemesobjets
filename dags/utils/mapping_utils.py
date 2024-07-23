@@ -33,11 +33,14 @@ def transform_acteur_type_id(value, df_acteurtype):
     return id_value
 
 
-def create_identifiant_unique(row):
+def create_identifiant_unique(row, source_name=None):
     unique_str = row["identifiant_externe"].replace("/", "-")
-    if row["type_de_point_de_collecte"] == "Solution en ligne (site web, app. mobile)":
+    if (
+        row.get("type_de_point_de_collecte")
+        == "Solution en ligne (site web, app. mobile)"
+    ):
         unique_str = unique_str + "_d"
-    return row["ecoorganisme"].lower() + "_" + unique_str
+    return row.get("ecoorganisme", source_name).lower() + "_" + unique_str
 
 
 def get_id_from_code(value, df_mapping, code="code"):

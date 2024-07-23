@@ -97,24 +97,38 @@ def create_proposition_services_sous_categories(**kwargs):
     data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
     config = kwargs["ti"].xcom_pull(task_ids="create_actors")["config"]
     df_sous_categories_map = data_dict["sous_categories"]
-
+    params = kwargs["params"]
+    mapping_config_key = params.get("mapping_config_key", "sous_categories")
     rows_list = []
-    sous_categories = config["sous_categories"]
+    sous_categories = config[mapping_config_key]
 
     for index, row in df.iterrows():
         products = str(row["sous_categories"]).split("|")
         for product in set(products):
-            if product.strip().lower() in sous_categories:
-                rows_list.append(
-                    {
-                        "propositionservice_id": row["id"],
-                        "souscategorieobjet_id": mapping_utils.get_id_from_code(
-                            sous_categories[product.strip().lower()],
-                            df_sous_categories_map,
-                        ),
-                        "souscategorie": product.strip(),
-                    }
-                )
+            product_key = product.strip().lower()
+            if product_key in sous_categories:
+                sous_categories_value = sous_categories[product_key]
+                if isinstance(sous_categories_value, list):
+                    for value in sous_categories_value:
+                        rows_list.append(
+                            {
+                                "propositionservice_id": row["id"],
+                                "souscategorieobjet_id": mapping_utils.get_id_from_code(
+                                    value, df_sous_categories_map
+                                ),
+                                "souscategorie": value,
+                            }
+                        )
+                else:
+                    rows_list.append(
+                        {
+                            "propositionservice_id": row["id"],
+                            "souscategorieobjet_id": mapping_utils.get_id_from_code(
+                                sous_categories_value, df_sous_categories_map
+                            ),
+                            "souscategorie": product.strip(),
+                        }
+                    )
 
     df_sous_categories = pd.DataFrame(
         rows_list,
