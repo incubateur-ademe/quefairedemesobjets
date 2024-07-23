@@ -381,11 +381,6 @@ class AddressesView(FormView):
         ):
             excludes |= Q(exclusivite_de_reprisereparation=True)
 
-        if self.cleaned_data["label_reparacteur"] and reparer_is_checked:
-            selected_actions_ids = [
-                a for a in selected_actions_ids if a != reparer_action_id
-            ]
-
         if self.cleaned_data["ess"]:
             filters &= Q(labels__code="ess")
 
@@ -399,15 +394,18 @@ class AddressesView(FormView):
 
         actions_filters = Q()
 
-        if selected_actions_ids:
-            actions_filters |= Q(
-                proposition_services__action_id__in=selected_actions_ids,
-            )
-
-        if reparer_is_checked:
+        if self.cleaned_data["label_reparacteur"] and reparer_is_checked:
+            selected_actions_ids = [
+                a for a in selected_actions_ids if a != reparer_action_id
+            ]
             actions_filters |= Q(
                 proposition_services__action_id=reparer_action_id,
                 labels__code="reparacteur",
+            )
+
+        if selected_actions_ids:
+            actions_filters |= Q(
+                proposition_services__action_id__in=selected_actions_ids,
             )
 
         filters &= actions_filters
