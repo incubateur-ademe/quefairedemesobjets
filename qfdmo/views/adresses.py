@@ -29,7 +29,6 @@ from qfdmo.models import (
     Action,
     CachedDirectionAction,
     DisplayedActeur,
-    DisplayedPropositionService,
     Objet,
     RevisionActeur,
 )
@@ -324,15 +323,15 @@ class AddressesView(FormView):
 
         # Selection is not set in interface, get all available from
         # (checked_)action_list
-        elif self.request.GET.get("action_list"):
+        elif action_list := self.cleaned_data.get("action_list"):
             # TODO : effet de bord si la list des action n'est pas cohérente avec
             # les actions affichées
             # il faut collecté les actions coché selon les groupes d'action
-            codes = self.request.GET.get("action_list", "").split("|")
+            codes = action_list.split("|")
         # Selection is not set in interface, defeult checked action list is not set
         # get all available from action_displayed
-        elif self.request.GET.get("action_displayed"):
-            codes = self.request.GET.get("action_displayed", "").split("|")
+        elif action_displayed := self.cleaned_data.get("action_displayed"):
+            codes = action_displayed.split("|")
         # return empty array, will search in all actions
 
         actions = (
@@ -369,7 +368,7 @@ class AddressesView(FormView):
         return acteurs
 
     def _compile_acteurs_queryset(self):
-        filters = Q()
+        filters = Q(statut=ActeurStatus.ACTIF)
         excludes = Q()
 
         selected_actions_ids = self._get_selected_action_ids()
@@ -382,52 +381,34 @@ class AddressesView(FormView):
         ):
             excludes |= Q(exclusivite_de_reprisereparation=True)
 
+        if self.cleaned_data["ess"]:
+            filters &= Q(labels__code="ess")
+
+        if self.cleaned_data["bonus"]:
+            filters &= Q(labels__bonus=True)
+
+        if sous_categorie_id := self.cleaned_data.get("sc_id", 0):
+            filters &= Q(
+                proposition_services__sous_categories__id=sous_categorie_id,
+            )
+
+        actions_filters = Q()
+
         if self.cleaned_data["label_reparacteur"] and reparer_is_checked:
             selected_actions_ids = [
                 a for a in selected_actions_ids if a != reparer_action_id
             ]
+            actions_filters |= Q(
+                proposition_services__action_id=reparer_action_id,
+                labels__code="reparacteur",
+            )
 
-        if self.cleaned_data["ess"]:
-            filters |= Q(labels__code="ess")
+        if selected_actions_ids:
+            actions_filters |= Q(
+                proposition_services__action_id__in=selected_actions_ids,
+            )
 
-        if self.cleaned_data["bonus"]:
-            filters |= Q(labels__bonus=True)
-
-        if self.cleaned_data.get("sous_categorie_objet") and self.cleaned_data.get(
-            "sc_id"
-        ):
-            sous_categorie_id = self.cleaned_data.get("sc_id", 0)
-            filters |= Q(proposition_services__sous_categories__id=sous_categorie_id)
-
-            if selected_actions_ids:
-                filters |= Q(
-                    proposition_services__in=DisplayedPropositionService.objects.filter(
-                        action_id__in=selected_actions_ids,
-                        sous_categories__id=sous_categorie_id,
-                    ),
-                    statut=ActeurStatus.ACTIF,
-                )
-            if reparer_action_id:
-                filters |= Q(
-                    proposition_services__in=DisplayedPropositionService.objects.filter(
-                        action_id=reparer_action_id,
-                        sous_categories__id=sous_categorie_id,
-                    ),
-                    labels__code="reparacteur",
-                    statut=ActeurStatus.ACTIF,
-                )
-        else:
-            if selected_actions_ids:
-                filters |= Q(
-                    proposition_services__action_id__in=selected_actions_ids,
-                    statut=ActeurStatus.ACTIF,
-                )
-            if reparer_action_id:
-                filters |= Q(
-                    proposition_services__action_id=reparer_action_id,
-                    labels__code="reparacteur",
-                    statut=ActeurStatus.ACTIF,
-                )
+        filters &= actions_filters
 
         return filters, excludes
 
