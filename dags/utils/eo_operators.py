@@ -9,7 +9,7 @@ env = Path(__file__).parent.parent.name
 dag_eo_utils = import_module(f"{env}.utils.dag_eo_utils")
 
 
-def fetch_data_task(dag: DAG) -> PythonOperator:
+def fetch_data_from_api_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id="fetch_data_from_api",
         python_callable=dag_eo_utils.fetch_data_from_api,
@@ -17,7 +17,7 @@ def fetch_data_task(dag: DAG) -> PythonOperator:
     )
 
 
-def load_data_task(dag: DAG) -> PythonOperator:
+def load_data_from_postgresql_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id="load_data_from_postgresql",
         python_callable=dag_eo_utils.load_data_from_postgresql,
@@ -59,7 +59,7 @@ def write_data_task(dag: DAG) -> PythonOperator:
 
 def serialize_to_json_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
-        task_id="serialize_actors_to_records",
+        task_id="serialize_to_json",
         python_callable=dag_eo_utils.serialize_to_json,
         dag=dag,
     )

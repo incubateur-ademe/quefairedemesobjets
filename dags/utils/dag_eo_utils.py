@@ -101,7 +101,7 @@ def create_proposition_services_sous_categories(**kwargs):
     rows_list = []
     sous_categories = config["sous_categories"]
 
-    for index, row in df.iterrows():
+    for _, row in df.iterrows():
         products = str(row["sous_categories"]).split("|")
         for product in set(products):
             if product.strip().lower() in sous_categories:
@@ -120,29 +120,36 @@ def create_proposition_services_sous_categories(**kwargs):
         rows_list,
         columns=["propositionservice_id", "souscategorieobjet_id", "souscategorie"],
     )
+
+    df_sous_categories.drop_duplicates(
+        ["propositionservice_id", "souscategorieobjet_id"], keep="first", inplace=True
+    )
+    df_sous_categories = df_sous_categories[
+        df_sous_categories["souscategorieobjet_id"].notna()
+    ]
+
     return df_sous_categories
 
 
 def serialize_to_json(**kwargs):
     df_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
-    df_pds = kwargs["ti"].xcom_pull(task_ids="create_proposition_services")["df"]
-    df_pdsc = kwargs["ti"].xcom_pull(
+    df_ps = kwargs["ti"].xcom_pull(task_ids="create_proposition_services")["df"]
+    df_pssc = kwargs["ti"].xcom_pull(
         task_ids="create_proposition_services_sous_categories"
     )
-    df_pdsc.drop_duplicates(
-        ["propositionservice_id", "souscategorieobjet_id"], keep="first", inplace=True
-    )
-    df_pdsc = df_pdsc[df_pdsc["souscategorieobjet_id"].notna()]
     df_labels = kwargs["ti"].xcom_pull(task_ids="create_labels")
+    df_acteur_services = kwargs["ti"].xcom_pull(task_ids="create_acteur_services")
 
     aggregated_pdsc = (
-        df_pdsc.groupby("propositionservice_id")
-        .apply(lambda x: x.to_dict("records") if not x.empty else [])
+        df_pssc.groupby("propositionservice_id")
+        .apply(
+            lambda x: x.to_dict("records") if not x.empty else [], include_groups=False
+        )
         .reset_index(name="pds_sous_categories")
     )
 
     df_pds_joined = pd.merge(
-        df_pds,
+        df_ps,
         aggregated_pdsc,
         how="left",
         left_on="id",
@@ -160,17 +167,29 @@ def serialize_to_json(**kwargs):
 
     aggregated_pds = (
         df_pds_joined.groupby("acteur_id")
-        .apply(lambda x: x.to_dict("records") if not x.empty else [])
+        .apply(
+            lambda x: x.to_dict("records") if not x.empty else [], include_groups=False
+        )
         .reset_index(name="proposition_services")
     )
 
     aggregated_labels = df_labels.groupby("acteur_id").apply(
-        lambda x: x.to_dict("records") if not x.empty else []
+        lambda x: x.to_dict("records") if not x.empty else [], include_groups=False
     )
     aggregated_labels = (
-        aggregated_labels.reset_index(name="labels")
-        if len(aggregated_labels) > 0
-        else pd.DataFrame(columns=["acteur_id", "labels"])
+        pd.DataFrame(columns=["acteur_id", "labels"])
+        if aggregated_labels.empty
+        else aggregated_labels.reset_index(name="labels")
+    )
+
+    # df_acteur_services
+    aggregated_acteur_services = df_acteur_services.groupby("acteur_id").apply(
+        lambda x: x.to_dict("records") if not x.empty else [], include_groups=False
+    )
+    aggregated_acteur_services = (
+        pd.DataFrame(columns=["acteur_id", "acteur_services"])
+        if aggregated_acteur_services.empty
+        else aggregated_acteur_services.reset_index(name="acteur_services")
     )
 
     df_joined_with_pds = pd.merge(
@@ -181,9 +200,17 @@ def serialize_to_json(**kwargs):
         right_on="acteur_id",
     )
 
-    df_joined = pd.merge(
+    df_joined_with_labels = pd.merge(
         df_joined_with_pds,
         aggregated_labels,
+        how="left",
+        left_on="acteur_id",
+        right_on="acteur_id",
+    )
+
+    df_joined = pd.merge(
+        df_joined_with_labels,
+        aggregated_acteur_services,
         how="left",
         left_on="acteur_id",
         right_on="acteur_id",
@@ -278,7 +305,7 @@ def write_to_dagruns(**kwargs):
     dag_id = kwargs["dag"].dag_id
     run_id = kwargs["run_id"]
     event = kwargs.get("event", "CREATE")
-    dfs = kwargs["ti"].xcom_pull(task_ids="serialize_actors_to_records")
+    dfs = kwargs["ti"].xcom_pull(task_ids="serialize_to_json")
     metadata_actors = (
         kwargs["ti"]
         .xcom_pull(task_ids="create_actors", key="return_value", default={})
@@ -493,28 +520,40 @@ def create_acteur_services(**kwargs):
     df_acteur_services = data_dict["acteur_services"]
     df_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
 
-    acteurserviceid_eovalues = {
-        mapping_utils.get_id_from_code("Service de réparation", df_acteur_services): [
+    acteurservice_acteurserviceid = {
+        "Service de réparation": mapping_utils.get_id_from_code(
+            "Service de réparation", df_acteur_services
+        ),
+        "Collecte par une structure spécialisée": mapping_utils.get_id_from_code(
+            "Collecte par une structure spécialisée", df_acteur_services
+        ),
+    }
+    acteurservice_eovalues = {
+        "Service de réparation": [
             "point_dapport_de_service_reparation",
             "point_de_reparation",
         ],
-        mapping_utils.get_id_from_code(
-            "Collecte par une structure spécialisée", df_acteur_services
-        ): [
+        "Collecte par une structure spécialisée": [
             "point_dapport_pour_reemploi",
             "point_de_collecte_ou_de_reprise_des_dechets",
         ],
     }
     acteur_acteurservice_list = []
     for _, eo_acteur in df_actors.iterrows():
-        for acteur_service_id, eo_values in acteurserviceid_eovalues.items():
+        for acteur_service, eo_values in acteurservice_eovalues.items():
             if any(eo_acteur.get(eo_value) for eo_value in eo_values):
                 acteur_acteurservice_list.append(
                     {
                         "acteur_id": eo_acteur["identifiant_unique"],
-                        "acteur_service_id": acteur_service_id,
+                        "acteur_service_id": acteurservice_acteurserviceid[
+                            acteur_service
+                        ],
+                        "acteur_service": acteur_service,
                     }
                 )
 
-    df_acteur_services = pd.DataFrame(acteur_acteurservice_list)
+    df_acteur_services = pd.DataFrame(
+        acteur_acteurservice_list,
+        columns=["acteur_id", "acteur_service_id", "acteur_service"],
+    )
     return df_acteur_services

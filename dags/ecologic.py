@@ -53,8 +53,8 @@ with DAG(
 ) as dag:
     (
         [
-            eo_operators.fetch_data_task(dag),
-            eo_operators.load_data_task(dag),
+            eo_operators.fetch_data_from_api_task(dag),
+            eo_operators.load_data_from_postgresql_task(dag),
         ]
         >> eo_operators.create_actors_task(dag)
         >> [
