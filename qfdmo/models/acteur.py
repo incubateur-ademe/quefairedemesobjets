@@ -470,6 +470,12 @@ class DisplayedActeurTemp(BaseActeur):
         through="ActeurLabelQualite",
     )
 
+    acteur_services = models.ManyToManyField(
+        ActeurService,
+        blank=True,
+        through="ActeurActeurService",
+    )
+
     class ActeurLabelQualite(models.Model):
         class Meta:
             db_table = "qfdmo_displayedacteurtemp_labels"
@@ -484,6 +490,22 @@ class DisplayedActeurTemp(BaseActeur):
             LabelQualite,
             on_delete=models.CASCADE,
             db_column="labelqualite_id",
+        )
+
+    class ActeurActeurService(models.Model):
+        class Meta:
+            db_table = "qfdmo_displayedacteurtemp_acteur_services"
+
+        id = models.BigAutoField(primary_key=True)
+        acteur = models.ForeignKey(
+            "DisplayedActeurTemp",
+            on_delete=models.CASCADE,
+            db_column="displayedacteur_id",
+        )
+        acteur_service = models.ForeignKey(
+            ActeurService,
+            on_delete=models.CASCADE,
+            db_column="acteurservice_id",
         )
 
 
