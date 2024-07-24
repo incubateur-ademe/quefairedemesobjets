@@ -99,7 +99,7 @@ def handle_update_actor_event(df_actors, dag_run_id):
 
 
 def handle_write_data_create_event(connection, df_actors, df_labels, df_pds, df_pdssc):
-    df_actors[["identifiant_unique"]].to_sql(
+    df_actors[["identifiant_unique", "source_id"]].to_sql(
         "temp_actors", connection, if_exists="replace"
     )
 
@@ -108,20 +108,23 @@ def handle_write_data_create_event(connection, df_actors, df_labels, df_pds, df_
         DELETE FROM qfdmo_propositionservice_sous_categories
         WHERE propositionservice_id IN (
             SELECT id FROM qfdmo_propositionservice
-            WHERE acteur_id IN ( SELECT identifiant_unique FROM temp_actors )
+            WHERE acteur_id IN ( SELECT identifiant_unique
+            FROM qfmdo_acteur where source_id in ( select source_id from temp_actors ) )
         );
         """,
         """
         DELETE FROM qfdmo_acteur_labels
-        WHERE acteur_id IN ( SELECT identifiant_unique FROM temp_actors );
+        WHERE acteur_id IN ( SELECT identifiant_unique
+        FROM qfmdo_acteur where source_id in ( select source_id from temp_actors ) );
         """,
         """
         DELETE FROM qfdmo_propositionservice
-        WHERE acteur_id IN ( SELECT identifiant_unique FROM temp_actors );
+        WHERE acteur_id IN ( SELECT identifiant_unique
+        FROM qfmdo_acteur where source_id in ( select source_id from temp_actors ) );
         """,
         """
-        DELETE FROM qfdmo_acteur WHERE identifiant_unique
-        IN ( SELECT identifiant_unique FROM temp_actors);
+        DELETE FROM qfdmo_acteur WHERE source_id
+        IN ( SELECT source_id FROM temp_actors);
         """,
     ]
 

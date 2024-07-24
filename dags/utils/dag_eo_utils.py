@@ -413,7 +413,14 @@ def create_actors(**kwargs):
 
     if "siret" in df.columns:
         df["siret"] = df["siret"].replace({np.nan: None})
-        df["siret"] = df["siret"].astype(str).apply(lambda x: x[:14])
+        df["siret"] = (
+            df["siret"].astype(str).apply(lambda x: "".join(filter(str.isdigit, x)))
+        )
+        df["siret"] = df["siret"].apply(
+            lambda x: (
+                x if len(x) == 14 else x.ljust(14, "0") if len(x) == 13 else x[:14]
+            )
+        )
     if "telephone" in df.columns:
         df["telephone"] = df["telephone"].dropna().apply(lambda x: x.replace(" ", ""))
         df["telephone"] = (
