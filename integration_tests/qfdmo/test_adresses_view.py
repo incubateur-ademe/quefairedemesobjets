@@ -190,7 +190,6 @@ class TestReparacteur:
             }
         )
         adresses_view.request = request
-        print(displayed_acteur_reparacteur.acteur_type)
         context = adresses_view.get_context_data()
 
         assert context["acteurs"].count() == 1
