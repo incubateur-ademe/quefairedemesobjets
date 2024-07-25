@@ -181,7 +181,6 @@ class BaseActeur(NomAsNaturalKeyModel):
     telephone = models.CharField(max_length=255, blank=True, null=True)
     nom_commercial = models.CharField(max_length=255, blank=True, null=True)
     nom_officiel = models.CharField(max_length=255, blank=True, null=True)
-    # FIXME : Could be replace to a many-to-many relationship with a label table ?
     labels = models.ManyToManyField(LabelQualite)
     acteur_services = models.ManyToManyField(ActeurService, blank=True)
     siret = models.CharField(max_length=14, blank=True, null=True)
