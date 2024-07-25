@@ -139,12 +139,15 @@ def serialize_to_json(**kwargs):
     )
     df_labels = kwargs["ti"].xcom_pull(task_ids="create_labels")
     df_acteur_services = kwargs["ti"].xcom_pull(task_ids="create_acteur_services")
+    df_acteur_services = (
+        df_acteur_services
+        if df_acteur_services is not None
+        else pd.DataFrame(columns=["acteur_id", "acteurservice_id", "acteurservice"])
+    )
 
     aggregated_pdsc = (
         df_pssc.groupby("propositionservice_id")
-        .apply(
-            lambda x: x.to_dict("records") if not x.empty else [], include_groups=False
-        )
+        .apply(lambda x: x.to_dict("records") if not x.empty else [])
         .reset_index(name="pds_sous_categories")
     )
 
@@ -167,14 +170,12 @@ def serialize_to_json(**kwargs):
 
     aggregated_pds = (
         df_pds_joined.groupby("acteur_id")
-        .apply(
-            lambda x: x.to_dict("records") if not x.empty else [], include_groups=False
-        )
+        .apply(lambda x: x.to_dict("records") if not x.empty else [])
         .reset_index(name="proposition_services")
     )
 
     aggregated_labels = df_labels.groupby("acteur_id").apply(
-        lambda x: x.to_dict("records") if not x.empty else [], include_groups=False
+        lambda x: x.to_dict("records") if not x.empty else []
     )
     aggregated_labels = (
         pd.DataFrame(columns=["acteur_id", "labels"])
@@ -182,9 +183,8 @@ def serialize_to_json(**kwargs):
         else aggregated_labels.reset_index(name="labels")
     )
 
-    # df_acteur_services
     aggregated_acteur_services = df_acteur_services.groupby("acteur_id").apply(
-        lambda x: x.to_dict("records") if not x.empty else [], include_groups=False
+        lambda x: x.to_dict("records") if not x.empty else []
     )
     aggregated_acteur_services = (
         pd.DataFrame(columns=["acteur_id", "acteur_services"])
@@ -289,16 +289,16 @@ def insert_dagrun_and_process_df(df, event, metadata, dag_id, run_id):
         )
         dag_run_id = result.fetchone()[0]
 
-        df["change_type"] = event
-        df["dag_run_id"] = dag_run_id
-        df[["row_updates", "dag_run_id", "change_type"]].to_sql(
-            "qfdmo_dagrunchange",
-            engine,
-            if_exists="append",
-            index=False,
-            method="multi",
-            chunksize=1000,
-        )
+    df["change_type"] = event
+    df["dag_run_id"] = dag_run_id
+    df[["row_updates", "dag_run_id", "change_type"]].to_sql(
+        "qfdmo_dagrunchange",
+        engine,
+        if_exists="append",
+        index=False,
+        method="multi",
+        chunksize=1000,
+    )
 
 
 def write_to_dagruns(**kwargs):
@@ -545,15 +545,15 @@ def create_acteur_services(**kwargs):
                 acteur_acteurservice_list.append(
                     {
                         "acteur_id": eo_acteur["identifiant_unique"],
-                        "acteur_service_id": acteurservice_acteurserviceid[
+                        "acteurservice_id": acteurservice_acteurserviceid[
                             acteur_service
                         ],
-                        "acteur_service": acteur_service,
+                        "acteurservice": acteur_service,
                     }
                 )
 
     df_acteur_services = pd.DataFrame(
         acteur_acteurservice_list,
-        columns=["acteur_id", "acteur_service_id", "acteur_service"],
+        columns=["acteur_id", "acteurservice_id", "acteurservice"],
     )
     return df_acteur_services

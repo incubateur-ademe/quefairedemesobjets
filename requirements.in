@@ -4,12 +4,14 @@ dj-database-url
 dj-static
 Django
 django-import-export
+django-ninja
 django-sql-explorer
 django-storages
 gunicorn
 Jinja2
 opening-hours-py
 orjson
+pandas<2.2.0
 Pillow
 psycopg2
 python-decouple
@@ -19,5 +21,3 @@ tqdm
 unidecode
 uvicorn
 whitenoise
-pandas
-django-ninja

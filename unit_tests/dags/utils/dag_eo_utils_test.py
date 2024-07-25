@@ -912,8 +912,8 @@ class TestCreateActeurServices:
         assert df_result.empty
         assert df_result.columns.tolist() == [
             "acteur_id",
-            "acteur_service_id",
-            "acteur_service",
+            "acteurservice_id",
+            "acteurservice",
         ]
 
     def test_create_acteur_services_full(self, df_acteur_services_from_db):
@@ -942,17 +942,17 @@ class TestCreateActeurServices:
 
         assert df_result.columns.tolist() == [
             "acteur_id",
-            "acteur_service_id",
-            "acteur_service",
+            "acteurservice_id",
+            "acteurservice",
         ]
         assert sorted(
-            df_result.loc[df_result["acteur_id"] == 1, "acteur_service_id"].tolist()
+            df_result.loc[df_result["acteur_id"] == 1, "acteurservice_id"].tolist()
         ) == [
             10,
             20,
         ]
         assert sorted(
-            df_result.loc[df_result["acteur_id"] == 2, "acteur_service_id"].tolist()
+            df_result.loc[df_result["acteur_id"] == 2, "acteurservice_id"].tolist()
         ) == [
             10,
             20,
@@ -984,14 +984,14 @@ class TestCreateActeurServices:
 
         assert df_result.columns.tolist() == [
             "acteur_id",
-            "acteur_service_id",
-            "acteur_service",
+            "acteurservice_id",
+            "acteurservice",
         ]
         assert sorted(
-            df_result.loc[df_result["acteur_id"] == 1, "acteur_service_id"].tolist()
+            df_result.loc[df_result["acteur_id"] == 1, "acteurservice_id"].tolist()
         ) == [10]
         assert sorted(
-            df_result.loc[df_result["acteur_id"] == 2, "acteur_service_id"].tolist()
+            df_result.loc[df_result["acteur_id"] == 2, "acteurservice_id"].tolist()
         ) == [20]
 
 
@@ -1020,6 +1020,7 @@ class TestSerializeToJson:
                 {
                     0: [
                         {
+                            "acteur_id": 1,
                             "labelqualite": (
                                 "Enseigne de l'économie sociale et solidaire"
                             ),
@@ -1028,12 +1029,14 @@ class TestSerializeToJson:
                     ],
                     1: [
                         {
+                            "acteur_id": 2,
                             "labelqualite": (
                                 "Enseigne de l'économie sociale et solidaire"
                             ),
                             "labelqualite_id": 1,
                         },
                         {
+                            "acteur_id": 2,
                             "labelqualite": "Labellisé Bonus Réparation Re_fashion",
                             "labelqualite_id": 2,
                         },
@@ -1061,7 +1064,7 @@ class TestSerializeToJson:
             ),
             "create_labels": create_labels,
             "create_acteur_services": pd.DataFrame(
-                columns=["acteur_id", "acteur_service_id", "acteur_service"]
+                columns=["acteur_id", "acteurservice_id", "acteurservice"]
             ),
         }[task_ids]
 
@@ -1078,7 +1081,7 @@ class TestSerializeToJson:
         [
             (
                 pd.DataFrame(
-                    columns=["acteur_id", "acteur_service_id", "acteur_service"]
+                    columns=["acteur_id", "acteurservice_id", "acteurservice"]
                 ),
                 {0: None, 1: None},
             ),
@@ -1086,8 +1089,8 @@ class TestSerializeToJson:
                 pd.DataFrame(
                     {
                         "acteur_id": [1, 2, 2],
-                        "acteur_service_id": [10, 10, 20],
-                        "acteur_service": [
+                        "acteurservice_id": [10, 10, 20],
+                        "acteurservice": [
                             "Service de réparation",
                             "Service de réparation",
                             "Collecte par une structure spécialisée",
@@ -1097,18 +1100,21 @@ class TestSerializeToJson:
                 {
                     0: [
                         {
-                            "acteur_service": "Service de réparation",
-                            "acteur_service_id": 10,
+                            "acteur_id": 1,
+                            "acteurservice": "Service de réparation",
+                            "acteurservice_id": 10,
                         }
                     ],
                     1: [
                         {
-                            "acteur_service": "Service de réparation",
-                            "acteur_service_id": 10,
+                            "acteur_id": 2,
+                            "acteurservice": "Service de réparation",
+                            "acteurservice_id": 10,
                         },
                         {
-                            "acteur_service": "Collecte par une structure spécialisée",
-                            "acteur_service_id": 20,
+                            "acteur_id": 2,
+                            "acteurservice": "Collecte par une structure spécialisée",
+                            "acteurservice_id": 20,
                         },
                     ],
                 },
