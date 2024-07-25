@@ -1,5 +1,5 @@
-<thead>
-    {% if dagrun_lines|length > 0 and dagrun_lines[0].change_type == 'UPDATE_ACTOR' %}
+{% if dagrun_lines|length > 0 and dagrun_lines[0].change_type == 'UPDATE_ACTOR' %}
+    <thead>
 
         <tr>
             <th scope="col">change_type</th>
@@ -8,32 +8,31 @@
             <th scope="col">Candidats</th>
             <th scope="col">row_updates</th>
         </tr>
-    {% endif %}
 
-</thead>
-<tbody>
-    {% for dagrun_line in dagrun_lines if dagrun_line.change_type == 'UPDATE_ACTOR' %}
-        <tr>
-            <td>{{ dagrun_line.get_change_type_display() }}</td>
-            <td>{{ dagrun_line.meta_data if dagrun_line.meta_data else "-" }}</td>
-            <td>
-                <a href="{{ dagrun_line.row_updates.admin_link }}" target="_blank" >{{ dagrun_line.display_acteur_details().identifiant_unique
-                    }}</a>
-            </td>
-            <td>
-                {% with candidat=candidat, index=loop.index, dagrun=request.GET.dagrun,
-                identifiant_unique=dagrun_line.display_acteur_details().identifiant_unique %}
-                {% include 'qfdmo/partials/candidat_row.html' %}
+    </thead>
+    <tbody>
+        {% for dagrun_line in dagrun_lines if dagrun_line.change_type == 'UPDATE_ACTOR' %}
+            <tr>
+                <td>{{ dagrun_line.get_change_type_display() }}</td>
+                <td>{{ dagrun_line.meta_data if dagrun_line.meta_data else "-" }}</td>
+                <td>
+                    <a href="{{ dagrun_line.row_updates.admin_link }}" target="_blank" >{{ dagrun_line.display_acteur_details().identifiant_unique
+                        }}</a>
+                </td>
+                <td>
+                    {% with candidat=candidat, index=loop.index, dagrun=request.GET.dagrun,
+                    identifiant_unique=dagrun_line.display_acteur_details().identifiant_unique %}
+                    {% include 'qfdmo/partials/candidat_row.html' %}
 
-    {% endwith %}
-</td>
-<td>
-    <details>
-        <summary>Données brutes</summary>
-        <pre class="qfdmo-text-wrap">{{ dagrun_line.row_updates }}</pre>
-    </details>
-</td>
-</tr>
+        {% endwith %}
+    </td>
+    <td>
+        <details>
+            <summary>Données brutes</summary>
+            <pre class="qfdmo-text-wrap">{{ dagrun_line.row_updates }}</pre>
+        </details>
+    </td>
+    </tr>
 {% endfor %}
 </tbody>
 {% if dagrun_lines.has_other_pages %}
@@ -51,4 +50,5 @@
             <input type="submit" value="Go">
         </noscript>
     </form>
+{% endif %}
 {% endif %}

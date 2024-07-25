@@ -154,10 +154,7 @@ def apply_normalization(df, normalization_map):
     """
     Apply normalization functions to the specified columns of a DataFrame.
     """
-    # print(df['adresse'])
-
     df = normalize_address(df)
-    #   print(df['adresse'])
     for column, normalize_func in normalization_map.items():
         if column in df.columns:
             df[column] = df[column].apply(normalize_func)
