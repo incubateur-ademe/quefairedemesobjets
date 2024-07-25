@@ -24,13 +24,11 @@
                     <table>
                         <tr>
                             <th>Action</th>
-                            <th>Acteur Service</th>
                             <th>Sous-Catégories</th>
                         </tr>
                         {% for service in dagrun_line.display_proposition_service() %}
                             <tr>
                                 <td>{{ service.action }}</td>
-                                <td>{{ service.acteur_service }}</td>
                                 <td>
                                     <ul>
                                         {% for sous_cat in service.pds_sous_categories %}
