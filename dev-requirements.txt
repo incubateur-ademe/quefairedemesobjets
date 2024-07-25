@@ -150,7 +150,9 @@ apache-airflow-providers-sqlite==3.8.1 \
 apispec[yaml]==6.6.1 \
     --hash=sha256:6460315cb38ac6a2ff42d9e2b8dc0435c37d4428d3abeda96ff97b5dc8eb6b94 \
     --hash=sha256:f5caa47cee75fe03b9c50b5594048b4c052eeca2c212e0dac12dbb6175d9a659
-    # via flask-appbuilder
+    # via
+    #   apispec
+    #   flask-appbuilder
 appdirs==1.4.4 \
     --hash=sha256:7d5d0167b2b1ba821647616af46a749d1c653740dd0d2415100fe26e27afdf41 \
     --hash=sha256:a841dacd6b99318a741b166adb07e19ee71a274450e68237b4650ca1055ab128
@@ -393,7 +395,9 @@ configupdater==3.2 \
 connexion[flask]==2.14.2 \
     --hash=sha256:a73b96a0e07b16979a42cde7c7e26afe8548099e352cf350f80c57185e0e0b36 \
     --hash=sha256:dbc06f52ebeebcf045c9904d570f24377e8bbd5a6521caef15a06f634cf85646
-    # via apache-airflow
+    # via
+    #   apache-airflow
+    #   connexion
 cron-descriptor==1.4.3 \
     --hash=sha256:7b1a00d7d25d6ae6896c0da4457e790b98cba778398a3d48e341e5e0d33f0488 \
     --hash=sha256:a67ba21804983b1427ed7f3e1ec27ee77bf24c652b0430239c268c5ddfbf9dc0

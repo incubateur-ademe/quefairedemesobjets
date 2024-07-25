@@ -58,94 +58,23 @@ Certains objets de la base de données sont des objets d'administration qui n'on
 
 **Direction de l'action** (qfdmo_actiondirection):
 
-| nom       | libelle  |
-| --------- | ------------ |
-| jecherche | Je recherche |
-| jai       | J'ai         |
+Détenir ou chercher un objet
 
 **Action** (qfdmo_action):
 
-| nom              | libelle | description        | directions       |
-| ---------------- | ----------- | ------------------ | ---------------- |
-| preter           | Prêter      | NULL               | jai              |
-| reparer          | Réparer     | NULL               | jai              |
-| mettreenlocation | Louer       | Mettre en location | jai              |
-| echanger         | Èchanger    | NULL               | jai, jerecherche |
-| acheter          | Acheter     | Acheter d'occasion | jerecherche      |
-| revendre         | Vendre      | NULL               | jai              |
-| donner           | Donner      | NULL               | jai              |
-| louer            | Louer       | NULL               | jerecherche      |
-| emprunter        | Emprunter   | NULL               | jerecherche      |
+Quelle action souhaitez vous faire, Exemple : réparer un objet, acheter de seconde main…
 
-**Catégories/Sous-catégories** (qfdmo_categorieobjet, qfdmo_souscategorieobjet)
+**Catégorie / Sous-catégorie / Objet** (qfdmo_categorieobjet, qfdmo_souscategorieobjet)
 
-| Catégories                 | Sous-catégorie                   |
-| -------------------------- |----------------------------------|
-| Bijou, montre, horlogerie  | Bijou, montre, horlogerie        |
-| Bricolage / Jardinage      | Outillage (bricolage/jardinage)  |
-| Electroménager             | Gros électroménager (froid)      |
-| Electroménager             | Gros électroménager (hors froid) |
-| Electroménager             | Petit électroménager             |
-| Equipements de loisir      | "Jardin (mobilier accessoires)"  |
-| Equipements de loisir      | Autre matériel de sport          |
-| Equipements de loisir      | Instruments de musique           |
-| Equipements de loisir      | Jouets                           |
-| Equipements de loisir      | Vélos                            |
-| Image & son & Informatique | Autres équipements électroniques |
-| Image & son & Informatique | Écrans                           |
-| Image & son & Informatique | Hifi/vidéo (hors écrans)         |
-| Image & son & Informatique | Matériel informatique            |
-| Image & son & Informatique | Photo/ciné                       |
-| Image & son & Informatique | Smartphones/tablettes/consoles   |
-| Livres & Multimedia        | CD/DVD/jeux vidéo                |
-| Livres & Multimedia        | Livres                           |
-| Mobilier et décoration     | Décoration                       |
-| Mobilier et décoration     | Luminaires                       |
-| Mobilier et décoration     | Mobilier                         |
-| Mobilier et décoration     | Vaisselle                        |
-| Produits divers            | Matériel médical                 |
-| Produits divers            | Puériculture                     |
-| Vêtements & Accessoires    | Chaussures                       |
-| Vêtements & Accessoires    | Linge de maison                  |
-| Vêtements & Accessoires    | Maroquinerie                     |
-| Vêtements & Accessoires    | Vêtements                        |
-
-Cette liste est amenée à évoluer et est probablement non exhaustive
+Classification des objets
 
 **Type de service** (qfdmo_acteurservice)
 
-| nom                                    |
-| -------------------------------------- |
-| Achat, revente entre particuliers      |
-| Achat, revente par un professionnel    |
-| Atelier d'auto-réparation              |
-| Collecte par une structure spécialisée |
-| Depôt-vente                            |
-| Don entre particuliers                 |
-| Echanges entre particuliers            |
-| Hub de partage                         |
-| Location entre particuliers            |
-| Location par un professionnel          |
-| Partage entre particuliers             |
-| Pièces détachées                       |
-| Relai d'acteurs et d'événements        |
-| Ressourcerie, recyclerie               |
-| Service de réparation                  |
-| Tutoriels et diagnostics en ligne      |
-
-Cette liste est amenée à évoluer et est probablement non exhaustive
+Type des services rendu par l'acteur, Exemple : Achat/revente entre particuliers, Location par un professionnel, Pièces détachées…
 
 **Type d'acteur** (qfdmo_acteurtype)
 
-| nom            | libelle                                                |
-| -------------- | ---------------------------------------------------------- |
-| acteur digital | Acteur digital (site web, app. mobile)                     |
-| commerce       | Franchise, enseigne commerciale                            |
-| artisan        | Artisan, commerce indépendant                              |
-| collectivité   | Collectivité, établissement public                         |
-| ess            | Association, entreprise de l'économie sociale et solidaire |
-
-Cette liste est amenée à évoluer et est probablement non exhaustive
+Exemple : commerce, association, acteur digital…
 
 ## Environnement de développement
 
@@ -339,36 +268,35 @@ title: Schéma simplifié les acteurs
 classDiagram
     class ActeurService {
         - id: int
-        - nom: str
+        - code: str
         - libelle: str
         - actions: List[Action]
-        + serialize(): dict
     }
 
     class ActeurType {
         - id: int
-        - nom: str
+        - code: str
         - libelle: str
-        + serialize(): dict
-        + get_digital_acteur_type_id(): int
     }
 
     class Source {
         - id: int
-        - nom: str
+        - code: str
+        - libelle: str
         - afficher: bool
         - url: str
         - logo_file: str
-        + serialize(): dict
     }
 
     class LabelQualite {
         - id: int
-        - nom: str
+        - code: str
+        - libelle: str
         - afficher: bool
+        - bonus: bool
+        - type_enseigne: bool
         - url: str
         - logo_file: str
-        + serialize(): dict
     }
 
     class DisplayedActeur {
@@ -386,6 +314,8 @@ classDiagram
         - telephone: str
         - nom_commercial: str
         - nom_officiel: str
+        - labels: List[LabelQualite]
+        - acteur_services: List[ActeurService]
         - siret: str
         - source: Source
         - identifiant_externe: str
@@ -396,56 +326,79 @@ classDiagram
         - modifie_le: datetime
         - horaires_osm: str
         - horaires_description: str
-        + get_share_url(request: HttpRequest, direction: str | None): str
-        + latitude: float
-        + longitude: float
-        + libelle: str
-        + is_digital(): bool
-        + serialize(format: None | str): dict | str
-        + acteur_services(): List[str]
-        + proposition_services_by_direction(direction: str | None): List[PropositionService]
-        + get_or_create_revision(): RevisionActeur
-        + get_or_create_correctionequipe(): CorrectionEquipeActeur
-        + clean_location()
-        + save(*args, **kwargs)
-        + set_default_field_before_save()
+        - public_accueilli: str
+        - reprise: str
+        - exclusivite_de_reprisereparation: bool
+        - uniquement_sur_rdv: bool
     }
 
     class DisplayedPropositionService {
         - action: Action
-        - acteur_service: ActeurService
         - sous_categories: List[SousCategorieObjet]
         - acteur: Acteur
     }
 
     class Action {
         - id: int
-        - nom: str
+        - code: str
+        - afficher: bool
+        - description: str
         - directions: List[Direction]
         - order: int
-        + serialize(): dict
+        - couleur: str
+        - icon: str
+        - groupe_action: GroupeAction
     }
 
     class Direction {
-        - nom: str
+        - id: int
+        - code: str
+        - libelle: str
         - order: int
+    }
+
+    class GroupeAction {
+        - id: int
+        - code: str
+        - afficher: bool
+        - description: str
+        - order: int
+        - couleur: str
+        - icon: str
+    }
+
+    class CategorieObjet {
+        - id: int
+        - code: str
+        - libelle: str
     }
 
     class SousCategorieObjet {
         - id: int
-        - nom: str
+        - code: str
         - libelle: str
-        + serialize(): dict
+        - afficher: bool
+        - categorie: CategorieObjet
+    }
+
+    class Objet {
+        - id: int
+        - code: str
+        - libelle: str
+        - sous_categorie: SousCategorieObjet
     }
 
     Direction --> Action
     DisplayedActeur --> DisplayedPropositionService
+    DisplayedActeur <--> ActeurService
     ActeurType --> DisplayedActeur
     Source --> DisplayedActeur
     LabelQualite <--> DisplayedActeur
     DisplayedPropositionService <-- Action
-    DisplayedPropositionService <-- ActeurService
     DisplayedPropositionService <--> SousCategorieObjet
+    CategorieObjet --> SousCategorieObjet
+    SousCategorieObjet --> Objet
+    GroupeAction --> Action
 ```
 
 ```mermaid
@@ -454,12 +407,12 @@ title: Schéma simplifié des relations autour des acteurs
 ---
 
 erDiagram
-    Direction ||--|{ Action : un-n
+    Direction }|--|{ Action : n-m
     DisplayedActeur ||--|{ DisplayedPropositionService : un-n
     ActeurType ||--|{ DisplayedActeur : un-n
     Source ||--|{ DisplayedActeur : un-n
     Action ||--|{ DisplayedPropositionService : un-n
-    ActeurService ||--|{ DisplayedPropositionService : un-n
+    ActeurService }|--|{ DisplayedActeur : un-n
     DisplayedPropositionService }|--|{ SousCategorieObjet : n-m
 
 ```
