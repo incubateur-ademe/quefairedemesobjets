@@ -388,10 +388,12 @@ def create_actors(**kwargs):
     config = utils.get_mapping_config()
     params = kwargs["params"]
     reparacteurs = params.get("reparacteurs", False)
-    column_mapping = params["column_mapping"]
+    column_mapping = params.get("column_mapping", {})
     column_to_drop = params.get("column_to_drop", [])
     column_to_replace = params.get("default_column_value", {})
 
+    # intersection of columns in df and column_to_drop
+    column_to_drop = list(set(column_to_drop) & set(df.columns))
     df = df.drop(column_to_drop, axis=1)
 
     for k, val in column_to_replace.items():
