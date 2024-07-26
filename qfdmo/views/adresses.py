@@ -362,7 +362,6 @@ class AddressesView(FormView):
             "proposition_services__sous_categories",
             "proposition_services__sous_categories__categorie",
             "proposition_services__action",
-            "proposition_services__acteur_service",
         ).distinct()
 
         return acteurs
@@ -517,7 +516,6 @@ def adresse_detail(request, identifiant_unique):
         "proposition_services__sous_categories",
         "proposition_services__sous_categories__categorie",
         "proposition_services__action__groupe_action",
-        "proposition_services__acteur_service",
         "labels",
         "source",
     ).get(identifiant_unique=identifiant_unique)

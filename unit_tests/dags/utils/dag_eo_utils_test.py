@@ -176,11 +176,9 @@ class TestCreatePropositionService:
                 ),
                 pd.DataFrame(
                     {
-                        "acteur_service_id": [10],
                         "action_id": [1],
                         "acteur_id": [1],
                         "action": ["reparer"],
-                        "acteur_service": ["Service de réparation"],
                         "sous_categories": ["téléphones portables"],
                         "id": [1],
                     },
@@ -201,11 +199,9 @@ class TestCreatePropositionService:
                 ),
                 pd.DataFrame(
                     {
-                        "acteur_service_id": [20],
                         "action_id": [2],
                         "acteur_id": [1],
                         "action": ["donner"],
-                        "acteur_service": ["Collecte par une structure spécialisée"],
                         "sous_categories": ["téléphones portables"],
                         "id": [1],
                     },
@@ -226,11 +222,9 @@ class TestCreatePropositionService:
                 ),
                 pd.DataFrame(
                     {
-                        "acteur_service_id": [10],
                         "action_id": [1],
                         "acteur_id": [1],
                         "action": ["reparer"],
-                        "acteur_service": ["Service de réparation"],
                         "sous_categories": ["téléphones portables"],
                         "id": [1],
                     },
@@ -251,11 +245,9 @@ class TestCreatePropositionService:
                 ),
                 pd.DataFrame(
                     {
-                        "acteur_service_id": [20],
                         "action_id": [3],
                         "acteur_id": [1],
                         "action": ["trier"],
-                        "acteur_service": ["Collecte par une structure spécialisée"],
                         "sous_categories": ["téléphones portables"],
                         "id": [1],
                     },
@@ -276,15 +268,9 @@ class TestCreatePropositionService:
                 ),
                 pd.DataFrame(
                     {
-                        "acteur_service_id": [10, 20, 20],
                         "action_id": [1, 2, 3],
                         "acteur_id": [1, 1, 1],
                         "action": ["reparer", "donner", "trier"],
-                        "acteur_service": [
-                            "Service de réparation",
-                            "Collecte par une structure spécialisée",
-                            "Collecte par une structure spécialisée",
-                        ],
                         "sous_categories": [
                             "téléphones portables",
                             "téléphones portables",
@@ -350,14 +336,9 @@ class TestCreatePropositionService:
 
         expected_df = pd.DataFrame(
             {
-                "acteur_service_id": [20, 20],
                 "action_id": [3, 3],
                 "acteur_id": [1, 2],
                 "action": ["trier", "trier"],
-                "acteur_service": [
-                    "Collecte par une structure spécialisée",
-                    "Collecte par une structure spécialisée",
-                ],
                 "sous_categories": ["téléphones portables", "téléphones portables"],
                 "id": [1, 2],
             }
@@ -402,11 +383,9 @@ class TestCreatePropositionService:
 
         df_expected = pd.DataFrame(
             {
-                "acteur_service_id": [10],
                 "action_id": [1],
                 "acteur_id": [1],
                 "action": ["reparer"],
-                "acteur_service": ["Service de réparation"],
                 "sous_categories": ["téléphones portables | écrans"],
                 "id": [1],
             }
@@ -457,7 +436,6 @@ class TestCreatePropositionService:
 def df_proposition_services():
     return pd.DataFrame(
         {
-            "acteur_service_id": [10, 20, 10, 20],
             "action_id": [1, 3, 1, 3],
             "acteur_id": [1, 1, 2, 2],
             "action": ["reparer", "trier", "reparer", "trier"],
@@ -549,7 +527,6 @@ def mock_ti(
 
     df_proposition_services = pd.DataFrame(
         {
-            "acteur_service_id": [10, 20, 10, 20],
             "action_id": [1, 3, 1, 3],
             "acteur_id": [1, 1, 2, 2],
             "action": ["reparer", "trier", "reparer", "trier"],

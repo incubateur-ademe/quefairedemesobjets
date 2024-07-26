@@ -330,7 +330,6 @@ class Acteur(BaseActeur):
                     RevisionPropositionService.objects.create(
                         acteur=acteur,
                         action_id=proposition_service.action_id,
-                        acteur_service_id=proposition_service.acteur_service_id,
                     )
                 )
                 revision_proposition_service.sous_categories.add(
@@ -518,11 +517,6 @@ class BasePropositionService(models.Model):
         on_delete=models.CASCADE,
         null=False,
     )
-    acteur_service = models.ForeignKey(
-        ActeurService,
-        on_delete=models.CASCADE,
-        null=True,
-    )
     sous_categories = models.ManyToManyField(
         SousCategorieObjet,
     )
@@ -546,8 +540,8 @@ class PropositionService(BasePropositionService):
         verbose_name_plural = "PROPOSITIONS DE SERVICE - IMPORTÉ"
         constraints = [
             models.UniqueConstraint(
-                fields=["acteur", "action", "acteur_service"],
-                name="ps_unique_by_acteur_action_service",
+                fields=["acteur", "action"],
+                name="ps_unique_by_acteur",
             )
         ]
 
@@ -569,8 +563,8 @@ class RevisionPropositionService(BasePropositionService):
         verbose_name_plural = "PROPOSITIONS DE SERVICE - CORRIGÉ"
         constraints = [
             models.UniqueConstraint(
-                fields=["acteur", "action", "acteur_service"],
-                name="rps_unique_by_revisionacteur_action_service",
+                fields=["acteur", "action"],
+                name="rps_unique_by_revisionacteur",
             )
         ]
 
