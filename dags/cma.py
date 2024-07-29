@@ -28,6 +28,7 @@ with DAG(
         "endpoint": (
             "https://data.artisanat.fr/api/explore/v2.1/catalog/datasets/reparacteurs/records"
         ),
+        "reparacteurs": True,
         "column_mapping": {
             "name": "nom",
             "reparactor_description": "description",
