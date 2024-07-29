@@ -1,7 +1,7 @@
 import math
 import json
 from datetime import datetime
-
+import re
 import pandas as pd
 
 
@@ -64,6 +64,30 @@ def transform_float(x):
         return None if math.isnan(f) else f
     except ValueError:
         return None
+
+
+def clean_float_from_fr_str(value):
+    if isinstance(value, str):
+        value = re.sub(r",$", "", value).replace(",", ".")
+    try:
+        return float(value)
+    except ValueError:
+        return None
+
+
+def combine_categories(row):
+    categories = [row["categorie"], row["categorie2"], row["categorie3"]]
+    categories = [cat for cat in categories if pd.notna(cat)]
+    return " | ".join(categories)
+
+
+def prefix_url(url):
+    if url is None:
+        return None
+    elif url.startswith("http://") or url.startswith("https://"):
+        return url
+    else:
+        return "https://" + url
 
 
 def combine_comments(existing_commentaires, new_commentaires):

@@ -25,6 +25,9 @@ with DAG(
         " for CMA reparacteur dataset"
     ),
     params={
+        "endpoint": (
+            "https://data.artisanat.fr/api/explore/v2.1/catalog/datasets/reparacteurs/records"
+        ),
         "column_mapping": {
             "name": "nom",
             "reparactor_description": "description",
@@ -49,13 +52,14 @@ with DAG(
 ) as dag:
     (
         [
-            cma_utils.fetch_data_task(dag),
-            eo_operators.load_data_task(dag),
+            eo_operators.fetch_data_from_api_task(dag),
+            eo_operators.load_data_from_postgresql_task(dag),
         ]
-        >> cma_utils.create_actors_task(dag)
+        >> cma_utils.create_reparacteur_task(dag)
         >> [
             eo_operators.create_proposition_services_task(dag),
             eo_operators.create_labels_task(dag),
+            eo_operators.create_acteur_services_task(dag),
         ]
         >> eo_operators.create_proposition_services_sous_categories_task(dag)
         >> eo_operators.serialize_to_json_task(dag)

@@ -3,7 +3,6 @@ import io
 import math
 import re
 from importlib import import_module
-from pathlib import Path
 from urllib.parse import urlparse
 
 import pandas as pd
@@ -11,6 +10,8 @@ import requests
 from fuzzywuzzy import fuzz
 from shapely import wkb
 from shapely.geometry import Point
+import json
+from pathlib import Path
 
 env = Path(__file__).parent.parent.name
 
@@ -35,6 +36,13 @@ def get_address(row, col="adresse_format_ban"):
         address, postal_code, city = extract_details(row, col)
 
     return pd.Series([address, postal_code, city])
+
+
+def get_mapping_config():
+    config_path = Path(__file__).parent.parent / "config" / "db_mapping.json"
+    with open(config_path, "r") as f:
+        config = json.load(f)
+    return config
 
 
 def get_address_from_ban(address):
