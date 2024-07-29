@@ -55,7 +55,7 @@ with DAG(
             eo_operators.fetch_data_from_api_task(dag),
             eo_operators.load_data_from_postgresql_task(dag),
         ]
-        >> cma_utils.create_reparacteur_task(dag)
+        >> eo_operators.create_actors_task(dag)
         >> [
             eo_operators.create_proposition_services_task(dag),
             eo_operators.create_labels_task(dag),

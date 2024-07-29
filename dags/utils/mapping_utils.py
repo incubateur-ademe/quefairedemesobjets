@@ -2,7 +2,16 @@ import math
 import json
 from datetime import datetime
 import re
+from importlib import import_module
+
 import pandas as pd
+import numpy as np
+from pathlib import Path
+
+
+env = Path(__file__).parent.parent.name
+
+utils = import_module(f"{env}.utils.utils")
 
 
 def transform_acteur_type_id(value, df_acteurtype):
@@ -64,6 +73,53 @@ def transform_float(x):
         return None if math.isnan(f) else f
     except ValueError:
         return None
+
+
+def process_reparacteurs(df, df_sources, df_acteurtype):
+    df["produitsdechets_acceptes"] = df.apply(combine_categories, axis=1)
+    df["source_id"] = get_id_from_code(
+        "CMA - Chambre des métiers et de l'artisanat", df_sources
+    )
+    df["label_code"] = "reparacteur"
+    df["latitude"] = df["latitude"].apply(clean_float_from_fr_str)
+    df["longitude"] = df["longitude"].apply(clean_float_from_fr_str)
+    df["type_de_point_de_collecte"] = None
+    df["acteur_type_id"] = transform_acteur_type_id(
+        "artisan, commerce indépendant", df_acteurtype=df_acteurtype
+    )
+    df["point_de_reparation"] = True
+    df["cree_le"] = datetime.now()
+    df["statut"] = "ACTIF"
+    df["modifie_le"] = df["cree_le"]
+    df["labels_etou_bonus"] = "Agréé Bonus Réparation"
+    df["url"] = df["url"].apply(prefix_url)
+    return df
+
+
+def process_actors(df):
+    df["nom_de_lorganisme_std"] = df["nom_de_lorganisme"].str.replace("-", "")
+    df["id_point_apport_ou_reparation"] = df["id_point_apport_ou_reparation"].fillna(
+        df["nom_de_lorganisme_std"]
+    )
+    df["id_point_apport_ou_reparation"] = (
+        df["id_point_apport_ou_reparation"]
+        .str.replace(" ", "_")
+        .str.replace("_-", "_")
+        .str.replace("__", "_")
+    )
+    df = df.dropna(subset=["latitudewgs84", "longitudewgs84"])
+    df = df.replace({np.nan: None})
+    df["statut"] = "ACTIF"
+    df["latitude"] = df["latitudewgs84"].astype(float).replace({np.nan: None})
+    df["longitude"] = df["longitudewgs84"].astype(float).replace({np.nan: None})
+    df = df.drop(["latitudewgs84", "longitudewgs84"], axis=1)
+    df["modifie_le"] = df["cree_le"]
+
+    if "service_a_domicile" in df.columns:
+        df.loc[
+            df["service_a_domicile"] == "service à domicile uniquement", "statut"
+        ] = "SUPPRIME"
+    return df
 
 
 def clean_float_from_fr_str(value):

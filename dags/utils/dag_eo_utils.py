@@ -357,32 +357,33 @@ def create_actors(**kwargs):
     df = kwargs["ti"].xcom_pull(task_ids="fetch_data_from_api")
     df_sources = data_dict["sources"]
     df_acteurtype = data_dict["acteurtype"]
-    config = utils.get_mapping_config()
 
+    config = utils.get_mapping_config()
     params = kwargs["params"]
+    reparacteurs = params.get("reparacteurs", False)
     column_mapping = params["column_mapping"]
     column_to_drop = params.get("column_to_drop", [])
     column_to_replace = params.get("default_column_value", {})
+
+    df = df.drop(column_to_drop, axis=1)
+
     for k, val in column_to_replace.items():
         df[k] = val
 
-    df["nom_de_lorganisme_std"] = df["nom_de_lorganisme"].str.replace("-", "")
-    df["id_point_apport_ou_reparation"] = df["id_point_apport_ou_reparation"].fillna(
-        df["nom_de_lorganisme_std"]
-    )
-    df["id_point_apport_ou_reparation"] = (
-        df["id_point_apport_ou_reparation"]
-        .str.replace(" ", "_")
-        .str.replace("_-", "_")
-        .str.replace("__", "_")
-    )
-    df = df.drop(column_to_drop, axis=1)
-    df = df.dropna(subset=["latitudewgs84", "longitudewgs84"])
-    df = df.replace({np.nan: None})
+    if reparacteurs:
+        df = mapping_utils.process_reparacteurs(df, df_sources, df_acteurtype)
+    else:
+        df = mapping_utils.process_actors(df)
 
     for old_col, new_col in column_mapping.items():
         if new_col:
-            if old_col == "type_de_point_de_collecte":
+            if old_col in ["latitude", "longitudewgs84"]:
+                continue
+            elif old_col == "id":
+                df[new_col] = "CMA_REPARACTEUR_" + df["id"].astype(str)
+            elif old_col == "is_enabled":
+                df[new_col] = df[old_col].map({1: "ACTIF", 0: "SUPPRIME"})
+            elif old_col == "type_de_point_de_collecte":
                 df[new_col] = df[old_col].apply(
                     lambda x: mapping_utils.transform_acteur_type_id(
                         x, df_acteurtype=df_acteurtype
@@ -431,41 +432,16 @@ def create_actors(**kwargs):
                 df[new_col] = df[old_col].apply(lambda x: True if x == "oui" else False)
             else:
                 df[new_col] = df[old_col]
+
     df["identifiant_unique"] = df.apply(
-        lambda x: mapping_utils.create_identifiant_unique(x),
+        lambda x: mapping_utils.create_identifiant_unique(
+            x, source_name="CMA_REPARACTEUR" if reparacteurs else None
+        ),
         axis=1,
     )
-    df["statut"] = "ACTIF"
-    df["latitude"] = df["latitudewgs84"].astype(float).replace({np.nan: None})
-    df["longitude"] = df["longitudewgs84"].astype(float).replace({np.nan: None})
-    df = df.drop(["latitudewgs84", "longitudewgs84"], axis=1)
-    df["modifie_le"] = df["cree_le"]
-
-    if "siret" in df.columns:
-        df["siret"] = df["siret"].replace({np.nan: None})
-        df["siret"] = (
-            df["siret"].astype(str).apply(lambda x: "".join(filter(str.isdigit, x)))
-        )
-        df["siret"] = df["siret"].apply(
-            lambda x: (
-                x if len(x) == 14 else x.ljust(14, "0") if len(x) == 13 else x[:14]
-            )
-        )
-    if "telephone" in df.columns:
-        df["telephone"] = df["telephone"].dropna().apply(lambda x: x.replace(" ", ""))
-        df["telephone"] = (
-            df["telephone"]
-            .dropna()
-            .apply(lambda x: "0" + x[2:] if x.startswith("33") else x)
-        )
-    if "service_a_domicile" in df.columns:
-        df.loc[
-            df["service_a_domicile"] == "service à domicile uniquement", "statut"
-        ] = "SUPPRIME"
 
     duplicates_mask = df.duplicated("identifiant_unique", keep=False)
     duplicate_ids = df.loc[duplicates_mask, "identifiant_unique"].unique()
-
     number_of_duplicates = len(duplicate_ids)
 
     metadata = {
@@ -473,6 +449,8 @@ def create_actors(**kwargs):
         "duplicate_ids": list(duplicate_ids),
         "added_rows": len(df),
     }
+
+    df = df.drop_duplicates(subset="siret", keep="first")
 
     return {"df": df, "metadata": metadata, "config": config}
 
