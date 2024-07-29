@@ -196,3 +196,7 @@ Style the autocomplete container:
 .fr-btn--secondary-light:hover {
     background-color: #dcdcfc !important;
 }
+
+.qfdmo-no-external-link-icon:after {
+    content: none;
+}

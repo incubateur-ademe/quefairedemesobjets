@@ -5,7 +5,6 @@ from qfdmo.views.adresses import AddressesView
 
 
 class TestAdessesViewGetActionList:
-
     @pytest.mark.parametrize(
         "params,action_list",
         [

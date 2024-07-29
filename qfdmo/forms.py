@@ -5,7 +5,7 @@ from django.utils.safestring import mark_safe
 from qfdmo.models import CachedDirectionAction, DagRun, DagRunStatus, SousCategorieObjet
 
 
-class AutoCompleteInput(forms.Select):
+class AutoCompleteInput(forms.TextInput):
     template_name = "django/forms/widgets/autocomplete.html"
 
     def __init__(self, attrs=None, data_controller="autocomplete", **kwargs):
@@ -122,6 +122,25 @@ class AddressesForm(forms.Form):
         ),
         choices=[],
         label="Direction des actions",
+        required=False,
+    )
+
+    pas_exclusivite_reparation = forms.BooleanField(
+        widget=forms.CheckboxInput(
+            attrs={
+                "class": "fr-checkbox fr-m-1v",
+                "data-search-solution-form-target": "reparerFilter",
+            }
+        ),
+        label=(
+            "Masquer les adresses qui réparent uniquement les produits de leurs marques"
+        ),
+        help_text=(
+            "Les enseignes ne réparant que les produits de leur propre marque"
+            " n'apparaîtront pas si cette case est cochée."
+            " (uniquement valable lorsque le geste « réparer » est sélectionné)"
+        ),
+        label_suffix="",
         required=False,
     )
 
@@ -266,9 +285,11 @@ class CarteAddressesForm(AddressesForm):
                 grouped_action_choices,
             )
         ]
+
         if disable_reparer_option:
-            self.fields["bonus"].widget.attrs["disabled"] = "true"
-            self.fields["label_reparacteur"].widget.attrs["disabled"] = "true"
+            for field in ["bonus", "label_reparacteur", "pas_exclusivite_reparation"]:
+                self.fields[field].widget.attrs["disabled"] = "true"
+
         if address_placeholder := request.GET.get("address_placeholder"):
             self.fields["adresse"].widget.attrs["placeholder"] = address_placeholder
 

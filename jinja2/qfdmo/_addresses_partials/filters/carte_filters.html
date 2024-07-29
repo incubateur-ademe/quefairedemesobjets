@@ -7,10 +7,10 @@
 {% endblock %}
 
 {% block filters_content %}
-
-    {% include 'qfdmo/_addresses_partials/filters/_object_filter.html' %}
+    {% if display_object_filter(request) %}
+        {% include 'qfdmo/_addresses_partials/filters/_object_filter.html' %}
+    {% endif %}
     {% include 'qfdmo/_addresses_partials/filters/_labels_filters.html' %}
-
 {% endblock %}
 
 {% block filters_footer_links %}

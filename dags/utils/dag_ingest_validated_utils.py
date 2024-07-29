@@ -14,23 +14,26 @@ mapping_utils = import_module(f"{env}.utils.mapping_utils")
 qfdmd = import_module(f"{env}.utils.shared_constants")
 
 
-def process_labels(df, column_name):
+def process_many2many_df(df, column_name, df_columns=["acteur_id", "labelqualite_id"]):
     try:
         # Attempt to process the 'labels' column if it exists and is not empty
-        normalized_labels = df[column_name].dropna().apply(pd.json_normalize)
-        if normalized_labels.empty:
+        normalized_df = df[column_name].dropna().apply(pd.json_normalize)
+        if normalized_df.empty:
             return pd.DataFrame(
-                columns=["acteur_id", "labelqualite_id"]
+                columns=df_columns
             )  # Return empty DataFrame if no data to process
         else:
-            return pd.concat(normalized_labels.tolist(), ignore_index=True)
+            return pd.concat(normalized_df.tolist(), ignore_index=True)
     except KeyError:
         # Handle the case where the specified column does not exist
-        return pd.DataFrame(columns=["acteur_id", "labelqualite_id"])
+        return pd.DataFrame(columns=df_columns)
 
 
 def handle_create_event(df_actors, dag_run_id, engine):
-    df_labels = process_labels(df_actors, "labels")
+    df_labels = process_many2many_df(df_actors, "labels")
+    df_acteur_services = process_many2many_df(
+        df_actors, "acteur_services", df_columns=["acteur_id", "acteurservice_id"]
+    )
 
     max_id_pds = pd.read_sql_query(
         "SELECT max(id) FROM qfdmo_propositionservice", engine
@@ -53,12 +56,13 @@ def handle_create_event(df_actors, dag_run_id, engine):
 
     return {
         "actors": df_actors,
-        "pds": df_pds[["id", "acteur_service_id", "action_id", "acteur_id"]],
+        "pds": df_pds[["id", "action_id", "acteur_id"]],
         "pds_sous_categories": df_pdssc[
             ["propositionservice_id", "souscategorieobjet_id"]
         ],
         "dag_run_id": dag_run_id,
         "labels": df_labels[["acteur_id", "labelqualite_id"]],
+        "acteur_services": df_acteur_services[["acteur_id", "acteurservice_id"]],
         "change_type": "CREATE",
     }
 
@@ -98,7 +102,9 @@ def handle_update_actor_event(df_actors, dag_run_id):
     }
 
 
-def handle_write_data_create_event(connection, df_actors, df_labels, df_pds, df_pdssc):
+def handle_write_data_create_event(
+    connection, df_actors, df_labels, df_acteur_services, df_pds, df_pdssc
+):
     df_actors[["identifiant_unique"]].to_sql(
         "temp_actors", connection, if_exists="replace"
     )
@@ -113,6 +119,10 @@ def handle_write_data_create_event(connection, df_actors, df_labels, df_pds, df_
         """,
         """
         DELETE FROM qfdmo_acteur_labels
+        WHERE acteur_id IN ( SELECT identifiant_unique FROM temp_actors );
+        """,
+        """
+        DELETE FROM qfdmo_acteur_acteur_services
         WHERE acteur_id IN ( SELECT identifiant_unique FROM temp_actors );
         """,
         """
@@ -149,6 +159,8 @@ def handle_write_data_create_event(connection, df_actors, df_labels, df_pds, df_
         chunksize=1000,
     )
 
+    df_labels = df_labels[["acteur_id", "labelqualite_id"]]
+    df_labels.drop_duplicates(inplace=True)
     df_labels[["acteur_id", "labelqualite_id"]].to_sql(
         "qfdmo_acteur_labels",
         connection,
@@ -158,7 +170,18 @@ def handle_write_data_create_event(connection, df_actors, df_labels, df_pds, df_
         chunksize=1000,
     )
 
-    df_pds[["id", "acteur_service_id", "action_id", "acteur_id"]].to_sql(
+    df_acteur_services = df_acteur_services[["acteur_id", "acteurservice_id"]]
+    df_acteur_services.drop_duplicates(inplace=True)
+    df_acteur_services.to_sql(
+        "qfdmo_acteur_acteur_services",
+        connection,
+        if_exists="append",
+        index=False,
+        method="multi",
+        chunksize=1000,
+    )
+
+    df_pds[["id", "action_id", "acteur_id"]].to_sql(
         "qfdmo_propositionservice",
         connection,
         if_exists="append",
