@@ -427,7 +427,14 @@ def create_actors(**kwargs):
 
     if "siret" in df.columns:
         df["siret"] = df["siret"].replace({np.nan: None})
-        df["siret"] = df["siret"].astype(str).apply(lambda x: x[:14])
+        df["siret"] = (
+            df["siret"].astype(str).apply(lambda x: "".join(filter(str.isdigit, x)))
+        )
+        df["siret"] = df["siret"].apply(
+            lambda x: (
+                x if len(x) == 14 else x.ljust(14, "0") if len(x) == 13 else x[:14]
+            )
+        )
     if "telephone" in df.columns:
         df["telephone"] = df["telephone"].dropna().apply(lambda x: x.replace(" ", ""))
         df["telephone"] = (
@@ -474,13 +481,15 @@ def create_labels(**kwargs):
         if "labels_etou_bonus" in row:
             label = str(row["labels_etou_bonus"])
             if label == "Agréé Bonus Réparation":
-                eco_code = row["ecoorganisme"].lower()
-                if eco_code in label_mapping:
+                label_code = (
+                    row.get("ecoorganisme") or row.get("label_code", "").lower()
+                )
+                if label_code in label_mapping:
                     rows_list.append(
                         {
                             "acteur_id": row["identifiant_unique"],
-                            "labelqualite_id": label_mapping[eco_code]["id"],
-                            "labelqualite": label_mapping[eco_code]["libelle"],
+                            "labelqualite_id": label_mapping[label_code]["id"],
+                            "labelqualite": label_mapping[label_code]["libelle"],
                         }
                     )
 

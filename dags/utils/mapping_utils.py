@@ -20,6 +20,8 @@ def transform_acteur_type_id(value, df_acteurtype):
         "déchèterie": "déchèterie",
         "point d'apport volontaire privé": "point d'apport volontaire privé",
         "plateforme inertes": "plateforme de valorisation des inertes",
+        "magasin / franchise, enseigne commerciale / distributeur / point de vente "
+        "/ franchise, enseigne commerciale / distributeur / point de vente": "commerce",
     }
 
     libelle = mapping_dict.get(value.lower())

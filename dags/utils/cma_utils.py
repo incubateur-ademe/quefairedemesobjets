@@ -64,6 +64,15 @@ def combine_categories(row):
     return " | ".join(categories)
 
 
+def prefix_url(url):
+    if url is None:
+        return None
+    elif url.startswith("http://") or url.startswith("https://"):
+        return url
+    else:
+        return "https://" + url
+
+
 def get_cma_dataset():
     total_records = get_data_from_artisanat_api(limit=1, offset=0)["total_count"]
     records_per_request = 100
@@ -94,6 +103,7 @@ def create_actors(**kwargs):
     df["source_id"] = mapping_utils.get_id_from_code(
         "CMA - Chambre des métiers et de l'artisanat", df_sources
     )
+    df["label_code"] = "reparacteur"
 
     df["latitude"] = df["latitude"].apply(clean_float)
     df["longitude"] = df["longitude"].apply(clean_float)
@@ -121,11 +131,17 @@ def create_actors(**kwargs):
         ),
         axis=1,
     )
+
+    # Apply the function to the URL column
+    df["url"] = df["url"].apply(prefix_url)
     df["point_de_reparation"] = True
     date_creation = datetime.now()
     df["cree_le"] = date_creation
     df["statut"] = "ACTIF"
     df["modifie_le"] = df["cree_le"]
+    df["labels_etou_bonus"] = "Agréé Bonus Réparation"
+
+    df = df.drop_duplicates(subset="siret", keep="first")
 
     metadata = {
         "added_rows": len(df),
