@@ -9,7 +9,6 @@ from airflow.operators.python_operator import BranchPythonOperator, PythonOperat
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.utils.dates import days_ago
 
-
 env = Path(__file__).parent.name
 utils = import_module(f"{env}.utils.utils")
 dag_ingest_validated_utils = import_module(f"{env}.utils.dag_ingest_validated_utils")
@@ -75,6 +74,7 @@ def write_data_to_postgres(**kwargs):
     data_dict = kwargs["ti"].xcom_pull(task_ids="fetch_and_parse_data")
     df_actors = data_dict["actors"]
     df_labels = data_dict.get("labels")
+    df_acteur_services = data_dict.get("acteur_services")
     df_pds = data_dict.get("pds")
     df_pdssc = data_dict.get("pds_sous_categories")
     dag_run_id = data_dict["dag_run_id"]
@@ -85,7 +85,7 @@ def write_data_to_postgres(**kwargs):
     with engine.begin() as connection:
         if change_type == "CREATE":
             dag_ingest_validated_utils.handle_write_data_create_event(
-                connection, df_actors, df_labels, df_pds, df_pdssc
+                connection, df_actors, df_labels, df_acteur_services, df_pds, df_pdssc
             )
         elif change_type == "UPDATE_ACTOR":
             dag_ingest_validated_utils.handle_write_data_update_actor_event(

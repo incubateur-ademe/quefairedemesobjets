@@ -95,6 +95,9 @@ def write_data_to_postgres(**kwargs):
         task_ids="apply_corrections_actors"
     )
     df_labels_updated = kwargs["ti"].xcom_pull(task_ids="merge_labels")
+    df_acteur_services_updated = kwargs["ti"].xcom_pull(
+        task_ids="merge_acteur_services"
+    )
     task_output = kwargs["ti"].xcom_pull(
         task_ids="apply_corrections_propositionservice"
     )
@@ -114,6 +117,9 @@ def write_data_to_postgres(**kwargs):
     original_table_name_labels = "qfdmo_displayedacteur_labels"
     temp_table_name_labels = "qfdmo_displayedacteurtemp_labels"
 
+    original_table_name_acteur_services = "qfdmo_displayedacteur_acteur_services"
+    temp_table_name_acteur_services = "qfdmo_displayedacteurtemp_acteur_services"
+
     original_table_name_ps = "qfdmo_displayedpropositionservice"
     temp_table_name_ps = "qfdmo_displayedpropositionservicetemp"
 
@@ -124,6 +130,7 @@ def write_data_to_postgres(**kwargs):
         conn.execute(f"DELETE FROM {temp_table_name_pssc}")
         conn.execute(f"DELETE FROM {temp_table_name_ps}")
         conn.execute(f"DELETE FROM {temp_table_name_labels}")
+        conn.execute(f"DELETE FROM {temp_table_name_acteur_services}")
         conn.execute(f"DELETE FROM {temp_table_name_actor}")
 
         df_normalized_corrected_actors[
@@ -165,6 +172,7 @@ def write_data_to_postgres(**kwargs):
             method="multi",
             chunksize=1000,
         )
+
         df_labels_updated[["displayedacteur_id", "labelqualite_id"]].to_sql(
             temp_table_name_labels,
             engine,
@@ -174,7 +182,16 @@ def write_data_to_postgres(**kwargs):
             chunksize=1000,
         )
 
-        df_ps_updated[["id", "acteur_service_id", "action_id", "acteur_id"]].to_sql(
+        df_acteur_services_updated[["displayedacteur_id", "acteurservice_id"]].to_sql(
+            temp_table_name_acteur_services,
+            engine,
+            if_exists="append",
+            index=False,
+            method="multi",
+            chunksize=1000,
+        )
+
+        df_ps_updated[["id", "action_id", "acteur_id"]].to_sql(
             temp_table_name_ps,
             engine,
             if_exists="append",
@@ -222,6 +239,19 @@ def write_data_to_postgres(**kwargs):
         )
 
         conn.execute(
+            f"ALTER TABLE {original_table_name_acteur_services} "
+            f"RENAME TO {original_table_name_acteur_services}_old"
+        )
+        conn.execute(
+            f"ALTER TABLE {temp_table_name_acteur_services} "
+            f"RENAME TO {original_table_name_acteur_services}"
+        )
+        conn.execute(
+            f"ALTER TABLE {original_table_name_acteur_services}_old "
+            f"RENAME TO {temp_table_name_acteur_services}"
+        )
+
+        conn.execute(
             f"ALTER TABLE {original_table_name_ps} "
             f"RENAME TO {original_table_name_ps}_old"
         )
@@ -249,39 +279,50 @@ def write_data_to_postgres(**kwargs):
     print("Table swap completed successfully.")
 
 
-def merge_actors_labels(**kwargs):
+def merge_labels(**kwargs):
+    return _merge_acteurs_many2many_relationship(
+        "read_acteur_labels", "read_revisionacteur_labels", **kwargs
+    )
+
+
+# FIXME : This function should be tested
+def merge_acteur_services(**kwargs):
+    return _merge_acteurs_many2many_relationship(
+        "read_acteur_acteur_services", "read_revisionacteur_acteur_services", **kwargs
+    )
+
+
+def _merge_acteurs_many2many_relationship(
+    acteur_task_id: str, revisionacteur_task_id: str, **kwargs: dict
+):
     # Pull dataframes
-    df_actor_labels = kwargs["ti"].xcom_pull(task_ids="load_actor_labels")
-    df_revision_labels = kwargs["ti"].xcom_pull(task_ids="load_revision_labels")
+    df_acteur = kwargs["ti"].xcom_pull(task_ids=acteur_task_id)
+    df_acteurrevision = kwargs["ti"].xcom_pull(task_ids=revisionacteur_task_id)
 
     # Rename 'acteur_id' column to 'displayedacteur_id' and drop 'id' column
-    df_actor_labels.rename(columns={"acteur_id": "displayedacteur_id"}, inplace=True)
-    df_actor_labels.drop(columns=["id"], inplace=True)
+    df_acteur.rename(columns={"acteur_id": "displayedacteur_id"}, inplace=True)
+    df_acteur.drop(columns=["id"], inplace=True)
 
     # Rename 'revisionacteur_id' column to 'displayedacteur_id' and drop 'id' column
-    df_revision_labels.rename(
+    df_acteurrevision.rename(
         columns={"revisionacteur_id": "displayedacteur_id"}, inplace=True
     )
-    df_revision_labels.drop(columns=["id"], inplace=True)
+    df_acteurrevision.drop(columns=["id"], inplace=True)
 
     # Get common 'displayedacteur_id'
-    common_acteur_ids = df_actor_labels[
-        df_actor_labels["displayedacteur_id"].isin(
-            df_revision_labels["displayedacteur_id"]
-        )
+    common_acteur_ids = df_acteur[
+        df_acteur["displayedacteur_id"].isin(df_acteurrevision["displayedacteur_id"])
     ]["displayedacteur_id"].unique()
 
-    # Concatenate dataframes excluding common 'displayedacteur_id' in df_actor_labels
-    df_merged_labels = pd.concat(
+    # Concatenate dataframes excluding common 'displayedacteur_id' in df_actor
+    df_merged = pd.concat(
         [
-            df_actor_labels[
-                ~df_actor_labels["displayedacteur_id"].isin(common_acteur_ids)
-            ],
-            df_revision_labels,
+            df_acteur[~df_acteur["displayedacteur_id"].isin(common_acteur_ids)],
+            df_acteurrevision,
         ]
     ).drop_duplicates()
 
-    return df_merged_labels
+    return df_merged
 
 
 default_args = {
@@ -345,23 +386,44 @@ read_sc = PythonOperator(
     dag=dag,
 )
 
-read_actor_labels = PythonOperator(
-    task_id="load_actor_labels",
+read_acteur_labels = PythonOperator(
+    task_id="read_acteur_labels",
     python_callable=read_data_from_postgres,
     op_kwargs={"table_name": "qfdmo_acteur_labels"},
     dag=dag,
 )
 
-read_revision_labels = PythonOperator(
-    task_id="load_revision_labels",
+read_acteur_acteur_services = PythonOperator(
+    task_id="read_acteur_acteur_services",
+    python_callable=read_data_from_postgres,
+    op_kwargs={"table_name": "qfdmo_acteur_acteur_services"},
+    dag=dag,
+)
+
+read_revisionacteur_labels = PythonOperator(
+    task_id="read_revisionacteur_labels",
     python_callable=read_data_from_postgres,
     op_kwargs={"table_name": "qfdmo_revisionacteur_labels"},
     dag=dag,
 )
 
-merge_labels = PythonOperator(
+read_revisionacteur_acteur_services = PythonOperator(
+    task_id="read_revisionacteur_acteur_services",
+    python_callable=read_data_from_postgres,
+    op_kwargs={"table_name": "qfdmo_revisionacteur_acteur_services"},
+    dag=dag,
+)
+# qfdmo_revisionacteur_acteur_services
+
+merge_labels_task = PythonOperator(
     task_id="merge_labels",
-    python_callable=merge_actors_labels,
+    python_callable=merge_labels,
+    dag=dag,
+)
+
+merge_acteur_services_task = PythonOperator(
+    task_id="merge_acteur_services",
+    python_callable=merge_acteur_services,
     dag=dag,
 )
 
@@ -385,5 +447,9 @@ write_pos = PythonOperator(
 
 [read_actors, read_revision_actor] >> apply_corr
 [read_ps, read_revision_ps, read_sc, read_revision_sc] >> apply_corr_ps
-[read_actor_labels, read_revision_labels] >> merge_labels
-[merge_labels, apply_corr, apply_corr_ps] >> write_pos
+[read_acteur_labels, read_revisionacteur_labels] >> merge_labels_task
+[
+    read_acteur_acteur_services,
+    read_revisionacteur_acteur_services,
+] >> merge_acteur_services_task
+[merge_labels_task, merge_acteur_services_task, apply_corr, apply_corr_ps] >> write_pos

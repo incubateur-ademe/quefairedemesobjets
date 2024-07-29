@@ -1,21 +1,15 @@
 import pytest
 from django.contrib.gis.geos import Point
-from django.core.management import call_command
 from django.forms import ValidationError, model_to_dict
 
 from qfdmo.models import (
     Acteur,
-    ActeurService,
-    ActeurType,
-    Action,
     CachedDirectionAction,
     NomAsNaturalKeyModel,
-    PropositionService,
     RevisionActeur,
     RevisionPropositionService,
-    Source,
 )
-from qfdmo.models.acteur import LabelQualite
+from qfdmo.models.acteur import ActeurType, LabelQualite
 from unit_tests.qfdmo.acteur_factory import (
     ActeurFactory,
     ActeurServiceFactory,
@@ -23,21 +17,9 @@ from unit_tests.qfdmo.acteur_factory import (
     DisplayedActeurFactory,
     DisplayedPropositionServiceFactory,
     PropositionServiceFactory,
+    SourceFactory,
 )
 from unit_tests.qfdmo.action_factory import ActionDirectionFactory, ActionFactory
-
-
-@pytest.fixture(scope="session")
-def django_db_setup(django_db_setup, django_db_blocker):
-    with django_db_blocker.unblock():
-        call_command(
-            "loaddata",
-            "categories",
-            "actions",
-            "acteur_services",
-            "acteur_types",
-        )
-        CachedDirectionAction.reload_cache()
 
 
 @pytest.fixture()
@@ -61,14 +43,14 @@ class TestPoint:
 class TestActeurNomAffiche:
     def test_nom(self):
         assert (
-            Acteur(nom="Test Object 1", location=Point(0, 0)).libelle == "Test Object 1"
+            Acteur(nom="Test Object 1", location=Point(1, 1)).libelle == "Test Object 1"
         )
 
     def test_nom_commercial(self):
         assert (
             Acteur(
                 nom="Test Object 1",
-                location=Point(0, 0),
+                location=Point(1, 1),
                 nom_commercial="Nom commercial",
             ).libelle
             == "Nom commercial"
@@ -78,15 +60,16 @@ class TestActeurNomAffiche:
 @pytest.mark.django_db
 class TestActeurIsdigital:
     def test_isdigital_false(self):
-        acteur_type = ActeurType.objects.exclude(code="acteur digital").first()
+        acteur_type = ActeurTypeFactory()
         assert not Acteur(
-            nom="Test Object 1", location=Point(0, 0), acteur_type=acteur_type
+            nom="Test Object 1", location=Point(1, 1), acteur_type=acteur_type
         ).is_digital
 
     def test_isdigital_true(self):
-        acteur_type = ActeurType.objects.get(code="acteur digital")
-        assert Acteur(
-            nom="Test Object 1", location=Point(0, 0), acteur_type=acteur_type
+        ActeurType._digital_acteur_type_id = 0
+        acteur_type = ActeurTypeFactory(code="acteur digital")
+        assert ActeurFactory.build(
+            nom="Test Object 1", acteur_type=acteur_type
         ).is_digital
 
 
@@ -127,25 +110,24 @@ class TestActeurIsdigital:
 class TestActeurDefaultOnSave:
     def test_empty(self):
         acteur_type = ActeurTypeFactory(code="fake")
-        acteur = Acteur.objects.create(
+        acteur = ActeurFactory(
             nom="Test Object 1",
             acteur_type_id=acteur_type.id,
-            location=Point(0, 0),
+            location=Point(1, 1),
+            source=None,
         )
         assert len(acteur.identifiant_externe) == 12
         assert acteur.identifiant_unique == "equipe_" + acteur.identifiant_externe
         assert acteur.source.code == "equipe"
 
     def test_default_identifiantunique(self):
-        source = Source.objects.get_or_create(
-            libelle="Source Équipe", code="source_equipe"
-        )[0]
+        source = SourceFactory(code="source_equipe")
         acteur_type = ActeurTypeFactory(code="fake")
 
-        acteur = Acteur.objects.create(
+        acteur = ActeurFactory(
             nom="Test Object 1",
             acteur_type_id=acteur_type.id,
-            location=Point(0, 0),
+            location=Point(1, 1),
             source=source,
             identifiant_externe="123ABC",
         )
@@ -153,10 +135,10 @@ class TestActeurDefaultOnSave:
 
     def test_set_identifiantunique(self):
         acteur_type = ActeurTypeFactory(code="fake")
-        acteur = Acteur.objects.create(
+        acteur = ActeurFactory(
             nom="Test Object 1",
             acteur_type_id=acteur_type.id,
-            location=Point(0, 0),
+            location=Point(1, 1),
             identifiant_unique="Unique",
         )
         assert acteur.identifiant_unique == "Unique"
@@ -169,7 +151,7 @@ class TestActeurOpeningHours:
         acteur = Acteur(
             nom="Test Object 1",
             acteur_type_id=acteur_type.id,
-            location=Point(0, 0),
+            location=Point(1, 1),
         )
         assert acteur.full_clean() is None
         acteur.horaires = ""
@@ -182,7 +164,7 @@ class TestActeurOpeningHours:
     def test_horaires_ko(self):
         acteur = Acteur(
             nom="Test Object 1",
-            location=Point(0, 0),
+            location=Point(1, 1),
         )
         acteur.horaires_osm = "24/24"
         with pytest.raises(ValidationError):
@@ -192,7 +174,7 @@ class TestActeurOpeningHours:
 @pytest.mark.django_db
 class TestLocationValidation:
     def test_location_validation_raise(self):
-        acteur_type = ActeurType.objects.exclude(code="acteur digital").first()
+        acteur_type = ActeurTypeFactory()
         acteur = Acteur(
             nom="Test Object 1", identifiant_unique="123", acteur_type=acteur_type
         )
@@ -200,7 +182,8 @@ class TestLocationValidation:
             acteur.save()
 
     def test_location_validation_dont_raise(self):
-        acteur_type = ActeurType.objects.get(code="acteur digital")
+        ActeurType._digital_acteur_type_id = 0
+        acteur_type = ActeurTypeFactory(code="acteur digital")
         acteur = Acteur(
             nom="Test Object 1", identifiant_unique="123", acteur_type=acteur_type
         )
@@ -232,10 +215,8 @@ class TestActeurGetOrCreateRevisionActeur:
     def test_create_revisionacteur(self, acteur):
         revision_acteur = acteur.get_or_create_revision()
         revision_acteur.proposition_services.all().delete()
-        acteur_service = ActeurServiceFactory.create(code="service 2")
         action = ActionFactory.create(code="action 2")
         proposition_service = RevisionPropositionService.objects.create(
-            acteur_service=acteur_service,
             action=action,
             acteur=revision_acteur,
         )
@@ -245,12 +226,8 @@ class TestActeurGetOrCreateRevisionActeur:
         assert revision_acteur2.serialize() == revision_acteur.serialize()
         assert revision_acteur2.nom is None
         assert (
-            revision_acteur2.proposition_services.values_list(
-                "acteur_service__code", "action__code"
-            ).all()
-            != acteur.proposition_services.values_list(
-                "acteur_service__code", "action__code"
-            ).all()
+            revision_acteur2.proposition_services.values_list("action__code").all()
+            != acteur.proposition_services.values_list("action__code").all()
         )
 
 
@@ -260,9 +237,8 @@ class TestCreateRevisionActeur:
         acteur_type = ActeurTypeFactory(code="fake")
         revision_acteur = RevisionActeur.objects.create(
             nom="Test Object 1",
-            location=Point(0, 0),
-            acteur_type=ActeurType.objects.first(),
-            acteur_type_id=acteur_type.id,
+            location=Point(1, 1),
+            acteur_type=acteur_type,
         )
         acteur = Acteur.objects.get(
             identifiant_unique=revision_acteur.identifiant_unique
@@ -273,88 +249,26 @@ class TestCreateRevisionActeur:
 
 @pytest.mark.django_db
 class TestActeurService:
-    def test_acteur_actions_basic(self):
-        action1 = Action.objects.get(code="reparer")
-        acteur_service = ActeurService.objects.get(
-            code="Achat, revente par un professionnel"
-        )
-        acteur_type = ActeurTypeFactory(code="fake")
-        acteur = Acteur.objects.create(
-            nom="Acteur 1", location=Point(0, 0), acteur_type_id=acteur_type.id
-        )
-        PropositionService.objects.create(
-            acteur=acteur, acteur_service=acteur_service, action=action1
+
+    @pytest.fixture
+    def displayed_acteur(self):
+        return DisplayedActeurFactory()
+
+    def test_acteur_actions_basic(self, displayed_acteur):
+        displayed_acteur.acteur_services.add(
+            ActeurServiceFactory(libelle="Par un professionnel")
         )
 
-        assert acteur.acteur_services() == ["Par un professionnel"]
+        assert displayed_acteur.get_acteur_services() == ["Par un professionnel"]
 
-    def test_acteur_actions_distinct(self):
-        action1 = Action.objects.get(code="reparer")
-        acteur_service = ActeurService.objects.get(
-            code="Achat, revente par un professionnel"
-        )
-        action2 = Action.objects.get(code="echanger")
-        acteur_type = ActeurTypeFactory(code="fake")
-        acteur = Acteur.objects.create(
-            nom="Acteur 1",
-            location=Point(0, 0),
-            acteur_type_id=acteur_type.id,
-        )
-        PropositionService.objects.create(
-            acteur=acteur, acteur_service=acteur_service, action=action1
-        )
-        PropositionService.objects.create(
-            acteur=acteur, acteur_service=acteur_service, action=action2
+    def test_acteur_actions_multiple(self, displayed_acteur):
+        displayed_acteur.acteur_services.add(
+            ActeurServiceFactory(libelle="Par un professionnel"),
+            ActeurServiceFactory(libelle="Atelier pour réparer soi-même"),
         )
 
-        assert acteur.acteur_services() == ["Par un professionnel"]
-
-    def test_acteur_actions_multiple(self):
-        action = Action.objects.get(code="reparer")
-        acteur_service1 = ActeurService.objects.get(
-            code="Achat, revente par un professionnel"
-        )
-        acteur_service2 = ActeurService.objects.get(
-            code="Atelier pour réparer soi-même"
-        )
-        acteur_type = ActeurTypeFactory(code="fake")
-        acteur = Acteur.objects.create(
-            nom="Acteur 1", location=Point(0, 0), acteur_type_id=acteur_type.id
-        )
-        PropositionService.objects.create(
-            acteur=acteur, acteur_service=acteur_service1, action=action
-        )
-        PropositionService.objects.create(
-            acteur=acteur, acteur_service=acteur_service2, action=action
-        )
-
-        assert acteur.acteur_services() == [
+        assert displayed_acteur.get_acteur_services() == [
             "Atelier pour réparer soi-même",
-            "Par un professionnel",
-        ]
-
-    def test_acteur_actions_multiple_with_same_libelle(self):
-        action = Action.objects.get(code="reparer")
-        acteur_service1 = ActeurService.objects.get(
-            code="Achat, revente par un professionnel"
-        )
-        acteur_service2 = ActeurService.objects.get(
-            code="Atelier pour réparer soi-même"
-        )
-        acteur_service2.libelle = acteur_service1.libelle
-        acteur_service2.save()
-        acteur_type = ActeurTypeFactory(code="fake")
-        acteur = Acteur.objects.create(
-            nom="Acteur 1", location=Point(0, 0), acteur_type_id=acteur_type.id
-        )
-        PropositionService.objects.create(
-            acteur=acteur, acteur_service=acteur_service1, action=action
-        )
-        PropositionService.objects.create(
-            acteur=acteur, acteur_service=acteur_service2, action=action
-        )
-
-        assert acteur.acteur_services() == [
             "Par un professionnel",
         ]
 
@@ -363,13 +277,10 @@ class TestActeurPropositionServicesByDirection:
     @pytest.mark.django_db
     def test_proposition_services_by_direction(self):
         acteur = ActeurFactory()
-        acteur_service = ActeurServiceFactory()
         direction_jai = ActionDirectionFactory(code="jai")
         action = ActionFactory()
         action.directions.add(direction_jai)
-        proposition_service = PropositionServiceFactory(
-            acteur=acteur, acteur_service=acteur_service, action=action
-        )
+        proposition_service = PropositionServiceFactory(acteur=acteur, action=action)
         acteur.proposition_services.add(proposition_service)
         assert list(acteur.proposition_services_by_direction("jai")) == [
             proposition_service
@@ -394,10 +305,7 @@ class TestDisplayActeurActeurActions:
         direction = ActionDirectionFactory(code="jai")
         action = ActionFactory()
         action.directions.add(direction)
-        acteur_service = ActeurServiceFactory()
-        DisplayedPropositionServiceFactory(
-            action=action, acteur_service=acteur_service, acteur=displayed_acteur
-        )
+        DisplayedPropositionServiceFactory(action=action, acteur=displayed_acteur)
         CachedDirectionAction.reload_cache()
         assert [
             model_to_dict(a, exclude=["directions"])
@@ -422,10 +330,7 @@ class TestDisplayActeurActeurActions:
         direction = ActionDirectionFactory(code="jai")
         action = ActionFactory()
         action.directions.add(direction)
-        acteur_service = ActeurServiceFactory()
-        DisplayedPropositionServiceFactory(
-            action=action, acteur_service=acteur_service, acteur=displayed_acteur
-        )
+        DisplayedPropositionServiceFactory(action=action, acteur=displayed_acteur)
         CachedDirectionAction.reload_cache()
         assert displayed_acteur.acteur_actions(direction="fake") == []
         assert [
@@ -449,13 +354,10 @@ class TestDisplayActeurActeurActions:
     def test_ordered_action(self):
         displayed_acteur = DisplayedActeurFactory()
         direction = ActionDirectionFactory(code="jai")
-        acteur_service = ActeurServiceFactory()
         for i in [2, 1, 3]:
             action = ActionFactory(order=i, code=f"{i}")
             action.directions.add(direction)
-            DisplayedPropositionServiceFactory(
-                action=action, acteur_service=acteur_service, acteur=displayed_acteur
-            )
+            DisplayedPropositionServiceFactory(action=action, acteur=displayed_acteur)
 
         CachedDirectionAction.reload_cache()
         assert [

@@ -222,7 +222,7 @@ write_data_task = PythonOperator(
 )
 
 serialize_to_json_task = PythonOperator(
-    task_id="serialize_actors_to_records",
+    task_id="serialize_to_json",
     python_callable=serialize_to_json,
     dag=dag,
 )

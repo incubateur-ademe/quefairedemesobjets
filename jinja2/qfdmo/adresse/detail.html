@@ -7,7 +7,7 @@
             <img
                 class="fr-mr-1w"
                 src="{{ source_or_label.logo_file.url }}"
-                alt="🏷️"
+                alt="Ademe - Agence de la transition écologique"
                 class="qfdmo-cursor-pointer"
                 width=16
                 height=16
@@ -24,7 +24,7 @@
                 <img
                     class="fr-mr-1w"
                     src="{{ source_or_label.logo_file.url }}"
-                    alt="🏷️"
+                    alt="Ademe - Agence de la transition écologique"
                     class="qfdmo-cursor-pointer"
                     width=16
                     height=16
@@ -35,12 +35,12 @@
     {% endwith %}
 {% endif %}
 
-<h5 class='fr-my-1v fr-h6'>
+<h4 class='fr-my-1v fr-h6'>
     {{ adresse.libelle }}
-</h5>
+</h4>
 
 <p class="qfdmo-text-sm fr-mb-1w fr-mt-0 fr-text--xs">
-    {% for acteur_service in adresse.acteur_services() %}
+    {% for acteur_service in adresse.get_acteur_services() %}
         {{ acteur_service }}{% if not loop.last %},&nbsp;{% endif %}
     {% endfor %}
     {{ distance_to_acteur(request, adresse) }}
