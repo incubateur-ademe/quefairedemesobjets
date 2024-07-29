@@ -11,7 +11,16 @@ logger = logging.getLogger(__name__)
 class Command(BaseCommand):
     help = "Copy acteur services from proposition services to acteurs"
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--limit",
+            help="limit the number of acteurs to process",
+            type=int,
+            default=None,
+        )
+
     def handle(self, *args, **options):
+        nb_acteur_limit = options.get("limit")
         for cls in [Acteur, RevisionActeur, DisplayedActeur]:
             logger.warning(f"Copying acteur services to {cls.__name__}")
 
@@ -20,6 +29,8 @@ class Command(BaseCommand):
                 .annotate(count_acteur_services=models.Count("acteur_services"))
                 .filter(count_acteur_services=0)
             )
+            if nb_acteur_limit:
+                acteur_query = acteur_query[:nb_acteur_limit]
             count = 0
             total = acteur_query.count()
             # collect acteur services from proposition services

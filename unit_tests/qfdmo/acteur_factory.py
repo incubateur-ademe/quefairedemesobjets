@@ -75,7 +75,6 @@ class PropositionServiceFactory(Factory):
     class Meta:
         model = PropositionService
 
-    acteur_service = SubFactory(ActeurServiceFactory)
     action = SubFactory(ActionFactory)
     acteur = SubFactory(ActeurFactory)
 
@@ -84,6 +83,5 @@ class DisplayedPropositionServiceFactory(Factory):
     class Meta:
         model = DisplayedPropositionService
 
-    acteur_service = SubFactory(ActeurServiceFactory)
     action = SubFactory(ActionFactory)
     acteur = SubFactory(DisplayedActeurFactory)

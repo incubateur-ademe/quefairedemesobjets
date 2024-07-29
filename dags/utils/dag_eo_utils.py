@@ -34,19 +34,16 @@ def create_proposition_services(**kwargs):
     rows_dict = {}
     merged_count = 0
     df_actions = data_dict["actions"]
-    df_acteur_services = data_dict["acteur_services"]
 
     conditions = [
-        ("point_dapport_de_service_reparation", "Service de réparation", "reparer"),
+        ("point_dapport_de_service_reparation", "reparer"),
         (
             "point_dapport_pour_reemploi",
-            "Collecte par une structure spécialisée",
             "donner",
         ),
-        ("point_de_reparation", "Service de réparation", "reparer"),
+        ("point_de_reparation", "reparer"),
         (
             "point_de_collecte_ou_de_reprise_des_dechets",
-            "Collecte par une structure spécialisée",
             "trier",
         ),
     ]
@@ -55,13 +52,10 @@ def create_proposition_services(**kwargs):
         acteur_id = row["identifiant_unique"]
         sous_categories = row["produitsdechets_acceptes"]
 
-        for condition, acteur_service_name, action_name in conditions:
+        for condition, action_name in conditions:
             if row.get(condition):
-                acteur_service_id = mapping_utils.get_id_from_code(
-                    acteur_service_name, df_acteur_services
-                )
                 action_id = mapping_utils.get_id_from_code(action_name, df_actions)
-                key = (acteur_service_id, action_id, acteur_id)
+                key = (action_id, acteur_id)
 
                 if key in rows_dict:
                     if sous_categories not in rows_dict[key]["sous_categories"]:
@@ -69,11 +63,9 @@ def create_proposition_services(**kwargs):
                         rows_dict[key]["sous_categories"] += " | " + sous_categories
                 else:
                     rows_dict[key] = {
-                        "acteur_service_id": acteur_service_id,
                         "action_id": action_id,
                         "acteur_id": acteur_id,
                         "action": action_name,
-                        "acteur_service": acteur_service_name,
                         "sous_categories": sous_categories,
                     }
 

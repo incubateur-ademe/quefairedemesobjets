@@ -191,7 +191,7 @@ def write_data_to_postgres(**kwargs):
             chunksize=1000,
         )
 
-        df_ps_updated[["id", "acteur_service_id", "action_id", "acteur_id"]].to_sql(
+        df_ps_updated[["id", "action_id", "acteur_id"]].to_sql(
             temp_table_name_ps,
             engine,
             if_exists="append",
