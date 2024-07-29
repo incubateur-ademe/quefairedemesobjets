@@ -314,6 +314,9 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
                 form_field.help_text = str(acteur_value)
                 acteur_value_js = str(acteur_value).replace("'", "\\'")
 
+                if field_name == "acteur_services":
+                    form_field.help_text = acteur.get_acteur_services()
+
                 if acteur_value and (
                     isinstance(form_field, CharField)
                     or isinstance(form_field, PointField)
@@ -341,7 +344,7 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
                         "https://annuaire-entreprises.data.gouv.fr/etablissement/"
                         f"{siret}</a>"
                     )
-                if field_name == "ville" and form_field:  # vill  est pas null
+                if field_name == "ville" and form_field:  # ville  est pas null
                     google_adresse = [
                         obj.nom_commercial
                         or acteur.nom_commercial

@@ -17,13 +17,13 @@ qfdmd = import_module(f"{env}.utils.shared_constants")
 def process_many2many_df(df, column_name, df_columns=["acteur_id", "labelqualite_id"]):
     try:
         # Attempt to process the 'labels' column if it exists and is not empty
-        normalized_labels = df[column_name].dropna().apply(pd.json_normalize)
-        if normalized_labels.empty:
+        normalized_df = df[column_name].dropna().apply(pd.json_normalize)
+        if normalized_df.empty:
             return pd.DataFrame(
                 columns=df_columns
             )  # Return empty DataFrame if no data to process
         else:
-            return pd.concat(normalized_labels.tolist(), ignore_index=True)
+            return pd.concat(normalized_df.tolist(), ignore_index=True)
     except KeyError:
         # Handle the case where the specified column does not exist
         return pd.DataFrame(columns=df_columns)
@@ -56,7 +56,7 @@ def handle_create_event(df_actors, dag_run_id, engine):
 
     return {
         "actors": df_actors,
-        "pds": df_pds[["id", "acteur_service_id", "action_id", "acteur_id"]],
+        "pds": df_pds[["id", "action_id", "acteur_id"]],
         "pds_sous_categories": df_pdssc[
             ["propositionservice_id", "souscategorieobjet_id"]
         ],
@@ -159,6 +159,8 @@ def handle_write_data_create_event(
         chunksize=1000,
     )
 
+    df_labels = df_labels[["acteur_id", "labelqualite_id"]]
+    df_labels.drop_duplicates(inplace=True)
     df_labels[["acteur_id", "labelqualite_id"]].to_sql(
         "qfdmo_acteur_labels",
         connection,
@@ -168,7 +170,9 @@ def handle_write_data_create_event(
         chunksize=1000,
     )
 
-    df_acteur_services[["acteur_id", "acteurservice_id"]].to_sql(
+    df_acteur_services = df_acteur_services[["acteur_id", "acteurservice_id"]]
+    df_acteur_services.drop_duplicates(inplace=True)
+    df_acteur_services.to_sql(
         "qfdmo_acteur_acteur_services",
         connection,
         if_exists="append",
@@ -177,7 +181,7 @@ def handle_write_data_create_event(
         chunksize=1000,
     )
 
-    df_pds[["id", "acteur_service_id", "action_id", "acteur_id"]].to_sql(
+    df_pds[["id", "action_id", "acteur_id"]].to_sql(
         "qfdmo_propositionservice",
         connection,
         if_exists="append",
