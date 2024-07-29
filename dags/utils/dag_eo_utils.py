@@ -22,7 +22,7 @@ def fetch_data_from_api(**kwargs):
     params = kwargs["params"]
     api_url = params["endpoint"]
     logger.info(f"Fetching data from API : {api_url}")
-    data = api_utils.fetch_dataset_from_point_apport(api_url)
+    data = api_utils.fetch_data_from_url(api_url)
     df = pd.DataFrame(data)
     return df
 
