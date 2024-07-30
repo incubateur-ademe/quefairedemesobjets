@@ -45,7 +45,7 @@
         "@axe-core/playwright": "^4.9.1",
         "@gouvfr/dsfr": "^1.12",
         "@hotwired/stimulus": "^3.2.1",
-        "@hotwired/turbo": "^8.0.4",
+        "@hotwired/turbo": "^8.0.5",
         "bowser": "^2.11.0",
         "eslint-config-prettier": "^9.1.0",
         "iframe-resizer": "^4.4.5",
