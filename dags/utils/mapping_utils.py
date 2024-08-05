@@ -87,12 +87,9 @@ def process_reparacteurs(df, df_sources, df_acteurtype):
     df["acteur_type_id"] = transform_acteur_type_id(
         "artisan, commerce indépendant", df_acteurtype=df_acteurtype
     )
-    df["point_de_reparation"] = True
-    df["cree_le"] = datetime.now()
-    df["statut"] = "ACTIF"
-    df["modifie_le"] = df["cree_le"]
-    df["labels_etou_bonus"] = "Agréé Bonus Réparation"
     df["url"] = df["url"].apply(prefix_url)
+    df["point_de_reparation"] = True
+    df["labels_etou_bonus"] = "Agréé Bonus Réparation"
     return df
 
 
@@ -108,13 +105,9 @@ def process_actors(df):
         .str.replace("__", "_")
     )
     df = df.dropna(subset=["latitudewgs84", "longitudewgs84"])
-    df = df.replace({np.nan: None})
-    df["statut"] = "ACTIF"
     df["latitude"] = df["latitudewgs84"].astype(float).replace({np.nan: None})
     df["longitude"] = df["longitudewgs84"].astype(float).replace({np.nan: None})
     df = df.drop(["latitudewgs84", "longitudewgs84"], axis=1)
-    df["modifie_le"] = df["cree_le"]
-
     if "service_a_domicile" in df.columns:
         df.loc[
             df["service_a_domicile"] == "service à domicile uniquement", "statut"

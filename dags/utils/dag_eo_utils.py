@@ -138,6 +138,13 @@ def create_proposition_services_sous_categories(**kwargs):
 
 
 def serialize_to_json(**kwargs):
+    df_removed_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")[
+        "removed_actors"
+    ]
+    update_actors_columns = ["identifiant_unique", "statut"]
+    df_removed_actors["row_updates"] = df_removed_actors[update_actors_columns].apply(
+        lambda row: json.dumps(row.to_dict(), default=str), axis=1
+    )
     df_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
     df_ps = kwargs["ti"].xcom_pull(task_ids="create_proposition_services")["df"]
     df_pssc = kwargs["ti"].xcom_pull(
@@ -239,7 +246,7 @@ def serialize_to_json(**kwargs):
     )
     df_joined.drop_duplicates("identifiant_unique", keep="first", inplace=True)
 
-    return {"all": {"df": df_joined}}
+    return {"all": {"df": df_joined}, "to_disable": {"df": df_removed_actors}}
 
 
 def load_data_from_postgresql(**kwargs):
@@ -269,7 +276,23 @@ def load_data_from_postgresql(**kwargs):
     }
 
 
-def insert_dagrun_and_process_df(df, event, metadata, dag_id, run_id):
+def load_data_from_displayedactor_by_source(source_id):
+    pg_hook = PostgresHook(
+        postgres_conn_id=utils.get_db_conn_id(__file__, parent_of_parent=True)
+    )
+    engine = pg_hook.get_sqlalchemy_engine()
+
+    df_displayedactors = pd.read_sql_query(
+        f"SELECT identifiant_unique, cree_le, modifie_le "
+        f"FROM qfdmo_displayedacteur where statut='ACTIF' "
+        f"and source_id={source_id}",
+        engine,
+    )
+
+    return df_displayedactors
+
+
+def insert_dagrun_and_process_df(df, metadata, dag_id, run_id):
     pg_hook = PostgresHook(
         postgres_conn_id=utils.get_db_conn_id(__file__, parent_of_parent=True)
     )
@@ -295,7 +318,7 @@ def insert_dagrun_and_process_df(df, event, metadata, dag_id, run_id):
         )
         dag_run_id = result.fetchone()[0]
 
-    df["change_type"] = event
+    df["change_type"] = df["event"]
     df["dag_run_id"] = dag_run_id
     df[["row_updates", "dag_run_id", "change_type"]].to_sql(
         "qfdmo_dagrunchange",
@@ -310,7 +333,6 @@ def insert_dagrun_and_process_df(df, event, metadata, dag_id, run_id):
 def write_to_dagruns(**kwargs):
     dag_id = kwargs["dag"].dag_id
     run_id = kwargs["run_id"]
-    event = kwargs.get("event", "CREATE")
     dfs = kwargs["ti"].xcom_pull(task_ids="serialize_to_json")
     metadata_actors = (
         kwargs["ti"]
@@ -335,7 +357,7 @@ def write_to_dagruns(**kwargs):
         dag_id_suffixed = dag_id if key == "all" else f"{dag_id}_{key}"
         df = data["df"]
         metadata.update(data.get("metadata", {}))
-        insert_dagrun_and_process_df(df, event, metadata, dag_id_suffixed, run_id)
+        insert_dagrun_and_process_df(df, metadata, dag_id_suffixed, run_id)
 
 
 def _force_column_value(
@@ -377,10 +399,8 @@ def create_actors(**kwargs):
 
     for old_col, new_col in column_mapping.items():
         if new_col:
-            if old_col in ["latitude", "longitudewgs84"]:
-                continue
-            elif old_col == "id":
-                df[new_col] = "CMA_REPARACTEUR_" + df["id"].astype(str)
+            if old_col == "id":
+                df[new_col] = df["id"].astype(str)
             elif old_col == "is_enabled":
                 df[new_col] = df[old_col].map({1: "ACTIF", 0: "SUPPRIME"})
             elif old_col == "type_de_point_de_collecte":
@@ -389,10 +409,10 @@ def create_actors(**kwargs):
                         x, df_acteurtype=df_acteurtype
                     )
                 )
-            elif old_col in ["latitudewgs84", "longitudewgs84"]:
+            elif old_col in ["latitude", "longitude"]:
                 df[new_col] = df.apply(
                     lambda row: utils.transform_location(
-                        row["longitudewgs84"], row["latitudewgs84"]
+                        row["latitude"], row["longitude"]
                     ),
                     axis=1,
                 )
@@ -439,20 +459,42 @@ def create_actors(**kwargs):
         ),
         axis=1,
     )
+    df["cree_le"] = datetime.now()
+    df["statut"] = "ACTIF"
+    df["modifie_le"] = df["cree_le"]
+    df["labels_etou_bonus"] = "Agréé Bonus Réparation"
+    df = df.replace({np.nan: None})
 
     duplicates_mask = df.duplicated("identifiant_unique", keep=False)
     duplicate_ids = df.loc[duplicates_mask, "identifiant_unique"].unique()
     number_of_duplicates = len(duplicate_ids)
 
+    source_id = df["source_id"].iloc[0]
+    df_actors = load_data_from_displayedactor_by_source(source_id)
+
+    df_missing_actors = df_actors[
+        ~df_actors["identifiant_unique"].isin(df["identifiant_unique"])
+    ][["identifiant_unique", "cree_le", "modifie_le"]]
+
+    df_missing_actors["statut"] = "SUPPRIME"
+    df_missing_actors["event"] = "UPDATE_ACTOR"
+
     metadata = {
         "number_of_duplicates": number_of_duplicates,
         "duplicate_ids": list(duplicate_ids),
         "added_rows": len(df),
+        "number_of_removed_actors": len(df_missing_actors),
     }
 
     df = df.drop_duplicates(subset="siret", keep="first")
+    df["event"] = "CREATE"
 
-    return {"df": df, "metadata": metadata, "config": config}
+    return {
+        "df": df,
+        "metadata": metadata,
+        "config": config,
+        "removed_actors": df_missing_actors,
+    }
 
 
 def create_labels(**kwargs):

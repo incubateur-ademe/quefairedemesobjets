@@ -60,7 +60,6 @@ with DAG(
         >> [
             eo_operators.create_proposition_services_task(dag),
             eo_operators.create_labels_task(dag),
-            eo_operators.create_acteur_services_task(dag),
         ]
         >> eo_operators.create_proposition_services_sous_categories_task(dag)
         >> eo_operators.serialize_to_json_task(dag)
