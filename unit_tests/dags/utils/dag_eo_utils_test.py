@@ -65,6 +65,19 @@ def df_acteur_services_from_db():
 
 
 @pytest.fixture
+def df_displayed_acteurs_from_db():
+    return pd.DataFrame(
+        {
+            "identifiant_unique": ["id1", "id2"],
+            "source_id": ["source1", "source2"],
+            "statut": ["ACTIF", "ACTIF"],
+            "cree_le": ["2024-01-01", "2024-01-01"],
+            "modifie_le": ["2024-01-01", "2024-01-01"],
+        }
+    )
+
+
+@pytest.fixture
 def df_sous_categories_from_db():
     return pd.DataFrame(
         {"code": ["ecran", "smartphone, tablette et console"], "id": [101, 102]}
@@ -481,6 +494,7 @@ def mock_ti(
     df_acteur_services_from_db,
     df_sous_categories_from_db,
     df_labels_from_db,
+    df_displayed_acteurs_from_db,
 ):
     mock = MagicMock()
 
@@ -583,6 +597,7 @@ def mock_ti(
             "sources": df_sources_from_db,
             "acteurtype": df_acteurtype_from_db,
             "labels": df_labels_from_db,
+            "displayedacteurs": df_displayed_acteurs_from_db,
         },
         "create_proposition_services": {"df": df_proposition_services},
         "create_proposition_"
@@ -642,8 +657,19 @@ class TestCreateActorSeriesTransformations:
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
             "load_data_from_postgresql": {
-                "sources": None,
+                "sources": pd.DataFrame(
+                    {"code": ["source1", "source2"], "id": [101, 102]}
+                ),
                 "acteurtype": None,
+                "displayedacteurs": pd.DataFrame(
+                    {
+                        "identifiant_unique": ["id1", "id2"],
+                        "source_id": ["source1", "source2"],
+                        "statut": ["ACTIF", "ACTIF"],
+                        "cree_le": ["2024-01-01", "2024-01-01"],
+                        "modifie_le": ["2024-01-01", "2024-01-01"],
+                    }
+                ),
             },
             "fetch_data_from_api": pd.DataFrame(
                 {
@@ -676,6 +702,7 @@ class TestCreateActorSeriesTransformations:
                     "id_point_apport_ou_reparation": "identifiant_externe",
                     "public_accueilli": "public_accueilli",
                     "nom_de_lorganisme": "nom",
+                    "ecoorganisme": "source_id",
                 },
             },
         }
@@ -697,8 +724,19 @@ class TestCreateActorSeriesTransformations:
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
             "load_data_from_postgresql": {
-                "sources": None,
+                "sources": pd.DataFrame(
+                    {"code": ["source1", "source2"], "id": [101, 102]}
+                ),
                 "acteurtype": None,
+                "displayedacteurs": pd.DataFrame(
+                    {
+                        "identifiant_unique": ["id1", "id2"],
+                        "source_id": ["source1", "source2"],
+                        "statut": ["ACTIF", "ACTIF"],
+                        "cree_le": ["2024-01-01", "2024-01-01"],
+                        "modifie_le": ["2024-01-01", "2024-01-01"],
+                    }
+                ),
             },
             "fetch_data_from_api": pd.DataFrame(
                 {
@@ -731,6 +769,7 @@ class TestCreateActorSeriesTransformations:
                     "id_point_apport_ou_reparation": "identifiant_externe",
                     "uniquement_sur_rdv": "uniquement_sur_rdv",
                     "nom_de_lorganisme": "nom",
+                    "ecoorganisme": "source_id",
                 },
             },
         }
@@ -753,8 +792,19 @@ class TestCreateActorSeriesTransformations:
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
             "load_data_from_postgresql": {
-                "sources": None,
+                "sources": pd.DataFrame(
+                    {"code": ["source1", "source2"], "id": [101, 102]}
+                ),
                 "acteurtype": None,
+                "displayedacteurs": pd.DataFrame(
+                    {
+                        "identifiant_unique": ["id1", "id2"],
+                        "source_id": ["source1", "source2"],
+                        "statut": ["ACTIF", "ACTIF"],
+                        "cree_le": ["2024-01-01", "2024-01-01"],
+                        "modifie_le": ["2024-01-01", "2024-01-01"],
+                    }
+                ),
             },
             "fetch_data_from_api": pd.DataFrame(
                 {
@@ -787,6 +837,7 @@ class TestCreateActorSeriesTransformations:
                     "id_point_apport_ou_reparation": "identifiant_externe",
                     "reprise": "reprise",
                     "nom_de_lorganisme": "nom",
+                    "ecoorganisme": "source_id",
                 },
             },
         }
@@ -811,8 +862,19 @@ class TestCreateActorSeriesTransformations:
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
             "load_data_from_postgresql": {
-                "sources": None,
+                "sources": pd.DataFrame(
+                    {"code": ["source1", "source2"], "id": [101, 102]}
+                ),
                 "acteurtype": None,
+                "displayedacteurs": pd.DataFrame(
+                    {
+                        "identifiant_unique": ["id1", "id2"],
+                        "source_id": ["source1", "source2"],
+                        "statut": ["ACTIF", "ACTIF"],
+                        "cree_le": ["2024-01-01", "2024-01-01"],
+                        "modifie_le": ["2024-01-01", "2024-01-01"],
+                    }
+                ),
             },
             "fetch_data_from_api": pd.DataFrame(
                 {
@@ -849,6 +911,7 @@ class TestCreateActorSeriesTransformations:
                         "exclusivite_de_reprisereparation"
                     ),
                     "nom_de_lorganisme": "nom",
+                    "ecoorganisme": "source_id",
                 },
             },
         }
@@ -1034,6 +1097,9 @@ class TestSerializeToJson:
         mock.xcom_pull.side_effect = lambda task_ids="": {
             "create_actors": {
                 "df": pd.DataFrame({"identifiant_unique": [1, 2]}),
+                "removed_actors": pd.DataFrame(
+                    {"identifiant_unique": [3], "statut": ["SUPPRIME"]}
+                ),
             },
             "create_proposition_services": {"df": df_proposition_services},
             "create_proposition_services_sous_categories": (
@@ -1110,6 +1176,9 @@ class TestSerializeToJson:
         mock.xcom_pull.side_effect = lambda task_ids="": {
             "create_actors": {
                 "df": pd.DataFrame({"identifiant_unique": [1, 2]}),
+                "removed_actors": pd.DataFrame(
+                    {"identifiant_unique": [3], "statut": ["ACTIF"]}
+                ),
             },
             "create_proposition_services": {"df": df_proposition_services},
             "create_proposition_services_sous_categories": (
@@ -1131,7 +1200,7 @@ class TestSerializeToJson:
 
 
 def test_create_proposition_services_sous_categories(mock_ti):
-    kwargs = {"ti": mock_ti}
+    kwargs = {"ti": mock_ti, "params": {}}
     df_result = create_proposition_services_sous_categories(**kwargs)
 
     assert not df_result.empty

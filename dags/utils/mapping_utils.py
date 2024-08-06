@@ -104,10 +104,10 @@ def process_actors(df):
         .str.replace("_-", "_")
         .str.replace("__", "_")
     )
-    df = df.dropna(subset=["latitudewgs84", "longitudewgs84"])
-    df["latitude"] = df["latitudewgs84"].astype(float).replace({np.nan: None})
-    df["longitude"] = df["longitudewgs84"].astype(float).replace({np.nan: None})
-    df = df.drop(["latitudewgs84", "longitudewgs84"], axis=1)
+    df = df.rename(columns={"latitudewgs84": "latitude", "longitudewgs84": "longitude"})
+    df = df.dropna(subset=["latitude", "longitude"])
+    df["latitude"] = df["latitude"].astype(float).replace({np.nan: None})
+    df["longitude"] = df["longitude"].astype(float).replace({np.nan: None})
     if "service_a_domicile" in df.columns:
         df.loc[
             df["service_a_domicile"] == "service à domicile uniquement", "statut"

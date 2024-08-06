@@ -264,6 +264,7 @@ def load_data_from_postgresql(**kwargs):
     max_id_pds = pd.read_sql_query(
         "SELECT max(id) FROM qfdmo_displayedpropositionservice", engine
     )["max"][0]
+    df_displayedacteurs = pd.read_sql_table("qfdmo_displayedacteur", engine)
 
     return {
         "acteurtype": df_acteurtype,
@@ -273,6 +274,7 @@ def load_data_from_postgresql(**kwargs):
         "max_pds_idx": max_id_pds,
         "sous_categories": df_sous_categories_objet,
         "labels": df_label,
+        "displayedacteurs": df_displayedacteurs,
     }
 
 
@@ -379,7 +381,7 @@ def create_actors(**kwargs):
     df = kwargs["ti"].xcom_pull(task_ids="fetch_data_from_api")
     df_sources = data_dict["sources"]
     df_acteurtype = data_dict["acteurtype"]
-
+    df_displayedacteurs = data_dict["displayedacteurs"]
     config = utils.get_mapping_config()
     params = kwargs["params"]
     reparacteurs = params.get("reparacteurs", False)
@@ -396,6 +398,7 @@ def create_actors(**kwargs):
         df = mapping_utils.process_reparacteurs(df, df_sources, df_acteurtype)
     else:
         df = mapping_utils.process_actors(df)
+    print(df.columns)
 
     for old_col, new_col in column_mapping.items():
         if new_col:
@@ -409,7 +412,12 @@ def create_actors(**kwargs):
                         x, df_acteurtype=df_acteurtype
                     )
                 )
-            elif old_col in ["latitude", "longitude"]:
+            elif old_col in [
+                "latitude",
+                "longitude",
+                "longitudewgs84",
+                "latitudewgs84",
+            ]:
                 df[new_col] = df.apply(
                     lambda row: utils.transform_location(
                         row["latitude"], row["longitude"]
@@ -451,6 +459,7 @@ def create_actors(**kwargs):
             elif old_col == "exclusivite_de_reprisereparation":
                 df[new_col] = df[old_col].apply(lambda x: True if x == "oui" else False)
             else:
+                print(old_col)
                 df[new_col] = df[old_col]
 
     df["identifiant_unique"] = df.apply(
@@ -470,8 +479,10 @@ def create_actors(**kwargs):
     number_of_duplicates = len(duplicate_ids)
 
     source_id = df["source_id"].iloc[0]
-    df_actors = load_data_from_displayedactor_by_source(source_id)
-
+    df_actors = df_displayedacteurs[
+        (df_displayedacteurs["source_id"] == source_id)
+        & (df_displayedacteurs["statut"] == "ACTIF")
+    ]
     df_missing_actors = df_actors[
         ~df_actors["identifiant_unique"].isin(df["identifiant_unique"])
     ][["identifiant_unique", "cree_le", "modifie_le"]]
@@ -486,7 +497,7 @@ def create_actors(**kwargs):
         "number_of_removed_actors": len(df_missing_actors),
     }
 
-    df = df.drop_duplicates(subset="siret", keep="first")
+    df = df.drop_duplicates(subset="identifiant_unique", keep="first")
     df["event"] = "CREATE"
 
     return {
