@@ -476,9 +476,10 @@ def create_actors(**kwargs):
     duplicate_ids = df.loc[duplicates_mask, "identifiant_unique"].unique()
     number_of_duplicates = len(duplicate_ids)
 
-    source_id = df["source_id"].iloc[0]
+    unique_source_ids = df["source_id"].unique()
+
     df_actors = df_displayedacteurs[
-        (df_displayedacteurs["source_id"] == source_id)
+        (df_displayedacteurs["source_id"].isin(unique_source_ids))
         & (df_displayedacteurs["statut"] == "ACTIF")
     ]
     df_missing_actors = df_actors[
