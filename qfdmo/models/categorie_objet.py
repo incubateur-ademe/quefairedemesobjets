@@ -1,5 +1,6 @@
-from django.conf import settings
 from urllib.parse import urlencode
+
+from django.conf import settings
 from django.contrib.gis.db import models
 from django.db.utils import cached_property
 from django.forms import model_to_dict
@@ -83,4 +84,7 @@ class Objet(CodeAsNaturalKeyModel):
         blank=True,
         null=True,
         related_name="objets",
+    )
+    identifiant_qfdmod = models.IntegerField(
+        blank=True, null=True, verbose_name="Identifiant QFDMD"
     )
