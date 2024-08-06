@@ -69,7 +69,7 @@ def df_displayed_acteurs_from_db():
     return pd.DataFrame(
         {
             "identifiant_unique": ["id1", "id2"],
-            "source_id": ["source1", "source2"],
+            "source_id": [101, 102],
             "statut": ["ACTIF", "ACTIF"],
             "cree_le": ["2024-01-01", "2024-01-01"],
             "modifie_le": ["2024-01-01", "2024-01-01"],
@@ -1231,6 +1231,60 @@ def test_create_actors(mock_ti, mock_config):
     assert metadata["added_rows"] == len(df_result)
     assert "siren" not in df_result.columns
     assert "sous_categories" in result["config"]
+
+
+def test_deleted_acteur():
+    mock = MagicMock()
+    mock.xcom_pull.side_effect = lambda task_ids="": {
+        "load_data_from_postgresql": {
+            "sources": pd.DataFrame({"code": ["source1", "source2"], "id": [101, 102]}),
+            "acteurtype": None,
+            "displayedacteurs": pd.DataFrame(
+                {
+                    "identifiant_unique": ["id1", "id2"],
+                    "source_id": [101, 102],
+                    "statut": ["ACTIF", "ACTIF"],
+                    "cree_le": ["2024-01-01", "2024-01-01"],
+                    "modifie_le": ["2024-01-01", "2024-01-01"],
+                }
+            ),
+        },
+        "fetch_data_from_api": pd.DataFrame(
+            {
+                "nom_de_lorganisme": ["Eco1"],
+                "id_point_apport_ou_reparation": ["1"],
+                "latitudewgs84": ["3.8566"],
+                "longitudewgs84": ["50.8566"],
+                "type_de_point_de_collecte": [
+                    "artisan, commerce indépendant",
+                ],
+                "ecoorganisme": [
+                    "source1",
+                ],
+                "produitsdechets_acceptes": ["téléphones portables"],
+                "point_dapport_de_service_reparation": [True],
+                "point_dapport_pour_reemploi": [False],
+                "point_de_reparation": [True],
+                "point_de_collecte_ou_de_reprise_des_dechets": [True],
+                "_updatedAt": ["2023-01-01 20:10:10"],
+                "cree_le": ["2021-01-01"],
+            }
+        ),
+    }[task_ids]
+
+    kwargs = {
+        "ti": mock,
+        "params": {
+            "column_mapping": {
+                "id_point_apport_ou_reparation": "identifiant_externe",
+                "nom_de_lorganisme": "nom",
+                "ecoorganisme": "source_id",
+            },
+        },
+    }
+    result = create_actors(**kwargs)
+    assert len(result["removed_actors"]) == 1
+    assert result["removed_actors"]["event"].tolist()[0] == "UPDATE_ACTOR"
 
 
 def test_create_reparacteurs():

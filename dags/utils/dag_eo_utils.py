@@ -482,6 +482,7 @@ def create_actors(**kwargs):
         (df_displayedacteurs["source_id"] == source_id)
         & (df_displayedacteurs["statut"] == "ACTIF")
     ]
+    print(df_displayedacteurs)
     df_missing_actors = df_actors[
         ~df_actors["identifiant_unique"].isin(df["identifiant_unique"])
     ][["identifiant_unique", "cree_le", "modifie_le"]]
@@ -498,7 +499,6 @@ def create_actors(**kwargs):
 
     df = df.drop_duplicates(subset="identifiant_unique", keep="first")
     df["event"] = "CREATE"
-
     return {
         "df": df,
         "metadata": metadata,
