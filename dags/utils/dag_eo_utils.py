@@ -458,7 +458,6 @@ def create_actors(**kwargs):
             elif old_col == "exclusivite_de_reprisereparation":
                 df[new_col] = df[old_col].apply(lambda x: True if x == "oui" else False)
             else:
-                print(old_col)
                 df[new_col] = df[old_col]
 
     df["identifiant_unique"] = df.apply(
@@ -482,7 +481,6 @@ def create_actors(**kwargs):
         (df_displayedacteurs["source_id"] == source_id)
         & (df_displayedacteurs["statut"] == "ACTIF")
     ]
-    print(df_displayedacteurs)
     df_missing_actors = df_actors[
         ~df_actors["identifiant_unique"].isin(df["identifiant_unique"])
     ][["identifiant_unique", "cree_le", "modifie_le"]]
