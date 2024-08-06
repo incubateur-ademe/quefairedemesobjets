@@ -1233,6 +1233,94 @@ def test_create_actors(mock_ti, mock_config):
     assert "sous_categories" in result["config"]
 
 
+def test_create_reparacteurs():
+    mock = MagicMock()
+    mock.xcom_pull.side_effect = lambda task_ids="": {
+        "load_data_from_postgresql": {
+            "sources": pd.DataFrame({"code": ["source1", "source2"], "id": [101, 102]}),
+            "acteurtype": pd.DataFrame(
+                {
+                    "libelle": ["Type1", "Type2"],
+                    "code": ["ess", "code2"],
+                    "id": [201, 202],
+                }
+            ),
+            "displayedacteurs": pd.DataFrame(
+                {
+                    "identifiant_unique": ["id1", "id2"],
+                    "source_id": ["source1", "source2"],
+                    "statut": ["ACTIF", "ACTIF"],
+                    "cree_le": ["2024-01-01", "2024-01-01"],
+                    "modifie_le": ["2024-01-01", "2024-01-01"],
+                }
+            ),
+        },
+        "fetch_data_from_api": pd.DataFrame(
+            {
+                "reparactor_description": ["Ceci est une description du réparacteur."],
+                "address_1": ["12 Rue de Rivoli"],
+                "address_2": ["Bâtiment A"],
+                "zip_code": ["75001"],
+                "zip_code_label": ["Paris"],
+                "website": ["https://www.exemple.com"],
+                "email": ["contact@exemple.com"],
+                "phone": ["+33-1-23-45-67-89"],
+                "siret": ["123 456 789 00010"],
+                "id": ["identifiant-unique-123"],
+                "is_enabled": ["True"],
+                "other_info": ["Informations supplémentaires sur le réparacteur."],
+                "creation_date": ["2023-01-01"],
+                "update_date": ["2023-06-01"],
+                "reparactor_hours": ["Lun-Ven 9:00-17:00"],
+                "categorie": ["categorie"],
+                "categorie2": ["categorie2"],
+                "categorie3": ["categorie3"],
+                "latitude": ["45,3"],
+                "longitude": ["48,3"],
+                "url": ["abcde.fr"],
+                "name": ["artisan reparacteur"],
+            }
+        ),
+    }[task_ids]
+
+    kwargs = {
+        "ti": mock,
+        "params": {
+            "reparacteurs": True,
+            "column_mapping": {
+                "name": "nom",
+                "reparactor_description": "description",
+                "address_1": "adresse",
+                "address_2": "adresse_complement",
+                "zip_code": "code_postal",
+                "zip_code_label": "ville",
+                "website": "url",
+                "email": "email",
+                "phone": "telephone",
+                "siret": "siret",
+                "id": "identifiant_externe",
+                "is_enabled": "statut",
+                "other_info": "commentaires",
+                "creation_date": "cree_le",
+                "update_date": "modifie_le",
+                "reparactor_hours": "horaires_description",
+            },
+        },
+    }
+
+    result = create_actors(**kwargs)
+    df_result = result["df"]
+    metadata = result["metadata"]
+
+    assert not df_result.empty
+    assert len(df_result) == 1
+    assert metadata["number_of_duplicates"] == 0
+    assert metadata["added_rows"] == len(df_result)
+    assert "siren" not in df_result.columns
+    assert "sous_categories" in result["config"]
+    assert "event" in df_result.columns
+
+
 def test_create_labels(
     db_mapping_config,
     df_actions_from_db,

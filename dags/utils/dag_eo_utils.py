@@ -398,7 +398,6 @@ def create_actors(**kwargs):
         df = mapping_utils.process_reparacteurs(df, df_sources, df_acteurtype)
     else:
         df = mapping_utils.process_actors(df)
-    print(df.columns)
 
     for old_col, new_col in column_mapping.items():
         if new_col:
