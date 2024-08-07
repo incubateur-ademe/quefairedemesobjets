@@ -76,7 +76,7 @@ MIDDLEWARE = [
 X_FRAME_OPTIONS = "ALLOWALL"
 
 CORS_ALLOWED_ORIGINS = decouple.config(
-    "CORS_ALLOWED_ORIGINS", default="lvao.ademe.fr", cast=str
+    "CORS_ALLOWED_ORIGINS", default="https://lvao.ademe.fr", cast=str
 ).split(",")
 
 CORS_ALLOWED_ORIGIN_REGEXES = [
