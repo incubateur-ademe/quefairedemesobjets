@@ -63,7 +63,6 @@ class SousCategorieObjet(CodeAsNaturalKeyModel):
             )
 
             return f"{settings.BASE_URL}/?{params}"
-        return ""
 
     def natural_key(self) -> tuple[str]:
         return (self.code,)
