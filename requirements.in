@@ -21,3 +21,4 @@ tqdm
 unidecode
 uvicorn
 whitenoise
+django-cors-headers
