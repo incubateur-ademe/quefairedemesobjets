@@ -525,6 +525,7 @@ def create_labels(**kwargs):
         if "labels_etou_bonus" in row:
             label = str(row["labels_etou_bonus"])
             label_code = row.get("ecoorganisme") or row.get("label_code", "").lower()
+            print(label_code)
             if label == "Agréé Bonus Réparation" or label_code == "reparacteur":
                 if label_code in label_mapping:
                     rows_list.append(

@@ -29,11 +29,12 @@ def df_acteurtype_from_db():
 def df_labels_from_db():
     return pd.DataFrame(
         {
-            "code": ["ess", "refashion"],
-            "id": [1, 2],
+            "code": ["ess", "refashion", "reparacteur"],
+            "id": [1, 2, 3],
             "libelle": [
                 "Enseigne de l'économie sociale et solidaire",
                 "Labellisé Bonus Réparation Re_fashion",
+                "Labellisé Repar'Acteur",
             ],
         }
     )
@@ -1416,3 +1417,46 @@ def test_create_labels(
         "Labellisé Bonus Réparation Re_fashion",
     }
     assert df["labelqualite_id"].tolist() == [1, 2]
+
+
+def test_create_reparacteur_labels(
+    db_mapping_config,
+    df_actions_from_db,
+    df_acteurtype_from_db,
+    df_acteur_services_from_db,
+    df_sous_categories_from_db,
+    df_labels_from_db,
+):
+
+    mock = get_mock_ti_label(
+        db_mapping_config,
+        df_actions_from_db,
+        df_acteurtype_from_db,
+        df_acteur_services_from_db,
+        df_sous_categories_from_db,
+        df_labels_from_db,
+        df_create_actors=pd.DataFrame(
+            {
+                "identifiant_unique": [1, 2],
+                "labels_etou_bonus": [None, None],
+                "produitsdechets_acceptes": ["téléphones portables", "ecrans"],
+                "label_code": ["reparacteur", "reparacteur"],
+                "acteur_type_id": [202, 202],
+                "point_dapport_de_service_reparation": [False, True],
+                "point_dapport_pour_reemploi": [False, False],
+                "point_de_reparation": [True, True],
+                "point_de_collecte_ou_de_reprise_des_dechets": [True, True],
+            }
+        ),
+        max_pds_idx=123,
+    )
+
+    kwargs = {"ti": mock}
+
+    df = create_labels(**kwargs)
+    assert len(df) == 2
+    assert set(df["labelqualite"].tolist()) == {
+        "Labellisé Repar'Acteur",
+        "Labellisé Repar'Acteur",
+    }
+    assert df["labelqualite_id"].tolist() == [3, 3]
