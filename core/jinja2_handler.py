@@ -62,8 +62,8 @@ def display_sources_panel(adresse: DisplayedActeur) -> bool:
     return bool(adresse.source and adresse.source.afficher)
 
 
-def display_object_filter(request) -> bool:
-    return not bool(request.GET.get("sc_id"))
+def hide_object_filter(request) -> bool:
+    return bool(request.GET.get("sc_id"))
 
 
 def distance_to_acteur(request, adresse):
@@ -89,7 +89,7 @@ def environment(**options):
             "display_infos_panel": display_infos_panel,
             "display_sources_panel": display_sources_panel,
             "display_labels_panel": display_labels_panel,
-            "display_object_filter": display_object_filter,
+            "hide_object_filter": hide_object_filter,
             "distance_to_acteur": distance_to_acteur,
             "display_exclusivite_reparation": display_exclusivite_reparation,
             "is_embedded": is_embedded,
