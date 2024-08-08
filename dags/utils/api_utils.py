@@ -1,5 +1,11 @@
-import requests
 from ratelimit import limits, sleep_and_retry
+import requests
+from importlib import import_module
+from pathlib import Path
+
+env = Path(__file__).parent.parent.name
+
+mapping_utils = import_module(f"{env}.utils.mapping_utils")
 
 
 def fetch_dataset_from_point_apport(url):
@@ -13,6 +19,35 @@ def fetch_dataset_from_point_apport(url):
         else:
             print(f"Failed to fetch data: {response.status_code}")
             break
+    return all_data
+
+
+def fetch_data_from_url(base_url):
+    if "pointsapport.ademe.fr" in base_url:
+        return fetch_dataset_from_point_apport(base_url)
+    elif "artisanat.fr" in base_url:
+        return fetch_dataset_from_artisanat(base_url)
+    return []
+
+
+def fetch_dataset_from_artisanat(base_url):
+    all_data = []
+    offset = 0
+    total_records = requests.get(base_url, params={"limit": 1, "offset": 0}).json()[
+        "total_count"
+    ]
+    records_per_request = 100
+    params = {"limit": records_per_request, "offset": 0}
+    while offset < total_records:
+        params.update({"offset": offset})
+        response = requests.get(base_url, params=params)
+        if response.status_code == 200:
+            data = response.json()
+            all_data.extend(data["results"])
+            offset += records_per_request
+        else:
+            response.raise_for_status()
+
     return all_data
 
 

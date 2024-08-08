@@ -55,18 +55,20 @@ def fetch_and_parse_data(**context):
 
     dag_run_id = df_sql["dag_run_id"].iloc[0]
 
-    change_type = df_sql["change_type"].iloc[0]
+    df_create = df_sql[df_sql["change_type"] == "CREATE"]
+    df_update_actor = df_sql[df_sql["change_type"] == "UPDATE_ACTOR"]
 
-    normalized_dfs = df_sql["row_updates"].apply(pd.json_normalize)
-    df_actors = pd.concat(normalized_dfs.tolist(), ignore_index=True)
-
-    if change_type == "CREATE":
+    if not df_create.empty:
+        normalized_dfs = df_create["row_updates"].apply(pd.json_normalize)
+        df_actors_create = pd.concat(normalized_dfs.tolist(), ignore_index=True)
         return dag_ingest_validated_utils.handle_create_event(
-            df_actors, dag_run_id, engine
+            df_actors_create, dag_run_id, engine
         )
-    elif change_type == "UPDATE_ACTOR":
+    if not df_update_actor.empty:
+        normalized_dfs = df_update_actor["row_updates"].apply(pd.json_normalize)
+        df_actors_update_actor = pd.concat(normalized_dfs.tolist(), ignore_index=True)
         return dag_ingest_validated_utils.handle_update_actor_event(
-            df_actors, dag_run_id
+            df_actors_update_actor, dag_run_id
         )
 
 
