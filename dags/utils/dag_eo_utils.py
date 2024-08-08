@@ -469,7 +469,6 @@ def create_actors(**kwargs):
     df["cree_le"] = datetime.now()
     df["statut"] = "ACTIF"
     df["modifie_le"] = df["cree_le"]
-    df["labels_etou_bonus"] = "Agréé Bonus Réparation"
     df = df.replace({np.nan: None})
 
     duplicates_mask = df.duplicated("identifiant_unique", keep=False)
@@ -525,10 +524,8 @@ def create_labels(**kwargs):
     for _, row in df_actors.iterrows():
         if "labels_etou_bonus" in row:
             label = str(row["labels_etou_bonus"])
-            if label == "Agréé Bonus Réparation":
-                label_code = (
-                    row.get("ecoorganisme") or row.get("label_code", "").lower()
-                )
+            label_code = row.get("ecoorganisme") or row.get("label_code", "").lower()
+            if label == "Agréé Bonus Réparation" or label_code == "reparacteur":
                 if label_code in label_mapping:
                     rows_list.append(
                         {
