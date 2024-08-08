@@ -264,6 +264,9 @@ def load_data_from_postgresql(**kwargs):
     max_id_pds = pd.read_sql_query(
         "SELECT max(id) FROM qfdmo_displayedpropositionservice", engine
     )["max"][0]
+    # TODO : ici on rappatrie tous les acteurs, ce serait bien de filtrer par source_id
+    # TODO : est-ce qu'on doit lire les acteurs dans qfdmo_displayedacteur ou
+    # qfdmo_acteur ?
     df_displayedacteurs = pd.read_sql_table("qfdmo_displayedacteur", engine)
 
     return {
@@ -411,6 +414,8 @@ def create_actors(**kwargs):
                         x, df_acteurtype=df_acteurtype
                     )
                 )
+            # TODO : je pense qu'on passe 2 fois dans cette condition, une fois pour
+            # la latitude et une fois pour la longitude
             elif old_col in [
                 "latitude",
                 "longitude",
@@ -481,6 +486,7 @@ def create_actors(**kwargs):
         (df_displayedacteurs["source_id"].isin(unique_source_ids))
         & (df_displayedacteurs["statut"] == "ACTIF")
     ]
+    # TODO : est-ce que les colonne cree_le et modifie_le sont nécessaires
     df_missing_actors = df_actors[
         ~df_actors["identifiant_unique"].isin(df["identifiant_unique"])
     ][["identifiant_unique", "cree_le", "modifie_le"]]

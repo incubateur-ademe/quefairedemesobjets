@@ -1,13 +1,12 @@
-import math
 import json
-from datetime import datetime
+import math
 import re
+from datetime import datetime
 from importlib import import_module
-
-import pandas as pd
-import numpy as np
 from pathlib import Path
 
+import numpy as np
+import pandas as pd
 
 env = Path(__file__).parent.parent.name
 
@@ -80,6 +79,7 @@ def process_reparacteurs(df, df_sources, df_acteurtype):
     df["source_id"] = get_id_from_code(
         "CMA - Chambre des métiers et de l'artisanat", df_sources
     )
+    # TODO : on pourrait gérer en configuration les colonne qui sont pareil pour tous
     df["label_code"] = "reparacteur"
     df["latitude"] = df["latitude"].apply(clean_float_from_fr_str)
     df["longitude"] = df["longitude"].apply(clean_float_from_fr_str)
@@ -87,9 +87,10 @@ def process_reparacteurs(df, df_sources, df_acteurtype):
     df["acteur_type_id"] = transform_acteur_type_id(
         "artisan, commerce indépendant", df_acteurtype=df_acteurtype
     )
+    # TODO : voir si on peut tester les urls dans un opérateur, quite à maintenir
+    # un cache des urls validées
     df["url"] = df["url"].apply(prefix_url)
     df["point_de_reparation"] = True
-    df["labels_etou_bonus"] = "Agréé Bonus Réparation"
     return df
 
 
@@ -105,9 +106,10 @@ def process_actors(df):
         .str.replace("__", "_")
     )
     df = df.rename(columns={"latitudewgs84": "latitude", "longitudewgs84": "longitude"})
-    df = df.dropna(subset=["latitude", "longitude"])
-    df["latitude"] = df["latitude"].astype(float).replace({np.nan: None})
-    df["longitude"] = df["longitude"].astype(float).replace({np.nan: None})
+    if "latitude" in df.columns and "longitude" in df.columns:
+        df = df.dropna(subset=["latitude", "longitude"])
+        df["latitude"] = df["latitude"].astype(float).replace({np.nan: None})
+        df["longitude"] = df["longitude"].astype(float).replace({np.nan: None})
     if "service_a_domicile" in df.columns:
         df.loc[
             df["service_a_domicile"] == "service à domicile uniquement", "statut"
