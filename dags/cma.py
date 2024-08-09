@@ -7,7 +7,6 @@ from airflow import DAG
 env = Path(__file__).parent.name
 utils = import_module(f"{env}.utils.utils")
 eo_operators = import_module(f"{env}.utils.eo_operators")
-cma_utils = import_module(f"{env}.utils.cma_utils")
 default_args = {
     "owner": "airflow",
     "depends_on_past": False,
