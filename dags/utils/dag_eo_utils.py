@@ -396,7 +396,6 @@ def create_actors(**kwargs):
 
     for k, val in column_to_replace.items():
         df[k] = val
-
     if reparacteurs:
         df = mapping_utils.process_reparacteurs(df, df_sources, df_acteurtype)
     else:
