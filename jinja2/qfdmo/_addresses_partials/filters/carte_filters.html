@@ -7,9 +7,9 @@
 {% endblock %}
 
 {% block filters_content %}
-    {% if display_object_filter(request) %}
+    {% with hidden=hide_object_filter(request) %}
         {% include 'qfdmo/_addresses_partials/filters/_object_filter.html' %}
-    {% endif %}
+    {% endwith %}
     {% include 'qfdmo/_addresses_partials/filters/_labels_filters.html' %}
 {% endblock %}
 

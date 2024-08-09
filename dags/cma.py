@@ -7,7 +7,6 @@ from airflow import DAG
 env = Path(__file__).parent.name
 utils = import_module(f"{env}.utils.utils")
 eo_operators = import_module(f"{env}.utils.eo_operators")
-
 default_args = {
     "owner": "airflow",
     "depends_on_past": False,
@@ -18,36 +17,36 @@ default_args = {
 }
 
 with DAG(
-    utils.get_dag_name(__file__, "soren"),
+    utils.get_dag_name(__file__, "cma"),
     default_args=default_args,
     description=(
         "A pipeline to fetch, process, and load to validate data into postgresql"
-        " for Soren dataset"
+        " for CMA reparacteur dataset"
     ),
     params={
         "endpoint": (
-            "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
-            "donnees-eo-soren/lines?size=10000"
+            "https://data.artisanat.fr/api/explore/v2.1/catalog/datasets/reparacteurs/records"
         ),
+        "reparacteurs": True,
         "column_mapping": {
-            "id_point_apport_ou_reparation": "identifiant_externe",
-            "type_de_point_de_collecte": "acteur_type_id",
-            "filiere": "",
-            "exclusivite_de_reprisereparation": "exclusivite_de_reprisereparation",
-            "uniquement_sur_rdv": "uniquement_sur_rdv",
-            "public_accueilli": "public_accueilli",
-            "reprise": "reprise",
-            "produitsdechets_acceptes": "",
-            "labels_etou_bonus": "",
-            "point_de_reparation": "",
-            "ecoorganisme": "source_id",
-            "adresse_format_ban": "adresse",
-            "nom_de_lorganisme": "nom",
-            "_updatedAt": "cree_le",
-            "perimetre_dintervention": "",
-            "longitudewgs84": "location",
-            "latitudewgs84": "location",
+            "name": "nom",
+            "reparactor_description": "description",
+            "address_1": "adresse",
+            "address_2": "adresse_complement",
+            "zip_code": "code_postal",
+            "zip_code_label": "ville",
+            "website": "url",
+            "email": "email",
+            "phone": "telephone",
+            "siret": "siret",
+            "id": "identifiant_externe",
+            "is_enabled": "statut",
+            "other_info": "commentaires",
+            "creation_date": "cree_le",
+            "update_date": "modifie_le",
+            "reparactor_hours": "horaires_description",
         },
+        "mapping_config_key": "sous_categories_cma",
     },
     schedule=None,
 ) as dag:

@@ -22,7 +22,7 @@ def fetch_data_from_api(**kwargs):
     params = kwargs["params"]
     api_url = params["endpoint"]
     logger.info(f"Fetching data from API : {api_url}")
-    data = api_utils.fetch_dataset_from_point_apport(api_url)
+    data = api_utils.fetch_data_from_url(api_url)
     df = pd.DataFrame(data)
     return df
 
@@ -89,24 +89,38 @@ def create_proposition_services_sous_categories(**kwargs):
     data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
     config = kwargs["ti"].xcom_pull(task_ids="create_actors")["config"]
     df_sous_categories_map = data_dict["sous_categories"]
-
+    params = kwargs["params"]
+    mapping_config_key = params.get("mapping_config_key", "sous_categories")
     rows_list = []
-    sous_categories = config["sous_categories"]
+    sous_categories = config[mapping_config_key]
 
     for _, row in df.iterrows():
         products = str(row["sous_categories"]).split("|")
         for product in set(products):
-            if product.strip().lower() in sous_categories:
-                rows_list.append(
-                    {
-                        "propositionservice_id": row["id"],
-                        "souscategorieobjet_id": mapping_utils.get_id_from_code(
-                            sous_categories[product.strip().lower()],
-                            df_sous_categories_map,
-                        ),
-                        "souscategorie": product.strip(),
-                    }
-                )
+            product_key = product.strip().lower()
+            if product_key in sous_categories:
+                sous_categories_value = sous_categories[product_key]
+                if isinstance(sous_categories_value, list):
+                    for value in sous_categories_value:
+                        rows_list.append(
+                            {
+                                "propositionservice_id": row["id"],
+                                "souscategorieobjet_id": mapping_utils.get_id_from_code(
+                                    value, df_sous_categories_map
+                                ),
+                                "souscategorie": value,
+                            }
+                        )
+                else:
+                    rows_list.append(
+                        {
+                            "propositionservice_id": row["id"],
+                            "souscategorieobjet_id": mapping_utils.get_id_from_code(
+                                sous_categories_value, df_sous_categories_map
+                            ),
+                            "souscategorie": product.strip(),
+                        }
+                    )
 
     df_sous_categories = pd.DataFrame(
         rows_list,
@@ -124,6 +138,13 @@ def create_proposition_services_sous_categories(**kwargs):
 
 
 def serialize_to_json(**kwargs):
+    df_removed_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")[
+        "removed_actors"
+    ]
+    update_actors_columns = ["identifiant_unique", "statut"]
+    df_removed_actors["row_updates"] = df_removed_actors[update_actors_columns].apply(
+        lambda row: json.dumps(row.to_dict(), default=str), axis=1
+    )
     df_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
     df_ps = kwargs["ti"].xcom_pull(task_ids="create_proposition_services")["df"]
     df_pssc = kwargs["ti"].xcom_pull(
@@ -225,7 +246,7 @@ def serialize_to_json(**kwargs):
     )
     df_joined.drop_duplicates("identifiant_unique", keep="first", inplace=True)
 
-    return {"all": {"df": df_joined}}
+    return {"all": {"df": df_joined}, "to_disable": {"df": df_removed_actors}}
 
 
 def load_data_from_postgresql(**kwargs):
@@ -243,6 +264,10 @@ def load_data_from_postgresql(**kwargs):
     max_id_pds = pd.read_sql_query(
         "SELECT max(id) FROM qfdmo_displayedpropositionservice", engine
     )["max"][0]
+    # TODO : ici on rappatrie tous les acteurs, ce serait bien de filtrer par source_id
+    # TODO : est-ce qu'on doit lire les acteurs dans qfdmo_displayedacteur ou
+    # qfdmo_acteur ?
+    df_displayedacteurs = pd.read_sql_table("qfdmo_displayedacteur", engine)
 
     return {
         "acteurtype": df_acteurtype,
@@ -252,10 +277,27 @@ def load_data_from_postgresql(**kwargs):
         "max_pds_idx": max_id_pds,
         "sous_categories": df_sous_categories_objet,
         "labels": df_label,
+        "displayedacteurs": df_displayedacteurs,
     }
 
 
-def insert_dagrun_and_process_df(df, event, metadata, dag_id, run_id):
+def load_data_from_displayedactor_by_source(source_id):
+    pg_hook = PostgresHook(
+        postgres_conn_id=utils.get_db_conn_id(__file__, parent_of_parent=True)
+    )
+    engine = pg_hook.get_sqlalchemy_engine()
+
+    df_displayedactors = pd.read_sql_query(
+        f"SELECT identifiant_unique, cree_le, modifie_le "
+        f"FROM qfdmo_displayedacteur where statut='ACTIF' "
+        f"and source_id={source_id}",
+        engine,
+    )
+
+    return df_displayedactors
+
+
+def insert_dagrun_and_process_df(df, metadata, dag_id, run_id):
     pg_hook = PostgresHook(
         postgres_conn_id=utils.get_db_conn_id(__file__, parent_of_parent=True)
     )
@@ -281,7 +323,7 @@ def insert_dagrun_and_process_df(df, event, metadata, dag_id, run_id):
         )
         dag_run_id = result.fetchone()[0]
 
-    df["change_type"] = event
+    df["change_type"] = df["event"]
     df["dag_run_id"] = dag_run_id
     df[["row_updates", "dag_run_id", "change_type"]].to_sql(
         "qfdmo_dagrunchange",
@@ -296,7 +338,6 @@ def insert_dagrun_and_process_df(df, event, metadata, dag_id, run_id):
 def write_to_dagruns(**kwargs):
     dag_id = kwargs["dag"].dag_id
     run_id = kwargs["run_id"]
-    event = kwargs.get("event", "CREATE")
     dfs = kwargs["ti"].xcom_pull(task_ids="serialize_to_json")
     metadata_actors = (
         kwargs["ti"]
@@ -321,7 +362,7 @@ def write_to_dagruns(**kwargs):
         dag_id_suffixed = dag_id if key == "all" else f"{dag_id}_{key}"
         df = data["df"]
         metadata.update(data.get("metadata", {}))
-        insert_dagrun_and_process_df(df, event, metadata, dag_id_suffixed, run_id)
+        insert_dagrun_and_process_df(df, metadata, dag_id_suffixed, run_id)
 
 
 def _force_column_value(
@@ -343,44 +384,47 @@ def create_actors(**kwargs):
     df = kwargs["ti"].xcom_pull(task_ids="fetch_data_from_api")
     df_sources = data_dict["sources"]
     df_acteurtype = data_dict["acteurtype"]
-    config_path = Path(__file__).parent.parent / "config" / "db_mapping.json"
-
-    with open(config_path, "r") as f:
-        config = json.load(f)
-
+    df_displayedacteurs = data_dict["displayedacteurs"]
+    config = utils.get_mapping_config()
     params = kwargs["params"]
+    reparacteurs = params.get("reparacteurs", False)
     column_mapping = params["column_mapping"]
     column_to_drop = params.get("column_to_drop", [])
     column_to_replace = params.get("default_column_value", {})
+
+    df = df.drop(column_to_drop, axis=1)
+
     for k, val in column_to_replace.items():
         df[k] = val
 
-    df["nom_de_lorganisme_std"] = df["nom_de_lorganisme"].str.replace("-", "")
-    df["id_point_apport_ou_reparation"] = df["id_point_apport_ou_reparation"].fillna(
-        df["nom_de_lorganisme_std"]
-    )
-    df["id_point_apport_ou_reparation"] = (
-        df["id_point_apport_ou_reparation"]
-        .str.replace(" ", "_")
-        .str.replace("_-", "_")
-        .str.replace("__", "_")
-    )
-    df = df.drop(column_to_drop, axis=1)
-    df = df.dropna(subset=["latitudewgs84", "longitudewgs84"])
-    df = df.replace({np.nan: None})
+    if reparacteurs:
+        df = mapping_utils.process_reparacteurs(df, df_sources, df_acteurtype)
+    else:
+        df = mapping_utils.process_actors(df)
 
     for old_col, new_col in column_mapping.items():
         if new_col:
-            if old_col == "type_de_point_de_collecte":
+            if old_col == "id":
+                df[new_col] = df["id"].astype(str)
+            elif old_col == "is_enabled":
+                df[new_col] = df[old_col].map({1: "ACTIF", 0: "SUPPRIME"})
+            elif old_col == "type_de_point_de_collecte":
                 df[new_col] = df[old_col].apply(
                     lambda x: mapping_utils.transform_acteur_type_id(
                         x, df_acteurtype=df_acteurtype
                     )
                 )
-            elif old_col in ["latitudewgs84", "longitudewgs84"]:
+            # TODO : je pense qu'on passe 2 fois dans cette condition, une fois pour
+            # la latitude et une fois pour la longitude
+            elif old_col in [
+                "latitude",
+                "longitude",
+                "longitudewgs84",
+                "latitudewgs84",
+            ]:
                 df[new_col] = df.apply(
                     lambda row: utils.transform_location(
-                        row["longitudewgs84"], row["latitudewgs84"]
+                        row["latitude"], row["longitude"]
                     ),
                     axis=1,
                 )
@@ -420,43 +464,51 @@ def create_actors(**kwargs):
                 df[new_col] = df[old_col].apply(lambda x: True if x == "oui" else False)
             else:
                 df[new_col] = df[old_col]
+
     df["identifiant_unique"] = df.apply(
-        lambda x: mapping_utils.create_identifiant_unique(x),
+        lambda x: mapping_utils.create_identifiant_unique(
+            x, source_name="CMA_REPARACTEUR" if reparacteurs else None
+        ),
         axis=1,
     )
+    df["cree_le"] = datetime.now()
     df["statut"] = "ACTIF"
-    df["latitude"] = df["latitudewgs84"].astype(float).replace({np.nan: None})
-    df["longitude"] = df["longitudewgs84"].astype(float).replace({np.nan: None})
-    df = df.drop(["latitudewgs84", "longitudewgs84"], axis=1)
     df["modifie_le"] = df["cree_le"]
-
-    if "siret" in df.columns:
-        df["siret"] = df["siret"].replace({np.nan: None})
-        df["siret"] = df["siret"].astype(str).apply(lambda x: x[:14])
-    if "telephone" in df.columns:
-        df["telephone"] = df["telephone"].dropna().apply(lambda x: x.replace(" ", ""))
-        df["telephone"] = (
-            df["telephone"]
-            .dropna()
-            .apply(lambda x: "0" + x[2:] if x.startswith("33") else x)
-        )
-    if "service_a_domicile" in df.columns:
-        df.loc[
-            df["service_a_domicile"] == "service à domicile uniquement", "statut"
-        ] = "SUPPRIME"
+    df = df.replace({np.nan: None})
 
     duplicates_mask = df.duplicated("identifiant_unique", keep=False)
     duplicate_ids = df.loc[duplicates_mask, "identifiant_unique"].unique()
-
     number_of_duplicates = len(duplicate_ids)
+
+    unique_source_ids = df["source_id"].unique()
+
+    df_actors = df_displayedacteurs[
+        (df_displayedacteurs["source_id"].isin(unique_source_ids))
+        & (df_displayedacteurs["statut"] == "ACTIF")
+    ]
+    # TODO : est-ce que les colonne cree_le et modifie_le sont nécessaires
+    df_missing_actors = df_actors[
+        ~df_actors["identifiant_unique"].isin(df["identifiant_unique"])
+    ][["identifiant_unique", "cree_le", "modifie_le"]]
+
+    df_missing_actors["statut"] = "SUPPRIME"
+    df_missing_actors["event"] = "UPDATE_ACTOR"
 
     metadata = {
         "number_of_duplicates": number_of_duplicates,
         "duplicate_ids": list(duplicate_ids),
         "added_rows": len(df),
+        "number_of_removed_actors": len(df_missing_actors),
     }
 
-    return {"df": df, "metadata": metadata, "config": config}
+    df = df.drop_duplicates(subset="identifiant_unique", keep="first")
+    df["event"] = "CREATE"
+    return {
+        "df": df,
+        "metadata": metadata,
+        "config": config,
+        "removed_actors": df_missing_actors,
+    }
 
 
 def create_labels(**kwargs):
@@ -478,14 +530,14 @@ def create_labels(**kwargs):
     for _, row in df_actors.iterrows():
         if "labels_etou_bonus" in row:
             label = str(row["labels_etou_bonus"])
-            if label == "Agréé Bonus Réparation":
-                eco_code = row["ecoorganisme"].lower()
-                if eco_code in label_mapping:
+            label_code = row.get("ecoorganisme") or row.get("label_code", "").lower()
+            if label == "Agréé Bonus Réparation" or label_code == "reparacteur":
+                if label_code in label_mapping:
                     rows_list.append(
                         {
                             "acteur_id": row["identifiant_unique"],
-                            "labelqualite_id": label_mapping[eco_code]["id"],
-                            "labelqualite": label_mapping[eco_code]["libelle"],
+                            "labelqualite_id": label_mapping[label_code]["id"],
+                            "labelqualite": label_mapping[label_code]["libelle"],
                         }
                     )
 
