@@ -89,7 +89,7 @@ def process_reparacteurs(df, df_sources, df_acteurtype):
     )
     # TODO : voir si on peut tester les urls dans un opérateur, quite à maintenir
     # un cache des urls validées
-    df["url"] = df["url"].apply(prefix_url)
+    df["website"] = df["website"].apply(prefix_url)
     df["point_de_reparation"] = True
     return df
 
