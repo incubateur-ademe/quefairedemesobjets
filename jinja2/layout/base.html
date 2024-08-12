@@ -77,11 +77,15 @@
                 {
                     "username": "{{ request.user.username }}",
                     "email": "{{ request.user.email }}",
-                    "admin": "{{ request.user.is_superuser|tojson }}",
-                    "iframe": "{{ is_embedded(request)|tojson }}"
+                    "admin": "{{ request.user.is_superuser|tojson }}"
                 }
             </script>
         {% endif %}
+        <script id="posthog-infos">
+            {
+                "iframe": "{{ is_embedded(request)|tojson }}"
+            }
+        </script>
 
     </body>
 </html>

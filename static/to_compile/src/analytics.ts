@@ -24,6 +24,14 @@ window.addEventListener("DOMContentLoaded", () => {
           iframe: iframe,
       })
     }
+
+    const infos = document.querySelector<HTMLScriptElement>("#posthog-infos")?.textContent!
+    const { iframe } = JSON.parse(infos)
+    posthog.capture("$set", {
+      $set: {
+        iframe
+      }
+    })
 })
 
 export default posthog
