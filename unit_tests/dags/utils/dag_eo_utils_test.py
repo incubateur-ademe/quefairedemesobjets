@@ -1466,7 +1466,6 @@ def test_create_reparacteur_labels(
         df_create_actors=pd.DataFrame(
             {
                 "identifiant_unique": [1, 2],
-                "labels_etou_bonus": [None, None],
                 "produitsdechets_acceptes": ["téléphones portables", "ecrans"],
                 "label_code": ["reparacteur", "reparacteur"],
                 "acteur_type_id": [202, 202],

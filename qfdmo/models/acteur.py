@@ -20,6 +20,7 @@ from qfdmo.models.utils import CodeAsNaturalKeyModel, NomAsNaturalKeyModel
 
 class ActeurService(CodeAsNaturalKeyModel):
     class Meta:
+        ordering = ["libelle"]
         verbose_name = "Service proposé"
         verbose_name_plural = "Services proposés"
 
