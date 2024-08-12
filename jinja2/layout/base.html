@@ -71,5 +71,17 @@
                 defer
             ></script>
         {% endif %}
+
+        {% if request.user.is_authenticated %}
+            <script id="posthog-user">
+                {
+                    "username": "{{ request.user.username }}",
+                    "email": "{{ request.user.email }}",
+                    "admin": "{{ request.user.is_superuser|tojson }}",
+                    "iframe": "{{ is_embedded(request)|tojson }}"
+                }
+            </script>
+        {% endif %}
+
     </body>
 </html>
