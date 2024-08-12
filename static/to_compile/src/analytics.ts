@@ -1,4 +1,5 @@
 import posthog from "posthog-js"
+import { InteractionType } from "./types"
 
 const posthogConfig = {
   api_host: "https://eu.posthog.com",
@@ -34,5 +35,13 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   })
 })
+
+export function captureInteractionWithASolution(
+    specificInteractionType?: InteractionType,
+) {
+    posthog.capture("interaction_with_a_solution", {
+        specific_interaction_type: specificInteractionType,
+    })
+}
 
 export default posthog

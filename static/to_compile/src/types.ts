@@ -26,3 +26,5 @@ export class SSCatObject {
     sub_label: string
     identifier: int
 }
+
+export type InteractionType = "with_map"
