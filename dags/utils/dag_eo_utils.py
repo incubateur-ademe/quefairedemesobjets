@@ -516,6 +516,7 @@ def create_labels(**kwargs):
     df_acteurtype = data_dict["acteurtype"]
     df_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
 
+    # Get ESS constant values to use in in the loop
     ess_acteur_type_id = df_acteurtype.loc[
         df_acteurtype["code"].str.lower() == "ess", "id"
     ].iloc[0]
@@ -527,9 +528,22 @@ def create_labels(**kwargs):
     label_mapping = labels.set_index(labels["code"].str.lower()).to_dict(orient="index")
     rows_list = []
     for _, row in df_actors.iterrows():
+
+        # Handle label_code if it is set (works for reparacteur)
+        label_code = row.get("label_code", "").lower()
+        if label_code in label_mapping:
+            rows_list.append(
+                {
+                    "acteur_id": row["identifiant_unique"],
+                    "labelqualite_id": label_mapping[label_code]["id"],
+                    "labelqualite": label_mapping[label_code]["libelle"],
+                }
+            )
+
+        # Manage bonus reparation
         label = str(row.get("labels_etou_bonus"))
-        label_code = row.get("ecoorganisme") or row.get("label_code", "").lower()
-        if label == "Agréé Bonus Réparation" or label_code == "reparacteur":
+        if label == "Agréé Bonus Réparation":
+            label_code = row.get("ecoorganisme")
             if label_code in label_mapping:
                 rows_list.append(
                     {
@@ -539,6 +553,7 @@ def create_labels(**kwargs):
                     }
                 )
 
+        # Handle special case for ESS
         if row["acteur_type_id"] == ess_acteur_type_id:
             rows_list.append(
                 {
