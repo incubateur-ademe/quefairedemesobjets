@@ -527,18 +527,17 @@ def create_labels(**kwargs):
     label_mapping = labels.set_index(labels["code"].str.lower()).to_dict(orient="index")
     rows_list = []
     for _, row in df_actors.iterrows():
-        if "labels_etou_bonus" in row:
-            label = str(row["labels_etou_bonus"])
-            label_code = row.get("ecoorganisme") or row.get("label_code", "").lower()
-            if label == "Agréé Bonus Réparation" or label_code == "reparacteur":
-                if label_code in label_mapping:
-                    rows_list.append(
-                        {
-                            "acteur_id": row["identifiant_unique"],
-                            "labelqualite_id": label_mapping[label_code]["id"],
-                            "labelqualite": label_mapping[label_code]["libelle"],
-                        }
-                    )
+        label = str(row.get("labels_etou_bonus"))
+        label_code = row.get("ecoorganisme") or row.get("label_code", "").lower()
+        if label == "Agréé Bonus Réparation" or label_code == "reparacteur":
+            if label_code in label_mapping:
+                rows_list.append(
+                    {
+                        "acteur_id": row["identifiant_unique"],
+                        "labelqualite_id": label_mapping[label_code]["id"],
+                        "labelqualite": label_mapping[label_code]["libelle"],
+                    }
+                )
 
         if row["acteur_type_id"] == ess_acteur_type_id:
             rows_list.append(
