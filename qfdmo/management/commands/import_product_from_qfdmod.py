@@ -12,20 +12,46 @@ from functools import reduce
 from operator import or_
 from typing import List
 
+import requests
 from django.core.management.base import BaseCommand
 from django.db.models import Q
 
 from qfdmo.models.categorie_objet import Objet
+
+produits_qfdmod_url = (
+    "https://data.ademe.fr/data-fair/api/v1/datasets/que-faire-de-mes-dechets-produits"
+    "/lines?size=10000&page=1&format=csv"
+)
+
+
+def _get_qfdmod_products2():
+    qfdmod_products = []
+
+    # Télécharger le fichier CSV depuis l'URL
+    response = requests.get(produits_qfdmod_url)
+    response.raise_for_status()  # Vérifie si la requête a réussi
+
+    # Lire le fichier CSV depuis le contenu téléchargé
+    content = response.content.decode("utf-8").splitlines()
+    reader = csv.DictReader(content)
+
+    for row in reader:
+        qfdmod_products.append(row)
+
+    return qfdmod_products
+
 
 csv_filepath = "que-faire-de-mes-dechets-produits.csv"
 
 
 def _get_qfdmod_products(filepath: str = csv_filepath) -> List[dict]:
     qfdmod_products = []
-    with open(filepath, mode="r", encoding="utf-8") as file:
+
+    with open(filepath, "r") as file:
         reader = csv.DictReader(file)
         for row in reader:
             qfdmod_products.append(row)
+
     return qfdmod_products
 
 
@@ -36,6 +62,7 @@ def _get_product_names_from_qfdmod_product(qfdmod_product: dict) -> List[str]:
         if word.lower().strip()
     ]
     product_names.append(qfdmod_product["Nom"].lower().strip())
+    product_names = list(set(product_names))
     return product_names
 
 
@@ -97,6 +124,41 @@ def _create_or_update_object_from_product(
     return result_in_details
 
 
+def _should_create_products(
+    qfdmod_product, objects_from_names, product_names, sous_categories
+):
+    product_name = qfdmod_product["Nom"]
+    collect_names_from_objects = [
+        objet.libelle.lower().strip() for objet in objects_from_names
+    ]
+    collect_names_from_objects += [
+        objet.code.lower().strip() for objet in objects_from_names
+    ]
+
+    if len(sous_categories) == 1 and len(product_names) != len(objects_from_names):
+
+        print(f"\n\nPour le produit « {product_name} »")
+        print(
+            f"Avec la sous categorie {sous_categories[0].libelle}"
+            f" ({sous_categories[0].categorie.libelle})"
+        )
+        print(
+            f"\nLes produits trouvés sont : "
+            f"{[objet.libelle.lower().strip() for objet in objects_from_names]}"
+        )
+        print(
+            f"\nLes produits trouvés sont : "
+            f"{[product_name for product_name in product_names if product_name in collect_names_from_objects]}"
+        )
+        print(
+            f"\nLes produits suivants seront créés : {[product_name for product_name in product_names if product_name not in collect_names_from_objects]}"
+        )
+        should_create = None
+        while should_create not in ["y", "n"]:
+            should_create = input("Voulez-vous créer ces objects ? (y/n) : ").lower()
+        return should_create == "y"
+
+
 class Command(BaseCommand):
     help = "Get info from INSEE and save proposition of correction"
 
@@ -141,6 +203,11 @@ class Command(BaseCommand):
                         f"Pas de sous catégories pour {product_names} "
                         f"{objects_from_names}"
                     )
+
+                if not _should_create_products(
+                    qfdmod_product, objects_from_names, product_names, sous_categories
+                ):
+                    continue
 
                 result_in_details = _create_or_update_object_from_product(
                     product_id,
