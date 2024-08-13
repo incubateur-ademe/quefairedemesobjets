@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("qfdmo", "0085_alter_acteur_acteur_services_and_more"),
+        ("qfdmo", "0088_alter_acteurservice_options"),
     ]
 
     operations = [

@@ -24,7 +24,7 @@ produits_qfdmod_url = (
 )
 
 
-def _get_qfdmod_products2():
+def _get_qfdmod_products():
     qfdmod_products = []
 
     # Télécharger le fichier CSV depuis l'URL
@@ -37,20 +37,6 @@ def _get_qfdmod_products2():
 
     for row in reader:
         qfdmod_products.append(row)
-
-    return qfdmod_products
-
-
-csv_filepath = "que-faire-de-mes-dechets-produits.csv"
-
-
-def _get_qfdmod_products(filepath: str = csv_filepath) -> List[dict]:
-    qfdmod_products = []
-
-    with open(filepath, "r") as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            qfdmod_products.append(row)
 
     return qfdmod_products
 
@@ -136,27 +122,27 @@ def _should_create_products(
     ]
 
     if len(sous_categories) == 1 and len(product_names) != len(objects_from_names):
-
-        print(f"\n\nPour le produit « {product_name} »")
-        print(
-            f"Avec la sous categorie {sous_categories[0].libelle}"
-            f" ({sous_categories[0].categorie.libelle})"
-        )
-        print(
-            f"\nLes produits trouvés sont : "
-            f"{[objet.libelle.lower().strip() for objet in objects_from_names]}"
-        )
-        print(
-            f"\nLes produits trouvés sont : "
-            f"{[product_name for product_name in product_names if product_name in collect_names_from_objects]}"
-        )
-        print(
-            f"\nLes produits suivants seront créés : {[product_name for product_name in product_names if product_name not in collect_names_from_objects]}"
-        )
+        sous_categorie_libelle = sous_categories[0].libelle
+        categorie_libelle = sous_categories[0].categorie.libelle
+        inpuut_text = f"""
+Pour le produit « {product_name} »
+Avec la sous categorie {sous_categorie_libelle} ({categorie_libelle})
+Les produits trouvés sont : {' / '.join([
+    product_name
+    for product_name in product_names
+    if product_name in collect_names_from_objects
+])}
+Les produits suivants seront créés : {' / '.join([
+    product_name
+    for product_name in product_names
+    if product_name not in collect_names_from_objects
+])}
+Voulez-vous créer ces objects ? (y/n) : """
         should_create = None
         while should_create not in ["y", "n"]:
-            should_create = input("Voulez-vous créer ces objects ? (y/n) : ").lower()
+            should_create = input(inpuut_text).lower()
         return should_create == "y"
+    return True
 
 
 class Command(BaseCommand):
