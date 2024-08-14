@@ -2,6 +2,7 @@ import posthog from "posthog-js"
 
 const posthogConfig = {
     api_host: "https://eu.posthog.com",
+    persistence: "memory",
 }
 
 if (process.env.NODE_ENV !== "development") {

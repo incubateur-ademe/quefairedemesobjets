@@ -335,6 +335,12 @@ default_args = {
     "retry_delay": timedelta(minutes=5),
 }
 
+
+# Retry settings for reading tasks
+read_retry_count = 5
+read_retry_interval = timedelta(minutes=2)
+
+
 dag = DAG(
     utils.get_dag_name(__file__, "apply_adresse_corrections"),
     default_args=default_args,
@@ -349,6 +355,8 @@ read_actors = PythonOperator(
     python_callable=read_data_from_postgres,
     op_kwargs={"table_name": "qfdmo_acteur"},
     dag=dag,
+    retries=read_retry_count,
+    retry_delay=read_retry_interval,
 )
 
 read_ps = PythonOperator(
@@ -356,6 +364,8 @@ read_ps = PythonOperator(
     python_callable=read_data_from_postgres,
     op_kwargs={"table_name": "qfdmo_propositionservice"},
     dag=dag,
+    retries=read_retry_count,
+    retry_delay=read_retry_interval,
 )
 
 read_revision_actor = PythonOperator(
@@ -363,6 +373,8 @@ read_revision_actor = PythonOperator(
     python_callable=read_data_from_postgres,
     op_kwargs={"table_name": "qfdmo_revisionacteur"},
     dag=dag,
+    retries=read_retry_count,
+    retry_delay=read_retry_interval,
 )
 
 read_revision_ps = PythonOperator(
@@ -370,6 +382,8 @@ read_revision_ps = PythonOperator(
     python_callable=read_data_from_postgres,
     op_kwargs={"table_name": "qfdmo_revisionpropositionservice"},
     dag=dag,
+    retries=read_retry_count,
+    retry_delay=read_retry_interval,
 )
 
 read_revision_sc = PythonOperator(
@@ -377,6 +391,8 @@ read_revision_sc = PythonOperator(
     python_callable=read_data_from_postgres,
     op_kwargs={"table_name": "qfdmo_revisionpropositionservice_sous_categories"},
     dag=dag,
+    retries=read_retry_count,
+    retry_delay=read_retry_interval,
 )
 
 read_sc = PythonOperator(
@@ -384,6 +400,8 @@ read_sc = PythonOperator(
     python_callable=read_data_from_postgres,
     op_kwargs={"table_name": "qfdmo_propositionservice_sous_categories"},
     dag=dag,
+    retries=read_retry_count,
+    retry_delay=read_retry_interval,
 )
 
 read_acteur_labels = PythonOperator(
@@ -391,6 +409,8 @@ read_acteur_labels = PythonOperator(
     python_callable=read_data_from_postgres,
     op_kwargs={"table_name": "qfdmo_acteur_labels"},
     dag=dag,
+    retries=read_retry_count,
+    retry_delay=read_retry_interval,
 )
 
 read_acteur_acteur_services = PythonOperator(
@@ -398,6 +418,8 @@ read_acteur_acteur_services = PythonOperator(
     python_callable=read_data_from_postgres,
     op_kwargs={"table_name": "qfdmo_acteur_acteur_services"},
     dag=dag,
+    retries=read_retry_count,
+    retry_delay=read_retry_interval,
 )
 
 read_revisionacteur_labels = PythonOperator(
@@ -405,6 +427,8 @@ read_revisionacteur_labels = PythonOperator(
     python_callable=read_data_from_postgres,
     op_kwargs={"table_name": "qfdmo_revisionacteur_labels"},
     dag=dag,
+    retries=read_retry_count,
+    retry_delay=read_retry_interval,
 )
 
 read_revisionacteur_acteur_services = PythonOperator(
@@ -412,6 +436,8 @@ read_revisionacteur_acteur_services = PythonOperator(
     python_callable=read_data_from_postgres,
     op_kwargs={"table_name": "qfdmo_revisionacteur_acteur_services"},
     dag=dag,
+    retries=read_retry_count,
+    retry_delay=read_retry_interval,
 )
 # qfdmo_revisionacteur_acteur_services
 
