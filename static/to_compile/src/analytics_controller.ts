@@ -7,7 +7,6 @@ export default class extends Controller<HTMLElement> {
         posthogEvent: PosthogEventType,
         uiInteractionType?: PosthogUIInteractionType,
     ) {
-        console.debug("posthogWrapper", { posthogEvent, specificInteractionType: uiInteractionType })
         posthog.capture(posthogEvent, {
             ui_interaction_type: uiInteractionType,
         })
