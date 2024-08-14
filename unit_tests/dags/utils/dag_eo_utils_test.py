@@ -1436,18 +1436,16 @@ class TestCeateLabels:
         kwargs = {"ti": mock}
 
         df = create_labels(**kwargs)
-        pd.testing.assert_frame_equal(
-            df,
-            pd.DataFrame(
-                {
-                    "acteur_id": [1],
-                    "labelqualite_id": [3],
-                    "labelqualite": [
-                        "Labellisé Repar'Acteur",
-                    ],
-                }
-            ),
+        expected_dataframe_with_reparacteur_label = pd.DataFrame(
+            {
+                "acteur_id": [1],
+                "labelqualite_id": [3],
+                "labelqualite": [
+                    "Labellisé Repar'Acteur",
+                ],
+            }
         )
+        pd.testing.assert_frame_equal(df, expected_dataframe_with_reparacteur_label)
 
     def test_create_ess_labels(
         self,
@@ -1478,18 +1476,16 @@ class TestCeateLabels:
         kwargs = {"ti": mock}
 
         df = create_labels(**kwargs)
-        pd.testing.assert_frame_equal(
-            df,
-            pd.DataFrame(
-                {
-                    "acteur_id": [1],
-                    "labelqualite_id": [1],
-                    "labelqualite": [
-                        "Enseigne de l'économie sociale et solidaire",
-                    ],
-                }
-            ),
+        expected_dataframe_with_ess_label = pd.DataFrame(
+            {
+                "acteur_id": [1],
+                "labelqualite_id": [1],
+                "labelqualite": [
+                    "Enseigne de l'économie sociale et solidaire",
+                ],
+            }
         )
+        pd.testing.assert_frame_equal(df, expected_dataframe_with_ess_label)
 
     def test_create_bonus_reparation_labels(
         self,
@@ -1522,15 +1518,15 @@ class TestCeateLabels:
         kwargs = {"ti": mock}
 
         df = create_labels(**kwargs)
+        expected_dataframe_with_bonus_reparation_label = pd.DataFrame(
+            {
+                "acteur_id": [1],
+                "labelqualite_id": [2],
+                "labelqualite": [
+                    "Labellisé Bonus Réparation EcoOrganisme",
+                ],
+            }
+        )
         pd.testing.assert_frame_equal(
-            df,
-            pd.DataFrame(
-                {
-                    "acteur_id": [1],
-                    "labelqualite_id": [2],
-                    "labelqualite": [
-                        "Labellisé Bonus Réparation EcoOrganisme",
-                    ],
-                }
-            ),
+            df, expected_dataframe_with_bonus_reparation_label
         )
