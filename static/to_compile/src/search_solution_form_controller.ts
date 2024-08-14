@@ -1,5 +1,4 @@
 import { Controller } from "@hotwired/stimulus"
-import { captureInteractioncaptureInteractionWithSolutionDetails } from "./analytics"
 
 export default class extends Controller<HTMLElement> {
     #selectedOption: string = ""
