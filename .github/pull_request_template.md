@@ -1,6 +1,6 @@
 # Description succincte du problème résolu
 
-Description de l'intention, l'approche ou de l'implémentation (ce qui n’est pas visible directement en lisant le code)
+Description plus détaillée de l'intention, l'approche ou de l'implémentation (ce qui n’est pas visible directement en lisant le code)
 
 <!-- Cocher la/les case.s appropriée.s -->
 **Type de changement** :
