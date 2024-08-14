@@ -23,7 +23,7 @@
   "déchets phytosanitaires ménagers": "Déchets phytosanitaires ménagers - Produits chimiques",
   "outillage du peintre": "ABJ_Outillage du peintre usagé",
   "panneaux photovoltaïques": "Panneaux photovoltaïques",
-  "déchets dangereux de pmcb": "Déchets dangereux de PMCB",
+  "déchets dangereux de pmcb": "Déchets dangereux de PMCB (produits et matériaux de construction du bâtiment)",
   "décoration textile": "Décoration textile - Éléments d'ameublement",
   "huisseries": "Huisseries (produits et matériaux de construction du bâtiment)",
   "laine de roche": "Laine de roche (produits et matériaux de construction du bâtiment)",
@@ -38,7 +38,8 @@
   "rembourrés d'assise ou de couchage": "Rembourrés d'assise ou de couchage - Éléments d'ameublement",
   "sièges": "Sièges - Éléments d'ameublement",
   "produits pyrotechniques": "produits pyrotechniques",
-  "pneu": "pneu"
+  "pneu": "pneu",
+  "béton": "Béton - PMCB (produits et matériaux de construction du bâtiment)"
 },
   "sous_categories_cma":{
     "articles d’ameublement (meubles, chaises, fauteuils, canapés, tapis, etc)": ["meuble"],
