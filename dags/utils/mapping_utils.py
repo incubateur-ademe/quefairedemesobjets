@@ -13,6 +13,24 @@ env = Path(__file__).parent.parent.name
 utils = import_module(f"{env}.utils.utils")
 
 
+def process_siret(siret):
+    if pd.isna(siret):
+        return None
+    siret = str(siret).strip()
+    if len(siret) == 13 and siret.isdigit():
+        siret = "0" + siret
+    return siret[:14]
+
+
+def process_phone_number(number):
+    if pd.isna(number):
+        return number
+    number = number.replace(" ", "")
+    if number.startswith("33"):
+        number = "0" + number[2:]
+    return number
+
+
 def transform_acteur_type_id(value, df_acteurtype):
     mapping_dict = {
         "solution en ligne (site web, app. mobile)": "en ligne (web, mobile)",
