@@ -2,6 +2,8 @@ import { Controller } from "@hotwired/stimulus"
 import debounce from "lodash/debounce"
 import { SolutionMap } from "./solution_map"
 import { Actor } from "./types"
+import { captureRejections } from "stream"
+import { captureInteractionWithASolution } from "./analytics"
 
 export default class extends Controller<HTMLElement> {
     static targets = ["acteur", "searchInZoneButton", "bbox"]
@@ -59,5 +61,6 @@ export default class extends Controller<HTMLElement> {
         this.dispatch("setSrcDetailsAddress", {
             detail: { identifiantUnique: identifiantUnique },
         })
+        captureInteractionWithASolution("with_map", "clic sur un pin point sur la carte / ouverture aperçu de la fiche")
     }
 }

@@ -1,5 +1,4 @@
 import posthog from "posthog-js"
-import { InteractionType } from "./types"
 
 const posthogConfig = {
   api_host: "https://eu.posthog.com",
@@ -38,23 +37,5 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   })
 })
-
-// Ci-dessous sont définis les événements utilisés côté métier
-// pour tracker l'activié des utilisteurs dans PostHog.
-//
-// Cette abstraction a été définie pour faciliter un éventuel changement d'outil futur.
-// Elle consiste simplement en :
-// - Une fonction nommée (en camelCase)
-// - Un appel à la méthode posthog.capture reprenant le nom de cette fonction dans la convention de nommage (snake_case)
-//
-// Il est important de ne pas intégrer trop de logique dans celle-ci, et de la conserver
-// dans les contrôleurs Stimulus.
-export function captureInteractionWithASolution(
-    specificInteractionType?: InteractionType,
-) {
-    posthog.capture("interaction_with_a_solution", {
-        specific_interaction_type: specificInteractionType,
-    })
-}
 
 export default posthog
