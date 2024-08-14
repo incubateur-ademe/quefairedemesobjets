@@ -210,7 +210,6 @@ export default class extends Controller<HTMLElement> {
         this.detailsAddressPanelTarget.classList.add("sm:qfdmo-w-full")
         this.detailsAddressPanelTarget.classList.remove("sm:qfdmo-w-0")
         this.detailsAddressPanelTarget.classList.remove("sm:qfdmo-w-[480]")
-        captureInteractionWithASolution("with_details","ouverture de la fiche détaillée en grand “ouvrir” (sur mobile)")
     }
 
     displayActeurDetails(event) {

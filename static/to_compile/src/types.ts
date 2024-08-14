@@ -28,3 +28,4 @@ export class SSCatObject {
 }
 
 export type InteractionType = "with_map"
+export type PosthogEventType = "interaction_with_a_solution"

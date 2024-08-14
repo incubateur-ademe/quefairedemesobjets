@@ -7,6 +7,7 @@ const posthogConfig = {
 
 if (process.env.NODE_ENV !== "development") {
   posthog.init("phc_SGbYOrenShCMKJOQYyl62se9ZqCHntjTlzgKNhrKnzm", posthogConfig)
+  posthog.debug()
 } else {
   // TODO : ce serait bien qu'on définisse ces variables dans l'environnement de build,
   // pour qu'elles soient écrites durant cette phase et

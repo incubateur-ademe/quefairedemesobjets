@@ -38,8 +38,9 @@
                 <div
                     class="qfdmo-flex-grow qfdmo-relative qfdmo-shadow"
                     data-controller="map"
+                    data-action="map:captureInteraction->analytics#captureInteractionWithMap"
                     data-map-location-value="{{ location }}"
-                >
+                    >
                     {{ form.bounding_box }}
                     <div id="map" class="qfdmo-absolute qfdmo-inset-0">
                     </div>
@@ -161,7 +162,8 @@
                 </button>
                 <button class="fr-btn fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-arrow-up-s-line sm:qfdmo-hidden"
                     type='button'
-                    data-action="click -> search-solution-form#displayFullDetails"
+                    data-action="click -> search-solution-form#displayFullDetails
+                    click -> analytics#captureInteractionWithASolution"
                     data-search-solution-form-target="expandDetailsButton"
                     >
                     Ouvrir

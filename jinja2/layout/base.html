@@ -31,7 +31,10 @@
         {% endif %}
     </head>
 
-    <body class="qfdmo-flex qfdmo-flex-col" data-controller="analytics">
+    <body
+        class="qfdmo-flex qfdmo-flex-col"
+        data-controller="analytics"
+    >
         {% if not is_embedded(request) %}
             {% block header %}
                 {% include "layout/header.html" %}
