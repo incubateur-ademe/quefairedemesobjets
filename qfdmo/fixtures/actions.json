@@ -90,7 +90,7 @@
         "fields": {
             "code": "acheter",
             "libelle": "acheter de seconde main",
-            "libelle_groupe": "J'achête",
+            "libelle_groupe": "J'achète",
             "afficher": true,
             "description": "acheter d'occasion",
             "order": 8,
