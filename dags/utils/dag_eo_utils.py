@@ -473,8 +473,10 @@ def create_actors(**kwargs):
     df["cree_le"] = datetime.now()
     df["statut"] = "ACTIF"
     df["modifie_le"] = df["cree_le"]
-    df["siret"] = df["siret"].apply(mapping_utils.process_siret)
-    df["telephone"] = df["telephone"].apply(mapping_utils.process_phone_number)
+    if "siret" in df.columns:
+        df["siret"] = df["siret"].apply(mapping_utils.process_siret)
+    if "telephone" in df.columns:
+        df["telephone"] = df["telephone"].apply(mapping_utils.process_phone_number)
 
     df = df.replace({np.nan: None})
 
