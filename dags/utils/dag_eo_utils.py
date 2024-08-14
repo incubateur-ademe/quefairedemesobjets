@@ -423,7 +423,7 @@ def create_actors(**kwargs):
             ]:
                 df[new_col] = df.apply(
                     lambda row: utils.transform_location(
-                        row["latitude"], row["longitude"]
+                        row["longitude"], row["latitude"]
                     ),
                     axis=1,
                 )
@@ -473,6 +473,11 @@ def create_actors(**kwargs):
     df["cree_le"] = datetime.now()
     df["statut"] = "ACTIF"
     df["modifie_le"] = df["cree_le"]
+    if "siret" in df.columns:
+        df["siret"] = df["siret"].apply(mapping_utils.process_siret)
+    if "telephone" in df.columns:
+        df["telephone"] = df["telephone"].apply(mapping_utils.process_phone_number)
+
     df = df.replace({np.nan: None})
 
     duplicates_mask = df.duplicated("identifiant_unique", keep=False)

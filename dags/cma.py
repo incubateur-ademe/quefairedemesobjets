@@ -39,6 +39,8 @@ with DAG(
             "email": "email",
             "phone": "telephone",
             "siret": "siret",
+            "longitude": "location",
+            "latitude": "location",
             "id": "identifiant_externe",
             "is_enabled": "statut",
             "other_info": "commentaires",
