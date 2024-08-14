@@ -1,23 +1,23 @@
 import { Controller } from "@hotwired/stimulus"
-import { InteractionType, PosthogEventType } from "./types"
+import { InteractionType as PosthogUIInteractionType, PosthogEventType } from "./types"
 import posthog from "posthog-js"
 
 export default class extends Controller<HTMLElement> {
-    posthogWrapper(
+    posthogCapture(
         posthogEvent: PosthogEventType,
-        specificInteractionType?: InteractionType,
+        uiInteractionType?: PosthogUIInteractionType,
     ) {
-        console.debug("posthogWrapper", { posthogEvent, specificInteractionType })
+        console.debug("posthogWrapper", { posthogEvent, specificInteractionType: uiInteractionType })
         posthog.capture(posthogEvent, {
-            specific_interaction_type: specificInteractionType,
+            ui_interaction_type: uiInteractionType,
         })
     }
 
-    captureInteractionWithASolution() {
-        this.posthogWrapper("interaction_with_a_solution")
+    captureInteractioncaptureInteractionWithSolutionDetailsDetails() {
+        this.posthogCapture("ui_interaction", "solution_details")
     }
 
     captureInteractionWithMap() {
-        this.posthogWrapper("interaction_with_a_solution", "with_map")
+        this.posthogCapture("ui_interaction", "map")
     }
 }

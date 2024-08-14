@@ -54,7 +54,7 @@
             target="_blank"
             title="itinéraire"
             rel='noopener'
-            data-action="click -> analytics#captureInteractionWithASolution"
+            data-action="click -> analytics#captureInteractionWithSolutionDetails"
             >
             <span  class="fr-btn fr-icon-send-plane-line qfdmo-rounded-full"
             ></span>
@@ -64,7 +64,7 @@
     {% if adresse.url %}
         <a class="qfdmo-flex qfdmo-flex-col qfdmo-items-center qfdmo-no-underline qfdmo-bg-none qfdmo-no-external-link-icon"
             href="{{ adresse.url }}" target="_blank" title="Site Internet" rel='noopener'
-            data-action="click -> analytics#captureInteractionWithASolution"
+            data-action="click -> analytics#captureInteractionWithSolutionDetails"
             >
             <span class="fr-btn fr-btn--secondary-light fr-icon-global-line qfdmo-rounded-full">
             </span>
@@ -83,7 +83,7 @@
     {% if adresse.telephone %}
         <a class="qfdmo-flex qfdmo-flex-col qfdmo-items-center qfdmo-bg-none qfdmo-no-external-link-icon"
             href="tel:{{ adresse.telephone }}" title="Téléphone" rel='noopener'
-            data-action="click -> analytics#captureInteractionWithASolution"
+            data-action="click -> analytics#captureInteractionWithSolutionDetails"
             >
             <span class="fr-btn fr-btn--secondary-light fr-icon-phone-line qfdmo-rounded-full"
             ></span>
@@ -97,7 +97,7 @@
             type="button"
             aria-describedby="shareTooltip"
             aria-labelledby="detail-share-tooltip-label"
-            data-action="click -> analytics#captureInteractionWithASolution"
+            data-action="click -> analytics#captureInteractionWithSolutionDetails"
             >
         </button>
         <span class="fr-tooltip fr-placement" id="shareTooltip" role="tooltip" aria-hidden="true">
@@ -186,7 +186,7 @@
                     aria-selected="false"
                     aria-controls="infosPanel"
                     type="button"
-                    data-action="click -> analytics#captureInteractionWithASolution"
+                    data-action="click -> analytics#captureInteractionWithSolutionDetails"
                     >
                     Adresse
                 </button>
@@ -200,7 +200,7 @@
                     aria-selected="false"
                     aria-controls="labelsPanel"
                     type="button"
-                    data-action="click -> analytics#captureInteractionWithASolution"
+                    data-action="click -> analytics#captureInteractionWithSolutionDetails"
                     >
                     Labels
                 </button>
@@ -214,7 +214,7 @@
                     aria-selected="false"
                     aria-controls="sourcesPanel"
                     type="button"
-                    data-action="click -> analytics#captureInteractionWithASolution"
+                    data-action="click -> analytics#captureInteractionWithSolutionDetails"
                     >
                     Sources
                 </button>
@@ -366,7 +366,7 @@
     target="_blank"
     rel="noopener"
     title="Proposer une modification - Nouvelle fenêtre"
-    data-action="click -> analytics#captureInteractionWithASolution"
+    data-action="click -> analytics#captureInteractionWithSolutionDetails"
     >
     Proposer une modification
 </a>

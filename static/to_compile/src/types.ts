@@ -27,5 +27,5 @@ export class SSCatObject {
     identifier: int
 }
 
-export type InteractionType = "with_map"
+export type InteractionType = "map" | "solution_details"
 export type PosthogEventType = "interaction_with_a_solution"
