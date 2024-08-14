@@ -38,7 +38,8 @@
   "rembourrés d'assise ou de couchage": "Rembourrés d'assise ou de couchage - Éléments d'ameublement",
   "sièges": "Sièges - Éléments d'ameublement",
   "produits pyrotechniques": "produits pyrotechniques",
-  "pneu": "pneu"
+  "pneu": "pneu",
+  "béton": "Béton - PMCB (produits et matériaux de construction du bâtiment)"
 },
   "sous_categories_cma":{
     "articles d’ameublement (meubles, chaises, fauteuils, canapés, tapis, etc)": ["meuble"],
