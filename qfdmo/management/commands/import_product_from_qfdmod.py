@@ -7,6 +7,7 @@
 # si pas de colonne P, on crée catégorie colonne B et sous-catégorie de la colonne M
 
 
+import csv
 from functools import reduce
 from operator import or_
 from typing import List
@@ -22,13 +23,32 @@ produits_qfdmod_url = (
     "/lines?size=10000"
 )
 
+google_doc_url = "https://drive.usercontent.google.com/download?id=1pQzfCR6IN1Ig8tltrJG8WaLQ_WwguZeP&export=download&authuser=0&confirm=t&uuid=131dd3f2-8e39-49cd-af5d-5468229cb5a1&at=APZUnTUGY0bZIAIOvtHGCuigMn5a:1723557127581"
 
-def _get_qfdmod_products():
-    # Download product in json format from URL
-    response = requests.get(produits_qfdmod_url)
-    response.raise_for_status()
+
+def _get_qfdmod_products_from_url(url):
+    # Télécharger le fichier CSV depuis l'URL
+    response = requests.get(url)
+    response.raise_for_status()  # Vérifie si la requête a réussi
 
     return response.json()["results"]
+
+
+def _get_qfdmod_products_from_urlfile(url):
+    qfdmod_products = []
+
+    # Télécharger le fichier CSV depuis l'URL
+    response = requests.get(produits_qfdmod_url)
+    response.raise_for_status()  # Vérifie si la requête a réussi
+
+    # Lire le fichier CSV depuis le contenu téléchargé
+    content = response.content.decode("utf-8").splitlines()
+    reader = csv.DictReader(content)
+
+    for row in reader:
+        qfdmod_products.append(row)
+
+    return qfdmod_products
 
 
 def _get_product_names_from_qfdmod_product(qfdmod_product: dict) -> List[str]:
@@ -141,7 +161,12 @@ class Command(BaseCommand):
     help = "Get info from INSEE and save proposition of correction"
 
     def handle(self, *args, **options):
-        qfdmod_products = _get_qfdmod_products()
+        qfdmod_products = _get_qfdmod_products_from_url(produits_qfdmod_url)
+        googledoc_products = _get_qfdmod_products_from_urlfile(google_doc_url)
+        print(googledoc_products[0])
+        googledoc_by_product_id = {
+            product["ID"].strip(): product for product in googledoc_products
+        }
 
         result_in_details = {
             "multi_assignments": [],
@@ -167,7 +192,26 @@ class Command(BaseCommand):
                 "sous_categorie"
             ).filter(reduce(or_, q_objects))
 
-            if objects_from_names.count():
+            if objects_from_names.count() == 0:  # Option create_products
+                if not googledoc_by_product_id.get(str(product_id)):
+                    product_name = qfdmod_product["Nom"]
+                    print(
+                        f"product not found in google doc : {product_name}"
+                        f" ({product_id})"
+                    )
+                    continue
+                sscat = googledoc_by_product_id[str(product_id)]["Sous-Catégorie LVAO"]
+                if sscat and sscat != "N/A":
+                    input_text = f"""
+Pour le produit : {product_name} ({product_id}) et ses synonymes : {product_names}
+Avec la sous-catégorie suivante : {sscat}
+Voulez-vous créer ces objects ? (y/n) :
+"""
+                    should_create = None
+                    while should_create not in ["y", "n"]:
+                        should_create = input(input_text).lower()
+
+            if objects_from_names.count() and False:  # Option create_synomines
                 result_in_details["count_product_found_in_object_list"] += 1
 
                 # Collect sous categories from objects
