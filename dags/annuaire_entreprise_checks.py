@@ -44,10 +44,8 @@ def fetch_and_parse_data(**context):
     pg_hook = PostgresHook(postgres_conn_id=utils.get_db_conn_id(__file__))
     engine = pg_hook.get_sqlalchemy_engine()
 
-    # Fetching the main actor data
     df_acteur = pd.read_sql("qfdmo_displayedacteur", engine)
 
-    # Generating full address
     df_acteur["full_adresse"] = (
         df_acteur["adresse"]
         .fillna("")
@@ -55,14 +53,11 @@ def fetch_and_parse_data(**context):
         .str.cat(df_acteur["ville"].fillna(""), sep=" ")
     )
 
-    # Filter for active status
     df_acteur = df_acteur[df_acteur["statut"] == "ACTIF"]
 
-    # Applying limit if necessary
     if limit > 1:
         df_acteur = df_acteur.head(limit)
 
-    # Fetching the closed siret data and renaming df1
     good_siret_closed_query = """
         SELECT
             a.*,
@@ -80,7 +75,6 @@ def fetch_and_parse_data(**context):
         """
     df_good_siret_closed = pd.read_sql(good_siret_closed_query, engine)
 
-    # Define the good address condition
     good_address_condition = (
         df_acteur["adresse"].notna()
         & (df_acteur["ville"].notnull())
@@ -90,7 +84,6 @@ def fetch_and_parse_data(**context):
         & (df_acteur["code_postal"].str.len() == 5)
     )
 
-    # Creating df3 with rows where identifiant_unique is not in df_good_siret_closed
     df_a_siretiser = df_acteur[
         (
             ~df_acteur["identifiant_unique"].isin(
@@ -100,7 +93,6 @@ def fetch_and_parse_data(**context):
         & (good_address_condition)
         & (df_acteur["siret"].str.len() != 14)
     ]
-    # Print the size of each DataFrame
     print("df_good_siret_closed size:", df_good_siret_closed.shape)
     print("df_a_siretiser size:", df_a_siretiser.shape)
     return {
