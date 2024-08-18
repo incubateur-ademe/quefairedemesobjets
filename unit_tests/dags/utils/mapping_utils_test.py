@@ -3,6 +3,7 @@ import unittest
 import pandas as pd
 
 from dags.utils import mapping_utils
+import numpy as np
 
 
 class TestDataTransformations(unittest.TestCase):
@@ -48,6 +49,26 @@ class TestDataTransformations(unittest.TestCase):
             "type_de_point_de_collecte": "Artisan, commerce indépendant ",
         }
         self.assertEqual(mapping_utils.create_identifiant_unique(row), "ecoorg_123AbC")
+
+    def test_process_siret_value(self):
+        self.assertEqual(
+            mapping_utils.process_siret("123456789012345"), "12345678901234"
+        )
+        self.assertEqual(mapping_utils.process_siret(np.nan), None)
+        self.assertEqual(
+            mapping_utils.process_siret("98765432109876"), "98765432109876"
+        )
+        self.assertEqual(mapping_utils.process_siret("8765432109876"), "08765432109876")
+
+    def test_process_telephone_value(self):
+        self.assertEqual(
+            mapping_utils.process_phone_number("33 1 23 45 67 89"), "0123456789"
+        )
+        self.assertEqual(mapping_utils.process_phone_number("0612345678"), "0612345678")
+        self.assertEqual(mapping_utils.process_phone_number(None), None)
+        self.assertEqual(
+            mapping_utils.process_phone_number("+33612345678"), "+33612345678"
+        )
 
 
 class TestTransformFloat(unittest.TestCase):
