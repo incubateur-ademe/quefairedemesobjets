@@ -44,6 +44,22 @@ def fetch_and_parse_data(**context):
     pg_hook = PostgresHook(postgres_conn_id=utils.get_db_conn_id(__file__))
     engine = pg_hook.get_sqlalchemy_engine()
     df_acteur = pd.read_sql("qfdmo_displayedacteur", engine)
+    good_siret_closed_query = """
+        SELECT
+            a.*,
+            e.etat_administratif
+        FROM
+            qfdmo_displayedacteur a
+        LEFT JOIN
+            etablissements e
+        ON
+            a.siret = e.siret
+        WHERE
+            a.statut = 'ACTIF'
+            AND LENGTH(a.siret) = 14
+            AND e.etat_administratif = 'F'
+        """
+    df1 = pd.read_sql(good_siret_closed_query, engine)
     df_acteur["full_adresse"] = (
         df_acteur["adresse"]
         .fillna("")
@@ -55,13 +71,11 @@ def fetch_and_parse_data(**context):
     if limit > 1:
         df_acteur = df_acteur.head(limit)
 
-    good_siret_condition = (
-        df_acteur["siret"].notna()
-        & (df_acteur["siret"] != "")
-        & (df_acteur["siret"] != "None")
-        & (df_acteur["siret"] != " ")
-        & (df_acteur["siret"] != "ZZZ")
-    )
+        # Define the good SIRET condition (SIRET should be 14 digits long)
+    good_siret_condition = df_acteur["siret "].notna() & df_acteur["siret"].str.match(
+        r"^\d{14}$"
+    )  # SIRET with exactly 14 digits
+
     good_address_condition = (
         df_acteur["adresse"].notna()
         & (df_acteur["ville"].notnull())
@@ -71,21 +85,19 @@ def fetch_and_parse_data(**context):
         & (df_acteur["code_postal"].str.len() == 5)
     )
 
-    df1 = df_acteur[good_siret_condition & good_address_condition]
-
     df2 = df_acteur[~good_siret_condition & good_address_condition]
     df3 = df_acteur[good_siret_condition & ~good_address_condition]
 
     return {
-        "ok_siret_ok_adresse": df1,
+        "closed_ok_siret_ok_adresse": df1,
         "nok_siret_ok_adresse": df2,
-        "ok_siret_nok_adresse": df3,
+        "closed_ok_siret_nok_adresse": df3,
     }
 
 
 def check_actor_with_adresse(**kwargs):
     data = kwargs["ti"].xcom_pull(task_ids="load_and_filter_actors_data")
-    df_ok_siret_ok_adresse = data["ok_siret_ok_adresse"]
+    df_ok_siret_ok_adresse = data["closed_ok_siret_ok_adresse"]
     df_nok_siret_ok_adresse = data["nok_siret_ok_adresse"]
     df = pd.concat([df_ok_siret_ok_adresse, df_nok_siret_ok_adresse])
 
@@ -103,8 +115,8 @@ def check_actor_with_adresse(**kwargs):
 
 def check_actor_with_siret(**kwargs):
     data = kwargs["ti"].xcom_pull(task_ids="load_and_filter_actors_data")
-    df_ok_siret_ok_adresse = data["ok_siret_ok_adresse"]
-    df_ok_siret_nok_adresse = data["ok_siret_nok_adresse"]
+    df_ok_siret_ok_adresse = data["closed_ok_siret_ok_adresse"]
+    df_ok_siret_nok_adresse = data["closed_ok_siret_nok_adresse"]
     df_acteur = pd.concat([df_ok_siret_ok_adresse, df_ok_siret_nok_adresse])
 
     df_acteur["ae_result"] = df_acteur.apply(
@@ -144,6 +156,17 @@ def combine_actors(**kwargs):
     )
 
     cohort_dfs = {}
+
+    df_bad_siret = df[
+        df["siret_siret"].isnull()
+        & df["full_adresse"].notnull()
+        & (df["siret_adresse"].str.len() < 14)
+    ]
+
+    if not df_bad_siret.empty:
+        cohort_dfs["siretitsation_with_adresse_bad_siret"] = df_bad_siret
+
+    df = df[~df["identifiant_unique"].isin(df_bad_siret["identifiant_unique"])]
 
     df["ae_result"] = df.apply(siret_control_utils.combine_ae_result_dicts, axis=1)
     df[["statut", "categorie_naf", "ae_adresse"]] = df.apply(
@@ -235,7 +258,8 @@ combine_candidates = PythonOperator(
 
 (
     load_and_filter_data_task
-    >> [check_siret_task, check_adresse_task]
+    >> check_siret_task
+    >> check_adresse_task
     >> combine_candidates
     >> get_location_task
     >> serialize_to_json_task
