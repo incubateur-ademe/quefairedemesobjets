@@ -23,15 +23,13 @@ def apply_corrections(**kwargs):
 
     df_normalized_actors = kwargs["ti"].xcom_pull(task_ids="load_actors")
     df_manual_actor_updates = kwargs["ti"].xcom_pull(task_ids="load_revision_actors")
-
+    print(df_manual_actor_updates)
     # Drop the "cree_le" column if it exists
     if "cree_le" in df_manual_actor_updates.columns:
         df_manual_actor_updates = df_manual_actor_updates.drop(columns=["cree_le"])
 
     # Filter new parent actors
-    df_new_parents = df_manual_actor_updates[
-        df_manual_actor_updates["is_parent"] is True
-    ]
+    df_new_parents = df_manual_actor_updates[df_manual_actor_updates["is_parent"]]
 
     df_normalized_actors = df_normalized_actors.set_index("identifiant_unique")
     df_manual_actor_updates = df_manual_actor_updates.set_index("identifiant_unique")
@@ -39,32 +37,23 @@ def apply_corrections(**kwargs):
 
     df_normalized_actors.update(df_manual_actor_updates)
 
-    df_normalized_actors = update_children_status(df_normalized_actors, df_new_parents)
-
     df_normalized_actors = pd.concat([df_normalized_actors, df_new_parents])
 
     parents = df_new_parents.copy()
 
-    parents["children_id"] = parents.index.map(
-        lambda parent_id: df_normalized_actors[
-            df_normalized_actors["parent_id"] == parent_id
+    parents["child_id"] = parents.index.map(
+        lambda parent_id: df_manual_actor_updates[
+            df_manual_actor_updates["parent_id"] == parent_id
         ].index.tolist()
     )
 
-    parents = parents.explode("children_id").dropna(subset=["children_id"])
+    parents = parents.explode("child_id").dropna(subset=["child_id"])
+    parents = parents.reset_index().rename(columns={"index": "identifiant_unique"})
 
     return {
         "df_normalized_actors": df_normalized_actors.reset_index(),
-        "parents": parents[["parent_id", "children_id"]].reset_index(drop=True),
+        "parents": parents[["identifiant_unique", "child_id"]].reset_index(drop=True),
     }
-
-
-def update_children_status(df_normalized_actors, df_new_parents):
-    for parent_id in df_new_parents.index:
-        children = df_normalized_actors[df_normalized_actors["parent_id"] == parent_id]
-        df_normalized_actors.loc[children.index, "statut"] = "SUPPRIME"
-
-    return df_normalized_actors
 
 
 def apply_corrections_ps(**kwargs):
@@ -422,17 +411,22 @@ def _deduplicate_acteurs_many2many_relationship(
 ):
     df_parents = kwargs["ti"].xcom_pull(task_ids="apply_corrections_actors")["parents"]
     merged_acteur = kwargs["ti"].xcom_pull(task_ids=merged_acteur_task_id)
-
     merged_df = df_parents.merge(
-        merged_acteur, left_on="child_id", right_on="acteur_id", how="inner"
+        merged_acteur, left_on="child_id", right_on="displayedacteur_id", how="inner"
+    )
+    merged_df = merged_df.drop(columns=["displayedacteur_id"])
+
+    deduped_df = merged_df.drop_duplicates(
+        subset=["identifiant_unique", col], keep="first"
     )
 
-    deduped_df = merged_df.drop_duplicates(subset=["parent_id", col], keep="first")
-
-    deduped_df.rename(columns={"parent_id": "acteur_id"}, inplace=True)
-
+    deduped_df.rename(
+        columns={"identifiant_unique": "displayedacteur_id"}, inplace=True
+    )
+    print(deduped_df.columns)
+    print(deduped_df[["displayedacteur_id", col]])
     final_df = pd.concat(
-        [merged_acteur, deduped_df[["acteur_id", col]]], ignore_index=True
+        [merged_acteur, deduped_df[["displayedacteur_id", col]]], ignore_index=True
     )
 
     return final_df
