@@ -10,6 +10,7 @@ Description plus détaillée de l'intention, l'approche ou de l'implémentation 
 - [ ] Nouvelle fonctionnalité
 - [ ] Mise à jour de données / DAG
 - [ ] Les changements nécessitent une mise à jour de documentation
+- [ ] Refactoring de code (explication à retrouver dans la description)
 
 ## Comment tester
 
