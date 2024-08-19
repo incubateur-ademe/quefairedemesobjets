@@ -12,6 +12,14 @@ Description plus détaillée de l'intention, l'approche ou de l'implémentation 
 - [ ] Les changements nécessitent une mise à jour de documentation
 - [ ] Refactoring de code (explication à retrouver dans la description)
 
+## Auto-review
+
+Les trucs à faire avant de demander une review :
+- [ ] J'ai bien relu mon code
+- [ ] La CI passe bien
+- [ ] En cas d'ajout de variable d'environnement, j'ai bien mis à jour le `.env.template`
+- [ ] J'ai ajouté des tests qui couvrent le nouveau code
+
 ## Comment tester
 
 En local / staging :
@@ -19,14 +27,6 @@ En local / staging :
 - Aller sur http://localhost:8000
 - Cliquer sur ABC
 - …
-
-## Déploiement
-
-<!-- Dans le cas où il y a des instructions spécifiques de déploiement -->
-
-- Exécuter les migrations
-- Exécuter la commande `rf -rf /`
-- ...
 
 ## Développement local
 
@@ -37,10 +37,10 @@ En local / staging :
 - Rebuild la stack docker avec `docker compose build`
 - ...
 
-## Auto-review
+## Déploiement
 
-Les trucs à faire avant de demander une review :
-- [ ] J'ai bien relu mon code
-- [ ] La CI passe bien
-- [ ] En cas d'ajout de variable d'environnement, j'ai bien mis à jour le `.env.template`
-- [ ] J'ai ajouté des tests qui couvrent le nouveau code
+<!-- Dans le cas où il y a des instructions spécifiques de déploiement -->
+
+- Exécuter les migrations
+- Exécuter la commande `rf -rf /`
+- ...
