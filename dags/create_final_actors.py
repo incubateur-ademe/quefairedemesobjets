@@ -174,16 +174,15 @@ def deduplicate_proposition_services_and_sous_categories(**kwargs):
 def write_data_to_postgres(**kwargs):
     df_normalized_corrected_actors = kwargs["ti"].xcom_pull(
         task_ids="apply_corrections_actors"
-    )
-    df_labels_updated = kwargs["ti"].xcom_pull(task_ids="merge_labels")
+    )["df_normalized_actors"]
+    df_labels_updated = kwargs["ti"].xcom_pull(task_ids="dedup_labels")
     df_acteur_services_updated = kwargs["ti"].xcom_pull(
-        task_ids="merge_acteur_services"
+        task_ids="dedup_acteur_services"
     )
-    task_output = kwargs["ti"].xcom_pull(
-        task_ids="apply_corrections_propositionservice"
-    )
-    df_ps_updated = task_output["df_ps_updated"]
-    df_sous_categories_updated = task_output["df_sous_categories_updated"]
+    task_output = kwargs["ti"].xcom_pull(task_ids="apply_dedup_propositionservice")
+
+    df_ps_updated = task_output["df_final_ps_updated"]
+    df_sous_categories_updated = task_output["df_final_sous_categories"]
     df_sous_categories_updated.rename(
         columns={"propositionservice_id": "displayedpropositionservice_id"},
         inplace=True,
@@ -374,6 +373,18 @@ def merge_acteur_services(**kwargs):
     )
 
 
+def deduplicate_labels(**kwargs):
+    return _deduplicate_acteurs_many2many_relationship(
+        "merge_labels", "labelqualite_id", **kwargs
+    )
+
+
+def deduplicate_acteur_serivces(**kwargs):
+    return _deduplicate_acteurs_many2many_relationship(
+        "merge_acteur_services", "acteurservice_id", **kwargs
+    )
+
+
 def _merge_acteurs_many2many_relationship(
     acteur_task_id: str, revisionacteur_task_id: str, **kwargs: dict
 ):
@@ -405,6 +416,27 @@ def _merge_acteurs_many2many_relationship(
     ).drop_duplicates()
 
     return df_merged
+
+
+def _deduplicate_acteurs_many2many_relationship(
+    merged_acteur_task_id: str, col: str, **kwargs: dict
+):
+    df_parents = kwargs["ti"].xcom_pull(task_ids="apply_corrections_actors")["parents"]
+    merged_acteur = kwargs["ti"].xcom_pull(task_ids=merged_acteur_task_id)
+
+    merged_df = df_parents.merge(
+        merged_acteur, left_on="child_id", right_on="acteur_id", how="inner"
+    )
+
+    deduped_df = merged_df.drop_duplicates(subset=["parent_id", col], keep="first")
+
+    deduped_df.rename(columns={"parent_id": "acteur_id"}, inplace=True)
+
+    final_df = pd.concat(
+        [merged_acteur, deduped_df[["acteur_id", col]]], ignore_index=True
+    )
+
+    return final_df
 
 
 default_args = {
@@ -533,6 +565,18 @@ merge_acteur_services_task = PythonOperator(
     dag=dag,
 )
 
+dedup_labels_task = PythonOperator(
+    task_id="dedup_labels",
+    python_callable=deduplicate_labels,
+    dag=dag,
+)
+
+dedup_acteur_services_task = PythonOperator(
+    task_id="dedup_acteur_services",
+    python_callable=deduplicate_acteur_serivces,
+    dag=dag,
+)
+
 apply_corr = PythonOperator(
     task_id="apply_corrections_actors",
     python_callable=apply_corrections,
@@ -544,6 +588,13 @@ apply_corr_ps = PythonOperator(
     python_callable=apply_corrections_ps,
     dag=dag,
 )
+
+dedup_ps = PythonOperator(
+    task_id="apply_dedup_propositionservice",
+    python_callable=deduplicate_proposition_services_and_sous_categories,
+    dag=dag,
+)
+
 
 write_pos = PythonOperator(
     task_id="write_data_to_postgres",
@@ -558,4 +609,11 @@ write_pos = PythonOperator(
     read_acteur_acteur_services,
     read_revisionacteur_acteur_services,
 ] >> merge_acteur_services_task
-[merge_labels_task, merge_acteur_services_task, apply_corr, apply_corr_ps] >> write_pos
+apply_corr >> dedup_ps
+apply_corr_ps >> dedup_ps
+merge_labels_task >> dedup_labels_task
+merge_acteur_services_task >> dedup_acteur_services_task
+
+dedup_ps >> write_pos
+dedup_labels_task >> write_pos
+dedup_acteur_services_task >> write_pos
