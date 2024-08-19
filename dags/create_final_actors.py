@@ -20,18 +20,52 @@ def read_data_from_postgres(**kwargs):
 
 
 def apply_corrections(**kwargs):
+    import pandas as pd
+
     df_normalized_actors = kwargs["ti"].xcom_pull(task_ids="load_actors")
     df_manual_actor_updates = kwargs["ti"].xcom_pull(task_ids="load_revision_actors")
 
+    # Drop the "cree_le" column if it exists
     if "cree_le" in df_manual_actor_updates.columns:
         df_manual_actor_updates = df_manual_actor_updates.drop(columns=["cree_le"])
 
+    # Filter new parent actors
+    df_new_parents = df_manual_actor_updates[
+        df_manual_actor_updates["is_parent"] is True
+    ]
+
     df_normalized_actors = df_normalized_actors.set_index("identifiant_unique")
     df_manual_actor_updates = df_manual_actor_updates.set_index("identifiant_unique")
+    df_new_parents = df_new_parents.set_index("identifiant_unique")
 
     df_normalized_actors.update(df_manual_actor_updates)
 
-    return df_normalized_actors.reset_index()
+    df_normalized_actors = update_children_status(df_normalized_actors, df_new_parents)
+
+    df_normalized_actors = pd.concat([df_normalized_actors, df_new_parents])
+
+    parents = df_new_parents.copy()
+
+    parents["children_id"] = parents.index.map(
+        lambda parent_id: df_normalized_actors[
+            df_normalized_actors["parent_id"] == parent_id
+        ].index.tolist()
+    )
+
+    parents = parents.explode("children_id").dropna(subset=["children_id"])
+
+    return {
+        "df_normalized_actors": df_normalized_actors.reset_index(),
+        "parents": parents[["parent_id", "children_id"]].reset_index(drop=True),
+    }
+
+
+def update_children_status(df_normalized_actors, df_new_parents):
+    for parent_id in df_new_parents.index:
+        children = df_normalized_actors[df_normalized_actors["parent_id"] == parent_id]
+        df_normalized_actors.loc[children.index, "statut"] = "SUPPRIME"
+
+    return df_normalized_actors
 
 
 def apply_corrections_ps(**kwargs):
@@ -87,6 +121,53 @@ def apply_corrections_ps(**kwargs):
     return {
         "df_ps_updated": df_ps_updated,
         "df_sous_categories_updated": df_sous_categories_updated,
+    }
+
+
+def deduplicate_proposition_services_and_sous_categories(**kwargs):
+    df_parents = kwargs["ti"].xcom_pull(task_ids="apply_corrections_actors")["parents"]
+    df_ps_updated = kwargs["ti"].xcom_pull(task_ids="apply_corrections_ps")[
+        "df_ps_updated"
+    ]
+    df_sous_categories_updated = kwargs["ti"].xcom_pull(
+        task_ids="apply_corrections_ps"
+    )["df_sous_categories_updated"]
+
+    df_joined = df_ps_updated.merge(
+        df_parents, left_on="acteur_id", right_on="children_id", how="inner"
+    )
+
+    df_joined_with_sous_categories = df_joined.merge(
+        df_sous_categories_updated,
+        left_on="id",
+        right_on="propositionservice_id",
+        how="left",
+    )
+
+    df_grouped = (
+        df_joined_with_sous_categories.groupby(["parent_id", "action_id"])
+        .agg({"souscategorieobjet_id": lambda x: list(set(x)), "id": "first"})
+        .reset_index()
+    )
+
+    max_id = df_ps_updated["propositionservice_id"].max()
+    df_grouped["id"] = range(max_id + 1, max_id + 1 + len(df_grouped))
+
+    df_new_sous_categories = df_grouped.explode("souscategorieobjet_id")[
+        ["id", "souscategorieobjet_id"]
+    ]
+
+    df_final_sous_categories = pd.concat(
+        [df_sous_categories_updated, df_new_sous_categories], ignore_index=True
+    )
+
+    df_final_ps_updated = pd.concat(
+        [df_ps_updated, df_grouped[["id", "parent_id", "action_id"]]], ignore_index=True
+    )
+
+    return {
+        "df_final_ps_updated": df_final_ps_updated,
+        "df_final_sous_categories": df_final_sous_categories,
     }
 
 
@@ -336,11 +417,9 @@ default_args = {
     "retry_delay": timedelta(minutes=5),
 }
 
-
 # Retry settings for reading tasks
 read_retry_count = 5
 read_retry_interval = timedelta(minutes=2)
-
 
 dag = DAG(
     utils.get_dag_name(__file__, "apply_adresse_corrections"),

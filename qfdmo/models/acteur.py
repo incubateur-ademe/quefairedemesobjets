@@ -334,12 +334,27 @@ class RevisionActeur(BaseActeur):
     acteur_type = models.ForeignKey(
         ActeurType, on_delete=models.CASCADE, blank=True, null=True
     )
+    parent_id = models.CharField(
+        max_length=255, blank=True, null=True, db_column="parent_id"
+    )
+    is_parent = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         # OPTIMIZE: if we need to validate the main action in the service propositions
         # I guess it should be here
         self.set_default_fields_and_objects_before_save()
+        self.clean_parent_id()
         return super().save(*args, **kwargs)
+
+    def clean_parent_id(self):
+        if self.parent_id:
+            parent_acteur = RevisionActeur.objects.filter(
+                identifiant_unique=self.parent_id
+            ).first()
+            if parent_acteur and not parent_acteur.is_parent:
+                raise ValidationError(
+                    {"parent_id": "The referenced parent_id is not a parent."}
+                )
 
     def set_default_fields_and_objects_before_save(self):
         acteur_exists = True
