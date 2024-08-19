@@ -149,22 +149,22 @@ export default class extends Controller<HTMLElement> {
 
     backToSearch() {
         this.hideDetails()
-        this.searchFormPanelTarget.classList.add("qfdmo-flex-grow")
-        this.backToSearchPanelTarget.classList.add("qfdmo-h-0")
+        this.showSearchFormPanel()
+        this.backToSearchPanelTarget.classList.add("qfdmo-h-0", "qfdmo-invisible")
         this.addressesPanelTarget.classList.remove("qfdmo-flex-grow")
         this.scrollToContent()
     }
 
     displayDetails() {
         // mobile
-        this.detailsAddressPanelTarget.classList.remove("qfdmo-h-0")
+        this.detailsAddressPanelTarget.classList.remove("qfdmo-h-0", "qfdmo-invisible")
         this.detailsAddressPanelTarget.classList.remove("qfdmo-h-full")
         this.detailsAddressPanelTarget.classList.add("qfdmo-h-1/2")
         if (this.hasProposeAddressPanelTarget) {
-            this.proposeAddressPanelTarget.classList.add("qfdmo-h-0")
+            this.proposeAddressPanelTarget.classList.add("qfdmo-h-0", "qfdmo-invisible")
         }
         if (this.hasHeaderAddressPanelTarget)
-            this.headerAddressPanelTarget.classList.remove("qfdmo-h-0")
+            this.headerAddressPanelTarget.classList.remove("qfdmo-h-0", "qfdmo-invisible")
         this.collapseDetailsButtonTarget.classList.add("qfdmo-hidden")
         this.expandDetailsButtonTarget.classList.remove("qfdmo-hidden")
         // desktop
@@ -179,14 +179,14 @@ export default class extends Controller<HTMLElement> {
 
     hideDetails() {
         // mobile
-        this.detailsAddressPanelTarget.classList.add("qfdmo-h-0")
+        this.detailsAddressPanelTarget.classList.add("qfdmo-h-0", "qfdmo-invisible")
         this.detailsAddressPanelTarget.classList.remove("qfdmo-h-full")
         this.detailsAddressPanelTarget.classList.remove("qfdmo-h-1/2")
         if (this.hasProposeAddressPanelTarget) {
-            this.proposeAddressPanelTarget.classList.remove("qfdmo-h-0")
+            this.proposeAddressPanelTarget.classList.remove("qfdmo-h-0", "qfdmo-invisible")
         }
         if (this.hasHeaderAddressPanelTarget)
-            this.headerAddressPanelTarget.classList.remove("qfdmo-h-0")
+            this.headerAddressPanelTarget.classList.remove("qfdmo-h-0", "qfdmo-invisible")
         // desktop
         this.detailsAddressPanelTarget.classList.add("sm:qfdmo-w-0")
         this.detailsAddressPanelTarget.classList.remove("sm:qfdmo-w-full")
@@ -195,14 +195,14 @@ export default class extends Controller<HTMLElement> {
 
     displayFullDetails() {
         // mobile
-        this.detailsAddressPanelTarget.classList.remove("qfdmo-h-0")
+        this.detailsAddressPanelTarget.classList.remove("qfdmo-h-0", "qfdmo-invisible")
         this.detailsAddressPanelTarget.classList.remove("qfdmo-h-1/2")
         this.detailsAddressPanelTarget.classList.add("qfdmo-h-full")
         if (this.hasProposeAddressPanelTarget) {
-            this.proposeAddressPanelTarget.classList.add("qfdmo-h-0")
+            this.proposeAddressPanelTarget.classList.add("qfdmo-h-0", "qfdmo-invisible")
         }
         if (this.hasHeaderAddressPanelTarget)
-            this.headerAddressPanelTarget.classList.add("qfdmo-h-0")
+            this.headerAddressPanelTarget.classList.add("qfdmo-h-0", "qfdmo-invisible")
         this.collapseDetailsButtonTarget.classList.remove("qfdmo-hidden")
         this.expandDetailsButtonTarget.classList.add("qfdmo-hidden")
         // desktop
@@ -362,14 +362,14 @@ export default class extends Controller<HTMLElement> {
     #showAdvancedFilters() {
         this.advancedFiltersMainPanelTarget.classList.remove("qfdmo-hidden")
         setTimeout(() => {
-            this.advancedFiltersFormPanelTarget.classList.remove("qfdmo-h-0")
+            this.advancedFiltersFormPanelTarget.classList.remove("qfdmo-h-0", "qfdmo-invisible")
             this.advancedFiltersFormPanelTarget.classList.add("qfdmo-h-[95%]")
         }, 100)
     }
 
     #hideAdvancedFilters() {
         this.advancedFiltersFormPanelTarget.classList.remove("qfdmo-h-[95%]")
-        this.advancedFiltersFormPanelTarget.classList.add("qfdmo-h-0")
+        this.advancedFiltersFormPanelTarget.classList.add("qfdmo-h-0", "qfdmo-invisible")
         setTimeout(() => {
             this.advancedFiltersMainPanelTarget.classList.add("qfdmo-hidden")
         }, 300)
@@ -387,7 +387,7 @@ export default class extends Controller<HTMLElement> {
     #showLegend() {
         this.legendMainPanelTarget.classList.remove("qfdmo-hidden")
         setTimeout(() => {
-            this.legendFormPanelTarget.classList.remove("qfdmo-h-0")
+            this.legendFormPanelTarget.classList.remove("qfdmo-h-0", "qfdmo-invisible")
             this.legendFormPanelTarget.classList.add("qfdmo-h-[95%]")
         }, 100)
     }
@@ -395,12 +395,24 @@ export default class extends Controller<HTMLElement> {
     #hideLegend() {
         if (this.hasLegendFormPanelTarget) {
             this.legendFormPanelTarget.classList.remove("qfdmo-h-[95%]")
-            this.legendFormPanelTarget.classList.add("qfdmo-h-0")
+            this.legendFormPanelTarget.classList.add("qfdmo-h-0", "qfdmo-invisible")
             setTimeout(() => {
                 this.legendMainPanelTarget.classList.add("qfdmo-hidden")
             }, 300)
         }
     }
+
+    showSearchFormPanel() {
+      this.searchFormPanelTarget.classList.add("qfdmo-flex-grow")
+      this.searchFormPanelTarget.classList.remove("qfdmo-h-0", "qfdmo-invisible")
+    }
+
+    hideSearchFormPanel() {
+      this.searchFormPanelTarget.classList.remove("qfdmo-flex-grow")
+      this.searchFormPanelTarget.classList.add("qfdmo-h-0", "qfdmo-invisible")
+    }
+
+
 
     advancedSubmit(event: Event) {
         const withControls =
@@ -422,9 +434,11 @@ export default class extends Controller<HTMLElement> {
                 event.target as HTMLElement
             ).dataset.withDynamicFormPanel?.toLowerCase() === "true"
         if (withDynamicFormPanel) {
-            this.searchFormPanelTarget.classList.remove("qfdmo-flex-grow")
-            this.backToSearchPanelTarget.classList.remove("qfdmo-h-0")
+
+            this.hideSearchFormPanel()
+            this.backToSearchPanelTarget.classList.remove("qfdmo-h-0", "qfdmo-invisible")
             this.addressesPanelTarget.classList.add("qfdmo-flex-grow")
+            this.addressesPanelTarget.classList.remove("qfdmo-invisible")
             this.scrollToContent()
         }
 
@@ -452,14 +466,14 @@ export default class extends Controller<HTMLElement> {
     #showAPropos() {
         this.aProposMainPanelTarget.classList.remove("qfdmo-hidden")
         setTimeout(() => {
-            this.aProposFormPanelTarget.classList.remove("qfdmo-h-0")
+            this.aProposFormPanelTarget.classList.remove("qfdmo-h-0", "qfdmo-invisible")
             this.aProposFormPanelTarget.classList.add("qfdmo-h-[95%]")
         }, 100)
     }
 
     #hideAPropos() {
         this.aProposFormPanelTarget.classList.remove("qfdmo-h-[95%]")
-        this.aProposFormPanelTarget.classList.add("qfdmo-h-0")
+        this.aProposFormPanelTarget.classList.add("qfdmo-h-0", "qfdmo-invisible")
         setTimeout(() => {
             this.aProposMainPanelTarget.classList.add("qfdmo-hidden")
         }, 300)
