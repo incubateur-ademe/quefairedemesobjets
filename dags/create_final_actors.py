@@ -20,7 +20,6 @@ def read_data_from_postgres(**kwargs):
 
 
 def apply_corrections(**kwargs):
-    import pandas as pd
 
     df_normalized_actors = kwargs["ti"].xcom_pull(task_ids="load_actors")
     df_manual_actor_updates = kwargs["ti"].xcom_pull(task_ids="load_revision_actors")
