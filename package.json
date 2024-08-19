@@ -75,5 +75,8 @@
         "ts-jest": "^29.2.3",
         "ts-node": "^10.9.2",
         "typescript": "^5.5.4"
+    },
+    "optionalDependencies": {
+        "@parcel/watcher-linux-x64-glibc": "^2.4.2-alpha.0"
     }
 }
