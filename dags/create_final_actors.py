@@ -79,7 +79,6 @@ def apply_corrections_ps(**kwargs):
             df_manual_propositionservice_updates["acteur_id"]
         )
     ]["acteur_id"].unique()
-
     df_ps_updated = pd.concat(
         [
             df_propositionservice[
@@ -89,10 +88,13 @@ def apply_corrections_ps(**kwargs):
         ],
         ignore_index=True,
     )
+
     rps_ids = df_manual_propositionservice_updates["id"].unique()
     only_ps_ids = df_propositionservice[
         ~df_propositionservice["acteur_id"].isin(common_acteur_ids)
     ]["id"].unique()
+
+    print(rps_ids)
 
     matching_rpssc_rows = df_manual_propositionservice_sous_categories_updates[
         df_manual_propositionservice_sous_categories_updates[
@@ -114,15 +116,13 @@ def apply_corrections_ps(**kwargs):
 
 def deduplicate_proposition_services_and_sous_categories(**kwargs):
     df_parents = kwargs["ti"].xcom_pull(task_ids="apply_corrections_actors")["parents"]
-    df_ps_updated = kwargs["ti"].xcom_pull(task_ids="apply_corrections_ps")[
-        "df_ps_updated"
-    ]
-    df_sous_categories_updated = kwargs["ti"].xcom_pull(
-        task_ids="apply_corrections_ps"
-    )["df_sous_categories_updated"]
-
+    data_task_ps = kwargs["ti"].xcom_pull(
+        task_ids="apply_corrections_propositionservice"
+    )
+    df_ps_updated = data_task_ps["df_ps_updated"]
+    df_sous_categories_updated = data_task_ps["df_sous_categories_updated"]
     df_joined = df_ps_updated.merge(
-        df_parents, left_on="acteur_id", right_on="children_id", how="inner"
+        df_parents, left_on="acteur_id", right_on="child_id", how="inner"
     )
 
     df_joined_with_sous_categories = df_joined.merge(
@@ -131,14 +131,16 @@ def deduplicate_proposition_services_and_sous_categories(**kwargs):
         right_on="propositionservice_id",
         how="left",
     )
+    print(df_joined_with_sous_categories.columns)
+    print(df_joined_with_sous_categories)
+    print(df_sous_categories_updated)
 
     df_grouped = (
         df_joined_with_sous_categories.groupby(["parent_id", "action_id"])
-        .agg({"souscategorieobjet_id": lambda x: list(set(x)), "id": "first"})
+        .agg({"souscategorieobjet_id": lambda x: list(set(x))})
         .reset_index()
     )
-
-    max_id = df_ps_updated["propositionservice_id"].max()
+    max_id = df_ps_updated["id"].max()
     df_grouped["id"] = range(max_id + 1, max_id + 1 + len(df_grouped))
 
     df_new_sous_categories = df_grouped.explode("souscategorieobjet_id")[
@@ -148,6 +150,7 @@ def deduplicate_proposition_services_and_sous_categories(**kwargs):
     df_final_sous_categories = pd.concat(
         [df_sous_categories_updated, df_new_sous_categories], ignore_index=True
     )
+    print(df_grouped)
 
     df_final_ps_updated = pd.concat(
         [df_ps_updated, df_grouped[["id", "parent_id", "action_id"]]], ignore_index=True
@@ -423,8 +426,6 @@ def _deduplicate_acteurs_many2many_relationship(
     deduped_df.rename(
         columns={"identifiant_unique": "displayedacteur_id"}, inplace=True
     )
-    print(deduped_df.columns)
-    print(deduped_df[["displayedacteur_id", col]])
     final_df = pd.concat(
         [merged_acteur, deduped_df[["displayedacteur_id", col]]], ignore_index=True
     )
