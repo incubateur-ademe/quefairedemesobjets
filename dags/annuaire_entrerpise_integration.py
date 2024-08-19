@@ -14,7 +14,6 @@ from tqdm import tqdm
 env = Path(__file__).parent.name
 utils = import_module(f"{env}.utils.utils")
 
-# Set up default arguments
 default_args = {
     "owner": "airflow",
     "depends_on_past": False,
@@ -24,7 +23,6 @@ default_args = {
     "email_on_retry": False,
 }
 
-# Define the DAG
 dag = DAG(
     "annuaire_entreprise_datasets_integration",
     default_args=default_args,
@@ -34,7 +32,6 @@ dag = DAG(
 )
 
 
-# Define the generalized function to fetch and process data
 def fetch_and_process_data(url_index, table_name, index_column, schema, **context):
     pg_hook = PostgresHook(postgres_conn_id=utils.get_db_conn_id(__file__))
     engine = pg_hook.get_sqlalchemy_engine()
@@ -83,7 +80,6 @@ def fetch_and_process_data(url_index, table_name, index_column, schema, **contex
     conn.close()
 
 
-# Define the tasks in the DAG using the generalized function
 fetch_and_process_unites_legales_task = PythonOperator(
     task_id="fetch_and_process_unites_legales",
     python_callable=fetch_and_process_data,
@@ -126,6 +122,5 @@ fetch_and_process_etablissements_task = PythonOperator(
     dag=dag,
 )
 
-# Set the tasks to run
 fetch_and_process_unites_legales_task
 fetch_and_process_etablissements_task
