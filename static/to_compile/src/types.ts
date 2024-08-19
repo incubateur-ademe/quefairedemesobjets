@@ -26,3 +26,6 @@ export class SSCatObject {
     sub_label: string
     identifier: int
 }
+
+export type InteractionType = "map" | "solution_details"
+export type PosthogEventType = "ui_interaction"
