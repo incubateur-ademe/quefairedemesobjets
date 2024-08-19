@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "core",
     "qfdmd",
     "qfdmo",
+    "corsheaders",
 ]
 
 # FIXME : check if we can manage django forms templating with jinja2
@@ -57,10 +58,11 @@ FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 
 if DEBUG:
     INSTALLED_APPS.extend(
-        ["debug_toolbar", "django_browser_reload", "django_extensions", "corsheaders"]
+        ["debug_toolbar", "django_browser_reload", "django_extensions"]
     )
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -73,13 +75,15 @@ MIDDLEWARE = [
 
 X_FRAME_OPTIONS = "ALLOWALL"
 
-if DEBUG:
-    # Le middleware corsheaders doit être ajouté le plus haut possible. On ne peut donc
-    # pas l'ajouter via extend comme plus bas.
-    MIDDLEWARE = [
-        "corsheaders.middleware.CorsMiddleware",
-    ] + MIDDLEWARE
+CORS_ALLOWED_ORIGINS = decouple.config(
+    "CORS_ALLOWED_ORIGINS", default="https://quefairedemesdechets.ademe.fr", cast=str
+).split(",")
 
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https:\/\/deploy-preview-\d*--quefairedemesdechets\.netlify\.app$",
+]
+
+if DEBUG:
     MIDDLEWARE.extend(
         [
             "debug_toolbar.middleware.DebugToolbarMiddleware",

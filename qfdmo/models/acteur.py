@@ -1,5 +1,4 @@
 import json
-from django.db.models.functions import Now
 import random
 import string
 from typing import Any
@@ -8,6 +7,7 @@ import opening_hours
 import orjson
 from django.contrib.gis.db import models
 from django.core.files.images import get_image_dimensions
+from django.db.models.functions import Now
 from django.forms import ValidationError, model_to_dict
 from django.http import HttpRequest
 from django.urls import reverse
@@ -20,6 +20,7 @@ from qfdmo.models.utils import CodeAsNaturalKeyModel, NomAsNaturalKeyModel
 
 class ActeurService(CodeAsNaturalKeyModel):
     class Meta:
+        ordering = ["libelle"]
         verbose_name = "Service proposé"
         verbose_name_plural = "Services proposés"
 
@@ -73,7 +74,12 @@ class ActeurType(CodeAsNaturalKeyModel):
     @classmethod
     def get_digital_acteur_type_id(cls) -> int:
         if not cls._digital_acteur_type_id:
-            cls._digital_acteur_type_id = cls.objects.get(code="acteur digital").id
+            (digital_acteur_type, _) = cls.objects.get_or_create(code="acteur digital")
+            print(
+                f"digital_acteur_type : {digital_acteur_type.id}"
+                f" - {digital_acteur_type.code} - {digital_acteur_type}"
+            )
+            cls._digital_acteur_type_id = digital_acteur_type.id
         return cls._digital_acteur_type_id
 
 
@@ -176,8 +182,8 @@ class BaseActeur(NomAsNaturalKeyModel):
     telephone = models.CharField(max_length=255, blank=True, null=True)
     nom_commercial = models.CharField(max_length=255, blank=True, null=True)
     nom_officiel = models.CharField(max_length=255, blank=True, null=True)
-    # FIXME : Could be replace to a many-to-many relationship with a label table ?
     labels = models.ManyToManyField(LabelQualite)
+    acteur_services = models.ManyToManyField(ActeurService, blank=True)
     siret = models.CharField(max_length=14, blank=True, null=True)
     source = models.ForeignKey(Source, on_delete=models.CASCADE, blank=True, null=True)
     identifiant_externe = models.CharField(max_length=255, blank=True, null=True)
@@ -244,6 +250,8 @@ class BaseActeur(NomAsNaturalKeyModel):
 
     @property
     def is_digital(self) -> bool:
+        print(f"acteur_type : {self.acteur_type_id} - {self.acteur_type}")
+        print(f"get_digital_acteur_type_id : {ActeurType.get_digital_acteur_type_id()}")
         return self.acteur_type_id == ActeurType.get_digital_acteur_type_id()
 
     def serialize(self, format: None | str = None) -> dict | str:
@@ -279,16 +287,14 @@ class BaseActeur(NomAsNaturalKeyModel):
             return json.dumps(self_as_dict)
         return self_as_dict
 
-    def acteur_services(self) -> list[str]:
-        # FIXME: just for test (to be removed)
-        # return ["relai d'acteur", "lieu trop cool", "ressourcerie", "boutique"]
+    def get_acteur_services(self) -> list[str]:
         return sorted(
             list(
                 set(
                     [
-                        ps.acteur_service.libelle
-                        for ps in self.proposition_services.all()
-                        if ps.acteur_service.libelle
+                        acteur_service.libelle
+                        for acteur_service in self.acteur_services.all()
+                        if acteur_service.libelle
                     ]
                 )
             )
@@ -325,7 +331,6 @@ class Acteur(BaseActeur):
                     RevisionPropositionService.objects.create(
                         acteur=acteur,
                         action_id=proposition_service.action_id,
-                        acteur_service_id=proposition_service.acteur_service_id,
                     )
                 )
                 revision_proposition_service.sous_categories.add(
@@ -386,6 +391,7 @@ class RevisionActeur(BaseActeur):
                         "acteur_type",
                         "source",
                         "proposition_services",
+                        "acteur_services",
                         "labels",
                     ],
                 ),
@@ -463,6 +469,12 @@ class DisplayedActeurTemp(BaseActeur):
         through="ActeurLabelQualite",
     )
 
+    acteur_services = models.ManyToManyField(
+        ActeurService,
+        blank=True,
+        through="ActeurActeurService",
+    )
+
     class ActeurLabelQualite(models.Model):
         class Meta:
             db_table = "qfdmo_displayedacteurtemp_labels"
@@ -479,6 +491,22 @@ class DisplayedActeurTemp(BaseActeur):
             db_column="labelqualite_id",
         )
 
+    class ActeurActeurService(models.Model):
+        class Meta:
+            db_table = "qfdmo_displayedacteurtemp_acteur_services"
+
+        id = models.BigAutoField(primary_key=True)
+        acteur = models.ForeignKey(
+            "DisplayedActeurTemp",
+            on_delete=models.CASCADE,
+            db_column="displayedacteur_id",
+        )
+        acteur_service = models.ForeignKey(
+            ActeurService,
+            on_delete=models.CASCADE,
+            db_column="acteurservice_id",
+        )
+
 
 class BasePropositionService(models.Model):
     class Meta:
@@ -490,22 +518,16 @@ class BasePropositionService(models.Model):
         on_delete=models.CASCADE,
         null=False,
     )
-    acteur_service = models.ForeignKey(
-        ActeurService,
-        on_delete=models.CASCADE,
-        null=False,
-    )
     sous_categories = models.ManyToManyField(
         SousCategorieObjet,
     )
 
     def __str__(self):
-        return f"{self.action.code} - {self.acteur_service.code}"
+        return f"{self.action.code}"
 
     def serialize(self):
         return {
             "action": self.action.serialize(),
-            "acteur_service": self.acteur_service.serialize(),
             "sous_categories": [
                 sous_categorie.serialize()
                 for sous_categorie in self.sous_categories.all()
@@ -519,8 +541,8 @@ class PropositionService(BasePropositionService):
         verbose_name_plural = "PROPOSITIONS DE SERVICE - IMPORTÉ"
         constraints = [
             models.UniqueConstraint(
-                fields=["acteur", "action", "acteur_service"],
-                name="ps_unique_by_acteur_action_service",
+                fields=["acteur", "action"],
+                name="ps_unique_by_acteur",
             )
         ]
 
@@ -542,8 +564,8 @@ class RevisionPropositionService(BasePropositionService):
         verbose_name_plural = "PROPOSITIONS DE SERVICE - CORRIGÉ"
         constraints = [
             models.UniqueConstraint(
-                fields=["acteur", "action", "acteur_service"],
-                name="rps_unique_by_revisionacteur_action_service",
+                fields=["acteur", "action"],
+                name="rps_unique_by_revisionacteur",
             )
         ]
 

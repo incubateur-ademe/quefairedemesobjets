@@ -5,7 +5,7 @@ from django.utils.safestring import mark_safe
 from qfdmo.models import CachedDirectionAction, DagRun, DagRunStatus, SousCategorieObjet
 
 
-class AutoCompleteInput(forms.Select):
+class AutoCompleteInput(forms.TextInput):
     template_name = "django/forms/widgets/autocomplete.html"
 
     def __init__(self, attrs=None, data_controller="autocomplete", **kwargs):
@@ -132,9 +132,14 @@ class AddressesForm(forms.Form):
                 "data-search-solution-form-target": "reparerFilter",
             }
         ),
-        label="Pas d'exclusivité de réparation",
-        help_text="Masquer les adresses qui réparent "
-        "uniquement les produits de leurs marques",
+        label=(
+            "Masquer les adresses qui réparent uniquement les produits de leurs marques"
+        ),
+        help_text=(
+            "Les enseignes ne réparant que les produits de leur propre marque"
+            " n'apparaîtront pas si cette case est cochée."
+            " (uniquement valable lorsque le geste « réparer » est sélectionné)"
+        ),
         label_suffix="",
         required=False,
     )

@@ -179,6 +179,7 @@ def serialize_to_json(**kwargs):
         df["admin_link"] = df["identifiant_unique"].apply(
             lambda x: mapping_utils.construct_url(x, env)
         )
+        df["event"] = "UPDATE_ACTOR"
         df["row_updates"] = df[columns].apply(
             lambda row: json.dumps(row.to_dict(), default=str), axis=1
         )
@@ -217,12 +218,11 @@ get_location_task = PythonOperator(
 write_data_task = PythonOperator(
     task_id="write_data_to_validate_into_dagruns",
     python_callable=dag_eo_utils.write_to_dagruns,
-    op_kwargs={"event": "UPDATE_ACTOR"},
     dag=dag,
 )
 
 serialize_to_json_task = PythonOperator(
-    task_id="serialize_actors_to_records",
+    task_id="serialize_to_json",
     python_callable=serialize_to_json,
     dag=dag,
 )

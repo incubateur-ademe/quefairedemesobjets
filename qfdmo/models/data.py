@@ -1,7 +1,7 @@
 from django.contrib.gis.db import models
 
+from dags.utils.shared_constants import FINISHED, REJECTED, TO_INSERT, TO_VALIDATE
 from qfdmo.models.acteur import ActeurType, Source
-from dags.utils.shared_constants import TO_VALIDATE, TO_INSERT, REJECTED, FINISHED
 
 
 class DagRunStatus(models.TextChoices):
@@ -119,6 +119,12 @@ class DagRunChange(models.Model):
             ).libelle
         if value := self.row_updates.get("source_id"):
             displayed_details["Source"] = Source.objects.get(pk=value).libelle
+        if value := self.row_updates.get("labels"):
+            displayed_details["Labels"] = ", ".join([v["labelqualite"] for v in value])
+        if value := self.row_updates.get("acteur_services"):
+            displayed_details["Acteur Services"] = ", ".join(
+                [v["acteurservice"] for v in value]
+            )
 
         return displayed_details
 

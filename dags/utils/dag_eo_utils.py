@@ -22,7 +22,7 @@ def fetch_data_from_api(**kwargs):
     params = kwargs["params"]
     api_url = params["endpoint"]
     logger.info(f"Fetching data from API : {api_url}")
-    data = api_utils.fetch_dataset_from_point_apport(api_url)
+    data = api_utils.fetch_data_from_url(api_url)
     df = pd.DataFrame(data)
     return df
 
@@ -34,34 +34,28 @@ def create_proposition_services(**kwargs):
     rows_dict = {}
     merged_count = 0
     df_actions = data_dict["actions"]
-    df_acteur_services = data_dict["acteur_services"]
+
+    conditions = [
+        ("point_dapport_de_service_reparation", "reparer"),
+        (
+            "point_dapport_pour_reemploi",
+            "donner",
+        ),
+        ("point_de_reparation", "reparer"),
+        (
+            "point_de_collecte_ou_de_reprise_des_dechets",
+            "trier",
+        ),
+    ]
 
     for _, row in df.iterrows():
         acteur_id = row["identifiant_unique"]
         sous_categories = row["produitsdechets_acceptes"]
 
-        conditions = [
-            ("point_dapport_de_service_reparation", "Service de réparation", "reparer"),
-            (
-                "point_dapport_pour_reemploi",
-                "Collecte par une structure spécialisée",
-                "donner",
-            ),
-            ("point_de_reparation", "Service de réparation", "reparer"),
-            (
-                "point_de_collecte_ou_de_reprise_des_dechets",
-                "Collecte par une structure spécialisée",
-                "trier",
-            ),
-        ]
-
-        for condition, acteur_service_name, action_name in conditions:
+        for condition, action_name in conditions:
             if row.get(condition):
-                acteur_service_id = mapping_utils.get_id_from_code(
-                    acteur_service_name, df_acteur_services
-                )
                 action_id = mapping_utils.get_id_from_code(action_name, df_actions)
-                key = (acteur_service_id, action_id, acteur_id)
+                key = (action_id, acteur_id)
 
                 if key in rows_dict:
                     if sous_categories not in rows_dict[key]["sous_categories"]:
@@ -69,11 +63,9 @@ def create_proposition_services(**kwargs):
                         rows_dict[key]["sous_categories"] += " | " + sous_categories
                 else:
                     rows_dict[key] = {
-                        "acteur_service_id": acteur_service_id,
                         "action_id": action_id,
                         "acteur_id": acteur_id,
                         "action": action_name,
-                        "acteur_service": acteur_service_name,
                         "sous_categories": sous_categories,
                     }
 
@@ -97,52 +89,83 @@ def create_proposition_services_sous_categories(**kwargs):
     data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
     config = kwargs["ti"].xcom_pull(task_ids="create_actors")["config"]
     df_sous_categories_map = data_dict["sous_categories"]
-
+    params = kwargs["params"]
+    mapping_config_key = params.get("mapping_config_key", "sous_categories")
     rows_list = []
-    sous_categories = config["sous_categories"]
+    sous_categories = config[mapping_config_key]
 
-    for index, row in df.iterrows():
+    for _, row in df.iterrows():
         products = str(row["sous_categories"]).split("|")
         for product in set(products):
-            if product.strip().lower() in sous_categories:
-                rows_list.append(
-                    {
-                        "propositionservice_id": row["id"],
-                        "souscategorieobjet_id": mapping_utils.get_id_from_code(
-                            sous_categories[product.strip().lower()],
-                            df_sous_categories_map,
-                        ),
-                        "souscategorie": product.strip(),
-                    }
-                )
+            product_key = product.strip().lower()
+            if product_key in sous_categories:
+                sous_categories_value = sous_categories[product_key]
+                if isinstance(sous_categories_value, list):
+                    for value in sous_categories_value:
+                        rows_list.append(
+                            {
+                                "propositionservice_id": row["id"],
+                                "souscategorieobjet_id": mapping_utils.get_id_from_code(
+                                    value, df_sous_categories_map
+                                ),
+                                "souscategorie": value,
+                            }
+                        )
+                else:
+                    rows_list.append(
+                        {
+                            "propositionservice_id": row["id"],
+                            "souscategorieobjet_id": mapping_utils.get_id_from_code(
+                                sous_categories_value, df_sous_categories_map
+                            ),
+                            "souscategorie": product.strip(),
+                        }
+                    )
 
     df_sous_categories = pd.DataFrame(
         rows_list,
         columns=["propositionservice_id", "souscategorieobjet_id", "souscategorie"],
     )
+
+    df_sous_categories.drop_duplicates(
+        ["propositionservice_id", "souscategorieobjet_id"], keep="first", inplace=True
+    )
+    df_sous_categories = df_sous_categories[
+        df_sous_categories["souscategorieobjet_id"].notna()
+    ]
+
     return df_sous_categories
 
 
 def serialize_to_json(**kwargs):
+    df_removed_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")[
+        "removed_actors"
+    ]
+    update_actors_columns = ["identifiant_unique", "statut"]
+    df_removed_actors["row_updates"] = df_removed_actors[update_actors_columns].apply(
+        lambda row: json.dumps(row.to_dict(), default=str), axis=1
+    )
     df_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
-    df_pds = kwargs["ti"].xcom_pull(task_ids="create_proposition_services")["df"]
-    df_pdsc = kwargs["ti"].xcom_pull(
+    df_ps = kwargs["ti"].xcom_pull(task_ids="create_proposition_services")["df"]
+    df_pssc = kwargs["ti"].xcom_pull(
         task_ids="create_proposition_services_sous_categories"
     )
-    df_pdsc.drop_duplicates(
-        ["propositionservice_id", "souscategorieobjet_id"], keep="first", inplace=True
-    )
-    df_pdsc = df_pdsc[df_pdsc["souscategorieobjet_id"].notna()]
     df_labels = kwargs["ti"].xcom_pull(task_ids="create_labels")
+    df_acteur_services = kwargs["ti"].xcom_pull(task_ids="create_acteur_services")
+    df_acteur_services = (
+        df_acteur_services
+        if df_acteur_services is not None
+        else pd.DataFrame(columns=["acteur_id", "acteurservice_id", "acteurservice"])
+    )
 
     aggregated_pdsc = (
-        df_pdsc.groupby("propositionservice_id")
+        df_pssc.groupby("propositionservice_id")
         .apply(lambda x: x.to_dict("records") if not x.empty else [])
         .reset_index(name="pds_sous_categories")
     )
 
     df_pds_joined = pd.merge(
-        df_pds,
+        df_ps,
         aggregated_pdsc,
         how="left",
         left_on="id",
@@ -168,9 +191,18 @@ def serialize_to_json(**kwargs):
         lambda x: x.to_dict("records") if not x.empty else []
     )
     aggregated_labels = (
-        aggregated_labels.reset_index(name="labels")
-        if len(aggregated_labels) > 0
-        else pd.DataFrame(columns=["acteur_id", "labels"])
+        pd.DataFrame(columns=["acteur_id", "labels"])
+        if aggregated_labels.empty
+        else aggregated_labels.reset_index(name="labels")
+    )
+
+    aggregated_acteur_services = df_acteur_services.groupby("acteur_id").apply(
+        lambda x: x.to_dict("records") if not x.empty else []
+    )
+    aggregated_acteur_services = (
+        pd.DataFrame(columns=["acteur_id", "acteur_services"])
+        if aggregated_acteur_services.empty
+        else aggregated_acteur_services.reset_index(name="acteur_services")
     )
 
     df_joined_with_pds = pd.merge(
@@ -181,9 +213,17 @@ def serialize_to_json(**kwargs):
         right_on="acteur_id",
     )
 
-    df_joined = pd.merge(
+    df_joined_with_labels = pd.merge(
         df_joined_with_pds,
         aggregated_labels,
+        how="left",
+        left_on="acteur_id",
+        right_on="acteur_id",
+    )
+
+    df_joined = pd.merge(
+        df_joined_with_labels,
+        aggregated_acteur_services,
         how="left",
         left_on="acteur_id",
         right_on="acteur_id",
@@ -206,7 +246,7 @@ def serialize_to_json(**kwargs):
     )
     df_joined.drop_duplicates("identifiant_unique", keep="first", inplace=True)
 
-    return {"all": {"df": df_joined}}
+    return {"all": {"df": df_joined}, "to_disable": {"df": df_removed_actors}}
 
 
 def load_data_from_postgresql(**kwargs):
@@ -224,6 +264,10 @@ def load_data_from_postgresql(**kwargs):
     max_id_pds = pd.read_sql_query(
         "SELECT max(id) FROM qfdmo_displayedpropositionservice", engine
     )["max"][0]
+    # TODO : ici on rappatrie tous les acteurs, ce serait bien de filtrer par source_id
+    # TODO : est-ce qu'on doit lire les acteurs dans qfdmo_displayedacteur ou
+    # qfdmo_acteur ?
+    df_displayedacteurs = pd.read_sql_table("qfdmo_displayedacteur", engine)
 
     return {
         "acteurtype": df_acteurtype,
@@ -233,10 +277,27 @@ def load_data_from_postgresql(**kwargs):
         "max_pds_idx": max_id_pds,
         "sous_categories": df_sous_categories_objet,
         "labels": df_label,
+        "displayedacteurs": df_displayedacteurs,
     }
 
 
-def insert_dagrun_and_process_df(df, event, metadata, dag_id, run_id):
+def load_data_from_displayedactor_by_source(source_id):
+    pg_hook = PostgresHook(
+        postgres_conn_id=utils.get_db_conn_id(__file__, parent_of_parent=True)
+    )
+    engine = pg_hook.get_sqlalchemy_engine()
+
+    df_displayedactors = pd.read_sql_query(
+        f"SELECT identifiant_unique, cree_le, modifie_le "
+        f"FROM qfdmo_displayedacteur where statut='ACTIF' "
+        f"and source_id={source_id}",
+        engine,
+    )
+
+    return df_displayedactors
+
+
+def insert_dagrun_and_process_df(df, metadata, dag_id, run_id):
     pg_hook = PostgresHook(
         postgres_conn_id=utils.get_db_conn_id(__file__, parent_of_parent=True)
     )
@@ -262,23 +323,22 @@ def insert_dagrun_and_process_df(df, event, metadata, dag_id, run_id):
         )
         dag_run_id = result.fetchone()[0]
 
-        df["change_type"] = event
-        df["dag_run_id"] = dag_run_id
-        df[["row_updates", "dag_run_id", "change_type"]].to_sql(
-            "qfdmo_dagrunchange",
-            engine,
-            if_exists="append",
-            index=False,
-            method="multi",
-            chunksize=1000,
-        )
+    df["change_type"] = df["event"]
+    df["dag_run_id"] = dag_run_id
+    df[["row_updates", "dag_run_id", "change_type"]].to_sql(
+        "qfdmo_dagrunchange",
+        engine,
+        if_exists="append",
+        index=False,
+        method="multi",
+        chunksize=1000,
+    )
 
 
 def write_to_dagruns(**kwargs):
     dag_id = kwargs["dag"].dag_id
     run_id = kwargs["run_id"]
-    event = kwargs.get("event", "CREATE")
-    dfs = kwargs["ti"].xcom_pull(task_ids="serialize_actors_to_records")
+    dfs = kwargs["ti"].xcom_pull(task_ids="serialize_to_json")
     metadata_actors = (
         kwargs["ti"]
         .xcom_pull(task_ids="create_actors", key="return_value", default={})
@@ -302,7 +362,7 @@ def write_to_dagruns(**kwargs):
         dag_id_suffixed = dag_id if key == "all" else f"{dag_id}_{key}"
         df = data["df"]
         metadata.update(data.get("metadata", {}))
-        insert_dagrun_and_process_df(df, event, metadata, dag_id_suffixed, run_id)
+        insert_dagrun_and_process_df(df, metadata, dag_id_suffixed, run_id)
 
 
 def _force_column_value(
@@ -324,44 +384,46 @@ def create_actors(**kwargs):
     df = kwargs["ti"].xcom_pull(task_ids="fetch_data_from_api")
     df_sources = data_dict["sources"]
     df_acteurtype = data_dict["acteurtype"]
-    config_path = Path(__file__).parent.parent / "config" / "db_mapping.json"
-
-    with open(config_path, "r") as f:
-        config = json.load(f)
-
+    df_displayedacteurs = data_dict["displayedacteurs"]
+    config = utils.get_mapping_config()
     params = kwargs["params"]
+    reparacteurs = params.get("reparacteurs", False)
     column_mapping = params["column_mapping"]
     column_to_drop = params.get("column_to_drop", [])
     column_to_replace = params.get("default_column_value", {})
+
+    df = df.drop(column_to_drop, axis=1)
+
     for k, val in column_to_replace.items():
         df[k] = val
-
-    df["nom_de_lorganisme_std"] = df["nom_de_lorganisme"].str.replace("-", "")
-    df["id_point_apport_ou_reparation"] = df["id_point_apport_ou_reparation"].fillna(
-        df["nom_de_lorganisme_std"]
-    )
-    df["id_point_apport_ou_reparation"] = (
-        df["id_point_apport_ou_reparation"]
-        .str.replace(" ", "_")
-        .str.replace("_-", "_")
-        .str.replace("__", "_")
-    )
-    df = df.drop(column_to_drop, axis=1)
-    df = df.dropna(subset=["latitudewgs84", "longitudewgs84"])
-    df = df.replace({np.nan: None})
+    if reparacteurs:
+        df = mapping_utils.process_reparacteurs(df, df_sources, df_acteurtype)
+    else:
+        df = mapping_utils.process_actors(df)
 
     for old_col, new_col in column_mapping.items():
         if new_col:
-            if old_col == "type_de_point_de_collecte":
+            if old_col == "id":
+                df[new_col] = df["id"].astype(str)
+            elif old_col == "is_enabled":
+                df[new_col] = df[old_col].map({1: "ACTIF", 0: "SUPPRIME"})
+            elif old_col == "type_de_point_de_collecte":
                 df[new_col] = df[old_col].apply(
                     lambda x: mapping_utils.transform_acteur_type_id(
                         x, df_acteurtype=df_acteurtype
                     )
                 )
-            elif old_col in ["latitudewgs84", "longitudewgs84"]:
+            # TODO : je pense qu'on passe 2 fois dans cette condition, une fois pour
+            # la latitude et une fois pour la longitude
+            elif old_col in [
+                "latitude",
+                "longitude",
+                "longitudewgs84",
+                "latitudewgs84",
+            ]:
                 df[new_col] = df.apply(
                     lambda row: utils.transform_location(
-                        row["longitudewgs84"], row["latitudewgs84"]
+                        row["longitude"], row["latitude"]
                     ),
                     axis=1,
                 )
@@ -401,43 +463,56 @@ def create_actors(**kwargs):
                 df[new_col] = df[old_col].apply(lambda x: True if x == "oui" else False)
             else:
                 df[new_col] = df[old_col]
+
     df["identifiant_unique"] = df.apply(
-        lambda x: mapping_utils.create_identifiant_unique(x),
+        lambda x: mapping_utils.create_identifiant_unique(
+            x, source_name="CMA_REPARACTEUR" if reparacteurs else None
+        ),
         axis=1,
     )
+    df["cree_le"] = datetime.now()
     df["statut"] = "ACTIF"
-    df["latitude"] = df["latitudewgs84"].astype(float).replace({np.nan: None})
-    df["longitude"] = df["longitudewgs84"].astype(float).replace({np.nan: None})
-    df = df.drop(["latitudewgs84", "longitudewgs84"], axis=1)
     df["modifie_le"] = df["cree_le"]
-
     if "siret" in df.columns:
-        df["siret"] = df["siret"].replace({np.nan: None})
-        df["siret"] = df["siret"].astype(str).apply(lambda x: x[:14])
+        df["siret"] = df["siret"].apply(mapping_utils.process_siret)
     if "telephone" in df.columns:
-        df["telephone"] = df["telephone"].dropna().apply(lambda x: x.replace(" ", ""))
-        df["telephone"] = (
-            df["telephone"]
-            .dropna()
-            .apply(lambda x: "0" + x[2:] if x.startswith("33") else x)
-        )
-    if "service_a_domicile" in df.columns:
-        df.loc[
-            df["service_a_domicile"] == "service à domicile uniquement", "statut"
-        ] = "SUPPRIME"
+        df["telephone"] = df["telephone"].apply(mapping_utils.process_phone_number)
+
+    df = df.replace({np.nan: None})
 
     duplicates_mask = df.duplicated("identifiant_unique", keep=False)
     duplicate_ids = df.loc[duplicates_mask, "identifiant_unique"].unique()
-
     number_of_duplicates = len(duplicate_ids)
+
+    unique_source_ids = df["source_id"].unique()
+
+    df_actors = df_displayedacteurs[
+        (df_displayedacteurs["source_id"].isin(unique_source_ids))
+        & (df_displayedacteurs["statut"] == "ACTIF")
+    ]
+    # TODO : est-ce que les colonne cree_le et modifie_le sont nécessaires
+    df_missing_actors = df_actors[
+        ~df_actors["identifiant_unique"].isin(df["identifiant_unique"])
+    ][["identifiant_unique", "cree_le", "modifie_le"]]
+
+    df_missing_actors["statut"] = "SUPPRIME"
+    df_missing_actors["event"] = "UPDATE_ACTOR"
 
     metadata = {
         "number_of_duplicates": number_of_duplicates,
         "duplicate_ids": list(duplicate_ids),
         "added_rows": len(df),
+        "number_of_removed_actors": len(df_missing_actors),
     }
 
-    return {"df": df, "metadata": metadata, "config": config}
+    df = df.drop_duplicates(subset="identifiant_unique", keep="first")
+    df["event"] = "CREATE"
+    return {
+        "df": df,
+        "metadata": metadata,
+        "config": config,
+        "removed_actors": df_missing_actors,
+    }
 
 
 def create_labels(**kwargs):
@@ -446,6 +521,7 @@ def create_labels(**kwargs):
     df_acteurtype = data_dict["acteurtype"]
     df_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
 
+    # Get ESS constant values to use in in the loop
     ess_acteur_type_id = df_acteurtype.loc[
         df_acteurtype["code"].str.lower() == "ess", "id"
     ].iloc[0]
@@ -457,19 +533,32 @@ def create_labels(**kwargs):
     label_mapping = labels.set_index(labels["code"].str.lower()).to_dict(orient="index")
     rows_list = []
     for _, row in df_actors.iterrows():
-        if "labels_etou_bonus" in row:
-            label = str(row["labels_etou_bonus"])
-            if label == "Agréé Bonus Réparation":
-                eco_code = row["ecoorganisme"].lower()
-                if eco_code in label_mapping:
-                    rows_list.append(
-                        {
-                            "acteur_id": row["identifiant_unique"],
-                            "labelqualite_id": label_mapping[eco_code]["id"],
-                            "labelqualite": label_mapping[eco_code]["libelle"],
-                        }
-                    )
 
+        # Handle label_code if it is set (works for reparacteur)
+        label_code = row.get("label_code", "").lower()
+        if label_code in label_mapping:
+            rows_list.append(
+                {
+                    "acteur_id": row["identifiant_unique"],
+                    "labelqualite_id": label_mapping[label_code]["id"],
+                    "labelqualite": label_mapping[label_code]["libelle"],
+                }
+            )
+
+        # Manage bonus reparation
+        label = str(row.get("labels_etou_bonus"))
+        if label == "Agréé Bonus Réparation":
+            label_code = row.get("ecoorganisme")
+            if label_code in label_mapping:
+                rows_list.append(
+                    {
+                        "acteur_id": row["identifiant_unique"],
+                        "labelqualite_id": label_mapping[label_code]["id"],
+                        "labelqualite": label_mapping[label_code]["libelle"],
+                    }
+                )
+
+        # Handle special case for ESS
         if row["acteur_type_id"] == ess_acteur_type_id:
             rows_list.append(
                 {
@@ -486,3 +575,47 @@ def create_labels(**kwargs):
         ["acteur_id", "labelqualite_id"], keep="first", inplace=True
     )
     return df_labels
+
+
+def create_acteur_services(**kwargs):
+    data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
+    df_acteur_services = data_dict["acteur_services"]
+    df_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
+
+    acteurservice_acteurserviceid = {
+        "Service de réparation": mapping_utils.get_id_from_code(
+            "Service de réparation", df_acteur_services
+        ),
+        "Collecte par une structure spécialisée": mapping_utils.get_id_from_code(
+            "Collecte par une structure spécialisée", df_acteur_services
+        ),
+    }
+    acteurservice_eovalues = {
+        "Service de réparation": [
+            "point_dapport_de_service_reparation",
+            "point_de_reparation",
+        ],
+        "Collecte par une structure spécialisée": [
+            "point_dapport_pour_reemploi",
+            "point_de_collecte_ou_de_reprise_des_dechets",
+        ],
+    }
+    acteur_acteurservice_list = []
+    for _, eo_acteur in df_actors.iterrows():
+        for acteur_service, eo_values in acteurservice_eovalues.items():
+            if any(eo_acteur.get(eo_value) for eo_value in eo_values):
+                acteur_acteurservice_list.append(
+                    {
+                        "acteur_id": eo_acteur["identifiant_unique"],
+                        "acteurservice_id": acteurservice_acteurserviceid[
+                            acteur_service
+                        ],
+                        "acteurservice": acteur_service,
+                    }
+                )
+
+    df_acteur_services = pd.DataFrame(
+        acteur_acteurservice_list,
+        columns=["acteur_id", "acteurservice_id", "acteurservice"],
+    )
+    return df_acteur_services

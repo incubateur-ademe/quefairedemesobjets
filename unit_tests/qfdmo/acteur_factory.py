@@ -1,6 +1,6 @@
 import factory.fuzzy
 from django.contrib.gis.geos import Point
-from factory import SubFactory, Faker
+from factory import Faker, SubFactory
 from factory.django import DjangoModelFactory as Factory
 
 from qfdmo.models import (
@@ -19,6 +19,7 @@ from unit_tests.qfdmo.action_factory import ActionFactory
 class SourceFactory(Factory):
     class Meta:
         model = Source
+        django_get_or_create = ("code",)
 
     libelle = Faker("word")
     code = Faker("word")
@@ -39,7 +40,7 @@ class ActeurTypeFactory(Factory):
         model = ActeurType
         django_get_or_create = ("code",)
 
-    code = "a code"
+    code = Faker("word")
 
 
 class ActeurFactory(Factory):
@@ -47,7 +48,7 @@ class ActeurFactory(Factory):
         model = Acteur
 
     nom = "Test Object 1"
-    location = Point(0, 0)
+    location = Point(1, 1)
     acteur_type = SubFactory(ActeurTypeFactory)
     source = SubFactory(SourceFactory)
 
@@ -58,7 +59,7 @@ class DisplayedActeurFactory(Factory):
 
     identifiant_unique = factory.fuzzy.FuzzyText(length=10)
     nom = "Test Object 1"
-    location = Point(0, 0)
+    location = Point(1, 1)
     acteur_type = SubFactory(ActeurTypeFactory)
     source = SubFactory(SourceFactory)
 
@@ -67,14 +68,13 @@ class ActeurServiceFactory(Factory):
     class Meta:
         model = ActeurService
 
-    code = "service"
+    code = Faker("word")
 
 
 class PropositionServiceFactory(Factory):
     class Meta:
         model = PropositionService
 
-    acteur_service = SubFactory(ActeurServiceFactory)
     action = SubFactory(ActionFactory)
     acteur = SubFactory(ActeurFactory)
 
@@ -83,6 +83,5 @@ class DisplayedPropositionServiceFactory(Factory):
     class Meta:
         model = DisplayedPropositionService
 
-    acteur_service = SubFactory(ActeurServiceFactory)
     action = SubFactory(ActionFactory)
     acteur = SubFactory(DisplayedActeurFactory)
