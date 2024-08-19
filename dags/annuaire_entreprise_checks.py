@@ -46,13 +46,6 @@ def fetch_and_parse_data(**context):
 
     df_acteur = pd.read_sql("qfdmo_displayedacteur", engine)
 
-    df_acteur["full_adresse"] = (
-        df_acteur["adresse"]
-        .fillna("")
-        .str.cat(df_acteur["code_postal"].fillna(""), sep=" ")
-        .str.cat(df_acteur["ville"].fillna(""), sep=" ")
-    )
-
     df_acteur = df_acteur[df_acteur["statut"] == "ACTIF"]
 
     if limit > 1:
@@ -92,6 +85,7 @@ def fetch_and_parse_data(**context):
         )
         & (good_address_condition)
         & (df_acteur["siret"].str.len() != 14)
+        & (df_acteur["siret"].str.len() != 9)
     ]
     print("df_good_siret_closed size:", df_good_siret_closed.shape)
     print("df_a_siretiser size:", df_a_siretiser.shape)
@@ -106,6 +100,7 @@ def check_actor_with_adresse(**kwargs):
     df_ok_siret_ok_adresse = data["closed_ok_siret"]
     df_nok_siret_ok_adresse = data["nok_siret_ok_adresse"]
     df = pd.concat([df_ok_siret_ok_adresse, df_nok_siret_ok_adresse])
+    df["full_adresse"] = mapping_utils.create_full_adresse(df)
 
     df["ae_result"] = df.apply(
         lambda x: utils.check_siret_using_annuaire_entreprise(
@@ -122,7 +117,7 @@ def check_actor_with_adresse(**kwargs):
 def check_actor_with_siret(**kwargs):
     data = kwargs["ti"].xcom_pull(task_ids="load_and_filter_actors_data")
     df_acteur = data["closed_ok_siret"]
-
+    df_acteur["full_adresse"] = mapping_utils.create_full_adresse(df_acteur)
     df_acteur["ae_result"] = df_acteur.apply(
         utils.check_siret_using_annuaire_entreprise, axis=1
     )
@@ -133,7 +128,7 @@ def check_actor_with_siret(**kwargs):
 
 def enrich_row(row):
     enriched_ae_result = []
-    for item in row["ae_result"]:
+    for item in row.get("ae_result", []):
         latitude = item.get("latitude_candidat")
         longitude = item.get("longitude_candidat")
         if latitude is not None and longitude is not None:
@@ -162,13 +157,26 @@ def combine_actors(**kwargs):
     cohort_dfs = {}
 
     df_bad_siret = df[
-        df["siret_siret"].isnull()
+        df["ae_result_siret"].isnull()
         & df["full_adresse"].notnull()
-        & (df["siret_adresse"].str.len() < 14)
+        & (df["siret"].str.len() != 14)
+        & (df["siret"].str.len() != 9)
     ]
 
     if not df_bad_siret.empty:
-        cohort_dfs["siretitsation_with_adresse_bad_siret"] = df_bad_siret
+        df_bad_siret["ae_result"] = df_bad_siret.apply(
+            siret_control_utils.combine_ae_result_dicts, axis=1
+        )
+        df_non_empty_ae_results = df_bad_siret[
+            df_bad_siret["ae_result"].apply(lambda x: len(x) > 0)
+        ]
+        df_empty_ae_results = df_bad_siret[
+            df_bad_siret["ae_result"].apply(lambda x: len(x) == 0)
+        ]
+        cohort_dfs["siretitsation_with_adresse_bad_siret_non_empty"] = (
+            df_non_empty_ae_results
+        )
+        cohort_dfs["siretitsation_with_adresse_bad_siret_empty"] = df_empty_ae_results
 
     df = df[~df["identifiant_unique"].isin(df_bad_siret["identifiant_unique"])]
 
@@ -184,6 +192,9 @@ def combine_actors(**kwargs):
 
     for cohort_id in df["cohort_id"].unique():
         cohort_dfs[cohort_id] = df[df["cohort_id"] == cohort_id]
+
+    for cohort_id, cohort_df in cohort_dfs.items():
+        print(f"Cohort ID: {cohort_id} - Number of rows: {len(cohort_df)}")
 
     return cohort_dfs
 
