@@ -337,7 +337,7 @@ class RevisionActeur(BaseActeur):
     parent_id = models.CharField(
         max_length=255, blank=True, null=True, db_column="parent_id"
     )
-    is_parent = models.BooleanField(default=False)
+    is_parent = models.BooleanField(default=False, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         # OPTIMIZE: if we need to validate the main action in the service propositions
