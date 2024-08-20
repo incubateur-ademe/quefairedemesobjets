@@ -1,3 +1,5 @@
+import json
+
 import pytest
 from django.contrib.gis.geos import Point
 from django.forms import ValidationError, model_to_dict
@@ -19,7 +21,11 @@ from unit_tests.qfdmo.acteur_factory import (
     PropositionServiceFactory,
     SourceFactory,
 )
-from unit_tests.qfdmo.action_factory import ActionDirectionFactory, ActionFactory
+from unit_tests.qfdmo.action_factory import (
+    ActionDirectionFactory,
+    ActionFactory,
+    GroupeActionFactory,
+)
 
 
 @pytest.fixture()
@@ -324,6 +330,216 @@ class TestDisplayActeurActeurActions:
             DisplayedPropositionServiceFactory(action=action, acteur=displayed_acteur)
 
         CachedDirectionAction.reload_cache()
+
         assert [
             action.order for action in displayed_acteur.acteur_actions(direction="jai")
         ] == [1, 2, 3]
+
+
+@pytest.mark.django_db
+class TestDisplayedActionJsonActeurForDisplay:
+
+    @pytest.fixture
+    def displayed_acteur(self):
+        displayed_acteur = DisplayedActeurFactory()
+        directionjai = ActionDirectionFactory(code="jai")
+        directionjecherche = ActionDirectionFactory(code="jecherche")
+        groupeaction1 = GroupeActionFactory(
+            code="groupe1",
+            icon="icon-groupeaction1",
+            couleur="couleur-groupeaction1",
+            order=1,
+        )
+        groupeaction2 = GroupeActionFactory(
+            code="groupe2",
+            icon="icon-groupeaction2",
+            couleur="couleur-groupeaction2",
+            order=2,
+        )
+        action1 = ActionFactory(
+            code="actionjai1",
+            icon="icon-actionjai1",
+            couleur="couleur-actionjai1",
+            groupe_action=groupeaction1,
+            order=1,
+        )
+        action1.directions.add(directionjai)
+        action2 = ActionFactory(
+            code="actionjai2",
+            icon="icon-actionjai2",
+            couleur="couleur-actionjai2",
+            groupe_action=groupeaction2,
+            order=2,
+        )
+        action2.directions.add(directionjai)
+        action3 = ActionFactory(
+            code="actionjecherche1",
+            icon="icon-actionjecherche1",
+            couleur="couleur-actionjecherche1",
+            groupe_action=groupeaction1,
+            order=3,
+        )
+        action3.directions.add(directionjecherche)
+        action4 = ActionFactory(
+            code="actionjecherche2",
+            icon="icon-actionjecherche2",
+            couleur="couleur-actionjecherche2",
+            groupe_action=groupeaction2,
+            order=4,
+        )
+        action4.directions.add(directionjecherche)
+
+        DisplayedPropositionServiceFactory(action=action1, acteur=displayed_acteur)
+        DisplayedPropositionServiceFactory(action=action2, acteur=displayed_acteur)
+        DisplayedPropositionServiceFactory(action=action3, acteur=displayed_acteur)
+        DisplayedPropositionServiceFactory(action=action4, acteur=displayed_acteur)
+
+        return displayed_acteur
+
+    def test_json_acteur_for_display_ordered(self, displayed_acteur):
+        CachedDirectionAction.reload_cache()
+        acteur_for_display = json.loads(displayed_acteur.json_acteur_for_display())
+
+        assert acteur_for_display["identifiant_unique"] is not None
+        assert acteur_for_display["location"] is not None
+        assert acteur_for_display["icon"] == "icon-actionjai1"
+        assert acteur_for_display["couleur"] == "couleur-actionjai1"
+
+    def test_json_acteur_for_display_by_direction(self, displayed_acteur):
+        CachedDirectionAction.reload_cache()
+        acteur_for_display = json.loads(
+            displayed_acteur.json_acteur_for_display(direction="jai")
+        )
+
+        assert acteur_for_display["identifiant_unique"] is not None
+        assert acteur_for_display["location"] is not None
+        assert acteur_for_display["icon"] == "icon-actionjai1"
+        assert acteur_for_display["couleur"] == "couleur-actionjai1"
+
+        CachedDirectionAction.reload_cache()
+        acteur_for_display = json.loads(
+            displayed_acteur.json_acteur_for_display(direction="jecherche")
+        )
+
+        assert acteur_for_display["identifiant_unique"] is not None
+        assert acteur_for_display["location"] is not None
+        assert acteur_for_display["icon"] == "icon-actionjecherche1"
+        assert acteur_for_display["couleur"] == "couleur-actionjecherche1"
+
+    def test_json_acteur_for_display_action_list(self, displayed_acteur):
+
+        CachedDirectionAction.reload_cache()
+        acteur_for_display = json.loads(
+            displayed_acteur.json_acteur_for_display(action_list="actionjai2")
+        )
+
+        assert acteur_for_display["identifiant_unique"] is not None
+        assert acteur_for_display["location"] is not None
+        assert acteur_for_display["icon"] == "icon-actionjai2"
+        assert acteur_for_display["couleur"] == "couleur-actionjai2"
+
+        CachedDirectionAction.reload_cache()
+        acteur_for_display = json.loads(
+            displayed_acteur.json_acteur_for_display(
+                action_list="actionjai1|actionjai2|actionjecherche2"
+            )
+        )
+
+        assert acteur_for_display["identifiant_unique"] is not None
+        assert acteur_for_display["location"] is not None
+        assert acteur_for_display["icon"] == "icon-actionjai1"
+        assert acteur_for_display["couleur"] == "couleur-actionjai1"
+
+    def test_json_acteur_for_display_carte(self, displayed_acteur):
+
+        CachedDirectionAction.reload_cache()
+        acteur_for_display = json.loads(
+            displayed_acteur.json_acteur_for_display(carte=True)
+        )
+
+        assert acteur_for_display["identifiant_unique"] is not None
+        assert acteur_for_display["location"] is not None
+        assert acteur_for_display["icon"] == "icon-groupeaction1"
+        assert acteur_for_display["couleur"] == "couleur-groupeaction1"
+
+    def test_json_acteur_for_display_carte_direction(self, displayed_acteur):
+
+        CachedDirectionAction.reload_cache()
+        acteur_for_display = json.loads(
+            displayed_acteur.json_acteur_for_display(carte=True, direction="jecherche")
+        )
+
+        assert acteur_for_display["identifiant_unique"] is not None
+        assert acteur_for_display["location"] is not None
+        assert acteur_for_display["icon"] == "icon-groupeaction1"
+        assert acteur_for_display["couleur"] == "couleur-groupeaction1"
+
+    def test_json_acteur_for_display_carte_action_list(self, displayed_acteur):
+
+        CachedDirectionAction.reload_cache()
+        acteur_for_display = json.loads(
+            displayed_acteur.json_acteur_for_display(
+                carte=True, action_list="actionjai2|actionjecherche2"
+            )
+        )
+
+        assert acteur_for_display["identifiant_unique"] is not None
+        assert acteur_for_display["location"] is not None
+        assert acteur_for_display["icon"] == "icon-groupeaction2"
+        assert acteur_for_display["couleur"] == "couleur-groupeaction2"
+
+        CachedDirectionAction.reload_cache()
+        acteur_for_display = json.loads(
+            displayed_acteur.json_acteur_for_display(
+                carte=True, action_list="actionjai1|actionjai2|actionjecherche2"
+            )
+        )
+
+        assert acteur_for_display["identifiant_unique"] is not None
+        assert acteur_for_display["location"] is not None
+        assert acteur_for_display["icon"] == "icon-groupeaction1"
+        assert acteur_for_display["couleur"] == "couleur-groupeaction1"
+
+    def test_json_acteur_for_display_action_principale_basic(self, displayed_acteur):
+        displayed_acteur.action_principale = ActionFactory(code="actionjai2")
+        displayed_acteur.save()
+
+        CachedDirectionAction.reload_cache()
+        acteur_for_display = json.loads(displayed_acteur.json_acteur_for_display())
+
+        assert acteur_for_display["identifiant_unique"] is not None
+        assert acteur_for_display["location"] is not None
+        assert acteur_for_display["icon"] == "icon-actionjai2"
+        assert acteur_for_display["couleur"] == "couleur-actionjai2"
+
+    def test_json_acteur_for_display_action_principale_not_in_direction(
+        self, displayed_acteur
+    ):
+        displayed_acteur.action_principale = ActionFactory(code="actionjai2")
+        displayed_acteur.save()
+
+        CachedDirectionAction.reload_cache()
+        acteur_for_display = json.loads(
+            displayed_acteur.json_acteur_for_display(direction="jecherche")
+        )
+
+        assert acteur_for_display["identifiant_unique"] is not None
+        assert acteur_for_display["location"] is not None
+        assert acteur_for_display["icon"] == "icon-actionjecherche1"
+        assert acteur_for_display["couleur"] == "couleur-actionjecherche1"
+
+    def test_json_acteur_for_display_action_principale_not_in_list(
+        self, displayed_acteur
+    ):
+        displayed_acteur.action_principale = ActionFactory(code="actionjai2")
+        displayed_acteur.save()
+
+        CachedDirectionAction.reload_cache()
+        acteur_for_display = json.loads(
+            displayed_acteur.json_acteur_for_display(action_list="actionjai1")
+        )
+
+        assert acteur_for_display["identifiant_unique"] is not None
+        assert acteur_for_display["location"] is not None
+        assert acteur_for_display["icon"] == "icon-actionjai1"
+        assert acteur_for_display["couleur"] == "couleur-actionjai1"
