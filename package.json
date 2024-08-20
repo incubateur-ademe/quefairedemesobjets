@@ -58,6 +58,7 @@
         "@playwright/test": "^1.46.1",
         "@testing-library/jest-dom": "^6.4.8",
         "@types/jest": "^29.5.12",
+        "@types/lodash": "^4.17.7",
         "@types/node": "^22.1.0",
         "@typescript-eslint/eslint-plugin": "^7.0.1",
         "buffer": "^6.0.3",
@@ -74,5 +75,8 @@
         "ts-jest": "^29.2.4",
         "ts-node": "^10.9.2",
         "typescript": "^5.5.4"
+    },
+    "optionalDependencies": {
+        "@parcel/watcher-linux-x64-glibc": "^2.4.2-alpha.0"
     }
 }
