@@ -27,7 +27,6 @@ google_doc_url = "https://drive.usercontent.google.com/download?id=1pQzfCR6IN1Ig
 
 
 def _get_qfdmod_products_from_url(url):
-    # Télécharger le fichier CSV depuis l'URL
     response = requests.get(url)
     response.raise_for_status()  # Vérifie si la requête a réussi
 
@@ -38,25 +37,28 @@ def _get_qfdmod_products_from_urlfile(url):
     qfdmod_products = []
 
     # Télécharger le fichier CSV depuis l'URL
-    response = requests.get(produits_qfdmod_url)
+    response = requests.get(url)
     response.raise_for_status()  # Vérifie si la requête a réussi
-
     # Lire le fichier CSV depuis le contenu téléchargé
     content = response.content.decode("utf-8").splitlines()
     reader = csv.DictReader(content)
 
     for row in reader:
+        if not row["Nom"]:
+            continue
         qfdmod_products.append(row)
 
     return qfdmod_products
 
 
 def _get_product_names_from_qfdmod_product(qfdmod_product: dict) -> List[str]:
-    product_names = [
-        word.lower().strip()
-        for word in qfdmod_product["Synonymes_existants"].split("/")
-        if word.lower().strip()
-    ]
+    product_names = []
+    if "Synonymes_existants" in qfdmod_product:
+        product_names = [
+            word.lower().strip()
+            for word in qfdmod_product["Synonymes_existants"].split("/")
+            if word.lower().strip()
+        ]
     product_names.append(qfdmod_product["Nom"].lower().strip())
     product_names = list(set(product_names))
     return product_names
@@ -158,12 +160,30 @@ Voulez-vous créer ces objects ? (y/n) : """
 
 
 class Command(BaseCommand):
-    help = "Get info from INSEE and save proposition of correction"
+    help = "Fusion des produits de l'assistant et des objets de la carte"
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--create_products",
+            help="Creation des produits dont aucun synonyme n'existe",
+            action="store_true",
+        )
+        parser.add_argument(
+            "--create_synomines",
+            help="Creation des produits dont au moins un synonyme existe",
+            action="store_true",
+        )
 
     def handle(self, *args, **options):
+        create_products_option = options.get("create_products")
+        create_synomines_option = options.get("create_synomines")
+        if not create_products_option and not create_synomines_option:
+            print("Aucune action demandée")
+            self.print_help("manage.py", "import_product_from_qfdmod")
+            return
         qfdmod_products = _get_qfdmod_products_from_url(produits_qfdmod_url)
         googledoc_products = _get_qfdmod_products_from_urlfile(google_doc_url)
-        print(googledoc_products[0])
+        # print(googledoc_products[0])
         googledoc_by_product_id = {
             product["ID"].strip(): product for product in googledoc_products
         }
@@ -192,9 +212,9 @@ class Command(BaseCommand):
                 "sous_categorie"
             ).filter(reduce(or_, q_objects))
 
-            if objects_from_names.count() == 0:  # Option create_products
+            if objects_from_names.count() == 0 and create_products_option:
+                product_name = qfdmod_product["Nom"]
                 if not googledoc_by_product_id.get(str(product_id)):
-                    product_name = qfdmod_product["Nom"]
                     print(
                         f"product not found in google doc : {product_name}"
                         f" ({product_id})"
@@ -211,7 +231,7 @@ Voulez-vous créer ces objects ? (y/n) :
                     while should_create not in ["y", "n"]:
                         should_create = input(input_text).lower()
 
-            if objects_from_names.count() and False:  # Option create_synomines
+            if objects_from_names.count() and create_synomines_option:
                 result_in_details["count_product_found_in_object_list"] += 1
 
                 # Collect sous categories from objects
