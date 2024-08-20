@@ -87,7 +87,7 @@ def create_proposition_services(**kwargs):
 def create_proposition_services_sous_categories(**kwargs):
     df = kwargs["ti"].xcom_pull(task_ids="create_proposition_services")["df"]
     data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
-    config = kwargs["ti"].xcom_pull(task_ids="create_actors")["config"]
+    config = utils.get_mapping_config()
     df_sous_categories_map = data_dict["sous_categories"]
     params = kwargs["params"]
     mapping_config_key = params.get("mapping_config_key", "sous_categories")
@@ -138,9 +138,7 @@ def create_proposition_services_sous_categories(**kwargs):
 
 
 def serialize_to_json(**kwargs):
-    df_removed_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")[
-        "removed_actors"
-    ]
+    df_removed_actors = kwargs["ti"].xcom_pull(task_ids="remove_actors")
     update_actors_columns = ["identifiant_unique", "statut"]
     df_removed_actors["row_updates"] = df_removed_actors[update_actors_columns].apply(
         lambda row: json.dumps(row.to_dict(), default=str), axis=1
@@ -384,8 +382,6 @@ def create_actors(**kwargs):
     df = kwargs["ti"].xcom_pull(task_ids="fetch_data_from_api")
     df_sources = data_dict["sources"]
     df_acteurtype = data_dict["acteurtype"]
-    df_displayedacteurs = data_dict["displayedacteurs"]
-    config = utils.get_mapping_config()
     params = kwargs["params"]
     reparacteurs = params.get("reparacteurs", False)
     column_mapping = params["column_mapping"]
@@ -484,12 +480,36 @@ def create_actors(**kwargs):
     duplicate_ids = df.loc[duplicates_mask, "identifiant_unique"].unique()
     number_of_duplicates = len(duplicate_ids)
 
+    metadata = {
+        "number_of_duplicates": number_of_duplicates,
+        "duplicate_ids": list(duplicate_ids),
+        "added_rows": len(df),
+    }
+
+    df = df.drop_duplicates(subset="identifiant_unique", keep="first")
+    df["event"] = "CREATE"
+    return {
+        "df": df,
+        "metadata": metadata,
+    }
+
+
+def compute_geoloc(**kwargs):
+    pass
+
+
+def remove_actors(**kwargs):
+    df = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
+    data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
+    df_displayedacteurs = data_dict["displayedacteurs"]
+
     unique_source_ids = df["source_id"].unique()
 
     df_actors = df_displayedacteurs[
         (df_displayedacteurs["source_id"].isin(unique_source_ids))
         & (df_displayedacteurs["statut"] == "ACTIF")
     ]
+
     # TODO : est-ce que les colonne cree_le et modifie_le sont nécessaires
     df_missing_actors = df_actors[
         ~df_actors["identifiant_unique"].isin(df["identifiant_unique"])
@@ -498,21 +518,18 @@ def create_actors(**kwargs):
     df_missing_actors["statut"] = "SUPPRIME"
     df_missing_actors["event"] = "UPDATE_ACTOR"
 
-    metadata = {
-        "number_of_duplicates": number_of_duplicates,
-        "duplicate_ids": list(duplicate_ids),
-        "added_rows": len(df),
-        "number_of_removed_actors": len(df_missing_actors),
-    }
+    return df_missing_actors
 
-    df = df.drop_duplicates(subset="identifiant_unique", keep="first")
-    df["event"] = "CREATE"
-    return {
-        "df": df,
-        "metadata": metadata,
-        "config": config,
-        "removed_actors": df_missing_actors,
-    }
+
+def compute_metadata(**kwargs):
+    df_removed_actors = kwargs["ti"].xcom_pull(task_ids="remove_actors")
+    metadata = kwargs["ti"].xcom_pull(task_ids="create_actors")["metadata"]
+    metadata["number_of_removed_actors"] = len(df_removed_actors)
+    return metadata
+
+
+def merge_df_actor(**kwargs):
+    pass
 
 
 def create_labels(**kwargs):

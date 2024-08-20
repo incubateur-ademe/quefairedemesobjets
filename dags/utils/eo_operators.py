@@ -33,6 +33,14 @@ def create_actors_task(dag: DAG) -> PythonOperator:
     )
 
 
+def remove_actors_task(dag: DAG) -> PythonOperator:
+    return PythonOperator(
+        task_id="remove_actors",
+        python_callable=dag_eo_utils.remove_actors,
+        dag=dag,
+    )
+
+
 def create_proposition_services_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id="create_proposition_services",
@@ -49,22 +57,6 @@ def create_proposition_services_sous_categories_task(dag: DAG) -> PythonOperator
     )
 
 
-def write_data_task(dag: DAG) -> PythonOperator:
-    return PythonOperator(
-        task_id="write_data_to_validate_into_dagruns",
-        python_callable=dag_eo_utils.write_to_dagruns,
-        dag=dag,
-    )
-
-
-def serialize_to_json_task(dag: DAG) -> PythonOperator:
-    return PythonOperator(
-        task_id="serialize_to_json",
-        python_callable=dag_eo_utils.serialize_to_json,
-        dag=dag,
-    )
-
-
 def create_labels_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id="create_labels",
@@ -77,5 +69,45 @@ def create_acteur_services_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id="create_acteur_services",
         python_callable=dag_eo_utils.create_acteur_services,
+        dag=dag,
+    )
+
+
+def compute_metadata_task(dag: DAG) -> PythonOperator:
+    return PythonOperator(
+        task_id="compute_metadata",
+        python_callable=dag_eo_utils.compute_metadata,
+        dag=dag,
+    )
+
+
+def merge_df_actor_task(dag: DAG) -> PythonOperator:
+    return PythonOperator(
+        task_id="merge_df_actor",
+        python_callable=dag_eo_utils.merge_df_actor,
+        dag=dag,
+    )
+
+
+def compute_geoloc_task(dag: DAG) -> PythonOperator:
+    return PythonOperator(
+        task_id="compute_geoloc",
+        python_callable=dag_eo_utils.compute_geoloc,
+        dag=dag,
+    )
+
+
+def serialize_to_json_task(dag: DAG) -> PythonOperator:
+    return PythonOperator(
+        task_id="serialize_to_json",
+        python_callable=dag_eo_utils.serialize_to_json,
+        dag=dag,
+    )
+
+
+def write_data_task(dag: DAG) -> PythonOperator:
+    return PythonOperator(
+        task_id="write_to_dagruns",
+        python_callable=dag_eo_utils.write_to_dagruns,
         dag=dag,
     )
