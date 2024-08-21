@@ -7,7 +7,6 @@
 # si pas de colonne P, on crée catégorie colonne B et sous-catégorie de la colonne M
 
 
-import csv
 from functools import reduce
 from operator import or_
 from typing import List
@@ -20,25 +19,16 @@ from qfdmo.models.categorie_objet import Objet
 
 produits_qfdmod_url = (
     "https://data.ademe.fr/data-fair/api/v1/datasets/que-faire-de-mes-dechets-produits"
-    "/lines?size=10000&page=1&format=csv"
+    "/lines?size=10000"
 )
 
 
 def _get_qfdmod_products():
-    qfdmod_products = []
-
-    # Télécharger le fichier CSV depuis l'URL
+    # Download product in json format from URL
     response = requests.get(produits_qfdmod_url)
-    response.raise_for_status()  # Vérifie si la requête a réussi
+    response.raise_for_status()
 
-    # Lire le fichier CSV depuis le contenu téléchargé
-    content = response.content.decode("utf-8").splitlines()
-    reader = csv.DictReader(content)
-
-    for row in reader:
-        qfdmod_products.append(row)
-
-    return qfdmod_products
+    return response.json()["results"]
 
 
 def _get_product_names_from_qfdmod_product(qfdmod_product: dict) -> List[str]:
@@ -162,7 +152,7 @@ class Command(BaseCommand):
         # si il existe déjà un objet avec le nom, on met à jour l'identifiant_qfdmod
         # on crée les synomimes si ils n'existent pas
         for qfdmod_product in qfdmod_products:
-            product_id = int(qfdmod_product['\ufeff"ID"'])
+            product_id = int(qfdmod_product["ID"])
             product_names = _get_product_names_from_qfdmod_product(qfdmod_product)
 
             # Construire une liste de filtres Q pour chaque nom de produit
