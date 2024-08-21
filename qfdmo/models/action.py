@@ -175,7 +175,15 @@ class CachedDirectionAction:
     def get_reparer_action_id(cls):
         cls._manage_cache_expiration()
         if cls._reparer_action_id is None:
-            cls._reparer_action_id = Action.objects.get(code="reparer").id
+            # TODO : can use the cache
+            try:
+                cls._reparer_action_id = [
+                    action
+                    for action in cls.get_action_instances()
+                    if action.code == "reparer"
+                ][0].id
+            except IndexError:
+                raise Exception("Action 'Réparer' not found")
         return cls._reparer_action_id
 
     @classmethod

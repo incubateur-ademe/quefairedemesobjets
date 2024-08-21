@@ -247,8 +247,6 @@ class BaseActeur(NomAsNaturalKeyModel):
 
     @property
     def is_digital(self) -> bool:
-        print(f"acteur_type : {self.acteur_type_id} - {self.acteur_type}")
-        print(f"get_digital_acteur_type_id : {ActeurType.get_digital_acteur_type_id()}")
         return self.acteur_type_id == ActeurType.get_digital_acteur_type_id()
 
     def get_acteur_services(self) -> list[str]:

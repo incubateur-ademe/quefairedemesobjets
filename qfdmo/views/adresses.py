@@ -420,6 +420,7 @@ class AddressesView(FormView):
         for cached_groupe in CachedDirectionAction.get_groupe_action_instances():
             if groupe_actions := [
                 action
+                # TODO : à optimiser avec le cache
                 for action in cached_groupe.actions.all().order_by(  # type: ignore
                     "order"
                 )
