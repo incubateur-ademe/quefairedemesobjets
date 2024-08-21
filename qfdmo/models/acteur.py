@@ -336,7 +336,7 @@ class RevisionActeur(BaseActeur):
     )
 
     def save(self, *args, **kwargs):
-        # FIXME: if we need to validate the main action in the service propositions
+        # OPTIMIZE: if we need to validate the main action in the service propositions
         # I guess it should be here
         self.set_default_fields_and_objects_before_save()
         return super().save(*args, **kwargs)
