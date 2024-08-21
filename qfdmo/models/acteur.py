@@ -272,6 +272,16 @@ class BaseActeur(NomAsNaturalKeyModel):
         return self.labels.filter(code="reparacteur").exists()
 
 
+def clean_parent(parent):
+    try:
+        parent = RevisionActeur.objects.get(identifiant_unique=parent)
+    except RevisionActeur.DoesNotExist:
+        raise ValidationError("You can't define a Parent which does not exist.")
+
+    if parent and parent.parent:
+        raise ValidationError("You can't define a Parent which is already a duplicate.")
+
+
 class Acteur(BaseActeur):
     class Meta:
         verbose_name = "ACTEUR de l'EC - IMPORTÉ"
@@ -334,27 +344,29 @@ class RevisionActeur(BaseActeur):
     acteur_type = models.ForeignKey(
         ActeurType, on_delete=models.CASCADE, blank=True, null=True
     )
-    parent_id = models.CharField(
-        max_length=255, blank=True, null=True, db_column="parent_id"
+    # parent_id = models.CharField(
+    #     max_length=255, blank=True, null=True, db_column="parent_id"
+    # )
+    parent = models.ForeignKey(
+        "self",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="duplicats",
+        validators=[clean_parent],
     )
-    is_parent = models.BooleanField(default=False, null=True, blank=True)
+
+    # is_parent = models.BooleanField(default=False, null=True, blank=True)
+    @property
+    def is_parent(self):
+        return self.duplicats.exists()
 
     def save(self, *args, **kwargs):
         # OPTIMIZE: if we need to validate the main action in the service propositions
         # I guess it should be here
         self.set_default_fields_and_objects_before_save()
-        self.clean_parent_id()
+        self.full_clean()
         return super().save(*args, **kwargs)
-
-    def clean_parent_id(self):
-        if self.parent_id:
-            parent_acteur = RevisionActeur.objects.filter(
-                identifiant_unique=self.parent_id
-            ).first()
-            if parent_acteur and not parent_acteur.is_parent:
-                raise ValidationError(
-                    {"parent_id": "The referenced parent_id is not a parent."}
-                )
 
     def set_default_fields_and_objects_before_save(self):
         acteur_exists = True
@@ -374,6 +386,8 @@ class RevisionActeur(BaseActeur):
                         "proposition_services",
                         "acteur_services",
                         "labels",
+                        "parent",
+                        "is_parent",
                     ],
                 ),
                 acteur_type=(

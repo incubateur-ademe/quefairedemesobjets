@@ -20,6 +20,7 @@ from unit_tests.qfdmo.acteur_factory import (
     DisplayedActeurFactory,
     DisplayedPropositionServiceFactory,
     PropositionServiceFactory,
+    RevisionActeurFactory,
     SourceFactory,
 )
 from unit_tests.qfdmo.action_factory import (
@@ -230,6 +231,20 @@ class TestCreateRevisionActeur:
             identifiant_unique=revision_acteur.identifiant_unique
         )
         assert revision_acteur.action_principale == acteur.action_principale
+
+    def test_revision_acteur_is_parent(self):
+        revision_acteur_parent = RevisionActeurFactory()
+        revision_acteur = RevisionActeurFactory(parent=revision_acteur_parent)
+
+        assert revision_acteur_parent.is_parent
+        assert not revision_acteur.is_parent
+
+    def test_revision_acteur_parent_validator(self):
+        revision_acteur_parent = RevisionActeurFactory()
+        revision_acteur = RevisionActeurFactory(parent=revision_acteur_parent)
+
+        with pytest.raises(ValidationError):
+            RevisionActeurFactory(parent=revision_acteur)
 
 
 @pytest.mark.django_db

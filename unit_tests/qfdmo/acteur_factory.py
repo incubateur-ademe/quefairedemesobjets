@@ -13,6 +13,7 @@ from qfdmo.models import (
     PropositionService,
     Source,
 )
+from qfdmo.models.acteur import RevisionActeur
 from unit_tests.qfdmo.action_factory import ActionFactory
 
 
@@ -46,6 +47,16 @@ class ActeurTypeFactory(Factory):
 class ActeurFactory(Factory):
     class Meta:
         model = Acteur
+
+    nom = "Test Object 1"
+    location = Point(1, 1)
+    acteur_type = SubFactory(ActeurTypeFactory)
+    source = SubFactory(SourceFactory)
+
+
+class RevisionActeurFactory(Factory):
+    class Meta:
+        model = RevisionActeur
 
     nom = "Test Object 1"
     location = Point(1, 1)
