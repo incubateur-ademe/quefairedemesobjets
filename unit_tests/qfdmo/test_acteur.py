@@ -73,39 +73,6 @@ class TestActeurIsdigital:
         ).is_digital
 
 
-# @pytest.mark.django_db
-# class TestActeurSerialize:
-#     def test_serialize(self, acteur):
-#         proposition_service = PropositionService.objects.last()
-#         expected_serialized_acteur = {
-#             "nom": "Test Object 1",
-#             "description": None,
-#             "identifiant_unique": acteur.identifiant_unique,
-#             "acteur_type": acteur.acteur_type.serialize(),
-#             "adresse": None,
-#             "adresse_complement": None,
-#             "code_postal": None,
-#             "ville": None,
-#             "url": None,
-#             "email": None,
-#             "telephone": None,
-#             "nom_commercial": None,
-#             "nom_officiel": None,
-#             "siret": None,
-#             "source": acteur.source.serialize(),
-#             "statut": "ACTIF",
-#             "identifiant_externe": acteur.identifiant_externe,
-#             "location": {"type": "Point", "coordinates": [0.0, 0.0]},
-#             "naf_principal": None,
-#             "commentaires": None,
-#             "horaires_osm": None,
-#             "horaires_description": None,
-#             "proposition_services": [proposition_service.serialize()],
-#             "labels": [],
-#         }
-#         assert acteur.serialize() == expected_serialized_acteur
-
-
 @pytest.mark.django_db
 class TestActeurDefaultOnSave:
     def test_empty(self):
@@ -197,10 +164,7 @@ class TestActeurGetOrCreateRevisionActeur:
     def test_create_revisionacteur_copy1(self, acteur):
         revision_acteur = acteur.get_or_create_revision()
 
-        assert (
-            revision_acteur.serialize()["identifiant_unique"]
-            == acteur.serialize()["identifiant_unique"]
-        )
+        assert revision_acteur.identifiant_unique == acteur.identifiant_unique
 
     def test_create_revisionacteur_copy2(self, acteur):
         revision_acteur = acteur.get_or_create_revision()
@@ -208,7 +172,7 @@ class TestActeurGetOrCreateRevisionActeur:
         revision_acteur.save()
         revision_acteur2 = acteur.get_or_create_revision()
 
-        assert revision_acteur2.serialize() == revision_acteur.serialize()
+        assert revision_acteur2 == revision_acteur
         assert revision_acteur2.nom == "Test Object 2"
         assert revision_acteur2.nom != acteur.nom
 
@@ -223,7 +187,7 @@ class TestActeurGetOrCreateRevisionActeur:
         revision_acteur.proposition_services.add(proposition_service)
         revision_acteur2 = acteur.get_or_create_revision()
 
-        assert revision_acteur2.serialize() == revision_acteur.serialize()
+        assert revision_acteur2 == revision_acteur
         assert revision_acteur2.nom is None
         assert (
             revision_acteur2.proposition_services.values_list("action__code").all()

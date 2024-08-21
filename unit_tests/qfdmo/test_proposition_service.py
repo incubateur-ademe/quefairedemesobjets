@@ -74,16 +74,6 @@ class TestActionNomAsNaturalKeyHeritage:
         return revision_proposition_service
 
     @pytest.mark.django_db
-    def test_serialize(self, proposition_service, action, sous_categories, acteur):
-        assert proposition_service.serialize() == {
-            "action": action.serialize(),
-            "sous_categories": [
-                sous_categories[0].serialize(),
-                sous_categories[1].serialize(),
-            ],
-        }
-
-    @pytest.mark.django_db
     def test_proposition_service_str(self, proposition_service):
         assert str(proposition_service) == ("fake acteur - fake action")
 
