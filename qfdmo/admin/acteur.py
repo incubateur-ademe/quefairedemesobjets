@@ -6,9 +6,12 @@ from django.contrib.gis import admin
 from django.contrib.gis.forms.fields import PointField
 from django.contrib.gis.geos import Point
 from django.contrib.postgres.lookups import Unaccent
+from django.db.models import Subquery
 from django.db.models.functions import Lower
 from django.forms import CharField
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponseRedirect
+from django.urls import reverse
+from django.utils.html import format_html
 from import_export import admin as import_export_admin
 from import_export import fields, resources, widgets
 
@@ -24,6 +27,7 @@ from qfdmo.models import (
     SousCategorieObjet,
 )
 from qfdmo.models.acteur import (
+    ActeurStatus,
     DisplayedActeur,
     DisplayedPropositionService,
     LabelQualite,
@@ -104,17 +108,8 @@ class BasePropositionServiceInline(admin.TabularInline):
     )
 
 
-class PropositionServiceInline(BasePropositionServiceInline, NotEditableInlineMixin):
+class PropositionServiceInline(NotEditableInlineMixin, BasePropositionServiceInline):
     model = PropositionService
-
-    def has_add_permission(self, request, obj=None):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
 
 
 class RevisionPropositionServiceInline(BasePropositionServiceInline):
@@ -122,18 +117,9 @@ class RevisionPropositionServiceInline(BasePropositionServiceInline):
 
 
 class DisplayedPropositionServiceInline(
-    BasePropositionServiceInline, NotEditableInlineMixin
+    NotEditableInlineMixin, BasePropositionServiceInline
 ):
     model = DisplayedPropositionService
-
-    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
 
 
 class BaseActeurForm(forms.ModelForm):
@@ -287,13 +273,89 @@ class RevisionActeurResource(ActeurResource):
         model = RevisionActeur
 
 
+class RevisionActeurChildInline(NotEditableInlineMixin, admin.TabularInline):
+    verbose_name = "Duplicat"
+    model = RevisionActeur
+    fk_name = "parent"
+    fields = ["view_link", "statut"]
+    readonly_fields = ["view_link", "statut"]
+    can_delete = False
+    extra = 0
+
+    def view_link(self, obj):
+        if obj.identifiant_unique:
+            return format_html(
+                '<a href="{}">{} ({})</a>',
+                reverse(
+                    "admin:qfdmo_revisionacteur_change", args=[obj.identifiant_unique]
+                ),
+                obj.nom,
+                obj.identifiant_unique,
+            )
+        return None
+
+
 class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin):
+    change_form_template = "admin/revision_acteur/change_form.html"
     save_as = True
     gis_widget = CustomOSMWidget
-    inlines = [RevisionPropositionServiceInline, RevisionActeurLabelQualiteInline]
+    inlines = []
+
+    def get_inline_instances(self, request, revision_acteur=None):
+        inlines = []
+        if revision_acteur and revision_acteur.is_parent:
+            inlines.append(RevisionActeurChildInline(self.model, self.admin_site))
+        else:
+            inlines.append(
+                RevisionPropositionServiceInline(self.model, self.admin_site)
+            )
+            inlines.append(
+                RevisionActeurLabelQualiteInline(self.model, self.admin_site)
+            )
+        return inlines
 
     exclude = ["id"]
     resource_classes = [RevisionActeurResource]
+    fields = list(BaseActeurAdmin.fields) + ["parent"]
+    autocomplete_fields = ["parent"]
+
+    # update readlonly fields following statut of object
+    def get_readonly_fields(self, request, revision_acteur=None):
+        if revision_acteur and revision_acteur.is_parent:
+            return list(super().get_readonly_fields(request, revision_acteur)) + [
+                "parent",
+                "proposition_services",
+                "acteur_services",
+                "source",
+                "labels",
+            ]
+        return super().get_readonly_fields(request, revision_acteur)
+
+    def get_search_results(self, request, queryset, search_term):
+        queryset, use_distinct = super().get_search_results(
+            request, queryset, search_term
+        )
+        if "field_name" in request.GET and request.GET["field_name"] == "parent":
+            queryset = queryset.filter(
+                # filtrer les acteurs pour n'afficher que ceux qui sont déjà parents
+                # identifiant_unique in select distinct(parent_id) from revisionacteur
+                identifiant_unique__in=Subquery(
+                    RevisionActeur.objects.filter(parent_id__isnull=False)
+                    .values("parent_id")
+                    .distinct()
+                ),
+                statut=ActeurStatus.ACTIF,
+            )
+        return queryset, use_distinct
+
+    def response_change(self, request, revision_acteur):
+        if "_get_or_create_parent" in request.POST:
+            # Cloner l'objet actuel
+            parent = revision_acteur.parent or revision_acteur.create_parent()
+            return HttpResponseRedirect(
+                reverse("admin:qfdmo_revisionacteur_change", args=[parent.pk])
+            )
+        return super().response_change(request, revision_acteur)
 
     def get_form(
         self, request: Any, obj: Any | None = None, change: bool = False, **kwargs: Any
@@ -302,9 +364,13 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
         Display Acteur fields value as help_text
         """
         revision_acteur_form = super().get_form(request, obj, change, **kwargs)
+        if obj.is_parent:
+            return revision_acteur_form
         if obj and obj.identifiant_unique:
             acteur = Acteur.objects.get(identifiant_unique=obj.identifiant_unique)
             for field_name, form_field in revision_acteur_form.base_fields.items():
+                if field_name == "parent":
+                    continue
                 acteur_value = getattr(acteur, field_name)
                 if acteur_value and isinstance(form_field, PointField):
                     (lon, lat) = acteur_value.coords

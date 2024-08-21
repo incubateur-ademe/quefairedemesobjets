@@ -1,5 +1,6 @@
 import random
 import string
+import uuid
 from typing import Any
 
 import opening_hours
@@ -271,6 +272,20 @@ class BaseActeur(NomAsNaturalKeyModel):
     def has_label_reparacteur(self):
         return self.labels.filter(code="reparacteur").exists()
 
+    def _get_dict_for_clone(self):
+        excluded_fields = [
+            "identifiant_unique",
+            "identifiant_externe",
+            "proposition_services",
+            "acteur_type",
+            "acteur_services",
+            "source",
+            "labels",
+        ]
+        acteur_dict = model_to_dict(self, exclude=excluded_fields)
+        acteur_dict["acteur_type"] = self.acteur_type
+        return {k: v for k, v in acteur_dict.items() if v}
+
 
 def clean_parent(parent):
     try:
@@ -344,19 +359,17 @@ class RevisionActeur(BaseActeur):
     acteur_type = models.ForeignKey(
         ActeurType, on_delete=models.CASCADE, blank=True, null=True
     )
-    # parent_id = models.CharField(
-    #     max_length=255, blank=True, null=True, db_column="parent_id"
-    # )
     parent = models.ForeignKey(
         "self",
-        on_delete=models.CASCADE,
+        verbose_name="Dédupliqué par",
+        help_text="RevisonActeur «chapeau» utilisé pour dédupliquer cet acteur",
+        on_delete=models.SET_NULL,
         blank=True,
         null=True,
         related_name="duplicats",
         validators=[clean_parent],
     )
 
-    # is_parent = models.BooleanField(default=False, null=True, blank=True)
     @property
     def is_parent(self):
         return self.duplicats.exists()
@@ -368,7 +381,16 @@ class RevisionActeur(BaseActeur):
         self.full_clean()
         return super().save(*args, **kwargs)
 
+    def save_as_parent(self, *args, **kwargs):
+        """
+        Won't create an Acteur instance
+        """
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
     def set_default_fields_and_objects_before_save(self):
+        if self.is_parent:
+            return
         acteur_exists = True
         if not self.identifiant_unique or not Acteur.objects.filter(
             identifiant_unique=self.identifiant_unique
@@ -402,8 +424,27 @@ class RevisionActeur(BaseActeur):
             self.identifiant_externe = acteur.identifiant_externe
             self.source = acteur.source
 
+    def create_parent(self):
+        acteur = Acteur.objects.get(pk=self.pk)
+        acteur_dict = acteur._get_dict_for_clone()
+        self_dict = self._get_dict_for_clone()
+
+        revision_acteur_parent = RevisionActeur(
+            identifiant_unique=uuid.uuid4(),
+            **(acteur_dict | self_dict),
+        )
+        revision_acteur_parent.save_as_parent()
+
+        self.parent = revision_acteur_parent
+        self.save()
+        return revision_acteur_parent
+
     def __str__(self):
-        return self.nom or self.identifiant_unique
+        return (
+            f"{self.nom} ({self.identifiant_unique})"
+            if self.nom
+            else self.identifiant_unique
+        )
 
 
 class DisplayedActeur(BaseActeur):
