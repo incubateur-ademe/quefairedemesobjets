@@ -19,8 +19,10 @@ from unit_tests.qfdmo.acteur_factory import (
     ActeurTypeFactory,
     DisplayedActeurFactory,
     DisplayedPropositionServiceFactory,
+    LabelQualiteFactory,
     PropositionServiceFactory,
     RevisionActeurFactory,
+    RevisionPropositionServiceFactory,
     SourceFactory,
 )
 from unit_tests.qfdmo.action_factory import (
@@ -245,6 +247,80 @@ class TestCreateRevisionActeur:
 
         with pytest.raises(ValidationError):
             RevisionActeurFactory(parent=revision_acteur)
+
+
+@pytest.mark.django_db
+class TestCreateRevisionActeurCreateParent:
+    def test_create_parent_from_acteur(self):
+        acteur = ActeurFactory()
+        revision_acteur = RevisionActeurFactory(
+            identifiant_unique=acteur.identifiant_unique,
+            nom=None,
+            location=None,
+            acteur_type=None,
+        )
+
+        revision_acteur_parent = revision_acteur.create_parent()
+
+        assert revision_acteur_parent.nom == acteur.nom
+        assert revision_acteur_parent.acteur_type == acteur.acteur_type
+        assert revision_acteur_parent.location == acteur.location
+
+        assert revision_acteur_parent.nom != revision_acteur.nom
+        assert revision_acteur_parent.acteur_type != revision_acteur.acteur_type
+        assert revision_acteur_parent.location != revision_acteur.location
+
+    def test_create_parent_from_revision_acteur(self):
+        acteur = ActeurFactory()
+        revision_acteur = RevisionActeurFactory(
+            identifiant_unique=acteur.identifiant_unique
+        )
+
+        revision_acteur_parent = revision_acteur.create_parent()
+
+        assert revision_acteur_parent.nom != acteur.nom
+        assert revision_acteur_parent.acteur_type != acteur.acteur_type
+        assert revision_acteur_parent.location != acteur.location
+
+        assert revision_acteur_parent.nom == revision_acteur.nom
+        assert revision_acteur_parent.acteur_type == revision_acteur.acteur_type
+        assert revision_acteur_parent.location == revision_acteur.location
+
+    def test_create_parent_source(self):
+        acteur = ActeurFactory()
+        revision_acteur = RevisionActeurFactory(
+            identifiant_unique=acteur.identifiant_unique
+        )
+
+        revision_acteur_parent = revision_acteur.create_parent()
+        assert revision_acteur_parent.source is None
+
+    def test_create_parent_labels(self):
+        acteur = ActeurFactory()
+        revision_acteur = RevisionActeurFactory(
+            identifiant_unique=acteur.identifiant_unique
+        )
+        labels = LabelQualiteFactory()
+        acteur.labels.add(labels)
+        revision_acteur.labels.add(labels)
+
+        revision_acteur_parent = revision_acteur.create_parent()
+
+        assert revision_acteur_parent.labels.count() == 0
+
+    def test_create_parent_proposition_servuces(self):
+        acteur = ActeurFactory()
+        revision_acteur = RevisionActeurFactory(
+            identifiant_unique=acteur.identifiant_unique
+        )
+        proposition_services = PropositionServiceFactory()
+        acteur.proposition_services.add(proposition_services)
+        revision_proposition_services = RevisionPropositionServiceFactory()
+        revision_acteur.proposition_services.add(revision_proposition_services)
+
+        revision_acteur_parent = revision_acteur.create_parent()
+
+        assert revision_acteur_parent.proposition_services.count() == 0
 
 
 @pytest.mark.django_db
