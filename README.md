@@ -258,7 +258,7 @@ le code de l'interface est déployé sur le repo git de scalingo à conditions q
 
 le code des dags Airflow est déployé sur le repo s3 de clevercloud à conditions que les tests soit passés avec succès via Github
 
-# Schema simplifié de base de données
+## Schema simplifié de base de données
 
 ```mermaid
 ---
@@ -441,3 +441,31 @@ flowchart TB
     PropositionService --> CorrectionEquipePropositionService --> DisplayedPropositionService
     PropositionService --> DisplayedPropositionService
 ```
+
+## Conventions de code - Utilisation des langues françaises et anglaises
+
+Nous suivons les règles et standards de l'industrie que nous controlons à chaque commit et Pull Request grêce à des outils tel que `ruff` ou `eslint`.
+
+Cependant, ce projet est développé et propulsé par l'État français et doit être utilisable et administrable simplement par le plus grand nombre. Nous appliquons donc une règles spécifique quand à l'utilisation de la langue française versus la langue anglaise, nous avons donc défini les cas d'utilisation de ces 2 langues
+
+### En Français
+
+A l'attention des administrés, administrations, administrateurs, et l'équipe Longue vie aux objets
+
+- Git/Github Les commits, les Pull Request
+- La documentation dans les markdowns
+- Les noms et les champs des tables en base de données
+
+### En Anglais
+
+Dans le code, à l'attention des équipes techniques
+
+- les fonctions
+- les noms de variables
+- les commentaires dans le code
+
+### Effets de bord acceptés
+
+Certaines variables combinant un nom d'objet et un suffixe ou prefix peuvent être en franglais
+
+Ex :  `acteur_by_id`
