@@ -18,11 +18,13 @@ class Migration(migrations.Migration):
             name="parent",
             field=models.ForeignKey(
                 blank=True,
+                help_text="RevisonActeur «chapeau» utilisé pour dédupliquer cet acteur",
                 null=True,
-                on_delete=django.db.models.deletion.CASCADE,
+                on_delete=django.db.models.deletion.SET_NULL,
                 related_name="duplicats",
                 to="qfdmo.revisionacteur",
                 validators=[qfdmo.models.acteur.clean_parent],
+                verbose_name="Dédupliqué par",
             ),
         ),
     ]
