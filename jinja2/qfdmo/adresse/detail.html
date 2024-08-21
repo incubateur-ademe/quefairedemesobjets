@@ -373,6 +373,6 @@
 
 {% if request.user.is_staff %}
     <div class="fr-m-0 fr-text-italic fr-text--xs qfdmo-text-center">
-        Pour le staff : <a target='_blank' class='' data-turbo=false href="{{ url('admin:qfdmo_displayedacteur_change', args=[adresse.identifiant_unique]) }}">Lien vers l'admin</a>
+        Pour le staff : <a target="_blank"  rel="noreferrer noopener" data-turbo=false href="{{ url('admin:qfdmo_displayedacteur_change', args=[adresse.identifiant_unique]) }}">Lien vers l'admin</a>
     </div>
 {% endif %}
