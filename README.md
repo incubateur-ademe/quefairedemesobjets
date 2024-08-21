@@ -446,7 +446,7 @@ flowchart TB
 
 Nous suivons les règles et standards de l'industrie que nous contrôlons à chaque commit et Pull Request grâce à des outils tel que `ruff` ou `eslint`.
 
-Cependant, ce projet est développé et propulsé par l'État français et doit être utilisable et administrable simplement par le plus grand nombre. Nous appliquons donc une règles spécifique quand à l'utilisation de la langue française versus la langue anglaise, nous avons donc défini les cas d'utilisation de ces 2 langues
+Cependant, ce projet est développé et propulsé par l'État français et doit être utilisable et administrable simplement par le plus grand nombre. Nous appliquons donc une règle spécifique quant à l'utilisation de la langue française versus la langue anglaise, nous avons donc défini les cas d'utilisation de ces 2 langues.
 
 ### En Français
 
