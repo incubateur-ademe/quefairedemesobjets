@@ -43,26 +43,31 @@ def _get_product_names_from_qfdmod_product(qfdmod_product: dict) -> List[str]:
 
 
 def _choose_sous_categorie(sous_categories, product_name):
-    choosen_sous_categorie = None
-    while choosen_sous_categorie is None:
-        input_text = f"\nPour le produit : {product_name}"
-        input_text += "\nChoisissez la categorie adéquat ?\n\n"
-        input_text += "\n".join(
+    chosen_sous_categorie = None
+    while chosen_sous_categorie is None:
+        sous_categorie_options = "\n".join(
             [
                 f"{i + 1} : {prop.libelle} ({prop.categorie.libelle})"
                 for i, prop in enumerate(sous_categories)
             ]
         )
-        input_text += "\n0 : Ignorer\n\n"
-        input_text += "\n\nVotre choix : "
-        choosen_sous_categorie = input(input_text)
-        if not choosen_sous_categorie.isnumeric() or int(
-            choosen_sous_categorie
+
+        input_text = f"""
+Pour le produit : {product_name}
+Choisissez la categorie adéquat ?
+
+{sous_categorie_options}
+0 : Ignorer
+
+Votre choix : """
+        chosen_sous_categorie = input(input_text)
+        if not chosen_sous_categorie.isnumeric() or int(
+            chosen_sous_categorie
         ) not in range(0, len(sous_categories) + 1):
-            choosen_sous_categorie = None
-    if choosen_sous_categorie == "0":
+            chosen_sous_categorie = None
+    if chosen_sous_categorie == "0":
         return None
-    return sous_categories[int(choosen_sous_categorie) - 1]
+    return sous_categories[int(chosen_sous_categorie) - 1]
 
 
 def _create_or_update_object_from_product(
@@ -106,10 +111,7 @@ def _should_create_products(
     product_name = qfdmod_product["Nom"]
     collect_names_from_objects = [
         objet.libelle.lower().strip() for objet in objects_from_names
-    ]
-    collect_names_from_objects += [
-        objet.code.lower().strip() for objet in objects_from_names
-    ]
+    ] + [objet.code.lower().strip() for objet in objects_from_names]
 
     if len(sous_categories) == 1 and len(product_names) != len(objects_from_names):
         sous_categorie_libelle = sous_categories[0].libelle
