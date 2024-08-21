@@ -466,6 +466,6 @@ Dans le code, à l'attention des équipes techniques
 
 ### Effets de bord acceptés
 
-Certaines variables combinant un nom d'objet et un suffixe ou prefix peuvent être en franglais
+Certaines variables combinant un nom d'objet et un suffixe ou préfixe peuvent être en franglais
 
 Ex :  `acteur_by_id`
