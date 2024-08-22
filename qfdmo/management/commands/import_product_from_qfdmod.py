@@ -129,7 +129,7 @@ Les produits suivants seront créés : {' / '.join([
     for product_name in product_names
     if product_name not in collect_names_from_objects
 ])}
-Voulez-vous créer ces objects ? (y/n) : """
+Voulez-vous créer ces objets ? (y/n) : """
         should_create = None
         while should_create not in ["y", "n"]:
             should_create = input(inpuut_text).lower()
