@@ -402,6 +402,20 @@ class DisplayedActeur(BaseActeur):
         if action_list:
             actions = [a for a in actions if a.code in action_list.split("|")]
 
+        # sort actions
+        if carte:
+
+            def sort_key(a):
+                return (a.order or 0) + (
+                    a.groupe_action.order
+                    if a.groupe_action and a.groupe_action.order
+                    else 0
+                ) * 100
+
+            actions = sorted(actions, key=sort_key)
+        else:
+            actions = sorted(actions, key=lambda a: a.order or 0)
+
         # move action_principale as first of the list
         if self.action_principale in actions:
             actions.remove(self.action_principale)

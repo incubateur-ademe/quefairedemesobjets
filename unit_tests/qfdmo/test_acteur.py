@@ -344,23 +344,23 @@ class TestDisplayedActionJsonActeurForDisplay:
         displayed_acteur = DisplayedActeurFactory()
         directionjai = ActionDirectionFactory(code="jai")
         directionjecherche = ActionDirectionFactory(code="jecherche")
-        groupeaction1 = GroupeActionFactory(
+        groupeaction1order2 = GroupeActionFactory(
             code="groupe1",
             icon="icon-groupeaction1",
             couleur="couleur-groupeaction1",
-            order=1,
+            order=2,
         )
-        groupeaction2 = GroupeActionFactory(
+        groupeaction2order1 = GroupeActionFactory(
             code="groupe2",
             icon="icon-groupeaction2",
             couleur="couleur-groupeaction2",
-            order=2,
+            order=1,
         )
         action1 = ActionFactory(
             code="actionjai1",
             icon="icon-actionjai1",
             couleur="couleur-actionjai1",
-            groupe_action=groupeaction1,
+            groupe_action=groupeaction1order2,
             order=1,
         )
         action1.directions.add(directionjai)
@@ -368,7 +368,7 @@ class TestDisplayedActionJsonActeurForDisplay:
             code="actionjai2",
             icon="icon-actionjai2",
             couleur="couleur-actionjai2",
-            groupe_action=groupeaction2,
+            groupe_action=groupeaction2order1,
             order=2,
         )
         action2.directions.add(directionjai)
@@ -376,7 +376,7 @@ class TestDisplayedActionJsonActeurForDisplay:
             code="actionjecherche1",
             icon="icon-actionjecherche1",
             couleur="couleur-actionjecherche1",
-            groupe_action=groupeaction1,
+            groupe_action=groupeaction1order2,
             order=3,
         )
         action3.directions.add(directionjecherche)
@@ -384,7 +384,7 @@ class TestDisplayedActionJsonActeurForDisplay:
             code="actionjecherche2",
             icon="icon-actionjecherche2",
             couleur="couleur-actionjecherche2",
-            groupe_action=groupeaction2,
+            groupe_action=groupeaction2order1,
             order=4,
         )
         action4.directions.add(directionjecherche)
@@ -459,8 +459,8 @@ class TestDisplayedActionJsonActeurForDisplay:
 
         assert acteur_for_display["identifiant_unique"] is not None
         assert acteur_for_display["location"] is not None
-        assert acteur_for_display["icon"] == "icon-groupeaction1"
-        assert acteur_for_display["couleur"] == "couleur-groupeaction1"
+        assert acteur_for_display["icon"] == "icon-groupeaction2"
+        assert acteur_for_display["couleur"] == "couleur-groupeaction2"
 
     def test_json_acteur_for_display_carte_direction(self, displayed_acteur):
 
@@ -471,22 +471,22 @@ class TestDisplayedActionJsonActeurForDisplay:
 
         assert acteur_for_display["identifiant_unique"] is not None
         assert acteur_for_display["location"] is not None
-        assert acteur_for_display["icon"] == "icon-groupeaction1"
-        assert acteur_for_display["couleur"] == "couleur-groupeaction1"
+        assert acteur_for_display["icon"] == "icon-groupeaction2"
+        assert acteur_for_display["couleur"] == "couleur-groupeaction2"
 
     def test_json_acteur_for_display_carte_action_list(self, displayed_acteur):
 
         CachedDirectionAction.reload_cache()
         acteur_for_display = json.loads(
             displayed_acteur.json_acteur_for_display(
-                carte=True, action_list="actionjai2|actionjecherche2"
+                carte=True, action_list="actionjai1|actionjecherche1"
             )
         )
 
         assert acteur_for_display["identifiant_unique"] is not None
         assert acteur_for_display["location"] is not None
-        assert acteur_for_display["icon"] == "icon-groupeaction2"
-        assert acteur_for_display["couleur"] == "couleur-groupeaction2"
+        assert acteur_for_display["icon"] == "icon-groupeaction1"
+        assert acteur_for_display["couleur"] == "couleur-groupeaction1"
 
         CachedDirectionAction.reload_cache()
         acteur_for_display = json.loads(
@@ -497,8 +497,8 @@ class TestDisplayedActionJsonActeurForDisplay:
 
         assert acteur_for_display["identifiant_unique"] is not None
         assert acteur_for_display["location"] is not None
-        assert acteur_for_display["icon"] == "icon-groupeaction1"
-        assert acteur_for_display["couleur"] == "couleur-groupeaction1"
+        assert acteur_for_display["icon"] == "icon-groupeaction2"
+        assert acteur_for_display["couleur"] == "couleur-groupeaction2"
 
     def test_json_acteur_for_display_action_principale_basic(self, displayed_acteur):
         displayed_acteur.action_principale = ActionFactory(code="actionjai2")
