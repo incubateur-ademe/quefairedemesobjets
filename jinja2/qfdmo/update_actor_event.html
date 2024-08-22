@@ -16,7 +16,7 @@
                 <td>{{ dagrun_line.get_change_type_display() }}</td>
                 <td>{{ dagrun_line.meta_data if dagrun_line.meta_data else "-" }}</td>
                 <td>
-                    <a href="{{ dagrun_line.row_updates.admin_link }}" target="_blank" >{{ dagrun_line.display_acteur_details().identifiant_unique
+                    <a href="{{ dagrun_line.row_updates.admin_link }}" target="_blank" rel="noreferrer">{{ dagrun_line.display_acteur_details().identifiant_unique
                         }}</a>
                 </td>
                 <td>
