@@ -337,11 +337,11 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
                     form_field.help_text += (
                         '<br>ENTREPRISE : <a href="https://'
                         f'annuaire-entreprises.data.gouv.fr/entreprise/{siren}"'
-                        ' target="_blank" rel="noopener" rel="noreferrer">'
+                        ' target="_blank" rel="noreferrer">'
                         f"https://annuaire-entreprises.data.gouv.fr/entreprise/{siren}"
                         '</a><br>ETABLISSEMENT : <a href="https://'
                         f'annuaire-entreprises.data.gouv.fr/etablissement/{siret}"'
-                        ' target="_blank" rel="noopener" rel="noreferrer">'
+                        ' target="_blank" rel="noreferrer">'
                         "https://annuaire-entreprises.data.gouv.fr/etablissement/"
                         f"{siret}</a>"
                     )
@@ -362,7 +362,7 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
                     ]
                     form_field.help_text += (
                         '<br><a href="https://google.com/maps/search/'
-                        f'{"+".join(google_adresse)}" target="_blank" rel="noopener"'
+                        f'{"+".join(google_adresse)}" target="_blank"'
                         ' rel="noreferrer">Voir l\'adresse sur Google Maps</a>'
                     )
 
