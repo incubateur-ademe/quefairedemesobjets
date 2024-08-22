@@ -94,7 +94,7 @@ class Source(CodeAsNaturalKeyModel):
         verbose_name_plural = "Sources de données"
 
     id = models.AutoField(primary_key=True)
-    libelle = models.CharField(max_length=255, unique=True)
+    libelle = models.CharField(max_length=255)
     code = models.CharField(
         max_length=255,
         unique=True,
