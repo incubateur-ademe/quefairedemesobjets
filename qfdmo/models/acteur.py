@@ -401,11 +401,11 @@ class DisplayedActeur(BaseActeur):
 
         if action_list:
             actions = [a for a in actions if a.code in action_list.split("|")]
-            # move action_principale as first of the list
-        if action_principale := self.action_principale:
-            if action_principale in actions:
-                actions.remove(action_principale)
-                actions.insert(0, action_principale)
+
+        # move action_principale as first of the list
+        if self.action_principale in actions:
+            actions.remove(self.action_principale)
+            actions.insert(0, self.action_principale)
 
         acteur_dict = {
             "identifiant_unique": self.identifiant_unique,
