@@ -9,6 +9,11 @@
     >
         <div class="form-group">
             {{ form.adresse.label_tag() }}
+            {% if form.adresse.help_text %}
+                <span class="fr-hint-text fr-mt-1v">
+                    {{ form.adresse.help_text }}
+                </span>
+            {% endif %}
             {{ form.adresse }}
         </div>
         {{ form.longitude }}
