@@ -200,7 +200,3 @@ Style the autocomplete container:
 .qfdmo-no-external-link-icon:after {
     content: none;
 }
-
-*:focus {
-    outline: 10px solid red !important;
-}
