@@ -1,8 +1,8 @@
-from django.conf import settings
 from urllib.parse import urlencode
+
+from django.conf import settings
 from django.contrib.gis.db import models
 from django.db.utils import cached_property
-from django.forms import model_to_dict
 
 from qfdmo.models.utils import CodeAsNaturalKeyModel
 
@@ -15,9 +15,6 @@ class CategorieObjet(CodeAsNaturalKeyModel):
     id = models.AutoField(primary_key=True)
     libelle = models.CharField(max_length=255, blank=False, null=False)
     code = models.CharField(max_length=255, unique=True, blank=False, null=False)
-
-    def serialize(self):
-        return model_to_dict(self)
 
 
 class SousCategorieObjet(CodeAsNaturalKeyModel):
@@ -66,11 +63,6 @@ class SousCategorieObjet(CodeAsNaturalKeyModel):
 
     def natural_key(self) -> tuple[str]:
         return (self.code,)
-
-    def serialize(self):
-        sous_categorie = model_to_dict(self, exclude=["categorie"])
-        sous_categorie["categorie"] = self.categorie.serialize()
-        return sous_categorie
 
 
 class Objet(CodeAsNaturalKeyModel):
