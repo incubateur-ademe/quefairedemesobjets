@@ -10,7 +10,7 @@
         <div class="form-group">
             {{ form.adresse.label_tag() }}
             {% if form.adresse.help_text %}
-                <span class="fr-hint-text fr-mt-1v">
+                <span class="fr-hint-text fr-mt-1v" id="{{ form.adresse.id_for_label }}_helptext">
                     {{ form.adresse.help_text }}
                 </span>
             {% endif %}

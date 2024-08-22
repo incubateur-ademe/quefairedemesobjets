@@ -9,7 +9,7 @@
         <div class="form-group">
             {{ form.sous_categorie_objet.label_tag() }}
             {% if form.sous_categorie_objet.help_text %}
-                <span class="fr-hint-text fr-mt-1v">
+                <span class="fr-hint-text fr-mt-1v" id="{{ form.sous_categorie_objet.id_for_label }}_helptext">
                     {{ form.sous_categorie_objet.help_text }}
                 </span>
             {% endif %}

@@ -1,49 +1,23 @@
-<fieldset class="fr-fieldset qfdmo-gap-y-2w" aria-labelledby="labels-filters-lenged">
+<fieldset class="fr-fieldset qfdmo-gap-y-2w" aria-labelledby="labels-filters-legend">
     <legend class="qfdmo-hidden" id="labels-filters-legend">
         Choisir le(s) filtre(s)
     </legend>
 
-    <div class="fr-fieldset__element fr-fieldset__element--inline qfdmo-font-normal">
-        <div
-            class="fr-checkbox-group qfdmo-flex qfdmo-flex-row qfdmo-items-center"
-        >
-            {{ form.bonus }}
-            {{ form.bonus.label_tag() }}
-        </div>
-        <span class="fr-hint-text">{{ form.bonus.help_text }}</span>
-    </div>
-    <div class="fr-fieldset__element fr-fieldset__element--inline qfdmo-font-normal">
-        <div
-            class="fr-checkbox-group qfdmo-flex qfdmo-flex-row qfdmo-items-center"
-        >
-            {{ form.ess }}
-            {{ form.ess.label_tag() }}
-        </div>
-        <span class="fr-hint-text">{{ form.ess.help_text }}</span>
-    </div>
+    {% with field=form.bonus %}
+        {% include "qfdmo/_addresses_partials/filters/_labels_filters_field.html" %}
+    {% endwith %}
 
-    <div
-        class="qfdmo-flex qfdmo-flex-row qfdmo-items-center"
-    >
-        <div class="fr-fieldset__element fr-fieldset__element--inline qfdmo-font-normal">
-            <div
-                class="fr-checkbox-group qfdmo-flex qfdmo-flex-row qfdmo-items-center"
-            >
-                {{ form.label_reparacteur }}
-                {{ form.label_reparacteur.label_tag() }}
-            </div>
-            <span class="fr-hint-text">{{ form.label_reparacteur.help_text }}</span>
-        </div>
-        {% include "qfdmo/partials/label_reparacteur_icon.html" %}
-    </div>
+    {% with field=form.ess %}
+        {% include "qfdmo/_addresses_partials/filters/_labels_filters_field.html" %}
+    {% endwith %}
 
-    <div class="fr-fieldset__element fr-fieldset__element--inline qfdmo-font-normal">
-        <div
-            class="fr-checkbox-group qfdmo-flex qfdmo-flex-row qfdmo-items-center"
-        >
-            {{ form.pas_exclusivite_reparation }}
-            {{ form.pas_exclusivite_reparation.label_tag() }}
-        </div>
-        <span class="fr-hint-text">{{ form.pas_exclusivite_reparation.help_text }}</span>
-    </div>
+    {% with field=form.label_reparacteur %}
+        {% with icon="qfdmo/partials/label_reparacteur_icon.html" %}
+            {% include "qfdmo/_addresses_partials/filters/_labels_filters_field.html" %}
+        {% endwith %}
+    {% endwith %}
+
+    {% with field=form.pas_exclusivite_reparation %}
+        {% include "qfdmo/_addresses_partials/filters/_labels_filters_field.html" %}
+    {% endwith %}
 </fieldset>

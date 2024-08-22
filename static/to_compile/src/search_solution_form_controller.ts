@@ -154,7 +154,7 @@ export default class extends Controller<HTMLElement> {
 
     showAddressesPanel() {
       this.addressesPanelTarget.classList.add("qfdmo-flex-grow")
-      this.addressesPanelTarget.classList.remove("qfdmo-invisible")
+      this.addressesPanelTarget.classList.remove("qfdmo-invisible", "qfdmo-h-0")
     }
 
     backToSearch() {

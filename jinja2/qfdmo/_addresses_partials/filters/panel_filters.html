@@ -26,57 +26,28 @@
                     <hr>
 
                     {% block filters_content %}
-                        <fieldset class="fr-fieldset" aria-labelledby="bonus-reparation-legend">
-                            <legend class="qfdmo-hidden" id="bonus-reparation-legend">
-                                Éligibles au bonus réparation
-                            </legend>
-                            <div class="fr-fieldset__element fr-fieldset__element--inline">
-                                <div
-                                    class="fr-checkbox-group qfdmo-flex qfdmo-flex-row qfdmo-items-center"
-                                >
-                                    {{ form.bonus }}
-                                    {{ form.bonus.label_tag() }}
-                                </div>
-                                <span class="fr-hint-text">{{ form.bonus.help_text }}</span>
-                            </div>
-                        </fieldset>
+                        {% with field=form.bonus %}
+                            {% with legend="Éligibles au bonus réparation" %}
+                                {% include "qfdmo/_addresses_partials/filter/_panel_filters" %}
+                            {% endwith %}
+                        {% endwith %}
 
+                        {% with field=form.ess %}
+                            {% with legend="Type d'enseigne ESS" %}
+                                {% include "qfdmo/_addresses_partials/filter/_panel_filters" %}
+                            {% endwith %}
+                        {% endwith %}
 
-                        <fieldset class="fr-fieldset" aria-labelledby="ess-legend">
-                            <legend class="qfdmo-hidden" id="ess-legend">
-                                Type d'enseigne ESS
-                            </legend>
-                            <div class="fr-fieldset__element fr-fieldset__element--inline">
-                                <div
-                                    class="fr-checkbox-group qfdmo-flex qfdmo-flex-row qfdmo-items-center"
-                                >
-                                    {{ form.ess }}
-                                    {{ form.ess.label_tag() }}
-                                </div>
-                                <span class="fr-hint-text">{{ form.ess.help_text }}</span>
-                            </div>
-                        </fieldset>
-
-                        <div
-                            class="qfdmo-flex qfdmo-flex-row qfdmo-items-center"
-                        >
-                            <fieldset class="fr-fieldset" aria-labelledby="reparacteurs-legend">
-                                <legend class="qfdmo-hidden" id="reparacteurs-legend">
-                                    Enseignes labellisées Répar’Acteurs
-                                </legend>
-                                <div class="fr-fieldset__element fr-fieldset__element--inline">
-                                    <div
-                                        class="fr-checkbox-group qfdmo-flex qfdmo-flex-row qfdmo-items-center"
-                                    >
-                                        {{ form.label_reparacteur }}
-                                        {{ form.label_reparacteur.label_tag() }}
-                                    </div>
-                                    <span class="fr-hint-text">{{ form.label_reparacteur.help_text }}</span>
-                                </div>
-                            </fieldset>
-                            {% include "qfdmo/partials/label_reparacteur_icon.html" %}
-                        </div>
+                        {% with field=form.label_reparacteur %}
+                            {% with legend="Enseignes labellisées Répar’Acteurs" %}
+                                {% with icon="qfdmo/partials/label_reparacteur_icon.html" %}
+                                    {% include "qfdmo/_addresses_partials/filter/_panel_filters" %}
+                                {% endwith %}
+                            {% endwith %}
+                        {% endwith %}
                     {% endblock %}
+
+
                 </div>
                 <div class="fr-modal__footer qfdmo-flex qfdmo-flex-col">
                     <div
