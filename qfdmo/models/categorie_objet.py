@@ -76,3 +76,6 @@ class Objet(CodeAsNaturalKeyModel):
         null=True,
         related_name="objets",
     )
+    identifiant_qfdmod = models.IntegerField(
+        blank=True, null=True, verbose_name="Identifiant QFDMD"
+    )
