@@ -1,8 +1,14 @@
 import pytest
+from django.core.cache import cache
 
 from qfdmo.models import Action, CodeAsNaturalKeyModel
 from qfdmo.models.action import ActionDirection, CachedDirectionAction
 from unit_tests.qfdmo.action_factory import ActionDirectionFactory, ActionFactory
+
+
+@pytest.fixture(autouse=True, scope="function")
+def clear_cache():
+    cache.clear()
 
 
 class TestActionNomAsNaturalKeyHeritage:
@@ -62,7 +68,6 @@ class TestCachedDirectionActionGetActionsByDirection:
 
     @pytest.mark.django_db
     def test_get_actions_by_direction_basic(self, action_directions, actions):
-        CachedDirectionAction.reload_cache()
 
         assert [
             a["code"] for a in CachedDirectionAction.get_actions_by_direction()["first"]
@@ -75,7 +80,6 @@ class TestCachedDirectionActionGetActionsByDirection:
     @pytest.mark.django_db
     def test_get_actions_by_direction_order(self, action_directions, actions):
         Action.objects.filter(code="first_1").update(order=999)
-        CachedDirectionAction.reload_cache()
 
         assert [
             a["code"] for a in CachedDirectionAction.get_actions_by_direction()["first"]
@@ -84,33 +88,7 @@ class TestCachedDirectionActionGetActionsByDirection:
     @pytest.mark.django_db
     def test_get_actions_by_direction_hidden(self, action_directions, actions):
         Action.objects.filter(code="first_1").update(afficher=False)
-        CachedDirectionAction.reload_cache()
 
         assert [
             a["code"] for a in CachedDirectionAction.get_actions_by_direction()["first"]
         ] == ["first_2", "first_3", "first_second"]
-
-
-class TestCachedDirectionActionReloadCache:
-
-    @pytest.mark.django_db
-    @pytest.mark.parametrize(
-        "func, field",
-        [
-            ("get_reparer_action_id", "_reparer_action_id"),
-            ("get_directions", "_cached_direction"),
-            ("get_actions_by_direction", "_cached_actions_by_direction"),
-        ],
-    )
-    def test__reload_cache(self, action_directions, actions, func, field):
-        CachedDirectionAction.reload_cache()
-
-        assert getattr(CachedDirectionAction, field) is None
-
-        getattr(CachedDirectionAction, func)()
-
-        assert getattr(CachedDirectionAction, field) is not None
-
-        CachedDirectionAction.reload_cache()
-
-        assert getattr(CachedDirectionAction, field) is None

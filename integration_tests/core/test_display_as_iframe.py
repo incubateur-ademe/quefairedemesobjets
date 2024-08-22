@@ -1,8 +1,6 @@
 import pytest
 from django.core.management import call_command
 
-from qfdmo.models import CachedDirectionAction
-
 
 @pytest.fixture(scope="session")
 def django_db_setup(django_db_setup, django_db_blocker):
@@ -11,7 +9,6 @@ def django_db_setup(django_db_setup, django_db_blocker):
             "loaddata",
             "actions",
         )
-        CachedDirectionAction.reload_cache()
 
 
 class TestDisplayAsIframe:

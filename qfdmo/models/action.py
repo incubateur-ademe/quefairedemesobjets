@@ -1,7 +1,8 @@
-import time
+import logging
 from typing import List
 
 from django.contrib.gis.db import models
+from django.core.cache import cache
 from django.db.models.query import QuerySet
 from django.forms import model_to_dict
 
@@ -120,28 +121,30 @@ class CachedDirectionAction:
 
     @classmethod
     def get_action_instances(cls) -> List[Action]:
-        cls._manage_cache_expiration()
-        if cls._cached_action_instances is None:
-            cls._cached_action_instances = list(
+        action_instances = cache.get("action_instances")
+        if action_instances is None:
+            action_instances = list(
                 Action.objects.prefetch_related("directions", "groupe_action")
             )
-        return cls._cached_action_instances
+            cache.set("action_instances", action_instances)
+        return action_instances
 
     @classmethod
     def get_groupe_action_instances(cls) -> QuerySet[GroupeAction]:
-        cls._manage_cache_expiration()
-        if cls._cached_groupe_action_instances is None:
-            cls._cached_groupe_action_instances = GroupeAction.objects.prefetch_related(
+        groupe_action_instances = cache.get("groupe_action_instances")
+        if groupe_action_instances is None:
+            groupe_action_instances = GroupeAction.objects.prefetch_related(
                 "actions"
             ).order_by("order")
-        return cls._cached_groupe_action_instances
+            cache.set("groupe_action_instances", groupe_action_instances)
+        return groupe_action_instances
 
     # TODO : to be factorized
     @classmethod
     def get_actions_by_direction(cls) -> dict:
-        cls._manage_cache_expiration()
-        if cls._cached_actions_by_direction is None:
-            cls._cached_actions_by_direction = {
+        actions_by_direction = cache.get("actions_by_direction")
+        if actions_by_direction is None:
+            actions_by_direction = {
                 d.code: sorted(
                     [
                         model_to_dict(a, exclude=["directions"])
@@ -151,56 +154,39 @@ class CachedDirectionAction:
                 )
                 for d in ActionDirection.objects.all()
             }
+            cache.set("actions_by_direction", actions_by_direction)
 
-        return cls._cached_actions_by_direction
+        return actions_by_direction
 
     @classmethod
     def get_directions(cls, first_direction=None) -> List[dict]:
-        cls._manage_cache_expiration()
-        if cls._cached_direction is None:
-            directions = ActionDirection.objects.all()
-            directions_list = [model_to_dict(d) for d in directions]
-            sorted_directions = sorted(directions_list, key=lambda x: x["order"])
-            cls._cached_direction = sorted_directions
+        directions = cache.get("directions")
+        logging.warning(f"directions: {directions}")
+        if directions is None:
+            direction_instances = ActionDirection.objects.all()
+            directions_list = [model_to_dict(d) for d in direction_instances]
+            directions = sorted(directions_list, key=lambda x: x["order"])
+            cache.set("directions", directions)
         if first_direction is not None and first_direction in [
-            d["code"] for d in cls._cached_direction
+            d["code"] for d in directions
         ]:
             return sorted(
-                cls._cached_direction,
+                directions,
                 key=lambda x: (x["code"] != first_direction, x["code"]),
             )
-        return cls._cached_direction
+        return directions
 
     @classmethod
     def get_reparer_action_id(cls):
-        cls._manage_cache_expiration()
-        if cls._reparer_action_id is None:
-            # TODO : can use the cache
+        reparer_action_id = cache.get("reparer_action_id")
+        if reparer_action_id is None:
             try:
-                cls._reparer_action_id = [
+                reparer_action_id = [
                     action
                     for action in cls.get_action_instances()
                     if action.code == "reparer"
                 ][0].id
+                cache.set("reparer_action_id", reparer_action_id)
             except IndexError:
                 raise Exception("Action 'Réparer' not found")
-        return cls._reparer_action_id
-
-    @classmethod
-    def reload_cache(cls):
-        cls._cached_actions_by_direction = None
-        cls._cached_direction = None
-        cls._reparer_action_id = None
-        cls._cached_action_instances = None
-        cls._cached_groupe_action_instances = None
-
-    @classmethod
-    def _manage_cache_expiration(cls):
-        if cls._last_cache_update is None:
-            cls._last_cache_update = time.time()
-            return
-
-        current_time = time.time()
-        if current_time - cls._last_cache_update > 300:
-            cls.reload_cache()
-            cls._last_cache_update = current_time
+        return reparer_action_id

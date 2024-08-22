@@ -1,7 +1,13 @@
 import pytest
+from django.core.cache import cache
 from django.http import HttpRequest
 
 from qfdmo.views.adresses import AddressesView
+
+
+@pytest.fixture(autouse=True, scope="function")
+def clear_cache():
+    cache.clear()
 
 
 class TestAdessesViewGetActionList:

@@ -11,7 +11,6 @@ from core.jinja2_handler import (
     distance_to_acteur,
     is_embedded,
 )
-from qfdmo.models import CachedDirectionAction
 from qfdmo.models.acteur import ActeurType
 from unit_tests.qfdmo.acteur_factory import ActeurTypeFactory, DisplayedActeurFactory
 
@@ -24,7 +23,6 @@ def django_db_setup(django_db_setup, django_db_blocker):
             "actions",
             "acteur_types",
         )
-        CachedDirectionAction.reload_cache()
 
 
 class TestIsIframe:
