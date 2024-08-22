@@ -147,11 +147,20 @@ export default class extends Controller<HTMLElement> {
         this.searchFormTarget.scrollIntoView()
     }
 
+    hideAddressesPanel() {
+      this.backToSearchPanelTarget.classList.add("qfdmo-h-0", "qfdmo-invisible")
+      this.addressesPanelTarget.classList.remove("qfdmo-flex-grow")
+    }
+
+    showAddressesPanel() {
+      this.addressesPanelTarget.classList.add("qfdmo-flex-grow")
+      this.addressesPanelTarget.classList.remove("qfdmo-invisible")
+    }
+
     backToSearch() {
         this.hideDetails()
-        this.showSearchFormPanel()
-        this.backToSearchPanelTarget.classList.add("qfdmo-h-0", "qfdmo-invisible")
-        this.addressesPanelTarget.classList.remove("qfdmo-flex-grow")
+        this.#showSearchFormPanel()
+        this.hideAddressesPanel()
         this.scrollToContent()
     }
 
@@ -171,6 +180,10 @@ export default class extends Controller<HTMLElement> {
         this.detailsAddressPanelTarget.classList.add("sm:qfdmo-w-[480]")
         this.detailsAddressPanelTarget.classList.remove("sm:qfdmo-w-full")
         this.detailsAddressPanelTarget.classList.remove("sm:qfdmo-w-0")
+
+        setTimeout(() => {
+            this.detailsAddressPanelTarget.focus()
+        }, 100)
     }
 
     updateBboxInput(event) {
@@ -361,6 +374,7 @@ export default class extends Controller<HTMLElement> {
 
     #showAdvancedFilters() {
         this.advancedFiltersMainPanelTarget.classList.remove("qfdmo-hidden")
+        this.advancedFiltersMainPanelTarget.focus()
         setTimeout(() => {
             this.advancedFiltersFormPanelTarget.classList.remove("qfdmo-h-0", "qfdmo-invisible")
             this.advancedFiltersFormPanelTarget.classList.add("qfdmo-h-[95%]")
@@ -402,16 +416,15 @@ export default class extends Controller<HTMLElement> {
         }
     }
 
-    showSearchFormPanel() {
+    #showSearchFormPanel() {
       this.searchFormPanelTarget.classList.add("qfdmo-flex-grow")
       this.searchFormPanelTarget.classList.remove("qfdmo-h-0", "qfdmo-invisible")
     }
 
-    hideSearchFormPanel() {
+    #hideSearchFormPanel() {
       this.searchFormPanelTarget.classList.remove("qfdmo-flex-grow")
       this.searchFormPanelTarget.classList.add("qfdmo-h-0", "qfdmo-invisible")
     }
-
 
 
     advancedSubmit(event: Event) {
@@ -435,10 +448,9 @@ export default class extends Controller<HTMLElement> {
             ).dataset.withDynamicFormPanel?.toLowerCase() === "true"
         if (withDynamicFormPanel) {
 
-            this.hideSearchFormPanel()
+            this.#hideSearchFormPanel()
             this.backToSearchPanelTarget.classList.remove("qfdmo-h-0", "qfdmo-invisible")
-            this.addressesPanelTarget.classList.add("qfdmo-flex-grow")
-            this.addressesPanelTarget.classList.remove("qfdmo-invisible")
+            this.showAddressesPanel()
             this.scrollToContent()
         }
 

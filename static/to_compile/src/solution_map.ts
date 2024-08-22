@@ -118,6 +118,14 @@ export class SolutionMap {
                 marker.on("click", (e) => {
                     this.#onClickMarker(e)
                 })
+
+                marker.on("keydown", (e) => {
+                  // Open solution details when user presses enter or spacebar keys
+                  if ([32, 13].includes(e.originalEvent.keyCode)) {
+                    this.#onClickMarker(e)
+                  }
+                })
+
                 marker.addTo(this.#map)
 
                 points.push([

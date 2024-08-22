@@ -1,9 +1,3 @@
-<turbo-frame id="addressesPanel"
-    data-search-solution-form-target="addressesPanel"
-    class="
-    qfdmo-relative qfdmo-h-0 qfdmo-invisible qfdmo-duration-300 qfdmo-overflow-hidden qfdmo-z-1
-    qfdmo-flex qfdmo-flex-col qfdmo-flex-grow"
->
-    {# Panel «Map» #}
-    {% include 'qfdmo/_addresses_partials/map_and_detail.html' %}
-</turbo-frame>
+{% extends "jinja2/qfdmo/_addresses_partials/carte_result.html" %}
+
+{% block panel_extra_classes %}qfdmo-flex-grow{% endblock panel_extra_classes %}
