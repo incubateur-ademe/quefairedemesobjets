@@ -63,7 +63,7 @@
     {% endif %}
     {% if adresse.url %}
         <a class="qfdmo-flex qfdmo-flex-col qfdmo-items-center qfdmo-no-underline qfdmo-bg-none qfdmo-no-external-link-icon"
-            href="{{ adresse.url }}" target="_blank" title="Site Internet" rel="noreferrer"
+            href="{{ adresse.url }}" target="_blank" rel="noreferrer"
             data-action="click -> analytics#captureInteractionWithSolutionDetails"
             >
             <span class="fr-btn fr-btn--secondary-light fr-icon-global-line qfdmo-rounded-full">
@@ -73,7 +73,7 @@
     {% endif %}
     {% if adresse.email and False %}
         <a class="qfdmo-flex qfdmo-flex-col qfdmo-items-center qfdmo-bg-none qfdmo-no-external-link-icon"
-            href="mailto:{{ adresse.email }}" target="_blank" title="Courriel" rel="noreferrer"
+            href="mailto:{{ adresse.email }}" target="_blank" rel="noreferrer"
         >
             <span class="fr-btn fr-btn--secondary-light fr-icon-mail-line qfdmo-rounded-full"
             ></span>
@@ -82,7 +82,7 @@
     {% endif %}
     {% if adresse.telephone %}
         <a class="qfdmo-flex qfdmo-flex-col qfdmo-items-center qfdmo-bg-none qfdmo-no-external-link-icon"
-            href="tel:{{ adresse.telephone }}" title="Téléphone" rel='noopener'
+            href="tel:{{ adresse.telephone }}" rel='noreferrer'
             data-action="click -> analytics#captureInteractionWithSolutionDetails"
             >
             <span class="fr-btn fr-btn--secondary-light fr-icon-phone-line qfdmo-rounded-full"
