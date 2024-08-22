@@ -210,6 +210,12 @@ class BaseActeur(NomAsNaturalKeyModel):
         verbose_name="Exclusivité de reprise/réparation",
     )
     uniquement_sur_rdv = models.BooleanField(null=True, blank=True)
+    action_principale = models.ForeignKey(
+        Action,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+    )
 
     def get_share_url(self, request: HttpRequest, direction: str | None = None) -> str:
         protocol = "https" if request.is_secure() else "http"
@@ -330,6 +336,8 @@ class RevisionActeur(BaseActeur):
     )
 
     def save(self, *args, **kwargs):
+        # OPTIMIZE: if we need to validate the main action in the service propositions
+        # I guess it should be here
         self.set_default_fields_and_objects_before_save()
         return super().save(*args, **kwargs)
 
@@ -391,25 +399,19 @@ class DisplayedActeur(BaseActeur):
     ) -> str:
         actions = self.acteur_actions(direction=direction)
 
-        acteur_selected_actions = None
         if action_list:
-            acteur_selected_actions = [
-                a for a in actions if a.code in action_list.split("|")
-            ]
-        main_action = (
-            acteur_selected_actions[0]
-            if acteur_selected_actions
-            else (actions[0] if actions else None)
-        )
+            actions = [a for a in actions if a.code in action_list.split("|")]
+
+        # move action_principale as first of the list
+        if self.action_principale in actions:
+            actions.remove(self.action_principale)
+            actions.insert(0, self.action_principale)
+
         acteur_dict = {
             "identifiant_unique": self.identifiant_unique,
             "location": orjson.loads(self.location.geojson),
         }
-        if main_action := (
-            acteur_selected_actions[0]
-            if acteur_selected_actions
-            else (actions[0] if actions else None)
-        ):
+        if main_action := actions[0] if actions else None:
             if carte and main_action.groupe_action:
                 acteur_dict["icon"] = main_action.groupe_action.icon
                 acteur_dict["couleur"] = main_action.groupe_action.couleur

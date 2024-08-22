@@ -1,7 +1,7 @@
 from factory import Sequence
 from factory.django import DjangoModelFactory as Factory
 
-from qfdmo.models.action import Action, ActionDirection
+from qfdmo.models.action import Action, ActionDirection, GroupeAction
 
 
 class ActionDirectionFactory(Factory):
@@ -21,4 +21,13 @@ class ActionFactory(Factory):
 
     code = "action"
     libelle = "Action"
+    order = Sequence(lambda n: n + 1)
+
+
+class GroupeActionFactory(Factory):
+    class Meta:
+        model = GroupeAction
+        django_get_or_create = ("code",)
+
+    code = "groupeaction"
     order = Sequence(lambda n: n + 1)

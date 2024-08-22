@@ -201,6 +201,7 @@ class BaseActeurAdmin(admin.GISModelAdmin):
         "cree_le",
         "modifie_le",
         "acteur_services",
+        "action_principale",
     )
 
     readonly_fields = [
