@@ -129,9 +129,9 @@ dj-database-url==2.1.0 \
 dj-static==0.0.6 \
     --hash=sha256:032ec1c532617922e6e3e956d504a6fb1acce4fc1c7c94612d0fda21828ce8ef
     # via -r requirements.in
-django==5.0.4 \
-    --hash=sha256:4bd01a8c830bb77a8a3b0e7d8b25b887e536ad17a81ba2dce5476135c73312bd \
-    --hash=sha256:916423499d75d62da7aa038d19aef23d23498d8df229775eb0a6309ee1013775
+django==5.0.8 \
+    --hash=sha256:333a7988f7ca4bc14d360d3d8f6b793704517761ae3813b95432043daec22a45 \
+    --hash=sha256:ebe859c9da6fead9c9ee6dbfa4943b04f41342f4cea2c4d8c978ef0d10694f2b
     # via
     #   -r requirements.in
     #   dj-database-url
@@ -740,7 +740,9 @@ static3==0.7.0 \
 tablib[html,ods,xls,xlsx,yaml]==3.5.0 \
     --hash=sha256:9821caa9eca6062ff7299fa645e737aecff982e6b2b42046928a6413c8dabfd9 \
     --hash=sha256:f6661dfc45e1d4f51fa8a6239f9c8349380859a5bfaa73280645f046d6c96e33
-    # via django-import-export
+    # via
+    #   django-import-export
+    #   tablib
 tqdm==4.66.1 \
     --hash=sha256:d302b3c5b53d47bce91fea46679d9c3c6508cf6332229aa1e7d8653723793386 \
     --hash=sha256:d88e651f9db8d8551a62556d3cff9e3034274ca5d66e93197cf2490e2dcb69c7
