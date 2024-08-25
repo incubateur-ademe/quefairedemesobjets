@@ -365,10 +365,10 @@ def get_db_conn_id(dag_filepath, parent_of_parent=False):
 
 
 def check_siret_using_annuaire_entreprise(
-    row, adresse_query_flag=False, siret_col="siret", naf_col=None
+    row, adresse_query_flag=False, query_col="siret", naf_col=None
 ):
     res = api_utils.call_annuaire_entreprises(
-        row[siret_col], adresse_query_flag=adresse_query_flag, naf=row.get(naf_col)
+        row[query_col], adresse_query_flag=adresse_query_flag, naf=row.get(naf_col)
     )
     return res
 
