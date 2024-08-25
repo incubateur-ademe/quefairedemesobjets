@@ -8,7 +8,6 @@ import requests
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
-from tqdm import tqdm
 
 env = Path(__file__).parent.name
 utils = import_module(f"{env}.utils.utils")
@@ -53,7 +52,7 @@ def fetch_and_process_data(url_title, table_name, index_column, schema, **contex
     ]
 
     url = next(
-        (resource["url"] for resource in resources if resource["title"] == url_title),
+        (resource["url"] for resource in resources if url_title in resource["title"]),
         None,
     )
 
@@ -69,10 +68,9 @@ def fetch_and_process_data(url_title, table_name, index_column, schema, **contex
             decompressed_file, chunksize=chunk_size, usecols=schema.keys(), dtype=schema
         )
 
-        with tqdm(total=0, unit="B", unit_scale=True, unit_divisor=1024) as pbar:
-            for chunk in dp_iter:
-                chunk.to_sql(table_name, con=engine, if_exists="append", index=False)
-                pbar.update(chunk.memory_usage(deep=True).sum())
+        for chunk in dp_iter:
+            chunk.to_sql(table_name, con=engine, if_exists="append", index=False)
+
     with pg_hook.get_conn() as conn:
         with conn.cursor() as cursor:
             cursor.execute(
@@ -86,7 +84,7 @@ fetch_and_process_unites_legales_task = PythonOperator(
     task_id="fetch_and_process_unites_legales",
     python_callable=fetch_and_process_data,
     op_kwargs={
-        "url_title": "documentation-unite-legale.json",
+        "url_title": "unites-legales",
         "table_name": "unites_legales",
         "index_column": "siret_siege",
         "schema": {
@@ -107,7 +105,7 @@ fetch_and_process_etablissements_task = PythonOperator(
     task_id="fetch_and_process_etablissements",
     python_callable=fetch_and_process_data,
     op_kwargs={
-        "url_title": "documentation-etablissement.json",
+        "url_title": "etablissements",
         "table_name": "etablissements",
         "index_column": "siret",
         "schema": {
