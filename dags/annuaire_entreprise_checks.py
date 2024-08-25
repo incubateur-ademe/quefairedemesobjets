@@ -43,10 +43,20 @@ def fetch_and_parse_data(**context):
     limit = context["params"]["limit"]
     pg_hook = PostgresHook(postgres_conn_id=utils.get_db_conn_id(__file__))
     engine = pg_hook.get_sqlalchemy_engine()
-
-    df_acteur = pd.read_sql("qfdmo_displayedacteur", engine)
-
-    df_acteur = df_acteur[df_acteur["statut"] == "ACTIF"]
+    active_actors_query = """
+        SELECT
+            da.*,
+            s.code AS source_code
+        FROM
+            qfdmo_displayedacteur da
+        JOIN
+            qfdmo_source s
+        ON
+            da.source_id = s.id
+        WHERE
+            da.statut = 'ACTIF';
+        """
+    df_acteur = pd.read_sql(active_actors_query, engine)
 
     if limit > 1:
         df_acteur = df_acteur.head(limit)
@@ -97,10 +107,13 @@ def fetch_and_parse_data(**context):
 
 def check_actor_with_adresse(**kwargs):
     data = kwargs["ti"].xcom_pull(task_ids="load_and_filter_actors_data")
+    config = utils.get_mapping_config()
+    source_code_naf = config["source_code_naf"]
     df_ok_siret_ok_adresse = data["closed_ok_siret"]
     df_nok_siret_ok_adresse = data["nok_siret_ok_adresse"]
     df = pd.concat([df_ok_siret_ok_adresse, df_nok_siret_ok_adresse])
     df["full_adresse"] = mapping_utils.create_full_adresse(df)
+    df["naf_code"] = df["source_code"].map(source_code_naf)
 
     df["ae_result"] = df.apply(
         lambda x: utils.check_siret_using_annuaire_entreprise(
@@ -143,25 +156,19 @@ def enrich_row(row):
 
 
 def combine_actors(**kwargs):
-    df_acteur_with_siret = kwargs["ti"].xcom_pull(task_ids="check_with_siret")
+    # df_acteur_with_siret = kwargs["ti"].xcom_pull(task_ids="check_with_siret")
     df_acteur_with_adresse = kwargs["ti"].xcom_pull(task_ids="check_with_adresse")
 
-    df = pd.merge(
-        df_acteur_with_siret,
-        df_acteur_with_adresse,
-        on=["identifiant_unique", "nom", "statut", "siret", "full_adresse"],
-        how="outer",
-        suffixes=("_siret", "_adresse"),
-    )
-
+    df = df_acteur_with_adresse
     cohort_dfs = {}
 
     df_bad_siret = df[
-        df["ae_result_siret"].isnull()
-        & df["full_adresse"].notnull()
+        df["full_adresse"].notnull()
         & (df["siret"].str.len() != 14)
         & (df["siret"].str.len() != 9)
     ]
+    df_bad_siret["ae_result_adresse"] = df_bad_siret["ae_result"]
+    df_bad_siret["ae_result_siret"] = None
 
     if not df_bad_siret.empty:
         df_bad_siret["ae_result"] = df_bad_siret.apply(
@@ -177,21 +184,6 @@ def combine_actors(**kwargs):
             df_non_empty_ae_results
         )
         cohort_dfs["siretitsation_with_adresse_bad_siret_empty"] = df_empty_ae_results
-
-    df = df[~df["identifiant_unique"].isin(df_bad_siret["identifiant_unique"])]
-
-    df["ae_result"] = df.apply(siret_control_utils.combine_ae_result_dicts, axis=1)
-    df[["statut", "categorie_naf", "ae_adresse"]] = df.apply(
-        siret_control_utils.update_statut, axis=1
-    )
-    df = df[df["statut"] == "SUPPRIME"]
-    if len(df) > 0:
-        df["cohort_id"] = df.apply(siret_control_utils.set_cohort_id, axis=1)
-    else:
-        return cohort_dfs
-
-    for cohort_id in df["cohort_id"].unique():
-        cohort_dfs[cohort_id] = df[df["cohort_id"] == cohort_id]
 
     for cohort_id, cohort_df in cohort_dfs.items():
         print(f"Cohort ID: {cohort_id} - Number of rows: {len(cohort_df)}")

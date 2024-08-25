@@ -53,5 +53,11 @@
     "ordinateurs fixes, portables, tablettes, objets connectés": ["materiel informatique"],
     "téléphones, smartphones": ["smartphone", "tablette et console"],
     "vêtements, textiles": ["vetement", "linge de maison"]
-}
+},
+  "source_code_naf": {
+    "Ordre National Des Pharmaciens": "47.73Z",
+    "Bibliothèques - Ministère de la culture": "84.11Z,91.01Z",
+    "Lunettes de Zac": "47.78A",
+    "Association des Ludothèques Françaises": "91.01Z,93.29Z"
+  }
 }
