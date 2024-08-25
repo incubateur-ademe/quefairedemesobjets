@@ -1,5 +1,4 @@
 import gzip
-import io
 from datetime import datetime
 from importlib import import_module
 from pathlib import Path
@@ -30,18 +29,19 @@ dag = DAG(
     "and save it to postgresql",
     schedule_interval="@weekly",
 )
+URL_METADATA_ANNUAIRE_ENTREPRISE = "https://www.data.gouv.fr/api/1/datasets/donnees-des-entreprises-utilisees-dans-lannuaire-des-entreprises"
 
 
-def fetch_and_process_data(url_index, table_name, index_column, schema, **context):
+def fetch_and_process_data(url_title, table_name, index_column, schema, **context):
     pg_hook = PostgresHook(postgres_conn_id=utils.get_db_conn_id(__file__))
     engine = pg_hook.get_sqlalchemy_engine()
-    conn = pg_hook.get_conn()
-    cursor = conn.cursor()
 
-    cursor.execute(f"TRUNCATE TABLE  {table_name};")
-    conn.commit()
+    with pg_hook.get_conn() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(f"TRUNCATE TABLE {table_name};")
+            conn.commit()
 
-    metadata_url = "https://www.data.gouv.fr/api/1/datasets/donnees-des-entreprises-utilisees-dans-lannuaire-des-entreprises"
+    metadata_url = URL_METADATA_ANNUAIRE_ENTREPRISE
     metadata_response = requests.get(metadata_url)
     metadata_response.raise_for_status()
     metadata = metadata_response.json()
@@ -51,14 +51,18 @@ def fetch_and_process_data(url_index, table_name, index_column, schema, **contex
         for resource in metadata["resources"]
         if resource["type"] != "documentation"
     ]
-    urls = [resource["url"] for resource in resources]
 
-    if not urls:
+    url = next(
+        (resource["url"] for resource in resources if resource["title"] == url_title),
+        None,
+    )
+
+    if not url:
         raise ValueError("No data URLs found in the resources.")
 
-    with requests.get(urls[url_index], stream=True) as r:
+    with requests.get(url, stream=True) as r:
         r.raise_for_status()
-        decompressed_file = gzip.GzipFile(fileobj=io.BytesIO(r.content))
+        decompressed_file = gzip.GzipFile(fileobj=r.raw)
 
         chunk_size = 10000
         dp_iter = pd.read_csv(
@@ -69,22 +73,20 @@ def fetch_and_process_data(url_index, table_name, index_column, schema, **contex
             for chunk in dp_iter:
                 chunk.to_sql(table_name, con=engine, if_exists="append", index=False)
                 pbar.update(chunk.memory_usage(deep=True).sum())
-
-    cursor.execute(
-        f"CREATE INDEX IF NOT EXISTS idx_{index_column} "
-        f"ON {table_name}({index_column});"
-    )
-    conn.commit()
-
-    cursor.close()
-    conn.close()
+    with pg_hook.get_conn() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                f"CREATE INDEX IF NOT EXISTS idx_{index_column} "
+                f"ON {table_name}({index_column});"
+            )
+            conn.commit()
 
 
 fetch_and_process_unites_legales_task = PythonOperator(
     task_id="fetch_and_process_unites_legales",
     python_callable=fetch_and_process_data,
     op_kwargs={
-        "url_index": 0,
+        "url_title": "documentation-unite-legale.json",
         "table_name": "unites_legales",
         "index_column": "siret_siege",
         "schema": {
@@ -105,7 +107,7 @@ fetch_and_process_etablissements_task = PythonOperator(
     task_id="fetch_and_process_etablissements",
     python_callable=fetch_and_process_data,
     op_kwargs={
-        "url_index": 1,
+        "url_title": "documentation-etablissement.json",
         "table_name": "etablissements",
         "index_column": "siret",
         "schema": {
