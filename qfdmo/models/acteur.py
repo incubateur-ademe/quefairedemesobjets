@@ -435,7 +435,7 @@ class DisplayedActeur(BaseActeur):
 
         return orjson.dumps(acteur_dict).decode("utf-8")
 
-    def display_postal_address(self):
+    def display_postal_address(self) -> bool:
         return bool(
             self.adresse or self.adresse_complement or self.code_postal or self.ville
         )
