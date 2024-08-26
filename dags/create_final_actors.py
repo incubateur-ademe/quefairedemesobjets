@@ -90,8 +90,6 @@ def apply_corrections_ps(**kwargs):
         ~df_propositionservice["acteur_id"].isin(common_acteur_ids)
     ]["id"].unique()
 
-    print(rps_ids)
-
     matching_rpssc_rows = df_manual_propositionservice_sous_categories_updates[
         df_manual_propositionservice_sous_categories_updates[
             "propositionservice_id"
