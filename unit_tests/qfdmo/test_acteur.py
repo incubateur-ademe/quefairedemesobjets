@@ -3,6 +3,7 @@ import json
 import pytest
 from django.contrib.gis.geos import Point
 from django.forms import ValidationError, model_to_dict
+from factory import Faker
 
 from qfdmo.models import (
     Acteur,
@@ -337,7 +338,7 @@ class TestDisplayActeurActeurActions:
 
 
 @pytest.mark.django_db
-class TestDisplayedActionJsonActeurForDisplay:
+class TestDisplayedActeurJsonActeurForDisplay:
 
     @pytest.fixture
     def displayed_acteur(self):
@@ -543,3 +544,25 @@ class TestDisplayedActionJsonActeurForDisplay:
         assert acteur_for_display["location"] is not None
         assert acteur_for_display["icon"] == "icon-actionjai1"
         assert acteur_for_display["couleur"] == "couleur-actionjai1"
+
+
+class TestDisplayedActeurDisplayPostalAddress:
+
+    def test_display_postal_address_empty(self):
+        displayed_acteur = DisplayedActeurFactory.build()
+
+        assert displayed_acteur.display_postal_address() is False
+
+    @pytest.mark.parametrize(
+        "fields",
+        [
+            {"adresse": Faker("address")},
+            {"adresse_complement": Faker("address")},
+            {"code_postal": Faker("postalcode")},
+            {"ville": Faker("city")},
+        ],
+    )
+    def test_display_postal_address_not_empty(self, fields):
+        displayed_acteur = DisplayedActeurFactory.build(**fields)
+
+        assert displayed_acteur.display_postal_address() is True
