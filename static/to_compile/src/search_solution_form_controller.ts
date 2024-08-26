@@ -238,7 +238,7 @@ export default class extends Controller<HTMLElement> {
         }
         const direction = this.directionTarget
         // In "La Carte" mode, the direction is a hidden input
-        if (direction.tagName == "INPUT") {
+        if (direction instanceof HTMLInputElement) {
             this.#selectedOption = direction.value
             return
         }
