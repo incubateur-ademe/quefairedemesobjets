@@ -23,36 +23,32 @@ def apply_corrections(**kwargs):
 
     df_normalized_actors = kwargs["ti"].xcom_pull(task_ids="load_actors")
     df_manual_actor_updates = kwargs["ti"].xcom_pull(task_ids="load_revision_actors")
-    print(df_manual_actor_updates)
-    # Drop the "cree_le" column if it exists
-    if "cree_le" in df_manual_actor_updates.columns:
-        df_manual_actor_updates = df_manual_actor_updates.drop(columns=["cree_le"])
 
-    # Filter new parent actors
-    df_new_parents = df_manual_actor_updates[df_manual_actor_updates["is_parent"]]
+    unique_parent_ids = df_manual_actor_updates["parent_id"].unique()
+
+    df_new_parents = df_manual_actor_updates[
+        df_manual_actor_updates["identifiant_unique"].isin(unique_parent_ids)
+    ]
 
     df_normalized_actors = df_normalized_actors.set_index("identifiant_unique")
     df_manual_actor_updates = df_manual_actor_updates.set_index("identifiant_unique")
-    df_new_parents = df_new_parents.set_index("identifiant_unique")
-
+    if "cree_le" in df_manual_actor_updates.columns:
+        df_manual_actor_updates = df_manual_actor_updates.drop(columns=["cree_le"])
     df_normalized_actors.update(df_manual_actor_updates)
-
-    df_normalized_actors = pd.concat([df_normalized_actors, df_new_parents])
-
-    parents = df_new_parents.copy()
-
-    parents["child_id"] = parents.index.map(
-        lambda parent_id: df_manual_actor_updates[
-            df_manual_actor_updates["parent_id"] == parent_id
-        ].index.tolist()
+    df_normalized_actors = pd.concat(
+        [df_normalized_actors, df_new_parents.set_index("identifiant_unique")]
     )
 
-    parents = parents.explode("child_id").dropna(subset=["child_id"])
-    parents = parents.reset_index().rename(columns={"index": "identifiant_unique"})
+    parents = (
+        df_manual_actor_updates.reset_index()
+        .query("parent_id.notnull()")
+        .drop_duplicates(subset=["parent_id", "identifiant_unique"])
+        .rename(columns={"identifiant_unique": "child_id"})
+    )
 
     return {
         "df_normalized_actors": df_normalized_actors.reset_index(),
-        "parents": parents[["identifiant_unique", "child_id"]].reset_index(drop=True),
+        "parents": parents[["parent_id", "child_id"]].reset_index(drop=True),
     }
 
 
@@ -124,16 +120,12 @@ def deduplicate_proposition_services_and_sous_categories(**kwargs):
     df_joined = df_ps_updated.merge(
         df_parents, left_on="acteur_id", right_on="child_id", how="inner"
     )
-
     df_joined_with_sous_categories = df_joined.merge(
         df_sous_categories_updated,
         left_on="id",
         right_on="propositionservice_id",
-        how="left",
+        how="inner",
     )
-    print(df_joined_with_sous_categories.columns)
-    print(df_joined_with_sous_categories)
-    print(df_sous_categories_updated)
 
     df_grouped = (
         df_joined_with_sous_categories.groupby(["parent_id", "action_id"])
@@ -141,19 +133,26 @@ def deduplicate_proposition_services_and_sous_categories(**kwargs):
         .reset_index()
     )
     max_id = df_ps_updated["id"].max()
-    df_grouped["id"] = range(max_id + 1, max_id + 1 + len(df_grouped))
+    df_grouped["propositionservice_id"] = range(
+        max_id + 1, max_id + 1 + len(df_grouped)
+    )
 
     df_new_sous_categories = df_grouped.explode("souscategorieobjet_id")[
-        ["id", "souscategorieobjet_id"]
+        ["propositionservice_id", "souscategorieobjet_id"]
     ]
 
     df_final_sous_categories = pd.concat(
         [df_sous_categories_updated, df_new_sous_categories], ignore_index=True
     )
-    print(df_grouped)
 
     df_final_ps_updated = pd.concat(
-        [df_ps_updated, df_grouped[["id", "parent_id", "action_id"]]], ignore_index=True
+        [
+            df_ps_updated,
+            df_grouped.rename(
+                columns={"propositionservice_id": "id", "parent_id": "acteur_id"}
+            )[["id", "action_id", "acteur_id"]],
+        ],
+        ignore_index=True,
     )
 
     return {
@@ -419,13 +418,9 @@ def _deduplicate_acteurs_many2many_relationship(
     )
     merged_df = merged_df.drop(columns=["displayedacteur_id"])
 
-    deduped_df = merged_df.drop_duplicates(
-        subset=["identifiant_unique", col], keep="first"
-    )
+    deduped_df = merged_df.drop_duplicates(subset=["parent_id", col], keep="first")
 
-    deduped_df.rename(
-        columns={"identifiant_unique": "displayedacteur_id"}, inplace=True
-    )
+    deduped_df.rename(columns={"parent_id": "displayedacteur_id"}, inplace=True)
     final_df = pd.concat(
         [merged_acteur, deduped_df[["displayedacteur_id", col]]], ignore_index=True
     )
@@ -605,8 +600,8 @@ write_pos = PythonOperator(
 ] >> merge_acteur_services_task
 apply_corr >> dedup_ps
 apply_corr_ps >> dedup_ps
-merge_labels_task >> dedup_labels_task
-merge_acteur_services_task >> dedup_acteur_services_task
+merge_labels_task >> apply_corr >> dedup_labels_task
+merge_acteur_services_task >> apply_corr >> dedup_acteur_services_task
 
 dedup_ps >> write_pos
 dedup_labels_task >> write_pos
