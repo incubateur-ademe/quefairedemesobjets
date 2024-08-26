@@ -471,7 +471,7 @@ class DisplayedActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
     resource_classes = [DisplayedActeurResource]
 
     def get_readonly_fields(self, request, obj=None):
-        if settings.ENVIRONMENT == "development":
+        if settings.DEBUG:
             return list(super().get_readonly_fields(request, obj))
         return [f.name for f in self.model._meta.fields if f.name != "location"]
 

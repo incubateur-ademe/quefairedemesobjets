@@ -9,7 +9,7 @@
             <a href="{% add_preserved_filters changelist_url %}" class="closelink">{% translate 'Close' %}</a>
         </div>
     {% endblock %}
-    {% if ENVIRONMENT == "development"%}
+    {% if DEBUG %}
         {{ block.super }}
     {% endif %}
 {% endblock %}
