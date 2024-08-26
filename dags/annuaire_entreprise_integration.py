@@ -1,4 +1,5 @@
 import gzip
+import io
 from datetime import datetime
 from importlib import import_module
 from pathlib import Path
@@ -61,7 +62,7 @@ def fetch_and_process_data(url_title, table_name, index_column, schema, **contex
 
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
-        decompressed_file = gzip.GzipFile(fileobj=r.raw)
+        decompressed_file = gzip.GzipFile(fileobj=io.BytesIO(r.content))
 
         chunk_size = 10000
         dp_iter = pd.read_csv(
