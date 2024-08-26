@@ -12,7 +12,11 @@
                                 data-identifiant-unique="{{ adresse.identifiant_unique }}"
                                 class="qfdmo-cursor-pointer qfdmo-rounded qfdmo-border-solid qfdmo-border qfdmo-border-light-gray qfdmo-content-start fr-p-1w fr-mb-1w
                                 {{ loop.cycle('qfdmo-bg-grey-975','qfdmo-bg-grey-950') }}
-                                qfdmo-flex qfdmo-flex-col">
+                                qfdmo-flex qfdmo-flex-col"
+                                role="button"
+                                aria-controls="detailsAddressPanel"
+                                aria-expanded="false"
+                                >
                                 {% with direction=form.direction.value() %}
                                     {% include 'qfdmo/_address_card_partials/address_actions.html'%}
                                 {% endwith %}
@@ -146,6 +150,7 @@
 
     {# Détail de l'adresse #}
     <div
+        id="detailsAddressPanel"
         data-search-solution-form-target="detailsAddressPanel"
         class="qfdmo-overflow-hidden qfdmo-duration-300 qfdmo-bg-white qfdmo-z-10
         qfdmo-w-full {% if request.GET.get('detail') %} qfdmo-h-1/2 {% else %} qfdmo-h-0 qfdmo-invisible {% endif %}
@@ -159,7 +164,7 @@
                     type='button'
                     data-action="click -> search-solution-form#hideDetails"
                     >
-                    Fermer
+                    Fermer la modale
                 </button>
                 <button class="fr-btn fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-arrow-up-s-line sm:qfdmo-hidden"
                     type='button'
