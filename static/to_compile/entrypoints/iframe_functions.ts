@@ -9,7 +9,7 @@ function compileIframeAttributes(
         id: "lvao_iframe",
         frameBorder: "0",
         scrolling: "no",
-        allow: "geolocation",
+        allow: "geolocation; clipboard-write",
         allowFullscreen: true,
         title: "Longue vie aux objets",
         style: `overflow: hidden; max-width: ${maxWidth}; width: 100%; height: ${height};`,

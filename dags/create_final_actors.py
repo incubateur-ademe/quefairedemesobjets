@@ -163,6 +163,7 @@ def write_data_to_postgres(**kwargs):
                 "reprise",
                 "exclusivite_de_reprisereparation",
                 "uniquement_sur_rdv",
+                "action_principale_id",
             ]
         ].to_sql(
             temp_table_name_actor,

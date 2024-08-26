@@ -156,7 +156,7 @@ class AddressesForm(forms.Form):
             "Afficher uniquement les artisans labellisés (uniquement valable lorsque le"
             " geste « réparer » est sélectionné). En savoir plus <a href="
             '"https://www.artisanat.fr/nous-connaitre/vous-accompagner/reparacteurs"'
-            ' target="_blank" rel="noopener" title="sur le site de la CMA - Nouvelle'
+            ' target="_blank" rel="noreferrer" title="sur le site de la CMA - Nouvelle'
             ' fenêtre"> sur le site de la CMA</a>'
         ),
         label_suffix="",
@@ -170,7 +170,7 @@ class AddressesForm(forms.Form):
             "Afficher uniquement les adresses recensées comme relevant de l'économie"
             " sociale et solidaire. En savoir plus sur le site <a href="
             '"https://www.economie.gouv.fr/cedef/economie-sociale-et-solidaire"'
-            ' target="_blank" rel="noopener" title="economie.gouv.fr - Nouvelle'
+            ' target="_blank" rel="noreferrer" title="economie.gouv.fr - Nouvelle'
             ' fenêtre">economie.gouv.fr</a>'
         ),
         label_suffix="",
@@ -192,7 +192,7 @@ class AddressesForm(forms.Form):
             "Afficher uniquement les adresses éligibles (uniquement valable lorsque le"
             " geste « réparer » est sélectionné). En savoir plus sur le site <a href="
             '"https://www.ecologie.gouv.fr/bonus-reparation" target="_blank"'
-            ' rel="noopener" title="Bonus réparation - Nouvelle fenêtre">Bonus'
+            ' rel="noreferrer" title="Bonus réparation - Nouvelle fenêtre">Bonus'
             " réparation</a>"
         ),
         label_suffix="",
