@@ -217,6 +217,7 @@ export default class extends Controller<HTMLElement> {
         this.displayDetails()
     }
     setSrcDetailsAddress({ detail: { identifiantUnique } }) {
+        // TODO : gérer ça côté template / python
         const latitude = this.latitudeInputTarget.value
         const longitude = this.longitudeInputTarget.value
 
@@ -428,6 +429,7 @@ export default class extends Controller<HTMLElement> {
         this.#hideAdvancedFilters()
         this.#hideLegend()
 
+        this.searchFormTarget.submit()
         let submitEvent = new Event("submit", { bubbles: true, cancelable: true })
         setTimeout(() => {
             this.searchFormTarget.dispatchEvent(submitEvent)
