@@ -307,11 +307,18 @@
             {% if adresse.display_postal_address() %}
                 <h3 class="fr-text--sm fr-m-0 qfdmo-text-grey-425">Adresse</h3>
                 <div class="fr-p-1w fr-my-1w qfdmo-bg-grey-975">
-                    {{ adresse.adresse|title }}<br>
+                    {% if adresse.adresse %}
+                        {{ adresse.adresse|title }}<br>
+                    {% endif %}
                     {% if adresse.adresse_complement %}
                         {{ adresse.adresse_complement }}<br>
                     {% endif %}
-                    {{ adresse.code_postal }} {{ adresse.ville|title }}
+                    {% if adresse.code_postal %}
+                        {{ adresse.code_postal }}
+                    {% endif %}
+                    {% if adresse.ville %}
+                        {{ adresse.ville|title }}
+                    {% endif %}
                 </div>
             {% endif %}
 

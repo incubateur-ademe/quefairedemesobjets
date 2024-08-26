@@ -564,4 +564,5 @@ class TestDisplayedActeurDisplayPostalAddress:
     )
     def test_display_postal_address_not_empty(self, fields):
         displayed_acteur = DisplayedActeurFactory.build(**fields)
+
         assert displayed_acteur.display_postal_address() is True
