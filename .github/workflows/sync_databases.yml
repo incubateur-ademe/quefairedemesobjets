@@ -2,8 +2,8 @@ name: Sync databases
 
 on:
   workflow_dispatch:
-  schedule:
-  - cron: "0 0 * * SUN"
+  # schedule:
+  # - cron: "0 0 * * SUN"
 
 env:
   DUPLICATE_API_TOKEN: ${{ secrets.DUPLICATE_API_TOKEN }}
@@ -36,4 +36,3 @@ jobs:
           --file ./scripts/restore_prod_to_preprod.sh \
           /tmp/uploads/restore_prod_to_preprod.sh
         continue-on-error: true
-
