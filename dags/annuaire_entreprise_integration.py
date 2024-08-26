@@ -1,5 +1,6 @@
 import gzip
-import io
+import socket
+import time
 from datetime import datetime
 from importlib import import_module
 from pathlib import Path
@@ -32,6 +33,10 @@ dag = DAG(
 URL_METADATA_ANNUAIRE_ENTREPRISE = "https://www.data.gouv.fr/api/1/datasets/donnees-des-entreprises-utilisees-dans-lannuaire-des-entreprises"
 
 
+MAX_RETRIES = 2
+WAIT_SECONDS = 5
+
+
 def fetch_and_process_data(url_title, table_name, index_column, schema, **context):
     pg_hook = PostgresHook(postgres_conn_id=utils.get_db_conn_id(__file__))
     engine = pg_hook.get_sqlalchemy_engine()
@@ -60,17 +65,49 @@ def fetch_and_process_data(url_title, table_name, index_column, schema, **contex
     if not url:
         raise ValueError("No data URLs found in the resources.")
 
-    with requests.get(url, stream=True) as r:
-        r.raise_for_status()
-        decompressed_file = gzip.GzipFile(fileobj=io.BytesIO(r.content))
+    for i in range(MAX_RETRIES):
+        try:
+            with requests.get(url, stream=True, timeout=10) as r:
+                r.raise_for_status()
+                decompressed_file = gzip.GzipFile(fileobj=r.raw)
 
-        chunk_size = 10000
-        dp_iter = pd.read_csv(
-            decompressed_file, chunksize=chunk_size, usecols=schema.keys(), dtype=schema
-        )
+                chunk_size = 10000
+                dp_iter = pd.read_csv(
+                    decompressed_file,
+                    chunksize=chunk_size,
+                    usecols=schema.keys(),
+                    dtype=schema,
+                )
 
-        for chunk in dp_iter:
-            chunk.to_sql(table_name, con=engine, if_exists="append", index=False)
+                for chunk_number, chunk in enumerate(dp_iter):
+                    for retry in range(MAX_RETRIES):
+                        try:
+                            chunk.to_sql(
+                                table_name, con=engine, if_exists="append", index=False
+                            )
+                            print(f"Chunk {chunk_number + 1} processed successfully.")
+                            break  # Break out of retry loop if successful
+                        except (requests.exceptions.ConnectionError, socket.timeout):
+                            print(
+                                f"Chunk {chunk_number + 1} failed,"
+                                f" retrying... ({retry + 1}/{MAX_RETRIES})"
+                            )
+                            time.sleep(WAIT_SECONDS)
+                    else:
+                        raise RuntimeError(
+                            f"Failed to process chunk {chunk_number + 1}"
+                            f" after {MAX_RETRIES} retries."
+                        )
+            break  # Exit retry loop if request and processing succeed
+
+        except requests.exceptions.ConnectionError:
+            print("HTTP connection failed, retrying...")
+        except socket.timeout:
+            print("Download failed due to timeout, retrying...")
+
+        time.sleep(WAIT_SECONDS)
+    else:
+        print("All retries failed. The data could not be fetched and processed.")
 
     with pg_hook.get_conn() as conn:
         with conn.cursor() as cursor:
