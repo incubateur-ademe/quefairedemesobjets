@@ -34,7 +34,6 @@ export default class extends Controller<HTMLElement> {
         "adresseError",
 
         "advancedFiltersMainPanel",
-        "advancedFiltersFormPanel",
         "advancedFiltersSaveButton",
         "advancedFiltersSaveAndSubmitButton",
 
@@ -91,7 +90,6 @@ export default class extends Controller<HTMLElement> {
     declare readonly adresseErrorTarget: HTMLElement
 
     declare readonly advancedFiltersMainPanelTarget: HTMLElement
-    declare readonly advancedFiltersFormPanelTarget: HTMLElement
     declare readonly advancedFiltersSaveButtonTarget: HTMLElement
     declare readonly advancedFiltersSaveAndSubmitButtonTarget: HTMLElement
 
@@ -115,6 +113,7 @@ export default class extends Controller<HTMLElement> {
 
     connect() {
         this.displayActionList()
+
         if (!this.isIframeValue) {
             this.scrollToContent()
         }
@@ -384,7 +383,7 @@ export default class extends Controller<HTMLElement> {
     }
 
     #toggleAdvancedFilters() {
-        if (this.advancedFiltersMainPanelTarget.classList.contains("qfdmo-hidden")) {
+        if (this.advancedFiltersMainPanelTarget.dataset.visible === "false") {
             this.#showAdvancedFilters()
         } else {
             this.#hideAdvancedFilters()
@@ -393,26 +392,25 @@ export default class extends Controller<HTMLElement> {
     }
 
     #showAdvancedFilters() {
-        this.advancedFiltersMainPanelTarget.classList.remove("qfdmo-hidden")
-        this.advancedFiltersMainPanelTarget.focus()
-        setTimeout(() => {
-            this.advancedFiltersFormPanelTarget.classList.remove(
-                "qfdmo-h-0",
-                "qfdmo-invisible",
-            )
-            this.advancedFiltersFormPanelTarget.classList.add("qfdmo-h-[95%]")
-        }, 100)
+        this.advancedFiltersMainPanelTarget.dataset.visible = "true"
+        this.advancedFiltersMainPanelTarget.addEventListener(
+            "animationend",
+            () => {
+                this.advancedFiltersMainPanelTarget.focus()
+            },
+            { once: true },
+        )
     }
 
     #hideAdvancedFilters() {
-        this.advancedFiltersFormPanelTarget.classList.remove("qfdmo-h-[95%]")
-        this.advancedFiltersFormPanelTarget.classList.add(
-            "qfdmo-h-0",
-            "qfdmo-invisible",
+        this.advancedFiltersMainPanelTarget.dataset.visible = "exit"
+        this.advancedFiltersMainPanelTarget.addEventListener(
+            "animationend",
+            () => {
+                this.advancedFiltersMainPanelTarget.dataset.visible = "false"
+            },
+            { once: true },
         )
-        setTimeout(() => {
-            this.advancedFiltersMainPanelTarget.classList.add("qfdmo-hidden")
-        }, 300)
     }
 
     toggleLegend() {

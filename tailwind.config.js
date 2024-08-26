@@ -180,5 +180,5 @@ module.exports = {
             minWidth: ({ theme }) => ({ ...theme("spacing") }),
         },
     },
-    plugins: [],
+    plugins: [require("tailwindcss-animate")],
 }
