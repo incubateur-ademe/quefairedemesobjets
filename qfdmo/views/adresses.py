@@ -122,6 +122,8 @@ class AddressesView(FormView):
         # Manage the selection of sous_categorie_objet and actions
         acteurs = self._manage_sous_categorie_objet_and_actions()
 
+        acteurs = acteurs.prefetch_related("action_principale")
+
         # Case of digital acteurs
         if self.request.GET.get("digital") and self.request.GET.get("digital") == "1":
             kwargs["acteurs"] = (

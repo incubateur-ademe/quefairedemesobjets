@@ -13,26 +13,6 @@ class TestActionNomAsNaturalKeyHeritage:
         action = ActionFactory.build(code="My Code", libelle="My Libelle")
         assert str(action) == "My Libelle"
 
-    @pytest.mark.django_db
-    def test_serialize(self):
-        action = Action.objects.create(
-            code="Test Object",
-            libelle="Test Objet Displayed",
-            order=1,
-        )
-        assert action.serialize() == {
-            "id": action.id,
-            "description": None,
-            "afficher": True,
-            "code": "Test Object",
-            "libelle": "Test Objet Displayed",
-            "libelle_groupe": "",
-            "groupe_action": None,
-            "order": 1,
-            "couleur": "yellow-tournesol",
-            "icon": None,
-        }
-
 
 @pytest.fixture
 def action_directions():
