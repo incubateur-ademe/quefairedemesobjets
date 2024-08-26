@@ -39,11 +39,37 @@ logger = logging.getLogger(__name__)
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
 
 
+class FormulaireView(FormView):
+    # TODO
+    pass
+
+
+class FormulaireResultatsView(FormView):
+    # TODO
+    pass
+
+
+class FormulaireResultatsEnLigneView(FormView):
+    # TODO
+    pass
+
+
+class CarteView(FormView):
+    # TODO
+    pass
+
+
+class CarteResultatsView(FormView):
+    # TODO
+    pass
+
+
 class AddressesView(FormView):
     form_class = IframeAddressesForm
     template_name = "qfdmo/adresses.html"
 
     def get_form_class(self) -> type:
+        # TODO : découper en plusieurs vues pour éviter cette fonction
         if self.request.GET.get("carte") is not None:
             return CarteAddressesForm
         return super().get_form_class()

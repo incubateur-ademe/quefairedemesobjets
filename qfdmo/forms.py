@@ -51,9 +51,11 @@ class DSFRCheckboxSelectMultiple(forms.CheckboxSelectMultiple):
 
 
 class AddressesForm(forms.Form):
+    # TODO : découper en plusieurs formulaires
     def load_choices(self, request: HttpRequest) -> None:
         pass
 
+    # TODO : déplacer dans formulaire Formulaire (...)
     bounding_box = forms.CharField(
         widget=forms.HiddenInput(
             attrs={
@@ -64,6 +66,7 @@ class AddressesForm(forms.Form):
         required=False,
     )
 
+    # TODO : déplacer dans formulaire Formulaire (...)
     sous_categorie_objet = forms.ModelChoiceField(
         queryset=SousCategorieObjet.objects.all(),
         widget=AutoCompleteInput(
@@ -80,6 +83,7 @@ class AddressesForm(forms.Form):
         required=False,
     )
 
+    # TODO : déplacer dans formulaire Formulaire (...)
     sc_id = forms.IntegerField(
         widget=forms.HiddenInput(
             attrs={
@@ -90,6 +94,7 @@ class AddressesForm(forms.Form):
         required=False,
     )
 
+    # TODO : déplacer dans formulaire Formulaire (...)
     latitude = forms.FloatField(
         widget=forms.HiddenInput(
             attrs={
@@ -100,6 +105,7 @@ class AddressesForm(forms.Form):
         required=False,
     )
 
+    # TODO : déplacer dans formulaire Formulaire (...)
     longitude = forms.FloatField(
         widget=forms.HiddenInput(
             attrs={
@@ -110,6 +116,7 @@ class AddressesForm(forms.Form):
         required=False,
     )
 
+    # TODO : déplacer dans formulaire Formulaire (...)
     direction = forms.ChoiceField(
         widget=SegmentedControlSelect(
             attrs={

@@ -429,8 +429,9 @@ export default class extends Controller<HTMLElement> {
         this.#hideAdvancedFilters()
         this.#hideLegend()
 
-        this.searchFormTarget.submit()
         let submitEvent = new Event("submit", { bubbles: true, cancelable: true })
+        // TODO : appeler la méthode submit du formulaire directement
+        // this.searchFormTarget.submit()
         setTimeout(() => {
             this.searchFormTarget.dispatchEvent(submitEvent)
         }, 300)
