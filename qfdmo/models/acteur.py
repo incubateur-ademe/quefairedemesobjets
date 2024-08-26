@@ -1,4 +1,3 @@
-import json
 import random
 import string
 from typing import Any
@@ -31,9 +30,6 @@ class ActeurService(CodeAsNaturalKeyModel):
 
     def __str__(self):
         return f"{self.libelle} ({self.code})"
-
-    def serialize(self):
-        return model_to_dict(self, exclude=["actions"])
 
 
 class ActeurStatus(models.TextChoices):
@@ -68,9 +64,6 @@ class ActeurType(CodeAsNaturalKeyModel):
     code = models.CharField(max_length=255, unique=True, blank=False, null=False)
     libelle = models.CharField(max_length=255, blank=False, null=False, default="?")
 
-    def serialize(self):
-        return model_to_dict(self)
-
     @classmethod
     def get_digital_acteur_type_id(cls) -> int:
         if not cls._digital_acteur_type_id:
@@ -101,7 +94,7 @@ class Source(CodeAsNaturalKeyModel):
         verbose_name_plural = "Sources de données"
 
     id = models.AutoField(primary_key=True)
-    libelle = models.CharField(max_length=255, unique=True)
+    libelle = models.CharField(max_length=255)
     code = models.CharField(
         max_length=255,
         unique=True,
@@ -115,9 +108,6 @@ class Source(CodeAsNaturalKeyModel):
     logo_file = models.ImageField(
         upload_to="logos", blank=True, null=True, validators=[validate_logo]
     )
-
-    def serialize(self):
-        return model_to_dict(self)
 
 
 def validate_opening_hours(value):
@@ -220,6 +210,12 @@ class BaseActeur(NomAsNaturalKeyModel):
         verbose_name="Exclusivité de reprise/réparation",
     )
     uniquement_sur_rdv = models.BooleanField(null=True, blank=True)
+    action_principale = models.ForeignKey(
+        Action,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+    )
 
     def get_share_url(self, request: HttpRequest, direction: str | None = None) -> str:
         protocol = "https" if request.is_secure() else "http"
@@ -253,39 +249,6 @@ class BaseActeur(NomAsNaturalKeyModel):
         print(f"acteur_type : {self.acteur_type_id} - {self.acteur_type}")
         print(f"get_digital_acteur_type_id : {ActeurType.get_digital_acteur_type_id()}")
         return self.acteur_type_id == ActeurType.get_digital_acteur_type_id()
-
-    def serialize(self, format: None | str = None) -> dict | str:
-        self_as_dict = model_to_dict(
-            self,
-            exclude=[
-                "location",
-                "proposition_services",
-                "acteur_type",
-                "source",
-                "labels",
-            ],
-        )
-        if self.acteur_type:
-            self_as_dict["acteur_type"] = (
-                self.acteur_type.serialize()
-            )  # FIXME: to be cached or get only the name
-        if self.source:
-            self_as_dict["source"] = self.source.serialize()  # FIXME: to be cached
-        if self.location:
-            self_as_dict["location"] = json.loads(self.location.geojson)
-        proposition_services = self.proposition_services.all()  # type: ignore
-        self_as_dict["proposition_services"] = []
-        for proposition_service in proposition_services:
-            self_as_dict["proposition_services"].append(proposition_service.serialize())
-
-        labels = self.labels.all()  # type: ignore
-        self_as_dict["labels"] = []
-        for proposition_service in labels:
-            self_as_dict["labels"].append(proposition_service.serialize())
-
-        if format == "json":
-            return json.dumps(self_as_dict)
-        return self_as_dict
 
     def get_acteur_services(self) -> list[str]:
         return sorted(
@@ -373,6 +336,8 @@ class RevisionActeur(BaseActeur):
     )
 
     def save(self, *args, **kwargs):
+        # OPTIMIZE: if we need to validate the main action in the service propositions
+        # I guess it should be here
         self.set_default_fields_and_objects_before_save()
         return super().save(*args, **kwargs)
 
@@ -434,25 +399,33 @@ class DisplayedActeur(BaseActeur):
     ) -> str:
         actions = self.acteur_actions(direction=direction)
 
-        acteur_selected_actions = None
         if action_list:
-            acteur_selected_actions = [
-                a for a in actions if a.code in action_list.split("|")
-            ]
-        main_action = (
-            acteur_selected_actions[0]
-            if acteur_selected_actions
-            else (actions[0] if actions else None)
-        )
+            actions = [a for a in actions if a.code in action_list.split("|")]
+
+        # sort actions
+        if carte:
+
+            def sort_key(a):
+                return (a.order or 0) + (
+                    a.groupe_action.order
+                    if a.groupe_action and a.groupe_action.order
+                    else 0
+                ) * 100
+
+            actions = sorted(actions, key=sort_key)
+        else:
+            actions = sorted(actions, key=lambda a: a.order or 0)
+
+        # move action_principale as first of the list
+        if self.action_principale in actions:
+            actions.remove(self.action_principale)
+            actions.insert(0, self.action_principale)
+
         acteur_dict = {
             "identifiant_unique": self.identifiant_unique,
             "location": orjson.loads(self.location.geojson),
         }
-        if main_action := (
-            acteur_selected_actions[0]
-            if acteur_selected_actions
-            else (actions[0] if actions else None)
-        ):
+        if main_action := actions[0] if actions else None:
             if carte and main_action.groupe_action:
                 acteur_dict["icon"] = main_action.groupe_action.icon
                 acteur_dict["couleur"] = main_action.groupe_action.couleur
@@ -524,15 +497,6 @@ class BasePropositionService(models.Model):
 
     def __str__(self):
         return f"{self.action.code}"
-
-    def serialize(self):
-        return {
-            "action": self.action.serialize(),
-            "sous_categories": [
-                sous_categorie.serialize()
-                for sous_categorie in self.sous_categories.all()
-            ],
-        }
 
 
 class PropositionService(BasePropositionService):
