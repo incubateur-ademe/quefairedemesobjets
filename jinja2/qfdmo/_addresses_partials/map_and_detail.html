@@ -6,9 +6,11 @@
             {% if request.GET["digital"] == "1" %}
                 {# On line addresses#}
                 <div class="qfdmo-relative qfdmo-flex-grow qfdmo-shadow">
-                    <div class="qfdmo-px-2w sm:qfdmo-px-0 lg:qfdmo-px-0 qfdmo-absolute qfdmo-inset-0 qfdmo-overflow-y-auto">
+                    <div class="qfdmo-px-2w sm:qfdmo-px-0 lg:qfdmo-px-0 qfdmo-absolute qfdmo-inset-0">
                         {% for adresse in acteurs.all() %}
-                            <div data-action="click->search-solution-form#displayActeurDetails"
+                            <div data-action="click->search-solution-form#displayActeurDetails
+                                keydown.enter->search-solution-form#displayActeurDetails
+                                keydown.space->search-solution-form#displayActeurDetails"
                                 data-identifiant-unique="{{ adresse.identifiant_unique }}"
                                 class="qfdmo-cursor-pointer qfdmo-rounded qfdmo-border-solid qfdmo-border qfdmo-border-light-gray qfdmo-content-start fr-p-1w fr-mb-1w
                                 {{ loop.cycle('qfdmo-bg-grey-975','qfdmo-bg-grey-950') }}
@@ -16,6 +18,7 @@
                                 role="button"
                                 aria-controls="detailsAddressPanel"
                                 aria-expanded="false"
+                                tabindex="0"
                                 >
                                 {% with direction=form.direction.value() %}
                                     {% include 'qfdmo/_address_card_partials/address_actions.html'%}

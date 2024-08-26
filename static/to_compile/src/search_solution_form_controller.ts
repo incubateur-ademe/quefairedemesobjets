@@ -238,7 +238,6 @@ export default class extends Controller<HTMLElement> {
     }
 
     displayActeurDetails(event) {
-        console.log(event.currentTarget)
         const identifiantUnique = event.currentTarget.dataset.identifiantUnique
         document
             .querySelector(
