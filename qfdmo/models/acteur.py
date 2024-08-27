@@ -452,6 +452,13 @@ class DisplayedActeur(BaseActeur):
         verbose_name = "ACTEUR de l'EC - AFFICHÉ"
         verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ"
 
+    acteur_sources = models.ManyToManyField(
+        Source,
+        blank=True,
+        through="ActeurActeurSource",
+        related_name="related_displayed_acteurs",
+    )
+
     def acteur_actions(self, direction=None):
         ps_action_ids = list(
             {ps.action_id for ps in self.proposition_services.all()}  # type: ignore
@@ -525,6 +532,13 @@ class DisplayedActeurTemp(BaseActeur):
         through="ActeurActeurService",
     )
 
+    acteur_sources = models.ManyToManyField(
+        Source,
+        blank=True,
+        through="ActeurActeurSourceTemp",
+        related_name="related_displayed_acteur_temps",
+    )
+
     class ActeurLabelQualite(models.Model):
         class Meta:
             db_table = "qfdmo_displayedacteurtemp_labels"
@@ -556,6 +570,40 @@ class DisplayedActeurTemp(BaseActeur):
             on_delete=models.CASCADE,
             db_column="acteurservice_id",
         )
+
+
+class ActeurActeurSource(models.Model):
+    class Meta:
+        db_table = "qfdmo_displayedacteur_acteur_sources"
+        unique_together = ("displayed_acteur", "source")
+
+    id = models.AutoField(primary_key=True)
+    displayed_acteur = models.ForeignKey(
+        "DisplayedActeur",
+        on_delete=models.CASCADE,
+        related_name="acteur_source_relations",
+        db_column="displayedacteur_id",
+    )
+    source = models.ForeignKey(
+        Source, on_delete=models.CASCADE, related_name="displayed_acteur_sources"
+    )
+
+
+class ActeurActeurSourceTemp(models.Model):
+    class Meta:
+        db_table = "qfdmo_displayedacteur_acteur_sources_temp"
+        unique_together = ("displayed_acteur_temp", "source")
+
+    id = models.AutoField(primary_key=True)
+    displayed_acteur_temp = models.ForeignKey(
+        "DisplayedActeurTemp",
+        on_delete=models.CASCADE,
+        related_name="acteur_source_temp_relations",
+        db_column="displayedacteur_id",
+    )
+    source = models.ForeignKey(
+        Source, on_delete=models.CASCADE, related_name="displayed_acteur_temp_sources"
+    )
 
 
 class BasePropositionService(models.Model):

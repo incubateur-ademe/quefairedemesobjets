@@ -38,17 +38,24 @@ def apply_corrections(**kwargs):
     df_normalized_actors = pd.concat(
         [df_normalized_actors, df_new_parents.set_index("identifiant_unique")]
     )
-
     parents = (
         df_manual_actor_updates.reset_index()
         .query("parent_id.notnull()")
         .drop_duplicates(subset=["parent_id", "identifiant_unique"])
         .rename(columns={"identifiant_unique": "child_id"})
     )
+    parents = pd.merge(
+        parents[["parent_id", "child_id"]],
+        df_normalized_actors.reset_index()[["identifiant_unique", "source_id"]],
+        left_on="child_id",
+        right_on="identifiant_unique",
+    ).rename(columns={"source_id": "child_source_id"})
 
     return {
         "df_normalized_actors": df_normalized_actors.reset_index(),
-        "parents": parents[["parent_id", "child_id"]].reset_index(drop=True),
+        "parents": parents[["parent_id", "child_id", "child_source_id"]].reset_index(
+            drop=True
+        ),
     }
 
 
@@ -167,6 +174,7 @@ def write_data_to_postgres(**kwargs):
     df_acteur_services_updated = kwargs["ti"].xcom_pull(
         task_ids="dedup_acteur_services"
     )
+    df_acteur_sources_updated = kwargs["ti"].xcom_pull(task_ids="dedup_acteur_sources")
     task_output = kwargs["ti"].xcom_pull(task_ids="apply_dedup_propositionservice")
 
     df_ps_updated = task_output["df_final_ps_updated"]
@@ -188,6 +196,9 @@ def write_data_to_postgres(**kwargs):
     original_table_name_acteur_services = "qfdmo_displayedacteur_acteur_services"
     temp_table_name_acteur_services = "qfdmo_displayedacteurtemp_acteur_services"
 
+    original_table_name_sources = "qfdmo_displayedacteur_acteur_sources"
+    temp_table_name_sources = "qfdmo_displayedacteur_acteur_sources_temp"
+
     original_table_name_ps = "qfdmo_displayedpropositionservice"
     temp_table_name_ps = "qfdmo_displayedpropositionservicetemp"
 
@@ -199,6 +210,7 @@ def write_data_to_postgres(**kwargs):
         conn.execute(f"DELETE FROM {temp_table_name_ps}")
         conn.execute(f"DELETE FROM {temp_table_name_labels}")
         conn.execute(f"DELETE FROM {temp_table_name_acteur_services}")
+        conn.execute(f"DELETE FROM {temp_table_name_sources}")
         conn.execute(f"DELETE FROM {temp_table_name_actor}")
 
         df_normalized_corrected_actors[
@@ -244,6 +256,15 @@ def write_data_to_postgres(**kwargs):
 
         df_labels_updated[["displayedacteur_id", "labelqualite_id"]].to_sql(
             temp_table_name_labels,
+            engine,
+            if_exists="append",
+            index=False,
+            method="multi",
+            chunksize=1000,
+        )
+
+        df_acteur_sources_updated[["displayedacteur_id", "source_id"]].to_sql(
+            temp_table_name_sources,
             engine,
             if_exists="append",
             index=False,
@@ -305,6 +326,18 @@ def write_data_to_postgres(**kwargs):
         conn.execute(
             f"ALTER TABLE {original_table_name_labels}_old "
             f"RENAME TO {temp_table_name_labels}"
+        )
+        conn.execute(
+            f"ALTER TABLE {original_table_name_sources} "
+            f"RENAME TO {original_table_name_sources}_old"
+        )
+        conn.execute(
+            f"ALTER TABLE {temp_table_name_sources} "
+            f"RENAME TO {original_table_name_sources}"
+        )
+        conn.execute(
+            f"ALTER TABLE {original_table_name_sources}_old "
+            f"RENAME TO {temp_table_name_sources}"
         )
 
         conn.execute(
@@ -371,6 +404,32 @@ def deduplicate_acteur_serivces(**kwargs):
     return _deduplicate_acteurs_many2many_relationship(
         "merge_acteur_services", "acteurservice_id", **kwargs
     )
+
+
+def deduplicate_acteur_sources(**kwargs):
+    data_actors = kwargs["ti"].xcom_pull(task_ids="apply_corrections_actors")
+    df_parents = data_actors["parents"]
+    df_normalized_actors = data_actors["df_normalized_actors"]
+
+    df_acteur_sources_without_parents = df_normalized_actors[
+        ~df_normalized_actors["identifiant_unique"].isin(df_parents["parent_id"])
+    ][["identifiant_unique", "source_id"]]
+
+    df_acteur_sources_without_parents = df_acteur_sources_without_parents.rename(
+        columns={"identifiant_unique": "displayedacteur_id"}
+    )
+
+    parents_df = df_parents[["parent_id", "child_source_id"]].drop_duplicates()
+
+    parents_df = parents_df.rename(
+        columns={"parent_id": "displayedacteur_id", "child_source_id": "source_id"}
+    )
+
+    result_df = pd.concat(
+        [df_acteur_sources_without_parents, parents_df], ignore_index=True
+    )
+
+    return result_df
 
 
 def _merge_acteurs_many2many_relationship(
@@ -564,6 +623,13 @@ dedup_acteur_services_task = PythonOperator(
     dag=dag,
 )
 
+merge_and_dedup_acteur_sources_task = PythonOperator(
+    task_id="dedup_acteur_sources",
+    python_callable=deduplicate_acteur_sources,
+    dag=dag,
+)
+
+
 apply_corr = PythonOperator(
     task_id="apply_corrections_actors",
     python_callable=apply_corrections,
@@ -597,10 +663,11 @@ write_pos = PythonOperator(
     read_revisionacteur_acteur_services,
 ] >> merge_acteur_services_task
 apply_corr >> dedup_ps
+apply_corr >> merge_and_dedup_acteur_sources_task
 apply_corr_ps >> dedup_ps
 merge_labels_task >> apply_corr >> dedup_labels_task
 merge_acteur_services_task >> apply_corr >> dedup_acteur_services_task
-
+merge_and_dedup_acteur_sources_task >> write_pos
 dedup_ps >> write_pos
 dedup_labels_task >> write_pos
 dedup_acteur_services_task >> write_pos
