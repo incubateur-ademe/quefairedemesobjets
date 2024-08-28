@@ -1,3 +1,5 @@
+import math
+
 from ratelimit import limits, sleep_and_retry
 import requests
 from importlib import import_module
@@ -59,8 +61,10 @@ def call_annuaire_entreprises(query, adresse_query_flag=False, naf=None):
         "page": 1,
         "per_page": 3,
         "etat_administratif": "A",
-        "activite_principale": naf,
     }
+
+    if naf is not None and not (isinstance(naf, float) and math.isnan(naf)):
+        params["activite_principale"] = naf
     base_url = "https://recherche-entreprises.api.gouv.fr"
     endpoint = "/search"
     try:
