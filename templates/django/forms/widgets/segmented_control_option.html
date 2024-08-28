@@ -1,4 +1,4 @@
-<div class="fr-segmented__element{% if widget.attrs.class %} {{ widget.attrs.class }}{% endif %}" role="tab">
+<div class="fr-segmented__element{% if widget.attrs.class %} {{ widget.attrs.class }}{% endif %}">
     <input
         {% if widget.value != None %} value="{{ widget.value|stringformat:'s' }}"{% endif %}
         type="radio"
