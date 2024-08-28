@@ -1,14 +1,8 @@
 import pytest
-from django.core.cache import cache
 
 from qfdmo.models import Action, CodeAsNaturalKeyModel
 from qfdmo.models.action import ActionDirection, CachedDirectionAction
 from unit_tests.qfdmo.action_factory import ActionDirectionFactory, ActionFactory
-
-
-@pytest.fixture(autouse=True, scope="function")
-def clear_cache():
-    cache.clear()
 
 
 class TestActionNomAsNaturalKeyHeritage:

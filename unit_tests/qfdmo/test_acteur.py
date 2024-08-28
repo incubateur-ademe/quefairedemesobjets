@@ -2,7 +2,6 @@ import json
 
 import pytest
 from django.contrib.gis.geos import Point
-from django.core.cache import cache
 from django.forms import ValidationError, model_to_dict
 from factory import Faker
 
@@ -30,11 +29,6 @@ from unit_tests.qfdmo.action_factory import (
     ActionFactory,
     GroupeActionFactory,
 )
-
-
-@pytest.fixture(autouse=True, scope="function")
-def clear_cache():
-    cache.clear()
 
 
 @pytest.fixture()
