@@ -402,6 +402,10 @@ export default class extends Controller<HTMLElement> {
     }
 
     #hideAdvancedFilters() {
+        if (this.advancedFiltersMainPanelTarget.dataset.visible == "false") {
+          return
+        }
+
         this.advancedFiltersMainPanelTarget.dataset.visible = "exit"
         this.advancedFiltersMainPanelTarget.addEventListener(
             "animationend",
