@@ -153,11 +153,26 @@ class AddressesForm(forms.Form):
         ),
         label="Label Répar’Acteurs",
         help_text=mark_safe(
-            "Afficher uniquement les artisans labellisés (uniquement valable lorsque le"
-            " geste « réparer » est sélectionné). En savoir plus <a href="
-            '"https://www.artisanat.fr/nous-connaitre/vous-accompagner/reparacteurs"'
-            ' target="_blank" rel="noreferrer" title="sur le site de la CMA - Nouvelle'
-            ' fenêtre"> sur le site de la CMA</a>'
+            """Afficher uniquement les artisans labellisés
+            (uniquement valable lorsque le geste « réparer » est sélectionné).
+            Les <span
+                class="qfdmo-underline qfdmo-cursor-pointer"
+                title="Ouvre la modale Répar'Acteurs"
+                onclick="document
+                .getElementById('display_modale_reparacteur')
+                .setAttribute('data-fr-opened', 'true');"
+            >
+                Répar'Acteurs
+            </span>
+             sont une initiative de la
+            <a
+                href='https://www.artisanat.fr/nous-connaitre/vous-accompagner/reparacteurs'
+                target="_blank"
+                rel="noreferrer"
+                title="sur le site de la CMA - Nouvelle fenêtre"
+            >
+                Chambre des Métiers et de l’Artisanat
+            </a>"""
         ),
         label_suffix="",
         required=False,

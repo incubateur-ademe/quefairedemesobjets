@@ -63,6 +63,7 @@ module.exports = {
         "qfdmo-w-full",
         "qfdmo-text-white",
         "qfdmo-rounded-full",
+        "qfdmo-underline"
     ],
     theme: {
         colors: {
