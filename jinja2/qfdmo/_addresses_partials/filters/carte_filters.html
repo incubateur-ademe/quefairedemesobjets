@@ -10,7 +10,7 @@
     <input
         id="{{ form.direction.id_for_label}}"
         name="{{ form.direction.html_name}}"
-        value="{{ form.direction.value() }}"
+        value="{{ form.direction.value() or '' }}"
         type="hidden"
         data-search-solution-form-target="direction"
     >
