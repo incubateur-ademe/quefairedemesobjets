@@ -7,6 +7,13 @@
 {% endblock %}
 
 {% block filters_content %}
+    <input
+        id="{{ form.direction.id_for_label}}"
+        name="{{ form.direction.html_name}}"
+        value="{{ form.direction.value() or '' }}"
+        type="hidden"
+        data-search-solution-form-target="direction"
+    >
     {% with hidden=hide_object_filter(request) %}
         {% include 'qfdmo/_addresses_partials/filters/_object_filter.html' %}
     {% endwith %}

@@ -109,9 +109,6 @@ brown-cafe-creme-main-782, purple-glycine-main-494, green-menthe-main-548
     def __str__(self):
         return self.libelle
 
-    def serialize(self):
-        return model_to_dict(self, exclude=["directions"])
-
 
 class CachedDirectionAction:
     _cached_actions_by_direction = None

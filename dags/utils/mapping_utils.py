@@ -188,6 +188,15 @@ def combine_comments(existing_commentaires, new_commentaires):
     return json.dumps(combined_commentaires)
 
 
+def create_full_adresse(df):
+    return (
+        df["adresse"]
+        .fillna("")
+        .str.cat(df["code_postal"].fillna(""), sep=" ")
+        .str.cat(df["ville"].fillna(""), sep=" ")
+    )
+
+
 def replace_with_selected_candidat(row):
     row["adresse_candidat"] = None
     if "ae_result" in row:

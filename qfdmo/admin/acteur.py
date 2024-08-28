@@ -201,6 +201,7 @@ class BaseActeurAdmin(admin.GISModelAdmin):
         "cree_le",
         "modifie_le",
         "acteur_services",
+        "action_principale",
     )
 
     readonly_fields = [
@@ -336,11 +337,11 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
                     form_field.help_text += (
                         '<br>ENTREPRISE : <a href="https://'
                         f'annuaire-entreprises.data.gouv.fr/entreprise/{siren}"'
-                        ' target="_blank" rel="noopener" rel="noreferrer">'
+                        ' target="_blank" rel="noreferrer">'
                         f"https://annuaire-entreprises.data.gouv.fr/entreprise/{siren}"
                         '</a><br>ETABLISSEMENT : <a href="https://'
                         f'annuaire-entreprises.data.gouv.fr/etablissement/{siret}"'
-                        ' target="_blank" rel="noopener" rel="noreferrer">'
+                        ' target="_blank" rel="noreferrer">'
                         "https://annuaire-entreprises.data.gouv.fr/etablissement/"
                         f"{siret}</a>"
                     )
@@ -361,7 +362,7 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
                     ]
                     form_field.help_text += (
                         '<br><a href="https://google.com/maps/search/'
-                        f'{"+".join(google_adresse)}" target="_blank" rel="noopener"'
+                        f'{"+".join(google_adresse)}" target="_blank"'
                         ' rel="noreferrer">Voir l\'adresse sur Google Maps</a>'
                     )
 
@@ -470,6 +471,8 @@ class DisplayedActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
     resource_classes = [DisplayedActeurResource]
 
     def get_readonly_fields(self, request, obj=None):
+        if settings.DEBUG:
+            return list(super().get_readonly_fields(request, obj))
         return [f.name for f in self.model._meta.fields if f.name != "location"]
 
     def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
