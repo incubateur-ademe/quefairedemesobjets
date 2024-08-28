@@ -146,20 +146,19 @@ export default class extends Controller<HTMLElement> {
         this.searchFormTarget.scrollIntoView()
     }
 
-    hideAddressesPanel() {
+    #hideAddressesPanel() {
         this.backToSearchPanelTarget.classList.add("qfdmo-h-0", "qfdmo-invisible")
-        this.addressesPanelTarget.classList.remove("qfdmo-flex-grow")
+        this.addressesPanelTarget.dataset.visible = "false"
     }
 
-    showAddressesPanel() {
-        this.addressesPanelTarget.classList.add("qfdmo-flex-grow")
-        this.addressesPanelTarget.classList.remove("qfdmo-invisible", "qfdmo-h-0")
+    #showAddressesPanel() {
+        this.addressesPanelTarget.dataset.visible = "true"
     }
 
     backToSearch() {
         this.hideDetails()
         this.#showSearchFormPanel()
-        this.hideAddressesPanel()
+        this.#hideAddressesPanel()
         this.scrollToContent()
     }
 
@@ -446,6 +445,7 @@ export default class extends Controller<HTMLElement> {
     }
 
     #hideSearchFormPanel() {
+      this.searchFormPanelTarget.dataset.visible = "false"
         this.searchFormPanelTarget.classList.remove("qfdmo-flex-grow")
         this.searchFormPanelTarget.classList.add("qfdmo-h-0", "qfdmo-invisible")
     }
@@ -475,7 +475,7 @@ export default class extends Controller<HTMLElement> {
                 "qfdmo-h-0",
                 "qfdmo-invisible",
             )
-            this.showAddressesPanel()
+            this.#showAddressesPanel()
             this.scrollToContent()
         }
 
