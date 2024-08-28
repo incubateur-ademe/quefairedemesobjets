@@ -404,7 +404,7 @@ def create_actors(**kwargs):
         df = mapping_utils.process_actors(df)
 
     for old_col, new_col in column_mapping.items():
-        if new_col:
+        if old_col in df.columns and new_col:
             if old_col == "id":
                 df[new_col] = df["id"].astype(str)
             elif old_col == "is_enabled":
