@@ -144,6 +144,7 @@ def check_actor_with_adresse(**kwargs):
             "ae_result",
             "full_adresse",
             "source_code",
+            "naf_code",
         ]
     ]
 
@@ -227,6 +228,9 @@ def combine_actors(**kwargs):
                 )
                 > 0
             )
+        ]
+        df_non_empty_ae_results["naf_code"] = df_non_empty_ae_results[
+            "naf_code_adresse"
         ]
         df_empty_ae_results = df_bad_siret[
             df_bad_siret["ae_result"].apply(lambda x: len(x) == 0)
