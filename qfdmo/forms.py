@@ -148,7 +148,10 @@ class AdressesActionDirectionForm(forms.Form):
 
 
 class AdressesAdvancedFiltersForm(forms.Form):
-    form_template_name = "qfdmo/forms/advanced_filters.html"
+    # TODO : voir pourquoi cela ne fonctionne pas comme prévu
+    # ca render le nom de la variable du formulaire au lieu du formulaire lui-même...
+    # template_name = "qfdmo/forms/advanced_filters.html"
+
     pas_exclusivite_reparation = forms.BooleanField(
         widget=forms.CheckboxInput(
             attrs={
