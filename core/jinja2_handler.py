@@ -46,7 +46,8 @@ def action_by_direction(request: HttpRequest, direction: str):
 
 def display_infos_panel(adresse: DisplayedActeur) -> bool:
     return (
-        bool(adresse.horaires_description or adresse.adresse) and not adresse.is_digital
+        bool(adresse.horaires_description or adresse.display_postal_address())
+        and not adresse.is_digital
     )
 
 

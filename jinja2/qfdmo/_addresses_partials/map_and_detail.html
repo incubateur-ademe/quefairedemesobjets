@@ -183,7 +183,7 @@
                         <turbo-frame id="adr_detail"
                             data-search-solution-form-target="srcDetailsAddress"
                             {% if request.GET.get('detail') %}
-                                src="{{ url('qfdmo:adresse_detail', args=[request.GET.get('detail')])}}?{% if is_carte(request) %}carte=1&{% endif %}direction={{ direction }}&latitude={{ latitude }}&longitude={{ longitude }}"
+                                src="{{ url('qfdmo:adresse_detail', args=[request.GET.get('detail')])}}?{% if is_carte(request) %}carte=1&{% endif %}{% if direction %}direction={{ direction }}&{% endif %}latitude={{ latitude }}&longitude={{ longitude }}"
                             {% endif %}
                         >
                         </turbo-frame>

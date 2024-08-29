@@ -2,4 +2,7 @@ from django.conf import settings
 
 
 def environment(request):
-    return {"ENVIRONMENT": settings.ENVIRONMENT}
+    return {
+        "ENVIRONMENT": settings.ENVIRONMENT,
+        "DEBUG": settings.DEBUG,
+    }

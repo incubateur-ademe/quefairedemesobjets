@@ -238,6 +238,12 @@ export default class extends Controller<HTMLElement> {
             return
         }
         const direction = this.directionTarget
+        // In "La Carte" mode, the direction is a hidden input
+        if (direction instanceof HTMLInputElement) {
+            this.#selectedOption = direction.value
+            return
+        }
+        // In form mode, the direction is a fieldset
         const options = direction.getElementsByTagName("input")
         for (let i = 0; i < options.length; i++) {
             if (options[i].checked && options[i].value == "jai") {
