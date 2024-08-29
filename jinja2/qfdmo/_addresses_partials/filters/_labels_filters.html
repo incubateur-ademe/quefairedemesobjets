@@ -12,9 +12,7 @@
     {% endwith %}
 
     {% with field=form.label_reparacteur %}
-        {% with icon="qfdmo/partials/label_reparacteur_icon.html" %}
-            {% include "qfdmo/_addresses_partials/filters/_labels_filters_field.html" %}
-        {% endwith %}
+        {% include "qfdmo/_addresses_partials/filters/_labels_filters_field.html" %}
     {% endwith %}
 
     {% with field=form.pas_exclusivite_reparation %}
