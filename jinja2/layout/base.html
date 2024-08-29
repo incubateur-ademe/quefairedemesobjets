@@ -31,7 +31,10 @@
         {% endif %}
     </head>
 
-    <body class="qfdmo-flex qfdmo-flex-col">
+    <body
+        class="qfdmo-flex qfdmo-flex-col"
+        data-controller="analytics"
+    >
         {% if not is_embedded(request) %}
             {% block header %}
                 {% include "layout/header.html" %}
@@ -43,7 +46,7 @@
                     <div class="fr-alert fr-alert--error">
                         <h3 class="fr-alert__title">L'application nécessite Javascript pour être exécutée correctement</h3>
                         <p>Javascript est désactivé dans votre navigateur. Veuillez l'activer pour une meilleure expérience.</p>
-                        <p>Vous trouverez sur le lien suivant comment activer Javascript dans votre navigateur : <a href="https://www.enable-javascript.com/fr/" target="_blank" rel="noopener">https://www.enable-javascript.com/fr/</a></p>
+                        <p>Vous trouverez sur le lien suivant comment activer Javascript dans votre navigateur : <a href="https://www.enable-javascript.com/fr/" target="_blank" rel="noreferrer">https://www.enable-javascript.com/fr/</a></p>
                     </div>
                 </div>
             </noscript>

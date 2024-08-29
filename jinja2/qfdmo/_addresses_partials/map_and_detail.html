@@ -38,8 +38,9 @@
                 <div
                     class="qfdmo-flex-grow qfdmo-relative qfdmo-shadow"
                     data-controller="map"
+                    data-action="map:captureInteraction->analytics#captureInteractionWithMap"
                     data-map-location-value="{{ location }}"
-                >
+                    >
                     {{ form.bounding_box }}
                     <div id="map" class="qfdmo-absolute qfdmo-inset-0">
                     </div>
@@ -72,7 +73,7 @@
                             <a class="fr-mb-1w fr-btn fr-btn--tertiary qfdmo-whitespace-nowrap qfdmo-w-full qfdmo-flex qfdmo-justify-center"
                                 href="https://tally.so/r/wzy9ZZ"
                                 target="_blank"
-                                rel="noopener"
+                                rel="noreferrer"
                                 aria-label="Proposer une adresse - Nouvelle fenêtre"
                             >
                                 Proposer une adresse
@@ -134,7 +135,7 @@
                 <a class="fr-my-1w fr-btn fr-btn--tertiary qfdmo-whitespace-nowrap qfdmo-w-full sm:qfdmo-w-max qfdmo-flex qfdmo-justify-center"
                     href="https://tally.so/r/wzy9ZZ"
                     target="_blank"
-                    rel="noopener"
+                    rel="noreferrer"
                     aria-label="Proposer une adresse - Nouvelle fenêtre"
                 >
                     Proposer une adresse
@@ -161,7 +162,8 @@
                 </button>
                 <button class="fr-btn fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-arrow-up-s-line sm:qfdmo-hidden"
                     type='button'
-                    data-action="click -> search-solution-form#displayFullDetails"
+                    data-action="click -> search-solution-form#displayFullDetails
+                    click -> analytics#captureInteractionWithSolutionDetails"
                     data-search-solution-form-target="expandDetailsButton"
                     >
                     Ouvrir
@@ -181,7 +183,7 @@
                         <turbo-frame id="adr_detail"
                             data-search-solution-form-target="srcDetailsAddress"
                             {% if request.GET.get('detail') %}
-                                src="{{ url('qfdmo:adresse_detail', args=[request.GET.get('detail')])}}?{% if is_carte(request) %}carte=1&{% endif %}direction={{ direction }}&latitude={{ latitude }}&longitude={{ longitude }}"
+                                src="{{ url('qfdmo:adresse_detail', args=[request.GET.get('detail')])}}?{% if is_carte(request) %}carte=1&{% endif %}{% if direction %}direction={{ direction }}&{% endif %}latitude={{ latitude }}&longitude={{ longitude }}"
                             {% endif %}
                         >
                         </turbo-frame>

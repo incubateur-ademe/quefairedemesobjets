@@ -59,5 +59,6 @@ export default class extends Controller<HTMLElement> {
         this.dispatch("setSrcDetailsAddress", {
             detail: { identifiantUnique: identifiantUnique },
         })
+        this.dispatch("captureInteraction")
     }
 }
