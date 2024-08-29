@@ -21,7 +21,11 @@ from django.views.decorators.http import require_GET
 from django.views.generic.edit import FormView
 
 from core.utils import get_direction
-from qfdmo.forms import CarteAddressesForm, IframeAddressesForm
+from qfdmo.forms import (
+    AdressesAdvancedFiltersForm,
+    CarteAddressesForm,
+    IframeAddressesForm,
+)
 from qfdmo.models import (
     Acteur,
     ActeurStatus,
@@ -39,9 +43,14 @@ logger = logging.getLogger(__name__)
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
 
 
-class FormulaireView(FormView):
-    # TODO
-    pass
+class AdressesFormulaireView(FormView):
+    form_class = IframeAddressesForm
+    template_name = "qfdmo/adresses.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["advanced_filters_form"] = AdressesAdvancedFiltersForm(self.request.GET)
+        return context
 
 
 class FormulaireResultatsView(FormView):
@@ -66,7 +75,7 @@ class CarteResultatsView(FormView):
 
 class AddressesView(FormView):
     form_class = IframeAddressesForm
-    template_name = "qfdmo/adresses.html"
+    template_name = "qfdmo/adresses_legacy.html"
 
     def get_form_class(self) -> type:
         # TODO : découper en plusieurs vues pour éviter cette fonction

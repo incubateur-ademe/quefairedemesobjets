@@ -217,7 +217,7 @@ export default class extends Controller<HTMLElement> {
         this.displayDetails()
     }
     setSrcDetailsAddress({ detail: { identifiantUnique } }) {
-        // TODO : gérer ça côté template / python
+        // DEPRECATED / TODO : gérer ça côté template / python
         const latitude = this.latitudeInputTarget.value
         const longitude = this.longitudeInputTarget.value
 
@@ -404,6 +404,8 @@ export default class extends Controller<HTMLElement> {
     }
 
     advancedSubmit(event: Event) {
+      // DEPRECATED : devrait être fit en python
+      // on peut réagir à l'event submit pour déclencher des animations etc
         const withControls =
             (event.target as HTMLElement).dataset.withControls?.toLowerCase() === "true"
         if (withControls) {

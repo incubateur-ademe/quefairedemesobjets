@@ -1,0 +1,65 @@
+{# Panel «Filtres avancés» #}
+<div class='fr-container qfdmo-px-0 qfdmo-absolute qfdmo-inset-0 qfdmo-font-black qfdmo-z-[10010] qfdmo-flex-col qfdmo-hidden'
+    data-search-solution-form-target="advancedFiltersMainPanel"
+>
+    <div class="qfdmo-flex-grow qfdmo-bg-black qfdmo-opacity-20"></div>
+    <div class="qfdmo-bg-white qfdmo-duration-300 qfdmo-h-0" data-search-solution-form-target="advancedFiltersFormPanel">
+        <div class="fr-container fr-container--fluid qfdmo-h-full">
+            <div class="qfdmo-h-full qfdmo-flex qfdmo-flex-col">
+                <div class="fr-modal__header">
+                    <button
+                        class="fr-btn fr-btn--close fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-close-line"
+                        type="button"
+                        data-action="click -> search-solution-form#toggleAdvancedFiltersWithoutSubmitButton"
+                        >
+                        Fermer
+                    </button>
+                </div>
+                <div class="fr-modal__content fr-text--normal qfdmo-overflow-y-auto qfdmo-flex-grow  qfdmo-font-normal">
+
+                    {% block filters_title %}
+                        <h4 class="fr-mt-3w qfdmo-text-center">
+                            Filtres avancés
+                        </h4>
+                    {% endblock %}
+                    <hr>
+
+                    {% block filters_content %}
+                        {{ advanced_filters_form }}
+                    {% endblock %}
+                </div>
+                <div class="fr-modal__footer qfdmo-flex qfdmo-flex-col">
+                    <div
+                        class="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg fr-btns-group--icon-left"
+                        data-search-solution-form-target="advancedFiltersSaveButton"
+                    >
+                        <button
+                            class="fr-btn"
+                            type="button"
+                            data-action="click -> search-solution-form#toggleAdvancedFiltersWithoutSubmitButton"
+                            >
+                            Enregistrer les filtres
+                        </button>
+                    </div>
+                    <div
+                        class="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg fr-btns-group--icon-left"
+                        data-search-solution-form-target="advancedFiltersSaveAndSubmitButton"
+                    >
+                        <button
+                            class="fr-btn"
+                            type="button"
+                            data-action="click -> search-solution-form#advancedSubmit"
+                            data-without-zone="false"
+                            data-with-controls="true"
+                            data-toggle-advanced-filters="true"
+                            >
+                            Appliquer
+                        </button>
+                    </div>
+                    {% block filters_footer_links %}
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

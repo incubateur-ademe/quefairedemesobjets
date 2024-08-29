@@ -1,3 +1,4 @@
+from random import randint
 from django import forms
 from django.http import HttpRequest
 from django.utils.safestring import mark_safe
@@ -50,12 +51,7 @@ class DSFRCheckboxSelectMultiple(forms.CheckboxSelectMultiple):
     option_template_name = "django/forms/widgets/checkbox_option.html"
 
 
-class AddressesForm(forms.Form):
-    # TODO : découper en plusieurs formulaires
-    def load_choices(self, request: HttpRequest) -> None:
-        pass
-
-    # TODO : déplacer dans formulaire Formulaire (...)
+class AdressesMainForm(forms.Form):
     bounding_box = forms.CharField(
         widget=forms.HiddenInput(
             attrs={
@@ -66,7 +62,6 @@ class AddressesForm(forms.Form):
         required=False,
     )
 
-    # TODO : déplacer dans formulaire Formulaire (...)
     sous_categorie_objet = forms.ModelChoiceField(
         queryset=SousCategorieObjet.objects.all(),
         widget=AutoCompleteInput(
@@ -83,7 +78,6 @@ class AddressesForm(forms.Form):
         required=False,
     )
 
-    # TODO : déplacer dans formulaire Formulaire (...)
     sc_id = forms.IntegerField(
         widget=forms.HiddenInput(
             attrs={
@@ -94,7 +88,6 @@ class AddressesForm(forms.Form):
         required=False,
     )
 
-    # TODO : déplacer dans formulaire Formulaire (...)
     latitude = forms.FloatField(
         widget=forms.HiddenInput(
             attrs={
@@ -105,7 +98,6 @@ class AddressesForm(forms.Form):
         required=False,
     )
 
-    # TODO : déplacer dans formulaire Formulaire (...)
     longitude = forms.FloatField(
         widget=forms.HiddenInput(
             attrs={
@@ -116,7 +108,18 @@ class AddressesForm(forms.Form):
         required=False,
     )
 
-    # TODO : déplacer dans formulaire Formulaire (...)
+    # Feature flip
+    is_iframe = forms.BooleanField(widget=forms.HiddenInput(), required=False)
+    is_carte = forms.BooleanField(widget=forms.HiddenInput(), required=False)
+    # <input type="hidden" name="carte" data-search-solution-form-target='carte'>
+    limit = forms.IntegerField(widget=forms.HiddenInput(), required=False)
+    address_placeholder = forms.CharField(widget=forms.HiddenInput, required=False)
+    # TODO: ca sert à quoi ?
+    r = forms.IntegerField(widget=forms.HiddenInput, initial=randint(0, 1000))
+    first_dir = forms.CharField(widget=forms.HiddenInput, required=False)
+
+
+class AdressesActionDirectionForm(forms.Form):
     direction = forms.ChoiceField(
         widget=SegmentedControlSelect(
             attrs={
@@ -131,7 +134,21 @@ class AddressesForm(forms.Form):
         label="Direction des actions",
         required=False,
     )
+    action_list = forms.CharField(
+        widget=forms.HiddenInput(
+            attrs={"data-search-solution-form-target": "actionList"},
+        ),
+        required=False,
+    )
 
+    action_displayed = forms.CharField(
+        widget=forms.HiddenInput(),
+        required=False,
+    )
+
+
+class AdressesAdvancedFiltersForm(forms.Form):
+    form_template_name = "qfdmo/forms/advanced_filters.html"
     pas_exclusivite_reparation = forms.BooleanField(
         widget=forms.CheckboxInput(
             attrs={
@@ -220,18 +237,8 @@ class AddressesForm(forms.Form):
         required=False,
     )
 
-    action_list = forms.CharField(
-        widget=forms.HiddenInput(
-            attrs={"data-search-solution-form-target": "actionList"},
-        ),
-        required=False,
-    )
 
-    action_displayed = forms.CharField(
-        widget=forms.HiddenInput(),
-        required=False,
-    )
-
+class AdressesHeaderForm(forms.Form):
     digital = forms.ChoiceField(
         widget=SegmentedControlSelect(
             attrs={
@@ -260,17 +267,17 @@ class AddressesForm(forms.Form):
     )
 
 
-class IframeAddressesForm(AddressesForm):
-    def load_choices(self, request: HttpRequest) -> None:
-        first_direction = request.GET.get("first_dir")
-        self.fields["direction"].choices = [
-            [direction["code"], direction["libelle"]]
-            for direction in CachedDirectionAction.get_directions(
-                first_direction=first_direction
-            )
-        ]
-        if address_placeholder := request.GET.get("address_placeholder"):
-            self.fields["adresse"].widget.attrs["placeholder"] = address_placeholder
+class IframeAddressesForm(AdressesMainForm):
+    # def load_choices(self, request: HttpRequest) -> None:
+    #     first_direction = request.GET.get("first_dir")
+    #     self.fields["direction"].choices = [
+    #         [direction["code"], direction["libelle"]]
+    #         for direction in CachedDirectionAction.get_directions(
+    #             first_direction=first_direction
+    #         )
+    #     ]
+    #     if address_placeholder := request.GET.get("address_placeholder"):
+    #         self.fields["adresse"].widget.attrs["placeholder"] = address_placeholder
 
     adresse = forms.CharField(
         widget=AutoCompleteInput(
@@ -287,7 +294,7 @@ class IframeAddressesForm(AddressesForm):
     )
 
 
-class CarteAddressesForm(AddressesForm):
+class CarteAddressesForm(AdressesMainForm):
     def load_choices(
         self,
         request: HttpRequest,
