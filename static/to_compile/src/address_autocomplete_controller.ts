@@ -45,6 +45,37 @@ export default class extends AutocompleteController {
             })
     }
 
+    async searchAndSubmit(): Promise<void> {
+        const inputTargetValue = this.inputTarget.value
+        const val = this.addAccents(inputTargetValue)
+        const regexPattern = new RegExp(val, "gi")
+
+        if (!val) this.closeAllLists()
+
+        let countResult = 0
+
+        return this.#getOptionCallback(inputTargetValue)
+            .then((data) => {
+                if (data.length > 1) {
+                    const [adresse, latitude, longitude] = data[1].split(SEPARATOR)
+                    console.log("adresse : ", adresse)
+                    console.log("longitude : ", longitude)
+                    console.log("latitude : ", latitude)
+                    this.inputTarget.value = adresse
+                    this.latitudeTarget.value = latitude
+                    this.longitudeTarget.value = longitude
+                    this.#hideInputError()
+                    this.dispatch("optionSelected")
+                    this.dispatch("formSubmit")
+                    return
+                }
+            })
+            .then(() => {
+                this.spinnerTarget.classList.add("qfdmo-hidden")
+                return
+            })
+    }
+
     selectOption(event: Event) {
         let target = event.target as HTMLElement
         while (target && target.nodeName !== "DIV") {
@@ -81,6 +112,10 @@ export default class extends AutocompleteController {
                             .then(() => {
                                 this.dispatch("optionSelected")
                             })
+                            .then(() => {
+                                // TODO : ajout d'une condition pour submit après sélection si selon une value du controller
+                                this.dispatch("formSubmit")
+                            })
                             .catch((error) => {
                                 console.error("error catched : ", error)
                                 this.hideSpinner()
@@ -96,6 +131,8 @@ export default class extends AutocompleteController {
             if (longitude) this.longitudeTarget.value = longitude
             if (latitude) this.latitudeTarget.value = latitude
             this.dispatch("optionSelected")
+            // TODO : ajout d'une condition pour submit après sélection si selon une value du controller
+            this.dispatch("formSubmit")
         }
         this.closeAllLists()
     }

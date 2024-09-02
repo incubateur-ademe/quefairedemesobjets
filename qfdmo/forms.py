@@ -28,7 +28,7 @@ class AutoCompleteInput(forms.TextInput):
 
 
 class AutoCompleteAndSearchInput(AutoCompleteInput):
-    template_name = "django/forms/widgets/autocomplete_and_search.html"
+    template_name = "django/forms/widgets/autocomplete.html"
 
     def __init__(self, attrs=None, btn_attrs={}, **kwargs):
         self.btn_attrs = btn_attrs
@@ -324,7 +324,7 @@ class CarteAddressesForm(AddressesForm):
             },
             data_controller="address-autocomplete",
             btn_attrs={
-                "data-action": "click -> search-solution-form#advancedSubmit",
+                "data-action": "click -> address-autocomplete#searchAndSubmit",
                 "type": "button",
                 "data-without-zone": "true",
             },
