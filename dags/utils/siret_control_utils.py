@@ -88,6 +88,10 @@ def set_cohort_id(row):
     )
 
     for index, candidate in enumerate(row["ae_result"]):
+        if candidate["siret_candidat"] is None:
+            continue
+        candidate_siren = candidate["siret_candidat"][:9]
+
         nom_match_strength = fuzz.ratio(candidate["nom_candidat"], current_nom)
         adresse_lvao_match_ratio = fuzz.ratio(
             candidate["adresse_candidat"], current_adresse_lvao
@@ -95,7 +99,6 @@ def set_cohort_id(row):
         adresse_ae_match_ratio = fuzz.ratio(
             candidate["adresse_candidat"], current_adresse_ae
         )
-        candidate_siren = candidate["siret_candidat"][:9]
         if current_siret is None:
             best_outcome = "empty_siret"
             best_candidate_index = index
