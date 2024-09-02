@@ -133,6 +133,21 @@ export class SolutionMap {
             points.push([this.#location.latitude, this.#location.longitude])
         }
 
+        this.createObserver(points, bboxValue)
+    }
+    createObserver(points, bboxValue) {
+        const mapContainer = this.#map.getContainer()
+        const observer = new ResizeObserver((entries) => {
+            for (const entry of entries) {
+              console.log(entry.contentBoxSize)
+              this.#map.invalidateSize()
+                this.fitBounds(points, bboxValue)
+            }
+        })
+        observer.observe(mapContainer)
+    }
+
+    fitBounds(points, bboxValue) {
         if (bboxValue !== undefined) {
             this.#map.fitBounds([
                 [bboxValue.southWest.lat, bboxValue.southWest.lng],
