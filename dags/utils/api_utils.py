@@ -73,71 +73,75 @@ def call_annuaire_entreprises(query, adresse_query_flag=False, naf=None):
         if response.status_code == 200:
             data = response.json()
             if "results" in data and data["results"]:
-                data = data["results"][0]
-                nombre_etablissements_ouverts = data.get(
-                    "nombre_etablissements_ouverts"
-                )
-                if nombre_etablissements_ouverts == 1 and not adresse_query_flag:
-                    # Récupérer les informations du siège
-                    siege = data.get("siege", {})
-                    adresse_siege = siege.get("adresse")
-                    etat_admin_siege = siege.get("etat_administratif")
-                    siret_siege = siege.get("siret")
-                    categorie_naf_siege = siege.get("activite_principale")
-                    nom_candidat = siege.get("nom_commercial") or siege.get(
+                for result in data["results"]:
+                    nombre_etablissements_ouverts = result.get(
+                        "nombre_etablissements_ouverts"
+                    )
+                    nom_candidat = result.get("nom_commercial") or result.get(
                         "nom_complet"
                     )
-                    latitude = siege.get("latitude")
-                    longitude = siege.get("longitude")
 
-                    res.append(
-                        {
-                            "adresse_candidat": adresse_siege,
-                            "etat_admin_candidat": etat_admin_siege,
-                            "categorie_naf_candidat": categorie_naf_siege,
-                            "siret_candidat": siret_siege,
-                            "nom_candidat": nom_candidat,
-                            "latitude_candidat": latitude,
-                            "longitude_candidat": longitude,
-                            "siege_flag": True,
-                            "nombre_etablissements_ouver"
-                            "ts": nombre_etablissements_ouverts,
-                            "search_by_siret_candidat": False,
-                        }
-                    )
-                # Récupérer les informations du premier candidat ouvert
-                matching_etablissements = data.get("matching_etablissements", [])
-                if matching_etablissements:
-                    premier_etablissement = matching_etablissements[0]
-                    etat_admin_candidat = premier_etablissement.get(
-                        "etat_administratif"
-                    )
-                    categorie_naf_candidat = premier_etablissement.get(
-                        "activite_principale"
-                    )
-                    siret_candidat = premier_etablissement.get("siret")
-                    adresse_candidat = premier_etablissement.get("adresse")
-                    nom_candidat = premier_etablissement.get("nom_commercial")
-                    latitude = premier_etablissement.get("latitude")
-                    longitude = premier_etablissement.get("longitude")
-                    search_by_siret_candidat = False
-                    if not adresse_query_flag:
-                        search_by_siret_candidat = True
-                    res.append(
-                        {
-                            "adresse_candidat": adresse_candidat,
-                            "etat_admin_candidat": etat_admin_candidat,
-                            "categorie_naf_candidat": categorie_naf_candidat,
-                            "siret_candidat": siret_candidat,
-                            "nom_candidat": nom_candidat,
-                            "latitude_candidat": latitude,
-                            "longitude_candidat": longitude,
-                            "nombre_etablisseme"
-                            "nts_ouverts": nombre_etablissements_ouverts,
-                            "siege_flag": False,
-                            "search_by_siret_candidat": search_by_siret_candidat,
-                        }
-                    )
+                    nature_juridique_candidat = result.get("nature_juridique")
+                    if nombre_etablissements_ouverts == 1 and not adresse_query_flag:
+
+                        adresse_siege = result.get("adresse")
+                        etat_admin_siege = result.get("etat_administratif")
+                        siret_siege = result.get("siret")
+                        categorie_naf_siege = result.get("activite_principale")
+
+                        latitude = result.get("latitude")
+                        longitude = result.get("longitude")
+
+                        res.append(
+                            {
+                                "adresse_candidat": adresse_siege,
+                                "etat_admin_candidat": etat_admin_siege,
+                                "categorie_naf_candidat": categorie_naf_siege,
+                                "siret_candidat": siret_siege,
+                                "nom_candidat": nom_candidat,
+                                "nature_juridique": nature_juridique_candidat,
+                                "latitude_candidat": latitude,
+                                "longitude_candidat": longitude,
+                                "siege_flag": True,
+                                "nombre_etablissements_ouver"
+                                "ts": nombre_etablissements_ouverts,
+                                "search_by_siret_candidat": False,
+                            }
+                        )
+                    # Récupérer les informations du premier candidat ouvert
+                    matching_etablissements = result.get("matching_etablissements", [])
+                    if matching_etablissements:
+                        premier_etablissement = matching_etablissements[0]
+                        etat_admin_candidat = premier_etablissement.get(
+                            "etat_administratif"
+                        )
+                        categorie_naf_candidat = premier_etablissement.get(
+                            "activite_principale"
+                        )
+                        siret_candidat = premier_etablissement.get("siret")
+                        adresse_candidat = premier_etablissement.get("adresse")
+                        latitude = premier_etablissement.get("latitude")
+                        longitude = premier_etablissement.get("longitude")
+                        search_by_siret_candidat = False
+
+                        if not adresse_query_flag:
+                            search_by_siret_candidat = True
+                        res.append(
+                            {
+                                "adresse_candidat": adresse_candidat,
+                                "etat_admin_candidat": etat_admin_candidat,
+                                "categorie_naf_candidat": categorie_naf_candidat,
+                                "siret_candidat": siret_candidat,
+                                "nom_candidat": nom_candidat,
+                                "nature_juridique_candidat": nature_juridique_candidat,
+                                "latitude_candidat": latitude,
+                                "longitude_candidat": longitude,
+                                "nombre_etablisseme"
+                                "nts_ouverts": nombre_etablissements_ouverts,
+                                "siege_flag": False,
+                                "search_by_siret_candidat": search_by_siret_candidat,
+                            }
+                        )
 
                 return res
             else:

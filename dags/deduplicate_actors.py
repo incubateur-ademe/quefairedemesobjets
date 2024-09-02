@@ -28,7 +28,7 @@ default_args = {
 }
 
 dag = DAG(
-    utils.get_dag_name(__file__, "annuaire_entreprise_checks"),
+    utils.get_dag_name(__file__, "deduplicate_actors"),
     default_args=default_args,
     params={
         "limit": Param(0, type="integer", description="Limit for data processed"),
@@ -39,7 +39,6 @@ dag = DAG(
             "Association des Ludothèques Françaises": "91.01Z,93.29Z",
             "ALIAPUR": "45.31Z",
         },
-        "source_code_nature_juridique": {"Ordre National Des Pharmaciens": "5485"},
     },
     description=(
         "A pipeline to apply checks using annuaire entreprise "
@@ -123,13 +122,11 @@ def fetch_and_parse_data(**context):
 def check_actor_with_adresse(**kwargs):
     data = kwargs["ti"].xcom_pull(task_ids="load_and_filter_actors_data")
     source_code_naf = kwargs["params"]["source_code_naf"]
-    source_code_nature_juridique = kwargs["params"]["source_code_nature_juridique"]
     df_ok_siret_ok_adresse = data["closed_ok_siret"]
     df_nok_siret_ok_adresse = data["nok_siret_ok_adresse"]
     df = pd.concat([df_ok_siret_ok_adresse, df_nok_siret_ok_adresse])
     df["full_adresse"] = mapping_utils.create_full_adresse(df)
     df["naf_code"] = df["source_code"].map(source_code_naf)
-    df["nature_juridique"] = df["source_code"].map(source_code_nature_juridique)
 
     df["ae_result"] = df.apply(
         lambda x: utils.check_siret_using_annuaire_entreprise(
@@ -148,7 +145,6 @@ def check_actor_with_adresse(**kwargs):
             "full_adresse",
             "source_code",
             "naf_code",
-            "nature_juridique",
         ]
     ]
 
@@ -233,30 +229,21 @@ def combine_actors(**kwargs):
                 > 0
             )
         ]
-        df_non_empty_ae_results = df_non_empty_ae_results.apply(
-            siret_control_utils.set_best_candidat_for_siretisation, axis=1
-        )
+        df_non_empty_ae_results["naf_code"] = df_non_empty_ae_results[
+            "naf_code_adresse"
+        ]
         df_empty_ae_results = df_bad_siret[
             df_bad_siret["ae_result"].apply(lambda x: len(x) == 0)
         ]
-        for (
-            source_code,
-            source_code_naf,
-            nature_juridique,
-            matched,
-        ), group in df_non_empty_ae_results.groupby(
+        for (source_code, source_code_naf), group in df_non_empty_ae_results.groupby(
             [
                 df_non_empty_ae_results["source_code"].fillna("None"),
-                df_non_empty_ae_results["best_candidate_naf_code"].fillna("None"),
-                df_non_empty_ae_results["best_candidate_nature_juridique"].fillna(
-                    "None"
-                ),
-                df_non_empty_ae_results["matched"],
+                df_non_empty_ae_results["naf_code"].fillna("None"),
             ]
         ):
             cohort_name = (
                 f"siretitsation_with_adresse_bad_siret_source_"
-                f"{source_code}_naf_{source_code_naf}_legalnature_{nature_juridique}_matched_{matched}"
+                f"{source_code}_naf_{source_code_naf}"
             )
             cohort_dfs[cohort_name] = group
 
@@ -270,6 +257,7 @@ def combine_actors(**kwargs):
     )
     df = df[df["statut"] == "SUPPRIME"]
     if len(df) > 0:
+
         df["cohort_id"] = df.apply(siret_control_utils.set_cohort_id, axis=1)
     else:
         return cohort_dfs

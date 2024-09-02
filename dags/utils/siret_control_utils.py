@@ -2,6 +2,56 @@ import pandas as pd
 from fuzzywuzzy import fuzz
 
 
+def set_best_candidat_for_siretisation(row):
+    best_candidate = None
+    max_conditions_met = 0
+
+    for candidate in row["ae_result"]:
+        candidate["used_for_decision"] = False
+
+        adresse_match = (
+            fuzz.ratio(candidate["adresse_candidat"], row["full_adresse"]) >= 70
+        )
+        naf_match = (
+            row["naf_code"] is not None
+            and candidate["categorie_naf_candidat"] == row["naf_code"]
+        )
+        nature_juridique_match = (
+            row["nature_juridique"] is not None
+            and candidate["nature_juridique_candidat"] == row["nature_juridique"]
+        )
+
+        conditions_met = (
+            int(adresse_match) + int(naf_match) + int(nature_juridique_match)
+        )
+
+        if conditions_met > max_conditions_met:
+            max_conditions_met = conditions_met
+            best_candidate = candidate
+
+            if max_conditions_met == 3:
+                break
+
+    if best_candidate is not None:
+        best_candidate["used_for_decision"] = True
+
+        if naf_match:
+            row["best_candidate_naf_code"] = best_candidate["categorie_naf_candidat"]
+        else:
+            row["best_candidate_naf_code"] = "other"
+
+        if nature_juridique_match:
+            row["best_candidate_nature_juridique"] = best_candidate[
+                "nature_juridique_candidat"
+            ]
+        else:
+            row["best_candidate_nature_juridique"] = "other"
+
+    row["matched"] = max_conditions_met > 0
+
+    return row
+
+
 def set_cohort_id(row):
     current_nom = row["nom"]
     current_adresse_ae = row["ae_adresse"]
@@ -12,6 +62,7 @@ def set_cohort_id(row):
     current_siret_size = None
     if current_siret is not None:
         current_siret_size = len(current_siret.strip())
+    if current_siret_size >= 9:
         current_siren = current_siret[:9]
     priorities = {
         "empty_siret": 12,
