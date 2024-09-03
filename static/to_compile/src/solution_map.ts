@@ -137,12 +137,29 @@ export class SolutionMap {
     }
     createObserver(points, bboxValue) {
         const mapContainer = this.#map.getContainer()
+        let count = 0
         const observer = new ResizeObserver((entries) => {
-            for (const entry of entries) {
-              console.log(entry.contentBoxSize)
-              this.#map.invalidateSize()
+          let blockSize = 0
+          for (const entry of entries) {
+            console.log(entry.contentBoxSize, count)
+            // We let some time to the map container to draw and find
+            // its size before we fit its content to its container.
+            // What we expect :
+            // - In case the iframe is hidden, in an accordion for example,
+            //   it is displayed after a user interaction that triggers a transition.
+            //   To prevent several redraws of the map if its still animated,
+            //   we let it sit for 300ms before and we check if its size changed.
+            //   if it did not : then we call the fitBounds method to resize
+            //   map's content.
+            blockSize = entry.contentBoxSize.blockSize
+            setTimeout(() => {
+              if (entry.contentBoxSize.blockSize === blockSize) {
+                this.#map.invalidateSize()
                 this.fitBounds(points, bboxValue)
-            }
+                count += 1
+              }
+            }, 300)
+          }
         })
         observer.observe(mapContainer)
     }
