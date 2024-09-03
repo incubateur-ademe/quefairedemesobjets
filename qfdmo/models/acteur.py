@@ -452,11 +452,11 @@ class DisplayedActeur(BaseActeur):
         verbose_name = "ACTEUR de l'EC - AFFICHÉ"
         verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ"
 
-    acteur_sources = models.ManyToManyField(
+    # Table name qfdmo_displayedacteur_sources
+    sources = models.ManyToManyField(
         Source,
         blank=True,
-        through="ActeurActeurSource",
-        related_name="related_displayed_acteurs",
+        related_name="displayed_acteurs",
     )
 
     def acteur_actions(self, direction=None):
@@ -532,11 +532,12 @@ class DisplayedActeurTemp(BaseActeur):
         through="ActeurActeurService",
     )
 
-    acteur_sources = models.ManyToManyField(
+    # Table name qfdmo_displayedacteurtemp_sources
+    sources = models.ManyToManyField(
         Source,
         blank=True,
-        through="ActeurActeurSourceTemp",
-        related_name="related_displayed_acteur_temps",
+        through="ActeurSource",
+        related_name="displayed_acteur_temps",
     )
 
     class ActeurLabelQualite(models.Model):
@@ -571,39 +572,22 @@ class DisplayedActeurTemp(BaseActeur):
             db_column="acteurservice_id",
         )
 
+    class ActeurSource(models.Model):
+        class Meta:
+            db_table = "qfdmo_displayedacteurtemp_sources"
+            unique_together = ("acteur_id", "source_id")
 
-class ActeurActeurSource(models.Model):
-    class Meta:
-        db_table = "qfdmo_displayedacteur_acteur_sources"
-        unique_together = ("displayed_acteur", "source")
-
-    id = models.AutoField(primary_key=True)
-    displayed_acteur = models.ForeignKey(
-        "DisplayedActeur",
-        on_delete=models.CASCADE,
-        related_name="acteur_source_relations",
-        db_column="displayedacteur_id",
-    )
-    source = models.ForeignKey(
-        Source, on_delete=models.CASCADE, related_name="displayed_acteur_sources"
-    )
-
-
-class ActeurActeurSourceTemp(models.Model):
-    class Meta:
-        db_table = "qfdmo_displayedacteur_acteur_sources_temp"
-        unique_together = ("displayed_acteur_temp", "source")
-
-    id = models.AutoField(primary_key=True)
-    displayed_acteur_temp = models.ForeignKey(
-        "DisplayedActeurTemp",
-        on_delete=models.CASCADE,
-        related_name="acteur_source_temp_relations",
-        db_column="displayedacteur_id",
-    )
-    source = models.ForeignKey(
-        Source, on_delete=models.CASCADE, related_name="displayed_acteur_temp_sources"
-    )
+        id = models.AutoField(primary_key=True)
+        acteur = models.ForeignKey(
+            "DisplayedActeurTemp",
+            on_delete=models.CASCADE,
+            db_column="displayedacteur_id",
+        )
+        source = models.ForeignKey(
+            Source,
+            on_delete=models.CASCADE,
+            related_name="source_id",
+        )
 
 
 class BasePropositionService(models.Model):

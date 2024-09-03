@@ -529,6 +529,11 @@ class DisplayedActeurResource(ActeurResource):
 class DisplayedActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
     change_form_template = "admin/displayed_acteur/change_form.html"
     gis_widget = CustomOSMWidget
+    base_fields = list(BaseActeurAdmin.fields)
+    base_fields.remove("source")
+    base_fields.insert(1, "sources")
+    fields = base_fields
+
     inlines = [
         DisplayedPropositionServiceInline,
         DisplayedActeurLabelQualiteInline,

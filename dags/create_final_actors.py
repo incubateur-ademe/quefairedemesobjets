@@ -196,8 +196,8 @@ def write_data_to_postgres(**kwargs):
     original_table_name_acteur_services = "qfdmo_displayedacteur_acteur_services"
     temp_table_name_acteur_services = "qfdmo_displayedacteurtemp_acteur_services"
 
-    original_table_name_sources = "qfdmo_displayedacteur_acteur_sources"
-    temp_table_name_sources = "qfdmo_displayedacteur_acteur_sources_temp"
+    original_table_name_sources = "qfdmo_displayedacteur_sources"
+    temp_table_name_sources = "qfdmo_displayedacteurtemp_sources"
 
     original_table_name_ps = "qfdmo_displayedpropositionservice"
     temp_table_name_ps = "qfdmo_displayedpropositionservicetemp"
