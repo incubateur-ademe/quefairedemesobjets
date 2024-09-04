@@ -84,7 +84,7 @@
                     {% endif %}
                     {% with address_ok=(form.initial.adresse or form.initial.bounding_box or acteurs) %}
                         <div
-                            class="qfdmo-absolute qfdmo-top-1w qfdmo-bottom-1w qfdmo-left-1w qfdmo-right-1w qfdmo-z-[3000]{% if address_ok %} qfdmo-hidden{% endif %} qfdmo-flex qfdmo-flex-row qfdmo-justify-center qfdmo-border qfdmo-border-grey-900 qfdmo-border-solid"
+                            class="qfdmo-absolute qfdmo-top-1w qfdmo-bottom-1w qfdmo-left-1w qfdmo-right-1w qfdmo-z-[4000]{% if address_ok %} qfdmo-hidden{% endif %} qfdmo-flex qfdmo-flex-row qfdmo-justify-center qfdmo-border qfdmo-border-grey-900 qfdmo-border-solid"
                             data-search-solution-form-target="addressMissing"
                         >
                             <picture>
@@ -104,7 +104,7 @@
                                     Saisissez une adresse et recherchez des établissements à proximité qui vous aideront à remettre votre objet en circulation.</p>
                             </div>
                             <div
-                                class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-80 qfdmo-font-black qfdmo-z-[3000] {% if acteurs or not address_ok %} qfdmo-hidden{% endif %}"
+                                class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-80 qfdmo-font-black qfdmo-z-[4000] {% if acteurs or not address_ok %} qfdmo-hidden{% endif %}"
                                 data-search-solution-form-target="NoLocalSolution"
                             >
                                 <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl sm:qfdmo-text-4xl qfdmo-text-center">
@@ -123,7 +123,7 @@
         </div>
         <div
             data-search-solution-form-target="loadingSolutions"
-            class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-90 qfdmo-font-black qfdmo-z-[3000] qfdmo-hidden"
+            class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-90 qfdmo-font-black qfdmo-z-[4000] qfdmo-hidden"
         >
             <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl sm:qfdmo-text-4xl ">
                 <span class="fr-icon-refresh-line qfdmo-animate-spin"></span>
@@ -147,7 +147,7 @@
     {# Détail de l'adresse #}
     <div
         data-search-solution-form-target="detailsAddressPanel"
-        class="qfdmo-overflow-hidden qfdmo-duration-300 qfdmo-bg-white qfdmo-z-10
+        class="qfdmo-overflow-hidden qfdmo-duration-300 qfdmo-bg-white qfdmo-z-[3000]
         qfdmo-w-full {% if request.GET.get('detail') %} qfdmo-h-1/2 {% else %} qfdmo-h-0 {% endif %}
         sm:qfdmo-h-full {% if request.GET.get('detail') %} sm:qfdmo-w-[480] {% else %} sm:qfdmo-w-0 {% endif %}"
     >
