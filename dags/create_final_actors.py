@@ -21,39 +21,43 @@ def read_data_from_postgres(**kwargs):
 
 def apply_corrections(**kwargs):
 
-    df_normalized_actors = kwargs["ti"].xcom_pull(task_ids="load_actors")
-    df_manual_actor_updates = kwargs["ti"].xcom_pull(task_ids="load_revision_actors")
+    df_actors_sql = kwargs["ti"].xcom_pull(task_ids="load_actors")
+    df_revision_actors_sql = kwargs["ti"].xcom_pull(task_ids="load_revision_actors")
 
-    unique_parent_ids = df_manual_actor_updates["parent_id"].unique()
+    unique_parent_ids = df_revision_actors_sql["parent_id"].unique()
 
-    df_new_parents = df_manual_actor_updates[
-        df_manual_actor_updates["identifiant_unique"].isin(unique_parent_ids)
+    df_new_parents = df_revision_actors_sql[
+        df_revision_actors_sql["identifiant_unique"].isin(unique_parent_ids)
     ]
 
-    df_normalized_actors = df_normalized_actors.set_index("identifiant_unique")
-    df_manual_actor_updates = df_manual_actor_updates.set_index("identifiant_unique")
-    if "cree_le" in df_manual_actor_updates.columns:
-        df_manual_actor_updates = df_manual_actor_updates.drop(columns=["cree_le"])
-    df_normalized_actors.update(df_manual_actor_updates)
-    df_normalized_actors = pd.concat(
-        [df_normalized_actors, df_new_parents.set_index("identifiant_unique")]
+    df_actors_sql = df_actors_sql.set_index("identifiant_unique")
+    df_revision_actors_sql = df_revision_actors_sql.set_index("identifiant_unique")
+    if "cree_le" in df_revision_actors_sql.columns:
+        df_revision_actors_sql = df_revision_actors_sql.drop(columns=["cree_le"])
+    df_actors_sql.update(df_revision_actors_sql)
+    df_displayed_actors = pd.concat(
+        [df_actors_sql, df_new_parents.set_index("identifiant_unique")]
     )
-    parents = (
-        df_manual_actor_updates.reset_index()
+    children = (
+        df_revision_actors_sql.reset_index()
         .query("parent_id.notnull()")
         .drop_duplicates(subset=["parent_id", "identifiant_unique"])
         .rename(columns={"identifiant_unique": "child_id"})
     )
-    parents = pd.merge(
-        parents[["parent_id", "child_id"]],
-        df_normalized_actors.reset_index()[["identifiant_unique", "source_id"]],
+    children = pd.merge(
+        children[["parent_id", "child_id"]],
+        df_displayed_actors.reset_index()[["identifiant_unique", "source_id"]],
         left_on="child_id",
         right_on="identifiant_unique",
     ).rename(columns={"source_id": "child_source_id"})
 
+    df_displayed_actors = df_displayed_actors[
+        ~df_displayed_actors["identifiant_unique"].isin(children["child_id"].tolist())
+    ]
+
     return {
-        "df_normalized_actors": df_normalized_actors.reset_index(),
-        "parents": parents[["parent_id", "child_id", "child_source_id"]].reset_index(
+        "df_displayed_actors": df_displayed_actors.reset_index(),
+        "children": children[["parent_id", "child_id", "child_source_id"]].reset_index(
             drop=True
         ),
     }
@@ -116,14 +120,16 @@ def apply_corrections_ps(**kwargs):
 
 
 def deduplicate_proposition_services_and_sous_categories(**kwargs):
-    df_parents = kwargs["ti"].xcom_pull(task_ids="apply_corrections_actors")["parents"]
+    df_children = kwargs["ti"].xcom_pull(task_ids="apply_corrections_actors")[
+        "children"
+    ]
     data_task_ps = kwargs["ti"].xcom_pull(
         task_ids="apply_corrections_propositionservice"
     )
     df_ps_updated = data_task_ps["df_ps_updated"]
     df_sous_categories_updated = data_task_ps["df_sous_categories_updated"]
     df_joined = df_ps_updated.merge(
-        df_parents, left_on="acteur_id", right_on="child_id", how="inner"
+        df_children, left_on="acteur_id", right_on="child_id", how="inner"
     )
     df_joined_with_sous_categories = df_joined.merge(
         df_sous_categories_updated,
@@ -160,6 +166,20 @@ def deduplicate_proposition_services_and_sous_categories(**kwargs):
         ignore_index=True,
     )
 
+    children = df_children["child_id"].unique()
+
+    children_ps_ids = df_final_ps_updated[
+        df_final_ps_updated["acteur_id"].isin(children)
+    ]["id"].unique()
+
+    df_final_ps_updated = df_final_ps_updated[
+        ~df_final_ps_updated["acteur_id"].isin(children)
+    ]
+
+    df_final_sous_categories = df_final_sous_categories[
+        ~df_final_sous_categories["propositionservice_id"].isin(children_ps_ids)
+    ]
+
     return {
         "df_final_ps_updated": df_final_ps_updated,
         "df_final_sous_categories": df_final_sous_categories,
@@ -167,9 +187,9 @@ def deduplicate_proposition_services_and_sous_categories(**kwargs):
 
 
 def write_data_to_postgres(**kwargs):
-    df_normalized_corrected_actors = kwargs["ti"].xcom_pull(
-        task_ids="apply_corrections_actors"
-    )["df_normalized_actors"]
+    df_displayed_actors = kwargs["ti"].xcom_pull(task_ids="apply_corrections_actors")[
+        "df_displayed_actors"
+    ]
     df_labels_updated = kwargs["ti"].xcom_pull(task_ids="dedup_labels")
     df_acteur_services_updated = kwargs["ti"].xcom_pull(
         task_ids="dedup_acteur_services"
@@ -213,7 +233,7 @@ def write_data_to_postgres(**kwargs):
         conn.execute(f"DELETE FROM {temp_table_name_sources}")
         conn.execute(f"DELETE FROM {temp_table_name_actor}")
 
-        df_normalized_corrected_actors[
+        df_displayed_actors[
             [
                 "identifiant_unique",
                 "nom",
@@ -408,18 +428,18 @@ def deduplicate_acteur_serivces(**kwargs):
 
 def deduplicate_acteur_sources(**kwargs):
     data_actors = kwargs["ti"].xcom_pull(task_ids="apply_corrections_actors")
-    df_parents = data_actors["parents"]
-    df_normalized_actors = data_actors["df_normalized_actors"]
+    df_children = data_actors["children"]
+    df_displayed_actors = data_actors["df_displayed_actors"]
 
-    df_acteur_sources_without_parents = df_normalized_actors[
-        ~df_normalized_actors["identifiant_unique"].isin(df_parents["parent_id"])
+    df_acteur_sources_without_parents = df_displayed_actors[
+        ~df_displayed_actors["identifiant_unique"].isin(df_children["parent_id"])
     ][["identifiant_unique", "source_id"]]
 
     df_acteur_sources_without_parents = df_acteur_sources_without_parents.rename(
         columns={"identifiant_unique": "displayedacteur_id"}
     )
 
-    parents_df = df_parents[["parent_id", "child_source_id"]].drop_duplicates()
+    parents_df = df_children[["parent_id", "child_source_id"]].drop_duplicates()
 
     parents_df = parents_df.rename(
         columns={"parent_id": "displayedacteur_id", "child_source_id": "source_id"}
@@ -428,6 +448,10 @@ def deduplicate_acteur_sources(**kwargs):
     result_df = pd.concat(
         [df_acteur_sources_without_parents, parents_df], ignore_index=True
     )
+
+    result_df = result_df[
+        ~result_df["displayedacteur_id"].isin(df_children["child_id"].tolist())
+    ]
 
     return result_df
 
@@ -468,9 +492,11 @@ def _merge_acteurs_many2many_relationship(
 def _deduplicate_acteurs_many2many_relationship(
     merged_acteur_task_id: str, col: str, **kwargs: dict
 ):
-    df_parents = kwargs["ti"].xcom_pull(task_ids="apply_corrections_actors")["parents"]
+    df_children = kwargs["ti"].xcom_pull(task_ids="apply_corrections_actors")[
+        "children"
+    ]
     merged_acteur = kwargs["ti"].xcom_pull(task_ids=merged_acteur_task_id)
-    merged_df = df_parents.merge(
+    merged_df = df_children.merge(
         merged_acteur, left_on="child_id", right_on="displayedacteur_id", how="inner"
     )
     merged_df = merged_df.drop(columns=["displayedacteur_id"])
@@ -481,6 +507,9 @@ def _deduplicate_acteurs_many2many_relationship(
     final_df = pd.concat(
         [merged_acteur, deduped_df[["displayedacteur_id", col]]], ignore_index=True
     )
+    final_df = final_df[
+        ~final_df["displayedacteur_id"].isin(df_children["child_id"].tolist())
+    ]
 
     return final_df
 
