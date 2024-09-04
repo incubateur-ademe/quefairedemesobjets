@@ -5,16 +5,14 @@ import { Actor } from "./types"
 import { Map } from "leaflet"
 
 export default class extends Controller<HTMLElement> {
-    #map: Map
     static targets = ["acteur", "searchInZoneButton", "bbox"]
+    static values = { location: { type: Object, default: {} }, fitted: Boolean }
     declare readonly acteurTargets: Array<HTMLScriptElement>
     declare readonly searchInZoneButtonTarget: HTMLButtonElement
     declare readonly bboxTarget: HTMLInputElement
-
     declare readonly hasBboxTarget: boolean
-
-    static values = { location: { type: Object, default: {} } }
     declare readonly locationValue: object
+    fittedValue: boolean
 
     connect() {
         const actorsMap = new SolutionMap({
@@ -38,21 +36,21 @@ export default class extends Controller<HTMLElement> {
         }
 
         actorsMap.initEventListener()
-        this.#map = actorsMap.map
     }
+
     initialize() {
         this.mapChanged = debounce(this.mapChanged, 300).bind(this)
     }
 
     mapChanged(event: CustomEvent) {
         this.dispatch("updateBbox", { detail: event.detail })
-        if (this.#map.getContainer().dataset.fitted === "true") {
-            this.displaySearchInZoneButton()
-        }
+        this.displaySearchInZoneButton()
     }
 
     displaySearchInZoneButton() {
-        this.searchInZoneButtonTarget.classList.remove("qfdmo-hidden")
+        if (this.fittedValue) {
+            this.searchInZoneButtonTarget.classList.remove("qfdmo-hidden")
+        }
     }
 
     hideSearchInZoneButton() {

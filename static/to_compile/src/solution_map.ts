@@ -1,4 +1,4 @@
-import L from "leaflet"
+import L, { Map } from "leaflet"
 import "leaflet-extra-markers/dist/js/leaflet.extra-markers.min.js"
 import { defaultMarker, homeIconMarker } from "./icon_marker"
 import MapController from "./map_controller"
@@ -195,16 +195,17 @@ export class SolutionMap {
         })
         this.#controller.mapChanged(event)
     }
-    #adaptMapBoundsToNewSize(oldsize, newsize) {
+
+    #adaptMapBoundsToNewSize() {
       setTimeout(() => {
-        this.map.invalidateSize()
+        this.map.invalidateSize({ pan: false})
         this.fitBounds(this.points, this.bboxValue)
-        this.map.getContainer().dataset.fitted = "true"
+        this.#controller.fittedValue = true
       }, 500)
     }
 
     initEventListener(): void {
-        this.map.on("moveend", this.#dispatchMapChangedEvent.bind(this))
-        this.map.on("resize", this.#adaptMapBoundsToNewSize.bind(this))
+      this.map.on("resize", this.#adaptMapBoundsToNewSize.bind(this))
+      this.map.on("moveend", this.#dispatchMapChangedEvent.bind(this))
     }
 }
