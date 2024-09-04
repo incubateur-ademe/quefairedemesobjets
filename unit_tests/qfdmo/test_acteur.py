@@ -217,6 +217,20 @@ class TestCreateRevisionActeur:
         assert revision_acteur.source == acteur.source
         assert revision_acteur.acteur_type == acteur.acteur_type
 
+    def test_new_revision_acteur_with_action_principale(self):
+        acteur_type = ActeurTypeFactory(code="fake")
+        action_principale = ActionFactory(code="action 1")
+        revision_acteur = RevisionActeur.objects.create(
+            nom="Test Object 1",
+            location=Point(1, 1),
+            acteur_type=acteur_type,
+            action_principale=action_principale,
+        )
+        acteur = Acteur.objects.get(
+            identifiant_unique=revision_acteur.identifiant_unique
+        )
+        assert revision_acteur.action_principale == acteur.action_principale
+
 
 @pytest.mark.django_db
 class TestActeurService:

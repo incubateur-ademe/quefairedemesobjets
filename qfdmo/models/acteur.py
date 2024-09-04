@@ -355,6 +355,7 @@ class RevisionActeur(BaseActeur):
                         "id",
                         "acteur_type",
                         "source",
+                        "action_principale",
                         "proposition_services",
                         "acteur_services",
                         "labels",
@@ -366,6 +367,7 @@ class RevisionActeur(BaseActeur):
                     else ActeurType.objects.get(code="commerce")
                 ),
                 source=self.source,
+                action_principale=self.action_principale,
             )
             self.identifiant_unique = acteur.identifiant_unique
             self.identifiant_externe = acteur.identifiant_externe
