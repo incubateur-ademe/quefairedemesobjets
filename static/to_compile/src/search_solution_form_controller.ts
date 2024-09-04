@@ -116,41 +116,52 @@ export default class extends Controller<HTMLElement> {
     connect() {
         this.displayActionList()
 
-        // Mode Carte
-        this.groupedActionInputTargets.forEach((groupedActionInput) => {
-            console.log(groupedActionInput)
-            if (groupedActionInput.value == "reparer") {
-                this.reparerFilterTargets.forEach((element: HTMLInputElement) => {
-                    element.disabled = !groupedActionInput.checked
-                })
-            }
-        })
-
         if (!this.isIframeValue) {
             this.scrollToContent()
         }
     }
 
     activeReparerFilters(activate: boolean = true) {
-        if (this.#selectedOption == "jai") {
-            if (this.reparerInputTarget.checked) {
-                this.reparerFilterTargets.forEach((element: HTMLInputElement) => {
-                    element.disabled = false
-                })
-                return
-            }
-        }
-        this.reparerFilterTargets.forEach((element: HTMLInputElement) => {
-            element.disabled = true
-        })
+        // Carte mode
+        this.activeReparerFiltersCarte()
+
+        // Form mode
+        this.activeReparerFiltersForm()
     }
 
-    activeReparerFiltersCarte(event: Event) {
-        const target = event.target as HTMLInputElement
-        if (target.value == "reparer") {
+    activeReparerFiltersForm() {
+        if (this.groupedActionInputTargets.length == 0) {
+            if (this.#selectedOption == "jai") {
+                if (this.reparerInputTarget.checked) {
+                    this.reparerFilterTargets.forEach((element: HTMLInputElement) => {
+                        element.disabled = false
+                    })
+                    return
+                }
+            }
             this.reparerFilterTargets.forEach((element: HTMLInputElement) => {
-                element.disabled = !target.checked
+                element.disabled = true
             })
+        }
+    }
+
+    activeReparerFiltersCarte() {
+        if (this.groupedActionInputTargets.length > 0) {
+            let reparerFilterIsDisplayed = false
+            this.groupedActionInputTargets.forEach((groupedActionInput) => {
+                if (groupedActionInput.value == "reparer") {
+                    reparerFilterIsDisplayed = true
+                    this.reparerFilterTargets.forEach((element: HTMLInputElement) => {
+                        element.disabled = !groupedActionInput.checked
+                    })
+                }
+                return reparerFilterIsDisplayed
+            })
+            if (!reparerFilterIsDisplayed) {
+                this.reparerFilterTargets.forEach((element: HTMLInputElement) => {
+                    element.disabled = true
+                })
+            }
         }
     }
 
@@ -308,7 +319,7 @@ export default class extends Controller<HTMLElement> {
             }
         })
         // Mode Carte
-        this.activeReparerFiltersCarte(event)
+        this.activeReparerFiltersCarte()
         this.advancedSubmit(event)
     }
 
