@@ -179,7 +179,7 @@ export class SolutionMap {
         // If the map container grew, the value should be different, hence
         // considering the map to not be idle.
         // Once the mapWidth has stopped growing, we can consider the map as idle
-        // and add events.
+        // and add events that will help set its boundaries and zoom level.
         this.#mapWidth = this.map.getSize().x
 
         const resizeObserver = new ResizeObserver(() => {
