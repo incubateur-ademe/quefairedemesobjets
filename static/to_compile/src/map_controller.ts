@@ -2,8 +2,10 @@ import { Controller } from "@hotwired/stimulus"
 import debounce from "lodash/debounce"
 import { SolutionMap } from "./solution_map"
 import { Actor } from "./types"
+import { Map } from "leaflet"
 
 export default class extends Controller<HTMLElement> {
+    #map: Map
     static targets = ["acteur", "searchInZoneButton", "bbox"]
     declare readonly acteurTargets: Array<HTMLScriptElement>
     declare readonly searchInZoneButtonTarget: HTMLButtonElement
@@ -36,6 +38,7 @@ export default class extends Controller<HTMLElement> {
         }
 
         actorsMap.initEventListener()
+        this.#map = actorsMap.map
     }
     initialize() {
         this.mapChanged = debounce(this.mapChanged, 300).bind(this)
@@ -43,7 +46,9 @@ export default class extends Controller<HTMLElement> {
 
     mapChanged(event: CustomEvent) {
         this.dispatch("updateBbox", { detail: event.detail })
-        this.displaySearchInZoneButton()
+        if (this.#map.getContainer().dataset.fitted === "true") {
+            this.displaySearchInZoneButton()
+        }
     }
 
     displaySearchInZoneButton() {

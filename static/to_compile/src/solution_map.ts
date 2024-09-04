@@ -47,10 +47,12 @@ function get_color_code(colorName: string): string {
 }
 
 export class SolutionMap {
-    #map: L.Map
+    map: L.Map
     #zoomControl: L.Control.Zoom
     #location: Location
     #controller: MapController
+    bboxValue?: Array<Number>
+    points: Array<Array<Number>>
 
     constructor({
         location,
@@ -61,18 +63,18 @@ export class SolutionMap {
     }) {
         this.#location = location
         this.#controller = controller
-        this.#map = L.map("map", {
+        this.map = L.map("map", {
             preferCanvas: true,
             zoomControl: false,
         })
 
-        this.#map.setView(DEFAULT_LOCATION, DEFAULT_ZOOM)
+        this.map.setView(DEFAULT_LOCATION, DEFAULT_ZOOM)
         L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png", {
             maxZoom: DEFAULT_MAX_ZOOM,
             attribution:
                 "© <a href='https://www.openstreetmap.org/copyright' rel='noopener'>OpenStreetMap</a>",
-        }).addTo(this.#map)
-        L.control.scale({ imperial: false }).addTo(this.#map)
+        }).addTo(this.map)
+        L.control.scale({ imperial: false }).addTo(this.map)
         this.#manageZoomControl()
 
         if (
@@ -82,14 +84,13 @@ export class SolutionMap {
             L.marker([this.#location.latitude, this.#location.longitude], {
                 icon: homeIconMarker,
             })
-                .addTo(this.#map)
+                .addTo(this.map)
                 .bindPopup("<p><strong>Vous êtes ici !</strong></b>")
         }
     }
 
     displayActor(actors: Array<Actor>, bboxValue?: Array<Number>): void {
         let points: Array<Array<Number>> = []
-
         actors.forEach(function (actor: Actor) {
             if (actor.location) {
                 // Create the marker look and feel : pin + icon
@@ -118,7 +119,7 @@ export class SolutionMap {
                 marker.on("click", (e) => {
                     this.#onClickMarker(e)
                 })
-                marker.addTo(this.#map)
+                marker.addTo(this.map)
 
                 points.push([
                     actor.location.coordinates[1],
@@ -132,51 +133,44 @@ export class SolutionMap {
         ) {
             points.push([this.#location.latitude, this.#location.longitude])
         }
-
-        this.createObserver(points, bboxValue)
+        this.fitBounds(points, bboxValue)
     }
     createObserver(points, bboxValue) {
-        const mapContainer = this.#map.getContainer()
-        let count = 0
+        const mapContainer = this.map.getContainer()
         const observer = new ResizeObserver((entries) => {
-          let blockSize = 0
-          for (const entry of entries) {
-            console.log(entry.contentBoxSize, count)
-            // We let some time to the map container to draw and find
-            // its size before we fit its content to its container.
-            // What we expect :
-            // - In case the iframe is hidden, in an accordion for example,
-            //   it is displayed after a user interaction that triggers a transition.
-            //   To prevent several redraws of the map if its still animated,
-            //   we let it sit for 300ms before and we check if its size changed.
-            //   if it did not : then we call the fitBounds method to resize
-            //   map's content.
-            blockSize = entry.contentBoxSize.blockSize
-            setTimeout(() => {
-              if (entry.contentBoxSize.blockSize === blockSize) {
-                this.#map.invalidateSize()
-                this.fitBounds(points, bboxValue)
-                count += 1
-              }
-            }, 300)
-          }
+            for (const entry of entries) {
+                // We let some time to the map container to draw and find
+                // its size before we fit its content to its container.
+                // What we expect :
+                // - In case the iframe is hidden, in an accordion for example,
+                //   it is displayed after a user interaction that triggers a transition.
+                //   To prevent several redraws of the map if its still animated,
+                //   we let it sit for 300ms before and we check if its size changed.
+                //   if it did not : then we call the fitBounds method to resize
+                //   map's content.
+                // The width of map container should equal blockSize.
+                const mapContainerWidth = this.map
+                    .getContainer()
+                    .getBoundingClientRect().width
+                setTimeout(() => {
+                    this.fitBounds(points, bboxValue, mapContainerWidth)
+                }, 300)
+            }
         })
         observer.observe(mapContainer)
     }
 
     fitBounds(points, bboxValue) {
+        this.points = points
+        this.bboxValue = bboxValue
         if (bboxValue !== undefined) {
-            this.#map.fitBounds([
+            this.map.fitBounds([
                 [bboxValue.southWest.lat, bboxValue.southWest.lng],
                 [bboxValue.northEast.lat, bboxValue.northEast.lng],
             ])
         } else if (points.length > 0) {
-            this.#map.fitBounds(points)
+            this.map.fitBounds(points)
         }
-    }
-
-    get_map(): L.Map {
-        return this.#map
     }
 
     #onClickMarker(event: L.LeafletEvent) {
@@ -185,7 +179,7 @@ export class SolutionMap {
 
     #manageZoomControl() {
         this.#zoomControl = L.control.zoom({ position: "topleft" })
-        this.#zoomControl.addTo(this.#map)
+        this.#zoomControl.addTo(this.map)
     }
 
     #dispatchMapChangedEvent(e: L.LeafletEvent): void {
@@ -201,8 +195,16 @@ export class SolutionMap {
         })
         this.#controller.mapChanged(event)
     }
+    #adaptMapBoundsToNewSize(oldsize, newsize) {
+      setTimeout(() => {
+        this.map.invalidateSize()
+        this.fitBounds(this.points, this.bboxValue)
+        this.map.getContainer().dataset.fitted = "true"
+      }, 500)
+    }
 
     initEventListener(): void {
-        this.#map.on("moveend", this.#dispatchMapChangedEvent.bind(this))
+        this.map.on("moveend", this.#dispatchMapChangedEvent.bind(this))
+        this.map.on("resize", this.#adaptMapBoundsToNewSize.bind(this))
     }
 }
