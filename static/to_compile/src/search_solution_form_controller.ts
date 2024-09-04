@@ -115,6 +115,17 @@ export default class extends Controller<HTMLElement> {
 
     connect() {
         this.displayActionList()
+
+        // Mode Carte
+        this.groupedActionInputTargets.forEach((groupedActionInput) => {
+            console.log(groupedActionInput)
+            if (groupedActionInput.value == "reparer") {
+                this.reparerFilterTargets.forEach((element: HTMLInputElement) => {
+                    element.disabled = !groupedActionInput.checked
+                })
+            }
+        })
+
         if (!this.isIframeValue) {
             this.scrollToContent()
         }
@@ -296,6 +307,8 @@ export default class extends Controller<HTMLElement> {
                 groupedActionInput.checked = eventTarget.checked
             }
         })
+        // Mode Carte
+        this.activeReparerFiltersCarte(event)
         this.advancedSubmit(event)
     }
 
