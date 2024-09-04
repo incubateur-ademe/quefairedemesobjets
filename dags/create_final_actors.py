@@ -37,7 +37,7 @@ def apply_corrections(**kwargs):
     df_actors_sql.update(df_revision_actors_sql)
     df_displayed_actors = pd.concat(
         [df_actors_sql, df_new_parents.set_index("identifiant_unique")]
-    )
+    ).reset_index()
     children = (
         df_revision_actors_sql.reset_index()
         .query("parent_id.notnull()")
@@ -46,7 +46,7 @@ def apply_corrections(**kwargs):
     )
     children = pd.merge(
         children[["parent_id", "child_id"]],
-        df_displayed_actors.reset_index()[["identifiant_unique", "source_id"]],
+        df_displayed_actors[["identifiant_unique", "source_id"]],
         left_on="child_id",
         right_on="identifiant_unique",
     ).rename(columns={"source_id": "child_source_id"})
@@ -56,7 +56,7 @@ def apply_corrections(**kwargs):
     ]
 
     return {
-        "df_displayed_actors": df_displayed_actors.reset_index(),
+        "df_displayed_actors": df_displayed_actors,
         "children": children[["parent_id", "child_id", "child_source_id"]].reset_index(
             drop=True
         ),
