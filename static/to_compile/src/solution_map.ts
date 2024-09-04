@@ -219,6 +219,7 @@ export class SolutionMap {
                 // when the map is still moving.
                 setTimeout(() => {
                     this.map.on("moveend", this.#dispatchMapChangedEvent.bind(this))
+                    resizeObserver.disconnect()
                 }, 1000)
             }
             this.#mapWidth = this.map.getSize().x
