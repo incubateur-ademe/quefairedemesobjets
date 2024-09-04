@@ -16,13 +16,23 @@
         {% if request.GET.get('no-height') %}
             <div data-testid="iframe-no-height-wrapper" style="display: none;">
         {% endif %}
-        <script src="http://localhost:8000/static/iframe.js"
-            data-max_width="800px"
-            data-height="100vh"
-            data-direction="jai"
-            data-first_dir="jai"
-            data-action_list="reparer|echanger|mettreenlocation|revendre"
-        ></script>
+        {% if request.GET.get('carte') %}
+            <script src="http://localhost:8000/static/carte.js"
+                data-action_displayed="preter|emprunter|louer|mettreenlocation|reparer|donner|echanger|acheter|revendre"
+                data-max-width="800px"
+                data-height="100vh"
+                data-bounding_box="{&quot;southWest&quot;: {&quot;lat&quot;: 47.570401, &quot;lng&quot;: 1.597977}, &quot;northEast&quot;: {&quot;lat&quot;: 48.313697, &quot;lng&quot;: 3.059159}}">
+            </script>
+        {% else %}
+
+            <script src="http://localhost:8000/static/iframe.js"
+                data-max_width="800px"
+                data-height="100vh"
+                data-direction="jai"
+                data-first_dir="jai"
+                data-action_list="reparer|echanger|mettreenlocation|revendre"
+            ></script>
+        {% endif %}
         {% if request.GET.get('no-height') %}
             </div>
         {% endif %}

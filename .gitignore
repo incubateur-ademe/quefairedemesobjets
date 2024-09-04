@@ -24,3 +24,4 @@ staticfiles
 /blob-report/
 /playwright/.cache/
 /tests-examples/
+e2e_tests/*-snapshots

@@ -50,10 +50,27 @@ test("the form is visible in the iframe", async ({ page }) => {
     expect(height).toBeGreaterThan(600)
 })
 
+// test("rechercher dans cette zone", async ({ page }) => {
+//     await page.goto(`http://localhost:8000/test_iframe?carte=1`, { waitUntil: "networkidle" })
+//     await page.frameLocator("#lvao_iframe").locator("#djHideToolBarButton").click()
+//     expect(page.frameLocator("#lvao_iframe").getByTestId("searchInZone")).toBeHidden()
+//     await page.waitForTimeout(1000); // ensures iframe has enough time to load properly
+//     await page.locator("#lvao_iframe").hover();
+//     await page.mouse.down();
+//     await page.mouse.move(2000, 2000)
+//     await page.mouse.up();
+//     await page.waitForTimeout(2000); // ensures iframe has enough time to load properly
+//     expect(page.frameLocator("#lvao_iframe").getByTestId("searchInZone")).toBeVisible()
+//     // page.frameLocator("#lvao_iframe").getByTestId("searchInZone").click()
+//     // expect(searchInZoneButton).not.toHaveClass("qfdmo-hidden")
+//     // expect(searchInZoneButton).toHaveText("Rechercher dans cette zone")
+//     // expect(searchInZoneButton).toBeVisible()
+// })
+
 test("iframe loaded with 0px parent height looks good", async ({ page }) => {
-    await page.goto(`http://localhost:8000/test_iframe`, { waitUntil: "networkidle" })
+    await page.goto(`http://localhost:8000/test_iframe?carte=1`, { waitUntil: "networkidle" })
     await expect(page).toHaveScreenshot( `iframe.png`);
-    await page.goto(`http://localhost:8000/test_iframe?no-height=true`, {
+    await page.goto(`http://localhost:8000/test_iframe?no-height=1&carte=1`, {
         waitUntil: "networkidle",
     })
     await page.evaluate(() =>
@@ -61,6 +78,6 @@ test("iframe loaded with 0px parent height looks good", async ({ page }) => {
             .querySelector("[data-testid=iframe-no-height-wrapper]")
             ?.setAttribute("style", ""),
         )
-    await page.waitForTimeout(2000); // ensures iframe loads properly
+    await page.waitForTimeout(1000); // ensures iframe has enough time to load properly
     await expect(page).toHaveScreenshot( `iframe.png`);
 })
