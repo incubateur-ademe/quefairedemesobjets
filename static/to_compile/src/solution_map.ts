@@ -3,6 +3,7 @@ import "leaflet-extra-markers/dist/js/leaflet.extra-markers.min.js"
 import { defaultMarker, homeIconMarker } from "./icon_marker"
 import MapController from "./map_controller"
 import { Actor, Location } from "./types"
+import debounce = require("lodash/debounce")
 
 const DEFAULT_LOCATION: Array<Number> = [46.227638, 2.213749]
 const DEFAULT_ZOOM: Number = 5
@@ -50,6 +51,7 @@ export class SolutionMap {
     map: L.Map
     #zoomControl: L.Control.Zoom
     #location: Location
+    #mapWidth: number
     #controller: MapController
     bboxValue?: Array<Number>
     points: Array<Array<Number>>
@@ -196,16 +198,32 @@ export class SolutionMap {
         this.#controller.mapChanged(event)
     }
 
-    #adaptMapBoundsToNewSize() {
-      setTimeout(() => {
-        this.map.invalidateSize({ pan: false})
-        this.fitBounds(this.points, this.bboxValue)
-        this.#controller.fittedValue = true
-      }, 500)
-    }
-
     initEventListener(): void {
-      this.map.on("resize", this.#adaptMapBoundsToNewSize.bind(this))
-      this.map.on("moveend", this.#dispatchMapChangedEvent.bind(this))
+        // Map width is set here so that it can be compared during each resize.
+        // If the map container grew, the value should be different, hence
+        // considering the map to not be idle.
+        // Once the mapWidth has stopped growing, we can consider the map as idle
+        // and add events.
+        this.#mapWidth = this.map.getSize().x
+
+        const resizeObserver = new ResizeObserver(() => {
+            this.map.invalidateSize({ pan: false })
+            this.fitBounds(this.points, this.bboxValue)
+            const resizeStopped =
+                this.#mapWidth > 0 && this.#mapWidth === this.map.getSize().x
+
+            if (resizeStopped) {
+                document.querySelector("body")!.dataset.mapResize = "done"
+
+                // The 1s timeout here is arbitrary and prevents adding listener
+                // when the map is still moving.
+                setTimeout(() => {
+                    this.map.on("moveend", this.#dispatchMapChangedEvent.bind(this))
+                }, 1000)
+            }
+            this.#mapWidth = this.map.getSize().x
+        })
+
+        resizeObserver.observe(this.map.getContainer())
     }
 }

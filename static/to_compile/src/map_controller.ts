@@ -6,13 +6,15 @@ import { Map } from "leaflet"
 
 export default class extends Controller<HTMLElement> {
     static targets = ["acteur", "searchInZoneButton", "bbox"]
-    static values = { location: { type: Object, default: {} }, fitted: Boolean }
+    static values = {
+        location: { type: Object, default: {} },
+        fitted: { type: Boolean, default: false },
+    }
     declare readonly acteurTargets: Array<HTMLScriptElement>
     declare readonly searchInZoneButtonTarget: HTMLButtonElement
     declare readonly bboxTarget: HTMLInputElement
     declare readonly hasBboxTarget: boolean
     declare readonly locationValue: object
-    fittedValue: boolean
 
     connect() {
         const actorsMap = new SolutionMap({
@@ -43,14 +45,14 @@ export default class extends Controller<HTMLElement> {
     }
 
     mapChanged(event: CustomEvent) {
-        this.dispatch("updateBbox", { detail: event.detail })
-        this.displaySearchInZoneButton()
+        if (document.querySelector("body")!.dataset.mapResize === "done") {
+            this.dispatch("updateBbox", { detail: event.detail })
+            this.displaySearchInZoneButton()
+        }
     }
 
     displaySearchInZoneButton() {
-        if (this.fittedValue) {
-            this.searchInZoneButtonTarget.classList.remove("qfdmo-hidden")
-        }
+        this.searchInZoneButtonTarget.classList.remove("qfdmo-hidden")
     }
 
     hideSearchInZoneButton() {
