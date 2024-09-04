@@ -13,6 +13,9 @@
             <h1>Page d'affichage dynamique de l'iframe de l'application</h1>
             <p>Ci-dessous s'affiche l'iframe de l'application</p>
         </div>
+        {% if request.GET.get('no-height') %}
+            <div data-testid="iframe-no-height-wrapper" style="display: none;">
+        {% endif %}
         <script src="http://localhost:8000/static/iframe.js"
             data-max_width="800px"
             data-height="100vh"
@@ -20,6 +23,9 @@
             data-first_dir="jai"
             data-action_list="reparer|echanger|mettreenlocation|revendre"
         ></script>
+        {% if request.GET.get('no-height') %}
+            </div>
+        {% endif %}
         <div>
             <p>Fin de l'affichage de l'iframe de l'application</p>
         </div>

@@ -49,3 +49,18 @@ test("the form is visible in the iframe", async ({ page }) => {
     )
     expect(height).toBeGreaterThan(600)
 })
+
+test("iframe loaded with 0px parent height looks good", async ({ page }) => {
+    await page.goto(`http://localhost:8000/test_iframe`, { waitUntil: "networkidle" })
+    await expect(page).toHaveScreenshot( `iframe.png`);
+    await page.goto(`http://localhost:8000/test_iframe?no-height=true`, {
+        waitUntil: "networkidle",
+    })
+    await page.evaluate(() =>
+        document
+            .querySelector("[data-testid=iframe-no-height-wrapper]")
+            ?.setAttribute("style", ""),
+        )
+    await page.waitForTimeout(2000); // ensures iframe loads properly
+    await expect(page).toHaveScreenshot( `iframe.png`);
+})
