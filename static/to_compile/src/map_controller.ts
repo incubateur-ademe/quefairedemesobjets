@@ -8,7 +8,6 @@ export default class extends Controller<HTMLElement> {
     static targets = ["acteur", "searchInZoneButton", "bbox"]
     static values = {
         location: { type: Object, default: {} },
-        fitted: { type: Boolean, default: false },
     }
     declare readonly acteurTargets: Array<HTMLScriptElement>
     declare readonly searchInZoneButtonTarget: HTMLButtonElement
