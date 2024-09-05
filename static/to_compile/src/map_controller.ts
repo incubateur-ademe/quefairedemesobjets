@@ -2,7 +2,6 @@ import { Controller } from "@hotwired/stimulus"
 import debounce from "lodash/debounce"
 import { SolutionMap } from "./solution_map"
 import { Actor } from "./types"
-import { Map } from "leaflet"
 
 export default class extends Controller<HTMLElement> {
     static targets = ["acteur", "searchInZoneButton", "bbox"]

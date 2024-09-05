@@ -31,12 +31,13 @@ window.addEventListener("DOMContentLoaded", () => {
     })
   }
 
-  const infos = document.querySelector<HTMLScriptElement>("#posthog-infos")?.textContent!
+  const infos =
+    document.querySelector<HTMLScriptElement>("#posthog-infos")?.textContent!
   const { iframe } = JSON.parse(infos)
   posthog.capture("$set", {
     $set: {
-      iframe
-    }
+      iframe,
+    },
   })
 })
 
