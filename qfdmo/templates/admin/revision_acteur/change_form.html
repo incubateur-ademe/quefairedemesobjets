@@ -1,0 +1,11 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls %}
+
+{% block submit_buttons_bottom %}
+    {% if original.parent %}
+        <input type="submit" value="Accéder au parent « {{original.parent}} »" name="_get_or_create_parent" {% if original.is_parent %}disabled{% endif %}>
+    {% else %}
+        <input type="submit" value="Créer un parent (agrège les duplicats)" name="_get_or_create_parent" {% if original.is_parent %}disabled{% endif %}>
+    {% endif %}
+    {{ block.super }}
+{% endblock %}

@@ -13,6 +13,7 @@ from qfdmo.models import (
     PropositionService,
     Source,
 )
+from qfdmo.models.acteur import RevisionActeur, RevisionPropositionService
 from unit_tests.qfdmo.action_factory import ActionFactory
 
 
@@ -47,8 +48,18 @@ class ActeurFactory(Factory):
     class Meta:
         model = Acteur
 
-    nom = "Test Object 1"
+    nom = Faker("word")
     location = Point(1, 1)
+    acteur_type = SubFactory(ActeurTypeFactory)
+    source = SubFactory(SourceFactory)
+
+
+class RevisionActeurFactory(Factory):
+    class Meta:
+        model = RevisionActeur
+
+    nom = Faker("word")
+    location = Point(2, 2)
     acteur_type = SubFactory(ActeurTypeFactory)
     source = SubFactory(SourceFactory)
 
@@ -58,8 +69,8 @@ class DisplayedActeurFactory(Factory):
         model = DisplayedActeur
 
     identifiant_unique = factory.fuzzy.FuzzyText(length=10)
-    nom = "Test Object 1"
-    location = Point(1, 1)
+    nom = Faker("word")
+    location = Point(3, 3)
     acteur_type = SubFactory(ActeurTypeFactory)
     source = SubFactory(SourceFactory)
 
@@ -77,6 +88,14 @@ class PropositionServiceFactory(Factory):
 
     action = SubFactory(ActionFactory)
     acteur = SubFactory(ActeurFactory)
+
+
+class RevisionPropositionServiceFactory(Factory):
+    class Meta:
+        model = RevisionPropositionService
+
+    action = SubFactory(ActionFactory)
+    acteur = SubFactory(RevisionActeurFactory)
 
 
 class DisplayedPropositionServiceFactory(Factory):
