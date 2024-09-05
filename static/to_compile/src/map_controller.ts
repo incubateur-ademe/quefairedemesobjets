@@ -5,13 +5,13 @@ import { Actor } from "./types"
 
 export default class extends Controller<HTMLElement> {
     static targets = ["acteur", "searchInZoneButton", "bbox"]
+    static values = {
+        location: { type: Object, default: {} },
+    }
     declare readonly acteurTargets: Array<HTMLScriptElement>
     declare readonly searchInZoneButtonTarget: HTMLButtonElement
     declare readonly bboxTarget: HTMLInputElement
-
     declare readonly hasBboxTarget: boolean
-
-    static values = { location: { type: Object, default: {} } }
     declare readonly locationValue: object
 
     connect() {
@@ -37,6 +37,7 @@ export default class extends Controller<HTMLElement> {
 
         actorsMap.initEventListener()
     }
+
     initialize() {
         this.mapChanged = debounce(this.mapChanged, 300).bind(this)
     }

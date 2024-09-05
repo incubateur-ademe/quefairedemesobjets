@@ -5,7 +5,8 @@
         "lint-check": "prettier --check static/to_compile",
         "lint": "prettier static/to_compile --write",
         "test": "jest ./static/to_compile",
-        "watch": "parcel watch"
+        "watch": "parcel watch",
+        "e2e_test": " npx playwright test --update-snapshots"
     },
     "source": [
         "static/to_compile/entrypoints/qfdmo.css",
@@ -30,16 +31,7 @@
     "prettier": {
         "trailingComma": "all",
         "printWidth": 88,
-        "tabWidth": 4,
-        "semi": false,
-        "overrides": [
-            {
-                "files": "*yml",
-                "options": {
-                    "tabWidth": 2
-                }
-            }
-        ]
+        "semi": false
     },
     "dependencies": {
         "@axe-core/playwright": "^4.9.1",
@@ -58,6 +50,7 @@
         "@playwright/test": "^1.46.1",
         "@testing-library/jest-dom": "^6.4.8",
         "@types/jest": "^29.5.12",
+        "@types/leaflet": "^1.9.12",
         "@types/lodash": "^4.17.7",
         "@types/node": "^22.1.0",
         "@typescript-eslint/eslint-plugin": "^7.0.1",

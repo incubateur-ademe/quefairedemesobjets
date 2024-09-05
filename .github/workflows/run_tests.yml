@@ -126,7 +126,7 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run Playwright tests
-        run: npx playwright test --reporter=list
+        run: npx playwright test --reporter=list --update-snapshots
 
       - uses: actions/upload-artifact@v4
         if: always()
