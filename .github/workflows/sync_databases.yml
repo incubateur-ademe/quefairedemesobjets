@@ -1,0 +1,38 @@
+name: Sync databases
+
+on:
+  workflow_dispatch:
+  # schedule:
+  # - cron: "0 0 * * SUN"
+
+env:
+  DUPLICATE_API_TOKEN: ${{ secrets.DUPLICATE_API_TOKEN }}
+  PRODUCTION_APP: ${{ secrets.SCALINGO_PRODUCTION_APP }}
+  PREPROD_APP: ${{ secrets.SCALINGO_PREPROD_APP }}
+  PREPROD_DATABASE_URL: ${{ secrets.PREPROD_DATABASE_URL }}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  sync_prod_to_preprod:
+    name: Sync production database to preprod
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install Scalingo CLI
+        run: |
+          curl -O https://cli-dl.scalingo.com/install && bash install
+      - name: Login Scalingo CLI
+        run: scalingo login --api-token "${DUPLICATE_API_TOKEN}"
+      - name: Execute sync script in one-off container
+        run: |
+          scalingo --app ${PREPROD_APP} run \
+          --env DUPLICATE_API_TOKEN="${DUPLICATE_API_TOKEN}" \
+          --env PREPROD_DATABASE_URL="${PREPROD_DATABASE_URL}" \
+          --env PRODUCTION_APP="${PRODUCTION_APP}" \
+          --file ./scripts/restore_prod_to_preprod.sh \
+          /tmp/uploads/restore_prod_to_preprod.sh
+        continue-on-error: true
