@@ -189,8 +189,6 @@ export class SolutionMap {
                 this.#mapWidth > 0 && this.#mapWidth === this.map.getSize().x
 
             if (resizeStopped) {
-                document.querySelector("body")!.dataset.mapResize = "done"
-
                 // The 1s timeout here is arbitrary and prevents adding listener
                 // when the map is still moving.
                 setTimeout(() => {

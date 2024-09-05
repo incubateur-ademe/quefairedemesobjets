@@ -44,10 +44,8 @@ export default class extends Controller<HTMLElement> {
     }
 
     mapChanged(event: CustomEvent) {
-        if (document.querySelector("body")!.dataset.mapResize === "done") {
-            this.dispatch("updateBbox", { detail: event.detail })
-            this.displaySearchInZoneButton()
-        }
+        this.dispatch("updateBbox", { detail: event.detail })
+        this.displaySearchInZoneButton()
     }
 
     displaySearchInZoneButton() {
