@@ -51,7 +51,7 @@ export class SolutionMap {
     map: L.Map
     #zoomControl: L.Control.Zoom
     #location: Location
-    #mapWidth: number
+    #mapWidthBeforeResize: number
     #controller: MapController
     bboxValue?: Array<Number>
     points: Array<Array<Number>>
@@ -180,13 +180,14 @@ export class SolutionMap {
         // considering the map to not be idle.
         // Once the mapWidth has stopped growing, we can consider the map as idle
         // and add events that will help set its boundaries and zoom level.
-        this.#mapWidth = this.map.getSize().x
+        this.#mapWidthBeforeResize = this.map.getSize().x
 
         const resizeObserver = new ResizeObserver(() => {
             this.map.invalidateSize({ pan: false })
             this.fitBounds(this.points, this.bboxValue)
+            const currentMapWidth = this.map.getSize().x
             const resizeStopped =
-                this.#mapWidth > 0 && this.#mapWidth === this.map.getSize().x
+                this.#mapWidthBeforeResize > 0 && this.#mapWidthBeforeResize === currentMapWidth
 
             if (resizeStopped) {
                 // The 1s timeout here is arbitrary and prevents adding listener
@@ -196,7 +197,7 @@ export class SolutionMap {
                     resizeObserver.disconnect()
                 }, 1000)
             }
-            this.#mapWidth = this.map.getSize().x
+            this.#mapWidthBeforeResize = currentMapWidth
         })
 
         resizeObserver.observe(this.map.getContainer())
