@@ -8,18 +8,12 @@ from django.http import HttpRequest
 from core.jinja2_handler import (
     action_by_direction,
     display_infos_panel,
-    display_labels_panel,
-    display_sources_panel,
     distance_to_acteur,
     is_embedded,
 )
 from qfdmo.models import CachedDirectionAction
 from qfdmo.models.acteur import ActeurType
-from unit_tests.qfdmo.acteur_factory import (
-    ActeurTypeFactory,
-    DisplayedActeurFactory,
-    LabelQualiteFactory,
-)
+from unit_tests.qfdmo.acteur_factory import ActeurTypeFactory, DisplayedActeurFactory
 
 
 @pytest.fixture(scope="session")
@@ -182,35 +176,6 @@ class TestDisplayInfosPanel:
 
         adresse.adresse = None
         assert not display_infos_panel(adresse)
-
-
-@pytest.mark.django_db
-class TestDisplayLabelsPanel:
-
-    def test_display_labels_panel(self, adresse):
-        assert not display_labels_panel(adresse)
-        label = LabelQualiteFactory(
-            afficher=True,
-            type_enseigne=False,
-        )
-        adresse.labels.add(label)
-        assert display_labels_panel(adresse)
-        label.afficher = False
-        label.save()
-        assert not display_labels_panel(adresse)
-        label.afficher = True
-        label.type_enseigne = True
-        label.save()
-        assert not display_labels_panel(adresse)
-
-
-@pytest.mark.django_db
-class TestDisplaySourcesPanel:
-
-    def test_display_sources_panel(self, adresse):
-        assert display_sources_panel(adresse)
-        adresse.source.afficher = False
-        assert not display_sources_panel(adresse)
 
 
 @pytest.mark.django_db

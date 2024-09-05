@@ -55,14 +55,6 @@ def display_exclusivite_reparation(acteur: DisplayedActeur) -> bool:
     return acteur.exclusivite_de_reprisereparation
 
 
-def display_labels_panel(adresse: DisplayedActeur) -> bool:
-    return bool(adresse.labels.filter(afficher=True, type_enseigne=False).count())
-
-
-def display_sources_panel(adresse: DisplayedActeur) -> bool:
-    return bool(adresse.source and adresse.source.afficher)
-
-
 def hide_object_filter(request) -> bool:
     return bool(request.GET.get("sc_id"))
 
@@ -88,8 +80,6 @@ def environment(**options):
         {
             "action_by_direction": action_by_direction,
             "display_infos_panel": display_infos_panel,
-            "display_sources_panel": display_sources_panel,
-            "display_labels_panel": display_labels_panel,
             "hide_object_filter": hide_object_filter,
             "distance_to_acteur": distance_to_acteur,
             "display_exclusivite_reparation": display_exclusivite_reparation,

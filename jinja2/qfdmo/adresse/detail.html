@@ -192,7 +192,7 @@
                 </button>
             </li>
         {% endif %}
-        {% if display_labels_panel(adresse) %}
+        {% if display_labels_panel %}
             <li role="presentation">
                 <button class="fr-tabs__tab fr-tabs__tab--noborder"
                     tabindex="-1"
@@ -206,7 +206,7 @@
                 </button>
             </li>
         {% endif %}
-        {% if display_sources_panel(adresse) %}
+        {% if display_sources_panel %}
             <li role="presentation">
                 <button class="fr-tabs__tab fr-tabs__tab--noborder"
                     tabindex="-1"
@@ -334,7 +334,7 @@
         </div>
     {% endif %}
 
-    {% if display_labels_panel(adresse) %}
+    {% if display_labels_panel %}
         <div id="labelsPanel"
             class="fr-tabs__panel"
             role="tabpanel"
@@ -349,14 +349,14 @@
         </div>
     {% endif %}
 
-    {% if display_sources_panel(adresse) %}
+    {% if display_sources_panel %}
         <div id="sourcesPanel"
             class="fr-tabs__panel"
             role="tabpanel"
             aria-labelledby="sourcesPanel"
             tabindex="0"
         >
-            {% with source_or_label_list=[adresse.source] %}
+            {% with source_or_label_list=adresse.sources.all() %}
                 {% include "qfdmo/_address_card_partials/source_or_label_list.html" %}
             {% endwith %}
         </div>

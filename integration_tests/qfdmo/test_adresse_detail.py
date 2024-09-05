@@ -1,11 +1,47 @@
 import pytest
 from bs4 import BeautifulSoup
 
-from unit_tests.qfdmo.acteur_factory import DisplayedActeurFactory, LabelQualiteFactory
+from unit_tests.qfdmo.acteur_factory import (
+    DisplayedActeurFactory,
+    LabelQualiteFactory,
+    SourceFactory,
+)
+
+
+@pytest.mark.django_db
+class TestDisplaySource:
+    def test_display_no_source(self, client):
+        adresse = DisplayedActeurFactory()
+
+        url = f"/adresse/{adresse.identifiant_unique}"
+
+        response = client.get(url)
+        assert response.status_code == 200
+        assert response.context["display_sources_panel"] is False
+
+    def test_display_one_source(self, client):
+        adresse = DisplayedActeurFactory()
+        source = SourceFactory(afficher=True)
+        adresse.sources.add(source)
+
+        url = f"/adresse/{adresse.identifiant_unique}"
+
+        response = client.get(url)
+        assert response.status_code == 200
+        assert response.context["display_sources_panel"]
 
 
 @pytest.mark.django_db
 class TestDisplayLabel:
+    def test_display_no_label(self, client):
+        adresse = DisplayedActeurFactory()
+
+        url = f"/adresse/{adresse.identifiant_unique}"
+
+        response = client.get(url)
+        assert response.status_code == 200
+        assert response.context["display_labels_panel"] is False
+
     def test_display_ess_label(self, client):
         adresse = DisplayedActeurFactory()
         label_ess = LabelQualiteFactory(
@@ -19,6 +55,7 @@ class TestDisplayLabel:
 
         response = client.get(url)
         assert response.status_code == 200
+        assert response.context["display_labels_panel"]
 
         soup = BeautifulSoup(response.content, "html.parser")
         label_tag = soup.find(attrs={"data-testid": "adresse_detail_header_tag"})
@@ -37,6 +74,7 @@ class TestDisplayLabel:
 
         response = client.get(url)
         assert response.status_code == 200
+        assert response.context["display_labels_panel"]
 
         soup = BeautifulSoup(response.content, "html.parser")
         label_tag = soup.find(attrs={"data-testid": "adresse_detail_header_tag"})
@@ -59,6 +97,7 @@ class TestDisplayLabel:
 
         response = client.get(url)
         assert response.status_code == 200
+        assert response.context["display_labels_panel"]
 
         soup = BeautifulSoup(response.content, "html.parser")
         label_tag = soup.find(attrs={"data-testid": "adresse_detail_header_tag"})
@@ -78,6 +117,7 @@ class TestDisplayLabel:
 
         response = client.get(url)
         assert response.status_code == 200
+        assert response.context["display_labels_panel"]
 
         soup = BeautifulSoup(response.content, "html.parser")
         label_tag = soup.find(attrs={"data-testid": "adresse_detail_header_tag"})
@@ -110,6 +150,7 @@ class TestDisplayLabel:
 
         response = client.get(url)
         assert response.status_code == 200
+        assert response.context["display_labels_panel"]
 
         soup = BeautifulSoup(response.content, "html.parser")
         label_tag = soup.find(attrs={"data-testid": "adresse_detail_header_tag"})
@@ -133,6 +174,7 @@ class TestDisplayLabel:
 
         response = client.get(url)
         assert response.status_code == 200
+        assert response.context["display_labels_panel"]
 
         soup = BeautifulSoup(response.content, "html.parser")
         label_tag = soup.find(attrs={"data-testid": "adresse_detail_header_tag"})
