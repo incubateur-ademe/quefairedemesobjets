@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.CreateModel(
-            name="ActeurSource",
+            name="DisplayedActeurTempSource",
             fields=[
                 ("id", models.AutoField(primary_key=True, serialize=False)),
                 (
@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
             field=models.ManyToManyField(
                 blank=True,
                 related_name="displayed_acteur_temps",
-                through="qfdmo.ActeurSource",
+                through="qfdmo.DisplayedActeurTempSource",
                 to="qfdmo.source",
             ),
         ),

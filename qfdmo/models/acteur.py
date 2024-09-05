@@ -536,7 +536,7 @@ class DisplayedActeurTemp(BaseActeur):
     sources = models.ManyToManyField(
         Source,
         blank=True,
-        through="ActeurSource",
+        through="DisplayedActeurTempSource",
         related_name="displayed_acteur_temps",
     )
 
@@ -572,7 +572,7 @@ class DisplayedActeurTemp(BaseActeur):
             db_column="acteurservice_id",
         )
 
-    class ActeurSource(models.Model):
+    class DisplayedActeurTempSource(models.Model):
         class Meta:
             db_table = "qfdmo_displayedacteurtemp_sources"
             unique_together = ("acteur_id", "source_id")
