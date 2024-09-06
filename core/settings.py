@@ -96,8 +96,13 @@ if DEBUG:
 with suppress(ModuleNotFoundError):
     from debug_toolbar.settings import CONFIG_DEFAULTS
 
+    patterns_to_exclude = [
+        "/test_iframe",
+    ]
     DEBUG_TOOLBAR_CONFIG = {
-        "SHOW_TOOLBAR_CALLBACK": "operator.truth",
+        "SHOW_TOOLBAR_CALLBACK": lambda request: not any(
+            p in request.path for p in patterns_to_exclude
+        ),
         "HIDE_IN_STACKTRACES": CONFIG_DEFAULTS["HIDE_IN_STACKTRACES"] + ("sentry_sdk",),
     }
 
