@@ -3,6 +3,7 @@ import "leaflet-extra-markers/dist/js/leaflet.extra-markers.min.js"
 import { defaultMarker, homeIconMarker } from "./icon_marker"
 import MapController from "./map_controller"
 import { Actor, Location } from "./types"
+import debounce = require("lodash/debounce")
 
 const DEFAULT_LOCATION: Array<Number> = [46.227638, 2.213749]
 const DEFAULT_ZOOM: Number = 5
@@ -47,10 +48,13 @@ function get_color_code(colorName: string): string {
 }
 
 export class SolutionMap {
-    #map: L.Map
+    map: L.Map
     #zoomControl: L.Control.Zoom
     #location: Location
+    #mapWidthBeforeResize: number
     #controller: MapController
+    bboxValue?: Array<Number>
+    points: Array<Array<Number>>
 
     constructor({
         location,
@@ -61,18 +65,18 @@ export class SolutionMap {
     }) {
         this.#location = location
         this.#controller = controller
-        this.#map = L.map("map", {
+        this.map = L.map("map", {
             preferCanvas: true,
             zoomControl: false,
         })
 
-        this.#map.setView(DEFAULT_LOCATION, DEFAULT_ZOOM)
+        this.map.setView(DEFAULT_LOCATION, DEFAULT_ZOOM)
         L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png", {
             maxZoom: DEFAULT_MAX_ZOOM,
             attribution:
                 "© <a href='https://www.openstreetmap.org/copyright' rel='noopener'>OpenStreetMap</a>",
-        }).addTo(this.#map)
-        L.control.scale({ imperial: false }).addTo(this.#map)
+        }).addTo(this.map)
+        L.control.scale({ imperial: false }).addTo(this.map)
         this.#manageZoomControl()
 
         if (
@@ -82,14 +86,13 @@ export class SolutionMap {
             L.marker([this.#location.latitude, this.#location.longitude], {
                 icon: homeIconMarker,
             })
-                .addTo(this.#map)
+                .addTo(this.map)
                 .bindPopup("<p><strong>Vous êtes ici !</strong></b>")
         }
     }
 
     displayActor(actors: Array<Actor>, bboxValue?: Array<Number>): void {
         let points: Array<Array<Number>> = []
-
         actors.forEach(function (actor: Actor) {
             if (actor.location) {
                 // Create the marker look and feel : pin + icon
@@ -126,7 +129,7 @@ export class SolutionMap {
                   }
                 })
 
-                marker.addTo(this.#map)
+                marker.addTo(this.map)
 
                 points.push([
                     actor.location.coordinates[1],
@@ -140,19 +143,20 @@ export class SolutionMap {
         ) {
             points.push([this.#location.latitude, this.#location.longitude])
         }
+        this.fitBounds(points, bboxValue)
+    }
 
+    fitBounds(points, bboxValue) {
+        this.points = points
+        this.bboxValue = bboxValue
         if (bboxValue !== undefined) {
-            this.#map.fitBounds([
+            this.map.fitBounds([
                 [bboxValue.southWest.lat, bboxValue.southWest.lng],
                 [bboxValue.northEast.lat, bboxValue.northEast.lng],
             ])
         } else if (points.length > 0) {
-            this.#map.fitBounds(points)
+            this.map.fitBounds(points)
         }
-    }
-
-    get_map(): L.Map {
-        return this.#map
     }
 
     #onClickMarker(event: L.LeafletEvent) {
@@ -161,7 +165,7 @@ export class SolutionMap {
 
     #manageZoomControl() {
         this.#zoomControl = L.control.zoom({ position: "topleft" })
-        this.#zoomControl.addTo(this.#map)
+        this.#zoomControl.addTo(this.map)
     }
 
     #dispatchMapChangedEvent(e: L.LeafletEvent): void {
@@ -179,6 +183,31 @@ export class SolutionMap {
     }
 
     initEventListener(): void {
-        this.#map.on("moveend", this.#dispatchMapChangedEvent.bind(this))
+        // Map width is set here so that it can be compared during each resize.
+        // If the map container grew, the value should be different, hence
+        // considering the map to not be idle.
+        // Once the mapWidth has stopped growing, we can consider the map as idle
+        // and add events that will help set its boundaries and zoom level.
+        this.#mapWidthBeforeResize = this.map.getSize().x
+
+        const resizeObserver = new ResizeObserver(() => {
+            this.map.invalidateSize({ pan: false })
+            this.fitBounds(this.points, this.bboxValue)
+            const currentMapWidth = this.map.getSize().x
+            const resizeStopped =
+                this.#mapWidthBeforeResize > 0 && this.#mapWidthBeforeResize === currentMapWidth
+
+            if (resizeStopped) {
+                // The 1s timeout here is arbitrary and prevents adding listener
+                // when the map is still moving.
+                setTimeout(() => {
+                    this.map.on("moveend", this.#dispatchMapChangedEvent.bind(this))
+                    resizeObserver.disconnect()
+                }, 1000)
+            }
+            this.#mapWidthBeforeResize = currentMapWidth
+        })
+
+        resizeObserver.observe(this.map.getContainer())
     }
 }

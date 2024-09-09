@@ -12,7 +12,8 @@ if (process.env.NODE_ENV !== "development") {
   // pour qu'elles soient écrites durant cette phase et
   // avoir un environnement PostHog dédié en staging
   posthog.init("phc_SwcKewoXg9MZyAIdl8qsyvwz3Vij8Vlrbr2SjEeN3u9", posthogConfig)
-  posthog.debug()
+  // Turn this on to debug posthog events
+  // posthog.debug()
 }
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -30,12 +31,13 @@ window.addEventListener("DOMContentLoaded", () => {
     })
   }
 
-  const infos = document.querySelector<HTMLScriptElement>("#posthog-infos")?.textContent!
+  const infos =
+    document.querySelector<HTMLScriptElement>("#posthog-infos")?.textContent!
   const { iframe } = JSON.parse(infos)
   posthog.capture("$set", {
     $set: {
-      iframe
-    }
+      iframe,
+    },
   })
 })
 
