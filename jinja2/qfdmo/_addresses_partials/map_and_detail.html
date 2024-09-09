@@ -49,7 +49,7 @@
                         data-turbo-frame="adresses"
                         data-action="click -> search-solution-form#advancedSubmit"
                         class="fr-btn fr-btn--sm fr-btn--secondary fr-m-1w fr-p-1v
-                        qfdmo-absolute qfdmo-z-[2000] qfdmo-right-0 qfdmo-hidden qfdmo-bg-white"
+                        qfdmo-absolute qfdmo-z-[1010] qfdmo-right-0 qfdmo-hidden qfdmo-bg-white"
                         type="button"
                         data-with-controls={{"false" if is_carte(request) else "true"}}
                         data-testid="searchInZone"
@@ -104,13 +104,13 @@
                                 <p class="qfdmo-max-w-xl qfdmo-text-lg mx-auto qfdmo-text-grey-50">
                                     Saisissez une adresse et recherchez des établissements à proximité qui vous aideront à remettre votre objet en circulation.</p>
                             </div>
-                            <div
-                                class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-80 qfdmo-font-black qfdmo-z-[4000] {% if acteurs or not address_ok %} qfdmo-hidden{% endif %}"
-                                data-search-solution-form-target="NoLocalSolution"
-                            >
-                                <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl sm:qfdmo-text-4xl qfdmo-text-center">
-                                    Il n'existe pas de solution {% if bounding_box %}dans cette zone{% else %}localisée proche de chez vous (&lt;30 km){% endif %}, essayez avec une autre combinaison de filtres.
-                                </div>
+                        </div>
+                        <div
+                            class="qfdmo-absolute qfdmo-inset-0 qfdmo-bg-white qfdmo-opacity-80 qfdmo-font-black qfdmo-z-[1020] {% if acteurs or not address_ok %} qfdmo-hidden{% endif %}"
+                            data-search-solution-form-target="NoLocalSolution"
+                        >
+                            <div class="qfdmo-flex qfdmo-h-full qfdmo-w-full qfdmo-items-center qfdmo-justify-center qfdmo-text-2xl sm:qfdmo-text-4xl qfdmo-text-center{% if is_carte(request) %} lg:qfdmo-pl-[350px]{% endif %}">
+                                Il n'existe pas de solution {% if bounding_box %}dans cette zone{% else %}localisée proche de chez vous (&lt;30 km){% endif %}, essayez avec une autre combinaison de filtres.
                             </div>
                         </div>
                     {% endwith %}
