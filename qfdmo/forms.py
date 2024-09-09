@@ -69,7 +69,7 @@ class AddressesForm(forms.Form):
         widget=AutoCompleteInput(
             attrs={
                 "class": "fr-input fr-icon-search-line sm:qfdmo-w-[596px]",
-                "placeholder": "chaussures, perceuse, canapé...",
+                "placeholder": "pantalon, perceuse, canapé...",
                 "autocomplete": "off",
                 "aria-label": "Indiquer un objet - obligatoire",
             },
