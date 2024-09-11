@@ -8,7 +8,13 @@ from django.shortcuts import get_object_or_404
 from ninja import ModelSchema, Router, Field
 from ninja.pagination import paginate
 
-from qfdmo.models import ActeurStatus, DisplayedActeur, ActeurService, Action
+from qfdmo.models import (
+    ActeurStatus,
+    DisplayedActeur,
+    ActeurService,
+    Action,
+    ActeurType,
+)
 
 router = Router()
 
@@ -28,13 +34,19 @@ def distance_to_decimal_degrees(distance, latitude):
     return distance.m / (111_319.5 * math.cos(lat_radians))
 
 
+class ActeurTypeSchema(ModelSchema):
+    class Meta:
+        model = ActeurType
+        fields = ["id", "code", "libelle"]
+
+
 class ActionSchema(ModelSchema):
     class Meta:
         model = Action
         fields = ["id", "code", "libelle", "couleur"]
 
 
-class ServiceSchema(ModelSchema):
+class ActeurServiceSchema(ModelSchema):
     class Meta:
         model = ActeurService
         fields = ["id", "code", "libelle"]
@@ -44,7 +56,7 @@ class ActeurSchema(ModelSchema):
     latitude: float
     longitude: float
     distance: float = Field(..., alias="distance.m")
-    services: List[str] = Field(..., alias="get_acteur_services")
+    services: List[str]
 
     class Meta:
         model = DisplayedActeur
@@ -62,20 +74,16 @@ def actions(request):
     return qs
 
 
-@router.get(
-    "/services", response=List[ServiceSchema], summary="Liste des services proposés"
-)
-def services(request):
-    """
-    Liste l'ensemble des <i>services</i> qui peuvent être proposés par un acteur.
-    """  # noqa
-    qs = Action.objects.all()
-    return qs
-
-
 @router.get("/acteurs", response=List[ActeurSchema], summary="Liste des acteurs actifs")
 @paginate
-def acteurs(request, latitude: float = None, longitude: float = None, rayon: int = 2):
+def acteurs(
+    request,
+    latitude: float | None = None,
+    longitude: float | None = None,
+    rayon: int = 2,
+    services: str | None = None,
+    actions: str | None = None,
+):
     """
     Les acteurs correspondant à un point sur la carte Longue Vie Aux Objets
 
@@ -88,6 +96,14 @@ def acteurs(request, latitude: float = None, longitude: float = None, rayon: int
     qs = DisplayedActeur.objects.filter(
         statut=ActeurStatus.ACTIF,
     ).order_by("nom")
+
+    if actions:
+        actions_ids = [int(action) for action in actions.split(",")]
+        qs = qs.only_actions(actions_ids)
+
+    if services:
+        services_ids = [int(service) for service in services.split(",")]
+        qs = qs.only_services(services_ids)
 
     if latitude and longitude:
         point = Point(longitude, latitude, srid=4326)
@@ -102,6 +118,32 @@ def acteurs(request, latitude: float = None, longitude: float = None, rayon: int
             .order_by("distance")
         )
 
+    return qs
+
+
+@router.get(
+    "/acteurs/types",
+    response=List[ActeurTypeSchema],
+    summary="Liste des actions possibles",
+)
+def acteurs_types(request):
+    """
+    Liste l'ensemble des <i>types</i> d'acteurs possibles.
+    """  # noqa
+    qs = ActeurType.objects.all()
+    return qs
+
+
+@router.get(
+    "/acteurs/services",
+    response=List[ActeurServiceSchema],
+    summary="Liste des services proposés par les acteurs",
+)
+def services(request):
+    """
+    Liste l'ensemble des <i>services</i> qui peuvent être proposés par un acteur.
+    """  # noqa
+    qs = ActeurService.objects.all()
     return qs
 
 

@@ -15,7 +15,11 @@ from unidecode import unidecode
 
 from qfdmo.models.action import Action, CachedDirectionAction
 from qfdmo.models.categorie_objet import SousCategorieObjet
-from qfdmo.models.utils import CodeAsNaturalKeyModel, NomAsNaturalKeyModel
+from qfdmo.models.utils import (
+    CodeAsNaturalKeyModel,
+    NomAsNaturalKeyManager,
+    NomAsNaturalKeyModel,
+)
 
 
 class ActeurService(CodeAsNaturalKeyModel):
@@ -153,7 +157,22 @@ class LabelQualite(models.Model):
         return self.libelle
 
 
+class ActeurQuerySet(models.QuerySet):
+    def only_actions(self, action_ids=[]):
+        return self.filter(proposition_services__action_id__in=action_ids)
+
+    def only_services(self, service_ids=[]):
+        return self.filter(proposition_services__id__in=service_ids)
+
+
+class ActeurManager(NomAsNaturalKeyManager):
+    def get_queryset(self):
+        return ActeurQuerySet(self.model, using=self._db)
+
+
 class BaseActeur(NomAsNaturalKeyModel):
+    objects = ActeurManager()
+
     class Meta:
         abstract = True
 
@@ -250,6 +269,10 @@ class BaseActeur(NomAsNaturalKeyModel):
         print(f"acteur_type : {self.acteur_type_id} - {self.acteur_type}")
         print(f"get_digital_acteur_type_id : {ActeurType.get_digital_acteur_type_id()}")
         return self.acteur_type_id == ActeurType.get_digital_acteur_type_id()
+
+    @property
+    def services(self):
+        return self.get_acteur_services()
 
     def get_acteur_services(self) -> list[str]:
         return sorted(

@@ -1,0 +1,19 @@
+{
+	"info": {
+		"_postman_id": "ab300264-377c-4d6c-8bab-f9933b15b7ea",
+		"name": "Que faire de mes objets",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "13517415",
+		"_collection_link": "https://speeding-escape-588206.postman.co/workspace/L'%25C3%25A9tabli~15bf6b4b-56f8-49ce-99e0-4f954dff67e1/collection/13517415-ab300264-377c-4d6c-8bab-f9933b15b7ea?action=share&source=collection_link&creator=13517415"
+	},
+	"item": [
+		{
+			"name": "New Request",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		}
+	]
+}
