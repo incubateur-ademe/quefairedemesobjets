@@ -379,6 +379,45 @@ def _force_column_value(
     )
 
 
+def merge_produits_accepter(group):
+    produits_sets = set()
+    for produits in group:
+        produits_sets.update(produits.split(" | "))
+    return " | ".join(sorted(produits_sets))
+
+
+def merge_duplicates(
+    df, group_column="identifiant_unique", merge_column="produitsdechets_acceptes"
+):
+
+    # Function to merge pipe-separated values into a set and join them back
+
+    # Filter out duplicates based on group_column
+    df_duplicates = df[df.duplicated(group_column, keep=False)]
+    df_non_duplicates = df[~df.duplicated(group_column, keep=False)]
+
+    # Group duplicates by group_column and merge the merge_column
+    df_merged_duplicates = (
+        df_duplicates.groupby(group_column)
+        .agg(
+            {
+                **{
+                    col: "first"
+                    for col in df.columns
+                    if col != merge_column and col != group_column
+                },
+                merge_column: merge_produits_accepter,
+            }
+        )
+        .reset_index()
+    )  # Keep the group_column as is, do not re-insert it
+
+    # Concatenate the non-duplicates and merged duplicates
+    df_final = pd.concat([df_non_duplicates, df_merged_duplicates], ignore_index=True)
+
+    return df_final
+
+
 def create_actors(**kwargs):
     data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
     df = kwargs["ti"].xcom_pull(task_ids="fetch_data_from_api")
@@ -482,9 +521,11 @@ def create_actors(**kwargs):
 
     df = df.replace({np.nan: None})
 
-    duplicates_mask = df.duplicated("identifiant_unique", keep=False)
-    duplicate_ids = df.loc[duplicates_mask, "identifiant_unique"].unique()
-    number_of_duplicates = len(duplicate_ids)
+    df = merge_duplicates(
+        df,
+        group_column="id_point_apport_ou_reparation",
+        merge_column="produitsdechets_acceptes",
+    )
 
     unique_source_ids = df["source_id"].unique()
 
@@ -501,8 +542,6 @@ def create_actors(**kwargs):
     df_missing_actors["event"] = "UPDATE_ACTOR"
 
     metadata = {
-        "number_of_duplicates": number_of_duplicates,
-        "duplicate_ids": list(duplicate_ids),
         "added_rows": len(df),
         "number_of_removed_actors": len(df_missing_actors),
     }

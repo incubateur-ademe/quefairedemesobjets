@@ -4,7 +4,6 @@ import re
 from datetime import datetime
 from importlib import import_module
 from pathlib import Path
-
 import numpy as np
 import pandas as pd
 
@@ -16,18 +15,35 @@ utils = import_module(f"{env}.utils.utils")
 def process_siret(siret):
     if pd.isna(siret):
         return None
-    siret = str(siret).strip()
-    if len(siret) == 13 and siret.isdigit():
-        siret = "0" + siret
-    return siret[:14]
+    siret = str(siret).replace(" ", "")
+
+    if not siret.isdigit():
+        return None
+
+    if len(siret) == 9:
+        return siret
+
+    if len(siret) == 13:
+        return "0" + siret
+
+    if len(siret) == 14:
+        return siret
+
+    return None
 
 
 def process_phone_number(number):
     if pd.isna(number):
         return number
-    number = number.replace(" ", "")
+
+    number = re.sub(r"\D", "", number)
+
     if number.startswith("33"):
         number = "0" + number[2:]
+
+    if len(number) < 6:
+        return None
+
     return number
 
 
@@ -132,6 +148,8 @@ def process_actors(df):
         df.loc[
             df["service_a_domicile"] == "service à domicile uniquement", "statut"
         ] = "SUPPRIME"
+    if "site_web" in df.columns:
+        df["site_web"] = df["site_web"].apply(prefix_url)
     return df
 
 
@@ -153,10 +171,12 @@ def combine_categories(row):
 def prefix_url(url):
     if url is None:
         return None
-    elif url.startswith("http://") or url.startswith("https://"):
-        return url
-    else:
-        return "https://" + url
+    url = str(url)
+
+    if not (url.startswith("http://") or url.startswith("https://")):
+        url = "https://" + url
+
+    return url
 
 
 def combine_comments(existing_commentaires, new_commentaires):
