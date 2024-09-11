@@ -390,13 +390,9 @@ def merge_duplicates(
     df, group_column="identifiant_unique", merge_column="produitsdechets_acceptes"
 ):
 
-    # Function to merge pipe-separated values into a set and join them back
-
-    # Filter out duplicates based on group_column
     df_duplicates = df[df.duplicated(group_column, keep=False)]
     df_non_duplicates = df[~df.duplicated(group_column, keep=False)]
 
-    # Group duplicates by group_column and merge the merge_column
     df_merged_duplicates = (
         df_duplicates.groupby(group_column)
         .agg(
@@ -410,7 +406,7 @@ def merge_duplicates(
             }
         )
         .reset_index()
-    )  # Keep the group_column as is, do not re-insert it
+    )
 
     # Concatenate the non-duplicates and merged duplicates
     df_final = pd.concat([df_non_duplicates, df_merged_duplicates], ignore_index=True)
