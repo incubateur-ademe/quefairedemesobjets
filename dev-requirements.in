@@ -1,4 +1,4 @@
---constraint=requirements.txt
+--constraint=requirements.txt --constraint=airflow-requirements.txt
 
 beautifulsoup4
 black

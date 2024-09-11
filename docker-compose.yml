@@ -1,5 +1,6 @@
 services:
-  postgres:
+  lvao-postgres:
+    container_name: lvao-postgres
     image: postgis/postgis:15-3.3-alpine
     environment:
       - POSTGRES_USER=qfdmo

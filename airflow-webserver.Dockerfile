@@ -1,4 +1,4 @@
-FROM apache/airflow:2.8.2
+FROM apache/airflow:2.10.0
 
 # Use user airflow
 RUN chown -R ${AIRFLOW_UID:-50000}:0 /opt/airflow

@@ -38,7 +38,11 @@ AIRFLOW__LOGGING__ENCRYPT_S3_LOGS=false
 
 ![Configuration d'une connexion à Cellar (stockage s3 de clevercloud) dans Airflow](./img/airflow-s3-connection-configuration.png)
 
-Attention à ajouter le paramètre enfpoint_url pour le stockage Cellar de CleverCloud
+Attention à ajouter le paramètre endpoint_url pour le stockage Cellar de CleverCloud
+
+La connexion `lvao-development` dit aussi être configurée dans l'interface d'Airflow
+
+![Configuration d'une connexion à Postgres dockerisé dans Airflow](./img/airflow-db-connection-configuration.png)
 
 ## déploiement des dags en preprod et en prod
 
@@ -70,7 +74,7 @@ cp .env.template .env
 Enfin, lancer les containers docker avec docker compose:
 
 ```sh
-docker compose -f docker-compose.airflow.yaml up
+docker compose -f docker-compose.airflow.yml up
 ```
 
 docker compose lancera :

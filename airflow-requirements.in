@@ -1,8 +1,8 @@
-# Astro Runtime includes the following pre-installed providers packages: https://docs.astronomer.io/astro/runtime-image-architecture#provider-packages
-pandas>=2.2.0
-SQLAlchemy>=2.0.0
+apache-airflow==2.10.0
 apache-airflow-providers-postgres
-python-decouple
 fuzzywuzzy
+# related to https://github.com/pandas-dev/pandas/issues/57049 because sqlalchemy & numpy should be < 2.0
+pandas==2.1.4
 pyproj
+python-decouple
 ratelimit

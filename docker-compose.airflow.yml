@@ -1,6 +1,8 @@
 ---
 x-airflow-common:
   &airflow-common
+  networks:
+    - airflow-network
   environment:
     &airflow-common-env
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
@@ -38,6 +40,9 @@ x-airflow-common:
 
 services:
   postgres:
+    networks:
+      - airflow-network
+    container_name: airflow-postgres
     image: postgres:13
     environment:
       POSTGRES_USER: airflow
@@ -91,3 +96,6 @@ services:
       <<: *airflow-common-depends-on
       airflow-webserver:
         condition: service_healthy
+
+networks:
+  airflow-network:
