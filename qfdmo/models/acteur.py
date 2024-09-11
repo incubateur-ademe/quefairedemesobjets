@@ -161,9 +161,6 @@ class ActeurQuerySet(models.QuerySet):
     def only_actions(self, action_ids=[]):
         return self.filter(proposition_services__action_id__in=action_ids)
 
-    def only_services(self, service_ids=[]):
-        return self.filter(proposition_services__id__in=service_ids)
-
 
 class ActeurManager(NomAsNaturalKeyManager):
     def get_queryset(self):

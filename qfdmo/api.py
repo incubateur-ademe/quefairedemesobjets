@@ -55,8 +55,8 @@ class ActeurServiceSchema(ModelSchema):
 class ActeurSchema(ModelSchema):
     latitude: float
     longitude: float
-    distance: float = Field(..., alias="distance.m")
-    services: List[str]
+    distance: float = Field(..., alias="distance.m", description="Distance en mètres")
+    services: List[str] = Field(..., description="Les services proposés pour un acteur")
 
     class Meta:
         model = DisplayedActeur
@@ -81,7 +81,6 @@ def acteurs(
     latitude: float | None = None,
     longitude: float | None = None,
     rayon: int = 2,
-    services: str | None = None,
     actions: str | None = None,
 ):
     """
@@ -100,10 +99,6 @@ def acteurs(
     if actions:
         actions_ids = [int(action) for action in actions.split(",")]
         qs = qs.only_actions(actions_ids)
-
-    if services:
-        services_ids = [int(service) for service in services.split(",")]
-        qs = qs.only_services(services_ids)
 
     if latitude and longitude:
         point = Point(longitude, latitude, srid=4326)
