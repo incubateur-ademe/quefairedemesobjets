@@ -78,6 +78,7 @@ class DisplayedActeurFactory(Factory):
 class ActeurServiceFactory(Factory):
     class Meta:
         model = ActeurService
+        django_get_or_create = ("code",)
 
     code = Faker("word")
 

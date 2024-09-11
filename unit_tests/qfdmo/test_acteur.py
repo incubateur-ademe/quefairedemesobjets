@@ -339,8 +339,10 @@ class TestActeurService:
 
     def test_acteur_actions_multiple(self, displayed_acteur):
         displayed_acteur.acteur_services.add(
-            ActeurServiceFactory(libelle="Par un professionnel"),
-            ActeurServiceFactory(libelle="Atelier pour réparer soi-même"),
+            ActeurServiceFactory(code="pro", libelle="Par un professionnel"),
+            ActeurServiceFactory(
+                code="atelier", libelle="Atelier pour réparer soi-même"
+            ),
         )
 
         assert displayed_acteur.get_acteur_services() == [
