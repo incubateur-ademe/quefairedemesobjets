@@ -382,8 +382,8 @@ def _force_column_value(
 def merge_produits_accepter(group):
     produits_sets = set()
     for produits in group:
-        produits_sets.update(produits.split(" | "))
-    return " | ".join(sorted(produits_sets))
+        produits_sets.update(produits.replace(" ", "").split("|"))
+    return "|".join(sorted(produits_sets))
 
 
 def merge_duplicates(

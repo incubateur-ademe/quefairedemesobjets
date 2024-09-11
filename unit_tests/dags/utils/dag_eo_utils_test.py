@@ -1,3 +1,4 @@
+import unittest
 from unittest.mock import MagicMock
 
 import pandas as pd
@@ -10,6 +11,7 @@ from dags.utils.dag_eo_utils import (
     create_proposition_services,
     create_proposition_services_sous_categories,
     serialize_to_json,
+    merge_duplicates,
 )
 
 
@@ -1536,3 +1538,45 @@ class TestCeateLabels:
         pd.testing.assert_frame_equal(
             df, expected_dataframe_with_bonus_reparation_label
         )
+
+
+class TestMergeDuplicates(unittest.TestCase):
+    def setUp(self):
+        self.df = pd.DataFrame(
+            {
+                "identifiant_unique": [1, 1, 2, 3, 3, 3],
+                "produitsdechets_acceptes": [
+                    "Plastic|Metal",
+                    "Metal|Glass",
+                    "Paper",
+                    "Glass|Plastic",
+                    "Plastic|Metal",
+                    "Metal",
+                ],
+                "other_column": ["A", "B", "C", "D", "E", "F"],
+            }
+        )
+
+    def test_merge_duplicates(self):
+        expected_df = pd.DataFrame(
+            {
+                "identifiant_unique": [2, 1, 3],
+                "produitsdechets_acceptes": [
+                    "Paper",
+                    "Glass|Metal|Plastic",
+                    "Glass|Metal|Plastic",
+                ],
+                "other_column": ["C", "A", "D"],
+            }
+        )
+
+        result_df = merge_duplicates(self.df)
+
+        result_df = result_df.sort_values(by="identifiant_unique").reset_index(
+            drop=True
+        )
+        expected_df = expected_df.sort_values(by="identifiant_unique").reset_index(
+            drop=True
+        )
+
+        pd.testing.assert_frame_equal(result_df, expected_df)
