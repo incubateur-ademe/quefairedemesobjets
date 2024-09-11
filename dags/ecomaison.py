@@ -22,7 +22,7 @@ with DAG(
     default_args=default_args,
     description=(
         "A pipeline to fetch, process, and load to validate data into postgresql"
-        " for Aliapur dataset"
+        " for Ecomaison dataset"
     ),
     params={
         "endpoint": (
