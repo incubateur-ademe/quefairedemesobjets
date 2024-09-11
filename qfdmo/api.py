@@ -5,21 +5,12 @@ from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
 
 from django.shortcuts import get_object_or_404
-from ninja import ModelSchema, Router
+from ninja import ModelSchema, Router, Field
 from ninja.pagination import paginate
 
-from qfdmo.models import ActeurStatus, DisplayedActeur
+from qfdmo.models import ActeurStatus, DisplayedActeur, ActeurService, Action
 
 router = Router()
-
-
-class ActeurSchema(ModelSchema):
-    latitude: float
-    longitude: float
-
-    class Meta:
-        model = DisplayedActeur
-        fields = ["nom", "nom_commercial", "adresse"]
 
 
 def distance_to_decimal_degrees(distance, latitude):
@@ -35,6 +26,51 @@ def distance_to_decimal_degrees(distance, latitude):
     lat_radians = latitude * (math.pi / 180)
     # 1 longitudinal degree at the equator equal 111,319.5m equiv to 111.32km
     return distance.m / (111_319.5 * math.cos(lat_radians))
+
+
+class ActionSchema(ModelSchema):
+    class Meta:
+        model = Action
+        fields = ["id", "code", "libelle", "couleur"]
+
+
+class ServiceSchema(ModelSchema):
+    class Meta:
+        model = ActeurService
+        fields = ["id", "code", "libelle"]
+
+
+class ActeurSchema(ModelSchema):
+    latitude: float
+    longitude: float
+    distance: float = Field(..., alias="distance.m")
+    services: List[str] = Field(..., alias="get_acteur_services")
+
+    class Meta:
+        model = DisplayedActeur
+        fields = ["nom", "nom_commercial", "adresse", "identifiant_unique", "siret"]
+
+
+@router.get(
+    "/actions", response=List[ActionSchema], summary="Liste des actions possibles"
+)
+def actions(request):
+    """
+    Liste l'ensemble des <i>actions</i> possibles sur un objet / déchet.
+    """  # noqa
+    qs = Action.objects.all()
+    return qs
+
+
+@router.get(
+    "/services", response=List[ServiceSchema], summary="Liste des services proposés"
+)
+def services(request):
+    """
+    Liste l'ensemble des <i>services</i> qui peuvent être proposés par un acteur.
+    """  # noqa
+    qs = Action.objects.all()
+    return qs
 
 
 @router.get("/acteurs", response=List[ActeurSchema], summary="Liste des acteurs actifs")
