@@ -469,3 +469,7 @@ Dans le code, à l'attention des équipes techniques
 Certaines variables combinant un nom d'objet et un suffixe ou préfixe peuvent être en franglais
 
 Ex :  `acteur_by_id`
+
+## Data platform
+
+Longue vie aux objets est aussi une `data platform` dont la documentation est dans [README.airflow.md](./README.airflow.md)

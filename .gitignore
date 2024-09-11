@@ -25,3 +25,12 @@ staticfiles
 /playwright/.cache/
 /tests-examples/
 e2e_tests/*-snapshots
+
+# airflow
+airflow_settings.yaml
+logs
+airflow-dags/development/
+airflow-dags/preprod/
+airflow-dags/production/
+airflow-dags/utils/
+airflow-pgdata/
