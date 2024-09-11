@@ -169,7 +169,7 @@ def combine_categories(row):
 
 
 def prefix_url(url):
-    if url is None:
+    if pd.isna(url):
         return None
     url = str(url)
 
