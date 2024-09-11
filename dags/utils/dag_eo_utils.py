@@ -523,6 +523,10 @@ def create_actors(**kwargs):
         merge_column="produitsdechets_acceptes",
     )
 
+    duplicates_mask = df.duplicated("identifiant_unique", keep=False)
+    duplicate_ids = df.loc[duplicates_mask, "identifiant_unique"].unique()
+    number_of_duplicates = len(duplicate_ids)
+
     unique_source_ids = df["source_id"].unique()
 
     df_actors = df_displayedacteurs[
@@ -538,6 +542,8 @@ def create_actors(**kwargs):
     df_missing_actors["event"] = "UPDATE_ACTOR"
 
     metadata = {
+        "number_of_duplicates": number_of_duplicates,
+        "duplicate_ids": list(duplicate_ids),
         "added_rows": len(df),
         "number_of_removed_actors": len(df_missing_actors),
     }

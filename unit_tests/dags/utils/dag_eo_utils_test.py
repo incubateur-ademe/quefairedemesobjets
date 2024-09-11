@@ -1308,6 +1308,7 @@ def test_acteur_to_delete(
         "fetch_data_from_api": pd.DataFrame(
             {
                 "id_point_apport_ou_reparation": ["1"],
+                "produitsdechets_acceptes": ["12345678"],
                 "nom_de_lorganisme": ["Eco1"],
                 "ecoorganisme": ["source1"],
             }
@@ -1343,6 +1344,7 @@ def test_create_reparacteurs(
                 "reparactor_description": ["Ceci est une description du réparacteur."],
                 "address_1": ["12 Rue de Rivoli"],
                 "address_2": ["Bâtiment A"],
+                "id_point_apport_ou_reparation": ["12345678"],
                 "zip_code": ["75001"],
                 "zip_code_label": ["Paris"],
                 "website": ["https://www.exemple.com"],

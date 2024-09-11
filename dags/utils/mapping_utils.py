@@ -36,7 +36,7 @@ def process_phone_number(number):
     if pd.isna(number):
         return number
 
-    number = re.sub(r"\D", "", number)
+    number = re.sub(r"[^\d+]", "", number)
 
     if number.startswith("33"):
         number = "0" + number[2:]
