@@ -7,7 +7,7 @@
             {% if request.GET["digital"] == "1" %}
                 {# On line addresses#}
                 <div class="qfdmo-relative qfdmo-flex-grow qfdmo-shadow">
-                    <div class="qfdmo-px-2w sm:qfdmo-px-0 lg:qfdmo-px-0 qfdmo-inset-0">
+                    <div class="qfdmo-px-2w sm:qfdmo-px-0 lg:qfdmo-px-0 qfdmo-absolute qfdmo-inset-0">
                         {% for adresse in acteurs.all() %}
                             <div data-action="click->search-solution-form#displayActeurDetails
                                 keydown.enter->search-solution-form#displayActeurDetails
@@ -157,8 +157,7 @@
     <div
         id="detailsAddressPanel"
         data-search-solution-form-target="detailsAddressPanel"
-        class="qfdmo-duration-300 qfdmo-bg-white qfdmo-z-[3000]
-        qfdmo-sticky qfdmo-top-0 qfdmo-bottom-0 qfdmo-right-0
+        class="qfdmo-overflow-hidden qfdmo-duration-300 qfdmo-bg-white qfdmo-z-[3000]
         qfdmo-w-full {% if request.GET.get('detail') %} qfdmo-h-1/2 {% else %} qfdmo-h-0 qfdmo-invisible {% endif %}
         sm:qfdmo-h-full {% if request.GET.get('detail') %} sm:qfdmo-w-[480] {% else %} sm:qfdmo-w-0 {% endif %}"
         tabindex="0"
