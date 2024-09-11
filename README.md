@@ -114,7 +114,7 @@ Conseil: utiliser `asdf` pour la gestion des environnement virtuel `node` et `py
 Les bases de données source `MySQL` et cible `Postgres + Postgis` sont executées et mises à disposition par le gestionnaire de conteneur Docker
 
 ```sh
-docker compose up
+docker compose  --profiles lvao up
 ```
 
 Création de l'environnement virtuel de votre choix (préférence pour asdf)

@@ -74,7 +74,7 @@ cp .env.template .env
 Enfin, lancer les containers docker avec docker compose:
 
 ```sh
-docker compose -f docker-compose.airflow.yml up
+docker compose --profiles airflow up
 ```
 
 docker compose lancera :
