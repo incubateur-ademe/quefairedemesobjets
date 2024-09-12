@@ -19,120 +19,135 @@ def read_data_from_postgres(**kwargs):
     return df
 
 
-def apply_corrections(**kwargs):
+def apply_corrections_acteur(**kwargs):
 
-    df_actors_sql = kwargs["ti"].xcom_pull(task_ids="load_actors")
-    df_revision_actors_sql = kwargs["ti"].xcom_pull(task_ids="load_revision_actors")
+    df_acteur = kwargs["ti"].xcom_pull(task_ids="load_acteur")
+    df_revisionacteur = kwargs["ti"].xcom_pull(task_ids="load_revisionacteur")
 
-    unique_parent_ids = df_revision_actors_sql["parent_id"].unique()
+    revisionacteur_parent_ids = df_revisionacteur["parent_id"].unique()
 
-    df_new_parents = df_revision_actors_sql[
-        df_revision_actors_sql["identifiant_unique"].isin(unique_parent_ids)
+    df_revisionacteur_parents = df_revisionacteur[
+        df_revisionacteur["identifiant_unique"].isin(revisionacteur_parent_ids)
     ]
 
-    df_actors_sql = df_actors_sql.set_index("identifiant_unique")
-    df_revision_actors_sql = df_revision_actors_sql.set_index("identifiant_unique")
-    if "cree_le" in df_revision_actors_sql.columns:
-        df_revision_actors_sql = df_revision_actors_sql.drop(columns=["cree_le"])
-    df_actors_sql.update(df_revision_actors_sql)
-    df_displayed_actors = pd.concat(
-        [df_actors_sql, df_new_parents.set_index("identifiant_unique")]
+    df_acteur = df_acteur.set_index("identifiant_unique")
+    df_revisionacteur = df_revisionacteur.set_index("identifiant_unique")
+    # suppression du if et ajout de errors="ignore" pour éviter les erreurs
+    df_revisionacteur = df_revisionacteur.drop(columns=["cree_le"], errors="ignore")
+    df_acteur.update(df_revisionacteur)
+
+    df_acteur_merged = pd.concat(
+        [df_acteur, df_revisionacteur_parents.set_index("identifiant_unique")]
     ).reset_index()
-    children = (
-        df_revision_actors_sql.reset_index()
+    df_children = (
+        df_revisionacteur.reset_index()
         .query("parent_id.notnull()")
         .drop_duplicates(subset=["parent_id", "identifiant_unique"])
         .rename(columns={"identifiant_unique": "child_id"})
     )
-    children = pd.merge(
-        children[["parent_id", "child_id"]],
-        df_displayed_actors[["identifiant_unique", "source_id"]],
+    df_children = pd.merge(
+        df_children[["parent_id", "child_id"]],
+        df_acteur_merged[["identifiant_unique", "source_id"]],
         left_on="child_id",
         right_on="identifiant_unique",
     ).rename(columns={"source_id": "child_source_id"})
 
-    df_displayed_actors = df_displayed_actors[
-        ~df_displayed_actors["identifiant_unique"].isin(children["child_id"].tolist())
+    df_acteur_merged = df_acteur_merged[
+        ~df_acteur_merged["identifiant_unique"].isin(df_children["child_id"].tolist())
     ]
 
     return {
-        "df_displayed_actors": df_displayed_actors,
-        "children": children[["parent_id", "child_id", "child_source_id"]].reset_index(
-            drop=True
-        ),
+        "df_displayed_actors": df_acteur_merged,
+        "df_children": df_children[
+            ["parent_id", "child_id", "child_source_id"]
+        ].reset_index(drop=True),
     }
 
 
-def apply_corrections_ps(**kwargs):
+def apply_corrections_propositionservices(**kwargs):
     df_propositionservice = kwargs["ti"].xcom_pull(task_ids="load_propositionservice")
-    df_manual_propositionservice_updates = kwargs["ti"].xcom_pull(
-        task_ids="load_revision_propositionservice"
+    df_revisionpropositionservice = kwargs["ti"].xcom_pull(
+        task_ids="load_revisionpropositionservice"
     )
-    df_manual_propositionservice_updates = df_manual_propositionservice_updates.rename(
+    df_revisionpropositionservice = df_revisionpropositionservice.rename(
         columns={"revision_acteur_id": "acteur_id"}
     )
-    df_ps_sous_categories = kwargs["ti"].xcom_pull(task_ids="load_ps_sous_categories")
-    df_manual_propositionservice_sous_categories_updates = kwargs["ti"].xcom_pull(
-        task_ids="load_revision_ps_sous_categories"
+    df_propositionservice_sous_categories = kwargs["ti"].xcom_pull(
+        task_ids="load_propositionservice_sous_categories"
     )
-    df_manual_propositionservice_sous_categories_updates = (
-        df_manual_propositionservice_sous_categories_updates.rename(
+    df_revisionpropositionservice_sous_categories = kwargs["ti"].xcom_pull(
+        task_ids="load_revisionpropositionservice_sous_categories"
+    )
+    df_revisionpropositionservice_sous_categories = (
+        df_revisionpropositionservice_sous_categories.rename(
             columns={"revisionpropositionservice_id": "propositionservice_id"}
         )
     )
+    df_revisionacteur = kwargs["ti"].xcom_pull(task_ids="load_revisionacteur")
 
-    common_acteur_ids = df_propositionservice[
-        df_propositionservice["acteur_id"].isin(
-            df_manual_propositionservice_updates["acteur_id"]
+    # Remove the propositionservice for the acteur that have a revision
+    df_propositionservice = df_propositionservice[
+        ~df_propositionservice["acteur_id"].isin(
+            df_revisionacteur["identifiant_unique"]
         )
-    ]["acteur_id"].unique()
-    df_ps_updated = pd.concat(
+    ]
+
+    df_propositionservice_merged = pd.concat(
         [
-            df_propositionservice[
-                ~df_propositionservice["acteur_id"].isin(common_acteur_ids)
-            ],
-            df_manual_propositionservice_updates,
+            # Remove the propositionservice for the acteur that have a revision
+            df_propositionservice,
+            df_revisionpropositionservice,
         ],
         ignore_index=True,
     )
 
-    rps_ids = df_manual_propositionservice_updates["id"].unique()
-    only_ps_ids = df_propositionservice[
-        ~df_propositionservice["acteur_id"].isin(common_acteur_ids)
-    ]["id"].unique()
+    revisionpropositionservice_ids = df_revisionpropositionservice["id"].unique()
+    propositionservice_ids = df_propositionservice["id"].unique()
 
-    matching_rpssc_rows = df_manual_propositionservice_sous_categories_updates[
-        df_manual_propositionservice_sous_categories_updates[
-            "propositionservice_id"
-        ].isin(rps_ids)
+    df_revisionpropositionservice_sous_categories = (
+        df_revisionpropositionservice_sous_categories[
+            df_revisionpropositionservice_sous_categories["propositionservice_id"].isin(
+                revisionpropositionservice_ids
+            )
+        ]
+    )
+    df_propositionservice_sous_categories = df_propositionservice_sous_categories[
+        df_propositionservice_sous_categories["propositionservice_id"].isin(
+            propositionservice_ids
+        )
     ]
-    matching_pssc_rows = df_ps_sous_categories[
-        df_ps_sous_categories["propositionservice_id"].isin(only_ps_ids)
-    ]
-    df_sous_categories_updated = pd.concat(
-        [matching_rpssc_rows, matching_pssc_rows], ignore_index=True
+    df_propositionservice_sous_categories_merged = pd.concat(
+        [
+            df_revisionpropositionservice_sous_categories,
+            df_propositionservice_sous_categories,
+        ],
+        ignore_index=True,
     )
 
     return {
-        "df_ps_updated": df_ps_updated,
-        "df_sous_categories_updated": df_sous_categories_updated,
+        "df_propositionservice_merged": df_propositionservice_merged,
+        "df_propositionservice_sous_categories_merged": (
+            df_propositionservice_sous_categories_merged
+        ),
     }
 
 
-def deduplicate_proposition_services_and_sous_categories(**kwargs):
-    df_children = kwargs["ti"].xcom_pull(task_ids="apply_corrections_actors")[
-        "children"
+def deduplicate_propositionservices(**kwargs):
+    df_children = kwargs["ti"].xcom_pull(task_ids="apply_corrections_acteur")[
+        "df_children"
     ]
     data_task_ps = kwargs["ti"].xcom_pull(
-        task_ids="apply_corrections_propositionservice"
+        task_ids="apply_corrections_propositionservices"
     )
-    df_ps_updated = data_task_ps["df_ps_updated"]
-    df_sous_categories_updated = data_task_ps["df_sous_categories_updated"]
-    df_joined = df_ps_updated.merge(
+    df_propositionservice_merged = data_task_ps["df_propositionservice_merged"]
+    df_propositionservice_sous_categories_merged = data_task_ps[
+        "df_propositionservice_sous_categories_merged"
+    ]
+    df_joined = df_propositionservice_merged.merge(
         df_children, left_on="acteur_id", right_on="child_id", how="inner"
     )
     df_joined_with_sous_categories = df_joined.merge(
-        df_sous_categories_updated,
+        df_propositionservice_sous_categories_merged,
         left_on="id",
         right_on="propositionservice_id",
         how="inner",
@@ -143,7 +158,7 @@ def deduplicate_proposition_services_and_sous_categories(**kwargs):
         .agg({"souscategorieobjet_id": lambda x: list(set(x))})
         .reset_index()
     )
-    max_id = df_ps_updated["id"].max()
+    max_id = df_propositionservice_merged["id"].max()
     df_grouped["propositionservice_id"] = range(
         max_id + 1, max_id + 1 + len(df_grouped)
     )
@@ -153,12 +168,13 @@ def deduplicate_proposition_services_and_sous_categories(**kwargs):
     ]
 
     df_final_sous_categories = pd.concat(
-        [df_sous_categories_updated, df_new_sous_categories], ignore_index=True
+        [df_propositionservice_sous_categories_merged, df_new_sous_categories],
+        ignore_index=True,
     )
 
     df_final_ps_updated = pd.concat(
         [
-            df_ps_updated,
+            df_propositionservice_merged,
             df_grouped.rename(
                 columns={"propositionservice_id": "id", "parent_id": "acteur_id"}
             )[["id", "action_id", "acteur_id"]],
@@ -166,18 +182,18 @@ def deduplicate_proposition_services_and_sous_categories(**kwargs):
         ignore_index=True,
     )
 
-    children = df_children["child_id"].unique()
+    df_children = df_children["child_id"].unique()
 
-    children_ps_ids = df_final_ps_updated[
-        df_final_ps_updated["acteur_id"].isin(children)
+    df_children_ps_ids = df_final_ps_updated[
+        df_final_ps_updated["acteur_id"].isin(df_children)
     ]["id"].unique()
 
     df_final_ps_updated = df_final_ps_updated[
-        ~df_final_ps_updated["acteur_id"].isin(children)
+        ~df_final_ps_updated["acteur_id"].isin(df_children)
     ]
 
     df_final_sous_categories = df_final_sous_categories[
-        ~df_final_sous_categories["propositionservice_id"].isin(children_ps_ids)
+        ~df_final_sous_categories["propositionservice_id"].isin(df_children_ps_ids)
     ]
 
     return {
@@ -187,19 +203,23 @@ def deduplicate_proposition_services_and_sous_categories(**kwargs):
 
 
 def write_data_to_postgres(**kwargs):
-    df_displayed_actors = kwargs["ti"].xcom_pull(task_ids="apply_corrections_actors")[
+    df_displayed_actors = kwargs["ti"].xcom_pull(task_ids="apply_corrections_acteur")[
         "df_displayed_actors"
     ]
-    df_labels_updated = kwargs["ti"].xcom_pull(task_ids="dedup_labels")
+    df_labels_updated = kwargs["ti"].xcom_pull(task_ids="deduplicate_labels")
     df_acteur_services_updated = kwargs["ti"].xcom_pull(
-        task_ids="dedup_acteur_services"
+        task_ids="deduplicate_acteur_serivces"
     )
-    df_acteur_sources_updated = kwargs["ti"].xcom_pull(task_ids="dedup_acteur_sources")
-    task_output = kwargs["ti"].xcom_pull(task_ids="apply_dedup_propositionservice")
+    df_acteur_sources_updated = kwargs["ti"].xcom_pull(
+        task_ids="deduplicate_acteur_sources"
+    )
+    task_output = kwargs["ti"].xcom_pull(task_ids="deduplicate_propositionservices")
 
-    df_ps_updated = task_output["df_final_ps_updated"]
-    df_sous_categories_updated = task_output["df_final_sous_categories"]
-    df_sous_categories_updated.rename(
+    df_propositionservice_merged = task_output["df_final_ps_updated"]
+    df_propositionservice_sous_categories_merged = task_output[
+        "df_final_sous_categories"
+    ]
+    df_propositionservice_sous_categories_merged.rename(
         columns={"propositionservice_id": "displayedpropositionservice_id"},
         inplace=True,
     )
@@ -301,7 +321,7 @@ def write_data_to_postgres(**kwargs):
             chunksize=1000,
         )
 
-        df_ps_updated[["id", "action_id", "acteur_id"]].to_sql(
+        df_propositionservice_merged[["id", "action_id", "acteur_id"]].to_sql(
             temp_table_name_ps,
             engine,
             if_exists="append",
@@ -310,7 +330,7 @@ def write_data_to_postgres(**kwargs):
             chunksize=1000,
         )
 
-        df_sous_categories_updated[
+        df_propositionservice_sous_categories_merged[
             ["displayedpropositionservice_id", "souscategorieobjet_id"]
         ].to_sql(
             temp_table_name_pssc,
@@ -403,14 +423,14 @@ def write_data_to_postgres(**kwargs):
 
 def merge_labels(**kwargs):
     return _merge_acteurs_many2many_relationship(
-        "read_acteur_labels", "read_revisionacteur_labels", **kwargs
+        "load_acteur_labels", "load_revisionacteur_labels", **kwargs
     )
 
 
 # FIXME : This function should be tested
 def merge_acteur_services(**kwargs):
     return _merge_acteurs_many2many_relationship(
-        "read_acteur_acteur_services", "read_revisionacteur_acteur_services", **kwargs
+        "load_acteur_acteur_services", "load_revisionacteur_acteur_services", **kwargs
     )
 
 
@@ -427,8 +447,8 @@ def deduplicate_acteur_serivces(**kwargs):
 
 
 def deduplicate_acteur_sources(**kwargs):
-    data_actors = kwargs["ti"].xcom_pull(task_ids="apply_corrections_actors")
-    df_children = data_actors["children"]
+    data_actors = kwargs["ti"].xcom_pull(task_ids="apply_corrections_acteur")
+    df_children = data_actors["df_children"]
     df_displayed_actors = data_actors["df_displayed_actors"]
 
     df_acteur_sources_without_parents = df_displayed_actors[
@@ -457,43 +477,48 @@ def deduplicate_acteur_sources(**kwargs):
 
 
 def _merge_acteurs_many2many_relationship(
-    acteur_task_id: str, revisionacteur_task_id: str, **kwargs: dict
+    link_with_acteur_task_id: str, link_with_revisionacteur_task_id: str, **kwargs: dict
 ):
     # Pull dataframes
-    df_acteur = kwargs["ti"].xcom_pull(task_ids=acteur_task_id)
-    df_acteurrevision = kwargs["ti"].xcom_pull(task_ids=revisionacteur_task_id)
+    df_link_with_acteur = kwargs["ti"].xcom_pull(task_ids=link_with_acteur_task_id)
+    df_link_with_revisionacteur = kwargs["ti"].xcom_pull(
+        task_ids=link_with_revisionacteur_task_id
+    )
+    df_revisionacteur = kwargs["ti"].xcom_pull(task_ids="load_revisionacteur")
+
+    # Remove the link_with_acteur for the acteur that have a revision
+    df_link_with_acteur = df_link_with_acteur[
+        ~df_link_with_acteur["acteur_id"].isin(df_revisionacteur["identifiant_unique"])
+    ]
 
     # Rename 'acteur_id' column to 'displayedacteur_id' and drop 'id' column
-    df_acteur.rename(columns={"acteur_id": "displayedacteur_id"}, inplace=True)
-    df_acteur.drop(columns=["id"], inplace=True)
+    df_link_with_acteur.rename(
+        columns={"acteur_id": "displayedacteur_id"}, inplace=True
+    )
+    df_link_with_acteur.drop(columns=["id"], inplace=True)
 
     # Rename 'revisionacteur_id' column to 'displayedacteur_id' and drop 'id' column
-    df_acteurrevision.rename(
+    df_link_with_revisionacteur.rename(
         columns={"revisionacteur_id": "displayedacteur_id"}, inplace=True
     )
-    df_acteurrevision.drop(columns=["id"], inplace=True)
-
-    # Get common 'displayedacteur_id'
-    common_acteur_ids = df_acteur[
-        df_acteur["displayedacteur_id"].isin(df_acteurrevision["displayedacteur_id"])
-    ]["displayedacteur_id"].unique()
+    df_link_with_revisionacteur.drop(columns=["id"], inplace=True)
 
     # Concatenate dataframes excluding common 'displayedacteur_id' in df_actor
-    df_merged = pd.concat(
+    df_link_with_acteur_merged = pd.concat(
         [
-            df_acteur[~df_acteur["displayedacteur_id"].isin(common_acteur_ids)],
-            df_acteurrevision,
+            df_link_with_acteur,
+            df_link_with_revisionacteur,
         ]
     ).drop_duplicates()
 
-    return df_merged
+    return df_link_with_acteur_merged
 
 
 def _deduplicate_acteurs_many2many_relationship(
     merged_acteur_task_id: str, col: str, **kwargs: dict
 ):
-    df_children = kwargs["ti"].xcom_pull(task_ids="apply_corrections_actors")[
-        "children"
+    df_children = kwargs["ti"].xcom_pull(task_ids="apply_corrections_acteur")[
+        "df_children"
     ]
     merged_acteur = kwargs["ti"].xcom_pull(task_ids=merged_acteur_task_id)
     merged_df = df_children.merge(
@@ -537,8 +562,8 @@ dag = DAG(
     schedule=None,
 )
 
-read_actors = PythonOperator(
-    task_id="load_actors",
+load_acteur_task = PythonOperator(
+    task_id="load_acteur",
     python_callable=read_data_from_postgres,
     op_kwargs={"table_name": "qfdmo_acteur"},
     dag=dag,
@@ -546,7 +571,7 @@ read_actors = PythonOperator(
     retry_delay=read_retry_interval,
 )
 
-read_ps = PythonOperator(
+load_propositionservice_task = PythonOperator(
     task_id="load_propositionservice",
     python_callable=read_data_from_postgres,
     op_kwargs={"table_name": "qfdmo_propositionservice"},
@@ -555,8 +580,8 @@ read_ps = PythonOperator(
     retry_delay=read_retry_interval,
 )
 
-read_revision_actor = PythonOperator(
-    task_id="load_revision_actors",
+load_revisionacteur_task = PythonOperator(
+    task_id="load_revisionacteur",
     python_callable=read_data_from_postgres,
     op_kwargs={"table_name": "qfdmo_revisionacteur"},
     dag=dag,
@@ -564,8 +589,8 @@ read_revision_actor = PythonOperator(
     retry_delay=read_retry_interval,
 )
 
-read_revision_ps = PythonOperator(
-    task_id="load_revision_propositionservice",
+load_revisionpropositionservice_task = PythonOperator(
+    task_id="load_revisionpropositionservice",
     python_callable=read_data_from_postgres,
     op_kwargs={"table_name": "qfdmo_revisionpropositionservice"},
     dag=dag,
@@ -573,8 +598,8 @@ read_revision_ps = PythonOperator(
     retry_delay=read_retry_interval,
 )
 
-read_revision_sc = PythonOperator(
-    task_id="load_revision_ps_sous_categories",
+load_revisionpropositionservice_sous_categories_task = PythonOperator(
+    task_id="load_revisionpropositionservice_sous_categories",
     python_callable=read_data_from_postgres,
     op_kwargs={"table_name": "qfdmo_revisionpropositionservice_sous_categories"},
     dag=dag,
@@ -582,8 +607,8 @@ read_revision_sc = PythonOperator(
     retry_delay=read_retry_interval,
 )
 
-read_sc = PythonOperator(
-    task_id="load_ps_sous_categories",
+load_propositionservice_sous_categories_task = PythonOperator(
+    task_id="load_propositionservice_sous_categories",
     python_callable=read_data_from_postgres,
     op_kwargs={"table_name": "qfdmo_propositionservice_sous_categories"},
     dag=dag,
@@ -591,8 +616,8 @@ read_sc = PythonOperator(
     retry_delay=read_retry_interval,
 )
 
-read_acteur_labels = PythonOperator(
-    task_id="read_acteur_labels",
+load_acteur_labels_task = PythonOperator(
+    task_id="load_acteur_labels",
     python_callable=read_data_from_postgres,
     op_kwargs={"table_name": "qfdmo_acteur_labels"},
     dag=dag,
@@ -600,8 +625,8 @@ read_acteur_labels = PythonOperator(
     retry_delay=read_retry_interval,
 )
 
-read_acteur_acteur_services = PythonOperator(
-    task_id="read_acteur_acteur_services",
+load_acteur_acteur_services_task = PythonOperator(
+    task_id="load_acteur_acteur_services",
     python_callable=read_data_from_postgres,
     op_kwargs={"table_name": "qfdmo_acteur_acteur_services"},
     dag=dag,
@@ -610,7 +635,7 @@ read_acteur_acteur_services = PythonOperator(
 )
 
 read_revisionacteur_labels = PythonOperator(
-    task_id="read_revisionacteur_labels",
+    task_id="load_revisionacteur_labels",
     python_callable=read_data_from_postgres,
     op_kwargs={"table_name": "qfdmo_revisionacteur_labels"},
     dag=dag,
@@ -618,8 +643,8 @@ read_revisionacteur_labels = PythonOperator(
     retry_delay=read_retry_interval,
 )
 
-read_revisionacteur_acteur_services = PythonOperator(
-    task_id="read_revisionacteur_acteur_services",
+load_revisionacteur_acteur_services_task = PythonOperator(
+    task_id="load_revisionacteur_acteur_services",
     python_callable=read_data_from_postgres,
     op_kwargs={"table_name": "qfdmo_revisionacteur_acteur_services"},
     dag=dag,
@@ -640,40 +665,40 @@ merge_acteur_services_task = PythonOperator(
     dag=dag,
 )
 
-dedup_labels_task = PythonOperator(
-    task_id="dedup_labels",
+deduplicate_labels_task = PythonOperator(
+    task_id="deduplicate_labels",
     python_callable=deduplicate_labels,
     dag=dag,
 )
 
-dedup_acteur_services_task = PythonOperator(
-    task_id="dedup_acteur_services",
+deduplicate_acteur_serivces_task = PythonOperator(
+    task_id="deduplicate_acteur_serivces",
     python_callable=deduplicate_acteur_serivces,
     dag=dag,
 )
 
-merge_and_dedup_acteur_sources_task = PythonOperator(
-    task_id="dedup_acteur_sources",
+deduplicate_acteur_sources_task = PythonOperator(
+    task_id="deduplicate_acteur_sources",
     python_callable=deduplicate_acteur_sources,
     dag=dag,
 )
 
 
-apply_corr = PythonOperator(
-    task_id="apply_corrections_actors",
-    python_callable=apply_corrections,
+apply_corrections_acteur_task = PythonOperator(
+    task_id="apply_corrections_acteur",
+    python_callable=apply_corrections_acteur,
     dag=dag,
 )
 
-apply_corr_ps = PythonOperator(
-    task_id="apply_corrections_propositionservice",
-    python_callable=apply_corrections_ps,
+apply_corrections_propositionservices_task = PythonOperator(
+    task_id="apply_corrections_propositionservices",
+    python_callable=apply_corrections_propositionservices,
     dag=dag,
 )
 
-dedup_ps = PythonOperator(
-    task_id="apply_dedup_propositionservice",
-    python_callable=deduplicate_proposition_services_and_sous_categories,
+deduplicate_propositionservices_task = PythonOperator(
+    task_id="deduplicate_propositionservices",
+    python_callable=deduplicate_propositionservices,
     dag=dag,
 )
 
@@ -684,19 +709,33 @@ write_pos = PythonOperator(
     dag=dag,
 )
 
-[read_actors, read_revision_actor] >> apply_corr
-[read_ps, read_revision_ps, read_sc, read_revision_sc] >> apply_corr_ps
-[read_acteur_labels, read_revisionacteur_labels] >> merge_labels_task
+load_acteur_task >> apply_corrections_acteur_task
 [
-    read_acteur_acteur_services,
-    read_revisionacteur_acteur_services,
+    load_propositionservice_task,
+    load_revisionpropositionservice_task,
+    load_propositionservice_sous_categories_task,
+    load_revisionpropositionservice_sous_categories_task,
+] >> apply_corrections_propositionservices_task
+[
+    load_revisionacteur_task,
+    load_acteur_labels_task,
+    read_revisionacteur_labels,
+] >> merge_labels_task
+[
+    load_revisionacteur_task,
+    load_acteur_acteur_services_task,
+    load_revisionacteur_acteur_services_task,
 ] >> merge_acteur_services_task
-apply_corr >> dedup_ps
-apply_corr >> merge_and_dedup_acteur_sources_task
-apply_corr_ps >> dedup_ps
-merge_labels_task >> apply_corr >> dedup_labels_task
-merge_acteur_services_task >> apply_corr >> dedup_acteur_services_task
-merge_and_dedup_acteur_sources_task >> write_pos
-dedup_ps >> write_pos
-dedup_labels_task >> write_pos
-dedup_acteur_services_task >> write_pos
+apply_corrections_acteur_task >> deduplicate_propositionservices_task
+apply_corrections_acteur_task >> deduplicate_acteur_sources_task
+apply_corrections_propositionservices_task >> deduplicate_propositionservices_task
+merge_labels_task >> apply_corrections_acteur_task >> deduplicate_labels_task
+(
+    merge_acteur_services_task
+    >> apply_corrections_acteur_task
+    >> deduplicate_acteur_serivces_task
+)
+deduplicate_acteur_sources_task >> write_pos
+deduplicate_propositionservices_task >> write_pos
+deduplicate_labels_task >> write_pos
+deduplicate_acteur_serivces_task >> write_pos

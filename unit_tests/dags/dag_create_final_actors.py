@@ -11,7 +11,7 @@ from dags.create_final_actors import (
 
 
 @pytest.fixture
-def df_load_actors():
+def df_load_acteur():
     return pd.DataFrame(
         {
             "identifiant_unique": ["actor1", "actor2"],
@@ -22,7 +22,7 @@ def df_load_actors():
 
 
 @pytest.fixture
-def df_load_revision_actors():
+def df_load_revisionacteur():
     return pd.DataFrame(
         {
             "identifiant_unique": ["actor1"],
@@ -33,16 +33,16 @@ def df_load_revision_actors():
 
 
 class TestApplyCorrections:
-    def test_apply_corrections(self, df_load_actors, df_load_revision_actors):
+    def test_apply_corrections(self, df_load_acteur, df_load_revisionacteur):
 
         # Mock the xcom_pull method
         mock_ti = Mock()
 
         def xcom_pull_side_effect(task_ids=""):
-            if task_ids == "load_actors":
-                return df_load_actors
-            elif task_ids == "load_revision_actors":
-                return df_load_revision_actors
+            if task_ids == "load_acteur":
+                return df_load_acteur
+            elif task_ids == "load_revisionacteur":
+                return df_load_revisionacteur
 
         mock_ti.xcom_pull.side_effect = xcom_pull_side_effect
 
@@ -63,7 +63,7 @@ class TestApplyCorrections:
 
 class TestMergeLabels:
     @pytest.mark.parametrize(
-        "read_acteur_labels, read_revisionacteur_labels, expected",
+        "load_acteur_labels, load_revisionacteur_labels, expected",
         [
             (
                 pd.DataFrame(columns=["id", "acteur_id", "labelqualite_id"]),
@@ -130,12 +130,12 @@ class TestMergeLabels:
         ],
     )
     def test_merge_labels(
-        self, read_acteur_labels, read_revisionacteur_labels, expected
+        self, load_acteur_labels, load_revisionacteur_labels, expected
     ):
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "read_acteur_labels": read_acteur_labels,
-            "read_revisionacteur_labels": read_revisionacteur_labels,
+            "load_acteur_labels": load_acteur_labels,
+            "load_revisionacteur_labels": load_revisionacteur_labels,
         }[task_ids]
 
         result = merge_labels(ti=mock)
@@ -148,7 +148,7 @@ class TestMergeLabels:
 
 class TestMergeActeurServices:
     @pytest.mark.parametrize(
-        "read_acteur_acteur_services, read_revisionacteur_acteur_services, expected",
+        "load_acteur_acteur_services, load_revisionacteur_acteur_services, expected",
         [
             (
                 pd.DataFrame(columns=["id", "acteur_id", "acteurservice_id"]),
@@ -215,12 +215,12 @@ class TestMergeActeurServices:
         ],
     )
     def test_merge_acteur_services(
-        self, read_acteur_acteur_services, read_revisionacteur_acteur_services, expected
+        self, load_acteur_acteur_services, load_revisionacteur_acteur_services, expected
     ):
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "read_acteur_acteur_services": read_acteur_acteur_services,
-            "read_revisionacteur_acteur_services": read_revisionacteur_acteur_services,
+            "load_acteur_acteur_services": load_acteur_acteur_services,
+            "load_revisionacteur_acteur_services": load_revisionacteur_acteur_services,
         }[task_ids]
 
         result = merge_acteur_services(ti=mock)
