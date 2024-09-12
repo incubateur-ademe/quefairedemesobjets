@@ -1,13 +1,13 @@
 <div
-    class="fr-container qfdmo-px-0 md:qfdmo-px-2w lg:qfdmo-px-3w qfdmo-relative qfdmo-flex-grow qfdmo-flex qfdmo-flex-col sm:qfdmo-flex-row
-    qfdmo-overflow-y-auto qfdmo-pt-1v"
+    class="fr-container qfdmo-px-0 md:qfdmo-px-2w lg:qfdmo-px-3w qfdmo-relative qfdmo-flex-grow qfdmo-flex qfdmo-flex-col sm:qfdmo-flex-row"
 >
     <div class="qfdmo-flex-grow qfdmo-flex qfdmo-flex-col">
         <div class="qfdmo-h-full qfdmo-w-full qfdmo-flex qfdmo-flex-col">
             {% if request.GET["digital"] == "1" %}
                 {# On line addresses#}
                 <div class="qfdmo-relative qfdmo-flex-grow qfdmo-shadow">
-                    <div class="qfdmo-px-2w sm:qfdmo-px-0 lg:qfdmo-px-0 qfdmo-absolute qfdmo-inset-0">
+                    {# TODO: REFACTO OVERFLOW : supprimer les overflow auto et le padding left sur la liste qui empêche l'outline de déborder du conteneur #}
+                    <div class="qfdmo-px-2w sm:qfdmo-px-1v qfdmo-absolute qfdmo-inset-0 qfdmo-overflow-y-auto qfdmo-pt-1v">
                         {% for adresse in acteurs.all() %}
                             <div data-action="click->search-solution-form#displayActeurDetails
                                 keydown.enter->search-solution-form#displayActeurDetails

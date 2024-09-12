@@ -8,8 +8,8 @@
     <div class="qfdmo-h-full qfdmo-flex qfdmo-flex-row" id='boo'>
 
         <div class="qfdmo-flex qfdmo-flex-col qfdmo-w-full sm:qfdmo-w-[604px] qfdmo-h-full" data-test-id="form-content">
-
-            <div class="qfdmo-flex-grow">
+            {# TODO: REFACTO OVERFLOW : supprimer les overflow et le padding left #}
+            <div class="qfdmo-flex-grow qfdmo-overflow-y-auto qfdmo-overflow-x-hidden qfdmo-pl-3v">
                 {# Direction #}
                 <fieldset class="fr-segmented fr-segmented--sm qfdmo-w-full fr-mt-3w">
                     <legend class="fr-segmented__legend qfdmo-hidden">
@@ -39,8 +39,6 @@
                         {% include "qfdmo/partials/action_list_by_direction.html" %}
                     {% endwith %}
                 </div>
-
-
             </div>
             <div class="fr-my-1w qfdmo-w-full qfdmo-flex qfdmo-flex-col sm:qfdmo-max-w-[604px] qfdmo-mx-auto">
 
