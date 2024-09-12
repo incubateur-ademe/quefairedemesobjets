@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 import math
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
@@ -55,8 +55,23 @@ class ActeurServiceSchema(ModelSchema):
 class ActeurSchema(ModelSchema):
     latitude: float
     longitude: float
-    distance: float = Field(..., alias="distance.m", description="Distance en mètres")
-    services: List[str] = Field(..., description="Les services proposés pour un acteur")
+    services: List[ActeurServiceSchema] = Field(
+        ...,
+        alias="acteur_services.all",
+        description="Les services proposés pour un acteur",
+    )
+    actions: List[ActionSchema] = Field(
+        ..., alias="acteur_actions", description="Les actions proposés pour un acteur"
+    )
+    distance: Optional[float] = None
+
+    # (..., description="Distance en mètres")
+
+    @staticmethod
+    def resolve_distance(obj):
+        if not obj.distance:
+            return
+        return obj.distance.m
 
     class Meta:
         model = DisplayedActeur
