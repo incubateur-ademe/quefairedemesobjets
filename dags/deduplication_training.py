@@ -15,7 +15,7 @@ default_args = {
     "owner": "airflow",
     "start_date": datetime(2024, 9, 11),
     "retries": 1,
-    "retry_delay": timedelta(minutes=5),  # Adjust based on needs
+    "retry_delay": timedelta(minutes=5),
 }
 
 dag = DAG(
@@ -92,7 +92,6 @@ def clean_string(value):
 
 
 def preprocessing(**kwargs):
-    # Retrieve the data from XCom
     df = kwargs["ti"].xcom_pull(task_ids="read_data")
     df["location_latlon"] = df["location"].apply(parse_location)
     df["location_latlon"] = df["location_latlon"].apply(clean_location)
@@ -123,7 +122,6 @@ def preprocessing(**kwargs):
 
 
 def dedupe_training(**kwargs):
-    # Retrieve the preprocessed data from XCom
     df = kwargs["ti"].xcom_pull(task_ids="preprocessing")
 
     acteur_type = kwargs["params"]["acteur_type"]
