@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 
 from dags.create_final_actors import (
-    apply_corrections,
+    apply_corrections_acteur,
     merge_acteur_services,
     merge_labels,
 )
@@ -33,7 +33,7 @@ def df_load_revisionacteur():
 
 
 class TestApplyCorrections:
-    def test_apply_corrections(self, df_load_acteur, df_load_revisionacteur):
+    def test_apply_corrections_acteur(self, df_load_acteur, df_load_revisionacteur):
 
         # Mock the xcom_pull method
         mock_ti = Mock()
@@ -47,7 +47,7 @@ class TestApplyCorrections:
         mock_ti.xcom_pull.side_effect = xcom_pull_side_effect
 
         # Call the function with the mocked ti
-        result = apply_corrections(ti=mock_ti)
+        result = apply_corrections_acteur(ti=mock_ti)
 
         # Check that the result is as expected
         expected = pd.DataFrame(
