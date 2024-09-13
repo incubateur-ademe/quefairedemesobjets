@@ -489,7 +489,7 @@ def _merge_acteurs_many2many_relationship(
     # Remove the link_with_acteur for the acteur that have a revision
     df_link_with_acteur = df_link_with_acteur[
         ~df_link_with_acteur["acteur_id"].isin(df_revisionacteur["identifiant_unique"])
-    ]
+    ].copy()
 
     # Rename 'acteur_id' column to 'displayedacteur_id' and drop 'id' column
     df_link_with_acteur.rename(
