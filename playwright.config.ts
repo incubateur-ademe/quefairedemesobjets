@@ -69,7 +69,7 @@ export default defineConfig({
         /* Test against branded browsers. */
         {
             name: "Microsoft Edge",
-            grepInvert: /Desktop/,
+            grepInvert: /Mobile/,
             use: { ...devices["Desktop Edge"], channel: "msedge" },
         },
     ],
