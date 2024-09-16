@@ -28,13 +28,22 @@ test("Filtres avancés s'ouvrent et se ferment en mode iframe", async ({ page })
     await openAdvancedFilters(page)
 })
 
-test("Filtres avancés s'ouvrent et se ferment en mode carte", async ({ page }) => {
+test("Desktop | Filtres avancés s'ouvrent et se ferment en mode carte", async ({ page }) => {
     await page.goto(`http://localhost:8000/?carte`, {
         waitUntil: "networkidle",
     })
     await hideDjangoToolbar(page)
     await searchInCarteMode(page)
     await openAdvancedFilters(page, "advanced-filters-in-legend")
+})
+
+test("Mobile | Filtres avancés s'ouvrent et se ferment en mode carte", async ({ page }) => {
+    await page.goto(`http://localhost:8000/?carte`, {
+        waitUntil: "networkidle",
+    })
+    await hideDjangoToolbar(page)
+    await searchInCarteMode(page)
+    await openAdvancedFilters(page)
 })
 
 test("Filtres avancés s'ouvrent et se ferment en mode formulaire", async ({ page }) => {
