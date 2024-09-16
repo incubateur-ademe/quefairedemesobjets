@@ -5,7 +5,7 @@ from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
 
 from django.shortcuts import get_object_or_404
-from ninja import ModelSchema, Router, Field
+from ninja import ModelSchema, Router, Field, FilterSchema, Query
 from ninja.pagination import paginate
 
 from qfdmo.models import (
@@ -63,6 +63,9 @@ class ActeurSchema(ModelSchema):
     actions: List[ActionSchema] = Field(
         ..., alias="acteur_actions", description="Les actions proposés pour un acteur"
     )
+    type: ActeurTypeSchema = Field(
+        ..., alias="acteur_type", description="Le type d'acteur"
+    )
     distance: Optional[float] = None
 
     # (..., description="Distance en mètres")
@@ -76,6 +79,12 @@ class ActeurSchema(ModelSchema):
     class Meta:
         model = DisplayedActeur
         fields = ["nom", "nom_commercial", "adresse", "identifiant_unique", "siret"]
+
+
+class ActeurFilterSchema(FilterSchema):
+    types: Optional[List[int]] = Field(None, q="acteur_type__in")
+    services: Optional[List[int]] = Field(None, q="acteur_services__in")
+    actions: Optional[List[int]] = Field(None, q="proposition_services__action_id__in")
 
 
 @router.get(
@@ -93,10 +102,10 @@ def actions(request):
 @paginate
 def acteurs(
     request,
+    filters: ActeurFilterSchema = Query(...),
     latitude: float | None = None,
     longitude: float | None = None,
     rayon: int = 2,
-    actions: str | None = None,
 ):
     """
     Les acteurs correspondant à un point sur la carte Longue Vie Aux Objets
@@ -110,10 +119,7 @@ def acteurs(
     qs = DisplayedActeur.objects.filter(
         statut=ActeurStatus.ACTIF,
     ).order_by("nom")
-
-    if actions:
-        actions_ids = [int(action) for action in actions.split(",")]
-        qs = qs.only_actions(actions_ids)
+    qs = filters.filter(qs)
 
     if latitude and longitude:
         point = Point(longitude, latitude, srid=4326)

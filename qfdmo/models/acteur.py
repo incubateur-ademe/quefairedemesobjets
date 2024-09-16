@@ -158,8 +158,7 @@ class LabelQualite(models.Model):
 
 
 class ActeurQuerySet(models.QuerySet):
-    def only_actions(self, action_ids=[]):
-        return self.filter(proposition_services__action_id__in=action_ids)
+    pass
 
 
 class ActeurManager(NomAsNaturalKeyManager):
