@@ -43,23 +43,23 @@ def apply_corrections_acteur(**kwargs):
         df_revisionacteur.reset_index()
         .query("parent_id.notnull()")
         .drop_duplicates(subset=["parent_id", "identifiant_unique"])
-        .rename(columns={"identifiant_unique": "child_id"})
     )
     df_children = pd.merge(
-        df_children[["parent_id", "child_id"]],
+        df_children[["parent_id", "identifiant_unique"]],
         df_acteur_merged[["identifiant_unique", "source_id"]],
-        left_on="child_id",
-        right_on="identifiant_unique",
-    ).rename(columns={"source_id": "child_source_id"})
-
+        on="identifiant_unique",
+    )
     df_acteur_merged = df_acteur_merged[
-        ~df_acteur_merged["identifiant_unique"].isin(df_children["child_id"].tolist())
+        ~df_acteur_merged["identifiant_unique"].isin(
+            df_children["identifiant_unique"].tolist()
+        )
     ]
 
     return {
-        "df_displayed_actors": df_acteur_merged,
+        "df_acteur_merged": df_acteur_merged,
+        # ["parent_id", "child_id", "child_source_id"]
         "df_children": df_children[
-            ["parent_id", "child_id", "child_source_id"]
+            ["parent_id", "identifiant_unique", "source_id"]
         ].reset_index(drop=True),
     }
 
@@ -144,7 +144,7 @@ def deduplicate_propositionservices(**kwargs):
         "df_propositionservice_sous_categories_merged"
     ]
     df_joined = df_propositionservice_merged.merge(
-        df_children, left_on="acteur_id", right_on="child_id", how="inner"
+        df_children, left_on="acteur_id", right_on="identifiant_unique", how="inner"
     )
     df_joined_with_sous_categories = df_joined.merge(
         df_propositionservice_sous_categories_merged,
@@ -182,14 +182,14 @@ def deduplicate_propositionservices(**kwargs):
         ignore_index=True,
     )
 
-    df_children = df_children["child_id"].unique()
+    children_ids = df_children["identifiant_unique"].unique()
 
     df_children_ps_ids = df_final_ps_updated[
-        df_final_ps_updated["acteur_id"].isin(df_children)
+        df_final_ps_updated["acteur_id"].isin(children_ids)
     ]["id"].unique()
 
     df_final_ps_updated = df_final_ps_updated[
-        ~df_final_ps_updated["acteur_id"].isin(df_children)
+        ~df_final_ps_updated["acteur_id"].isin(children_ids)
     ]
 
     df_final_sous_categories = df_final_sous_categories[
@@ -203,8 +203,8 @@ def deduplicate_propositionservices(**kwargs):
 
 
 def write_data_to_postgres(**kwargs):
-    df_displayed_actors = kwargs["ti"].xcom_pull(task_ids="apply_corrections_acteur")[
-        "df_displayed_actors"
+    df_acteur_merged = kwargs["ti"].xcom_pull(task_ids="apply_corrections_acteur")[
+        "df_acteur_merged"
     ]
     df_labels_updated = kwargs["ti"].xcom_pull(task_ids="deduplicate_labels")
     df_acteur_services_updated = kwargs["ti"].xcom_pull(
@@ -253,7 +253,7 @@ def write_data_to_postgres(**kwargs):
         conn.execute(f"DELETE FROM {temp_table_name_sources}")
         conn.execute(f"DELETE FROM {temp_table_name_actor}")
 
-        df_displayed_actors[
+        df_acteur_merged[
             [
                 "identifiant_unique",
                 "nom",
@@ -449,28 +449,28 @@ def deduplicate_acteur_serivces(**kwargs):
 def deduplicate_acteur_sources(**kwargs):
     data_actors = kwargs["ti"].xcom_pull(task_ids="apply_corrections_acteur")
     df_children = data_actors["df_children"]
-    df_displayed_actors = data_actors["df_displayed_actors"]
+    df_acteur_merged = data_actors["df_acteur_merged"]
 
-    df_acteur_sources_without_parents = df_displayed_actors[
-        ~df_displayed_actors["identifiant_unique"].isin(df_children["parent_id"])
+    df_acteur_sources_without_parents = df_acteur_merged[
+        ~df_acteur_merged["identifiant_unique"].isin(df_children["parent_id"])
     ][["identifiant_unique", "source_id"]]
 
     df_acteur_sources_without_parents = df_acteur_sources_without_parents.rename(
         columns={"identifiant_unique": "displayedacteur_id"}
     )
 
-    parents_df = df_children[["parent_id", "child_source_id"]].drop_duplicates()
+    parents_df = df_children[["parent_id", "source_id"]].drop_duplicates()
 
-    parents_df = parents_df.rename(
-        columns={"parent_id": "displayedacteur_id", "child_source_id": "source_id"}
-    )
+    parents_df = parents_df.rename(columns={"parent_id": "displayedacteur_id"})
 
     result_df = pd.concat(
         [df_acteur_sources_without_parents, parents_df], ignore_index=True
     )
 
     result_df = result_df[
-        ~result_df["displayedacteur_id"].isin(df_children["child_id"].tolist())
+        ~result_df["displayedacteur_id"].isin(
+            df_children["identifiant_unique"].tolist()
+        )
     ]
 
     return result_df
@@ -515,28 +515,43 @@ def _merge_acteurs_many2many_relationship(
 
 
 def _deduplicate_acteurs_many2many_relationship(
-    merged_acteur_task_id: str, col: str, **kwargs: dict
+    merged_relationship_task_id: str, col: str, **kwargs: dict
 ):
     df_children = kwargs["ti"].xcom_pull(task_ids="apply_corrections_acteur")[
         "df_children"
     ]
-    merged_acteur = kwargs["ti"].xcom_pull(task_ids=merged_acteur_task_id)
-    merged_df = df_children.merge(
-        merged_acteur, left_on="child_id", right_on="displayedacteur_id", how="inner"
+    df_merged_relationship = kwargs["ti"].xcom_pull(
+        task_ids=merged_relationship_task_id
     )
-    merged_df = merged_df.drop(columns=["displayedacteur_id"])
 
-    deduped_df = merged_df.drop_duplicates(subset=["parent_id", col], keep="first")
-
-    deduped_df.rename(columns={"parent_id": "displayedacteur_id"}, inplace=True)
-    final_df = pd.concat(
-        [merged_acteur, deduped_df[["displayedacteur_id", col]]], ignore_index=True
+    # Keep only the relationship of the children
+    df_children_relationship = df_children.merge(
+        df_merged_relationship,
+        left_on="identifiant_unique",
+        right_on="displayedacteur_id",
+        how="inner",
     )
-    final_df = final_df[
-        ~final_df["displayedacteur_id"].isin(df_children["child_id"].tolist())
+
+    # Deduplicate the relationship : renaming parent_id to displayedacteur_id
+    df_children_relationship.drop(columns=["displayedacteur_id"], inplace=True)
+    df_children_relationship.drop_duplicates(
+        subset=["parent_id", col], keep="first", inplace=True
+    )
+    df_children_relationship.rename(
+        columns={"parent_id": "displayedacteur_id"}, inplace=True
+    )
+
+    df_relationship = pd.concat(
+        [df_merged_relationship, df_children_relationship[["displayedacteur_id", col]]],
+        ignore_index=True,
+    )
+    df_relationship = df_relationship[
+        ~df_relationship["displayedacteur_id"].isin(
+            df_children["identifiant_unique"].tolist()
+        )
     ]
 
-    return final_df
+    return df_relationship
 
 
 default_args = {
