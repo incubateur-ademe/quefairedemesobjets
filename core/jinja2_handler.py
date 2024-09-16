@@ -44,6 +44,7 @@ def action_by_direction(request: HttpRequest, direction: str):
     return [{**a, "active": True} for a in actions_to_display]
 
 
+# TODO : should be deprecated and replaced by a value in context view
 def display_infos_panel(adresse: DisplayedActeur) -> bool:
     return (
         bool(adresse.horaires_description or adresse.display_postal_address())
@@ -51,6 +52,7 @@ def display_infos_panel(adresse: DisplayedActeur) -> bool:
     )
 
 
+# TODO : should be deprecated and replaced by a value in context view
 def display_exclusivite_reparation(acteur: DisplayedActeur) -> bool:
     return acteur.exclusivite_de_reprisereparation
 
