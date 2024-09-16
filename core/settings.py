@@ -314,3 +314,5 @@ STORAGES = {
 AIRFLOW_WEBSERVER_REFRESHACTEUR_URL = decouple.config(
     "AIRFLOW_WEBSERVER_REFRESHACTEUR_URL", cast=str, default="http://localhost:8080"
 )
+
+IMPORT_EXPORT_TMP_STORAGE_CLASS = "import_export.tmp_storages.MediaStorage"

@@ -519,7 +519,7 @@ def adresse_detail(request, identifiant_unique):
         "proposition_services__sous_categories__categorie",
         "proposition_services__action__groupe_action",
         "labels",
-        "source",
+        "sources",
     ).get(identifiant_unique=identifiant_unique)
 
     return render(
@@ -530,6 +530,12 @@ def adresse_detail(request, identifiant_unique):
             "latitude": latitude,
             "longitude": longitude,
             "direction": direction,
+            "display_labels_panel": any(
+                label.afficher for label in displayed_acteur.labels.all()
+            ),
+            "display_sources_panel": any(
+                source.afficher for source in displayed_acteur.sources.all()
+            ),
         },
     )
 

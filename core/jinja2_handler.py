@@ -44,6 +44,7 @@ def action_by_direction(request: HttpRequest, direction: str):
     return [{**a, "active": True} for a in actions_to_display]
 
 
+# TODO : should be deprecated and replaced by a value in context view
 def display_infos_panel(adresse: DisplayedActeur) -> bool:
     return (
         bool(adresse.horaires_description or adresse.display_postal_address())
@@ -51,16 +52,9 @@ def display_infos_panel(adresse: DisplayedActeur) -> bool:
     )
 
 
+# TODO : should be deprecated and replaced by a value in context view
 def display_exclusivite_reparation(acteur: DisplayedActeur) -> bool:
     return acteur.exclusivite_de_reprisereparation
-
-
-def display_labels_panel(adresse: DisplayedActeur) -> bool:
-    return bool(adresse.labels.filter(afficher=True, type_enseigne=False).count())
-
-
-def display_sources_panel(adresse: DisplayedActeur) -> bool:
-    return bool(adresse.source and adresse.source.afficher)
 
 
 def hide_object_filter(request) -> bool:
@@ -88,8 +82,6 @@ def environment(**options):
         {
             "action_by_direction": action_by_direction,
             "display_infos_panel": display_infos_panel,
-            "display_sources_panel": display_sources_panel,
-            "display_labels_panel": display_labels_panel,
             "hide_object_filter": hide_object_filter,
             "distance_to_acteur": distance_to_acteur,
             "display_exclusivite_reparation": display_exclusivite_reparation,
