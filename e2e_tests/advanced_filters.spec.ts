@@ -12,7 +12,8 @@ async function searchInCarteMode(page){
 }
 
 async function openAdvancedFilters(page, dataTestId="advanced-filters") {
-  await page.waitForTimeout(3000);
+  // Explicitely wait for addresses to load
+  await page.waitForTimeout(5000);
   await page.locator(`button[data-testid=${dataTestId}]`).click()
   await expect(page.locator("[data-testid=advanced-filters-modal] .fr-modal__content h4")).toBeInViewport()
   await page.locator("[data-testid=advanced-filters-modal] .fr-modal__header button").click()
