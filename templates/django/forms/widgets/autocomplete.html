@@ -19,7 +19,6 @@
         data-on-focus=true
         type="{{ widget.type }}"
         name="{{ widget.name }}"
-        id="{{ widget.attrs.id }}"
         {% if widget.value != None %} value="{{ widget.value|stringformat:'s' }}"{% endif %}
         {% include "django/forms/widgets/attrs.html" %}
         >
