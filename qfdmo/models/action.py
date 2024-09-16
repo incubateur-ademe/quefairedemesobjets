@@ -1,5 +1,4 @@
-import logging
-from typing import List
+from typing import List, cast
 
 from django.contrib.gis.db import models
 from django.core.cache import cache
@@ -111,82 +110,51 @@ brown-cafe-creme-main-782, purple-glycine-main-494, green-menthe-main-548
         return self.libelle
 
 
-class CachedDirectionAction:
-    _cached_actions_by_direction = None
-    _cached_action_instances: List[Action] | None = None
-    _cached_groupe_action_instances: QuerySet[GroupeAction] | None = None
-    _cached_direction = None
-    _reparer_action_id = None
-    _last_cache_update = None
+def get_action_instances() -> List[Action]:
+    return list(Action.objects.prefetch_related("directions", "groupe_action"))
 
-    @classmethod
-    def get_action_instances(cls) -> List[Action]:
-        action_instances = cache.get("action_instances")
-        if action_instances is None:
-            action_instances = list(
-                Action.objects.prefetch_related("directions", "groupe_action")
-            )
-            cache.set("action_instances", action_instances)
-        return action_instances
 
-    @classmethod
-    def get_groupe_action_instances(cls) -> QuerySet[GroupeAction]:
-        groupe_action_instances = cache.get("groupe_action_instances")
-        if groupe_action_instances is None:
-            groupe_action_instances = GroupeAction.objects.prefetch_related(
-                "actions"
-            ).order_by("order")
-            cache.set("groupe_action_instances", groupe_action_instances)
-        return groupe_action_instances
+def get_reparer_action_id() -> int:
+    try:
+        return [
+            action for action in get_action_instances() if action.code == "reparer"
+        ][0].id
+    except IndexError:
+        raise Exception("Action 'Réparer' not found")
 
-    # TODO : to be factorized
-    @classmethod
-    def get_actions_by_direction(cls) -> dict:
-        actions_by_direction = cache.get("actions_by_direction")
-        if actions_by_direction is None:
-            actions_by_direction = {
-                d.code: sorted(
-                    [
-                        model_to_dict(a, exclude=["directions"])
-                        for a in d.actions.filter(afficher=True)
-                    ],
-                    key=lambda x: x["order"],
-                )
-                for d in ActionDirection.objects.all()
-            }
-            cache.set("actions_by_direction", actions_by_direction)
 
-        return actions_by_direction
+def get_groupe_action_instances() -> QuerySet[GroupeAction]:
+    return GroupeAction.objects.prefetch_related("actions").order_by("order")
 
-    @classmethod
-    def get_directions(cls, first_direction=None) -> List[dict]:
-        directions = cache.get("directions")
-        logging.warning(f"directions: {directions}")
-        if directions is None:
-            direction_instances = ActionDirection.objects.all()
-            directions_list = [model_to_dict(d) for d in direction_instances]
-            directions = sorted(directions_list, key=lambda x: x["order"])
-            cache.set("directions", directions)
-        if first_direction is not None and first_direction in [
-            d["code"] for d in directions
-        ]:
-            return sorted(
-                directions,
-                key=lambda x: (x["code"] != first_direction, x["code"]),
-            )
-        return directions
 
-    @classmethod
-    def get_reparer_action_id(cls):
-        reparer_action_id = cache.get("reparer_action_id")
-        if reparer_action_id is None:
-            try:
-                reparer_action_id = [
-                    action
-                    for action in cls.get_action_instances()
-                    if action.code == "reparer"
-                ][0].id
-                cache.set("reparer_action_id", reparer_action_id)
-            except IndexError:
-                raise Exception("Action 'Réparer' not found")
-        return reparer_action_id
+def get_actions_by_direction() -> dict:
+    return {
+        d.code: sorted(
+            [
+                model_to_dict(a, exclude=["directions"])
+                for a in d.actions.filter(afficher=True)
+            ],
+            key=lambda x: x["order"],
+        )
+        for d in ActionDirection.objects.all()
+    }
+
+
+def get_directions() -> List[dict]:
+    direction_instances = ActionDirection.objects.all()
+    directions_list = [model_to_dict(d) for d in direction_instances]
+    return sorted(directions_list, key=lambda x: x["order"])
+
+
+def get_ordered_directions(first_direction=None) -> List[dict]:
+    ordered_directions = cast(
+        List[dict], cache.get_or_set("directions", get_directions)
+    )
+    if first_direction is not None and first_direction in [
+        d["code"] for d in ordered_directions
+    ]:
+        return sorted(
+            ordered_directions,
+            key=lambda x: (x["code"] != first_direction, x["code"]),
+        )
+    return ordered_directions

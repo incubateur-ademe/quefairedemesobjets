@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from qfdmo.models import CachedDirectionAction
+from qfdmo.models.action import get_directions
 
 
 def get_direction(request):
@@ -10,6 +10,6 @@ def get_direction(request):
         else settings.DEFAULT_ACTION_DIRECTION
     )
     direction = request.GET.get("direction", default_direction)
-    if direction not in [d["code"] for d in CachedDirectionAction.get_directions()]:
+    if direction not in [d["code"] for d in get_directions()]:
         direction = default_direction
     return direction

@@ -1,7 +1,11 @@
 import pytest
 
 from qfdmo.models import Action, CodeAsNaturalKeyModel
-from qfdmo.models.action import ActionDirection, CachedDirectionAction
+from qfdmo.models.action import (
+    ActionDirection,
+    get_actions_by_direction,
+    get_ordered_directions,
+)
 from unit_tests.qfdmo.action_factory import ActionDirectionFactory, ActionFactory
 
 
@@ -35,7 +39,7 @@ def actions():
     ActionFactory(code="first_second").directions.add(first, second)
 
 
-class TestCachedDirectionActionGetDirections:
+class TestCachedGetDirections:
 
     @pytest.mark.django_db
     @pytest.mark.parametrize(
@@ -52,37 +56,45 @@ class TestCachedDirectionActionGetDirections:
     def test_get_directions(self, first_direction, expected, action_directions):
         assert [
             {k: v for k, v in direction.items() if k in ["order", "code"]}
-            for direction in CachedDirectionAction.get_directions(
-                first_direction=first_direction
-            )
+            for direction in get_ordered_directions(first_direction=first_direction)
         ] == expected
 
 
-class TestCachedDirectionActionGetActionsByDirection:
+class TestCachedGetActionsByDirection:
 
     @pytest.mark.django_db
     def test_get_actions_by_direction_basic(self, action_directions, actions):
 
-        assert [
-            a["code"] for a in CachedDirectionAction.get_actions_by_direction()["first"]
-        ] == ["first_1", "first_2", "first_3", "first_second"]
-        assert [
-            a["code"]
-            for a in CachedDirectionAction.get_actions_by_direction()["second"]
-        ] == ["second_1", "second_2", "second_3", "first_second"]
+        assert [a["code"] for a in get_actions_by_direction()["first"]] == [
+            "first_1",
+            "first_2",
+            "first_3",
+            "first_second",
+        ]
+        assert [a["code"] for a in get_actions_by_direction()["second"]] == [
+            "second_1",
+            "second_2",
+            "second_3",
+            "first_second",
+        ]
 
     @pytest.mark.django_db
     def test_get_actions_by_direction_order(self, action_directions, actions):
         Action.objects.filter(code="first_1").update(order=999)
 
-        assert [
-            a["code"] for a in CachedDirectionAction.get_actions_by_direction()["first"]
-        ] == ["first_2", "first_3", "first_second", "first_1"]
+        assert [a["code"] for a in get_actions_by_direction()["first"]] == [
+            "first_2",
+            "first_3",
+            "first_second",
+            "first_1",
+        ]
 
     @pytest.mark.django_db
     def test_get_actions_by_direction_hidden(self, action_directions, actions):
         Action.objects.filter(code="first_1").update(afficher=False)
 
-        assert [
-            a["code"] for a in CachedDirectionAction.get_actions_by_direction()["first"]
-        ] == ["first_2", "first_3", "first_second"]
+        assert [a["code"] for a in get_actions_by_direction()["first"]] == [
+            "first_2",
+            "first_3",
+            "first_second",
+        ]

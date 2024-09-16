@@ -1,11 +1,12 @@
 import random
 import string
 import uuid
-from typing import Any
+from typing import Any, List, cast
 
 import opening_hours
 import orjson
 from django.contrib.gis.db import models
+from django.core.cache import cache
 from django.core.files.images import get_image_dimensions
 from django.db.models.functions import Now
 from django.forms import ValidationError, model_to_dict
@@ -13,7 +14,7 @@ from django.http import HttpRequest
 from django.urls import reverse
 from unidecode import unidecode
 
-from qfdmo.models.action import Action, CachedDirectionAction
+from qfdmo.models.action import Action, get_action_instances
 from qfdmo.models.categorie_objet import SousCategorieObjet
 from qfdmo.models.utils import CodeAsNaturalKeyModel, NomAsNaturalKeyModel
 
@@ -465,9 +466,13 @@ class DisplayedActeur(BaseActeur):
         ps_action_ids = list(
             {ps.action_id for ps in self.proposition_services.all()}  # type: ignore
         )
+        # Cast needed because of the cache
+        cached_action_instances = cast(
+            List[Action], cache.get_or_set("action_instances", get_action_instances)
+        )
         return [
             action
-            for action in CachedDirectionAction.get_action_instances()
+            for action in cached_action_instances
             if (not direction or direction in [d.code for d in action.directions.all()])
             and action.id in ps_action_ids
         ]
