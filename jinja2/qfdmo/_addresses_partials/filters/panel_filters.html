@@ -1,113 +1,91 @@
 {# Panel «Filtres avancés» #}
-<div class='fr-container qfdmo-px-0 qfdmo-absolute qfdmo-inset-0 qfdmo-font-black qfdmo-z-[10010] qfdmo-flex qfdmo-flex-col qfdmo-hidden'
+<div class='fr-container
+    qfdmo-px-0
+    qfdmo-absolute qfdmo-z-[10010] qfdmo-top-auto qfdmo-hidden qfdmo-mt-auto qfdmo-h-[95%]
+    qfdmo-drop-shadow-[0_0_100px_rgba(0,0,0,0.5)]
+    qfdmo-inset-0 qfdmo-font-black qfdmo-bg-white
+    qfdmo-flex-col
+    qfdmo-fill-mode-forwards
+    data-[visible=true]:qfdmo-animate-in
+    data-[visible=true]:qfdmo-flex
+    data-[visible=true]:qfdmo-slide-in-from-bottom-9w
+    data-[visible=exit]:qfdmo-flex
+    data-[visible=exit]:qfdmo-animate-out
+    data-[visible=exit]:qfdmo-slide-out-to-bottom-9w
+    data-[visible=exit]:qfdmo-fade-out
+    '
+    data-visible="false"
     data-search-solution-form-target="advancedFiltersMainPanel"
->
-    <div class="qfdmo-flex-grow qfdmo-bg-black qfdmo-opacity-20"></div>
-    <div class="qfdmo-bg-white qfdmo-duration-300 qfdmo-h-0" data-search-solution-form-target="advancedFiltersFormPanel">
-        <div class="fr-container fr-container--fluid qfdmo-h-full">
-            <div class="qfdmo-h-full qfdmo-flex qfdmo-flex-col">
-                <div class="fr-modal__header">
+    data-action="keydown.esc@document->search-solution-form#toggleAdvancedFiltersWithoutSubmitButton"
+    data-testid="advanced-filters-modal"
+    tabindex="0"
+    >
+    <div class="fr-container fr-container--fluid qfdmo-h-full">
+        <div class="qfdmo-h-full qfdmo-flex qfdmo-flex-col">
+            <div class="fr-modal__header">
+                <button
+                    class="fr-btn fr-btn--close fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-close-line"
+                    type="button"
+                    data-action="click -> search-solution-form#toggleAdvancedFiltersWithoutSubmitButton"
+                    >
+                    Fermer
+                </button>
+            </div>
+            <div class="fr-modal__content fr-text--normal qfdmo-overflow-y-auto qfdmo-flex-grow  qfdmo-font-normal">
+
+                {% block filters_title %}
+                    <h4 class="fr-mt-3w qfdmo-text-center">
+                        Filtres avancés
+                    </h4>
+                {% endblock %}
+                <hr>
+
+                {% block filters_content %}
+                    {% with field=form.bonus, legend="Éligibles au bonus réparation" %}
+                        {% include "qfdmo/_addresses_partials/filter/_panel_filters" %}
+                    {% endwith %}
+
+                    {% with field=form.ess, legend="Type d'enseigne ESS" %}
+                        {% include "qfdmo/_addresses_partials/filter/_panel_filters" %}
+                    {% endwith %}
+
+                    {% with field=form.label_reparacteur, legend="Enseignes labellisées Répar’Acteurs", icon="qfdmo/partials/label_reparacteur_icon.html" %}
+                        {% include "qfdmo/_addresses_partials/filter/_panel_filters" %}
+                    {% endwith %}
+                {% endblock %}
+
+
+            </div>
+            <div class="fr-modal__footer qfdmo-flex qfdmo-flex-col">
+                <div
+                    class="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg fr-btns-group--icon-left"
+                    data-search-solution-form-target="advancedFiltersSaveButton"
+                >
                     <button
-                        class="fr-btn fr-btn--close fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-close-line"
+                        class="fr-btn"
                         type="button"
                         data-action="click -> search-solution-form#toggleAdvancedFiltersWithoutSubmitButton"
                         >
-                        Fermer
+                        Enregistrer les filtres
                     </button>
                 </div>
-                <div class="fr-modal__content fr-text--normal qfdmo-overflow-y-auto qfdmo-flex-grow  qfdmo-font-normal">
-
-                    {% block filters_title %}
-                        <h4 class="fr-mt-3w qfdmo-text-center">
-                            Filtres avancés
-                        </h4>
-                    {% endblock %}
-                    <hr>
-
-                    {% block filters_content %}
-                        <fieldset class="fr-fieldset" aria-labelledby="bonus-reparation-legend">
-                            <legend class="qfdmo-hidden" id="bonus-reparation-legend">
-                                Éligibles au bonus réparation
-                            </legend>
-                            <div class="fr-fieldset__element fr-fieldset__element--inline">
-                                <div
-                                    class="fr-checkbox-group qfdmo-flex qfdmo-flex-row qfdmo-items-center"
-                                >
-                                    {{ form.bonus }}
-                                    {{ form.bonus.label_tag() }}
-                                </div>
-                                <span class="fr-hint-text">{{ form.bonus.help_text }}</span>
-                            </div>
-                        </fieldset>
-
-
-                        <fieldset class="fr-fieldset" aria-labelledby="ess-legend">
-                            <legend class="qfdmo-hidden" id="ess-legend">
-                                Type d'enseigne ESS
-                            </legend>
-                            <div class="fr-fieldset__element fr-fieldset__element--inline">
-                                <div
-                                    class="fr-checkbox-group qfdmo-flex qfdmo-flex-row qfdmo-items-center"
-                                >
-                                    {{ form.ess }}
-                                    {{ form.ess.label_tag() }}
-                                </div>
-                                <span class="fr-hint-text">{{ form.ess.help_text }}</span>
-                            </div>
-                        </fieldset>
-
-                        <div
-                            class="qfdmo-flex qfdmo-flex-row qfdmo-items-center"
+                <div
+                    class="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg fr-btns-group--icon-left"
+                    data-search-solution-form-target="advancedFiltersSaveAndSubmitButton"
+                >
+                    <button
+                        class="fr-btn"
+                        type="button"
+                        data-action="click -> search-solution-form#advancedSubmit"
+                        data-without-zone="false"
+                        data-with-controls={{"false" if is_carte(request) else "true"}}
+                        data-toggle-advanced-filters="true"
                         >
-                            <fieldset class="fr-fieldset" aria-labelledby="reparacteurs-legend">
-                                <legend class="qfdmo-hidden" id="reparacteurs-legend">
-                                    Enseignes labellisées Répar’Acteurs
-                                </legend>
-                                <div class="fr-fieldset__element fr-fieldset__element--inline">
-                                    <div
-                                        class="fr-checkbox-group qfdmo-flex qfdmo-flex-row qfdmo-items-center"
-                                    >
-                                        {{ form.label_reparacteur }}
-                                        {{ form.label_reparacteur.label_tag() }}
-                                    </div>
-                                    <span class="fr-hint-text">{{ form.label_reparacteur.help_text }}</span>
-                                </div>
-                            </fieldset>
-                            {% include "qfdmo/partials/label_reparacteur_icon.html" %}
-                        </div>
-                    {% endblock %}
+                        Appliquer
+                    </button>
                 </div>
-                <div class="fr-modal__footer qfdmo-flex qfdmo-flex-col">
-                    <div
-                        class="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg fr-btns-group--icon-left"
-                        data-search-solution-form-target="advancedFiltersSaveButton"
-                    >
-                        <button
-                            class="fr-btn"
-                            type="button"
-                            data-action="click -> search-solution-form#toggleAdvancedFiltersWithoutSubmitButton"
-                            >
-                            Enregistrer les filtres
-                        </button>
-                    </div>
-                    <div
-                        class="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg fr-btns-group--icon-left"
-                        data-search-solution-form-target="advancedFiltersSaveAndSubmitButton"
-                    >
-                        <button
-                            class="fr-btn"
-                            type="button"
-                            data-action="click -> search-solution-form#advancedSubmit"
-                            data-without-zone="false"
-                            data-with-controls={{"false" if is_carte(request) else "true"}}
-                            data-toggle-advanced-filters="true"
-                            >
-                            Appliquer
-                        </button>
-                    </div>
-                    {% block filters_footer_links %}
-                    {% endblock %}
-                </div>
+                {% block filters_footer_links %}
+                {% endblock %}
             </div>
         </div>
     </div>

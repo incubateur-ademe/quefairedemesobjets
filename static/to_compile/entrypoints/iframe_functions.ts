@@ -4,16 +4,16 @@ function compileIframeAttributes(
   maxWidth: string,
   height: string,
 ): { [Property in keyof HTMLIFrameElement]?: unknown } {
-  return {
-    src: `${baseUrl}?${urlParams.toString()}`,
-    id: "lvao_iframe",
-    frameBorder: "0",
-    scrolling: "no",
-    allow: "geolocation; clipboard-write",
-    allowFullscreen: true,
-    title: "Longue vie aux objets",
-    style: `overflow: hidden; max-width: ${maxWidth}; width: 100%; height: ${height};`,
-  }
+    return {
+        src: `${baseUrl}?${urlParams.toString()}`,
+        id: "lvao_iframe",
+        frameBorder: "0",
+        scrolling: "no",
+        allow: "geolocation; clipboard-write",
+        allowFullscreen: true,
+        title: "Longue vie aux objets",
+        style: `overflow: hidden; max-width: ${maxWidth}; width: 100%; height: ${height};`,
+    }
 }
 
 function parseJSONDataset(dataset: string): any {

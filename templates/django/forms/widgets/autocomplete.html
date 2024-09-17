@@ -1,6 +1,6 @@
 {% load custom_filters %}
 <div
-    class="fr-mb-1w qfdmo-flex-grow"
+    class="fr-my-1w qfdmo-flex-grow"
 >
     <div
         class="autocomplete qfdmo-relative"
@@ -17,10 +17,8 @@
         "
         data-{{ widget.data_controller }}-target="input"
         data-on-focus=true
-        autocomplete="off"
         type="{{ widget.type }}"
         name="{{ widget.name }}"
-        id="{{ widget.id }}"
         {% if widget.value != None %} value="{{ widget.value|stringformat:'s' }}"{% endif %}
         {% include "django/forms/widgets/attrs.html" %}
         >

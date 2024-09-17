@@ -6,9 +6,15 @@
         data-with-controls={{"false" if is_carte(request) else "true"}}
         data-without-zone="true"
         data-with-dynamic-form-panel={{"false" if is_carte(request) else "true"}}
+        data-testid="rechercher-adresses-submit"
     >
         <div class="form-group">
             {{ form.adresse.label_tag() }}
+            {% if form.adresse.help_text %}
+                <span class="fr-hint-text fr-mt-1v" id="{{ form.adresse.id_for_label }}_helptext">
+                    {{ form.adresse.help_text }}
+                </span>
+            {% endif %}
             {{ form.adresse }}
         </div>
         {{ form.longitude }}
