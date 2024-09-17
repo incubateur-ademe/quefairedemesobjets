@@ -36,7 +36,7 @@
     "dependencies": {
         "@axe-core/playwright": "^4.10.0",
         "@gouvfr/dsfr": "^1.12",
-        "@hotwired/stimulus": "^3.2.1",
+        "@hotwired/stimulus": "^3.2.2",
         "@hotwired/turbo": "^8.0.5",
         "bowser": "^2.11.0",
         "eslint-config-prettier": "^9.1.0",
@@ -66,6 +66,7 @@
         "parcel": "^2.12.0",
         "prettier": "^3.3.3",
         "ts-jest": "^29.2.5",
+        "tailwindcss-animate": "^1.0.7",
         "ts-node": "^10.9.2",
         "typescript": "^5.5.4"
     },

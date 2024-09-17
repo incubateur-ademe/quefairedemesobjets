@@ -1,0 +1,30 @@
+<turbo-frame id="addressesPanel"
+    data-search-solution-form-target="addressesPanel"
+    class="qfdmo-relative qfdmo-duration-300 qfdmo-overflow-hidden qfdmo-z-1
+    qfdmo-flex qfdmo-flex-col
+    data-[visible=true]:qfdmo-flex-grow
+    data-[visible=false]:qfdmo-invisible data-[visible=false]:qfdmo-h-0"
+    data-visible={{"true" if is_carte(request) else "false"}}
+    tabindex="0"
+>
+    {% block panel_header %}
+        <div data-search-solution-form-target="headerAddressPanel"
+            class="fr-container qfdmo-duration-300">
+
+            {# Digital #}
+            <fieldset class="fr-segmented fr-segmented--sm qfdmo-w-full ">
+                <legend class="fr-segmented__legend qfdmo-hidden">
+                    {{ form.digital.label_tag() }}
+                </legend>
+                {{ form.digital }}
+            </fieldset>
+
+            <h4 class="fr-my-1w fr-h6">
+                Vos {% if form.digital.value() == "1" %}résultats{% else %}adresses{% endif %} {% if form.sous_categorie_objet.value() %}pour «{{ form.sous_categorie_objet.value() }}»{% endif %}&nbsp;:
+            </h4>
+        </div>
+    {% endblock panel_header %}
+
+    {% include 'qfdmo/_addresses_partials/map_and_detail.html' %}
+
+</turbo-frame>
