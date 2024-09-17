@@ -34,7 +34,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install gdal-bin
       - name: Install Dependencies
-        run: pip install --require-hashes --no-deps -r requirements.txt -r dev-requirements.txt
+        run: pip install --require-hashes --no-deps -r airflow-requirements.txt -r requirements.txt -r dev-requirements.txt
       - name: Run unit tests
         run: pytest unit_tests
       - name: Run integration tests

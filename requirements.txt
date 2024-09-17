@@ -159,9 +159,9 @@ django-import-export[xls,xlsx]==4.1.1 \
     --hash=sha256:16ecc5a9f0df46bde6eb278a3e65ebda0ee1db55656f36440e9fb83f40ab85a3 \
     --hash=sha256:730ae2443a02b1ba27d8dba078a27ae9123adfcabb78161b4f130843607b3df9
     # via -r requirements.in
-django-ninja==1.2.0 \
-    --hash=sha256:0a7b7e20202f50546ae45af6a262fccb606c9e75b8bbe9fe38d49075a9435bf0 \
-    --hash=sha256:aa8ca853bf189cc13247b1922ca41f1a6e60056c90041ec0081cce0ea8d8de02
+django-ninja==1.3.0 \
+    --hash=sha256:5b320e2dc0f41a6032bfa7e1ebc33559ae1e911a426f0c6be6674a50b20819be \
+    --hash=sha256:f58096b6c767d1403dfd6c49743f82d780d7b9688d9302ecab316ac1fa6131bb
     # via -r requirements.in
 django-sql-explorer==3.2.1 \
     --hash=sha256:35e05f40eff91eead10c553cce2ee63033a19ac39c99b9ccdf87552c52784d63 \
