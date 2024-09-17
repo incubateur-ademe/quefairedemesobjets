@@ -16,6 +16,7 @@ from pathlib import Path
 import decouple
 import dj_database_url
 import sentry_sdk
+from import_export.formats.base_formats import CSV, XLS, XLSX
 from sentry_sdk.integrations.django import DjangoIntegration
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -316,3 +317,4 @@ AIRFLOW_WEBSERVER_REFRESHACTEUR_URL = decouple.config(
 )
 
 IMPORT_EXPORT_TMP_STORAGE_CLASS = "import_export.tmp_storages.MediaStorage"
+IMPORT_FORMATS = [CSV, XLSX, XLS]
