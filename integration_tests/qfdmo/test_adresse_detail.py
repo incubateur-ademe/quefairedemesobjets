@@ -55,7 +55,7 @@ class TestDisplayLabel:
 
         response = client.get(url)
         assert response.status_code == 200
-        assert response.context["display_labels_panel"]
+        assert response.context["display_labels_panel"] is False
 
         soup = BeautifulSoup(response.content, "html.parser")
         label_tag = soup.find(attrs={"data-testid": "adresse_detail_header_tag"})
