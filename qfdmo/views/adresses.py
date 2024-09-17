@@ -530,11 +530,13 @@ def adresse_detail(request, identifiant_unique):
             "latitude": latitude,
             "longitude": longitude,
             "direction": direction,
-            "display_labels_panel": any(
-                label.afficher for label in displayed_acteur.labels.all()
+            "display_labels_panel": bool(
+                displayed_acteur.labels.filter(
+                    afficher=True, type_enseigne=False
+                ).count()
             ),
-            "display_sources_panel": any(
-                source.afficher for source in displayed_acteur.sources.all()
+            "display_sources_panel": bool(
+                displayed_acteur.sources.filter(afficher=True).count()
             ),
         },
     )
