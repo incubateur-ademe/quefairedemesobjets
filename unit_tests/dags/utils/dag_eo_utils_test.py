@@ -1487,6 +1487,9 @@ class TestCeateLabels:
         )
         pd.testing.assert_frame_equal(df, expected_dataframe_with_ess_label)
 
+    @pytest.mark.parametrize(
+        "code_ecoorganisme_bonus", ["ECOORGANISME", "ecoorganisme"]
+    )
     def test_create_bonus_reparation_labels(
         self,
         db_mapping_config,
@@ -1495,6 +1498,7 @@ class TestCeateLabels:
         df_acteur_services_from_db,
         df_sous_categories_from_db,
         df_labels_from_db,
+        code_ecoorganisme_bonus,
     ):
 
         mock = get_mock_ti_label(
@@ -1508,7 +1512,7 @@ class TestCeateLabels:
                 {
                     "identifiant_unique": [1, 2],
                     "labels_etou_bonus": ["Agréé Bonus Réparation", ""],
-                    "ecoorganisme": ["ecoorganisme", "source1"],
+                    "ecoorganisme": [code_ecoorganisme_bonus, "source1"],
                     "acteur_type_id": [202, 202],
                 }
             ),
