@@ -550,8 +550,8 @@ def create_labels(**kwargs):
         # Manage bonus reparation
         label = str(row.get("labels_etou_bonus"))
         if label == "Agréé Bonus Réparation":
-            label_code = row.get("ecoorganisme")
-            if label_code in label_mapping:
+            label_code = row.get("ecoorganisme").lower()
+            if label_code in label_mapping.keys():
                 rows_list.append(
                     {
                         "acteur_id": row["identifiant_unique"],
