@@ -77,7 +77,11 @@ MIDDLEWARE = [
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-    }
+    },
+    "database": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "lvao_django_cache",
+    },
 }
 
 X_FRAME_OPTIONS = "ALLOWALL"

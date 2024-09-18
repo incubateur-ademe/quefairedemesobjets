@@ -5,63 +5,27 @@ from django.core.cache import cache
 from django.http import HttpRequest
 from django.utils.safestring import mark_safe
 
-from qfdmo.models import DagRun, DagRunStatus, SousCategorieObjet
+from core.geography import all_epci_codes
 from qfdmo.models.action import (
     Action,
     get_action_instances,
     get_directions,
     get_ordered_directions,
 )
+from qfdmo.models import DagRun, DagRunStatus, SousCategorieObjet
 
-
-class AutoCompleteInput(forms.TextInput):
-    template_name = "django/forms/widgets/autocomplete.html"
-
-    def __init__(self, attrs=None, data_controller="autocomplete", **kwargs):
-        self.data_controller = data_controller
-        super().__init__(attrs=attrs, **kwargs)
-
-    def get_context(self, name, value, attrs):
-        context = super().get_context(name, value, attrs)
-        context["widget"]["data_controller"] = self.data_controller
-        return context
-
-
-class AutoCompleteAndSearchInput(AutoCompleteInput):
-    template_name = "django/forms/widgets/autocomplete_and_search.html"
-
-    def __init__(self, attrs=None, btn_attrs={}, **kwargs):
-        self.btn_attrs = btn_attrs
-        super().__init__(attrs=attrs, **kwargs)
-
-    def get_context(self, name, value, attrs):
-        context = super().get_context(name, value, attrs)
-        context["widget"]["btn_attrs"] = self.btn_attrs
-        return context
-
-
-class SegmentedControlSelect(forms.RadioSelect):
-    template_name = "django/forms/widgets/segmented_control.html"
-    option_template_name = "django/forms/widgets/segmented_control_option.html"
-
-    def __init__(self, attrs=None, fieldset_attrs=None, option_attrs=None, choices=()):
-        self.fieldset_attrs = {} if fieldset_attrs is None else fieldset_attrs.copy()
-        super().__init__(attrs)
-
-    def get_context(self, name, value, attrs):
-        context = super().get_context(name, value, attrs)
-        context["widget"]["fieldset_attrs"] = self.build_attrs(self.fieldset_attrs)
-        return context
-
-
-class DSFRCheckboxSelectMultiple(forms.CheckboxSelectMultiple):
-    template_name = "django/forms/widgets/checkbox_select.html"
-    option_template_name = "django/forms/widgets/checkbox_option.html"
+from qfdmo.widgets import (
+    AutoCompleteInput,
+    AutoCompleteAndSearchInput,
+    SegmentedControlSelect,
+    DSFRCheckboxSelectMultiple,
+)
 
 
 class AddressesForm(forms.Form):
     def load_choices(self, request: HttpRequest) -> None:
-        pass
+        if address_placeholder := request.GET.get("address_placeholder"):
+            self.fields["adresse"].widget.attrs["placeholder"] = address_placeholder
 
     bounding_box = forms.CharField(
         widget=forms.HiddenInput(
@@ -129,7 +93,8 @@ class AddressesForm(forms.Form):
                 "data-search-solution-form-target": "direction",
             },
         ),
-        choices=[],
+        # TODO: why are we not using initial values here ?
+        # initial="jai",
         label="Direction des actions",
         required=False,
     )
@@ -263,14 +228,17 @@ class AddressesForm(forms.Form):
 
 
 class IframeAddressesForm(AddressesForm):
-    def load_choices(self, request: HttpRequest) -> None:
+    def load_choices(self, request: HttpRequest, **kwargs) -> None:
+        # The kwargs in function signature prevents type error.
+        # TODO : refacto forms : if AddressesForm and CarteAddressesForm
+        # are used on differents views, the method signature would not need
+        # to be the same.
         first_direction = request.GET.get("first_dir")
         self.fields["direction"].choices = [
             [direction["code"], direction["libelle"]]
             for direction in get_ordered_directions(first_direction=first_direction)
         ]
-        if address_placeholder := request.GET.get("address_placeholder"):
-            self.fields["adresse"].widget.attrs["placeholder"] = address_placeholder
+        super().load_choices(request)
 
     adresse = forms.CharField(
         widget=AutoCompleteInput(
@@ -311,8 +279,7 @@ class CarteAddressesForm(AddressesForm):
             for field in ["bonus", "label_reparacteur", "pas_exclusivite_reparation"]:
                 self.fields[field].widget.attrs["disabled"] = "true"
 
-        if address_placeholder := request.GET.get("address_placeholder"):
-            self.fields["adresse"].widget.attrs["placeholder"] = address_placeholder
+        super().load_choices(request)
 
     adresse = forms.CharField(
         widget=AutoCompleteAndSearchInput(
@@ -330,6 +297,12 @@ class CarteAddressesForm(AddressesForm):
             },
         ),
         label="",
+        required=False,
+    )
+
+    epci_list = forms.MultipleChoiceField(
+        choices=[(item, item) for item in all_epci_codes()],
+        widget=forms.MultipleHiddenInput(),
         required=False,
     )
 
@@ -452,7 +425,8 @@ class ConfiguratorForm(forms.Form):
         required=False,
     )
 
-    # - `data-direction`, option `jai` ou `jecherche`, par défaut l'option de direction « Je cherche » est active # noqa
+    # - `data-direction`, option `jai` ou `jecherche`,
+    # par défaut l'option de direction « Je cherche » est active
     direction = forms.ChoiceField(
         widget=SegmentedControlSelect(
             attrs={
@@ -460,11 +434,14 @@ class ConfiguratorForm(forms.Form):
             },
             fieldset_attrs={},
         ),
+        # TODO: why are we not using initial values here ?
+        # initial="jecherche",
         label="Direction des actions",
         required=False,
     )
 
-    # - `data-first_dir`, option `jai` ou `jecherche`, par défaut l'option de direction « Je cherche » est affiché en premier dans la liste des options de direction # noqa
+    # - `data-first_dir`, option `jai` ou `jecherche`, par défaut l'option de direction
+    # « Je cherche » est affiché en premier dans la liste des options de direction
     first_dir = forms.ChoiceField(
         widget=SegmentedControlSelect(
             attrs={

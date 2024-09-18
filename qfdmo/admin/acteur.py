@@ -32,7 +32,7 @@ from qfdmo.models.acteur import (
     DisplayedPropositionService,
     LabelQualite,
 )
-from qfdmo.widget import CustomOSMWidget
+from qfdmo.widgets import CustomOSMWidget
 
 
 class NotEditableInlineMixin:
