@@ -3,6 +3,7 @@ DJANGO_SETTINGS_MODULE = "core.test_settings"
 env_files = [".env.template"]
 addopts = "--reuse-db"
 filterwarnings = [
+  # Because of django-ninja package, cf. https://github.com/vitalik/django-ninja/issues/1266
   "ignore::pydantic.warnings.PydanticDeprecatedSince20",
   "ignore::django.utils.deprecation.RemovedInDjango60Warning",
 ]
