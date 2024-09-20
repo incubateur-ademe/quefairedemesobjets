@@ -121,6 +121,10 @@ def create_proposition_services_sous_categories(**kwargs):
                             "souscategorie": product.strip(),
                         }
                     )
+            else:
+                raise Exception(
+                    f"Could not find mapping for sous categorie {product} in config"
+                )
 
     df_sous_categories = pd.DataFrame(
         rows_list,
