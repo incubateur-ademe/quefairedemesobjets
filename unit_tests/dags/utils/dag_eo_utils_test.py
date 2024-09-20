@@ -1541,32 +1541,95 @@ class TestCeateLabels:
 
 class TestMergeDuplicates:
 
-    def test_merge_duplicates(self):
-        df = pd.DataFrame(
-            {
-                "identifiant_unique": [1, 1, 2, 3, 3, 3],
-                "produitsdechets_acceptes": [
-                    "Plastic|Metal",
-                    "Metal|Glass",
-                    "Paper",
-                    "Glass|Plastic",
-                    "Plastic|Metal",
-                    "Metal",
-                ],
-                "other_column": ["A", "B", "C", "D", "E", "F"],
-            }
-        )
-        expected_df = pd.DataFrame(
-            {
-                "identifiant_unique": [2, 1, 3],
-                "produitsdechets_acceptes": [
-                    "Paper",
-                    "Glass|Metal|Plastic",
-                    "Glass|Metal|Plastic",
-                ],
-                "other_column": ["C", "A", "D"],
-            }
-        )
+    @pytest.mark.parametrize(
+        "df, expected_df",
+        [
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1, 2, 3],
+                        "produitsdechets_acceptes": [
+                            "Plastic|Metal",
+                            "Metal|Glass",
+                            "Paper",
+                        ],
+                        "other_column": [
+                            "A",
+                            "B",
+                            "C",
+                        ],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1, 2, 3],
+                        "produitsdechets_acceptes": [
+                            "Plastic|Metal",
+                            "Metal|Glass",
+                            "Paper",
+                        ],
+                        "other_column": [
+                            "A",
+                            "B",
+                            "C",
+                        ],
+                    }
+                ),
+            ),
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1, 1, 1],
+                        "produitsdechets_acceptes": [
+                            "Plastic|Metal",
+                            "Metal|Glass",
+                            "Paper",
+                        ],
+                        "other_column": [
+                            "A",
+                            "B",
+                            "C",
+                        ],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1],
+                        "produitsdechets_acceptes": ["Glass|Metal|Paper|Plastic"],
+                        "other_column": ["A"],
+                    }
+                ),
+            ),
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1, 1, 2, 3, 3, 3],
+                        "produitsdechets_acceptes": [
+                            "Plastic|Metal",
+                            "Metal|Glass",
+                            "Paper",
+                            "Glass|Plastic",
+                            "Plastic|Metal",
+                            "Metal",
+                        ],
+                        "other_column": ["A", "B", "C", "D", "E", "F"],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1, 2, 3],
+                        "produitsdechets_acceptes": [
+                            "Glass|Metal|Plastic",
+                            "Paper",
+                            "Glass|Metal|Plastic",
+                        ],
+                        "other_column": ["A", "C", "D"],
+                    }
+                ),
+            ),
+        ],
+    )
+    def test_merge_duplicates(self, df, expected_df):
 
         result_df = merge_duplicates(df)
 
