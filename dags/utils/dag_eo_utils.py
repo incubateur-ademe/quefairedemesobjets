@@ -6,6 +6,7 @@ from typing import Union
 import numpy as np
 import pandas as pd
 from airflow.providers.postgres.hooks.postgres import PostgresHook
+from sqlalchemy import text
 from utils import api_utils, base_utils, mapping_utils, shared_constants
 
 logger = logging.getLogger(__name__)
@@ -16,6 +17,7 @@ def fetch_data_from_api(**kwargs):
     api_url = params["endpoint"]
     logger.info(f"Fetching data from API : {api_url}")
     data = api_utils.fetch_data_from_url(api_url)
+    logger.info("Fetching data from API done")
     df = pd.DataFrame(data)
     return df
 
@@ -23,10 +25,10 @@ def fetch_data_from_api(**kwargs):
 def create_proposition_services(**kwargs):
     df = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
     data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
-    idx_max = data_dict["max_pds_idx"]
+    displayedpropositionservice_max_id = data_dict["displayedpropositionservice_max_id"]
     rows_dict = {}
     merged_count = 0
-    df_actions = data_dict["actions"]
+    df_actions = data_dict["action"]
 
     conditions = [
         ("point_dapport_de_service_reparation", "reparer"),
@@ -67,7 +69,10 @@ def create_proposition_services(**kwargs):
     df_pds = pd.DataFrame(rows_list)
     if "sous_categories" in df_pds.columns:
         df_pds["sous_categories"] = df_pds["sous_categories"].replace(np.nan, None)
-    if indexes := range(idx_max, idx_max + len(df_pds)):
+    if indexes := range(
+        displayedpropositionservice_max_id,
+        displayedpropositionservice_max_id + len(df_pds),
+    ):
         df_pds["id"] = indexes
     metadata = {
         "number_of_merged_actors": merged_count,
@@ -80,7 +85,7 @@ def create_proposition_services(**kwargs):
 def create_proposition_services_sous_categories(**kwargs):
     df = kwargs["ti"].xcom_pull(task_ids="create_proposition_services")["df"]
     data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
-    df_sous_categories_map = data_dict["sous_categories"]
+    df_sous_categories_map = data_dict["souscategorieobjet"]
     params = kwargs["params"]
     mapping_config_key = params.get("mapping_config_key", "sous_categories")
     config = utils.get_mapping_config()
@@ -258,28 +263,28 @@ def load_data_from_postgresql(**kwargs):
     engine = pg_hook.get_sqlalchemy_engine()
 
     df_acteurtype = pd.read_sql_table("qfdmo_acteurtype", engine)
-    df_sources = pd.read_sql_table("qfdmo_source", engine)
-    df_actions = pd.read_sql_table("qfdmo_action", engine)
-    df_acteur_services = pd.read_sql_table("qfdmo_acteurservice", engine)
-    df_sous_categories_objet = pd.read_sql_table("qfdmo_souscategorieobjet", engine)
-    df_label = pd.read_sql_table("qfdmo_labelqualite", engine)
-    max_id_pds = pd.read_sql_query(
-        "SELECT max(id) FROM qfdmo_displayedpropositionservice", engine
-    )["max"][0]
+    df_source = pd.read_sql_table("qfdmo_source", engine)
+    df_action = pd.read_sql_table("qfdmo_action", engine)
+    df_acteurservice = pd.read_sql_table("qfdmo_acteurservice", engine)
+    df_souscategorieobjet = pd.read_sql_table("qfdmo_souscategorieobjet", engine)
+    df_labelqualite = pd.read_sql_table("qfdmo_labelqualite", engine)
+    displayedpropositionservice_max_id = engine.execute(
+        text("SELECT max(id) FROM qfdmo_displayedpropositionservice")
+    ).scalar()
     # TODO : ici on rappatrie tous les acteurs, ce serait bien de filtrer par source_id
     # TODO : est-ce qu'on doit lire les acteurs dans qfdmo_displayedacteur ou
     # qfdmo_acteur ?
-    df_displayedacteurs = pd.read_sql_table("qfdmo_displayedacteur", engine)
+    df_displayedacteur = pd.read_sql_table("qfdmo_displayedacteur", engine)
 
     return {
         "acteurtype": df_acteurtype,
-        "sources": df_sources,
-        "actions": df_actions,
-        "acteur_services": df_acteur_services,
-        "max_pds_idx": max_id_pds,
-        "sous_categories": df_sous_categories_objet,
-        "labels": df_label,
-        "displayedacteurs": df_displayedacteurs,
+        "source": df_source,
+        "action": df_action,
+        "acteurservice": df_acteurservice,
+        "displayedpropositionservice_max_id": displayedpropositionservice_max_id,
+        "souscategorieobjet": df_souscategorieobjet,
+        "labelqualite": df_labelqualite,
+        "displayedacteur": df_displayedacteur,
     }
 
 
@@ -416,9 +421,9 @@ def merge_duplicates(
 def create_actors(**kwargs):
     data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
     df = kwargs["ti"].xcom_pull(task_ids="fetch_data_from_api")
-    df_sources = data_dict["sources"]
+    df_sources = data_dict["source"]
     df_acteurtype = data_dict["acteurtype"]
-    df_displayedacteurs = data_dict["displayedacteurs"]
+    df_displayedacteurs = data_dict["displayedacteur"]
     params = kwargs["params"]
     reparacteurs = params.get("reparacteurs", False)
     column_mapping = params.get("column_mapping", {})
@@ -560,7 +565,7 @@ def create_actors(**kwargs):
 
 def create_labels(**kwargs):
     data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
-    labels = data_dict["labels"]
+    labels = data_dict["labelqualite"]
     df_acteurtype = data_dict["acteurtype"]
     df_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
 
@@ -622,7 +627,7 @@ def create_labels(**kwargs):
 
 def create_acteur_services(**kwargs):
     data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
-    df_acteur_services = data_dict["acteur_services"]
+    df_acteur_services = data_dict["acteurservice"]
     df_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
 
     acteurservice_acteurserviceid = {

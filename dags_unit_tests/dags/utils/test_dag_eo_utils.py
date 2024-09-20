@@ -127,7 +127,7 @@ def get_mock_ti_ps(
     df_acteur_services_from_db,
     df_sous_categories_from_db,
     df_create_actors: pd.DataFrame = pd.DataFrame(),
-    max_pds_idx: int = 1,
+    displayedpropositionservice_max_id: int = 1,
 ) -> MagicMock:
     mock = MagicMock()
 
@@ -137,10 +137,10 @@ def get_mock_ti_ps(
             "config": db_mapping_config,
         },
         "load_data_from_postgresql": {
-            "max_pds_idx": max_pds_idx,
-            "actions": df_actions_from_db,
-            "acteur_services": df_acteur_services_from_db,
-            "sous_categories": df_sous_categories_from_db,
+            "displayedpropositionservice_max_id": displayedpropositionservice_max_id,
+            "action": df_actions_from_db,
+            "acteurservice": df_acteur_services_from_db,
+            "souscategorieobjet": df_sous_categories_from_db,
         },
     }[task_ids]
     return mock
@@ -154,7 +154,7 @@ def get_mock_ti_label(
     df_sous_categories_from_db,
     df_labels_from_db=pd.DataFrame(),
     df_create_actors: pd.DataFrame = pd.DataFrame(),
-    max_pds_idx: int = 1,
+    displayedpropositionservice_max_id: int = 1,
 ) -> MagicMock:
     mock = MagicMock()
 
@@ -164,11 +164,11 @@ def get_mock_ti_label(
             "config": db_mapping_config,
         },
         "load_data_from_postgresql": {
-            "max_pds_idx": max_pds_idx,
-            "actions": df_actions_from_db,
-            "acteur_services": df_acteur_services_from_db,
-            "sous_categories": df_sous_categories_from_db,
-            "labels": df_labels_from_db,
+            "displayedpropositionservice_max_id": displayedpropositionservice_max_id,
+            "action": df_actions_from_db,
+            "acteurservice": df_acteur_services_from_db,
+            "souscategorieobjet": df_sous_categories_from_db,
+            "labelqualite": df_labels_from_db,
             "acteurtype": df_acteurtype_from_db,
         },
     }[task_ids]
@@ -456,7 +456,7 @@ class TestCreatePropositionService:
                     "point_de_collecte_ou_de_reprise_des_dechets": [True],
                 }
             ),
-            max_pds_idx=123,
+            displayedpropositionservice_max_id=123,
         )
 
         kwargs = {"ti": mock}
@@ -610,14 +610,14 @@ def mock_ti(
             "config": db_mapping_config,
         },
         "load_data_from_postgresql": {
-            "max_pds_idx": 1,
-            "actions": df_actions_from_db,
-            "acteur_services": df_acteur_services_from_db,
-            "sous_categories": df_sous_categories_from_db,
-            "sources": df_sources_from_db,
+            "displayedpropositionservice_max_id": 1,
+            "action": df_actions_from_db,
+            "acteurservice": df_acteur_services_from_db,
+            "souscategorieobjet": df_sous_categories_from_db,
+            "source": df_sources_from_db,
             "acteurtype": df_acteurtype_from_db,
-            "labels": df_labels_from_db,
-            "displayedacteurs": df_displayed_acteurs_from_db,
+            "labelqualite": df_labels_from_db,
+            "displayedacteur": df_displayed_acteurs_from_db,
         },
         "create_proposition_services": {"df": df_proposition_services},
         "create_proposition_"
@@ -689,9 +689,9 @@ class TestCreateActorSeriesTransformations:
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
             "load_data_from_postgresql": {
-                "sources": df_sources_from_db,
+                "source": df_sources_from_db,
                 "acteurtype": None,
-                "displayedacteurs": df_empty_displayed_acteurs_from_db,
+                "displayedacteur": df_empty_displayed_acteurs_from_db,
             },
             "fetch_data_from_api": pd.DataFrame(
                 {
@@ -750,9 +750,9 @@ class TestCreateActorSeriesTransformations:
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
             "load_data_from_postgresql": {
-                "sources": df_sources_from_db,
+                "source": df_sources_from_db,
                 "acteurtype": None,
-                "displayedacteurs": df_empty_displayed_acteurs_from_db,
+                "displayedacteur": df_empty_displayed_acteurs_from_db,
             },
             "fetch_data_from_api": pd.DataFrame(
                 {
@@ -814,9 +814,9 @@ class TestCreateActorSeriesTransformations:
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
             "load_data_from_postgresql": {
-                "sources": df_sources_from_db,
+                "source": df_sources_from_db,
                 "acteurtype": None,
-                "displayedacteurs": df_empty_displayed_acteurs_from_db,
+                "displayedacteur": df_empty_displayed_acteurs_from_db,
             },
             "fetch_data_from_api": pd.DataFrame(
                 {
@@ -876,9 +876,9 @@ class TestCreateActorSeriesTransformations:
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
             "load_data_from_postgresql": {
-                "sources": df_sources_from_db,
+                "source": df_sources_from_db,
                 "acteurtype": None,
-                "displayedacteurs": df_empty_displayed_acteurs_from_db,
+                "displayedacteur": df_empty_displayed_acteurs_from_db,
             },
             "fetch_data_from_api": pd.DataFrame(
                 {
@@ -934,7 +934,7 @@ class TestCreateActeurServices:
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
             "load_data_from_postgresql": {
-                "acteur_services": df_acteur_services_from_db,
+                "acteurservice": df_acteur_services_from_db,
             },
             "create_actors": {
                 "df": pd.DataFrame(
@@ -965,7 +965,7 @@ class TestCreateActeurServices:
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
             "load_data_from_postgresql": {
-                "acteur_services": df_acteur_services_from_db,
+                "acteurservice": df_acteur_services_from_db,
             },
             "create_actors": {
                 "df": pd.DataFrame(
@@ -1007,7 +1007,7 @@ class TestCreateActeurServices:
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
             "load_data_from_postgresql": {
-                "acteur_services": df_acteur_services_from_db,
+                "acteurservice": df_acteur_services_from_db,
             },
             "create_actors": {
                 "df": pd.DataFrame(
@@ -1311,7 +1311,6 @@ def test_create_actors(mock_ti, mock_config):
     assert metadata["number_of_duplicates"] == 0
     assert metadata["added_rows"] == len(df_result)
     assert "siren" not in df_result.columns
-    assert "sous_categories" in result["config"]
 
 
 @pytest.mark.parametrize(
@@ -1388,9 +1387,9 @@ def test_acteur_to_delete(
     mock = MagicMock()
     mock.xcom_pull.side_effect = lambda task_ids="": {
         "load_data_from_postgresql": {
-            "sources": df_sources_from_db,
+            "source": df_sources_from_db,
             "acteurtype": None,
-            "displayedacteurs": df_displatedacteurs,
+            "displayedacteur": df_displatedacteurs,
         },
         "fetch_data_from_api": pd.DataFrame(
             {
@@ -1422,9 +1421,9 @@ def test_create_reparacteurs(
     mock = MagicMock()
     mock.xcom_pull.side_effect = lambda task_ids="": {
         "load_data_from_postgresql": {
-            "sources": df_sources_from_db,
+            "source": df_sources_from_db,
             "acteurtype": df_acteurtype_from_db,
-            "displayedacteurs": df_empty_displayed_acteurs_from_db,
+            "displayedacteur": df_empty_displayed_acteurs_from_db,
         },
         "fetch_data_from_api": pd.DataFrame(
             {
@@ -1489,7 +1488,6 @@ def test_create_reparacteurs(
     assert metadata["number_of_duplicates"] == 0
     assert metadata["added_rows"] == len(df_result)
     assert "siren" not in df_result.columns
-    assert "sous_categories" in result["config"]
     assert "event" in df_result.columns
 
 
@@ -1519,7 +1517,7 @@ class TestCeateLabels:
                     "acteur_type_id": [202, 202],
                 }
             ),
-            max_pds_idx=123,
+            displayedpropositionservice_max_id=123,
         )
 
         kwargs = {"ti": mock}
@@ -1559,7 +1557,7 @@ class TestCeateLabels:
                     "acteur_type_id": [201, 202],
                 }
             ),
-            max_pds_idx=123,
+            displayedpropositionservice_max_id=123,
         )
 
         kwargs = {"ti": mock}
@@ -1605,7 +1603,7 @@ class TestCeateLabels:
                     "acteur_type_id": [202, 202],
                 }
             ),
-            max_pds_idx=123,
+            displayedpropositionservice_max_id=123,
         )
 
         kwargs = {"ti": mock}
