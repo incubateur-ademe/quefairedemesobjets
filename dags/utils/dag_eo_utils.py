@@ -95,7 +95,14 @@ def create_proposition_services_sous_categories(**kwargs):
     sous_categories = config[mapping_config_key]
 
     for _, row in df.iterrows():
-        products = str(row["sous_categories"]).split("|")
+        sous_categories_value = (
+            str(row["sous_categories"]) if row["sous_categories"] else ""
+        )
+        products = [
+            sous_categorie
+            for sous_categorie in sous_categories_value.split("|")
+            if sous_categorie
+        ]
         for product in set(products):
             product_key = product.strip().lower()
             if product_key in sous_categories:
@@ -123,7 +130,7 @@ def create_proposition_services_sous_categories(**kwargs):
                     )
             else:
                 raise Exception(
-                    f"Could not find mapping for sous categorie {product} in config"
+                    f"Could not find mapping for sous categorie `{product}` in config"
                 )
 
     df_sous_categories = pd.DataFrame(

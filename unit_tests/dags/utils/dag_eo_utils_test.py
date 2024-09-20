@@ -1194,24 +1194,100 @@ class TestSerializeToJson:
         assert acteur_services == expected_acteur_services
 
 
-def test_create_proposition_services_sous_categories(mock_ti):
-    kwargs = {"ti": mock_ti, "params": {}}
-    df_result = create_proposition_services_sous_categories(**kwargs)
+class TestCreatePropositionServicesSousCategories:
+    def test_create_proposition_services_sous_categories(self, mock_ti):
 
-    assert not df_result.empty
-    assert df_result.columns.tolist() == [
-        "propositionservice_id",
-        "souscategorieobjet_id",
-        "souscategorie",
-    ]
-    assert df_result["propositionservice_id"].tolist() == [1, 2, 3, 4]
-    assert df_result["souscategorieobjet_id"].tolist() == [102, 102, 101, 101]
-    assert df_result["souscategorie"].tolist() == [
-        "téléphones portables",
-        "téléphones portables",
-        "ecrans",
-        "ecrans",
-    ]
+        kwargs = {"ti": mock_ti, "params": {}}
+        df_result = create_proposition_services_sous_categories(**kwargs)
+
+        assert not df_result.empty
+        assert df_result.columns.tolist() == [
+            "propositionservice_id",
+            "souscategorieobjet_id",
+            "souscategorie",
+        ]
+        assert df_result["propositionservice_id"].tolist() == [1, 2, 3, 4]
+        assert df_result["souscategorieobjet_id"].tolist() == [102, 102, 101, 101]
+        assert df_result["souscategorie"].tolist() == [
+            "téléphones portables",
+            "téléphones portables",
+            "ecrans",
+            "ecrans",
+        ]
+
+    def test_create_proposition_services_sous_categories_unknown_product(
+        self, db_mapping_config, df_sous_categories_from_db
+    ):
+
+        mock = MagicMock()
+
+        mock.xcom_pull.side_effect = lambda task_ids="": {
+            "create_actors": {
+                "config": db_mapping_config,
+            },
+            "load_data_from_postgresql": {
+                "sous_categories": df_sous_categories_from_db,
+            },
+            "create_proposition_services": {
+                "df": pd.DataFrame(
+                    {
+                        "action_id": [1],
+                        "acteur_id": [1],
+                        "action": ["reparer"],
+                        "acteur_service": ["Service de réparation"],
+                        "sous_categories": ["Objet inconnu dans la table de mapping"],
+                        "id": [1],
+                    }
+                )
+            },
+        }[task_ids]
+
+        kwargs = {"ti": mock, "params": {}}
+        with pytest.raises(Exception):
+            create_proposition_services_sous_categories(**kwargs)
+
+    def test_create_proposition_services_sous_categories_empty_products(
+        self, db_mapping_config, df_sous_categories_from_db
+    ):
+
+        mock = MagicMock()
+
+        mock.xcom_pull.side_effect = lambda task_ids="": {
+            "create_actors": {
+                "config": db_mapping_config,
+            },
+            "load_data_from_postgresql": {
+                "sous_categories": df_sous_categories_from_db,
+            },
+            "create_proposition_services": {
+                "df": pd.DataFrame(
+                    {
+                        "action_id": [1, 1],
+                        "acteur_id": [1, 2],
+                        "action": ["reparer", "reparer"],
+                        "acteur_service": [
+                            "Service de réparation",
+                            "Service de réparation",
+                        ],
+                        "sous_categories": ["", None],
+                        "id": [1, 2],
+                    }
+                )
+            },
+        }[task_ids]
+
+        kwargs = {"ti": mock, "params": {}}
+        result = create_proposition_services_sous_categories(**kwargs)
+        pd.testing.assert_frame_equal(
+            result,
+            pd.DataFrame(
+                columns=[
+                    "propositionservice_id",
+                    "souscategorieobjet_id",
+                    "souscategorie",
+                ]
+            ),
+        )
 
 
 def test_create_actors(mock_ti, mock_config):
