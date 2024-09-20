@@ -427,6 +427,13 @@ def create_actors(**kwargs):
     column_to_drop = params.get("column_to_drop", [])
     column_to_replace = params.get("default_column_value", {})
 
+    if params.get("multi_ecoorganisme"):
+        df = merge_duplicates(
+            df,
+            group_column="id_point_apport_ou_reparation",
+            merge_column="produitsdechets_acceptes",
+        )
+
     # intersection of columns in df and column_to_drop
     column_to_drop = list(set(column_to_drop) & set(df.columns))
     df = df.drop(column_to_drop, axis=1)
@@ -516,12 +523,6 @@ def create_actors(**kwargs):
         df["telephone"] = df["telephone"].apply(mapping_utils.process_phone_number)
 
     df = df.replace({np.nan: None})
-
-    df = merge_duplicates(
-        df,
-        group_column="id_point_apport_ou_reparation",
-        merge_column="produitsdechets_acceptes",
-    )
 
     duplicates_mask = df.duplicated("identifiant_unique", keep=False)
     duplicate_ids = df.loc[duplicates_mask, "identifiant_unique"].unique()

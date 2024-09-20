@@ -1,4 +1,3 @@
-import unittest
 from unittest.mock import MagicMock
 
 import pandas as pd
@@ -10,8 +9,8 @@ from dags.utils.dag_eo_utils import (
     create_labels,
     create_proposition_services,
     create_proposition_services_sous_categories,
-    serialize_to_json,
     merge_duplicates,
+    serialize_to_json,
 )
 
 
@@ -1540,9 +1539,10 @@ class TestCeateLabels:
         )
 
 
-class TestMergeDuplicates(unittest.TestCase):
-    def setUp(self):
-        self.df = pd.DataFrame(
+class TestMergeDuplicates:
+
+    def test_merge_duplicates(self):
+        df = pd.DataFrame(
             {
                 "identifiant_unique": [1, 1, 2, 3, 3, 3],
                 "produitsdechets_acceptes": [
@@ -1556,8 +1556,6 @@ class TestMergeDuplicates(unittest.TestCase):
                 "other_column": ["A", "B", "C", "D", "E", "F"],
             }
         )
-
-    def test_merge_duplicates(self):
         expected_df = pd.DataFrame(
             {
                 "identifiant_unique": [2, 1, 3],
@@ -1570,7 +1568,7 @@ class TestMergeDuplicates(unittest.TestCase):
             }
         )
 
-        result_df = merge_duplicates(self.df)
+        result_df = merge_duplicates(df)
 
         result_df = result_df.sort_values(by="identifiant_unique").reset_index(
             drop=True

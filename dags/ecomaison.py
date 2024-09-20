@@ -29,6 +29,7 @@ with DAG(
             "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
             "donnees-eo-ecomaison/lines?size=10000"
         ),
+        "multi_ecoorganisme": True,
         "column_mapping": {
             "id_point_apport_ou_reparation": "identifiant_externe",
             "type_de_point_de_collecte": "acteur_type_id",
