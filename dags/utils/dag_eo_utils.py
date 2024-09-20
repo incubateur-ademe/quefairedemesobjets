@@ -80,12 +80,12 @@ def create_proposition_services(**kwargs):
 def create_proposition_services_sous_categories(**kwargs):
     df = kwargs["ti"].xcom_pull(task_ids="create_proposition_services")["df"]
     data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
-    config = kwargs["ti"].xcom_pull(task_ids="create_actors")["config"]
     df_sous_categories_map = data_dict["sous_categories"]
     params = kwargs["params"]
     mapping_config_key = params.get("mapping_config_key", "sous_categories")
-    rows_list = []
+    config = utils.get_mapping_config()
     sous_categories = config[mapping_config_key]
+    rows_list = []
 
     for _, row in df.iterrows():
         sous_categories_value = (
@@ -419,7 +419,6 @@ def create_actors(**kwargs):
     df_sources = data_dict["sources"]
     df_acteurtype = data_dict["acteurtype"]
     df_displayedacteurs = data_dict["displayedacteurs"]
-    config = base_utils.get_mapping_config()
     params = kwargs["params"]
     reparacteurs = params.get("reparacteurs", False)
     column_mapping = params.get("column_mapping", {})
@@ -555,7 +554,6 @@ def create_actors(**kwargs):
     return {
         "df": df,
         "metadata": metadata,
-        "config": config,
         "removed_actors": df_missing_actors,
     }
 
