@@ -1547,6 +1547,25 @@ class TestMergeDuplicates:
             (
                 pd.DataFrame(
                     {
+                        "identifiant_unique": [1, 1],
+                        "produitsdechets_acceptes": [
+                            " Plastic Box | Metal | Aàèë l'test",
+                            " Plastic Box | Metal | Aàèë l'test",
+                        ],
+                        "other_column": ["A", "B"],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1],
+                        "produitsdechets_acceptes": ["Aàèë l'test|Metal|Plastic Box"],
+                        "other_column": ["A"],
+                    }
+                ),
+            ),
+            (
+                pd.DataFrame(
+                    {
                         "identifiant_unique": [1, 2, 3],
                         "produitsdechets_acceptes": [
                             "Plastic|Metal",
