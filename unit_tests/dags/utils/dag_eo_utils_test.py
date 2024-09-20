@@ -1200,20 +1200,21 @@ class TestCreatePropositionServicesSousCategories:
         kwargs = {"ti": mock_ti, "params": {}}
         df_result = create_proposition_services_sous_categories(**kwargs)
 
-        assert not df_result.empty
-        assert df_result.columns.tolist() == [
-            "propositionservice_id",
-            "souscategorieobjet_id",
-            "souscategorie",
-        ]
-        assert df_result["propositionservice_id"].tolist() == [1, 2, 3, 4]
-        assert df_result["souscategorieobjet_id"].tolist() == [102, 102, 101, 101]
-        assert df_result["souscategorie"].tolist() == [
-            "téléphones portables",
-            "téléphones portables",
-            "ecrans",
-            "ecrans",
-        ]
+        pd.testing.assert_frame_equal(
+            df_result,
+            pd.DataFrame(
+                {
+                    "propositionservice_id": [1, 2, 3, 4],
+                    "souscategorieobjet_id": [102, 102, 101, 101],
+                    "souscategorie": [
+                        "téléphones portables",
+                        "téléphones portables",
+                        "ecrans",
+                        "ecrans",
+                    ],
+                }
+            ),
+        )
 
     def test_create_proposition_services_sous_categories_unknown_product(
         self, db_mapping_config, df_sous_categories_from_db
