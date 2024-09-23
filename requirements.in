@@ -10,12 +10,6 @@ django-sql-explorer
 django-storages
 gunicorn
 Jinja2
-# certifi>2024.8
-# charset-normalizer>3.3
-# gunicorn>=23.0
-# idna>=3.10
-# Jinja2>=3.1.4
-# markupsafe>=2.1.5
 opening-hours-py
 orjson
 #packaging>=24.1
