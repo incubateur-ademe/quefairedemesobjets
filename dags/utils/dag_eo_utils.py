@@ -526,7 +526,9 @@ def create_actors(**kwargs):
         axis=1,
     )
     df["cree_le"] = datetime.now()
-    df["statut"] = "ACTIF"
+    df["statut"] = df["public_accueilli"].apply(
+        lambda x: "SUPPRIME" if x == "Professionnels" else "ACTIF"
+    )
     df["modifie_le"] = df["cree_le"]
     if "siret" in df.columns:
         df["siret"] = df["siret"].apply(mapping_utils.process_siret)
