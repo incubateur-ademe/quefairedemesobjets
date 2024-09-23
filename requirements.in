@@ -1,4 +1,3 @@
-#--constraint=airflow-requirements.txt
 
 api-insee
 boto3
