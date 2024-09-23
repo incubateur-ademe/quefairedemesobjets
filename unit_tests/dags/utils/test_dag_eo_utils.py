@@ -668,6 +668,7 @@ class TestCreateActorSeriesTransformations:
             ("fake", None),
             ("Particuliers", "Particuliers"),
             ("PARTICULIERS", "Particuliers"),
+            ("professionnels", "Professionnels"),
         ],
     )
     def test_create_actor_public_accueilli(
@@ -720,7 +721,10 @@ class TestCreateActorSeriesTransformations:
             },
         }
         result = create_actors(**kwargs)
-
+        if public_accueilli == "Professionnels":
+            assert result["df"]["statut"].iloc[0] == "SUPPRIME"
+        else:
+            assert result["df"]["statut"].iloc[0] == "ACTIF"
         assert result["df"]["public_accueilli"][0] == expected_public_accueilli
 
     @pytest.mark.parametrize(
