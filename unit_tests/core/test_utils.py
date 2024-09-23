@@ -1,7 +1,7 @@
 from unittest.mock import patch
-from django.http.request import QueryDict, MultiValueDict
 
 import pytest
+from django.http.request import MultiValueDict, QueryDict
 from django.test import RequestFactory, override_settings
 
 from core import utils
@@ -12,9 +12,7 @@ def request_factory():
     return RequestFactory()
 
 
-@patch(
-    "core.utils.CachedDirectionAction.get_directions"
-)  # replace with the actual module path
+@patch("core.utils.get_directions")  # replace with the actual module path
 class TestGetDirection:
     def test_get_direction_for_carte(self, mock_get_directions, request_factory):
         mock_get_directions.return_value = [{"code": "north"}, {"code": "south"}]

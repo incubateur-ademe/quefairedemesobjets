@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import List
+from typing import List, cast
 
 import unidecode
 from django.conf import settings
@@ -9,6 +9,7 @@ from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point, Polygon
 from django.contrib.postgres.lookups import Unaccent
 from django.contrib.postgres.search import TrigramWordDistance  # type: ignore
+from django.core.cache import cache
 from django.db.models import Min, Q
 from django.db.models.functions import Length, Lower
 from django.db.models.query import QuerySet
@@ -27,10 +28,15 @@ from qfdmo.models import (
     ActeurStatus,
     ActeurType,
     Action,
-    CachedDirectionAction,
     DisplayedActeur,
     Objet,
     RevisionActeur,
+)
+from qfdmo.models.action import (
+    GroupeAction,
+    get_action_instances,
+    get_groupe_action_instances,
+    get_reparer_action_id,
 )
 from qfdmo.thread.materialized_view import RefreshMateriazedViewThread
 
@@ -240,7 +246,9 @@ class AddressesView(FormView):
         return center, my_bounding_box_polygon
 
     def _set_action_displayed(self) -> List[Action]:
-        cached_action_instances = CachedDirectionAction.get_action_instances()
+        cached_action_instances = cast(
+            List[Action], cache.get_or_set("action_instances", get_action_instances)
+        )
         """
         Limit to actions of the direction only in Carte mode
         """
@@ -305,10 +313,6 @@ class AddressesView(FormView):
 
         return [a["id"] for a in self.get_action_list()]
 
-    def _get_reparer_action_id(self):
-        """Sert essentiellement à faciliter le teste de AddressesView"""
-        return CachedDirectionAction.get_reparer_action_id()
-
     def _get_selected_action(self) -> List[Action]:
         """
         Get the action to include in the request
@@ -336,10 +340,14 @@ class AddressesView(FormView):
             codes = action_displayed.split("|")
         # return empty array, will search in all actions
 
+        # Cast needed because of the cache
+        cached_action_instances = cast(
+            List[Action], cache.get_or_set("action_instances", get_action_instances)
+        )
         actions = (
-            [a for a in CachedDirectionAction.get_action_instances() if a.code in codes]
+            [a for a in cached_action_instances if a.code in codes]
             if codes
-            else CachedDirectionAction.get_action_instances()
+            else cached_action_instances
         )
         if direction := self.request.GET.get("direction"):
             actions = [
@@ -373,7 +381,7 @@ class AddressesView(FormView):
         excludes = Q()
 
         selected_actions_ids = self._get_selected_action_ids()
-        reparer_action_id = self._get_reparer_action_id()
+        reparer_action_id = cache.get_or_set("reparer_action_id", get_reparer_action_id)
         reparer_is_checked = reparer_action_id in selected_actions_ids
 
         if (
@@ -417,9 +425,17 @@ class AddressesView(FormView):
         self, action_displayed: list[Action]
     ) -> list[list[str]]:
         groupe_with_displayed_actions = []
-        for cached_groupe in CachedDirectionAction.get_groupe_action_instances():
+
+        # Cast needed because of the cache
+        cached_groupe_action_instances = cast(
+            QuerySet[GroupeAction],
+            cache.get_or_set("groupe_action_instances", get_groupe_action_instances),
+        )
+
+        for cached_groupe in cached_groupe_action_instances:
             if groupe_actions := [
                 action
+                # TODO : à optimiser avec le cache
                 for action in cached_groupe.actions.all().order_by(  # type: ignore
                     "order"
                 )
