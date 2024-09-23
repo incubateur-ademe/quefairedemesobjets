@@ -39,7 +39,11 @@
   "sièges": "Sièges - Éléments d'ameublement",
   "produits pyrotechniques": "produits pyrotechniques",
   "pneu": "pneu",
-  "béton": "Béton - PMCB (produits et matériaux de construction du bâtiment)"
+  "béton": "Béton - PMCB (produits et matériaux de construction du bâtiment)",
+  "jeux et jouets": "jouet",
+  "matériels de bricolage, dont l’outillage à main": "outil de bricolage et jardinage",
+  "produits et matériels destinés à l’entretien et l’aménagement du jardin": "accessoire et meuble de jardin",
+  "autres pmcb": "Autres PMCB"
 },
   "sous_categories_cma":{
     "articles d’ameublement (meubles, chaises, fauteuils, canapés, tapis, etc)": ["meuble"],
