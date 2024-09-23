@@ -51,9 +51,7 @@ class TestDataTransformations(unittest.TestCase):
         self.assertEqual(mapping_utils.create_identifiant_unique(row), "ecoorg_123AbC")
 
     def test_process_siret_value(self):
-        self.assertEqual(
-            mapping_utils.process_siret("123456789012345"), "12345678901234"
-        )
+        self.assertEqual(mapping_utils.process_siret("123456789012345"), None)
         self.assertEqual(mapping_utils.process_siret(np.nan), None)
         self.assertEqual(
             mapping_utils.process_siret("98765432109876"), "98765432109876"
