@@ -382,12 +382,15 @@ class ConfiguratorForm(forms.Form):
         self.load_choices()
 
     def load_choices(self):
+        cached_directions = cast(
+            List[dict], cache.get_or_set("directions", get_directions)
+        )
         self.fields["direction"].choices = [
-            (direction["code"], direction["libelle"]) for direction in get_directions()
+            (direction["code"], direction["libelle"]) for direction in cached_directions
         ] + [("no_dir", "Par défaut")]
         self.fields["first_dir"].choices = [
             ("first_" + direction["code"], direction["libelle"])
-            for direction in get_directions()
+            for direction in cached_directions
         ] + [("first_no_dir", "Par défaut")]
 
         # Cast needed because of the cache
