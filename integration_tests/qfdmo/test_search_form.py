@@ -2,8 +2,6 @@ import pytest
 from bs4 import BeautifulSoup
 from django.core.management import call_command
 
-from qfdmo.models import CachedDirectionAction
-
 
 @pytest.fixture(scope="session")
 def populate_admin_object(django_db_blocker):
@@ -15,7 +13,6 @@ def populate_admin_object(django_db_blocker):
             "acteur_services",
             "acteur_types",
         )
-        CachedDirectionAction.reload_cache()
 
 
 @pytest.mark.django_db

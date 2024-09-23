@@ -74,6 +74,12 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+    }
+}
+
 X_FRAME_OPTIONS = "ALLOWALL"
 
 CORS_ALLOWED_ORIGINS = decouple.config(

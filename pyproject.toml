@@ -1,5 +1,5 @@
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "core.settings"
+DJANGO_SETTINGS_MODULE = "core.test_settings"
 env_files = [".env.template"]
 addopts = "--reuse-db"
 filterwarnings = ["error", "ignore::pydantic.warnings.PydanticDeprecatedSince20"]
@@ -39,7 +39,7 @@ exclude = [
   "node_modules",
   "venv",
   "*/migrations/*",
-  "*.ipynb",  
+  "*.ipynb",
 ]
 per-file-ignores = {}
 

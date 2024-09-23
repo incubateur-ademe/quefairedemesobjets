@@ -1,8 +1,17 @@
+from typing import List, cast
+
 from django import forms
+from django.core.cache import cache
 from django.http import HttpRequest
 from django.utils.safestring import mark_safe
 
-from qfdmo.models import CachedDirectionAction, DagRun, DagRunStatus, SousCategorieObjet
+from qfdmo.models import DagRun, DagRunStatus, SousCategorieObjet
+from qfdmo.models.action import (
+    Action,
+    get_action_instances,
+    get_directions,
+    get_ordered_directions,
+)
 
 
 class AutoCompleteInput(forms.TextInput):
@@ -258,9 +267,7 @@ class IframeAddressesForm(AddressesForm):
         first_direction = request.GET.get("first_dir")
         self.fields["direction"].choices = [
             [direction["code"], direction["libelle"]]
-            for direction in CachedDirectionAction.get_directions(
-                first_direction=first_direction
-            )
+            for direction in get_ordered_directions(first_direction=first_direction)
         ]
         if address_placeholder := request.GET.get("address_placeholder"):
             self.fields["adresse"].widget.attrs["placeholder"] = address_placeholder
@@ -375,27 +382,34 @@ class ConfiguratorForm(forms.Form):
         self.load_choices()
 
     def load_choices(self):
+        cached_directions = cast(
+            List[dict], cache.get_or_set("directions", get_directions)
+        )
         self.fields["direction"].choices = [
-            (direction["code"], direction["libelle"])
-            for direction in CachedDirectionAction.get_directions()
+            (direction["code"], direction["libelle"]) for direction in cached_directions
         ] + [("no_dir", "Par défaut")]
         self.fields["first_dir"].choices = [
             ("first_" + direction["code"], direction["libelle"])
-            for direction in CachedDirectionAction.get_directions()
+            for direction in cached_directions
         ] + [("first_no_dir", "Par défaut")]
+
+        # Cast needed because of the cache
+        cached_action_instances = cast(
+            List[Action], cache.get_or_set("action_instances", get_action_instances)
+        )
         self.fields["action_list"].choices = [
             (
                 action.code,
                 f"{action.libelle} ({action.libelle_groupe.capitalize()})",
             )
-            for action in CachedDirectionAction.get_action_instances()
+            for action in cached_action_instances
         ]
         self.fields["action_displayed"].choices = [
             (
                 action.code,
                 f"{action.libelle} ({action.libelle_groupe.capitalize()})",
             )
-            for action in CachedDirectionAction.get_action_instances()
+            for action in cached_action_instances
         ]
 
     limit = forms.IntegerField(
