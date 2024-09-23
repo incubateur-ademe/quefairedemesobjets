@@ -15,7 +15,6 @@ orjson
 pandas<2.2.0
 Pillow
 psycopg2
-#python-dateutil==2.9.0.post0
 python-decouple
 requests
 sentry-sdk
