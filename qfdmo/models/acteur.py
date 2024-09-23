@@ -310,22 +310,26 @@ class Acteur(BaseActeur):
                 "statut",
             ],
         )
-        (acteur, created) = RevisionActeur.objects.get_or_create(
+        (revisionacteur, created) = RevisionActeur.objects.get_or_create(
             identifiant_unique=self.identifiant_unique, defaults=fields
         )
         if created:
             for proposition_service in self.proposition_services.all():  # type: ignore
                 revision_proposition_service = (
                     RevisionPropositionService.objects.create(
-                        acteur=acteur,
+                        acteur=revisionacteur,
                         action_id=proposition_service.action_id,
                     )
                 )
                 revision_proposition_service.sous_categories.add(
                     *proposition_service.sous_categories.all()
                 )
+            for label in self.labels.all():
+                revisionacteur.labels.add(label)
+            for acteur_service in self.acteur_services.all():
+                revisionacteur.acteur_services.add(acteur_service)
 
-        return acteur
+        return revisionacteur
 
     def clean_location(self):
         if self.location is None and self.acteur_type.code != "acteur digital":
