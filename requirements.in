@@ -12,7 +12,6 @@ gunicorn
 Jinja2
 opening-hours-py
 orjson
-#packaging>=24.1
 pandas<2.2.0
 Pillow
 psycopg2
