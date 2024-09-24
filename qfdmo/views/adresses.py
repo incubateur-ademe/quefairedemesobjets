@@ -108,8 +108,8 @@ class AddressesView(FormView):
 
         if self.request.GET & form_class.base_fields.keys():
             # TODO: we should use a bounded form in this case
-            # form = form_class(self.request.GET)
-            form = super().get_form(**kwargs)
+            form = form_class(self.request.GET)
+            # form = super().get_form(**kwargs)
         else:
             form = super().get_form(**kwargs)
 
@@ -190,17 +190,19 @@ class AddressesView(FormView):
         return super().get_context_data(**kwargs)
 
     def _bbox_and_acteurs_from_location_or_epci(self, acteurs):
-        if epci_list := self.get_data("epci_list"):
-            acteurs = acteurs.in_epcis(epci_list)
-            return None, acteurs
-
         if custom_bbox := self.get_data("bounding_box"):
+            # TODO : recherche dans cette zone
             bbox = sanitize_leaflet_bbox(custom_bbox)
             acteurs_in_bbox = acteurs.in_bbox(bbox)
 
             # Manage bounding_box parameter
             if acteurs_in_bbox.count() > 0:
                 return custom_bbox, acteurs_in_bbox
+
+        if epci_list := self.get_data("epci_list"):
+            acteurs = acteurs.in_epcis(epci_list)
+            # return bbox ?
+            return None, acteurs
 
         if (latitude := self.get_data("latitude")) and (
             longitude := self.get_data("longitude")
@@ -350,8 +352,8 @@ class AddressesView(FormView):
                 "proposition_services__sous_categories",
                 "proposition_services__sous_categories__categorie",
                 "proposition_services__action",
-            )
-            .distinct()
+            ).distinct()
+            # TODO : voir si ca change qqch de l'appeler plus tot
             .prefetch_related("action_principale")
         )
 

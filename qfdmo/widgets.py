@@ -39,11 +39,13 @@ class SegmentedControlSelect(forms.RadioSelect):
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)
         context["widget"]["fieldset_attrs"] = self.fieldset_attrs
+        # context["widget"]["fieldset_attrs"] = self.build_attrs(self.fieldset_attrs)
         return context
 
 
 class DSFRCheckboxSelectMultiple(forms.CheckboxSelectMultiple):
-    pass
+    template_name = "forms/widgets/dsfr_checkbox_select.html"
+    option_template_name = "forms/widgets/dsfr_checkbox_option.html"
 
 
 class CustomOSMWidget(gis_forms.BaseGeometryWidget):

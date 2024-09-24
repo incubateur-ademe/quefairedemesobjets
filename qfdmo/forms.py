@@ -23,7 +23,7 @@ from qfdmo.widgets import (
 
 
 class AddressesForm(forms.Form):
-    def load_choices(self, request: HttpRequest) -> None:
+    def load_choices(self, request: HttpRequest, **kwargs) -> None:
         if address_placeholder := request.GET.get("address_placeholder"):
             self.fields["adresse"].widget.attrs["placeholder"] = address_placeholder
 
@@ -300,6 +300,7 @@ class CarteAddressesForm(AddressesForm):
         required=False,
     )
 
+    # epci_codes
     epci_list = forms.MultipleChoiceField(
         choices=[(item, item) for item in all_epci_codes()],
         widget=forms.MultipleHiddenInput(),

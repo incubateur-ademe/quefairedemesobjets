@@ -185,11 +185,11 @@ class ActeurQuerySet(models.QuerySet):
         if not epci_list:
             return self
 
-        bounding_boxes = [retrieve_epci_bounding_box(epci) for epci in epci_list]
+        polygons = [retrieve_epci_bounding_box(epci) for epci in epci_list]
         # TODO : merge bounding box, for now we get only the first
-        bbox = bounding_boxes[0]
+        polygon = polygons[0]
 
-        geom = GEOSGeometry(str(bbox))
+        geom = GEOSGeometry(str(polygon))
         return self.physical().filter(location__within=geom).order_by("?")
 
     def from_center(self, longitude, latitude):
