@@ -18,7 +18,7 @@ with DAG(
     "download_dags_from_s3",
     default_args=default_args,
     description="DAG to download dags from S3",
-    schedule_interval=timedelta(days=1),
+    schedule_interval=timedelta(minutes=5),
     catchup=False,
 ) as dag:
 
