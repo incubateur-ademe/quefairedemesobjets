@@ -1,13 +1,18 @@
 import json
 import logging
+import sys
 from datetime import datetime
+from pathlib import Path
 from typing import Union
 
 import numpy as np
 import pandas as pd
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 
-from . import api_utils, base_utils, mapping_utils
+# FIXME : nécéssaire seulement pour les tests unitaires
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from utils import api_utils, base_utils, mapping_utils  # noqa : E402
 
 logger = logging.getLogger(__name__)
 

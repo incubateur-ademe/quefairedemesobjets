@@ -1,7 +1,6 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-
-from . import dag_eo_utils
+from utils import dag_eo_utils
 
 
 def fetch_data_from_api_task(dag: DAG) -> PythonOperator:

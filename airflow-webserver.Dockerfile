@@ -8,7 +8,7 @@ COPY ./airflow-requirements.txt /opt/airflow/requirements.txt
 RUN pip install -r /opt/airflow/requirements.txt
 
 # Copy the dags, logs, config, and plugins directories to the appropriate locations
-COPY ./airflow-dags/ /opt/airflow/dags/
+COPY ./dags/ /opt/airflow/dags/
 
 EXPOSE 8080
 

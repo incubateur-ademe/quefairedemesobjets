@@ -11,8 +11,7 @@ import requests
 from fuzzywuzzy import fuzz
 from shapely import wkb
 from shapely.geometry import Point
-
-from . import api_utils
+from utils import api_utils
 
 
 def get_address(row, col="adresse_format_ban"):
