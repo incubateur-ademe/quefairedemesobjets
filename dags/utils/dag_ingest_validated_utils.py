@@ -2,8 +2,7 @@ import logging
 from datetime import datetime
 
 import pandas as pd
-
-from . import base_utils, mapping_utils, shared_constants
+from utils import base_utils, mapping_utils, shared_constants
 
 logging.basicConfig(level=logging.INFO)
 

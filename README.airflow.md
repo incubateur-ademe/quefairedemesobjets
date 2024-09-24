@@ -67,7 +67,7 @@ export AIRFLOW_DAGS_LOCAL_FOLDER=$HOME/workspace/beta.gouv.fr/quefairedemesobjet
 
 Ce dossier est monté dans les containers docker à l'emplacement `/opt/airflow/development`
 
-Puis copier les variable d'environnement airflow-dags/.env.template vers airflow-dags/.env
+Puis copier les variable d'environnement dags/.env.template vers dags/.env
 
 ```sh
 cp .env.template .env
