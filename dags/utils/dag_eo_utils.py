@@ -505,7 +505,7 @@ def create_actors(**kwargs):
                     },
                 )
                 df["statut"] = df["public_accueilli"].apply(
-                    lambda x: "SUPPRIME" if x == "professionnels" else "ACTIF"
+                    lambda x: "SUPPRIME" if x == "Professionnels" else "ACTIF"
                 )
             elif old_col == "uniquement_sur_rdv":
                 df[new_col] = df[old_col].astype(bool)

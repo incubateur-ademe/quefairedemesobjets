@@ -721,7 +721,7 @@ class TestCreateActorSeriesTransformations:
             },
         }
         result = create_actors(**kwargs)
-        if public_accueilli == "Professionnels":
+        if expected_public_accueilli == "Professionnels":
             assert result["df"]["statut"].iloc[0] == "SUPPRIME"
         else:
             assert result["df"]["statut"].iloc[0] == "ACTIF"
