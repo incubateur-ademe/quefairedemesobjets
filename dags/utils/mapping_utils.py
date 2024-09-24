@@ -2,14 +2,9 @@ import json
 import math
 import re
 from datetime import datetime
-from importlib import import_module
-from pathlib import Path
+
 import numpy as np
 import pandas as pd
-
-env = Path(__file__).parent.parent.name
-
-utils = import_module(f"{env}.utils.utils")
 
 
 def process_siret(siret):
@@ -245,14 +240,6 @@ def replace_with_selected_candidat(row):
         row = row.drop(labels=["ae_result"])
 
     return row
-
-
-def construct_url(identifiant, env):
-    if env == "production":
-        base_url = "https://lvao.ademe.fr/admin/qfdmo/displayedacteur/{}/change/"
-    else:
-        base_url = "https://quefairedemesobjets-preprod.osc-fr1.scalingo.io/admin/qfdmo/displayedacteur/{}/change/"
-    return base_url.format(identifiant)
 
 
 def construct_change_log(message):
