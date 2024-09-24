@@ -1,5 +1,6 @@
 import json
 import logging
+from django.http import HttpResponseRedirect
 from typing import List, cast
 
 import unidecode
@@ -569,3 +570,7 @@ def solution_admin(request, identifiant_unique):
         )
     acteur = Acteur.objects.get(identifiant_unique=identifiant_unique)
     return redirect("admin:qfdmo_acteur_change", quote(acteur.identifiant_unique))
+
+
+def form_adresse_suggestion(request):
+    return HttpResponseRedirect(settings.FORM_ADRESSE_SUGGESTION)

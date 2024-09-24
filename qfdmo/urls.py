@@ -7,6 +7,7 @@ from django.views.generic.base import RedirectView
 from qfdmo.views.adresses import (
     AddressesView,
     adresse_detail,
+    form_adresse_suggestion,
     get_object_list,
     getorcreate_revisionacteur,
     solution_admin,
@@ -17,6 +18,11 @@ from qfdmo.views.dags import DagsValidation
 urlpatterns = [
     path("", AddressesView.as_view(), name="reemploi_solution"),
     path("connexion", LoginView.as_view(), name="login"),
+    path(
+        "formulaire-suggestion-adresse",
+        form_adresse_suggestion,
+        name="form-adresse-suggestion",
+    ),
     path(
         "qfdmo/getorcreate_revisionacteur/<str:acteur_identifiant>",
         getorcreate_revisionacteur,
