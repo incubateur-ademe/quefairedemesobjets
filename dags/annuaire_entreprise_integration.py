@@ -2,17 +2,12 @@ import gzip
 import socket
 import time
 from datetime import datetime
-from importlib import import_module
-from pathlib import Path
 
 import pandas as pd
 import requests
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
-
-env = Path(__file__).parent.name
-utils = import_module(f"{env}.utils.utils")
 
 default_args = {
     "owner": "airflow",
@@ -38,7 +33,7 @@ WAIT_SECONDS = 5
 
 
 def fetch_and_process_data(url_title, table_name, index_column, schema, **context):
-    pg_hook = PostgresHook(postgres_conn_id=utils.get_db_conn_id(__file__))
+    pg_hook = PostgresHook(postgres_conn_id="lvao-db")
     engine = pg_hook.get_sqlalchemy_engine()
 
     with pg_hook.get_conn() as conn:

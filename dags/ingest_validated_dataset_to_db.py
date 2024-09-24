@@ -1,6 +1,4 @@
 from datetime import timedelta
-from importlib import import_module
-from pathlib import Path
 
 import pandas as pd
 from airflow.models import DAG
@@ -8,11 +6,7 @@ from airflow.operators.dagrun_operator import TriggerDagRunOperator
 from airflow.operators.python_operator import BranchPythonOperator, PythonOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.utils.dates import days_ago
-
-env = Path(__file__).parent.name
-utils = import_module(f"{env}.utils.utils")
-dag_ingest_validated_utils = import_module(f"{env}.utils.dag_ingest_validated_utils")
-shared_constants = import_module(f"{env}.utils.shared_constants")
+from utils import dag_ingest_validated_utils, shared_constants
 
 default_args = {
     "owner": "airflow",
@@ -23,7 +17,7 @@ default_args = {
 }
 
 dag = DAG(
-    utils.get_dag_name(__file__, "validate_and_process_dagruns"),
+    "validate_and_process_dagruns",
     default_args=default_args,
     description="Check for VALIDATE in qfdmo_dagrun and process qfdmo_dagrunchange",
     schedule="*/5 * * * *",
@@ -33,7 +27,7 @@ dag = DAG(
 
 
 def check_for_validation(**kwargs):
-    hook = PostgresHook(postgres_conn_id=utils.get_db_conn_id(__file__))
+    hook = PostgresHook(postgres_conn_id="lvao-db")
     row = hook.get_records(
         "SELECT EXISTS "
         f"(SELECT 1 FROM qfdmo_dagrun WHERE status = '{shared_constants.TO_INSERT}')"
@@ -42,7 +36,7 @@ def check_for_validation(**kwargs):
 
 
 def fetch_and_parse_data(**context):
-    pg_hook = PostgresHook(postgres_conn_id=utils.get_db_conn_id(__file__))
+    pg_hook = PostgresHook(postgres_conn_id="lvao-db")
     engine = pg_hook.get_sqlalchemy_engine()
 
     df_sql = pd.read_sql_query(
@@ -89,7 +83,7 @@ def write_data_to_postgres(**kwargs):
     df_pdssc = data_dict.get("pds_sous_categories")
     dag_run_id = data_dict["dag_run_id"]
     change_type = data_dict.get("change_type", "CREATE")
-    pg_hook = PostgresHook(postgres_conn_id=utils.get_db_conn_id(__file__))
+    pg_hook = PostgresHook(postgres_conn_id="lvao-db")
     engine = pg_hook.get_sqlalchemy_engine()
 
     with engine.begin() as connection:
@@ -136,7 +130,7 @@ write_to_postgres_task = PythonOperator(
 
 trigger_create_final_actors_dag = TriggerDagRunOperator(
     task_id="create_displayed_actors",
-    trigger_dag_id=utils.get_dag_name(__file__, "apply_adresse_corrections"),
+    trigger_dag_id="apply_adresse_corrections",
     dag=dag,
 )
 

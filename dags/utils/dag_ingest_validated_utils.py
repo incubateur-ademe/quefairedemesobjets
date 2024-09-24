@@ -1,17 +1,11 @@
 import logging
 from datetime import datetime
-from importlib import import_module
-from pathlib import Path
 
 import pandas as pd
 
+from . import base_utils, mapping_utils, shared_constants
+
 logging.basicConfig(level=logging.INFO)
-
-env = Path(__file__).parent.parent.name
-
-utils = import_module(f"{env}.utils.utils")
-mapping_utils = import_module(f"{env}.utils.mapping_utils")
-shared_constants = import_module(f"{env}.utils.shared_constants")
 
 
 def process_many2many_df(df, column_name, df_columns=["acteur_id", "labelqualite_id"]):
@@ -85,7 +79,7 @@ def handle_update_actor_event(df_actors, dag_run_id):
     df_actors = df_actors[df_actors["status"] == shared_constants.TO_INSERT]
     df_actors = df_actors.apply(mapping_utils.replace_with_selected_candidat, axis=1)
     df_actors[["adresse", "code_postal", "ville"]] = df_actors.apply(
-        lambda row: utils.extract_details(row, col="adresse_candidat"), axis=1
+        lambda row: base_utils.extract_details(row, col="adresse_candidat"), axis=1
     )
 
     df_actors["modifie_le"] = current_time
