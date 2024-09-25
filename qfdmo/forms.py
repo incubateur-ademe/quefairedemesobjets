@@ -5,7 +5,7 @@ from django.core.cache import cache
 from django.http import HttpRequest
 from django.utils.safestring import mark_safe
 
-from core.geography import all_epci_codes
+from qfdmo.geo_api import all_epci_codes_cached
 from qfdmo.models.action import (
     Action,
     get_action_instances,
@@ -93,7 +93,8 @@ class AddressesForm(forms.Form):
                 "data-search-solution-form-target": "direction",
             },
         ),
-        # TODO: why are we not using initial values here ?
+        choices=[],
+        # TODO: refacto forms : set initial value
         # initial="jai",
         label="Direction des actions",
         required=False,
@@ -300,9 +301,8 @@ class CarteAddressesForm(AddressesForm):
         required=False,
     )
 
-    # epci_codes
-    epci_list = forms.MultipleChoiceField(
-        choices=[(item, item) for item in all_epci_codes()],
+    epci_codes = forms.MultipleChoiceField(
+        choices=[(item, item) for item in all_epci_codes_cached()],
         widget=forms.MultipleHiddenInput(),
         required=False,
     )
@@ -435,7 +435,7 @@ class ConfiguratorForm(forms.Form):
             },
             fieldset_attrs={},
         ),
-        # TODO: why are we not using initial values here ?
+        # TODO: refacto forms : set initial value
         # initial="jecherche",
         label="Direction des actions",
         required=False,

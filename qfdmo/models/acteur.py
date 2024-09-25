@@ -28,7 +28,7 @@ from qfdmo.models.utils import (
     NomAsNaturalKeyModel,
 )
 
-from core.geography import retrieve_epci_bounding_box
+from qfdmo.geo_api import retrieve_epci_bounding_box
 
 logger = logging.getLogger(__name__)
 
@@ -181,11 +181,11 @@ class ActeurQuerySet(models.QuerySet):
 
         return self.physical().filter(location__within=Polygon.from_bbox(bbox))
 
-    def in_epcis(self, epci_list=[]):
-        if not epci_list:
+    def in_epcis(self, epci_codes=[]):
+        if not epci_codes:
             return self
 
-        polygons = [retrieve_epci_bounding_box(epci) for epci in epci_list]
+        polygons = [retrieve_epci_bounding_box(code) for code in epci_codes]
         # TODO : merge bounding box, for now we get only the first
         polygon = polygons[0]
 

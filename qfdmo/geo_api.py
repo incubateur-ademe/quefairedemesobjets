@@ -1,11 +1,8 @@
-from typing import TypedDict, List, cast
+from typing import List, cast
 from django.core.cache import caches
-import json
 import requests
 
 db_cache = caches["database"]
-
-# TODO : find a place for this file
 
 
 def fetch_epci_codes() -> List[str]:
@@ -14,7 +11,7 @@ def fetch_epci_codes() -> List[str]:
     return codes
 
 
-def all_epci_codes() -> List[str]:
+def all_epci_codes_cached() -> List[str]:
     return cast(
         List[str],
         db_cache.get_or_set(
@@ -41,31 +38,3 @@ def retrieve_epci_bounding_box(epci):
     return db_cache.get_or_set(
         f"{epci}_bounding_box", fetch_epci_bounding_box, timeout=3600 * 24 * 365
     )
-
-
-class PointDict(TypedDict):
-    lat: float
-    lng: float
-
-
-class LeafletBbox(TypedDict):
-    center: List[str]
-    southWest: PointDict
-    northEast: PointDict
-
-
-def sanitize_leaflet_bbox(custom_bbox_as_string: str) -> List[float] | None:
-    custom_bbox: LeafletBbox = json.loads(custom_bbox_as_string)
-
-    try:
-        # Handle center
-        return [
-            custom_bbox["southWest"]["lng"],
-            custom_bbox["southWest"]["lat"],
-            custom_bbox["northEast"]["lng"],
-            custom_bbox["northEast"]["lat"],
-        ]
-    except KeyError as exception:
-        # TODO : gérer l'erreur
-        print(f"Uh oh {exception=}")
-        return []

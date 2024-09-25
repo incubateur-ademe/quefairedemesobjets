@@ -1,7 +1,6 @@
 {% extends 'layout/base.html' %}
 
 {% block content %}
-
     <turbo-frame id="turboForm">
         {# Controleur général de gestion de la navigation et du formulaire #}
 
@@ -36,7 +35,7 @@
                 {% include 'qfdmo/_addresses_partials/filters/carte_legend.html' %}
                 {# Panel À propos #}
                 {% include 'qfdmo/_addresses_partials/filters/carte_apropos.html' %}
-                {{ form.epci_list }}
+                {{ form.epci_codes }}
             {% else %}
                 {# Ici on on a tout préfixé de iframe, mais en fait il aurait fallu préfixer de formulaire. Car la carte peut être dans une iframe, non ? #}
                 {# Panel «Filtres avancés» #}

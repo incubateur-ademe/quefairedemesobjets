@@ -18,7 +18,7 @@ from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_GET
 from django.views.generic.edit import FormView
 
-from core.geography import sanitize_leaflet_bbox
+from qfdmo.leaflet import sanitize_leaflet_bbox
 from core.utils import get_direction
 from qfdmo.forms import CarteAddressesForm, IframeAddressesForm
 from qfdmo.models import (
@@ -104,14 +104,18 @@ class AddressesView(FormView):
 
     # TODO: investigate type error here
     def get_form(self, **kwargs):
-        form_class = self.get_form_class()
-
-        if self.request.GET & form_class.base_fields.keys():
-            # TODO: we should use a bounded form in this case
-            form = form_class(self.request.GET)
-            # form = super().get_form(**kwargs)
+        if self.request.GET & self.get_form_class().base_fields.keys():
+            # TODO: refacto forms we should use a bounded form in this case
+            # Here we check that the request shares some parameters
+            # with the fields in the form. If this happens, this might
+            # means that we are badly using request instead of a bounded
+            # form and that we need to access a validated form.
+            #
+            # This case happens when the form is loaded inside a turbo-frame.
+            # form = self.get_form_class()(self.request.GET)
+            form = super().get_form()
         else:
-            form = super().get_form(**kwargs)
+            form = super().get_form()
 
         action_displayed = self._set_action_displayed() if self.is_carte else None
         grouped_action_choices = (
@@ -130,67 +134,80 @@ class AddressesView(FormView):
 
         return form
 
-    def get_data(self, key: str, default=None):
-        """
-        The form is currently used for various use cases:
-            - The map form
-            - The "iframe form" form (for https://epargnonsnosressources.gouv.fr)
-            - The turbo-frames
+    def get_data_from_request_or_bounded_form(self, key: str, default=None):
+        # There is a flaw in the way the form is instantiated, because the
+        # form is never bounded to its data.
+        # The request is directly used to perform various tasks, like
+        # populating some multiple choice field choices, hence missing all
+        # the validation provided by django forms.
 
-        There is a major flaw in the way it is instantiated, because the
-        form is never bounded to its data.
-        The request is directly used, hence missing all the validation.
-
-        To prepare a future refactor of this form, the method here calls
-        the cleaned_data when the form is bound and the request.GET dict
-        when it is not bounded.
-        The form should be bounded at least when used in turbo-frames.
-        """
+        # To prepare a future refactor of this form, the method here calls
+        # the cleaned_data when the form is bounded and the request.GET
+        # QueryDict when it is not bounded.
+        # Note : we call getlist and not get because in some cases, the request
+        # parameters needs to be treated as a list.
+        #
+        # The form is currently used for various use cases:
+        #     - The map form
+        #     - The "iframe form" form (for https://epargnonsnosressources.gouv.fr)
+        #     - The turbo-frames
+        # The form should be bounded at least when used in turbo-frames.
+        #
+        # The name is explicitely very verbose because it is not meant to stay
+        # a long time as is.
+        #
+        # TODO: refacto forms : get rid of this method and use cleaned_data when
+        # form is valid and request.GET for non-field request parameters
         try:
             return self.cleaned_data.get(key, default)
         except AttributeError:
             self.request.GET.getlist(key, default=default)
 
     def get_context_data(self, **kwargs):
-        form = self.get_form()
+        # form = self._get_form()
+        form = self.get_form_class()(self.request.GET)
 
         kwargs.update(
             # TODO: refacto forms : define a BooleanField carte on CarteAddressesForm
             carte=self.is_carte,
-            form=form,
+            # form=form,
             location="{}",
         )
 
         if form.is_valid():
             self.cleaned_data = form.cleaned_data
         else:
+            self.cleaned_data = form.cleaned_data
             # TODO : refacto forms : handle this case properly
             pass
 
         # Manage the selection of sous_categorie_objet and actions
         acteurs = self._acteurs_from_sous_categorie_objet_and_actions()
 
-        if self.get_data("digital") == "1":
+        if self.get_data_from_request_or_bounded_form("digital") == "1":
             acteurs = acteurs.digital()
         else:
             bbox, acteurs = self._bbox_and_acteurs_from_location_or_epci(acteurs)
+            acteurs = acteurs[: self._get_max_displayed_acteurs()]
             kwargs.update(bbox=bbox)
 
             # Set Home location (address set as input)
             # FIXME : can be manage in template using the form value ?
-            if (latitude := self.get_data("latitude")) and (
-                longitude := self.get_data("longitude")
+            if (
+                latitude := self.get_data_from_request_or_bounded_form("latitude")
+            ) and (
+                longitude := self.get_data_from_request_or_bounded_form("longitude")
             ):
                 kwargs.update(
                     location=json.dumps({"latitude": latitude, "longitude": longitude})
                 )
 
-        kwargs.update(acteurs=acteurs[: self._get_max_displayed_acteurs()])
+        kwargs.update(acteurs=acteurs)
 
         return super().get_context_data(**kwargs)
 
     def _bbox_and_acteurs_from_location_or_epci(self, acteurs):
-        if custom_bbox := self.get_data("bounding_box"):
+        if custom_bbox := self.get_data_from_request_or_bounded_form("bounding_box"):
             # TODO : recherche dans cette zone
             bbox = sanitize_leaflet_bbox(custom_bbox)
             acteurs_in_bbox = acteurs.in_bbox(bbox)
@@ -199,13 +216,13 @@ class AddressesView(FormView):
             if acteurs_in_bbox.count() > 0:
                 return custom_bbox, acteurs_in_bbox
 
-        if epci_list := self.get_data("epci_list"):
-            acteurs = acteurs.in_epcis(epci_list)
+        if epci_codes := self.get_data_from_request_or_bounded_form("epci_codes"):
+            acteurs = acteurs.in_epcis(epci_codes)
             # return bbox ?
             return None, acteurs
 
-        if (latitude := self.get_data("latitude")) and (
-            longitude := self.get_data("longitude")
+        if (latitude := self.get_data_from_request_or_bounded_form("latitude")) and (
+            longitude := self.get_data_from_request_or_bounded_form("longitude")
         ):
             # if not bounding_box or if no acteur in the bounding_box
             acteurs_from_center = acteurs.from_center(longitude, latitude)
@@ -368,25 +385,29 @@ class AddressesView(FormView):
         reparer_is_checked = reparer_action_id in selected_actions_ids
 
         if (
-            self.get_data("pas_exclusivite_reparation") is not False
+            self.get_data_from_request_or_bounded_form("pas_exclusivite_reparation")
+            is not False
             or not reparer_is_checked
         ):
             excludes |= Q(exclusivite_de_reprisereparation=True)
 
-        if self.get_data("ess"):
+        if self.get_data_from_request_or_bounded_form("ess"):
             filters &= Q(labels__code="ess")
 
-        if self.get_data("bonus"):
+        if self.get_data_from_request_or_bounded_form("bonus"):
             filters &= Q(labels__bonus=True)
 
-        if sous_categorie_id := self.get_data("sc_id", 0):
+        if sous_categorie_id := self.get_data_from_request_or_bounded_form("sc_id", 0):
             filters &= Q(
                 proposition_services__sous_categories__id=sous_categorie_id,
             )
 
         actions_filters = Q()
 
-        if self.get_data("label_reparacteur") and reparer_is_checked:
+        if (
+            self.get_data_from_request_or_bounded_form("label_reparacteur")
+            and reparer_is_checked
+        ):
             selected_actions_ids = [
                 a for a in selected_actions_ids if a != reparer_action_id
             ]
