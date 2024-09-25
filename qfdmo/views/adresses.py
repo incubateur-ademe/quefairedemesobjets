@@ -2,7 +2,6 @@ import json
 from typing import List, cast
 import logging
 
-from django.contrib.gis.geos.geometry import GEOSGeometry
 import unidecode
 from django.conf import settings
 from django.contrib.admin.utils import quote
@@ -19,7 +18,7 @@ from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_GET
 from django.views.generic.edit import FormView
 
-from qfdmo.geo_api import retrieve_epci_bounding_box
+from qfdmo.geo_api import bbox_from_list_of_geojson, retrieve_epci_geojson
 from qfdmo.leaflet import compile_leaflet_bbox, sanitize_leaflet_bbox
 from core.utils import get_direction
 from qfdmo.forms import CarteAddressesForm, IframeAddressesForm
@@ -219,13 +218,8 @@ class AddressesView(FormView):
                 return custom_bbox, acteurs_in_bbox
 
         if epci_codes := self.get_data_from_request_or_bounded_form("epci_codes"):
-            polygons = [retrieve_epci_bounding_box(code) for code in epci_codes]
-            # TODO : merge bounding box, for now we get only the first
-            polygon = polygons[0]
-
-            geom = GEOSGeometry(str(polygon))
-            bigger_geom = geom.buffer(0)
-            bbox = bigger_geom.extent
+            contours = [retrieve_epci_geojson(code) for code in epci_codes]
+            bbox = bbox_from_list_of_geojson(contours, buffer=0.1)
             acteurs = acteurs.in_bbox(bbox)
             return compile_leaflet_bbox(bbox), acteurs
 
