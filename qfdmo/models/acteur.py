@@ -190,11 +190,11 @@ class ActeurQuerySet(models.QuerySet):
         polygon = polygons[0]
 
         geom = GEOSGeometry(str(polygon))
-        return self.physical().filter(location__within=geom).order_by("?")
+        return self.physical().from_center(*geom.centroid.coords, distance=geom.length)
 
-    def from_center(self, longitude, latitude):
+    def from_center(self, longitude, latitude, distance=settings.DISTANCE_MAX):
         reference_point = Point(float(longitude), float(latitude), srid=4326)
-        distance_in_degrees = settings.DISTANCE_MAX / 111320
+        distance_in_degrees = distance / 111320
 
         return (
             self.physical()
