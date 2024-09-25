@@ -179,18 +179,6 @@ class ActeurQuerySet(models.QuerySet):
 
         return self.physical().filter(location__within=Polygon.from_bbox(bbox))
 
-    # def in_epcis(self, epci_codes=[]):
-    #     if not epci_codes:
-    #         return self
-
-    #     polygons = [retrieve_epci_bounding_box(code) for code in epci_codes]
-    #     # TODO : merge bounding box, for now we get only the first
-    #     polygon = polygons[0]
-
-    #     geom = GEOSGeometry(str(polygon))
-    #     bigger_geom = geom.buffer(.4)
-    #     return self.physical().in_bbox(bigger_geom.extent).order_by("?")
-
     def from_center(self, longitude, latitude, distance=settings.DISTANCE_MAX):
         reference_point = Point(float(longitude), float(latitude), srid=4326)
         distance_in_degrees = distance / 111320
