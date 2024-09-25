@@ -8,7 +8,7 @@ from airflow.providers.postgres.hooks.postgres import PostgresHook
 
 def read_data_from_postgres(**kwargs):
     table_name = kwargs["table_name"]
-    pg_hook = PostgresHook(postgres_conn_id="lvao-db")
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
     engine = pg_hook.get_sqlalchemy_engine()
     df = pd.read_sql_table(table_name, engine)
     return df
@@ -219,7 +219,7 @@ def write_data_to_postgres(**kwargs):
         inplace=True,
     )
 
-    pg_hook = PostgresHook(postgres_conn_id="lvao-db")
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
     engine = pg_hook.get_sqlalchemy_engine()
 
     original_table_name_actor = "qfdmo_displayedacteur"
@@ -564,7 +564,8 @@ read_retry_count = 5
 read_retry_interval = timedelta(minutes=2)
 
 dag = DAG(
-    "apply_adresse_corrections",
+    dag_id="compute_carte_acteur",
+    dag_display_name="Rafraichir les acteurs afichés sur la carte",
     default_args=default_args,
     description=(
         "DAG for applying correction on normalized actors and propositionservice"

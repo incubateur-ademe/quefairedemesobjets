@@ -1,7 +1,6 @@
 import pandas as pd
 from pandas._testing import assert_frame_equal
-
-from dags.utils.dag_ingest_validated_utils import process_many2many_df
+from utils.dag_ingest_validated_utils import process_many2many_df
 
 
 def test_process_labels_valid_column():

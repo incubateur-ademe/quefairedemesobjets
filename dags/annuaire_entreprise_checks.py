@@ -23,7 +23,8 @@ default_args = {
 }
 
 dag = DAG(
-    "annuaire_entreprise_checks",
+    dag_id="annuaire_entreprise_checks",
+    dag_display_name="Vérification des données avec l'API Annuaire Entreprise",
     default_args=default_args,
     params={
         "limit": Param(0, type="integer", description="Limit for data processed"),
@@ -45,7 +46,7 @@ dag = DAG(
 
 def fetch_and_parse_data(**context):
     limit = context["params"]["limit"]
-    pg_hook = PostgresHook(postgres_conn_id="lvao-db")
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
     engine = pg_hook.get_sqlalchemy_engine()
     active_actors_query = """
         SELECT

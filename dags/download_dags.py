@@ -18,7 +18,8 @@ default_args = {
 ENVIRONMENT = decouple.config("ENVIRONMENT", "development")
 
 with DAG(
-    "download_dags_from_s3",
+    dag_id="download_dags_from_s3",
+    dag_display_name="Téléchargement des DAGs depuis S3",
     default_args=default_args,
     description="DAG to download dags from S3",
     schedule_interval=timedelta(minutes=5),

@@ -13,7 +13,8 @@ default_args = {
 }
 
 with DAG(
-    "eo-ocab",
+    dag_id="eo-ocab",
+    dag_display_name="Téléchargement de la source OCAB",
     default_args=default_args,
     description=(
         "A pipeline to fetch, process, and load to validate data into postgresql"

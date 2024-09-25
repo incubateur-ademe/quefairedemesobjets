@@ -13,7 +13,8 @@ default_args = {
 }
 
 with DAG(
-    "eo-corepile",
+    dag_id="eo-corepile",
+    dag_display_name="Téléchargement de la source COREPILE",
     default_args=default_args,
     description=(
         "A pipeline to fetch, process, and load to validate data into postgresql"

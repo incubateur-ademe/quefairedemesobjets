@@ -13,7 +13,8 @@ default_args = {
 }
 
 with DAG(
-    "eo-ecodds",
+    dag_id="eo-ecodds",
+    dag_display_name="Téléchargement de la source ECODDS",
     default_args=default_args,
     description=(
         "A pipeline to fetch, process, and load to validate data into postgresql"

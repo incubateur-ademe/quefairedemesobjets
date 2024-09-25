@@ -19,7 +19,8 @@ default_args = {
 }
 
 dag = DAG(
-    "annuaire_entreprise_datasets_integration",
+    dag_id="annuaire_entreprise_datasets_integration",
+    dag_display_name="Téléchargement de la base de données annuaire entreprise",
     default_args=default_args,
     description="Download unités légales and etablissements from data.gouv.fr "
     "and save it to postgresql",
@@ -33,7 +34,7 @@ WAIT_SECONDS = 5
 
 
 def fetch_and_process_data(url_title, table_name, index_column, schema, **context):
-    pg_hook = PostgresHook(postgres_conn_id="lvao-db")
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
     engine = pg_hook.get_sqlalchemy_engine()
 
     with pg_hook.get_conn() as conn:
