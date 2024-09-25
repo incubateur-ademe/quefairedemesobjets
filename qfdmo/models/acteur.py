@@ -1,11 +1,12 @@
 import random
 import string
 import uuid
-from typing import Any
+from typing import Any, List, cast
 
 import opening_hours
 import orjson
 from django.contrib.gis.db import models
+from django.core.cache import cache
 from django.core.files.images import get_image_dimensions
 from django.db.models.functions import Now
 from django.forms import ValidationError, model_to_dict
@@ -13,7 +14,7 @@ from django.http import HttpRequest
 from django.urls import reverse
 from unidecode import unidecode
 
-from qfdmo.models.action import Action, CachedDirectionAction
+from qfdmo.models.action import Action, get_action_instances
 from qfdmo.models.categorie_objet import SousCategorieObjet
 from qfdmo.models.utils import CodeAsNaturalKeyModel, NomAsNaturalKeyModel
 
@@ -247,8 +248,6 @@ class BaseActeur(NomAsNaturalKeyModel):
 
     @property
     def is_digital(self) -> bool:
-        print(f"acteur_type : {self.acteur_type_id} - {self.acteur_type}")
-        print(f"get_digital_acteur_type_id : {ActeurType.get_digital_acteur_type_id()}")
         return self.acteur_type_id == ActeurType.get_digital_acteur_type_id()
 
     def get_acteur_services(self) -> list[str]:
@@ -310,22 +309,26 @@ class Acteur(BaseActeur):
                 "statut",
             ],
         )
-        (acteur, created) = RevisionActeur.objects.get_or_create(
+        (revisionacteur, created) = RevisionActeur.objects.get_or_create(
             identifiant_unique=self.identifiant_unique, defaults=fields
         )
         if created:
             for proposition_service in self.proposition_services.all():  # type: ignore
                 revision_proposition_service = (
                     RevisionPropositionService.objects.create(
-                        acteur=acteur,
+                        acteur=revisionacteur,
                         action_id=proposition_service.action_id,
                     )
                 )
                 revision_proposition_service.sous_categories.add(
                     *proposition_service.sous_categories.all()
                 )
+            for label in self.labels.all():
+                revisionacteur.labels.add(label)
+            for acteur_service in self.acteur_services.all():
+                revisionacteur.acteur_services.add(acteur_service)
 
-        return acteur
+        return revisionacteur
 
     def clean_location(self):
         if self.location is None and self.acteur_type.code != "acteur digital":
@@ -463,9 +466,13 @@ class DisplayedActeur(BaseActeur):
         ps_action_ids = list(
             {ps.action_id for ps in self.proposition_services.all()}  # type: ignore
         )
+        # Cast needed because of the cache
+        cached_action_instances = cast(
+            List[Action], cache.get_or_set("action_instances", get_action_instances)
+        )
         return [
             action
-            for action in CachedDirectionAction.get_action_instances()
+            for action in cached_action_instances
             if (not direction or direction in [d.code for d in action.directions.all()])
             and action.id in ps_action_ids
         ]

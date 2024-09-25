@@ -9,6 +9,7 @@ from dags.utils.dag_eo_utils import (
     create_labels,
     create_proposition_services,
     create_proposition_services_sous_categories,
+    merge_duplicates,
     serialize_to_json,
 )
 
@@ -1193,24 +1194,101 @@ class TestSerializeToJson:
         assert acteur_services == expected_acteur_services
 
 
-def test_create_proposition_services_sous_categories(mock_ti):
-    kwargs = {"ti": mock_ti, "params": {}}
-    df_result = create_proposition_services_sous_categories(**kwargs)
+class TestCreatePropositionServicesSousCategories:
+    def test_create_proposition_services_sous_categories(self, mock_ti):
 
-    assert not df_result.empty
-    assert df_result.columns.tolist() == [
-        "propositionservice_id",
-        "souscategorieobjet_id",
-        "souscategorie",
-    ]
-    assert df_result["propositionservice_id"].tolist() == [1, 2, 3, 4]
-    assert df_result["souscategorieobjet_id"].tolist() == [102, 102, 101, 101]
-    assert df_result["souscategorie"].tolist() == [
-        "téléphones portables",
-        "téléphones portables",
-        "ecrans",
-        "ecrans",
-    ]
+        kwargs = {"ti": mock_ti, "params": {}}
+        df_result = create_proposition_services_sous_categories(**kwargs)
+
+        pd.testing.assert_frame_equal(
+            df_result,
+            pd.DataFrame(
+                {
+                    "propositionservice_id": [1, 2, 3, 4],
+                    "souscategorieobjet_id": [102, 102, 101, 101],
+                    "souscategorie": [
+                        "téléphones portables",
+                        "téléphones portables",
+                        "ecrans",
+                        "ecrans",
+                    ],
+                }
+            ),
+        )
+
+    def test_create_proposition_services_sous_categories_unknown_product(
+        self, db_mapping_config, df_sous_categories_from_db
+    ):
+
+        mock = MagicMock()
+
+        mock.xcom_pull.side_effect = lambda task_ids="": {
+            "create_actors": {
+                "config": db_mapping_config,
+            },
+            "load_data_from_postgresql": {
+                "sous_categories": df_sous_categories_from_db,
+            },
+            "create_proposition_services": {
+                "df": pd.DataFrame(
+                    {
+                        "action_id": [1],
+                        "acteur_id": [1],
+                        "action": ["reparer"],
+                        "acteur_service": ["Service de réparation"],
+                        "sous_categories": ["Objet inconnu dans la table de mapping"],
+                        "id": [1],
+                    }
+                )
+            },
+        }[task_ids]
+
+        kwargs = {"ti": mock, "params": {}}
+        with pytest.raises(Exception):
+            create_proposition_services_sous_categories(**kwargs)
+
+    def test_create_proposition_services_sous_categories_empty_products(
+        self, db_mapping_config, df_sous_categories_from_db
+    ):
+
+        mock = MagicMock()
+
+        mock.xcom_pull.side_effect = lambda task_ids="": {
+            "create_actors": {
+                "config": db_mapping_config,
+            },
+            "load_data_from_postgresql": {
+                "sous_categories": df_sous_categories_from_db,
+            },
+            "create_proposition_services": {
+                "df": pd.DataFrame(
+                    {
+                        "action_id": [1, 1],
+                        "acteur_id": [1, 2],
+                        "action": ["reparer", "reparer"],
+                        "acteur_service": [
+                            "Service de réparation",
+                            "Service de réparation",
+                        ],
+                        "sous_categories": ["", None],
+                        "id": [1, 2],
+                    }
+                )
+            },
+        }[task_ids]
+
+        kwargs = {"ti": mock, "params": {}}
+        result = create_proposition_services_sous_categories(**kwargs)
+        pd.testing.assert_frame_equal(
+            result,
+            pd.DataFrame(
+                columns=[
+                    "propositionservice_id",
+                    "souscategorieobjet_id",
+                    "souscategorie",
+                ]
+            ),
+        )
 
 
 def test_create_actors(mock_ti, mock_config):
@@ -1308,6 +1386,7 @@ def test_acteur_to_delete(
         "fetch_data_from_api": pd.DataFrame(
             {
                 "id_point_apport_ou_reparation": ["1"],
+                "produitsdechets_acceptes": ["12345678"],
                 "nom_de_lorganisme": ["Eco1"],
                 "ecoorganisme": ["source1"],
             }
@@ -1343,6 +1422,7 @@ def test_create_reparacteurs(
                 "reparactor_description": ["Ceci est une description du réparacteur."],
                 "address_1": ["12 Rue de Rivoli"],
                 "address_2": ["Bâtiment A"],
+                "id_point_apport_ou_reparation": ["12345678"],
                 "zip_code": ["75001"],
                 "zip_code_label": ["Paris"],
                 "website": ["https://www.exemple.com"],
@@ -1487,6 +1567,9 @@ class TestCeateLabels:
         )
         pd.testing.assert_frame_equal(df, expected_dataframe_with_ess_label)
 
+    @pytest.mark.parametrize(
+        "code_ecoorganisme_bonus", ["ECOORGANISME", "ecoorganisme"]
+    )
     def test_create_bonus_reparation_labels(
         self,
         db_mapping_config,
@@ -1495,6 +1578,7 @@ class TestCeateLabels:
         df_acteur_services_from_db,
         df_sous_categories_from_db,
         df_labels_from_db,
+        code_ecoorganisme_bonus,
     ):
 
         mock = get_mock_ti_label(
@@ -1508,7 +1592,7 @@ class TestCeateLabels:
                 {
                     "identifiant_unique": [1, 2],
                     "labels_etou_bonus": ["Agréé Bonus Réparation", ""],
-                    "ecoorganisme": ["ecoorganisme", "source1"],
+                    "ecoorganisme": [code_ecoorganisme_bonus, "source1"],
                     "acteur_type_id": [202, 202],
                 }
             ),
@@ -1530,3 +1614,126 @@ class TestCeateLabels:
         pd.testing.assert_frame_equal(
             df, expected_dataframe_with_bonus_reparation_label
         )
+
+
+class TestMergeDuplicates:
+
+    @pytest.mark.parametrize(
+        "df, expected_df",
+        [
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1, 1],
+                        "produitsdechets_acceptes": [
+                            " Plastic Box | Metal | Aàèë l'test",
+                            " Plastic Box | Metal | Aàèë l'test",
+                        ],
+                        "other_column": ["A", "B"],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1],
+                        "produitsdechets_acceptes": ["Aàèë l'test|Metal|Plastic Box"],
+                        "other_column": ["A"],
+                    }
+                ),
+            ),
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1, 2, 3],
+                        "produitsdechets_acceptes": [
+                            "Plastic|Metal",
+                            "Metal|Glass",
+                            "Paper",
+                        ],
+                        "other_column": [
+                            "A",
+                            "B",
+                            "C",
+                        ],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1, 2, 3],
+                        "produitsdechets_acceptes": [
+                            "Plastic|Metal",
+                            "Metal|Glass",
+                            "Paper",
+                        ],
+                        "other_column": [
+                            "A",
+                            "B",
+                            "C",
+                        ],
+                    }
+                ),
+            ),
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1, 1, 1],
+                        "produitsdechets_acceptes": [
+                            "Plastic|Metal",
+                            "Metal|Glass",
+                            "Paper",
+                        ],
+                        "other_column": [
+                            "A",
+                            "B",
+                            "C",
+                        ],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1],
+                        "produitsdechets_acceptes": ["Glass|Metal|Paper|Plastic"],
+                        "other_column": ["A"],
+                    }
+                ),
+            ),
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1, 1, 2, 3, 3, 3],
+                        "produitsdechets_acceptes": [
+                            "Plastic|Metal",
+                            "Metal|Glass",
+                            "Paper",
+                            "Glass|Plastic",
+                            "Plastic|Metal",
+                            "Metal",
+                        ],
+                        "other_column": ["A", "B", "C", "D", "E", "F"],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1, 2, 3],
+                        "produitsdechets_acceptes": [
+                            "Glass|Metal|Plastic",
+                            "Paper",
+                            "Glass|Metal|Plastic",
+                        ],
+                        "other_column": ["A", "C", "D"],
+                    }
+                ),
+            ),
+        ],
+    )
+    def test_merge_duplicates(self, df, expected_df):
+
+        result_df = merge_duplicates(df)
+
+        result_df = result_df.sort_values(by="identifiant_unique").reset_index(
+            drop=True
+        )
+        expected_df = expected_df.sort_values(by="identifiant_unique").reset_index(
+            drop=True
+        )
+
+        pd.testing.assert_frame_equal(result_df, expected_df)

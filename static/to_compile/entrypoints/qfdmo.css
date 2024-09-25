@@ -200,3 +200,12 @@ Style the autocomplete container:
 .qfdmo-no-external-link-icon:after {
     content: none;
 }
+
+
+/* OPTIMIZE : solution temporaire, pour coller aux contraintes d'accessibilité
+* de Havas, cf https://www.notion.so/accelerateur-transition-ecologique-ademe/ACCESSIBILIT-CARTE-FORMULAIRE-Contr-le-segment-actif-pas-assez-clair-48f99736d566414d8d7ba5c1a6e24361?pvs=4
+* À remonter au DSFR et supprimer lorqsu'ils l'auront implémenté.
+*/
+.fr-segmented__element input:checked:focus + label {
+    outline: 2px solid #0a76f6;
+}

@@ -7,7 +7,6 @@ from factory import Faker
 
 from qfdmo.models import (
     Acteur,
-    CachedDirectionAction,
     NomAsNaturalKeyModel,
     RevisionActeur,
     RevisionPropositionService,
@@ -339,8 +338,10 @@ class TestActeurService:
 
     def test_acteur_actions_multiple(self, displayed_acteur):
         displayed_acteur.acteur_services.add(
-            ActeurServiceFactory(libelle="Par un professionnel"),
-            ActeurServiceFactory(libelle="Atelier pour réparer soi-même"),
+            ActeurServiceFactory(code="pro", libelle="Par un professionnel"),
+            ActeurServiceFactory(
+                code="atelier", libelle="Atelier pour réparer soi-même"
+            ),
         )
 
         assert displayed_acteur.get_acteur_services() == [
@@ -382,7 +383,6 @@ class TestDisplayActeurActeurActions:
         action = ActionFactory()
         action.directions.add(direction)
         DisplayedPropositionServiceFactory(action=action, acteur=displayed_acteur)
-        CachedDirectionAction.reload_cache()
         assert [
             model_to_dict(a, exclude=["directions"])
             for a in displayed_acteur.acteur_actions()
@@ -407,7 +407,6 @@ class TestDisplayActeurActeurActions:
         action = ActionFactory()
         action.directions.add(direction)
         DisplayedPropositionServiceFactory(action=action, acteur=displayed_acteur)
-        CachedDirectionAction.reload_cache()
         assert displayed_acteur.acteur_actions(direction="fake") == []
         assert [
             model_to_dict(a, exclude=["directions"])
@@ -434,8 +433,6 @@ class TestDisplayActeurActeurActions:
             action = ActionFactory(order=i, code=f"{i}")
             action.directions.add(direction)
             DisplayedPropositionServiceFactory(action=action, acteur=displayed_acteur)
-
-        CachedDirectionAction.reload_cache()
 
         assert [
             action.order for action in displayed_acteur.acteur_actions(direction="jai")
@@ -503,7 +500,6 @@ class TestDisplayedActeurJsonActeurForDisplay:
         return displayed_acteur
 
     def test_json_acteur_for_display_ordered(self, displayed_acteur):
-        CachedDirectionAction.reload_cache()
         acteur_for_display = json.loads(displayed_acteur.json_acteur_for_display())
 
         assert acteur_for_display["identifiant_unique"] is not None
@@ -512,7 +508,6 @@ class TestDisplayedActeurJsonActeurForDisplay:
         assert acteur_for_display["couleur"] == "couleur-actionjai1"
 
     def test_json_acteur_for_display_by_direction(self, displayed_acteur):
-        CachedDirectionAction.reload_cache()
         acteur_for_display = json.loads(
             displayed_acteur.json_acteur_for_display(direction="jai")
         )
@@ -522,7 +517,6 @@ class TestDisplayedActeurJsonActeurForDisplay:
         assert acteur_for_display["icon"] == "icon-actionjai1"
         assert acteur_for_display["couleur"] == "couleur-actionjai1"
 
-        CachedDirectionAction.reload_cache()
         acteur_for_display = json.loads(
             displayed_acteur.json_acteur_for_display(direction="jecherche")
         )
@@ -533,8 +527,6 @@ class TestDisplayedActeurJsonActeurForDisplay:
         assert acteur_for_display["couleur"] == "couleur-actionjecherche1"
 
     def test_json_acteur_for_display_action_list(self, displayed_acteur):
-
-        CachedDirectionAction.reload_cache()
         acteur_for_display = json.loads(
             displayed_acteur.json_acteur_for_display(action_list="actionjai2")
         )
@@ -544,7 +536,6 @@ class TestDisplayedActeurJsonActeurForDisplay:
         assert acteur_for_display["icon"] == "icon-actionjai2"
         assert acteur_for_display["couleur"] == "couleur-actionjai2"
 
-        CachedDirectionAction.reload_cache()
         acteur_for_display = json.loads(
             displayed_acteur.json_acteur_for_display(
                 action_list="actionjai1|actionjai2|actionjecherche2"
@@ -557,8 +548,6 @@ class TestDisplayedActeurJsonActeurForDisplay:
         assert acteur_for_display["couleur"] == "couleur-actionjai1"
 
     def test_json_acteur_for_display_carte(self, displayed_acteur):
-
-        CachedDirectionAction.reload_cache()
         acteur_for_display = json.loads(
             displayed_acteur.json_acteur_for_display(carte=True)
         )
@@ -569,8 +558,6 @@ class TestDisplayedActeurJsonActeurForDisplay:
         assert acteur_for_display["couleur"] == "couleur-groupeaction2"
 
     def test_json_acteur_for_display_carte_direction(self, displayed_acteur):
-
-        CachedDirectionAction.reload_cache()
         acteur_for_display = json.loads(
             displayed_acteur.json_acteur_for_display(carte=True, direction="jecherche")
         )
@@ -581,8 +568,6 @@ class TestDisplayedActeurJsonActeurForDisplay:
         assert acteur_for_display["couleur"] == "couleur-groupeaction2"
 
     def test_json_acteur_for_display_carte_action_list(self, displayed_acteur):
-
-        CachedDirectionAction.reload_cache()
         acteur_for_display = json.loads(
             displayed_acteur.json_acteur_for_display(
                 carte=True, action_list="actionjai1|actionjecherche1"
@@ -594,7 +579,6 @@ class TestDisplayedActeurJsonActeurForDisplay:
         assert acteur_for_display["icon"] == "icon-groupeaction1"
         assert acteur_for_display["couleur"] == "couleur-groupeaction1"
 
-        CachedDirectionAction.reload_cache()
         acteur_for_display = json.loads(
             displayed_acteur.json_acteur_for_display(
                 carte=True, action_list="actionjai1|actionjai2|actionjecherche2"
@@ -610,7 +594,6 @@ class TestDisplayedActeurJsonActeurForDisplay:
         displayed_acteur.action_principale = ActionFactory(code="actionjai2")
         displayed_acteur.save()
 
-        CachedDirectionAction.reload_cache()
         acteur_for_display = json.loads(displayed_acteur.json_acteur_for_display())
 
         assert acteur_for_display["identifiant_unique"] is not None
@@ -624,7 +607,6 @@ class TestDisplayedActeurJsonActeurForDisplay:
         displayed_acteur.action_principale = ActionFactory(code="actionjai2")
         displayed_acteur.save()
 
-        CachedDirectionAction.reload_cache()
         acteur_for_display = json.loads(
             displayed_acteur.json_acteur_for_display(direction="jecherche")
         )
@@ -640,7 +622,6 @@ class TestDisplayedActeurJsonActeurForDisplay:
         displayed_acteur.action_principale = ActionFactory(code="actionjai2")
         displayed_acteur.save()
 
-        CachedDirectionAction.reload_cache()
         acteur_for_display = json.loads(
             displayed_acteur.json_acteur_for_display(action_list="actionjai1")
         )

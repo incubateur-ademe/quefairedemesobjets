@@ -13,7 +13,7 @@
             class="
             {% if not is_carte(request) %}qfdmo-min-h-[700px] {% endif %}qfdmo-max-h-[800px]{%if is_embedded(request) %} qfdmo-h-screen{% else %} qfdmo-h-svh{% endif %}
             qfdmo-flex qfdmo-flex-col qfdmo-flex-auto
-            qfdmo-relative"
+            qfdmo-relative qfdmo-overflow-hidden"
             data-action="
             map:displayDetails->search-solution-form#displayDetails
             map:updateBbox->search-solution-form#updateBboxInput
@@ -26,7 +26,6 @@
             >
             {% include "qfdmo/partials/featureflip_inputs.html" %}
             {% if is_carte(request) %}
-
                 {# Panel Header #}
                 {% include 'qfdmo/_addresses_partials/carte_header.html' %}
                 {# Panel Result #}
@@ -37,7 +36,6 @@
                 {% include 'qfdmo/_addresses_partials/filters/carte_legend.html' %}
                 {# Panel À propos #}
                 {% include 'qfdmo/_addresses_partials/filters/carte_apropos.html' %}
-
             {% else %}
                 {# Panel «Filtres avancés» #}
                 {% include 'qfdmo/_addresses_partials/filters/iframe_advanced_filters.html' %}
@@ -46,7 +44,7 @@
                 {# Panel «Formulaire de recherche» #}
                 {% include 'qfdmo/_addresses_partials/iframe_form.html' %}
                 {# Panel «Résultats de la recherche» #}
-                {% include 'qfdmo/_addresses_partials/iframe_result.html' %}
+                {% include 'qfdmo/_addresses_partials/result.html' %}
                 {# Liens de pieds de page pour iframe #}
                 {% include 'qfdmo/_addresses_partials/iframe_footer_links.html' %}
             {% endif %}

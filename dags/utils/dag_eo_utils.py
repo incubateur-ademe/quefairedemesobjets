@@ -95,7 +95,14 @@ def create_proposition_services_sous_categories(**kwargs):
     sous_categories = config[mapping_config_key]
 
     for _, row in df.iterrows():
-        products = str(row["sous_categories"]).split("|")
+        sous_categories_value = (
+            str(row["sous_categories"]) if row["sous_categories"] else ""
+        )
+        products = [
+            sous_categorie
+            for sous_categorie in sous_categories_value.split("|")
+            if sous_categorie
+        ]
         for product in set(products):
             product_key = product.strip().lower()
             if product_key in sous_categories:
@@ -121,6 +128,10 @@ def create_proposition_services_sous_categories(**kwargs):
                             "souscategorie": product.strip(),
                         }
                     )
+            else:
+                raise Exception(
+                    f"Could not find mapping for sous categorie `{product}` in config"
+                )
 
     df_sous_categories = pd.DataFrame(
         rows_list,
@@ -379,6 +390,41 @@ def _force_column_value(
     )
 
 
+def merge_produits_accepter(group):
+    produits_sets = set()
+    for produits in group:
+        produits_sets.update([produit.strip() for produit in produits.split("|")])
+    return "|".join(sorted(produits_sets))
+
+
+def merge_duplicates(
+    df, group_column="identifiant_unique", merge_column="produitsdechets_acceptes"
+):
+
+    df_duplicates = df[df.duplicated(group_column, keep=False)]
+    df_non_duplicates = df[~df.duplicated(group_column, keep=False)]
+
+    df_merged_duplicates = (
+        df_duplicates.groupby(group_column)
+        .agg(
+            {
+                **{
+                    col: "first"
+                    for col in df.columns
+                    if col != merge_column and col != group_column
+                },
+                merge_column: merge_produits_accepter,
+            }
+        )
+        .reset_index()
+    )
+
+    # Concatenate the non-duplicates and merged duplicates
+    df_final = pd.concat([df_non_duplicates, df_merged_duplicates], ignore_index=True)
+
+    return df_final
+
+
 def create_actors(**kwargs):
     data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
     df = kwargs["ti"].xcom_pull(task_ids="fetch_data_from_api")
@@ -391,6 +437,13 @@ def create_actors(**kwargs):
     column_mapping = params.get("column_mapping", {})
     column_to_drop = params.get("column_to_drop", [])
     column_to_replace = params.get("default_column_value", {})
+
+    if params.get("multi_ecoorganisme"):
+        df = merge_duplicates(
+            df,
+            group_column="id_point_apport_ou_reparation",
+            merge_column="produitsdechets_acceptes",
+        )
 
     # intersection of columns in df and column_to_drop
     column_to_drop = list(set(column_to_drop) & set(df.columns))
@@ -550,8 +603,8 @@ def create_labels(**kwargs):
         # Manage bonus reparation
         label = str(row.get("labels_etou_bonus"))
         if label == "Agréé Bonus Réparation":
-            label_code = row.get("ecoorganisme")
-            if label_code in label_mapping:
+            label_code = row.get("ecoorganisme").lower()
+            if label_code in label_mapping.keys():
                 rows_list.append(
                     {
                         "acteur_id": row["identifiant_unique"],

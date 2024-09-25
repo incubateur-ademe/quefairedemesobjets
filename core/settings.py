@@ -16,6 +16,7 @@ from pathlib import Path
 import decouple
 import dj_database_url
 import sentry_sdk
+from import_export.formats.base_formats import CSV, XLS, XLSX
 from sentry_sdk.integrations.django import DjangoIntegration
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -72,6 +73,12 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+    }
+}
 
 X_FRAME_OPTIONS = "ALLOWALL"
 
@@ -314,3 +321,6 @@ STORAGES = {
 AIRFLOW_WEBSERVER_REFRESHACTEUR_URL = decouple.config(
     "AIRFLOW_WEBSERVER_REFRESHACTEUR_URL", cast=str, default="http://localhost:8080"
 )
+
+IMPORT_EXPORT_TMP_STORAGE_CLASS = "import_export.tmp_storages.MediaStorage"
+IMPORT_FORMATS = [CSV, XLSX, XLS]

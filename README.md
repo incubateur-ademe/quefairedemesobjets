@@ -114,7 +114,7 @@ Conseil: utiliser `asdf` pour la gestion des environnement virtuel `node` et `py
 Les bases de données source `MySQL` et cible `Postgres + Postgis` sont executées et mises à disposition par le gestionnaire de conteneur Docker
 
 ```sh
-docker compose up
+docker compose  --profiles lvao up
 ```
 
 Création de l'environnement virtuel de votre choix (préférence pour asdf)
@@ -469,3 +469,7 @@ Dans le code, à l'attention des équipes techniques
 Certaines variables combinant un nom d'objet et un suffixe ou préfixe peuvent être en franglais
 
 Ex :  `acteur_by_id`
+
+## Data platform
+
+Longue vie aux objets est aussi une `data platform` dont la documentation est dans [README.airflow.md](./README.airflow.md)

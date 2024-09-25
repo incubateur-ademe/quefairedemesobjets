@@ -20,7 +20,7 @@ test("Action list is well set with jai", async ({ page }) => {
     expect(id_action_list1).toBe("preter")
 
     // Select "jai" option
-    await page.check("#jai")
+    await page.check("[value=jai]")
 
     // Assuming "action1" and "action2" are ids of checkboxes inside "jaiTarget"
     // Check these checkboxes

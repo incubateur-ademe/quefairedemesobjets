@@ -2,9 +2,10 @@
     <input
         {% if widget.value != None %} value="{{ widget.value|stringformat:'s' }}"{% endif %}
         type="radio"
-        id="{{ widget.value }}" name="{{ widget.name }}"
-        {% include "django/forms/widgets/attrs.html" %}>
-    <label class="fr-label qfdmo-justify-center" for="{{ widget.value }}">
-        <div>{{ widget.label }}</div>
+        name="{{ widget.name }}"
+        {% include "django/forms/widgets/attrs.html" %}
+    >
+    <label class="fr-label qfdmo-justify-center" for="{{ widget.attrs.id }}">
+        <span>{{ widget.label }}</span>
     </label>
 </div>

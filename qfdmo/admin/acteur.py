@@ -364,7 +364,7 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
         Display Acteur fields value as help_text
         """
         revision_acteur_form = super().get_form(request, obj, change, **kwargs)
-        if obj.is_parent:
+        if obj and obj.is_parent:
             return revision_acteur_form
         if obj and obj.identifiant_unique:
             acteur = Acteur.objects.get(identifiant_unique=obj.identifiant_unique)

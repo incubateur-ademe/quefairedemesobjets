@@ -12,11 +12,10 @@
     "
     data-{{ widget.data_controller }}-target="input"
     data-on-focus=true
-    autocomplete="off"
     type="{{ widget.type }}"
     name="{{ widget.name }}"
     id="{{ widget.name }}"
-    {% if widget.value != None %} value="{{ widget.value.0|stringformat:'s' }}"{% endif %}
+    {% if widget.value != None %} value="{{ widget.value|stringformat:'s' }}"{% endif %}
     {% include "django/forms/widgets/attrs.html" %}
     >
     <span data-{{ widget.data_controller }}-target="spinner" class="fr-icon-refresh-line qfdmo-absolute qfdmo-right-0 qfdmo-top-0 qfdmo-m-1w qfdmo-animate-spin qfdmo-hidden"></span>
@@ -24,6 +23,7 @@
         {% for name, value in widget.btn_attrs.items %}
             {{ name }}="{{ value }}"
         {% endfor %}
+        data-testid="rechercher-adresses-submit"
     >
         Rechercher
     </button>
