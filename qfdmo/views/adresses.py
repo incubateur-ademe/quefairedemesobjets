@@ -161,7 +161,12 @@ class AddressesView(FormView):
         try:
             return self.cleaned_data.get(key, default)
         except AttributeError:
-            self.request.GET.getlist(key, default=default)
+            pass
+
+        try:
+            return self.request.GET.getlist(key, default)
+        except AttributeError:
+            return self.request.GET.get(key, default)
 
     def get_context_data(self, **kwargs):
         form = self.get_form_class()(self.request.GET)
@@ -245,14 +250,16 @@ class AddressesView(FormView):
         """
         Limit to actions of the direction only in Carte mode
         """
-        if direction := self.request.GET.get("direction"):
+        if direction := self.get_data_from_request_or_bounded_form("direction"):
             if self.is_carte:
                 cached_action_instances = [
                     action
                     for action in cached_action_instances
                     if direction in [d.code for d in action.directions.all()]
                 ]
-        if action_displayed := self.request.GET.get("action_displayed", ""):
+        if action_displayed := self.get_data_from_request_or_bounded_form(
+            "action_displayed", ""
+        ):
             cached_action_instances = [
                 action
                 for action in cached_action_instances
@@ -268,7 +275,7 @@ class AddressesView(FormView):
         return cached_action_instances
 
     def _set_action_list(self, action_displayed: List[Action]) -> List[Action]:
-        if action_list := self.request.GET.get("action_list", ""):
+        if action_list := self.get_data_from_request_or_bounded_form("action_list", ""):
             return [
                 action
                 for action in action_displayed
@@ -283,19 +290,23 @@ class AddressesView(FormView):
         # FIXME : est-ce possible d'optimiser en accédant au valeur initial du form ?
 
         # selection from interface
-        if self.request.GET.get("grouped_action"):
+        if self.get_data_from_request_or_bounded_form("grouped_action"):
             return [
                 code
-                for new_groupe_action in self.request.GET.getlist("grouped_action")
+                for new_groupe_action in self.get_data_from_request_or_bounded_form(
+                    "grouped_action"
+                )
                 for code in new_groupe_action.split("|")
             ]
         # Selection is not set in interface, get all available from
         # (checked_)action_list
-        if self.request.GET.get("action_list"):
-            return self.request.GET.get("action_list", "").split("|")
+        if self.get_data_from_request_or_bounded_form("action_list"):
+            return self.get_data_from_request_or_bounded_form("action_list", "").split(
+                "|"
+            )
         # Selection is not set in interface, defeult checked action list is not set
         # get all available from action_displayed
-        if self.request.GET.get("action_displayed"):
+        if self.get_data_from_request_or_bounded_form("action_displayed"):
             return self.request.GET.get("action_displayed", "").split("|")
         # return empty array, will search in all actions
         return []
@@ -313,7 +324,7 @@ class AddressesView(FormView):
 
         codes = []
         # selection from interface
-        if self.request.GET.get("grouped_action"):
+        if self.get_data_from_request_or_bounded_form("grouped_action"):
             codes = [
                 code
                 for new_groupe_action in self.request.GET.getlist("grouped_action")
@@ -322,14 +333,16 @@ class AddressesView(FormView):
 
         # Selection is not set in interface, get all available from
         # (checked_)action_list
-        elif action_list := self.request.GET.get("action_list"):
+        elif action_list := self.get_data_from_request_or_bounded_form("action_list"):
             # TODO : effet de bord si la list des action n'est pas cohérente avec
             # les actions affichées
             # il faut collecté les actions coché selon les groupes d'action
             codes = action_list.split("|")
         # Selection is not set in interface, defeult checked action list is not set
         # get all available from action_displayed
-        elif action_displayed := self.request.GET.get("action_displayed"):
+        elif action_displayed := self.get_data_from_request_or_bounded_form(
+            "action_displayed"
+        ):
             codes = action_displayed.split("|")
         # return empty array, will search in all actions
 
@@ -342,7 +355,7 @@ class AddressesView(FormView):
             if codes
             else cached_action_instances
         )
-        if direction := self.request.GET.get("direction"):
+        if direction := self.get_data_from_request_or_bounded_form("direction"):
             actions = [
                 a for a in actions if direction in [d.code for d in a.directions.all()]
             ]
