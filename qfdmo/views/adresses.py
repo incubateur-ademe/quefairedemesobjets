@@ -103,8 +103,7 @@ class AddressesView(FormView):
         else:
             self.form_class = IframeAddressesForm
 
-    # TODO: investigate type error here
-    def get_form(self, **kwargs):
+    def get_form(self, form_class=None):
         if self.request.GET & self.get_form_class().base_fields.keys():
             # TODO: refacto forms we should use a bounded form in this case
             # Here we check that the request shares some parameters
@@ -114,9 +113,9 @@ class AddressesView(FormView):
             #
             # This case happens when the form is loaded inside a turbo-frame.
             # form = self.get_form_class()(self.request.GET)
-            form = super().get_form()
+            form = super().get_form(form_class)
         else:
-            form = super().get_form()
+            form = super().get_form(form_class)
 
         action_displayed = self._set_action_displayed() if self.is_carte else None
         grouped_action_choices = (
