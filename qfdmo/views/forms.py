@@ -15,4 +15,4 @@ def update_suggestion_form(request):
 
 
 def feedback_form(request):
-    return HttpResponseRedirect(settings.FEEDBACK_FORm)
+    return HttpResponseRedirect(settings.FEEDBACK_FORM)
