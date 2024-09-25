@@ -135,29 +135,31 @@ class AddressesView(FormView):
         return form
 
     def get_data_from_request_or_bounded_form(self, key: str, default=None):
-        # There is a flaw in the way the form is instantiated, because the
-        # form is never bounded to its data.
-        # The request is directly used to perform various tasks, like
-        # populating some multiple choice field choices, hence missing all
-        # the validation provided by django forms.
+        """Temporary dummy method
 
-        # To prepare a future refactor of this form, the method here calls
-        # the cleaned_data when the form is bounded and the request.GET
-        # QueryDict when it is not bounded.
-        # Note : we call getlist and not get because in some cases, the request
-        # parameters needs to be treated as a list.
-        #
-        # The form is currently used for various use cases:
-        #     - The map form
-        #     - The "iframe form" form (for https://epargnonsnosressources.gouv.fr)
-        #     - The turbo-frames
-        # The form should be bounded at least when used in turbo-frames.
-        #
-        # The name is explicitely very verbose because it is not meant to stay
-        # a long time as is.
-        #
-        # TODO: refacto forms : get rid of this method and use cleaned_data when
-        # form is valid and request.GET for non-field request parameters
+        There is a flaw in the way the form is instantiated, because the
+        form is never bounded to its data.
+        The request is directly used to perform various tasks, like
+        populating some multiple choice field choices, hence missing all
+        the validation provided by django forms.
+
+        To prepare a future refactor of this form, the method here calls
+        the cleaned_data when the form is bounded and the request.GET
+        QueryDict when it is not bounded.
+        Note : we call getlist and not get because in some cases, the request
+        parameters needs to be treated as a list.
+
+        The form is currently used for various use cases:
+            - The map form
+            - The "iframe form" form (for https://epargnonsnosressources.gouv.fr)
+            - The turbo-frames
+        The form should be bounded at least when used in turbo-frames.
+
+        The name is explicitely very verbose because it is not meant to stay
+        a long time as is.
+
+        TODO: refacto forms : get rid of this method and use cleaned_data when
+        form is valid and request.GET for non-field request parameters"""
         try:
             return self.cleaned_data.get(key, default)
         except AttributeError:
@@ -182,9 +184,8 @@ class AddressesView(FormView):
         if form.is_valid():
             self.cleaned_data = form.cleaned_data
         else:
-            self.cleaned_data = form.cleaned_data
             # TODO : refacto forms : handle this case properly
-            pass
+            self.cleaned_data = form.cleaned_data
 
         # Manage the selection of sous_categorie_objet and actions
         acteurs = self._acteurs_from_sous_categorie_objet_and_actions()
