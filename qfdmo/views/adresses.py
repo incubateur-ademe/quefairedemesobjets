@@ -164,12 +164,12 @@ class AddressesView(FormView):
             self.request.GET.getlist(key, default=default)
 
     def get_context_data(self, **kwargs):
-        # form = self._get_form()
         form = self.get_form_class()(self.request.GET)
 
         kwargs.update(
             # TODO: refacto forms : define a BooleanField carte on CarteAddressesForm
             carte=self.is_carte,
+            # TODO: refacto forms, return bounded form in template
             # form=form,
             location="{}",
         )
@@ -212,7 +212,6 @@ class AddressesView(FormView):
             bbox = sanitize_leaflet_bbox(custom_bbox)
             acteurs_in_bbox = acteurs.in_bbox(bbox)
 
-            # Manage bounding_box parameter
             if acteurs_in_bbox.count() > 0:
                 return custom_bbox, acteurs_in_bbox
 
@@ -225,7 +224,6 @@ class AddressesView(FormView):
         if (latitude := self.get_data_from_request_or_bounded_form("latitude")) and (
             longitude := self.get_data_from_request_or_bounded_form("longitude")
         ):
-            # if not bounding_box or if no acteur in the bounding_box
             acteurs_from_center = acteurs.from_center(longitude, latitude)
             if acteurs_from_center.count():
                 custom_bbox = None
@@ -365,15 +363,12 @@ class AddressesView(FormView):
     ) -> QuerySet[DisplayedActeur]:
         filters, excludes = self._compile_acteurs_queryset()
         acteurs = DisplayedActeur.objects.filter(filters).exclude(excludes)
-        acteurs = (
-            acteurs.prefetch_related(
-                "proposition_services__sous_categories",
-                "proposition_services__sous_categories__categorie",
-                "proposition_services__action",
-            ).distinct()
-            # TODO : voir si ca change qqch de l'appeler plus tot
-            .prefetch_related("action_principale")
-        )
+        acteurs = acteurs.prefetch_related(
+            "proposition_services__sous_categories",
+            "proposition_services__sous_categories__categorie",
+            "proposition_services__action",
+            "action_principale",
+        ).distinct()
 
         return acteurs
 
