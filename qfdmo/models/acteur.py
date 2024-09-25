@@ -4,7 +4,7 @@ from django.db.models import Min
 from django.conf import settings
 import random
 from django.contrib.gis.db.models.functions import Distance
-from django.contrib.gis.geos import GEOSGeometry, Point, Polygon
+from django.contrib.gis.geos import Point, Polygon
 import string
 import uuid
 from typing import Any, List, cast
@@ -27,8 +27,6 @@ from qfdmo.models.utils import (
     NomAsNaturalKeyManager,
     NomAsNaturalKeyModel,
 )
-
-from qfdmo.geo_api import retrieve_epci_bounding_box
 
 logger = logging.getLogger(__name__)
 
@@ -181,16 +179,17 @@ class ActeurQuerySet(models.QuerySet):
 
         return self.physical().filter(location__within=Polygon.from_bbox(bbox))
 
-    def in_epcis(self, epci_codes=[]):
-        if not epci_codes:
-            return self
+    # def in_epcis(self, epci_codes=[]):
+    #     if not epci_codes:
+    #         return self
 
-        polygons = [retrieve_epci_bounding_box(code) for code in epci_codes]
-        # TODO : merge bounding box, for now we get only the first
-        polygon = polygons[0]
+    #     polygons = [retrieve_epci_bounding_box(code) for code in epci_codes]
+    #     # TODO : merge bounding box, for now we get only the first
+    #     polygon = polygons[0]
 
-        geom = GEOSGeometry(str(polygon))
-        return self.physical().from_center(*geom.centroid.coords, distance=geom.length)
+    #     geom = GEOSGeometry(str(polygon))
+    #     bigger_geom = geom.buffer(.4)
+    #     return self.physical().in_bbox(bigger_geom.extent).order_by("?")
 
     def from_center(self, longitude, latitude, distance=settings.DISTANCE_MAX):
         reference_point = Point(float(longitude), float(latitude), srid=4326)

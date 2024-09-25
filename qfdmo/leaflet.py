@@ -28,3 +28,16 @@ def sanitize_leaflet_bbox(custom_bbox_as_string: str) -> List[float] | None:
         # TODO : gérer l'erreur
         print(f"Uh oh {exception=}")
         return []
+
+
+def compile_leaflet_bbox(bbox) -> str:
+    xmin, ymin, xmax, ymax = bbox
+    return json.dumps(
+        {
+            "southWest": {
+                "lng": xmin,
+                "lat": ymin,
+            },
+            "northEast": {"lng": xmax, "lat": ymax},
+        }
+    )
