@@ -17,7 +17,8 @@ default_args = {
 }
 
 dag = DAG(
-    "validate_and_process_dagruns",
+    dag_id="validate_and_process_dagruns",
+    dag_display_name="Traitement des cohortes de données validées",
     default_args=default_args,
     description="Check for VALIDATE in qfdmo_dagrun and process qfdmo_dagrunchange",
     schedule="*/5 * * * *",
@@ -27,7 +28,7 @@ dag = DAG(
 
 
 def check_for_validation(**kwargs):
-    hook = PostgresHook(postgres_conn_id="lvao-db")
+    hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
     row = hook.get_records(
         "SELECT EXISTS "
         f"(SELECT 1 FROM qfdmo_dagrun WHERE status = '{shared_constants.TO_INSERT}')"
@@ -36,7 +37,7 @@ def check_for_validation(**kwargs):
 
 
 def fetch_and_parse_data(**context):
-    pg_hook = PostgresHook(postgres_conn_id="lvao-db")
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
     engine = pg_hook.get_sqlalchemy_engine()
 
     df_sql = pd.read_sql_query(
@@ -75,7 +76,7 @@ def write_data_to_postgres(**kwargs):
     df_pdssc = data_dict.get("pds_sous_categories")
     dag_run_id = data_dict["dag_run_id"]
     change_type = data_dict.get("change_type", "CREATE")
-    pg_hook = PostgresHook(postgres_conn_id="lvao-db")
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
     engine = pg_hook.get_sqlalchemy_engine()
 
     with engine.begin() as connection:
@@ -122,7 +123,7 @@ write_to_postgres_task = PythonOperator(
 
 trigger_create_final_actors_dag = TriggerDagRunOperator(
     task_id="create_displayed_actors",
-    trigger_dag_id="apply_adresse_corrections",
+    trigger_dag_id="compute_carte_acteur",
     dag=dag,
 )
 

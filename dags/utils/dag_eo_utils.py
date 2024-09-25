@@ -6,7 +6,7 @@ from typing import Union
 import numpy as np
 import pandas as pd
 from airflow.providers.postgres.hooks.postgres import PostgresHook
-from utils import api_utils, base_utils, mapping_utils  # noqa : E402
+from utils import api_utils, base_utils, mapping_utils
 
 logger = logging.getLogger(__name__)
 
@@ -254,7 +254,7 @@ def serialize_to_json(**kwargs):
 
 
 def load_data_from_postgresql(**kwargs):
-    pg_hook = PostgresHook(postgres_conn_id="lvao-db")
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
     engine = pg_hook.get_sqlalchemy_engine()
 
     df_acteurtype = pd.read_sql_table("qfdmo_acteurtype", engine)
@@ -284,7 +284,7 @@ def load_data_from_postgresql(**kwargs):
 
 
 def load_data_from_displayedactor_by_source(source_id):
-    pg_hook = PostgresHook(postgres_conn_id="lvao-db")
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
     engine = pg_hook.get_sqlalchemy_engine()
 
     df_displayedactors = pd.read_sql_query(
@@ -298,7 +298,7 @@ def load_data_from_displayedactor_by_source(source_id):
 
 
 def insert_dagrun_and_process_df(df, metadata, dag_id, run_id):
-    pg_hook = PostgresHook(postgres_conn_id="lvao-db")
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
     engine = pg_hook.get_sqlalchemy_engine()
     current_date = datetime.now()
 

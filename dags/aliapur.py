@@ -13,7 +13,8 @@ default_args = {
 }
 
 with DAG(
-    "eo-aliapur",
+    dag_id="eo-aliapur",
+    dag_display_name="Téléchargement de la source ALIAPUR",
     default_args=default_args,
     description=(
         "A pipeline to fetch, process, and load to validate data into postgresql"

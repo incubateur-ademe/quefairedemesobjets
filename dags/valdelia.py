@@ -13,7 +13,8 @@ default_args = {
 }
 
 with DAG(
-    "eo-valdelia",
+    dag_id="eo-valdelia",
+    dag_display_name="Téléchargement de la source VALDELIA",
     default_args=default_args,
     description=(
         "A pipeline to fetch, process, and load to validate data into postgresql"

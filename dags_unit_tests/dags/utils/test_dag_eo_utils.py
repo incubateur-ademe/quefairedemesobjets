@@ -2,8 +2,7 @@ from unittest.mock import MagicMock
 
 import pandas as pd
 import pytest
-
-from dags.utils.dag_eo_utils import (
+from utils.dag_eo_utils import (
     create_acteur_services,
     create_actors,
     create_labels,

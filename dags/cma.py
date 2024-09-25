@@ -13,7 +13,8 @@ default_args = {
 }
 
 with DAG(
-    "eo-cma",
+    dag_id="like-eo-from-api-cma",
+    dag_display_name="Téléchargement de la source CMA",
     default_args=default_args,
     description=(
         "A pipeline to fetch, process, and load to validate data into postgresql"
