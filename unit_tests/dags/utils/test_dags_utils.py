@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import patch
 import pandas as pd
 
+from dags.utils.mapping_utils import parse_float
 from dags.utils.utils import get_address
 
 
@@ -58,3 +59,30 @@ class TestGetAddress(unittest.TestCase):
             expected_output = pd.Series(["10 passage saint ambroise", "75011", "Paris"])
             result = get_address(df.iloc[0])
             pd.testing.assert_series_equal(result, expected_output)
+
+
+class TestParseFloat(unittest.TestCase):
+    def test_parse_float_with_french_decimal(self):
+        self.assertEqual(parse_float("1234,56"), 1234.56)
+        self.assertEqual(parse_float("-1234,56"), -1234.56)
+        self.assertEqual(parse_float("0,0"), 0.0)
+        self.assertEqual(parse_float("1,234"), 1.234)
+
+    def test_parse_float_with_trailing_comma(self):
+        self.assertEqual(parse_float("1234,"), 1234.0)
+        self.assertEqual(parse_float("1234,56,"), 1234.56)
+
+    def test_parse_float_with_valid_float(self):
+        self.assertEqual(parse_float(1234.56), 1234.56)
+        self.assertEqual(parse_float(-1234.56), -1234.56)
+
+    def test_parse_float_with_nan(self):
+        self.assertIsNone(parse_float(float("nan")))
+
+    def test_parse_float_with_none(self):
+        self.assertIsNone(parse_float(None))
+
+    def test_parse_float_with_invalid_string(self):
+        self.assertIsNone(parse_float("abc"))
+        self.assertIsNone(parse_float("1234abc"))
+        self.assertIsNone(parse_float("12,34,56"))

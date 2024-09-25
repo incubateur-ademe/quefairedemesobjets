@@ -455,11 +455,17 @@ def create_actors(**kwargs):
         df = mapping_utils.process_reparacteurs(df, df_sources, df_acteurtype)
     else:
         df = mapping_utils.process_actors(df)
+<<<<<<< HEAD
 
     # By default, all actors are active
     # TODO : manage constant as an enum in config
     df["statut"] = "ACTIF"
 
+=======
+    lat_col = None
+    lon_col = None
+    new_location_col = None
+>>>>>>> aee33fa (fix location)
     for old_col, new_col in column_mapping.items():
         if old_col in df.columns and new_col:
             if old_col == "id":
@@ -472,20 +478,12 @@ def create_actors(**kwargs):
                         x, df_acteurtype=df_acteurtype
                     )
                 )
-            # TODO : je pense qu'on passe 2 fois dans cette condition, une fois pour
-            # la latitude et une fois pour la longitude
-            elif old_col in [
-                "latitude",
-                "longitude",
-                "longitudewgs84",
-                "latitudewgs84",
-            ]:
-                df[new_col] = df.apply(
-                    lambda row: utils.transform_location(
-                        row["longitude"], row["latitude"]
-                    ),
-                    axis=1,
-                )
+            elif old_col in ["latitude", "latitudewgs84"]:
+                lat_col = old_col
+                new_location_col = new_col
+            elif old_col in ["longitude", "longitudewgs84"]:
+                lon_col = old_col
+                new_location_col = new_col
             elif old_col == "ecoorganisme":
                 df[new_col] = df[old_col].apply(
                     lambda x: mapping_utils.get_id_from_code(x, df_sources)
@@ -525,6 +523,12 @@ def create_actors(**kwargs):
                 df[new_col] = df[old_col].apply(lambda x: True if x == "oui" else False)
             else:
                 df[new_col] = df[old_col]
+
+    if lat_col and lon_col and new_location_col:
+        df[new_location_col] = df.apply(
+            lambda row: utils.transform_location(row[lon_col], row[lat_col]),
+            axis=1,
+        )
 
     df["identifiant_unique"] = df.apply(
         lambda x: mapping_utils.create_identifiant_unique(
