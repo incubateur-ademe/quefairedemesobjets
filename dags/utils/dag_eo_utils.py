@@ -456,6 +456,8 @@ def create_actors(**kwargs):
     else:
         df = mapping_utils.process_actors(df)
 
+    # By default, all actors are active
+    # TODO : manage constant as an enum in config
     df["statut"] = "ACTIF"
 
     for old_col, new_col in column_mapping.items():
