@@ -4,6 +4,7 @@ import re
 from datetime import datetime
 from importlib import import_module
 from pathlib import Path
+
 import pandas as pd
 
 env = Path(__file__).parent.parent.name
@@ -114,8 +115,6 @@ def process_reparacteurs(df, df_sources, df_acteurtype):
     )
     # TODO : on pourrait gérer en configuration les colonne qui sont pareil pour tous
     df["label_code"] = "reparacteur"
-    df["latitude"] = df["latitude"].apply(parse_float)
-    df["longitude"] = df["longitude"].apply(parse_float)
     df["type_de_point_de_collecte"] = None
     df["acteur_type_id"] = transform_acteur_type_id(
         "artisan, commerce indépendant", df_acteurtype=df_acteurtype
@@ -138,9 +137,6 @@ def process_actors(df):
         .str.replace("_-", "_")
         .str.replace("__", "_")
     )
-    if "latitudewgs84" in df.columns and "longitudewgs84" in df.columns:
-        df["latitude"] = df["latitudewgs84"].apply(parse_float)
-        df["longitude"] = df["longitudewgs84"].apply(parse_float)
     if "service_a_domicile" in df.columns:
         df.loc[
             df["service_a_domicile"] == "service à domicile uniquement", "statut"

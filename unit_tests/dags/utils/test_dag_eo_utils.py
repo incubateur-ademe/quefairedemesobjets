@@ -651,8 +651,8 @@ def mock_config():
             "site_web": "url",
             "email": "email",
             "perimetre_dintervention": "",
-            "longitudewgs84": "location",
-            "latitudewgs84": "location",
+            "longitudewgs84": "longitude",
+            "latitudewgs84": "latitude",
             "horaires_douverture": "horaires_description",
             "consignes_dacces": "commentaires",
         },
@@ -1626,61 +1626,22 @@ class TestCeateLabels:
 
 
 class TestActorsLocation:
-    def test_create_actors_location_reparacteurs_true(
+    @pytest.mark.parametrize(
+        "latitude, longitude",
+        [
+            (48.8566, 2.3522),
+            ("48.8566", "2.3522"),
+            ("48,8566", "2,3522"),
+        ],
+    )
+    def test_create_actors_location(
         self,
         df_sources_from_db,
         df_acteurtype_from_db,
         df_empty_displayed_acteurs_from_db,
+        latitude,
+        longitude,
     ):
-        mock = MagicMock()
-        mock.xcom_pull.side_effect = lambda task_ids="": {
-            "load_data_from_postgresql": {
-                "sources": df_sources_from_db,
-                "acteurtype": df_acteurtype_from_db,
-                "displayedacteurs": df_empty_displayed_acteurs_from_db,
-            },
-            "fetch_data_from_api": pd.DataFrame(
-                {
-                    "id": ["1"],
-                    "name": ["Reparateur 1"],
-                    "latitude": ["48.8566"],
-                    "longitude": ["2.3522"],
-                    "categorie": ["Electronics"],
-                    "categorie2": [None],
-                    "categorie3": [None],
-                    "website": ["website.gg"],
-                }
-            ),
-        }[task_ids]
-
-        kwargs = {
-            "ti": mock,
-            "params": {
-                "reparacteurs": True,
-                "column_mapping": {
-                    "id": "identifiant_externe",
-                    "name": "nom",
-                    "latitude": "location",
-                    "longitude": "location",
-                },
-            },
-        }
-        result = create_actors(**kwargs)
-        df_result = result["df"]
-
-        lon = float("2.3522")
-        lat = float("48.8566")
-        expected_location = transform_location(lon, lat)
-
-        assert df_result["location"].iloc[0] == expected_location
-
-    def test_create_actors_location_reparacteurs_false(
-        self,
-        df_sources_from_db,
-        df_acteurtype_from_db,
-        df_empty_displayed_acteurs_from_db,
-    ):
-
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
             "load_data_from_postgresql": {
@@ -1692,10 +1653,10 @@ class TestActorsLocation:
                 {
                     "id_point_apport_ou_reparation": ["1"],
                     "nom_de_lorganisme": ["Actor 1"],
-                    "latitudewgs84": ["48.8566"],
-                    "longitudewgs84": ["2.3522"],
                     "ecoorganisme": ["source1"],
                     "source_id": ["source_id1"],
+                    "latitudewgs84": [latitude],
+                    "longitudewgs84": [longitude],
                 }
             ),
         }[task_ids]
@@ -1706,8 +1667,8 @@ class TestActorsLocation:
                 "column_mapping": {
                     "id_point_apport_ou_reparation": "identifiant_externe",
                     "nom_de_lorganisme": "nom",
-                    "latitudewgs84": "location",
-                    "longitudewgs84": "location",
+                    "latitudewgs84": "latitude",
+                    "longitudewgs84": "longitude",
                 },
             },
         }
