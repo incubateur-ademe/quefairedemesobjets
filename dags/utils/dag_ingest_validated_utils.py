@@ -11,7 +11,7 @@ env = Path(__file__).parent.parent.name
 
 utils = import_module(f"{env}.utils.utils")
 mapping_utils = import_module(f"{env}.utils.mapping_utils")
-qfdmd = import_module(f"{env}.utils.shared_constants")
+shared_constants = import_module(f"{env}.utils.shared_constants")
 
 
 def process_many2many_df(df, column_name, df_columns=["acteur_id", "labelqualite_id"]):
@@ -82,7 +82,7 @@ def handle_update_actor_event(df_actors, dag_run_id):
     ]
 
     current_time = datetime.now().astimezone().isoformat(timespec="microseconds")
-    df_actors = df_actors[df_actors["row_status"] == qfdmd.TO_INSERT]
+    df_actors = df_actors[df_actors["status"] == shared_constants.TO_INSERT]
     df_actors = df_actors.apply(mapping_utils.replace_with_selected_candidat, axis=1)
     df_actors[["adresse", "code_postal", "ville"]] = df_actors.apply(
         lambda row: utils.extract_details(row, col="adresse_candidat"), axis=1
@@ -320,7 +320,7 @@ def handle_write_data_update_actor_event(connection, df_actors):
 def update_dag_run_status(connection, dag_run_id):
     update_query = f"""
         UPDATE qfdmo_dagrun
-        SET status = '{qfdmd.FINISHED}'
+        SET status = '{shared_constants.FINISHED}'
         WHERE id = {dag_run_id}
         """
     connection.execute(update_query)

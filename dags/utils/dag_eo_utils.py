@@ -9,6 +9,9 @@ import numpy as np
 import pandas as pd
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 
+env = Path(__file__).parent.parent.name
+shared_constants = import_module(f"{env}.utils.shared_constants")
+
 logger = logging.getLogger(__name__)
 
 env = Path(__file__).parent.parent.name
@@ -336,7 +339,8 @@ def insert_dagrun_and_process_df(df, metadata, dag_id, run_id):
 
     df["change_type"] = df["event"]
     df["dag_run_id"] = dag_run_id
-    df[["row_updates", "dag_run_id", "change_type"]].to_sql(
+    df["status"] = shared_constants.TO_VALIDATE
+    df[["row_updates", "dag_run_id", "change_type", "status"]].to_sql(
         "qfdmo_dagrunchange",
         engine,
         if_exists="append",
