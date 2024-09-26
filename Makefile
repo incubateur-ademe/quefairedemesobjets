@@ -4,17 +4,35 @@ ifneq (,$(wildcard ./.env))
 	export
 endif
 
-DJANGO_ADMIN := .venv/bin/python manage.py
-PYTEST := .venv/bin/python -m pytest
+# Aliases
+PYTHON := .venv/bin/python
+DJANGO_ADMIN := $(PYTHON) manage.py
+PYTEST := $(PYTHON) -m pytest
+
+# Makefile config
+.PHONY: check
+check:
+	@source .venv/bin/activate; python --version; pip --version
+	@npm --version
+	@node --version
 
 # Setup development environment
 .PHONY: init-dev
 init-dev:
+	# git
+	git config blame.ignoreRevsFile .git-blame-ignore-revs
+	pre-commit install
+	# python
 	python -m venv .venv --prompt $(basename $(CURDIR)) --clear
-	source .venv/bin/activate; pip install --no-deps -r requirements.txt -r dev-requirements.txt
+	$(PYTHON) -m pip install --no-deps -r requirements.txt -r dev-requirements.txt
+	$(PYTON) -m pip install pip-tools
+	# javascript
 	npm install
+	npx playwright install --with-deps
+	# environment
 	cp .env.template .env
 	cp ./dags/.env.template ./dags/.env
+	# prepare django
 	make migrate
 	make createsuperuser
 
@@ -40,6 +58,15 @@ createsuperuser:
 seed-database:
 	$(DJANGO_ADMIN) loaddata categories actions acteur_services acteur_types
 
+# Dependencies management
+.PHONY: pip-update
+pip-update:
+	$(PYTHON) -m pip-compile dev-requirements.in --generate-hashes
+	$(PYTHON) -m pip-compile requirements.in --generate-hashes
+
+.PHONY: npm-upgrade
+npm-upgrade:
+	npx npm-upgrade
 
 # Happy testing
 .PHONY: unit-test
@@ -48,15 +75,14 @@ unit-test:
 
 .PHONY: e2e-test
 e2e-test:
+	npx playwright test
 	$(PYTEST) ./integration_tests
+
+.PHONY: js-test
+js-test:
+	npm run test
 
 .PHONY: test
 test:
 	@make unit-test
 	@make e2e-test
-
-.PHONY: check
-check:
-	@source .venv/bin/activate; python --version; pip --version
-	@npm --version
-	@node --version
