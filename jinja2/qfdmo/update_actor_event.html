@@ -16,8 +16,9 @@
                 <td>{{ dagrun_line.get_change_type_display() }}</td>
                 <td>{{ dagrun_line.meta_data if dagrun_line.meta_data else "-" }}</td>
                 <td>
-                    <a href="{{ dagrun_line.row_updates.admin_link }}" target="_blank" rel="noreferrer">{{ dagrun_line.display_acteur_details().identifiant_unique
-                        }}</a>
+                    {% with identifiant_unique=dagrun_line.display_acteur_details().identifiant_unique %}
+                        <a href="{{ url('admin:qfdmo_displayedacteur_change', args=[identifiant_unique]) }}" target="_blank" rel="noreferrer">{{ identifiant_unique }}</a>
+                    {% endwith %}
                 </td>
                 <td>
                     {% with candidat=candidat, index=loop.index, dagrun=request.GET.dagrun,
