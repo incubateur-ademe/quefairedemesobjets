@@ -1,8 +1,9 @@
 from django.contrib.gis import forms as gis_forms
 from django import forms
+from django.forms import widgets
 
 
-class AutoCompleteInput(forms.Select):
+class AutoCompleteInput(widgets.ChoiceWidget):
     template_name = "forms/widgets/autocomplete.html"
 
     def get_context(self, name, value, attrs):

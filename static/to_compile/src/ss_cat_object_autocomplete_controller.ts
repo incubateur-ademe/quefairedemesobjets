@@ -9,18 +9,18 @@ export default class extends AutocompleteController {
     static targets = AutocompleteController.targets.concat(["ssCat"])
     declare readonly ssCatTarget: HTMLInputElement
 
-    async search_to_complete(events: Event): Promise<void> {
+    async searchToComplete(events: Event): Promise<void> {
         const inputTargetValue = this.inputTarget.value
         const val = this.addAccents(inputTargetValue)
         const regexPattern = new RegExp(val, "gi")
 
-        if (!val) this.closeAllLists()
+        if (!val) this.hideAutocompleteList()
 
         let countResult = 0
 
         return this.#getOptionCallback(inputTargetValue)
             .then((data) => {
-                this.closeAllLists()
+                this.hideAutocompleteList()
                 this.allAvailableOptions = data
                 if (this.allAvailableOptions.length == 0) return
 
@@ -32,7 +32,7 @@ export default class extends AutocompleteController {
                 }
                 if (this.autocompleteList.childElementCount > 0) {
                     this.currentFocus = 0
-                    this.addActive()
+                    this.showAutocompleteList()
                 }
 
                 posthog.capture("object_input", {
@@ -89,7 +89,7 @@ export default class extends AutocompleteController {
             identifier_selected: Number(identifierValue),
         })
 
-        this.closeAllLists()
+        this.hideAutocompleteList()
         this.dispatch("optionSelected")
     }
 

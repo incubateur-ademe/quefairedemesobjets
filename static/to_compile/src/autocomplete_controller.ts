@@ -26,30 +26,29 @@ export default abstract class extends Controller<HTMLElement> {
   }
 
   initialize() {
-    this.search_to_complete = debounce(this.search_to_complete, 300).bind(this)
+    this.searchToComplete = debounce(this.searchToComplete, 300).bind(this)
     // Delay blur event to allow click an option
     this.blurInput = debounce(this.blurInput, 300).bind(this)
   }
 
   async complete(events: Event): Promise<void> {
     if (this.inputTarget.value) this.displaySpinner()
-    return this.search_to_complete(events)
+    return this.searchToComplete(events)
   }
 
-  async search_to_complete(events: Event): Promise<void> {
+  async searchToComplete(events: Event): Promise<void> {
     const inputTargetValue = this.inputTarget.value
     const val = this.addAccents(inputTargetValue)
     const regexPattern = new RegExp(val, "gi")
 
-    if (!val) this.closeAllLists()
+    if (!val) this.hideAutocompleteList()
 
     let countResult = 0
 
     return this.#getOptionCallback(inputTargetValue)
       .then((data) => {
-        this.closeAllLists()
+        this.hideAutocompleteList()
         this.autocompleteList = this.createAutocompleteList()
-        console.log(data)
         this.allAvailableOptions = data
         if (this.allAvailableOptions.length == 0) return
 
@@ -61,7 +60,7 @@ export default abstract class extends Controller<HTMLElement> {
 
         if (this.autocompleteList.childElementCount > 0) {
           this.currentFocus = 0
-          this.addActive()
+          this.showAutocompleteList()
         }
         this.#getOptionAnalyticsCallback(inputTargetValue)
         return
@@ -85,18 +84,18 @@ export default abstract class extends Controller<HTMLElement> {
     const label = target.getElementsByTagName("input")[0].value
 
     this.inputTarget.value = label
-    this.closeAllLists()
+    this.hideAutocompleteList()
     this.hideSpinner()
   }
 
   keydownDown(event: KeyboardEvent) {
     this.currentFocus++
-    this.addActive()
+    this.showAutocompleteList()
   }
 
   keydownUp(event: KeyboardEvent) {
     this.currentFocus--
-    this.addActive()
+    this.showAutocompleteList()
   }
 
   keydownEnter(event: KeyboardEvent): boolean {
@@ -119,17 +118,17 @@ export default abstract class extends Controller<HTMLElement> {
   }
 
   blurInput(event: Event) {
-    this.closeAllLists()
+    this.hideAutocompleteList()
   }
 
-  closeAllLists(event?: Event) {
+  hideAutocompleteList(event?: Event) {
     var x = document.getElementsByClassName("autocomplete-items")
     for (var i = 0; i < x.length; i++) {
       x[i].remove()
     }
   }
 
-  addActive() {
+  showAutocompleteList() {
     var x: HTMLElement | null = document.getElementById(
       this.inputTarget.id + "autocomplete-list",
     )
