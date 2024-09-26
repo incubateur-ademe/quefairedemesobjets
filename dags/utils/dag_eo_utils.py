@@ -456,6 +456,10 @@ def create_actors(**kwargs):
     else:
         df = mapping_utils.process_actors(df)
 
+    # By default, all actors are active
+    # TODO : manage constant as an enum in config
+    df["statut"] = "ACTIF"
+
     for old_col, new_col in column_mapping.items():
         if old_col in df.columns and new_col:
             if old_col == "id":
@@ -502,6 +506,9 @@ def create_actors(**kwargs):
                         "aucun": "Aucun",
                     },
                 )
+                df["statut"] = df["public_accueilli"].apply(
+                    lambda x: "SUPPRIME" if x == "Professionnels" else "ACTIF"
+                )
             elif old_col == "uniquement_sur_rdv":
                 df[new_col] = df[old_col].astype(bool)
             elif old_col == "reprise":
@@ -526,7 +533,6 @@ def create_actors(**kwargs):
         axis=1,
     )
     df["cree_le"] = datetime.now()
-    df["statut"] = "ACTIF"
     df["modifie_le"] = df["cree_le"]
     if "siret" in df.columns:
         df["siret"] = df["siret"].apply(mapping_utils.process_siret)
