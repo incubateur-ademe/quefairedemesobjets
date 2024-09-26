@@ -1,4 +1,4 @@
-import AutocompleteController from "../src/autocomplete_controller"
+import AutocompleteController from "./autocomplete_controller"
 
 const SEPARATOR = "||"
 export default class extends AutocompleteController {

@@ -27,6 +27,9 @@ class GroupeAction(CodeAsNaturalKeyModel):
         verbose_name = "Groupe d'actions"
         verbose_name_plural = "Groupes d'actions"
 
+    def __str__(self):
+        return self.libelle.replace(",", " ou")
+
     id = models.AutoField(primary_key=True)
     code = models.CharField(max_length=255, unique=True, blank=False, null=False)
     afficher = models.BooleanField(default=True)

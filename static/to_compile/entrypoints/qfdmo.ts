@@ -4,6 +4,7 @@ import * as Turbo from "@hotwired/turbo"
 
 import AddressAutocompleteController from "../src/address_autocomplete_controller"
 import MapController from "../src/map_controller"
+import AutocompleteController from "../src/autocomplete_controller"
 import AnalyticsController from "../src/analytics_controller"
 import SearchSolutionFormController from "../src/search_solution_form_controller"
 import SsCatObjectAutocompleteController from "../src/ss_cat_object_autocomplete_controller"
@@ -12,10 +13,12 @@ import "../src/browser_check"
 import "../src/iframe"
 
 window.stimulus = Application.start()
+window.stimulus.debug = true
 stimulus.register("map", MapController)
 stimulus.register("ss-cat-object-autocomplete", SsCatObjectAutocompleteController)
 stimulus.register("address-autocomplete", AddressAutocompleteController)
 stimulus.register("search-solution-form", SearchSolutionFormController)
 stimulus.register("analytics", AnalyticsController)
+stimulus.register("autocomplete", AutocompleteController)
 
 Turbo.session.drive = false

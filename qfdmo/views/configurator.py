@@ -5,7 +5,7 @@ from html import escape
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import FormView
 
-from qfdmo.forms import ConfiguratorForm
+from qfdmo.forms import ConfiguratorForm, AdvancedConfiguratorForm
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +14,12 @@ BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
 
 class ConfiguratorView(LoginRequiredMixin, FormView):
     form_class = ConfiguratorForm
-    template_name = "qfdmo/iframe_configurator.html"
+    template_name = "qfdmo/iframe_configurator/base.html"
+
+
+class AdvancedConfiguratorView(LoginRequiredMixin, FormView):
+    form_class = AdvancedConfiguratorForm
+    template_name = "qfdmo/iframe_configurator/advanced.html"
 
     def get_initial(self):
         initial = super().get_initial()

@@ -5,9 +5,10 @@ from django.core.cache import cache
 from django.http import HttpRequest
 from django.utils.safestring import mark_safe
 
-from qfdmo.geo_api import all_epci_codes
+from qfdmo.geo_api import all_epci_codes, fetch_epci_codes
 from qfdmo.models.action import (
     Action,
+    GroupeAction,
     get_action_instances,
     get_directions,
     get_ordered_directions,
@@ -16,6 +17,7 @@ from qfdmo.models import DagRun, DagRunStatus, SousCategorieObjet
 
 from qfdmo.widgets import (
     AutoCompleteInput,
+    LegacyAutoCompleteInput,
     AutoCompleteAndSearchInput,
     SegmentedControlSelect,
     DSFRCheckboxSelectMultiple,
@@ -39,7 +41,7 @@ class AddressesForm(forms.Form):
 
     sous_categorie_objet = forms.ModelChoiceField(
         queryset=SousCategorieObjet.objects.all(),
-        widget=AutoCompleteInput(
+        widget=LegacyAutoCompleteInput(
             attrs={
                 "class": "fr-input fr-icon-search-line sm:qfdmo-w-[596px]",
                 "autocomplete": "off",
@@ -242,7 +244,7 @@ class IframeAddressesForm(AddressesForm):
         super().load_choices(request)
 
     adresse = forms.CharField(
-        widget=AutoCompleteInput(
+        widget=LegacyAutoCompleteInput(
             attrs={
                 "class": "fr-input sm:qfdmo-w-[596px]",
                 "autocomplete": "off",
@@ -351,6 +353,43 @@ class DagsForm(forms.Form):
 
 
 class ConfiguratorForm(forms.Form):
+    available_actions = forms.ModelMultipleChoiceField(
+        queryset=GroupeAction.objects.all(),
+        to_field_name="code",
+        label="Choisissez les actions disponibles pour vos usagers",
+        help_text="Ce sont les actions que vos usagers pourront consulter "
+        "dans la carte que vous intègrerez. Par exemple, si vous ne voulez "
+        "faire une carte que sur les points de tri ou de réparation, il vous "
+        "suffit de décocher toutes les autres actions possibles",
+        widget=forms.CheckboxSelectMultiple(),
+    )
+    epci_codes = forms.MultipleChoiceField(
+        label="1. Choisir l’EPCI affiché par défaut sur la carte",
+        help_text="Commencez à taper un nom d’EPCI et sélectionnez un EPCI parmi "
+        "les propositions de la liste.",
+        choices=fetch_epci_codes,
+        widget=AutoCompleteInput(
+            attrs={
+                "class": "fr-input",
+                "autocomplete": "off",
+            },
+        ),
+    )
+
+    limit = forms.IntegerField(
+        widget=forms.NumberInput(
+            attrs={
+                "class": "fr-input",
+            },
+        ),
+        label="2. Nombre de résultats maximum à afficher sur la carte",
+        help_text="Indiquez le nombre maximum de lieux qui pourront apparaître "
+        "sur la carte suite à une recherche.",
+        required=False,
+    )
+
+
+class AdvancedConfiguratorForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.load_choices()

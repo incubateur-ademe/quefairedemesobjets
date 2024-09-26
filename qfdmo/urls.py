@@ -13,6 +13,8 @@ from qfdmo.views.adresses import (
 )
 from qfdmo.views.configurator import ConfiguratorView
 from qfdmo.views.dags import DagsValidation
+from qfdmo.views.configurator import AdvancedConfiguratorView, ConfiguratorView
+from qfdmo.views.dags import DagsValidation
 
 urlpatterns = [
     path("", AddressesView.as_view(), name="reemploi_solution"),
@@ -114,5 +116,10 @@ urlpatterns = [
         "iframe/configurateur",
         ConfiguratorView.as_view(),
         name="iframe_configurator",
+    ),
+    path(
+        "iframe/configurateur/avance",
+        AdvancedConfiguratorView.as_view(),
+        name="advanced_iframe_configurator",
     ),
 ]

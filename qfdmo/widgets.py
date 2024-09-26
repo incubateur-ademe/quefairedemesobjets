@@ -2,8 +2,17 @@ from django.contrib.gis import forms as gis_forms
 from django import forms
 
 
-class AutoCompleteInput(forms.TextInput):
+class AutoCompleteInput(forms.Select):
     template_name = "forms/widgets/autocomplete.html"
+
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        context["widget"]["data_controller"] = "autocomplete"
+        return context
+
+
+class LegacyAutoCompleteInput(forms.TextInput):
+    template_name = "forms/widgets/legacy_autocomplete.html"
 
     def __init__(self, attrs=None, data_controller="autocomplete", **kwargs):
         self.data_controller = data_controller
@@ -15,7 +24,7 @@ class AutoCompleteInput(forms.TextInput):
         return context
 
 
-class AutoCompleteAndSearchInput(AutoCompleteInput):
+class AutoCompleteAndSearchInput(LegacyAutoCompleteInput):
     template_name = "forms/widgets/autocomplete_and_search.html"
 
     def __init__(self, attrs=None, btn_attrs={}, **kwargs):
