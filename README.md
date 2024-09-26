@@ -81,8 +81,8 @@ Exemple : commerce, association, acteur digital…
 ### Prérequis
 
 - docker-compose
-- python 3.11
-- node 18.17
+- python 3.12
+- node 20
 - gdal (librairie nécessaire à l'utilisation de GeoDjango)
 
 Conseil: utiliser `asdf` pour la gestion des environnement virtuel `node` et `python`
@@ -114,7 +114,7 @@ Conseil: utiliser `asdf` pour la gestion des environnement virtuel `node` et `py
 Les bases de données source `MySQL` et cible `Postgres + Postgis` sont executées et mises à disposition par le gestionnaire de conteneur Docker
 
 ```sh
-docker compose  --profiles lvao up
+docker compose  --profile lvao up
 ```
 
 Création de l'environnement virtuel de votre choix (préférence pour asdf)
