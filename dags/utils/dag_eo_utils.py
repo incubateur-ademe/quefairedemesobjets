@@ -472,20 +472,6 @@ def create_actors(**kwargs):
                         x, df_acteurtype=df_acteurtype
                     )
                 )
-            # TODO : je pense qu'on passe 2 fois dans cette condition, une fois pour
-            # la latitude et une fois pour la longitude
-            elif old_col in [
-                "latitude",
-                "longitude",
-                "longitudewgs84",
-                "latitudewgs84",
-            ]:
-                df[new_col] = df.apply(
-                    lambda row: utils.transform_location(
-                        row["longitude"], row["latitude"]
-                    ),
-                    axis=1,
-                )
             elif old_col == "ecoorganisme":
                 df[new_col] = df[old_col].apply(
                     lambda x: mapping_utils.get_id_from_code(x, df_sources)
@@ -525,6 +511,14 @@ def create_actors(**kwargs):
                 df[new_col] = df[old_col].apply(lambda x: True if x == "oui" else False)
             else:
                 df[new_col] = df[old_col]
+
+    if "latitude" in df.columns and "longitude" in df.columns:
+        df["latitude"] = df["latitude"].apply(mapping_utils.parse_float)
+        df["longitude"] = df["longitude"].apply(mapping_utils.parse_float)
+        df["location"] = df.apply(
+            lambda row: utils.transform_location(row["longitude"], row["latitude"]),
+            axis=1,
+        )
 
     df["identifiant_unique"] = df.apply(
         lambda x: mapping_utils.create_identifiant_unique(
