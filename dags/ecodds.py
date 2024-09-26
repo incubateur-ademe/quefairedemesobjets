@@ -41,8 +41,8 @@ with DAG(
             "nom_de_lorganisme": "nom",
             "enseigne_commerciale": "nom_commercial",
             "_updatedAt": "cree_le",
-            "longitudewgs84": "location",
-            "latitudewgs84": "location",
+            "longitudewgs84": "longitude",
+            "latitudewgs84": "latitude",
         },
         "column_to_drop": [
             "perimetre_dintervention",

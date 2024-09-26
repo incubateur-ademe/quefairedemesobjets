@@ -45,8 +45,8 @@ with DAG(
             "nom_de_lorganisme": "nom",
             "_updatedAt": "cree_le",
             "perimetre_dintervention": "",
-            "longitudewgs84": "location",
-            "latitudewgs84": "location",
+            "longitudewgs84": "longitude",
+            "latitudewgs84": "latitude",
         },
         "default_column_value": {
             "type_de_point_de_collecte": "magasin / franchise,"
