@@ -6,7 +6,7 @@ from typing import Union
 import numpy as np
 import pandas as pd
 from airflow.providers.postgres.hooks.postgres import PostgresHook
-from utils import api_utils, base_utils, mapping_utils
+from utils import api_utils, base_utils, mapping_utils, shared_constants
 
 logger = logging.getLogger(__name__)
 
@@ -504,7 +504,9 @@ def create_actors(**kwargs):
         df["latitude"] = df["latitude"].apply(mapping_utils.parse_float)
         df["longitude"] = df["longitude"].apply(mapping_utils.parse_float)
         df["location"] = df.apply(
-            lambda row: utils.transform_location(row["longitude"], row["latitude"]),
+            lambda row: base_utils.transform_location(
+                row["longitude"], row["latitude"]
+            ),
             axis=1,
         )
 

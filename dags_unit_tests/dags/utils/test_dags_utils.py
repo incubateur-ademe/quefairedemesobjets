@@ -1,9 +1,8 @@
 from unittest.mock import patch
 
 import pandas as pd
-
-from dags.utils.base_utils import get_address
-from dags.utils.mapping_utils import parse_float
+from utils.base_utils import get_address
+from utils.mapping_utils import parse_float
 
 
 def mock_get_address_from_ban(address):
