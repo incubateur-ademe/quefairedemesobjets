@@ -81,20 +81,20 @@ class DagsValidation(IsStaffMixin, FormView):
         return context
 
     def form_valid(self, form):
-        logging.warning(form)
-
+        if not form.is_valid():
+            raise ValueError("Form is not valid")
         dagrun_id = form.cleaned_data["dagrun"].id
         dagrun_obj = DagRun.objects.get(pk=dagrun_id)
-        dagrun_lines = dagrun_obj.dagrunchanges.all()
         new_status = (
             DagRunStatus.TO_INSERT.value
             if self.request.POST.get("dag_valid") == "1"
             else DagRunStatus.REJECTED.value
         )
 
-        for dagrun_line in dagrun_lines:
-            if "row_status" not in dagrun_line.row_updates:
-                dagrun_line.update_row_update_field("row_status", new_status)
+        # FIXME: I am not sure we need the filter here
+        dagrun_obj.dagrunchanges.filter(status=DagRunStatus.TO_VALIDATE.value).update(
+            status=new_status
+        )
 
         logging.info(f"{dagrun_id} - {self.request.user}")
 

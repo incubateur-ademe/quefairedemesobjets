@@ -57,6 +57,11 @@ class DagRunChange(models.Model):
     meta_data = models.JSONField(null=True, blank=True)
     # metadata : JSON of any error or information about the line to change
     row_updates = models.JSONField(null=True, blank=True)
+    status = models.CharField(
+        max_length=50,
+        choices=DagRunStatus.choices,
+        default=DagRunStatus.TO_VALIDATE,
+    )
 
     # row_updates : JSON of acteur to update or create to store on row_updates
     # {
@@ -147,16 +152,15 @@ class DagRunChange(models.Model):
             self.row_updates = {}
 
         if (
-            "row_status" in self.row_updates
-            and self.row_updates["row_status"] == status
+            self.status == status
             and "best_candidat_index" in self.row_updates
             and self.row_updates["best_candidat_index"] == index
         ):
-            del self.row_updates["row_status"]
+            self.status = DagRunStatus.TO_VALIDATE.value
             del self.row_updates["best_candidat_index"]
 
         else:
-            self.row_updates["row_status"] = status
+            self.status = status
             self.row_updates["best_candidat_index"] = index
 
         self.save()
