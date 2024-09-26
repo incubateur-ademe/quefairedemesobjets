@@ -1,12 +1,7 @@
 from datetime import datetime
-from importlib import import_module
-from pathlib import Path
 
+import utils.eo_operators as eo_operators
 from airflow import DAG
-
-env = Path(__file__).parent.name
-utils = import_module(f"{env}.utils.utils")
-eo_operators = import_module(f"{env}.utils.eo_operators")
 
 default_args = {
     "owner": "airflow",
@@ -18,7 +13,8 @@ default_args = {
 }
 
 with DAG(
-    utils.get_dag_name(__file__, "soren"),
+    dag_id="eo-soren",
+    dag_display_name="Téléchargement de la source SOREN",
     default_args=default_args,
     description=(
         "A pipeline to fetch, process, and load to validate data into postgresql"

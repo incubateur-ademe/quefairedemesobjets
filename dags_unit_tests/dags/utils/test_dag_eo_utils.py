@@ -4,8 +4,7 @@ import pandas as pd
 import pytest
 from shapely import wkb
 from shapely.geometry import Point
-
-from dags.utils.dag_eo_utils import (
+from utils.dag_eo_utils import (
     create_acteur_services,
     create_actors,
     create_labels,

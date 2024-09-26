@@ -1,13 +1,7 @@
 import math
 
-from ratelimit import limits, sleep_and_retry
 import requests
-from importlib import import_module
-from pathlib import Path
-
-env = Path(__file__).parent.parent.name
-
-mapping_utils = import_module(f"{env}.utils.mapping_utils")
+from ratelimit import limits, sleep_and_retry
 
 
 def fetch_dataset_from_point_apport(url):

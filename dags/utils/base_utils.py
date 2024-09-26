@@ -3,7 +3,6 @@ import io
 import json
 import math
 import re
-from importlib import import_module
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -12,10 +11,7 @@ import requests
 from fuzzywuzzy import fuzz
 from shapely import wkb
 from shapely.geometry import Point
-
-env = Path(__file__).parent.parent.name
-
-api_utils = import_module(f"{env}.utils.api_utils")
+from utils import api_utils
 
 
 def get_address(row, col="adresse_format_ban"):
@@ -147,10 +143,6 @@ def process_search_api_response(element):
         element["st_x"] = element["longitude"]
         element["st_y"] = element["latitude"]
     return element, is_non_ok
-
-
-def load_table(table_name, engine):
-    return pd.read_sql_table(table_name, engine)
 
 
 def apply_normalization(df, normalization_map):
@@ -343,20 +335,6 @@ def find_differences(df_act, df_rev_act, columns_to_exclude, normalization_map):
         subset=[col for col in df_differences.columns if col != "identifiant_unique"],
     )
     return df_differences
-
-
-def get_environment(dag_filepath, parent_of_parent=False):
-    if parent_of_parent:
-        return Path(dag_filepath).parent.parent.name
-    return Path(dag_filepath).parent.name
-
-
-def get_dag_name(dag_filepath, dag_name):
-    return get_environment(dag_filepath) + "_" + dag_name
-
-
-def get_db_conn_id(dag_filepath, parent_of_parent=False):
-    return "lvao-" + get_environment(dag_filepath, parent_of_parent=parent_of_parent)
 
 
 def check_siret_using_annuaire_entreprise(

@@ -1,12 +1,6 @@
-from importlib import import_module
-from pathlib import Path
-
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-
-env = Path(__file__).parent.parent.name
-
-dag_eo_utils = import_module(f"{env}.utils.dag_eo_utils")
+from utils import dag_eo_utils
 
 
 def fetch_data_from_api_task(dag: DAG) -> PythonOperator:
