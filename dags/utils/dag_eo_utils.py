@@ -378,6 +378,12 @@ def _force_column_value(
     )
 
 
+def _column_to_bool(df_column: pd.Series) -> pd.Series:
+    return df_column.apply(
+        lambda x: x is True or isinstance(x, str) and x.lower().strip() == "oui"
+    )
+
+
 def merge_produits_accepter(group):
     produits_sets = set()
     for produits in group:
@@ -483,8 +489,8 @@ def create_actors(**kwargs):
                 df["statut"] = df["public_accueilli"].apply(
                     lambda x: "SUPPRIME" if x == "Professionnels" else "ACTIF"
                 )
-            elif old_col == "uniquement_sur_rdv":
-                df[new_col] = df[old_col].astype(bool)
+            elif old_col in ["uniquement_sur_rdv", "exclusivite_de_reprisereparation"]:
+                df[new_col] = _column_to_bool(df[old_col])
             elif old_col == "reprise":
                 df[new_col] = _force_column_value(
                     df[old_col],
@@ -495,8 +501,6 @@ def create_actors(**kwargs):
                         "oui": "1 pour 1",
                     },
                 )
-            elif old_col == "exclusivite_de_reprisereparation":
-                df[new_col] = df[old_col].apply(lambda x: True if x == "oui" else False)
             else:
                 df[new_col] = df[old_col]
 

@@ -738,6 +738,15 @@ class TestCreateActorSeriesTransformations:
             (None, False),
             (False, False),
             (True, True),
+            ("oui", True),
+            ("Oui", True),
+            (" Oui ", True),
+            ("non", False),
+            ("NON", False),
+            (" NON ", False),
+            ("", False),
+            (" ", False),
+            ("fake", False),
         ],
     )
     def test_create_actor_uniquement_sur_rdv(
@@ -861,8 +870,16 @@ class TestCreateActorSeriesTransformations:
         "exclusivite_de_reprisereparation, expected_exclusivite_de_reprisereparation",
         [
             (None, False),
-            ("non", False),
+            (False, False),
+            (True, True),
             ("oui", True),
+            ("Oui", True),
+            (" Oui ", True),
+            ("non", False),
+            ("NON", False),
+            (" NON ", False),
+            ("", False),
+            (" ", False),
             ("fake", False),
         ],
     )
