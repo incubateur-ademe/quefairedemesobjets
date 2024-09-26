@@ -1,9 +1,9 @@
 import unittest
 
+import numpy as np
 import pandas as pd
 
 from dags.utils import mapping_utils
-import numpy as np
 
 
 class TestDataTransformations(unittest.TestCase):

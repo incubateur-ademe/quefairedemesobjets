@@ -1,8 +1,10 @@
 import csv
 import io
+import json
 import math
 import re
 from importlib import import_module
+from pathlib import Path
 from urllib.parse import urlparse
 
 import pandas as pd
@@ -10,8 +12,6 @@ import requests
 from fuzzywuzzy import fuzz
 from shapely import wkb
 from shapely.geometry import Point
-import json
-from pathlib import Path
 
 env = Path(__file__).parent.parent.name
 

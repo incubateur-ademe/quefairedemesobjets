@@ -1,9 +1,9 @@
 import math
-
-from ratelimit import limits, sleep_and_retry
-import requests
 from importlib import import_module
 from pathlib import Path
+
+import requests
+from ratelimit import limits, sleep_and_retry
 
 env = Path(__file__).parent.parent.name
 
