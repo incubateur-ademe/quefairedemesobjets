@@ -662,12 +662,19 @@ def mock_config():
 class TestCreateActorSeriesTransformations:
 
     @pytest.mark.parametrize(
-        "public_accueilli,expected_public_accueilli",
+        "public_accueilli, expected_public_accueilli, expected_statut",
         [
-            (None, None),
-            ("fake", None),
-            ("Particuliers", "Particuliers"),
-            ("PARTICULIERS", "Particuliers"),
+            (None, None, "ACTIF"),
+            ("fake", None, "ACTIF"),
+            ("PARTICULIERS", "Particuliers", "ACTIF"),
+            ("Particuliers", "Particuliers", "ACTIF"),
+            (
+                "Particuliers et professionnels",
+                "Particuliers et professionnels",
+                "ACTIF",
+            ),
+            ("PROFESSIONNELS", "Professionnels", "SUPPRIME"),
+            ("Professionnels", "Professionnels", "SUPPRIME"),
         ],
     )
     def test_create_actor_public_accueilli(
@@ -676,6 +683,7 @@ class TestCreateActorSeriesTransformations:
         df_empty_displayed_acteurs_from_db,
         public_accueilli,
         expected_public_accueilli,
+        expected_statut,
     ):
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
@@ -720,8 +728,8 @@ class TestCreateActorSeriesTransformations:
             },
         }
         result = create_actors(**kwargs)
-
         assert result["df"]["public_accueilli"][0] == expected_public_accueilli
+        assert result["df"]["statut"][0] == expected_statut
 
     @pytest.mark.parametrize(
         "uniquement_sur_rdv,expected_uniquement_sur_rdv",
