@@ -515,8 +515,6 @@ def create_actors(**kwargs):
     if "latitude" in df.columns and "longitude" in df.columns:
         df["latitude"] = df["latitude"].apply(mapping_utils.parse_float)
         df["longitude"] = df["longitude"].apply(mapping_utils.parse_float)
-        print("df.columns")
-        print(df.columns)
         df["location"] = df.apply(
             lambda row: utils.transform_location(row["longitude"], row["latitude"]),
             axis=1,

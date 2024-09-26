@@ -2,6 +2,8 @@ from unittest.mock import MagicMock
 
 import pandas as pd
 import pytest
+from shapely import wkb
+from shapely.geometry import Point
 
 from dags.utils.dag_eo_utils import (
     create_acteur_services,
@@ -12,7 +14,6 @@ from dags.utils.dag_eo_utils import (
     merge_duplicates,
     serialize_to_json,
 )
-from dags.utils.utils import transform_location
 
 
 @pytest.fixture
@@ -1675,9 +1676,7 @@ class TestActorsLocation:
         result = create_actors(**kwargs)
         df_result = result["df"]
 
-        lon = float("2.3522")
-        lat = float("48.8566")
-        expected_location = transform_location(lon, lat)
+        expected_location = wkb.dumps(Point(2.3522, 48.8566)).hex()
 
         assert df_result["location"].iloc[0] == expected_location
 
