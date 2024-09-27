@@ -378,10 +378,12 @@ def _force_column_value(
     )
 
 
-def _column_to_bool(df_column: pd.Series) -> pd.Series:
-    return df_column.apply(
-        lambda x: x is True or isinstance(x, str) and x.lower().strip() == "oui"
-    )
+def cast_eo_boolean_or_string_to_boolean(value: str | bool) -> bool:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.lower().strip() == "oui"
+    return False
 
 
 def merge_produits_accepter(group):
@@ -490,7 +492,7 @@ def create_actors(**kwargs):
                     lambda x: "SUPPRIME" if x == "Professionnels" else "ACTIF"
                 )
             elif old_col in ["uniquement_sur_rdv", "exclusivite_de_reprisereparation"]:
-                df[new_col] = _column_to_bool(df[old_col])
+                df[new_col] = df[old_col].apply(cast_eo_boolean_or_string_to_boolean)
             elif old_col == "reprise":
                 df[new_col] = _force_column_value(
                     df[old_col],
