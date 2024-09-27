@@ -22,13 +22,27 @@ def fetch_data_from_api(**kwargs):
     return df
 
 
+def load_data_from_postgresql(**kwargs):
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
+    engine = pg_hook.get_sqlalchemy_engine()
+
+    # TODO : check if we need to manage the max id here
+    displayedpropositionservice_max_id = engine.execute(
+        text("SELECT max(id) FROM qfdmo_displayedpropositionservice")
+    ).scalar()
+
+    return {
+        "displayedpropositionservice_max_id": displayedpropositionservice_max_id,
+    }
+
+
 def create_proposition_services(**kwargs):
     df = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
     data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
     displayedpropositionservice_max_id = data_dict["displayedpropositionservice_max_id"]
     rows_dict = {}
     merged_count = 0
-    df_actions = data_dict["action"]
+    df_actions = kwargs["ti"].xcom_pull(task_ids="read_action")
 
     conditions = [
         ("point_dapport_de_service_reparation", "reparer"),
@@ -84,8 +98,7 @@ def create_proposition_services(**kwargs):
 
 def create_proposition_services_sous_categories(**kwargs):
     df = kwargs["ti"].xcom_pull(task_ids="create_proposition_services")["df"]
-    data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
-    df_sous_categories_map = data_dict["souscategorieobjet"]
+    df_sous_categories_map = kwargs["ti"].xcom_pull(task_ids="read_souscategorieobjet")
     params = kwargs["params"]
     mapping_config_key = params.get("mapping_config_key", "sous_categories")
     config = base_utils.get_mapping_config()
@@ -258,48 +271,28 @@ def serialize_to_json(**kwargs):
     return {"all": {"df": df_joined}, "to_disable": {"df": df_removed_actors}}
 
 
-def load_data_from_postgresql(**kwargs):
-    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
-    engine = pg_hook.get_sqlalchemy_engine()
+def read_displayedacteur(**kwargs):
+    df_data_from_api = kwargs["ti"].xcom_pull(task_ids="fetch_data_from_api")
+    df_sources = kwargs["ti"].xcom_pull(task_ids="read_source")
 
-    df_acteurtype = pd.read_sql_table("qfdmo_acteurtype", engine)
-    df_source = pd.read_sql_table("qfdmo_source", engine)
-    df_action = pd.read_sql_table("qfdmo_action", engine)
-    df_acteurservice = pd.read_sql_table("qfdmo_acteurservice", engine)
-    df_souscategorieobjet = pd.read_sql_table("qfdmo_souscategorieobjet", engine)
-    df_labelqualite = pd.read_sql_table("qfdmo_labelqualite", engine)
-    displayedpropositionservice_max_id = engine.execute(
-        text("SELECT max(id) FROM qfdmo_displayedpropositionservice")
-    ).scalar()
-    # TODO : ici on rappatrie tous les acteurs, ce serait bien de filtrer par source_id
-    # TODO : est-ce qu'on doit lire les acteurs dans qfdmo_displayedacteur ou
-    # qfdmo_acteur ?
-    df_displayedacteur = pd.read_sql_table("qfdmo_displayedacteur", engine)
-
-    return {
-        "acteurtype": df_acteurtype,
-        "source": df_source,
-        "action": df_action,
-        "acteurservice": df_acteurservice,
-        "displayedpropositionservice_max_id": displayedpropositionservice_max_id,
-        "souscategorieobjet": df_souscategorieobjet,
-        "labelqualite": df_labelqualite,
-        "displayedacteur": df_displayedacteur,
-    }
-
-
-def load_data_from_displayedactor_by_source(source_id):
-    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
-    engine = pg_hook.get_sqlalchemy_engine()
-
-    df_displayedactors = pd.read_sql_query(
-        f"SELECT identifiant_unique, cree_le, modifie_le "
-        f"FROM qfdmo_displayedacteur where statut='ACTIF' "
-        f"and source_id={source_id}",
-        engine,
+    df_data_from_api["source_id"] = df_data_from_api["ecoorganisme"].apply(
+        lambda x: mapping_utils.get_id_from_code(x, df_sources)
     )
 
-    return df_displayedactors
+    unique_source_ids = df_data_from_api["source_id"].unique()
+
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
+    engine = pg_hook.get_sqlalchemy_engine()
+    logging.warning(f"unique_source_ids : {unique_source_ids}")
+    joined_source_ids = ",".join([f"'{source_id}'" for source_id in unique_source_ids])
+    logging.warning(f"source_ids : {joined_source_ids}")
+    query = f"""
+    SELECT * FROM qfdmo_displayedacteur
+    WHERE source_id IN ({joined_source_ids})
+    """
+    df_displayedacteur = pd.read_sql_query(query, engine)
+
+    return df_displayedacteur
 
 
 def insert_dagrun_and_process_df(df, metadata, dag_id, run_id):
@@ -419,11 +412,11 @@ def merge_duplicates(
 
 
 def create_actors(**kwargs):
-    data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
     df = kwargs["ti"].xcom_pull(task_ids="fetch_data_from_api")
-    df_sources = data_dict["source"]
-    df_acteurtype = data_dict["acteurtype"]
-    df_displayedacteurs = data_dict["displayedacteur"]
+    df_acteurtype = kwargs["ti"].xcom_pull(task_ids="read_acteurtype")
+    df_sources = kwargs["ti"].xcom_pull(task_ids="read_source")
+    df_displayedacteurs = kwargs["ti"].xcom_pull(task_ids="read_displayedacteur")
+
     params = kwargs["params"]
     reparacteurs = params.get("reparacteurs", False)
     column_mapping = params.get("column_mapping", {})
@@ -564,9 +557,8 @@ def create_actors(**kwargs):
 
 
 def create_labels(**kwargs):
-    data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
-    labels = data_dict["labelqualite"]
-    df_acteurtype = data_dict["acteurtype"]
+    labels = kwargs["ti"].xcom_pull(task_ids="read_labelqualite")
+    df_acteurtype = kwargs["ti"].xcom_pull(task_ids="read_acteurtype")
     df_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
 
     # Get ESS constant values to use in in the loop
@@ -626,8 +618,7 @@ def create_labels(**kwargs):
 
 
 def create_acteur_services(**kwargs):
-    data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
-    df_acteur_services = data_dict["acteurservice"]
+    df_acteur_services = kwargs["ti"].xcom_pull(task_ids="read_acteurservice")
     df_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
 
     acteurservice_acteurserviceid = {
