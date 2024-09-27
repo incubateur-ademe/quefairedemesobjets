@@ -134,7 +134,6 @@ def get_mock_ti_ps(
     mock.xcom_pull.side_effect = lambda task_ids="": {
         "create_actors": {
             "df": df_create_actors,
-            "config": db_mapping_config,
         },
         "load_data_from_postgresql": {
             "displayedpropositionservice_max_id": displayedpropositionservice_max_id,
@@ -161,7 +160,6 @@ def get_mock_ti_label(
     mock.xcom_pull.side_effect = lambda task_ids="": {
         "create_actors": {
             "df": df_create_actors,
-            "config": db_mapping_config,
         },
         "load_data_from_postgresql": {
             "displayedpropositionservice_max_id": displayedpropositionservice_max_id,
@@ -607,7 +605,6 @@ def mock_ti(
                     "point_de_collecte_ou_de_reprise_des_dechets": [True, True],
                 }
             ),
-            "config": db_mapping_config,
         },
         "load_data_from_postgresql": {
             "displayedpropositionservice_max_id": 1,
@@ -620,7 +617,6 @@ def mock_ti(
             "displayedacteur": df_displayed_acteurs_from_db,
         },
         "create_proposition_services": {"df": df_proposition_services},
-        "create_proposition_"
         "services_sous_categories": df_proposition_services_sous_categories,
     }[task_ids]
     return mock
@@ -1232,9 +1228,6 @@ class TestCreatePropositionServicesSousCategories:
         mock = MagicMock()
 
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "create_actors": {
-                "config": db_mapping_config,
-            },
             "load_data_from_postgresql": {
                 "sous_categories": df_sous_categories_from_db,
             },
@@ -1263,11 +1256,8 @@ class TestCreatePropositionServicesSousCategories:
         mock = MagicMock()
 
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "create_actors": {
-                "config": db_mapping_config,
-            },
             "load_data_from_postgresql": {
-                "sous_categories": df_sous_categories_from_db,
+                "souscategorieobjet": df_sous_categories_from_db,
             },
             "create_proposition_services": {
                 "df": pd.DataFrame(
@@ -1643,9 +1633,9 @@ class TestActorsLocation:
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
             "load_data_from_postgresql": {
-                "sources": df_sources_from_db,
+                "source": df_sources_from_db,
                 "acteurtype": df_acteurtype_from_db,
-                "displayedacteurs": df_empty_displayed_acteurs_from_db,
+                "displayedacteur": df_empty_displayed_acteurs_from_db,
             },
             "fetch_data_from_api": pd.DataFrame(
                 {

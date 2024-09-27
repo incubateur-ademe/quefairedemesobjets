@@ -88,7 +88,7 @@ def create_proposition_services_sous_categories(**kwargs):
     df_sous_categories_map = data_dict["souscategorieobjet"]
     params = kwargs["params"]
     mapping_config_key = params.get("mapping_config_key", "sous_categories")
-    config = utils.get_mapping_config()
+    config = base_utils.get_mapping_config()
     sous_categories = config[mapping_config_key]
     rows_list = []
 
