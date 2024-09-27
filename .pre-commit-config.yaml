@@ -2,21 +2,35 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
     - repo: https://github.com/pre-commit/pre-commit-hooks
-      rev: v4.0.1
+      rev: v4.6.0
       hooks:
           - id: trailing-whitespace
           - id: check-yaml
           - id: check-added-large-files
     - repo: https://github.com/ambv/black
-      rev: 24.1.1
+      rev: 24.8.0
       hooks:
           - id: black
     - repo: https://github.com/astral-sh/ruff-pre-commit
       # Ruff version.
-      rev: v0.0.282
+      rev: v0.6.7
       hooks:
           - id: ruff
     - repo: https://github.com/rtts/djhtml
-      rev: v1.4.9
+      rev: 3.0.6
       hooks:
           - id: djhtml
+    - repo: https://github.com/Yelp/detect-secrets
+      rev: v1.5.0
+      hooks:
+        - id: detect-secrets
+          name: Detect secrets
+          language: python
+          entry: detect-secrets-hook
+          args: ['--baseline', '.secrets.baseline']
+    - repo: https://github.com/pycqa/isort
+      rev: 5.13.2
+      hooks:
+        - id: isort
+          name: isort (python)
+          args: ["--profile", "black", "--filter-files"]

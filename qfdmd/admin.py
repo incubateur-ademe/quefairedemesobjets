@@ -1,4 +1,5 @@
 from django.contrib.gis import admin
+
 from qfdmd.models import Produit
 from qfdmo.admin.acteur import NotEditableInlineMixin
 
