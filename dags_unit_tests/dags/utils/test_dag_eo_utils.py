@@ -127,16 +127,12 @@ def get_mock_ti_ps(
     df_acteur_services_from_db,
     df_sous_categories_from_db,
     df_create_actors: pd.DataFrame = pd.DataFrame(),
-    displayedpropositionservice_max_id: int = 1,
 ) -> MagicMock:
     mock = MagicMock()
 
     mock.xcom_pull.side_effect = lambda task_ids="": {
         "create_actors": {
             "df": df_create_actors,
-        },
-        "load_data_from_postgresql": {
-            "displayedpropositionservice_max_id": displayedpropositionservice_max_id,
         },
         "read_action": df_actions_from_db,
         "read_acteurservice": df_acteur_services_from_db,
@@ -153,16 +149,12 @@ def get_mock_ti_label(
     df_sous_categories_from_db,
     df_labels_from_db=pd.DataFrame(),
     df_create_actors: pd.DataFrame = pd.DataFrame(),
-    displayedpropositionservice_max_id: int = 1,
 ) -> MagicMock:
     mock = MagicMock()
 
     mock.xcom_pull.side_effect = lambda task_ids="": {
         "create_actors": {
             "df": df_create_actors,
-        },
-        "load_data_from_postgresql": {
-            "displayedpropositionservice_max_id": displayedpropositionservice_max_id,
         },
         "read_action": df_actions_from_db,
         "read_acteurtype": df_acteurtype_from_db,
@@ -211,7 +203,6 @@ class TestCreatePropositionService:
                         "acteur_id": [1],
                         "action": ["reparer"],
                         "sous_categories": ["téléphones portables"],
-                        "id": [1],
                     },
                 ),
                 {"number_of_merged_actors": 0, "number_of_propositionservices": 1},
@@ -234,7 +225,6 @@ class TestCreatePropositionService:
                         "acteur_id": [1],
                         "action": ["donner"],
                         "sous_categories": ["téléphones portables"],
-                        "id": [1],
                     },
                 ),
                 {"number_of_merged_actors": 0, "number_of_propositionservices": 1},
@@ -257,7 +247,6 @@ class TestCreatePropositionService:
                         "acteur_id": [1],
                         "action": ["reparer"],
                         "sous_categories": ["téléphones portables"],
-                        "id": [1],
                     },
                 ),
                 {"number_of_merged_actors": 0, "number_of_propositionservices": 1},
@@ -280,7 +269,6 @@ class TestCreatePropositionService:
                         "acteur_id": [1],
                         "action": ["trier"],
                         "sous_categories": ["téléphones portables"],
-                        "id": [1],
                     },
                 ),
                 {"number_of_merged_actors": 0, "number_of_propositionservices": 1},
@@ -307,7 +295,6 @@ class TestCreatePropositionService:
                             "téléphones portables",
                             "téléphones portables",
                         ],
-                        "id": [1, 2, 3],
                     },
                 ),
                 {"number_of_merged_actors": 0, "number_of_propositionservices": 3},
@@ -371,7 +358,6 @@ class TestCreatePropositionService:
                 "acteur_id": [1, 2],
                 "action": ["trier", "trier"],
                 "sous_categories": ["téléphones portables", "téléphones portables"],
-                "id": [1, 2],
             }
         )
         expected_metadata = {
@@ -418,7 +404,6 @@ class TestCreatePropositionService:
                 "acteur_id": [1],
                 "action": ["reparer"],
                 "sous_categories": ["téléphones portables | écrans"],
-                "id": [1],
             }
         )
         expected_metadata = {
@@ -431,36 +416,6 @@ class TestCreatePropositionService:
 
         assert result["df"].equals(df_expected)
         assert result["metadata"] == expected_metadata
-
-    def test_create_proposition_services_increment_ids(
-        self,
-        db_mapping_config,
-        df_actions_from_db,
-        df_acteur_services_from_db,
-        df_sous_categories_from_db,
-    ):
-        mock = get_mock_ti_ps(
-            db_mapping_config,
-            df_actions_from_db,
-            df_acteur_services_from_db,
-            df_sous_categories_from_db,
-            df_create_actors=pd.DataFrame(
-                {
-                    "identifiant_unique": [1],
-                    "produitsdechets_acceptes": ["téléphones portables"],
-                    "point_dapport_de_service_reparation": [False],
-                    "point_dapport_pour_reemploi": [False],
-                    "point_de_reparation": [False],
-                    "point_de_collecte_ou_de_reprise_des_dechets": [True],
-                }
-            ),
-            displayedpropositionservice_max_id=123,
-        )
-
-        kwargs = {"ti": mock}
-        result = create_proposition_services(**kwargs)
-
-        assert result["df"]["id"].tolist() == [123]
 
 
 @pytest.fixture
@@ -605,9 +560,6 @@ def mock_ti(
                     "point_de_collecte_ou_de_reprise_des_dechets": [True, True],
                 }
             ),
-        },
-        "load_data_from_postgresql": {
-            "displayedpropositionservice_max_id": 1,
         },
         "read_displayedacteur": df_displayed_acteurs_from_db,
         "read_action": df_actions_from_db,
@@ -1485,7 +1437,6 @@ class TestCeateLabels:
                     "acteur_type_id": [202, 202],
                 }
             ),
-            displayedpropositionservice_max_id=123,
         )
 
         kwargs = {"ti": mock}
@@ -1525,7 +1476,6 @@ class TestCeateLabels:
                     "acteur_type_id": [201, 202],
                 }
             ),
-            displayedpropositionservice_max_id=123,
         )
 
         kwargs = {"ti": mock}
@@ -1571,7 +1521,6 @@ class TestCeateLabels:
                     "acteur_type_id": [202, 202],
                 }
             ),
-            displayedpropositionservice_max_id=123,
         )
 
         kwargs = {"ti": mock}
