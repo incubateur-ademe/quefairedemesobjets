@@ -137,10 +137,10 @@ def get_mock_ti_ps(
         },
         "load_data_from_postgresql": {
             "displayedpropositionservice_max_id": displayedpropositionservice_max_id,
-            "action": df_actions_from_db,
-            "acteurservice": df_acteur_services_from_db,
-            "souscategorieobjet": df_sous_categories_from_db,
         },
+        "read_action": df_actions_from_db,
+        "read_acteurservice": df_acteur_services_from_db,
+        "read_souscategorieobjet": df_sous_categories_from_db,
     }[task_ids]
     return mock
 
@@ -163,12 +163,12 @@ def get_mock_ti_label(
         },
         "load_data_from_postgresql": {
             "displayedpropositionservice_max_id": displayedpropositionservice_max_id,
-            "action": df_actions_from_db,
-            "acteurservice": df_acteur_services_from_db,
-            "souscategorieobjet": df_sous_categories_from_db,
-            "labelqualite": df_labels_from_db,
-            "acteurtype": df_acteurtype_from_db,
         },
+        "read_action": df_actions_from_db,
+        "read_acteurtype": df_acteurtype_from_db,
+        "read_acteurservice": df_acteur_services_from_db,
+        "read_souscategorieobjet": df_sous_categories_from_db,
+        "read_labelqualite": df_labels_from_db,
     }[task_ids]
     return mock
 
@@ -608,14 +608,14 @@ def mock_ti(
         },
         "load_data_from_postgresql": {
             "displayedpropositionservice_max_id": 1,
-            "action": df_actions_from_db,
-            "acteurservice": df_acteur_services_from_db,
-            "souscategorieobjet": df_sous_categories_from_db,
-            "source": df_sources_from_db,
-            "acteurtype": df_acteurtype_from_db,
-            "labelqualite": df_labels_from_db,
-            "displayedacteur": df_displayed_acteurs_from_db,
         },
+        "read_displayedacteur": df_displayed_acteurs_from_db,
+        "read_action": df_actions_from_db,
+        "read_acteurtype": df_acteurtype_from_db,
+        "read_acteurservice": df_acteur_services_from_db,
+        "read_source": df_sources_from_db,
+        "read_souscategorieobjet": df_sous_categories_from_db,
+        "read_labelqualite": df_labels_from_db,
         "create_proposition_services": {"df": df_proposition_services},
         "services_sous_categories": df_proposition_services_sous_categories,
     }[task_ids]
@@ -684,11 +684,9 @@ class TestCreateActorSeriesTransformations:
     ):
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "load_data_from_postgresql": {
-                "source": df_sources_from_db,
-                "acteurtype": None,
-                "displayedacteur": df_empty_displayed_acteurs_from_db,
-            },
+            "read_displayedacteur": df_empty_displayed_acteurs_from_db,
+            "read_acteurtype": None,
+            "read_source": df_sources_from_db,
             "fetch_data_from_api": pd.DataFrame(
                 {
                     "nom_de_lorganisme": ["Eco1"],
@@ -745,11 +743,9 @@ class TestCreateActorSeriesTransformations:
     ):
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "load_data_from_postgresql": {
-                "source": df_sources_from_db,
-                "acteurtype": None,
-                "displayedacteur": df_empty_displayed_acteurs_from_db,
-            },
+            "read_displayedacteur": df_empty_displayed_acteurs_from_db,
+            "read_acteurtype": None,
+            "read_source": df_sources_from_db,
             "fetch_data_from_api": pd.DataFrame(
                 {
                     "nom_de_lorganisme": ["Eco1"],
@@ -809,11 +805,9 @@ class TestCreateActorSeriesTransformations:
     ):
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "load_data_from_postgresql": {
-                "source": df_sources_from_db,
-                "acteurtype": None,
-                "displayedacteur": df_empty_displayed_acteurs_from_db,
-            },
+            "read_displayedacteur": df_empty_displayed_acteurs_from_db,
+            "read_acteurtype": None,
+            "read_source": df_sources_from_db,
             "fetch_data_from_api": pd.DataFrame(
                 {
                     "nom_de_lorganisme": ["Eco1"],
@@ -871,11 +865,9 @@ class TestCreateActorSeriesTransformations:
     ):
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "load_data_from_postgresql": {
-                "source": df_sources_from_db,
-                "acteurtype": None,
-                "displayedacteur": df_empty_displayed_acteurs_from_db,
-            },
+            "read_displayedacteur": df_empty_displayed_acteurs_from_db,
+            "read_acteurtype": None,
+            "read_source": df_sources_from_db,
             "fetch_data_from_api": pd.DataFrame(
                 {
                     "nom_de_lorganisme": ["Eco1"],
@@ -929,9 +921,7 @@ class TestCreateActeurServices:
 
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "load_data_from_postgresql": {
-                "acteurservice": df_acteur_services_from_db,
-            },
+            "read_acteurservice": df_acteur_services_from_db,
             "create_actors": {
                 "df": pd.DataFrame(
                     {
@@ -960,9 +950,7 @@ class TestCreateActeurServices:
 
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "load_data_from_postgresql": {
-                "acteurservice": df_acteur_services_from_db,
-            },
+            "read_acteurservice": df_acteur_services_from_db,
             "create_actors": {
                 "df": pd.DataFrame(
                     {
@@ -1002,9 +990,7 @@ class TestCreateActeurServices:
 
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "load_data_from_postgresql": {
-                "acteurservice": df_acteur_services_from_db,
-            },
+            "read_acteurservice": df_acteur_services_from_db,
             "create_actors": {
                 "df": pd.DataFrame(
                     {
@@ -1228,9 +1214,7 @@ class TestCreatePropositionServicesSousCategories:
         mock = MagicMock()
 
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "load_data_from_postgresql": {
-                "sous_categories": df_sous_categories_from_db,
-            },
+            "read_souscategorieobjet": df_sous_categories_from_db,
             "create_proposition_services": {
                 "df": pd.DataFrame(
                     {
@@ -1256,9 +1240,7 @@ class TestCreatePropositionServicesSousCategories:
         mock = MagicMock()
 
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "load_data_from_postgresql": {
-                "souscategorieobjet": df_sous_categories_from_db,
-            },
+            "read_souscategorieobjet": df_sous_categories_from_db,
             "create_proposition_services": {
                 "df": pd.DataFrame(
                     {
@@ -1376,11 +1358,9 @@ def test_acteur_to_delete(
 ):
     mock = MagicMock()
     mock.xcom_pull.side_effect = lambda task_ids="": {
-        "load_data_from_postgresql": {
-            "source": df_sources_from_db,
-            "acteurtype": None,
-            "displayedacteur": df_displatedacteurs,
-        },
+        "read_displayedacteur": df_displatedacteurs,
+        "read_acteurtype": None,
+        "read_source": df_sources_from_db,
         "fetch_data_from_api": pd.DataFrame(
             {
                 "id_point_apport_ou_reparation": ["1"],
@@ -1410,11 +1390,9 @@ def test_create_reparacteurs(
 ):
     mock = MagicMock()
     mock.xcom_pull.side_effect = lambda task_ids="": {
-        "load_data_from_postgresql": {
-            "source": df_sources_from_db,
-            "acteurtype": df_acteurtype_from_db,
-            "displayedacteur": df_empty_displayed_acteurs_from_db,
-        },
+        "read_displayedacteur": df_empty_displayed_acteurs_from_db,
+        "read_acteurtype": df_acteurtype_from_db,
+        "read_source": df_sources_from_db,
         "fetch_data_from_api": pd.DataFrame(
             {
                 "reparactor_description": ["Ceci est une description du réparacteur."],
@@ -1632,11 +1610,9 @@ class TestActorsLocation:
     ):
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "load_data_from_postgresql": {
-                "source": df_sources_from_db,
-                "acteurtype": df_acteurtype_from_db,
-                "displayedacteur": df_empty_displayed_acteurs_from_db,
-            },
+            "read_displayedacteur": df_empty_displayed_acteurs_from_db,
+            "read_acteurtype": df_acteurtype_from_db,
+            "read_source": df_sources_from_db,
             "fetch_data_from_api": pd.DataFrame(
                 {
                     "id_point_apport_ou_reparation": ["1"],
