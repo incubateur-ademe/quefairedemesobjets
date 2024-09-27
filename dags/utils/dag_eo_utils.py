@@ -6,7 +6,6 @@ from typing import Union
 import numpy as np
 import pandas as pd
 from airflow.providers.postgres.hooks.postgres import PostgresHook
-from sqlalchemy import text
 from utils import api_utils, base_utils, mapping_utils, shared_constants
 
 logger = logging.getLogger(__name__)
@@ -22,24 +21,8 @@ def fetch_data_from_api(**kwargs):
     return df
 
 
-def load_data_from_postgresql(**kwargs):
-    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
-    engine = pg_hook.get_sqlalchemy_engine()
-
-    # TODO : check if we need to manage the max id here
-    displayedpropositionservice_max_id = engine.execute(
-        text("SELECT max(id) FROM qfdmo_displayedpropositionservice")
-    ).scalar()
-
-    return {
-        "displayedpropositionservice_max_id": displayedpropositionservice_max_id,
-    }
-
-
 def create_proposition_services(**kwargs):
     df = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
-    data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
-    displayedpropositionservice_max_id = data_dict["displayedpropositionservice_max_id"]
     rows_dict = {}
     merged_count = 0
     df_actions = kwargs["ti"].xcom_pull(task_ids="read_action")
@@ -83,11 +66,6 @@ def create_proposition_services(**kwargs):
     df_pds = pd.DataFrame(rows_list)
     if "sous_categories" in df_pds.columns:
         df_pds["sous_categories"] = df_pds["sous_categories"].replace(np.nan, None)
-    if indexes := range(
-        displayedpropositionservice_max_id,
-        displayedpropositionservice_max_id + len(df_pds),
-    ):
-        df_pds["id"] = indexes
     metadata = {
         "number_of_merged_actors": merged_count,
         "number_of_propositionservices": len(df_pds),

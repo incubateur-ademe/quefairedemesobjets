@@ -4,6 +4,7 @@ import pandas as pd
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
+from sqlalchemy import text
 from utils.db_tasks import read_data_from_postgres
 
 
@@ -120,6 +121,18 @@ def apply_corrections_propositionservices(**kwargs):
     }
 
 
+def displayedpropositionservice_max_id(**kwargs):
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
+    engine = pg_hook.get_sqlalchemy_engine()
+
+    # TODO : check if we need to manage the max id here
+    displayedpropositionservice_max_id = engine.execute(
+        text("SELECT max(id) FROM qfdmo_displayedpropositionservice")
+    ).scalar()
+
+    return displayedpropositionservice_max_id
+
+
 def deduplicate_propositionservices(**kwargs):
     df_children = kwargs["ti"].xcom_pull(task_ids="apply_corrections_acteur")[
         "df_children"
@@ -131,6 +144,10 @@ def deduplicate_propositionservices(**kwargs):
     df_propositionservice_sous_categories_merged = data_task_ps[
         "df_propositionservice_sous_categories_merged"
     ]
+    displayedpropositionservice_max_id = kwargs["ti"].xcom_pull(
+        task_ids="displayedpropositionservice_max_id"
+    )
+
     df_joined = df_propositionservice_merged.merge(
         df_children, left_on="acteur_id", right_on="identifiant_unique", how="inner"
     )
@@ -146,9 +163,11 @@ def deduplicate_propositionservices(**kwargs):
         .agg({"souscategorieobjet_id": lambda x: list(set(x))})
         .reset_index()
     )
-    max_id = df_propositionservice_merged["id"].max()
+    # TODO : waiting a better management of PS ids, perhaps, il would be better to use
+    #  uuid ad ps id
     df_grouped["propositionservice_id"] = range(
-        max_id + 1, max_id + 1 + len(df_grouped)
+        displayedpropositionservice_max_id + 1,
+        displayedpropositionservice_max_id + 1 + len(df_grouped),
     )
 
     df_new_sous_categories = df_grouped.explode("souscategorieobjet_id")[
@@ -705,6 +724,11 @@ deduplicate_propositionservices_task = PythonOperator(
     python_callable=deduplicate_propositionservices,
     dag=dag,
 )
+displayedpropositionservice_max_id_task = PythonOperator(
+    task_id="displayedpropositionservice_max_id",
+    python_callable=displayedpropositionservice_max_id,
+    dag=dag,
+)
 
 
 write_pos = PythonOperator(
@@ -731,6 +755,7 @@ load_acteur_task >> apply_corrections_acteur_task
     load_revisionacteur_acteur_services_task,
 ] >> merge_acteur_services_task
 apply_corrections_acteur_task >> deduplicate_propositionservices_task
+displayedpropositionservice_max_id_task >> deduplicate_propositionservices_task
 apply_corrections_acteur_task >> deduplicate_acteur_sources_task
 apply_corrections_propositionservices_task >> deduplicate_propositionservices_task
 merge_labels_task >> apply_corrections_acteur_task >> deduplicate_labels_task

@@ -24,14 +24,6 @@ def fetch_data_from_api_task(dag: DAG) -> PythonOperator:
     )
 
 
-def load_data_from_postgresql_task(dag: DAG) -> PythonOperator:
-    return PythonOperator(
-        task_id="load_data_from_postgresql",
-        python_callable=dag_eo_utils.load_data_from_postgresql,
-        dag=dag,
-    )
-
-
 def read_data_from_postgres_task(
     *,
     dag: DAG,
@@ -138,7 +130,6 @@ def eo_task_chain(dag: DAG) -> None:
         read_data_from_postgres_task(
             dag=dag, table_name="qfdmo_labelqualite", task_id="read_labelqualite"
         ),
-        load_data_from_postgresql_task(dag),
     ]
 
     create_tasks = [
