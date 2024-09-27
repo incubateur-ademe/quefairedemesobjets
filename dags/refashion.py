@@ -1,16 +1,5 @@
-from datetime import datetime
-
-import utils.eo_operators as eo_operators
 from airflow import DAG
-
-default_args = {
-    "owner": "airflow",
-    "depends_on_past": False,
-    "start_date": datetime(2024, 3, 23),
-    "email_on_failure": False,
-    "email_on_retry": False,
-    "retries": 1,
-}
+from utils.eo_operators import default_args, eo_task_chain
 
 with DAG(
     dag_id="eo-refashion",
@@ -47,26 +36,12 @@ with DAG(
             "site_web": "url",
             "email": "email",
             "perimetre_dintervention": "",
-            "longitudewgs84": "location",
-            "latitudewgs84": "location",
+            "longitudewgs84": "longitude",
+            "latitudewgs84": "latitude",
             "horaires_douverture": "horaires_description",
             "consignes_dacces": "commentaires",
         },
     },
     schedule=None,
 ) as dag:
-    (
-        [
-            eo_operators.fetch_data_from_api_task(dag),
-            eo_operators.load_data_from_postgresql_task(dag),
-        ]
-        >> eo_operators.create_actors_task(dag)
-        >> [
-            eo_operators.create_proposition_services_task(dag),
-            eo_operators.create_labels_task(dag),
-            eo_operators.create_acteur_services_task(dag),
-        ]
-        >> eo_operators.create_proposition_services_sous_categories_task(dag)
-        >> eo_operators.serialize_to_json_task(dag)
-        >> eo_operators.write_data_task(dag)
-    )  # type: ignore
+    eo_task_chain(dag)

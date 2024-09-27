@@ -1,10 +1,10 @@
 <div data-search-solution-form-target="sousCategoryObjetGroup" class="fr-mt-3w fr-px-1v fr-input-group {% if hidden %}qfdmo-hidden{% endif %}">
     <div data-controller='ss-cat-object-autocomplete'
-        data-ss-cat-object-autocomplete-max-option-displayed-value=5
-        data-ss-cat-object-autocomplete-nb-char-to-search-value=1
-        data-with-controls={{"false" if is_carte(request) else "true"}}
-        data-without-zone={{"false" if is_carte(request) else "true"}}
-        data-with-dynamic-form-panel={{"false" if is_carte(request) else "true"}}
+         data-ss-cat-object-autocomplete-max-option-displayed-value=5
+         data-ss-cat-object-autocomplete-nb-char-to-search-value=1
+         data-with-controls={{"false" if is_carte(request) else "true"}}
+         data-without-zone={{"false" if is_carte(request) else "true"}}
+         data-with-dynamic-form-panel={{"false" if is_carte(request) else "true"}}
     >
         <div class="form-group">
             {{ form.sous_categorie_objet.label_tag() }}

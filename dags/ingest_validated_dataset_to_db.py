@@ -60,8 +60,16 @@ def fetch_and_parse_data(**context):
             df_actors_create, dag_run_id, engine
         )
     if not df_update_actor.empty:
+
         normalized_dfs = df_update_actor["row_updates"].apply(pd.json_normalize)
         df_actors_update_actor = pd.concat(normalized_dfs.tolist(), ignore_index=True)
+        status_repeated = (
+            df_update_actor["status"]
+            .repeat(df_update_actor["row_updates"].apply(len))
+            .reset_index(drop=True)
+        )
+        df_actors_update_actor["status"] = status_repeated
+
         return dag_ingest_validated_utils.handle_update_actor_event(
             df_actors_update_actor, dag_run_id
         )

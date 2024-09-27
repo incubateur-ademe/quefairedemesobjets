@@ -103,8 +103,8 @@ Les variables d'environnement dans Github Action nécessaires au déploiement de
 
 Les dags sont déployés via un bucket s3, dans un bucket au nom de l'environnement sur clevercloud :
 
-- `s3://preprod-dags/` sur l'instance s3 `preprod-airflow-s3`
-- `s3://prod-dags/` sur l'instance s3 `preprod-airflow-s3`
+- `s3://preprod-data-dags/` sur l'instance s3 `preprod-airflow-s3`
+- `s3://prod-dags/` sur l'instance s3 `prod-airflow-s3`
 
 Cette copie est faite via la CI/CD github action:
 

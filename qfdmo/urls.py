@@ -11,14 +11,14 @@ from qfdmo.views.adresses import (
     getorcreate_revisionacteur,
     solution_admin,
 )
+from qfdmo.views.configurator import ConfiguratorView
+from qfdmo.views.dags import DagsValidation
 from qfdmo.views.forms import (
     address_suggestion_form,
     contact_form,
-    update_suggestion_form,
     feedback_form,
+    update_suggestion_form,
 )
-from qfdmo.views.configurator import ConfiguratorView
-from qfdmo.views.dags import DagsValidation
 
 urlpatterns = [
     path("", AddressesView.as_view(), name="reemploi_solution"),

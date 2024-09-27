@@ -2,6 +2,8 @@ from unittest.mock import MagicMock
 
 import pandas as pd
 import pytest
+from shapely import wkb
+from shapely.geometry import Point
 from utils.dag_eo_utils import (
     create_acteur_services,
     create_actors,
@@ -125,21 +127,20 @@ def get_mock_ti_ps(
     df_acteur_services_from_db,
     df_sous_categories_from_db,
     df_create_actors: pd.DataFrame = pd.DataFrame(),
-    max_pds_idx: int = 1,
+    displayedpropositionservice_max_id: int = 1,
 ) -> MagicMock:
     mock = MagicMock()
 
     mock.xcom_pull.side_effect = lambda task_ids="": {
         "create_actors": {
             "df": df_create_actors,
-            "config": db_mapping_config,
         },
         "load_data_from_postgresql": {
-            "max_pds_idx": max_pds_idx,
-            "actions": df_actions_from_db,
-            "acteur_services": df_acteur_services_from_db,
-            "sous_categories": df_sous_categories_from_db,
+            "displayedpropositionservice_max_id": displayedpropositionservice_max_id,
         },
+        "read_action": df_actions_from_db,
+        "read_acteurservice": df_acteur_services_from_db,
+        "read_souscategorieobjet": df_sous_categories_from_db,
     }[task_ids]
     return mock
 
@@ -152,23 +153,22 @@ def get_mock_ti_label(
     df_sous_categories_from_db,
     df_labels_from_db=pd.DataFrame(),
     df_create_actors: pd.DataFrame = pd.DataFrame(),
-    max_pds_idx: int = 1,
+    displayedpropositionservice_max_id: int = 1,
 ) -> MagicMock:
     mock = MagicMock()
 
     mock.xcom_pull.side_effect = lambda task_ids="": {
         "create_actors": {
             "df": df_create_actors,
-            "config": db_mapping_config,
         },
         "load_data_from_postgresql": {
-            "max_pds_idx": max_pds_idx,
-            "actions": df_actions_from_db,
-            "acteur_services": df_acteur_services_from_db,
-            "sous_categories": df_sous_categories_from_db,
-            "labels": df_labels_from_db,
-            "acteurtype": df_acteurtype_from_db,
+            "displayedpropositionservice_max_id": displayedpropositionservice_max_id,
         },
+        "read_action": df_actions_from_db,
+        "read_acteurtype": df_acteurtype_from_db,
+        "read_acteurservice": df_acteur_services_from_db,
+        "read_souscategorieobjet": df_sous_categories_from_db,
+        "read_labelqualite": df_labels_from_db,
     }[task_ids]
     return mock
 
@@ -454,7 +454,7 @@ class TestCreatePropositionService:
                     "point_de_collecte_ou_de_reprise_des_dechets": [True],
                 }
             ),
-            max_pds_idx=123,
+            displayedpropositionservice_max_id=123,
         )
 
         kwargs = {"ti": mock}
@@ -605,20 +605,18 @@ def mock_ti(
                     "point_de_collecte_ou_de_reprise_des_dechets": [True, True],
                 }
             ),
-            "config": db_mapping_config,
         },
         "load_data_from_postgresql": {
-            "max_pds_idx": 1,
-            "actions": df_actions_from_db,
-            "acteur_services": df_acteur_services_from_db,
-            "sous_categories": df_sous_categories_from_db,
-            "sources": df_sources_from_db,
-            "acteurtype": df_acteurtype_from_db,
-            "labels": df_labels_from_db,
-            "displayedacteurs": df_displayed_acteurs_from_db,
+            "displayedpropositionservice_max_id": 1,
         },
+        "read_displayedacteur": df_displayed_acteurs_from_db,
+        "read_action": df_actions_from_db,
+        "read_acteurtype": df_acteurtype_from_db,
+        "read_acteurservice": df_acteur_services_from_db,
+        "read_source": df_sources_from_db,
+        "read_souscategorieobjet": df_sous_categories_from_db,
+        "read_labelqualite": df_labels_from_db,
         "create_proposition_services": {"df": df_proposition_services},
-        "create_proposition_"
         "services_sous_categories": df_proposition_services_sous_categories,
     }[task_ids]
     return mock
@@ -649,8 +647,8 @@ def mock_config():
             "site_web": "url",
             "email": "email",
             "perimetre_dintervention": "",
-            "longitudewgs84": "location",
-            "latitudewgs84": "location",
+            "longitudewgs84": "longitude",
+            "latitudewgs84": "latitude",
             "horaires_douverture": "horaires_description",
             "consignes_dacces": "commentaires",
         },
@@ -661,12 +659,19 @@ def mock_config():
 class TestCreateActorSeriesTransformations:
 
     @pytest.mark.parametrize(
-        "public_accueilli,expected_public_accueilli",
+        "public_accueilli, expected_public_accueilli, expected_statut",
         [
-            (None, None),
-            ("fake", None),
-            ("Particuliers", "Particuliers"),
-            ("PARTICULIERS", "Particuliers"),
+            (None, None, "ACTIF"),
+            ("fake", None, "ACTIF"),
+            ("PARTICULIERS", "Particuliers", "ACTIF"),
+            ("Particuliers", "Particuliers", "ACTIF"),
+            (
+                "Particuliers et professionnels",
+                "Particuliers et professionnels",
+                "ACTIF",
+            ),
+            ("PROFESSIONNELS", "Professionnels", "SUPPRIME"),
+            ("Professionnels", "Professionnels", "SUPPRIME"),
         ],
     )
     def test_create_actor_public_accueilli(
@@ -675,14 +680,13 @@ class TestCreateActorSeriesTransformations:
         df_empty_displayed_acteurs_from_db,
         public_accueilli,
         expected_public_accueilli,
+        expected_statut,
     ):
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "load_data_from_postgresql": {
-                "sources": df_sources_from_db,
-                "acteurtype": None,
-                "displayedacteurs": df_empty_displayed_acteurs_from_db,
-            },
+            "read_displayedacteur": df_empty_displayed_acteurs_from_db,
+            "read_acteurtype": None,
+            "read_source": df_sources_from_db,
             "fetch_data_from_api": pd.DataFrame(
                 {
                     "nom_de_lorganisme": ["Eco1"],
@@ -719,8 +723,8 @@ class TestCreateActorSeriesTransformations:
             },
         }
         result = create_actors(**kwargs)
-
         assert result["df"]["public_accueilli"][0] == expected_public_accueilli
+        assert result["df"]["statut"][0] == expected_statut
 
     @pytest.mark.parametrize(
         "uniquement_sur_rdv,expected_uniquement_sur_rdv",
@@ -728,6 +732,15 @@ class TestCreateActorSeriesTransformations:
             (None, False),
             (False, False),
             (True, True),
+            ("oui", True),
+            ("Oui", True),
+            (" Oui ", True),
+            ("non", False),
+            ("NON", False),
+            (" NON ", False),
+            ("", False),
+            (" ", False),
+            ("fake", False),
         ],
     )
     def test_create_actor_uniquement_sur_rdv(
@@ -739,11 +752,9 @@ class TestCreateActorSeriesTransformations:
     ):
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "load_data_from_postgresql": {
-                "sources": df_sources_from_db,
-                "acteurtype": None,
-                "displayedacteurs": df_empty_displayed_acteurs_from_db,
-            },
+            "read_displayedacteur": df_empty_displayed_acteurs_from_db,
+            "read_acteurtype": None,
+            "read_source": df_sources_from_db,
             "fetch_data_from_api": pd.DataFrame(
                 {
                     "nom_de_lorganisme": ["Eco1"],
@@ -803,11 +814,9 @@ class TestCreateActorSeriesTransformations:
     ):
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "load_data_from_postgresql": {
-                "sources": df_sources_from_db,
-                "acteurtype": None,
-                "displayedacteurs": df_empty_displayed_acteurs_from_db,
-            },
+            "read_displayedacteur": df_empty_displayed_acteurs_from_db,
+            "read_acteurtype": None,
+            "read_source": df_sources_from_db,
             "fetch_data_from_api": pd.DataFrame(
                 {
                     "nom_de_lorganisme": ["Eco1"],
@@ -851,8 +860,16 @@ class TestCreateActorSeriesTransformations:
         "exclusivite_de_reprisereparation, expected_exclusivite_de_reprisereparation",
         [
             (None, False),
-            ("non", False),
+            (False, False),
+            (True, True),
             ("oui", True),
+            ("Oui", True),
+            (" Oui ", True),
+            ("non", False),
+            ("NON", False),
+            (" NON ", False),
+            ("", False),
+            (" ", False),
             ("fake", False),
         ],
     )
@@ -865,11 +882,9 @@ class TestCreateActorSeriesTransformations:
     ):
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "load_data_from_postgresql": {
-                "sources": df_sources_from_db,
-                "acteurtype": None,
-                "displayedacteurs": df_empty_displayed_acteurs_from_db,
-            },
+            "read_displayedacteur": df_empty_displayed_acteurs_from_db,
+            "read_acteurtype": None,
+            "read_source": df_sources_from_db,
             "fetch_data_from_api": pd.DataFrame(
                 {
                     "nom_de_lorganisme": ["Eco1"],
@@ -923,9 +938,7 @@ class TestCreateActeurServices:
 
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "load_data_from_postgresql": {
-                "acteur_services": df_acteur_services_from_db,
-            },
+            "read_acteurservice": df_acteur_services_from_db,
             "create_actors": {
                 "df": pd.DataFrame(
                     {
@@ -954,9 +967,7 @@ class TestCreateActeurServices:
 
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "load_data_from_postgresql": {
-                "acteur_services": df_acteur_services_from_db,
-            },
+            "read_acteurservice": df_acteur_services_from_db,
             "create_actors": {
                 "df": pd.DataFrame(
                     {
@@ -996,9 +1007,7 @@ class TestCreateActeurServices:
 
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "load_data_from_postgresql": {
-                "acteur_services": df_acteur_services_from_db,
-            },
+            "read_acteurservice": df_acteur_services_from_db,
             "create_actors": {
                 "df": pd.DataFrame(
                     {
@@ -1222,12 +1231,7 @@ class TestCreatePropositionServicesSousCategories:
         mock = MagicMock()
 
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "create_actors": {
-                "config": db_mapping_config,
-            },
-            "load_data_from_postgresql": {
-                "sous_categories": df_sous_categories_from_db,
-            },
+            "read_souscategorieobjet": df_sous_categories_from_db,
             "create_proposition_services": {
                 "df": pd.DataFrame(
                     {
@@ -1253,12 +1257,7 @@ class TestCreatePropositionServicesSousCategories:
         mock = MagicMock()
 
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "create_actors": {
-                "config": db_mapping_config,
-            },
-            "load_data_from_postgresql": {
-                "sous_categories": df_sous_categories_from_db,
-            },
+            "read_souscategorieobjet": df_sous_categories_from_db,
             "create_proposition_services": {
                 "df": pd.DataFrame(
                     {
@@ -1301,7 +1300,6 @@ def test_create_actors(mock_ti, mock_config):
     assert metadata["number_of_duplicates"] == 0
     assert metadata["added_rows"] == len(df_result)
     assert "siren" not in df_result.columns
-    assert "sous_categories" in result["config"]
 
 
 @pytest.mark.parametrize(
@@ -1377,11 +1375,9 @@ def test_acteur_to_delete(
 ):
     mock = MagicMock()
     mock.xcom_pull.side_effect = lambda task_ids="": {
-        "load_data_from_postgresql": {
-            "sources": df_sources_from_db,
-            "acteurtype": None,
-            "displayedacteurs": df_displatedacteurs,
-        },
+        "read_displayedacteur": df_displatedacteurs,
+        "read_acteurtype": None,
+        "read_source": df_sources_from_db,
         "fetch_data_from_api": pd.DataFrame(
             {
                 "id_point_apport_ou_reparation": ["1"],
@@ -1411,11 +1407,9 @@ def test_create_reparacteurs(
 ):
     mock = MagicMock()
     mock.xcom_pull.side_effect = lambda task_ids="": {
-        "load_data_from_postgresql": {
-            "sources": df_sources_from_db,
-            "acteurtype": df_acteurtype_from_db,
-            "displayedacteurs": df_empty_displayed_acteurs_from_db,
-        },
+        "read_displayedacteur": df_empty_displayed_acteurs_from_db,
+        "read_acteurtype": df_acteurtype_from_db,
+        "read_source": df_sources_from_db,
         "fetch_data_from_api": pd.DataFrame(
             {
                 "reparactor_description": ["Ceci est une description du réparacteur."],
@@ -1479,7 +1473,6 @@ def test_create_reparacteurs(
     assert metadata["number_of_duplicates"] == 0
     assert metadata["added_rows"] == len(df_result)
     assert "siren" not in df_result.columns
-    assert "sous_categories" in result["config"]
     assert "event" in df_result.columns
 
 
@@ -1509,7 +1502,7 @@ class TestCeateLabels:
                     "acteur_type_id": [202, 202],
                 }
             ),
-            max_pds_idx=123,
+            displayedpropositionservice_max_id=123,
         )
 
         kwargs = {"ti": mock}
@@ -1549,7 +1542,7 @@ class TestCeateLabels:
                     "acteur_type_id": [201, 202],
                 }
             ),
-            max_pds_idx=123,
+            displayedpropositionservice_max_id=123,
         )
 
         kwargs = {"ti": mock}
@@ -1595,7 +1588,7 @@ class TestCeateLabels:
                     "acteur_type_id": [202, 202],
                 }
             ),
-            max_pds_idx=123,
+            displayedpropositionservice_max_id=123,
         )
 
         kwargs = {"ti": mock}
@@ -1613,6 +1606,59 @@ class TestCeateLabels:
         pd.testing.assert_frame_equal(
             df, expected_dataframe_with_bonus_reparation_label
         )
+
+
+class TestActorsLocation:
+    @pytest.mark.parametrize(
+        "latitude, longitude",
+        [
+            (48.8566, 2.3522),
+            ("48.8566", "2.3522"),
+            ("48,8566", "2,3522"),
+        ],
+    )
+    def test_create_actors_location(
+        self,
+        df_sources_from_db,
+        df_acteurtype_from_db,
+        df_empty_displayed_acteurs_from_db,
+        latitude,
+        longitude,
+    ):
+        mock = MagicMock()
+        mock.xcom_pull.side_effect = lambda task_ids="": {
+            "read_displayedacteur": df_empty_displayed_acteurs_from_db,
+            "read_acteurtype": df_acteurtype_from_db,
+            "read_source": df_sources_from_db,
+            "fetch_data_from_api": pd.DataFrame(
+                {
+                    "id_point_apport_ou_reparation": ["1"],
+                    "nom_de_lorganisme": ["Actor 1"],
+                    "ecoorganisme": ["source1"],
+                    "source_id": ["source_id1"],
+                    "latitudewgs84": [latitude],
+                    "longitudewgs84": [longitude],
+                }
+            ),
+        }[task_ids]
+
+        kwargs = {
+            "ti": mock,
+            "params": {
+                "column_mapping": {
+                    "id_point_apport_ou_reparation": "identifiant_externe",
+                    "nom_de_lorganisme": "nom",
+                    "latitudewgs84": "latitude",
+                    "longitudewgs84": "longitude",
+                },
+            },
+        }
+        result = create_actors(**kwargs)
+        df_result = result["df"]
+
+        expected_location = wkb.dumps(Point(2.3522, 48.8566)).hex()
+
+        assert df_result["location"].iloc[0] == expected_location
 
 
 class TestMergeDuplicates:

@@ -3,7 +3,6 @@ import math
 import re
 from datetime import datetime
 
-import numpy as np
 import pandas as pd
 
 
@@ -110,8 +109,6 @@ def process_reparacteurs(df, df_sources, df_acteurtype):
     )
     # TODO : on pourrait gérer en configuration les colonne qui sont pareil pour tous
     df["label_code"] = "reparacteur"
-    df["latitude"] = df["latitude"].apply(clean_float_from_fr_str)
-    df["longitude"] = df["longitude"].apply(clean_float_from_fr_str)
     df["type_de_point_de_collecte"] = None
     df["acteur_type_id"] = transform_acteur_type_id(
         "artisan, commerce indépendant", df_acteurtype=df_acteurtype
@@ -134,11 +131,6 @@ def process_actors(df):
         .str.replace("_-", "_")
         .str.replace("__", "_")
     )
-    df = df.rename(columns={"latitudewgs84": "latitude", "longitudewgs84": "longitude"})
-    if "latitude" in df.columns and "longitude" in df.columns:
-        df = df.dropna(subset=["latitude", "longitude"])
-        df["latitude"] = df["latitude"].astype(float).replace({np.nan: None})
-        df["longitude"] = df["longitude"].astype(float).replace({np.nan: None})
     if "service_a_domicile" in df.columns:
         df.loc[
             df["service_a_domicile"] == "service à domicile uniquement", "statut"
@@ -148,11 +140,15 @@ def process_actors(df):
     return df
 
 
-def clean_float_from_fr_str(value):
-    if isinstance(value, str):
-        value = re.sub(r",$", "", value).replace(",", ".")
+def parse_float(value):
+    if isinstance(value, float):
+        return None if math.isnan(value) else value
+    if not isinstance(value, str):
+        return None
+    value = re.sub(r",$", "", value).replace(",", ".")
     try:
-        return float(value)
+        f = float(value)
+        return None if math.isnan(f) else f
     except ValueError:
         return None
 

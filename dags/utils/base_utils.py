@@ -95,12 +95,7 @@ def extract_details(row, col="adresse_format_ban"):
 
 
 def transform_location(longitude, latitude):
-    point = Point(longitude, latitude)
-
-    transformed_location_binary = wkb.dumps(point)
-    transformed_location_hex = transformed_location_binary.hex()
-
-    return transformed_location_hex
+    return wkb.dumps(Point(longitude, latitude)).hex()
 
 
 def send_batch_to_api(batch):

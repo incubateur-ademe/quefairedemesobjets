@@ -75,7 +75,7 @@ def handle_update_actor_event(df_actors, dag_run_id):
     ]
 
     current_time = datetime.now().astimezone().isoformat(timespec="microseconds")
-    df_actors = df_actors[df_actors["row_status"] == shared_constants.TO_INSERT]
+    df_actors = df_actors[df_actors["status"] == shared_constants.TO_INSERT]
     df_actors = df_actors.apply(mapping_utils.replace_with_selected_candidat, axis=1)
     df_actors[["adresse", "code_postal", "ville"]] = df_actors.apply(
         lambda row: base_utils.extract_details(row, col="adresse_candidat"), axis=1
