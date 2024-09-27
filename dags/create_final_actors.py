@@ -558,10 +558,13 @@ read_retry_interval = timedelta(minutes=2)
 
 dag = DAG(
     dag_id="compute_carte_acteur",
-    dag_display_name="Rafraichir les acteurs afichés sur la carte",
+    dag_display_name="Rafraichir les acteurs affichés sur la carte",
     default_args=default_args,
     description=(
-        "DAG for applying correction on normalized actors and propositionservice"
+        "Ce DAG récupère les données des acteurs et des propositions de services et"
+        " applique les corrections. De plus, il déduplique les acteurs déclarés par"
+        " plusieurs sources en cumulant leur services, sources et propositions"
+        " services."
     ),
     schedule=None,
 )
