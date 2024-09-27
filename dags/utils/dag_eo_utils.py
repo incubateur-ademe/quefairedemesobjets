@@ -92,12 +92,12 @@ def create_proposition_services_sous_categories(**kwargs):
             str(row["sous_categories"]) if row["sous_categories"] else ""
         )
         products = [
-            sous_categorie
+            sous_categorie.strip().lower()
             for sous_categorie in sous_categories_value.split("|")
-            if sous_categorie
+            if sous_categorie.strip()
         ]
         for product in set(products):
-            product_key = product.strip().lower()
+            product_key = product
             if product_key in sous_categories:
                 sous_categories_value = sous_categories[product_key]
                 if isinstance(sous_categories_value, list):
