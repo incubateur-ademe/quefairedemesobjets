@@ -2,8 +2,7 @@ import unittest
 
 import numpy as np
 import pandas as pd
-
-from dags.utils import mapping_utils
+from utils import mapping_utils
 
 
 class TestDataTransformations(unittest.TestCase):

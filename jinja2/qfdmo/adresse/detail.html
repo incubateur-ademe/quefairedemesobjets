@@ -374,12 +374,12 @@
 
 <div class="qfdmo-flex fr-px-1v">
     <a class="fr-my-1w fr-btn fr-btn--tertiary qfdmo-whitespace-nowrap qfdmo-w-full qfdmo-justify-center"
-       href="https://tally.so/r/3xMqd9?Nom={{adresse.nom}}&Ville={{adresse.ville}}&Adresse={{adresse.adresse}}"
-       target="_blank"
-       rel="noreferrer"
-       title="Proposer une modification - Nouvelle fenêtre"
-       data-action="click -> analytics#captureInteractionWithSolutionDetails"
-    >
+        href="{{ url('qfdmo:update-suggestion-form')}}?Nom={{adresse.nom}}&Ville={{adresse.ville}}&Adresse={{adresse.adresse}}"
+        target="_blank"
+        rel="noreferrer"
+        title="Proposer une modification - Nouvelle fenêtre"
+        data-action="click -> analytics#captureInteractionWithSolutionDetails"
+        >
         Proposer une modification
     </a>
 </div>

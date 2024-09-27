@@ -1,12 +1,8 @@
 from datetime import datetime
-from importlib import import_module
-from pathlib import Path
 
+import utils.eo_operators as eo_operators
 from airflow import DAG
 
-env = Path(__file__).parent.name
-utils = import_module(f"{env}.utils.utils")
-eo_operators = import_module(f"{env}.utils.eo_operators")
 default_args = {
     "owner": "airflow",
     "depends_on_past": False,
@@ -17,7 +13,8 @@ default_args = {
 }
 
 with DAG(
-    utils.get_dag_name(__file__, "cma"),
+    dag_id="like-eo-from-api-cma",
+    dag_display_name="Téléchargement de la source CMA",
     default_args=default_args,
     description=(
         "A pipeline to fetch, process, and load to validate data into postgresql"
@@ -39,8 +36,8 @@ with DAG(
             "email": "email",
             "phone": "telephone",
             "siret": "siret",
-            "longitude": "location",
-            "latitude": "location",
+            "longitude": "longitude",
+            "latitude": "latitude",
             "id": "identifiant_externe",
             "is_enabled": "statut",
             "other_info": "commentaires",

@@ -1,21 +1,14 @@
 import json
 import logging
 from datetime import datetime
-from importlib import import_module
-from pathlib import Path
 from typing import Union
 
 import numpy as np
 import pandas as pd
 from airflow.providers.postgres.hooks.postgres import PostgresHook
+from utils import api_utils, base_utils, mapping_utils, shared_constants
 
 logger = logging.getLogger(__name__)
-
-env = Path(__file__).parent.parent.name
-
-utils = import_module(f"{env}.utils.utils")
-api_utils = import_module(f"{env}.utils.api_utils")
-mapping_utils = import_module(f"{env}.utils.mapping_utils")
 
 
 def fetch_data_from_api(**kwargs):
@@ -261,9 +254,7 @@ def serialize_to_json(**kwargs):
 
 
 def load_data_from_postgresql(**kwargs):
-    pg_hook = PostgresHook(
-        postgres_conn_id=utils.get_db_conn_id(__file__, parent_of_parent=True)
-    )
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
     engine = pg_hook.get_sqlalchemy_engine()
 
     df_acteurtype = pd.read_sql_table("qfdmo_acteurtype", engine)
@@ -293,9 +284,7 @@ def load_data_from_postgresql(**kwargs):
 
 
 def load_data_from_displayedactor_by_source(source_id):
-    pg_hook = PostgresHook(
-        postgres_conn_id=utils.get_db_conn_id(__file__, parent_of_parent=True)
-    )
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
     engine = pg_hook.get_sqlalchemy_engine()
 
     df_displayedactors = pd.read_sql_query(
@@ -309,9 +298,7 @@ def load_data_from_displayedactor_by_source(source_id):
 
 
 def insert_dagrun_and_process_df(df, metadata, dag_id, run_id):
-    pg_hook = PostgresHook(
-        postgres_conn_id=utils.get_db_conn_id(__file__, parent_of_parent=True)
-    )
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
     engine = pg_hook.get_sqlalchemy_engine()
     current_date = datetime.now()
 
@@ -336,7 +323,8 @@ def insert_dagrun_and_process_df(df, metadata, dag_id, run_id):
 
     df["change_type"] = df["event"]
     df["dag_run_id"] = dag_run_id
-    df[["row_updates", "dag_run_id", "change_type"]].to_sql(
+    df["status"] = shared_constants.TO_VALIDATE
+    df[["row_updates", "dag_run_id", "change_type", "status"]].to_sql(
         "qfdmo_dagrunchange",
         engine,
         if_exists="append",
@@ -431,7 +419,7 @@ def create_actors(**kwargs):
     df_sources = data_dict["sources"]
     df_acteurtype = data_dict["acteurtype"]
     df_displayedacteurs = data_dict["displayedacteurs"]
-    config = utils.get_mapping_config()
+    config = base_utils.get_mapping_config()
     params = kwargs["params"]
     reparacteurs = params.get("reparacteurs", False)
     column_mapping = params.get("column_mapping", {})
@@ -456,6 +444,10 @@ def create_actors(**kwargs):
     else:
         df = mapping_utils.process_actors(df)
 
+    # By default, all actors are active
+    # TODO : manage constant as an enum in config
+    df["statut"] = "ACTIF"
+
     for old_col, new_col in column_mapping.items():
         if old_col in df.columns and new_col:
             if old_col == "id":
@@ -468,27 +460,13 @@ def create_actors(**kwargs):
                         x, df_acteurtype=df_acteurtype
                     )
                 )
-            # TODO : je pense qu'on passe 2 fois dans cette condition, une fois pour
-            # la latitude et une fois pour la longitude
-            elif old_col in [
-                "latitude",
-                "longitude",
-                "longitudewgs84",
-                "latitudewgs84",
-            ]:
-                df[new_col] = df.apply(
-                    lambda row: utils.transform_location(
-                        row["longitude"], row["latitude"]
-                    ),
-                    axis=1,
-                )
             elif old_col == "ecoorganisme":
                 df[new_col] = df[old_col].apply(
                     lambda x: mapping_utils.get_id_from_code(x, df_sources)
                 )
             elif old_col == "adresse_format_ban":
                 df[["adresse", "code_postal", "ville"]] = df.apply(
-                    utils.get_address, axis=1
+                    base_utils.get_address, axis=1
                 )
             elif old_col == "public_accueilli":
                 df[new_col] = _force_column_value(
@@ -501,6 +479,9 @@ def create_actors(**kwargs):
                         "particuliers": "Particuliers",
                         "aucun": "Aucun",
                     },
+                )
+                df["statut"] = df["public_accueilli"].apply(
+                    lambda x: "SUPPRIME" if x == "Professionnels" else "ACTIF"
                 )
             elif old_col == "uniquement_sur_rdv":
                 df[new_col] = df[old_col].astype(bool)
@@ -519,6 +500,16 @@ def create_actors(**kwargs):
             else:
                 df[new_col] = df[old_col]
 
+    if "latitude" in df.columns and "longitude" in df.columns:
+        df["latitude"] = df["latitude"].apply(mapping_utils.parse_float)
+        df["longitude"] = df["longitude"].apply(mapping_utils.parse_float)
+        df["location"] = df.apply(
+            lambda row: base_utils.transform_location(
+                row["longitude"], row["latitude"]
+            ),
+            axis=1,
+        )
+
     df["identifiant_unique"] = df.apply(
         lambda x: mapping_utils.create_identifiant_unique(
             x, source_name="CMA_REPARACTEUR" if reparacteurs else None
@@ -526,7 +517,6 @@ def create_actors(**kwargs):
         axis=1,
     )
     df["cree_le"] = datetime.now()
-    df["statut"] = "ACTIF"
     df["modifie_le"] = df["cree_le"]
     if "siret" in df.columns:
         df["siret"] = df["siret"].apply(mapping_utils.process_siret)

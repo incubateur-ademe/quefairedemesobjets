@@ -51,6 +51,19 @@
                 >
                     {{ form.bounding_box }}
                     <div id="map" class="qfdmo-absolute qfdmo-inset-0">
+                        {% if is_carte(request) %}
+                            <a class="qfdmo-flex lg:qfdmo-hidden
+                                qfdmo-bg-white
+                                fr-mb-1w fr-btn fr-btn--icon-left fr-icon-epingle-plus fr-btn--tertiary qfdmo-whitespace-nowrap qfdmo-w-auto qfdmo-justify-center
+                                qfdmo-absolute qfdmo-left-2w qfdmo-right-2w qfdmo-bottom-3w qfdmo-z-[1000]"
+                                href="{{ url('qfdmo:address-suggestion-form') }}"
+                                target="_blank"
+                                rel="noreferrer"
+                                aria-label="Proposer une adresse - Nouvelle fenêtre"
+                            >
+                                Proposer une adresse
+                            </a>
+                        {% endif %}
                     </div>
                     <button
                         data-map-target="searchInZoneButton"
@@ -80,11 +93,12 @@
                                 Filtres
                             </button>
 
-                            <a class="fr-mb-1w fr-btn fr-btn--tertiary qfdmo-whitespace-nowrap qfdmo-w-full qfdmo-flex qfdmo-justify-center"
-                               href="https://tally.so/r/wzy9ZZ"
-                               target="_blank"
-                               rel="noreferrer"
-                               aria-label="Proposer une adresse - Nouvelle fenêtre"
+                            <a class="fr-mb-1w fr-btn fr-btn--icon-left fr-icon-epingle-plus fr-btn--tertiary
+                                qfdmo-whitespace-nowrap qfdmo-w-full qfdmo-flex qfdmo-justify-center"
+                                href="{{ url('qfdmo:address-suggestion-form') }}"
+                                target="_blank"
+                                rel="noreferrer"
+                                aria-label="Proposer une adresse - Nouvelle fenêtre"
                             >
                                 Proposer une adresse
                             </a>
@@ -143,10 +157,10 @@
         {% if not is_carte(request) %}
             <div class="qfdmo-px-2w sm:qfdmo-px-0 qfdmo-duration-300 sm:qfdmo-h-fit sm:qfdmo-mr-1w qfdmo-flex qfdmo-flex-row-reverse" data-search-solution-form-target="proposeAddressPanel">
                 <a class="fr-my-1w fr-btn fr-btn--tertiary qfdmo-whitespace-nowrap qfdmo-w-full sm:qfdmo-w-max qfdmo-flex qfdmo-justify-center"
-                   href="https://tally.so/r/wzy9ZZ"
-                   target="_blank"
-                   rel="noreferrer"
-                   aria-label="Proposer une adresse - Nouvelle fenêtre"
+                    href="{{ url('qfdmo:address-suggestion-form') }}"
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="Proposer une adresse - Nouvelle fenêtre"
                 >
                     Proposer une adresse
                 </a>

@@ -2,8 +2,9 @@ from unittest.mock import MagicMock
 
 import pandas as pd
 import pytest
-
-from dags.utils.dag_eo_utils import (
+from shapely import wkb
+from shapely.geometry import Point
+from utils.dag_eo_utils import (
     create_acteur_services,
     create_actors,
     create_labels,
@@ -650,8 +651,8 @@ def mock_config():
             "site_web": "url",
             "email": "email",
             "perimetre_dintervention": "",
-            "longitudewgs84": "location",
-            "latitudewgs84": "location",
+            "longitudewgs84": "longitude",
+            "latitudewgs84": "latitude",
             "horaires_douverture": "horaires_description",
             "consignes_dacces": "commentaires",
         },
@@ -662,12 +663,19 @@ def mock_config():
 class TestCreateActorSeriesTransformations:
 
     @pytest.mark.parametrize(
-        "public_accueilli,expected_public_accueilli",
+        "public_accueilli, expected_public_accueilli, expected_statut",
         [
-            (None, None),
-            ("fake", None),
-            ("Particuliers", "Particuliers"),
-            ("PARTICULIERS", "Particuliers"),
+            (None, None, "ACTIF"),
+            ("fake", None, "ACTIF"),
+            ("PARTICULIERS", "Particuliers", "ACTIF"),
+            ("Particuliers", "Particuliers", "ACTIF"),
+            (
+                "Particuliers et professionnels",
+                "Particuliers et professionnels",
+                "ACTIF",
+            ),
+            ("PROFESSIONNELS", "Professionnels", "SUPPRIME"),
+            ("Professionnels", "Professionnels", "SUPPRIME"),
         ],
     )
     def test_create_actor_public_accueilli(
@@ -676,6 +684,7 @@ class TestCreateActorSeriesTransformations:
         df_empty_displayed_acteurs_from_db,
         public_accueilli,
         expected_public_accueilli,
+        expected_statut,
     ):
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
@@ -720,8 +729,8 @@ class TestCreateActorSeriesTransformations:
             },
         }
         result = create_actors(**kwargs)
-
         assert result["df"]["public_accueilli"][0] == expected_public_accueilli
+        assert result["df"]["statut"][0] == expected_statut
 
     @pytest.mark.parametrize(
         "uniquement_sur_rdv,expected_uniquement_sur_rdv",
@@ -1614,6 +1623,61 @@ class TestCeateLabels:
         pd.testing.assert_frame_equal(
             df, expected_dataframe_with_bonus_reparation_label
         )
+
+
+class TestActorsLocation:
+    @pytest.mark.parametrize(
+        "latitude, longitude",
+        [
+            (48.8566, 2.3522),
+            ("48.8566", "2.3522"),
+            ("48,8566", "2,3522"),
+        ],
+    )
+    def test_create_actors_location(
+        self,
+        df_sources_from_db,
+        df_acteurtype_from_db,
+        df_empty_displayed_acteurs_from_db,
+        latitude,
+        longitude,
+    ):
+        mock = MagicMock()
+        mock.xcom_pull.side_effect = lambda task_ids="": {
+            "load_data_from_postgresql": {
+                "sources": df_sources_from_db,
+                "acteurtype": df_acteurtype_from_db,
+                "displayedacteurs": df_empty_displayed_acteurs_from_db,
+            },
+            "fetch_data_from_api": pd.DataFrame(
+                {
+                    "id_point_apport_ou_reparation": ["1"],
+                    "nom_de_lorganisme": ["Actor 1"],
+                    "ecoorganisme": ["source1"],
+                    "source_id": ["source_id1"],
+                    "latitudewgs84": [latitude],
+                    "longitudewgs84": [longitude],
+                }
+            ),
+        }[task_ids]
+
+        kwargs = {
+            "ti": mock,
+            "params": {
+                "column_mapping": {
+                    "id_point_apport_ou_reparation": "identifiant_externe",
+                    "nom_de_lorganisme": "nom",
+                    "latitudewgs84": "latitude",
+                    "longitudewgs84": "longitude",
+                },
+            },
+        }
+        result = create_actors(**kwargs)
+        df_result = result["df"]
+
+        expected_location = wkb.dumps(Point(2.3522, 48.8566)).hex()
+
+        assert df_result["location"].iloc[0] == expected_location
 
 
 class TestMergeDuplicates:

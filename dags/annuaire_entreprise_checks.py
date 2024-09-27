@@ -1,20 +1,15 @@
 import json
 from datetime import datetime
-from importlib import import_module
-from pathlib import Path
 
 import pandas as pd
+import utils.base_utils as base_utils
+import utils.dag_eo_utils as dag_eo_utils
+import utils.mapping_utils as mapping_utils
+import utils.siret_control_utils as siret_control_utils
 from airflow import DAG
 from airflow.models.param import Param
 from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
-
-env = Path(__file__).parent.name
-utils = import_module(f"{env}.utils.utils")
-dag_eo_utils = import_module(f"{env}.utils.dag_eo_utils")
-api_utils = import_module(f"{env}.utils.api_utils")
-mapping_utils = import_module(f"{env}.utils.mapping_utils")
-siret_control_utils = import_module(f"{env}.utils.siret_control_utils")
 
 pd.set_option("display.max_columns", None)
 
@@ -28,7 +23,8 @@ default_args = {
 }
 
 dag = DAG(
-    utils.get_dag_name(__file__, "annuaire_entreprise_checks"),
+    dag_id="annuaire_entreprise_checks",
+    dag_display_name="Vérification des données avec l'API Annuaire Entreprise",
     default_args=default_args,
     params={
         "limit": Param(0, type="integer", description="Limit for data processed"),
@@ -50,7 +46,7 @@ dag = DAG(
 
 def fetch_and_parse_data(**context):
     limit = context["params"]["limit"]
-    pg_hook = PostgresHook(postgres_conn_id=utils.get_db_conn_id(__file__))
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
     engine = pg_hook.get_sqlalchemy_engine()
     active_actors_query = """
         SELECT
@@ -129,7 +125,7 @@ def check_actor_with_adresse(**kwargs):
     df["naf_code"] = df["source_code"].map(source_code_naf)
 
     df["ae_result"] = df.apply(
-        lambda x: utils.check_siret_using_annuaire_entreprise(
+        lambda x: base_utils.check_siret_using_annuaire_entreprise(
             x, query_col="full_adresse", naf_col="naf_code", adresse_query_flag=True
         ),
         axis=1,
@@ -154,7 +150,7 @@ def check_actor_with_siret(**kwargs):
     df_acteur = data["closed_ok_siret"]
     df_acteur["full_adresse"] = mapping_utils.create_full_adresse(df_acteur)
     df_acteur["ae_result"] = df_acteur.apply(
-        utils.check_siret_using_annuaire_entreprise, axis=1
+        base_utils.check_siret_using_annuaire_entreprise, axis=1
     )
     return df_acteur[
         [
@@ -175,7 +171,7 @@ def enrich_row(row):
         latitude = item.get("latitude_candidat")
         longitude = item.get("longitude_candidat")
         if latitude is not None and longitude is not None:
-            location = utils.get_location(latitude, longitude)
+            location = base_utils.get_location(latitude, longitude)
             if location:
                 item["latitude_candidat"] = location["latitude"]
                 item["longitude_candidat"] = location["longitude"]
@@ -286,9 +282,6 @@ def serialize_to_json(**kwargs):
     columns = ["identifiant_unique", "statut", "ae_result", "admin_link"]
     serialized_data = {}
     for key, df in data.items():
-        df["admin_link"] = df["identifiant_unique"].apply(
-            lambda x: mapping_utils.construct_url(x, env)
-        )
         df["event"] = "UPDATE_ACTOR"
         df["row_updates"] = df[columns].apply(
             lambda row: json.dumps(row.to_dict(), default=str), axis=1

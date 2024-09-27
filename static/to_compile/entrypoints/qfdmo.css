@@ -159,6 +159,16 @@ Style the autocomplete container:
   mask-image: url("svg/money-euro-circle-line.svg");
 }
 
+.fr-icon-epingle-plus::before,
+.fr-icon-epingle-plus::after {
+    -webkit-mask-image: url("svg/epingle-plus.svg");
+    mask-image: url("svg/epingle-plus.svg");
+}
+
+.fr-btn--icon-left.fr-btn[target="_blank"]::after {
+    display: none;
+}
+
 /*
  * Failed to load some tailwind classes with parcel
  */

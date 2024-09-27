@@ -324,3 +324,16 @@ AIRFLOW_WEBSERVER_REFRESHACTEUR_URL = decouple.config(
 
 IMPORT_EXPORT_TMP_STORAGE_CLASS = "import_export.tmp_storages.MediaStorage"
 IMPORT_FORMATS = [CSV, XLSX, XLS]
+ADDRESS_SUGGESTION_FORM = decouple.config(
+    "ADDRESS_SUGGESTION_FORM", default="https://tally.so/r/wzy9ZZ", cast=str
+)
+UPDATE_SUGGESTION_FORM = decouple.config(
+    "UPDATE_SUGGESTION_FORM", default="https://tally.so/r/3xMqd9", cast=str
+)
+CONTACT_FORM = decouple.config(
+    "CONTACT_FORM", default="https://tally.so/r/wzME61", cast=str
+)
+
+FEEDBACK_FORM = decouple.config(
+    "FEEDBACK_FORM", default="https://tally.so/r/3EW88q", cast=str
+)
