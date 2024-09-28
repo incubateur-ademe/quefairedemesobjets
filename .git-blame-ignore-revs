@@ -6,3 +6,5 @@
 
 # Run pre-commit hooks on all codebase - 27 september 2024
 40baf54727d624c8feac553caea48cc3306fd9cf
+# Add djade and run on all files - 28 September 2024
+830e5434da2b61173225c3f29ba63d3126b18b90
