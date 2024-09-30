@@ -43,6 +43,7 @@ run-airflow:
 
 .PHONY: run-django
 run-django:
+	docker compose --profile lvao up -d
 	rm -rf .parcel-cache
 	honcho start -f Procfile.dev
 
