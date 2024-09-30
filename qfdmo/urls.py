@@ -19,22 +19,30 @@ urlpatterns = [
     path("connexion", LoginView.as_view(), name="login"),
     path(
         "donnez-votre-avis",
-        RedirectView.as_view(url=settings.FEEDBACK_FORM, query_string=True),
+        RedirectView.as_view(
+            url=settings.FEEDBACK_FORM, query_string=True, permanent=True
+        ),
         name="feedback-form",
     ),
     path(
         "proposer-une-adresse",
-        RedirectView.as_view(url=settings.ADDRESS_SUGGESTION_FORM, query_string=True),
+        RedirectView.as_view(
+            url=settings.ADDRESS_SUGGESTION_FORM, query_string=True, permanent=True
+        ),
         name="address-suggestion-form",
     ),
     path(
         "nous-contacter",
-        RedirectView.as_view(url=settings.CONTACT_FORM, query_string=True),
+        RedirectView.as_view(
+            url=settings.CONTACT_FORM, query_string=True, permanent=True
+        ),
         name="contact-form",
     ),
     path(
         "proposer-une-modification",
-        RedirectView.as_view(url=settings.UPDATE_SUGGESTION_FORM, query_string=True),
+        RedirectView.as_view(
+            url=settings.UPDATE_SUGGESTION_FORM, query_string=True, permanent=True
+        ),
         name="update-suggestion-form",
     ),
     path(
