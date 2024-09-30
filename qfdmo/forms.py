@@ -3,9 +3,11 @@ from typing import List, cast
 from django import forms
 from django.core.cache import cache
 from django.http import HttpRequest
+from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 
 from qfdmo.geo_api import all_epci_codes, fetch_epci_codes
+from qfdmo.models import DagRun, DagRunStatus, SousCategorieObjet
 from qfdmo.models.action import (
     Action,
     GroupeAction,
@@ -13,14 +15,12 @@ from qfdmo.models.action import (
     get_directions,
     get_ordered_directions,
 )
-from qfdmo.models import DagRun, DagRunStatus, SousCategorieObjet
-
 from qfdmo.widgets import (
-    AutoCompleteInput,
-    LegacyAutoCompleteInput,
     AutoCompleteAndSearchInput,
-    SegmentedControlSelect,
+    AutoCompleteInput,
     DSFRCheckboxSelectMultiple,
+    LegacyAutoCompleteInput,
+    SegmentedControlSelect,
 )
 
 
@@ -352,8 +352,18 @@ class DagsForm(forms.Form):
     )
 
 
+class GroupeActionChoiceField(forms.ModelMultipleChoiceField):
+    def label_from_instance(self, obj):
+        return mark_safe(
+            render_to_string(
+                "forms/widgets/groupe_action_label.html",
+                {"groupe_action": obj},
+            )
+        )
+
+
 class ConfiguratorForm(forms.Form):
-    available_actions = forms.ModelMultipleChoiceField(
+    available_actions = GroupeActionChoiceField(
         queryset=GroupeAction.objects.all(),
         to_field_name="code",
         label="Choisissez les actions disponibles pour vos usagers",
