@@ -33,7 +33,8 @@ export default abstract class extends Controller<HTMLElement> {
 
   async complete(events: Event): Promise<void> {
     if (this.inputTarget.value) this.displaySpinner()
-    return this.searchToComplete(events)
+    await this.searchToComplete(events)
+    this.hideSpinner()
   }
 
   async searchToComplete(events: Event): Promise<void> {
@@ -65,14 +66,11 @@ export default abstract class extends Controller<HTMLElement> {
         this.#getOptionAnalyticsCallback(inputTargetValue)
         return
       })
-      .then(() => {
-        this.hideSpinner()
-        return
-      })
   }
 
   #getOptionAnalyticsCallback(inputTargetValue) {
     // Implement in inherited controller
+    throw new Error("La méthode getOptionAnalyticsCallback doit être implémentée dans la classe héritant de autocomplete_controller")
   }
 
   selectOption(event: Event) {
@@ -166,6 +164,7 @@ export default abstract class extends Controller<HTMLElement> {
 
   addOption(regexPattern: RegExp, option: any) {
     // Implement this method in your controller
+    throw new Error("La méthode addOption doit être implémentée dans la classe héritant de autocomplete_controller")
   }
 
   createAutocompleteList() {
@@ -191,9 +190,7 @@ export default abstract class extends Controller<HTMLElement> {
 
   async #getOptionCallback(value: string): Promise<string[]> {
     // Implement this method in your controller
-    return new Promise((resolve, reject) => {
-      resolve(this.allAvailableOptions)
-    })
+    throw new Error("La méthode addOption doit être implémentée dans la classe héritant de autocomplete_controller")
   }
 
   displaySpinner(): void {

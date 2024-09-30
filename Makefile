@@ -39,11 +39,12 @@ init-dev:
 # Run development servers
 .PHONY: run-airflow
 run-airflow:
-		docker compose --profile airflow up -d
+	docker compose --profile airflow up -d
 
 .PHONY: run-django
 run-django:
-		honcho start -f Procfile.dev
+	rm -rf .parcel-cache
+	honcho start -f Procfile.dev
 
 # Local django operations
 .PHONY: migrate
