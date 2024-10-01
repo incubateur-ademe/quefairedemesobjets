@@ -13,34 +13,36 @@ from qfdmo.views.adresses import (
 )
 from qfdmo.views.configurator import ConfiguratorView
 from qfdmo.views.dags import DagsValidation
-from qfdmo.views.forms import (
-    address_suggestion_form,
-    contact_form,
-    feedback_form,
-    update_suggestion_form,
-)
 
 urlpatterns = [
     path("", AddressesView.as_view(), name="reemploi_solution"),
     path("connexion", LoginView.as_view(), name="login"),
     path(
         "donnez-votre-avis",
-        feedback_form,
+        RedirectView.as_view(
+            url=settings.FEEDBACK_FORM, query_string=True, permanent=True
+        ),
         name="feedback-form",
     ),
     path(
         "proposer-une-adresse",
-        address_suggestion_form,
+        RedirectView.as_view(
+            url=settings.ADDRESS_SUGGESTION_FORM, query_string=True, permanent=True
+        ),
         name="address-suggestion-form",
     ),
     path(
         "nous-contacter",
-        contact_form,
+        RedirectView.as_view(
+            url=settings.CONTACT_FORM, query_string=True, permanent=True
+        ),
         name="contact-form",
     ),
     path(
         "proposer-une-modification",
-        update_suggestion_form,
+        RedirectView.as_view(
+            url=settings.UPDATE_SUGGESTION_FORM, query_string=True, permanent=True
+        ),
         name="update-suggestion-form",
     ),
     path(
