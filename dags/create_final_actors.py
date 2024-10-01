@@ -558,7 +558,7 @@ read_retry_interval = timedelta(minutes=2)
 
 dag = DAG(
     dag_id="compute_carte_acteur",
-    dag_display_name="Rafraichir les acteurs affichés sur la carte",
+    dag_display_name="Rafraîchir les acteurs affichés sur la carte",
     default_args=default_args,
     description=(
         "Ce DAG récupère les données des acteurs et des propositions de services et"
