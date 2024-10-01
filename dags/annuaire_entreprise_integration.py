@@ -1,4 +1,5 @@
 import gzip
+from psycopg2.errors import UndefinedTable
 import socket
 import time
 from datetime import datetime
@@ -39,7 +40,10 @@ def fetch_and_process_data(url_title, table_name, index_column, schema, **contex
 
     with pg_hook.get_conn() as conn:
         with conn.cursor() as cursor:
-            cursor.execute(f"TRUNCATE TABLE {table_name};")
+            try:
+                cursor.execute(f"TRUNCATE TABLE {table_name};")
+            except UndefinedTable:
+                cursor.execute(f"CREATE TABLE {table_name};")
             conn.commit()
 
     metadata_url = URL_METADATA_ANNUAIRE_ENTREPRISE
