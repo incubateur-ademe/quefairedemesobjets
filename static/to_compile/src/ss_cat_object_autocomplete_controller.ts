@@ -32,7 +32,7 @@ export default class extends AutocompleteController {
                 }
                 if (this.autocompleteList.childElementCount > 0) {
                     this.currentFocus = 0
-                    this.showAutocompleteList()
+                    this.openDropwdown()
                 }
 
                 posthog.capture("object_input", {

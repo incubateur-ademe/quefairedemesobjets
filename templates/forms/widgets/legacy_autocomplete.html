@@ -15,13 +15,14 @@
                 keydown.down->{{ widget.data_controller }}#keydownDown
                 keydown.up->{{ widget.data_controller }}#keydownUp
                 keydown.enter->{{ widget.data_controller }}#keydownEnter
-                keydown.esc->{{ widget.data_controller }}#closeAllLists
-                blur->{{ widget.data_controller }}#blurInput"
+                keydown.esc->{{ widget.data_controller }}#hideAutocompleteList
+                blur->{{ widget.data_controller }}#hideAutocompleteList"
             {% endblock data_action %}
             data-{{ widget.data_controller }}-target="input"
             data-on-focus=true
             type="{{ widget.type }}"
             name="{{ widget.name }}"
+            autocomplete="off"
             {% if widget.value != None %} value="{{ widget.value|stringformat:'s' }}"{% endif %}
             {% include "django/forms/widgets/attrs.html" %}
             >

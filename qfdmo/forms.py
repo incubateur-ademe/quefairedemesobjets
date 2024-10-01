@@ -378,6 +378,7 @@ class ConfiguratorForm(forms.Form):
         help_text="Commencez à taper un nom d’EPCI et sélectionnez un EPCI parmi "
         "les propositions de la liste.",
         choices=fetch_epci_codes,
+        initial="",
         widget=AutoCompleteInput(
             attrs={
                 "class": "fr-input",
