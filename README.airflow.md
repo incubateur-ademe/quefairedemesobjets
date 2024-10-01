@@ -126,7 +126,7 @@ cp dags/.env.template dags/.env
 Enfin, lancer les containers docker avec docker compose:
 
 ```sh
-docker compose --profiles airflow up
+docker compose --profile airflow up
 ```
 
 docker compose lancera :

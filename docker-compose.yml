@@ -1,27 +1,8 @@
 ---
 x-airflow-common:
   &airflow-common
-  environment:
-    &airflow-common-env
-    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db/airflow
-    AIRFLOW__CORE__DAGS_FOLDER: '/opt/airflow/dags'
-    AIRFLOW__CORE__FERNET_KEY: ''
-    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
-    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
-    AIRFLOW__CORE__ENABLE_XCOM_PICKLING: 'true'
-    AIRFLOW__WEBSERVER__EXPOSE_CONFIG: 'true'
-    AIRFLOW__WEBSERVER__WORKERS: '2'
-    AIRFLOW__CORE__EXECUTOR: LocalExecutor
-    AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
-    # Uncomment the next 4 lines to store logs in S3
-    # AIRFLOW__LOGGING__REMOTE_LOGGING: 'true'
-    # AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: "s3://qfdmo-airflow-logs"
-    # AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: 's3logs'
-    # AIRFLOW__LOGGING__ENCRYPT_S3_LOGS: "false"
-    AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
-    # WARNING: Use _PIP_ADDITIONAL_REQUIREMENTS option ONLY for a quick checks
-    # for other purpose (development, test and especially production usage) build/extend Airflow image.
-    _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
+  env_file:
+    - ./dags/.env
   volumes:
     - ./logs:/opt/airflow/logs
     - ./dags:/opt/airflow/dags
@@ -41,11 +22,13 @@ services:
     image: postgis/postgis:15-3.3-alpine
     environment:
       - POSTGRES_USER=qfdmo
-      - POSTGRES_PASSWORD=qfdmo
+      - POSTGRES_PASSWORD=qfdmo # pragma: allowlist secret
       - POSTGRES_DB=qfdmo
       - POSTGRES_MULTIPLE_EXTENSIONS=postgis
     volumes:
       - ./pgdata:/var/lib/postgresql/data:delegated
+    expose:
+      - 5432
     ports:
       - 6543:5432
     profiles: [lvao, airflow]
@@ -68,7 +51,6 @@ services:
     <<: *airflow-common
 
     environment:
-      <<: *airflow-common-env
       _AIRFLOW_DB_MIGRATE: 'true'
       _AIRFLOW_WWW_USER_CREATE: 'true'
       _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
