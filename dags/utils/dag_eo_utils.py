@@ -163,7 +163,7 @@ def serialize_to_json(**kwargs):
     df_removed_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")[
         "removed_actors"
     ]
-    update_actors_columns = ["identifiant_unique", "statut"]
+    update_actors_columns = ["identifiant_unique", "statut", "cree_le"]
     df_removed_actors["row_updates"] = df_removed_actors[update_actors_columns].apply(
         lambda row: json.dumps(row.to_dict(), default=str), axis=1
     )
@@ -271,7 +271,7 @@ def serialize_to_json(**kwargs):
     return {"all": {"df": df_joined}, "to_disable": {"df": df_removed_actors}}
 
 
-def read_displayedacteur(**kwargs):
+def read_acteur(**kwargs):
     df_data_from_api = kwargs["ti"].xcom_pull(task_ids="fetch_data_from_api")
     df_sources = kwargs["ti"].xcom_pull(task_ids="read_source")
 
@@ -283,16 +283,11 @@ def read_displayedacteur(**kwargs):
 
     pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
     engine = pg_hook.get_sqlalchemy_engine()
-    logging.warning(f"unique_source_ids : {unique_source_ids}")
     joined_source_ids = ",".join([f"'{source_id}'" for source_id in unique_source_ids])
-    logging.warning(f"source_ids : {joined_source_ids}")
-    query = f"""
-    SELECT * FROM qfdmo_displayedacteur
-    WHERE source_id IN ({joined_source_ids})
-    """
-    df_displayedacteur = pd.read_sql_query(query, engine)
+    query = f"SELECT * FROM qfdmo_acteur WHERE source_id IN ({joined_source_ids})"
+    df_acteur = pd.read_sql_query(query, engine)
 
-    return df_displayedacteur
+    return df_acteur
 
 
 def insert_dagrun_and_process_df(df, metadata, dag_id, run_id):
@@ -423,7 +418,7 @@ def create_actors(**kwargs):
     df = kwargs["ti"].xcom_pull(task_ids="fetch_data_from_api")
     df_acteurtype = kwargs["ti"].xcom_pull(task_ids="read_acteurtype")
     df_sources = kwargs["ti"].xcom_pull(task_ids="read_source")
-    df_displayedacteurs = kwargs["ti"].xcom_pull(task_ids="read_displayedacteur")
+    df_acteurs = kwargs["ti"].xcom_pull(task_ids="read_acteur")
 
     params = kwargs["params"]
     reparacteurs = params.get("reparacteurs", False)
@@ -519,8 +514,19 @@ def create_actors(**kwargs):
         ),
         axis=1,
     )
-    df["cree_le"] = datetime.now()
-    df["modifie_le"] = df["cree_le"]
+
+    # On garde le cree_le de qfdmo_acteur
+    df.drop(columns=["cree_le"], inplace=True, errors="ignore")
+    df = df.merge(
+        df_acteurs[["identifiant_unique", "cree_le"]],
+        on="identifiant_unique",
+        how="left",
+    )
+    df["cree_le"] = df["cree_le"].fillna(datetime.now())
+
+    # On met à jour le modifie_le de qfdmo_acteur
+    df["modifie_le"] = datetime.now()
+
     if "siret" in df.columns:
         df["siret"] = df["siret"].apply(mapping_utils.process_siret)
     if "telephone" in df.columns:
@@ -532,15 +538,12 @@ def create_actors(**kwargs):
     duplicate_ids = df.loc[duplicates_mask, "identifiant_unique"].unique()
     number_of_duplicates = len(duplicate_ids)
 
-    unique_source_ids = df["source_id"].unique()
+    df_acteurs_actifs = df_acteurs[df_acteurs["statut"] == "ACTIF"]
 
-    df_actors = df_displayedacteurs[
-        (df_displayedacteurs["source_id"].isin(unique_source_ids))
-        & (df_displayedacteurs["statut"] == "ACTIF")
-    ]
-    # TODO : est-ce que les colonne cree_le et modifie_le sont nécessaires
-    df_missing_actors = df_actors[
-        ~df_actors["identifiant_unique"].isin(df["identifiant_unique"])
+    # Get acteur to delete
+    # Here we get the actors that are present in df_acteurs_actifs but not in df
+    df_missing_actors = df_acteurs_actifs[
+        ~df_acteurs_actifs["identifiant_unique"].isin(df["identifiant_unique"])
     ][["identifiant_unique", "cree_le", "modifie_le"]]
 
     df_missing_actors["statut"] = "SUPPRIME"
