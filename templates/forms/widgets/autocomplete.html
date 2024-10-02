@@ -8,16 +8,17 @@
         data-controller="{{ widget.data_controller }}"
     >
         <input
-            {% block data_action %}
                 data-action="
+                {% block data_action %}
                 input->{{ widget.data_controller }}#complete
                 focus->{{ widget.data_controller }}#complete
                 keydown.down->{{ widget.data_controller }}#keydownDown
                 keydown.up->{{ widget.data_controller }}#keydownUp
                 keydown.enter->{{ widget.data_controller }}#keydownEnter
                 keydown.esc->{{ widget.data_controller }}#hideAutocompleteList
-                blur->{{ widget.data_controller }}#hideAutocompleteList"
-            {% endblock data_action %}
+                blur->{{ widget.data_controller }}#hideAutocompleteList
+                {% endblock data_action %}
+            "
             data-{{ widget.data_controller }}-target="input"
             data-on-focus=true
             type="{{ widget.type }}"

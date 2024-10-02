@@ -31,8 +31,8 @@ export default class extends AutocompleteController {
                     this.addOption(regexPattern, this.allAvailableOptions[i])
                 }
                 if (this.autocompleteList.childElementCount > 0) {
-                    this.currentFocus = 0
-                    this.openDropwdown()
+                    this.currentFocusedOptionIndexValue = 0
+                    this.updateAutocompleteListFocusedItem()
                 }
 
                 posthog.capture("object_input", {

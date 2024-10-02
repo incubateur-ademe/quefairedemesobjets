@@ -85,7 +85,7 @@ export default abstract class extends Controller<HTMLElement> {
 
   currentFocusedOptionIndexValueChanged(currentValue: string | number, previousValue: string | number) {
     if (currentValue !== previousValue) {
-      this.#updateAutocompleteListFocusedItem()
+      this.updateAutocompleteListFocusedItem()
     }
   }
 
@@ -143,7 +143,7 @@ export default abstract class extends Controller<HTMLElement> {
 
   }
 
-  #updateAutocompleteListFocusedItem() {
+  updateAutocompleteListFocusedItem() {
     // TODO : revoir ce sélecteur qui n'est pas hyper robuste
     const autocompleteListWrapper: HTMLElement | null = document.getElementById(
       this.inputTarget.id + "autocomplete-list",

@@ -1,12 +1,9 @@
 {% with id=widget.attrs.id %}
-    <fieldset{% if id %} id="{{ id }}"{% endif %}{% if widget.attrs.class %} class="{{ widget.attrs.class }}"{% endif %} aria-labelledby="legend-{{ id }}">
-        {% for group, options, index in widget.optgroups %}
-            {% if group %}<legend class="qfdmo-hidden" id="legend-{{ id }}">{{ group }}</legend>{% endif %}
-            {% for widget in options %}
-                <div class="fr-fieldset__element">
-                    {% include widget.template_name %}
-                </div>
-            {% endfor %}
+    {% for group, options, index in widget.optgroups %}
+        {% for widget in options %}
+            <div class="fr-fieldset__element">
+                {% include widget.template_name %}
+            </div>
         {% endfor %}
-    </fieldset>
+    {% endfor %}
 {% endwith %}

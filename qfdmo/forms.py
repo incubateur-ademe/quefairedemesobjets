@@ -353,6 +353,11 @@ class DagsForm(forms.Form):
 
 
 class GroupeActionChoiceField(forms.ModelMultipleChoiceField):
+    use_fieldset = False
+    widget = DSFRCheckboxSelectMultiple(
+        attrs={"class": "fr-fieldset"},
+    )
+
     def label_from_instance(self, obj):
         return mark_safe(
             render_to_string(
@@ -371,7 +376,6 @@ class ConfiguratorForm(forms.Form):
         "dans la carte que vous intègrerez. Par exemple, si vous ne voulez "
         "faire une carte que sur les points de tri ou de réparation, il vous "
         "suffit de décocher toutes les autres actions possibles",
-        widget=forms.CheckboxSelectMultiple(),
     )
     epci_codes = forms.MultipleChoiceField(
         label="1. Choisir l’EPCI affiché par défaut sur la carte",
