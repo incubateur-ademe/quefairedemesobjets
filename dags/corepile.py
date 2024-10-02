@@ -30,7 +30,6 @@ with DAG(
             "adresse_format_ban": "adresse",
             "nom_de_lorganisme": "nom",
             "enseigne_commerciale": "nom_commercial",
-            "_updatedAt": "cree_le",
             "perimetre_dintervention": "",
             "longitudewgs84": "longitude",
             "latitudewgs84": "latitude",

@@ -34,7 +34,6 @@ with DAG(
             "site_web": "url",
             "adresse_format_ban": "adresse",
             "nom_de_lorganisme": "nom",
-            "_updatedAt": "cree_le",
             "perimetre_dintervention": "",
             "longitudewgs84": "longitude",
             "latitudewgs84": "latitude",

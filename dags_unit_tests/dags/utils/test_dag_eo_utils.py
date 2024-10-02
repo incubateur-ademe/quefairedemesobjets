@@ -1,3 +1,4 @@
+from datetime import datetime
 from unittest.mock import MagicMock
 
 import pandas as pd
@@ -71,8 +72,9 @@ def df_acteur_services_from_db():
     )
 
 
+# To be renamed to df_acteurs_from_db
 @pytest.fixture
-def df_empty_displayed_acteurs_from_db():
+def df_empty_acteurs_from_db():
     return pd.DataFrame(
         columns=[
             "identifiant_unique",
@@ -85,14 +87,14 @@ def df_empty_displayed_acteurs_from_db():
 
 
 @pytest.fixture
-def df_displayed_acteurs_from_db():
+def df_acteurs_from_db():
     return pd.DataFrame(
         {
             "identifiant_unique": ["id1", "id2"],
             "source_id": [101, 102],
             "statut": ["ACTIF", "ACTIF"],
-            "cree_le": ["2024-01-01", "2024-01-01"],
-            "modifie_le": ["2024-01-01", "2024-01-01"],
+            "cree_le": [datetime(2024, 1, 1), datetime(2024, 1, 1)],
+            "modifie_le": [datetime(2024, 1, 1), datetime(2024, 1, 1)],
         }
     )
 
@@ -104,25 +106,7 @@ def df_sous_categories_from_db():
     )
 
 
-@pytest.fixture
-def db_mapping_config():
-    # Can read the mapping table from json instead
-    return {
-        "sous_categories": {
-            "écrans": "ecran",
-            "téléphones portables": "smartphone, tablette et console",
-            "vêtement": "vetement",
-            "linge": "linge de maison",
-            "chaussure": "chaussures",
-            "cartouches": "cartouches",
-            "lampes": "luminaire",
-            "ecrans": "ecran",
-        }
-    }
-
-
 def get_mock_ti_ps(
-    db_mapping_config,
     df_actions_from_db,
     df_acteur_services_from_db,
     df_sous_categories_from_db,
@@ -146,7 +130,6 @@ def get_mock_ti_ps(
 
 
 def get_mock_ti_label(
-    db_mapping_config,
     df_actions_from_db,
     df_acteurtype_from_db,
     df_acteur_services_from_db,
@@ -319,13 +302,11 @@ class TestCreatePropositionService:
         df_create_actors,
         expected_df,
         expected_metadata,
-        db_mapping_config,
         df_actions_from_db,
         df_acteur_services_from_db,
         df_sous_categories_from_db,
     ):
         mock = get_mock_ti_ps(
-            db_mapping_config,
             df_actions_from_db,
             df_acteur_services_from_db,
             df_sous_categories_from_db,
@@ -340,13 +321,11 @@ class TestCreatePropositionService:
 
     def test_create_proposition_multiple_actor(
         self,
-        db_mapping_config,
         df_actions_from_db,
         df_acteur_services_from_db,
         df_sous_categories_from_db,
     ):
         mock = get_mock_ti_ps(
-            db_mapping_config,
             df_actions_from_db,
             df_acteur_services_from_db,
             df_sous_categories_from_db,
@@ -387,13 +366,11 @@ class TestCreatePropositionService:
 
     def test_create_proposition_multiple_product(
         self,
-        db_mapping_config,
         df_actions_from_db,
         df_acteur_services_from_db,
         df_sous_categories_from_db,
     ):
         mock = get_mock_ti_ps(
-            db_mapping_config,
             df_actions_from_db,
             df_acteur_services_from_db,
             df_sous_categories_from_db,
@@ -434,13 +411,11 @@ class TestCreatePropositionService:
 
     def test_create_proposition_services_increment_ids(
         self,
-        db_mapping_config,
         df_actions_from_db,
         df_acteur_services_from_db,
         df_sous_categories_from_db,
     ):
         mock = get_mock_ti_ps(
-            db_mapping_config,
             df_actions_from_db,
             df_acteur_services_from_db,
             df_sous_categories_from_db,
@@ -507,12 +482,12 @@ def df_proposition_services_sous_categories():
 def mock_ti(
     df_sources_from_db,
     df_acteurtype_from_db,
-    db_mapping_config,
+    # TODO: supprimer db_mapping_config
     df_actions_from_db,
     df_acteur_services_from_db,
     df_sous_categories_from_db,
     df_labels_from_db,
-    df_displayed_acteurs_from_db,
+    df_acteurs_from_db,
 ):
     mock = MagicMock()
 
@@ -609,7 +584,7 @@ def mock_ti(
         "load_data_from_postgresql": {
             "displayedpropositionservice_max_id": 1,
         },
-        "read_displayedacteur": df_displayed_acteurs_from_db,
+        "read_acteur": df_acteurs_from_db,
         "read_action": df_actions_from_db,
         "read_acteurtype": df_acteurtype_from_db,
         "read_acteurservice": df_acteur_services_from_db,
@@ -643,7 +618,6 @@ def mock_config():
             "adresse_format_ban": "adresse",
             "nom_de_lorganisme": "nom",
             "enseigne_commerciale": "nom_commercial",
-            "_updatedAt": "cree_le",
             "site_web": "url",
             "email": "email",
             "perimetre_dintervention": "",
@@ -677,14 +651,14 @@ class TestCreateActorSeriesTransformations:
     def test_create_actor_public_accueilli(
         self,
         df_sources_from_db,
-        df_empty_displayed_acteurs_from_db,
+        df_empty_acteurs_from_db,
         public_accueilli,
         expected_public_accueilli,
         expected_statut,
     ):
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "read_displayedacteur": df_empty_displayed_acteurs_from_db,
+            "read_acteur": df_empty_acteurs_from_db,
             "read_acteurtype": None,
             "read_source": df_sources_from_db,
             "fetch_data_from_api": pd.DataFrame(
@@ -704,8 +678,6 @@ class TestCreateActorSeriesTransformations:
                     "point_dapport_pour_reemploi": [False],
                     "point_de_reparation": [True],
                     "point_de_collecte_ou_de_reprise_des_dechets": [True],
-                    "_updatedAt": ["2023-01-01 20:10:10"],
-                    "cree_le": ["2021-01-01"],
                     "public_accueilli": [public_accueilli],
                 }
             ),
@@ -746,13 +718,13 @@ class TestCreateActorSeriesTransformations:
     def test_create_actor_uniquement_sur_rdv(
         self,
         df_sources_from_db,
-        df_empty_displayed_acteurs_from_db,
+        df_empty_acteurs_from_db,
         uniquement_sur_rdv,
         expected_uniquement_sur_rdv,
     ):
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "read_displayedacteur": df_empty_displayed_acteurs_from_db,
+            "read_acteur": df_empty_acteurs_from_db,
             "read_acteurtype": None,
             "read_source": df_sources_from_db,
             "fetch_data_from_api": pd.DataFrame(
@@ -772,8 +744,6 @@ class TestCreateActorSeriesTransformations:
                     "point_dapport_pour_reemploi": [False],
                     "point_de_reparation": [True],
                     "point_de_collecte_ou_de_reprise_des_dechets": [True],
-                    "_updatedAt": ["2023-01-01 20:10:10"],
-                    "cree_le": ["2021-01-01"],
                     "uniquement_sur_rdv": [uniquement_sur_rdv],
                 }
             ),
@@ -808,13 +778,13 @@ class TestCreateActorSeriesTransformations:
     def test_create_actor_reprise(
         self,
         df_sources_from_db,
-        df_empty_displayed_acteurs_from_db,
+        df_empty_acteurs_from_db,
         reprise,
         expected_reprise,
     ):
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "read_displayedacteur": df_empty_displayed_acteurs_from_db,
+            "read_acteur": df_empty_acteurs_from_db,
             "read_acteurtype": None,
             "read_source": df_sources_from_db,
             "fetch_data_from_api": pd.DataFrame(
@@ -834,8 +804,6 @@ class TestCreateActorSeriesTransformations:
                     "point_dapport_pour_reemploi": [False],
                     "point_de_reparation": [True],
                     "point_de_collecte_ou_de_reprise_des_dechets": [True],
-                    "_updatedAt": ["2023-01-01 20:10:10"],
-                    "cree_le": ["2021-01-01"],
                     "reprise": [reprise],
                 }
             ),
@@ -876,13 +844,13 @@ class TestCreateActorSeriesTransformations:
     def test_create_actor_exclusivite_de_reprisereparation(
         self,
         df_sources_from_db,
-        df_empty_displayed_acteurs_from_db,
+        df_empty_acteurs_from_db,
         exclusivite_de_reprisereparation,
         expected_exclusivite_de_reprisereparation,
     ):
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "read_displayedacteur": df_empty_displayed_acteurs_from_db,
+            "read_acteur": df_empty_acteurs_from_db,
             "read_acteurtype": None,
             "read_source": df_sources_from_db,
             "fetch_data_from_api": pd.DataFrame(
@@ -902,8 +870,6 @@ class TestCreateActorSeriesTransformations:
                     "point_dapport_pour_reemploi": [False],
                     "point_de_reparation": [True],
                     "point_de_collecte_ou_de_reprise_des_dechets": [True],
-                    "_updatedAt": ["2023-01-01 20:10:10"],
-                    "cree_le": ["2021-01-01"],
                     "exclusivite_de_reprisereparation": [
                         exclusivite_de_reprisereparation
                     ],
@@ -1101,7 +1067,11 @@ class TestSerializeToJson:
             "create_actors": {
                 "df": pd.DataFrame({"identifiant_unique": [1, 2]}),
                 "removed_actors": pd.DataFrame(
-                    {"identifiant_unique": [3], "statut": ["SUPPRIME"]}
+                    {
+                        "identifiant_unique": [3],
+                        "statut": ["SUPPRIME"],
+                        "cree_le": [datetime(2024, 1, 1)],
+                    }
                 ),
             },
             "create_proposition_services": {"df": df_proposition_services},
@@ -1180,7 +1150,11 @@ class TestSerializeToJson:
             "create_actors": {
                 "df": pd.DataFrame({"identifiant_unique": [1, 2]}),
                 "removed_actors": pd.DataFrame(
-                    {"identifiant_unique": [3], "statut": ["ACTIF"]}
+                    {
+                        "identifiant_unique": [3],
+                        "statut": ["ACTIF"],
+                        "cree_le": [datetime(2024, 1, 1)],
+                    }
                 ),
             },
             "create_proposition_services": {"df": df_proposition_services},
@@ -1225,7 +1199,7 @@ class TestCreatePropositionServicesSousCategories:
         )
 
     def test_create_proposition_services_sous_categories_unknown_product(
-        self, db_mapping_config, df_sous_categories_from_db
+        self, df_sous_categories_from_db
     ):
 
         mock = MagicMock()
@@ -1251,7 +1225,7 @@ class TestCreatePropositionServicesSousCategories:
             create_proposition_services_sous_categories(**kwargs)
 
     def test_create_proposition_services_sous_categories_empty_products(
-        self, db_mapping_config, df_sous_categories_from_db
+        self, df_sous_categories_from_db
     ):
 
         mock = MagicMock()
@@ -1303,18 +1277,18 @@ def test_create_actors(mock_ti, mock_config):
 
 
 @pytest.mark.parametrize(
-    "df_displatedacteurs, df_removed_actors_expected",
+    "df_acteurs, df_removed_actors_expected",
     [
         # Test acteur non supprimé car existe tous dans fetch_data_from_api
         (
             pd.DataFrame(
-                columns=[
-                    "identifiant_unique",
-                    "source_id",
-                    "statut",
-                    "cree_le",
-                    "modifie_le",
-                ]
+                {
+                    "identifiant_unique": pd.Series(dtype="str"),
+                    "source_id": pd.Series(dtype="str"),
+                    "statut": pd.Series(dtype="str"),
+                    "cree_le": pd.Series(dtype="datetime64[ns]"),
+                    "modifie_le": pd.Series(dtype="datetime64[ns]"),
+                }
             ),
             pd.DataFrame(
                 columns=[
@@ -1333,8 +1307,8 @@ def test_create_actors(mock_ti, mock_config):
                     "identifiant_unique": ["source1_1"],
                     "source_id": [101],
                     "statut": ["ACTIF"],
-                    "cree_le": ["2024-01-01"],
-                    "modifie_le": ["2024-01-01"],
+                    "cree_le": [datetime(2024, 1, 1)],
+                    "modifie_le": [datetime(2024, 1, 1)],
                 }
             ),
             pd.DataFrame(
@@ -1354,15 +1328,15 @@ def test_create_actors(mock_ti, mock_config):
                     "identifiant_unique": ["source1_0"],
                     "source_id": [101],
                     "statut": ["ACTIF"],
-                    "cree_le": ["2024-01-01"],
-                    "modifie_le": ["2024-01-01"],
+                    "cree_le": [datetime(2024, 1, 1)],
+                    "modifie_le": [datetime(2024, 1, 1)],
                 }
             ),
             pd.DataFrame(
                 {
                     "identifiant_unique": ["source1_0"],
-                    "cree_le": ["2024-01-01"],
-                    "modifie_le": ["2024-01-01"],
+                    "cree_le": [datetime(2024, 1, 1)],
+                    "modifie_le": [datetime(2024, 1, 1)],
                     "statut": ["SUPPRIME"],
                     "event": ["UPDATE_ACTOR"],
                 }
@@ -1370,12 +1344,10 @@ def test_create_actors(mock_ti, mock_config):
         ),
     ],
 )
-def test_acteur_to_delete(
-    df_sources_from_db, df_displatedacteurs, df_removed_actors_expected
-):
+def test_acteur_to_delete(df_sources_from_db, df_acteurs, df_removed_actors_expected):
     mock = MagicMock()
     mock.xcom_pull.side_effect = lambda task_ids="": {
-        "read_displayedacteur": df_displatedacteurs,
+        "read_acteur": df_acteurs,
         "read_acteurtype": None,
         "read_source": df_sources_from_db,
         "fetch_data_from_api": pd.DataFrame(
@@ -1399,15 +1371,21 @@ def test_acteur_to_delete(
         },
     }
     result = create_actors(**kwargs)
+    df_removed_actors_expected["cree_le"] = pd.to_datetime(
+        df_removed_actors_expected["cree_le"]
+    )
+    df_removed_actors_expected["modifie_le"] = pd.to_datetime(
+        df_removed_actors_expected["modifie_le"]
+    )
     pd.testing.assert_frame_equal(result["removed_actors"], df_removed_actors_expected)
 
 
 def test_create_reparacteurs(
-    df_sources_from_db, df_acteurtype_from_db, df_empty_displayed_acteurs_from_db
+    df_sources_from_db, df_acteurtype_from_db, df_empty_acteurs_from_db
 ):
     mock = MagicMock()
     mock.xcom_pull.side_effect = lambda task_ids="": {
-        "read_displayedacteur": df_empty_displayed_acteurs_from_db,
+        "read_acteur": df_empty_acteurs_from_db,
         "read_acteurtype": df_acteurtype_from_db,
         "read_source": df_sources_from_db,
         "fetch_data_from_api": pd.DataFrame(
@@ -1457,7 +1435,6 @@ def test_create_reparacteurs(
                 "id": "identifiant_externe",
                 "is_enabled": "statut",
                 "other_info": "commentaires",
-                "creation_date": "cree_le",
                 "update_date": "modifie_le",
                 "reparactor_hours": "horaires_description",
             },
@@ -1476,11 +1453,92 @@ def test_create_reparacteurs(
     assert "event" in df_result.columns
 
 
+class TestCeateActorsCreeLe:
+    @pytest.mark.parametrize(
+        "df_acteur, df_data_from_api, expected_cree_le",
+        [
+            # Empty acteur
+            (
+                pd.DataFrame(
+                    columns=[
+                        "identifiant_unique",
+                        "source_id",
+                        "statut",
+                        "cree_le",
+                        "modifie_le",
+                    ]
+                ),
+                pd.DataFrame(
+                    {
+                        "id_point_apport_ou_reparation": ["12345678"],
+                        "produitsdechets_acceptes": ["12345678"],
+                        "nom_de_lorganisme": ["Eco1"],
+                        "ecoorganisme": ["source1"],
+                    }
+                ),
+                datetime.now().date(),
+            ),
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": ["source1_id1"],
+                        "source_id": [101],
+                        "statut": ["ACTIF"],
+                        "cree_le": [datetime(2024, 1, 1)],
+                        "modifie_le": [datetime(2024, 1, 2)],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "id_point_apport_ou_reparation": ["id1"],
+                        "produitsdechets_acceptes": ["12345678"],
+                        "nom_de_lorganisme": ["Eco1"],
+                        "ecoorganisme": ["source1"],
+                    }
+                ),
+                datetime(2024, 1, 1).date(),
+            ),
+        ],
+    )
+    def test_create_actors_cree_le(
+        self,
+        df_sources_from_db,
+        df_acteurtype_from_db,
+        df_acteur,
+        df_data_from_api,
+        expected_cree_le,
+    ):
+        mock = MagicMock()
+        mock.xcom_pull.side_effect = lambda task_ids="": {
+            "read_acteur": df_acteur,
+            "read_acteurtype": df_acteurtype_from_db,
+            "read_source": df_sources_from_db,
+            "fetch_data_from_api": df_data_from_api,
+        }[task_ids]
+
+        kwargs = {
+            "ti": mock,
+            "params": {
+                "column_mapping": {
+                    "id_point_apport_ou_reparation": "identifiant_externe",
+                    "nom_de_lorganisme": "nom",
+                    "ecoorganisme": "source_id",
+                },
+            },
+        }
+
+        result = create_actors(**kwargs)
+        df_result = result["df"]
+
+        assert "cree_le" in df_result.columns
+        assert df_result["cree_le"].notnull().all()
+        assert df_result["cree_le"][0].date() == expected_cree_le
+
+
 class TestCeateLabels:
 
     def test_create_reparacteur_labels(
         self,
-        db_mapping_config,
         df_actions_from_db,
         df_acteurtype_from_db,
         df_acteur_services_from_db,
@@ -1489,7 +1547,6 @@ class TestCeateLabels:
     ):
 
         mock = get_mock_ti_label(
-            db_mapping_config,
             df_actions_from_db,
             df_acteurtype_from_db,
             df_acteur_services_from_db,
@@ -1521,7 +1578,6 @@ class TestCeateLabels:
 
     def test_create_ess_labels(
         self,
-        db_mapping_config,
         df_actions_from_db,
         df_acteurtype_from_db,
         df_acteur_services_from_db,
@@ -1530,7 +1586,6 @@ class TestCeateLabels:
     ):
 
         mock = get_mock_ti_label(
-            db_mapping_config,
             df_actions_from_db,
             df_acteurtype_from_db,
             df_acteur_services_from_db,
@@ -1564,7 +1619,6 @@ class TestCeateLabels:
     )
     def test_create_bonus_reparation_labels(
         self,
-        db_mapping_config,
         df_actions_from_db,
         df_acteurtype_from_db,
         df_acteur_services_from_db,
@@ -1574,7 +1628,6 @@ class TestCeateLabels:
     ):
 
         mock = get_mock_ti_label(
-            db_mapping_config,
             df_actions_from_db,
             df_acteurtype_from_db,
             df_acteur_services_from_db,
@@ -1621,13 +1674,13 @@ class TestActorsLocation:
         self,
         df_sources_from_db,
         df_acteurtype_from_db,
-        df_empty_displayed_acteurs_from_db,
+        df_empty_acteurs_from_db,
         latitude,
         longitude,
     ):
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "read_displayedacteur": df_empty_displayed_acteurs_from_db,
+            "read_acteur": df_empty_acteurs_from_db,
             "read_acteurtype": df_acteurtype_from_db,
             "read_source": df_sources_from_db,
             "fetch_data_from_api": pd.DataFrame(

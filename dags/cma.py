@@ -30,7 +30,6 @@ with DAG(
             "id": "identifiant_externe",
             "is_enabled": "statut",
             "other_info": "commentaires",
-            "creation_date": "cree_le",
             "update_date": "modifie_le",
             "reparactor_hours": "horaires_description",
         },

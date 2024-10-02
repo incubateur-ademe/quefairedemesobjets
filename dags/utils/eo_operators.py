@@ -51,10 +51,10 @@ def read_data_from_postgres_task(
     )
 
 
-def read_displayedacteur_task(dag: DAG) -> PythonOperator:
+def read_acteur_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
-        task_id="read_displayedacteur",
-        python_callable=dag_eo_utils.read_displayedacteur,
+        task_id="read_acteur",
+        python_callable=dag_eo_utils.read_acteur,
         dag=dag,
     )
 
@@ -149,7 +149,7 @@ def eo_task_chain(dag: DAG) -> None:
 
     chain(
         read_tasks,
-        read_displayedacteur_task(dag),
+        read_acteur_task(dag),
         create_actors_task(dag),
         create_tasks,
         create_proposition_services_sous_categories_task(dag),
