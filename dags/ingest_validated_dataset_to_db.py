@@ -27,28 +27,37 @@ dag = DAG(
 )
 
 
-def check_for_validation(**kwargs):
+def _get_first_dagrun_to_insert():
     hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
-    row = hook.get_records(
-        "SELECT EXISTS "
-        f"(SELECT 1 FROM qfdmo_dagrun WHERE status = '{shared_constants.TO_INSERT}')"
+    # get first row from table qfdmo_dagrun with status TO_INSERT
+    row = hook.get_first(
+        f"SELECT * FROM qfdmo_dagrun WHERE status = '{shared_constants.TO_INSERT}'"
+        " LIMIT 1"
     )
-    return "fetch_and_parse_data" if row[0][0] else "skip_processing"
+    return row
+
+
+def check_for_validation(**kwargs):
+    # get first row from table qfdmo_dagrun with status TO_INSERT
+    row = _get_first_dagrun_to_insert()
+
+    # Skip if row is None
+    if row is None:
+        return "skip_processing"
+    return "fetch_and_parse_data"
 
 
 def fetch_and_parse_data(**context):
+    row = _get_first_dagrun_to_insert()
+    dag_run_id = row[0]
+
     pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
     engine = pg_hook.get_sqlalchemy_engine()
 
     df_sql = pd.read_sql_query(
-        "SELECT * FROM qfdmo_dagrunchange WHERE "
-        "dag_run_id IN "
-        "(SELECT id FROM qfdmo_dagrun WHERE status = "
-        f"'{shared_constants.TO_INSERT}')",
+        f"SELECT * FROM qfdmo_dagrunchange WHERE dag_run_id = '{dag_run_id}'",
         engine,
     )
-
-    dag_run_id = df_sql["dag_run_id"].iloc[0]
 
     df_create = df_sql[df_sql["change_type"] == "CREATE"]
     df_update_actor = df_sql[df_sql["change_type"] == "UPDATE_ACTOR"]
@@ -73,10 +82,21 @@ def fetch_and_parse_data(**context):
         return dag_ingest_validated_utils.handle_update_actor_event(
             df_actors_update_actor, dag_run_id
         )
+    return {
+        "dag_run_id": dag_run_id,
+    }
 
 
 def write_data_to_postgres(**kwargs):
     data_dict = kwargs["ti"].xcom_pull(task_ids="fetch_and_parse_data")
+    # If data_set is empty, nothing to do
+    dag_run_id = data_dict["dag_run_id"]
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
+    engine = pg_hook.get_sqlalchemy_engine()
+    if "actors" not in data_dict:
+        with engine.begin() as connection:
+            dag_ingest_validated_utils.update_dag_run_status(connection, dag_run_id)
+        return
     df_actors = data_dict["actors"]
     df_labels = data_dict.get("labels")
     df_acteur_services = data_dict.get("acteur_services")
@@ -84,8 +104,6 @@ def write_data_to_postgres(**kwargs):
     df_pdssc = data_dict.get("pds_sous_categories")
     dag_run_id = data_dict["dag_run_id"]
     change_type = data_dict.get("change_type", "CREATE")
-    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
-    engine = pg_hook.get_sqlalchemy_engine()
 
     with engine.begin() as connection:
         if change_type == "CREATE":
