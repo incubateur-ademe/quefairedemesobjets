@@ -310,10 +310,6 @@ def handle_write_data_update_actor_event(connection, df_actors):
     )
 
 
-def update_dag_run_status(connection, dag_run_id):
-    update_query = f"""
-        UPDATE qfdmo_dagrun
-        SET status = '{shared_constants.FINISHED}'
-        WHERE id = {dag_run_id}
-        """
-    connection.execute(update_query)
+def update_dag_run_status(connection, dag_run_id, statut=shared_constants.FINISHED):
+    query = f"UPDATE qfdmo_dagrun SET status = '{statut}' WHERE id = {dag_run_id}"
+    connection.execute(query)
