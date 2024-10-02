@@ -5,7 +5,7 @@ from html import escape
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import FormView
 
-from qfdmo.forms import ConfiguratorForm, AdvancedConfiguratorForm
+from qfdmo.forms import AdvancedConfiguratorForm, ConfiguratorForm
 
 logger = logging.getLogger(__name__)
 

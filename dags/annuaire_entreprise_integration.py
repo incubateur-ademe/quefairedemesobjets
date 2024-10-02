@@ -1,5 +1,4 @@
 import gzip
-from psycopg2.errors import UndefinedTable
 import socket
 import time
 from datetime import datetime
@@ -9,6 +8,7 @@ import requests
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
+from psycopg2.errors import UndefinedTable
 
 default_args = {
     "owner": "airflow",
