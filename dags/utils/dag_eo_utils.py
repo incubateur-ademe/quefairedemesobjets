@@ -334,7 +334,7 @@ def insert_dagrun_and_process_df(df_acteur_updates, metadata, dag_name, run_name
 
 
 def write_to_dagruns(**kwargs):
-    dag_name = kwargs["dag"].dag_display_name
+    dag_name = kwargs["dag"].dag_display_name or kwargs["dag"].dag_id
     run_id = kwargs["run_id"]
     dfs = kwargs["ti"].xcom_pull(task_ids="serialize_to_json")
     metadata_actors = (

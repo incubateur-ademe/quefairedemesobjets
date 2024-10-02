@@ -27,7 +27,7 @@ dag = DAG(
 )
 
 
-def _get_first_dagrun():
+def _get_first_dagrun_to_insert():
     hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
     # get first row from table qfdmo_dagrun with status TO_INSERT
     row = hook.get_first(
@@ -39,7 +39,7 @@ def _get_first_dagrun():
 
 def check_for_validation(**kwargs):
     # get first row from table qfdmo_dagrun with status TO_INSERT
-    row = _get_first_dagrun()
+    row = _get_first_dagrun_to_insert()
 
     # Skip if row is None
     if row is None:
@@ -48,14 +48,12 @@ def check_for_validation(**kwargs):
 
 
 def fetch_and_parse_data(**context):
-    row = _get_first_dagrun()
-    # get id from row
+    row = _get_first_dagrun_to_insert()
     dag_run_id = row[0]
 
     pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
     engine = pg_hook.get_sqlalchemy_engine()
 
-    # get all rows from qfdmo_dagrunchange with dag_run_id
     df_sql = pd.read_sql_query(
         f"SELECT * FROM qfdmo_dagrunchange WHERE dag_run_id = '{dag_run_id}'",
         engine,
