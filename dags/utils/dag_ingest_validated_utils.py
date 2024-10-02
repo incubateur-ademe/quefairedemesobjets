@@ -82,7 +82,7 @@ def handle_update_actor_event(df_actors, dag_run_id):
     )
 
     df_actors["modifie_le"] = current_time
-    df_actors["cree_le"] = current_time
+    df_actors["cree_le"] = df_actors["cree_le"].fillna(current_time)
 
     for column in update_required_columns:
         if column not in df_actors.columns:
