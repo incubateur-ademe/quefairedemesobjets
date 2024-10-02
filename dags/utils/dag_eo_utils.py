@@ -160,6 +160,7 @@ def create_proposition_services_sous_categories(**kwargs):
 
 
 def serialize_to_json(**kwargs):
+    # Removed acteurs
     df_removed_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")[
         "removed_actors"
     ]
@@ -167,6 +168,7 @@ def serialize_to_json(**kwargs):
     df_removed_actors["row_updates"] = df_removed_actors[update_actors_columns].apply(
         lambda row: json.dumps(row.to_dict(), default=str), axis=1
     )
+    # Created or updated Acteurs
     df_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
     df_ps = kwargs["ti"].xcom_pull(task_ids="create_proposition_services")["df"]
     df_pssc = kwargs["ti"].xcom_pull(
@@ -290,12 +292,15 @@ def read_acteur(**kwargs):
     return df_acteur
 
 
-def insert_dagrun_and_process_df(df, metadata, dag_id, run_id):
+def insert_dagrun_and_process_df(df_acteur_updates, metadata, dag_name, run_name):
+    if df_acteur_updates.empty:
+        return
     pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
     engine = pg_hook.get_sqlalchemy_engine()
     current_date = datetime.now()
 
     with engine.connect() as conn:
+        # Insert a new dagrun
         result = conn.execute(
             """
             INSERT INTO qfdmo_dagrun
@@ -304,8 +309,8 @@ def insert_dagrun_and_process_df(df, metadata, dag_id, run_id):
             RETURNING ID;
         """,
             (
-                dag_id,
-                run_id,
+                dag_name,
+                run_name,
                 "TO_VALIDATE",
                 json.dumps(metadata),
                 current_date,
@@ -314,10 +319,11 @@ def insert_dagrun_and_process_df(df, metadata, dag_id, run_id):
         )
         dag_run_id = result.fetchone()[0]
 
-    df["change_type"] = df["event"]
-    df["dag_run_id"] = dag_run_id
-    df["status"] = shared_constants.TO_VALIDATE
-    df[["row_updates", "dag_run_id", "change_type", "status"]].to_sql(
+    # Insert dag_run_change
+    df_acteur_updates["change_type"] = df_acteur_updates["event"]
+    df_acteur_updates["dag_run_id"] = dag_run_id
+    df_acteur_updates["status"] = shared_constants.TO_VALIDATE
+    df_acteur_updates[["row_updates", "dag_run_id", "change_type", "status"]].to_sql(
         "qfdmo_dagrunchange",
         engine,
         if_exists="append",
@@ -328,7 +334,7 @@ def insert_dagrun_and_process_df(df, metadata, dag_id, run_id):
 
 
 def write_to_dagruns(**kwargs):
-    dag_id = kwargs["dag"].dag_id
+    dag_name = kwargs["dag"].dag_display_name
     run_id = kwargs["run_id"]
     dfs = kwargs["ti"].xcom_pull(task_ids="serialize_to_json")
     metadata_actors = (
@@ -351,10 +357,14 @@ def write_to_dagruns(**kwargs):
         metadata.update(metadata_pds)
 
     for key, data in dfs.items():
-        dag_id_suffixed = dag_id if key == "all" else f"{dag_id}_{key}"
+        # TODO dag_id
+        dag_name_suffixed = (
+            dag_name if key == "all" else f"{dag_name} - {key.replace('_', ' ')}"
+        )
+        run_name = run_id.replace("__", " - ")
         df = data["df"]
         metadata.update(data.get("metadata", {}))
-        insert_dagrun_and_process_df(df, metadata, dag_id_suffixed, run_id)
+        insert_dagrun_and_process_df(df, metadata, dag_name_suffixed, run_name)
 
 
 def _force_column_value(
