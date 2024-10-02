@@ -19,7 +19,7 @@ from qfdmo.widgets import (
     AutoCompleteAndSearchInput,
     AutoCompleteInput,
     DSFRCheckboxSelectMultiple,
-    LegacyAutoCompleteInput,
+    GenericAutoCompleteInput,
     SegmentedControlSelect,
 )
 
@@ -41,7 +41,7 @@ class AddressesForm(forms.Form):
 
     sous_categorie_objet = forms.ModelChoiceField(
         queryset=SousCategorieObjet.objects.all(),
-        widget=LegacyAutoCompleteInput(
+        widget=AutoCompleteInput(
             attrs={
                 "class": "fr-input fr-icon-search-line sm:qfdmo-w-[596px]",
                 "autocomplete": "off",
@@ -244,7 +244,7 @@ class IframeAddressesForm(AddressesForm):
         super().load_choices(request)
 
     adresse = forms.CharField(
-        widget=LegacyAutoCompleteInput(
+        widget=AutoCompleteInput(
             attrs={
                 "class": "fr-input sm:qfdmo-w-[596px]",
                 "autocomplete": "off",
@@ -377,9 +377,10 @@ class ConfiguratorForm(forms.Form):
         label="1. Choisir l’EPCI affiché par défaut sur la carte",
         help_text="Commencez à taper un nom d’EPCI et sélectionnez un EPCI parmi "
         "les propositions de la liste.",
+        # TODO : types
         choices=fetch_epci_codes,
         initial="",
-        widget=AutoCompleteInput(
+        widget=GenericAutoCompleteInput(
             attrs={
                 "class": "fr-input",
                 "autocomplete": "off",

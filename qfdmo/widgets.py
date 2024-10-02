@@ -3,7 +3,7 @@ from django import forms
 from django.forms import widgets
 
 
-class AutoCompleteInput(widgets.ChoiceWidget):
+class GenericAutoCompleteInput(widgets.ChoiceWidget):
     template_name = "forms/widgets/generic_autocomplete.html"
 
     def get_context(self, name, value, attrs):
@@ -12,7 +12,7 @@ class AutoCompleteInput(widgets.ChoiceWidget):
         return context
 
 
-class LegacyAutoCompleteInput(forms.TextInput):
+class AutoCompleteInput(forms.TextInput):
     template_name = "forms/widgets/autocomplete.html"
 
     def __init__(self, attrs=None, data_controller="autocomplete", **kwargs):
@@ -25,7 +25,7 @@ class LegacyAutoCompleteInput(forms.TextInput):
         return context
 
 
-class AutoCompleteAndSearchInput(LegacyAutoCompleteInput):
+class AutoCompleteAndSearchInput(AutoCompleteInput):
     template_name = "forms/widgets/autocomplete_and_search.html"
 
     def __init__(self, attrs=None, btn_attrs={}, **kwargs):
