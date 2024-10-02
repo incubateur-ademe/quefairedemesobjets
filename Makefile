@@ -36,6 +36,12 @@ init-dev:
 	make migrate
 	make createsuperuser
 
+.PHONY: fix
+fix:
+	$(PYTHON) -m ruff check . --fix
+	$(PYTHON) -m black --exclude=.venv .
+
+
 # Run development servers
 .PHONY: run-airflow
 run-airflow:
