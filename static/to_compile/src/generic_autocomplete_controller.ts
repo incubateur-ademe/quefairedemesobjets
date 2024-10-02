@@ -7,14 +7,12 @@ export default class extends AutocompleteController {
   static targets = [...AutocompleteController.targets, "listbox", "option"]
   static values = {
     ...AutocompleteController.values,
-    displayedOptionsIds: Array,
-    selectedOptionsIds: Array,
-    selectedOptionId: String,
+    displayedIds: Array,
+    selectedIds: Array,
   }
-  declare selectedOptionIdValue: string
-  declare selectedOptionsIdsValue: Array<string>
-  declare displayedOptionsIdsValue: Array<string | null>
-  declare readonly displayedOptionsIds: Array<string>
+  declare selectedIdsValue: Array<string>
+  declare displayedIdsValue: Array<string | null>
+  declare readonly displayedIds: Array<string>
   declare readonly listboxTarget: HTMLDivElement
   declare readonly optionTargets: Array<HTMLDivElement>
 
@@ -25,12 +23,11 @@ export default class extends AutocompleteController {
     this.currentFocusedOptionIndexValue = -1
   }
 
-  selectedOptionIdsValueChanged(currentValue) {
-    console.log("selected options ids value changed")
-    this.inputTarget.value = currentValue
+  selectedIdsValueChanged(currentValue) {
+    this.inputTarget.value = this.selectedIdsValue.join(",")
   }
 
-  displayedOptionsIdsValueChanged(ids: Array<string>) {
+  displayedIdsValueChanged(ids: Array<string>) {
     ids.forEach((id) => {
       this.optionTargets
         .filter((option) => option.getAttribute("id") === id)
@@ -40,10 +37,8 @@ export default class extends AutocompleteController {
   }
 
   currentFocusedOptionIndexValueChanged(currentValue: string, previousValue: string) {
-    console.log("COUCOU", this.displayedOptionsIdsValue)
     if (currentValue !== previousValue) {
-      const currentId = this.displayedOptionsIdsValue[currentValue]
-      console.log({ currentId, currentValue }, this.displayedOptionsIdsValue)
+      const currentId = this.displayedIdsValue[currentValue]
       this.optionTargets.forEach((option) =>
         option.classList.remove("autocomplete-active"),
       )
@@ -64,10 +59,8 @@ export default class extends AutocompleteController {
   }
 
   keydownEnter(event: KeyboardEvent): void {
-    this.selectedOptionsIdsValue
-      .push
-      // this.#getOptionIdFrom(this.currentFocusedOptionIndexValue),
-      ()
+    const selectedOptionId = this.#getOptionIdFrom(this.currentFocusedOptionIndexValue)
+    this.selectedIdsValue = [...this.selectedIdsValue, selectedOptionId!]
   }
 
   selectOption(event: Event): void {
@@ -105,7 +98,6 @@ export default class extends AutocompleteController {
   }
 
   #showOption(option: HTMLDivElement) {
-    console.log("SHOW OPTION", { option })
     option.classList.remove("qfdmo-hidden")
   }
 
@@ -114,7 +106,7 @@ export default class extends AutocompleteController {
   }
 
   #getOptionIdFrom(index: number) {
-    return this.displayedOptionsIds[index]
+    return this.displayedIdsValue[index]
   }
 
   #filterOptionsFromUserInput() {
@@ -126,7 +118,7 @@ export default class extends AutocompleteController {
     }
 
     this.optionTargets.forEach(this.#hideOption)
-    this.displayedOptionsIdsValue = this.optionTargets
+    this.displayedIdsValue = this.optionTargets
       .filter((option) =>
         this.#normalizeUserInput(option.dataset.autocompleteSearchValue)?.includes(
           normalizedUserInput,

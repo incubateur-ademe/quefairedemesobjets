@@ -99,12 +99,12 @@ export default abstract class extends Controller<HTMLElement> {
 
   keydownEnter(event: KeyboardEvent): boolean | void {
     // TODO : revoir ce sélecteur qui n'est pas hyper robuste
-    const autocompleteListWrapper = document.getElementById(
+    const autocompleteList = document.getElementById(
       this.inputTarget.id + "autocomplete-list",
     )
     let options: HTMLCollectionOf<HTMLElement> | undefined
-    if (autocompleteListWrapper) {
-      options = autocompleteListWrapper.getElementsByTagName("div")
+    if (autocompleteList) {
+      options = autocompleteList.getElementsByTagName("div")
     }
 
     /*If the ENTER key is pressed, prevent the form from being submitted when select an option */
@@ -120,9 +120,9 @@ export default abstract class extends Controller<HTMLElement> {
   }
 
   hideAutocompleteList(event?: Event) {
-    const autocompleteWrapper = document.getElementsByClassName("autocomplete-items")
-    for (var i = 0; i < autocompleteWrapper.length; i++) {
-      autocompleteWrapper[i].remove()
+    const autocompleteItemsWrapper = document.getElementsByClassName("autocomplete-items")
+    for (var i = 0; i < autocompleteItemsWrapper.length; i++) {
+      autocompleteItemsWrapper[i].remove()
     }
   }
 
