@@ -4,7 +4,7 @@ from django.forms import widgets
 
 
 class AutoCompleteInput(widgets.ChoiceWidget):
-    template_name = "forms/widgets/autocomplete.html"
+    template_name = "forms/widgets/generic_autocomplete.html"
 
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)
@@ -13,7 +13,7 @@ class AutoCompleteInput(widgets.ChoiceWidget):
 
 
 class LegacyAutoCompleteInput(forms.TextInput):
-    template_name = "forms/widgets/legacy_autocomplete.html"
+    template_name = "forms/widgets/autocomplete.html"
 
     def __init__(self, attrs=None, data_controller="autocomplete", **kwargs):
         self.data_controller = data_controller
