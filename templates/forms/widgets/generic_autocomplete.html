@@ -1,8 +1,9 @@
 {% extends "forms/widgets/autocomplete.html" %}
 
-{% block actions %}
+{% block data_action %}
+{{ block.super }}
 change->autocomplete#change
-{% endblock actions %}
+{% endblock data_action %}
 
 {% block choices %}
     <div class="autocomplete-items" data-autocomplete-target="listbox" role="listbox">

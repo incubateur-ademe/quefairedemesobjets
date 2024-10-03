@@ -5,6 +5,7 @@ from django.core.cache import cache
 from django.http import HttpRequest
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
+from dsfr.forms import DsfrBaseForm
 
 from qfdmo.geo_api import all_epci_codes, fetch_epci_codes
 from qfdmo.models import DagRun, DagRunStatus, SousCategorieObjet
@@ -353,11 +354,6 @@ class DagsForm(forms.Form):
 
 
 class GroupeActionChoiceField(forms.ModelMultipleChoiceField):
-    use_fieldset = False
-    widget = DSFRCheckboxSelectMultiple(
-        attrs={"class": "fr-fieldset"},
-    )
-
     def label_from_instance(self, obj):
         return mark_safe(
             render_to_string(
@@ -367,10 +363,11 @@ class GroupeActionChoiceField(forms.ModelMultipleChoiceField):
         )
 
 
-class ConfiguratorForm(forms.Form):
+class ConfiguratorForm(DsfrBaseForm):
     available_actions = GroupeActionChoiceField(
         queryset=GroupeAction.objects.all(),
         to_field_name="code",
+        widget=forms.CheckboxSelectMultiple,
         label="Choisissez les actions disponibles pour vos usagers",
         help_text="Ce sont les actions que vos usagers pourront consulter "
         "dans la carte que vous intègrerez. Par exemple, si vous ne voulez "
