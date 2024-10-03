@@ -3,7 +3,10 @@ import logging
 from html import escape
 
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponse
+from django.shortcuts import render
 from django.views.generic.edit import FormView
+from pandas.core.apply import Any
 
 from qfdmo.forms import AdvancedConfiguratorForm, ConfiguratorForm
 
@@ -15,6 +18,24 @@ BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
 class ConfiguratorView(LoginRequiredMixin, FormView):
     form_class = ConfiguratorForm
     template_name = "qfdmo/iframe_configurator/base.html"
+
+    def form_valid(self, form) -> HttpResponse:
+        form.is_valid()  # To fetch cleaned_data
+        return render(
+            self.request,
+            self.template_name,
+            {
+                **self.get_context_data(
+                    form=form
+                ),  # Inherited from django.views.generic.edit.FormMixin.form_invalid
+                "data": form.cleaned_data,
+            },
+        )
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+
+        return context
 
 
 class AdvancedConfiguratorView(LoginRequiredMixin, FormView):

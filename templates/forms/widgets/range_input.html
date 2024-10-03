@@ -1,0 +1,6 @@
+<div class="fr-range fr-range--sm">
+    <span class="fr-range__output">{{ widget.initial }} </span>
+    {% include "django/forms/widgets/number.html" %}
+    <span class="fr-range__min" aria-hidden="true">{{ widget.min_value }}</span>
+    <span class="fr-range__max" aria-hidden="true">{{ widget.max_value }}</span>
+</div>

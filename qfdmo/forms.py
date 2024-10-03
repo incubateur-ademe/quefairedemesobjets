@@ -375,7 +375,7 @@ class ConfiguratorForm(DsfrBaseForm):
         "faire une carte que sur les points de tri ou de réparation, il vous "
         "suffit de décocher toutes les autres actions possibles",
     )
-    epci_codes = forms.MultipleChoiceField(
+    epci_codes = forms.ChoiceField(
         label="1. Choisir l’EPCI affiché par défaut sur la carte",
         help_text="Commencez à taper un nom d’EPCI et sélectionnez un EPCI parmi "
         "les propositions de la liste.",
