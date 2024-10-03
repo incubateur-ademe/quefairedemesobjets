@@ -17,20 +17,19 @@
             </div>
         </form>
 
-        <hr>
+        {% if form.cleaned_data %}
+        {% with data=form.cleaned_data %}
+            <hr>
+            <h2>Résultats</h2>
+            <h3>Code à implémenter</h3>
+            <p>Il vous suffit de copier/coller ce code dans votre site Internet. En cas de difficultés, de questions, ou pour tout autre échange, vous pouvez contacter l’équipe.</p>
 
-        {% if data %}
-        <h2>Résultats</h2>
-        <h3>Code à implémenter</h3>
-        <p>Il vous suffit de copier/coller ce code dans votre site Internet. En cas de difficultés, de questions, ou pour tout autre échange, vous pouvez contacter l’équipe.</p>
-
-        <turbo-frame>
-            {{ data.epci_codes }}
-            {{ data.available_actions }}
-            {{ data.limit }}
-        </turbo-frame>
+            <turbo-frame>
+                {{ data.epci_codes }}
+                {{ data.available_actions }}
+                {{ data.limit }}
+            </turbo-frame>
+        {% endwith %}
         {% endif %}
-
-
     </div>
 {% endblock content %}

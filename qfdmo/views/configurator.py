@@ -20,16 +20,12 @@ class ConfiguratorView(LoginRequiredMixin, FormView):
     template_name = "qfdmo/iframe_configurator/base.html"
 
     def form_valid(self, form) -> HttpResponse:
-        form.is_valid()  # To fetch cleaned_data
         return render(
             self.request,
             self.template_name,
-            {
-                **self.get_context_data(
-                    form=form
-                ),  # Inherited from django.views.generic.edit.FormMixin.form_invalid
-                "data": form.cleaned_data,
-            },
+            self.get_context_data(
+                form=form
+            ),  # Inherited from django.views.generic.edit.FormMixin.form_invalid
         )
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
