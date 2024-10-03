@@ -53,6 +53,7 @@ export default class extends AutocompleteController {
   }
 
   selectedIdValueChanged(currentValue: string): void {
+    this.hideAutocompleteList()
     if (currentValue !== this.inputTarget.value) {
       this.inputTarget.value = currentValue
     }
@@ -65,11 +66,9 @@ export default class extends AutocompleteController {
   keydownEnter(event: KeyboardEvent): void {
     const selectedOptionId = this.#getOptionIdFrom(this.currentFocusedOptionIndexValue)
     this.selectedIdValue = selectedOptionId!
-    this.hideAutocompleteList()
   }
 
   change(event): void {
-    console.log(this)
     if (event.target.value.length === 0) {
       this.hideAutocompleteList()
     }
@@ -77,6 +76,7 @@ export default class extends AutocompleteController {
 
   click(event: MouseEvent): void {
     const id = event.target?.getAttribute("id")
+    console.log("CLICK", id, this)
     this.selectedIdValue = id
   }
 

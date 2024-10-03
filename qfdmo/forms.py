@@ -21,6 +21,7 @@ from qfdmo.widgets import (
     AutoCompleteInput,
     DSFRCheckboxSelectMultiple,
     GenericAutoCompleteInput,
+    RangeInput,
     SegmentedControlSelect,
 )
 
@@ -390,11 +391,8 @@ class ConfiguratorForm(DsfrBaseForm):
     )
 
     limit = forms.IntegerField(
-        widget=forms.NumberInput(
-            attrs={
-                "class": "fr-input",
-            },
-        ),
+        widget=RangeInput(attrs={"max": 100, "min": 0}),
+        initial=20,
         label="2. Nombre de résultats maximum à afficher sur la carte",
         help_text="Indiquez le nombre maximum de lieux qui pourront apparaître "
         "sur la carte suite à une recherche.",

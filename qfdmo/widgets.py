@@ -3,6 +3,11 @@ from django import forms
 from django.forms import widgets
 
 
+class RangeInput(widgets.NumberInput):
+    template_name = "forms/widgets/range_input.html"
+    input_type = "range"
+
+
 class GenericAutoCompleteInput(widgets.ChoiceWidget):
     template_name = "forms/widgets/generic_autocomplete.html"
 

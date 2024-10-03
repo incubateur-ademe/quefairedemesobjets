@@ -225,3 +225,8 @@ Style the autocomplete container:
 .fr-segmented__element input:checked:focus + label {
     outline: 2px solid #0a76f6;
 }
+
+
+.fr-input[type=range] {
+    box-shadow: none;
+}
