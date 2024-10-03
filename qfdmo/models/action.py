@@ -5,7 +5,7 @@ from django.core.cache import cache
 from django.db.models.query import QuerySet
 from django.forms import model_to_dict
 
-from qfdmo.models.utils import CodeAsNaturalKeyModel
+from qfdmo.models.utils import CodeAsNaturalKeyManager, CodeAsNaturalKeyModel
 
 
 class ActionDirection(CodeAsNaturalKeyModel):
@@ -22,7 +22,27 @@ class ActionDirection(CodeAsNaturalKeyModel):
         return self.libelle
 
 
+class GroupeActionQueryset(models.QuerySet):
+    def as_actions_codes(self, concat=False):
+        actions = []
+
+        for groupe in self:
+            actions = [*actions, *groupe.actions.all().values_list("code", flat=True)]
+
+        if concat:
+            return "|".join(actions)
+
+        return actions
+
+
+class GroupeActionManager(CodeAsNaturalKeyManager):
+    def get_queryset(self):
+        return GroupeActionQueryset(self.model, using=self._db)
+
+
 class GroupeAction(CodeAsNaturalKeyModel):
+    objects = GroupeActionManager()
+
     class Meta:
         verbose_name = "Groupe d'actions"
         verbose_name_plural = "Groupes d'actions"

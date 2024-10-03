@@ -9,10 +9,7 @@
             {{ form }}
             <div class="fr-input-group fr-my-4w">
             <button type="submit" class="fr-btn" title="Valider">
-                Valider ce formulaire
-            </button>
-            <button type="" class="fr-btn fr-btn--secondary" title="Annuler">
-                Annuler
+                Prévisualiser
             </button>
             </div>
         </form>
@@ -24,11 +21,13 @@
             <h3>Code à implémenter</h3>
             <p>Il vous suffit de copier/coller ce code dans votre site Internet. En cas de difficultés, de questions, ou pour tout autre échange, vous pouvez contacter l’équipe.</p>
 
-            <turbo-frame>
-                {{ data.epci_codes }}
-                {{ data.available_actions }}
-                {{ data.limit }}
-            </turbo-frame>
+            <script
+                src='http://localhost:8000/static/carte.js'
+                data-action_displayed={{ data.available_actions.as_actions_codes(concat=True) }}
+                data-epci_codes="{{ data.epci_codes }}"
+                data-limit="{{ data.limit }}"
+            >
+            </script>
         {% endwith %}
         {% endif %}
     </div>
