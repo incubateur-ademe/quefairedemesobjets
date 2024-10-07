@@ -135,6 +135,12 @@ Style the autocomplete container:
   mask-image: url("svg/shield-check-line.svg");
 }
 
+.fr-icon-money-euro-box-line::before,
+ .fr-icon-money-euro-box-line::after {
+   -webkit-mask-image: url("svg/money-euro-box-line.svg");
+   mask-image: url("svg/money-euro-box-line.svg");
+ }
+
 .fr-icon-percent-line::before,
 .fr-icon-percent-line::after {
   -webkit-mask-image: url("svg/percent-line.svg");
