@@ -330,6 +330,9 @@ AIRFLOW_WEBSERVER_REFRESHACTEUR_URL = decouple.config(
     "AIRFLOW_WEBSERVER_REFRESHACTEUR_URL", cast=str, default="http://localhost:8080"
 )
 
+USE_I18N = True
+LANGUAGE_CODE = "fr-fr"
+
 IMPORT_EXPORT_TMP_STORAGE_CLASS = "import_export.tmp_storages.MediaStorage"
 IMPORT_FORMATS = [CSV, XLSX, XLS]
 ADDRESS_SUGGESTION_FORM = decouple.config(

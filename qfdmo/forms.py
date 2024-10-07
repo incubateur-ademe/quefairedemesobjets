@@ -381,7 +381,6 @@ class ConfiguratorForm(DsfrBaseForm):
         label="1. Choisir l’EPCI affiché par défaut sur la carte",
         help_text="Commencez à taper un nom d’EPCI et sélectionnez un EPCI parmi "
         "les propositions de la liste.",
-        # TODO : types
         choices=fetch_epci_codes,
         initial="",
         required=False,

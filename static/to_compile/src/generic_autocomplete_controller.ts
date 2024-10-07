@@ -24,7 +24,11 @@ export default class extends AutocompleteController {
     this.blurInput = debounce(this.blurInput, 300).bind(this)
     this.change = debounce(this.change, 300).bind(this)
     this.currentFocusedOptionIndexValue = -1
-    this.selectedIdValue = JSON.parse(this.inputTarget.value.replace("'", '"'))[0]
+    if (this.inputTarget.value.replace("['", "").replace("']", "")) {
+      this.selectedIdValue = JSON.parse(this.inputTarget.value)[0]
+    } else {
+      this.inputTarget.value = ""
+    }
   }
 
   displayedIdsValueChanged(ids: Array<string>) {
