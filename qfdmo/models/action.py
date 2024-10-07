@@ -23,7 +23,7 @@ class ActionDirection(CodeAsNaturalKeyModel):
 
 
 class GroupeActionQueryset(models.QuerySet):
-    def as_actions_codes(self, concat=False):
+    def as_codes(self, concat=True):
         actions = []
 
         for groupe in self:

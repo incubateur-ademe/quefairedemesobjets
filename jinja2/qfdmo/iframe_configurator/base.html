@@ -20,10 +20,23 @@
             <h2>Résultats</h2>
             <h3>Code à implémenter</h3>
             <p>Il vous suffit de copier/coller ce code dans votre site Internet. En cas de difficultés, de questions, ou pour tout autre échange, vous pouvez contacter l’équipe.</p>
+            <div class="qfdmo-flex
+                qfdmo-p-2w qfdmo-bg-grey-975
+                "
+            >
+                <pre class="
+                    qfdmo-m-0
+                    qfdmo-text-blue-france-sun-113 qfdmo-font-bold
+                    qfdmo-whitespace-break-spaces
+                ">{{ iframe_script }}</pre>
+                <button class="fr-btn qfdmo-mb-auto qfdmo-ml-auto" title="Copier">
+                    Copier
+                </button>
+            </div>
 
             <script
                 src='http://localhost:8000/static/carte.js'
-                data-action_displayed={{ data.available_actions.as_actions_codes(concat=True) }}
+                data-action_displayed={{ data.available_actions.as_codes(concat=True) }}
                 data-epci_codes="{{ data.epci_codes }}"
                 data-limit="{{ data.limit }}"
             >

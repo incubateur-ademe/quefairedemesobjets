@@ -24,9 +24,29 @@ class ConfiguratorView(LoginRequiredMixin, FormView):
             self.request,
             self.template_name,
             self.get_context_data(
-                form=form
+                form=form, iframe_script=self._compile_script_tag(form.cleaned_data)
             ),  # Inherited from django.views.generic.edit.FormMixin.form_invalid
         )
+
+    @property
+    def iframe_url(self):
+        return (
+            f"http{'s' if self.request.is_secure() else ''}://{self.request.get_host()}"
+        )
+
+    def _compile_script_tag(self, attributes):
+        iframe_script = f"<script src='{ self.iframe_url }'"
+        for key, value in attributes.items():
+            try:
+                # Some values need to be formatted
+                value = value.as_codes()
+            except AttributeError:
+                pass
+
+            if value:
+                iframe_script += f" data-{key}='{str(value)}'"
+        iframe_script += "></script>"
+        return iframe_script
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)

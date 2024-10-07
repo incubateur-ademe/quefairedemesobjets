@@ -369,6 +369,8 @@ class ConfiguratorForm(DsfrBaseForm):
         queryset=GroupeAction.objects.all(),
         to_field_name="code",
         widget=forms.CheckboxSelectMultiple,
+        required=False,
+        initial=GroupeAction.objects.all,
         label="Choisissez les actions disponibles pour vos usagers",
         help_text="Ce sont les actions que vos usagers pourront consulter "
         "dans la carte que vous intègrerez. Par exemple, si vous ne voulez "
@@ -382,6 +384,7 @@ class ConfiguratorForm(DsfrBaseForm):
         # TODO : types
         choices=fetch_epci_codes,
         initial="",
+        required=False,
         widget=GenericAutoCompleteInput(
             attrs={
                 "class": "fr-input",
@@ -506,7 +509,7 @@ class AdvancedConfiguratorForm(forms.Form):
     )
 
     action_displayed = forms.MultipleChoiceField(
-        widget=forms.CheckboxSelectMultiple(
+        widget=DSFRCheckboxSelectMultiple(
             attrs={
                 "class": (
                     "fr-checkbox qfdmo-inline-grid qfdmo-grid-cols-4 qfdmo-gap-4"
@@ -535,7 +538,7 @@ class AdvancedConfiguratorForm(forms.Form):
     #   - pour la direction `jai` les actions possibles sont : `reparer`, `preter`, `donner`, `echanger`, `mettreenlocation`, `revendre` # noqa
     #   - si le paramètre `action_list` n'est pas renseigné ou est vide, toutes les actions éligibles à la direction sont cochées # noqa
     action_list = forms.MultipleChoiceField(
-        widget=forms.CheckboxSelectMultiple(
+        widget=DSFRCheckboxSelectMultiple(
             attrs={
                 "class": (
                     "fr-checkbox qfdmo-inline-grid qfdmo-grid-cols-4 qfdmo-gap-4"
