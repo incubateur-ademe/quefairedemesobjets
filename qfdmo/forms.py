@@ -208,7 +208,7 @@ class AddressesForm(forms.Form):
             },
         ),
         label=mark_safe(
-            "<span class='fr-icon--sm fr-icon-money-euro-box-line'></span>"
+            "<span class='fr-icon--sm fr-icon-percent-line'></span>"
             "&nbsp;Éligible au bonus réparation"
         ),
         help_text=mark_safe(
