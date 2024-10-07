@@ -17,35 +17,44 @@
         {% if form.cleaned_data %}
         {% with data=form.cleaned_data %}
             <hr>
-            <h2>Résultats</h2>
-            <h3>Code à implémenter</h3>
-            <p>Il vous suffit de copier/coller ce code dans votre site Internet. En cas de difficultés, de questions, ou pour tout autre échange, vous pouvez contacter l’équipe.</p>
             <div
-                data-controller="copy"
-                class="qfdmo-flex
-                qfdmo-p-2w qfdmo-bg-grey-975
-                "
+                class="qfdmo-max-w-screen-lg"
             >
-                <pre
-                    data-copy-target="toCopy"
-                    class="
-                    qfdmo-m-0
-                    qfdmo-text-blue-france-sun-113 qfdmo-font-bold
-                    qfdmo-whitespace-break-spaces
-                ">{{ iframe_script }}</pre>
-                <button
-                    class="fr-btn qfdmo-mb-auto qfdmo-ml-auto"
-                    title="Copier"
-                    data-action="click->copy#toClipboard"
-                    data-copy-target="button"
+                <h2>Résultats</h2>
+                <h3>Code à implémenter</h3>
+                <p>Il vous suffit de copier/coller ce code dans votre site Internet. En cas de difficultés, de questions, ou pour tout autre échange, vous pouvez contacter l’équipe.</p>
+                <div
+                    data-controller="copy"
+                    class="qfdmo-flex
+                    qfdmo-p-2w qfdmo-bg-grey-975
+                    "
                 >
-                    Copier
-                </button>
+                    <pre
+                        data-copy-target="toCopy"
+                        class="
+                        qfdmo-m-0 qfdmo-pr-1w
+                        qfdmo-text-blue-france-sun-113 qfdmo-font-bold
+                        qfdmo-whitespace-break-spaces
+                        qfdmo-break-all
+                    ">{{ iframe_script }}</pre>
+                    <button
+                        class="fr-btn qfdmo-mb-auto qfdmo-ml-auto"
+                        title="Copier"
+                        data-action="click->copy#toClipboard"
+                        data-copy-target="button"
+                    >
+                        Copier
+                    </button>
+                </div>
+
+                <div class="fr-alert fr-alert--info qfdmo-mt-1w qfdmo-mb-4w">
+                    <p>
+                        Cette balise HTML vous permet d'afficher le simulateur à l'intérieur d'une page de votre site internet.
+                        Le module sera automatiquement mis à jour avec les dernières nouveautés.
+                    </p>
+                </div>
             </div>
-
             {{ iframe_script|safe }}
-
-            </script>
         {% endwith %}
         {% endif %}
     </div>

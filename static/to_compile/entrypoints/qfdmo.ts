@@ -14,6 +14,7 @@ import "../src/browser_check"
 import "../src/iframe"
 
 window.stimulus = Application.start()
+//  TODO : do not merge
 window.stimulus.debug = true
 stimulus.register("map", MapController)
 stimulus.register("ss-cat-object-autocomplete", SsCatObjectAutocompleteController)
