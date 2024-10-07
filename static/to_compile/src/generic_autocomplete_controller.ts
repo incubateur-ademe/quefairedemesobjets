@@ -22,10 +22,7 @@ export default class extends AutocompleteController {
     this.searchToComplete = debounce(this.searchToComplete, 300).bind(this)
     this.change = debounce(this.change, 300).bind(this)
     this.currentFocusedOptionIndexValue = -1
-  }
-
-  selectedIdsValueChanged(currentValue) {
-    this.inputTarget.value = this.selectedIdValue
+    this.selectedIdValue = JSON.parse(this.inputTarget.value)[0]
   }
 
   displayedIdsValueChanged(ids: Array<string>) {
@@ -54,7 +51,7 @@ export default class extends AutocompleteController {
 
   selectedIdValueChanged(currentValue: string): void {
     this.hideAutocompleteList()
-    if (currentValue !== this.inputTarget.value) {
+    if (currentValue && currentValue !== this.inputTarget.value) {
       this.inputTarget.value = currentValue
     }
   }
@@ -64,17 +61,21 @@ export default class extends AutocompleteController {
   }
 
   keydownEnter(event: KeyboardEvent): void {
+    event.preventDefault()
     const selectedOptionId = this.#getOptionIdFrom(this.currentFocusedOptionIndexValue)
     this.selectedIdValue = selectedOptionId!
   }
 
   change(event): void {
+    console.log("CHANGE")
     if (event.target.value.length === 0) {
       this.hideAutocompleteList()
     }
   }
 
-  click(event: MouseEvent): void {
+  setActiveOptionFrom(event: MouseEvent): void {
+    event.preventDefault()
+    alert("CUCOUCOU")
     const id = event.target?.getAttribute("id")
     console.log("CLICK", id, this)
     this.selectedIdValue = id
@@ -95,7 +96,14 @@ export default class extends AutocompleteController {
     return this.listboxTarget
   }
 
+  #validateUserInput() {
+    if (this.inputTarget.value !== this.selectedIdValue) {
+      this.inputTarget.value = ""
+    }
+  }
+
   hideAutocompleteList(event?: Event): void {
+    this.#validateUserInput()
     this.listboxTarget.classList.add("qfdmo-hidden")
     this.optionTargets.forEach(this.#hideOption)
   }
