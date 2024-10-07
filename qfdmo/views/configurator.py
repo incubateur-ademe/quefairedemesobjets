@@ -30,9 +30,7 @@ class ConfiguratorView(LoginRequiredMixin, FormView):
 
     @property
     def iframe_url(self):
-        return (
-            f"http{'s' if self.request.is_secure() else ''}://{self.request.get_host()}"
-        )
+        return f"{self.request.scheme}://{self.request.get_host()}/static/carte.js"
 
     def _compile_script_tag(self, attributes):
         iframe_script = f"<script src='{ self.iframe_url }'"
