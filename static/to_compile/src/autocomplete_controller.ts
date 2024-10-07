@@ -32,7 +32,7 @@ export default abstract class extends Controller<HTMLElement> {
   initialize() {
     this.searchToComplete = debounce(this.searchToComplete, 300).bind(this)
     // Delay blur event to allow click an option
-    // this.blurInput = debounce(this.blurInput, 300).bind(this)
+    this.blurInput = debounce(this.blurInput, 300).bind(this)
   }
 
   async complete(events: Event): Promise<void> {
@@ -87,6 +87,10 @@ export default abstract class extends Controller<HTMLElement> {
     if (currentValue !== previousValue) {
       this.updateAutocompleteListFocusedItem()
     }
+  }
+
+  blurInput(event: Event) {
+    this.hideAutocompleteList()
   }
 
   keydownDown(event: KeyboardEvent) {

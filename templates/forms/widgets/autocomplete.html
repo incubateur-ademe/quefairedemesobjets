@@ -16,7 +16,7 @@
                 keydown.up->{{ widget.data_controller }}#keydownUp
                 keydown.enter->{{ widget.data_controller }}#keydownEnter
                 keydown.esc->{{ widget.data_controller }}#hideAutocompleteList
-                blur->{{ widget.data_controller }}#hideAutocompleteList
+                blur->{{ widget.data_controller }}#blurInput
                 {% endblock data_action %}
             "
             data-{{ widget.data_controller }}-target="input"

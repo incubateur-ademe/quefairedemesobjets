@@ -20,9 +20,11 @@ export default class extends AutocompleteController {
 
   initialize() {
     this.searchToComplete = debounce(this.searchToComplete, 300).bind(this)
+    // Let time to click on an option
+    this.blurInput = debounce(this.blurInput, 300).bind(this)
     this.change = debounce(this.change, 300).bind(this)
     this.currentFocusedOptionIndexValue = -1
-    this.selectedIdValue = JSON.parse(this.inputTarget.value)[0]
+    this.selectedIdValue = JSON.parse(this.inputTarget.value.replace("'", '"'))[0]
   }
 
   displayedIdsValueChanged(ids: Array<string>) {
@@ -50,7 +52,6 @@ export default class extends AutocompleteController {
   }
 
   selectedIdValueChanged(currentValue: string): void {
-    this.hideAutocompleteList()
     if (currentValue && currentValue !== this.inputTarget.value) {
       this.inputTarget.value = currentValue
     }
@@ -67,17 +68,14 @@ export default class extends AutocompleteController {
   }
 
   change(event): void {
-    console.log("CHANGE")
     if (event.target.value.length === 0) {
       this.hideAutocompleteList()
     }
   }
 
   setActiveOptionFrom(event: MouseEvent): void {
-    event.preventDefault()
-    alert("CUCOUCOU")
     const id = event.target?.getAttribute("id")
-    console.log("CLICK", id, this)
+    console.log("id", {id, event })
     this.selectedIdValue = id
   }
 
