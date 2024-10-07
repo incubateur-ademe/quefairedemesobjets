@@ -19,9 +19,9 @@ def center_from_leaflet_bbox(custom_bbox_as_string: str) -> List[float]:
         custom_bbox: LeafletBbox = json.loads(custom_bbox_as_string)
         # Handle center
         return [custom_bbox["center"]["lng"], custom_bbox["center"]["lat"]]
-    except (JSONDecodeError, KeyError) as exception:
+    except (JSONDecodeError, KeyError):
         # TODO : gérer l'erreur
-        print(f"Uh oh {exception=}")
+        pass
 
 
 def sanitize_leaflet_bbox(custom_bbox_as_string: str) -> List[float] | None:
@@ -35,9 +35,8 @@ def sanitize_leaflet_bbox(custom_bbox_as_string: str) -> List[float] | None:
             custom_bbox["northEast"]["lng"],
             custom_bbox["northEast"]["lat"],
         ]
-    except KeyError as exception:
+    except KeyError:
         # TODO : gérer l'erreur
-        print(f"Uh oh {exception=}")
         return []
 
 
