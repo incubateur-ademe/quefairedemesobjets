@@ -1,5 +1,6 @@
-from typing import TypedDict, List
 import json
+from json.decoder import JSONDecodeError
+from typing import List, TypedDict
 
 
 class PointDict(TypedDict):
@@ -8,9 +9,19 @@ class PointDict(TypedDict):
 
 
 class LeafletBbox(TypedDict):
-    center: List[str]
+    center: PointDict
     southWest: PointDict
     northEast: PointDict
+
+
+def center_from_leaflet_bbox(custom_bbox_as_string: str) -> List[float]:
+    try:
+        custom_bbox: LeafletBbox = json.loads(custom_bbox_as_string)
+        # Handle center
+        return [custom_bbox["center"]["lng"], custom_bbox["center"]["lat"]]
+    except (JSONDecodeError, KeyError) as exception:
+        # TODO : gérer l'erreur
+        print(f"Uh oh {exception=}")
 
 
 def sanitize_leaflet_bbox(custom_bbox_as_string: str) -> List[float] | None:

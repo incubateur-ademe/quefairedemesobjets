@@ -1,6 +1,6 @@
 import json
-from typing import List, cast
 import logging
+from typing import List, cast
 
 import unidecode
 from django.conf import settings
@@ -18,10 +18,14 @@ from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_GET
 from django.views.generic.edit import FormView
 
-from qfdmo.geo_api import bbox_from_list_of_geojson, retrieve_epci_geojson
-from qfdmo.leaflet import compile_leaflet_bbox, sanitize_leaflet_bbox
 from core.utils import get_direction
 from qfdmo.forms import CarteAddressesForm, IframeAddressesForm
+from qfdmo.geo_api import bbox_from_list_of_geojson, retrieve_epci_geojson
+from qfdmo.leaflet import (
+    center_from_leaflet_bbox,
+    compile_leaflet_bbox,
+    sanitize_leaflet_bbox,
+)
 from qfdmo.models import (
     Acteur,
     ActeurStatus,
@@ -68,7 +72,7 @@ class AddressesView(FormView):
         # TODO: refacto forms : delete this line
         initial["ess"] = self.request.GET.get("ess")
         # TODO: refacto forms : delete this line
-        initial["bounding_box"] = self.request.GET.get("bounding_box")
+        initial["bounding_box"] = self.kwargs.get("bbox")
         initial["sc_id"] = (
             self.request.GET.get("sc_id") if initial["sous_categorie_objet"] else None
         )
@@ -195,7 +199,6 @@ class AddressesView(FormView):
         else:
             bbox, acteurs = self._bbox_and_acteurs_from_location_or_epci(acteurs)
             acteurs = acteurs[: self._get_max_displayed_acteurs()]
-            kwargs.update(bbox=bbox)
 
             # Set Home location (address set as input)
             # FIXME : can be manage in template using the form value ?
@@ -209,12 +212,16 @@ class AddressesView(FormView):
                 )
 
         kwargs.update(acteurs=acteurs)
+        return super().get_context_data(**kwargs)
 
         return super().get_context_data(**kwargs)
 
     def _bbox_and_acteurs_from_location_or_epci(self, acteurs):
-        if custom_bbox := self.get_data_from_request_or_bounded_form("bounding_box"):
-            # TODO : recherche dans cette zone
+        custom_bbox = cast(
+            str, self.get_data_from_request_or_bounded_form("bounding_box")
+        )
+
+        if custom_bbox:
             bbox = sanitize_leaflet_bbox(custom_bbox)
             acteurs_in_bbox = acteurs.in_bbox(bbox)
 
@@ -230,9 +237,15 @@ class AddressesView(FormView):
         if (latitude := self.get_data_from_request_or_bounded_form("latitude")) and (
             longitude := self.get_data_from_request_or_bounded_form("longitude")
         ):
+            if center := center_from_leaflet_bbox(custom_bbox):
+                longitude = center[0]
+                latitude = center[1]
+
             acteurs_from_center = acteurs.from_center(longitude, latitude)
+
             if acteurs_from_center.count():
                 custom_bbox = None
+
             return custom_bbox, acteurs_from_center
 
         return custom_bbox, acteurs.none()
