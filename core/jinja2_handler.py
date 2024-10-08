@@ -12,8 +12,6 @@ from jinja2 import Environment
 from qfdmo.models import DisplayedActeur
 from qfdmo.models.action import get_actions_by_direction
 
-# from dsfr.templatetags.dsfr_tags import dsfr_alert
-
 
 def is_embedded(request: HttpRequest) -> bool:
     return "iframe" in request.GET or "carte" in request.GET
