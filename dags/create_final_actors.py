@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime, timedelta
 
 import pandas as pd
@@ -42,6 +43,8 @@ def apply_corrections_acteur(**kwargs):
             df_children["identifiant_unique"].tolist()
         )
     ]
+    # Add a new column uuid to make the displayedacteur id without source name in id
+    df_acteur_merged["uuid"] = uuid.uuid4()
 
     return {
         "df_acteur_merged": df_acteur_merged,
@@ -272,6 +275,7 @@ def write_data_to_postgres(**kwargs):
                 "exclusivite_de_reprisereparation",
                 "uniquement_sur_rdv",
                 "action_principale_id",
+                "uuid",
             ]
         ].to_sql(
             temp_table_name_actor,

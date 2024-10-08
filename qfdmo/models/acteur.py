@@ -531,6 +531,8 @@ class DisplayedActeur(BaseActeur):
         verbose_name = "ACTEUR de l'EC - AFFICHÉ"
         verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ"
 
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
+
     # Table name qfdmo_displayedacteur_sources
     sources = models.ManyToManyField(
         Source,
@@ -604,6 +606,9 @@ class DisplayedActeur(BaseActeur):
 
 
 class DisplayedActeurTemp(BaseActeur):
+
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
+
     labels = models.ManyToManyField(
         LabelQualite,
         through="ActeurLabelQualite",
