@@ -1,12 +1,18 @@
+import logging
+from django.db.models import Min
+
+from django.conf import settings
 import random
+from django.contrib.gis.db.models.functions import Distance
+from django.contrib.gis.geos import Point, Polygon
 import string
 import uuid
 from typing import Any, List, cast
 
 import opening_hours
 import orjson
-from django.contrib.gis.db import models
 from django.core.cache import cache
+from django.contrib.gis.db import models
 from django.core.files.images import get_image_dimensions
 from django.db.models.functions import Now
 from django.forms import ValidationError, model_to_dict
@@ -16,7 +22,13 @@ from unidecode import unidecode
 
 from qfdmo.models.action import Action, get_action_instances
 from qfdmo.models.categorie_objet import SousCategorieObjet
-from qfdmo.models.utils import CodeAsNaturalKeyModel, NomAsNaturalKeyModel
+from qfdmo.models.utils import (
+    CodeAsNaturalKeyModel,
+    NomAsNaturalKeyManager,
+    NomAsNaturalKeyModel,
+)
+
+logger = logging.getLogger(__name__)
 
 
 class ActeurService(CodeAsNaturalKeyModel):
@@ -70,10 +82,6 @@ class ActeurType(CodeAsNaturalKeyModel):
     def get_digital_acteur_type_id(cls) -> int:
         if not cls._digital_acteur_type_id:
             (digital_acteur_type, _) = cls.objects.get_or_create(code="acteur digital")
-            print(
-                f"digital_acteur_type : {digital_acteur_type.id}"
-                f" - {digital_acteur_type.code} - {digital_acteur_type}"
-            )
             cls._digital_acteur_type_id = digital_acteur_type.id
         return cls._digital_acteur_type_id
 
@@ -154,7 +162,48 @@ class LabelQualite(models.Model):
         return self.libelle
 
 
+class ActeurQuerySet(models.QuerySet):
+    def digital(self):
+        return (
+            self.filter(acteur_type_id=ActeurType.get_digital_acteur_type_id())
+            .annotate(min_action_order=Min("proposition_services__action__order"))
+            .order_by("min_action_order", "?")
+        )
+
+    def physical(self):
+        return self.exclude(acteur_type_id=ActeurType.get_digital_acteur_type_id())
+
+    def in_bbox(self, bbox):
+        if not bbox:
+            return self
+
+        return self.physical().filter(location__within=Polygon.from_bbox(bbox))
+
+    def from_center(self, longitude, latitude, distance=settings.DISTANCE_MAX):
+        reference_point = Point(float(longitude), float(latitude), srid=4326)
+        distance_in_degrees = distance / 111320
+
+        return (
+            self.physical()
+            .annotate(distance=Distance("location", reference_point))
+            .filter(
+                location__dwithin=(
+                    reference_point,
+                    distance_in_degrees,
+                )
+            )
+            .order_by("distance")
+        )
+
+
+class ActeurManager(NomAsNaturalKeyManager):
+    def get_queryset(self):
+        return ActeurQuerySet(self.model, using=self._db)
+
+
 class BaseActeur(NomAsNaturalKeyModel):
+    objects = ActeurManager()
+
     class Meta:
         abstract = True
 

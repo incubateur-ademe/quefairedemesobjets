@@ -42,8 +42,8 @@ jobs:
       - name: Check code formatting
         run: black --check --diff .
       - uses: chartboost/ruff-action@v1
-      - name: Check for mising migrations
-        run: python manage.py makemigrations --check --no-input
+      - name: Check for missing migrations
+        run: python manage.py makemigrations --check --no-input --settings=core.test_settings
         env:
           SECRET_KEY: votre_blanquette_est_bonne
           DATABASE_URL: "postgres://fakeusername:fakepassword@postgres:5432/database"
@@ -112,6 +112,7 @@ jobs:
 
       - name: Migrate database
         run: |
+          python manage.py createcachetable
           python manage.py migrate
 
       - name: Populate database
