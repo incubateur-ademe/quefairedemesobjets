@@ -6,19 +6,18 @@ from django.http import HttpRequest
 from django.utils.safestring import mark_safe
 
 from qfdmo.geo_api import all_epci_codes
+from qfdmo.models import DagRun, DagRunStatus, SousCategorieObjet
 from qfdmo.models.action import (
     Action,
     get_action_instances,
     get_directions,
     get_ordered_directions,
 )
-from qfdmo.models import DagRun, DagRunStatus, SousCategorieObjet
-
 from qfdmo.widgets import (
-    AutoCompleteInput,
     AutoCompleteAndSearchInput,
-    SegmentedControlSelect,
+    AutoCompleteInput,
     DSFRCheckboxSelectMultiple,
+    SegmentedControlSelect,
 )
 
 
@@ -302,7 +301,7 @@ class CarteAddressesForm(AddressesForm):
     )
 
     epci_codes = forms.MultipleChoiceField(
-        choices=[(item, item) for item in all_epci_codes()],
+        choices=all_epci_codes,
         widget=forms.MultipleHiddenInput(),
         required=False,
     )
