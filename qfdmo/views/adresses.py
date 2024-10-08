@@ -220,6 +220,9 @@ class AddressesView(FormView):
         custom_bbox = cast(
             str, self.get_data_from_request_or_bounded_form("bounding_box")
         )
+        center = center_from_leaflet_bbox(custom_bbox)
+        latitude = center[1] or self.get_data_from_request_or_bounded_form("latitude")
+        longitude = center[0] or self.get_data_from_request_or_bounded_form("longitude")
 
         if custom_bbox:
             bbox = sanitize_leaflet_bbox(custom_bbox)
@@ -234,13 +237,10 @@ class AddressesView(FormView):
             acteurs = acteurs.in_bbox(bbox)
             return compile_leaflet_bbox(bbox), acteurs
 
-        if (latitude := self.get_data_from_request_or_bounded_form("latitude")) and (
-            longitude := self.get_data_from_request_or_bounded_form("longitude")
-        ):
-            if center := center_from_leaflet_bbox(custom_bbox):
-                longitude = center[0]
-                latitude = center[1]
-
+        # TODO
+        # - Tester cas avec bounding box définie depuis le configurateur
+        # - Tester cas avec center retourné par leaflet
+        if latitude and longitude:
             acteurs_from_center = acteurs.from_center(longitude, latitude)
 
             if acteurs_from_center.count():
