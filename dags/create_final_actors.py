@@ -44,8 +44,9 @@ def apply_corrections_acteur(**kwargs):
         )
     ]
     # Add a new column uuid to make the displayedacteur id without source name in id
-    df_acteur_merged["uuid"] = uuid.uuid4()
-
+    df_acteur_merged["uuid"] = df_acteur_merged["identifiant_unique"].apply(
+        lambda x: str(uuid.uuid5(uuid.NAMESPACE_DNS, x))
+    )
     return {
         "df_acteur_merged": df_acteur_merged,
         # ["parent_id", "child_id", "child_source_id"]
