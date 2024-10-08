@@ -3,7 +3,6 @@ from urllib.parse import quote_plus
 
 from django.conf import settings
 from django.http import HttpRequest
-from django.template.defaulttags import csrf_token
 from django.templatetags.static import static
 from django.urls import reverse
 
@@ -83,7 +82,6 @@ def environment(**options):
     env.globals.update(
         {
             "action_by_direction": action_by_direction,
-            "csrf_token": csrf_token,
             "display_infos_panel": display_infos_panel,
             "hide_object_filter": hide_object_filter,
             "distance_to_acteur": distance_to_acteur,

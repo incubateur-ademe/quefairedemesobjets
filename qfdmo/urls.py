@@ -111,12 +111,12 @@ urlpatterns = [
         name="dags_validations",
     ),
     path(
-        "iframe/configurateur",
+        "configurateur",
         ConfiguratorView.as_view(),
         name="iframe_configurator",
     ),
     path(
-        "iframe/configurateur/avance",
+        "iframe/configurateur",
         AdvancedConfiguratorView.as_view(),
         name="advanced_iframe_configurator",
     ),

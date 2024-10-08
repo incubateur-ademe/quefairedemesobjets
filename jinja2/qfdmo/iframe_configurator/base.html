@@ -5,7 +5,7 @@
         <h1>Configurateur d'Iframe</h1>
 
         <form action="{{ url('qfdmo:iframe_configurator') }}" method="post">
-            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            {{ csrf_input }}
             {{ form }}
             <div class="fr-input-group fr-my-4w">
             <button type="submit" class="fr-btn" title="Valider">
