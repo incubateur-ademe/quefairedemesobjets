@@ -1,7 +1,8 @@
 from typing import List, Tuple, cast
+
+import requests
 from django.contrib.gis.geos import GEOSGeometry
 from django.core.cache import caches
-import requests
 
 db_cache = caches["database"]
 

@@ -11,8 +11,6 @@ from qfdmo.views.adresses import (
     getorcreate_revisionacteur,
     solution_admin,
 )
-from qfdmo.views.configurator import ConfiguratorView
-from qfdmo.views.dags import DagsValidation
 from qfdmo.views.configurator import AdvancedConfiguratorView, ConfiguratorView
 from qfdmo.views.dags import DagsValidation
 

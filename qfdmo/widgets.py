@@ -1,5 +1,5 @@
-from django.contrib.gis import forms as gis_forms
 from django import forms
+from django.contrib.gis import forms as gis_forms
 from django.forms import widgets
 
 
