@@ -7,7 +7,7 @@ from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from dsfr.forms import DsfrBaseForm
 
-from qfdmo.geo_api import all_epci_codes_as_tuples, fetch_epci_codes
+from qfdmo.geo_api import all_epci_codes, fetch_epci_codes
 from qfdmo.models import DagRun, DagRunStatus, SousCategorieObjet
 from qfdmo.models.action import (
     Action,
@@ -306,7 +306,7 @@ class CarteAddressesForm(AddressesForm):
     )
 
     epci_codes = forms.MultipleChoiceField(
-        choices=all_epci_codes_as_tuples,
+        choices=all_epci_codes,
         widget=forms.MultipleHiddenInput(),
         required=False,
     )
