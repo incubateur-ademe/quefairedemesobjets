@@ -1,7 +1,8 @@
-from typing import List, cast
+from typing import List, Tuple, cast
+
+import requests
 from django.contrib.gis.geos import GEOSGeometry
 from django.core.cache import caches
-import requests
 
 db_cache = caches["database"]
 
@@ -20,6 +21,11 @@ def all_epci_codes() -> List[str]:
             "all_epci_codes", fetch_epci_codes, timeout=3600 * 24 * 365
         ),
     )
+
+
+def all_epci_codes_as_tuples() -> List[Tuple[str, str]]:
+    # Just a callable to use in forms
+    return [(item, item) for item in all_epci_codes()]
 
 
 def retrieve_epci_geojson(epci):
