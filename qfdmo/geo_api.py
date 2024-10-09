@@ -7,15 +7,11 @@ from django.core.cache import caches
 db_cache = caches["database"]
 
 
-def fetch_epci_data(fields=["code"]) -> List[any]:
-    """Retrieves EPCI codes from geo.api with fields passed in parameter"""
-    response = requests.get("https://geo.api.gouv.fr/epcis/?fields=code")
-    fields = [(item[field] for field in fields) for item in response.json()]
-    return fields
-
-
 def fetch_epci_codes() -> List[str]:
-    return fetch_epci_data(["code"])
+    """Retrieves EPCI codes from geo.api"""
+    response = requests.get("https://geo.api.gouv.fr/epcis/?fields=code")
+    codes = [item["code"] for item in response.json()]
+    return codes
 
 
 def all_epci_codes() -> List[str]:
