@@ -19,8 +19,8 @@ export default abstract class extends Controller<HTMLElement> {
     currentFocusedOptionIndex: Number,
   }
   declare readonly maxOptionDisplayedValue: number
-  declare currentFocusedOptionIndexValue: number
   declare nbCharToSearchValue: number
+  declare currentFocusedOptionIndexValue: number
 
   connect() {
     if (this.allAvailableOptionsTarget.textContent != null) {
@@ -50,24 +50,27 @@ export default abstract class extends Controller<HTMLElement> {
 
     let countResult = 0
 
-    return this.#getOptionCallback(inputTargetValue).then((data) => {
-      this.hideAutocompleteList()
-      this.autocompleteList = this.createAutocompleteList()
-      this.allAvailableOptions = data
-      if (this.allAvailableOptions.length == 0) return
+    return this.#getOptionCallback(inputTargetValue)
+      .then((data) => {
+        this.hideAutocompleteList()
+        this.allAvailableOptions = data
+        if (this.allAvailableOptions.length == 0) return
 
-      for (let i = 0; i < this.allAvailableOptions.length; i++) {
-        if (countResult >= this.maxOptionDisplayedValue) break
-        countResult++
-        this.addOption(regexPattern, this.allAvailableOptions[i])
-      }
-
-      if (this.autocompleteList.childElementCount > 0) {
-        this.currentFocusedOptionIndexValue = 0
-      }
-      this.#getOptionAnalyticsCallback(inputTargetValue)
-      return
-    })
+        this.autocompleteList = this.createAutocompleteList()
+        for (let i = 0; i < this.allAvailableOptions.length; i++) {
+          if (countResult >= this.maxOptionDisplayedValue) break
+          countResult++
+          this.addOption(regexPattern, this.allAvailableOptions[i])
+        }
+        if (this.autocompleteList.childElementCount > 0) {
+          this.currentFocusedOptionIndexValue = 0
+        }
+        return
+      })
+      .then(() => {
+        this.hideSpinner()
+        return
+      })
   }
 
   selectOption(event: Event) {
@@ -83,16 +86,6 @@ export default abstract class extends Controller<HTMLElement> {
     this.hideSpinner()
   }
 
-  currentFocusedOptionIndexValueChanged(currentValue: string | number, previousValue: string | number) {
-    if (currentValue !== previousValue) {
-      this.updateAutocompleteListFocusedItem()
-    }
-  }
-
-  blurInput(event: Event) {
-    this.hideAutocompleteList()
-  }
-
   keydownDown(event: KeyboardEvent) {
     this.currentFocusedOptionIndexValue++
   }
@@ -100,8 +93,16 @@ export default abstract class extends Controller<HTMLElement> {
   keydownUp(event: KeyboardEvent) {
     this.currentFocusedOptionIndexValue--
   }
+  currentFocusedOptionIndexValueChanged(
+    currentValue: string | number,
+    previousValue: string | number,
+  ) {
+    if (currentValue !== previousValue) {
+      this.updateAutocompleteListFocusedItem()
+    }
+  }
 
-  keydownEnter(event: KeyboardEvent): boolean | void {
+  keydownEnter(event: KeyboardEvent): boolean {
     // TODO : revoir ce sélecteur qui n'est pas hyper robuste
     const autocompleteList = document.getElementById(
       this.inputTarget.id + "autocomplete-list",
@@ -123,40 +124,34 @@ export default abstract class extends Controller<HTMLElement> {
     return false
   }
 
-  hideAutocompleteList(event?: Event) {
-    const autocompleteItemsWrapper = document.getElementsByClassName("autocomplete-items")
-    for (var i = 0; i < autocompleteItemsWrapper.length; i++) {
-      autocompleteItemsWrapper[i].remove()
-    }
+  blurInput(event: Event) {
+    this.hideAutocompleteList()
   }
 
-  #updateFocusedOptionIn(optionElements: NodeListOf<HTMLElement>) {
-    if (!optionElements) {
-      return
+  hideAutocompleteList(event?: Event) {
+    var x = document.getElementsByClassName("autocomplete-items")
+    for (var i = 0; i < x.length; i++) {
+      x[i].remove()
     }
-
-    this.#removeActiveClassOnAllOptions(optionElements)
-    if (this.currentFocusedOptionIndexValue >= optionElements.length) {
-      this.currentFocusedOptionIndexValue = 0
-    }
-    if (this.currentFocusedOptionIndexValue < 0) {
-      this.currentFocusedOptionIndexValue = optionElements.length - 1
-    }
-
-    optionElements[this.currentFocusedOptionIndexValue].classList.add("autocomplete-active")
-
   }
 
   updateAutocompleteListFocusedItem() {
-    // TODO : revoir ce sélecteur qui n'est pas hyper robuste
     const autocompleteListWrapper: HTMLElement | null = document.getElementById(
       this.inputTarget.id + "autocomplete-list",
     )
+    let optionDiv: HTMLCollectionOf<HTMLElement> | undefined
     if (autocompleteListWrapper) {
-      const optionsElements: NodeListOf<HTMLDivElement> =
-        autocompleteListWrapper.querySelectorAll("div")
-      this.#updateFocusedOptionIn(optionsElements)
+      optionDiv = autocompleteListWrapper.getElementsByTagName("div")
     }
+
+    /*a function to classify an item as "active":*/
+    if (!optionDiv) return false
+    /*start by removing the "active" class on all items:*/
+    this.#removeActive(optionDiv)
+    if (this.currentFocusedOptionIndexValue >= optionDiv.length) this.currentFocusedOptionIndexValue = 0
+    if (this.currentFocusedOptionIndexValue < 0) this.currentFocusedOptionIndexValue = optionDiv.length - 1
+    /*add class "autocomplete-active":*/
+    optionDiv[this.currentFocusedOptionIndexValue].classList.add("autocomplete-active")
   }
 
   addAccents(input: string) {
@@ -178,27 +173,24 @@ export default abstract class extends Controller<HTMLElement> {
 
   addOption(regexPattern: RegExp, option: any) {
     // Implement this method in your controller
-    throw new Error(
-      "La méthode addOption doit être implémentée dans la classe héritant de autocomplete_controller",
-    )
   }
 
   createAutocompleteList() {
     /*create a DIV element that will contain the items (values):*/
-    const autocompleteDivWrapper = document.createElement("DIV")
-    autocompleteDivWrapper.setAttribute("id", this.inputTarget.id + "autocomplete-list")
-    autocompleteDivWrapper.classList.add("autocomplete-items")
+     const autocompleteDivWrapper = document.createElement("DIV")
+     autocompleteDivWrapper.setAttribute("id", this.inputTarget.id + "autocomplete-list")
+     autocompleteDivWrapper.classList.add("autocomplete-items")
 
-    const inputTargetWidth = this.inputTarget.offsetWidth
-    autocompleteDivWrapper.classList.add("qfdmo-w-full")
-    autocompleteDivWrapper.style.width = `${inputTargetWidth}px`
+     const inputTargetWidth = this.inputTarget.offsetWidth
+     autocompleteDivWrapper.classList.add("qfdmo-w-full")
+     autocompleteDivWrapper.style.width = `${inputTargetWidth}px`
 
-    /*append the DIV element as a child of the autocomplete container:*/
-    this.inputTarget.after(autocompleteDivWrapper)
-    return autocompleteDivWrapper
-  }
+     /*append the DIV element as a child of the autocomplete container:*/
+     this.inputTarget.after(autocompleteDivWrapper)
+     return autocompleteDivWrapper
+   }
 
-  #removeActiveClassOnAllOptions(optionDiv: NodeListOf<HTMLElement>) {
+  #removeActive(optionDiv: HTMLCollectionOf<HTMLElement>) {
     for (var i = 0; i < optionDiv.length; i++) {
       optionDiv[i].classList.remove("autocomplete-active")
     }
@@ -206,16 +198,8 @@ export default abstract class extends Controller<HTMLElement> {
 
   async #getOptionCallback(value: string): Promise<string[]> {
     // Implement this method in your controller
-    throw new Error(
-      "La méthode getOptionCallback doit être implémentée dans la classe héritant de autocomplete_controller",
-    )
-  }
+    return []
 
-  #getOptionAnalyticsCallback(inputTargetValue) {
-    // Implement in inherited controller
-    throw new Error(
-      "La méthode getOptionAnalyticsCallback doit être implémentée dans la classe héritant de autocomplete_controller",
-    )
   }
 
   displaySpinner(): void {

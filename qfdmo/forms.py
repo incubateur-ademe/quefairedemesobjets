@@ -7,7 +7,7 @@ from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from dsfr.forms import DsfrBaseForm
 
-from qfdmo.geo_api import all_epci_codes_as_tuples
+from qfdmo.geo_api import all_epci_codes_as_tuples, fetch_epci_codes
 from qfdmo.models import DagRun, DagRunStatus, SousCategorieObjet
 from qfdmo.models.action import (
     Action,
@@ -20,6 +20,8 @@ from qfdmo.widgets import (
     AutoCompleteAndSearchInput,
     AutoCompleteInput,
     DSFRCheckboxSelectMultiple,
+    GenericAutoCompleteInput,
+    RangeInput,
     SegmentedControlSelect,
 )
 

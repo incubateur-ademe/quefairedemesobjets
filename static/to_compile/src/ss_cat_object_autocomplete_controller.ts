@@ -32,7 +32,6 @@ export default class extends AutocompleteController {
                 }
                 if (this.autocompleteList.childElementCount > 0) {
                     this.currentFocusedOptionIndexValue = 0
-                    this.updateAutocompleteListFocusedItem()
                 }
 
                 posthog.capture("object_input", {
