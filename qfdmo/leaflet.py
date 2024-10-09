@@ -21,7 +21,7 @@ def center_from_leaflet_bbox(custom_bbox_as_string: str) -> List[float]:
         return [custom_bbox["center"]["lng"], custom_bbox["center"]["lat"]]
     except (JSONDecodeError, KeyError):
         # TODO : gérer l'erreur
-        pass
+        return ["", ""]
 
 
 def sanitize_leaflet_bbox(custom_bbox_as_string: str) -> List[float] | None:
