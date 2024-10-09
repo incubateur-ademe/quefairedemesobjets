@@ -1,16 +1,21 @@
-from typing import List, cast
+from typing import List, Tuple, cast
+
+import requests
 from django.contrib.gis.geos import GEOSGeometry
 from django.core.cache import caches
-import requests
 
 db_cache = caches["database"]
 
 
-def fetch_epci_codes() -> List[str]:
-    """Retrieves EPCI codes from geo.api"""
+def fetch_epci_data(fields=["code"]) -> List[any]:
+    """Retrieves EPCI codes from geo.api with fields passed in parameter"""
     response = requests.get("https://geo.api.gouv.fr/epcis/?fields=code")
-    codes = [item["code"] for item in response.json()]
-    return codes
+    fields = [(item[field] for field in fields) for item in response.json()]
+    return fields
+
+
+def fetch_epci_codes() -> List[str]:
+    return fetch_epci_data(["code"])
 
 
 def all_epci_codes() -> List[str]:
@@ -20,6 +25,11 @@ def all_epci_codes() -> List[str]:
             "all_epci_codes", fetch_epci_codes, timeout=3600 * 24 * 365
         ),
     )
+
+
+def all_epci_codes_as_tuples() -> List[Tuple[str, str]]:
+    # Just a callable to use in forms
+    return [(item, item) for item in all_epci_codes()]
 
 
 def retrieve_epci_geojson(epci):
