@@ -4,8 +4,8 @@
 >
     <div
         class="autocomplete qfdmo-relative"
-        {# TODO : Voir pour mieux gérer ce cas si le controleur est déjà défini sur le parent quelque part #}
-        data-controller="{{ widget.data_controller }}"
+        {% block wrapper_attributes %}
+        {% endblock wrapper_attributes %}
     >
         <input
                 data-action="

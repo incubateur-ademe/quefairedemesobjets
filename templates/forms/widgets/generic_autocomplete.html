@@ -5,6 +5,10 @@
 change->autocomplete#change
 {% endblock data_action %}
 
+{% block wrapper_attributes %}
+data-controller="autocomplete"
+{% endblock wrapper_attributes %}
+
 {% block choices %}
     <div class="autocomplete-items" data-autocomplete-target="listbox" role="listbox">
         {% for group, option, _ in widget.optgroups %}
