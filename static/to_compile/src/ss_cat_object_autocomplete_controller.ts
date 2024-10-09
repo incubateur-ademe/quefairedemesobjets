@@ -1,4 +1,4 @@
-import AutocompleteController from "./src/autocomplete_controller"
+import AutocompleteController from "./autocomplete_controller"
 import posthog from "./analytics"
 import { SSCatObject } from "./types"
 

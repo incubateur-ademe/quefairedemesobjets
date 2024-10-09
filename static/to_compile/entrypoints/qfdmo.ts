@@ -23,6 +23,5 @@ stimulus.register("search-solution-form", SearchSolutionFormController)
 stimulus.register("analytics", AnalyticsController)
 stimulus.register("autocomplete", GenericAutocompleteController)
 stimulus.register("copy", CopyController)
-stimulus.register("scrollController", ScrollController)
 
 Turbo.session.drive = false
