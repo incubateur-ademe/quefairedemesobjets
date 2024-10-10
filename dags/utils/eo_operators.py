@@ -24,6 +24,38 @@ def fetch_data_from_api_task(dag: DAG) -> PythonOperator:
     )
 
 
+def fetch_pharma_data_task(dag: DAG) -> PythonOperator:
+    return PythonOperator(
+        task_id="fetch_pharma_data",
+        python_callable=dag_eo_utils.fetch_pharma_data,
+        dag=dag,
+    )
+
+
+def filtre_pharma_only_task(dag: DAG) -> PythonOperator:
+    return PythonOperator(
+        task_id="filtre_pharma_only",
+        python_callable=dag_eo_utils.filtre_pharma_only,
+        dag=dag,
+    )
+
+
+def normalize_adresse_task(dag: DAG) -> PythonOperator:
+    return PythonOperator(
+        task_id="normalize_adresse",
+        python_callable=dag_eo_utils.normalize_adresse,
+        dag=dag,
+    )
+
+
+def normalized_data_for_pharma_task(dag: DAG) -> PythonOperator:
+    return PythonOperator(
+        task_id="fetch_data_from_api",
+        python_callable=dag_eo_utils.normalized_data_for_pharma,
+        dag=dag,
+    )
+
+
 def load_data_from_postgresql_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id="load_data_from_postgresql",
@@ -148,6 +180,52 @@ def eo_task_chain(dag: DAG) -> None:
     ]
 
     chain(
+        read_tasks,
+        read_acteur_task(dag),
+        create_actors_task(dag),
+        create_tasks,
+        create_proposition_services_sous_categories_task(dag),
+        serialize_to_json_task(dag),
+        write_data_task(dag),
+    )
+
+
+def pharma_task_chain(dag: DAG) -> None:
+    read_tasks = [
+        read_data_from_postgres_task(
+            dag=dag, table_name="qfdmo_acteurtype", task_id="read_acteurtype"
+        ),
+        read_data_from_postgres_task(
+            dag=dag, table_name="qfdmo_source", task_id="read_source"
+        ),
+        read_data_from_postgres_task(
+            dag=dag, table_name="qfdmo_action", task_id="read_action"
+        ),
+        read_data_from_postgres_task(
+            dag=dag, table_name="qfdmo_acteurservice", task_id="read_acteurservice"
+        ),
+        read_data_from_postgres_task(
+            dag=dag,
+            table_name="qfdmo_souscategorieobjet",
+            task_id="read_souscategorieobjet",
+        ),
+        read_data_from_postgres_task(
+            dag=dag, table_name="qfdmo_labelqualite", task_id="read_labelqualite"
+        ),
+        load_data_from_postgresql_task(dag),
+    ]
+
+    create_tasks = [
+        create_proposition_services_task(dag),
+        create_labels_task(dag),
+        create_acteur_services_task(dag),
+    ]
+
+    chain(
+        fetch_pharma_data_task(dag),
+        filtre_pharma_only_task(dag),
+        normalize_adresse_task(dag),
+        normalized_data_for_pharma_task(dag),
         read_tasks,
         read_acteur_task(dag),
         create_actors_task(dag),

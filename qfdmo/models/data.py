@@ -1,4 +1,5 @@
 from django.contrib.gis.db import models
+from django.db.models.functions import Now
 
 from dags.utils.shared_constants import FINISHED, REJECTED, TO_INSERT, TO_VALIDATE
 from qfdmo.models.acteur import ActeurType, Source
@@ -167,3 +168,16 @@ class DagRunChange(models.Model):
 
     def get_candidat(self, index):
         return self.row_updates["ae_result"][int(index) - 1]
+
+
+class BANCache(models.Model):
+    class Meta:
+        verbose_name = "Cache BAN"
+        verbose_name_plural = "Cache BAN"
+
+    adresse = models.CharField(max_length=255, blank=True, null=True)
+    code_postal = models.CharField(max_length=255, blank=True, null=True)
+    ville = models.CharField(max_length=255, blank=True, null=True)
+    location = models.PointField(blank=True, null=True)
+    ban_returned = models.JSONField(blank=True, null=True)
+    modifie_le = models.DateTimeField(auto_now=True, db_default=Now())

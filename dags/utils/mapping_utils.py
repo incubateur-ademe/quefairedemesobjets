@@ -58,6 +58,7 @@ def transform_acteur_type_id(value, df_acteurtype):
         "plateforme inertes": "plateforme de valorisation des inertes",
         "magasin / franchise, enseigne commerciale / distributeur / point de vente "
         "/ franchise, enseigne commerciale / distributeur / point de vente": "commerce",
+        "pharmacie": "commerce",
     }
 
     libelle = mapping_dict.get(value.lower())
@@ -115,18 +116,17 @@ def process_reparacteurs(df, df_sources, df_acteurtype):
     )
     # TODO : voir si on peut tester les urls dans un opérateur, quite à maintenir
     # un cache des urls validées
-    df["website"] = df["website"].apply(prefix_url)
+    df["url"] = df["url"].apply(prefix_url)
     df["point_de_reparation"] = True
     return df
 
 
 def process_actors(df):
-    df["nom_de_lorganisme_std"] = df["nom_de_lorganisme"].str.replace("-", "")
-    df["id_point_apport_ou_reparation"] = df["id_point_apport_ou_reparation"].fillna(
-        df["nom_de_lorganisme_std"]
+    df["identifiant_externe"] = df["identifiant_externe"].fillna(
+        df["nom"].str.replace("-", "")
     )
-    df["id_point_apport_ou_reparation"] = (
-        df["id_point_apport_ou_reparation"]
+    df["identifiant_externe"] = (
+        df["identifiant_externe"]
         .str.replace(" ", "_")
         .str.replace("_-", "_")
         .str.replace("__", "_")
@@ -135,8 +135,8 @@ def process_actors(df):
         df.loc[
             df["service_a_domicile"] == "service à domicile uniquement", "statut"
         ] = "SUPPRIME"
-    if "site_web" in df.columns:
-        df["site_web"] = df["site_web"].apply(prefix_url)
+    if "url" in df.columns:
+        df["url"] = df["url"].apply(prefix_url)
     return df
 
 

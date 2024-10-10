@@ -45,7 +45,8 @@
     "jeux et jouets": "jouet",
     "matériels de bricolage, dont l’outillage à main": "outil de bricolage et jardinage",
     "produits et matériels destinés à l’entretien et l’aménagement du jardin": "accessoire et meuble de jardin",
-    "autres pmcb": "Autres PMCB"
+    "autres pmcb": "Autres PMCB",
+    "médicaments & dasri": "Médicaments & DASRI"
   },
   "sous_categories_cma": {
     "articles d’ameublement (meubles, chaises, fauteuils, canapés, tapis, etc)": [
