@@ -205,7 +205,7 @@ class BaseActeurAdmin(admin.GISModelAdmin):
 
 
 class ActeurResource(resources.ModelResource):
-    nb_object_max = settings.DJANGO_IMPORT_EXPORT_LIMIT
+    nb_object = settings.DJANGO_IMPORT_EXPORT_LIMIT
 
     delete = fields.Field(widget=widgets.BooleanWidget())
     acteur_type = fields.Field(
@@ -224,8 +224,8 @@ class ActeurResource(resources.ModelResource):
     )
 
     def __init__(self, **kwargs):
-        if "nb_object_max" in kwargs:
-            self.nb_object_max = kwargs["nb_object_max"]
+        if "nb_object" in kwargs:
+            self.nb_object = kwargs["nb_object"]
         super().__init__(**kwargs)
 
     def for_delete(self, row, instance):
@@ -240,8 +240,8 @@ class ActeurResource(resources.ModelResource):
             row["location"] = None
 
     def get_queryset(self):
-        if self.nb_object_max:
-            return super().get_queryset()[: self.nb_object_max]
+        if self.nb_object:
+            return super().get_queryset()[: self.nb_object]
         return super().get_queryset()
 
     class Meta:
@@ -524,6 +524,104 @@ class RevisionPropositionServiceAdmin(
 class DisplayedActeurResource(ActeurResource):
     class Meta:
         model = DisplayedActeur
+
+
+class OpenSourceDisplayedActeurResource(resources.ModelResource):
+    """
+    Only used to export data to open-source in Koumoul
+    """
+
+    nb_object = 0
+    offset_object = 0
+
+    acteur_type = fields.Field(
+        column_name="acteur_type",
+        attribute="acteur_type",
+        widget=widgets.ForeignKeyWidget(ActeurType, field="code"),
+    )
+    sources = fields.Field(
+        column_name="sources",
+        attribute="sources",
+        widget=widgets.ManyToManyWidget(Source, field="code", separator="|"),
+    )
+    latitude = fields.Field(column_name="latitude", attribute="latitude", readonly=True)
+    longitude = fields.Field(
+        column_name="longitude", attribute="longitude", readonly=True
+    )
+
+    contributeurs = fields.Field(
+        column_name="contributeurs", attribute="contributeurs", readonly=True
+    )
+
+    propositions_services = fields.Field(
+        column_name="propositions_services",
+        attribute="propositions_services_json",
+        readonly=True,
+    )
+
+    def __init__(self, **kwargs):
+        if "nb_object" in kwargs:
+            self.nb_object = kwargs["nb_object"]
+        if "offset_object" in kwargs:
+            self.offset_object = kwargs["offset_object"]
+        super().__init__(**kwargs)
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        # queryset = queryset.prefetch_related(
+        #     "sources",
+        #     "labels",
+        #     "proposition_services__sous_categories",
+        #     "proposition_services__action",
+        # )
+        if self.nb_object:
+            return queryset[: self.nb_object]
+        return queryset
+
+    class Meta:
+        model = DisplayedActeur
+        fields = [
+            "uuid",
+            "nom",
+            "description",
+            "acteur_type",
+            "adresse",
+            "adresse_complement",
+            "code_postal",
+            "ville",
+            "url",
+            "email",
+            "telephone",
+            "location",
+            "nom_commercial",
+            "nom_officiel",
+            "labels",
+            "acteur_services",
+            "siret",
+            "identifiant_externe",
+            "statut",
+            "naf_principal",
+            "commentaires",
+            "horaires_osm",
+            "horaires_description",
+            "public_accueilli",
+            "reprise",
+            "exclusivite_de_reprisereparation",
+            "uniquement_sur_rdv",
+            "action_principale",
+            "sources",
+            "latitude",
+            "longitude",
+            "contributeurs",
+            "propositions_services",
+        ]
+        exclude = [
+            "identifiant_unique",
+            "cree_le",
+            "modifie_le",
+            "source",
+            "location",
+        ]
 
 
 class DisplayedActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):

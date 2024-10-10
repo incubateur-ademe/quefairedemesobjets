@@ -49,6 +49,7 @@ def apply_corrections_acteur(**kwargs):
     df_acteur_merged["uuid"] = df_acteur_merged["identifiant_unique"].apply(
         lambda x: shortuuid.uuid(name=x)
     )
+
     return {
         "df_acteur_merged": df_acteur_merged,
         # ["parent_id", "child_id", "child_source_id"]
