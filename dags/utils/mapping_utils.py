@@ -60,12 +60,12 @@ def transform_acteur_type_id(value, df_acteurtype):
         "/ franchise, enseigne commerciale / distributeur / point de vente": "commerce",
     }
 
-    libelle = mapping_dict.get(value.lower())
+    code = mapping_dict.get(value.lower())
     id_value = (
         df_acteurtype.loc[
-            df_acteurtype["libelle"].str.lower() == libelle.lower(), "id"
+            df_acteurtype["code"].str.lower() == code.lower(), "id"
         ].values[0]
-        if any(df_acteurtype["libelle"].str.lower() == libelle.lower())
+        if any(df_acteurtype["code"].str.lower() == code.lower())
         else None
     )
     return id_value

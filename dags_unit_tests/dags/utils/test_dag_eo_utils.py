@@ -1569,9 +1569,7 @@ class TestCeateLabels:
             {
                 "acteur_id": [1],
                 "labelqualite_id": [3],
-                "labelqualite": [
-                    "Labellisé Repar'Acteur",
-                ],
+                "labelqualite": ["reparacteur"],
             }
         )
         pd.testing.assert_frame_equal(df, expected_dataframe_with_reparacteur_label)
@@ -1607,9 +1605,7 @@ class TestCeateLabels:
             {
                 "acteur_id": [1],
                 "labelqualite_id": [1],
-                "labelqualite": [
-                    "Enseigne de l'économie sociale et solidaire",
-                ],
+                "labelqualite": ["ess"],
             }
         )
         pd.testing.assert_frame_equal(df, expected_dataframe_with_ess_label)
@@ -1651,9 +1647,7 @@ class TestCeateLabels:
             {
                 "acteur_id": [1],
                 "labelqualite_id": [2],
-                "labelqualite": [
-                    "Labellisé Bonus Réparation EcoOrganisme",
-                ],
+                "labelqualite": ["ecoorganisme"],
             }
         )
         pd.testing.assert_frame_equal(

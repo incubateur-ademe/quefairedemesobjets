@@ -585,9 +585,7 @@ def create_labels(**kwargs):
         df_acteurtype["code"].str.lower() == "ess", "id"
     ].iloc[0]
     ess_label_id = labels.loc[labels["code"].str.lower() == "ess", "id"].iloc[0]
-    ess_label_libelle = labels.loc[labels["code"].str.lower() == "ess", "libelle"].iloc[
-        0
-    ]
+    ess_label_code = labels.loc[labels["code"].str.lower() == "ess", "code"].iloc[0]
 
     label_mapping = labels.set_index(labels["code"].str.lower()).to_dict(orient="index")
     rows_list = []
@@ -600,7 +598,7 @@ def create_labels(**kwargs):
                 {
                     "acteur_id": row["identifiant_unique"],
                     "labelqualite_id": label_mapping[label_code]["id"],
-                    "labelqualite": label_mapping[label_code]["libelle"],
+                    "labelqualite": label_mapping[label_code]["code"],
                 }
             )
 
@@ -613,7 +611,7 @@ def create_labels(**kwargs):
                     {
                         "acteur_id": row["identifiant_unique"],
                         "labelqualite_id": label_mapping[label_code]["id"],
-                        "labelqualite": label_mapping[label_code]["libelle"],
+                        "labelqualite": label_mapping[label_code]["code"],
                     }
                 )
 
@@ -623,7 +621,7 @@ def create_labels(**kwargs):
                 {
                     "acteur_id": row["identifiant_unique"],
                     "labelqualite_id": ess_label_id,
-                    "labelqualite": ess_label_libelle,
+                    "labelqualite": ess_label_code,
                 }
             )
 
