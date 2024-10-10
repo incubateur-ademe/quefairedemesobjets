@@ -1,7 +1,7 @@
 import unittest
 
-import numpy as np
 import pandas as pd
+import pytest
 from utils import mapping_utils
 
 
@@ -49,23 +49,36 @@ class TestDataTransformations(unittest.TestCase):
         }
         self.assertEqual(mapping_utils.create_identifiant_unique(row), "ecoorg_123AbC")
 
-    def test_process_siret_value(self):
-        self.assertEqual(mapping_utils.process_siret("123456789012345"), None)
-        self.assertEqual(mapping_utils.process_siret(np.nan), None)
-        self.assertEqual(
-            mapping_utils.process_siret("98765432109876"), "98765432109876"
-        )
-        self.assertEqual(mapping_utils.process_siret("8765432109876"), "08765432109876")
 
-    def test_process_telephone_value(self):
-        self.assertEqual(
-            mapping_utils.process_phone_number("33 1 23 45 67 89"), "0123456789"
-        )
-        self.assertEqual(mapping_utils.process_phone_number("0612345678"), "0612345678")
-        self.assertEqual(mapping_utils.process_phone_number(None), None)
-        self.assertEqual(
-            mapping_utils.process_phone_number("+33612345678"), "+33612345678"
-        )
+@pytest.mark.parametrize(
+    "siret, expected_siret",
+    [
+        (None, None),
+        ("123456789012345", None),
+        ("98765432109876", "98765432109876"),
+        ("8765432109876", "08765432109876"),
+        ("AB123", None),
+    ],
+)
+def test_process_siret(siret, expected_siret):
+    assert mapping_utils.process_siret(siret) == expected_siret
+
+
+@pytest.mark.parametrize(
+    "phone_number, code_postal, expected_phone_number",
+    [
+        (None, None, None),
+        ("1 23 45 67 89", "75001", "0123456789"),
+        ("33 1 23 45 67 89", "75001", "0123456789"),
+        ("0612345678", "75001", "0612345678"),
+        ("+33612345678", "75001", "+33612345678"),
+    ],
+)
+def test_process_phone_number(phone_number, code_postal, expected_phone_number):
+    assert (
+        mapping_utils.process_phone_number(phone_number, code_postal)
+        == expected_phone_number
+    )
 
 
 class TestTransformFloat(unittest.TestCase):

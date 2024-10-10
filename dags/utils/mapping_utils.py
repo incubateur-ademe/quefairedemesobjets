@@ -6,12 +6,21 @@ from datetime import datetime
 import pandas as pd
 
 
-def process_siret(siret):
-    if pd.isna(siret):
-        return None
-    siret = str(siret).replace(" ", "")
+def _clean_number(number):
+    if pd.isna(number) or number is None:
+        return number
 
-    if not siret.isdigit():
+    # suppression des 2 derniers chiffres si le caractère si == .0
+    number = re.sub(r"\.0$", "", str(number))
+    # suppression de tous les caractères autre que digital
+    number = re.sub(r"[^\d+]", "", number)
+    return number
+
+
+def process_siret(siret):
+    siret = _clean_number(siret)
+
+    if siret is None:
         return None
 
     if len(siret) == 9:
@@ -26,11 +35,15 @@ def process_siret(siret):
     return None
 
 
-def process_phone_number(number):
-    if pd.isna(number):
-        return number
+def process_phone_number(number, code_postal):
 
-    number = re.sub(r"[^\d+]", "", number)
+    number = _clean_number(number)
+
+    if number is None:
+        return None
+
+    if len(number) == 9 and code_postal and int(code_postal) < 96000:
+        number = "0" + number
 
     if number.startswith("33"):
         number = "0" + number[2:]
