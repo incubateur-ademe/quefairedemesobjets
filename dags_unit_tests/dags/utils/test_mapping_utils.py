@@ -1,5 +1,6 @@
 import unittest
 
+import numpy as np
 import pandas as pd
 import pytest
 from utils import mapping_utils
@@ -68,6 +69,7 @@ def test_process_siret(siret, expected_siret):
     "phone_number, code_postal, expected_phone_number",
     [
         (None, None, None),
+        (np.NaN, None, None),
         ("1 23 45 67 89", "75001", "0123456789"),
         ("33 1 23 45 67 89", "75001", "0123456789"),
         ("0612345678", "75001", "0612345678"),

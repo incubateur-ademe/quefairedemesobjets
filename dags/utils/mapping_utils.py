@@ -2,13 +2,14 @@ import json
 import math
 import re
 from datetime import datetime
+from typing import Any
 
 import pandas as pd
 
 
-def _clean_number(number):
+def _clean_number(number: Any) -> str | None:
     if pd.isna(number) or number is None:
-        return number
+        return None
 
     # suppression des 2 derniers chiffres si le caractère si == .0
     number = re.sub(r"\.0$", "", str(number))
