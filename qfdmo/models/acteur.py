@@ -12,6 +12,7 @@ from django.contrib.gis.geos import Point, Polygon
 from django.contrib.gis.geos.geometry import GEOSGeometry
 from django.core.cache import cache
 from django.core.files.images import get_image_dimensions
+from django.core.validators import RegexValidator
 from django.db.models import Min
 from django.db.models.functions import Now
 from django.forms import ValidationError, model_to_dict
@@ -35,7 +36,26 @@ class ActeurService(CodeAsNaturalKeyModel):
         verbose_name_plural = "Services proposés"
 
     id = models.AutoField(primary_key=True)
-    code = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    code = models.CharField(
+        max_length=255,
+        unique=True,
+        blank=False,
+        null=False,
+        help_text=(
+            "Ce champs est utilisé lors de l'import de données, il ne doit pas être"
+            " mis à jour sous peine de casser l'import de données"
+        ),
+        validators=[
+            RegexValidator(
+                regex=r"^[a-z_]+$",
+                message=(
+                    "Le champ Code ne doit contenir que des caractères"
+                    " minuscule et des underscores."
+                ),
+                code="invalid_code",
+            )
+        ],
+    )
     libelle = models.CharField(max_length=255, blank=True, null=True)
     actions = models.ManyToManyField(Action)
 
@@ -72,7 +92,26 @@ class ActeurType(CodeAsNaturalKeyModel):
         verbose_name_plural = "Types d'acteur"
 
     id = models.AutoField(primary_key=True)
-    code = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    code = models.CharField(
+        max_length=255,
+        unique=True,
+        blank=False,
+        null=False,
+        help_text=(
+            "Ce champs est utilisé lors de l'import de données, il ne doit pas être"
+            " mis à jour sous peine de casser l'import de données"
+        ),
+        validators=[
+            RegexValidator(
+                regex=r"^[a-z_]+$",
+                message=(
+                    "Le champ Code ne doit contenir que des caractères"
+                    " minuscule et des underscores."
+                ),
+                code="invalid_code",
+            )
+        ],
+    )
     libelle = models.CharField(max_length=255, blank=False, null=False, default="?")
 
     @classmethod

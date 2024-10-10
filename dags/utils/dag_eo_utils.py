@@ -179,7 +179,7 @@ def serialize_to_json(**kwargs):
     df_acteur_services = (
         df_acteur_services
         if df_acteur_services is not None
-        else pd.DataFrame(columns=["acteur_id", "acteurservice_id", "acteurservice"])
+        else pd.DataFrame(columns=["acteur_id", "acteurservice_id"])
     )
 
     aggregated_pdsc = (
@@ -458,27 +458,30 @@ def create_actors(**kwargs):
     # TODO : manage constant as an enum in config
     df["statut"] = "ACTIF"
 
+    # TODO Plutôt se baser sur le nom de la colonne cibel plutôt que sur le nom de la
+    # colonne source
     for old_col, new_col in column_mapping.items():
         if old_col in df.columns and new_col:
-            if old_col == "id":
-                df[new_col] = df["id"].astype(str)
-            elif old_col == "is_enabled":
+            if new_col == "identifiant_externe":
+                df[new_col] = df[old_col].astype(str)
+            elif new_col == "statut":
                 df[new_col] = df[old_col].map({1: "ACTIF", 0: "SUPPRIME"})
-            elif old_col == "type_de_point_de_collecte":
+            elif new_col == "acteur_type_id":
                 df[new_col] = df[old_col].apply(
                     lambda x: mapping_utils.transform_acteur_type_id(
                         x, df_acteurtype=df_acteurtype
                     )
                 )
-            elif old_col == "ecoorganisme":
+            elif new_col == "source_id":
                 df[new_col] = df[old_col].apply(
                     lambda x: mapping_utils.get_id_from_code(x, df_sources)
                 )
+            # here we keep the condition on old_col
             elif old_col == "adresse_format_ban":
                 df[["adresse", "code_postal", "ville"]] = df.apply(
                     base_utils.get_address, axis=1
                 )
-            elif old_col == "public_accueilli":
+            elif new_col == "public_accueilli":
                 df[new_col] = _force_column_value(
                     df[old_col],
                     {
@@ -493,9 +496,9 @@ def create_actors(**kwargs):
                 df["statut"] = df["public_accueilli"].apply(
                     lambda x: "SUPPRIME" if x == "Professionnels" else "ACTIF"
                 )
-            elif old_col in ["uniquement_sur_rdv", "exclusivite_de_reprisereparation"]:
+            elif new_col in ["uniquement_sur_rdv", "exclusivite_de_reprisereparation"]:
                 df[new_col] = df[old_col].apply(cast_eo_boolean_or_string_to_boolean)
-            elif old_col == "reprise":
+            elif new_col == "reprise":
                 df[new_col] = _force_column_value(
                     df[old_col],
                     {
@@ -585,12 +588,10 @@ def create_labels(**kwargs):
         df_acteurtype["code"].str.lower() == "ess", "id"
     ].iloc[0]
     ess_label_id = labels.loc[labels["code"].str.lower() == "ess", "id"].iloc[0]
-    ess_label_code = labels.loc[labels["code"].str.lower() == "ess", "code"].iloc[0]
 
     label_mapping = labels.set_index(labels["code"].str.lower()).to_dict(orient="index")
     rows_list = []
     for _, row in df_actors.iterrows():
-
         # Handle label_code if it is set (works for reparacteur)
         label_code = row.get("label_code", "").lower()
         if label_code in label_mapping:
@@ -598,20 +599,20 @@ def create_labels(**kwargs):
                 {
                     "acteur_id": row["identifiant_unique"],
                     "labelqualite_id": label_mapping[label_code]["id"],
-                    "labelqualite": label_mapping[label_code]["code"],
                 }
             )
 
         # Manage bonus reparation
         label = str(row.get("labels_etou_bonus"))
         if label == "Agréé Bonus Réparation":
+            # The label with the same code than the eco-organisme code is the one of
+            # the "bonus réparation"
             label_code = row.get("ecoorganisme").lower()
             if label_code in label_mapping.keys():
                 rows_list.append(
                     {
                         "acteur_id": row["identifiant_unique"],
                         "labelqualite_id": label_mapping[label_code]["id"],
-                        "labelqualite": label_mapping[label_code]["code"],
                     }
                 )
 
@@ -621,13 +622,10 @@ def create_labels(**kwargs):
                 {
                     "acteur_id": row["identifiant_unique"],
                     "labelqualite_id": ess_label_id,
-                    "labelqualite": ess_label_code,
                 }
             )
 
-    df_labels = pd.DataFrame(
-        rows_list, columns=["acteur_id", "labelqualite_id", "labelqualite"]
-    )
+    df_labels = pd.DataFrame(rows_list, columns=["acteur_id", "labelqualite_id"])
     df_labels.drop_duplicates(
         ["acteur_id", "labelqualite_id"], keep="first", inplace=True
     )
@@ -639,19 +637,19 @@ def create_acteur_services(**kwargs):
     df_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
 
     acteurservice_acteurserviceid = {
-        "Service de réparation": mapping_utils.get_id_from_code(
-            "Service de réparation", df_acteur_services
+        "service_de_reparation": mapping_utils.get_id_from_code(
+            "service_de_reparation", df_acteur_services
         ),
-        "Collecte par une structure spécialisée": mapping_utils.get_id_from_code(
-            "Collecte par une structure spécialisée", df_acteur_services
+        "structure_de_collecte": mapping_utils.get_id_from_code(
+            "structure_de_collecte", df_acteur_services
         ),
     }
     acteurservice_eovalues = {
-        "Service de réparation": [
+        "service_de_reparation": [
             "point_dapport_de_service_reparation",
             "point_de_reparation",
         ],
-        "Collecte par une structure spécialisée": [
+        "structure_de_collecte": [
             "point_dapport_pour_reemploi",
             "point_de_collecte_ou_de_reprise_des_dechets",
         ],
@@ -666,12 +664,11 @@ def create_acteur_services(**kwargs):
                         "acteurservice_id": acteurservice_acteurserviceid[
                             acteur_service
                         ],
-                        "acteurservice": acteur_service,
                     }
                 )
 
     df_acteur_services = pd.DataFrame(
         acteur_acteurservice_list,
-        columns=["acteur_id", "acteurservice_id", "acteurservice"],
+        columns=["acteur_id", "acteurservice_id"],
     )
     return df_acteur_services

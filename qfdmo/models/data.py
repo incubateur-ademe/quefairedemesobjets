@@ -125,10 +125,12 @@ class DagRunChange(models.Model):
         if value := self.row_updates.get("source_id"):
             displayed_details["Source"] = Source.objects.get(pk=value).libelle
         if value := self.row_updates.get("labels"):
-            displayed_details["Labels"] = ", ".join([v["labelqualite"] for v in value])
+            displayed_details["Labels"] = ", ".join(
+                [str(v["labelqualite_id"]) for v in value]
+            )
         if value := self.row_updates.get("acteur_services"):
             displayed_details["Acteur Services"] = ", ".join(
-                [v["acteurservice"] for v in value]
+                [str(v["acteurservice_id"]) for v in value]
             )
 
         return displayed_details
