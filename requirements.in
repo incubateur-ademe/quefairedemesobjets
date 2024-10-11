@@ -17,6 +17,7 @@ psycopg2
 python-decouple
 requests
 sentry-sdk
+shortuuid
 tqdm
 unidecode
 uvicorn

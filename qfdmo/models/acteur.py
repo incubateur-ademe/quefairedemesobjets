@@ -5,6 +5,7 @@ from typing import Any, List, cast
 
 import opening_hours
 import orjson
+import shortuuid
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.gis.db.models.functions import Distance
@@ -531,7 +532,7 @@ class DisplayedActeur(BaseActeur):
         verbose_name = "ACTEUR de l'EC - AFFICHÉ"
         verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ"
 
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
+    uuid = models.CharField(max_length=255, default=shortuuid.uuid, editable=False)
 
     # Table name qfdmo_displayedacteur_sources
     sources = models.ManyToManyField(
@@ -607,7 +608,7 @@ class DisplayedActeur(BaseActeur):
 
 class DisplayedActeurTemp(BaseActeur):
 
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
+    uuid = models.CharField(max_length=255, default=shortuuid.uuid, editable=False)
 
     labels = models.ManyToManyField(
         LabelQualite,

@@ -1,7 +1,7 @@
-import uuid
 from datetime import datetime, timedelta
 
 import pandas as pd
+import shortuuid
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
@@ -45,7 +45,7 @@ def apply_corrections_acteur(**kwargs):
     ]
     # Add a new column uuid to make the displayedacteur id without source name in id
     df_acteur_merged["uuid"] = df_acteur_merged["identifiant_unique"].apply(
-        lambda x: str(uuid.uuid5(uuid.NAMESPACE_DNS, x))
+        lambda x: shortuuid.uuid(name=x)
     )
     return {
         "df_acteur_merged": df_acteur_merged,
