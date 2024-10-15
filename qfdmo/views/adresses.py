@@ -64,6 +64,7 @@ class AddressesView(FormView):
         initial["longitude"] = self.request.GET.get("longitude")
         # TODO: refacto forms : delete this line
         initial["label_reparacteur"] = self.request.GET.get("label_reparacteur")
+        initial["epci_codes"] = self.request.GET.getlist("epci_codes")
         initial["pas_exclusivite_reparation"] = self.request.GET.get(
             "pas_exclusivite_reparation", True
         )
@@ -72,7 +73,7 @@ class AddressesView(FormView):
         # TODO: refacto forms : delete this line
         initial["ess"] = self.request.GET.get("ess")
         # TODO: refacto forms : delete this line
-        initial["bounding_box"] = self.kwargs.get("bbox")
+        initial["bounding_box"] = self.request.GET.get("bounding_box")
         initial["sc_id"] = (
             self.request.GET.get("sc_id") if initial["sous_categorie_objet"] else None
         )
