@@ -44,7 +44,7 @@
         "leaflet": "^1.9.4",
         "leaflet-extra-markers": "^1.2.2",
         "posthog-js": "^1.165.1",
-        "tailwindcss": "^3.4.10"
+        "tailwindcss": "^3.4.13"
     },
     "devDependencies": {
         "@playwright/test": "^1.47.2",
