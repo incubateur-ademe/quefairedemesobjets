@@ -232,9 +232,12 @@ class AddressesView(FormView):
                 return custom_bbox, acteurs_in_bbox
 
         if epci_codes := self.get_data_from_request_or_bounded_form("epci_codes"):
-            contours = [retrieve_epci_geojson(code) for code in epci_codes]
-            bbox = bbox_from_list_of_geojson(contours, buffer=0.1)
-            acteurs = acteurs.in_bbox(bbox)
+            geojson_list = [retrieve_epci_geojson(code) for code in epci_codes]
+            bbox = bbox_from_list_of_geojson(geojson_list, buffer=0)
+            if geojson_list:
+                # TODO: handle case with multiples EPCI codes passed in URL
+                geojson = json.dumps(geojson_list[0])
+                acteurs = acteurs.in_geojson(geojson)
             return compile_leaflet_bbox(bbox), acteurs
 
         # TODO

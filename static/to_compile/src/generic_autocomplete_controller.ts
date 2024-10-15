@@ -24,8 +24,10 @@ export default class extends AutocompleteController {
     this.blurInput = debounce(this.blurInput, 300).bind(this)
     this.change = debounce(this.change, 300).bind(this)
     this.currentFocusedOptionIndexValue = -1
-    if (this.inputTarget.value.replace("['", "").replace("']", "")) {
-      this.selectedIdValue = JSON.parse(this.inputTarget.value)[0]
+    // TODO: remove when the input support multiple values
+    const sanitizedInputValue = this.inputTarget.value.replace("['", "").replace("']", "")
+    if (sanitizedInputValue) {
+      this.inputTarget.value = JSON.parse(sanitizedInputValue)
     } else {
       this.inputTarget.value = ""
     }

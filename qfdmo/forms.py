@@ -7,7 +7,7 @@ from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from dsfr.forms import DsfrBaseForm
 
-from qfdmo.geo_api import all_epci_codes, fetch_epci_codes
+from qfdmo.geo_api import all_epci_codes
 from qfdmo.models import DagRun, DagRunStatus, SousCategorieObjet
 from qfdmo.models.action import (
     Action,
@@ -381,7 +381,7 @@ class ConfiguratorForm(DsfrBaseForm):
         label="1. Choisir l’EPCI affiché par défaut sur la carte",
         help_text="Commencez à taper un nom d’EPCI et sélectionnez un EPCI parmi "
         "les propositions de la liste.",
-        choices=fetch_epci_codes,
+        choices=all_epci_codes,
         initial="",
         required=False,
         widget=GenericAutoCompleteInput(

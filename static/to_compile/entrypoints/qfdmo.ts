@@ -13,7 +13,7 @@ import CopyController from "../src/copy_controller"
 import "../src/browser_check"
 import "../src/iframe"
 
-window.stimulus.debug = true
+window.stimulus = Application.start()
 stimulus.register("map", MapController)
 stimulus.register("ss-cat-object-autocomplete", SsCatObjectAutocompleteController)
 stimulus.register("address-autocomplete", AddressAutocompleteController)

@@ -28,7 +28,7 @@ def retrieve_epci_geojson(epci):
         "all_epci_codes", fetch_epci_codes, timeout=3600 * 24 * 365
     )
 
-    if epci not in all_epcis_codes:
+    if epci not in [k for k, v in cast(List[Tuple[str, str]], all_epcis_codes)]:
         raise ValueError(f"The provided EPCI code does not seem to exist | {epci}")
 
     def fetch_epci_bounding_box():
