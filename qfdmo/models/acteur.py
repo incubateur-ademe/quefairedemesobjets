@@ -1,3 +1,4 @@
+import logging
 import random
 import string
 import uuid
@@ -13,7 +14,7 @@ from django.contrib.gis.geos import Point, Polygon
 from django.contrib.gis.geos.geometry import GEOSGeometry
 from django.core.cache import cache
 from django.core.files.images import get_image_dimensions
-from django.db.models import Min
+from django.db.models import Exists, Min, OuterRef
 from django.db.models.functions import Now
 from django.forms import ValidationError, model_to_dict
 from django.http import HttpRequest
@@ -28,6 +29,8 @@ from qfdmo.models.utils import (
     NomAsNaturalKeyModel,
 )
 from qfdmo.validators import CodeValidator
+
+logger = logging.getLogger(__name__)
 
 
 class ActeurService(CodeAsNaturalKeyModel):
@@ -182,6 +185,12 @@ class LabelQualite(models.Model):
 
 
 class ActeurQuerySet(models.QuerySet):
+    def with_bonus(self):
+        bonus_label_qualite = LabelQualite.objects.filter(
+            displayedacteur=OuterRef("pk"), bonus=True
+        )
+        return self.annotate(bonus=Exists(bonus_label_qualite))
+
     def digital(self):
         return (
             self.filter(acteur_type_id=ActeurType.get_digital_acteur_type_id())
@@ -561,6 +570,7 @@ class DisplayedActeur(BaseActeur):
         direction: str | None = None,
         action_list: str | None = None,
         carte: bool = False,
+        bonus: bool = False,
     ) -> str:
         actions = self.acteur_actions(direction=direction)
 
@@ -589,8 +599,10 @@ class DisplayedActeur(BaseActeur):
         acteur_dict = {
             "identifiant_unique": self.identifiant_unique,
             "location": orjson.loads(self.location.geojson),
-            "bonus": self.bonus,
         }
+
+        if bonus:
+            acteur_dict["bonus"] = True
 
         if main_action := actions[0] if actions else None:
             if carte and main_action.groupe_action:
@@ -606,10 +618,6 @@ class DisplayedActeur(BaseActeur):
         return bool(
             self.adresse or self.adresse_complement or self.code_postal or self.ville
         )
-
-    @property
-    def bonus(self):
-        return self.labels.filter(bonus=True).exists()
 
 
 class DisplayedActeurTemp(BaseActeur):
