@@ -7,7 +7,6 @@ django-import-export[xls, xlsx]
 django-ninja
 django-sql-explorer
 django-storages
-djangorestframework
 gunicorn
 Jinja2
 opening-hours-py

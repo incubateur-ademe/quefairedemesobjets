@@ -1,5 +1,6 @@
 from typing import Any
 
+import orjson
 from django import forms
 from django.conf import settings
 from django.contrib.gis import admin
@@ -527,18 +528,22 @@ class DisplayedActeurResource(ActeurResource):
         model = DisplayedActeur
 
 
+# TODO : ajouter des tests pour cette ressources
 class OpenSourceDisplayedActeurResource(resources.ModelResource):
     """
     Only used to export data to open-source in Koumoul
     """
 
-    nb_object = 0
-    offset_object = 0
-
     uuid = fields.Field(column_name="Identifiant", attribute="uuid", readonly=True)
-    contributeurs = fields.Field(
-        column_name="Contributeurs", attribute="contributeurs", readonly=True
+    sources = fields.Field(
+        column_name="Contributeurs", attribute="sources", readonly=True
     )
+
+    def dehydrate_sources(self, acteur):
+        sources = ["LVAO", "ADEME"]
+        sources.extend([f"{source.code}" for source in acteur.sources.all()])
+        return "|".join(sources)
+
     nom = fields.Field(column_name="Nom", attribute="nom", readonly=True)
     nom_commercial = fields.Field(
         column_name="Nom commercial", attribute="nom_commercial", readonly=True
@@ -552,12 +557,13 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource):
         readonly=True,
     )
     url = fields.Field(column_name="Site web", attribute="url", readonly=True)
-
     telephone = fields.Field(attribute="telephone", column_name="Téléphone")
 
-    # surdefinir le champ telephone pour exclude tous les numéros de téléphone
-    # qui commencent par 06 ou 07
     def dehydrate_telephone(self, acteur):
+        """
+        Exclure les numéros de téléphone qui commencent pas 06 ou 07 pour ne pas avoir
+        de soucis de mis en ligne d'informations personnelles (cf. RGPD)
+        """
         telephone = acteur.telephone
         if telephone and (telephone.startswith("06") or telephone.startswith("07")):
             return None
@@ -604,9 +610,21 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource):
     )
     propositions_services = fields.Field(
         column_name="Propositions de services",
-        attribute="propositions_services_json",
+        attribute="propositions_services",
         readonly=True,
     )
+
+    def dehydrate_propositions_services(self, acteur):
+        return orjson.dumps(
+            [
+                {
+                    "action": ps.action.code,
+                    "sous_categories": [sc.code for sc in ps.sous_categories.all()],
+                }
+                for ps in acteur.proposition_services.all()
+            ]
+        ).decode("utf-8")
+
     modifie_le = fields.Field(
         column_name="Date de dernière modification",
         attribute="modifie_le",
@@ -614,10 +632,6 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource):
     )
 
     def __init__(self, **kwargs):
-        if "nb_object" in kwargs:
-            self.nb_object = kwargs["nb_object"]
-        if "offset_object" in kwargs:
-            self.offset_object = kwargs["offset_object"]
         super().__init__(**kwargs)
 
     def get_queryset(self):
@@ -636,13 +650,14 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource):
             "proposition_services__sous_categories",
             "proposition_services__action",
         )
+        queryset = queryset.order_by("uuid")
         return queryset
 
     class Meta:
         model = DisplayedActeur
         fields = [
             "uuid",
-            "contributeurs",
+            "sources",
             "nom",
             "nom_commercial",
             "siret",

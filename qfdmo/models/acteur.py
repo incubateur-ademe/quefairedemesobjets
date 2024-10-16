@@ -541,24 +541,6 @@ class DisplayedActeur(BaseActeur):
         related_name="displayed_acteurs",
     )
 
-    @property
-    def propositions_services_json(self):
-        return orjson.dumps(
-            [
-                {
-                    "action": ps.action.code,
-                    "sous_categories": [sc.code for sc in ps.sous_categories.all()],
-                }
-                for ps in self.proposition_services.all()
-            ]
-        ).decode("utf-8")
-
-    @property
-    def contributeurs(self):
-        sources = ["LVAO", "ADEME"]
-        sources.extend([f"{source.code}" for source in self.sources.all()])
-        return " | ".join(sources)
-
     def acteur_actions(self, direction=None):
         ps_action_ids = list(
             {ps.action_id for ps in self.proposition_services.all()}  # type: ignore

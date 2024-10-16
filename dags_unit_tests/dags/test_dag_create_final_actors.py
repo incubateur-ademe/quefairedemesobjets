@@ -68,9 +68,7 @@ class TestApplyCorrections:
             }
         )
 
-        pd.testing.assert_frame_equal(
-            result["df_acteur_merged"].drop(columns=["uuid"]), df_acteur_expected
-        )
+        pd.testing.assert_frame_equal(result["df_acteur_merged"], df_acteur_expected)
         pd.testing.assert_frame_equal(result["df_children"], df_children_expected)
 
     @pytest.fixture
@@ -130,7 +128,7 @@ class TestApplyCorrections:
         )
 
         pd.testing.assert_frame_equal(
-            result["df_acteur_merged"].reset_index(drop=True).drop(columns=["uuid"]),
+            result["df_acteur_merged"].reset_index(drop=True),
             df_acteur_expected.reset_index(drop=True),
         )
         pd.testing.assert_frame_equal(
