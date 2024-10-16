@@ -6,5 +6,6 @@ pandas==2.1.4
 pyproj
 python-decouple
 ratelimit
+tenacity
 # Manage compatibility with Django part
 urllib3<2.1

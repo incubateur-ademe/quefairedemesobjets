@@ -1,31 +1,175 @@
 import json
 import logging
+import tempfile
+import zipfile
 from datetime import datetime
+from pathlib import Path
 from typing import Union
 
 import numpy as np
 import pandas as pd
+import requests
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from sqlalchemy import text
+from tenacity import retry, stop_after_attempt, wait_fixed
 from utils import api_utils, base_utils, mapping_utils, shared_constants
 
 logger = logging.getLogger(__name__)
 
+# pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
+# engine = pg_hook.get_sqlalchemy_engine()
+
+
+def _download_file(url, dest_folder="."):
+    local_filename = Path(dest_folder) / url.split("/")[-1]
+    with requests.get(url) as r:
+        with open(local_filename, "wb") as f:
+            f.write(r.content)
+    return local_filename
+
+
+def _extract_zip(zip_file, dest_folder="."):
+    with zipfile.ZipFile(zip_file, "r") as zip_ref:
+        zip_ref.extractall(dest_folder)
+    return zip_ref.namelist()
+
+
+def _read_csv(csv_file):
+    df = pd.read_csv(csv_file, sep=";", encoding="utf-16-le", on_bad_lines="warn")
+    return df
+
 
 def fetch_data_from_api(**kwargs):
     params = kwargs["params"]
-    api_url = params["endpoint"]
-    logger.info(f"Fetching data from API : {api_url}")
-    data = api_utils.fetch_data_from_url(api_url)
+    endpoint = params["endpoint"]
+    logger.info(f"Fetching data from API : {endpoint}")
+    data = api_utils.fetch_data_from_url(endpoint)
     logger.info("Fetching data from API done")
     df = pd.DataFrame(data)
+    return df
+
+
+def fetch_pharma_data(**kwargs):
+    params = kwargs["params"]
+    endpoint = params["endpoint"]
+    with tempfile.TemporaryDirectory() as temp_dir:
+        zip_file = _download_file(endpoint, temp_dir)
+        unzip_files = _extract_zip(zip_file, temp_dir)
+        etablissements_file = [f for f in unzip_files if "etablissements" in f][0]
+        df_etablissements = _read_csv(Path(temp_dir) / etablissements_file)
+    return df_etablissements
+
+
+def filtre_pharma_only(**kwargs):
+    df_etablissements = kwargs["ti"].xcom_pull(task_ids="fetch_pharma_data")
+    logging.warning(df_etablissements.columns)
+    logging.warning(df_etablissements.head())
+    df_etablissements = df_etablissements[
+        df_etablissements["Type établissement"] == "OFFICINE"
+    ]  # TODO : gérer comme une constante ou comme un paramètre du dag
+    return df_etablissements
+
+
+def _compute_ban_adresse(row):
+    ban_adresse = [row["Adresse"], row["Code postal"], row["Commune"]]
+    ban_adresse = [str(x) for x in ban_adresse if x]
+    return " ".join(ban_adresse)
+
+
+@retry(wait=wait_fixed(2), stop=stop_after_attempt(3))
+def _enrich_from_ban_api(ban_adresse, adresse, code_postal, ville):
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
+    engine = pg_hook.get_sqlalchemy_engine()
+
+    # get row from qfdmo_bancache
+    logging.warning(
+        f"SELECT * FROM qfdmo_bancache "
+        f"WHERE adresse = '{adresse}'"
+        f" AND code_postal = '{code_postal}'"
+        f" AND ville = '{ville}'"
+    )
+    ban_cache_row = engine.execute(
+        text(
+            "SELECT * FROM qfdmo_bancache WHERE adresse = :adresse and code_postal ="
+            " :code_postal and ville = :ville order by modifie_le desc limit 1"
+        ),
+        adresse=adresse,
+        code_postal=code_postal,
+        ville=ville,
+    ).fetchone()
+
+    if ban_cache_row:
+        result = ban_cache_row["ban_returned"]
+    else:
+        url = "https://api-adresse.data.gouv.fr/search/"
+        r = requests.get(url, params={"q": ban_adresse})
+        if r.status_code != 200:
+            raise Exception(f"Failed to get data from API: {r.status_code}")
+        result = r.json()
+
+    better_result = None
+    better_geo = None
+    if "features" in result and result["features"]:
+        better_geo = result["features"][0]["geometry"]["coordinates"]
+        better_result = result["features"][0]["properties"]
+    if better_geo and better_result and better_result["score"] > 0.5:
+        better_postcode = (
+            better_result["postcode"] if "postcode" in better_result else code_postal
+        )
+        better_city = better_result["city"] if "city" in better_result else ville
+        better_adresse = better_result["name"] if "name" in better_result else adresse
+        latitude = better_geo[1]
+        longitude = better_geo[0]
+
+        # insert row in qfdmo_bancache
+        engine.execute(
+            text(
+                "INSERT INTO qfdmo_bancache (adresse, code_postal, ville, ban_returned)"
+                " VALUES (:adresse, :code_postal, :ville, :result)"
+            ),
+            adresse=adresse,
+            code_postal=code_postal,
+            ville=ville,
+            result=json.dumps(result),
+        )
+
+        return longitude, latitude, better_adresse, better_postcode, better_city
+    else:
+        return 0, 0, adresse, code_postal, ville
+
+
+def normalize_adresse(**kwargs):
+    df_etablissements = kwargs["ti"].xcom_pull(task_ids="filtre_pharma_only")
+    params = kwargs["params"]
+    if params.get("geolocation"):
+        df_etablissements["ban_adresse"] = df_etablissements.apply(
+            _compute_ban_adresse, axis=1
+        )
+        df_etablissements[
+            ["longitude", "latitude", "Adresse", "Code postal", "Commune"]
+        ] = df_etablissements.apply(
+            lambda row: _enrich_from_ban_api(
+                row["ban_adresse"], row["Adresse"], row["Code postal"], row["Commune"]
+            ),
+            axis=1,
+            result_type="expand",
+        )
+    return df_etablissements
+
+
+def normalized_data_for_pharma(**kwargs):
+    df = kwargs["ti"].xcom_pull(task_ids="normalize_adresse")
+    params = kwargs["params"]
+    fixed_columns = params.get("fixed_columns", {})
+    for k, v in fixed_columns.items():
+        df[k] = v
+
     return df
 
 
 def load_data_from_postgresql(**kwargs):
     pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
     engine = pg_hook.get_sqlalchemy_engine()
-
     # TODO : check if we need to manage the max id here
     displayedpropositionservice_max_id = engine.execute(
         text("SELECT max(id) FROM qfdmo_displayedpropositionservice")
@@ -274,6 +418,9 @@ def serialize_to_json(**kwargs):
 
 
 def read_acteur(**kwargs):
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
+    engine = pg_hook.get_sqlalchemy_engine()
+
     df_data_from_api = kwargs["ti"].xcom_pull(task_ids="fetch_data_from_api")
     df_sources = kwargs["ti"].xcom_pull(task_ids="read_source")
 
@@ -283,8 +430,6 @@ def read_acteur(**kwargs):
 
     unique_source_ids = df_data_from_api["source_id"].unique()
 
-    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
-    engine = pg_hook.get_sqlalchemy_engine()
     joined_source_ids = ",".join([f"'{source_id}'" for source_id in unique_source_ids])
     query = f"SELECT * FROM qfdmo_acteur WHERE source_id IN ({joined_source_ids})"
     df_acteur = pd.read_sql_query(query, engine)
@@ -293,10 +438,11 @@ def read_acteur(**kwargs):
 
 
 def insert_dagrun_and_process_df(df_acteur_updates, metadata, dag_name, run_name):
-    if df_acteur_updates.empty:
-        return
     pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
     engine = pg_hook.get_sqlalchemy_engine()
+
+    if df_acteur_updates.empty:
+        return
     current_date = datetime.now()
 
     with engine.connect() as conn:
@@ -449,10 +595,6 @@ def create_actors(**kwargs):
 
     for k, val in column_to_replace.items():
         df[k] = val
-    if reparacteurs:
-        df = mapping_utils.process_reparacteurs(df, df_sources, df_acteurtype)
-    else:
-        df = mapping_utils.process_actors(df)
 
     # By default, all actors are active
     # TODO : manage constant as an enum in config
@@ -507,6 +649,11 @@ def create_actors(**kwargs):
                 )
             else:
                 df[new_col] = df[old_col]
+
+    if reparacteurs:
+        df = mapping_utils.process_reparacteurs(df, df_sources, df_acteurtype)
+    else:
+        df = mapping_utils.process_actors(df)
 
     if "latitude" in df.columns and "longitude" in df.columns:
         df["latitude"] = df["latitude"].apply(mapping_utils.parse_float)
