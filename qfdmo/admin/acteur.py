@@ -27,6 +27,7 @@ from qfdmo.models import (
     SousCategorieObjet,
 )
 from qfdmo.models.acteur import (
+    ActeurPublicAccueilli,
     ActeurStatus,
     DisplayedActeur,
     DisplayedPropositionService,
@@ -534,28 +535,81 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource):
     nb_object = 0
     offset_object = 0
 
+    uuid = fields.Field(column_name="Identifiant", attribute="uuid", readonly=True)
+    contributeurs = fields.Field(
+        column_name="Contributeurs", attribute="contributeurs", readonly=True
+    )
+    nom = fields.Field(column_name="Nom", attribute="nom", readonly=True)
+    nom_commercial = fields.Field(
+        column_name="Nom commercial", attribute="nom_commercial", readonly=True
+    )
+    siret = fields.Field(column_name="SIRET", attribute="siret", readonly=True)
+    description = fields.Field(column_name="Description", attribute="description")
     acteur_type = fields.Field(
-        column_name="acteur_type",
+        column_name="Type d'acteur",
         attribute="acteur_type",
         widget=widgets.ForeignKeyWidget(ActeurType, field="code"),
+        readonly=True,
     )
-    sources = fields.Field(
-        column_name="sources",
-        attribute="sources",
-        widget=widgets.ManyToManyWidget(Source, field="code", separator="|"),
+    url = fields.Field(column_name="Site web", attribute="url", readonly=True)
+
+    telephone = fields.Field(attribute="telephone", column_name="Téléphone")
+
+    # surdefinir le champ telephone pour exclude tous les numéros de téléphone
+    # qui commencent par 06 ou 07
+    def dehydrate_telephone(self, acteur):
+        telephone = acteur.telephone
+        if telephone and (telephone.startswith("06") or telephone.startswith("07")):
+            return None
+        return telephone
+
+    adresse = fields.Field(column_name="Adresse", attribute="adresse", readonly=True)
+    adresse_complement = fields.Field(
+        column_name="Complément d'adresse",
+        attribute="adresse_complement",
+        readonly=True,
     )
+    code_postal = fields.Field(
+        column_name="Code postal", attribute="code_postal", readonly=True
+    )
+    ville = fields.Field(column_name="Ville", attribute="ville", readonly=True)
     latitude = fields.Field(column_name="latitude", attribute="latitude", readonly=True)
     longitude = fields.Field(
         column_name="longitude", attribute="longitude", readonly=True
     )
-
-    contributeurs = fields.Field(
-        column_name="contributeurs", attribute="contributeurs", readonly=True
+    labels = fields.Field(
+        column_name="Qualité et labels",
+        attribute="labels",
+        widget=widgets.ManyToManyWidget(LabelQualite, field="code", separator="|"),
     )
-
+    public_accueilli = fields.Field(
+        column_name="Public accueilli",
+        attribute="public_accueilli",
+        readonly=True,
+    )
+    reprise = fields.Field(column_name="Reprise", attribute="reprise", readonly=True)
+    exclusivite_de_reprisereparation = fields.Field(
+        column_name="Exclusivité de reprise/réparation",
+        attribute="exclusivite_de_reprisereparation",
+        readonly=True,
+    )
+    uniquement_sur_rdv = fields.Field(
+        column_name="Uniquement sur RDV", attribute="uniquement_sur_rdv", readonly=True
+    )
+    acteur_services = fields.Field(
+        column_name="Type de services",
+        attribute="acteur_services",
+        widget=widgets.ManyToManyWidget(ActeurService, field="code", separator="|"),
+        readonly=True,
+    )
     propositions_services = fields.Field(
-        column_name="propositions_services",
+        column_name="Propositions de services",
         attribute="propositions_services_json",
+        readonly=True,
+    )
+    modifie_le = fields.Field(
+        column_name="Date de dernière modification",
+        attribute="modifie_le",
         readonly=True,
     )
 
@@ -568,6 +622,14 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource):
 
     def get_queryset(self):
         queryset = super().get_queryset()
+        queryset = queryset.filter(
+            statut=ActeurStatus.ACTIF,
+        ).exclude(
+            public_accueilli__in=[
+                ActeurPublicAccueilli.AUCUN,
+                ActeurPublicAccueilli.PROFESSIONNELS,
+            ],
+        )
         # queryset = queryset.prefetch_related(
         #     "sources",
         #     "labels",
@@ -582,45 +644,28 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource):
         model = DisplayedActeur
         fields = [
             "uuid",
+            "contributeurs",
             "nom",
+            "nom_commercial",
+            "siret",
             "description",
             "acteur_type",
+            "url",
+            "telephone",
             "adresse",
             "adresse_complement",
             "code_postal",
             "ville",
-            "url",
-            "email",
-            "telephone",
-            "location",
-            "nom_commercial",
-            "nom_officiel",
+            "latitude",
+            "longitude",
             "labels",
-            "acteur_services",
-            "siret",
-            "identifiant_externe",
-            "statut",
-            "naf_principal",
-            "commentaires",
-            "horaires_osm",
-            "horaires_description",
             "public_accueilli",
             "reprise",
             "exclusivite_de_reprisereparation",
             "uniquement_sur_rdv",
-            "action_principale",
-            "sources",
-            "latitude",
-            "longitude",
-            "contributeurs",
-            "propositions_services",
-        ]
-        exclude = [
-            "identifiant_unique",
-            "cree_le",
             "modifie_le",
-            "source",
-            "location",
+            "acteur_services",
+            "propositions_services",
         ]
 
 

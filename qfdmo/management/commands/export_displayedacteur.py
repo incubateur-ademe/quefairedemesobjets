@@ -15,7 +15,12 @@ class Command(BaseCommand):
             offset_object=100,
         ).export()
 
-        open("export.xlsx", "w").write(dataset.xlsx)
+        open("export.csv", "w").write(dataset.csv)
+
+        # Écrire les données dans un fichier XLSX
+        with open("export.xlsx", "wb") as f:
+            f.write(dataset.xlsx)
+
         print(f"Ended : {datetime.now()}")
         # print(dataset.headers)
         # for row in dataset:
