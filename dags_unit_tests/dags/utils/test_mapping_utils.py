@@ -10,8 +10,8 @@ class TestDataTransformations(unittest.TestCase):
         self.df_acteurtype = pd.DataFrame(
             {
                 "code": [
-                    "en ligne (web, mobile)",
-                    "artisan, commerce indépendant",
+                    "acteur_digital",
+                    "artisan",
                     "commerce",
                 ],
                 "id": [1, 2, 3],
