@@ -589,7 +589,9 @@ class DisplayedActeur(BaseActeur):
         acteur_dict = {
             "identifiant_unique": self.identifiant_unique,
             "location": orjson.loads(self.location.geojson),
+            "bonus": self.bonus,
         }
+
         if main_action := actions[0] if actions else None:
             if carte and main_action.groupe_action:
                 acteur_dict["icon"] = main_action.groupe_action.icon
@@ -604,6 +606,10 @@ class DisplayedActeur(BaseActeur):
         return bool(
             self.adresse or self.adresse_complement or self.code_postal or self.ville
         )
+
+    @property
+    def bonus(self):
+        return self.labels.filter(bonus=True).exists()
 
 
 class DisplayedActeurTemp(BaseActeur):
