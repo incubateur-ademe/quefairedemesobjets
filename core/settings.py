@@ -144,7 +144,7 @@ LOGGING = {
     "formatters": {
         "default": {
             # exact format is not important, this is the minimum information
-            "format": "[%(asctime)s] %(name)-12s] %(levelname)-8s : %(message)s",
+            "format": "[%(asctime)s] [%(name)s] [%(levelname)s] : %(message)s",
         },
     },
 }
