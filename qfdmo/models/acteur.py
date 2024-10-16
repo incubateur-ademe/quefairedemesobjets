@@ -42,7 +42,7 @@ class ActeurService(CodeAsNaturalKeyModel):
         blank=False,
         null=False,
         help_text=(
-            "Ce champs est utilisé lors de l'import de données, il ne doit pas être"
+            "Ce champ est utilisé lors de l'import de données, il ne doit pas être"
             " mis à jour sous peine de casser l'import de données"
         ),
         validators=[CodeValidator()],
@@ -89,7 +89,7 @@ class ActeurType(CodeAsNaturalKeyModel):
         blank=False,
         null=False,
         help_text=(
-            "Ce champs est utilisé lors de l'import de données, il ne doit pas être"
+            "Ce champ est utilisé lors de l'import de données, il ne doit pas être"
             " mis à jour sous peine de casser l'import de données"
         ),
         validators=[CodeValidator()],

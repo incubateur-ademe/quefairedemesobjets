@@ -48,7 +48,7 @@ class Migration(migrations.Migration):
             name="code",
             field=models.CharField(
                 help_text=(
-                    "Ce champs est utilisé lors de l'import de données, il ne doit"
+                    "Ce champ est utilisé lors de l'import de données, il ne doit"
                     " pas être mis à jour sous peine de casser l'import de données"
                 ),
                 max_length=255,
@@ -58,7 +58,7 @@ class Migration(migrations.Migration):
                         code="invalid_code",
                         message=(
                             "Le champ Code ne doit contenir que des caractères"
-                            " minuscule et des underscores."
+                            " minuscules et des underscores."
                         ),
                         regex="^[a-z_]+$",
                     )

@@ -458,7 +458,7 @@ def create_actors(**kwargs):
     # TODO : manage constant as an enum in config
     df["statut"] = "ACTIF"
 
-    # TODO Plutôt se baser sur le nom de la colonne cibel plutôt que sur le nom de la
+    # TODO Plutôt se baser sur le nom de la colonne cible plutôt que sur le nom de la
     # colonne source
     for old_col, new_col in column_mapping.items():
         if old_col in df.columns and new_col:
