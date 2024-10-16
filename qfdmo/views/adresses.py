@@ -93,6 +93,7 @@ class AddressesView(FormView):
             )
             # TODO : refacto forms, merge with grouped_action field
             initial["legend_grouped_action"] = initial["grouped_action"]
+
             initial["action_list"] = "|".join(
                 [a for ga in initial["grouped_action"] for a in ga.split("|")]
             )
@@ -129,8 +130,6 @@ class AddressesView(FormView):
             if action_displayed
             else None
         )
-
-        logger.info(f"{grouped_action_choices=}")
 
         form.load_choices(
             self.request,
@@ -216,8 +215,6 @@ class AddressesView(FormView):
                 )
 
         kwargs.update(acteurs=acteurs)
-        return super().get_context_data(**kwargs)
-
         return super().get_context_data(**kwargs)
 
     def _bbox_and_acteurs_from_location_or_epci(self, acteurs):
@@ -345,7 +342,7 @@ class AddressesView(FormView):
 
         codes = []
         # selection from interface
-        if self.get_data_from_request_or_bounded_form("grouped_action"):
+        if self.request.GET.get("grouped_action"):
             codes = [
                 code
                 for new_groupe_action in self.request.GET.getlist("grouped_action")
@@ -354,16 +351,14 @@ class AddressesView(FormView):
 
         # Selection is not set in interface, get all available from
         # (checked_)action_list
-        elif action_list := self.get_data_from_request_or_bounded_form("action_list"):
+        elif action_list := self.cleaned_data.get("action_list"):
             # TODO : effet de bord si la list des action n'est pas cohérente avec
             # les actions affichées
             # il faut collecté les actions coché selon les groupes d'action
             codes = action_list.split("|")
         # Selection is not set in interface, defeult checked action list is not set
         # get all available from action_displayed
-        elif action_displayed := self.get_data_from_request_or_bounded_form(
-            "action_displayed"
-        ):
+        elif action_displayed := self.cleaned_data.get("action_displayed"):
             codes = action_displayed.split("|")
         # return empty array, will search in all actions
 
