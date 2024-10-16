@@ -40,18 +40,6 @@ def process_phone_number(number):
 
     return number
 
-    # "ess": "ess",
-    # "déchèterie": "decheterie",
-    # "établissement de santé": "ets_sante",
-    # "point d'apport volontaire privé": "pav_prive",
-    # "point d'apport volontaire public": "pav_public",
-    # "acteur digital": "acteur_digital",
-    # "commerce": "commerce",
-    # "artisan": "artisan",
-    # "collectivité": "collectivite",
-    # "plateforme inertes": "plateforme_inertes",
-    # "point d'apport volontaire ponctuel": "pav_ponctuel",
-
 
 # TODO : Ajout de tests unitaires
 def transform_acteur_type_id(value, df_acteurtype):

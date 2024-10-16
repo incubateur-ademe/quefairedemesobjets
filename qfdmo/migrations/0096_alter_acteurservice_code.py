@@ -3,6 +3,8 @@
 import django.core.validators
 from django.db import migrations, models
 
+from qfdmo.validators import CodeValidator
+
 mapping = {
     "Location entre particuliers": "localtion_particuliers",
     "Location par un professionnel": "location_professionnel",
@@ -53,16 +55,7 @@ class Migration(migrations.Migration):
                 ),
                 max_length=255,
                 unique=True,
-                validators=[
-                    django.core.validators.RegexValidator(
-                        code="invalid_code",
-                        message=(
-                            "Le champ Code ne doit contenir que des caractères"
-                            " minuscules et des underscores."
-                        ),
-                        regex="^[a-z_]+$",
-                    )
-                ],
+                validators=[CodeValidator()],
             ),
         ),
         migrations.RunPython(update_acteurservice_code, rollcack_acteurservice_code),
