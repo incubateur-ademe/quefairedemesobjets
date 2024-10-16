@@ -132,7 +132,7 @@ LOGGING = {
         "console": {
             "class": "logging.StreamHandler",
             "formatter": "default",
-            "filters": ["hide_staticfiles"],
+            "filters": ["hide_staticfiles"] if DEBUG else [],
         }
     },
     "loggers": {
