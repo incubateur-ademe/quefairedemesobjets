@@ -1,4 +1,4 @@
-import AutocompleteController from "../src/autocomplete_controller"
+import AutocompleteController from "./autocomplete_controller"
 
 const SEPARATOR = "||"
 export default class extends AutocompleteController {
@@ -14,18 +14,18 @@ export default class extends AutocompleteController {
     declare readonly longitudeTarget: HTMLInputElement
     declare readonly displayErrorTarget: HTMLElement
 
-    async search_to_complete(events: Event): Promise<void> {
+    async searchToComplete(events: Event): Promise<void> {
         const inputTargetValue = this.inputTarget.value
         const val = this.addAccents(inputTargetValue)
         const regexPattern = new RegExp(val, "gi")
 
-        if (!val) this.closeAllLists()
+        if (!val) this.hideAutocompleteList()
 
         let countResult = 0
 
         return this.#getOptionCallback(inputTargetValue)
             .then((data) => {
-                this.closeAllLists()
+                this.hideAutocompleteList()
                 this.autocompleteList = this.createAutocompleteList()
                 this.allAvailableOptions = data
                 for (let i = 0; i < this.allAvailableOptions.length; i++) {
@@ -35,7 +35,6 @@ export default class extends AutocompleteController {
                 }
                 if (this.autocompleteList.childElementCount > 0) {
                     this.currentFocus = 0
-                    this.addActive()
                 }
                 return
             })
@@ -97,7 +96,7 @@ export default class extends AutocompleteController {
             if (latitude) this.latitudeTarget.value = latitude
             this.dispatch("optionSelected")
         }
-        this.closeAllLists()
+        this.hideAutocompleteList()
     }
 
     addOption(regexPattern: RegExp, option: any) {

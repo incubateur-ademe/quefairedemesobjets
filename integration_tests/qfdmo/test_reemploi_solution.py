@@ -17,6 +17,31 @@ def django_db_setup(django_db_setup, django_db_blocker):
 
 @pytest.mark.django_db
 class TestInitialValue:
+
+    default_context = {
+        "sous_categorie_objet": None,
+        "sc_id": None,
+        "adresse": None,
+        "direction": settings.DEFAULT_ACTION_DIRECTION,
+        "digital": "0",
+        "latitude": None,
+        "longitude": None,
+        "label_reparacteur": None,
+        "ess": None,
+        "bonus": None,
+        "bounding_box": None,
+        "pas_exclusivite_reparation": True,
+        "action_displayed": (
+            "preter|emprunter|louer|mettreenlocation|reparer|donner|echanger"
+            "|acheter|revendre"
+        ),
+        "action_list": (
+            "preter|emprunter|louer|mettreenlocation|reparer|donner|echanger"
+            "|acheter|revendre"
+        ),
+        "epci_codes": [],
+    }
+
     def test_no_parameters(self, client):
         url = ""
         response = client.get(url)
@@ -24,28 +49,7 @@ class TestInitialValue:
         assert response.status_code == 200
         assert response.context_data["location"] == "{}"
         assert response.context_data["acteurs"].count() == 0
-        assert response.context_data["form"].initial == {
-            "sous_categorie_objet": None,
-            "sc_id": None,
-            "adresse": None,
-            "direction": settings.DEFAULT_ACTION_DIRECTION,
-            "digital": "0",
-            "latitude": None,
-            "longitude": None,
-            "label_reparacteur": None,
-            "ess": None,
-            "bonus": None,
-            "bounding_box": None,
-            "pas_exclusivite_reparation": True,
-            "action_displayed": (
-                "preter|emprunter|louer|mettreenlocation|reparer|donner|echanger"
-                "|acheter|revendre"
-            ),
-            "action_list": (
-                "preter|emprunter|louer|mettreenlocation|reparer|donner|echanger"
-                "|acheter|revendre"
-            ),
-        }
+        assert response.context_data["form"].initial == self.default_context
 
     def test_carte(self, client):
         url = "?carte"
@@ -56,18 +60,8 @@ class TestInitialValue:
         assert response.context_data["location"] == "{}"
         assert response.context_data["acteurs"].count() == 0
         assert response.context_data["form"].initial == {
-            "sous_categorie_objet": None,
-            "sc_id": None,
-            "adresse": None,
+            **self.default_context,
             "direction": None,
-            "digital": "0",
-            "latitude": None,
-            "longitude": None,
-            "label_reparacteur": None,
-            "ess": None,
-            "bonus": None,
-            "bounding_box": None,
-            "pas_exclusivite_reparation": True,
             "action_displayed": (
                 "preter|emprunter|louer|mettreenlocation|reparer|donner|echanger"
                 "|acheter|revendre|trier"
@@ -100,25 +94,4 @@ class TestInitialValue:
         assert response.status_code == 200
         assert response.context_data["location"] == "{}"
         assert response.context_data["acteurs"].count() == 0
-        assert response.context_data["form"].initial == {
-            "sous_categorie_objet": None,
-            "sc_id": None,
-            "adresse": None,
-            "direction": settings.DEFAULT_ACTION_DIRECTION,
-            "digital": "0",
-            "latitude": None,
-            "longitude": None,
-            "label_reparacteur": None,
-            "ess": None,
-            "bonus": None,
-            "bounding_box": None,
-            "pas_exclusivite_reparation": True,
-            "action_displayed": (
-                "preter|emprunter|louer|mettreenlocation|reparer|donner|echanger"
-                "|acheter|revendre"
-            ),
-            "action_list": (
-                "preter|emprunter|louer|mettreenlocation|reparer|donner|echanger"
-                "|acheter|revendre"
-            ),
-        }
+        assert response.context_data["form"].initial == self.default_context

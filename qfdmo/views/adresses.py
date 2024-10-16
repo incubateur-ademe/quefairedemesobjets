@@ -64,6 +64,7 @@ class AddressesView(FormView):
         initial["longitude"] = self.request.GET.get("longitude")
         # TODO: refacto forms : delete this line
         initial["label_reparacteur"] = self.request.GET.get("label_reparacteur")
+        initial["epci_codes"] = self.request.GET.getlist("epci_codes")
         initial["pas_exclusivite_reparation"] = self.request.GET.get(
             "pas_exclusivite_reparation", True
         )
@@ -72,7 +73,7 @@ class AddressesView(FormView):
         # TODO: refacto forms : delete this line
         initial["ess"] = self.request.GET.get("ess")
         # TODO: refacto forms : delete this line
-        initial["bounding_box"] = self.kwargs.get("bbox")
+        initial["bounding_box"] = self.request.GET.get("bounding_box")
         initial["sc_id"] = (
             self.request.GET.get("sc_id") if initial["sous_categorie_objet"] else None
         )
@@ -232,9 +233,12 @@ class AddressesView(FormView):
                 return custom_bbox, acteurs_in_bbox
 
         if epci_codes := self.get_data_from_request_or_bounded_form("epci_codes"):
-            contours = [retrieve_epci_geojson(code) for code in epci_codes]
-            bbox = bbox_from_list_of_geojson(contours, buffer=0.1)
-            acteurs = acteurs.in_bbox(bbox)
+            geojson_list = [retrieve_epci_geojson(code) for code in epci_codes]
+            bbox = bbox_from_list_of_geojson(geojson_list, buffer=0)
+            if geojson_list:
+                # TODO: handle case with multiples EPCI codes passed in URL
+                geojson = json.dumps(geojson_list[0])
+                acteurs = acteurs.in_geojson(geojson)
             return compile_leaflet_bbox(bbox), acteurs
 
         # TODO

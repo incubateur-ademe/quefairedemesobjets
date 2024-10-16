@@ -1,19 +1,19 @@
 import logging
-from django.db.models import Min
-
-from django.conf import settings
 import random
-from django.contrib.gis.db.models.functions import Distance
-from django.contrib.gis.geos import Point, Polygon
 import string
 import uuid
 from typing import Any, List, cast
 
 import opening_hours
 import orjson
-from django.core.cache import cache
+from django.conf import settings
 from django.contrib.gis.db import models
+from django.contrib.gis.db.models.functions import Distance
+from django.contrib.gis.geos import Point, Polygon
+from django.contrib.gis.geos.geometry import GEOSGeometry
+from django.core.cache import cache
 from django.core.files.images import get_image_dimensions
+from django.db.models import Min
 from django.db.models.functions import Now
 from django.forms import ValidationError, model_to_dict
 from django.http import HttpRequest
@@ -173,9 +173,18 @@ class ActeurQuerySet(models.QuerySet):
     def physical(self):
         return self.exclude(acteur_type_id=ActeurType.get_digital_acteur_type_id())
 
+    def in_geojson(self, geojson):
+        if not geojson:
+            # TODO : test
+            return self.physical()
+
+        geometry = GEOSGeometry(geojson)
+        return self.physical().filter(location__within=geometry)
+
     def in_bbox(self, bbox):
         if not bbox:
-            return self
+            # TODO : test
+            return self.physical()
 
         return self.physical().filter(location__within=Polygon.from_bbox(bbox))
 
