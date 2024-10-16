@@ -326,6 +326,7 @@ class CarteAddressesForm(AddressesForm):
         required=False,
     )
 
+    # TODO : refacto forms, merge with grouped_action field
     legend_grouped_action = forms.MultipleChoiceField(
         widget=DSFRCheckboxSelectMultiple(
             attrs={

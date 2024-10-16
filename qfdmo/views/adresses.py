@@ -42,7 +42,7 @@ from qfdmo.models.action import (
 )
 from qfdmo.thread.materialized_view import RefreshMateriazedViewThread
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("django")
 
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
 
@@ -91,6 +91,7 @@ class AddressesView(FormView):
             initial["grouped_action"] = self._grouped_action_from(
                 grouped_action_choices, actions_to_select
             )
+            # TODO : refacto forms, merge with grouped_action field
             initial["legend_grouped_action"] = initial["grouped_action"]
             initial["action_list"] = "|".join(
                 [a for ga in initial["grouped_action"] for a in ga.split("|")]
@@ -128,6 +129,8 @@ class AddressesView(FormView):
             if action_displayed
             else None
         )
+
+        logger.info(f"{grouped_action_choices=}")
 
         form.load_choices(
             self.request,
