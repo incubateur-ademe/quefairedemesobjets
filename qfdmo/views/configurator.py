@@ -1,5 +1,4 @@
 import json
-import logging
 from html import escape
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -9,8 +8,6 @@ from django.views.generic.edit import FormView
 from typing import Any
 
 from qfdmo.forms import AdvancedConfiguratorForm, ConfiguratorForm
-
-logger = logging.getLogger(__name__)
 
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
 
