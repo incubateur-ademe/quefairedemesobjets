@@ -6,7 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.generic.edit import FormView
-from pandas.core.apply import Any
+from typing import Any
 
 from qfdmo.forms import AdvancedConfiguratorForm, ConfiguratorForm
 
