@@ -18,16 +18,25 @@ from utils.dag_eo_utils import (
 
 @pytest.fixture
 def df_sources_from_db():
-    return pd.DataFrame({"code": ["source1", "source2"], "id": [101, 102]})
+    return pd.DataFrame(
+        {
+            "code": [
+                "source1",
+                "source2",
+                "cma - chambre des métiers et de l'artisanat",
+            ],
+            "id": [101, 102, 103],
+        }
+    )
 
 
 @pytest.fixture
 def df_acteurtype_from_db():
     return pd.DataFrame(
         {
-            "libelle": ["Type1", "Type2"],
-            "code": ["ess", "commerce"],
-            "id": [201, 202],
+            "libelle": ["Type1", "Type2", "Type3", "Type4"],
+            "code": ["ess", "commerce", "artisan", "pav_prive"],
+            "id": [201, 202, 203, 204],
         }
     )
 
@@ -67,7 +76,7 @@ def df_acteur_services_from_db():
                 "Collecte par une structure spécialisée",
             ],
             "id": [10, 20],
-            "code": ["Service de réparation", "Collecte par une structure spécialisée"],
+            "code": ["service_de_reparation", "structure_de_collecte"],
         }
     )
 
@@ -899,6 +908,7 @@ class TestCreateActorSeriesTransformations:
 
 
 class TestCreateActeurServices:
+    # TODO : refacto avec parametize
 
     def test_create_acteur_services_empty(self, df_acteur_services_from_db):
 
@@ -926,7 +936,6 @@ class TestCreateActeurServices:
         assert df_result.columns.tolist() == [
             "acteur_id",
             "acteurservice_id",
-            "acteurservice",
         ]
 
     def test_create_acteur_services_full(self, df_acteur_services_from_db):
@@ -954,7 +963,6 @@ class TestCreateActeurServices:
         assert df_result.columns.tolist() == [
             "acteur_id",
             "acteurservice_id",
-            "acteurservice",
         ]
         assert sorted(
             df_result.loc[df_result["acteur_id"] == 1, "acteurservice_id"].tolist()
@@ -994,7 +1002,6 @@ class TestCreateActeurServices:
         assert df_result.columns.tolist() == [
             "acteur_id",
             "acteurservice_id",
-            "acteurservice",
         ]
         assert sorted(
             df_result.loc[df_result["acteur_id"] == 1, "acteurservice_id"].tolist()
@@ -1011,7 +1018,7 @@ class TestSerializeToJson:
         "create_labels, expected_labels",
         [
             (
-                pd.DataFrame(columns=["acteur_id", "labelqualite_id", "labelqualite"]),
+                pd.DataFrame(columns=["acteur_id", "labelqualite_id"]),
                 {0: None, 1: None},
             ),
             (
@@ -1019,34 +1026,22 @@ class TestSerializeToJson:
                     {
                         "acteur_id": [1, 2, 2],
                         "labelqualite_id": [1, 1, 2],
-                        "labelqualite": [
-                            "Enseigne de l'économie sociale et solidaire",
-                            "Enseigne de l'économie sociale et solidaire",
-                            "Labellisé Bonus Réparation EcoOrganisme",
-                        ],
                     }
                 ),
                 {
                     0: [
                         {
                             "acteur_id": 1,
-                            "labelqualite": (
-                                "Enseigne de l'économie sociale et solidaire"
-                            ),
                             "labelqualite_id": 1,
                         }
                     ],
                     1: [
                         {
                             "acteur_id": 2,
-                            "labelqualite": (
-                                "Enseigne de l'économie sociale et solidaire"
-                            ),
                             "labelqualite_id": 1,
                         },
                         {
                             "acteur_id": 2,
-                            "labelqualite": "Labellisé Bonus Réparation EcoOrganisme",
                             "labelqualite_id": 2,
                         },
                     ],
@@ -1161,9 +1156,7 @@ class TestSerializeToJson:
             "create_proposition_services_sous_categories": (
                 df_proposition_services_sous_categories
             ),
-            "create_labels": pd.DataFrame(
-                columns=["acteur_id", "labelqualite_id", "labelqualite"]
-            ),
+            "create_labels": pd.DataFrame(columns=["acteur_id", "labelqualite_id"]),
             "create_acteur_services": create_acteur_services,
         }[task_ids]
 
@@ -1569,9 +1562,6 @@ class TestCeateLabels:
             {
                 "acteur_id": [1],
                 "labelqualite_id": [3],
-                "labelqualite": [
-                    "Labellisé Repar'Acteur",
-                ],
             }
         )
         pd.testing.assert_frame_equal(df, expected_dataframe_with_reparacteur_label)
@@ -1607,9 +1597,6 @@ class TestCeateLabels:
             {
                 "acteur_id": [1],
                 "labelqualite_id": [1],
-                "labelqualite": [
-                    "Enseigne de l'économie sociale et solidaire",
-                ],
             }
         )
         pd.testing.assert_frame_equal(df, expected_dataframe_with_ess_label)
@@ -1651,9 +1638,6 @@ class TestCeateLabels:
             {
                 "acteur_id": [1],
                 "labelqualite_id": [2],
-                "labelqualite": [
-                    "Labellisé Bonus Réparation EcoOrganisme",
-                ],
             }
         )
         pd.testing.assert_frame_equal(

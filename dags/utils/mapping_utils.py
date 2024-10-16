@@ -41,34 +41,33 @@ def process_phone_number(number):
     return number
 
 
+# TODO : Ajout de tests unitaires
 def transform_acteur_type_id(value, df_acteurtype):
     mapping_dict = {
-        "solution en ligne (site web, app. mobile)": "en ligne (web, mobile)",
-        "artisan, commerce indépendant": "artisan, commerce indépendant",
+        "solution en ligne (site web, app. mobile)": "acteur_digital",
+        "artisan, commerce indépendant": "artisan",
         "magasin / franchise,"
         " enseigne commerciale / distributeur / point de vente": "commerce",
-        "point d'apport volontaire publique": "point d'apport volontaire public",
-        "association, entreprise"
-        " de l'économie sociale et solidaire (ess)": "Association, entreprise de l'ESS",
-        "association, entreprise"
-        " de l’économie sociale et solidaire (ess)": "Association, entreprise de l'ESS",
-        "établissement de santé": "établissement de santé",
-        "déchèterie": "déchèterie",
-        "point d'apport volontaire privé": "point d'apport volontaire privé",
-        "plateforme inertes": "plateforme de valorisation des inertes",
+        "point d'apport volontaire publique": "pav_public",
+        "association, entreprise de l’économie sociale et solidaire (ess)": "ess",
+        "établissement de santé": "ets_sante",
+        "déchèterie": "decheterie",
+        "point d'apport volontaire privé": "pav_prive",
+        "plateforme inertes": "plateforme_inertes",
         "magasin / franchise, enseigne commerciale / distributeur / point de vente "
         "/ franchise, enseigne commerciale / distributeur / point de vente": "commerce",
+        "point d'apport volontaire éphémère / ponctuel": "pav_ponctuel",
     }
-
-    libelle = mapping_dict.get(value.lower())
-    id_value = (
-        df_acteurtype.loc[
-            df_acteurtype["libelle"].str.lower() == libelle.lower(), "id"
+    code = mapping_dict.get(value.lower(), None)
+    if code is None:
+        raise ValueError(f"Acteur type {value} not found in mapping")
+    if any(df_acteurtype["code"].str.lower() == code.lower()):
+        id_value = df_acteurtype.loc[
+            df_acteurtype["code"].str.lower() == code.lower(), "id"
         ].values[0]
-        if any(df_acteurtype["libelle"].str.lower() == libelle.lower())
-        else None
-    )
-    return id_value
+        return id_value
+    else:
+        raise ValueError(f"Acteur type {code.lower()} not found in database")
 
 
 def create_identifiant_unique(row, source_name=None):
@@ -81,13 +80,14 @@ def create_identifiant_unique(row, source_name=None):
     return row.get("ecoorganisme", source_name).lower() + "_" + unique_str
 
 
-def get_id_from_code(value, df_mapping, code="code"):
-    id_value = (
-        df_mapping.loc[df_mapping[code].str.lower() == value.lower(), "id"].values[0]
-        if any(df_mapping[code].str.lower() == value.lower())
-        else None
-    )
-    return id_value
+def get_id_from_code(code, df_mapping):
+    if any(df_mapping["code"].str.lower() == code.lower()):
+        id_value = df_mapping.loc[
+            df_mapping["code"].str.lower() == code.lower(), "id"
+        ].values[0]
+        return id_value
+    else:
+        raise ValueError(f"{code.lower()} not found in database")
 
 
 def transform_float(x):

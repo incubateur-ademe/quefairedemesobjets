@@ -26,6 +26,7 @@ from qfdmo.models.utils import (
     NomAsNaturalKeyManager,
     NomAsNaturalKeyModel,
 )
+from qfdmo.validators import CodeValidator
 
 
 class ActeurService(CodeAsNaturalKeyModel):
@@ -35,7 +36,17 @@ class ActeurService(CodeAsNaturalKeyModel):
         verbose_name_plural = "Services proposés"
 
     id = models.AutoField(primary_key=True)
-    code = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    code = models.CharField(
+        max_length=255,
+        unique=True,
+        blank=False,
+        null=False,
+        help_text=(
+            "Ce champ est utilisé lors de l'import de données, il ne doit pas être"
+            " mis à jour sous peine de casser l'import de données"
+        ),
+        validators=[CodeValidator()],
+    )
     libelle = models.CharField(max_length=255, blank=True, null=True)
     actions = models.ManyToManyField(Action)
 
@@ -72,7 +83,17 @@ class ActeurType(CodeAsNaturalKeyModel):
         verbose_name_plural = "Types d'acteur"
 
     id = models.AutoField(primary_key=True)
-    code = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    code = models.CharField(
+        max_length=255,
+        unique=True,
+        blank=False,
+        null=False,
+        help_text=(
+            "Ce champ est utilisé lors de l'import de données, il ne doit pas être"
+            " mis à jour sous peine de casser l'import de données"
+        ),
+        validators=[CodeValidator()],
+    )
     libelle = models.CharField(max_length=255, blank=False, null=False, default="?")
 
     @classmethod
