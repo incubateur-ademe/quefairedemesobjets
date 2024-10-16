@@ -542,8 +542,14 @@ def create_actors(**kwargs):
 
     if "siret" in df.columns:
         df["siret"] = df["siret"].apply(mapping_utils.process_siret)
-    if "telephone" in df.columns:
-        df["telephone"] = df["telephone"].apply(mapping_utils.process_phone_number)
+
+    if "telephone" in df.columns and "code_postal" in df.columns:
+        df["telephone"] = df.apply(
+            lambda row: pd.Series(
+                mapping_utils.process_phone_number(row["telephone"], row["code_postal"])
+            ),
+            axis=1,
+        )
 
     df = df.replace({np.nan: None})
 
