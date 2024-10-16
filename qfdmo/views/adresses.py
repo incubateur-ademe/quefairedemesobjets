@@ -42,7 +42,7 @@ from qfdmo.models.action import (
 )
 from qfdmo.thread.materialized_view import RefreshMateriazedViewThread
 
-logger = logging.getLogger("django")
+logger = logging.getLogger(__name__)
 
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
 

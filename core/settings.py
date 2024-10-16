@@ -140,6 +140,10 @@ LOGGING = {
             "handlers": ["console"],
             "level": LOGLEVEL,
         },
+        "qfdmo": {
+            "handlers": ["console"],
+            "level": LOGLEVEL,
+        },
     },
     "formatters": {
         "default": {
