@@ -12,7 +12,6 @@ from django.contrib.gis.geos import Point, Polygon
 from django.contrib.gis.geos.geometry import GEOSGeometry
 from django.core.cache import cache
 from django.core.files.images import get_image_dimensions
-from django.core.validators import RegexValidator
 from django.db.models import Min
 from django.db.models.functions import Now
 from django.forms import ValidationError, model_to_dict
@@ -27,6 +26,7 @@ from qfdmo.models.utils import (
     NomAsNaturalKeyManager,
     NomAsNaturalKeyModel,
 )
+from qfdmo.validators import CodeValidator
 
 
 class ActeurService(CodeAsNaturalKeyModel):
@@ -45,16 +45,7 @@ class ActeurService(CodeAsNaturalKeyModel):
             "Ce champs est utilisé lors de l'import de données, il ne doit pas être"
             " mis à jour sous peine de casser l'import de données"
         ),
-        validators=[
-            RegexValidator(
-                regex=r"^[a-z_]+$",
-                message=(
-                    "Le champ Code ne doit contenir que des caractères"
-                    " minuscule et des underscores."
-                ),
-                code="invalid_code",
-            )
-        ],
+        validators=[CodeValidator()],
     )
     libelle = models.CharField(max_length=255, blank=True, null=True)
     actions = models.ManyToManyField(Action)
@@ -101,16 +92,7 @@ class ActeurType(CodeAsNaturalKeyModel):
             "Ce champs est utilisé lors de l'import de données, il ne doit pas être"
             " mis à jour sous peine de casser l'import de données"
         ),
-        validators=[
-            RegexValidator(
-                regex=r"^[a-z_]+$",
-                message=(
-                    "Le champ Code ne doit contenir que des caractères"
-                    " minuscule et des underscores."
-                ),
-                code="invalid_code",
-            )
-        ],
+        validators=[CodeValidator()],
     )
     libelle = models.CharField(max_length=255, blank=False, null=False, default="?")
 
