@@ -366,7 +366,7 @@ class GroupeActionChoiceField(forms.ModelMultipleChoiceField):
 
 
 class ConfiguratorForm(DsfrBaseForm):
-    available_actions = GroupeActionChoiceField(
+    action_displayed = GroupeActionChoiceField(
         queryset=GroupeAction.objects.all(),
         to_field_name="code",
         widget=forms.CheckboxSelectMultiple,
