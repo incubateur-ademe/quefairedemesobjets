@@ -11,7 +11,7 @@ from qfdmo.views.adresses import (
     getorcreate_revisionacteur,
     solution_admin,
 )
-from qfdmo.views.configurator import ConfiguratorView
+from qfdmo.views.configurator import AdvancedConfiguratorView, ConfiguratorView
 from qfdmo.views.dags import DagsValidation
 
 urlpatterns = [
@@ -111,8 +111,13 @@ urlpatterns = [
         name="dags_validations",
     ),
     path(
-        "iframe/configurateur",
+        "configurateur",
         ConfiguratorView.as_view(),
         name="iframe_configurator",
+    ),
+    path(
+        "iframe/configurateur",
+        AdvancedConfiguratorView.as_view(),
+        name="advanced_iframe_configurator",
     ),
 ]

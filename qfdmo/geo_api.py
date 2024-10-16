@@ -7,25 +7,20 @@ from django.core.cache import caches
 db_cache = caches["database"]
 
 
-def fetch_epci_codes() -> List[str]:
+def fetch_epci_codes() -> List[Tuple[str, str]]:
     """Retrieves EPCI codes from geo.api"""
-    response = requests.get("https://geo.api.gouv.fr/epcis/?fields=code")
-    codes = [item["code"] for item in response.json()]
+    response = requests.get("https://geo.api.gouv.fr/epcis/?fields=code,nom")
+    codes = [(item["code"], item["nom"]) for item in response.json()]
     return codes
 
 
-def all_epci_codes() -> List[str]:
+def all_epci_codes():
     return cast(
-        List[str],
+        List[Tuple[str, str]],
         db_cache.get_or_set(
             "all_epci_codes", fetch_epci_codes, timeout=3600 * 24 * 365
         ),
     )
-
-
-def all_epci_codes_as_tuples() -> List[Tuple[str, str]]:
-    # Just a callable to use in forms
-    return [(item, item) for item in all_epci_codes()]
 
 
 def retrieve_epci_geojson(epci):
@@ -33,7 +28,7 @@ def retrieve_epci_geojson(epci):
         "all_epci_codes", fetch_epci_codes, timeout=3600 * 24 * 365
     )
 
-    if epci not in all_epcis_codes:
+    if epci not in [k for k, v in cast(List[Tuple[str, str]], all_epcis_codes)]:
         raise ValueError(f"The provided EPCI code does not seem to exist | {epci}")
 
     def fetch_epci_bounding_box():

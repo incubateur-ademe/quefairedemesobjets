@@ -3,12 +3,15 @@ from typing import List, cast
 from django import forms
 from django.core.cache import cache
 from django.http import HttpRequest
+from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
+from dsfr.forms import DsfrBaseForm
 
-from qfdmo.geo_api import all_epci_codes_as_tuples
+from qfdmo.geo_api import all_epci_codes
 from qfdmo.models import DagRun, DagRunStatus, SousCategorieObjet
 from qfdmo.models.action import (
     Action,
+    GroupeAction,
     get_action_instances,
     get_directions,
     get_ordered_directions,
@@ -17,6 +20,8 @@ from qfdmo.widgets import (
     AutoCompleteAndSearchInput,
     AutoCompleteInput,
     DSFRCheckboxSelectMultiple,
+    GenericAutoCompleteInput,
+    RangeInput,
     SegmentedControlSelect,
 )
 
@@ -301,7 +306,7 @@ class CarteAddressesForm(AddressesForm):
     )
 
     epci_codes = forms.MultipleChoiceField(
-        choices=all_epci_codes_as_tuples,
+        choices=all_epci_codes,
         widget=forms.MultipleHiddenInput(),
         required=False,
     )
@@ -349,7 +354,55 @@ class DagsForm(forms.Form):
     )
 
 
-class ConfiguratorForm(forms.Form):
+class GroupeActionChoiceField(forms.ModelMultipleChoiceField):
+    def label_from_instance(self, obj):
+        return mark_safe(
+            render_to_string(
+                "forms/widgets/groupe_action_label.html",
+                {"groupe_action": obj},
+            )
+        )
+
+
+class ConfiguratorForm(DsfrBaseForm):
+    available_actions = GroupeActionChoiceField(
+        queryset=GroupeAction.objects.all(),
+        to_field_name="code",
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        initial=GroupeAction.objects.all,
+        label="Choisissez les actions disponibles pour vos usagers",
+        help_text="Ce sont les actions que vos usagers pourront consulter "
+        "dans la carte que vous intègrerez. Par exemple, si vous ne voulez "
+        "faire une carte que sur les points de tri ou de réparation, il vous "
+        "suffit de décocher toutes les autres actions possibles",
+    )
+    epci_codes = forms.ChoiceField(
+        label="1. Choisir l’EPCI affiché par défaut sur la carte",
+        help_text="Commencez à taper un nom d’EPCI et sélectionnez un EPCI parmi "
+        "les propositions de la liste.",
+        choices=all_epci_codes,
+        initial="",
+        required=False,
+        widget=GenericAutoCompleteInput(
+            attrs={
+                "class": "fr-input",
+                "autocomplete": "off",
+            },
+        ),
+    )
+
+    limit = forms.IntegerField(
+        widget=RangeInput(attrs={"max": 100, "min": 0}),
+        initial=20,
+        label="2. Nombre de résultats maximum à afficher sur la carte",
+        help_text="Indiquez le nombre maximum de lieux qui pourront apparaître "
+        "sur la carte suite à une recherche.",
+        required=False,
+    )
+
+
+class AdvancedConfiguratorForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.load_choices()
@@ -455,7 +508,7 @@ class ConfiguratorForm(forms.Form):
     )
 
     action_displayed = forms.MultipleChoiceField(
-        widget=forms.CheckboxSelectMultiple(
+        widget=DSFRCheckboxSelectMultiple(
             attrs={
                 "class": (
                     "fr-checkbox qfdmo-inline-grid qfdmo-grid-cols-4 qfdmo-gap-4"
@@ -484,7 +537,7 @@ class ConfiguratorForm(forms.Form):
     #   - pour la direction `jai` les actions possibles sont : `reparer`, `preter`, `donner`, `echanger`, `mettreenlocation`, `revendre` # noqa
     #   - si le paramètre `action_list` n'est pas renseigné ou est vide, toutes les actions éligibles à la direction sont cochées # noqa
     action_list = forms.MultipleChoiceField(
-        widget=forms.CheckboxSelectMultiple(
+        widget=DSFRCheckboxSelectMultiple(
             attrs={
                 "class": (
                     "fr-checkbox qfdmo-inline-grid qfdmo-grid-cols-4 qfdmo-gap-4"

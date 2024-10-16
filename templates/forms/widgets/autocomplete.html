@@ -4,30 +4,37 @@
 >
     <div
         class="autocomplete qfdmo-relative"
+        {% block wrapper_attributes %}
+        {% endblock wrapper_attributes %}
     >
         <input
-            data-action="
-                         input->{{ widget.data_controller }}#complete
-                         focus->{{ widget.data_controller }}#complete
-                         keydown.down->{{ widget.data_controller }}#keydownDown
-                         keydown.up->{{ widget.data_controller }}#keydownUp
-                         keydown.enter->{{ widget.data_controller }}#keydownEnter
-                         keydown.esc->{{ widget.data_controller }}#closeAllLists
-                         blur->{{ widget.data_controller }}#blurInput
-                        "
+                data-action="
+                {% block data_action %}
+                input->{{ widget.data_controller }}#complete
+                focus->{{ widget.data_controller }}#complete
+                keydown.down->{{ widget.data_controller }}#keydownDown
+                keydown.up->{{ widget.data_controller }}#keydownUp
+                keydown.enter->{{ widget.data_controller }}#keydownEnter
+                keydown.esc->{{ widget.data_controller }}#hideAutocompleteList
+                blur->{{ widget.data_controller }}#blurInput
+                {% endblock data_action %}
+            "
             data-{{ widget.data_controller }}-target="input"
             data-on-focus=true
             type="{{ widget.type }}"
             name="{{ widget.name }}"
+            autocomplete="off"
             {% if widget.value != None %} value="{{ widget.value|stringformat:'s' }}"{% endif %}
             {% include "django/forms/widgets/attrs.html" %}
-        >
-        <span data-{{ widget.data_controller }}-target="spinner" class="fr-icon-refresh-line qfdmo-absolute qfdmo-right-0 qfdmo-top-0 qfdmo-m-1w qfdmo-animate-spin qfdmo-hidden"></span>
+            >
+            {% include "forms/widgets/_spinner.html" %}
+            {% block choices %}
+                <script type="application/json" data-{{ widget.data_controller }}-target="allAvailableOptions">
+                    {{ widget.optgroups|options_in_json }}
+                </script>
+            {% endblock choices %}
+        </div>
+        <p data-address-autocomplete-target="displayError" class="fr-error-text fr-mt-1w" style="display:none;">
+            Texte d’erreur obligatoire
+        </p>
     </div>
-    <p data-address-autocomplete-target="displayError" class="fr-error-text fr-mt-1w" style="display:none;">
-        Texte d’erreur obligatoire
-    </p>
-    <script type="application/json" data-{{ widget.data_controller }}-target="allAvailableOptions">
-        {{ widget.optgroups|options_in_json }}
-    </script>
-</div>
