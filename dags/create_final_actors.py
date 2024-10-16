@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 import pandas as pd
+import shortuuid
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
@@ -41,8 +42,12 @@ def apply_corrections_acteur(**kwargs):
         ~df_acteur_merged["identifiant_unique"].isin(
             df_children["identifiant_unique"].tolist()
         )
-    ]
+    ].copy()
 
+    # Add a new column uuid to make the displayedacteur id without source name in id
+    df_acteur_merged["uuid"] = df_acteur_merged["identifiant_unique"].apply(
+        lambda x: shortuuid.uuid(name=x)
+    )
     return {
         "df_acteur_merged": df_acteur_merged,
         # ["parent_id", "child_id", "child_source_id"]
@@ -272,6 +277,7 @@ def write_data_to_postgres(**kwargs):
                 "exclusivite_de_reprisereparation",
                 "uniquement_sur_rdv",
                 "action_principale_id",
+                "uuid",
             ]
         ].to_sql(
             temp_table_name_actor,
