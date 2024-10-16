@@ -1,4 +1,3 @@
-import logging
 import random
 import string
 import uuid
@@ -29,8 +28,6 @@ from qfdmo.models.utils import (
     NomAsNaturalKeyModel,
 )
 from qfdmo.validators import CodeValidator
-
-logger = logging.getLogger(__name__)
 
 
 class ActeurService(CodeAsNaturalKeyModel):
