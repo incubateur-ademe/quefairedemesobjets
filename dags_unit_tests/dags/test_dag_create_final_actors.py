@@ -54,6 +54,7 @@ class TestApplyCorrections:
                 "cree_le": ["2022-01-01", "2022-01-02"],
                 "parent_id": [None, None],
                 "source_id": [1, 2],
+                "uuid": ["Hogy2rqwtvgMUctiqUyYmH", "AS5wKPytvs9VjWEFQdqTwK"],
             }
         )
         df_children_expected = pd.DataFrame(
@@ -114,6 +115,7 @@ class TestApplyCorrections:
                 "cree_le": ["2022-01-03"],
                 "parent_id": [None],
                 "source_id": [np.nan],
+                "uuid": ["Ad4fYCpSxc7rpzNvK8wCYr"],
             }
         )
         df_children_expected = pd.DataFrame(
@@ -124,6 +126,7 @@ class TestApplyCorrections:
                 "source_id": [1.0, 2.0],
             }
         )
+
         pd.testing.assert_frame_equal(
             result["df_acteur_merged"].reset_index(drop=True),
             df_acteur_expected.reset_index(drop=True),

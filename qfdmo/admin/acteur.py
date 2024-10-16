@@ -532,6 +532,9 @@ class DisplayedActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
     base_fields = list(BaseActeurAdmin.fields)
     base_fields.remove("source")
     base_fields.insert(1, "sources")
+    base_fields.insert(0, "uuid")
+    readonly_fields = list(BaseActeurAdmin.readonly_fields)
+    readonly_fields.insert(0, "uuid")
     fields = base_fields
 
     inlines = [
