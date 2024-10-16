@@ -9,9 +9,9 @@ class TestDataTransformations(unittest.TestCase):
     def setUp(self):
         self.df_acteurtype = pd.DataFrame(
             {
-                "libelle": [
-                    "en ligne (web, mobile)",
-                    "artisan, commerce indépendant",
+                "code": [
+                    "acteur_digital",
+                    "artisan",
                     "commerce",
                 ],
                 "id": [1, 2, 3],

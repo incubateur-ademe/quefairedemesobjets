@@ -555,6 +555,12 @@ class CodeLibelleModelAdmin(admin.ModelAdmin):
     search_fields = ["libelle", "code"]
     search_help_text = "Recherche sur le libellé ou le code"
 
+    # le champ code ne doit pas être modifiable
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return ["code"]
+        return []
+
 
 admin.site.register(Acteur, ActeurAdmin)
 admin.site.register(ActeurService, CodeLibelleModelAdmin)
