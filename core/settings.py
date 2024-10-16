@@ -120,15 +120,19 @@ with suppress(ModuleNotFoundError):
         "HIDE_IN_STACKTRACES": CONFIG_DEFAULTS["HIDE_IN_STACKTRACES"] + ("sentry_sdk",),
     }
 
-LOGLEVEL = decouple.config("LOGLEVEL", default="error", cast=str).upper()
+LOGLEVEL = decouple.config(
+    "LOGLEVEL", default="info" if DEBUG else "error", cast=str
+).upper()
 
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "filters": {"hide_staticfiles": {"()": "core.logging.SkipStaticFilter"}},
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
             "formatter": "default",
+            "filters": ["hide_staticfiles"] if DEBUG else [],
         }
     },
     "loggers": {
@@ -136,11 +140,15 @@ LOGGING = {
             "handlers": ["console"],
             "level": LOGLEVEL,
         },
+        "qfdmo": {
+            "handlers": ["console"],
+            "level": LOGLEVEL,
+        },
     },
     "formatters": {
         "default": {
             # exact format is not important, this is the minimum information
-            "format": "[%(asctime)s] %(name)-12s] %(levelname)-8s : %(message)s",
+            "format": "[%(asctime)s] [%(name)s] [%(levelname)s] : %(message)s",
         },
     },
 }
