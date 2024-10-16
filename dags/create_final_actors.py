@@ -42,7 +42,8 @@ def apply_corrections_acteur(**kwargs):
         ~df_acteur_merged["identifiant_unique"].isin(
             df_children["identifiant_unique"].tolist()
         )
-    ]
+    ].copy()
+
     # Add a new column uuid to make the displayedacteur id without source name in id
     df_acteur_merged["uuid"] = df_acteur_merged["identifiant_unique"].apply(
         lambda x: shortuuid.uuid(name=x)
