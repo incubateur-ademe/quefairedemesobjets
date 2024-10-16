@@ -24,8 +24,8 @@ init-dev:
 	pre-commit install
 	# python
 	python -m venv .venv --prompt $(basename $(CURDIR)) --clear
+	$(PYTHON) -m pip install pip-tools
 	$(PYTHON) -m pip install --no-deps -r requirements.txt -r dev-requirements.txt
-	$(PYTON) -m pip install pip-tools
 	# javascript
 	npm install
 	npx playwright install --with-deps
@@ -34,6 +34,7 @@ init-dev:
 	cp ./dags/.env.template ./dags/.env
 	# prepare django
 	make migrate
+	make createcachetable
 	make createsuperuser
 
 .PHONY: fix
@@ -56,6 +57,10 @@ run-django:
 .PHONY: migrate
 migrate:
 	$(DJANGO_ADMIN) migrate
+
+.PHONY: createcachetable
+migrate:
+	$(DJANGO_ADMIN) createcachetable
 
 .PHONY: createsuperuser
 createsuperuser:
