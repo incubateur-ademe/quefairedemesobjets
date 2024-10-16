@@ -93,33 +93,36 @@ export class SolutionMap {
     }
   }
 
+  #generateHTMLFromActor(actor: DisplayedActeur): string {
+    const markerHtmlStyles = `color: ${get_color_code(actor.couleur)};`
+    const background = actor.bonus ? pinBackgroundFillSvg : pinBackgroundSvg
+    const cornerIcon = actor.bonus ? bonusIconSvg : ""
+    const markerIconClasses = `qfdmo-absolute qfdmo-top-[10] qfdmo-left-[10] qfdmo-right-[10] qfdmo-margin-auto
+      qfdmo-icon ${actor.icon} ${actor.bonus ? "qfdmo-text-white" : ""}
+      `
+    const htmlTree = [`<div style="${markerHtmlStyles}">`, background]
+    if (cornerIcon) {
+      htmlTree.push(
+        `<span class="qfdmo-absolute qfdmo-right-[-5] qfdmo-top-[-5] qfdmo-z-10">`,
+        cornerIcon,
+        `</span>`,
+      )
+    }
+    htmlTree.push(`<span class="${markerIconClasses}"></span>`, `</div>`)
+    return htmlTree.join("")
+  }
+
   displayActor(actors: Array<DisplayedActeur>, bboxValue?: Array<Number>): void {
     let points: Array<Array<Number>> = []
     actors.forEach(function (actor: DisplayedActeur) {
       if (actor.location) {
         let customMarker = defaultMarker
+        const markerHtml = this.#generateHTMLFromActor(actor)
         if (actor.icon) {
-          const markerHtmlStyles = `color: ${get_color_code(actor.couleur)};`
-
-          const background = actor.bonus ? pinBackgroundFillSvg : pinBackgroundSvg
-          const cornerIcon = actor.bonus ? bonusIconSvg : ""
-          const iconClasses = `qfdmo-absolute qfdmo-top-[10] qfdmo-left-[10] qfdmo-right-[10] qfdmo-margin-auto
-            qfdmo-icon ${actor.icon} ${actor.bonus ? "qfdmo-text-white" : ""}
-            `
-
-          const htmlTree = [`<div style="${markerHtmlStyles}">`, background]
-          if (cornerIcon) {
-            htmlTree.push(
-              `<span class="qfdmo-absolute qfdmo-right-[-5] qfdmo-top-[-5] qfdmo-z-10">`,
-              cornerIcon,
-              `</span>`,
-            )
-          }
-          htmlTree.push(`<span class="${iconClasses}"></span>`, `</div>`)
           customMarker = L.divIcon({
             className: "",
             iconSize: [45, 60],
-            html: htmlTree.join(""),
+            html: markerHtml,
           })
         }
 
