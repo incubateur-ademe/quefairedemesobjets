@@ -10,12 +10,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         print(f"Starting : {datetime.now()}")
-        dataset = OpenSourceDisplayedActeurResource(
-            nb_object=100,
-            offset_object=100,
-        ).export()
 
-        open("export.csv", "w").write(dataset.csv)
+        # Exporter les données dans un fichier CSV
+        # par chunk de 1000 lignes
+        dataset = OpenSourceDisplayedActeurResource().export()
+
+        # open("export.csv", "w").write(dataset.csv)
 
         # Écrire les données dans un fichier XLSX
         with open("export.xlsx", "wb") as f:

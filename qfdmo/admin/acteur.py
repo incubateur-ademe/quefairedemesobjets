@@ -630,14 +630,12 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource):
                 ActeurPublicAccueilli.PROFESSIONNELS,
             ],
         )
-        # queryset = queryset.prefetch_related(
-        #     "sources",
-        #     "labels",
-        #     "proposition_services__sous_categories",
-        #     "proposition_services__action",
-        # )
-        if self.nb_object:
-            return queryset[: self.nb_object]
+        queryset = queryset.prefetch_related(
+            "sources",
+            "labels",
+            "proposition_services__sous_categories",
+            "proposition_services__action",
+        )
         return queryset
 
     class Meta:
