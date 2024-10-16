@@ -8,6 +8,7 @@
          data-with-dynamic-form-panel={{"false" if is_carte(request) else "true"}}
          data-testid="rechercher-adresses-submit"
     >
+        <span class="qfdmo-italic qfdmo-text-sm">Taper et sélectionner une adresse ci-dessous pour lancer la recherche</span>
         <div class="form-group">
             {{ form.adresse.label_tag() }}
             {% if form.adresse.help_text %}
