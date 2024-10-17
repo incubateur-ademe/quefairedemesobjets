@@ -172,7 +172,7 @@ class TestReparacteur:
                 "label_reparacteur": ["true"],
             }
         )
-        adresses_view.request = request
+        adresses_view.setup(request)
         context = adresses_view.get_context_data()
 
         assert context["acteurs"].count() == 0
@@ -189,7 +189,7 @@ class TestReparacteur:
                 "label_reparacteur": ["true"],
             }
         )
-        adresses_view.request = request
+        adresses_view.setup(request)
         context = adresses_view.get_context_data()
 
         assert context["acteurs"].count() == 1
@@ -210,7 +210,7 @@ class TestReparacteur:
                 "label_reparacteur": ["true"],
             }
         )
-        adresses_view.request = request
+        adresses_view.setup(request)
         context = adresses_view.get_context_data()
 
         assert context["acteurs"].count() == 1
@@ -230,7 +230,7 @@ class TestExclusiviteReparation:
                 "pas_exclusivite_reparation": ["true"],
             }
         )
-        adresses_view.request = request
+        adresses_view.setup(request)
         context = adresses_view.get_context_data()
 
         assert context["acteurs"].count() == 0
@@ -247,7 +247,7 @@ class TestExclusiviteReparation:
                 "pas_exclusivite_reparation": ["true"],
             }
         )
-        adresses_view.request = request
+        adresses_view.setup(request)
         context = adresses_view.get_context_data()
 
         assert context["acteurs"].count() == 0
@@ -264,7 +264,7 @@ class TestExclusiviteReparation:
                 "pas_exclusivite_reparation": ["false"],
             }
         )
-        adresses_view.request = request
+        adresses_view.setup(request)
         context = adresses_view.get_context_data()
 
         assert context["acteurs"].count() == 1
@@ -283,7 +283,7 @@ class TestExclusiviteReparation:
                 "pas_exclusivite_reparation": ["false"],
             }
         )
-        adresses_view.request = request
+        adresses_view.setup(request)
         context = adresses_view.get_context_data()
 
         assert context["acteurs"].count() == 1
@@ -318,7 +318,7 @@ class TestFilters:
                 "carte": carte,
             }
         )
-        adresses_view.request = request
+        adresses_view.setup(request)
         context = adresses_view.get_context_data()
 
         assert context["acteurs"].count() == 2
@@ -340,7 +340,7 @@ class TestFilters:
                 "sc_id": [str(sous_categorie_id)],
             }
         )
-        adresses_view.request = request
+        adresses_view.setup(request)
         context = adresses_view.get_context_data()
 
         assert DisplayedActeur.objects.count() > 1
@@ -363,7 +363,7 @@ class TestFilters:
                 "sc_id": [str(sous_categorie_id)],
             }
         )
-        adresses_view.request = request
+        adresses_view.setup(request)
         context = adresses_view.get_context_data()
 
         assert DisplayedActeur.objects.count() > 1
@@ -386,7 +386,7 @@ class TestFilters:
                 "sc_id": [str(sous_categorie_id)],
             }
         )
-        adresses_view.request = request
+        adresses_view.setup(request)
         context = adresses_view.get_context_data()
 
         assert DisplayedActeur.objects.count() > 1

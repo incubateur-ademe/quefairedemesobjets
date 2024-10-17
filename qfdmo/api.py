@@ -1,9 +1,8 @@
 from typing import List, Optional
-import math
+
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
-
 from django.shortcuts import get_object_or_404
 from ninja import ModelSchema, Router, Field, FilterSchema, Query
 from ninja.pagination import paginate

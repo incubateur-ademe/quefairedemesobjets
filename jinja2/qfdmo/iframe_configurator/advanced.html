@@ -2,8 +2,9 @@
 
 {% block content %}
     <div class="fr-container fr-my-3w">
+        <h1>Configurateur d'Iframe</h1>
+
         <form action='#iframe_view'>
-            <h1>Configurateur d'Iframe</h1>
             <fieldset class="fr-segmented fr-segmented--sm qfdmo-w-full fr-mt-3w">
                 <legend class="fr-segmented__legend">
                     {{ form.iframe_mode.label }}
@@ -107,11 +108,7 @@
                 Visualiser l'iframe
             </button>
         </form>
-        <h2 id='iframe_view'>Visualisation de l'Iframe</h2>
-        <pre class="qfdmo-w-full qfdmo-whitespace-pre-wrap" style="white-space: pre-wrap;">
-            {{iframe_script}}
-        </pre>
-        {{ iframe_script|safe }}
 
+        {% include "qfdmo/iframe_configurator/_iframe.html"%}
     </div>
-{% endblock %}
+{% endblock content %}

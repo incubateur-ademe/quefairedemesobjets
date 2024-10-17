@@ -1,20 +1,57 @@
 import json
-import logging
 from html import escape
 
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponse
+from django.shortcuts import render
 from django.views.generic.edit import FormView
+from typing import Any
 
-from qfdmo.forms import ConfiguratorForm
-
-logger = logging.getLogger(__name__)
+from qfdmo.forms import AdvancedConfiguratorForm, ConfiguratorForm
 
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
 
 
 class ConfiguratorView(LoginRequiredMixin, FormView):
     form_class = ConfiguratorForm
-    template_name = "qfdmo/iframe_configurator.html"
+    template_name = "qfdmo/iframe_configurator/base.html"
+
+    def form_valid(self, form) -> HttpResponse:
+        return render(
+            self.request,
+            self.template_name,
+            self.get_context_data(
+                form=form, iframe_script=self._compile_script_tag(form.cleaned_data)
+            ),  # Inherited from django.views.generic.edit.FormMixin.form_invalid
+        )
+
+    @property
+    def iframe_url(self):
+        return f"{self.request.scheme}://{self.request.get_host()}/static/carte.js"
+
+    def _compile_script_tag(self, attributes):
+        iframe_script = f"<script src='{ self.iframe_url }'"
+        for key, value in attributes.items():
+            try:
+                # Some values need to be formatted
+                value = value.as_codes()
+            except AttributeError:
+                pass
+
+            if value:
+                iframe_script += f" data-{key}='{str(value)}'"
+        iframe_script += "></script>"
+        return iframe_script
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+
+        return context
+
+
+class AdvancedConfiguratorView(LoginRequiredMixin, FormView):
+    form_class = AdvancedConfiguratorForm
+    template_name = "qfdmo/iframe_configurator/advanced.html"
 
     def get_initial(self):
         initial = super().get_initial()

@@ -1,58 +1,35 @@
+from typing import List, cast
+
 from django import forms
+from django.core.cache import cache
 from django.http import HttpRequest
+from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
+from dsfr.forms import DsfrBaseForm
 
-from qfdmo.models import CachedDirectionAction, DagRun, DagRunStatus, SousCategorieObjet
-
-
-class AutoCompleteInput(forms.TextInput):
-    template_name = "django/forms/widgets/autocomplete.html"
-
-    def __init__(self, attrs=None, data_controller="autocomplete", **kwargs):
-        self.data_controller = data_controller
-        super().__init__(attrs=attrs, **kwargs)
-
-    def get_context(self, name, value, attrs):
-        context = super().get_context(name, value, attrs)
-        context["widget"]["data_controller"] = self.data_controller
-        return context
-
-
-class AutoCompleteAndSearchInput(AutoCompleteInput):
-    template_name = "django/forms/widgets/autocomplete_and_search.html"
-
-    def __init__(self, attrs=None, btn_attrs={}, **kwargs):
-        self.btn_attrs = btn_attrs
-        super().__init__(attrs=attrs, **kwargs)
-
-    def get_context(self, name, value, attrs):
-        context = super().get_context(name, value, attrs)
-        context["widget"]["btn_attrs"] = self.btn_attrs
-        return context
-
-
-class SegmentedControlSelect(forms.RadioSelect):
-    template_name = "django/forms/widgets/segmented_control.html"
-    option_template_name = "django/forms/widgets/segmented_control_option.html"
-
-    def __init__(self, attrs=None, fieldset_attrs=None, option_attrs=None, choices=()):
-        self.fieldset_attrs = {} if fieldset_attrs is None else fieldset_attrs.copy()
-        super().__init__(attrs)
-
-    def get_context(self, name, value, attrs):
-        context = super().get_context(name, value, attrs)
-        context["widget"]["fieldset_attrs"] = self.build_attrs(self.fieldset_attrs)
-        return context
-
-
-class DSFRCheckboxSelectMultiple(forms.CheckboxSelectMultiple):
-    template_name = "django/forms/widgets/checkbox_select.html"
-    option_template_name = "django/forms/widgets/checkbox_option.html"
+from qfdmo.geo_api import all_epci_codes
+from qfdmo.models import DagRun, DagRunStatus, SousCategorieObjet
+from qfdmo.models.action import (
+    Action,
+    GroupeAction,
+    get_action_instances,
+    get_directions,
+    get_ordered_directions,
+)
+from qfdmo.widgets import (
+    AutoCompleteAndSearchInput,
+    AutoCompleteInput,
+    DSFRCheckboxSelectMultiple,
+    GenericAutoCompleteInput,
+    RangeInput,
+    SegmentedControlSelect,
+)
 
 
 class AddressesForm(forms.Form):
-    def load_choices(self, request: HttpRequest) -> None:
-        pass
+    def load_choices(self, request: HttpRequest, **kwargs) -> None:
+        if address_placeholder := request.GET.get("address_placeholder"):
+            self.fields["adresse"].widget.attrs["placeholder"] = address_placeholder
 
     bounding_box = forms.CharField(
         widget=forms.HiddenInput(
@@ -121,6 +98,8 @@ class AddressesForm(forms.Form):
             },
         ),
         choices=[],
+        # TODO: refacto forms : set initial value
+        # initial="jai",
         label="Direction des actions",
         required=False,
     )
@@ -199,7 +178,7 @@ class AddressesForm(forms.Form):
             },
         ),
         label=mark_safe(
-            "<span class='fr-icon--sm fr-icon-money-euro-box-line'></span>"
+            "<span class='fr-icon--sm fr-icon-percent-line'></span>"
             "&nbsp;Éligible au bonus réparation"
         ),
         help_text=mark_safe(
@@ -254,16 +233,17 @@ class AddressesForm(forms.Form):
 
 
 class IframeAddressesForm(AddressesForm):
-    def load_choices(self, request: HttpRequest) -> None:
+    def load_choices(self, request: HttpRequest, **kwargs) -> None:
+        # The kwargs in function signature prevents type error.
+        # TODO : refacto forms : if AddressesForm and CarteAddressesForm
+        # are used on differents views, the method signature would not need
+        # to be the same.
         first_direction = request.GET.get("first_dir")
         self.fields["direction"].choices = [
             [direction["code"], direction["libelle"]]
-            for direction in CachedDirectionAction.get_directions(
-                first_direction=first_direction
-            )
+            for direction in get_ordered_directions(first_direction=first_direction)
         ]
-        if address_placeholder := request.GET.get("address_placeholder"):
-            self.fields["adresse"].widget.attrs["placeholder"] = address_placeholder
+        super().load_choices(request)
 
     adresse = forms.CharField(
         widget=AutoCompleteInput(
@@ -304,8 +284,7 @@ class CarteAddressesForm(AddressesForm):
             for field in ["bonus", "label_reparacteur", "pas_exclusivite_reparation"]:
                 self.fields[field].widget.attrs["disabled"] = "true"
 
-        if address_placeholder := request.GET.get("address_placeholder"):
-            self.fields["adresse"].widget.attrs["placeholder"] = address_placeholder
+        super().load_choices(request)
 
     adresse = forms.CharField(
         widget=AutoCompleteAndSearchInput(
@@ -326,6 +305,12 @@ class CarteAddressesForm(AddressesForm):
         required=False,
     )
 
+    epci_codes = forms.MultipleChoiceField(
+        choices=all_epci_codes,
+        widget=forms.MultipleHiddenInput(),
+        required=False,
+    )
+
     grouped_action = forms.MultipleChoiceField(
         widget=DSFRCheckboxSelectMultiple(
             attrs={
@@ -341,6 +326,7 @@ class CarteAddressesForm(AddressesForm):
         required=False,
     )
 
+    # TODO : refacto forms, merge with grouped_action field
     legend_grouped_action = forms.MultipleChoiceField(
         widget=DSFRCheckboxSelectMultiple(
             attrs={
@@ -369,33 +355,88 @@ class DagsForm(forms.Form):
     )
 
 
-class ConfiguratorForm(forms.Form):
+class GroupeActionChoiceField(forms.ModelMultipleChoiceField):
+    def label_from_instance(self, obj):
+        return mark_safe(
+            render_to_string(
+                "forms/widgets/groupe_action_label.html",
+                {"groupe_action": obj},
+            )
+        )
+
+
+class ConfiguratorForm(DsfrBaseForm):
+    action_displayed = GroupeActionChoiceField(
+        queryset=GroupeAction.objects.all(),
+        to_field_name="code",
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        initial=GroupeAction.objects.all,
+        label="Choisissez les actions disponibles pour vos usagers",
+        help_text="Ce sont les actions que vos usagers pourront consulter "
+        "dans la carte que vous intègrerez. Par exemple, si vous ne voulez "
+        "faire une carte que sur les points de tri ou de réparation, il vous "
+        "suffit de décocher toutes les autres actions possibles",
+    )
+    epci_codes = forms.ChoiceField(
+        label="1. Choisir l’EPCI affiché par défaut sur la carte",
+        help_text="Commencez à taper un nom d’EPCI et sélectionnez un EPCI parmi "
+        "les propositions de la liste.",
+        choices=all_epci_codes,
+        initial="",
+        required=False,
+        widget=GenericAutoCompleteInput(
+            attrs={
+                "class": "fr-input",
+                "autocomplete": "off",
+            },
+        ),
+    )
+
+    limit = forms.IntegerField(
+        widget=RangeInput(attrs={"max": 100, "min": 0}),
+        initial=20,
+        label="2. Nombre de résultats maximum à afficher sur la carte",
+        help_text="Indiquez le nombre maximum de lieux qui pourront apparaître "
+        "sur la carte suite à une recherche.",
+        required=False,
+    )
+
+
+class AdvancedConfiguratorForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.load_choices()
 
     def load_choices(self):
+        cached_directions = cast(
+            List[dict], cache.get_or_set("directions", get_directions)
+        )
         self.fields["direction"].choices = [
-            (direction["code"], direction["libelle"])
-            for direction in CachedDirectionAction.get_directions()
+            (direction["code"], direction["libelle"]) for direction in cached_directions
         ] + [("no_dir", "Par défaut")]
         self.fields["first_dir"].choices = [
             ("first_" + direction["code"], direction["libelle"])
-            for direction in CachedDirectionAction.get_directions()
+            for direction in cached_directions
         ] + [("first_no_dir", "Par défaut")]
+
+        # Cast needed because of the cache
+        cached_action_instances = cast(
+            List[Action], cache.get_or_set("action_instances", get_action_instances)
+        )
         self.fields["action_list"].choices = [
             (
                 action.code,
                 f"{action.libelle} ({action.libelle_groupe.capitalize()})",
             )
-            for action in CachedDirectionAction.get_action_instances()
+            for action in cached_action_instances
         ]
         self.fields["action_displayed"].choices = [
             (
                 action.code,
                 f"{action.libelle} ({action.libelle_groupe.capitalize()})",
             )
-            for action in CachedDirectionAction.get_action_instances()
+            for action in cached_action_instances
         ]
 
     limit = forms.IntegerField(
@@ -438,7 +479,8 @@ class ConfiguratorForm(forms.Form):
         required=False,
     )
 
-    # - `data-direction`, option `jai` ou `jecherche`, par défaut l'option de direction « Je cherche » est active # noqa
+    # - `data-direction`, option `jai` ou `jecherche`,
+    # par défaut l'option de direction « Je cherche » est active
     direction = forms.ChoiceField(
         widget=SegmentedControlSelect(
             attrs={
@@ -446,11 +488,14 @@ class ConfiguratorForm(forms.Form):
             },
             fieldset_attrs={},
         ),
+        # TODO: refacto forms : set initial value
+        # initial="jecherche",
         label="Direction des actions",
         required=False,
     )
 
-    # - `data-first_dir`, option `jai` ou `jecherche`, par défaut l'option de direction « Je cherche » est affiché en premier dans la liste des options de direction # noqa
+    # - `data-first_dir`, option `jai` ou `jecherche`, par défaut l'option de direction
+    # « Je cherche » est affiché en premier dans la liste des options de direction
     first_dir = forms.ChoiceField(
         widget=SegmentedControlSelect(
             attrs={
@@ -464,7 +509,7 @@ class ConfiguratorForm(forms.Form):
     )
 
     action_displayed = forms.MultipleChoiceField(
-        widget=forms.CheckboxSelectMultiple(
+        widget=DSFRCheckboxSelectMultiple(
             attrs={
                 "class": (
                     "fr-checkbox qfdmo-inline-grid qfdmo-grid-cols-4 qfdmo-gap-4"
@@ -493,7 +538,7 @@ class ConfiguratorForm(forms.Form):
     #   - pour la direction `jai` les actions possibles sont : `reparer`, `preter`, `donner`, `echanger`, `mettreenlocation`, `revendre` # noqa
     #   - si le paramètre `action_list` n'est pas renseigné ou est vide, toutes les actions éligibles à la direction sont cochées # noqa
     action_list = forms.MultipleChoiceField(
-        widget=forms.CheckboxSelectMultiple(
+        widget=DSFRCheckboxSelectMultiple(
             attrs={
                 "class": (
                     "fr-checkbox qfdmo-inline-grid qfdmo-grid-cols-4 qfdmo-gap-4"

@@ -45,9 +45,11 @@ INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "django.contrib.gis",
-    "django.forms",
     "explorer",
     "import_export",
+    "widget_tweaks",
+    "dsfr",
+    "django.forms",
     "core",
     "qfdmd",
     "qfdmo",
@@ -56,6 +58,7 @@ INSTALLED_APPS = [
 
 # FIXME : check if we can manage django forms templating with jinja2
 FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
+
 
 if DEBUG:
     INSTALLED_APPS.extend(
@@ -73,6 +76,16 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+    },
+    "database": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "lvao_django_cache",
+    },
+}
 
 X_FRAME_OPTIONS = "ALLOWALL"
 
@@ -107,15 +120,19 @@ with suppress(ModuleNotFoundError):
         "HIDE_IN_STACKTRACES": CONFIG_DEFAULTS["HIDE_IN_STACKTRACES"] + ("sentry_sdk",),
     }
 
-LOGLEVEL = decouple.config("LOGLEVEL", default="error", cast=str).upper()
+LOGLEVEL = decouple.config(
+    "LOGLEVEL", default="info" if DEBUG else "error", cast=str
+).upper()
 
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "filters": {"hide_staticfiles": {"()": "core.logging.SkipStaticFilter"}},
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
             "formatter": "default",
+            "filters": ["hide_staticfiles"] if DEBUG else [],
         }
     },
     "loggers": {
@@ -123,11 +140,15 @@ LOGGING = {
             "handlers": ["console"],
             "level": LOGLEVEL,
         },
+        "qfdmo": {
+            "handlers": ["console"],
+            "level": LOGLEVEL,
+        },
     },
     "formatters": {
         "default": {
             # exact format is not important, this is the minimum information
-            "format": "[%(asctime)s] %(name)-12s] %(levelname)-8s : %(message)s",
+            "format": "[%(asctime)s] [%(name)s] [%(levelname)s] : %(message)s",
         },
     },
 }
@@ -153,6 +174,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "core.context_processors.environment",
+                "dsfr.context_processors.site_config",
             ],
         },
     },
@@ -316,5 +338,21 @@ AIRFLOW_WEBSERVER_REFRESHACTEUR_URL = decouple.config(
     "AIRFLOW_WEBSERVER_REFRESHACTEUR_URL", cast=str, default="http://localhost:8080"
 )
 
+USE_I18N = True
+LANGUAGE_CODE = "fr-fr"
+
 IMPORT_EXPORT_TMP_STORAGE_CLASS = "import_export.tmp_storages.MediaStorage"
 IMPORT_FORMATS = [CSV, XLSX, XLS]
+ADDRESS_SUGGESTION_FORM = decouple.config(
+    "ADDRESS_SUGGESTION_FORM", default="https://tally.so/r/wzy9ZZ", cast=str
+)
+UPDATE_SUGGESTION_FORM = decouple.config(
+    "UPDATE_SUGGESTION_FORM", default="https://tally.so/r/3xMqd9", cast=str
+)
+CONTACT_FORM = decouple.config(
+    "CONTACT_FORM", default="https://tally.so/r/wzME61", cast=str
+)
+
+FEEDBACK_FORM = decouple.config(
+    "FEEDBACK_FORM", default="https://tally.so/r/3EW88q", cast=str
+)

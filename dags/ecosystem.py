@@ -1,24 +1,9 @@
-from datetime import datetime
-from importlib import import_module
-from pathlib import Path
-
 from airflow import DAG
-
-env = Path(__file__).parent.name
-utils = import_module(f"{env}.utils.utils")
-eo_operators = import_module(f"{env}.utils.eo_operators")
-
-default_args = {
-    "owner": "airflow",
-    "depends_on_past": False,
-    "start_date": datetime(2024, 3, 23),
-    "email_on_failure": False,
-    "email_on_retry": False,
-    "retries": 1,
-}
+from utils.eo_operators import default_args, eo_task_chain
 
 with DAG(
-    utils.get_dag_name(__file__, "ecosystem"),
+    dag_id="eo-ecosystem",
+    dag_display_name="Téléchargement de la source ECOSYSTEM",
     default_args=default_args,
     description=(
         "A pipeline to fetch, process, and load to validate data into postgresql"
@@ -43,10 +28,9 @@ with DAG(
             "ecoorganisme": "source_id",
             "adresse_format_ban": "adresse",
             "nom_de_lorganisme": "nom",
-            "_updatedAt": "cree_le",
             "perimetre_dintervention": "",
-            "longitudewgs84": "location",
-            "latitudewgs84": "location",
+            "longitudewgs84": "longitude",
+            "latitudewgs84": "latitude",
         },
         "column_to_drop": [
             "siret",
@@ -54,18 +38,4 @@ with DAG(
     },
     schedule=None,
 ) as dag:
-    (
-        [
-            eo_operators.fetch_data_from_api_task(dag),
-            eo_operators.load_data_from_postgresql_task(dag),
-        ]
-        >> eo_operators.create_actors_task(dag)
-        >> [
-            eo_operators.create_proposition_services_task(dag),
-            eo_operators.create_labels_task(dag),
-            eo_operators.create_acteur_services_task(dag),
-        ]
-        >> eo_operators.create_proposition_services_sous_categories_task(dag)
-        >> eo_operators.serialize_to_json_task(dag)
-        >> eo_operators.write_data_task(dag)
-    )  # type: ignore
+    eo_task_chain(dag)

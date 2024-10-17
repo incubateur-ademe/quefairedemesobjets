@@ -19,27 +19,26 @@
                 fetch(url)
                     .then(response => response.json())
                     .then(data => {
-                    var lon = data.features[0].geometry.coordinates[0];
-                    var lat = data.features[0].geometry.coordinates[1];
-                    var map = geodjango_location.map;
+                        var lon = data.features[0].geometry.coordinates[0];
+                        var lat = data.features[0].geometry.coordinates[1];
+                        var map = geodjango_location.map;
 
                     // Supprimer tous les marqueurs de la carte
-                    geodjango_location.clearFeatures();
-                    document.getElementById(geodjango_location.options.id).value = '{ "type": "Point", "coordinates": [ ' + lon + ', ' + lat + ' ] }'
-                    var point = new ol.Feature({
-                        geometry: new ol.geom.Point(ol.proj.fromLonLat([lon, lat]))
-                    });
-                    geodjango_location.featureCollection.push(point);
-                    geodjango_location.map.setView(new ol.View({
-                        center: ol.proj.fromLonLat([lon, lat]),
-                        zoom: 15
-                    }));
+                        geodjango_location.clearFeatures();
+                        document.getElementById(geodjango_location.options.id).value = '{ "type": "Point", "coordinates": [ ' + lon + ', ' + lat + ' ] }'
+                        var point = new ol.Feature({
+                            geometry: new ol.geom.Point(ol.proj.fromLonLat([lon, lat]))
+                        });
+                        geodjango_location.featureCollection.push(point);
+                        geodjango_location.map.setView(new ol.View({
+                            center: ol.proj.fromLonLat([lon, lat]),
+                            zoom: 15
+                        }));
 
-                })
+                    })
                     .catch(error => console.error(error));
             });
         });
     </script>
 
 </div>
-

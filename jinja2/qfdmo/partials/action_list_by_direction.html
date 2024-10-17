@@ -5,9 +5,9 @@
             <div class="fr-fieldset__element fr-my-1v">
                 <div
                     class="fr-checkbox-group fr-p-1v
-                    qfdmo-w-fit qfdmo-bg-{{action.couleur}} qfdmo-bg-opacity-30"
+                           qfdmo-w-fit qfdmo-bg-{{action.couleur}} qfdmo-bg-opacity-30"
                     data-action="click->search-solution-form#apply"
-                    >
+                >
                     <input
                         name="{{action.code}}"
                         {% if action.code == 'reparer' %}
@@ -17,15 +17,15 @@
                         id="{{action_direction}}_{{action.code}}"
                         type="checkbox"
                         {% if action.active %} checked{% endif %}
-                        >
-                        <label class="fr-label before:qfdmo-bg-white fr-text--sm fr-mb-0" for="{{action_direction}}_{{action.code}}">
-                            {% if action.icon %}
-                                <span class="{{ action.icon }}" aria-hidden="true"></span>&nbsp;
-                            {% endif %}
-                            {{ action.libelle }}
-                        </label>
-                    </div>
+                    >
+                    <label class="fr-label before:qfdmo-bg-white fr-text--sm fr-mb-0" for="{{action_direction}}_{{action.code}}">
+                        {% if action.icon %}
+                            <span class="{{ action.icon }}" aria-hidden="true"></span>&nbsp;
+                        {% endif %}
+                        {{ action.libelle }}
+                    </label>
                 </div>
+            </div>
         {% endfor %}
     </fieldset>
 </div>

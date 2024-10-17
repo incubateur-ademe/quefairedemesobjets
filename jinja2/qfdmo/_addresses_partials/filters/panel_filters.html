@@ -1,25 +1,25 @@
 {# Panel «Filtres avancés» #}
 <div class='fr-container
-    qfdmo-px-0
-    qfdmo-absolute qfdmo-z-[10010] qfdmo-top-auto qfdmo-hidden qfdmo-mt-auto qfdmo-h-[95%]
-    qfdmo-drop-shadow-[0_0_100px_rgba(0,0,0,0.5)]
-    qfdmo-inset-0 qfdmo-font-black qfdmo-bg-white
-    qfdmo-flex-col
-    qfdmo-fill-mode-forwards
-    data-[visible=true]:qfdmo-animate-in
-    data-[visible=true]:qfdmo-flex
-    data-[visible=true]:qfdmo-slide-in-from-bottom-9w
-    data-[visible=exit]:qfdmo-flex
-    data-[visible=exit]:qfdmo-animate-out
-    data-[visible=exit]:qfdmo-slide-out-to-bottom-9w
-    data-[visible=exit]:qfdmo-fade-out
-    '
-    data-visible="false"
-    data-search-solution-form-target="advancedFiltersMainPanel"
-    data-action="keydown.esc@document->search-solution-form#toggleAdvancedFiltersWithoutSubmitButton"
-    data-testid="advanced-filters-modal"
-    tabindex="0"
-    >
+            qfdmo-px-0
+            qfdmo-absolute qfdmo-z-[10010] qfdmo-top-auto qfdmo-hidden qfdmo-mt-auto qfdmo-h-[95%]
+            qfdmo-drop-shadow-[0_0_100px_rgba(0,0,0,0.5)]
+            qfdmo-inset-0 qfdmo-font-black qfdmo-bg-white
+            qfdmo-flex-col
+            qfdmo-fill-mode-forwards
+            data-[visible=true]:qfdmo-animate-in
+            data-[visible=true]:qfdmo-flex
+            data-[visible=true]:qfdmo-slide-in-from-bottom-9w
+            data-[visible=exit]:qfdmo-flex
+            data-[visible=exit]:qfdmo-animate-out
+            data-[visible=exit]:qfdmo-slide-out-to-bottom-9w
+            data-[visible=exit]:qfdmo-fade-out
+           '
+     data-visible="false"
+     data-search-solution-form-target="advancedFiltersMainPanel"
+     data-action="keydown.esc@document->search-solution-form#toggleAdvancedFiltersWithoutSubmitButton"
+     data-testid="advanced-filters-modal"
+     tabindex="0"
+>
     <div class="fr-container fr-container--fluid qfdmo-h-full">
         <div class="qfdmo-h-full qfdmo-flex qfdmo-flex-col">
             <div class="fr-modal__header">
@@ -27,7 +27,7 @@
                     class="fr-btn fr-btn--close fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-close-line"
                     type="button"
                     data-action="click -> search-solution-form#toggleAdvancedFiltersWithoutSubmitButton"
-                    >
+                >
                     Fermer
                 </button>
             </div>
@@ -65,7 +65,7 @@
                         class="fr-btn"
                         type="button"
                         data-action="click -> search-solution-form#toggleAdvancedFiltersWithoutSubmitButton"
-                        >
+                    >
                         Enregistrer les filtres
                     </button>
                 </div>
@@ -80,7 +80,7 @@
                         data-without-zone="false"
                         data-with-controls={{"false" if is_carte(request) else "true"}}
                         data-toggle-advanced-filters="true"
-                        >
+                    >
                         Appliquer
                     </button>
                 </div>

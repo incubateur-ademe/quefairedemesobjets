@@ -1,11 +1,11 @@
-import time
-from typing import List
+from typing import List, cast
 
 from django.contrib.gis.db import models
+from django.core.cache import cache
 from django.db.models.query import QuerySet
 from django.forms import model_to_dict
 
-from qfdmo.models.utils import CodeAsNaturalKeyModel
+from qfdmo.models.utils import CodeAsNaturalKeyManager, CodeAsNaturalKeyModel
 
 
 class ActionDirection(CodeAsNaturalKeyModel):
@@ -22,7 +22,27 @@ class ActionDirection(CodeAsNaturalKeyModel):
         return self.libelle
 
 
+class GroupeActionQueryset(models.QuerySet):
+    def as_codes(self, concat=True):
+        actions = []
+
+        for groupe in self:
+            actions = [*actions, *groupe.actions.all().values_list("code", flat=True)]
+
+        if concat:
+            return "|".join(actions)
+
+        return actions
+
+
+class GroupeActionManager(CodeAsNaturalKeyManager):
+    def get_queryset(self):
+        return GroupeActionQueryset(self.model, using=self._db)
+
+
 class GroupeAction(CodeAsNaturalKeyModel):
+    objects = GroupeActionManager()
+
     class Meta:
         verbose_name = "Groupe d'actions"
         verbose_name_plural = "Groupes d'actions"
@@ -110,89 +130,51 @@ brown-cafe-creme-main-782, purple-glycine-main-494, green-menthe-main-548
         return self.libelle
 
 
-class CachedDirectionAction:
-    _cached_actions_by_direction = None
-    _cached_action_instances: List[Action] | None = None
-    _cached_groupe_action_instances: QuerySet[GroupeAction] | None = None
-    _cached_direction = None
-    _reparer_action_id = None
-    _last_cache_update = None
+def get_action_instances() -> List[Action]:
+    return list(Action.objects.prefetch_related("directions", "groupe_action"))
 
-    @classmethod
-    def get_action_instances(cls) -> List[Action]:
-        cls._manage_cache_expiration()
-        if cls._cached_action_instances is None:
-            cls._cached_action_instances = list(
-                Action.objects.prefetch_related("directions", "groupe_action")
-            )
-        return cls._cached_action_instances
 
-    @classmethod
-    def get_groupe_action_instances(cls) -> QuerySet[GroupeAction]:
-        cls._manage_cache_expiration()
-        if cls._cached_groupe_action_instances is None:
-            cls._cached_groupe_action_instances = GroupeAction.objects.prefetch_related(
-                "actions"
-            ).order_by("order")
-        return cls._cached_groupe_action_instances
+def get_reparer_action_id() -> int:
+    try:
+        return [
+            action for action in get_action_instances() if action.code == "reparer"
+        ][0].id
+    except IndexError:
+        raise Exception("Action 'Réparer' not found")
 
-    # TODO : to be factorized
-    @classmethod
-    def get_actions_by_direction(cls) -> dict:
-        cls._manage_cache_expiration()
-        if cls._cached_actions_by_direction is None:
-            cls._cached_actions_by_direction = {
-                d.code: sorted(
-                    [
-                        model_to_dict(a, exclude=["directions"])
-                        for a in d.actions.filter(afficher=True)
-                    ],
-                    key=lambda x: x["order"],
-                )
-                for d in ActionDirection.objects.all()
-            }
 
-        return cls._cached_actions_by_direction
+def get_groupe_action_instances() -> QuerySet[GroupeAction]:
+    return GroupeAction.objects.prefetch_related("actions").order_by("order")
 
-    @classmethod
-    def get_directions(cls, first_direction=None) -> List[dict]:
-        cls._manage_cache_expiration()
-        if cls._cached_direction is None:
-            directions = ActionDirection.objects.all()
-            directions_list = [model_to_dict(d) for d in directions]
-            sorted_directions = sorted(directions_list, key=lambda x: x["order"])
-            cls._cached_direction = sorted_directions
-        if first_direction is not None and first_direction in [
-            d["code"] for d in cls._cached_direction
-        ]:
-            return sorted(
-                cls._cached_direction,
-                key=lambda x: (x["code"] != first_direction, x["code"]),
-            )
-        return cls._cached_direction
 
-    @classmethod
-    def get_reparer_action_id(cls):
-        cls._manage_cache_expiration()
-        if cls._reparer_action_id is None:
-            cls._reparer_action_id = Action.objects.get(code="reparer").id
-        return cls._reparer_action_id
+def get_actions_by_direction() -> dict:
+    return {
+        d.code: sorted(
+            [
+                model_to_dict(a, exclude=["directions"])
+                for a in d.actions.filter(afficher=True)
+            ],
+            key=lambda x: x["order"],
+        )
+        for d in ActionDirection.objects.all()
+    }
 
-    @classmethod
-    def reload_cache(cls):
-        cls._cached_actions_by_direction = None
-        cls._cached_direction = None
-        cls._reparer_action_id = None
-        cls._cached_action_instances = None
-        cls._cached_groupe_action_instances = None
 
-    @classmethod
-    def _manage_cache_expiration(cls):
-        if cls._last_cache_update is None:
-            cls._last_cache_update = time.time()
-            return
+def get_directions() -> List[dict]:
+    direction_instances = ActionDirection.objects.all()
+    directions_list = [model_to_dict(d) for d in direction_instances]
+    return sorted(directions_list, key=lambda x: x["order"])
 
-        current_time = time.time()
-        if current_time - cls._last_cache_update > 300:
-            cls.reload_cache()
-            cls._last_cache_update = current_time
+
+def get_ordered_directions(first_direction=None) -> List[dict]:
+    ordered_directions = cast(
+        List[dict], cache.get_or_set("directions", get_directions)
+    )
+    if first_direction is not None and first_direction in [
+        d["code"] for d in ordered_directions
+    ]:
+        return sorted(
+            ordered_directions,
+            key=lambda x: (x["code"] != first_direction, x["code"]),
+        )
+    return ordered_directions

@@ -11,12 +11,40 @@ from qfdmo.views.adresses import (
     getorcreate_revisionacteur,
     solution_admin,
 )
-from qfdmo.views.configurator import ConfiguratorView
+from qfdmo.views.configurator import AdvancedConfiguratorView, ConfiguratorView
 from qfdmo.views.dags import DagsValidation
 
 urlpatterns = [
     path("", AddressesView.as_view(), name="reemploi_solution"),
     path("connexion", LoginView.as_view(), name="login"),
+    path(
+        "donnez-votre-avis",
+        RedirectView.as_view(
+            url=settings.FEEDBACK_FORM, query_string=True, permanent=True
+        ),
+        name="feedback-form",
+    ),
+    path(
+        "proposer-une-adresse",
+        RedirectView.as_view(
+            url=settings.ADDRESS_SUGGESTION_FORM, query_string=True, permanent=True
+        ),
+        name="address-suggestion-form",
+    ),
+    path(
+        "nous-contacter",
+        RedirectView.as_view(
+            url=settings.CONTACT_FORM, query_string=True, permanent=True
+        ),
+        name="contact-form",
+    ),
+    path(
+        "proposer-une-modification",
+        RedirectView.as_view(
+            url=settings.UPDATE_SUGGESTION_FORM, query_string=True, permanent=True
+        ),
+        name="update-suggestion-form",
+    ),
     path(
         "qfdmo/getorcreate_revisionacteur/<str:acteur_identifiant>",
         getorcreate_revisionacteur,
@@ -83,8 +111,13 @@ urlpatterns = [
         name="dags_validations",
     ),
     path(
-        "iframe/configurateur",
+        "configurateur",
         ConfiguratorView.as_view(),
         name="iframe_configurator",
+    ),
+    path(
+        "iframe/configurateur",
+        AdvancedConfiguratorView.as_view(),
+        name="advanced_iframe_configurator",
     ),
 ]

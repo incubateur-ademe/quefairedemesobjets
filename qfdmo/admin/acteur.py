@@ -32,7 +32,7 @@ from qfdmo.models.acteur import (
     DisplayedPropositionService,
     LabelQualite,
 )
-from qfdmo.widget import CustomOSMWidget
+from qfdmo.widgets import CustomOSMWidget
 
 
 class NotEditableInlineMixin:
@@ -532,6 +532,9 @@ class DisplayedActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
     base_fields = list(BaseActeurAdmin.fields)
     base_fields.remove("source")
     base_fields.insert(1, "sources")
+    base_fields.insert(0, "uuid")
+    readonly_fields = list(BaseActeurAdmin.readonly_fields)
+    readonly_fields.insert(0, "uuid")
     fields = base_fields
 
     inlines = [
@@ -554,6 +557,12 @@ class CodeLibelleModelAdmin(admin.ModelAdmin):
     list_display = ("libelle", "code")
     search_fields = ["libelle", "code"]
     search_help_text = "Recherche sur le libellé ou le code"
+
+    # le champ code ne doit pas être modifiable
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return ["code"]
+        return []
 
 
 admin.site.register(Acteur, ActeurAdmin)

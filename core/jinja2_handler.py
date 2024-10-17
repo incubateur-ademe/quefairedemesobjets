@@ -8,7 +8,8 @@ from django.urls import reverse
 
 from core.utils import get_direction
 from jinja2 import Environment
-from qfdmo.models import CachedDirectionAction, DisplayedActeur
+from qfdmo.models import DisplayedActeur
+from qfdmo.models.action import get_actions_by_direction
 
 
 def is_embedded(request: HttpRequest) -> bool:
@@ -26,7 +27,7 @@ def is_iframe(request: HttpRequest) -> bool:
 def action_by_direction(request: HttpRequest, direction: str):
     requested_direction = get_direction(request)
     action_displayed = request.GET.get("action_displayed", "")
-    actions_to_display = CachedDirectionAction.get_actions_by_direction()[direction]
+    actions_to_display = get_actions_by_direction()[direction]
     if action_displayed:
         actions_to_display = [
             a for a in actions_to_display if a["code"] in action_displayed.split("|")

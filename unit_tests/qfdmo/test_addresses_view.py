@@ -55,7 +55,7 @@ class TestAdessesViewGetActionList:
         request = HttpRequest()
         request.GET = params
         adresses_view = AddressesView()
-        adresses_view.request = request
+        adresses_view.setup(request)
 
         assert [
             action["libelle"] for action in adresses_view.get_action_list()

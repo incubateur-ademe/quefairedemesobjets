@@ -1,21 +1,33 @@
 import random
 import string
 import uuid
-from typing import Any
+from typing import Any, List, cast
 
 import opening_hours
 import orjson
+import shortuuid
+from django.conf import settings
 from django.contrib.gis.db import models
+from django.contrib.gis.db.models.functions import Distance
+from django.contrib.gis.geos import Point, Polygon
+from django.contrib.gis.geos.geometry import GEOSGeometry
+from django.core.cache import cache
 from django.core.files.images import get_image_dimensions
+from django.db.models import Exists, Min, OuterRef
 from django.db.models.functions import Now
 from django.forms import ValidationError, model_to_dict
 from django.http import HttpRequest
 from django.urls import reverse
 from unidecode import unidecode
 
-from qfdmo.models.action import Action, CachedDirectionAction
+from qfdmo.models.action import Action, get_action_instances
 from qfdmo.models.categorie_objet import SousCategorieObjet
-from qfdmo.models.utils import CodeAsNaturalKeyModel, NomAsNaturalKeyModel
+from qfdmo.models.utils import (
+    CodeAsNaturalKeyModel,
+    NomAsNaturalKeyManager,
+    NomAsNaturalKeyModel,
+)
+from qfdmo.validators import CodeValidator
 
 
 class ActeurService(CodeAsNaturalKeyModel):
@@ -25,7 +37,17 @@ class ActeurService(CodeAsNaturalKeyModel):
         verbose_name_plural = "Services proposés"
 
     id = models.AutoField(primary_key=True)
-    code = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    code = models.CharField(
+        max_length=255,
+        unique=True,
+        blank=False,
+        null=False,
+        help_text=(
+            "Ce champ est utilisé lors de l'import de données, il ne doit pas être"
+            " mis à jour sous peine de casser l'import de données"
+        ),
+        validators=[CodeValidator()],
+    )
     libelle = models.CharField(max_length=255, blank=True, null=True)
     actions = models.ManyToManyField(Action)
 
@@ -62,17 +84,23 @@ class ActeurType(CodeAsNaturalKeyModel):
         verbose_name_plural = "Types d'acteur"
 
     id = models.AutoField(primary_key=True)
-    code = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    code = models.CharField(
+        max_length=255,
+        unique=True,
+        blank=False,
+        null=False,
+        help_text=(
+            "Ce champ est utilisé lors de l'import de données, il ne doit pas être"
+            " mis à jour sous peine de casser l'import de données"
+        ),
+        validators=[CodeValidator()],
+    )
     libelle = models.CharField(max_length=255, blank=False, null=False, default="?")
 
     @classmethod
     def get_digital_acteur_type_id(cls) -> int:
         if not cls._digital_acteur_type_id:
             (digital_acteur_type, _) = cls.objects.get_or_create(code="acteur digital")
-            print(
-                f"digital_acteur_type : {digital_acteur_type.id}"
-                f" - {digital_acteur_type.code} - {digital_acteur_type}"
-            )
             cls._digital_acteur_type_id = digital_acteur_type.id
         return cls._digital_acteur_type_id
 
@@ -153,7 +181,63 @@ class LabelQualite(models.Model):
         return self.libelle
 
 
+class ActeurQuerySet(models.QuerySet):
+    def with_bonus(self):
+        bonus_label_qualite = LabelQualite.objects.filter(
+            displayedacteur=OuterRef("pk"), bonus=True
+        )
+        return self.annotate(bonus=Exists(bonus_label_qualite))
+
+    def digital(self):
+        return (
+            self.filter(acteur_type_id=ActeurType.get_digital_acteur_type_id())
+            .annotate(min_action_order=Min("proposition_services__action__order"))
+            .order_by("min_action_order", "?")
+        )
+
+    def physical(self):
+        return self.exclude(acteur_type_id=ActeurType.get_digital_acteur_type_id())
+
+    def in_geojson(self, geojson):
+        if not geojson:
+            # TODO : test
+            return self.physical()
+
+        geometry = GEOSGeometry(geojson)
+        return self.physical().filter(location__within=geometry)
+
+    def in_bbox(self, bbox):
+        if not bbox:
+            # TODO : test
+            return self.physical()
+
+        return self.physical().filter(location__within=Polygon.from_bbox(bbox))
+
+    def from_center(self, longitude, latitude, distance=settings.DISTANCE_MAX):
+        reference_point = Point(float(longitude), float(latitude), srid=4326)
+        distance_in_degrees = distance / 111320
+
+        return (
+            self.physical()
+            .annotate(distance=Distance("location", reference_point))
+            .filter(
+                location__dwithin=(
+                    reference_point,
+                    distance_in_degrees,
+                )
+            )
+            .order_by("distance")
+        )
+
+
+class ActeurManager(NomAsNaturalKeyManager):
+    def get_queryset(self):
+        return ActeurQuerySet(self.model, using=self._db)
+
+
 class BaseActeur(NomAsNaturalKeyModel):
+    objects = ActeurManager()
+
     class Meta:
         abstract = True
 
@@ -247,8 +331,6 @@ class BaseActeur(NomAsNaturalKeyModel):
 
     @property
     def is_digital(self) -> bool:
-        print(f"acteur_type : {self.acteur_type_id} - {self.acteur_type}")
-        print(f"get_digital_acteur_type_id : {ActeurType.get_digital_acteur_type_id()}")
         return self.acteur_type_id == ActeurType.get_digital_acteur_type_id()
 
     def get_acteur_services(self) -> list[str]:
@@ -310,22 +392,26 @@ class Acteur(BaseActeur):
                 "statut",
             ],
         )
-        (acteur, created) = RevisionActeur.objects.get_or_create(
+        (revisionacteur, created) = RevisionActeur.objects.get_or_create(
             identifiant_unique=self.identifiant_unique, defaults=fields
         )
         if created:
             for proposition_service in self.proposition_services.all():  # type: ignore
                 revision_proposition_service = (
                     RevisionPropositionService.objects.create(
-                        acteur=acteur,
+                        acteur=revisionacteur,
                         action_id=proposition_service.action_id,
                     )
                 )
                 revision_proposition_service.sous_categories.add(
                     *proposition_service.sous_categories.all()
                 )
+            for label in self.labels.all():
+                revisionacteur.labels.add(label)
+            for acteur_service in self.acteur_services.all():
+                revisionacteur.acteur_services.add(acteur_service)
 
-        return acteur
+        return revisionacteur
 
     def clean_location(self):
         if self.location is None and self.acteur_type.code != "acteur digital":
@@ -452,6 +538,8 @@ class DisplayedActeur(BaseActeur):
         verbose_name = "ACTEUR de l'EC - AFFICHÉ"
         verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ"
 
+    uuid = models.CharField(max_length=255, default=shortuuid.uuid, editable=False)
+
     # Table name qfdmo_displayedacteur_sources
     sources = models.ManyToManyField(
         Source,
@@ -463,9 +551,13 @@ class DisplayedActeur(BaseActeur):
         ps_action_ids = list(
             {ps.action_id for ps in self.proposition_services.all()}  # type: ignore
         )
+        # Cast needed because of the cache
+        cached_action_instances = cast(
+            List[Action], cache.get_or_set("action_instances", get_action_instances)
+        )
         return [
             action
-            for action in CachedDirectionAction.get_action_instances()
+            for action in cached_action_instances
             if (not direction or direction in [d.code for d in action.directions.all()])
             and action.id in ps_action_ids
         ]
@@ -503,7 +595,9 @@ class DisplayedActeur(BaseActeur):
         acteur_dict = {
             "identifiant_unique": self.identifiant_unique,
             "location": orjson.loads(self.location.geojson),
+            "bonus": getattr(self, "bonus", False),
         }
+
         if main_action := actions[0] if actions else None:
             if carte and main_action.groupe_action:
                 acteur_dict["icon"] = main_action.groupe_action.icon
@@ -521,6 +615,9 @@ class DisplayedActeur(BaseActeur):
 
 
 class DisplayedActeurTemp(BaseActeur):
+
+    uuid = models.CharField(max_length=255, default=shortuuid.uuid, editable=False)
+
     labels = models.ManyToManyField(
         LabelQualite,
         through="ActeurLabelQualite",

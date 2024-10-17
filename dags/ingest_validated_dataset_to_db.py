@@ -1,6 +1,4 @@
 from datetime import timedelta
-from importlib import import_module
-from pathlib import Path
 
 import pandas as pd
 from airflow.models import DAG
@@ -8,11 +6,7 @@ from airflow.operators.dagrun_operator import TriggerDagRunOperator
 from airflow.operators.python_operator import BranchPythonOperator, PythonOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.utils.dates import days_ago
-
-env = Path(__file__).parent.name
-utils = import_module(f"{env}.utils.utils")
-dag_ingest_validated_utils = import_module(f"{env}.utils.dag_ingest_validated_utils")
-qfdmd = import_module(f"{env}.utils.shared_constants")
+from utils import dag_ingest_validated_utils, shared_constants
 
 default_args = {
     "owner": "airflow",
@@ -23,7 +17,8 @@ default_args = {
 }
 
 dag = DAG(
-    utils.get_dag_name(__file__, "validate_and_process_dagruns"),
+    dag_id="validate_and_process_dagruns",
+    dag_display_name="Traitement des cohortes de données validées",
     default_args=default_args,
     description="Check for VALIDATE in qfdmo_dagrun and process qfdmo_dagrunchange",
     schedule="*/5 * * * *",
@@ -32,28 +27,37 @@ dag = DAG(
 )
 
 
-def check_for_validation(**kwargs):
-    hook = PostgresHook(postgres_conn_id=utils.get_db_conn_id(__file__))
-    row = hook.get_records(
-        "SELECT EXISTS "
-        f"(SELECT 1 FROM qfdmo_dagrun WHERE status = '{qfdmd.TO_INSERT}')"
+def _get_first_dagrun_to_insert():
+    hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
+    # get first row from table qfdmo_dagrun with status TO_INSERT
+    row = hook.get_first(
+        f"SELECT * FROM qfdmo_dagrun WHERE status = '{shared_constants.TO_INSERT}'"
+        " LIMIT 1"
     )
-    return "fetch_and_parse_data" if row[0][0] else "skip_processing"
+    return row
+
+
+def check_for_validation(**kwargs):
+    # get first row from table qfdmo_dagrun with status TO_INSERT
+    row = _get_first_dagrun_to_insert()
+
+    # Skip if row is None
+    if row is None:
+        return "skip_processing"
+    return "fetch_and_parse_data"
 
 
 def fetch_and_parse_data(**context):
-    pg_hook = PostgresHook(postgres_conn_id=utils.get_db_conn_id(__file__))
+    row = _get_first_dagrun_to_insert()
+    dag_run_id = row[0]
+
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
     engine = pg_hook.get_sqlalchemy_engine()
 
     df_sql = pd.read_sql_query(
-        "SELECT * FROM qfdmo_dagrunchange WHERE "
-        "dag_run_id IN "
-        "(SELECT id FROM qfdmo_dagrun WHERE status = "
-        f"'{qfdmd.TO_INSERT}')",
+        f"SELECT * FROM qfdmo_dagrunchange WHERE dag_run_id = '{dag_run_id}'",
         engine,
     )
-
-    dag_run_id = df_sql["dag_run_id"].iloc[0]
 
     df_create = df_sql[df_sql["change_type"] == "CREATE"]
     df_update_actor = df_sql[df_sql["change_type"] == "UPDATE_ACTOR"]
@@ -65,15 +69,34 @@ def fetch_and_parse_data(**context):
             df_actors_create, dag_run_id, engine
         )
     if not df_update_actor.empty:
+
         normalized_dfs = df_update_actor["row_updates"].apply(pd.json_normalize)
         df_actors_update_actor = pd.concat(normalized_dfs.tolist(), ignore_index=True)
+        status_repeated = (
+            df_update_actor["status"]
+            .repeat(df_update_actor["row_updates"].apply(len))
+            .reset_index(drop=True)
+        )
+        df_actors_update_actor["status"] = status_repeated
+
         return dag_ingest_validated_utils.handle_update_actor_event(
             df_actors_update_actor, dag_run_id
         )
+    return {
+        "dag_run_id": dag_run_id,
+    }
 
 
 def write_data_to_postgres(**kwargs):
     data_dict = kwargs["ti"].xcom_pull(task_ids="fetch_and_parse_data")
+    # If data_set is empty, nothing to do
+    dag_run_id = data_dict["dag_run_id"]
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
+    engine = pg_hook.get_sqlalchemy_engine()
+    if "actors" not in data_dict:
+        with engine.begin() as connection:
+            dag_ingest_validated_utils.update_dag_run_status(connection, dag_run_id)
+        return
     df_actors = data_dict["actors"]
     df_labels = data_dict.get("labels")
     df_acteur_services = data_dict.get("acteur_services")
@@ -81,8 +104,6 @@ def write_data_to_postgres(**kwargs):
     df_pdssc = data_dict.get("pds_sous_categories")
     dag_run_id = data_dict["dag_run_id"]
     change_type = data_dict.get("change_type", "CREATE")
-    pg_hook = PostgresHook(postgres_conn_id=utils.get_db_conn_id(__file__))
-    engine = pg_hook.get_sqlalchemy_engine()
 
     with engine.begin() as connection:
         if change_type == "CREATE":
@@ -128,7 +149,7 @@ write_to_postgres_task = PythonOperator(
 
 trigger_create_final_actors_dag = TriggerDagRunOperator(
     task_id="create_displayed_actors",
-    trigger_dag_id=utils.get_dag_name(__file__, "apply_adresse_corrections"),
+    trigger_dag_id="compute_carte_acteur",
     dag=dag,
 )
 

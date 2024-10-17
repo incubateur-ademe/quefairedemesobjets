@@ -136,9 +136,15 @@ Style the autocomplete container:
 }
 
 .fr-icon-money-euro-box-line::before,
-.fr-icon-money-euro-box-line::after {
-  -webkit-mask-image: url("svg/money-euro-box-line.svg");
-  mask-image: url("svg/money-euro-box-line.svg");
+ .fr-icon-money-euro-box-line::after {
+   -webkit-mask-image: url("svg/money-euro-box-line.svg");
+   mask-image: url("svg/money-euro-box-line.svg");
+ }
+
+.fr-icon-percent-line::before,
+.fr-icon-percent-line::after {
+  -webkit-mask-image: url("svg/percent-line.svg");
+  mask-image: url("svg/percent-line.svg");
 }
 
 .fr-icon-tools-fill::before,
@@ -157,6 +163,16 @@ Style the autocomplete container:
 .fr-icon-money-euro-circle-line::after {
   -webkit-mask-image: url("svg/money-euro-circle-line.svg");
   mask-image: url("svg/money-euro-circle-line.svg");
+}
+
+.fr-icon-epingle-plus::before,
+.fr-icon-epingle-plus::after {
+    -webkit-mask-image: url("svg/epingle-plus.svg");
+    mask-image: url("svg/epingle-plus.svg");
+}
+
+.fr-btn--icon-left.fr-btn[target="_blank"]::after {
+    display: none;
 }
 
 /*
@@ -208,4 +224,9 @@ Style the autocomplete container:
 */
 .fr-segmented__element input:checked:focus + label {
     outline: 2px solid #0a76f6;
+}
+
+
+.fr-input[type=range] {
+    box-shadow: none;
 }
