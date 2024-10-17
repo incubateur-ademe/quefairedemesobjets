@@ -25,7 +25,12 @@ Réutiliser la carte | {{ super() }}
             >
                 <h2>Résultats</h2>
                 <h3>Code à implémenter</h3>
-                <p>Il vous suffit de copier/coller ce code dans votre site Internet. En cas de difficultés, de questions, ou pour tout autre échange, vous pouvez contacter l’équipe.</p>
+                <p>Il vous suffit de copier/coller ce code dans votre site Internet. En cas de difficultés, de questions, ou pour tout autre échange, vous pouvez
+                    <a href="{{ url('qfdmo:contact-team-form') }}?campaign=site-header">
+                        contacter l’équipe
+                    </a>
+                    .
+                </p>
                 <div
                     data-controller="copy"
                     class="qfdmo-flex
