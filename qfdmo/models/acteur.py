@@ -152,18 +152,7 @@ class LabelQualite(models.Model):
         return self.libelle
 
 
-class ActeurQuerySet(models.QuerySet):
-    pass
-
-
-class ActeurManager(NomAsNaturalKeyManager):
-    def get_queryset(self):
-        return ActeurQuerySet(self.model, using=self._db)
-
-
 class BaseActeur(NomAsNaturalKeyModel):
-    objects = ActeurManager()
-
     class Meta:
         abstract = True
 
