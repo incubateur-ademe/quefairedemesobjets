@@ -85,12 +85,29 @@ export class SolutionMap {
       this.#location.latitude !== undefined &&
       this.#location.longitude !== undefined
     ) {
+
+      const homeIcon = L.divIcon({
+        // Empty className ensures default leaflet classes are not added,
+        // they add styles like a border and a background to the marker
+        className: "",
+        iconSize: [24, 24],
+        html: this.#generateHomeHTMLString(),
+      })
+
       L.marker([this.#location.latitude, this.#location.longitude], {
-        icon: homeIconMarker,
+        icon: homeIcon,
       })
         .addTo(this.map)
         .bindPopup("<p><strong>Vous êtes ici !</strong></b>")
     }
+  }
+
+  #generateHomeHTMLString() {
+    return `<div class="qfdmo-flex qfdmo-items-center qfdmo-justify-center qfdmo-rounded-full qfdmo-bg-[#E3E3FD] qfdmo-aspect-square qfdmo-border qfdmo-border-solid qfdmo-border-[#E1000F]">
+      <span class="fr-icon-map-pin-2-fill fr-icon--sm qfdmo-text-[#E1000F]"></span>
+    </div>
+    `
+
   }
 
   #generateMarkerHTMLStringFrom(actor: DisplayedActeur): string {
