@@ -207,7 +207,7 @@ class BaseActeurAdmin(admin.GISModelAdmin):
 
 
 class ActeurResource(resources.ModelResource):
-    nb_object = settings.DJANGO_IMPORT_EXPORT_LIMIT
+    limit = settings.DJANGO_IMPORT_EXPORT_LIMIT
 
     delete = fields.Field(widget=widgets.BooleanWidget())
     acteur_type = fields.Field(
@@ -226,8 +226,8 @@ class ActeurResource(resources.ModelResource):
     )
 
     def __init__(self, **kwargs):
-        if "nb_object" in kwargs:
-            self.nb_object = kwargs["nb_object"]
+        if "limit" in kwargs:
+            self.limit = kwargs["limit"]
         super().__init__(**kwargs)
 
     def for_delete(self, row, instance):
@@ -242,8 +242,8 @@ class ActeurResource(resources.ModelResource):
             row["location"] = None
 
     def get_queryset(self):
-        if self.nb_object:
-            return super().get_queryset()[: self.nb_object]
+        if self.limit:
+            return super().get_queryset()[: self.limit]
         return super().get_queryset()
 
     class Meta:
@@ -533,11 +533,11 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource):
     Only used to export data to open-source in Koumoul
     """
 
-    nb_objet = 0
+    limit = 0
     offset = 0
 
-    def __init__(self, nb_objet=0, offset=0, **kwargs):
-        self.nb_objet = nb_objet
+    def __init__(self, limit=0, offset=0, **kwargs):
+        self.limit = limit
         self.offset = offset
         super().__init__(**kwargs)
 
@@ -675,8 +675,8 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource):
             "proposition_services__action",
         )
         queryset = queryset.order_by("uuid")
-        if self.nb_objet:
-            return queryset[self.offset : self.offset + self.nb_objet]
+        if self.limit:
+            return queryset[self.offset : self.offset + self.limit]
         return queryset
 
     class Meta:

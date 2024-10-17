@@ -27,9 +27,7 @@ class Command(BaseCommand):
             sheet = workbook.active
 
         offset = 0
-        dataset = OpenSourceDisplayedActeurResource(
-            nb_objet=CHUNK, offset=offset
-        ).export()
+        dataset = OpenSourceDisplayedActeurResource(limit=CHUNK, offset=offset).export()
         sheet.append(dataset.headers)
 
         while dataset.dict:
@@ -41,7 +39,7 @@ class Command(BaseCommand):
 
             offset += CHUNK
             dataset = OpenSourceDisplayedActeurResource(
-                nb_objet=CHUNK, offset=offset
+                limit=CHUNK, offset=offset
             ).export()
 
         workbook.save(TARGET_FILE)
