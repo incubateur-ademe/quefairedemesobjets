@@ -2,10 +2,8 @@ import L from "leaflet"
 import "leaflet-extra-markers/dist/js/leaflet.extra-markers.min.js"
 import { defaultMarker, homeIconMarker } from "./icon_marker"
 import MapController from "./map_controller"
-import { DisplayedActeur, Location } from "./types"
-import pinBackgroundSvg from "bundle-text:./svg/pin-background.svg"
-import pinBackgroundFillSvg from "bundle-text:./svg/pin-background-fill.svg"
-import bonusIconSvg from "bundle-text:./svg/bonus-icon.svg"
+import { Actor, Location } from "./types"
+import debounce = require("lodash/debounce")
 
 const DEFAULT_LOCATION: Array<Number> = [46.227638, 2.213749]
 const DEFAULT_ZOOM: Number = 5
@@ -93,43 +91,26 @@ export class SolutionMap {
     }
   }
 
-  #generateMarkerHTMLStringFrom(actor: DisplayedActeur): string {
-    const markerHtmlStyles = `color: ${get_color_code(actor.couleur)};`
-    const background = actor.bonus ? pinBackgroundFillSvg : pinBackgroundSvg
-    const cornerIcon = actor.bonus ? bonusIconSvg : ""
-    const markerIconClasses = `qfdmo-absolute qfdmo-top-[10] qfdmo-left-[10] qfdmo-right-[10] qfdmo-margin-auto
-      qfdmo-icon ${actor.icon} ${actor.bonus ? "qfdmo-text-white" : ""}
-      `
-    const htmlTree = [`<div style="${markerHtmlStyles}">`, background]
-    if (cornerIcon) {
-      htmlTree.push(
-        `<span class="qfdmo-absolute qfdmo-right-[-5] qfdmo-top-[-5] qfdmo-z-10">`,
-        cornerIcon,
-        `</span>`,
-      )
-    }
-    htmlTree.push(`<span class="${markerIconClasses}"></span>`, `</div>`)
-    return htmlTree.join("")
-  }
-
-  displayActor(actors: Array<DisplayedActeur>, bboxValue?: Array<Number>): void {
+  displayActor(actors: Array<Actor>, bboxValue?: Array<Number>): void {
     let points: Array<Array<Number>> = []
-    actors.forEach(function (actor: DisplayedActeur) {
+    actors.forEach(function (actor: Actor) {
       if (actor.location) {
-        let customMarker = defaultMarker
-        const markerHtmlString = this.#generateMarkerHTMLStringFrom(actor)
-
+        // Create the marker look and feel : pin + icon
+        var customMarker = undefined
         if (actor.icon) {
-          customMarker = L.divIcon({
-            // Empty className ensures default leaflet classes are not added,
-            // they add styles like a border and a background to the marker
-            className: "",
-            iconSize: [45, 60],
-            html: markerHtmlString,
+          customMarker = L.ExtraMarkers.icon({
+            icon: actor.icon,
+            markerColor: get_color_code(actor.couleur),
+            shape: "square",
+            prefix: "qfdmo-icon",
+            svg: true,
           })
+        } else {
+          customMarker = defaultMarker
         }
 
-        const marker = L.marker(
+        // create the marker on map
+        let marker = L.marker(
           [actor.location.coordinates[1], actor.location.coordinates[0]],
           {
             icon: customMarker,
@@ -140,13 +121,16 @@ export class SolutionMap {
         marker.on("click", (e) => {
           this.#onClickMarker(e)
         })
+
         marker.on("keydown", (e) => {
           // Open solution details when user presses enter or spacebar keys
           if ([32, 13].includes(e.originalEvent.keyCode)) {
             this.#onClickMarker(e)
           }
         })
+
         marker.addTo(this.map)
+
         points.push([actor.location.coordinates[1], actor.location.coordinates[0]])
       }
     }, this)
