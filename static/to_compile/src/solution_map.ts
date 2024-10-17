@@ -137,7 +137,9 @@ export class SolutionMap {
           },
         )
         marker._identifiant_unique = actor.identifiant_unique
-        marker.on("click", this.#onClickMarker)
+        marker.on("click", (e) => {
+          this.#onClickMarker(e)
+        })
         marker.on("keydown", (e) => {
           // Open solution details when user presses enter or spacebar keys
           if ([32, 13].includes(e.originalEvent.keyCode)) {

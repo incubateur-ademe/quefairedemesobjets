@@ -365,29 +365,46 @@ class GroupeActionChoiceField(forms.ModelMultipleChoiceField):
         )
 
 
+class EPCIField(forms.ChoiceField):
+    def to_python(self, value):
+        # TODO : once multiple EPCI codes will be managed, this method will be useless
+        # and the frontend will be rewritten to support a more complex state with all
+        # values matching their labels.
+        value = super().to_python(value)
+        return value.split(" - ")[1]
+
+
 class ConfiguratorForm(DsfrBaseForm):
     action_displayed = GroupeActionChoiceField(
         queryset=GroupeAction.objects.all(),
         to_field_name="code",
         widget=forms.CheckboxSelectMultiple,
         required=False,
-        initial=GroupeAction.objects.all,
-        label="Choisissez les actions disponibles pour vos usagers",
+        initial=GroupeAction.objects.exclude(code="trier"),
+        label=mark_safe(
+            "<h3>Paramètres de la carte</h3>"
+            "Choisissez les actions disponibles pour vos usagers."
+        ),
         help_text="Ce sont les actions que vos usagers pourront consulter "
         "dans la carte que vous intègrerez. Par exemple, si vous ne voulez "
-        "faire une carte que sur les points de tri ou de réparation, il vous "
+        "faire une carte que sur les points de collecte ou de réparation, il vous "
         "suffit de décocher toutes les autres actions possibles",
     )
-    epci_codes = forms.ChoiceField(
-        label="1. Choisir l’EPCI affiché par défaut sur la carte",
+    epci_codes = EPCIField(
+        label=mark_safe(
+            """
+        <hr/>
+        <h3>Paramètres de la carte</h3>
+        1. Choisir l’EPCI affiché par défaut sur la carte"""
+        ),
         help_text="Commencez à taper un nom d’EPCI et sélectionnez un EPCI parmi "
         "les propositions de la liste.",
         choices=all_epci_codes,
         initial="",
-        required=False,
         widget=GenericAutoCompleteInput(
             attrs={
                 "class": "fr-input",
+                "wrapper_classes": "qfdmo-max-w-[576]",
                 "autocomplete": "off",
             },
         ),

@@ -349,10 +349,10 @@ ADDRESS_SUGGESTION_FORM = decouple.config(
 UPDATE_SUGGESTION_FORM = decouple.config(
     "UPDATE_SUGGESTION_FORM", default="https://tally.so/r/3xMqd9", cast=str
 )
-CONTACT_FORM = decouple.config(
-    "CONTACT_FORM", default="https://tally.so/r/wzME61", cast=str
-)
 
 FEEDBACK_FORM = decouple.config(
     "FEEDBACK_FORM", default="https://tally.so/r/3EW88q", cast=str
+)
+CONTACT_FORM = decouple.config(
+    "CONTACT_FORM", default="https://tally.so/r/wzYveR", cast=str
 )
