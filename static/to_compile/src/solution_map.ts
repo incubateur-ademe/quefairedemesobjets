@@ -2,8 +2,10 @@ import L from "leaflet"
 import "leaflet-extra-markers/dist/js/leaflet.extra-markers.min.js"
 import { defaultMarker, homeIconMarker } from "./icon_marker"
 import MapController from "./map_controller"
-import { Actor, Location } from "./types"
-import debounce = require("lodash/debounce")
+import { DisplayedActeur, Location } from "./types"
+import pinBackgroundSvg from "bundle-text:./svg/pin-background.svg"
+import pinBackgroundFillSvg from "bundle-text:./svg/pin-background-fill.svg"
+import bonusIconSvg from "bundle-text:./svg/bonus-icon.svg"
 
 const DEFAULT_LOCATION: Array<Number> = [46.227638, 2.213749]
 const DEFAULT_ZOOM: Number = 5
@@ -112,10 +114,11 @@ export class SolutionMap {
 
   displayActor(actors: Array<DisplayedActeur>, bboxValue?: Array<Number>): void {
     let points: Array<Array<Number>> = []
-    actors.forEach(function (actor: Actor) {
+    actors.forEach(function (actor: DisplayedActeur) {
       if (actor.location) {
-        // Create the marker look and feel : pin + icon
-        var customMarker = undefined
+        let customMarker = defaultMarker
+        const markerHtmlString = this.#generateMarkerHTMLStringFrom(actor)
+
         if (actor.icon) {
           customMarker = L.divIcon({
             // Empty className ensures default leaflet classes are not added,
@@ -124,12 +127,9 @@ export class SolutionMap {
             iconSize: [46, 61],
             html: markerHtmlString,
           })
-        } else {
-          customMarker = defaultMarker
         }
 
-        // create the marker on map
-        let marker = L.marker(
+        const marker = L.marker(
           [actor.location.coordinates[1], actor.location.coordinates[0]],
           {
             icon: customMarker,
@@ -140,16 +140,13 @@ export class SolutionMap {
         marker.on("click", (e) => {
           this.#onClickMarker(e)
         })
-
         marker.on("keydown", (e) => {
           // Open solution details when user presses enter or spacebar keys
           if ([32, 13].includes(e.originalEvent.keyCode)) {
             this.#onClickMarker(e)
           }
         })
-
         marker.addTo(this.map)
-
         points.push([actor.location.coordinates[1], actor.location.coordinates[0]])
       }
     }, this)

@@ -19,7 +19,7 @@ export interface DisplayedActeur {
 export class SSCatObject {
     label: string
     sub_label: string
-    identifier: int
+    identifier: number
 }
 
 export type InteractionType = "map" | "solution_details"
