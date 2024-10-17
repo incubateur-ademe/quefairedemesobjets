@@ -17,6 +17,10 @@ check:
 	@node --version
 
 # Setup development environment
+.PHONY: update-requirements
+update-requirements:
+	$(PYTHON) -m pip install --no-deps -r requirements.txt -r dev-requirements.txt
+
 .PHONY: init-dev
 init-dev:
 	# git
@@ -59,7 +63,7 @@ migrate:
 	$(DJANGO_ADMIN) migrate
 
 .PHONY: createcachetable
-migrate:
+createcachetable:
 	$(DJANGO_ADMIN) createcachetable
 
 .PHONY: createsuperuser
