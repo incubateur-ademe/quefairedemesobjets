@@ -1,25 +1,21 @@
-import math
-from typing import List
+from typing import List, Optional
 
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
 from django.shortcuts import get_object_or_404
-from ninja import ModelSchema, Router
+from ninja import ModelSchema, Router, Field, FilterSchema, Query
 from ninja.pagination import paginate
 
-from qfdmo.models import ActeurStatus, DisplayedActeur
+from qfdmo.models import (
+    ActeurStatus,
+    DisplayedActeur,
+    ActeurService,
+    Action,
+    ActeurType,
+)
 
 router = Router()
-
-
-class ActeurSchema(ModelSchema):
-    latitude: float
-    longitude: float
-
-    class Meta:
-        model = DisplayedActeur
-        fields = ["nom", "nom_commercial", "adresse"]
 
 
 def distance_to_decimal_degrees(distance, latitude):
@@ -37,9 +33,79 @@ def distance_to_decimal_degrees(distance, latitude):
     return distance.m / (111_319.5 * math.cos(lat_radians))
 
 
+class ActeurTypeSchema(ModelSchema):
+    class Meta:
+        model = ActeurType
+        fields = ["id", "code", "libelle"]
+
+
+class ActionSchema(ModelSchema):
+    class Meta:
+        model = Action
+        fields = ["id", "code", "libelle", "couleur"]
+
+
+class ActeurServiceSchema(ModelSchema):
+    class Meta:
+        model = ActeurService
+        fields = ["id", "code", "libelle"]
+
+
+class ActeurSchema(ModelSchema):
+    latitude: float
+    longitude: float
+    services: List[ActeurServiceSchema] = Field(
+        ...,
+        alias="acteur_services.all",
+        description="Les services proposés pour un acteur",
+    )
+    actions: List[ActionSchema] = Field(
+        ..., alias="acteur_actions", description="Les actions proposés pour un acteur"
+    )
+    type: ActeurTypeSchema = Field(
+        ..., alias="acteur_type", description="Le type d'acteur"
+    )
+    distance: Optional[float] = None
+
+    # (..., description="Distance en mètres")
+
+    @staticmethod
+    def resolve_distance(obj):
+        if not obj.distance:
+            return
+        return obj.distance.m
+
+    class Meta:
+        model = DisplayedActeur
+        fields = ["nom", "nom_commercial", "adresse", "identifiant_unique", "siret"]
+
+
+class ActeurFilterSchema(FilterSchema):
+    types: Optional[List[int]] = Field(None, q="acteur_type__in")
+    services: Optional[List[int]] = Field(None, q="acteur_services__in")
+    actions: Optional[List[int]] = Field(None, q="proposition_services__action_id__in")
+
+
+@router.get(
+    "/actions", response=List[ActionSchema], summary="Liste des actions possibles"
+)
+def actions(request):
+    """
+    Liste l'ensemble des <i>actions</i> possibles sur un objet / déchet.
+    """  # noqa
+    qs = Action.objects.all()
+    return qs
+
+
 @router.get("/acteurs", response=List[ActeurSchema], summary="Liste des acteurs actifs")
 @paginate
-def acteurs(request, latitude: float = None, longitude: float = None, rayon: int = 2):
+def acteurs(
+    request,
+    filters: ActeurFilterSchema = Query(...),
+    latitude: float | None = None,
+    longitude: float | None = None,
+    rayon: int = 2,
+):
     """
     Les acteurs correspondant à un point sur la carte Longue Vie Aux Objets
 
@@ -52,6 +118,7 @@ def acteurs(request, latitude: float = None, longitude: float = None, rayon: int
     qs = DisplayedActeur.objects.filter(
         statut=ActeurStatus.ACTIF,
     ).order_by("nom")
+    qs = filters.filter(qs)
 
     if latitude and longitude:
         point = Point(longitude, latitude, srid=4326)
@@ -66,6 +133,32 @@ def acteurs(request, latitude: float = None, longitude: float = None, rayon: int
             .order_by("distance")
         )
 
+    return qs
+
+
+@router.get(
+    "/acteurs/types",
+    response=List[ActeurTypeSchema],
+    summary="Liste des actions possibles",
+)
+def acteurs_types(request):
+    """
+    Liste l'ensemble des <i>types</i> d'acteurs possibles.
+    """  # noqa
+    qs = ActeurType.objects.all()
+    return qs
+
+
+@router.get(
+    "/acteurs/services",
+    response=List[ActeurServiceSchema],
+    summary="Liste des services proposés par les acteurs",
+)
+def services(request):
+    """
+    Liste l'ensemble des <i>services</i> qui peuvent être proposés par un acteur.
+    """  # noqa
+    qs = ActeurService.objects.all()
     return qs
 
 

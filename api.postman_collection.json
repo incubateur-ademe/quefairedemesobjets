@@ -1,0 +1,493 @@
+{
+	"info": {
+		"_postman_id": "c3a2e043-227a-46a6-9585-c70201ed4b8b",
+		"name": "Longue vie aux objets",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "13517415",
+		"_collection_link": "https://speeding-escape-588206.postman.co/workspace/L'%25C3%25A9tabli~15bf6b4b-56f8-49ce-99e0-4f954dff67e1/collection/13517415-c3a2e043-227a-46a6-9585-c70201ed4b8b?action=share&source=collection_link&creator=13517415"
+	},
+	"item": [
+		{
+			"name": "api",
+			"item": [
+				{
+					"name": "qfdmo",
+					"item": [
+						{
+							"name": "acteurs",
+							"item": [
+								{
+									"name": "Liste des acteurs actifs",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/qfdmo/acteurs?latitude=<number>&longitude=<number>&rayon=2&actions=<string>&limit=100&offset=0",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"qfdmo",
+												"acteurs"
+											],
+											"query": [
+												{
+													"key": "latitude",
+													"value": "<number>"
+												},
+												{
+													"key": "longitude",
+													"value": "<number>"
+												},
+												{
+													"key": "rayon",
+													"value": "2"
+												},
+												{
+													"key": "actions",
+													"value": "<string>"
+												},
+												{
+													"key": "limit",
+													"value": "100"
+												},
+												{
+													"key": "offset",
+													"value": "0"
+												}
+											]
+										},
+										"description": "Les acteurs correspondant à un point sur la carte Longue Vie Aux Objets\n\nPour retrouver les acteurs à proximité :\n- Indiquer une latitude / longitude (exemple : latitude=48.86 et longitude=2.3)\n- Indiquer un rayon (optionnel) en km : les résultats en dehors de ce rayon ne seront pas retournés\n\nSi la latitude ou longitude sont manquantes, alors tous les résultats seront retournés triés par nom."
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/api/qfdmo/acteurs?latitude=<number>&longitude=<number>&rayon=2&actions=<string>&limit=100&offset=0",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"qfdmo",
+														"acteurs"
+													],
+													"query": [
+														{
+															"key": "latitude",
+															"value": "<number>"
+														},
+														{
+															"key": "longitude",
+															"value": "<number>"
+														},
+														{
+															"key": "rayon",
+															"value": "2"
+														},
+														{
+															"key": "actions",
+															"value": "<string>"
+														},
+														{
+															"key": "limit",
+															"value": "100"
+														},
+														{
+															"key": "offset",
+															"value": "0"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"items\": [\n    {\n      \"latitude\": \"<number>\",\n      \"longitude\": \"<number>\",\n      \"distance\": \"<number>\",\n      \"services\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"nom\": \"<string>\",\n      \"nom_commercial\": \"<string>\",\n      \"adresse\": \"<string>\",\n      \"identifiant_unique\": \"<string>\",\n      \"siret\": \"<string>\"\n    },\n    {\n      \"latitude\": \"<number>\",\n      \"longitude\": \"<number>\",\n      \"distance\": \"<number>\",\n      \"services\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"nom\": \"<string>\",\n      \"nom_commercial\": \"<string>\",\n      \"adresse\": \"<string>\",\n      \"identifiant_unique\": \"<string>\",\n      \"siret\": \"<string>\"\n    }\n  ],\n  \"count\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "Liste des actions possibles",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/qfdmo/acteurs/types",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"qfdmo",
+												"acteurs",
+												"types"
+											]
+										},
+										"description": "Liste l'ensemble des <i>types</i> d'acteurs possibles."
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/api/qfdmo/acteurs/types",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"qfdmo",
+														"acteurs",
+														"types"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "[\n  {\n    \"code\": \"<string>\",\n    \"id\": \"<integer>\",\n    \"libelle\": \"?\"\n  },\n  {\n    \"code\": \"<string>\",\n    \"id\": \"<integer>\",\n    \"libelle\": \"?\"\n  }\n]"
+										}
+									]
+								},
+								{
+									"name": "Liste des services proposés par les acteurs",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/qfdmo/acteurs/services",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"qfdmo",
+												"acteurs",
+												"services"
+											]
+										},
+										"description": "Liste l'ensemble des <i>services</i> qui peuvent être proposés par un acteur."
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/api/qfdmo/acteurs/services",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"qfdmo",
+														"acteurs",
+														"services"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "[\n  {\n    \"code\": \"<string>\",\n    \"id\": \"<integer>\",\n    \"libelle\": \"<string>\"\n  },\n  {\n    \"code\": \"<string>\",\n    \"id\": \"<integer>\",\n    \"libelle\": \"<string>\"\n  }\n]"
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "Liste des actions possibles",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/qfdmo/actions",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"qfdmo",
+										"actions"
+									]
+								},
+								"description": "Liste l'ensemble des <i>actions</i> possibles sur un objet / déchet."
+							},
+							"response": [
+								{
+									"name": "OK",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/qfdmo/actions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"qfdmo",
+												"actions"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "[\n  {\n    \"code\": \"<string>\",\n    \"id\": \"<integer>\",\n    \"libelle\": \"\",\n    \"couleur\": \"<string>\"\n  },\n  {\n    \"code\": \"<string>\",\n    \"id\": \"<integer>\",\n    \"libelle\": \"\",\n    \"couleur\": \"<string>\"\n  }\n]"
+								}
+							]
+						},
+						{
+							"name": "Retrouver un acteur actif",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/qfdmo/acteur?identifiant_unique=<string>",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"qfdmo",
+										"acteur"
+									],
+									"query": [
+										{
+											"key": "identifiant_unique",
+											"value": "<string>",
+											"description": "(Required) "
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "OK",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/qfdmo/acteur?identifiant_unique=<string>",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"qfdmo",
+												"acteur"
+											],
+											"query": [
+												{
+													"key": "identifiant_unique",
+													"value": "<string>"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"latitude\": \"<number>\",\n  \"longitude\": \"<number>\",\n  \"distance\": \"<number>\",\n  \"services\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"nom\": \"<string>\",\n  \"nom_commercial\": \"<string>\",\n  \"adresse\": \"<string>\",\n  \"identifiant_unique\": \"<string>\",\n  \"siret\": \"<string>\"\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Sous Categorie From Product",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/qfdmd/produit?id=<string>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"qfdmd",
+								"produit"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "<string>",
+									"description": "(Required) "
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/qfdmd/produit?id=<string>",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"qfdmd",
+										"produit"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "<string>"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"url_carte\": \"<string>\",\n  \"id\": \"<integer>\"\n}"
+						}
+					]
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8000",
+			"type": "string"
+		}
+	]
+}
