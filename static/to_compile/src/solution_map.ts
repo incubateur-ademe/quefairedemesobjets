@@ -89,7 +89,7 @@ export class SolutionMap {
       const homeIcon = L.divIcon({
         // Empty className ensures default leaflet classes are not added,
         // they add styles like a border and a background to the marker
-        className: "",
+        className: "!qfdmo-z-[10000]",
         iconSize: [24, 24],
         html: this.#generateHomeHTMLString(),
       })
