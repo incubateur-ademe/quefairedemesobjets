@@ -11,6 +11,11 @@
     position: relative !important;
 }
 
+pre {
+    font-family: Marianne, arial, sans-serif;
+    font-weight: 500;
+}
+
 .leaflet-container a {
     color: var(--text-action-high-blue-france);
 }

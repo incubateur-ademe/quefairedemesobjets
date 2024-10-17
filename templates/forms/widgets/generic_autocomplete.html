@@ -9,16 +9,20 @@ change->autocomplete#change
 data-controller="autocomplete"
 {% endblock wrapper_attributes %}
 
+{% block wrapper_classes %}
+{{ widget.attrs.wrapper_classes }}
+{% endblock wrapper_classes %}
+
 {% block choices %}
-    <div class="autocomplete-items" data-autocomplete-target="listbox" role="listbox">
+    <div class="qfdmo-w-full autocomplete-items" data-autocomplete-target="listbox" role="listbox">
         {% for group, option, _ in widget.optgroups %}
             <div
                 role="option"
                 class="qfdmo-hidden"
-                id="{{ option.0.value }}"
+                id="{{ option.0.label }}"
                 data-action="click->autocomplete#setActiveOptionFrom"
                 data-autocomplete-target="option"
-                data-autocomplete-search-value="{{ option.0.value }} {{ option.0.label }}"
+                data-autocomplete-search-value="{{ option.0.label }}"
                 data-autocomplete-value-value="{{ option.0.value }}"
             >
                 {{ option.0.label }}

@@ -25,9 +25,13 @@ export default class extends AutocompleteController {
     this.change = debounce(this.change, 300).bind(this)
     this.currentFocusedOptionIndexValue = -1
     // TODO: remove when the input support multiple values
+    this.#sanitizeInputValue()
+  }
+
+  #sanitizeInputValue() {
     const sanitizedInputValue = this.inputTarget.value.replace("['", "").replace("']", "")
     if (sanitizedInputValue) {
-      this.inputTarget.value = JSON.parse(sanitizedInputValue)
+      this.inputTarget.value = sanitizedInputValue
     } else {
       this.inputTarget.value = ""
     }

@@ -10,7 +10,9 @@ db_cache = caches["database"]
 def fetch_epci_codes() -> List[Tuple[str, str]]:
     """Retrieves EPCI codes from geo.api"""
     response = requests.get("https://geo.api.gouv.fr/epcis/?fields=code,nom")
-    codes = [(item["code"], item["nom"]) for item in response.json()]
+    codes = [
+        (item["code"], f"{item['nom']} - {item['code']}") for item in response.json()
+    ]
     return codes
 
 
