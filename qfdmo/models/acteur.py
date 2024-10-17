@@ -13,7 +13,7 @@ from django.contrib.gis.geos import Point, Polygon
 from django.contrib.gis.geos.geometry import GEOSGeometry
 from django.core.cache import cache
 from django.core.files.images import get_image_dimensions
-from django.db.models import Min
+from django.db.models import Exists, Min, OuterRef
 from django.db.models.functions import Now
 from django.forms import ValidationError, model_to_dict
 from django.http import HttpRequest
@@ -181,7 +181,19 @@ class LabelQualite(models.Model):
         return self.libelle
 
 
-class ActeurQuerySet(models.QuerySet):
+class DisplayedActeurQuerySet(models.QuerySet):
+    def with_reparer(self):
+        proposition_service_reparer = DisplayedPropositionService.objects.filter(
+            acteur=OuterRef("pk"), action__code="reparer"
+        )
+        return self.annotate(reparer=Exists(proposition_service_reparer))
+
+    def with_bonus(self):
+        bonus_label_qualite = LabelQualite.objects.filter(
+            displayedacteur=OuterRef("pk"), bonus=True
+        )
+        return self.annotate(bonus=Exists(bonus_label_qualite))
+
     def digital(self):
         return (
             self.filter(acteur_type_id=ActeurType.get_digital_acteur_type_id())
@@ -224,13 +236,12 @@ class ActeurQuerySet(models.QuerySet):
         )
 
 
-class ActeurManager(NomAsNaturalKeyManager):
+class DisplayedActeurManager(NomAsNaturalKeyManager):
     def get_queryset(self):
-        return ActeurQuerySet(self.model, using=self._db)
+        return DisplayedActeurQuerySet(self.model, using=self._db)
 
 
 class BaseActeur(NomAsNaturalKeyModel):
-    objects = ActeurManager()
 
     class Meta:
         abstract = True
@@ -528,6 +539,8 @@ class RevisionActeur(BaseActeur):
 
 
 class DisplayedActeur(BaseActeur):
+    objects = DisplayedActeurManager()
+
     class Meta:
         verbose_name = "ACTEUR de l'EC - AFFICHÉ"
         verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ"
@@ -589,7 +602,10 @@ class DisplayedActeur(BaseActeur):
         acteur_dict = {
             "identifiant_unique": self.identifiant_unique,
             "location": orjson.loads(self.location.geojson),
+            "bonus": getattr(self, "bonus", False),
+            "reparer": getattr(self, "reparer", False),
         }
+
         if main_action := actions[0] if actions else None:
             if carte and main_action.groupe_action:
                 acteur_dict["icon"] = main_action.groupe_action.icon
