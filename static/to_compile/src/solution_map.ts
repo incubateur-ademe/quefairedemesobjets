@@ -85,7 +85,6 @@ export class SolutionMap {
       this.#location.latitude !== undefined &&
       this.#location.longitude !== undefined
     ) {
-
       const homeIcon = L.divIcon({
         // Empty className ensures default leaflet classes are not added,
         // they add styles like a border and a background to the marker
@@ -107,7 +106,6 @@ export class SolutionMap {
       <span class="fr-icon-map-pin-2-fill fr-icon--sm qfdmo-text-[#E1000F]"></span>
     </div>
     `
-
   }
 
   #generateMarkerHTMLStringFrom(actor: DisplayedActeur): string {
