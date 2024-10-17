@@ -567,7 +567,6 @@ class DisplayedActeur(BaseActeur):
         direction: str | None = None,
         action_list: str | None = None,
         carte: bool = False,
-        bonus: bool = False,
     ) -> str:
         actions = self.acteur_actions(direction=direction)
 
@@ -596,10 +595,8 @@ class DisplayedActeur(BaseActeur):
         acteur_dict = {
             "identifiant_unique": self.identifiant_unique,
             "location": orjson.loads(self.location.geojson),
+            "bonus": getattr(self, "bonus", False),
         }
-
-        if bonus:
-            acteur_dict["bonus"] = True
 
         if main_action := actions[0] if actions else None:
             if carte and main_action.groupe_action:
