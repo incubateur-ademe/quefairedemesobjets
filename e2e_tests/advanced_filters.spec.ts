@@ -5,10 +5,9 @@ async function hideDjangoToolbar(page) {
 }
 
 async function searchInCarteMode(page){
-  await page.locator("input#adresse").click()
-  await page.locator("input#adresse").fill("10 rue de la paix")
-  await page.locator("#adresseautocomplete-list.autocomplete-items div:nth-of-type(2)").click()
-  await page.locator("button[data-testid=rechercher-adresses-submit]").click()
+  await page.locator("input#id_adresse").click()
+  await page.locator("input#id_adresse").fill("10 rue de la paix")
+  await page.locator("#id_adresseautocomplete-list.autocomplete-items div:nth-of-type(2)").click()
 }
 
 async function openAdvancedFilters(page, dataTestId="advanced-filters") {
