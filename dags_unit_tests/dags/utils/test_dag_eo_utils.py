@@ -491,7 +491,6 @@ def df_proposition_services_sous_categories():
 def mock_ti(
     df_sources_from_db,
     df_acteurtype_from_db,
-    # TODO: supprimer db_mapping_config
     df_actions_from_db,
     df_acteur_services_from_db,
     df_sous_categories_from_db,
