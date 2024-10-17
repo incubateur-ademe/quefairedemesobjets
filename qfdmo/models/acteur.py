@@ -13,7 +13,7 @@ from django.contrib.gis.geos import Point, Polygon
 from django.contrib.gis.geos.geometry import GEOSGeometry
 from django.core.cache import cache
 from django.core.files.images import get_image_dimensions
-from django.db.models import Exists, Min, OuterRef
+from django.db.models import Min
 from django.db.models.functions import Now
 from django.forms import ValidationError, model_to_dict
 from django.http import HttpRequest
@@ -182,12 +182,6 @@ class LabelQualite(models.Model):
 
 
 class ActeurQuerySet(models.QuerySet):
-    def with_bonus(self):
-        bonus_label_qualite = LabelQualite.objects.filter(
-            displayedacteur=OuterRef("pk"), bonus=True
-        )
-        return self.annotate(bonus=Exists(bonus_label_qualite))
-
     def digital(self):
         return (
             self.filter(acteur_type_id=ActeurType.get_digital_acteur_type_id())
@@ -595,9 +589,7 @@ class DisplayedActeur(BaseActeur):
         acteur_dict = {
             "identifiant_unique": self.identifiant_unique,
             "location": orjson.loads(self.location.geojson),
-            "bonus": getattr(self, "bonus", False),
         }
-
         if main_action := actions[0] if actions else None:
             if carte and main_action.groupe_action:
                 acteur_dict["icon"] = main_action.groupe_action.icon
