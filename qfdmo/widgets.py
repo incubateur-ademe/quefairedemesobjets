@@ -10,7 +10,6 @@ class RangeInput(widgets.NumberInput):
 
 class GenericAutoCompleteInput(widgets.ChoiceWidget):
     template_name = "forms/widgets/generic_autocomplete.html"
-    attrs = {"class": "qfdmo-sr-only"}
 
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)
