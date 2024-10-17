@@ -1,18 +1,13 @@
 {# Recherche adresse #}
-
-{% with carte=is_carte(request) %}
 <div data-search-solution-form-target="adresseGroup">
     <div data-controller='address-autocomplete'
          data-address-autocomplete-max-option-displayed-value=5
          data-address-autocomplete-is-ban-address-value='true'
-         data-with-controls={{"false" if is_carte else "true"}}
+         data-with-controls={{"false" if is_carte(request) else "true"}}
          data-without-zone="true"
-         data-with-dynamic-form-panel={{"false" if is_carte else "true"}}
+         data-with-dynamic-form-panel={{"false" if is_carte(request) else "true"}}
          data-testid="rechercher-adresses-submit"
     >
-        {% if is_carte %}
-        <span class="qfdmo-italic qfdmo-text-sm">Taper et sélectionner une adresse ci-dessous pour lancer la recherche</span>
-        {% endif %}
         <div class="form-group">
             {{ form.adresse.label_tag() }}
             {% if form.adresse.help_text %}
@@ -29,4 +24,3 @@
         Veuillez saisir une adresse
     </p>
 </div>
-{% endwith %}
