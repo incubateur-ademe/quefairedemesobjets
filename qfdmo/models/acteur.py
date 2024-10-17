@@ -15,12 +15,7 @@ from unidecode import unidecode
 
 from qfdmo.models.action import Action, CachedDirectionAction
 from qfdmo.models.categorie_objet import SousCategorieObjet
-from qfdmo.models.utils import (
-    CodeAsNaturalKeyModel,
-    NomAsNaturalKeyManager,
-    NomAsNaturalKeyModel,
-)
-
+from qfdmo.models.utils import CodeAsNaturalKeyModel
 
 class ActeurService(CodeAsNaturalKeyModel):
     class Meta:
