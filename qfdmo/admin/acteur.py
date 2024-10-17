@@ -1,5 +1,6 @@
 from typing import Any
 
+import orjson
 from django import forms
 from django.conf import settings
 from django.contrib.gis import admin
@@ -27,6 +28,7 @@ from qfdmo.models import (
     SousCategorieObjet,
 )
 from qfdmo.models.acteur import (
+    ActeurPublicAccueilli,
     ActeurStatus,
     DisplayedActeur,
     DisplayedPropositionService,
@@ -205,7 +207,7 @@ class BaseActeurAdmin(admin.GISModelAdmin):
 
 
 class ActeurResource(resources.ModelResource):
-    nb_object_max = settings.DJANGO_IMPORT_EXPORT_LIMIT
+    limit = settings.DJANGO_IMPORT_EXPORT_LIMIT
 
     delete = fields.Field(widget=widgets.BooleanWidget())
     acteur_type = fields.Field(
@@ -224,8 +226,8 @@ class ActeurResource(resources.ModelResource):
     )
 
     def __init__(self, **kwargs):
-        if "nb_object_max" in kwargs:
-            self.nb_object_max = kwargs["nb_object_max"]
+        if "limit" in kwargs:
+            self.limit = kwargs["limit"]
         super().__init__(**kwargs)
 
     def for_delete(self, row, instance):
@@ -240,8 +242,8 @@ class ActeurResource(resources.ModelResource):
             row["location"] = None
 
     def get_queryset(self):
-        if self.nb_object_max:
-            return super().get_queryset()[: self.nb_object_max]
+        if self.limit:
+            return super().get_queryset()[: self.limit]
         return super().get_queryset()
 
     class Meta:
@@ -524,6 +526,186 @@ class RevisionPropositionServiceAdmin(
 class DisplayedActeurResource(ActeurResource):
     class Meta:
         model = DisplayedActeur
+
+
+class OpenSourceDisplayedActeurResource(resources.ModelResource):
+    """
+    Only used to export data to open-source in Koumoul
+    """
+
+    limit = 0
+    offset = 0
+
+    def __init__(self, limit=0, offset=0, **kwargs):
+        self.limit = limit
+        self.offset = offset
+        super().__init__(**kwargs)
+
+    uuid = fields.Field(column_name="Identifiant", attribute="uuid", readonly=True)
+    sources = fields.Field(
+        column_name="Contributeurs", attribute="sources", readonly=True
+    )
+
+    def dehydrate_sources(self, acteur):
+        sources = ["Longue Vie Aux Objets", "ADEME"]
+        sources.extend([f"{source.libelle}" for source in acteur.sources.all()])
+        seen = set()
+        deduplicated_sources = []
+        for source in sources:
+            if source not in seen:
+                deduplicated_sources.append(source)
+                seen.add(source)
+        return "|".join(deduplicated_sources)
+
+    nom = fields.Field(column_name="Nom", attribute="nom", readonly=True)
+    nom_commercial = fields.Field(
+        column_name="Nom commercial", attribute="nom_commercial", readonly=True
+    )
+    siret = fields.Field(column_name="SIRET", attribute="siret", readonly=True)
+    description = fields.Field(column_name="Description", attribute="description")
+    acteur_type = fields.Field(
+        column_name="Type d'acteur",
+        attribute="acteur_type",
+        widget=widgets.ForeignKeyWidget(ActeurType, field="code"),
+        readonly=True,
+    )
+    url = fields.Field(column_name="Site web", attribute="url", readonly=True)
+    telephone = fields.Field(attribute="telephone", column_name="Téléphone")
+
+    def dehydrate_telephone(self, acteur):
+        """
+        Exclure les numéros de téléphone qui commencent pas 06 ou 07 pour ne pas avoir
+        de soucis de mis en ligne d'informations personnelles (cf. RGPD)
+        """
+        telephone = acteur.telephone
+        if telephone and (telephone.startswith("06") or telephone.startswith("07")):
+            return None
+        # filtrer les téléphones pour les acteur de la source carte-Eco
+        if telephone and acteur.sources.filter(code="CartEco - ESS France").exists():
+            return None
+
+        return telephone
+
+    adresse = fields.Field(column_name="Adresse", attribute="adresse", readonly=True)
+    adresse_complement = fields.Field(
+        column_name="Complément d'adresse",
+        attribute="adresse_complement",
+        readonly=True,
+    )
+    code_postal = fields.Field(
+        column_name="Code postal", attribute="code_postal", readonly=True
+    )
+    ville = fields.Field(column_name="Ville", attribute="ville", readonly=True)
+    latitude = fields.Field(column_name="latitude", attribute="latitude", readonly=True)
+    longitude = fields.Field(
+        column_name="longitude", attribute="longitude", readonly=True
+    )
+    labels = fields.Field(
+        column_name="Qualités et labels",
+        attribute="labels",
+        widget=widgets.ManyToManyWidget(LabelQualite, field="code", separator="|"),
+    )
+    public_accueilli = fields.Field(
+        column_name="Public accueilli",
+        attribute="public_accueilli",
+        readonly=True,
+    )
+    reprise = fields.Field(column_name="Reprise", attribute="reprise", readonly=True)
+    exclusivite_de_reprisereparation = fields.Field(
+        column_name="Exclusivité de reprise/réparation",
+        attribute="exclusivite_de_reprisereparation",
+        readonly=True,
+    )
+    uniquement_sur_rdv = fields.Field(
+        column_name="Uniquement sur RDV", attribute="uniquement_sur_rdv", readonly=True
+    )
+    acteur_services = fields.Field(
+        column_name="Type de services",
+        attribute="acteur_services",
+        widget=widgets.ManyToManyWidget(ActeurService, field="code", separator="|"),
+        readonly=True,
+    )
+    propositions_services = fields.Field(
+        column_name="Propositions de services",
+        attribute="propositions_services",
+        readonly=True,
+    )
+
+    def dehydrate_propositions_services(self, acteur):
+        return orjson.dumps(
+            [
+                {
+                    "action": ps.action.code,
+                    "sous_categories": [sc.code for sc in ps.sous_categories.all()],
+                }
+                for ps in acteur.proposition_services.all()
+            ]
+        ).decode("utf-8")
+
+    modifie_le = fields.Field(
+        column_name="Date de dernière modification",
+        attribute="modifie_le",
+        readonly=True,
+        widget=widgets.DateTimeWidget(format="%Y-%m-%d"),
+    )
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset = queryset.filter(
+            statut=ActeurStatus.ACTIF,
+        ).exclude(
+            public_accueilli__in=[
+                ActeurPublicAccueilli.AUCUN,
+                ActeurPublicAccueilli.PROFESSIONNELS,
+            ],
+        )
+        # filter les acteur qui on '_reparation_' dans le champ identifiant_unique
+        queryset = queryset.exclude(
+            identifiant_unique__icontains="_reparation_",
+        )
+        # filter les acteur qui on 'cma_reparacteur_' dans le champ identifiant_unique
+        queryset = queryset.exclude(
+            identifiant_unique__icontains="cma_reparacteur_",
+        )
+
+        queryset = queryset.prefetch_related(
+            "sources",
+            "labels",
+            "proposition_services__sous_categories",
+            "proposition_services__action",
+        )
+        queryset = queryset.order_by("uuid")
+        if self.limit:
+            return queryset[self.offset : self.offset + self.limit]
+        return queryset
+
+    class Meta:
+        model = DisplayedActeur
+        fields = [
+            "uuid",
+            "sources",
+            "nom",
+            "nom_commercial",
+            "siret",
+            "description",
+            "acteur_type",
+            "url",
+            "telephone",
+            "adresse",
+            "adresse_complement",
+            "code_postal",
+            "ville",
+            "latitude",
+            "longitude",
+            "labels",
+            "public_accueilli",
+            "reprise",
+            "exclusivite_de_reprisereparation",
+            "uniquement_sur_rdv",
+            "modifie_le",
+            "acteur_services",
+            "propositions_services",
+        ]
 
 
 class DisplayedActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
