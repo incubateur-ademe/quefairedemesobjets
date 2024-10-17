@@ -31,7 +31,7 @@ export default class extends AutocompleteController {
   #sanitizeInputValue() {
     const sanitizedInputValue = this.inputTarget.value.replace("['", "").replace("']", "")
     if (sanitizedInputValue) {
-      this.inputTarget.value = JSON.parse(sanitizedInputValue)
+      this.inputTarget.value = sanitizedInputValue
     } else {
       this.inputTarget.value = ""
     }
@@ -64,7 +64,6 @@ export default class extends AutocompleteController {
   selectedIdValueChanged(currentValue: string): void {
     if (currentValue && currentValue !== this.inputTarget.value) {
       this.inputTarget.value = currentValue
-      this.inputTarget.textContent = "coucou"
     }
   }
 

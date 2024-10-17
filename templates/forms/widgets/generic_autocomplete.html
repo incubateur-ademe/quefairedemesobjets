@@ -19,10 +19,10 @@ data-controller="autocomplete"
             <div
                 role="option"
                 class="qfdmo-hidden"
-                id="{{ option.0.value }}"
+                id="{{ option.0.label }}"
                 data-action="click->autocomplete#setActiveOptionFrom"
                 data-autocomplete-target="option"
-                data-autocomplete-search-value="{{ option.0.value }} {{ option.0.label }}"
+                data-autocomplete-search-value="{{ option.0.label }}"
                 data-autocomplete-value-value="{{ option.0.value }}"
             >
                 {{ option.0.label }}

@@ -365,6 +365,15 @@ class GroupeActionChoiceField(forms.ModelMultipleChoiceField):
         )
 
 
+class EPCIField(forms.ChoiceField):
+    def to_python(self, value):
+        # TODO : once multiple EPCI codes will be managed, this method will be useless
+        # and the frontend will be rewritten to support a more complex state with all
+        # values matching their labels.
+        value = super().to_python(value)
+        return value.split(" - ")[1]
+
+
 class ConfiguratorForm(DsfrBaseForm):
     action_displayed = GroupeActionChoiceField(
         queryset=GroupeAction.objects.all(),
@@ -381,7 +390,7 @@ class ConfiguratorForm(DsfrBaseForm):
         "faire une carte que sur les points de collecte ou de réparation, il vous "
         "suffit de décocher toutes les autres actions possibles",
     )
-    epci_codes = forms.ChoiceField(
+    epci_codes = EPCIField(
         label=mark_safe(
             """
         <hr/>
