@@ -42,7 +42,7 @@ export default class extends Controller<HTMLElement> {
         const actors: Array<Actor> = this.acteurTargets
             .map((ecoCirTarget: HTMLScriptElement) => {
                 if (ecoCirTarget.textContent !== null) {
-                    const actor_fields: DisplayedActeur = JSON.parse(ecoCirTarget.textContent)
+                    const actor_fields = JSON.parse(ecoCirTarget.textContent)
                     return new Actor(actor_fields)
                 }
             })

@@ -13,7 +13,7 @@ from django.contrib.gis.geos import Point, Polygon
 from django.contrib.gis.geos.geometry import GEOSGeometry
 from django.core.cache import cache
 from django.core.files.images import get_image_dimensions
-from django.db.models import Exists, Min, OuterRef
+from django.db.models import Min
 from django.db.models.functions import Now
 from django.forms import ValidationError, model_to_dict
 from django.http import HttpRequest
@@ -605,7 +605,6 @@ class DisplayedActeur(BaseActeur):
             "bonus": getattr(self, "bonus", False),
             "reparer": getattr(self, "reparer", False),
         }
-
         if main_action := actions[0] if actions else None:
             if carte and main_action.groupe_action:
                 acteur_dict["icon"] = main_action.groupe_action.icon
