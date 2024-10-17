@@ -36,7 +36,7 @@ class TestOpenSourceDisplayedActeurResource:
                 "Ville",
                 "latitude",
                 "longitude",
-                "Qualité et labels",
+                "Qualités et labels",
                 "Public accueilli",
                 "Reprise",
                 "Exclusivité de reprise/réparation",
@@ -102,9 +102,26 @@ class TestOpenSourceDisplayedActeurResource:
         source1 = SourceFactory(libelle="Source 1", code="source1")
         source2 = SourceFactory(libelle="Source 2", code="source2")
         displayedacteur.sources.set([source1, source2])
-        print(displayedacteur.sources.all())
 
         dataset = OpenSourceDisplayedActeurResource().export()
 
         dataset_dict = dataset.dict
-        assert dataset_dict[0]["Contributeurs"] == "LVAO|ADEME|source1|source2"
+        assert (
+            dataset_dict[0]["Contributeurs"]
+            == "Longue Vie Aux Objets|ADEME|Source 1|Source 2"
+        )
+
+    def test_sources_deduplicated(self):
+        displayedacteur = DisplayedActeurFactory()
+        source1 = SourceFactory(libelle="Source 1", code="source1")
+        source2 = SourceFactory(libelle="Source 2", code="source2")
+        source3 = SourceFactory(libelle="Source 1", code="source3")
+        displayedacteur.sources.set([source1, source2, source3])
+
+        dataset = OpenSourceDisplayedActeurResource().export()
+
+        dataset_dict = dataset.dict
+        assert (
+            dataset_dict[0]["Contributeurs"]
+            == "Longue Vie Aux Objets|ADEME|Source 1|Source 2"
+        )

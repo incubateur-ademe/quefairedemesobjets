@@ -534,15 +534,29 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource):
     Only used to export data to open-source in Koumoul
     """
 
+    nb_objet = 0
+    offset = 0
+
+    def __init__(self, nb_objet=0, offset=0, **kwargs):
+        self.nb_objet = nb_objet
+        self.offset = offset
+        super().__init__(**kwargs)
+
     uuid = fields.Field(column_name="Identifiant", attribute="uuid", readonly=True)
     sources = fields.Field(
         column_name="Contributeurs", attribute="sources", readonly=True
     )
 
     def dehydrate_sources(self, acteur):
-        sources = ["LVAO", "ADEME"]
-        sources.extend([f"{source.code}" for source in acteur.sources.all()])
-        return "|".join(sources)
+        sources = ["Longue Vie Aux Objets", "ADEME"]
+        sources.extend([f"{source.libelle}" for source in acteur.sources.all()])
+        seen = set()
+        deduplicated_sources = []
+        for source in sources:
+            if source not in seen:
+                deduplicated_sources.append(source)
+                seen.add(source)
+        return "|".join(deduplicated_sources)
 
     nom = fields.Field(column_name="Nom", attribute="nom", readonly=True)
     nom_commercial = fields.Field(
@@ -584,7 +598,7 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource):
         column_name="longitude", attribute="longitude", readonly=True
     )
     labels = fields.Field(
-        column_name="Qualité et labels",
+        column_name="Qualités et labels",
         attribute="labels",
         widget=widgets.ManyToManyWidget(LabelQualite, field="code", separator="|"),
     )
@@ -629,10 +643,8 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource):
         column_name="Date de dernière modification",
         attribute="modifie_le",
         readonly=True,
+        widget=widgets.DateTimeWidget(format="%Y-%m-%d"),
     )
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -651,6 +663,8 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource):
             "proposition_services__action",
         )
         queryset = queryset.order_by("uuid")
+        if self.nb_objet:
+            return queryset[self.offset : self.offset + self.nb_objet]
         return queryset
 
     class Meta:
