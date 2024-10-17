@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand
 
 from qfdmo.admin import OpenSourceDisplayedActeurResource
 
-TARGET_FILE = "export6.xlsx"
+TARGET_FILE = "export_lavo_acteurs.xlsx"
 CHUNK = 1000
 
 
@@ -16,7 +16,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write(f"Exporting Ressources, starting at {datetime.now()}")
 
-        # supprimer le fichier cible
         if Path(TARGET_FILE).exists():
             Path(TARGET_FILE).unlink()
 
@@ -45,7 +44,6 @@ class Command(BaseCommand):
                 nb_objet=CHUNK, offset=offset
             ).export()
 
-        # Enregistrez le fichier mis à jour
         workbook.save(TARGET_FILE)
 
         self.stdout.write(f"Ended at {datetime.now()}")

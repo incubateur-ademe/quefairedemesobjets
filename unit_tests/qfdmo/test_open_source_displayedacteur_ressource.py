@@ -97,31 +97,36 @@ class TestOpenSourceDisplayedActeurResource:
             == expected_propositions_de_services
         )
 
-    def test_sources(self):
+    @pytest.mark.parametrize(
+        "source_data, expected_contributeurs",
+        [
+            (
+                [],
+                "Longue Vie Aux Objets|ADEME",
+            ),
+            (
+                [
+                    {"libelle": "Source 1", "code": "source1"},
+                    {"libelle": "Source 2", "code": "source2"},
+                ],
+                "Longue Vie Aux Objets|ADEME|Source 1|Source 2",
+            ),
+            (
+                [
+                    {"libelle": "Source 1", "code": "source1"},
+                    {"libelle": "Source 2", "code": "source2"},
+                    {"libelle": "Source 1", "code": "source3"},
+                ],
+                "Longue Vie Aux Objets|ADEME|Source 1|Source 2",
+            ),
+        ],
+    )
+    def test_sources(self, source_data, expected_contributeurs):
         displayedacteur = DisplayedActeurFactory()
-        source1 = SourceFactory(libelle="Source 1", code="source1")
-        source2 = SourceFactory(libelle="Source 2", code="source2")
-        displayedacteur.sources.set([source1, source2])
+        sources = [SourceFactory(**data) for data in source_data]
+        displayedacteur.sources.set(sources)
 
         dataset = OpenSourceDisplayedActeurResource().export()
 
         dataset_dict = dataset.dict
-        assert (
-            dataset_dict[0]["Contributeurs"]
-            == "Longue Vie Aux Objets|ADEME|Source 1|Source 2"
-        )
-
-    def test_sources_deduplicated(self):
-        displayedacteur = DisplayedActeurFactory()
-        source1 = SourceFactory(libelle="Source 1", code="source1")
-        source2 = SourceFactory(libelle="Source 2", code="source2")
-        source3 = SourceFactory(libelle="Source 1", code="source3")
-        displayedacteur.sources.set([source1, source2, source3])
-
-        dataset = OpenSourceDisplayedActeurResource().export()
-
-        dataset_dict = dataset.dict
-        assert (
-            dataset_dict[0]["Contributeurs"]
-            == "Longue Vie Aux Objets|ADEME|Source 1|Source 2"
-        )
+        assert dataset_dict[0]["Contributeurs"] == expected_contributeurs

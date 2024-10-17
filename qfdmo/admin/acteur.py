@@ -528,7 +528,6 @@ class DisplayedActeurResource(ActeurResource):
         model = DisplayedActeur
 
 
-# TODO : ajouter des tests pour cette ressources
 class OpenSourceDisplayedActeurResource(resources.ModelResource):
     """
     Only used to export data to open-source in Koumoul
