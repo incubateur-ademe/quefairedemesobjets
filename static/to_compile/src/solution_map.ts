@@ -97,7 +97,7 @@ export class SolutionMap {
     const markerHtmlStyles = `color: ${get_color_code(actor.couleur)};`
     const background = actor.reparer ? pinBackgroundFillSvg : pinBackgroundSvg
     const cornerIcon = actor.bonus ? bonusIconSvg : ""
-    const markerIconClasses = `qfdmo-absolute qfdmo-top-[10] qfdmo-left-[10] qfdmo-right-[10] qfdmo-margin-auto
+    const markerIconClasses = `qfdmo-absolute qfdmo-top-[5] qfdmo-left-[5.5] qfdmo-margin-auto
       qfdmo-icon ${actor.icon} ${actor.reparer ? "qfdmo-text-white" : ""}
       `
     const htmlTree = [`<div class="qfdmo--translate-y-2/4" style="${markerHtmlStyles}">`, background]
@@ -124,7 +124,7 @@ export class SolutionMap {
             // Empty className ensures default leaflet classes are not added,
             // they add styles like a border and a background to the marker
             className: "",
-            iconSize: [46, 61],
+            iconSize: [34, 45],
             html: markerHtmlString,
           })
         }
