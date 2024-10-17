@@ -100,7 +100,7 @@ export class SolutionMap {
     const markerIconClasses = `qfdmo-absolute qfdmo-top-[10] qfdmo-left-[10] qfdmo-right-[10] qfdmo-margin-auto
       qfdmo-icon ${actor.icon} ${actor.bonus ? "qfdmo-text-white" : ""}
       `
-    const htmlTree = [`<div style="${markerHtmlStyles}">`, background]
+    const htmlTree = [`<div class="qfdmo--translate-y-2/4" style="${markerHtmlStyles}">`, background]
     if (cornerIcon) {
       htmlTree.push(
         `<span class="qfdmo-absolute qfdmo-right-[-5] qfdmo-top-[-5] qfdmo-z-10">`,
@@ -124,7 +124,7 @@ export class SolutionMap {
             // Empty className ensures default leaflet classes are not added,
             // they add styles like a border and a background to the marker
             className: "",
-            iconSize: [45, 60],
+            iconSize: [46, 61],
             html: markerHtmlString,
           })
         }
