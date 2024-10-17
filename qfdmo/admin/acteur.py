@@ -580,6 +580,10 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource):
         telephone = acteur.telephone
         if telephone and (telephone.startswith("06") or telephone.startswith("07")):
             return None
+        # filtrer les téléphones pour les acteur de la source carte-Eco
+        if telephone and acteur.sources.filter(code="CartEco - ESS France").exists():
+            return None
+
         return telephone
 
     adresse = fields.Field(column_name="Adresse", attribute="adresse", readonly=True)
@@ -655,6 +659,15 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource):
                 ActeurPublicAccueilli.PROFESSIONNELS,
             ],
         )
+        # filter les acteur qui on '_reparation_' dans le champ identifiant_unique
+        queryset = queryset.exclude(
+            identifiant_unique__icontains="_reparation_",
+        )
+        # filter les acteur qui on 'cma_reparacteur_' dans le champ identifiant_unique
+        queryset = queryset.exclude(
+            identifiant_unique__icontains="cma_reparacteur_",
+        )
+
         queryset = queryset.prefetch_related(
             "sources",
             "labels",
