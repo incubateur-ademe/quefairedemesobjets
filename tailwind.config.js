@@ -7,6 +7,8 @@ module.exports = {
     "jinja2/**/**/*html",
     "templates/**/*html",
     "static/to_compile/**/*{j,t}s",
+    "static/to_compile/**/*svg",
+    "./**/forms.py
   ],
   prefix: "qfdmo-",
   corePlugins: {
