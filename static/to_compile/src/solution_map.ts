@@ -95,10 +95,10 @@ export class SolutionMap {
 
   #generateMarkerHTMLStringFrom(actor: DisplayedActeur): string {
     const markerHtmlStyles = `color: ${get_color_code(actor.couleur)};`
-    const background = actor.bonus ? pinBackgroundFillSvg : pinBackgroundSvg
+    const background = actor.reparer ? pinBackgroundFillSvg : pinBackgroundSvg
     const cornerIcon = actor.bonus ? bonusIconSvg : ""
     const markerIconClasses = `qfdmo-absolute qfdmo-top-[10] qfdmo-left-[10] qfdmo-right-[10] qfdmo-margin-auto
-      qfdmo-icon ${actor.icon} ${actor.bonus ? "qfdmo-text-white" : ""}
+      qfdmo-icon ${actor.icon} ${actor.reparer ? "qfdmo-text-white" : ""}
       `
     const htmlTree = [`<div class="qfdmo--translate-y-2/4" style="${markerHtmlStyles}">`, background]
     if (cornerIcon) {
