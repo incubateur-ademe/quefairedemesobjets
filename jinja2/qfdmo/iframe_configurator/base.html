@@ -1,9 +1,13 @@
 {% extends "layout/base.html" %}
 
+{% block page_title %}
+Réutiliser la carte | {{ super() }}
+{% endblock page_title %}
+
 {% block content %}
     <div class="fr-container fr-my-3w">
-        <h1>Configurateur d'Iframe</h1>
-
+        <h1>Réutiliser la carte sur mon site Internet</h1>
+        <h2>Paramètres de l’intégration</h2>
         <form action="{{ url('qfdmo:iframe_configurator') }}" method="post">
             {{ csrf_input }}
             {{ form }}
@@ -32,7 +36,7 @@
                         data-copy-target="toCopy"
                         class="
                         qfdmo-m-0 qfdmo-pr-1w
-                        qfdmo-text-blue-france-sun-113 qfdmo-font-bold
+                        qfdmo-text-blue-france-sun-113
                         qfdmo-whitespace-break-spaces
                         qfdmo-break-all
                     ">{{ iframe_script }}</pre>
@@ -53,6 +57,8 @@
                     </p>
                 </div>
             </div>
+
+            <h3>Prévisualisation</h3>
             {{ iframe_script|safe }}
         {% endif %}
     </div>

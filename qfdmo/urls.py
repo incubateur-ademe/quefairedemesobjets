@@ -46,6 +46,13 @@ urlpatterns = [
         name="update-suggestion-form",
     ),
     path(
+        "contacter-l-equipe",
+        RedirectView.as_view(
+            url=settings.CONTACT_TEAM_FORM, query_string=True, permanent=True
+        ),
+        name="contact-team-form",
+    ),
+    path(
         "qfdmo/getorcreate_revisionacteur/<str:acteur_identifiant>",
         getorcreate_revisionacteur,
         name="getorcreate_revisionacteur",

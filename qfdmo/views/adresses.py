@@ -232,15 +232,6 @@ class AddressesView(FormView):
             if acteurs_in_bbox.count() > 0:
                 return custom_bbox, acteurs_in_bbox
 
-        if epci_codes := self.get_data_from_request_or_bounded_form("epci_codes"):
-            geojson_list = [retrieve_epci_geojson(code) for code in epci_codes]
-            bbox = bbox_from_list_of_geojson(geojson_list, buffer=0)
-            if geojson_list:
-                # TODO: handle case with multiples EPCI codes passed in URL
-                geojson = json.dumps(geojson_list[0])
-                acteurs = acteurs.in_geojson(geojson)
-            return compile_leaflet_bbox(bbox), acteurs
-
         # TODO
         # - Tester cas avec bounding box définie depuis le configurateur
         # - Tester cas avec center retourné par leaflet
@@ -251,6 +242,15 @@ class AddressesView(FormView):
                 custom_bbox = None
 
             return custom_bbox, acteurs_from_center
+
+        if epci_codes := self.get_data_from_request_or_bounded_form("epci_codes"):
+            geojson_list = [retrieve_epci_geojson(code) for code in epci_codes]
+            bbox = bbox_from_list_of_geojson(geojson_list, buffer=0)
+            if geojson_list:
+                # TODO: handle case with multiples EPCI codes passed in URL
+                geojson = json.dumps(geojson_list[0])
+                acteurs = acteurs.in_geojson(geojson)
+            return compile_leaflet_bbox(bbox), acteurs
 
         return custom_bbox, acteurs.none()
 

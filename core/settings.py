@@ -356,3 +356,6 @@ CONTACT_FORM = decouple.config(
 FEEDBACK_FORM = decouple.config(
     "FEEDBACK_FORM", default="https://tally.so/r/3EW88q", cast=str
 )
+CONTACT_TEAM_FORM = decouple.config(
+    "CONTACT_TEAM_FORM", default="https://tally.so/r/wzYveR", cast=str
+)
