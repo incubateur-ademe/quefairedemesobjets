@@ -93,7 +93,7 @@ export class SolutionMap {
     }
   }
 
-  #generateHTMLFromActor(actor: DisplayedActeur): string {
+  #generateMarkerHTMLStringFrom(actor: DisplayedActeur): string {
     const markerHtmlStyles = `color: ${get_color_code(actor.couleur)};`
     const background = actor.bonus ? pinBackgroundFillSvg : pinBackgroundSvg
     const cornerIcon = actor.bonus ? bonusIconSvg : ""
@@ -117,17 +117,19 @@ export class SolutionMap {
     actors.forEach(function (actor: DisplayedActeur) {
       if (actor.location) {
         let customMarker = defaultMarker
-        const markerHtml = this.#generateHTMLFromActor(actor)
+        const markerHtmlString = this.#generateMarkerHTMLStringFrom(actor)
+
         if (actor.icon) {
           customMarker = L.divIcon({
+            // Empty className ensures default leaflet classes are not added,
+            // they add styles like a border and a background to the marker
             className: "",
             iconSize: [45, 60],
-            html: markerHtml,
+            html: markerHtmlString,
           })
         }
 
-        // create the marker on map
-        let marker = L.marker(
+        const marker = L.marker(
           [actor.location.coordinates[1], actor.location.coordinates[0]],
           {
             icon: customMarker,
@@ -135,19 +137,14 @@ export class SolutionMap {
           },
         )
         marker._identifiant_unique = actor.identifiant_unique
-        marker.on("click", (e) => {
-          this.#onClickMarker(e)
-        })
-
+        marker.on("click", this.#onClickMarker)
         marker.on("keydown", (e) => {
           // Open solution details when user presses enter or spacebar keys
           if ([32, 13].includes(e.originalEvent.keyCode)) {
             this.#onClickMarker(e)
           }
         })
-
         marker.addTo(this.map)
-
         points.push([actor.location.coordinates[1], actor.location.coordinates[0]])
       }
     }, this)
