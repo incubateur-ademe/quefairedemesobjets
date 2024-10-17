@@ -382,7 +382,7 @@ class ConfiguratorForm(DsfrBaseForm):
         required=False,
         initial=GroupeAction.objects.exclude(code="trier"),
         label=mark_safe(
-            "<h3>Paramètres de la carte</h3>"
+            "<h3>Informations disponibles sur la carte</h3>"
             "Choisissez les actions disponibles pour vos usagers."
         ),
         help_text="Ce sont les actions que vos usagers pourront consulter "
