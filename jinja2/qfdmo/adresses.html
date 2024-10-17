@@ -18,7 +18,11 @@
                            map:updateBbox->search-solution-form#updateBboxInput
                            map:setSrcDetailsAddress->search-solution-form#setSrcDetailsAddress
                            ss-cat-object-autocomplete:optionSelected->search-solution-form#checkSsCatObjetErrorForm
+                           {% if is_carte(request) %}
                            address-autocomplete:optionSelected->search-solution-form#advancedSubmit
+                           {% else %}
+                           address-autocomplete:optionSelected->search-solution-form#checkAdresseErrorForm
+                           {% endif %}
                            address-autocomplete:formSubmit->search-solution-form#advancedSubmit
                            ss-cat-object-autocomplete:formSubmit->search-solution-form#advancedSubmit
                           "
