@@ -22,7 +22,6 @@ with DAG(
             "siret": "siret",
             "exclusivite_de_reprisereparation": "exclusivite_de_reprisereparation",
             "uniquement_sur_rdv": "uniquement_sur_rdv",
-            "filiere": "",
             "public_accueilli": "public_accueilli",
             "produitsdechets_acceptes": "",
             "labels_etou_bonus": "",
@@ -40,6 +39,7 @@ with DAG(
             "horaires_douverture": "horaires_description",
             "consignes_dacces": "commentaires",
         },
+        "label_bonus_reparation": "refashion",
     },
     schedule=None,
 ) as dag:

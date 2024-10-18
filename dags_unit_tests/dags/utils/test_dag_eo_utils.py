@@ -45,7 +45,7 @@ def df_acteurtype_from_db():
 def df_labels_from_db():
     return pd.DataFrame(
         {
-            "code": ["ess", "ecoorganisme", "reparacteur"],
+            "code": ["ess", "label_bonus", "reparacteur"],
             "id": [1, 2, 3],
             "libelle": [
                 "Enseigne de l'économie sociale et solidaire",
@@ -616,7 +616,6 @@ def mock_config():
             "siret": "siret",
             "uniquement_sur_rdv": "",
             "exclusivite_de_reprisereparation": "",
-            "filiere": "",
             "public_accueilli": "",
             "produitsdechets_acceptes": "",
             "labels_etou_bonus": "",
@@ -1531,114 +1530,97 @@ class TestCeateLabels:
 
     def test_create_reparacteur_labels(
         self,
-        df_actions_from_db,
         df_acteurtype_from_db,
-        df_acteur_services_from_db,
-        df_sous_categories_from_db,
         df_labels_from_db,
     ):
+        mock = MagicMock()
+        mock.xcom_pull.side_effect = lambda task_ids="": {
+            "create_actors": {
+                "df": pd.DataFrame(
+                    {
+                        "identifiant_unique": [1, 2],
+                        "labels_etou_bonus": ["reparacteur", ""],
+                        "acteur_type_id": [202, 202],
+                    }
+                ),
+            },
+            "read_acteurtype": df_acteurtype_from_db,
+            "read_labelqualite": df_labels_from_db,
+        }[task_ids]
+        df = create_labels(ti=mock)
 
-        mock = get_mock_ti_label(
-            df_actions_from_db,
-            df_acteurtype_from_db,
-            df_acteur_services_from_db,
-            df_sous_categories_from_db,
-            df_labels_from_db,
-            df_create_actors=pd.DataFrame(
-                {
-                    "identifiant_unique": [1, 2],
-                    "label_code": ["reparacteur", ""],
-                    "acteur_type_id": [202, 202],
-                }
-            ),
-            displayedpropositionservice_max_id=123,
-        )
-
-        kwargs = {"ti": mock}
-
-        df = create_labels(**kwargs)
         expected_dataframe_with_reparacteur_label = pd.DataFrame(
             {
                 "acteur_id": [1],
                 "labelqualite_id": [3],
             }
         )
+
         pd.testing.assert_frame_equal(df, expected_dataframe_with_reparacteur_label)
 
     def test_create_ess_labels(
         self,
-        df_actions_from_db,
         df_acteurtype_from_db,
-        df_acteur_services_from_db,
-        df_sous_categories_from_db,
         df_labels_from_db,
     ):
+        mock = MagicMock()
+        mock.xcom_pull.side_effect = lambda task_ids="": {
+            "create_actors": {
+                "df": pd.DataFrame(
+                    {
+                        "identifiant_unique": [1, 2],
+                        "acteur_type_id": [201, 202],
+                    }
+                ),
+            },
+            "read_acteurtype": df_acteurtype_from_db,
+            "read_labelqualite": df_labels_from_db,
+        }[task_ids]
+        df = create_labels(ti=mock)
 
-        mock = get_mock_ti_label(
-            df_actions_from_db,
-            df_acteurtype_from_db,
-            df_acteur_services_from_db,
-            df_sous_categories_from_db,
-            df_labels_from_db,
-            df_create_actors=pd.DataFrame(
-                {
-                    "identifiant_unique": [1, 2],
-                    "acteur_type_id": [201, 202],
-                }
-            ),
-            displayedpropositionservice_max_id=123,
-        )
-
-        kwargs = {"ti": mock}
-
-        df = create_labels(**kwargs)
         expected_dataframe_with_ess_label = pd.DataFrame(
             {
                 "acteur_id": [1],
                 "labelqualite_id": [1],
             }
         )
+
         pd.testing.assert_frame_equal(df, expected_dataframe_with_ess_label)
 
     @pytest.mark.parametrize(
-        "code_ecoorganisme_bonus", ["ECOORGANISME", "ecoorganisme"]
+        "code_label_bonus", ["LABEL_BONUS", "label_bonus", "Làbèl_bônùS"]
     )
     def test_create_bonus_reparation_labels(
         self,
-        df_actions_from_db,
         df_acteurtype_from_db,
-        df_acteur_services_from_db,
-        df_sous_categories_from_db,
         df_labels_from_db,
-        code_ecoorganisme_bonus,
+        code_label_bonus,
     ):
 
-        mock = get_mock_ti_label(
-            df_actions_from_db,
-            df_acteurtype_from_db,
-            df_acteur_services_from_db,
-            df_sous_categories_from_db,
-            df_labels_from_db,
-            df_create_actors=pd.DataFrame(
-                {
-                    "identifiant_unique": [1, 2],
-                    "labels_etou_bonus": ["Agréé Bonus Réparation", ""],
-                    "ecoorganisme": [code_ecoorganisme_bonus, "source1"],
-                    "acteur_type_id": [202, 202],
-                }
-            ),
-            displayedpropositionservice_max_id=123,
-        )
-
-        kwargs = {"ti": mock}
-
+        mock = MagicMock()
+        mock.xcom_pull.side_effect = lambda task_ids="": {
+            "create_actors": {
+                "df": pd.DataFrame(
+                    {
+                        "identifiant_unique": [1, 2],
+                        "labels_etou_bonus": [code_label_bonus, ""],
+                        "acteur_type_id": [202, 202],
+                    }
+                ),
+            },
+            "read_acteurtype": df_acteurtype_from_db,
+            "read_labelqualite": df_labels_from_db,
+        }[task_ids]
+        kwargs = {"ti": mock, "params": {"label_bonus_reparation": "qualirepar"}}
         df = create_labels(**kwargs)
+
         expected_dataframe_with_bonus_reparation_label = pd.DataFrame(
             {
                 "acteur_id": [1],
                 "labelqualite_id": [2],
             }
         )
+
         pd.testing.assert_frame_equal(
             df, expected_dataframe_with_bonus_reparation_label
         )
