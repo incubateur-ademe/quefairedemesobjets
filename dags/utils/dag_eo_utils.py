@@ -5,6 +5,7 @@ from typing import Union
 
 import numpy as np
 import pandas as pd
+import unidecode
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from sqlalchemy import text
 from utils import api_utils, base_utils, mapping_utils, shared_constants
@@ -432,6 +433,8 @@ def create_actors(**kwargs):
 
     params = kwargs["params"]
     reparacteurs = params.get("reparacteurs", False)
+    # TODO : to be tested
+    label_bonus_reparation = params.get("label_bonus_reparation")
     column_mapping = params.get("column_mapping", {})
     column_to_drop = params.get("column_to_drop", [])
     column_to_replace = params.get("default_column_value", {})
@@ -442,6 +445,11 @@ def create_actors(**kwargs):
             group_column="id_point_apport_ou_reparation",
             merge_column="produitsdechets_acceptes",
         )
+
+    # TODO : to be tested
+    # filtre des service à domicile uniquement
+    if "service_a_domicile" in df.columns:
+        df = df[df["service_a_domicile"].str.lower() != "oui exclusivement"]
 
     # intersection of columns in df and column_to_drop
     column_to_drop = list(set(column_to_drop) & set(df.columns))
@@ -508,6 +516,13 @@ def create_actors(**kwargs):
                         "oui": "1 pour 1",
                     },
                 )
+            # TODO : TO BE TESTED
+            elif new_col == "labels_etou_bonus" and label_bonus_reparation:
+                df[new_col] = df[old_col].apply(
+                    lambda x: x.replace(
+                        "Agréé Bonus Réparation", label_bonus_reparation
+                    )
+                )
             else:
                 df[new_col] = df[old_col]
 
@@ -551,6 +566,12 @@ def create_actors(**kwargs):
             axis=1,
         )
 
+    if "code_postal" in df.columns:
+        # cast en str et ajout de 0 si le code postal est inférieur à 10000
+        df["code_postal"] = df["code_postal"].apply(
+            lambda x: f"0{x}" if x and len(str(x)) == 4 else str(x)
+        )
+
     df = df.replace({np.nan: None})
 
     duplicates_mask = df.duplicated("identifiant_unique", keep=False)
@@ -584,6 +605,10 @@ def create_actors(**kwargs):
     }
 
 
+def format_libelle_to_code(input_str):
+    return unidecode.unidecode(input_str).strip().lower()
+
+
 def create_labels(**kwargs):
     labels = kwargs["ti"].xcom_pull(task_ids="read_labelqualite")
     df_acteurtype = kwargs["ti"].xcom_pull(task_ids="read_acteurtype")
@@ -598,29 +623,6 @@ def create_labels(**kwargs):
     label_mapping = labels.set_index(labels["code"].str.lower()).to_dict(orient="index")
     rows_list = []
     for _, row in df_actors.iterrows():
-        # Handle label_code if it is set (works for reparacteur)
-        label_code = row.get("label_code", "").lower()
-        if label_code in label_mapping:
-            rows_list.append(
-                {
-                    "acteur_id": row["identifiant_unique"],
-                    "labelqualite_id": label_mapping[label_code]["id"],
-                }
-            )
-
-        # Manage bonus reparation
-        label = str(row.get("labels_etou_bonus"))
-        if label == "Agréé Bonus Réparation":
-            # The label with the same code than the eco-organisme code is the one of
-            # the "bonus réparation"
-            label_code = row.get("ecoorganisme").lower()
-            if label_code in label_mapping.keys():
-                rows_list.append(
-                    {
-                        "acteur_id": row["identifiant_unique"],
-                        "labelqualite_id": label_mapping[label_code]["id"],
-                    }
-                )
 
         # Handle special case for ESS
         if row["acteur_type_id"] == ess_acteur_type_id:
@@ -628,6 +630,23 @@ def create_labels(**kwargs):
                 {
                     "acteur_id": row["identifiant_unique"],
                     "labelqualite_id": ess_label_id,
+                }
+            )
+
+        labels_etou_bonus = row.get("labels_etou_bonus", "")
+        if not labels_etou_bonus:
+            continue
+        for label_ou_bonus in labels_etou_bonus.split("|"):
+
+            label_ou_bonus = format_libelle_to_code(label_ou_bonus)
+            if label_ou_bonus not in label_mapping:
+                raise ValueError(
+                    f"Label ou bonus {label_ou_bonus} not found in database"
+                )
+            rows_list.append(
+                {
+                    "acteur_id": row["identifiant_unique"],
+                    "labelqualite_id": label_mapping[label_ou_bonus]["id"],
                 }
             )
 

@@ -21,7 +21,6 @@ with DAG(
             "uniquement_sur_rdv": "uniquement_sur_rdv",
             "public_accueilli": "public_accueilli",
             "reprise": "reprise",
-            "filiere": "",
             "siret": "siret",
             "produitsdechets_acceptes": "",
             "labels_etou_bonus": "",

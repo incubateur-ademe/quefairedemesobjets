@@ -22,7 +22,6 @@ with DAG(
             "uniquement_sur_rdv": "uniquement_sur_rdv",
             "public_accueilli": "public_accueilli",
             "reprise": "reprise",
-            "filiere": "",
             "enseigne_commerciale": "nom_commercial",
             "telephone": "telephone",
             "email": "email",

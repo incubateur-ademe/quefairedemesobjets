@@ -122,7 +122,7 @@ def process_reparacteurs(df, df_sources, df_acteurtype):
         "CMA - Chambre des métiers et de l'artisanat", df_sources
     )
     # TODO : on pourrait gérer en configuration les colonne qui sont pareil pour tous
-    df["label_code"] = "reparacteur"
+    df["labels_etou_bonus"] = "reparacteur"
     df["type_de_point_de_collecte"] = None
     df["acteur_type_id"] = transform_acteur_type_id(
         "artisan, commerce indépendant", df_acteurtype=df_acteurtype
