@@ -1627,6 +1627,96 @@ class TestCeateLabels:
 
 
 class TestActorsLocation:
+
+    # "service_a_domicile"
+    def test_service_a_domicile(
+        self,
+        df_sources_from_db,
+        df_acteurtype_from_db,
+        df_empty_acteurs_from_db,
+    ):
+        mock = MagicMock()
+        mock.xcom_pull.side_effect = lambda task_ids="": {
+            "read_acteur": df_empty_acteurs_from_db,
+            "read_acteurtype": df_acteurtype_from_db,
+            "read_source": df_sources_from_db,
+            "fetch_data_from_api": pd.DataFrame(
+                {
+                    "id_point_apport_ou_reparation": ["1", "2"],
+                    "nom_de_lorganisme": ["Actor 1", "Actor 2"],
+                    "ecoorganisme": ["source1", "source1"],
+                    "source_id": ["source_id1", "source_id1"],
+                    "service_a_domicile": ["Oui exclusivement", "Non"],
+                }
+            ),
+        }[task_ids]
+
+        kwargs = {
+            "ti": mock,
+            "params": {
+                "column_mapping": {
+                    "id_point_apport_ou_reparation": "identifiant_externe",
+                    "nom_de_lorganisme": "nom",
+                },
+            },
+        }
+        result = create_actors(**kwargs)
+        result_df = result["df"]
+
+        assert len(result_df) == 1
+        assert result_df["service_a_domicile"].iloc[0] == "Non"
+        assert result_df["nom"].iloc[0] == "Actor 2"
+
+    @pytest.mark.parametrize(
+        "label_et_bonus, label_et_bonus_expected",
+        [
+            ("label_et_bonus", "label_et_bonus"),
+            ("label_et_bonus1|label_et_bonus2", "label_et_bonus1|label_et_bonus2"),
+            (
+                "Agréé Bonus Réparation|label_et_bonus2",
+                "bonus_reparation|label_et_bonus2",
+            ),
+        ],
+    )
+    def test_label_bonus(
+        self,
+        df_sources_from_db,
+        df_acteurtype_from_db,
+        df_empty_acteurs_from_db,
+        label_et_bonus,
+        label_et_bonus_expected,
+    ):
+        mock = MagicMock()
+        mock.xcom_pull.side_effect = lambda task_ids="": {
+            "read_acteur": df_empty_acteurs_from_db,
+            "read_acteurtype": df_acteurtype_from_db,
+            "read_source": df_sources_from_db,
+            "fetch_data_from_api": pd.DataFrame(
+                {
+                    "id_point_apport_ou_reparation": ["1"],
+                    "nom_de_lorganisme": ["Actor 1"],
+                    "ecoorganisme": ["source1"],
+                    "source_id": ["source_id1"],
+                    "labels_etou_bonus": [label_et_bonus],
+                }
+            ),
+        }[task_ids]
+
+        kwargs = {
+            "ti": mock,
+            "params": {
+                "column_mapping": {
+                    "id_point_apport_ou_reparation": "identifiant_externe",
+                    "nom_de_lorganisme": "nom",
+                    "labels_etou_bonus": "labels_etou_bonus",
+                },
+                "label_bonus_reparation": "bonus_reparation",
+            },
+        }
+        result = create_actors(**kwargs)
+
+        assert result["df"]["labels_etou_bonus"].iloc[0] == label_et_bonus_expected
+
     @pytest.mark.parametrize(
         "latitude, longitude",
         [

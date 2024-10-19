@@ -433,7 +433,6 @@ def create_actors(**kwargs):
 
     params = kwargs["params"]
     reparacteurs = params.get("reparacteurs", False)
-    # TODO : to be tested
     label_bonus_reparation = params.get("label_bonus_reparation")
     column_mapping = params.get("column_mapping", {})
     column_to_drop = params.get("column_to_drop", [])
@@ -446,7 +445,6 @@ def create_actors(**kwargs):
             merge_column="produitsdechets_acceptes",
         )
 
-    # TODO : to be tested
     # filtre des service à domicile uniquement
     if "service_a_domicile" in df.columns:
         df = df[df["service_a_domicile"].str.lower() != "oui exclusivement"]
@@ -516,7 +514,6 @@ def create_actors(**kwargs):
                         "oui": "1 pour 1",
                     },
                 )
-            # TODO : TO BE TESTED
             elif new_col == "labels_etou_bonus" and label_bonus_reparation:
                 df[new_col] = df[old_col].apply(
                     lambda x: x.replace(
@@ -605,6 +602,7 @@ def create_actors(**kwargs):
     }
 
 
+# TODO : où met-on cette fonction de normalisation qui sera util un peu partout
 def format_libelle_to_code(input_str):
     return unidecode.unidecode(input_str).strip().lower()
 
