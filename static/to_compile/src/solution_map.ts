@@ -2,11 +2,14 @@ import L from "leaflet"
 import "leaflet-extra-markers/dist/js/leaflet.extra-markers.min.js"
 import { defaultMarker, homeIconMarker } from "./icon_marker"
 import MapController from "./map_controller"
-import { Actor, Location } from "./types"
-import debounce = require("lodash/debounce")
+import { DisplayedActeur, Location } from "./types"
+import pinBackgroundSvg from "bundle-text:./svg/pin-background.svg"
+import pinBackgroundFillSvg from "bundle-text:./svg/pin-background-fill.svg"
+import bonusIconSvg from "bundle-text:../entrypoints/svg/bonus-reparation-fill.svg"
 
 const DEFAULT_LOCATION: Array<Number> = [46.227638, 2.213749]
 const DEFAULT_ZOOM: Number = 5
+const ACTIVE_CLASSNAME = "active-pinpoint"
 const DEFAULT_MAX_ZOOM: Number = 19
 const COLOR_MAPPING: object = {
   "beige-gris-galet": "#AEA397",
@@ -91,26 +94,47 @@ export class SolutionMap {
     }
   }
 
-  displayActor(actors: Array<Actor>, bboxValue?: Array<Number>): void {
+  #generateMarkerHTMLStringFrom(actor: DisplayedActeur): string {
+    const markerHtmlStyles = `color: ${get_color_code(actor.couleur)};`
+    const background = actor.reparer ? pinBackgroundFillSvg : pinBackgroundSvg
+    const cornerIcon = actor.bonus ? bonusIconSvg : ""
+    const markerIconClasses = `qfdmo-absolute qfdmo-top-[9] qfdmo-left-[10] qfdmo-margin-auto
+      ${actor.icon} ${actor.reparer ? "qfdmo-text-white" : ""}
+      `
+    const htmlTree = [
+      `<div data-animated class="qfdmo-scale-75">`,
+      `<div class="qfdmo--translate-y-2/4" style="${markerHtmlStyles}">`,
+      background,
+    ]
+    if (cornerIcon) {
+      htmlTree.push(
+        `<span class="qfdmo-absolute qfdmo-right-[-16] qfdmo-top-[-6] qfdmo-z-10">`,
+        cornerIcon,
+        `</span>`,
+      )
+    }
+    htmlTree.push(`<span class="${markerIconClasses}"></span>`, `</div>`, `</div>`)
+    return htmlTree.join("")
+  }
+
+  displayActor(actors: Array<DisplayedActeur>, bboxValue?: Array<Number>): void {
     let points: Array<Array<Number>> = []
-    actors.forEach(function (actor: Actor) {
+    actors.forEach(function (actor: DisplayedActeur) {
       if (actor.location) {
-        // Create the marker look and feel : pin + icon
-        var customMarker = undefined
+        let customMarker = defaultMarker
+        const markerHtmlString = this.#generateMarkerHTMLStringFrom(actor)
+
         if (actor.icon) {
-          customMarker = L.ExtraMarkers.icon({
-            icon: actor.icon,
-            markerColor: get_color_code(actor.couleur),
-            shape: "square",
-            prefix: "qfdmo-icon",
-            svg: true,
+          customMarker = L.divIcon({
+            // Empty className ensures default leaflet classes are not added,
+            // they add styles like a border and a background to the marker
+            className: "",
+            iconSize: [34, 45],
+            html: markerHtmlString,
           })
-        } else {
-          customMarker = defaultMarker
         }
 
-        // create the marker on map
-        let marker = L.marker(
+        const marker = L.marker(
           [actor.location.coordinates[1], actor.location.coordinates[0]],
           {
             icon: customMarker,
@@ -121,16 +145,13 @@ export class SolutionMap {
         marker.on("click", (e) => {
           this.#onClickMarker(e)
         })
-
         marker.on("keydown", (e) => {
           // Open solution details when user presses enter or spacebar keys
           if ([32, 13].includes(e.originalEvent.keyCode)) {
             this.#onClickMarker(e)
           }
         })
-
         marker.addTo(this.map)
-
         points.push([actor.location.coordinates[1], actor.location.coordinates[0]])
       }
     }, this)
@@ -157,6 +178,12 @@ export class SolutionMap {
   }
 
   #onClickMarker(event: L.LeafletEvent) {
+    console.log({ event })
+
+    document.querySelectorAll(`.${ACTIVE_CLASSNAME}`).forEach((element) => {
+      element.classList.remove(ACTIVE_CLASSNAME)
+    })
+    event.target._icon.classList.add(ACTIVE_CLASSNAME)
     this.#controller.displayActorDetail(event.target._identifiant_unique)
   }
 

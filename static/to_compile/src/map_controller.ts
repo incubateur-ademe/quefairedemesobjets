@@ -1,7 +1,26 @@
 import { Controller } from "@hotwired/stimulus"
 import debounce from "lodash/debounce"
 import { SolutionMap } from "./solution_map"
-import { Actor } from "./types"
+import { ActorLocation, DisplayedActeur } from "./types"
+
+export class Actor implements DisplayedActeur {
+    identifiant_unique: string
+    location: ActorLocation
+    icon: string
+    couleur: string
+    bonus: boolean
+    reparer: boolean
+
+    constructor(actorFields: DisplayedActeur) {
+        this.identifiant_unique = actorFields.identifiant_unique
+        this.location = actorFields.location
+        this.icon = actorFields.icon
+        this.couleur = actorFields.couleur
+        this.bonus = actorFields.bonus
+        this.reparer = actorFields.reparer
+    }
+}
+
 
 export default class extends Controller<HTMLElement> {
     static targets = ["acteur", "searchInZoneButton", "bbox"]
@@ -23,7 +42,7 @@ export default class extends Controller<HTMLElement> {
         const actors: Array<Actor> = this.acteurTargets
             .map((ecoCirTarget: HTMLScriptElement) => {
                 if (ecoCirTarget.textContent !== null) {
-                    const actor_fields = JSON.parse(ecoCirTarget.textContent)
+                    const actor_fields: DisplayedActeur = JSON.parse(ecoCirTarget.textContent)
                     return new Actor(actor_fields)
                 }
             })
