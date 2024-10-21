@@ -78,14 +78,16 @@
                         Rechercher dans cette zone
                     </button>
                     {% if is_carte(request) %}
-                        <div class="fr-px-2w qfdmo-hidden lg:qfdmo-block qfdmo-absolute qfdmo-bottom-0 qfdmo-left-0 qfdmo-bg-white qfdmo-z-[2000] qfdmo-max-w-[21rem]">
+                        <aside class="fr-px-2w qfdmo-hidden lg:qfdmo-block qfdmo-absolute qfdmo-bottom-0 qfdmo-left-0 qfdmo-bg-white qfdmo-z-[2000] qfdmo-max-w-[17rem]">
                             <h2 class="fr-h4 fr-mt-3w">
                                 Actions possibles
                             </h2>
                             {{form.legend_grouped_action}}
                             <hr>
                             <button
-                                class="fr-mb-1w fr-btn fr-btn--icon-left fr-icon-equalizer-line qfdmo-w-full qfdmo-flex qfdmo-justify-center"
+                                class="fr-mb-1w fr-btn fr-btn--secondary fr-btn--icon-left
+                                fr-icon-equalizer-line
+                                qfdmo-w-full qfdmo-flex qfdmo-justify-center"
                                 type="button"
                                 data-action="click -> search-solution-form#toggleAdvancedFiltersWithSubmitButton"
                                 data-testid="advanced-filters-in-legend"
@@ -93,8 +95,9 @@
                                 Filtres
                             </button>
 
-                            <a class="fr-mb-1w fr-btn fr-btn--icon-left fr-icon-epingle-plus fr-btn--tertiary
-                                      qfdmo-whitespace-nowrap qfdmo-w-full qfdmo-flex qfdmo-justify-center"
+                            <a class="fr-mb-1w fr-btn fr-btn--secondary
+                                fr-btn--icon-left fr-icon-epingle-plus
+                                qfdmo-whitespace-nowrap qfdmo-w-full qfdmo-flex qfdmo-justify-center"
                                href="{{ url('qfdmo:address-suggestion-form') }}"
                                target="_blank"
                                rel="noreferrer"
@@ -102,9 +105,18 @@
                             >
                                 Proposer une adresse
                             </a>
-                            {# Liens de pieds de page pour iframe #}
-                            {% include 'qfdmo/_addresses_partials/iframe_footer_links.html' %}
-                        </div>
+
+                            <button
+                                class="fr-mb-1w fr-btn fr-btn--tertiary fr-btn--icon-left
+                                fr-icon-info-line
+                                qfdmo-w-full qfdmo-flex qfdmo-justify-center"
+                                type="button"
+                                data-action="click -> search-solution-form#toggleAPropos"
+                                data-testid="advanced-filters-in-legend"
+                            >
+                                À propos
+                            </button>
+                        </aside>
                     {% endif %}
                     {% with address_ok=(form.initial.adresse or form.initial.bounding_box or acteurs) %}
                         <div

@@ -1,92 +1,76 @@
+{% extends 'qfdmo/_addresses_partials/filters/_modal.html' %}
+
 {# Panel «Filtres avancés» #}
-<div class='fr-container
-            qfdmo-px-0
-            qfdmo-absolute qfdmo-z-[10010] qfdmo-top-auto qfdmo-hidden qfdmo-mt-auto qfdmo-h-[95%]
-            qfdmo-drop-shadow-[0_0_100px_rgba(0,0,0,0.5)]
-            qfdmo-inset-0 qfdmo-font-black qfdmo-bg-white
-            qfdmo-flex-col
-            qfdmo-fill-mode-forwards
-            data-[visible=true]:qfdmo-animate-in
-            data-[visible=true]:qfdmo-flex
-            data-[visible=true]:qfdmo-slide-in-from-bottom-9w
-            data-[visible=exit]:qfdmo-flex
-            data-[visible=exit]:qfdmo-animate-out
-            data-[visible=exit]:qfdmo-slide-out-to-bottom-9w
-            data-[visible=exit]:qfdmo-fade-out
-           '
-     data-visible="false"
+
+{% block wrapper_attrs %}
      data-search-solution-form-target="advancedFiltersMainPanel"
      data-action="keydown.esc@document->search-solution-form#toggleAdvancedFiltersWithoutSubmitButton"
      data-testid="advanced-filters-modal"
      tabindex="0"
->
-    <div class="fr-container fr-container--fluid qfdmo-h-full">
-        <div class="qfdmo-h-full qfdmo-flex qfdmo-flex-col">
-            <div class="fr-modal__header">
-                <button
-                    class="fr-btn fr-btn--close fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-close-line"
-                    type="button"
-                    data-action="click -> search-solution-form#toggleAdvancedFiltersWithoutSubmitButton"
-                >
-                    Fermer
-                </button>
-            </div>
-            <div class="fr-modal__content fr-text--normal qfdmo-overflow-y-auto qfdmo-flex-grow  qfdmo-font-normal">
+{% endblock wrapper_attrs %}
 
-                {% block filters_title %}
-                    <h4 class="fr-mt-3w qfdmo-text-center">
-                        Filtres avancés
-                    </h4>
-                {% endblock %}
-                <hr>
-
-                {% block filters_content %}
-                    {% with field=form.bonus, legend="Éligibles au bonus réparation" %}
-                        {% include "qfdmo/_addresses_partials/filter/_panel_filters" %}
-                    {% endwith %}
-
-                    {% with field=form.ess, legend="Type d'enseigne ESS" %}
-                        {% include "qfdmo/_addresses_partials/filter/_panel_filters" %}
-                    {% endwith %}
-
-                    {% with field=form.label_reparacteur, legend="Enseignes labellisées Répar’Acteurs", icon="qfdmo/partials/label_reparacteur_icon.html" %}
-                        {% include "qfdmo/_addresses_partials/filter/_panel_filters" %}
-                    {% endwith %}
-                {% endblock %}
-
-
-            </div>
-            <div class="fr-modal__footer qfdmo-flex qfdmo-flex-col">
-                <div
-                    class="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg fr-btns-group--icon-left"
-                    data-search-solution-form-target="advancedFiltersSaveButton"
-                >
-                    <button
-                        class="fr-btn"
-                        type="button"
-                        data-action="click -> search-solution-form#toggleAdvancedFiltersWithoutSubmitButton"
-                    >
-                        Enregistrer les filtres
-                    </button>
-                </div>
-                <div
-                    class="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg fr-btns-group--icon-left"
-                    data-search-solution-form-target="advancedFiltersSaveAndSubmitButton"
-                >
-                    <button
-                        class="fr-btn"
-                        type="button"
-                        data-action="click -> search-solution-form#advancedSubmit"
-                        data-without-zone="false"
-                        data-with-controls={{"false" if is_carte(request) else "true"}}
-                        data-toggle-advanced-filters="true"
-                    >
-                        Appliquer
-                    </button>
-                </div>
-                {% block filters_footer_links %}
-                {% endblock %}
-            </div>
-        </div>
-    </div>
+{% block content %}
+<div class="fr-modal__header">
+    <button
+        class="fr-btn fr-btn--close fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-close-line"
+        type="button"
+        data-action="click -> search-solution-form#toggleAdvancedFiltersWithoutSubmitButton"
+    >
+        Fermer
+    </button>
 </div>
+<div class="fr-modal__content fr-text--normal qfdmo-overflow-y-auto qfdmo-flex-grow  qfdmo-font-normal">
+
+    {% block filters_title %}
+        <h4 class="fr-mt-3w qfdmo-text-center">
+            Filtres avancés
+        </h4>
+    {% endblock %}
+    <hr>
+
+    {% block filters_content %}
+        {% with field=form.bonus, legend="Éligibles au bonus réparation" %}
+            {% include "qfdmo/_addresses_partials/filter/_panel_filters" %}
+        {% endwith %}
+
+        {% with field=form.ess, legend="Type d'enseigne ESS" %}
+            {% include "qfdmo/_addresses_partials/filter/_panel_filters" %}
+        {% endwith %}
+
+        {% with field=form.label_reparacteur, legend="Enseignes labellisées Répar’Acteurs", icon="qfdmo/partials/label_reparacteur_icon.html" %}
+            {% include "qfdmo/_addresses_partials/filter/_panel_filters" %}
+        {% endwith %}
+    {% endblock %}
+
+
+</div>
+<div class="fr-modal__footer qfdmo-flex qfdmo-flex-col">
+    <div
+        class="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg fr-btns-group--icon-left"
+        data-search-solution-form-target="advancedFiltersSaveButton"
+    >
+        <button
+            class="fr-btn"
+            type="button"
+            data-action="click -> search-solution-form#toggleAdvancedFiltersWithoutSubmitButton"
+        >
+            Enregistrer les filtres
+        </button>
+    </div>
+    <div
+        class="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg fr-btns-group--icon-left"
+        data-search-solution-form-target="advancedFiltersSaveAndSubmitButton"
+    >
+        <button
+            class="fr-btn"
+            type="button"
+            data-action="click -> search-solution-form#advancedSubmit"
+            data-without-zone="false"
+            data-with-controls={{"false" if is_carte(request) else "true"}}
+            data-toggle-advanced-filters="true"
+        >
+            Appliquer
+        </button>
+    </div>
+    </div>
+{% endblock content %}
