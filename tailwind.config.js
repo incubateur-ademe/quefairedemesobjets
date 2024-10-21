@@ -183,6 +183,19 @@ module.exports = {
         busy: "busy=true",
       },
       minWidth: ({ theme }) => ({ ...theme("spacing") }),
+      keyframes: {
+        wave: {
+          "0%": { transform: "rotate(0.0deg) scale3d(0.75, 0.75, 1) translateZ(0)" },
+          "10%": { transform: "rotate(6deg) scale3d(1, 1, 1)" },
+          "20%": { transform: "rotate(0deg) scale3d(0.9, 0.9, 1)" },
+          "30%": { transform: "rotate(1deg) scale3d(0.9, 0.9, 1)" },
+          "40%": { transform: "rotate(0deg) scale3d(0.9, 0.9, 1)" },
+          "100%": { transform: "rotate(0) scale3d(0.9, 0.9, 1) translateZ(0)" },
+        },
+      },
+      animation: {
+        wave: "wave 1.5s linear",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],
