@@ -7,6 +7,17 @@ from django.forms import model_to_dict
 
 from qfdmo.models.utils import CodeAsNaturalKeyManager, CodeAsNaturalKeyModel
 
+COULEUR_FIELD_HELP_TEXT = """Couleur du badge à choisir dans le DSFR
+Couleurs disponibles : blue-france, green-tilleul-verveine, green-bourgeon,
+green-emeraude, green-menthe, green-archipel, blue-ecume, blue-cumulus, purple-glycine,
+pink-macaron, pink-tuile, yellow-tournesol, yellow-moutarde, orange-terre-battue,
+brown-cafe-creme, brown-caramel, brown-opera, beige-gris-galet, pink-tuile-850,
+green-menthe-850,green-bourgeon-850, yellow-moutarde-850, blue-ecume-850,
+green-menthe-sun-373,blue-cumulus-sun-368, orange-terre-battue-main-645,
+brown-cafe-creme-main-782, purple-glycine-main-494, green-menthe-main-548,
+brown-caramel-sun-425-hover
+"""
+
 
 class ActionDirection(CodeAsNaturalKeyModel):
     class Meta:
@@ -57,15 +68,7 @@ class GroupeAction(CodeAsNaturalKeyModel):
         null=True,
         blank=True,
         default="yellow-tournesol",
-        help_text="""Couleur du badge à choisir dans le DSFR
-Couleurs disponibles : blue-france, green-tilleul-verveine, green-bourgeon,
-green-emeraude, green-menthe, green-archipel, blue-ecume, blue-cumulus, purple-glycine,
-pink-macaron, pink-tuile, yellow-tournesol, yellow-moutarde, orange-terre-battue,
-brown-cafe-creme,brown-caramel, brown-opera, beige-gris-galet, pink-tuile-850,
-green-menthe-850,green-bourgeon-850, yellow-moutarde-850, blue-ecume-850,
-green-menthe-sun-373,blue-cumulus-sun-368, orange-terre-battue-main-645,
-brown-cafe-creme-main-782, purple-glycine-main-494, green-menthe-main-548
-""",
+        help_text=COULEUR_FIELD_HELP_TEXT,
     )
     icon = models.CharField(
         max_length=255,
@@ -102,15 +105,7 @@ class Action(CodeAsNaturalKeyModel):
         null=True,
         blank=True,
         default="yellow-tournesol",
-        help_text="""Couleur du badge à choisir dans le DSFR
-Couleurs disponibles : blue-france, green-tilleul-verveine, green-bourgeon,
-green-emeraude, green-menthe, green-archipel, blue-ecume, blue-cumulus, purple-glycine,
-pink-macaron, pink-tuile, yellow-tournesol, yellow-moutarde, orange-terre-battue,
-brown-cafe-creme,brown-caramel, brown-opera, beige-gris-galet, pink-tuile-850,
-green-menthe-850,green-bourgeon-850, yellow-moutarde-850, blue-ecume-850,
-green-menthe-sun-373,blue-cumulus-sun-368, orange-terre-battue-main-645,
-brown-cafe-creme-main-782, purple-glycine-main-494, green-menthe-main-548
-""",
+        help_text=COULEUR_FIELD_HELP_TEXT,
     )
     icon = models.CharField(
         max_length=255,
