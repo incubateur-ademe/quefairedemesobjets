@@ -88,7 +88,7 @@ export class SolutionMap {
     ) {
       const homeIcon = L.divIcon({
         className: "!qfdmo-z-[10000]",
-        iconSize: [24, 24],
+        iconSize: [35, 35],
         html: this.#generateHomeHTMLString(),
       })
 
@@ -101,8 +101,8 @@ export class SolutionMap {
   }
 
   #generateHomeHTMLString() {
-    return `<div class="qfdmo-flex qfdmo-items-center qfdmo-justify-center qfdmo-rounded-full qfdmo-bg-[#E3E3FD] qfdmo-aspect-square qfdmo-border qfdmo-border-solid qfdmo-border-[#E1000F]">
-      <span class="fr-icon-map-pin-2-fill fr-icon--sm qfdmo-text-[#E1000F]"></span>
+    return `<div class="qfdmo-flex qfdmo-items-center qfdmo-justify-center qfdmo-rounded-full qfdmo-bg-white qfdmo-aspect-square qfdmo-border-2 qfdmo-border-solid qfdmo-border-[#E1000F]">
+      <span class="fr-icon-map-pin-2-fill qfdmo-text-[#E1000F]"></span>
     </div>
     `
   }
