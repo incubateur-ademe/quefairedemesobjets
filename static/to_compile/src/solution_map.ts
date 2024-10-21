@@ -1,10 +1,10 @@
 import * as L from "leaflet"
 import MapController from "./map_controller"
-import { DisplayedActeur, Location, LVAOMarker } from "./types"
 import pinBackgroundSvg from "bundle-text:./svg/pin-background.svg"
 import pinBackgroundFillSvg from "bundle-text:./svg/pin-background-fill.svg"
 import bonusIconSvg from "bundle-text:../entrypoints/svg/bonus-reparation-fill.svg"
 import { ACTIVE_PINPOINT_CLASSNAME, clearActivePinpoints } from "./map_helpers"
+import type { DisplayedActeur, Location, LVAOMarker } from "./types"
 
 const DEFAULT_LOCATION: L.LatLngTuple = [46.227638, 2.213749]
 const DEFAULT_ZOOM: number = 5
