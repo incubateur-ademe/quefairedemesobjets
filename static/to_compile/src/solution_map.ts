@@ -98,7 +98,7 @@ export class SolutionMap {
     const background = actor.reparer ? pinBackgroundFillSvg : pinBackgroundSvg
     const cornerIcon = actor.bonus ? bonusIconSvg : ""
     const markerIconClasses = `qfdmo-absolute qfdmo-top-[5] qfdmo-left-[5.5] qfdmo-margin-auto
-      qfdmo-icon ${actor.icon} ${actor.reparer ? "qfdmo-text-white" : ""}
+      qfdmo-scale-75 ${actor.icon} ${actor.reparer ? "qfdmo-text-white" : ""}
       `
     const htmlTree = [`<div class="qfdmo--translate-y-2/4" style="${markerHtmlStyles}">`, background]
     if (cornerIcon) {
