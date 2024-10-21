@@ -5,7 +5,7 @@ import MapController from "./map_controller"
 import { DisplayedActeur, Location } from "./types"
 import pinBackgroundSvg from "bundle-text:./svg/pin-background.svg"
 import pinBackgroundFillSvg from "bundle-text:./svg/pin-background-fill.svg"
-import bonusIconSvg from "bundle-text:./svg/bonus-icon.svg"
+import bonusIconSvg from "bundle-text:../entrypoints/svg/bonus-reparation-fill.svg"
 
 const DEFAULT_LOCATION: Array<Number> = [46.227638, 2.213749]
 const DEFAULT_ZOOM: Number = 5
@@ -98,17 +98,17 @@ export class SolutionMap {
     const markerHtmlStyles = `color: ${get_color_code(actor.couleur)};`
     const background = actor.reparer ? pinBackgroundFillSvg : pinBackgroundSvg
     const cornerIcon = actor.bonus ? bonusIconSvg : ""
-    const markerIconClasses = `qfdmo-absolute qfdmo-top-[5] qfdmo-left-[5.5] qfdmo-margin-auto
-      qfdmo-scale-75 ${actor.icon} ${actor.reparer ? "qfdmo-text-white" : ""}
+    const markerIconClasses = `qfdmo-absolute qfdmo-top-[9] qfdmo-left-[10] qfdmo-margin-auto
+      ${actor.icon} ${actor.reparer ? "qfdmo-text-white" : ""}
       `
     const htmlTree = [
-      `<div data-animated>`,
+      `<div data-animated class="qfdmo-scale-75">`,
       `<div class="qfdmo--translate-y-2/4" style="${markerHtmlStyles}">`,
       background,
     ]
     if (cornerIcon) {
       htmlTree.push(
-        `<span class="qfdmo-absolute qfdmo-right-[-5] qfdmo-top-[-5] qfdmo-z-10">`,
+        `<span class="qfdmo-absolute qfdmo-right-[-12] qfdmo-top-[-8] qfdmo-z-10">`,
         cornerIcon,
         `</span>`,
       )

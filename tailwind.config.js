@@ -185,12 +185,12 @@ module.exports = {
       minWidth: ({ theme }) => ({ ...theme("spacing") }),
       keyframes: {
         wave: {
-          "0%": { transform: "rotate(0.0deg) scale(1)" },
-          "10%": { transform: "rotate(6deg) scale(1.4)" },
-          "20%": { transform: "rotate(0deg) scale(1.35)" },
-          "30%": { transform: "rotate(1deg) scale(1.35)" },
-          "40%": { transform: "rotate(0deg) scale(1.35)" },
-          "100%": { transform: "rotate(0) scale(1.35)" },
+          "0%": { transform: "rotate(0.0deg) scale3d(0.75, 0.75, 1) translateZ(0)" },
+          "10%": { transform: "rotate(6deg) scale3d(1, 1, 1)" },
+          "20%": { transform: "rotate(0deg) scale3d(0.9, 0.9, 1)" },
+          "30%": { transform: "rotate(1deg) scale3d(0.9, 0.9, 1)" },
+          "40%": { transform: "rotate(0deg) scale3d(0.9, 0.9, 1)" },
+          "100%": { transform: "rotate(0) scale3d(0.9, 0.9, 1) translateZ(0)" },
         },
       },
       animation: {
