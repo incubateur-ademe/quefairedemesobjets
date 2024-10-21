@@ -148,8 +148,8 @@ Style the autocomplete container:
 
 .fr-icon-percent-line::before,
 .fr-icon-percent-line::after {
-  -webkit-mask-image: url("svg/bonus-reparation-fill.svg");
-  mask-image: url("svg/bonus-reparation-fill.svg");
+  -webkit-mask-image: url("svg/bonus-reparation.svg");
+  mask-image: url("svg/bonus-reparation.svg");
 }
 
 .fr-icon-tools-fill::before,

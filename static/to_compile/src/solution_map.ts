@@ -108,7 +108,7 @@ export class SolutionMap {
     ]
     if (cornerIcon) {
       htmlTree.push(
-        `<span class="qfdmo-absolute qfdmo-right-[-12] qfdmo-top-[-8] qfdmo-z-10">`,
+        `<span class="qfdmo-absolute qfdmo-right-[-16] qfdmo-top-[-6] qfdmo-z-10">`,
         cornerIcon,
         `</span>`,
       )
