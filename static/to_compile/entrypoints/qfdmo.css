@@ -1,7 +1,6 @@
 @import "npm:@gouvfr/dsfr/dist/dsfr.css";
 @import "npm:@gouvfr/dsfr/dist/utility/utility.css";
 @import "npm:leaflet/dist/leaflet.css";
-@import "npm:leaflet-extra-markers/dist/css/leaflet.extra-markers.min.css";
 
 @tailwind base;
 @tailwind components;
