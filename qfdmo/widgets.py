@@ -30,19 +30,6 @@ class AutoCompleteInput(forms.TextInput):
         return context
 
 
-class AutoCompleteAndSearchInput(AutoCompleteInput):
-    template_name = "forms/widgets/autocomplete_and_search.html"
-
-    def __init__(self, attrs=None, btn_attrs={}, **kwargs):
-        self.btn_attrs = btn_attrs
-        super().__init__(attrs=attrs, **kwargs)
-
-    def get_context(self, name, value, attrs):
-        context = super().get_context(name, value, attrs)
-        context["widget"]["btn_attrs"] = self.btn_attrs
-        return context
-
-
 class SegmentedControlSelect(forms.RadioSelect):
     template_name = "forms/widgets/segmented_control.html"
     option_template_name = "forms/widgets/segmented_control_option.html"

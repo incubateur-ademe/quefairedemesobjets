@@ -181,7 +181,13 @@ class LabelQualite(models.Model):
         return self.libelle
 
 
-class ActeurQuerySet(models.QuerySet):
+class DisplayedActeurQuerySet(models.QuerySet):
+    def with_reparer(self):
+        proposition_service_reparer = DisplayedPropositionService.objects.filter(
+            acteur=OuterRef("pk"), action__code="reparer"
+        )
+        return self.annotate(reparer=Exists(proposition_service_reparer))
+
     def with_bonus(self):
         bonus_label_qualite = LabelQualite.objects.filter(
             displayedacteur=OuterRef("pk"), bonus=True
@@ -204,14 +210,18 @@ class ActeurQuerySet(models.QuerySet):
             return self.physical()
 
         geometry = GEOSGeometry(geojson)
-        return self.physical().filter(location__within=geometry)
+        return self.physical().filter(location__within=geometry).order_by("?")
 
     def in_bbox(self, bbox):
         if not bbox:
             # TODO : test
             return self.physical()
 
-        return self.physical().filter(location__within=Polygon.from_bbox(bbox))
+        return (
+            self.physical()
+            .filter(location__within=Polygon.from_bbox(bbox))
+            .order_by("?")
+        )
 
     def from_center(self, longitude, latitude, distance=settings.DISTANCE_MAX):
         reference_point = Point(float(longitude), float(latitude), srid=4326)
@@ -230,13 +240,12 @@ class ActeurQuerySet(models.QuerySet):
         )
 
 
-class ActeurManager(NomAsNaturalKeyManager):
+class DisplayedActeurManager(NomAsNaturalKeyManager):
     def get_queryset(self):
-        return ActeurQuerySet(self.model, using=self._db)
+        return DisplayedActeurQuerySet(self.model, using=self._db)
 
 
 class BaseActeur(NomAsNaturalKeyModel):
-    objects = ActeurManager()
 
     class Meta:
         abstract = True
@@ -534,6 +543,8 @@ class RevisionActeur(BaseActeur):
 
 
 class DisplayedActeur(BaseActeur):
+    objects = DisplayedActeurManager()
+
     class Meta:
         verbose_name = "ACTEUR de l'EC - AFFICHÉ"
         verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ"
@@ -596,6 +607,7 @@ class DisplayedActeur(BaseActeur):
             "identifiant_unique": self.identifiant_unique,
             "location": orjson.loads(self.location.geojson),
             "bonus": getattr(self, "bonus", False),
+            "reparer": getattr(self, "reparer", False),
         }
 
         if main_action := actions[0] if actions else None:

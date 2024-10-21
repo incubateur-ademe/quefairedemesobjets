@@ -5,10 +5,11 @@ import MapController from "./map_controller"
 import { DisplayedActeur, Location } from "./types"
 import pinBackgroundSvg from "bundle-text:./svg/pin-background.svg"
 import pinBackgroundFillSvg from "bundle-text:./svg/pin-background-fill.svg"
-import bonusIconSvg from "bundle-text:./svg/bonus-icon.svg"
+import bonusIconSvg from "bundle-text:../entrypoints/svg/bonus-reparation-fill.svg"
 
 const DEFAULT_LOCATION: Array<Number> = [46.227638, 2.213749]
 const DEFAULT_ZOOM: Number = 5
+const ACTIVE_CLASSNAME = "active-pinpoint"
 const DEFAULT_MAX_ZOOM: Number = 19
 const COLOR_MAPPING: object = {
   "beige-gris-galet": "#AEA397",
@@ -108,20 +109,24 @@ export class SolutionMap {
 
   #generateMarkerHTMLStringFrom(actor: DisplayedActeur): string {
     const markerHtmlStyles = `color: ${get_color_code(actor.couleur)};`
-    const background = actor.bonus ? pinBackgroundFillSvg : pinBackgroundSvg
+    const background = actor.reparer ? pinBackgroundFillSvg : pinBackgroundSvg
     const cornerIcon = actor.bonus ? bonusIconSvg : ""
-    const markerIconClasses = `qfdmo-absolute qfdmo-top-[10] qfdmo-left-[10] qfdmo-right-[10] qfdmo-margin-auto
-      qfdmo-icon ${actor.icon} ${actor.bonus ? "qfdmo-text-white" : ""}
+    const markerIconClasses = `qfdmo-absolute qfdmo-top-[9] qfdmo-left-[10] qfdmo-margin-auto
+      ${actor.icon} ${actor.reparer ? "qfdmo-text-white" : ""}
       `
-    const htmlTree = [`<div style="${markerHtmlStyles}">`, background]
+    const htmlTree = [
+      `<div data-animated class="qfdmo-scale-75">`,
+      `<div class="qfdmo--translate-y-2/4" style="${markerHtmlStyles}">`,
+      background,
+    ]
     if (cornerIcon) {
       htmlTree.push(
-        `<span class="qfdmo-absolute qfdmo-right-[-5] qfdmo-top-[-5] qfdmo-z-10">`,
+        `<span class="qfdmo-absolute qfdmo-right-[-16] qfdmo-top-[-6] qfdmo-z-10">`,
         cornerIcon,
         `</span>`,
       )
     }
-    htmlTree.push(`<span class="${markerIconClasses}"></span>`, `</div>`)
+    htmlTree.push(`<span class="${markerIconClasses}"></span>`, `</div>`, `</div>`)
     return htmlTree.join("")
   }
 
@@ -137,7 +142,7 @@ export class SolutionMap {
             // Empty className ensures default leaflet classes are not added,
             // they add styles like a border and a background to the marker
             className: "",
-            iconSize: [45, 60],
+            iconSize: [34, 45],
             html: markerHtmlString,
           })
         }
@@ -186,6 +191,12 @@ export class SolutionMap {
   }
 
   #onClickMarker(event: L.LeafletEvent) {
+    console.log({ event })
+
+    document.querySelectorAll(`.${ACTIVE_CLASSNAME}`).forEach((element) => {
+      element.classList.remove(ACTIVE_CLASSNAME)
+    })
+    event.target._icon.classList.add(ACTIVE_CLASSNAME)
     this.#controller.displayActorDetail(event.target._identifiant_unique)
   }
 

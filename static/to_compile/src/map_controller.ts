@@ -9,13 +9,15 @@ export class Actor implements DisplayedActeur {
     icon: string
     couleur: string
     bonus: boolean
+    reparer: boolean
 
-    constructor(actor_fields: DisplayedActeur) {
-        this.identifiant_unique = actor_fields.identifiant_unique
-        this.location = actor_fields.location
-        this.icon = actor_fields.icon
-        this.couleur = actor_fields.couleur
-        this.bonus = actor_fields.bonus
+    constructor(actorFields: DisplayedActeur) {
+        this.identifiant_unique = actorFields.identifiant_unique
+        this.location = actorFields.location
+        this.icon = actorFields.icon
+        this.couleur = actorFields.couleur
+        this.bonus = actorFields.bonus
+        this.reparer = actorFields.reparer
     }
 }
 

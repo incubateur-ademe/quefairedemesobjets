@@ -17,7 +17,6 @@ from qfdmo.models.action import (
     get_ordered_directions,
 )
 from qfdmo.widgets import (
-    AutoCompleteAndSearchInput,
     AutoCompleteInput,
     DSFRCheckboxSelectMultiple,
     GenericAutoCompleteInput,
@@ -287,7 +286,7 @@ class CarteAddressesForm(AddressesForm):
         super().load_choices(request)
 
     adresse = forms.CharField(
-        widget=AutoCompleteAndSearchInput(
+        widget=AutoCompleteInput(
             attrs={
                 "class": "fr-input",
                 "placeholder": "Rechercher autour d'une adresse",
@@ -295,11 +294,6 @@ class CarteAddressesForm(AddressesForm):
                 "aria-label": "Saisir une adresse - obligatoire",
             },
             data_controller="address-autocomplete",
-            btn_attrs={
-                "data-action": "click -> search-solution-form#advancedSubmit",
-                "type": "button",
-                "data-without-zone": "true",
-            },
         ),
         label="",
         required=False,
@@ -382,7 +376,7 @@ class ConfiguratorForm(DsfrBaseForm):
         required=False,
         initial=GroupeAction.objects.exclude(code="trier"),
         label=mark_safe(
-            "<h3>Paramètres de la carte</h3>"
+            "<h3>Informations disponibles sur la carte</h3>"
             "Choisissez les actions disponibles pour vos usagers."
         ),
         help_text="Ce sont les actions que vos usagers pourront consulter "

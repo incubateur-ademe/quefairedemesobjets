@@ -13,6 +13,7 @@ export interface DisplayedActeur {
   couleur: string
   location: ActorLocation
   bonus: boolean
+  reparer: boolean
 }
 
 export class SSCatObject {

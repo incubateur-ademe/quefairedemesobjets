@@ -148,8 +148,8 @@ Style the autocomplete container:
 
 .fr-icon-percent-line::before,
 .fr-icon-percent-line::after {
-  -webkit-mask-image: url("svg/percent-line.svg");
-  mask-image: url("svg/percent-line.svg");
+  -webkit-mask-image: url("svg/bonus-reparation.svg");
+  mask-image: url("svg/bonus-reparation.svg");
 }
 
 .fr-icon-tools-fill::before,
@@ -234,4 +234,8 @@ Style the autocomplete container:
 
 .fr-input[type=range] {
     box-shadow: none;
+}
+
+.active-pinpoint [data-animated] {
+    @apply qfdmo-animate-wave qfdmo-fill-mode-forwards;
 }

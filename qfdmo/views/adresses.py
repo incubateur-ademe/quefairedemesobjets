@@ -268,7 +268,7 @@ class AddressesView(FormView):
         """
         Limit to actions of the direction only in Carte mode
         """
-        if direction := self.get_data_from_request_or_bounded_form("direction"):
+        if direction := self.request.GET.get("direction"):
             if self.is_carte:
                 cached_action_instances = [
                     action
@@ -325,7 +325,9 @@ class AddressesView(FormView):
         # Selection is not set in interface, defeult checked action list is not set
         # get all available from action_displayed
         if self.get_data_from_request_or_bounded_form("action_displayed"):
-            return self.request.GET.get("action_displayed", "").split("|")
+            return self.get_data_from_request_or_bounded_form(
+                "action_displayed", ""
+            ).split("|")
         # return empty array, will search in all actions
         return []
 
@@ -348,7 +350,6 @@ class AddressesView(FormView):
                 for new_groupe_action in self.request.GET.getlist("grouped_action")
                 for code in new_groupe_action.split("|")
             ]
-
         # Selection is not set in interface, get all available from
         # (checked_)action_list
         elif action_list := self.cleaned_data.get("action_list"):
@@ -371,7 +372,7 @@ class AddressesView(FormView):
             if codes
             else cached_action_instances
         )
-        if direction := self.get_data_from_request_or_bounded_form("direction"):
+        if direction := self.request.GET.get("direction"):
             actions = [
                 a for a in actions if direction in [d.code for d in a.directions.all()]
             ]
