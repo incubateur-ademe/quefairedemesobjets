@@ -210,14 +210,18 @@ class DisplayedActeurQuerySet(models.QuerySet):
             return self.physical()
 
         geometry = GEOSGeometry(geojson)
-        return self.physical().filter(location__within=geometry)
+        return self.physical().filter(location__within=geometry).order_by("?")
 
     def in_bbox(self, bbox):
         if not bbox:
             # TODO : test
             return self.physical()
 
-        return self.physical().filter(location__within=Polygon.from_bbox(bbox))
+        return (
+            self.physical()
+            .filter(location__within=Polygon.from_bbox(bbox))
+            .order_by("?")
+        )
 
     def from_center(self, longitude, latitude, distance=settings.DISTANCE_MAX):
         reference_point = Point(float(longitude), float(latitude), srid=4326)

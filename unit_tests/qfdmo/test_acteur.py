@@ -11,7 +11,7 @@ from qfdmo.models import (
     RevisionActeur,
     RevisionPropositionService,
 )
-from qfdmo.models.acteur import ActeurType, LabelQualite
+from qfdmo.models.acteur import ActeurType, DisplayedActeur, LabelQualite
 from unit_tests.qfdmo.acteur_factory import (
     ActeurFactory,
     ActeurServiceFactory,
@@ -652,3 +652,57 @@ class TestDisplayedActeurDisplayPostalAddress:
         displayed_acteur = DisplayedActeurFactory.build(**fields)
 
         assert displayed_acteur.display_postal_address() is True
+
+
+@pytest.mark.django_db
+class TestActeurOrdering:
+    def test_in_bbox_ordering_is_random(self):
+        DisplayedActeurFactory.create_batch(20)
+        bbox_whole_planet = [-180, -90, 180, 90]
+        # in_bbox is explicitely called each time so that
+        # the ordering of the queryset is re-computed.
+        # We expect it to change at least once
+        assert DisplayedActeur.objects.all().in_bbox(bbox_whole_planet).count() > 0
+        first_acteur = DisplayedActeur.objects.all().in_bbox(bbox_whole_planet).first()
+        while (
+            first_acteur
+            == DisplayedActeur.objects.all().in_bbox(bbox_whole_planet).first()
+        ):
+            first_acteur = (
+                DisplayedActeur.objects.all().in_bbox(bbox_whole_planet).first()
+            )
+
+    def test_in_geojson_ordering_is_random(self):
+        DisplayedActeurFactory.create_batch(20)
+        geojson_whole_planet = json.dumps(
+            {
+                "type": "MultiPolygon",
+                "coordinates": [
+                    [
+                        [
+                            [-180, 90],
+                            [180, 90],
+                            [180, -90],
+                            [-180, -90],
+                            [-180, 90],
+                        ]
+                    ]
+                ],
+            }
+        )
+        # in_geojson is explicitely called each time so that
+        # the ordering of the queryset is re-computed.
+        # We expect it to change at least once
+        assert (
+            DisplayedActeur.objects.all().in_geojson(geojson_whole_planet).count() > 0
+        )
+        first_acteur = (
+            DisplayedActeur.objects.all().in_geojson(geojson_whole_planet).first()
+        )
+        while (
+            first_acteur
+            == DisplayedActeur.objects.all().in_geojson(geojson_whole_planet).first()
+        ):
+            first_acteur = (
+                DisplayedActeur.objects.all().in_geojson(geojson_whole_planet).first()
+            )
