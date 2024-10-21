@@ -1,0 +1,42 @@
+{% extends base_template %}
+
+{% block content %}
+    <turbo-frame id="turboForm">
+        {# Controleur général de gestion de la navigation et du formulaire #}
+
+        <form
+            data-controller="search-solution-form" id='search_form'
+            data-search-solution-form-target="searchForm"
+            data-search-solution-form-is-iframe-value="{{ is_embedded(request) }}"
+            data-turbo-frame="addressesPanel"
+            class="
+                    qfdmo-max-h-[800px]{%if is_embedded(request) %} qfdmo-h-screen{% else %} qfdmo-h-svh{% endif %}
+                    qfdmo-flex qfdmo-flex-col qfdmo-flex-auto
+                    qfdmo-relative qfdmo-overflow-hidden"
+            data-action="
+                        map:displayDetails->search-solution-form#displayDetails
+                        map:updateBbox->search-solution-form#updateBboxInput
+                        map:setSrcDetailsAddress->search-solution-form#setSrcDetailsAddress
+                        ss-cat-object-autocomplete:optionSelected->search-solution-form#checkSsCatObjetErrorForm
+                        address-autocomplete:optionSelected->search-solution-form#advancedSubmit
+                        address-autocomplete:formSubmit->search-solution-form#advancedSubmit
+                        ss-cat-object-autocomplete:formSubmit->search-solution-form#advancedSubmit
+                        "
+        >
+            {% include "qfdmo/partials/featureflip_inputs.html" %}
+            {# Panel Header #}
+            {% include 'qfdmo/_addresses_partials/carte_header.html' %}
+            {# Panel Result #}
+            {% include 'qfdmo/_addresses_partials/carte_result.html' %}
+            {# Panel «Filtres» #}
+            {% include 'qfdmo/_addresses_partials/filters/carte_filters.html' %}
+            {# Panel «Legend» #}
+            {% include 'qfdmo/_addresses_partials/filters/carte_legend.html' %}
+            {# Panel À propos #}
+            {% include 'qfdmo/_addresses_partials/filters/carte_apropos.html' %}
+            {{ form.epci_codes }}
+        </form>
+    </turbo-frame>
+
+    {% include 'qfdmo/reparacteur_modale.html' %}
+{% endblock %}
