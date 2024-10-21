@@ -235,3 +235,7 @@ Style the autocomplete container:
 .fr-input[type=range] {
     box-shadow: none;
 }
+
+.active-pinpoint [data-animated] {
+    @apply qfdmo-animate-wave qfdmo-fill-mode-forwards;
+}

@@ -9,6 +9,7 @@ import bonusIconSvg from "bundle-text:./svg/bonus-icon.svg"
 
 const DEFAULT_LOCATION: Array<Number> = [46.227638, 2.213749]
 const DEFAULT_ZOOM: Number = 5
+const ACTIVE_CLASSNAME = "active-pinpoint"
 const DEFAULT_MAX_ZOOM: Number = 19
 const COLOR_MAPPING: object = {
   "beige-gris-galet": "#AEA397",
@@ -100,7 +101,11 @@ export class SolutionMap {
     const markerIconClasses = `qfdmo-absolute qfdmo-top-[5] qfdmo-left-[5.5] qfdmo-margin-auto
       qfdmo-scale-75 ${actor.icon} ${actor.reparer ? "qfdmo-text-white" : ""}
       `
-    const htmlTree = [`<div class="qfdmo--translate-y-2/4" style="${markerHtmlStyles}">`, background]
+    const htmlTree = [
+      `<div data-animated>`,
+      `<div class="qfdmo--translate-y-2/4" style="${markerHtmlStyles}">`,
+      background,
+    ]
     if (cornerIcon) {
       htmlTree.push(
         `<span class="qfdmo-absolute qfdmo-right-[-5] qfdmo-top-[-5] qfdmo-z-10">`,
@@ -108,7 +113,7 @@ export class SolutionMap {
         `</span>`,
       )
     }
-    htmlTree.push(`<span class="${markerIconClasses}"></span>`, `</div>`)
+    htmlTree.push(`<span class="${markerIconClasses}"></span>`, `</div>`, `</div>`)
     return htmlTree.join("")
   }
 
@@ -173,6 +178,12 @@ export class SolutionMap {
   }
 
   #onClickMarker(event: L.LeafletEvent) {
+    console.log({ event })
+
+    document.querySelectorAll(`.${ACTIVE_CLASSNAME}`).forEach((element) => {
+      element.classList.remove(ACTIVE_CLASSNAME)
+    })
+    event.target._icon.classList.add(ACTIVE_CLASSNAME)
     this.#controller.displayActorDetail(event.target._identifiant_unique)
   }
 
