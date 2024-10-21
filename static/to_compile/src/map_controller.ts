@@ -23,7 +23,7 @@ export class Actor implements DisplayedActeur {
 
 
 export default class extends Controller<HTMLElement> {
-    static targets = ["acteur", "searchInZoneButton", "bbox"]
+        static targets = ["acteur", "searchInZoneButton", "bbox"]
     static values = {
         location: { type: Object, default: {} },
     }

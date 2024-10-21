@@ -1,5 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
-import { SolutionMap } from "./solution_map"
+import { clearActivePinpoints } from "./map_helpers"
 
 export default class extends Controller<HTMLElement> {
     #selectedOption: string = ""
@@ -237,7 +237,7 @@ export default class extends Controller<HTMLElement> {
         this.detailsAddressPanelTarget.classList.add("sm:qfdmo-w-0")
         this.detailsAddressPanelTarget.classList.remove("sm:qfdmo-w-full")
         this.detailsAddressPanelTarget.classList.remove("sm:qfdmo-w-[480]")
-        SolutionMap.clearActivePinpoints()
+        clearActivePinpoints()
     }
 
     displayFullDetails() {

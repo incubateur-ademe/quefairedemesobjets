@@ -1,16 +1,15 @@
-import L from "leaflet"
-import "leaflet-extra-markers/dist/js/leaflet.extra-markers.min.js"
-import { defaultMarker } from "./icon_marker"
+import * as L from "leaflet"
 import MapController from "./map_controller"
-import { DisplayedActeur, Location } from "./types"
+import { DisplayedActeur, Location, LVAOMarker } from "./types"
 import pinBackgroundSvg from "bundle-text:./svg/pin-background.svg"
 import pinBackgroundFillSvg from "bundle-text:./svg/pin-background-fill.svg"
 import bonusIconSvg from "bundle-text:../entrypoints/svg/bonus-reparation-fill.svg"
+import { ACTIVE_PINPOINT_CLASSNAME, clearActivePinpoints } from "./map_helpers"
 
-const DEFAULT_LOCATION: Array<Number> = [46.227638, 2.213749]
-const DEFAULT_ZOOM: Number = 5
-const ACTIVE_CLASSNAME = "active-pinpoint"
-const DEFAULT_MAX_ZOOM: Number = 19
+
+const DEFAULT_LOCATION: L.LatLngTuple = [46.227638, 2.213749]
+const DEFAULT_ZOOM: number = 5
+const DEFAULT_MAX_ZOOM: number = 19
 const COLOR_MAPPING: object = {
   "beige-gris-galet": "#AEA397",
   "blue-cumulus-sun-368": "#3558A2",
@@ -107,13 +106,14 @@ export class SolutionMap {
     `
   }
 
-  #generateMarkerHTMLStringFrom(actor: DisplayedActeur): string {
-    const markerHtmlStyles = `color: ${get_color_code(actor.couleur)};`
-    const background = actor.reparer ? pinBackgroundFillSvg : pinBackgroundSvg
-    const cornerIcon = actor.bonus ? bonusIconSvg : ""
-    const markerIconClasses = `qfdmo-absolute qfdmo-top-[9] qfdmo-left-[10] qfdmo-margin-auto
-      ${actor.icon} ${actor.reparer ? "qfdmo-text-white" : ""}
-      `
+  #generateMarkerHTMLStringFrom(actor?: DisplayedActeur): string {
+    const markerHtmlStyles = `color: ${get_color_code(actor?.couleur || "")};`
+    const background = actor?.reparer ? pinBackgroundFillSvg : pinBackgroundSvg
+    const cornerIcon = actor?.bonus ? bonusIconSvg : ""
+    const icon = actor?.icon || "fr-icon-checkbox-circle-line"
+    const markerIconClasses = `qfdmo-absolute qfdmo-top-[10] qfdmo-left-[10.5] qfdmo-margin-auto
+      ${icon} ${actor?.reparer ? "qfdmo-text-white" : ""}
+    `
     const htmlTree = [
       `<div data-animated class="qfdmo-scale-75">`,
       `<div class="qfdmo--translate-y-2/4" style="${markerHtmlStyles}">`,
@@ -134,23 +134,19 @@ export class SolutionMap {
     let points: Array<Array<Number>> = []
     actors.forEach(function (actor: DisplayedActeur) {
       if (actor.location) {
-        let customMarker = defaultMarker
         const markerHtmlString = this.#generateMarkerHTMLStringFrom(actor)
-
-        if (actor.icon) {
-          customMarker = L.divIcon({
+        const actorMarker = L.divIcon({
             // Empty className ensures default leaflet classes are not added,
             // they add styles like a border and a background to the marker
             className: "",
             iconSize: [34, 45],
             html: markerHtmlString,
           })
-        }
 
-        const marker = L.marker(
+        const marker: LVAOMarker = L.marker(
           [actor.location.coordinates[1], actor.location.coordinates[0]],
           {
-            icon: customMarker,
+            icon: actorMarker,
             riseOnHover: true,
           },
         )
@@ -190,14 +186,9 @@ export class SolutionMap {
     }
   }
 
-  static clearActivePinpoints() {
-    document.querySelectorAll(`.${ACTIVE_CLASSNAME}`).forEach((element) => {
-      element.classList.remove(ACTIVE_CLASSNAME)
-    })
-  }
   #onClickMarker(event: L.LeafletEvent) {
-    SolutionMap.clearActivePinpoints()
-    event.target._icon.classList.add(ACTIVE_CLASSNAME)
+    clearActivePinpoints()
+    event.target._icon.classList.add(ACTIVE_PINPOINT_CLASSNAME)
     this.#controller.displayActorDetail(event.target._identifiant_unique)
   }
 

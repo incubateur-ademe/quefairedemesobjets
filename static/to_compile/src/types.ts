@@ -1,3 +1,5 @@
+import type { Marker } from "leaflet"
+
 export interface Location {
     latitude?: number
     longitude?: number
@@ -24,3 +26,7 @@ export class SSCatObject {
 
 export type InteractionType = "map" | "solution_details"
 export type PosthogEventType = "ui_interaction"
+
+export type LVAOMarker = Marker & {
+  _identifiant_unique?: string
+}

@@ -85,7 +85,6 @@ export default class extends AutocompleteController {
 
   setActiveOptionFrom(event: MouseEvent): void {
     const id = event.target?.getAttribute("id")
-    console.log("id", {id, event })
     this.selectedIdValue = id
   }
 
