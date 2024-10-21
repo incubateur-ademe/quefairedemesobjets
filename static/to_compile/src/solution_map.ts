@@ -1,6 +1,6 @@
 import L from "leaflet"
 import "leaflet-extra-markers/dist/js/leaflet.extra-markers.min.js"
-import { defaultMarker, homeIconMarker } from "./icon_marker"
+import { defaultMarker } from "./icon_marker"
 import MapController from "./map_controller"
 import { DisplayedActeur, Location } from "./types"
 import pinBackgroundSvg from "bundle-text:./svg/pin-background.svg"
@@ -190,12 +190,13 @@ export class SolutionMap {
     }
   }
 
-  #onClickMarker(event: L.LeafletEvent) {
-    console.log({ event })
-
+  static clearActivePinpoints() {
     document.querySelectorAll(`.${ACTIVE_CLASSNAME}`).forEach((element) => {
       element.classList.remove(ACTIVE_CLASSNAME)
     })
+  }
+  #onClickMarker(event: L.LeafletEvent) {
+    SolutionMap.clearActivePinpoints()
     event.target._icon.classList.add(ACTIVE_CLASSNAME)
     this.#controller.displayActorDetail(event.target._identifiant_unique)
   }
