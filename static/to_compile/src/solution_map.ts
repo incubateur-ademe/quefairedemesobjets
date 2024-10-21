@@ -11,6 +11,7 @@ const DEFAULT_LOCATION: Array<Number> = [46.227638, 2.213749]
 const DEFAULT_ZOOM: Number = 5
 const ACTIVE_CLASSNAME = "active-pinpoint"
 const DEFAULT_MAX_ZOOM: Number = 19
+// TODO : handle directly from DSFR module
 const COLOR_MAPPING: object = {
   "beige-gris-galet": "#AEA397",
   "blue-cumulus-sun-368": "#3558A2",
@@ -41,6 +42,7 @@ const COLOR_MAPPING: object = {
   "yellow-moutarde-850": "#fcc63a",
   "yellow-moutarde": "#C3992A",
   "yellow-tournesol": "#e9c53b",
+  "brown-caramel-sun-425-hover": "#bb8568"
 }
 
 function get_color_code(colorName: string): string {
