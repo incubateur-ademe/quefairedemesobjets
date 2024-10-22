@@ -67,7 +67,20 @@
     "ordinateurs fixes, portables, tablettes, objets connectés": [
       "materiel informatique"
     ],
-    "téléphones, smartphones": ["smartphone", "tablette et console"],
+    "téléphones, smartphones": ["smartphone, tablette et console"],
     "vêtements, textiles": ["vetement", "linge de maison"]
-  }
-}
+  },
+  "sous_categories_qualirepar": {
+    "tv" : "ecran",
+    "ei & t (equipements informatiques et de télécommunications)" : ["smartphone, tablette et console", "materiel informatique"],
+    "appareil photo avec optique séparée (hors fixed-lens)" : "materiel photo et cinema",
+    "gem (gros electroménager) - appareils avec circuits de fluides frigorigènes" : ["gros electromenager (refrigerant)"],
+    "gem (gros electroménager) - hors appareils avec circuits de fluides frigorigènes" : ["gros electromenager (hors refrigerant)"],
+    "cycle" : ["velo"],
+    "jels (jouets, équipements de loisirs et de sport) - mobilité" : ["JELS_Mobilite_electrique"],
+    "pem (petit electroménager) - hors fluides frigorigènes" : ["petit electromenager"],
+    "gros outillage électrique" : ["ABJ_electrique"],
+    "petit outillage électrique" : ["ABJ_electrique"],
+    "tout egp (equipements grand public) - hors tv et optique non intégrée et jels" : ["gros electromenager (refrigerant)","gros electromenager (hors refrigerant)","petit electromenager","smartphone, tablette et console", "autre equipement electronique","luminaire","velo","materiel hifi et video"],
+    "tout egp (equipements grand public) - hors tv et optique non intégrée et jels (jouets, équipements de loisirs et de sport) - hors mobilité" : ["gros electromenager (refrigerant)","gros electromenager (hors refrigerant)","petit electromenager","smartphone, tablette et console","autre equipement electronique","luminaire","materiel hifi et video"]
+}}
