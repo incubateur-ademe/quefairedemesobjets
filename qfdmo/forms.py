@@ -369,6 +369,7 @@ class EPCIField(forms.ChoiceField):
 
 
 class ConfiguratorForm(DsfrBaseForm):
+    # TODO: rename this field in all codebase -> actions_displayed
     action_displayed = GroupeActionChoiceField(
         queryset=GroupeAction.objects.all(),
         to_field_name="code",
@@ -383,6 +384,14 @@ class ConfiguratorForm(DsfrBaseForm):
         "dans la carte que vous intègrerez. Par exemple, si vous ne voulez "
         "faire une carte que sur les points de collecte ou de réparation, il vous "
         "suffit de décocher toutes les autres actions possibles.",
+    )
+    # TODO: rename this field in all codebase to use checked_actions
+    action_list = forms.ModelMultipleChoiceField(
+        queryset=GroupeAction.objects.all(),
+        to_field_name="code",
+        widget=forms.MultipleHiddenInput,
+        required=False,
+        initial=GroupeAction.objects.exclude(code="trier"),
     )
     epci_codes = EPCIField(
         label=mark_safe(
