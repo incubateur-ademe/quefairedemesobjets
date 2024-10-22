@@ -232,7 +232,7 @@ class AddressesForm(forms.Form):
     )
 
 
-class IframeAddressesForm(AddressesForm):
+class FormulaireForm(AddressesForm):
     def load_choices(self, request: HttpRequest, **kwargs) -> None:
         # The kwargs in function signature prevents type error.
         # TODO : refacto forms : if AddressesForm and CarteAddressesForm
@@ -260,7 +260,7 @@ class IframeAddressesForm(AddressesForm):
     )
 
 
-class CarteAddressesForm(AddressesForm):
+class CarteForm(AddressesForm):
     def load_choices(
         self,
         request: HttpRequest,
