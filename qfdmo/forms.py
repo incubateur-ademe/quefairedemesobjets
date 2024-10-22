@@ -117,7 +117,7 @@ class AddressesForm(forms.Form):
         help_text=(
             "Les enseignes ne réparant que les produits de leur propre marque"
             " n'apparaîtront pas si cette case est cochée."
-            " (uniquement valable lorsque le geste « réparer » est sélectionné)"
+            " (uniquement valable lorsque l'action « réparer » est sélectionnée)"
         ),
         label_suffix="",
         required=False,
@@ -133,7 +133,7 @@ class AddressesForm(forms.Form):
         label="Label Répar’Acteurs",
         help_text=mark_safe(
             """Afficher uniquement les artisans labellisés
-            (uniquement valable lorsque le geste « réparer » est sélectionné).
+            (uniquement valable lorsque l'action « réparer » est sélectionnée).
             Les <span
                 class="qfdmo-underline qfdmo-cursor-pointer
                 qfdmo-underline-offset-[3px] hover:qfdmo-decoration-[1.5px]"
@@ -182,8 +182,8 @@ class AddressesForm(forms.Form):
             "&nbsp;Éligible au bonus réparation"
         ),
         help_text=mark_safe(
-            "Afficher uniquement les adresses éligibles (uniquement valable lorsque le"
-            " geste « réparer » est sélectionné). En savoir plus sur le site <a href="
+            "Afficher uniquement les adresses éligibles (uniquement valable lorsque l'"
+            "action « réparer » est sélectionnée). En savoir plus sur le site <a href="
             '"https://www.ecologie.gouv.fr/bonus-reparation" target="_blank"'
             ' rel="noreferrer" title="Bonus réparation - Nouvelle fenêtre">Bonus'
             " réparation</a>"
