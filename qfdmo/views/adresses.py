@@ -231,7 +231,16 @@ class CarteView(TurboFormView, FormView):
                 )
 
         kwargs.update(acteurs=acteurs)
-        return super().get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
+
+        # TODO : refacto forms, gérer ça autrement
+        try:
+            if bbox is None:
+                context["form"].initial["bounding_box"] = None
+        except NameError:
+            pass
+
+        return context
 
     def _bbox_and_acteurs_from_location_or_epci(self, acteurs):
         custom_bbox = cast(

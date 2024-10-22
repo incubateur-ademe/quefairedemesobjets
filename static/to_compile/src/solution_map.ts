@@ -133,7 +133,7 @@ export class SolutionMap {
   }
 
   displayActor(actors: Array<DisplayedActeur>, bboxValue?: Array<Number>): void {
-    let points: Array<Array<Number>> = []
+    const points: Array<Array<Number>> = []
     actors.forEach(function (actor: DisplayedActeur) {
       if (actor.location) {
         const markerHtmlString = this.#generateMarkerHTMLStringFrom(actor)
@@ -178,7 +178,7 @@ export class SolutionMap {
   fitBounds(points, bboxValue) {
     this.points = points
     this.bboxValue = bboxValue
-    if (bboxValue !== undefined) {
+    if (typeof bboxValue !== "undefined") {
       this.map.fitBounds([
         [bboxValue.southWest.lat, bboxValue.southWest.lng],
         [bboxValue.northEast.lat, bboxValue.northEast.lng],
