@@ -1,7 +1,7 @@
 import pytest
 from django.http import HttpRequest
 
-from qfdmo.views.adresses import AddressesView
+from qfdmo.views.adresses import CarteView
 
 
 class TestAdessesViewGetActionList:
@@ -54,7 +54,7 @@ class TestAdessesViewGetActionList:
     def test_get_action_list(self, params, action_list):
         request = HttpRequest()
         request.GET = params
-        adresses_view = AddressesView()
+        adresses_view = CarteView()
         adresses_view.setup(request)
 
         assert [

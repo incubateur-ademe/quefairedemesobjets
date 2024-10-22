@@ -19,7 +19,7 @@ from django.views.decorators.http import require_GET
 from django.views.generic.edit import FormView
 
 from core.utils import get_direction
-from qfdmo.forms import CarteAddressesForm, IframeAddressesForm
+from qfdmo.forms import CarteForm, FormulaireForm
 from qfdmo.geo_api import bbox_from_list_of_geojson, retrieve_epci_geojson
 from qfdmo.leaflet import (
     center_from_leaflet_bbox,
@@ -47,8 +47,24 @@ logger = logging.getLogger(__name__)
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
 
 
-class AddressesView(FormView):
-    template_name = "qfdmo/adresses.html"
+class TurboFormView(FormView):
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        self.turbo = request.headers.get("Turbo-Frame")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.turbo:
+            context.update(turbo=self.turbo)
+            context.update(base_template="layout/turbo.html")
+        else:
+            context.update(base_template="layout/base.html")
+
+        return context
+
+
+class CarteView(TurboFormView, FormView):
+    template_name = "qfdmo/carte/base.html"
 
     def get_initial(self):
         initial = super().get_initial()
@@ -104,11 +120,11 @@ class AddressesView(FormView):
         super().setup(request, *args, **kwargs)
 
         self.is_carte = request.GET.get("carte") is not None
-
         if self.is_carte:
-            self.form_class = CarteAddressesForm
+            self.form_class = CarteForm
         else:
-            self.form_class = IframeAddressesForm
+            self.form_class = FormulaireForm
+            self.template_name = "qfdmo/formulaire.html"
 
     def get_form(self, form_class=None):
         if self.request.GET & self.get_form_class().base_fields.keys():
