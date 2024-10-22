@@ -24,16 +24,25 @@
                         "
         >
             {% include "qfdmo/partials/featureflip_inputs.html" %}
+
             {# Panel Header #}
+            {# TODO: refacto turbo, should be moved outside of form #}
             {% include 'qfdmo/_addresses_partials/carte_header.html' %}
+
             {# Panel Result #}
             {% include 'qfdmo/_addresses_partials/carte_result.html' %}
+
             {# Panel «Filtres» #}
             {% include 'qfdmo/_addresses_partials/filters/carte_filters.html' %}
+
             {# Panel «Legend» #}
+            {# TODO: refacto turbo, should be moved outside of form #}
             {% include 'qfdmo/_addresses_partials/filters/carte_legend.html' %}
+
             {# Panel À propos #}
+            {# TODO: refacto turbo, should be moved outside of form #}
             {% include 'qfdmo/_addresses_partials/filters/carte_apropos.html' %}
+
             {{ form.epci_codes }}
         </form>
     </turbo-frame>
