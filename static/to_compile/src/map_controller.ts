@@ -48,9 +48,9 @@ export default class extends Controller<HTMLElement> {
       .filter((actor) => actor !== undefined)
     if (this.hasBboxTarget && this.bboxTarget.value !== "") {
       const bbox = JSON.parse(this.bboxTarget.value)
-      actorsMap.displayActor(actors, bbox)
+      actorsMap.addActorMarkersToMap(actors, bbox)
     } else {
-      actorsMap.displayActor(actors)
+      actorsMap.addActorMarkersToMap(actors)
     }
 
     actorsMap.initEventListener()
@@ -73,7 +73,8 @@ export default class extends Controller<HTMLElement> {
     this.searchInZoneButtonTarget.classList.add("qfdmo-hidden")
   }
 
-  displayActorDetail(identifiantUnique: string) {
+  #displayActeur(identifiantUnique: string) {
+    // TODO: react on hash change
     this.dispatch("displayDetails", { detail: {} })
     this.dispatch("setSrcDetailsAddress", {
       detail: { identifiantUnique: identifiantUnique },

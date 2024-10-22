@@ -132,7 +132,7 @@ export class SolutionMap {
     return htmlTree.join("")
   }
 
-  displayActor(actors: Array<DisplayedActeur>, bboxValue?: Array<Number>): void {
+  addActorMarkersToMap(actors: Array<DisplayedActeur>, bboxValue?: Array<Number>): void {
     let points: Array<Array<Number>> = []
     actors.forEach(function (actor: DisplayedActeur) {
       if (actor.location) {
@@ -191,7 +191,7 @@ export class SolutionMap {
   #onClickMarker(event: L.LeafletEvent) {
     clearActivePinpoints()
     event.target._icon.classList.add(ACTIVE_PINPOINT_CLASSNAME)
-    this.#controller.displayActorDetail(event.target._identifiant_unique)
+    window.location.hash = event.target._identifiant_unique
   }
 
   #manageZoomControl() {

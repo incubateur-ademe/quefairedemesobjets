@@ -249,7 +249,8 @@ export default class extends Controller<HTMLElement> {
     this.detailsAddressPanelTarget.classList.remove("sm:qfdmo-w-[480]")
   }
 
-  displayActeurDetails(event) {
+  displayDigitalActeur(event) {
+    // TODO: refactor
     const identifiantUnique = event.currentTarget.dataset.identifiantUnique
     document
       .querySelector("[aria-controls='detailsAddressPanel'][aria-expanded='true']")
@@ -260,6 +261,7 @@ export default class extends Controller<HTMLElement> {
     this.displayDetails()
   }
   setSrcDetailsAddress({ detail: { identifiantUnique } }) {
+    // TODO: refactor
     const latitude = this.latitudeInputTarget.value
     const longitude = this.longitudeInputTarget.value
 

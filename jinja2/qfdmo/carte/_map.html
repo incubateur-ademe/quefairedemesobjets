@@ -9,9 +9,9 @@
                     {# TODO: REFACTO OVERFLOW : supprimer les overflow auto et le padding left sur la liste qui empêche l'outline de déborder du conteneur #}
                     <div class="qfdmo-px-2w sm:qfdmo-px-1v qfdmo-absolute qfdmo-inset-0 qfdmo-overflow-y-auto qfdmo-pt-1v">
                         {% for adresse in acteurs.all() %}
-                            <div data-action="click->search-solution-form#displayActeurDetails
-                                              keydown.enter->search-solution-form#displayActeurDetails
-                                              keydown.space->search-solution-form#displayActeurDetails"
+                            <div data-action="click->search-solution-form#displayDigitalActeur
+                                              keydown.enter->search-solution-form#displayDigitalActeur
+                                              keydown.space->search-solution-form#displayDigitalActeur"
                                  data-identifiant-unique="{{ adresse.identifiant_unique }}"
                                  class="qfdmo-cursor-pointer qfdmo-rounded qfdmo-border-solid qfdmo-border qfdmo-border-light-gray qfdmo-content-start fr-p-1w fr-mb-1w
                                         {{ loop.cycle('qfdmo-bg-grey-975','qfdmo-bg-grey-950') }}
