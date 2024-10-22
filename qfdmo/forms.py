@@ -7,6 +7,7 @@ from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from dsfr.forms import DsfrBaseForm
 
+from qfdmo.fields import EPCIField, GroupeActionChoiceField
 from qfdmo.geo_api import all_epci_codes
 from qfdmo.models import DagRun, DagRunStatus, SousCategorieObjet
 from qfdmo.models.action import (
@@ -324,7 +325,7 @@ class CarteAddressesForm(AddressesForm):
     legend_grouped_action = forms.MultipleChoiceField(
         widget=DSFRCheckboxSelectMultiple(
             attrs={
-                "class": "fr-fieldset",
+                "class": "fr-fieldset qfdmo-mb-0",
                 "data-action": (
                     "click -> search-solution-form#applyLegendGroupedAction"
                 ),
@@ -347,25 +348,6 @@ class DagsForm(forms.Form):
         queryset=DagRun.objects.filter(status=DagRunStatus.TO_VALIDATE.value),
         required=True,
     )
-
-
-class GroupeActionChoiceField(forms.ModelMultipleChoiceField):
-    def label_from_instance(self, obj):
-        return mark_safe(
-            render_to_string(
-                "forms/widgets/groupe_action_label.html",
-                {"groupe_action": obj},
-            )
-        )
-
-
-class EPCIField(forms.ChoiceField):
-    def to_python(self, value):
-        # TODO : once multiple EPCI codes will be managed, this method will be useless
-        # and the frontend will be rewritten to support a more complex state with all
-        # values matching their labels.
-        value = super().to_python(value)
-        return value.split(" - ")[1]
 
 
 class ConfiguratorForm(DsfrBaseForm):

@@ -482,7 +482,7 @@ class AddressesView(FormView):
                 libelle = (
                     f'<span class="fr-px-1v qfdmo-text-white {groupe.icon}'
                     f' fr-icon--sm qfdmo-rounded-full qfdmo-bg-{groupe.couleur}"'
-                    ' aria-hidden="true"></span>&nbsp;'
+                    ' aria-hidden="true"></span>'
                 )
             libelles: List[str] = []
             for gda in groupe_displayed_actions:
