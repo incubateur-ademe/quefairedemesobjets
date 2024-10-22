@@ -11,9 +11,14 @@ class RangeInput(widgets.NumberInput):
 class GenericAutoCompleteInput(widgets.ChoiceWidget):
     template_name = "forms/widgets/generic_autocomplete.html"
 
+    def __init__(self, attrs=None, choices=(), additionnal_info=None):
+        super().__init__(attrs, choices)
+        self.additionnal_info = additionnal_info
+
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)
         context["widget"]["data_controller"] = "autocomplete"
+        context["widget"].update(additionnal_info=self.additionnal_info)
         return context
 
 
