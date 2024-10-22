@@ -3,6 +3,7 @@ from typing import List, cast
 from django import forms
 from django.core.cache import cache
 from django.http import HttpRequest
+from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from dsfr.forms import DsfrBaseForm
 
