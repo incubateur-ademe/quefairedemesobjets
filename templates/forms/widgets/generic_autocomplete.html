@@ -30,3 +30,11 @@ data-controller="autocomplete"
         {% endfor %}
     </div>
 {% endblock choices %}
+
+{% block additionnal_info %}
+{% if widget.additionnal_info %}
+<div class="qfdmo-mt-2w">
+    {{ widget.additionnal_info }}
+</div>
+{% endif %}
+{% endblock additionnal_info %}
