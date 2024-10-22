@@ -54,6 +54,8 @@ export default class extends Controller<HTMLElement> {
     }
 
     actorsMap.initEventListener()
+
+    window.addEventListener("hashchange", this.setActiveActor.bind(this))
   }
 
   initialize() {
@@ -73,7 +75,15 @@ export default class extends Controller<HTMLElement> {
     this.searchInZoneButtonTarget.classList.add("qfdmo-hidden")
   }
 
-  #displayActeur(identifiantUnique: string) {
+  setActiveActor(event?: HashChangeEvent) {
+    const identifiantUnique = event
+      ? new URL(event.newURL).hash.substring(1)
+      : window.location.hash.substring(1)
+
+    if (!identifiantUnique) {
+      // TODO: gérer le cas où on a plus de hash dans l'URL
+    }
+
     // TODO: react on hash change
     this.dispatch("displayDetails", { detail: {} })
     this.dispatch("setSrcDetailsAddress", {
