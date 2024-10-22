@@ -44,7 +44,7 @@
             {% else %}
                 {# Near by addresses#}
                 <div
-                    class="qfdmo-flex-grow qfdmo-relative qfdmo-shadow"
+                    class="qfdmo-flex-grow qfdmo-relative qfdmo-shadow qfdmo-overflow-hidden"
                     data-controller="map"
                     data-action="map:captureInteraction->analytics#captureInteractionWithMap"
                     data-map-location-value="{{ location }}"
@@ -78,7 +78,13 @@
                         Rechercher dans cette zone
                     </button>
                     {% if is_carte(request) %}
-                        <aside class="fr-px-2w qfdmo-hidden lg:qfdmo-block qfdmo-absolute qfdmo-bottom-0 qfdmo-left-0 qfdmo-bg-white qfdmo-z-[2000] qfdmo-max-w-[17rem]">
+                        <aside
+                            class="
+                            fr-px-2w qfdmo-max-w-[17rem]
+                            qfdmo-hidden lg:qfdmo-block
+                            qfdmo-absolute qfdmo-bottom-0 qfdmo-left-0 qfdmo-z-[2000]
+                            qfdmo-bg-white qfdmo-shadow-md"
+                        >
                             <h2 class="fr-h4 fr-mt-3w">
                                 Actions possibles
                             </h2>
