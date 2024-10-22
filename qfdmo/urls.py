@@ -5,7 +5,7 @@ from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 
 from qfdmo.views.adresses import (
-    AddressesView,
+    CarteView,
     adresse_detail,
     get_object_list,
     getorcreate_revisionacteur,
@@ -15,7 +15,7 @@ from qfdmo.views.configurator import AdvancedConfiguratorView, ConfiguratorView
 from qfdmo.views.dags import DagsValidation
 
 urlpatterns = [
-    path("", AddressesView.as_view(), name="reemploi_solution"),
+    path("", CarteView.as_view(), name="reemploi_solution"),
     path("connexion", LoginView.as_view(), name="login"),
     path(
         "donnez-votre-avis",

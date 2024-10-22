@@ -3,7 +3,7 @@ from django.contrib.gis.geos import Point
 from django.http import HttpRequest
 
 from qfdmo.models.acteur import ActeurStatus, DisplayedActeur
-from qfdmo.views.adresses import AddressesView
+from qfdmo.views.adresses import CarteView
 from unit_tests.core.test_utils import query_dict_from
 from unit_tests.qfdmo.acteur_factory import (
     DisplayedActeurFactory,
@@ -92,7 +92,7 @@ def displayed_acteur_reparacteur(displayed_acteur_reparer):
 
 @pytest.fixture
 def adresses_view():
-    adresses_view = AddressesView()
+    adresses_view = CarteView()
     return adresses_view
 
 
@@ -353,7 +353,7 @@ class TestFilters:
         displayed_acteur_donner_sscat_preter_sscat2,
     ):
         request = HttpRequest()
-        adresses_view = AddressesView()
+        adresses_view = CarteView()
         sous_categorie_id = sous_categorie.id
         request.GET = query_dict_from(
             {
@@ -376,7 +376,7 @@ class TestFilters:
         displayed_acteur_donner_sscat_preter_sscat2,
     ):
         request = HttpRequest()
-        adresses_view = AddressesView()
+        adresses_view = CarteView()
         sous_categorie_id = sous_categorie2.id
         request.GET = query_dict_from(
             {
