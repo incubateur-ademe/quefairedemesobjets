@@ -374,7 +374,7 @@ class ConfiguratorForm(DsfrBaseForm):
         to_field_name="code",
         widget=forms.CheckboxSelectMultiple,
         required=False,
-        initial=GroupeAction.objects.exclude(code="trier"),
+        initial=GroupeAction.objects.all,
         label=mark_safe(
             "<h3>Informations disponibles sur la carte</h3>"
             "Choisissez les actions disponibles pour vos usagers."
@@ -382,7 +382,7 @@ class ConfiguratorForm(DsfrBaseForm):
         help_text="Ce sont les actions que vos usagers pourront consulter "
         "dans la carte que vous intègrerez. Par exemple, si vous ne voulez "
         "faire une carte que sur les points de collecte ou de réparation, il vous "
-        "suffit de décocher toutes les autres actions possibles",
+        "suffit de décocher toutes les autres actions possibles.",
     )
     epci_codes = EPCIField(
         label=mark_safe(
@@ -396,6 +396,11 @@ class ConfiguratorForm(DsfrBaseForm):
         choices=all_epci_codes,
         initial="",
         widget=GenericAutoCompleteInput(
+            additionnal_info=mark_safe(
+                render_to_string(
+                    "forms/widgets/epci_codes_additionnal_info.html",
+                )
+            ),
             attrs={
                 "class": "fr-input",
                 "wrapper_classes": "qfdmo-max-w-[576]",
@@ -405,8 +410,8 @@ class ConfiguratorForm(DsfrBaseForm):
     )
 
     limit = forms.IntegerField(
-        widget=RangeInput(attrs={"max": 100, "min": 0}),
-        initial=20,
+        widget=RangeInput(attrs={"max": 100, "min": 20}),
+        initial=50,
         label="2. Nombre de résultats maximum à afficher sur la carte",
         help_text="Indiquez le nombre maximum de lieux qui pourront apparaître "
         "sur la carte suite à une recherche.",

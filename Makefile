@@ -62,6 +62,16 @@ run-django:
 migrate:
 	$(DJANGO_ADMIN) migrate
 
+.PHONY: makemigrations
+makemigrations:
+	$(DJANGO_ADMIN) makemigrations
+
+
+.PHONY: makemessages
+makemessages:
+	$(DJANGO_ADMIN) makemessages -a
+
+
 .PHONY: createcachetable
 createcachetable:
 	$(DJANGO_ADMIN) createcachetable

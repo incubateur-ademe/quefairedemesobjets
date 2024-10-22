@@ -131,6 +131,7 @@ module.exports = {
       "grey-925": "#e5e5e5",
       "grey-950": "#eeeeee",
       "grey-975": "#f6f6f6",
+      "info-425": "#0063CB",
       "light-gray": "#e5e5e5",
       "orange-terre-battue-main-645-active": "#f4bfb1",
       "orange-terre-battue-main-645-hover": "#f1a892",
