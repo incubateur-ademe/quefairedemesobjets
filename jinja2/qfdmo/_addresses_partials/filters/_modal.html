@@ -1,0 +1,24 @@
+<div class='fr-container
+            qfdmo-px-0
+            qfdmo-absolute qfdmo-z-[10010] qfdmo-top-auto qfdmo-hidden qfdmo-mt-auto qfdmo-h-[95%]
+            qfdmo-drop-shadow-[0_0_100px_rgba(0,0,0,0.5)]
+            qfdmo-inset-0 qfdmo-font-black qfdmo-bg-white
+            qfdmo-flex-col
+            qfdmo-fill-mode-forwards
+            data-[visible=true]:qfdmo-animate-in
+            data-[visible=true]:qfdmo-flex
+            data-[visible=true]:qfdmo-slide-in-from-bottom-9w
+            data-[visible=exit]:qfdmo-flex
+            data-[visible=exit]:qfdmo-animate-out
+            data-[visible=exit]:qfdmo-slide-out-to-bottom-9w
+            data-[visible=exit]:qfdmo-fade-out
+           '
+     data-visible="false"
+     {% block wrapper_attrs %}
+     {% endblock wrapper_attrs %}
+>
+    <div class="fr-container fr-container--fluid qfdmo-h-full">
+        {% block content %}
+        {% endblock content %}
+    </div>
+</div>
