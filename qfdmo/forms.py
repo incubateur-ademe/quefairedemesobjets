@@ -325,7 +325,7 @@ class CarteAddressesForm(AddressesForm):
     legend_grouped_action = forms.MultipleChoiceField(
         widget=DSFRCheckboxSelectMultiple(
             attrs={
-                "class": "fr-fieldset",
+                "class": "fr-fieldset qfdmo-mb-0",
                 "data-action": (
                     "click -> search-solution-form#applyLegendGroupedAction"
                 ),
