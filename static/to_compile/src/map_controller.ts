@@ -62,15 +62,6 @@ export default class extends Controller<HTMLElement> {
 
   mapChanged(event: CustomEvent) {
     this.dispatch("updateBbox", { detail: event.detail })
-    this.displaySearchInZoneButton()
-  }
-
-  displaySearchInZoneButton() {
-    this.searchInZoneButtonTarget.classList.remove("qfdmo-hidden")
-  }
-
-  hideSearchInZoneButton() {
-    this.searchInZoneButtonTarget.classList.add("qfdmo-hidden")
   }
 
   displayActorDetail(identifiantUnique: string) {
