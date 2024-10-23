@@ -7,6 +7,7 @@ from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from dsfr.forms import DsfrBaseForm
 
+from qfdmo.fields import EPCIField, GroupeActionChoiceField
 from qfdmo.geo_api import all_epci_codes
 from qfdmo.models import DagRun, DagRunStatus, SousCategorieObjet
 from qfdmo.models.action import (
@@ -116,7 +117,7 @@ class AddressesForm(forms.Form):
         help_text=(
             "Les enseignes ne réparant que les produits de leur propre marque"
             " n'apparaîtront pas si cette case est cochée."
-            " (uniquement valable lorsque le geste « réparer » est sélectionné)"
+            " (uniquement valable lorsque l'action « réparer » est sélectionnée)"
         ),
         label_suffix="",
         required=False,
@@ -132,7 +133,7 @@ class AddressesForm(forms.Form):
         label="Label Répar’Acteurs",
         help_text=mark_safe(
             """Afficher uniquement les artisans labellisés
-            (uniquement valable lorsque le geste « réparer » est sélectionné).
+            (uniquement valable lorsque l'action « réparer » est sélectionnée).
             Les <span
                 class="qfdmo-underline qfdmo-cursor-pointer
                 qfdmo-underline-offset-[3px] hover:qfdmo-decoration-[1.5px]"
@@ -181,8 +182,8 @@ class AddressesForm(forms.Form):
             "&nbsp;Éligible au bonus réparation"
         ),
         help_text=mark_safe(
-            "Afficher uniquement les adresses éligibles (uniquement valable lorsque le"
-            " geste « réparer » est sélectionné). En savoir plus sur le site <a href="
+            "Afficher uniquement les adresses éligibles (uniquement valable lorsque l'"
+            "action « réparer » est sélectionnée). En savoir plus sur le site <a href="
             '"https://www.ecologie.gouv.fr/bonus-reparation" target="_blank"'
             ' rel="noreferrer" title="Bonus réparation - Nouvelle fenêtre">Bonus'
             " réparation</a>"
@@ -231,7 +232,7 @@ class AddressesForm(forms.Form):
     )
 
 
-class IframeAddressesForm(AddressesForm):
+class FormulaireForm(AddressesForm):
     def load_choices(self, request: HttpRequest, **kwargs) -> None:
         # The kwargs in function signature prevents type error.
         # TODO : refacto forms : if AddressesForm and CarteAddressesForm
@@ -259,7 +260,7 @@ class IframeAddressesForm(AddressesForm):
     )
 
 
-class CarteAddressesForm(AddressesForm):
+class CarteForm(AddressesForm):
     def load_choices(
         self,
         request: HttpRequest,
@@ -324,7 +325,7 @@ class CarteAddressesForm(AddressesForm):
     legend_grouped_action = forms.MultipleChoiceField(
         widget=DSFRCheckboxSelectMultiple(
             attrs={
-                "class": "fr-fieldset",
+                "class": "fr-fieldset qfdmo-mb-0",
                 "data-action": (
                     "click -> search-solution-form#applyLegendGroupedAction"
                 ),
@@ -349,27 +350,9 @@ class DagsForm(forms.Form):
     )
 
 
-class GroupeActionChoiceField(forms.ModelMultipleChoiceField):
-    def label_from_instance(self, obj):
-        return mark_safe(
-            render_to_string(
-                "forms/widgets/groupe_action_label.html",
-                {"groupe_action": obj},
-            )
-        )
-
-
-class EPCIField(forms.ChoiceField):
-    def to_python(self, value):
-        # TODO : once multiple EPCI codes will be managed, this method will be useless
-        # and the frontend will be rewritten to support a more complex state with all
-        # values matching their labels.
-        value = super().to_python(value)
-        return value.split(" - ")[1]
-
-
 class ConfiguratorForm(DsfrBaseForm):
-    action_displayed = GroupeActionChoiceField(
+    # TODO: rename this field in all codebase -> actions_displayed
+    action_list = GroupeActionChoiceField(
         queryset=GroupeAction.objects.all(),
         to_field_name="code",
         widget=forms.CheckboxSelectMultiple,
@@ -382,7 +365,7 @@ class ConfiguratorForm(DsfrBaseForm):
         help_text="Ce sont les actions que vos usagers pourront consulter "
         "dans la carte que vous intègrerez. Par exemple, si vous ne voulez "
         "faire une carte que sur les points de collecte ou de réparation, il vous "
-        "suffit de décocher toutes les autres actions possibles",
+        "suffit de décocher toutes les autres actions possibles.",
     )
     epci_codes = EPCIField(
         label=mark_safe(
@@ -396,6 +379,11 @@ class ConfiguratorForm(DsfrBaseForm):
         choices=all_epci_codes,
         initial="",
         widget=GenericAutoCompleteInput(
+            additionnal_info=mark_safe(
+                render_to_string(
+                    "forms/widgets/epci_codes_additionnal_info.html",
+                )
+            ),
             attrs={
                 "class": "fr-input",
                 "wrapper_classes": "qfdmo-max-w-[576]",
@@ -405,8 +393,8 @@ class ConfiguratorForm(DsfrBaseForm):
     )
 
     limit = forms.IntegerField(
-        widget=RangeInput(attrs={"max": 100, "min": 0}),
-        initial=20,
+        widget=RangeInput(attrs={"max": 100, "min": 20}),
+        initial=50,
         label="2. Nombre de résultats maximum à afficher sur la carte",
         help_text="Indiquez le nombre maximum de lieux qui pourront apparaître "
         "sur la carte suite à une recherche.",

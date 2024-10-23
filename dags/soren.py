@@ -17,7 +17,6 @@ with DAG(
         "column_mapping": {
             "id_point_apport_ou_reparation": "identifiant_externe",
             "type_de_point_de_collecte": "acteur_type_id",
-            "filiere": "",
             "exclusivite_de_reprisereparation": "exclusivite_de_reprisereparation",
             "uniquement_sur_rdv": "uniquement_sur_rdv",
             "public_accueilli": "public_accueilli",

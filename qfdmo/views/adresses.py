@@ -19,7 +19,7 @@ from django.views.decorators.http import require_GET
 from django.views.generic.edit import FormView
 
 from core.utils import get_direction
-from qfdmo.forms import CarteAddressesForm, IframeAddressesForm
+from qfdmo.forms import CarteForm, FormulaireForm
 from qfdmo.geo_api import bbox_from_list_of_geojson, retrieve_epci_geojson
 from qfdmo.leaflet import (
     center_from_leaflet_bbox,
@@ -47,8 +47,24 @@ logger = logging.getLogger(__name__)
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
 
 
-class AddressesView(FormView):
-    template_name = "qfdmo/adresses.html"
+class TurboFormView(FormView):
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        self.turbo = request.headers.get("Turbo-Frame")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.turbo:
+            context.update(turbo=self.turbo)
+            context.update(base_template="layout/turbo.html")
+        else:
+            context.update(base_template="layout/base.html")
+
+        return context
+
+
+class CarteView(TurboFormView, FormView):
+    template_name = "qfdmo/carte/base.html"
 
     def get_initial(self):
         initial = super().get_initial()
@@ -104,11 +120,11 @@ class AddressesView(FormView):
         super().setup(request, *args, **kwargs)
 
         self.is_carte = request.GET.get("carte") is not None
-
         if self.is_carte:
-            self.form_class = CarteAddressesForm
+            self.form_class = CarteForm
         else:
-            self.form_class = IframeAddressesForm
+            self.form_class = FormulaireForm
+            self.template_name = "qfdmo/formulaire.html"
 
     def get_form(self, form_class=None):
         if self.request.GET & self.get_form_class().base_fields.keys():
@@ -173,9 +189,9 @@ class AddressesView(FormView):
             pass
 
         try:
-            return self.request.GET.getlist(key, default)
-        except AttributeError:
             return self.request.GET.get(key, default)
+        except AttributeError:
+            return self.request.GET.getlist(key, default)
 
     def get_context_data(self, **kwargs):
         form = self.get_form_class()(self.request.GET)
@@ -215,7 +231,16 @@ class AddressesView(FormView):
                 )
 
         kwargs.update(acteurs=acteurs)
-        return super().get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
+
+        # TODO : refacto forms, gérer ça autrement
+        try:
+            if bbox is None:
+                context["form"].initial["bounding_box"] = None
+        except NameError:
+            pass
+
+        return context
 
     def _bbox_and_acteurs_from_location_or_epci(self, acteurs):
         custom_bbox = cast(
@@ -391,8 +416,19 @@ class AddressesView(FormView):
     def _acteurs_from_sous_categorie_objet_and_actions(
         self,
     ) -> QuerySet[DisplayedActeur]:
-        filters, excludes = self._compile_acteurs_queryset()
+        selected_actions_ids = self._get_selected_action_ids()
+        reparer_action_id = cache.get_or_set("reparer_action_id", get_reparer_action_id)
+        reparer_is_checked = reparer_action_id in selected_actions_ids
+
+        filters, excludes = self._compile_acteurs_queryset(
+            reparer_is_checked, selected_actions_ids, reparer_action_id
+        )
+
         acteurs = DisplayedActeur.objects.filter(filters).exclude(excludes)
+
+        if reparer_is_checked:
+            acteurs = acteurs.with_reparer().with_bonus()
+
         acteurs = acteurs.prefetch_related(
             "proposition_services__sous_categories",
             "proposition_services__sous_categories__categorie",
@@ -402,13 +438,11 @@ class AddressesView(FormView):
 
         return acteurs
 
-    def _compile_acteurs_queryset(self):
+    def _compile_acteurs_queryset(
+        self, reparer_is_checked, selected_actions_ids, reparer_action_id
+    ):
         filters = Q(statut=ActeurStatus.ACTIF)
         excludes = Q()
-
-        selected_actions_ids = self._get_selected_action_ids()
-        reparer_action_id = cache.get_or_set("reparer_action_id", get_reparer_action_id)
-        reparer_is_checked = reparer_action_id in selected_actions_ids
 
         if (
             self.get_data_from_request_or_bounded_form("pas_exclusivite_reparation")
@@ -482,7 +516,7 @@ class AddressesView(FormView):
                 libelle = (
                     f'<span class="fr-px-1v qfdmo-text-white {groupe.icon}'
                     f' fr-icon--sm qfdmo-rounded-full qfdmo-bg-{groupe.couleur}"'
-                    ' aria-hidden="true"></span>&nbsp;'
+                    ' aria-hidden="true"></span>'
                 )
             libelles: List[str] = []
             for gda in groupe_displayed_actions:

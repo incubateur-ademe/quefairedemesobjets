@@ -7,5 +7,6 @@ pyproj
 python-decouple
 ratelimit
 shortuuid
+unidecode
 # Manage compatibility with Django part
 urllib3<2.1
