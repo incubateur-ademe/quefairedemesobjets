@@ -584,40 +584,36 @@ class DisplayedActeur(BaseActeur):
         if action_list:
             actions = [a for a in actions if a.code in action_list.split("|")]
 
-        # sort actions
-        def sort_key(a):
+        def sort_actions(a):
             if a == self.action_principale:
                 return -1
 
-            if carte:
-                return (a.order or 0) + (
-                    a.groupe_action.order
-                    if a.groupe_action and a.groupe_action.order
-                    else 0
-                ) * 100
+            base_order = a.order or 0
+            if carte and a.groupe_action:
+                base_order += (a.groupe_action.order or 0) * 100
+            return base_order
 
-            return a.order or 0
-
-        actions = sorted(actions, key=sort_key)
+        actions = sorted(actions, key=sort_actions)
 
         acteur_dict = {
             "identifiant_unique": self.identifiant_unique,
             "location": orjson.loads(self.location.geojson),
         }
 
-        displayed_action = actions[0] if actions else None
-        if displayed_action:
-            if carte and (groupe_action := displayed_action.groupe_action):
-                displayed_action = groupe_action
+        if not actions:
+            return orjson.dumps(acteur_dict).decode("utf-8")
 
-            if displayed_action.code == "reparer":
-                acteur_dict.update(
-                    bonus=getattr(self, "bonus", False),
-                    reparer=getattr(self, "reparer", False),
-                )
+        displayed_action = actions[0]
 
+        if carte and displayed_action.groupe_action:
+            displayed_action = displayed_action.groupe_action
+
+        acteur_dict.update(icon=displayed_action.icon, couleur=displayed_action.couleur)
+
+        if carte and displayed_action.code == "reparer":
             acteur_dict.update(
-                icon=displayed_action.icon, couleur=displayed_action.couleur
+                bonus=getattr(self, "bonus", False),
+                reparer=getattr(self, "reparer", False),
             )
 
         return orjson.dumps(acteur_dict).decode("utf-8")
