@@ -189,9 +189,9 @@ class CarteView(TurboFormView, FormView):
             pass
 
         try:
-            return self.request.GET.getlist(key, default)
-        except AttributeError:
             return self.request.GET.get(key, default)
+        except AttributeError:
+            return self.request.GET.getlist(key, default)
 
     def get_context_data(self, **kwargs):
         form = self.get_form_class()(self.request.GET)

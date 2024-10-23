@@ -223,9 +223,9 @@ class DisplayedActeurQuerySet(models.QuerySet):
             .order_by("?")
         )
 
-    def from_center(self, longitude, latitude, distance=settings.DISTANCE_MAX):
+    def from_center(self, longitude, latitude):
         reference_point = Point(float(longitude), float(latitude), srid=4326)
-        distance_in_degrees = distance / 111320
+        distance_in_degrees = settings.DISTANCE_MAX / 111320
 
         return (
             self.physical()
