@@ -588,6 +588,7 @@ class DisplayedActeur(BaseActeur):
         def sort_key(a):
             if a == self.action_principale:
                 return -1
+
             if carte:
                 return (a.order or 0) + (
                     a.groupe_action.order
@@ -598,11 +599,10 @@ class DisplayedActeur(BaseActeur):
             return a.order or 0
 
         actions = sorted(actions, key=sort_key)
+
         acteur_dict = {
             "identifiant_unique": self.identifiant_unique,
             "location": orjson.loads(self.location.geojson),
-            "bonus": getattr(self, "bonus", False),
-            "reparer": getattr(self, "reparer", False),
         }
 
         displayed_action = actions[0] if actions else None
