@@ -1,0 +1,50 @@
+{# Détail de l'adresse #}
+<div
+    id="detailsAddressPanel"
+    data-search-solution-form-target="detailsAddressPanel"
+    class="qfdmo-overflow-hidden qfdmo-duration-300 qfdmo-bg-white qfdmo-z-[3000]
+           qfdmo-w-full {% if request.GET.get('detail') %} qfdmo-h-1/2 {% else %} qfdmo-h-0 qfdmo-invisible {% endif %}
+           sm:qfdmo-h-full {% if request.GET.get('detail') %} sm:qfdmo-w-[480] {% else %} sm:qfdmo-w-0 {% endif %}"
+    tabindex="0"
+>
+    <div class="qfdmo-border-solid qfdmo-border-t sm:qfdmo-border-t-0 qfdmo-border-0 qfdmo-border-light-gray
+                qfdmo-py-1w qfdmo-px-2w sm:qfdmo-px-3w qfdmo-h-full qfdmo-flex qfdmo-flex-col">
+        <div class="qfdmo-flex qfdmo-flex-row-reverse qfdmo-justify-between">
+            <button class="fr-btn fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-close-line"
+                    type='button'
+                    data-action="click -> search-solution-form#hideDetails"
+            >
+                Fermer
+            </button>
+            <button class="fr-btn fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-arrow-up-s-line sm:qfdmo-hidden"
+                    type='button'
+                    data-action="click -> search-solution-form#displayFullDetails
+                                 click -> analytics#captureInteractionWithSolutionDetails"
+                    data-search-solution-form-target="expandDetailsButton"
+            >
+                Ouvrir
+            </button>
+            <button class="fr-btn fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-arrow-down-s-line sm:qfdmo-hidden qfdmo-hidden"
+                    type='button'
+                    data-action="click -> search-solution-form#displayDetails"
+                    data-search-solution-form-target="collapseDetailsButton"
+            >
+                Réduire
+            </button>
+        </div>
+        {# passer la direction en paramètre  #}
+        <div class="qfdmo-flex-grow qfdmo-relative">
+            <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-overflow-y-scroll">
+                {% with direction=form.direction.value(), latitude=form.latitude.value(), longitude=form.longitude.value() %}
+                    <turbo-frame id="adr_detail"
+                                 data-search-solution-form-target="srcDetailsAddress"
+                                 {% if request.GET.get('detail') %}
+                                     src="{{ url('qfdmo:adresse_detail', args=[request.GET.get('detail')])}}?{% if is_carte(request) %}carte=1&{% endif %}{% if direction %}direction={{ direction }}&{% endif %}latitude={{ latitude }}&longitude={{ longitude }}"
+                                 {% endif %}
+                    >
+                    </turbo-frame>
+                {% endwith %}
+            </div>
+        </div>
+    </div>
+</div>

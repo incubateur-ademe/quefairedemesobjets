@@ -14,7 +14,7 @@ BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
 
 class ConfiguratorView(FormView):
     form_class = ConfiguratorForm
-    template_name = "qfdmo/iframe_configurator/base.html"
+    template_name = "qfdmo/configurator/base.html"
 
     def form_valid(self, form) -> HttpResponse:
         return render(
@@ -51,7 +51,7 @@ class ConfiguratorView(FormView):
 
 class AdvancedConfiguratorView(LoginRequiredMixin, FormView):
     form_class = AdvancedConfiguratorForm
-    template_name = "qfdmo/iframe_configurator/advanced.html"
+    template_name = "qfdmo/configurator/advanced.html"
 
     def get_initial(self):
         initial = super().get_initial()
