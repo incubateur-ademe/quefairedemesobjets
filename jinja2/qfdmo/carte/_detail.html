@@ -36,11 +36,9 @@
         <div class="qfdmo-flex-grow qfdmo-relative">
             <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-overflow-y-scroll">
                 {% with direction=form.direction.value(), latitude=form.latitude.value(), longitude=form.longitude.value() %}
-                    <turbo-frame id="adr_detail"
-                                 data-search-solution-form-target="srcDetailsAddress"
-                                 {% if request.GET.get('detail') %}
-                                     src="{{ url('qfdmo:adresse_detail', args=[request.GET.get('detail')])}}?{% if is_carte(request) %}carte=1&{% endif %}{% if direction %}direction={{ direction }}&{% endif %}latitude={{ latitude }}&longitude={{ longitude }}"
-                                 {% endif %}
+                    <turbo-frame
+                        id="adr_detail"
+                        data-search-solution-form-target="srcDetailsAddress"
                     >
                     </turbo-frame>
                 {% endwith %}

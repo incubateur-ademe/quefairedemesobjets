@@ -315,7 +315,7 @@ class BaseActeur(NomAsNaturalKeyModel):
         protocol = "https" if request.is_secure() else "http"
         host = request.get_host()
         base_url = f"{protocol}://{host}"
-        base_url += reverse("qfdmo:adresse_detail", args=[self.identifiant_unique])
+        base_url += reverse("qfdmo:acteur-detail", args=[self.identifiant_unique])
 
         params = []
         if "carte" in request.GET:

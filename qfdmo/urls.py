@@ -62,8 +62,9 @@ urlpatterns = [
     ),
     path(
         "adresse/<str:identifiant_unique>",
+        # ActeurView.as_view(),
         adresse_detail,
-        name="adresse_detail",
+        name="acteur-detail",
     ),
     path(
         "solution_admin/<str:identifiant_unique>",

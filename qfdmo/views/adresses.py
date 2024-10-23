@@ -605,7 +605,7 @@ def adresse_detail(request, identifiant_unique):
 
     return render(
         request,
-        "qfdmo/adresse_detail.html",
+        "qfdmo/acteur.html",
         {
             "adresse": displayed_acteur,
             "latitude": latitude,
