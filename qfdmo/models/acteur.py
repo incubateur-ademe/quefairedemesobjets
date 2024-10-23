@@ -605,18 +605,20 @@ class DisplayedActeur(BaseActeur):
             "reparer": getattr(self, "reparer", False),
         }
 
-        if main_action := actions[0] if actions else None:
-            if action_list and "reparer" in action_list:
+        displayed_action = actions[0] if actions else None
+        if displayed_action:
+            if carte and (groupe_action := displayed_action.groupe_action):
+                displayed_action = groupe_action
+
+            if displayed_action.code == "reparer":
                 acteur_dict.update(
                     bonus=getattr(self, "bonus", False),
                     reparer=getattr(self, "reparer", False),
                 )
-            if carte and main_action.groupe_action:
-                acteur_dict["icon"] = main_action.groupe_action.icon
-                acteur_dict["couleur"] = main_action.groupe_action.couleur
-            else:
-                acteur_dict["icon"] = main_action.icon
-                acteur_dict["couleur"] = main_action.couleur
+
+            acteur_dict.update(
+                icon=displayed_action.icon, couleur=displayed_action.couleur
+            )
 
         return orjson.dumps(acteur_dict).decode("utf-8")
 
