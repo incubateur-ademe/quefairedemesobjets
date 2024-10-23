@@ -561,10 +561,16 @@ class DisplayedActeur(BaseActeur):
         related_name="displayed_acteurs",
     )
 
-    def acteur_actions(self, direction=None):
-        ps_action_ids = list(
-            {ps.action_id for ps in self.proposition_services.all()}  # type: ignore
-        )
+    def acteur_actions(self, direction=None, sous_categorie_id=None):
+        proposition_services = self.proposition_services.all()
+
+        if sous_categorie_id:
+            proposition_services = proposition_services.sous_categories(
+                [sous_categorie_id]
+            )
+
+        ps_action_ids = list({ps.action_id for ps in proposition_services})
+
         # Cast needed because of the cache
         cached_action_instances = cast(
             List[Action], cache.get_or_set("action_instances", get_action_instances)
@@ -581,10 +587,12 @@ class DisplayedActeur(BaseActeur):
         direction: str | None = None,
         action_list: str | None = None,
         carte: bool = False,
-        sous_categorie: str = "",
+        form_cleaned_data: str = "",
     ) -> str:
-        logger.info(sous_categorie)
-        actions = self.acteur_actions(direction=direction)
+        selected_sous_categorie_id = form_cleaned_data.get("sc_id")
+        actions = self.acteur_actions(
+            direction=direction, sous_categorie_id=selected_sous_categorie_id
+        )
 
         if action_list:
             actions = [a for a in actions if a.code in action_list.split("|")]
@@ -709,7 +717,19 @@ class DisplayedActeurTemp(BaseActeur):
         )
 
 
+class PropositionServiceQuerySet(models.QuerySet):
+    def sous_categories(self, sous_categorie_ids: List[int]):
+        return self.filter(sous_categories__id__in=sous_categorie_ids)
+
+
+class PropositionServiceManager(models.Manager):
+    def get_queryset(self):
+        return PropositionServiceQuerySet(self.model, using=self._db)
+
+
 class BasePropositionService(models.Model):
+    objects = PropositionServiceManager()
+
     class Meta:
         abstract = True
 
