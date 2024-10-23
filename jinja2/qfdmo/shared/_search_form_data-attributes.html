@@ -1,0 +1,10 @@
+data-controller="search-solution-form" id='search_form'
+data-search-solution-form-target="searchForm"
+data-search-solution-form-is-iframe-value="{{ is_embedded(request) }}"
+data-turbo-frame="addressesPanel"
+data-action="map:displayActeur->search-solution-form#displayActeur
+map:updateBbox->search-solution-form#updateBboxInput
+ss-cat-object-autocomplete:optionSelected->search-solution-form#checkSsCatObjetErrorForm
+address-autocomplete:optionSelected->search-solution-form#advancedSubmit
+address-autocomplete:formSubmit->search-solution-form#advancedSubmit
+ss-cat-object-autocomplete:formSubmit->search-solution-form#advancedSubmit"
