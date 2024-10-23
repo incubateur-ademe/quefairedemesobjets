@@ -223,9 +223,9 @@ class DisplayedActeurQuerySet(models.QuerySet):
             .order_by("?")
         )
 
-    def from_center(self, longitude, latitude, distance=settings.DISTANCE_MAX):
+    def from_center(self, longitude, latitude):
         reference_point = Point(float(longitude), float(latitude), srid=4326)
-        distance_in_degrees = distance / 111320
+        distance_in_degrees = settings.DISTANCE_MAX / 111320
 
         return (
             self.physical()
@@ -584,39 +584,37 @@ class DisplayedActeur(BaseActeur):
         if action_list:
             actions = [a for a in actions if a.code in action_list.split("|")]
 
-        # sort actions
-        if carte:
+        def sort_actions(a):
+            if a == self.action_principale:
+                return -1
 
-            def sort_key(a):
-                return (a.order or 0) + (
-                    a.groupe_action.order
-                    if a.groupe_action and a.groupe_action.order
-                    else 0
-                ) * 100
+            base_order = a.order or 0
+            if carte and a.groupe_action:
+                base_order += (a.groupe_action.order or 0) * 100
+            return base_order
 
-            actions = sorted(actions, key=sort_key)
-        else:
-            actions = sorted(actions, key=lambda a: a.order or 0)
-
-        # move action_principale as first of the list
-        if self.action_principale in actions:
-            actions.remove(self.action_principale)
-            actions.insert(0, self.action_principale)
+        actions = sorted(actions, key=sort_actions)
 
         acteur_dict = {
             "identifiant_unique": self.identifiant_unique,
             "location": orjson.loads(self.location.geojson),
-            "bonus": getattr(self, "bonus", False),
-            "reparer": getattr(self, "reparer", False),
         }
 
-        if main_action := actions[0] if actions else None:
-            if carte and main_action.groupe_action:
-                acteur_dict["icon"] = main_action.groupe_action.icon
-                acteur_dict["couleur"] = main_action.groupe_action.couleur
-            else:
-                acteur_dict["icon"] = main_action.icon
-                acteur_dict["couleur"] = main_action.couleur
+        if not actions:
+            return orjson.dumps(acteur_dict).decode("utf-8")
+
+        displayed_action = actions[0]
+
+        if carte and displayed_action.groupe_action:
+            displayed_action = displayed_action.groupe_action
+
+        acteur_dict.update(icon=displayed_action.icon, couleur=displayed_action.couleur)
+
+        if carte and displayed_action.code == "reparer":
+            acteur_dict.update(
+                bonus=getattr(self, "bonus", False),
+                reparer=getattr(self, "reparer", False),
+            )
 
         return orjson.dumps(acteur_dict).decode("utf-8")
 

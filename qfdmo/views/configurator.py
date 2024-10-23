@@ -1,18 +1,18 @@
 import json
 from html import escape
+from typing import Any
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.generic.edit import FormView
-from typing import Any
 
 from qfdmo.forms import AdvancedConfiguratorForm, ConfiguratorForm
 
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
 
 
-class ConfiguratorView(LoginRequiredMixin, FormView):
+class ConfiguratorView(FormView):
     form_class = ConfiguratorForm
     template_name = "qfdmo/iframe_configurator/base.html"
 

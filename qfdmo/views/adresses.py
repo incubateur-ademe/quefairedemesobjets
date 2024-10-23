@@ -189,9 +189,9 @@ class CarteView(TurboFormView, FormView):
             pass
 
         try:
-            return self.request.GET.getlist(key, default)
-        except AttributeError:
             return self.request.GET.get(key, default)
+        except AttributeError:
+            return self.request.GET.getlist(key, default)
 
     def get_context_data(self, **kwargs):
         form = self.get_form_class()(self.request.GET)
@@ -232,7 +232,16 @@ class CarteView(TurboFormView, FormView):
                 )
 
         kwargs.update(acteurs=acteurs)
-        return super().get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
+
+        # TODO : refacto forms, gérer ça autrement
+        try:
+            if bbox is None:
+                context["form"].initial["bounding_box"] = None
+        except NameError:
+            pass
+
+        return context
 
     def _bbox_and_acteurs_from_location_or_epci(self, acteurs):
         custom_bbox = cast(
@@ -408,8 +417,19 @@ class CarteView(TurboFormView, FormView):
     def _acteurs_from_sous_categorie_objet_and_actions(
         self,
     ) -> QuerySet[DisplayedActeur]:
-        filters, excludes = self._compile_acteurs_queryset()
+        selected_actions_ids = self._get_selected_action_ids()
+        reparer_action_id = cache.get_or_set("reparer_action_id", get_reparer_action_id)
+        reparer_is_checked = reparer_action_id in selected_actions_ids
+
+        filters, excludes = self._compile_acteurs_queryset(
+            reparer_is_checked, selected_actions_ids, reparer_action_id
+        )
+
         acteurs = DisplayedActeur.objects.filter(filters).exclude(excludes)
+
+        if reparer_is_checked:
+            acteurs = acteurs.with_reparer().with_bonus()
+
         acteurs = acteurs.prefetch_related(
             "proposition_services__sous_categories",
             "proposition_services__sous_categories__categorie",
@@ -419,13 +439,11 @@ class CarteView(TurboFormView, FormView):
 
         return acteurs
 
-    def _compile_acteurs_queryset(self):
+    def _compile_acteurs_queryset(
+        self, reparer_is_checked, selected_actions_ids, reparer_action_id
+    ):
         filters = Q(statut=ActeurStatus.ACTIF)
         excludes = Q()
-
-        selected_actions_ids = self._get_selected_action_ids()
-        reparer_action_id = cache.get_or_set("reparer_action_id", get_reparer_action_id)
-        reparer_is_checked = reparer_action_id in selected_actions_ids
 
         if (
             self.get_data_from_request_or_bounded_form("pas_exclusivite_reparation")

@@ -1,7 +1,9 @@
 import pytest
 from django.contrib.gis.geos import Point
 from django.http import HttpRequest
+from django.test import override_settings
 
+from qfdmo.leaflet import compile_leaflet_bbox
 from qfdmo.models.acteur import ActeurStatus, DisplayedActeur
 from qfdmo.views.adresses import CarteView
 from unit_tests.core.test_utils import query_dict_from
@@ -217,8 +219,47 @@ class TestReparacteur:
 
 
 @pytest.mark.django_db
+class TestReparerAlternateIcon:
+    def test_no_action_reparer_selected_does_not_add_reparer_attribute(
+        self, adresses_view, displayed_acteur_donner_reparer, action_donner
+    ):
+        request = HttpRequest()
+        request.GET = query_dict_from(
+            {
+                "action_list": [action_donner.code],
+                "latitude": [1],
+                "longitude": [1],
+            }
+        )
+        adresses_view.setup(request)
+        context = adresses_view.get_context_data()
+
+        with pytest.raises(AttributeError):
+            context["acteurs"].first().reparer
+
+    def test_action_reparer_selected_adds_reparer_attribute_on_actors_with_reparation(
+        self,
+        adresses_view,
+        displayed_acteur_donner_reparer,
+        action_donner,
+        action_reparer,
+    ):
+        request = HttpRequest()
+        request.GET = query_dict_from(
+            {
+                "action_list": [action_donner.code, action_reparer.code],
+                "latitude": [1],
+                "longitude": [1],
+            }
+        )
+        adresses_view.setup(request)
+        context = adresses_view.get_context_data()
+        assert context["acteurs"].first().reparer
+
+
+@pytest.mark.django_db
 class TestExclusiviteReparation:
-    def test_pas_action_reparer_exclut_acteurs_avec_exclusivite(
+    def test_no_action_reparer_excludes_acteurs_avec_exclusivite(
         self, adresses_view, displayed_acteur_reparer, action_preter
     ):
         request = HttpRequest()
@@ -235,7 +276,7 @@ class TestExclusiviteReparation:
 
         assert context["acteurs"].count() == 0
 
-    def test_action_reparer_exclut_par_defaut_acteurs_avec_exclusivite(
+    def test_action_reparer_excludes_acteurs_avec_exclusivite_by_default(
         self, adresses_view, displayed_acteur_reparer, action_reparer, action_preter
     ):
         request = HttpRequest()
@@ -252,7 +293,7 @@ class TestExclusiviteReparation:
 
         assert context["acteurs"].count() == 0
 
-    def test_action_reparer_et_exclusivite_inclut_acteurs_avec_exclusivite(
+    def test_action_reparer_and_exclusivite_includes_acteurs_with_exclusivite(
         self, adresses_view, displayed_acteur_reparer, action_reparer
     ):
         request = HttpRequest()
@@ -391,3 +432,57 @@ class TestFilters:
 
         assert DisplayedActeur.objects.count() > 1
         assert context["acteurs"].count() == 1
+
+
+@pytest.mark.django_db
+class TestBBOX:
+    def test_bbox_is_returned_if_no_acteurs(self):
+        request = HttpRequest()
+        adresses_view = CarteView()
+        leaflet_bbox = compile_leaflet_bbox([1, 1, 1, 1])
+        request.GET = query_dict_from({})
+        request.GET.update(bounding_box=leaflet_bbox)
+        adresses_view.setup(request)
+
+        acteurs = DisplayedActeur.objects.all()
+        assert acteurs.count() == 0
+        bbox, acteurs = adresses_view._bbox_and_acteurs_from_location_or_epci(acteurs)
+        assert bbox == leaflet_bbox
+
+    @override_settings(DISTANCE_MAX=100000000000)
+    def test_no_bbox_and_acteurs_from_center_if_no_acteurs_found_in_bbox(
+        self,
+    ):
+        request = HttpRequest()
+        adresses_view = CarteView()
+        bbox = [0, 0, 0, 0]
+        leaflet_bbox = compile_leaflet_bbox(bbox)
+        request.GET = query_dict_from({})
+        request.GET.update(bounding_box=leaflet_bbox, latitude="1", longitude="1")
+        adresses_view.setup(request)
+
+        DisplayedActeurFactory.create_batch(2)
+        acteurs = DisplayedActeur.objects.all()
+        assert acteurs.in_bbox(bbox).count() == 0
+        assert acteurs.from_center(1, 1).count() == 2
+
+        bbox, acteurs = adresses_view._bbox_and_acteurs_from_location_or_epci(acteurs)
+        assert bbox is None
+        assert acteurs.count() == 2
+
+    def test_bbox_and_acteurs_are_returned_if_contained_in_bbox(self):
+        request = HttpRequest()
+        adresses_view = CarteView()
+        bbox = [-2, -2, 4, 4]  # Acteurs in factory are created with a location of 3, 3
+        leaflet_bbox = compile_leaflet_bbox(bbox)
+        request.GET = query_dict_from({})
+        request.GET.update(bounding_box=leaflet_bbox, latitude="1", longitude="1")
+        adresses_view.setup(request)
+
+        DisplayedActeurFactory.create_batch(2)
+        acteurs = DisplayedActeur.objects.all()
+        assert acteurs.in_bbox(bbox).count() == 2
+
+        bbox, acteurs = adresses_view._bbox_and_acteurs_from_location_or_epci(acteurs)
+        assert bbox == bbox
+        assert acteurs.count() == 2
