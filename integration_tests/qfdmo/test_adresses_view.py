@@ -220,7 +220,7 @@ class TestReparacteur:
 
 @pytest.mark.django_db
 class TestReparerAlternateIcon:
-    def test_no_action_reparer_selected_do_not_add_reparer_attribute(
+    def test_no_action_reparer_selected_does_not_add_reparer_attribute(
         self, adresses_view, displayed_acteur_donner_reparer, action_donner
     ):
         request = HttpRequest()
@@ -259,7 +259,7 @@ class TestReparerAlternateIcon:
 
 @pytest.mark.django_db
 class TestExclusiviteReparation:
-    def test_pas_action_reparer_exclut_acteurs_avec_exclusivite(
+    def test_no_action_reparer_excludes_acteurs_avec_exclusivite(
         self, adresses_view, displayed_acteur_reparer, action_preter
     ):
         request = HttpRequest()
@@ -276,7 +276,7 @@ class TestExclusiviteReparation:
 
         assert context["acteurs"].count() == 0
 
-    def test_action_reparer_exclut_par_defaut_acteurs_avec_exclusivite(
+    def test_action_reparer_excludes_acteurs_avec_exclusivite_by_default(
         self, adresses_view, displayed_acteur_reparer, action_reparer, action_preter
     ):
         request = HttpRequest()
@@ -293,7 +293,7 @@ class TestExclusiviteReparation:
 
         assert context["acteurs"].count() == 0
 
-    def test_action_reparer_et_exclusivite_inclut_acteurs_avec_exclusivite(
+    def test_action_reparer_and_exclusivite_includes_acteurs_with_exclusivite(
         self, adresses_view, displayed_acteur_reparer, action_reparer
     ):
         request = HttpRequest()
@@ -450,7 +450,9 @@ class TestBBOX:
         assert bbox == leaflet_bbox
 
     @override_settings(DISTANCE_MAX=100000000000)
-    def test_no_bbox_is_returned_if_no_acteurs_found_in_bbox(self):
+    def test_no_bbox_and_acteurs_from_center_if_no_acteurs_found_in_bbox(
+        self,
+    ):
         request = HttpRequest()
         adresses_view = CarteView()
         bbox = [0, 0, 0, 0]
