@@ -1,3 +1,4 @@
+import logging
 import random
 import string
 import uuid
@@ -28,6 +29,8 @@ from qfdmo.models.utils import (
     NomAsNaturalKeyModel,
 )
 from qfdmo.validators import CodeValidator
+
+logger = logging.getLogger(__name__)
 
 
 class ActeurService(CodeAsNaturalKeyModel):
@@ -558,10 +561,16 @@ class DisplayedActeur(BaseActeur):
         related_name="displayed_acteurs",
     )
 
-    def acteur_actions(self, direction=None):
-        ps_action_ids = list(
-            {ps.action_id for ps in self.proposition_services.all()}  # type: ignore
-        )
+    def acteur_actions(self, direction=None, sous_categorie_id=None):
+        proposition_services = self.proposition_services.all()
+
+        if sous_categorie_id:
+            proposition_services = proposition_services.sous_categories(
+                [sous_categorie_id]
+            )
+
+        ps_action_ids = list({ps.action_id for ps in proposition_services})
+
         # Cast needed because of the cache
         cached_action_instances = cast(
             List[Action], cache.get_or_set("action_instances", get_action_instances)
@@ -578,8 +587,12 @@ class DisplayedActeur(BaseActeur):
         direction: str | None = None,
         action_list: str | None = None,
         carte: bool = False,
+        form_cleaned_data: str = "",
     ) -> str:
-        actions = self.acteur_actions(direction=direction)
+        selected_sous_categorie_id = form_cleaned_data.get("sc_id")
+        actions = self.acteur_actions(
+            direction=direction, sous_categorie_id=selected_sous_categorie_id
+        )
 
         if action_list:
             actions = [a for a in actions if a.code in action_list.split("|")]
@@ -606,17 +619,22 @@ class DisplayedActeur(BaseActeur):
         acteur_dict = {
             "identifiant_unique": self.identifiant_unique,
             "location": orjson.loads(self.location.geojson),
-            "bonus": getattr(self, "bonus", False),
-            "reparer": getattr(self, "reparer", False),
         }
+
+        if action_list and "reparer" in action_list:
+            acteur_dict.update(
+                bonus=getattr(self, "bonus", False),
+                reparer=getattr(self, "reparer", False),
+            )
 
         if main_action := actions[0] if actions else None:
             if carte and main_action.groupe_action:
-                acteur_dict["icon"] = main_action.groupe_action.icon
-                acteur_dict["couleur"] = main_action.groupe_action.couleur
+                acteur_dict.update(
+                    icon=main_action.groupe_action.icon,
+                    couleur=main_action.groupe_action.couleur,
+                )
             else:
-                acteur_dict["icon"] = main_action.icon
-                acteur_dict["couleur"] = main_action.couleur
+                acteur_dict.update(icon=main_action.icon, couleur=main_action.couleur)
 
         return orjson.dumps(acteur_dict).decode("utf-8")
 
@@ -699,7 +717,19 @@ class DisplayedActeurTemp(BaseActeur):
         )
 
 
+class PropositionServiceQuerySet(models.QuerySet):
+    def sous_categories(self, sous_categorie_ids: List[int]):
+        return self.filter(sous_categories__id__in=sous_categorie_ids)
+
+
+class PropositionServiceManager(models.Manager):
+    def get_queryset(self):
+        return PropositionServiceQuerySet(self.model, using=self._db)
+
+
 class BasePropositionService(models.Model):
+    objects = PropositionServiceManager()
+
     class Meta:
         abstract = True
 
