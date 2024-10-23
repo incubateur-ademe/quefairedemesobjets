@@ -1,4 +1,4 @@
-name: "[Prod] Déploiement continu"
+name: "[LVAO] [🔴 Prod] Déploiement continu"
 
 on:
   push:
@@ -18,10 +18,10 @@ defaults:
 
 jobs:
   run_test:
-    uses: ./.github/workflows/run_tests.yml
+    uses: ./.github/workflows/lvao_tests.yml
 
   create-release:
-    name: "Create Release"
+    name: Create GitHub Release
     needs: [run_test]
     runs-on: "ubuntu-latest"
     steps:
@@ -31,7 +31,7 @@ jobs:
           prerelease: false
 
   deploy:
-    name: Deploy to Production
+    name: Deploy on Scalingo
     needs: [run_test]
     runs-on: ubuntu-latest
     steps:
@@ -41,16 +41,3 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
           known-host: ssh.osc-fr1.scalingo.com
           app-name: quefairedemesobjets
-
-  deploy_dags:
-    name: Copy local folder to Production s3 bucket
-    needs: [run_test]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Install AWS CLI dependencies
-        run: |
-          pip install awscli
-      - name: Push to S3 bucket production
-        run: aws --endpoint-url ${{ env.S3_HOST }} s3 sync --delete --quiet ${{ env.FOLDER_SOURCE }} ${{ env.S3_BUCKET_DESTINATION }}
