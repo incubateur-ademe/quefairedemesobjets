@@ -611,6 +611,11 @@ class DisplayedActeur(BaseActeur):
         }
 
         if main_action := actions[0] if actions else None:
+            if action_list and "reparer" in action_list:
+                acteur_dict.update(
+                    bonus=getattr(self, "bonus", False),
+                    reparer=getattr(self, "reparer", False),
+                )
             if carte and main_action.groupe_action:
                 acteur_dict["icon"] = main_action.groupe_action.icon
                 acteur_dict["couleur"] = main_action.groupe_action.couleur
