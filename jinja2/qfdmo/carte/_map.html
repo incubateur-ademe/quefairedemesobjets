@@ -156,7 +156,7 @@
                     {% endwith %}
                     {% for acteur in acteurs %}
                         <script type="application/json" data-map-target="acteur">
-                            {{ acteur.json_acteur_for_display(direction=form.initial.direction, action_list=form.initial.action_list, carte=carte) | safe }}
+                            {{ acteur.json_acteur_for_display(direction=form.initial.direction, action_list=form.initial.action_list, carte=carte, sous_categorie=bounded_form.cleaned_data) | safe }}
                         </script>
                     {% endfor %}
                 </div>

@@ -1,3 +1,4 @@
+import logging
 import random
 import string
 import uuid
@@ -28,6 +29,8 @@ from qfdmo.models.utils import (
     NomAsNaturalKeyModel,
 )
 from qfdmo.validators import CodeValidator
+
+logger = logging.getLogger(__name__)
 
 
 class ActeurService(CodeAsNaturalKeyModel):
@@ -578,7 +581,9 @@ class DisplayedActeur(BaseActeur):
         direction: str | None = None,
         action_list: str | None = None,
         carte: bool = False,
+        sous_categorie: str = "",
     ) -> str:
+        logger.info(sous_categorie)
         actions = self.acteur_actions(direction=direction)
 
         if action_list:
@@ -606,17 +611,22 @@ class DisplayedActeur(BaseActeur):
         acteur_dict = {
             "identifiant_unique": self.identifiant_unique,
             "location": orjson.loads(self.location.geojson),
-            "bonus": getattr(self, "bonus", False),
-            "reparer": getattr(self, "reparer", False),
         }
+
+        if action_list and "reparer" in action_list:
+            acteur_dict.update(
+                bonus=getattr(self, "bonus", False),
+                reparer=getattr(self, "reparer", False),
+            )
 
         if main_action := actions[0] if actions else None:
             if carte and main_action.groupe_action:
-                acteur_dict["icon"] = main_action.groupe_action.icon
-                acteur_dict["couleur"] = main_action.groupe_action.couleur
+                acteur_dict.update(
+                    icon=main_action.groupe_action.icon,
+                    couleur=main_action.groupe_action.couleur,
+                )
             else:
-                acteur_dict["icon"] = main_action.icon
-                acteur_dict["couleur"] = main_action.couleur
+                acteur_dict.update(icon=main_action.icon, couleur=main_action.couleur)
 
         return orjson.dumps(acteur_dict).decode("utf-8")
 
