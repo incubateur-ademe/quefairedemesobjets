@@ -64,7 +64,7 @@ class TurboFormView(FormView):
 
 
 class CarteView(TurboFormView, FormView):
-    template_name = "qfdmo/carte/base.html"
+    template_name = "qfdmo/carte.html"
 
     def get_initial(self):
         initial = super().get_initial()

@@ -25,13 +25,13 @@
              {% include "qfdmo/partials/featureflip_inputs.html" %}
              {# Ici on on a tout préfixé de iframe, mais en fait il aurait fallu préfixer de formulaire. Car la carte peut être dans une iframe, non ? #}
              {# Panel «Filtres avancés» #}
-             {% include 'qfdmo/_addresses_partials/filters/iframe_advanced_filters.html' %}
+             {% include 'qfdmo/formulaire/_filters.html' %}
              {# Panel «Modifier ma recherche» #}
-             {% include 'qfdmo/_addresses_partials/iframe_back_to_form.html' %}
+             {% include 'qfdmo/formulaire/_back_to_form.html' %}
              {# Panel «Formulaire de recherche» #}
-             {% include 'qfdmo/_addresses_partials/iframe_form.html' %}
+             {% include 'qfdmo/formulaire/_iframe_form.html' %}
              {# Panel «Résultats de la recherche» #}
-             {% include 'qfdmo/_addresses_partials/result.html' %}
+             {% include 'qfdmo/carte/_result.html' %}
              {# Liens de pieds de page pour iframe #}
              {% include 'qfdmo/_addresses_partials/iframe_footer_links.html' %}
          </form>
