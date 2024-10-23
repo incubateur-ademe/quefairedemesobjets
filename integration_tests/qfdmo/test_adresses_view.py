@@ -391,3 +391,23 @@ class TestFilters:
 
         assert DisplayedActeur.objects.count() > 1
         assert context["acteurs"].count() == 1
+
+
+@pytest.mark.django_db
+class TestBBOX:
+    def test_no_acteurs_in_bbox_no_bbox_is_returned(self):
+        DisplayedActeurFactory.create_batch(2)
+        request = HttpRequest()
+        adresses_view = CarteView()
+        request.GET = query_dict_from(
+            {
+                "latitude": [1],
+                "longitude": [1],
+                # "bounding_box": [json.loads(compile_leaflet_bbox([-3, -3, 3, 3]))]
+            }
+        )
+        adresses_view.setup(request)
+        acteurs = DisplayedActeur.objects.all()
+        bbox, acteurs = adresses_view._bbox_and_acteurs_from_location_or_epci(acteurs)
+        assert bbox is None
+        assert acteurs.count() == 0
