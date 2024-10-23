@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import * as Turbo from "@hotwired/turbo"
 import debounce from "lodash/debounce"
 import { SolutionMap } from "./solution_map"
 import { ActorLocation, DisplayedActeur } from "./types"
@@ -54,7 +55,6 @@ export default class extends Controller<HTMLElement> {
     }
 
     actorsMap.initEventListener()
-
     window.addEventListener("hashchange", this.setActiveActor.bind(this))
   }
 
@@ -80,15 +80,7 @@ export default class extends Controller<HTMLElement> {
       ? new URL(event.newURL).hash.substring(1)
       : window.location.hash.substring(1)
 
-    if (!identifiantUnique) {
-      // TODO: gérer le cas où on a plus de hash dans l'URL
-    }
-
-    // TODO: react on hash change
-    this.dispatch("displayDetails", { detail: {} })
-    this.dispatch("setSrcDetailsAddress", {
-      detail: { identifiantUnique: identifiantUnique },
-    })
+    this.dispatch("displayActeur", { detail: { identifiantUnique } })
     this.dispatch("captureInteraction")
   }
 }
