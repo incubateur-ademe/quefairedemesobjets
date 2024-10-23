@@ -21,13 +21,18 @@ check:
 update-requirements:
 	$(PYTHON) -m pip install --no-deps -r requirements.txt -r dev-requirements.txt
 
+
+.PHONY: init-venv
+init-venv:
+	python -m venv .venv --prompt $(basename $(CURDIR)) --clear
+
 .PHONY: init-dev
 init-dev:
 	# git
 	git config blame.ignoreRevsFile .git-blame-ignore-revs
 	pre-commit install
 	# python
-	python -m venv .venv --prompt $(basename $(CURDIR)) --clear
+	make init-venv
 	$(PYTHON) -m pip install pip-tools
 	$(PYTHON) -m pip install --no-deps -r requirements.txt -r dev-requirements.txt
 	# javascript
