@@ -1,6 +1,7 @@
 name: "[Prod] Déploiement continu"
 
 on:
+  workflow_dispatch:
   push:
     paths: ["dags*", "airflow*"]
     tags:
