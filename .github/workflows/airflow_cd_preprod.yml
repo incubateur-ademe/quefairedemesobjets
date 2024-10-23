@@ -1,0 +1,45 @@
+name: "[Airflow] [🟠 Preprod] Déploiement continu"
+
+on:
+  workflow_dispatch:
+  push:
+    paths: ["dags*", "airflow*"]
+    branches:
+      - main
+
+env:
+  CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+  CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.PREPROD_S3_ACCESS_KEY }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.PREPROD_S3_SECRET_KEY }}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  run_airflow_tests:
+    uses: ./.github/workflows/airflow_tests.yml
+
+  deploy_dags:
+    needs: [run_airflow_tests]
+    uses: ./.github/workflows/airflow_deploy_dags.yml
+    with:
+      S3_BUCKET_DESTINATION: s3://preprod-data-dags/
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.PREPROD_S3_ACCESS_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.PREPROD_S3_SECRET_KEY }}
+
+  deploy_airflow:
+    needs: [deploy_dags]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: 47ng/actions-clever-cloud@v2.0.0
+        with:
+          appID: ${{ secrets.AIRFLOW_WEBSERVER_PREPROD_APP_ID }}
+      - uses: 47ng/actions-clever-cloud@v2.0.0
+        with:
+          appID: ${{ secrets.AIRFLOW_SCHEDULER_PREPROD_APP_ID }}
