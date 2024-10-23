@@ -19,7 +19,7 @@ defaults:
 
 jobs:
   run_test:
-    uses: ./.github/workflows/run_tests.yml
+    uses: ./.github/workflows/lvao_tests.yml
 
   deploy:
     name: Deploy to Preprod

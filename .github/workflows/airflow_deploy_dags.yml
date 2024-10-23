@@ -1,0 +1,19 @@
+on:
+  workflow_call:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  deploy_dags:
+    name: "Déploiement des DAGs dans Clever Cloud"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install AWS CLI dependencies
+        run: |
+          pip install awscli
+      - name: Push to S3 bucket production
+        run: aws --endpoint-url ${{ env.S3_HOST }} s3 sync --delete --quiet ${{ env.FOLDER_SOURCE }} ${{ env.S3_BUCKET_DESTINATION }}

@@ -1,0 +1,21 @@
+on:
+  workflow_call:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  unit_tests:
+    name: "Tests unitaires des DAGs"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          cache: "pip"
+          python-version: "3.12.1"
+      - name: Install Dependencies
+        run: pip install --require-hashes --no-deps -r airflow-requirements.txt
+      - name: Run unit tests
+        run: pytest dags_unit_tests

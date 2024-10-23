@@ -6,14 +6,14 @@ defaults:
     shell: bash
 
 jobs:
-  python:
+  unit_tests:
     runs-on: ubuntu-latest
     services:
       postgres:
         image: postgis/postgis:15-3.3-alpine
         env:
           POSTGRES_USER: qfdmo
-          POSTGRES_PASSWORD: qfdmo
+          POSTGRES_PASSWORD: qfdmo # pragma: allowlist secret
           POSTGRES_DB: qfdmo
         options: >-
           --health-cmd pg_isready
@@ -45,10 +45,10 @@ jobs:
       - name: Check for missing migrations
         run: python manage.py makemigrations --check --no-input --settings=core.test_settings
         env:
-          SECRET_KEY: votre_blanquette_est_bonne
-          DATABASE_URL: "postgres://fakeusername:fakepassword@postgres:5432/database"
+          SECRET_KEY: votre_blanquette_est_bonne # pragma: allowlist secret
+          DATABASE_URL: "postgres://fakeusername:fakepassword@postgres:5432/database" # pragma: allowlist secret
 
-  node:
+  frontend_tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -72,7 +72,7 @@ jobs:
         image: postgis/postgis:15-3.3-alpine
         env:
           POSTGRES_USER: qfdmo
-          POSTGRES_PASSWORD: qfdmo
+          POSTGRES_PASSWORD: qfdmo # pragma: allowlist secret
           POSTGRES_DB: qfdmo
         options: >-
           --health-cmd pg_isready

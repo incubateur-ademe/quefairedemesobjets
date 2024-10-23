@@ -1,0 +1,39 @@
+name: "[Prod] Déploiement continu"
+
+on:
+  push:
+    paths: ["dags*", "airflow*"]
+    tags:
+      - v*
+
+env:
+  S3_HOST: https://cellar-c2.services.clever-cloud.com
+  FOLDER_SOURCE: dags
+  S3_BUCKET_DESTINATION: s3://prod-dags/
+  AWS_ACCESS_KEY_ID: ${{ secrets.PROD_S3_ACCESS_KEY }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_S3_SECRET_KEY }}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  run_test:
+    uses: ./.github/workflows/airflow_tests.yml
+
+  deploy_airflow:
+    name: Deploy to Production
+    needs: [run_test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: 47ng/actions-clever-cloud@v2.0.0
+        with:
+          appID: ${{ secrets.AIRFLOW_PROD_APP_ID }}
+        env:
+          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
+
+  deploy_dags:
+    needs: [deploy_airflow]
+    uses: ./.github/workflows/airflow_deploy_dags.yml
