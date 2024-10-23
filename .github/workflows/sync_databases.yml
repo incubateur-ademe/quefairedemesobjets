@@ -1,4 +1,4 @@
-name: Sync databases
+name: "[LVAO] Sync prod > preprod"
 
 on:
   workflow_dispatch:
@@ -10,11 +10,11 @@ env:
   PRODUCTION_APP: ${{ secrets.SCALINGO_PRODUCTION_APP }}
   PREPROD_APP: ${{ secrets.SCALINGO_PREPROD_APP }}
   PREPROD_DATABASE_URL: ${{ secrets.PREPROD_DATABASE_URL }}
-  S3_HOST: ${{ secrets.S3_HOST }}
-  S3_PREPROD_BUCKET: ${{ secrets.S3_PREPROD_BUCKET }}
-  S3_PRODUCTION_BUCKET: ${{ secrets.S3_PRODUCTION_BUCKET }}
-  AWS_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_KEY }}
+  S3_HOST: https://cellar-c2.services.clever-cloud.com
+  S3_PREPROD_BUCKET: ${{ secrets.LVAO_S3_PREPROD_BUCKET }}
+  S3_PRODUCTION_BUCKET: ${{ secrets.LVAO_S3_PRODUCTION_BUCKET }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.LVAO_S3_ACCESS_KEY }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.LVAO_S3_SECRET_KEY }}
 
 defaults:
   run:
