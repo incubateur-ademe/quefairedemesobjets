@@ -1,3 +1,4 @@
+name: "[Airflow] [🔴 Prod] Déploiement des DAGs"
 on:
   workflow_call:
 

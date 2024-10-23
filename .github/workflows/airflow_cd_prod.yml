@@ -1,4 +1,4 @@
-name: "[Prod] Déploiement continu"
+name: "[Airflow] [🔴 Prod] Déploiement continu"
 
 on:
   workflow_dispatch:
@@ -21,12 +21,12 @@ defaults:
     shell: bash
 
 jobs:
-  run_test:
+  run_airflow_tests:
     uses: ./.github/workflows/airflow_tests.yml
 
-  deploy_airflow_webserver:
+  deploy_airflow:
     name: Deploy to Production
-    needs: [run_test]
+    needs: [run_airflow_tests]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

@@ -1,4 +1,4 @@
-name: Intégration continue
+name: "[LVAO] Intégration continue"
 
 on:
   pull_request:

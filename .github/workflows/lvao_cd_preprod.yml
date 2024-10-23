@@ -1,4 +1,4 @@
-name: "[Preprod] Déploiement continu"
+name: "[LVAO] [🟠 Preprod] Déploiement continu"
 
 on:
   workflow_dispatch:

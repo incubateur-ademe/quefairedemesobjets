@@ -1,3 +1,5 @@
+name: "[LVAO] Tests"
+
 on:
   workflow_call:
 

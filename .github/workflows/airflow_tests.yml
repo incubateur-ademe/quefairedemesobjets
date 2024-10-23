@@ -1,3 +1,5 @@
+name: "[Airflow] Tests"
+
 on:
   workflow_call:
 

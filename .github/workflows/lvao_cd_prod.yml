@@ -1,4 +1,4 @@
-name: "[Prod] Déploiement continu"
+name: "[LVAO] [🔴 Prod] Déploiement continu"
 
 on:
   push:
