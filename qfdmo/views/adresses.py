@@ -627,7 +627,7 @@ def acteur_detail(request, identifiant_unique):
     if latitude and longitude and not displayed_acteur.is_digital:
         context.update(
             itineraire_url="https://www.google.com/maps/dir/?api=1&origin="
-            f"{latitude },{ longitude }"
+            f"{latitude},{ longitude }"
             f"&destination={ displayed_acteur.latitude },"
             f"{ displayed_acteur.longitude }&travelMode=WALKING"
         )
