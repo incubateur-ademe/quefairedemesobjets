@@ -38,8 +38,8 @@
                 {% endif %}
 
                 {% with address_ok=(form.initial.adresse or form.initial.bounding_box or acteurs) %}
-                    {% include "qfdmo/shared/_adresse_missing_disclaimer.html" %}
-                    {% include "qfdmo/shared/_no_local_solution_disclaimer.html" %}
+                    {% include "qfdmo/shared/disclaimers/adresse_missing.html" %}
+                    {% include "qfdmo/shared/disclaimers/no_local_solution.html" %}
 
                 {% endwith %}
                 {% for acteur in acteurs %}
@@ -50,7 +50,7 @@
             </div>
         {% endif %}
     </div>
-    {% include "qfdmo/shared/_loading_solutions_disclaimer.html" %}
+    {% include "qfdmo/shared/disclaimers/loading_solutions.html" %}
     {% if not is_carte(request) %}
         <div class="qfdmo-px-2w sm:qfdmo-px-0 qfdmo-duration-300 sm:qfdmo-h-fit sm:qfdmo-mr-1w qfdmo-flex qfdmo-flex-row-reverse" data-search-solution-form-target="proposeAddressPanel">
             <a class="fr-my-1w fr-btn fr-btn--tertiary qfdmo-whitespace-nowrap qfdmo-w-full sm:qfdmo-w-max qfdmo-flex qfdmo-justify-center"

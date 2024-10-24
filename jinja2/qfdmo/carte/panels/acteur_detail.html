@@ -3,7 +3,8 @@
     id="acteurDetailsPanel"
     class="
         qfdmo-absolute qfdmo-right-0 qfdmo-top-0 qfdmo-bottom-0 qfdmo-z-[3000] qfdmo-left-auto
-        qfdmo-bg-white
+        qfdmo-bg-white qfdmo-drop-shadow-xl qfdmo-rounded-tl-sm qfdmo-rounded-bl-sm
+        qfdmo-px-2w
         qfdmo-w-[320px]
         qfdmo-flex qfdmo-flex-col
         qfdmo-fill-mode-forwards
@@ -16,10 +17,12 @@
     "
     tabindex="0"
     data-search-solution-form-target="acteurDetailsPanel"
-    data-visible="false"
+    data-visible="true"
 >
         {# Action buttons : open, close, minimize #}
-        <header class="qfdmo-flex qfdmo-flex-row-reverse qfdmo-justify-between">
+        <header
+            class="qfdmo-flex qfdmo-flex-row-reverse qfdmo-justify-between"
+        >
             <button class="fr-btn fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-close-line"
                     type='button'
                     data-action="click -> search-solution-form#hideActeurDetailsPanel"
