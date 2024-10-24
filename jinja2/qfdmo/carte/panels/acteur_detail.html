@@ -2,14 +2,17 @@
 <div
     id="acteurDetailsPanel"
     class="
-        qfdmo-bg-white qfdmo-z-[3000]
-        qfdmo-hidden
-        qfdmo-flex-col
-        data-[visible=false]:qfdmo-translate-x-full
-        data-[visible=true]:qfdmo-w-[320px]
+        qfdmo-absolute qfdmo-right-0 qfdmo-top-0 qfdmo-bottom-0 qfdmo-z-[3000] qfdmo-left-auto
+        qfdmo-bg-white
+        qfdmo-w-[320px]
+        qfdmo-flex qfdmo-flex-col
+        qfdmo-fill-mode-forwards
+        data-[visible=false]:qfdmo-hidden
         data-[visible=true]:qfdmo-animate-in
         data-[visible=true]:qfdmo-flex
-        data-[visible=true]:qfdmo-slide-in-from-right-9w
+        data-[visible=true]:qfdmo-slide-in-from-right-[320px]
+        data-[visible=exit]:qfdmo-animate-out
+        data-[visible=exit]:qfdmo-slide-out-to-right-[320px]
     "
     tabindex="0"
     data-search-solution-form-target="acteurDetailsPanel"

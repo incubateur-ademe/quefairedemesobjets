@@ -1,0 +1,68 @@
+<div class="
+    fr-container qfdmo-p-0 qfdmo-m-auto
+    qfdmo-relative
+    qfdmo-flex-grow qfdmo-flex qfdmo-flex-col
+    qfdmo-overflow-hidden
+">
+    <div class="qfdmo-h-full qfdmo-w-full qfdmo-flex qfdmo-flex-col">
+        {% if request.GET["digital"] == "1" %}
+            {% include "qfdmo/carte/_digital_results" %}
+        {% else %}
+            {# Near by addresses#}
+            <div
+                class="qfdmo-flex-grow qfdmo-relative qfdmo-shadow qfdmo-overflow-hidden"
+                data-controller="map"
+                data-action="map:captureInteraction->analytics#captureInteractionWithMap"
+                data-map-location-value="{{ location }}"
+            >
+                {{ form.bounding_box }}
+                <div id="map" class="qfdmo-absolute qfdmo-inset-0">
+                    {% if is_carte(request) %}
+                        <a class="qfdmo-flex lg:qfdmo-hidden
+                                    qfdmo-bg-white
+                                    fr-mb-1w fr-btn fr-btn--icon-left fr-icon-epingle-plus fr-btn--tertiary qfdmo-whitespace-nowrap qfdmo-w-auto qfdmo-justify-center
+                                    qfdmo-absolute qfdmo-left-2w qfdmo-right-2w qfdmo-bottom-3w qfdmo-z-[1000]"
+                            href="{{ url('qfdmo:address-suggestion-form') }}"
+                            target="_blank"
+                            rel="noreferrer"
+                            aria-label="Proposer une adresse - Nouvelle fenêtre"
+                        >
+                            Proposer une adresse
+                        </a>
+                    {% endif %}
+                </div>
+                {% include "qfdmo/shared/_search_in_zone.html" %}
+
+                {% if is_carte(request) %}
+                    {% include "qfdmo/carte/panels/legend.html" %}
+                {% endif %}
+
+                {% with address_ok=(form.initial.adresse or form.initial.bounding_box or acteurs) %}
+                    {% include "qfdmo/shared/_adresse_missing_disclaimer.html" %}
+                    {% include "qfdmo/shared/_no_local_solution_disclaimer.html" %}
+
+                {% endwith %}
+                {% for acteur in acteurs %}
+                    <script type="application/json" data-map-target="acteur">
+                        {{ acteur.json_acteur_for_display(direction=form.initial.direction, action_list=form.initial.action_list, carte=carte) | safe }}
+                    </script>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+    {% include "qfdmo/shared/_loading_solutions_disclaimer.html" %}
+    {% if not is_carte(request) %}
+        <div class="qfdmo-px-2w sm:qfdmo-px-0 qfdmo-duration-300 sm:qfdmo-h-fit sm:qfdmo-mr-1w qfdmo-flex qfdmo-flex-row-reverse" data-search-solution-form-target="proposeAddressPanel">
+            <a class="fr-my-1w fr-btn fr-btn--tertiary qfdmo-whitespace-nowrap qfdmo-w-full sm:qfdmo-w-max qfdmo-flex qfdmo-justify-center"
+                href="{{ url('qfdmo:address-suggestion-form') }}"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Proposer une adresse - Nouvelle fenêtre"
+            >
+                Proposer une adresse
+            </a>
+        </div>
+    {% endif %}
+
+    {% include "qfdmo/carte/panels/acteur_detail.html" %}
+</div>

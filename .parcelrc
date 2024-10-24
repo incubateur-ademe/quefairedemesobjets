@@ -1,6 +1,0 @@
-{
-  "extends": "@parcel/config-default",
-  "transformers": {
-    "*.{css,js}": ["./parcel-transformers/remove-ie-hack", "...", "./parcel-transformers/dsfr"]
-  }
-}

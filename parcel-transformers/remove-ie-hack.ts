@@ -1,10 +1,4 @@
-
 import { Transformer } from "@parcel/plugin"
-import { PurgeCSS } from "purgecss"
-import purgeJs from "purgecss-from-js"
-import purgeHtml from "purgecss-from-html"
-
-import tailwindConfig from "../tailwind.config.js"
 
 export default new Transformer({
   async transform({ asset }) {

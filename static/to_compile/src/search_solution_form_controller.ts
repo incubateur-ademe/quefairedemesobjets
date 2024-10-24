@@ -177,7 +177,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   backToSearch() {
-    this.hideacteurDetailsPanel()
+    this.hideActeurDetailsPanel()
     this.#showSearchFormPanel()
     this.#hideAddressesPanel()
     this.scrollToContent()
@@ -201,10 +201,13 @@ export default class extends Controller<HTMLElement> {
     // this.acteurDetailsPanelTarget.classList.add("sm:qfdmo-w-[480]")
     // this.acteurDetailsPanelTarget.classList.remove("sm:qfdmo-w-full")
     // this.acteurDetailsPanelTarget.classList.remove("sm:qfdmo-w-0")
-
-    setTimeout(() => {
-      this.acteurDetailsPanelTarget.focus()
-    }, 100)
+    this.acteurDetailsPanelTarget.addEventListener(
+      "animationend",
+      () => {
+        this.acteurDetailsPanelTarget.focus()
+      },
+      { once: true },
+    )
   }
 
   updateBboxInput(event) {
@@ -215,7 +218,14 @@ export default class extends Controller<HTMLElement> {
     document
       .querySelector("[aria-controls=acteurDetailsPanel][aria-expanded=true]")
       ?.setAttribute("aria-expanded", "false")
-    this.acteurDetailsPanelTarget.dataset.visible = "false"
+    this.acteurDetailsPanelTarget.dataset.visible = "exit"
+    this.acteurDetailsPanelTarget.addEventListener(
+      "animationend",
+      () => {
+        this.acteurDetailsPanelTarget.dataset.visible = "false"
+      },
+      { once: true },
+    )
     clearActivePinpoints()
 
     // mobile

@@ -21,16 +21,16 @@
              {% include 'qfdmo/carte/_result.html' %}
 
              {# Panel «Filtres» #}
-             {% include 'qfdmo/carte/_filters.html' %}
+             {% include 'qfdmo/carte/modals/filters.html' %}
 
              {# Panel «Legend» #}
              {# TODO: refacto turbo, should be moved outside of form #}
-             {% include 'qfdmo/carte/_legend_mobile.html' %}
+             {% include 'qfdmo/carte/panels/legend_mobile.html' %}
 
              {# Panel À propos #}
 
              {# TODO: refacto turbo, should be moved outside of form #}
-             {% include 'qfdmo/carte/_a_propos.html' %}
+             {% include 'qfdmo/carte/modals/a_propos.html' %}
 
              {{ form.epci_codes }}
          </form>

@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "parcel build",
+    "build": "parcel build --no-cache",
     "eslint": "eslint . --fix",
     "lint-check": "prettier --check static/to_compile",
     "lint": "prettier static/to_compile --write",
@@ -9,8 +9,8 @@
     "e2e_test": " npx playwright test --update-snapshots"
   },
   "source": [
-    "static/to_compile/entrypoints/qfdmo.ts",
     "static/to_compile/entrypoints/qfdmo.css",
+    "static/to_compile/entrypoints/qfdmo.ts",
     "static/to_compile/entrypoints/iframe_resizer.ts",
     "static/to_compile/entrypoints/iframe.ts",
     "static/to_compile/entrypoints/carte.ts",

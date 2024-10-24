@@ -11,7 +11,7 @@ export default new Transformer({
     let source = await asset.getCode()
     let sourceMap = await asset.getMap()
 
-    if (asset.filePath.includes("@gouvfr/dsfr") && asset.filePath.endsWith(".css")) {
+    if (false && asset.filePath.includes("@gouvfr/dsfr") && asset.filePath.endsWith(".css")) {
       try {
         const purgeCSSResults = await new PurgeCSS().purge({
           content: ["**/*.html"],
