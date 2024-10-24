@@ -1,3 +1,4 @@
+import logging
 import random
 import string
 import uuid
@@ -18,6 +19,7 @@ from django.db.models.functions import Now
 from django.forms import ValidationError, model_to_dict
 from django.http import HttpRequest
 from django.urls import reverse
+from django.utils.functional import cached_property
 from unidecode import unidecode
 
 from qfdmo.models.action import Action, get_action_instances
@@ -28,6 +30,8 @@ from qfdmo.models.utils import (
     NomAsNaturalKeyModel,
 )
 from qfdmo.validators import CodeValidator
+
+logger = logging.getLogger(__name__)
 
 
 class ActeurService(CodeAsNaturalKeyModel):
@@ -354,6 +358,20 @@ class BaseActeur(NomAsNaturalKeyModel):
                 )
             )
         )
+
+    @cached_property
+    def acteur_services_display(self):
+        logger.info(self.get_acteur_services())
+        return ",".join(self.get_acteur_services())
+
+    @cached_property
+    def labels_display(self):
+        labels = list(self.labels.filter(afficher=True, bonus=False))
+
+        if label_bonus := self.labels.filter(afficher=True, bonus=True).first():
+            labels.append(label_bonus)
+
+        return labels
 
     def proposition_services_by_direction(self, direction: str | None = None):
         if direction:

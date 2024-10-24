@@ -15,7 +15,6 @@ module.exports = {
     preflight: false,
   },
   safelist: [
-    "fr-checkbox",
     "sm:qfdmo-max-w-[596px]",
     "sm:qfdmo-min-w-[600px]",
     "sm:qfdmo-w-[250px]",

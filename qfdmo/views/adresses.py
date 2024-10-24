@@ -18,6 +18,7 @@ from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_GET
 from django.views.generic.edit import FormView
 
+from core.jinja2_handler import distance_to_acteur
 from core.utils import get_direction
 from qfdmo.forms import CarteForm, FormulaireForm
 from qfdmo.geo_api import bbox_from_list_of_geojson, retrieve_epci_geojson
@@ -613,10 +614,12 @@ def acteur_detail(request, identifiant_unique):
         "qfdmo/acteur.html",
         {
             "base_template": base_template,
-            "adresse": displayed_acteur,
+            "object": displayed_acteur,  # We can use object here so that switching to a DetailView later
+            # will not required a template update
             "latitude": latitude,
             "longitude": longitude,
             "direction": direction,
+            "distance": distance_to_acteur(request, displayed_acteur),
             "display_labels_panel": bool(
                 displayed_acteur.labels.filter(
                     afficher=True, type_enseigne=False
