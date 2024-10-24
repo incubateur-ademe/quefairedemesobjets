@@ -590,7 +590,12 @@ def get_object_list(request):
     )
 
 
-def adresse_detail(request, identifiant_unique):
+def acteur_detail(request, identifiant_unique):
+    base_template = "layout/base.html"
+
+    if request.headers.get("Turbo-Frame"):
+        base_template = "layout/turbo.html"
+
     latitude = request.GET.get("latitude")
     longitude = request.GET.get("longitude")
     direction = request.GET.get("direction")
@@ -607,6 +612,7 @@ def adresse_detail(request, identifiant_unique):
         request,
         "qfdmo/acteur.html",
         {
+            "base_template": base_template,
             "adresse": displayed_acteur,
             "latitude": latitude,
             "longitude": longitude,
