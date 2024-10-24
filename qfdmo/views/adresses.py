@@ -608,28 +608,31 @@ def acteur_detail(request, identifiant_unique):
         "labels",
         "sources",
     ).get(identifiant_unique=identifiant_unique)
+    context = {
+        "base_template": base_template,
+        "object": displayed_acteur,  # We can use object here so that switching
+        # to a DetailView later will not required a template update
+        "latitude": latitude,
+        "longitude": longitude,
+        "direction": direction,
+        "distance": distance_to_acteur(request, displayed_acteur),
+        "display_labels_panel": bool(
+            displayed_acteur.labels.filter(afficher=True, type_enseigne=False).count()
+        ),
+        "display_sources_panel": bool(
+            displayed_acteur.sources.filter(afficher=True).count()
+        ),
+    }
 
-    return render(
-        request,
-        "qfdmo/acteur.html",
-        {
-            "base_template": base_template,
-            "object": displayed_acteur,  # We can use object here so that switching to a DetailView later
-            # will not required a template update
-            "latitude": latitude,
-            "longitude": longitude,
-            "direction": direction,
-            "distance": distance_to_acteur(request, displayed_acteur),
-            "display_labels_panel": bool(
-                displayed_acteur.labels.filter(
-                    afficher=True, type_enseigne=False
-                ).count()
-            ),
-            "display_sources_panel": bool(
-                displayed_acteur.sources.filter(afficher=True).count()
-            ),
-        },
-    )
+    if latitude and longitude and not displayed_acteur.is_digital:
+        context.update(
+            itineraire_url="https://www.google.com/maps/dir/?api=1&origin="
+            f"{latitude },{ longitude }"
+            f"&destination={ displayed_acteur.latitude },"
+            f"{ displayed_acteur.longitude }&travelMode=WALKING"
+        )
+
+    return render(request, "qfdmo/acteur.html", context)
 
 
 def solution_admin(request, identifiant_unique):

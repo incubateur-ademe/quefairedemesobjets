@@ -11,19 +11,9 @@
                 {{ object.acteur_services_display }} {{ distance }}
             </p>
 
-            {% with content="Cet établissement dispose de plusieurs labels",icon="fr-icon-shield-check-line" %}
-                {% include "qfdmo/acteur/_tag.html" %}
-            {% endwith %}
-
-            {% for label in self.labels_display %}
-                {% if label.bonus %}
-                    {% include "qfdmo/acteur/labels/bonus.html" %}
-                {% else %}
-                    {% include "qfdmo/acteur/labels/generic.html" %}
-                {% endif %}
-            {% endfor %}
-
+            {% include "qfdmo/acteur/_labels.html" %}
             <hr class="qfdmo-my-2w">
+            {% include "qfdmo/acteur/_actions.html" %}
         </header>
         <div></div>
         </article>

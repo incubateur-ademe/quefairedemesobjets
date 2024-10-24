@@ -1,0 +1,16 @@
+<a
+    class="
+    qfdmo-flex qfdmo-flex-col qfdmo-items-center
+    qfdmo-bg-none qfdmo-no-external-link-icon
+    "
+    href="{{ url }}"
+    title="{{ title }}"
+    target="_blank"
+    rel="noreferrer"
+    {% if data_action %}
+    data-action="{{ data_action }}"
+    {% endif %}
+>
+    <span class="fr-btn {{ icon }} qfdmo-rounded-full"></span>
+    <span class="fr-text--xs fr-mb-0">{{ text }}</span>
+</a>
