@@ -1,0 +1,56 @@
+{# Détail de l'adresse #}
+<div
+    tabindex="0"
+    id="acteurDetailsPanel"
+    class="
+        qfdmo-absolute qfdmo-right-0 qfdmo-top-0 qfdmo-bottom-0 qfdmo-z-[3000] qfdmo-left-auto
+        qfdmo-bg-white qfdmo-drop-shadow-xl qfdmo-rounded-tl-sm qfdmo-rounded-bl-sm
+        qfdmo-px-2w
+        qfdmo-w-[320px]
+        qfdmo-flex qfdmo-flex-col
+        qfdmo-fill-mode-forwards
+        data-[visible=false]:qfdmo-hidden
+        data-[visible=true]:qfdmo-animate-in
+        data-[visible=true]:qfdmo-flex
+        data-[visible=true]:qfdmo-slide-in-from-right-[320px]
+        data-[visible=exit]:qfdmo-animate-out
+        data-[visible=exit]:qfdmo-slide-out-to-right-[320px]
+    "
+    data-search-solution-form-target="acteurDetailsPanel"
+    data-visible="false"
+>
+        {# Action buttons : open, close, minimize #}
+        <header
+            class="qfdmo-flex qfdmo-flex-row-reverse qfdmo-justify-between"
+        >
+            <button class="fr-btn fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-close-line"
+                    type='button'
+                    data-action="click -> search-solution-form#hideActeurDetailsPanel"
+            >
+                Fermer
+            </button>
+            <button class="fr-btn fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-arrow-up-s-line sm:qfdmo-hidden"
+                    type='button'
+                    data-action="click -> search-solution-form#displayFullDetails
+                                 click -> analytics#captureInteractionWithSolutionDetails"
+                    data-search-solution-form-target="expandDetailsButton"
+            >
+                Ouvrir
+            </button>
+            <button class="fr-btn fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-arrow-down-s-line sm:qfdmo-hidden qfdmo-hidden"
+                    type='button'
+                    data-action="click -> search-solution-form#displayDetails"
+                    data-search-solution-form-target="collapseDetailsButton"
+            >
+                Réduire
+            </button>
+        </header>
+
+        {# Content #}
+        <div class="qfdmo-flex-grow qfdmo-relative">
+            <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-overflow-y-scroll">
+                <turbo-frame id="acteur-detail"></turbo-frame>
+            </div>
+        </div>
+    </div>
+</div>

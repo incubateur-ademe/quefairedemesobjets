@@ -62,19 +62,24 @@ def hide_object_filter(request) -> bool:
     return bool(request.GET.get("sc_id"))
 
 
-def distance_to_acteur(request, adresse):
-    long = request.GET.get("longitude")
-    lat = request.GET.get("latitude")
-    point = adresse.location
+def distance_to_acteur(request, acteur):
+    longitude = request.GET.get("longitude")
+    latitude = request.GET.get("latitude")
+    location = acteur.location
 
-    if long and lat and point and not adresse.is_digital:
-        dist = sqrt((point.y - float(lat)) ** 2 + (point.x - float(long)) ** 2) * 111320
+    if not (longitude and latitude and location and not acteur.is_digital):
+        return ""
+
+    distance_meters = (
+        sqrt((location.y - float(latitude)) ** 2 + (location.x - float(longitude)) ** 2)
+        * 111320
+    )
+    if distance_meters >= 1000:
+        return f"({round(distance_meters / 1000, 1)} km)".replace(".", ",")
+    else:
         return (
-            f"({str(round(dist/1000,1)).replace('.',',')} km)"
-            if dist >= 1000
-            else f"({round(dist/10)*10} m)"
+            f"({round(distance_meters/10) * 10 } m)"  # TODO : check nothing broke here
         )
-    return ""
 
 
 def environment(**options):

@@ -1,0 +1,11 @@
+const purgecss = require('@fullhuman/postcss-purgecss')
+
+module.exports = {
+    "plugins": [
+        require("stylehacks"),
+        require('tailwindcss'),
+        purgecss({
+            content: ['templates/**/*.html', 'jinja2/**/*.html'],
+        })
+    ]
+}

@@ -1,0 +1,24 @@
+{% extends base_template %}
+
+{% block content %}
+<div class="fr-container">
+  <div class="sm:qfdmo-w-[480] qfdmo-bg-white fr-mt-2w">
+    <turbo-frame id="acteur-detail">
+        <article>
+        <header>
+            <h2 class="qfdmo-text-lg qfdmo-m-0">{{ object.nom }}</h2>
+            <p class="qfdmo-text-sm">
+                {{ object.acteur_services_display }} {{ distance }}
+            </p>
+
+            {% include "qfdmo/acteur/_labels.html" %}
+            <hr class="qfdmo-my-2w">
+            {% include "qfdmo/acteur/_actions.html" %}
+        </header>
+        <div></div>
+        </article>
+
+    </turbo-frame>
+  </div>
+</div>
+{% endblock content %}

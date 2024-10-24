@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import * as Turbo from "@hotwired/turbo"
 import debounce from "lodash/debounce"
 import { SolutionMap } from "./solution_map"
 import { ActorLocation, DisplayedActeur } from "./types"
@@ -48,12 +49,13 @@ export default class extends Controller<HTMLElement> {
       .filter((actor) => actor !== undefined)
     if (this.hasBboxTarget && this.bboxTarget.value !== "") {
       const bbox = JSON.parse(this.bboxTarget.value)
-      actorsMap.displayActor(actors, bbox)
+      actorsMap.addActorMarkersToMap(actors, bbox)
     } else {
-      actorsMap.displayActor(actors)
+      actorsMap.addActorMarkersToMap(actors)
     }
 
     actorsMap.initEventListener()
+    window.addEventListener("hashchange", this.setActiveActor.bind(this))
   }
 
   initialize() {
@@ -73,11 +75,12 @@ export default class extends Controller<HTMLElement> {
     this.searchInZoneButtonTarget.classList.add("qfdmo-hidden")
   }
 
-  displayActorDetail(identifiantUnique: string) {
-    this.dispatch("displayDetails", { detail: {} })
-    this.dispatch("setSrcDetailsAddress", {
-      detail: { identifiantUnique: identifiantUnique },
-    })
+  setActiveActor(event?: HashChangeEvent) {
+    const identifiantUnique = event
+      ? new URL(event.newURL).hash.substring(1)
+      : window.location.hash.substring(1)
+
+    this.dispatch("displayActeur", { detail: { identifiantUnique } })
     this.dispatch("captureInteraction")
   }
 }

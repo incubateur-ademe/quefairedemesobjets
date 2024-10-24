@@ -18,6 +18,7 @@ from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_GET
 from django.views.generic.edit import FormView
 
+from core.jinja2_handler import distance_to_acteur
 from core.utils import get_direction
 from qfdmo.forms import CarteForm, FormulaireForm
 from qfdmo.geo_api import bbox_from_list_of_geojson, retrieve_epci_geojson
@@ -64,7 +65,7 @@ class TurboFormView(FormView):
 
 
 class CarteView(TurboFormView, FormView):
-    template_name = "qfdmo/carte/base.html"
+    template_name = "qfdmo/carte.html"
 
     def get_initial(self):
         initial = super().get_initial()
@@ -217,6 +218,7 @@ class CarteView(TurboFormView, FormView):
             acteurs = acteurs.digital()
         else:
             bbox, acteurs = self._bbox_and_acteurs_from_location_or_epci(acteurs)
+            # acteurs = acteurs.values()
             acteurs = acteurs[: self._get_max_displayed_acteurs()]
 
             # Set Home location (address set as input)
@@ -589,7 +591,12 @@ def get_object_list(request):
     )
 
 
-def adresse_detail(request, identifiant_unique):
+def acteur_detail(request, identifiant_unique):
+    base_template = "layout/base.html"
+
+    if request.headers.get("Turbo-Frame"):
+        base_template = "layout/turbo.html"
+
     latitude = request.GET.get("latitude")
     longitude = request.GET.get("longitude")
     direction = request.GET.get("direction")
@@ -601,25 +608,31 @@ def adresse_detail(request, identifiant_unique):
         "labels",
         "sources",
     ).get(identifiant_unique=identifiant_unique)
+    context = {
+        "base_template": base_template,
+        "object": displayed_acteur,  # We can use object here so that switching
+        # to a DetailView later will not required a template update
+        "latitude": latitude,
+        "longitude": longitude,
+        "direction": direction,
+        "distance": distance_to_acteur(request, displayed_acteur),
+        "display_labels_panel": bool(
+            displayed_acteur.labels.filter(afficher=True, type_enseigne=False).count()
+        ),
+        "display_sources_panel": bool(
+            displayed_acteur.sources.filter(afficher=True).count()
+        ),
+    }
 
-    return render(
-        request,
-        "qfdmo/adresse_detail.html",
-        {
-            "adresse": displayed_acteur,
-            "latitude": latitude,
-            "longitude": longitude,
-            "direction": direction,
-            "display_labels_panel": bool(
-                displayed_acteur.labels.filter(
-                    afficher=True, type_enseigne=False
-                ).count()
-            ),
-            "display_sources_panel": bool(
-                displayed_acteur.sources.filter(afficher=True).count()
-            ),
-        },
-    )
+    if latitude and longitude and not displayed_acteur.is_digital:
+        context.update(
+            itineraire_url="https://www.google.com/maps/dir/?api=1&origin="
+            f"{latitude},{ longitude }"
+            f"&destination={ displayed_acteur.latitude },"
+            f"{ displayed_acteur.longitude }&travelMode=WALKING"
+        )
+
+    return render(request, "qfdmo/acteur.html", context)
 
 
 def solution_admin(request, identifiant_unique):

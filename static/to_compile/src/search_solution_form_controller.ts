@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import * as Turbo from "@hotwired/turbo"
 import { clearActivePinpoints } from "./map_helpers"
 
 export default class extends Controller<HTMLElement> {
@@ -19,8 +20,7 @@ export default class extends Controller<HTMLElement> {
     "searchFormPanel",
     "addressesPanel",
     "backToSearchPanel",
-    "detailsAddressPanel",
-    "srcDetailsAddress",
+    "acteurDetailsPanel",
     "proposeAddressPanel",
     "headerAddressPanel",
 
@@ -72,8 +72,7 @@ export default class extends Controller<HTMLElement> {
   declare readonly searchFormPanelTarget: HTMLElement
   declare readonly addressesPanelTarget: HTMLElement
   declare readonly backToSearchPanelTarget: HTMLElement
-  declare readonly detailsAddressPanelTarget: HTMLElement
-  declare readonly srcDetailsAddressTarget: HTMLElement
+  declare readonly acteurDetailsPanelTarget: HTMLElement
   declare readonly proposeAddressPanelTarget: HTMLElement
   declare readonly headerAddressPanelTarget: HTMLElement
 
@@ -178,64 +177,80 @@ export default class extends Controller<HTMLElement> {
   }
 
   backToSearch() {
-    this.hideDetails()
+    this.hideActeurDetailsPanel()
     this.#showSearchFormPanel()
     this.#hideAddressesPanel()
     this.scrollToContent()
   }
 
-  displayDetails() {
-    // mobile
-    this.detailsAddressPanelTarget.classList.remove("qfdmo-h-0", "qfdmo-invisible")
-    this.detailsAddressPanelTarget.classList.remove("qfdmo-h-full")
-    this.detailsAddressPanelTarget.classList.add("qfdmo-h-1/2")
-    if (this.hasProposeAddressPanelTarget) {
-      this.proposeAddressPanelTarget.classList.add("qfdmo-h-0", "qfdmo-invisible")
-    }
-    if (this.hasHeaderAddressPanelTarget)
-      this.headerAddressPanelTarget.classList.remove("qfdmo-h-0", "qfdmo-invisible")
-    this.collapseDetailsButtonTarget.classList.add("qfdmo-hidden")
-    this.expandDetailsButtonTarget.classList.remove("qfdmo-hidden")
-    // desktop
-    this.detailsAddressPanelTarget.classList.add("sm:qfdmo-w-[480]")
-    this.detailsAddressPanelTarget.classList.remove("sm:qfdmo-w-full")
-    this.detailsAddressPanelTarget.classList.remove("sm:qfdmo-w-0")
+  showActeurDetailsPanel() {
+    this.acteurDetailsPanelTarget.dataset.visible = "true"
 
-    setTimeout(() => {
-      this.detailsAddressPanelTarget.focus()
-    }, 100)
+    // mobile
+    // this.acteurDetailsPanelTarget.classList.remove("qfdmo-h-0", "qfdmo-invisible")
+    // this.acteurDetailsPanelTarget.classList.remove("qfdmo-h-full")
+    // this.acteurDetailsPanelTarget.classList.add("qfdmo-h-1/2")
+    // if (this.hasProposeAddressPanelTarget) {
+    //   this.proposeAddressPanelTarget.classList.add("qfdmo-h-0", "qfdmo-invisible")
+    // }
+    // if (this.hasHeaderAddressPanelTarget)
+    //   this.headerAddressPanelTarget.classList.remove("qfdmo-h-0", "qfdmo-invisible")
+    // this.collapseDetailsButtonTarget.classList.add("qfdmo-hidden")
+    // this.expandDetailsButtonTarget.classList.remove("qfdmo-hidden")
+    // desktop
+    // this.acteurDetailsPanelTarget.classList.add("sm:qfdmo-w-[480]")
+    // this.acteurDetailsPanelTarget.classList.remove("sm:qfdmo-w-full")
+    // this.acteurDetailsPanelTarget.classList.remove("sm:qfdmo-w-0")
+    this.acteurDetailsPanelTarget.addEventListener(
+      "animationend",
+      () => {
+        this.acteurDetailsPanelTarget.focus()
+      },
+      { once: true },
+    )
   }
 
   updateBboxInput(event) {
     this.bboxTarget.value = JSON.stringify(event.detail)
   }
 
-  hideDetails() {
+  hideActeurDetailsPanel() {
     document
-      .querySelector("[aria-controls=detailsAddressPanel][aria-expanded=true]")
+      .querySelector("[aria-controls=acteurDetailsPanel][aria-expanded=true]")
       ?.setAttribute("aria-expanded", "false")
+    this.acteurDetailsPanelTarget.dataset.visible = "exit"
+    this.acteurDetailsPanelTarget.addEventListener(
+      "animationend",
+      () => {
+        this.acteurDetailsPanelTarget.dataset.visible = "false"
+      },
+      { once: true },
+    )
+    clearActivePinpoints()
 
     // mobile
-    this.detailsAddressPanelTarget.classList.add("qfdmo-h-0", "qfdmo-invisible")
-    this.detailsAddressPanelTarget.classList.remove("qfdmo-h-full")
-    this.detailsAddressPanelTarget.classList.remove("qfdmo-h-1/2")
-    if (this.hasProposeAddressPanelTarget) {
-      this.proposeAddressPanelTarget.classList.remove("qfdmo-h-0", "qfdmo-invisible")
-    }
-    if (this.hasHeaderAddressPanelTarget)
-      this.headerAddressPanelTarget.classList.remove("qfdmo-h-0", "qfdmo-invisible")
-    // desktop
-    this.detailsAddressPanelTarget.classList.add("sm:qfdmo-w-0")
-    this.detailsAddressPanelTarget.classList.remove("sm:qfdmo-w-full")
-    this.detailsAddressPanelTarget.classList.remove("sm:qfdmo-w-[480]")
-    clearActivePinpoints()
+    // this.acteurDetailsPanelTarget.classList.add("qfdmo-h-0", "qfdmo-invisible")
+    // this.acteurDetailsPanelTarget.classList.remove("qfdmo-h-full")
+    // this.acteurDetailsPanelTarget.classList.remove("qfdmo-h-1/2")
+    // if (this.hasProposeAddressPanelTarget) {
+    //   // ????????????
+    //   this.proposeAddressPanelTarget.classList.remove("qfdmo-h-0", "qfdmo-invisible")
+    // }
+    // if (this.hasHeaderAddressPanelTarget)
+    //   // ????????????
+    //   this.headerAddressPanelTarget.classList.remove("qfdmo-h-0", "qfdmo-invisible")
+
+    // // desktop
+    // this.acteurDetailsPanelTarget.classList.add("sm:qfdmo-w-0")
+    // this.acteurDetailsPanelTarget.classList.remove("sm:qfdmo-w-full")
+    // this.acteurDetailsPanelTarget.classList.remove("sm:qfdmo-w-[480]")
   }
 
   displayFullDetails() {
     // mobile
-    this.detailsAddressPanelTarget.classList.remove("qfdmo-h-0", "qfdmo-invisible")
-    this.detailsAddressPanelTarget.classList.remove("qfdmo-h-1/2")
-    this.detailsAddressPanelTarget.classList.add("qfdmo-h-full")
+    this.acteurDetailsPanelTarget.classList.remove("qfdmo-h-0", "qfdmo-invisible")
+    this.acteurDetailsPanelTarget.classList.remove("qfdmo-h-1/2")
+    this.acteurDetailsPanelTarget.classList.add("qfdmo-h-full")
     if (this.hasProposeAddressPanelTarget) {
       this.proposeAddressPanelTarget.classList.add("qfdmo-h-0", "qfdmo-invisible")
     }
@@ -244,22 +259,24 @@ export default class extends Controller<HTMLElement> {
     this.collapseDetailsButtonTarget.classList.remove("qfdmo-hidden")
     this.expandDetailsButtonTarget.classList.add("qfdmo-hidden")
     // desktop
-    this.detailsAddressPanelTarget.classList.add("sm:qfdmo-w-full")
-    this.detailsAddressPanelTarget.classList.remove("sm:qfdmo-w-0")
-    this.detailsAddressPanelTarget.classList.remove("sm:qfdmo-w-[480]")
+    this.acteurDetailsPanelTarget.classList.add("sm:qfdmo-w-full")
+    this.acteurDetailsPanelTarget.classList.remove("sm:qfdmo-w-0")
+    this.acteurDetailsPanelTarget.classList.remove("sm:qfdmo-w-[480]")
   }
 
-  displayActeurDetails(event) {
+  displayDigitalActeur(event) {
+    // TODO: refactor
     const identifiantUnique = event.currentTarget.dataset.identifiantUnique
     document
-      .querySelector("[aria-controls='detailsAddressPanel'][aria-expanded='true']")
+      .querySelector("[aria-controls='acteurDetailsPanel'][aria-expanded='true']")
       ?.setAttribute("aria-expanded", "false")
     event.currentTarget.setAttribute("aria-expanded", "true")
-
-    this.setSrcDetailsAddress({ detail: { identifiantUnique } })
-    this.displayDetails()
+    this.showActeurDetailsPanel()
   }
-  setSrcDetailsAddress({ detail: { identifiantUnique } }) {
+
+  displayActeur({ detail: { identifiantUnique } }) {
+    console.log({ identifiantUnique})
+
     const latitude = this.latitudeInputTarget.value
     const longitude = this.longitudeInputTarget.value
 
@@ -270,9 +287,9 @@ export default class extends Controller<HTMLElement> {
     if (this.hasCarteTarget) {
       params.set("carte", "1")
     }
-    const srcDetailsAddress = `/adresse/${identifiantUnique}?${params.toString()}`
-
-    this.srcDetailsAddressTarget.setAttribute("src", srcDetailsAddress)
+    const acteurDetailPath = `/adresse/${identifiantUnique}?${params.toString()}`
+    Turbo.visit(acteurDetailPath, { frame: "acteur-detail" })
+    this.showActeurDetailsPanel()
   }
 
   displayActionList() {

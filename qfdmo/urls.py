@@ -6,7 +6,7 @@ from django.views.generic.base import RedirectView
 
 from qfdmo.views.adresses import (
     CarteView,
-    adresse_detail,
+    acteur_detail,
     get_object_list,
     getorcreate_revisionacteur,
     solution_admin,
@@ -62,8 +62,9 @@ urlpatterns = [
     ),
     path(
         "adresse/<str:identifiant_unique>",
-        adresse_detail,
-        name="adresse_detail",
+        # ActeurView.as_view(),
+        acteur_detail,
+        name="acteur-detail",
     ),
     path(
         "solution_admin/<str:identifiant_unique>",
