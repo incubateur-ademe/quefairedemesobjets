@@ -21,9 +21,6 @@
       "distDir": "./static/compiled"
     }
   },
-  "@parcel/transformer-css": {
-    "errorRecovery": true
-  },
   "browserslist": [
     "defaults",
     "iOS 14"
@@ -55,6 +52,7 @@
     "@types/lodash": "^4.17.10",
     "@types/node": "^22.7.5",
     "@typescript-eslint/eslint-plugin": "^8.7.0",
+    "autoprefixer": "^10.4.20",
     "buffer": "^6.0.3",
     "eslint": "^8.57.1",
     "eslint-config-love": "^84.1.0",

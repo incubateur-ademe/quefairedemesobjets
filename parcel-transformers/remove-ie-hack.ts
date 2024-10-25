@@ -1,4 +1,5 @@
 import { Transformer } from "@parcel/plugin"
+import postcss from "postcss"
 
 export default new Transformer({
   async transform({ asset }) {
@@ -6,10 +7,12 @@ export default new Transformer({
     let source = await asset.getCode()
     let sourceMap = await asset.getMap()
 
-    if (asset.filePath.includes("@gouvfr/dsfr") && asset.filePath.endsWith(".css")) {
-      // C'est un hack internet explorer ajouté dans le dsfr dont on a pas besoin...
-      // source = source.replace("min-width:")
-      // source = source.replace(/and \(min-width: 0\\0\)/g, '');
+    if (asset.filePath.endsWith(".css")) {
+      // This is a IE hack we do not need to support.
+      // Setting a unrealistic value of 100000000 ensures
+      // this media query will never run.
+      const regex = /0\\0/g;
+      source = source.replaceAll(regex, "1000000000")
     }
 
     asset.setCode(source)

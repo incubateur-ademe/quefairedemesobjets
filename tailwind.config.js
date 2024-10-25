@@ -15,6 +15,8 @@ module.exports = {
     preflight: false,
   },
   safelist: [
+    "fr-icon-recycle-line",
+    "fr-icon-arrow-go-back-line",
     "sm:qfdmo-max-w-[596px]",
     "sm:qfdmo-min-w-[600px]",
     "sm:qfdmo-w-[250px]",
