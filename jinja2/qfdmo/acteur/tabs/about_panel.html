@@ -1,0 +1,26 @@
+{% extends "qfdmo/acteur/tabs/_panel.html" %}
+
+{% block id %}aboutPanel{% endblock id %}
+
+{% block aria_labelledby %}aboutPanel{% endblock aria_labelledby %}
+
+{% block content %}
+<div class="qfdmo-space-y-3v">
+
+{% if object.adresse %}
+    {% include "qfdmo/acteur/tabs/sections/adresse.html" %}
+{% endif %}
+
+{% if object.description %}
+    {% include "qfdmo/acteur/tabs/sections/description.html" %}
+{% endif %}
+
+{% include "qfdmo/acteur/tabs/sections/services_disponibles.html" %}
+
+{% include "qfdmo/acteur/tabs/sections/bonus.html" %}
+
+{% include "qfdmo/acteur/tabs/sections/horaires.html" %}
+
+{% include "qfdmo/acteur/tabs/sections/type_enseigne.html" %}
+</div>
+{% endblock content %}

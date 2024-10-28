@@ -1,6 +1,6 @@
 <div class="qfdmo-flex qfdmo-justify-around">
-    {% if object.initeraire_url %}
-        {% with text="Itinéraire",url=object.itineraire_url,icon="fr-icon-send-plane-line",data_action="click -> analytics#captureInteractionWithSolutionDetails" %}
+    {% if itineraire_url %}
+        {% with text="Itinéraire",url=itineraire_url,icon="fr-icon-send-plane-line",data_action="click -> analytics#captureInteractionWithSolutionDetails" %}
             {% include "qfdmo/acteur/_action.html" %}
         {% endwith %}
     {% endif %}
