@@ -1,33 +1,26 @@
-<div class="qfdmo-flex qfdmo-justify-around">
+<div class="qfdmo-flex qfdmo-justify-around qfdmo-">
     {% if itineraire_url %}
-        {% with text="Itinéraire",url=itineraire_url,icon="fr-icon-send-plane-line",data_action="click -> analytics#captureInteractionWithSolutionDetails" %}
+        {% with text="Itinéraire",url=itineraire_url,icon="fr-icon-send-plane-line" %}
             {% include "qfdmo/acteur/_action.html" %}
         {% endwith %}
     {% endif %}
 
     {% if object.url %}
-        {% with text="Site web",url=object.url,icon="fr-icon-global-line",data_action="click -> analytics#captureInteractionWithSolutionDetails" %}
+        {% with text="Site web",url=object.url,icon="fr-icon-global-line",extra_classes="fr-btn--secondary-light" %}
             {% include "qfdmo/acteur/_action.html" %}
         {% endwith %}
     {% endif %}
-    {% if object.email and False %}
-        <a class="qfdmo-flex qfdmo-flex-col qfdmo-items-center qfdmo-bg-none qfdmo-no-external-link-icon"
-           href="mailto:{{ object.email }}" target="_blank" rel="noreferrer"
-        >
-            <span class="fr-btn fr-btn--secondary-light fr-icon-mail-line qfdmo-rounded-full"
-            ></span>
-            <span class="fr-text--xs fr-mb-0">E-mail</span>
-        </a>
+
+    {% if object.email %}
+        {% with text="E-mail",mailto=object.email,icon="fr-icon-mail-line",extra_classes="fr-btn--secondary-light" %}
+            {% include "qfdmo/acteur/_action_mailto.html" %}
+        {% endwith %}
     {% endif %}
+
     {% if object.telephone %}
-        <a class="qfdmo-flex qfdmo-flex-col qfdmo-items-center qfdmo-bg-none qfdmo-no-external-link-icon"
-           href="tel:{{ object.telephone }}" rel='noreferrer'
-           data-action="click -> analytics#captureInteractionWithSolutionDetails"
-        >
-            <span class="fr-btn fr-btn--secondary-light fr-icon-phone-line qfdmo-rounded-full"
-            ></span>
-            <span class="fr-text--xs fr-mb-0">Téléphone</span>
-        </a>
+        {% with text="Téléphone",tel=object.telephone,icon="fr-icon-phone-line",extra_classes="fr-btn--secondary-light" %}
+            {% include "qfdmo/acteur/_action_tel.html" %}
+        {% endwith %}
     {% endif %}
 
     <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">

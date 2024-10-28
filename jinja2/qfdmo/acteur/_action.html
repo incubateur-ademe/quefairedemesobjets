@@ -3,14 +3,12 @@
     qfdmo-flex qfdmo-flex-col qfdmo-items-center
     qfdmo-bg-none qfdmo-no-external-link-icon
     "
-    href="{{ url }}"
+    href="{% block href %}{{ url }}{% endblock href %}"
     title="{{ title }}"
     target="_blank"
     rel="noreferrer"
-    {% if data_action %}
-    data-action="{{ data_action }}"
-    {% endif %}
+    {% block data_action %}data_action="click -> analytics#captureInteractionWithSolutionDetails"{% endblock data_action %}
 >
-    <span class="fr-btn {{ icon }} qfdmo-rounded-full"></span>
+    <span class="fr-btn {{ icon }} qfdmo-rounded-full {{ extra_classes }}"></span>
     <span class="fr-text--xs fr-mb-0">{{ text }}</span>
 </a>
