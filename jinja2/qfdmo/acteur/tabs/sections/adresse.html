@@ -5,5 +5,10 @@ Adresse
 {% endblock title %}
 
 {% block content %}
-    {{ object.adresse }}
+    <div>
+        {{ object.adresse }}
+    </div>
+
+    {% if object.services_a_domicile %}
+    {% endif %}
 {% endblock content %}

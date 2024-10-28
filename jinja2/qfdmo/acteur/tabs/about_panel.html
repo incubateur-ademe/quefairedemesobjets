@@ -5,22 +5,31 @@
 {% block aria_labelledby %}aboutPanel{% endblock aria_labelledby %}
 
 {% block content %}
-<div class="qfdmo-space-y-3v">
+<div class="
+    qfdmo-space-y-3v
+">
+    {% if object.adresse %}
+        {% include "qfdmo/acteur/tabs/sections/adresse.html" %}
+    {% endif %}
 
-{% if object.adresse %}
-    {% include "qfdmo/acteur/tabs/sections/adresse.html" %}
-{% endif %}
+    {% if object.description %}
+        {% include "qfdmo/acteur/tabs/sections/description.html" %}
+    {% endif %}
 
-{% if object.description %}
-    {% include "qfdmo/acteur/tabs/sections/description.html" %}
-{% endif %}
+    {% if False %}
+        {% include "qfdmo/acteur/tabs/sections/services_disponibles.html" %}
+    {% endif %}
 
-{% include "qfdmo/acteur/tabs/sections/services_disponibles.html" %}
+    {% if False %}
+        {% include "qfdmo/acteur/tabs/sections/bonus.html" %}
+    {% endif %}
 
-{% include "qfdmo/acteur/tabs/sections/bonus.html" %}
+    {% if object.horaires_description %}
+        {% include "qfdmo/acteur/tabs/sections/horaires.html" %}
+    {% endif %}
 
-{% include "qfdmo/acteur/tabs/sections/horaires.html" %}
-
-{% include "qfdmo/acteur/tabs/sections/type_enseigne.html" %}
+    {% if False %}
+        {% include "qfdmo/acteur/tabs/sections/type_enseigne.html" %}
+    {% endif %}
 </div>
 {% endblock content %}
