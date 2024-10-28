@@ -348,7 +348,11 @@ class BaseActeur(NomAsNaturalKeyModel):
 
     @cached_property
     def sorted_proposition_services(self):
-        proposition_services = self.proposition_services.all()
+        proposition_services = (
+            self.proposition_services.all()
+            .prefetch_related("sous_categories")
+            .select_related("action")
+        )
         order = ["action__order"]
 
         if action_principale := self.action_principale:
@@ -361,9 +365,6 @@ class BaseActeur(NomAsNaturalKeyModel):
             order = ["action_principale", *order]
 
         return proposition_services.order_by(*order)
-
-        logger.info(proposition_services)
-        return proposition_services
 
     @cached_property
     def acteur_services_libelles_alpha_sorted(self) -> list[str]:
@@ -742,6 +743,12 @@ class BasePropositionService(models.Model):
     sous_categories = models.ManyToManyField(
         SousCategorieObjet,
     )
+
+    @cached_property
+    def sous_categories_display(self):
+        return ", ".join(
+            self.sous_categories.order_by("libelle").values_list("libelle", flat=True)
+        )
 
     def __str__(self):
         return f"{self.action.code}"

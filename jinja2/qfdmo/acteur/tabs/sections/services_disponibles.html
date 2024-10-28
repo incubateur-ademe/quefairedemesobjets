@@ -5,8 +5,18 @@ Services disponibles
 {% endblock title %}
 
 {% block content %}
-{% for service in object.sorted_proposition_services %}
-    {{ service.action }}
-    {{ service.sous_categories.all() }}
-{% endfor %}
+<div class="qfdmo-space-y-1w">
+    {% for service in object.sorted_proposition_services %}
+        <div class="qfdmo-space-y-1v">
+            {% with action=service.action %}
+                {% with content=action.libelle,icon=action.icon,couleur=action.couleur %}
+                    {% include "qfdmo/acteur/tabs/_tag.html" %}
+                {% endwith %}
+            {% endwith %}
+            <p class="qfdmo-m-0 qfdmo-text-sm">
+            {{ service.sous_categories_display }}
+            </p>
+        </div>
+    {% endfor %}
+</div>
 {% endblock content %}
