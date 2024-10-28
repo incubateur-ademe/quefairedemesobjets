@@ -43,7 +43,7 @@
 </h4>
 
 <p class="qfdmo-text-sm fr-mb-1w fr-mt-0 fr-text--xs">
-    {% for acteur_service in adresse.get_acteur_services() %}
+    {% for acteur_service in adresse.acteur_services_libelles_alpha_sorted %}
         {{ acteur_service }}{% if not loop.last %},&nbsp;{% endif %}
     {% endfor %}
     {{ distance_to_acteur(request, adresse) }}

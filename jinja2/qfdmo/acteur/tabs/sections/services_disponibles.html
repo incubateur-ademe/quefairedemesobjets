@@ -5,4 +5,8 @@ Services disponibles
 {% endblock title %}
 
 {% block content %}
+{% for service in object.sorted_proposition_services %}
+    {{ service.action }}
+    {{ service.sous_categories.all() }}
+{% endfor %}
 {% endblock content %}

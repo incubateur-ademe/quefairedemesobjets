@@ -334,7 +334,9 @@ class TestActeurService:
             ActeurServiceFactory(libelle="Par un professionnel")
         )
 
-        assert displayed_acteur.get_acteur_services() == ["Par un professionnel"]
+        assert displayed_acteur.acteur_services_libelles_alpha_sorted == [
+            "Par un professionnel"
+        ]
 
     def test_acteur_actions_multiple(self, displayed_acteur):
         displayed_acteur.acteur_services.add(

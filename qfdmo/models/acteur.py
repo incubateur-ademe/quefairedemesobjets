@@ -14,7 +14,7 @@ from django.contrib.gis.geos import Point, Polygon
 from django.contrib.gis.geos.geometry import GEOSGeometry
 from django.core.cache import cache
 from django.core.files.images import get_image_dimensions
-from django.db.models import Exists, Min, OuterRef
+from django.db.models import Case, Exists, Min, OuterRef, Value, When
 from django.db.models.functions import Now
 from django.forms import ValidationError, model_to_dict
 from django.http import HttpRequest
@@ -346,23 +346,37 @@ class BaseActeur(NomAsNaturalKeyModel):
     def is_digital(self) -> bool:
         return self.acteur_type_id == ActeurType.get_digital_acteur_type_id()
 
-    def get_acteur_services(self) -> list[str]:
-        return sorted(
-            list(
-                set(
-                    [
-                        acteur_service.libelle
-                        for acteur_service in self.acteur_services.all()
-                        if acteur_service.libelle
-                    ]
+    @cached_property
+    def sorted_proposition_services(self):
+        proposition_services = self.proposition_services.all()
+        order = ["action__order"]
+
+        if action_principale := self.action_principale:
+            proposition_services = proposition_services.annotate(
+                action_principale=Case(
+                    When(action__id=action_principale.id, then=Value(0)),
+                    default=Value(1),
                 )
             )
+            order = ["action_principale", *order]
+
+        return proposition_services.order_by(*order)
+
+        logger.info(proposition_services)
+        return proposition_services
+
+    @cached_property
+    def acteur_services_libelles_alpha_sorted(self) -> list[str]:
+        return list(
+            self.acteur_services.exclude(libelle=None)
+            .order_by("libelle")
+            .values_list("libelle", flat=True)
+            .distinct()
         )
 
     @cached_property
     def acteur_services_display(self):
-        logger.info(self.get_acteur_services())
-        return ",".join(self.get_acteur_services())
+        return ", ".join(self.acteur_services_libelles_alpha_sorted)
 
     @cached_property
     def labels_display(self):

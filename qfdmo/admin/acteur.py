@@ -384,7 +384,7 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
                 acteur_value_js = str(acteur_value).replace("'", "\\'")
 
                 if field_name == "acteur_services":
-                    form_field.help_text = acteur.get_acteur_services()
+                    form_field.help_text = acteur.acteur_services_libelles_alpha_sorted
 
                 if acteur_value and (
                     isinstance(form_field, CharField)
