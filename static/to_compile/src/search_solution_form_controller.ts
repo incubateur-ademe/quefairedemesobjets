@@ -185,22 +185,6 @@ export default class extends Controller<HTMLElement> {
 
   showActeurDetailsPanel() {
     this.acteurDetailsPanelTarget.dataset.visible = "true"
-
-    // mobile
-    // this.acteurDetailsPanelTarget.classList.remove("qfdmo-h-0", "qfdmo-invisible")
-    // this.acteurDetailsPanelTarget.classList.remove("qfdmo-h-full")
-    // this.acteurDetailsPanelTarget.classList.add("qfdmo-h-1/2")
-    // if (this.hasProposeAddressPanelTarget) {
-    //   this.proposeAddressPanelTarget.classList.add("qfdmo-h-0", "qfdmo-invisible")
-    // }
-    // if (this.hasHeaderAddressPanelTarget)
-    //   this.headerAddressPanelTarget.classList.remove("qfdmo-h-0", "qfdmo-invisible")
-    // this.collapseDetailsButtonTarget.classList.add("qfdmo-hidden")
-    // this.expandDetailsButtonTarget.classList.remove("qfdmo-hidden")
-    // desktop
-    // this.acteurDetailsPanelTarget.classList.add("sm:qfdmo-w-[480]")
-    // this.acteurDetailsPanelTarget.classList.remove("sm:qfdmo-w-full")
-    // this.acteurDetailsPanelTarget.classList.remove("sm:qfdmo-w-0")
     this.acteurDetailsPanelTarget.addEventListener(
       "animationend",
       () => {
@@ -227,23 +211,6 @@ export default class extends Controller<HTMLElement> {
       { once: true },
     )
     clearActivePinpoints()
-
-    // mobile
-    // this.acteurDetailsPanelTarget.classList.add("qfdmo-h-0", "qfdmo-invisible")
-    // this.acteurDetailsPanelTarget.classList.remove("qfdmo-h-full")
-    // this.acteurDetailsPanelTarget.classList.remove("qfdmo-h-1/2")
-    // if (this.hasProposeAddressPanelTarget) {
-    //   // ????????????
-    //   this.proposeAddressPanelTarget.classList.remove("qfdmo-h-0", "qfdmo-invisible")
-    // }
-    // if (this.hasHeaderAddressPanelTarget)
-    //   // ????????????
-    //   this.headerAddressPanelTarget.classList.remove("qfdmo-h-0", "qfdmo-invisible")
-
-    // // desktop
-    // this.acteurDetailsPanelTarget.classList.add("sm:qfdmo-w-0")
-    // this.acteurDetailsPanelTarget.classList.remove("sm:qfdmo-w-full")
-    // this.acteurDetailsPanelTarget.classList.remove("sm:qfdmo-w-[480]")
   }
 
   displayFullDetails() {
