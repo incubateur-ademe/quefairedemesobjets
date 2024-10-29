@@ -1,0 +1,15 @@
+<div class="fr-px-1w fr-my-1w fr-text--md qfdmo-bg-grey-975">
+    <a class="fr-py-2w fr-my-1w fr-link fr-link--no-underline qfdmo-w-full qfdmo-flex" href="{{ source_or_label.url if source_or_label.url else '#' }}" target="_blank" rel="noreferrer">
+        {% if source_or_label.logo_file %}
+            <img
+                class="fr-mr-1w"
+                src="{{ source_or_label.logo_file.url }}"
+                alt="Ademe - Agence de la transition écologique"
+                class="qfdmo-cursor-pointer"
+                width=32
+                height=32
+            >
+        {% endif %}
+        <span class="qfdmo-grow">{{ source_or_label.libelle }}</span>
+    </a>
+</div>

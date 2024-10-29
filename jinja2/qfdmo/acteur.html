@@ -6,13 +6,16 @@
     <turbo-frame id="acteur-detail">
         <article>
             <header class="qfdmo-mb-2w">
+                {% if object.labels_display %}
+                    {% include "qfdmo/acteur/_labels.html" %}
+                {% endif %}
+
                 <h2 class="qfdmo-text-lg qfdmo-m-0">{{ object.nom }}</h2>
-                <p class="qfdmo-text-sm">
+                <p class="qfdmo-text-sm qfdmo-m-0">
                     {{ object.acteur_services_display }} {{ distance }}
                 </p>
 
-                {% include "qfdmo/acteur/_labels.html" %}
-                <hr class="qfdmo-py-2w">
+                {% include "qfdmo/acteur/tabs/_separator.html" %}
                 {% include "qfdmo/acteur/_actions.html" %}
             </header>
             {% include "qfdmo/acteur/_tabs.html" %}

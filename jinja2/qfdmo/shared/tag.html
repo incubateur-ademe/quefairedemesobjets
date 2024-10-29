@@ -1,5 +1,8 @@
 {# Migrate to django dsfr when jinja dropped #}
-<p class="fr-tag fr-tag--sm fr-tag--icon-left {{ icon }}" {% if id %}data-testid="{{ id }}"{% endif %}>
+<{% if href %}a href="{{ href }}"{% else %}p{% endif %}
+    class="fr-tag fr-tag--sm fr-tag--icon-left {{ icon }}"
+    {% if id %}data-testid="{{ id }}"{% endif %}
+>
     {% if icon_url %}
         <img
             class="fr-mr-1w"
@@ -13,4 +16,4 @@
     <span>
         {{ content }}
     </span>
-</p>
+</{% if href %}a{% else %}p{% endif %}>

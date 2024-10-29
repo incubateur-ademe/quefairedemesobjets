@@ -5,7 +5,7 @@
 {% block aria_labelledby %}labelsPanel{% endblock aria_labelledby %}
 
 {% block content %}
-    {% with source_or_label_list=object.labels.filter(afficher=True, type_enseigne=False) %}
-        {% include "qfdmo/_address_card_partials/source_or_label_list.html" %}
-    {% endwith %}
+{% for source_or_label in object.labels_display %}
+    {% include "qfdmo/acteur/_label.html" %}
+{% endfor %}
 {% endblock content %}

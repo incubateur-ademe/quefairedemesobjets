@@ -381,12 +381,11 @@ class BaseActeur(NomAsNaturalKeyModel):
 
     @cached_property
     def labels_display(self):
-        labels = list(self.labels.filter(afficher=True, bonus=False))
+        return self.labels.filter(afficher=True).order_by("-bonus")
 
-        if label_bonus := self.labels.filter(afficher=True, bonus=True).first():
-            labels.append(label_bonus)
-
-        return labels
+    @cached_property
+    def is_bonus_reparation(self):
+        return self.labels.filter(afficher=True, bonus=True).exists()
 
     def proposition_services_by_direction(self, direction: str | None = None):
         if direction:

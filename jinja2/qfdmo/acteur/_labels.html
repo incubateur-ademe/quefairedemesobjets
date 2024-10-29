@@ -1,13 +1,15 @@
-{% if object.labels_display|length > 1 %}
-    {% with content="Cet établissement dispose de plusieurs labels",icon="fr-icon-shield-check-line" %}
-        {% include "qfdmo/shared/tag.html" %}
-    {% endwith %}
-{% endif %}
-
-{% for label in object.labels_display %}
-    {% if label.bonus %}
-        {% include "qfdmo/acteur/_labels/bonus.html" %}
-    {% else %}
-        {% include "qfdmo/acteur/_labels/generic.html" %}
+<div class="qfdmo-space-y-1w qfdmo-pb-1w">
+    {% if object.labels_display|length > 1 %}
+        {% with content="Cet établissement dispose de plusieurs labels",icon="fr-icon-shield-check-line" %}
+            {% include "qfdmo/shared/tag.html" %}
+        {% endwith %}
     {% endif %}
-{% endfor %}
+
+    {% with label=object.labels_display.first() %}
+        {% if label.bonus %}
+            {% include "qfdmo/acteur/_labels/bonus.html" %}
+        {% else %}
+            {% include "qfdmo/acteur/_labels/generic.html" %}
+        {% endif %}
+    {% endwith %}
+</div>

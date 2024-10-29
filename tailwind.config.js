@@ -15,6 +15,8 @@ module.exports = {
     preflight: false,
   },
   safelist: [
+    "qfdmo-bg-[#DFFDF7]", // icone réparer
+    "qfdmo-border-[#009081]", // icone réparer
     "fr-icon-recycle-line",
     "fr-icon-arrow-go-back-line",
     "sm:qfdmo-max-w-[596px]",

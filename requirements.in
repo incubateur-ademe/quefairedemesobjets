@@ -25,3 +25,4 @@ whitenoise
 django-widget-tweaks
 django-cors-headers
 django-dsfr
+django-colorfield

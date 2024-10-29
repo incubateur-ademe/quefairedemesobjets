@@ -41,9 +41,11 @@ class ActeurTypeSchema(ModelSchema):
 
 
 class ActionSchema(ModelSchema):
+    couleur: str = Field(..., alias="couleur_foncee")
+
     class Meta:
         model = Action
-        fields = ["id", "code", "libelle", "couleur"]
+        fields = ["id", "code", "libelle"]
 
 
 class ActeurServiceSchema(ModelSchema):

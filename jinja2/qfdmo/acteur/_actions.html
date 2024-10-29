@@ -1,4 +1,6 @@
-<div class="qfdmo-flex qfdmo-justify-around qfdmo-">
+<div
+    class="qfdmo-flex qfdmo-justify-start qfdmo-space-x-2w"
+>
     {% if itineraire_url %}
         {% with text="Itinéraire",url=itineraire_url,icon="fr-icon-send-plane-line" %}
             {% include "qfdmo/acteur/_action.html" %}
@@ -25,7 +27,7 @@
 
     <div class="qfdmo-flex qfdmo-flex-col qfdmo-items-center">
         <button
-            class="fr-btn fr-btn--secondary-light fr-icon-share-line qfdmo-rounded-full"
+            class="fr-btn fr-btn--sm fr-btn--secondary-light fr-icon-share-line qfdmo-rounded-full"
             aria-describedby="shareTooltip"
             type="button"
             data-action="click -> analytics#captureInteractionWithSolutionDetails"

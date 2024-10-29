@@ -1,0 +1,12 @@
+<p
+    class="fr-tag fr-tag--lg fr-tag--icon-left
+    {{ icon }}
+    qfdmo-border qfdmo-border-solid qfdmo-capitalize
+    qfdmo-border-[{{ border }}] qfdmo-bg-[{{ background }}]
+    "
+    {% if id %}data-testid="{{ id }}"{% endif %}
+>
+    <span>
+        {{ content }}
+    </span>
+</p>

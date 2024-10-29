@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "widget_tweaks",
     "dsfr",
     "django.forms",
+    "colorfield",
     "core",
     "qfdmd",
     "qfdmo",
