@@ -35,7 +35,7 @@ with DAG(
         "column_to_drop": [
             "siret",
         ],
-        "product_mapping": get_mapping_config(),
+        "product_mapping": get_mapping_config(mapping_key="sous_categories_3eee"),
     },
     schedule=None,
 ) as dag:

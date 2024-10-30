@@ -32,7 +32,7 @@ with DAG(
             "longitudewgs84": "longitude",
             "latitudewgs84": "latitude",
         },
-        "product_mapping": get_mapping_config(),
+        "product_mapping": get_mapping_config(mapping_key="sous_categories_3eee"),
     },
     schedule=None,
 ) as dag:
