@@ -24,7 +24,6 @@ export default class extends Controller<HTMLElement> {
     "proposeAddressPanel",
     "headerAddressPanel",
 
-    "expandDetailsButton",
     "collapseDetailsButton",
 
     "sousCategoryObjetGroup",
@@ -79,7 +78,6 @@ export default class extends Controller<HTMLElement> {
   declare readonly hasProposeAddressPanelTarget: boolean
   declare readonly hasHeaderAddressPanelTarget: boolean
 
-  declare readonly expandDetailsButtonTarget: HTMLElement
   declare readonly collapseDetailsButtonTarget: HTMLElement
 
   declare readonly sousCategoryObjetGroupTarget: HTMLElement
@@ -213,24 +211,6 @@ export default class extends Controller<HTMLElement> {
     clearActivePinpoints()
   }
 
-  displayFullDetails() {
-    // mobile
-    this.acteurDetailsPanelTarget.classList.remove("qfdmo-h-0", "qfdmo-invisible")
-    this.acteurDetailsPanelTarget.classList.remove("qfdmo-h-1/2")
-    this.acteurDetailsPanelTarget.classList.add("qfdmo-h-full")
-    if (this.hasProposeAddressPanelTarget) {
-      this.proposeAddressPanelTarget.classList.add("qfdmo-h-0", "qfdmo-invisible")
-    }
-    if (this.hasHeaderAddressPanelTarget)
-      this.headerAddressPanelTarget.classList.add("qfdmo-h-0", "qfdmo-invisible")
-    this.collapseDetailsButtonTarget.classList.remove("qfdmo-hidden")
-    this.expandDetailsButtonTarget.classList.add("qfdmo-hidden")
-    // desktop
-    this.acteurDetailsPanelTarget.classList.add("sm:qfdmo-w-full")
-    this.acteurDetailsPanelTarget.classList.remove("sm:qfdmo-w-0")
-    this.acteurDetailsPanelTarget.classList.remove("sm:qfdmo-w-[480]")
-  }
-
   displayDigitalActeur(event) {
     // TODO: refactor
     const identifiantUnique = event.currentTarget.dataset.identifiantUnique
@@ -242,8 +222,6 @@ export default class extends Controller<HTMLElement> {
   }
 
   displayActeur({ detail: { identifiantUnique } }) {
-    console.log({ identifiantUnique})
-
     const latitude = this.latitudeInputTarget.value
     const longitude = this.longitudeInputTarget.value
 

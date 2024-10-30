@@ -1,13 +1,9 @@
 <div class="qfdmo-space-y-1w qfdmo-pb-1w">
-    {% if object.labels_display|length > 1 %}
-        {% with content="Cet établissement dispose de plusieurs labels",icon="fr-icon-shield-check-line" %}
-            {% include "qfdmo/shared/tag.html" %}
-        {% endwith %}
-    {% endif %}
-
     {% with label=object.labels_display.first() %}
         {% if label.bonus %}
             {% include "qfdmo/acteur/_labels/bonus.html" %}
+        {% elif object.labels_display.filter(type_enseigne=False).count() > 1 %}
+        {% include "qfdmo/acteur/_labels/multiple_labels.html" %}
         {% else %}
             {% include "qfdmo/acteur/_labels/generic.html" %}
         {% endif %}

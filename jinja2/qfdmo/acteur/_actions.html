@@ -1,5 +1,5 @@
 <div
-    class="qfdmo-flex qfdmo-justify-start qfdmo-space-x-2w"
+    class="qfdmo-flex qfdmo-justify-start qfdmo-space-x-5w"
 >
     {% if itineraire_url %}
         {% with text="Itinéraire",url=itineraire_url,icon="fr-icon-send-plane-line" %}
@@ -10,12 +10,6 @@
     {% if object.url %}
         {% with text="Site web",url=object.url,icon="fr-icon-global-line",extra_classes="fr-btn--secondary-light" %}
             {% include "qfdmo/acteur/_action.html" %}
-        {% endwith %}
-    {% endif %}
-
-    {% if object.email %}
-        {% with text="E-mail",mailto=object.email,icon="fr-icon-mail-line",extra_classes="fr-btn--secondary-light" %}
-            {% include "qfdmo/acteur/_action_mailto.html" %}
         {% endwith %}
     {% endif %}
 

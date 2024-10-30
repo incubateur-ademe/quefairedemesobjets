@@ -84,6 +84,10 @@ createsuperuser:
 seed-database:
 	$(DJANGO_ADMIN) loaddata categories actions acteur_services acteur_types
 
+.PHONY: restore-prod
+restore-prod:
+	./scripts/restore_prod_locally.sh
+
 # Dependencies management
 .PHONY: pip-update
 pip-update:

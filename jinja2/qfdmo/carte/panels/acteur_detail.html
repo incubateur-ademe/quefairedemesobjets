@@ -3,18 +3,22 @@
     tabindex="0"
     id="acteurDetailsPanel"
     class="
-        qfdmo-absolute qfdmo-right-0 qfdmo-top-0 qfdmo-bottom-0 qfdmo-z-[3000] qfdmo-left-auto
+        md:qfdmo-absolute
+        qfdmo-right-0 qfdmo-top-0 qfdmo-bottom-0 qfdmo-z-[3000] qfdmo-left-auto
         qfdmo-bg-white qfdmo-drop-shadow-xl qfdmo-rounded-tl-sm qfdmo-rounded-bl-sm
         qfdmo-px-2w
-        qfdmo-w-[360px]
+        max-md:qfdmo-h-screen
+        md:qfdmo-w-[400px] qfdmo-w-full
         qfdmo-flex qfdmo-flex-col
-        qfdmo-fill-mode-forwards
+        md:qfdmo-fill-mode-forwards
         data-[visible=false]:qfdmo-hidden
-        data-[visible=true]:qfdmo-animate-in
         data-[visible=true]:qfdmo-flex
-        data-[visible=true]:qfdmo-slide-in-from-right-[360px]
-        data-[visible=exit]:qfdmo-animate-out
-        data-[visible=exit]:qfdmo-slide-out-to-right-[360px]
+        md:data-[visible=true]:qfdmo-animate-in
+        md:data-[visible=true]:qfdmo-ease-in
+        md:data-[visible=true]:qfdmo-slide-in-from-right-[400px]
+        md:data-[visible=exit]:qfdmo-animate-out
+        md:data-[visible=exit]:qfdmo-ease-out
+        md:data-[visible=exit]:qfdmo-slide-out-to-right-[400px]
     "
     data-search-solution-form-target="acteurDetailsPanel"
     data-visible="false"

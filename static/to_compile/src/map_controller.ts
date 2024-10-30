@@ -55,6 +55,7 @@ export default class extends Controller<HTMLElement> {
     }
 
     actorsMap.initEventListener()
+    window.location.hash = null
     window.addEventListener("hashchange", this.setActiveActor.bind(this))
   }
 

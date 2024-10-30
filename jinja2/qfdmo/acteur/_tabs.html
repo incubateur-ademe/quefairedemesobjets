@@ -7,9 +7,11 @@
         {% with text="Présentation",target="aboutPanel" %}
             {% include "qfdmo/acteur/tabs/_tab.html" %}
         {% endwith %}
-        {% with text="Labels",target="labelsPanel" %}
-            {% include "qfdmo/acteur/tabs/_tab.html" %}
-        {% endwith %}
+        {% if object.labels_display %}
+            {% with text="Labels",target="labelsPanel" %}
+                {% include "qfdmo/acteur/tabs/_tab.html" %}
+            {% endwith %}
+        {% endif %}
         {% with text="Sources",target="sourcesPanel" %}
             {% include "qfdmo/acteur/tabs/_tab.html" %}
         {% endwith %}

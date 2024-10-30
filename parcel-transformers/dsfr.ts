@@ -20,11 +20,11 @@ export default new Transformer({
         safelist: ["htm", "body", ...tailwindConfig.safelist],
       })
 
-      source = purgeCSSResults
-        .map((purged) => {
-          return purged.css
-        })
-        .join("\n")
+      // source = purgeCSSResults
+      //   .map((purged) => {
+      //     return purged.css
+      //   })
+      //   .join("\n")
     }
 
     asset.setCode(source)

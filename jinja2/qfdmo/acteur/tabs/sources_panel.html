@@ -5,7 +5,7 @@
 {% block aria_labelledby %}sourcesPanel{% endblock aria_labelledby %}
 
 {% block content %}
-{% for source_or_label in object.sources.all() %}
-    {% include "qfdmo/acteur/_label.html" %}
-{% endfor %}
+    {% for source_or_label in object.sources.all() %}
+        {% include "qfdmo/acteur/_label.html" %}
+    {% endfor %}
 {% endblock content %}

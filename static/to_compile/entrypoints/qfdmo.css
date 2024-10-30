@@ -194,15 +194,15 @@ DSFR customization for tabs
   }
 
   .fr-tabs__panel {
-      @apply qfdmo-py-1w qfdmo-px-0;
+    @apply qfdmo-py-1w qfdmo-px-0;
   }
 
   .fr-tabs__list {
-      @apply qfdmo-space-x-1w qfdmo-min-h-min;
+    @apply qfdmo-space-x-1w qfdmo-min-h-min;
   }
 
   .fr-tabs__tab {
-      @apply qfdmo-m-0;
+    @apply qfdmo-m-0;
   }
 }
 
@@ -230,6 +230,14 @@ DSFR customization for tabs
   padding: 4px !important;
 }
 
+.qfdmo-no-external-link-icon {
+  &,
+  .fr-link& {
+    &:after {
+      content: none;
+    }
+  }
+}
 .fr-link--no-underline {
   background-image: none !important;
 }
@@ -242,10 +250,6 @@ DSFR customization for tabs
 
 .fr-btn--secondary-light:hover {
   background-color: #dcdcfc !important;
-}
-
-.qfdmo-no-external-link-icon:after {
-  content: none;
 }
 
 /* OPTIMIZE : solution temporaire, pour coller aux contraintes d'accessibilité

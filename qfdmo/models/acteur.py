@@ -381,7 +381,15 @@ class BaseActeur(NomAsNaturalKeyModel):
 
     @cached_property
     def labels_display(self):
-        return self.labels.filter(afficher=True).order_by("-bonus")
+        """
+        On retourne une liste de labels qualité.
+        Dans la plupart des cas on ne retournera qu'un label, une future évolution
+        va intégrer la gestion des labels multiples.
+
+        La spec suivie est la suivante :
+            - Si l'acteur dispose du bonus réparation : on l'affiche
+        """
+        return self.labels.filter(afficher=True).order_by("-bonus", "type_enseigne")
 
     @cached_property
     def is_bonus_reparation(self):
