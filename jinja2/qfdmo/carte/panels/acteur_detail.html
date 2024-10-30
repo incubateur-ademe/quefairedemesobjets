@@ -24,35 +24,15 @@
     data-visible="false"
 >
         {# Action buttons : open, close, minimize #}
-        <header
-            class="qfdmo-flex qfdmo-flex-row-reverse qfdmo-justify-between"
-        >
-            <button class="fr-btn fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-close-line"
-                    type='button'
-                    data-action="click -> search-solution-form#hideActeurDetailsPanel"
-            >
-                Fermer
-            </button>
-            <button class="fr-btn fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-arrow-up-s-line sm:qfdmo-hidden"
-                    type='button'
-                    data-action="click -> search-solution-form#displayFullDetails
-                                 click -> analytics#captureInteractionWithSolutionDetails"
-                    data-search-solution-form-target="expandDetailsButton"
-            >
-                Ouvrir
-            </button>
-            <button class="fr-btn fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-arrow-down-s-line sm:qfdmo-hidden qfdmo-hidden"
-                    type='button'
-                    data-action="click -> search-solution-form#displayDetails"
-                    data-search-solution-form-target="collapseDetailsButton"
-            >
-                Réduire
-            </button>
-        </header>
-
+        <span class="md:qfdmo-hidden qfdmo-rounded-full qfdmo-w-12w qfdmo-h-1v qfdmo-bg-[#DFDFDF] qfdmo-my-2w qfdmo-mx-auto"></span>
         {# Content #}
         <div class="qfdmo-flex-grow qfdmo-relative">
             <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-overflow-y-scroll">
+                <span
+                    class="fr-icon fr-icon-close-line qfdmo-absolute qfdmo-top-0 qfdmo-right-0 qfdmo-text-blue-france-sun-113q"
+                    data-action="click -> search-solution-form#hideActeurDetailsPanel"
+                >
+                </span>
                 <turbo-frame id="acteur-detail"></turbo-frame>
             </div>
         </div>
