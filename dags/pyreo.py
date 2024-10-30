@@ -1,4 +1,5 @@
 from airflow import DAG
+from utils.base_utils import get_mapping_config
 from utils.eo_operators import default_args, eo_task_chain
 
 with DAG(
@@ -35,6 +36,7 @@ with DAG(
             "type_de_point_de_collecte": "magasin / franchise,"
             " enseigne commerciale / distributeur / point de vente"
         },
+        "product_mapping": get_mapping_config(),
     },
     schedule=None,
 ) as dag:
