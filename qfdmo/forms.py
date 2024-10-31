@@ -186,7 +186,7 @@ class AddressesForm(forms.Form):
             "action « réparer » est sélectionnée). En savoir plus sur le site <a href="
             '"https://www.ecologie.gouv.fr/bonus-reparation" target="_blank"'
             ' rel="noreferrer" title="Bonus Réparation - Nouvelle fenêtre">Bonus'
-            " réparation</a>"
+            " Réparation</a>"
         ),
         label_suffix="",
         required=False,
