@@ -654,6 +654,7 @@ def acteur_detail(request, identifiant_unique):
         "display_sources_panel": bool(
             displayed_acteur.sources.filter(afficher=True).count()
         ),
+        "is_embedded": False,
     }
 
     if latitude and longitude and not displayed_acteur.is_digital:

@@ -599,6 +599,9 @@ class DisplayedActeur(BaseActeur):
         related_name="displayed_acteurs",
     )
 
+    def get_absolute_url(self):
+        return reverse("qfdmo:acteur-detail", args=[self.identifiant_unique])
+
     def acteur_actions(self, direction=None):
         ps_action_ids = list(
             {ps.action_id for ps in self.proposition_services.all()}  # type: ignore
