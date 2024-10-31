@@ -200,7 +200,7 @@ class DisplayedActeurQuerySet(models.QuerySet):
 
     def digital(self):
         return (
-            self.filter(acteur_type_id=ActeurType.get_digital_acteur_type_id())
+            self.filter(acteur_type__code="acteur_digital")
             .annotate(min_action_order=Min("proposition_services__action__order"))
             .order_by("min_action_order", "?")
         )

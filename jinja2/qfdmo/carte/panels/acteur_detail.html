@@ -1,39 +1,15 @@
 {# Détail de l'adresse #}
-<div
-    tabindex="0"
-    id="acteurDetailsPanel"
-    class="
-        qfdmo-bg-white qfdmo-drop-shadow-xl qfdmo-rounded-tl-sm qfdmo-rounded-bl-sm
-        qfdmo-px-2w
-        qfdmo-w-full
-        qfdmo-h-full
-        qfdmo-flex qfdmo-flex-col
-        md:qfdmo-fill-mode-forwards
-        qfdmo-transition-all
-        data-[visible=false]:qfdmo-w-0
-        data-[visible=false]:qfdmo-hidden
-        data-[visible=true]:qfdmo-flex
-        data-[visible=true]:qfdmo-w-[400px]
-
-    "
-    data-search-solution-form-target="acteurDetailsPanel"
-    data-visible="false"
->
-        {# Barre visible en mobile uniquement #}
-        <span
-            class="md:qfdmo-hidden qfdmo-rounded-full qfdmo-w-12w qfdmo-h-1v qfdmo-bg-[#DFDFDF] qfdmo-my-2w qfdmo-mx-auto"
-        ></span>
-        {# Content #}
-        <div class="qfdmo-flex-grow qfdmo-relative">
-            <div class="qfdmo-absolute qfdmo-inset-0 qfdmo-overflow-y-scroll">
-                {# Close button #}
-                <span
-                    class="qfdmo-cursor-pointer fr-icon fr-icon-close-line qfdmo-absolute qfdmo-top-0 qfdmo-right-0 qfdmo-text-blue-france-sun-113"
-                    data-action="click->search-solution-form#hideActeurDetailsPanel"
-                >
-                </span>
-                <turbo-frame id="acteur-detail"></turbo-frame>
-            </div>
-        </div>
-    </div>
+{# Barre visible en mobile uniquement #}
+<span
+    class="md:qfdmo-hidden qfdmo-rounded-full qfdmo-w-12w qfdmo-h-1v qfdmo-bg-[#DFDFDF] qfdmo-my-2w qfdmo-mx-auto"
+></span>
+{# Content #}
+<div class="qfdmo-flex-grow qfdmo-relative snap-center">
+    {# Close button #}
+    <span
+        class="qfdmo-cursor-pointer fr-icon fr-icon-close-line qfdmo-absolute qfdmo-top-0 qfdmo-right-0 qfdmo-text-blue-france-sun-113"
+        data-action="click->search-solution-form#hideActeurDetailsPanel"
+    >
+    </span>
+    <turbo-frame id="acteur-detail"></turbo-frame>
 </div>

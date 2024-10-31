@@ -111,12 +111,21 @@ export default class extends Controller<HTMLElement> {
 
   connect() {
     this.displayActionList()
+    window.addEventListener("hashchange", this.#setActiveActor.bind(this))
 
     if (!this.isIframeValue) {
       this.scrollToContent()
     }
   }
 
+  #setActiveActor(event?: HashChangeEvent) {
+    const identifiantUnique = event
+      ? new URL(event.newURL).hash.substring(1)
+      : window.location.hash.substring(1)
+
+    this.displayActeur(identifiantUnique)
+    this.dispatch("captureInteraction")
+  }
   activeReparerFilters(activate: boolean = true) {
     // Carte mode
     this.activeReparerFiltersCarte()
@@ -184,13 +193,7 @@ export default class extends Controller<HTMLElement> {
 
   showActeurDetailsPanel() {
     this.acteurDetailsPanelTarget.dataset.visible = "true"
-    this.acteurDetailsPanelTarget.addEventListener(
-      "animationend",
-      () => {
-        this.acteurDetailsPanelTarget.focus()
-      },
-      { once: true },
-    )
+    this.acteurDetailsPanelTarget.scrollIntoView()
   }
 
   updateBboxInput(event) {
@@ -201,7 +204,7 @@ export default class extends Controller<HTMLElement> {
     document
       .querySelector("[aria-controls=acteurDetailsPanel][aria-expanded=true]")
       ?.setAttribute("aria-expanded", "false")
-    this.acteurDetailsPanelTarget.dataset.visible = "false"
+    this.acteurDetailsPanelTarget.dataset.visible = "exit"
     this.acteurDetailsPanelTarget.addEventListener(
       "animationend",
       () => {
@@ -213,8 +216,8 @@ export default class extends Controller<HTMLElement> {
   }
 
   displayDigitalActeur(event) {
-    // TODO: refactor
     const identifiantUnique = event.currentTarget.dataset.identifiantUnique
+    window.location.hash = identifiantUnique
     document
       .querySelector("[aria-controls='acteurDetailsPanel'][aria-expanded='true']")
       ?.setAttribute("aria-expanded", "false")
@@ -222,7 +225,7 @@ export default class extends Controller<HTMLElement> {
     this.showActeurDetailsPanel()
   }
 
-  displayActeur({ detail: { identifiantUnique } }) {
+  displayActeur(identifiantUnique) {
     const latitude = this.latitudeInputTarget.value
     const longitude = this.longitudeInputTarget.value
 
@@ -372,7 +375,7 @@ export default class extends Controller<HTMLElement> {
     this.advancedFiltersMainPanelTarget.addEventListener(
       "animationend",
       () => {
-        this.advancedFiltersMainPanelTarget.focus()
+        // this.advancedFiltersMainPanelTarget.focus()
       },
       { once: true },
     )

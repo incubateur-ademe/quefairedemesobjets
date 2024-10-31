@@ -63,7 +63,6 @@ export default class extends Controller<HTMLElement> {
 
     actorsMap.initEventListener()
     removeHash()
-    window.addEventListener("hashchange", this.setActiveActor.bind(this))
   }
 
   initialize() {
@@ -81,16 +80,5 @@ export default class extends Controller<HTMLElement> {
 
   hideSearchInZoneButton() {
     this.searchInZoneButtonTarget.classList.add("qfdmo-hidden")
-  }
-
-  setActiveActor(event?: HashChangeEvent) {
-    const identifiantUnique = event
-      ? new URL(event.newURL).hash.substring(1)
-      : window.location.hash.substring(1)
-
-    console.log({ identifiantUnique })
-
-    this.dispatch("displayActeur", { detail: { identifiantUnique } })
-    this.dispatch("captureInteraction")
   }
 }

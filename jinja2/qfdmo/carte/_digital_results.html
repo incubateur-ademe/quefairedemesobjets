@@ -1,8 +1,7 @@
 {# On line addresses #}
 <div class="qfdmo-relative qfdmo-flex-grow qfdmo-shadow">
-    {# TODO: REFACTO OVERFLOW : supprimer les overflow auto et le padding left sur la liste qui empêche l'outline de déborder du conteneur #}
-    <div class="qfdmo-px-2w sm:qfdmo-px-1v qfdmo-absolute qfdmo-inset-0 qfdmo-overflow-y-auto qfdmo-pt-1v">
-        {% for adresse in acteurs.all() %}
+    <div class="qfdmo-px-2w sm:qfdmo-px-1v qfdmo-inset-0 qfdmo-pt-1v">
+        {% for adresse in acteurs %}
             <div data-action="click->search-solution-form#displayDigitalActeur
                               keydown.enter->search-solution-form#displayDigitalActeur
                               keydown.space->search-solution-form#displayDigitalActeur"

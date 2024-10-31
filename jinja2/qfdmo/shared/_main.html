@@ -1,0 +1,115 @@
+{% extends base_template %}
+
+{% block content %}
+<turbo-frame id="mapContainer">
+    {# Controleur général de gestion de la navigation et du formulaire #}
+    <form
+    data-controller="search-solution-form" id='search_form'
+    data-search-solution-form-target="searchForm"
+    data-search-solution-form-is-iframe-value="{{ is_embedded }}"
+    data-turbo-frame="addressesPanel"
+    data-action="map:displayActeur->search-solution-form#displayActeur
+    map:updateBbox->search-solution-form#updateBboxInput
+    ss-cat-object-autocomplete:optionSelected->search-solution-form#checkSsCatObjetErrorForm
+    address-autocomplete:optionSelected->search-solution-form#advancedSubmit
+    address-autocomplete:formSubmit->search-solution-form#advancedSubmit
+    ss-cat-object-autocomplete:formSubmit->search-solution-form#advancedSubmit"
+    class="
+    qfdmo-h-full
+    qfdmo-flex qfdmo-flex-col qfdmo-flex-auto
+    qfdmo-relative
+    qfdmo-p-1v
+    "
+    >
+        <section class="map-grid">
+            <header
+                class="
+                qfdmo-flex qfdmo-flex-row sm:qfdmo-items-center
+                max-md:qfdmo-sticky qfdmo-top-0 qfdmo-left-0 qfdmo-right-0"
+            >
+                {% block content_header %}
+                {% endblock content_header %}
+            </header>
+
+            {#
+            We need to set a size on the map to help Leaflet size its content.
+            We do not want the map to be bigger than the height of its container
+
+            The values of 120px and 150px are determined empirically.
+            They need to match the css variables used for .grid-map selector in qfdmo.css
+            #}
+            <main class="
+                {% if is_carte %}
+                qfdmo-h-[calc(100vh_-_120px)]
+                {% else %}
+                qfdmo-h-[calc(100vh_-_250px)]
+                {% endif %}
+                qfdmo-overflow-scroll
+                qfdmo-flex
+                max-md:qfdmo-sticky
+                qfdmo-top-0
+                ">
+                {% block result %}
+                    <turbo-frame id="addressesPanel"
+                        data-search-solution-form-target="addressesPanel"
+                        class="qfdmo-relative qfdmo-duration-300 qfdmo-z-1
+                            qfdmo-flex qfdmo-flex-col
+                            data-[visible=true]:qfdmo-flex-grow
+                            data-[visible=false]:qfdmo-invisible data-[visible=false]:qfdmo-h-0
+                            "
+                        data-visible={{"true" if is_carte else "false"}}
+                        tabindex="0"
+                    >
+                        {% include 'qfdmo/shared/_map_container.html' %}
+                    </turbo-frame>
+                {% endblock result %}
+
+                {% block everything_else %}
+                {% endblock everything_else %}
+
+                {% block form %}
+                    {% include "qfdmo/partials/featureflip_inputs.html" %}
+                    {{ form.bounding_box }}
+                {% endblock form %}
+            </main>
+            <aside class="
+                qfdmo-relative
+                qfdmo-z-50
+                qfdmo-flex qfdmo-flex-col
+                qfdmo-h-screen
+                {% if is_carte %}
+                md:qfdmo-h-[calc(100vh_-_120px)]
+                {% else %}
+                md:qfdmo-h-[calc(100vh_-_250px)]
+                {% endif %}
+                max-md:snap-y md:qfdmo-overflow-scroll qfdmo-scroll-m-[75vh]
+                qfdmo-bg-white
+                qfdmo-px-2w
+                md:qfdmo-w-[400px]
+                data-[visible=false]:qfdmo-hidden
+                data-[visible=true]md::qfdmo-animate-in
+                data-[visible=true]:qfdmo-flex
+                data-[visible=true]:md:qfdmo-slide-in-from-right-[400px]
+                data-[visible=exit]:qfdmo-flex
+                data-[visible=exit]:qfdmo-animate-out
+                data-[visible=exit]:qfdmo-slide-out-to-bottom-[100vh]
+                data-[visible=exit]:md:qfdmo-slide-out-to-right-[400px]
+            "
+            tabindex="0"
+            id="acteurDetailsPanel"
+            data-search-solution-form-target="acteurDetailsPanel"
+            data-visible="false"
+            >
+                {% include "qfdmo/carte/panels/acteur_detail.html" %}
+            </aside>
+
+            <footer>
+            {% block content_footer %}
+            {% endblock content_footer %}
+            </footer>
+        </section>
+    </form>
+</turbo-frame>
+
+{% include 'qfdmo/reparacteur_modale.html' %}
+{% endblock content %}

@@ -247,7 +247,7 @@ class CarteView(
         acteurs = self._acteurs_from_sous_categorie_objet_and_actions()
 
         if self.get_data_from_request_or_bounded_form("digital") == "1":
-            acteurs = acteurs.digital()
+            acteurs = acteurs.digital()[:100]
         else:
             bbox, acteurs = self._bbox_and_acteurs_from_location_or_epci(acteurs)
             # acteurs = acteurs.values()
