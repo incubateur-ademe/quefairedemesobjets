@@ -346,7 +346,7 @@ class TestActeurService:
             ),
         )
 
-        assert displayed_acteur.get_acteur_services() == [
+        assert displayed_acteur.acteur_services_libelles_alpha_sorted == [
             "Atelier pour réparer soi-même",
             "Par un professionnel",
         ]
@@ -397,7 +397,8 @@ class TestDisplayActeurActeurActions:
                 "afficher": True,
                 "description": None,
                 "order": action.order,
-                "couleur": "yellow-tournesol",
+                "couleur": "#C3992A",
+                "couleur_claire": "#C3992A",
                 "icon": None,
                 "groupe_action": None,
             }
@@ -422,7 +423,8 @@ class TestDisplayActeurActeurActions:
                 "afficher": True,
                 "description": None,
                 "order": action.order,
-                "couleur": "yellow-tournesol",
+                "couleur": "#C3992A",
+                "couleur_claire": "#C3992A",
                 "icon": None,
                 "groupe_action": None,
             }

@@ -368,6 +368,7 @@ class BaseActeur(NomAsNaturalKeyModel):
 
     @cached_property
     def acteur_services_libelles_alpha_sorted(self) -> list[str]:
+        # TODO : rename this method......
         return list(
             self.acteur_services.exclude(libelle=None)
             .order_by("libelle")

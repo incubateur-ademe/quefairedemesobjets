@@ -115,6 +115,7 @@ class GroupeAction(CodeAsNaturalKeyModel):
         default="yellow-tournesol",
         help_text=COULEUR_FIELD_HELP_TEXT,
     )
+
     icon = models.CharField(
         max_length=255,
         null=True,
@@ -145,13 +146,13 @@ class Action(CodeAsNaturalKeyModel):
     description = models.CharField(max_length=255, null=True, blank=True)
     order = models.IntegerField(blank=False, null=False, default=0)
     directions = models.ManyToManyField(ActionDirection, related_name="actions")
-    couleur_foncee = ColorField(
+    couleur = ColorField(
         null=True, blank=True, default="#C3992A", max_length=255, choices=COLOR_PALETTE
     )
 
     @property
-    def couleur(self):
-        return self.couleur_foncee
+    def couleur_foncee(self):
+        return self.couleur
 
     couleur_claire = ColorField(
         null=True, blank=True, default="#C3992A", max_length=255, choices=COLOR_PALETTE

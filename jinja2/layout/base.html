@@ -67,32 +67,31 @@
         {% endif %}
 
         {% block js %}
-        {% endblock js %}
+            {% if is_embedded %}
+                <script
+                    src="https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4.3.6/iframeResizer.contentWindow.js"
+                    integrity="sha512-hBWsS94l8+snzSPo759jDKZ3z3jn3WT4snJZTBaeMPbrCGzDrYdl2pN9EaXjh6IqEZC7wF10qcmp42TPRVgAYQ=="
+                    crossorigin="anonymous"
+                    referrerpolicy="no-referrer"
+                    defer
+                ></script>
+            {% endif %}
 
-        {% if is_embedded %}
-            <script
-                src="https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4.3.6/iframeResizer.contentWindow.js"
-                integrity="sha512-hBWsS94l8+snzSPo759jDKZ3z3jn3WT4snJZTBaeMPbrCGzDrYdl2pN9EaXjh6IqEZC7wF10qcmp42TPRVgAYQ=="
-                crossorigin="anonymous"
-                referrerpolicy="no-referrer"
-                defer
-            ></script>
-        {% endif %}
+            {% if request.user.is_authenticated %}
+                <script type="applicaton/json" id="posthog-user">
+                    {
+                        "username": "{{ request.user.username }}",
+                        "email": "{{ request.user.email }}",
+                        "admin": "{{ request.user.is_superuser|tojson }}"
+                    }
+                </script>
+            {% endif %}
 
-        {% if request.user.is_authenticated %}
-            <script type="applicaton/json" id="posthog-user">
+            <script type="application/json" id="posthog-infos">
                 {
-                    "username": "{{ request.user.username }}",
-                    "email": "{{ request.user.email }}",
-                    "admin": "{{ request.user.is_superuser|tojson }}"
+                    "iframe": "{{ is_embedded|tojson }}"
                 }
             </script>
-        {% endif %}
-
-        <script type="application/json" id="posthog-infos">
-            {
-                "iframe": "{{ is_embedded|tojson }}"
-            }
-        </script>
+        {% endblock js %}
     </body>
 </html>

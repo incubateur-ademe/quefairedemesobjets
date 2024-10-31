@@ -1,5 +1,3 @@
-import random
-
 import pytest
 from django.contrib.gis.geos import Point
 from django.core.management import call_command
@@ -9,7 +7,6 @@ from core.jinja2_handler import (
     action_by_direction,
     display_infos_panel,
     distance_to_acteur,
-    is_embedded,
 )
 from qfdmo.models.acteur import ActeurType
 from unit_tests.qfdmo.acteur_factory import ActeurTypeFactory, DisplayedActeurFactory
@@ -23,25 +20,6 @@ def django_db_setup(django_db_setup, django_db_blocker):
             "actions",
             "acteur_types",
         )
-
-
-class TestIsIframe:
-    def test_is_embedded_false(self):
-        request = HttpRequest()
-
-        request.GET = {}
-        assert is_embedded(request) is False
-
-    def test_is_embedded_true(self):
-        request = HttpRequest()
-
-        request.GET = {"iframe": str(random.randint(0, 10))}
-
-        assert is_embedded(request) is True
-
-        request.GET = {"iframe": "anything"}
-
-        assert is_embedded(request) is True
 
 
 class TestActionByDirection:
