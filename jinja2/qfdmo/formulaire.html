@@ -1,34 +1,21 @@
-{% extends 'layout/base.html' %}
+{% extends "qfdmo/shared/_layout.html" %}
 
- {% block content %}
-     <turbo-frame id="turboForm">
-         {# Controleur général de gestion de la navigation et du formulaire #}
+{% include "qfdmo/partials/featureflip_inputs.html" %}
 
-         <form
-            {% include "qfdmo/shared/_search_form_data-attributes.html" %}
-            class="
-                    qfdmo-min-h-[700px] qfdmo-max-h-[800px]{%if is_embedded(request) %} qfdmo-h-screen{% else %} qfdmo-h-svh{% endif %}
-                    qfdmo-flex qfdmo-flex-col qfdmo-flex-auto
-                    qfdmo-relative qfdmo-overflow-hidden"
-         >
-             {% include "qfdmo/partials/featureflip_inputs.html" %}
+{% block content_header %}
+{# Panel Filtres avancés et modifier ma recherche #}
+{% include 'qfdmo/formulaire/header.html' %}
+{% endblock content_header %}
 
-             {# Panel «Filtres avancés» #}
-             {% include 'qfdmo/formulaire/_filters.html' %}
 
-             {# Panel «Modifier ma recherche» #}
-             {% include 'qfdmo/formulaire/_back_to_form.html' %}
+{% block result %}
+{# Panel «Résultats de la recherche» #}
+{% include 'qfdmo/shared/_result.html' %}
+{% endblock result %}
 
-             {# Panel «Formulaire de recherche» #}
-             {% include 'qfdmo/formulaire/_iframe_form.html' %}
-
-             {# Panel «Résultats de la recherche» #}
-             {% include 'qfdmo/shared/_result.html' %}
-
-             {# Liens de pieds de page pour iframe #}
-             {% include 'qfdmo/_addresses_partials/iframe_footer_links.html' %}
-         </form>
-     </turbo-frame>
-
-     {% include 'qfdmo/reparacteur_modale.html' %}
- {% endblock %}
+{% block everything_else %}
+{# Panel «Formulaire de recherche» #}
+{% include 'qfdmo/formulaire/search_form.html' %}
+{# Liens de pieds de page pour iframe #}
+{% include 'qfdmo/_addresses_partials/iframe_footer_links.html' %}
+{% endblock everything_else %}

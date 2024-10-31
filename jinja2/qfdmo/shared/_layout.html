@@ -1,0 +1,47 @@
+{% extends base_template %}
+
+ {% block content %}
+     <turbo-frame id="turboForm">
+         {# Controleur général de gestion de la navigation et du formulaire #}
+
+         <form
+            {% include "qfdmo/shared/_search_form_data-attributes.html" %}
+            class="
+            qfdmo-min-h-screen
+                    qfdmo-flex qfdmo-flex-col qfdmo-flex-auto
+                    qfdmo-relative"
+         >
+             {% include "qfdmo/partials/featureflip_inputs.html" %}
+
+             {% block content_header %}
+                {# Panel Header #}
+                {# TODO: refacto turbo, should be moved outside of form #}
+                {% include 'qfdmo/carte/header.html' %}
+             {% endblock content_header %}
+
+             {% block result %}
+             {# Panel Result #}
+             {% include 'qfdmo/carte/result.html' %}
+             {% endblock result %}
+
+             {% block everything_else %}
+             {# Panel «Filtres» #}
+             {% include 'qfdmo/carte/modals/filters.html' %}
+
+             {# Panel «Legend» #}
+             {# TODO: refacto turbo, should be moved outside of form #}
+             {% include 'qfdmo/carte/panels/legend_mobile.html' %}
+
+             {# Panel À propos #}
+
+             {# TODO: refacto turbo, should be moved outside of form #}
+             {% include 'qfdmo/carte/modals/a_propos.html' %}
+
+             {{ form.epci_codes }}
+             {% endblock %}
+
+         </form>
+     </turbo-frame>
+
+     {% include 'qfdmo/reparacteur_modale.html' %}
+ {% endblock %}

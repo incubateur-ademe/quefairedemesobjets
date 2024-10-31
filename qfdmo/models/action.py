@@ -148,6 +148,11 @@ class Action(CodeAsNaturalKeyModel):
     couleur_foncee = ColorField(
         null=True, blank=True, default="#C3992A", max_length=255, choices=COLOR_PALETTE
     )
+
+    @property
+    def couleur(self):
+        return self.couleur_foncee
+
     couleur_claire = ColorField(
         null=True, blank=True, default="#C3992A", max_length=255, choices=COLOR_PALETTE
     )

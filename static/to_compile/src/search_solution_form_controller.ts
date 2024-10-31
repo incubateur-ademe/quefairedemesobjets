@@ -166,7 +166,8 @@ export default class extends Controller<HTMLElement> {
   }
 
   #hideAddressesPanel() {
-    this.backToSearchPanelTarget.classList.add("qfdmo-h-0", "qfdmo-invisible")
+    // this.backToSearchPanelTarget.classList.add("qfdmo-h-0", "qfdmo-invisible")
+    this.backToSearchPanelTarget.dataset.visible = "false"
     this.addressesPanelTarget.dataset.visible = "false"
   }
 
@@ -448,9 +449,10 @@ export default class extends Controller<HTMLElement> {
     const withDynamicFormPanel =
       (event.target as HTMLElement).dataset.withDynamicFormPanel?.toLowerCase() ===
       "true"
+
     if (withDynamicFormPanel) {
       this.#hideSearchFormPanel()
-      this.backToSearchPanelTarget.classList.remove("qfdmo-h-0", "qfdmo-invisible")
+      this.backToSearchPanelTarget.dataset.visible = "true"
       this.#showAddressesPanel()
       this.scrollToContent()
     }

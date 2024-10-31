@@ -1,40 +1,28 @@
-{% extends base_template %}
+{% extends "qfdmo/shared/_layout.html" %}
 
- {% block content %}
-     <turbo-frame id="turboForm">
-         {# Controleur général de gestion de la navigation et du formulaire #}
+{% block content_header %}
+    {# Panel Header #}
+    {# TODO: refacto turbo, should be moved outside of form #}
+    {% include 'qfdmo/carte/header.html' %}
+{% endblock content_header %}
 
-         <form
-            {% include "qfdmo/shared/_search_form_data-attributes.html" %}
-            class="
-            qfdmo-min-h-screen
-                    qfdmo-flex qfdmo-flex-col qfdmo-flex-auto
-                    qfdmo-relative"
-         >
-             {% include "qfdmo/partials/featureflip_inputs.html" %}
+{% block result %}
+    {# Panel Result #}
+    {% include 'qfdmo/carte/result.html' %}
+{% endblock result %}
 
-             {# Panel Header #}
-             {# TODO: refacto turbo, should be moved outside of form #}
-             {% include 'qfdmo/carte/_header.html' %}
+{% block everything_else %}
+    {# Panel «Filtres» #}
+    {% include 'qfdmo/carte/modals/filters.html' %}
 
-             {# Panel Result #}
-             {% include 'qfdmo/carte/_result.html' %}
+    {# Panel «Legend» #}
+    {# TODO: refacto turbo, should be moved outside of form #}
+    {% include 'qfdmo/carte/panels/legend_mobile.html' %}
 
-             {# Panel «Filtres» #}
-             {% include 'qfdmo/carte/modals/filters.html' %}
+    {# Panel À propos #}
 
-             {# Panel «Legend» #}
-             {# TODO: refacto turbo, should be moved outside of form #}
-             {% include 'qfdmo/carte/panels/legend_mobile.html' %}
+    {# TODO: refacto turbo, should be moved outside of form #}
+    {% include 'qfdmo/carte/modals/a_propos.html' %}
 
-             {# Panel À propos #}
-
-             {# TODO: refacto turbo, should be moved outside of form #}
-             {% include 'qfdmo/carte/modals/a_propos.html' %}
-
-             {{ form.epci_codes }}
-         </form>
-     </turbo-frame>
-
-     {% include 'qfdmo/reparacteur_modale.html' %}
- {% endblock %}
+    {{ form.epci_codes }}
+{% endblock everything_else %}
