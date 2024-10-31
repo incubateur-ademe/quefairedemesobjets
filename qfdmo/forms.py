@@ -179,13 +179,13 @@ class AddressesForm(forms.Form):
         ),
         label=mark_safe(
             "<span class='fr-icon--sm fr-icon-percent-line'></span>"
-            "&nbsp;Éligible au bonus réparation"
+            "&nbsp;Propose le Bonus Réparation"
         ),
         help_text=mark_safe(
             "Afficher uniquement les adresses éligibles (uniquement valable lorsque l'"
             "action « réparer » est sélectionnée). En savoir plus sur le site <a href="
             '"https://www.ecologie.gouv.fr/bonus-reparation" target="_blank"'
-            ' rel="noreferrer" title="Bonus réparation - Nouvelle fenêtre">Bonus'
+            ' rel="noreferrer" title="Bonus Réparation - Nouvelle fenêtre">Bonus'
             " réparation</a>"
         ),
         label_suffix="",
