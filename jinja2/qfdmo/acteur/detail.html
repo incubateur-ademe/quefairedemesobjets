@@ -1,6 +1,6 @@
 
 {% if adresse.labels.filter(afficher=True, bonus=True, type_enseigne=False) %}
-    <p class="fr-tag fr-tag--icon-left fr-icon-percent-line" data-testid='adresse_detail_header_tag'>Éligible au bonus réparation</p>
+    <p class="fr-tag fr-tag--icon-left fr-icon-percent-line" data-testid='adresse_detail_header_tag'>Propose le Bonus Réparation</p>
 {% elif adresse.labels.filter(afficher=True, type_enseigne=False).count() == 1 %}
     {% with source_or_label=adresse.labels.filter(afficher=True, type_enseigne=False).first() %}
         {% if source_or_label.logo_file %}
@@ -282,7 +282,7 @@
                     <div class="fr-card__content">
                         <h3 class="fr-card__title fr-text--md">
                             <a href="https://www.ecologie.gouv.fr/bonus-reparation" target="_blank" title="Bonus réparation - Nouvelle fenêtre" rel="noreferrer">
-                                <span class='fr-icon--sm fr-icon-percent-line'></span>&nbsp;Éligible au bonus réparation
+                                <span class='fr-icon--sm fr-icon-percent-line'></span>&nbsp;Propose le Bonus Réparation
                             </a>
                         </h3>
                         <p class="fr-card__desc">Découvrez les réparations pour lesquelles vous pouvez bénéficier d'une aide et faites des économies</p>
