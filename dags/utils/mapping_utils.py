@@ -116,11 +116,9 @@ def transform_float(x):
         return None
 
 
-def process_reparacteurs(df, df_sources, df_acteurtype):
+def process_reparacteurs(df, df_sources, df_acteurtype, source_code):
     df["produitsdechets_acceptes"] = df.apply(combine_categories, axis=1)
-    df["source_id"] = get_id_from_code(
-        "CMA - Chambre des métiers et de l'artisanat", df_sources
-    )
+    df["source_id"] = get_id_from_code(source_code, df_sources)
     # TODO : on pourrait gérer en configuration les colonne qui sont pareil pour tous
     df["labels_etou_bonus"] = "reparacteur"
     df["type_de_point_de_collecte"] = None

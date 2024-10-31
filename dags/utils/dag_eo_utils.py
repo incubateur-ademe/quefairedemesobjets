@@ -275,14 +275,17 @@ def serialize_to_json(**kwargs):
 
 
 def read_acteur(**kwargs):
+    source_code = kwargs["params"].get("source_code", [])
     df_data_from_api = kwargs["ti"].xcom_pull(task_ids="fetch_data_from_api")
     df_sources = kwargs["ti"].xcom_pull(task_ids="read_source")
 
-    df_data_from_api["source_id"] = df_data_from_api["ecoorganisme"].apply(
-        lambda x: mapping_utils.get_id_from_code(x, df_sources)
-    )
-
-    unique_source_ids = df_data_from_api["source_id"].unique()
+    if source_code:
+        unique_source_ids = [mapping_utils.get_id_from_code(source_code, df_sources)]
+    else:
+        df_data_from_api["source_id"] = df_data_from_api["ecoorganisme"].apply(
+            lambda x: mapping_utils.get_id_from_code(x, df_sources)
+        )
+        unique_source_ids = df_data_from_api["source_id"].unique()
 
     pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
     engine = pg_hook.get_sqlalchemy_engine()
@@ -433,6 +436,7 @@ def create_actors(**kwargs):
 
     params = kwargs["params"]
     reparacteurs = params.get("reparacteurs", False)
+    source_code = params.get("source_code")
     label_bonus_reparation = params.get("label_bonus_reparation")
     column_mapping = params.get("column_mapping", {})
     column_to_drop = params.get("column_to_drop", [])
@@ -456,7 +460,9 @@ def create_actors(**kwargs):
     for k, val in column_to_replace.items():
         df[k] = val
     if reparacteurs:
-        df = mapping_utils.process_reparacteurs(df, df_sources, df_acteurtype)
+        df = mapping_utils.process_reparacteurs(
+            df, df_sources, df_acteurtype, source_code
+        )
     else:
         df = mapping_utils.process_actors(df)
 
