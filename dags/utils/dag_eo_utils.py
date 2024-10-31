@@ -448,7 +448,7 @@ def create_actors(**kwargs):
     column_to_drop = params.get("column_to_drop", [])
     column_to_replace = params.get("default_column_value", {})
 
-    if params.get("multi_ecoorganisme"):
+    if params.get("merge_duplicated_acteurs"):
         df = merge_duplicates(
             df,
             group_column="id_point_apport_ou_reparation",
