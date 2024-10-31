@@ -1,9 +1,25 @@
 {% extends "qfdmo/shared/_header.html" %}
 
 {% block content %}
-{# Panel «Filtres avancés» #}
-{% include 'qfdmo/formulaire/advanced_filters.html' %}
+<div>
+    {# Panel «Filtres avancés» #}
+    {% include 'qfdmo/formulaire/advanced_filters.html' %}
 
-{# Panel «Modifier ma recherche» #}
-{% include 'qfdmo/formulaire/update_search.html' %}
+    {# Panel «Modifier ma recherche» #}
+    {% include 'qfdmo/formulaire/update_search.html' %}
+
+    <div data-search-solution-form-target="headerAddressPanel">
+        {# Digital #}
+        <fieldset class="fr-segmented fr-segmented--sm qfdmo-w-full ">
+            <legend class="fr-segmented__legend qfdmo-hidden">
+                {{ form.digital.label_tag() }}
+            </legend>
+            {{ form.digital }}
+        </fieldset>
+
+        <h4 class="fr-my-1w fr-h6">
+            Vos {% if form.digital.value() == "1" %}résultats{% else %}adresses{% endif %} {% if form.sous_categorie_objet.value() %}pour «{{ form.sous_categorie_objet.value() }}»{% endif %}&nbsp;:
+        </h4>
+    </div>
+</div>
 {% endblock content %}

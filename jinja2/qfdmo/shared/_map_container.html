@@ -1,22 +1,35 @@
-{% if request.GET["digital"] == "1" %}
-    {% include "qfdmo/carte/_digital_results.html" %}
-{% else %}
-    {# Near by addresses#}
-    <div
-        class="
-        qfdmo-flex-grow
-        {# 120px below must mastch the header height #}
-        md:qfdmo-max-h-[calc(100vh-120px)]
-        max-md:qfdmo-sticky max-md:qfdmo-top-[120px] md:qfdmo-relative
-        qfdmo-shadow qfdmo-overflow-hidden
-        qfdmo-max-h-[calc(100vh-350px)]
-        "
-        data-controller="map"
-        data-action="map:captureInteraction->analytics#captureInteractionWithMap"
-        data-map-location-value="{{ location }}"
-    >
-        {{ form.bounding_box }}
-        <div id="map" class="qfdmo-h-screen qfdmo-inset-0">
+{#
+We need to set a size on the map to help Leaflet size its content.
+We do not want the map to be bigger than the height of its container
+
+The values of 120px and 150px are determined empirically.
+They need to match the css variables used for .grid-map selector in qfdmo.css
+#}
+
+<div
+    class="
+    qfdmo-relative
+    qfdmo-flex-grow
+    {% if is_carte %}
+    qfdmo-h-[calc(100vh_-_120px)]
+    {% else %}
+    qfdmo-h-[calc(100vh_-_250px)]
+    {% endif %}
+    md:qfdmo-relative
+    qfdmo-shadow
+    "
+>
+    {% if is_digital %}
+        {% include "qfdmo/carte/_digital_results.html" %}
+    {% else %}
+        {# Near by addresses#}
+        <div
+            id="map"
+            class="qfdmo-inset-0 qfdmo-h-full"
+            data-controller="map"
+            data-action="map:captureInteraction->analytics#captureInteractionWithMap"
+            data-map-location-value="{{ location }}"
+        >
             {% if is_carte %}
                 <a class="qfdmo-flex lg:qfdmo-hidden
                             qfdmo-bg-white
@@ -30,37 +43,24 @@
                     Proposer une adresse
                 </a>
             {% endif %}
+            {% include "qfdmo/shared/_search_in_zone.html" %}
+
+            {% if is_carte %}
+                {% include "qfdmo/carte/panels/legend.html" %}
+            {% endif %}
+
+            {% with address_ok=(form.initial.adresse or form.initial.bounding_box or acteurs) %}
+                {% include "qfdmo/shared/disclaimers/adresse_missing.html" %}
+                {% include "qfdmo/shared/disclaimers/no_local_solution.html" %}
+            {% endwith %}
+
+            {% for acteur in acteurs %}
+                <script type="application/json" data-map-target="acteur">
+                    {{ acteur.json_acteur_for_display(direction=form.initial.direction, action_list=form.initial.action_list, carte=carte) | safe }}
+                </script>
+            {% endfor %}
         </div>
-        {% include "qfdmo/shared/_search_in_zone.html" %}
+    {% endif %}
 
-        {% if is_carte %}
-            {% include "qfdmo/carte/panels/legend.html" %}
-        {% endif %}
-
-        {% with address_ok=(form.initial.adresse or form.initial.bounding_box or acteurs) %}
-            {% include "qfdmo/shared/disclaimers/adresse_missing.html" %}
-            {% include "qfdmo/shared/disclaimers/no_local_solution.html" %}
-
-        {% endwith %}
-        {% for acteur in acteurs %}
-            <script type="application/json" data-map-target="acteur">
-                {{ acteur.json_acteur_for_display(direction=form.initial.direction, action_list=form.initial.action_list, carte=carte) | safe }}
-            </script>
-        {% endfor %}
-    </div>
-{% endif %}
-{% include "qfdmo/shared/disclaimers/loading_solutions.html" %}
-{% if not is_carte %}
-    <div class="qfdmo-px-2w sm:qfdmo-px-0 qfdmo-duration-300 sm:qfdmo-h-fit sm:qfdmo-mr-1w qfdmo-flex qfdmo-flex-row-reverse" data-search-solution-form-target="proposeAddressPanel">
-        <a class="fr-my-1w fr-btn fr-btn--tertiary qfdmo-whitespace-nowrap qfdmo-w-full sm:qfdmo-w-max qfdmo-flex qfdmo-justify-center"
-            href="{{ url('qfdmo:address-suggestion-form') }}"
-            target="_blank"
-            rel="noreferrer"
-            aria-label="Proposer une adresse - Nouvelle fenêtre"
-        >
-            Proposer une adresse
-        </a>
-    </div>
-{% endif %}
-
-{% include "qfdmo/carte/panels/acteur_detail.html" %}
+    {% include "qfdmo/shared/disclaimers/loading_solutions.html" %}
+</div>

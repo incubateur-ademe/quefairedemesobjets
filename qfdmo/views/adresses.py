@@ -48,6 +48,14 @@ logger = logging.getLogger(__name__)
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
 
 
+class DigitalMixin:
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(is_digital=self.request.GET.get("digital") == "1")
+
+        return context
+
+
 class TurboFormMixin:
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
@@ -85,7 +93,12 @@ class IframeMixin:
         return context
 
 
-class CarteView(TurboFormMixin, IframeMixin, FormView):
+class CarteView(
+    DigitalMixin,
+    TurboFormMixin,
+    IframeMixin,
+    FormView,
+):
     template_name = "qfdmo/carte.html"
 
     def get_initial(self):

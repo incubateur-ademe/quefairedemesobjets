@@ -32,7 +32,7 @@
     </head>
 
     <body
-        class="qfdmo-flex qfdmo-flex-col"
+        class="qfdmo-flex qfdmo-flex-col {% if is_iframe %}max-h-screen{% endif %} {% if not is_carte %}formulaire{% endif %}"
         data-controller="analytics"
     >
         {% if not is_embedded %}
@@ -40,6 +40,7 @@
                 {% include "layout/header.html" %}
             {% endblock %}
         {% endif %}
+
         <main id="solutions">
             <noscript>
                 <div class="fr-container fr-my-3w">
@@ -58,13 +59,16 @@
             </div>
             {% block content %}{% endblock %}
         </main>
+
         {% if not is_embedded %}
             {% block footer %}
                 {% include "layout/footer.html" %}
             {% endblock %}
         {% endif %}
+
         {% block js %}
-        {% endblock %}
+        {% endblock js %}
+
         {% if is_embedded %}
             <script
                 src="https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4.3.6/iframeResizer.contentWindow.js"
@@ -76,7 +80,7 @@
         {% endif %}
 
         {% if request.user.is_authenticated %}
-            <script id="posthog-user">
+            <script type="applicaton/json" id="posthog-user">
                 {
                     "username": "{{ request.user.username }}",
                     "email": "{{ request.user.email }}",
@@ -84,11 +88,11 @@
                 }
             </script>
         {% endif %}
-        <script id="posthog-infos">
+
+        <script type="application/json" id="posthog-infos">
             {
                 "iframe": "{{ is_embedded|tojson }}"
             }
         </script>
-
     </body>
 </html>

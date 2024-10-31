@@ -21,6 +21,13 @@ export class Actor implements DisplayedActeur {
     this.reparer = actorFields.reparer
   }
 }
+export function removeHash() {
+  history.pushState(
+    "",
+    document.title,
+    window.location.pathname + window.location.search,
+  )
+}
 
 export default class extends Controller<HTMLElement> {
   static targets = ["acteur", "searchInZoneButton", "bbox"]
@@ -55,7 +62,7 @@ export default class extends Controller<HTMLElement> {
     }
 
     actorsMap.initEventListener()
-    window.location.hash = null
+    removeHash()
     window.addEventListener("hashchange", this.setActiveActor.bind(this))
   }
 
@@ -80,6 +87,8 @@ export default class extends Controller<HTMLElement> {
     const identifiantUnique = event
       ? new URL(event.newURL).hash.substring(1)
       : window.location.hash.substring(1)
+
+    console.log({ identifiantUnique })
 
     this.dispatch("displayActeur", { detail: { identifiantUnique } })
     this.dispatch("captureInteraction")

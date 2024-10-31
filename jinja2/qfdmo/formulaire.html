@@ -3,19 +3,31 @@
 {% include "qfdmo/partials/featureflip_inputs.html" %}
 
 {% block content_header %}
-{# Panel Filtres avancés et modifier ma recherche #}
-{% include 'qfdmo/formulaire/header.html' %}
+    {# Panel Filtres avancés et modifier ma recherche #}
+    {% include 'qfdmo/formulaire/header.html' %}
 {% endblock content_header %}
 
-
-{% block result %}
-{# Panel «Résultats de la recherche» #}
-{% include 'qfdmo/shared/_result.html' %}
-{% endblock result %}
-
 {% block everything_else %}
-{# Panel «Formulaire de recherche» #}
-{% include 'qfdmo/formulaire/search_form.html' %}
-{# Liens de pieds de page pour iframe #}
-{% include 'qfdmo/_addresses_partials/iframe_footer_links.html' %}
+    {# Panel «Formulaire de recherche» #}
+    {% include 'qfdmo/formulaire/search_form.html' %}
+
 {% endblock everything_else %}
+
+{% block content_footer %}
+    <div
+        class="qfdmo-px-2w sm:qfdmo-px-0 qfdmo-duration-300 sm:qfdmo-h-fit sm:qfdmo-mr-1w qfdmo-flex qfdmo-flex-row-reverse"
+        data-search-solution-form-target="proposeAddressPanel"
+    >
+        <a class="fr-my-1w fr-btn fr-btn--tertiary qfdmo-whitespace-nowrap qfdmo-w-full sm:qfdmo-w-max qfdmo-flex qfdmo-justify-center"
+            href="{{ url('qfdmo:address-suggestion-form') }}"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Proposer une adresse - Nouvelle fenêtre"
+        >
+            Proposer une adresse
+        </a>
+    </div>
+
+    {# Liens de pieds de page pour iframe #}
+    {% include 'qfdmo/_addresses_partials/iframe_footer_links.html' %}
+{% endblock content_footer %}

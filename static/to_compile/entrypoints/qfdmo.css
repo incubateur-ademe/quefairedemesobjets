@@ -267,3 +267,36 @@ DSFR customization for tabs
 .active-pinpoint [data-animated] {
   @apply qfdmo-animate-wave qfdmo-fill-mode-forwards;
 }
+
+.map-grid {
+--footer-height: 0;
+--header-height: 120px;
+min-height: 100vh;
+  display: grid;
+  grid-auto-flow: row dense;
+  /* grid-template-columns: 1fr 400px; */
+  grid-template-columns: 1fr auto;
+  grid-template-rows: var(--header-height) 1.5fr var(--footer-height);
+  gap: 0px 0px;
+  grid-template-areas:
+    "header header"
+    "map detail"
+    "footer footer";
+  > aside {
+    grid-area: detail;
+  }
+  > footer {
+    grid-area: footer;
+  }
+  > header {
+    grid-area: header;
+  }
+  > main {
+    grid-area: map;
+  }
+  .formulaire & {
+      --footer-height: 100px;
+      --header-height: 135px;
+
+  }
+}

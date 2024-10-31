@@ -6,11 +6,6 @@
     {% include 'qfdmo/carte/header.html' %}
 {% endblock content_header %}
 
-{% block result %}
-    {# Panel Result #}
-    {% include 'qfdmo/carte/result.html' %}
-{% endblock result %}
-
 {% block everything_else %}
     {# Panel «Filtres» #}
     {% include 'qfdmo/carte/modals/filters.html' %}
@@ -20,9 +15,11 @@
     {% include 'qfdmo/carte/panels/legend_mobile.html' %}
 
     {# Panel À propos #}
-
     {# TODO: refacto turbo, should be moved outside of form #}
     {% include 'qfdmo/carte/modals/a_propos.html' %}
-
-    {{ form.epci_codes }}
 {% endblock everything_else %}
+
+{% block form %}
+    {{ super() }}
+    {{ form.epci_codes }}
+{% endblock form %}

@@ -201,7 +201,7 @@ export default class extends Controller<HTMLElement> {
     document
       .querySelector("[aria-controls=acteurDetailsPanel][aria-expanded=true]")
       ?.setAttribute("aria-expanded", "false")
-    this.acteurDetailsPanelTarget.dataset.visible = "exit"
+    this.acteurDetailsPanelTarget.dataset.visible = "false"
     this.acteurDetailsPanelTarget.addEventListener(
       "animationend",
       () => {
