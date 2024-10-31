@@ -663,10 +663,6 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource):
         queryset = queryset.exclude(
             identifiant_unique__icontains="_reparation_",
         )
-        # filter les acteur qui on 'cma_reparacteur_' dans le champ identifiant_unique
-        queryset = queryset.exclude(
-            identifiant_unique__icontains="cma_reparacteur_",
-        )
 
         queryset = queryset.prefetch_related(
             "sources",
