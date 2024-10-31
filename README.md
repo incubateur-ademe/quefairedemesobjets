@@ -496,4 +496,4 @@ les robots suivants sont configurés en CI pour inspecter le code :
 
 ### Monitoring applicatif
 
-L'application est monitrée par l'[instance Sentry de beta.gouv.fr](https://sentry.incubateur.net/organizations/betagouv/projects/que-faire-de-mes-objets/?project=115)
+L'application est monitorée par l'[instance Sentry de beta.gouv.fr](https://sentry.incubateur.net/organizations/betagouv/projects/que-faire-de-mes-objets/?project=115)
