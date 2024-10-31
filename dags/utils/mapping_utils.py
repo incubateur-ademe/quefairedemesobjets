@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Any
 
 import pandas as pd
+from utils.formatter import format_libelle_to_code
 
 
 def _clean_number(number: Any) -> str | None:
@@ -58,26 +59,27 @@ def process_phone_number(number, code_postal):
 # TODO : Ajout de tests unitaires
 def transform_acteur_type_id(value, df_acteurtype):
     mapping_dict = {
+        # Here we store key without accents and special characters
         "solution en ligne (site web, app. mobile)": "acteur_digital",
-        "artisan, commerce indépendant": "artisan",
+        "artisan, commerce independant": "artisan",
         "magasin / franchise,"
         " enseigne commerciale / distributeur / point de vente": "commerce",
         "point d'apport volontaire publique": "pav_public",
-        "association, entreprise de l’économie sociale et solidaire (ess)": "ess",
-        "établissement de santé": "ets_sante",
-        "déchèterie": "decheterie",
-        "point d'apport volontaire privé": "pav_prive",
+        "association, entreprise de l'economie sociale et solidaire (ess)": "ess",
+        "etablissement de sante": "ets_sante",
+        "decheterie": "decheterie",
+        "point d'apport volontaire prive": "pav_prive",
         "plateforme inertes": "plateforme_inertes",
         "magasin / franchise, enseigne commerciale / distributeur / point de vente "
         "/ franchise, enseigne commerciale / distributeur / point de vente": "commerce",
-        "point d'apport volontaire éphémère / ponctuel": "pav_ponctuel",
+        "point d'apport volontaire ephemere / ponctuel": "pav_ponctuel",
     }
-    code = mapping_dict.get(value.lower(), None)
+    code = mapping_dict.get(format_libelle_to_code(value), None)
     if code is None:
-        raise ValueError(f"Acteur type {value} not found in mapping")
-    if any(df_acteurtype["code"].str.lower() == code.lower()):
+        raise ValueError(f"Acteur type `{value}` not found in mapping")
+    if any(df_acteurtype["code"].str.lower() == code):
         id_value = df_acteurtype.loc[
-            df_acteurtype["code"].str.lower() == code.lower(), "id"
+            df_acteurtype["code"].str.lower() == code, "id"
         ].values[0]
         return id_value
     else:

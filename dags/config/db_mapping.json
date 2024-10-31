@@ -128,6 +128,9 @@
         "autre equipement electronique",
         "luminaire"
     ],
+    "pep (petits équipements professionnels)": [],
+    "gep froid": [],
+    "gep hors froid": [],
     "panneaux photovoltaïques": "Panneaux photovoltaïques",
     "plâtre": "Plâtre - PMCB (produits et matériaux de construction du bâtiment)",
     "pmcb - bois": "Bois - PMCB (produits et matériaux de construction du bâtiment)",

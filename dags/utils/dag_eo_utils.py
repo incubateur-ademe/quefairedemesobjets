@@ -5,10 +5,10 @@ from typing import Union
 
 import numpy as np
 import pandas as pd
-import unidecode
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from sqlalchemy import text
 from utils import api_utils, base_utils, mapping_utils, shared_constants
+from utils.formatter import format_libelle_to_code
 
 logger = logging.getLogger(__name__)
 
@@ -139,7 +139,7 @@ def create_proposition_services_sous_categories(**kwargs):
                             "souscategorieobjet_id": mapping_utils.get_id_from_code(
                                 sous_categories_value, df_sous_categories_map
                             ),
-                            "souscategorie": product.strip(),
+                            "souscategorie": sous_categories_value,
                         }
                     )
             else:
@@ -612,11 +612,6 @@ def create_actors(**kwargs):
         "metadata": metadata,
         "removed_actors": df_missing_actors,
     }
-
-
-# TODO : où met-on cette fonction de normalisation qui sera util un peu partout
-def format_libelle_to_code(input_str):
-    return unidecode.unidecode(input_str).strip().lower()
 
 
 def create_labels(**kwargs):
