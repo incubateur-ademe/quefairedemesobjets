@@ -280,7 +280,6 @@ def read_acteur(**kwargs):
     df_data_from_api = kwargs["ti"].xcom_pull(task_ids="fetch_data_from_api")
     df_sources = kwargs["ti"].xcom_pull(task_ids="read_source")
 
-    # TODO : raise an error
     if not source_code and "ecoorganisme" not in df_data_from_api.columns:
         raise ValueError(
             "No source code provided and no `ecoorganisme` column in the data"

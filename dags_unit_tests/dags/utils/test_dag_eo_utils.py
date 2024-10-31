@@ -12,6 +12,7 @@ from utils.dag_eo_utils import (
     create_proposition_services,
     create_proposition_services_sous_categories,
     merge_duplicates,
+    read_acteur,
     serialize_to_json,
 )
 
@@ -1890,3 +1891,29 @@ class TestMergeDuplicates:
         )
 
         pd.testing.assert_frame_equal(result_df, expected_df)
+
+
+class TestReadActeur:
+
+    @pytest.mark.parametrize(
+        "df_data_from_api",
+        [
+            (pd.DataFrame()),
+            (
+                pd.DataFrame(
+                    {
+                        "not_ecoorganisme_column": ["value"],
+                    }
+                )
+            ),
+        ],
+    )
+    def test_read_acteur_raises(self, df_data_from_api, df_sources_from_db):
+        mock = MagicMock()
+        mock.xcom_pull.side_effect = lambda task_ids="": {
+            "read_source": df_sources_from_db,
+            "fetch_data_from_api": df_data_from_api,
+        }[task_ids]
+
+        with pytest.raises(ValueError):
+            read_acteur(ti=mock, params={})
