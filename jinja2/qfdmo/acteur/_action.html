@@ -3,6 +3,9 @@
     qfdmo-flex qfdmo-flex-col qfdmo-items-center
     qfdmo-bg-none qfdmo-no-external-link-icon
     qfdmo-space-y-1v
+    {% if mobile_only %}
+    md:qfdmo-hidden
+    {% endif %}
     "
     href="{% block href %}{{ url }}{% endblock href %}"
     title="{{ title }}"

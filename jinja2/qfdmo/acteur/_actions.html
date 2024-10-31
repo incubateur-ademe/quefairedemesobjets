@@ -14,7 +14,7 @@
     {% endif %}
 
     {% if object.telephone %}
-        {% with text="Téléphone",tel=object.telephone,icon="fr-icon-phone-line",extra_classes="fr-btn--secondary-light" %}
+        {% with text="Téléphone",tel=object.telephone,icon="fr-icon-phone-line",extra_classes="fr-btn--secondary-light md:qfdmo-hidden",mobile_only=True %}
             {% include "qfdmo/acteur/_action_tel.html" %}
         {% endwith %}
     {% endif %}

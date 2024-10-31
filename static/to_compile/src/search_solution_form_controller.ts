@@ -112,6 +112,8 @@ export default class extends Controller<HTMLElement> {
   connect() {
     this.displayActionList()
     window.addEventListener("hashchange", this.#setActiveActor.bind(this))
+    // Prevents the leaflet map to move when the user moves panel
+    this.acteurDetailsPanelTarget.addEventListener("touchmove", event => event.stopPropagation())
 
     if (!this.isIframeValue) {
       this.scrollToContent()

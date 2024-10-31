@@ -12,6 +12,10 @@
         {% include "qfdmo/acteur/tabs/sections/adresse.html" %}
     {% endif %}
 
+    {% if object.telephone %}
+        {% include "qfdmo/acteur/tabs/sections/telephone.html" %}
+    {% endif %}
+
     {% if object.description %}
         {% include "qfdmo/acteur/tabs/sections/description.html" %}
     {% endif %}
