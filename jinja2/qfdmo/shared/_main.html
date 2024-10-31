@@ -16,16 +16,15 @@
     ss-cat-object-autocomplete:formSubmit->search-solution-form#advancedSubmit"
     class="
     qfdmo-h-full
+    qfdmo-m-0
     qfdmo-flex qfdmo-flex-col qfdmo-flex-auto
-    qfdmo-relative
-    qfdmo-p-1v
-    "
+    qfdmo-relative"
     >
         <section class="map-grid">
             <header
                 class="
                 qfdmo-flex qfdmo-flex-row sm:qfdmo-items-center
-                max-md:qfdmo-sticky qfdmo-top-0 qfdmo-left-0 qfdmo-right-0 qfdmo-z-30"
+                max-md:qfdmo-sticky qfdmo-top-0 qfdmo-left-0 qfdmo-right-0 qfdmo-z-0"
             >
                 {% block content_header %}
                 {% endblock content_header %}
@@ -39,17 +38,16 @@
             They need to match the css variables used for .grid-map selector in qfdmo.css
             #}
             <main class="
-                {% if is_carte %}
-                qfdmo-h-[calc(100vh_-_120px)]
                 qfdmo-top-[120px]
+                {% if is_carte %}
+                max-md:qfdmo-h-[calc(100vh_-_120px)]
                 {% else %}
-                qfdmo-h-[calc(100vh_-_250px)]
-                qfdmo-top-[250px]
+                max-md:qfdmo-h-[calc(100vh_-_250px)]
                 {% endif %}
                 qfdmo-overflow-scroll
                 qfdmo-flex
                 max-md:qfdmo-sticky
-                qfdmo-z-40
+                qfdmo-z-0
                 ">
                 {% block result %}
                     <turbo-frame id="addressesPanel"
@@ -78,14 +76,13 @@
                 qfdmo-relative
                 qfdmo-z-50
                 qfdmo-flex qfdmo-flex-col
-                qfdmo-min-h-screen
+                max-md:qfdmo-min-h-screen
                 {% if is_carte %}
                 md:qfdmo-h-[calc(100vh_-_120px)]
                 {% else %}
                 md:qfdmo-h-[calc(100vh_-_250px)]
                 {% endif %}
                 max-md:snap-y md:qfdmo-overflow-scroll qfdmo-scroll-mt-[65vh]
-
                 qfdmo-bg-white
                 qfdmo-px-2w
                 md:qfdmo-w-[400px]
