@@ -274,11 +274,17 @@ def serialize_to_json(**kwargs):
     return {"all": {"df": df_joined}, "to_disable": {"df": df_removed_actors}}
 
 
+# TODO : ajout d'un test
 def read_acteur(**kwargs):
     source_code = kwargs["params"].get("source_code", [])
     df_data_from_api = kwargs["ti"].xcom_pull(task_ids="fetch_data_from_api")
     df_sources = kwargs["ti"].xcom_pull(task_ids="read_source")
 
+    # TODO : raise an error
+    if not source_code and "ecoorganisme" not in df_data_from_api.columns:
+        raise ValueError(
+            "No source code provided and no `ecoorganisme` column in the data"
+        )
     if source_code:
         unique_source_ids = [mapping_utils.get_id_from_code(source_code, df_sources)]
     else:
