@@ -48,7 +48,7 @@ logger = logging.getLogger(__name__)
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
 
 
-class TurboFormView(FormView):
+class TurboFormMixin:
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
         self.turbo = request.headers.get("Turbo-Frame")
@@ -64,7 +64,28 @@ class TurboFormView(FormView):
         return context
 
 
-class CarteView(TurboFormView, FormView):
+class IframeMixin:
+    @property
+    def is_embedded(self):
+        return self.is_carte or self.is_iframe
+
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        self.is_carte = "carte" in request.GET
+        self.is_iframe = "iframe" in request.GET
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(
+            is_carte=self.is_carte,
+            is_iframe=self.is_iframe,
+            is_embedded=self.is_embedded,
+        )
+
+        return context
+
+
+class CarteView(TurboFormMixin, IframeMixin, FormView):
     template_name = "qfdmo/carte.html"
 
     def get_initial(self):
@@ -119,8 +140,6 @@ class CarteView(TurboFormView, FormView):
 
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
-
-        self.is_carte = request.GET.get("carte") is not None
         if self.is_carte:
             self.form_class = CarteForm
         else:

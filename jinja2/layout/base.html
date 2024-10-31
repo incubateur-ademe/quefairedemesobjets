@@ -26,7 +26,7 @@
         <script src="{{ static('qfdmo.js') }}"></script>
         {% block javascript_extras %}{% endblock %}
 
-        {% if is_embedded(request) %}
+        {% if is_embedded %}
             <script src="{{ static('iframe_resizer.js') }}"></script>
         {% endif %}
     </head>
@@ -35,7 +35,7 @@
         class="qfdmo-flex qfdmo-flex-col"
         data-controller="analytics"
     >
-        {% if not is_embedded(request) %}
+        {% if not is_embedded %}
             {% block header %}
                 {% include "layout/header.html" %}
             {% endblock %}
@@ -58,14 +58,14 @@
             </div>
             {% block content %}{% endblock %}
         </main>
-        {% if not is_embedded(request) %}
+        {% if not is_embedded %}
             {% block footer %}
                 {% include "layout/footer.html" %}
             {% endblock %}
         {% endif %}
         {% block js %}
         {% endblock %}
-        {% if is_embedded(request) %}
+        {% if is_embedded %}
             <script
                 src="https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4.3.6/iframeResizer.contentWindow.js"
                 integrity="sha512-hBWsS94l8+snzSPo759jDKZ3z3jn3WT4snJZTBaeMPbrCGzDrYdl2pN9EaXjh6IqEZC7wF10qcmp42TPRVgAYQ=="
@@ -86,7 +86,7 @@
         {% endif %}
         <script id="posthog-infos">
             {
-                "iframe": "{{ is_embedded(request)|tojson }}"
+                "iframe": "{{ is_embedded|tojson }}"
             }
         </script>
 

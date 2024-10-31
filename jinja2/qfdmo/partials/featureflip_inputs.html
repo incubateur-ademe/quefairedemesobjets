@@ -1,7 +1,7 @@
-{% if is_iframe(request) %}
+{% if is_iframe %}
     <input type="hidden" name="iframe">
 {% endif %}
-{% if is_carte(request) %}
+{% if is_carte %}
     <input type="hidden" name="carte" data-search-solution-form-target='carte'>
 {% endif %}
 {% if request.GET.get('limit') %}

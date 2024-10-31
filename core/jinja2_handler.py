@@ -12,18 +12,6 @@ from qfdmo.models import DisplayedActeur
 from qfdmo.models.action import get_actions_by_direction
 
 
-def is_embedded(request: HttpRequest) -> bool:
-    return "iframe" in request.GET or "carte" in request.GET
-
-
-def is_carte(request: HttpRequest) -> bool:
-    return "carte" in request.GET
-
-
-def is_iframe(request: HttpRequest) -> bool:
-    return "iframe" in request.GET
-
-
 def action_by_direction(request: HttpRequest, direction: str):
     requested_direction = get_direction(request)
     action_displayed = request.GET.get("action_displayed", "")
@@ -89,9 +77,6 @@ def environment(**options):
             "hide_object_filter": hide_object_filter,
             "distance_to_acteur": distance_to_acteur,
             "display_exclusivite_reparation": display_exclusivite_reparation,
-            "is_embedded": is_embedded,
-            "is_iframe": is_iframe,
-            "is_carte": is_carte,
             "url": reverse,
             "static": static,
             "quote_plus": lambda u: quote_plus(u),

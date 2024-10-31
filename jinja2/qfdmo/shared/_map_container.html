@@ -17,7 +17,7 @@
     >
         {{ form.bounding_box }}
         <div id="map" class="qfdmo-h-screen qfdmo-inset-0">
-            {% if is_carte(request) %}
+            {% if is_carte %}
                 <a class="qfdmo-flex lg:qfdmo-hidden
                             qfdmo-bg-white
                             fr-mb-1w fr-btn fr-btn--icon-left fr-icon-epingle-plus fr-btn--tertiary qfdmo-whitespace-nowrap qfdmo-w-auto qfdmo-justify-center
@@ -33,7 +33,7 @@
         </div>
         {% include "qfdmo/shared/_search_in_zone.html" %}
 
-        {% if is_carte(request) %}
+        {% if is_carte %}
             {% include "qfdmo/carte/panels/legend.html" %}
         {% endif %}
 
@@ -50,7 +50,7 @@
     </div>
 {% endif %}
 {% include "qfdmo/shared/disclaimers/loading_solutions.html" %}
-{% if not is_carte(request) %}
+{% if not is_carte %}
     <div class="qfdmo-px-2w sm:qfdmo-px-0 qfdmo-duration-300 sm:qfdmo-h-fit sm:qfdmo-mr-1w qfdmo-flex qfdmo-flex-row-reverse" data-search-solution-form-target="proposeAddressPanel">
         <a class="fr-my-1w fr-btn fr-btn--tertiary qfdmo-whitespace-nowrap qfdmo-w-full sm:qfdmo-w-max qfdmo-flex qfdmo-justify-center"
             href="{{ url('qfdmo:address-suggestion-form') }}"
