@@ -197,9 +197,17 @@ module.exports = {
           "40%": { transform: "rotate(0deg) scale3d(0.9, 0.9, 1)" },
           "100%": { transform: "rotate(0) scale3d(0.9, 0.9, 1) translateZ(0)" },
         },
+        "modal-appear": {
+          "0%": { opacity: 0, transform: "translateY(0px) scale(0.98)" },
+          "50%": { opacity: 1 },
+          "100%": {
+            transform: "translateY(0px) scale(1)",
+          },
+        },
       },
       animation: {
         wave: "wave 1.5s linear",
+        "modal-appear": "modal-appear 0.3s",
       },
     },
   },

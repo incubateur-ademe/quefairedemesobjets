@@ -1,12 +1,10 @@
 {% extends 'qfdmo/_addresses_partials/filters/panel_filters.html' %}
 
-{% block filters_title %}
-    <h4 class="fr-h4 fr-mt-3w qfdmo-text-center">
-        Filtres
-    </h4>
+{% block modal_title %}
+Filtres
 {% endblock %}
 
-{% block filters_content %}
+{% block modal_content %}
     <input
         id="{{ form.direction.id_for_label}}"
         name="{{ form.direction.html_name}}"
@@ -19,4 +17,4 @@
         {% include 'qfdmo/_addresses_partials/filters/_object_filter.html' %}
     {% endwith %}
     {% include 'qfdmo/_addresses_partials/filters/_labels_filters.html' %}
-{% endblock %}
+{% endblock modal_content %}
