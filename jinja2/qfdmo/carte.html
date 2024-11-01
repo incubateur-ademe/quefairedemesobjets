@@ -7,17 +7,20 @@
 {% endblock content_header %}
 
 {% block everything_else %}
-    {# Panel «Filtres» #}
-    {% include 'qfdmo/carte/modals/filters.html' %}
 
     {# Panel «Legend» #}
     {# TODO: refacto turbo, should be moved outside of form #}
     {% include 'qfdmo/carte/panels/legend_mobile.html' %}
-
-    {# Panel À propos #}
-    {# TODO: refacto turbo, should be moved outside of form #}
-    {% include 'qfdmo/carte/modals/a_propos.html' %}
 {% endblock everything_else %}
+
+{% block content_modals %}
+{# Panel «Filtres» #}
+{% include 'qfdmo/carte/modals/filters.html' %}
+
+{# Panel À propos #}
+{# TODO: refacto turbo, should be moved outside of form #}
+{% include 'qfdmo/carte/modals/a_propos.html' %}
+{% endblock content_modals %}
 
 {% block form %}
     {{ super() }}

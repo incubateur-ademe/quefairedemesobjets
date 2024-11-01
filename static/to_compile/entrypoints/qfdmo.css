@@ -289,6 +289,20 @@ DSFR customization for tabs
 
   > aside {
     grid-area: detail;
+
+    &[aria-hidden=false]:after {
+        /* content: ''; */
+        ---size: 130px;
+        display: block;
+        background: #5555;
+        position: absolute;
+        left: 0;
+        right: 0;
+        z-index: -1;
+        height: var(---size);
+        top: calc(-1 * var(---size));
+        background: linear-gradient(transparent, #3332);
+    }
   }
 
   > footer {

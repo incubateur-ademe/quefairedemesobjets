@@ -23,8 +23,10 @@
         <section class="map-grid">
             <header
                 class="
+                qfdmo-bg-white
                 qfdmo-flex qfdmo-flex-row sm:qfdmo-items-center
-                max-md:qfdmo-sticky qfdmo-top-0 qfdmo-left-0 qfdmo-right-0 qfdmo-z-0"
+                max-md:qfdmo-sticky qfdmo-top-0 qfdmo-left-0 qfdmo-right-0
+                qfdmo-z-20"
             >
                 {% block content_header %}
                 {% endblock content_header %}
@@ -44,7 +46,6 @@
                 {% else %}
                 max-md:qfdmo-h-[calc(100vh_-_250px)]
                 {% endif %}
-                qfdmo-overflow-scroll
                 qfdmo-flex
                 max-md:qfdmo-sticky
                 qfdmo-z-0
@@ -74,17 +75,19 @@
             </main>
             {# Part of this tag style is defined in qfdmo.css because it would have been a bit unreadable as tailwind classes #}
             <aside class="
-                qfdmo-relative qfdmo-z-50
+                qfdmo-relative qfdmo-z-30
                 qfdmo-flex qfdmo-flex-col
-                max-md:qfdmo-min-h-screen
                 {% if is_carte %}md:qfdmo-h-[calc(100vh_-_120px)]{% else %}md:qfdmo-h-[calc(100vh_-_250px)]{% endif %}
                 max-md:qfdmo-snap-y md:qfdmo-overflow-scroll qfdmo-scroll-mt-[65vh]
-                max-md:qfdmo-drop-shadow-xl
+                max-md:qfdmo-snap-mandatory
                 qfdmo-bg-white
                 qfdmo-px-2w
+                qfdmo-drop-shadow-[0_0_100px_rgba(0,0,0,0.3)]
                 aria-[hidden=true]:max-md:qfdmo-animate-out
                 aria-[hidden=true]:max-md:qfdmo-slide-out-to-bottom
                 aria-[hidden=true]:data-[exit-animation-ended=true]:qfdmo-hidden
+                aria-[hidden=false]:max-md:qfdmo-min-h-[calc(100vh_-_200px)]
+                aria-[hidden=true]:max-md:qfdmo-hidden
             "
             tabindex="0"
             id="acteurDetailsPanel"
@@ -99,8 +102,13 @@
             {% endblock content_footer %}
             </footer>
         </section>
+        {% block content_modals %}
+        {% endblock content_modals %}
     </form>
 </turbo-frame>
 
-{% include 'qfdmo/reparacteur_modale.html' %}
 {% endblock content %}
+
+{% block modals %}
+    {% include 'qfdmo/reparacteur_modale.html' %}
+{% endblock modals %}
