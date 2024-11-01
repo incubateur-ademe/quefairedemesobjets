@@ -72,33 +72,24 @@
                     {{ form.bounding_box }}
                 {% endblock form %}
             </main>
+            {# Part of this tag style is defined in qfdmo.css because it would have been a bit unreadable as tailwind classes #}
             <aside class="
-                qfdmo-relative
-                qfdmo-z-50
+                qfdmo-relative qfdmo-z-50
                 qfdmo-flex qfdmo-flex-col
                 max-md:qfdmo-min-h-screen
-                {% if is_carte %}
-                md:qfdmo-h-[calc(100vh_-_120px)]
-                {% else %}
-                md:qfdmo-h-[calc(100vh_-_250px)]
-                {% endif %}
-                max-md:snap-y md:qfdmo-overflow-scroll qfdmo-scroll-mt-[65vh]
+                {% if is_carte %}md:qfdmo-h-[calc(100vh_-_120px)]{% else %}md:qfdmo-h-[calc(100vh_-_250px)]{% endif %}
+                max-md:qfdmo-snap-y md:qfdmo-overflow-scroll qfdmo-scroll-mt-[65vh]
+                max-md:qfdmo-drop-shadow-xl
                 qfdmo-bg-white
                 qfdmo-px-2w
-                md:qfdmo-w-[400px]
-                data-[visible=false]:qfdmo-hidden
-                data-[visible=true]md::qfdmo-animate-in
-                data-[visible=true]:qfdmo-flex
-                data-[visible=true]:md:qfdmo-slide-in-from-right-[400px]
-                data-[visible=exit]:qfdmo-flex
-                data-[visible=exit]:qfdmo-animate-out
-                data-[visible=exit]:qfdmo-slide-out-to-bottom-[100vh]
-                data-[visible=exit]:md:qfdmo-slide-out-to-right-[400px]
+                aria-[hidden=true]:max-md:qfdmo-animate-out
+                aria-[hidden=true]:max-md:qfdmo-slide-out-to-bottom
+                aria-[hidden=true]:data-[exit-animation-ended=true]:qqfdmo-hidden
             "
             tabindex="0"
             id="acteurDetailsPanel"
             data-search-solution-form-target="acteurDetailsPanel"
-            data-visible="false"
+            aria-hidden="true"
             >
                 {% include "qfdmo/carte/panels/acteur_detail.html" %}
             </aside>

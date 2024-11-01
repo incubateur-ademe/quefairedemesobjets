@@ -1,8 +1,7 @@
 {% extends base_template %}
 
 {% block content %}
-<div class="fr-container">
-  <div class="sm:qfdmo-w-[480] qfdmo-bg-white fr-mt-2w">
+<div class="fr-container qfdmo-py-2w">
     <turbo-frame id="acteur-detail">
         <article>
             <header class="qfdmo-mb-2w">
@@ -21,6 +20,5 @@
             {% include "qfdmo/acteur/_tabs.html" %}
         </article>
     </turbo-frame>
-  </div>
 </div>
 {% endblock content %}

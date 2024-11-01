@@ -4,12 +4,12 @@
     class="md:qfdmo-hidden qfdmo-rounded-full qfdmo-w-12w qfdmo-h-1v qfdmo-bg-[#DFDFDF] qfdmo-my-2w qfdmo-mx-auto"
 ></span>
 {# Content #}
-<div class="qfdmo-flex-grow qfdmo-relative snap-center">
+<div class="qfdmo-flex-grow qfdmo-relative qfdmo-snap-center">
     {# Close button #}
     <span
         class="qfdmo-cursor-pointer fr-icon fr-icon-close-line qfdmo-absolute qfdmo-top-0 qfdmo-right-0 qfdmo-text-blue-france-sun-113"
         data-action="click->search-solution-form#hideActeurDetailsPanel"
     >
     </span>
-    <turbo-frame id="acteur-detail"></turbo-frame>
+    <turbo-frame id="acteur-detail" class="qfdmo-animate-in qfdmo-fade-in"></turbo-frame>
 </div>

@@ -177,7 +177,6 @@ export default class extends Controller<HTMLElement> {
   }
 
   #hideAddressesPanel() {
-    // this.backToSearchPanelTarget.classList.add("qfdmo-h-0", "qfdmo-invisible")
     this.backToSearchPanelTarget.dataset.visible = "false"
     this.addressesPanelTarget.dataset.visible = "false"
   }
@@ -193,24 +192,28 @@ export default class extends Controller<HTMLElement> {
     this.scrollToContent()
   }
 
-  showActeurDetailsPanel() {
-    this.acteurDetailsPanelTarget.dataset.visible = "true"
-    this.acteurDetailsPanelTarget.scrollIntoView()
-  }
-
   updateBboxInput(event) {
     this.bboxTarget.value = JSON.stringify(event.detail)
+  }
+
+  #showActeurDetailsPanel() {
+    if (this.acteurDetailsPanelTarget.ariaHidden !== "false") {
+      this.acteurDetailsPanelTarget.ariaHidden = "false"
+    }
+
+    this.acteurDetailsPanelTarget.dataset.exitAnimationEnded = "false"
+    this.acteurDetailsPanelTarget.scrollIntoView()
   }
 
   hideActeurDetailsPanel() {
     document
       .querySelector("[aria-controls=acteurDetailsPanel][aria-expanded=true]")
       ?.setAttribute("aria-expanded", "false")
-    this.acteurDetailsPanelTarget.dataset.visible = "exit"
+    this.acteurDetailsPanelTarget.ariaHidden = "true"
     this.acteurDetailsPanelTarget.addEventListener(
       "animationend",
       () => {
-        this.acteurDetailsPanelTarget.dataset.visible = "false"
+        this.acteurDetailsPanelTarget.dataset.exitAnimationEnded= "true"
       },
       { once: true },
     )
@@ -224,7 +227,7 @@ export default class extends Controller<HTMLElement> {
       .querySelector("[aria-controls='acteurDetailsPanel'][aria-expanded='true']")
       ?.setAttribute("aria-expanded", "false")
     event.currentTarget.setAttribute("aria-expanded", "true")
-    this.showActeurDetailsPanel()
+    this.#showActeurDetailsPanel()
   }
 
   displayActeur(identifiantUnique) {
@@ -240,7 +243,7 @@ export default class extends Controller<HTMLElement> {
     }
     const acteurDetailPath = `/adresse/${identifiantUnique}?${params.toString()}`
     Turbo.visit(acteurDetailPath, { frame: "acteur-detail" })
-    this.showActeurDetailsPanel()
+    this.#showActeurDetailsPanel()
   }
 
   displayActionList() {
