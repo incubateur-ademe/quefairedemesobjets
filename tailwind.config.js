@@ -207,7 +207,7 @@ module.exports = {
       },
       animation: {
         wave: "wave 1.5s linear",
-        "modal-appear": "modal-appear 0.3s",
+        "modal-appear": "modal-appear 0.2s",
       },
     },
   },
