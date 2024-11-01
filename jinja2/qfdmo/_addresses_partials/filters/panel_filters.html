@@ -23,15 +23,15 @@
 
 {% block modal_content %}
     {% with field=form.bonus, legend="Éligibles au bonus réparation" %}
-        {% include "qfdmo/_addresses_partials/filter/_panel_filters" %}
+        {% include "qfdmo/_addresses_partials/filters/_panel_filters.html" %}
     {% endwith %}
 
     {% with field=form.ess, legend="Type d'enseigne ESS" %}
-        {% include "qfdmo/_addresses_partials/filter/_panel_filters" %}
+        {% include "qfdmo/_addresses_partials/filters/_panel_filters.html" %}
     {% endwith %}
 
     {% with field=form.label_reparacteur, legend="Enseignes labellisées Répar’Acteurs", icon="qfdmo/partials/label_reparacteur_icon.html" %}
-        {% include "qfdmo/_addresses_partials/filter/_panel_filters" %}
+        {% include "qfdmo/_addresses_partials/filters/_panel_filters.html" %}
     {% endwith %}
 {% endblock modal_content %}
 
