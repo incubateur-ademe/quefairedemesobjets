@@ -23,7 +23,7 @@
 
 {% block modal_content %}
     {% with field=form.bonus, legend="Éligibles au bonus réparation" %}
-        {% include "qfdmo/_addresses_partials/filters/_panel_filters_filter.html" %}
+        {% include "qfdmo/_addresses_partials/filters/_panel_filters_field.html" %}
     {% endwith %}
 
     {% with field=form.ess, legend="Type d'enseigne ESS" %}
