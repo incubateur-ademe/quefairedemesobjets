@@ -10,14 +10,11 @@ from unit_tests.qfdmo.acteur_factory import (
 
 @pytest.fixture
 def adresse():
-    """Fixture to create a DisplayedActeur instance."""
     return DisplayedActeurFactory()
 
 
 @pytest.fixture
 def get_response(client):
-    """Fixture to create a function for getting a response and parsing BeautifulSoup."""
-
     def _get_response(identifiant_unique):
         url = f"/adresse/{identifiant_unique}"
         response = client.get(url)
@@ -86,50 +83,40 @@ class TestDisplayLabel:
 
 
 @pytest.mark.django_db
-class TestUniquementSurRDV:
-    @pytest.mark.parametrize(
-        "uniquement_sur_rdv",
-        [
-            (True),
-            (False),
-        ],
-    )
-    def test_display_rdv_message(self, adresse, get_response, uniquement_sur_rdv):
-        adresse.uniquement_sur_rdv = uniquement_sur_rdv
-        adresse.save()
-        response, soup = get_response(adresse.identifiant_unique)
+class TestAboutPanel:
+    def assert_about_panel_text(self, soup, expected_text, text_is_expected):
         wrapper = soup.find(attrs={"data-testid": "acteur-detail-about-panel"})
         assert wrapper is not None
-
-        disclaimer_text = "📆 Les services de cet établissement ne sont disponibles "
-        "que sur rendez-vous."
-        if uniquement_sur_rdv:
-            assert disclaimer_text in wrapper.text
+        if text_is_expected:
+            assert expected_text in wrapper.text
         else:
-            assert disclaimer_text not in wrapper.text
+            assert expected_text not in wrapper.text
 
+    @pytest.mark.parametrize(
+        "uniquement_sur_rdv", [True, False], ids=["With RDV", "Without RDV"]
+    )
+    def test_display_rdv_message(self, adresse, get_response, uniquement_sur_rdv):
+        expected_text = "📆 Les services de cet établissement ne sont disponibles"
+        " que sur rendez-vous."
+        adresse.uniquement_sur_rdv = uniquement_sur_rdv
+        adresse.save()
 
-@pytest.mark.django_db
-class TestExclusiviteReparation:
+        response, soup = get_response(adresse.identifiant_unique)
+        self.assert_about_panel_text(soup, expected_text, uniquement_sur_rdv)
+
     @pytest.mark.parametrize(
         "exclusivite_de_reprisereparation",
-        [
-            (True),
-            (False),
-        ],
+        [True, False],
+        ids=["Exclusive Reparation", "Non-exclusive Reparation"],
     )
     def test_display_reparation_message(
         self, adresse, get_response, exclusivite_de_reprisereparation
     ):
+        expected_text = "Cet établissement ne répare que les produits de ses marques."
         adresse.exclusivite_de_reprisereparation = exclusivite_de_reprisereparation
         adresse.save()
+
         response, soup = get_response(adresse.identifiant_unique)
-        wrapper = soup.find(attrs={"data-testid": "acteur-detail-about-panel"})
-        assert wrapper is not None
-
-        disclaimer_text = "Cet établissement ne répare que les produits de ses marques."
-
-        if exclusivite_de_reprisereparation:
-            assert disclaimer_text in wrapper.text
-        else:
-            assert disclaimer_text not in wrapper.text
+        self.assert_about_panel_text(
+            soup, expected_text, exclusivite_de_reprisereparation
+        )
