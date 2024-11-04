@@ -6,8 +6,19 @@
     {% include 'qfdmo/carte/header.html' %}
 {% endblock content_header %}
 
-{% block everything_else %}
+{% block main_classes %}
+{#
+We need to set a size on the map to help Leaflet size its content.
+We do not want the map to be bigger than the height of its container
 
+The values of 120px is determined empirically.
+They need to match the css variables used for .grid-map selector in qfdmo.css
+#}
+qfdmo-top-[120px]
+max-md:qfdmo-h-[calc(100vh_-_120px)]
+{% endblock main_classes %}
+
+{% block everything_else %}
     {# Panel «Legend» #}
     {# TODO: refacto turbo, should be moved outside of form #}
     {% include 'qfdmo/carte/panels/legend_mobile.html' %}

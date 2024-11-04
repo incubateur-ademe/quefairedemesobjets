@@ -1,17 +1,17 @@
 {# Panel «Formulaire de recherche» #}
 <div
     class="
-    qfdmo-absolute qfdmo-bottom-6w qfdmo-top-0 qfdmo-left-0 qfdmo-right-0 qfdmo-bg-white
+    qfdmo-absolute top-0 right-0 left-0
+    qfdmo-bg-white
     qfdmo-flex-grow
-    qfdmo-px-1v
-    "
+    qfdmo-px-1v"
     data-search-solution-form-target="searchFormPanel"
 >
     <h1 class="qfdmo-sr-only">Longue vie aux objets</h1>
-    <div class="qfdmo-h-full qfdmo-flex qfdmo-flex-row">
-        <div class="qfdmo-flex qfdmo-flex-col qfdmo-w-full sm:qfdmo-max-w-[604px] qfdmo-h-full" data-testid="form-content">
+    <div class="qfdmo-flex">
+        <div data-testid="form-content">
             {# TODO: REFACTO OVERFLOW : supprimer les overflow et le padding left #}
-            <div class="qfdmo-flex-grow qfdmo-overflow-y-auto qfdmo-overflow-x-hidden qfdmo-pl-3v">
+            <div class="qfdmo-flex-grow qfdmo-pl-3v">
                 {# Direction #}
                 <fieldset class="fr-segmented fr-segmented--sm qfdmo-w-full fr-mt-3w">
                     <legend class="fr-segmented__legend qfdmo-hidden">
@@ -42,8 +42,8 @@
                     {% endwith %}
                 </div>
             </div>
-            <div class="fr-my-1w qfdmo-w-full qfdmo-flex qfdmo-flex-col sm:qfdmo-max-w-[604px] qfdmo-mx-auto qfdmo-pl-3v">
 
+            <div class="fr-my-1w qfdmo-w-full qfdmo-flex qfdmo-flex-col sm:qfdmo-max-w-[604px] qfdmo-mx-auto qfdmo-pl-3v">
                 {# Advanced filters #}
                 <button
                     class="fr-my-1w qfdmo-w-full sm:qfdmo-w-fit fr-btn fr-btn--tertiary-no-outline qfdmo-flex qfdmo-justify-center sm:qfdmo-text-left"
@@ -67,6 +67,7 @@
                 </button>
             </div>
         </div>
+
         <div class="fr-p-3w qfdmo-my-auto qfdmo-flex-grow qfdmo-hidden sm:qfdmo-block">
             <img
                 src="{{ static('france_map.svg') }}"

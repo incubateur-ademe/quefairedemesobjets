@@ -2,16 +2,31 @@
 
 {% include "qfdmo/partials/featureflip_inputs.html" %}
 
-{% block content_header %}{% if "turbo" in base_template %}
-        {# Panel Filtres avancés et modifier ma recherche #}
-        {% include 'qfdmo/formulaire/header.html' %}
-    {% endif %}{% endblock content_header %}
+{% block main_classes %}
+{#
+We need to set a size on the map to help Leaflet size its content.
+We do not want the map to be bigger than the height of its container
 
-{% block everything_else %}
-    {# Panel «Formulaire de recherche» #}
-    {% include 'qfdmo/formulaire/search_form.html' %}
+The values of 250px is determined empirically.
+They need to match the css variables used for .grid-map selector in qfdmo.css
+#}
+max-md:qfdmo-h-[calc(100vh_-_250px)]
+{% endblock main_classes %}
 
-{% endblock everything_else %}
+{% block content_header %}
+    {# Panel Filtres avancés et modifier ma recherche #}
+    {% include 'qfdmo/formulaire/header.html' %}
+{% endblock content_header %}
+
+{% block everything_else %}{% endblock everything_else %}
+
+{% block content_modals %}
+{# Panel «Formulaire de recherche» #}
+{% include 'qfdmo/formulaire/search_form.html' %}
+
+{# Panel «Filtres avancés» #}
+{% include 'qfdmo/formulaire/advanced_filters.html' %}
+{% endblock content_modals %}
 
 {% block content_footer %}
     <div

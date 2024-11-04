@@ -4,58 +4,51 @@
 <turbo-frame id="mapContainer">
     {# Controleur général de gestion de la navigation et du formulaire #}
     <form
-    data-controller="search-solution-form" id='search_form'
-    data-search-solution-form-target="searchForm"
-    data-search-solution-form-is-iframe-value="{{ is_embedded }}"
-    data-turbo-frame="addressesPanel"
-    data-action="map:displayActeur->search-solution-form#displayActeur
-    map:updateBbox->search-solution-form#updateBboxInput
-    ss-cat-object-autocomplete:optionSelected->search-solution-form#checkSsCatObjetErrorForm
-    address-autocomplete:optionSelected->search-solution-form#advancedSubmit
-    address-autocomplete:formSubmit->search-solution-form#advancedSubmit
-    ss-cat-object-autocomplete:formSubmit->search-solution-form#advancedSubmit"
-    class="
-    qfdmo-h-full
-    qfdmo-m-0
-    qfdmo-flex qfdmo-flex-col qfdmo-flex-auto
-    qfdmo-relative"
+        data-controller="search-solution-form" id='search_form'
+        data-search-solution-form-target="searchForm"
+        data-search-solution-form-is-iframe-value="{{ is_embedded }}"
+        data-turbo-frame="addressesPanel"
+        data-action="map:displayActeur->search-solution-form#displayActeur
+        map:updateBbox->search-solution-form#updateBboxInput
+        address-autocomplete:formSubmit->search-solution-form#advancedSubmit
+        address-autocomplete:optionSelected->search-solution-form#advancedSubmit
+        ss-cat-object-autocomplete:formSubmit->search-solution-form#advancedSubmit
+        ss-cat-object-autocomplete:optionSelected->search-solution-form#checkSsCatObjetErrorForm"
+        class="
+        qfdmo-h-full
+        qfdmo-m-0
+        qfdmo-flex qfdmo-flex-col qfdmo-flex-auto
+        qfdmo-relative"
     >
         <section class="map-grid">
-            <header
+            <turbo-frame id="header">
+                <header
+                    class="
+                    qfdmo-bg-white
+                    qfdmo-flex qfdmo-flex-row sm:qfdmo-items-center
+                    max-md:qfdmo-sticky qfdmo-top-0 qfdmo-left-0 qfdmo-right-0
+                    qfdmo-z-20"
+                >
+                    {% block content_header %}
+                    {% endblock content_header %}
+                </header>
+            </turbo-frame>
+
+            <main
                 class="
-                qfdmo-bg-white
-                qfdmo-flex qfdmo-flex-row sm:qfdmo-items-center
-                max-md:qfdmo-sticky qfdmo-top-0 qfdmo-left-0 qfdmo-right-0
-                qfdmo-z-20
-                empty:qfdmo-hidden"
-            >{% block content_header %}{% endblock content_header %}</header>
-
-            {#
-            We need to set a size on the map to help Leaflet size its content.
-            We do not want the map to be bigger than the height of its container
-
-            The values of 120px and 150px are determined empirically.
-            They need to match the css variables used for .grid-map selector in qfdmo.css
-            #}
-            <main class="
-                qfdmo-top-[120px]
-                {% if is_carte %}
-                max-md:qfdmo-h-[calc(100vh_-_120px)]
-                {% else %}
-                max-md:qfdmo-h-[calc(100vh_-_250px)]
-                {% endif %}
                 qfdmo-flex
                 max-md:qfdmo-sticky
                 qfdmo-z-0
-                ">
+                {% block main_classes %}
+                {% endblock main_classes %}"
+            >
                 {% block result %}
                     <turbo-frame id="addressesPanel"
                         data-search-solution-form-target="addressesPanel"
-                        class="qfdmo-relative qfdmo-duration-300 qfdmo-z-1
+                        class="qfdmo-relative qfdmo-z-1
                             qfdmo-flex qfdmo-flex-col
                             data-[visible=true]:qfdmo-flex-grow
-                            data-[visible=false]:qfdmo-invisible data-[visible=false]:qfdmo-h-0
-                            "
+                            data-[visible=false]:qfdmo-invisible data-[visible=false]:qfdmo-h-0"
                         data-visible={{"true" if is_carte else "false"}}
                         tabindex="0"
                     >
@@ -71,7 +64,8 @@
                     {{ form.bounding_box }}
                 {% endblock form %}
             </main>
-            {# Part of this tag style is defined in qfdmo.css because it would have been a bit unreadable as tailwind classes #}
+
+            {# Part of this tag' style is defined in qfdmo.css because it would have been a bit unreadable as tailwind classes #}
             <aside class="
                 qfdmo-relative qfdmo-z-30
                 aria-[hidden=false]:qfdmo-flex qfdmo-hidden qfdmo-flex-col
@@ -85,8 +79,7 @@
                 aria-[hidden=true]:max-md:qfdmo-animate-out
                 aria-[hidden=true]:max-md:qfdmo-fade-out
                 aria-[hidden=true]:data-[exit-animation-ended=true]:qfdmo-hidden
-                aria-[hidden=false]:max-md:qfdmo-min-h-[calc(100vh_-_200px)]
-            "
+                aria-[hidden=false]:max-md:qfdmo-min-h-[calc(100vh_-_200px)]"
             tabindex="0"
             id="acteurDetailsPanel"
             data-search-solution-form-target="acteurDetailsPanel"
@@ -104,7 +97,6 @@
         {% endblock content_modals %}
     </form>
 </turbo-frame>
-
 {% endblock content %}
 
 {% block modals %}
