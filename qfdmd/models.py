@@ -2,21 +2,56 @@ from django.contrib.gis.db import models
 
 
 class Produit(models.Model):
-    libelle = models.CharField(
+    id = models.IntegerField(
+        primary_key=True,
+        help_text="Correspond à l'identifiant ID défini dans les données "
+        "<i>Que Faire</i>.",
+    )
+    nom = models.CharField(
         unique=True,
         blank=True,
         help_text="Ce champ est facultatif et n'est utilisé que "
         "dans l'administration Django.",
         verbose_name="Libellé",
     )
-    id = models.IntegerField(
-        primary_key=True,
-        help_text="Correspond à l'identifiant ID défini dans les données "
-        "<i>Que Faire</i>.",
+    synonymes_existants = models.TextField(blank=True, help_text="Synonymes existants")
+    code = models.CharField(blank=True, help_text="Code")
+
+    bdd = models.CharField(blank=True, help_text="Bdd")
+
+    comment_les_eviter = models.TextField(blank=True, help_text="Comment les éviter ?")
+    qu_est_ce_que_j_en_fais = models.TextField(
+        blank=True, help_text="Qu'est-ce que j'en fais ?"
+    )
+
+    que_va_t_il_devenir = models.TextField(
+        blank=True, help_text="Que va-t-il devenir ?"
+    )
+    nom_eco_organisme = models.TextField(blank=True, help_text="Nom de l’éco-organisme")
+    filieres_rep = models.TextField(blank=True, help_text="Filière(s) REP concernée(s)")
+    slug = models.CharField(blank=True, help_text="Slug - ne pas modifier")
+
+    def __str__(self):
+        return f"{self.id} - {self.nom}"
+
+
+class Lien(models.Model):
+    titre_du_lien = models.CharField(blank=True, unique=True, help_text="Titre du lien")
+    url = models.URLField(blank=True, help_text="URL", max_length=300)
+    description = models.TextField(blank=True, help_text="Description")
+    produits = models.ManyToManyField(
+        Produit, related_name="liens", help_text="Produits associés"
     )
 
     def __str__(self):
-        return "%s %s" % (self.id, self.libelle)
+        return self.titre_du_lien
 
-    class Meta:
-        verbose_name = "Produit"
+
+class Synonyme(models.Model):
+    nom = models.CharField(blank=True, unique=True, help_text="Nom du produit")
+    produit = models.ForeignKey(
+        Produit, related_name="synonymes", on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return self.nom
