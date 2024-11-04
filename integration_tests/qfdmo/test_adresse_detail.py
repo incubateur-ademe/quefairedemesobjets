@@ -122,7 +122,7 @@ class TestDisplayLabel:
         soup = BeautifulSoup(response.content, "html.parser")
         label_tag = soup.find(attrs={"data-testid": "adresse_detail_header_tag"})
         assert label_tag is not None
-        assert "Éligible au bonus réparation" in label_tag.text
+        assert "Propose le Bonus Réparation" in label_tag.text
 
     def test_display_bonus_first_label(self, client):
         adresse = DisplayedActeurFactory()
@@ -155,7 +155,7 @@ class TestDisplayLabel:
         soup = BeautifulSoup(response.content, "html.parser")
         label_tag = soup.find(attrs={"data-testid": "adresse_detail_header_tag"})
         assert label_tag is not None
-        assert "Éligible au bonus réparation" in label_tag.text
+        assert "Propose le Bonus Réparation" in label_tag.text
 
     def test_display_label_before_ess(self, client):
         adresse = DisplayedActeurFactory()
