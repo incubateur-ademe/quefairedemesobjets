@@ -14,9 +14,9 @@ async function openAdvancedFilters(page, dataTestId="advanced-filters") {
   // Explicitely wait for addresses to load
   await page.waitForTimeout(5000);
   await page.locator(`button[data-testid=${dataTestId}]`).click()
-  await expect(page.locator("[data-testid=advanced-filters-modal] .fr-modal__content h4")).toBeInViewport()
+  await expect(page.locator("[data-testid=advanced-filters-modal] .fr-modal__content h2")).toBeInViewport()
   await page.locator("[data-testid=advanced-filters-modal] .fr-modal__header button").click()
-  await expect(page.locator("[data-testid=advanced-filters-modal] .fr-modal__content h4")).toBeHidden()
+  await expect(page.locator("[data-testid=advanced-filters-modal] .fr-modal__content h2")).toBeHidden()
 }
 
 test("Filtres avancés s'ouvrent et se ferment en mode iframe", async ({ page }) => {
