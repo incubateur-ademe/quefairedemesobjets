@@ -26,11 +26,9 @@
                 qfdmo-bg-white
                 qfdmo-flex qfdmo-flex-row sm:qfdmo-items-center
                 max-md:qfdmo-sticky qfdmo-top-0 qfdmo-left-0 qfdmo-right-0
-                qfdmo-z-20"
-            >
-                {% block content_header %}
-                {% endblock content_header %}
-            </header>
+                qfdmo-z-20
+                empty:qfdmo-hidden"
+            >{% block content_header %}{% endblock content_header %}</header>
 
             {#
             We need to set a size on the map to help Leaflet size its content.
@@ -76,7 +74,7 @@
             {# Part of this tag style is defined in qfdmo.css because it would have been a bit unreadable as tailwind classes #}
             <aside class="
                 qfdmo-relative qfdmo-z-30
-                aria-[hidden=true]qfdmo-flex qfdmo-hidden qfdmo-flex-col
+                aria-[hidden=false]:qfdmo-flex qfdmo-hidden qfdmo-flex-col
                 {% if is_carte %}md:qfdmo-h-[calc(100vh_-_120px)]{% else %}md:qfdmo-h-[calc(100vh_-_250px)]{% endif %}
                 max-md:qfdmo-snap-y md:qfdmo-overflow-scroll qfdmo-scroll-mt-[65vh]
                 max-md:qfdmo-snap-mandatory

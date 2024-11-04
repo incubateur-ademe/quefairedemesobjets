@@ -1,82 +1,65 @@
+
 import { expect, test } from "@playwright/test"
-import exp = require("constants")
 
-test("iframe is loaded with correct parameter", async ({ page }) => {
-  await page.goto(`http://localhost:8000/test_iframe`, { waitUntil: "networkidle" })
+// Helper function to check iframe attributes
+async function expectIframeAttributes(iframeElement) {
+  const attributes = await Promise.all([
+    iframeElement?.getAttribute("allow"),
+    iframeElement?.getAttribute("src"),
+    iframeElement?.getAttribute("frameborder"),
+    iframeElement?.getAttribute("scrolling"),
+    iframeElement?.getAttribute("allowfullscreen"),
+    iframeElement?.getAttribute("style"),
+    iframeElement?.getAttribute("title")
+  ]);
 
-  const titlePage = await page.title()
-  expect(titlePage).toBe("IFrame test : QFDMO")
+  const [
+    allow, src, frameborder, scrolling, allowfullscreen, style, title
+  ] = attributes;
 
-  // Check if the iframe is loaded
-  const iframeElement = await page.$("iframe")
+  expect(allow).toBe("geolocation; clipboard-write");
+  expect(src).toBe(
+    "http://localhost:8000?iframe=1&direction=jai&first_dir=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre"
+  );
+  expect(frameborder).toBe("0");
+  expect(scrolling).toBe("no");
+  expect(allowfullscreen).toBe("true");
+  expect(style).toContain("width: 100%;");
+  expect(style).toContain("height: 100vh;");
+  expect(style).toContain("max-width: 800px;");
+  expect(title).toBe("Longue vie aux objets");
+}
 
-  // test attribute allow="geolocation" is present
-  const iframeAllowAttribute = await iframeElement?.getAttribute("allow")
-  expect(iframeAllowAttribute).toBe("geolocation; clipboard-write")
+test("iframe is loaded with correct parameters", async ({ page }) => {
+  await page.goto("http://localhost:8000/test_iframe", { waitUntil: "networkidle" });
 
-  // <iframe  ></iframe>
-  const iframeSrcAttribute = await iframeElement?.getAttribute("src")
-  expect(iframeSrcAttribute).toBe(
-    "http://localhost:8000?iframe=1&direction=jai&first_dir=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre",
-  )
+  const titlePage = await page.title();
+  expect(titlePage).toBe("IFrame test : QFDMO");
 
-  const iframeFrameborderAttribute = await iframeElement?.getAttribute("frameborder")
-  expect(iframeFrameborderAttribute).toBe("0")
-  const iframeScrollingAttribute = await iframeElement?.getAttribute("scrolling")
-  expect(iframeScrollingAttribute).toBe("no")
-  const iframeAllowfullscreenAttribute =
-    await iframeElement?.getAttribute("allowfullscreen")
-  expect(iframeAllowfullscreenAttribute).toBe("true")
-  const iframeStyleAttribute = await iframeElement?.getAttribute("style")
-  expect(iframeStyleAttribute).toContain("width: 100%;")
-  expect(iframeStyleAttribute).toContain("height: 100vh;")
-  expect(iframeStyleAttribute).toContain("max-width: 800px;")
-  const iframeTitleAttribute = await iframeElement?.getAttribute("title")
-  expect(iframeTitleAttribute).toBe("Longue vie aux objets")
-})
+  const iframeElement = await page.$("iframe");
+  await expectIframeAttributes(iframeElement);
+});
 
-test("the form is visible in the iframe", async ({ page }) => {
-  await page.goto(`http://localhost:8000/test_iframe`, { waitUntil: "networkidle" })
+test("form is visible in the iframe", async ({ page }) => {
+  await page.goto("http://localhost:8000/test_iframe", { waitUntil: "networkidle" });
 
-  const iframeElement = await page.$("iframe")
-  const iframe = await iframeElement?.contentFrame()
-  const form = await iframe?.$("#search_form")
-  expect(form).not.toBeNull()
+  const iframeElement = await page.$("iframe");
+  const iframe = await iframeElement?.contentFrame();
+  const form = await iframe?.$("#search_form");
+  expect(form).not.toBeNull();
 
-  const height = await iframe?.$eval(
-    "[data-test-id='form-content']",
-    (el) => (el as HTMLElement).offsetHeight,
-  )
-  expect(height).toBeGreaterThan(600)
-})
+  const formHeight = await iframe?.$eval("[data-testid='form-content']", el => el.offsetHeight);
+  expect(formHeight).toBeGreaterThan(600);
+});
 
-// test("rechercher dans cette zone", async ({ page }) => {
-//   await page.goto(`http://localhost:8000/test_iframe?carte=1`, {
-//     waitUntil: "networkidle",
-//   })
-//   await page.frameLocator("#lvao_iframe").locator("#djHideToolBarButton").click()
-//   expect(page.frameLocator("#lvao_iframe").getByTestId("searchInZone")).toBeHidden()
-//   await page.locator("#lvao_iframe").hover()
-//   await page.mouse.down()
-//   await page.mouse.move(2000, 2000)
-//   await page.mouse.up()
-//   await page.waitForTimeout(2000) // ensures iframe has enough time to load properly
-//   expect(page.frameLocator("#lvao_iframe").getByTestId("searchInZone")).toBeVisible()
-// })
+test("iframe with 0px parent height displays correctly", async ({ page }) => {
+  await page.goto("http://localhost:8000/test_iframe?carte=1", { waitUntil: "networkidle" });
+  await expect(page).toHaveScreenshot("iframe.png");
 
-test("iframe loaded with 0px parent height looks good", async ({ page }) => {
-  await page.goto(`http://localhost:8000/test_iframe?carte=1`, {
-    waitUntil: "networkidle",
-  })
-  await expect(page).toHaveScreenshot(`iframe.png`)
-  await page.goto(`http://localhost:8000/test_iframe?no-height=1&carte=1`, {
-    waitUntil: "networkidle",
-  })
-  await page.evaluate(() =>
-    document
-      .querySelector("[data-testid=iframe-no-height-wrapper]")
-      ?.setAttribute("style", ""),
-  )
-  await page.waitForTimeout(1000) // ensures iframe has enough time to load properly
-  await expect(page).toHaveScreenshot(`iframe.png`)
-})
+  await page.goto("http://localhost:8000/test_iframe?no-height=1&carte=1", { waitUntil: "networkidle" });
+  await page.evaluate(() => {
+    document.querySelector("[data-testid=iframe-no-height-wrapper]")?.setAttribute("style", "");
+  });
+  await page.waitForTimeout(1000);
+  await expect(page).toHaveScreenshot("iframe.png");
+});

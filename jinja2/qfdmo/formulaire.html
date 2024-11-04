@@ -2,10 +2,10 @@
 
 {% include "qfdmo/partials/featureflip_inputs.html" %}
 
-{% block content_header %}
-    {# Panel Filtres avancés et modifier ma recherche #}
-    {% include 'qfdmo/formulaire/header.html' %}
-{% endblock content_header %}
+{% block content_header %}{% if "turbo" in base_template %}
+        {# Panel Filtres avancés et modifier ma recherche #}
+        {% include 'qfdmo/formulaire/header.html' %}
+    {% endif %}{% endblock content_header %}
 
 {% block everything_else %}
     {# Panel «Formulaire de recherche» #}
