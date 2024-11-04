@@ -13,8 +13,10 @@ Filtres
         data-search-solution-form-target="direction"
     >
     {{ form.action_displayed }}
+
     {% with hidden=hide_object_filter(request) %}
         {% include 'qfdmo/_addresses_partials/filters/_object_filter.html' %}
     {% endwith %}
+
     {% include 'qfdmo/_addresses_partials/filters/_labels_filters.html' %}
 {% endblock modal_content %}
