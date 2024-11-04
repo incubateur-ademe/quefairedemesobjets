@@ -5,9 +5,14 @@
 {% block aria_labelledby %}aboutPanel{% endblock aria_labelledby %}
 
 {% block content %}
-<div class="
-    qfdmo-space-y-3v
-">
+<div class="qfdmo-space-y-3v"
+    data-testid="acteur-detail-about-panel"
+>
+
+    {% if object.exclusivite_de_reprisereparation %}
+        Cet établissement ne répare que les produits de ses marques.
+    {% endif %}
+
     {% if object.adresse %}
         {% include "qfdmo/acteur/tabs/sections/adresse.html" %}
     {% endif %}
@@ -28,7 +33,7 @@
         {% include "qfdmo/acteur/tabs/sections/bonus.html" %}
     {% endif %}
 
-    {% if object.horaires_description %}
+    {% if object.horaires_description or object.uniquement_sur_rdv %}
         {% include "qfdmo/acteur/tabs/sections/horaires.html" %}
     {% endif %}
 

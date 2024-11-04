@@ -3,10 +3,10 @@
     class="fr-tag fr-tag--sm fr-tag--icon-left {{ icon }}"
     {% if id %}data-testid="{{ id }}"{% endif %}
 >
-    {% if icon_url %}
+    {% if icon_image %}
         <img
             class="fr-mr-1w"
-            src="{{ icon_url }}"
+            src="{{ icon_image.url }}"
             alt="Ademe - Agence de la transition écologique"
             class="qfdmo-cursor-pointer"
             width=16
