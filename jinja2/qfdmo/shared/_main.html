@@ -76,7 +76,7 @@
             {# Part of this tag style is defined in qfdmo.css because it would have been a bit unreadable as tailwind classes #}
             <aside class="
                 qfdmo-relative qfdmo-z-30
-                qfdmo-flex qfdmo-flex-col
+                aria-[hidden=true]qfdmo-flex qfdmo-hidden qfdmo-flex-col
                 {% if is_carte %}md:qfdmo-h-[calc(100vh_-_120px)]{% else %}md:qfdmo-h-[calc(100vh_-_250px)]{% endif %}
                 max-md:qfdmo-snap-y md:qfdmo-overflow-scroll qfdmo-scroll-mt-[65vh]
                 max-md:qfdmo-snap-mandatory
