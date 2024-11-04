@@ -6,6 +6,8 @@
     {% include 'qfdmo/carte/header.html' %}
 {% endblock content_header %}
 
+{% block form_controller_data_actions %}address-autocomplete:optionSelected->search-solution-form#advancedSubmit{% endblock form_controller_data_actions %}
+
 {% block main_classes %}
 {#
 We need to set a size on the map to help Leaflet size its content.

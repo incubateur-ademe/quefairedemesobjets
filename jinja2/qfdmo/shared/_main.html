@@ -11,9 +11,9 @@
         data-action="map:displayActeur->search-solution-form#displayActeur
         map:updateBbox->search-solution-form#updateBboxInput
         address-autocomplete:formSubmit->search-solution-form#advancedSubmit
-        address-autocomplete:optionSelected->search-solution-form#advancedSubmit
         ss-cat-object-autocomplete:formSubmit->search-solution-form#advancedSubmit
-        ss-cat-object-autocomplete:optionSelected->search-solution-form#checkSsCatObjetErrorForm"
+        ss-cat-object-autocomplete:optionSelected->search-solution-form#checkSsCatObjetErrorForm
+        {% block form_controller_data_actions %}{% endblock form_controller_data_actions %}"
         class="
         qfdmo-h-full
         qfdmo-m-0
