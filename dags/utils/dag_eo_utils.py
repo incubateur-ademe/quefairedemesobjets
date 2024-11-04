@@ -274,7 +274,6 @@ def serialize_to_json(**kwargs):
     return {"all": {"df": df_joined}, "to_disable": {"df": df_removed_actors}}
 
 
-# TODO : ajout d'un test
 def read_acteur(**kwargs):
     source_code = kwargs["params"].get("source_code", [])
     df_data_from_api = kwargs["ti"].xcom_pull(task_ids="fetch_data_from_api")
