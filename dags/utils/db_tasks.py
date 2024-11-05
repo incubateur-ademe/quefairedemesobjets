@@ -8,3 +8,9 @@ def read_data_from_postgres(**kwargs):
     engine = pg_hook.get_sqlalchemy_engine()
     df = pd.read_sql_table(table_name, engine)
     return df
+
+
+def read_mapping_from_postgres(**kwargs):
+    df = read_data_from_postgres(**kwargs)
+    code_id_dict = dict(zip(df["code"], df["id"]))
+    return code_id_dict

@@ -1,36 +1,36 @@
-import unittest
-
 import numpy as np
 import pandas as pd
 import pytest
 from utils import mapping_utils
 
 
-class TestDataTransformations(unittest.TestCase):
-    def setUp(self):
-        self.df_acteurtype = pd.DataFrame(
-            {
-                "code": [
-                    "acteur_digital",
-                    "artisan",
-                    "commerce",
-                ],
-                "id": [1, 2, 3],
-            }
-        )
-        self.df_mapping = pd.DataFrame({"code": ["donner", "preter"], "id": [1, 2]})
+@pytest.fixture
+def acteurtype_id_by_code():
+    return {
+        "acteur_digital": 1,
+        "artisan": 2,
+        "commerce": 3,
+    }
 
-    def test_transform_acteur_type_id(self):
+
+@pytest.fixture
+def df_mapping():
+    return pd.DataFrame({"code": ["donner", "preter"], "id": [1, 2]})
+
+
+class TestDataTransformations:
+
+    def test_transform_acteur_type_id(self, acteurtype_id_by_code):
         value = "Solution en ligne (site web, app. mobile)"
         expected_id = 1
-        result_id = mapping_utils.transform_acteur_type_id(value, self.df_acteurtype)
-        self.assertEqual(result_id, expected_id)
+        result_id = mapping_utils.transform_acteur_type_id(value, acteurtype_id_by_code)
+        assert result_id == expected_id
 
-    def test_get_id_from_code(self):
+    def test_get_id_from_code(self, df_mapping):
         value = "donner"
         expected_id = 1
-        result_id = mapping_utils.get_id_from_code(value, self.df_mapping)
-        self.assertEqual(result_id, expected_id)
+        result_id = mapping_utils.get_id_from_code(value, df_mapping)
+        assert result_id == expected_id
 
     def test_with_service_a_domicile_only(self):
         row = {
@@ -38,9 +38,7 @@ class TestDataTransformations(unittest.TestCase):
             "identifiant_externe": "123AbC",
             "type_de_point_de_collecte": "Solution en ligne (site web, app. mobile)",
         }
-        self.assertEqual(
-            mapping_utils.create_identifiant_unique(row), "ecoorg_123AbC_d"
-        )
+        assert mapping_utils.create_identifiant_unique(row) == "ecoorg_123AbC_d"
 
     def test_without_service_a_domicile_only(self):
         row = {
@@ -48,7 +46,7 @@ class TestDataTransformations(unittest.TestCase):
             "identifiant_externe": "123AbC",
             "type_de_point_de_collecte": "Artisan, commerce indépendant ",
         }
-        self.assertEqual(mapping_utils.create_identifiant_unique(row), "ecoorg_123AbC")
+        assert mapping_utils.create_identifiant_unique(row), "ecoorg_123AbC"
 
 
 @pytest.mark.parametrize(
@@ -83,21 +81,17 @@ def test_process_phone_number(phone_number, code_postal, expected_phone_number):
     )
 
 
-class TestTransformFloat(unittest.TestCase):
+class TestTransformFloat:
     def test_float(self):
-        self.assertEqual(mapping_utils.transform_float(1.0), 1.0)
+        assert mapping_utils.transform_float(1.0) == 1.0
 
     def test_string(self):
-        self.assertEqual(mapping_utils.transform_float("1,0"), 1.0)
-        self.assertEqual(mapping_utils.transform_float("1.0"), 1.0)
+        assert mapping_utils.transform_float("1,0") == 1.0
+        assert mapping_utils.transform_float("1.0") == 1.0
 
     def test_invalid_string(self):
-        self.assertIsNone(mapping_utils.transform_float("1.0.0"))
-        self.assertIsNone(mapping_utils.transform_float("NaN"))
+        assert not mapping_utils.transform_float("1.0.0")
+        assert not mapping_utils.transform_float("NaN")
 
     def test_invalid_type(self):
-        self.assertIsNone(mapping_utils.transform_float(None))
-
-
-if __name__ == "__main__":
-    unittest.main()
+        assert not mapping_utils.transform_float(None)

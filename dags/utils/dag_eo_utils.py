@@ -45,7 +45,7 @@ def create_proposition_services(**kwargs):
     displayedpropositionservice_max_id = data_dict["displayedpropositionservice_max_id"]
     rows_dict = {}
     merged_count = 0
-    df_actions = kwargs["ti"].xcom_pull(task_ids="read_action")
+    actions_id_by_code = kwargs["ti"].xcom_pull(task_ids="read_action")
 
     conditions = [
         ("point_dapport_de_service_reparation", "reparer"),
@@ -66,7 +66,7 @@ def create_proposition_services(**kwargs):
 
         for condition, action_name in conditions:
             if row.get(condition):
-                action_id = mapping_utils.get_id_from_code(action_name, df_actions)
+                action_id = actions_id_by_code[action_name]
                 key = (action_id, acteur_id)
 
                 if key in rows_dict:
@@ -101,7 +101,12 @@ def create_proposition_services(**kwargs):
 
 def create_proposition_services_sous_categories(**kwargs):
     df = kwargs["ti"].xcom_pull(task_ids="create_proposition_services")["df"]
-    df_sous_categories_map = kwargs["ti"].xcom_pull(task_ids="read_souscategorieobjet")
+    souscategorieobjet_code_by_id = kwargs["ti"].xcom_pull(
+        task_ids="read_souscategorieobjet"
+    )
+    souscategorieobjet_code_by_id = {
+        k.lower(): v for k, v in souscategorieobjet_code_by_id.items()
+    }
     params = kwargs["params"]
     sous_categories_mapping = params.get("product_mapping", {})
     rows_list = []
@@ -126,9 +131,9 @@ def create_proposition_services_sous_categories(**kwargs):
                         rows_list.append(
                             {
                                 "propositionservice_id": row["id"],
-                                "souscategorieobjet_id": mapping_utils.get_id_from_code(
-                                    value, df_sous_categories_map
-                                ),
+                                "souscategorieobjet_id": souscategorieobjet_code_by_id[
+                                    value
+                                ],
                                 "souscategorie": value,
                             }
                         )
@@ -136,9 +141,9 @@ def create_proposition_services_sous_categories(**kwargs):
                     rows_list.append(
                         {
                             "propositionservice_id": row["id"],
-                            "souscategorieobjet_id": mapping_utils.get_id_from_code(
-                                sous_categories_value, df_sous_categories_map
-                            ),
+                            "souscategorieobjet_id": souscategorieobjet_code_by_id[
+                                sous_categories_value
+                            ],
                             "souscategorie": sous_categories_value,
                         }
                     )
@@ -279,17 +284,17 @@ def serialize_to_json(**kwargs):
 def read_acteur(**kwargs):
     source_code = kwargs["params"].get("source_code", None)
     df_data_from_api = kwargs["ti"].xcom_pull(task_ids="fetch_data_from_api")
-    df_sources = kwargs["ti"].xcom_pull(task_ids="read_source")
+    sources_id_by_code = kwargs["ti"].xcom_pull(task_ids="read_source")
 
     if source_code is None and "ecoorganisme" not in df_data_from_api.columns:
         raise ValueError(
             "No source code provided and no `ecoorganisme` column in the data"
         )
     if source_code:
-        unique_source_ids = [mapping_utils.get_id_from_code(source_code, df_sources)]
+        unique_source_ids = [sources_id_by_code[source_code]]
     else:
-        df_data_from_api["source_id"] = df_data_from_api["ecoorganisme"].apply(
-            lambda x: mapping_utils.get_id_from_code(x, df_sources)
+        df_data_from_api["source_id"] = df_data_from_api["ecoorganisme"].map(
+            sources_id_by_code
         )
         unique_source_ids = df_data_from_api["source_id"].unique()
 
@@ -436,8 +441,8 @@ def merge_duplicates(
 
 def create_actors(**kwargs):
     df = kwargs["ti"].xcom_pull(task_ids="fetch_data_from_api")
-    df_acteurtype = kwargs["ti"].xcom_pull(task_ids="read_acteurtype")
-    df_sources = kwargs["ti"].xcom_pull(task_ids="read_source")
+    acteurtype_id_by_code = kwargs["ti"].xcom_pull(task_ids="read_acteurtype")
+    sources_id_by_code = kwargs["ti"].xcom_pull(task_ids="read_source")
     df_acteurs = kwargs["ti"].xcom_pull(task_ids="read_acteur")
 
     params = kwargs["params"]
@@ -467,7 +472,7 @@ def create_actors(**kwargs):
         df[k] = val
     if reparacteurs:
         df = mapping_utils.process_reparacteurs(
-            df, df_sources, df_acteurtype, source_code
+            df, sources_id_by_code, acteurtype_id_by_code, source_code
         )
     else:
         df = mapping_utils.process_actors(df)
@@ -487,13 +492,11 @@ def create_actors(**kwargs):
             elif new_col == "acteur_type_id":
                 df[new_col] = df[old_col].apply(
                     lambda x: mapping_utils.transform_acteur_type_id(
-                        x, df_acteurtype=df_acteurtype
+                        x, acteurtype_id_by_code=acteurtype_id_by_code
                     )
                 )
             elif new_col == "source_id":
-                df[new_col] = df[old_col].apply(
-                    lambda x: mapping_utils.get_id_from_code(x, df_sources)
-                )
+                df[new_col] = df[old_col].map(sources_id_by_code)
             # here we keep the condition on old_col
             elif old_col == "adresse_format_ban":
                 df[["adresse", "code_postal", "ville"]] = df.apply(
@@ -615,17 +618,14 @@ def create_actors(**kwargs):
 
 
 def create_labels(**kwargs):
-    labels = kwargs["ti"].xcom_pull(task_ids="read_labelqualite")
-    df_acteurtype = kwargs["ti"].xcom_pull(task_ids="read_acteurtype")
+    labelqualite_id_by_code = kwargs["ti"].xcom_pull(task_ids="read_labelqualite")
+    acteurtype_id_by_code = kwargs["ti"].xcom_pull(task_ids="read_acteurtype")
     df_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
 
     # Get ESS constant values to use in in the loop
-    ess_acteur_type_id = df_acteurtype.loc[
-        df_acteurtype["code"].str.lower() == "ess", "id"
-    ].iloc[0]
-    ess_label_id = labels.loc[labels["code"].str.lower() == "ess", "id"].iloc[0]
+    ess_acteur_type_id = acteurtype_id_by_code["ess"]
+    ess_label_id = labelqualite_id_by_code["ess"]
 
-    label_mapping = labels.set_index(labels["code"].str.lower()).to_dict(orient="index")
     rows_list = []
     for _, row in df_actors.iterrows():
 
@@ -645,14 +645,14 @@ def create_labels(**kwargs):
             label_ou_bonus = format_libelle_to_code(label_ou_bonus)
             if label_ou_bonus in LABEL_TO_INGNORE:
                 continue
-            if label_ou_bonus not in label_mapping:
+            if label_ou_bonus not in labelqualite_id_by_code.keys():
                 raise ValueError(
                     f"Label ou bonus {label_ou_bonus} not found in database"
                 )
             rows_list.append(
                 {
                     "acteur_id": row["identifiant_unique"],
-                    "labelqualite_id": label_mapping[label_ou_bonus]["id"],
+                    "labelqualite_id": labelqualite_id_by_code[label_ou_bonus],
                 }
             )
 
@@ -664,16 +664,12 @@ def create_labels(**kwargs):
 
 
 def create_acteur_services(**kwargs):
-    df_acteur_services = kwargs["ti"].xcom_pull(task_ids="read_acteurservice")
+    acteurservice_id_by_code = kwargs["ti"].xcom_pull(task_ids="read_acteurservice")
     df_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
 
     acteurservice_acteurserviceid = {
-        "service_de_reparation": mapping_utils.get_id_from_code(
-            "service_de_reparation", df_acteur_services
-        ),
-        "structure_de_collecte": mapping_utils.get_id_from_code(
-            "structure_de_collecte", df_acteur_services
-        ),
+        "service_de_reparation": acteurservice_id_by_code["service_de_reparation"],
+        "structure_de_collecte": acteurservice_id_by_code["structure_de_collecte"],
     }
     acteurservice_eovalues = {
         "service_de_reparation": [

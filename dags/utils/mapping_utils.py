@@ -57,7 +57,7 @@ def process_phone_number(number, code_postal):
 
 
 # TODO : Ajout de tests unitaires
-def transform_acteur_type_id(value, df_acteurtype):
+def transform_acteur_type_id(value, acteurtype_id_by_code):
     mapping_dict = {
         # Here we store key without accents and special characters
         "solution en ligne (site web, app. mobile)": "acteur_digital",
@@ -77,11 +77,8 @@ def transform_acteur_type_id(value, df_acteurtype):
     code = mapping_dict.get(format_libelle_to_code(value), None)
     if code is None:
         raise ValueError(f"Acteur type `{value}` not found in mapping")
-    if any(df_acteurtype["code"].str.lower() == code):
-        id_value = df_acteurtype.loc[
-            df_acteurtype["code"].str.lower() == code, "id"
-        ].values[0]
-        return id_value
+    if code in acteurtype_id_by_code.keys():
+        return acteurtype_id_by_code[code]
     else:
         raise ValueError(f"Acteur type {code.lower()} not found in database")
 
@@ -118,14 +115,14 @@ def transform_float(x):
         return None
 
 
-def process_reparacteurs(df, df_sources, df_acteurtype, source_code):
+def process_reparacteurs(df, sources_id_by_code, acteurtype_id_by_code, source_code):
     df["produitsdechets_acceptes"] = df.apply(combine_categories, axis=1)
-    df["source_id"] = get_id_from_code(source_code, df_sources)
+    df["source_id"] = sources_id_by_code[source_code]
     # TODO : on pourrait gérer en configuration les colonne qui sont pareil pour tous
     df["labels_etou_bonus"] = "reparacteur"
     df["type_de_point_de_collecte"] = None
     df["acteur_type_id"] = transform_acteur_type_id(
-        "artisan, commerce indépendant", df_acteurtype=df_acteurtype
+        "artisan, commerce indépendant", acteurtype_id_by_code=acteurtype_id_by_code
     )
     # TODO : voir si on peut tester les urls dans un opérateur, quite à maintenir
     # un cache des urls validées
