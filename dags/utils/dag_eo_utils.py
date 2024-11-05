@@ -119,6 +119,8 @@ def create_proposition_services_sous_categories(**kwargs):
             product_key = product
             if product_key in sous_categories:
                 sous_categories_value = sous_categories[product_key]
+                if sous_categories_value is None:
+                    continue
                 if isinstance(sous_categories_value, list):
                     for value in sous_categories_value:
                         rows_list.append(
@@ -275,11 +277,11 @@ def serialize_to_json(**kwargs):
 
 
 def read_acteur(**kwargs):
-    source_code = kwargs["params"].get("source_code", [])
+    source_code = kwargs["params"].get("source_code", None)
     df_data_from_api = kwargs["ti"].xcom_pull(task_ids="fetch_data_from_api")
     df_sources = kwargs["ti"].xcom_pull(task_ids="read_source")
 
-    if not source_code and "ecoorganisme" not in df_data_from_api.columns:
+    if source_code is None and "ecoorganisme" not in df_data_from_api.columns:
         raise ValueError(
             "No source code provided and no `ecoorganisme` column in the data"
         )
