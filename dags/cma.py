@@ -1,4 +1,5 @@
 from airflow import DAG
+from utils.base_utils import get_mapping_config
 from utils.eo_operators import default_args, eo_task_chain
 
 with DAG(
@@ -34,7 +35,7 @@ with DAG(
             "update_date": "modifie_le",
             "reparactor_hours": "horaires_description",
         },
-        "mapping_config_key": "sous_categories_cma",
+        "product_mapping": get_mapping_config(mapping_key="sous_categories_cma"),
     },
     schedule=None,
 ) as dag:

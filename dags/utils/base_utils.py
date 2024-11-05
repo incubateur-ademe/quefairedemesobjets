@@ -34,11 +34,11 @@ def get_address(row, col="adresse_format_ban"):
     return pd.Series([address, postal_code, city])
 
 
-def get_mapping_config():
+def get_mapping_config(mapping_key: str = "sous_categories"):
     config_path = Path(__file__).parent.parent / "config" / "db_mapping.json"
     with open(config_path, "r") as f:
         config = json.load(f)
-    return config
+    return config[mapping_key]
 
 
 def get_address_from_ban(address):

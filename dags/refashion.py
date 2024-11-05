@@ -1,4 +1,5 @@
 from airflow import DAG
+from utils.base_utils import get_mapping_config
 from utils.eo_operators import default_args, eo_task_chain
 
 with DAG(
@@ -40,6 +41,7 @@ with DAG(
             "consignes_dacces": "commentaires",
         },
         "label_bonus_reparation": "refashion",
+        "product_mapping": get_mapping_config(),
     },
     schedule=None,
 ) as dag:
