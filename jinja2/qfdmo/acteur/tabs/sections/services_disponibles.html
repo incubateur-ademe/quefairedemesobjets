@@ -9,7 +9,7 @@ Services disponibles
     {% for service in object.sorted_proposition_services %}
         <div class="qfdmo-space-y-1v">
             {% with action=service.action %}
-                {% with content=action.libelle,icon=action.icon,background=action.couleur_claire,border=action.couleur %}
+                {% with content=action.libelle,icon=action.groupe_action.icon,background=action.groupe_action.couleur_claire,border=action.groupe_action.couleur %}
                     {% include "qfdmo/acteur/tabs/_tag.html" %}
                 {% endwith %}
             {% endwith %}

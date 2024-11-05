@@ -682,7 +682,9 @@ class DisplayedActeur(BaseActeur):
 
     @cached_property
     def should_display_adresse(self) -> bool:
-        return self.adresse or self.adresse_complement or self.code_postal or self.ville
+        return bool(
+            self.adresse or self.adresse_complement or self.code_postal or self.ville
+        )
 
 
 class DisplayedActeurTemp(BaseActeur):

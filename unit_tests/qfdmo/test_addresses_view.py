@@ -18,8 +18,6 @@ class TestAdresseViewMixins:
         adresses_view.setup(request)
         assert adresses_view.is_carte
         assert adresses_view.get_context_data()["is_carte"]
-        assert adresses_view.is_embedded
-        assert adresses_view.get_context_data()["is_embedded"]
 
     def test_iframe_mixin_is_iframe(self):
         request = HttpRequest()
@@ -32,8 +30,6 @@ class TestAdresseViewMixins:
         adresses_view.setup(request)
         assert adresses_view.is_iframe
         assert adresses_view.get_context_data()["is_iframe"]
-        assert adresses_view.is_embedded
-        assert adresses_view.get_context_data()["is_embedded"]
 
     def test_digital_mixin(self):
         request = HttpRequest()

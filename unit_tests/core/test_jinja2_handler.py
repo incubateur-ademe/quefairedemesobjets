@@ -3,11 +3,7 @@ from django.contrib.gis.geos import Point
 from django.core.management import call_command
 from django.http import HttpRequest
 
-from core.jinja2_handler import (
-    action_by_direction,
-    display_infos_panel,
-    distance_to_acteur,
-)
+from core.jinja2_handler import action_by_direction, distance_to_acteur
 from qfdmo.models.acteur import ActeurType
 from unit_tests.qfdmo.acteur_factory import ActeurTypeFactory, DisplayedActeurFactory
 
@@ -124,34 +120,6 @@ def adresse():
         adresse="1 rue de la paix",
         location=Point(0, 0),
     )
-
-
-@pytest.mark.django_db
-class TestDisplayInfosPanel:
-
-    def test_display_infos_panel_adresse_not_digital(self, adresse):
-        adresse.horaires_description = None
-        adresse.adresse = "something"
-        assert display_infos_panel(adresse)
-
-        adresse.adresse = None
-        assert not display_infos_panel(adresse)
-
-    def test_display_infos_panel_horaires_not_digital(self, adresse):
-        adresse.horaires_description = "something"
-        adresse.adresse = None
-        assert display_infos_panel(adresse)
-
-        adresse.horaires_description = None
-        assert not display_infos_panel(adresse)
-
-    def test_display_infos_panel_digital(self, adresse):
-        ActeurType._digital_acteur_type_id = 0
-        adresse.acteur_type = ActeurTypeFactory(code="acteur digital")
-        assert not display_infos_panel(adresse)
-
-        adresse.adresse = None
-        assert not display_infos_panel(adresse)
 
 
 @pytest.mark.django_db

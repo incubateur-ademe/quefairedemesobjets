@@ -34,14 +34,6 @@ def action_by_direction(request: HttpRequest, direction: str):
 
 
 # TODO : should be deprecated and replaced by a value in context view
-def display_infos_panel(adresse: DisplayedActeur) -> bool:
-    return (
-        bool(adresse.horaires_description or adresse.should_display_adresse)
-        and not adresse.is_digital
-    )
-
-
-# TODO : should be deprecated and replaced by a value in context view
 def display_exclusivite_reparation(acteur: DisplayedActeur) -> bool:
     return acteur.exclusivite_de_reprisereparation
 
@@ -73,7 +65,6 @@ def environment(**options):
     env.globals.update(
         {
             "action_by_direction": action_by_direction,
-            "display_infos_panel": display_infos_panel,
             "hide_object_filter": hide_object_filter,
             "distance_to_acteur": distance_to_acteur,
             "display_exclusivite_reparation": display_exclusivite_reparation,
