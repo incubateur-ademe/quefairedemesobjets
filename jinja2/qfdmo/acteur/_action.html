@@ -8,11 +8,16 @@
     {% endif %}
     "
     href="{% block href %}{{ url }}{% endblock href %}"
-    title="{{ title }}"
+    {% if title %}title="{{ title }}"{% endif %}
     target="_blank"
     rel="noreferrer"
     {% block data_action %}data_action="click -> analytics#captureInteractionWithSolutionDetails"{% endblock data_action %}
 >
-    <span class="fr-btn fr-btn--sm {{ icon }} qfdmo-rounded-full {{ extra_classes }}"></span>
+    <span class="
+        fr-btn fr-btn--sm
+        qfdmo-rounded-full
+        {% if icon %}{{ icon }}{% endif %}
+        {% if extra_classes %}{{ extra_classes }}{% endif %}">
+    </span>
     <span class="fr-text--xs fr-mb-0 qfdmo-whitespace-nowrap">{{ text }}</span>
 </a>

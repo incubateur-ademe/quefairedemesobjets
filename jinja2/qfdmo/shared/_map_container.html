@@ -12,15 +12,18 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
     qfdmo-flex-grow
     qfdmo-shadow
     "
+    {% if not is_digital %}
+    data-controller="map"
+    {% endif %}
 >
     {% if is_digital %}
         {% include "qfdmo/carte/_digital_results.html" %}
     {% else %}
         {# Near by addresses#}
+        {% include "qfdmo/shared/_search_in_zone.html" %}
         <div
             id="map"
-            class="qfdmo-inset-0 qfdmo-h-full"
-            data-controller="map"
+            class="qfdmo-inset-0 qfdmo-h-full qfdmo-relative qfdmo-z-0"
             data-action="map:captureInteraction->analytics#captureInteractionWithMap"
             data-map-location-value="{{ location }}"
         >
@@ -37,7 +40,6 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
                     Proposer une adresse
                 </a>
             {% endif %}
-            {% include "qfdmo/shared/_search_in_zone.html" %}
 
             {% if is_carte %}
                 {% include "qfdmo/carte/panels/legend.html" %}

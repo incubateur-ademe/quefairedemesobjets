@@ -1,0 +1,78 @@
+<div class="
+    qfdmo-flex qfdmo-flex-col qfdmo-items-center
+    qfdmo-space-y-1v"
+>
+    <button
+        class="fr-btn fr-btn--sm fr-btn--secondary-light fr-icon-share-line qfdmo-rounded-full"
+        aria-describedby="shareTooltip"
+        type="button"
+        data-action="click -> analytics#captureInteractionWithSolutionDetails"
+    >
+        <span class="qfdmo-sr-only">partager</span>
+    </button>
+
+    <div class="fr-tooltip fr-placement" id="shareTooltip" role="tooltip" tabindex="1">
+        <div class="fr-share" role="toolbar">
+            {% with address_url=object.get_share_url(request) %}
+                <ul class="fr-btns-group">
+                    <li>
+                        <a class="fr-btn--facebook fr-btn"
+                           target="_blank"
+                           rel="noreferrer"
+                           title="partager {{ object }} sur Facebook - nouvelle fenêtre"
+                           href="https://www.facebook.com/sharer.php?u={{ quote_plus(address_url) }}"
+                           tabindex="-1"
+                        >
+                            Partager sur Facebook
+                        </a>
+                    </li>
+                    <li>
+                        {# Les paramètres de la reqûete doivent être URI-encodés (ex: encodeURIComponent() en js) #}
+                        <a  class="fr-btn--twitter-x fr-btn"
+                           target="_blank"
+                           rel="noreferrer"
+                           title="partager {{ object }} sur X - nouvelle fenêtre"
+                           href="https://twitter.com/intent/tweet?url={{ quote_plus(address_url) }}&text=Super object trouvée grâce à l'ADEME&via=Longue+vie+aux+objets&hashtags=longuevieauxobjets,ademe"
+                           tabindex="-1"
+                        >
+                            Partager sur X (anciennement Twitter)
+                        </a>
+                    </li>
+                    <li>
+                        <a  class="fr-btn--linkedin fr-btn"
+                           target="_blank"
+                           rel="noreferrer"
+                           title="partager {{ object }} sur LinkedIn - nouvelle fenêtre"
+                           onclick="window.open(this.href,'Partager sur LinkedIn','toolbar=no,location=yes,status=no,menubar=no,scrollbars=yes,resizable=yes,width=550,height=550'); event.preventDefault();"
+                           href="https://www.linkedin.com/shareArticle?url={{ quote_plus(address_url) }}&title=Super object trouvée grâce à l'ADEME"
+                           tabindex="-1"
+                        >
+                            Partager sur LinkedIn
+                        </a>
+                    </li>
+                    <li>
+                        <a  class="fr-btn--mail fr-btn"
+                           target="_blank"
+                           rel="noreferrer"
+                           title="partager {{ object }} par email - nouvelle fenêtre"
+                           href="mailto:?subject=Super object trouvée grâce à l'ADEME&body=Super object trouvée grâce à l'ADEME : {{ quote_plus(address_url) }}"
+                           tabindex="-1"
+                        >
+                            Partager par email
+                        </a>
+                    </li>
+                    <li>
+                        <button class="fr-btn--copy fr-btn"
+                                onclick="navigator.clipboard.writeText('{{ address_url }}').then(function() {alert('Adresse copiée dans le presse papier.')});"
+                                type="button"
+                                tabindex="-1"
+                        >
+                            Copier dans le presse-papier
+                        </button>
+                    </li>
+                </ul>
+            {% endwith %}
+        </div>
+    </div>
+    <span class="fr-text--xs fr-mb-0">Partager</span>
+</div>

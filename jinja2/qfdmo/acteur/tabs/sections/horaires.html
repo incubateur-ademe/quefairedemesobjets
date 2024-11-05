@@ -10,7 +10,10 @@ Horaires
     <p class="qfdmo-font-bold">
         📆 Les services de cet établissement ne sont disponibles que sur rendez-vous.
     </p>
-    {% include "qfdmo/acteur/tabs/_separator.html" %}
+    {% endif %}
+
+    {% if object.uniquement_sur_rdv and object.horaires_description|safe %}
+        {% include "qfdmo/acteur/tabs/_separator.html" %}
     {% endif %}
 
     {{ object.horaires_description|safe }}
