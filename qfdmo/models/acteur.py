@@ -357,9 +357,9 @@ class BaseActeur(NomAsNaturalKeyModel):
         proposition_services = (
             self.proposition_services.all()
             .prefetch_related("sous_categories")
-            .select_related("action")
+            .select_related("action", "action__groupe_action")
         )
-        order = ["action__order"]
+        order = ["action__groupe_action__order", "action__order"]
 
         if action_principale := self.action_principale:
             proposition_services = proposition_services.annotate(
