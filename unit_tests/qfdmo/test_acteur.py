@@ -398,7 +398,6 @@ class TestDisplayActeurActeurActions:
                 "description": None,
                 "order": action.order,
                 "couleur": "#C3992A",
-                "couleur_claire": "#C3992A",
                 "icon": None,
                 "groupe_action": None,
             }
@@ -424,7 +423,6 @@ class TestDisplayActeurActeurActions:
                 "description": None,
                 "order": action.order,
                 "couleur": "#C3992A",
-                "couleur_claire": "#C3992A",
                 "icon": None,
                 "groupe_action": None,
             }
