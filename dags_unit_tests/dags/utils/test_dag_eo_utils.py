@@ -1171,7 +1171,15 @@ class TestSerializeToJson:
 class TestCreatePropositionServicesSousCategories:
     def test_create_proposition_services_sous_categories(self, mock_ti):
 
-        kwargs = {"ti": mock_ti, "params": {}}
+        kwargs = {
+            "ti": mock_ti,
+            "params": {
+                "product_mapping": {
+                    "téléphones portables": "smartphone, tablette et console",
+                    "ecrans": "ecran",
+                }
+            },
+        }
         df_result = create_proposition_services_sous_categories(**kwargs)
 
         pd.testing.assert_frame_equal(
