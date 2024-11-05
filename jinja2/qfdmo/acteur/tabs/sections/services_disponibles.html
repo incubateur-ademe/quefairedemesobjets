@@ -9,15 +9,15 @@ Services disponibles
     {% for service in object.sorted_proposition_services %}
         <div class="qfdmo-space-y-1v">
             {% with action=service.action %}
-                {% with content=action.libelle,icon=action.groupe_action.icon,background=action.groupe_action.couleur_claire,border=action.groupe_action.couleur %}
-                    {% include "qfdmo/acteur/tabs/_tag.html" %}
-                {% endwith %}
+                {% include "qfdmo/acteur/tabs/_service_tag.html" %}
             {% endwith %}
+
             <p class="qfdmo-m-0 qfdmo-text-sm">
             {{ service.sous_categories_display }}
             </p>
         </div>
     {% endfor %}
+
     {% if object.reprise == "1 pour 1" %}
     <div class="fr-callout fr-callout--sm !qfdmo-p-2w">
         <h3 class="fr-callout__title qfdmo-text-base">

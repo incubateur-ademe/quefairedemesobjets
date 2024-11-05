@@ -108,12 +108,12 @@ class GroupeAction(CodeAsNaturalKeyModel):
     afficher = models.BooleanField(default=True)
     description = models.CharField(max_length=255, null=True, blank=True)
     order = models.IntegerField(blank=False, null=False, default=0)
-    couleur = models.CharField(
-        max_length=255,
-        null=True,
-        blank=True,
-        default="yellow-tournesol",
-        help_text=COULEUR_FIELD_HELP_TEXT,
+    couleur = ColorField(
+        null=True, blank=True, default="#C3992A", max_length=255, choices=COLOR_PALETTE
+    )
+
+    couleur_claire = ColorField(
+        null=True, blank=True, default="#C3992A", max_length=255, choices=COLOR_PALETTE
     )
 
     icon = models.CharField(
@@ -147,17 +147,14 @@ class Action(CodeAsNaturalKeyModel):
     order = models.IntegerField(blank=False, null=False, default=0)
     directions = models.ManyToManyField(ActionDirection, related_name="actions")
     couleur = ColorField(
-        null=True, blank=True, default="#C3992A", max_length=255, choices=COLOR_PALETTE
+        null=True,
+        blank=True,
+        default="#C3992A",
+        max_length=255,
+        choices=COLOR_PALETTE,
+        help_text="Cette couleur est utilisée uniquement pour"
+        " la version formulaire (épargnons).",
     )
-
-    @property
-    def couleur_foncee(self):
-        return self.couleur
-
-    couleur_claire = ColorField(
-        null=True, blank=True, default="#C3992A", max_length=255, choices=COLOR_PALETTE
-    )
-
     icon = models.CharField(
         max_length=255,
         null=True,
