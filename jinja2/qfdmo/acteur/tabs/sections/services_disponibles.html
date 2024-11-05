@@ -18,5 +18,17 @@ Services disponibles
             </p>
         </div>
     {% endfor %}
+    {% if object.reprise == "1 pour 1" %}
+    <div class="fr-callout fr-callout--sm !qfdmo-p-2w">
+        <h3 class="fr-callout__title qfdmo-text-base">
+            Information importante
+        </h3>
+        <p class="fr-callout__text fr-text--sm">
+            Cet établissement ne reprend vos objets que dans le cadre d’un achat neuf.
+        </p>
+    </div>
+    {% endif %}
+    <div>
+    </div>
 </div>
 {% endblock content %}
