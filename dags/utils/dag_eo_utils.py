@@ -5,12 +5,14 @@ from typing import Union
 
 import numpy as np
 import pandas as pd
-import unidecode
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from sqlalchemy import text
 from utils import api_utils, base_utils, mapping_utils, shared_constants
+from utils.formatter import format_libelle_to_code
 
 logger = logging.getLogger(__name__)
+
+LABEL_TO_INGNORE = ["non applicable", "na", "n/a", "null", "aucun", "non"]
 
 
 def fetch_data_from_api(**kwargs):
@@ -101,9 +103,7 @@ def create_proposition_services_sous_categories(**kwargs):
     df = kwargs["ti"].xcom_pull(task_ids="create_proposition_services")["df"]
     df_sous_categories_map = kwargs["ti"].xcom_pull(task_ids="read_souscategorieobjet")
     params = kwargs["params"]
-    mapping_config_key = params.get("mapping_config_key", "sous_categories")
-    config = base_utils.get_mapping_config()
-    sous_categories = config[mapping_config_key]
+    sous_categories_mapping = params.get("product_mapping", {})
     rows_list = []
 
     for _, row in df.iterrows():
@@ -117,8 +117,8 @@ def create_proposition_services_sous_categories(**kwargs):
         ]
         for product in set(products):
             product_key = product
-            if product_key in sous_categories:
-                sous_categories_value = sous_categories[product_key]
+            if product_key in sous_categories_mapping:
+                sous_categories_value = sous_categories_mapping[product_key]
                 if sous_categories_value is None:
                     continue
                 if isinstance(sous_categories_value, list):
@@ -139,7 +139,7 @@ def create_proposition_services_sous_categories(**kwargs):
                             "souscategorieobjet_id": mapping_utils.get_id_from_code(
                                 sous_categories_value, df_sous_categories_map
                             ),
-                            "souscategorie": product.strip(),
+                            "souscategorie": sous_categories_value,
                         }
                     )
             else:
@@ -448,7 +448,7 @@ def create_actors(**kwargs):
     column_to_drop = params.get("column_to_drop", [])
     column_to_replace = params.get("default_column_value", {})
 
-    if params.get("multi_ecoorganisme"):
+    if params.get("merge_duplicated_acteurs"):
         df = merge_duplicates(
             df,
             group_column="id_point_apport_ou_reparation",
@@ -614,11 +614,6 @@ def create_actors(**kwargs):
     }
 
 
-# TODO : où met-on cette fonction de normalisation qui sera util un peu partout
-def format_libelle_to_code(input_str):
-    return unidecode.unidecode(input_str).strip().lower()
-
-
 def create_labels(**kwargs):
     labels = kwargs["ti"].xcom_pull(task_ids="read_labelqualite")
     df_acteurtype = kwargs["ti"].xcom_pull(task_ids="read_acteurtype")
@@ -647,8 +642,9 @@ def create_labels(**kwargs):
         if not labels_etou_bonus:
             continue
         for label_ou_bonus in labels_etou_bonus.split("|"):
-
             label_ou_bonus = format_libelle_to_code(label_ou_bonus)
+            if label_ou_bonus in LABEL_TO_INGNORE:
+                continue
             if label_ou_bonus not in label_mapping:
                 raise ValueError(
                     f"Label ou bonus {label_ou_bonus} not found in database"

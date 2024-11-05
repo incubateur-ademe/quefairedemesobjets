@@ -1,4 +1,5 @@
 from airflow import DAG
+from utils.base_utils import get_mapping_config
 from utils.eo_operators import default_args, eo_task_chain
 
 with DAG(
@@ -31,6 +32,8 @@ with DAG(
             "longitudewgs84": "longitude",
             "latitudewgs84": "latitude",
         },
+        "merge_duplicated_acteurs": True,  # In case of multi ecoorganisme or filiere
+        "product_mapping": get_mapping_config(mapping_key="sous_categories_3eee"),
     },
     schedule=None,
 ) as dag:
