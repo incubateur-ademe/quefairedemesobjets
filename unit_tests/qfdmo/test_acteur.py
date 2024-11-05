@@ -641,7 +641,7 @@ class TestDisplayedActeurDisplayPostalAddress:
     def test_display_postal_address_empty(self):
         displayed_acteur = DisplayedActeurFactory.build()
 
-        assert displayed_acteur.display_postal_address() is False
+        assert displayed_acteur.display_postal_address is False
 
     @pytest.mark.parametrize(
         "fields",
@@ -655,7 +655,7 @@ class TestDisplayedActeurDisplayPostalAddress:
     def test_display_postal_address_not_empty(self, fields):
         displayed_acteur = DisplayedActeurFactory.build(**fields)
 
-        assert displayed_acteur.display_postal_address() is True
+        assert displayed_acteur.display_postal_address is True
 
 
 @pytest.mark.django_db

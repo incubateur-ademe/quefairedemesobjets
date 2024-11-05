@@ -73,10 +73,6 @@ class TurboFormMixin:
 
 
 class IframeMixin:
-    @property
-    def is_embedded(self):
-        return self.is_carte or self.is_iframe
-
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
         self.is_carte = "carte" in request.GET
@@ -87,7 +83,6 @@ class IframeMixin:
         context.update(
             is_carte=self.is_carte,
             is_iframe=self.is_iframe,
-            is_embedded=self.is_embedded,
         )
 
         return context
@@ -654,7 +649,6 @@ def acteur_detail(request, identifiant_unique):
         "display_sources_panel": bool(
             displayed_acteur.sources.filter(afficher=True).count()
         ),
-        "is_embedded": False,
     }
 
     if latitude and longitude and not displayed_acteur.is_digital:

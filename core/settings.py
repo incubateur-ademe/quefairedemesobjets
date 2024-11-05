@@ -157,28 +157,32 @@ LOGGING = {
 
 ROOT_URLCONF = "core.urls"
 
+
+def context_processors():
+    return [
+        "django.template.context_processors.debug",
+        "django.template.context_processors.request",
+        "django.contrib.auth.context_processors.auth",
+        "django.contrib.messages.context_processors.messages",
+        "core.context_processors.environment",
+        "dsfr.context_processors.site_config",
+    ]
+
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.jinja2.Jinja2",
         "DIRS": [BASE_DIR / "jinja2"],
         "OPTIONS": {
             "environment": "core.jinja2_handler.environment",
+            "context_processors": context_processors(),
         },
     },
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
-        "OPTIONS": {
-            "context_processors": [
-                "django.template.context_processors.debug",
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
-                "core.context_processors.environment",
-                "dsfr.context_processors.site_config",
-            ],
-        },
+        "OPTIONS": {"context_processors": context_processors()},
     },
 ]
 

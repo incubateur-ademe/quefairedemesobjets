@@ -331,6 +331,12 @@ class BaseActeur(NomAsNaturalKeyModel):
         return f"{base_url}?{'&'.join(params)}"
 
     @property
+    def change_url(self):
+        return reverse(
+            "admin:qfdmo_displayedacteur_change", args=[self.identifiant_unique]
+        )
+
+    @property
     def latitude(self):
         return self.location.y if self.location else None
 
@@ -379,6 +385,18 @@ class BaseActeur(NomAsNaturalKeyModel):
     @cached_property
     def acteur_services_display(self):
         return ", ".join(self.acteur_services_libelles_alpha_sorted)
+
+    @cached_property
+    def modifie_le_display(self):
+        return self.modifie_le.strftime("%d/%m/%Y")
+
+    @cached_property
+    def labels_enseigne_display(self):
+        return self.labels_display.filter(type_enseigne=True)
+
+    @cached_property
+    def labels_without_enseigne_display(self):
+        return self.labels_display.filter(type_enseigne=False)
 
     @cached_property
     def labels_display(self):
@@ -662,10 +680,9 @@ class DisplayedActeur(BaseActeur):
 
         return orjson.dumps(acteur_dict).decode("utf-8")
 
-    def display_postal_address(self) -> bool:
-        return bool(
-            self.adresse or self.adresse_complement or self.code_postal or self.ville
-        )
+    @cached_property
+    def should_display_adresse(self) -> bool:
+        return self.adresse or self.adresse_complement or self.code_postal or self.ville
 
 
 class DisplayedActeurTemp(BaseActeur):

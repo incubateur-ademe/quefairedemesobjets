@@ -6,7 +6,21 @@ Adresse
 
 {% block content %}
 <address class="qfdmo-not-italic">
-    {{ object.adresse }}
+    {% if object.adresse %}
+        {{ object.adresse|title }}<br>
+    {% endif %}
+
+    {% if object.adresse_complement %}
+        {{ object.adresse_complement }}<br>
+    {% endif %}
+
+    {% if object.code_postal %}
+        {{ object.code_postal }}
+    {% endif %}
+
+    {% if object.ville %}
+        {{ object.ville|title }}
+    {% endif %}
 </address>
 
 {# TODO: Ce champ n'est pas implémenté. Lorsqu'il sera implémenté, adapter le nom du champ à celui utilisé en base de données. #}

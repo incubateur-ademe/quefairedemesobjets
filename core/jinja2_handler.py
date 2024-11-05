@@ -36,7 +36,7 @@ def action_by_direction(request: HttpRequest, direction: str):
 # TODO : should be deprecated and replaced by a value in context view
 def display_infos_panel(adresse: DisplayedActeur) -> bool:
     return (
-        bool(adresse.horaires_description or adresse.display_postal_address())
+        bool(adresse.horaires_description or adresse.should_display_adresse)
         and not adresse.is_digital
     )
 
@@ -80,7 +80,6 @@ def environment(**options):
             "url": reverse,
             "static": static,
             "quote_plus": lambda u: quote_plus(u),
-            "ENVIRONMENT": settings.ENVIRONMENT,
             "AIRFLOW_WEBSERVER_REFRESHACTEUR_URL": (
                 settings.AIRFLOW_WEBSERVER_REFRESHACTEUR_URL
             ),
