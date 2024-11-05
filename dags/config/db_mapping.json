@@ -68,7 +68,8 @@
       "materiel informatique"
     ],
     "téléphones, smartphones": ["smartphone, tablette et console"],
-    "vêtements, textiles": ["vetement", "linge de maison"]
+    "vêtements, textiles": ["vetement", "linge de maison"],
+    "autres": null
   },
   "sous_categories_qualirepar": {
     "tv" : "ecran",

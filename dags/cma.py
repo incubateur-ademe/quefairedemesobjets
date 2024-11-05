@@ -14,6 +14,7 @@ with DAG(
             "https://data.artisanat.fr/api/explore/v2.1/catalog/datasets/reparacteurs/records"
         ),
         "reparacteurs": True,
+        "source_code": "CMA - Chambre des métiers et de l'artisanat",
         "column_mapping": {
             "name": "nom",
             "reparactor_description": "description",
