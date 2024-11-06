@@ -11,10 +11,6 @@ with DAG(
         " for Refashion dataset"
     ),
     params={
-        "endpoint": (
-            "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
-            "donnees-eo-refashion/lines?size=10000"
-        ),
         "column_mapping": {
             "id_point_apport_ou_reparation": "identifiant_externe",
             "adresse_complement": "adresse_complement",
@@ -39,6 +35,13 @@ with DAG(
             "latitudewgs84": "latitude",
             "horaires_douverture": "horaires_description",
             "consignes_dacces": "commentaires",
+        },
+        "endpoint": (
+            "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
+            "donnees-eo-refashion/lines?size=10000"
+        ),
+        "columns_to_add_by_default": {
+            "statut": "ACTIF",
         },
         "label_bonus_reparation": "refashion",
         "product_mapping": get_mapping_config(),

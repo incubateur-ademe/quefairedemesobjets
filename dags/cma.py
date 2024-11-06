@@ -11,11 +11,6 @@ with DAG(
         " for CMA reparacteur dataset"
     ),
     params={
-        "endpoint": (
-            "https://data.artisanat.fr/api/explore/v2.1/catalog/datasets/reparacteurs/records"
-        ),
-        "reparacteurs": True,
-        "source_code": "CMA - Chambre des métiers et de l'artisanat",
         "column_mapping": {
             "name": "nom",
             "reparactor_description": "description",
@@ -34,8 +29,21 @@ with DAG(
             "other_info": "commentaires",
             "update_date": "modifie_le",
             "reparactor_hours": "horaires_description",
+            "type_de_point_de_collecte": "acteur_type_id",
+        },
+        "endpoint": (
+            "https://data.artisanat.fr/api/explore/v2.1/catalog/datasets/reparacteurs/records"
+        ),
+        "columns_to_add_by_default": {
+            "statut": "ACTIF",
+            "labels_etou_bonus": "reparacteur",
+            "type_de_point_de_collecte": "artisan, commerce indépendant",
+            "point_de_reparation": True,
         },
         "product_mapping": get_mapping_config(mapping_key="sous_categories_cma"),
+        # TODO: voir si on peut remplacer ces clé par des fixed columns
+        "combine_columns_categories": ["categorie", "categorie2", "categorie3"],
+        "source_code": "cma_reparacteur",
     },
     schedule=None,
 ) as dag:

@@ -115,42 +115,6 @@ def transform_float(x):
         return None
 
 
-def process_reparacteurs(df, sources_id_by_code, acteurtype_id_by_code, source_code):
-    df["produitsdechets_acceptes"] = df.apply(combine_categories, axis=1)
-    df["source_id"] = sources_id_by_code[source_code]
-    # TODO : on pourrait gérer en configuration les colonne qui sont pareil pour tous
-    df["labels_etou_bonus"] = "reparacteur"
-    df["type_de_point_de_collecte"] = None
-    df["acteur_type_id"] = transform_acteur_type_id(
-        "artisan, commerce indépendant", acteurtype_id_by_code=acteurtype_id_by_code
-    )
-    # TODO : voir si on peut tester les urls dans un opérateur, quite à maintenir
-    # un cache des urls validées
-    df["website"] = df["website"].apply(prefix_url)
-    df["point_de_reparation"] = True
-    return df
-
-
-def process_actors(df):
-    df["nom_de_lorganisme_std"] = df["nom_de_lorganisme"].str.replace("-", "")
-    df["id_point_apport_ou_reparation"] = df["id_point_apport_ou_reparation"].fillna(
-        df["nom_de_lorganisme_std"]
-    )
-    df["id_point_apport_ou_reparation"] = (
-        df["id_point_apport_ou_reparation"]
-        .str.replace(" ", "_")
-        .str.replace("_-", "_")
-        .str.replace("__", "_")
-    )
-    if "service_a_domicile" in df.columns:
-        df.loc[
-            df["service_a_domicile"] == "service à domicile uniquement", "statut"
-        ] = "SUPPRIME"
-    if "site_web" in df.columns:
-        df["site_web"] = df["site_web"].apply(prefix_url)
-    return df
-
-
 def parse_float(value):
     if isinstance(value, float):
         return None if math.isnan(value) else value
@@ -164,9 +128,8 @@ def parse_float(value):
         return None
 
 
-def combine_categories(row):
-    categories = [row["categorie"], row["categorie2"], row["categorie3"]]
-    categories = [cat for cat in categories if pd.notna(cat)]
+def combine_categories(row, combine_columns_categories):
+    categories = [row[col] for col in combine_columns_categories if pd.notna(row[col])]
     return " | ".join(categories)
 
 

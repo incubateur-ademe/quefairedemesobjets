@@ -13,12 +13,7 @@ with DAG(
         " for ECOD3E dataset"
     ),
     params={
-        "endpoint": (
-            "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
-            "donnees-eo-ocad3e/lines?size=10000"
-        ),
         "column_mapping": {
-            "ecoorganisme": "source_id",
             "id_point_apport_ou_reparation": "identifiant_externe",
             "type_de_point_de_collecte": "acteur_type_id",
             "nom_de_lorganisme": "nom",
@@ -32,6 +27,14 @@ with DAG(
             "latitudewgs84": "latitude",
             "adresse_format_ban": "adresse",
         },
+        "endpoint": (
+            "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
+            "donnees-eo-ocad3e/lines?size=10000"
+        ),
+        "columns_to_add_by_default": {
+            "statut": "ACTIF",
+        },
+        "source_code": "ocad3e",
         "label_bonus_reparation": "qualirepar",
         "product_mapping": get_mapping_config(mapping_key="sous_categories_qualirepar"),
     },

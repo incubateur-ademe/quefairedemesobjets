@@ -11,10 +11,6 @@ with DAG(
         " for Pyreo dataset"
     ),
     params={
-        "endpoint": (
-            "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
-            "donnees-eo-pyreo/lines?size=10000"
-        ),
         "column_mapping": {
             "id_point_apport_ou_reparation": "identifiant_externe",
             "type_de_point_de_collecte": "acteur_type_id",
@@ -32,10 +28,17 @@ with DAG(
             "longitudewgs84": "longitude",
             "latitudewgs84": "latitude",
         },
-        "default_column_value": {
-            "type_de_point_de_collecte": "magasin / franchise,"
-            " enseigne commerciale / distributeur / point de vente"
+        "columns_to_add_by_default": {
+            "type_de_point_de_collecte": (
+                "magasin / franchise, enseigne commerciale / distributeur /"
+                " point de vente"
+            ),
+            "statut": "ACTIF",
         },
+        "endpoint": (
+            "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
+            "donnees-eo-pyreo/lines?size=10000"
+        ),
         "product_mapping": get_mapping_config(),
     },
     schedule=None,
