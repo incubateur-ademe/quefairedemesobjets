@@ -7,36 +7,18 @@ def assign_non_reparacteur_cma(apps, schema_editor):
     Source = apps.get_model("qfdmo", "Source")
     Acteur = apps.get_model("qfdmo", "Acteur")
     RevisionActeur = apps.get_model("qfdmo", "RevisionActeur")
-    source_cma_historique = Source(
-        libelle="CMA historique - non-reparacteur",
-        code="cma_historique",
-        afficher=False,
+    source_cma_historique, _ = Source.objects.get_or_create(
+        code="Longue Vie Aux Objets"
     )
-    source_cma_historique.save()
-    Acteur.objects.filter(
+    acteurs_cma_non_reparacteur = Acteur.objects.filter(
         source__code="CMA - Chambre des métiers et de l'artisanat"
-    ).exclude(labels__code="reparacteur").update(source=source_cma_historique)
+    ).exclude(labels__code="reparacteur")
+    acteurs_cma_non_reparacteur.update(source=source_cma_historique)
     RevisionActeur.objects.filter(
-        identifiant_unique__in=Acteur.objects.filter(
-            source=source_cma_historique
-        ).values_list("identifiant_unique", flat=True)
+        identifiant_unique__in=acteurs_cma_non_reparacteur.values_list(
+            "identifiant_unique", flat=True
+        )
     ).update(source=source_cma_historique)
-
-
-def unassign_non_reparacteur_cma(apps, schema_editor):
-    Source = apps.get_model("qfdmo", "Source")
-    Acteur = apps.get_model("qfdmo", "Acteur")
-    RevisionActeur = apps.get_model("qfdmo", "RevisionActeur")
-    source_cma = Source.objects.get(code="CMA - Chambre des métiers et de l'artisanat")
-    source_cma_historique = Source.objects.get(code="cma_historique")
-    source_lvao = Source.objects.get(code="Longue Vie Aux Objets")
-    RevisionActeur.objects.filter(
-        identifiant_unique__in=Acteur.objects.filter(
-            source=source_cma_historique
-        ).values_list("identifiant_unique", flat=True)
-    ).update(source=source_lvao)
-    Acteur.objects.filter(source=source_cma_historique).update(source=source_cma)
-    source_cma_historique.delete()
 
 
 class Migration(migrations.Migration):
@@ -46,5 +28,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(assign_non_reparacteur_cma, unassign_non_reparacteur_cma)
+        migrations.RunPython(assign_non_reparacteur_cma, migrations.RunPython.noop)
     ]
