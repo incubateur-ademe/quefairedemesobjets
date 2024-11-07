@@ -17,6 +17,7 @@ const colors = [
   "green-menthe-main-548",
   "orange-terre-battue-main-645",
   "pink-tuile-main-556",
+  "pink-tuile-975-75",
   "purple-glycine-975-75",
   "purple-glycine-main-494",
   "green-menthe-975-75",

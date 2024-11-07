@@ -240,7 +240,7 @@ const colorVariables = {
   'yellow-tournesol-950-100-active': '#e6c130',
   'yellow-tournesol-sun-407-moon-922': '#716043',
   'yellow-tournesol-sun-407-moon-922-hover': '#a28a62',
-  'yellow-tournesol-sun-407-moon-922-active': 'cab300',
+  'yellow-tournesol-sun-407-moon-922-active': '#cab300',
   'yellow-tournesol-925-125': '#fde39c',
   'yellow-tournesol-925-125-hover': '#e9c53b',
   'yellow-tournesol-925-125-active': '#d3b235',

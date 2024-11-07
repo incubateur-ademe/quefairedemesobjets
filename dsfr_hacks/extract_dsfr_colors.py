@@ -24,7 +24,7 @@ for block in root_blocks:
 
 # THIS IS A HACK BECAUSE FORMULAIRE VERSION USES A BAD COLOR NAME
 # TODO: write better documentation regarding this case.
-css_variables["yellow-tournesol-sun-407-moon-922-active"] = "cab300"
+css_variables["yellow-tournesol-sun-407-moon-922-active"] = "#cab300"
 
 # Generate js file
 js_content = "const colorVariables = {\n"

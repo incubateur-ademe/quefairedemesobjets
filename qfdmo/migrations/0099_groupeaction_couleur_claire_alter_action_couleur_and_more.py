@@ -9,7 +9,7 @@ action_couleur_mapping = [
     ("orange-terre-battue", "orange-terre-battue-main-645"),
     ("purple-glycine", "purple-glycine-main-494"),
     ("green-menthe", "green-menthe-main-548"),
-    ("yellow-tournesol", "yellow-tournesol-sun-407-moon-922"),
+    ("yellow-tournesol", "yellow-tournesol-sun-407-moon-922-active"),
     ("blue-cumulus", "blue-cumulus-main-526"),
     ("brown-cafe-creme", "brown-cafe-creme-main-782"),
 ]
