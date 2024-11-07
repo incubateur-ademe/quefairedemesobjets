@@ -2,6 +2,8 @@ import re
 
 import requests
 
+from .legacy import LEGACY_MAPPING_FROM_TAILWIND
+
 
 def format_line(variable, value):
     return f"  '{variable.replace('--', '')}': '{value}',\n"
@@ -22,7 +24,13 @@ for block in root_blocks:
         if name not in css_variables:
             css_variables[name] = value.strip()
 
-# THIS IS A HACK BECAUSE FORMULAIRE VERSION USES A BAD COLOR NAME
+
+# Keep support for colors previously defined manually in tailwind.config.js
+# These should be removed later in order to only used colors names coming from
+# the DSFR
+css_variables.update(**LEGACY_MAPPING_FROM_TAILWIND)
+
+# THIS IS A HACK BECAUSE THE FORMULAIRE VIEW USES A BAD COLOR NAME
 # TODO: write better documentation regarding this case.
 css_variables["yellow-tournesol-sun-407-moon-922-active"] = "#cab300"
 
