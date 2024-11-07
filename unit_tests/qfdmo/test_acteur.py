@@ -334,7 +334,7 @@ class TestActeurService:
             ActeurServiceFactory(libelle="Par un professionnel")
         )
 
-        assert displayed_acteur.acteur_services_libelles_alpha_sorted == [
+        assert displayed_acteur.sorted_acteur_services_libelles == [
             "Par un professionnel"
         ]
 
@@ -346,7 +346,7 @@ class TestActeurService:
             ),
         )
 
-        assert displayed_acteur.acteur_services_libelles_alpha_sorted == [
+        assert displayed_acteur.sorted_acteur_services_libelles == [
             "Atelier pour réparer soi-même",
             "Par un professionnel",
         ]

@@ -358,8 +358,7 @@ class BaseActeur(NomAsNaturalKeyModel):
         return proposition_services.order_by(*order)
 
     @cached_property
-    def acteur_services_libelles_alpha_sorted(self) -> list[str]:
-        # TODO : rename this method......
+    def sorted_acteur_services_libelles(self) -> list[str]:
         return list(
             self.acteur_services.exclude(libelle=None)
             .order_by("libelle")
@@ -369,7 +368,7 @@ class BaseActeur(NomAsNaturalKeyModel):
 
     @cached_property
     def acteur_services_display(self):
-        return ", ".join(self.acteur_services_libelles_alpha_sorted)
+        return ", ".join(self.sorted_acteur_services_libelles)
 
     @cached_property
     def modifie_le_display(self):
