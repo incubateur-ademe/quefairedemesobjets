@@ -71,6 +71,10 @@ migrate:
 makemigrations:
 	$(DJANGO_ADMIN) makemigrations
 
+.PHONY: merge-migrations
+merge-migrations:
+	$(DJANGO_ADMIN) makemigrations --merge
+
 
 .PHONY: createcachetable
 createcachetable:
