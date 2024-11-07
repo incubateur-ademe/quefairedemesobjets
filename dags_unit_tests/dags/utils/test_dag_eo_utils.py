@@ -22,7 +22,7 @@ def sources_id_by_code():
     return {
         "source1": 101,
         "source2": 102,
-        "cma - chambre des métiers et de l'artisanat": 103,
+        "cma_reparacteur": 103,
     }
 
 
@@ -1405,7 +1405,7 @@ def test_create_reparacteurs(
                 "update_date": "modifie_le",
                 "reparactor_hours": "horaires_description",
             },
-            "source_code": "cma - chambre des métiers et de l'artisanat",
+            "source_code": "cma_reparacteur",
         },
     }
 

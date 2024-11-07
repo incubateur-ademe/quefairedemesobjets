@@ -302,6 +302,7 @@ def read_acteur(**kwargs):
     engine = pg_hook.get_sqlalchemy_engine()
     joined_source_ids = ",".join([f"'{source_id}'" for source_id in unique_source_ids])
     query = f"SELECT * FROM qfdmo_acteur WHERE source_id IN ({joined_source_ids})"
+
     df_acteur = pd.read_sql_query(query, engine)
 
     return df_acteur
@@ -446,12 +447,12 @@ def create_actors(**kwargs):
     df_acteurs = kwargs["ti"].xcom_pull(task_ids="read_acteur")
 
     params = kwargs["params"]
-    reparacteurs = params.get("reparacteurs", False)
     source_code = params.get("source_code")
     label_bonus_reparation = params.get("label_bonus_reparation")
     column_mapping = params.get("column_mapping", {})
     column_to_drop = params.get("column_to_drop", [])
-    column_to_replace = params.get("default_column_value", {})
+    columns_to_add_by_default = params.get("columns_to_add_by_default", {})
+    combine_columns_categories = params.get("combine_columns_categories")
 
     if params.get("merge_duplicated_acteurs"):
         df = merge_duplicates(
@@ -459,6 +460,15 @@ def create_actors(**kwargs):
             group_column="id_point_apport_ou_reparation",
             merge_column="produitsdechets_acceptes",
         )
+
+    for k, val in columns_to_add_by_default.items():
+        df[k] = val
+
+    # Supprimer les acteurs qui ne propose qu'un service à domicile
+    if "service_a_domicile" in df.columns:
+        df.loc[
+            df["service_a_domicile"] == "service à domicile uniquement", "statut"
+        ] = "SUPPRIME"
 
     # filtre des service à domicile uniquement
     if "service_a_domicile" in df.columns:
@@ -468,25 +478,33 @@ def create_actors(**kwargs):
     column_to_drop = list(set(column_to_drop) & set(df.columns))
     df = df.drop(column_to_drop, axis=1)
 
-    for k, val in column_to_replace.items():
-        df[k] = val
-    if reparacteurs:
-        df = mapping_utils.process_reparacteurs(
-            df, sources_id_by_code, acteurtype_id_by_code, source_code
+    if combine_columns_categories:
+        df["produitsdechets_acceptes"] = df.apply(
+            lambda row: mapping_utils.combine_categories(
+                row, combine_columns_categories
+            ),
+            axis=1,
         )
-    else:
-        df = mapping_utils.process_actors(df)
-
-    # By default, all actors are active
-    # TODO : manage constant as an enum in config
-    df["statut"] = "ACTIF"
+    if source_code:
+        df["source_id"] = sources_id_by_code[source_code]
 
     # TODO Plutôt se baser sur le nom de la colonne cible plutôt que sur le nom de la
     # colonne source
     for old_col, new_col in column_mapping.items():
         if old_col in df.columns and new_col:
             if new_col == "identifiant_externe":
-                df[new_col] = df[old_col].astype(str)
+
+                # TODO: simplifier cette partie de code quite à faire des migrations
+                if "nom_de_lorganisme" in df.columns:
+                    df[old_col] = df[old_col].fillna(
+                        df["nom_de_lorganisme"]
+                        .str.replace("-", "")
+                        .str.replace(" ", "_")
+                        .str.replace("__", "_")
+                    )
+                # TODO: raise si l'identifiant unique n'est pas unique
+                df["identifiant_externe"] = df[old_col].astype(str)
+
             elif new_col == "statut":
                 df[new_col] = df[old_col].map({1: "ACTIF", 0: "SUPPRIME"})
             elif new_col == "acteur_type_id":
@@ -535,6 +553,9 @@ def create_actors(**kwargs):
                         "Agréé Bonus Réparation", label_bonus_reparation
                     )
                 )
+            elif new_col == "url":
+                df[new_col] = df[old_col].apply(mapping_utils.prefix_url)
+
             else:
                 df[new_col] = df[old_col]
 
@@ -549,9 +570,7 @@ def create_actors(**kwargs):
         )
 
     df["identifiant_unique"] = df.apply(
-        lambda x: mapping_utils.create_identifiant_unique(
-            x, source_name="CMA_REPARACTEUR" if reparacteurs else None
-        ),
+        lambda x: mapping_utils.create_identifiant_unique(x, source_name=source_code),
         axis=1,
     )
 
