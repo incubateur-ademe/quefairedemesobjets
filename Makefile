@@ -116,3 +116,8 @@ js-test:
 test:
 	@make unit-test
 	@make e2e-test
+
+# DSFR
+.PHONY: extract-dsfr-colors
+extract-dsfr-colors:
+	$(PYTHON) ./dsfr_hacks/extract_dsfr_colors.py

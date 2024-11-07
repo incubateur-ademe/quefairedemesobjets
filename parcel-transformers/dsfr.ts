@@ -17,7 +17,7 @@ export default new Transformer({
           "static/to_compile/**/*.ts"
         ],
         css: [{ raw: source }],
-        safelist: ["htm", "body", ...tailwindConfig.safelist],
+        // safelist: ["htm", "body", ...tailwindConfig.safelist],
       })
 
       // source = purgeCSSResults

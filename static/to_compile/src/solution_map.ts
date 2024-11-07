@@ -5,48 +5,15 @@ import pinBackgroundFillSvg from "bundle-text:./svg/pin-background-fill.svg"
 import bonusIconSvg from "bundle-text:../entrypoints/svg/bonus-reparation-fill.svg"
 import { ACTIVE_PINPOINT_CLASSNAME, clearActivePinpoints } from "./map_helpers"
 import type { DisplayedActeur, Location, LVAOMarker } from "./types"
+import DSFRColors from "../../../dsfr_hacks/colors"
 
 const DEFAULT_LOCATION: L.LatLngTuple = [46.227638, 2.213749]
 const DEFAULT_ZOOM: number = 5
 const DEFAULT_MAX_ZOOM: number = 19
 
-// TODO : handle directly from DSFR module
-const COLOR_MAPPING: object = {
-  "beige-gris-galet": "#AEA397",
-  "blue-cumulus-sun-368": "#3558A2",
-  "blue-cumulus": "#417DC4",
-  "blue-ecume-850": "#bfccfb",
-  "blue-ecume": "#465F9D",
-  "blue-france": "#0055FF",
-  "brown-cafe-creme-main-782": "#D1B781",
-  "brown-cafe-creme": "#D1B781",
-  "brown-caramel": "#C08C65",
-  "brown-opera": "#BD987A",
-  "green-archipel": "#009099",
-  "green-bourgeon-850": "#95e257",
-  "green-bourgeon": "#68A532",
-  "green-emeraude": "#00A95F",
-  "green-menthe-850": "#73e0cf",
-  "green-menthe-main-548": "#009081",
-  "green-menthe-sun-373": "#37635f",
-  "green-menthe": "#009081",
-  "green-tilleul-verveine": "#B7A73F",
-  "orange-terre-battue-main-645": "#E4794A",
-  "orange-terre-battue": "#E4794A",
-  "pink-macaron": "#E18B76",
-  "pink-tuile-850": "#fcbfb7",
-  "pink-tuile": "#CE614A",
-  "purple-glycine-main-494": "#A558A0",
-  "purple-glycine": "#A558A0",
-  "yellow-moutarde-850": "#fcc63a",
-  "yellow-moutarde": "#C3992A",
-  "yellow-tournesol": "#e9c53b",
-  "brown-caramel-sun-425-hover": "#bb8568"
-}
-
 function get_color_code(colorName: string): string {
-  if (colorName in COLOR_MAPPING) {
-    return COLOR_MAPPING[colorName]
+  if (colorName in DSFRColors) {
+    return DSFRColors[colorName]
   }
   return "#000"
 }
