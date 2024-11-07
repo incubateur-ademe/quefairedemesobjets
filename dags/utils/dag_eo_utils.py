@@ -104,9 +104,6 @@ def create_proposition_services_sous_categories(**kwargs):
     souscategorieobjet_code_by_id = kwargs["ti"].xcom_pull(
         task_ids="read_souscategorieobjet"
     )
-    souscategorieobjet_code_by_id = {
-        k.lower(): v for k, v in souscategorieobjet_code_by_id.items()
-    }
     params = kwargs["params"]
     sous_categories_mapping = params.get("product_mapping", {})
     rows_list = []
@@ -121,9 +118,8 @@ def create_proposition_services_sous_categories(**kwargs):
             if sous_categorie.strip()
         ]
         for product in set(products):
-            product_key = product
-            if product_key in sous_categories_mapping:
-                sous_categories_value = sous_categories_mapping[product_key]
+            if product in sous_categories_mapping:
+                sous_categories_value = sous_categories_mapping[product]
                 if sous_categories_value is None:
                     continue
                 if isinstance(sous_categories_value, list):
