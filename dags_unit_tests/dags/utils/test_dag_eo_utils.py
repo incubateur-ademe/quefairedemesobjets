@@ -11,6 +11,7 @@ from utils.dag_eo_utils import (
     create_labels,
     create_proposition_services,
     create_proposition_services_sous_categories,
+    get_acteur_to_delete,
     merge_duplicates,
     read_acteur,
     serialize_to_json,
@@ -51,7 +52,6 @@ def acteurservice_id_by_code():
     return {"service_de_reparation": 10, "structure_de_collecte": 20}
 
 
-# To be renamed to df_acteurs_from_db
 @pytest.fixture
 def df_empty_acteurs_from_db():
     return pd.DataFrame(
@@ -1027,10 +1027,12 @@ class TestSerializeToJson:
         mock.xcom_pull.side_effect = lambda task_ids="": {
             "create_actors": {
                 "df": pd.DataFrame({"identifiant_unique": [1, 2]}),
-                "removed_actors": pd.DataFrame(
+            },
+            "get_acteur_to_delete": {
+                "df_acteur_to_delete": pd.DataFrame(
                     {
                         "identifiant_unique": [3],
-                        "statut": ["SUPPRIME"],
+                        "statut": ["ACTIF"],
                         "cree_le": [datetime(2024, 1, 1)],
                     }
                 ),
@@ -1110,7 +1112,9 @@ class TestSerializeToJson:
         mock.xcom_pull.side_effect = lambda task_ids="": {
             "create_actors": {
                 "df": pd.DataFrame({"identifiant_unique": [1, 2]}),
-                "removed_actors": pd.DataFrame(
+            },
+            "get_acteur_to_delete": {
+                "df_acteur_to_delete": pd.DataFrame(
                     {
                         "identifiant_unique": [3],
                         "statut": ["ACTIF"],
@@ -1241,110 +1245,6 @@ def test_create_actors(mock_ti, mock_config):
     assert metadata["number_of_duplicates"] == 0
     assert metadata["added_rows"] == len(df_result)
     assert "siren" not in df_result.columns
-
-
-@pytest.mark.parametrize(
-    "df_acteurs, df_removed_actors_expected",
-    [
-        # Test acteur non supprimé car existe tous dans fetch_data_from_api
-        (
-            pd.DataFrame(
-                {
-                    "identifiant_unique": pd.Series(dtype="str"),
-                    "source_id": pd.Series(dtype="str"),
-                    "statut": pd.Series(dtype="str"),
-                    "cree_le": pd.Series(dtype="datetime64[ns]"),
-                    "modifie_le": pd.Series(dtype="datetime64[ns]"),
-                }
-            ),
-            pd.DataFrame(
-                columns=[
-                    "identifiant_unique",
-                    "cree_le",
-                    "modifie_le",
-                    "statut",
-                    "event",
-                ]
-            ),
-        ),
-        # TODO: test acteur non supprimé car il n'appartient pas à la source
-        (
-            pd.DataFrame(
-                {
-                    "identifiant_unique": ["source1_1"],
-                    "source_id": [101],
-                    "statut": ["ACTIF"],
-                    "cree_le": [datetime(2024, 1, 1)],
-                    "modifie_le": [datetime(2024, 1, 1)],
-                }
-            ),
-            pd.DataFrame(
-                columns=[
-                    "identifiant_unique",
-                    "cree_le",
-                    "modifie_le",
-                    "statut",
-                    "event",
-                ]
-            ),
-        ),
-        # TODO: test acteur suprimé car n'existe pas dans fetch_data_from_api
-        (
-            pd.DataFrame(
-                {
-                    "identifiant_unique": ["source1_0"],
-                    "source_id": [101],
-                    "statut": ["ACTIF"],
-                    "cree_le": [datetime(2024, 1, 1)],
-                    "modifie_le": [datetime(2024, 1, 1)],
-                }
-            ),
-            pd.DataFrame(
-                {
-                    "identifiant_unique": ["source1_0"],
-                    "cree_le": [datetime(2024, 1, 1)],
-                    "modifie_le": [datetime(2024, 1, 1)],
-                    "statut": ["SUPPRIME"],
-                    "event": ["UPDATE_ACTOR"],
-                }
-            ),
-        ),
-    ],
-)
-def test_acteur_to_delete(sources_id_by_code, df_acteurs, df_removed_actors_expected):
-    mock = MagicMock()
-    mock.xcom_pull.side_effect = lambda task_ids="": {
-        "read_acteur": df_acteurs,
-        "read_acteurtype": None,
-        "read_source": sources_id_by_code,
-        "fetch_data_from_api": pd.DataFrame(
-            {
-                "id_point_apport_ou_reparation": ["1"],
-                "produitsdechets_acceptes": ["12345678"],
-                "nom_de_lorganisme": ["Eco1"],
-                "ecoorganisme": ["source1"],
-            }
-        ),
-    }[task_ids]
-
-    kwargs = {
-        "ti": mock,
-        "params": {
-            "column_mapping": {
-                "id_point_apport_ou_reparation": "identifiant_externe",
-                "nom_de_lorganisme": "nom",
-                "ecoorganisme": "source_id",
-            },
-        },
-    }
-    result = create_actors(**kwargs)
-    df_removed_actors_expected["cree_le"] = pd.to_datetime(
-        df_removed_actors_expected["cree_le"]
-    )
-    df_removed_actors_expected["modifie_le"] = pd.to_datetime(
-        df_removed_actors_expected["modifie_le"]
-    )
-    pd.testing.assert_frame_equal(result["removed_actors"], df_removed_actors_expected)
 
 
 def test_create_reparacteurs(
@@ -1893,3 +1793,151 @@ class TestReadActeur:
 
         with pytest.raises(ValueError):
             read_acteur(ti=mock, params={})
+
+
+# @pytest.fixture
+# def df_acteurs_from_db():
+#     return pd.DataFrame(
+#         {
+#             "identifiant_unique": ["id1", "id2"],
+#             "statut": ["ACTIF", "ACTIF"],
+#             "cree_le": [datetime(2024, 1, 1), datetime(2024, 1, 1)],
+#             "modifie_le": [datetime(2024, 1, 1), datetime(2024, 1, 1)],
+#         }
+#     )
+
+
+@pytest.fixture
+def metadata():
+    return
+
+
+class TestActeurToDelete:
+    @pytest.mark.parametrize(
+        (
+            "df_acteurs_from_db1, df_acteurs_for_source, df_expected_acteur_to_delete,"
+            " expected_metadata"
+        ),
+        [
+            # No deletion
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": ["id1", "id2"],
+                        "statut": ["ACTIF", "ACTIF"],
+                        "cree_le": [datetime(2024, 1, 1), datetime(2024, 1, 1)],
+                        "modifie_le": [datetime(2024, 1, 1), datetime(2024, 1, 1)],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": ["id1", "id2"],
+                        "statut": ["ACTIF", "ACTIF"],
+                        "cree_le": [datetime(2024, 1, 1), datetime(2024, 1, 1)],
+                        "modifie_le": [datetime(2024, 1, 1), datetime(2024, 1, 1)],
+                    }
+                ),
+                pd.DataFrame(
+                    columns=[
+                        "identifiant_unique",
+                        "cree_le",
+                        "modifie_le",
+                        "statut",
+                        "event",
+                    ]
+                ),
+                {"number_of_removed_actors": 0},
+            ),
+            # No Deletion
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": ["id1", "id2", "id3", "id4"],
+                        "statut": ["ACTIF", "ACTIF", "INACTIF", "SUPPRIME"],
+                        "cree_le": [
+                            datetime(2024, 1, 1),
+                            datetime(2024, 1, 1),
+                            datetime(2024, 1, 1),
+                            datetime(2024, 1, 1),
+                        ],
+                        "modifie_le": [
+                            datetime(2024, 1, 1),
+                            datetime(2024, 1, 1),
+                            datetime(2024, 1, 1),
+                            datetime(2024, 1, 1),
+                        ],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": ["id1", "id2"],
+                        "statut": ["ACTIF", "ACTIF"],
+                        "cree_le": [datetime(2024, 1, 1), datetime(2024, 1, 1)],
+                        "modifie_le": [datetime(2024, 1, 1), datetime(2024, 1, 1)],
+                    }
+                ),
+                pd.DataFrame(
+                    columns=[
+                        "identifiant_unique",
+                        "cree_le",
+                        "modifie_le",
+                        "statut",
+                        "event",
+                    ]
+                ),
+                {"number_of_removed_actors": 0},
+            ),
+            # Deletion
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": ["id1", "id2"],
+                        "statut": ["ACTIF", "ACTIF"],
+                        "cree_le": [datetime(2024, 1, 1), datetime(2024, 1, 1)],
+                        "modifie_le": [datetime(2024, 1, 1), datetime(2024, 1, 1)],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": ["id1"],
+                        "statut": ["ACTIF"],
+                        "cree_le": [datetime(2024, 1, 1)],
+                        "modifie_le": [datetime(2024, 1, 1)],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": ["id2"],
+                        "cree_le": [datetime(2024, 1, 1)],
+                        "modifie_le": [datetime(2024, 1, 1)],
+                        "statut": ["SUPPRIME"],
+                        "event": ["UPDATE_ACTOR"],
+                    }
+                ),
+                {"number_of_removed_actors": 1},
+            ),
+        ],
+    )
+    def test_get_acteur_to_delete(
+        self,
+        df_acteurs_from_db1,
+        df_acteurs_for_source,
+        df_expected_acteur_to_delete,
+        expected_metadata,
+    ):
+        mock = MagicMock()
+        mock.xcom_pull.side_effect = lambda task_ids="": {
+            "create_actors": {"df": df_acteurs_for_source, "metadata": {}},
+            "read_acteur": df_acteurs_from_db1,
+        }[task_ids]
+
+        kwargs = {"ti": mock}
+        result = get_acteur_to_delete(**kwargs)
+        df_returned_acteur_to_delete = result["df_acteur_to_delete"]
+
+        pd.testing.assert_frame_equal(
+            df_returned_acteur_to_delete.reset_index(drop=True),
+            df_expected_acteur_to_delete.reset_index(drop=True),
+            check_dtype=False,
+        )
+        assert result["metadata"] == expected_metadata

@@ -169,13 +169,13 @@ def create_proposition_services_sous_categories(**kwargs):
 
 def serialize_to_json(**kwargs):
     # Removed acteurs
-    df_removed_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")[
-        "removed_actors"
+    df_acteur_to_delete = kwargs["ti"].xcom_pull(task_ids="get_acteur_to_delete")[
+        "df_acteur_to_delete"
     ]
     update_actors_columns = ["identifiant_unique", "statut", "cree_le"]
-    df_removed_actors["row_updates"] = df_removed_actors[update_actors_columns].apply(
-        lambda row: json.dumps(row.to_dict(), default=str), axis=1
-    )
+    df_acteur_to_delete["row_updates"] = df_acteur_to_delete[
+        update_actors_columns
+    ].apply(lambda row: json.dumps(row.to_dict(), default=str), axis=1)
     # Created or updated Acteurs
     df_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
     df_ps = kwargs["ti"].xcom_pull(task_ids="create_proposition_services")["df"]
@@ -278,7 +278,7 @@ def serialize_to_json(**kwargs):
     )
     df_joined.drop_duplicates("identifiant_unique", keep="first", inplace=True)
 
-    return {"all": {"df": df_joined}, "to_disable": {"df": df_removed_actors}}
+    return {"all": {"df": df_joined}, "to_disable": {"df": df_acteur_to_delete}}
 
 
 def read_acteur(**kwargs):
@@ -357,6 +357,11 @@ def write_to_dagruns(**kwargs):
         .xcom_pull(task_ids="create_actors", key="return_value", default={})
         .get("metadata", {})
     )
+    metadata_acteur_to_delete = (
+        kwargs["ti"]
+        .xcom_pull(task_ids="get_acteur_to_delete", key="return_value", default={})
+        .get("metadata", {})
+    )
     metadata_pds = (
         kwargs["ti"]
         .xcom_pull(
@@ -365,11 +370,7 @@ def write_to_dagruns(**kwargs):
         .get("metadata", {})
     )
 
-    metadata = {}
-    if metadata_actors:
-        metadata.update(metadata_actors)
-    if metadata_pds:
-        metadata.update(metadata_pds)
+    metadata = {**metadata_actors, **metadata_acteur_to_delete, **metadata_pds}
 
     for key, data in dfs.items():
         # TODO dag_id
@@ -590,22 +591,10 @@ def create_actors(**kwargs):
     duplicate_ids = df.loc[duplicates_mask, "identifiant_unique"].unique()
     number_of_duplicates = len(duplicate_ids)
 
-    df_acteurs_actifs = df_acteurs[df_acteurs["statut"] == "ACTIF"]
-
-    # Get acteur to delete
-    # Here we get the actors that are present in df_acteurs_actifs but not in df
-    df_missing_actors = df_acteurs_actifs[
-        ~df_acteurs_actifs["identifiant_unique"].isin(df["identifiant_unique"])
-    ][["identifiant_unique", "cree_le", "modifie_le"]]
-
-    df_missing_actors["statut"] = "SUPPRIME"
-    df_missing_actors["event"] = "UPDATE_ACTOR"
-
     metadata = {
         "number_of_duplicates": number_of_duplicates,
         "duplicate_ids": list(duplicate_ids),
         "added_rows": len(df),
-        "number_of_removed_actors": len(df_missing_actors),
     }
 
     df = df.drop_duplicates(subset="identifiant_unique", keep="first")
@@ -613,7 +602,29 @@ def create_actors(**kwargs):
     return {
         "df": df,
         "metadata": metadata,
-        "removed_actors": df_missing_actors,
+    }
+
+
+def get_acteur_to_delete(**kwargs):
+    df_acteurs_for_source = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
+    df_acteurs_from_db = kwargs["ti"].xcom_pull(task_ids="read_acteur")
+
+    df_acteurs_from_db_actifs = df_acteurs_from_db[
+        df_acteurs_from_db["statut"] == "ACTIF"
+    ]
+
+    df_acteur_to_delete = df_acteurs_from_db_actifs[
+        ~df_acteurs_from_db_actifs["identifiant_unique"].isin(
+            df_acteurs_for_source["identifiant_unique"]
+        )
+    ][["identifiant_unique", "cree_le", "modifie_le"]]
+
+    df_acteur_to_delete["statut"] = "SUPPRIME"
+    df_acteur_to_delete["event"] = "UPDATE_ACTOR"
+
+    return {
+        "metadata": {"number_of_removed_actors": len(df_acteur_to_delete)},
+        "df_acteur_to_delete": df_acteur_to_delete,
     }
 
 
