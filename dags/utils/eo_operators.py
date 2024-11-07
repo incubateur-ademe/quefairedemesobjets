@@ -67,6 +67,14 @@ def create_actors_task(dag: DAG) -> PythonOperator:
     )
 
 
+def get_acteur_to_delete_task(dag: DAG) -> PythonOperator:
+    return PythonOperator(
+        task_id="get_acteur_to_delete",
+        python_callable=dag_eo_utils.get_acteur_to_delete,
+        dag=dag,
+    )
+
+
 def create_proposition_services_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id="create_proposition_services",
@@ -151,6 +159,7 @@ def eo_task_chain(dag: DAG) -> None:
         read_tasks,
         read_acteur_task(dag),
         create_actors_task(dag),
+        get_acteur_to_delete_task(dag),
         create_tasks,
         create_proposition_services_sous_categories_task(dag),
         serialize_to_json_task(dag),
