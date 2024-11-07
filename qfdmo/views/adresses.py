@@ -64,8 +64,7 @@ class TurboFormMixin:
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.turbo:
-            context.update(turbo=True)
-            context.update(base_template="layout/turbo.html")
+            context.update(turbo=True, base_template="layout/turbo.html")
         else:
             context.update(base_template="layout/base.html")
 
