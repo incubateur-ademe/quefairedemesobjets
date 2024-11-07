@@ -14,7 +14,7 @@ class ColorsView(FormView):
             (
                 key
                 for key, val in DSFRColors.items()
-                if val == form.cleaned_data["hexa_color"]
+                if form.cleaned_data["hexa_color"].lower() in val.lower()
             ),
             "Couleur introuvable",
         )

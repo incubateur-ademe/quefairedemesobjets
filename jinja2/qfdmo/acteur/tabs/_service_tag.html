@@ -1,12 +1,9 @@
 <p
     class="fr-tag fr-tag--lg fr-tag--icon-left
-    {% if is_carte %}{{ action.icon }}{% else %}{{ action.groupe_action.icon }}{% endif %}
-    qfdmo-border qfdmo-border-solid"
-    {% if is_carte %}
-    style="border-color: {{ action.groupe_action.couleur }}; background-color: {{ action.groupe_action.couleur_claire }}"
-    {% else %}
-    style="border-color: {{ action.couleur }}; background-color: {{ action.couleur }}"
-    {% endif %}
+    {{ action.icon }}
+    qfdmo-border qfdmo-border-solid
+    qfdmo-bg-{{ action.background }} qfdmo-border-{{ action.border }}
+    {{ extra_classes }}"
 >
     <span>
         {{ action.libelle|capitalize }}

@@ -5,6 +5,7 @@ from django.contrib.gis.db import models
 from django.core.cache import cache
 from django.db.models.query import QuerySet
 from django.forms import model_to_dict
+from django.utils.functional import cached_property
 
 from dsfr_hacks.colors import DSFRColors
 from qfdmo.models.utils import CodeAsNaturalKeyManager, CodeAsNaturalKeyModel
@@ -65,6 +66,19 @@ class GroupeAction(CodeAsNaturalKeyModel):
         null=True, blank=True, default="#C3992A", max_length=255, choices=COLOR_PALETTE
     )
 
+    @cached_property
+    def border(self):
+        return next(
+            (key for key, value in DSFRColors.items() if value == self.couleur), None
+        )
+
+    @cached_property
+    def background(self):
+        return next(
+            (key for key, value in DSFRColors.items() if value == self.couleur_claire),
+            None,
+        )
+
     icon = models.CharField(
         max_length=255,
         null=True,
@@ -118,6 +132,16 @@ class Action(CodeAsNaturalKeyModel):
         blank=True,
     )
 
+    @cached_property
+    def border(self):
+        return self.background
+
+    @cached_property
+    def background(self):
+        return next(
+            (key for key, value in DSFRColors.items() if value == self.couleur), None
+        )
+
     def __str__(self):
         return self.libelle
 
@@ -140,10 +164,11 @@ def get_groupe_action_instances() -> QuerySet[GroupeAction]:
 
 
 def get_actions_by_direction() -> dict:
+    # TODO: refactor to not use a dict anymore
     return {
         d.code: sorted(
             [
-                model_to_dict(a, exclude=["directions"])
+                {**model_to_dict(a, exclude=["directions"]), "background": a.background}
                 for a in d.actions.filter(afficher=True)
             ],
             key=lambda x: x["order"],

@@ -13,6 +13,7 @@ from qfdmo.models.action import get_actions_by_direction
 
 
 def action_by_direction(request: HttpRequest, direction: str):
+    # TODO: refactor to not use a dict anymore
     requested_direction = get_direction(request)
     action_displayed = request.GET.get("action_displayed", "")
     actions_to_display = get_actions_by_direction()[direction]

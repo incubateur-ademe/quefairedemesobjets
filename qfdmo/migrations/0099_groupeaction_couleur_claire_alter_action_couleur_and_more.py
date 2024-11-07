@@ -8,10 +8,10 @@ from django.db import migrations
 action_couleur_mapping = [
     ("orange-terre-battue", "orange-terre-battue-main-645"),
     ("purple-glycine", "purple-glycine-main-494"),
-    ("green-archipel", "green-menthe-main-548"),
-    ("yellow-moutarde", "yellow-tournesol-sun-407-moon-922"),
-    ("blue-france", "blue-cumulus-main-526"),
-    ("brown-caramel", "brown-cafe-creme-main-782"),
+    ("green-menthe", "green-menthe-main-548"),
+    ("yellow-tournesol", "yellow-tournesol-sun-407-moon-922"),
+    ("blue-cumulus", "blue-cumulus-main-526"),
+    ("brown-cafe-creme", "brown-cafe-creme-main-782"),
 ]
 
 groupe_action_couleur_mapping: List[List[str]] = [
@@ -30,14 +30,11 @@ def set_hexadecimal_colors(apps, schema_editor):
     GroupeAction = apps.get_model("qfdmo", "GroupeAction")
 
     for old, new in action_couleur_mapping:
-        DSFRColors[new]  # We do not allow to fail if the color does not exist
-        Action.objects.filter(couleur=old).update(couleur=new)
+        Action.objects.filter(couleur=old).update(couleur=DSFRColors[new])
 
     for code, couleur_claire, couleur in groupe_action_couleur_mapping:
-        DSFRColors[couleur]  # We do not allow to fail if the color does not exist
-        DSFRColors[couleur_claire]
         GroupeAction.objects.filter(code=code).update(
-            couleur=couleur, couleur_claire=couleur_claire
+            couleur=DSFRColors[couleur], couleur_claire=DSFRColors[couleur_claire]
         )
 
 

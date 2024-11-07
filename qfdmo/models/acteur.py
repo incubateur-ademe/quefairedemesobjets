@@ -626,7 +626,7 @@ class DisplayedActeur(BaseActeur):
         )
         # Cast needed because of the cache
         cached_action_instances = cast(
-            List[Action], cache.get_or_set("action_instances", get_action_instances)
+            List[Action], cache.get_or_set("_action_instances", get_action_instances)
         )
         return [
             action

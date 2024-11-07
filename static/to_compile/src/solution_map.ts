@@ -5,18 +5,10 @@ import pinBackgroundFillSvg from "bundle-text:./svg/pin-background-fill.svg"
 import bonusIconSvg from "bundle-text:../entrypoints/svg/bonus-reparation-fill.svg"
 import { ACTIVE_PINPOINT_CLASSNAME, clearActivePinpoints } from "./map_helpers"
 import type { DisplayedActeur, Location, LVAOMarker } from "./types"
-import DSFRColors from "../../../dsfr_hacks/colors"
 
 const DEFAULT_LOCATION: L.LatLngTuple = [46.227638, 2.213749]
 const DEFAULT_ZOOM: number = 5
 const DEFAULT_MAX_ZOOM: number = 19
-
-function get_color_code(colorName: string): string {
-  if (colorName in DSFRColors) {
-    return DSFRColors[colorName]
-  }
-  return "#000"
-}
 
 export class SolutionMap {
   map: L.Map
@@ -75,13 +67,13 @@ export class SolutionMap {
     `
   }
 
-  #generateMarkerHTMLStringFrom(actor?: DisplayedActeur): string {
-    const markerHtmlStyles = `color: ${get_color_code(actor?.couleur || "")};`
-    const background = actor?.reparer ? pinBackgroundFillSvg : pinBackgroundSvg
-    const cornerIcon = actor?.bonus ? bonusIconSvg : ""
-    const icon = actor?.icon || "fr-icon-checkbox-circle-line"
+  #generateMarkerHTMLStringFrom(acteur?: DisplayedActeur): string {
+    const markerHtmlStyles = `color: ${acteur?.couleur};`
+    const background = acteur?.reparer ? pinBackgroundFillSvg : pinBackgroundSvg
+    const cornerIcon = acteur?.bonus ? bonusIconSvg : ""
+    const icon = acteur?.icon || "fr-icon-checkbox-circle-line"
     const markerIconClasses = `qfdmo-absolute qfdmo-top-[10] qfdmo-left-[10.5] qfdmo-margin-auto
-      ${icon} ${actor?.reparer ? "qfdmo-text-white" : ""}
+      ${icon} ${acteur?.reparer ? "qfdmo-text-white" : ""}
     `
     const htmlTree = [
       `<div data-animated class="qfdmo-scale-75">`,

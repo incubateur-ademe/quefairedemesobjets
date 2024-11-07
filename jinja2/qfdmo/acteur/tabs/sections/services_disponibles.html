@@ -8,9 +8,15 @@ Services disponibles
 <div class="qfdmo-space-y-1w">
     {% for service in object.sorted_proposition_services %}
         <div class="qfdmo-space-y-1v">
-            {% with action=service.action %}
-                {% include "qfdmo/acteur/tabs/_service_tag.html" %}
-            {% endwith %}
+            {% if is_carte %}
+                {% with action=service.action.groupe_action %}
+                    {% include "qfdmo/acteur/tabs/_service_tag.html" %}
+                {% endwith %}
+            {% else %}
+                {% with action=service.action,extra_classes="qfdmo-bg-opacity-30" %}
+                    {% include "qfdmo/acteur/tabs/_service_tag.html" %}
+                {% endwith %}
+            {% endif %}
 
             <p class="qfdmo-m-0 qfdmo-text-sm">
             {{ service.sous_categories_display }}
