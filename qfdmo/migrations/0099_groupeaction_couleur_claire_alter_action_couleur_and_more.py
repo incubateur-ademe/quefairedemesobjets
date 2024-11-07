@@ -9,17 +9,17 @@ action_couleur_mapping = [
     ("orange-terre-battue", "orange-terre-battue-main-645"),
     ("purple-glycine", "purple-glycine-main-494"),
     ("green-archipel", "green-menthe-main-548"),
-    ("yellow-moutarde", "yellow-tournesol-moon-922-active"),
+    ("yellow-moutarde", "yellow-tournesol-sun-407-moon-922"),
     ("blue-france", "blue-cumulus-main-526"),
     ("brown-caramel", "brown-cafe-creme-main-782"),
 ]
 
 groupe_action_couleur_mapping: List[List[str]] = [
-    ["trier", "purple-glycine-975", "purple-glycine-main-494"],
-    ["vendre_acheter", "brown-cafe-creme-950", "brown-cafe-creme-main-782"],
-    ["emprunter_preter_louer", "pink-tuile-975", "pink-tuile-main-556"],
-    ["donner_echanger", "blue-cumulus-975", "blue-cumulus-main-526"],
-    ["reparer", "green-menthe-975", "green-menthe-main-548"],
+    ["trier", "purple-glycine-975-75", "purple-glycine-main-494"],
+    ["vendre_acheter", "brown-cafe-creme-950-100", "brown-cafe-creme-main-782"],
+    ["emprunter_preter_louer", "pink-tuile-975-75", "pink-tuile-main-556"],
+    ["donner_echanger", "blue-cumulus-975-75", "blue-cumulus-main-526"],
+    ["reparer", "green-menthe-975-75", "green-menthe-main-548"],
 ]
 
 
@@ -30,11 +30,14 @@ def set_hexadecimal_colors(apps, schema_editor):
     GroupeAction = apps.get_model("qfdmo", "GroupeAction")
 
     for old, new in action_couleur_mapping:
-        Action.objects.filter(couleur=old).update(couleur=DSFRColors[new])
+        DSFRColors[new]  # We do not allow to fail if the color does not exist
+        Action.objects.filter(couleur=old).update(couleur=new)
 
     for code, couleur_claire, couleur in groupe_action_couleur_mapping:
+        DSFRColors[couleur]  # We do not allow to fail if the color does not exist
+        DSFRColors[couleur_claire]
         GroupeAction.objects.filter(code=code).update(
-            couleur=DSFRColors[couleur], couleur_claire=DSFRColors[couleur_claire]
+            couleur=couleur, couleur_claire=couleur_claire
         )
 
 
