@@ -245,7 +245,6 @@ class CarteView(
             acteurs = acteurs.digital()[:100]
         else:
             bbox, acteurs = self._bbox_and_acteurs_from_location_or_epci(acteurs)
-            # acteurs = acteurs.values()
             acteurs = acteurs[: self._get_max_displayed_acteurs()]
 
             # Set Home location (address set as input)
