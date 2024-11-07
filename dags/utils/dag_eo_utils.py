@@ -104,9 +104,6 @@ def create_proposition_services_sous_categories(**kwargs):
     souscategorieobjet_code_by_id = kwargs["ti"].xcom_pull(
         task_ids="read_souscategorieobjet"
     )
-    souscategorieobjet_code_by_id = {
-        k.lower(): v for k, v in souscategorieobjet_code_by_id.items()
-    }
     params = kwargs["params"]
     sous_categories_mapping = params.get("product_mapping", {})
     rows_list = []
@@ -121,9 +118,8 @@ def create_proposition_services_sous_categories(**kwargs):
             if sous_categorie.strip()
         ]
         for product in set(products):
-            product_key = product
-            if product_key in sous_categories_mapping:
-                sous_categories_value = sous_categories_mapping[product_key]
+            if product in sous_categories_mapping:
+                sous_categories_value = sous_categories_mapping[product]
                 if sous_categories_value is None:
                     continue
                 if isinstance(sous_categories_value, list):
@@ -169,13 +165,13 @@ def create_proposition_services_sous_categories(**kwargs):
 
 def serialize_to_json(**kwargs):
     # Removed acteurs
-    df_removed_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")[
-        "removed_actors"
+    df_acteur_to_delete = kwargs["ti"].xcom_pull(task_ids="get_acteur_to_delete")[
+        "df_acteur_to_delete"
     ]
     update_actors_columns = ["identifiant_unique", "statut", "cree_le"]
-    df_removed_actors["row_updates"] = df_removed_actors[update_actors_columns].apply(
-        lambda row: json.dumps(row.to_dict(), default=str), axis=1
-    )
+    df_acteur_to_delete["row_updates"] = df_acteur_to_delete[
+        update_actors_columns
+    ].apply(lambda row: json.dumps(row.to_dict(), default=str), axis=1)
     # Created or updated Acteurs
     df_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
     df_ps = kwargs["ti"].xcom_pull(task_ids="create_proposition_services")["df"]
@@ -278,7 +274,7 @@ def serialize_to_json(**kwargs):
     )
     df_joined.drop_duplicates("identifiant_unique", keep="first", inplace=True)
 
-    return {"all": {"df": df_joined}, "to_disable": {"df": df_removed_actors}}
+    return {"all": {"df": df_joined}, "to_disable": {"df": df_acteur_to_delete}}
 
 
 def read_acteur(**kwargs):
@@ -302,6 +298,7 @@ def read_acteur(**kwargs):
     engine = pg_hook.get_sqlalchemy_engine()
     joined_source_ids = ",".join([f"'{source_id}'" for source_id in unique_source_ids])
     query = f"SELECT * FROM qfdmo_acteur WHERE source_id IN ({joined_source_ids})"
+
     df_acteur = pd.read_sql_query(query, engine)
 
     return df_acteur
@@ -357,6 +354,11 @@ def write_to_dagruns(**kwargs):
         .xcom_pull(task_ids="create_actors", key="return_value", default={})
         .get("metadata", {})
     )
+    metadata_acteur_to_delete = (
+        kwargs["ti"]
+        .xcom_pull(task_ids="get_acteur_to_delete", key="return_value", default={})
+        .get("metadata", {})
+    )
     metadata_pds = (
         kwargs["ti"]
         .xcom_pull(
@@ -365,11 +367,7 @@ def write_to_dagruns(**kwargs):
         .get("metadata", {})
     )
 
-    metadata = {}
-    if metadata_actors:
-        metadata.update(metadata_actors)
-    if metadata_pds:
-        metadata.update(metadata_pds)
+    metadata = {**metadata_actors, **metadata_acteur_to_delete, **metadata_pds}
 
     for key, data in dfs.items():
         # TODO dag_id
@@ -446,12 +444,12 @@ def create_actors(**kwargs):
     df_acteurs = kwargs["ti"].xcom_pull(task_ids="read_acteur")
 
     params = kwargs["params"]
-    reparacteurs = params.get("reparacteurs", False)
     source_code = params.get("source_code")
     label_bonus_reparation = params.get("label_bonus_reparation")
     column_mapping = params.get("column_mapping", {})
     column_to_drop = params.get("column_to_drop", [])
-    column_to_replace = params.get("default_column_value", {})
+    columns_to_add_by_default = params.get("columns_to_add_by_default", {})
+    combine_columns_categories = params.get("combine_columns_categories")
 
     if params.get("merge_duplicated_acteurs"):
         df = merge_duplicates(
@@ -459,6 +457,15 @@ def create_actors(**kwargs):
             group_column="id_point_apport_ou_reparation",
             merge_column="produitsdechets_acceptes",
         )
+
+    for k, val in columns_to_add_by_default.items():
+        df[k] = val
+
+    # Supprimer les acteurs qui ne propose qu'un service à domicile
+    if "service_a_domicile" in df.columns:
+        df.loc[
+            df["service_a_domicile"] == "service à domicile uniquement", "statut"
+        ] = "SUPPRIME"
 
     # filtre des service à domicile uniquement
     if "service_a_domicile" in df.columns:
@@ -468,25 +475,33 @@ def create_actors(**kwargs):
     column_to_drop = list(set(column_to_drop) & set(df.columns))
     df = df.drop(column_to_drop, axis=1)
 
-    for k, val in column_to_replace.items():
-        df[k] = val
-    if reparacteurs:
-        df = mapping_utils.process_reparacteurs(
-            df, sources_id_by_code, acteurtype_id_by_code, source_code
+    if combine_columns_categories:
+        df["produitsdechets_acceptes"] = df.apply(
+            lambda row: mapping_utils.combine_categories(
+                row, combine_columns_categories
+            ),
+            axis=1,
         )
-    else:
-        df = mapping_utils.process_actors(df)
-
-    # By default, all actors are active
-    # TODO : manage constant as an enum in config
-    df["statut"] = "ACTIF"
+    if source_code:
+        df["source_id"] = sources_id_by_code[source_code]
 
     # TODO Plutôt se baser sur le nom de la colonne cible plutôt que sur le nom de la
     # colonne source
     for old_col, new_col in column_mapping.items():
         if old_col in df.columns and new_col:
             if new_col == "identifiant_externe":
-                df[new_col] = df[old_col].astype(str)
+
+                # TODO: simplifier cette partie de code quite à faire des migrations
+                if "nom_de_lorganisme" in df.columns:
+                    df[old_col] = df[old_col].fillna(
+                        df["nom_de_lorganisme"]
+                        .str.replace("-", "")
+                        .str.replace(" ", "_")
+                        .str.replace("__", "_")
+                    )
+                # TODO: raise si l'identifiant unique n'est pas unique
+                df["identifiant_externe"] = df[old_col].astype(str)
+
             elif new_col == "statut":
                 df[new_col] = df[old_col].map({1: "ACTIF", 0: "SUPPRIME"})
             elif new_col == "acteur_type_id":
@@ -535,6 +550,9 @@ def create_actors(**kwargs):
                         "Agréé Bonus Réparation", label_bonus_reparation
                     )
                 )
+            elif new_col == "url":
+                df[new_col] = df[old_col].apply(mapping_utils.prefix_url)
+
             else:
                 df[new_col] = df[old_col]
 
@@ -549,9 +567,7 @@ def create_actors(**kwargs):
         )
 
     df["identifiant_unique"] = df.apply(
-        lambda x: mapping_utils.create_identifiant_unique(
-            x, source_name="CMA_REPARACTEUR" if reparacteurs else None
-        ),
+        lambda x: mapping_utils.create_identifiant_unique(x, source_name=source_code),
         axis=1,
     )
 
@@ -590,22 +606,10 @@ def create_actors(**kwargs):
     duplicate_ids = df.loc[duplicates_mask, "identifiant_unique"].unique()
     number_of_duplicates = len(duplicate_ids)
 
-    df_acteurs_actifs = df_acteurs[df_acteurs["statut"] == "ACTIF"]
-
-    # Get acteur to delete
-    # Here we get the actors that are present in df_acteurs_actifs but not in df
-    df_missing_actors = df_acteurs_actifs[
-        ~df_acteurs_actifs["identifiant_unique"].isin(df["identifiant_unique"])
-    ][["identifiant_unique", "cree_le", "modifie_le"]]
-
-    df_missing_actors["statut"] = "SUPPRIME"
-    df_missing_actors["event"] = "UPDATE_ACTOR"
-
     metadata = {
         "number_of_duplicates": number_of_duplicates,
         "duplicate_ids": list(duplicate_ids),
         "added_rows": len(df),
-        "number_of_removed_actors": len(df_missing_actors),
     }
 
     df = df.drop_duplicates(subset="identifiant_unique", keep="first")
@@ -613,7 +617,29 @@ def create_actors(**kwargs):
     return {
         "df": df,
         "metadata": metadata,
-        "removed_actors": df_missing_actors,
+    }
+
+
+def get_acteur_to_delete(**kwargs):
+    df_acteurs_for_source = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
+    df_acteurs_from_db = kwargs["ti"].xcom_pull(task_ids="read_acteur")
+
+    df_acteurs_from_db_actifs = df_acteurs_from_db[
+        df_acteurs_from_db["statut"] == "ACTIF"
+    ]
+
+    df_acteur_to_delete = df_acteurs_from_db_actifs[
+        ~df_acteurs_from_db_actifs["identifiant_unique"].isin(
+            df_acteurs_for_source["identifiant_unique"]
+        )
+    ][["identifiant_unique", "cree_le", "modifie_le"]]
+
+    df_acteur_to_delete["statut"] = "SUPPRIME"
+    df_acteur_to_delete["event"] = "UPDATE_ACTOR"
+
+    return {
+        "metadata": {"number_of_removed_actors": len(df_acteur_to_delete)},
+        "df_acteur_to_delete": df_acteur_to_delete,
     }
 
 
