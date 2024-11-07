@@ -41,7 +41,6 @@ with DAG(
             "point_de_reparation": True,
         },
         "product_mapping": get_mapping_config(mapping_key="sous_categories_cma"),
-        # TODO: voir si on peut remplacer ces clé par des fixed columns
         "combine_columns_categories": ["categorie", "categorie2", "categorie3"],
         "source_code": "cma_reparacteur",
     },

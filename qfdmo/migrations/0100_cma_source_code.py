@@ -6,13 +6,13 @@ from django.db import migrations
 def rename_cma_source_code(apps, schema_editor):
     Source = apps.get_model("qfdmo", "Source")
     Source.objects.filter(code="CMA - Chambre des métiers et de l'artisanat").update(
-        code="cma_reparateur"
+        code="cma_reparacteur"
     )
 
 
 def reverse_rename_cma_source_code(apps, schema_editor):
     Source = apps.get_model("qfdmo", "Source")
-    Source.objects.filter(code="cma_reparateur").update(
+    Source.objects.filter(code="cma_reparacteur").update(
         code="CMA - Chambre des métiers et de l'artisanat"
     )
 
