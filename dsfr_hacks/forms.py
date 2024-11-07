@@ -1,20 +1,6 @@
 from django import forms
-from pydantic import ValidationError
-
-from dsfr_hacks.colors import DSFRColors
+from dsfr.forms import DsfrBaseForm
 
 
-class DSFRColorField(forms.CharField):
-    def validate(self, value):
-        """Check if value consists only of valid emails."""
-        # Use the parent's handling of required fields, etc.
-        super().validate(value)
-        try:
-            DSFRColors[value]
-        except KeyError:
-            raise ValidationError("La couleur n'existe pas dans les couleurs du DSFR")
-
-
-class ColorForm(forms.Form):
-    hexa_color = forms.CharField()
-    dsfr_color = forms.CharField()
+class ColorForm(DsfrBaseForm):
+    hexa_color = forms.CharField(label="Couleur hexadécimale")

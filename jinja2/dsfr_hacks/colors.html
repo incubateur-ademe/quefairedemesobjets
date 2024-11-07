@@ -1,0 +1,21 @@
+{% extends "layout/base.html" %}
+
+{% block content %}
+<div class="fr-container qfdmo-my-5w">
+    <form action="{{ url('dsfr_hacks:colors') }}" method="post">
+        {{ csrf_input }}
+        {{ form }}
+        <div class="fr-input-group fr-my-4w">
+        <button type="submit" class="fr-btn" title="Valider">
+            Vérifier
+        </button>
+        </div>
+    </form>
+    {% if form.cleaned_data %}
+    <h2>
+        Nom de la couleur: <code>{{ form.cleaned_data.dsfr_color }}</code><br/>
+        Code hexadécimal : <code>{{ form.cleaned_data.hexa_color }}</code>
+    </h2>
+    {% endif %}
+</div>
+{% endblock content %}
