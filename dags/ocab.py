@@ -11,10 +11,6 @@ with DAG(
         " for OCAB dataset"
     ),
     params={
-        "endpoint": (
-            "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
-            "donnees-eo-ocab/lines?size=10000"
-        ),
         "column_mapping": {
             "id_point_apport_ou_reparation": "identifiant_externe",
             "type_de_point_de_collecte": "acteur_type_id",
@@ -32,6 +28,13 @@ with DAG(
             "perimetre_dintervention": "",
             "longitudewgs84": "longitude",
             "latitudewgs84": "latitude",
+        },
+        "endpoint": (
+            "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
+            "donnees-eo-ocab/lines?size=10000"
+        ),
+        "columns_to_add_by_default": {
+            "statut": "ACTIF",
         },
         "product_mapping": get_mapping_config(),
     },
