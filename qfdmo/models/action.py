@@ -69,13 +69,22 @@ class GroupeAction(CodeAsNaturalKeyModel):
     @cached_property
     def border(self):
         return next(
-            (key for key, value in DSFRColors.items() if value == self.couleur), None
+            (
+                key
+                for key, value in DSFRColors.items()
+                if value.lower() == self.couleur.lower()
+            ),
+            None,
         )
 
     @cached_property
     def background(self):
         return next(
-            (key for key, value in DSFRColors.items() if value == self.couleur_claire),
+            (
+                key
+                for key, value in DSFRColors.items()
+                if value.lower() == self.couleur_claire.lower()
+            ),
             None,
         )
 
@@ -139,7 +148,12 @@ class Action(CodeAsNaturalKeyModel):
     @cached_property
     def background(self):
         return next(
-            (key for key, value in DSFRColors.items() if value == self.couleur), None
+            (
+                key
+                for key, value in DSFRColors.items()
+                if value.lower() == self.couleur.lower()
+            ),
+            None,
         )
 
     def __str__(self):

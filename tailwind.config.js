@@ -1,30 +1,12 @@
 /** @type {import('tailwindcss').Config | null} */
 import DSFRColors from "./dsfr_hacks/colors"
+import usedColors from "./dsfr_hacks/used_colors"
 
 /*
-variables = re.findall(r'--([a-zA-Z0-9-_]+)\s*:\s*([^;]+);', block)
 The colors set here are defined at the database level in actions and groupe actions
 objects.
 They match some colors from the DSFR and their name comes from their CSS variable.
 */
-const colors = [
-  "blue-cumulus-975-75",
-  "blue-cumulus-main-526",
-  "blue-cumulus-main-526",
-  "brown-cafe-creme-950-100",
-  "brown-cafe-creme-main-782",
-  "brown-cafe-creme-main-782",
-  "green-menthe-main-548",
-  "orange-terre-battue-main-645",
-  "pink-tuile-main-556",
-  "pink-tuile-975-75",
-  "purple-glycine-975-75",
-  "purple-glycine-main-494",
-  "green-menthe-975-75",
-  "purple-glycine-main-494",
-  "yellow-tournesol-sun-407-moon-922",
-]
-
 module.exports = {
   content: [
     "jinja2/*.html",
@@ -34,21 +16,21 @@ module.exports = {
     "static/to_compile/**/*{j,t}s",
     "static/to_compile/**/*svg",
     "./**/forms.py",
+    "./dsfr_hacks/used_colors.js",
+    "./dsfr_hacks/used_icons.js"
   ],
   prefix: "qfdmo-",
   corePlugins: {
     preflight: false,
   },
   safelist: [
-    {
-      pattern: new RegExp(`qfdmo-(border|bg)-(${colors.join("|")})`)
-    },
-    "fr-icon-recycle-line",
-    "fr-icon-arrow-go-back-line",
     "sm:qfdmo-max-w-[596px]",
     "sm:qfdmo-min-w-[600px]",
     "sm:qfdmo-w-[250px]",
     "sm:qfdmo-w-[400px]",
+    {
+      pattern: new RegExp(`qfdmo-(border|bg)-(${usedColors.join('|')})`)
+    }
   ],
   theme: {
     colors: {

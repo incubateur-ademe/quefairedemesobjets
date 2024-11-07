@@ -380,7 +380,7 @@ class BaseActeur(NomAsNaturalKeyModel):
 
     @cached_property
     def labels_without_enseigne_display(self):
-        return self.labels_display.filter(type_enseigne=False)
+        return self.labels_display.exclude(type_enseigne=True)
 
     @cached_property
     def labels_display(self):

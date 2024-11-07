@@ -14,6 +14,7 @@ from qfdmo.models import (
     ActeurType,
     Action,
     DisplayedActeur,
+    GroupeAction,
 )
 
 router = Router()
@@ -41,11 +42,17 @@ class ActeurTypeSchema(ModelSchema):
 
 
 class ActionSchema(ModelSchema):
-    couleur: str = Field(..., alias="couleur_foncee")
+    border: str
+    background: str
 
     class Meta:
         model = Action
-        fields = ["id", "code", "libelle"]
+        fields = ["id", "code", "libelle", "icon", "couleur"]
+
+
+class GroupeActionSchema(ActionSchema):
+    class Meta(ActionSchema.Meta):
+        model = GroupeAction
 
 
 class ActeurServiceSchema(ModelSchema):
@@ -97,6 +104,19 @@ def actions(request):
     Liste l'ensemble des <i>actions</i> possibles sur un objet / déchet.
     """  # noqa
     qs = Action.objects.all()
+    return qs
+
+
+@router.get(
+    "/actions/groupes",
+    response=List[GroupeActionSchema],
+    summary="Liste des groupes d'actions possibles",
+)
+def groupe_actions(request):
+    """
+    Liste l'ensemble des <i>actions</i> possibles sur un objet / déchet.
+    """  # noqa
+    qs = GroupeAction.objects.all()
     return qs
 
 

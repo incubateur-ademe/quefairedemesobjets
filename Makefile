@@ -122,6 +122,8 @@ test:
 	@make e2e-test
 
 # DSFR
-.PHONY: extract-dsfr-colors
-extract-dsfr-colors:
+.PHONY: extract-dsfr
+extract-dsfr:
 	$(PYTHON) ./dsfr_hacks/extract_dsfr_colors.py
+	$(PYTHON) ./dsfr_hacks/extract_used_colors.py
+	$(PYTHON) ./dsfr_hacks/extract_used_icons.py
