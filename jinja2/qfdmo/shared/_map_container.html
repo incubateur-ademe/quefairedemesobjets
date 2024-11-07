@@ -14,6 +14,7 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
     "
     {% if not is_digital %}
     data-controller="map"
+    data-map-location-value="{{ location }}"
     {% endif %}
 >
     {% if is_digital %}
@@ -25,7 +26,6 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
             id="map"
             class="qfdmo-inset-0 qfdmo-h-full qfdmo-relative qfdmo-z-0"
             data-action="map:captureInteraction->analytics#captureInteractionWithMap"
-            data-map-location-value="{{ location }}"
         >
             {% if is_carte %}
                 <a class="qfdmo-flex lg:qfdmo-hidden
