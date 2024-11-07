@@ -7,7 +7,7 @@
         {% with text="Présentation",target="aboutPanel" %}
             {% include "qfdmo/acteur/tabs/_tab.html" %}
         {% endwith %}
-        {% if object.labels_display %}
+        {% if object.labels_without_enseigne_display %}
             {% with text="Labels",target="labelsPanel" %}
                 {% include "qfdmo/acteur/tabs/_tab.html" %}
             {% endwith %}
