@@ -4,7 +4,7 @@ from airflow import DAG
 from airflow.models.baseoperator import chain
 from airflow.operators.python import PythonOperator
 from utils import dag_eo_utils
-from utils.db_tasks import read_data_from_postgres
+from utils.db_tasks import read_mapping_from_postgres
 
 default_args = {
     "owner": "airflow",
@@ -32,7 +32,7 @@ def load_data_from_postgresql_task(dag: DAG) -> PythonOperator:
     )
 
 
-def read_data_from_postgres_task(
+def read_mapping_from_postgres_task(
     *,
     dag: DAG,
     table_name: str,
@@ -43,7 +43,7 @@ def read_data_from_postgres_task(
 
     return PythonOperator(
         task_id=task_id,
-        python_callable=read_data_from_postgres,
+        python_callable=read_mapping_from_postgres,
         op_kwargs={"table_name": table_name},
         dag=dag,
         retries=retries,
@@ -118,25 +118,25 @@ def create_acteur_services_task(dag: DAG) -> PythonOperator:
 def eo_task_chain(dag: DAG) -> None:
     read_tasks = [
         fetch_data_from_api_task(dag),
-        read_data_from_postgres_task(
+        read_mapping_from_postgres_task(
             dag=dag, table_name="qfdmo_acteurtype", task_id="read_acteurtype"
         ),
-        read_data_from_postgres_task(
+        read_mapping_from_postgres_task(
             dag=dag, table_name="qfdmo_source", task_id="read_source"
         ),
-        read_data_from_postgres_task(
+        read_mapping_from_postgres_task(
             dag=dag, table_name="qfdmo_action", task_id="read_action"
         ),
-        read_data_from_postgres_task(
+        read_mapping_from_postgres_task(
             dag=dag, table_name="qfdmo_acteurservice", task_id="read_acteurservice"
         ),
-        read_data_from_postgres_task(
+        read_mapping_from_postgres_task(
+            dag=dag, table_name="qfdmo_labelqualite", task_id="read_labelqualite"
+        ),
+        read_mapping_from_postgres_task(
             dag=dag,
             table_name="qfdmo_souscategorieobjet",
             task_id="read_souscategorieobjet",
-        ),
-        read_data_from_postgres_task(
-            dag=dag, table_name="qfdmo_labelqualite", task_id="read_labelqualite"
         ),
         load_data_from_postgresql_task(dag),
     ]
