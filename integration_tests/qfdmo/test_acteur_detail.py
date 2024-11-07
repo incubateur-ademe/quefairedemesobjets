@@ -9,11 +9,6 @@ from unit_tests.qfdmo.acteur_factory import (
 
 
 @pytest.fixture
-def adresse():
-    return DisplayedActeurFactory()
-
-
-@pytest.fixture
 def get_response(client):
     def _get_response(identifiant_unique):
         url = f"/adresse/{identifiant_unique}"
@@ -26,11 +21,13 @@ def get_response(client):
 
 @pytest.mark.django_db
 class TestDisplaySource:
-    def test_display_no_source(self, adresse, get_response):
+    def test_display_no_source(self, get_response):
+        adresse = DisplayedActeurFactory()
         response, _ = get_response(adresse.identifiant_unique)
         assert response.context["display_sources_panel"] is False
 
-    def test_display_one_source(self, adresse, get_response):
+    def test_display_one_source(self, get_response):
+        adresse = DisplayedActeurFactory()
         adresse.sources.add(SourceFactory(afficher=True))
         response, _ = get_response(adresse.identifiant_unique)
         assert response.context["display_sources_panel"] is True
@@ -61,8 +58,9 @@ class TestDisplayLabel:
         ],
     )
     def test_display_labels(
-        self, adresse, get_response, label_setup, expected_text, should_display
+        self, get_response, label_setup, expected_text, should_display
     ):
+        adresse = DisplayedActeurFactory()
         for code, libelle, type_enseigne, *bonus in label_setup:
             adresse.labels.add(
                 LabelQualiteFactory(
@@ -95,7 +93,8 @@ class TestAboutPanel:
     @pytest.mark.parametrize(
         "uniquement_sur_rdv", [True, False], ids=["With RDV", "Without RDV"]
     )
-    def test_display_rdv_message(self, adresse, get_response, uniquement_sur_rdv):
+    def test_display_rdv_message(self, get_response, uniquement_sur_rdv):
+        adresse = DisplayedActeurFactory()
         expected_text = "📆 Les services de cet établissement ne sont disponibles"
         " que sur rendez-vous."
         adresse.uniquement_sur_rdv = uniquement_sur_rdv
@@ -110,8 +109,9 @@ class TestAboutPanel:
         ids=["Exclusive Reparation", "Non-exclusive Reparation"],
     )
     def test_display_reparation_message(
-        self, adresse, get_response, exclusivite_de_reprisereparation
+        self, get_response, exclusivite_de_reprisereparation
     ):
+        adresse = DisplayedActeurFactory()
         expected_text = "Cet établissement ne répare que les produits de ses marques."
         adresse.exclusivite_de_reprisereparation = exclusivite_de_reprisereparation
         adresse.save()
