@@ -194,7 +194,10 @@ class CarteView(TurboFormView, FormView):
             return self.request.GET.getlist(key, default)
 
     def get_context_data(self, **kwargs):
-        form = self.get_form_class()(self.request.GET)
+
+        logger.info("🦄🦄🦄🦄🦄🦄🦄🦄🦄🦄")
+        logger.info(self.request.GET)
+        form = self.get_form_class()(dict(self.request.GET.lists()))
 
         kwargs.update(
             # TODO: refacto forms : define a BooleanField carte on CarteAddressesForm
@@ -208,6 +211,7 @@ class CarteView(TurboFormView, FormView):
             self.cleaned_data = form.cleaned_data
         else:
             # TODO : refacto forms : handle this case properly
+            logger.info(form.errors)
             self.cleaned_data = form.cleaned_data
 
         # Manage the selection of sous_categorie_objet and actions
@@ -268,13 +272,12 @@ class CarteView(TurboFormView, FormView):
 
             return custom_bbox, acteurs_from_center
 
-        if epci_codes := self.get_data_from_request_or_bounded_form("epci_codes"):
+        if epci_codes := self.cleaned_data.get("epci_codes"):
             geojson_list = [retrieve_epci_geojson(code) for code in epci_codes]
             bbox = bbox_from_list_of_geojson(geojson_list, buffer=0)
-            if geojson_list:
-                # TODO: handle case with multiples EPCI codes passed in URL
-                geojson = json.dumps(geojson_list[0])
-                acteurs = acteurs.in_geojson(geojson)
+            acteurs = acteurs.in_geojson(
+                [json.dumps(geojson) for geojson in geojson_list]
+            )
             return compile_leaflet_bbox(bbox), acteurs
 
         return custom_bbox, acteurs.none()

@@ -1,6 +1,6 @@
 import json
+import logging
 from html import escape
-from typing import Any
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
@@ -8,13 +8,20 @@ from django.shortcuts import render
 from django.views.generic.edit import FormView
 
 from qfdmo.forms import AdvancedConfiguratorForm, ConfiguratorForm
+from qfdmo.models.action import GroupeActionQueryset
 
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
+
+logger = logging.getLogger(__name__)
 
 
 class ConfiguratorView(FormView):
     form_class = ConfiguratorForm
     template_name = "qfdmo/iframe_configurator/base.html"
+
+    def form_invalid(self, form) -> HttpResponse:
+        logger.info(form.cleaned_data)
+        return super().form_invalid(form)
 
     def form_valid(self, form) -> HttpResponse:
         return render(
@@ -32,21 +39,19 @@ class ConfiguratorView(FormView):
     def _compile_script_tag(self, attributes):
         iframe_script = f"<script src='{ self.iframe_url }'"
         for key, value in attributes.items():
-            try:
+            logger.info(type(value))
+            # In some cases, the value need to be rewritten
+            # so that it can be easily parsed in the frontend
+            if type(value) is GroupeActionQueryset:
                 # Some values need to be formatted
                 value = value.as_codes()
-            except AttributeError:
-                pass
-
+            if type(value) is list:
+                value = ",".join(value)
             if value:
                 iframe_script += f" data-{key}='{str(value)}'"
+
         iframe_script += "></script>"
         return iframe_script
-
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-
-        return context
 
 
 class AdvancedConfiguratorView(LoginRequiredMixin, FormView):

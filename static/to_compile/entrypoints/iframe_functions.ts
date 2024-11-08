@@ -55,6 +55,13 @@ export function getIframeAttributesAndExtra(
   let iframeExtraAttributes: { [Property in keyof HTMLScriptElement]?: unknown } = {}
 
   for (const param in scriptTag.dataset) {
+    // if (scriptTag.dataset[param]?.includes(",")) {
+    if (scriptTag.dataset[param]?.includes(",")) {
+      for (const value of scriptTag.dataset[param].split(",")) {
+        urlParams.append(param, value)
+      }
+      continue
+    }
     if (param === "max_width") {
       maxWidth = scriptTag.dataset[param]!
       continue

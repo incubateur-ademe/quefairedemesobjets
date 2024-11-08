@@ -301,8 +301,8 @@ class CarteForm(AddressesForm):
     )
 
     epci_codes = forms.MultipleChoiceField(
-        choices=all_epci_codes,
-        widget=forms.MultipleHiddenInput(),
+        choices=all_epci_codes(["code", "nom"]),
+        widget=forms.HiddenInput(),
         required=False,
     )
 
@@ -376,7 +376,7 @@ class ConfiguratorForm(DsfrBaseForm):
         ),
         help_text="Commencez à taper un nom d’EPCI et sélectionnez un EPCI parmi "
         "les propositions de la liste.",
-        initial="",
+        choices=all_epci_codes(["code", "nom"]),
         widget=GenericAutoCompleteInput(
             attrs={"data-autocomplete-target": "hiddenInput", "class": "qfdmo-hidden"},
             extra_attrs={

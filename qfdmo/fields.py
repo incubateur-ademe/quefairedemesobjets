@@ -1,6 +1,10 @@
+import logging
+
 from django import forms
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
+
+logger = logging.getLogger(__name__)
 
 
 class GroupeActionChoiceField(forms.ModelMultipleChoiceField):
@@ -18,5 +22,7 @@ class EPCIField(forms.MultipleChoiceField):
         # TODO : once multiple EPCI codes will be managed, this method will be useless
         # and the frontend will be rewritten to support a more complex state with all
         # values matching their labels.
-        value = super().to_python(value)
-        return value.split(" - ")[1]
+        python_value = super().to_python(value)
+        logger.info(python_value)
+        logger.info(value)
+        return [value.split(" - ")[1] for value in python_value]

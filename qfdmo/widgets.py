@@ -8,9 +8,9 @@ class RangeInput(widgets.NumberInput):
     input_type = "range"
 
 
-class GenericAutoCompleteInput(widgets.Input):
+class GenericAutoCompleteInput(widgets.SelectMultiple):
     template_name = "forms/widgets/generic_autocomplete.html"
-    hidden_template_name = widgets.MultipleHiddenInput.template_name
+    hidden_template_name = widgets.SelectMultiple.template_name
 
     def __init__(self, attrs=None, extra_attrs=None):
         super().__init__(attrs)

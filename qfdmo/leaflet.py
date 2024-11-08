@@ -1,6 +1,9 @@
 import json
+import logging
 from json.decoder import JSONDecodeError
 from typing import List, TypedDict
+
+logger = logging.getLogger(__name__)
 
 
 class PointDict(TypedDict):
@@ -25,9 +28,8 @@ def center_from_leaflet_bbox(custom_bbox_as_string: str) -> List[float]:
 
 
 def sanitize_leaflet_bbox(custom_bbox_as_string: str) -> List[float] | None:
-    custom_bbox: LeafletBbox = json.loads(custom_bbox_as_string)
-
     try:
+        custom_bbox: LeafletBbox = json.loads(custom_bbox_as_string)
         # Handle center
         return [
             custom_bbox["southWest"]["lng"],
@@ -35,7 +37,11 @@ def sanitize_leaflet_bbox(custom_bbox_as_string: str) -> List[float] | None:
             custom_bbox["northEast"]["lng"],
             custom_bbox["northEast"]["lat"],
         ]
-    except KeyError:
+    except (KeyError, JSONDecodeError) as exception:
+        logger.error(
+            "An error occured while sanitizing a leaflet bbox. It was ignored"
+            f" - {exception} - {custom_bbox_as_string=}"
+        )
         # TODO : gérer l'erreur
         return []
 

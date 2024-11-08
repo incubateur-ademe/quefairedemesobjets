@@ -13,7 +13,7 @@ from django.contrib.gis.geos import Point, Polygon
 from django.contrib.gis.geos.geometry import GEOSGeometry
 from django.core.cache import cache
 from django.core.files.images import get_image_dimensions
-from django.db.models import Exists, Min, OuterRef
+from django.db.models import Exists, Min, OuterRef, Q
 from django.db.models.functions import Now
 from django.forms import ValidationError, model_to_dict
 from django.http import HttpRequest
@@ -204,13 +204,17 @@ class DisplayedActeurQuerySet(models.QuerySet):
     def physical(self):
         return self.exclude(acteur_type_id=ActeurType.get_digital_acteur_type_id())
 
-    def in_geojson(self, geojson):
-        if not geojson:
+    def in_geojson(self, geojson_list):
+        if not geojson_list:
             # TODO : test
             return self.physical()
 
-        geometry = GEOSGeometry(geojson)
-        return self.physical().filter(location__within=geometry).order_by("?")
+        geometries = [GEOSGeometry(geojson) for geojson in geojson_list]
+        query = Q()
+        for geometry in geometries:
+            query |= Q(location__within=geometry)
+
+        return self.physical().filter(query).order_by("?")
 
     def in_bbox(self, bbox):
         if not bbox:

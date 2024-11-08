@@ -53,7 +53,7 @@ export default class extends Controller<HTMLElement> {
     )
   }
 
-  // Lifecycle
+  // Lifecycle methods
   selectedItemsValueChanged(currentValue) {
     this.#resetAutocompleteItems()
     this.#resetSearchInput()
@@ -71,13 +71,18 @@ export default class extends Controller<HTMLElement> {
   }
 
   // Local methods to manipulate HTML
-
   #updateCounterValue() {
     this.counterTarget.innerHTML = this.selectedTarget.children.length.toString()
   }
 
-  #updateHiddenInput(value: string) {
-    this.hiddenInputTarget.value = value
+  #updateHiddenInput(values: Array<string>) {
+    this.hiddenInputTarget.innerHTML = ""
+    for (const value of values) {
+      const option = document.createElement("option")
+      option.value = value
+      option.selected = true
+      this.hiddenInputTarget.appendChild(option)
+    }
   }
 
   #generateAutocompleteItem(value: string) {
