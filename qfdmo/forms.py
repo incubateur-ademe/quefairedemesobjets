@@ -372,22 +372,22 @@ class ConfiguratorForm(DsfrBaseForm):
             """
         <hr/>
         <h3>Paramètres de la carte</h3>
-        1. Choisir l’EPCI affiché par défaut sur la carte"""
+        1. Choisir les EPCI affichés par défaut sur la carte"""
         ),
         help_text="Commencez à taper un nom d’EPCI et sélectionnez un EPCI parmi "
         "les propositions de la liste.",
-        choices=all_epci_codes,
         initial="",
         widget=GenericAutoCompleteInput(
-            additionnal_info=mark_safe(
-                render_to_string(
-                    "forms/widgets/epci_codes_additionnal_info.html",
-                )
-            ),
-            attrs={
-                "class": "fr-input",
-                "wrapper_classes": "qfdmo-max-w-[576]",
-                "autocomplete": "off",
+            attrs={"data-autocomplete-target": "hiddenInput", "class": "qfdmo-hidden"},
+            extra_attrs={
+                "selected_label": "Vos EPCI sélectionnés",
+                "empty_label": "Il n’y a pas d’EPCI sélectionné pour le moment",
+                "endpoint": "/api/qfdmo/autocomplete/configurateur?query=",
+                "additionnal_info": mark_safe(
+                    render_to_string(
+                        "forms/widgets/epci_codes_additionnal_info.html",
+                    )
+                ),
             },
         ),
     )

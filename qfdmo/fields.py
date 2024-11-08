@@ -13,7 +13,7 @@ class GroupeActionChoiceField(forms.ModelMultipleChoiceField):
         )
 
 
-class EPCIField(forms.ChoiceField):
+class EPCIField(forms.MultipleChoiceField):
     def to_python(self, value):
         # TODO : once multiple EPCI codes will be managed, this method will be useless
         # and the frontend will be rewritten to support a more complex state with all

@@ -8,6 +8,7 @@
         {% endblock wrapper_attributes %}
     >
         <div class="autocomplete">
+            {% block input %}
             <input
                     data-action="
                     {% block data_action %}
@@ -28,6 +29,7 @@
                 {% if widget.value != None %} value="{{ widget.value|stringformat:'s' }}"{% endif %}
                 {% include "django/forms/widgets/attrs.html" %}
             >
+            {% endblock input %}
             {% include "forms/widgets/_spinner.html" %}
             {% block choices %}
                 <script type="application/json" data-{{ widget.data_controller }}-target="allAvailableOptions">

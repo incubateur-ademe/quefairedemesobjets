@@ -3,31 +3,32 @@ from typing import List, Tuple, cast
 import requests
 from django.contrib.gis.geos import GEOSGeometry
 from django.core.cache import caches
+from rapidfuzz import fuzz, process
 
 db_cache = caches["database"]
 
 
-def fetch_epci_codes() -> List[Tuple[str, str]]:
+def search_epci_code(query) -> List[str]:
+    results = process.extract(query, all_epci_codes(), scorer=fuzz.WRatio, limit=5)
+    return [match for match, score, index in results]
+
+
+def fetch_epci_codes() -> List[str]:
     """Retrieves EPCI codes from geo.api"""
     response = requests.get("https://geo.api.gouv.fr/epcis/?fields=code,nom")
-    codes = [
-        (item["code"], f"{item['nom']} - {item['code']}") for item in response.json()
-    ]
-    return codes
+    return [f"{item['nom']} - {item['code']}" for item in response.json()]
 
 
 def all_epci_codes():
     return cast(
-        List[Tuple[str, str]],
-        db_cache.get_or_set(
-            "all_epci_codes", fetch_epci_codes, timeout=3600 * 24 * 365
-        ),
+        List[str],
+        db_cache.get_or_set("all_epci_codes", fetch_epci_codes, timeout=3600 * 24 * 30),
     )
 
 
 def retrieve_epci_geojson(epci):
     all_epcis_codes = db_cache.get_or_set(
-        "all_epci_codes", fetch_epci_codes, timeout=3600 * 24 * 365
+        "all_epci_codes", fetch_epci_codes, timeout=3600 * 24 * 30
     )
 
     if epci not in [k for k, v in cast(List[Tuple[str, str]], all_epcis_codes)]:

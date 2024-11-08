@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from ninja import Field, FilterSchema, ModelSchema, Query, Router
 from ninja.pagination import paginate
 
+from qfdmo.geo_api import search_epci_code
 from qfdmo.models import (
     ActeurService,
     ActeurStatus,
@@ -170,3 +171,8 @@ def services(request):
 )
 def acteur(request, identifiant_unique: str):
     return get_object_or_404(DisplayedActeur, pk=id, statut=ActeurStatus.ACTIF)
+
+
+@router.get("/autocomplete/configurateur")
+def autocomplete_epcis(request, query: str):
+    return search_epci_code(query)
