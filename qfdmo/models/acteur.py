@@ -204,12 +204,15 @@ class DisplayedActeurQuerySet(models.QuerySet):
     def physical(self):
         return self.exclude(acteur_type_id=ActeurType.get_digital_acteur_type_id())
 
-    def in_geojson(self, geojson_list):
-        if not geojson_list:
+    def in_geojson(self, geojson):
+        if not geojson:
             # TODO : test
             return self.physical()
 
-        geometries = [GEOSGeometry(geojson) for geojson in geojson_list]
+        if type(geojson) is not list:
+            geojson = [geojson]
+
+        geometries = [GEOSGeometry(geojson) for geojson in geojson]
         query = Q()
         for geometry in geometries:
             query |= Q(location__within=geometry)

@@ -302,7 +302,7 @@ class CarteForm(AddressesForm):
 
     epci_codes = forms.MultipleChoiceField(
         choices=all_epci_codes(["code", "nom"]),
-        widget=forms.HiddenInput(),
+        widget=forms.MultipleHiddenInput(),
         required=False,
     )
 

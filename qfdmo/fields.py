@@ -23,6 +23,4 @@ class EPCIField(forms.MultipleChoiceField):
         # and the frontend will be rewritten to support a more complex state with all
         # values matching their labels.
         python_value = super().to_python(value)
-        logger.info(python_value)
-        logger.info(value)
         return [value.split(" - ")[1] for value in python_value]

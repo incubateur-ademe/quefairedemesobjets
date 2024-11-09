@@ -19,10 +19,6 @@ class ConfiguratorView(FormView):
     form_class = ConfiguratorForm
     template_name = "qfdmo/iframe_configurator/base.html"
 
-    def form_invalid(self, form) -> HttpResponse:
-        logger.info(form.cleaned_data)
-        return super().form_invalid(form)
-
     def form_valid(self, form) -> HttpResponse:
         return render(
             self.request,
@@ -39,13 +35,12 @@ class ConfiguratorView(FormView):
     def _compile_script_tag(self, attributes):
         iframe_script = f"<script src='{ self.iframe_url }'"
         for key, value in attributes.items():
-            logger.info(type(value))
             # In some cases, the value need to be rewritten
             # so that it can be easily parsed in the frontend
             if type(value) is GroupeActionQueryset:
                 # Some values need to be formatted
                 value = value.as_codes()
-            if type(value) is list:
+            if key == "epci_codes":
                 value = ",".join(value)
             if value:
                 iframe_script += f" data-{key}='{str(value)}'"

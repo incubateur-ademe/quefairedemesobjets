@@ -2,13 +2,8 @@
 <div
     class="fr-my-1w qfdmo-flex-grow"
 >
-    <div
-        class="{% block wrapper_classes %}{% endblock %}"
-        {% block wrapper_attributes %}
-        {% endblock wrapper_attributes %}
-    >
+    <div>
         <div class="autocomplete">
-            {% block input %}
             <input
                     data-action="
                     {% block data_action %}
@@ -29,7 +24,6 @@
                 {% if widget.value != None %} value="{{ widget.value|stringformat:'s' }}"{% endif %}
                 {% include "django/forms/widgets/attrs.html" %}
             >
-            {% endblock input %}
             {% include "forms/widgets/_spinner.html" %}
             {% block choices %}
                 <script type="application/json" data-{{ widget.data_controller }}-target="allAvailableOptions">
@@ -37,8 +31,6 @@
                 </script>
             {% endblock choices %}
         </div>
-        {% block additionnal_info %}
-        {% endblock additionnal_info %}
     </div>
     <p data-address-autocomplete-target="displayError" class="fr-error-text fr-mt-1w" style="display:none;">
         Texte d’erreur obligatoire
