@@ -194,7 +194,7 @@ class CarteView(TurboFormView, FormView):
             return self.request.GET.getlist(key, default)
 
     def get_context_data(self, **kwargs):
-        form = self.get_form_class()(dict(self.request.GET.lists()))
+        form = self.get_form_class()(self.request.GET)
 
         kwargs.update(
             # TODO: refacto forms : define a BooleanField carte on CarteAddressesForm
