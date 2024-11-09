@@ -208,7 +208,6 @@ class CarteView(TurboFormView, FormView):
             self.cleaned_data = form.cleaned_data
         else:
             # TODO : refacto forms : handle this case properly
-            logger.info(form.errors)
             self.cleaned_data = form.cleaned_data
 
         # Manage the selection of sous_categorie_objet and actions
