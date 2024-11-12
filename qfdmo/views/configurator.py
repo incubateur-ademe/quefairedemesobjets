@@ -24,6 +24,7 @@ class ConfiguratorView(FormView):
     template_name = "qfdmo/iframe_configurator/base.html"
 
     def get_initial(self) -> dict[str, Any]:
+        """Populate the view with values passed as a querystring in the URL"""
         for key in self.request.GET:
             if key in self.get_form_class()().fields:
                 self.initial[key] = self.request.GET.getlist(key)
@@ -43,7 +44,8 @@ class ConfiguratorView(FormView):
         return context
 
     def form_valid(self, form) -> HttpResponse:
-        logger.info(f"{form.cleaned_data=}")
+        """Overrides the default redirect so that form values are passed
+        as a querystring"""
         querydict = QueryDict("", mutable=True)
 
         for key, value in form.cleaned_data.items():
@@ -61,8 +63,6 @@ class ConfiguratorView(FormView):
             else:
                 querydict[key] = value
 
-        logger.info(querydict)
-
         return redirect(
             f"{reverse("qfdmo:iframe_configurator")}?{querydict.urlencode()}"
         )
@@ -71,7 +71,12 @@ class ConfiguratorView(FormView):
     def iframe_url(self):
         return f"{self.request.scheme}://{self.request.get_host()}/static/carte.js"
 
-    def _compile_script_tag(self, attributes):
+    def _compile_script_tag(self, attributes) -> str:
+        """Compiles a HTML <script> tag that loads an iframe containing the Carte view.
+        Values from a valid ConfiguratorForm are passed as data-attributes to the tag so
+        that they can be destructured and passed to the view loaded in the iframe.
+        """
+
         iframe_script = f"<script src='{ self.iframe_url }'"
         for key, value in attributes.items():
             # In some cases, the value need to be rewritten

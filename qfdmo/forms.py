@@ -376,6 +376,7 @@ class ConfiguratorForm(DsfrBaseForm):
         ),
         help_text="Commencez à taper un nom d’EPCI et sélectionnez un EPCI parmi "
         "les propositions de la liste.",
+        # TODO: voir comment évaluer cela "lazily"
         choices=all_epci_codes(["code", "nom"]),
         widget=GenericAutoCompleteInput(
             attrs={"data-autocomplete-target": "hiddenInput", "class": "qfdmo-hidden"},
