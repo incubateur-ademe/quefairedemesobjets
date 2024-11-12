@@ -10,7 +10,7 @@ class ColorsView(FormView):
     form_class = ColorForm
 
     def form_valid(self, form):
-        color = next(
+        dsfr_color = next(
             (
                 key
                 for key, val in DSFRColors.items()
@@ -18,10 +18,9 @@ class ColorsView(FormView):
             ),
             "Couleur introuvable",
         )
-        form.cleaned_data["dsfr_color"] = color
 
         return render(
             self.request,
             self.template_name,
-            self.get_context_data(form=form),
+            self.get_context_data(form=form, dsfr_color=dsfr_color),
         )
