@@ -4,6 +4,9 @@
     data-controller="autocomplete"
     data-autocomplete-endpoint-url-value="{{ extra_attrs.endpoint }}"
     data-autocomplete-empty-label-value="{{ extra_attrs.empty_label }}"
+    {% if widget.value %}
+    data-autocomplete-selected-items-value='["{{ widget.value|join:'","' }}"]'
+    {% endif %}
 >
     <div class="qfdmo-flex qfdmo-flex-col qfdmo-gap-2w">
         <div class="qfdmo-relative">

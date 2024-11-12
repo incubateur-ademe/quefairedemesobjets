@@ -38,8 +38,6 @@ class ConfiguratorView(FormView):
             context.update(
                 iframe_script=self._compile_script_tag(form.cleaned_data), form=form
             )
-        else:
-            logger.error(form.errors)
 
         return context
 
