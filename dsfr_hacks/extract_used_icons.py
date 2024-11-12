@@ -1,5 +1,6 @@
 import requests
 
+# TODO: user a django command and read the database directly.
 r = requests.get("http://localhost:8000/api/qfdmo/actions")
 actions = r.json()
 icons = [action["icon"] for action in actions]
@@ -7,6 +8,7 @@ icons = [action["icon"] for action in actions]
 r = requests.get("http://localhost:8000/api/qfdmo/actions/groupes")
 groupe_actions = r.json()
 icons.extend([action["icon"] for action in groupe_actions])
+
 
 # Generate js file
 js_content = "const icons = [\n"
