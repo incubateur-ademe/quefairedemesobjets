@@ -37,11 +37,8 @@ def sanitize_leaflet_bbox(custom_bbox_as_string: str) -> List[float] | None:
             custom_bbox["northEast"]["lng"],
             custom_bbox["northEast"]["lat"],
         ]
-    except (KeyError, JSONDecodeError) as exception:
-        logger.error(
-            "An error occured while sanitizing a leaflet bbox. It was ignored"
-            f" - {exception} - {custom_bbox_as_string=}"
-        )
+    except (KeyError, JSONDecodeError):
+        logger.error("An error occured while sanitizing a leaflet bbox. It was ignored")
         # TODO : gérer l'erreur
         return []
 
