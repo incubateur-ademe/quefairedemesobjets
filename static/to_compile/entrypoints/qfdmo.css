@@ -295,7 +295,7 @@ DSFR customization for tabs
     grid-area: footer;
   }
 
-  > #header {
+  > header {
     grid-area: header;
   }
 

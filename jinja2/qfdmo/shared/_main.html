@@ -22,23 +22,20 @@
         qfdmo-relative"
     >
         <section class="map-grid">
-            <turbo-frame id="header">
-                <header
-                    class="
-                    qfdmo-bg-white
-                    qfdmo-flex qfdmo-flex-row sm:qfdmo-items-center
-                    qfdmo-z-20
-                    {% block header_classes %}{% endblock header_classes %}"
-                >
-                    {% block content_header %}
-                    {% endblock content_header %}
-                </header>
-            </turbo-frame>
+            <header
+                class="
+                qfdmo-bg-white
+                qfdmo-flex qfdmo-flex-row sm:qfdmo-items-center
+                qfdmo-z-20
+                {% block header_classes %}{% endblock header_classes %}"
+            >
+                {% block content_header %}
+                {% endblock content_header %}
+            </header>
 
             <main
                 class="
                 qfdmo-flex
-                max-md:qfdmo-sticky
                 qfdmo-z-0
                 {% block main_classes %}
                 {% endblock main_classes %}"
@@ -47,6 +44,8 @@
                     <turbo-frame id="addressesPanel"
                         data-search-solution-form-target="addressesPanel"
                         class="qfdmo-relative qfdmo-z-1
+                            max-md:qfdmo-fixed
+                            qfdmo-top-[120] qfdmo-left-0 qfdmo-right-0 qfdmo-bottom-0
                             qfdmo-flex qfdmo-flex-col
                             data-[visible=true]:qfdmo-flex-grow
                             data-[visible=false]:qfdmo-invisible data-[visible=false]:qfdmo-h-0"

@@ -640,6 +640,8 @@ def acteur_detail(request, identifiant_unique):
         "object": displayed_acteur,  # We can use object here so that switching
         # to a DetailView later will not required a template update
         "latitude": latitude,
+        # TODO: remove when this view will be migrated to a class-based view
+        "is_embedded": "carte" in request.GET or "iframe" in request.GET,
         "longitude": longitude,
         "direction": direction,
         "distance": distance_to_acteur(request, displayed_acteur),
