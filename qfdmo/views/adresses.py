@@ -86,6 +86,10 @@ class IframeMixin:
 
         return context
 
+    @property
+    def is_embedded(self):
+        return self.is_carte or self.is_iframe
+
 
 class CarteView(
     DigitalMixin,

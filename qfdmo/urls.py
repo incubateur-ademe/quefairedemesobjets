@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.contrib.auth.views import LoginView
 from django.urls import path
 from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
@@ -11,12 +10,13 @@ from qfdmo.views.adresses import (
     getorcreate_revisionacteur,
     solution_admin,
 )
+from qfdmo.views.auth import LVAOLoginView
 from qfdmo.views.configurator import AdvancedConfiguratorView, ConfiguratorView
 from qfdmo.views.dags import DagsValidation
 
 urlpatterns = [
     path("", CarteView.as_view(), name="reemploi_solution"),
-    path("connexion", LoginView.as_view(), name="login"),
+    path("connexion", LVAOLoginView.as_view(), name="login"),
     path(
         "donnez-votre-avis",
         RedirectView.as_view(
