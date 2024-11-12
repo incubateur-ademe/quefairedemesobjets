@@ -1,9 +1,9 @@
 <div
-    class="qfdmo-border qfdmo-border-grey-900 qfdmo-border-solid"
+    class="{% if border %}qfdmo-border qfdmo-border-grey-900 qfdmo-border-solid{% endif %}"
 >
     <a
-        class="fr-p-2w fr-link fr-link--no-underline
-        qfdmo-w-full qfdmo-flex fr-text--sm
+        class="{% if border %}fr-p-2w{% endif %} fr-link fr-link--no-underline
+        qfdmo-w-full qfdmo-flex fr-text--sm qfdmo-gap-1w
         qfdmo-no-external-link-icon"
         href="{{ source_or_label.url if source_or_label.url else '#' }}"
         target="_blank"
@@ -11,7 +11,6 @@
     >
         {% if source_or_label.logo_file %}
             <img
-                class="fr-mr-1w"
                 src="{{ source_or_label.logo_file.url }}"
                 alt="Ademe - Agence de la transition écologique"
                 class="qfdmo-cursor-pointer"
@@ -19,7 +18,7 @@
                 height=32
             >
         {% endif %}
-        <span class="qfdmo-grow">{{ source_or_label.libelle }}</span>
+        <span class="qfdmo-inline-flex qfdmo-items-center">{{ source_or_label.libelle }}</span>
         <span class="qfdmo-flex qfdmo-items-center fr-icon fr-icon-arrow-right-line"></span>
     </a>
 </div>
