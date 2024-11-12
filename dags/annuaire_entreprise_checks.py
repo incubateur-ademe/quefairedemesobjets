@@ -46,7 +46,7 @@ dag = DAG(
 
 def fetch_and_parse_data(**context):
     limit = context["params"]["limit"]
-    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo_django_db")
     engine = pg_hook.get_sqlalchemy_engine()
     active_actors_query = """
         SELECT

@@ -26,7 +26,7 @@ def fetch_data_from_api(**kwargs):
 
 
 def load_data_from_postgresql(**kwargs):
-    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo_django_db")
     engine = pg_hook.get_sqlalchemy_engine()
 
     # TODO : check if we need to manage the max id here
@@ -294,7 +294,7 @@ def read_acteur(**kwargs):
         )
         unique_source_ids = df_data_from_api["source_id"].unique()
 
-    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo_django_db")
     engine = pg_hook.get_sqlalchemy_engine()
     joined_source_ids = ",".join([f"'{source_id}'" for source_id in unique_source_ids])
     query = f"SELECT * FROM qfdmo_acteur WHERE source_id IN ({joined_source_ids})"
@@ -307,7 +307,7 @@ def read_acteur(**kwargs):
 def insert_dagrun_and_process_df(df_acteur_updates, metadata, dag_name, run_name):
     if df_acteur_updates.empty:
         return
-    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo_django_db")
     engine = pg_hook.get_sqlalchemy_engine()
     current_date = datetime.now()
 

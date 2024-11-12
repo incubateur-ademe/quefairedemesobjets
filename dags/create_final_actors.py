@@ -218,7 +218,7 @@ def write_data_to_postgres(**kwargs):
         inplace=True,
     )
 
-    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo_django_db")
     engine = pg_hook.get_sqlalchemy_engine()
 
     original_table_name_actor = "qfdmo_displayedacteur"
