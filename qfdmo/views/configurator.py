@@ -80,10 +80,17 @@ class ConfiguratorView(FormView):
             # In some cases, the value need to be rewritten
             # so that it can be easily parsed in the frontend
             if type(value) is GroupeActionQueryset:
-                # Some values need to be formatted
+                # Groupe action need to be formatted as codes to keep compatbility
+                # with AdresseView that expects codes in the request
                 value = value.as_codes()
-            if type(value) is list:
+            elif key == "epci_codes":
+                # The EPCI codes need to be returned as a list of code whereas
+                # they are displayed as `{{ nom }} - {{ code }}` in the frontend
+                codes = [epci.split(" - ")[-1] for epci in value]
+                value = ",".join(codes)
+            elif type(value) is list:
                 value = ",".join(value)
+
             if value:
                 iframe_script += f" data-{key}='{str(value)}'"
 

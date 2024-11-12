@@ -8,7 +8,7 @@ from django.utils.safestring import mark_safe
 from dsfr.forms import DsfrBaseForm
 
 from qfdmo.fields import EPCIField, GroupeActionChoiceField
-from qfdmo.geo_api import all_epci_codes
+from qfdmo.geo_api import epcis_from, formatted_epcis
 from qfdmo.models import DagRun, DagRunStatus, SousCategorieObjet
 from qfdmo.models.action import (
     Action,
@@ -300,8 +300,8 @@ class CarteForm(AddressesForm):
         required=False,
     )
 
-    epci_codes = forms.MultipleChoiceField(
-        choices=all_epci_codes(["code", "nom"]),
+    epci_codes = EPCIField(
+        choices=[(code, code) for code in epcis_from(["code"])],
         widget=forms.MultipleHiddenInput(),
         required=False,
     )
@@ -367,7 +367,7 @@ class ConfiguratorForm(DsfrBaseForm):
         "faire une carte que sur les points de collecte ou de réparation, il vous "
         "suffit de décocher toutes les autres actions possibles.",
     )
-    epci_codes = EPCIField(
+    epci_codes = forms.MultipleChoiceField(
         label=mark_safe(
             """
         <hr/>
@@ -377,7 +377,8 @@ class ConfiguratorForm(DsfrBaseForm):
         help_text="Commencez à taper un nom d’EPCI et sélectionnez un EPCI parmi "
         "les propositions de la liste.",
         # TODO: voir comment évaluer cela "lazily"
-        choices=all_epci_codes(["code", "nom"]),
+        # L'utilisation de lazy(all_epci_codes(...)) génère une erreur côté Django DSFR
+        choices=formatted_epcis(as_tuple=True),
         widget=GenericAutoCompleteInput(
             attrs={"data-autocomplete-target": "hiddenInput", "class": "qfdmo-hidden"},
             extra_attrs={

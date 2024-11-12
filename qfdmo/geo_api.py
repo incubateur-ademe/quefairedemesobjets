@@ -1,4 +1,5 @@
 import itertools
+import logging
 from typing import List, Union, cast
 
 import requests
@@ -9,10 +10,20 @@ from rapidfuzz import fuzz, process
 db_cache = caches["database"]
 
 
+logger = logging.getLogger(__name__)
+
+
+def formatted_epcis(as_tuple=False):
+    formatted = [f"{nom} - {code}" for nom, code in epcis_from(["nom", "code"])]
+    if as_tuple:
+        return [(item, item) for item in formatted]
+    return formatted
+
+
 def search_epci_code(query) -> List[str]:
     results = process.extract(
         query.lower(),
-        [f"{nom} - {code}" for nom, code in all_epci_codes(["nom", "code"])],
+        formatted_epcis(),
         scorer=fuzz.WRatio,
         limit=5,
     )
@@ -25,23 +36,27 @@ def fetch_epci_codes() -> List[str]:
     return response.json()
 
 
-def all_epci_codes(fields: List[str] = []) -> Union[List, List[tuple]]:
+def epcis_from(fields: List[str] = []) -> Union[List, List[tuple]]:
+    """Retrieves a list of fields from the geo.api
+    At the moment only nom and code fields are supported.
+    The fields are returned in the same order they are passed in the parameter
+    """
     raw_codes = cast(
         List,
         db_cache.get_or_set("all_epci_codes", fetch_epci_codes, timeout=3600 * 24 * 30),
     )
-    codes_fields = [[code.get(field) for field in fields] for code in raw_codes]
+    epcis = [[code.get(field) for field in fields] for code in raw_codes]
 
     # This can be handy if we just need a list of codes and not
     # a list of list of codes.
     if len(fields) == 1:
-        return list(itertools.chain.from_iterable(codes_fields))
+        return list(itertools.chain.from_iterable(epcis))
 
-    return codes_fields
+    return epcis
 
 
 def retrieve_epci_geojson(epci):
-    all_codes = all_epci_codes(["code"])
+    all_codes = epcis_from(["code"])
     if epci not in all_codes:
         raise ValueError(f"The provided EPCI code does not seem to exist | {epci}")
 
