@@ -1,10 +1,14 @@
 import json
 import logging
 from html import escape
+from typing import Any
 
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import QuerySet
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.http.request import QueryDict
+from django.shortcuts import redirect
+from django.urls import reverse
 from django.views.generic.edit import FormView
 
 from qfdmo.forms import AdvancedConfiguratorForm, ConfiguratorForm
@@ -19,13 +23,48 @@ class ConfiguratorView(FormView):
     form_class = ConfiguratorForm
     template_name = "qfdmo/iframe_configurator/base.html"
 
+    def get_initial(self) -> dict[str, Any]:
+        for key in self.request.GET:
+            if key in self.get_form_class()().fields:
+                self.initial[key] = self.request.GET.getlist(key)
+
+        return super().get_initial()
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        form = self.get_form_class()(self.request.GET)
+        if form.is_valid():
+            context.update(
+                iframe_script=self._compile_script_tag(form.cleaned_data), form=form
+            )
+        else:
+            logger.error(form.errors)
+
+        return context
+
     def form_valid(self, form) -> HttpResponse:
-        return render(
-            self.request,
-            self.template_name,
-            self.get_context_data(
-                form=form, iframe_script=self._compile_script_tag(form.cleaned_data)
-            ),  # Inherited from django.views.generic.edit.FormMixin.form_invalid
+        logger.info(f"{form.cleaned_data=}")
+        querydict = QueryDict("", mutable=True)
+
+        for key, value in form.cleaned_data.items():
+            if isinstance(value, QuerySet):
+                # If the value is a queryset, we work with a ModelChoiceField
+                for nested_value in value.values_list(
+                    # Support the to_field_name field of ModelChoiceField
+                    self.get_form_class()().fields[key].to_field_name,
+                    flat=True,
+                ):
+                    querydict.appendlist(key, nested_value)
+            elif isinstance(value, list):
+                for nested_value in value:
+                    querydict.appendlist(key, nested_value)
+            else:
+                querydict[key] = value
+
+        logger.info(querydict)
+
+        return redirect(
+            f"{reverse("qfdmo:iframe_configurator")}?{querydict.urlencode()}"
         )
 
     @property
@@ -40,7 +79,7 @@ class ConfiguratorView(FormView):
             if type(value) is GroupeActionQueryset:
                 # Some values need to be formatted
                 value = value.as_codes()
-            if key == "epci_codes":
+            if type(value) is list:
                 value = ",".join(value)
             if value:
                 iframe_script += f" data-{key}='{str(value)}'"
