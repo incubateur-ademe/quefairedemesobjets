@@ -19,6 +19,5 @@ test("Recherche et modification d'une recherche", async ({ page }) => {
 
     await expect (page.locator("[data-search-solution-form-target=headerAddressPanel]")).toBeInViewport()
     await page.locator("button[data-testid=modifier-recherche]").click()
-    // TODO : revert
-    // await expect (page.locator("[data-search-solution-form-target=headerAddressPanel]")).toBeHidden()
+    await expect (page.locator("[data-search-solution-form-target=headerAddressPanel]")).toBeHidden()
 })
