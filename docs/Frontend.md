@@ -12,7 +12,7 @@ Le projet utilise le templating Django pour développer le frontend.
 ## Jinja et templating Django
 
 Le projet utilise Jinja et le templating Django.
-Ces deux approches cohabitent mais il est envisagé d'abandonner Jinja à terme.
+:warning: **Ces deux approches cohabitent mais il est envisagé d'abandonner Jinja à terme.**
 Quand bien même les templates continuent d'être placé dans le dossier `jinja2` afin de garantir une rétrocompatibilité, tous les futurs développement doivent s'efforcer de s'affranchir de Jinja.
 
 ## Parcel
