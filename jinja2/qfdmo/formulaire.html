@@ -1,6 +1,5 @@
 {% extends "qfdmo/shared/_main.html" %}
 
-{% include "qfdmo/partials/featureflip_inputs.html" %}
 
 {% block main_classes %}
 {#
@@ -11,6 +10,7 @@ The values of 250px is determined empirically.
 They need to match the css variables used for .grid-map selector in qfdmo.css
 #}
 max-md:qfdmo-h-[calc(100vh_-_250px)]
+qfdmo-overflow-auto
 {% endblock main_classes %}
 
 {% block content_header %}
