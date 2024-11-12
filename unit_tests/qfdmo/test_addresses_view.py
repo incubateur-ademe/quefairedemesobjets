@@ -7,17 +7,24 @@ from unit_tests.core.test_utils import query_dict_from
 
 @pytest.mark.django_db
 class TestAdresseViewMixins:
-    def test_iframe_mixin_is_carte(self):
+    @pytest.mark.parametrize(
+        "query_params, expected_is_carte",
+        [
+            ({"carte": "coucou"}, True),
+            ({}, False),
+        ],
+    )
+    def test_iframe_mixin_carte_flag(self, query_params, expected_is_carte):
         request = HttpRequest()
-        request.GET = query_dict_from(
-            {
-                "carte": "coucou",
-            }
-        )
+        request.GET = query_dict_from(query_params)
+
         adresses_view = CarteView()
         adresses_view.setup(request)
-        assert adresses_view.is_carte
-        assert adresses_view.get_context_data()["is_carte"]
+
+        assert adresses_view.is_carte == expected_is_carte
+        assert (
+            adresses_view.get_context_data().get("is_carte", False) == expected_is_carte
+        )
 
     def test_iframe_mixin_is_iframe(self):
         request = HttpRequest()
