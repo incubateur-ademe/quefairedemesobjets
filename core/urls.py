@@ -54,8 +54,9 @@ urlpatterns = [
         {"sitemaps": sitemaps},
         name="django.contrib.sitemaps.views.sitemap",
     ),
-    path("", include(("qfdmo.urls", "qfdmo"), namespace="qfdmo")),
     path("dsfr/", include(("dsfr_hacks.urls", "dsfr_hacks"), namespace="dsfr_hacks")),
+    path("", include(("qfdmo.urls", "qfdmo"), namespace="qfdmo")),
+    path("", include(("qfdmd.urls", "qfdmd"), namespace="qfdmd")),
 ]
 
 if settings.DEBUG:

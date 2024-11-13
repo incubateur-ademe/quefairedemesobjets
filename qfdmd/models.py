@@ -1,4 +1,5 @@
 from django.contrib.gis.db import models
+from django_extensions.db.fields import AutoSlugField
 
 
 class Produit(models.Model):
@@ -48,6 +49,7 @@ class Lien(models.Model):
 
 
 class Synonyme(models.Model):
+    slug = AutoSlugField(populate_from=["nom"])
     nom = models.CharField(blank=True, unique=True, help_text="Nom du produit")
     produit = models.ForeignKey(
         Produit, related_name="synonymes", on_delete=models.CASCADE
