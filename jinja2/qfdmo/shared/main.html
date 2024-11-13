@@ -16,20 +16,19 @@
         ss-cat-object-autocomplete:optionSelected->search-solution-form#checkSsCatObjetErrorForm
         {% block form_controller_data_actions %}{% endblock form_controller_data_actions %}"
         class="
-        qfdmo-h-full qfdmo-max-h-svh qfdmo-max-h-screen
+        qfdmo-h-full qfdmo-max-h-svh qfdmo-max-h-screen md:qfdmo-overflow-hidden
         qfdmo-m-0
         qfdmo-flex qfdmo-flex-col qfdmo-flex-auto
         qfdmo-relative"
     >
         <section class="map-grid">
             <header
-                class="max-md:qfdmo-sticky qfdmo-top-0"
+                class="max-md:qfdmo-sticky qfdmo-z-20 qfdmo-top-0"
             >
                 <div
                     class="
                     qfdmo-bg-white
                     qfdmo-flex qfdmo-flex-row sm:qfdmo-items-center
-                    qfdmo-z-20
                     {% block header_classes %}{% endblock header_classes %}"
                 >
                 {% block form_header %}
@@ -48,7 +47,7 @@
                 {% block form_result %}
                     <turbo-frame id="addressesPanel"
                         data-search-solution-form-target="addressesPanel"
-                        class="qfdmo-relative qfdmo-z-1
+                        class="qfdmo-relative qfdmo-z-10
                             qfdmo-flex qfdmo-flex-col
                             max-md:qfdmo-fixed
                             max-md:qfdmo-top-header max-md:qfdmo-bottom-footer
