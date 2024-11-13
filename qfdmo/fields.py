@@ -15,12 +15,3 @@ class GroupeActionChoiceField(forms.ModelMultipleChoiceField):
                 {"groupe_action": obj},
             )
         )
-
-
-class EPCIField(forms.MultipleChoiceField):
-    def to_python(self, value):
-        # TODO : once multiple EPCI codes will be managed, this method will be useless
-        # and the frontend will be rewritten to support a more complex state with all
-        # values matching their labels.
-        python_value = super().to_python(value)
-        return [value.split(" - ")[-1].strip() for value in python_value]

@@ -7,7 +7,7 @@ from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from dsfr.forms import DsfrBaseForm
 
-from qfdmo.fields import EPCIField, GroupeActionChoiceField
+from qfdmo.fields import GroupeActionChoiceField
 from qfdmo.geo_api import epcis_from, formatted_epcis_as_list_of_tuple
 from qfdmo.models import DagRun, DagRunStatus, SousCategorieObjet
 from qfdmo.models.action import (
@@ -300,8 +300,8 @@ class CarteForm(AddressesForm):
         required=False,
     )
 
-    epci_codes = EPCIField(
-        choices=[(code, code) for code in epcis_from(["code"])],
+    epci_codes = forms.MultipleChoiceField(
+        choices=[(code, code) for code in cast(List[str], epcis_from(["code"]))],
         widget=forms.MultipleHiddenInput(),
         required=False,
     )
