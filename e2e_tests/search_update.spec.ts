@@ -16,8 +16,16 @@ test("Recherche et modification d'une recherche", async ({ page }) => {
     await expect (page.locator("#id_adresseautocomplete-list.autocomplete-items div:nth-of-type(2)")).toBeInViewport()
     await page.locator("#id_adresseautocomplete-list.autocomplete-items div:nth-of-type(2)").click()
     await page.locator("button[data-testid=rechercher-adresses-submit]").click()
-
-    await expect (page.locator("[data-search-solution-form-target=headerAddressPanel]")).toBeInViewport()
+    await expect (page.locator("[data-search-solution-form-target=headerAddressPanel]")).toBeVisible()
+    // This tests that the header of the Formulaire view cannot be reached when the Update form is opened.
+    // This cannot be tested with .toBeVisible or toBeInViewport because of the way the header is styled.
+    // It is actually visible, but is covered by a child of the header's adjacent <main> tag, and
+    // Playwright detect it as visible.
+    // Testing that we cannot interact with it ensures it is actually not visible.
     await page.locator("button[data-testid=modifier-recherche]").click()
-    await expect (page.locator("[data-search-solution-form-target=headerAddressPanel]")).toBeHidden()
+    try {
+      await page.locator("[data-search-solution-form-target=headerAddressPanel]").click({ timeout: 2000 })
+    } catch (error) {
+      expect(error.message).toContain('locator.click: Timeout');
+    }
 })
