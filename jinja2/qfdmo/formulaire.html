@@ -1,5 +1,9 @@
 {% extends "qfdmo/shared/main.html" %}
 
+{% block header_classes %}
+qfdmo-z-0 {# The header in Formulaire needs to be under the main tag #}
+{% endblock header_classes %}
+
 {% block form_header %}
     {# Panel Filtres avancés et modifier ma recherche #}
     {% include 'qfdmo/formulaire/header.html' %}

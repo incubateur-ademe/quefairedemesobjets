@@ -23,13 +23,14 @@
     >
         <section class="map-grid">
             <header
-                class="max-md:qfdmo-sticky qfdmo-z-20 qfdmo-top-0"
+                class="max-md:qfdmo-sticky qfdmo-top-0
+                {% block header_classes %}qfdmo-z-20{% endblock header_classes %}
+                "
             >
                 <div
                     class="
                     qfdmo-bg-white
-                    qfdmo-flex qfdmo-flex-row sm:qfdmo-items-center
-                    {% block header_classes %}{% endblock header_classes %}"
+                    qfdmo-flex qfdmo-flex-row sm:qfdmo-items-center"
                 >
                 {% block form_header %}
                 {% endblock form_header %}
