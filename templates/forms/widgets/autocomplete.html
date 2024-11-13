@@ -2,11 +2,7 @@
 <div
     class="fr-my-1w qfdmo-flex-grow"
 >
-    <div
-        class="{% block wrapper_classes %}{% endblock %}"
-        {% block wrapper_attributes %}
-        {% endblock wrapper_attributes %}
-    >
+    <div>
         <div class="autocomplete">
             <input
                     data-action="
@@ -35,8 +31,6 @@
                 </script>
             {% endblock choices %}
         </div>
-        {% block additionnal_info %}
-        {% endblock additionnal_info %}
     </div>
     <p data-address-autocomplete-target="displayError" class="fr-error-text fr-mt-1w" style="display:none;">
         Texte d’erreur obligatoire

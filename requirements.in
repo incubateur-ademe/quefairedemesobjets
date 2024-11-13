@@ -3,6 +3,7 @@ boto3
 dj-database-url
 dj-static
 Django
+django-extensions
 django-import-export[xls, xlsx]
 django-ninja
 django-sql-explorer
@@ -25,3 +26,4 @@ whitenoise
 django-widget-tweaks
 django-cors-headers
 django-dsfr
+rapidfuzz

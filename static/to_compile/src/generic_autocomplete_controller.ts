@@ -1,161 +1,115 @@
 import debounce from "lodash/debounce"
-import AutocompleteController from "./autocomplete_controller"
+import { Controller } from "@hotwired/stimulus"
 
 // inspiration https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-autocomplete-both/
-export default class extends AutocompleteController {
-  maxDisplayedResultsCount: number = 5
-  static targets = [...AutocompleteController.targets, "listbox", "option"]
+export default class extends Controller<HTMLElement> {
+  static targets = ["input", "selected", "searched", "counter", "hiddenInput"]
   static values = {
-    ...AutocompleteController.values,
-    displayedIds: Array,
-    selectedId: String,
+    endpointUrl: String,
+    emptyLabel: String,
+    selectedItems: Array<String>,
   }
-  declare selectedIdValue: string
-  declare displayedIdsValue: Array<string | null>
-  declare readonly displayedIds: Array<string>
-  declare readonly listboxTarget: HTMLDivElement
-  declare readonly optionTargets: Array<HTMLDivElement>
+  declare selectedItemsValue: Array<string>
+  declare readonly endpointUrlValue: string
+  declare readonly emptyLabelValue: string
+  declare readonly counterTarget: HTMLSpanElement
+  declare readonly inputTarget: HTMLInputElement
+  declare readonly searchedTarget: HTMLDivElement
+  declare readonly selectedTarget: HTMLDivElement
+  declare readonly hiddenInputTarget: HTMLInputElement
 
-  connect() {}
-
+  // Stimulus core methods
   initialize() {
-    this.searchToComplete = debounce(this.searchToComplete, 300).bind(this)
-    // Let time to click on an option
-    this.blurInput = debounce(this.blurInput, 300).bind(this)
-    this.change = debounce(this.change, 300).bind(this)
-    this.currentFocusedOptionIndexValue = -1
-    // TODO: remove when the input support multiple values
-    this.#sanitizeInputValue()
+    this.search = debounce(this.search, 300).bind(this)
   }
 
-  #sanitizeInputValue() {
-    const sanitizedInputValue = this.inputTarget.value.replace("['", "").replace("']", "")
-    if (sanitizedInputValue) {
-      this.inputTarget.value = sanitizedInputValue
-    } else {
-      this.inputTarget.value = ""
+  // Event handlers
+  async search(event) {
+    try {
+      const request = await fetch(`${this.endpointUrlValue}${event.target.value}`)
+      const results = await request.json()
+
+      this.#resetAutocompleteItems()
+      results.forEach((result: string) => {
+        const autocompleteItem = this.#generateAutocompleteItem(result)
+        this.searchedTarget.appendChild(autocompleteItem)
+      })
+    } catch (error) {
+      console.error("Failed to fetch autocomplete results", error)
     }
   }
 
-  displayedIdsValueChanged(ids: Array<string>) {
-    ids.forEach((id) => {
-      this.optionTargets
-        .filter((option) => option.getAttribute("id") === id)
-        .filter((option, index) => index < this.maxDisplayedResultsCount)
-        .forEach(this.#showOption)
-    })
-  }
-
-  currentFocusedOptionIndexValueChanged(currentValue: string, previousValue: string) {
-    if (currentValue === previousValue) {
-      // This can happen when first loading the page
+  selectItem(event) {
+    const value = event.target.innerText
+    if (this.selectedItemsValue.includes(value)) {
       return
     }
 
-    const currentId = this.displayedIdsValue[currentValue]
-    this.optionTargets.forEach((option) =>
-      option.classList.remove("autocomplete-active"),
+    this.selectedItemsValue = [...this.selectedItemsValue, value]
+  }
+
+  removeItem(event) {
+    const itemElement = event.currentTarget as HTMLElement
+    const value = itemElement.innerText
+
+    this.selectedItemsValue = this.selectedItemsValue.filter(
+      (itemValue) => itemValue !== value,
     )
-    this.optionTargets
-      .find((option) => option.getAttribute("id") === currentId)
-      ?.classList.add("autocomplete-active")
   }
 
-  selectedIdValueChanged(currentValue: string): void {
-    if (currentValue && currentValue !== this.inputTarget.value) {
-      this.inputTarget.value = currentValue
+  // Lifecycle methods
+  selectedItemsValueChanged(currentValue) {
+    this.#resetAutocompleteItems()
+    this.#renderSelectedItems()
+    this.#updateCounterValue()
+    this.#updateHiddenInput(currentValue)
+  }
+
+  // Local methods to manipulate HTML
+  #updateCounterValue() {
+    this.counterTarget.innerHTML = this.selectedTarget.children.length.toString()
+  }
+
+  #updateHiddenInput(values: Array<string>) {
+    this.hiddenInputTarget.innerHTML = ""
+    for (const value of values) {
+      const option = document.createElement("option")
+      option.value = value
+      option.selected = true
+      this.hiddenInputTarget.appendChild(option)
     }
   }
 
-  async searchToComplete(events: Event): Promise<void> {
-    this.#filterOptionsFromUserInput()
+  #generateAutocompleteItem(value: string) {
+    const autocompleteItem = document.createElement("div")
+    autocompleteItem.textContent = value
+    autocompleteItem.dataset.action = "click->autocomplete#selectItem"
+    return autocompleteItem
   }
 
-  keydownEnter(event: KeyboardEvent): void {
-    event.preventDefault()
-    const selectedOptionId = this.#getOptionIdFrom(this.currentFocusedOptionIndexValue)
-    this.selectedIdValue = selectedOptionId!
+  #generateSelectedItem(value: string): HTMLButtonElement {
+    const selectedItem = document.createElement("button")
+    const classes = ["qfdmo-whitespace-nowrap", "fr-tag", "fr-tag--icon-left", "fr-icon-close-line"]
+    selectedItem.classList.add(...classes)
+    selectedItem.textContent = value
+    selectedItem.dataset.action = "autocomplete#removeItem"
+    return selectedItem
   }
 
-  change(event): void {
-    if (event.target.value.length === 0) {
-      this.hideAutocompleteList()
-    }
+  #resetAutocompleteItems() {
+    this.searchedTarget.innerHTML = ""
   }
 
-  setActiveOptionFrom(event: MouseEvent): void {
-    const id = event.target?.getAttribute("id")
-    this.selectedIdValue = id
-  }
-
-  selectOption(event: Event): void {
-    // do nothing
-    // TODO: check if this method could be removed in parent class
-  }
-
-  addOption() {
-    // Do nothing,
-    // TODO: check if this can be removed in parent class
-  }
-
-  createAutocompleteList() {
-    // TODO: rename this method in parent class
-    return this.listboxTarget
-  }
-
-  #validateUserInput() {
-    if (this.inputTarget.value !== this.selectedIdValue) {
-      this.inputTarget.value = ""
-    }
-  }
-
-  hideAutocompleteList(event?: Event): void {
-    this.#validateUserInput()
-    this.listboxTarget.classList.add("qfdmo-hidden")
-    this.optionTargets.forEach(this.#hideOption)
-  }
-
-  #normalizeUserInput(userInput: string | null = "") {
-    if (!userInput) {
-      return ""
-    }
-    return userInput
-      .normalize("NFD")
-      .replace(/\p{Diacritic}/gu, "")
-      .toLowerCase()
-  }
-
-  #openDropdown() {
-    this.listboxTarget.classList.remove("qfdmo-hidden")
-  }
-
-  #showOption(option: HTMLDivElement) {
-    option.classList.remove("qfdmo-hidden")
-  }
-
-  #hideOption(option: HTMLDivElement) {
-    option.classList.add("qfdmo-hidden")
-  }
-
-  #getOptionIdFrom(index: number) {
-    return this.displayedIdsValue[index]
-  }
-
-  #filterOptionsFromUserInput() {
-    this.#openDropdown()
-    const normalizedUserInput = this.#normalizeUserInput(this.inputTarget.value)
-
-    if (!normalizedUserInput.length) {
+  #renderSelectedItems() {
+    this.selectedTarget.innerHTML = ""
+    if (this.selectedItemsValue.length === 0) {
+      this.selectedTarget.textContent = this.emptyLabelValue
       return
     }
 
-    this.optionTargets.forEach(this.#hideOption)
-    this.displayedIdsValue = this.optionTargets
-      .filter((option) =>
-        this.#normalizeUserInput(option.dataset.autocompleteSearchValue)?.includes(
-          normalizedUserInput,
-        ),
-      )
-      .map((option) => option.getAttribute("id"))
+    this.selectedItemsValue.forEach((value) => {
+      const item = this.#generateSelectedItem(value)
+      this.selectedTarget.appendChild(item)
+    })
   }
 }

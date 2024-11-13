@@ -8,17 +8,17 @@ class RangeInput(widgets.NumberInput):
     input_type = "range"
 
 
-class GenericAutoCompleteInput(widgets.ChoiceWidget):
+class GenericAutoCompleteInput(widgets.SelectMultiple):
     template_name = "forms/widgets/generic_autocomplete.html"
 
-    def __init__(self, attrs=None, choices=(), additionnal_info=None):
-        super().__init__(attrs, choices)
-        self.additionnal_info = additionnal_info
+    def __init__(self, attrs=None, extra_attrs=None):
+        super().__init__(attrs)
+        self.extra_attrs = extra_attrs
 
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)
-        context["widget"]["data_controller"] = "autocomplete"
-        context["widget"].update(additionnal_info=self.additionnal_info)
+        context["hidden_template_name"] = widgets.SelectMultiple.template_name
+        context["extra_attrs"] = self.extra_attrs
         return context
 
 
