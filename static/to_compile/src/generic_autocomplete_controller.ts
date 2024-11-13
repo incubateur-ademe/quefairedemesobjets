@@ -47,6 +47,7 @@ export default class extends Controller<HTMLElement> {
 
   removeItem(event) {
     const value = event.target.innerText
+    console.log("removeItem", { event, value })
 
     this.selectedItemsValue = this.selectedItemsValue.filter(
       (itemValue) => itemValue !== value,
@@ -55,6 +56,7 @@ export default class extends Controller<HTMLElement> {
 
   // Lifecycle methods
   selectedItemsValueChanged(currentValue) {
+    console.log("selectedItemsValueChanged", { currentValue })
     this.#resetAutocompleteItems()
     this.#resetSearchInput()
     this.#resetSelectedItems()
@@ -93,6 +95,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   #generateSelectedItem(value: string): HTMLButtonElement {
+    console.log("generate selected item", { value })
     const selectedItem = document.createElement("button")
     const classes = ["qfdmo-whitespace-nowrap", "fr-tag", "fr-tag--dismiss"]
     selectedItem.classList.add(...classes)

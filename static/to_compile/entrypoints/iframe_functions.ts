@@ -55,7 +55,7 @@ export function getIframeAttributesAndExtra(
   let iframeExtraAttributes: { [Property in keyof HTMLScriptElement]?: unknown } = {}
 
   for (const param in scriptTag.dataset) {
-    if (scriptTag.dataset[param]?.includes(",")) {
+    if (param == "epci_codes" && scriptTag.dataset[param]?.includes(",")) {
       for (const value of scriptTag.dataset[param].split(",")) {
         urlParams.append(param, value)
       }
