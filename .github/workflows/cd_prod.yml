@@ -1,4 +1,4 @@
-name: "[LVAO] [🔴 Prod] Déploiement continu"
+name: "[🔴 Prod] Déploiement continu"
 
 on:
   push:
@@ -17,12 +17,12 @@ defaults:
     shell: bash
 
 jobs:
-  run_test:
-    uses: ./.github/workflows/lvao_tests.yml
+  run_tests:
+    uses: ./.github/workflows/run_tests.yml
 
   create-release:
     name: Create GitHub Release
-    needs: [run_test]
+    needs: [run_tests]
     runs-on: "ubuntu-latest"
     steps:
       - uses: "marvinpinto/action-automatic-releases@v1.2.1"
@@ -32,7 +32,7 @@ jobs:
 
   deploy:
     name: Deploy on Scalingo
-    needs: [run_test]
+    needs: [run_tests]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -41,3 +41,12 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
           known-host: ssh.osc-fr1.scalingo.com
           app-name: quefairedemesobjets
+
+  deploy_dags:
+    needs: [run_tests]
+    uses: ./.github/workflows/airflow_deploy_dags.yml
+    with:
+      S3_BUCKET_DESTINATION: s3://prod-dags/
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AIRFLOW_PROD_S3_ACCESS_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AIRFLOW_PROD_S3_SECRET_KEY }}

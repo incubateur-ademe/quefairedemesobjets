@@ -1,4 +1,4 @@
-name: "[LVAO] Intégration continue"
+name: "Intégration continue"
 
 on:
   pull_request:
@@ -9,5 +9,5 @@ defaults:
     shell: bash
 
 jobs:
-  run_test:
-    uses: ./.github/workflows/lvao_tests.yml
+  run_tests:
+    uses: ./.github/workflows/run_tests.yml

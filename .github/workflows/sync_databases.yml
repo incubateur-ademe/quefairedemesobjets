@@ -1,4 +1,4 @@
-name: "[LVAO] Sync prod > preprod"
+name: "Sync prod > preprod"
 
 on:
   workflow_dispatch:
