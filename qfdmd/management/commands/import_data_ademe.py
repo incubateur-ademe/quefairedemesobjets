@@ -91,7 +91,7 @@ class Command(BaseCommand):
                     self.stdout.write(
                         self.style.ERROR(
                             "Erreur lors de l'ajout du produit avec IDs"
-                            f" {line["Produits_associes"]}: {e}"
+                            f" {line['Produits_associes']}: {e}"
                         )
                     )
 
@@ -108,22 +108,22 @@ class Command(BaseCommand):
         self.stdout.write(
             self.style.SUCCESS(
                 "Import des produits depuis data.ademe.fr terminé: "
-                f"{result_import_produits["nb_produit_created"]} créés, "
-                f"{result_import_produits["nb_produit_updated"]} mis à jour"
+                f"{result_import_produits['nb_produit_created']} créés, "
+                f"{result_import_produits['nb_produit_updated']} mis à jour"
             )
         )
         self.stdout.write(
             self.style.SUCCESS(
                 "Import des synonymes depuis data.ademe.fr terminé: "
-                f"{result_import_produits["nb_synonyme_created"]} créés, "
-                f"{result_import_produits["nb_synonyme_updated"]} mis à jour"
+                f"{result_import_produits['nb_synonyme_created']} créés, "
+                f"{result_import_produits['nb_synonyme_updated']} mis à jour"
             )
         )
 
         self.stdout.write(
             self.style.SUCCESS(
                 "Import des liens depuis data.ademe.fr terminé: "
-                f"{result_import_liens["nb_lien_created"]} créés, "
-                f"{result_import_liens["nb_lien_updated"]} mis à jour"
+                f"{result_import_liens['nb_lien_created']} créés, "
+                f"{result_import_liens['nb_lien_updated']} mis à jour"
             )
         )
