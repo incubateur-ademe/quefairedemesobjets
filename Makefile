@@ -78,11 +78,15 @@ createcachetable:
 
 .PHONY: createsuperuser
 createsuperuser:
-	$(DJANGO_ADMIN) createsuperuse
+	$(DJANGO_ADMIN) createsuperuser
 
 .PHONY: seed-database
 seed-database:
 	$(DJANGO_ADMIN) loaddata categories actions acteur_services acteur_types
+
+.PHONY: clear-cache
+clear-cache:
+	$(DJANGO_ADMIN) shell -c "from django.core.cache import caches; caches['database'].clear();"
 
 # Dependencies management
 .PHONY: pip-update
