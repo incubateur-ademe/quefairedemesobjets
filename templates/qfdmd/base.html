@@ -1,0 +1,59 @@
+{% load dsfr_tags static %}
+
+<!DOCTYPE html>
+<html
+    lang="fr"
+    class="qf-scroll-smooth"
+    {% if not is_carte %}data-formulaire{% endif %}
+>
+    <head>
+        <meta charset="utf-8">
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, shrink-to-fit=no"
+        />
+        <title>{% block title %}Que faire de mes déchets{% endblock %}</title>
+        <meta name="description" content="{% block meta_description %}Donnons une nouvelle vie aux objets{% endblock %}">
+
+        {# Css #}
+        {% dsfr_css %}
+
+        {% block extra_css %}
+        {% endblock extra_css %}
+
+        {% comment %}
+        Ajouter
+        - iframe resizer
+        - posthog
+        - matomo
+        {% endcomment %}
+
+    </head>
+
+    <body>
+        <header>
+            {% block header %}
+            {% include "components/header.html" %}
+            {% endblock header %}
+        </header>
+
+        <main class="fr-container">
+            {% block main %}
+            {% endblock main %}
+        </main>
+
+        <aside>
+            {% block sidebar %}
+            {% include "components/sidebar.html" %}
+            {% endblock sidebar %}
+        </aside>
+
+        <footer>
+        {% block footer %}
+        {% include "components/footer.html" %}
+        {% endblock footer %}
+        </footer>
+
+        {% dsfr_js %}
+    </body>
+</html>
