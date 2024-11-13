@@ -79,14 +79,14 @@ def df_acteurs_from_db():
 
 
 @pytest.fixture
-def souscategorieobjet_code_by_id():
+def souscategorieobjet_id_by_code():
     return {"ecran": 101, "smartphone, tablette et console": 102}
 
 
 def get_mock_ti_ps(
     actions_id_by_code,
     acteurservice_id_by_code,
-    souscategorieobjet_code_by_id,
+    souscategorieobjet_id_by_code,
     df_create_actors: pd.DataFrame = pd.DataFrame(),
     displayedpropositionservice_max_id: int = 1,
 ) -> MagicMock:
@@ -101,7 +101,7 @@ def get_mock_ti_ps(
         },
         "read_action": actions_id_by_code,
         "read_acteurservice": acteurservice_id_by_code,
-        "read_souscategorieobjet": souscategorieobjet_code_by_id,
+        "read_souscategorieobjet": souscategorieobjet_id_by_code,
     }[task_ids]
     return mock
 
@@ -110,7 +110,7 @@ def get_mock_ti_label(
     actions_id_by_code,
     acteurtype_id_by_code,
     acteurservice_id_by_code,
-    souscategorieobjet_code_by_id,
+    souscategorieobjet_id_by_code,
     labelqualite_id_by_code=pd.DataFrame(),
     df_create_actors: pd.DataFrame = pd.DataFrame(),
     displayedpropositionservice_max_id: int = 1,
@@ -127,7 +127,7 @@ def get_mock_ti_label(
         "read_action": actions_id_by_code,
         "read_acteurtype": acteurtype_id_by_code,
         "read_acteurservice": acteurservice_id_by_code,
-        "read_souscategorieobjet": souscategorieobjet_code_by_id,
+        "read_souscategorieobjet": souscategorieobjet_id_by_code,
         "read_labelqualite": labelqualite_id_by_code,
     }[task_ids]
     return mock
@@ -281,12 +281,12 @@ class TestCreatePropositionService:
         expected_metadata,
         actions_id_by_code,
         acteurservice_id_by_code,
-        souscategorieobjet_code_by_id,
+        souscategorieobjet_id_by_code,
     ):
         mock = get_mock_ti_ps(
             actions_id_by_code,
             acteurservice_id_by_code,
-            souscategorieobjet_code_by_id,
+            souscategorieobjet_id_by_code,
             df_create_actors=pd.DataFrame(df_create_actors),
         )
 
@@ -300,12 +300,12 @@ class TestCreatePropositionService:
         self,
         actions_id_by_code,
         acteurservice_id_by_code,
-        souscategorieobjet_code_by_id,
+        souscategorieobjet_id_by_code,
     ):
         mock = get_mock_ti_ps(
             actions_id_by_code,
             acteurservice_id_by_code,
-            souscategorieobjet_code_by_id,
+            souscategorieobjet_id_by_code,
             df_create_actors=pd.DataFrame(
                 {
                     "identifiant_unique": [1, 2],
@@ -345,12 +345,12 @@ class TestCreatePropositionService:
         self,
         actions_id_by_code,
         acteurservice_id_by_code,
-        souscategorieobjet_code_by_id,
+        souscategorieobjet_id_by_code,
     ):
         mock = get_mock_ti_ps(
             actions_id_by_code,
             acteurservice_id_by_code,
-            souscategorieobjet_code_by_id,
+            souscategorieobjet_id_by_code,
             df_create_actors=pd.DataFrame(
                 {
                     "identifiant_unique": [1, 1],
@@ -390,12 +390,12 @@ class TestCreatePropositionService:
         self,
         actions_id_by_code,
         acteurservice_id_by_code,
-        souscategorieobjet_code_by_id,
+        souscategorieobjet_id_by_code,
     ):
         mock = get_mock_ti_ps(
             actions_id_by_code,
             acteurservice_id_by_code,
-            souscategorieobjet_code_by_id,
+            souscategorieobjet_id_by_code,
             df_create_actors=pd.DataFrame(
                 {
                     "identifiant_unique": [1],
@@ -461,7 +461,7 @@ def mock_ti(
     acteurtype_id_by_code,
     actions_id_by_code,
     acteurservice_id_by_code,
-    souscategorieobjet_code_by_id,
+    souscategorieobjet_id_by_code,
     labelqualite_id_by_code,
     df_acteurs_from_db,
 ):
@@ -565,7 +565,7 @@ def mock_ti(
         "read_acteurtype": acteurtype_id_by_code,
         "read_acteurservice": acteurservice_id_by_code,
         "read_source": sources_id_by_code,
-        "read_souscategorieobjet": souscategorieobjet_code_by_id,
+        "read_souscategorieobjet": souscategorieobjet_id_by_code,
         "read_labelqualite": labelqualite_id_by_code,
         "create_proposition_services": {"df": df_proposition_services},
         "services_sous_categories": df_proposition_services_sous_categories,
@@ -1170,13 +1170,13 @@ class TestCreatePropositionServicesSousCategories:
         )
 
     def test_create_proposition_services_sous_categories_unknown_product(
-        self, souscategorieobjet_code_by_id
+        self, souscategorieobjet_id_by_code
     ):
 
         mock = MagicMock()
 
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "read_souscategorieobjet": souscategorieobjet_code_by_id,
+            "read_souscategorieobjet": souscategorieobjet_id_by_code,
             "create_proposition_services": {
                 "df": pd.DataFrame(
                     {
@@ -1196,13 +1196,13 @@ class TestCreatePropositionServicesSousCategories:
             create_proposition_services_sous_categories(**kwargs)
 
     def test_create_proposition_services_sous_categories_empty_products(
-        self, souscategorieobjet_code_by_id
+        self, souscategorieobjet_id_by_code
     ):
 
         mock = MagicMock()
 
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "read_souscategorieobjet": souscategorieobjet_code_by_id,
+            "read_souscategorieobjet": souscategorieobjet_id_by_code,
             "create_proposition_services": {
                 "df": pd.DataFrame(
                     {
