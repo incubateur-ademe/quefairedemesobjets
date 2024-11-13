@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "django.contrib.gis",
+    "django_extensions",
     "explorer",
     "import_export",
     "widget_tweaks",
@@ -63,9 +64,7 @@ FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 
 
 if DEBUG:
-    INSTALLED_APPS.extend(
-        ["debug_toolbar", "django_browser_reload", "django_extensions"]
-    )
+    INSTALLED_APPS.extend(["debug_toolbar", "django_browser_reload"])
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
