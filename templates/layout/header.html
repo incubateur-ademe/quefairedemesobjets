@@ -1,0 +1,47 @@
+<header class="fr-header">
+    <div class="fr-header__body">
+        <div class="fr-container">
+            <div class="fr-header__body-row">
+                <div class="fr-header__brand fr-enlarge-link">
+                    <div class="fr-header__brand-top qfdmo-align-middle">
+                        {% include 'layout/_partials/header_logos.html' %}
+                        <div class="fr-header__navbar">
+                            <a aria-label='Nous contacter - Nouvelle fenêtre' class="fr-btn fr-btn--tertiary-no-outline" title="Nous contacter" target="_blank" href="https://tally.so/r/wzME61" rel="noreferrer">
+                                <span class="fr-icon-mail-line"></span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="fr-header__service">
+                        <p class="fr-header__service-title">
+                            Longue vie aux objets
+                        </p>
+                        <p class="fr-header__service-tagline">Encourager le tri et la consommation responsable pour donner une nouvelle vie aux objets</p>
+                    </div>
+                </div>
+
+                <div class="fr-header__tools">
+                    <div class="fr-header__tools-links">
+                        <ul class="fr-btns-group">
+                            <li>
+                                <a class="fr-btn fr-btn--tertiary fr-icon-mail-line fr-mb-1w fr-ml-1w"
+                                   href="{% url 'qfdmo:contact-form' %}}?campaign=lvao-header"
+                                   target="_blank"  rel="noreferrer"
+                                   aria-label='Nous contacter - Nouvelle fenêtre'
+                                >
+                                    Nous contacter
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="fr-header__menu fr-modal">
+        <div class="fr-container">
+            <div class="fr-header__menu-links">
+            </div>
+        </div>
+    </div>
+</header>

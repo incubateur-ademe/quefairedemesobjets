@@ -1,0 +1,26 @@
+{# Recherche adresse #}
+<div data-search-solution-form-target="adresseGroup">
+    <div data-controller='address-autocomplete'
+         data-address-autocomplete-max-option-displayed-value=5
+         data-address-autocomplete-is-ban-address-value='true'
+         data-with-controls={{ is_carte|yesno:"false,true,true" }}
+         data-without-zone="true"
+         data-with-dynamic-form-panel={{ is_carte|yesno:"false,true,true" }}
+         data-testid="rechercher-adresses-submit"
+    >
+        <div class="form-group">
+            {{ form.adresse.label_tag }}
+            {% if form.adresse.help_text %}
+                <span class="fr-hint-text fr-mt-1v" id="{{ form.adresse.id_for_label }}_helptext">
+                    {{ form.adresse.help_text }}
+                </span>
+            {% endif %}
+            {{ form.adresse }}
+        </div>
+        {{ form.longitude }}
+        {{ form.latitude }}
+    </div>
+    <p class="fr-error-text fr-mt-1v qfdmo-hidden" data-search-solution-form-target="adresseError">
+        Veuillez saisir une adresse
+    </p>
+</div>

@@ -1,16 +1,9 @@
-import random
-
 import pytest
 from django.contrib.gis.geos import Point
 from django.core.management import call_command
 from django.http import HttpRequest
 
-from core.jinja2_handler import (
-    action_by_direction,
-    display_infos_panel,
-    distance_to_acteur,
-    is_embedded,
-)
+from core.templatetags.custom_filters import action_by_direction, distance_to_acteur
 from qfdmo.models.acteur import ActeurType
 from unit_tests.qfdmo.acteur_factory import ActeurTypeFactory, DisplayedActeurFactory
 
@@ -23,25 +16,6 @@ def django_db_setup(django_db_setup, django_db_blocker):
             "actions",
             "acteur_types",
         )
-
-
-class TestIsIframe:
-    def test_is_embedded_false(self):
-        request = HttpRequest()
-
-        request.GET = {}
-        assert is_embedded(request) is False
-
-    def test_is_embedded_true(self):
-        request = HttpRequest()
-
-        request.GET = {"iframe": str(random.randint(0, 10))}
-
-        assert is_embedded(request) is True
-
-        request.GET = {"iframe": "anything"}
-
-        assert is_embedded(request) is True
 
 
 class TestActionByDirection:
@@ -149,34 +123,6 @@ def adresse():
 
 
 @pytest.mark.django_db
-class TestDisplayInfosPanel:
-
-    def test_display_infos_panel_adresse_not_digital(self, adresse):
-        adresse.horaires_description = None
-        adresse.adresse = "something"
-        assert display_infos_panel(adresse)
-
-        adresse.adresse = None
-        assert not display_infos_panel(adresse)
-
-    def test_display_infos_panel_horaires_not_digital(self, adresse):
-        adresse.horaires_description = "something"
-        adresse.adresse = None
-        assert display_infos_panel(adresse)
-
-        adresse.horaires_description = None
-        assert not display_infos_panel(adresse)
-
-    def test_display_infos_panel_digital(self, adresse):
-        ActeurType._digital_acteur_type_id = 0
-        adresse.acteur_type = ActeurTypeFactory(code="acteur digital")
-        assert not display_infos_panel(adresse)
-
-        adresse.adresse = None
-        assert not display_infos_panel(adresse)
-
-
-@pytest.mark.django_db
 class TestDistanceToActeur:
 
     @pytest.mark.parametrize(
@@ -198,11 +144,11 @@ class TestDistanceToActeur:
     def test_distance_to_acteur_not_digital(self, adresse, request_params, expected):
         request = type("", (), {})()  # create a dummy object
         request.GET = request_params
-        assert distance_to_acteur(request, adresse) == expected
+        assert distance_to_acteur(adresse, request) == expected
 
     def test_distance_to_acteur_digital(self, adresse):
         ActeurType._digital_acteur_type_id = 0
         adresse.acteur_type = ActeurTypeFactory(code="acteur digital")
         request = type("", (), {})()
         request.GET = {"longitude": str(1000 / 111320), "latitude": str(1000 / 111320)}
-        assert distance_to_acteur(request, adresse) == ""
+        assert distance_to_acteur(adresse, request) == ""

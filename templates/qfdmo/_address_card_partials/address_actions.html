@@ -1,0 +1,12 @@
+<div class="qfdmo-flex qfdmo-justify-between">
+    <div class="fr-mb-1v">
+        {% for action in adresse.acteur_actions(direction=direction) %}
+            <p class="fr-badge fr-badge--sm qfdmo-bg-{{ action.couleur }} qfdmo-bg-opacity-30 fr-my-1v fr-mr-1v">
+                {% if action.icon %}
+                    <span class="{{ action.icon }}" aria-hidden="true"></span>&nbsp;
+                {% endif %}
+                {{ action.libelle }}
+            </p>
+        {% endfor %}
+    </div>
+</div>

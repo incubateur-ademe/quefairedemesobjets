@@ -618,6 +618,25 @@ def adresse_detail(request, identifiant_unique):
             "display_sources_panel": bool(
                 displayed_acteur.sources.filter(afficher=True).count()
             ),
+            "display_infos_panel": (
+                (
+                    displayed_acteur.horaires_description
+                    or displayed_acteur.display_postal_address()
+                )
+                and not displayed_acteur.is_digital
+            ),
+            "display_exclusivite_reparation": (
+                displayed_acteur.exclusivite_de_reprisereparation
+            ),
+            "labels_qualite_bonus": displayed_acteur.labels.filter(
+                afficher=True, bonus=True, type_enseigne=False
+            ),
+            "labels_qualite": displayed_acteur.labels.filter(
+                afficher=True, type_enseigne=False
+            ),
+            "labels_enseigne": displayed_acteur.labels.filter(
+                afficher=True, type_enseigne=True
+            ),
         },
     )
 

@@ -1,0 +1,26 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+    <div class="fr-container fr-my-3w">
+        <h1>Plan du site</h1>
+        <div>
+            <ul>
+                <li>
+                    <a href="/">Page d’accueil</a>
+                </li>
+                <li>
+                    <a href="{% url 'qfdmo:address-suggestion-form' %}}">Proposer une adresse</a>
+                </li>
+                <li>
+                    <a href="{% url 'qfdmo:update-suggestion-form' %}}">Proposer une modification</a>
+                </li>
+                <li><a href="{% url 'qfdmo:legal_notices' %}}">Mentions légales</a></li>
+                <li><a href="{% url 'qfdmo:cgu' %}}">Conditions générales d'utilisation</a></li>
+                <li><a href="{% url 'qfdmo:cookies' %}}">Politiques des cookies</a></li>
+                <li><a href="{% url 'qfdmo:personal_data' %}}">Données personnelles</a></li>
+                <li><a href="{% url 'qfdmo:accessibility' %}}">Accessibilité : non conforme</a></li>
+                <li><a href="{% url 'qfdmo:contact-form' %}}">Nous contacter</a></li>
+            </ul>
+        </div>
+    </div>
+{% endblock content %}

@@ -1,0 +1,11 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+    <div class="fr-container">
+        <div class="sm:qfdmo-w-[480] qfdmo-bg-white fr-mt-2w">
+            <turbo-frame id="adr_detail">
+                {% include 'qfdmo/acteur/detail.html' %}
+            </turbo-frame>
+        </div>
+    </div>
+{% endblock content %}

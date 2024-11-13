@@ -1,0 +1,42 @@
+{% load static %}
+
+<button class="qfdmo-hidden"
+        id="display_modale_reparacteur"
+        data-fr-opened="false"
+        aria-controls="fr-modal-reparacteur"
+>
+    display modal reparacteur
+</button>
+<dialog aria-labelledby="fr-modal-reparacteur-title" id="fr-modal-reparacteur" class="fr-modal qfdmo-z-[10020]">
+    <div class="fr-container fr-container--fluid fr-container-md">
+        <div class="fr-grid-row fr-grid-row--center">
+            <div class="fr-col-12 fr-col-md-10">
+                <div class="fr-modal__body">
+                    <div class="fr-modal__header">
+                        <button class="fr-btn--close fr-btn" title="Fermer la fenêtre modale" aria-controls="fr-modal-reparacteur">Fermer</button>
+                    </div>
+                    <div class="fr-modal__content">
+                        <h1 id="fr-modal-reparacteur-title" class="fr-modal__title"><span class="fr-icon-arrow-right-line fr-icon--lg"></span>Réparac'Acteurs</h1>
+                        <div class="fr-container">
+                            <div class="fr-grid-row fr-grid-row--center">
+                                <div class="fr-col-12 fr-col-md-3 qfdmo-text-center">
+                                    <img
+                                        src="{% static 'reparacteurs.png' %}"
+                                        alt="Repar'Acteur"
+                                        class="qfdmo-text-center qfdmo-max-w-[100%]"
+                                        data-fr-opened="false"
+                                        aria-controls="fr-modal-reparacteur"
+                                    >
+                                </div>
+                                <div class="fr-col-12 fr-col-md-9 qfdmo-text-center sm:qfdmo-text-left sm:qfdmo-pl-2w">
+                                    <p>Les Répar’Acteurs ont adhéré à une démarche déployée par la Chambre des Métiers et de l’Artisanat avec le soutien de l’ADEME, qui salue la compétence, le savoir-faire et l’engagement des artisans mettant à l’honneur la réparation des biens et équipements avant tout remplacement par un produit neuf.</p>
+                                </div>
+                            </div>
+                            <div class="qfdmo-text-center fr-text--sm"><a href="https://www.artisanat.fr/annuaire-repar-acteurs" target="_blank" rel="noreferrer">Annuaire Répar'acteurs | Artisanat.fr</a></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</dialog>
