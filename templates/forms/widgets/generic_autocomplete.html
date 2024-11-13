@@ -1,40 +1,50 @@
-{% extends "forms/widgets/autocomplete.html" %}
-
-{% block data_action %}
-{{ block.super }}
-change->autocomplete#change
-{% endblock data_action %}
-
-{% block wrapper_attributes %}
-data-controller="autocomplete"
-{% endblock wrapper_attributes %}
-
-{% block wrapper_classes %}
-{{ widget.attrs.wrapper_classes }}
-{% endblock wrapper_classes %}
-
-{% block choices %}
-    <div class="qfdmo-w-full autocomplete-items" data-autocomplete-target="listbox" role="listbox">
-        {% for group, option, _ in widget.optgroups %}
-            <div
-                role="option"
-                class="qfdmo-hidden"
-                id="{{ option.0.label }}"
-                data-action="click->autocomplete#setActiveOptionFrom"
-                data-autocomplete-target="option"
-                data-autocomplete-search-value="{{ option.0.label }}"
-                data-autocomplete-value-value="{{ option.0.value }}"
+<div
+    class="qfdmo-flex qfdmo-flex-col
+    qfdmo-grid-cols-1 lg:qfdmo-grid md:qfdmo-grid-cols-[minmax(0,576px)_1fr] qfdmo-gap-7w"
+    data-controller="autocomplete"
+    data-autocomplete-endpoint-url-value="{{ extra_attrs.endpoint }}"
+    data-autocomplete-empty-label-value="{{ extra_attrs.empty_label }}"
+    {% if widget.value %}
+    data-autocomplete-selected-items-value='["{{ widget.value|join:'","' }}"]'
+    {% endif %}
+>
+    <div class="qfdmo-flex qfdmo-flex-col qfdmo-gap-2w">
+        <div class="qfdmo-relative">
+            {# search box #}
+            <input
+                data-action="autocomplete#search"
+                data-autocomplete-target="input"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="off"
+                spellcheck="false"
+                type="text"
+                name="search"
+                class="fr-input"
             >
-                {{ option.0.label }}
+            {# This is automatically populated based on the input value #}
+            {# Selected results displayed alongside the input #}
+            <div
+                data-autocomplete-target="searched"
+                class="autocomplete-items qfdmo-w-full empty:qfdmo-hidden"
+            >
             </div>
-        {% endfor %}
+        </div>
+        {{ extra_attrs.additionnal_info }}
     </div>
-{% endblock choices %}
+    <div class="qfdmo-flex qfdmo-flex-col qfdmo-gap-1w -qfdmo-mt-6w qfdmo-w-full">
+        <p class="qfdmo-m-0">{{ extra_attrs.selected_label }} (<span data-autocomplete-target="counter">0</span>)</>
+        <div
+            class="fr-text--sm qfdmo-p-2w
+            qfdmo-flex qfdmo-gap-3v
+            qfdmo-flex-wrap
+            qfdmo-border qfdmo-border-solid qfdmo-border-grey-900"
+            data-autocomplete-target="selected"
+        ></div>
+    </div>
 
-{% block additionnal_info %}
-{% if widget.additionnal_info %}
-<div class="qfdmo-mt-2w">
-    {{ widget.additionnal_info }}
+    {# Hidden form that stores the submitted data #}
+    <div class="qfdmo-hidden">
+        {% include hidden_template_name %}
+    </div>
 </div>
-{% endif %}
-{% endblock additionnal_info %}

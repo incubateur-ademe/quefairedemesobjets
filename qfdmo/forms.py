@@ -7,8 +7,8 @@ from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from dsfr.forms import DsfrBaseForm
 
-from qfdmo.fields import EPCIField, GroupeActionChoiceField
-from qfdmo.geo_api import all_epci_codes
+from qfdmo.fields import GroupeActionChoiceField
+from qfdmo.geo_api import epcis_from, formatted_epcis_as_list_of_tuple
 from qfdmo.models import DagRun, DagRunStatus, SousCategorieObjet
 from qfdmo.models.action import (
     Action,
@@ -301,7 +301,7 @@ class CarteForm(AddressesForm):
     )
 
     epci_codes = forms.MultipleChoiceField(
-        choices=all_epci_codes,
+        choices=[(code, code) for code in cast(List[str], epcis_from(["code"]))],
         widget=forms.MultipleHiddenInput(),
         required=False,
     )
@@ -367,27 +367,29 @@ class ConfiguratorForm(DsfrBaseForm):
         "faire une carte que sur les points de collecte ou de réparation, il vous "
         "suffit de décocher toutes les autres actions possibles.",
     )
-    epci_codes = EPCIField(
+    epci_codes = forms.MultipleChoiceField(
         label=mark_safe(
             """
         <hr/>
         <h3>Paramètres de la carte</h3>
-        1. Choisir l’EPCI affiché par défaut sur la carte"""
+        1. Choisir les EPCI affichés par défaut sur la carte"""
         ),
         help_text="Commencez à taper un nom d’EPCI et sélectionnez un EPCI parmi "
         "les propositions de la liste.",
-        choices=all_epci_codes,
-        initial="",
+        # TODO: voir comment évaluer cela "lazily"
+        # L'utilisation de lazy(all_epci_codes(...)) génère une erreur côté Django DSFR
+        choices=formatted_epcis_as_list_of_tuple(),
         widget=GenericAutoCompleteInput(
-            additionnal_info=mark_safe(
-                render_to_string(
-                    "forms/widgets/epci_codes_additionnal_info.html",
-                )
-            ),
-            attrs={
-                "class": "fr-input",
-                "wrapper_classes": "qfdmo-max-w-[576]",
-                "autocomplete": "off",
+            attrs={"data-autocomplete-target": "hiddenInput", "class": "qfdmo-hidden"},
+            extra_attrs={
+                "selected_label": "Vos EPCI sélectionnés",
+                "empty_label": "Il n’y a pas d’EPCI sélectionné pour le moment",
+                "endpoint": "/api/qfdmo/autocomplete/configurateur?query=",
+                "additionnal_info": mark_safe(
+                    render_to_string(
+                        "forms/widgets/epci_codes_additionnal_info.html",
+                    )
+                ),
             },
         ),
     )

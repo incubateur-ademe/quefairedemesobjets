@@ -303,9 +303,9 @@ class CarteView(
             geojson_list = [retrieve_epci_geojson(code) for code in epci_codes]
             bbox = bbox_from_list_of_geojson(geojson_list, buffer=0)
             if geojson_list:
-                # TODO: handle case with multiples EPCI codes passed in URL
-                geojson = json.dumps(geojson_list[0])
-                acteurs = acteurs.in_geojson(geojson)
+                acteurs = acteurs.in_geojson(
+                    [json.dumps(geojson) for geojson in geojson_list]
+                )
             return compile_leaflet_bbox(bbox), acteurs
 
         return custom_bbox, acteurs.none()

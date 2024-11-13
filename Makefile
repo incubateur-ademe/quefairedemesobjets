@@ -82,7 +82,7 @@ createcachetable:
 
 .PHONY: createsuperuser
 createsuperuser:
-	$(DJANGO_ADMIN) createsuperuse
+	$(DJANGO_ADMIN) createsuperuser
 
 .PHONY: seed-database
 seed-database:
@@ -91,6 +91,10 @@ seed-database:
 .PHONY: restore-prod
 restore-prod:
 	./scripts/restore_prod_locally.sh
+
+.PHONY: clear-cache
+clear-cache:
+	$(DJANGO_ADMIN) clear_cache --all
 
 # Dependencies management
 .PHONY: pip-update
