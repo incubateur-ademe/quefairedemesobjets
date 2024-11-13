@@ -1,15 +1,15 @@
 <div
-    class="qfdmo-flex qfdmo-flex-col
-    qfdmo-grid-cols-1 lg:qfdmo-grid md:qfdmo-grid-cols-[minmax(0,576px)_1fr] qfdmo-gap-7w"
+    class="qf-flex qf-flex-col
+    qf-grid-cols-1 lg:qf-grid md:qf-grid-cols-[minmax(0,576px)_1fr] qf-gap-7w"
     data-controller="autocomplete"
     data-autocomplete-endpoint-url-value="{{ extra_attrs.endpoint }}"
     data-autocomplete-empty-label-value="{{ extra_attrs.empty_label }}"
     {% if widget.value %}
     data-autocomplete-selected-items-value='["{{ widget.value|join:'","' }}"]'
     {% endif %}
->
-    <div class="qfdmo-flex qfdmo-flex-col qfdmo-gap-2w">
-        <div class="qfdmo-relative">
+></div>
+    <div class="qf-flex qf-flex-col qf-gap-2w">
+        <div class="qf-relative">
             {# search box #}
             <input
                 data-action="autocomplete#search"
@@ -26,25 +26,25 @@
             {# Selected results displayed alongside the input #}
             <div
                 data-autocomplete-target="searched"
-                class="autocomplete-items qfdmo-w-full empty:qfdmo-hidden"
+                class="autocomplete-items qf-w-full empty:qf-hidden"
             >
             </div>
         </div>
         {{ extra_attrs.additionnal_info }}
     </div>
-    <div class="qfdmo-flex qfdmo-flex-col qfdmo-gap-1w -qfdmo-mt-6w qfdmo-w-full">
-        <p class="qfdmo-m-0">{{ extra_attrs.selected_label }} (<span data-autocomplete-target="counter">0</span>)</>
+    <div class="qf-flex qf-flex-col qf-gap-1w -qf-mt-6w qf-w-full">
+        <p class="qf-m-0">{{ extra_attrs.selected_label }} (<span data-autocomplete-target="counter">0</span>)</>
         <div
-            class="fr-text--sm qfdmo-p-2w
-            qfdmo-flex qfdmo-gap-3v
-            qfdmo-flex-wrap
-            qfdmo-border qfdmo-border-solid qfdmo-border-grey-900"
+            class="fr-text--sm qf-p-2w
+            qf-flex qf-gap-3v
+            qf-flex-wrap
+            qf-border qf-border-solid qf-border-grey-900"
             data-autocomplete-target="selected"
         ></div>
     </div>
 
     {# Hidden form that stores the submitted data #}
-    <div class="qfdmo-hidden">
+    <div class="qf-hidden">
         {% include hidden_template_name %}
     </div>
 </div>

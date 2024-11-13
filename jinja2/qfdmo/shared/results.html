@@ -8,9 +8,9 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
 
 <div
     class="
-    qfdmo-relative
-    qfdmo-flex-grow
-    qfdmo-shadow
+    qf-relative
+    qf-flex-grow
+    qf-shadow
     "
     {% if not is_digital %}
     data-controller="map"
@@ -24,14 +24,14 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
         {% include "qfdmo/carte/_search_in_zone.html" %}
         <div
             id="map"
-            class="qfdmo-inset-0 qfdmo-h-full qfdmo-relative qfdmo-z-0"
+            class="qf-inset-0 qf-h-full qf-relative qf-z-0"
             data-action="map:captureInteraction->analytics#captureInteractionWithMap"
         >
             {% if is_carte %}
-                <a class="qfdmo-flex lg:qfdmo-hidden
-                            qfdmo-bg-white
-                            fr-mb-1w fr-btn fr-btn--icon-left fr-icon-epingle-plus fr-btn--tertiary qfdmo-whitespace-nowrap qfdmo-w-auto qfdmo-justify-center
-                            qfdmo-absolute qfdmo-left-2w qfdmo-right-2w qfdmo-bottom-3w qfdmo-z-30"
+                <a class="qf-flex lg:qf-hidden
+                            qf-bg-white
+                            fr-mb-1w fr-btn fr-btn--icon-left fr-icon-epingle-plus fr-btn--tertiary qf-whitespace-nowrap qf-w-auto qf-justify-center
+                            qf-absolute qf-left-2w qf-right-2w qf-bottom-3w qf-z-30"
                     href="{{ url('qfdmo:address-suggestion-form') }}"
                     target="_blank"
                     rel="noreferrer"

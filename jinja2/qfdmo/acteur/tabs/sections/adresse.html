@@ -5,7 +5,7 @@ Adresse
 {% endblock title %}
 
 {% block content %}
-<address class="qfdmo-not-italic">
+<address class="qf-not-italic">
     {% if object.adresse %}
         {{ object.adresse|title }}<br>
     {% endif %}
@@ -25,8 +25,8 @@ Adresse
 
 {# TODO: Ce champ n'est pas implémenté. Lorsqu'il sera implémenté, adapter le nom du champ à celui utilisé en base de données. #}
 {% if object.services_a_domicile %}
-<div class="fr-highlight qfdmo-ml-0 qfdmo-pl-2w">
-    <p class="qfdmo-text-sm">
+<div class="fr-highlight qf-ml-0 qf-pl-2w">
+    <p class="qf-text-sm">
     Cet établissement propose des services à domicile.
     </p>
 </div>

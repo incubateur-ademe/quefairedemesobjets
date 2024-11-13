@@ -21,7 +21,7 @@ Réutiliser la carte | {{ super() }}
         {% if form.cleaned_data %}
             <hr>
             <div
-                class="qfdmo-max-w-screen-lg"
+                class="qf-max-w-screen-lg"
                 data-controller="scroll"
             >
                 <h2>Résultat</h2>
@@ -37,20 +37,20 @@ Réutiliser la carte | {{ super() }}
                 </p>
                 <div
                     data-controller="copy"
-                    class="qfdmo-flex
-                    qfdmo-p-2w qfdmo-bg-grey-975
+                    class="qf-flex
+                    qf-p-2w qf-bg-grey-975
                     "
                 >
                     <pre
                         data-copy-target="toCopy"
                         class="
-                        qfdmo-m-0 qfdmo-pr-1w
-                        qfdmo-text-blue-france-sun-113
-                        qfdmo-whitespace-break-spaces
-                        qfdmo-break-all
+                        qf-m-0 qf-pr-1w
+                        qf-text-blue-france-sun-113
+                        qf-whitespace-break-spaces
+                        qf-break-all
                     ">{{ iframe_script }}</pre>
                     <button
-                        class="fr-btn qfdmo-mb-auto qfdmo-ml-auto"
+                        class="fr-btn qf-mb-auto qf-ml-auto"
                         title="Copier"
                         data-action="click->copy#toClipboard"
                         data-copy-target="button"
@@ -59,7 +59,7 @@ Réutiliser la carte | {{ super() }}
                     </button>
                 </div>
 
-                <div class="fr-alert fr-alert--info qfdmo-mt-1w qfdmo-mb-4w">
+                <div class="fr-alert fr-alert--info qf-mt-1w qf-mb-4w">
                     <p>
                         Cette balise HTML vous permet d'afficher le simulateur à l'intérieur d'une page de votre site internet.
                         Le module sera automatiquement mis à jour avec les dernières nouveautés.

@@ -1,0 +1,209 @@
+{
+  "numFailedTestSuites": 1,
+  "numFailedTests": 3,
+  "numPassedTestSuites": 1,
+  "numPassedTests": 2,
+  "numPendingTestSuites": 0,
+  "numPendingTests": 0,
+  "numRuntimeErrorTestSuites": 0,
+  "numTodoTests": 0,
+  "numTotalTestSuites": 2,
+  "numTotalTests": 5,
+  "openHandles": [],
+  "snapshot": {
+    "added": 0,
+    "didUpdate": false,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0
+  },
+  "startTime": 1731512989362,
+  "success": false,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["getIframeAttributesAndExtra function tests"],
+          "duration": 17,
+          "failureDetails": [
+            {
+              "matcherResult": {
+                "actual": {
+                  "src": "https://example.com?carte=1&address_placeholder=toto%2Ctata&bounding_box=%7B%22southWest%22%3A%7B%22lat%22%3A48.916%2C%22lng%22%3A2.298202514648438%7D%2C%22northEast%22%3A%7B%22lat%22%3A48.98742568330284%2C%22lng%22%3A2.483596801757813%7D%7D&direction=jai",
+                  "id": "lvao_iframe",
+                  "frameBorder": "0",
+                  "scrolling": "yes",
+                  "allow": "geolocation; clipboard-write",
+                  "allowFullscreen": true,
+                  "title": "Longue vie aux objets",
+                  "style": "overflow: hidden; max-width: 100%; width: 100%; height: 700px;"
+                },
+                "expected": {
+                  "allow": "geolocation; clipboard-write",
+                  "allowFullscreen": true,
+                  "frameBorder": "0",
+                  "id": "lvao_iframe",
+                  "scrolling": "no",
+                  "src": "https://example.com?carte=1&address_placeholder=toto%2Ctata&bounding_box=%7B%22southWest%22%3A%7B%22lat%22%3A48.916%2C%22lng%22%3A2.298202514648438%7D%2C%22northEast%22%3A%7B%22lat%22%3A48.98742568330284%2C%22lng%22%3A2.483596801757813%7D%7D&direction=jai",
+                  "style": "overflow: hidden; max-width: 100%; width: 100%; height: 700px;",
+                  "title": "Longue vie aux objets"
+                },
+                "message": "\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoStrictEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 1\u001b[39m\n\n\u001b[2m  Object {\u001b[22m\n\u001b[2m    \"allow\": \"geolocation; clipboard-write\",\u001b[22m\n\u001b[2m    \"allowFullscreen\": true,\u001b[22m\n\u001b[2m    \"frameBorder\": \"0\",\u001b[22m\n\u001b[2m    \"id\": \"lvao_iframe\",\u001b[22m\n\u001b[32m-   \"scrolling\": \"no\",\u001b[39m\n\u001b[31m+   \"scrolling\": \"yes\",\u001b[39m\n\u001b[2m    \"src\": \"https://example.com?carte=1&address_placeholder=toto%2Ctata&bounding_box=%7B%22southWest%22%3A%7B%22lat%22%3A48.916%2C%22lng%22%3A2.298202514648438%7D%2C%22northEast%22%3A%7B%22lat%22%3A48.98742568330284%2C%22lng%22%3A2.483596801757813%7D%7D&direction=jai\",\u001b[22m\n\u001b[2m    \"style\": \"overflow: hidden; max-width: 100%; width: 100%; height: 700px;\",\u001b[22m\n\u001b[2m    \"title\": \"Longue vie aux objets\",\u001b[22m\n\u001b[2m  }\u001b[22m",
+                "name": "toStrictEqual",
+                "pass": false
+              }
+            }
+          ],
+          "failureMessages": [
+            "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoStrictEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 1\u001b[39m\n\n\u001b[2m  Object {\u001b[22m\n\u001b[2m    \"allow\": \"geolocation; clipboard-write\",\u001b[22m\n\u001b[2m    \"allowFullscreen\": true,\u001b[22m\n\u001b[2m    \"frameBorder\": \"0\",\u001b[22m\n\u001b[2m    \"id\": \"lvao_iframe\",\u001b[22m\n\u001b[32m-   \"scrolling\": \"no\",\u001b[39m\n\u001b[31m+   \"scrolling\": \"yes\",\u001b[39m\n\u001b[2m    \"src\": \"https://example.com?carte=1&address_placeholder=toto%2Ctata&bounding_box=%7B%22southWest%22%3A%7B%22lat%22%3A48.916%2C%22lng%22%3A2.298202514648438%7D%2C%22northEast%22%3A%7B%22lat%22%3A48.98742568330284%2C%22lng%22%3A2.483596801757813%7D%7D&direction=jai\",\u001b[22m\n\u001b[2m    \"style\": \"overflow: hidden; max-width: 100%; width: 100%; height: 700px;\",\u001b[22m\n\u001b[2m    \"title\": \"Longue vie aux objets\",\u001b[22m\n\u001b[2m  }\u001b[22m\n    at assertIframeAttributes (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/static/to_compile/tests/iframe_functions.test.ts:16:30)\n    at /Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/static/to_compile/tests/iframe_functions.test.ts:79:7\n    at Object.<anonymous> (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-each/build/bind.js:81:13)\n    at Promise.then.completed (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-circus/build/utils.js:298:28)\n    at new Promise (<anonymous>)\n    at callAsyncCircusFn (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-circus/build/utils.js:231:10)\n    at _callCircusTest (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-circus/build/run.js:316:40)\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at _runTest (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-circus/build/run.js:252:3)\n    at _runTestsForDescribeBlock (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-circus/build/run.js:126:9)\n    at _runTestsForDescribeBlock (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-circus/build/run.js:121:9)\n    at run (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-circus/build/run.js:71:3)\n    at runAndTransformResultsToJestFormat (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)\n    at jestAdapter (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)\n    at runTestInternal (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-runner/build/runTest.js:444:34)\n    at Object.worker (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-runner/build/testWorker.js:106:12)"
+          ],
+          "fullName": "getIframeAttributesAndExtra function tests should generate correct iframe attributes with bounding box",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "should generate correct iframe attributes with bounding box"
+        },
+        {
+          "ancestorTitles": ["getIframeAttributesAndExtra function tests"],
+          "duration": 7,
+          "failureDetails": [
+            {
+              "matcherResult": {
+                "actual": {
+                  "src": "https://example.com?carte=1&action_list=acheter%7Crevendre%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cdonner%7Cechanger%7Creparer&epci_codes=200073146&limit=71",
+                  "id": "lvao_iframe",
+                  "frameBorder": "0",
+                  "scrolling": "yes",
+                  "allow": "geolocation; clipboard-write",
+                  "allowFullscreen": true,
+                  "title": "Longue vie aux objets",
+                  "style": "overflow: hidden; max-width: 100%; width: 100%; height: 700px;"
+                },
+                "expected": {
+                  "allow": "geolocation; clipboard-write",
+                  "allowFullscreen": true,
+                  "frameBorder": "0",
+                  "id": "lvao_iframe",
+                  "scrolling": "no",
+                  "src": "https://example.com?carte=1&action_list=acheter%7Crevendre%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cdonner%7Cechanger%7Creparer&epci_codes=200073146&limit=71",
+                  "style": "overflow: hidden; max-width: 100%; width: 100%; height: 700px;",
+                  "title": "Longue vie aux objets"
+                },
+                "message": "\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoStrictEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 1\u001b[39m\n\n\u001b[2m  Object {\u001b[22m\n\u001b[2m    \"allow\": \"geolocation; clipboard-write\",\u001b[22m\n\u001b[2m    \"allowFullscreen\": true,\u001b[22m\n\u001b[2m    \"frameBorder\": \"0\",\u001b[22m\n\u001b[2m    \"id\": \"lvao_iframe\",\u001b[22m\n\u001b[32m-   \"scrolling\": \"no\",\u001b[39m\n\u001b[31m+   \"scrolling\": \"yes\",\u001b[39m\n\u001b[2m    \"src\": \"https://example.com?carte=1&action_list=acheter%7Crevendre%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cdonner%7Cechanger%7Creparer&epci_codes=200073146&limit=71\",\u001b[22m\n\u001b[2m    \"style\": \"overflow: hidden; max-width: 100%; width: 100%; height: 700px;\",\u001b[22m\n\u001b[2m    \"title\": \"Longue vie aux objets\",\u001b[22m\n\u001b[2m  }\u001b[22m",
+                "name": "toStrictEqual",
+                "pass": false
+              }
+            }
+          ],
+          "failureMessages": [
+            "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoStrictEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 1\u001b[39m\n\n\u001b[2m  Object {\u001b[22m\n\u001b[2m    \"allow\": \"geolocation; clipboard-write\",\u001b[22m\n\u001b[2m    \"allowFullscreen\": true,\u001b[22m\n\u001b[2m    \"frameBorder\": \"0\",\u001b[22m\n\u001b[2m    \"id\": \"lvao_iframe\",\u001b[22m\n\u001b[32m-   \"scrolling\": \"no\",\u001b[39m\n\u001b[31m+   \"scrolling\": \"yes\",\u001b[39m\n\u001b[2m    \"src\": \"https://example.com?carte=1&action_list=acheter%7Crevendre%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cdonner%7Cechanger%7Creparer&epci_codes=200073146&limit=71\",\u001b[22m\n\u001b[2m    \"style\": \"overflow: hidden; max-width: 100%; width: 100%; height: 700px;\",\u001b[22m\n\u001b[2m    \"title\": \"Longue vie aux objets\",\u001b[22m\n\u001b[2m  }\u001b[22m\n    at assertIframeAttributes (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/static/to_compile/tests/iframe_functions.test.ts:16:30)\n    at /Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/static/to_compile/tests/iframe_functions.test.ts:79:7\n    at Object.<anonymous> (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-each/build/bind.js:81:13)\n    at Promise.then.completed (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-circus/build/utils.js:298:28)\n    at new Promise (<anonymous>)\n    at callAsyncCircusFn (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-circus/build/utils.js:231:10)\n    at _callCircusTest (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-circus/build/run.js:316:40)\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at _runTest (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-circus/build/run.js:252:3)\n    at _runTestsForDescribeBlock (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-circus/build/run.js:126:9)\n    at _runTestsForDescribeBlock (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-circus/build/run.js:121:9)\n    at run (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-circus/build/run.js:71:3)\n    at runAndTransformResultsToJestFormat (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)\n    at jestAdapter (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)\n    at runTestInternal (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-runner/build/runTest.js:444:34)\n    at Object.worker (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-runner/build/testWorker.js:106:12)"
+          ],
+          "fullName": "getIframeAttributesAndExtra function tests should generate correct iframe attributes with a single EPCI code",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "should generate correct iframe attributes with a single EPCI code"
+        },
+        {
+          "ancestorTitles": ["getIframeAttributesAndExtra function tests"],
+          "duration": 2,
+          "failureDetails": [
+            {
+              "matcherResult": {
+                "actual": {
+                  "src": "https://example.com?carte=1&action_list=acheter%7Crevendre%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cdonner%7Cechanger%7Creparer&epci_codes=200073146&epci_codes=200040442&epci_codes=245804497&limit=71",
+                  "id": "lvao_iframe",
+                  "frameBorder": "0",
+                  "scrolling": "yes",
+                  "allow": "geolocation; clipboard-write",
+                  "allowFullscreen": true,
+                  "title": "Longue vie aux objets",
+                  "style": "overflow: hidden; max-width: 100%; width: 100%; height: 700px;"
+                },
+                "expected": {
+                  "allow": "geolocation; clipboard-write",
+                  "allowFullscreen": true,
+                  "frameBorder": "0",
+                  "id": "lvao_iframe",
+                  "scrolling": "no",
+                  "src": "https://example.com?carte=1&action_list=acheter%7Crevendre%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cdonner%7Cechanger%7Creparer&epci_codes=200073146&epci_codes=200040442&epci_codes=245804497&limit=71",
+                  "style": "overflow: hidden; max-width: 100%; width: 100%; height: 700px;",
+                  "title": "Longue vie aux objets"
+                },
+                "message": "\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoStrictEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 1\u001b[39m\n\n\u001b[2m  Object {\u001b[22m\n\u001b[2m    \"allow\": \"geolocation; clipboard-write\",\u001b[22m\n\u001b[2m    \"allowFullscreen\": true,\u001b[22m\n\u001b[2m    \"frameBorder\": \"0\",\u001b[22m\n\u001b[2m    \"id\": \"lvao_iframe\",\u001b[22m\n\u001b[32m-   \"scrolling\": \"no\",\u001b[39m\n\u001b[31m+   \"scrolling\": \"yes\",\u001b[39m\n\u001b[2m    \"src\": \"https://example.com?carte=1&action_list=acheter%7Crevendre%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cdonner%7Cechanger%7Creparer&epci_codes=200073146&epci_codes=200040442&epci_codes=245804497&limit=71\",\u001b[22m\n\u001b[2m    \"style\": \"overflow: hidden; max-width: 100%; width: 100%; height: 700px;\",\u001b[22m\n\u001b[2m    \"title\": \"Longue vie aux objets\",\u001b[22m\n\u001b[2m  }\u001b[22m",
+                "name": "toStrictEqual",
+                "pass": false
+              }
+            }
+          ],
+          "failureMessages": [
+            "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoStrictEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 1\u001b[39m\n\n\u001b[2m  Object {\u001b[22m\n\u001b[2m    \"allow\": \"geolocation; clipboard-write\",\u001b[22m\n\u001b[2m    \"allowFullscreen\": true,\u001b[22m\n\u001b[2m    \"frameBorder\": \"0\",\u001b[22m\n\u001b[2m    \"id\": \"lvao_iframe\",\u001b[22m\n\u001b[32m-   \"scrolling\": \"no\",\u001b[39m\n\u001b[31m+   \"scrolling\": \"yes\",\u001b[39m\n\u001b[2m    \"src\": \"https://example.com?carte=1&action_list=acheter%7Crevendre%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cdonner%7Cechanger%7Creparer&epci_codes=200073146&epci_codes=200040442&epci_codes=245804497&limit=71\",\u001b[22m\n\u001b[2m    \"style\": \"overflow: hidden; max-width: 100%; width: 100%; height: 700px;\",\u001b[22m\n\u001b[2m    \"title\": \"Longue vie aux objets\",\u001b[22m\n\u001b[2m  }\u001b[22m\n    at assertIframeAttributes (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/static/to_compile/tests/iframe_functions.test.ts:16:30)\n    at /Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/static/to_compile/tests/iframe_functions.test.ts:79:7\n    at Object.<anonymous> (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-each/build/bind.js:81:13)\n    at Promise.then.completed (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-circus/build/utils.js:298:28)\n    at new Promise (<anonymous>)\n    at callAsyncCircusFn (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-circus/build/utils.js:231:10)\n    at _callCircusTest (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-circus/build/run.js:316:40)\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at _runTest (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-circus/build/run.js:252:3)\n    at _runTestsForDescribeBlock (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-circus/build/run.js:126:9)\n    at _runTestsForDescribeBlock (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-circus/build/run.js:121:9)\n    at run (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-circus/build/run.js:71:3)\n    at runAndTransformResultsToJestFormat (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)\n    at jestAdapter (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)\n    at runTestInternal (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-runner/build/runTest.js:444:34)\n    at Object.worker (/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/node_modules/jest-runner/build/testWorker.js:106:12)"
+          ],
+          "fullName": "getIframeAttributesAndExtra function tests should generate correct iframe attributes with multiple EPCI codes",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "status": "failed",
+          "title": "should generate correct iframe attributes with multiple EPCI codes"
+        }
+      ],
+      "endTime": 1731512991201,
+      "message": "\u001b[1m\u001b[31m  \u001b[1m● \u001b[22m\u001b[1mgetIframeAttributesAndExtra function tests › should generate correct iframe attributes with bounding box\u001b[39m\u001b[22m\n\n    \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoStrictEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n    \u001b[32m- Expected  - 1\u001b[39m\n    \u001b[31m+ Received  + 1\u001b[39m\n\n    \u001b[2m  Object {\u001b[22m\n    \u001b[2m    \"allow\": \"geolocation; clipboard-write\",\u001b[22m\n    \u001b[2m    \"allowFullscreen\": true,\u001b[22m\n    \u001b[2m    \"frameBorder\": \"0\",\u001b[22m\n    \u001b[2m    \"id\": \"lvao_iframe\",\u001b[22m\n    \u001b[32m-   \"scrolling\": \"no\",\u001b[39m\n    \u001b[31m+   \"scrolling\": \"yes\",\u001b[39m\n    \u001b[2m    \"src\": \"https://example.com?carte=1&address_placeholder=toto%2Ctata&bounding_box=%7B%22southWest%22%3A%7B%22lat%22%3A48.916%2C%22lng%22%3A2.298202514648438%7D%2C%22northEast%22%3A%7B%22lat%22%3A48.98742568330284%2C%22lng%22%3A2.483596801757813%7D%7D&direction=jai\",\u001b[22m\n    \u001b[2m    \"style\": \"overflow: hidden; max-width: 100%; width: 100%; height: 700px;\",\u001b[22m\n    \u001b[2m    \"title\": \"Longue vie aux objets\",\u001b[22m\n    \u001b[2m  }\u001b[22m\n\u001b[2m\u001b[22m\n\u001b[2m    \u001b[0m \u001b[90m 14 |\u001b[39m   \u001b[36mconst\u001b[39m assertIframeAttributes \u001b[33m=\u001b[39m (iframeAttributes\u001b[33m:\u001b[39m any\u001b[33m,\u001b[39m expectedSrc\u001b[33m:\u001b[39m string) \u001b[33m=>\u001b[39m {\u001b[22m\n\u001b[2m     \u001b[90m 15 |\u001b[39m     expect(iframeAttributes\u001b[33m.\u001b[39msrc)\u001b[33m.\u001b[39mtoBe(expectedSrc)\u001b[33m;\u001b[39m\u001b[22m\n\u001b[2m    \u001b[31m\u001b[1m>\u001b[22m\u001b[2m\u001b[39m\u001b[90m 16 |\u001b[39m     expect(iframeAttributes)\u001b[33m.\u001b[39mtoStrictEqual({\u001b[22m\n\u001b[2m     \u001b[90m    |\u001b[39m                              \u001b[31m\u001b[1m^\u001b[22m\u001b[2m\u001b[39m\u001b[22m\n\u001b[2m     \u001b[90m 17 |\u001b[39m       allow\u001b[33m:\u001b[39m \u001b[32m\"geolocation; clipboard-write\"\u001b[39m\u001b[33m,\u001b[39m\u001b[22m\n\u001b[2m     \u001b[90m 18 |\u001b[39m       allowFullscreen\u001b[33m:\u001b[39m \u001b[36mtrue\u001b[39m\u001b[33m,\u001b[39m\u001b[22m\n\u001b[2m     \u001b[90m 19 |\u001b[39m       frameBorder\u001b[33m:\u001b[39m \u001b[32m\"0\"\u001b[39m\u001b[33m,\u001b[39m\u001b[0m\u001b[22m\n\u001b[2m\u001b[22m\n\u001b[2m      \u001b[2mat assertIframeAttributes (\u001b[22m\u001b[2m\u001b[0m\u001b[36mstatic/to_compile/tests/iframe_functions.test.ts\u001b[39m\u001b[0m\u001b[2m:16:30)\u001b[22m\u001b[2m\u001b[22m\n\u001b[2m      \u001b[2mat \u001b[22m\u001b[2m\u001b[0m\u001b[36mstatic/to_compile/tests/iframe_functions.test.ts\u001b[39m\u001b[0m\u001b[2m:79:7\u001b[22m\u001b[2m\u001b[22m\n\n\u001b[1m\u001b[31m  \u001b[1m● \u001b[22m\u001b[1mgetIframeAttributesAndExtra function tests › should generate correct iframe attributes with a single EPCI code\u001b[39m\u001b[22m\n\n    \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoStrictEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n    \u001b[32m- Expected  - 1\u001b[39m\n    \u001b[31m+ Received  + 1\u001b[39m\n\n    \u001b[2m  Object {\u001b[22m\n    \u001b[2m    \"allow\": \"geolocation; clipboard-write\",\u001b[22m\n    \u001b[2m    \"allowFullscreen\": true,\u001b[22m\n    \u001b[2m    \"frameBorder\": \"0\",\u001b[22m\n    \u001b[2m    \"id\": \"lvao_iframe\",\u001b[22m\n    \u001b[32m-   \"scrolling\": \"no\",\u001b[39m\n    \u001b[31m+   \"scrolling\": \"yes\",\u001b[39m\n    \u001b[2m    \"src\": \"https://example.com?carte=1&action_list=acheter%7Crevendre%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cdonner%7Cechanger%7Creparer&epci_codes=200073146&limit=71\",\u001b[22m\n    \u001b[2m    \"style\": \"overflow: hidden; max-width: 100%; width: 100%; height: 700px;\",\u001b[22m\n    \u001b[2m    \"title\": \"Longue vie aux objets\",\u001b[22m\n    \u001b[2m  }\u001b[22m\n\u001b[2m\u001b[22m\n\u001b[2m    \u001b[0m \u001b[90m 14 |\u001b[39m   \u001b[36mconst\u001b[39m assertIframeAttributes \u001b[33m=\u001b[39m (iframeAttributes\u001b[33m:\u001b[39m any\u001b[33m,\u001b[39m expectedSrc\u001b[33m:\u001b[39m string) \u001b[33m=>\u001b[39m {\u001b[22m\n\u001b[2m     \u001b[90m 15 |\u001b[39m     expect(iframeAttributes\u001b[33m.\u001b[39msrc)\u001b[33m.\u001b[39mtoBe(expectedSrc)\u001b[33m;\u001b[39m\u001b[22m\n\u001b[2m    \u001b[31m\u001b[1m>\u001b[22m\u001b[2m\u001b[39m\u001b[90m 16 |\u001b[39m     expect(iframeAttributes)\u001b[33m.\u001b[39mtoStrictEqual({\u001b[22m\n\u001b[2m     \u001b[90m    |\u001b[39m                              \u001b[31m\u001b[1m^\u001b[22m\u001b[2m\u001b[39m\u001b[22m\n\u001b[2m     \u001b[90m 17 |\u001b[39m       allow\u001b[33m:\u001b[39m \u001b[32m\"geolocation; clipboard-write\"\u001b[39m\u001b[33m,\u001b[39m\u001b[22m\n\u001b[2m     \u001b[90m 18 |\u001b[39m       allowFullscreen\u001b[33m:\u001b[39m \u001b[36mtrue\u001b[39m\u001b[33m,\u001b[39m\u001b[22m\n\u001b[2m     \u001b[90m 19 |\u001b[39m       frameBorder\u001b[33m:\u001b[39m \u001b[32m\"0\"\u001b[39m\u001b[33m,\u001b[39m\u001b[0m\u001b[22m\n\u001b[2m\u001b[22m\n\u001b[2m      \u001b[2mat assertIframeAttributes (\u001b[22m\u001b[2m\u001b[0m\u001b[36mstatic/to_compile/tests/iframe_functions.test.ts\u001b[39m\u001b[0m\u001b[2m:16:30)\u001b[22m\u001b[2m\u001b[22m\n\u001b[2m      \u001b[2mat \u001b[22m\u001b[2m\u001b[0m\u001b[36mstatic/to_compile/tests/iframe_functions.test.ts\u001b[39m\u001b[0m\u001b[2m:79:7\u001b[22m\u001b[2m\u001b[22m\n\n\u001b[1m\u001b[31m  \u001b[1m● \u001b[22m\u001b[1mgetIframeAttributesAndExtra function tests › should generate correct iframe attributes with multiple EPCI codes\u001b[39m\u001b[22m\n\n    \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoStrictEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n    \u001b[32m- Expected  - 1\u001b[39m\n    \u001b[31m+ Received  + 1\u001b[39m\n\n    \u001b[2m  Object {\u001b[22m\n    \u001b[2m    \"allow\": \"geolocation; clipboard-write\",\u001b[22m\n    \u001b[2m    \"allowFullscreen\": true,\u001b[22m\n    \u001b[2m    \"frameBorder\": \"0\",\u001b[22m\n    \u001b[2m    \"id\": \"lvao_iframe\",\u001b[22m\n    \u001b[32m-   \"scrolling\": \"no\",\u001b[39m\n    \u001b[31m+   \"scrolling\": \"yes\",\u001b[39m\n    \u001b[2m    \"src\": \"https://example.com?carte=1&action_list=acheter%7Crevendre%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cdonner%7Cechanger%7Creparer&epci_codes=200073146&epci_codes=200040442&epci_codes=245804497&limit=71\",\u001b[22m\n    \u001b[2m    \"style\": \"overflow: hidden; max-width: 100%; width: 100%; height: 700px;\",\u001b[22m\n    \u001b[2m    \"title\": \"Longue vie aux objets\",\u001b[22m\n    \u001b[2m  }\u001b[22m\n\u001b[2m\u001b[22m\n\u001b[2m    \u001b[0m \u001b[90m 14 |\u001b[39m   \u001b[36mconst\u001b[39m assertIframeAttributes \u001b[33m=\u001b[39m (iframeAttributes\u001b[33m:\u001b[39m any\u001b[33m,\u001b[39m expectedSrc\u001b[33m:\u001b[39m string) \u001b[33m=>\u001b[39m {\u001b[22m\n\u001b[2m     \u001b[90m 15 |\u001b[39m     expect(iframeAttributes\u001b[33m.\u001b[39msrc)\u001b[33m.\u001b[39mtoBe(expectedSrc)\u001b[33m;\u001b[39m\u001b[22m\n\u001b[2m    \u001b[31m\u001b[1m>\u001b[22m\u001b[2m\u001b[39m\u001b[90m 16 |\u001b[39m     expect(iframeAttributes)\u001b[33m.\u001b[39mtoStrictEqual({\u001b[22m\n\u001b[2m     \u001b[90m    |\u001b[39m                              \u001b[31m\u001b[1m^\u001b[22m\u001b[2m\u001b[39m\u001b[22m\n\u001b[2m     \u001b[90m 17 |\u001b[39m       allow\u001b[33m:\u001b[39m \u001b[32m\"geolocation; clipboard-write\"\u001b[39m\u001b[33m,\u001b[39m\u001b[22m\n\u001b[2m     \u001b[90m 18 |\u001b[39m       allowFullscreen\u001b[33m:\u001b[39m \u001b[36mtrue\u001b[39m\u001b[33m,\u001b[39m\u001b[22m\n\u001b[2m     \u001b[90m 19 |\u001b[39m       frameBorder\u001b[33m:\u001b[39m \u001b[32m\"0\"\u001b[39m\u001b[33m,\u001b[39m\u001b[0m\u001b[22m\n\u001b[2m\u001b[22m\n\u001b[2m      \u001b[2mat assertIframeAttributes (\u001b[22m\u001b[2m\u001b[0m\u001b[36mstatic/to_compile/tests/iframe_functions.test.ts\u001b[39m\u001b[0m\u001b[2m:16:30)\u001b[22m\u001b[2m\u001b[22m\n\u001b[2m      \u001b[2mat \u001b[22m\u001b[2m\u001b[0m\u001b[36mstatic/to_compile/tests/iframe_functions.test.ts\u001b[39m\u001b[0m\u001b[2m:79:7\u001b[22m\u001b[2m\u001b[22m\n",
+      "name": "/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/static/to_compile/tests/iframe_functions.test.ts",
+      "startTime": 1731512989701,
+      "status": "failed",
+      "summary": ""
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["SearchSolutionFormController"],
+          "duration": 57,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "SearchSolutionFormController default display jai or jecherche target",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 2,
+          "retryReasons": [],
+          "status": "passed",
+          "title": "default display jai or jecherche target"
+        },
+        {
+          "ancestorTitles": ["SearchSolutionFormController"],
+          "duration": 48,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "SearchSolutionFormController click jecherche option display jecherche target and hide advancedFilters",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 2,
+          "retryReasons": [],
+          "status": "passed",
+          "title": "click jecherche option display jecherche target and hide advancedFilters"
+        }
+      ],
+      "endTime": 1731512991406,
+      "message": "",
+      "name": "/Users/fabienlefrapper/Developer/beta.gouv.fr/quefairedemesobjets/static/to_compile/tests/choose_action_controller.test.ts",
+      "startTime": 1731512989700,
+      "status": "passed",
+      "summary": ""
+    }
+  ],
+  "wasInterrupted": false
+}
