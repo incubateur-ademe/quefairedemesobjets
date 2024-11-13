@@ -18,7 +18,7 @@ describe("getIframeAttributesAndExtra function tests", () => {
       allowFullscreen: true,
       frameBorder: "0",
       id: "lvao_iframe",
-      scrolling: "no",
+      scrolling: "yes",
       src: expectedSrc,
       style: "overflow: hidden; max-width: 100%; width: 100%; height: 700px;",
       title: "Longue vie aux objets",
