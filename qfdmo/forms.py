@@ -8,7 +8,7 @@ from django.utils.safestring import mark_safe
 from dsfr.forms import DsfrBaseForm
 
 from qfdmo.fields import EPCIField, GroupeActionChoiceField
-from qfdmo.geo_api import epcis_from, formatted_epcis
+from qfdmo.geo_api import epcis_from, formatted_epcis_as_list_of_tuple
 from qfdmo.models import DagRun, DagRunStatus, SousCategorieObjet
 from qfdmo.models.action import (
     Action,
@@ -378,7 +378,7 @@ class ConfiguratorForm(DsfrBaseForm):
         "les propositions de la liste.",
         # TODO: voir comment évaluer cela "lazily"
         # L'utilisation de lazy(all_epci_codes(...)) génère une erreur côté Django DSFR
-        choices=formatted_epcis(as_tuple=True),
+        choices=formatted_epcis_as_list_of_tuple(),
         widget=GenericAutoCompleteInput(
             attrs={"data-autocomplete-target": "hiddenInput", "class": "qfdmo-hidden"},
             extra_attrs={

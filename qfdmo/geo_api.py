@@ -1,6 +1,6 @@
 import itertools
 import logging
-from typing import List, Union, cast
+from typing import List, Tuple, Union, cast
 
 import requests
 from django.contrib.gis.geos import GEOSGeometry
@@ -15,17 +15,19 @@ logger = logging.getLogger(__name__)
 BASE_URL = "https://geo.api.gouv.fr"
 
 
-def formatted_epcis(as_tuple=False):
+def formatted_epcis_list() -> List[str]:
     formatted = [f"{nom} - {code}" for nom, code in epcis_from(["nom", "code"])]
-    if as_tuple:
-        return [(item, item) for item in formatted]
     return formatted
+
+
+def formatted_epcis_as_list_of_tuple() -> List[Tuple[str, str]]:
+    return [(item, item) for item in formatted_epcis_list()]
 
 
 def search_epci_code(query) -> List[str]:
     results = process.extract(
         query.lower(),
-        formatted_epcis(),
+        formatted_epcis_list(),
         scorer=fuzz.WRatio,
         limit=5,
     )
