@@ -65,7 +65,8 @@ module.exports = {
         "main-vh": "calc(100vh - var(--header-height))"
       },
       spacing: {
-        header: "var(--header-height)"
+        header: "var(--header-height)",
+        footer: "var(--footer-height)"
       },
       maxWidth: {
         readable: "80ch",

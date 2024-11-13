@@ -51,10 +51,8 @@
                         class="qfdmo-relative qfdmo-z-1
                             qfdmo-flex qfdmo-flex-col
                             max-md:qfdmo-fixed
-                            max-md:qfdmo-top-header
-                            max-md:qfdmo-bottom-0
-                            max-md:qfdmo-left-0
-                            max-md:qfdmo-right-0
+                            max-md:qfdmo-top-header max-md:qfdmo-bottom-footer
+                            max-md:qfdmo-left-0 max-md:qfdmo-right-0
                             data-[visible=true]:qfdmo-flex-grow
                             data-[visible=false]:qfdmo-invisible data-[visible=false]:qfdmo-h-0"
                         data-visible={{"true" if is_carte else "false"}}
@@ -93,7 +91,10 @@
                 {% include "qfdmo/carte/panels/acteur_detail.html" %}
             </aside>
 
-            <footer>
+            <footer
+                class="max-md:qfdmo-fixed
+                qfdmo-bottom-0 qfdmo-left-0 qfdmo-right-0"
+            >
             {% block content_footer %}
             {% endblock content_footer %}
             </footer>
