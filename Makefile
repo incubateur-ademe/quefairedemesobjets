@@ -78,11 +78,15 @@ createcachetable:
 
 .PHONY: createsuperuser
 createsuperuser:
-	$(DJANGO_ADMIN) createsuperuse
+	$(DJANGO_ADMIN) createsuperuser
 
 .PHONY: seed-database
 seed-database:
 	$(DJANGO_ADMIN) loaddata categories actions acteur_services acteur_types
+
+.PHONY: clear-cache
+clear-cache:
+	$(DJANGO_ADMIN) clear_cache --all
 
 # Dependencies management
 .PHONY: pip-update
