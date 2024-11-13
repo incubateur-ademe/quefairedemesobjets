@@ -12,6 +12,8 @@ db_cache = caches["database"]
 
 logger = logging.getLogger(__name__)
 
+BASE_URL = "https://geo.api.gouv.fr"
+
 
 def formatted_epcis(as_tuple=False):
     formatted = [f"{nom} - {code}" for nom, code in epcis_from(["nom", "code"])]
@@ -32,7 +34,7 @@ def search_epci_code(query) -> List[str]:
 
 def fetch_epci_codes() -> List[str]:
     """Retrieves EPCI codes from geo.api"""
-    response = requests.get("https://geo.api.gouv.fr/epcis/?fields=code,nom")
+    response = requests.get(f"{BASE_URL}/epcis/?fields=code,nom")
     return response.json()
 
 
@@ -62,7 +64,7 @@ def retrieve_epci_geojson(epci):
 
     def fetch_epci_bounding_box():
         response = requests.get(
-            f"https://geo.api.gouv.fr/epcis/{epci}?nom=Nan&fields=code,nom,contour"
+            f"{BASE_URL}/epcis/{epci}?nom=Nan&fields=code,nom,contour"
         )
         contour = response.json()["contour"]
         return contour
