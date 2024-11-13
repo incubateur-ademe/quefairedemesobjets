@@ -25,11 +25,12 @@ class ConfiguratorView(FormView):
 
     def get_initial(self) -> dict[str, Any]:
         """Populate the view with values passed as a querystring in the URL"""
+
+        initial = super().get_initial()
         for key in self.request.GET:
             if key in self.get_form_class()().fields:
-                self.initial[key] = self.request.GET.getlist(key)
-
-        return super().get_initial()
+                initial[key] = self.request.GET.getlist(key)
+        return initial
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -62,7 +63,8 @@ class ConfiguratorView(FormView):
                 querydict[key] = value
 
         return redirect(
-            f"{reverse("qfdmo:iframe_configurator")}?{querydict.urlencode()}"
+            f"{reverse("qfdmo:iframe_configurator")}?{querydict.urlencode()}",
+            permanent=False,
         )
 
     @property
