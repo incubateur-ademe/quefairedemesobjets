@@ -7,7 +7,10 @@ import numpy as np
 import pandas as pd
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from sqlalchemy import text
-from utils import api_utils, base_utils, mapping_utils, shared_constants
+from utils import base_utils
+from utils import logging_utils as log
+from utils import mapping_utils
+from utils import shared_constants as constants
 from utils.formatter import format_libelle_to_code
 
 logger = logging.getLogger(__name__)
@@ -15,18 +18,8 @@ logger = logging.getLogger(__name__)
 LABEL_TO_INGNORE = ["non applicable", "na", "n/a", "null", "aucun", "non"]
 
 
-def fetch_data_from_api(**kwargs):
-    params = kwargs["params"]
-    api_url = params["endpoint"]
-    logger.info(f"Fetching data from API : {api_url}")
-    data = api_utils.fetch_data_from_url(api_url)
-    logger.info("Fetching data from API done")
-    df = pd.DataFrame(data)
-    return df
-
-
-def load_data_from_postgresql(**kwargs):
-    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
+def db_read_propositions_max_id(**kwargs):
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo_django_db")
     engine = pg_hook.get_sqlalchemy_engine()
 
     # TODO : check if we need to manage the max id here
@@ -39,13 +32,13 @@ def load_data_from_postgresql(**kwargs):
     }
 
 
-def create_proposition_services(**kwargs):
-    df = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
-    data_dict = kwargs["ti"].xcom_pull(task_ids="load_data_from_postgresql")
+def propose_services(**kwargs):
+    df = kwargs["ti"].xcom_pull(task_ids="propose_acteur_changes")["df"]
+    data_dict = kwargs["ti"].xcom_pull(task_ids="db_read_propositions_max_id")
     displayedpropositionservice_max_id = data_dict["displayedpropositionservice_max_id"]
     rows_dict = {}
     merged_count = 0
-    actions_id_by_code = kwargs["ti"].xcom_pull(task_ids="read_action")
+    actions_id_by_code = kwargs["ti"].xcom_pull(task_ids="db_read_action")
 
     conditions = [
         ("point_dapport_de_service_reparation", "reparer"),
@@ -62,6 +55,7 @@ def create_proposition_services(**kwargs):
 
     for _, row in df.iterrows():
         acteur_id = row["identifiant_unique"]
+        # TODO: ne pas gérer la données avec des str |, cinder en liste dès la norma
         sous_categories = row["produitsdechets_acceptes"]
 
         for condition, action_name in conditions:
@@ -84,6 +78,8 @@ def create_proposition_services(**kwargs):
     rows_list = list(rows_dict.values())
 
     df_pds = pd.DataFrame(rows_list)
+    if df_pds.empty:
+        raise ValueError("df_pds est vide")
     if "sous_categories" in df_pds.columns:
         df_pds["sous_categories"] = df_pds["sous_categories"].replace(np.nan, None)
     if indexes := range(
@@ -95,31 +91,43 @@ def create_proposition_services(**kwargs):
         "number_of_merged_actors": merged_count,
         "number_of_propositionservices": len(df_pds),
     }
+    log.preview("df_pds retournée par la tâche", df_pds)
 
     return {"df": df_pds, "metadata": metadata}
 
 
-def create_proposition_services_sous_categories(**kwargs):
-    df = kwargs["ti"].xcom_pull(task_ids="create_proposition_services")["df"]
-    souscategorieobjet_code_by_id = kwargs["ti"].xcom_pull(
-        task_ids="read_souscategorieobjet"
-    )
+def propose_services_sous_categories(**kwargs):
+    df_ps = kwargs["ti"].xcom_pull(task_ids="propose_services")["df"]
+    souscats_id_by_code = kwargs["ti"].xcom_pull(task_ids="db_read_souscategorieobjet")
     params = kwargs["params"]
-    sous_categories_mapping = params.get("product_mapping", {})
+    product_mapping = params.get("product_mapping", {})
     rows_list = []
 
-    for _, row in df.iterrows():
-        sous_categories_value = (
-            str(row["sous_categories"]) if row["sous_categories"] else ""
-        )
-        products = [
-            sous_categorie.strip().lower()
-            for sous_categorie in sous_categories_value.split("|")
-            if sous_categorie.strip()
-        ]
-        for product in set(products):
-            if product in sous_categories_mapping:
-                sous_categories_value = sous_categories_mapping[product]
+    log.preview("df_ps", df_ps)
+    logger.info(df_ps.head(1).to_dict(orient="records"))
+    log.preview("souscats_id_by_code", souscats_id_by_code)
+    log.preview("product_mapping", product_mapping)
+
+    for _, row in df_ps.iterrows():
+        # TODO: à déplacer dans source_data_normalize
+        if isinstance(row["sous_categories"], str):
+            sous_categories_value = (
+                str(row["sous_categories"]) if row["sous_categories"] else ""
+            )
+            souscats = [
+                sous_categorie.strip().lower()
+                for sous_categorie in sous_categories_value.split("|")
+                if sous_categorie.strip()
+            ]
+        elif isinstance(row["sous_categories"], list):
+            souscats = row["sous_categories"]
+        else:
+            raise ValueError(
+                f"sous_categories: mauvais format {type(row['sous_categories'])}"
+            )
+        for souscat in set(souscats):
+            if souscat in product_mapping:
+                sous_categories_value = product_mapping[souscat]
                 if sous_categories_value is None:
                     continue
                 if isinstance(sous_categories_value, list):
@@ -127,9 +135,7 @@ def create_proposition_services_sous_categories(**kwargs):
                         rows_list.append(
                             {
                                 "propositionservice_id": row["id"],
-                                "souscategorieobjet_id": souscategorieobjet_code_by_id[
-                                    value
-                                ],
+                                "souscategorieobjet_id": souscats_id_by_code[value],
                                 "souscategorie": value,
                             }
                         )
@@ -137,35 +143,35 @@ def create_proposition_services_sous_categories(**kwargs):
                     rows_list.append(
                         {
                             "propositionservice_id": row["id"],
-                            "souscategorieobjet_id": souscategorieobjet_code_by_id[
+                            "souscategorieobjet_id": souscats_id_by_code[
                                 sous_categories_value
                             ],
                             "souscategorie": sous_categories_value,
                         }
                     )
             else:
-                raise Exception(
-                    f"Could not find mapping for sous categorie `{product}` in config"
-                )
+                raise Exception(f"Sous categorie `{souscat}` pas dans la config")
 
-    df_sous_categories = pd.DataFrame(
+    df_souscats = pd.DataFrame(
         rows_list,
         columns=["propositionservice_id", "souscategorieobjet_id", "souscategorie"],
     )
-
-    df_sous_categories.drop_duplicates(
+    log.preview("df_souscats créée par le mapping souscats", df_souscats)
+    logger.info(f"# entrées df_souscats avant nettoyage: {len(df_souscats)}")
+    df_souscats.drop_duplicates(
         ["propositionservice_id", "souscategorieobjet_id"], keep="first", inplace=True
     )
-    df_sous_categories = df_sous_categories[
-        df_sous_categories["souscategorieobjet_id"].notna()
-    ]
+    logger.info(f"# entrées df_souscats après suppression doublons: {len(df_souscats)}")
+    df_souscats = df_souscats[df_souscats["souscategorieobjet_id"].notna()]
+    logger.info(f"# entrées df_souscats après nettoyage des vides: {len(df_souscats)}")
+    if df_souscats.empty:
+        raise ValueError("df_souscats est vide")
+    return df_souscats
 
-    return df_sous_categories
 
-
-def serialize_to_json(**kwargs):
+def db_data_prepare(**kwargs):
     # Removed acteurs
-    df_acteur_to_delete = kwargs["ti"].xcom_pull(task_ids="get_acteur_to_delete")[
+    df_acteur_to_delete = kwargs["ti"].xcom_pull(task_ids="propose_acteur_to_delete")[
         "df_acteur_to_delete"
     ]
     update_actors_columns = ["identifiant_unique", "statut", "cree_le"]
@@ -173,18 +179,30 @@ def serialize_to_json(**kwargs):
         update_actors_columns
     ].apply(lambda row: json.dumps(row.to_dict(), default=str), axis=1)
     # Created or updated Acteurs
-    df_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
-    df_ps = kwargs["ti"].xcom_pull(task_ids="create_proposition_services")["df"]
-    df_pssc = kwargs["ti"].xcom_pull(
-        task_ids="create_proposition_services_sous_categories"
-    )
-    df_labels = kwargs["ti"].xcom_pull(task_ids="create_labels")
-    df_acteur_services = kwargs["ti"].xcom_pull(task_ids="create_acteur_services")
+    df_actors = kwargs["ti"].xcom_pull(task_ids="propose_acteur_changes")["df"]
+    df_ps = kwargs["ti"].xcom_pull(task_ids="propose_services")["df"]
+    df_pssc = kwargs["ti"].xcom_pull(task_ids="propose_services_sous_categories")
+    df_labels = kwargs["ti"].xcom_pull(task_ids="propose_labels")
+    df_acteur_services = kwargs["ti"].xcom_pull(task_ids="propose_acteur_services")
     df_acteur_services = (
         df_acteur_services
         if df_acteur_services is not None
         else pd.DataFrame(columns=["acteur_id", "acteurservice_id"])
     )
+
+    log.preview("df_acteur_to_delete", df_acteur_to_delete)
+    log.preview("df_actors", df_actors)
+    log.preview("df_ps", df_ps)
+    log.preview("df_pssc", df_pssc)
+    log.preview("df_labels", df_labels)
+    log.preview("df_acteur_services", df_acteur_services)
+
+    if df_actors.empty:
+        raise ValueError("df_actors est vide")
+    if df_ps.empty:
+        raise ValueError("df_ps est vide")
+    if df_pssc.empty:
+        raise ValueError("df_pssc est vide")
 
     aggregated_pdsc = (
         df_pssc.groupby("propositionservice_id")
@@ -273,41 +291,45 @@ def serialize_to_json(**kwargs):
         lambda row: json.dumps(row.to_dict(), default=str), axis=1
     )
     df_joined.drop_duplicates("identifiant_unique", keep="first", inplace=True)
+    log.preview("df_joined", df_joined)
+    log.preview("df_acteur_to_delete", df_acteur_to_delete)
 
     return {"all": {"df": df_joined}, "to_disable": {"df": df_acteur_to_delete}}
 
 
-def read_acteur(**kwargs):
+def db_read_acteur(**kwargs):
     source_code = kwargs["params"].get("source_code", None)
-    df_data_from_api = kwargs["ti"].xcom_pull(task_ids="fetch_data_from_api")
-    sources_id_by_code = kwargs["ti"].xcom_pull(task_ids="read_source")
+    df_normalized = kwargs["ti"].xcom_pull(task_ids="source_data_normalize")
+    sources_id_by_code = kwargs["ti"].xcom_pull(task_ids="db_read_source")
+    log.preview("df_normalized", df_normalized)
+    log.preview("sources_id_by_code", sources_id_by_code)
 
-    if source_code is None and "ecoorganisme" not in df_data_from_api.columns:
-        raise ValueError(
-            "No source code provided and no `ecoorganisme` column in the data"
-        )
+    # TODO: à déplacer dans la source_data_normalize
     if source_code:
         unique_source_ids = [sources_id_by_code[source_code]]
     else:
-        df_data_from_api["source_id"] = df_data_from_api["ecoorganisme"].map(
+        df_normalized["source_id"] = df_normalized["ecoorganisme"].map(
             sources_id_by_code
         )
-        unique_source_ids = df_data_from_api["source_id"].unique()
+        unique_source_ids = df_normalized["source_id"].unique()
 
-    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo_django_db")
     engine = pg_hook.get_sqlalchemy_engine()
     joined_source_ids = ",".join([f"'{source_id}'" for source_id in unique_source_ids])
     query = f"SELECT * FROM qfdmo_acteur WHERE source_id IN ({joined_source_ids})"
-
+    log.preview("Requête SQL pour df_acteur", query)
     df_acteur = pd.read_sql_query(query, engine)
-
+    logger.info(f"Nombre d'acteurs existants: {len(df_acteur)}")
+    if df_acteur.empty:
+        logger.warning("Aucun acteur trouvé: OK si 1ère fois qu'on ingère la source")
+    log.preview("df_acteur retourné par la tâche", df_acteur)
     return df_acteur
 
 
 def insert_dagrun_and_process_df(df_acteur_updates, metadata, dag_name, run_name):
     if df_acteur_updates.empty:
         return
-    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo_django_db")
     engine = pg_hook.get_sqlalchemy_engine()
     current_date = datetime.now()
 
@@ -334,7 +356,7 @@ def insert_dagrun_and_process_df(df_acteur_updates, metadata, dag_name, run_name
     # Insert dag_run_change
     df_acteur_updates["change_type"] = df_acteur_updates["event"]
     df_acteur_updates["dag_run_id"] = dag_run_id
-    df_acteur_updates["status"] = shared_constants.TO_VALIDATE
+    df_acteur_updates["status"] = constants.TO_VALIDATE
     df_acteur_updates[["row_updates", "dag_run_id", "change_type", "status"]].to_sql(
         "qfdmo_dagrunchange",
         engine,
@@ -348,22 +370,20 @@ def insert_dagrun_and_process_df(df_acteur_updates, metadata, dag_name, run_name
 def write_to_dagruns(**kwargs):
     dag_name = kwargs["dag"].dag_display_name or kwargs["dag"].dag_id
     run_id = kwargs["run_id"]
-    dfs = kwargs["ti"].xcom_pull(task_ids="serialize_to_json")
+    dfs = kwargs["ti"].xcom_pull(task_ids="db_data_prepare")
     metadata_actors = (
         kwargs["ti"]
-        .xcom_pull(task_ids="create_actors", key="return_value", default={})
+        .xcom_pull(task_ids="propose_acteur_changes", key="return_value", default={})
         .get("metadata", {})
     )
     metadata_acteur_to_delete = (
         kwargs["ti"]
-        .xcom_pull(task_ids="get_acteur_to_delete", key="return_value", default={})
+        .xcom_pull(task_ids="propose_acteur_to_delete", key="return_value", default={})
         .get("metadata", {})
     )
     metadata_pds = (
         kwargs["ti"]
-        .xcom_pull(
-            task_ids="create_proposition_services", key="return_value", default={}
-        )
+        .xcom_pull(task_ids="propose_services", key="return_value", default={})
         .get("metadata", {})
     )
 
@@ -437,11 +457,11 @@ def merge_duplicates(
     return df_final
 
 
-def create_actors(**kwargs):
-    df = kwargs["ti"].xcom_pull(task_ids="fetch_data_from_api")
-    acteurtype_id_by_code = kwargs["ti"].xcom_pull(task_ids="read_acteurtype")
-    sources_id_by_code = kwargs["ti"].xcom_pull(task_ids="read_source")
-    df_acteurs = kwargs["ti"].xcom_pull(task_ids="read_acteur")
+def propose_acteur_changes(**kwargs):
+    df = kwargs["ti"].xcom_pull(task_ids="source_data_normalize")
+    acteurtype_id_by_code = kwargs["ti"].xcom_pull(task_ids="db_read_acteurtype")
+    sources_id_by_code = kwargs["ti"].xcom_pull(task_ids="db_read_source")
+    df_acteurs = kwargs["ti"].xcom_pull(task_ids="db_read_acteur")
 
     params = kwargs["params"]
     source_code = params.get("source_code")
@@ -450,6 +470,17 @@ def create_actors(**kwargs):
     column_to_drop = params.get("column_to_drop", [])
     columns_to_add_by_default = params.get("columns_to_add_by_default", {})
     combine_columns_categories = params.get("combine_columns_categories")
+
+    log.preview("df (source_data_normalize)", df)
+    log.preview("acteurtype_id_by_code", acteurtype_id_by_code)
+    log.preview("sources_id_by_code", sources_id_by_code)
+    log.preview("df_acteurs", df_acteurs)
+    log.preview("source_code", source_code)
+    log.preview("label_bonus_reparation", label_bonus_reparation)
+    log.preview("column_mapping", column_mapping)
+    log.preview("column_to_drop", column_to_drop)
+    log.preview("columns_to_add_by_default", columns_to_add_by_default)
+    log.preview("combine_columns_categories", combine_columns_categories)
 
     if params.get("merge_duplicated_acteurs"):
         df = merge_duplicates(
@@ -471,6 +502,7 @@ def create_actors(**kwargs):
     if "service_a_domicile" in df.columns:
         df = df[df["service_a_domicile"].str.lower() != "oui exclusivement"]
 
+    # TODO: à déplacer dans la source_data_normalize
     # intersection of columns in df and column_to_drop
     column_to_drop = list(set(column_to_drop) & set(df.columns))
     df = df.drop(column_to_drop, axis=1)
@@ -499,7 +531,6 @@ def create_actors(**kwargs):
                         .str.replace(" ", "_")
                         .str.replace("__", "_")
                     )
-                # TODO: raise si l'identifiant unique n'est pas unique
                 df["identifiant_externe"] = df[old_col].astype(str)
 
             elif new_col == "statut":
@@ -566,11 +597,6 @@ def create_actors(**kwargs):
             axis=1,
         )
 
-    df["identifiant_unique"] = df.apply(
-        lambda x: mapping_utils.create_identifiant_unique(x, source_name=source_code),
-        axis=1,
-    )
-
     # On garde le cree_le de qfdmo_acteur
     df.drop(columns=["cree_le"], inplace=True, errors="ignore")
     df = df.merge(
@@ -609,7 +635,7 @@ def create_actors(**kwargs):
     metadata = {
         "number_of_duplicates": number_of_duplicates,
         "duplicate_ids": list(duplicate_ids),
-        "added_rows": len(df),
+        "acteurs_to_add_or_update": len(df),
     }
 
     df = df.drop_duplicates(subset="identifiant_unique", keep="first")
@@ -620,9 +646,11 @@ def create_actors(**kwargs):
     }
 
 
-def get_acteur_to_delete(**kwargs):
-    df_acteurs_for_source = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
-    df_acteurs_from_db = kwargs["ti"].xcom_pull(task_ids="read_acteur")
+def propose_acteur_to_delete(**kwargs):
+    df_acteurs_for_source = kwargs["ti"].xcom_pull(task_ids="propose_acteur_changes")[
+        "df"
+    ]
+    df_acteurs_from_db = kwargs["ti"].xcom_pull(task_ids="db_read_acteur")
 
     df_acteurs_from_db_actifs = df_acteurs_from_db[
         df_acteurs_from_db["statut"] == "ACTIF"
@@ -643,10 +671,10 @@ def get_acteur_to_delete(**kwargs):
     }
 
 
-def create_labels(**kwargs):
-    labelqualite_id_by_code = kwargs["ti"].xcom_pull(task_ids="read_labelqualite")
-    acteurtype_id_by_code = kwargs["ti"].xcom_pull(task_ids="read_acteurtype")
-    df_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
+def propose_labels(**kwargs):
+    labelqualite_id_by_code = kwargs["ti"].xcom_pull(task_ids="db_read_labelqualite")
+    acteurtype_id_by_code = kwargs["ti"].xcom_pull(task_ids="db_read_acteurtype")
+    df_actors = kwargs["ti"].xcom_pull(task_ids="propose_acteur_changes")["df"]
 
     # Get ESS constant values to use in in the loop
     ess_acteur_type_id = acteurtype_id_by_code["ess"]
@@ -689,9 +717,9 @@ def create_labels(**kwargs):
     return df_labels
 
 
-def create_acteur_services(**kwargs):
-    acteurservice_id_by_code = kwargs["ti"].xcom_pull(task_ids="read_acteurservice")
-    df_actors = kwargs["ti"].xcom_pull(task_ids="create_actors")["df"]
+def propose_acteur_services(**kwargs):
+    acteurservice_id_by_code = kwargs["ti"].xcom_pull(task_ids="db_read_acteurservice")
+    df_actors = kwargs["ti"].xcom_pull(task_ids="propose_acteur_changes")["df"]
 
     acteurservice_acteurserviceid = {
         "service_de_reparation": acteurservice_id_by_code["service_de_reparation"],

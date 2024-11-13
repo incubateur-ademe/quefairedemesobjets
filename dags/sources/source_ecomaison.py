@@ -4,7 +4,7 @@ from utils.eo_operators import default_args, eo_task_chain
 
 with DAG(
     dag_id="eo-ecomaison",
-    dag_display_name="Téléchargement de la source ECOMAISON",
+    dag_display_name="Source - ECOMAISON",
     default_args=default_args,
     description=(
         "A pipeline to fetch, process, and load to validate data into postgresql"

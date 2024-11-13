@@ -3,12 +3,12 @@ from utils.base_utils import get_mapping_config
 from utils.eo_operators import default_args, eo_task_chain
 
 with DAG(
-    dag_id="eo-ecosystem",
-    dag_display_name="Téléchargement de la source ECOSYSTEM",
+    dag_id="eo-aliapur",
+    dag_display_name="Source - ALIAPUR",
     default_args=default_args,
     description=(
         "A pipeline to fetch, process, and load to validate data into postgresql"
-        " for Ecosystem dataset"
+        " for Aliapur dataset"
     ),
     params={
         "column_mapping": {
@@ -28,17 +28,14 @@ with DAG(
             "longitudewgs84": "longitude",
             "latitudewgs84": "latitude",
         },
-        "column_to_drop": [
-            "siret",
-        ],
         "endpoint": (
             "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
-            "donnees-eo-ecosystem/lines?size=10000"
+            "donnees-eo-aliapur/lines?size=10000"
         ),
         "columns_to_add_by_default": {
             "statut": "ACTIF",
         },
-        "product_mapping": get_mapping_config(mapping_key="sous_categories_3eee"),
+        "product_mapping": get_mapping_config(),
     },
     schedule=None,
 ) as dag:

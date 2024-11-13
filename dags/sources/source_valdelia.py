@@ -3,12 +3,12 @@ from utils.base_utils import get_mapping_config
 from utils.eo_operators import default_args, eo_task_chain
 
 with DAG(
-    dag_id="eo-pyreo",
-    dag_display_name="Téléchargement de la source PYREO",
+    dag_id="eo-valdelia",
+    dag_display_name="Source - VALDELIA",
     default_args=default_args,
     description=(
         "A pipeline to fetch, process, and load to validate data into postgresql"
-        " for Pyreo dataset"
+        " for Valdelia dataset"
     ),
     params={
         "column_mapping": {
@@ -18,6 +18,8 @@ with DAG(
             "uniquement_sur_rdv": "uniquement_sur_rdv",
             "public_accueilli": "public_accueilli",
             "reprise": "reprise",
+            "siret": "siret",
+            "telephone": "telephone",
             "produitsdechets_acceptes": "",
             "labels_etou_bonus": "",
             "point_de_reparation": "",
@@ -28,17 +30,13 @@ with DAG(
             "longitudewgs84": "longitude",
             "latitudewgs84": "latitude",
         },
-        "columns_to_add_by_default": {
-            "type_de_point_de_collecte": (
-                "magasin / franchise, enseigne commerciale / distributeur /"
-                " point de vente"
-            ),
-            "statut": "ACTIF",
-        },
         "endpoint": (
             "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
-            "donnees-eo-pyreo/lines?size=10000"
+            "donnees-eo-valdelia/lines?size=10000"
         ),
+        "columns_to_add_by_default": {
+            "statut": "ACTIF",
+        },
         "product_mapping": get_mapping_config(),
     },
     schedule=None,

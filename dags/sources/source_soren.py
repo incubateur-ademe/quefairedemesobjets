@@ -3,12 +3,12 @@ from utils.base_utils import get_mapping_config
 from utils.eo_operators import default_args, eo_task_chain
 
 with DAG(
-    dag_id="eo-valdelia",
-    dag_display_name="Téléchargement de la source VALDELIA",
+    dag_id="eo-soren",
+    dag_display_name="Source - OREN",
     default_args=default_args,
     description=(
         "A pipeline to fetch, process, and load to validate data into postgresql"
-        " for Valdelia dataset"
+        " for Soren dataset"
     ),
     params={
         "column_mapping": {
@@ -18,8 +18,6 @@ with DAG(
             "uniquement_sur_rdv": "uniquement_sur_rdv",
             "public_accueilli": "public_accueilli",
             "reprise": "reprise",
-            "siret": "siret",
-            "telephone": "telephone",
             "produitsdechets_acceptes": "",
             "labels_etou_bonus": "",
             "point_de_reparation": "",
@@ -32,7 +30,7 @@ with DAG(
         },
         "endpoint": (
             "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
-            "donnees-eo-valdelia/lines?size=10000"
+            "donnees-eo-soren/lines?size=10000"
         ),
         "columns_to_add_by_default": {
             "statut": "ACTIF",

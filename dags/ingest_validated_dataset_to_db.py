@@ -28,7 +28,7 @@ dag = DAG(
 
 
 def _get_first_dagrun_to_insert():
-    hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
+    hook = PostgresHook(postgres_conn_id="qfdmo_django_db")
     # get first row from table qfdmo_dagrun with status TO_INSERT
     row = hook.get_first(
         f"SELECT * FROM qfdmo_dagrun WHERE status = '{shared_constants.TO_INSERT}'"
@@ -51,7 +51,7 @@ def fetch_and_parse_data(**context):
     row = _get_first_dagrun_to_insert()
     dag_run_id = row[0]
 
-    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo_django_db")
     engine = pg_hook.get_sqlalchemy_engine()
 
     df_sql = pd.read_sql_query(
@@ -91,7 +91,7 @@ def write_data_to_postgres(**kwargs):
     data_dict = kwargs["ti"].xcom_pull(task_ids="fetch_and_parse_data")
     # If data_set is empty, nothing to do
     dag_run_id = data_dict["dag_run_id"]
-    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo_django_db")
     engine = pg_hook.get_sqlalchemy_engine()
     if "actors" not in data_dict:
         with engine.begin() as connection:

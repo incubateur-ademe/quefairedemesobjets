@@ -41,6 +41,32 @@ def get_mapping_config(mapping_key: str = "sous_categories"):
     return config[mapping_key]
 
 
+def source_sinoe_dechet_mapping_get():
+    """Mapping de C_TYP_DECHET (ex: "01")
+    vers L_TYP_DECHET (ex: "Déchets de composés chimiques")
+    {
+    "total": 232,
+    "results": [
+        {
+        "_rand": 237210,
+        "C_TYP_DECHET": "01",
+        "_i": 1,
+        "NIV_HIER": 1,
+        "L_TYP_DECHET": "Déchets de composés chimiques",
+        "_score": null,
+        "_id": "4UbH7jVe1hc_lXPc0oWz9"
+        },
+    """
+    url = "https://data.ademe.fr/data-fair/api/v1/datasets/sinoe-r-nomenclature-dechets/lines?size=1000"
+    data = requests.get(url).json()
+    # Attention on a eu des renommage L_TYP_DECHET <-> LST_TYP_DECHET par le passé
+    # d'où le get sur les deux clés
+    return {
+        x["C_TYP_DECHET"]: x.get("L_TYP_DECHET", None) or x.get("LST_TYP_DECHET")
+        for x in data["results"]
+    }
+
+
 def get_address_from_ban(address):
     url = "https://api-adresse.data.gouv.fr/search/"
     params = {"q": address, "limit": 1}

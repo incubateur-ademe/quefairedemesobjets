@@ -3,12 +3,12 @@ from utils.base_utils import get_mapping_config
 from utils.eo_operators import default_args, eo_task_chain
 
 with DAG(
-    dag_id="eo-soren",
-    dag_display_name="Téléchargement de la source SOREN",
+    dag_id="eo-ecologic",
+    dag_display_name="Source - ECOLOGIC",
     default_args=default_args,
     description=(
         "A pipeline to fetch, process, and load to validate data into postgresql"
-        " for Soren dataset"
+        " for Ecologic dataset"
     ),
     params={
         "column_mapping": {
@@ -30,12 +30,13 @@ with DAG(
         },
         "endpoint": (
             "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
-            "donnees-eo-soren/lines?size=10000"
+            "donnees-eo-ecologic/lines?size=10000"
         ),
         "columns_to_add_by_default": {
             "statut": "ACTIF",
         },
-        "product_mapping": get_mapping_config(),
+        "merge_duplicated_acteurs": True,  # In case of multi ecoorganisme or filiere
+        "product_mapping": get_mapping_config(mapping_key="sous_categories_3eee"),
     },
     schedule=None,
 ) as dag:
