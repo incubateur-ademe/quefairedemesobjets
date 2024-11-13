@@ -86,7 +86,7 @@ seed-database:
 
 .PHONY: clear-cache
 clear-cache:
-	$(DJANGO_ADMIN) shell -c "from django.core.cache import caches; caches['database'].clear();"
+	$(DJANGO_ADMIN) clear_cache --all
 
 # Dependencies management
 .PHONY: pip-update

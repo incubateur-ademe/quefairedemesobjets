@@ -149,6 +149,7 @@ django==5.1.1 \
     #   django-cors-headers
     #   django-crispy-forms
     #   django-dsfr
+    #   django-extensions
     #   django-import-export
     #   django-ninja
     #   django-sql-explorer
@@ -164,6 +165,10 @@ django-crispy-forms==2.3 \
 django-dsfr==1.3.1 \
     --hash=sha256:c12bafe36ceb381b18fef47c5db1f0dc9fc62841594062caca8311d53fdd6a35 \
     --hash=sha256:d0b57923b25cfe7bf3313d2a8c73d89156679422b98cf07eb635bd0b2848a9d1
+    # via -r requirements.in
+django-extensions==3.2.3 \
+    --hash=sha256:44d27919d04e23b3f40231c4ab7af4e61ce832ef46d610cc650d53e68328410a \
+    --hash=sha256:9600b7562f79a92cbf1fde6403c04fee314608fefbb595502e34383ae8203401
     # via -r requirements.in
 django-import-export[xls,xlsx]==4.1.1 \
     --hash=sha256:16ecc5a9f0df46bde6eb278a3e65ebda0ee1db55656f36440e9fb83f40ab85a3 \

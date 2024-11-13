@@ -509,7 +509,6 @@ django==5.1.1 \
     #   -c requirements.txt
     #   django-browser-reload
     #   django-debug-toolbar
-    #   django-extensions
     #   django-stubs
     #   django-stubs-ext
 django-browser-reload==1.17.0 \
@@ -519,10 +518,6 @@ django-browser-reload==1.17.0 \
 django-debug-toolbar==4.4.6 \
     --hash=sha256:36e421cb908c2f0675e07f9f41e3d1d8618dc386392ec82d23bcfcd5d29c7044 \
     --hash=sha256:3beb671c9ec44ffb817fad2780667f172bd1c067dbcabad6268ce39a81335f45
-    # via -r dev-requirements.in
-django-extensions==3.2.3 \
-    --hash=sha256:44d27919d04e23b3f40231c4ab7af4e61ce832ef46d610cc650d53e68328410a \
-    --hash=sha256:9600b7562f79a92cbf1fde6403c04fee314608fefbb595502e34383ae8203401
     # via -r dev-requirements.in
 django-stubs==5.1.1 \
     --hash=sha256:126d354bbdff4906c4e93e6361197f6fbfb6231c3df6def85a291dae6f9f577b \
