@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 class ConfiguratorView(FormView):
     form_class = ConfiguratorForm
-    template_name = "qfdmo/iframe_configurator/base.html"
+    template_name = "qfdmo/configurator/base.html"
 
     def get_initial(self) -> dict[str, Any]:
         """Populate the view with values passed as a querystring in the URL"""
@@ -102,7 +102,7 @@ class ConfiguratorView(FormView):
 
 class AdvancedConfiguratorView(LoginRequiredMixin, FormView):
     form_class = AdvancedConfiguratorForm
-    template_name = "qfdmo/iframe_configurator/advanced.html"
+    template_name = "qfdmo/configurator/advanced.html"
 
     def get_initial(self):
         initial = super().get_initial()

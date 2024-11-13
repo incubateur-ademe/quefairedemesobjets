@@ -1,0 +1,13 @@
+{% extends "qfdmo/acteur/tabs/_panel.html" %}
+
+{% block id %}sourcesPanel{% endblock id %}
+
+{% block aria_labelledby %}sourcesPanel{% endblock aria_labelledby %}
+
+{% block content %}
+    {% with border=True %}
+        {% for source_or_label in object.sources.all() %}
+            {% include "qfdmo/acteur/_label.html" %}
+        {% endfor %}
+    {% endwith %}
+{% endblock content %}

@@ -71,6 +71,10 @@ migrate:
 makemigrations:
 	$(DJANGO_ADMIN) makemigrations
 
+.PHONY: merge-migrations
+merge-migrations:
+	$(DJANGO_ADMIN) makemigrations --merge
+
 
 .PHONY: createcachetable
 createcachetable:
@@ -83,6 +87,10 @@ createsuperuser:
 .PHONY: seed-database
 seed-database:
 	$(DJANGO_ADMIN) loaddata categories actions acteur_services acteur_types
+
+.PHONY: restore-prod
+restore-prod:
+	./scripts/restore_prod_locally.sh
 
 .PHONY: clear-cache
 clear-cache:
@@ -116,3 +124,10 @@ js-test:
 test:
 	@make unit-test
 	@make e2e-test
+
+# DSFR
+.PHONY: extract-dsfr
+extract-dsfr:
+	$(PYTHON) ./dsfr_hacks/extract_dsfr_colors.py
+	$(PYTHON) ./dsfr_hacks/extract_used_colors.py
+	$(PYTHON) ./dsfr_hacks/extract_used_icons.py

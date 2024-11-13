@@ -17,15 +17,45 @@ Including another URLconf
 
 from django.conf import settings
 from django.contrib import admin
+from django.contrib.sitemaps import GenericSitemap
+from django.contrib.sitemaps import views as sitemaps_views
 from django.urls import include, path
 
+from qfdmo.models.acteur import DisplayedActeur
+
 from .api import api
+
+info_dict = {
+    "queryset": DisplayedActeur.objects.all(),
+    "date_field": "modifie_le",
+}
+
+
+class PaginatedSitemap(GenericSitemap):
+    limit = 500
+
+
+sitemaps = {"items": PaginatedSitemap(info_dict, priority=1.0)}
+
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", api.urls),
     path("explorer/", include("explorer.urls")),
+    path(
+        "sitemap.xml",
+        sitemaps_views.index,
+        {"sitemaps": sitemaps},
+        name="django.contrib.sitemaps.views.index",
+    ),
+    path(
+        "sitemap-<section>.xml",
+        sitemaps_views.sitemap,
+        {"sitemaps": sitemaps},
+        name="django.contrib.sitemaps.views.sitemap",
+    ),
     path("", include(("qfdmo.urls", "qfdmo"), namespace="qfdmo")),
+    path("dsfr/", include(("dsfr_hacks.urls", "dsfr_hacks"), namespace="dsfr_hacks")),
 ]
 
 if settings.DEBUG:

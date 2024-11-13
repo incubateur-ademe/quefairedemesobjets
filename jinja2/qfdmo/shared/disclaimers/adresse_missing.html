@@ -1,0 +1,21 @@
+<div
+    class="qfdmo-absolute qfdmo-top-1w qfdmo-bottom-1w qfdmo-left-1w qfdmo-right-1w qfdmo-z-[4000]{% if address_ok %} qfdmo-hidden{% endif %} qfdmo-flex qfdmo-flex-row qfdmo-justify-center qfdmo-border qfdmo-border-grey-900 qfdmo-border-solid"
+    data-search-solution-form-target="addressMissing"
+>
+    <picture>
+        <source srcset="{{ static("map-background-mobile.png")}}" media="(orientation: portrait)">
+        <img
+            class="qfdmo-absolute qfdmo-left-0 qfdmo-right-0 qfdmo-top-0 qfdmo-bottom-0 qfdmo-w-full qfdmo-h-full qfdmo-object-cover"
+            src="{{ static("map-background-desktop.png")}}"
+            alt=""
+        >
+    </picture>
+    <div class="mx-auto qfdmo-max-w-3xl qfdmo-flex qfdmo-flex-col qfdmo-justify-center qfdmo-text-center qfdmo-items-center qfdmo-relative qfdmo-p-1w">
+        <h3 class="qfdmo-text-2xl sm:qfdmo-text-4xl qfdmo-text-center text-black qfdmo-mb-2w">
+            Découvrez les lieux près de chez vous
+            pour donner une seconde vie à votre objet !
+        </h3>
+        <p class="qfdmo-max-w-xl qfdmo-text-lg mx-auto qfdmo-text-grey-50">
+            Saisissez une adresse et recherchez des établissements à proximité qui vous aideront à remettre votre objet en circulation.</p>
+    </div>
+</div>

@@ -24,14 +24,3 @@ class TestDisplayAsIframe:
         assert b"R\xc3\xa9utiliser cette carte sur mon site" in response.content
         assert b"Participer \xc3\xa0 son am\xc3\xa9lioration" in response.content
         assert "longuevieauxobjets.ademe.fr" in str(response.content)
-
-    @pytest.mark.django_db
-    def test_display_as_no_iframe(self, client):
-        url = ""
-
-        response = client.get(url)
-
-        assert response.status_code == 200
-        assert 'class="fr-header' in str(response.content)
-        assert 'class="fr-footer' in str(response.content)
-        assert "Pour en savoir plus :" not in str(response.content)

@@ -1,0 +1,24 @@
+{% extends base_template %}
+
+{% block content %}
+<div class="fr-container qfdmo-py-2w">
+    <turbo-frame id="acteur-detail">
+        <article>
+            <header class="qfdmo-mb-2w">
+                {% if object.labels_display %}
+                    {% include "qfdmo/acteur/_labels.html" %}
+                {% endif %}
+
+                <h2 class="qfdmo-text-lg qfdmo-m-0 qfdmo-max-w-[90%]">{{ object.nom }}</h2>
+                <p class="qfdmo-text-sm qfdmo-m-0">
+                    {{ object.acteur_services_display }} {{ distance }}
+                </p>
+
+                {% include "qfdmo/acteur/tabs/_separator.html" %}
+                {% include "qfdmo/acteur/_actions.html" %}
+            </header>
+            {% include "qfdmo/acteur/_tabs.html" %}
+        </article>
+    </turbo-frame>
+</div>
+{% endblock content %}

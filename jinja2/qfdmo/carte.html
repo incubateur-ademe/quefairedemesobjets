@@ -1,0 +1,30 @@
+{% extends "qfdmo/shared/main.html" %}
+
+{% block form_controller_data_actions %}address-autocomplete:optionSelected->search-solution-form#advancedSubmit{% endblock form_controller_data_actions %}
+
+{% block form_header %}
+    {# Panel Header #}
+    {# TODO: refacto turbo, should be moved outside of form #}
+    {% include 'qfdmo/carte/header.html' %}
+{% endblock form_header %}
+
+{% block form_result %}
+    {{ super() }}
+    {# Panel «Legend» #}
+    {# TODO: refacto turbo, should be moved outside of form #}
+    {% include 'qfdmo/carte/panels/legend_mobile.html' %}
+{% endblock form_result %}
+
+{% block form_fields %}
+    {{ super() }}
+    {{ form.epci_codes }}
+{% endblock form_fields %}
+
+{% block form_modals %}
+    {# Panel «Filtres» #}
+    {% include 'qfdmo/carte/modals/filters.html' %}
+
+    {# Panel À propos #}
+    {# TODO: refacto turbo, should be moved outside of form #}
+    {% include 'qfdmo/carte/modals/a_propos.html' %}
+{% endblock form_modals %}

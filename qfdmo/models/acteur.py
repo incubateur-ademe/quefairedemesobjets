@@ -1,3 +1,4 @@
+import logging
 import random
 import string
 import uuid
@@ -13,11 +14,12 @@ from django.contrib.gis.geos import Point, Polygon
 from django.contrib.gis.geos.geometry import GEOSGeometry
 from django.core.cache import cache
 from django.core.files.images import get_image_dimensions
-from django.db.models import Exists, Min, OuterRef, Q
+from django.db.models import Case, Exists, Min, OuterRef, Q, Value, When
 from django.db.models.functions import Now
 from django.forms import ValidationError, model_to_dict
 from django.http import HttpRequest
 from django.urls import reverse
+from django.utils.functional import cached_property
 from unidecode import unidecode
 
 from qfdmo.models.action import Action, get_action_instances
@@ -28,6 +30,8 @@ from qfdmo.models.utils import (
     NomAsNaturalKeyModel,
 )
 from qfdmo.validators import CodeValidator
+
+logger = logging.getLogger(__name__)
 
 
 class ActeurService(CodeAsNaturalKeyModel):
@@ -196,7 +200,7 @@ class DisplayedActeurQuerySet(models.QuerySet):
 
     def digital(self):
         return (
-            self.filter(acteur_type_id=ActeurType.get_digital_acteur_type_id())
+            self.filter(acteur_type__code="acteur_digital")
             .annotate(min_action_order=Min("proposition_services__action__order"))
             .order_by("min_action_order", "?")
         )
@@ -318,20 +322,11 @@ class BaseActeur(NomAsNaturalKeyModel):
         null=True,
     )
 
-    def get_share_url(self, request: HttpRequest, direction: str | None = None) -> str:
-        protocol = "https" if request.is_secure() else "http"
-        host = request.get_host()
-        base_url = f"{protocol}://{host}"
-        base_url += reverse("qfdmo:adresse_detail", args=[self.identifiant_unique])
-
-        params = []
-        if "carte" in request.GET:
-            params.append("carte=1")
-        elif "iframe" in request.GET:
-            params.append("iframe=1")
-        if direction:
-            params.append(f"direction={direction}")
-        return f"{base_url}?{'&'.join(params)}"
+    @property
+    def change_url(self):
+        return reverse(
+            "admin:qfdmo_displayedacteur_change", args=[self.identifiant_unique]
+        )
 
     @property
     def latitude(self):
@@ -349,18 +344,66 @@ class BaseActeur(NomAsNaturalKeyModel):
     def is_digital(self) -> bool:
         return self.acteur_type_id == ActeurType.get_digital_acteur_type_id()
 
-    def get_acteur_services(self) -> list[str]:
-        return sorted(
-            list(
-                set(
-                    [
-                        acteur_service.libelle
-                        for acteur_service in self.acteur_services.all()
-                        if acteur_service.libelle
-                    ]
+    @cached_property
+    def sorted_proposition_services(self):
+        proposition_services = (
+            self.proposition_services.all()
+            .prefetch_related("sous_categories")
+            .select_related("action", "action__groupe_action")
+        )
+        order = ["action__groupe_action__order", "action__order"]
+
+        if action_principale := self.action_principale:
+            proposition_services = proposition_services.annotate(
+                action_principale=Case(
+                    When(action__id=action_principale.id, then=Value(0)),
+                    default=Value(1),
                 )
             )
+            order = ["action_principale", *order]
+
+        return proposition_services.order_by(*order)
+
+    @cached_property
+    def sorted_acteur_services_libelles(self) -> list[str]:
+        return list(
+            self.acteur_services.exclude(libelle=None)
+            .order_by("libelle")
+            .values_list("libelle", flat=True)
+            .distinct()
         )
+
+    @cached_property
+    def acteur_services_display(self):
+        return ", ".join(self.sorted_acteur_services_libelles)
+
+    @cached_property
+    def modifie_le_display(self):
+        return self.modifie_le.strftime("%d/%m/%Y")
+
+    @cached_property
+    def labels_enseigne_display(self):
+        return self.labels_display.filter(type_enseigne=True)
+
+    @cached_property
+    def labels_without_enseigne_display(self):
+        return self.labels_display.exclude(type_enseigne=True)
+
+    @cached_property
+    def labels_display(self):
+        """
+        On retourne une liste de labels qualité.
+        Dans la plupart des cas on ne retournera qu'un label, une future évolution
+        va intégrer la gestion des labels multiples.
+
+        La spec suivie est la suivante :
+            - Si l'acteur dispose du bonus réparation : on l'affiche
+        """
+        return self.labels.filter(afficher=True).order_by("-bonus", "type_enseigne")
+
+    @cached_property
+    def is_bonus_reparation(self):
+        return self.labels.filter(afficher=True, bonus=True).exists()
 
     def proposition_services_by_direction(self, direction: str | None = None):
         if direction:
@@ -565,13 +608,16 @@ class DisplayedActeur(BaseActeur):
         related_name="displayed_acteurs",
     )
 
+    def get_absolute_url(self):
+        return reverse("qfdmo:acteur-detail", args=[self.identifiant_unique])
+
     def acteur_actions(self, direction=None):
         ps_action_ids = list(
             {ps.action_id for ps in self.proposition_services.all()}  # type: ignore
         )
         # Cast needed because of the cache
         cached_action_instances = cast(
-            List[Action], cache.get_or_set("action_instances", get_action_instances)
+            List[Action], cache.get_or_set("_action_instances", get_action_instances)
         )
         return [
             action
@@ -625,7 +671,22 @@ class DisplayedActeur(BaseActeur):
 
         return orjson.dumps(acteur_dict).decode("utf-8")
 
-    def display_postal_address(self) -> bool:
+    def get_share_url(self, request: HttpRequest, direction: str | None = None) -> str:
+        protocol = "https" if request.is_secure() else "http"
+        host = request.get_host()
+        base_url = f"{protocol}://{host}{self.get_absolute_url()}"
+
+        params = []
+        if "carte" in request.GET:
+            params.append("carte=1")
+        elif "iframe" in request.GET:
+            params.append("iframe=1")
+        if direction:
+            params.append(f"direction={direction}")
+        return f"{base_url}?{'&'.join(params)}"
+
+    @cached_property
+    def should_display_adresse(self) -> bool:
         return bool(
             self.adresse or self.adresse_complement or self.code_postal or self.ville
         )
@@ -717,6 +778,12 @@ class BasePropositionService(models.Model):
     sous_categories = models.ManyToManyField(
         SousCategorieObjet,
     )
+
+    @cached_property
+    def sous_categories_display(self):
+        return ", ".join(
+            self.sous_categories.order_by("libelle").values_list("libelle", flat=True)
+        )
 
     def __str__(self):
         return f"{self.action.code}"

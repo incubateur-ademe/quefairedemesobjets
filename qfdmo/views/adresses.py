@@ -18,6 +18,7 @@ from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_GET
 from django.views.generic.edit import FormView
 
+from core.jinja2_handler import distance_to_acteur
 from core.utils import get_direction
 from qfdmo.forms import CarteForm, FormulaireForm
 from qfdmo.geo_api import bbox_from_list_of_geojson, retrieve_epci_geojson
@@ -47,7 +48,15 @@ logger = logging.getLogger(__name__)
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
 
 
-class TurboFormView(FormView):
+class DigitalMixin:
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(is_digital=self.request.GET.get("digital") == "1")
+
+        return context
+
+
+class TurboFormMixin:
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
         self.turbo = request.headers.get("Turbo-Frame")
@@ -55,16 +64,40 @@ class TurboFormView(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.turbo:
-            context.update(turbo=self.turbo)
-            context.update(base_template="layout/turbo.html")
+            context.update(turbo=True, base_template="layout/turbo.html")
         else:
             context.update(base_template="layout/base.html")
 
         return context
 
 
-class CarteView(TurboFormView, FormView):
-    template_name = "qfdmo/carte/base.html"
+class IframeMixin:
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        self.is_carte = "carte" in request.GET
+        self.is_iframe = "iframe" in request.GET
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(
+            is_carte=self.is_carte,
+            is_iframe=self.is_iframe,
+        )
+
+        return context
+
+    @property
+    def is_embedded(self):
+        return self.is_carte or self.is_iframe
+
+
+class CarteView(
+    DigitalMixin,
+    TurboFormMixin,
+    IframeMixin,
+    FormView,
+):
+    template_name = "qfdmo/carte.html"
 
     def get_initial(self):
         initial = super().get_initial()
@@ -118,8 +151,6 @@ class CarteView(TurboFormView, FormView):
 
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
-
-        self.is_carte = request.GET.get("carte") is not None
         if self.is_carte:
             self.form_class = CarteForm
         else:
@@ -214,7 +245,7 @@ class CarteView(TurboFormView, FormView):
         acteurs = self._acteurs_from_sous_categorie_objet_and_actions()
 
         if self.get_data_from_request_or_bounded_form("digital") == "1":
-            acteurs = acteurs.digital()
+            acteurs = acteurs.digital()[:100]
         else:
             bbox, acteurs = self._bbox_and_acteurs_from_location_or_epci(acteurs)
             acteurs = acteurs[: self._get_max_displayed_acteurs()]
@@ -511,11 +542,9 @@ class CarteView(TurboFormView, FormView):
         for [groupe, groupe_displayed_actions] in groupe_with_displayed_actions:
             libelle = ""
             if groupe.icon:
-                # Les classes qfdmo- ci-dessous doivent être ajoutées à la safelist
-                # Tailwind dans tailwind.config.js
                 libelle = (
                     f'<span class="fr-px-1v qfdmo-text-white {groupe.icon}'
-                    f' fr-icon--sm qfdmo-rounded-full qfdmo-bg-{groupe.couleur}"'
+                    f' fr-icon--sm qfdmo-rounded-full qfdmo-bg-{groupe.border}"'
                     ' aria-hidden="true"></span>'
                 )
             libelles: List[str] = []
@@ -589,7 +618,12 @@ def get_object_list(request):
     )
 
 
-def adresse_detail(request, identifiant_unique):
+def acteur_detail(request, identifiant_unique):
+    base_template = "layout/base.html"
+
+    if request.headers.get("Turbo-Frame"):
+        base_template = "layout/turbo.html"
+
     latitude = request.GET.get("latitude")
     longitude = request.GET.get("longitude")
     direction = request.GET.get("direction")
@@ -601,25 +635,34 @@ def adresse_detail(request, identifiant_unique):
         "labels",
         "sources",
     ).get(identifiant_unique=identifiant_unique)
+    context = {
+        "base_template": base_template,
+        "object": displayed_acteur,  # We can use object here so that switching
+        # to a DetailView later will not required a template update
+        "latitude": latitude,
+        # TODO: remove when this view will be migrated to a class-based view
+        "is_embedded": "carte" in request.GET or "iframe" in request.GET,
+        "longitude": longitude,
+        "direction": direction,
+        "distance": distance_to_acteur(request, displayed_acteur),
+        "display_labels_panel": bool(
+            displayed_acteur.labels.filter(afficher=True, type_enseigne=False).count()
+        ),
+        "display_sources_panel": bool(
+            displayed_acteur.sources.filter(afficher=True).count()
+        ),
+        "is_carte": "carte" in request.GET,
+    }
 
-    return render(
-        request,
-        "qfdmo/adresse_detail.html",
-        {
-            "adresse": displayed_acteur,
-            "latitude": latitude,
-            "longitude": longitude,
-            "direction": direction,
-            "display_labels_panel": bool(
-                displayed_acteur.labels.filter(
-                    afficher=True, type_enseigne=False
-                ).count()
-            ),
-            "display_sources_panel": bool(
-                displayed_acteur.sources.filter(afficher=True).count()
-            ),
-        },
-    )
+    if latitude and longitude and not displayed_acteur.is_digital:
+        context.update(
+            itineraire_url="https://www.google.com/maps/dir/?api=1&origin="
+            f"{latitude},{ longitude }"
+            f"&destination={ displayed_acteur.latitude },"
+            f"{ displayed_acteur.longitude }&travelMode=WALKING"
+        )
+
+    return render(request, "qfdmo/acteur.html", context)
 
 
 def solution_admin(request, identifiant_unique):

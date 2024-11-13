@@ -1,24 +1,40 @@
 <div class='fr-container
             qfdmo-px-0
-            qfdmo-absolute qfdmo-z-[10010] qfdmo-top-auto qfdmo-hidden qfdmo-mt-auto qfdmo-h-[95%]
-            qfdmo-drop-shadow-[0_0_100px_rgba(0,0,0,0.5)]
+            qfdmo-fixed qfdmo-z-50 qfdmo-top-auto qfdmo-left-0 qfdmo-right-0 qfdmo-mt-auto
+            qfdmo-h-[90vh] qfdmo-h-[90svh] {# Keep both values help keep support for vh in firefox #}
             qfdmo-inset-0 qfdmo-font-black qfdmo-bg-white
-            qfdmo-flex-col
-            qfdmo-fill-mode-forwards
-            data-[visible=true]:qfdmo-animate-in
-            data-[visible=true]:qfdmo-flex
-            data-[visible=true]:qfdmo-slide-in-from-bottom-9w
-            data-[visible=exit]:qfdmo-flex
+            qfdmo-flex qfdmo-flex-col
+            qfdmo-overflow-scroll
+            qfdmo-origin-bottom
+            qfdmo-drop-shadow-[0_0_100px_#5555]
+            data-[visible=false]:qfdmo-hidden
+            data-[visible=true]:qfdmo-animate-modal-appear
             data-[visible=exit]:qfdmo-animate-out
-            data-[visible=exit]:qfdmo-slide-out-to-bottom-9w
             data-[visible=exit]:qfdmo-fade-out
            '
      data-visible="false"
      {% block wrapper_attrs %}
      {% endblock wrapper_attrs %}
 >
-    <div class="fr-container fr-container--fluid qfdmo-h-full">
-        {% block content %}
-        {% endblock content %}
+    <div class="fr-modal__header">
+    {% block modal_header %}
+    {% endblock modal_header %}
     </div>
+
+    <div class="fr-modal__content fr-text--normal qfdmo-font-normal">
+        <h2 class="qfdmo-text-center fr-h4">
+            {% block modal_title %}
+            {% endblock modal_title %}
+        </h2>
+        <hr>
+
+        {% block modal_content %}
+        {% endblock modal_content %}
+    </div>
+
+    <div class="fr-modal__footer qfdmo-flex qfdmo-flex-col empty:qfdmo-hidden">
+        {% block modal_footer %}
+        {% endblock modal_footer %}
+    </div>
+
 </div>

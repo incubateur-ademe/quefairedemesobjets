@@ -1,0 +1,20 @@
+{# Détail de l'adresse #}
+{# Barre visible en mobile uniquement #}
+<span
+    class="qfdmo-snap-start md:qfdmo-hidden qfdmo-block qfdmo-rounded-full qfdmo-w-12w qfdmo-h-1v qfdmo-bg-[#DFDFDF] qfdmo-my-2w qfdmo-mx-auto"
+></span>
+{# Content #}
+<div class="qfdmo-flex-grow qfdmo-relative qfdmo-snap-start">
+    {# Close button #}
+    <span
+        class="
+        qfdmo-cursor-pointer
+        fr-icon fr-icon-close-line
+        qfdmo-flex qfdmo-justify-end
+        qfdmo-absolute qfdmo-top-0 qfdmo-right-0
+        qfdmo-text-blue-france-sun-113-625"
+        data-action="click->search-solution-form#hideActeurDetailsPanel"
+    >
+    </span>
+    <turbo-frame id="acteur-detail"></turbo-frame>
+</div>

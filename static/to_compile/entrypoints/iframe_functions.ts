@@ -8,7 +8,7 @@ function compileIframeAttributes(
         src: `${baseUrl}?${urlParams.toString()}`,
         id: "lvao_iframe",
         frameBorder: "0",
-        scrolling: "no",
+        scrolling: "yes",
         allow: "geolocation; clipboard-write",
         allowFullscreen: true,
         title: "Longue vie aux objets",

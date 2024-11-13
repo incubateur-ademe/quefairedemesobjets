@@ -1,0 +1,34 @@
+{% extends "qfdmo/acteur/tabs/_section.html" %}
+
+{% block title %}
+Adresse
+{% endblock title %}
+
+{% block content %}
+<address class="qfdmo-not-italic">
+    {% if object.adresse %}
+        {{ object.adresse|title }}<br>
+    {% endif %}
+
+    {% if object.adresse_complement %}
+        {{ object.adresse_complement }}<br>
+    {% endif %}
+
+    {% if object.code_postal %}
+        {{ object.code_postal }}
+    {% endif %}
+
+    {% if object.ville %}
+        {{ object.ville|title }}
+    {% endif %}
+</address>
+
+{# TODO: Ce champ n'est pas implémenté. Lorsqu'il sera implémenté, adapter le nom du champ à celui utilisé en base de données. #}
+{% if object.services_a_domicile %}
+<div class="fr-highlight qfdmo-ml-0 qfdmo-pl-2w">
+    <p class="qfdmo-text-sm">
+    Cet établissement propose des services à domicile.
+    </p>
+</div>
+{% endif %}
+{% endblock content %}

@@ -1,0 +1,25 @@
+{% extends "qfdmo/acteur/tabs/_section.html" %}
+
+{% block wrapper_attrs %}id="bonus"{% endblock wrapper_attrs %}
+
+{% block title %}
+{# TODO : icone #}
+<span class="fr-icon qfdmo-mr-1w fr-icon-percent-line"></span>Éligible au bonus réparation
+{% endblock title %}
+
+{% block content %}
+<div>
+    Découvrez les réparations pour lesquelles vous pouvez bénéficier d'une aide et faites des économies.
+</div>
+
+<a
+    href="https://www.ecologie.gouv.fr/bonus-reparation"
+    target="_blank"
+    rel="noreferrer"
+    title="Bonus réparation - nouvelle fenêtre"
+    class="fr-link qfdmo-text-sm qfdmo-no-external-link-icon qfdmo-inline-flex qfdmo-gap-1w"
+>
+En savoir plus
+<span class="qfdmo-items-center fr-icon fr-icon-arrow-right-line fr-icon--sm"></span>
+</a>
+{% endblock content %}

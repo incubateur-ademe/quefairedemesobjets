@@ -1,22 +1,14 @@
 from typing import List, cast
 
+from colorfield.fields import ColorField
 from django.contrib.gis.db import models
 from django.core.cache import cache
 from django.db.models.query import QuerySet
 from django.forms import model_to_dict
+from django.utils.functional import cached_property
 
+from dsfr_hacks.colors import DSFRColors
 from qfdmo.models.utils import CodeAsNaturalKeyManager, CodeAsNaturalKeyModel
-
-COULEUR_FIELD_HELP_TEXT = """Couleur du badge à choisir dans le DSFR
-Couleurs disponibles : blue-france, green-tilleul-verveine, green-bourgeon,
-green-emeraude, green-menthe, green-archipel, blue-ecume, blue-cumulus, purple-glycine,
-pink-macaron, pink-tuile, yellow-tournesol, yellow-moutarde, orange-terre-battue,
-brown-cafe-creme, brown-caramel, brown-opera, beige-gris-galet, pink-tuile-850,
-green-menthe-850,green-bourgeon-850, yellow-moutarde-850, blue-ecume-850,
-green-menthe-sun-373,blue-cumulus-sun-368, orange-terre-battue-main-645,
-brown-cafe-creme-main-782, purple-glycine-main-494, green-menthe-main-548,
-brown-caramel-sun-425-hover
-"""
 
 
 class ActionDirection(CodeAsNaturalKeyModel):
@@ -51,6 +43,9 @@ class GroupeActionManager(CodeAsNaturalKeyManager):
         return GroupeActionQueryset(self.model, using=self._db)
 
 
+COLOR_PALETTE = list(DSFRColors.items())
+
+
 class GroupeAction(CodeAsNaturalKeyModel):
     objects = GroupeActionManager()
 
@@ -63,13 +58,36 @@ class GroupeAction(CodeAsNaturalKeyModel):
     afficher = models.BooleanField(default=True)
     description = models.CharField(max_length=255, null=True, blank=True)
     order = models.IntegerField(blank=False, null=False, default=0)
-    couleur = models.CharField(
-        max_length=255,
-        null=True,
-        blank=True,
-        default="yellow-tournesol",
-        help_text=COULEUR_FIELD_HELP_TEXT,
+    couleur = ColorField(
+        null=True, blank=True, default="#C3992A", max_length=255, choices=COLOR_PALETTE
     )
+
+    couleur_claire = ColorField(
+        null=True, blank=True, default="#C3992A", max_length=255, choices=COLOR_PALETTE
+    )
+
+    @cached_property
+    def border(self):
+        return next(
+            (
+                key
+                for key, value in DSFRColors.items()
+                if value.lower() == self.couleur.lower()
+            ),
+            None,
+        )
+
+    @cached_property
+    def background(self):
+        return next(
+            (
+                key
+                for key, value in DSFRColors.items()
+                if value.lower() == self.couleur_claire.lower()
+            ),
+            None,
+        )
+
     icon = models.CharField(
         max_length=255,
         null=True,
@@ -100,12 +118,14 @@ class Action(CodeAsNaturalKeyModel):
     description = models.CharField(max_length=255, null=True, blank=True)
     order = models.IntegerField(blank=False, null=False, default=0)
     directions = models.ManyToManyField(ActionDirection, related_name="actions")
-    couleur = models.CharField(
-        max_length=255,
+    couleur = ColorField(
         null=True,
         blank=True,
-        default="yellow-tournesol",
-        help_text=COULEUR_FIELD_HELP_TEXT,
+        default="#C3992A",
+        max_length=255,
+        choices=COLOR_PALETTE,
+        help_text="Cette couleur est utilisée uniquement pour"
+        " la version formulaire (épargnons).",
     )
     icon = models.CharField(
         max_length=255,
@@ -120,6 +140,21 @@ class Action(CodeAsNaturalKeyModel):
         null=True,
         blank=True,
     )
+
+    @cached_property
+    def border(self):
+        return self.background
+
+    @cached_property
+    def background(self):
+        return next(
+            (
+                key
+                for key, value in DSFRColors.items()
+                if value.lower() == self.couleur.lower()
+            ),
+            None,
+        )
 
     def __str__(self):
         return self.libelle
@@ -143,10 +178,11 @@ def get_groupe_action_instances() -> QuerySet[GroupeAction]:
 
 
 def get_actions_by_direction() -> dict:
+    # TODO: refactor to not use a dict anymore
     return {
         d.code: sorted(
             [
-                model_to_dict(a, exclude=["directions"])
+                {**model_to_dict(a, exclude=["directions"]), "background": a.background}
                 for a in d.actions.filter(afficher=True)
             ],
             key=lambda x: x["order"],

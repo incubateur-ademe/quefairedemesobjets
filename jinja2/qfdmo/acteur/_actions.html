@@ -1,0 +1,24 @@
+<div
+    class="qfdmo-flex qfdmo-justify-start qfdmo-space-x-5w"
+>
+    {% if itineraire_url %}
+        {% with text="Itinéraire",url=itineraire_url,icon="fr-icon-send-plane-line" %}
+            {% include "qfdmo/acteur/_action.html" %}
+        {% endwith %}
+    {% endif %}
+
+    {% if object.url %}
+        {% with text="Site web",url=object.url,icon="fr-icon-global-line",extra_classes="fr-btn--secondary-light" %}
+            {% include "qfdmo/acteur/_action.html" %}
+        {% endwith %}
+    {% endif %}
+
+    {% if object.telephone %}
+        {% with text="Téléphone",tel=object.telephone,icon="fr-icon-phone-line",extra_classes="fr-btn--secondary-light md:qfdmo-hidden",mobile_only=True %}
+            {% include "qfdmo/acteur/_action_tel.html" %}
+        {% endwith %}
+    {% endif %}
+
+    {% include "qfdmo/acteur/_action_share.html" %}
+
+</div>

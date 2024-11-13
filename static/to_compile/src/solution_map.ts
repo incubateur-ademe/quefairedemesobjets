@@ -10,47 +10,6 @@ const DEFAULT_LOCATION: L.LatLngTuple = [46.227638, 2.213749]
 const DEFAULT_ZOOM: number = 5
 const DEFAULT_MAX_ZOOM: number = 19
 
-// TODO : handle directly from DSFR module
-const COLOR_MAPPING: object = {
-  "beige-gris-galet": "#AEA397",
-  "blue-cumulus-sun-368": "#3558A2",
-  "blue-cumulus": "#417DC4",
-  "blue-ecume-850": "#bfccfb",
-  "blue-ecume": "#465F9D",
-  "blue-france": "#0055FF",
-  "brown-cafe-creme-main-782": "#D1B781",
-  "brown-cafe-creme": "#D1B781",
-  "brown-caramel": "#C08C65",
-  "brown-opera": "#BD987A",
-  "green-archipel": "#009099",
-  "green-bourgeon-850": "#95e257",
-  "green-bourgeon": "#68A532",
-  "green-emeraude": "#00A95F",
-  "green-menthe-850": "#73e0cf",
-  "green-menthe-main-548": "#009081",
-  "green-menthe-sun-373": "#37635f",
-  "green-menthe": "#009081",
-  "green-tilleul-verveine": "#B7A73F",
-  "orange-terre-battue-main-645": "#E4794A",
-  "orange-terre-battue": "#E4794A",
-  "pink-macaron": "#E18B76",
-  "pink-tuile-850": "#fcbfb7",
-  "pink-tuile": "#CE614A",
-  "purple-glycine-main-494": "#A558A0",
-  "purple-glycine": "#A558A0",
-  "yellow-moutarde-850": "#fcc63a",
-  "yellow-moutarde": "#C3992A",
-  "yellow-tournesol": "#e9c53b",
-  "brown-caramel-sun-425-hover": "#bb8568"
-}
-
-function get_color_code(colorName: string): string {
-  if (colorName in COLOR_MAPPING) {
-    return COLOR_MAPPING[colorName]
-  }
-  return "#000"
-}
-
 export class SolutionMap {
   map: L.Map
   #zoomControl: L.Control.Zoom
@@ -108,13 +67,13 @@ export class SolutionMap {
     `
   }
 
-  #generateMarkerHTMLStringFrom(actor?: DisplayedActeur): string {
-    const markerHtmlStyles = `color: ${get_color_code(actor?.couleur || "")};`
-    const background = actor?.reparer ? pinBackgroundFillSvg : pinBackgroundSvg
-    const cornerIcon = actor?.bonus ? bonusIconSvg : ""
-    const icon = actor?.icon || "fr-icon-checkbox-circle-line"
+  #generateMarkerHTMLStringFrom(acteur?: DisplayedActeur): string {
+    const markerHtmlStyles = `color: ${acteur?.couleur};`
+    const background = acteur?.reparer ? pinBackgroundFillSvg : pinBackgroundSvg
+    const cornerIcon = acteur?.bonus ? bonusIconSvg : ""
+    const icon = acteur?.icon || "fr-icon-checkbox-circle-line"
     const markerIconClasses = `qfdmo-absolute qfdmo-top-[10] qfdmo-left-[10.5] qfdmo-margin-auto
-      ${icon} ${actor?.reparer ? "qfdmo-text-white" : ""}
+      ${icon} ${acteur?.reparer ? "qfdmo-text-white" : ""}
     `
     const htmlTree = [
       `<div data-animated class="qfdmo-scale-75">`,
@@ -132,7 +91,7 @@ export class SolutionMap {
     return htmlTree.join("")
   }
 
-  displayActor(actors: Array<DisplayedActeur>, bboxValue?: Array<Number>): void {
+  addActorMarkersToMap(actors: Array<DisplayedActeur>, bboxValue?: Array<Number>): void {
     const points: Array<Array<Number>> = []
     actors.forEach(function (actor: DisplayedActeur) {
       if (actor.location) {
@@ -191,7 +150,7 @@ export class SolutionMap {
   #onClickMarker(event: L.LeafletEvent) {
     clearActivePinpoints()
     event.target._icon.classList.add(ACTIVE_PINPOINT_CLASSNAME)
-    this.#controller.displayActorDetail(event.target._identifiant_unique)
+    window.location.hash = event.target._identifiant_unique
   }
 
   #manageZoomControl() {
