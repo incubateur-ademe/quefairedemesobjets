@@ -1,0 +1,62 @@
+{#
+We need to set a size on the map to help Leaflet size its content.
+We do not want the map to be bigger than the height of its container
+
+The values of 120px and 150px are determined empirically.
+They need to match the css variables used for .grid-map selector in qfdmo.css
+#}
+
+<div
+    class="
+    qfdmo-relative
+    qfdmo-flex-grow
+    qfdmo-shadow
+    "
+    {% if not is_digital %}
+    data-controller="map"
+    data-map-location-value="{{ location }}"
+    {% endif %}
+>
+    {% if is_digital %}
+        {% include "qfdmo/carte/_digital_results.html" %}
+    {% else %}
+        {# Near by addresses#}
+        {% include "qfdmo/carte/_search_in_zone.html" %}
+        <div
+            id="map"
+            class="qfdmo-inset-0 qfdmo-h-full qfdmo-relative qfdmo-z-0"
+            data-action="map:captureInteraction->analytics#captureInteractionWithMap"
+        >
+            {% if is_carte %}
+                <a class="qfdmo-flex lg:qfdmo-hidden
+                            qfdmo-bg-white
+                            fr-mb-1w fr-btn fr-btn--icon-left fr-icon-epingle-plus fr-btn--tertiary qfdmo-whitespace-nowrap qfdmo-w-auto qfdmo-justify-center
+                            qfdmo-absolute qfdmo-left-2w qfdmo-right-2w qfdmo-bottom-3w qfdmo-z-30"
+                    href="{{ url('qfdmo:address-suggestion-form') }}"
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="Proposer une adresse - Nouvelle fenêtre"
+                >
+                    Proposer une adresse
+                </a>
+            {% endif %}
+
+            {% if is_carte %}
+                {% include "qfdmo/carte/panels/legend.html" %}
+            {% endif %}
+
+            {% with address_ok=(form.initial.adresse or form.initial.bounding_box or acteurs) %}
+                {% include "qfdmo/shared/disclaimers/adresse_missing.html" %}
+                {% include "qfdmo/shared/disclaimers/no_local_solution.html" %}
+            {% endwith %}
+
+            {% for acteur in acteurs %}
+                <script type="application/json" data-map-target="acteur">
+                    {{ acteur.json_acteur_for_display(direction=form.initial.direction, action_list=form.initial.action_list, carte=carte) | safe }}
+                </script>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% include "qfdmo/shared/disclaimers/loading_solutions.html" %}
+</div>

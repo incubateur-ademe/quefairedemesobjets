@@ -1,0 +1,111 @@
+{% extends base_template %}
+
+{% block content %}
+<turbo-frame id="mapContainer">
+    {# Controleur général de gestion de la navigation et du formulaire #}
+    <form
+        id='search_form'
+        data-controller="search-solution-form"
+        data-search-solution-form-target="searchForm"
+        data-search-solution-form-is-iframe-value="{{ is_embedded }}"
+        data-turbo-frame="addressesPanel"
+        data-action="map:displayActeur->search-solution-form#displayActeur
+        map:updateBbox->search-solution-form#updateBboxInput
+        address-autocomplete:formSubmit->search-solution-form#advancedSubmit
+        ss-cat-object-autocomplete:formSubmit->search-solution-form#advancedSubmit
+        ss-cat-object-autocomplete:optionSelected->search-solution-form#checkSsCatObjetErrorForm
+        {% block form_controller_data_actions %}{% endblock form_controller_data_actions %}"
+        class="
+        qfdmo-h-full qfdmo-max-h-svh qfdmo-max-h-screen md:qfdmo-overflow-hidden
+        qfdmo-m-0
+        qfdmo-flex qfdmo-flex-col qfdmo-flex-auto
+        qfdmo-relative"
+    >
+        <section class="map-grid">
+            <header
+                class="max-md:qfdmo-sticky qfdmo-top-0
+                {% block header_classes %}qfdmo-z-20{% endblock header_classes %}
+                "
+            >
+                <div
+                    class="
+                    qfdmo-bg-white
+                    qfdmo-flex qfdmo-flex-row sm:qfdmo-items-center"
+                >
+                {% block form_header %}
+                {% endblock form_header %}
+                </div>
+            </header>
+
+            <main
+                class="
+                qfdmo-flex
+                max-md:qfdmo-h-main-svh
+                {# Is useful for digital view so that the users can scrol in the results #}
+                qfdmo-overflow-auto
+                "
+            >
+                {% block form_result %}
+                    <turbo-frame id="addressesPanel"
+                        data-search-solution-form-target="addressesPanel"
+                        class="qfdmo-relative qfdmo-z-10
+                            qfdmo-flex qfdmo-flex-col
+                            max-md:qfdmo-fixed
+                            max-md:qfdmo-top-header max-md:qfdmo-bottom-footer
+                            max-md:qfdmo-left-0 max-md:qfdmo-right-0
+                            data-[visible=true]:qfdmo-flex-grow
+                            data-[visible=false]:qfdmo-invisible data-[visible=false]:qfdmo-h-0"
+                        data-visible={{"true" if is_carte else "false"}}
+                        tabindex="0"
+                    >
+                        {% include 'qfdmo/shared/results.html' %}
+                    </turbo-frame>
+                {% endblock form_result %}
+
+                {% block form_fields %}
+                    {% include "qfdmo/partials/featureflip_inputs.html" %}
+                    {{ form.bounding_box }}
+                {% endblock form_fields %}
+            </main>
+
+            {# Part of this tag' style is defined in qfdmo.css because it would have been a bit unreadable as tailwind classes #}
+            <aside class="
+                qfdmo-relative qfdmo-z-30
+                aria-[hidden=false]:qfdmo-flex qfdmo-hidden qfdmo-flex-col
+                {% if is_carte %}md:qfdmo-h-[calc(100vh_-_120px)]{% else %}md:qfdmo-h-[calc(100vh_-_250px)]{% endif %}
+                max-md:qfdmo-snap-y md:qfdmo-overflow-scroll qfdmo-scroll-mt-[65vh]
+                max-md:qfdmo-snap-mandatory
+                qfdmo-bg-white
+                qfdmo-px-2w
+                max-md:qfdmo-drop-shadow-[0_0_100px_rgba(0,0,0,0.3)]
+                max-md:qfdmo-rounded-t-xl
+                aria-[hidden=true]:max-md:qfdmo-animate-out
+                aria-[hidden=true]:max-md:qfdmo-fade-out
+                aria-[hidden=true]:data-[exit-animation-ended=true]:qfdmo-hidden
+                aria-[hidden=false]:max-md:qfdmo-min-h-[calc(100vh_-_200px)]"
+            tabindex="0"
+            id="acteurDetailsPanel"
+            data-search-solution-form-target="acteurDetailsPanel"
+            aria-hidden="true"
+            >
+                {% include "qfdmo/carte/panels/acteur_detail.html" %}
+            </aside>
+
+            <footer
+                class="max-md:qfdmo-fixed
+                qfdmo-bottom-0 qfdmo-left-0 qfdmo-right-0"
+            >
+            {% block content_footer %}
+            {% endblock content_footer %}
+            </footer>
+        </section>
+
+        {% block form_modals %}
+        {% endblock form_modals %}
+    </form>
+</turbo-frame>
+{% endblock content %}
+
+{% block modals %}
+    {% include 'qfdmo/reparacteur_modale.html' %}
+{% endblock modals %}

@@ -1,0 +1,19 @@
+{# Migrate to django dsfr when jinja dropped #}
+<{% if href %}a href="{{ href }}"{% else %}p{% endif %}
+    class="fr-tag fr-tag--sm fr-tag--icon-left {{ icon }}"
+    {% if id %}data-testid="{{ id }}"{% endif %}
+>
+    {% if icon_image %}
+        <img
+            class="fr-mr-1w"
+            src="{{ icon_image.url }}"
+            alt="Ademe - Agence de la transition écologique"
+            class="qfdmo-cursor-pointer"
+            width=16
+            height=16
+        >
+    {% endif %}
+    <span>
+        {{ content }}
+    </span>
+</{% if href %}a{% else %}p{% endif %}>

@@ -1,0 +1,11 @@
+<div class="qfdmo-space-y-1w qfdmo-pb-1w" data-testid="acteur-detail-labels">
+    {% with label=object.labels_display.first() %}
+        {% if label.bonus %}
+            {% include "qfdmo/acteur/_labels/bonus.html" %}
+        {% elif object.labels_display.filter(type_enseigne=False).count() > 1 %}
+        {% include "qfdmo/acteur/_labels/multiple_labels.html" %}
+        {% else %}
+            {% include "qfdmo/acteur/_labels/generic.html" %}
+        {% endif %}
+    {% endwith %}
+</div>

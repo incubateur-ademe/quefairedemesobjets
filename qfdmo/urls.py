@@ -1,22 +1,22 @@
 from django.conf import settings
-from django.contrib.auth.views import LoginView
 from django.urls import path
 from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 
 from qfdmo.views.adresses import (
     CarteView,
-    adresse_detail,
+    acteur_detail,
     get_object_list,
     getorcreate_revisionacteur,
     solution_admin,
 )
+from qfdmo.views.auth import LVAOLoginView
 from qfdmo.views.configurator import AdvancedConfiguratorView, ConfiguratorView
 from qfdmo.views.dags import DagsValidation
 
 urlpatterns = [
     path("", CarteView.as_view(), name="reemploi_solution"),
-    path("connexion", LoginView.as_view(), name="login"),
+    path("connexion", LVAOLoginView.as_view(), name="login"),
     path(
         "donnez-votre-avis",
         RedirectView.as_view(
@@ -62,8 +62,9 @@ urlpatterns = [
     ),
     path(
         "adresse/<str:identifiant_unique>",
-        adresse_detail,
-        name="adresse_detail",
+        # ActeurView.as_view(),
+        acteur_detail,
+        name="acteur-detail",
     ),
     path(
         "solution_admin/<str:identifiant_unique>",

@@ -1,0 +1,45 @@
+{% extends "qfdmo/acteur/tabs/_panel.html" %}
+
+{% block id %}aboutPanel{% endblock id %}
+
+{% block aria_labelledby %}aboutPanel{% endblock aria_labelledby %}
+
+{% block content %}
+<div class="qfdmo-space-y-3v"
+    data-testid="acteur-detail-about-panel"
+>
+    {% if object.exclusivite_de_reprisereparation %}
+        {% include "qfdmo/acteur/tabs/sections/exclusivite_de_reprisereparation.html" %}
+    {% endif %}
+
+    {% if object.should_display_adresse %}
+        {% include "qfdmo/acteur/tabs/sections/adresse.html" %}
+    {% endif %}
+
+    {% if object.telephone %}
+        {% include "qfdmo/acteur/tabs/sections/telephone.html" %}
+    {% endif %}
+
+    {% if object.description %}
+        {% include "qfdmo/acteur/tabs/sections/description.html" %}
+    {% endif %}
+
+    {% if object.sorted_acteur_services_libelles %}
+        {% include "qfdmo/acteur/tabs/sections/services_disponibles.html" %}
+    {% endif %}
+
+    {% if object.is_bonus_reparation %}
+        {% include "qfdmo/acteur/tabs/sections/bonus.html" %}
+    {% endif %}
+
+    {% if object.horaires_description or object.uniquement_sur_rdv %}
+        {% include "qfdmo/acteur/tabs/sections/horaires.html" %}
+    {% endif %}
+
+    {% if object.labels_enseigne_display %}
+        {% include "qfdmo/acteur/tabs/sections/type_enseigne.html" %}
+    {% endif %}
+
+    {% include "qfdmo/acteur/tabs/sections/meta.html" %}
+</div>
+{% endblock content %}

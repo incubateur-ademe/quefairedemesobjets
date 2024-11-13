@@ -1,0 +1,11 @@
+{% extends "qfdmo/acteur/tabs/_section.html" %}
+
+{% block title %}
+Type{% if object.labels_enseigne_display|length > 1 %}s{% endif %} d'enseigne
+{% endblock title %}
+
+{% block content %}
+    {% for source_or_label in object.labels_enseigne_display %}
+        {% include "qfdmo/acteur/_label.html" %}
+    {% endfor %}
+{% endblock content %}

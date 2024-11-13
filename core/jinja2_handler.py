@@ -12,19 +12,8 @@ from qfdmo.models import DisplayedActeur
 from qfdmo.models.action import get_actions_by_direction
 
 
-def is_embedded(request: HttpRequest) -> bool:
-    return "iframe" in request.GET or "carte" in request.GET
-
-
-def is_carte(request: HttpRequest) -> bool:
-    return "carte" in request.GET
-
-
-def is_iframe(request: HttpRequest) -> bool:
-    return "iframe" in request.GET
-
-
 def action_by_direction(request: HttpRequest, direction: str):
+    # TODO: refactor to not use a dict anymore
     requested_direction = get_direction(request)
     action_displayed = request.GET.get("action_displayed", "")
     actions_to_display = get_actions_by_direction()[direction]
@@ -46,14 +35,6 @@ def action_by_direction(request: HttpRequest, direction: str):
 
 
 # TODO : should be deprecated and replaced by a value in context view
-def display_infos_panel(adresse: DisplayedActeur) -> bool:
-    return (
-        bool(adresse.horaires_description or adresse.display_postal_address())
-        and not adresse.is_digital
-    )
-
-
-# TODO : should be deprecated and replaced by a value in context view
 def display_exclusivite_reparation(acteur: DisplayedActeur) -> bool:
     return acteur.exclusivite_de_reprisereparation
 
@@ -62,19 +43,22 @@ def hide_object_filter(request) -> bool:
     return bool(request.GET.get("sc_id"))
 
 
-def distance_to_acteur(request, adresse):
-    long = request.GET.get("longitude")
-    lat = request.GET.get("latitude")
-    point = adresse.location
+def distance_to_acteur(request, acteur):
+    longitude = request.GET.get("longitude")
+    latitude = request.GET.get("latitude")
+    location = acteur.location
 
-    if long and lat and point and not adresse.is_digital:
-        dist = sqrt((point.y - float(lat)) ** 2 + (point.x - float(long)) ** 2) * 111320
-        return (
-            f"({str(round(dist/1000,1)).replace('.',',')} km)"
-            if dist >= 1000
-            else f"({round(dist/10)*10} m)"
-        )
-    return ""
+    if not (longitude and latitude and location and not acteur.is_digital):
+        return ""
+
+    distance_meters = (
+        sqrt((location.y - float(latitude)) ** 2 + (location.x - float(longitude)) ** 2)
+        * 111320
+    )
+    if distance_meters >= 1000:
+        return f"({round(distance_meters / 1000, 1)} km)".replace(".", ",")
+    else:
+        return f"({round(distance_meters/10) * 10 } m)"
 
 
 def environment(**options):
@@ -82,17 +66,12 @@ def environment(**options):
     env.globals.update(
         {
             "action_by_direction": action_by_direction,
-            "display_infos_panel": display_infos_panel,
             "hide_object_filter": hide_object_filter,
             "distance_to_acteur": distance_to_acteur,
             "display_exclusivite_reparation": display_exclusivite_reparation,
-            "is_embedded": is_embedded,
-            "is_iframe": is_iframe,
-            "is_carte": is_carte,
             "url": reverse,
             "static": static,
             "quote_plus": lambda u: quote_plus(u),
-            "ENVIRONMENT": settings.ENVIRONMENT,
             "AIRFLOW_WEBSERVER_REFRESHACTEUR_URL": (
                 settings.AIRFLOW_WEBSERVER_REFRESHACTEUR_URL
             ),

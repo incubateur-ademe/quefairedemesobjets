@@ -1,0 +1,23 @@
+<a
+    class="
+    qfdmo-flex qfdmo-flex-col qfdmo-items-center
+    qfdmo-bg-none qfdmo-no-external-link-icon
+    qfdmo-space-y-1v
+    {% if mobile_only %}
+    md:qfdmo-hidden
+    {% endif %}
+    "
+    href="{% block href %}{{ url }}{% endblock href %}"
+    {% if title %}title="{{ title }}"{% endif %}
+    target="_blank"
+    rel="noreferrer"
+    {% block data_action %}data_action="click -> analytics#captureInteractionWithSolutionDetails"{% endblock data_action %}
+>
+    <span class="
+        fr-btn fr-btn--sm
+        qfdmo-rounded-full
+        {% if icon %}{{ icon }}{% endif %}
+        {% if extra_classes %}{{ extra_classes }}{% endif %}">
+    </span>
+    <span class="fr-text--xs fr-mb-0 qfdmo-whitespace-nowrap">{{ text }}</span>
+</a>

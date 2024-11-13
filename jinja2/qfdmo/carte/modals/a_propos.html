@@ -1,0 +1,60 @@
+{% extends 'qfdmo/_addresses_partials/filters/_modal.html' %}
+
+{# Panel «À propos» #}
+{% block wrapper_attrs %}
+     data-search-solution-form-target="aProposMainPanel"
+{% endblock wrapper_attrs %}
+
+{% block modal_header %}
+<button
+    class="fr-btn fr-btn--close fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-close-line"
+    type="button"
+    data-action="click -> search-solution-form#toggleAPropos"
+>
+    Fermer
+</button>
+{% endblock modal_header %}
+
+{% block modal_title %}À propos de La Carte{% endblock modal_title %}
+
+{% block modal_content %}
+<div class="fr-card fr-enlarge-link fr-card--horizontal">
+    <div class="fr-card__body">
+        <div class="fr-card__content">
+            <h3 class="fr-card__title">
+                <a
+                    href="https://longuevieauxobjets.ademe.fr/reutiliser-nos-outils/?mtm_campaign=widget"
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="Réutiliser La Carte - Nouvelle fenêtre"
+                >
+                    Réutiliser La Carte
+                </a>
+            </h3>
+            <p class="fr-card__desc">
+                Et si vous ajoutiez cette carte à votre site ? Pour utiliser notre widget, c'est par ici !
+            </p>
+        </div>
+    </div>
+</div>
+<div class="fr-card fr-enlarge-link fr-card--horizontal fr-mt-2w">
+    <div class="fr-card__body">
+        <div class="fr-card__content">
+            <h3 class="fr-card__title">
+                <a
+                    href="{{ url('qfdmo:feedback-form') }}"
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="Donnez votre avis - Nouvelle fenêtre"
+                >
+                    Donner votre avis
+                </a>
+            </h3>
+            <p class="fr-card__desc">Cette carte doit-être la vôtre ! Si vous avez des idées pour l'améliorer, on vous écoute.</p>
+        </div>
+    </div>
+</div>
+<div class="qfdmo-flex">
+    {% include 'layout/_partials/header_logos.html' %}
+</div>
+{% endblock modal_content %}

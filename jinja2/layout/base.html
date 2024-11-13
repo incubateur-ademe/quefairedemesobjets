@@ -1,5 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr" class="qfdmo-scroll-smooth">
+<html
+    lang="fr"
+    class="qfdmo-scroll-smooth"
+    {% if not is_carte %}data-formulaire{% endif %}
+>
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -26,7 +30,7 @@
         <script src="{{ static('qfdmo.js') }}"></script>
         {% block javascript_extras %}{% endblock %}
 
-        {% if is_embedded(request) %}
+        {% if is_embedded %}
             <script src="{{ static('iframe_resizer.js') }}"></script>
         {% endif %}
     </head>
@@ -35,11 +39,12 @@
         class="qfdmo-flex qfdmo-flex-col"
         data-controller="analytics"
     >
-        {% if not is_embedded(request) %}
+        {% if not is_embedded %}
             {% block header %}
                 {% include "layout/header.html" %}
             {% endblock %}
         {% endif %}
+
         <main id="solutions">
             <noscript>
                 <div class="fr-container fr-my-3w">
@@ -58,37 +63,40 @@
             </div>
             {% block content %}{% endblock %}
         </main>
-        {% if not is_embedded(request) %}
+
+        {% if not is_embedded %}
             {% block footer %}
                 {% include "layout/footer.html" %}
             {% endblock %}
         {% endif %}
-        {% block js %}
-        {% endblock %}
-        {% if is_embedded(request) %}
-            <script
-                src="https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4.3.6/iframeResizer.contentWindow.js"
-                integrity="sha512-hBWsS94l8+snzSPo759jDKZ3z3jn3WT4snJZTBaeMPbrCGzDrYdl2pN9EaXjh6IqEZC7wF10qcmp42TPRVgAYQ=="
-                crossorigin="anonymous"
-                referrerpolicy="no-referrer"
-                defer
-            ></script>
-        {% endif %}
 
-        {% if request.user.is_authenticated %}
-            <script id="posthog-user">
+        {% block modals %}{% endblock modals %}
+        {% block js %}
+            {% if is_embedded %}
+                <script
+                    src="https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4.3.6/iframeResizer.contentWindow.js"
+                    integrity="sha512-hBWsS94l8+snzSPo759jDKZ3z3jn3WT4snJZTBaeMPbrCGzDrYdl2pN9EaXjh6IqEZC7wF10qcmp42TPRVgAYQ=="
+                    crossorigin="anonymous"
+                    referrerpolicy="no-referrer"
+                    defer
+                ></script>
+            {% endif %}
+
+            {% if request.user.is_authenticated %}
+                <script type="applicaton/json" id="posthog-user">
+                    {
+                        "username": "{{ request.user.username }}",
+                        "email": "{{ request.user.email }}",
+                        "admin": "{{ request.user.is_superuser|tojson }}"
+                    }
+                </script>
+            {% endif %}
+
+            <script type="application/json" id="posthog-infos">
                 {
-                    "username": "{{ request.user.username }}",
-                    "email": "{{ request.user.email }}",
-                    "admin": "{{ request.user.is_superuser|tojson }}"
+                    "iframe": "{{ is_embedded|tojson }}"
                 }
             </script>
-        {% endif %}
-        <script id="posthog-infos">
-            {
-                "iframe": "{{ is_embedded(request)|tojson }}"
-            }
-        </script>
-
+        {% endblock js %}
     </body>
 </html>

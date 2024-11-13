@@ -1,0 +1,13 @@
+{% extends "qfdmo/acteur/tabs/_panel.html" %}
+
+{% block id %}labelsPanel{% endblock id %}
+
+{% block aria_labelledby %}labelsPanel{% endblock aria_labelledby %}
+
+{% block content %}
+<div class="qfdmo-pt-1w">
+{% for source_or_label in object.labels_without_enseigne_display %}
+    {% include "qfdmo/acteur/_label.html" %}
+{% endfor %}
+</div>
+{% endblock content %}
