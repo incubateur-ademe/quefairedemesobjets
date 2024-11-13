@@ -16,7 +16,6 @@ module.exports = {
     "static/to_compile/**/*{j,t}s",
     "static/to_compile/**/*svg",
     "./**/forms.py",
-    "./dsfr_hacks/used_colors.js",
     "./dsfr_hacks/used_icons.js"
   ],
   prefix: "qfdmo-",
