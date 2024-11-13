@@ -1,5 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr" class="qfdmo-scroll-smooth">
+<html
+    lang="fr"
+    class="qfdmo-scroll-smooth"
+    {% if not is_carte %}data-formulaire{% endif %}
+>
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -32,7 +36,7 @@
     </head>
 
     <body
-        class="qfdmo-flex qfdmo-flex-col {% if not is_carte %}formulaire{% endif %}"
+        class="qfdmo-flex qfdmo-flex-col"
         data-controller="analytics"
     >
         {% if not is_embedded %}

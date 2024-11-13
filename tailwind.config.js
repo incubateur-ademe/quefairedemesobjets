@@ -59,6 +59,14 @@ module.exports = {
       "15w": "7.5rem",
     },
     extend: {
+      height: {
+        header: "var(--header-height)",
+        "main-svh": "calc(100svh - var(--header-height))",
+        "main-vh": "calc(100vh - var(--header-height))"
+      },
+      spacing: {
+        header: "var(--header-height)"
+      },
       maxWidth: {
         readable: "80ch",
         "120w": "60rem",
@@ -66,10 +74,6 @@ module.exports = {
       screens: {
         xs: "320px",
         xsm: "360px",
-      },
-      aria: {
-        // Remove when https://github.com/tailwindlabs/tailwindcss/pull/10966 in a release
-        busy: "busy=true",
       },
       minWidth: ({ theme }) => ({ ...theme("spacing") }),
       keyframes: {

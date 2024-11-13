@@ -24,28 +24,32 @@
         <section class="map-grid">
             <header
                 class="
-                qfdmo-bg-white
-                qfdmo-flex qfdmo-flex-row sm:qfdmo-items-center
-                qfdmo-z-20
-                {% block header_classes %}{% endblock header_classes %}"
+                "
             >
-                {% block content_header %}
-                {% endblock content_header %}
+                <div
+                    class="
+                    qfdmo-bg-white
+                    qfdmo-flex qfdmo-flex-row sm:qfdmo-items-center
+                    qfdmo-z-20
+                    {% block header_classes %}{% endblock header_classes %}"
+                >
+                {% block form_header %}
+                {% endblock form_header %}
+                </div>
             </header>
 
             <main
                 class="
                 qfdmo-flex
-                qfdmo-z-0
-                {% block main_classes %}
-                {% endblock main_classes %}"
+                max-md:qfdmo-h-main-svh
+                {# Is useful for digital view so that the users can scrol in the results #}
+                qfdmo-overflow-auto
+                "
             >
-                {% block result %}
+                {% block form_result %}
                     <turbo-frame id="addressesPanel"
                         data-search-solution-form-target="addressesPanel"
                         class="qfdmo-relative qfdmo-z-1
-                            max-md:qfdmo-fixed
-                            qfdmo-top-[120] qfdmo-left-0 qfdmo-right-0 qfdmo-bottom-0
                             qfdmo-flex qfdmo-flex-col
                             data-[visible=true]:qfdmo-flex-grow
                             data-[visible=false]:qfdmo-invisible data-[visible=false]:qfdmo-h-0"
@@ -54,15 +58,12 @@
                     >
                         {% include 'qfdmo/shared/results.html' %}
                     </turbo-frame>
-                {% endblock result %}
+                {% endblock form_result %}
 
-                {% block everything_else %}
-                {% endblock everything_else %}
-
-                {% block form %}
+                {% block form_fields %}
                     {% include "qfdmo/partials/featureflip_inputs.html" %}
                     {{ form.bounding_box }}
-                {% endblock form %}
+                {% endblock form_fields %}
             </main>
 
             {# Part of this tag' style is defined in qfdmo.css because it would have been a bit unreadable as tailwind classes #}
@@ -93,8 +94,9 @@
             {% endblock content_footer %}
             </footer>
         </section>
-        {% block content_modals %}
-        {% endblock content_modals %}
+
+        {% block form_modals %}
+        {% endblock form_modals %}
     </form>
 </turbo-frame>
 {% endblock content %}

@@ -1,32 +1,17 @@
 {% extends "qfdmo/shared/_main.html" %}
 
-
-{% block main_classes %}
-{#
-We need to set a size on the map to help Leaflet size its content.
-We do not want the map to be bigger than the height of its container
-
-The values of 250px is determined empirically.
-They need to match the css variables used for .grid-map selector in qfdmo.css
-#}
-max-md:qfdmo-h-[calc(100vh_-_250px)]
-qfdmo-overflow-auto
-{% endblock main_classes %}
-
-{% block content_header %}
+{% block form_header %}
     {# Panel Filtres avancés et modifier ma recherche #}
     {% include 'qfdmo/formulaire/header.html' %}
-{% endblock content_header %}
+{% endblock form_header %}
 
-{% block everything_else %}{% endblock everything_else %}
+{% block form_modals %}
+    {# Panel «Formulaire de recherche» #}
+    {% include 'qfdmo/formulaire/search_form.html' %}
 
-{% block content_modals %}
-{# Panel «Formulaire de recherche» #}
-{% include 'qfdmo/formulaire/search_form.html' %}
-
-{# Panel «Filtres avancés» #}
-{% include 'qfdmo/formulaire/modals/advanced_filters.html' %}
-{% endblock content_modals %}
+    {# Panel «Filtres avancés» #}
+    {% include 'qfdmo/formulaire/modals/advanced_filters.html' %}
+{% endblock form_modals %}
 
 {% block content_footer %}
     <div

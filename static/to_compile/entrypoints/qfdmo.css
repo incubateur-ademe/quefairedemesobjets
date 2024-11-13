@@ -269,9 +269,6 @@ DSFR customization for tabs
 }
 
 .map-grid {
-  --footer-height: 0;
-  --sidebar-width: 0;
-  --header-height: 120px;
   @apply qfdmo-min-h-screen md:qfdmo-grid qfdmo-gap-0;
   @apply qfdmo-grid-flow-row-dense;
   @apply qfdmo-transition-[grid-template-columns] qfdmo-ease-in qfdmo-duration-200;
@@ -302,9 +299,15 @@ DSFR customization for tabs
   > main {
     grid-area: map;
   }
+}
 
-  .formulaire & {
+:root {
+    --footer-height: 0;
+    --sidebar-width: 0;
+    --header-height: 120px;
+}
+
+:root[data-formulaire] {
     --footer-height: 100px;
     --header-height: 135px;
-  }
 }
