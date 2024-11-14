@@ -30,29 +30,25 @@
 
     </head>
 
-    <body>
-        <header>
-            {% block header %}
-            {% include "components/header/header.html" %}
-            {% endblock header %}
-        </header>
+    <body
+        class="qf-flex qf-flex-col qf-gap-7w"
+    >
+        {% block header %}
+        {% include "components/header/header.html" %}
+        {% endblock header %}
 
         <main class="fr-container">
             {% block main %}
             {% endblock main %}
         </main>
 
-        <aside>
-            {% block sidebar %}
-            {% include "components/sidebar/sidebar.html" %}
-            {% endblock sidebar %}
-        </aside>
+        {% block sidebar %}
+        {% include "components/sidebar/sidebar.html" %}
+        {% endblock sidebar %}
 
-        <footer>
-            {% block footer %}
-            {% include "components/footer/footer.html" %}
-            {% endblock footer %}
-        </footer>
+        {% block footer %}
+        {% include "components/footer/footer.html" %}
+        {% endblock footer %}
 
         {% dsfr_js %}
     </body>

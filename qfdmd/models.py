@@ -1,4 +1,5 @@
 from django.contrib.gis.db import models
+from django.urls.base import reverse
 from django.utils.functional import cached_property
 from django_extensions.db.fields import AutoSlugField
 
@@ -34,7 +35,7 @@ class Produit(models.Model):
         return f"{self.id} - {self.nom}"
 
     @cached_property
-    def sous_categorie(self):
+    def sous_categorie_with_carte_display(self):
         return self.sous_categories.filter(afficher_carte=True).first()
 
     @cached_property
@@ -80,6 +81,9 @@ class Synonyme(models.Model):
     produit = models.ForeignKey(
         Produit, related_name="synonymes", on_delete=models.CASCADE
     )
+
+    def get_absolute_url(self):
+        return reverse("qfdmd:synonyme-detail", args=[self.slug])
 
     def __str__(self):
         return self.nom
