@@ -30,20 +30,21 @@ with DAG(
             "other_info": "commentaires",
             "update_date": "modifie_le",
             "reparactor_hours": "horaires_description",
-            "type_de_point_de_collecte": "acteur_type_id",
         },
-        "endpoint": (
-            "https://data.artisanat.fr/api/explore/v2.1/catalog/datasets/reparacteurs/records"
-        ),
         "columns_to_add_by_default": {
             "statut": "ACTIF",
             "labels_etou_bonus": "reparacteur",
-            "type_de_point_de_collecte": "artisan, commerce indépendant",
+            "acteur_type_id": "artisan, commerce indépendant",
             "point_de_reparation": True,
             "public_accueilli": constants.PUBLIC_PAR,
         },
-        "product_mapping": get_mapping_config(mapping_key="sous_categories_cma"),
         "combine_columns_categories": ["categorie", "categorie2", "categorie3"],
+        "endpoint": (
+            "https://data.artisanat.fr/api/explore/v2.1/catalog/datasets/reparacteurs/records"
+        ),
+        "ignore_duplicates": False,
+        "validate_address_with_ban": False,
+        "product_mapping": get_mapping_config(mapping_key="sous_categories_cma"),
         "source_code": "cma_reparacteur",
     },
     schedule=None,

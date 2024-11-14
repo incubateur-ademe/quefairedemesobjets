@@ -23,10 +23,14 @@ def source_data_validate(**kwargs) -> None:
     # ------------------------------------
     # identifiant_externe
     # Pas de doublons sur identifiant_externe (false=garde first+last)
-    dups = df[df["identifiant_externe"].duplicated(keep=False)]
+
+    # On vérifie que les identifiants uniques sont uniques, on ne se base pas sur
+    # l'identifiant externe car il est parfois dupliqués pour des service physique et
+    # en ligne
+    dups = df[df["identifiant_unique"].duplicated(keep=False)]
     if not dups.empty:
-        log.preview("Doublons sur identifiant_externe", dups)
-        raise ValueError("Doublons sur identifiant_externe")
+        log.preview("Doublons sur identifiant_unique", dups)
+        raise ValueError("Doublons sur identifiant_unique")
 
     # ------------------------------------
     # acteur_type_id
@@ -53,6 +57,19 @@ def source_data_validate(**kwargs) -> None:
     codes_invalid = codes_mapping - codes_db
     if codes_invalid:
         raise ValueError(f"product_mapping: codes pas dans DB: {codes_invalid}")
+
+    # ------------------------------------
+    # produitsdechets_acceptes
+    # - les valeurs de produits acceptés doivent être de type string ou list et non
+    #   vides
+    df_produits_invalid = df[
+        ~df["produitsdechets_acceptes"].apply(
+            lambda x: isinstance(x, (str, list)) and bool(x)
+        )
+    ]
+    if not df_produits_invalid.empty:
+        log.preview("produitsdechets_acceptes invalid", df_produits_invalid)
+        raise ValueError("produitsdechets_acceptes invalid")
 
     # Le but de la validation n'est pas de modifier les données
     # donc on retourn explicitement None et les tâches suivantes

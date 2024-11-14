@@ -35,6 +35,8 @@ with DAG(
         "columns_to_add_by_default": {
             "statut": "ACTIF",
         },
+        "ignore_duplicates": False,
+        "validate_address_with_ban": False,
         "product_mapping": get_mapping_config(),
     },
     schedule=None,

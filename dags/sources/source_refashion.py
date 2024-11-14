@@ -36,13 +36,15 @@ with DAG(
             "horaires_douverture": "horaires_description",
             "consignes_dacces": "commentaires",
         },
+        "columns_to_add_by_default": {
+            "statut": "ACTIF",
+        },
         "endpoint": (
             "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
             "donnees-eo-refashion/lines?size=10000"
         ),
-        "columns_to_add_by_default": {
-            "statut": "ACTIF",
-        },
+        "ignore_duplicates": False,
+        "validate_address_with_ban": False,
         "label_bonus_reparation": "refashion",
         "product_mapping": get_mapping_config(),
     },

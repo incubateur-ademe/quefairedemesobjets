@@ -1,5 +1,6 @@
 import logging
 
+import numpy as np
 import pandas as pd
 from utils import api_utils
 from utils import logging_utils as log
@@ -18,7 +19,7 @@ def source_data_download(**kwargs) -> pd.DataFrame:
     # tant que possible
     data = api_utils.fetch_data_from_url(api_url)
     logger.info("Téléchargement données de l'API : ✅ succès.")
-    df = pd.DataFrame(data).replace({pd.NA: None})
+    df = pd.DataFrame(data).replace({pd.NA: None, np.nan: None})
     if df.empty:
         raise ValueError("Aucune donnée reçue de l'API")
     log.preview("df retournée par la tâche", df)

@@ -88,8 +88,10 @@ with DAG(
             # Champs système à ignorer
             "_i": None,
         },
-        "product_mapping": PRODUCT_MAPPING,
         "dechet_mapping": source_sinoe_dechet_mapping_get(),
+        "ignore_duplicates": False,
+        "validate_address_with_ban": False,
+        "product_mapping": PRODUCT_MAPPING,
     },
     schedule=None,
 ) as dag:

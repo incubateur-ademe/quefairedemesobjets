@@ -475,13 +475,6 @@ def propose_acteur_changes(**kwargs):
     log.preview("column_to_drop", column_to_drop)
     log.preview("combine_columns_categories", combine_columns_categories)
 
-    if params.get("merge_duplicated_acteurs"):
-        df = merge_duplicates(
-            df,
-            group_column="id_point_apport_ou_reparation",
-            merge_column="produitsdechets_acceptes",
-        )
-
     # Supprimer les acteurs qui ne propose qu'un service à domicile
     if "service_a_domicile" in df.columns:
         df.loc[

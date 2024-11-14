@@ -35,6 +35,8 @@ with DAG(
         "columns_to_add_by_default": {
             "statut": "ACTIF",
         },
+        "ignore_duplicates": False,
+        "validate_address_with_ban": False,
         "merge_duplicated_acteurs": True,  # In case of multi ecoorganisme or filiere
         "product_mapping": get_mapping_config(mapping_key="sous_categories_3eee"),
     },

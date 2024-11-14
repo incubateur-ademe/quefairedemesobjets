@@ -28,13 +28,15 @@ with DAG(
         "column_to_drop": [
             "perimetre_dintervention",
         ],
+        "columns_to_add_by_default": {
+            "statut": "ACTIF",
+        },
         "endpoint": (
             "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
             "donnees-eo-ecodds/lines?size=10000"
         ),
-        "columns_to_add_by_default": {
-            "statut": "ACTIF",
-        },
+        "ignore_duplicates": False,
+        "validate_address_with_ban": False,
         "product_mapping": get_mapping_config(),
     },
     schedule=None,
