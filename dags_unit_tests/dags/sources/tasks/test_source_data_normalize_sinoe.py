@@ -1,10 +1,11 @@
 import pandas as pd
+import pytest
 from rich import print
 from sources.tasks.source_data_normalize import df_normalize_sinoe
 
 
-def test_df_normalize_sinoe():
-
+@pytest.fixture
+def df_normalised():
     df = pd.DataFrame(
         (
             # pas gardée car produitsdechets_acceptes manquant
@@ -27,7 +28,7 @@ def test_df_normalize_sinoe():
                 "ANNEE": 2024,
                 "_geopoint": "48.4812237361283,3.120109493179493",
                 "produitsdechets_acceptes": "07.6",
-                "public_accueilli": "DMA/PRO",
+                "public_accueilli": "DMA",
             },
             # pas gardée car 01.22=Déchets alcalins manquant dans product_mapping
             {
@@ -63,8 +64,27 @@ def test_df_normalize_sinoe():
     }
     df = df_normalize_sinoe(df, params)
     print(df.to_dict(orient="records"))
-    assert df["identifiant_externe"].tolist() == ["DECHET_2", "DECHET_3"]
+    return df
 
 
-if __name__ == "__main__":
-    test_df_normalize_sinoe()
+class TestSourceDataNormalizeSinoe:
+
+    def test_produitsdechets_acceptes_exclude_entries_not_mapped(self, df_normalised):
+        df = df_normalised
+        assert df["identifiant_externe"].tolist() == ["DECHET_2", "DECHET_3"]
+
+    def test_produitsdechets_acceptes_convert_dechet_codes_to_our_codes(
+        self, df_normalised
+    ):
+        df = df_normalised
+        assert df["produitsdechets_acceptes"].tolist() == [
+            ["Solvants usés", "Papiers cartons mêlés triés", "Déchets textiles"],
+            ["Déchets textiles"],
+        ]
+
+    def test_public_accueilli_conversion(self, df_normalised):
+        df = df_normalised
+        assert df["public_accueilli"].tolist() == [
+            "Particuliers et professionnels",
+            "Particuliers",
+        ]

@@ -23,8 +23,7 @@ def df_normalize_sinoe(df: pd.DataFrame, params: dict) -> pd.DataFrame:
     df["identifiant_externe"] = df["identifiant_externe"].astype(str).str.strip()
 
     # MISC
-    df["acteur_type_id"] = 7
-    # df["ecoorganisme"] = source_code
+    df["acteur_type_id"] = 7  # Déchetterie
     # Pour forcer l'action "trier"
     df["point_de_collecte_ou_de_reprise_des_dechets"] = True
     df["public_accueilli"] = df["public_accueilli"].map(public_mapping)
@@ -44,6 +43,7 @@ def df_normalize_sinoe(df: pd.DataFrame, params: dict) -> pd.DataFrame:
     df = df.drop(columns=["_geopoint"])
 
     # PRODUCT MAPPING:
+    # TODO: à sortir dans une fonction df pour tester/débugger plus facilement
     logger.info(f"# déchetteries avant logique produitsdechets_acceptes: {len(df)}")
     col = "produitsdechets_acceptes"
 
@@ -56,14 +56,14 @@ def df_normalize_sinoe(df: pd.DataFrame, params: dict) -> pd.DataFrame:
     # nettoyage après cindage
     df[col] = df[col].apply(
         # "NP": "Non précisé", on garde pas
-        lambda x: [v.strip() for v in x if v.strip() not in ("", "nan", "NP")]
+        lambda x: [v.strip() for v in x if v.strip().lower() not in ("", "nan", "np")]
     )
     # On map à des chaîne de caractères (ex: "01" -> "Déchets de composés chimiques")
     # en ignorant les codes déchets qui ne sont pas dans notre product_mapping
     df[col] = df[col].apply(
         lambda x: [dechet_mapping[v] for v in x if dechet_mapping[v] in product_mapping]
     )
-    # Encore une fois on supprime les déchetteries qu'on peut pas categoriser
+    # Encore une fois on supprime les déchetteries qu'on ne peut pas categoriser
     df = df[df[col].apply(len) > 0]
     logger.info(f"# déchetteries après logique produitsdechets_acceptes: {len(df)}")
     souscats_dechet = set(df[col].explode())
