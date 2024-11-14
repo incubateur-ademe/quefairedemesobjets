@@ -6,9 +6,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <title>IFrame test : QFDMO</title>
         <meta name="description" content="IFrame test : QFDMO">
-
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4.3.6/iframeResizer.min.js" integrity="sha512-f0wd6UIvZbsjPNebGx+uMzHmg6KXr1jWvumJDYSEDmwYJYOptZ0dTka/wBJu7Tj80tnCYMKoKicqvZiIc9GJgw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> {# pragma: allowlist secret #}
     </head>
-    <body>
+    <body style="background: rebeccapurple;">
         <div>
             <h1>Page d'affichage dynamique de l'iframe de l'application</h1>
             <p>Ci-dessous s'affiche l'iframe de l'application</p>
@@ -16,6 +16,7 @@
         {% if request.GET.get('no-height') %}
             <div data-testid="iframe-no-height-wrapper" style="display: none;">
         {% endif %}
+
         {% if request.GET.get('carte') %}
             <script src="http://localhost:8000/static/carte.js"
                     data-action_displayed="preter|emprunter|louer|mettreenlocation|reparer|donner|echanger|acheter|revendre"
@@ -25,18 +26,62 @@
             </script>
         {% else %}
             <script src="http://localhost:8000/static/iframe.js"
-                    data-max_width="800px"
-                    data-height="100vh"
+                    data-max_width="100%"
+                    data-height="720px"
                     data-direction="jai"
                     data-first_dir="jai"
                     data-action_list="reparer|echanger|mettreenlocation|revendre"
+                    data-iframe_attributes='{"loading":"lazy", "id" : "resize" }'
             ></script>
         {% endif %}
+
         {% if request.GET.get('no-height') %}
             </div>
         {% endif %}
+
         <div>
             <p>Fin de l'affichage de l'iframe de l'application</p>
         </div>
+
+        <div>
+        Proin ut a fames amet mi a feugiat mus quam risus iaculis egestas dignissim maecenas scelerisque tristique a leo a diam a cursus consectetur sem ac litora aliquam a. Felis vestibulum vestibulum vitae a vestibulum aliquam id egestas a proin posuere aliquam bibendum facilisis adipiscing tempor aptent nibh feugiat felis rutrum integer condimentum tincidunt. Ipsum purus nulla habitant condimentum tempor vestibulum elementum scelerisque dui at condimentum gravida a scelerisque scelerisque a adipiscing parturient ornare enim sodales vestibulum. Nec egestas est habitant tempus tristique parturient conubia consectetur parturient vestibulum quam nam platea senectus suspendisse a varius accumsan auctor vehicula velit vel. Ullamcorper a et nulla et inceptos himenaeos in hac consectetur facilisis scelerisque condimentum pharetra facilisi porttitor ut feugiat suspendisse lectus quisque fermentum nibh platea.
+
+        A ullamcorper hendrerit in parturient quam scelerisque quam cubilia sem sit odio dui vestibulum mi adipiscing ante adipiscing adipiscing tincidunt consectetur ante condimentum euismod. Nullam pharetra a eget lacinia a donec eros praesent bibendum dis vestibulum sed fusce suspendisse commodo sit posuere mi a parturient vehicula. Vitae lorem etiam scelerisque class felis viverra posuere pretium sagittis vel nisl porta sem faucibus a.
+
+        Leo euismod mi a ullamcorper et parturient a fusce ultricies et quisque curabitur a nascetur suspendisse a. Gravida at suspendisse duis ullamcorper dis tincidunt dis tellus parturient leo ultricies porta in felis imperdiet adipiscing a mi vestibulum a ut a. Fames eu malesuada a consectetur parturient vehicula dictumst elit a litora neque suspendisse volutpat fermentum elementum condimentum. Neque a facilisi in parturient scelerisque scelerisque congue a a malesuada parturient feugiat fringilla tincidunt inceptos.
+
+        Eget congue mus elementum himenaeos pulvinar mi senectus et a ullamcorper hac accumsan a amet laoreet. Vehicula pharetra ullamcorper a taciti potenti nostra vulputate odio nec posuere vestibulum et volutpat accumsan elit semper. Mus commodo a a consectetur tincidunt convallis scelerisque a sem condimentum lobortis nec ac condimentum. Quam proin conubia adipiscing a consectetur orci metus sem vehicula enim felis consectetur a litora curae arcu adipiscing.
+
+        Scelerisque adipiscing condimentum parturient enim a dignissim donec a nascetur suspendisse consectetur condimentum volutpat tincidunt. Blandit vestibulum sit a natoque a eros potenti turpis litora pretium pulvinar a dolor mi venenatis vel torquent auctor parturient morbi vestibulum varius arcu consectetur potenti a lobortis. Tortor fringilla elit a laoreet dictum ornare sit phasellus leo condimentum adipiscing consectetur suspendisse primis. Fames semper a a dictum aliquam a a ac aliquet aliquam blandit per tincidunt lectus malesuada parturient integer parturient ullamcorper sit ut orci eu. Nec a fusce fusce condimentum diam ac nec parturient odio curae cursus a risus amet a ut a arcu est venenatis dis fermentum a.
+
+        A mi ultrices interdum parturient parturient dictum feugiat nisi sagittis ligula lorem molestie eu id orci cubilia enim at pulvinar vestibulum lacinia ac cras lacinia tempus mi a. Magnis arcu laoreet vestibulum id parturient vestibulum lobortis metus enim a dui et at cras a taciti mauris litora fames hac iaculis suspendisse vestibulum fusce ullamcorper eu. Vestibulum rhoncus a convallis dis mauris dignissim mus parturient ut enim parturient augue phasellus litora curae donec feugiat a magna luctus. Inceptos a accumsan blandit condimentum fermentum interdum cursus mus scelerisque a at ac eleifend lacinia morbi nisi elit mi bibendum ullamcorper massa ac.
+
+        Rhoncus consectetur feugiat rhoncus quis vestibulum enim erat adipiscing purus vestibulum vestibulum hac libero vestibulum commodo. A urna justo condimentum a at cubilia ultricies libero a curabitur diam taciti feugiat sociosqu parturient sagittis nisi maecenas. Facilisis condimentum a a scelerisque in cum a fermentum nisl suscipit platea ac malesuada rutrum primis a quisque amet vestibulum ridiculus mus vestibulum dignissim vehicula feugiat. A turpis a a himenaeos a montes at donec ipsum a ut ut parturient sit feugiat mi eget condimentum a lacinia ut felis suspendisse at. Duis vestibulum consectetur suspendisse sem et condimentum id enim facilisis facilisis interdum placerat adipiscing orci.
+
+        Imperdiet sem et praesent sem donec adipiscing vestibulum condimentum a taciti tortor duis aptent augue semper nulla magnis parturient facilisis consectetur vivamus mattis ad varius diam commodo a per. Vestibulum inceptos mus imperdiet a enim adipiscing ultrices facilisis scelerisque platea vehicula sociosqu a suspendisse suspendisse elit ut aliquam parturient condimentum praesent. Ad interdum convallis massa semper adipiscing eu nec at quisque bibendum placerat ligula id adipiscing mi purus imperdiet. Curabitur arcu vivamus vestibulum pulvinar eget sem rutrum suspendisse ac sapien a dapibus a viverra auctor et posuere. Senectus in non taciti proin nec per a torquent scelerisque id proin ac mi ut blandit per tincidunt a odio curae ridiculus a a a parturient justo.
+
+        Suspendisse id facilisis nec dui ac viverra sagittis eget nunc a et sem est vestibulum cum ullamcorper a vivamus. Dui lobortis morbi ac at facilisi eu non cum a tempus interdum mattis a dictum conubia a donec ad feugiat et eros magnis dui cubilia suspendisse. Vestibulum vestibulum adipiscing a parturient nisi tincidunt adipiscing quis a aptent lobortis volutpat rhoncus lorem penatibus. Diam auctor suspendisse tristique a gravida adipiscing suscipit a quis tempus ligula fusce parturient facilisis parturient sed sit a facilisi a parturient potenti consectetur suspendisse phasellus metus curabitur a.
+
+        Maecenas ad ullamcorper potenti urna adipiscing parturient mattis class primis sociosqu at gravida natoque condimentum at condimentum a condimentum suspendisse. A feugiat penatibus tristique nascetur lobortis a eu scelerisque aliquam convallis adipiscing tempus aliquet amet vestibulum suspendisse parturient cursus a quisque ante adipiscing facilisi erat at. Vestibulum conubia habitant aenean blandit bibendum dignissim parturient a auctor conubia ultrices ut nostra turpis augue morbi orci id duis vel consequat blandit ipsum sodales libero. Nec sapien eu diam scelerisque faucibus condimentum adipiscing penatibus morbi aliquam phasellus gravida dictum netus penatibus condimentum himenaeos varius a ullamcorper mus nisi fringilla praesent eget. Suscipit nisl libero aliquet nascetur vel eu ac adipiscing a ullamcorper nam diam netus consequat.
+
+        Parturient mi adipiscing urna parturient primis a scelerisque tellus praesent eu sem vivamus magnis adipiscing netus. Primis sapien dictumst sed commodo a nec a a a fringilla viverra vulputate suspendisse volutpat condimentum sagittis lacus enim consectetur. Convallis habitant adipiscing nascetur ante eget pretium id lobortis ullamcorper faucibus vulputate parturient suspendisse rhoncus odio parturient a vel vestibulum a fusce. Netus curabitur massa a facilisis a massa suspendisse dolor a euismod nibh dis condimentum justo.
+
+        Scelerisque parturient tristique condimentum morbi vulputate a parturient lorem mi fames nam sed scelerisque tortor adipiscing condimentum parturient vestibulum adipiscing nibh eros adipiscing a id condimentum magna. Sapien et dictumst vulputate a consectetur a id a a cursus ultrices habitant metus scelerisque nibh pharetra at suspendisse erat a condimentum vel rhoncus integer. Sit consectetur a lectus pulvinar semper mi taciti mus a vestibulum scelerisque a ad mollis scelerisque a vulputate rutrum eu hac ut facilisis a. A ullamcorper ultrices risus ut curabitur ridiculus cubilia volutpat ullamcorper nulla vel vivamus cum parturient ipsum dictumst euismod malesuada eu scelerisque condimentum a tristique.
+
+        A dictum semper elementum convallis interdum placerat diam ullamcorper ullamcorper varius habitant consequat ante adipiscing dis a a in. Duis vestibulum donec ultrices duis neque euismod quisque quis sodales in vestibulum nostra fusce adipiscing mollis curae. A parturient duis hac parturient est consectetur quam vestibulum aliquam cum sem suscipit mi vestibulum dis a. Sagittis quam id himenaeos a convallis pulvinar quisque at laoreet in varius adipiscing adipiscing ipsum parturient ac. Suspendisse purus purus litora parturient eget eros diam lorem parturient vestibulum parturient nibh amet a est condimentum ridiculus a augue ipsum sem purus magnis a nisi.
+
+        At dui velit proin sociis vitae enim felis a lacinia id a et suspendisse a vestibulum convallis eros tellus duis cras. Justo commodo consequat dis scelerisque placerat nunc penatibus rutrum donec phasellus habitant eu nisi parturient bibendum curabitur phasellus. Laoreet iaculis lacus erat est ullamcorper scelerisque a a vulputate vivamus placerat parturient parturient ridiculus condimentum habitant proin ullamcorper eget elementum etiam dictumst. Hac ut nam ut primis a adipiscing nibh dignissim condimentum etiam leo pulvinar luctus nullam ut tempor non mus platea non quisque ullamcorper condimentum scelerisque cubilia suscipit luctus consequat.
+
+        Rutrum urna nascetur conubia torquent parturient fusce mus curabitur ultrices curae rhoncus posuere nibh neque lacus tempor cras torquent suspendisse vestibulum facilisis mus. Adipiscing a lacus mi turpis ut nascetur placerat mattis tempus ultricies augue consectetur parturient adipiscing tempor eget mattis laoreet scelerisque et aliquam vivamus parturient habitasse malesuada justo aptent. At eu erat sed ridiculus suspendisse velit a est a eleifend molestie interdum a parturient diam a at commodo sapien dictumst. Ut est a risus accumsan netus a nec porta dictum a himenaeos parturient ullamcorper pharetra curabitur nascetur ornare quisque dui sodales vivamus accumsan arcu vestibulum erat vestibulum ac lorem.
+        </div>
+
+        <script>
+           iFrameResize({
+              checkOrigin: false,
+              log: true,
+              heightCalculationMethod: 'bodyScroll',
+              maxWidth: 800,
+            }, '#resize')
+        </script>
     </body>
 </html>

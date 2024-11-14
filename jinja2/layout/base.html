@@ -29,23 +29,14 @@
         {#Js#}
         <script src="{{ static('qfdmo.js') }}"></script>
         {% block javascript_extras %}{% endblock %}
-
-        {% if is_embedded %}
-            <script src="{{ static('iframe_resizer.js') }}"></script>
-        {% endif %}
     </head>
 
     <body
-        class="qfdmo-flex qfdmo-flex-col"
+        class="qfdmo-flex qfdmo-flex-col qfdmo-h-svh qfdmo-h-screen qfdmo-overflow-hidden"
         data-controller="analytics"
     >
-        {% if not is_embedded %}
-            {% block header %}
-                {% include "layout/header.html" %}
-            {% endblock %}
-        {% endif %}
 
-        <main id="solutions">
+        <main id="solutions" class="qfdmo-overflow-auto qfdmo-overscroll-none qfdmo-scroll-smooth">
             <noscript>
                 <div class="fr-container fr-my-3w">
                     <div class="fr-alert fr-alert--error">
@@ -63,12 +54,6 @@
             </div>
             {% block content %}{% endblock %}
         </main>
-
-        {% if not is_embedded %}
-            {% block footer %}
-                {% include "layout/footer.html" %}
-            {% endblock %}
-        {% endif %}
 
         {% block modals %}{% endblock modals %}
         {% block js %}
