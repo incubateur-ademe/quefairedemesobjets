@@ -1,13 +1,33 @@
 {% extends "qfdmd/base.html" %}
+{% load dsfr_tags qfdmd_tags %}
 
 {% block main %}
-<article>
+{% with object.produit as produit %}
+<article
+    class=""
+>
     <header>
         <h1>
             {{ object.nom }}
         </h1>
     </header>
+
+    {% if produit.que_va_t_il_devenir %}
+    <section id="que-va-t-il-devenir">
+        {% carte_from produit %}
+    </section>
+    {% endif %}
+
+    {% if produit.carte_display %}
+    <section id="où-l-apporter">
+        {{ produit.que_va_t_il_devenir|safe }}
+    </section>
+    {% endif %}
+
+    {% dsfr_accordion_group produit.content_display %}
+
     <footer>
     </footer>
 </article>
+{% endwith %}
 {% endblock main %}

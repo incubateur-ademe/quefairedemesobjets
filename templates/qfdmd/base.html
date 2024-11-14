@@ -15,8 +15,8 @@
         <title>{% block title %}Que faire de mes déchets{% endblock %}</title>
         <meta name="description" content="{% block meta_description %}Donnons une nouvelle vie aux objets{% endblock %}">
 
-        {# Css #}
         {% dsfr_css %}
+        <link rel="stylesheet" href="{% static 'qfdmd.css' %}">
 
         {% block extra_css %}
         {% endblock extra_css %}
@@ -33,7 +33,7 @@
     <body>
         <header>
             {% block header %}
-            {% include "components/header.html" %}
+            {% include "components/header/header.html" %}
             {% endblock header %}
         </header>
 
@@ -44,14 +44,14 @@
 
         <aside>
             {% block sidebar %}
-            {% include "components/sidebar.html" %}
+            {% include "components/sidebar/sidebar.html" %}
             {% endblock sidebar %}
         </aside>
 
         <footer>
-        {% block footer %}
-        {% include "components/footer.html" %}
-        {% endblock footer %}
+            {% block footer %}
+            {% include "components/footer/footer.html" %}
+            {% endblock footer %}
         </footer>
 
         {% dsfr_js %}

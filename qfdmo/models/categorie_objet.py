@@ -46,18 +46,20 @@ class SousCategorieObjet(CodeAsNaturalKeyModel):
         return self.libelle
 
     @cached_property
+    def carte_settings(self):
+        return {
+            "carte": 1,
+            "direction": "jai",
+            "first_dir": "jai",
+            "sous_categorie_objet": self.libelle,
+            "sc_id": self.id,
+            "limit": 25,
+        }
+
+    @property
     def url_carte(self):
         if self.afficher_carte:
-            params = urlencode(
-                {
-                    "carte": 1,
-                    "direction": "jai",
-                    "first_dir": "jai",
-                    "sous_categorie_objet": self.libelle,
-                    "sc_id": self.id,
-                    "limit": 25,
-                }
-            )
+            params = urlencode(self.carte_settings)
 
             return f"{settings.BASE_URL}/?{params}"
 

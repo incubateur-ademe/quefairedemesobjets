@@ -1,4 +1,5 @@
 from django.contrib.gis.db import models
+from django.utils.functional import cached_property
 from django_extensions.db.fields import AutoSlugField
 
 
@@ -17,14 +18,11 @@ class Produit(models.Model):
     )
     synonymes_existants = models.TextField(blank=True, help_text="Synonymes existants")
     code = models.CharField(blank=True, help_text="Code")
-
     bdd = models.CharField(blank=True, help_text="Bdd")
-
     comment_les_eviter = models.TextField(blank=True, help_text="Comment les éviter ?")
     qu_est_ce_que_j_en_fais = models.TextField(
         blank=True, help_text="Qu'est-ce que j'en fais ?"
     )
-
     que_va_t_il_devenir = models.TextField(
         blank=True, help_text="Que va-t-il devenir ?"
     )
@@ -34,6 +32,34 @@ class Produit(models.Model):
 
     def __str__(self):
         return f"{self.id} - {self.nom}"
+
+    @cached_property
+    def sous_categorie(self):
+        return self.sous_categories.filter(afficher_carte=True).first()
+
+    @cached_property
+    def content_display(self):
+        return [
+            item
+            for item in [
+                {
+                    "id": "Comment mieux consommer",
+                    "title": "Comment mieux consommer",
+                    "content": self.comment_les_eviter,
+                },
+                {
+                    "id": "Que va-t-il devenir ?",
+                    "title": "Que va-t-il devenir ?",
+                    "content": self.que_va_t_il_devenir,
+                },
+                {
+                    "id": "En savoir plus",
+                    "title": "En savoir plus",
+                    "content": self.que_va_t_il_devenir,
+                },
+            ]
+            if item["content"]
+        ]
 
 
 class Lien(models.Model):
