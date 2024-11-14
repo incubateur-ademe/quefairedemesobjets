@@ -22,7 +22,7 @@ async function expectIframeAttributes(iframeElement) {
     "http://localhost:8000?iframe=1&direction=jai&first_dir=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre"
   );
   expect(frameborder).toBe("0");
-  expect(scrolling).toBe("yes");
+  expect(scrolling).toBe("no");
   expect(allowfullscreen).toBe("true");
   expect(style).toContain("width: 100%;");
   expect(style).toContain("height: 100vh;");
