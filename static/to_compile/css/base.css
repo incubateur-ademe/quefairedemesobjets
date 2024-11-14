@@ -1,9 +1,6 @@
-<<<<<<< HEAD
-=======
 @import "npm:@gouvfr/dsfr/dist/dsfr.css";
 @import "npm:@gouvfr/dsfr/dist/utility/utility.css";
 
->>>>>>> eb792ca (Reorganise static files)
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

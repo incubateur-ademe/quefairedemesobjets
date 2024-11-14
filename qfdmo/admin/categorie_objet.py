@@ -27,6 +27,7 @@ class CategorieAdmin(admin.ModelAdmin):
 
 class SousCategorieAdmin(admin.ModelAdmin):
     list_display = ("libelle", "categorie", "code")
+    list_filter = ["afficher_carte"]
     autocomplete_fields = ("qfdmd_produits",)
     search_fields = ["categorie__libelle", "categorie__code", "code", "libelle"]
 

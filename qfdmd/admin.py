@@ -41,7 +41,7 @@ class LienAdmin(NotEditableInlineMixin, admin.ModelAdmin):
 
 class SynonymeAdmin(NotEditableInlineMixin, ImportExportModelAdmin, admin.ModelAdmin):
     resource_classes = [SynonymeResource]
-    list_display = ("nom", "produit")
+    list_display = ("nom", "produit", "slug")
 
 
 admin.site.register(Produit, ProduitAdmin)

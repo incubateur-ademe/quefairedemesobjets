@@ -1,6 +1,5 @@
 @import "npm:leaflet/dist/leaflet.css";
-@import "npm:@gouvfr/dsfr/dist/dsfr.css";
-@import "npm:@gouvfr/dsfr/dist/utility/utility.css";
+
 @import "../css/base.css";
 @import "../css/leaflet-overrides.css";
 @import "../css/dsfr-overrides.css";
