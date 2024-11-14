@@ -544,7 +544,7 @@ class CarteView(
             if groupe.icon:
                 libelle = (
                     f'<span class="fr-px-1v qfdmo-text-white {groupe.icon}'
-                    f' fr-icon--sm qfdmo-rounded-full qfdmo-bg-{groupe.border}"'
+                    f' fr-icon--sm qfdmo-rounded-full qfdmo-bg-{groupe.primary}"'
                     ' aria-hidden="true"></span>'
                 )
             libelles: List[str] = []
