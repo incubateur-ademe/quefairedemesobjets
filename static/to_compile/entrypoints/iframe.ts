@@ -14,5 +14,4 @@ const setupIframe = () => {
     buildAndInsertIframeFrom(iframeAttributes, iframeExtraAttributes, scriptTag)
 }
 
-//addIframeResizer()
 setupIframe()
