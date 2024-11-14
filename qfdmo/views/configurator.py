@@ -63,7 +63,7 @@ class ConfiguratorView(FormView):
                 querydict[key] = value
 
         return redirect(
-            f"{reverse("qfdmo:iframe_configurator")}?{querydict.urlencode()}",
+            f"{reverse('qfdmo:iframe_configurator')}?{querydict.urlencode()}",
             permanent=False,
         )
 
