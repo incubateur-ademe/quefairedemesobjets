@@ -1,4 +1,5 @@
 from airflow import DAG
+from utils import shared_constants as constants
 from utils.base_utils import get_mapping_config
 from utils.eo_operators import default_args, eo_task_chain
 
@@ -39,6 +40,7 @@ with DAG(
             "labels_etou_bonus": "reparacteur",
             "type_de_point_de_collecte": "artisan, commerce indépendant",
             "point_de_reparation": True,
+            "public_accueilli": constants.PUBLIC_PAR,
         },
         "product_mapping": get_mapping_config(mapping_key="sous_categories_cma"),
         "combine_columns_categories": ["categorie", "categorie2", "categorie3"],

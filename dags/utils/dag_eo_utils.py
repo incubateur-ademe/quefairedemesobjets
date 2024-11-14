@@ -128,8 +128,6 @@ def propose_services_sous_categories(**kwargs):
         for souscat in set(souscats):
             if souscat in product_mapping:
                 sous_categories_value = product_mapping[souscat]
-                if sous_categories_value is None:
-                    continue
                 if isinstance(sous_categories_value, list):
                     for value in sous_categories_value:
                         rows_list.append(
@@ -139,7 +137,7 @@ def propose_services_sous_categories(**kwargs):
                                 "souscategorie": value,
                             }
                         )
-                else:
+                elif isinstance(sous_categories_value, str):
                     rows_list.append(
                         {
                             "propositionservice_id": row["id"],
@@ -148,6 +146,11 @@ def propose_services_sous_categories(**kwargs):
                             ],
                             "souscategorie": sous_categories_value,
                         }
+                    )
+                else:
+                    raise ValueError(
+                        f"le type de la Sous categorie `{sous_categories_value}` dans"
+                        " la config n'est pas valide"
                     )
             else:
                 raise Exception(f"Sous categorie `{souscat}` pas dans la config")
@@ -298,20 +301,12 @@ def db_data_prepare(**kwargs):
 
 
 def db_read_acteur(**kwargs):
-    source_code = kwargs["params"].get("source_code", None)
     df_normalized = kwargs["ti"].xcom_pull(task_ids="source_data_normalize")
     sources_id_by_code = kwargs["ti"].xcom_pull(task_ids="db_read_source")
     log.preview("df_normalized", df_normalized)
     log.preview("sources_id_by_code", sources_id_by_code)
 
-    # TODO: à déplacer dans la source_data_normalize
-    if source_code:
-        unique_source_ids = [sources_id_by_code[source_code]]
-    else:
-        df_normalized["source_id"] = df_normalized["ecoorganisme"].map(
-            sources_id_by_code
-        )
-        unique_source_ids = df_normalized["source_id"].unique()
+    unique_source_ids = df_normalized["source_id"].unique()
 
     pg_hook = PostgresHook(postgres_conn_id="qfdmo_django_db")
     engine = pg_hook.get_sqlalchemy_engine()
@@ -400,7 +395,7 @@ def write_to_dagruns(**kwargs):
         insert_dagrun_and_process_df(df, metadata, dag_name_suffixed, run_name)
 
 
-def _force_column_value(
+def mapping_try_or_fallback_column_value(
     df_column: pd.Series,
     values_mapping: dict,
     default_value: Union[str, bool, None] = None,
@@ -468,7 +463,6 @@ def propose_acteur_changes(**kwargs):
     label_bonus_reparation = params.get("label_bonus_reparation")
     column_mapping = params.get("column_mapping", {})
     column_to_drop = params.get("column_to_drop", [])
-    columns_to_add_by_default = params.get("columns_to_add_by_default", {})
     combine_columns_categories = params.get("combine_columns_categories")
 
     log.preview("df (source_data_normalize)", df)
@@ -479,7 +473,6 @@ def propose_acteur_changes(**kwargs):
     log.preview("label_bonus_reparation", label_bonus_reparation)
     log.preview("column_mapping", column_mapping)
     log.preview("column_to_drop", column_to_drop)
-    log.preview("columns_to_add_by_default", columns_to_add_by_default)
     log.preview("combine_columns_categories", combine_columns_categories)
 
     if params.get("merge_duplicated_acteurs"):
@@ -488,9 +481,6 @@ def propose_acteur_changes(**kwargs):
             group_column="id_point_apport_ou_reparation",
             merge_column="produitsdechets_acceptes",
         )
-
-    for k, val in columns_to_add_by_default.items():
-        df[k] = val
 
     # Supprimer les acteurs qui ne propose qu'un service à domicile
     if "service_a_domicile" in df.columns:
@@ -516,76 +506,6 @@ def propose_acteur_changes(**kwargs):
         )
     if source_code:
         df["source_id"] = sources_id_by_code[source_code]
-
-    # TODO Plutôt se baser sur le nom de la colonne cible plutôt que sur le nom de la
-    # colonne source
-    for old_col, new_col in column_mapping.items():
-        if old_col in df.columns and new_col:
-            if new_col == "identifiant_externe":
-
-                # TODO: simplifier cette partie de code quite à faire des migrations
-                if "nom_de_lorganisme" in df.columns:
-                    df[old_col] = df[old_col].fillna(
-                        df["nom_de_lorganisme"]
-                        .str.replace("-", "")
-                        .str.replace(" ", "_")
-                        .str.replace("__", "_")
-                    )
-                df["identifiant_externe"] = df[old_col].astype(str)
-
-            elif new_col == "statut":
-                df[new_col] = df[old_col].map({1: "ACTIF", 0: "SUPPRIME"})
-            elif new_col == "acteur_type_id":
-                df[new_col] = df[old_col].apply(
-                    lambda x: mapping_utils.transform_acteur_type_id(
-                        x, acteurtype_id_by_code=acteurtype_id_by_code
-                    )
-                )
-            elif new_col == "source_id":
-                df[new_col] = df[old_col].map(sources_id_by_code)
-            # here we keep the condition on old_col
-            elif old_col == "adresse_format_ban":
-                df[["adresse", "code_postal", "ville"]] = df.apply(
-                    base_utils.get_address, axis=1
-                )
-            elif new_col == "public_accueilli":
-                df[new_col] = _force_column_value(
-                    df[old_col],
-                    {
-                        "particuliers et professionnels": (
-                            "Particuliers et professionnels"
-                        ),
-                        "professionnels": "Professionnels",
-                        "particuliers": "Particuliers",
-                        "aucun": "Aucun",
-                    },
-                )
-                df["statut"] = df["public_accueilli"].apply(
-                    lambda x: "SUPPRIME" if x == "Professionnels" else "ACTIF"
-                )
-            elif new_col in ["uniquement_sur_rdv", "exclusivite_de_reprisereparation"]:
-                df[new_col] = df[old_col].apply(cast_eo_boolean_or_string_to_boolean)
-            elif new_col == "reprise":
-                df[new_col] = _force_column_value(
-                    df[old_col],
-                    {
-                        "1 pour 0": "1 pour 0",
-                        "1 pour 1": "1 pour 1",
-                        "non": "1 pour 0",
-                        "oui": "1 pour 1",
-                    },
-                )
-            elif new_col == "labels_etou_bonus" and label_bonus_reparation:
-                df[new_col] = df[old_col].apply(
-                    lambda x: x.replace(
-                        "Agréé Bonus Réparation", label_bonus_reparation
-                    )
-                )
-            elif new_col == "url":
-                df[new_col] = df[old_col].apply(mapping_utils.prefix_url)
-
-            else:
-                df[new_col] = df[old_col]
 
     if "latitude" in df.columns and "longitude" in df.columns:
         df["latitude"] = df["latitude"].apply(mapping_utils.parse_float)

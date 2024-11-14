@@ -4,7 +4,7 @@ from utils.eo_operators import default_args, eo_task_chain
 
 with DAG(
     dag_id="eo-soren",
-    dag_display_name="Source - OREN",
+    dag_display_name="Source - SOREN",
     default_args=default_args,
     description=(
         "A pipeline to fetch, process, and load to validate data into postgresql"
@@ -18,13 +18,13 @@ with DAG(
             "uniquement_sur_rdv": "uniquement_sur_rdv",
             "public_accueilli": "public_accueilli",
             "reprise": "reprise",
-            "produitsdechets_acceptes": "",
-            "labels_etou_bonus": "",
-            "point_de_reparation": "",
+            "produitsdechets_acceptes": "produitsdechets_acceptes",
+            "labels_etou_bonus": "labels_etou_bonus",
+            "point_de_reparation": "point_de_reparation",
             "ecoorganisme": "source_id",
             "adresse_format_ban": "adresse",
             "nom_de_lorganisme": "nom",
-            "perimetre_dintervention": "",
+            "perimetre_dintervention": "perimetre_dintervention",
             "longitudewgs84": "longitude",
             "latitudewgs84": "latitude",
         },

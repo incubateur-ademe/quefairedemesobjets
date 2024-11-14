@@ -38,6 +38,8 @@ def source_data_validate(**kwargs) -> None:
 
     # ------------------------------------
     # product_mapping
+    # - les valeur du mapping des produit peuvent-être des listes vides quand aucun
+    #   produit n'est à associer
     product_mapping = params.get("product_mapping", {})
     souscats_codes_to_ids = db_tasks.read_mapping_from_postgres(
         table_name="qfdmo_souscategorieobjet"

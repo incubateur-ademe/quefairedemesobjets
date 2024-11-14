@@ -4,6 +4,12 @@ import pandas as pd
 from utils import logging_utils as log
 from utils import mapping_utils
 from utils import shared_constants as constants
+from utils.base_utils import get_address
+from utils.dag_eo_utils import (
+    cast_eo_boolean_or_string_to_boolean,
+    mapping_try_or_fallback_column_value,
+)
+from utils.db_tasks import read_mapping_from_postgres
 
 logger = logging.getLogger(__name__)
 
@@ -82,30 +88,113 @@ def source_data_normalize(**kwargs):
     - toutes les sources doivent avoir une nomenclature et formatage alignés
     - les sources peuvent préservées des spécificités (ex: présence/absence de SIRET)
         mais toujours en cohérence avec les règles de nommage et formatage
+    - Ajout des colonnes avec valeurs par défaut
     """
     df = kwargs["ti"].xcom_pull(task_ids="source_data_download")
-    log.preview("df avant normalisation", df)
 
     params = kwargs["params"]
     source_code = params.get("source_code")
     column_mapping = params.get("column_mapping", {})
+    columns_to_add_by_default = params.get("columns_to_add_by_default", {})
+    label_bonus_reparation = params.get("label_bonus_reparation")
+
+    log.preview("df avant normalisation", df)
+    log.preview("columns_to_add_by_default", columns_to_add_by_default)
+    log.preview("label_bonus_reparation", label_bonus_reparation)
+
+    for k, val in columns_to_add_by_default.items():
+        df[k] = val
+
+    # Avant le renommage des colonnes prise en chage de adresse_format_ban
+    if "adresse_format_ban" in df.columns:
+        df[["adresse", "code_postal", "ville"]] = df.apply(get_address, axis=1)
 
     # Renommage des colonnes
     df = df.rename(columns={k: v for k, v in column_mapping.items() if v is not None})
 
-    # Vérification requise pour la gestion source/ecoorganisme
-    if source_code is None and "ecoorganisme" not in df.columns:
-        raise ValueError("Pas de 'source_code' et pas de colonne 'ecoorganisme'")
+    if "identifiant_externe" in df.columns:
+        # TODO: simplifier cette partie de code quite à faire des migrations
+        count_nan = df["identifiant_externe"].isna().sum()
+        if count_nan > 0:
+            logger.warning(f"Nombre de NaN dans 'identifiant_externe': {count_nan}")
+        if "nom_de_lorganisme" in df.columns:
+            df["identifiant_externe"] = df["identifiant_externe"].fillna(
+                df["nom_de_lorganisme"]
+                .str.replace("-", "")
+                .str.replace(" ", "_")
+                .str.replace("__", "_")
+            )
+        df["identifiant_externe"] = df["identifiant_externe"].astype(str)
+    else:
+        raise ValueError("Pas de colonne 'identifiant_externe'")
+
+    if "statut" in df.columns:
+        df["statut"] = df["statut"].map({1: "ACTIF", 0: "SUPPRIME"})
+
+    # TODO : un peu crado, à revoir
+    # A cause de la résolution de l'identifiant unique qui dépend du code de la source
+    sources_id_by_code = read_mapping_from_postgres(table_name="qfdmo_source")
+    if "source_id" in df.columns:
+        df["source_code"] = df["source_id"]
+        df["source_id"] = df["source_id"].map(sources_id_by_code)
+    elif source_code is not None:
+        df["source_code"] = source_code
+        df["source_id"] = sources_id_by_code[source_code]
+    else:
+        ValueError("Pas de colonne 'source_id'")
+
+    if "public_accueilli" in df.columns:
+
+        df["public_accueilli"] = mapping_try_or_fallback_column_value(
+            df["public_accueilli"],
+            {
+                "particuliers et professionnels": ("Particuliers et professionnels"),
+                "professionnels": "Professionnels",
+                "particuliers": "Particuliers",
+                "aucun": "Aucun",
+            },
+        )
+    for column in ["uniquement_sur_rdv", "exclusivite_de_reprisereparation"]:
+        if column in df.columns:
+
+            df[column] = df[column].apply(cast_eo_boolean_or_string_to_boolean)
+
+    if "reprise" in df.columns:
+
+        df["reprise"] = mapping_try_or_fallback_column_value(
+            df["reprise"],
+            {
+                "1 pour 0": "1 pour 0",
+                "1 pour 1": "1 pour 1",
+                "non": "1 pour 0",
+                "oui": "1 pour 1",
+            },
+        )
+
+    if "labels_etou_bonus" in df.columns and label_bonus_reparation:
+        df["labels_etou_bonus"] = df["labels_etou_bonus"].str.replace(
+            "Agréé Bonus Réparation", label_bonus_reparation
+        )
+    if "url" in df.columns:
+        df["url"] = df["url"].map(mapping_utils.prefix_url)
 
     # Etapes de normalisation spécifiques aux sources
     if source_code == "ADEME_SINOE_Decheteries":
         df = df_normalize_sinoe(df, params)
+    else:
+        acteurtype_id_by_code = read_mapping_from_postgres(
+            table_name="qfdmo_acteurtype"
+        )
+        df["acteur_type_id"] = df["acteur_type_id"].apply(
+            lambda x: mapping_utils.transform_acteur_type_id(
+                x, acteurtype_id_by_code=acteurtype_id_by_code
+            )
+        )
 
     # Formattage des types
     # TODO: on dévrait pouvoir utiliser les modèles django/DB pour automatiser cela
-    df["identifiant_externe"] = df["identifiant_externe"].astype(str)
     df["identifiant_unique"] = df.apply(
-        lambda x: mapping_utils.create_identifiant_unique(x, source_name=source_code),
+        lambda x: mapping_utils.create_identifiant_unique(x),
         axis=1,
     )
 

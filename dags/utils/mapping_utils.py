@@ -83,14 +83,14 @@ def transform_acteur_type_id(value, acteurtype_id_by_code):
         raise ValueError(f"Acteur type {code.lower()} not found in database")
 
 
-def create_identifiant_unique(row, source_name=None):
+def create_identifiant_unique(row):
     unique_str = row["identifiant_externe"].replace("/", "-")
     if (
         row.get("type_de_point_de_collecte")
         == "Solution en ligne (site web, app. mobile)"
     ):
         unique_str = unique_str + "_d"
-    return row.get("ecoorganisme", source_name).lower() + "_" + unique_str
+    return row.get("source_code").lower() + "_" + unique_str
 
 
 def get_id_from_code(code, df_mapping):
