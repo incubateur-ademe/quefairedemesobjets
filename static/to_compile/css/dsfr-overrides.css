@@ -1,0 +1,171 @@
+
+.fr-enlarge-link a::before {
+  position: relative !important;
+}
+
+.fr-icon-action-acheter::before,
+.fr-icon-action-acheter::after {
+  -webkit-mask-image: url("../svg/acheter.svg");
+  mask-image: url("../svg/acheter.svg");
+}
+
+.fr-icon-action-donner::before,
+.fr-icon-action-donner::after {
+  -webkit-mask-image: url("../svg/donner.svg");
+  mask-image: url("../svg/donner.svg");
+}
+
+.fr-icon-action-echanger::before,
+.fr-icon-action-echanger::after {
+  -webkit-mask-image: url("../svg/echanger.svg");
+  mask-image: url("../svg/echanger.svg");
+}
+
+.fr-icon-action-emprunter::before,
+.fr-icon-action-emprunter::after {
+  -webkit-mask-image: url("../svg/emprunter.svg");
+  mask-image: url("../svg/emprunter.svg");
+}
+
+.fr-icon-action-louer::before,
+.fr-icon-action-louer::after {
+  -webkit-mask-image: url("../svg/louer.svg");
+  mask-image: url("../svg/louer.svg");
+}
+
+.fr-icon-action-mettreenlocation::before,
+.fr-icon-action-mettreenlocation::after {
+  -webkit-mask-image: url("../svg/mettreenlocation.svg");
+  mask-image: url("../svg/mettreenlocation.svg");
+}
+
+.fr-icon-action-preter::before,
+.fr-icon-action-preter::after {
+  -webkit-mask-image: url("../svg/preter.svg");
+  mask-image: url("../svg/preter.svg");
+}
+
+.fr-icon-action-reparer::before,
+.fr-icon-action-reparer::after {
+  -webkit-mask-image: url("../svg/reparer.svg");
+  mask-image: url("../svg/reparer.svg");
+}
+
+.fr-icon-action-vendre::before,
+.fr-icon-action-vendre::after {
+  -webkit-mask-image: url("../svg/vendre.svg");
+  mask-image: url("../svg/vendre.svg");
+}
+
+.fr-icon-share-line::before,
+.fr-icon-share-line::after {
+  -webkit-mask-image: url("../svg/share-line.svg");
+  mask-image: url("../svg/share-line.svg");
+}
+
+.fr-icon-shield-check-line::before,
+.fr-icon-shield-check-line::after {
+  -webkit-mask-image: url("../svg/shield-check-line.svg");
+  mask-image: url("../svg/shield-check-line.svg");
+}
+
+.fr-icon-money-euro-box-line::before,
+.fr-icon-money-euro-box-line::after {
+  -webkit-mask-image: url("../svg/money-euro-box-line.svg");
+  mask-image: url("../svg/money-euro-box-line.svg");
+}
+
+.fr-icon-percent-line::before,
+.fr-icon-percent-line::after {
+  -webkit-mask-image: url("../svg/bonus-reparation.svg");
+  mask-image: url("../svg/bonus-reparation.svg");
+}
+
+.fr-icon-tools-fill::before,
+.fr-icon-tools-fill::after {
+  -webkit-mask-image: url("../svg/tools-fill.svg");
+  mask-image: url("../svg/tools-fill.svg");
+}
+
+.fr-icon-hand-heart-line::before,
+.fr-icon-hand-heart-line::after {
+  -webkit-mask-image: url("../svg/hand-heart-line.svg");
+  mask-image: url("../svg/hand-heart-line.svg");
+}
+
+.fr-icon-money-euro-circle-line::before,
+.fr-icon-money-euro-circle-line::after {
+  -webkit-mask-image: url("../svg/money-euro-circle-line.svg");
+  mask-image: url("../svg/money-euro-circle-line.svg");
+}
+
+.fr-icon-epingle-plus::before,
+.fr-icon-epingle-plus::after {
+  -webkit-mask-image: url("../svg/epingle-plus.svg");
+  mask-image: url("../svg/epingle-plus.svg");
+}
+
+.fr-btn--icon-left.fr-btn[target="_blank"]::after {
+  display: none;
+}
+
+/*
+DSFR customization for tabs
+*/
+
+.fr-tabs--noborder {
+  &:before,
+  & {
+    @apply qf-shadow-none;
+  }
+
+  .fr-tabs__list {
+    @apply qf-p-0;
+  }
+
+  .fr-tabs__panel {
+    @apply qf-py-1w qf-px-0;
+  }
+
+  .fr-tabs__list {
+    @apply qf-space-x-1w qf-min-h-min;
+  }
+
+  .fr-tabs__tab {
+    @apply qf-m-0;
+  }
+}
+
+.qf-no-external-link-icon {
+  &,
+  .fr-link& {
+    &:after {
+      content: none;
+    }
+  }
+}
+.fr-link--no-underline {
+  background-image: none !important;
+}
+
+.fr-btn--secondary-light {
+  background-color: #f5f5fe !important;
+  color: var(--text-active-blue-france) !important;
+  border-style: none !important;
+}
+
+.fr-btn--secondary-light:hover {
+  background-color: #dcdcfc !important;
+}
+
+/* OPTIMIZE : solution temporaire, pour coller aux contraintes d'accessibilité
+* de Havas, cf https://www.notion.so/accelerateur-transition-ecologique-ademe/ACCESSIBILIT-CARTE-FORMULAIRE-Contr-le-segment-actif-pas-assez-clair-48f99736d566414d8d7ba5c1a6e24361?pvs=4
+* À remonter au DSFR et supprimer lorqsu'ils l'auront implémenté.
+*/
+.fr-segmented__element input:checked:focus + label {
+  outline: 2px solid #0a76f6;
+}
+
+.fr-input[type="range"] {
+  box-shadow: none;
+}
