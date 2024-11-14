@@ -25,7 +25,7 @@ async function expectIframeAttributes(iframeElement) {
   expect(scrolling).toBe("no");
   expect(allowfullscreen).toBe("true");
   expect(style).toContain("width: 100%;");
-  expect(style).toContain("height: 100vh;");
+  expect(style).toContain("height: 720px;");
   expect(style).toContain("max-width: 800px;");
   expect(title).toBe("Longue vie aux objets");
 }
