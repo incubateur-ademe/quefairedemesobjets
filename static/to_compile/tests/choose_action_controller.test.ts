@@ -12,7 +12,7 @@ describe("SearchSolutionFormController", () => {
                     <input type="radio" name="direction" value="jecherche" data-action="click->search-solution-form#changeDirection" id="id_direction_1">
                 </fieldset>
                 <button type="button" data-action="click -> search-solution-form#toggleadvancedFiltersDiv" data-search-solution-form-target="advancedFiltersButton">
-                    <span class="qfdmo-hidden" data-search-solution-form-target="advancedFiltersCounter"></span>
+                    <span class="qf-hidden" data-search-solution-form-target="advancedFiltersCounter"></span>
                 </button>
                 <div data-search-solution-form-target="jai"></div>
                 <div data-search-solution-form-target="jecherche"></div>

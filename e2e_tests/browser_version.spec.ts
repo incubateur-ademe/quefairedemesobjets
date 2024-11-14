@@ -8,7 +8,7 @@ test("Browser version alert is not displayed", async ({ page }) => {
 
     // Check that the browser version alert is not displayed
     const alert = await page.$("#obsolete_browser_message")
-    expect(await alert?.getAttribute("class")).toContain("qfdmo-hidden")
+    expect(await alert?.getAttribute("class")).toContain("qf-hidden")
 
     // check libelé "L'application nécessite Javascript pour être exécutée correctement" is inside a noscript tag
     const noscript = await page.$("noscript")
