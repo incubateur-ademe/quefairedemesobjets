@@ -67,7 +67,7 @@ class GroupeAction(CodeAsNaturalKeyModel):
     )
 
     @cached_property
-    def border(self):
+    def primary(self):
         return next(
             (
                 key
@@ -78,7 +78,7 @@ class GroupeAction(CodeAsNaturalKeyModel):
         )
 
     @cached_property
-    def background(self):
+    def secondary(self):
         return next(
             (
                 key
@@ -142,11 +142,7 @@ class Action(CodeAsNaturalKeyModel):
     )
 
     @cached_property
-    def border(self):
-        return self.background
-
-    @cached_property
-    def background(self):
+    def primary(self):
         return next(
             (
                 key
@@ -155,6 +151,10 @@ class Action(CodeAsNaturalKeyModel):
             ),
             None,
         )
+
+    @cached_property
+    def secondary(self):
+        return self.primary
 
     def __str__(self):
         return self.libelle
@@ -182,7 +182,7 @@ def get_actions_by_direction() -> dict:
     return {
         d.code: sorted(
             [
-                {**model_to_dict(a, exclude=["directions"]), "background": a.background}
+                {**model_to_dict(a, exclude=["directions"]), "primary": a.primary}
                 for a in d.actions.filter(afficher=True)
             ],
             key=lambda x: x["order"],
