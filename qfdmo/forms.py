@@ -260,6 +260,10 @@ class FormulaireForm(AddressesForm):
     )
 
 
+def get_epcis_for_carte_form():
+    return [(code, code) for code in cast(List[str], epcis_from(["code"]))]
+
+
 class CarteForm(AddressesForm):
     def load_choices(
         self,
@@ -301,7 +305,7 @@ class CarteForm(AddressesForm):
     )
 
     epci_codes = forms.MultipleChoiceField(
-        choices=[(code, code) for code in cast(List[str], epcis_from(["code"]))],
+        choices=get_epcis_for_carte_form,
         widget=forms.MultipleHiddenInput(),
         required=False,
     )
@@ -378,7 +382,7 @@ class ConfiguratorForm(DsfrBaseForm):
         "les propositions de la liste.",
         # TODO: voir comment évaluer cela "lazily"
         # L'utilisation de lazy(all_epci_codes(...)) génère une erreur côté Django DSFR
-        choices=formatted_epcis_as_list_of_tuple(),
+        choices=formatted_epcis_as_list_of_tuple,
         widget=GenericAutoCompleteInput(
             attrs={"data-autocomplete-target": "hiddenInput", "class": "qfdmo-hidden"},
             extra_attrs={
