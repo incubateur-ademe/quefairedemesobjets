@@ -8,6 +8,7 @@ from qfdmo.views.adresses import (
     acteur_detail,
     get_object_list,
     getorcreate_revisionacteur,
+    redirect_or_carte_view,
     solution_admin,
 )
 from qfdmo.views.auth import LVAOLoginView
@@ -15,7 +16,9 @@ from qfdmo.views.configurator import AdvancedConfiguratorView, ConfiguratorView
 from qfdmo.views.dags import DagsValidation
 
 urlpatterns = [
-    path("", CarteView.as_view(), name="reemploi_solution"),
+    path("", redirect_or_carte_view, name="reemploi_solution"),
+    path("carte", CarteView.as_view(), name="carte"),
+    path("formulaire", CarteView.as_view(), name="formulaire"),
     path("connexion", LVAOLoginView.as_view(), name="login"),
     path(
         "donnez-votre-avis",

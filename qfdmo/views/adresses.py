@@ -14,6 +14,7 @@ from django.db.models.query import QuerySet
 from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
+from django.urls.base import reverse
 from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_GET
 from django.views.generic.edit import FormView
@@ -46,6 +47,14 @@ from qfdmo.thread.materialized_view import RefreshMateriazedViewThread
 logger = logging.getLogger(__name__)
 
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
+
+
+def redirect_or_carte_view(request):
+    if "carte" in request.GET:
+        return redirect(reverse("qfdmo:carte"))
+    if "iframe" in request.GET:
+        return redirect(reverse("qfdmo:formulaire"))
+    return redirect("https://longuevieauxobjets.ademe.fr")
 
 
 class DigitalMixin:
