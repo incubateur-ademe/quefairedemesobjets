@@ -108,7 +108,7 @@ class GroupeAction(CodeAsNaturalKeyModel):
                 for key, value in DSFRColors.items()
                 if value.lower() == self.couleur.lower()
             ),
-            None,
+            "",
         )
 
     @cached_property
@@ -201,7 +201,7 @@ class Action(CodeAsNaturalKeyModel):
                 for key, value in DSFRColors.items()
                 if value.lower() == self.couleur.lower()
             ),
-            None,
+            "",
         )
 
     @cached_property
