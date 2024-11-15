@@ -1,6 +1,9 @@
 import pandas as pd
 import pytest
-from sources.tasks.source_data_normalize import df_normalize_sinoe
+from sources.tasks.source_data_normalize import (
+    df_normalize_sinoe,
+    source_data_normalize,
+)
 
 """
 TODO:
@@ -236,11 +239,11 @@ class TestSourceDataNormalize:
     - [ ] test columns_to_add_by_default
     - [ ] test adresse_format_ban
     - [ ] test statut
-    - [ ] test public_accueilli (+ suppression des pro)
-    - [ ] test uniquement_sur_rdv
-    - [ ] test exclusivite_de_reprisereparation
-    - [ ] test reprise
-    - [ ] test labels_etou_bonus
+    - [x] test public_accueilli (+ suppression des pro)
+    - [x] test uniquement_sur_rdv
+    - [x] test exclusivite_de_reprisereparation
+    - [x] test reprise
+    - [x] test labels_etou_bonus
     - [ ] test url
     - [ ] test acteur_type_id
     - [ ] test Suppresion des colonnes non voulues
@@ -248,4 +251,267 @@ class TestSourceDataNormalize:
     - [ ] test produitsdechets_acceptes vide ou None
     """
 
-    pass
+    # FIXME: A déplacer dans normalize
+    @pytest.mark.parametrize(
+        "label_et_bonus, label_et_bonus_expected",
+        [
+            ("label_et_bonus", "label_et_bonus"),
+            ("label_et_bonus1|label_et_bonus2", "label_et_bonus1|label_et_bonus2"),
+            (
+                "Agréé Bonus Réparation|label_et_bonus2",
+                "bonus_reparation|label_et_bonus2",
+            ),
+        ],
+    )
+    def test_label_bonus(
+        self,
+        acteurtype_id_by_code,
+        label_et_bonus,
+        label_et_bonus_expected,
+    ):
+        df = source_data_normalize(
+            df_acteur_from_source=pd.DataFrame(
+                {
+                    "identifiant_externe": ["1"],
+                    "ecoorganisme": ["source1"],
+                    "source_id": ["source_id1"],
+                    "acteur_type_id": ["decheterie"],
+                    "labels_etou_bonus": [label_et_bonus],
+                    "produitsdechets_acceptes": ["Plastic Box"],
+                }
+            ),
+            source_code=None,
+            column_mapping={},
+            columns_to_add_by_default={},
+            label_bonus_reparation="bonus_reparation",
+            validate_address_with_ban=False,
+            ignore_duplicates=False,
+            combine_columns_categories=[],
+            merge_duplicated_acteurs=False,
+            product_mapping={},
+            dechet_mapping={},
+            acteurtype_id_by_code=acteurtype_id_by_code,
+        )
+
+        assert df["labels_etou_bonus"].iloc[0] == label_et_bonus_expected
+
+    @pytest.mark.parametrize(
+        "public_accueilli, expected_public_accueilli",
+        [
+            (None, None),
+            ("fake", None),
+            ("PARTICULIERS", "Particuliers"),
+            ("Particuliers", "Particuliers"),
+            ("Particuliers et professionnels", "Particuliers et professionnels"),
+        ],
+    )
+    def test_public_accueilli(
+        self,
+        acteurtype_id_by_code,
+        public_accueilli,
+        expected_public_accueilli,
+    ):
+        df = source_data_normalize(
+            df_acteur_from_source=pd.DataFrame(
+                {
+                    "identifiant_externe": ["1"],
+                    "ecoorganisme": ["source1"],
+                    "source_id": ["source_id1"],
+                    "public_accueilli": [public_accueilli],
+                    "acteur_type_id": ["decheterie"],
+                    "produitsdechets_acceptes": ["Plastic Box"],
+                }
+            ),
+            source_code=None,
+            column_mapping={},
+            columns_to_add_by_default={},
+            label_bonus_reparation=None,
+            validate_address_with_ban=False,
+            ignore_duplicates=False,
+            combine_columns_categories=[],
+            merge_duplicated_acteurs=False,
+            product_mapping={},
+            dechet_mapping={},
+            acteurtype_id_by_code=acteurtype_id_by_code,
+        )
+        assert df["public_accueilli"][0] == expected_public_accueilli
+
+    @pytest.mark.parametrize(
+        "public_accueilli",
+        [
+            "PROFESSIONNELS",
+            "Professionnels",
+        ],
+    )
+    def test_public_accueilli_filtre_pro(
+        self,
+        acteurtype_id_by_code,
+        public_accueilli,
+    ):
+        with pytest.raises(ValueError):
+            source_data_normalize(
+                df_acteur_from_source=pd.DataFrame(
+                    {
+                        "identifiant_externe": ["1"],
+                        "ecoorganisme": ["source1"],
+                        "source_id": ["source_id1"],
+                        "public_accueilli": [public_accueilli],
+                        "acteur_type_id": ["decheterie"],
+                        "produitsdechets_acceptes": ["Plastic Box"],
+                    }
+                ),
+                source_code=None,
+                column_mapping={},
+                columns_to_add_by_default={},
+                label_bonus_reparation=None,
+                validate_address_with_ban=False,
+                ignore_duplicates=False,
+                combine_columns_categories=[],
+                merge_duplicated_acteurs=False,
+                product_mapping={},
+                dechet_mapping={},
+                acteurtype_id_by_code=acteurtype_id_by_code,
+            )
+
+    @pytest.mark.parametrize(
+        "uniquement_sur_rdv,expected_uniquement_sur_rdv",
+        [
+            (None, False),
+            (False, False),
+            (True, True),
+            ("oui", True),
+            ("Oui", True),
+            (" Oui ", True),
+            ("non", False),
+            ("NON", False),
+            (" NON ", False),
+            ("", False),
+            (" ", False),
+            ("fake", False),
+        ],
+    )
+    def test_uniquement_sur_rdv(
+        self, uniquement_sur_rdv, expected_uniquement_sur_rdv, acteurtype_id_by_code
+    ):
+        df = source_data_normalize(
+            df_acteur_from_source=pd.DataFrame(
+                {
+                    "identifiant_externe": ["1"],
+                    "ecoorganisme": ["source1"],
+                    "source_id": ["source_id1"],
+                    "uniquement_sur_rdv": [uniquement_sur_rdv],
+                    "acteur_type_id": ["decheterie"],
+                    "produitsdechets_acceptes": ["Plastic Box"],
+                }
+            ),
+            source_code=None,
+            column_mapping={},
+            columns_to_add_by_default={},
+            label_bonus_reparation=None,
+            validate_address_with_ban=False,
+            ignore_duplicates=False,
+            combine_columns_categories=[],
+            merge_duplicated_acteurs=False,
+            product_mapping={},
+            dechet_mapping={},
+            acteurtype_id_by_code=acteurtype_id_by_code,
+        )
+        assert df["uniquement_sur_rdv"][0] == expected_uniquement_sur_rdv
+
+    @pytest.mark.parametrize(
+        "reprise,expected_reprise",
+        [
+            (None, None),
+            ("1 pour 0", "1 pour 0"),
+            ("1 pour 1", "1 pour 1"),
+            ("non", "1 pour 0"),
+            ("oui", "1 pour 1"),
+            ("fake", None),
+        ],
+    )
+    def test_reprise(
+        self,
+        acteurtype_id_by_code,
+        reprise,
+        expected_reprise,
+    ):
+        df = source_data_normalize(
+            df_acteur_from_source=pd.DataFrame(
+                {
+                    "identifiant_externe": ["1"],
+                    "ecoorganisme": ["source1"],
+                    "source_id": ["source_id1"],
+                    "reprise": [reprise],
+                    "acteur_type_id": ["decheterie"],
+                    "produitsdechets_acceptes": ["Plastic Box"],
+                }
+            ),
+            source_code=None,
+            column_mapping={},
+            columns_to_add_by_default={},
+            label_bonus_reparation=None,
+            validate_address_with_ban=False,
+            ignore_duplicates=False,
+            combine_columns_categories=[],
+            merge_duplicated_acteurs=False,
+            product_mapping={},
+            dechet_mapping={},
+            acteurtype_id_by_code=acteurtype_id_by_code,
+        )
+        assert df["reprise"][0] == expected_reprise
+
+
+class TestCreateActorSeriesTransformations:
+
+    @pytest.mark.parametrize(
+        "exclusivite_de_reprisereparation, expected_exclusivite_de_reprisereparation",
+        [
+            (None, False),
+            (False, False),
+            (True, True),
+            ("oui", True),
+            ("Oui", True),
+            (" Oui ", True),
+            ("non", False),
+            ("NON", False),
+            (" NON ", False),
+            ("", False),
+            (" ", False),
+            ("fake", False),
+        ],
+    )
+    def test_exclusivite_de_reprisereparation(
+        self,
+        acteurtype_id_by_code,
+        exclusivite_de_reprisereparation,
+        expected_exclusivite_de_reprisereparation,
+    ):
+        df = source_data_normalize(
+            df_acteur_from_source=pd.DataFrame(
+                {
+                    "identifiant_externe": ["1"],
+                    "ecoorganisme": ["source1"],
+                    "source_id": ["source_id1"],
+                    "exclusivite_de_reprisereparation": [
+                        exclusivite_de_reprisereparation
+                    ],
+                    "acteur_type_id": ["decheterie"],
+                    "produitsdechets_acceptes": ["Plastic Box"],
+                }
+            ),
+            source_code=None,
+            column_mapping={},
+            columns_to_add_by_default={},
+            label_bonus_reparation=None,
+            validate_address_with_ban=False,
+            ignore_duplicates=False,
+            combine_columns_categories=[],
+            merge_duplicated_acteurs=False,
+            product_mapping={},
+            dechet_mapping={},
+            acteurtype_id_by_code=acteurtype_id_by_code,
+        )
+        assert (
+            df["exclusivite_de_reprisereparation"][0]
+            == expected_exclusivite_de_reprisereparation
+        )

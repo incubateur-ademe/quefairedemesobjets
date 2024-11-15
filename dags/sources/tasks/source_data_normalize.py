@@ -15,7 +15,7 @@ from utils.db_tasks import read_mapping_from_postgres
 logger = logging.getLogger(__name__)
 
 
-def source_data_normalize(**kwargs):
+def source_data_normalize_taskfct(**kwargs) -> pd.DataFrame:
     df = kwargs["ti"].xcom_pull(task_ids="source_data_download")
 
     params = kwargs["params"]
@@ -46,7 +46,7 @@ def source_data_normalize(**kwargs):
 
     params = kwargs["params"]
 
-    return source_data_normalize_fct(
+    return source_data_normalize(
         df_acteur_from_source=df,
         source_code=source_code,
         column_mapping=column_mapping,
@@ -62,7 +62,7 @@ def source_data_normalize(**kwargs):
     )
 
 
-def source_data_normalize_fct(
+def source_data_normalize(
     df_acteur_from_source: pd.DataFrame,
     source_code: str | None,
     column_mapping: dict,
@@ -172,8 +172,8 @@ def source_data_normalize_fct(
             },
         )
 
-    # Règle métier: Ne pas ingérer les acteurs avec public pur PRO
-    df = df[df["public_accueilli"] != constants.PUBLIC_PRO]
+        # Règle métier: Ne pas ingérer les acteurs avec public pur PRO
+        df = df[df["public_accueilli"] != constants.PUBLIC_PRO]
 
     for column in ["uniquement_sur_rdv", "exclusivite_de_reprisereparation"]:
         if column in df.columns:

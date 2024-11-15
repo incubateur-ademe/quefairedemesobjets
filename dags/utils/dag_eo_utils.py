@@ -375,8 +375,6 @@ def propose_acteur_changes(**kwargs):
 
     params = kwargs["params"]
     source_code = params.get("source_code")
-    label_bonus_reparation = params.get("label_bonus_reparation")
-    column_mapping = params.get("column_mapping", {})
     column_to_drop = params.get("column_to_drop", [])
 
     log.preview("df (source_data_normalize)", df)
@@ -384,8 +382,6 @@ def propose_acteur_changes(**kwargs):
     log.preview("sources_id_by_code", sources_id_by_code)
     log.preview("df_acteurs", df_acteurs)
     log.preview("source_code", source_code)
-    log.preview("label_bonus_reparation", label_bonus_reparation)
-    log.preview("column_mapping", column_mapping)
     log.preview("column_to_drop", column_to_drop)
 
     # Supprimer les acteurs qui ne propose qu'un service à domicile
@@ -402,9 +398,6 @@ def propose_acteur_changes(**kwargs):
     # intersection of columns in df and column_to_drop
     column_to_drop = list(set(column_to_drop) & set(df.columns))
     df = df.drop(column_to_drop, axis=1)
-
-    if source_code:
-        df["source_id"] = sources_id_by_code[source_code]
 
     if "latitude" in df.columns and "longitude" in df.columns:
         df["latitude"] = df["latitude"].apply(mapping_utils.parse_float)
