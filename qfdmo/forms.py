@@ -357,7 +357,7 @@ class DagsForm(forms.Form):
 class ConfiguratorForm(DsfrBaseForm):
     # TODO: rename this field in all codebase -> actions_displayed
     action_list = GroupeActionChoiceField(
-        queryset=GroupeAction.objects.all(),
+        queryset=GroupeAction.objects.all().order_by("order"),
         to_field_name="code",
         widget=forms.CheckboxSelectMultiple,
         required=False,
