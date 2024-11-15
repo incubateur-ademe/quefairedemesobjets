@@ -292,31 +292,6 @@ def mock_ti(
 @pytest.fixture
 def mock_config():
     return {
-        "column_mapping": {
-            "identifiant_unique": "identifiant_externe",
-            "adresse_complement": "adresse_complement",
-            "type_de_point_de_collecte": "acteur_type_id",
-            "telephone": "telephone",
-            "siret": "siret",
-            "uniquement_sur_rdv": "",
-            "exclusivite_de_reprisereparation": "",
-            "public_accueilli": "",
-            "produitsdechets_acceptes": "",
-            "labels_etou_bonus": "",
-            "reprise": "",
-            "point_de_reparation": "",
-            "ecoorganisme": "source_id",
-            "adresse_format_ban": "adresse",
-            "nom_de_lorganisme": "nom",
-            "enseigne_commerciale": "nom_commercial",
-            "site_web": "url",
-            "email": "email",
-            "perimetre_dintervention": "",
-            "longitudewgs84": "longitude",
-            "latitudewgs84": "latitude",
-            "horaires_douverture": "horaires_description",
-            "consignes_dacces": "commentaires",
-        },
         "column_to_drop": ["siren"],
     }
 
@@ -726,24 +701,6 @@ def test_create_reparacteurs(
     kwargs = {
         "ti": mock,
         "params": {
-            "reparacteurs": True,
-            "column_mapping": {
-                "name": "nom",
-                "reparactor_description": "description",
-                "address_1": "adresse",
-                "address_2": "adresse_complement",
-                "zip_code": "code_postal",
-                "zip_code_label": "ville",
-                "website": "url",
-                "email": "email",
-                "phone": "telephone",
-                "siret": "siret",
-                "id": "identifiant_externe",
-                "is_enabled": "statut",
-                "other_info": "commentaires",
-                "update_date": "modifie_le",
-                "reparactor_hours": "horaires_description",
-            },
             "source_code": "cma_reparacteur",
         },
     }
@@ -823,18 +780,7 @@ class TestCeateActorsCreeLe:
             "source_data_normalize": df_data_from_api,
         }[task_ids]
 
-        kwargs = {
-            "ti": mock,
-            "params": {
-                "column_mapping": {
-                    "identifiant_unique": "identifiant_externe",
-                    "nom_de_lorganisme": "nom",
-                    "ecoorganisme": "source_id",
-                },
-            },
-        }
-
-        result = propose_acteur_changes(**kwargs)
+        result = propose_acteur_changes(**{"ti": mock, "params": {}})
         df_result = result["df"]
 
         assert "cree_le" in df_result.columns
