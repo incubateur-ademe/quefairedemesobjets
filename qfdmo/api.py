@@ -43,12 +43,11 @@ class ActeurTypeSchema(ModelSchema):
 
 
 class ActionSchema(ModelSchema):
-    border: str
-    background: str
+    services: str = Field(..., alias="primary")
 
     class Meta:
         model = Action
-        fields = ["id", "code", "libelle", "icon", "couleur"]
+        fields = ["id", "code", "libelle", "icon"]
 
 
 class GroupeActionSchema(ActionSchema):
