@@ -32,70 +32,6 @@ def db_read_propositions_max_id(**kwargs):
     }
 
 
-def propose_services(**kwargs):
-    df = kwargs["ti"].xcom_pull(task_ids="propose_acteur_changes")["df"]
-    data_dict = kwargs["ti"].xcom_pull(task_ids="db_read_propositions_max_id")
-    displayedpropositionservice_max_id = data_dict["displayedpropositionservice_max_id"]
-    rows_dict = {}
-    merged_count = 0
-    actions_id_by_code = kwargs["ti"].xcom_pull(task_ids="db_read_action")
-
-    conditions = [
-        ("point_dapport_de_service_reparation", "reparer"),
-        (
-            "point_dapport_pour_reemploi",
-            "donner",
-        ),
-        ("point_de_reparation", "reparer"),
-        (
-            "point_de_collecte_ou_de_reprise_des_dechets",
-            "trier",
-        ),
-    ]
-
-    for _, row in df.iterrows():
-        acteur_id = row["identifiant_unique"]
-        # TODO: ne pas gérer la données avec des str |, cinder en liste dès la norma
-        sous_categories = row["produitsdechets_acceptes"]
-
-        for condition, action_name in conditions:
-            if row.get(condition):
-                action_id = actions_id_by_code[action_name]
-                key = (action_id, acteur_id)
-
-                if key in rows_dict:
-                    if sous_categories not in rows_dict[key]["sous_categories"]:
-                        merged_count = +merged_count
-                        rows_dict[key]["sous_categories"] += " | " + sous_categories
-                else:
-                    rows_dict[key] = {
-                        "action_id": action_id,
-                        "acteur_id": acteur_id,
-                        "action": action_name,
-                        "sous_categories": sous_categories,
-                    }
-
-    rows_list = list(rows_dict.values())
-
-    df_pds = pd.DataFrame(rows_list)
-    if df_pds.empty:
-        raise ValueError("df_pds est vide")
-    if "sous_categories" in df_pds.columns:
-        df_pds["sous_categories"] = df_pds["sous_categories"].replace(np.nan, None)
-    if indexes := range(
-        displayedpropositionservice_max_id,
-        displayedpropositionservice_max_id + len(df_pds),
-    ):
-        df_pds["id"] = indexes
-    metadata = {
-        "number_of_merged_actors": merged_count,
-        "number_of_propositionservices": len(df_pds),
-    }
-    log.preview("df_pds retournée par la tâche", df_pds)
-
-    return {"df": df_pds, "metadata": metadata}
-
-
 def propose_services_sous_categories(**kwargs):
     df_ps = kwargs["ti"].xcom_pull(task_ids="propose_services")["df"]
     souscats_id_by_code = kwargs["ti"].xcom_pull(task_ids="db_read_souscategorieobjet")
@@ -300,27 +236,6 @@ def db_data_prepare(**kwargs):
     return {"all": {"df": df_joined}, "to_disable": {"df": df_acteur_to_delete}}
 
 
-def db_read_acteur(**kwargs):
-    df_normalized = kwargs["ti"].xcom_pull(task_ids="source_data_normalize")
-    sources_id_by_code = kwargs["ti"].xcom_pull(task_ids="db_read_source")
-    log.preview("df_normalized", df_normalized)
-    log.preview("sources_id_by_code", sources_id_by_code)
-
-    unique_source_ids = df_normalized["source_id"].unique()
-
-    pg_hook = PostgresHook(postgres_conn_id="qfdmo_django_db")
-    engine = pg_hook.get_sqlalchemy_engine()
-    joined_source_ids = ",".join([f"'{source_id}'" for source_id in unique_source_ids])
-    query = f"SELECT * FROM qfdmo_acteur WHERE source_id IN ({joined_source_ids})"
-    log.preview("Requête SQL pour df_acteur", query)
-    df_acteur = pd.read_sql_query(query, engine)
-    logger.info(f"Nombre d'acteurs existants: {len(df_acteur)}")
-    if df_acteur.empty:
-        logger.warning("Aucun acteur trouvé: OK si 1ère fois qu'on ingère la source")
-    log.preview("df_acteur retourné par la tâche", df_acteur)
-    return df_acteur
-
-
 def insert_dagrun_and_process_df(df_acteur_updates, metadata, dag_name, run_name):
     if df_acteur_updates.empty:
         return
@@ -463,7 +378,6 @@ def propose_acteur_changes(**kwargs):
     label_bonus_reparation = params.get("label_bonus_reparation")
     column_mapping = params.get("column_mapping", {})
     column_to_drop = params.get("column_to_drop", [])
-    combine_columns_categories = params.get("combine_columns_categories")
 
     log.preview("df (source_data_normalize)", df)
     log.preview("acteurtype_id_by_code", acteurtype_id_by_code)
@@ -473,7 +387,6 @@ def propose_acteur_changes(**kwargs):
     log.preview("label_bonus_reparation", label_bonus_reparation)
     log.preview("column_mapping", column_mapping)
     log.preview("column_to_drop", column_to_drop)
-    log.preview("combine_columns_categories", combine_columns_categories)
 
     # Supprimer les acteurs qui ne propose qu'un service à domicile
     if "service_a_domicile" in df.columns:
@@ -490,13 +403,6 @@ def propose_acteur_changes(**kwargs):
     column_to_drop = list(set(column_to_drop) & set(df.columns))
     df = df.drop(column_to_drop, axis=1)
 
-    if combine_columns_categories:
-        df["produitsdechets_acceptes"] = df.apply(
-            lambda row: mapping_utils.combine_categories(
-                row, combine_columns_categories
-            ),
-            axis=1,
-        )
     if source_code:
         df["source_id"] = sources_id_by_code[source_code]
 

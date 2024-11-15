@@ -7,13 +7,11 @@ from shapely import wkb
 from shapely.geometry import Point
 from utils.dag_eo_utils import (
     db_data_prepare,
-    db_read_acteur,
     merge_duplicates,
     propose_acteur_changes,
     propose_acteur_services,
     propose_acteur_to_delete,
     propose_labels,
-    propose_services,
     propose_services_sous_categories,
 )
 
@@ -131,288 +129,6 @@ def get_mock_ti_label(
         "db_read_labelqualite": labelqualite_id_by_code,
     }[task_ids]
     return mock
-
-
-class TestCreatePropositionService:
-
-    @pytest.mark.parametrize(
-        "df_create_actors, expected_df, expected_metadata",
-        [
-            # No services
-            (
-                pd.DataFrame(
-                    {
-                        "identifiant_unique": [1],
-                        "produitsdechets_acceptes": ["téléphones portables"],
-                        "point_dapport_de_service_reparation": [False],
-                        "point_dapport_pour_reemploi": [False],
-                        "point_de_reparation": [False],
-                        "point_de_collecte_ou_de_reprise_des_dechets": [False],
-                    }
-                ),
-                pd.DataFrame(),
-                {"number_of_merged_actors": 0, "number_of_propositionservices": 0},
-            ),
-            # Service Réparation
-            (
-                pd.DataFrame(
-                    {
-                        "identifiant_unique": [1],
-                        "produitsdechets_acceptes": ["téléphones portables"],
-                        "point_dapport_de_service_reparation": [True],
-                        "point_dapport_pour_reemploi": [False],
-                        "point_de_reparation": [False],
-                        "point_de_collecte_ou_de_reprise_des_dechets": [False],
-                    }
-                ),
-                pd.DataFrame(
-                    {
-                        "action_id": [1],
-                        "acteur_id": [1],
-                        "action": ["reparer"],
-                        "sous_categories": ["téléphones portables"],
-                        "id": [1],
-                    },
-                ),
-                {"number_of_merged_actors": 0, "number_of_propositionservices": 1},
-            ),
-            # Service Réemploi
-            (
-                pd.DataFrame(
-                    {
-                        "identifiant_unique": [1],
-                        "produitsdechets_acceptes": ["téléphones portables"],
-                        "point_dapport_de_service_reparation": [False],
-                        "point_dapport_pour_reemploi": [True],
-                        "point_de_reparation": [False],
-                        "point_de_collecte_ou_de_reprise_des_dechets": [False],
-                    }
-                ),
-                pd.DataFrame(
-                    {
-                        "action_id": [2],
-                        "acteur_id": [1],
-                        "action": ["donner"],
-                        "sous_categories": ["téléphones portables"],
-                        "id": [1],
-                    },
-                ),
-                {"number_of_merged_actors": 0, "number_of_propositionservices": 1},
-            ),
-            # Point Réparation
-            (
-                pd.DataFrame(
-                    {
-                        "identifiant_unique": [1],
-                        "produitsdechets_acceptes": ["téléphones portables"],
-                        "point_dapport_de_service_reparation": [False],
-                        "point_dapport_pour_reemploi": [False],
-                        "point_de_reparation": [True],
-                        "point_de_collecte_ou_de_reprise_des_dechets": [False],
-                    }
-                ),
-                pd.DataFrame(
-                    {
-                        "action_id": [1],
-                        "acteur_id": [1],
-                        "action": ["reparer"],
-                        "sous_categories": ["téléphones portables"],
-                        "id": [1],
-                    },
-                ),
-                {"number_of_merged_actors": 0, "number_of_propositionservices": 1},
-            ),
-            # Point Collecte (tri)
-            (
-                pd.DataFrame(
-                    {
-                        "identifiant_unique": [1],
-                        "produitsdechets_acceptes": ["téléphones portables"],
-                        "point_dapport_de_service_reparation": [False],
-                        "point_dapport_pour_reemploi": [False],
-                        "point_de_reparation": [False],
-                        "point_de_collecte_ou_de_reprise_des_dechets": [True],
-                    }
-                ),
-                pd.DataFrame(
-                    {
-                        "action_id": [3],
-                        "acteur_id": [1],
-                        "action": ["trier"],
-                        "sous_categories": ["téléphones portables"],
-                        "id": [1],
-                    },
-                ),
-                {"number_of_merged_actors": 0, "number_of_propositionservices": 1},
-            ),
-            # All services
-            (
-                pd.DataFrame(
-                    {
-                        "identifiant_unique": [1],
-                        "produitsdechets_acceptes": ["téléphones portables"],
-                        "point_dapport_de_service_reparation": [True],
-                        "point_dapport_pour_reemploi": [True],
-                        "point_de_reparation": [True],
-                        "point_de_collecte_ou_de_reprise_des_dechets": [True],
-                    }
-                ),
-                pd.DataFrame(
-                    {
-                        "action_id": [1, 2, 3],
-                        "acteur_id": [1, 1, 1],
-                        "action": ["reparer", "donner", "trier"],
-                        "sous_categories": [
-                            "téléphones portables",
-                            "téléphones portables",
-                            "téléphones portables",
-                        ],
-                        "id": [1, 2, 3],
-                    },
-                ),
-                {"number_of_merged_actors": 0, "number_of_propositionservices": 3},
-            ),
-        ],
-    )
-    def test_create_proposition_services_services(
-        self,
-        df_create_actors,
-        expected_df,
-        expected_metadata,
-        actions_id_by_code,
-        acteurservice_id_by_code,
-        souscategorieobjet_code_by_id,
-    ):
-        mock = get_mock_ti_ps(
-            actions_id_by_code,
-            acteurservice_id_by_code,
-            souscategorieobjet_code_by_id,
-            df_create_actors=pd.DataFrame(df_create_actors),
-        )
-
-        kwargs = {"ti": mock}
-        result = propose_services(**kwargs)
-
-        assert result["df"].equals(expected_df)
-        assert result["metadata"] == expected_metadata
-
-    def test_create_proposition_multiple_actor(
-        self,
-        actions_id_by_code,
-        acteurservice_id_by_code,
-        souscategorieobjet_code_by_id,
-    ):
-        mock = get_mock_ti_ps(
-            actions_id_by_code,
-            acteurservice_id_by_code,
-            souscategorieobjet_code_by_id,
-            df_create_actors=pd.DataFrame(
-                {
-                    "identifiant_unique": [1, 2],
-                    "produitsdechets_acceptes": [
-                        "téléphones portables",
-                        "téléphones portables",
-                    ],
-                    "point_dapport_de_service_reparation": [False, False],
-                    "point_dapport_pour_reemploi": [False, False],
-                    "point_de_reparation": [False, False],
-                    "point_de_collecte_ou_de_reprise_des_dechets": [True, True],
-                }
-            ),
-        )
-
-        expected_df = pd.DataFrame(
-            {
-                "action_id": [3, 3],
-                "acteur_id": [1, 2],
-                "action": ["trier", "trier"],
-                "sous_categories": ["téléphones portables", "téléphones portables"],
-                "id": [1, 2],
-            }
-        )
-        expected_metadata = {
-            "number_of_merged_actors": 0,
-            "number_of_propositionservices": 2,
-        }
-
-        kwargs = {"ti": mock}
-        result = propose_services(**kwargs)
-
-        assert result["df"].equals(expected_df)
-        assert result["metadata"] == expected_metadata
-
-    def test_create_proposition_multiple_product(
-        self,
-        actions_id_by_code,
-        acteurservice_id_by_code,
-        souscategorieobjet_code_by_id,
-    ):
-        mock = get_mock_ti_ps(
-            actions_id_by_code,
-            acteurservice_id_by_code,
-            souscategorieobjet_code_by_id,
-            df_create_actors=pd.DataFrame(
-                {
-                    "identifiant_unique": [1, 1],
-                    "produitsdechets_acceptes": [
-                        "téléphones portables",
-                        "écrans",
-                    ],
-                    "point_dapport_de_service_reparation": [True, False],
-                    "point_dapport_pour_reemploi": [False, False],
-                    "point_de_reparation": [False, True],
-                    "point_de_collecte_ou_de_reprise_des_dechets": [False, False],
-                }
-            ),
-        )
-
-        df_expected = pd.DataFrame(
-            {
-                "action_id": [1],
-                "acteur_id": [1],
-                "action": ["reparer"],
-                "sous_categories": ["téléphones portables | écrans"],
-                "id": [1],
-            }
-        )
-        expected_metadata = {
-            "number_of_merged_actors": 0,
-            "number_of_propositionservices": 1,
-        }
-
-        kwargs = {"ti": mock}
-        result = propose_services(**kwargs)
-
-        assert result["df"].equals(df_expected)
-        assert result["metadata"] == expected_metadata
-
-    def test_create_proposition_services_increment_ids(
-        self,
-        actions_id_by_code,
-        acteurservice_id_by_code,
-        souscategorieobjet_code_by_id,
-    ):
-        mock = get_mock_ti_ps(
-            actions_id_by_code,
-            acteurservice_id_by_code,
-            souscategorieobjet_code_by_id,
-            df_create_actors=pd.DataFrame(
-                {
-                    "identifiant_unique": [1],
-                    "produitsdechets_acceptes": ["téléphones portables"],
-                    "point_dapport_de_service_reparation": [False],
-                    "point_dapport_pour_reemploi": [False],
-                    "point_de_reparation": [False],
-                    "point_de_collecte_ou_de_reprise_des_dechets": [True],
-                }
-            ),
-            displayedpropositionservice_max_id=123,
-        )
-
-        kwargs = {"ti": mock}
-        result = propose_services(**kwargs)
-
-        assert result["df"]["id"].tolist() == [123]
 
 
 @pytest.fixture
@@ -543,7 +259,7 @@ def mock_ti(
     )
 
     mock.xcom_pull.side_effect = lambda task_ids="": {
-        "source_data_download": df_api,
+        "source_data_normalize": df_api,
         "propose_acteur_changes": {
             "df": pd.DataFrame(
                 {
@@ -636,7 +352,7 @@ class TestCreateActorSeriesTransformations:
             "db_read_acteur": df_empty_acteurs_from_db,
             "db_read_acteurtype": None,
             "db_read_source": sources_id_by_code,
-            "source_data_download": pd.DataFrame(
+            "source_data_normalize": pd.DataFrame(
                 {
                     "nom_de_lorganisme": ["Eco1"],
                     "id_point_apport_ou_reparation": ["1"],
@@ -702,7 +418,7 @@ class TestCreateActorSeriesTransformations:
             "db_read_acteur": df_empty_acteurs_from_db,
             "db_read_acteurtype": None,
             "db_read_source": sources_id_by_code,
-            "source_data_download": pd.DataFrame(
+            "source_data_normalize": pd.DataFrame(
                 {
                     "nom_de_lorganisme": ["Eco1"],
                     "id_point_apport_ou_reparation": ["1"],
@@ -762,7 +478,7 @@ class TestCreateActorSeriesTransformations:
             "db_read_acteur": df_empty_acteurs_from_db,
             "db_read_acteurtype": None,
             "db_read_source": sources_id_by_code,
-            "source_data_download": pd.DataFrame(
+            "source_data_normalize": pd.DataFrame(
                 {
                     "nom_de_lorganisme": ["Eco1"],
                     "id_point_apport_ou_reparation": ["1"],
@@ -828,7 +544,7 @@ class TestCreateActorSeriesTransformations:
             "db_read_acteur": df_empty_acteurs_from_db,
             "db_read_acteurtype": None,
             "db_read_source": sources_id_by_code,
-            "source_data_download": pd.DataFrame(
+            "source_data_normalize": pd.DataFrame(
                 {
                     "nom_de_lorganisme": ["Eco1"],
                     "id_point_apport_ou_reparation": ["1"],
@@ -1255,7 +971,7 @@ def test_create_reparacteurs(
         "db_read_acteur": df_empty_acteurs_from_db,
         "db_read_acteurtype": acteurtype_id_by_code,
         "db_read_source": sources_id_by_code,
-        "source_data_download": pd.DataFrame(
+        "source_data_normalize": pd.DataFrame(
             {
                 "reparactor_description": ["Ceci est une description du réparacteur."],
                 "address_1": ["12 Rue de Rivoli"],
@@ -1381,7 +1097,7 @@ class TestCeateActorsCreeLe:
             "db_read_acteur": df_acteur,
             "db_read_acteurtype": acteurtype_id_by_code,
             "db_read_source": sources_id_by_code,
-            "source_data_download": df_data_from_api,
+            "source_data_normalize": df_data_from_api,
         }[task_ids]
 
         kwargs = {
@@ -1517,7 +1233,7 @@ class TestActorsLocation:
             "db_read_acteur": df_empty_acteurs_from_db,
             "db_read_acteurtype": acteurtype_id_by_code,
             "db_read_source": sources_id_by_code,
-            "source_data_download": pd.DataFrame(
+            "source_data_normalize": pd.DataFrame(
                 {
                     "id_point_apport_ou_reparation": ["1", "2"],
                     "nom_de_lorganisme": ["Actor 1", "Actor 2"],
@@ -1568,7 +1284,7 @@ class TestActorsLocation:
             "db_read_acteur": df_empty_acteurs_from_db,
             "db_read_acteurtype": acteurtype_id_by_code,
             "db_read_source": sources_id_by_code,
-            "source_data_download": pd.DataFrame(
+            "source_data_normalize": pd.DataFrame(
                 {
                     "id_point_apport_ou_reparation": ["1"],
                     "nom_de_lorganisme": ["Actor 1"],
@@ -1615,14 +1331,14 @@ class TestActorsLocation:
             "db_read_acteur": df_empty_acteurs_from_db,
             "db_read_acteurtype": acteurtype_id_by_code,
             "db_read_source": sources_id_by_code,
-            "source_data_download": pd.DataFrame(
+            "source_data_normalize": pd.DataFrame(
                 {
-                    "id_point_apport_ou_reparation": ["1"],
+                    "identifiant_unique": ["1"],
                     "nom_de_lorganisme": ["Actor 1"],
                     "ecoorganisme": ["source1"],
                     "source_id": ["source_id1"],
-                    "latitudewgs84": [latitude],
-                    "longitudewgs84": [longitude],
+                    "latitude": [latitude],
+                    "longitude": [longitude],
                 }
             ),
         }[task_ids]
@@ -1767,44 +1483,6 @@ class TestMergeDuplicates:
         )
 
         pd.testing.assert_frame_equal(result_df, expected_df)
-
-
-class TestReadActeur:
-
-    @pytest.mark.parametrize(
-        "df_data_from_api",
-        [
-            (pd.DataFrame()),
-            (
-                pd.DataFrame(
-                    {
-                        "not_ecoorganisme_column": ["value"],
-                    }
-                )
-            ),
-        ],
-    )
-    def test_read_acteur_raises(self, df_data_from_api, sources_id_by_code):
-        mock = MagicMock()
-        mock.xcom_pull.side_effect = lambda task_ids="": {
-            "db_read_source": sources_id_by_code,
-            "source_data_download": df_data_from_api,
-        }[task_ids]
-
-        with pytest.raises(ValueError):
-            db_read_acteur(ti=mock, params={})
-
-
-# @pytest.fixture
-# def df_acteurs_from_db():
-#     return pd.DataFrame(
-#         {
-#             "identifiant_unique": ["id1", "id2"],
-#             "statut": ["ACTIF", "ACTIF"],
-#             "cree_le": [datetime(2024, 1, 1), datetime(2024, 1, 1)],
-#             "modifie_le": [datetime(2024, 1, 1), datetime(2024, 1, 1)],
-#         }
-#     )
 
 
 @pytest.fixture

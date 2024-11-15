@@ -4,6 +4,8 @@ from airflow import DAG
 from airflow.models.baseoperator import chain
 from airflow.operators.python import PythonOperator
 from airflow.utils.trigger_rule import TriggerRule
+from sources.tasks.db_read_acteur import db_read_acteur_task
+from sources.tasks.propose_services import propose_services_task
 from sources.tasks.source_config_validate import source_config_validate
 from sources.tasks.source_data_download import source_data_download
 from sources.tasks.source_data_normalize import source_data_normalize
@@ -91,7 +93,7 @@ def read_mapping_from_postgres_task(
 def read_acteur_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id="db_read_acteur",
-        python_callable=dag_eo_utils.db_read_acteur,
+        python_callable=db_read_acteur_task,
         dag=dag,
     )
 
@@ -115,7 +117,7 @@ def get_acteur_to_delete_task(dag: DAG) -> PythonOperator:
 def create_proposition_services_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id="propose_services",
-        python_callable=dag_eo_utils.propose_services,
+        python_callable=propose_services_task,
         dag=dag,
     )
 

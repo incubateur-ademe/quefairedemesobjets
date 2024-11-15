@@ -15,83 +15,7 @@ from utils.db_tasks import read_mapping_from_postgres
 logger = logging.getLogger(__name__)
 
 
-def df_normalize_sinoe(df: pd.DataFrame, params: dict) -> pd.DataFrame:
-    """Normalisation spécifique à la dataframe SINOE"""
-
-    product_mapping = params["product_mapping"]
-    dechet_mapping = params["dechet_mapping"]
-    public_mapping = {
-        "DMA/PRO": constants.PUBLIC_PRO_ET_PAR,
-        "DMA": constants.PUBLIC_PAR,
-        "PRO": constants.PUBLIC_PRO,
-        "NP": None,
-    }
-    # IDENTIFIANTS:
-    df["identifiant_externe"] = df["identifiant_externe"].astype(str).str.strip()
-
-    # MISC
-    acteurtype_id_by_code = read_mapping_from_postgres(table_name="qfdmo_acteurtype")
-    df["acteur_type_id"] = acteurtype_id_by_code["decheterie"]  # Déchetterie
-    # Pour forcer l'action "trier"
-    df["point_de_collecte_ou_de_reprise_des_dechets"] = True
-    df["public_accueilli"] = df["public_accueilli"].map(public_mapping)
-
-    # DOUBLONS: extra sécurité: même si on ne devrait pas obtenir
-    # de doublon grâce à l'API (q_mode=simple&ANNEE_eq=2024)
-    # on vérifie qu'on a qu'une année
-    log.preview("ANNEE uniques", df["ANNEE"].unique().tolist())
-    if df["ANNEE"].nunique() != 1:
-        raise ValueError("Plusieurs ANNEE, changer requête API pour n'en avoir qu'une")
-    df = df.drop(columns=["ANNEE"])
-
-    # GEO
-    df["_geopoint"] = df["_geopoint"].str.split(",")
-    df["latitude"] = df["_geopoint"].map(lambda x: x[0].strip()).astype(float)
-    df["longitude"] = df["_geopoint"].map(lambda x: x[1].strip()).astype(float)
-    df = df.drop(columns=["_geopoint"])
-
-    # PRODUCT MAPPING:
-    # TODO: à sortir dans une fonction df pour tester/débugger plus facilement
-    logger.info(f"# déchetteries avant logique produitsdechets_acceptes: {len(df)}")
-    col = "produitsdechets_acceptes"
-
-    # on supprime les déchetteries qu'on peut pas categoriser
-    df = df[df[col].notnull()]
-
-    # on cinde les codes déchêts en liste (ex: "01.3|02.31" -> ["01.3", "02.31"])
-    df[col] = df[col].str.split("|")
-
-    # nettoyage après cindage
-    df[col] = df[col].apply(
-        # "NP": "Non précisé", on garde pas
-        lambda x: [v.strip() for v in x if v.strip().lower() not in ("", "nan", "np")]
-    )
-    # On map à des chaîne de caractères (ex: "01" -> "Déchets de composés chimiques")
-    # en ignorant les codes déchets qui ne sont pas dans notre product_mapping
-    df[col] = df[col].apply(
-        lambda x: [dechet_mapping[v] for v in x if dechet_mapping[v] in product_mapping]
-    )
-    # Encore une fois on supprime les déchetteries qu'on ne peut pas categoriser
-    df = df[df[col].apply(len) > 0]
-    logger.info(f"# déchetteries après logique produitsdechets_acceptes: {len(df)}")
-    souscats_dechet = set(df[col].explode())
-    souscats_mapping = set(product_mapping.keys())
-    souscats_invalid = souscats_dechet - souscats_mapping
-    log.preview("Sous-catégories du dechet_mapping", souscats_dechet)
-    log.preview("Sous-catégories du product_mapping", souscats_mapping)
-    if souscats_invalid:
-        raise ValueError(f"Sous-catégories invalides: {souscats_invalid}")
-
-    return df
-
-
 def source_data_normalize(**kwargs):
-    """Normalisation des données source. Passée cette étape:
-    - toutes les sources doivent avoir une nomenclature et formatage alignés
-    - les sources peuvent préservées des spécificités (ex: présence/absence de SIRET)
-        mais toujours en cohérence avec les règles de nommage et formatage
-    - Ajout des colonnes avec valeurs par défaut
-    """
     df = kwargs["ti"].xcom_pull(task_ids="source_data_download")
 
     params = kwargs["params"]
@@ -102,6 +26,10 @@ def source_data_normalize(**kwargs):
     validate_address_with_ban = params.get("validate_address_with_ban", False)
     ignore_duplicates = params.get("ignore_duplicates", False)
     combine_columns_categories = params.get("combine_columns_categories", [])
+    merge_duplicated_acteurs = params.get("merge_duplicated_acteurs", False)
+    product_mapping = params.get("product_mapping", {})
+    dechet_mapping = params.get("dechet_mapping", {})
+    acteurtype_id_by_code = read_mapping_from_postgres(table_name="qfdmo_acteurtype")
 
     log.preview("df avant normalisation", df)
     log.preview("source_code", source_code)
@@ -111,6 +39,51 @@ def source_data_normalize(**kwargs):
     log.preview("validate_address_with_ban", validate_address_with_ban)
     log.preview("ignore_duplicates", ignore_duplicates)
     log.preview("combine_columns_categories", combine_columns_categories)
+    log.preview("merge_duplicated_acteurs", merge_duplicated_acteurs)
+    log.preview("product_mapping", product_mapping)
+    log.preview("dechet_mapping", dechet_mapping)
+    log.preview("acteurtype_id_by_code", acteurtype_id_by_code)
+
+    params = kwargs["params"]
+
+    return source_data_normalize_fct(
+        df_acteur_from_source=df,
+        source_code=source_code,
+        column_mapping=column_mapping,
+        columns_to_add_by_default=columns_to_add_by_default,
+        label_bonus_reparation=label_bonus_reparation,
+        validate_address_with_ban=validate_address_with_ban,
+        ignore_duplicates=ignore_duplicates,
+        combine_columns_categories=combine_columns_categories,
+        merge_duplicated_acteurs=merge_duplicated_acteurs,
+        product_mapping=product_mapping,
+        dechet_mapping=dechet_mapping,
+        acteurtype_id_by_code=acteurtype_id_by_code,
+    )
+
+
+def source_data_normalize_fct(
+    df_acteur_from_source: pd.DataFrame,
+    source_code: str | None,
+    column_mapping: dict,
+    columns_to_add_by_default: dict,
+    label_bonus_reparation: str | None,
+    validate_address_with_ban: bool,
+    ignore_duplicates: bool,
+    combine_columns_categories: list,
+    merge_duplicated_acteurs: bool,
+    product_mapping: dict,
+    dechet_mapping: dict,
+    acteurtype_id_by_code: dict,
+) -> pd.DataFrame:
+    """
+    Normalisation des données source. Passée cette étape:
+    - toutes les sources doivent avoir une nomenclature et formatage alignés
+    - les sources peuvent préservées des spécificités (ex: présence/absence de SIRET)
+        mais toujours en cohérence avec les règles de nommage et formatage
+    - Ajout des colonnes avec valeurs par défaut
+    """
+    df = df_acteur_from_source
 
     # Renommage des colonnes
     df = df.rename(columns={k: v for k, v in column_mapping.items() if v is not None})
@@ -167,7 +140,7 @@ def source_data_normalize(**kwargs):
     # Après le traitement des identifiants :
     # Merge les lignes au plus tôt pour minimiser le traitement (réduction de la taille
     # du df)
-    if params.get("merge_duplicated_acteurs"):
+    if merge_duplicated_acteurs:
         df = merge_duplicates(
             df,
             group_column="identifiant_unique",
@@ -198,6 +171,10 @@ def source_data_normalize(**kwargs):
                 "aucun": "Aucun",
             },
         )
+
+    # Règle métier: Ne pas ingérer les acteurs avec public pur PRO
+    df = df[df["public_accueilli"] != constants.PUBLIC_PRO]
+
     for column in ["uniquement_sur_rdv", "exclusivite_de_reprisereparation"]:
         if column in df.columns:
 
@@ -224,19 +201,18 @@ def source_data_normalize(**kwargs):
 
     # Etapes de normalisation spécifiques aux sources
     if source_code == "ADEME_SINOE_Decheteries":
-        df = df_normalize_sinoe(df, params)
-    else:
-        acteurtype_id_by_code = read_mapping_from_postgres(
-            table_name="qfdmo_acteurtype"
+        df = df_normalize_sinoe(
+            df,
+            product_mapping=product_mapping,
+            dechet_mapping=dechet_mapping,
+            acteurtype_id_by_code=acteurtype_id_by_code,
         )
+    else:
         df["acteur_type_id"] = df["acteur_type_id"].apply(
             lambda x: mapping_utils.transform_acteur_type_id(
                 x, acteurtype_id_by_code=acteurtype_id_by_code
             )
         )
-
-    # Règle métier: Ne pas ingérer les acteurs avec public pur PRO
-    df = df[df["public_accueilli"] != constants.PUBLIC_PRO]
 
     # Suppresion des colonnes non voulues:
     # - mappées à None
@@ -265,4 +241,74 @@ def source_data_normalize(**kwargs):
     log.preview("df après normalisation", df)
     if df.empty:
         raise ValueError("Plus aucune donnée disponible après normalisation")
+    return df
+
+
+def df_normalize_sinoe(
+    df: pd.DataFrame,
+    product_mapping: dict,
+    dechet_mapping: dict,
+    acteurtype_id_by_code: dict,
+) -> pd.DataFrame:
+    """Normalisation spécifique à la dataframe SINOE"""
+
+    public_mapping = {
+        "DMA/PRO": constants.PUBLIC_PRO_ET_PAR,
+        "DMA": constants.PUBLIC_PAR,
+        "PRO": constants.PUBLIC_PRO,
+        "NP": None,
+    }
+
+    # MISC
+    df["acteur_type_id"] = acteurtype_id_by_code["decheterie"]  # Déchetterie
+    # Pour forcer l'action "trier"
+    df["point_de_collecte_ou_de_reprise_des_dechets"] = True
+    df["public_accueilli"] = df["public_accueilli"].map(public_mapping)
+
+    # DOUBLONS: extra sécurité: même si on ne devrait pas obtenir
+    # de doublon grâce à l'API (q_mode=simple&ANNEE_eq=2024)
+    # on vérifie qu'on a qu'une année
+    log.preview("ANNEE uniques", df["ANNEE"].unique().tolist())
+    if df["ANNEE"].nunique() != 1:
+        raise ValueError("Plusieurs ANNEE, changer requête API pour n'en avoir qu'une")
+    df = df.drop(columns=["ANNEE"])
+
+    # GEO
+    df["_geopoint"] = df["_geopoint"].str.split(",")
+    df["latitude"] = df["_geopoint"].map(lambda x: x[0].strip()).astype(float)
+    df["longitude"] = df["_geopoint"].map(lambda x: x[1].strip()).astype(float)
+    df = df.drop(columns=["_geopoint"])
+
+    # PRODUCT MAPPING:
+    # TODO: à sortir dans une fonction df pour tester/débugger plus facilement
+    logger.info(f"# déchetteries avant logique produitsdechets_acceptes: {len(df)}")
+    col = "produitsdechets_acceptes"
+
+    # on supprime les déchetteries qu'on peut pas categoriser
+    df = df[df[col].notnull()]
+
+    # on cinde les codes déchêts en liste (ex: "01.3|02.31" -> ["01.3", "02.31"])
+    df[col] = df[col].str.split("|")
+
+    # nettoyage après cindage
+    df[col] = df[col].apply(
+        # "NP": "Non précisé", on garde pas
+        lambda x: [v.strip() for v in x if v.strip().lower() not in ("", "nan", "np")]
+    )
+    # On map à des chaîne de caractères (ex: "01" -> "Déchets de composés chimiques")
+    # en ignorant les codes déchets qui ne sont pas dans notre product_mapping
+    df[col] = df[col].apply(
+        lambda x: [dechet_mapping[v] for v in x if dechet_mapping[v] in product_mapping]
+    )
+    # Encore une fois on supprime les déchetteries qu'on ne peut pas categoriser
+    df = df[df[col].apply(len) > 0]
+    logger.info(f"# déchetteries après logique produitsdechets_acceptes: {len(df)}")
+    souscats_dechet = set(df[col].explode())
+    souscats_mapping = set(product_mapping.keys())
+    souscats_invalid = souscats_dechet - souscats_mapping
+    log.preview("Sous-catégories du dechet_mapping", souscats_dechet)
+    log.preview("Sous-catégories du product_mapping", souscats_mapping)
+    if souscats_invalid:
+        raise ValueError(f"Sous-catégories invalides: {souscats_invalid}")
+
     return df

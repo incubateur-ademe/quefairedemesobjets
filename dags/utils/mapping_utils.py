@@ -133,9 +133,9 @@ def combine_categories(row, combine_columns_categories):
     return " | ".join(categories)
 
 
-def prefix_url(url):
+def prefix_url(url) -> str:
     if pd.isna(url):
-        return None
+        return ""
     url = str(url)
 
     if not (url.startswith("http://") or url.startswith("https://")):
