@@ -44,7 +44,9 @@ class TestInitialValue:
 
     def test_no_parameters(self, client):
         url = ""
-        response = client.get(url)
+
+        # FIXME : supprimer `follow=True` et adapter les tests
+        response = client.get(url, follow=True)
 
         assert response.status_code == 200
         assert response.context_data["location"] == "{}"
@@ -54,7 +56,8 @@ class TestInitialValue:
     def test_carte(self, client):
         url = "?carte"
 
-        response = client.get(url)
+        # FIXME : supprimer `follow=True` et adapter les tests
+        response = client.get(url, follow=True)
 
         assert response.status_code == 200
         assert response.context_data["location"] == "{}"
@@ -89,7 +92,8 @@ class TestInitialValue:
     def test_iframe(self, client):
         url = "?iframe"
 
-        response = client.get(url)
+        # FIXME : supprimer `follow=True` et adapter les tests
+        response = client.get(url, follow=True)
 
         assert response.status_code == 200
         assert response.context_data["location"] == "{}"

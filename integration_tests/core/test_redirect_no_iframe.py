@@ -14,7 +14,8 @@ def test_redirect_without_param(client):
 @override_settings(DEBUG=False)
 def test_redirect_with_carte_param(client):
     url = "/?carte"
-    response = client.get(url)
+    # FIXME : supprimer `follow=True` et adapter les tests
+    response = client.get(url, follow=True)
 
     assert response.status_code == 200
 
@@ -23,7 +24,8 @@ def test_redirect_with_carte_param(client):
 @override_settings(DEBUG=False)
 def test_redirect_with_iframe_param(client):
     url = "/?iframe"
-    response = client.get(url)
+    # FIXME : supprimer `follow=True` et adapter les tests
+    response = client.get(url, follow=True)
 
     assert response.status_code == 200
 

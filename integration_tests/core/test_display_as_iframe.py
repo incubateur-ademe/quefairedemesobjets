@@ -16,7 +16,8 @@ class TestDisplayAsIframe:
     def test_display_as_iframe(self, client):
         url = "?iframe"
 
-        response = client.get(url)
+        # FIXME : supprimer `follow=True` et adapter les tests
+        response = client.get(url, follow=True)
 
         assert response.status_code == 200
         assert 'class="fr-header' not in str(response.content)

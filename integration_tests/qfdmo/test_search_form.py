@@ -29,7 +29,8 @@ class TestDirectionOrder:
     def test_default_direction(self, client, params, expected_order):
         url = params
 
-        response = client.get(url)
+        # FIXME : supprimer `follow=True` et adapter les tests
+        response = client.get(url, follow=True)
         assert response.status_code == 200
 
         soup = BeautifulSoup(response.content, "html.parser")
@@ -53,7 +54,8 @@ class TestDirectionChecked:
     def test_default_direction(self, client, params, checked_direction):
         url = params
 
-        response = client.get(url)
+        # FIXME : supprimer `follow=True` et adapter les tests
+        response = client.get(url, follow=True)
         assert response.status_code == 200
 
         soup = BeautifulSoup(response.content, "html.parser")

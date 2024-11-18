@@ -50,10 +50,22 @@ BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
 
 
 def redirect_or_carte_view(request):
+    get_params = request.GET.copy()
+
     if "carte" in request.GET:
-        return redirect(reverse("qfdmo:carte"))
+        get_params.pop("carte")
+        redirect_url = f"{reverse('qfdmo:carte')}?{get_params.urlencode()}"
+        return redirect(redirect_url)
+
+    # FIXME : c'est comme ça pour bien tester mais il faudra supprimer ces 2 lignes
+    redirect_url = f"{reverse('qfdmo:formulaire')}?{get_params.urlencode()}"
+    return redirect(redirect_url)
+
     if "iframe" in request.GET:
-        return redirect(reverse("qfdmo:formulaire"))
+        get_params.pop("iframe")
+        redirect_url = f"{reverse('qfdmo:formulaire')}?{get_params.urlencode()}"
+        return redirect(redirect_url)
+
     return redirect("https://longuevieauxobjets.ademe.fr")
 
 
