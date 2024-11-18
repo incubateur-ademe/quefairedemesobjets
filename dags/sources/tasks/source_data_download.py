@@ -8,10 +8,17 @@ from utils import logging_utils as log
 logger = logging.getLogger(__name__)
 
 
-def source_data_download(**kwargs) -> pd.DataFrame:
-    """Téléchargement de la données source sans lui apporter de modification"""
+def source_data_download_wrapper(**kwargs) -> pd.DataFrame:
     params = kwargs["params"]
     api_url = params["endpoint"]
+
+    log.preview("API end point", api_url)
+
+    return source_data_download(api_url=api_url)
+
+
+def source_data_download(api_url: str) -> pd.DataFrame:
+    """Téléchargement de la données source sans lui apporter de modification"""
     logger.info("Téléchargement données de l'API : début...")
     # TODO: changer de logique, plutôt que de tout charger en mémoire et se
     # trimballer des dataframes en XCOM, on devrait plutôt streamer les données

@@ -5,11 +5,11 @@ from airflow.models.baseoperator import chain
 from airflow.operators.python import PythonOperator
 from airflow.utils.trigger_rule import TriggerRule
 from sources.tasks.db_read_acteur import db_read_acteur_wrapper
-from sources.tasks.propose_services import propose_services_task
-from sources.tasks.source_config_validate import source_config_validate
-from sources.tasks.source_data_download import source_data_download
+from sources.tasks.propose_services import propose_services_wrapper
+from sources.tasks.source_config_validate import source_config_validate_wrapper
+from sources.tasks.source_data_download import source_data_download_wrapper
 from sources.tasks.source_data_normalize import source_data_normalize_wrapper
-from sources.tasks.source_data_validate import source_data_validate
+from sources.tasks.source_data_validate import source_data_validate_wrapper
 from utils import dag_eo_utils
 from utils.db_tasks import read_mapping_from_postgres
 
@@ -23,22 +23,20 @@ default_args = {
 }
 
 
-# TODO : faire un wrapper
 def source_config_validate_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id="source_config_validate",
-        python_callable=source_config_validate,
+        python_callable=source_config_validate_wrapper,
         dag=dag,
         trigger_rule=TriggerRule.ALL_SUCCESS,
         retries=0,
     )
 
 
-# TODO : faire un wrapper
 def source_data_download_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id="source_data_download",
-        python_callable=source_data_download,
+        python_callable=source_data_download_wrapper,
         dag=dag,
         trigger_rule=TriggerRule.ALL_SUCCESS,
         retries=0,
@@ -55,11 +53,10 @@ def source_data_normalize_task(dag: DAG) -> PythonOperator:
     )
 
 
-# TODO : faire un wrapper
 def source_data_validate_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id="source_data_validate",
-        python_callable=source_data_validate,
+        python_callable=source_data_validate_wrapper,
         dag=dag,
         trigger_rule=TriggerRule.ALL_SUCCESS,
         retries=0,
@@ -120,11 +117,10 @@ def get_acteur_to_delete_task(dag: DAG) -> PythonOperator:
     )
 
 
-# TODO : faire un wrapper & déplacer dans un fichier dédié
-def create_proposition_services_task(dag: DAG) -> PythonOperator:
+def propose_services_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id="propose_services",
-        python_callable=propose_services_task,
+        python_callable=propose_services_wrapper,
         dag=dag,
     )
 
@@ -200,7 +196,7 @@ def eo_task_chain(dag: DAG) -> None:
     ]
 
     create_tasks = [
-        create_proposition_services_task(dag),
+        propose_services_task(dag),
         create_labels_task(dag),
         create_acteur_services_task(dag),
     ]

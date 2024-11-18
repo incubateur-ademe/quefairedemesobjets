@@ -8,17 +8,35 @@ from utils import logging_utils as log
 logger = logging.getLogger(__name__)
 
 
-def source_config_validate(**kwargs) -> None:
+def source_config_validate_wrapper(**kwargs) -> None:
+    params = kwargs["params"]
+    engine = PostgresHook(postgres_conn_id="qfdmo_django_db").get_sqlalchemy_engine()
+    codes_sc_db = set(
+        pd.read_sql_table("qfdmo_souscategorieobjet", engine, columns=["code"])[
+            "code"
+        ].unique()
+    )
+
+    log.preview("paramètres du DAG", params)
+    log.preview("codes sous-catégories DB", codes_sc_db)
+
+    return source_config_validate(
+        params=params,
+        codes_sc_db=codes_sc_db,
+    )
+
+
+def source_config_validate(
+    params: dict,
+    codes_sc_db: set[str],
+) -> None:
     """Etape de validation des paramètres de configuration du DAG
     pour éviter d'engendrer des coûts d'infra (et de fournisseurs API)
     si on peut déjà déterminer que le DAG ne pourra pas fonctionner
     """
-    params = kwargs["params"]
     # TODO: la validation de la structure même des paramètres devrait
     # se faire avec un schéma de validation (dataclass, pydantic, etc.)
     # potentiellement appliqué directement dans le fichier DAG
-
-    engine = PostgresHook(postgres_conn_id="qfdmo_django_db").get_sqlalchemy_engine()
 
     # Validation des sous-catégories produit qui doivent être mappées
     # et toutes correspondre à des codes valides dans notre DB
@@ -31,11 +49,6 @@ def source_config_validate(**kwargs) -> None:
         chain.from_iterable(
             (x if isinstance(x, list) else [x]) for x in product_mapping.values()
         )
-    )
-    codes_sc_db = set(
-        pd.read_sql_table("qfdmo_souscategorieobjet", engine, columns=["code"])[
-            "code"
-        ].unique()
     )
     codes_sc_invalid = codes_sc_params - codes_sc_db
     log.preview("Codes sous-cat dans params", codes_sc_params)
