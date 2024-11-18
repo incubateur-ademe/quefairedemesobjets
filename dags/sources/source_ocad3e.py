@@ -23,7 +23,7 @@ with DAG(
             "labels_etou_bonus": "labels_etou_bonus",
             "exclusivite_de_reprisereparation": "exclusivite_de_reprisereparation",
             "latitudewgs84": "latitude",
-            "adresse_format_ban": "adresse",
+            "adresse_format_ban": "adresse_format_ban",
         },
         "columns_to_add_by_default": {
             "statut": "ACTIF",
