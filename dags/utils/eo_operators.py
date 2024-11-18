@@ -4,7 +4,7 @@ from airflow import DAG
 from airflow.models.baseoperator import chain
 from airflow.operators.python import PythonOperator
 from airflow.utils.trigger_rule import TriggerRule
-from sources.tasks.db_read_acteur import db_read_acteur_task
+from sources.tasks.db_read_acteur import db_read_acteur_wrapper
 from sources.tasks.propose_services import propose_services_task
 from sources.tasks.source_config_validate import source_config_validate
 from sources.tasks.source_data_download import source_data_download
@@ -23,6 +23,7 @@ default_args = {
 }
 
 
+# TODO : faire un wrapper
 def source_config_validate_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id="source_config_validate",
@@ -33,6 +34,7 @@ def source_config_validate_task(dag: DAG) -> PythonOperator:
     )
 
 
+# TODO : faire un wrapper
 def source_data_download_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id="source_data_download",
@@ -53,6 +55,7 @@ def source_data_normalize_task(dag: DAG) -> PythonOperator:
     )
 
 
+# TODO : faire un wrapper
 def source_data_validate_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id="source_data_validate",
@@ -71,6 +74,7 @@ def db_read_propositions_max_id_task(dag: DAG) -> PythonOperator:
     )
 
 
+# TODO : faire un wrapper
 def read_mapping_from_postgres_task(
     *,
     dag: DAG,
@@ -90,14 +94,15 @@ def read_mapping_from_postgres_task(
     )
 
 
-def read_acteur_task(dag: DAG) -> PythonOperator:
+def db_read_acteur_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id="db_read_acteur",
-        python_callable=db_read_acteur_task,
+        python_callable=db_read_acteur_wrapper,
         dag=dag,
     )
 
 
+# TODO : faire un wrapper & déplacer dans un fichier dédié
 def create_actors_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id="propose_acteur_changes",
@@ -106,6 +111,7 @@ def create_actors_task(dag: DAG) -> PythonOperator:
     )
 
 
+# TODO : faire un wrapper & déplacer dans un fichier dédié
 def get_acteur_to_delete_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id="propose_acteur_to_delete",
@@ -114,6 +120,7 @@ def get_acteur_to_delete_task(dag: DAG) -> PythonOperator:
     )
 
 
+# TODO : faire un wrapper & déplacer dans un fichier dédié
 def create_proposition_services_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id="propose_services",
@@ -122,6 +129,7 @@ def create_proposition_services_task(dag: DAG) -> PythonOperator:
     )
 
 
+# TODO : faire un wrapper & déplacer dans un fichier dédié
 def create_proposition_services_sous_categories_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id="propose_services_sous_categories",
@@ -130,6 +138,7 @@ def create_proposition_services_sous_categories_task(dag: DAG) -> PythonOperator
     )
 
 
+# TODO : faire un wrapper & déplacer dans un fichier dédié
 def write_data_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id="db_data_write",
@@ -138,6 +147,7 @@ def write_data_task(dag: DAG) -> PythonOperator:
     )
 
 
+# TODO : faire un wrapper & déplacer dans un fichier dédié
 def serialize_to_json_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id="db_data_prepare",
@@ -146,6 +156,7 @@ def serialize_to_json_task(dag: DAG) -> PythonOperator:
     )
 
 
+# TODO : faire un wrapper & déplacer dans un fichier dédié
 def create_labels_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id="propose_labels",
@@ -154,6 +165,7 @@ def create_labels_task(dag: DAG) -> PythonOperator:
     )
 
 
+# TODO : faire un wrapper
 def create_acteur_services_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id="propose_acteur_services",
@@ -202,7 +214,7 @@ def eo_task_chain(dag: DAG) -> None:
         source_data_validate_task(dag),
         # Logique commune à toutes les sources
         read_tasks,
-        read_acteur_task(dag),
+        db_read_acteur_task(dag),
         create_actors_task(dag),
         get_acteur_to_delete_task(dag),
         create_tasks,

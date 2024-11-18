@@ -7,7 +7,7 @@ from utils import logging_utils as log
 logger = logging.getLogger(__name__)
 
 
-def db_read_acteur_task(**kwargs):
+def db_read_acteur_wrapper(**kwargs):
     df_normalized = kwargs["ti"].xcom_pull(task_ids="source_data_normalize")
 
     log.preview("df_normalized", df_normalized)
