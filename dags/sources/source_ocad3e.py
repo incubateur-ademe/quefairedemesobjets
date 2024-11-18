@@ -4,11 +4,11 @@ from utils.eo_operators import default_args, eo_task_chain
 
 with DAG(
     dag_id="eo-ocad3e",
-    dag_display_name="Source - ECOD3E (ECOSYSTEM & ECOLOGIC) - label QualiRépar",
+    dag_display_name="Source - OCAD3E (ECOSYSTEM & ECOLOGIC) - label QualiRépar",
     default_args=default_args,
     description=(
         "A pipeline to fetch, process, and load to validate data into postgresql"
-        " for ECOD3E dataset"
+        " for OCAD3E dataset"
     ),
     params={
         "column_mapping": {
