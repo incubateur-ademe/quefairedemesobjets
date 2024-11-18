@@ -15,7 +15,7 @@ from utils.db_tasks import read_mapping_from_postgres
 logger = logging.getLogger(__name__)
 
 
-def source_data_normalize_taskfct(**kwargs) -> pd.DataFrame:
+def source_data_normalize_wrapper(**kwargs) -> pd.DataFrame:
     df = kwargs["ti"].xcom_pull(task_ids="source_data_download")
 
     params = kwargs["params"]

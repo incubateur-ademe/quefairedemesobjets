@@ -8,7 +8,7 @@ from sources.tasks.db_read_acteur import db_read_acteur_task
 from sources.tasks.propose_services import propose_services_task
 from sources.tasks.source_config_validate import source_config_validate
 from sources.tasks.source_data_download import source_data_download
-from sources.tasks.source_data_normalize import source_data_normalize_taskfct
+from sources.tasks.source_data_normalize import source_data_normalize_wrapper
 from sources.tasks.source_data_validate import source_data_validate
 from utils import dag_eo_utils
 from utils.db_tasks import read_mapping_from_postgres
@@ -46,7 +46,7 @@ def source_data_download_task(dag: DAG) -> PythonOperator:
 def source_data_normalize_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id="source_data_normalize",
-        python_callable=source_data_normalize_taskfct,
+        python_callable=source_data_normalize_wrapper,
         dag=dag,
         trigger_rule=TriggerRule.ALL_SUCCESS,
         retries=0,

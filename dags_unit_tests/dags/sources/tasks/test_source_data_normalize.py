@@ -251,7 +251,23 @@ class TestSourceDataNormalize:
     - [ ] test produitsdechets_acceptes vide ou None
     """
 
-    # FIXME: A déplacer dans normalize
+    @pytest.fixture
+    def source_data_normalize_kwargs(self, acteurtype_id_by_code):
+        return {
+            "df_acteur_from_source": pd.DataFrame(),
+            "source_code": None,
+            "column_mapping": {},
+            "columns_to_add_by_default": {},
+            "label_bonus_reparation": "bonus_reparation",
+            "validate_address_with_ban": False,
+            "ignore_duplicates": False,
+            "combine_columns_categories": [],
+            "merge_duplicated_acteurs": False,
+            "product_mapping": {},
+            "dechet_mapping": {},
+            "acteurtype_id_by_code": acteurtype_id_by_code,
+        }
+
     @pytest.mark.parametrize(
         "label_et_bonus, label_et_bonus_expected",
         [
@@ -264,34 +280,19 @@ class TestSourceDataNormalize:
         ],
     )
     def test_label_bonus(
-        self,
-        acteurtype_id_by_code,
-        label_et_bonus,
-        label_et_bonus_expected,
+        self, label_et_bonus, label_et_bonus_expected, source_data_normalize_kwargs
     ):
-        df = source_data_normalize(
-            df_acteur_from_source=pd.DataFrame(
-                {
-                    "identifiant_externe": ["1"],
-                    "ecoorganisme": ["source1"],
-                    "source_id": ["source_id1"],
-                    "acteur_type_id": ["decheterie"],
-                    "labels_etou_bonus": [label_et_bonus],
-                    "produitsdechets_acceptes": ["Plastic Box"],
-                }
-            ),
-            source_code=None,
-            column_mapping={},
-            columns_to_add_by_default={},
-            label_bonus_reparation="bonus_reparation",
-            validate_address_with_ban=False,
-            ignore_duplicates=False,
-            combine_columns_categories=[],
-            merge_duplicated_acteurs=False,
-            product_mapping={},
-            dechet_mapping={},
-            acteurtype_id_by_code=acteurtype_id_by_code,
+        source_data_normalize_kwargs["df_acteur_from_source"] = pd.DataFrame(
+            {
+                "identifiant_externe": ["1"],
+                "ecoorganisme": ["source1"],
+                "source_id": ["source_id1"],
+                "acteur_type_id": ["decheterie"],
+                "labels_etou_bonus": [label_et_bonus],
+                "produitsdechets_acceptes": ["Plastic Box"],
+            }
         )
+        df = source_data_normalize(**source_data_normalize_kwargs)
 
         assert df["labels_etou_bonus"].iloc[0] == label_et_bonus_expected
 
@@ -307,33 +308,22 @@ class TestSourceDataNormalize:
     )
     def test_public_accueilli(
         self,
-        acteurtype_id_by_code,
         public_accueilli,
         expected_public_accueilli,
+        source_data_normalize_kwargs,
     ):
-        df = source_data_normalize(
-            df_acteur_from_source=pd.DataFrame(
-                {
-                    "identifiant_externe": ["1"],
-                    "ecoorganisme": ["source1"],
-                    "source_id": ["source_id1"],
-                    "public_accueilli": [public_accueilli],
-                    "acteur_type_id": ["decheterie"],
-                    "produitsdechets_acceptes": ["Plastic Box"],
-                }
-            ),
-            source_code=None,
-            column_mapping={},
-            columns_to_add_by_default={},
-            label_bonus_reparation=None,
-            validate_address_with_ban=False,
-            ignore_duplicates=False,
-            combine_columns_categories=[],
-            merge_duplicated_acteurs=False,
-            product_mapping={},
-            dechet_mapping={},
-            acteurtype_id_by_code=acteurtype_id_by_code,
+        source_data_normalize_kwargs["df_acteur_from_source"] = pd.DataFrame(
+            {
+                "identifiant_externe": ["1"],
+                "ecoorganisme": ["source1"],
+                "source_id": ["source_id1"],
+                "public_accueilli": [public_accueilli],
+                "acteur_type_id": ["decheterie"],
+                "produitsdechets_acceptes": ["Plastic Box"],
+            }
         )
+        df = source_data_normalize(**source_data_normalize_kwargs)
+
         assert df["public_accueilli"][0] == expected_public_accueilli
 
     @pytest.mark.parametrize(
@@ -345,33 +335,21 @@ class TestSourceDataNormalize:
     )
     def test_public_accueilli_filtre_pro(
         self,
-        acteurtype_id_by_code,
         public_accueilli,
+        source_data_normalize_kwargs,
     ):
+        source_data_normalize_kwargs["df_acteur_from_source"] = pd.DataFrame(
+            {
+                "identifiant_externe": ["1"],
+                "ecoorganisme": ["source1"],
+                "source_id": ["source_id1"],
+                "public_accueilli": [public_accueilli],
+                "acteur_type_id": ["decheterie"],
+                "produitsdechets_acceptes": ["Plastic Box"],
+            }
+        )
         with pytest.raises(ValueError):
-            source_data_normalize(
-                df_acteur_from_source=pd.DataFrame(
-                    {
-                        "identifiant_externe": ["1"],
-                        "ecoorganisme": ["source1"],
-                        "source_id": ["source_id1"],
-                        "public_accueilli": [public_accueilli],
-                        "acteur_type_id": ["decheterie"],
-                        "produitsdechets_acceptes": ["Plastic Box"],
-                    }
-                ),
-                source_code=None,
-                column_mapping={},
-                columns_to_add_by_default={},
-                label_bonus_reparation=None,
-                validate_address_with_ban=False,
-                ignore_duplicates=False,
-                combine_columns_categories=[],
-                merge_duplicated_acteurs=False,
-                product_mapping={},
-                dechet_mapping={},
-                acteurtype_id_by_code=acteurtype_id_by_code,
-            )
+            source_data_normalize(**source_data_normalize_kwargs)
 
     @pytest.mark.parametrize(
         "uniquement_sur_rdv,expected_uniquement_sur_rdv",
@@ -391,31 +369,23 @@ class TestSourceDataNormalize:
         ],
     )
     def test_uniquement_sur_rdv(
-        self, uniquement_sur_rdv, expected_uniquement_sur_rdv, acteurtype_id_by_code
+        self,
+        uniquement_sur_rdv,
+        expected_uniquement_sur_rdv,
+        source_data_normalize_kwargs,
     ):
-        df = source_data_normalize(
-            df_acteur_from_source=pd.DataFrame(
-                {
-                    "identifiant_externe": ["1"],
-                    "ecoorganisme": ["source1"],
-                    "source_id": ["source_id1"],
-                    "uniquement_sur_rdv": [uniquement_sur_rdv],
-                    "acteur_type_id": ["decheterie"],
-                    "produitsdechets_acceptes": ["Plastic Box"],
-                }
-            ),
-            source_code=None,
-            column_mapping={},
-            columns_to_add_by_default={},
-            label_bonus_reparation=None,
-            validate_address_with_ban=False,
-            ignore_duplicates=False,
-            combine_columns_categories=[],
-            merge_duplicated_acteurs=False,
-            product_mapping={},
-            dechet_mapping={},
-            acteurtype_id_by_code=acteurtype_id_by_code,
+        source_data_normalize_kwargs["df_acteur_from_source"] = pd.DataFrame(
+            {
+                "identifiant_externe": ["1"],
+                "ecoorganisme": ["source1"],
+                "source_id": ["source_id1"],
+                "uniquement_sur_rdv": [uniquement_sur_rdv],
+                "acteur_type_id": ["decheterie"],
+                "produitsdechets_acceptes": ["Plastic Box"],
+            }
         )
+        df = source_data_normalize(**source_data_normalize_kwargs)
+
         assert df["uniquement_sur_rdv"][0] == expected_uniquement_sur_rdv
 
     @pytest.mark.parametrize(
@@ -431,37 +401,22 @@ class TestSourceDataNormalize:
     )
     def test_reprise(
         self,
-        acteurtype_id_by_code,
         reprise,
         expected_reprise,
+        source_data_normalize_kwargs,
     ):
-        df = source_data_normalize(
-            df_acteur_from_source=pd.DataFrame(
-                {
-                    "identifiant_externe": ["1"],
-                    "ecoorganisme": ["source1"],
-                    "source_id": ["source_id1"],
-                    "reprise": [reprise],
-                    "acteur_type_id": ["decheterie"],
-                    "produitsdechets_acceptes": ["Plastic Box"],
-                }
-            ),
-            source_code=None,
-            column_mapping={},
-            columns_to_add_by_default={},
-            label_bonus_reparation=None,
-            validate_address_with_ban=False,
-            ignore_duplicates=False,
-            combine_columns_categories=[],
-            merge_duplicated_acteurs=False,
-            product_mapping={},
-            dechet_mapping={},
-            acteurtype_id_by_code=acteurtype_id_by_code,
+        source_data_normalize_kwargs["df_acteur_from_source"] = pd.DataFrame(
+            {
+                "identifiant_externe": ["1"],
+                "ecoorganisme": ["source1"],
+                "source_id": ["source_id1"],
+                "reprise": [reprise],
+                "acteur_type_id": ["decheterie"],
+                "produitsdechets_acceptes": ["Plastic Box"],
+            }
         )
+        df = source_data_normalize(**source_data_normalize_kwargs)
         assert df["reprise"][0] == expected_reprise
-
-
-class TestCreateActorSeriesTransformations:
 
     @pytest.mark.parametrize(
         "exclusivite_de_reprisereparation, expected_exclusivite_de_reprisereparation",
@@ -482,35 +437,21 @@ class TestCreateActorSeriesTransformations:
     )
     def test_exclusivite_de_reprisereparation(
         self,
-        acteurtype_id_by_code,
         exclusivite_de_reprisereparation,
         expected_exclusivite_de_reprisereparation,
+        source_data_normalize_kwargs,
     ):
-        df = source_data_normalize(
-            df_acteur_from_source=pd.DataFrame(
-                {
-                    "identifiant_externe": ["1"],
-                    "ecoorganisme": ["source1"],
-                    "source_id": ["source_id1"],
-                    "exclusivite_de_reprisereparation": [
-                        exclusivite_de_reprisereparation
-                    ],
-                    "acteur_type_id": ["decheterie"],
-                    "produitsdechets_acceptes": ["Plastic Box"],
-                }
-            ),
-            source_code=None,
-            column_mapping={},
-            columns_to_add_by_default={},
-            label_bonus_reparation=None,
-            validate_address_with_ban=False,
-            ignore_duplicates=False,
-            combine_columns_categories=[],
-            merge_duplicated_acteurs=False,
-            product_mapping={},
-            dechet_mapping={},
-            acteurtype_id_by_code=acteurtype_id_by_code,
+        source_data_normalize_kwargs["df_acteur_from_source"] = pd.DataFrame(
+            {
+                "identifiant_externe": ["1"],
+                "ecoorganisme": ["source1"],
+                "source_id": ["source_id1"],
+                "exclusivite_de_reprisereparation": [exclusivite_de_reprisereparation],
+                "acteur_type_id": ["decheterie"],
+                "produitsdechets_acceptes": ["Plastic Box"],
+            }
         )
+        df = source_data_normalize(**source_data_normalize_kwargs)
         assert (
             df["exclusivite_de_reprisereparation"][0]
             == expected_exclusivite_de_reprisereparation
