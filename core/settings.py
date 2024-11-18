@@ -67,7 +67,7 @@ if DEBUG:
     INSTALLED_APPS.extend(["debug_toolbar", "django_browser_reload"])
 
 MIDDLEWARE = [
-    "core.middleware.CarteRedirectMiddleware",
+    # "core.middleware.CarteRedirectMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
