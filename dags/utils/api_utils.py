@@ -1,29 +1,36 @@
+import logging
 import math
 
 import requests
 from ratelimit import limits, sleep_and_retry
 
+logger = logging.getLogger(__name__)
+
 
 def fetch_dataset_from_point_apport(url):
     all_data = []
     while url:
-        response = requests.get(url)
-        if response.status_code == 200:
-            data = response.json()
-            all_data.extend(data["results"])
-            url = data.get("next", None)
-        else:
-            print(f"Failed to fetch data: {response.status_code}")
-            break
+        logger.info(f"Récupération de données pour {url}")
+        response = requests.get(url, timeout=60)
+        response.raise_for_status()
+        data = response.json()
+        logger.info("Nombre de lignes récupérées: " + str(len(data["results"])))
+        all_data.extend(data["results"])
+        url = data.get("next", None)
+    logger.info("Plus d'URL à parcourir")
+    logger.info("Nombre total de lignes récupérées: " + str(len(all_data)))
     return all_data
 
 
 def fetch_data_from_url(base_url):
-    if "pointsapport.ademe.fr" in base_url:
+    if "pointsapport.ademe.fr" or "data.ademe.fr" in base_url:
         return fetch_dataset_from_point_apport(base_url)
     elif "artisanat.fr" in base_url:
         return fetch_dataset_from_artisanat(base_url)
-    return []
+    # Le but de nos intégrations API est de récupérer des données.
+    # Si on ne récupére pas de données, on sait qu'on à un problème,
+    # et donc il faut échouer explicitement au plus tôt
+    raise NotImplementedError(f"Pas de fonction de récupération pour l'url {base_url}")
 
 
 def fetch_dataset_from_artisanat(base_url):
@@ -160,3 +167,9 @@ def get_lat_lon_from_address(address):
             return coords[1], coords[0]
 
     return None, None
+
+
+if __name__ == "__main__":
+    fetch_dataset_from_point_apport(
+        "https://data.ademe.fr/data-fair/api/v1/datasets/sinoe-(r)-annuaire-des-decheteries-dma/lines?size=10000&q_mode=simple&ANNEE_eq=2024"
+    )

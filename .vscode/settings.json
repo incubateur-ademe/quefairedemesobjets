@@ -7,6 +7,9 @@
     "files.associations": {
         "*.html": "django-html"
     },
+    "python.analysis.extraPaths": [
+        "./dags"
+    ],
     "python.analysis.typeCheckingMode": "basic",
     "[django-html]": {
         "editor.formatOnSave": false,

@@ -14,6 +14,12 @@ from shapely.geometry import Point
 from utils import api_utils
 
 
+# TODO: Implémenter un cache pour les appels à l'API
+# TODO: Batcher l'appel à l'API
+# TODO: Est-ce qu'on veux cette donnée transformé dans Acteur Importé ou dans Acteur
+# Révision
+# TODO: Ce n'est as de la normalisation mais de la transformation
+# TODO: Quid des sources qui n'ont pas de Geoloc ?
 def get_address(row, col="adresse_format_ban"):
     if pd.isnull(row[col]):
         return pd.Series([None, None, None])
@@ -28,8 +34,9 @@ def get_address(row, col="adresse_format_ban"):
 
         if not address or not postal_code or not city:
             address, postal_code, city = extract_details(row, col)
-    else:
-        address, postal_code, city = extract_details(row, col)
+        return pd.Series([address, postal_code, city])
+
+    address, postal_code, city = extract_details(row, col)
 
     return pd.Series([address, postal_code, city])
 
@@ -41,6 +48,33 @@ def get_mapping_config(mapping_key: str = "sous_categories"):
     return config[mapping_key]
 
 
+def source_sinoe_dechet_mapping_get():
+    """Mapping de C_TYP_DECHET (ex: "01")
+    vers L_TYP_DECHET (ex: "Déchets de composés chimiques")
+    {
+    "total": 232,
+    "results": [
+        {
+        "_rand": 237210,
+        "C_TYP_DECHET": "01",
+        "_i": 1,
+        "NIV_HIER": 1,
+        "L_TYP_DECHET": "Déchets de composés chimiques",
+        "_score": null,
+        "_id": "4UbH7jVe1hc_lXPc0oWz9"
+        },
+    """
+    url = "https://data.ademe.fr/data-fair/api/v1/datasets/sinoe-r-nomenclature-dechets/lines?size=1000"
+    data = requests.get(url).json()
+    # Attention on a eu des renommage L_TYP_DECHET <-> LST_TYP_DECHET par le passé
+    # d'où le get sur les deux clés
+    return {
+        x["C_TYP_DECHET"]: x.get("L_TYP_DECHET", None) or x.get("LST_TYP_DECHET")
+        for x in data["results"]
+    }
+
+
+# TODO faire un retry avec tenacity
 def get_address_from_ban(address):
     url = "https://api-adresse.data.gouv.fr/search/"
     params = {"q": address, "limit": 1}
@@ -73,6 +107,7 @@ def get_address_from_ban(address):
     return {}
 
 
+# TODO : utiliser la cellule en entrée plutôt que la ligne
 def extract_details(row, col="adresse_format_ban"):
     # Pattern pour capturer les codes postaux et les noms de ville optionnels
     pattern = re.compile(r"(.*?)\s+(\d{4,5})\s+(.*)")
@@ -90,8 +125,8 @@ def extract_details(row, col="adresse_format_ban"):
         if len(postal_code) == 4:
             postal_code += "0"
         return pd.Series([address, postal_code, city])
-    else:
-        return pd.Series([None, None, None])
+
+    return pd.Series([None, None, None])
 
 
 def transform_location(longitude, latitude):

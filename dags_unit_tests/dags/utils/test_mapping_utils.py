@@ -34,7 +34,7 @@ class TestDataTransformations:
 
     def test_with_service_a_domicile_only(self):
         row = {
-            "ecoorganisme": "ECOORG",
+            "source_code": "ECOORG",
             "identifiant_externe": "123AbC",
             "type_de_point_de_collecte": "Solution en ligne (site web, app. mobile)",
         }
@@ -42,7 +42,7 @@ class TestDataTransformations:
 
     def test_without_service_a_domicile_only(self):
         row = {
-            "ecoorganisme": "ECOORG",
+            "source_code": "ECOORG",
             "identifiant_externe": "123AbC",
             "type_de_point_de_collecte": "Artisan, commerce indépendant ",
         }
