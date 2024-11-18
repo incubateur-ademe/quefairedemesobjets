@@ -35,7 +35,7 @@ WAIT_SECONDS = 5
 
 
 def fetch_and_process_data(url_title, table_name, index_column, schema, **context):
-    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo_django_db")
     engine = pg_hook.get_sqlalchemy_engine()
 
     with pg_hook.get_conn() as conn:

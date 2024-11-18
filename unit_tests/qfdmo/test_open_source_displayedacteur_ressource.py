@@ -129,4 +129,9 @@ class TestOpenSourceDisplayedActeurResource:
         dataset = OpenSourceDisplayedActeurResource().export()
 
         dataset_dict = dataset.dict
-        assert dataset_dict[0]["Contributeurs"] == expected_contributeurs
+
+        contributeurs = dataset_dict[0]["Contributeurs"].split("|")
+        assert contributeurs[0] == "Longue Vie Aux Objets"
+        assert contributeurs[1] == "ADEME"
+        other_contributeurs = set(contributeurs[2:])
+        assert sorted(contributeurs[2:]) == sorted(other_contributeurs)

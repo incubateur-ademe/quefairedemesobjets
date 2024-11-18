@@ -6,15 +6,13 @@ import pytest
 from shapely import wkb
 from shapely.geometry import Point
 from utils.dag_eo_utils import (
-    create_acteur_services,
-    create_actors,
-    create_labels,
-    create_proposition_services,
-    create_proposition_services_sous_categories,
-    get_acteur_to_delete,
+    db_data_prepare,
     merge_duplicates,
-    read_acteur,
-    serialize_to_json,
+    propose_acteur_changes,
+    propose_acteur_services,
+    propose_acteur_to_delete,
+    propose_labels,
+    propose_services_sous_categories,
 )
 
 
@@ -93,15 +91,15 @@ def get_mock_ti_ps(
     mock = MagicMock()
 
     mock.xcom_pull.side_effect = lambda task_ids="": {
-        "create_actors": {
+        "propose_acteur_changes": {
             "df": df_create_actors,
         },
-        "load_data_from_postgresql": {
+        "db_read_propositions_max_id": {
             "displayedpropositionservice_max_id": displayedpropositionservice_max_id,
         },
-        "read_action": actions_id_by_code,
-        "read_acteurservice": acteurservice_id_by_code,
-        "read_souscategorieobjet": souscategorieobjet_code_by_id,
+        "db_read_action": actions_id_by_code,
+        "db_read_acteurservice": acteurservice_id_by_code,
+        "db_read_souscategorieobjet": souscategorieobjet_code_by_id,
     }[task_ids]
     return mock
 
@@ -118,301 +116,19 @@ def get_mock_ti_label(
     mock = MagicMock()
 
     mock.xcom_pull.side_effect = lambda task_ids="": {
-        "create_actors": {
+        "propose_acteur_changes": {
             "df": df_create_actors,
         },
-        "load_data_from_postgresql": {
+        "db_read_propositions_max_id": {
             "displayedpropositionservice_max_id": displayedpropositionservice_max_id,
         },
-        "read_action": actions_id_by_code,
-        "read_acteurtype": acteurtype_id_by_code,
-        "read_acteurservice": acteurservice_id_by_code,
-        "read_souscategorieobjet": souscategorieobjet_code_by_id,
-        "read_labelqualite": labelqualite_id_by_code,
+        "db_read_action": actions_id_by_code,
+        "db_read_acteurtype": acteurtype_id_by_code,
+        "db_read_acteurservice": acteurservice_id_by_code,
+        "db_read_souscategorieobjet": souscategorieobjet_code_by_id,
+        "db_read_labelqualite": labelqualite_id_by_code,
     }[task_ids]
     return mock
-
-
-class TestCreatePropositionService:
-
-    @pytest.mark.parametrize(
-        "df_create_actors, expected_df, expected_metadata",
-        [
-            # No services
-            (
-                pd.DataFrame(
-                    {
-                        "identifiant_unique": [1],
-                        "produitsdechets_acceptes": ["téléphones portables"],
-                        "point_dapport_de_service_reparation": [False],
-                        "point_dapport_pour_reemploi": [False],
-                        "point_de_reparation": [False],
-                        "point_de_collecte_ou_de_reprise_des_dechets": [False],
-                    }
-                ),
-                pd.DataFrame(),
-                {"number_of_merged_actors": 0, "number_of_propositionservices": 0},
-            ),
-            # Service Réparation
-            (
-                pd.DataFrame(
-                    {
-                        "identifiant_unique": [1],
-                        "produitsdechets_acceptes": ["téléphones portables"],
-                        "point_dapport_de_service_reparation": [True],
-                        "point_dapport_pour_reemploi": [False],
-                        "point_de_reparation": [False],
-                        "point_de_collecte_ou_de_reprise_des_dechets": [False],
-                    }
-                ),
-                pd.DataFrame(
-                    {
-                        "action_id": [1],
-                        "acteur_id": [1],
-                        "action": ["reparer"],
-                        "sous_categories": ["téléphones portables"],
-                        "id": [1],
-                    },
-                ),
-                {"number_of_merged_actors": 0, "number_of_propositionservices": 1},
-            ),
-            # Service Réemploi
-            (
-                pd.DataFrame(
-                    {
-                        "identifiant_unique": [1],
-                        "produitsdechets_acceptes": ["téléphones portables"],
-                        "point_dapport_de_service_reparation": [False],
-                        "point_dapport_pour_reemploi": [True],
-                        "point_de_reparation": [False],
-                        "point_de_collecte_ou_de_reprise_des_dechets": [False],
-                    }
-                ),
-                pd.DataFrame(
-                    {
-                        "action_id": [2],
-                        "acteur_id": [1],
-                        "action": ["donner"],
-                        "sous_categories": ["téléphones portables"],
-                        "id": [1],
-                    },
-                ),
-                {"number_of_merged_actors": 0, "number_of_propositionservices": 1},
-            ),
-            # Point Réparation
-            (
-                pd.DataFrame(
-                    {
-                        "identifiant_unique": [1],
-                        "produitsdechets_acceptes": ["téléphones portables"],
-                        "point_dapport_de_service_reparation": [False],
-                        "point_dapport_pour_reemploi": [False],
-                        "point_de_reparation": [True],
-                        "point_de_collecte_ou_de_reprise_des_dechets": [False],
-                    }
-                ),
-                pd.DataFrame(
-                    {
-                        "action_id": [1],
-                        "acteur_id": [1],
-                        "action": ["reparer"],
-                        "sous_categories": ["téléphones portables"],
-                        "id": [1],
-                    },
-                ),
-                {"number_of_merged_actors": 0, "number_of_propositionservices": 1},
-            ),
-            # Point Collecte (tri)
-            (
-                pd.DataFrame(
-                    {
-                        "identifiant_unique": [1],
-                        "produitsdechets_acceptes": ["téléphones portables"],
-                        "point_dapport_de_service_reparation": [False],
-                        "point_dapport_pour_reemploi": [False],
-                        "point_de_reparation": [False],
-                        "point_de_collecte_ou_de_reprise_des_dechets": [True],
-                    }
-                ),
-                pd.DataFrame(
-                    {
-                        "action_id": [3],
-                        "acteur_id": [1],
-                        "action": ["trier"],
-                        "sous_categories": ["téléphones portables"],
-                        "id": [1],
-                    },
-                ),
-                {"number_of_merged_actors": 0, "number_of_propositionservices": 1},
-            ),
-            # All services
-            (
-                pd.DataFrame(
-                    {
-                        "identifiant_unique": [1],
-                        "produitsdechets_acceptes": ["téléphones portables"],
-                        "point_dapport_de_service_reparation": [True],
-                        "point_dapport_pour_reemploi": [True],
-                        "point_de_reparation": [True],
-                        "point_de_collecte_ou_de_reprise_des_dechets": [True],
-                    }
-                ),
-                pd.DataFrame(
-                    {
-                        "action_id": [1, 2, 3],
-                        "acteur_id": [1, 1, 1],
-                        "action": ["reparer", "donner", "trier"],
-                        "sous_categories": [
-                            "téléphones portables",
-                            "téléphones portables",
-                            "téléphones portables",
-                        ],
-                        "id": [1, 2, 3],
-                    },
-                ),
-                {"number_of_merged_actors": 0, "number_of_propositionservices": 3},
-            ),
-        ],
-    )
-    def test_create_proposition_services_services(
-        self,
-        df_create_actors,
-        expected_df,
-        expected_metadata,
-        actions_id_by_code,
-        acteurservice_id_by_code,
-        souscategorieobjet_code_by_id,
-    ):
-        mock = get_mock_ti_ps(
-            actions_id_by_code,
-            acteurservice_id_by_code,
-            souscategorieobjet_code_by_id,
-            df_create_actors=pd.DataFrame(df_create_actors),
-        )
-
-        kwargs = {"ti": mock}
-        result = create_proposition_services(**kwargs)
-
-        assert result["df"].equals(expected_df)
-        assert result["metadata"] == expected_metadata
-
-    def test_create_proposition_multiple_actor(
-        self,
-        actions_id_by_code,
-        acteurservice_id_by_code,
-        souscategorieobjet_code_by_id,
-    ):
-        mock = get_mock_ti_ps(
-            actions_id_by_code,
-            acteurservice_id_by_code,
-            souscategorieobjet_code_by_id,
-            df_create_actors=pd.DataFrame(
-                {
-                    "identifiant_unique": [1, 2],
-                    "produitsdechets_acceptes": [
-                        "téléphones portables",
-                        "téléphones portables",
-                    ],
-                    "point_dapport_de_service_reparation": [False, False],
-                    "point_dapport_pour_reemploi": [False, False],
-                    "point_de_reparation": [False, False],
-                    "point_de_collecte_ou_de_reprise_des_dechets": [True, True],
-                }
-            ),
-        )
-
-        expected_df = pd.DataFrame(
-            {
-                "action_id": [3, 3],
-                "acteur_id": [1, 2],
-                "action": ["trier", "trier"],
-                "sous_categories": ["téléphones portables", "téléphones portables"],
-                "id": [1, 2],
-            }
-        )
-        expected_metadata = {
-            "number_of_merged_actors": 0,
-            "number_of_propositionservices": 2,
-        }
-
-        kwargs = {"ti": mock}
-        result = create_proposition_services(**kwargs)
-
-        assert result["df"].equals(expected_df)
-        assert result["metadata"] == expected_metadata
-
-    def test_create_proposition_multiple_product(
-        self,
-        actions_id_by_code,
-        acteurservice_id_by_code,
-        souscategorieobjet_code_by_id,
-    ):
-        mock = get_mock_ti_ps(
-            actions_id_by_code,
-            acteurservice_id_by_code,
-            souscategorieobjet_code_by_id,
-            df_create_actors=pd.DataFrame(
-                {
-                    "identifiant_unique": [1, 1],
-                    "produitsdechets_acceptes": [
-                        "téléphones portables",
-                        "écrans",
-                    ],
-                    "point_dapport_de_service_reparation": [True, False],
-                    "point_dapport_pour_reemploi": [False, False],
-                    "point_de_reparation": [False, True],
-                    "point_de_collecte_ou_de_reprise_des_dechets": [False, False],
-                }
-            ),
-        )
-
-        df_expected = pd.DataFrame(
-            {
-                "action_id": [1],
-                "acteur_id": [1],
-                "action": ["reparer"],
-                "sous_categories": ["téléphones portables | écrans"],
-                "id": [1],
-            }
-        )
-        expected_metadata = {
-            "number_of_merged_actors": 0,
-            "number_of_propositionservices": 1,
-        }
-
-        kwargs = {"ti": mock}
-        result = create_proposition_services(**kwargs)
-
-        assert result["df"].equals(df_expected)
-        assert result["metadata"] == expected_metadata
-
-    def test_create_proposition_services_increment_ids(
-        self,
-        actions_id_by_code,
-        acteurservice_id_by_code,
-        souscategorieobjet_code_by_id,
-    ):
-        mock = get_mock_ti_ps(
-            actions_id_by_code,
-            acteurservice_id_by_code,
-            souscategorieobjet_code_by_id,
-            df_create_actors=pd.DataFrame(
-                {
-                    "identifiant_unique": [1],
-                    "produitsdechets_acceptes": ["téléphones portables"],
-                    "point_dapport_de_service_reparation": [False],
-                    "point_dapport_pour_reemploi": [False],
-                    "point_de_reparation": [False],
-                    "point_de_collecte_ou_de_reprise_des_dechets": [True],
-                }
-            ),
-            displayedpropositionservice_max_id=123,
-        )
-
-        kwargs = {"ti": mock}
-        result = create_proposition_services(**kwargs)
-
-        assert result["df"]["id"].tolist() == [123]
 
 
 @pytest.fixture
@@ -470,7 +186,7 @@ def mock_ti(
     df_api = pd.DataFrame(
         {
             "nom_de_lorganisme": ["Eco1", "Eco2"],
-            "id_point_apport_ou_reparation": ["1", "2"],
+            "identifiant_unique": ["1", "2"],
             "acteur_type_id": [
                 "point d'apport volontaire privé",
                 "artisan, commerce indépendant",
@@ -543,8 +259,8 @@ def mock_ti(
     )
 
     mock.xcom_pull.side_effect = lambda task_ids="": {
-        "fetch_data_from_api": df_api,
-        "create_actors": {
+        "source_data_normalize": df_api,
+        "propose_acteur_changes": {
             "df": pd.DataFrame(
                 {
                     "identifiant_unique": [1, 2],
@@ -557,17 +273,17 @@ def mock_ti(
                 }
             ),
         },
-        "load_data_from_postgresql": {
+        "db_read_propositions_max_id": {
             "displayedpropositionservice_max_id": 1,
         },
-        "read_acteur": df_acteurs_from_db,
-        "read_action": actions_id_by_code,
-        "read_acteurtype": acteurtype_id_by_code,
-        "read_acteurservice": acteurservice_id_by_code,
-        "read_source": sources_id_by_code,
-        "read_souscategorieobjet": souscategorieobjet_code_by_id,
-        "read_labelqualite": labelqualite_id_by_code,
-        "create_proposition_services": {"df": df_proposition_services},
+        "db_read_acteur": df_acteurs_from_db,
+        "db_read_action": actions_id_by_code,
+        "db_read_acteurtype": acteurtype_id_by_code,
+        "db_read_acteurservice": acteurservice_id_by_code,
+        "db_read_source": sources_id_by_code,
+        "db_read_souscategorieobjet": souscategorieobjet_code_by_id,
+        "db_read_labelqualite": labelqualite_id_by_code,
+        "propose_services": {"df": df_proposition_services},
         "services_sous_categories": df_proposition_services_sous_categories,
     }[task_ids]
     return mock
@@ -576,301 +292,8 @@ def mock_ti(
 @pytest.fixture
 def mock_config():
     return {
-        "column_mapping": {
-            "id_point_apport_ou_reparation": "identifiant_externe",
-            "adresse_complement": "adresse_complement",
-            "type_de_point_de_collecte": "acteur_type_id",
-            "telephone": "telephone",
-            "siret": "siret",
-            "uniquement_sur_rdv": "",
-            "exclusivite_de_reprisereparation": "",
-            "public_accueilli": "",
-            "produitsdechets_acceptes": "",
-            "labels_etou_bonus": "",
-            "reprise": "",
-            "point_de_reparation": "",
-            "ecoorganisme": "source_id",
-            "adresse_format_ban": "adresse",
-            "nom_de_lorganisme": "nom",
-            "enseigne_commerciale": "nom_commercial",
-            "site_web": "url",
-            "email": "email",
-            "perimetre_dintervention": "",
-            "longitudewgs84": "longitude",
-            "latitudewgs84": "latitude",
-            "horaires_douverture": "horaires_description",
-            "consignes_dacces": "commentaires",
-        },
         "column_to_drop": ["siren"],
     }
-
-
-class TestCreateActorSeriesTransformations:
-
-    @pytest.mark.parametrize(
-        "public_accueilli, expected_public_accueilli, expected_statut",
-        [
-            (None, None, "ACTIF"),
-            ("fake", None, "ACTIF"),
-            ("PARTICULIERS", "Particuliers", "ACTIF"),
-            ("Particuliers", "Particuliers", "ACTIF"),
-            (
-                "Particuliers et professionnels",
-                "Particuliers et professionnels",
-                "ACTIF",
-            ),
-            ("PROFESSIONNELS", "Professionnels", "SUPPRIME"),
-            ("Professionnels", "Professionnels", "SUPPRIME"),
-        ],
-    )
-    def test_create_actor_public_accueilli(
-        self,
-        sources_id_by_code,
-        df_empty_acteurs_from_db,
-        public_accueilli,
-        expected_public_accueilli,
-        expected_statut,
-    ):
-        mock = MagicMock()
-        mock.xcom_pull.side_effect = lambda task_ids="": {
-            "read_acteur": df_empty_acteurs_from_db,
-            "read_acteurtype": None,
-            "read_source": sources_id_by_code,
-            "fetch_data_from_api": pd.DataFrame(
-                {
-                    "nom_de_lorganisme": ["Eco1"],
-                    "id_point_apport_ou_reparation": ["1"],
-                    "latitudewgs84": ["3.8566"],
-                    "longitudewgs84": ["50.8566"],
-                    "type_de_point_de_collecte": [
-                        "artisan, commerce indépendant",
-                    ],
-                    "ecoorganisme": [
-                        "source1",
-                    ],
-                    "produitsdechets_acceptes": ["téléphones portables"],
-                    "point_dapport_de_service_reparation": [True],
-                    "point_dapport_pour_reemploi": [False],
-                    "point_de_reparation": [True],
-                    "point_de_collecte_ou_de_reprise_des_dechets": [True],
-                    "public_accueilli": [public_accueilli],
-                }
-            ),
-        }[task_ids]
-
-        kwargs = {
-            "ti": mock,
-            "params": {
-                "column_mapping": {
-                    "id_point_apport_ou_reparation": "identifiant_externe",
-                    "public_accueilli": "public_accueilli",
-                    "nom_de_lorganisme": "nom",
-                    "ecoorganisme": "source_id",
-                },
-            },
-        }
-        result = create_actors(**kwargs)
-        assert result["df"]["public_accueilli"][0] == expected_public_accueilli
-        assert result["df"]["statut"][0] == expected_statut
-
-    @pytest.mark.parametrize(
-        "uniquement_sur_rdv,expected_uniquement_sur_rdv",
-        [
-            (None, False),
-            (False, False),
-            (True, True),
-            ("oui", True),
-            ("Oui", True),
-            (" Oui ", True),
-            ("non", False),
-            ("NON", False),
-            (" NON ", False),
-            ("", False),
-            (" ", False),
-            ("fake", False),
-        ],
-    )
-    def test_create_actor_uniquement_sur_rdv(
-        self,
-        sources_id_by_code,
-        df_empty_acteurs_from_db,
-        uniquement_sur_rdv,
-        expected_uniquement_sur_rdv,
-    ):
-        mock = MagicMock()
-        mock.xcom_pull.side_effect = lambda task_ids="": {
-            "read_acteur": df_empty_acteurs_from_db,
-            "read_acteurtype": None,
-            "read_source": sources_id_by_code,
-            "fetch_data_from_api": pd.DataFrame(
-                {
-                    "nom_de_lorganisme": ["Eco1"],
-                    "id_point_apport_ou_reparation": ["1"],
-                    "latitudewgs84": ["3.8566"],
-                    "longitudewgs84": ["50.8566"],
-                    "type_de_point_de_collecte": [
-                        "artisan, commerce indépendant",
-                    ],
-                    "ecoorganisme": [
-                        "source1",
-                    ],
-                    "produitsdechets_acceptes": ["téléphones portables"],
-                    "point_dapport_de_service_reparation": [True],
-                    "point_dapport_pour_reemploi": [False],
-                    "point_de_reparation": [True],
-                    "point_de_collecte_ou_de_reprise_des_dechets": [True],
-                    "uniquement_sur_rdv": [uniquement_sur_rdv],
-                }
-            ),
-        }[task_ids]
-
-        kwargs = {
-            "ti": mock,
-            "params": {
-                "column_mapping": {
-                    "id_point_apport_ou_reparation": "identifiant_externe",
-                    "uniquement_sur_rdv": "uniquement_sur_rdv",
-                    "nom_de_lorganisme": "nom",
-                    "ecoorganisme": "source_id",
-                },
-            },
-        }
-        result = create_actors(**kwargs)
-
-        assert result["df"]["uniquement_sur_rdv"][0] == expected_uniquement_sur_rdv
-
-    @pytest.mark.parametrize(
-        "reprise,expected_reprise",
-        [
-            (None, None),
-            ("1 pour 0", "1 pour 0"),
-            ("1 pour 1", "1 pour 1"),
-            ("non", "1 pour 0"),
-            ("oui", "1 pour 1"),
-            ("fake", None),
-        ],
-    )
-    def test_create_actor_reprise(
-        self,
-        sources_id_by_code,
-        df_empty_acteurs_from_db,
-        reprise,
-        expected_reprise,
-    ):
-        mock = MagicMock()
-        mock.xcom_pull.side_effect = lambda task_ids="": {
-            "read_acteur": df_empty_acteurs_from_db,
-            "read_acteurtype": None,
-            "read_source": sources_id_by_code,
-            "fetch_data_from_api": pd.DataFrame(
-                {
-                    "nom_de_lorganisme": ["Eco1"],
-                    "id_point_apport_ou_reparation": ["1"],
-                    "latitudewgs84": ["3.8566"],
-                    "longitudewgs84": ["50.8566"],
-                    "type_de_point_de_collecte": [
-                        "artisan, commerce indépendant",
-                    ],
-                    "ecoorganisme": [
-                        "source1",
-                    ],
-                    "produitsdechets_acceptes": ["téléphones portables"],
-                    "point_dapport_de_service_reparation": [True],
-                    "point_dapport_pour_reemploi": [False],
-                    "point_de_reparation": [True],
-                    "point_de_collecte_ou_de_reprise_des_dechets": [True],
-                    "reprise": [reprise],
-                }
-            ),
-        }[task_ids]
-
-        kwargs = {
-            "ti": mock,
-            "params": {
-                "column_mapping": {
-                    "id_point_apport_ou_reparation": "identifiant_externe",
-                    "reprise": "reprise",
-                    "nom_de_lorganisme": "nom",
-                    "ecoorganisme": "source_id",
-                },
-            },
-        }
-        result = create_actors(**kwargs)
-
-        assert result["df"]["reprise"][0] == expected_reprise
-
-    @pytest.mark.parametrize(
-        "exclusivite_de_reprisereparation, expected_exclusivite_de_reprisereparation",
-        [
-            (None, False),
-            (False, False),
-            (True, True),
-            ("oui", True),
-            ("Oui", True),
-            (" Oui ", True),
-            ("non", False),
-            ("NON", False),
-            (" NON ", False),
-            ("", False),
-            (" ", False),
-            ("fake", False),
-        ],
-    )
-    def test_create_actor_exclusivite_de_reprisereparation(
-        self,
-        sources_id_by_code,
-        df_empty_acteurs_from_db,
-        exclusivite_de_reprisereparation,
-        expected_exclusivite_de_reprisereparation,
-    ):
-        mock = MagicMock()
-        mock.xcom_pull.side_effect = lambda task_ids="": {
-            "read_acteur": df_empty_acteurs_from_db,
-            "read_acteurtype": None,
-            "read_source": sources_id_by_code,
-            "fetch_data_from_api": pd.DataFrame(
-                {
-                    "nom_de_lorganisme": ["Eco1"],
-                    "id_point_apport_ou_reparation": ["1"],
-                    "latitudewgs84": ["3.8566"],
-                    "longitudewgs84": ["50.8566"],
-                    "type_de_point_de_collecte": [
-                        "artisan, commerce indépendant",
-                    ],
-                    "ecoorganisme": [
-                        "source1",
-                    ],
-                    "produitsdechets_acceptes": ["téléphones portables"],
-                    "point_dapport_de_service_reparation": [True],
-                    "point_dapport_pour_reemploi": [False],
-                    "point_de_reparation": [True],
-                    "point_de_collecte_ou_de_reprise_des_dechets": [True],
-                    "exclusivite_de_reprisereparation": [
-                        exclusivite_de_reprisereparation
-                    ],
-                }
-            ),
-        }[task_ids]
-
-        kwargs = {
-            "ti": mock,
-            "params": {
-                "column_mapping": {
-                    "id_point_apport_ou_reparation": "identifiant_externe",
-                    "exclusivite_de_reprisereparation": (
-                        "exclusivite_de_reprisereparation"
-                    ),
-                    "nom_de_lorganisme": "nom",
-                    "ecoorganisme": "source_id",
-                },
-            },
-        }
-        result = create_actors(**kwargs)
-
-        assert (
-            result["df"]["exclusivite_de_reprisereparation"][0]
-            == expected_exclusivite_de_reprisereparation
-        )
 
 
 class TestCreateActeurServices:
@@ -880,8 +303,8 @@ class TestCreateActeurServices:
 
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "read_acteurservice": acteurservice_id_by_code,
-            "create_actors": {
+            "db_read_acteurservice": acteurservice_id_by_code,
+            "propose_acteur_changes": {
                 "df": pd.DataFrame(
                     {
                         "identifiant_unique": [1, 2],
@@ -896,7 +319,7 @@ class TestCreateActeurServices:
 
         kwargs = {"ti": mock}
 
-        df_result = create_acteur_services(**kwargs)
+        df_result = propose_acteur_services(**kwargs)
 
         assert df_result.empty
         assert df_result.columns.tolist() == [
@@ -908,8 +331,8 @@ class TestCreateActeurServices:
 
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "read_acteurservice": acteurservice_id_by_code,
-            "create_actors": {
+            "db_read_acteurservice": acteurservice_id_by_code,
+            "propose_acteur_changes": {
                 "df": pd.DataFrame(
                     {
                         "identifiant_unique": [1, 2],
@@ -924,7 +347,7 @@ class TestCreateActeurServices:
 
         kwargs = {"ti": mock}
 
-        df_result = create_acteur_services(**kwargs)
+        df_result = propose_acteur_services(**kwargs)
 
         assert df_result.columns.tolist() == [
             "acteur_id",
@@ -947,8 +370,8 @@ class TestCreateActeurServices:
 
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "read_acteurservice": acteurservice_id_by_code,
-            "create_actors": {
+            "db_read_acteurservice": acteurservice_id_by_code,
+            "propose_acteur_changes": {
                 "df": pd.DataFrame(
                     {
                         "identifiant_unique": [1, 2],
@@ -963,7 +386,7 @@ class TestCreateActeurServices:
 
         kwargs = {"ti": mock}
 
-        df_result = create_acteur_services(**kwargs)
+        df_result = propose_acteur_services(**kwargs)
 
         assert df_result.columns.tolist() == [
             "acteur_id",
@@ -977,11 +400,11 @@ class TestCreateActeurServices:
         ) == [20]
 
 
-# serialize_to_json
+# db_data_prepare
 class TestSerializeToJson:
 
     @pytest.mark.parametrize(
-        "create_labels, expected_labels",
+        "propose_labels, expected_labels",
         [
             (
                 pd.DataFrame(columns=["acteur_id", "labelqualite_id"]),
@@ -1019,16 +442,16 @@ class TestSerializeToJson:
         self,
         df_proposition_services,
         df_proposition_services_sous_categories,
-        create_labels,
+        propose_labels,
         expected_labels,
     ):
 
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "create_actors": {
+            "propose_acteur_changes": {
                 "df": pd.DataFrame({"identifiant_unique": [1, 2]}),
             },
-            "get_acteur_to_delete": {
+            "propose_acteur_to_delete": {
                 "df_acteur_to_delete": pd.DataFrame(
                     {
                         "identifiant_unique": [3],
@@ -1037,26 +460,26 @@ class TestSerializeToJson:
                     }
                 ),
             },
-            "create_proposition_services": {"df": df_proposition_services},
-            "create_proposition_services_sous_categories": (
+            "propose_services": {"df": df_proposition_services},
+            "propose_services_sous_categories": (
                 df_proposition_services_sous_categories
             ),
-            "create_labels": create_labels,
-            "create_acteur_services": pd.DataFrame(
+            "propose_labels": propose_labels,
+            "propose_acteur_services": pd.DataFrame(
                 columns=["acteur_id", "acteurservice_id", "acteurservice"]
             ),
         }[task_ids]
 
         kwargs = {"ti": mock}
 
-        df_result = serialize_to_json(**kwargs)
+        df_result = db_data_prepare(**kwargs)
         result = df_result["all"]["df"].to_dict()
         labels = result["labels"]
 
         assert labels == expected_labels
 
     @pytest.mark.parametrize(
-        "create_acteur_services, expected_acteur_services",
+        "propose_acteur_services, expected_acteur_services",
         [
             (
                 pd.DataFrame(
@@ -1104,16 +527,16 @@ class TestSerializeToJson:
         self,
         df_proposition_services,
         df_proposition_services_sous_categories,
-        create_acteur_services,
+        propose_acteur_services,
         expected_acteur_services,
     ):
 
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "create_actors": {
+            "propose_acteur_changes": {
                 "df": pd.DataFrame({"identifiant_unique": [1, 2]}),
             },
-            "get_acteur_to_delete": {
+            "propose_acteur_to_delete": {
                 "df_acteur_to_delete": pd.DataFrame(
                     {
                         "identifiant_unique": [3],
@@ -1122,17 +545,17 @@ class TestSerializeToJson:
                     }
                 ),
             },
-            "create_proposition_services": {"df": df_proposition_services},
-            "create_proposition_services_sous_categories": (
+            "propose_services": {"df": df_proposition_services},
+            "propose_services_sous_categories": (
                 df_proposition_services_sous_categories
             ),
-            "create_labels": pd.DataFrame(columns=["acteur_id", "labelqualite_id"]),
-            "create_acteur_services": create_acteur_services,
+            "propose_labels": pd.DataFrame(columns=["acteur_id", "labelqualite_id"]),
+            "propose_acteur_services": propose_acteur_services,
         }[task_ids]
 
         kwargs = {"ti": mock}
 
-        df_result = serialize_to_json(**kwargs)
+        df_result = db_data_prepare(**kwargs)
         result = df_result["all"]["df"].to_dict()
         acteur_services = result["acteur_services"]
 
@@ -1151,7 +574,7 @@ class TestCreatePropositionServicesSousCategories:
                 }
             },
         }
-        df_result = create_proposition_services_sous_categories(**kwargs)
+        df_result = propose_services_sous_categories(**kwargs)
 
         pd.testing.assert_frame_equal(
             df_result,
@@ -1176,8 +599,8 @@ class TestCreatePropositionServicesSousCategories:
         mock = MagicMock()
 
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "read_souscategorieobjet": souscategorieobjet_code_by_id,
-            "create_proposition_services": {
+            "db_read_souscategorieobjet": souscategorieobjet_code_by_id,
+            "propose_services": {
                 "df": pd.DataFrame(
                     {
                         "action_id": [1],
@@ -1193,7 +616,7 @@ class TestCreatePropositionServicesSousCategories:
 
         kwargs = {"ti": mock, "params": {}}
         with pytest.raises(Exception):
-            create_proposition_services_sous_categories(**kwargs)
+            propose_services_sous_categories(**kwargs)
 
     def test_create_proposition_services_sous_categories_empty_products(
         self, souscategorieobjet_code_by_id
@@ -1202,8 +625,8 @@ class TestCreatePropositionServicesSousCategories:
         mock = MagicMock()
 
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "read_souscategorieobjet": souscategorieobjet_code_by_id,
-            "create_proposition_services": {
+            "db_read_souscategorieobjet": souscategorieobjet_code_by_id,
+            "propose_services": {
                 "df": pd.DataFrame(
                     {
                         "action_id": [1, 1],
@@ -1213,7 +636,7 @@ class TestCreatePropositionServicesSousCategories:
                             "Service de réparation",
                             "Service de réparation",
                         ],
-                        "sous_categories": ["", None],
+                        "sous_categories": ["", []],
                         "id": [1, 2],
                     }
                 )
@@ -1221,29 +644,20 @@ class TestCreatePropositionServicesSousCategories:
         }[task_ids]
 
         kwargs = {"ti": mock, "params": {}}
-        result = create_proposition_services_sous_categories(**kwargs)
-        pd.testing.assert_frame_equal(
-            result,
-            pd.DataFrame(
-                columns=[
-                    "propositionservice_id",
-                    "souscategorieobjet_id",
-                    "souscategorie",
-                ]
-            ),
-        )
+        with pytest.raises(ValueError):
+            propose_services_sous_categories(**kwargs)
 
 
 def test_create_actors(mock_ti, mock_config):
     kwargs = {"ti": mock_ti, "params": mock_config}
-    result = create_actors(**kwargs)
+    result = propose_acteur_changes(**kwargs)
     df_result = result["df"]
     metadata = result["metadata"]
 
     assert not df_result.empty
     assert len(df_result) == 2
     assert metadata["number_of_duplicates"] == 0
-    assert metadata["added_rows"] == len(df_result)
+    assert metadata["acteurs_to_add_or_update"] == len(df_result)
     assert "siren" not in df_result.columns
 
 
@@ -1252,15 +666,15 @@ def test_create_reparacteurs(
 ):
     mock = MagicMock()
     mock.xcom_pull.side_effect = lambda task_ids="": {
-        "read_acteur": df_empty_acteurs_from_db,
-        "read_acteurtype": acteurtype_id_by_code,
-        "read_source": sources_id_by_code,
-        "fetch_data_from_api": pd.DataFrame(
+        "db_read_acteur": df_empty_acteurs_from_db,
+        "db_read_acteurtype": acteurtype_id_by_code,
+        "db_read_source": sources_id_by_code,
+        "source_data_normalize": pd.DataFrame(
             {
                 "reparactor_description": ["Ceci est une description du réparacteur."],
                 "address_1": ["12 Rue de Rivoli"],
                 "address_2": ["Bâtiment A"],
-                "id_point_apport_ou_reparation": ["12345678"],
+                "identifiant_unique": ["12345678"],
                 "zip_code": ["75001"],
                 "zip_code_label": ["Paris"],
                 "website": ["https://www.exemple.com"],
@@ -1287,36 +701,18 @@ def test_create_reparacteurs(
     kwargs = {
         "ti": mock,
         "params": {
-            "reparacteurs": True,
-            "column_mapping": {
-                "name": "nom",
-                "reparactor_description": "description",
-                "address_1": "adresse",
-                "address_2": "adresse_complement",
-                "zip_code": "code_postal",
-                "zip_code_label": "ville",
-                "website": "url",
-                "email": "email",
-                "phone": "telephone",
-                "siret": "siret",
-                "id": "identifiant_externe",
-                "is_enabled": "statut",
-                "other_info": "commentaires",
-                "update_date": "modifie_le",
-                "reparactor_hours": "horaires_description",
-            },
             "source_code": "cma_reparacteur",
         },
     }
 
-    result = create_actors(**kwargs)
+    result = propose_acteur_changes(**kwargs)
     df_result = result["df"]
     metadata = result["metadata"]
 
     assert not df_result.empty
     assert len(df_result) == 1
     assert metadata["number_of_duplicates"] == 0
-    assert metadata["added_rows"] == len(df_result)
+    assert metadata["acteurs_to_add_or_update"] == len(df_result)
     assert "siren" not in df_result.columns
     assert "event" in df_result.columns
 
@@ -1338,7 +734,7 @@ class TestCeateActorsCreeLe:
                 ),
                 pd.DataFrame(
                     {
-                        "id_point_apport_ou_reparation": ["12345678"],
+                        "identifiant_unique": ["source1_id1"],
                         "produitsdechets_acceptes": ["12345678"],
                         "nom_de_lorganisme": ["Eco1"],
                         "ecoorganisme": ["source1"],
@@ -1358,7 +754,7 @@ class TestCeateActorsCreeLe:
                 ),
                 pd.DataFrame(
                     {
-                        "id_point_apport_ou_reparation": ["id1"],
+                        "identifiant_unique": ["source1_id1"],
                         "produitsdechets_acceptes": ["12345678"],
                         "nom_de_lorganisme": ["Eco1"],
                         "ecoorganisme": ["source1"],
@@ -1378,24 +774,13 @@ class TestCeateActorsCreeLe:
     ):
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "read_acteur": df_acteur,
-            "read_acteurtype": acteurtype_id_by_code,
-            "read_source": sources_id_by_code,
-            "fetch_data_from_api": df_data_from_api,
+            "db_read_acteur": df_acteur,
+            "db_read_acteurtype": acteurtype_id_by_code,
+            "db_read_source": sources_id_by_code,
+            "source_data_normalize": df_data_from_api,
         }[task_ids]
 
-        kwargs = {
-            "ti": mock,
-            "params": {
-                "column_mapping": {
-                    "id_point_apport_ou_reparation": "identifiant_externe",
-                    "nom_de_lorganisme": "nom",
-                    "ecoorganisme": "source_id",
-                },
-            },
-        }
-
-        result = create_actors(**kwargs)
+        result = propose_acteur_changes(**{"ti": mock, "params": {}})
         df_result = result["df"]
 
         assert "cree_le" in df_result.columns
@@ -1412,7 +797,7 @@ class TestCeateLabels:
     ):
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "create_actors": {
+            "propose_acteur_changes": {
                 "df": pd.DataFrame(
                     {
                         "identifiant_unique": [1, 2],
@@ -1421,10 +806,10 @@ class TestCeateLabels:
                     }
                 ),
             },
-            "read_acteurtype": acteurtype_id_by_code,
-            "read_labelqualite": labelqualite_id_by_code,
+            "db_read_acteurtype": acteurtype_id_by_code,
+            "db_read_labelqualite": labelqualite_id_by_code,
         }[task_ids]
-        df = create_labels(ti=mock)
+        df = propose_labels(ti=mock)
 
         expected_dataframe_with_reparacteur_label = pd.DataFrame(
             {
@@ -1442,7 +827,7 @@ class TestCeateLabels:
     ):
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "create_actors": {
+            "propose_acteur_changes": {
                 "df": pd.DataFrame(
                     {
                         "identifiant_unique": [1, 2],
@@ -1450,10 +835,10 @@ class TestCeateLabels:
                     }
                 ),
             },
-            "read_acteurtype": acteurtype_id_by_code,
-            "read_labelqualite": labelqualite_id_by_code,
+            "db_read_acteurtype": acteurtype_id_by_code,
+            "db_read_labelqualite": labelqualite_id_by_code,
         }[task_ids]
-        df = create_labels(ti=mock)
+        df = propose_labels(ti=mock)
 
         expected_dataframe_with_ess_label = pd.DataFrame(
             {
@@ -1476,7 +861,7 @@ class TestCeateLabels:
 
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "create_actors": {
+            "propose_acteur_changes": {
                 "df": pd.DataFrame(
                     {
                         "identifiant_unique": [1, 2],
@@ -1485,11 +870,11 @@ class TestCeateLabels:
                     }
                 ),
             },
-            "read_acteurtype": acteurtype_id_by_code,
-            "read_labelqualite": labelqualite_id_by_code,
+            "db_read_acteurtype": acteurtype_id_by_code,
+            "db_read_labelqualite": labelqualite_id_by_code,
         }[task_ids]
         kwargs = {"ti": mock, "params": {"label_bonus_reparation": "qualirepar"}}
-        df = create_labels(**kwargs)
+        df = propose_labels(**kwargs)
 
         expected_dataframe_with_bonus_reparation_label = pd.DataFrame(
             {
@@ -1503,7 +888,7 @@ class TestCeateLabels:
         )
 
 
-class TestActorsLocation:
+class TestActorServiceADomicile:
 
     # "service_a_domicile"
     def test_service_a_domicile(
@@ -1514,86 +899,26 @@ class TestActorsLocation:
     ):
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "read_acteur": df_empty_acteurs_from_db,
-            "read_acteurtype": acteurtype_id_by_code,
-            "read_source": sources_id_by_code,
-            "fetch_data_from_api": pd.DataFrame(
+            "db_read_acteur": df_empty_acteurs_from_db,
+            "db_read_acteurtype": acteurtype_id_by_code,
+            "db_read_source": sources_id_by_code,
+            "source_data_normalize": pd.DataFrame(
                 {
-                    "id_point_apport_ou_reparation": ["1", "2"],
-                    "nom_de_lorganisme": ["Actor 1", "Actor 2"],
-                    "ecoorganisme": ["source1", "source1"],
-                    "source_id": ["source_id1", "source_id1"],
+                    "identifiant_unique": ["1", "2"],
                     "service_a_domicile": ["Oui exclusivement", "Non"],
                 }
             ),
         }[task_ids]
 
-        kwargs = {
-            "ti": mock,
-            "params": {
-                "column_mapping": {
-                    "id_point_apport_ou_reparation": "identifiant_externe",
-                    "nom_de_lorganisme": "nom",
-                },
-            },
-        }
-        result = create_actors(**kwargs)
+        result = propose_acteur_changes(**{"ti": mock, "params": {}})
         result_df = result["df"]
 
         assert len(result_df) == 1
         assert result_df["service_a_domicile"].iloc[0] == "Non"
-        assert result_df["nom"].iloc[0] == "Actor 2"
+        assert result_df["identifiant_unique"].iloc[0] == "2"
 
-    @pytest.mark.parametrize(
-        "label_et_bonus, label_et_bonus_expected",
-        [
-            ("label_et_bonus", "label_et_bonus"),
-            ("label_et_bonus1|label_et_bonus2", "label_et_bonus1|label_et_bonus2"),
-            (
-                "Agréé Bonus Réparation|label_et_bonus2",
-                "bonus_reparation|label_et_bonus2",
-            ),
-        ],
-    )
-    def test_label_bonus(
-        self,
-        sources_id_by_code,
-        acteurtype_id_by_code,
-        df_empty_acteurs_from_db,
-        label_et_bonus,
-        label_et_bonus_expected,
-    ):
-        mock = MagicMock()
-        mock.xcom_pull.side_effect = lambda task_ids="": {
-            "read_acteur": df_empty_acteurs_from_db,
-            "read_acteurtype": acteurtype_id_by_code,
-            "read_source": sources_id_by_code,
-            "fetch_data_from_api": pd.DataFrame(
-                {
-                    "id_point_apport_ou_reparation": ["1"],
-                    "nom_de_lorganisme": ["Actor 1"],
-                    "ecoorganisme": ["source1"],
-                    "source_id": ["source_id1"],
-                    "labels_etou_bonus": [label_et_bonus],
-                }
-            ),
-        }[task_ids]
 
-        kwargs = {
-            "ti": mock,
-            "params": {
-                "column_mapping": {
-                    "id_point_apport_ou_reparation": "identifiant_externe",
-                    "nom_de_lorganisme": "nom",
-                    "labels_etou_bonus": "labels_etou_bonus",
-                },
-                "label_bonus_reparation": "bonus_reparation",
-            },
-        }
-        result = create_actors(**kwargs)
-
-        assert result["df"]["labels_etou_bonus"].iloc[0] == label_et_bonus_expected
-
+class TestActorsLocation:
     @pytest.mark.parametrize(
         "latitude, longitude",
         [
@@ -1612,33 +937,19 @@ class TestActorsLocation:
     ):
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "read_acteur": df_empty_acteurs_from_db,
-            "read_acteurtype": acteurtype_id_by_code,
-            "read_source": sources_id_by_code,
-            "fetch_data_from_api": pd.DataFrame(
+            "db_read_acteur": df_empty_acteurs_from_db,
+            "db_read_acteurtype": acteurtype_id_by_code,
+            "db_read_source": sources_id_by_code,
+            "source_data_normalize": pd.DataFrame(
                 {
-                    "id_point_apport_ou_reparation": ["1"],
-                    "nom_de_lorganisme": ["Actor 1"],
-                    "ecoorganisme": ["source1"],
-                    "source_id": ["source_id1"],
-                    "latitudewgs84": [latitude],
-                    "longitudewgs84": [longitude],
+                    "identifiant_unique": ["1"],
+                    "latitude": [latitude],
+                    "longitude": [longitude],
                 }
             ),
         }[task_ids]
 
-        kwargs = {
-            "ti": mock,
-            "params": {
-                "column_mapping": {
-                    "id_point_apport_ou_reparation": "identifiant_externe",
-                    "nom_de_lorganisme": "nom",
-                    "latitudewgs84": "latitude",
-                    "longitudewgs84": "longitude",
-                },
-            },
-        }
-        result = create_actors(**kwargs)
+        result = propose_acteur_changes(**{"ti": mock, "params": {}})
         df_result = result["df"]
 
         expected_location = wkb.dumps(Point(2.3522, 48.8566)).hex()
@@ -1769,44 +1080,6 @@ class TestMergeDuplicates:
         pd.testing.assert_frame_equal(result_df, expected_df)
 
 
-class TestReadActeur:
-
-    @pytest.mark.parametrize(
-        "df_data_from_api",
-        [
-            (pd.DataFrame()),
-            (
-                pd.DataFrame(
-                    {
-                        "not_ecoorganisme_column": ["value"],
-                    }
-                )
-            ),
-        ],
-    )
-    def test_read_acteur_raises(self, df_data_from_api, sources_id_by_code):
-        mock = MagicMock()
-        mock.xcom_pull.side_effect = lambda task_ids="": {
-            "read_source": sources_id_by_code,
-            "fetch_data_from_api": df_data_from_api,
-        }[task_ids]
-
-        with pytest.raises(ValueError):
-            read_acteur(ti=mock, params={})
-
-
-# @pytest.fixture
-# def df_acteurs_from_db():
-#     return pd.DataFrame(
-#         {
-#             "identifiant_unique": ["id1", "id2"],
-#             "statut": ["ACTIF", "ACTIF"],
-#             "cree_le": [datetime(2024, 1, 1), datetime(2024, 1, 1)],
-#             "modifie_le": [datetime(2024, 1, 1), datetime(2024, 1, 1)],
-#         }
-#     )
-
-
 @pytest.fixture
 def metadata():
     return
@@ -1927,12 +1200,12 @@ class TestActeurToDelete:
     ):
         mock = MagicMock()
         mock.xcom_pull.side_effect = lambda task_ids="": {
-            "create_actors": {"df": df_acteurs_for_source, "metadata": {}},
-            "read_acteur": df_acteurs_from_db1,
+            "propose_acteur_changes": {"df": df_acteurs_for_source, "metadata": {}},
+            "db_read_acteur": df_acteurs_from_db1,
         }[task_ids]
 
         kwargs = {"ti": mock}
-        result = get_acteur_to_delete(**kwargs)
+        result = propose_acteur_to_delete(**kwargs)
         df_returned_acteur_to_delete = result["df_acteur_to_delete"]
 
         pd.testing.assert_frame_equal(

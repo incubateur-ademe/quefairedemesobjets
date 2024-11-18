@@ -46,7 +46,7 @@ dag = DAG(
 
 def fetch_and_parse_data(**context):
     limit = context["params"]["limit"]
-    pg_hook = PostgresHook(postgres_conn_id="qfdmo-django-db")
+    pg_hook = PostgresHook(postgres_conn_id="qfdmo_django_db")
     engine = pg_hook.get_sqlalchemy_engine()
     active_actors_query = """
         SELECT
@@ -277,7 +277,7 @@ def enrich_location(**kwargs):
     return data
 
 
-def serialize_to_json(**kwargs):
+def db_data_prepare(**kwargs):
     data = kwargs["ti"].xcom_pull(task_ids="get_location")
     columns = ["identifiant_unique", "statut", "ae_result", "admin_link"]
     serialized_data = {}
@@ -319,14 +319,14 @@ get_location_task = PythonOperator(
 )
 
 write_data_task = PythonOperator(
-    task_id="write_data_to_validate_into_dagruns",
+    task_id="db_data_write",
     python_callable=dag_eo_utils.write_to_dagruns,
     dag=dag,
 )
 
 serialize_to_json_task = PythonOperator(
-    task_id="serialize_to_json",
-    python_callable=serialize_to_json,
+    task_id="db_data_prepare",
+    python_callable=db_data_prepare,
     dag=dag,
 )
 

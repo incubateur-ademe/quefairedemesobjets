@@ -4,9 +4,7 @@ from utils.eo_operators import default_args, eo_task_chain
 
 with DAG(
     dag_id="eo-ocad3e",
-    dag_display_name=(
-        "Téléchargement de la source ECOD3E (ECOSYSTEM & ECOLOGIC) - label QualiRépar"
-    ),
+    dag_display_name="Source - ECOD3E (ECOSYSTEM & ECOLOGIC) - label QualiRépar",
     default_args=default_args,
     description=(
         "A pipeline to fetch, process, and load to validate data into postgresql"
@@ -27,16 +25,18 @@ with DAG(
             "latitudewgs84": "latitude",
             "adresse_format_ban": "adresse",
         },
+        "columns_to_add_by_default": {
+            "statut": "ACTIF",
+        },
         "endpoint": (
             "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
             "donnees-eo-ocad3e/lines?size=10000"
         ),
-        "columns_to_add_by_default": {
-            "statut": "ACTIF",
-        },
-        "source_code": "ocad3e",
+        "ignore_duplicates": False,
+        "validate_address_with_ban": False,
         "label_bonus_reparation": "qualirepar",
         "product_mapping": get_mapping_config(mapping_key="sous_categories_qualirepar"),
+        "source_code": "ocad3e",
     },
     schedule=None,
 ) as dag:
