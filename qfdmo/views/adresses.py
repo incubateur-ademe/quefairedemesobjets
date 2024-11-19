@@ -105,11 +105,7 @@ class BaseAdresseView(
     # TODO : supprimer
     is_iframe = False
     is_carte = False
-
-    @property
-    def is_embedded(self):
-        # TODO : va sauter
-        return self.is_carte or self.is_iframe
+    is_embedded = True
 
     def get_initial(self):
         initial = super().get_initial()
