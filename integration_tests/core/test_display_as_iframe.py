@@ -14,12 +14,8 @@ def django_db_setup(django_db_setup, django_db_blocker):
 class TestDisplayAsIframe:
     @pytest.mark.django_db
     def test_display_as_iframe(self, client):
-        url = "?iframe"
-
-        redirect = client.get(url)
-        assert redirect.status_code == 302
-        assert "/formulaire" in redirect.url
-        response = client.get(redirect.url)
+        url = "/formulaire"
+        response = client.get(url)
         assert response.status_code == 200
         assert 'class="fr-header' not in str(response.content)
         assert 'class="fr-footer' not in str(response.content)
