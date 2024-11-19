@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test"
 
 test("Recherche et modification d'une recherche", async ({ page }) => {
-    await page.goto(`http://localhost:8000/`, {
+    await page.goto(`http://localhost:8000/formulaire`, {
         waitUntil: "networkidle",
     })
     // Masquage de django debug toolbar

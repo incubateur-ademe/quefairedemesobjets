@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test"
 
 test("Browser version alert is not displayed", async ({ page }) => {
-    await page.goto(`http://localhost:8000/`, { waitUntil: "networkidle" })
+    await page.goto(`http://localhost:8000/formulaire`, { waitUntil: "networkidle" })
 
     const titlePage = await page.title()
     expect(titlePage).toBe("Longue vie aux objets")

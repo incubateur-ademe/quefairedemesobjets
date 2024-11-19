@@ -14,6 +14,7 @@ from django.db.models.query import QuerySet
 from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
+from django.urls.base import reverse
 from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_GET
 from django.views.generic.edit import FormView
@@ -48,6 +49,30 @@ logger = logging.getLogger(__name__)
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
 
 
+def direct_access(request):
+    get_params = request.GET.copy()
+
+    if "carte" in request.GET:
+        # Order matters, this should be before iframe because iframe and carte
+        # parameters can coexist
+        del get_params["carte"]
+        try:
+            del get_params["iframe"]
+        except KeyError:
+            pass
+        params = get_params.urlencode()
+        parts = [reverse("qfdmo:carte"), "?" if params else "", params]
+        return redirect("".join(parts))
+
+    if "iframe" in request.GET:
+        del get_params["iframe"]
+        params = get_params.urlencode()
+        parts = [reverse("qfdmo:formulaire"), "?" if params else "", params]
+        return redirect("".join(parts))
+
+    return redirect("https://longuevieauxobjets.ademe.fr", permanent=True)
+
+
 class DigitalMixin:
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -71,33 +96,15 @@ class TurboFormMixin:
         return context
 
 
-class IframeMixin:
-    def setup(self, request, *args, **kwargs):
-        super().setup(request, *args, **kwargs)
-        self.is_carte = "carte" in request.GET
-        self.is_iframe = "iframe" in request.GET
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update(
-            is_carte=self.is_carte,
-            is_iframe=self.is_iframe,
-        )
-
-        return context
-
-    @property
-    def is_embedded(self):
-        return self.is_carte or self.is_iframe
-
-
-class CarteView(
+class SearchActeursView(
     DigitalMixin,
     TurboFormMixin,
-    IframeMixin,
     FormView,
 ):
-    template_name = "qfdmo/carte.html"
+    # TODO : supprimer
+    is_iframe = False
+    is_carte = False
+    is_embedded = True
 
     def get_initial(self):
         initial = super().get_initial()
@@ -106,7 +113,7 @@ class CarteView(
         # TODO: refacto forms : delete this line
         initial["adresse"] = self.request.GET.get("adresse")
         initial["digital"] = self.request.GET.get("digital", "0")
-        initial["direction"] = get_direction(self.request)
+        initial["direction"] = get_direction(self.request, self.is_carte)
         # TODO: refacto forms : delete this line
         initial["latitude"] = self.request.GET.get("latitude")
         # TODO: refacto forms : delete this line
@@ -148,14 +155,6 @@ class CarteView(
             )
 
         return initial
-
-    def setup(self, request, *args, **kwargs):
-        super().setup(request, *args, **kwargs)
-        if self.is_carte:
-            self.form_class = CarteForm
-        else:
-            self.form_class = FormulaireForm
-            self.template_name = "qfdmo/formulaire.html"
 
     def get_form(self, form_class=None):
         if self.request.GET & self.get_form_class().base_fields.keys():
@@ -387,12 +386,6 @@ class CarteView(
         # return empty array, will search in all actions
         return []
 
-    def _get_selected_action_ids(self):
-        if self.is_carte:
-            return [a.id for a in self._get_selected_action()]
-
-        return [a["id"] for a in self.get_action_list()]
-
     def _get_selected_action(self) -> List[Action]:
         """
         Get the action to include in the request
@@ -433,16 +426,6 @@ class CarteView(
                 a for a in actions if direction in [d.code for d in a.directions.all()]
             ]
         return actions
-
-    def get_action_list(self) -> List[dict]:
-        direction = get_direction(self.request)
-        action_displayed = self._set_action_displayed()
-        actions = self._set_action_list(action_displayed)
-        if direction:
-            actions = [
-                a for a in actions if direction in [d.code for d in a.directions.all()]
-            ]
-        return [model_to_dict(a, exclude=["directions"]) for a in actions]
 
     def _acteurs_from_sous_categorie_objet_and_actions(
         self,
@@ -564,6 +547,45 @@ class CarteView(
             for groupe_option in grouped_action_choices
             if set(groupe_option[0].split("|")) & set([a.code for a in action_list])
         ]
+
+
+class CarteSearchActeursView(SearchActeursView):
+    is_carte = True
+    template_name = "qfdmo/carte.html"
+    form_class = CarteForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(is_carte=True)
+        return context
+
+    def _get_selected_action_ids(self):
+        return [a.id for a in self._get_selected_action()]
+
+
+class FormulaireSearchActeursView(SearchActeursView):
+    """Affiche le formulaire utilisé sur epargnonsnosressources.gouv.fr
+    Cette vue est à considérer en mode maintenance uniquement et ne doit pas être
+    modifiée."""
+
+    is_iframe = True
+    template_name = "qfdmo/formulaire.html"
+    form_class = FormulaireForm
+
+    def _get_selected_action_ids(self):
+        # TODO: merge this method with the one from CarteSearchActeursView
+        # and do not return a list of dict but a queryset instead
+        return [a["id"] for a in self.get_action_list()]
+
+    def get_action_list(self) -> List[dict]:
+        direction = get_direction(self.request, False)
+        action_displayed = self._set_action_displayed()
+        actions = self._set_action_list(action_displayed)
+        if direction:
+            actions = [
+                a for a in actions if direction in [d.code for d in a.directions.all()]
+            ]
+        return [model_to_dict(a, exclude=["directions"]) for a in actions]
 
 
 # TODO : should be deprecated once all is moved to the displayed acteur
