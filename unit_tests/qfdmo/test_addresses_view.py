@@ -1,7 +1,7 @@
 import pytest
 from django.http import HttpRequest
 
-from qfdmo.views.adresses import CarteView, FormulaireView
+from qfdmo.views.adresses import CarteSearchActeursView, FormulaireSearchActeursView
 from unit_tests.core.test_utils import query_dict_from
 
 
@@ -14,7 +14,7 @@ class TestAdresseViewMixins:
                 "digital": "1",
             }
         )
-        adresses_view = CarteView()
+        adresses_view = CarteSearchActeursView()
         adresses_view.setup(request)
         assert adresses_view.get_context_data()["is_digital"]
 
@@ -69,7 +69,7 @@ class TestFormulaireViewGetActionList:
     def test_get_action_list(self, params, action_list):
         request = HttpRequest()
         request.GET = params
-        adresses_view = FormulaireView()
+        adresses_view = FormulaireSearchActeursView()
         adresses_view.setup(request)
 
         assert [

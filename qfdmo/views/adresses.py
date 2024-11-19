@@ -96,8 +96,7 @@ class TurboFormMixin:
         return context
 
 
-# TODO: revoir nom
-class BaseAdresseView(
+class SearchActeursView(
     DigitalMixin,
     TurboFormMixin,
     FormView,
@@ -550,7 +549,7 @@ class BaseAdresseView(
         ]
 
 
-class CarteView(BaseAdresseView):
+class CarteSearchActeursView(SearchActeursView):
     is_carte = True
     template_name = "qfdmo/carte.html"
     form_class = CarteForm
@@ -564,7 +563,7 @@ class CarteView(BaseAdresseView):
         return [a.id for a in self._get_selected_action()]
 
 
-class FormulaireView(BaseAdresseView):
+class FormulaireSearchActeursView(SearchActeursView):
     """Affiche le formulaire utilisé sur epargnonsnosressources.gouv.fr
     Cette vue est à considérer en mode maintenance uniquement et ne doit pas être
     modifiée."""

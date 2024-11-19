@@ -4,8 +4,8 @@ from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 
 from qfdmo.views.adresses import (
-    CarteView,
-    FormulaireView,
+    CarteSearchActeursView,
+    FormulaireSearchActeursView,
     acteur_detail,
     direct_access,
     get_object_list,
@@ -18,8 +18,8 @@ from qfdmo.views.dags import DagsValidation
 
 urlpatterns = [
     path("", direct_access, name="direct_access"),
-    path("carte", CarteView.as_view(), name="carte"),
-    path("formulaire", FormulaireView.as_view(), name="formulaire"),
+    path("carte", CarteSearchActeursView.as_view(), name="carte"),
+    path("formulaire", FormulaireSearchActeursView.as_view(), name="formulaire"),
     path("connexion", LVAOLoginView.as_view(), name="login"),
     path(
         "donnez-votre-avis",
