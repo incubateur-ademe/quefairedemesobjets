@@ -7,7 +7,7 @@ from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from dsfr.forms import DsfrBaseForm
 
-from content.constants import bonus_reparation
+from core.constants import bonus_reparation
 from qfdmo.fields import GroupeActionChoiceField
 from qfdmo.geo_api import epcis_from, formatted_epcis_as_list_of_tuple
 from qfdmo.models import DagRun, DagRunStatus, SousCategorieObjet
