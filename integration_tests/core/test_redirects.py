@@ -51,7 +51,7 @@ def test_routes_works(client, test_url):
 def test_protected_routes_works(client, test_url):
     response = client.get(test_url)
     assert response.status_code == 302
-    assert response.url == "/connexion"
+    assert response.url.startswith("/connexion")
 
 
 @pytest.mark.django_db

@@ -18,19 +18,16 @@ def populate_admin_object(django_db_blocker):
 @pytest.mark.django_db
 class TestDirectionOrder:
     @pytest.mark.parametrize(
-        "params,expected_order",
+        "url,expected_order",
         [
-            ("", ["jai", "jecherche"]),
-            ("?first_dir=fake", ["jai", "jecherche"]),
-            ("?first_dir=jai", ["jai", "jecherche"]),
-            ("?first_dir=jecherche", ["jecherche", "jai"]),
+            ("/formulaire", ["jai", "jecherche"]),
+            ("/formulaire?first_dir=fake", ["jai", "jecherche"]),
+            ("/formulaire?first_dir=jai", ["jai", "jecherche"]),
+            ("/formulaire?first_dir=jecherche", ["jecherche", "jai"]),
         ],
     )
-    def test_default_direction(self, client, params, expected_order):
-        url = params
-
-        # FIXME : supprimer `follow=True` et adapter les tests
-        response = client.get(url, follow=True)
+    def test_default_direction(self, client, url, expected_order):
+        response = client.get(url)
         assert response.status_code == 200
 
         soup = BeautifulSoup(response.content, "html.parser")
@@ -43,19 +40,16 @@ class TestDirectionOrder:
 @pytest.mark.django_db
 class TestDirectionChecked:
     @pytest.mark.parametrize(
-        "params,checked_direction",
+        "url,checked_direction",
         [
-            ("", "jai"),
-            ("?direction=fake", "jai"),
-            ("?direction=jai", "jai"),
-            ("?direction=jecherche", "jecherche"),
+            ("/formulaire", "jai"),
+            ("/formulaire?direction=fake", "jai"),
+            ("/formulaire?direction=jai", "jai"),
+            ("/formulaire?direction=jecherche", "jecherche"),
         ],
     )
-    def test_default_direction(self, client, params, checked_direction):
-        url = params
-
-        # FIXME : supprimer `follow=True` et adapter les tests
-        response = client.get(url, follow=True)
+    def test_default_direction(self, client, url, checked_direction):
+        response = client.get(url)
         assert response.status_code == 200
 
         soup = BeautifulSoup(response.content, "html.parser")
