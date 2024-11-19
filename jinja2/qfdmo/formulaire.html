@@ -1,7 +1,7 @@
 {% extends "qfdmo/shared/main.html" %}
 
 {% block header_classes %}
-qfdmo-z-0 {# The header in Formulaire needs to be under the main tag #}
+qf-z-0 {# The header in Formulaire needs to be under the main tag #}
 {% endblock header_classes %}
 
 {% block form_header %}
@@ -19,10 +19,10 @@ qfdmo-z-0 {# The header in Formulaire needs to be under the main tag #}
 
 {% block content_footer %}
     <div
-        class="qfdmo-px-2w sm:qfdmo-px-0 qfdmo-duration-300 sm:qfdmo-h-fit sm:qfdmo-mr-1w qfdmo-flex qfdmo-flex-row-reverse"
+        class="qf-px-2w sm:qf-px-0 qf-duration-300 sm:qf-h-fit sm:qf-mr-1w qf-flex qf-flex-row-reverse"
         data-search-solution-form-target="proposeAddressPanel"
     >
-        <a class="fr-my-1w fr-btn fr-btn--tertiary qfdmo-whitespace-nowrap qfdmo-w-full sm:qfdmo-w-max qfdmo-flex qfdmo-justify-center"
+        <a class="fr-my-1w fr-btn fr-btn--tertiary qf-whitespace-nowrap qf-w-full sm:qf-w-max qf-flex qf-justify-center"
             href="{{ url('qfdmo:address-suggestion-form') }}"
             target="_blank"
             rel="noreferrer"

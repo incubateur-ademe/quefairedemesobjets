@@ -1,13 +1,13 @@
 {% if icon %}
     <div
-        class="qfdmo-flex qfdmo-flex-row qfdmo-items-center"
+        class="qf-flex qf-flex-row qf-items-center"
     >
 {% endif %}
 <fieldset class="fr-fieldset" aria-labelledby="{{ field.id_for_label }}_legend">
-    <legend class="qfdmo-hidden" id="{{ field.id_for_label }}_legend">{{ legend }}</legend>
+    <legend class="qf-hidden" id="{{ field.id_for_label }}_legend">{{ legend }}</legend>
     <div class="fr-fieldset__element fr-fieldset__element--inline">
         <div
-            class="fr-checkbox-group qfdmo-flex qfdmo-flex-row qfdmo-items-center"
+            class="fr-checkbox-group qf-flex qf-flex-row qf-items-center"
         >
             {{ field }}
             {{ field.label_tag() }}

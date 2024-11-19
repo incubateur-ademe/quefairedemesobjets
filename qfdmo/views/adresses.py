@@ -526,8 +526,8 @@ class SearchActeursView(
             libelle = ""
             if groupe.icon:
                 libelle = (
-                    f'<span class="fr-px-1v qfdmo-text-white {groupe.icon}'
-                    f' fr-icon--sm qfdmo-rounded-full qfdmo-bg-{groupe.primary}"'
+                    f'<span class="fr-px-1v qf-text-white {groupe.icon}'
+                    f' fr-icon--sm qf-rounded-full qf-bg-{groupe.primary}"'
                     ' aria-hidden="true"></span>'
                 )
             libelles: List[str] = []

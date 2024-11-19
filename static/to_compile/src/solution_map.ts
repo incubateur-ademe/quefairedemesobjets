@@ -47,7 +47,7 @@ export class SolutionMap {
       this.#location.longitude !== undefined
     ) {
       const homeIcon = L.divIcon({
-        className: "!qfdmo-z-[10000]",
+        className: "!qf-z-[10000]",
         iconSize: [35, 35],
         html: this.#generateHomeHTMLString(),
       })
@@ -61,8 +61,8 @@ export class SolutionMap {
   }
 
   #generateHomeHTMLString() {
-    return `<div class="qfdmo-flex qfdmo-items-center qfdmo-justify-center qfdmo-rounded-full qfdmo-bg-white qfdmo-aspect-square qfdmo-border-2 qfdmo-border-solid qfdmo-border-[#E1000F]">
-      <span class="fr-icon-map-pin-2-fill qfdmo-text-[#E1000F]"></span>
+    return `<div class="qf-flex qf-items-center qf-justify-center qf-rounded-full qf-bg-white qf-aspect-square qf-border-2 qf-border-solid qf-border-[#E1000F]">
+      <span class="fr-icon-map-pin-2-fill qf-text-[#E1000F]"></span>
     </div>
     `
   }
@@ -72,17 +72,17 @@ export class SolutionMap {
     const background = acteur?.reparer ? pinBackgroundFillSvg : pinBackgroundSvg
     const cornerIcon = acteur?.bonus ? bonusIconSvg : ""
     const icon = acteur?.icon || "fr-icon-checkbox-circle-line"
-    const markerIconClasses = `qfdmo-absolute qfdmo-top-[10] qfdmo-left-[10.5] qfdmo-margin-auto
-      ${icon} ${acteur?.reparer ? "qfdmo-text-white" : ""}
+    const markerIconClasses = `qf-absolute qf-top-[10] qf-left-[10.5] qf-margin-auto
+      ${icon} ${acteur?.reparer ? "qf-text-white" : ""}
     `
     const htmlTree = [
-      `<div data-animated class="qfdmo-scale-75">`,
-      `<div class="qfdmo--translate-y-2/4" style="${markerHtmlStyles}">`,
+      `<div data-animated class="qf-scale-75">`,
+      `<div class="qf--translate-y-2/4" style="${markerHtmlStyles}">`,
       background,
     ]
     if (cornerIcon) {
       htmlTree.push(
-        `<span class="qfdmo-absolute qfdmo-right-[-16] qfdmo-top-[-6] qfdmo-z-10">`,
+        `<span class="qf-absolute qf-right-[-16] qf-top-[-6] qf-z-10">`,
         cornerIcon,
         `</span>`,
       )

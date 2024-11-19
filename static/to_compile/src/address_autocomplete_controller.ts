@@ -39,7 +39,7 @@ export default class extends AutocompleteController {
                 return
             })
             .then(() => {
-                this.spinnerTarget.classList.add("qfdmo-hidden")
+                this.spinnerTarget.classList.add("qf-hidden")
                 return
             })
     }

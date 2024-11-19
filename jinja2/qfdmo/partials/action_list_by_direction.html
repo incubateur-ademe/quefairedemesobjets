@@ -1,11 +1,11 @@
 <div id="{{action_direction}}_fieldset" data-search-solution-form-target='{{action_direction}}'>
-    <fieldset class="fr-fieldset fr-mx-0 fr-p-0 fr-mb-1w sm:qfdmo-max-w-[600px]" aria-labelledby="action-by-direction-legend-{{ action_direction }}">
+    <fieldset class="fr-fieldset fr-mx-0 fr-p-0 fr-mb-1w sm:qf-max-w-[600px]" aria-labelledby="action-by-direction-legend-{{ action_direction }}">
         <legend class="fr-px-0" id="action-by-direction-legend-{{ action_direction }}">Je souhaite :</legend>
         {% for action in action_by_direction(request, action_direction) %}
             <div class="fr-fieldset__element fr-my-1v">
                 <div
                     class="fr-checkbox-group fr-p-1v
-                           qfdmo-w-fit qfdmo-bg-{{action.primary}} qfdmo-bg-opacity-30"
+                           qf-w-fit qf-bg-{{action.primary}} qf-bg-opacity-30"
                     data-action="click->search-solution-form#apply"
                 >
                     <input
@@ -18,7 +18,7 @@
                         type="checkbox"
                         {% if action.active %} checked{% endif %}
                     >
-                    <label class="fr-label before:qfdmo-bg-white fr-text--sm fr-mb-0" for="{{action_direction}}_{{action.code}}">
+                    <label class="fr-label before:qf-bg-white fr-text--sm fr-mb-0" for="{{action_direction}}_{{action.code}}">
                         {% if action.icon %}
                             <span class="{{ action.icon }}" aria-hidden="true"></span>&nbsp;
                         {% endif %}
