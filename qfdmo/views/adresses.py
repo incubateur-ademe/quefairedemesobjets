@@ -53,7 +53,13 @@ def direct_access(request):
     get_params = request.GET.copy()
 
     if "carte" in request.GET:
+        # Order matters, this should be before iframe because iframe and carte
+        # parameters can coexist
         del get_params["carte"]
+        try:
+            del get_params["iframe"]
+        except KeyError:
+            pass
         params = get_params.urlencode()
         parts = [reverse("qfdmo:carte"), "?" if params else "", params]
         return redirect("".join(parts))
