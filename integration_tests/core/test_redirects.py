@@ -35,7 +35,7 @@ def test_redirect_with_carte_param(client, params, redirect_url):
     "test_url",
     ["/configurateur", "/sitemap.xml", "/dsfr/colors", "/connexion"],
 )
-def test_routes_works(client, test_url):
+def test_other_routes_work(client, test_url):
     response = client.get(test_url)
     assert response.status_code == 200
 
