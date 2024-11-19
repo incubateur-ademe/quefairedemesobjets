@@ -22,6 +22,6 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!isBrowserSupported()) {
         document
             ?.getElementById("obsolete_browser_message")
-            ?.classList.remove("qfdmo-hidden")
+            ?.classList.remove("qf-hidden")
     }
 })

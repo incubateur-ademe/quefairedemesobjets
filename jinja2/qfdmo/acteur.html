@@ -1,16 +1,16 @@
 {% extends base_template %}
 
 {% block content %}
-<div class="fr-container qfdmo-py-2w">
+<div class="fr-container qf-py-2w">
     <turbo-frame id="acteur-detail">
         <article>
-            <header class="qfdmo-mb-2w">
+            <header class="qf-mb-2w">
                 {% if object.labels_display %}
                     {% include "qfdmo/acteur/_labels.html" %}
                 {% endif %}
 
-                <h2 class="qfdmo-text-lg qfdmo-m-0 qfdmo-max-w-[90%]">{{ object.nom }}</h2>
-                <p class="qfdmo-text-sm qfdmo-m-0">
+                <h2 class="qf-text-lg qf-m-0 qf-max-w-[90%]">{{ object.nom }}</h2>
+                <p class="qf-text-sm qf-m-0">
                     {{ object.acteur_services_display }} {{ distance }}
                 </p>
 

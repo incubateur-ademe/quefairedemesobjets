@@ -75,10 +75,10 @@ export default class extends Controller<HTMLElement> {
   }
 
   displaySearchInZoneButton() {
-    this.searchInZoneButtonTarget.classList.remove("qfdmo-hidden")
+    this.searchInZoneButtonTarget.classList.remove("qf-hidden")
   }
 
   hideSearchInZoneButton() {
-    this.searchInZoneButtonTarget.classList.add("qfdmo-hidden")
+    this.searchInZoneButtonTarget.classList.add("qf-hidden")
   }
 }

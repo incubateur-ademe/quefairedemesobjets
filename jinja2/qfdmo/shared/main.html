@@ -16,21 +16,21 @@
         ss-cat-object-autocomplete:optionSelected->search-solution-form#checkSsCatObjetErrorForm
         {% block form_controller_data_actions %}{% endblock form_controller_data_actions %}"
         class="
-        qfdmo-h-full qfdmo-max-h-svh qfdmo-max-h-screen md:qfdmo-overflow-hidden
-        qfdmo-m-0
-        qfdmo-flex qfdmo-flex-col qfdmo-flex-auto
-        qfdmo-relative"
+        qf-h-full qf-max-h-svh qf-max-h-screen md:qf-overflow-hidden
+        qf-m-0
+        qf-flex qf-flex-col qf-flex-auto
+        qf-relative"
     >
         <section class="map-grid">
             <header
-                class="max-md:qfdmo-sticky qfdmo-top-0
-                {% block header_classes %}qfdmo-z-20{% endblock header_classes %}
+                class="max-md:qf-sticky qf-top-0
+                {% block header_classes %}qf-z-20{% endblock header_classes %}
                 "
             >
                 <div
                     class="
-                    qfdmo-bg-white
-                    qfdmo-flex qfdmo-flex-row sm:qfdmo-items-center"
+                    qf-bg-white
+                    qf-flex qf-flex-row sm:qf-items-center"
                 >
                 {% block form_header %}
                 {% endblock form_header %}
@@ -39,22 +39,22 @@
 
             <main
                 class="
-                qfdmo-flex
-                max-md:qfdmo-h-main-svh
+                qf-flex
+                max-md:qf-h-main-svh
                 {# Is useful for digital view so that the users can scrol in the results #}
-                qfdmo-overflow-auto
+                qf-overflow-auto
                 "
             >
                 {% block form_result %}
                     <turbo-frame id="addressesPanel"
                         data-search-solution-form-target="addressesPanel"
-                        class="qfdmo-relative qfdmo-z-10
-                            qfdmo-flex qfdmo-flex-col
-                            max-md:qfdmo-fixed
-                            max-md:qfdmo-top-header max-md:qfdmo-bottom-footer
-                            max-md:qfdmo-left-0 max-md:qfdmo-right-0
-                            data-[visible=true]:qfdmo-flex-grow
-                            data-[visible=false]:qfdmo-invisible data-[visible=false]:qfdmo-h-0"
+                        class="qf-relative qf-z-10
+                            qf-flex qf-flex-col
+                            max-md:qf-fixed
+                            max-md:qf-top-header max-md:qf-bottom-footer
+                            max-md:qf-left-0 max-md:qf-right-0
+                            data-[visible=true]:qf-flex-grow
+                            data-[visible=false]:qf-invisible data-[visible=false]:qf-h-0"
                         data-visible={{"true" if is_carte else "false"}}
                         tabindex="0"
                     >
@@ -70,19 +70,19 @@
 
             {# Part of this tag' style is defined in qfdmo.css because it would have been a bit unreadable as tailwind classes #}
             <aside class="
-                qfdmo-relative qfdmo-z-30
-                aria-[hidden=false]:qfdmo-flex qfdmo-hidden qfdmo-flex-col
-                {% if is_carte %}md:qfdmo-h-[calc(100vh_-_120px)]{% else %}md:qfdmo-h-[calc(100vh_-_250px)]{% endif %}
-                max-md:qfdmo-snap-y md:qfdmo-overflow-scroll qfdmo-scroll-mt-[65vh]
-                max-md:qfdmo-snap-mandatory
-                qfdmo-bg-white
-                qfdmo-px-2w
-                max-md:qfdmo-drop-shadow-[0_0_100px_rgba(0,0,0,0.3)]
-                max-md:qfdmo-rounded-t-xl
-                aria-[hidden=true]:max-md:qfdmo-animate-out
-                aria-[hidden=true]:max-md:qfdmo-fade-out
-                aria-[hidden=true]:data-[exit-animation-ended=true]:qfdmo-hidden
-                aria-[hidden=false]:max-md:qfdmo-min-h-[calc(100vh_-_200px)]"
+                qf-relative qf-z-30
+                aria-[hidden=false]:qf-flex qf-hidden qf-flex-col
+                {% if is_carte %}md:qf-h-[calc(100vh_-_120px)]{% else %}md:qf-h-[calc(100vh_-_250px)]{% endif %}
+                max-md:qf-snap-y md:qf-overflow-scroll qf-scroll-mt-[65vh]
+                max-md:qf-snap-mandatory
+                qf-bg-white
+                qf-px-2w
+                max-md:qf-drop-shadow-[0_0_100px_rgba(0,0,0,0.3)]
+                max-md:qf-rounded-t-xl
+                aria-[hidden=true]:max-md:qf-animate-out
+                aria-[hidden=true]:max-md:qf-fade-out
+                aria-[hidden=true]:data-[exit-animation-ended=true]:qf-hidden
+                aria-[hidden=false]:max-md:qf-min-h-[calc(100vh_-_200px)]"
             tabindex="0"
             id="acteurDetailsPanel"
             data-search-solution-form-target="acteurDetailsPanel"
@@ -92,8 +92,8 @@
             </aside>
 
             <footer
-                class="max-md:qfdmo-fixed
-                qfdmo-bottom-0 qfdmo-left-0 qfdmo-right-0"
+                class="max-md:qf-fixed
+                qf-bottom-0 qf-left-0 qf-right-0"
             >
             {% block content_footer %}
             {% endblock content_footer %}
