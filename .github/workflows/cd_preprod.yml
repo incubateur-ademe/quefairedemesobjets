@@ -1,0 +1,36 @@
+name: "[🟠 Preprod] Déploiement continu"
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  run_tests:
+    uses: ./.github/workflows/run_tests.yml
+
+  deploy:
+    name: Deploy on Scalingo
+    needs: [run_tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: kolok/deploy-to-scalingo@v1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known-host: ssh.osc-fr1.scalingo.com
+          app-name: quefairedemesobjets-preprod
+
+  deploy_dags:
+    needs: [run_tests]
+    uses: ./.github/workflows/airflow_deploy_dags.yml
+    with:
+      S3_BUCKET_DESTINATION: s3://preprod-data-dags/
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AIRFLOW_PREPROD_S3_ACCESS_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AIRFLOW_PREPROD_S3_SECRET_KEY }}

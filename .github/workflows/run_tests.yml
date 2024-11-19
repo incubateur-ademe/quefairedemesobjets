@@ -1,4 +1,4 @@
-name: "_[LVAO] Tests"
+name: "_Tests"
 
 on:
   workflow_call:
@@ -41,6 +41,8 @@ jobs:
         run: pytest unit_tests
       - name: Run integration tests
         run: pytest integration_tests
+      - name: Run data tests
+        run: pytest dags_unit_tests
       - name: Check code formatting
         run: black --check --diff .
       - uses: chartboost/ruff-action@v1
