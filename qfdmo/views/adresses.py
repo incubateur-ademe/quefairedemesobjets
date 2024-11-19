@@ -70,7 +70,7 @@ def direct_access(request):
         parts = [reverse("qfdmo:formulaire"), "?" if params else "", params]
         return redirect("".join(parts))
 
-    return redirect("https://longuevieauxobjets.ademe.fr", permanent=True)
+    return redirect("https://longuevieauxobjets.ademe.fr/lacarte", permanent=True)
 
 
 class DigitalMixin:

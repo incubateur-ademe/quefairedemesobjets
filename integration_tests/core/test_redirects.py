@@ -8,7 +8,7 @@ def test_redirect_without_param(client):
     url = "/"
     response = client.get(url)
     assert response.status_code == 301
-    assert response.url == "https://longuevieauxobjets.ademe.fr"
+    assert response.url == "https://longuevieauxobjets.ademe.fr/lacarte"
 
 
 @pytest.mark.django_db
