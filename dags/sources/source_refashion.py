@@ -25,7 +25,7 @@ with DAG(
             "reprise": "reprise",
             "point_de_reparation": "point_de_reparation",
             "ecoorganisme": "source_id",
-            "adresse_format_ban": "adresse",
+            "adresse_format_ban": "adresse_format_ban",
             "nom_de_lorganisme": "nom",
             "enseigne_commerciale": "nom_commercial",
             "site_web": "url",

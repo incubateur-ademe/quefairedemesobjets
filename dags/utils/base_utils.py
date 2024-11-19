@@ -107,25 +107,42 @@ def get_address_from_ban(address):
     return {}
 
 
-# TODO : utiliser la cellule en entrée plutôt que la ligne
-def extract_details(row, col="adresse_format_ban"):
+def _address_details_clean_cedex(address_str):
+    """Supprime les mentions CEDEX <NUM> de l'adresse."""
+    cedex_pattern = re.compile(r"\bCEDEX\s*\d*\b", re.IGNORECASE)
+    return cedex_pattern.sub("", address_str).strip()
+
+
+def _address_details_extract(address_str):
+    """Extrait les détails de l'adresse, y compris le code postal et la ville."""
+    address = postal_code = city = None
+
     # Pattern pour capturer les codes postaux et les noms de ville optionnels
-    pattern = re.compile(r"(.*?)\s+(\d{4,5})\s+(.*)")
-
-    if pd.isnull(row[col]):
-        return pd.Series([None, None, None])
-
-    match = pattern.search(str(row[col]))
-    if match:
-        address = match.group(1).strip()
-        postal_code = match.group(2).strip()
+    pattern1 = re.compile(r"(.*)\s+(\d{4,5})\s*(.*)")
+    # Pattern pour capturer les codes postaux sans adresse
+    pattern2 = re.compile(r"(\d{4,5})\s*(.*)")
+    if match := pattern1.search(address_str):
+        address = match.group(1).strip() if match.group(1) else None
+        postal_code = match.group(2).strip() if match.group(2) else None
         city = match.group(3).strip() if match.group(3) else None
+    elif match := pattern2.search(address_str):
+        postal_code = match.group(1).strip() if match.group(1) else None
+        city = match.group(2).strip() if match.group(2) else None
 
-        # Ajouter un zéro si le code postal a quatre chiffres
-        if len(postal_code) == 4:
-            postal_code += "0"
-        return pd.Series([address, postal_code, city])
+    if city:
+        city = city.title()
+    # Ajouter un zéro si le code postal a quatre chiffres
+    if postal_code and len(postal_code) == 4:
+        postal_code = "0" + postal_code
 
+    return pd.Series([address, postal_code, city])
+
+
+def extract_details(row, col="adresse_format_ban"):
+    """Extrait les détails de l'adresse à partir d'une ligne de DataFrame."""
+    if pd.notnull(row[col]):
+        address_str = _address_details_clean_cedex(str(row[col]))
+        return _address_details_extract(address_str)
     return pd.Series([None, None, None])
 
 

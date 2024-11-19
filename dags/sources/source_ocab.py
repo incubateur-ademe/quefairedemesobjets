@@ -23,7 +23,7 @@ with DAG(
             "labels_etou_bonus": "labels_etou_bonus",
             "point_de_reparation": "point_de_reparation",
             "ecoorganisme": "source_id",
-            "adresse_format_ban": "adresse",
+            "adresse_format_ban": "adresse_format_ban",
             "nom_de_lorganisme": "nom",
             "perimetre_dintervention": "perimetre_dintervention",
             "longitudewgs84": "longitude",
