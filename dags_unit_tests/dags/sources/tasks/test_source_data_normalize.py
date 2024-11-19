@@ -57,6 +57,15 @@ def acteurtype_id_by_code():
     }
 
 
+@pytest.fixture
+def source_id_by_code():
+    return {
+        "source1": 1,
+        "source2": 2,
+        "source3": 3,
+    }
+
+
 class TestSourceDataNormalizeSinoe:
     """
     Test de la fonction df_normalize_sinoe
@@ -252,7 +261,7 @@ class TestSourceDataNormalize:
     """
 
     @pytest.fixture
-    def source_data_normalize_kwargs(self, acteurtype_id_by_code):
+    def source_data_normalize_kwargs(self, acteurtype_id_by_code, source_id_by_code):
         return {
             "df_acteur_from_source": pd.DataFrame(),
             "source_code": None,
@@ -266,6 +275,7 @@ class TestSourceDataNormalize:
             "product_mapping": {},
             "dechet_mapping": {},
             "acteurtype_id_by_code": acteurtype_id_by_code,
+            "source_id_by_code": source_id_by_code,
         }
 
     @pytest.mark.parametrize(

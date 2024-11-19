@@ -30,6 +30,7 @@ def source_data_normalize_wrapper(**kwargs) -> pd.DataFrame:
     product_mapping = params.get("product_mapping", {})
     dechet_mapping = params.get("dechet_mapping", {})
     acteurtype_id_by_code = read_mapping_from_postgres(table_name="qfdmo_acteurtype")
+    source_id_by_code = read_mapping_from_postgres(table_name="qfdmo_source")
 
     log.preview("df avant normalisation", df)
     log.preview("source_code", source_code)
@@ -43,6 +44,7 @@ def source_data_normalize_wrapper(**kwargs) -> pd.DataFrame:
     log.preview("product_mapping", product_mapping)
     log.preview("dechet_mapping", dechet_mapping)
     log.preview("acteurtype_id_by_code", acteurtype_id_by_code)
+    log.preview("source_id_by_code", source_id_by_code)
 
     params = kwargs["params"]
 
@@ -59,6 +61,7 @@ def source_data_normalize_wrapper(**kwargs) -> pd.DataFrame:
         product_mapping=product_mapping,
         dechet_mapping=dechet_mapping,
         acteurtype_id_by_code=acteurtype_id_by_code,
+        source_id_by_code=source_id_by_code,
     )
 
 
@@ -75,6 +78,7 @@ def source_data_normalize(
     product_mapping: dict,
     dechet_mapping: dict,
     acteurtype_id_by_code: dict,
+    source_id_by_code: dict,
 ) -> pd.DataFrame:
     """
     Normalisation des données source. Passée cette étape:
@@ -112,13 +116,12 @@ def source_data_normalize(
     # Source : nécessaire pour les identifiants uniques
     # TODO : un peu crado, à revoir
     # A cause de la résolution de l'identifiant unique qui dépend du code de la source
-    sources_id_by_code = read_mapping_from_postgres(table_name="qfdmo_source")
     if "source_id" in df.columns:
         df["source_code"] = df["source_id"]
-        df["source_id"] = df["source_id"].map(sources_id_by_code)
+        df["source_id"] = df["source_id"].map(source_id_by_code)
     elif source_code is not None:
         df["source_code"] = source_code
-        df["source_id"] = sources_id_by_code[source_code]
+        df["source_id"] = source_id_by_code[source_code]
     else:
         ValueError("Pas de colonne 'source_id'")
 
