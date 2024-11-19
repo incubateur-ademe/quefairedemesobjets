@@ -173,7 +173,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   scrollToContent() {
-    this.searchFormTarget.scrollIntoView({ behavior: "smooth"})
+    this.searchFormTarget.scrollIntoView()
   }
 
   #hideAddressesPanel() {
