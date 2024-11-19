@@ -131,6 +131,8 @@ def _address_details_extract(address_str):
 
     if city:
         city = city.title()
+        city = city.replace("*", "").strip()
+
     # Ajouter un zéro si le code postal a quatre chiffres
     if postal_code and len(postal_code) == 4:
         postal_code = "0" + postal_code

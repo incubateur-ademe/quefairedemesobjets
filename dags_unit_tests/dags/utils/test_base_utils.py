@@ -104,6 +104,11 @@ from utils.base_utils import extract_details
             {"adresse_format_ban": 'RD 306, Lieudit "La Une" 77240 VERT SAINT DENIS'},
             pd.Series(['RD 306, Lieudit "La Une"', "77240", "Vert Saint Denis"]),
         ),
+        # Lamballe*
+        (
+            {"adresse_format_ban": "Lanjouan 22400 LAMBALLE*"},
+            pd.Series(["Lanjouan", "22400", "Lamballe"]),
+        ),
     ],
 )
 def test_extract_details(input_row, expected_output):
