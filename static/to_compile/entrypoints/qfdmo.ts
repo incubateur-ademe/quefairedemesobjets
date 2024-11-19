@@ -2,17 +2,17 @@ import "@gouvfr/dsfr/dist/dsfr.module.js"
 import { Application } from "@hotwired/stimulus"
 import * as Turbo from "@hotwired/turbo"
 
-import AddressAutocompleteController from "../src/address_autocomplete_controller"
-import AnalyticsController from "../src/analytics_controller"
-import CopyController from "../src/copy_controller"
-import GenericAutocompleteController from "../src/generic_autocomplete_controller"
-import MapController from "../src/map_controller"
-import ScrollController from "../src/scroll_controller"
-import SearchSolutionFormController from "../src/search_solution_form_controller"
-import SsCatObjectAutocompleteController from "../src/ss_cat_object_autocomplete_controller"
+import AddressAutocompleteController from "../js/address_autocomplete_controller"
+import AnalyticsController from "../js/analytics_controller"
+import CopyController from "../js/copy_controller"
+import GenericAutocompleteController from "../js/generic_autocomplete_controller"
+import MapController from "../js/map_controller"
+import ScrollController from "../js/scroll_controller"
+import SearchSolutionFormController from "../js/search_solution_form_controller"
+import SsCatObjectAutocompleteController from "../js/ss_cat_object_autocomplete_controller"
 
-import "../src/browser_check"
-import "../src/iframe"
+import "../js/browser_check"
+import "../js/iframe"
 
 window.stimulus = Application.start()
 // stimulus.debug = true

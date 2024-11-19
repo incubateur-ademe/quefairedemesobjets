@@ -1,0 +1,19 @@
+.leaflet-container a {
+  color: var(--text-action-high-blue-france);
+}
+
+.leaflet-container {
+  font-family: Marianne, arial, sans-serif;
+}
+
+.leaflet-control-zoom a {
+  background-image: none;
+}
+
+.leaflet-popup {
+  max-width: 80vw;
+}
+
+.leaflet-marker-icon i.qf-icon {
+  margin-top: 5px;
+}
