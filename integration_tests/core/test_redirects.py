@@ -49,7 +49,7 @@ def test_other_routes_work(client, test_url):
         "/iframe/configurateur",
     ],
 )
-def test_protected_routes_works(client, test_url):
+def test_protected_routes_work(client, test_url):
     response = client.get(test_url)
     assert response.status_code == 302
     assert response.url.startswith("/connexion")
