@@ -20,7 +20,7 @@ async function openAdvancedFilters(page, dataTestId="advanced-filters") {
 }
 
 test("Filtres avancés s'ouvrent et se ferment en mode iframe", async ({ page }) => {
-    await page.goto(`http://localhost:8000/?iframe`, {
+    await page.goto(`http://localhost:8000/formulaire`, {
         waitUntil: "networkidle",
     })
     await hideDjangoToolbar(page)
@@ -28,7 +28,7 @@ test("Filtres avancés s'ouvrent et se ferment en mode iframe", async ({ page })
 })
 
 test("Desktop | Filtres avancés s'ouvrent et se ferment en mode carte", async ({ page }) => {
-    await page.goto(`http://localhost:8000/?carte`, {
+    await page.goto(`http://localhost:8000/carte`, {
         waitUntil: "networkidle",
     })
     await hideDjangoToolbar(page)
@@ -37,7 +37,7 @@ test("Desktop | Filtres avancés s'ouvrent et se ferment en mode carte", async (
 })
 
 test("Mobile | Filtres avancés s'ouvrent et se ferment en mode carte", async ({ page }) => {
-    await page.goto(`http://localhost:8000/?carte`, {
+    await page.goto(`http://localhost:8000/carte`, {
         waitUntil: "networkidle",
     })
     await hideDjangoToolbar(page)
@@ -46,7 +46,7 @@ test("Mobile | Filtres avancés s'ouvrent et se ferment en mode carte", async ({
 })
 
 test("Filtres avancés s'ouvrent et se ferment en mode formulaire", async ({ page }) => {
-    await page.goto(`http://localhost:8000/`, {
+    await page.goto(`http://localhost:8000/formulaire`, {
         waitUntil: "networkidle",
     })
     await hideDjangoToolbar(page)

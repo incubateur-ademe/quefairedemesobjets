@@ -42,8 +42,9 @@ class TestInitialValue:
         "epci_codes": [],
     }
 
-    def test_no_parameters(self, client):
-        url = ""
+    def test_formulaire_without_parameters(self, client):
+        url = "/formulaire"
+
         response = client.get(url)
 
         assert response.status_code == 200
@@ -51,8 +52,8 @@ class TestInitialValue:
         assert response.context_data["acteurs"].count() == 0
         assert response.context_data["form"].initial == self.default_context
 
-    def test_carte(self, client):
-        url = "?carte"
+    def test_carte_without_parameters(self, client):
+        url = "/carte"
 
         response = client.get(url)
 
@@ -85,13 +86,3 @@ class TestInitialValue:
                 "trier",
             ],
         }
-
-    def test_iframe(self, client):
-        url = "?iframe"
-
-        response = client.get(url)
-
-        assert response.status_code == 200
-        assert response.context_data["location"] == "{}"
-        assert response.context_data["acteurs"].count() == 0
-        assert response.context_data["form"].initial == self.default_context

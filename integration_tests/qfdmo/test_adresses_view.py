@@ -5,7 +5,7 @@ from django.test import override_settings
 
 from qfdmo.leaflet import compile_leaflet_bbox
 from qfdmo.models.acteur import ActeurStatus, DisplayedActeur
-from qfdmo.views.adresses import CarteView
+from qfdmo.views.adresses import CarteSearchActeursView
 from unit_tests.core.test_utils import query_dict_from
 from unit_tests.qfdmo.acteur_factory import (
     DisplayedActeurFactory,
@@ -94,7 +94,7 @@ def displayed_acteur_reparacteur(displayed_acteur_reparer):
 
 @pytest.fixture
 def adresses_view():
-    adresses_view = CarteView()
+    adresses_view = CarteSearchActeursView()
     return adresses_view
 
 
@@ -394,7 +394,7 @@ class TestFilters:
         displayed_acteur_donner_sscat_preter_sscat2,
     ):
         request = HttpRequest()
-        adresses_view = CarteView()
+        adresses_view = CarteSearchActeursView()
         sous_categorie_id = sous_categorie.id
         request.GET = query_dict_from(
             {
@@ -417,7 +417,7 @@ class TestFilters:
         displayed_acteur_donner_sscat_preter_sscat2,
     ):
         request = HttpRequest()
-        adresses_view = CarteView()
+        adresses_view = CarteSearchActeursView()
         sous_categorie_id = sous_categorie2.id
         request.GET = query_dict_from(
             {
@@ -438,7 +438,7 @@ class TestFilters:
 class TestBBOX:
     def test_bbox_is_returned_if_no_acteurs(self):
         request = HttpRequest()
-        adresses_view = CarteView()
+        adresses_view = CarteSearchActeursView()
         leaflet_bbox = compile_leaflet_bbox([1, 1, 1, 1])
         request.GET = query_dict_from({})
         request.GET.update(bounding_box=leaflet_bbox)
@@ -454,7 +454,7 @@ class TestBBOX:
         self,
     ):
         request = HttpRequest()
-        adresses_view = CarteView()
+        adresses_view = CarteSearchActeursView()
         bbox = [0, 0, 0, 0]
         leaflet_bbox = compile_leaflet_bbox(bbox)
         request.GET = query_dict_from({})
@@ -472,7 +472,7 @@ class TestBBOX:
 
     def test_bbox_and_acteurs_are_returned_if_contained_in_bbox(self):
         request = HttpRequest()
-        adresses_view = CarteView()
+        adresses_view = CarteSearchActeursView()
         bbox = [-2, -2, 4, 4]  # Acteurs in factory are created with a location of 3, 3
         leaflet_bbox = compile_leaflet_bbox(bbox)
         request.GET = query_dict_from({})

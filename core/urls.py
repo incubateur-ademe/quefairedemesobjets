@@ -26,7 +26,7 @@ from qfdmo.models.acteur import DisplayedActeur
 from .api import api
 
 info_dict = {
-    "queryset": DisplayedActeur.objects.all(),
+    "queryset": DisplayedActeur.objects.all().order_by("identifiant_unique"),
     "date_field": "modifie_le",
 }
 
