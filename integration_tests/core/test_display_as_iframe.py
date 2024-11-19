@@ -16,9 +16,10 @@ class TestDisplayAsIframe:
     def test_display_as_iframe(self, client):
         url = "?iframe"
 
-        # FIXME : supprimer `follow=True` et adapter les tests
-        response = client.get(url, follow=True)
-
+        redirect = client.get(url)
+        assert redirect.status_code == 302
+        assert "/formulaire" in redirect.url
+        response = client.get(redirect.url)
         assert response.status_code == 200
         assert 'class="fr-header' not in str(response.content)
         assert 'class="fr-footer' not in str(response.content)

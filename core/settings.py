@@ -67,7 +67,6 @@ if DEBUG:
     INSTALLED_APPS.extend(["debug_toolbar", "django_browser_reload"])
 
 MIDDLEWARE = [
-    # "core.middleware.CarteRedirectMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -242,8 +241,9 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Redirect to home URL after login
-LOGIN_REDIRECT_URL = "qfdmo:reemploi_solution"
-LOGOUT_REDIRECT_URL = "qfdmo:reemploi_solution"
+# Renvoyer vers l'admin'
+LOGOUT_REDIRECT_URL = "qfdmo:login"
+LOGIN_URL = "qfdmo:login"
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -300,8 +300,6 @@ DEFAULT_ACTION_DIRECTION = "jai"
 INSEE_KEY = decouple.config("INSEE_KEY", cast=str, default="")
 INSEE_SECRET = decouple.config("INSEE_SECRET", cast=str, default="")
 
-LOGOUT_REDIRECT_URL = "qfdmo:reemploi_solution"
-LOGIN_URL = "qfdmo:login"
 
 DEFAULT_MAX_SOLUTION_DISPLAYED = decouple.config(
     "DEFAULT_MAX_SOLUTION_DISPLAYED", cast=int, default=10

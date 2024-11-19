@@ -18,7 +18,7 @@ class TestGetDirection:
         mock_get_directions.return_value = [{"code": "north"}, {"code": "south"}]
         # Test when "carte" is in GET parameters
         request = request_factory.get("/?carte")
-        assert utils.get_direction(request) is None
+        assert utils.get_direction(request, is_carte=True) is None
 
     @override_settings(DEFAULT_ACTION_DIRECTION="north")
     def test_get_direction_default_direction(
