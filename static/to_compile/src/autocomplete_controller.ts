@@ -182,7 +182,7 @@ export default abstract class extends Controller<HTMLElement> {
      autocompleteDivWrapper.classList.add("autocomplete-items")
 
      const inputTargetWidth = this.inputTarget.offsetWidth
-     autocompleteDivWrapper.classList.add("qfdmo-w-full")
+     autocompleteDivWrapper.classList.add("qf-w-full")
      autocompleteDivWrapper.style.width = `${inputTargetWidth}px`
 
      /*append the DIV element as a child of the autocomplete container:*/
@@ -203,10 +203,10 @@ export default abstract class extends Controller<HTMLElement> {
   }
 
   displaySpinner(): void {
-    this.spinnerTarget.classList.remove("qfdmo-hidden")
+    this.spinnerTarget.classList.remove("qf-hidden")
   }
 
   hideSpinner(): void {
-    this.spinnerTarget.classList.add("qfdmo-hidden")
+    this.spinnerTarget.classList.add("qf-hidden")
   }
 }

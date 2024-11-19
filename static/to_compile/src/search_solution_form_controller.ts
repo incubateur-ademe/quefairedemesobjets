@@ -325,11 +325,11 @@ export default class extends Controller<HTMLElement> {
     let errorExists = false
     if (!this.sousCategoryObjetIDTarget.value) {
       this.sousCategoryObjetGroupTarget.classList.add("fr-input-group--error")
-      this.sousCategoryObjetErrorTarget.classList.remove("qfdmo-hidden")
+      this.sousCategoryObjetErrorTarget.classList.remove("qf-hidden")
       errorExists = true
     } else {
       this.sousCategoryObjetGroupTarget.classList.remove("fr-input-group--error")
-      this.sousCategoryObjetErrorTarget.classList.add("qfdmo-hidden")
+      this.sousCategoryObjetErrorTarget.classList.add("qf-hidden")
     }
     return errorExists
   }
@@ -338,11 +338,11 @@ export default class extends Controller<HTMLElement> {
     let errorExists = false
     if (!this.latitudeInputTarget.value || !this.longitudeInputTarget.value) {
       this.adresseGroupTarget.classList.add("fr-input-group--error")
-      this.adresseErrorTarget.classList.remove("qfdmo-hidden")
+      this.adresseErrorTarget.classList.remove("qf-hidden")
       errorExists = true
     } else {
       this.adresseGroupTarget.classList.remove("fr-input-group--error")
-      this.adresseErrorTarget.classList.add("qfdmo-hidden")
+      this.adresseErrorTarget.classList.add("qf-hidden")
     }
     return errorExists
   }
@@ -355,14 +355,14 @@ export default class extends Controller<HTMLElement> {
   }
 
   toggleAdvancedFiltersWithSubmitButton() {
-    this.advancedFiltersSaveAndSubmitButtonTarget.classList.remove("qfdmo-hidden")
-    this.advancedFiltersSaveButtonTarget.classList.add("qfdmo-hidden")
+    this.advancedFiltersSaveAndSubmitButtonTarget.classList.remove("qf-hidden")
+    this.advancedFiltersSaveButtonTarget.classList.add("qf-hidden")
     this.#toggleAdvancedFilters()
   }
 
   toggleAdvancedFiltersWithoutSubmitButton() {
-    this.advancedFiltersSaveAndSubmitButtonTarget.classList.add("qfdmo-hidden")
-    this.advancedFiltersSaveButtonTarget.classList.remove("qfdmo-hidden")
+    this.advancedFiltersSaveAndSubmitButtonTarget.classList.add("qf-hidden")
+    this.advancedFiltersSaveButtonTarget.classList.remove("qf-hidden")
     this.#toggleAdvancedFilters()
   }
 
@@ -402,7 +402,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   toggleLegend() {
-    if (this.legendMainPanelTarget.classList.contains("qfdmo-hidden")) {
+    if (this.legendMainPanelTarget.classList.contains("qf-hidden")) {
       this.#showLegend()
     } else {
       this.#hideLegend()
@@ -411,32 +411,32 @@ export default class extends Controller<HTMLElement> {
   }
 
   #showLegend() {
-    this.legendMainPanelTarget.classList.remove("qfdmo-hidden")
+    this.legendMainPanelTarget.classList.remove("qf-hidden")
     setTimeout(() => {
-      this.legendFormPanelTarget.classList.remove("qfdmo-h-0", "qfdmo-invisible")
-      this.legendFormPanelTarget.classList.add("qfdmo-h-[95%]")
+      this.legendFormPanelTarget.classList.remove("qf-h-0", "qf-invisible")
+      this.legendFormPanelTarget.classList.add("qf-h-[95%]")
     }, 100)
   }
 
   #hideLegend() {
     if (this.hasLegendFormPanelTarget) {
-      this.legendFormPanelTarget.classList.remove("qfdmo-h-[95%]")
-      this.legendFormPanelTarget.classList.add("qfdmo-h-0", "qfdmo-invisible")
+      this.legendFormPanelTarget.classList.remove("qf-h-[95%]")
+      this.legendFormPanelTarget.classList.add("qf-h-0", "qf-invisible")
       setTimeout(() => {
-        this.legendMainPanelTarget.classList.add("qfdmo-hidden")
+        this.legendMainPanelTarget.classList.add("qf-hidden")
       }, 300)
     }
   }
 
   #showSearchFormPanel() {
-    this.searchFormPanelTarget.classList.add("qfdmo-flex-grow")
-    this.searchFormPanelTarget.classList.remove("qfdmo-h-0", "qfdmo-invisible")
+    this.searchFormPanelTarget.classList.add("qf-flex-grow")
+    this.searchFormPanelTarget.classList.remove("qf-h-0", "qf-invisible")
   }
 
   #hideSearchFormPanel() {
     this.searchFormPanelTarget.dataset.visible = "false"
-    this.searchFormPanelTarget.classList.remove("qfdmo-flex-grow")
-    this.searchFormPanelTarget.classList.add("qfdmo-h-0", "qfdmo-invisible")
+    this.searchFormPanelTarget.classList.remove("qf-flex-grow")
+    this.searchFormPanelTarget.classList.add("qf-h-0", "qf-invisible")
   }
 
   advancedSubmit(event: Event) {
@@ -465,9 +465,9 @@ export default class extends Controller<HTMLElement> {
       this.scrollToContent()
     }
 
-    this.loadingSolutionsTarget.classList.remove("qfdmo-hidden")
-    this.addressMissingTarget.classList.add("qfdmo-hidden")
-    this.NoLocalSolutionTarget.classList.add("qfdmo-hidden")
+    this.loadingSolutionsTarget.classList.remove("qf-hidden")
+    this.addressMissingTarget.classList.add("qf-hidden")
+    this.NoLocalSolutionTarget.classList.add("qf-hidden")
     this.#hideAdvancedFilters()
     this.#hideLegend()
 

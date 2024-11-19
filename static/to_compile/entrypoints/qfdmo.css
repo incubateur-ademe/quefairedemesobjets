@@ -31,7 +31,7 @@ pre {
   max-width: 80vw;
 }
 
-.leaflet-marker-icon i.qfdmo-icon {
+.leaflet-marker-icon i.qf-icon {
   margin-top: 5px;
 }
 
@@ -186,23 +186,23 @@ DSFR customization for tabs
 .fr-tabs--noborder {
   &:before,
   & {
-    @apply qfdmo-shadow-none;
+    @apply qf-shadow-none;
   }
 
   .fr-tabs__list {
-    @apply qfdmo-p-0;
+    @apply qf-p-0;
   }
 
   .fr-tabs__panel {
-    @apply qfdmo-py-1w qfdmo-px-0;
+    @apply qf-py-1w qf-px-0;
   }
 
   .fr-tabs__list {
-    @apply qfdmo-space-x-1w qfdmo-min-h-min;
+    @apply qf-space-x-1w qf-min-h-min;
   }
 
   .fr-tabs__tab {
-    @apply qfdmo-m-0;
+    @apply qf-m-0;
   }
 }
 
@@ -210,27 +210,27 @@ DSFR customization for tabs
  * Failed to load some tailwind classes with parcel
  */
 
-.qfdmo--bottom-5 {
+.qf--bottom-5 {
   bottom: -1.25rem;
 }
 
-.qfdmo-bottom-2 {
+.qf-bottom-2 {
   bottom: 0.5rem;
 }
 
-.qfdmo-right-2 {
+.qf-right-2 {
   right: 0.5rem;
 }
 
-.qfdmo--top-5 {
+.qf--top-5 {
   top: -1.25rem;
 }
 
-.qfdmo-adresse-hr {
+.qf-adresse-hr {
   padding: 4px !important;
 }
 
-.qfdmo-no-external-link-icon {
+.qf-no-external-link-icon {
   &,
   .fr-link& {
     &:after {
@@ -265,13 +265,13 @@ DSFR customization for tabs
 }
 
 .active-pinpoint [data-animated] {
-  @apply qfdmo-animate-wave qfdmo-fill-mode-forwards;
+  @apply qf-animate-wave qf-fill-mode-forwards;
 }
 
 .map-grid {
-  @apply qfdmo-min-h-screen md:qfdmo-grid qfdmo-gap-0;
-  @apply qfdmo-grid-flow-row-dense;
-  @apply qfdmo-transition-[grid-template-columns] qfdmo-ease-in qfdmo-duration-200;
+  @apply qf-min-h-screen md:qf-grid qf-gap-0;
+  @apply qf-grid-flow-row-dense;
+  @apply qf-transition-[grid-template-columns] qf-ease-in qf-duration-200;
   grid-template-columns: auto var(--sidebar-width);
   grid-template-rows: var(--header-height) 1.5fr var(--footer-height);
   grid-template-areas:
@@ -280,7 +280,7 @@ DSFR customization for tabs
     "footer footer";
 
   &:has(> aside[aria-hidden="false"]) {
-    @apply qfdmo-ease-out;
+    @apply qf-ease-out;
     --sidebar-width: 400px;
   }
 

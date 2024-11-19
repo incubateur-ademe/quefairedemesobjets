@@ -51,7 +51,7 @@ export default class extends AutocompleteController {
                 })
             })
             .then(() => {
-                this.spinnerTarget.classList.add("qfdmo-hidden")
+                this.spinnerTarget.classList.add("qf-hidden")
                 return
             })
     }
@@ -97,10 +97,10 @@ export default class extends AutocompleteController {
         /*create a DIV element for each matching element:*/
         let b = document.createElement("DIV")
         b.classList.add(
-            "qfdmo-flex",
-            "qfdmo-flex-col",
-            "sm:qfdmo-flex-row",
-            "sm:qfdmo-justify-between",
+            "qf-flex",
+            "qf-flex-col",
+            "sm:qf-flex-row",
+            "sm:qf-justify-between",
         )
         /*make the matching letters bold:*/
         // const [data, longitude, latitude] = option.split("||")
@@ -113,7 +113,7 @@ export default class extends AutocompleteController {
 
         if (option.sub_label != null) {
             const sub_label = document.createElement("span")
-            sub_label.classList.add("fr-text--sm", "fr-m-0", "qfdmo-italic")
+            sub_label.classList.add("fr-text--sm", "fr-m-0", "qf-italic")
             sub_label.innerHTML = option.sub_label
             b.appendChild(sub_label)
         }

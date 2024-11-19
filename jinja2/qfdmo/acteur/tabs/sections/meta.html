@@ -1,7 +1,7 @@
 <div>
     <div class="
-        qfdmo-flex qfdmo-flex-col
-        qfdmo-text-right qfdmo-text-grey-425 fr-text--xs"
+        qf-flex qf-flex-col
+        qf-text-right qf-text-grey-425 fr-text--xs"
     >
         {% if request.user.is_staff %}
             <span>
@@ -21,7 +21,7 @@
         </span>
     </div>
 
-    <a class="fr-my-1w fr-btn fr-btn--tertiary qfdmo-whitespace-nowrap qfdmo-w-full qfdmo-justify-center"
+    <a class="fr-my-1w fr-btn fr-btn--tertiary qf-whitespace-nowrap qf-w-full qf-justify-center"
         href="{{ url('qfdmo:update-suggestion-form')}}?Nom={{object.nom}}&Ville={{object.ville}}&Adresse={{object.adresse}}"
         target="_blank"
         rel="noreferrer"

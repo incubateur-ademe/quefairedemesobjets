@@ -71,8 +71,8 @@ Par exemple les classes relatives au style (bordure, couleur, taille de texte) p
 
 ```html
 <div class="
-  qfdmo-flex qfdmo-justify-around
-  qfdmo-border-solid qfdmo-border-black qfdmo-border-2
-  qfdmo-bg-white
+  qf-flex qf-justify-around
+  qf-border-solid qf-border-black qf-border-2
+  qf-bg-white
 ">
 ```

@@ -18,17 +18,17 @@ module.exports = {
     "./**/forms.py",
     "./dsfr_hacks/used_icons.js"
   ],
-  prefix: "qfdmo-",
+  prefix: "qf-",
   corePlugins: {
     preflight: false,
   },
   safelist: [
-    "sm:qfdmo-max-w-[596px]",
-    "sm:qfdmo-min-w-[600px]",
-    "sm:qfdmo-w-[250px]",
-    "sm:qfdmo-w-[400px]",
+    "sm:qf-max-w-[596px]",
+    "sm:qf-min-w-[600px]",
+    "sm:qf-w-[250px]",
+    "sm:qf-w-[400px]",
     {
-      pattern: new RegExp(`qfdmo-(border|bg)-(${usedColors.join('|')})`)
+      pattern: new RegExp(`qf-(border|bg)-(${usedColors.join('|')})`)
     }
   ],
   theme: {
