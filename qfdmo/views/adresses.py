@@ -573,6 +573,8 @@ class FormulaireSearchActeursView(SearchActeursView):
     form_class = FormulaireForm
 
     def _get_selected_action_ids(self):
+        # TODO: merge this method with the one from CarteSearchActeursView
+        # and do not return a list of dict but a queryset instead
         return [a["id"] for a in self.get_action_list()]
 
     def get_action_list(self) -> List[dict]:
