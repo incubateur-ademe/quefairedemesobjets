@@ -1,21 +1,21 @@
 --constraint=requirements.txt --constraint=airflow-requirements.txt
 
+apache-airflow-providers-postgres
+apache-airflow==2.10.2
 beautifulsoup4
 black
 django-browser-reload
 django-debug-toolbar
+django-stubs
 factory_boy
+fuzzywuzzy
 honcho
 pre-commit
 ptpython
 pytest
 pytest-django
 pytest-dotenv
-apache-airflow==2.10.2
-apache-airflow-providers-postgres
-shapely
+python-Levenshtein
 ratelimit
 ruff
-fuzzywuzzy
-python-Levenshtein
-django-stubs
+shapely
