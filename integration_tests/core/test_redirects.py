@@ -7,7 +7,8 @@ from django.test import override_settings
 def test_redirect_without_param(client):
     url = "/"
     response = client.get(url)
-    assert response.status_code == 302
+    assert response.status_code == 301
+    assert response.url == "https://longuevieauxobjets.ademe.fr"
 
 
 @pytest.mark.django_db
