@@ -107,13 +107,13 @@ def get_address_from_ban(address):
     return {}
 
 
-def _clean_cedex(address_str):
+def _address_details_clean_cedex(address_str):
     """Supprime les mentions CEDEX <NUM> de l'adresse."""
     cedex_pattern = re.compile(r"\bCEDEX\s*\d*\b", re.IGNORECASE)
     return cedex_pattern.sub("", address_str).strip()
 
 
-def _extract_address_details(address_str):
+def _address_details_extract(address_str):
     """Extrait les détails de l'adresse, y compris le code postal et la ville."""
     address = postal_code = city = None
 
@@ -141,8 +141,8 @@ def _extract_address_details(address_str):
 def extract_details(row, col="adresse_format_ban"):
     """Extrait les détails de l'adresse à partir d'une ligne de DataFrame."""
     if pd.notnull(row[col]):
-        address_str = _clean_cedex(str(row[col]))
-        return _extract_address_details(address_str)
+        address_str = _address_details_clean_cedex(str(row[col]))
+        return _address_details_extract(address_str)
     return pd.Series([None, None, None])
 
 
