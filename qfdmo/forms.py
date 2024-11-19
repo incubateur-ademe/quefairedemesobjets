@@ -7,6 +7,7 @@ from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from dsfr.forms import DsfrBaseForm
 
+from core.constants import bonus_reparation
 from qfdmo.fields import GroupeActionChoiceField
 from qfdmo.geo_api import epcis_from, formatted_epcis_as_list_of_tuple
 from qfdmo.models import DagRun, DagRunStatus, SousCategorieObjet
@@ -179,7 +180,7 @@ class AddressesForm(forms.Form):
         ),
         label=mark_safe(
             "<span class='fr-icon--sm fr-icon-percent-line'></span>"
-            "&nbsp;Éligible au bonus réparation"
+            f"&nbsp;{bonus_reparation}"
         ),
         help_text=mark_safe(
             "Afficher uniquement les adresses éligibles (uniquement valable lorsque l'"
