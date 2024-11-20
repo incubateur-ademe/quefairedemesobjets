@@ -10,9 +10,9 @@ They match some colors from the DSFR and their name comes from their CSS variabl
 module.exports = {
   content: [
     "jinja2/*.html",
-    "jinja2/**/*html",
-    "jinja2/**/**/*html",
-    "templates/**/*html",
+    "jinja2/**/*.html",
+    "jinja2/**/**/*.html",
+    "templates/**/*.html",
     "static/to_compile/**/*{j,t}s",
     "static/to_compile/**/*svg",
     "./**/forms.py",

@@ -15,6 +15,10 @@
         <title>{% block title %}Que faire de mes déchets{% endblock %}</title>
         <meta name="description" content="{% block meta_description %}Donnons une nouvelle vie aux objets{% endblock %}">
 
+        {% comment %}
+        Preload https://developer.mozilla.org/fr/docs/Web/HTML/Attributes/rel/preload
+        {% endcomment %}
+
         {% dsfr_css %}
         <link rel="stylesheet" href="{% static 'qfdmd.css' %}">
 
@@ -27,7 +31,6 @@
         - posthog
         - matomo
         {% endcomment %}
-
     </head>
 
     <body
@@ -51,5 +54,6 @@
         {% endblock footer %}
 
         {% dsfr_js %}
+        <script type="module" src="{% static 'qfdmd.js' %}"></script>
     </body>
 </html>

@@ -3,3 +3,17 @@
 {% block icon %}
 {% include "./_share_icon.html" %}
 {% endblock icon %}
+
+{% block modal_title %}
+Partager ce simulateur
+{% endblock modal_title %}
+
+{% block modal_content %}
+Bouton de partage
+{% endblock modal_content %}
+
+{% block modal_wrapper_for_id %}
+    {% with id="partager-le-simulateur" %}
+    {{ block.super }}
+    {% endwith %}
+{% endblock modal_wrapper_for_id %}
