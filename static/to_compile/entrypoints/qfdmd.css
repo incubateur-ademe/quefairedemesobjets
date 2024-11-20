@@ -1,1 +1,8 @@
 @import "../css/base.css";
+
+p a {
+    @apply qf-text-blue-france-sun-113-625;
+}
+pre, code {
+    @apply qf-text-blue-france-sun-113-625 qf-font-bold;
+}

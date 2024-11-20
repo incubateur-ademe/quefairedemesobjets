@@ -4,32 +4,33 @@
 {% block main %}
 {% with object.produit as produit %}
 <article
-    class="qf-flex qf-flex-col"
+    class="qf-flex qf-flex-col
+    qf-gap-4w
+    "
 >
     <header>
-        <h1>
+        <h1 class="qf-m-0">
             {{ object.nom }}
         </h1>
     </header>
 
-    {% if produit.qu_est_ce_que_j_en_fais %}
-    <section id="qu-est-ce-que-j-en-fais">
-        {{ produit.qu_est_ce_que_j_en_fais }}
-    </section>
-    {% endif %}
+    <div
+        class="qf-border qf-border-solid qf-border-grey-900
+        qf-p-1w md:qf-p-4w"
+    >
+        {% if produit.qu_est_ce_que_j_en_fais %}
+        <section id="qu-est-ce-que-j-en-fais">
+            {{ produit.qu_est_ce_que_j_en_fais|safe }}
+        </section>
+        {% endif %}
 
-    {% if produit.sous_categorie_with_carte_display %}
-    <section id="que-va-t-il-devenir" class="qf-mt-6w qf-mb-4w">
-        <h2>Où l'apporter</h2>
-        {% carte_from produit %}
-    </section>
-    {% endif %}
-
-    {% if produit.carte_display %}
-    <section id="où-l-apporter">
-        {{ produit.que_va_t_il_devenir|safe }}
-    </section>
-    {% endif %}
+        {% if produit.sous_categorie_with_carte_display %}
+        <section id="ou-l-apporter" class="qf-mt-6w qf-mb-4w">
+            <h2>Où l'apporter</h2>
+            {% carte_from produit %}
+        </section>
+        {% endif %}
+    </div>
 
     {% dsfr_accordion_group produit.content_display %}
 </article>

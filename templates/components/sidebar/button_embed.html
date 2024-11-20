@@ -3,3 +3,34 @@
 {% block icon %}
 {% include "./_embed_icon.html" %}
 {% endblock icon %}
+
+{% block modal_title %}
+Intégrer ce simulateur
+{% endblock modal_title %}
+
+{% block modal_content %}
+<div class="qf-flex qf-flex-col qf-gap-1w">
+    <code>
+        {{ iframe_script }}
+    </code>
+    <i>
+        Copiez ce code puis ajoutez-le où vous souhaitez qu'il s'affiche sur votre site web
+    </i>
+
+    <strong>Vous souhaitez réutiliser le code du simulateur ?</strong>
+    <p>
+        Ce simulateur est développé de manière ouverte (open source). L’ensemble du code est <a
+            href="https://github.com/incubateur-ademe/quefairedemesobjets/"
+            target="_blank"
+            rel="noopener"
+            title="Lien vers le dépôt GitHub - Nouvelle fenêtre"
+        >disponible librement</a>.
+    </p>
+</div>
+{% endblock modal_content %}
+
+{% block modal_wrapper_for_id %}
+    {% with id="integrer-le-simulateur" %}
+    {{ block.super }}
+    {% endwith %}
+{% endblock modal_wrapper_for_id %}

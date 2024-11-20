@@ -70,6 +70,9 @@ def direct_access(request):
         parts = [reverse("qfdmo:formulaire"), "?" if params else "", params]
         return redirect("".join(parts))
 
+    if "localhost" == request.META["HTTP_HOST"]:
+        return redirect(reverse("qfdmd:home"))
+
     return redirect("https://longuevieauxobjets.ademe.fr/lacarte", permanent=True)
 
 

@@ -1,0 +1,41 @@
+<turbo-frame id="search" class="qf-pt-3v qf-absolute qf-right-2w qf-w-[320px] qf-z-20">
+    <div
+        class="
+        qf-relative
+        qf-rounded-3xl qf-overflow-hidden
+        qf-border-solid qf-border-[3px] qf-border-green-menthe-850-hover qf-bg-white
+        qf-flex qf-flex-col"
+    >
+        <form
+            data-controller="search"
+            data-turbo-frame="search-results"
+            action="{% url 'qfdmd:search' %}"
+            class="qf-pl-4w {# should match the svg icon width #}"
+        >
+            {% csrf_token %}
+
+            <button
+                type="submit"
+                class="qf-absolute qf-left-0 qf-top-[5px] qf-m-auto"
+            >
+                <svg width="23" height="22" viewBox="0 0 23 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22.6503 20.0385L16.9804 14.5927C18.4383 12.9924 19.237 10.9787 19.237 8.8825C19.237 3.98476 14.9221 0 9.61854 0C4.31494 0 0 3.98476 0 8.8825C0 13.7802 4.31494 17.765 9.61854 17.765C11.6095 17.765 13.5069 17.2104 15.1291 16.1576L20.842 21.6447C21.0809 21.8737 21.402 22 21.7462 22C22.072 22 22.381 21.8853 22.6156 21.6767C23.1141 21.2338 23.13 20.4992 22.6503 20.0385ZM9.61854 2.31717C13.5387 2.31717 16.7279 5.2623 16.7279 8.8825C16.7279 12.5027 13.5387 15.4478 9.61854 15.4478C5.69834 15.4478 2.50918 12.5027 2.50918 8.8825C2.50918 5.2623 5.69834 2.31717 9.61854 2.31717Z" fill="#009081"/>
+                </svg>
+            </button>
+            {% for field in search_form %}
+                {{ field }}
+            {% endfor %}
+        </form>
+
+        <turbo-frame
+            id="search-results"
+            class="qf-flex qf-flex-col"
+        >
+            {% if search_form.results %}
+                {% for result in search_form.results %}
+                    {% include "./_search_result.html" %}
+                {% endfor %}
+            {% endif %}
+        </turbo-frame>
+    </div>
+</turbo-frame>
