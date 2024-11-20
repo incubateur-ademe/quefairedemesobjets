@@ -86,7 +86,7 @@ Attention à ajouter le paramètre endpoint_url pour le stockage Cellar de Cleve
 
 #### Gestion de la base de données
 
-La connexion postgres `qfdmo-django-db` doit aussi être configurée dans l'interface d'Airflow
+La connexion postgres `qfdmo_django_db` doit aussi être configurée dans l'interface d'Airflow
 
 ##### Spécificité de l'environnement de développement
 
