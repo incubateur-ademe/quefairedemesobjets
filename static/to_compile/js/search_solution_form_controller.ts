@@ -354,19 +354,16 @@ export default class extends Controller<HTMLElement> {
     return errorExists
   }
 
-  toggleAdvancedFiltersWithSubmitButton() {
+  closeAdvancedFilters() {
     this.advancedFiltersSaveAndSubmitButtonTarget.classList.remove("qf-hidden")
     this.advancedFiltersSaveButtonTarget.classList.add("qf-hidden")
-    this.#toggleAdvancedFilters()
+    this.#hideAdvancedFilters()
+    this.scrollToContent()
   }
 
-  toggleAdvancedFiltersWithoutSubmitButton() {
-    this.advancedFiltersSaveAndSubmitButtonTarget.classList.add("qf-hidden")
-    this.advancedFiltersSaveButtonTarget.classList.remove("qf-hidden")
-    this.#toggleAdvancedFilters()
-  }
-
-  #toggleAdvancedFilters() {
+  toggleAdvancedFilters() {
+    this.advancedFiltersSaveAndSubmitButtonTarget.classList.remove("qf-hidden")
+    this.advancedFiltersSaveButtonTarget.classList.add("qf-hidden")
     if (this.advancedFiltersMainPanelTarget.dataset.visible === "false") {
       this.#showAdvancedFilters()
     } else {
