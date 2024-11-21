@@ -1,0 +1,22 @@
+<div class="qf-relative" class="patchwork">
+    {% for produit in items %}
+        {% if forloop.counter == 20 %}
+        <h1 class="qfdmo-inline-flex">
+            Que faire de mes objets
+        </h1>
+        {% endif %}
+    <div class="
+        qf-aspect-square
+        qf-inline-flex
+        qf-p-2w
+    ">
+        <a
+            class="!qf-bg-none"
+            href="{{ produit.synonymes.first.url }}"
+            title="Fiche produit {{ produit.picto.nom }}"
+        >
+            <img src="{{ produit.picto.url }}" />
+        </a>
+    </div>
+    {% endfor %}
+</div>

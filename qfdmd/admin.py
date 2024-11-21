@@ -26,7 +26,7 @@ class ProduitInline(admin.StackedInline):
     extra = 1
 
 
-class ProduitAdmin(NotEditableInlineMixin, admin.ModelAdmin):
+class ProduitAdmin(admin.ModelAdmin):
     list_display = ("nom", "id", "synonymes_existants")
     search_fields = ["nom", "id", "synonymes_existants"]
     # ajout des filtres de recherche sur bdd et code

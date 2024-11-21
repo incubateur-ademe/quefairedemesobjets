@@ -45,7 +45,7 @@ class BaseView:
 
 
 class HomeView(BaseView, TemplateView):
-    pass
+    template_name = "qfdmd/home.html"
 
 
 class SynonymeDetailView(BaseView, DetailView):

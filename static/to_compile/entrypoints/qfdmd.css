@@ -6,3 +6,8 @@ p a {
 pre, code {
     @apply qf-text-blue-france-sun-113-625 qf-font-bold;
 }
+
+.patchwork {
+    @apply qf-gap-2w;
+    grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+}

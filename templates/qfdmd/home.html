@@ -1,0 +1,11 @@
+{% extends "qfdmd/base.html" %}
+
+{% block header %}
+{% include "components/header/header_home.html" %}
+{% endblock header %}
+
+{% block main %}
+<div class="qf-max-w-3xl qf-m-auto">
+    {% include search_view_template_name with big=True %}
+</div>
+{% endblock main %}
