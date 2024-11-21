@@ -1,0 +1,12 @@
+<a
+    class="!qf-bg-none icon"
+    href="{{ produit.synonymes.first.url }}"
+    title="Fiche produit {{ produit.picto.nom }}"
+    style="
+      --random-x: {{ forloop.counter|add:1|divisibleby:7|yesno:'-5,20' }};
+      --random-y: {{ forloop.revcounter|add:2|divisibleby:2|yesno:'15,-15' }};
+      --random-rotate: {{ forloop.counter|add:1|divisibleby:2|yesno:'5,-5' }};
+    "
+>
+    <img src="{{ produit.picto.url }}" />
+</a>

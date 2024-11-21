@@ -1,21 +1,22 @@
 <div class="patchwork">
-    {% for produit in items %}
-        {% if forloop.revcounter == 12 %}
-        <h1 class="fr-h1 title qf-inline-flex">
+    <div class="top">
+        {% for produit in top %}
+            {% include "./_item.html" %}
+        {% endfor %}
+    </div>
+    <div class="left">
+        {% for produit in left %}
+            {% include "./_item.html" %}
+        {% endfor %}
+    </div>
+    <div class="middle">
+        <h1 class="fr-h1 title qf-whitespace-nowrap">
             Que faire de mes <span>objets</span>
         </h1>
-        {% endif %}
-
-        <div
-            class="icon"
-        >
-            <a
-                class="!qf-bg-none "
-                href="{{ produit.synonymes.first.url }}"
-                title="Fiche produit {{ produit.picto.nom }}"
-            >
-                <img src="{{ produit.picto.url }}" />
-            </a>
-        </div>
-    {% endfor %}
+    </div>
+    <div class="right">
+        {% for produit in right %}
+            {% include "./_item.html" %}
+        {% endfor %}
+    </div>
 </div>

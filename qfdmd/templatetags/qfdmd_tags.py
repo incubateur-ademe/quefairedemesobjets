@@ -17,5 +17,6 @@ def carte_from(produit):
 def patchwork():
     from qfdmd.models import Produit
 
-    produits = Produit.objects.exclude(picto=None)
-    return {"items": list(produits) * 27}
+    produits = Produit.objects.exclude(picto="").exclude(picto=None)
+    items = list(produits) * 27
+    return {"top": items[:16], "left": items[17:22], "right": items[22:27]}
