@@ -9,7 +9,7 @@
     {
         "model": "qfdmo.acteurtype",
         "fields": {
-            "code": "collectivité",
+            "code": "collectivite",
             "libelle": "collectivité, établissement public"
         }
     },
@@ -30,49 +30,49 @@
     {
         "model": "qfdmo.acteurtype",
         "fields": {
-            "code": "acteur digital",
+            "code": "acteur_digital",
             "libelle": "en ligne (web, mobile)"
         }
     },
     {
         "model": "qfdmo.acteurtype",
         "fields": {
-            "code": "déchèterie",
+            "code": "decheterie",
             "libelle": "déchèterie"
         }
     },
     {
         "model": "qfdmo.acteurtype",
         "fields": {
-            "code": "établissement de santé",
+            "code": "ets_sante",
             "libelle": "établissement de santé"
         }
     },
     {
         "model": "qfdmo.acteurtype",
         "fields": {
-            "code": "plateforme inertes",
+            "code": "plateforme_inertes",
             "libelle": "plateforme de valorisation des inertes"
         }
     },
     {
         "model": "qfdmo.acteurtype",
         "fields": {
-            "code": "point d'apport volontaire public",
+            "code": "pav_public",
             "libelle": "point d'apport volontaire public"
         }
     },
     {
         "model": "qfdmo.acteurtype",
         "fields": {
-            "code": "point d'apport volontaire privé",
+            "code": "pav_prive",
             "libelle": "point d'apport volontaire privé"
         }
     },
     {
         "model": "qfdmo.acteurtype",
         "fields": {
-            "code": "point d'apport volontaire ponctuel",
+            "code": "pav_ponctuel",
             "libelle": "point d'apport volontaire ponctuel"
         }
     }
