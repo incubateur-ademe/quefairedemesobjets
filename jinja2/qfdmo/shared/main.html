@@ -41,19 +41,12 @@
                 class="
                 qf-flex
                 max-md:qf-h-main-svh
-                {# Is useful for digital view so that the users can scrol in the results #}
-                qf-overflow-auto
                 "
             >
                 {% block form_result %}
                     <turbo-frame id="addressesPanel"
                         data-search-solution-form-target="addressesPanel"
-                        class="qf-relative qf-z-10
-                            qf-flex qf-flex-col
-                            max-md:qf-fixed
-                            max-md:qf-top-header max-md:qf-bottom-footer
-                            max-md:qf-left-0 max-md:qf-right-0
-                            data-[visible=true]:qf-flex-grow
+                        class="data-[visible=true]:qf-flex-grow
                             data-[visible=false]:qf-invisible data-[visible=false]:qf-h-0"
                         data-visible={{"true" if is_carte else "false"}}
                         tabindex="0"
