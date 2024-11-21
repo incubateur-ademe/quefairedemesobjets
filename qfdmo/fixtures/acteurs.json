@@ -3,7 +3,7 @@
       "model":"qfdmo.displayedacteur",
       "pk":"000e0603-8060-42b0-a216-84636214ad99",
       "fields":{
-         "nom":"LIBOURNE BALLASTIERE",
+         "nom":"Ressourcerie des Biscottes",
          "description":null,
          "acteur_type_id": 666,
          "adresse":null,
