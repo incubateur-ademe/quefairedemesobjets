@@ -21,6 +21,10 @@
                 type="{{ widget.type }}"
                 name="{{ widget.name }}"
                 autocomplete="off"
+                autocorrect="off"
+                autocapitalize="off"
+                spellcheck="false"
+                data-form-type="other"
                 {% if widget.value != None %} value="{{ widget.value|stringformat:'s' }}"{% endif %}
                 {% include "django/forms/widgets/attrs.html" %}
             >
