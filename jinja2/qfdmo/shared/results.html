@@ -11,14 +11,8 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
     qf-relative
     qf-flex-grow
     qf-shadow
-    qf-relative qf-z-10
-    qf-flex qf-flex-col
     {% if is_digital %}
-    qf-overflow-auto
-    {% else %}
-    max-md:qf-fixed
-    max-md:qf-top-header max-md:qf-bottom-footer
-    max-md:qf-left-0 max-md:qf-right-0
+    qf-overflow-scroll
     {% endif %}
     "
     {% if not is_digital %}
