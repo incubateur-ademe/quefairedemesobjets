@@ -3,6 +3,7 @@
         "model": "qfdmo.acteurtype",
         "fields": {
             "code": "ess",
+            "id": 666,
             "libelle": "Association, entreprise de l'ESS"
         }
     },

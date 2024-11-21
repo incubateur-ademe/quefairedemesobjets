@@ -11,6 +11,9 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
     qf-relative
     qf-flex-grow
     qf-shadow
+    {% if is_digital %}
+    max-md:qf-overflow-scroll
+    {% endif %}
     "
     {% if not is_digital %}
     data-controller="map"
@@ -22,6 +25,9 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
     {% else %}
         {# Near by addresses#}
         {% include "qfdmo/carte/_search_in_zone.html" %}
+        {% if is_carte %}
+            {% include "qfdmo/carte/panels/legend.html" %}
+        {% endif %}
         <div
             id="map"
             class="qf-inset-0 qf-h-full qf-relative qf-z-0"
@@ -39,10 +45,6 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
                 >
                     Proposer une adresse
                 </a>
-            {% endif %}
-
-            {% if is_carte %}
-                {% include "qfdmo/carte/panels/legend.html" %}
             {% endif %}
 
             {% with address_ok=(form.initial.adresse or form.initial.bounding_box or acteurs) %}
