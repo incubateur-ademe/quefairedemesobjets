@@ -2,23 +2,23 @@
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "code": "Achat, revente entre particuliers",
-            "libelle": "Entre particuliers",
+            "code": "achat_revente_particuliers",
+            "libelle": "Achat, revente entre particuliers",
             "actions": [["acheter"], ["revendre"]]
         }
     },
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "code": "Achat, revente par un professionnel",
-            "libelle": "Par un professionnel",
+            "code": "achat_revente_professionnel",
+            "libelle": "Achat, revente via un professionnel",
             "actions": [["acheter"], ["revendre"]]
         }
     },
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "code": "Atelier pour réparer soi-même",
+            "code": "atelier_pour_reparer_soi_meme",
             "libelle": "Atelier pour réparer soi-même",
             "actions": [["reparer"]]
         }
@@ -26,7 +26,7 @@
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "code": "Collecte par une structure spécialisée",
+            "code": "structure_de_collecte",
             "libelle": "Structure de collecte",
             "actions": [["donner"]]
         }
@@ -34,7 +34,7 @@
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "code": "Depôt-vente",
+            "code": "depot_vente",
             "libelle": "Depôt-vente",
             "actions": [["acheter"], ["revendre"]]
         }
@@ -42,55 +42,55 @@
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "code": "Don entre particuliers",
-            "libelle": "Entre particuliers",
-            "actions": [["donner"]]
+        "code": "don_particuliers",
+        "libelle": "Don entre particuliers",
+        "actions": [["donner"]]
         }
     },
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "code": "Echanges entre particuliers",
-            "libelle": "Entre particuliers",
+            "code": "echanges_particuliers",
+            "libelle": "Echange entre particuliers",
             "actions": [["echanger"]]
         }
     },
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "code": "Espace de partage",
+            "code": "espace_de_partage",
             "libelle": "Espace de partage",
-            "actions": [["preter"], ["echanger"], ["emprunter"]]
+            "actions": [["preter"], ["emprunter"], ["echanger"]]
         }
     },
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "code": "Location entre particuliers",
-            "libelle": "Entre particuliers",
+            "code": "localtion_particuliers",
+            "libelle": "Location entre particuliers",
             "actions": [["louer"], ["mettreenlocation"]]
         }
     },
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "code": "Location par un professionnel",
-            "libelle": "Via un professionnel",
+            "code": "location_professionnel",
+            "libelle": "Location via un professionnel",
             "actions": [["louer"], ["mettreenlocation"]]
         }
     },
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "code": "Partage entre particuliers",
-            "libelle": "Entre particuliers",
+            "code": "partage_particuliers",
+            "libelle": "Partage entre particuliers",
             "actions": [["preter"], ["emprunter"]]
         }
     },
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "code": "Pièces détachées",
+            "code": "pieces_detachees",
             "libelle": "Pièces détachées",
             "actions": [["reparer"]]
         }
@@ -98,25 +98,25 @@
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "code": "Relai d'acteurs et d'événements",
+            "code": "relai_acteurs_et_evenements",
             "libelle": "Actualités et informations",
             "actions": [
-                ["reparer"],
-                ["acheter"],
-                ["revendre"],
-                ["donner"],
+                ["preter"],
+                ["emprunter"],
                 ["louer"],
                 ["mettreenlocation"],
-                ["emprunter"],
-                ["preter"],
-                ["echanger"]
+                ["reparer"],
+                ["donner"],
+                ["echanger"],
+                ["acheter"],
+                ["revendre"]
             ]
         }
     },
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "code": "Recyclerie",
+            "code": "recyclerie",
             "libelle": "Recyclerie",
             "actions": [["acheter"]]
         }
@@ -124,7 +124,7 @@
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "code": "Service de réparation",
+            "code": "service_de_reparation",
             "libelle": "Service de réparation",
             "actions": [["reparer"]]
         }
@@ -132,7 +132,7 @@
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "code": "Tutoriels et diagnostics en ligne",
+            "code": "tutoriels_et_diagnostics_en_ligne",
             "libelle": "Tutoriels et diagnostics en ligne",
             "actions": [["reparer"]]
         }
@@ -140,8 +140,8 @@
     {
         "model": "qfdmo.acteurservice",
         "fields": {
-            "code": "Structure qui va sous-traiter la réparation",
-            "libelle": "Structure qui va sous-traiter la réparation",
+            "code": "structure_qui_sous_traite_la_reparation",
+            "libelle": "Sous-traitance de la réparation",
             "actions": [["reparer"]]
         }
     }

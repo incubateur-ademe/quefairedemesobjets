@@ -104,7 +104,7 @@ class ActeurType(CodeAsNaturalKeyModel):
     @classmethod
     def get_digital_acteur_type_id(cls) -> int:
         if not cls._digital_acteur_type_id:
-            (digital_acteur_type, _) = cls.objects.get_or_create(code="acteur digital")
+            (digital_acteur_type, _) = cls.objects.get_or_create(code="acteur_digital")
             cls._digital_acteur_type_id = digital_acteur_type.id
         return cls._digital_acteur_type_id
 
@@ -473,7 +473,7 @@ class Acteur(BaseActeur):
         return revisionacteur
 
     def clean_location(self):
-        if self.location is None and self.acteur_type.code != "acteur digital":
+        if self.location is None and self.acteur_type.code != "acteur_digital":
             raise ValidationError(
                 {"location": "Location is mandatory when the actor is not digital"}
             )
