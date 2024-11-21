@@ -18,4 +18,4 @@ def patchwork():
     from qfdmd.models import Produit
 
     produits = Produit.objects.exclude(picto=None)
-    return {"items": list(produits) * 30}
+    return {"items": list(produits) * 27}

@@ -1,23 +1,21 @@
-<div class="qf-relative" class="patchwork">
+<div class="patchwork">
     {% for produit in items %}
-        {% if forloop.counter == 20 %}
-        <h1 class="qfdmo-inline-flex">
-            Que faire de mes objets
+        {% if forloop.revcounter == 12 %}
+        <h1 class="fr-h1 title qf-inline-flex">
+            Que faire de mes <span>objets</span>
         </h1>
         {% endif %}
-    <div class="
-        qf-aspect-square
-        qf-inline-flex
-        qf-p-2w
-        hover:qf-scale-115 qf-transition-transform
-    ">
-        <a
-            class="!qf-bg-none "
-            href="{{ produit.synonymes.first.url }}"
-            title="Fiche produit {{ produit.picto.nom }}"
+
+        <div
+            class="icon"
         >
-            <img src="{{ produit.picto.url }}" />
-        </a>
-    </div>
+            <a
+                class="!qf-bg-none "
+                href="{{ produit.synonymes.first.url }}"
+                title="Fiche produit {{ produit.picto.nom }}"
+            >
+                <img src="{{ produit.picto.url }}" />
+            </a>
+        </div>
     {% endfor %}
 </div>
