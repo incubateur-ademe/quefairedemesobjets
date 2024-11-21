@@ -1,0 +1,45 @@
+[
+   {
+      "model":"qfdmo.displayedacteur",
+      "pk":"000e0603-8060-42b0-a216-84636214ad99",
+      "fields":{
+         "nom":"LIBOURNE BALLASTIERE",
+         "description":null,
+         "acteur_type_id": 666,
+         "adresse":null,
+         "adresse_complement":null,
+         "code_postal":null,
+         "ville":null,
+         "url":null,
+         "email":null,
+         "location":"SRID=4326;POINT (2.349014 48.864716)",
+         "telephone":null,
+         "nom_commercial":"SMICVAL",
+         "nom_officiel":null,
+         "siret":null,
+         "source":null,
+         "identifiant_externe":null,
+         "statut":"ACTIF",
+         "naf_principal":null,
+         "commentaires":null,
+         "cree_le":"2024-03-05T12:39:35.142Z",
+         "modifie_le":"2024-03-05T12:39:35.142Z",
+         "horaires_osm":null,
+         "horaires_description":null,
+         "public_accueilli":null,
+         "reprise":null,
+         "exclusivite_de_reprisereparation":null,
+         "uniquement_sur_rdv":null,
+         "action_principale":null,
+         "uuid":"234f7MjdMpye3aEpJbqHNZ",
+         "labels":[
+
+         ],
+         "acteur_services":[
+            [
+               "Collecte par une structure spécialisée"
+            ]
+         ]
+      }
+   }
+]

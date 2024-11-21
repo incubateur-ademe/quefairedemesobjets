@@ -25,7 +25,7 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
     {% else %}
         {# Near by addresses#}
         {% include "qfdmo/carte/_search_in_zone.html" %}
-        {% if is_carte and acteurs %}
+        {% if is_carte %}
             {% include "qfdmo/carte/panels/legend.html" %}
         {% endif %}
         <div

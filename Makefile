@@ -86,7 +86,15 @@ createsuperuser:
 
 .PHONY: seed-database
 seed-database:
-	$(DJANGO_ADMIN) loaddata categories actions acteur_services acteur_types
+	$(DJANGO_ADMIN) loaddata categories actions acteur_services acteur_types acteurs objets
+
+.PHONY: drop-db
+drop-db:
+	docker compose exec lvao-db dropdb -f -i -U qfdmo -e qfdmo
+
+.PHONY: create-db
+create-db:
+	docker compose exec lvao-db createdb -U qfdmo -e qfdmo
 
 .PHONY: restore-prod
 restore-prod:
