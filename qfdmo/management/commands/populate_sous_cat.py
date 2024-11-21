@@ -59,12 +59,12 @@ MAPPINGS = [
     {
         "existing_sous_categorie": "gros electromenager (hors refrigerant)",
         "new_sous_categories": ["Panneaux photovoltaïques"],
-        "actions": ["donner", "revendre"],
+        "actions": ["donner", "revendre", "preter"],
     },
     {
         "existing_sous_categorie": "velo",
         "new_sous_categories": ["JELS_Mobilite_electrique"],
-        "actions": ["donner", "revendre"],
+        "actions": ["donner", "revendre", "preter"],
     },
     {
         "existing_sous_categorie": "gros electromenager (hors refrigerant)",
