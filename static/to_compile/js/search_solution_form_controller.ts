@@ -1,6 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import * as Turbo from "@hotwired/turbo"
-import { clearActivePinpoints } from "./map_helpers"
+import { clearActivePinpoints, removeHash } from "./helpers"
 
 export default class extends Controller<HTMLElement> {
   #selectedOption: string = ""
@@ -47,7 +47,7 @@ export default class extends Controller<HTMLElement> {
 
     "carte",
 
-    //FIXME: should be renamed
+    // TODO: should be renamed
     "loadingSolutions",
     "addressMissing",
     "NoLocalSolution",
@@ -124,9 +124,13 @@ export default class extends Controller<HTMLElement> {
     const identifiantUnique = event
       ? new URL(event.newURL).hash.substring(1)
       : window.location.hash.substring(1)
+    if (identifiantUnique) {
+      this.displayActeur(identifiantUnique)
+      this.dispatch("captureInteraction")
+    } else {
+      this.hideActeurDetailsPanel()
+    }
 
-    this.displayActeur(identifiantUnique)
-    this.dispatch("captureInteraction")
   }
   activeReparerFilters(activate: boolean = true) {
     // Carte mode
@@ -206,6 +210,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   hideActeurDetailsPanel() {
+    removeHash()
     document
       .querySelector("[aria-controls=acteurDetailsPanel][aria-expanded=true]")
       ?.setAttribute("aria-expanded", "false")
@@ -354,19 +359,16 @@ export default class extends Controller<HTMLElement> {
     return errorExists
   }
 
-  toggleAdvancedFiltersWithSubmitButton() {
+  closeAdvancedFilters() {
     this.advancedFiltersSaveAndSubmitButtonTarget.classList.remove("qf-hidden")
     this.advancedFiltersSaveButtonTarget.classList.add("qf-hidden")
-    this.#toggleAdvancedFilters()
+    this.#hideAdvancedFilters()
+    this.scrollToContent()
   }
 
-  toggleAdvancedFiltersWithoutSubmitButton() {
-    this.advancedFiltersSaveAndSubmitButtonTarget.classList.add("qf-hidden")
-    this.advancedFiltersSaveButtonTarget.classList.remove("qf-hidden")
-    this.#toggleAdvancedFilters()
-  }
-
-  #toggleAdvancedFilters() {
+  toggleAdvancedFilters() {
+    this.advancedFiltersSaveAndSubmitButtonTarget.classList.remove("qf-hidden")
+    this.advancedFiltersSaveButtonTarget.classList.add("qf-hidden")
     if (this.advancedFiltersMainPanelTarget.dataset.visible === "false") {
       this.#showAdvancedFilters()
     } else {
@@ -440,6 +442,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   advancedSubmit(event: Event) {
+    this.hideActeurDetailsPanel()
     const withControls =
       (event.target as HTMLElement).dataset.withControls?.toLowerCase() === "true"
     if (withControls) {

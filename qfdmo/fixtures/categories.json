@@ -279,7 +279,8 @@
         "fields": {
             "libelle": "chaussures",
             "categorie": ["vetements & accessoires"],
-            "code": "chaussures"
+            "code": "chaussures",
+            "afficher": "True"
         }
     },
     {

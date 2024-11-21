@@ -1,17 +1,17 @@
 {# Panel «Formulaire de recherche» #}
 <div
     class="
+    qf-max-h-screen qf-overflow-auto
     qf-absolute top-0 right-0 left-0
     qf-bg-white
-    qf-flex-grow
-    qf-px-1v"
+    qf-flex-grow"
     data-search-solution-form-target="searchFormPanel"
 >
     <h1 class="qf-sr-only">Longue vie aux objets</h1>
     <div class="qf-flex">
         <div data-testid="form-content">
             {# TODO: REFACTO OVERFLOW : supprimer les overflow et le padding left #}
-            <div class="qf-flex-grow qf-pl-3v">
+            <div class="qf-flex-grow md:qf-pl-3v max-md:qf-px-1w">
                 {# Direction #}
                 <fieldset class="fr-segmented fr-segmented--sm qf-w-full fr-mt-3w">
                     <legend class="fr-segmented__legend qf-hidden">
@@ -48,7 +48,7 @@
                 <button
                     class="fr-my-1w qf-w-full sm:qf-w-fit fr-btn fr-btn--tertiary-no-outline qf-flex qf-justify-center sm:qf-text-left"
                     type="button"
-                    data-action="click -> search-solution-form#toggleAdvancedFiltersWithoutSubmitButton"
+                    data-action="search-solution-form#toggleAdvancedFilters"
                     data-testid="advanced-filters"
                 >
                     Filtres avancés

@@ -3,7 +3,7 @@ import MapController from "./map_controller"
 import pinBackgroundSvg from "bundle-text:../svg/pin-background.svg"
 import pinBackgroundFillSvg from "bundle-text:../svg/pin-background-fill.svg"
 import bonusIconSvg from "bundle-text:../svg/bonus-reparation-fill.svg"
-import { ACTIVE_PINPOINT_CLASSNAME, clearActivePinpoints } from "./map_helpers"
+import { ACTIVE_PINPOINT_CLASSNAME, clearActivePinpoints } from "./helpers"
 import type { DisplayedActeur, Location, LVAOMarker } from "./types"
 
 const DEFAULT_LOCATION: L.LatLngTuple = [46.227638, 2.213749]
