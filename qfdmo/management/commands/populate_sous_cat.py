@@ -202,7 +202,7 @@ With actions: {mapping['actions']}
                 " révisions concernées"
             )
         )
-        sample_acteur_ids = random.sample(list(acteur_ids), max(10, len(acteur_ids)))
+        sample_acteur_ids = random.sample(list(acteur_ids), min(10, len(acteur_ids)))
         self.stdout.write(f"Echantillon d'acteurs modifiés (10) : {sample_acteur_ids}")
 
         for prop_service in prop_services:
