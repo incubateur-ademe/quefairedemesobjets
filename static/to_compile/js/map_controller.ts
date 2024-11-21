@@ -3,6 +3,7 @@ import * as Turbo from "@hotwired/turbo"
 import debounce from "lodash/debounce"
 import { SolutionMap } from "./solution_map"
 import { ActorLocation, DisplayedActeur } from "./types"
+import { removeHash } from "./helpers"
 
 export class Actor implements DisplayedActeur {
   identifiant_unique: string
@@ -20,13 +21,6 @@ export class Actor implements DisplayedActeur {
     this.bonus = actorFields.bonus
     this.reparer = actorFields.reparer
   }
-}
-export function removeHash() {
-  history.pushState(
-    "",
-    document.title,
-    window.location.pathname + window.location.search,
-  )
 }
 
 export default class extends Controller<HTMLElement> {
