@@ -18,5 +18,6 @@ def carte_from(context, produit):
 @register.inclusion_tag("components/patchwork/patchwork.html")
 def patchwork():
     from qfdmd.models import Produit
+
     produits = Produit.objects.exclude(picto="").exclude(picto=None)
     return {"top": produits[:24], "left": produits[24:30], "right": produits[30:36]}
