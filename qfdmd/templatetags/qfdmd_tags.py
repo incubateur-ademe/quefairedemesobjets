@@ -8,7 +8,7 @@ def carte_from(context, produit):
     request = context["request"]
     try:
         return {
-            "carte_settings": produit.sous_categorie_with_carte_display.carte_settings.items(),
+            "carte_settings": produit.sous_categorie_with_carte_display.carte_settings.items(),  # noqa: E501
             "request": request,
         }
     except AttributeError:
