@@ -1,6 +1,6 @@
 {% load static %}
 <script
-    src="http://localhost:8000{% static '/carte.js' %}"
+    src="{{ request.scheme }}://{{ request.META.HTTP_HOST }}/{% static 'carte.js' %}"
     {% for key, value in carte_settings %}
         data-{{ key }}="{{ value }}"
     {% endfor %}

@@ -5,6 +5,5 @@ import SearchController from "../js/controllers/assistant/search"
 
 window.stimulus = Application.start()
 stimulus.register("search", SearchController)
-stimulus.debug = true
 
 Turbo.session.drive = false;

@@ -3,11 +3,13 @@ from django import template
 register = template.Library()
 
 
-@register.inclusion_tag("components/carte/carte.html")
-def carte_from(produit):
+@register.inclusion_tag("components/carte/carte.html", takes_context=True)
+def carte_from(context, produit):
+    request = context["request"]
     try:
         return {
-            "carte_settings": produit.sous_categorie_with_carte_display.carte_settings.items()
+            "carte_settings": produit.sous_categorie_with_carte_display.carte_settings.items(),
+            "request": request,
         }
     except AttributeError:
         return {}
