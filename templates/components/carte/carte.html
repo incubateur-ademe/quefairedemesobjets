@@ -1,4 +1,8 @@
 {% load static %}
+{% comment %}
+The map is loaded using an iframe a the moment to mimic existing implementations.
+In a near future, it will use a turbo frame instead.
+{% endcomment %}
 <script
     src="{{ request.scheme }}://{{ request.META.HTTP_HOST }}/{% static 'carte.js' %}"
     {% for key, value in carte_settings %}
