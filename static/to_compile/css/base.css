@@ -88,6 +88,6 @@ Style the autocomplete container:
 }
 
 :root[data-formulaire] {
-    --footer-height: 100px;
+    --footer-height: 35px;
     --header-height: 135px;
 }

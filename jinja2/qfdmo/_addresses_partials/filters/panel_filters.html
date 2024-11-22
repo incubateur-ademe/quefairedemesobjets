@@ -4,7 +4,7 @@
 
 {% block wrapper_attrs %}
      data-search-solution-form-target="advancedFiltersMainPanel"
-     data-action="keydown.esc@document->search-solution-form#toggleAdvancedFiltersWithoutSubmitButton"
+     data-action="keydown.esc@document->search-solution-form#closeAdvancedFilters"
      data-testid="advanced-filters-modal"
      tabindex="0"
 {% endblock wrapper_attrs %}
@@ -13,7 +13,7 @@
 <button
    class="fr-btn fr-btn--close fr-btn--sm fr-btn--tertiary-no-outline fr-btn--icon-left fr-icon-close-line"
     type="button"
-    data-action="click -> search-solution-form#toggleAdvancedFiltersWithoutSubmitButton"
+    data-action="click -> search-solution-form#toggleAdvancedFilters"
 >
     Fermer
 </button>
@@ -33,7 +33,7 @@
     <button
         class="fr-btn"
         type="button"
-        data-action="click -> search-solution-form#toggleAdvancedFiltersWithoutSubmitButton"
+        data-action="search-solution-form#toggleAdvancedFilters"
     >
         Enregistrer les filtres
     </button>

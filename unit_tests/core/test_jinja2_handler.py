@@ -148,7 +148,7 @@ class TestDistanceToActeur:
 
     def test_distance_to_acteur_digital(self, adresse):
         ActeurType._digital_acteur_type_id = 0
-        adresse.acteur_type = ActeurTypeFactory(code="acteur digital")
+        adresse.acteur_type = ActeurTypeFactory(code="acteur_digital")
         request = type("", (), {})()
         request.GET = {"longitude": str(1000 / 111320), "latitude": str(1000 / 111320)}
         assert distance_to_acteur(request, adresse) == ""

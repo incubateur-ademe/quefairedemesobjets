@@ -13,3 +13,11 @@ export function clearActivePinpoints() {
     element.classList.remove(ACTIVE_PINPOINT_CLASSNAME)
   })
 }
+
+export function removeHash() {
+  history.pushState(
+    "",
+    document.title,
+    window.location.pathname + window.location.search,
+  )
+}

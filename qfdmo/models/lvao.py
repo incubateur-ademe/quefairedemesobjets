@@ -50,6 +50,7 @@ class LVAOBaseRevision(NomAsNaturalKeyModel):
     url = models.CharField(max_length=2048, blank=True, null=True)  # url
     email = models.EmailField(blank=True, null=True)  # email
     latitude = models.FloatField(blank=True, null=True)  # latitude
+
     longitude = models.FloatField(blank=True, null=True)  # longitude
     telephone = models.CharField(max_length=255, blank=True, null=True)  # Telephone
     multi_base = models.BooleanField(default=False)  # MultiBase
