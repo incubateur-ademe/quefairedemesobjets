@@ -7,6 +7,8 @@ from django.contrib.postgres.search import (
 )
 from dsfr.forms import DsfrBaseForm
 
+from .models import Synonyme
+
 logger = logging.getLogger(__name__)
 
 
@@ -19,9 +21,7 @@ class SearchForm(DsfrBaseForm):
         help_text="Entrez un objet ou un déchet", required=False, widget=SearchInput
     )
 
-    def clean(self):
-        from .models import Synonyme
-
+    def search(self) -> dict[str, str]:
         search_query: str = self.cleaned_data.get("input")
         self.results = (
             Synonyme.objects.annotate(
@@ -32,4 +32,4 @@ class SearchForm(DsfrBaseForm):
             .order_by("-word_similarity", "-similarity")
             .values("slug", "nom")[:10]
         )
-        return super().clean()
+        return self.results

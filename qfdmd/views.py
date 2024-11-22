@@ -26,6 +26,7 @@ def search_view(request) -> HttpResponse:
     template_name = SEARCH_VIEW_TEMPLATE_NAME
 
     if form.is_valid():
+        form.search()
         context.update(search_form=form)
 
     return render(request, template_name, context=context)
