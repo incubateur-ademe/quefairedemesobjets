@@ -5,7 +5,21 @@
 {% endblock header %}
 
 {% block main %}
-<div class="qf-max-w-3xl qf-m-auto">
-    {% include search_view_template_name with big=True %}
+<div class="qf-flex qf-flex-col qf-gap-7w">
+    {# search + patchwork #}
+    <div class="qf-w-full qf-max-w-3xl qf-m-auto qf-relative qf-pb-6w">
+        <div class="qf-absolute qf-left-0 qf-right-0 qf-top-0">
+            {% include search_view_template_name with big=True %}
+        </div>
+    </div>
+
+    {# suggestion #}
+    <div class= "qf-max-w-3xl qf-mx-auto qf-text-center">
+        En panne d’inspiration ? Essayez une des suggestions ci‑dessous.
+    </div>
+
+    {# accordion #}
+    <div>
+    </div>
 </div>
 {% endblock main %}

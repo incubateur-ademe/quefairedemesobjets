@@ -15,8 +15,10 @@
         </h1>
     </div>
     <div class="right">
+        {% with alt=True %}
         {% for produit in right %}
             {% include "./_item.html" %}
         {% endfor %}
+        {% endwith %}
     </div>
 </div>

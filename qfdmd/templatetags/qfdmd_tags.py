@@ -18,5 +18,5 @@ def patchwork():
     from qfdmd.models import Produit
 
     produits = Produit.objects.exclude(picto="").exclude(picto=None)
-    items = list(produits) * 27
-    return {"top": items[:16], "left": items[17:22], "right": items[22:27]}
+    items = list(produits) * 8
+    return {"top": items[:24], "left": items[20:26], "right": items[24:30]}
