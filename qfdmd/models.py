@@ -40,7 +40,7 @@ class Produit(models.Model):
         return self.sous_categories.filter(afficher_carte=True).first()
 
     @cached_property
-    def content_display(self):
+    def content_display(self) -> list[dict[str, str]]:
         return [
             item
             for item in [
@@ -84,18 +84,18 @@ class Synonyme(models.Model):
     )
 
     @property
-    def url(self):
+    def url(self) -> str:
         return self.get_absolute_url()
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
         return reverse("qfdmd:synonyme-detail", args=[self.slug])
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.nom
 
 
 class Suggestion(models.Model):
     produit = models.OneToOneField(Synonyme, primary_key=True, on_delete=models.CASCADE)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.produit)
