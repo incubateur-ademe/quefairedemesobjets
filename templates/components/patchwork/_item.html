@@ -1,0 +1,18 @@
+<div class="icon">
+    <a
+        href="{{ produit.synonymes.first.url }}"
+        title="Que faire de mon/ma {{ produit.nom }} ?"
+        style="
+        {% if alt %}
+        --random-x: {{ forloop.counter|divisibleby:3|yesno:'5,-8' }};
+        --random-y: {{ forloop.revcounter|divisibleby:5|yesno:'5,-15' }};
+        {% else %}
+        --random-x: {{ forloop.counter|divisibleby:7|yesno:'-5,20' }};
+        --random-y: {{ forloop.revcounter|divisibleby:3|yesno:'10,-10' }};
+        {% endif %}
+        --random-rotate: {{ forloop.counter|divisibleby:2|yesno:'5,-5' }};"
+    >
+        {# TODO : use inline SVG #}
+        <img src="{{ produit.picto.url }}" width="60" height="60" />
+    </a>
+</div>

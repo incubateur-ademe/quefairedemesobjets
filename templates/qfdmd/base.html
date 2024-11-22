@@ -1,0 +1,59 @@
+{% load dsfr_tags static %}
+
+<!DOCTYPE html>
+<html
+    lang="fr"
+    class="qf-scroll-smooth"
+    {% if not is_carte %}data-formulaire{% endif %}
+>
+    <head>
+        <meta charset="utf-8">
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, shrink-to-fit=no"
+        />
+        <title>{% block title %}Que faire de mes déchets{% endblock %}</title>
+        <meta name="description" content="{% block meta_description %}Donnons une nouvelle vie aux objets{% endblock %}">
+
+        {% comment %}
+        Preload https://developer.mozilla.org/fr/docs/Web/HTML/Attributes/rel/preload
+        {% endcomment %}
+
+        {% dsfr_css %}
+        <link rel="stylesheet" href="{% static 'qfdmd.css' %}">
+
+        {% block extra_css %}
+        {% endblock extra_css %}
+
+        {% comment %}
+        Ajouter
+        - iframe resizer
+        - posthog
+        - matomo
+        {% endcomment %}
+    </head>
+
+    <body
+        class="qf-flex qf-flex-col"
+    >
+        {% block header %}
+        {% include "components/header/header.html" %}
+        {% endblock header %}
+
+        <main class="fr-container qf-pb-7w">
+            {% block main %}
+            {% endblock main %}
+        </main>
+
+        {% block sidebar %}
+        {% include "components/sidebar/sidebar.html" %}
+        {% endblock sidebar %}
+
+        {% block footer %}
+        {% include "components/footer/footer.html" %}
+        {% endblock footer %}
+
+        {% dsfr_js %}
+        <script type="module" src="{% static 'qfdmd.js' %}"></script>
+    </body>
+</html>

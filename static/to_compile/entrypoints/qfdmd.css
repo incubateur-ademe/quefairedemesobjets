@@ -1,0 +1,92 @@
+@import "../css/base.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    p a {
+    @apply qf-text-blue-france-sun-113-625;
+    }
+
+    pre,
+    code {
+    @apply qf-text-blue-france-sun-113-625 qf-font-bold;
+    }
+}
+
+@layer components {
+    .patchwork {
+        @apply qf-grid qf-pt-4w qf-relative;
+        grid-template-rows: auto auto;
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-areas:
+        "top top top"
+        "left middle right";
+
+        .top {
+        @apply qf-grid;
+        grid-area: top;
+        /* @apply qf-flex qf-flex-wrap qf-gap-4w qf-justify-center; */
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            grid-auto-rows: 1fr;
+        }
+
+        .left {
+            @apply qf-grid;
+        grid-area: left;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            grid-auto-rows: 1fr;
+        }
+
+        .middle {
+            @apply qf-px-7w qf-pt-5w;
+        grid-area: middle;
+        }
+
+        .right {
+            @apply qf-grid;
+            grid-area: right;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            grid-auto-rows: 1fr;
+        }
+
+    .icon {
+        --scale: 1;
+        --rotate-factor: 1;
+        @apply qf-p-2w;
+
+
+        a {
+            &:hover {
+            --scale: 1.2;
+            --rotate-factor: 1.5;
+            }
+
+            @apply qf-origin-center qf-transition-transform !qf-bg-none qf-inline-flex;
+
+            &:active {
+                background-color: transparent;
+            }
+
+            transform: translate(
+                calc(var(--random-x, 0) * 1px),
+                calc(var(--random-y, 0) * 1px)
+            )
+            scale(var(--scale))
+            rotate(calc(var(--rotate-factor) * var(--random-rotate, 0) * 2deg));
+        }
+    }
+
+    .title span {
+        @apply qf-text-green-menthe-sun-373-moon-652-hover;
+    }
+    }
+
+    .qf-btn {
+        @apply qf-rounded-full qf-py-3v qf-px-3w qf-bg-none qf-bg-green-menthe-sun-373-moon-652;
+        @apply qf-text-blue-france-975-75 qf-font-bold;
+        @apply hover:!qf-bg-green-menthe-sun-373-moon-652-hover qf-transition-colors;
+    }
+
+}

@@ -1,0 +1,42 @@
+<turbo-frame id="search">
+    <div
+        class="
+        qf-relative
+        qf-rounded-3xl qf-overflow-hidden
+        qf-border-solid qf-border-[3px] qf-border-green-menthe-850-hover qf-bg-white
+        qf-flex qf-flex-col"
+    >
+        <form
+            data-controller="search"
+            data-turbo-frame="search-results"
+            action="{% url 'qfdmd:search' %}"
+            class="qf-pl-4w {# should match the svg icon width #}"
+        >
+            {% csrf_token %}
+
+            <button
+                type="submit"
+                class="qf-absolute qf-left-0 qf-top-0 qf-m-auto
+                fr-btn fr-icon-search-line fr-btn--tertiary-no-outline
+                qf-text-green-menthe-main-548
+                "
+            >
+            </button>
+
+            {% for field in search_form %}
+                {{ field }}
+            {% endfor %}
+        </form>
+
+        <turbo-frame
+            id="search-results"
+            class="qf-flex qf-flex-col"
+        >
+            {% if search_form.results %}
+                {% for result in search_form.results %}
+                    {% include "./_search_result.html" %}
+                {% endfor %}
+            {% endif %}
+        </turbo-frame>
+    </div>
+</turbo-frame>

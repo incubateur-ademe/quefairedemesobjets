@@ -1,3 +1,6 @@
+@import "npm:@gouvfr/dsfr/dist/dsfr.css";
+@import "npm:@gouvfr/dsfr/dist/utility/utility.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
