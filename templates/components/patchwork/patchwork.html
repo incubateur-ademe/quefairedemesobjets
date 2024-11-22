@@ -1,0 +1,24 @@
+<div class="patchwork">
+    <div class="top">
+        {% for produit in top %}
+            {% include "./_item.html" %}
+        {% endfor %}
+    </div>
+    <div class="left">
+        {% for produit in left %}
+            {% include "./_item.html" %}
+        {% endfor %}
+    </div>
+    <div class="middle">
+        <h1 class="fr-h1 title qf-whitespace-nowrap">
+            Que faire de mes <span>objets</span>
+        </h1>
+    </div>
+    <div class="right">
+        {% with alt=True %}
+        {% for produit in right %}
+            {% include "./_item.html" %}
+        {% endfor %}
+        {% endwith %}
+    </div>
+</div>

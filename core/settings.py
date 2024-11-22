@@ -65,6 +65,8 @@ FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 
 if DEBUG:
     INSTALLED_APPS.extend(["debug_toolbar", "django_browser_reload"])
+    MEDIA_ROOT = "media"
+    MEDIA_URL = "/media/"
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -325,6 +327,7 @@ AWS_SECRET_ACCESS_KEY = decouple.config("AWS_SECRET_ACCESS_KEY", default="")
 AWS_STORAGE_BUCKET_NAME = decouple.config("AWS_STORAGE_BUCKET_NAME", default="")
 AWS_S3_REGION_NAME = decouple.config("AWS_S3_REGION_NAME", default="")
 AWS_S3_ENDPOINT_URL = decouple.config("AWS_S3_ENDPOINT_URL", default="")
+
 
 STORAGES = {
     "default": {

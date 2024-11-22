@@ -8,6 +8,7 @@ def environment(request):
         "ENVIRONMENT": settings.ENVIRONMENT,
         "DEBUG": settings.DEBUG,
         "is_embedded": True,
+        "turbo": request.headers.get("Turbo-Frame"),
     }
 
 
