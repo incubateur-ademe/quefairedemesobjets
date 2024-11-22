@@ -3,10 +3,10 @@ from typing import Any
 
 from django.http import HttpResponse
 from django.shortcuts import render
-from django.views.generic import DetailView, TemplateView
+from django.views.generic import DetailView, ListView
 
 from qfdmd.forms import SearchForm
-from qfdmd.models import Synonyme
+from qfdmd.models import Suggestion, Synonyme
 
 logger = logging.getLogger(__name__)
 
@@ -44,8 +44,9 @@ class BaseView:
         return context
 
 
-class HomeView(BaseView, TemplateView):
+class HomeView(BaseView, ListView):
     template_name = "qfdmd/home.html"
+    model = Suggestion
 
 
 class SynonymeDetailView(BaseView, DetailView):

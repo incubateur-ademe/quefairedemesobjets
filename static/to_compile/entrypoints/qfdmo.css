@@ -1,4 +1,8 @@
 @import "npm:leaflet/dist/leaflet.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 
 @import "../css/base.css";
 @import "../css/leaflet-overrides.css";

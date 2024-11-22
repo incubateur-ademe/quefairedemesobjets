@@ -92,3 +92,10 @@ class Synonyme(models.Model):
 
     def __str__(self):
         return self.nom
+
+
+class Suggestion(models.Model):
+    produit = models.OneToOneField(Synonyme, primary_key=True, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.produit)

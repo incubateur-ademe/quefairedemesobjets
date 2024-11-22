@@ -2,7 +2,7 @@ from django.contrib import admin
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from qfdmd.models import Lien, Produit, Synonyme
+from qfdmd.models import Lien, Produit, Suggestion, Synonyme
 from qfdmo.admin.acteur import NotEditableInlineMixin
 
 
@@ -26,6 +26,12 @@ class ProduitInline(admin.StackedInline):
     extra = 1
 
 
+@admin.register(Suggestion)
+class SuggestionAdmin(admin.ModelAdmin):
+    autocomplete_fields = ["produit"]
+
+
+@admin.register(Produit)
 class ProduitAdmin(admin.ModelAdmin):
     list_display = ("nom", "id", "synonymes_existants")
     search_fields = ["nom", "id", "synonymes_existants"]
@@ -34,16 +40,14 @@ class ProduitAdmin(admin.ModelAdmin):
     inlines = [SynonymeInline, LienInline]
 
 
+@admin.register(Lien)
 class LienAdmin(NotEditableInlineMixin, admin.ModelAdmin):
     list_display = ("titre_du_lien", "url", "description")
     inlines = [ProduitInline]
 
 
+@admin.register(Synonyme)
 class SynonymeAdmin(NotEditableInlineMixin, ImportExportModelAdmin, admin.ModelAdmin):
     resource_classes = [SynonymeResource]
+    search_fields = ["nom"]
     list_display = ("nom", "produit", "slug")
-
-
-admin.site.register(Produit, ProduitAdmin)
-admin.site.register(Lien, LienAdmin)
-admin.site.register(Synonyme, SynonymeAdmin)

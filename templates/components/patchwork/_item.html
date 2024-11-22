@@ -1,7 +1,7 @@
 <div class="icon">
     <a
         href="{{ produit.synonymes.first.url }}"
-        title="Fiche produit {{ produit.picto.nom }}"
+        title="Que faire de mon/ma {{ produit.nom }} ?"
         style="
         {% if alt %}
         --random-x: {{ forloop.counter|divisibleby:3|yesno:'5,-8' }};

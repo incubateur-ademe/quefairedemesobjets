@@ -14,8 +14,25 @@
     </div>
 
     {# suggestion #}
-    <div class= "qf-max-w-3xl qf-mx-auto qf-text-center">
+    <div class= "qf-max-w-2xl qf-mx-auto qf-text-center qf-flex qf-flex-col qf-gap-3w">
+        <p class="qf-m-0">
         En panne d’inspiration ? Essayez une des suggestions ci‑dessous.
+        </p>
+        <div
+            class="qf-flex qf-gap-x-2w qf-gap-y-3w
+            qf-flex-wrap qf-items-center qf-justify-center "
+        >
+            {% for suggestion in object_list %}
+            {% with suggestion.produit as produit %}
+            <a
+                class="qf-btn"
+                href="{% url 'qfdmd:synonyme-detail' slug=produit.slug %}"
+            >
+                {{ produit.nom|capfirst }}
+            </a>
+            {% endwith %}
+            {% endfor %}
+        </div>
     </div>
 
     {# accordion #}
