@@ -2,18 +2,19 @@ from datetime import datetime
 
 from airflow import DAG
 from airflow.models.baseoperator import chain
+from sources.tasks.airflow_logic.db_data_prepare_task import db_data_prepare_task
 from sources.tasks.airflow_logic.db_read_acteur_task import db_read_acteur_task
 from sources.tasks.airflow_logic.db_read_propositions_max_id_task import (
     db_read_propositions_max_id_task,
-)
-from sources.tasks.airflow_logic.get_acteur_to_delete_task import (
-    propose_acteur_to_delete_task,
 )
 from sources.tasks.airflow_logic.propose_acteur_changes_task import (
     propose_acteur_changes_task,
 )
 from sources.tasks.airflow_logic.propose_acteur_services_task import (
     propose_acteur_services_task,
+)
+from sources.tasks.airflow_logic.propose_acteur_to_delete_task import (
+    propose_acteur_to_delete_task,
 )
 from sources.tasks.airflow_logic.propose_labels_task import propose_labels_task
 from sources.tasks.airflow_logic.propose_services_sous_categories_task import (
@@ -23,7 +24,6 @@ from sources.tasks.airflow_logic.propose_services_task import propose_services_t
 from sources.tasks.airflow_logic.read_mapping_from_postgres_task import (
     read_mapping_from_postgres_task,
 )
-from sources.tasks.airflow_logic.serialize_to_json_task import db_data_prepare_task
 from sources.tasks.airflow_logic.source_config_validate_task import (
     source_config_validate_task,
 )
