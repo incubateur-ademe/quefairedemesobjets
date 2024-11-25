@@ -431,11 +431,13 @@ export default class extends Controller<HTMLElement> {
   }
 
   #showSearchFormPanel() {
+    this.element.dataset.searchFormVisible = ""
     this.searchFormPanelTarget.classList.add("qf-flex-grow")
     this.searchFormPanelTarget.classList.remove("qf-h-0", "qf-invisible")
   }
 
   #hideSearchFormPanel() {
+    delete this.element.dataset.searchFormVisible
     this.searchFormPanelTarget.dataset.visible = "false"
     this.searchFormPanelTarget.classList.remove("qf-flex-grow")
     this.searchFormPanelTarget.classList.add("qf-h-0", "qf-invisible")
