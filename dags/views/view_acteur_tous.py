@@ -124,7 +124,7 @@ with DAG(
 ):
 
     @task
-    def view_acteur_all_create_task():
+    def view_acteur_all_drop_if_exists_and_create_task():
         """Tâche qui supprime (si existe) et crée la vue matérialisée view_acteur_all
         La tâche gère les 2 opérations car:
             - logiquement elles sont liées (pas l'un sans l'autre)
@@ -143,7 +143,7 @@ with DAG(
                 cursor.execute(SQL_VIEW_CREATE_QUERY)
                 conn.commit()
 
-    view_acteur_all_create_task()
+    view_acteur_all_drop_if_exists_and_create_task()
 
 # Pour débugger facilement via CLI
 if __name__ == "__main__":
