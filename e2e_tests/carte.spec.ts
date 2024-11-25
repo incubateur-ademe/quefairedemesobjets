@@ -6,7 +6,7 @@ test("Recherche et modification d'une recherche", async ({ page }) => {
     await page.goto(`http://localhost:8000/carte`, { waitUntil: "networkidle" });
     await hideDjangoToolbar(page)
 
-    expect(page.getByTestId("carte-legend")).toBeHidden()
+    await expect(page.getByTestId("carte-legend")).toBeHidden()
 
     // Fill "Adresse" autocomplete input
     await searchDummyAdresse(page)
