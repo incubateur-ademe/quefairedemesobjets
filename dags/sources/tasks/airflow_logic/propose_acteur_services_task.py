@@ -8,7 +8,6 @@ from utils import logging_utils as log
 logger = logging.getLogger(__name__)
 
 
-# TODO : faire un wrapper
 def propose_acteur_services_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id="propose_acteur_services",

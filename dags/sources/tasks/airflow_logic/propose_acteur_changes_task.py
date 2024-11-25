@@ -7,7 +7,7 @@ from utils import logging_utils as log
 def propose_acteur_changes_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id="propose_acteur_changes",
-        python_callable=propose_acteur_changes,
+        python_callable=propose_acteur_changes_wrapper,
         dag=dag,
     )
 

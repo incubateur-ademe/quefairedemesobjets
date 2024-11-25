@@ -2,6 +2,9 @@ import logging
 from itertools import chain
 
 import pandas as pd
+from sources.tasks.business_logic.read_mapping_from_postgres import (
+    read_mapping_from_postgres,
+)
 from utils import db_tasks
 from utils import logging_utils as log
 
@@ -47,7 +50,7 @@ def source_data_validate(
     # - les valeur du mapping des produit peuvent-être des listes vides quand aucun
     #   produit n'est à associer
     product_mapping = params.get("product_mapping", {})
-    souscats_codes_to_ids = db_tasks.read_mapping_from_postgres(
+    souscats_codes_to_ids = read_mapping_from_postgres(
         table_name="qfdmo_souscategorieobjet"
     )
     codes_db = set(souscats_codes_to_ids.keys())

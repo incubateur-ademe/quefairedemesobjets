@@ -2,7 +2,6 @@ from datetime import datetime
 
 from airflow import DAG
 from airflow.models.baseoperator import chain
-from airflow.operators.python import PythonOperator
 from sources.tasks.airflow_logic.db_read_acteur_task import db_read_acteur_task
 from sources.tasks.airflow_logic.db_read_propositions_max_id_task import (
     db_read_propositions_max_id_task,
@@ -24,6 +23,7 @@ from sources.tasks.airflow_logic.propose_services_task import propose_services_t
 from sources.tasks.airflow_logic.read_mapping_from_postgres_task import (
     read_mapping_from_postgres_task,
 )
+from sources.tasks.airflow_logic.serialize_to_json_task import db_data_prepare_task
 from sources.tasks.airflow_logic.source_config_validate_task import (
     source_config_validate_task,
 )
@@ -36,7 +36,7 @@ from sources.tasks.airflow_logic.source_data_normalize_task import (
 from sources.tasks.airflow_logic.source_data_validate_task import (
     source_data_validate_task,
 )
-from utils import dag_eo_utils
+from tasks.airflow_logic.write_data_task import write_data_task
 
 default_args = {
     "owner": "airflow",
@@ -46,24 +46,6 @@ default_args = {
     "email_on_retry": False,
     "retries": 1,
 }
-
-
-# TODO : faire un wrapper & déplacer dans un fichier dédié
-def write_data_task(dag: DAG) -> PythonOperator:
-    return PythonOperator(
-        task_id="db_data_write",
-        python_callable=dag_eo_utils.write_to_dagruns,
-        dag=dag,
-    )
-
-
-# TODO : faire un wrapper & déplacer dans un fichier dédié
-def serialize_to_json_task(dag: DAG) -> PythonOperator:
-    return PythonOperator(
-        task_id="db_data_prepare",
-        python_callable=dag_eo_utils.db_data_prepare,
-        dag=dag,
-    )
 
 
 def eo_task_chain(dag: DAG) -> None:
@@ -98,19 +80,16 @@ def eo_task_chain(dag: DAG) -> None:
     ]
 
     chain(
-        # Spécifique à la source pour amener à
-        # un état normalisé et validé des données
         source_config_validate_task(dag),
         source_data_download_task(dag),
         source_data_normalize_task(dag),
         source_data_validate_task(dag),
-        # Logique commune à toutes les sources
         read_tasks,
         db_read_acteur_task(dag),
         propose_acteur_changes_task(dag),
         propose_acteur_to_delete_task(dag),
         create_tasks,
         propose_services_sous_categories_task(dag),
-        serialize_to_json_task(dag),
+        db_data_prepare_task(dag),
         write_data_task(dag),
     )

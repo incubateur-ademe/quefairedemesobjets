@@ -14,7 +14,8 @@ from sources.tasks.business_logic.propose_labels import propose_labels
 from sources.tasks.business_logic.propose_services_sous_categories import (
     propose_services_sous_categories,
 )
-from utils.dag_eo_utils import db_data_prepare, merge_duplicates
+from sources.tasks.business_logic.serialize_to_json import db_data_prepare
+from sources.tasks.transform.transform_df import merge_duplicates
 
 
 @pytest.fixture
@@ -425,33 +426,22 @@ class TestSerializeToJson:
         expected_labels,
     ):
 
-        mock = MagicMock()
-        mock.xcom_pull.side_effect = lambda task_ids="": {
-            "propose_acteur_changes": {
-                "df": pd.DataFrame({"identifiant_unique": [1, 2]}),
-            },
-            "propose_acteur_to_delete": {
-                "df_acteur_to_delete": pd.DataFrame(
-                    {
-                        "identifiant_unique": [3],
-                        "statut": ["ACTIF"],
-                        "cree_le": [datetime(2024, 1, 1)],
-                    }
-                ),
-            },
-            "propose_services": {"df": df_proposition_services},
-            "propose_services_sous_categories": (
-                df_proposition_services_sous_categories
+        df_result = db_data_prepare(
+            df_acteur_to_delete=pd.DataFrame(
+                {
+                    "identifiant_unique": [3],
+                    "statut": ["ACTIF"],
+                    "cree_le": [datetime(2024, 1, 1)],
+                }
             ),
-            "propose_labels": propose_labels,
-            "propose_acteur_services": pd.DataFrame(
+            df_actors=pd.DataFrame({"identifiant_unique": [1, 2]}),
+            df_ps=df_proposition_services,
+            df_pssc=df_proposition_services_sous_categories,
+            df_labels=propose_labels,
+            df_acteur_services=pd.DataFrame(
                 columns=["acteur_id", "acteurservice_id", "acteurservice"]
             ),
-        }[task_ids]
-
-        kwargs = {"ti": mock}
-
-        df_result = db_data_prepare(**kwargs)
+        )
         result = df_result["all"]["df"].to_dict()
         labels = result["labels"]
 
@@ -509,32 +499,20 @@ class TestSerializeToJson:
         propose_acteur_services,
         expected_acteur_services,
     ):
-
-        mock = MagicMock()
-        mock.xcom_pull.side_effect = lambda task_ids="": {
-            "propose_acteur_changes": {
-                "df": pd.DataFrame({"identifiant_unique": [1, 2]}),
-            },
-            "propose_acteur_to_delete": {
-                "df_acteur_to_delete": pd.DataFrame(
-                    {
-                        "identifiant_unique": [3],
-                        "statut": ["ACTIF"],
-                        "cree_le": [datetime(2024, 1, 1)],
-                    }
-                ),
-            },
-            "propose_services": {"df": df_proposition_services},
-            "propose_services_sous_categories": (
-                df_proposition_services_sous_categories
+        df_result = db_data_prepare(
+            df_acteur_to_delete=pd.DataFrame(
+                {
+                    "identifiant_unique": [3],
+                    "statut": ["ACTIF"],
+                    "cree_le": [datetime(2024, 1, 1)],
+                }
             ),
-            "propose_labels": pd.DataFrame(columns=["acteur_id", "labelqualite_id"]),
-            "propose_acteur_services": propose_acteur_services,
-        }[task_ids]
-
-        kwargs = {"ti": mock}
-
-        df_result = db_data_prepare(**kwargs)
+            df_actors=pd.DataFrame({"identifiant_unique": [1, 2]}),
+            df_ps=df_proposition_services,
+            df_pssc=df_proposition_services_sous_categories,
+            df_labels=pd.DataFrame(columns=["acteur_id", "labelqualite_id"]),
+            df_acteur_services=propose_acteur_services,
+        )
         result = df_result["all"]["df"].to_dict()
         acteur_services = result["acteur_services"]
 
