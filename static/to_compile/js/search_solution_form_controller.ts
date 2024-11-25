@@ -49,8 +49,6 @@ export default class extends Controller<HTMLElement> {
 
     // TODO: should be renamed
     "loadingSolutions",
-    "addressMissing",
-    "NoLocalSolution",
   ]
 
   declare readonly jaiTarget: HTMLElement
@@ -103,8 +101,6 @@ export default class extends Controller<HTMLElement> {
   declare readonly hasCarteTarget: boolean
 
   declare readonly loadingSolutionsTarget: HTMLElement
-  declare readonly addressMissingTarget: HTMLElement
-  declare readonly NoLocalSolutionTarget: HTMLElement
 
   static values = { isIframe: Boolean }
   declare readonly isIframeValue: boolean
@@ -471,8 +467,6 @@ export default class extends Controller<HTMLElement> {
     }
 
     this.loadingSolutionsTarget.classList.remove("qf-hidden")
-    this.addressMissingTarget.classList.add("qf-hidden")
-    this.NoLocalSolutionTarget.classList.add("qf-hidden")
     this.#hideAdvancedFilters()
     this.#hideLegend()
 
