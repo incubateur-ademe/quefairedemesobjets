@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { hideDjangoToolbar, searchDummyAdresse } from "./helpers";
 
-test("Recherche et modification d'une recherche", async ({ page }) => {
+test("Desktop | La carte affiche la légende après une recherche", async ({ page }) => {
     // Navigate to the carte page
     await page.goto(`http://localhost:8000/carte`, { waitUntil: "networkidle" });
     await hideDjangoToolbar(page)
