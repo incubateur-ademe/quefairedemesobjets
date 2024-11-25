@@ -387,24 +387,16 @@ export default class extends Controller<HTMLElement> {
     )
   }
 
-  toggleLegend() {
-    if (this.legendMainPanelTarget.classList.contains("qf-hidden")) {
-      this.#showLegend()
-    } else {
-      this.#hideLegend()
-    }
-    this.scrollToContent()
-  }
-
-  #showLegend() {
+  showLegend() {
     this.legendMainPanelTarget.classList.remove("qf-hidden")
     setTimeout(() => {
       this.legendFormPanelTarget.classList.remove("qf-h-0", "qf-invisible")
       this.legendFormPanelTarget.classList.add("qf-h-[95%]")
     }, 100)
+    this.scrollToContent()
   }
 
-  #hideLegend() {
+  hideLegend() {
     if (this.hasLegendFormPanelTarget) {
       this.legendFormPanelTarget.classList.remove("qf-h-[95%]")
       this.legendFormPanelTarget.classList.add("qf-h-0", "qf-invisible")
@@ -455,12 +447,10 @@ export default class extends Controller<HTMLElement> {
     }
 
     this.#hideAdvancedFilters()
+    this.hideLegend()
 
-    this.element.ariaBusy = "true"
     let submitEvent = new Event("submit", { bubbles: true, cancelable: true })
-    setTimeout(() => {
-      this.searchFormTarget.dispatchEvent(submitEvent)
-    }, 300)
+    this.searchFormTarget.dispatchEvent(submitEvent)
   }
 
   toggleAPropos() {
