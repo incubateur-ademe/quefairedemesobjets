@@ -46,9 +46,6 @@ export default class extends Controller<HTMLElement> {
     "reparerFilter",
 
     "carte",
-
-    // TODO: should be renamed
-    "loadingSolutions",
   ]
 
   declare readonly jaiTarget: HTMLElement
@@ -100,8 +97,6 @@ export default class extends Controller<HTMLElement> {
 
   declare readonly hasCarteTarget: boolean
 
-  declare readonly loadingSolutionsTarget: HTMLElement
-
   static values = { isIframe: Boolean }
   declare readonly isIframeValue: boolean
 
@@ -126,8 +121,8 @@ export default class extends Controller<HTMLElement> {
     } else {
       this.hideActeurDetailsPanel()
     }
-
   }
+
   activeReparerFilters(activate: boolean = true) {
     // Carte mode
     this.activeReparerFiltersCarte()
@@ -375,13 +370,6 @@ export default class extends Controller<HTMLElement> {
 
   #showAdvancedFilters() {
     this.advancedFiltersMainPanelTarget.dataset.visible = "true"
-    this.advancedFiltersMainPanelTarget.addEventListener(
-      "animationend",
-      () => {
-        // this.advancedFiltersMainPanelTarget.focus()
-      },
-      { once: true },
-    )
   }
 
   #hideAdvancedFilters() {
@@ -466,10 +454,9 @@ export default class extends Controller<HTMLElement> {
       this.scrollToContent()
     }
 
-    this.loadingSolutionsTarget.classList.remove("qf-hidden")
     this.#hideAdvancedFilters()
-    this.#hideLegend()
 
+    this.element.ariaBusy = "true"
     let submitEvent = new Event("submit", { bubbles: true, cancelable: true })
     setTimeout(() => {
       this.searchFormTarget.dispatchEvent(submitEvent)

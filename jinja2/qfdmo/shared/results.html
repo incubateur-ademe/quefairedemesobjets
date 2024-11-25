@@ -6,7 +6,7 @@ The values of 120px and 150px are determined empirically.
 They need to match the css variables used for .grid-map selector in qfdmo.css
 #}
 
-{% with address_ok=(form.initial.adresse or form.initial.bounding_box or acteurs) %}
+{% with address_ok=(form.initial.adresse or form.initial.bounding_box) %}
 <div
     class="
     qf-relative
@@ -56,8 +56,10 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
             {% if is_carte %}
                 {% include "qfdmo/carte/panels/legend.html" %}
             {% endif %}
-        {% elif acteurs %}
-            {% include "qfdmo/shared/disclaimers/no_local_solution.html" %}
+
+            {% if not acteurs %}
+                {% include "qfdmo/shared/disclaimers/no_local_solution.html" %}
+            {% endif %}
         {% else %}
             {% include "qfdmo/shared/disclaimers/adresse_missing.html" %}
         {% endif %}
