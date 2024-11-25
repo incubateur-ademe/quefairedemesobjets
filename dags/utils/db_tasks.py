@@ -12,13 +12,3 @@ def read_data_from_postgres(**kwargs):
         raise ValueError(f"DB: pas de données pour table {table_name}")
     log.preview(f"df pour la table {table_name}", df)
     return df
-
-
-def read_mapping_from_postgres(**kwargs):
-    table_name = kwargs["table_name"]
-    df = read_data_from_postgres(**kwargs).replace({pd.NA: None})
-    if df.empty:
-        raise ValueError(f"DB: pas de données pour table {table_name}")
-    code_id_dict = dict(zip(df["code"], df["id"]))
-    log.preview(f"dict de mapping pour la table {table_name}", code_id_dict)
-    return code_id_dict

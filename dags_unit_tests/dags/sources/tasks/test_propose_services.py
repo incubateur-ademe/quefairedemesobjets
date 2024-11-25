@@ -1,6 +1,6 @@
 import pandas as pd
 import pytest
-from sources.tasks.propose_services import propose_services
+from sources.tasks.business_logic.propose_services import propose_services
 
 
 @pytest.fixture

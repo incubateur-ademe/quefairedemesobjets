@@ -1,6 +1,6 @@
 import pandas as pd
 import pytest
-from sources.tasks.source_data_normalize import (
+from sources.tasks.business_logic.source_data_normalize import (
     df_normalize_sinoe,
     source_data_normalize,
 )

@@ -1,7 +1,7 @@
 from airflow import DAG
+from sources.tasks.airflow_logic.operators import default_args, eo_task_chain
 from utils import shared_constants as constants
 from utils.base_utils import get_mapping_config
-from utils.eo_operators import default_args, eo_task_chain
 
 with DAG(
     dag_id="like-eo-from-api-cma",

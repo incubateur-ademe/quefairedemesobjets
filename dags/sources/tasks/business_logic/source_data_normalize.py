@@ -1,6 +1,9 @@
 import logging
 
 import pandas as pd
+from sources.tasks.business_logic.read_mapping_from_postgres import (
+    read_mapping_from_postgres,
+)
 from utils import logging_utils as log
 from utils import mapping_utils
 from utils import shared_constants as constants
@@ -10,7 +13,6 @@ from utils.dag_eo_utils import (
     mapping_try_or_fallback_column_value,
     merge_duplicates,
 )
-from utils.db_tasks import read_mapping_from_postgres
 
 logger = logging.getLogger(__name__)
 
