@@ -22,6 +22,7 @@ from django.urls import reverse
 from django.utils.functional import cached_property
 from unidecode import unidecode
 
+from core.constants import DIGITAL_ACTEUR_CODE
 from qfdmo.models.action import Action, get_action_instances
 from qfdmo.models.categorie_objet import SousCategorieObjet
 from qfdmo.models.utils import (
@@ -103,12 +104,6 @@ class ActeurType(CodeAsNaturalKeyModel):
 
     @classmethod
     def get_digital_acteur_type_id(cls) -> int:
-        """Returns the ID of the `ActeurType` with the code "acteur_digital",
-        creating it if necessary. Caches the ID to minimize database queries.
-        Subsequent calls use the cached ID after the first query.
-        """
-        if cls._digital_acteur_type_id is None:
-            digital_acteur_type, _ = cls.objects.get_or_create(code="acteur_digital")
             cls._digital_acteur_type_id = digital_acteur_type.id
         return cls._digital_acteur_type_id
 
@@ -204,13 +199,13 @@ class DisplayedActeurQuerySet(models.QuerySet):
 
     def digital(self):
         return (
-            self.filter(acteur_type__code="acteur_digital")
+            self.filter(acteur_type__code=DIGITAL_ACTEUR_CODE)
             .annotate(min_action_order=Min("proposition_services__action__order"))
             .order_by("min_action_order", "?")
         )
 
     def physical(self):
-        return self.exclude(acteur_type_id=ActeurType.get_digital_acteur_type_id())
+        return self.exclude(acteur_type__code=DIGITAL_ACTEUR_CODE)
 
     def in_geojson(self, geojson):
         if not geojson:
@@ -346,7 +341,7 @@ class BaseActeur(NomAsNaturalKeyModel):
 
     @property
     def is_digital(self) -> bool:
-        return self.acteur_type_id == ActeurType.get_digital_acteur_type_id()
+        return self.acteur_type.code == DIGITAL_ACTEUR_CODE
 
     @cached_property
     def sorted_proposition_services(self):
@@ -477,7 +472,7 @@ class Acteur(BaseActeur):
         return revisionacteur
 
     def clean_location(self):
-        if self.location is None and self.acteur_type.code != "acteur_digital":
+        if self.location is None and self.acteur_type.code != DIGITAL_ACTEUR_CODE:
             raise ValidationError(
                 {"location": "Location is mandatory when the actor is not digital"}
             )
