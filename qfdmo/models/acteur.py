@@ -82,8 +82,6 @@ class ActeurReprise(models.TextChoices):
 
 
 class ActeurType(CodeAsNaturalKeyModel):
-    _digital_acteur_type_id: int | None = None
-
     class Meta:
         verbose_name = "Type d'acteur"
         verbose_name_plural = "Types d'acteur"
