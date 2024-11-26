@@ -103,6 +103,10 @@ class ActeurType(CodeAsNaturalKeyModel):
 
     @classmethod
     def get_digital_acteur_type_id(cls) -> int:
+        """Returns the ID of the `ActeurType` with the code "acteur_digital",
+        creating it if necessary. Caches the ID to minimize database queries.
+        Subsequent calls use the cached ID after the first query.
+        """
         if cls._digital_acteur_type_id is None:
             digital_acteur_type, _ = cls.objects.get_or_create(code="acteur_digital")
             cls._digital_acteur_type_id = digital_acteur_type.id
