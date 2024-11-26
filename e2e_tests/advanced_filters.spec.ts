@@ -1,8 +1,5 @@
 import { expect, test } from "@playwright/test"
-
-async function hideDjangoToolbar(page) {
-  await page.locator("#djHideToolBarButton").click()
-}
+import { hideDjangoToolbar } from "./helpers"
 
 async function searchInCarteMode(page){
   await page.locator("input#id_adresse").click()

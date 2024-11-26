@@ -1,6 +1,6 @@
 <div
-    class="qf-absolute qf-inset-0 qf-bg-white qf-opacity-80 qf-font-black qf-z-[1020] {% if acteurs or not address_ok %} qf-hidden{% endif %}"
-    data-search-solution-form-target="NoLocalSolution"
+    class="qf-absolute qf-inset-0 qf-bg-white qf-opacity-80 qf-font-black
+    qf-flex group-aria-[busy]:qf-hidden"
 >
     <div class="qf-flex qf-h-full qf-w-full qf-items-center qf-justify-center qf-text-2xl sm:qf-text-4xl qf-text-center{% if is_carte %} lg:qf-pl-[350px]{% endif %}">
         Il n'existe pas de solution {% if bounding_box %}dans cette zone{% else %}localisée proche de chez vous (&lt;30 km){% endif %}, essayez avec une autre combinaison de filtres.

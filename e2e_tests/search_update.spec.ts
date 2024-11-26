@@ -1,31 +1,46 @@
 import { expect, test } from "@playwright/test"
+import { hideDjangoToolbar, searchDummyAdresse, searchDummySousCategorieObjet } from "./helpers"
 
 test("Recherche et modification d'une recherche", async ({ page }) => {
-    await page.goto(`http://localhost:8000/formulaire`, {
-        waitUntil: "networkidle",
-    })
-    // Masquage de django debug toolbar
-    await page.locator("#djHideToolBarButton").click()
-    await page.locator("input#id_sous_categorie_objet").click()
-    await page.locator("input#id_sous_categorie_objet").fill("chaussures")
-    await expect(page.locator("#id_sous_categorie_objetautocomplete-list")).toBeInViewport()
-    await page.locator("#id_sous_categorie_objetautocomplete-list.autocomplete-items div:first-of-type").click()
+  // Helper function to handle autocomplete inputs
 
-    await page.locator("input#id_adresse").click()
-    await page.locator("input#id_adresse").fill("10 rue de la paix")
-    await expect (page.locator("#id_adresseautocomplete-list.autocomplete-items div:nth-of-type(2)")).toBeInViewport()
-    await page.locator("#id_adresseautocomplete-list.autocomplete-items div:nth-of-type(2)").click()
-    await page.locator("button[data-testid=rechercher-adresses-submit]").click()
-    await expect (page.locator("[data-search-solution-form-target=headerAddressPanel]")).toBeVisible()
-    // This tests that the header of the Formulaire view cannot be reached when the Update form is opened.
-    // This cannot be tested with .toBeVisible or toBeInViewport because of the way the header is styled.
-    // It is actually visible, but is covered by a child of the header's adjacent <main> tag, and
-    // Playwright detect it as visible.
-    // Testing that we cannot interact with it ensures it is actually not visible.
-    await page.locator("button[data-testid=modifier-recherche]").click()
-    try {
-      await page.locator("[data-search-solution-form-target=headerAddressPanel]").click({ timeout: 2000 })
-    } catch (error) {
-      expect(error.message).toContain('locator.click: Timeout');
-    }
+  // Navigate to the formulaire page
+  await page.goto(`http://localhost:8000/formulaire`, { waitUntil: "networkidle" })
+
+  // Hide the Django debug toolbar
+  await hideDjangoToolbar(page)
+
+  // Expect the Proposer une adresse button to be hidden
+  await expect(page.getByTestId("formulaire-proposer-une-adresse")).not.toBeVisible()
+
+  // Fill "Sous catégorie objet" autocomplete input
+  await searchDummySousCategorieObjet(page)
+
+  // Fill "Adresse" autocomplete input
+  await searchDummyAdresse(page)
+
+  // Submit the search form
+  await page.locator("button[data-testid=rechercher-adresses-submit]").click()
+
+  // Expect the Proposer une adresse button to be visible
+  await expect(page.getByTestId("formulaire-proposer-une-adresse")).toBeVisible()
+
+  // Verify the search header is displayed
+  await expect(
+    page.locator("[data-search-solution-form-target=headerAddressPanel]"),
+  ).toBeVisible()
+
+  // Open the modification form
+  await page.locator("button[data-testid=modifier-recherche]").click()
+
+  // Verify the header cannot be interacted with
+  // This weird tests is explained in https://github.com/incubateur-ademe/quefairedemesobjets/issues/1020
+  try {
+    const headerLocator = page.locator(
+      "[data-search-solution-form-target=headerAddressPanel]",
+    )
+    await headerLocator.click({ timeout: 2000 })
+  } catch (error) {
+    expect(error.message).toContain("locator.click: Timeout")
+  }
 })
