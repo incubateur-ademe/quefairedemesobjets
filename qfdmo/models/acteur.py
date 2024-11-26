@@ -102,11 +102,6 @@ class ActeurType(CodeAsNaturalKeyModel):
     )
     libelle = models.CharField(max_length=255, blank=False, null=False, default="?")
 
-    @classmethod
-    def get_digital_acteur_type_id(cls) -> int:
-            cls._digital_acteur_type_id = digital_acteur_type.id
-        return cls._digital_acteur_type_id
-
 
 def validate_logo(value: Any):
     if value:
