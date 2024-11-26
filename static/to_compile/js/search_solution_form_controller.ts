@@ -46,11 +46,6 @@ export default class extends Controller<HTMLElement> {
     "reparerFilter",
 
     "carte",
-
-    // TODO: should be renamed
-    "loadingSolutions",
-    "addressMissing",
-    "NoLocalSolution",
   ]
 
   declare readonly jaiTarget: HTMLElement
@@ -102,10 +97,6 @@ export default class extends Controller<HTMLElement> {
 
   declare readonly hasCarteTarget: boolean
 
-  declare readonly loadingSolutionsTarget: HTMLElement
-  declare readonly addressMissingTarget: HTMLElement
-  declare readonly NoLocalSolutionTarget: HTMLElement
-
   static values = { isIframe: Boolean }
   declare readonly isIframeValue: boolean
 
@@ -130,8 +121,8 @@ export default class extends Controller<HTMLElement> {
     } else {
       this.hideActeurDetailsPanel()
     }
-
   }
+
   activeReparerFilters(activate: boolean = true) {
     // Carte mode
     this.activeReparerFiltersCarte()
@@ -379,13 +370,6 @@ export default class extends Controller<HTMLElement> {
 
   #showAdvancedFilters() {
     this.advancedFiltersMainPanelTarget.dataset.visible = "true"
-    this.advancedFiltersMainPanelTarget.addEventListener(
-      "animationend",
-      () => {
-        // this.advancedFiltersMainPanelTarget.focus()
-      },
-      { once: true },
-    )
   }
 
   #hideAdvancedFilters() {
@@ -403,24 +387,16 @@ export default class extends Controller<HTMLElement> {
     )
   }
 
-  toggleLegend() {
-    if (this.legendMainPanelTarget.classList.contains("qf-hidden")) {
-      this.#showLegend()
-    } else {
-      this.#hideLegend()
-    }
-    this.scrollToContent()
-  }
-
-  #showLegend() {
+  showLegend() {
     this.legendMainPanelTarget.classList.remove("qf-hidden")
     setTimeout(() => {
       this.legendFormPanelTarget.classList.remove("qf-h-0", "qf-invisible")
       this.legendFormPanelTarget.classList.add("qf-h-[95%]")
     }, 100)
+    this.scrollToContent()
   }
 
-  #hideLegend() {
+  hideLegend() {
     if (this.hasLegendFormPanelTarget) {
       this.legendFormPanelTarget.classList.remove("qf-h-[95%]")
       this.legendFormPanelTarget.classList.add("qf-h-0", "qf-invisible")
@@ -431,11 +407,13 @@ export default class extends Controller<HTMLElement> {
   }
 
   #showSearchFormPanel() {
+    this.element.dataset.searchFormVisible = ""
     this.searchFormPanelTarget.classList.add("qf-flex-grow")
     this.searchFormPanelTarget.classList.remove("qf-h-0", "qf-invisible")
   }
 
   #hideSearchFormPanel() {
+    delete this.element.dataset.searchFormVisible
     this.searchFormPanelTarget.dataset.visible = "false"
     this.searchFormPanelTarget.classList.remove("qf-flex-grow")
     this.searchFormPanelTarget.classList.add("qf-h-0", "qf-invisible")
@@ -468,16 +446,11 @@ export default class extends Controller<HTMLElement> {
       this.scrollToContent()
     }
 
-    this.loadingSolutionsTarget.classList.remove("qf-hidden")
-    this.addressMissingTarget.classList.add("qf-hidden")
-    this.NoLocalSolutionTarget.classList.add("qf-hidden")
     this.#hideAdvancedFilters()
-    this.#hideLegend()
+    this.hideLegend()
 
     let submitEvent = new Event("submit", { bubbles: true, cancelable: true })
-    setTimeout(() => {
-      this.searchFormTarget.dispatchEvent(submitEvent)
-    }, 300)
+    this.searchFormTarget.dispatchEvent(submitEvent)
   }
 
   toggleAPropos() {
