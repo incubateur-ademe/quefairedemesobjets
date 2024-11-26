@@ -1,7 +1,7 @@
-import importlib
 import logging
 from itertools import chain
 
+from sources.config.airflow_params import TRANSFORMATION_MAPPING
 from sources.tasks.airflow_logic.config_management import get_nested_config_parameter
 from utils import logging_utils as log
 
@@ -52,14 +52,11 @@ def source_config_validate(
     # Tester si les fonctions existent
     function_names = [x["transformation"] for x in column_transformations]
     for function_name in function_names:
-        module_name = "sources.tasks.transform"
-        module = importlib.import_module(module_name)
         try:
-            function_callable = getattr(module, function_name)
-        except AttributeError:
+            function_callable = TRANSFORMATION_MAPPING[function_name]
+        except KeyError:
             raise ValueError(
                 f"La fonction de transformation {function_name} n'existe pas dans"
-                f" {module_name}"
             )
         if not callable(function_callable):
             raise ValueError(

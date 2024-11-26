@@ -1,8 +1,8 @@
-import importlib
 import logging
 from typing import List
 
 import pandas as pd
+from sources.config.airflow_params import TRANSFORMATION_MAPPING
 from sources.tasks.transform.transform_column import (
     cast_eo_boolean_or_string_to_boolean,
     mapping_try_or_fallback_column_value,
@@ -45,17 +45,14 @@ def source_data_normalize(
     df = df.rename(columns={k: v for k, v in column_mapping.items() if v is not None})
 
     # Transformation des colonnes
+    # Appliquer la transformation à la colonne d'origine et stocker le résultat
+    # dans la colonne de destination
     for transformation in column_transformations:
         function_name = transformation["transformation"]
-        module_name = "sources.tasks.transform"
-        module = importlib.import_module(module_name)
-        function_transformation = getattr(module, function_name)
-
-        # Appliquer la transformation à la colonne d'origine et stocker le résultat
-        # dans la colonne de destination
         df[transformation["destination"]] = df[transformation["origin"]].apply(
-            function_transformation
+            TRANSFORMATION_MAPPING[function_name]
         )
+        df.drop(columns=[transformation["origin"]], inplace=True)
 
     # DEBUT Traitement des identifiants
 

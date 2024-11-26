@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 import requests
+from sources.tasks.transform.transform_column import convert_opening_hours
 
 PATH_NOMENCLARURE_DECHET = (
     "https://data.ademe.fr/data-fair/api/v1/datasets/sinoe-r-nomenclature-dechets/lines"
@@ -10,6 +11,9 @@ PATH_NOMENCLARURE_DECHET = (
 KEY_CODE_DECHET = "C_TYP_DECHET"
 KEY_LIBELLE_DECHET = "L_TYP_DECHET"
 KEY_LIBELLE_DECHET_ALT = "LST_TYP_DECHET"
+
+
+TRANSFORMATION_MAPPING = {"convert_opening_hours": convert_opening_hours}
 
 
 # TODO: dataclass à implémenter pour la validation des paramètres des DAGs
