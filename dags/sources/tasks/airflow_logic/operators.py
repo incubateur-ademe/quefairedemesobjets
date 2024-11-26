@@ -2,6 +2,7 @@ from datetime import datetime
 
 from airflow import DAG
 from airflow.models.baseoperator import chain
+from shared.tasks.airflow_logic.write_data_task import write_data_task
 from sources.tasks.airflow_logic.db_data_prepare_task import db_data_prepare_task
 from sources.tasks.airflow_logic.db_read_acteur_task import db_read_acteur_task
 from sources.tasks.airflow_logic.db_read_propositions_max_id_task import (
@@ -36,7 +37,6 @@ from sources.tasks.airflow_logic.source_data_normalize_task import (
 from sources.tasks.airflow_logic.source_data_validate_task import (
     source_data_validate_task,
 )
-from tasks.airflow_logic.write_data_task import write_data_task
 
 default_args = {
     "owner": "airflow",

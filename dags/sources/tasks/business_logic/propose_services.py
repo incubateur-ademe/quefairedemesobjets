@@ -15,6 +15,7 @@ def propose_services(
     rows_dict = {}
     merged_count = 0
 
+    # TODO : à déplacer dans la source_data_normalize
     conditions = [
         ("point_dapport_de_service_reparation", "reparer"),
         (

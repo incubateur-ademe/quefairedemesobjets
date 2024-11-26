@@ -9,7 +9,7 @@ from airflow import DAG
 from airflow.models.param import Param
 from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
-from tasks.airflow_logic.write_data_task import write_data_task
+from shared.tasks.airflow_logic.write_data_task import write_data_task
 
 pd.set_option("display.max_columns", None)
 

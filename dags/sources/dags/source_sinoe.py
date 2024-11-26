@@ -2,8 +2,11 @@ import os
 
 import pandas as pd
 from airflow import DAG
+from sources.config.airflow_params import (
+    get_mapping_config,
+    source_sinoe_dechet_mapping_get,
+)
 from sources.tasks.airflow_logic.operators import default_args, eo_task_chain
-from utils.base_utils import get_mapping_config, source_sinoe_dechet_mapping_get
 
 # ------------------------------------------
 # PARAMÈTRES ET DOCUMENTATION DU DAG

@@ -49,9 +49,11 @@ def propose_acteur_changes(
     # On met à jour le modifie_le de qfdmo_acteur
     df["modifie_le"] = datetime.now()
 
+    # TODO : à déplacer dans la source_data_normalize
     if "siret" in df.columns:
         df["siret"] = df["siret"].apply(process_siret)
 
+    # TODO : à déplacer dans la source_data_normalize
     if "telephone" in df.columns and "code_postal" in df.columns:
         df["telephone"] = df.apply(
             lambda row: pd.Series(
@@ -60,6 +62,7 @@ def propose_acteur_changes(
             axis=1,
         )
 
+    # TODO : à déplacer dans la source_data_normalize
     if "code_postal" in df.columns:
         # cast en str et ajout de 0 si le code postal est inférieur à 10000
         df["code_postal"] = df["code_postal"].apply(

@@ -2,7 +2,7 @@ import logging
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from tasks.business_logic.write_data import write_data
+from shared.tasks.business_logic.write_data import write_data
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
