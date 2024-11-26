@@ -11,7 +11,7 @@ from qfdmo.models import (
     RevisionActeur,
     RevisionPropositionService,
 )
-from qfdmo.models.acteur import ActeurType, DisplayedActeur, LabelQualite
+from qfdmo.models.acteur import DisplayedActeur, LabelQualite
 from unit_tests.qfdmo.acteur_factory import (
     ActeurFactory,
     ActeurServiceFactory,
@@ -75,17 +75,13 @@ class TestActeurIsdigital:
         ).is_digital
 
     def test_isdigital_true(self):
-        # Reset ActeurType cache for digital acteur type id to prevent pollution
-        # from previous tests
-        ActeurType._digital_acteur_type_id = None
-        acteur_type = ActeurTypeFactory(code="acteur_digital", id=5)
-        assert ActeurFactory(nom="Test Object 1", acteur_type=acteur_type).is_digital
+        acteur_type = ActeurTypeFactory(code="acteur_digital")
+        assert ActeurFactory.build(
+            nom="Test Object 1", acteur_type=acteur_type
+        ).is_digital
 
     def test_isdigital_hides_address(self):
-        # Reset ActeurType cache for digital acteur type id to prevent pollution
-        # from previous tests
-        ActeurType._digital_acteur_type_id = None
-        acteur_type = ActeurTypeFactory(code="acteur_digital", id=5)
+        acteur_type = ActeurTypeFactory(code="acteur_digital")
         acteur = DisplayedActeurFactory(acteur_type=acteur_type)
         assert acteur.is_digital
         assert not acteur.should_display_adresse
@@ -167,9 +163,12 @@ class TestLocationValidation:
             acteur.save()
 
     def test_location_validation_dont_raise(self):
+<<<<<<< HEAD
         # Reset ActeurType cache for digital acteur type id to prevent pollution
         # from previous tests
         ActeurType._digital_acteur_type_id = None
+=======
+>>>>>>> 606f9f5 (Remove now useless property)
         acteur_type = ActeurTypeFactory(code="acteur_digital")
         acteur = Acteur(
             nom="Test Object 1", identifiant_unique="123", acteur_type=acteur_type
