@@ -39,6 +39,8 @@ ALLOWED_HOSTS = decouple.config(
 ).split(",")
 BLOCK_ROBOTS = decouple.config("BLOCK_ROBOTS", default=False, cast=bool)
 
+WITH_WAGTAIL = decouple.config("WITH_WAGTAIL", default=False, cast=bool)
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -65,13 +67,9 @@ INSTALLED_APPS = [
     "corsheaders",
 ]
 
+
 FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 
-
-if DEBUG:
-    INSTALLED_APPS.extend(["debug_toolbar", "django_browser_reload"])
-    MEDIA_ROOT = "media"
-    MEDIA_URL = "/media/"
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -106,15 +104,6 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https:\/\/deploy-preview-\d*--quefairedemesdechets\.netlify\.app$",
 ]
 
-if DEBUG:
-    MIDDLEWARE.extend(
-        [
-            "debug_toolbar.middleware.DebugToolbarMiddleware",
-            "django_browser_reload.middleware.BrowserReloadMiddleware",
-        ]
-    )
-
-    CORS_ALLOW_ALL_ORIGINS = DEBUG
 
 with suppress(ModuleNotFoundError):
     from debug_toolbar.settings import CONFIG_DEFAULTS
@@ -372,7 +361,6 @@ FEEDBACK_FORM = decouple.config(
 CONTACT_FORM = decouple.config(
     "CONTACT_FORM", default="https://tally.so/r/wzYveR", cast=str
 )
-
 ASSISTANT_SURVEY_FORM = decouple.config(
     "ASSISTANT_SURVEY_FORM", default="https://tally.so/r/wvNgx0", cast=str
 )
@@ -404,3 +392,46 @@ NOTION = {
 DATA_UPLOAD_MAX_NUMBER_FIELDS = decouple.config(
     "DATA_UPLOAD_MAX_NUMBER_FIELDS", default=10000, cast=int
 )
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = DEBUG
+    MIDDLEWARE.extend(
+        [
+            "debug_toolbar.middleware.DebugToolbarMiddleware",
+            "django_browser_reload.middleware.BrowserReloadMiddleware",
+        ]
+    )
+    INSTALLED_APPS.extend(["debug_toolbar", "django_browser_reload"])
+    MEDIA_ROOT = "media"
+    MEDIA_URL = "/media/"
+
+
+if WITH_WAGTAIL:
+    import os
+
+    WAGTAIL_SITE_NAME = "Longue vie aux objets"
+    WAGTAILADMIN_BASE_URL = BASE_URL
+    MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+    MEDIA_URL = "/media/"
+    INSTALLED_APPS.extend(
+        [
+            "wagtail.contrib.forms",
+            "wagtail.contrib.redirects",
+            "wagtail.embeds",
+            "wagtail.sites",
+            "wagtail.users",
+            "wagtail.snippets",
+            "wagtail.documents",
+            "wagtail.images",
+            "wagtail.search",
+            "wagtail.admin",
+            "wagtail",
+            "modelcluster",
+            "taggit",
+        ]
+    )
+
+    MIDDLEWARE.extend(
+        [
+            "wagtail.contrib.redirects.middleware.RedirectMiddleware",
+        ]
+    )
