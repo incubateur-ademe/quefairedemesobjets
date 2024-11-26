@@ -37,8 +37,7 @@ def source_config_validate(
     log.preview("Codes sous-cat dans DB", codes_sc_db)
 
     if codes_sc_invalid:
-        logger.warning(f"Codes sous-cat DB non trouvés dans params: {codes_sc_invalid}")
-        # raise ValueError(f"Codes product_mapping invalides: {codes_sc_invalid}")
+        raise ValueError(f"Codes product_mapping invalides: {codes_sc_invalid}")
     logger.info("Validation sous-catégories produit: ✅ succès.")
 
     column_mapping = params.get("column_mapping", {})
