@@ -1,4 +1,6 @@
+import importlib
 import logging
+from typing import List
 
 import pandas as pd
 from sources.tasks.transform.transform_column import (
@@ -18,6 +20,7 @@ def source_data_normalize(
     df_acteur_from_source: pd.DataFrame,
     source_code: str | None,
     column_mapping: dict,
+    column_transformations: List[dict],
     columns_to_add_by_default: dict,
     label_bonus_reparation: str | None,
     validate_address_with_ban: bool,
@@ -41,7 +44,20 @@ def source_data_normalize(
     # Renommage des colonnes
     df = df.rename(columns={k: v for k, v in column_mapping.items() if v is not None})
 
-    # Traitement des identifiants
+    # Transformation des colonnes
+    for transformation in column_transformations:
+        function_name = transformation["transformation"]
+        module_name = "sources.tasks.transform"
+        module = importlib.import_module(module_name)
+        function_transformation = getattr(module, function_name)
+
+        # Appliquer la transformation à la colonne d'origine et stocker le résultat
+        # dans la colonne de destination
+        df[transformation["destination"]] = df[transformation["origin"]].apply(
+            function_transformation
+        )
+
+    # DEBUT Traitement des identifiants
 
     # Identifiant externe
     if "identifiant_externe" in df.columns:
@@ -80,6 +96,8 @@ def source_data_normalize(
         lambda x: mapping_utils.create_identifiant_unique(x),
         axis=1,
     )
+
+    # FIN Traitement des identifiants
 
     if combine_columns_categories:
         df["produitsdechets_acceptes"] = df.apply(

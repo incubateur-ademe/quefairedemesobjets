@@ -1,6 +1,8 @@
+import importlib
 import logging
 from itertools import chain
 
+from sources.tasks.airflow_logic.config_management import get_nested_config_parameter
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -38,6 +40,32 @@ def source_config_validate(
         logger.warning(f"Codes sous-cat DB non trouvés dans params: {codes_sc_invalid}")
         # raise ValueError(f"Codes product_mapping invalides: {codes_sc_invalid}")
     logger.info("Validation sous-catégories produit: ✅ succès.")
+
+    column_mapping = params.get("column_mapping", {})
+    if not isinstance(column_mapping, dict):
+        raise ValueError("column_mapping doit être un dictionnaire")
+
+    column_transformations = params.get("column_transformations", [])
+    column_transformations = get_nested_config_parameter(column_transformations)
+    if not isinstance(column_transformations, list):
+        raise ValueError("column_transformations doit être une liste")
+
+    # Tester si les fonctions existent
+    function_names = [x["transformation"] for x in column_transformations]
+    for function_name in function_names:
+        module_name = "sources.tasks.transform"
+        module = importlib.import_module(module_name)
+        try:
+            function_callable = getattr(module, function_name)
+        except AttributeError:
+            raise ValueError(
+                f"La fonction de transformation {function_name} n'existe pas dans"
+                f" {module_name}"
+            )
+        if not callable(function_callable):
+            raise ValueError(
+                f"La fonction de transformation {function_callable} n'est pas callable"
+            )
 
     # La validation de config ne doit pas changer les données, donc
     # on retourne explicitement None
