@@ -11,6 +11,13 @@ with DAG(
         " for Soren dataset"
     ),
     params={
+        "column_transformations": [
+            {
+                "origin": "horaires_douverture",
+                "transformation": "convert_opening_hours",
+                "destination": "horaires_description",
+            }
+        ],
         "column_mapping": {
             "id_point_apport_ou_reparation": "identifiant_externe",
             "type_de_point_de_collecte": "acteur_type_id",
