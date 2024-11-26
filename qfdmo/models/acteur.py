@@ -687,7 +687,7 @@ class DisplayedActeur(BaseActeur):
 
     @cached_property
     def should_display_adresse(self) -> bool:
-        return bool(
+        return not self.is_digital and bool(
             self.adresse or self.adresse_complement or self.code_postal or self.ville
         )
 
