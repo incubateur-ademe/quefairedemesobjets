@@ -34,6 +34,21 @@ class TestDisplaySource:
 
 
 @pytest.mark.django_db
+class TestDisplayNomCommercial:
+    def test_nom_is_capitalized(self, get_response):
+        adresse = DisplayedActeurFactory(nom="coucou", nom_commercial="")
+        response, soup = get_response(adresse.identifiant_unique)
+        acteur_title = soup.find(attrs={"data-testid": "acteur-title"})
+        assert "Coucou" in acteur_title.text, "Test that the nom field is capitalized"
+
+    def test_nom_commercial_is_displayed_if_present(self, get_response):
+        adresse = DisplayedActeurFactory(nom="coucou", nom_commercial="youpi")
+        response, soup = get_response(adresse.identifiant_unique)
+        acteur_title = soup.find(attrs={"data-testid": "acteur-title"})
+        assert "Youpi" in acteur_title.text, "Test that the nom commercial is displayed"
+
+
+@pytest.mark.django_db
 class TestDisplayLabel:
     @pytest.mark.parametrize(
         "label_setup, expected_text, should_display",
