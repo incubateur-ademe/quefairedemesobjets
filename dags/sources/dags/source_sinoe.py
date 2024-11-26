@@ -1,30 +1,9 @@
-import os
-
-import pandas as pd
 from airflow import DAG
 from sources.config.airflow_params import (
     get_mapping_config,
     source_sinoe_dechet_mapping_get,
 )
 from sources.tasks.airflow_logic.operators import default_args, eo_task_chain
-
-# ------------------------------------------
-# PARAMÈTRES ET DOCUMENTATION DU DAG
-# ------------------------------------------
-PRODUCT_MAPPING = get_mapping_config("sous_categories_sinoe")
-PM_TABLE = pd.DataFrame(list(PRODUCT_MAPPING.items()), columns=["Source", "LVAO"])
-PM_TABLE["Associations "] = PM_TABLE["LVAO"].apply(
-    lambda x: "1 <-> N" if isinstance(x, list) else "1 <-> 1"
-)
-PM_TABLE = PM_TABLE[["Source", "Associations ", "LVAO"]]
-DAG_DOC_MD = f"""
- - **fichier**: {os.path.abspath(__file__)}
-
-# Définition des sous-catégories
-{PM_TABLE.to_markdown(index=False)}
-"""
-DAG_DOC_MD = ""
-DAG_TAGS = ["source", "ademe", "sinoe", "déchèteries"]
 
 default_args["retries"] = 0
 with DAG(
@@ -34,8 +13,7 @@ with DAG(
     description=(
         "DAG pour télécharger, standardiser, et charger dans notre base la source SINOE"
     ),
-    doc_md=DAG_DOC_MD,
-    tags=DAG_TAGS,
+    tags=["source", "ademe", "sinoe", "déchèteries"],
     params={
         "endpoint": (
             "https://data.ademe.fr/data-fair/api/v1/datasets/"
@@ -94,7 +72,7 @@ with DAG(
         "dechet_mapping": source_sinoe_dechet_mapping_get(),
         "ignore_duplicates": False,
         "validate_address_with_ban": False,
-        "product_mapping": PRODUCT_MAPPING,
+        "product_mapping": get_mapping_config("sous_categories_sinoe"),
     },
     schedule=None,
 ) as dag:
