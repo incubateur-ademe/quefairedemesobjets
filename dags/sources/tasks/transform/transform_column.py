@@ -23,3 +23,37 @@ def cast_eo_boolean_or_string_to_boolean(value: str | bool) -> bool:
     if isinstance(value, str):
         return value.lower().strip() == "oui"
     return False
+
+
+def convert_opening_hours(opening_hours: str | None) -> str:
+    french_days = {
+        "Mo": "lundi",
+        "Tu": "mardi",
+        "We": "mercredi",
+        "Th": "jeudi",
+        "Fr": "vendredi",
+        "Sa": "samedi",
+        "Su": "dimanche",
+    }
+
+    def translate_hour(hour):
+        return hour.replace(":", "h").zfill(5)
+
+    def process_schedule(schedule):
+        parts = schedule.split(",")
+        translated = []
+        for part in parts:
+            start, end = part.split("-")
+            translated.append(f"de {translate_hour(start)} à {translate_hour(end)}")
+        return " et ".join(translated)
+
+    def process_entry(entry):
+        days, hours = entry.split(" ")
+        day_range = " au ".join(french_days[day] for day in days.split("-"))
+        hours_translated = process_schedule(hours)
+        return f"du {day_range} {hours_translated}"
+
+    if not opening_hours or pd.isna(opening_hours):
+        return ""
+
+    return process_entry(opening_hours)

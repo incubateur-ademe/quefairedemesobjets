@@ -4,6 +4,7 @@ import pandas as pd
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.utils.trigger_rule import TriggerRule
+from sources.tasks.airflow_logic.config_management import get_nested_config_parameter
 from sources.tasks.business_logic.read_mapping_from_postgres import (
     read_mapping_from_postgres,
 )
@@ -29,6 +30,8 @@ def source_data_normalize_wrapper(**kwargs) -> pd.DataFrame:
     params = kwargs["params"]
     source_code = params.get("source_code")
     column_mapping = params.get("column_mapping", {})
+    column_transformations = params.get("column_transformations", [])
+    column_transformations = get_nested_config_parameter(column_transformations)
     columns_to_add_by_default = params.get("columns_to_add_by_default", {})
     label_bonus_reparation = params.get("label_bonus_reparation")
     validate_address_with_ban = params.get("validate_address_with_ban", False)
@@ -43,6 +46,7 @@ def source_data_normalize_wrapper(**kwargs) -> pd.DataFrame:
     log.preview("df avant normalisation", df)
     log.preview("source_code", source_code)
     log.preview("column_mapping", column_mapping)
+    log.preview("column_transformations", column_transformations)
     log.preview("columns_to_add_by_default", columns_to_add_by_default)
     log.preview("label_bonus_reparation", label_bonus_reparation)
     log.preview("validate_address_with_ban", validate_address_with_ban)
@@ -60,6 +64,7 @@ def source_data_normalize_wrapper(**kwargs) -> pd.DataFrame:
         df_acteur_from_source=df,
         source_code=source_code,
         column_mapping=column_mapping,
+        column_transformations=column_transformations,
         columns_to_add_by_default=columns_to_add_by_default,
         label_bonus_reparation=label_bonus_reparation,
         validate_address_with_ban=validate_address_with_ban,
