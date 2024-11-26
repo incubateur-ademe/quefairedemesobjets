@@ -75,8 +75,7 @@ class TestActeurIsdigital:
         ).is_digital
 
     def test_isdigital_true(self):
-        ActeurType._digital_acteur_type_id = 0
-        acteur_type = ActeurTypeFactory(code="acteur_digital")
+        acteur_type = ActeurTypeFactory(code="acteur_digital", id=5)
         assert ActeurFactory.build(
             nom="Test Object 1", acteur_type=acteur_type
         ).is_digital
