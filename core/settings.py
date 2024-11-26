@@ -30,6 +30,8 @@ BASE_URL = decouple.config("BASE_URL", default="http://localhost:8000")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = decouple.config("DEBUG", default=False, cast=bool)
 
+WITH_WAGTAIL = decouple.config("WITH_WAGTAIL", default=False, cast=bool)
+
 ALLOWED_HOSTS = decouple.config("ALLOWED_HOSTS", default="localhost", cast=str).split(
     ","
 )
@@ -59,14 +61,10 @@ INSTALLED_APPS = [
     "corsheaders",
 ]
 
+
 # FIXME : check if we can manage django forms templating with jinja2
 FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 
-
-if DEBUG:
-    INSTALLED_APPS.extend(["debug_toolbar", "django_browser_reload"])
-    MEDIA_ROOT = "media"
-    MEDIA_URL = "/media/"
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -100,15 +98,6 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https:\/\/deploy-preview-\d*--quefairedemesdechets\.netlify\.app$",
 ]
 
-if DEBUG:
-    MIDDLEWARE.extend(
-        [
-            "debug_toolbar.middleware.DebugToolbarMiddleware",
-            "django_browser_reload.middleware.BrowserReloadMiddleware",
-        ]
-    )
-
-    CORS_ALLOW_ALL_ORIGINS = DEBUG
 
 with suppress(ModuleNotFoundError):
     from debug_toolbar.settings import CONFIG_DEFAULTS
@@ -364,3 +353,46 @@ FEEDBACK_FORM = decouple.config(
 CONTACT_FORM = decouple.config(
     "CONTACT_FORM", default="https://tally.so/r/wzYveR", cast=str
 )
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = DEBUG
+    MIDDLEWARE.extend(
+        [
+            "debug_toolbar.middleware.DebugToolbarMiddleware",
+            "django_browser_reload.middleware.BrowserReloadMiddleware",
+        ]
+    )
+    INSTALLED_APPS.extend(["debug_toolbar", "django_browser_reload"])
+    MEDIA_ROOT = "media"
+    MEDIA_URL = "/media/"
+
+
+if WITH_WAGTAIL:
+    import os
+
+    WAGTAIL_SITE_NAME = "Longue vie aux objets"
+    WAGTAILADMIN_BASE_URL = BASE_URL
+    MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+    MEDIA_URL = "/media/"
+    INSTALLED_APPS.extend(
+        [
+            "wagtail.contrib.forms",
+            "wagtail.contrib.redirects",
+            "wagtail.embeds",
+            "wagtail.sites",
+            "wagtail.users",
+            "wagtail.snippets",
+            "wagtail.documents",
+            "wagtail.images",
+            "wagtail.search",
+            "wagtail.admin",
+            "wagtail",
+            "modelcluster",
+            "taggit",
+        ]
+    )
+
+    MIDDLEWARE.extend(
+        [
+            "wagtail.contrib.redirects.middleware.RedirectMiddleware",
+        ]
+    )
