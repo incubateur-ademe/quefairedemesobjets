@@ -4,7 +4,6 @@ from django.core.management import call_command
 from django.http import HttpRequest
 
 from core.jinja2_handler import action_by_direction, distance_to_acteur
-from qfdmo.models.acteur import ActeurType
 from unit_tests.qfdmo.acteur_factory import ActeurTypeFactory, DisplayedActeurFactory
 
 
@@ -147,9 +146,6 @@ class TestDistanceToActeur:
         assert distance_to_acteur(request, adresse) == expected
 
     def test_distance_to_acteur_digital(self, adresse):
-        # Reset ActeurType cache for digital acteur type id to prevent pollution
-        # from previous tests
-        ActeurType._digital_acteur_type_id = None
         adresse.acteur_type = ActeurTypeFactory(code="acteur_digital")
         request = type("", (), {})()
         request.GET = {"longitude": str(1000 / 111320), "latitude": str(1000 / 111320)}
