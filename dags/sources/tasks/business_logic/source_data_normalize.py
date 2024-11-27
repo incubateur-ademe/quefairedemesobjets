@@ -125,7 +125,18 @@ def source_data_normalize(
             df[["adresse", "code_postal", "ville"]] = df.apply(extract_details, axis=1)
 
     if "statut" in df.columns:
-        df["statut"] = df["statut"].map({1: "ACTIF", 0: "SUPPRIME"})
+        df["statut"] = df["statut"].map(
+            {
+                1: "ACTIF",
+                0: "SUPPRIME",
+                "ACTIF": "ACTIF",
+                "INACTIF": "INACTIF",
+                "SUPPRIME": "SUPPRIME",
+            }
+        )
+        df["statut"] = df["statut"].fillna("ACTIF")
+    else:
+        df["statut"] = "ACTIF"
 
     if "public_accueilli" in df.columns:
 

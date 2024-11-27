@@ -109,8 +109,8 @@ def db_data_prepare(
     )
 
     df_joined.loc[
-        df_joined["proposition_services"].apply(lambda x: x == []), "status"
-    ] = "SUPPRIME"
+        df_joined["proposition_services"].apply(lambda x: x == []), "statut"
+    ] = "INACTIF"
 
     df_joined.drop("acteur_id", axis=1, inplace=True)
 
