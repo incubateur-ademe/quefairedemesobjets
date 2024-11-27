@@ -10,6 +10,9 @@ defaults:
 jobs:
   unit_tests:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        test_directory: [unit_tests, integration_testss, dags_unit_tests]
     services:
       postgres:
         image: postgis/postgis:15-3.3-alpine
@@ -24,7 +27,6 @@ jobs:
           --health-retries 50
         ports:
           - 6543:5432
-
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -37,12 +39,8 @@ jobs:
           sudo apt-get install gdal-bin
       - name: Install Dependencies
         run: pip install --require-hashes --no-deps -r airflow-requirements.txt -r requirements.txt -r dev-requirements.txt
-      - name: Run unit tests
-        run: pytest unit_tests
-      - name: Run integration tests
-        run: pytest integration_tests
-      - name: Run data tests
-        run: pytest dags_unit_tests
+      - name: Run tests
+        run: pytest {{ matrix.tests_directory }}
       - name: Check code formatting
         run: black --check --diff .
       - uses: chartboost/ruff-action@v1
@@ -71,6 +69,7 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
