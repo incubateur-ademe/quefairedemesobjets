@@ -43,7 +43,7 @@ class SousCategorieObjet(CodeAsNaturalKeyModel):
     )
 
     def __str__(self) -> str:
-        return self.libelle
+        return f"{self.categorie.libelle} | {self.libelle}"
 
     @cached_property
     def carte_settings(self):
