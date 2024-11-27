@@ -486,3 +486,21 @@ class TestBBOX:
         bbox, acteurs = adresses_view._bbox_and_acteurs_from_location_or_epci(acteurs)
         assert bbox == bbox
         assert acteurs.count() == 2
+
+
+@pytest.mark.django_db
+class TestLayers:
+    def test_adresse_missing_layer_is_displayed(self, client):
+        url = "/carte"
+        response = client.get(url)
+        assert 'data-testid="adresse-missing"' in str(response.content)
+
+    def test_adresse_missing_layer_is_not_displayed_with_bbox(self, client):
+        url = "/carte=1&direction=jai&bounding_box=%7B%22southWest%22%3A%7B%22lat%22%3A48.916%2C%22lng%22%3A2.298202514648438%7D%2C%22northEast%22%3A%7B%22lat%22%3A48.98742568330284%2C%22lng%22%3A2.483596801757813%7D%7D"  # noqa: E501
+        response = client.get(url)
+        assert 'data-testid="adresse-missing"' not in str(response.content)
+
+    def test_adresse_missing_layer_is_not_displayed_for_epcis(self, client):
+        url = "/carte?action_list=reparer%7Cdonner%7Cechanger%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cacheter%7Crevendre&epci_codes=200055887&limit=50"  # noqa: E501
+        response = client.get(url)
+        assert 'data-testid="adresse-missing"' not in str(response.content)
