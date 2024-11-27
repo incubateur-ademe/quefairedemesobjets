@@ -74,12 +74,23 @@ class TestActeurIsdigital:
             nom="Test Object 1", location=Point(1, 1), acteur_type=acteur_type
         ).is_digital
 
-    def test_isdigital_true(self):
+    def test_isdigital_true(self, django_assert_num_queries):
         # Reset ActeurType cache for digital acteur type id to prevent pollution
         # from previous tests
-        ActeurType._digital_acteur_type_id = None
         acteur_type = ActeurTypeFactory(code="acteur_digital", id=5)
+        ActeurType._digital_acteur_type_id = None
         assert ActeurFactory(nom="Test Object 1", acteur_type=acteur_type).is_digital
+
+        with django_assert_num_queries(6):
+            ActeurType._digital_acteur_type_id = None
+            assert ActeurFactory(
+                nom="Test Object 1", acteur_type=acteur_type
+            ).is_digital
+
+        with django_assert_num_queries(5):
+            assert ActeurFactory(
+                nom="Test Object 1", acteur_type=acteur_type
+            ).is_digital
 
     def test_isdigital_hides_address(self):
         # Reset ActeurType cache for digital acteur type id to prevent pollution
