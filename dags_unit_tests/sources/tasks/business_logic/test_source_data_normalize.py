@@ -249,7 +249,7 @@ class TestSourceDataNormalize:
     - [ ] test merge_duplicated_acteurs
     - [ ] test columns_to_add_by_default
     - [ ] test adresse_format_ban
-    - [ ] test statut
+    - [x] test statut
     - [x] test public_accueilli (+ suppression des pro)
     - [x] test uniquement_sur_rdv
     - [x] test exclusivite_de_reprisereparation
@@ -280,6 +280,48 @@ class TestSourceDataNormalize:
             "acteurtype_id_by_code": acteurtype_id_by_code,
             "source_id_by_code": source_id_by_code,
         }
+
+    @pytest.mark.parametrize(
+        "statut, statut_expected",
+        [
+            (None, "ACTIF"),
+            ("fake", "ACTIF"),
+            (np.nan, "ACTIF"),
+            (0, "SUPPRIME"),
+            (1, "ACTIF"),
+            ("ACTIF", "ACTIF"),
+            ("INACTIF", "INACTIF"),
+            ("SUPPRIME", "SUPPRIME"),
+        ],
+    )
+    def test_statut(self, statut, statut_expected, source_data_normalize_kwargs):
+        source_data_normalize_kwargs["df_acteur_from_source"] = pd.DataFrame(
+            {
+                "identifiant_externe": ["1"],
+                "ecoorganisme": ["source1"],
+                "source_id": ["source_id1"],
+                "acteur_type_id": ["decheterie"],
+                "produitsdechets_acceptes": ["Plastic Box"],
+                "statut": [statut],
+            }
+        )
+        df = source_data_normalize(**source_data_normalize_kwargs)
+
+        assert df["statut"].iloc[0] == statut_expected
+
+    def test_statut_no_column(self, source_data_normalize_kwargs):
+        source_data_normalize_kwargs["df_acteur_from_source"] = pd.DataFrame(
+            {
+                "identifiant_externe": ["1"],
+                "ecoorganisme": ["source1"],
+                "source_id": ["source_id1"],
+                "acteur_type_id": ["decheterie"],
+                "produitsdechets_acceptes": ["Plastic Box"],
+            }
+        )
+        df = source_data_normalize(**source_data_normalize_kwargs)
+
+        assert df["statut"].iloc[0] == "ACTIF"
 
     @pytest.mark.parametrize(
         "label_et_bonus, label_et_bonus_expected",
