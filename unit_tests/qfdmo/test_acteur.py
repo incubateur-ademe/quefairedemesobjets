@@ -75,15 +75,17 @@ class TestActeurIsdigital:
         ).is_digital
 
     def test_isdigital_true(self):
-        ActeurType._digital_acteur_type_id = 0
-        acteur_type = ActeurTypeFactory(code="acteur_digital")
-        assert ActeurFactory.build(
-            nom="Test Object 1", acteur_type=acteur_type
-        ).is_digital
+        # Reset ActeurType cache for digital acteur type id to prevent pollution
+        # from previous tests
+        ActeurType._digital_acteur_type_id = None
+        acteur_type = ActeurTypeFactory(code="acteur_digital", id=5)
+        assert ActeurFactory(nom="Test Object 1", acteur_type=acteur_type).is_digital
 
     def test_isdigital_hides_address(self):
-        ActeurType._digital_acteur_type_id = 0
-        acteur_type = ActeurTypeFactory(code="acteur_digital")
+        # Reset ActeurType cache for digital acteur type id to prevent pollution
+        # from previous tests
+        ActeurType._digital_acteur_type_id = None
+        acteur_type = ActeurTypeFactory(code="acteur_digital", id=5)
         acteur = DisplayedActeurFactory(acteur_type=acteur_type)
         assert acteur.is_digital
         assert not acteur.should_display_adresse
@@ -165,7 +167,9 @@ class TestLocationValidation:
             acteur.save()
 
     def test_location_validation_dont_raise(self):
-        ActeurType._digital_acteur_type_id = 0
+        # Reset ActeurType cache for digital acteur type id to prevent pollution
+        # from previous tests
+        ActeurType._digital_acteur_type_id = None
         acteur_type = ActeurTypeFactory(code="acteur_digital")
         acteur = Acteur(
             nom="Test Object 1", identifiant_unique="123", acteur_type=acteur_type

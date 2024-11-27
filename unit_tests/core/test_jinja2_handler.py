@@ -147,7 +147,9 @@ class TestDistanceToActeur:
         assert distance_to_acteur(request, adresse) == expected
 
     def test_distance_to_acteur_digital(self, adresse):
-        ActeurType._digital_acteur_type_id = 0
+        # Reset ActeurType cache for digital acteur type id to prevent pollution
+        # from previous tests
+        ActeurType._digital_acteur_type_id = None
         adresse.acteur_type = ActeurTypeFactory(code="acteur_digital")
         request = type("", (), {})()
         request.GET = {"longitude": str(1000 / 111320), "latitude": str(1000 / 111320)}
