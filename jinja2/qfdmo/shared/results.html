@@ -6,7 +6,7 @@ The values of 120px and 150px are determined empirically.
 They need to match the css variables used for .grid-map selector in qfdmo.css
 #}
 
-{% with address_ok=(form.initial.adresse or form.initial.bounding_box) %}
+{% with address_ok=(form.initial.adresse or form.initial.bounding_box or form.initial.epci_codes) %}
 <div
     class="
     qf-relative
