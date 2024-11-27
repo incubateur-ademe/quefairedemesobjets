@@ -40,7 +40,7 @@ jobs:
       - name: Install Dependencies
         run: pip install --require-hashes --no-deps -r airflow-requirements.txt -r requirements.txt -r dev-requirements.txt
       - name: Run tests
-        run: pytest {{ matrix.tests_directory }}
+        run: pytest ${{ matrix.tests_directory }}
       - name: Check code formatting
         run: black --check --diff .
       - uses: chartboost/ruff-action@v1
