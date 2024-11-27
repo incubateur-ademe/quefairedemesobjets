@@ -74,11 +74,14 @@ class TestActeurIsdigital:
             nom="Test Object 1", location=Point(1, 1), acteur_type=acteur_type
         ).is_digital
 
-    def test_isdigital_true(self):
+    def test_isdigital_true(self, django_assert_num_queries):
         acteur_type = ActeurTypeFactory(code="acteur_digital")
-        assert ActeurFactory.build(
-            nom="Test Object 1", acteur_type=acteur_type
-        ).is_digital
+        assert ActeurFactory(nom="Test Object 1", acteur_type=acteur_type).is_digital
+
+        with django_assert_num_queries(5):
+            assert ActeurFactory(
+                nom="Test Object 1", acteur_type=acteur_type
+            ).is_digital
 
     def test_isdigital_hides_address(self):
         acteur_type = ActeurTypeFactory(code="acteur_digital")
