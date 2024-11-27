@@ -163,12 +163,6 @@ class TestLocationValidation:
             acteur.save()
 
     def test_location_validation_dont_raise(self):
-<<<<<<< HEAD
-        # Reset ActeurType cache for digital acteur type id to prevent pollution
-        # from previous tests
-        ActeurType._digital_acteur_type_id = None
-=======
->>>>>>> 606f9f5 (Remove now useless property)
         acteur_type = ActeurTypeFactory(code="acteur_digital")
         acteur = Acteur(
             nom="Test Object 1", identifiant_unique="123", acteur_type=acteur_type
