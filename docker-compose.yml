@@ -20,6 +20,7 @@ x-airflow-common:
 services:
   lvao-db:
     image: postgis/postgis:15-3.3-alpine
+    platform: linux/amd64
     environment:
       - POSTGRES_USER=qfdmo
       - POSTGRES_PASSWORD=qfdmo # pragma: allowlist secret
