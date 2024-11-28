@@ -50,7 +50,7 @@ def process_phone_number(number, code_postal):
     if number.startswith("33"):
         number = "0" + number[2:]
 
-    if len(number) < 6:
+    if len(number) < 5:
         return None
 
     return number
