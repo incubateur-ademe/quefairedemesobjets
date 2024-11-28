@@ -1,4 +1,5 @@
 from airflow import DAG
+from sources.config import shared_constants as constants
 from sources.config.airflow_params import get_mapping_config
 from sources.tasks.airflow_logic.operators import default_args, eo_task_chain
 
@@ -31,7 +32,7 @@ with DAG(
                 "magasin / franchise, enseigne commerciale / distributeur /"
                 " point de vente"
             ),
-            "statut": "ACTIF",
+            "statut": constants.ACTEUR_ACTIF,
         },
         "endpoint": (
             "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"

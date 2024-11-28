@@ -3,7 +3,7 @@ import logging
 from datetime import datetime
 
 from shared.tasks.database_logic.db_manager import PostgresConnectionManager
-from utils import shared_constants as constants
+from sources.config import shared_constants as constants
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ def insert_dagrun_and_process_df(df_acteur_updates, metadata, dag_name, run_name
     # Insert dag_run_change
     df_acteur_updates["change_type"] = df_acteur_updates["event"]
     df_acteur_updates["dag_run_id"] = dag_run_id
-    df_acteur_updates["status"] = constants.TO_VALIDATE
+    df_acteur_updates["status"] = constants.DAGRUN_TOVALIDATE
     df_acteur_updates[["row_updates", "dag_run_id", "change_type", "status"]].to_sql(
         "qfdmo_dagrunchange",
         engine,

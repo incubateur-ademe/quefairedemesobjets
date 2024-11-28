@@ -1,4 +1,5 @@
 from airflow import DAG
+from sources.config import shared_constants as constants
 from sources.config.airflow_params import get_mapping_config
 from sources.tasks.airflow_logic.operators import default_args, eo_task_chain
 
@@ -32,7 +33,7 @@ with DAG(
             "consignes_dacces": "commentaires",
         },
         "columns_to_add_by_default": {
-            "statut": "ACTIF",
+            "statut": constants.ACTEUR_ACTIF,
         },
         "endpoint": (
             "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"

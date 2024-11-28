@@ -1,5 +1,6 @@
 import pandas as pd
 from fuzzywuzzy import fuzz
+from sources.config import shared_constants as constants
 
 
 def set_cohort_id(row):
@@ -188,7 +189,7 @@ def update_statut(row):
             if result["etat_admin_candidat"] == "A":
                 return pd.Series(
                     [
-                        "ACTIF",
+                        constants.ACTEUR_ACTIF,
                         result["categorie_naf_candidat"],
                         result["adresse_candidat"],
                     ]

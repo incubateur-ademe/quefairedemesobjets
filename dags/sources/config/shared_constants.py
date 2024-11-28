@@ -1,0 +1,20 @@
+# DagRun statuts
+DAGRUN_TOVALIDATE = "TO_VALIDATE"
+DAGRUN_TOINSERT = "TO_INSERT"
+DAGRUN_REJECTED = "REJECTED"
+DAGRUN_FINISHED = "FINISHED"
+
+# Public accueilli
+PUBLIC_PAR = "Particuliers"
+PUBLIC_PRO = "Professionnels"
+PUBLIC_PRO_ET_PAR = "Particuliers et professionnels"
+PUBLIC_AUCUN = "Aucun"
+
+# Acteur Statuts
+ACTEUR_ACTIF = "ACTIF"
+ACTEUR_INACTIF = "INACTIF"
+ACTEUR_SUPPRIME = "SUPPRIME"
+
+# Reprise
+REPRISE_1POUR0 = "1 pour 0"
+REPRISE_1POUR1 = "1 pour 1"

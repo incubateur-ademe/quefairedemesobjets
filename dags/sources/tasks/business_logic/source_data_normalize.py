@@ -5,6 +5,7 @@ from typing import List
 import pandas as pd
 import requests
 from shared.tasks.database_logic.db_manager import PostgresConnectionManager
+from sources.config import shared_constants as constants
 from sources.config.airflow_params import TRANSFORMATION_MAPPING
 from sources.tasks.transform.transform_column import (
     cast_eo_boolean_or_string_to_boolean,
@@ -15,7 +16,6 @@ from sqlalchemy import text
 from tenacity import retry, stop_after_attempt, wait_fixed
 from utils import logging_utils as log
 from utils import mapping_utils
-from utils import shared_constants as constants
 from utils.base_utils import extract_details, get_address
 
 logger = logging.getLogger(__name__)
@@ -132,26 +132,26 @@ def source_data_normalize(
     if "statut" in df.columns:
         df["statut"] = df["statut"].map(
             {
-                1: "ACTIF",
-                0: "SUPPRIME",
-                "ACTIF": "ACTIF",
-                "INACTIF": "INACTIF",
-                "SUPPRIME": "SUPPRIME",
+                1: constants.ACTEUR_ACTIF,
+                0: constants.ACTEUR_SUPPRIME,
+                constants.ACTEUR_ACTIF: constants.ACTEUR_ACTIF,
+                "INACTIF": constants.ACTEUR_INACTIF,
+                "SUPPRIME": constants.ACTEUR_SUPPRIME,
             }
         )
-        df["statut"] = df["statut"].fillna("ACTIF")
+        df["statut"] = df["statut"].fillna(constants.ACTEUR_ACTIF)
     else:
-        df["statut"] = "ACTIF"
+        df["statut"] = constants.ACTEUR_ACTIF
 
     if "public_accueilli" in df.columns:
 
         df["public_accueilli"] = mapping_try_or_fallback_column_value(
             df["public_accueilli"],
             {
-                "particuliers et professionnels": ("Particuliers et professionnels"),
-                "professionnels": "Professionnels",
-                "particuliers": "Particuliers",
-                "aucun": "Aucun",
+                "particuliers et professionnels": constants.PUBLIC_PRO_ET_PAR,
+                "professionnels": constants.PUBLIC_PRO,
+                "particuliers": constants.PUBLIC_PAR,
+                "aucun": constants.PUBLIC_AUCUN,
             },
         )
 
@@ -168,10 +168,10 @@ def source_data_normalize(
         df["reprise"] = mapping_try_or_fallback_column_value(
             df["reprise"],
             {
-                "1 pour 0": "1 pour 0",
-                "1 pour 1": "1 pour 1",
-                "non": "1 pour 0",
-                "oui": "1 pour 1",
+                "1 pour 0": constants.REPRISE_1POUR0,
+                "1 pour 1": constants.REPRISE_1POUR1,
+                "non": constants.REPRISE_1POUR0,
+                "oui": constants.REPRISE_1POUR1,
             },
         )
 

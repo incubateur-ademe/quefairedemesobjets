@@ -1,7 +1,7 @@
 from airflow import DAG
+from sources.config import shared_constants as constants
 from sources.config.airflow_params import get_mapping_config
 from sources.tasks.airflow_logic.operators import default_args, eo_task_chain
-from utils import shared_constants as constants
 
 with DAG(
     dag_id="like-eo-from-api-cma",
@@ -39,7 +39,7 @@ with DAG(
             "reparactor_hours": "horaires_description",
         },
         "columns_to_add_by_default": {
-            "statut": "ACTIF",
+            "statut": constants.ACTEUR_ACTIF,
             "labels_etou_bonus": "reparacteur",
             "acteur_type_id": "artisan, commerce indépendant",
             "point_de_reparation": True,
