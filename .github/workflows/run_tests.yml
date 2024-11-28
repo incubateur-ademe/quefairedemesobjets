@@ -71,6 +71,9 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       postgres:
         image: postgis/postgis:15-3.3-alpine
@@ -131,7 +134,9 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run Playwright tests
-        run: npx playwright test --reporter=list --update-snapshots
+        run: npx playwright test --reporter=list --update-snapshots --shard=${{ matrix.shard }}
+
+
 
       - uses: actions/upload-artifact@v4
         if: always()
