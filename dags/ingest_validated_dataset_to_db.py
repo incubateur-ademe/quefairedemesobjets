@@ -2,11 +2,12 @@ from datetime import timedelta
 
 import pandas as pd
 from airflow.models import DAG
-from airflow.operators.dagrun_operator import TriggerDagRunOperator
-from airflow.operators.python_operator import BranchPythonOperator, PythonOperator
+from airflow.operators.python import BranchPythonOperator, PythonOperator
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.utils.dates import days_ago
-from utils import dag_ingest_validated_utils, shared_constants
+from sources.config import shared_constants as constants
+from utils import dag_ingest_validated_utils
 
 default_args = {
     "owner": "airflow",
@@ -31,7 +32,7 @@ def _get_first_dagrun_to_insert():
     hook = PostgresHook(postgres_conn_id="qfdmo_django_db")
     # get first row from table qfdmo_dagrun with status TO_INSERT
     row = hook.get_first(
-        f"SELECT * FROM qfdmo_dagrun WHERE status = '{shared_constants.TO_INSERT}'"
+        f"SELECT * FROM qfdmo_dagrun WHERE status = '{constants.DAGRUN_TOINSERT}'"
         " LIMIT 1"
     )
     return row

@@ -22,6 +22,7 @@ from django.urls import reverse
 from django.utils.functional import cached_property
 from unidecode import unidecode
 
+from dags.sources.config.shared_constants import REPRISE_1POUR0, REPRISE_1POUR1
 from qfdmo.models.action import Action, get_action_instances
 from qfdmo.models.categorie_objet import SousCategorieObjet
 from qfdmo.models.utils import (
@@ -76,8 +77,8 @@ class ActeurPublicAccueilli(models.TextChoices):
 
 
 class ActeurReprise(models.TextChoices):
-    UN_POUR_ZERO = "1 pour 0", "1 pour 0"
-    UN_POUR_UN = "1 pour 1", "1 pour 1"
+    UN_POUR_ZERO = REPRISE_1POUR0, "1 pour 0"
+    UN_POUR_UN = REPRISE_1POUR1, "1 pour 1"
 
 
 class ActeurType(CodeAsNaturalKeyModel):

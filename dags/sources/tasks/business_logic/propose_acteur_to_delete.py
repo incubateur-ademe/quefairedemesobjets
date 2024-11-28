@@ -1,6 +1,7 @@
 import logging
 
 import pandas as pd
+from sources.config import shared_constants as constants
 
 logger = logging.getLogger(__name__)
 
@@ -11,7 +12,7 @@ def propose_acteur_to_delete(
 ):
 
     df_acteurs_from_db_actifs = df_acteurs_from_db[
-        df_acteurs_from_db["statut"] == "ACTIF"
+        df_acteurs_from_db["statut"] == constants.ACTEUR_ACTIF
     ]
 
     df_acteur_to_delete = df_acteurs_from_db_actifs[
