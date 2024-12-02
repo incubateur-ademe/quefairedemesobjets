@@ -1,4 +1,5 @@
 from django.contrib.gis.db import models
+from django.db.models.functions import Now
 
 from dags.utils.shared_constants import FINISHED, REJECTED, TO_INSERT, TO_VALIDATE
 from qfdmo.models.acteur import ActeurType, Source
@@ -63,39 +64,6 @@ class DagRunChange(models.Model):
         default=DagRunStatus.TO_VALIDATE,
     )
 
-    # row_updates : JSON of acteur to update or create to store on row_updates
-    # {
-    #     "nom": "NOM",
-    #     "description": null,
-    #     "identifiant_unique": "IDENTIFIANT_UNIQUE",
-    #     "adresse": "ADRESSE",
-    #     "adresse_complement": "…",
-    #     "code_postal": "CODE_POSTAL",
-    #     "ville": "VILLE",
-    #     "url": "…",
-    #     "email": "…",
-    #     "telephone": "…",
-    #     "nom_commercial": "…",
-    #     "nom_officiel": "…",
-    #     "labels": ['reparacteur],
-    #     "siret": "49819433100019",
-    #     "identifiant_externe": "144103",
-    #     "statut": "ACTIF",
-    #     "naf_principal": "62.02A",
-    #     "commentaires": null,
-    #     "horaires_osm": null,
-    #     "horaires_description": null,
-    #     "acteur_type_id": 3,
-    #     "source_id": 4,
-    #     "location": [2.9043527, 42.6949013],
-    #     "proposition_services": [
-    #         {
-    #             "action_id": 1,
-    #             "acteur_service_id": 15,
-    #             "sous_categories": [90]
-    #         }
-    #     ]
-    # }
     def display_acteur_details(self) -> dict:
         displayed_details = {}
         for field, field_value in {
@@ -169,3 +137,16 @@ class DagRunChange(models.Model):
 
     def get_candidat(self, index):
         return self.row_updates["ae_result"][int(index) - 1]
+
+
+class BANCache(models.Model):
+    class Meta:
+        verbose_name = "Cache BAN"
+        verbose_name_plural = "Cache BAN"
+
+    adresse = models.CharField(max_length=255, blank=True, null=True)
+    code_postal = models.CharField(max_length=255, blank=True, null=True)
+    ville = models.CharField(max_length=255, blank=True, null=True)
+    location = models.PointField(blank=True, null=True)
+    ban_returned = models.JSONField(blank=True, null=True)
+    modifie_le = models.DateTimeField(auto_now=True, db_default=Now())
