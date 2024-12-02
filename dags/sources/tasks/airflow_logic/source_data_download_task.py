@@ -22,8 +22,8 @@ def source_data_download_task(dag: DAG) -> PythonOperator:
 
 def source_data_download_wrapper(**kwargs) -> pd.DataFrame:
     params = kwargs["params"]
-    api_url = params["endpoint"]
+    endpoint = params["endpoint"]
 
-    log.preview("API end point", api_url)
+    log.preview("API end point", endpoint)
 
-    return source_data_download(api_url=api_url)
+    return source_data_download(endpoint=endpoint)

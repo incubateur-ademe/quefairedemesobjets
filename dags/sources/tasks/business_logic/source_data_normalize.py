@@ -2,12 +2,14 @@ import logging
 from typing import List
 
 import pandas as pd
+import requests
 from sources.config.airflow_params import TRANSFORMATION_MAPPING
 from sources.tasks.transform.transform_column import (
     cast_eo_boolean_or_string_to_boolean,
     mapping_try_or_fallback_column_value,
 )
 from sources.tasks.transform.transform_df import merge_duplicates
+from tenacity import retry, stop_after_attempt, wait_fixed
 from utils import logging_utils as log
 from utils import mapping_utils
 from utils import shared_constants as constants
@@ -178,6 +180,9 @@ def source_data_normalize(
         df["url"] = df["url"].map(mapping_utils.prefix_url)
 
     # Etapes de normalisation spécifiques aux sources
+    if source_code == "Ordre National Des Pharmaciens":
+        df = df_normalize_pharmacie(df)
+
     if source_code == "ADEME_SINOE_Decheteries":
         df = df_normalize_sinoe(
             df,
@@ -219,6 +224,20 @@ def source_data_normalize(
     log.preview("df après normalisation", df)
     if df.empty:
         raise ValueError("Plus aucune donnée disponible après normalisation")
+    return df
+
+
+def df_normalize_pharmacie(df: pd.DataFrame) -> pd.DataFrame:
+    # controle des adresses et localisation des pharmacies
+    df = df.apply(enrich_from_ban_api, axis=1)
+    # On supprime les pharmacies sans localisation
+    nb_pharmacies_sans_loc = len(df[(df["latitude"] == 0) | (df["longitude"] == 0)])
+    nb_pharmacies = len(df)
+    logger.warning(
+        f"Nombre de pharmacies sans localisation: {nb_pharmacies_sans_loc}"
+        f" / {nb_pharmacies}"
+    )
+    df = df[(df["latitude"] != 0) & (df["longitude"] != 0)]
     return df
 
 
@@ -290,3 +309,44 @@ def df_normalize_sinoe(
         raise ValueError(f"Sous-catégories invalides: {souscats_invalid}")
 
     return df
+
+
+@retry(wait=wait_fixed(2), stop=stop_after_attempt(3))
+def enrich_from_ban_api(row: pd.Series) -> pd.Series:
+    ban_adresse = _compute_ban_adresse(row)
+    url = "https://api-adresse.data.gouv.fr/search/"
+    r = requests.get(url, params={"q": ban_adresse})
+    if r.status_code != 200:
+        raise Exception(f"Failed to get data from API: {r.status_code}")
+    result = r.json()
+
+    better_result = None
+    better_geo = None
+    if "features" in result and result["features"]:
+        better_geo = result["features"][0]["geometry"]["coordinates"]
+        better_result = result["features"][0]["properties"]
+    if better_geo and better_result and better_result["score"] > 0.5:
+        better_postcode = (
+            better_result["postcode"]
+            if "postcode" in better_result
+            else row["code_postal"]
+        )
+        better_city = better_result["city"] if "city" in better_result else row["ville"]
+        better_adresse = (
+            better_result["name"] if "name" in better_result else row["adresse"]
+        )
+        row["longitude"] = better_geo[0]
+        row["latitude"] = better_geo[1]
+        row["adresse"] = better_adresse
+        row["code_postal"] = better_postcode
+        row["ville"] = better_city
+    else:
+        row["longitude"] = 0
+        row["latitude"] = 0
+    return row
+
+
+def _compute_ban_adresse(row):
+    ban_adresse = [row["adresse"], row["code_postal"], row["ville"]]
+    ban_adresse = [str(x) for x in ban_adresse if x]
+    return " ".join(ban_adresse)
