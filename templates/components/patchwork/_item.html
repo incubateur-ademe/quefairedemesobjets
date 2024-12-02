@@ -1,3 +1,4 @@
+{% load qfdmd_tags %}
 <div class="icon">
     <a
         href="{{ produit.synonymes.first.url }}"
@@ -12,7 +13,6 @@
         {% endif %}
         --random-rotate: {{ forloop.counter|divisibleby:2|yesno:'5,-5' }};"
     >
-        {# TODO : use inline SVG #}
-        <img src="{{ produit.picto.url }}" width="60" height="60" />
+        {% render_file_content produit.picto %}
     </a>
 </div>

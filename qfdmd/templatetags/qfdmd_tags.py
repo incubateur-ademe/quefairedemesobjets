@@ -1,4 +1,5 @@
 from django import template
+from django.utils.safestring import mark_safe
 
 register = template.Library()
 
@@ -21,3 +22,9 @@ def patchwork():
 
     produits = Produit.objects.exclude(picto="").exclude(picto=None)
     return {"top": produits[:24], "left": produits[24:30], "right": produits[30:36]}
+
+
+@register.simple_tag
+def render_file_content(svg_file):
+    with svg_file.open() as f:
+        return mark_safe(f.read().decode("utf-8"))
