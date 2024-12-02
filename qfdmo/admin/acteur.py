@@ -16,6 +16,7 @@ from django.utils.html import format_html
 from import_export import admin as import_export_admin
 from import_export import fields, resources, widgets
 
+from qfdmo.admin.widgets import CategorieChoiceWidget, SousCategorieChoiceWidget
 from qfdmo.models import (
     Acteur,
     ActeurService,
@@ -80,25 +81,6 @@ class DisplayedActeurLabelQualiteInline(admin.StackedInline):
 
     def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
         return False
-
-
-class SousCategorieChoiceWidget(forms.SelectMultiple):
-    def create_option(self, name, value, *args, **kwargs):
-        option = super().create_option(name, value, *args, **kwargs)
-        if value:
-            option["attrs"]["data-categorie"] = value.instance.categorie.pk
-        return option
-
-
-class CategorieChoiceWidget(forms.SelectMultiple):
-    def create_option(self, name, value, *args, **kwargs):
-        option = super().create_option(name, value, *args, **kwargs)
-        if value:
-            option["attrs"]["data-admin-categorie-widget-target"] = "option"
-        return option
-
-    class Media:
-        js = ("admin-categorie-widget.js",)
 
 
 class BasePropositionServiceForm(forms.ModelForm):
