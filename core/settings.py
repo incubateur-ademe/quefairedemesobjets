@@ -213,7 +213,11 @@ DB_READONLY = decouple.config(
 readonly_settings = dj_database_url.parse(DB_READONLY)
 
 DATABASES = {
-    "default": {**default_settings, "CONN_MAX_AGE": None, "CONN_HEALTH_CHECKS": True},
+    "default": {
+        **default_settings,
+        "CONN_MAX_AGE": 60,
+        "CONN_HEALTH_CHECKS": True,
+    },
     "readonly": readonly_settings,
 }
 
