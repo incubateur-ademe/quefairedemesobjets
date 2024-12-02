@@ -65,7 +65,7 @@ urlpatterns = [
         name="get_object_list",
     ),
     path(
-        "adresse/<str:identifiant_unique>",
+        "adresse/<str:uuid>",
         # ActeurView.as_view(),
         acteur_detail,
         name="acteur-detail",
