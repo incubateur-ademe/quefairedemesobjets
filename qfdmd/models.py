@@ -38,6 +38,39 @@ class Produit(models.Model):
     def sous_categorie_with_carte_display(self):
         return self.sous_categories.filter(afficher_carte=True).first()
 
+    def get_etats_descriptions(self) -> tuple[str, str] | None:
+        # TODO: rename this method
+        text = self.qu_est_ce_que_j_en_fais
+        if "En bon état" not in text and "En mauvais état" not in text:
+            return
+
+        _, _, mauvais_etat_and_rest = text.partition("<b>En bon état</b>")
+        bon_etat, _, mauvais_etat = mauvais_etat_and_rest.partition(
+            "<b>En mauvais état</b>"
+        )
+
+        print(f"{bon_etat=} {mauvais_etat_and_rest=} {text=}")
+
+        return (bon_etat, mauvais_etat)
+
+    @cached_property
+    def mauvais_etat(self) -> str:
+        try:
+            return self.get_etats_descriptions()[0]
+        except KeyError:
+            return ""
+
+    @cached_property
+    def bon_etat(self) -> str:
+        try:
+            return self.get_etats_descriptions()[1]
+        except KeyError:
+            return ""
+
+    @cached_property
+    def en_savoir_plus(self) -> str:
+        return ""
+
     @cached_property
     def content_display(self) -> list[dict[str, str]]:
         return [
@@ -56,7 +89,7 @@ class Produit(models.Model):
                 {
                     "id": "En savoir plus",
                     "title": "En savoir plus",
-                    "content": self.que_va_t_il_devenir,
+                    "content": self.en_savoir_plus,
                 },
             ]
             if item["content"]
