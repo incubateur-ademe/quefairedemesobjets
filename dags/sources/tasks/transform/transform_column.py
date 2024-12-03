@@ -54,7 +54,7 @@ def convert_opening_hours(opening_hours: str | None) -> str:
         hours_translated = process_schedule(hours)
         return f"du {day_range} {hours_translated}"
 
-    if not opening_hours or pd.isna(opening_hours):
+    if pd.isna(opening_hours) or not opening_hours:
         return ""
 
     return process_entry(opening_hours)
@@ -95,4 +95,4 @@ def clean_number(number: Any) -> str:
 
 
 def strip_string(value: str | None) -> str:
-    return str(value).strip() if value else ""
+    return str(value).strip() if not pd.isna(value) and value else ""
