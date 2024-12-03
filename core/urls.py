@@ -21,12 +21,14 @@ from django.contrib.sitemaps import GenericSitemap
 from django.contrib.sitemaps import views as sitemaps_views
 from django.urls import include, path
 
-from qfdmo.models.acteur import DisplayedActeur
+from qfdmo.models.acteur import ActeurStatus, DisplayedActeur
 
 from .api import api
 
 info_dict = {
-    "queryset": DisplayedActeur.objects.all().order_by("identifiant_unique"),
+    "queryset": DisplayedActeur.objects.filter(statut=ActeurStatus.ACTIF).order_by(
+        "identifiant_unique"
+    ),
     "date_field": "modifie_le",
 }
 
