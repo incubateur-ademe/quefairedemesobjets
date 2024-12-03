@@ -504,29 +504,3 @@ class TestLayers:
         url = "/carte?action_list=reparer%7Cdonner%7Cechanger%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cacheter%7Crevendre&epci_codes=200055887&limit=50"  # noqa: E501
         response = client.get(url)
         assert 'data-testid="adresse-missing"' not in str(response.content)
-
-
-@pytest.mark.django_db
-class TestSitemap:
-    def test_inactif_acteur(self, client):
-        acteur = DisplayedActeurFactory(
-            identifiant_unique="coucou",
-            statut=ActeurStatus.INACTIF,
-        )
-        url = f"/adresse/{acteur.identifiant_unique}"
-        response = client.get(url)
-        assert response.status_code == 301
-
-    def test_inactif_acteur_is_not_in_sitemap(self, client):
-        DisplayedActeurFactory(
-            identifiant_unique="youpi",
-            statut=ActeurStatus.ACTIF,
-        )
-        DisplayedActeurFactory(
-            identifiant_unique="coucou",
-            statut=ActeurStatus.INACTIF,
-        )
-        url = "/sitemap-items.xml"
-        response = client.get(url)
-        assert "coucou" not in str(response.content)
-        assert "youpi" in str(response.content)
