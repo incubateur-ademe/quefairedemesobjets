@@ -1,4 +1,5 @@
 from django.contrib.gis.db import models
+from django.template.loader import render_to_string
 from django.urls.base import reverse
 from django.utils.functional import cached_property
 from django_extensions.db.fields import AutoSlugField
@@ -68,8 +69,10 @@ class Produit(models.Model):
             return ""
 
     @cached_property
-    def en_savoir_plus(self) -> str:
-        return ""
+    def en_savoir_plus(self):
+        return render_to_string(
+            "components/produit/_en_savoir_plus.html", {"produit": self}
+        )
 
     @cached_property
     def content_display(self) -> list[dict[str, str]]:
