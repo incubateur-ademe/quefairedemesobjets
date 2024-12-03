@@ -46,7 +46,11 @@
     "solvants": "Produits chimiques - Solvants",
     "téléphones portables": "smartphone, tablette et console",
     "vélos non électriques, trottinettes non électriques, skate-board, rollers": "velo",
-    "vêtement": "vetement"  
+    "bouteilles plastique": "bouteilles_plastique",
+    "emballage multimatériaux": ["autres_emballages_menagers","bouteilles_plastique","emballage_metal","emballage_carton"],
+    "papiers graphiques": "papiers_graphiques",
+    "verre": "emballage_verre",
+    "vêtement": "vetement"
   },
   "sous_categories_cma": {
     "articles d’ameublement (meubles, chaises, fauteuils, canapés, tapis, etc)": [
