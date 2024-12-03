@@ -8,6 +8,10 @@ annotated-types==0.7.0 \
     --hash=sha256:1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53 \
     --hash=sha256:aff07c09a53a08bc8cfccb9c85b05f1aa9a2a6f23728d790723543408344ce89
     # via pydantic
+anyascii==0.3.2 \
+    --hash=sha256:3b3beef6fc43d9036d3b0529050b0c48bfad8bc960e9e562d7223cfb94fe45d4 \
+    --hash=sha256:9d5d32ef844fe225b8bc7cba7f950534fae4da27a9bf3a6bea2cb0ea46ce4730
+    # via wagtail
 api-insee==1.5 \
     --hash=sha256:c69ecdc4ddc03308bb7fc68dff3fadd43706772c55aed8b703d70526485250a2
     # via -r requirements.in
@@ -17,6 +21,10 @@ asgiref==3.8.1 \
     # via
     #   django
     #   django-cors-headers
+beautifulsoup4==4.12.3 \
+    --hash=sha256:74e3d1928edc070d21748185c46e3fb33490f22f52a3addee9aee0f4f7781051 \
+    --hash=sha256:b80878c9f40111313e55da8ba20bdba06d8fa3969fc68304167741bbf9e082ed
+    # via wagtail
 boto3==1.34.53 \
     --hash=sha256:340c73f57fcca6f503403e2e13a0a4ad44bec218feee2e0896be612324394afd \
     --hash=sha256:cd30261a782824ce543a628ae524480abb4ca6ab4e4a2631477e48baed43b5f2
@@ -129,6 +137,10 @@ click==8.1.7 \
     --hash=sha256:ae74fb96c20a0277a1d615f1e4d73c8414f5a98db8b799a7931d1582f3390c28 \
     --hash=sha256:ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de
     # via uvicorn
+defusedxml==0.7.1 \
+    --hash=sha256:1bb3032db185915b62d7c6209c5a8792be6a32ab2fedacc84e01b52c51aa3e69 \
+    --hash=sha256:a352e7e428770286cc899e2542b6cdaedb2b4953ff269a210103ec58f6198a61
+    # via willow
 diff-match-patch==20230430 \
     --hash=sha256:953019cdb9c9d2c9e47b5b12bcff3cf4746fc4598eb406076fa1fc27e6a1f15c \
     --hash=sha256:dce43505fb7b1b317de7195579388df0746d90db07015ed47a85e5e44930ef93
@@ -150,10 +162,18 @@ django==5.1.1 \
     #   django-crispy-forms
     #   django-dsfr
     #   django-extensions
+    #   django-filter
     #   django-import-export
+    #   django-modelcluster
     #   django-ninja
+    #   django-permissionedforms
     #   django-sql-explorer
     #   django-storages
+    #   django-taggit
+    #   django-treebeard
+    #   djangorestframework
+    #   laces
+    #   wagtail
 django-colorfield==0.11.0 \
     --hash=sha256:05c38c8eb2a94938b810a19b2011846391a4ce71d1c92e88a35974fbcc8fc62e \
     --hash=sha256:460f40e6123b6ae0fb51a4eb86fc258fcdc0ea28f75102b685e8209b1eae9ec3
@@ -174,14 +194,26 @@ django-extensions==3.2.3 \
     --hash=sha256:44d27919d04e23b3f40231c4ab7af4e61ce832ef46d610cc650d53e68328410a \
     --hash=sha256:9600b7562f79a92cbf1fde6403c04fee314608fefbb595502e34383ae8203401
     # via -r requirements.in
+django-filter==24.3 \
+    --hash=sha256:c4852822928ce17fb699bcfccd644b3574f1a2d80aeb2b4ff4f16b02dd49dc64 \
+    --hash=sha256:d8ccaf6732afd21ca0542f6733b11591030fa98669f8d15599b358e24a2cd9c3
+    # via wagtail
 django-import-export[xls,xlsx]==4.1.1 \
     --hash=sha256:16ecc5a9f0df46bde6eb278a3e65ebda0ee1db55656f36440e9fb83f40ab85a3 \
     --hash=sha256:730ae2443a02b1ba27d8dba078a27ae9123adfcabb78161b4f130843607b3df9
     # via -r requirements.in
+django-modelcluster==6.3 \
+    --hash=sha256:0caed8a0e889f3abb92f144670878a466ef954ffa6c4c7b9c80e6426b720a49d \
+    --hash=sha256:a8783d6565a0663f41cd6003ea361c3a5711e8a2a326160f1ec1eceb3e973d4f
+    # via wagtail
 django-ninja==1.3.0 \
     --hash=sha256:5b320e2dc0f41a6032bfa7e1ebc33559ae1e911a426f0c6be6674a50b20819be \
     --hash=sha256:f58096b6c767d1403dfd6c49743f82d780d7b9688d9302ecab316ac1fa6131bb
     # via -r requirements.in
+django-permissionedforms==0.1 \
+    --hash=sha256:4340bb20c4477fffb13b4cc5cccf9f1b1010b64f79956c291c72d2ad2ed243f8 \
+    --hash=sha256:d341a961a27cc77fde8cc42141c6ab55cc1f0cb886963cc2d6967b9674fa47d6
+    # via wagtail
 django-sql-explorer==3.2.1 \
     --hash=sha256:35e05f40eff91eead10c553cce2ee63033a19ac39c99b9ccdf87552c52784d63 \
     --hash=sha256:735cc39e4ae2629049571229e2f7a8c8a54af4a988fcad12a333597724adaad7
@@ -190,16 +222,36 @@ django-storages==1.14.2 \
     --hash=sha256:1db759346b52ada6c2efd9f23d8241ecf518813eb31db9e2589207174f58f6ad \
     --hash=sha256:51b36af28cc5813b98d5f3dfe7459af638d84428c8df4a03990c7d74d1bea4e5
     # via -r requirements.in
+django-taggit==6.1.0 \
+    --hash=sha256:ab776264bbc76cb3d7e49e1bf9054962457831bd21c3a42db9138b41956e4cf0 \
+    --hash=sha256:c4d1199e6df34125dd36db5eb0efe545b254dec3980ce5dd80e6bab3e78757c3
+    # via wagtail
+django-treebeard==4.7.1 \
+    --hash=sha256:846e462904b437155f76e04907ba4e48480716855f88b898df4122bdcfbd6e98 \
+    --hash=sha256:995c7120153ab999898fe3043bbdcd8a0fc77cc106eb94de7350e9d02c885135
+    # via wagtail
 django-widget-tweaks==1.5.0 \
     --hash=sha256:1c2180681ebb994e922c754804c7ffebbe1245014777ac47897a81f57cc629c7 \
     --hash=sha256:a41b7b2f05bd44d673d11ebd6c09a96f1d013ee98121cb98c384fe84e33b881e
     # via
     #   -r requirements.in
     #   django-dsfr
+djangorestframework==3.15.2 \
+    --hash=sha256:2b8871b062ba1aefc2de01f773875441a961fefbf79f5eed1e32b2f096944b20 \
+    --hash=sha256:36fe88cd2d6c6bec23dca9804bab2ba5517a8bb9d8f47ebc68981b56840107ad
+    # via wagtail
+draftjs-exporter==5.0.0 \
+    --hash=sha256:2efee45d4bb4c0aaacc3e5ea2983a29a29381e02037f3f92a6b12706d7b87e1e \
+    --hash=sha256:8cb9d2d51284233decfe274802f1c53e257158c62b9f53ed2399de3fa80ac561
+    # via wagtail
 et-xmlfile==1.1.0 \
     --hash=sha256:8eb9e2bc2f8c97e37a2dc85a09ecdcdec9d8a396530a6d5a33b30b9a92da0c5c \
     --hash=sha256:a2ba85d1d6a74ef63837eed693bcb89c3f752169b0e3e7ae5b16ca5e1b3deada
     # via openpyxl
+filetype==1.2.0 \
+    --hash=sha256:66b56cd6474bf41d8c54660347d37afcc3f7d1970648de365c102ef77548aadb \
+    --hash=sha256:7ce71b6880181241cf7ac8697a2f1eb6a8bd9b429f7ad6d27b8db9ba5f1c2d25
+    # via willow
 gunicorn==23.0.0 \
     --hash=sha256:ec400d38950de4dfd418cff8328b2c8faed0edb0d517d3394e457c317908ca4d \
     --hash=sha256:f014447a0101dc57e294f6c18ca6b40227a4c90e9bdb586042628030cba004ec
@@ -222,6 +274,14 @@ jmespath==1.0.1 \
     # via
     #   boto3
     #   botocore
+l18n==2021.3 \
+    --hash=sha256:1956e890d673d17135cc20913253c154f6bc1c00266c22b7d503cc1a5a42d848 \
+    --hash=sha256:78495d1df95b6f7dcc694d1ba8994df709c463a1cbac1bf016e1b9a5ce7280b9
+    # via wagtail
+laces==0.1.1 \
+    --hash=sha256:ae2c575b9aaa46154e5518c61c9f86f5a9478f753a51e9c5547c7d275d361242 \
+    --hash=sha256:e45159c46f6adca33010d34e9af869e57201b70675c6dc088e919b16c89456a4
+    # via wagtail
 markupsafe==2.1.5 \
     --hash=sha256:00e046b6dd71aa03a41079792f8473dc494d564611a8f89bbbd7cb93295ebdcf \
     --hash=sha256:075202fa5b72c86ad32dc7d0b56024ebdbcf2048c0ba09f1cde31bfdd57bcfff \
@@ -412,7 +472,9 @@ opening-hours-py==0.6.18 \
 openpyxl==3.1.5 \
     --hash=sha256:5282c12b107bffeef825f4617dc029afaf41d0ea60823bbb665ef3079dc79de2 \
     --hash=sha256:cf0e3cf56142039133628b5acffe8ef0c12bc902d2aadd3e0fe5878dc08d1050
-    # via tablib
+    # via
+    #   tablib
+    #   wagtail
 orjson==3.10.11 \
     --hash=sha256:03246774131701de8e7059b2e382597da43144a9a7400f178b2a32feafc54bd5 \
     --hash=sha256:0efabbf839388a1dab5b72b5d3baedbd6039ac83f3b55736eb9934ea5494d258 \
@@ -583,6 +645,56 @@ pillow==11.0.0 \
     # via
     #   -r requirements.in
     #   django-colorfield
+    #   pillow-heif
+    #   wagtail
+pillow-heif==0.21.0 \
+    --hash=sha256:03273b94a7548ba615f6bfc1031137f1a025b657226de6c3f09f84945295f565 \
+    --hash=sha256:04e824c087934bfd09605a992788db3c461f045a903dbc9f14b20eba0df0c6ac \
+    --hash=sha256:06663c825a3d71779e51df02080467761b74d515e59fce9d780220cd75de7dd0 \
+    --hash=sha256:07aee1bff05e5d61feb989eaa745ae21b367011fd66ee48f7732931f8a12b49b \
+    --hash=sha256:0aaea6ea45257cf74e76666b80b6109f8f56217009534726fa7f6a5694ebd563 \
+    --hash=sha256:0c3ffa486f56f52fe790d3b1bd522d93d2f59e22ce86045641cd596adc3c5273 \
+    --hash=sha256:121451d016c450bfb4d926fe08274e165553679917eb8c85d41fcadfda5f3b2e \
+    --hash=sha256:1b6ba6c3c4de739a1abf4f7fe0cdd04acd9e0c7fc661985b9a5288d94893a4b1 \
+    --hash=sha256:208b066bc7349b1ea1447199668edb6e2f74f36df54c86457ecb0131db8294df \
+    --hash=sha256:22a73ed7ca5c2c8ef1b4872827dc7d8a6875938e9e791fff2db92fb4ca60f560 \
+    --hash=sha256:23efab69a03a9a3a9ff07043d8c8bf0d15ffd661ecc5c7bff59b386eb25f0466 \
+    --hash=sha256:2448e180150b1ecb6576cc5030a6d14a179a7fa430b2b54d976f3beb3c5628ae \
+    --hash=sha256:2813c34cdd3f07e406b6a2cb216019409eb62270e6799088ddf3d4cb08a0d503 \
+    --hash=sha256:3456b4cdb4da485f27c53a91c81f0488b44dc99c0be6870f6a1dc5ac85709894 \
+    --hash=sha256:41693f5d87ed2b5fd01df4a6215045aff14d148a750aa0708c77e71139698154 \
+    --hash=sha256:55cba67787dfabb20e3fe0f54e4e768ca42c0ac5aa74c6b293b3407c7782fc87 \
+    --hash=sha256:5680a00519e5f3c7c1c51dfd41e7f1c632793dfde57a9620339ba4cc70cf9196 \
+    --hash=sha256:60196c08e9c256e81054c5da468eb5a0266c931b8564c96283a43e5fd2d7ce0e \
+    --hash=sha256:6576c9c7713e33150395cdc6e9cf59efd8f42c5783cf0764092ba50a048ee2c6 \
+    --hash=sha256:6724d6a2561f36b06e14e1cd396c004d32717e81528cb03565491ac8679ed760 \
+    --hash=sha256:7f9e939cd8e343237800fe998e26558a82cb25496b74d7674f29e75dc87eb636 \
+    --hash=sha256:8b27031c561ee3485a119c769fc2ef41d81fae1de530857beef935683e09615e \
+    --hash=sha256:8b30fbbb672a3413413bcfc726f9994e495c647c6b96ab9f832dccb61b67fb2f \
+    --hash=sha256:8d2fec1715ec77c2622e1eb52a6b30b58cea437b66dc45cfd28515dcb70bcc99 \
+    --hash=sha256:9305aa837ce77d98a8b5e7bc8f86eeaefb52237686d84d60de11d55bad541d7f \
+    --hash=sha256:9807c955ea7ed2caa5d105aea7d870d8c0958079ed2aba39a6ace7ef82aad402 \
+    --hash=sha256:9e5c0df7b8c84e4a8c249ba45ceca2453f205028d8a6525612ec6dd0553d925d \
+    --hash=sha256:9e67aae3c22a90bc7dfd42c9f0033c53a7d358e0f0d5d29aa42f2f193162fb01 \
+    --hash=sha256:a39d1043ec74afdeef00086c8d24b3cc30095927817182ae5bc960ddb3422d9c \
+    --hash=sha256:aaedb7f16f3f18fbb315648ba576d0d7bb26b18b50c16281665123c38f73101e \
+    --hash=sha256:b06125d594ca71c9af3bf69118c661b8f82a3a7ce2d2ea5302328d91ebef36cb \
+    --hash=sha256:bf2e2b0abad455a0896118856e82a8d5358dfe5480bedd09ddd6a04b23773899 \
+    --hash=sha256:c2d2ec026094c919ce010921586192968abe9dfd2528b38bce905c74cac9b9c6 \
+    --hash=sha256:c46be20058d72a5a158ffc65e6158279a4bcb337707a29b312c5293846bd5b8a \
+    --hash=sha256:cea6f1519a9c486baf3bdf63487fa3f699402724895d64841bb4636258a87c90 \
+    --hash=sha256:d0a68246340d4fad4f10721a1a50b87a7011f1bd18d0a7b7d231e196776d0260 \
+    --hash=sha256:d36441100756122b9d401502e39b60d0df9d876a929f5db858a4b7d05cc02e88 \
+    --hash=sha256:da2a015cfe4afec75551190d93c99dda13410aec89dc468794885b90f870f657 \
+    --hash=sha256:dc919aa10fe97cb2134043d6e2d0d7fdbe17d7a2a833b202437e53be39fa7eae \
+    --hash=sha256:e10ab63559346fc294b9612502221ddd6bfac8cd74091ace7328fefc1163a167 \
+    --hash=sha256:e5eebb73268b806d3c801271126382da4f556b756990f87590c843c5a8ec14e2 \
+    --hash=sha256:ee2d68cbc0df8ba6fd9103ac6b550ebafcaa3a179416737a96becf6e5f079586 \
+    --hash=sha256:f28c2c934f547823de3e204e48866c571d81ebb6b3e8646c32fe2104c570c7b2 \
+    --hash=sha256:f54609401164b0cb58000bd2516a88516b5e3e9b2f9c52ad9500575f1851da5e \
+    --hash=sha256:fa9a91d6e390e78fe5670ff6083f26d13c6f1cabfaf0f61d0b272f50b5651c81 \
+    --hash=sha256:fc9bfc50f55267d13b0abf63bd7d141b92a39e09812dadee1a88b5863d9b8808
+    # via willow
 psycopg2==2.9.9 \
     --hash=sha256:121081ea2e76729acfb0673ff33755e8703d45e926e416cb59bae3a86c6a4981 \
     --hash=sha256:38a8dcc6856f569068b47de286b472b7c473ac7977243593a288ebce0dc89516 \
@@ -705,7 +817,10 @@ python-decouple==3.8 \
 pytz==2024.2 \
     --hash=sha256:2aa355083c50a0f93fa581709deac0c9ad65cca8a9e9beac660adcbd493c798a \
     --hash=sha256:31c7c1817eb7fae7ca4b8c7ee50c72f93aa2dd863de768e1ef4245d426aa0725
-    # via pandas
+    # via
+    #   django-modelcluster
+    #   l18n
+    #   pandas
 rapidfuzz==3.10.1 \
     --hash=sha256:00d02cbd75d283c287471b5b3738b3e05c9096150f93f2d2dfa10b3d700f2db9 \
     --hash=sha256:031f8b367e5d92f7a1e27f7322012f3c321c3110137b43cc3bf678505583ef48 \
@@ -802,6 +917,7 @@ requests==2.32.3 \
     # via
     #   -r requirements.in
     #   django-dsfr
+    #   wagtail
 s3transfer==0.10.0 \
     --hash=sha256:3cdb40f5cfa6966e812209d0994f2a4709b561c88e90cf00c2696d2df4e56b2e \
     --hash=sha256:d0c8bbf672d5eebbe4e57945e23b972d963f07d82f661cabf678a5c88831595b
@@ -817,7 +933,13 @@ shortuuid==1.0.13 \
 six==1.16.0 \
     --hash=sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926 \
     --hash=sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254
-    # via python-dateutil
+    # via
+    #   l18n
+    #   python-dateutil
+soupsieve==2.6 \
+    --hash=sha256:e2e68417777af359ec65daac1057404a3c8a5455bb8abc36f1a9866ab1a51abb \
+    --hash=sha256:e72c4ff06e4fb6e4b5a9f0f55fe6e81514581fca1515028625d0f299c602ccc9
+    # via beautifulsoup4
 sqlparse==0.5.1 \
     --hash=sha256:773dcbf9a5ab44a090f3441e2180efe2560220203dc2f8c0b0fa141e18b505e4 \
     --hash=sha256:bb6b4df465655ef332548e24f08e205afc81b9ab86cb1c45657a7ff173a3a00e
@@ -831,6 +953,10 @@ tablib[xls,xlsx]==3.5.0 \
     --hash=sha256:9821caa9eca6062ff7299fa645e737aecff982e6b2b42046928a6413c8dabfd9 \
     --hash=sha256:f6661dfc45e1d4f51fa8a6239f9c8349380859a5bfaa73280645f046d6c96e33
     # via django-import-export
+telepath==0.3.1 \
+    --hash=sha256:925c0609e0a8a6488ec4a55b19d485882cf72223b2b19fe2359a50fddd813c9c \
+    --hash=sha256:c280aa8e77ad71ce80e96500a4e4d4a32f35b7e0b52e896bb5fde9a5bcf0699a
+    # via wagtail
 tqdm==4.66.1 \
     --hash=sha256:d302b3c5b53d47bce91fea46679d9c3c6508cf6332229aa1e7d8653723793386 \
     --hash=sha256:d88e651f9db8d8551a62556d3cff9e3034274ca5d66e93197cf2490e2dcb69c7
@@ -861,10 +987,24 @@ uvicorn==0.25.0 \
     --hash=sha256:6dddbad1d7ee0f5140aba5ec138ddc9612c5109399903828b4874c9937f009c2 \
     --hash=sha256:ce107f5d9bd02b4636001a77a4e74aab5e1e2b146868ebbad565237145af444c
     # via -r requirements.in
+wagtail==6.3.1 \
+    --hash=sha256:93876cc7a3bfcfff4c0393949562cbf249f244c4ca653d58a2dbab737f455715 \
+    --hash=sha256:d7d4e4fcb5edb4a5d0aaff5de72eaf33a51e4fa26c2d3a57801c58c4da35b209
+    # via wagtail-non-admin-draftail
+wagtail-non-admin-draftail==0.18.2 \
+    --hash=sha256:65057d5abdcdc19d79192017d79b53f9e0545c49965fa91438ad429e82c58d45 \
+    --hash=sha256:c7c9be2f863e63ae884189f8d1ebcaa376e9384f1bf2d695f19b2432e6caae26
+    # via -r requirements.in
 whitenoise==6.6.0 \
     --hash=sha256:8998f7370973447fac1e8ef6e8ded2c5209a7b1f67c1012866dbcd09681c3251 \
     --hash=sha256:b1f9db9bf67dc183484d760b99f4080185633136a273a03f6436034a41064146
     # via -r requirements.in
+willow[heif]==1.9.0 \
+    --hash=sha256:11a13097cffe501898cd434bb5761fb6cdbdb774a7853094cb56a4ba57cbbff7 \
+    --hash=sha256:ffac1406275ae30b60e7c6cbd1245f0bc359d1b5731002b18a712aaf424a5102
+    # via
+    #   wagtail
+    #   willow
 xlrd==2.0.1 \
     --hash=sha256:6a33ee89877bd9abc1158129f6e94be74e2679636b8a205b43b85206c3f0bbdd \
     --hash=sha256:f72f148f54442c6b056bf931dbc34f986fd0c3b0b6b5a58d013c9aef274d0c88
