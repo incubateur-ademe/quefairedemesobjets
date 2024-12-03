@@ -49,6 +49,24 @@ class HomeView(BaseView, ListView):
     template_name = "qfdmd/home.html"
     model = Suggestion
 
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context.update(
+            accordion={
+                "id": "professionels",
+                "title": "Je suis un professionnel",
+                "content": "Actuellement, l’ensemble des recommandations ne concerne "
+                "que les particuliers. Pour des informations à destination des "
+                "professionnels, veuillez consulter le site "
+                "<a href='https://economie-circulaire.ademe.fr/dechets-activites-economiques.'"
+                "target='_blank' rel='noreferrer' "
+                "title='Économie Circulaire ADEME - Nouvelle fenêtre'>"
+                "https://economie-circulaire.ademe.fr/dechets-activites-economiques"
+                "</a>.",
+            }
+        )
+        return context
+
 
 class SynonymeDetailView(BaseView, DetailView):
     model = Synonyme
