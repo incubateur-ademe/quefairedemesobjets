@@ -657,6 +657,10 @@ def acteur_detail(request, identifiant_unique):
         "labels",
         "sources",
     ).get(identifiant_unique=identifiant_unique)
+
+    if displayed_acteur.statut != ActeurStatus.ACTIF:
+        return redirect("https://quefairedemesdechets.ademe.fr", permanent=True)
+
     context = {
         "base_template": base_template,
         "object": displayed_acteur,  # We can use object here so that switching
