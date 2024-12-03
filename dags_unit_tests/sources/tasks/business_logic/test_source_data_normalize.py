@@ -1,8 +1,11 @@
+from unittest.mock import patch
+
 import numpy as np
 import pandas as pd
 import pytest
 from sources.config.airflow_params import TRANSFORMATION_MAPPING
 from sources.tasks.business_logic.source_data_normalize import (
+    df_normalize_pharmacie,
     df_normalize_sinoe,
     source_data_normalize,
 )
@@ -537,3 +540,50 @@ class TestSourceDataNormalize:
         df = source_data_normalize(**source_data_normalize_kwargs)
         assert "nom destination" in df.columns
         assert df["nom destination"].iloc[0] == "success"
+
+
+class TestDfNormalizePharmacie:
+    """
+    Test de la fonction df_normalize_pharmacie
+    """
+
+    @patch(
+        "sources.tasks.business_logic.source_data_normalize.enrich_from_ban_api",
+        autospec=True,
+    )
+    def test_df_normalize_pharmacie(self, mock_enrich_from_ban_api):
+        def _enrich_from_ban_api(row):
+            if row["ville"] == "Paris":
+                row["latitude"] = 48.8566
+                row["longitude"] = 2.3522
+            else:
+                row["latitude"] = 0
+                row["longitude"] = 0
+            return row
+
+        mock_enrich_from_ban_api.side_effect = _enrich_from_ban_api
+
+        df = pd.DataFrame(
+            {
+                "adresse": ["123 Rue de Paris", "456 Avenue de Lyon"],
+                "code_postal": ["75001", "69000"],
+                "ville": ["Paris", "Lyon"],
+            }
+        )
+
+        # Appeler la fonction df_normalize_pharmacie
+        result_df = df_normalize_pharmacie(df)
+
+        assert mock_enrich_from_ban_api.call_count == len(df)
+        pd.testing.assert_frame_equal(
+            result_df,
+            pd.DataFrame(
+                {
+                    "adresse": ["123 Rue de Paris"],
+                    "code_postal": ["75001"],
+                    "ville": ["Paris"],
+                    "latitude": [48.8566],
+                    "longitude": [2.3522],
+                }
+            ),
+        )
