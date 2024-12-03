@@ -30,7 +30,6 @@ class Produit(models.Model):
     nom_eco_organisme = models.TextField(blank=True, help_text="Nom de l’éco-organisme")
     filieres_rep = models.TextField(blank=True, help_text="Filière(s) REP concernée(s)")
     slug = models.CharField(blank=True, help_text="Slug - ne pas modifier")
-    picto = models.FileField(upload_to="pictos", blank=True, null=True)
 
     def __str__(self):
         return f"{self.id} - {self.nom}"
@@ -82,6 +81,7 @@ class Synonyme(models.Model):
     produit = models.ForeignKey(
         Produit, related_name="synonymes", on_delete=models.CASCADE
     )
+    picto = models.FileField(upload_to="pictos", blank=True, null=True)
 
     @property
     def url(self) -> str:
