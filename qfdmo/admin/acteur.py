@@ -16,6 +16,7 @@ from django.utils.html import format_html
 from import_export import admin as import_export_admin
 from import_export import fields, resources, widgets
 
+from qfdmo.admin.widgets import CategorieChoiceWidget, SousCategorieChoiceWidget
 from qfdmo.models import (
     Acteur,
     ActeurService,
@@ -34,6 +35,7 @@ from qfdmo.models.acteur import (
     DisplayedPropositionService,
     LabelQualite,
 )
+from qfdmo.models.categorie_objet import CategorieObjet
 from qfdmo.widgets import CustomOSMWidget
 
 
@@ -100,10 +102,29 @@ class BasePropositionServiceForm(forms.ModelForm):
     ]
 
 
+class RevisionPropositionServiceForm(BasePropositionServiceForm):
+    categories = forms.ModelMultipleChoiceField(
+        queryset=CategorieObjet.objects.annotate(
+            libelle_unaccent=Unaccent(Lower("libelle"))
+        ).order_by("libelle_unaccent"),
+        widget=CategorieChoiceWidget,
+        required=False,
+    )
+    categories.widget.attrs.update(
+        {
+            "data-controller": "admin-categorie-widget",
+            "data-action": "admin-categorie-widget#syncSousCategorie",
+        }
+    )
+
+    class Meta:
+        fields = "__all__"
+        widgets = {"sous_categories": SousCategorieChoiceWidget}
+
+
 class BasePropositionServiceInline(admin.TabularInline):
     form = BasePropositionServiceForm
     extra = 0
-
     fields = (
         "action",
         "sous_categories",
@@ -116,6 +137,12 @@ class PropositionServiceInline(NotEditableInlineMixin, BasePropositionServiceInl
 
 class RevisionPropositionServiceInline(BasePropositionServiceInline):
     model = RevisionPropositionService
+    form = RevisionPropositionServiceForm
+    fields = (
+        "action",
+        "categories",
+        "sous_categories",
+    )
 
 
 class DisplayedPropositionServiceInline(
