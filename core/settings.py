@@ -213,11 +213,7 @@ DB_READONLY = decouple.config(
 readonly_settings = dj_database_url.parse(DB_READONLY)
 
 DATABASES = {
-    "default": {
-        **default_settings,
-        "CONN_MAX_AGE": 60,
-        "CONN_HEALTH_CHECKS": True,
-    },
+    "default": default_settings,
     "readonly": readonly_settings,
 }
 
@@ -225,7 +221,7 @@ EXPLORER_CONNECTIONS = {"Default": "readonly"}
 EXPLORER_DEFAULT_CONNECTION = "readonly"
 
 CONN_HEALTH_CHECKS = True
-CONN_MAX_AGE = None
+CONN_MAX_AGE = decouple.config("CONN_MAX_AGE", cast=int, default=0)
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
