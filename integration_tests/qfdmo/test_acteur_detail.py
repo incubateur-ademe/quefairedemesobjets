@@ -1,6 +1,7 @@
 import pytest
 from bs4 import BeautifulSoup
 
+from qfdmo.models.acteur import ActeurStatus
 from unit_tests.qfdmo.acteur_factory import (
     DisplayedActeurFactory,
     LabelQualiteFactory,
@@ -135,3 +136,42 @@ class TestAboutPanel:
         self.assert_about_panel_text(
             soup, expected_text, exclusivite_de_reprisereparation
         )
+
+
+@pytest.mark.django_db
+class TestRedirects:
+    @pytest.mark.parametrize(
+        "statut, expected_status_code",
+        [
+            (ActeurStatus.INACTIF, 301),
+            (ActeurStatus.SUPPRIME, 301),
+            (ActeurStatus.ACTIF, 200),
+        ],
+    )
+    def test_acteur_status(self, client, statut, expected_status_code):
+        acteur = DisplayedActeurFactory(
+            identifiant_unique="coucou",
+            statut=statut,
+        )
+        url = f"/adresse/{acteur.identifiant_unique}"
+        response = client.get(url)
+        assert response.status_code == expected_status_code
+
+    def test_inactif_acteur_is_not_in_sitemap(self, client):
+        DisplayedActeurFactory(
+            identifiant_unique="youpi",
+            statut=ActeurStatus.ACTIF,
+        )
+        DisplayedActeurFactory(
+            identifiant_unique="coucou",
+            statut=ActeurStatus.INACTIF,
+        )
+        DisplayedActeurFactory(
+            identifiant_unique="super",
+            statut=ActeurStatus.SUPPRIME,
+        )
+        url = "/sitemap-items.xml"
+        response = client.get(url)
+        assert "coucou" not in str(response.content)
+        assert "super" not in str(response.content)
+        assert "youpi" in str(response.content)
