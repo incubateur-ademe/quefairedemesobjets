@@ -9,6 +9,14 @@
         @apply qf-text-blue-france-sun-113-625;
     }
 
+    /* Very temporary class to remove br at the top of bon etat / mauvais etat contents */
+    .qf-without-extra-br {
+        br:first-child,
+        br:first-child+br {
+            @apply qf-hidden;
+        }
+    }
+
     pre,
     code {
         @apply qf-text-blue-france-sun-113-625 qf-font-bold;
