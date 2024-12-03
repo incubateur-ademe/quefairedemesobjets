@@ -21,9 +21,11 @@ class Produit(models.Model):
     synonymes_existants = models.TextField(blank=True, help_text="Synonymes existants")
     code = models.CharField(blank=True, help_text="Code")
     bdd = models.CharField(blank=True, help_text="Bdd")
-    comment_les_eviter = models.TextField(blank=True, help_text="Comment les éviter ?")
     qu_est_ce_que_j_en_fais = models.TextField(
         blank=True, help_text="Qu'est-ce que j'en fais ?"
+    )
+    comment_les_eviter = models.TextField(
+        blank=True, help_text="Comment consommer responsable ?"
     )
     que_va_t_il_devenir = models.TextField(
         blank=True, help_text="Que va-t-il devenir ?"
