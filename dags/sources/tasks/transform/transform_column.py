@@ -92,3 +92,7 @@ def clean_number(number: Any) -> str:
     # suppression de tous les caractères autre que digital
     number = re.sub(r"[^\d+]", "", number)
     return number
+
+
+def strip_string(value: str | None) -> str:
+    return str(value).strip() if value else ""

@@ -6,6 +6,7 @@ from sources.tasks.transform.transform_column import (
     clean_siren,
     clean_siret,
     convert_opening_hours,
+    strip_string,
 )
 
 PATH_NOMENCLARURE_DECHET = (
@@ -21,6 +22,7 @@ TRANSFORMATION_MAPPING = {
     "convert_opening_hours": convert_opening_hours,
     "clean_siren": clean_siren,
     "clean_siret": clean_siret,
+    "strip_string": strip_string,
 }
 
 

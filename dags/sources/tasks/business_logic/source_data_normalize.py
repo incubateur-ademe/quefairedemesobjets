@@ -180,7 +180,7 @@ def source_data_normalize(
         df["url"] = df["url"].map(mapping_utils.prefix_url)
 
     # Etapes de normalisation spécifiques aux sources
-    if source_code == "Ordre National Des Pharmaciens":
+    if source_code == "ordredespharmaciens":
         df = df_normalize_pharmacie(df)
 
     if source_code == "ADEME_SINOE_Decheteries":
@@ -311,7 +311,7 @@ def df_normalize_sinoe(
     return df
 
 
-@retry(wait=wait_fixed(2), stop=stop_after_attempt(3))
+@retry(wait=wait_fixed(5), stop=stop_after_attempt(5))
 def enrich_from_ban_api(row: pd.Series) -> pd.Series:
     ban_adresse = _compute_ban_adresse(row)
     url = "https://api-adresse.data.gouv.fr/search/"
