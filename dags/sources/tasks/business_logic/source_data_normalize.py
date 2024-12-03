@@ -31,6 +31,7 @@ def source_data_normalize(
     dechet_mapping: dict,
     acteurtype_id_by_code: dict,
     source_id_by_code: dict,
+    source_code_prefix: str | None,
 ) -> pd.DataFrame:
     """
     Normalisation des données source. Passée cette étape:
@@ -78,6 +79,15 @@ def source_data_normalize(
     # Source : nécessaire pour les identifiants uniques
     # TODO : un peu crado, à revoir
     # A cause de la résolution de l'identifiant unique qui dépend du code de la source
+
+    # Nécessaire pour gérer les colisions des sources sur les donnes des eco-organismes
+    # comme ecomaison présent dans les sources ecomaison et ocab
+    # TODO: à tester et créer les sources ocab correspondantes
+    if source_code_prefix:
+        df["source_code"] = df["source_code"].apply(
+            lambda x: f"{source_code_prefix}_{x}"
+        )
+
     if "source_id" in df.columns:
         df["source_code"] = df["source_id"]
         df["source_id"] = df["source_id"].map(source_id_by_code)

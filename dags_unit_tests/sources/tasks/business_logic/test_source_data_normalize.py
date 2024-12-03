@@ -279,6 +279,7 @@ class TestSourceDataNormalize:
             "dechet_mapping": {},
             "acteurtype_id_by_code": acteurtype_id_by_code,
             "source_id_by_code": source_id_by_code,
+            "source_code_prefix": None,
         }
 
     @pytest.mark.parametrize(
