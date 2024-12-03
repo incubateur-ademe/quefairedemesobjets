@@ -102,6 +102,7 @@ class DagRunChange(models.Model):
             "nom": "Nom",
             "nom_commercial": "Nom commercial",
             "siret": "SIRET",
+            "siren": "SIREN",
             "url": "Site web",
             "email": "Email",
             "telephone": "Téléphone",

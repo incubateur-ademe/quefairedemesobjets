@@ -11,6 +11,13 @@ with DAG(
         " sur de Koumoul"
     ),
     params={
+        "column_transformations": [
+            {
+                "origin": "siren",
+                "transformation": "clean_siren",
+                "destination": "siren",
+            },
+        ],
         "column_mapping": {
             "id_point_apport_ou_reparation": "identifiant_externe",
             "type_de_point_de_collecte": "acteur_type_id",
