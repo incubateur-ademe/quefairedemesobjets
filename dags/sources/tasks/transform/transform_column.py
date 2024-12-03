@@ -57,3 +57,8 @@ def convert_opening_hours(opening_hours: str | None) -> str:
         return ""
 
     return process_entry(opening_hours)
+
+
+# FIXME: Add tests
+def strip_string(value: str | None) -> str:
+    return str(value).strip() if value else ""

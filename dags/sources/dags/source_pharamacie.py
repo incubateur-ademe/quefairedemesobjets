@@ -8,13 +8,35 @@ with DAG(
     default_args=default_args,
     description=("Téléchargement des pharmacies (Ordre National Des Pharmaciens)"),
     params={
+        "column_transformations": [
+            {
+                "origin": "Raison sociale",
+                "transformation": "strip_string",
+                "destination": "nom",
+            },
+            {
+                "origin": "Dénomination commerciale",
+                "transformation": "strip_string",
+                "destination": "nom_commercial",
+            },
+            {
+                "origin": "Adresse",
+                "transformation": "strip_string",
+                "destination": "adresse",
+            },
+            {
+                "origin": "Code postal",
+                "transformation": "strip_string",
+                "destination": "code_postal",
+            },
+            {
+                "origin": "Commune",
+                "transformation": "strip_string",
+                "destination": "ville",
+            },
+        ],
         "column_mapping": {
             "Numéro d'établissement": "identifiant_externe",
-            "Dénomination commerciale": "nom",
-            "Raison sociale": "nom_officiel",
-            "Adresse": "adresse",
-            "Code postal": "code_postal",
-            "Commune": "ville",
             "Téléphone": "telephone",
         },
         "endpoint": "https://www.ordre.pharmacien.fr/download/annuaire_csv.zip",
@@ -26,7 +48,7 @@ with DAG(
             "acteur_type_id": "pharmacie",
             "point_de_collecte_ou_de_reprise_des_dechets": True,
         },
-        "source_code": "Ordre National Des Pharmaciens",
+        "source_code": "ordredespharmaciens",
         "product_mapping": get_mapping_config(),
     },
     schedule=None,
