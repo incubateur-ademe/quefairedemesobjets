@@ -6,13 +6,14 @@
 
 @layer base {
     p a {
-    @apply qf-text-blue-france-sun-113-625;
+        @apply qf-text-blue-france-sun-113-625;
     }
 
     pre,
     code {
-    @apply qf-text-blue-france-sun-113-625 qf-font-bold;
+        @apply qf-text-blue-france-sun-113-625 qf-font-bold;
     }
+
 }
 
 @layer components {
@@ -89,4 +90,8 @@
         @apply hover:!qf-bg-green-menthe-sun-373-moon-652-hover qf-transition-colors;
     }
 
+}
+
+.fr-footer__logo {
+    @apply qf-max-h-12w;
 }
