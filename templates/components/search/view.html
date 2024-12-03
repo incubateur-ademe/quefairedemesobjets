@@ -4,6 +4,7 @@
         {# Z-index here helps prevent autocomplete overlapping on the accordion on the homepage #}
         qf-relative qf-z-10
         qf-rounded-3xl qf-overflow-hidden
+        group-data-[home]:qf-rounded-[2rem]
         qf-border-solid qf-border-[3px] qf-border-green-menthe-850-hover qf-bg-white
         qf-flex qf-flex-col"
     >
@@ -11,13 +12,17 @@
             data-controller="search"
             data-turbo-frame="search-results"
             action="{% url 'qfdmd:search' %}"
-            class="qf-pl-4w {# should match the svg icon width #}"
+            class="qf-pl-4w {# should match the svg icon width #}
+            group-data-[home]:qf-h-7w qf-h-5w
+            qf-content-center
+            "
         >
             {% csrf_token %}
 
             <button
                 type="submit"
-                class="qf-absolute qf-left-0 qf-top-0 qf-m-auto
+                class="qf-absolute qf-left-0
+                group-data-[home]:-qf-mt-1v -qf-mt-1w qf-m-auto
                 fr-btn fr-icon-search-line fr-btn--tertiary-no-outline
                 qf-text-green-menthe-main-548
                 "
