@@ -42,6 +42,7 @@ def source_data_normalize_wrapper(**kwargs) -> pd.DataFrame:
     dechet_mapping = params.get("dechet_mapping", {})
     acteurtype_id_by_code = read_mapping_from_postgres(table_name="qfdmo_acteurtype")
     source_id_by_code = read_mapping_from_postgres(table_name="qfdmo_source")
+    source_code_prefix = params.get("source_code_prefix")
 
     log.preview("df avant normalisation", df)
     log.preview("source_code", source_code)
@@ -57,6 +58,7 @@ def source_data_normalize_wrapper(**kwargs) -> pd.DataFrame:
     log.preview("dechet_mapping", dechet_mapping)
     log.preview("acteurtype_id_by_code", acteurtype_id_by_code)
     log.preview("source_id_by_code", source_id_by_code)
+    log.preview("source_code_prefix", source_code_prefix)
 
     params = kwargs["params"]
 
@@ -75,4 +77,5 @@ def source_data_normalize_wrapper(**kwargs) -> pd.DataFrame:
         dechet_mapping=dechet_mapping,
         acteurtype_id_by_code=acteurtype_id_by_code,
         source_id_by_code=source_id_by_code,
+        source_code_prefix=source_code_prefix,
     )
