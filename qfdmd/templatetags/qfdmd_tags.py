@@ -1,4 +1,5 @@
 from django import template
+from django.conf import settings
 from django.utils.safestring import mark_safe
 
 register = template.Library()
@@ -24,4 +25,17 @@ def render_file_content(svg_file) -> str:
 
 @register.inclusion_tag("head/favicon.html")
 def favicon() -> dict:
+    return {}
+
+
+@register.inclusion_tag("tracking/matomo.html")
+def matomo():
+    return {
+        "url": "stats.beta.gouv.fr",
+        "id": settings.ASSISTANT["MATOMO_ID"],
+    }
+
+
+@register.inclusion_tag("tracking/posthog.html")
+def posthog():
     return {}
