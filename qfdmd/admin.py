@@ -3,7 +3,16 @@ from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
 from qfdmd.models import Lien, Produit, Suggestion, Synonyme
-from qfdmo.admin.acteur import NotEditableInlineMixin
+
+
+class LienResource(resources.ModelResource):
+    class Meta:
+        model = Lien
+
+
+class ProduitResource(resources.ModelResource):
+    class Meta:
+        model = Produit
 
 
 class SynonymeResource(resources.ModelResource):
@@ -32,7 +41,8 @@ class SuggestionAdmin(admin.ModelAdmin):
 
 
 @admin.register(Produit)
-class ProduitAdmin(admin.ModelAdmin):
+class ProduitAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    resource_class = ProduitResource
     list_display = ("nom", "id", "synonymes_existants")
     search_fields = ["nom", "id", "synonymes_existants"]
     # ajout des filtres de recherche sur bdd et code
@@ -41,13 +51,14 @@ class ProduitAdmin(admin.ModelAdmin):
 
 
 @admin.register(Lien)
-class LienAdmin(NotEditableInlineMixin, admin.ModelAdmin):
+class LienAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    resource_class = LienResource
     list_display = ("titre_du_lien", "url", "description")
     inlines = [ProduitInline]
 
 
 @admin.register(Synonyme)
-class SynonymeAdmin(NotEditableInlineMixin, ImportExportModelAdmin, admin.ModelAdmin):
-    resource_classes = [SynonymeResource]
+class SynonymeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    resource_class = SynonymeResource
     search_fields = ["nom"]
     list_display = ("nom", "produit", "slug")
