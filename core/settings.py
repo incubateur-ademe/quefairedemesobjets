@@ -371,5 +371,8 @@ ASSISTANT_SURVEY_FORM = decouple.config(
 )
 
 QFDMO_GOOGLE_SEARCH_CONSOLE = "google9dfbbc61adbe3888.html"
-
 SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+ASSISTANT = {
+    "MATOMO_ID": decouple.config("ASSISTANT_MATOMO_ID", default=82, cast=int),
+    "POSTHOG": decouple.config("ASSISTANT_POSTHOG", default="", cast=str),
+}
