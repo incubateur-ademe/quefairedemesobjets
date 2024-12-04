@@ -29,10 +29,8 @@
         {% block extra_css %}
         {% endblock extra_css %}
 
-        {% comment %}
-        Ajouter
-        - iframe resizer
-        {% endcomment %}
+        {% block extra_js %}
+        {% endblock extra_js %}
     </head>
 
     <body
@@ -58,5 +56,6 @@
 
         {% dsfr_js %}
         <script type="module" src="{% static 'qfdmd.js' %}"></script>
+
     </body>
 </html>
