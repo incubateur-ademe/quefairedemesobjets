@@ -2,10 +2,11 @@ from datetime import timedelta
 
 import pandas as pd
 from airflow.models import DAG
-from airflow.operators.dagrun_operator import TriggerDagRunOperator
-from airflow.operators.python_operator import BranchPythonOperator, PythonOperator
+from airflow.operators.python import BranchPythonOperator, PythonOperator
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.utils.dates import days_ago
+from shared.tasks.database_logic.db_manager import PostgresConnectionManager
 from utils import dag_ingest_validated_utils, shared_constants
 
 default_args = {
@@ -51,8 +52,7 @@ def fetch_and_parse_data(**context):
     row = _get_first_dagrun_to_insert()
     dag_run_id = row[0]
 
-    pg_hook = PostgresHook(postgres_conn_id="qfdmo_django_db")
-    engine = pg_hook.get_sqlalchemy_engine()
+    engine = PostgresConnectionManager().engine
 
     df_sql = pd.read_sql_query(
         f"SELECT * FROM qfdmo_dagrunchange WHERE dag_run_id = '{dag_run_id}'",
@@ -91,8 +91,7 @@ def write_data_to_postgres(**kwargs):
     data_dict = kwargs["ti"].xcom_pull(task_ids="fetch_and_parse_data")
     # If data_set is empty, nothing to do
     dag_run_id = data_dict["dag_run_id"]
-    pg_hook = PostgresHook(postgres_conn_id="qfdmo_django_db")
-    engine = pg_hook.get_sqlalchemy_engine()
+    engine = PostgresConnectionManager().engine
     if "actors" not in data_dict:
         with engine.begin() as connection:
             dag_ingest_validated_utils.update_dag_run_status(connection, dag_run_id)

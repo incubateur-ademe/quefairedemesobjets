@@ -4,7 +4,7 @@ import pandas as pd
 import shortuuid
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from airflow.providers.postgres.hooks.postgres import PostgresHook
+from shared.tasks.database_logic.db_manager import PostgresConnectionManager
 from utils.db_tasks import read_data_from_postgres
 
 
@@ -218,8 +218,7 @@ def write_data_to_postgres(**kwargs):
         inplace=True,
     )
 
-    pg_hook = PostgresHook(postgres_conn_id="qfdmo_django_db")
-    engine = pg_hook.get_sqlalchemy_engine()
+    engine = PostgresConnectionManager().engine
 
     original_table_name_actor = "qfdmo_displayedacteur"
     temp_table_name_actor = "qfdmo_displayedacteurtemp"

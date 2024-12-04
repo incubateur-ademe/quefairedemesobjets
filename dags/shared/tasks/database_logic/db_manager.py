@@ -19,14 +19,8 @@ class PostgresConnectionManager:
     def __init__(self, postgres_conn_id="qfdmo_django_db"):
         if not hasattr(self, "initialized"):  # Pour éviter la réinitialisation
             self.postgres_conn_id = postgres_conn_id
-            self._engine = None
+            self.engine = self._create_engine()
             self.initialized = True
-
-    @property
-    def engine(self) -> Engine:
-        if self._engine is None:
-            self._engine = self._create_engine()
-        return self._engine
 
     def _create_engine(self) -> Engine:
         pg_hook = PostgresHook(postgres_conn_id=self.postgres_conn_id)
