@@ -368,3 +368,12 @@ CONTACT_FORM = decouple.config(
 ASSISTANT_SURVEY_FORM = decouple.config(
     "ASSISTANT_SURVEY_FORM", default="https://tally.so/r/wvNgx0", cast=str
 )
+
+ASSISTANT = {
+    "MATOMO_ID": decouple.config("ASSISTANT_MATOMO_ID", default=82, cast=int),
+    "POSTHOG_KEY": decouple.config(
+        "ASSISTANT_POSTHOG_KEY",
+        default="phc_SGbYOrenShCMKJOQYyl62se9ZqCHntjTlzgKNhrKnzm",  # pragma: allowlist secret  # noqa: E501
+        cast=str,
+    ),
+}

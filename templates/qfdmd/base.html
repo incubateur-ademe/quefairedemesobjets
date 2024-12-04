@@ -1,4 +1,4 @@
-{% load dsfr_tags static %}
+{% load dsfr_tags qfdmd_tags static %}
 
 <!DOCTYPE html>
 <html
@@ -22,14 +22,15 @@
         {% dsfr_css %}
         <link rel="stylesheet" href="{% static 'qfdmd.css' %}">
 
+        {% matomo %}
+        {% posthog %}
+
         {% block extra_css %}
         {% endblock extra_css %}
 
         {% comment %}
         Ajouter
         - iframe resizer
-        - posthog
-        - matomo
         {% endcomment %}
     </head>
 
