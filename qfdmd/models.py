@@ -25,7 +25,18 @@ class Produit(models.Model):
     code = models.CharField(blank=True, help_text="Code")
     bdd = models.CharField(blank=True, help_text="Bdd")
     qu_est_ce_que_j_en_fais = models.TextField(
-        blank=True, help_text="Qu'est-ce que j'en fais ?"
+        blank=True, help_text="Qu'est-ce que j'en fais ? - ANCIEN CHAMP"
+    )
+    # Le nom des champs conserve ici délibérément l'ancienne nomenclature,
+    # car le travail sur le nommage n'a pas encore été effectué.
+    # TODO : renommer ces champs lorsque le métier + technique seront tombés
+    # d'accord sur un nom pour ces champs
+    qu_est_ce_que_j_en_fais_bon_etat = models.TextField(
+        blank=True, help_text="Qu'est-ce que j'en fais ? - Bon état"
+    )
+    # TODO : idem ci-dessus
+    qu_est_ce_que_j_en_fais_mauvais_etat = models.TextField(
+        blank=True, help_text="Qu'est-ce que j'en fais ? - Mauvais état"
     )
     comment_les_eviter = models.TextField(
         blank=True, help_text="Comment consommer responsable ?"
@@ -46,6 +57,9 @@ class Produit(models.Model):
 
     def get_etats_descriptions(self) -> tuple[str, str] | None:
         # TODO: rename this method
+        # Une fois que les fiches déchet auront toutes
+        # la notion de bon etat / mauvais état stockée en
+        # base de donnée au bon endroit, cette méthode deviendra caduque.
         text = self.qu_est_ce_que_j_en_fais
         if "En bon état" not in text and "En mauvais état" not in text:
             return
@@ -59,6 +73,8 @@ class Produit(models.Model):
 
     @cached_property
     def mauvais_etat(self) -> str:
+        if self.qu_est_ce_que_j_en_fais_mauvais_etat:
+            return self.qu_est_ce_que_j_en_fais_mauvais_etat
         try:
             return self.get_etats_descriptions()[0]
         except KeyError:
@@ -98,6 +114,9 @@ class Produit(models.Model):
 
     @cached_property
     def bon_etat(self) -> str:
+        if self.qu_est_ce_que_j_en_fais_bon_etat:
+            return self.qu_est_ce_que_j_en_fais_bon_etat
+
         try:
             return self.get_etats_descriptions()[1]
         except KeyError:
