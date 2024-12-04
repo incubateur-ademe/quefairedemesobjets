@@ -10,7 +10,9 @@
 
         {% block header_search %}
         <div
-            class="qf-pt-3v qf-absolute qf-right-2w qf-w-[320px] qf-z-20"
+            class="qf-pt-3v
+            qf-absolute qf-right-2w qf-w-[320px] qf-z-20
+            max-md:qf-hidden"
         >
             {% include search_view_template_name %}
         </div>

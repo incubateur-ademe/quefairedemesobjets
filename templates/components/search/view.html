@@ -5,6 +5,7 @@
         qf-relative qf-z-10
         qf-rounded-3xl qf-overflow-hidden
         group-data-[home]:qf-rounded-[2rem]
+        max-md:qf-rounded-[2rem]
         qf-border-solid qf-border-[3px] qf-border-green-menthe-850-hover qf-bg-white
         qf-flex qf-flex-col"
     >
@@ -13,7 +14,8 @@
             data-turbo-frame="search-results"
             action="{% url 'qfdmd:search' %}"
             class="qf-pl-4w {# should match the svg icon width #}
-            group-data-[home]:qf-h-7w qf-h-5w
+            md:group-data-[home]:qf-h-7w
+            qf-h-5w
             qf-content-center
             "
         >
