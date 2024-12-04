@@ -5,6 +5,7 @@ dj-static
 Django
 django-extensions
 django-import-export[xls, xlsx]
+django-ninja
 django-sql-explorer
 django-storages
 gunicorn
@@ -24,12 +25,6 @@ uvicorn
 whitenoise
 django-widget-tweaks
 django-cors-headers
+django-dsfr
 django-colorfield
 rapidfuzz
-
-# Que faire de mes déchets
-django-dsfr
-wagtail_non_admin_draftail
-
-# API Rest
-django-ninja
