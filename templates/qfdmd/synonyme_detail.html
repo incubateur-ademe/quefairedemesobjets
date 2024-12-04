@@ -1,5 +1,11 @@
 {% extends "qfdmd/base.html" %}
 
+{% block title %}
+{{ block.super }} | {{ object.nom }}
+{% endblock title %}
+
+{% block meta_description %}{{ object.meta_description|default:block.super }}{% endblock %}
+
 {% block main %}
 {% with object.produit as produit %}
 <article

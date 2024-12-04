@@ -25,18 +25,18 @@ class Produit(models.Model):
     code = models.CharField(blank=True, help_text="Code")
     bdd = models.CharField(blank=True, help_text="Bdd")
     qu_est_ce_que_j_en_fais = models.TextField(
-        blank=True, help_text="Qu'est-ce que j'en fais ? - ANCIEN CHAMP"
+        blank=True, help_text="Qu'est-ce que j'en fais ? - ANCIEN CHAMP."
     )
     # Le nom des champs conserve ici délibérément l'ancienne nomenclature,
     # car le travail sur le nommage n'a pas encore été effectué.
     # TODO : renommer ces champs lorsque le métier + technique seront tombés
     # d'accord sur un nom pour ces champs
-    qu_est_ce_que_j_en_fais_bon_etat = models.TextField(
-        blank=True, help_text="Qu'est-ce que j'en fais ? - Bon état"
-    )
-    # TODO : idem ci-dessus
     qu_est_ce_que_j_en_fais_mauvais_etat = models.TextField(
         blank=True, help_text="Qu'est-ce que j'en fais ? - Mauvais état"
+    )
+    # TODO : idem ci-dessus
+    qu_est_ce_que_j_en_fais_bon_etat = models.TextField(
+        blank=True, help_text="Qu'est-ce que j'en fais ? - Bon état"
     )
     comment_les_eviter = models.TextField(
         blank=True, help_text="Comment consommer responsable ?"
@@ -173,6 +173,7 @@ class Synonyme(models.Model):
     )
     picto = models.FileField(upload_to="pictos", blank=True, null=True)
     pin_on_homepage = models.BooleanField(default=False)
+    meta_description = models.TextField()
 
     @property
     def url(self) -> str:
