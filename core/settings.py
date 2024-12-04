@@ -371,5 +371,9 @@ ASSISTANT_SURVEY_FORM = decouple.config(
 
 ASSISTANT = {
     "MATOMO_ID": decouple.config("ASSISTANT_MATOMO_ID", default=82, cast=int),
-    "POSTHOG": decouple.config("ASSISTANT_POSTHOG", default="", cast=str),
+    "POSTHOG_KEY": decouple.config(
+        "ASSISTANT_POSTHOG_KEY",
+        default="phc_SGbYOrenShCMKJOQYyl62se9ZqCHntjTlzgKNhrKnzm",  # pragma: allowlist secret  # noqa: E501
+        cast=str,
+    ),
 }

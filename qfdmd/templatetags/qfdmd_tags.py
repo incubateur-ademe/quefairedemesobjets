@@ -26,11 +26,11 @@ def render_file_content(svg_file):
 @register.inclusion_tag("tracking/matomo.html")
 def matomo():
     return {
-        "url": "stats.beta.gouv.fr",
-        "id": settings.ASSISTANT["MATOMO_ID"],
+        "matomo_url": "stats.beta.gouv.fr",
+        "matomo_id": settings.ASSISTANT["MATOMO_ID"],
     }
 
 
 @register.inclusion_tag("tracking/posthog.html")
 def posthog():
-    return {}
+    return {"posthog_key": settings.ASSISTANT["POSTHOG_KEY"]}
