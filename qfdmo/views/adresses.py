@@ -640,6 +640,13 @@ def get_object_list(request):
     )
 
 
+def acteur_detail_redirect(request, identifiant_unique):
+    displayed_acteur = DisplayedActeur.objects.get(
+        identifiant_unique=identifiant_unique
+    )
+    return redirect("qfdmo:acteur-detail", uuid=displayed_acteur.uuid, permanent=True)
+
+
 def acteur_detail(request, uuid):
     base_template = "layout/base.html"
 

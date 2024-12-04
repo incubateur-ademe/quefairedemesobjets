@@ -12,7 +12,7 @@ from unit_tests.qfdmo.acteur_factory import (
 @pytest.fixture
 def get_response(client):
     def _get_response(uuid):
-        url = f"/adresse/{uuid}"
+        url = f"/adresse_details/{uuid}"
         response = client.get(url)
         assert response.status_code == 200
         return response, BeautifulSoup(response.content, "html.parser")
@@ -153,25 +153,33 @@ class TestRedirects:
             identifiant_unique="coucou",
             statut=statut,
         )
-        url = f"/adresse/{acteur.identifiant_unique}"
+        url = f"/adresse_details/{acteur.uuid}"
         response = client.get(url)
         assert response.status_code == expected_status_code
 
     def test_inactif_acteur_is_not_in_sitemap(self, client):
-        DisplayedActeurFactory(
+        youpi = DisplayedActeurFactory(
             identifiant_unique="youpi",
             statut=ActeurStatus.ACTIF,
         )
-        DisplayedActeurFactory(
+        coucou = DisplayedActeurFactory(
             identifiant_unique="coucou",
             statut=ActeurStatus.INACTIF,
         )
-        DisplayedActeurFactory(
+        super = DisplayedActeurFactory(
             identifiant_unique="super",
             statut=ActeurStatus.SUPPRIME,
         )
         url = "/sitemap-items.xml"
         response = client.get(url)
-        assert "coucou" not in str(response.content)
-        assert "super" not in str(response.content)
-        assert "youpi" in str(response.content)
+        assert coucou.uuid not in str(response.content)
+        assert super.uuid not in str(response.content)
+        assert youpi.uuid in str(response.content)
+
+    def test_acteur_detail_redirect(self, client):
+        acteur = DisplayedActeurFactory(
+            identifiant_unique="coucou",
+        )
+        url = f"/adresse/{acteur.identifiant_unique}"
+        response = client.get(url)
+        assert response.status_code == 301

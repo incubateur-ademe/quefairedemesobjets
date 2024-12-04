@@ -7,6 +7,7 @@ from qfdmo.views.adresses import (
     CarteSearchActeursView,
     FormulaireSearchActeursView,
     acteur_detail,
+    acteur_detail_redirect,
     direct_access,
     get_object_list,
     getorcreate_revisionacteur,
@@ -65,7 +66,12 @@ urlpatterns = [
         name="get_object_list",
     ),
     path(
-        "adresse/<str:uuid>",
+        "adresse/<str:identifiant_unique>",
+        # ActeurView.as_view(),
+        acteur_detail_redirect,
+    ),
+    path(
+        "adresse_details/<str:uuid>",
         # ActeurView.as_view(),
         acteur_detail,
         name="acteur-detail",
