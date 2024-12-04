@@ -44,6 +44,9 @@ jobs:
       - name: Execute migrations in one-off container
         run: |
           scalingo --app ${PREPROD_APP} run python manage.py migrate
+      - name: Truncate the dagruns table
+        run: |
+          scalingo --app ${PREPROD_APP} run python manage.py reinitialize_dagrun
 
   sync_prod_to_preprod_s3:
     name: Copy Prod s3 bucket to Copy Preprod s3 bucket
