@@ -7,6 +7,11 @@ Longue vie aux objets propose des solutions pour promouvoir les gestes de consom
 
 Le site "Longue vie aux objets" est disponible à l'URL : [https://longuevieauxobjets.ademe.fr/](https://longuevieauxobjets.ademe.fr/)
 
+**Certaines pages disposent d'une page dédiée** :
+- [Frontend](./docs/Frontend.md)
+- [Coding guidelines](./docs/Coding-guidelines.md)
+- [Organisations des fichiers dans dags](./docs/Organisations-des-fichiers-dans-dags.md)
+
 ## Afficher l'application dans une Iframe
 
 il suffit d'ajouter le script js suivant:
