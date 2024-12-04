@@ -34,7 +34,7 @@ class SuggestionAdmin(admin.ModelAdmin):
 @admin.register(Produit)
 class ProduitAdmin(admin.ModelAdmin):
     list_display = ("nom", "id", "synonymes_existants")
-    search_fields = ["nom", "id", "synonymes_existants"]
+    search_fields = ["nom__unaccent", "id", "synonymes_existants__unaccent"]
     # ajout des filtres de recherche sur bdd et code
     list_filter = ["bdd", "code"]
     inlines = [SynonymeInline, LienInline]
@@ -49,5 +49,5 @@ class LienAdmin(NotEditableInlineMixin, admin.ModelAdmin):
 @admin.register(Synonyme)
 class SynonymeAdmin(NotEditableInlineMixin, ImportExportModelAdmin, admin.ModelAdmin):
     resource_classes = [SynonymeResource]
-    search_fields = ["nom"]
+    search_fields = ["nom__unaccent"]
     list_display = ("nom", "produit", "slug")
