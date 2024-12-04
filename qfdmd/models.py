@@ -1,3 +1,6 @@
+from urllib.parse import urlencode
+
+from django.conf import settings
 from django.contrib.gis.db import models
 from django.template.loader import render_to_string
 from django.urls.base import reverse
@@ -52,8 +55,6 @@ class Produit(models.Model):
             "<b>En mauvais état</b>"
         )
 
-        print(f"{bon_etat=} {mauvais_etat_and_rest=} {text=}")
-
         return (bon_etat, mauvais_etat)
 
     @cached_property
@@ -62,6 +63,38 @@ class Produit(models.Model):
             return self.get_etats_descriptions()[0]
         except KeyError:
             return ""
+
+    @property
+    def carte_settings(self):
+        # TODO : gérer plusieurs catégories ici
+        sous_categorie = self.sous_categories.filter(afficher_carte=True).first()
+        return {
+            "carte": 1,
+            "direction": "jai",
+            "first_dir": "jai",
+            "limit": 25,
+            "sc_id": sous_categorie.id,
+        }
+
+    def get_url_carte(self, actions=None):
+        carte_settings = self.carte_settings
+        if actions:
+            carte_settings.update(
+                action_list=actions,
+                action_displayed=actions,
+            )
+        params = urlencode(carte_settings)
+        return f"{settings.BASE_URL}/?{params}"
+
+    @cached_property
+    def url_carte_mauvais_etat(self):
+        actions = "reparer|trier"
+        return self.get_url_carte(actions)
+
+    @cached_property
+    def url_carte_bon_etat(self):
+        actions = "preter|emprunter|louer|mettreenlocation|donner|echanger|revendre"
+        return self.get_url_carte(actions)
 
     @cached_property
     def bon_etat(self) -> str:
@@ -120,6 +153,7 @@ class Synonyme(models.Model):
         Produit, related_name="synonymes", on_delete=models.CASCADE
     )
     picto = models.FileField(upload_to="pictos", blank=True, null=True)
+    pin_on_homepage = models.BooleanField(default=False)
 
     @property
     def url(self) -> str:

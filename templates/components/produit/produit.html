@@ -29,10 +29,10 @@
             </li>
         </ul>
         <div id="mauvais-etat-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="mauvais-etat-tab" tabindex="0">
-            {% include "./_detail.html" with content=produit.mauvais_etat %}
+            {% include "./_detail.html" with content=produit.mauvais_etat url_carte=produit.url_carte_mauvais_etat %}
         </div>
         <div id="bon-etat-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="bon-etat-tab" tabindex="0">
-            {% include "./_detail.html" with content=produit.bon_etat %}
+            {% include "./_detail.html" with content=produit.bon_etat url_carte=produit.url_carte_bon_etat %}
         </div>
     </div>
 {% else %}
@@ -41,7 +41,6 @@
     </div>
 {% endif %}
 
-{% include "./_carte.html" %}
 
 
 {% dsfr_accordion_group produit.content_display %}

@@ -49,7 +49,7 @@
         }
 
         .middle {
-            @apply qf-px-7w qf-pt-5w;
+            @apply md:qf-px-7w qf-pt-5w;
         grid-area: middle;
         }
 
