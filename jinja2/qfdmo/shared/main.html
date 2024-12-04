@@ -11,6 +11,7 @@
         data-turbo-frame="addressesPanel"
         data-action="map:displayActeur->search-solution-form#displayActeur
         map:updateBbox->search-solution-form#updateBboxInput
+        search-solution-form:captureInteraction->analytics#captureInteractionWithMap
         address-autocomplete:formSubmit->search-solution-form#advancedSubmit
         ss-cat-object-autocomplete:formSubmit->search-solution-form#advancedSubmit
         ss-cat-object-autocomplete:optionSelected->search-solution-form#checkSsCatObjetErrorForm
