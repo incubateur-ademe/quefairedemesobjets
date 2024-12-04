@@ -30,9 +30,13 @@ BASE_URL = decouple.config("BASE_URL", default="http://localhost:8000")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = decouple.config("DEBUG", default=False, cast=bool)
 
-ALLOWED_HOSTS = decouple.config("ALLOWED_HOSTS", default="localhost", cast=str).split(
-    ","
-)
+ALLOWED_HOSTS = decouple.config(
+    "ALLOWED_HOSTS",
+    default=(
+        "localhost," "*.ademe.fr," "quefairedemesobjets-preprod.osc-fr1.scalingo.io"
+    ),
+    cast=str,
+).split(",")
 
 # Application definition
 
