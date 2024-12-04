@@ -13,7 +13,7 @@ def patchwork():
         .exclude(picto=None)
         .filter(pin_on_homepage=True)
     )
-    return {"top": produits[:24], "left": produits[24:30], "right": produits[30:36]}
+    return {"top": produits[:20], "left": produits[20:25], "right": produits[25:30]}
 
 
 @register.simple_tag

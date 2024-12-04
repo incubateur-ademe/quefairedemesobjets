@@ -5,13 +5,13 @@
         title="Que faire de mon/ma {{ produit.nom }} ?"
         style="
         {% if alt %}
-        --random-x: {{ forloop.counter|divisibleby:3|yesno:'5,-8' }};
-        --random-y: {{ forloop.revcounter|divisibleby:5|yesno:'5,-15' }};
+        --random-x: {{ forloop.counter|divisibleby:2|yesno:'-5,-5' }};
+        --random-y: {{ forloop.revcounter|divisibleby:3|yesno:'5,-5' }};
         {% else %}
-        --random-x: {{ forloop.counter|divisibleby:7|yesno:'-5,20' }};
-        --random-y: {{ forloop.revcounter|divisibleby:3|yesno:'10,-10' }};
+        --random-x: {{ forloop.counter|divisibleby:3|yesno:'-15,10' }};
+        --random-y: {{ forloop.revcounter|divisibleby:2|yesno:'10,-10' }};
         {% endif %}
-        --random-rotate: {{ forloop.counter|divisibleby:2|yesno:'5,-5' }};"
+        --random-rotate: {{ forloop.counter|divisibleby:3|yesno:'5,-5' }};"
     >
         {% render_file_content produit.picto %}
     </a>

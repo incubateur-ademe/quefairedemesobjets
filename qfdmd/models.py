@@ -65,7 +65,7 @@ class Produit(models.Model):
             return
 
         _, _, mauvais_etat_and_rest = text.partition("<b>En bon état</b>")
-        bon_etat, _, mauvais_etat = mauvais_etat_and_rest.partition(
+        mauvais_etat, _, bon_etat = mauvais_etat_and_rest.partition(
             "<b>En mauvais état</b>"
         )
 
