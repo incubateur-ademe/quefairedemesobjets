@@ -1,5 +1,6 @@
 import tempfile
 from datetime import datetime
+from pathlib import Path
 
 import openpyxl
 from django.core.files.base import ContentFile
@@ -21,9 +22,8 @@ class Command(BaseCommand):
         )
 
         with tempfile.NamedTemporaryFile(mode="w+b", suffix=".xlsx") as tmp_file:
-
             try:
-                workbook = openpyxl.load_workbook("tmp.xlsx")
+                workbook = openpyxl.load_workbook(Path(tmp_file.name).name)
                 sheet = workbook.active
             except FileNotFoundError:
                 workbook = openpyxl.Workbook()
