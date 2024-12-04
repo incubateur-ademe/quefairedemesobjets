@@ -23,14 +23,15 @@
         {% dsfr_css %}
         <link rel="stylesheet" href="{% static 'qfdmd.css' %}">
 
+        {% matomo %}
+        {% posthog %}
+
         {% block extra_css %}
         {% endblock extra_css %}
 
         {% comment %}
         Ajouter
         - iframe resizer
-        - posthog
-        - matomo
         {% endcomment %}
     </head>
 
