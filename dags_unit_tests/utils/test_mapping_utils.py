@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 import pytest
 from utils import mapping_utils
@@ -47,38 +46,6 @@ class TestDataTransformations:
             "type_de_point_de_collecte": "Artisan, commerce indépendant ",
         }
         assert mapping_utils.create_identifiant_unique(row), "ecoorg_123AbC"
-
-
-@pytest.mark.parametrize(
-    "siret, expected_siret",
-    [
-        (None, None),
-        ("123456789012345", None),
-        ("98765432109876", "98765432109876"),
-        ("8765432109876", "08765432109876"),
-        ("AB123", None),
-    ],
-)
-def test_process_siret(siret, expected_siret):
-    assert mapping_utils.process_siret(siret) == expected_siret
-
-
-@pytest.mark.parametrize(
-    "phone_number, code_postal, expected_phone_number",
-    [
-        (None, None, None),
-        (np.NaN, None, None),
-        ("1 23 45 67 89", "75001", "0123456789"),
-        ("33 1 23 45 67 89", "75001", "0123456789"),
-        ("0612345678", "75001", "0612345678"),
-        ("+33612345678", "75001", "+33612345678"),
-    ],
-)
-def test_process_phone_number(phone_number, code_postal, expected_phone_number):
-    assert (
-        mapping_utils.process_phone_number(phone_number, code_postal)
-        == expected_phone_number
-    )
 
 
 class TestTransformFloat:

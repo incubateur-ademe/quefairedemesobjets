@@ -17,6 +17,7 @@
          "nom_commercial":"Ressourcerie des Biscottes",
          "nom_officiel":null,
          "siret":null,
+         "siren":null,
          "source":null,
          "identifiant_externe":null,
          "statut":"ACTIF",
