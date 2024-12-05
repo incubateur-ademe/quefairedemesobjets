@@ -5,17 +5,19 @@
     "batteries & piles portables": "Batteries & piles portables",
     "batteries de moyens de transport légers (mtl)": "batteries_de_mtl",
     "béton": "Béton - PMCB (produits et matériaux de construction du bâtiment)",
+    "bouteilles plastique": "bouteilles_plastique",
     "cartouches": "cartouches",
     "chaussure": "chaussures",
     "déchets dangereux de pmcb": "Déchets dangereux de PMCB (produits et matériaux de construction du bâtiment)",
     "déchets de peintures, vernis, encres et colles": "Déchets de peintures, vernis, encres et colles - Produits chimiques",
-    "déchets de produits chimiques": "Déchets de produits chimiques",
     "déchets de produits chimiques acides": "Déchets de produits chimiques acides",
     "déchets de produits chimiques basiques": "Déchets de produits chimiques basiques",
+    "déchets de produits chimiques": "Déchets de produits chimiques",
     "déchets phytosanitaires ménagers": "Déchets phytosanitaires ménagers - Produits chimiques",
     "décoration textile": "Décoration textile - Éléments d'ameublement",
     "ecrans": "ecran",
     "écrans": "ecran",
+    "emballage multimatériaux": ["autres_emballages_menagers","bouteilles_plastique","emballage_metal","emballage_carton"],
     "gem froid": "gros electromenager (refrigerant)",
     "gem hors froid": "gros electromenager (hors refrigerant)",
     "huisseries": "Huisseries (produits et matériaux de construction du bâtiment)",
@@ -34,6 +36,7 @@
     "pae (petits appareils extincteurs)": "Petits appareils extincteurs",
     "pam (petits appareils ménagers)": "petit electromenager",
     "panneaux photovoltaïques": "Panneaux photovoltaïques",
+    "papiers graphiques": "papiers_graphiques",
     "plâtre": "Plâtre - PMCB (produits et matériaux de construction du bâtiment)",
     "pmcb - bois": "Bois - PMCB (produits et matériaux de construction du bâtiment)",
     "pmcb - métal": "Métal - PMCB (produits et matériaux de construction du bâtiment)",
@@ -46,7 +49,8 @@
     "solvants": "Produits chimiques - Solvants",
     "téléphones portables": "smartphone, tablette et console",
     "vélos non électriques, trottinettes non électriques, skate-board, rollers": "velo",
-    "vêtement": "vetement"  
+    "verre": "emballage_verre",
+    "vêtement": "vetement"
   },
   "sous_categories_cma": {
     "articles d’ameublement (meubles, chaises, fauteuils, canapés, tapis, etc)": [
