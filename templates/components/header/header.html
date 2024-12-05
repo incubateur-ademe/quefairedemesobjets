@@ -2,17 +2,17 @@
 <header class="qf-flex qf-flex-col fr-container qf-relative">
     <div class="qf-flex qf-justify-between qf-pt-3w">
         <a
-            class="qf-bg-none"
+            class="qf-bg-none qf-flex qf-gap-2w"
             href="{% url 'qfdmd:home' %}"
         >
             <img
                 src="{% static 'assistant/bloc-marque.svg' %}"
                 class="max-md:qf-max-w-[220px]"
             >
+            {% if not is_home %}
+                {% include "components/logo/animated.html" %}
+            {% endif %}
         </a>
-        {% if not is_home %}
-        {% include "components/logo/animated.html" %}
-        {% endif %}
 
         {% block header_search %}
         <div
