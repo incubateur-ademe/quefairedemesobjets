@@ -171,9 +171,23 @@ class Synonyme(models.Model):
     produit = models.ForeignKey(
         Produit, related_name="synonymes", on_delete=models.CASCADE
     )
-    picto = models.FileField(upload_to="pictos", blank=True, null=True)
-    pin_on_homepage = models.BooleanField(default=False)
-    meta_description = models.TextField()
+    picto = models.FileField(
+        upload_to="pictos",
+        blank=True,
+        null=True,
+        help_text="Ce pictogramme est affiché en page d'accueil "
+        "s'il est renseigné et si la case ci-dessous est cochée.",
+    )
+    pin_on_homepage = models.BooleanField(
+        "Épingler en page d'accueil",
+        default=False,
+        help_text="Si un pictogramme est renseigné pour ce synonyme, "
+        "celui-ci s'affichera en page d'accueil. À noter : seuls les "
+        "30 premiers synonymes avec la case cochée s'afficheront.",
+    )
+    meta_description = models.TextField(
+        "Description lue et affichée par les moteurs de recherche.", blank=True
+    )
 
     @property
     def url(self) -> str:
