@@ -1,11 +1,14 @@
+from unittest.mock import patch
+
 import numpy as np
 import pandas as pd
 import pytest
+from sources.config.airflow_params import TRANSFORMATION_MAPPING
 from sources.tasks.business_logic.source_data_normalize import (
+    df_normalize_pharmacie,
     df_normalize_sinoe,
     source_data_normalize,
 )
-from sources.tasks.transform.transform_column import convert_opening_hours
 
 """
 TODO:
@@ -260,6 +263,7 @@ class TestSourceDataNormalize:
     - [ ] test Suppresion des colonnes non voulues
     - [ ] test ignore_duplicates
     - [ ] test produitsdechets_acceptes vide ou None
+    - [ ] test transformation from column_transformations is called
     """
 
     @pytest.fixture
@@ -512,27 +516,74 @@ class TestSourceDataNormalize:
             == expected_exclusivite_de_reprisereparation
         )
 
+    def test_column_transformations_is_called(self, source_data_normalize_kwargs):
 
-@pytest.mark.parametrize(
-    "input_value, expected_output",
-    [
-        # chaine vide ou Nulle
-        ("", ""),
-        (None, ""),
-        (np.nan, ""),
-        # chaines valides
-        ("Mo-Fr 09:00-16:00", "du lundi au vendredi de 09h00 à 16h00"),
-        (
-            "Mo-Fr 09:00-12:00,14:00-17:00",
-            "du lundi au vendredi de 09h00 à 12h00 et de 14h00 à 17h00",
-        ),
-        # TODO : à implémenter
-        # (
-        #     "Mo,Fr 09:00-12:00,15:00-17:00",
-        #     "le lundi et le vendredi de 09h00 à 12h00 et de 15h00 à 17h00"
-        # ),
-        # ("Mo,Tu,We 09:00-12:00", "le lundi, mardi et le mercredi de 09h00 à 12h00"),
-    ],
-)
-def test_convert_opening_hours(input_value, expected_output):
-    assert convert_opening_hours(input_value) == expected_output
+        source_data_normalize_kwargs["column_transformations"] = [
+            {
+                "origin": "nom origin",
+                "transformation": "test_fct",
+                "destination": "nom destination",
+            }
+        ]
+        source_data_normalize_kwargs["df_acteur_from_source"] = pd.DataFrame(
+            {
+                "identifiant_externe": ["1"],
+                "ecoorganisme": ["source1"],
+                "source_id": ["source_id1"],
+                "acteur_type_id": ["decheterie"],
+                "produitsdechets_acceptes": ["Plastic Box"],
+                "nom origin": ["nom"],
+            }
+        )
+
+        TRANSFORMATION_MAPPING["test_fct"] = lambda x: "success"
+        df = source_data_normalize(**source_data_normalize_kwargs)
+        assert "nom destination" in df.columns
+        assert df["nom destination"].iloc[0] == "success"
+
+
+class TestDfNormalizePharmacie:
+    """
+    Test de la fonction df_normalize_pharmacie
+    """
+
+    @patch(
+        "sources.tasks.business_logic.source_data_normalize.enrich_from_ban_api",
+        autospec=True,
+    )
+    def test_df_normalize_pharmacie(self, mock_enrich_from_ban_api):
+        def _enrich_from_ban_api(row):
+            if row["ville"] == "Paris":
+                row["latitude"] = 48.8566
+                row["longitude"] = 2.3522
+            else:
+                row["latitude"] = 0
+                row["longitude"] = 0
+            return row
+
+        mock_enrich_from_ban_api.side_effect = _enrich_from_ban_api
+
+        df = pd.DataFrame(
+            {
+                "adresse": ["123 Rue de Paris", "456 Avenue de Lyon"],
+                "code_postal": ["75001", "69000"],
+                "ville": ["Paris", "Lyon"],
+            }
+        )
+
+        # Appeler la fonction df_normalize_pharmacie
+        result_df = df_normalize_pharmacie(df)
+
+        assert mock_enrich_from_ban_api.call_count == len(df)
+        pd.testing.assert_frame_equal(
+            result_df,
+            pd.DataFrame(
+                {
+                    "adresse": ["123 Rue de Paris"],
+                    "code_postal": ["75001"],
+                    "ville": ["Paris"],
+                    "latitude": [48.8566],
+                    "longitude": [2.3522],
+                }
+            ),
+        )

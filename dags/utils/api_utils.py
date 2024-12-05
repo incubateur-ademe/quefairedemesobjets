@@ -7,53 +7,6 @@ from ratelimit import limits, sleep_and_retry
 logger = logging.getLogger(__name__)
 
 
-def fetch_dataset_from_point_apport(url):
-    all_data = []
-    while url:
-        logger.info(f"Récupération de données pour {url}")
-        response = requests.get(url, timeout=60)
-        response.raise_for_status()
-        data = response.json()
-        logger.info("Nombre de lignes récupérées: " + str(len(data["results"])))
-        all_data.extend(data["results"])
-        url = data.get("next", None)
-    logger.info("Plus d'URL à parcourir")
-    logger.info("Nombre total de lignes récupérées: " + str(len(all_data)))
-    return all_data
-
-
-def fetch_data_from_url(base_url):
-    if "pointsapport.ademe.fr" or "data.ademe.fr" in base_url:
-        return fetch_dataset_from_point_apport(base_url)
-    elif "artisanat.fr" in base_url:
-        return fetch_dataset_from_artisanat(base_url)
-    # Le but de nos intégrations API est de récupérer des données.
-    # Si on ne récupére pas de données, on sait qu'on à un problème,
-    # et donc il faut échouer explicitement au plus tôt
-    raise NotImplementedError(f"Pas de fonction de récupération pour l'url {base_url}")
-
-
-def fetch_dataset_from_artisanat(base_url):
-    all_data = []
-    offset = 0
-    total_records = requests.get(base_url, params={"limit": 1, "offset": 0}).json()[
-        "total_count"
-    ]
-    records_per_request = 100
-    params = {"limit": records_per_request, "offset": 0}
-    while offset < total_records:
-        params.update({"offset": offset})
-        response = requests.get(base_url, params=params)
-        if response.status_code == 200:
-            data = response.json()
-            all_data.extend(data["results"])
-            offset += records_per_request
-        else:
-            response.raise_for_status()
-
-    return all_data
-
-
 @sleep_and_retry
 @limits(calls=7, period=1)
 def call_annuaire_entreprises(query, adresse_query_flag=False, naf=None):
@@ -167,9 +120,3 @@ def get_lat_lon_from_address(address):
             return coords[1], coords[0]
 
     return None, None
-
-
-if __name__ == "__main__":
-    fetch_dataset_from_point_apport(
-        "https://data.ademe.fr/data-fair/api/v1/datasets/sinoe-(r)-annuaire-des-decheteries-dma/lines?size=10000&q_mode=simple&ANNEE_eq=2024"
-    )
