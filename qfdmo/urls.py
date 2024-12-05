@@ -67,7 +67,6 @@ urlpatterns = [
     ),
     path(
         "adresse/<str:identifiant_unique>",
-        # ActeurView.as_view(),
         acteur_detail_redirect,
     ),
     path(
