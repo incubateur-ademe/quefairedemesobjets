@@ -261,6 +261,7 @@ def write_data_to_postgres(**kwargs):
                 "telephone",
                 "nom_commercial",
                 "nom_officiel",
+                "siren",
                 "siret",
                 "identifiant_externe",
                 "acteur_type_id",

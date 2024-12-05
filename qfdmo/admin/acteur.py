@@ -168,6 +168,7 @@ class BaseActeurAdmin(admin.GISModelAdmin):
     list_display = (
         "nom",
         "siret",
+        "siren",
         "identifiant_unique",
         "code_postal",
         "ville",
@@ -179,10 +180,11 @@ class BaseActeurAdmin(admin.GISModelAdmin):
         "identifiant_unique",
         "nom__unaccent",
         "siret",
+        "siren",
         "ville",
     ]
     search_help_text = (
-        "Recherche sur le nom, le code postal, la ville, le siret ou"
+        "Recherche sur le nom, le code postal, la ville, le siret, le siren ou"
         " l'identifiant unique"
     )
     list_filter = ["statut"]
@@ -194,6 +196,7 @@ class BaseActeurAdmin(admin.GISModelAdmin):
         "nom_commercial",
         "nom_officiel",
         "siret",
+        "siren",
         "naf_principal",
         "description",
         "acteur_type",
@@ -428,7 +431,7 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
                 if field_name == "siret" and (
                     siret := obj.siret or acteur.siret
                 ):  # and siret is not null
-                    siren = siret[:9]
+                    siren = obj.siren or siret[:9]
                     form_field.help_text += (
                         '<br>ENTREPRISE : <a href="https://'
                         f'annuaire-entreprises.data.gouv.fr/entreprise/{siren}"'
@@ -511,8 +514,9 @@ class PropositionServiceAdmin(
     search_fields = [
         "acteur__nom",
         "acteur__siret",
+        "acteur__siren",
     ]
-    search_help_text = "Recherche sur le nom ou le siret de l'acteur"
+    search_help_text = "Recherche sur le nom, le siret ou le siren de l'acteur"
 
     def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
         return False
@@ -588,6 +592,7 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource):
     nom_commercial = fields.Field(
         column_name="Nom commercial", attribute="nom_commercial", readonly=True
     )
+    siren = fields.Field(column_name="SIREN", attribute="siren", readonly=True)
     siret = fields.Field(column_name="SIRET", attribute="siret", readonly=True)
     description = fields.Field(column_name="Description", attribute="description")
     acteur_type = fields.Field(
@@ -709,6 +714,7 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource):
             "sources",
             "nom",
             "nom_commercial",
+            "siren",
             "siret",
             "description",
             "acteur_type",
