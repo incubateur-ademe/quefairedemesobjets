@@ -1,8 +1,11 @@
 {% extends "qfdmd/base.html" %}
+{% load dsfr_tags %}
 
 {% block header %}
 {% include "components/header/header_home.html" %}
 {% endblock header %}
+
+{% block body_attrs %}data-home{% endblock %}
 
 {% block main %}
 <div class="qf-flex qf-flex-col qf-gap-7w">
@@ -35,8 +38,8 @@
         </div>
     </div>
 
-    {# accordion #}
-    <div>
+    <div class="qf-max-w-3xl qf-mx-auto">
+        {% dsfr_accordion accordion %}
     </div>
 </div>
 {% endblock main %}
