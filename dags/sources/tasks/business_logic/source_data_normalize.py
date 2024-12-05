@@ -1,14 +1,17 @@
+import json
 import logging
 from typing import List
 
 import pandas as pd
 import requests
+from shared.tasks.database_logic.db_manager import PostgresConnectionManager
 from sources.config.airflow_params import TRANSFORMATION_MAPPING
 from sources.tasks.transform.transform_column import (
     cast_eo_boolean_or_string_to_boolean,
     mapping_try_or_fallback_column_value,
 )
 from sources.tasks.transform.transform_df import merge_duplicates
+from sqlalchemy import text
 from tenacity import retry, stop_after_attempt, wait_fixed
 from utils import logging_utils as log
 from utils import mapping_utils
@@ -313,12 +316,43 @@ def df_normalize_sinoe(
 
 @retry(wait=wait_fixed(5), stop=stop_after_attempt(5))
 def enrich_from_ban_api(row: pd.Series) -> pd.Series:
-    ban_adresse = _compute_ban_adresse(row)
-    url = "https://api-adresse.data.gouv.fr/search/"
-    r = requests.get(url, params={"q": ban_adresse})
-    if r.status_code != 200:
-        raise Exception(f"Failed to get data from API: {r.status_code}")
-    result = r.json()
+    engine = PostgresConnectionManager().engine
+
+    adresse = row["adresse"] if row["adresse"] else ""
+    code_postal = row["code_postal"] if row["code_postal"] else ""
+    ville = row["ville"] if row["ville"] else ""
+
+    ban_cache_row = engine.execute(
+        text(
+            "SELECT * FROM qfdmo_bancache WHERE adresse = :adresse and code_postal = "
+            ":code_postal and ville = :ville and modifie_le > now() - interval '30 day'"
+            " order by modifie_le desc limit 1"
+        ),
+        adresse=adresse,
+        code_postal=str(code_postal),
+        ville=ville,
+    ).fetchone()
+
+    if ban_cache_row:
+        result = ban_cache_row["ban_returned"]
+    else:
+        ban_adresse = _compute_ban_adresse(row)
+        url = "https://api-adresse.data.gouv.fr/search/"
+        r = requests.get(url, params={"q": ban_adresse})
+        if r.status_code != 200:
+            raise Exception(f"Failed to get data from API: {r.status_code}")
+        result = r.json()
+        engine.execute(
+            text(
+                "INSERT INTO qfdmo_bancache"
+                " (adresse, code_postal, ville, ban_returned, modifie_le)"
+                " VALUES (:adresse, :code_postal, :ville, :result, NOW())"
+            ),
+            adresse=adresse,
+            code_postal=code_postal,
+            ville=ville,
+            result=json.dumps(result),
+        )
 
     better_result = None
     better_geo = None
