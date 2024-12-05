@@ -1,7 +1,7 @@
 import logging
 
 import pandas as pd
-from airflow.providers.postgres.hooks.postgres import PostgresHook
+from shared.tasks.database_logic.db_manager import PostgresConnectionManager
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -14,8 +14,7 @@ def db_read_acteur(
         raise ValueError(
             "La colonne source_id est requise dans la dataframe normalisée"
         )
-    pg_hook = PostgresHook(postgres_conn_id="qfdmo_django_db")
-    engine = pg_hook.get_sqlalchemy_engine()
+    engine = PostgresConnectionManager().engine
     unique_source_ids = df_normalized["source_id"].unique()
 
     joined_source_ids = ",".join([f"'{source_id}'" for source_id in unique_source_ids])
