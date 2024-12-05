@@ -177,7 +177,7 @@ class BaseActeurAdmin(admin.GISModelAdmin):
     search_fields = [
         "code_postal",
         "identifiant_unique",
-        "nom",
+        "nom__unaccent",
         "siret",
         "ville",
     ]
