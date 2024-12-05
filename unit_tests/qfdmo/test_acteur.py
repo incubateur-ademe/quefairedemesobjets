@@ -508,7 +508,7 @@ class TestDisplayedActeurJsonActeurForDisplay:
     def test_json_acteur_for_display_ordered(self, displayed_acteur):
         acteur_for_display = json.loads(displayed_acteur.json_acteur_for_display())
 
-        assert acteur_for_display["identifiant_unique"] is not None
+        assert acteur_for_display["uuid"] is not None
         assert acteur_for_display["location"] is not None
         assert acteur_for_display["icon"] == "icon-actionjai1"
         assert acteur_for_display["couleur"] == "couleur-actionjai1"
@@ -518,7 +518,7 @@ class TestDisplayedActeurJsonActeurForDisplay:
             displayed_acteur.json_acteur_for_display(direction="jai")
         )
 
-        assert acteur_for_display["identifiant_unique"] is not None
+        assert acteur_for_display["uuid"] is not None
         assert acteur_for_display["location"] is not None
         assert acteur_for_display["icon"] == "icon-actionjai1"
         assert acteur_for_display["couleur"] == "couleur-actionjai1"
@@ -527,7 +527,7 @@ class TestDisplayedActeurJsonActeurForDisplay:
             displayed_acteur.json_acteur_for_display(direction="jecherche")
         )
 
-        assert acteur_for_display["identifiant_unique"] is not None
+        assert acteur_for_display["uuid"] is not None
         assert acteur_for_display["location"] is not None
         assert acteur_for_display["icon"] == "icon-actionjecherche1"
         assert acteur_for_display["couleur"] == "couleur-actionjecherche1"
@@ -537,7 +537,7 @@ class TestDisplayedActeurJsonActeurForDisplay:
             displayed_acteur.json_acteur_for_display(action_list="actionjai2")
         )
 
-        assert acteur_for_display["identifiant_unique"] is not None
+        assert acteur_for_display["uuid"] is not None
         assert acteur_for_display["location"] is not None
         assert acteur_for_display["icon"] == "icon-actionjai2"
         assert acteur_for_display["couleur"] == "couleur-actionjai2"
@@ -548,7 +548,7 @@ class TestDisplayedActeurJsonActeurForDisplay:
             )
         )
 
-        assert acteur_for_display["identifiant_unique"] is not None
+        assert acteur_for_display["uuid"] is not None
         assert acteur_for_display["location"] is not None
         assert acteur_for_display["icon"] == "icon-actionjai1"
         assert acteur_for_display["couleur"] == "couleur-actionjai1"
@@ -558,7 +558,7 @@ class TestDisplayedActeurJsonActeurForDisplay:
             displayed_acteur.json_acteur_for_display(carte=True)
         )
 
-        assert acteur_for_display["identifiant_unique"] is not None
+        assert acteur_for_display["uuid"] is not None
         assert acteur_for_display["location"] is not None
         assert acteur_for_display["icon"] == "icon-groupeaction2"
         assert acteur_for_display["couleur"] == "couleur-groupeaction2"
@@ -568,7 +568,7 @@ class TestDisplayedActeurJsonActeurForDisplay:
             displayed_acteur.json_acteur_for_display(carte=True, direction="jecherche")
         )
 
-        assert acteur_for_display["identifiant_unique"] is not None
+        assert acteur_for_display["uuid"] is not None
         assert acteur_for_display["location"] is not None
         assert acteur_for_display["icon"] == "icon-groupeaction2"
         assert acteur_for_display["couleur"] == "couleur-groupeaction2"
@@ -580,7 +580,7 @@ class TestDisplayedActeurJsonActeurForDisplay:
             )
         )
 
-        assert acteur_for_display["identifiant_unique"] is not None
+        assert acteur_for_display["uuid"] is not None
         assert acteur_for_display["location"] is not None
         assert acteur_for_display["icon"] == "icon-groupeaction1"
         assert acteur_for_display["couleur"] == "couleur-groupeaction1"
@@ -591,7 +591,7 @@ class TestDisplayedActeurJsonActeurForDisplay:
             )
         )
 
-        assert acteur_for_display["identifiant_unique"] is not None
+        assert acteur_for_display["uuid"] is not None
         assert acteur_for_display["location"] is not None
         assert acteur_for_display["icon"] == "icon-groupeaction2"
         assert acteur_for_display["couleur"] == "couleur-groupeaction2"
@@ -602,7 +602,7 @@ class TestDisplayedActeurJsonActeurForDisplay:
 
         acteur_for_display = json.loads(displayed_acteur.json_acteur_for_display())
 
-        assert acteur_for_display["identifiant_unique"] is not None
+        assert acteur_for_display["uuid"] is not None
         assert acteur_for_display["location"] is not None
         assert acteur_for_display["icon"] == "icon-actionjai2"
         assert acteur_for_display["couleur"] == "couleur-actionjai2"
@@ -617,7 +617,7 @@ class TestDisplayedActeurJsonActeurForDisplay:
             displayed_acteur.json_acteur_for_display(direction="jecherche")
         )
 
-        assert acteur_for_display["identifiant_unique"] is not None
+        assert acteur_for_display["uuid"] is not None
         assert acteur_for_display["location"] is not None
         assert acteur_for_display["icon"] == "icon-actionjecherche1"
         assert acteur_for_display["couleur"] == "couleur-actionjecherche1"
@@ -632,7 +632,7 @@ class TestDisplayedActeurJsonActeurForDisplay:
             displayed_acteur.json_acteur_for_display(action_list="actionjai1")
         )
 
-        assert acteur_for_display["identifiant_unique"] is not None
+        assert acteur_for_display["uuid"] is not None
         assert acteur_for_display["location"] is not None
         assert acteur_for_display["icon"] == "icon-actionjai1"
         assert acteur_for_display["couleur"] == "couleur-actionjai1"
