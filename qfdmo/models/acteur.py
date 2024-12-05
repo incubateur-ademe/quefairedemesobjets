@@ -601,7 +601,7 @@ class DisplayedActeur(BaseActeur):
     )
 
     def get_absolute_url(self):
-        return reverse("qfdmo:acteur-detail", args=[self.identifiant_unique])
+        return reverse("qfdmo:acteur-detail", args=[self.uuid])
 
     def acteur_actions(self, direction=None):
         ps_action_ids = list(
@@ -641,7 +641,7 @@ class DisplayedActeur(BaseActeur):
         actions = sorted(actions, key=sort_actions)
 
         acteur_dict = {
-            "identifiant_unique": self.identifiant_unique,
+            "uuid": self.uuid,
             "location": orjson.loads(self.location.geojson),
         }
 
