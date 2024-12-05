@@ -154,6 +154,7 @@ django==5.1.1 \
     #   django-ninja
     #   django-sql-explorer
     #   django-storages
+    #   djangorestframework
 django-colorfield==0.11.0 \
     --hash=sha256:05c38c8eb2a94938b810a19b2011846391a4ce71d1c92e88a35974fbcc8fc62e \
     --hash=sha256:460f40e6123b6ae0fb51a4eb86fc258fcdc0ea28f75102b685e8209b1eae9ec3
@@ -196,6 +197,10 @@ django-widget-tweaks==1.5.0 \
     # via
     #   -r requirements.in
     #   django-dsfr
+djangorestframework==3.15.2 \
+    --hash=sha256:2b8871b062ba1aefc2de01f773875441a961fefbf79f5eed1e32b2f096944b20 \
+    --hash=sha256:36fe88cd2d6c6bec23dca9804bab2ba5517a8bb9d8f47ebc68981b56840107ad
+    # via -r requirements.in
 et-xmlfile==1.1.0 \
     --hash=sha256:8eb9e2bc2f8c97e37a2dc85a09ecdcdec9d8a396530a6d5a33b30b9a92da0c5c \
     --hash=sha256:a2ba85d1d6a74ef63837eed693bcb89c3f752169b0e3e7ae5b16ca5e1b3deada
