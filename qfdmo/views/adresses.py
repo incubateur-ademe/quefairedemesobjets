@@ -130,9 +130,7 @@ class SearchActeursView(
         initial["ess"] = self.request.GET.get("ess")
         # TODO: refacto forms : delete this line
         initial["bounding_box"] = self.request.GET.get("bounding_box")
-        initial["sc_id"] = (
-            self.request.GET.get("sc_id") if initial["sous_categorie_objet"] else None
-        )
+        initial["sc_id"] = self.request.GET.get("sc_id")
 
         # Action to display and check
         action_displayed = self._set_action_displayed()
@@ -472,8 +470,9 @@ class SearchActeursView(
             filters &= Q(labels__bonus=True)
 
         if sous_categorie_id := self.get_data_from_request_or_bounded_form("sc_id", 0):
+            logger.info(f"{sous_categorie_id=}")
             filters &= Q(
-                proposition_services__sous_categories__id=sous_categorie_id,
+                proposition_services__sous_categories__id__in=[sous_categorie_id],
             )
 
         actions_filters = Q()
