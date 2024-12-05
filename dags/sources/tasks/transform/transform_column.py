@@ -60,22 +60,16 @@ def convert_opening_hours(opening_hours: str | None) -> str:
     return process_entry(opening_hours)
 
 
-def clean_siren(siret: int | str | None) -> str:
+def clean_siren(siren: int | str | None) -> str | None:
+    siren = clean_number(siren)
+
+    if len(siren) == 9:
+        return siren
+    return None
+
+
+def clean_siret(siret: int | str | None) -> str | None:
     siret = clean_number(siret)
-
-    if siret is None:
-        return None
-
-    if len(siret) == 9:
-        return siret
-    return ""
-
-
-def clean_siret(siret: int | str | None) -> str:
-    siret = clean_number(siret)
-
-    if siret is None:
-        return ""
 
     if len(siret) == 9:
         return siret
@@ -86,7 +80,7 @@ def clean_siret(siret: int | str | None) -> str:
     if len(siret) == 14:
         return siret
 
-    return ""
+    return None
 
 
 def clean_number(number: Any) -> str:
