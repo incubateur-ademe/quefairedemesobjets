@@ -49,6 +49,20 @@ def apply_corrections_acteur(**kwargs):
         lambda x: shortuuid.uuid(name=x)
     )
 
+    # failed is identifiant unique is not unique in the dataframe df_acteur_merged
+    if not df_acteur_merged["identifiant_unique"].is_unique:
+        # get duplicates
+        df_duplicates = df_acteur_merged[
+            df_acteur_merged["identifiant_unique"].duplicated(keep=False)
+        ]
+        duplicates_identifiant_unique = (
+            df_duplicates["identifiant_unique"].unique().tolist()
+        )
+        raise ValueError(
+            "identifiant_unique is not unique in the dataframe df_acteur_merged :"
+            f" {duplicates_identifiant_unique}"
+        )
+
     return {
         "df_acteur_merged": df_acteur_merged,
         # ["parent_id", "child_id", "child_source_id"]
