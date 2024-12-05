@@ -72,7 +72,6 @@ urlpatterns = [
     ),
     path(
         "adresse_details/<str:uuid>",
-        # ActeurView.as_view(),
         acteur_detail,
         name="acteur-detail",
     ),
