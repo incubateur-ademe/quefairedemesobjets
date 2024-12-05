@@ -22,13 +22,3 @@ test("carte iFrame is WCAG compliant", async ({ page }) => {
 
   expect(accessibilityScanResults.violations).toEqual([])
 })
-
-// test("assistant is WCAG compliant", async ({ page }) => {
-//   await page.goto(`http://localhost:8000/dechet`, { waitUntil: "networkidle" })
-
-//   const accessibilityScanResults = await new AxeBuilder({ page })
-//     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])  // TODO : trouver quelle règle se rapproche le plus du RGAA
-//     .analyze()
-
-//   expect(accessibilityScanResults.violations).toEqual([])
-// })
