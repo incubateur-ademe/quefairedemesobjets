@@ -58,7 +58,7 @@ class LienAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 
 @admin.register(Synonyme)
-class SynonymeAdmin(NotEditableInlineMixin, ImportExportModelAdmin, admin.ModelAdmin):
+class SynonymeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     resource_classes = [SynonymeResource]
     search_fields = ["nom__unaccent"]
     list_display = ("nom", "produit", "slug")
