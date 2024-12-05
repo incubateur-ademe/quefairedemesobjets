@@ -134,8 +134,8 @@ class Produit(models.Model):
             item
             for item in [
                 {
-                    "id": "Comment mieux consommer",
-                    "title": "Comment mieux consommer",
+                    "id": "Comment consommer responsable ?",
+                    "title": "Comment consommer responsable ?",
                     "content": self.comment_les_eviter,
                 },
                 {
