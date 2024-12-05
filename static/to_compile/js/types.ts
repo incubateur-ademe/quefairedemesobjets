@@ -1,16 +1,16 @@
 import type { Marker } from "leaflet"
 
 export interface Location {
-    latitude?: number
-    longitude?: number
+  latitude?: number
+  longitude?: number
 }
 
 export interface ActorLocation {
-    coordinates: number[]
+  coordinates: number[]
 }
 
 export interface DisplayedActeur {
-  identifiant_unique: string
+  uuid: string
   icon: string
   couleur: string
   location: ActorLocation
@@ -19,14 +19,14 @@ export interface DisplayedActeur {
 }
 
 export class SSCatObject {
-    label: string
-    sub_label: string
-    identifier: number
+  label: string
+  sub_label: string
+  identifier: number
 }
 
 export type InteractionType = "map" | "solution_details"
 export type PosthogEventType = "ui_interaction"
 
 export type LVAOMarker = Marker & {
-  _identifiant_unique?: string
+  _uuid?: string
 }
