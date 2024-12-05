@@ -24,7 +24,7 @@ def rollback_rename_ordredespharmaciens(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("qfdmo", "0102_alter_action_couleur_alter_groupeaction_couleur_and_more"),
+        ("qfdmo", "0103_acteur_siren_displayedacteur_siren_and_more"),
     ]
 
     operations = [
