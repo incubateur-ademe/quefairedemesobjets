@@ -5,7 +5,7 @@ register = template.Library()
 
 
 @register.inclusion_tag("components/patchwork/patchwork.html")
-def patchwork():
+def patchwork() -> dict:
     from qfdmd.models import Synonyme
 
     produits = (
@@ -17,6 +17,11 @@ def patchwork():
 
 
 @register.simple_tag
-def render_file_content(svg_file):
+def render_file_content(svg_file) -> str:
     with svg_file.open() as f:
         return mark_safe(f.read().decode("utf-8"))
+
+
+@register.inclusion_tag("head/favicon.html")
+def favicon() -> dict:
+    return {}

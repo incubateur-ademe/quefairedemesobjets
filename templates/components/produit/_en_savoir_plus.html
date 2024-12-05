@@ -6,7 +6,6 @@ It is not directly included, however in order to maintain consistency accross
 templates, it is placed under the produit directory.
 {% endcomment %}
 
-<h2>En savoir plus</h2>
 <div class="qf-flex qf-flex-col qf-gap-3w">
     {% for lien in produit.liens.all %}
         {% include "components/lien/lien.html" %}

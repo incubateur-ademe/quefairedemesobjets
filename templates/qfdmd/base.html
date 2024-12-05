@@ -1,4 +1,4 @@
-{% load dsfr_tags static %}
+{% load dsfr_tags qfdmd_tags static %}
 
 <!DOCTYPE html>
 <html
@@ -14,6 +14,7 @@
         />
         <title>{% block title %}Que faire de mes déchets{% endblock %}</title>
         <meta name="description" content="{% block meta_description %}Donnons une nouvelle vie aux objets{% endblock %}">
+        {% favicon %}
 
         {% comment %}
         Preload https://developer.mozilla.org/fr/docs/Web/HTML/Attributes/rel/preload

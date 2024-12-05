@@ -11,7 +11,9 @@
     <section id="ou-l-apporter" class="qf-mb-4w">
         <h2>Où l'apporter</h2>
         <iframe
-            class="qf-aspect-[3/4] md:qf-aspect-[4/3] qf-w-full"
+            class="qf-aspect-[9/16] md:qf-aspect-[4/3]
+            qf-w-full
+            max-md:qf-min-h-[80vh] md:qf-min-h-[46em] md:qf-max-h-[50em]"
             src="{{ url_carte|default:produit.sous_categories.first.url_carte }}"></iframe>
     </section>
     {% endif %}

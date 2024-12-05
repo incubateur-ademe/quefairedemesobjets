@@ -167,6 +167,7 @@ def context_processors():
         "django.contrib.messages.context_processors.messages",
         "core.context_processors.environment",
         "core.context_processors.content",
+        "core.context_processors.assistant",
         "dsfr.context_processors.site_config",
     ]
 

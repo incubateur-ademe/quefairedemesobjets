@@ -76,10 +76,6 @@
                 rotate(calc(var(--rotate-factor) * var(--random-rotate, 0) * 2deg));
             }
         }
-
-        .title span {
-            @apply qf-text-green-menthe-sun-373-moon-652-hover;
-        }
     }
     @media (max-width: 1247px) {
         .patchwork .top .icon:nth-last-child(-n + 2) {
