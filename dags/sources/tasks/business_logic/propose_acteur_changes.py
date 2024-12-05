@@ -3,8 +3,9 @@ from datetime import datetime
 
 import numpy as np
 import pandas as pd
+from sources.tasks.transform.transform_df import clean_phone_number
 from utils.base_utils import transform_location
-from utils.mapping_utils import parse_float, process_phone_number, process_siret
+from utils.mapping_utils import parse_float
 
 logger = logging.getLogger(__name__)
 
@@ -50,14 +51,10 @@ def propose_acteur_changes(
     df["modifie_le"] = datetime.now()
 
     # TODO : à déplacer dans la source_data_normalize
-    if "siret" in df.columns:
-        df["siret"] = df["siret"].apply(process_siret)
-
-    # TODO : à déplacer dans la source_data_normalize
     if "telephone" in df.columns and "code_postal" in df.columns:
         df["telephone"] = df.apply(
             lambda row: pd.Series(
-                process_phone_number(row["telephone"], row["code_postal"])
+                clean_phone_number(row["telephone"], row["code_postal"])
             ),
             axis=1,
         )

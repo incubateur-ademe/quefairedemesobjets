@@ -1,12 +1,11 @@
 import pandas as pd
-from airflow.providers.postgres.hooks.postgres import PostgresHook
+from shared.tasks.database_logic.db_manager import PostgresConnectionManager
 from utils import logging_utils as log
 
 
 def read_data_from_postgres(**kwargs):
     table_name = kwargs["table_name"]
-    pg_hook = PostgresHook(postgres_conn_id="qfdmo_django_db")
-    engine = pg_hook.get_sqlalchemy_engine()
+    engine = PostgresConnectionManager().engine
     df = pd.read_sql_table(table_name, engine).replace({pd.NA: None})
     if df.empty:
         raise ValueError(f"DB: pas de données pour table {table_name}")

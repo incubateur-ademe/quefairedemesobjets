@@ -640,7 +640,14 @@ def get_object_list(request):
     )
 
 
-def acteur_detail(request, identifiant_unique):
+def acteur_detail_redirect(request, identifiant_unique):
+    displayed_acteur = DisplayedActeur.objects.get(
+        identifiant_unique=identifiant_unique
+    )
+    return redirect("qfdmo:acteur-detail", uuid=displayed_acteur.uuid, permanent=True)
+
+
+def acteur_detail(request, uuid):
     base_template = "layout/base.html"
 
     if request.headers.get("Turbo-Frame"):
@@ -656,7 +663,7 @@ def acteur_detail(request, identifiant_unique):
         "proposition_services__action__groupe_action",
         "labels",
         "sources",
-    ).get(identifiant_unique=identifiant_unique)
+    ).get(uuid=uuid)
 
     if displayed_acteur.statut != ActeurStatus.ACTIF:
         return redirect("https://quefairedemesdechets.ademe.fr", permanent=True)

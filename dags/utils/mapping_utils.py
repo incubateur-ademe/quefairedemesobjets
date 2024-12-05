@@ -68,6 +68,7 @@ def transform_acteur_type_id(value, acteurtype_id_by_code):
         "association, entreprise de l'economie sociale et solidaire (ess)": "ess",
         "etablissement de sante": "ets_sante",
         "decheterie": "decheterie",
+        "pharmacie": "commerce",
         "point d'apport volontaire prive": "pav_prive",
         "plateforme inertes": "plateforme_inertes",
         "magasin / franchise, enseigne commerciale / distributeur / point de vente "

@@ -25,6 +25,7 @@ class TestOpenSourceDisplayedActeurResource:
                 "Contributeurs",
                 "Nom",
                 "Nom commercial",
+                "SIREN",
                 "SIRET",
                 "Description",
                 "Type d'acteur",

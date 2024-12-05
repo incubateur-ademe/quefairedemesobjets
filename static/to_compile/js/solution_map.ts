@@ -1,9 +1,9 @@
-import * as L from "leaflet"
-import MapController from "./map_controller"
-import pinBackgroundSvg from "bundle-text:../svg/pin-background.svg"
-import pinBackgroundFillSvg from "bundle-text:../svg/pin-background-fill.svg"
 import bonusIconSvg from "bundle-text:../svg/bonus-reparation-fill.svg"
+import pinBackgroundFillSvg from "bundle-text:../svg/pin-background-fill.svg"
+import pinBackgroundSvg from "bundle-text:../svg/pin-background.svg"
+import * as L from "leaflet"
 import { ACTIVE_PINPOINT_CLASSNAME, clearActivePinpoints } from "./helpers"
+import MapController from "./map_controller"
 import type { DisplayedActeur, Location, LVAOMarker } from "./types"
 
 const DEFAULT_LOCATION: L.LatLngTuple = [46.227638, 2.213749]
@@ -91,18 +91,21 @@ export class SolutionMap {
     return htmlTree.join("")
   }
 
-  addActorMarkersToMap(actors: Array<DisplayedActeur>, bboxValue?: Array<Number>): void {
+  addActorMarkersToMap(
+    actors: Array<DisplayedActeur>,
+    bboxValue?: Array<Number>,
+  ): void {
     const points: Array<Array<Number>> = []
     actors.forEach(function (actor: DisplayedActeur) {
       if (actor.location) {
         const markerHtmlString = this.#generateMarkerHTMLStringFrom(actor)
         const actorMarker = L.divIcon({
-            // Empty className ensures default leaflet classes are not added,
-            // they add styles like a border and a background to the marker
-            className: "",
-            iconSize: [34, 45],
-            html: markerHtmlString,
-          })
+          // Empty className ensures default leaflet classes are not added,
+          // they add styles like a border and a background to the marker
+          className: "",
+          iconSize: [34, 45],
+          html: markerHtmlString,
+        })
 
         const marker: LVAOMarker = L.marker(
           [actor.location.coordinates[1], actor.location.coordinates[0]],
@@ -111,7 +114,7 @@ export class SolutionMap {
             riseOnHover: true,
           },
         )
-        marker._identifiant_unique = actor.identifiant_unique
+        marker._uuid = actor.uuid
         marker.on("click", (e) => {
           this.#onClickMarker(e)
         })
@@ -150,7 +153,7 @@ export class SolutionMap {
   #onClickMarker(event: L.LeafletEvent) {
     clearActivePinpoints()
     event.target._icon.classList.add(ACTIVE_PINPOINT_CLASSNAME)
-    window.location.hash = event.target._identifiant_unique
+    window.location.hash = event.target._uuid
   }
 
   #manageZoomControl() {

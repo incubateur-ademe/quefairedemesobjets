@@ -1,4 +1,5 @@
 import pandas as pd
+from sources.tasks.transform.transform_column import clean_number
 
 
 def merge_duplicates(
@@ -34,3 +35,22 @@ def merge_produits_accepter(group):
     for produits in group:
         produits_sets.update([produit.strip() for produit in produits.split("|")])
     return "|".join(sorted(produits_sets))
+
+
+def clean_phone_number(number, code_postal):
+
+    number = clean_number(number)
+
+    if number is None:
+        return None
+
+    if len(number) == 9 and code_postal and int(code_postal) < 96000:
+        number = "0" + number
+
+    if number.startswith("33"):
+        number = "0" + number[2:]
+
+    if len(number) < 6:
+        return None
+
+    return number

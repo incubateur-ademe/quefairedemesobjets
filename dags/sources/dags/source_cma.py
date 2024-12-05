@@ -12,6 +12,13 @@ with DAG(
         " for CMA reparacteur dataset"
     ),
     params={
+        "column_transformations": [
+            {
+                "origin": "siret",
+                "transformation": "clean_siret",
+                "destination": "siret",
+            },
+        ],
         "column_mapping": {
             "name": "nom",
             "reparactor_description": "description",

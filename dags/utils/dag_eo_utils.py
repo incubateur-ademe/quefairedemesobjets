@@ -2,7 +2,7 @@ import json
 import logging
 from datetime import datetime
 
-from airflow.providers.postgres.hooks.postgres import PostgresHook
+from shared.tasks.database_logic.db_manager import PostgresConnectionManager
 from utils import shared_constants as constants
 
 logger = logging.getLogger(__name__)
@@ -11,8 +11,7 @@ logger = logging.getLogger(__name__)
 def insert_dagrun_and_process_df(df_acteur_updates, metadata, dag_name, run_name):
     if df_acteur_updates.empty:
         return
-    pg_hook = PostgresHook(postgres_conn_id="qfdmo_django_db")
-    engine = pg_hook.get_sqlalchemy_engine()
+    engine = PostgresConnectionManager().engine
     current_date = datetime.now()
 
     with engine.connect() as conn:

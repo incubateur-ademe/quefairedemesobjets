@@ -271,6 +271,7 @@ class BaseActeur(NomAsNaturalKeyModel):
     nom_officiel = models.CharField(max_length=255, blank=True, null=True)
     labels = models.ManyToManyField(LabelQualite)
     acteur_services = models.ManyToManyField(ActeurService, blank=True)
+    siren = models.CharField(max_length=9, blank=True, null=True)
     siret = models.CharField(max_length=14, blank=True, null=True)
     source = models.ForeignKey(Source, on_delete=models.CASCADE, blank=True, null=True)
     identifiant_externe = models.CharField(max_length=255, blank=True, null=True)
@@ -601,7 +602,7 @@ class DisplayedActeur(BaseActeur):
     )
 
     def get_absolute_url(self):
-        return reverse("qfdmo:acteur-detail", args=[self.identifiant_unique])
+        return reverse("qfdmo:acteur-detail", args=[self.uuid])
 
     def acteur_actions(self, direction=None):
         ps_action_ids = list(
@@ -641,7 +642,7 @@ class DisplayedActeur(BaseActeur):
         actions = sorted(actions, key=sort_actions)
 
         acteur_dict = {
-            "identifiant_unique": self.identifiant_unique,
+            "uuid": self.uuid,
             "location": orjson.loads(self.location.geojson),
         }
 

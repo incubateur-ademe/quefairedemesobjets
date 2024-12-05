@@ -1,6 +1,6 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from airflow.providers.postgres.hooks.postgres import PostgresHook
+from shared.tasks.database_logic.db_manager import PostgresConnectionManager
 from sqlalchemy import text
 
 
@@ -14,8 +14,7 @@ def db_read_propositions_max_id_task(dag: DAG) -> PythonOperator:
 
 
 def db_read_propositions_max_id():
-    pg_hook = PostgresHook(postgres_conn_id="qfdmo_django_db")
-    engine = pg_hook.get_sqlalchemy_engine()
+    engine = PostgresConnectionManager().engine
 
     # TODO : check if we need to manage the max id here
     displayedpropositionservice_max_id = engine.execute(

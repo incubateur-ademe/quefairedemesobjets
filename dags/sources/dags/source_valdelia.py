@@ -11,6 +11,18 @@ with DAG(
         " for Valdelia dataset"
     ),
     params={
+        "column_transformations": [
+            {
+                "origin": "siren",
+                "transformation": "clean_siren",
+                "destination": "siren",
+            },
+            {
+                "origin": "siret",
+                "transformation": "clean_siret",
+                "destination": "siret",
+            },
+        ],
         "column_mapping": {
             "id_point_apport_ou_reparation": "identifiant_externe",
             "type_de_point_de_collecte": "acteur_type_id",

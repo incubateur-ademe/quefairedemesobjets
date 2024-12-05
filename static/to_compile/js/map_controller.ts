@@ -1,12 +1,11 @@
 import { Controller } from "@hotwired/stimulus"
-import * as Turbo from "@hotwired/turbo"
 import debounce from "lodash/debounce"
+import { removeHash } from "./helpers"
 import { SolutionMap } from "./solution_map"
 import { ActorLocation, DisplayedActeur } from "./types"
-import { removeHash } from "./helpers"
 
 export class Actor implements DisplayedActeur {
-  identifiant_unique: string
+  uuid: string
   location: ActorLocation
   icon: string
   couleur: string
@@ -14,7 +13,7 @@ export class Actor implements DisplayedActeur {
   reparer: boolean
 
   constructor(actorFields: DisplayedActeur) {
-    this.identifiant_unique = actorFields.identifiant_unique
+    this.uuid = actorFields.uuid
     this.location = actorFields.location
     this.icon = actorFields.icon
     this.couleur = actorFields.couleur

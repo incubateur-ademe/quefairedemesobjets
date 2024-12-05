@@ -104,7 +104,9 @@ export default class extends Controller<HTMLElement> {
     this.displayActionList()
     window.addEventListener("hashchange", this.#setActiveActeur.bind(this))
     // Prevents the leaflet map to move when the user moves panel
-    this.acteurDetailsPanelTarget.addEventListener("touchmove", event => event.stopPropagation())
+    this.acteurDetailsPanelTarget.addEventListener("touchmove", (event) =>
+      event.stopPropagation(),
+    )
 
     if (!this.isIframeValue) {
       this.scrollToContent()
@@ -112,11 +114,11 @@ export default class extends Controller<HTMLElement> {
   }
 
   #setActiveActeur(event?: HashChangeEvent) {
-    const identifiantUnique = event
+    const uuid = event
       ? new URL(event.newURL).hash.substring(1)
       : window.location.hash.substring(1)
-    if (identifiantUnique) {
-      this.displayActeur(identifiantUnique)
+    if (uuid) {
+      this.displayActeur(uuid)
       this.dispatch("captureInteraction")
     } else {
       this.hideActeurDetailsPanel()
@@ -168,7 +170,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   scrollToContent() {
-    this.searchFormTarget.scrollIntoView({ behavior: "smooth"})
+    this.searchFormTarget.scrollIntoView({ behavior: "smooth" })
   }
 
   #hideAddressesPanel() {
@@ -209,7 +211,7 @@ export default class extends Controller<HTMLElement> {
     this.acteurDetailsPanelTarget.addEventListener(
       "animationend",
       () => {
-        this.acteurDetailsPanelTarget.dataset.exitAnimationEnded= "true"
+        this.acteurDetailsPanelTarget.dataset.exitAnimationEnded = "true"
       },
       { once: true },
     )
@@ -226,7 +228,7 @@ export default class extends Controller<HTMLElement> {
     this.#showActeurDetailsPanel()
   }
 
-  displayActeur(identifiantUnique) {
+  displayActeur(uuid: string) {
     const latitude = this.latitudeInputTarget.value
     const longitude = this.longitudeInputTarget.value
 
@@ -237,7 +239,7 @@ export default class extends Controller<HTMLElement> {
     if (this.hasCarteTarget) {
       params.set("carte", "1")
     }
-    const acteurDetailPath = `/adresse/${identifiantUnique}?${params.toString()}`
+    const acteurDetailPath = `/adresse_details/${uuid}?${params.toString()}`
     Turbo.visit(acteurDetailPath, { frame: "acteur-detail" })
     this.#showActeurDetailsPanel()
   }

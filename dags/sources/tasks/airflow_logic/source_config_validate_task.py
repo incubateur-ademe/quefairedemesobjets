@@ -3,8 +3,8 @@ import logging
 import pandas as pd
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.utils.trigger_rule import TriggerRule
+from shared.tasks.database_logic.db_manager import PostgresConnectionManager
 from sources.tasks.business_logic.source_config_validate import source_config_validate
 from utils import logging_utils as log
 
@@ -22,8 +22,9 @@ def source_config_validate_task(dag: DAG) -> PythonOperator:
 
 
 def source_config_validate_wrapper(**kwargs) -> None:
+    engine = PostgresConnectionManager().engine
     params = kwargs["params"]
-    engine = PostgresHook(postgres_conn_id="qfdmo_django_db").get_sqlalchemy_engine()
+
     codes_sc_db = set(
         pd.read_sql_table("qfdmo_souscategorieobjet", engine, columns=["code"])[
             "code"

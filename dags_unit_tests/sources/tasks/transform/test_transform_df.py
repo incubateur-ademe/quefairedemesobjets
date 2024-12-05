@@ -1,6 +1,7 @@
+import numpy as np
 import pandas as pd
 import pytest
-from sources.tasks.transform.transform_df import merge_duplicates
+from sources.tasks.transform.transform_df import clean_phone_number, merge_duplicates
 
 
 class TestMergeDuplicates:
@@ -124,3 +125,19 @@ class TestMergeDuplicates:
         )
 
         pd.testing.assert_frame_equal(result_df, expected_df)
+
+
+class TestCleanPhoneNumber:
+    @pytest.mark.parametrize(
+        "phone_number, code_postal, expected_phone_number",
+        [
+            (None, None, None),
+            (np.NaN, None, None),
+            ("1 23 45 67 89", "75001", "0123456789"),
+            ("33 1 23 45 67 89", "75001", "0123456789"),
+            ("0612345678", "75001", "0612345678"),
+            ("+33612345678", "75001", "+33612345678"),
+        ],
+    )
+    def test_clean_phone_number(self, phone_number, code_postal, expected_phone_number):
+        assert clean_phone_number(phone_number, code_postal) == expected_phone_number

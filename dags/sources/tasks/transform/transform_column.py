@@ -1,4 +1,5 @@
-from typing import Union
+import re
+from typing import Any, Union
 
 import pandas as pd
 
@@ -53,7 +54,45 @@ def convert_opening_hours(opening_hours: str | None) -> str:
         hours_translated = process_schedule(hours)
         return f"du {day_range} {hours_translated}"
 
-    if not opening_hours or pd.isna(opening_hours):
+    if pd.isna(opening_hours) or not opening_hours:
         return ""
 
     return process_entry(opening_hours)
+
+
+def clean_siren(siren: int | str | None) -> str | None:
+    siren = clean_number(siren)
+
+    if len(siren) == 9:
+        return siren
+    return None
+
+
+def clean_siret(siret: int | str | None) -> str | None:
+    siret = clean_number(siret)
+
+    if len(siret) == 9:
+        return siret
+
+    if len(siret) == 13:
+        return "0" + siret
+
+    if len(siret) == 14:
+        return siret
+
+    return None
+
+
+def clean_number(number: Any) -> str:
+    if pd.isna(number) or number is None:
+        return ""
+
+    # suppression des 2 derniers chiffres si le caractère si == .0
+    number = re.sub(r"\.0$", "", str(number))
+    # suppression de tous les caractères autre que digital
+    number = re.sub(r"[^\d+]", "", number)
+    return number
+
+
+def strip_string(value: str | None) -> str:
+    return str(value).strip() if not pd.isna(value) and value else ""
