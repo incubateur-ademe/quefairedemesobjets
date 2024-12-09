@@ -9,7 +9,7 @@ from sources.tasks.transform.transform_column import (
     strip_string,
 )
 
-PATH_NOMENCLARURE_DECHET = (
+URL_NOMENCLARURE_DECHET = (
     "https://data.ademe.fr/data-fair/api/v1/datasets/sinoe-r-nomenclature-dechets/lines"
     "?size=10000"
 )
@@ -38,7 +38,7 @@ def get_mapping_config(mapping_key: str = "sous_categories"):
     return config[mapping_key]
 
 
-def source_sinoe_dechet_mapping_get():
+def source_sinoe_dechet_mapping_get() -> dict:
     """Mapping de C_TYP_DECHET (ex: "01")
     vers L_TYP_DECHET (ex: "Déchets de composés chimiques")
     {
@@ -54,7 +54,7 @@ def source_sinoe_dechet_mapping_get():
         "_id": "4UbH7jVe1hc_lXPc0oWz9"
         },
     """
-    data = requests.get(PATH_NOMENCLARURE_DECHET).json()
+    data = requests.get(URL_NOMENCLARURE_DECHET).json()
     # Attention on a eu des renommage L_TYP_DECHET <-> LST_TYP_DECHET par le passé
     # d'où le get sur les deux clés
     return {

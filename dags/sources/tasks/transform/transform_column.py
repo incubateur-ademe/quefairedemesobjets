@@ -65,14 +65,18 @@ def clean_siren(siren: int | str | None) -> str | None:
 
     if len(siren) == 9:
         return siren
+
+    # Sur un siret valide, les 9 premiers chiffres sont
+    # un siren valide
+    siret = clean_siret(siren)
+    if siret:
+        return siren[:9]
+
     return None
 
 
 def clean_siret(siret: int | str | None) -> str | None:
     siret = clean_number(siret)
-
-    if len(siret) == 9:
-        return siret
 
     if len(siret) == 13:
         return "0" + siret

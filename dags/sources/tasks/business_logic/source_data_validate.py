@@ -5,6 +5,7 @@ import pandas as pd
 from sources.tasks.business_logic.read_mapping_from_postgres import (
     read_mapping_from_postgres,
 )
+from sources.tasks.transform.transform_column import clean_siren, clean_siret
 from utils import db_tasks
 from utils import logging_utils as log
 
@@ -75,6 +76,17 @@ def source_data_validate(
     if not df_produits_invalid.empty:
         log.preview("produitsdechets_acceptes invalid", df_produits_invalid)
         raise ValueError("produitsdechets_acceptes invalid")
+
+    # ------------------------------------
+    # siren et siret
+    if "siren" in df.columns:
+        siren_invalid = next(x for x in df["siren"] if clean_siren(x) is None)
+        if siren_invalid:
+            raise ValueError(f"siren invalid {siren_invalid}")
+    if "siret" in df.columns:
+        siret_invalid = next(x for x in df["siret"] if clean_siret(x) is None)
+        if siret_invalid:
+            raise ValueError(f"siret invalid {siret_invalid}")
 
     # Le but de la validation n'est pas de modifier les données
     # donc on retourn explicitement None et les tâches suivantes

@@ -8,6 +8,8 @@ from shared.tasks.database_logic.db_manager import PostgresConnectionManager
 from sources.config.airflow_params import TRANSFORMATION_MAPPING
 from sources.tasks.transform.transform_column import (
     cast_eo_boolean_or_string_to_boolean,
+    clean_siren,
+    clean_siret,
     mapping_try_or_fallback_column_value,
 )
 from sources.tasks.transform.transform_df import merge_duplicates
@@ -185,20 +187,34 @@ def source_data_normalize(
     # Etapes de normalisation spécifiques aux sources
     if source_code == "ordredespharmaciens":
         df = df_normalize_pharmacie(df)
-
-    if source_code == "ADEME_SINOE_Decheteries":
+    elif source_code == "ADEME_SINOE_Decheteries":
         df = df_normalize_sinoe(
             df,
             product_mapping=product_mapping,
             dechet_mapping=dechet_mapping,
             acteurtype_id_by_code=acteurtype_id_by_code,
         )
+    elif source_code == "SCRELEC":
+        df = df_normalize_screlec(df, acteurtype_id_by_code=acteurtype_id_by_code)
     else:
+        # Ou une normalisation générique pour l'acteur_type_id
         df["acteur_type_id"] = df["acteur_type_id"].apply(
             lambda x: mapping_utils.transform_acteur_type_id(
                 x, acteurtype_id_by_code=acteurtype_id_by_code
             )
         )
+
+    # Gestion SIREN et SIRET
+    # Placer la logique SIREN avant SIRET car les SIRET peuvent contenir
+    # des SIREN valides qu'on souhaite récupérer avant que clean_siret
+    # ne les supprime
+    if "siren" in df.columns:
+        df["siren"] = df["siren"].apply(clean_siren)
+        # TODO: on pourrait étendre la logique de clean_siren pour essayer
+        # de récupérer des SIREN dans les SIRET (les 9 premiers chiffres)
+        # df["siren"] = df["siren"].fillna(df["siret"].apply(clean_siren))
+    if "siret" in df.columns:
+        df["siret"] = df["siret"].apply(clean_siret)
 
     # Suppresion des colonnes non voulues:
     # - mappées à None
@@ -214,10 +230,15 @@ def source_data_normalize(
             f"==== DOUBLONS SUR LES IDENTIFIANTS UNIQUES {len(dups)/2} ====="
         )
         log.preview("Doublons sur identifiant_unique", dups)
-    if ignore_duplicates:
-        # TODO: Attention aux lignes dupliquées à cause de de service en ligne
-        #  + physique
-        df = df.drop_duplicates(subset=["identifiant_unique"], keep="first")
+
+        if ignore_duplicates:
+            # TODO: Attention aux lignes dupliquées à cause de de service en ligne
+            #  + physique
+            df = df.drop_duplicates(subset=["identifiant_unique"], keep="first")
+        else:
+            raise ValueError(
+                f"Doublons sur les identifiants uniques et {ignore_duplicates=}"
+            )
 
     # Après les appels aux fonctions de normalisation spécifiques aux sources
     # On supprime les acteurs qui n'ont pas de produits acceptés
@@ -250,7 +271,7 @@ def df_normalize_sinoe(
     dechet_mapping: dict,
     acteurtype_id_by_code: dict,
 ) -> pd.DataFrame:
-    """Normalisation spécifique à la dataframe SINOE"""
+    """Normalisation spécifique à la source SINOE"""
 
     public_mapping = {
         "DMA/PRO": constants.PUBLIC_PRO_ET_PAR,
@@ -310,6 +331,28 @@ def df_normalize_sinoe(
     log.preview("Sous-catégories du product_mapping", souscats_mapping)
     if souscats_invalid:
         raise ValueError(f"Sous-catégories invalides: {souscats_invalid}")
+
+    return df
+
+
+def df_normalize_screlec(
+    df: pd.DataFrame,
+    acteurtype_id_by_code: dict,
+) -> pd.DataFrame:
+    """Normalisation spécifique à la source SCRELEC"""
+
+    # acteur_type_id
+    # On essaye de faire au mieux pour les acteur_type_id
+    # (d'où le stop_on_error=False)
+    # et on remplace les None avec "commerce" par défaut
+    # comme décidé par le métier: https://www.notion.so/accelerateur-transition-ecologique-ademe/Importer-source-SCRELEC-PA-Piles-et-Accumulateurs-v1-1526523d57d780b49c85cd79d6baac61?pvs=4#1576523d57d78048ad4dcea1bbe787af
+    df["acteur_type_id"] = df["acteur_type_id"].apply(
+        lambda x: mapping_utils.transform_acteur_type_id(
+            x, acteurtype_id_by_code=acteurtype_id_by_code, stop_on_error=False
+        )
+    )
+    id_commerce = acteurtype_id_by_code["commerce"]
+    df["acteur_type_id"] = df["acteur_type_id"].fillna(id_commerce)
 
     return df
 
