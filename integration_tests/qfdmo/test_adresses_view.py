@@ -76,7 +76,7 @@ def proposition_service_donner(action_donner, sous_categorie):
 @pytest.fixture
 def displayed_acteur_reparer(proposition_service_reparer):
     displayed_acteur = DisplayedActeurFactory(
-        exclusivite_de_reprisereparation=True,
+        exclusivite_de_reprisereparation=False,
         location=Point(1, 1),
         statut=ActeurStatus.ACTIF,
     )
@@ -86,7 +86,6 @@ def displayed_acteur_reparer(proposition_service_reparer):
 
 @pytest.fixture
 def displayed_acteur_reparacteur(displayed_acteur_reparer):
-
     reparacteur = LabelQualiteFactory(code="reparacteur")
     displayed_acteur_reparer.labels.add(reparacteur)
     return displayed_acteur_reparer
@@ -171,12 +170,11 @@ class TestReparacteur:
                 "action_list": [action_reparer.code],
                 "latitude": [1],
                 "longitude": [1],
-                "label_reparacteur": ["true"],
+                "label_reparacteur": ["on"],
             }
         )
         adresses_view.setup(request)
         context = adresses_view.get_context_data()
-
         assert context["acteurs"].count() == 0
 
     def test_filtre_reparacteur_return_1_reparacteur(
@@ -188,12 +186,11 @@ class TestReparacteur:
                 "action_list": [action_reparer.code],
                 "latitude": [1],
                 "longitude": [1],
-                "label_reparacteur": ["true"],
+                "label_reparacteur": ["on"],
             }
         )
         adresses_view.setup(request)
         context = adresses_view.get_context_data()
-
         assert context["acteurs"].count() == 1
 
     def test_filtre_reparacteur_return_1_noreparacteur(
@@ -209,7 +206,7 @@ class TestReparacteur:
                 "action_list": [f"{action_reparer.code}|{action_donner.code}"],
                 "latitude": [1],
                 "longitude": [1],
-                "label_reparacteur": ["true"],
+                "label_reparacteur": ["on"],
             }
         )
         adresses_view.setup(request)
@@ -279,13 +276,15 @@ class TestExclusiviteReparation:
     def test_action_reparer_excludes_acteurs_avec_exclusivite_by_default(
         self, adresses_view, displayed_acteur_reparer, action_reparer, action_preter
     ):
+        displayed_acteur_reparer.exclusivite_de_reprisereparation = True
+        displayed_acteur_reparer.save()
         request = HttpRequest()
         request.GET = query_dict_from(
             {
                 "action_list": [f"{action_reparer.code}|{action_preter.code}"],
                 "latitude": [1],
                 "longitude": [1],
-                "pas_exclusivite_reparation": ["true"],
+                "pas_exclusivite_reparation": ["on"],
             }
         )
         adresses_view.setup(request)
@@ -355,7 +354,7 @@ class TestFilters:
                 "action_list": [f"{action_reparer.code}|{action_preter.code}"],
                 "latitude": [1],
                 "longitude": [1],
-                "sc_id": [sous_categorie.id],
+                "sc_id": [str(sous_categorie.id)],
                 "carte": carte,
             }
         )

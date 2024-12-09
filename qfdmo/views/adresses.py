@@ -12,12 +12,12 @@ from django.db.models import Q
 from django.db.models.functions import Length, Lower
 from django.db.models.query import QuerySet
 from django.forms import model_to_dict
-from django.http import JsonResponse
+from django.http import HttpRequest, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls.base import reverse
 from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_GET
-from django.views.generic.edit import FormView
+from django.views.generic.list import ListView
 
 from core.jinja2_handler import distance_to_acteur
 from core.utils import get_direction
@@ -96,136 +96,74 @@ class TurboFormMixin:
         return context
 
 
-class SearchActeursView(
+class ActeursListView(
     DigitalMixin,
     TurboFormMixin,
-    FormView,
+    ListView,
 ):
     # TODO : supprimer
     is_iframe = False
     is_carte = False
     is_embedded = True
 
-    def get_initial(self):
-        initial = super().get_initial()
-        # TODO: refacto forms : delete this line
-        initial["sous_categorie_objet"] = self.request.GET.get("sous_categorie_objet")
-        # TODO: refacto forms : delete this line
-        initial["adresse"] = self.request.GET.get("adresse")
-        initial["digital"] = self.request.GET.get("digital", "0")
-        initial["direction"] = get_direction(self.request, self.is_carte)
-        # TODO: refacto forms : delete this line
-        initial["latitude"] = self.request.GET.get("latitude")
-        # TODO: refacto forms : delete this line
-        initial["longitude"] = self.request.GET.get("longitude")
-        # TODO: refacto forms : delete this line
-        initial["label_reparacteur"] = self.request.GET.get("label_reparacteur")
-        initial["epci_codes"] = self.request.GET.getlist("epci_codes")
-        initial["pas_exclusivite_reparation"] = self.request.GET.get(
-            "pas_exclusivite_reparation", True
+    action_displayed: str = ""
+    action_list: str = ""
+    adresse: str | None = ""
+    bonus: bool = False
+    bounding_box: str = ""
+    digital: str = "0"
+    direction: str | None = None
+    epci_codes: str = ""
+    ess: bool = False
+    grouped_action: list[str] = []  # list ?
+    label_reparacteur: bool = False
+    latitude: float | None = 0.0
+    legend_grouped_action: list[str] = []  # list ?
+    longitude: float | None = 0.0
+    pas_exclusivite_reparation: bool = False
+    sc_id: int | None = None
+    sous_categorie_objet: str = ""
+    request: HttpRequest
+
+    def setup(self, request, *args, **kwargs):
+
+        # FIXME : on peut certainement faire mieux
+        self.request = request
+
+        self.sous_categorie_objet = request.GET.get("sous_categorie_objet")
+        self.adresse = request.GET.get("adresse")
+        self.digital = request.GET.get("digital", "0")
+        self.direction = get_direction(request, self.is_carte)
+        self.latitude = request.GET.get("latitude")
+        self.longitude = request.GET.get("longitude")
+        self.label_reparacteur = bool(request.GET.get("label_reparacteur"))
+        self.epci_codes = request.GET.getlist("epci_codes")
+
+        self.pas_exclusivite_reparation = bool(
+            request.GET.get("pas_exclusivite_reparation", True)
         )
-        # TODO: refacto forms : delete this line
-        initial["bonus"] = self.request.GET.get("bonus")
-        # TODO: refacto forms : delete this line
-        initial["ess"] = self.request.GET.get("ess")
-        # TODO: refacto forms : delete this line
-        initial["bounding_box"] = self.request.GET.get("bounding_box")
-        initial["sc_id"] = (
-            self.request.GET.get("sc_id") if initial["sous_categorie_objet"] else None
-        )
-
-        # Action to display and check
-        action_displayed = self._set_action_displayed()
-        initial["action_displayed"] = "|".join([a.code for a in action_displayed])
-
-        action_list = self._set_action_list(action_displayed)
-        initial["action_list"] = "|".join([a.code for a in action_list])
-
-        if self.is_carte:
-            grouped_action_choices = self._get_grouped_action_choices(action_displayed)
-            actions_to_select = self._get_selected_action()
-            initial["grouped_action"] = self._grouped_action_from(
-                grouped_action_choices, actions_to_select
-            )
-            # TODO : refacto forms, merge with grouped_action field
-            initial["legend_grouped_action"] = initial["grouped_action"]
-
-            initial["action_list"] = "|".join(
-                [a for ga in initial["grouped_action"] for a in ga.split("|")]
-            )
-
-        return initial
-
-    def get_form(self, form_class=None):
-        if self.request.GET & self.get_form_class().base_fields.keys():
-            # TODO: refacto forms we should use a bounded form in this case
-            # Here we check that the request shares some parameters
-            # with the fields in the form. If this happens, this might
-            # means that we are badly using request instead of a bounded
-            # form and that we need to access a validated form.
-            #
-            # This case happens when the form is loaded inside a turbo-frame.
-            # form = self.get_form_class()(self.request.GET)
-            form = super().get_form(form_class)
-        else:
-            form = super().get_form(form_class)
-
-        action_displayed = self._set_action_displayed() if self.is_carte else None
-        grouped_action_choices = (
-            self._get_grouped_action_choices(action_displayed)
-            if action_displayed
+        self.bonus = bool(request.GET.get("bonus"))
+        self.ess = bool(request.GET.get("ess"))
+        self.bounding_box = request.GET.get("bounding_box", "")
+        self.sc_id = (
+            int(request.GET.get("sc_id", ""))
+            if request.GET.get("sc_id", "").isnumeric()
             else None
         )
 
-        form.load_choices(
-            self.request,
-            grouped_action_choices=grouped_action_choices,
-            disable_reparer_option=(
-                "reparer" not in form.initial.get("grouped_action", [])
-            ),
-        )
+        return super().setup(request, *args, **kwargs)
 
-        return form
-
-    def get_data_from_request_or_bounded_form(self, key: str, default=None):
-        """Temporary dummy method
-
-        There is a flaw in the way the form is instantiated, because the
-        form is never bounded to its data.
-        The request is directly used to perform various tasks, like
-        populating some multiple choice field choices, hence missing all
-        the validation provided by django forms.
-
-        To prepare a future refactor of this form, the method here calls
-        the cleaned_data when the form is bounded and the request.GET
-        QueryDict when it is not bounded.
-        Note : we call getlist and not get because in some cases, the request
-        parameters needs to be treated as a list.
-
-        The form is currently used for various use cases:
-            - The map form
-            - The "iframe form" form (for https://epargnonsnosressources.gouv.fr)
-            - The turbo-frames
-        The form should be bounded at least when used in turbo-frames.
-
-        The name is explicitely very verbose because it is not meant to stay
-        a long time as is.
-
-        TODO: refacto forms : get rid of this method and use cleaned_data when
-        form is valid and request.GET for non-field request parameters"""
-        try:
-            return self.cleaned_data.get(key, default)
-        except AttributeError:
-            pass
-
-        try:
-            return self.request.GET.get(key, default)
-        except AttributeError:
-            return self.request.GET.getlist(key, default)
+    def get_queryset(self):
+        # Manage the selection of sous_categorie_objet and actions
+        acteurs = self._acteurs_from_sous_categorie_objet_and_actions()
+        if self.digital == "1":
+            acteurs = acteurs.digital()[:100]
+        else:
+            bbox, acteurs = self._bbox_and_acteurs_from_location_or_epci(acteurs)
+            acteurs = acteurs[: self._get_max_displayed_acteurs()]
+        return acteurs
 
     def get_context_data(self, **kwargs):
-        form = self.get_form_class()(self.request.GET)
-
         kwargs.update(
             # TODO: refacto forms : define a BooleanField carte on CarteAddressesForm
             carte=self.is_carte,
@@ -234,16 +172,10 @@ class SearchActeursView(
             location="{}",
         )
 
-        if form.is_valid():
-            self.cleaned_data = form.cleaned_data
-        else:
-            # TODO : refacto forms : handle this case properly
-            self.cleaned_data = form.cleaned_data
-
         # Manage the selection of sous_categorie_objet and actions
         acteurs = self._acteurs_from_sous_categorie_objet_and_actions()
 
-        if self.get_data_from_request_or_bounded_form("digital") == "1":
+        if self.digital == "1":
             acteurs = acteurs.digital()[:100]
         else:
             bbox, acteurs = self._bbox_and_acteurs_from_location_or_epci(acteurs)
@@ -251,35 +183,27 @@ class SearchActeursView(
 
             # Set Home location (address set as input)
             # FIXME : can be manage in template using the form value ?
-            if (
-                latitude := self.get_data_from_request_or_bounded_form("latitude")
-            ) and (
-                longitude := self.get_data_from_request_or_bounded_form("longitude")
-            ):
+            if (latitude := self.latitude) and (longitude := self.longitude):
                 kwargs.update(
                     location=json.dumps({"latitude": latitude, "longitude": longitude})
                 )
-
-        kwargs.update(acteurs=acteurs)
-        context = super().get_context_data(**kwargs)
-
         # TODO : refacto forms, gérer ça autrement
         try:
             if bbox is None:
-                context["form"].initial["bounding_box"] = None
+                kwargs["form"].initial["bounding_box"] = None
         except NameError:
             pass
 
-        return context
+        kwargs.update(acteurs=acteurs)
+        # FIXME : on peut certainement faire mieux
+        kwargs.update(object_list=acteurs)
+        return super().get_context_data(**kwargs)
 
     def _bbox_and_acteurs_from_location_or_epci(self, acteurs):
-        custom_bbox = cast(
-            str, self.get_data_from_request_or_bounded_form("bounding_box")
-        )
+        custom_bbox = cast(str, self.bounding_box)
         center = center_from_leaflet_bbox(custom_bbox)
-        latitude = center[1] or self.get_data_from_request_or_bounded_form("latitude")
-        longitude = center[0] or self.get_data_from_request_or_bounded_form("longitude")
-
+        latitude = center[1] or self.latitude
+        longitude = center[0] or self.longitude
         if custom_bbox:
             bbox = sanitize_leaflet_bbox(custom_bbox)
             acteurs_in_bbox = acteurs.in_bbox(bbox)
@@ -292,13 +216,12 @@ class SearchActeursView(
         # - Tester cas avec center retourné par leaflet
         if latitude and longitude:
             acteurs_from_center = acteurs.from_center(longitude, latitude)
-
             if acteurs_from_center.count():
                 custom_bbox = None
 
             return custom_bbox, acteurs_from_center
 
-        if epci_codes := self.get_data_from_request_or_bounded_form("epci_codes"):
+        if epci_codes := self.epci_codes:
             geojson_list = [retrieve_epci_geojson(code) for code in epci_codes]
             bbox = bbox_from_list_of_geojson(geojson_list, buffer=0)
             if geojson_list:
@@ -310,8 +233,9 @@ class SearchActeursView(
         return custom_bbox, acteurs.none()
 
     def _get_max_displayed_acteurs(self):
-        if self.request.GET.get("limit", "").isnumeric():
-            return int(self.request.GET.get("limit"))
+        limit = self.request.GET.get("limit", "")
+        if limit.isnumeric():
+            return int(limit)
         if self.is_carte:
             return settings.CARTE_MAX_SOLUTION_DISPLAYED
         return settings.DEFAULT_MAX_SOLUTION_DISPLAYED
@@ -330,13 +254,11 @@ class SearchActeursView(
                     for action in cached_action_instances
                     if direction in [d.code for d in action.directions.all()]
                 ]
-        if action_displayed := self.get_data_from_request_or_bounded_form(
-            "action_displayed", ""
-        ):
+        if self.action_displayed:
             cached_action_instances = [
                 action
                 for action in cached_action_instances
-                if action.code in action_displayed.split("|")
+                if action.code in self.action_displayed.split("|")
             ]
         # In form mode, only display actions with afficher=True
         # TODO : discuss with epargnonsnosressources if we can remove this condition
@@ -348,7 +270,7 @@ class SearchActeursView(
         return cached_action_instances
 
     def _set_action_list(self, action_displayed: List[Action]) -> List[Action]:
-        if action_list := self.get_data_from_request_or_bounded_form("action_list", ""):
+        if action_list := self.request.GET.get("action_list", ""):
             return [
                 action
                 for action in action_displayed
@@ -363,26 +285,20 @@ class SearchActeursView(
         # FIXME : est-ce possible d'optimiser en accédant au valeur initial du form ?
 
         # selection from interface
-        if self.get_data_from_request_or_bounded_form("grouped_action"):
+        if self.grouped_action:
             return [
                 code
-                for new_groupe_action in self.get_data_from_request_or_bounded_form(
-                    "grouped_action"
-                )
+                for new_groupe_action in self.grouped_action
                 for code in new_groupe_action.split("|")
             ]
         # Selection is not set in interface, get all available from
         # (checked_)action_list
-        if self.get_data_from_request_or_bounded_form("action_list"):
-            return self.get_data_from_request_or_bounded_form("action_list", "").split(
-                "|"
-            )
+        if self.action_list:
+            return self.action_list.split("|")
         # Selection is not set in interface, defeult checked action list is not set
         # get all available from action_displayed
-        if self.get_data_from_request_or_bounded_form("action_displayed"):
-            return self.get_data_from_request_or_bounded_form(
-                "action_displayed", ""
-            ).split("|")
+        if self.action_displayed:
+            return self.action_displayed.split("|")
         # return empty array, will search in all actions
         return []
 
@@ -399,19 +315,19 @@ class SearchActeursView(
                 for new_groupe_action in self.request.GET.getlist("grouped_action")
                 for code in new_groupe_action.split("|")
             ]
+
         # Selection is not set in interface, get all available from
         # (checked_)action_list
-        elif action_list := self.cleaned_data.get("action_list"):
+        elif action_list := self.action_list:
             # TODO : effet de bord si la list des action n'est pas cohérente avec
             # les actions affichées
             # il faut collecté les actions coché selon les groupes d'action
             codes = action_list.split("|")
         # Selection is not set in interface, defeult checked action list is not set
         # get all available from action_displayed
-        elif action_displayed := self.cleaned_data.get("action_displayed"):
+        elif action_displayed := self.action_displayed:
             codes = action_displayed.split("|")
         # return empty array, will search in all actions
-
         # Cast needed because of the cache
         cached_action_instances = cast(
             List[Action], cache.get_or_set("action_instances", get_action_instances)
@@ -437,9 +353,7 @@ class SearchActeursView(
         filters, excludes = self._compile_acteurs_queryset(
             reparer_is_checked, selected_actions_ids, reparer_action_id
         )
-
-        acteurs = DisplayedActeur.objects.filter(filters).exclude(excludes)
-
+        acteurs = DisplayedActeur.objects.exclude(excludes).filter(filters)
         if reparer_is_checked:
             acteurs = acteurs.with_reparer().with_bonus()
 
@@ -458,30 +372,23 @@ class SearchActeursView(
         filters = Q(statut=ActeurStatus.ACTIF)
         excludes = Q()
 
-        if (
-            self.get_data_from_request_or_bounded_form("pas_exclusivite_reparation")
-            is not False
-            or not reparer_is_checked
-        ):
+        if self.pas_exclusivite_reparation and reparer_is_checked:
             excludes |= Q(exclusivite_de_reprisereparation=True)
 
-        if self.get_data_from_request_or_bounded_form("ess"):
+        if self.ess:
             filters &= Q(labels__code="ess")
 
-        if self.get_data_from_request_or_bounded_form("bonus"):
+        if self.bonus:
             filters &= Q(labels__bonus=True)
 
-        if sous_categorie_id := self.get_data_from_request_or_bounded_form("sc_id", 0):
+        if sous_categorie_id := self.sc_id:
             filters &= Q(
                 proposition_services__sous_categories__id=sous_categorie_id,
             )
 
         actions_filters = Q()
 
-        if (
-            self.get_data_from_request_or_bounded_form("label_reparacteur")
-            and reparer_is_checked
-        ):
+        if self.label_reparacteur and reparer_is_checked:
             selected_actions_ids = [
                 a for a in selected_actions_ids if a != reparer_action_id
             ]
@@ -549,21 +456,78 @@ class SearchActeursView(
         ]
 
 
-class CarteSearchActeursView(SearchActeursView):
+class CarteSearchActeursView(ActeursListView):
     is_carte = True
     template_name = "qfdmo/carte.html"
-    form_class = CarteForm
+
+    def setup(self, request, *args, **kwargs):
+        parent_setup = super().setup(request, *args, **kwargs)
+
+        # Action to display and check
+        action_displayed = self._set_action_displayed()
+        self.action_displayed = "|".join([a.code for a in action_displayed])
+
+        action_list = self._set_action_list(action_displayed)
+        self.action_list = "|".join([a.code for a in action_list])
+
+        if self.is_carte:
+            grouped_action_choices = self._get_grouped_action_choices(action_displayed)
+            actions_to_select = self._get_selected_action()
+            self.grouped_action = self._grouped_action_from(
+                grouped_action_choices, actions_to_select
+            )
+            # TODO : refacto forms, merge with grouped_action field
+            self.legend_grouped_action = self.grouped_action
+
+            self.action_list = "|".join(
+                [a for ga in self.grouped_action for a in ga.split("|")]
+            )
+
+        # TODO : simplifiable avec le setup
+        grouped_action_choices = self._get_grouped_action_choices(
+            self._set_action_displayed()
+        )
+
+        self.form = CarteForm(
+            initial={
+                "direction": self.direction,
+                "adresse": self.adresse,
+                "digital": self.digital,
+                "latitude": self.latitude,
+                "longitude": self.longitude,
+                "action_displayed": self.action_displayed,
+                "action_list": self.action_list,
+                "label_reparacteur": self.label_reparacteur,
+                "epci_codes": self.epci_codes,
+                "pas_exclusivite_reparation": self.pas_exclusivite_reparation,
+                "bonus": self.bonus,
+                "ess": self.ess,
+                "bounding_box": self.bounding_box,
+                "sc_id": self.sc_id,
+                "grouped_action": self.grouped_action,
+                "legend_grouped_action": self.legend_grouped_action,
+                "sous_categorie_objet": self.sous_categorie_objet,
+            }
+        )
+
+        self.form.load_choices(
+            self.request,
+            grouped_action_choices=grouped_action_choices,
+            disable_reparer_option=(
+                "reparer" not in self.form.initial.get("grouped_action", [])
+            ),
+        )
+
+        return parent_setup
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update(is_carte=True)
-        return context
+        return super().get_context_data(**kwargs, form=self.form, is_carte=True)
 
     def _get_selected_action_ids(self):
         return [a.id for a in self._get_selected_action()]
 
 
-class FormulaireSearchActeursView(SearchActeursView):
+class FormulaireSearchActeursView(ActeursListView):
     """Affiche le formulaire utilisé sur epargnonsnosressources.gouv.fr
     Cette vue est à considérer en mode maintenance uniquement et ne doit pas être
     modifiée."""
@@ -571,6 +535,41 @@ class FormulaireSearchActeursView(SearchActeursView):
     is_iframe = True
     template_name = "qfdmo/formulaire.html"
     form_class = FormulaireForm
+
+    def setup(self, request, *args, **kwargs):
+        parent_setup = super().setup(request, *args, **kwargs)
+
+        # Action to display and check
+        action_displayed = self._set_action_displayed()
+        self.action_displayed = "|".join([a.code for a in action_displayed])
+
+        action_list = self._set_action_list(action_displayed)
+        self.action_list = "|".join([a.code for a in action_list])
+
+        self.form = FormulaireForm(
+            initial={
+                "direction": self.direction,
+                "adresse": self.adresse,
+                "digital": self.digital,
+                "latitude": self.latitude,
+                "longitude": self.longitude,
+                "action_displayed": self.action_displayed,
+                "action_list": self.action_list,
+                "label_reparacteur": self.label_reparacteur,
+                "pas_exclusivite_reparation": self.pas_exclusivite_reparation,
+                "bonus": self.bonus,
+                "ess": self.ess,
+                "bounding_box": self.bounding_box,
+                "sc_id": self.sc_id,
+                "sous_categorie_objet": self.sous_categorie_objet,
+            }
+        )
+        self.form.load_choices(self.request)
+
+        return parent_setup
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(**kwargs, form=self.form, is_carte=False)
 
     def _get_selected_action_ids(self):
         # TODO: merge this method with the one from CarteSearchActeursView

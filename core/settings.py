@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     "qfdmd",
     "qfdmo",
     "corsheaders",
+    "rest_framework",
 ]
 
 # FIXME : check if we can manage django forms templating with jinja2
