@@ -219,8 +219,8 @@ export default class extends Controller<HTMLElement> {
   }
 
   displayDigitalActeur(event) {
-    const identifiantUnique = event.currentTarget.dataset.identifiantUnique
-    window.location.hash = identifiantUnique
+    const uuid = event.currentTarget.dataset.uuid
+    window.location.hash = uuid
     document
       .querySelector("[aria-controls='acteurDetailsPanel'][aria-expanded='true']")
       ?.setAttribute("aria-expanded", "false")
