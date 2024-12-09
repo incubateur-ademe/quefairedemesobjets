@@ -50,7 +50,9 @@ def source_config_validate(
         raise ValueError("column_transformations doit être une liste")
 
     # Tester si les fonctions existent
-    function_names = [x["transformation"] for x in column_transformations]
+    function_names = [
+        x["transformation"] for x in column_transformations if "transformation" in x
+    ]
     for function_name in function_names:
         try:
             function_callable = TRANSFORMATION_MAPPING[function_name]

@@ -47,18 +47,32 @@ def source_data_normalize(
     df = df_acteur_from_source
 
     # Renommage des colonnes
+    # DEPRECATED: le rename est désormais géré comme une transformation
     df = df.rename(columns={k: v for k, v in column_mapping.items() if v is not None})
 
     # Transformation des colonnes
     # Appliquer la transformation à la colonne d'origine et stocker le résultat
     # dans la colonne de destination
     for transformation in column_transformations:
-        function_name = transformation["transformation"]
-        df[transformation["destination"]] = df[transformation["origin"]].apply(
-            TRANSFORMATION_MAPPING[function_name]
-        )
-        if transformation["destination"] != transformation["origin"]:
-            df.drop(columns=[transformation["origin"]], inplace=True)
+        if "origin" in transformation and "destination" in transformation:
+            if "transformation" in transformation:
+                function_name = transformation["transformation"]
+                df[transformation["destination"]] = df[transformation["origin"]].apply(
+                    TRANSFORMATION_MAPPING[function_name]
+                )
+                df.drop(columns=[transformation["origin"]], inplace=True)
+                if transformation["destination"] != transformation["origin"]:
+                    df.drop(columns=[transformation["origin"]], inplace=True)
+
+            else:
+                df.rename(
+                    columns={transformation["origin"]: transformation["destination"]},
+                    inplace=True,
+                )
+        else:
+            raise ValueError(
+                "Chaque transformation doit avoir les colonnes origine et destination"
+            )
 
     # DEBUT Traitement des identifiants
 
