@@ -26,10 +26,10 @@ class TestInitialValue:
         "digital": "0",
         "latitude": None,
         "longitude": None,
-        "label_reparacteur": None,
-        "ess": None,
-        "bonus": None,
-        "bounding_box": None,
+        "label_reparacteur": False,
+        "ess": False,
+        "bonus": False,
+        "bounding_box": "",
         "pas_exclusivite_reparation": True,
         "action_displayed": (
             "preter|emprunter|louer|mettreenlocation|reparer|donner|echanger"
@@ -39,7 +39,6 @@ class TestInitialValue:
             "preter|emprunter|louer|mettreenlocation|reparer|donner|echanger"
             "|acheter|revendre"
         ),
-        "epci_codes": [],
     }
 
     def test_formulaire_without_parameters(self, client):
@@ -85,4 +84,5 @@ class TestInitialValue:
                 "acheter|revendre",
                 "trier",
             ],
+            "epci_codes": [],
         }

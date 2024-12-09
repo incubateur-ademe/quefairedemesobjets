@@ -229,7 +229,6 @@ class DisplayedActeurQuerySet(models.QuerySet):
     def from_center(self, longitude, latitude):
         reference_point = Point(float(longitude), float(latitude), srid=4326)
         distance_in_degrees = settings.DISTANCE_MAX / 111320
-
         return (
             self.physical()
             .annotate(distance=Distance("location", reference_point))
