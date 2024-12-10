@@ -1,15 +1,20 @@
 from django.contrib.gis.db import models
 from django.db.models.functions import Now
 
-from dags.utils.shared_constants import FINISHED, REJECTED, TO_INSERT, TO_VALIDATE
+from dags.sources.config.shared_constants import (
+    DAGRUN_FINISHED,
+    DAGRUN_REJECTED,
+    DAGRUN_TOINSERT,
+    DAGRUN_TOVALIDATE,
+)
 from qfdmo.models.acteur import ActeurType, Source
 
 
 class DagRunStatus(models.TextChoices):
-    TO_VALIDATE = TO_VALIDATE
-    TO_INSERT = TO_INSERT
-    REJECTED = REJECTED
-    FINISHED = FINISHED
+    TO_VALIDATE = DAGRUN_TOVALIDATE
+    TO_INSERT = DAGRUN_TOINSERT
+    REJECTED = DAGRUN_REJECTED
+    FINISHED = DAGRUN_FINISHED
 
 
 class DagRun(models.Model):
