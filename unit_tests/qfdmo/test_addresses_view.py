@@ -1,5 +1,5 @@
 import pytest
-from django.http import HttpRequest
+from django.http import HttpRequest, QueryDict
 
 from qfdmo.views.adresses import CarteSearchActeursView, FormulaireSearchActeursView
 from unit_tests.core.test_utils import query_dict_from
@@ -68,7 +68,8 @@ class TestFormulaireViewGetActionList:
     @pytest.mark.django_db
     def test_get_action_list(self, params, action_list):
         request = HttpRequest()
-        request.GET = params
+        query_string = "&".join([f"{key}={value}" for key, value in params.items()])
+        request.GET = QueryDict(query_string)
         adresses_view = FormulaireSearchActeursView()
         adresses_view.setup(request)
 
