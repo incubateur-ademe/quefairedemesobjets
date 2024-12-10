@@ -237,6 +237,16 @@ class TestCreateRevisionActeur:
         )
         assert revision_acteur.action_principale == acteur.action_principale
 
+    def test_new_revision_acteur_on_acteur_with_proposition_services(self):
+        acteur = ActeurFactory()
+        proposition_service = PropositionServiceFactory()
+        acteur.proposition_services.add(proposition_service)
+        revision_acteur = RevisionActeurFactory(
+            identifiant_unique=acteur.identifiant_unique
+        )
+        assert acteur.proposition_services.count() > 0
+        assert revision_acteur.proposition_services.count() > 0
+
     def test_revision_acteur_is_parent(self):
         revision_acteur_parent = RevisionActeurFactory()
         revision_acteur = RevisionActeurFactory(parent=revision_acteur_parent)
@@ -311,7 +321,7 @@ class TestCreateRevisionActeurCreateParent:
 
         assert revision_acteur_parent.labels.count() == 0
 
-    def test_create_parent_proposition_servuces(self):
+    def test_create_parent_proposition_services(self):
         acteur = ActeurFactory()
         revision_acteur = RevisionActeurFactory(
             identifiant_unique=acteur.identifiant_unique

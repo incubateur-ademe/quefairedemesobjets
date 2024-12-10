@@ -369,3 +369,5 @@ CONTACT_FORM = decouple.config(
 ASSISTANT_SURVEY_FORM = decouple.config(
     "ASSISTANT_SURVEY_FORM", default="https://tally.so/r/wvNgx0", cast=str
 )
+
+QFDMO_GOOGLE_SEARCH_CONSOLE = "google9dfbbc61adbe3888.html"

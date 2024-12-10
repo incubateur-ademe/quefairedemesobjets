@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Any
 
 import pandas as pd
+from sources.config import shared_constants as constants
 from utils.formatter import format_libelle_to_code
 
 
@@ -190,7 +191,7 @@ def replace_with_selected_candidat(row):
         best_candidat_index = row.get("best_candidat_index", None)
         if best_candidat_index is not None and pd.notna(best_candidat_index):
             selected_candidat = ae_result[int(best_candidat_index) - 1]
-            row["statut"] = "ACTIF"
+            row["statut"] = constants.ACTEUR_ACTIF
             row["adresse_candidat"] = selected_candidat.get("adresse_candidat")
             row["siret"] = selected_candidat.get("siret_candidat")
             row["nom"] = selected_candidat.get("nom_candidat")

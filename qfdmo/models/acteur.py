@@ -23,6 +23,7 @@ from django.utils.functional import cached_property
 from unidecode import unidecode
 
 from core.constants import DIGITAL_ACTEUR_CODE
+from dags.sources.config.shared_constants import REPRISE_1POUR0, REPRISE_1POUR1
 from qfdmo.models.action import Action, get_action_instances
 from qfdmo.models.categorie_objet import SousCategorieObjet
 from qfdmo.models.utils import (
@@ -66,6 +67,13 @@ class ActeurStatus(models.TextChoices):
     SUPPRIME = "SUPPRIME", "supprimé"
 
 
+class DataLicense(models.TextChoices):
+    OPEN_LICENSE = "OPEN_LICENSE", "Licence Ouverte"
+    ODBL = "ODBL", "ODBL"
+    CC_BY_NC_SA = "CC_BY_NC_SA", "CC-BY-NC-SA"
+    NO_LICENSE = "NO_LICENSE", "Pas de licence"
+
+
 class ActeurPublicAccueilli(models.TextChoices):
     PROFESSIONNELS_ET_PARTICULIERS = (
         "Particuliers et professionnels",
@@ -77,8 +85,8 @@ class ActeurPublicAccueilli(models.TextChoices):
 
 
 class ActeurReprise(models.TextChoices):
-    UN_POUR_ZERO = "1 pour 0", "1 pour 0"
-    UN_POUR_UN = "1 pour 1", "1 pour 1"
+    UN_POUR_ZERO = REPRISE_1POUR0, "1 pour 0"
+    UN_POUR_UN = REPRISE_1POUR1, "1 pour 1"
 
 
 class ActeurType(CodeAsNaturalKeyModel):
@@ -132,6 +140,11 @@ class Source(CodeAsNaturalKeyModel):
     url = models.CharField(max_length=2048, blank=True, null=True)
     logo_file = models.ImageField(
         upload_to="logos", blank=True, null=True, validators=[validate_logo]
+    )
+    licence = models.CharField(
+        default=DataLicense.NO_LICENSE,
+        choices=DataLicense,
+        db_default=DataLicense.NO_LICENSE,
     )
 
 
@@ -447,21 +460,6 @@ class Acteur(BaseActeur):
         (revisionacteur, created) = RevisionActeur.objects.get_or_create(
             identifiant_unique=self.identifiant_unique, defaults=fields
         )
-        if created:
-            for proposition_service in self.proposition_services.all():  # type: ignore
-                revision_proposition_service = (
-                    RevisionPropositionService.objects.create(
-                        acteur=revisionacteur,
-                        action_id=proposition_service.action_id,
-                    )
-                )
-                revision_proposition_service.sous_categories.add(
-                    *proposition_service.sous_categories.all()
-                )
-            for label in self.labels.all():
-                revisionacteur.labels.add(label)
-            for acteur_service in self.acteur_services.all():
-                revisionacteur.acteur_services.add(acteur_service)
 
         return revisionacteur
 
@@ -515,9 +513,26 @@ class RevisionActeur(BaseActeur):
     def save(self, *args, **kwargs):
         # OPTIMIZE: if we need to validate the main action in the service propositions
         # I guess it should be here
-        self.set_default_fields_and_objects_before_save()
+        acteur = self.set_default_fields_and_objects_before_save()
         self.full_clean()
-        return super().save(*args, **kwargs)
+        creating = self._state.adding  # Before calling save
+        super_result = super().save(*args, **kwargs)
+        if creating and acteur:
+            for proposition_service in acteur.proposition_services.all():  # type: ignore
+                revision_proposition_service = (
+                    RevisionPropositionService.objects.create(
+                        acteur=self,
+                        action_id=proposition_service.action_id,
+                    )
+                )
+                revision_proposition_service.sous_categories.add(
+                    *proposition_service.sous_categories.all()
+                )
+            for label in acteur.labels.all():
+                self.labels.add(label)
+            for acteur_service in acteur.acteur_services.all():
+                self.acteur_services.add(acteur_service)
+        return super_result
 
     def save_as_parent(self, *args, **kwargs):
         """
@@ -526,41 +541,44 @@ class RevisionActeur(BaseActeur):
         self.full_clean()
         return super().save(*args, **kwargs)
 
-    def set_default_fields_and_objects_before_save(self):
+    def set_default_fields_and_objects_before_save(self) -> Acteur | None:
         if self.is_parent:
-            return
-        acteur_exists = True
-        if not self.identifiant_unique or not Acteur.objects.filter(
-            identifiant_unique=self.identifiant_unique
-        ):
-            acteur_exists = False
-        if not acteur_exists:
-            acteur = Acteur.objects.create(
-                **model_to_dict(
-                    self,
-                    exclude=[
-                        "id",
-                        "acteur_type",
-                        "source",
-                        "action_principale",
-                        "proposition_services",
-                        "acteur_services",
-                        "labels",
-                        "parent",
-                        "is_parent",
-                    ],
-                ),
-                acteur_type=(
-                    self.acteur_type
-                    if self.acteur_type
-                    else ActeurType.objects.get(code="commerce")
-                ),
-                source=self.source,
-                action_principale=self.action_principale,
-            )
+            return None
+
+        default_acteur_fields = model_to_dict(
+            self,
+            exclude=[
+                "id",
+                "acteur_type",
+                "source",
+                "action_principale",
+                "proposition_services",
+                "acteur_services",
+                "labels",
+                "parent",
+                "is_parent",
+            ],
+        )
+        default_acteur_fields.update(
+            {
+                "acteur_type": self.acteur_type
+                or ActeurType.objects.get(code="commerce"),
+                "source": self.source,
+                "action_principale": self.action_principale,
+            }
+        )
+
+        (acteur, created) = Acteur.objects.get_or_create(
+            identifiant_unique=self.identifiant_unique,
+            defaults=default_acteur_fields,
+        )
+        if created:
+            # Ici on ré-écrit les champs qui ont pu être généré automatiquement lors de
+            # la création de l'Acteur
             self.identifiant_unique = acteur.identifiant_unique
             self.identifiant_externe = acteur.identifiant_externe
             self.source = acteur.source
+        return acteur
 
     def create_parent(self):
         acteur = Acteur.objects.get(pk=self.pk)
