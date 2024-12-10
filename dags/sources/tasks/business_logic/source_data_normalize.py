@@ -53,11 +53,22 @@ def source_data_normalize(
     # Appliquer la transformation à la colonne d'origine et stocker le résultat
     # dans la colonne de destination
     for transformation in column_transformations:
-        function_name = transformation["transformation"]
-        df[transformation["destination"]] = df[transformation["origin"]].apply(
-            TRANSFORMATION_MAPPING[function_name]
-        )
-        df.drop(columns=[transformation["origin"]], inplace=True)
+        if "origin" in transformation and "destination" in transformation:
+            if "transformation" in transformation:
+                function_name = transformation["transformation"]
+                df[transformation["destination"]] = df[transformation["origin"]].apply(
+                    TRANSFORMATION_MAPPING[function_name]
+                )
+                df.drop(columns=[transformation["origin"]], inplace=True)
+            else:
+                df.rename(
+                    columns={transformation["origin"]: transformation["destination"]},
+                    inplace=True,
+                )
+        else:
+            raise ValueError(
+                "Chaque transformation doit avoir les colonnes origine et destination"
+            )
 
     # DEBUT Traitement des identifiants
 

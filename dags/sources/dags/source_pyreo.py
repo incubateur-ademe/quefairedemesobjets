@@ -17,15 +17,31 @@ with DAG(
                 "transformation": "clean_siret",
                 "destination": "siret",
             },
+            {
+                "origin": "id_point_apport_ou_reparation",
+                "destination": "identifiant_externe",
+            },
+            {
+                "origin": "type_de_point_de_collecte",
+                "destination": "acteur_type_id",
+            },
+            {
+                "origin": "ecoorganisme",
+                "destination": "source_id",
+            },
+            {
+                "origin": "nom_de_lorganisme",
+                "destination": "nom",
+            },
+            {
+                "origin": "longitudewgs84",
+                "destination": "longitude",
+            },
+            {
+                "origin": "latitudewgs84",
+                "destination": "latitude",
+            },
         ],
-        "column_mapping": {
-            "id_point_apport_ou_reparation": "identifiant_externe",
-            "type_de_point_de_collecte": "acteur_type_id",
-            "ecoorganisme": "source_id",
-            "nom_de_lorganisme": "nom",
-            "longitudewgs84": "longitude",
-            "latitudewgs84": "latitude",
-        },
         "columns_to_add_by_default": {
             "type_de_point_de_collecte": (
                 "magasin / franchise, enseigne commerciale / distributeur /"
