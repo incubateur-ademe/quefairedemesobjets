@@ -17,7 +17,6 @@ class Migration(migrations.Migration):
                 choices=[("Licence Ouverte", "Licence Ouverte"), ("ODBL", "ODBL")],
                 db_default="Licence Ouverte",
                 default="Licence Ouverte",
-                max_length=255,
             ),
         ),
     ]

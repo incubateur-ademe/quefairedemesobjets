@@ -139,9 +139,8 @@ class Source(CodeAsNaturalKeyModel):
         upload_to="logos", blank=True, null=True, validators=[validate_logo]
     )
     licence = models.CharField(
-        max_length=255,
         default=DataLicense.OpenLicense,
-        choices=DataLicense.choices,
+        choices=DataLicense,
         db_default=DataLicense.OpenLicense,
     )
 
