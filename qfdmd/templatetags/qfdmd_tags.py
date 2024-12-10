@@ -13,7 +13,8 @@ def patchwork() -> dict:
         .exclude(picto=None)
         .filter(pin_on_homepage=True)
     )
-    return {"top": produits[:20], "left": produits[20:25], "right": produits[25:30]}
+    produits = 30 * list(produits)
+    return {"top": produits[:10], "left": produits[10:14], "right": produits[16:19]}
 
 
 @register.simple_tag
