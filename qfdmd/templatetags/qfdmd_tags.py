@@ -13,7 +13,6 @@ def patchwork() -> dict:
         .exclude(picto=None)
         .filter(pin_on_homepage=True)
     )
-    produits = 30 * list(produits)
     return {"top": produits[:10], "left": produits[10:14], "right": produits[16:19]}
 
 
