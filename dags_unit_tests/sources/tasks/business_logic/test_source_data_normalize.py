@@ -263,7 +263,7 @@ class TestSourceDataNormalize:
     - [ ] test Suppresion des colonnes non voulues
     - [ ] test ignore_duplicates
     - [ ] test produitsdechets_acceptes vide ou None
-    - [ ] test transformation from column_transformations is called
+    - [x] test transformation from column_transformations is called
     """
 
     @pytest.fixture
@@ -523,7 +523,12 @@ class TestSourceDataNormalize:
                 "origin": "nom origin",
                 "transformation": "test_fct",
                 "destination": "nom destination",
-            }
+            },
+            {
+                "origin": "nom",
+                "transformation": "test_fct",
+                "destination": "nom",
+            },
         ]
         source_data_normalize_kwargs["df_acteur_from_source"] = pd.DataFrame(
             {
@@ -532,7 +537,8 @@ class TestSourceDataNormalize:
                 "source_id": ["source_id1"],
                 "acteur_type_id": ["decheterie"],
                 "produitsdechets_acceptes": ["Plastic Box"],
-                "nom origin": ["nom"],
+                "nom origin": ["nom origin 1"],
+                "nom": ["nom"],
             }
         )
 
@@ -540,6 +546,9 @@ class TestSourceDataNormalize:
         df = source_data_normalize(**source_data_normalize_kwargs)
         assert "nom destination" in df.columns
         assert df["nom destination"].iloc[0] == "success"
+
+        assert "nom" in df.columns
+        assert df["nom"].iloc[0] == "success"
 
 
 class TestDfNormalizePharmacie:
