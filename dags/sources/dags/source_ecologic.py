@@ -1,4 +1,5 @@
 from airflow import DAG
+from sources.config import shared_constants as constants
 from sources.config.airflow_params import get_mapping_config
 from sources.tasks.airflow_logic.operators import default_args, eo_task_chain
 
@@ -24,7 +25,7 @@ with DAG(
             "donnees-eo-ecologic/lines?size=10000"
         ),
         "columns_to_add_by_default": {
-            "statut": "ACTIF",
+            "statut": constants.ACTEUR_ACTIF,
         },
         "ignore_duplicates": False,
         "validate_address_with_ban": False,
