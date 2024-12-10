@@ -2,14 +2,15 @@ import json
 import math
 import re
 from datetime import datetime
-from typing import Any
+from typing import Any, Dict, List, Pattern, Tuple
 
 import pandas as pd
 from utils.formatter import format_libelle_to_code
 
 
 def _clean_number(number: Any) -> str | None:
-    if pd.isna(number) or number is None:
+    # On met les évaluations les moints couteuses en premier
+    if number is None or pd.isna(number):
         return None
 
     # suppression des 2 derniers chiffres si le caractère si == .0
@@ -56,32 +57,81 @@ def process_phone_number(number, code_postal):
     return number
 
 
+ACTEUR_TYPE_MAPPING_STATIC = {
+    # Here we store key without accents and special characters
+    "solution en ligne (site web, app. mobile)": "acteur_digital",
+    "artisan, commerce independant": "artisan",
+    "magasin / franchise,"
+    " enseigne commerciale / distributeur / point de vente": "commerce",
+    "point d'apport volontaire publique": "pav_public",
+    "association, entreprise de l'economie sociale et solidaire (ess)": "ess",
+    "etablissement de sante": "ets_sante",
+    "decheterie": "decheterie",
+    "pharmacie": "commerce",
+    "point d'apport volontaire prive": "pav_prive",
+    "plateforme inertes": "plateforme_inertes",
+    "magasin / franchise, enseigne commerciale / distributeur / point de vente "
+    "/ franchise, enseigne commerciale / distributeur / point de vente": "commerce",
+    "point d'apport volontaire ephemere / ponctuel": "pav_ponctuel",
+}
+
+# Voir décision https://www.notion.so/accelerateur-transition-ecologique-ademe/Mapper-les-codes-acteur-type-source-dynamiquement-1576523d57d7803b9a98c146730088c5
+# On sort de la fonction transform_acteur_type_id pour éviter
+# d'avoir à compiler les patterns à chaque appel
+ACTEUR_TYPE_MAPPING_DYNAMIC: List[Tuple[Pattern[str], str]] = [
+    (re.compile("hospitalier|clinique|medical", flags=re.IGNORECASE), "ets_sante"),
+    (re.compile(r"association", flags=re.IGNORECASE), "ess"),
+    (
+        re.compile(r"collectivite|mairie|ministere", flags=re.IGNORECASE),
+        "collectivite",
+    ),
+]
+
+
 # TODO : Ajout de tests unitaires
-def transform_acteur_type_id(value, acteurtype_id_by_code):
-    mapping_dict = {
-        # Here we store key without accents and special characters
-        "solution en ligne (site web, app. mobile)": "acteur_digital",
-        "artisan, commerce independant": "artisan",
-        "magasin / franchise,"
-        " enseigne commerciale / distributeur / point de vente": "commerce",
-        "point d'apport volontaire publique": "pav_public",
-        "association, entreprise de l'economie sociale et solidaire (ess)": "ess",
-        "etablissement de sante": "ets_sante",
-        "decheterie": "decheterie",
-        "pharmacie": "commerce",
-        "point d'apport volontaire prive": "pav_prive",
-        "plateforme inertes": "plateforme_inertes",
-        "magasin / franchise, enseigne commerciale / distributeur / point de vente "
-        "/ franchise, enseigne commerciale / distributeur / point de vente": "commerce",
-        "point d'apport volontaire ephemere / ponctuel": "pav_ponctuel",
-    }
-    code = mapping_dict.get(format_libelle_to_code(value), None)
+def transform_acteur_type_id(
+    value: str, acteurtype_id_by_code: Dict[str, int], stop_on_error: bool = True
+) -> int | None:
+    """Converti un libellé d'acteur type en son id correspondant
+
+    Args:
+        value (str): Libellé de l'acteur type de la source
+        acteurtype_id_by_code (dict): Dictionnaire de correspondance code -> id DB
+        stop_on_error (bool, optional): Si True, lève une exception si
+            le libellé n'est pas trouvé. Permets d'utiliser la fonction dans des
+            normalisation custom de certaines sources. On essaye au mieux
+            (avec stop_on_error=False) et on renormalise par dessus.
+
+    Returns:
+        int: Id de l'acteur type correspondant
+    """
+    value = format_libelle_to_code(value)
+
+    # On essaye de trouver le code selon l'ordre suivant:
+    # 1) On essaye dans nos codes DB
+    code = value if value in acteurtype_id_by_code.keys() else None
+
+    # 2) Sinon on essaye notre mapping statique
     if code is None:
-        raise ValueError(f"Acteur type `{value}` not found in mapping")
-    if code in acteurtype_id_by_code.keys():
-        return acteurtype_id_by_code[code]
-    else:
-        raise ValueError(f"Acteur type {code.lower()} not found in database")
+        code = ACTEUR_TYPE_MAPPING_STATIC.get(value, None)
+
+    # 3) Sinon on essaye notre mapping dynamique
+    if code is None:
+        code = next(
+            (
+                code
+                for pattern, code in ACTEUR_TYPE_MAPPING_DYNAMIC
+                if re.search(pattern, value)
+            ),
+            None,
+        )
+
+    if code is None and stop_on_error:
+        raise ValueError(
+            f"Libellé acteur type `{value}` pas trouvé (ni DB ni mappings)"
+        )
+
+    return acteurtype_id_by_code.get(code, None)
 
 
 def create_identifiant_unique(row):
