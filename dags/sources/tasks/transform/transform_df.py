@@ -1,5 +1,23 @@
 import pandas as pd
-from sources.tasks.transform.transform_column import clean_number
+from sources.tasks.transform.transform_column import (
+    clean_number,
+    clean_siren,
+    clean_siret,
+)
+
+
+def clean_siret_and_siren(row):
+    if "siret" in row:
+        row["siret"] = clean_siret(row["siret"])
+    else:
+        row["siret"] = None
+    if "siren" in row:
+        row["siren"] = clean_siren(row["siren"])
+    else:
+        row["siren"] = (
+            row["siret"][:9] if "siret" in row and row["siret"] is not None else None
+        )
+    return row[["siret", "siren"]]
 
 
 def merge_duplicates(
