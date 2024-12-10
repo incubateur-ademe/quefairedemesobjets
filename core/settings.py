@@ -364,3 +364,5 @@ FEEDBACK_FORM = decouple.config(
 CONTACT_FORM = decouple.config(
     "CONTACT_FORM", default="https://tally.so/r/wzYveR", cast=str
 )
+
+QFDMO_GOOGLE_SEARCH_CONSOLE = "google9dfbbc61adbe3888.html"
