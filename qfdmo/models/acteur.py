@@ -66,6 +66,11 @@ class ActeurStatus(models.TextChoices):
     SUPPRIME = "SUPPRIME", "supprimé"
 
 
+class DataLicense(models.TextChoices):
+    OpenLicense = "Licence Ouverte", "Licence Ouverte"
+    ODBL = "ODBL", "ODBL"
+
+
 class ActeurPublicAccueilli(models.TextChoices):
     PROFESSIONNELS_ET_PARTICULIERS = (
         "Particuliers et professionnels",
@@ -132,6 +137,12 @@ class Source(CodeAsNaturalKeyModel):
     url = models.CharField(max_length=2048, blank=True, null=True)
     logo_file = models.ImageField(
         upload_to="logos", blank=True, null=True, validators=[validate_logo]
+    )
+    licence = models.CharField(
+        max_length=255,
+        default=DataLicense.OpenLicense,
+        choices=DataLicense.choices,
+        db_default=DataLicense.OpenLicense,
     )
 
 
