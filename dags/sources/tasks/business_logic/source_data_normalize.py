@@ -54,10 +54,15 @@ def source_data_normalize(
     # dans la colonne de destination
     for transformation in column_transformations:
         function_name = transformation["transformation"]
-        df[transformation["destination"]] = df[transformation["origin"]].apply(
-            TRANSFORMATION_MAPPING[function_name]
-        )
-        df.drop(columns=[transformation["origin"]], inplace=True)
+        if isinstance(transformation["destination"], list):
+            df[transformation["destination"]] = df[transformation["origin"]].apply(
+                TRANSFORMATION_MAPPING[function_name], axis=1
+            )
+        else:
+            df[transformation["destination"]] = df[transformation["origin"]].apply(
+                TRANSFORMATION_MAPPING[function_name]
+            )
+            df.drop(columns=[transformation["origin"]], inplace=True)
 
     # DEBUT Traitement des identifiants
 

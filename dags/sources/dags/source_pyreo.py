@@ -14,9 +14,9 @@ with DAG(
     params={
         "column_transformations": [
             {
-                "origin": "siret",
-                "transformation": "clean_siret",
-                "destination": "siret",
+                "origin": ["siret"],
+                "transformation": "clean_siret_and_siren",
+                "destination": ["siret", "siren"],
             },
         ],
         "column_mapping": {
