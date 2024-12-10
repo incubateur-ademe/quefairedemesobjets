@@ -1,5 +1,8 @@
+{% extends "./header.html" %}
 {% load qfdmd_tags %}
-<header class="qf-flex qf-flex-col fr-container qf-relative">
-    {% include "./_bloc_marque.html" %}
-    {% patchwork %}
-</header>
+
+{% block header_post %}
+{% patchwork %}
+{% endblock header_post %}
+
+{% block header_search %}{% endblock %}

@@ -167,6 +167,7 @@ def context_processors():
         "django.contrib.messages.context_processors.messages",
         "core.context_processors.environment",
         "core.context_processors.content",
+        "core.context_processors.assistant",
         "dsfr.context_processors.site_config",
     ]
 
@@ -363,6 +364,10 @@ FEEDBACK_FORM = decouple.config(
 )
 CONTACT_FORM = decouple.config(
     "CONTACT_FORM", default="https://tally.so/r/wzYveR", cast=str
+)
+
+ASSISTANT_SURVEY_FORM = decouple.config(
+    "ASSISTANT_SURVEY_FORM", default="https://tally.so/r/wvNgx0", cast=str
 )
 
 QFDMO_GOOGLE_SEARCH_CONSOLE = "google9dfbbc61adbe3888.html"

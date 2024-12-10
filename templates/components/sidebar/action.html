@@ -5,11 +5,17 @@
     qf-flex qf-items-center qf-justify-center"
     data-fr-opened="false"
     aria-controls="fr-modal-{{ id }}"
+    aria-label="Rechercher un déchet ou objet"
 >
     {% block icon %}{% endblock %}
 </button>
 
-<dialog aria-labelledby="fr-modal-title-{{ id }}" role="dialog" id="fr-modal-{{ id }}" class="fr-modal">
+<dialog
+    aria-labelledby="fr-modal-title-{{ id }}"
+    role="dialog"
+    id="fr-modal-{{ id }}"
+    class="fr-modal z-40"
+>
     <div class="fr-container fr-container--fluid fr-container-md">
         <div class="fr-grid-row fr-grid-row--center">
             <div class="fr-col-12 fr-col-md-8 fr-col-lg-6">
