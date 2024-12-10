@@ -67,8 +67,10 @@ class ActeurStatus(models.TextChoices):
 
 
 class DataLicense(models.TextChoices):
-    OpenLicense = "Licence Ouverte", "Licence Ouverte"
+    OPEN_LICENSE = "OPEN_LICENSE", "Licence Ouverte"
     ODBL = "ODBL", "ODBL"
+    CC_BY_NC_SA = "CC_BY_NC_SA", "CC-BY-NC-SA"
+    NO_LICENSE = "NO_LICENSE", "Pas de licence"
 
 
 class ActeurPublicAccueilli(models.TextChoices):
@@ -139,9 +141,9 @@ class Source(CodeAsNaturalKeyModel):
         upload_to="logos", blank=True, null=True, validators=[validate_logo]
     )
     licence = models.CharField(
-        default=DataLicense.OpenLicense,
+        default=DataLicense.NO_LICENSE,
         choices=DataLicense,
-        db_default=DataLicense.OpenLicense,
+        db_default=DataLicense.NO_LICENSE,
     )
 
 
