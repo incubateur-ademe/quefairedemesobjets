@@ -3,6 +3,7 @@ from django.urls import path
 from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 
+from qfdmo.views import google_verification
 from qfdmo.views.adresses import (
     CarteSearchActeursView,
     FormulaireSearchActeursView,
@@ -22,6 +23,7 @@ urlpatterns = [
     path("carte", CarteSearchActeursView.as_view(), name="carte"),
     path("formulaire", FormulaireSearchActeursView.as_view(), name="formulaire"),
     path("connexion", LVAOLoginView.as_view(), name="login"),
+    path(settings.QFDMO_GOOGLE_SEARCH_CONSOLE, google_verification),
     path(
         "donnez-votre-avis",
         RedirectView.as_view(
