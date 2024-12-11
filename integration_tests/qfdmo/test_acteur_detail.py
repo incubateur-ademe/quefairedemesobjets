@@ -68,7 +68,7 @@ class TestDisplayLabel:
             ),
             (
                 [("label", "Mon label", False, True)],
-                "Propose le bonus réparation",
+                "Propose le Bonus Réparation",
                 True,
             ),
         ],
