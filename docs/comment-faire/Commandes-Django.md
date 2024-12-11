@@ -7,7 +7,7 @@ Pour executer une commande en production, il faut au préalable se connection au
 
 Ensuite il est possible d'ouvrir un shell (ici bash) dans le worker Scalingo.
 
-```
+```sh
 scalingo run --app quefairedemesobjets bash
 ```
 
@@ -17,12 +17,12 @@ L'ensemble des commandes documentées ci-après peut être lancée soit depuis u
 
 ### Créer un super-utilisateur
 
-```
+```sh
 python manage.py createsuperuser
 ```
 
 ### Changer le mot de passe d'un utilisateur
 
-```
+```sh
 python manage.py changepassword <nom-de-l-utilisateur>
 ```
