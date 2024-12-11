@@ -371,3 +371,5 @@ ASSISTANT_SURVEY_FORM = decouple.config(
 )
 
 QFDMO_GOOGLE_SEARCH_CONSOLE = "google9dfbbc61adbe3888.html"
+
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
