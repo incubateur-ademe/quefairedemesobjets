@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 import numpy as np
 import pandas as pd
 import pytest
-from create_final_actors import (
+from compute_acteurs.dags.create_final_actors import (
     apply_corrections_acteur,
     merge_acteur_services,
     merge_labels,
