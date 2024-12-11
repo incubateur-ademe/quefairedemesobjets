@@ -3,12 +3,8 @@ import { iframeResize } from "iframe-resizer";
 window.addEventListener("DOMContentLoaded", () => {
   const script = document.getElementById("quefairedemesdechets");
   const search = script?.dataset?.search;
-  const source = window.location.href.toString();
-
-  const src = `http://localhost:8000/dechet${
-    search || "?"
-  }&iframe=1&source=${source}`;
-
+  const origin = new URL(script?.getAttribute("src")).origin
+  const src = `${origin}/dechet/?iframe`;
   const iframe = document.createElement("iframe");
 
   const iframeAttributes = {
@@ -21,6 +17,7 @@ window.addEventListener("DOMContentLoaded", () => {
   for (var key in iframeAttributes) {
     iframe.setAttribute(key, iframeAttributes[key]);
   }
+
   iframeResize({}, iframe);
 
   script.parentNode.insertBefore(iframe, script);

@@ -1,12 +1,13 @@
 {% block modal_wrapper_for_id %}
 <button
-    class=""
+    {# The rounded-full here need to match the one of the icon #}
+    class="qf-p-0 lg:qf-rounded-l-full"
     data-fr-opened="false"
     aria-controls="fr-modal-{{ id }}"
     aria-labelled-by="sidebar-action-{{ id }}"
 >
     <span class="
-        lg:qf-rounded-l-full lg:qf-py-2w lg:qf-pl-2w
+        lg:qf-rounded-l-full lg:qf-py-2w lg:qf-pl-2w lg:qf-pr-1w
         hover:!qf-bg-green-menthe-850-active qf-bg-green-menthe-850-hover
         qf-flex qf-items-center qf-justify-center
         max-lg:qf-aspect-square max-lg:qf-p-3v max-lg:qf-scale-75 max-lg:qf-rounded-full

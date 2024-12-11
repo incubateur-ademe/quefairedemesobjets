@@ -1,6 +1,7 @@
 import logging
 from typing import Any
 
+from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.generic import DetailView, ListView
@@ -14,7 +15,7 @@ logger = logging.getLogger(__name__)
 def generate_iframe_script() -> str:
     return (
         '<script id="quefairedemesdechets" '
-        'src="https://quefairedemesdechets.ademe.fr/iframe.js" '
+        f'src="{settings.BASE_URL}/iframe.js">'
         "</script>"
     )
 
