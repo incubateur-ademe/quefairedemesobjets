@@ -21,6 +21,7 @@ from qfdmo.views.dags import DagsValidation
 urlpatterns = [
     path("", direct_access, name="direct_access"),
     path("carte", CarteSearchActeursView.as_view(), name="carte"),
+    path("carte.json", CarteSearchActeursView.as_view(), name="carte_json"),
     path("formulaire", FormulaireSearchActeursView.as_view(), name="formulaire"),
     path("connexion", LVAOLoginView.as_view(), name="login"),
     path(settings.QFDMO_GOOGLE_SEARCH_CONSOLE, google_verification),
