@@ -303,7 +303,7 @@ class TestSourceDataNormalize:
             {
                 "identifiant_externe": ["1"],
                 "ecoorganisme": ["source1"],
-                "source_id": ["source_id1"],
+                "source_id": ["source1"],
                 "acteur_type_id": ["decheterie"],
                 "produitsdechets_acceptes": ["Plastic Box"],
                 "statut": [statut],
@@ -318,7 +318,7 @@ class TestSourceDataNormalize:
             {
                 "identifiant_externe": ["1"],
                 "ecoorganisme": ["source1"],
-                "source_id": ["source_id1"],
+                "source_id": ["source1"],
                 "acteur_type_id": ["decheterie"],
                 "produitsdechets_acceptes": ["Plastic Box"],
             }
@@ -345,7 +345,7 @@ class TestSourceDataNormalize:
             {
                 "identifiant_externe": ["1"],
                 "ecoorganisme": ["source1"],
-                "source_id": ["source_id1"],
+                "source_id": ["source1"],
                 "acteur_type_id": ["decheterie"],
                 "labels_etou_bonus": [label_et_bonus],
                 "produitsdechets_acceptes": ["Plastic Box"],
@@ -375,7 +375,7 @@ class TestSourceDataNormalize:
             {
                 "identifiant_externe": ["1"],
                 "ecoorganisme": ["source1"],
-                "source_id": ["source_id1"],
+                "source_id": ["source1"],
                 "public_accueilli": [public_accueilli],
                 "acteur_type_id": ["decheterie"],
                 "produitsdechets_acceptes": ["Plastic Box"],
@@ -401,7 +401,7 @@ class TestSourceDataNormalize:
             {
                 "identifiant_externe": ["1"],
                 "ecoorganisme": ["source1"],
-                "source_id": ["source_id1"],
+                "source_id": ["source1"],
                 "public_accueilli": [public_accueilli],
                 "acteur_type_id": ["decheterie"],
                 "produitsdechets_acceptes": ["Plastic Box"],
@@ -437,7 +437,7 @@ class TestSourceDataNormalize:
             {
                 "identifiant_externe": ["1"],
                 "ecoorganisme": ["source1"],
-                "source_id": ["source_id1"],
+                "source_id": ["source1"],
                 "uniquement_sur_rdv": [uniquement_sur_rdv],
                 "acteur_type_id": ["decheterie"],
                 "produitsdechets_acceptes": ["Plastic Box"],
@@ -468,7 +468,7 @@ class TestSourceDataNormalize:
             {
                 "identifiant_externe": ["1"],
                 "ecoorganisme": ["source1"],
-                "source_id": ["source_id1"],
+                "source_id": ["source1"],
                 "reprise": [reprise],
                 "acteur_type_id": ["decheterie"],
                 "produitsdechets_acceptes": ["Plastic Box"],
@@ -504,7 +504,7 @@ class TestSourceDataNormalize:
             {
                 "identifiant_externe": ["1"],
                 "ecoorganisme": ["source1"],
-                "source_id": ["source_id1"],
+                "source_id": ["source1"],
                 "exclusivite_de_reprisereparation": [exclusivite_de_reprisereparation],
                 "acteur_type_id": ["decheterie"],
                 "produitsdechets_acceptes": ["Plastic Box"],
@@ -534,7 +534,7 @@ class TestSourceDataNormalize:
             {
                 "identifiant_externe": ["1"],
                 "ecoorganisme": ["source1"],
-                "source_id": ["source_id1"],
+                "source_id": ["source1"],
                 "acteur_type_id": ["decheterie"],
                 "produitsdechets_acceptes": ["Plastic Box"],
                 "nom origin": ["nom origin 1"],
