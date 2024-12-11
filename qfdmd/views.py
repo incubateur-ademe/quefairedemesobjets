@@ -12,12 +12,15 @@ from qfdmd.models import Suggestion, Synonyme
 logger = logging.getLogger(__name__)
 
 
-def generate_iframe_script() -> str:
-    return (
-        '<script id="quefairedemesdechets" '
-        f'src="{settings.BASE_URL}/iframe.js">'
-        "</script>"
-    )
+def generate_iframe_script(request) -> str:
+    logger.info(f"{request.resolver_match.view_name=}")
+    script_parts = ['<script id="quefairedemesdechets" ']
+    if request.resolver_match.view_name == "qfdmd:synonyme-detail":
+        slug = request.resolver_match.kwargs["slug"]
+        script_parts.append(f'data-objet="{slug}"')
+
+    script_parts.extend([f'src="{settings.BASE_URL}/iframe.js">', "</script>"])
+    return "".join(script_parts)
 
 
 SEARCH_VIEW_TEMPLATE_NAME = "components/search/view.html"
@@ -44,7 +47,7 @@ class BaseView:
         context.update(
             search_form=SearchForm(),
             search_view_template_name=SEARCH_VIEW_TEMPLATE_NAME,
-            iframe_script=generate_iframe_script(),
+            iframe_script=generate_iframe_script(self.request),
         )
         return context
 

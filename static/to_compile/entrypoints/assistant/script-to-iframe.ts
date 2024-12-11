@@ -2,9 +2,9 @@ import { iframeResize } from "iframe-resizer";
 
 window.addEventListener("DOMContentLoaded", () => {
   const script = document.getElementById("quefairedemesdechets");
-  const search = script?.dataset?.search;
+  const slug = script?.dataset?.objet;
   const origin = new URL(script?.getAttribute("src")).origin
-  const src = `${origin}/dechet/?iframe`;
+  const src = `${origin}/dechet/${slug || ''}?iframe`;
   const iframe = document.createElement("iframe");
 
   const iframeAttributes = {
