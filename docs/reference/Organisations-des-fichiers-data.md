@@ -1,4 +1,4 @@
-## Organisation du dossier `dags`
+# Architecture des fichiers de code de la partie data
 
 Appliqué plus spécifiquement lors de la réorganisation des fichiers des dags d'ingestion des sources
 
