@@ -10,15 +10,13 @@ Intégrer ce simulateur
 
 {% block modal_content %}
 <div class="qf-flex qf-flex-col qf-gap-1w">
-    <code>
-        {{ iframe_script }}
-    </code>
-    <i>
-        Copiez ce code puis ajoutez-le où vous souhaitez qu'il s'affiche sur votre site web
-    </i>
-
-    <strong>Vous souhaitez réutiliser le code du simulateur ?</strong>
     <p>
+        Il vous suffit de copier/coller ce code dans votre site Internet. En cas de difficultés, de questions, ou pour tout autre échange, vous pouvez contacter notre équipe.
+    </p>
+
+    {% include "components/code/code.html" with script=iframe_script %}
+
+    <p><strong>Vous souhaitez réutiliser le code du simulateur ?</strong>
         Ce simulateur est développé de manière ouverte (open source). L’ensemble du code est <a
             href="https://github.com/incubateur-ademe/quefairedemesobjets/"
             target="_blank"

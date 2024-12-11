@@ -13,11 +13,15 @@
             <h1>Page d'affichage dynamique de l'iframe de l'application</h1>
             <p>Ci-dessous s'affiche l'iframe de l'application</p>
         </div>
+
+        <h2>TEST DE L'IFRAME ADRESSE</h2>
         {% if request.GET.get('no-height') %}
+            <h3>SANS HAUTEUR DÉFINIE</h3>
             <div data-testid="iframe-no-height-wrapper" style="display: none;">
         {% endif %}
 
         {% if request.GET.get('carte') %}
+            <h3>LA CARTE</h3>
             <script src="http://localhost:8000/static/carte.js"
                     data-action_displayed="preter|emprunter|louer|mettreenlocation|reparer|donner|echanger|acheter|revendre"
                     data-max-width="800px"
@@ -25,6 +29,7 @@
                     data-bounding_box="{&quot;southWest&quot;: {&quot;lat&quot;: 47.570401, &quot;lng&quot;: 1.597977}, &quot;northEast&quot;: {&quot;lat&quot;: 48.313697, &quot;lng&quot;: 3.059159}}">
             </script>
         {% else %}
+            <h3>LE FORMULAIRE</h3>
             <script src="http://localhost:8000/static/iframe.js"
                     data-max_width="100%"
                     data-height="720px"
@@ -39,9 +44,10 @@
             </div>
         {% endif %}
 
-        <div>
-            <p>Fin de l'affichage de l'iframe de l'application</p>
-        </div>
+        <hr>
+
+        <h2>ASSISTANT</h2>
+        <script src="http://localhost:8000/script.js" id="quefairedemesdechets"></script>
 
         <div>
         Proin ut a fames amet mi a feugiat mus quam risus iaculis egestas dignissim maecenas scelerisque tristique a leo a diam a cursus consectetur sem ac litora aliquam a. Felis vestibulum vestibulum vitae a vestibulum aliquam id egestas a proin posuere aliquam bibendum facilisis adipiscing tempor aptent nibh feugiat felis rutrum integer condimentum tincidunt. Ipsum purus nulla habitant condimentum tempor vestibulum elementum scelerisque dui at condimentum gravida a scelerisque scelerisque a adipiscing parturient ornare enim sodales vestibulum. Nec egestas est habitant tempus tristique parturient conubia consectetur parturient vestibulum quam nam platea senectus suspendisse a varius accumsan auctor vehicula velit vel. Ullamcorper a et nulla et inceptos himenaeos in hac consectetur facilisis scelerisque condimentum pharetra facilisi porttitor ut feugiat suspendisse lectus quisque fermentum nibh platea.

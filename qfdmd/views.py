@@ -12,9 +12,11 @@ logger = logging.getLogger(__name__)
 
 
 def generate_iframe_script() -> str:
-    return '<script id="datagir_dechets" '
-    'src="https://quefairedemesdechets.ademe.fr/iframe.js" '
-    'data-search="?theme=default"></script>'
+    return (
+        '<script id="quefairedemesdechets" '
+        'src="https://quefairedemesdechets.ademe.fr/iframe.js" '
+        "</script>"
+    )
 
 
 SEARCH_VIEW_TEMPLATE_NAME = "components/search/view.html"
@@ -41,6 +43,7 @@ class BaseView:
         context.update(
             search_form=SearchForm(),
             search_view_template_name=SEARCH_VIEW_TEMPLATE_NAME,
+            iframe_script=generate_iframe_script(),
         )
         return context
 
@@ -70,8 +73,3 @@ class HomeView(BaseView, ListView):
 
 class SynonymeDetailView(BaseView, DetailView):
     model = Synonyme
-
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        context.update(iframe_script=generate_iframe_script())
-        return context
