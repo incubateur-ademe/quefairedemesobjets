@@ -57,7 +57,8 @@ def source_data_normalize(
         df[transformation["destination"]] = df[transformation["origin"]].apply(
             TRANSFORMATION_MAPPING[function_name]
         )
-        df.drop(columns=[transformation["origin"]], inplace=True)
+        if transformation["destination"] != transformation["origin"]:
+            df.drop(columns=[transformation["origin"]], inplace=True)
 
     # DEBUT Traitement des identifiants
 
