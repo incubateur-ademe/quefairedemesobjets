@@ -14,13 +14,13 @@ logger = logging.getLogger(__name__)
 
 def generate_iframe_script(request) -> str:
     logger.info(f"{request.resolver_match.view_name=}")
-    script_parts = ['<script id="quefairedemesdechets" ']
+    script_parts = ["<script"]
     if request.resolver_match.view_name == "qfdmd:synonyme-detail":
         slug = request.resolver_match.kwargs["slug"]
         script_parts.append(f'data-objet="{slug}"')
 
-    script_parts.extend([f'src="{settings.BASE_URL}/iframe.js">', "</script>"])
-    return "".join(script_parts)
+    script_parts.append(f'src="{settings.BASE_URL}/script.js"></script>')
+    return " ".join(script_parts)
 
 
 SEARCH_VIEW_TEMPLATE_NAME = "components/search/view.html"
