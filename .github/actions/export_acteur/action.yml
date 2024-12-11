@@ -36,22 +36,26 @@ runs:
       with:
         region: ${{ inputs.SCALINGO_APP_REGION }}
     - name: Login Scalingo CLI
+      shell: bash
       run: |
         scalingo login --api-token ${{ inputs.SCALINGO_API_TOKEN }}
     - name: Generate timestamped file name
       id: generate_filename
+      shell: bash
       run: |
         TIMESTAMP=$(date +'%Y%m%d_%H%M%S')
         echo "TIMESTAMPED_FILE_NAME=${TIMESTAMP}_${{ inputs.FILE_NAME }}" >> $GITHUB_ENV
     - name: Execute sync script in one-off container
+      shell: bash
       run: |
         scalingo --app ${{ inputs.SCALINGO_APP }} run \
         python manage.py export_displayedacteur --file ${{ env.TIMESTAMPED_FILE_NAME }}
       continue-on-error: true
     - name: Get file from s3
+      shell: bash
       run: |
         aws --endpoint-url ${{ inputs.S3_HOST }} s3 cp ${{ inputs.S3_BUCKET }}/exports/${{ env.TIMESTAMPED_FILE_NAME }} ${{ env.TIMESTAMPED_FILE_NAME }}
     - name: Save file to artefact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         path: ${{ env.TIMESTAMPED_FILE_NAME }}

@@ -25,7 +25,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Export Displayed Acteur
-        uses: ./.github/actions/export_displayedacteur
+        uses: ./.github/actions/export_acteur
         with:
           SCALINGO_API_TOKEN: ${{ env.DUPLICATE_API_TOKEN }}
           SCALINGO_APP: ${{ env.PRODUCTION_APP }}
