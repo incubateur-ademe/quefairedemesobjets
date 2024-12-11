@@ -1,0 +1,57 @@
+name: "Export Displayed Acteur"
+description: "Export displayed acteur and upload to S3"
+inputs:
+  SCALINGO_API_TOKEN:
+    description: "Duplicate API token"
+    required: true
+  SCALINGO_APP:
+    description: "Scalingo production app"
+    required: true
+  S3_HOST:
+    description: "S3 host URL"
+    required: true
+  S3_BUCKET:
+    description: "S3 production bucket"
+    required: true
+  AWS_ACCESS_KEY_ID:
+    description: "AWS access key ID"
+    required: true
+  AWS_SECRET_ACCESS_KEY:
+    description: "AWS secret access key"
+    required: true
+  FILE_NAME:
+    description: "File name for the exported file"
+    required: false
+    default: "exported_displayedacteur.csv"
+  SCALINGO_APP_REGION:
+    description: "Scalingo region for the app"
+    required: false
+    default: "osc-fr1"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install Scalingo CLI
+      uses: scalingo-community/setup-scalingo@v0.1.1
+      with:
+        region: ${{ inputs.SCALINGO_APP_REGION }}
+    - name: Login Scalingo CLI
+      run: |
+        scalingo login --api-token ${{ inputs.SCALINGO_API_TOKEN }}
+    - name: Generate timestamped file name
+      id: generate_filename
+      run: |
+        TIMESTAMP=$(date +'%Y%m%d_%H%M%S')
+        echo "TIMESTAMPED_FILE_NAME=${TIMESTAMP}_${{ inputs.FILE_NAME }}" >> $GITHUB_ENV
+    - name: Execute sync script in one-off container
+      run: |
+        scalingo --app ${{ inputs.SCALINGO_APP }} run \
+        python manage.py export_displayedacteur --file ${{ env.TIMESTAMPED_FILE_NAME }}
+      continue-on-error: true
+    - name: Get file from s3
+      run: |
+        aws --endpoint-url ${{ inputs.S3_HOST }} s3 cp ${{ inputs.S3_BUCKET }}/exports/${{ env.TIMESTAMPED_FILE_NAME }} ${{ env.TIMESTAMPED_FILE_NAME }}
+    - name: Save file to artefact
+      uses: actions/upload-artifact@v2
+      with:
+        path: ${{ env.TIMESTAMPED_FILE_NAME }}
