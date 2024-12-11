@@ -1,20 +1,23 @@
-{% extends "./action.html" %}
+{% extends "../action.html" %}
 
 {% block icon %}
-{% include "./_share_icon.html" %}
+{% include "./_icon.html" %}
 {% endblock icon %}
 
+{% block button_text %}
+Nous contacter
+{% endblock button_text %}
+
 {% block modal_title %}
-Partager ce simulateur
+Nous contacter
 {% endblock modal_title %}
 
 {% block modal_content %}
-Bouton de partage
+Formulaire de contact
 {% endblock modal_content %}
 
-{# TODO: documenter #}
 {% block modal_wrapper_for_id %}
-    {% with id="partager-le-simulateur" %}
+    {% with id="nous-contacter" %}
     {{ block.super }}
     {% endwith %}
 {% endblock modal_wrapper_for_id %}
