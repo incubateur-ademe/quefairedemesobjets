@@ -1,4 +1,4 @@
-# Commandes utiles
+# Commandes Django utiles
 
 ## En production
 

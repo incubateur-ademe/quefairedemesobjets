@@ -1,14 +1,10 @@
 # Docmentation Technique
 
-**Statut :** ❓ À approuver
-
 La documentation technique est entretenu dans le code, dans le dossier [docs](./docs)
 
 Elle suit la convention [DATAXIS](https://diataxis.fr) et mets en application, tant que faire se peut, les guidelines de doc définit par [Google](https://developers.google.com/style)
 
 ## TLTR : Dataxis
-
-**Statut :** ❓ À approuver
 
 On découpe la documentation en 4 parties:
 
@@ -18,8 +14,6 @@ On découpe la documentation en 4 parties:
 - REFERENCE : Description technique, ex : Architecture du dossier `data` [./reference](./docs/reference)
 
 ## Spécificité de la documentation du projet
-
-**Statut :** ❓ À approuver
 
 Pour tous affirmation dans la documentation, il est possible d'ajouter un `Statut` qui décrit si la décision est appliquée.
 
