@@ -6,8 +6,10 @@
 
 {# Recherche adresse #}
 <div class="fr-my-1w qf-flex-grow qf-flex qf-flex-col
+    {% if not is_ademe %}
     qf-px-2w md:qf-px-3w
     md:qf-pr-6w
+    {% endif %}
 "
 >
     {% include 'qfdmo/_addresses_partials/adresse_input_form.html' %}
