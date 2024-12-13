@@ -42,6 +42,7 @@
         "@hotwired/stimulus": "^3.2.2",
         "@hotwired/turbo": "^8.0.10",
         "bowser": "^2.11.0",
+        "docsify": "^4.11.4",
         "eslint-config-prettier": "^9.1.0",
         "iframe-resizer": "^4.4.5",
         "leaflet": "^1.9.4",

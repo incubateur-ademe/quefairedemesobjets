@@ -1,0 +1,26 @@
+{% load shared_tags static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documentation</title>
+  <link rel="stylesheet" href="//unpkg.com/docsify/lib/themes/vue.css">
+  {% favicon %}
+</head>
+<body>
+  <div id="app"></div>
+  <script>
+    window.$docsify = {
+      name: '',
+      repo: '',
+      basePath: '/static/',
+      loadSidebar: true,
+      subMaxLevel: 2
+    }
+  </script>
+  <!-- TODO : utiliser la version installée en local docsify/lib/docsify.min.js-->
+  <script src="{% static '/docsify/docsify.min.js' %}"></script>
+</body>
+</html>
