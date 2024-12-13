@@ -268,6 +268,9 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = [
     BASE_DIR / "static" / "to_collect",
     BASE_DIR / "static" / "compiled",
+    # Pour la plublication de la documentation technique
+    BASE_DIR / "techdocs",
+    ("docsify", BASE_DIR / "node_modules" / "docsify" / "lib"),
 ]
 
 
