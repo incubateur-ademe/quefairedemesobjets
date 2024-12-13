@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, List
 
 import orjson
 from django import forms
@@ -566,20 +566,25 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource):
 
     limit = 0
     offset = 0
+    licenses = []
 
-    def __init__(self, limit=0, offset=0, **kwargs):
+    def __init__(
+        self, limit: int = 0, offset: int = 0, licenses: List[str] = [], **kwargs
+    ):
         self.limit = limit
         self.offset = offset
+        self.licenses = licenses
         super().__init__(**kwargs)
 
     uuid = fields.Field(column_name="Identifiant", attribute="uuid", readonly=True)
-    sources = fields.Field(
-        column_name="Contributeurs", attribute="sources", readonly=True
-    )
+    sources = fields.Field(column_name="Paternité", attribute="sources", readonly=True)
 
     def dehydrate_sources(self, acteur):
         sources = ["Longue Vie Aux Objets", "ADEME"]
-        sources.extend([f"{source.libelle}" for source in acteur.sources.all()])
+        acteur_sources = acteur.sources.all()
+        if self.licenses:
+            acteur_sources = acteur_sources.filter(licence__in=self.licenses)
+        sources.extend([f"{source.libelle}" for source in acteur_sources])
         seen = set()
         deduplicated_sources = []
         for source in sources:
@@ -682,10 +687,22 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource):
     )
 
     def get_queryset(self):
+
         queryset = super().get_queryset()
+
+        queryset = queryset.prefetch_related(
+            "sources",
+            "labels",
+            "proposition_services__sous_categories",
+            "proposition_services__action",
+        )
+
+        # Only Actif
         queryset = queryset.filter(
             statut=ActeurStatus.ACTIF,
-        ).exclude(
+        )
+        # Exclude acteurs only professionals
+        queryset = queryset.exclude(
             public_accueilli__in=[
                 ActeurPublicAccueilli.AUCUN,
                 ActeurPublicAccueilli.PROFESSIONNELS,
@@ -695,16 +712,15 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource):
         queryset = queryset.exclude(
             identifiant_unique__icontains="_reparation_",
         )
-
-        queryset = queryset.prefetch_related(
-            "sources",
-            "labels",
-            "proposition_services__sous_categories",
-            "proposition_services__action",
-        )
+        # Export only acteurs with expected licenses
+        if self.licenses:
+            queryset = queryset.filter(sources__licence__in=self.licenses)
+        queryset = queryset.distinct()
         queryset = queryset.order_by("uuid")
+
         if self.limit:
             return queryset[self.offset : self.offset + self.limit]
+
         return queryset
 
     class Meta:
