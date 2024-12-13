@@ -1,6 +1,7 @@
 import logging
 from typing import Any
 
+from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.generic import DetailView, ListView
@@ -11,10 +12,16 @@ from qfdmd.models import Suggestion, Synonyme
 logger = logging.getLogger(__name__)
 
 
-def generate_iframe_script() -> str:
-    return '<script id="datagir_dechets" '
-    'src="https://quefairedemesdechets.ademe.fr/iframe.js" '
-    'data-search="?theme=default"></script>'
+def generate_iframe_script(request) -> str:
+    """Generates a <script> tag used to embed Assistant website."""
+    script_parts = ["<script"]
+
+    if request.resolver_match.view_name == "qfdmd:synonyme-detail":
+        produit_slug = request.resolver_match.kwargs["slug"]
+        script_parts.append(f'data-objet="{produit_slug}"')
+
+    script_parts.append(f'src="{settings.BASE_URL}/script.js"></script>')
+    return " ".join(script_parts)
 
 
 SEARCH_VIEW_TEMPLATE_NAME = "components/search/view.html"
@@ -41,6 +48,7 @@ class BaseView:
         context.update(
             search_form=SearchForm(),
             search_view_template_name=SEARCH_VIEW_TEMPLATE_NAME,
+            iframe_script=generate_iframe_script(self.request),
         )
         return context
 
@@ -70,8 +78,3 @@ class HomeView(BaseView, ListView):
 
 class SynonymeDetailView(BaseView, DetailView):
     model = Synonyme
-
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        context.update(iframe_script=generate_iframe_script())
-        return context
