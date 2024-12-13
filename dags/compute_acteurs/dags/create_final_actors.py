@@ -1,419 +1,29 @@
 from datetime import datetime, timedelta
 
-import pandas as pd
-import shortuuid
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+from compute_acteurs.tasks.airflow_logic.apply_corrections_acteur_task import (
+    apply_corrections_acteur_task,
+)
 from compute_acteurs.tasks.airflow_logic.compute_parent_ps_task import (
     compute_parent_ps_task,
 )
 from compute_acteurs.tasks.airflow_logic.compute_ps_task import compute_ps_task
-from shared.tasks.database_logic.db_manager import PostgresConnectionManager
+from compute_acteurs.tasks.airflow_logic.db_data_write_task import db_data_write_task
+from compute_acteurs.tasks.airflow_logic.deduplicate_acteur_serivces_task import (
+    deduplicate_acteur_serivces_task,
+)
+from compute_acteurs.tasks.airflow_logic.deduplicate_acteur_sources_task import (
+    deduplicate_acteur_sources_task,
+)
+from compute_acteurs.tasks.airflow_logic.deduplicate_labels_task import (
+    deduplicate_labels_task,
+)
+from compute_acteurs.tasks.airflow_logic.merge_acteur_services_task import (
+    merge_acteur_services_task,
+)
+from compute_acteurs.tasks.airflow_logic.merge_labels_task import merge_labels_task
 from utils.db_tasks import read_data_from_postgres
-
-
-def apply_corrections_acteur(**kwargs):
-
-    df_acteur = kwargs["ti"].xcom_pull(task_ids="load_acteur")
-    df_revisionacteur = kwargs["ti"].xcom_pull(task_ids="load_revisionacteur")
-
-    revisionacteur_parent_ids = df_revisionacteur["parent_id"].unique()
-
-    df_revisionacteur_parents = df_revisionacteur[
-        df_revisionacteur["identifiant_unique"].isin(revisionacteur_parent_ids)
-    ]
-
-    df_acteur = df_acteur.set_index("identifiant_unique")
-    df_revisionacteur = df_revisionacteur.set_index("identifiant_unique")
-    # suppression du if et ajout de errors="ignore" pour éviter les erreurs
-    df_revisionacteur = df_revisionacteur.drop(columns=["cree_le"], errors="ignore")
-    df_acteur.update(df_revisionacteur)
-
-    df_acteur_merged = pd.concat(
-        [df_acteur, df_revisionacteur_parents.set_index("identifiant_unique")]
-    ).reset_index()
-    df_children = (
-        df_revisionacteur.reset_index()
-        .query("parent_id.notnull()")
-        .drop_duplicates(subset=["parent_id", "identifiant_unique"])
-    )
-    df_children = pd.merge(
-        df_children[["parent_id", "identifiant_unique"]],
-        df_acteur_merged[["identifiant_unique", "source_id"]],
-        on="identifiant_unique",
-    )
-    df_acteur_merged = df_acteur_merged[
-        ~df_acteur_merged["identifiant_unique"].isin(
-            df_children["identifiant_unique"].tolist()
-        )
-    ].copy()
-
-    # Add a new column uuid to make the displayedacteur id without source name in id
-    df_acteur_merged["uuid"] = df_acteur_merged["identifiant_unique"].apply(
-        lambda x: shortuuid.uuid(name=x)
-    )
-
-    return {
-        "df_acteur_merged": df_acteur_merged,
-        # ["parent_id", "child_id", "child_source_id"]
-        "df_children": df_children[
-            ["parent_id", "identifiant_unique", "source_id"]
-        ].reset_index(drop=True),
-    }
-
-
-def write_data_to_postgres(**kwargs):
-    df_acteur_merged = kwargs["ti"].xcom_pull(task_ids="apply_corrections_acteur")[
-        "df_acteur_merged"
-    ]
-    df_labels_updated = kwargs["ti"].xcom_pull(task_ids="deduplicate_labels")
-    df_acteur_services_updated = kwargs["ti"].xcom_pull(
-        task_ids="deduplicate_acteur_serivces"
-    )
-    df_acteur_sources_updated = kwargs["ti"].xcom_pull(
-        task_ids="deduplicate_acteur_sources"
-    )
-    task_output = kwargs["ti"].xcom_pull(task_ids="deduplicate_propositionservices")
-
-    df_propositionservice_merged = task_output["df_final_ps_updated"]
-    df_propositionservice_sous_categories_merged = task_output[
-        "df_final_sous_categories"
-    ]
-    df_propositionservice_sous_categories_merged.rename(
-        columns={"propositionservice_id": "displayedpropositionservice_id"},
-        inplace=True,
-    )
-
-    engine = PostgresConnectionManager().engine
-
-    original_table_name_actor = "qfdmo_displayedacteur"
-    temp_table_name_actor = "qfdmo_displayedacteurtemp"
-
-    original_table_name_labels = "qfdmo_displayedacteur_labels"
-    temp_table_name_labels = "qfdmo_displayedacteurtemp_labels"
-
-    original_table_name_acteur_services = "qfdmo_displayedacteur_acteur_services"
-    temp_table_name_acteur_services = "qfdmo_displayedacteurtemp_acteur_services"
-
-    original_table_name_sources = "qfdmo_displayedacteur_sources"
-    temp_table_name_sources = "qfdmo_displayedacteurtemp_sources"
-
-    original_table_name_ps = "qfdmo_displayedpropositionservice"
-    temp_table_name_ps = "qfdmo_displayedpropositionservicetemp"
-
-    original_table_name_pssc = "qfdmo_displayedpropositionservice_sous_categories"
-    temp_table_name_pssc = "qfdmo_displayedpropositionservicetemp_sous_categories"
-
-    with engine.connect() as conn:
-        conn.execute(f"DELETE FROM {temp_table_name_pssc}")
-        conn.execute(f"DELETE FROM {temp_table_name_ps}")
-        conn.execute(f"DELETE FROM {temp_table_name_labels}")
-        conn.execute(f"DELETE FROM {temp_table_name_acteur_services}")
-        conn.execute(f"DELETE FROM {temp_table_name_sources}")
-        conn.execute(f"DELETE FROM {temp_table_name_actor}")
-
-        df_acteur_merged[
-            [
-                "identifiant_unique",
-                "nom",
-                "adresse",
-                "adresse_complement",
-                "code_postal",
-                "ville",
-                "url",
-                "email",
-                "location",
-                "telephone",
-                "nom_commercial",
-                "nom_officiel",
-                "siren",
-                "siret",
-                "identifiant_externe",
-                "acteur_type_id",
-                "statut",
-                "source_id",
-                "cree_le",
-                "modifie_le",
-                "naf_principal",
-                "commentaires",
-                "horaires_osm",
-                "horaires_description",
-                "description",
-                "public_accueilli",
-                "reprise",
-                "exclusivite_de_reprisereparation",
-                "uniquement_sur_rdv",
-                "action_principale_id",
-                "uuid",
-            ]
-        ].to_sql(
-            temp_table_name_actor,
-            engine,
-            if_exists="append",
-            index=False,
-            method="multi",
-            chunksize=1000,
-        )
-
-        df_labels_updated[["displayedacteur_id", "labelqualite_id"]].to_sql(
-            temp_table_name_labels,
-            engine,
-            if_exists="append",
-            index=False,
-            method="multi",
-            chunksize=1000,
-        )
-
-        df_acteur_sources_updated[["displayedacteur_id", "source_id"]].to_sql(
-            temp_table_name_sources,
-            engine,
-            if_exists="append",
-            index=False,
-            method="multi",
-            chunksize=1000,
-        )
-
-        df_acteur_services_updated[["displayedacteur_id", "acteurservice_id"]].to_sql(
-            temp_table_name_acteur_services,
-            engine,
-            if_exists="append",
-            index=False,
-            method="multi",
-            chunksize=1000,
-        )
-
-        df_propositionservice_merged[["id", "action_id", "acteur_id"]].to_sql(
-            temp_table_name_ps,
-            engine,
-            if_exists="append",
-            index=False,
-            method="multi",
-            chunksize=1000,
-        )
-
-        df_propositionservice_sous_categories_merged[
-            ["displayedpropositionservice_id", "souscategorieobjet_id"]
-        ].to_sql(
-            temp_table_name_pssc,
-            engine,
-            if_exists="append",
-            index=False,
-            method="multi",
-            chunksize=1000,
-        )
-
-    with engine.begin() as conn:
-        conn.execute(
-            f"ALTER TABLE {original_table_name_actor} "
-            f"RENAME TO {original_table_name_actor}_old"
-        )
-        conn.execute(
-            f"ALTER TABLE {temp_table_name_actor} "
-            f"RENAME TO {original_table_name_actor}"
-        )
-        conn.execute(
-            f"ALTER TABLE {original_table_name_actor}_old "
-            f"RENAME TO {temp_table_name_actor}"
-        )
-
-        conn.execute(
-            f"ALTER TABLE {original_table_name_labels} "
-            f"RENAME TO {original_table_name_labels}_old"
-        )
-        conn.execute(
-            f"ALTER TABLE {temp_table_name_labels} "
-            f"RENAME TO {original_table_name_labels}"
-        )
-        conn.execute(
-            f"ALTER TABLE {original_table_name_labels}_old "
-            f"RENAME TO {temp_table_name_labels}"
-        )
-        conn.execute(
-            f"ALTER TABLE {original_table_name_sources} "
-            f"RENAME TO {original_table_name_sources}_old"
-        )
-        conn.execute(
-            f"ALTER TABLE {temp_table_name_sources} "
-            f"RENAME TO {original_table_name_sources}"
-        )
-        conn.execute(
-            f"ALTER TABLE {original_table_name_sources}_old "
-            f"RENAME TO {temp_table_name_sources}"
-        )
-
-        conn.execute(
-            f"ALTER TABLE {original_table_name_acteur_services} "
-            f"RENAME TO {original_table_name_acteur_services}_old"
-        )
-        conn.execute(
-            f"ALTER TABLE {temp_table_name_acteur_services} "
-            f"RENAME TO {original_table_name_acteur_services}"
-        )
-        conn.execute(
-            f"ALTER TABLE {original_table_name_acteur_services}_old "
-            f"RENAME TO {temp_table_name_acteur_services}"
-        )
-
-        conn.execute(
-            f"ALTER TABLE {original_table_name_ps} "
-            f"RENAME TO {original_table_name_ps}_old"
-        )
-        conn.execute(
-            f"ALTER TABLE {temp_table_name_ps} " f"RENAME TO {original_table_name_ps}"
-        )
-        conn.execute(
-            f"ALTER TABLE {original_table_name_ps}_old "
-            f"RENAME TO {temp_table_name_ps}"
-        )
-
-        conn.execute(
-            f"ALTER TABLE {original_table_name_pssc} "
-            f"RENAME TO {original_table_name_pssc}_old"
-        )
-        conn.execute(
-            f"ALTER TABLE {temp_table_name_pssc} "
-            f"RENAME TO {original_table_name_pssc}"
-        )
-        conn.execute(
-            f"ALTER TABLE {original_table_name_pssc}_old "
-            f"RENAME TO {temp_table_name_pssc}"
-        )
-
-    print("Table swap completed successfully.")
-
-
-def merge_labels(**kwargs):
-    return _merge_acteurs_many2many_relationship(
-        "load_acteur_labels", "load_revisionacteur_labels", **kwargs
-    )
-
-
-# FIXME : This function should be tested
-def merge_acteur_services(**kwargs):
-    return _merge_acteurs_many2many_relationship(
-        "load_acteur_acteur_services", "load_revisionacteur_acteur_services", **kwargs
-    )
-
-
-def deduplicate_labels(**kwargs):
-    return _deduplicate_acteurs_many2many_relationship(
-        "merge_labels", "labelqualite_id", **kwargs
-    )
-
-
-def deduplicate_acteur_serivces(**kwargs):
-    return _deduplicate_acteurs_many2many_relationship(
-        "merge_acteur_services", "acteurservice_id", **kwargs
-    )
-
-
-def deduplicate_acteur_sources(**kwargs):
-    data_actors = kwargs["ti"].xcom_pull(task_ids="apply_corrections_acteur")
-    df_children = data_actors["df_children"]
-    df_acteur_merged = data_actors["df_acteur_merged"]
-
-    df_acteur_sources_without_parents = df_acteur_merged[
-        ~df_acteur_merged["identifiant_unique"].isin(df_children["parent_id"])
-    ][["identifiant_unique", "source_id"]]
-
-    df_acteur_sources_without_parents = df_acteur_sources_without_parents.rename(
-        columns={"identifiant_unique": "displayedacteur_id"}
-    )
-
-    parents_df = df_children[["parent_id", "source_id"]].drop_duplicates()
-
-    parents_df = parents_df.rename(columns={"parent_id": "displayedacteur_id"})
-
-    result_df = pd.concat(
-        [df_acteur_sources_without_parents, parents_df], ignore_index=True
-    )
-
-    result_df = result_df[
-        ~result_df["displayedacteur_id"].isin(
-            df_children["identifiant_unique"].tolist()
-        )
-    ]
-
-    return result_df
-
-
-def _merge_acteurs_many2many_relationship(
-    link_with_acteur_task_id: str, link_with_revisionacteur_task_id: str, **kwargs: dict
-):
-    # Pull dataframes
-    df_link_with_acteur = kwargs["ti"].xcom_pull(task_ids=link_with_acteur_task_id)
-    df_link_with_revisionacteur = kwargs["ti"].xcom_pull(
-        task_ids=link_with_revisionacteur_task_id
-    )
-    df_revisionacteur = kwargs["ti"].xcom_pull(task_ids="load_revisionacteur")
-
-    # Remove the link_with_acteur for the acteur that have a revision
-    df_link_with_acteur = df_link_with_acteur[
-        ~df_link_with_acteur["acteur_id"].isin(df_revisionacteur["identifiant_unique"])
-    ].copy()
-
-    # Rename 'acteur_id' column to 'displayedacteur_id' and drop 'id' column
-    df_link_with_acteur.rename(
-        columns={"acteur_id": "displayedacteur_id"}, inplace=True
-    )
-    df_link_with_acteur.drop(columns=["id"], inplace=True)
-
-    # Rename 'revisionacteur_id' column to 'displayedacteur_id' and drop 'id' column
-    df_link_with_revisionacteur.rename(
-        columns={"revisionacteur_id": "displayedacteur_id"}, inplace=True
-    )
-    df_link_with_revisionacteur.drop(columns=["id"], inplace=True)
-
-    # Concatenate dataframes excluding common 'displayedacteur_id' in df_actor
-    df_link_with_acteur_merged = pd.concat(
-        [
-            df_link_with_acteur,
-            df_link_with_revisionacteur,
-        ]
-    ).drop_duplicates()
-
-    return df_link_with_acteur_merged
-
-
-def _deduplicate_acteurs_many2many_relationship(
-    merged_relationship_task_id: str, col: str, **kwargs: dict
-):
-    df_children = kwargs["ti"].xcom_pull(task_ids="apply_corrections_acteur")[
-        "df_children"
-    ]
-    df_merged_relationship = kwargs["ti"].xcom_pull(
-        task_ids=merged_relationship_task_id
-    )
-
-    # Keep only the relationship of the children
-    df_children_relationship = df_children.merge(
-        df_merged_relationship,
-        left_on="identifiant_unique",
-        right_on="displayedacteur_id",
-        how="inner",
-    )
-
-    # Deduplicate the relationship : renaming parent_id to displayedacteur_id
-    df_children_relationship.drop(columns=["displayedacteur_id"], inplace=True)
-    df_children_relationship.drop_duplicates(
-        subset=["parent_id", col], keep="first", inplace=True
-    )
-    df_children_relationship.rename(
-        columns={"parent_id": "displayedacteur_id"}, inplace=True
-    )
-
-    df_relationship = pd.concat(
-        [df_merged_relationship, df_children_relationship[["displayedacteur_id", col]]],
-        ignore_index=True,
-    )
-    df_relationship = df_relationship[
-        ~df_relationship["displayedacteur_id"].isin(
-            df_children["identifiant_unique"].tolist()
-        )
-    ]
-
-    return df_relationship
-
 
 default_args = {
     "owner": "airflow",
@@ -514,7 +124,7 @@ load_acteur_acteur_services_task = PythonOperator(
     retry_delay=read_retry_interval,
 )
 
-read_revisionacteur_labels = PythonOperator(
+load_revisionacteur_labels_task = PythonOperator(
     task_id="load_revisionacteur_labels",
     python_callable=read_data_from_postgres,
     op_kwargs={"table_name": "qfdmo_revisionacteur_labels"},
@@ -531,55 +141,20 @@ load_revisionacteur_acteur_services_task = PythonOperator(
     retries=read_retry_count,
     retry_delay=read_retry_interval,
 )
-# qfdmo_revisionacteur_acteur_services
-
-merge_labels_task = PythonOperator(
-    task_id="merge_labels",
-    python_callable=merge_labels,
-    dag=dag,
-)
-
-merge_acteur_services_task = PythonOperator(
-    task_id="merge_acteur_services",
-    python_callable=merge_acteur_services,
-    dag=dag,
-)
-
-deduplicate_labels_task = PythonOperator(
-    task_id="deduplicate_labels",
-    python_callable=deduplicate_labels,
-    dag=dag,
-)
-
-deduplicate_acteur_serivces_task = PythonOperator(
-    task_id="deduplicate_acteur_serivces",
-    python_callable=deduplicate_acteur_serivces,
-    dag=dag,
-)
-
-deduplicate_acteur_sources_task = PythonOperator(
-    task_id="deduplicate_acteur_sources",
-    python_callable=deduplicate_acteur_sources,
-    dag=dag,
-)
 
 
-apply_corrections_acteur_task = PythonOperator(
-    task_id="apply_corrections_acteur",
-    python_callable=apply_corrections_acteur,
-    dag=dag,
-)
-
-
-write_pos = PythonOperator(
-    task_id="write_data_to_postgres",
-    python_callable=write_data_to_postgres,
-    dag=dag,
-)
-
+apply_corrections_acteur_task_instance = apply_corrections_acteur_task(dag)
 compute_ps_task_instance = compute_ps_task(dag)
 compute_parent_ps_task_instance = compute_parent_ps_task(dag)
-load_acteur_task >> apply_corrections_acteur_task
+deduplicate_acteur_serivces_task_instance = deduplicate_acteur_serivces_task(dag)
+deduplicate_acteur_sources_task_instance = deduplicate_acteur_sources_task(dag)
+deduplicate_labels_task_instance = deduplicate_labels_task(dag)
+merge_acteur_services_task_instance = merge_acteur_services_task(dag)
+merge_labels_task_instance = merge_labels_task(dag)
+db_data_write_task_instance = db_data_write_task(dag)
+
+
+load_acteur_task >> apply_corrections_acteur_task_instance
 [
     load_propositionservice_task,
     load_revisionpropositionservice_task,
@@ -589,23 +164,27 @@ load_acteur_task >> apply_corrections_acteur_task
 [
     load_revisionacteur_task,
     load_acteur_labels_task,
-    read_revisionacteur_labels,
-] >> merge_labels_task
+    load_revisionacteur_labels_task,
+] >> merge_labels_task_instance
 [
     load_revisionacteur_task,
     load_acteur_acteur_services_task,
     load_revisionacteur_acteur_services_task,
-] >> merge_acteur_services_task
-apply_corrections_acteur_task >> compute_parent_ps_task_instance
-apply_corrections_acteur_task >> deduplicate_acteur_sources_task
+] >> merge_acteur_services_task_instance
+apply_corrections_acteur_task_instance >> compute_parent_ps_task_instance
+apply_corrections_acteur_task_instance >> deduplicate_acteur_sources_task_instance
 (compute_ps_task_instance >> compute_parent_ps_task_instance)
-merge_labels_task >> apply_corrections_acteur_task >> deduplicate_labels_task
 (
-    merge_acteur_services_task
-    >> apply_corrections_acteur_task
-    >> deduplicate_acteur_serivces_task
+    merge_labels_task_instance
+    >> apply_corrections_acteur_task_instance
+    >> deduplicate_labels_task_instance
 )
-deduplicate_acteur_sources_task >> write_pos
-compute_parent_ps_task_instance >> write_pos
-deduplicate_labels_task >> write_pos
-deduplicate_acteur_serivces_task >> write_pos
+(
+    merge_acteur_services_task_instance
+    >> apply_corrections_acteur_task_instance
+    >> deduplicate_acteur_serivces_task_instance
+)
+deduplicate_acteur_sources_task_instance >> db_data_write_task_instance
+compute_parent_ps_task_instance >> db_data_write_task_instance
+deduplicate_labels_task_instance >> db_data_write_task_instance
+deduplicate_acteur_serivces_task_instance >> db_data_write_task_instance
