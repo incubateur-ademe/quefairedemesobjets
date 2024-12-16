@@ -21,6 +21,13 @@ with DAG(
             "donnees-eo-screlec/lines?size=10000"
         ),
         "source_code": "SCRELEC",
+        "column_transformations": [
+            {
+                "origin": "siret",
+                "transformation": "clean_siret",
+                "destination": "siret",
+            },
+        ],
         "column_mapping": {
             # ----------------------------------------
             # Champs à mapper
