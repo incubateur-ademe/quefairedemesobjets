@@ -2,9 +2,7 @@ import logging
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from compute_acteurs.tasks.business_logic.deduplicate_acteur_serivces import (
-    deduplicate_acteur_serivces,
-)
+from compute_acteurs.tasks.business_logic import deduplicate_acteur_serivces
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)

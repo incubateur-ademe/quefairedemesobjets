@@ -2,9 +2,7 @@ import logging
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from compute_acteurs.tasks.business_logic.apply_corrections_acteur import (
-    apply_corrections_acteur,
-)
+from compute_acteurs.tasks.business_logic import apply_corrections_acteur
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)

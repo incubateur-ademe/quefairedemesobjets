@@ -2,27 +2,17 @@ from datetime import datetime, timedelta
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from compute_acteurs.tasks.airflow_logic.apply_corrections_acteur_task import (
+from compute_acteurs.tasks.airflow_logic import (
     apply_corrections_acteur_task,
-)
-from compute_acteurs.tasks.airflow_logic.compute_parent_ps_task import (
     compute_parent_ps_task,
-)
-from compute_acteurs.tasks.airflow_logic.compute_ps_task import compute_ps_task
-from compute_acteurs.tasks.airflow_logic.db_data_write_task import db_data_write_task
-from compute_acteurs.tasks.airflow_logic.deduplicate_acteur_serivces_task import (
+    compute_ps_task,
+    db_data_write_task,
     deduplicate_acteur_serivces_task,
-)
-from compute_acteurs.tasks.airflow_logic.deduplicate_acteur_sources_task import (
     deduplicate_acteur_sources_task,
-)
-from compute_acteurs.tasks.airflow_logic.deduplicate_labels_task import (
     deduplicate_labels_task,
-)
-from compute_acteurs.tasks.airflow_logic.merge_acteur_services_task import (
     merge_acteur_services_task,
+    merge_labels_task,
 )
-from compute_acteurs.tasks.airflow_logic.merge_labels_task import merge_labels_task
 from utils.db_tasks import read_data_from_postgres
 
 default_args = {
