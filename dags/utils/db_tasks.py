@@ -5,7 +5,7 @@ from utils import logging_utils as log
 
 def read_data_from_postgres(**kwargs):
     table_name = kwargs["table_name"]
-    engine = PostgresConnectionManager().engine
+    engine = PostgresConnectionManager().django_engine
     df = pd.read_sql_table(table_name, engine).replace({pd.NA: None})
     if df.empty:
         raise ValueError(f"DB: pas de données pour table {table_name}")

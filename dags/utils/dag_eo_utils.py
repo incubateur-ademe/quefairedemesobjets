@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 def insert_dagrun_and_process_df(df_acteur_updates, metadata, dag_name, run_name):
     if df_acteur_updates.empty:
         return
-    engine = PostgresConnectionManager().engine
+    engine = PostgresConnectionManager().django_engine
     current_date = datetime.now()
 
     with engine.connect() as conn:

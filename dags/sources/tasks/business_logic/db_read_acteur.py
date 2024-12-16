@@ -14,7 +14,7 @@ def db_read_acteur(
         raise ValueError(
             "La colonne source_id est requise dans la dataframe normalisée"
         )
-    engine = PostgresConnectionManager().engine
+    engine = PostgresConnectionManager().django_engine
     unique_source_ids = df_normalized["source_id"].unique()
 
     joined_source_ids = ",".join([f"'{source_id}'" for source_id in unique_source_ids])

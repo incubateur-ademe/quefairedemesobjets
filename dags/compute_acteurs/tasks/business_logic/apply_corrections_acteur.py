@@ -39,11 +39,11 @@ def apply_corrections_acteur(df_acteur: pd.DataFrame, df_revisionacteur: pd.Data
     df_acteur_merged["uuid"] = df_acteur_merged["identifiant_unique"].apply(
         lambda x: shortuuid.uuid(name=x)
     )
-
+    df_children = df_children[
+        ["parent_id", "identifiant_unique", "source_id"]
+    ].reset_index(drop=True)
     return {
         "df_acteur_merged": df_acteur_merged,
         # ["parent_id", "child_id", "child_source_id"]
-        "df_children": df_children[
-            ["parent_id", "identifiant_unique", "source_id"]
-        ].reset_index(drop=True),
+        "df_children": df_children,
     }
