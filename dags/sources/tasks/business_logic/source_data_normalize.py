@@ -85,15 +85,13 @@ def source_data_normalize(
     # TODO : un peu crado, à revoir
     # A cause de la résolution de l'identifiant unique qui dépend du code de la source
     if "source_id" in df.columns:
-        df["source_code"] = df["source_id"].str.lower()
-        df["source_id"] = df["source_code"].map(source_id_by_code)
+        df["source_code"] = df["source_id"]
+        df["source_id"] = df["source_id"].map(source_id_by_code)
     elif source_code is not None:
         df["source_code"] = source_code
         df["source_id"] = source_id_by_code[source_code]
     else:
         ValueError("Pas de colonne 'source_id'")
-    if df["source_id"].isna().sum() > 0:
-        raise ValueError("Valeur nan dans 'source_id'")
 
     # Identifiant unique
     # TODO: on dévrait pouvoir utiliser les modèles django/DB pour automatiser cela
