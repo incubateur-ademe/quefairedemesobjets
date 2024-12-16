@@ -2,7 +2,7 @@ from .apply_corrections_acteur_task import *  # noqa
 from .compute_parent_ps_task import *  # noqa
 from .compute_ps_task import *  # noqa
 from .db_data_write_task import *  # noqa
-from .deduplicate_acteur_serivces_task import *  # noqa
+from .deduplicate_acteur_services_task import *  # noqa
 from .deduplicate_acteur_sources_task import *  # noqa
 from .deduplicate_labels_task import *  # noqa
 from .merge_acteur_services_task import *  # noqa
