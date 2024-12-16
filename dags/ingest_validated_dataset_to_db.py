@@ -53,7 +53,7 @@ def fetch_and_parse_data(**context):
     row = _get_first_dagrun_to_insert()
     dag_run_id = row[0]
 
-    engine = PostgresConnectionManager().engine
+    engine = PostgresConnectionManager().django_engine
 
     df_sql = pd.read_sql_query(
         f"SELECT * FROM qfdmo_dagrunchange WHERE dag_run_id = '{dag_run_id}'",
@@ -92,7 +92,7 @@ def write_data_to_postgres(**kwargs):
     data_dict = kwargs["ti"].xcom_pull(task_ids="fetch_and_parse_data")
     # If data_set is empty, nothing to do
     dag_run_id = data_dict["dag_run_id"]
-    engine = PostgresConnectionManager().engine
+    engine = PostgresConnectionManager().django_engine
     if "actors" not in data_dict:
         with engine.begin() as connection:
             dag_ingest_validated_utils.update_dag_run_status(connection, dag_run_id)

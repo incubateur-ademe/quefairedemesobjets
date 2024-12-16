@@ -46,7 +46,7 @@ dag = DAG(
 
 def fetch_and_parse_data(**context):
     limit = context["params"]["limit"]
-    engine = PostgresConnectionManager().engine
+    engine = PostgresConnectionManager().django_engine
     active_actors_query = """
         SELECT
             da.*,

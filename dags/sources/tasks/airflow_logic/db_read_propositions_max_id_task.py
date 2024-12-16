@@ -14,7 +14,7 @@ def db_read_propositions_max_id_task(dag: DAG) -> PythonOperator:
 
 
 def db_read_propositions_max_id():
-    engine = PostgresConnectionManager().engine
+    engine = PostgresConnectionManager().django_engine
 
     # TODO : check if we need to manage the max id here
     displayedpropositionservice_max_id = engine.execute(
