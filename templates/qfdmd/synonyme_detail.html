@@ -1,13 +1,4 @@
 {% extends "qfdmd/base.html" %}
-{% load static %}
-
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'qfdmo.css' %}">
-{% endblock extra_css %}
-
-{% block extra_js %}
-<script src="{% static 'qfdmo.js' %}"></script>
-{% endblock extra_js %}
 
 {% block title %}
 {{ block.super }} | {{ object.nom }}

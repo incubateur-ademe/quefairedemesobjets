@@ -186,7 +186,7 @@ export default class extends Controller<HTMLElement> {
     this.hideActeurDetailsPanel()
     this.#showSearchFormPanel()
     this.#hideAddressesPanel()
-    // this.scrollToContent()
+    this.scrollToContent()
   }
 
   updateBboxInput(event) {
@@ -199,7 +199,7 @@ export default class extends Controller<HTMLElement> {
     }
 
     this.acteurDetailsPanelTarget.dataset.exitAnimationEnded = "false"
-    // this.acteurDetailsPanelTarget.scrollIntoView()
+    this.acteurDetailsPanelTarget.scrollIntoView()
   }
 
   hideActeurDetailsPanel() {
@@ -356,7 +356,7 @@ export default class extends Controller<HTMLElement> {
     this.advancedFiltersSaveAndSubmitButtonTarget.classList.remove("qf-hidden")
     this.advancedFiltersSaveButtonTarget.classList.add("qf-hidden")
     this.#hideAdvancedFilters()
-    // this.scrollToContent()
+    this.scrollToContent()
   }
 
   toggleAdvancedFilters() {
@@ -367,7 +367,7 @@ export default class extends Controller<HTMLElement> {
     } else {
       this.#hideAdvancedFilters()
     }
-    // this.scrollToContent()
+    this.scrollToContent()
   }
 
   #showAdvancedFilters() {
@@ -395,7 +395,7 @@ export default class extends Controller<HTMLElement> {
       this.legendFormPanelTarget.classList.remove("qf-h-0", "qf-invisible")
       this.legendFormPanelTarget.classList.add("qf-h-[95%]")
     }, 100)
-    // this.scrollToContent()
+    this.scrollToContent()
   }
 
   hideLegend() {
@@ -445,7 +445,7 @@ export default class extends Controller<HTMLElement> {
       this.#hideSearchFormPanel()
       this.backToSearchPanelTarget.dataset.visible = "true"
       this.#showAddressesPanel()
-      // this.scrollToContent()
+      this.scrollToContent()
     }
 
     this.#hideAdvancedFilters()
@@ -461,7 +461,7 @@ export default class extends Controller<HTMLElement> {
     } else {
       this.#showAPropos()
     }
-    // this.scrollToContent()
+    this.scrollToContent()
   }
 
   #showAPropos() {
