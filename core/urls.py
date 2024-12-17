@@ -20,7 +20,6 @@ from django.contrib import admin
 from django.contrib.sitemaps import GenericSitemap
 from django.contrib.sitemaps import views as sitemaps_views
 from django.urls import include, path
-from django.views.generic import TemplateView
 
 from qfdmo.models.acteur import ActeurStatus, DisplayedActeur
 
@@ -60,7 +59,6 @@ urlpatterns = [
     path("dsfr/", include(("dsfr_hacks.urls", "dsfr_hacks"), namespace="dsfr_hacks")),
     path("", include(("qfdmo.urls", "qfdmo"), namespace="qfdmo")),
     path("", include(("qfdmd.urls", "qfdmd"), namespace="qfdmd")),
-    path("docs/", TemplateView.as_view(template_name="techdocs.html"), name="techdocs"),
 ]
 
 if settings.DEBUG:

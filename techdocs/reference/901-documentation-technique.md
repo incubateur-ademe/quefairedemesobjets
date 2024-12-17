@@ -4,6 +4,8 @@ La documentation technique est entretenu dans le code, dans le dossier [docs](./
 
 Elle suit la convention [DATAXIS](https://diataxis.fr) et mets en application, tant que faire se peut, les guidelines de doc définit par [Google](https://developers.google.com/style)
 
+![Organisation de la doc selon diataxis](https://diataxis.fr/_images/diataxis.png)
+
 ## TLTR : Dataxis
 
 On découpe la documentation en 4 parties:
@@ -30,8 +32,12 @@ Chaque modification de code qui désapprouve la documentation doit faire l'objet
 
 **Statut : ❓ À approuver**
 
-Cette documentation est publiée en html grace à la librairie [Docsify](https://docsify.js.org)
-Elle est déployée sur tous les environnements (vs déployée uniquement en evironnement de développement)
+La doc devra être propulsée par un librairie de publication de doc, à définir.
+
+Candidats:
+
+- Docsify (JS)
+- Sphinx (python) - A priori, la solution préférée à ce jour
 
 ## Convention
 
@@ -39,9 +45,7 @@ Elle est déployée sur tous les environnements (vs déployée uniquement en evi
 
 ### Liens vers les fichiers
 
-Docsify permet de résoudre les chemins vers les fichiers en gérant les chemin absolu vs les chemins relatifs et en interprétant par défaut les fichiers README.md des dossiers données comme lien
-
-On fera attention d'utiliser les chemins complets vers les fichiers cibles pour une compatibilité de navigations dans les IDE tel que vscode et dans l'interface github.com. parmi les chemin suivants, tous fonctionnent avec Docsify maison ne s'autorisera que le format whitelisté (✅):
+On fera attention d'utiliser les chemins complets vers les fichiers cibles pour une compatibilité de navigations dans les IDE tel que vscode et dans l'interface github.com. Parmi les chemin suivants, on n'autorisera que le format whitelisté (✅):
 
 - `[chemin vers le README.md du dossier](./<dossier>/README.md)` ✅
 - `[chemin vers le README.md du dossier](/<dossier>/README.md)` ❌
@@ -61,8 +65,3 @@ Ex : dans le dossier REFERENCE
 - 311-db-guidelines.md : en 3xx les règles de donnée, 31x relatif à la base de données
 - 322-organisations-des-fichiers-data.md : 32x relatif à la plateforme data
 - 901-documentation-technique.md : 9xx les règles de documentation, volontairement en 9xx pour qu'elle soient affichiée à la fin de la section
-
-### Spécificité Docsify
-
-- On affiche les titres de niveau 2 dans la barre latéral de navigation lors de l'affichage de la page : `subMaxLevel: 2`
-- On ne maintient qu'une barre latéral de navigation à la racine [_sidebar.md](../_sidebar.md)

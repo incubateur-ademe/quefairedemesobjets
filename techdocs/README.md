@@ -1,6 +1,6 @@
 # Documentation technique de l'application
 
-## Par ou commencer ? <!-- {docsify-ignore} -->
+## Par ou commencer ?
 
 Cette documetation aide les développeurs et toute personne s'interessant à la construction technique de la plateforme à comprendre le fonctionnement et les prise de décision.
 
@@ -10,35 +10,51 @@ Elle est réparti en 4 sections suivant la convention [DATAXIS](https://diataxis
 
 Pour en savoir plus sur la construction de cette documentation, suivez le guide : [Guide de la docmentation technique](./reference/100-documentation-technique.md)
 
-## Référence <!-- {docsify-ignore} -->
+## Référence
 
-Toute la description technique de l'application
+Contient toute la description technique de l'application, par exemple :
 
 - Architecture des fichiers
 - Architecture des données
 - Conventions de code et de base de données
 …
 
-## Explications <!-- {docsify-ignore} -->
+## Explications
 
-Description de comment ça marche et des prises de décision
+Description de comment ça marche et des prises de décision, par exemple :
 
 - Pourquoi ce choix d'architecture des données
 - Principe sanitaire mise en place sur la platefome données
 …
 
-## Comment faire ? <!-- {docsify-ignore} -->
+## Comment faire ?
 
-Guide l'utilisateur pour résoudre un problème
+Guide l'utilisateur pour résoudre un problème, par exemple :
 
 - Copie de la base de données de prod vers preprod
-- debugage
+- Debugage
 …
 
-## Tutoriels <!-- {docsify-ignore} -->
+## Tutoriels
 
-Apprentissage pas à pas de l'utilisation des outils
+Décrit les apprentissage pas à pas de l'utilisation des outils, par exemple
 
 - Installation du un poste développeur
 - Mise en production
 …
+
+## Sommaire
+
+- [🧐 REFERENCE](./reference/README.md)
+  - [Règles de codage](./reference/101-coding-guidelines.md)
+  - [Frontend et templating](./reference/201-frontend.md)
+  - [Règle de codage de la base de données](./reference/301-db-guidelines.md)
+  - [Architecture des fichiers de code de la partie data](./reference/302-organisations-des-fichiers-data.md)
+  - [Guide de la docmentation technique](./reference/901-documentation-technique.md)
+
+- [❓ EXPLICATIONS](./explications/README.md)
+
+- [🤔 COMMENT FAIRE ?](./comment-faire/README.md)
+  - [Commandes Django utiles](./comment-faire/101-commandes-django.md)
+
+- [🙌 TUTORIELS](./tutoriels/README.md)
