@@ -7,7 +7,8 @@ with DAG(
     dag_display_name="Source - SCRELEC",
     default_args=default_args,
     description=(
-        "DAG pour télécharger, standardiser, et charger dans notre base la source SINOE"
+        "Injestion des données de l'éco-organisme SCRELEC à partir des données"
+        " disponibles sur de Koumoul"
     ),
     tags=["source", "ademe", "screlec", "piles", "batteries", "accumulateurs"],
     params={
