@@ -1,5 +1,19 @@
 # Documentation technique de l'application
 
+```{include} ../README.md
+:start-after: <!-- start elevator-pitch -->
+:end-before: <!-- end elevator-pitch -->
+```
+
+```{toctree}
+:hidden:
+
+comment-faire
+explications
+reference
+tutoriels
+```
+
 ## Par ou commencer ? <!-- {docsify-ignore} -->
 
 Cette documetation aide les développeurs et toute personne s'interessant à la construction technique de la plateforme à comprendre le fonctionnement et les prise de décision.

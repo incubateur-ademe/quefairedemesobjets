@@ -19,3 +19,6 @@ python-Levenshtein
 ratelimit
 ruff
 shapely
+myst-parser
+sphinx
+furo
