@@ -10,10 +10,10 @@ Elle suit la convention [DATAXIS](https://diataxis.fr) et met en application, ta
 
 On découpe la documentation en 4 parties:
 
-- TUTORIELS : Apprentissage pas à pas de l'utilisation de l'outil, ex : installer l'application sur un poste de développeur [./tutoriels](./tutoriels)
-- COMMENT-FAIRE : Guide l'utilisateur pour résoudre un problème, ex : copie de la base de données de prod vers preprod ([./comment-faire](./comment-faire))
-- EXPLICATIONS : Description de comment ça marche et des prises de décision, ex : architecture des données Acteurs et de leur revision [./explications](./explications))
-- REFERENCE : Description technique, ex : Architecture du dossier `data` [./reference](./reference)
+- TUTORIELS : Apprentissage pas à pas de l'utilisation de l'outil, ex : installer l'application sur un poste de développeur ([docs/tutoriels](../tutoriels/README.md))
+- COMMENT-FAIRE : Guide l'utilisateur pour résoudre un problème, ex : copie de la base de données de prod vers preprod ([docs/comment-faire](../comment-faire/README.md))
+- EXPLICATIONS : Description de comment ça marche et des prises de décision, ex : architecture des données Acteurs et de leur revision ([docs/explications](../explications/README.md)))
+- REFERENCE : Description technique, ex : Architecture du dossier `data` ([docs/reference](../reference/README.md))
 
 ## Spécificité de la documentation du projet
 
