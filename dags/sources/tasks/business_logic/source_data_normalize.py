@@ -50,29 +50,177 @@ def source_data_normalize(
     # DEPRECATED: le rename est désormais géré comme une transformation
     df = df.rename(columns={k: v for k, v in column_mapping.items() if v is not None})
 
-    # Transformation des colonnes
-    # Appliquer la transformation à la colonne d'origine et stocker le résultat
-    # dans la colonne de destination
-    for transformation in column_transformations:
-        if "origin" in transformation and "destination" in transformation:
-            if "transformation" in transformation:
-                function_name = transformation["transformation"]
-                df[transformation["destination"]] = df[transformation["origin"]].apply(
-                    TRANSFORMATION_MAPPING[function_name]
-                )
-                df.drop(columns=[transformation["origin"]], inplace=True)
-                if transformation["destination"] != transformation["origin"]:
-                    df.drop(columns=[transformation["origin"]], inplace=True)
+    ### TRANSFORMATIONS
+    # TODO : mettre cette doc dans la doc technique si accepté par les collègues
+    #
+    # Plusieurs types de transformations à executer dans l'ordre suivant
+    # 1. Renommage des colonnes
+    #
+    # { "origin": "col origin", "destination": "col origin" }
+    #
+    # 2. Transformation des colonnes
+    #
+    # { "origin": "col origin", "destination": "col destination",
+    #   "transformation": "function_name" }
+    #
+    # 3. Transformation du dataframe
+    #
+    # { "origin": ["col origin 1", "col origin 2"], "transformation": "function_name",
+    #   "destination": ["col destination 1", "col destination 2"] }
+    #
+    # 4. Ajout des colonnes avec une valeur par défaut
+    #
+    # { "colonne": "col 1", "value" : "val" }
+    #
+    # 5. Supression des colonnes
+    #
+    # { "remove": "col 1" }
+    #
+    # 6. Colonnes à garder (rien à faire, utilisé pour le controle)
+    #
+    # { "keep": "col 1" }
+    #
+    # Les transformations sont définies dans le fichier de configuration
+    # Après que toutes les transformations aient été appliquées, on vérifie que
+    # la dataframe a exactement les colonne attendues
 
-            else:
-                df.rename(
-                    columns={transformation["origin"]: transformation["destination"]},
-                    inplace=True,
-                )
-        else:
-            raise ValueError(
-                "Chaque transformation doit avoir les colonnes origine et destination"
-            )
+    # 1. Renommage des colonnes
+    #
+    # { "origin": "col origin", "destination": "col origin" }
+    #
+    # J'ai une origine de type string et une destination de type string et pas de
+    # transformation
+
+    columns_to_rename = [
+        t
+        for t in column_transformations
+        if "origin" in t
+        and isinstance(t["origin"], str)
+        and "destination" in t
+        and isinstance(t["destination"], str)
+        and "transformation" not in t
+    ]
+    df = df.rename(
+        columns={
+            column_to_rename["origin"]: column_to_rename["destination"]
+            for column_to_rename in columns_to_rename
+        }
+    )
+
+    # 2. Transformation des colonnes
+    #
+    # { "origin": "col origin", "destination": "col destination",
+    #   "transformation": "function_name" }
+    #
+    # J'ai une origine de type string et une destination de type string et une fonction
+    # de transformation
+
+    columns_to_transform = [
+        t
+        for t in column_transformations
+        if "origin" in t
+        and isinstance(t["origin"], str)
+        and "destination" in t
+        and isinstance(t["destination"], str)
+        and "transformation" in t
+    ]
+    for column_to_transform in columns_to_transform:
+        function_name = column_to_transform["transformation"]
+        df[column_to_transform["destination"]] = df[
+            column_to_transform["origin"]
+        ].apply(TRANSFORMATION_MAPPING[function_name])
+        if column_to_transform["destination"] != column_to_transform["origin"]:
+            df.drop(columns=[column_to_transform["origin"]], inplace=True)
+
+    # 3. Transformation du dataframe
+    #
+    # { "origin": ["col origin 1", "col origin 2"], "transformation": "function_name",
+    #  "destination": ["col destination 1", "col destination 2"] }
+    #
+    # J'ai une origine de type liste de string et une destination de type liste de
+    # string et une fonction de transformation
+
+    columns_to_transform_df = [
+        t
+        for t in column_transformations
+        if "origin" in t
+        and isinstance(t["origin"], list)
+        and "destination" in t
+        and isinstance(t["destination"], list)
+        and "transformation" in t
+    ]
+    for column_to_transform_df in columns_to_transform_df:
+        function_name = column_to_transform_df["transformation"]
+        logger.warning(column_to_transform_df["destination"])
+
+        #        df[["siret", "siren"]] = df[["siret"]].apply(clean_siret_and_siren)
+
+        df[column_to_transform_df["destination"]] = df[
+            column_to_transform_df["origin"]
+        ].apply(TRANSFORMATION_MAPPING[function_name], axis=1)
+        columns_to_drop = [
+            column_origin
+            for column_origin in column_to_transform_df["origin"]
+            if column_origin not in column_to_transform_df["destination"]
+        ]
+        df.drop(columns=columns_to_drop, inplace=True)
+
+    # 4. Ajout des colonnes avec une valeur par défaut
+    #
+    # { "colonne": "col 1", "value" : "val" }
+    #
+    # J'ai une colonne de type string et une valeur
+
+    columns_to_add_by_default = {
+        t["colonne"]: t["value"]
+        for t in column_transformations
+        if "colonne" in t and "value" in t
+    }
+
+    # 5. Supression des colonnes
+    #
+    # { "remove": "col 1" }
+    #
+    # J'ai une colonne remove de type string
+
+    columns_to_remove = [t["remove"] for t in column_transformations if "remove" in t]
+    df.drop(columns=columns_to_remove, inplace=True)
+
+    # 6. Colonnes à garder (rien à faire, utilisé pour le controle)
+
+    columns_to_keep = [t["keep"] for t in column_transformations if "keep" in t]
+
+    # Vérification que le dataframe a exactement les colonnes attendues
+    expected_columns = set(
+        [
+            column["destination"]
+            for column in columns_to_rename
+            if "destination" in column
+        ]
+        + [
+            column["destination"]
+            for column in columns_to_transform
+            if "destination" in column
+        ]
+        + [
+            dest
+            for column in columns_to_transform_df
+            if "destination" in column
+            for dest in column["destination"]
+        ]
+        + [
+            column["colonne"]
+            for column in columns_to_add_by_default
+            if "colonne" in column
+        ]
+        + columns_to_keep
+    )
+
+    if set(df.columns) != expected_columns:
+        raise ValueError(
+            "Le dataframe n'a pas les colonnes attendues: "
+            f"{set(df.columns)} != {expected_columns}"
+        )
 
     # DEBUT Traitement des identifiants
 
@@ -134,16 +282,19 @@ def source_data_normalize(
             merge_column="produitsdechets_acceptes",
         )
 
+    # DEPRECATED : pris en compte dans les transformations
     for k, val in columns_to_add_by_default.items():
         df[k] = val
 
     # Avant le renommage des colonnes prise en chage de adresse_format_ban
+    # TODO: à sortir dans une fonction de transformation df
     if "adresse_format_ban" in df.columns:
         if validate_address_with_ban:
             df[["adresse", "code_postal", "ville"]] = df.apply(get_address, axis=1)
         else:
             df[["adresse", "code_postal", "ville"]] = df.apply(extract_details, axis=1)
 
+    # TODO: à sortir dans une fonction de transformation column
     if "statut" in df.columns:
         df["statut"] = df["statut"].map(
             {
@@ -158,6 +309,7 @@ def source_data_normalize(
     else:
         df["statut"] = constants.ACTEUR_ACTIF
 
+    # TODO: à sortie dans une fonction de transformation column
     if "public_accueilli" in df.columns:
 
         df["public_accueilli"] = mapping_try_or_fallback_column_value(
@@ -173,11 +325,13 @@ def source_data_normalize(
         # Règle métier: Ne pas ingérer les acteurs avec public pur PRO
         df = df[df["public_accueilli"] != constants.PUBLIC_PRO]
 
+    # TODO: à sortie dans une fonction de transformation column
     for column in ["uniquement_sur_rdv", "exclusivite_de_reprisereparation"]:
         if column in df.columns:
 
             df[column] = df[column].apply(cast_eo_boolean_or_string_to_boolean)
 
+    # TODO: à sortie dans une fonction de transformation column
     if "reprise" in df.columns:
 
         df["reprise"] = mapping_try_or_fallback_column_value(
@@ -190,10 +344,13 @@ def source_data_normalize(
             },
         )
 
+    # TODO: à sortie dans une fonction de transformation column
     if "labels_etou_bonus" in df.columns and label_bonus_reparation:
         df["labels_etou_bonus"] = df["labels_etou_bonus"].str.replace(
             "Agréé Bonus Réparation", label_bonus_reparation
         )
+
+    # TODO: à sortie dans une fonction de transformation column
     if "url" in df.columns:
         df["url"] = df["url"].map(mapping_utils.prefix_url)
 
@@ -209,6 +366,8 @@ def source_data_normalize(
             acteurtype_id_by_code=acteurtype_id_by_code,
         )
     else:
+        # TODO: à sortie dans une fonction de transformation column
+        # (attention au normalisation des pharmacie et de SINOE)
         df["acteur_type_id"] = df["acteur_type_id"].apply(
             lambda x: mapping_utils.transform_acteur_type_id(
                 x, acteurtype_id_by_code=acteurtype_id_by_code
@@ -219,6 +378,7 @@ def source_data_normalize(
     # - mappées à None
     # - commençant par _ (internes aux sources)
     # - TODO: dropper ce que notre modèle django ne peut pas gérer
+    # DEPRECATED : pris en charge dans les transformations
     df = df.drop(columns=[k for k, v in column_mapping.items() if v is None])
     df = df.drop(columns=[col for col in df.columns if col.startswith("_")])
 

@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 def source_config_validate(
     params: dict,
     codes_sc_db: set[str],
+    column_transformations: dict,
 ) -> None:
     """Etape de validation des paramètres de configuration du DAG
     pour éviter d'engendrer des coûts d'infra (et de fournisseurs API)
@@ -64,6 +65,55 @@ def source_config_validate(
             raise ValueError(
                 f"La fonction de transformation {function_callable} n'est pas callable"
             )
+
+    # Valider que les transformations ont toutes un bon format parmis :
+    # { "origin": "col origin", "destination": "col origin" }
+    # { "origin": "col origin", "destination": "col destination",
+    #   "transformation": "function_name" }
+    # { "origin": ["col origin 1", "col origin 2"], "transformation":
+    #   "function_name", "destination": ["col destination 1", "col destination 2"] }
+    # { "colonne": "col 1", "value" : "val" }
+    # { "remove": "col 1" }
+    # { "keep": "col 1" }
+    for column_transformation in column_transformations:
+        if (
+            "origin" in column_transformation
+            and isinstance(column_transformation["origin"], str)
+            and "destination" in column_transformation
+            and isinstance(column_transformation["destination"], str)
+            and "transformation" not in column_transformation
+        ):
+            continue
+        if (
+            "origin" in column_transformation
+            and isinstance(column_transformation["origin"], str)
+            and "destination" in column_transformation
+            and isinstance(column_transformation["destination"], str)
+            and "transformation" in column_transformation
+        ):
+            continue
+        if (
+            "origin" in column_transformation
+            and isinstance(column_transformation["origin"], list)
+            and "destination" in column_transformation
+            and isinstance(column_transformation["destination"], list)
+            and "transformation" in column_transformation
+        ):
+            continue
+        if (
+            "column" in column_transformation
+            and isinstance(column_transformation["column"], str)
+            and "value" in column_transformation
+            and isinstance(column_transformation["value"], str)
+        ):
+            continue
+        if "remove" in column_transformation:
+            continue
+        if "keep" in column_transformation:
+            continue
+        raise ValueError(
+            f"La transformation {column_transformation} n'a pas un format valide"
+        )
 
     # La validation de config ne doit pas changer les données, donc
     # on retourne explicitement None
