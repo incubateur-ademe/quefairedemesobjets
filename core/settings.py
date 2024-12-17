@@ -32,13 +32,9 @@ DEBUG = decouple.config("DEBUG", default=False, cast=bool)
 STIMULUS_DEBUG = decouple.config("STIMULUS_DEBUG", default=False, cast=bool)
 POSTHOG_DEBUG = decouple.config("POSTHOG_DEBUG", default=False, cast=bool)
 
-ALLOWED_HOSTS = decouple.config(
-    "ALLOWED_HOSTS",
-    default=(
-        "localhost," "*.ademe.fr," "quefairedemesobjets-preprod.osc-fr1.scalingo.io"
-    ),
-    cast=str,
-).split(",")
+ALLOWED_HOSTS = decouple.config("ALLOWED_HOSTS", default="localhost", cast=str).split(
+    ","
+)
 
 # Application definition
 
