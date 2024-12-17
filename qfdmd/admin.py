@@ -79,6 +79,7 @@ class KoumoulProduitResource(KoumoulModelResource):
 class ProduitResource(resources.ModelResource):
     class Meta:
         model = Produit
+        name = "Import/export de tous les champs Produit"
 
 
 class SynonymeResource(resources.ModelResource):
