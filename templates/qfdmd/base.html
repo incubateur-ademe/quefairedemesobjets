@@ -65,6 +65,7 @@
                 data-analytics-user-email-value="{{ request.user.email }}"
                 data-analytics-user-admin-value="{{ request.user.is_superuser|lower }}"
             {% endif %}
+            data-analytics-action-value="{% block analytics_action %}{% endblock %}"
         ></script>
     </body>
 </html>
