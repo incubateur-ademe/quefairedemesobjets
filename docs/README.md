@@ -37,9 +37,9 @@ Guide l'utilisateur pour résoudre un problème, par exemple :
 
 ## Tutoriels
 
-Décrit les apprentissage pas à pas de l'utilisation des outils, par exemple
+Décrit les apprentissages pas à pas de l'utilisation des outils, par exemple
 
-- Installation du un poste développeur
+- Installation d'un poste développeur
 - Mise en production
 …
 
