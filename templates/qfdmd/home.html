@@ -29,7 +29,7 @@
             {% with suggestion.produit as produit %}
             <a
                 class="qf-btn"
-                href="{% url 'qfdmd:synonyme-detail' slug=produit.slug %}"
+                href="{% url 'qfdmd:synonyme-detail' slug=produit.slug %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}"
             >
                 {{ produit.nom|capfirst }}
             </a>
