@@ -1,5 +1,13 @@
+import logging
+
 import pandas as pd
-from sources.tasks.transform.transform_column import clean_number
+from sources.tasks.transform.transform_column import (
+    clean_number,
+    clean_siren,
+    clean_siret,
+)
+
+logger = logging.getLogger(__name__)
 
 
 def merge_duplicates(
@@ -18,7 +26,7 @@ def merge_duplicates(
                     for col in df.columns
                     if col != merge_column and col != group_column
                 },
-                merge_column: merge_produits_accepter,
+                merge_column: _merge_produits_accepter,
             }
         )
         .reset_index()
@@ -30,7 +38,7 @@ def merge_duplicates(
     return df_final
 
 
-def merge_produits_accepter(group):
+def _merge_produits_accepter(group):
     produits_sets = set()
     for produits in group:
         produits_sets.update([produit.strip() for produit in produits.split("|")])
@@ -54,3 +62,18 @@ def clean_phone_number(number, code_postal):
         return None
 
     return number
+
+
+# TODO : Ajouter des tests
+def clean_siret_and_siren(row):
+    if "siret" in row:
+        row["siret"] = clean_siret(row["siret"])
+    else:
+        row["siret"] = None
+    if "siren" in row:
+        row["siren"] = clean_siren(row["siren"])
+    else:
+        row["siren"] = (
+            row["siret"][:9] if "siret" in row and row["siret"] is not None else None
+        )
+    return row[["siret", "siren"]]
