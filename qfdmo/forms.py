@@ -179,7 +179,7 @@ class AddressesForm(forms.Form):
         ),
         label=mark_safe(
             "<span class='fr-icon--sm fr-icon-percent-line'></span>"
-            "&nbsp;Adresse proposant le Bonus Réparation"
+            "&nbsp;Adresses proposant le Bonus Réparation"
         ),
         help_text=mark_safe(
             "Afficher uniquement les adresses éligibles (uniquement valable lorsque l'"
