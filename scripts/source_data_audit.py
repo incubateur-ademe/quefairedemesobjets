@@ -2,6 +2,9 @@
 Script pour auditer la donnée d'une source, détecter
 des problèmes potentiels, et accélérer le développement
 des DAGs (en identifiant les problèmes en amont).
+
+Ce script est un outil de développement, et n'est pas destiné à être exécuté en
+production.
 """
 
 import os
