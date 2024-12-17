@@ -2,13 +2,13 @@
 
 ## Par ou commencer ?
 
-Cette documentation aide les développeurs et toute personne s'interessant à la construction technique de la plateforme à comprendre le fonctionnement et les prise de décision.
+Cette documentation aide les développeurs et toute personne s'intéressant à la construction technique de la plateforme à comprendre son architecture, son fonctionnement et les prise de décision qui y ont aboutis.
 
 Elle est répartie en 4 sections suivant la convention [DATAXIS](https://diataxis.fr)
 
 ![](https://diataxis.fr/_images/diataxis.png)
 
-Pour en savoir plus sur la construction de cette documentation, suivez le guide : [Guide de la documentation technique](./reference/100-documentation-technique.md)
+Pour en savoir plus sur la construction de cette documentation, suivez le guide : [Guide de la documentation technique](./reference/901-documentation-technique.md)
 
 ## Référence
 
