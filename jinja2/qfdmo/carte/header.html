@@ -1,15 +1,11 @@
-{% if not is_ademe %}
 <div class="qf-items-center qf-hidden md:qf-flex qf-flex-row" id="logo">
     {% include 'layout/_partials/header_logos.html' %}
 </div>
-{% endif %}
 
 {# Recherche adresse #}
 <div class="fr-my-1w qf-flex-grow qf-flex qf-flex-col
-    {% if not is_ademe %}
     qf-px-2w md:qf-px-3w
     md:qf-pr-6w
-    {% endif %}
 "
 >
     {% include 'qfdmo/_addresses_partials/adresse_input_form.html' %}
