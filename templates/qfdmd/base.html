@@ -24,7 +24,6 @@
         <link rel="stylesheet" href="{% static 'qfdmd.css' %}">
 
         {% matomo %}
-        {% posthog %}
 
         {% block extra_css %}
         {% endblock extra_css %}
@@ -35,6 +34,7 @@
 
     <body
         class="qf-flex qf-flex-col qf-group"
+        {% if STIMULUS_DEBUG %}data-stimulus-debug="true"{% endif %}
         {% block body_attrs %}{% endblock %}
     >
         {% block header %}
@@ -56,6 +56,15 @@
 
         {% dsfr_js %}
         <script type="module" src="{% static 'qfdmd.js' %}"></script>
-
+        <script
+            data-controller="analytics"
+            data-analytics-posthog-key-value="{{ assistant.POSTHOG_KEY }}"
+            data-analytics-posthog-debug-value="{{ POSTHOG_DEBUG }}"
+            {% if request.user.is_authenticated %}
+                data-analytics-user-username-value="{{ request.user.username }}"
+                data-analytics-user-email-value="{{ request.user.email }}"
+                data-analytics-user-admin-value="{{ request.user.is_superuser|lower }}"
+            {% endif %}
+        ></script>
     </body>
 </html>

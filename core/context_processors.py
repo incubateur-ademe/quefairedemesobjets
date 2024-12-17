@@ -9,6 +9,8 @@ def environment(request):
     return {
         "ENVIRONMENT": settings.ENVIRONMENT,
         "DEBUG": settings.DEBUG,
+        "STIMULUS_DEBUG": settings.STIMULUS_DEBUG,
+        "POSTHOG_DEBUG": settings.POSTHOG_DEBUG,
         "is_embedded": True,
         "is_ademe": host_without_port in settings.ALLOWED_HOSTS,
         "turbo": request.headers.get("Turbo-Frame"),
@@ -19,7 +21,11 @@ def content(request):
     return vars(constants)
 
 
-def assistant(request):
+def assistant(request) -> dict:
     return {
-        "is_home": request.path == reverse("qfdmd:home"),
+        "assistant": {
+            "is_home": request.path == reverse("qfdmd:home"),
+            "POSTHOG_KEY": settings.ASSISTANT["POSTHOG_KEY"],
+            "MATOMO_ID": settings.ASSISTANT["MATOMO_ID"],
+        },
     }
