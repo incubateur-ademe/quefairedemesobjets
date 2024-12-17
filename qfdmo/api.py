@@ -43,7 +43,7 @@ class ActeurTypeSchema(ModelSchema):
 
 
 class ActionSchema(ModelSchema):
-    services: str = Field(..., alias="primary")
+    couleur: str = Field(..., alias="primary")
 
     class Meta:
         model = Action
@@ -76,8 +76,6 @@ class ActeurSchema(ModelSchema):
         ..., alias="acteur_type", description="Le type d'acteur"
     )
     distance: Optional[float] = None
-
-    # (..., description="Distance en mètres")
 
     @staticmethod
     def resolve_distance(obj):
@@ -191,7 +189,9 @@ def services(request):
     summary="Retrouver un acteur actif",
 )
 def acteur(request, identifiant_unique: str):
-    return get_object_or_404(DisplayedActeur, pk=id, statut=ActeurStatus.ACTIF)
+    return get_object_or_404(
+        DisplayedActeur, pk=identifiant_unique, statut=ActeurStatus.ACTIF
+    )
 
 
 @router.get("/autocomplete/configurateur")

@@ -22,7 +22,7 @@
             "afficher": true,
             "description": null,
             "order": 1,
-            "couleur": "green-menthe-main-548",
+            "couleur": "#C3992A",
             "icon": "fr-icon-tools-fill"
         }
     },
@@ -33,7 +33,7 @@
             "afficher": true,
             "description": null,
             "order": 2,
-            "couleur": "blue-cumulus-sun-368",
+            "couleur": "#C3992A",
             "icon": "fr-icon-hand-heart-line"
         }
     },
@@ -44,7 +44,7 @@
             "afficher": true,
             "description": null,
             "order": 3,
-            "couleur": "orange-terre-battue-main-645",
+            "couleur": "#C3992A",
             "icon": "fr-icon-arrow-go-back-line"
         }
     },
@@ -55,7 +55,7 @@
             "afficher": true,
             "description": null,
             "order": 4,
-            "couleur": "brown-cafe-creme-main-782",
+            "couleur": "#C3992A",
             "icon": "fr-icon-money-euro-circle-line"
         }
     },
@@ -66,7 +66,7 @@
             "afficher": true,
             "description": null,
             "order": 5,
-            "couleur": "purple-glycine-main-494",
+            "couleur": "#C3992A",
             "icon": "fr-icon-recycle-line"
         }
     },
@@ -80,7 +80,7 @@
             "description": null,
             "order": 5,
             "couleur": "green-menthe",
-            "icon": "fr-icon-action-reparer",
+            "couleur": "#C3992A",
             "groupe_action": ["reparer"],
             "directions": [["jai"]]
         }
@@ -94,7 +94,7 @@
             "afficher": true,
             "description": "acheter d'occasion",
             "order": 8,
-            "couleur": "brown-cafe-creme",
+            "couleur": "#C3992A",
             "icon": "fr-icon-action-acheter",
             "groupe_action": ["vendre_acheter"],
             "directions": [["jecherche"]]
@@ -109,7 +109,7 @@
             "afficher": true,
             "description": null,
             "order": 9,
-            "couleur": "brown-cafe-creme",
+            "couleur": "#C3992A",
             "icon": "fr-icon-action-vendre",
             "groupe_action": ["vendre_acheter"],
             "directions": [["jai"]]
@@ -124,7 +124,7 @@
             "afficher": true,
             "description": null,
             "order": 6,
-            "couleur": "yellow-tournesol",
+            "couleur": "#C3992A",
             "icon": "fr-icon-action-donner",
             "groupe_action": ["donner_echanger"],
             "directions": [["jai"]]
@@ -139,7 +139,7 @@
             "afficher": true,
             "description": null,
             "order": 3,
-            "couleur": "purple-glycine",
+            "couleur": "#C3992A",
             "icon": "fr-icon-action-louer",
             "groupe_action": ["emprunter_preter_louer"],
             "directions": [["jecherche"]]
@@ -154,7 +154,7 @@
             "afficher": true,
             "description": "Mettre en location",
             "order": 4,
-            "couleur": "purple-glycine",
+            "couleur": "#C3992A",
             "icon": "fr-icon-action-mettreenlocation",
             "groupe_action": ["emprunter_preter_louer"],
             "directions": [["jai"]]
@@ -169,7 +169,7 @@
             "afficher": true,
             "description": null,
             "order": 2,
-            "couleur": "orange-terre-battue",
+            "couleur": "#C3992A",
             "icon": "fr-icon-action-emprunter",
             "groupe_action": ["emprunter_preter_louer"],
             "directions": [["jecherche"]]
@@ -184,7 +184,7 @@
             "afficher": true,
             "description": null,
             "order": 1,
-            "couleur": "orange-terre-battue",
+            "couleur": "#C3992A",
             "icon": "fr-icon-action-preter",
             "groupe_action": ["emprunter_preter_louer"],
             "directions": [["jai"]]
@@ -199,7 +199,7 @@
             "afficher": true,
             "description": null,
             "order": 7,
-            "couleur": "blue-cumulus",
+            "couleur": "#C3992A",
             "icon": "fr-icon-action-echanger",
             "groupe_action": ["donner_echanger"],
             "directions": [["jai"], ["jecherche"]]
@@ -214,7 +214,7 @@
             "afficher": false,
             "description": "trier pour recycler",
             "order": 10,
-            "couleur": "yellow-tournesol",
+            "couleur": "#C3992A",
             "icon": "fr-icon-recycle-line",
             "groupe_action": ["trier"],
             "directions": [["jai"]]
