@@ -4,8 +4,8 @@ les données de plusieurs acteurs pour en faire un parent, en priorisant
 les sources de préférence puis les données les plus complètes.
 """
 
-from pipelines.deduplication.tasks.db_manage_parent import parent_get_data_from_acteurs
-from pipelines.deduplication.utils.django_setup import RevisionActeur
+from qfdmo.models import RevisionActeur
+from scripts.deduplication.tasks.db_manage_parent import parent_get_data_from_acteurs
 
 
 def test_parent_get_data_from_acteurs():
@@ -14,7 +14,7 @@ def test_parent_get_data_from_acteurs():
             "identifiant_externe": "A",
             "identifiant_unique": "a",
             "nom": "Mon A",
-            "url": None,
+            "url": "url_a",
             "siren": None,
             "source_id": 1,
             "parent_id": None,
@@ -23,7 +23,7 @@ def test_parent_get_data_from_acteurs():
             "identifiant_externe": "B",
             "identifiant_unique": "b",
             "nom": "Mon B",
-            "url": "url_b",
+            "url": None,
             "siret": 12345678912345,
             "source_id": 2,
             "parent_id": "p1",
@@ -32,7 +32,7 @@ def test_parent_get_data_from_acteurs():
             "identifiant_externe": "C",
             "identifiant_unique": "c",
             "nom": "Mon C",
-            "url": "url_c",
+            "url": None,
             "siret": None,
             "source_id": 3,
             "parent_id": "p2",
@@ -42,7 +42,7 @@ def test_parent_get_data_from_acteurs():
             "identifiant_externe": "D",
             "identifiant_unique": "d",
             "nom": "Mon D",
-            "url": "url_d",
+            "url": None,
             "siret": None,
             "source_id": 4,
             "parent_id": "p2",
@@ -54,9 +54,9 @@ def test_parent_get_data_from_acteurs():
         # Intentionnellement pas de identifiant_unique retourné
         # pour nous forcer à gérer le ID séparément (ex: génréer un UUID)
         "nom": "Mon C",
-        "url": "url_c",
+        "url": "url_a",
         "siret": 12345678912345,
         "source_id": None,
     }
-    parent = parent_get_data_from_acteurs(acteurs, source_ids_preferred, RevisionActeur)
+    parent = parent_get_data_from_acteurs(acteurs, source_ids_preferred, RevisionActeur)  # type: ignore
     assert parent == parent_expected
