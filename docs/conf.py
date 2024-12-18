@@ -7,8 +7,8 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "Longue Vie Aux Objets"
-copyright = "2024, Fabien Le Frapper, Nicolas Oudard"
-author = "Fabien Le Frapper, Nicolas Oudard"
+copyright = "2024, Fabien Le Frapper (@fabienheureux), Nicolas Oudard, Max Corbeau"
+author = "Fabien Le Frapper, Nicolas Oudard, Max Corbeaux"
 
 # Add MyST Parser extension
 extensions = ["myst_parser"]
