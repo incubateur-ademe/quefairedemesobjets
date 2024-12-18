@@ -18,7 +18,10 @@ def patchwork() -> dict:
 
 @register.simple_tag
 def render_file_content(svg_file) -> str:
-    # Plante si le SVG n'exise pas, ce serat bien que ça ne plante pas car ce n'est pas
-    # une fonctionnalité corps de l'application
     with svg_file.open() as f:
         return mark_safe(f.read().decode("utf-8"))
+
+
+@register.inclusion_tag("head/favicon.html")
+def favicon() -> dict:
+    return {}
