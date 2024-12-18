@@ -9,4 +9,4 @@
  1. Définir les variables DB: `DB_URL_DEV`, `DB_URL_PREPROD` ou `DB_URL_PROD`
  2. Placer votre CSV de clustering dans ce dossier et adapter `CLUSTERING_CSV_FILEPATH`
  3. Mettre à jour `tests/verifications.py` au besoin
- 4. Lancer le script `python acteur_deduplicate.py` et laisser vous guider
+ 4. A partir du dossier `deduplication`, lancer le script `python acteur_deduplicate.py` et laisser vous guider
