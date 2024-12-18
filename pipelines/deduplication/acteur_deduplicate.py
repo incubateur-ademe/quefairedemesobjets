@@ -11,7 +11,7 @@ Paramètres optionnelles:
  - DRY_RUN: pour tester sans modifier la DB
 
 Execution:
- - python deduplicate.py
+ - python acteur_deduplicate.py
 
 Nommage des variables:
  - suffixe "_src" pour la donnée de source
