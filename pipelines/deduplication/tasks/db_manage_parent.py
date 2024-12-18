@@ -88,10 +88,8 @@ def acteurs_dict_to_list_of_dicts(acteurs_maps: List[ActeurMap]) -> List[dict]:
     # FIXME: voir si il est possible pour Django de donner à ces champs le même nom
     # qu'en DB pour éviter d'avoir à les renommer
     for acteur in acteurs_dicts:
-        acteur["source_id"] = acteur["source"]
-        acteur["acteur_type_id"] = acteur["acteur_type"]
-        del acteur["source"]
-        del acteur["acteur_type"]
+        acteur["source_id"] = acteur.pop("source")
+        acteur["acteur_type_id"] = acteur.pop("acteur_type")
         # Problème silimaire mais + compliqué puisque
         # django le rattache à un autre modèle: étant donné qu'on ne se
         # sert pas du champs parent_id pour générer le parent, on le supprime
