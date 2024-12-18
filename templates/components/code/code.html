@@ -1,0 +1,22 @@
+<div
+    data-controller="copy"
+    class="qf-flex
+    qf-p-2w qf-bg-grey-975"
+>
+    <pre
+        data-copy-target="toCopy"
+        class="
+        qf-m-0 qf-pr-1w
+        qf-text-blue-france-sun-113
+        qf-whitespace-break-spaces
+        qf-break-all"
+    >{{ iframe_script }}</pre>
+    <button
+        class="fr-btn qf-my-auto qf-ml-auto"
+        title="Copier"
+        data-action="click->copy#toClipboard"
+        data-copy-target="button"
+    >
+        Copier
+    </button>
+</div>
