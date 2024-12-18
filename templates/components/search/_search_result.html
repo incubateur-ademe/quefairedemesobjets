@@ -3,6 +3,9 @@
     target="_top"
     style="background-image: none;"
     class="
+    focus:!no-underline
+    focus:!bg-none
+    focus:!qf-bg-grey-1000-50-hover
     hover:!no-underline
     hover:!bg-none
     hover:!qf-bg-grey-1000-50-hover
@@ -10,6 +13,7 @@
     qf-text-xs md:qf-text-base qf-font-bold
     "
     tabindex="0"
+    data-action="keydown.esc->search#reset"
 >
     {{ result.nom|capfirst }}
 </a>
