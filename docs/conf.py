@@ -19,6 +19,8 @@ source_suffix = {
     ".md": "markdown",
 }
 
+master_doc = "README"
+
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 

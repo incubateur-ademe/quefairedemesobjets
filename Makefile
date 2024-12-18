@@ -139,9 +139,3 @@ extract-dsfr:
 	$(PYTHON) ./dsfr_hacks/extract_dsfr_colors.py
 	$(PYTHON) ./dsfr_hacks/extract_used_colors.py
 	$(PYTHON) ./dsfr_hacks/extract_used_icons.py
-
-
-# Docs
-.PHONY: build-docs
-build-docs:
-	$(PYTHON) -m sphinx-build -b html ./techdocs _build
