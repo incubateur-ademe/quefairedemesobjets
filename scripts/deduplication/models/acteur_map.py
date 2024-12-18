@@ -19,6 +19,8 @@ from django.db.models import Model
 
 @dataclass
 class ActeurMap:
+    """Mapping pour 1 acteur"""
+
     identifiant_unique: str
 
     # Un dict avec les différent objets Django pour chaque acteur

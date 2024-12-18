@@ -6,17 +6,15 @@ utilise les sous tâches db_manage_parent et db_manage_child
 from typing import List
 
 from rich import print
-from sqlalchemy.engine import Engine
 
-from pipelines.deduplication.models.acteur_map import ActeurMap
-from pipelines.deduplication.models.change import Change
-from pipelines.deduplication.tasks.db_manage_child import db_manage_child
-from pipelines.deduplication.tasks.db_manage_parent import db_manage_parent
 from qfdmo.models.acteur import Acteur, DisplayedActeur, RevisionActeur
+from scripts.deduplication.models.acteur_map import ActeurMap
+from scripts.deduplication.models.change import Change
+from scripts.deduplication.tasks.db_manage_child import db_manage_child
+from scripts.deduplication.tasks.db_manage_parent import db_manage_parent
 
 
 def db_manage_cluster(
-    db_engine: Engine,
     cluster_id: str,
     identifiants_uniques: List[str],
     parent_ids_to_children_count_db: dict,
@@ -59,7 +57,7 @@ def db_manage_cluster(
                 # est pratique pour les tests de présence et décider
                 # si on doit créer des révisions plus tards
                 table_states={
-                    "displayed": acteurs_displayed.filter(pk=id).first(),
+                    "displayed": acteurs_displayed.filter(pk=id).first(),  # type: ignore
                     "revision": acteurs_revision.filter(pk=id).first(),
                     "base": acteurs_base.filter(pk=id).first(),
                 },
@@ -85,7 +83,7 @@ def db_manage_cluster(
     # Tous les acteurs qui ne sont pas le parent sont des enfants
     children_maps = [x for x in acteurs_maps if x.identifiant_unique != parent_id]
     for child_map in children_maps:
-        change = db_manage_child(db_engine, child_map, parent_id, is_dry_run)
+        change = db_manage_child(child_map, parent_id, is_dry_run)
         changes.append(change)
 
     return changes

@@ -12,15 +12,18 @@ from django.db.models import Model
 from django.forms.models import model_to_dict
 from rich import print
 
-from pipelines.deduplication.models.acteur_map import ActeurMap
-from pipelines.deduplication.models.change import Change
 from qfdmo.models.acteur import RevisionActeur
+from scripts.deduplication.models.acteur_map import ActeurMap
+from scripts.deduplication.models.change import Change
 
 
 def parent_id_generate(ids: List[str]) -> str:
     """
-    Générer un UUID (pour l'identifiant_unique) à partir de la liste des identifiants
-    des enfants du cluster
+    Génère un UUID (pour l'identifiant_unique parent) à partir
+    de la liste des identifiants des enfants du cluster.
+    Le UUID généré doit être:
+    - déterministe (même entrée donne même sortie)
+    - ordre-insensible (sort automatique)
 
     Args:
         ids: liste des identifiants uniques des enfants
@@ -28,7 +31,7 @@ def parent_id_generate(ids: List[str]) -> str:
     Returns:
         str: nouvel identifiant_unique du parent
     """
-    combined = ",".join(ids)
+    combined = ",".join(sorted(ids))
     parent_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, combined))
     print("parent_id_generate", f"{ids=}", f"{parent_id=}")
     return parent_id
@@ -56,9 +59,9 @@ def acteurs_dict_to_list_of_dicts(acteurs_maps: List[ActeurMap]) -> List[dict]:
                 # Pour chaque acteur, on récupère dans l'ordre les
                 # objets displayed, revision, base si non None
                 [
-                    acteur.table_states[k]
+                    acteur.table_states[k]  # type: ignore
                     for k in ["displayed", "revision", "base"]
-                    if acteur.table_states[k] is not None
+                    if acteur.table_states[k] is not None  # type: ignore
                 ]
                 for acteur in acteurs_maps
             ]
@@ -79,14 +82,14 @@ def acteurs_dict_to_list_of_dicts(acteurs_maps: List[ActeurMap]) -> List[dict]:
                 field.name
                 for field in item._meta.get_fields()
                 # on the prend que les champs concrets et non many_to_many
-                if field.concrete and not field.many_to_many
+                if field.concrete and not field.many_to_many  # type: ignore
             ],
         )
         for item in acteurs_list
     ]
 
     # FIXME: voir si il est possible pour Django de donner à ces champs le même nom
-    # qu'en DB pour éviter d'avoir à les renommer
+    # qu'en DB pour éviter d'avoir à les renommer vers _id
     for acteur in acteurs_dicts:
         acteur["source_id"] = acteur.pop("source")
         acteur["acteur_type_id"] = acteur.pop("acteur_type")
@@ -201,7 +204,7 @@ def db_manage_parent(
     acteurs_dicts = acteurs_dict_to_list_of_dicts(acteurs_maps)
     # print(f"{acteurs_list=}")
     parent_data = parent_get_data_from_acteurs(
-        acteurs_dicts, sources_preferred_ids, validation_model=RevisionActeur
+        acteurs_dicts, sources_preferred_ids, validation_model=RevisionActeur  # type: ignore
     )
     print(f"{parent_data=}")
 
@@ -224,7 +227,7 @@ def db_manage_parent(
                 print("\t\t\t", f"{k=}", f"{val_current=}", f"{val_new=}")
                 setattr(parent, k, val_new)
         if is_dry_run:
-            print("\t\tDB: pas de modif en mode test ✋")
+            print("\t\tDB: pas de modif en dry run ✋")
             pass
         else:
             parent.save()
@@ -238,9 +241,9 @@ def db_manage_parent(
         parent.identifiant_unique = parent_id
         print(f"\t\t{parent=}")
         if is_dry_run:
-            print("\t\tDB: pas de modif en mode test ✋")
+            print("\t\tDB: pas de modif en dry run ✋")
             pass
         else:
-            parent.save()
+            parent.save_as_parent()
 
     return parent_id, change
