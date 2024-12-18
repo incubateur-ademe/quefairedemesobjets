@@ -8,7 +8,7 @@ from typing import List
 from django.db import transaction
 from rich import print
 
-from qfdmo.models.acteur import Acteur, DisplayedActeur, RevisionActeur
+from qfdmo.models.acteur import Acteur, RevisionActeur
 from scripts.deduplication.models.acteur_map import ActeurMap
 from scripts.deduplication.models.change import Change
 from scripts.deduplication.tasks.db_manage_child import db_manage_child
@@ -40,10 +40,8 @@ def db_manage_cluster(
     print("Récupération des données des acteurs")
     # On construit un dict avec l'identifiant_unique comme clef
     # et pour chaque acteur, on récupère les données des 3 tables
-    acteurs_displayed = DisplayedActeur.objects.filter(pk__in=identifiants_uniques)
     acteurs_revision = RevisionActeur.objects.filter(pk__in=identifiants_uniques)
     acteurs_base = Acteur.objects.filter(pk__in=identifiants_uniques)
-    print(f"{len(acteurs_displayed)=}")
     print(f"{len(acteurs_revision)=}")
     print(f"{len(acteurs_base)=}")
 
@@ -58,7 +56,6 @@ def db_manage_cluster(
                 # est pratique pour les tests de présence et décider
                 # si on doit créer des révisions plus tards
                 table_states={
-                    "displayed": acteurs_displayed.filter(pk=id).first(),  # type: ignore
                     "revision": acteurs_revision.filter(pk=id).first(),
                     "base": acteurs_base.filter(pk=id).first(),
                 },

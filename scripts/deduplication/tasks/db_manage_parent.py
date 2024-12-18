@@ -38,7 +38,7 @@ def parent_id_generate(ids: List[str]) -> str:
 
 
 def acteurs_dict_to_list_of_dicts(acteurs_maps: List[ActeurMap]) -> List[dict]:
-    """Extrait tous les acteurs sous tous leurs états (displayed -> revision -> base)
+    """Extrait tous les acteurs sous tous leurs états (revision -> base)
     pour les mettre dans une liste de dict, afin de faciliter la génération
     de la donnée parent reconciliée
 
@@ -50,17 +50,17 @@ def acteurs_dict_to_list_of_dicts(acteurs_maps: List[ActeurMap]) -> List[dict]:
     """
 
     # sort values of acteurs_map by children_count
-    # flatten/pick all non-None displayed, revision, base values
+    # flatten/pick all non-None revision, base values
     acteurs_maps = sorted(acteurs_maps, key=lambda x: x.children_count, reverse=True)
     acteurs_list = list(
         # On écrase la liste de liste en 1 seule liste
         chain.from_iterable(
             [
                 # Pour chaque acteur, on récupère dans l'ordre les
-                # objets displayed, revision, base si non None
+                # objets revision, base si non None
                 [
                     acteur.table_states[k]  # type: ignore
-                    for k in ["displayed", "revision", "base"]
+                    for k in ["revision", "base"]
                     if acteur.table_states[k] is not None  # type: ignore
                 ]
                 for acteur in acteurs_maps
@@ -70,7 +70,7 @@ def acteurs_dict_to_list_of_dicts(acteurs_maps: List[ActeurMap]) -> List[dict]:
     """
     [
         acteur["table_states"][k]
-        for k in ["displayed", "revision", "base"]
+        for k in ["revision", "base"]
         if acteur["table_states"][k] is not None
     ]
     """
