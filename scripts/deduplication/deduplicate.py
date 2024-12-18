@@ -11,7 +11,6 @@ Nommage des variables:
 import importlib
 import json
 from pathlib import Path
-from typing import List, Tuple
 
 import pandas as pd
 import utils.django_setup  # noqa: F401
@@ -61,7 +60,7 @@ MODE_DRY_RUN = None  # laisser None, définit par le script
 MODE_INTERACTIVE = None  # laisser None, définit par le script
 
 
-def environment_setup() -> Tuple[list, Path]:
+def environment_setup() -> tuple[list, Path]:
     """Choix de l'environnement et retourne les paramètres nécessaires
 
     Returns:
@@ -192,7 +191,7 @@ def main() -> None:
 
         # ------------------------------------------
         # Gestion du cluster en DB
-        changes: List[Change] = db_manage_cluster(
+        changes: list[Change] = db_manage_cluster(
             # Pylance doesn't get that from .groupby we get a string for cluster_id
             cluster_id,  # type: ignore
             identifiants_uniques,
@@ -207,7 +206,7 @@ def main() -> None:
         # Vérifications des changements obtenus
         # vs. changements attendus
         if RUN_CLUSTER_IDS_TO_CHANGES and cluster_id in RUN_CLUSTER_IDS_TO_CHANGES:
-            changes_exp: List[Change] = RUN_CLUSTER_IDS_TO_CHANGES[cluster_id]  # type: ignore
+            changes_exp: list[Change] = RUN_CLUSTER_IDS_TO_CHANGES[cluster_id]  # type: ignore
             # Conversion en dataframes pour faciliter la comparaison
             debug_act = pd.DataFrame(changes).rename(columns={"operation": "op_actual"})
             debug_exp = pd.DataFrame(changes_exp).rename(

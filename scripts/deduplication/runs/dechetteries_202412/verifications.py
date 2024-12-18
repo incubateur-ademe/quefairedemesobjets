@@ -14,12 +14,10 @@ pour appliquer les changements.
 
 """
 
-from typing import Dict, List
-
 from models.change import Change
 
 # Mapping de cluster_id -> list des changements attendus
-RUN_CLUSTER_IDS_TO_CHANGES: Dict[str, List[Change]] = {
+RUN_CLUSTER_IDS_TO_CHANGES: dict[str, list[Change]] = {
     # cluster sans parent
     "01100_1_1": [
         Change(

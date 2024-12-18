@@ -3,8 +3,6 @@ Tâche pour la gestion d'un cluster (parent + enfants),
 utilise les sous tâches db_manage_parent et db_manage_child
 """
 
-from typing import List
-
 from django.db import transaction
 from rich import print
 
@@ -17,24 +15,24 @@ from scripts.deduplication.tasks.db_manage_parent import db_manage_parent
 
 def db_manage_cluster(
     cluster_id: str,
-    identifiants_uniques: List[str],
+    identifiants_uniques: list[str],
     parent_ids_to_children_count_db: dict,
-    sources_preferred_ids: List[int],
+    sources_preferred_ids: list[int],
     is_dry_run: bool,
-) -> List[Change]:
+) -> list[Change]:
     """Fonction de gestion d'un cluster qui gère le parent et les enfants
     via des fonctions dédiées
 
     Args:
         db_engine (Engine): connexion à la DB
         cluster_id (str): Identifiant du cluster
-        identifiants_uniques (List[str]): liste des IDs des acteurs du cluster
+        identifiants_uniques (list[str]): liste des IDs des acteurs du cluster
         parent_ids_to_children_count_db (dict): mapping parent_id -> nombre d'enfants
-        sources_preferred_ids (List[int]): liste des IDs de sources préférées
+        sources_preferred_ids (list[int]): liste des IDs de sources préférées
         is_dry_run (bool): mode test ou non
 
     Returns:
-        List[Change]: liste des changements effectués
+        list[Change]: liste des changements effectués
     """
     print(f"\nGESTION DU CLUSTER {cluster_id=}")
     print("Récupération des données des acteurs")
