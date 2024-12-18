@@ -5,6 +5,7 @@ utilise les sous tâches db_manage_parent et db_manage_child
 
 from typing import List
 
+from django.db import transaction
 from rich import print
 
 from qfdmo.models.acteur import Acteur, DisplayedActeur, RevisionActeur
@@ -69,21 +70,22 @@ def db_manage_cluster(
 
     changes = []
 
-    # --------------------------------------
-    # GESTION PARENT
-    # --------------------------------------
-    parent_id, change = db_manage_parent(
-        acteurs_maps, sources_preferred_ids, is_dry_run
-    )
-    changes.append(change)
-
-    # --------------------------------------
-    # GESTION DES ENFANTS
-    # --------------------------------------
-    # Tous les acteurs qui ne sont pas le parent sont des enfants
-    children_maps = [x for x in acteurs_maps if x.identifiant_unique != parent_id]
-    for child_map in children_maps:
-        change = db_manage_child(child_map, parent_id, is_dry_run)
+    with transaction.atomic():
+        # --------------------------------------
+        # GESTION PARENT
+        # --------------------------------------
+        parent_id, change = db_manage_parent(
+            acteurs_maps, sources_preferred_ids, is_dry_run
+        )
         changes.append(change)
+
+        # --------------------------------------
+        # GESTION DES ENFANTS
+        # --------------------------------------
+        # Tous les acteurs qui ne sont pas le parent sont des enfants
+        children_maps = [x for x in acteurs_maps if x.identifiant_unique != parent_id]
+        for child_map in children_maps:
+            change = db_manage_child(child_map, parent_id, is_dry_run)
+            changes.append(change)
 
     return changes
