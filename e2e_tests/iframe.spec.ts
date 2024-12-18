@@ -30,7 +30,7 @@ async function expectIframeAttributes(iframeElement) {
   expect(title).toBe("Longue vie aux objets");
 }
 
-test("iframe is loaded with correct parameters", async ({ page }) => {
+test("Desktop | iframe is loaded with correct parameters", async ({ page }) => {
   await page.goto("http://localhost:8000/test_iframe", { waitUntil: "networkidle" });
 
   const titlePage = await page.title();
@@ -40,7 +40,7 @@ test("iframe is loaded with correct parameters", async ({ page }) => {
   await expectIframeAttributes(iframeElement);
 });
 
-test("form is visible in the iframe", async ({ page }) => {
+test("Desktop | form is visible in the iframe", async ({ page }) => {
   await page.goto("http://localhost:8000/test_iframe", { waitUntil: "networkidle" });
 
   const iframeElement = await page.$("iframe");
@@ -52,7 +52,7 @@ test("form is visible in the iframe", async ({ page }) => {
   expect(formHeight).toBeGreaterThan(600);
 });
 
-test("iframe with 0px parent height displays correctly", async ({ page }) => {
+test("Desktop | iframe with 0px parent height displays correctly", async ({ page }) => {
   await page.goto("http://localhost:8000/test_iframe?carte=1", { waitUntil: "networkidle" });
   await expect(page).toHaveScreenshot("iframe.png");
 
@@ -62,4 +62,34 @@ test("iframe with 0px parent height displays correctly", async ({ page }) => {
   });
   await page.waitForTimeout(1000);
   await expect(page).toHaveScreenshot("iframe.png");
+});
+
+test("Desktop | iframe cannot read the referrer when referrerPolicy is set to no-referrer", async ({ page }) => {
+  await page.goto("http://localhost:8000/test_iframe?carte=1", { waitUntil: "networkidle" });
+
+  // Get the content frame of the iframe
+  const iframeElement = await page.$("iframe[referrerpolicy='no-referrer']");
+  const iframe = await iframeElement?.contentFrame();
+  expect(iframe).not.toBeNull();
+
+  // Evaluate the referrer inside the iframe
+  const referrer = await iframe.evaluate(() => document.referrer);
+
+  // Assert that the referrer is set and not undefined
+  expect(referrer).toBe('');
+});
+
+test("iframe can read the referrer when referrerPolicy is not set", async ({ page }) => {
+  await page.goto("http://localhost:8000/test_iframe?carte=1", { waitUntil: "networkidle" });
+
+  // Get the content frame of the iframe
+  const iframeElement = await page.$("iframe[data-testid='assistant']");
+  const iframe = await iframeElement?.contentFrame();
+  expect(iframe).not.toBeNull();
+
+  // Evaluate the referrer inside the iframe
+  const referrer = await iframe.evaluate(() => document.referrer);
+
+  // Assert that the referrer is set and not undefined
+  expect(referrer).toBe('http://localhost:8000/test_iframe?carte=1');
 });
