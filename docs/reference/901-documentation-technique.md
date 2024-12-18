@@ -2,11 +2,11 @@
 
 La documentation technique est entretenue dans le code, dans le dossier [docs](./)
 
-Elle suit la convention [DATAXIS](https://diataxis.fr) et met en application, tant que faire se peut, les guidelines de documentation définies par [Google](https://developers.google.com/style)
+Elle suit la convention [DIATAXIS](https://diataxis.fr) et met en application, tant que faire se peut, les guidelines de documentation définies par [Google](https://developers.google.com/style)
 
 ![Organisation de la documentation selon diataxis](https://diataxis.fr/_images/diataxis.png)
 
-## TLTR : Dataxis
+## TL;PL : Diataxis
 
 On découpe la documentation en 4 parties:
 
