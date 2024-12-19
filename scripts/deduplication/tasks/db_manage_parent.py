@@ -5,7 +5,6 @@ ou mise à jour si existant)
 
 import uuid
 from itertools import chain
-from typing import List, Tuple
 
 from django import forms
 from django.db.models import Model
@@ -18,7 +17,7 @@ from scripts.deduplication.models.change import Change
 from scripts.deduplication.utils.db import db_source_ids_by_code_get
 
 
-def parent_id_generate(ids: List[str]) -> str:
+def parent_id_generate(ids: list[str]) -> str:
     """
     Génère un UUID (pour l'identifiant_unique parent) à partir
     de la liste des identifiants des enfants du cluster.
@@ -38,7 +37,7 @@ def parent_id_generate(ids: List[str]) -> str:
     return parent_id
 
 
-def acteurs_dict_to_list_of_dicts(acteurs_maps: List[ActeurMap]) -> List[dict]:
+def acteurs_dict_to_list_of_dicts(acteurs_maps: list[ActeurMap]) -> list[dict]:
     """Extrait tous les acteurs sous tous leurs états (revision -> base)
     pour les mettre dans une liste de dict, afin de faciliter la génération
     de la donnée parent reconciliée
@@ -104,7 +103,7 @@ def acteurs_dict_to_list_of_dicts(acteurs_maps: List[ActeurMap]) -> List[dict]:
 
 
 def parent_get_data_from_acteurs(
-    acteurs: List[dict],
+    acteurs: list[dict],
     source_ids_by_code: dict,
     sources_preferred_ids,
     validation_model: Model,
@@ -252,10 +251,10 @@ def parent_get_data_from_acteurs(
 
 
 def db_manage_parent(
-    acteurs_maps: List[ActeurMap],
-    sources_preferred_ids: List[int],
+    acteurs_maps: list[ActeurMap],
+    sources_preferred_ids: list[int],
     is_dry_run: bool,
-) -> Tuple[str, Change]:
+) -> tuple[str, Change]:
     """Gestion de tous les aspects du parent:
      - préparation de sa donnée
      - choix du parent
