@@ -29,31 +29,28 @@ def handle_create_event(df_actors, dag_run_id, engine):
         df_actors, "acteur_services", df_columns=["acteur_id", "acteurservice_id"]
     )
 
-    max_id_pds = pd.read_sql_query(
+    max_id_ps = pd.read_sql_query(
         "SELECT max(id) FROM qfdmo_propositionservice", engine
     )["max"][0]
-    normalized_pds_dfs = df_actors["proposition_services"].apply(pd.json_normalize)
-    df_pds = pd.concat(normalized_pds_dfs.tolist(), ignore_index=True)
-    ids_range = range(max_id_pds + 1, max_id_pds + 1 + len(df_pds))
+    normalized_ps_dfs = df_actors["proposition_services"].apply(pd.json_normalize)
+    df_ps = pd.concat(normalized_ps_dfs.tolist(), ignore_index=True)
+    ids_range = range(max_id_ps + 1, max_id_ps + 1 + len(df_ps))
 
-    df_pds["id"] = ids_range
-    df_pds["pds_sous_categories"] = df_pds.apply(
+    df_ps["id"] = ids_range
+    df_ps["ps_sscat"] = df_ps.apply(
         lambda row: [
-            {**d, "propositionservice_id": row["id"]}
-            for d in row["pds_sous_categories"]
+            {**d, "propositionservice_id": row["id"]} for d in row["ps_sscat"]
         ],
         axis=1,
     )
 
-    normalized_pdssc_dfs = df_pds["pds_sous_categories"].apply(pd.json_normalize)
-    df_pdssc = pd.concat(normalized_pdssc_dfs.tolist(), ignore_index=True)
+    normalized_ps_sscat_dfs = df_ps["ps_sscat"].apply(pd.json_normalize)
+    df_ps_sscat = pd.concat(normalized_ps_sscat_dfs.tolist(), ignore_index=True)
 
     return {
         "actors": df_actors,
-        "pds": df_pds[["id", "action_id", "acteur_id"]],
-        "pds_sous_categories": df_pdssc[
-            ["propositionservice_id", "souscategorieobjet_id"]
-        ],
+        "ps": df_ps[["id", "action_id", "acteur_id"]],
+        "ps_sscat": df_ps_sscat[["propositionservice_id", "souscategorieobjet_id"]],
         "dag_run_id": dag_run_id,
         "labels": df_labels[["acteur_id", "labelqualite_id"]],
         "acteur_services": df_acteur_services[["acteur_id", "acteurservice_id"]],
@@ -97,7 +94,7 @@ def handle_update_actor_event(df_actors, dag_run_id):
 
 
 def handle_write_data_create_event(
-    connection, df_actors, df_labels, df_acteur_services, df_pds, df_pdssc
+    connection, df_actors, df_labels, df_acteur_services, df_ps, df_ps_sscat
 ):
     df_actors[["identifiant_unique"]].to_sql(
         "temp_actors", connection, if_exists="replace"
@@ -175,7 +172,7 @@ def handle_write_data_create_event(
         chunksize=1000,
     )
 
-    df_pds[["id", "action_id", "acteur_id"]].to_sql(
+    df_ps[["id", "action_id", "acteur_id"]].to_sql(
         "qfdmo_propositionservice",
         connection,
         if_exists="append",
@@ -184,7 +181,7 @@ def handle_write_data_create_event(
         chunksize=1000,
     )
 
-    df_pdssc[["propositionservice_id", "souscategorieobjet_id"]].to_sql(
+    df_ps_sscat[["propositionservice_id", "souscategorieobjet_id"]].to_sql(
         "qfdmo_propositionservice_sous_categories",
         connection,
         if_exists="append",
@@ -210,15 +207,15 @@ def handle_write_data_update_actor_event(connection, df_actors):
             SELECT identifiant_unique FROM temp_actors
         );
 
-        CREATE TEMP TABLE temp_existing_pds AS
+        CREATE TEMP TABLE temp_existing_ps AS
         SELECT * FROM qfdmo_revisionpropositionservice WHERE acteur_id IN (
             SELECT identifiant_unique FROM temp_actors
         );
 
-        CREATE TEMP TABLE temp_existing_pdssc AS
+        CREATE TEMP TABLE temp_existing_ps_sscat AS
         SELECT * FROM qfdmo_revisionpropositionservice_sous_categories
         WHERE revisionpropositionservice_id IN (
-            SELECT id FROM temp_existing_pds
+            SELECT id FROM temp_existing_ps
         );
     """
     connection.execute(temp_tables_creation_query)
@@ -226,7 +223,7 @@ def handle_write_data_update_actor_event(connection, df_actors):
     delete_queries = """
         DELETE FROM qfdmo_revisionpropositionservice_sous_categories
         WHERE revisionpropositionservice_id IN (
-            SELECT id FROM temp_existing_pds
+            SELECT id FROM temp_existing_ps
         );
 
         DELETE FROM qfdmo_revisionpropositionservice
@@ -287,12 +284,12 @@ def handle_write_data_update_actor_event(connection, df_actors):
         chunksize=1000,
     )
 
-    existing_pds_df = pd.read_sql_query("SELECT * FROM temp_existing_pds", connection)
-    existing_pdssc_df = pd.read_sql_query(
-        "SELECT * FROM temp_existing_pdssc", connection
+    existing_ps_df = pd.read_sql_query("SELECT * FROM temp_existing_ps", connection)
+    existing_ps_sscat_df = pd.read_sql_query(
+        "SELECT * FROM temp_existing_ps_sscat", connection
     )
 
-    existing_pds_df.to_sql(
+    existing_ps_df.to_sql(
         "qfdmo_revisionpropositionservice",
         connection,
         if_exists="append",
@@ -301,7 +298,7 @@ def handle_write_data_update_actor_event(connection, df_actors):
         chunksize=1000,
     )
 
-    existing_pdssc_df.to_sql(
+    existing_ps_sscat_df.to_sql(
         "qfdmo_revisionpropositionservice_sous_categories",
         connection,
         if_exists="append",

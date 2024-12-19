@@ -27,20 +27,18 @@ def db_data_write_wrapper(**kwargs):
     df_acteur_sources_updated = kwargs["ti"].xcom_pull(
         task_ids="deduplicate_acteur_sources"
     )
-    task_output = kwargs["ti"].xcom_pull(task_ids="deduplicate_propositionservices")
-    df_propositionservice_merged = task_output["df_final_ps_updated"]
-    df_propositionservice_sous_categories_merged = task_output[
-        "df_final_sous_categories"
-    ]
+    task_output = kwargs["ti"].xcom_pull(task_ids="deduplicate_ps")
+    df_ps_merged = task_output["df_final_ps_updated"]
+    df_ps_sscat_merged = task_output["df_final_sscat"]
 
     log.preview("df_acteur_merged", df_acteur_merged)
     log.preview("df_labels_updated", df_labels_updated)
     log.preview("df_acteur_services_updated", df_acteur_services_updated)
     log.preview("df_acteur_sources_updated", df_acteur_sources_updated)
-    log.preview("df_propositionservice_merged", df_propositionservice_merged)
+    log.preview("df_ps_merged", df_ps_merged)
     log.preview(
-        "df_propositionservice_sous_categories_merged",
-        df_propositionservice_sous_categories_merged,
+        "df_ps_sscat_merged",
+        df_ps_sscat_merged,
     )
 
     return db_data_write(
@@ -48,6 +46,6 @@ def db_data_write_wrapper(**kwargs):
         df_labels_updated=df_labels_updated,
         df_acteur_services_updated=df_acteur_services_updated,
         df_acteur_sources_updated=df_acteur_sources_updated,
-        df_propositionservice_merged=df_propositionservice_merged,
-        df_propositionservice_sous_categories_merged=df_propositionservice_sous_categories_merged,
+        df_ps_merged=df_ps_merged,
+        df_ps_sscat_merged=df_ps_sscat_merged,
     )

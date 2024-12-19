@@ -1,15 +1,11 @@
 import pandas as pd
 import pytest
-from sources.tasks.business_logic.propose_services_sous_categories import (
-    propose_services_sous_categories,
-)
+from sources.tasks.business_logic.propose_ps_sscat import propose_ps_sscat
 
 
 class TestProposeServicesSousCategories:
-    def test_create_proposition_services_sous_categories(
-        self, souscategorieobjet_code_by_id
-    ):
-        df_result = propose_services_sous_categories(
+    def test_create_ps_sscat(self, souscategorieobjet_code_by_id):
+        df_result = propose_ps_sscat(
             df_ps=pd.DataFrame(
                 {
                     "action_id": [1, 3, 1, 3],
@@ -53,11 +49,9 @@ class TestProposeServicesSousCategories:
             ),
         )
 
-    def test_create_proposition_services_sous_categories_empty_products(
-        self, souscategorieobjet_code_by_id
-    ):
+    def test_create_ps_sscat_empty_products(self, souscategorieobjet_code_by_id):
         with pytest.raises(ValueError):
-            propose_services_sous_categories(
+            propose_ps_sscat(
                 df_ps=pd.DataFrame(
                     {
                         "action_id": [1, 1],

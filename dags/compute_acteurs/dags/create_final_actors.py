@@ -51,8 +51,8 @@ load_acteur_task = PythonOperator(
     retry_delay=read_retry_interval,
 )
 
-load_propositionservice_task = PythonOperator(
-    task_id="load_propositionservice",
+load_ps_task = PythonOperator(
+    task_id="load_ps",
     python_callable=read_data_from_postgres,
     op_kwargs={"table_name": "qfdmo_propositionservice"},
     dag=dag,
@@ -69,8 +69,8 @@ load_revisionacteur_task = PythonOperator(
     retry_delay=read_retry_interval,
 )
 
-load_revisionpropositionservice_task = PythonOperator(
-    task_id="load_revisionpropositionservice",
+load_rps_task = PythonOperator(
+    task_id="load_rps",
     python_callable=read_data_from_postgres,
     op_kwargs={"table_name": "qfdmo_revisionpropositionservice"},
     dag=dag,
@@ -78,8 +78,8 @@ load_revisionpropositionservice_task = PythonOperator(
     retry_delay=read_retry_interval,
 )
 
-load_revisionpropositionservice_sous_categories_task = PythonOperator(
-    task_id="load_revisionpropositionservice_sous_categories",
+load_rps_sscat_task = PythonOperator(
+    task_id="load_rps_sscat",
     python_callable=read_data_from_postgres,
     op_kwargs={"table_name": "qfdmo_revisionpropositionservice_sous_categories"},
     dag=dag,
@@ -87,8 +87,8 @@ load_revisionpropositionservice_sous_categories_task = PythonOperator(
     retry_delay=read_retry_interval,
 )
 
-load_propositionservice_sous_categories_task = PythonOperator(
-    task_id="load_propositionservice_sous_categories",
+load_ps_sscat_task = PythonOperator(
+    task_id="load_ps_sscat",
     python_callable=read_data_from_postgres,
     op_kwargs={"table_name": "qfdmo_propositionservice_sous_categories"},
     dag=dag,
@@ -146,10 +146,10 @@ db_data_write_task_instance = db_data_write_task(dag)
 
 load_acteur_task >> apply_corrections_acteur_task_instance
 [
-    load_propositionservice_task,
-    load_revisionpropositionservice_task,
-    load_propositionservice_sous_categories_task,
-    load_revisionpropositionservice_sous_categories_task,
+    load_ps_task,
+    load_rps_task,
+    load_ps_sscat_task,
+    load_rps_sscat_task,
 ] >> compute_ps_task_instance
 [
     load_revisionacteur_task,

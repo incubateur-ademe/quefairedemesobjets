@@ -6,8 +6,6 @@ def compute_parent_ps(
     df_ps: pd.DataFrame,
     df_ps_sscat: pd.DataFrame,
 ):
-    # old deduplicate_propositionservices
-
     # df_children_ps -> uniquement les propositions de services des enfants
     df_children_ps = df_ps.merge(
         df_children, left_on="acteur_id", right_on="identifiant_unique", how="inner"
@@ -68,5 +66,5 @@ def compute_parent_ps(
 
     return {
         "df_final_ps_updated": df_ps,
-        "df_final_sous_categories": df_ps_sscat,
+        "df_final_sscat": df_ps_sscat,
     }
