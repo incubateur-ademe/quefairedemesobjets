@@ -128,11 +128,4 @@ export default class extends Controller<HTMLElement> {
 
     observer.observe(document.body)
   }
-
-  // Sert principalement à typer les appels à la méthode capture de Posthog.
-  // Ça évite d'appeler un événement indéfini, ce qui peut rapidement polluer
-  // les données stockées côtés PostHog.
-  // capture(posthogEvent: PosthogEventType, details: object) {
-  //   posthog.capture(posthogEvent, details)
-  // }
 }
