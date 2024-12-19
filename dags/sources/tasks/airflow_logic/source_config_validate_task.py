@@ -22,7 +22,7 @@ def source_config_validate_task(dag: DAG) -> PythonOperator:
 
 
 def source_config_validate_wrapper(**kwargs) -> None:
-    engine = PostgresConnectionManager().engine
+    engine = PostgresConnectionManager().django_engine
     params = kwargs["params"]
 
     codes_sc_db = set(

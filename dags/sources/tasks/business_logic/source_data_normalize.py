@@ -317,7 +317,7 @@ def df_normalize_sinoe(
 
 @retry(wait=wait_fixed(5), stop=stop_after_attempt(5))
 def enrich_from_ban_api(row: pd.Series) -> pd.Series:
-    engine = PostgresConnectionManager().engine
+    engine = PostgresConnectionManager().django_engine
 
     adresse = row["adresse"] if row["adresse"] else ""
     code_postal = row["code_postal"] if row["code_postal"] else ""
