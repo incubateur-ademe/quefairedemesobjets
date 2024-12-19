@@ -1,5 +1,14 @@
 # Documentation technique de l'application
 
+```{toctree}
+:hidden:
+
+comment-faire/README
+explications/README
+reference/README
+tutoriels/README
+```
+
 ## Par ou commencer ?
 
 Cette documentation aide les développeurs et toute personne s'intéressant à la construction technique de la plateforme à comprendre son architecture, son fonctionnement et les prises de décision qui y ont abouties.

@@ -3,20 +3,21 @@
 Appliqué plus spécifiquement lors de la réorganisation des fichiers des dags d'ingestion des sources
 
 ```txt
-/dags
+/dags                               -> A renommer
 |- config
-|- source                           -> fichiers spécifique à l'ingestion des sources
-   |- dags                          -> dags d'ingestion des sources
-   |- tasks                         -> taches utilisées par les dags d'injestion des sources
+|- shared                           -> fichiers partagés par plusieurs sujets
+   |- tasks                         -> taches commune à plusieurs sujets
+      |- airflow_logic              -> logique propre à l'utilisation de airflow commune à plusieurs sujets
+      |- business_logic             -> logique métier commune à plusieurs sujets
+      |- database_logic             -> logique liée aux bases de données commune à plusieurs sujets
+|- <sujet>                          -> fichiers spécifiques à chaque sujet (ex : source, compute_acteur…)
+   |- dags                          -> dags relatif au sujet
+   |- tasks                         -> taches utilisées par les dags relatif au sujet
       |- airflow_logic              -> logic propre à l'utilisation de airflow : déclaration des tacks et des wrapper
       |- business_logic             -> logique métier
       |- transform                  -> fonction de transformation de données
          |- transform_df            -> fonction de transformation des dataframe
          |- transform_column        -> fonction de transformation des colonnes des dataframe
-|- tasks                            -> taches commune aux dags ayant différents propos
-   |- airflow_logic                 -> logic propre à l'utilisation de airflow commune aux dags ayant différents propos
-   |- business_logic                -> logique métier commune aux dags ayant différents propos
-   |- …
 |- utils                            -> utilitaire DÉPRÉCIÉ, à ranger dans l'arborescence ci-dessus
 ```
 
