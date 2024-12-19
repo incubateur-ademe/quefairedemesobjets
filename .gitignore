@@ -32,3 +32,5 @@ logs
 airflow-pgdata/
 
 media
+
+_build
