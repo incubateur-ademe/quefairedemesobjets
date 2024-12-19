@@ -117,9 +117,9 @@ anyio==4.7.0 \
     --hash=sha256:2f834749c602966b7d456a7567cafcb309f96482b5081d14ac93ccd457f9dd48 \
     --hash=sha256:ea60c3723ab42ba6fff7e8ccb0488c898ec538ff4df1f1d5e642c3601d07e352
     # via httpx
-apache-airflow==2.10.2 \
-    --hash=sha256:1b3a2a29a8e62702be8d1a6eb7a692f99407408d9c8cd91dff17b4b90985c6ba \
-    --hash=sha256:8049d29798fda50b8f8778fe4cf4cb3eb956ba1cb2121f0e6709397beb73efa7
+apache-airflow==2.10.4 \
+    --hash=sha256:10ebf8b95c59ba229f06235665e92cc684577861cfd1e96bdbe3d3eb7cb5779a \
+    --hash=sha256:9470a26479034ddede69fca913d7f84a32dd883368861b9421e2a692c0fc5ef4
     # via
     #   -r dev-requirements.in
     #   apache-airflow-providers-common-compat
@@ -2492,9 +2492,6 @@ uc-micro-py==1.0.3 \
     --hash=sha256:d321b92cff673ec58027c04015fcaa8bb1e005478643ff4a500882eaab88c48a \
     --hash=sha256:db1dffff340817673d7b466ec86114a9dc0e9d4d9b5ba229d9d60e5c12600cd5
     # via linkify-it-py
-unicodecsv==0.14.1 \
-    --hash=sha256:018c08037d48649a0412063ff4eda26eaa81eff1546dbffa51fa5293276ff7fc
-    # via apache-airflow
 universal-pathlib==0.2.6 \
     --hash=sha256:50817aaeaa9f4163cb1e76f5bdf84207fa05ce728b23fd779479b3462e5430ac \
     --hash=sha256:700dec2b58ef34b87998513de6d2ae153b22f083197dfafb8544744edabd1b18
