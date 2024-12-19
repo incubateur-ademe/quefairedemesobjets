@@ -76,6 +76,8 @@ class TestParentDataFromActeur:
                 "source_id": SOURCE_IDS_BY_CODES["Bon url"],
                 "parent_id": None,
                 "acteur_type_id": ACTEUR_TYPE_ID,
+                "cree_le": "2021-01-01",
+                "modifie_le": "2021-01-01",
             },
             {
                 "identifiant_externe": "B",
@@ -143,6 +145,11 @@ class TestParentDataFromActeur:
     def test_field_never_filled_because_all_none(self, parent):
         """On ne remplit pas un champs si toutes les valeurs dispos sont None"""
         assert "adresse_complement" not in parent
+
+    def test_datetimes_are_removed(self, parent):
+        """Les dates de création et modification ne sont pas copiées"""
+        assert "cree_le" not in parent
+        assert "modifie_le" not in parent
 
     def test_source_id_set_to_none(self, parent):
         """Pour expliciter que le parent a été fabriqué par nous"""

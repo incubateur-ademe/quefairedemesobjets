@@ -156,6 +156,11 @@ def parent_get_data_from_acteurs(
         "identifiant_externe",
         "parent_id",
         "source_id",
+        # Déjà géré par Django
+        "modifie_le",
+        # Soit on garde la valeur historique, ou soit pour un nouveau
+        # parent c'est géré par Django
+        "cree_le",
     ]
 
     def results_update(field, value, acteur):
@@ -242,6 +247,7 @@ def parent_get_data_from_acteurs(
     # Et on met la source_id à None car c'est une création de notre
     # part, donc il ne correspond pas à une source existante
     parent_dict["source_id"] = None
+
     # On s'assure que la donnée est compatible avec le modèle de révision
     validation_model(**parent_dict)  # type: ignore
     # On retourne la données sous forme de dict pour qu'elle puisse
