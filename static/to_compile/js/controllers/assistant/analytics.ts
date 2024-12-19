@@ -119,7 +119,7 @@ export default class extends Controller<HTMLElement> {
       },
       {
         root: null,
-        threshold: 0.01, // Trigger when at least 1% of the page is visible
+        threshold: 0.1, // Trigger when at least 10% of the page is visible
       },
     )
 
