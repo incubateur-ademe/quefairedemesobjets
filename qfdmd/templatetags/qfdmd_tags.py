@@ -1,4 +1,9 @@
+from typing import cast
+
 from django import template
+from django.conf import settings
+from django.core.cache import cache
+from django.forms import FileField
 from django.utils.safestring import mark_safe
 
 register = template.Library()
@@ -17,11 +22,30 @@ def patchwork() -> dict:
 
 
 @register.simple_tag
-def render_file_content(svg_file) -> str:
-    with svg_file.open() as f:
-        return mark_safe(f.read().decode("utf-8"))
+def render_file_content(file_field: FileField) -> str:
+    """Renders the content of a Filefield as a safe HTML string
+    and caches the result."""
+
+    def get_file_content() -> str:
+        with file_field.open() as f:
+            return mark_safe(f.read().decode("utf-8"))  # noqa: S308
+
+    return cast(
+        str,
+        cache.get_or_set(
+            f"filefield-{file_field.name}-{file_field.size}", get_file_content
+        ),
+    )
 
 
 @register.inclusion_tag("head/favicon.html")
 def favicon() -> dict:
     return {}
+
+
+@register.inclusion_tag("tracking/matomo.html")
+def matomo():
+    return {
+        "matomo_url": "stats.beta.gouv.fr",
+        "matomo_id": settings.ASSISTANT["MATOMO_ID"],
+    }

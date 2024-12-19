@@ -9,7 +9,7 @@
                 src="{% static 'assistant/bloc-marque.svg' %}"
                 class="max-md:qf-max-w-[220px]"
             >
-            {% if not is_home %}
+            {% if not assistant.is_home %}
                 {% include "components/logo/animated.html" %}
             {% endif %}
         </a>
