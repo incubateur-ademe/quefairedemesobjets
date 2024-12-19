@@ -65,26 +65,29 @@ export default class extends Controller<HTMLElement> {
   }
 
   #checkIfWeAreInAnIframe() {
-    let areWeInAnIframe = false
+    const propertiesToSendToPostHog = {
+      iframe: false
+    }
     try {
       if (window.self !== window.top) {
-        areWeInAnIframe = true
+        propertiesToSendToPostHog.iframe = true
+        propertiesToSendToPostHog.iframeReferrer =
+          window.top?.location.href
       }
     } catch (e) {
       // Unable to access window.top
       // this might be due to cross-origin restrictions.
       // Assuming it's inside an iframe.
-      areWeInAnIframe = true
+      propertiesToSendToPostHog.iframe = true
     }
 
     if (document.referrer) {
-      areWeInAnIframe = true
+      propertiesToSendToPostHog.iframe = true
     }
 
+
     posthog.capture("$set", {
-      $set: {
-        iframe: areWeInAnIframe,
-      },
+      $set: propertiesToSendToPostHog
     })
   }
 
