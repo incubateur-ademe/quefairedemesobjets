@@ -15,7 +15,10 @@ urlpatterns = [
     path("dechet/", HomeView.as_view(), name="home"),
     path("dechet/recherche", search_view, name="search"),
     path("dechet/<slug:slug>/", SynonymeDetailView.as_view(), name="synonyme-detail"),
-    path("script.js", get_assistant_script, name="script"),
+    # The URL here needs to be kept as is because it was used in the previous
+    # Gatsby website. If changed, a redirect need to be created to keep the
+    # legacy behaviour.
+    path("iframe.js", get_assistant_script, name="script"),
     path(
         "assistant-enquete",
         RedirectView.as_view(

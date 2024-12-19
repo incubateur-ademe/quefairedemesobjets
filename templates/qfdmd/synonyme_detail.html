@@ -1,5 +1,7 @@
 {% extends "qfdmd/base.html" %}
 
+{% block analytics_action %}produitPageView{% endblock %}
+
 {% block title %}
 {{ block.super }} | {{ object.nom }}
 {% endblock title %}

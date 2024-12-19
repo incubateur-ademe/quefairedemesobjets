@@ -29,6 +29,8 @@ BASE_URL = decouple.config("BASE_URL", default="http://localhost:8000")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = decouple.config("DEBUG", default=False, cast=bool)
+STIMULUS_DEBUG = decouple.config("STIMULUS_DEBUG", default=False, cast=bool)
+POSTHOG_DEBUG = decouple.config("POSTHOG_DEBUG", default=False, cast=bool)
 
 ALLOWED_HOSTS = decouple.config("ALLOWED_HOSTS", default="localhost", cast=str).split(
     ","
@@ -371,5 +373,12 @@ ASSISTANT_SURVEY_FORM = decouple.config(
 )
 
 QFDMO_GOOGLE_SEARCH_CONSOLE = "google9dfbbc61adbe3888.html"
-
 SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+ASSISTANT = {
+    "MATOMO_ID": decouple.config("ASSISTANT_MATOMO_ID", default=82, cast=int),
+    "POSTHOG_KEY": decouple.config(
+        "ASSISTANT_POSTHOG_KEY",
+        default="phc_fSfhoWDOUxZdKWty16Z3XfRiAoWd1qdJK0N0z9kQHJr",  # pragma: allowlist secret  # noqa: E501
+        cast=str,
+    ),
+}

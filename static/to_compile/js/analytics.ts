@@ -1,3 +1,10 @@
+/**
+DEPRECATION NOTICE
+This approach should be considered as deprecated, in favor
+of the one introduced in js/controllers/assistant/analytics.ts
+- A controller that sets up various trackers
+- Events that are handled by this controller
+*/
 import posthog from "posthog-js"
 
 const posthogConfig = {

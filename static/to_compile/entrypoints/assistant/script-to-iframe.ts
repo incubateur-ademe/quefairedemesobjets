@@ -13,10 +13,21 @@ const iframeAttributes = {
   allow: "geolocation; clipboard-write",
 };
 
-for (var key in iframeAttributes) {
-  iframe.setAttribute(key, iframeAttributes[key]);
+if (script?.dataset?.testid) {
+  iframeAttributes["data-testid"] = script.dataset.testid
 }
 
-iframeResize({}, iframe);
+document.addEventListener("DOMContentLoaded", () => {
 
-script.parentNode.insertBefore(iframe, script);
+  const debugReferrer = typeof script?.dataset?.debugReferrer !== "undefined"
+  if (debugReferrer) {
+    iframeAttributes.referrerPolicy = "no-referrer"
+  }
+  for (var key in iframeAttributes) {
+    iframe.setAttribute(key, iframeAttributes[key]);
+  }
+
+  iframeResize({}, iframe);
+
+  script.parentNode.insertBefore(iframe, script);
+});
