@@ -144,7 +144,7 @@ def parent_get_data_from_acteurs(
     # Mapping d'exclusion de source spécifique à certains champs
     field_source_codes_exclusion = {
         "nom": ["REFASHION"],
-        "nom_commercial": ["REFASHION"],
+        "nom_commercial": ["REFASHION", "ECODDS"],
         "siret": ["REFASHION"],
         "siren": ["REFASHION"],
         "telephone": ["REFASHION"],
