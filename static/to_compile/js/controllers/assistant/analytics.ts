@@ -68,17 +68,17 @@ export default class extends Controller<HTMLElement> {
     let areWeInAnIframe = false
     try {
       if (window.self !== window.top) {
-        return true
+        areWeInAnIframe = true
       }
     } catch (e) {
       // Unable to access window.top
       // this might be due to cross-origin restrictions.
       // Assuming it's inside an iframe.
-      return true
+      areWeInAnIframe = true
     }
 
     if (document.referrer) {
-      return true
+      areWeInAnIframe = true
     }
 
     posthog.capture("$set", {
