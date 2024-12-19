@@ -7,9 +7,9 @@ from utils import logging_utils as log
 logger = logging.getLogger(__name__)
 
 
-def propose_services(
+def propose_ps(
     df: pd.DataFrame,
-    displayedpropositionservice_max_id: int,
+    dps_max_id: int,
     actions_id_by_code: dict,
 ) -> dict:
     rows_dict = {}
@@ -53,20 +53,20 @@ def propose_services(
 
     rows_list = list(rows_dict.values())
 
-    df_pds = pd.DataFrame(rows_list)
-    if df_pds.empty:
-        raise ValueError("df_pds est vide")
-    if "sous_categories" in df_pds.columns:
-        df_pds["sous_categories"] = df_pds["sous_categories"].replace(np.nan, None)
+    df_ps = pd.DataFrame(rows_list)
+    if df_ps.empty:
+        raise ValueError("df_ps est vide")
+    if "sous_categories" in df_ps.columns:
+        df_ps["sous_categories"] = df_ps["sous_categories"].replace(np.nan, None)
     if indexes := range(
-        displayedpropositionservice_max_id,
-        displayedpropositionservice_max_id + len(df_pds),
+        dps_max_id,
+        dps_max_id + len(df_ps),
     ):
-        df_pds["id"] = indexes
+        df_ps["id"] = indexes
     metadata = {
         "number_of_merged_actors": merged_count,
-        "number_of_propositionservices": len(df_pds),
+        "number_of_propositionservices": len(df_ps),
     }
-    log.preview("df_pds retournée par la tâche", df_pds)
+    log.preview("df_ps retournée par la tâche", df_ps)
 
-    return {"df": df_pds, "metadata": metadata}
+    return {"df": df_ps, "metadata": metadata}

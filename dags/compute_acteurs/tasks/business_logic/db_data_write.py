@@ -7,11 +7,11 @@ def db_data_write(
     df_labels_updated=pd.DataFrame,
     df_acteur_services_updated=pd.DataFrame,
     df_acteur_sources_updated=pd.DataFrame,
-    df_propositionservice_merged=pd.DataFrame,
-    df_propositionservice_sous_categories_merged=pd.DataFrame,
+    df_ps_merged=pd.DataFrame,
+    df_ps_sscat_merged=pd.DataFrame,
 ):
 
-    df_propositionservice_sous_categories_merged.rename(
+    df_ps_sscat_merged.rename(
         columns={"propositionservice_id": "displayedpropositionservice_id"},
         inplace=True,
     )
@@ -33,11 +33,11 @@ def db_data_write(
     original_table_name_ps = "qfdmo_displayedpropositionservice"
     temp_table_name_ps = "qfdmo_displayedpropositionservicetemp"
 
-    original_table_name_pssc = "qfdmo_displayedpropositionservice_sous_categories"
-    temp_table_name_pssc = "qfdmo_displayedpropositionservicetemp_sous_categories"
+    original_table_name_ps_sscat = "qfdmo_displayedpropositionservice_sous_categories"
+    temp_table_name_ps_sscat = "qfdmo_displayedpropositionservicetemp_sous_categories"
 
     with engine.connect() as conn:
-        conn.execute(f"DELETE FROM {temp_table_name_pssc}")
+        conn.execute(f"DELETE FROM {temp_table_name_ps_sscat}")
         conn.execute(f"DELETE FROM {temp_table_name_ps}")
         conn.execute(f"DELETE FROM {temp_table_name_labels}")
         conn.execute(f"DELETE FROM {temp_table_name_acteur_services}")
@@ -114,7 +114,7 @@ def db_data_write(
             chunksize=1000,
         )
 
-        df_propositionservice_merged[["id", "action_id", "acteur_id"]].to_sql(
+        df_ps_merged[["id", "action_id", "acteur_id"]].to_sql(
             temp_table_name_ps,
             engine,
             if_exists="append",
@@ -123,10 +123,10 @@ def db_data_write(
             chunksize=1000,
         )
 
-        df_propositionservice_sous_categories_merged[
+        df_ps_sscat_merged[
             ["displayedpropositionservice_id", "souscategorieobjet_id"]
         ].to_sql(
-            temp_table_name_pssc,
+            temp_table_name_ps_sscat,
             engine,
             if_exists="append",
             index=False,
@@ -199,16 +199,16 @@ def db_data_write(
         )
 
         conn.execute(
-            f"ALTER TABLE {original_table_name_pssc} "
-            f"RENAME TO {original_table_name_pssc}_old"
+            f"ALTER TABLE {original_table_name_ps_sscat} "
+            f"RENAME TO {original_table_name_ps_sscat}_old"
         )
         conn.execute(
-            f"ALTER TABLE {temp_table_name_pssc} "
-            f"RENAME TO {original_table_name_pssc}"
+            f"ALTER TABLE {temp_table_name_ps_sscat} "
+            f"RENAME TO {original_table_name_ps_sscat}"
         )
         conn.execute(
-            f"ALTER TABLE {original_table_name_pssc}_old "
-            f"RENAME TO {temp_table_name_pssc}"
+            f"ALTER TABLE {original_table_name_ps_sscat}_old "
+            f"RENAME TO {temp_table_name_ps_sscat}"
         )
 
     print("Table swap completed successfully.")

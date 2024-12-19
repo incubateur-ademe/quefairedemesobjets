@@ -21,15 +21,15 @@ def db_data_prepare_wrapper(**kwargs):
         "df_acteur_to_delete"
     ]
     df_actors = kwargs["ti"].xcom_pull(task_ids="propose_acteur_changes")["df"]
-    df_ps = kwargs["ti"].xcom_pull(task_ids="propose_services")["df"]
-    df_pssc = kwargs["ti"].xcom_pull(task_ids="propose_services_sous_categories")
+    df_ps = kwargs["ti"].xcom_pull(task_ids="propose_ps")["df"]
+    df_ps_sscat = kwargs["ti"].xcom_pull(task_ids="propose_ps_sscat")
     df_labels = kwargs["ti"].xcom_pull(task_ids="propose_labels")
     df_acteur_services = kwargs["ti"].xcom_pull(task_ids="propose_acteur_services")
 
     log.preview("df_acteur_to_delete", df_acteur_to_delete)
     log.preview("df_actors", df_actors)
     log.preview("df_ps", df_ps)
-    log.preview("df_pssc", df_pssc)
+    log.preview("df_ps_sscat", df_ps_sscat)
     log.preview("df_labels", df_labels)
     log.preview("df_acteur_services", df_acteur_services)
 
@@ -37,7 +37,7 @@ def db_data_prepare_wrapper(**kwargs):
         df_acteur_to_delete=df_acteur_to_delete,
         df_actors=df_actors,
         df_ps=df_ps,
-        df_pssc=df_pssc,
+        df_ps_sscat=df_ps_sscat,
         df_labels=df_labels,
         df_acteur_services=df_acteur_services,
     )

@@ -6,7 +6,7 @@ from utils import logging_utils as log
 logger = logging.getLogger(__name__)
 
 
-def propose_services_sous_categories(
+def propose_ps_sscat(
     df_ps: pd.DataFrame,
     souscats_id_by_code: dict,
     product_mapping: dict,

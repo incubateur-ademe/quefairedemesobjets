@@ -44,8 +44,8 @@ class TestSerializeToJson:
     )
     def test_serialize_to_json_labels(
         self,
-        df_proposition_services,
-        df_proposition_services_sous_categories,
+        df_ps,
+        df_ps_sscat,
         propose_labels,
         expected_labels,
     ):
@@ -59,8 +59,8 @@ class TestSerializeToJson:
                 }
             ),
             df_actors=pd.DataFrame({"identifiant_unique": [1, 2]}),
-            df_ps=df_proposition_services,
-            df_pssc=df_proposition_services_sous_categories,
+            df_ps=df_ps,
+            df_ps_sscat=df_ps_sscat,
             df_labels=propose_labels,
             df_acteur_services=pd.DataFrame(
                 columns=["acteur_id", "acteurservice_id", "acteurservice"]
@@ -118,8 +118,8 @@ class TestSerializeToJson:
     )
     def test_serialize_to_json_acteur_services(
         self,
-        df_proposition_services,
-        df_proposition_services_sous_categories,
+        df_ps,
+        df_ps_sscat,
         propose_acteur_services,
         expected_acteur_services,
     ):
@@ -132,8 +132,8 @@ class TestSerializeToJson:
                 }
             ),
             df_actors=pd.DataFrame({"identifiant_unique": [1, 2]}),
-            df_ps=df_proposition_services,
-            df_pssc=df_proposition_services_sous_categories,
+            df_ps=df_ps,
+            df_ps_sscat=df_ps_sscat,
             df_labels=pd.DataFrame(columns=["acteur_id", "labelqualite_id"]),
             df_acteur_services=propose_acteur_services,
         )

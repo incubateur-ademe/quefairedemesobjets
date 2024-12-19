@@ -11,7 +11,7 @@ def db_data_prepare(
     df_acteur_to_delete: pd.DataFrame,
     df_actors: pd.DataFrame,
     df_ps: pd.DataFrame,
-    df_pssc: pd.DataFrame,
+    df_ps_sscat: pd.DataFrame,
     df_labels: pd.DataFrame,
     df_acteur_services: pd.DataFrame,
 ):
@@ -30,34 +30,34 @@ def db_data_prepare(
         raise ValueError("df_actors est vide")
     if df_ps.empty:
         raise ValueError("df_ps est vide")
-    if df_pssc.empty:
-        raise ValueError("df_pssc est vide")
+    if df_ps_sscat.empty:
+        raise ValueError("df_ps_sscat est vide")
 
-    aggregated_pdsc = (
-        df_pssc.groupby("propositionservice_id")
+    aggregated_psc = (
+        df_ps_sscat.groupby("propositionservice_id")
         .apply(lambda x: x.to_dict("records") if not x.empty else [])
-        .reset_index(name="pds_sous_categories")
+        .reset_index(name="ps_sscat")
     )
 
-    df_pds_joined = pd.merge(
+    df_ps_joined = pd.merge(
         df_ps,
-        aggregated_pdsc,
+        aggregated_psc,
         how="left",
         left_on="id",
         right_on="propositionservice_id",
     )
-    df_pds_joined["propositionservice_id"] = df_pds_joined[
+    df_ps_joined["propositionservice_id"] = df_ps_joined[
         "propositionservice_id"
     ].astype(str)
 
-    df_pds_joined["pds_sous_categories"] = df_pds_joined["pds_sous_categories"].apply(
+    df_ps_joined["ps_sscat"] = df_ps_joined["ps_sscat"].apply(
         lambda x: x if isinstance(x, list) else []
     )
 
-    df_pds_joined.drop("id", axis=1, inplace=True)
+    df_ps_joined.drop("id", axis=1, inplace=True)
 
-    aggregated_pds = (
-        df_pds_joined.groupby("acteur_id")
+    aggregated_ps = (
+        df_ps_joined.groupby("acteur_id")
         .apply(lambda x: x.to_dict("records") if not x.empty else [])
         .reset_index(name="proposition_services")
     )
@@ -80,16 +80,16 @@ def db_data_prepare(
         else aggregated_acteur_services.reset_index(name="acteur_services")
     )
 
-    df_joined_with_pds = pd.merge(
+    df_joined_with_ps = pd.merge(
         df_actors,
-        aggregated_pds,
+        aggregated_ps,
         how="left",
         left_on="identifiant_unique",
         right_on="acteur_id",
     )
 
     df_joined_with_labels = pd.merge(
-        df_joined_with_pds,
+        df_joined_with_ps,
         aggregated_labels,
         how="left",
         left_on="acteur_id",
