@@ -8,6 +8,7 @@ from sources.tasks.transform.transform_column import (
     convert_opening_hours,
     strip_string,
 )
+from sources.tasks.transform.transform_df import clean_siret_and_siren
 
 PATH_NOMENCLARURE_DECHET = (
     "https://data.ademe.fr/data-fair/api/v1/datasets/sinoe-r-nomenclature-dechets/lines"
@@ -23,6 +24,7 @@ TRANSFORMATION_MAPPING = {
     "clean_siren": clean_siren,
     "clean_siret": clean_siret,
     "strip_string": strip_string,
+    "clean_siret_and_siren": clean_siret_and_siren,
 }
 
 
