@@ -24,8 +24,9 @@ from rich.traceback import install
 from tasks.db_manage_cluster import db_manage_cluster
 from tasks.source_data_get import source_data_get
 from utils.cli import banner
+from utils.db import db_source_ids_by_code_get
 
-from qfdmo.models import RevisionActeur, Source
+from qfdmo.models import RevisionActeur
 
 install()  # you can install globally to your env, see docs
 
@@ -37,7 +38,7 @@ DIR_CURRENT = Path(__file__).resolve().parent
 # A adapter
 RUN_SOURCES_PREFERRED_CODES = ["ALIAPUR", "COREPILE"]
 RUN_ID = "dechetteries_202412"
-RUN_CLUSTER_IDS_TO_SKIP = []  # Si besoin pour passer des erreurs
+RUN_CLUSTER_IDS_TO_SKIP = ["85250_3_1"]  # Si besoin pour passer des erreurs
 
 # Automatique par le script
 RUN_CLUSTER_IDS_TO_CHANGES = getattr(
@@ -147,7 +148,7 @@ def main() -> None:
     # ------------------------------------------
     # Pour privilégier certaines sources au moment de la création des parents
     banner("RECUPERATION IDS DES SOURCES PREFEREES")
-    source_ids_by_codes = dict(Source.objects.values_list("code", "id"))
+    source_ids_by_codes = db_source_ids_by_code_get()
     sources_preferred_ids = [
         source_ids_by_codes[x] for x in RUN_SOURCES_PREFERRED_CODES
     ]
