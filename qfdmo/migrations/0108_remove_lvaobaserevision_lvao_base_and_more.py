@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("qfdmo", "0102_alter_action_couleur_alter_groupeaction_couleur_and_more"),
+        ("qfdmo", "0107_alter_source_licence"),
     ]
 
     operations = [
