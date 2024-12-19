@@ -8,7 +8,30 @@ from django.utils.functional import cached_property
 from django_extensions.db.fields import AutoSlugField
 
 
-class Produit(models.Model):
+class AbstractBaseProduit(models.Model):
+    # Le nom des champs conserve ici délibérément l'ancienne nomenclature,
+    # car le travail sur le nommage n'a pas encore été effectué.
+    # TODO : renommer ces champs lorsque le métier + technique seront tombés
+    # d'accord sur un nom pour ces champs
+    qu_est_ce_que_j_en_fais_mauvais_etat = models.TextField(
+        blank=True, help_text="Qu'est-ce que j'en fais ? - Mauvais état"
+    )
+    # TODO : idem ci-dessus
+    qu_est_ce_que_j_en_fais_bon_etat = models.TextField(
+        blank=True, help_text="Qu'est-ce que j'en fais ? - Bon état"
+    )
+    comment_les_eviter = models.TextField(
+        blank=True, help_text="Comment consommer responsable ?"
+    )
+    que_va_t_il_devenir = models.TextField(
+        blank=True, help_text="Que va-t-il devenir ?"
+    )
+
+    class Meta:
+        abstract = True
+
+
+class Produit(AbstractBaseProduit):
     id = models.IntegerField(
         primary_key=True,
         help_text="Correspond à l'identifiant ID défini dans les données "
@@ -26,23 +49,6 @@ class Produit(models.Model):
     bdd = models.CharField(blank=True, help_text="Bdd")
     qu_est_ce_que_j_en_fais = models.TextField(
         blank=True, help_text="Qu'est-ce que j'en fais ? - ANCIEN CHAMP."
-    )
-    # Le nom des champs conserve ici délibérément l'ancienne nomenclature,
-    # car le travail sur le nommage n'a pas encore été effectué.
-    # TODO : renommer ces champs lorsque le métier + technique seront tombés
-    # d'accord sur un nom pour ces champs
-    qu_est_ce_que_j_en_fais_mauvais_etat = models.TextField(
-        blank=True, help_text="Qu'est-ce que j'en fais ? - Mauvais état"
-    )
-    # TODO : idem ci-dessus
-    qu_est_ce_que_j_en_fais_bon_etat = models.TextField(
-        blank=True, help_text="Qu'est-ce que j'en fais ? - Bon état"
-    )
-    comment_les_eviter = models.TextField(
-        blank=True, help_text="Comment consommer responsable ?"
-    )
-    que_va_t_il_devenir = models.TextField(
-        blank=True, help_text="Que va-t-il devenir ?"
     )
     nom_eco_organisme = models.TextField(blank=True, help_text="Nom de l’éco-organisme")
     filieres_rep = models.TextField(blank=True, help_text="Filière(s) REP concernée(s)")
@@ -165,7 +171,7 @@ class Lien(models.Model):
         return self.titre_du_lien
 
 
-class Synonyme(models.Model):
+class Synonyme(AbstractBaseProduit):
     slug = AutoSlugField(populate_from=["nom"])
     nom = models.CharField(blank=True, unique=True, help_text="Nom du produit")
     produit = models.ForeignKey(

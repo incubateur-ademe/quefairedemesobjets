@@ -128,5 +128,6 @@ class LienAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 class SynonymeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     resource_classes = [SynonymeResource]
     search_fields = ["nom__unaccent"]
+    readonly_fields = ["slug"]
     list_display = ("nom", "produit", "slug")
     list_filter = ["pin_on_homepage"]
