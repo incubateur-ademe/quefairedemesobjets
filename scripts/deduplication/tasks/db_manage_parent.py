@@ -137,8 +137,9 @@ def parent_get_data_from_acteurs(
     parent_dict = {}
     sources_codes_picked = {}
     # Mapping d'inclusion de source spécifique à certains champs
-    field_source_codes_inclusion = {
-        "nom": ["REFASHION", "COREPILE"],
+    # TODO: les 2 mapping doivent être exclusif
+    field_source_codes_priority = {
+        "nom": ["COREPILE", "ALIAPUR"],
         "location": ["REFASHION"],
     }
     # Mapping d'exclusion de source spécifique à certains champs
@@ -150,8 +151,7 @@ def parent_get_data_from_acteurs(
         "telephone": ["REFASHION"],
     }
     # Ignore les champs d'identifications acteurs
-    # car il doivent tous restés vides (sauf identifiant_unique
-    # qui est généré avec un UUID séparément)
+    # car il doivent tous restés vides (générés ultérieurement)
     keys_to_ignore = [
         "identifiant_unique",
         "identifiant_externe",
@@ -175,7 +175,7 @@ def parent_get_data_from_acteurs(
     # Boucle 1: données via inclusion/exclusion champs/sources spécéfiques
     # ------------------------------------
     print("parent_get_data_from_acteurs: boucle 1")
-    for field, source_codes_inclusion in field_source_codes_inclusion.items():
+    for field, source_codes_inclusion in field_source_codes_priority.items():
         source_codes_exlusion = field_source_codes_exclusion.get(field, [])
         # acteurs candidats pour le champ
         cands = sorted(
