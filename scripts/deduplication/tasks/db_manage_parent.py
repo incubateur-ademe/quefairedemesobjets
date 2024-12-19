@@ -5,6 +5,7 @@ ou mise à jour si existant)
 
 import uuid
 from itertools import chain
+from typing import List, Tuple
 
 from django import forms
 from django.db.models import Model
@@ -14,9 +15,10 @@ from rich import print
 from qfdmo.models.acteur import RevisionActeur
 from scripts.deduplication.models.acteur_map import ActeurMap
 from scripts.deduplication.models.change import Change
+from scripts.deduplication.utils.db import db_source_ids_by_code_get
 
 
-def parent_id_generate(ids: list[str]) -> str:
+def parent_id_generate(ids: List[str]) -> str:
     """
     Génère un UUID (pour l'identifiant_unique parent) à partir
     de la liste des identifiants des enfants du cluster.
@@ -36,7 +38,7 @@ def parent_id_generate(ids: list[str]) -> str:
     return parent_id
 
 
-def acteurs_dict_to_list_of_dicts(acteurs_maps: list[ActeurMap]) -> list[dict]:
+def acteurs_dict_to_list_of_dicts(acteurs_maps: List[ActeurMap]) -> List[dict]:
     """Extrait tous les acteurs sous tous leurs états (revision -> base)
     pour les mettre dans une liste de dict, afin de faciliter la génération
     de la donnée parent reconciliée
@@ -102,8 +104,11 @@ def acteurs_dict_to_list_of_dicts(acteurs_maps: list[ActeurMap]) -> list[dict]:
 
 
 def parent_get_data_from_acteurs(
-    acteurs: list[dict], sources_preferred_ids, validation_model: Model
-) -> dict:
+    acteurs: List[dict],
+    source_ids_by_code: dict,
+    sources_preferred_ids,
+    validation_model: Model,
+) -> tuple[dict, dict]:
     """
     Récupération des données d'acteurs pour l'utilisation dans un parent. Pour l'instant
     la logique est primitive de choisir selon une liste de sources préférées. A l'avenir
@@ -116,8 +121,83 @@ def parent_get_data_from_acteurs(
 
     Returns:
         parent_dict: donnée parent sous forme de dict
+        sources_codes_picked: mapping des champs et sources choisies
     """
+    # TODO: revoir les règles d'inclusion/exclusion pour la prochaine
+    # dédup pour le rendre plus flexible avec l'acteur_type_id
+    # - entrée de mapping = acteur_type_id x champ
+    # - sortie de mapping = liste de sources à inclure/exclure
+    if any(x["acteur_type_id"] not in (None, 7) for x in acteurs):
+        raise NotImplementedError(
+            """Règles inclusion/exclusion pour la dédup déchetteries uniquement,
+            revoir avec Christian avec la prochaine dédup"""
+        )
+
+    source_codes_by_id = {v: k for k, v in source_ids_by_code.items()}
     parent_dict = {}
+    sources_codes_picked = {}
+    # Mapping d'inclusion de source spécifique à certains champs
+    field_source_codes_inclusion = {
+        "nom": ["REFASHION", "COREPILE"],
+        "location": ["REFASHION"],
+    }
+    # Mapping d'exclusion de source spécifique à certains champs
+    field_source_codes_exclusion = {
+        "nom": ["REFASHION"],
+        "nom_commercial": ["REFASHION"],
+        "siret": ["REFASHION"],
+        "siren": ["REFASHION"],
+        "telephone": ["REFASHION"],
+    }
+    # Ignore les champs d'identifications acteurs
+    # car il doivent tous restés vides (sauf identifiant_unique
+    # qui est généré avec un UUID séparément)
+    keys_to_ignore = [
+        "identifiant_unique",
+        "identifiant_externe",
+        "parent_id",
+        "source_id",
+    ]
+
+    def results_update(field, value, acteur):
+        """utilitaire MAJ de parent_dict et sources_codes_picked
+        + some debug prints pour éviter de se répéter sur les
+        2 boucles"""
+        source_id = acteur["source_id"]
+        source_code = source_codes_by_id.get(source_id)
+        acteur_id = acteur["identifiant_unique"]
+        parent_dict[field] = value
+        sources_codes_picked[field] = source_code
+        print(f"\t✅ {field=} {value=}")
+        print(f"\t\t via {source_code=} {acteur_id=}")
+
+    # ------------------------------------
+    # Boucle 1: données via inclusion/exclusion champs/sources spécéfiques
+    # ------------------------------------
+    print("parent_get_data_from_acteurs: boucle 1")
+    for field, source_codes_inclusion in field_source_codes_inclusion.items():
+        source_codes_exlusion = field_source_codes_exclusion.get(field, [])
+        # acteurs candidats pour le champ
+        cands = sorted(
+            [
+                x
+                for x in acteurs
+                if x["source_id"] is not None
+                and source_codes_by_id[x["source_id"]] in source_codes_inclusion
+                and source_codes_by_id[x["source_id"]] not in source_codes_exlusion
+                and x[field] is not None
+            ],
+            key=lambda x: source_codes_inclusion.index(
+                source_codes_by_id[x["source_id"]]
+            ),
+        )
+        acteur = next(iter(cands), None)
+        if acteur is not None:
+            results_update(field, acteur[field], acteur)
+
+    # ------------------------------------
+    # Boucle 2: données restantes via les sources préférées
+    # ------------------------------------
     # Ordonner acteurs sur source_id dans l'ordre de sources_preferred_ids
     # et les autres acteurs par défaut après
     acteurs = sorted(
@@ -132,38 +212,34 @@ def parent_get_data_from_acteurs(
             else len(sources_preferred_ids)
         ),
     )
-    # Ignore les champs d'identifications acteurs
-    # car il doivent tous restés vides (sauf identifiant_unique
-    # qui est généré avec un UUID séparément)
-    keys_to_ignore = [
-        "identifiant_unique",
-        "identifiant_externe",
-        "parent_id",
-        "source_id",
-    ]
-    print("parent_get_data_from_acteurs:")
+    print("parent_get_data_from_acteurs: boucle 2")
     email_field = forms.EmailField()
     for acteur in acteurs:
-        for key, val in acteur.items():
-            if key in keys_to_ignore:
-                continue
-            if val is not None and parent_dict.get(key) is None:
+        source_code = source_codes_by_id.get(acteur["source_id"])
+        # Précédent parent non selectionné comme parent pour le nouveau
+        # cluster, on veut pas prendre le risque de réutiliser ces données
+        if source_code is None:
+            continue
+        for field, value in acteur.items():
+            source_codes_exlusion = field_source_codes_exclusion.get(field, [])
+            if (
+                field not in keys_to_ignore
+                and value is not None
+                and parent_dict.get(field) is None
+                and source_code not in source_codes_exlusion
+            ):
                 # TODO: voir si il y aurait une façon plus élégante
                 # d'automatiquement supprimer toutes les données invalides
                 # plutôt que de le faire manuellement champ par champ.
                 # Ceci est en lien avec le problème de présence de mauvais
                 # emails dans la DB, qui empêche la réutilisation du
                 # modèle django car .save() appelle .full_clean() qui crash
-                if key == "email":
+                if field == "email":
                     try:
-                        email_field.clean(val)
+                        email_field.clean(value)
                     except forms.ValidationError:
                         continue
-                print(
-                    f"\t{key=}, {val=}",
-                    f"via {acteur['source_id']=} {acteur['identifiant_unique']=}",
-                )
-                parent_dict[key] = val
+                results_update(field, value, acteur)
     # Et on met la source_id à None car c'est une création de notre
     # part, donc il ne correspond pas à une source existante
     parent_dict["source_id"] = None
@@ -172,14 +248,14 @@ def parent_get_data_from_acteurs(
     # On retourne la données sous forme de dict pour qu'elle puisse
     # être utilisée soit sur un parent existant (update) soit pour créer un
     # nouveau parent (insert)
-    return parent_dict
+    return parent_dict, sources_codes_picked
 
 
 def db_manage_parent(
-    acteurs_maps: list[ActeurMap],
-    sources_preferred_ids: list[int],
+    acteurs_maps: List[ActeurMap],
+    sources_preferred_ids: List[int],
     is_dry_run: bool,
-) -> tuple[str, Change]:
+) -> Tuple[str, Change]:
     """Gestion de tous les aspects du parent:
      - préparation de sa donnée
      - choix du parent
@@ -202,8 +278,11 @@ def db_manage_parent(
     identifiants_uniques = [x.identifiant_unique for x in acteurs_maps]
     acteurs_dicts = acteurs_dict_to_list_of_dicts(acteurs_maps)
     # print(f"{acteurs_list=}")
-    parent_data = parent_get_data_from_acteurs(
-        acteurs_dicts, sources_preferred_ids, validation_model=RevisionActeur  # type: ignore
+    parent_data, _ = parent_get_data_from_acteurs(
+        acteurs=acteurs_dicts,
+        source_ids_by_code=db_source_ids_by_code_get(),
+        sources_preferred_ids=sources_preferred_ids,
+        validation_model=RevisionActeur,  # type: ignore
     )
     print(f"{parent_data=}")
 
