@@ -11,7 +11,7 @@ def pytest_configure(config):
 
 
 @pytest.fixture
-def df_proposition_services():
+def df_ps():
     return pd.DataFrame(
         {
             "action_id": [1, 3, 1, 3],
@@ -35,7 +35,7 @@ def df_proposition_services():
 
 
 @pytest.fixture
-def df_proposition_services_sous_categories():
+def df_ps_sscat():
     return pd.DataFrame(
         {
             "propositionservice_id": [1, 2, 3, 4],

@@ -7,10 +7,10 @@ def write_data(
     dfs: dict,
     metadata_actors: dict,
     metadata_acteur_to_delete: dict,
-    metadata_pds: dict,
+    metadata_ps: dict,
 ):
 
-    metadata = {**metadata_actors, **metadata_acteur_to_delete, **metadata_pds}
+    metadata = {**metadata_actors, **metadata_acteur_to_delete, **metadata_ps}
 
     for key, data in dfs.items():
         # TODO dag_id
