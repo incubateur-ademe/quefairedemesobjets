@@ -17,33 +17,25 @@ def compute_ps_task(dag: DAG) -> PythonOperator:
 
 
 def compute_ps_wrapper(**kwargs):
-    df_propositionservice = kwargs["ti"].xcom_pull(task_ids="load_propositionservice")
-    df_revisionpropositionservice = kwargs["ti"].xcom_pull(
-        task_ids="load_revisionpropositionservice"
-    )
-    df_propositionservice_sous_categories = kwargs["ti"].xcom_pull(
-        task_ids="load_propositionservice_sous_categories"
-    )
-    df_revisionpropositionservice_sous_categories = kwargs["ti"].xcom_pull(
-        task_ids="load_revisionpropositionservice_sous_categories"
-    )
+    df_ps = kwargs["ti"].xcom_pull(task_ids="load_ps")
+    df_rps = kwargs["ti"].xcom_pull(task_ids="load_rps")
+    df_ps_sscat = kwargs["ti"].xcom_pull(task_ids="load_ps_sscat")
+    df_rps_sscat = kwargs["ti"].xcom_pull(task_ids="load_rps_sscat")
     df_revisionacteur = kwargs["ti"].xcom_pull(task_ids="load_revisionacteur")
 
-    log.preview("df_propositionservice", df_propositionservice)
-    log.preview("df_revisionpropositionservice", df_revisionpropositionservice)
+    log.preview("df_ps", df_ps)
+    log.preview("df_rps", df_rps)
+    log.preview("df_ps_sscat", df_ps_sscat)
     log.preview(
-        "df_propositionservice_sous_categories", df_propositionservice_sous_categories
-    )
-    log.preview(
-        "df_revisionpropositionservice_sous_categories",
-        df_revisionpropositionservice_sous_categories,
+        "df_rps_sscat",
+        df_rps_sscat,
     )
     log.preview("df_revisionacteur", df_revisionacteur)
 
     return compute_ps(
-        df_propositionservice=df_propositionservice,
-        df_revisionpropositionservice=df_revisionpropositionservice,
-        df_propositionservice_sous_categories=df_propositionservice_sous_categories,
-        df_revisionpropositionservice_sous_categories=df_revisionpropositionservice_sous_categories,
+        df_ps=df_ps,
+        df_rps=df_rps,
+        df_ps_sscat=df_ps_sscat,
+        df_rps_sscat=df_rps_sscat,
         df_revisionacteur=df_revisionacteur,
     )

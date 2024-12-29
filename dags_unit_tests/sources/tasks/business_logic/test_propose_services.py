@@ -1,6 +1,6 @@
 import pandas as pd
 import pytest
-from sources.tasks.business_logic.propose_services import propose_services
+from sources.tasks.business_logic.propose_ps import propose_ps
 
 
 @pytest.fixture
@@ -10,7 +10,7 @@ def actions_id_by_code():
 
 class TestCreatePropositionService:
 
-    def test_create_proposition_services_empty(
+    def test_create_ps_empty(
         self,
         actions_id_by_code,
     ):
@@ -26,9 +26,9 @@ class TestCreatePropositionService:
         )
 
         with pytest.raises(ValueError):
-            propose_services(
+            propose_ps(
                 df=df_create_actors,
-                displayedpropositionservice_max_id=1,
+                dps_max_id=1,
                 actions_id_by_code=actions_id_by_code,
             )
 
@@ -156,16 +156,16 @@ class TestCreatePropositionService:
             ),
         ],
     )
-    def test_create_proposition_services_services(
+    def test_create_ps_services(
         self,
         df_create_actors,
         expected_df,
         expected_metadata,
         actions_id_by_code,
     ):
-        result = propose_services(
+        result = propose_ps(
             df=df_create_actors,
-            displayedpropositionservice_max_id=1,
+            dps_max_id=1,
             actions_id_by_code=actions_id_by_code,
         )
 
@@ -204,9 +204,9 @@ class TestCreatePropositionService:
             "number_of_propositionservices": 2,
         }
 
-        result = propose_services(
+        result = propose_ps(
             df=df_create_actors,
-            displayedpropositionservice_max_id=1,
+            dps_max_id=1,
             actions_id_by_code=actions_id_by_code,
         )
 
@@ -245,9 +245,9 @@ class TestCreatePropositionService:
             "number_of_propositionservices": 1,
         }
 
-        result = propose_services(
+        result = propose_ps(
             df=df_create_actors,
-            displayedpropositionservice_max_id=1,
+            dps_max_id=1,
             actions_id_by_code=actions_id_by_code,
         )
 
