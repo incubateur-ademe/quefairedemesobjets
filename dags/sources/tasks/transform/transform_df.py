@@ -26,7 +26,7 @@ def merge_duplicates(
                     for col in df.columns
                     if col != merge_column and col != group_column
                 },
-                merge_column: _merge_produits_accepter,
+                merge_column: _merge_columns_of_accepted_products,
             }
         )
         .reset_index()
@@ -38,7 +38,7 @@ def merge_duplicates(
     return df_final
 
 
-def _merge_produits_accepter(group):
+def _merge_columns_of_accepted_products(group):
     produits_sets = set()
     for produits in group:
         produits_sets.update([produit.strip() for produit in produits.split("|")])
