@@ -203,29 +203,42 @@ class TestSourceDataNormalizeSinoe:
 
 
 class TestSourceDataNormalize:
-    """
-    Test de la fonction source_data_normalize
-    - [ ] test que la fonction source_data_normalize appelle df_normalize_sinoe
-    - [ ] test renommage des colonnes
-    - [ ] test source_id et source_code
-    - [ ] test identifiant_unique
-    - [ ] test combine_columns_categories
-    - [ ] test merge_duplicated_acteurs
-    - [ ] test columns_to_add_by_default
-    - [ ] test adresse_format_ban
-    - [x] test statut
-    - [x] test public_accueilli (+ suppression des pro)
-    - [x] test uniquement_sur_rdv
-    - [x] test exclusivite_de_reprisereparation
-    - [x] test reprise
-    - [x] test labels_etou_bonus
-    - [ ] test url
-    - [ ] test acteur_type_id
-    - [ ] test Suppresion des colonnes non voulues
-    - [ ] test ignore_duplicates
-    - [ ] test produitsdechets_acceptes vide ou None
-    - [x] test transformation from column_transformations is called
-    """
+    # FIXME : Add tests to check all kind of transformation is applied
+    def test_column_transformations_is_called(self):
+        dag_config_kwargs = {
+            "column_transformations": [
+                {
+                    "origin": "nom origin",
+                    "transformation": "test_fct",
+                    "destination": "nom destination",
+                },
+                {
+                    "origin": "nom",
+                    "transformation": "test_fct",
+                    "destination": "nom",
+                },
+                {"keep": "identifiant_unique"},
+            ],
+            "product_mapping": {},
+            "endpoint": "http://example.com/api",
+        }
+        TRANSFORMATION_MAPPING["test_fct"] = lambda x, y: "success"
+        df = source_data_normalize(
+            df_acteur_from_source=pd.DataFrame(
+                {
+                    "identifiant_unique": ["id"],
+                    "nom origin": ["nom origin 1"],
+                    "nom": ["nom"],
+                }
+            ),
+            dag_config=DAGConfig.model_validate(dag_config_kwargs),
+            dag_id="dag_id",
+        )
+        assert "nom destination" in df.columns
+        assert df["nom destination"].iloc[0] == "success"
+
+        assert "nom" in df.columns
+        assert df["nom"].iloc[0] == "success"
 
     # @pytest.mark.parametrize(
     #     "statut, statut_expected",
@@ -273,43 +286,6 @@ class TestSourceDataNormalize:
                 df_acteur_from_source=pd.DataFrame({"identifiant_externe": ["1"]}),
                 dag_id="id",
             )
-
-    def test_column_transformations_is_called(self):
-
-        dag_config_kwargs = {
-            "column_transformations": [
-                {
-                    "origin": "nom origin",
-                    "transformation": "test_fct",
-                    "destination": "nom destination",
-                },
-                {
-                    "origin": "nom",
-                    "transformation": "test_fct",
-                    "destination": "nom",
-                },
-                {"keep": "identifiant_unique"},
-            ],
-            "product_mapping": {},
-            "endpoint": "http://example.com/api",
-        }
-        TRANSFORMATION_MAPPING["test_fct"] = lambda x, y: "success"
-        df = source_data_normalize(
-            df_acteur_from_source=pd.DataFrame(
-                {
-                    "identifiant_unique": ["id"],
-                    "nom origin": ["nom origin 1"],
-                    "nom": ["nom"],
-                }
-            ),
-            dag_config=DAGConfig.model_validate(dag_config_kwargs),
-            dag_id="dag_id",
-        )
-        assert "nom destination" in df.columns
-        assert df["nom destination"].iloc[0] == "success"
-
-        assert "nom" in df.columns
-        assert df["nom"].iloc[0] == "success"
 
 
 class TestDfNormalizePharmacie:

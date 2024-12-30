@@ -1,9 +1,11 @@
 import pandas as pd
 import pytest
 from sources.tasks.transform.transform_df import (
+    clean_action_codes,
     clean_label_codes,
     clean_telephone,
     merge_duplicates,
+    merge_sous_categories_columns,
 )
 
 
@@ -130,7 +132,7 @@ class TestMergeDuplicates:
         pd.testing.assert_frame_equal(result_df, expected_df)
 
 
-class TestCleanPhoneNumber:
+class TestCleanTelephone:
     @pytest.mark.parametrize(
         "phone_number, code_postal, expected_phone_number",
         [
@@ -142,11 +144,111 @@ class TestCleanPhoneNumber:
             ("+33612345678", "75001", "+33612345678"),
         ],
     )
-    def test_clean_phone_number(self, phone_number, code_postal, expected_phone_number):
+    def test_clean_telephone(self, phone_number, code_postal, expected_phone_number):
         result = clean_telephone(
             pd.Series({"telephone": phone_number, "code_postal": code_postal}), None
         )
         assert result["telephone"] == expected_phone_number
+
+
+class TestCleanSiretAndSiren:
+    # FIXME : Add tests
+    pass
+
+
+class TestCleanIdentifiantExterne:
+    # FIXME : Add tests
+    pass
+
+
+class TestCleanIdentifiantUnique:
+    # FIXME : Add tests
+    pass
+
+
+class TestMergeSSCatColumns:
+    @pytest.mark.parametrize(
+        "row_columns, expected_produitsdechets_acceptes",
+        [
+            ({}, ""),
+            ({"cat 1": "produit 1"}, "produit 1"),
+            (
+                {"cat 1": "produit 1", "cat 2": "produit 2", "cat 3": ""},
+                "produit 1 | produit 2",
+            ),
+            (
+                {"cat 1": "produit 1", "cat 2": "produit 2", "cat 3": "produit 3"},
+                "produit 1 | produit 2 | produit 3",
+            ),
+        ],
+    )
+    def test_merge_sscat_columns(self, row_columns, expected_produitsdechets_acceptes):
+        assert (
+            merge_sous_categories_columns(
+                pd.Series(row_columns),
+                None,
+            )["produitsdechets_acceptes"]
+            == expected_produitsdechets_acceptes
+        )
+
+
+class TestCleanAdresse:
+    # FIXME : Add tests
+    # @patch("sources.tasks.transform.transform_df._get_address")
+    pass
+
+
+class TestCleanActeurserviceCodes:
+    @pytest.mark.parametrize(
+        "row_columns, expected_acteurservice_codes",
+        [
+            ({}, []),
+            ({"point_dapport_de_service_reparation": True}, ["service_de_reparation"]),
+            ({"point_de_reparation": True}, ["service_de_reparation"]),
+            ({"point_dapport_pour_reemploi": True}, ["structure_de_collecte"]),
+            (
+                {"point_de_collecte_ou_de_reprise_des_dechets": True},
+                ["structure_de_collecte"],
+            ),
+            (
+                {
+                    "point_dapport_de_service_reparation": True,
+                    "point_de_reparation": True,
+                    "point_dapport_pour_reemploi": True,
+                    "point_de_collecte_ou_de_reprise_des_dechets": True,
+                },
+                ["service_de_reparation", "structure_de_collecte"],
+            ),
+        ],
+    )
+    def clean_acteurservice_codes(self, row_columns, expected_action_codes):
+        result = clean_action_codes(pd.Series(row_columns), None)
+        assert result["action_codes"] == expected_action_codes
+
+
+class TestCleanActionCodes:
+    @pytest.mark.parametrize(
+        "row_columns, expected_action_codes",
+        [
+            ({}, []),
+            ({"point_dapport_de_service_reparation": True}, ["reparer"]),
+            ({"point_de_reparation": True}, ["reparer"]),
+            ({"point_dapport_pour_reemploi": True}, ["donner"]),
+            ({"point_de_collecte_ou_de_reprise_des_dechets": True}, ["trier"]),
+            (
+                {
+                    "point_dapport_de_service_reparation": True,
+                    "point_de_reparation": True,
+                    "point_dapport_pour_reemploi": True,
+                    "point_de_collecte_ou_de_reprise_des_dechets": True,
+                },
+                ["reparer", "donner", "trier"],
+            ),
+        ],
+    )
+    def test_clean_action_codes(self, row_columns, expected_action_codes):
+        result = clean_action_codes(pd.Series(row_columns), None)
+        assert result["action_codes"] == expected_action_codes
 
 
 class TestCleanLabelCodes:
@@ -169,3 +271,13 @@ class TestCleanLabelCodes:
         )
 
         assert result["label_codes"], expected_value
+
+    def test_ess_label(self, dag_config):
+        result = clean_label_codes(
+            pd.Series(
+                {"label_etou_bonus": "label_et_bonus", "acteur_type_code": "ess"}
+            ),
+            dag_config=dag_config,
+        )
+
+        assert result["label_codes"], ["ess", "label_et_bonus"]
