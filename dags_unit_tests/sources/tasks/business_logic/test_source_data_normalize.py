@@ -53,24 +53,6 @@ def dechet_mapping():
     }
 
 
-@pytest.fixture
-def acteurtype_id_by_code():
-    return {
-        "commerce": 1,
-        "decheterie": 2,
-        "autre": 3,
-    }
-
-
-@pytest.fixture
-def source_id_by_code():
-    return {
-        "source1": 1,
-        "source2": 2,
-        "source3": 3,
-    }
-
-
 class TestSourceDataNormalizeSinoe:
     """
     Test de la fonction df_normalize_sinoe

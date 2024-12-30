@@ -113,3 +113,12 @@ def df_acteurs_from_db():
 @pytest.fixture
 def souscategorieobjet_code_by_id():
     return {"ecran": 101, "smartphone, tablette et console": 102}
+
+
+@pytest.fixture
+def source_id_by_code():
+    return {
+        "source1": 1,
+        "source2": 2,
+        "source3": 3,
+    }

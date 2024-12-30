@@ -1,12 +1,19 @@
 import json
 import logging
-from typing import List
 
 import pandas as pd
 import requests
 from shared.tasks.database_logic.db_manager import PostgresConnectionManager
 from sources.config import shared_constants as constants
 from sources.config.airflow_params import TRANSFORMATION_MAPPING
+from sources.tasks.airflow_logic.config_management import (
+    DAGConfig,
+    NormalizationColumnDefault,
+    NormalizationColumnRemove,
+    NormalizationColumnRename,
+    NormalizationColumnTransform,
+    NormalizationDFTransform,
+)
 from sources.tasks.transform.transform_column import (
     cast_eo_boolean_or_string_to_boolean,
     mapping_try_or_fallback_column_value,
@@ -21,19 +28,83 @@ from utils.base_utils import extract_details, get_address
 logger = logging.getLogger(__name__)
 
 
+def _rename_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
+    columns_to_rename = [
+        t
+        for t in dag_config.column_transformations
+        if isinstance(t, NormalizationColumnRename)
+    ]
+    return df.rename(
+        columns={
+            column_to_rename.origin: column_to_rename.destination
+            for column_to_rename in columns_to_rename
+        },
+    )
+
+
+def _transform_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
+    columns_to_transform = [
+        t
+        for t in dag_config.column_transformations
+        if isinstance(t, NormalizationColumnTransform)
+    ]
+    for column_to_transform in columns_to_transform:
+        function_name = column_to_transform.transformation
+        df[column_to_transform.destination] = df[column_to_transform.origin].apply(
+            TRANSFORMATION_MAPPING[function_name]
+        )
+        if column_to_transform.destination != column_to_transform.origin:
+            df.drop(columns=[column_to_transform.origin], inplace=True)
+    return df
+
+
+def _transform_df(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
+    columns_to_transform_df = [
+        t
+        for t in dag_config.column_transformations
+        if isinstance(t, NormalizationDFTransform)
+    ]
+    for column_to_transform_df in columns_to_transform_df:
+        function_name = column_to_transform_df.transformation
+        logger.warning(column_to_transform_df.destination)
+
+        #        df[.siret", "siren] = df[.siret].apply(clean_siret_and_siren)
+
+        df[column_to_transform_df.destination] = df[
+            column_to_transform_df.origin
+        ].apply(TRANSFORMATION_MAPPING[function_name], axis=1)
+        columns_to_drop = [
+            column_origin
+            for column_origin in column_to_transform_df.origin
+            if column_origin not in column_to_transform_df.destination
+        ]
+        df.drop(columns=columns_to_drop, inplace=True)
+    return df
+
+
+def _default_value_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
+    columns_to_add_by_default = [
+        t
+        for t in dag_config.column_transformations
+        if isinstance(t, NormalizationColumnDefault)
+    ]
+    for column_to_add_by_default in columns_to_add_by_default:
+        df[column_to_add_by_default.column] = column_to_add_by_default.value
+    return df
+
+
+def _remove_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
+    columns_to_remove = [
+        t.remove
+        for t in dag_config.column_transformations
+        if isinstance(t, NormalizationColumnRemove)
+    ]
+    return df.drop(columns=columns_to_remove)
+
+
 def source_data_normalize(
     df_acteur_from_source: pd.DataFrame,
-    source_code: str | None,
-    column_mapping: dict,
-    column_transformations: List[dict],
-    columns_to_add_by_default: dict,
-    label_bonus_reparation: str | None,
-    validate_address_with_ban: bool,
-    ignore_duplicates: bool,
-    combine_columns_categories: list,
-    merge_duplicated_acteurs: bool,
-    product_mapping: dict,
-    dechet_mapping: dict,
+    dag_config: DAGConfig,
     acteurtype_id_by_code: dict,
     source_id_by_code: dict,
 ) -> pd.DataFrame:
@@ -45,176 +116,14 @@ def source_data_normalize(
     - Ajout des colonnes avec valeurs par défaut
     """
     df = df_acteur_from_source
-
-    # Renommage des colonnes
-    # DEPRECATED: le rename est désormais géré comme une transformation
-    df = df.rename(columns={k: v for k, v in column_mapping.items() if v is not None})
-
-    ### TRANSFORMATIONS
-    # TODO : mettre cette doc dans la doc technique si accepté par les collègues
-    #
-    # Plusieurs types de transformations à executer dans l'ordre suivant
-    # 1. Renommage des colonnes
-    #
-    # { "origin": "col origin", "destination": "col origin" }
-    #
-    # 2. Transformation des colonnes
-    #
-    # { "origin": "col origin", "destination": "col destination",
-    #   "transformation": "function_name" }
-    #
-    # 3. Transformation du dataframe
-    #
-    # { "origin": ["col origin 1", "col origin 2"], "transformation": "function_name",
-    #   "destination": ["col destination 1", "col destination 2"] }
-    #
-    # 4. Ajout des colonnes avec une valeur par défaut
-    #
-    # { "colonne": "col 1", "value" : "val" }
-    #
-    # 5. Supression des colonnes
-    #
-    # { "remove": "col 1" }
-    #
-    # 6. Colonnes à garder (rien à faire, utilisé pour le controle)
-    #
-    # { "keep": "col 1" }
-    #
-    # Les transformations sont définies dans le fichier de configuration
-    # Après que toutes les transformations aient été appliquées, on vérifie que
-    # la dataframe a exactement les colonne attendues
-
-    # 1. Renommage des colonnes
-    #
-    # { "origin": "col origin", "destination": "col origin" }
-    #
-    # J'ai une origine de type string et une destination de type string et pas de
-    # transformation
-
-    columns_to_rename = [
-        t
-        for t in column_transformations
-        if "origin" in t
-        and isinstance(t["origin"], str)
-        and "destination" in t
-        and isinstance(t["destination"], str)
-        and "transformation" not in t
-    ]
-    df = df.rename(
-        columns={
-            column_to_rename["origin"]: column_to_rename["destination"]
-            for column_to_rename in columns_to_rename
-        }
-    )
-
-    # 2. Transformation des colonnes
-    #
-    # { "origin": "col origin", "destination": "col destination",
-    #   "transformation": "function_name" }
-    #
-    # J'ai une origine de type string et une destination de type string et une fonction
-    # de transformation
-
-    columns_to_transform = [
-        t
-        for t in column_transformations
-        if "origin" in t
-        and isinstance(t["origin"], str)
-        and "destination" in t
-        and isinstance(t["destination"], str)
-        and "transformation" in t
-    ]
-    for column_to_transform in columns_to_transform:
-        function_name = column_to_transform["transformation"]
-        df[column_to_transform["destination"]] = df[
-            column_to_transform["origin"]
-        ].apply(TRANSFORMATION_MAPPING[function_name])
-        if column_to_transform["destination"] != column_to_transform["origin"]:
-            df.drop(columns=[column_to_transform["origin"]], inplace=True)
-
-    # 3. Transformation du dataframe
-    #
-    # { "origin": ["col origin 1", "col origin 2"], "transformation": "function_name",
-    #  "destination": ["col destination 1", "col destination 2"] }
-    #
-    # J'ai une origine de type liste de string et une destination de type liste de
-    # string et une fonction de transformation
-
-    columns_to_transform_df = [
-        t
-        for t in column_transformations
-        if "origin" in t
-        and isinstance(t["origin"], list)
-        and "destination" in t
-        and isinstance(t["destination"], list)
-        and "transformation" in t
-    ]
-    for column_to_transform_df in columns_to_transform_df:
-        function_name = column_to_transform_df["transformation"]
-        logger.warning(column_to_transform_df["destination"])
-
-        #        df[["siret", "siren"]] = df[["siret"]].apply(clean_siret_and_siren)
-
-        df[column_to_transform_df["destination"]] = df[
-            column_to_transform_df["origin"]
-        ].apply(TRANSFORMATION_MAPPING[function_name], axis=1)
-        columns_to_drop = [
-            column_origin
-            for column_origin in column_to_transform_df["origin"]
-            if column_origin not in column_to_transform_df["destination"]
-        ]
-        df.drop(columns=columns_to_drop, inplace=True)
-
-    # 4. Ajout des colonnes avec une valeur par défaut
-    #
-    # { "colonne": "col 1", "value" : "val" }
-    #
-    # J'ai une colonne de type string et une valeur
-
-    columns_to_add_by_default = {
-        t["colonne"]: t["value"]
-        for t in column_transformations
-        if "colonne" in t and "value" in t
-    }
-
-    # 5. Supression des colonnes
-    #
-    # { "remove": "col 1" }
-    #
-    # J'ai une colonne remove de type string
-
-    columns_to_remove = [t["remove"] for t in column_transformations if "remove" in t]
-    df.drop(columns=columns_to_remove, inplace=True)
-
-    # 6. Colonnes à garder (rien à faire, utilisé pour le controle)
-
-    columns_to_keep = [t["keep"] for t in column_transformations if "keep" in t]
+    df = _rename_columns(df, dag_config)
+    df = _transform_columns(df, dag_config)
+    df = _default_value_columns(df, dag_config)
+    df = _transform_df(df, dag_config)
+    df = _remove_columns(df, dag_config)
 
     # Vérification que le dataframe a exactement les colonnes attendues
-    expected_columns = set(
-        [
-            column["destination"]
-            for column in columns_to_rename
-            if "destination" in column
-        ]
-        + [
-            column["destination"]
-            for column in columns_to_transform
-            if "destination" in column
-        ]
-        + [
-            dest
-            for column in columns_to_transform_df
-            if "destination" in column
-            for dest in column["destination"]
-        ]
-        + [
-            column["colonne"]
-            for column in columns_to_add_by_default
-            if "colonne" in column
-        ]
-        + columns_to_keep
-    )
+    expected_columns = dag_config.get_expected_columns()
 
     if set(df.columns) != expected_columns:
         raise ValueError(
@@ -247,13 +156,21 @@ def source_data_normalize(
     # TODO : un peu crado, à revoir
     # A cause de la résolution de l'identifiant unique qui dépend du code de la source
     if "source_id" in df.columns:
+
+        # TODO: transformer ecosystem en source_code
+
         df["source_code"] = df["source_id"]
         df["source_id"] = df["source_id"].map(source_id_by_code)
-    elif source_code is not None:
-        df["source_code"] = source_code
-        df["source_id"] = source_id_by_code[source_code]
+    elif dag_config.source_code is not None:
+
+        # TODO: mettre la valeur source_code = dag_config.source_code
+
+        df["source_code"] = dag_config.source_code
+        df["source_id"] = source_id_by_code[dag_config.source_code]
     else:
         ValueError("Pas de colonne 'source_id'")
+
+    # TODO: résoudre source_id dans une étape postérieur à la normalisation
 
     # Identifiant unique
     # TODO: on dévrait pouvoir utiliser les modèles django/DB pour automatiser cela
@@ -263,11 +180,11 @@ def source_data_normalize(
     )
 
     # FIN Traitement des identifiants
-
-    if combine_columns_categories:
+    # DEPRECATED : pris en charge dans les transformations ???
+    if dag_config.combine_columns_categories:
         df["produitsdechets_acceptes"] = df.apply(
             lambda row: mapping_utils.combine_categories(
-                row, combine_columns_categories
+                row, dag_config.combine_columns_categories
             ),
             axis=1,
         )
@@ -275,21 +192,17 @@ def source_data_normalize(
     # Après le traitement des identifiants :
     # Merge les lignes au plus tôt pour minimiser le traitement (réduction de la taille
     # du df)
-    if merge_duplicated_acteurs:
+    if dag_config.merge_duplicated_acteurs:
         df = merge_duplicates(
             df,
             group_column="identifiant_unique",
             merge_column="produitsdechets_acceptes",
         )
 
-    # DEPRECATED : pris en compte dans les transformations
-    for k, val in columns_to_add_by_default.items():
-        df[k] = val
-
     # Avant le renommage des colonnes prise en chage de adresse_format_ban
     # TODO: à sortir dans une fonction de transformation df
     if "adresse_format_ban" in df.columns:
-        if validate_address_with_ban:
+        if dag_config.validate_address_with_ban:
             df[["adresse", "code_postal", "ville"]] = df.apply(get_address, axis=1)
         else:
             df[["adresse", "code_postal", "ville"]] = df.apply(extract_details, axis=1)
@@ -345,9 +258,9 @@ def source_data_normalize(
         )
 
     # TODO: à sortie dans une fonction de transformation column
-    if "labels_etou_bonus" in df.columns and label_bonus_reparation:
+    if "labels_etou_bonus" in df.columns and dag_config.label_bonus_reparation:
         df["labels_etou_bonus"] = df["labels_etou_bonus"].str.replace(
-            "Agréé Bonus Réparation", label_bonus_reparation
+            "Agréé Bonus Réparation", dag_config.label_bonus_reparation
         )
 
     # TODO: à sortie dans une fonction de transformation column
@@ -355,14 +268,14 @@ def source_data_normalize(
         df["url"] = df["url"].map(mapping_utils.prefix_url)
 
     # Etapes de normalisation spécifiques aux sources
-    if source_code == "ordredespharmaciens":
+    if dag_config.source_code == "ordredespharmaciens":
         df = df_normalize_pharmacie(df)
 
-    if source_code == "ADEME_SINOE_Decheteries":
+    if dag_config.source_code == "ADEME_SINOE_Decheteries":
         df = df_normalize_sinoe(
             df,
-            product_mapping=product_mapping,
-            dechet_mapping=dechet_mapping,
+            product_mapping=dag_config.product_mapping,
+            dechet_mapping=dag_config.dechet_mapping,
             acteurtype_id_by_code=acteurtype_id_by_code,
         )
     else:
@@ -374,13 +287,8 @@ def source_data_normalize(
             )
         )
 
-    # Suppresion des colonnes non voulues:
-    # - mappées à None
-    # - commençant par _ (internes aux sources)
-    # - TODO: dropper ce que notre modèle django ne peut pas gérer
-    # DEPRECATED : pris en charge dans les transformations
-    df = df.drop(columns=[k for k, v in column_mapping.items() if v is None])
-    df = df.drop(columns=[col for col in df.columns if col.startswith("_")])
+        # TODO : résolution de acteur_type_id à faire plus tard
+        # rester avec 'acteur_type_code' à cette etape
 
     # Trouver les doublons pour les publier dans les logs
     dups = df[df["identifiant_unique"].duplicated(keep=False)]
@@ -389,7 +297,7 @@ def source_data_normalize(
             f"==== DOUBLONS SUR LES IDENTIFIANTS UNIQUES {len(dups)/2} ====="
         )
         log.preview("Doublons sur identifiant_unique", dups)
-    if ignore_duplicates:
+    if dag_config.ignore_duplicates:
         # TODO: Attention aux lignes dupliquées à cause de de service en ligne
         #  + physique
         df = df.drop_duplicates(subset=["identifiant_unique"], keep="first")
