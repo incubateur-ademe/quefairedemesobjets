@@ -12,7 +12,7 @@ with DAG(
         " for Soren dataset"
     ),
     params={
-        "column_transformations": [
+        "normalization_rules": [
             {
                 "origin": "horaires_douverture",
                 "transformation": "convert_opening_hours",

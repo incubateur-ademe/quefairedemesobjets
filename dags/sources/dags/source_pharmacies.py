@@ -8,7 +8,7 @@ with DAG(
     default_args=default_args,
     description=("Téléchargement des pharmacies (Ordre National Des Pharmaciens)"),
     params={
-        "column_transformations": [
+        "normalization_rules": [
             {
                 "origin": "Raison sociale",
                 "transformation": "strip_string",

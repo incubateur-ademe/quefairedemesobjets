@@ -54,13 +54,13 @@ class TestDAGConfig:
     def test_dag_config_success(self):
         dag_config = DAGConfig.model_validate(
             {
-                "column_transformations": [],
+                "normalization_rules": [],
                 "endpoint": "https://example.com/api",
                 "product_mapping": {},
             }
         )
         assert str(dag_config.endpoint) == "https://example.com/api"
-        assert dag_config.column_transformations == []
+        assert dag_config.normalization_rules == []
         assert dag_config.combine_columns_categories == []
         assert dag_config.dechet_mapping == {}
         assert dag_config.ignore_duplicates is False
@@ -75,22 +75,22 @@ class TestDAGConfig:
         [
             {},
             {
-                "column_transformations": "not_a_list",
+                "normalization_rules": "not_a_list",
                 "endpoint": "https://example.com/api",
                 "product_mapping": {},
             },
             {
-                "column_transformations": [],
+                "normalization_rules": [],
                 "endpoint": "https://example.com/api",
                 "product_mapping": "not_a_dict",
             },
             {
-                "column_transformations": [],
+                "normalization_rules": [],
                 "endpoint": "not_an_url",
                 "product_mapping": {},
             },
             {
-                "column_transformations": [{"fake": "column"}],
+                "normalization_rules": [{"fake": "column"}],
                 "endpoint": "not_an_url",
                 "product_mapping": {},
             },
@@ -101,7 +101,7 @@ class TestDAGConfig:
             DAGConfig.model_validate(input_value)
 
     @pytest.mark.parametrize(
-        "column_transformations, expected_column_transformations",
+        "normalization_rules, expected_normalization_rules",
         [
             ([], []),
             (
@@ -138,38 +138,38 @@ class TestDAGConfig:
             ([{"keep": "column"}], [NormalizationColumnKeep(keep="column")]),
         ],
     )
-    def test_dag_config_column_transformations_succeed(
-        self, column_transformations, expected_column_transformations
+    def test_dag_config_normalization_rules_succeed(
+        self, normalization_rules, expected_normalization_rules
     ):
         dag_config = DAGConfig.model_validate(
             {
-                "column_transformations": column_transformations,
+                "normalization_rules": normalization_rules,
                 "endpoint": "https://example.com/api",
                 "product_mapping": {},
             }
         )
-        assert dag_config.column_transformations == expected_column_transformations
+        assert dag_config.normalization_rules == expected_normalization_rules
 
     @pytest.mark.parametrize(
-        "column_transformations",
+        "normalization_rules",
         [
             [{"fake": "column"}],
             [{"origin": ["orig"], "transformation": "trans", "destination": "dest"}],
             [{"origin": "orig", "transformation": "trans", "destination": ["dest"]}],
         ],
     )
-    def test_dag_config_column_transformations_failed(self, column_transformations):
+    def test_dag_config_normalization_rules_failed(self, normalization_rules):
         with pytest.raises(ValueError):
             DAGConfig.model_validate(
                 {
-                    "column_transformations": column_transformations,
+                    "normalization_rules": normalization_rules,
                     "endpoint": "https://example.com/api",
                     "product_mapping": {},
                 }
             )
 
     def test_get_expected_columns(self):
-        column_transformations = [
+        normalization_rules = [
             NormalizationColumnRename(origin="orig", destination="dest1"),
             NormalizationColumnTransform(
                 origin="orig", transformation="", destination="dest2"
@@ -182,7 +182,7 @@ class TestDAGConfig:
         ]
         dag_config = DAGConfig.model_validate(
             {
-                "column_transformations": column_transformations,
+                "normalization_rules": normalization_rules,
                 "endpoint": "https://example.com/api",
                 "product_mapping": {},
             }

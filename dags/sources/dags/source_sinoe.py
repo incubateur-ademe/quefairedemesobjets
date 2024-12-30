@@ -20,7 +20,7 @@ with DAG(
             "sinoe-(r)-annuaire-des-decheteries-dma/lines?size=10000&q_mode=simple&ANNEE_eq=2024"
         ),
         "source_code": "ADEME_SINOE_Decheteries",
-        "column_transformations": [
+        "normalization_rules": [
             # 3. Ajout des colonnes avec une valeur par défaut
             {
                 "column": "acteur_type_code",

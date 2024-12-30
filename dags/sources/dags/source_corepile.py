@@ -12,7 +12,7 @@ with DAG(
         " for Corepile dataset"
     ),
     params={
-        "column_transformations": [
+        "normalization_rules": [
             {
                 "origin": "siret",
                 "transformation": "clean_siret",

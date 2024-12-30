@@ -11,7 +11,7 @@ with DAG(
         " sur de Koumoul"
     ),
     params={
-        "column_transformations": [
+        "normalization_rules": [
             {
                 "origin": "siren",
                 "transformation": "clean_siren",

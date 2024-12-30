@@ -12,7 +12,7 @@ with DAG(
         " for Valdelia dataset"
     ),
     params={
-        "column_transformations": [
+        "normalization_rules": [
             {
                 "origin": "siren",
                 "transformation": "clean_siren",

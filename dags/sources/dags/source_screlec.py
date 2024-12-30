@@ -17,7 +17,7 @@ with DAG(
             "donnees-eo-screlec/lines?size=10000"
         ),
         "source_code": "SCRELEC",
-        "column_transformations": [
+        "normalization_rules": [
             {
                 "origin": "siret",
                 "transformation": "clean_siret",

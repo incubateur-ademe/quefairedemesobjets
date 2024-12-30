@@ -32,7 +32,7 @@ def get_transformation_function(function_name, dag_config):
 def _rename_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
     columns_to_rename = [
         t
-        for t in dag_config.column_transformations
+        for t in dag_config.normalization_rules
         if isinstance(t, NormalizationColumnRename)
     ]
     return df.rename(
@@ -46,7 +46,7 @@ def _rename_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
 def _transform_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
     columns_to_transform = [
         t
-        for t in dag_config.column_transformations
+        for t in dag_config.normalization_rules
         if isinstance(t, NormalizationColumnTransform)
     ]
     for column_to_transform in columns_to_transform:
@@ -64,7 +64,7 @@ def _transform_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
 def _transform_df(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
     columns_to_transform_df = [
         t
-        for t in dag_config.column_transformations
+        for t in dag_config.normalization_rules
         if isinstance(t, NormalizationDFTransform)
     ]
     for column_to_transform_df in columns_to_transform_df:
@@ -88,7 +88,7 @@ def _transform_df(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
 def _default_value_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
     columns_to_add_by_default = [
         t
-        for t in dag_config.column_transformations
+        for t in dag_config.normalization_rules
         if isinstance(t, NormalizationColumnDefault)
     ]
     for column_to_add_by_default in columns_to_add_by_default:
@@ -99,7 +99,7 @@ def _default_value_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFr
 def _remove_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
     columns_to_remove = [
         t.remove
-        for t in dag_config.column_transformations
+        for t in dag_config.normalization_rules
         if isinstance(t, NormalizationColumnRemove)
     ]
     return df.drop(columns=columns_to_remove)

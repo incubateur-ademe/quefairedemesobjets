@@ -43,7 +43,7 @@ class NormalizationColumnKeep(BaseModel):
 
 
 class DAGConfig(BaseModel):
-    column_transformations: list[
+    normalization_rules: list[
         Union[
             NormalizationColumnRename,
             NormalizationColumnTransform,
@@ -68,14 +68,14 @@ class DAGConfig(BaseModel):
         cls, params: dict[str, Union[str, list, dict]]
     ) -> "DAGConfig":
 
-        params["column_transformations"] = get_nested_config_parameter(
-            params.get("column_transformations", [])
+        params["normalization_rules"] = get_nested_config_parameter(
+            params.get("normalization_rules", [])
         )
         return cls.model_validate(params)
 
     def get_expected_columns(self) -> set[str]:
         columns = set()
-        for transformation in self.column_transformations:
+        for transformation in self.normalization_rules:
             if isinstance(transformation, NormalizationColumnRename):
                 columns.add(transformation.destination)
             elif isinstance(transformation, NormalizationColumnTransform):

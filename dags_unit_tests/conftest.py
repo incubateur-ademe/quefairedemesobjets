@@ -130,7 +130,7 @@ def source_id_by_code():
 def dag_config():
     return DAGConfig.model_validate(
         {
-            "column_transformations": [],
+            "normalization_rules": [],
             "endpoint": "https://example.com/api",
             "product_mapping": {},
         }

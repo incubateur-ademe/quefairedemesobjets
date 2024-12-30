@@ -204,9 +204,9 @@ class TestSourceDataNormalizeSinoe:
 
 class TestSourceDataNormalize:
     # FIXME : Add tests to check all kind of transformation is applied
-    def test_column_transformations_is_called(self):
+    def test_normalization_rules_is_called(self):
         dag_config_kwargs = {
-            "column_transformations": [
+            "normalization_rules": [
                 {
                     "origin": "nom origin",
                     "transformation": "test_fct",
