@@ -4,6 +4,7 @@ import re
 import pandas as pd
 import requests
 from fuzzywuzzy import fuzz
+from sources.tasks.airflow_logic.config_management import DAGConfig
 from sources.tasks.transform.transform_column import (
     clean_code_postal,
     clean_number,
@@ -177,6 +178,27 @@ def clean_label_codes(row, dag_config):
 
     row["label_codes"] = label_codes
     return row[["label_codes"]]
+
+
+def merge_and_clean_souscategorie_codes(
+    row: pd.Series, dag_config: DAGConfig
+) -> pd.Series:
+    categories = [row[col] for col in row.keys() if pd.notna(row[col]) and row[col]]
+    souscategorie_codes = []
+    product_mapping = dag_config.product_mapping
+    for sscat in categories:
+        sscat = sscat.strip().lower()
+        sscat = product_mapping[sscat]
+        if isinstance(sscat, str):
+            souscategorie_codes.append(sscat)
+        elif isinstance(sscat, list):
+            souscategorie_codes.extend(sscat)
+        else:
+            raise ValueError(
+                f"Type {type(sscat)} not supported for souscategorie_codes"
+            )
+    row["souscategorie_codes"] = list(set(souscategorie_codes))
+    return row[["souscategorie_codes"]]
 
 
 ### Fonctions de résolution de l'adresse au format BAN et avec vérification via l'API

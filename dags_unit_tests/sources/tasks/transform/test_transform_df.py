@@ -281,3 +281,8 @@ class TestCleanLabelCodes:
         )
 
         assert result["label_codes"], ["ess", "label_et_bonus"]
+
+
+class TestMergeAndCleanSouscategorieCodes:
+    # FIXME : Add tests
+    pass

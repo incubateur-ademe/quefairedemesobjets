@@ -70,17 +70,21 @@ with DAG(
                 "value": constants.ACTEUR_ACTIF,
             },
             {
-                "column": "labels_etou_bonus",
-                "value": "reparacteur",
+                "column": "label_codes",
+                "value": ["reparacteur"],
             },
             {
                 "column": "acteur_type_code",
                 "value": "commerce",
             },
-            # {  # TODO : modofier le fonctionnement
-            #     "column": "point_de_reparation",
-            #     "value": True,
-            # },
+            {
+                "column": "acteurservice_codes",
+                "value": ["service_de_reparation"],
+            },
+            {
+                "column": "action_codes",
+                "value": ["reparer"],
+            },
             {
                 "column": "public_accueilli",
                 "value": constants.PUBLIC_PAR,
@@ -115,8 +119,8 @@ with DAG(
             },
             {
                 "origin": ["categorie", "categorie2", "categorie3"],
-                "transformation": "merge_sous_categories_columns",
-                "destination": ["produitsdechets_acceptes"],
+                "transformation": "merge_and_clean_souscategorie_codes",
+                "destination": ["souscategorie_codes"],
             },
             # 5. Supression des colonnes
             {"remove": "categorie"},
