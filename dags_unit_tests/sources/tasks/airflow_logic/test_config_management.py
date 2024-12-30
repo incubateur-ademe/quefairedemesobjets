@@ -121,6 +121,10 @@ class TestDAGConfig:
                 [NormalizationColumnDefault(column="col", value="val")],
             ),
             (
+                [{"column": "col", "value": ["val"]}],
+                [NormalizationColumnDefault(column="col", value=["val"])],
+            ),
+            (
                 [
                     {
                         "origin": ["orig"],

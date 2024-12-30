@@ -14,7 +14,7 @@ La confiuration doit suivre le format de la class [DAGConfig](../../dags/sources
 
 ### Normalisation
 
-Les règles de nomalisation décrite dans le paramètre du DAG dans la section `nomalisation_rules`
+Les règles de nomalisation décrite dans le paramètre du DAG dans la section `normalization_rules`
 
 les règles sont de différent type et appliquée dans l'ordre suivant:
 

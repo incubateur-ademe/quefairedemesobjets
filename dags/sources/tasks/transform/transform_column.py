@@ -161,7 +161,7 @@ def clean_souscategorie_codes(sscat_list: str, dag_config: DAGConfig) -> list[st
 
     product_mapping = dag_config.product_mapping
     for sscat in sscat_list.split("|"):
-        sscat = format_libelle_to_code(sscat)
+        sscat = sscat.strip().lower()
         souscategorie_codes.append(product_mapping[sscat])
 
     return list(set(souscategorie_codes))

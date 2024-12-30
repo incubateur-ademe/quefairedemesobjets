@@ -92,7 +92,12 @@ def _default_value_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFr
         if isinstance(t, NormalizationColumnDefault)
     ]
     for column_to_add_by_default in columns_to_add_by_default:
-        df[column_to_add_by_default.column] = column_to_add_by_default.value
+        if isinstance(column_to_add_by_default.value, list):
+            df[column_to_add_by_default.column] = [
+                column_to_add_by_default.value
+            ] * len(df)
+        else:
+            df[column_to_add_by_default.column] = column_to_add_by_default.value
     return df
 
 

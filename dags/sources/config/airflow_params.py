@@ -23,6 +23,7 @@ from sources.tasks.transform.transform_df import (
     clean_label_codes,
     clean_siret_and_siren,
     clean_telephone,
+    merge_and_clean_souscategorie_codes,
     merge_sous_categories_columns,
 )
 
@@ -55,6 +56,7 @@ TRANSFORMATION_MAPPING = {
     "clean_code_postal": clean_code_postal,
     "clean_action_codes": clean_action_codes,
     "clean_souscategorie_codes": clean_souscategorie_codes,
+    "merge_and_clean_souscategorie_codes": merge_and_clean_souscategorie_codes,
 }
 
 
