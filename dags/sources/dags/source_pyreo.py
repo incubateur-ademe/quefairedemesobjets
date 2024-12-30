@@ -19,10 +19,6 @@ with DAG(
                 "destination": "identifiant_externe",
             },
             {
-                "origin": "type_de_point_de_collecte",
-                "destination": "acteur_type_id",
-            },
-            {
                 "origin": "ecoorganisme",
                 "destination": "source_id",
             },
@@ -39,13 +35,12 @@ with DAG(
                 "destination": "latitude",
             },
             # 2. Transformation des colonnes
-            # 3. Transformation du dataframe
             {
-                "origin": ["siret"],
-                "transformation": "clean_siret_and_siren",
-                "destination": ["siret", "siren"],
+                "origin": "type_de_point_de_collecte",
+                "transformation": "clean_acteur_type_code",
+                "destination": "acteur_type_code",
             },
-            # 4. Ajout des colonnes avec une valeur par défaut
+            # 3. Ajout des colonnes avec une valeur par défaut
             {
                 "column": "type_de_point_de_collecte",
                 "value": (
@@ -56,6 +51,12 @@ with DAG(
             {
                 "column": "statut",
                 "value": constants.ACTEUR_ACTIF,
+            },
+            # 4. Transformation du dataframe
+            {
+                "origin": ["siret"],
+                "transformation": "clean_siret_and_siren",
+                "destination": ["siret", "siren"],
             },
             # 5. Supression des colonnes
             {"remove": "_i"},
