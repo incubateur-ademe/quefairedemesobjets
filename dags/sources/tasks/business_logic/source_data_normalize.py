@@ -14,18 +14,19 @@ from sources.tasks.airflow_logic.config_management import (
     NormalizationColumnTransform,
     NormalizationDFTransform,
 )
-from sources.tasks.transform.transform_column import (
-    cast_eo_boolean_or_string_to_boolean,
-    mapping_try_or_fallback_column_value,
-)
 from sources.tasks.transform.transform_df import merge_duplicates
 from sqlalchemy import text
 from tenacity import retry, stop_after_attempt, wait_fixed
 from utils import logging_utils as log
-from utils import mapping_utils
-from utils.base_utils import extract_details, get_address
 
 logger = logging.getLogger(__name__)
+
+
+def get_transformation_function(function_name, dag_config):
+    def transformation_function(row):
+        return TRANSFORMATION_MAPPING[function_name](row, dag_config)
+
+    return transformation_function
 
 
 def _rename_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
@@ -50,8 +51,10 @@ def _transform_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
     ]
     for column_to_transform in columns_to_transform:
         function_name = column_to_transform.transformation
+        normalisation_function = get_transformation_function(function_name, dag_config)
+        logger.warning(f"Transformation {function_name}")
         df[column_to_transform.destination] = df[column_to_transform.origin].apply(
-            TRANSFORMATION_MAPPING[function_name]
+            normalisation_function
         )
         if column_to_transform.destination != column_to_transform.origin:
             df.drop(columns=[column_to_transform.origin], inplace=True)
@@ -66,19 +69,19 @@ def _transform_df(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
     ]
     for column_to_transform_df in columns_to_transform_df:
         function_name = column_to_transform_df.transformation
-        logger.warning(column_to_transform_df.destination)
+        normalisation_function = get_transformation_function(function_name, dag_config)
 
-        #        df[.siret", "siren] = df[.siret].apply(clean_siret_and_siren)
-
+        logger.warning(f"Transformation {function_name}")
         df[column_to_transform_df.destination] = df[
             column_to_transform_df.origin
-        ].apply(TRANSFORMATION_MAPPING[function_name], axis=1)
-        columns_to_drop = [
-            column_origin
-            for column_origin in column_to_transform_df.origin
-            if column_origin not in column_to_transform_df.destination
-        ]
-        df.drop(columns=columns_to_drop, inplace=True)
+        ].apply(normalisation_function, axis=1)
+        # FIXME: Pour le moment, on ne souhaite pas supprimer les colonnes
+        #  columns_to_drop = [
+        #     column_origin
+        #     for column_origin in column_to_transform_df.origin
+        #     if column_origin not in column_to_transform_df.destination
+        # ]
+        # df.drop(columns=columns_to_drop, inplace=True)
     return df
 
 
@@ -102,11 +105,41 @@ def _remove_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
     return df.drop(columns=columns_to_remove)
 
 
+def _remove_undesired_lines(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
+    if dag_config.merge_duplicated_acteurs:
+        df = merge_duplicates(
+            df,
+            group_column="identifiant_unique",
+            merge_column="produitsdechets_acceptes",
+        )
+
+    # Suppression des lignes dont public_acceuilli est uniqueùent les professionnels
+    df = df[df["public_accueilli"] != constants.PUBLIC_PRO]
+
+    # Après les appels aux fonctions de normalisation spécifiques aux sources
+    # On supprime les acteurs qui n'ont pas de produits acceptés
+    df = df[df["souscategorie_codes"].notnull()]
+    df = df[df["souscategorie_codes"].apply(len) > 0]
+
+    # Trouver les doublons pour les publier dans les logs
+    dups = df[df["identifiant_unique"].duplicated(keep=False)]
+    if not dups.empty:
+        logger.warning(
+            f"==== DOUBLONS SUR LES IDENTIFIANTS UNIQUES {len(dups)/2} ====="
+        )
+        log.preview("Doublons sur identifiant_unique", dups)
+    if dag_config.ignore_duplicates:
+        # TODO: Attention aux lignes dupliquées à cause de de service en ligne
+        #  + physique
+        df = df.drop_duplicates(subset=["identifiant_unique"], keep="first")
+
+    return df
+
+
 def source_data_normalize(
     df_acteur_from_source: pd.DataFrame,
     dag_config: DAGConfig,
-    acteurtype_id_by_code: dict,
-    source_id_by_code: dict,
+    dag_id: str,
 ) -> pd.DataFrame:
     """
     Normalisation des données source. Passée cette étape:
@@ -131,186 +164,41 @@ def source_data_normalize(
             f"{set(df.columns)} != {expected_columns}"
         )
 
-    # DEBUT Traitement des identifiants
-
-    # Identifiant externe
-    if "identifiant_externe" in df.columns:
-        # TODO: simplifier cette partie de code quite à faire des migrations
-        count_nan = df["identifiant_externe"].isna().sum()
-        if count_nan > 0:
-            logger.warning(f"Nombre de NaN dans 'identifiant_externe': {count_nan}")
-        # TODO : A voir si on dégage ceux qui n'ont pas d'identifiant externe
-        # cf. Christian
-        if "nom_de_lorganisme" in df.columns:
-            df["identifiant_externe"] = df["identifiant_externe"].fillna(
-                df["nom_de_lorganisme"]
-                .str.replace("-", "")
-                .str.replace(" ", "_")
-                .str.replace("__", "_")
-            )
-        df["identifiant_externe"] = df["identifiant_externe"].astype(str)
-    else:
-        raise ValueError("Pas de colonne 'identifiant_externe'")
-
-    # Source : nécessaire pour les identifiants uniques
-    # TODO : un peu crado, à revoir
-    # A cause de la résolution de l'identifiant unique qui dépend du code de la source
-    if "source_id" in df.columns:
-
-        # TODO: transformer ecosystem en source_code
-
-        df["source_code"] = df["source_id"]
-        df["source_id"] = df["source_id"].map(source_id_by_code)
-    elif dag_config.source_code is not None:
-
-        # TODO: mettre la valeur source_code = dag_config.source_code
-
-        df["source_code"] = dag_config.source_code
-        df["source_id"] = source_id_by_code[dag_config.source_code]
-    else:
-        ValueError("Pas de colonne 'source_id'")
-
-    # TODO: résoudre source_id dans une étape postérieur à la normalisation
-
-    # Identifiant unique
-    # TODO: on dévrait pouvoir utiliser les modèles django/DB pour automatiser cela
-    df["identifiant_unique"] = df.apply(
-        lambda x: mapping_utils.create_identifiant_unique(x),
-        axis=1,
-    )
-
-    # FIN Traitement des identifiants
-    # DEPRECATED : pris en charge dans les transformations ???
-    if dag_config.combine_columns_categories:
-        df["produitsdechets_acceptes"] = df.apply(
-            lambda row: mapping_utils.combine_categories(
-                row, dag_config.combine_columns_categories
-            ),
-            axis=1,
-        )
-
-    # Après le traitement des identifiants :
-    # Merge les lignes au plus tôt pour minimiser le traitement (réduction de la taille
-    # du df)
-    if dag_config.merge_duplicated_acteurs:
-        df = merge_duplicates(
-            df,
-            group_column="identifiant_unique",
-            merge_column="produitsdechets_acceptes",
-        )
-
-    # Avant le renommage des colonnes prise en chage de adresse_format_ban
-    # TODO: à sortir dans une fonction de transformation df
-    if "adresse_format_ban" in df.columns:
-        if dag_config.validate_address_with_ban:
-            df[["adresse", "code_postal", "ville"]] = df.apply(get_address, axis=1)
-        else:
-            df[["adresse", "code_postal", "ville"]] = df.apply(extract_details, axis=1)
-
-    # TODO: à sortir dans une fonction de transformation column
-    if "statut" in df.columns:
-        df["statut"] = df["statut"].map(
-            {
-                1: constants.ACTEUR_ACTIF,
-                0: constants.ACTEUR_SUPPRIME,
-                constants.ACTEUR_ACTIF: constants.ACTEUR_ACTIF,
-                "INACTIF": constants.ACTEUR_INACTIF,
-                "SUPPRIME": constants.ACTEUR_SUPPRIME,
-            }
-        )
-        df["statut"] = df["statut"].fillna(constants.ACTEUR_ACTIF)
-    else:
-        df["statut"] = constants.ACTEUR_ACTIF
-
-    # TODO: à sortie dans une fonction de transformation column
-    if "public_accueilli" in df.columns:
-
-        df["public_accueilli"] = mapping_try_or_fallback_column_value(
-            df["public_accueilli"],
-            {
-                "particuliers et professionnels": constants.PUBLIC_PRO_ET_PAR,
-                "professionnels": constants.PUBLIC_PRO,
-                "particuliers": constants.PUBLIC_PAR,
-                "aucun": constants.PUBLIC_AUCUN,
-            },
-        )
-
-        # Règle métier: Ne pas ingérer les acteurs avec public pur PRO
-        df = df[df["public_accueilli"] != constants.PUBLIC_PRO]
-
-    # TODO: à sortie dans une fonction de transformation column
-    for column in ["uniquement_sur_rdv", "exclusivite_de_reprisereparation"]:
-        if column in df.columns:
-
-            df[column] = df[column].apply(cast_eo_boolean_or_string_to_boolean)
-
-    # TODO: à sortie dans une fonction de transformation column
-    if "reprise" in df.columns:
-
-        df["reprise"] = mapping_try_or_fallback_column_value(
-            df["reprise"],
-            {
-                "1 pour 0": constants.REPRISE_1POUR0,
-                "1 pour 1": constants.REPRISE_1POUR1,
-                "non": constants.REPRISE_1POUR0,
-                "oui": constants.REPRISE_1POUR1,
-            },
-        )
-
-    # TODO: à sortie dans une fonction de transformation column
-    if "labels_etou_bonus" in df.columns and dag_config.label_bonus_reparation:
-        df["labels_etou_bonus"] = df["labels_etou_bonus"].str.replace(
-            "Agréé Bonus Réparation", dag_config.label_bonus_reparation
-        )
-
-    # TODO: à sortie dans une fonction de transformation column
-    if "url" in df.columns:
-        df["url"] = df["url"].map(mapping_utils.prefix_url)
-
     # Etapes de normalisation spécifiques aux sources
-    if dag_config.source_code == "ordredespharmaciens":
+    # TODO: Remplacer par le dag_id
+    if dag_id == "pharmacies":
         df = df_normalize_pharmacie(df)
 
-    if dag_config.source_code == "ADEME_SINOE_Decheteries":
+    # TODO: Remplacer par le dag_id
+    if dag_id == "sinoe":
         df = df_normalize_sinoe(
             df,
             product_mapping=dag_config.product_mapping,
             dechet_mapping=dag_config.dechet_mapping,
-            acteurtype_id_by_code=acteurtype_id_by_code,
-        )
-    else:
-        # TODO: à sortie dans une fonction de transformation column
-        # (attention au normalisation des pharmacie et de SINOE)
-        df["acteur_type_id"] = df["acteur_type_id"].apply(
-            lambda x: mapping_utils.transform_acteur_type_id(
-                x, acteurtype_id_by_code=acteurtype_id_by_code
-            )
         )
 
-        # TODO : résolution de acteur_type_id à faire plus tard
-        # rester avec 'acteur_type_code' à cette etape
-
-    # Trouver les doublons pour les publier dans les logs
-    dups = df[df["identifiant_unique"].duplicated(keep=False)]
-    if not dups.empty:
-        logger.warning(
-            f"==== DOUBLONS SUR LES IDENTIFIANTS UNIQUES {len(dups)/2} ====="
-        )
-        log.preview("Doublons sur identifiant_unique", dups)
-    if dag_config.ignore_duplicates:
-        # TODO: Attention aux lignes dupliquées à cause de de service en ligne
-        #  + physique
-        df = df.drop_duplicates(subset=["identifiant_unique"], keep="first")
-
-    # Après les appels aux fonctions de normalisation spécifiques aux sources
-    # On supprime les acteurs qui n'ont pas de produits acceptés
-    df = df[df["produitsdechets_acceptes"].notnull()]
-    df = df[df["produitsdechets_acceptes"].apply(len) > 0]
+    # Merge et suppression des lignes indésirables
+    df = _remove_undesired_lines(df, dag_config)
 
     log.preview("df après normalisation", df)
     if df.empty:
         raise ValueError("Plus aucune donnée disponible après normalisation")
     return df
+
+    # # TODO: Je n'ai pas vu la source qui applique cette règle
+    # if "statut" in df.columns:
+    #     df["statut"] = df["statut"].map(
+    #         {
+    #             1: constants.ACTEUR_ACTIF,
+    #             0: constants.ACTEUR_SUPPRIME,
+    #             constants.ACTEUR_ACTIF: constants.ACTEUR_ACTIF,
+    #             "INACTIF": constants.ACTEUR_INACTIF,
+    #             "SUPPRIME": constants.ACTEUR_SUPPRIME,
+    #         }
+    #     )
+    #     df["statut"] = df["statut"].fillna(constants.ACTEUR_ACTIF)
+    # else:
+    #     df["statut"] = constants.ACTEUR_ACTIF
 
 
 def df_normalize_pharmacie(df: pd.DataFrame) -> pd.DataFrame:
@@ -331,7 +219,6 @@ def df_normalize_sinoe(
     df: pd.DataFrame,
     product_mapping: dict,
     dechet_mapping: dict,
-    acteurtype_id_by_code: dict,
 ) -> pd.DataFrame:
     """Normalisation spécifique à la dataframe SINOE"""
 
@@ -342,8 +229,6 @@ def df_normalize_sinoe(
         "NP": None,
     }
 
-    # MISC
-    df["acteur_type_id"] = acteurtype_id_by_code["decheterie"]  # Déchetterie
     # Pour forcer l'action "trier"
     df["point_de_collecte_ou_de_reprise_des_dechets"] = True
     df["public_accueilli"] = df["public_accueilli"].map(public_mapping)

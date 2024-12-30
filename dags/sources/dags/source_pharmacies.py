@@ -3,7 +3,7 @@ from sources.config.airflow_params import get_mapping_config
 from sources.tasks.airflow_logic.operators import default_args, eo_task_chain
 
 with DAG(
-    dag_id="eo-pharmacies",
+    dag_id="pharmacies",
     dag_display_name="Source - PHARMACIES",
     default_args=default_args,
     description=("Téléchargement des pharmacies (Ordre National Des Pharmaciens)"),

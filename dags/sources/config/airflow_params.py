@@ -3,12 +3,28 @@ from pathlib import Path
 
 import requests
 from sources.tasks.transform.transform_column import (
+    cast_eo_boolean_or_string_to_boolean,
+    clean_acteur_type_code,
+    clean_code_postal,
+    clean_public_accueilli,
+    clean_reprise,
     clean_siren,
     clean_siret,
+    clean_souscategorie_codes,
     convert_opening_hours,
     strip_string,
 )
-from sources.tasks.transform.transform_df import clean_siret_and_siren
+from sources.tasks.transform.transform_df import (
+    clean_acteurservice_codes,
+    clean_action_codes,
+    clean_adresse,
+    clean_identifiant_externe,
+    clean_identifiant_unique,
+    clean_label_codes,
+    clean_siret_and_siren,
+    clean_telephone,
+    merge_sous_categories_columns,
+)
 
 PATH_NOMENCLARURE_DECHET = (
     "https://data.ademe.fr/data-fair/api/v1/datasets/sinoe-r-nomenclature-dechets/lines"
@@ -25,6 +41,20 @@ TRANSFORMATION_MAPPING = {
     "clean_siret": clean_siret,
     "strip_string": strip_string,
     "clean_siret_and_siren": clean_siret_and_siren,
+    "clean_acteur_type_code": clean_acteur_type_code,
+    "clean_identifiant_externe": clean_identifiant_externe,
+    "clean_identifiant_unique": clean_identifiant_unique,
+    "clean_telephone": clean_telephone,
+    "merge_sous_categories_columns": merge_sous_categories_columns,
+    "clean_adresse": clean_adresse,
+    "clean_public_accueilli": clean_public_accueilli,
+    "cast_eo_boolean_or_string_to_boolean": cast_eo_boolean_or_string_to_boolean,
+    "clean_reprise": clean_reprise,
+    "clean_acteurservice_codes": clean_acteurservice_codes,
+    "clean_label_codes": clean_label_codes,
+    "clean_code_postal": clean_code_postal,
+    "clean_action_codes": clean_action_codes,
+    "clean_souscategorie_codes": clean_souscategorie_codes,
 }
 
 
