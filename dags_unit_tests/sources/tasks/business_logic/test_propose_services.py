@@ -1,3 +1,5 @@
+# FIXME : ces tests sont à revoir, par très à propos depuis la refacto
+
 import pandas as pd
 import pytest
 from sources.tasks.business_logic.propose_services import propose_services
@@ -17,11 +19,8 @@ class TestCreatePropositionService:
         df_create_actors = pd.DataFrame(
             {
                 "identifiant_unique": [1],
-                "produitsdechets_acceptes": ["téléphones portables"],
-                "point_dapport_de_service_reparation": [False],
-                "point_dapport_pour_reemploi": [False],
-                "point_de_reparation": [False],
-                "point_de_collecte_ou_de_reprise_des_dechets": [False],
+                "souscategorie_codes": [["smartphone, tablette et console"]],
+                "action_codes": [[]],
             }
         )
 
@@ -40,11 +39,8 @@ class TestCreatePropositionService:
                 pd.DataFrame(
                     {
                         "identifiant_unique": [1],
-                        "produitsdechets_acceptes": ["téléphones portables"],
-                        "point_dapport_de_service_reparation": [True],
-                        "point_dapport_pour_reemploi": [False],
-                        "point_de_reparation": [False],
-                        "point_de_collecte_ou_de_reprise_des_dechets": [False],
+                        "souscategorie_codes": [["smartphone, tablette et console"]],
+                        "action_codes": [["reparer"]],
                     }
                 ),
                 pd.DataFrame(
@@ -52,7 +48,7 @@ class TestCreatePropositionService:
                         "action_id": [1],
                         "acteur_id": [1],
                         "action": ["reparer"],
-                        "sous_categories": ["téléphones portables"],
+                        "sous_categories": [["smartphone, tablette et console"]],
                         "id": [1],
                     },
                 ),
@@ -63,11 +59,8 @@ class TestCreatePropositionService:
                 pd.DataFrame(
                     {
                         "identifiant_unique": [1],
-                        "produitsdechets_acceptes": ["téléphones portables"],
-                        "point_dapport_de_service_reparation": [False],
-                        "point_dapport_pour_reemploi": [True],
-                        "point_de_reparation": [False],
-                        "point_de_collecte_ou_de_reprise_des_dechets": [False],
+                        "souscategorie_codes": [["smartphone, tablette et console"]],
+                        "action_codes": [["donner"]],
                     }
                 ),
                 pd.DataFrame(
@@ -75,30 +68,7 @@ class TestCreatePropositionService:
                         "action_id": [2],
                         "acteur_id": [1],
                         "action": ["donner"],
-                        "sous_categories": ["téléphones portables"],
-                        "id": [1],
-                    },
-                ),
-                {"number_of_merged_actors": 0, "number_of_propositionservices": 1},
-            ),
-            # Point Réparation
-            (
-                pd.DataFrame(
-                    {
-                        "identifiant_unique": [1],
-                        "produitsdechets_acceptes": ["téléphones portables"],
-                        "point_dapport_de_service_reparation": [False],
-                        "point_dapport_pour_reemploi": [False],
-                        "point_de_reparation": [True],
-                        "point_de_collecte_ou_de_reprise_des_dechets": [False],
-                    }
-                ),
-                pd.DataFrame(
-                    {
-                        "action_id": [1],
-                        "acteur_id": [1],
-                        "action": ["reparer"],
-                        "sous_categories": ["téléphones portables"],
+                        "sous_categories": [["smartphone, tablette et console"]],
                         "id": [1],
                     },
                 ),
@@ -109,11 +79,8 @@ class TestCreatePropositionService:
                 pd.DataFrame(
                     {
                         "identifiant_unique": [1],
-                        "produitsdechets_acceptes": ["téléphones portables"],
-                        "point_dapport_de_service_reparation": [False],
-                        "point_dapport_pour_reemploi": [False],
-                        "point_de_reparation": [False],
-                        "point_de_collecte_ou_de_reprise_des_dechets": [True],
+                        "souscategorie_codes": [["smartphone, tablette et console"]],
+                        "action_codes": [["trier"]],
                     }
                 ),
                 pd.DataFrame(
@@ -121,7 +88,7 @@ class TestCreatePropositionService:
                         "action_id": [3],
                         "acteur_id": [1],
                         "action": ["trier"],
-                        "sous_categories": ["téléphones portables"],
+                        "sous_categories": [["smartphone, tablette et console"]],
                         "id": [1],
                     },
                 ),
@@ -132,11 +99,8 @@ class TestCreatePropositionService:
                 pd.DataFrame(
                     {
                         "identifiant_unique": [1],
-                        "produitsdechets_acceptes": ["téléphones portables"],
-                        "point_dapport_de_service_reparation": [True],
-                        "point_dapport_pour_reemploi": [True],
-                        "point_de_reparation": [True],
-                        "point_de_collecte_ou_de_reprise_des_dechets": [True],
+                        "souscategorie_codes": [["smartphone, tablette et console"]],
+                        "action_codes": [["reparer", "donner", "trier"]],
                     }
                 ),
                 pd.DataFrame(
@@ -145,9 +109,9 @@ class TestCreatePropositionService:
                         "acteur_id": [1, 1, 1],
                         "action": ["reparer", "donner", "trier"],
                         "sous_categories": [
-                            "téléphones portables",
-                            "téléphones portables",
-                            "téléphones portables",
+                            ["smartphone, tablette et console"],
+                            ["smartphone, tablette et console"],
+                            ["smartphone, tablette et console"],
                         ],
                         "id": [1, 2, 3],
                     },
@@ -169,6 +133,8 @@ class TestCreatePropositionService:
             actions_id_by_code=actions_id_by_code,
         )
 
+        print(result["df"])
+        print(expected_df)
         assert result["df"].equals(expected_df)
         assert result["metadata"] == expected_metadata
 
@@ -179,14 +145,11 @@ class TestCreatePropositionService:
         df_create_actors = pd.DataFrame(
             {
                 "identifiant_unique": [1, 2],
-                "produitsdechets_acceptes": [
-                    "téléphones portables",
-                    "téléphones portables",
+                "souscategorie_codes": [
+                    "smartphone, tablette et console",
+                    "smartphone, tablette et console",
                 ],
-                "point_dapport_de_service_reparation": [False, False],
-                "point_dapport_pour_reemploi": [False, False],
-                "point_de_reparation": [False, False],
-                "point_de_collecte_ou_de_reprise_des_dechets": [True, True],
+                "action_codes": [["trier"], ["trier"]],
             }
         )
 
@@ -195,7 +158,10 @@ class TestCreatePropositionService:
                 "action_id": [3, 3],
                 "acteur_id": [1, 2],
                 "action": ["trier", "trier"],
-                "sous_categories": ["téléphones portables", "téléphones portables"],
+                "sous_categories": [
+                    "smartphone, tablette et console",
+                    "smartphone, tablette et console",
+                ],
                 "id": [1, 2],
             }
         )
@@ -219,15 +185,9 @@ class TestCreatePropositionService:
     ):
         df_create_actors = pd.DataFrame(
             {
-                "identifiant_unique": [1, 1],
-                "produitsdechets_acceptes": [
-                    "téléphones portables",
-                    "écrans",
-                ],
-                "point_dapport_de_service_reparation": [True, False],
-                "point_dapport_pour_reemploi": [False, False],
-                "point_de_reparation": [False, True],
-                "point_de_collecte_ou_de_reprise_des_dechets": [False, False],
+                "identifiant_unique": [1],
+                "action_codes": [["reparer"]],
+                "souscategorie_codes": [["smartphone, tablette et console", "ecran"]],
             }
         )
 
@@ -236,7 +196,7 @@ class TestCreatePropositionService:
                 "action_id": [1],
                 "acteur_id": [1],
                 "action": ["reparer"],
-                "sous_categories": ["téléphones portables | écrans"],
+                "sous_categories": [["smartphone, tablette et console", "ecran"]],
                 "id": [1],
             }
         )

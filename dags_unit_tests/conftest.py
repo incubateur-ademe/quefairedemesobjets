@@ -5,6 +5,8 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
+from dags.sources.tasks.airflow_logic.config_management import DAGConfig
+
 
 def pytest_configure(config):
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "dags"))
@@ -122,3 +124,14 @@ def source_id_by_code():
         "source2": 2,
         "source3": 3,
     }
+
+
+@pytest.fixture
+def dag_config():
+    return DAGConfig.model_validate(
+        {
+            "column_transformations": [],
+            "endpoint": "https://example.com/api",
+            "product_mapping": {},
+        }
+    )

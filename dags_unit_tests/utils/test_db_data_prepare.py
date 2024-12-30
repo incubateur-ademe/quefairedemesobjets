@@ -56,12 +56,17 @@ class TestDBDataPrepare:
             df_acteur_to_delete=pd.DataFrame(
                 {
                     "identifiant_unique": [3],
-                    "source_code": ["source1"],
                     "statut": ["ACTIF"],
                     "cree_le": [datetime(2024, 1, 1)],
                 }
             ),
-            df_acteur=pd.DataFrame({"identifiant_unique": [1, 2]}),
+            df_acteur=pd.DataFrame(
+                {
+                    "identifiant_unique": [1, 2],
+                    "source_code": ["source1", "source2"],
+                    "acteur_type_code": ["commerce", "commerce"],
+                }
+            ),
             df_ps=df_proposition_services,
             df_pssc=df_proposition_services_sous_categories,
             df_labels=propose_labels,
@@ -139,7 +144,11 @@ class TestDBDataPrepare:
                 }
             ),
             df_acteur=pd.DataFrame(
-                {"identifiant_unique": [1, 2], "source_code": ["source1", "source2"]}
+                {
+                    "identifiant_unique": [1, 2],
+                    "source_code": ["source1", "source2"],
+                    "acteur_type_code": ["commerce", "commerce"],
+                }
             ),
             df_ps=df_proposition_services,
             df_pssc=df_proposition_services_sous_categories,

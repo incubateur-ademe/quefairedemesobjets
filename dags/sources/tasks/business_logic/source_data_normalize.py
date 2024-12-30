@@ -114,12 +114,14 @@ def _remove_undesired_lines(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataF
         )
 
     # Suppression des lignes dont public_acceuilli est uniqueùent les professionnels
-    df = df[df["public_accueilli"] != constants.PUBLIC_PRO]
+    if "public_accueilli" in df.columns:
+        df = df[df["public_accueilli"] != constants.PUBLIC_PRO]
 
     # Après les appels aux fonctions de normalisation spécifiques aux sources
     # On supprime les acteurs qui n'ont pas de produits acceptés
-    df = df[df["souscategorie_codes"].notnull()]
-    df = df[df["souscategorie_codes"].apply(len) > 0]
+    if "souscategorie_codes" in df.columns:
+        df = df[df["souscategorie_codes"].notnull()]
+        df = df[df["souscategorie_codes"].apply(len) > 0]
 
     # Trouver les doublons pour les publier dans les logs
     dups = df[df["identifiant_unique"].duplicated(keep=False)]

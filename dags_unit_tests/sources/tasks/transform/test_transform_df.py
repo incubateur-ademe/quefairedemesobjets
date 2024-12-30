@@ -1,7 +1,10 @@
-import numpy as np
 import pandas as pd
 import pytest
-from sources.tasks.transform.transform_df import clean_phone_number, merge_duplicates
+from sources.tasks.transform.transform_df import (
+    clean_label_codes,
+    clean_telephone,
+    merge_duplicates,
+)
 
 
 class TestMergeDuplicates:
@@ -132,7 +135,7 @@ class TestCleanPhoneNumber:
         "phone_number, code_postal, expected_phone_number",
         [
             (None, None, None),
-            (np.NaN, None, None),
+            (pd.NA, None, None),
             ("1 23 45 67 89", "75001", "0123456789"),
             ("33 1 23 45 67 89", "75001", "0123456789"),
             ("0612345678", "75001", "0612345678"),
@@ -140,4 +143,29 @@ class TestCleanPhoneNumber:
         ],
     )
     def test_clean_phone_number(self, phone_number, code_postal, expected_phone_number):
-        assert clean_phone_number(phone_number, code_postal) == expected_phone_number
+        result = clean_telephone(
+            pd.Series({"telephone": phone_number, "code_postal": code_postal}), None
+        )
+        assert result["telephone"] == expected_phone_number
+
+
+class TestCleanLabelCodes:
+    @pytest.mark.parametrize(
+        "value, expected_value",
+        [
+            ("label_et_bonus", ["label_et_bonus"]),
+            ("label_et_bonus1|label_et_bonus2", ["label_et_bonus1", "label_et_bonus2"]),
+            (
+                "Agréé Bonus Réparation|label_et_bonus2",
+                ["bonus_reparation", "label_et_bonus2"],
+            ),
+        ],
+    )
+    def test_clean_label_codes(self, value, expected_value, dag_config):
+        dag_config.label_bonus_reparation = ("bonus_reparation",)
+        result = clean_label_codes(
+            pd.Series({"label_etou_bonus": value, "acteur_type_code": "commerce"}),
+            dag_config=dag_config,
+        )
+
+        assert result["label_codes"], expected_value
