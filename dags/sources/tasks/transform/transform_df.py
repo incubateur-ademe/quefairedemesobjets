@@ -55,12 +55,13 @@ def _merge_columns_of_accepted_products(group):
     return "|".join(sorted(produits_sets))
 
 
-def clean_telephone(row, _):
+def clean_telephone(row: pd.Series, _):
 
     number = clean_number(row["telephone"])
 
     if number is None:
-        return None
+        row[["telephone"]] = None
+        return row[["telephone"]]
 
     if len(number) == 9 and row["code_postal"] and int(row["code_postal"]) < 96000:
         number = "0" + number
@@ -69,8 +70,9 @@ def clean_telephone(row, _):
         number = "0" + number[2:]
 
     if len(number) < 6:
-        return None
+        number = None
 
+    row[["telephone"]] = number
     return row[["telephone"]]
 
 

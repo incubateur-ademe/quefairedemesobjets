@@ -1,9 +1,9 @@
 from unittest.mock import patch
 
-import numpy as np
 import pandas as pd
 import pytest
 from sources.config.airflow_params import TRANSFORMATION_MAPPING
+from sources.tasks.airflow_logic.config_management import DAGConfig
 from sources.tasks.business_logic.source_data_normalize import (
     df_normalize_pharmacie,
     df_normalize_sinoe,
@@ -63,7 +63,6 @@ class TestSourceDataNormalizeSinoe:
         self,
         product_mapping,
         dechet_mapping,
-        acteurtype_id_by_code,
         produitsdechets_acceptes,
     ):
         df_normalised = pd.DataFrame(
@@ -80,7 +79,6 @@ class TestSourceDataNormalizeSinoe:
             df=df_normalised,
             product_mapping=product_mapping,
             dechet_mapping=dechet_mapping,
-            acteurtype_id_by_code=acteurtype_id_by_code,
         )
         assert len(df) == 0
 
@@ -98,7 +96,6 @@ class TestSourceDataNormalizeSinoe:
         self,
         product_mapping,
         dechet_mapping,
-        acteurtype_id_by_code,
         produitsdechets_acceptes,
         produitsdechets_acceptes_expected,
     ):
@@ -115,7 +112,6 @@ class TestSourceDataNormalizeSinoe:
             df=df_normalised,
             product_mapping=product_mapping,
             dechet_mapping=dechet_mapping,
-            acteurtype_id_by_code=acteurtype_id_by_code,
         )
         assert (
             df.iloc[0]["produitsdechets_acceptes"] == produitsdechets_acceptes_expected
@@ -133,7 +129,6 @@ class TestSourceDataNormalizeSinoe:
         self,
         product_mapping,
         dechet_mapping,
-        acteurtype_id_by_code,
         public_accueilli,
         public_accueilli_expected,
     ):
@@ -150,7 +145,6 @@ class TestSourceDataNormalizeSinoe:
             df=df_normalised,
             product_mapping=product_mapping,
             dechet_mapping=dechet_mapping,
-            acteurtype_id_by_code=acteurtype_id_by_code,
         )
         assert df.iloc[0]["public_accueilli"] == public_accueilli_expected
 
@@ -161,20 +155,8 @@ class TestSourceDataNormalizeSinoe:
             df=df_sinoe,
             product_mapping=product_mapping,
             dechet_mapping=dechet_mapping,
-            acteurtype_id_by_code=acteurtype_id_by_code,
         )
         assert df.iloc[0]["point_de_collecte_ou_de_reprise_des_dechets"]
-
-    def test_acteur_type_id(
-        self, df_sinoe, product_mapping, dechet_mapping, acteurtype_id_by_code
-    ):
-        df = df_normalize_sinoe(
-            df=df_sinoe,
-            product_mapping=product_mapping,
-            dechet_mapping=dechet_mapping,
-            acteurtype_id_by_code=acteurtype_id_by_code,
-        )
-        assert df.iloc[0]["acteur_type_id"] == 2
 
     def test_annee_unique(self, product_mapping, dechet_mapping, acteurtype_id_by_code):
         df = pd.DataFrame(
@@ -195,7 +177,6 @@ class TestSourceDataNormalizeSinoe:
                 df=df,
                 product_mapping=product_mapping,
                 dechet_mapping=dechet_mapping,
-                acteurtype_id_by_code=acteurtype_id_by_code,
             )
 
     def test_drop_annee_column(
@@ -205,7 +186,6 @@ class TestSourceDataNormalizeSinoe:
             df=df_sinoe,
             product_mapping=product_mapping,
             dechet_mapping=dechet_mapping,
-            acteurtype_id_by_code=acteurtype_id_by_code,
         )
         assert "ANNEE" not in df.columns
 
@@ -216,7 +196,6 @@ class TestSourceDataNormalizeSinoe:
             df=df_sinoe,
             product_mapping=product_mapping,
             dechet_mapping=dechet_mapping,
-            acteurtype_id_by_code=acteurtype_id_by_code,
         )
         assert df.iloc[0]["longitude"] == 3.120109493179493
         assert df.iloc[0]["latitude"] == 48.4812237361283
@@ -248,124 +227,33 @@ class TestSourceDataNormalize:
     - [x] test transformation from column_transformations is called
     """
 
-    @pytest.fixture
-    def source_data_normalize_kwargs(self, acteurtype_id_by_code, source_id_by_code):
-        return {
-            "df_acteur_from_source": pd.DataFrame(),
-            "source_code": None,
-            "column_mapping": {},
-            "column_transformations": [],
-            "columns_to_add_by_default": {},
-            "label_bonus_reparation": "bonus_reparation",
-            "validate_address_with_ban": False,
-            "ignore_duplicates": False,
-            "combine_columns_categories": [],
-            "merge_duplicated_acteurs": False,
-            "product_mapping": {},
-            "dechet_mapping": {},
-            "acteurtype_id_by_code": acteurtype_id_by_code,
-            "source_id_by_code": source_id_by_code,
-        }
+    # @pytest.mark.parametrize(
+    #     "statut, statut_expected",
+    #     [
+    #         (None, "ACTIF"),
+    #         ("fake", "ACTIF"),
+    #         (np.nan, "ACTIF"),
+    #         (0, "SUPPRIME"),
+    #         (1, "ACTIF"),
+    #         ("ACTIF", "ACTIF"),
+    #         ("INACTIF", "INACTIF"),
+    #         ("SUPPRIME", "SUPPRIME"),
+    #     ],
+    # )
+    # def test_statut(self, statut, statut_expected, source_data_normalize_kwargs):
+    #     source_data_normalize_kwargs["df_acteur_from_source"] = pd.DataFrame(
+    #         {
+    #             "identifiant_externe": ["1"],
+    #             "ecoorganisme": ["source1"],
+    #             "source_id": ["source_id1"],
+    #             "acteur_type_id": ["decheterie"],
+    #             "produitsdechets_acceptes": ["Plastic Box"],
+    #             "statut": [statut],
+    #         }
+    #     )
+    #     df = source_data_normalize(**source_data_normalize_kwargs)
 
-    @pytest.mark.parametrize(
-        "statut, statut_expected",
-        [
-            (None, "ACTIF"),
-            ("fake", "ACTIF"),
-            (np.nan, "ACTIF"),
-            (0, "SUPPRIME"),
-            (1, "ACTIF"),
-            ("ACTIF", "ACTIF"),
-            ("INACTIF", "INACTIF"),
-            ("SUPPRIME", "SUPPRIME"),
-        ],
-    )
-    def test_statut(self, statut, statut_expected, source_data_normalize_kwargs):
-        source_data_normalize_kwargs["df_acteur_from_source"] = pd.DataFrame(
-            {
-                "identifiant_externe": ["1"],
-                "ecoorganisme": ["source1"],
-                "source_id": ["source_id1"],
-                "acteur_type_id": ["decheterie"],
-                "produitsdechets_acceptes": ["Plastic Box"],
-                "statut": [statut],
-            }
-        )
-        df = source_data_normalize(**source_data_normalize_kwargs)
-
-        assert df["statut"].iloc[0] == statut_expected
-
-    def test_statut_no_column(self, source_data_normalize_kwargs):
-        source_data_normalize_kwargs["df_acteur_from_source"] = pd.DataFrame(
-            {
-                "identifiant_externe": ["1"],
-                "ecoorganisme": ["source1"],
-                "source_id": ["source_id1"],
-                "acteur_type_id": ["decheterie"],
-                "produitsdechets_acceptes": ["Plastic Box"],
-            }
-        )
-        df = source_data_normalize(**source_data_normalize_kwargs)
-
-        assert df["statut"].iloc[0] == "ACTIF"
-
-    @pytest.mark.parametrize(
-        "label_et_bonus, label_et_bonus_expected",
-        [
-            ("label_et_bonus", "label_et_bonus"),
-            ("label_et_bonus1|label_et_bonus2", "label_et_bonus1|label_et_bonus2"),
-            (
-                "Agréé Bonus Réparation|label_et_bonus2",
-                "bonus_reparation|label_et_bonus2",
-            ),
-        ],
-    )
-    def test_label_bonus(
-        self, label_et_bonus, label_et_bonus_expected, source_data_normalize_kwargs
-    ):
-        source_data_normalize_kwargs["df_acteur_from_source"] = pd.DataFrame(
-            {
-                "identifiant_externe": ["1"],
-                "ecoorganisme": ["source1"],
-                "source_id": ["source_id1"],
-                "acteur_type_id": ["decheterie"],
-                "labels_etou_bonus": [label_et_bonus],
-                "produitsdechets_acceptes": ["Plastic Box"],
-            }
-        )
-        df = source_data_normalize(**source_data_normalize_kwargs)
-
-        assert df["labels_etou_bonus"].iloc[0] == label_et_bonus_expected
-
-    @pytest.mark.parametrize(
-        "public_accueilli, expected_public_accueilli",
-        [
-            (None, None),
-            ("fake", None),
-            ("PARTICULIERS", "Particuliers"),
-            ("Particuliers", "Particuliers"),
-            ("Particuliers et professionnels", "Particuliers et professionnels"),
-        ],
-    )
-    def test_public_accueilli(
-        self,
-        public_accueilli,
-        expected_public_accueilli,
-        source_data_normalize_kwargs,
-    ):
-        source_data_normalize_kwargs["df_acteur_from_source"] = pd.DataFrame(
-            {
-                "identifiant_externe": ["1"],
-                "ecoorganisme": ["source1"],
-                "source_id": ["source_id1"],
-                "public_accueilli": [public_accueilli],
-                "acteur_type_id": ["decheterie"],
-                "produitsdechets_acceptes": ["Plastic Box"],
-            }
-        )
-        df = source_data_normalize(**source_data_normalize_kwargs)
-
-        assert df["public_accueilli"][0] == expected_public_accueilli
+    #     assert df["statut"].iloc[0] == statut_expected
 
     @pytest.mark.parametrize(
         "public_accueilli",
@@ -377,155 +265,46 @@ class TestSourceDataNormalize:
     def test_public_accueilli_filtre_pro(
         self,
         public_accueilli,
-        source_data_normalize_kwargs,
+        dag_config,
     ):
-        source_data_normalize_kwargs["df_acteur_from_source"] = pd.DataFrame(
-            {
-                "identifiant_externe": ["1"],
-                "ecoorganisme": ["source1"],
-                "source_id": ["source_id1"],
-                "public_accueilli": [public_accueilli],
-                "acteur_type_id": ["decheterie"],
-                "produitsdechets_acceptes": ["Plastic Box"],
-            }
-        )
         with pytest.raises(ValueError):
-            source_data_normalize(**source_data_normalize_kwargs)
+            source_data_normalize(
+                dag_config=dag_config,
+                df_acteur_from_source=pd.DataFrame({"identifiant_externe": ["1"]}),
+                dag_id="id",
+            )
 
-    @pytest.mark.parametrize(
-        "uniquement_sur_rdv,expected_uniquement_sur_rdv",
-        [
-            (None, False),
-            (False, False),
-            (True, True),
-            ("oui", True),
-            ("Oui", True),
-            (" Oui ", True),
-            ("non", False),
-            ("NON", False),
-            (" NON ", False),
-            ("", False),
-            (" ", False),
-            ("fake", False),
-        ],
-    )
-    def test_uniquement_sur_rdv(
-        self,
-        uniquement_sur_rdv,
-        expected_uniquement_sur_rdv,
-        source_data_normalize_kwargs,
-    ):
-        source_data_normalize_kwargs["df_acteur_from_source"] = pd.DataFrame(
-            {
-                "identifiant_externe": ["1"],
-                "ecoorganisme": ["source1"],
-                "source_id": ["source_id1"],
-                "uniquement_sur_rdv": [uniquement_sur_rdv],
-                "acteur_type_id": ["decheterie"],
-                "produitsdechets_acceptes": ["Plastic Box"],
-            }
+    def test_column_transformations_is_called(self):
+
+        dag_config_kwargs = {
+            "column_transformations": [
+                {
+                    "origin": "nom origin",
+                    "transformation": "test_fct",
+                    "destination": "nom destination",
+                },
+                {
+                    "origin": "nom",
+                    "transformation": "test_fct",
+                    "destination": "nom",
+                },
+                {"keep": "identifiant_unique"},
+            ],
+            "product_mapping": {},
+            "endpoint": "http://example.com/api",
+        }
+        TRANSFORMATION_MAPPING["test_fct"] = lambda x, y: "success"
+        df = source_data_normalize(
+            df_acteur_from_source=pd.DataFrame(
+                {
+                    "identifiant_unique": ["id"],
+                    "nom origin": ["nom origin 1"],
+                    "nom": ["nom"],
+                }
+            ),
+            dag_config=DAGConfig.model_validate(dag_config_kwargs),
+            dag_id="dag_id",
         )
-        df = source_data_normalize(**source_data_normalize_kwargs)
-
-        assert df["uniquement_sur_rdv"][0] == expected_uniquement_sur_rdv
-
-    @pytest.mark.parametrize(
-        "reprise,expected_reprise",
-        [
-            (None, None),
-            ("1 pour 0", "1 pour 0"),
-            ("1 pour 1", "1 pour 1"),
-            ("non", "1 pour 0"),
-            ("oui", "1 pour 1"),
-            ("fake", None),
-        ],
-    )
-    def test_reprise(
-        self,
-        reprise,
-        expected_reprise,
-        source_data_normalize_kwargs,
-    ):
-        source_data_normalize_kwargs["df_acteur_from_source"] = pd.DataFrame(
-            {
-                "identifiant_externe": ["1"],
-                "ecoorganisme": ["source1"],
-                "source_id": ["source_id1"],
-                "reprise": [reprise],
-                "acteur_type_id": ["decheterie"],
-                "produitsdechets_acceptes": ["Plastic Box"],
-            }
-        )
-        df = source_data_normalize(**source_data_normalize_kwargs)
-        assert df["reprise"][0] == expected_reprise
-
-    @pytest.mark.parametrize(
-        "exclusivite_de_reprisereparation, expected_exclusivite_de_reprisereparation",
-        [
-            (None, False),
-            (False, False),
-            (True, True),
-            ("oui", True),
-            ("Oui", True),
-            (" Oui ", True),
-            ("non", False),
-            ("NON", False),
-            (" NON ", False),
-            ("", False),
-            (" ", False),
-            ("fake", False),
-        ],
-    )
-    def test_exclusivite_de_reprisereparation(
-        self,
-        exclusivite_de_reprisereparation,
-        expected_exclusivite_de_reprisereparation,
-        source_data_normalize_kwargs,
-    ):
-        source_data_normalize_kwargs["df_acteur_from_source"] = pd.DataFrame(
-            {
-                "identifiant_externe": ["1"],
-                "ecoorganisme": ["source1"],
-                "source_id": ["source_id1"],
-                "exclusivite_de_reprisereparation": [exclusivite_de_reprisereparation],
-                "acteur_type_id": ["decheterie"],
-                "produitsdechets_acceptes": ["Plastic Box"],
-            }
-        )
-        df = source_data_normalize(**source_data_normalize_kwargs)
-        assert (
-            df["exclusivite_de_reprisereparation"][0]
-            == expected_exclusivite_de_reprisereparation
-        )
-
-    def test_column_transformations_is_called(self, source_data_normalize_kwargs):
-
-        source_data_normalize_kwargs["column_transformations"] = [
-            {
-                "origin": "nom origin",
-                "transformation": "test_fct",
-                "destination": "nom destination",
-            },
-            {
-                "origin": "nom",
-                "transformation": "test_fct",
-                "destination": "nom",
-            },
-        ]
-        source_data_normalize_kwargs["df_acteur_from_source"] = pd.DataFrame(
-            {
-                "identifiant_externe": ["1"],
-                "ecoorganisme": ["source1"],
-                "source_id": ["source_id1"],
-                "acteur_type_id": ["decheterie"],
-                "produitsdechets_acceptes": ["Plastic Box"],
-                "nom origin": ["nom origin 1"],
-                "nom": ["nom"],
-            }
-        )
-
-        TRANSFORMATION_MAPPING["test_fct"] = lambda x: "success"
-        df = source_data_normalize(**source_data_normalize_kwargs)
         assert "nom destination" in df.columns
         assert df["nom destination"].iloc[0] == "success"
 

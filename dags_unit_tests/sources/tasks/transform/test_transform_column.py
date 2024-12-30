@@ -2,6 +2,9 @@ import numpy as np
 import pandas as pd
 import pytest
 from sources.tasks.transform.transform_column import (
+    cast_eo_boolean_or_string_to_boolean,
+    clean_public_accueilli,
+    clean_reprise,
     clean_siren,
     clean_siret,
     convert_opening_hours,
@@ -90,4 +93,72 @@ class TestConvertOpeningHours:
         ],
     )
     def test_convert_opening_hours(self, input_value, expected_output):
-        assert convert_opening_hours(input_value) == expected_output
+        assert convert_opening_hours(input_value, None) == expected_output
+
+
+class TestCastEOBooleanOrStringToBoolean:
+    @pytest.mark.parametrize(
+        "value,expected_value",
+        [
+            (None, False),
+            (False, False),
+            (True, True),
+            ("oui", True),
+            ("Oui", True),
+            (" Oui ", True),
+            ("non", False),
+            ("NON", False),
+            (" NON ", False),
+            ("", False),
+            (" ", False),
+            ("fake", False),
+        ],
+    )
+    def test_cast_eo_boolean_or_string_to_boolean(
+        self,
+        value,
+        expected_value,
+    ):
+
+        assert cast_eo_boolean_or_string_to_boolean(value, None) == expected_value
+
+
+class TestCleanReprise:
+
+    @pytest.mark.parametrize(
+        "value,expected_value",
+        [
+            (None, None),
+            ("1 pour 0", "1 pour 0"),
+            ("1 pour 1", "1 pour 1"),
+            ("non", "1 pour 0"),
+            ("oui", "1 pour 1"),
+            ("fake", None),
+        ],
+    )
+    def test_clean_reprise(
+        self,
+        value,
+        expected_value,
+    ):
+        assert clean_reprise(value, None) == expected_value
+
+
+class TestCleanPublicAccueilli:
+    @pytest.mark.parametrize(
+        "value, expected_value",
+        [
+            (None, None),
+            ("fake", None),
+            ("PARTICULIERS", "Particuliers"),
+            ("Particuliers", "Particuliers"),
+            ("Particuliers et professionnels", "Particuliers et professionnels"),
+        ],
+    )
+    def test_clean_public_accueilli(
+        self,
+        value,
+        expected_value,
+    ):
+
+        assert clean_public_accueilli(value, None) == expected_value

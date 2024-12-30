@@ -126,6 +126,8 @@ def clean_acteur_type_code(value, _):
 
 
 def clean_public_accueilli(value, _):
+    if not value:
+        return None
 
     values_mapping = {
         "particuliers et professionnels": constants.PUBLIC_PRO_ET_PAR,
@@ -134,10 +136,12 @@ def clean_public_accueilli(value, _):
         "aucun": constants.PUBLIC_AUCUN,
     }
 
-    return values_mapping.get(value, constants.PUBLIC_PAR)
+    return values_mapping.get(value.lower().strip())
 
 
 def clean_reprise(value, _):
+    if not value:
+        return None
 
     values_mapping = {
         "1 pour 0": constants.REPRISE_1POUR0,
@@ -145,7 +149,7 @@ def clean_reprise(value, _):
         "non": constants.REPRISE_1POUR0,
         "oui": constants.REPRISE_1POUR1,
     }
-    return values_mapping.get(value, constants.REPRISE_1POUR0)
+    return values_mapping.get(value.lower().strip())
 
 
 def clean_url(url, _) -> str:
