@@ -2,6 +2,9 @@ import re
 from typing import Any, Union
 
 import pandas as pd
+from sources.config import shared_constants as constants
+from sources.tasks.airflow_logic.config_management import DAGConfig
+from utils.formatter import format_libelle_to_code
 
 
 def mapping_try_or_fallback_column_value(
@@ -18,7 +21,7 @@ def mapping_try_or_fallback_column_value(
     )
 
 
-def cast_eo_boolean_or_string_to_boolean(value: str | bool) -> bool:
+def cast_eo_boolean_or_string_to_boolean(value: str | bool, _) -> bool:
     if isinstance(value, bool):
         return value
     if isinstance(value, str):
@@ -26,7 +29,7 @@ def cast_eo_boolean_or_string_to_boolean(value: str | bool) -> bool:
     return False
 
 
-def convert_opening_hours(opening_hours: str | None) -> str:
+def convert_opening_hours(opening_hours: str | None, _) -> str:
     french_days = {
         "Mo": "lundi",
         "Tu": "mardi",
@@ -96,3 +99,77 @@ def clean_number(number: Any) -> str:
 
 def strip_string(value: str | None) -> str:
     return str(value).strip() if not pd.isna(value) and value else ""
+
+
+def clean_acteur_type_code(value, _):
+    mapping_dict = {
+        # Here we store key without accents and special characters
+        "solution en ligne (site web, app. mobile)": "acteur_digital",
+        "artisan, commerce independant": "artisan",
+        "magasin / franchise,"
+        " enseigne commerciale / distributeur / point de vente": "commerce",
+        "point d'apport volontaire publique": "pav_public",
+        "association, entreprise de l'economie sociale et solidaire (ess)": "ess",
+        "etablissement de sante": "ets_sante",
+        "decheterie": "decheterie",
+        "pharmacie": "commerce",
+        "point d'apport volontaire prive": "pav_prive",
+        "plateforme inertes": "plateforme_inertes",
+        "magasin / franchise, enseigne commerciale / distributeur / point de vente "
+        "/ franchise, enseigne commerciale / distributeur / point de vente": "commerce",
+        "point d'apport volontaire ephemere / ponctuel": "pav_ponctuel",
+    }
+    code = mapping_dict.get(format_libelle_to_code(value), None)
+    if code is None:
+        raise ValueError(f"Acteur type `{value}` not found in mapping")
+    return code
+
+
+def clean_public_accueilli(value, _):
+
+    values_mapping = {
+        "particuliers et professionnels": constants.PUBLIC_PRO_ET_PAR,
+        "professionnels": constants.PUBLIC_PRO,
+        "particuliers": constants.PUBLIC_PAR,
+        "aucun": constants.PUBLIC_AUCUN,
+    }
+
+    return values_mapping.get(value, constants.PUBLIC_PAR)
+
+
+def clean_reprise(value, _):
+
+    values_mapping = {
+        "1 pour 0": constants.REPRISE_1POUR0,
+        "1 pour 1": constants.REPRISE_1POUR1,
+        "non": constants.REPRISE_1POUR0,
+        "oui": constants.REPRISE_1POUR1,
+    }
+    return values_mapping.get(value, constants.REPRISE_1POUR0)
+
+
+def clean_url(url, _) -> str:
+    if pd.isna(url):
+        return ""
+    url = str(url)
+
+    if not (url.startswith("http://") or url.startswith("https://")):
+        url = "https://" + url
+
+    return url
+
+
+def clean_code_postal(cp: str | None, _) -> str:
+    # cast en str et ajout de 0 si le code postal est inférieur à 10000
+    return f"0{cp}" if cp and len(str(cp)) == 4 else str(cp)
+
+
+def clean_souscategorie_codes(sscat_list: str, dag_config: DAGConfig) -> list[str]:
+    souscategorie_codes = []
+
+    product_mapping = dag_config.product_mapping
+    for sscat in sscat_list.split("|"):
+        sscat = format_libelle_to_code(sscat)
+        souscategorie_codes.append(product_mapping[sscat])
+
+    return list(set(souscategorie_codes))

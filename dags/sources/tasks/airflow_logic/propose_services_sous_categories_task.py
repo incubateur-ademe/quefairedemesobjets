@@ -21,15 +21,11 @@ def propose_services_sous_categories_task(dag: DAG) -> PythonOperator:
 def propose_services_sous_categories_wrapper(**kwargs):
     df_ps = kwargs["ti"].xcom_pull(task_ids="propose_services")["df"]
     souscats_id_by_code = kwargs["ti"].xcom_pull(task_ids="db_read_souscategorieobjet")
-    params = kwargs["params"]
-    product_mapping = params.get("product_mapping", {})
 
     log.preview("df_ps", df_ps)
     log.preview("souscats_id_by_code", souscats_id_by_code)
-    log.preview("product_mapping", product_mapping)
 
     return propose_services_sous_categories(
         df_ps=df_ps,
         souscats_id_by_code=souscats_id_by_code,
-        product_mapping=product_mapping,
     )

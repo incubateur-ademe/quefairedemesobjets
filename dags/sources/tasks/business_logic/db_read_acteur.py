@@ -10,15 +10,21 @@ logger = logging.getLogger(__name__)
 def db_read_acteur(
     df_normalized: pd.DataFrame,
 ):
-    if "source_id" not in df_normalized.columns:
+    if "source_code" not in df_normalized.columns:
         raise ValueError(
-            "La colonne source_id est requise dans la dataframe normalisée"
+            "La colonne source_codes est requise dans la dataframe normalisée"
         )
     engine = PostgresConnectionManager().engine
-    unique_source_ids = df_normalized["source_id"].unique()
+    unique_source_codes = df_normalized["source_code"].unique()
 
-    joined_source_ids = ",".join([f"'{source_id}'" for source_id in unique_source_ids])
-    query = f"SELECT * FROM qfdmo_acteur WHERE source_id IN ({joined_source_ids})"
+    joined_source_codes = ",".join(
+        [f"'{source_code}'" for source_code in unique_source_codes]
+    )
+    query = f"""
+    SELECT * FROM qfdmo_acteur
+    JOIN qfdmo_source ON qfdmo_acteur.source_id = qfdmo_source.id
+    WHERE qfdmo_source.code IN ({joined_source_codes})
+    """
     log.preview("Requête SQL pour df_acteur", query)
     df_acteur = pd.read_sql_query(query, engine)
     logger.info(f"Nombre d'acteurs existants: {len(df_acteur)}")

@@ -7,7 +7,7 @@ from sources.tasks.airflow_logic.operators import default_args, eo_task_chain
 
 default_args["retries"] = 0
 with DAG(
-    dag_id="eo-sinoe",
+    dag_id="sinoe",
     dag_display_name="Source - SINOE",
     default_args=default_args,
     description=(
@@ -20,6 +20,13 @@ with DAG(
             "sinoe-(r)-annuaire-des-decheteries-dma/lines?size=10000&q_mode=simple&ANNEE_eq=2024"
         ),
         "source_code": "ADEME_SINOE_Decheteries",
+        "column_transformations": [
+            # 3. Ajout des colonnes avec une valeur par défaut
+            {
+                "column": "acteur_type_code",
+                "value": "decheterie",
+            },
+        ],
         "column_mapping": {
             # Champs à conserver
             "C_SERVICE": "identifiant_externe",

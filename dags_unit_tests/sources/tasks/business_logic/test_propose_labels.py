@@ -11,7 +11,7 @@ class TestCeateLabels:
         labelqualite_id_by_code,
     ):
         df = propose_labels(
-            df_actors=pd.DataFrame(
+            df_acteur=pd.DataFrame(
                 {
                     "identifiant_unique": [1, 2],
                     "labels_etou_bonus": ["reparacteur", ""],
@@ -37,7 +37,7 @@ class TestCeateLabels:
         labelqualite_id_by_code,
     ):
         df = propose_labels(
-            df_actors=pd.DataFrame(
+            df_acteur=pd.DataFrame(
                 {
                     "identifiant_unique": [1, 2],
                     "acteur_type_id": [201, 202],
@@ -66,7 +66,7 @@ class TestCeateLabels:
         code_label_bonus,
     ):
         df = propose_labels(
-            df_actors=pd.DataFrame(
+            df_acteur=pd.DataFrame(
                 {
                     "identifiant_unique": [1, 2],
                     "labels_etou_bonus": [code_label_bonus, ""],

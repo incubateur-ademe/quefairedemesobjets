@@ -26,7 +26,6 @@ def propose_labels_wrapper(**kwargs):
     log.preview(acteurtype_id_by_code, "acteurtype_id_by_code")
 
     return propose_labels(
-        df_actors=df_actors,
+        df_acteur=df_actors,
         labelqualite_id_by_code=labelqualite_id_by_code,
-        acteurtype_id_by_code=acteurtype_id_by_code,
     )

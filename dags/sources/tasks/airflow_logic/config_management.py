@@ -22,7 +22,7 @@ class NormalizationColumnTransform(BaseModel):
 # Ajout des colonnes avec une valeur par défaut
 class NormalizationColumnDefault(BaseModel):
     column: str
-    value: str
+    value: Union[str, bool]
 
 
 # Transformation du dataframe

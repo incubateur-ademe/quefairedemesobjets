@@ -15,12 +15,8 @@ with DAG(
         "column_transformations": [
             # 1. Renommage des colonnes
             {
-                "origin": "id_point_apport_ou_reparation",
-                "destination": "identifiant_externe",
-            },
-            {
                 "origin": "ecoorganisme",
-                "destination": "source_id",
+                "destination": "source_code",
             },
             {
                 "origin": "nom_de_lorganisme",
@@ -40,23 +36,86 @@ with DAG(
                 "transformation": "clean_acteur_type_code",
                 "destination": "acteur_type_code",
             },
-            # 3. Ajout des colonnes avec une valeur par défaut
             {
-                "column": "type_de_point_de_collecte",
-                "value": (
-                    "magasin / franchise, enseigne commerciale / distributeur /"
-                    " point de vente"
-                ),
+                "origin": "public_accueilli",
+                "transformation": "clean_public_accueilli",
+                "destination": "public_accueilli",
             },
+            # uniquement_sur_rdv n'est pas renseigné pour pyreo
+            # {
+            #     "origin": "uniquement_sur_rdv",
+            #     "transformation": "cast_eo_boolean_or_string_to_boolean",
+            #     "destination": "uniquement_sur_rdv",
+            # },
+            # exclusivite_de_reprisereparation n'est pas renseigné pour pyreo
+            # {
+            #     "origin": "exclusivite_de_reprisereparation",
+            #     "transformation": "cast_eo_boolean_or_string_to_boolean",
+            #     "destination": "exclusivite_de_reprisereparation",
+            # },
+            {
+                "origin": "reprise",
+                "transformation": "clean_reprise",
+                "destination": "reprise",
+            },
+            {
+                "origin": "produitsdechets_acceptes",
+                "transformation": "clean_souscategorie_codes",
+                "destination": "souscategorie_codes",
+            },
+            # 3. Ajout des colonnes avec une valeur par défaut
             {
                 "column": "statut",
                 "value": constants.ACTEUR_ACTIF,
             },
             # 4. Transformation du dataframe
             {
+                "origin": ["labels_etou_bonus", "acteur_type_code"],
+                "transformation": "clean_label_codes",
+                "destination": ["label_codes"],
+            },
+            {
+                "origin": ["id_point_apport_ou_reparation", "nom"],
+                "transformation": "clean_identifiant_externe",
+                "destination": ["identifiant_externe"],
+            },
+            {
+                "origin": [
+                    "identifiant_externe",
+                    "source_code",
+                ],
+                "transformation": "clean_identifiant_unique",
+                "destination": ["identifiant_unique"],
+            },
+            {
                 "origin": ["siret"],
                 "transformation": "clean_siret_and_siren",
                 "destination": ["siret", "siren"],
+            },
+            {
+                "origin": ["adresse_format_ban"],
+                "transformation": "clean_adresse",
+                "destination": ["adresse", "code_postal", "ville"],
+            },
+            {
+                "origin": [
+                    "point_dapport_de_service_reparation",
+                    "point_de_reparation",
+                    "point_dapport_pour_reemploi",
+                    "point_de_collecte_ou_de_reprise_des_dechets",
+                ],
+                "transformation": "clean_acteurservice_codes",
+                "destination": ["acteurservice_codes"],
+            },
+            {
+                "origin": [
+                    "point_dapport_de_service_reparation",
+                    "point_de_reparation",
+                    "point_dapport_pour_reemploi",
+                    "point_de_collecte_ou_de_reprise_des_dechets",
+                ],
+                "transformation": "clean_action_codes",
+                "destination": ["action_codes"],
             },
             # 5. Supression des colonnes
             {"remove": "_i"},
@@ -66,16 +125,14 @@ with DAG(
             {"remove": "_geopoint"},
             {"remove": "filiere"},
             {"remove": "_score"},
+            {"remove": "adresse_format_ban"},
+            {"remove": "id_point_apport_ou_reparation"},
+            {"remove": "point_de_collecte_ou_de_reprise_des_dechets"},
+            {"remove": "labels_etou_bonus"},
+            {"remove": "point_dapport_de_service_reparation"},
+            {"remove": "point_dapport_pour_reemploi"},
+            {"remove": "point_de_reparation"},
             # 6. Colonnes à garder (rien à faire, utilisé pour le controle)
-            {"keep": "public_accueilli"},
-            {"keep": "produitsdechets_acceptes"},
-            {"keep": "reprise"},
-            {"keep": "point_de_collecte_ou_de_reprise_des_dechets"},
-            {"keep": "adresse_format_ban"},
-            {"keep": "labels_etou_bonus"},
-            {"keep": "point_dapport_de_service_reparation"},
-            {"keep": "point_dapport_pour_reemploi"},
-            {"keep": "point_de_reparation"},
         ],
         "endpoint": (
             "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"

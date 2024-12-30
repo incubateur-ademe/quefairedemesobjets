@@ -37,7 +37,9 @@ def db_data_prepare(
 
     # Convertir les codes des sources et des acteur_types en identifiants
     df_acteur["source_id"] = df_acteur["source_code"].map(source_id_by_code)
-    df_acteur["acteur_type_id"] = df_acteur["acteur_type_id"].map(acteurtype_id_by_code)
+    df_acteur["acteur_type_id"] = df_acteur["acteur_type_code"].map(
+        acteurtype_id_by_code
+    )
 
     aggregated_pdsc = (
         df_pssc.groupby("propositionservice_id")
