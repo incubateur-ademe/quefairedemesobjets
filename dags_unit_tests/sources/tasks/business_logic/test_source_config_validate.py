@@ -11,7 +11,7 @@ def valid_params():
             "product2": "code3",
             "product3": [],
         },
-        "column_transformations": [],
+        "normalization_rules": [],
         "endpoint": "https://api.example.com",
     }
 
@@ -37,14 +37,14 @@ def test_product_mapping_no_code(codes_sc_db, dag_config):
         source_config_validate(dag_config=dag_config, codes_sc_db=codes_sc_db)
 
 
-def test_column_transformations_not_list(codes_sc_db, dag_config):
-    dag_config.column_transformations = "not_a_list"
+def test_normalization_rules_not_list(codes_sc_db, dag_config):
+    dag_config.normalization_rules = "not_a_list"
     with pytest.raises(ValueError):
         source_config_validate(dag_config=dag_config, codes_sc_db=codes_sc_db)
 
 
-def test_column_transformations_invalid_function(codes_sc_db, dag_config):
-    dag_config.column_transformations = [
+def test_normalization_rules_invalid_function(codes_sc_db, dag_config):
+    dag_config.normalization_rules = [
         NormalizationColumnTransform(
             origin="src", transformation="invalid_function", destination="dest"
         )

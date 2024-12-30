@@ -12,7 +12,7 @@ with DAG(
         " for OCAD3E dataset"
     ),
     params={
-        "column_transformations": [
+        "normalization_rules": [
             {
                 "origin": "siren",
                 "transformation": "clean_siren",

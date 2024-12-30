@@ -12,7 +12,7 @@ with DAG(
         " for Ecosystem dataset"
     ),
     params={
-        "column_transformations": [
+        "normalization_rules": [
             {
                 "origin": "siren",
                 "transformation": "clean_siren",

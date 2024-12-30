@@ -12,7 +12,7 @@ with DAG(
         " for CMA reparacteur dataset"
     ),
     params={
-        "column_transformations": [
+        "normalization_rules": [
             # 1. Renommage des colonnes
             {
                 "origin": "name",

@@ -48,7 +48,7 @@ def source_config_validate(
     # récupération des transformations de type NormalizationColumnTransform
     function_names = [
         x.transformation
-        for x in dag_config.column_transformations
+        for x in dag_config.normalization_rules
         if isinstance(x, NormalizationColumnTransform)
         or isinstance(x, NormalizationDFTransform)
     ]
