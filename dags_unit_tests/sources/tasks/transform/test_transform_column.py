@@ -3,66 +3,43 @@ import pandas as pd
 import pytest
 from sources.tasks.transform.transform_column import (
     cast_eo_boolean_or_string_to_boolean,
+    clean_code_postal,
+    clean_number,
     clean_public_accueilli,
     clean_reprise,
     clean_siren,
     clean_siret,
+    clean_url,
     convert_opening_hours,
     strip_string,
 )
 
 
-class TestCleanSiret:
+class TestCastEOBooleanOrStringToBoolean:
     @pytest.mark.parametrize(
-        "siret, expected_siret",
+        "value,expected_value",
         [
-            (np.nan, None),
-            (pd.NA, None),
-            (None, None),
-            ("", None),
-            ("123456789012345", None),
-            ("98765432109876", "98765432109876"),
-            ("8765432109876", "08765432109876"),
-            ("AB123", None),
+            (None, False),
+            (False, False),
+            (True, True),
+            ("oui", True),
+            ("Oui", True),
+            (" Oui ", True),
+            ("non", False),
+            ("NON", False),
+            (" NON ", False),
+            ("", False),
+            (" ", False),
+            ("fake", False),
         ],
     )
-    def test_clean_siret(self, siret, expected_siret):
-        assert clean_siret(siret) == expected_siret
+    def test_cast_eo_boolean_or_string_to_boolean(
+        self,
+        value,
+        expected_value,
+    ):
 
-
-class TestCleanSiren:
-    @pytest.mark.parametrize(
-        "siren, expected_siren",
-        [
-            (np.nan, None),
-            (pd.NA, None),
-            (None, None),
-            ("", None),
-            ("1234567890", None),
-            ("123456789", "123456789"),
-            ("12345678", None),
-        ],
-    )
-    def test_clean_siren(self, siren, expected_siren):
-        assert clean_siren(siren) == expected_siren
-
-
-class TestStripString:
-
-    @pytest.mark.parametrize(
-        "input, output",
-        [
-            (None, ""),
-            (pd.NA, ""),
-            (np.nan, ""),
-            ("", ""),
-            (" ", ""),
-            (75001, "75001"),
-            (" adresse postale ", "adresse postale"),
-        ],
-    )
-    def test_strip_string(self, input, output):
-        assert strip_string(input) == output
+        assert cast_eo_boolean_or_string_to_boolean(value, None) == expected_value
 
 
 class TestConvertOpeningHours:
@@ -96,31 +73,104 @@ class TestConvertOpeningHours:
         assert convert_opening_hours(input_value, None) == expected_output
 
 
-class TestCastEOBooleanOrStringToBoolean:
+class TestCleanSiren:
     @pytest.mark.parametrize(
-        "value,expected_value",
+        "siren, expected_siren",
         [
-            (None, False),
-            (False, False),
-            (True, True),
-            ("oui", True),
-            ("Oui", True),
-            (" Oui ", True),
-            ("non", False),
-            ("NON", False),
-            (" NON ", False),
-            ("", False),
-            (" ", False),
-            ("fake", False),
+            (np.nan, None),
+            (pd.NA, None),
+            (None, None),
+            ("", None),
+            ("1234567890", None),
+            ("123456789", "123456789"),
+            ("12345678", None),
         ],
     )
-    def test_cast_eo_boolean_or_string_to_boolean(
+    def test_clean_siren(self, siren, expected_siren):
+        assert clean_siren(siren) == expected_siren
+
+
+class TestCleanSiret:
+    @pytest.mark.parametrize(
+        "siret, expected_siret",
+        [
+            (np.nan, None),
+            (pd.NA, None),
+            (None, None),
+            ("", None),
+            ("123456789012345", None),
+            ("98765432109876", "98765432109876"),
+            ("8765432109876", "08765432109876"),
+            ("AB123", None),
+        ],
+    )
+    def test_clean_siret(self, siret, expected_siret):
+        assert clean_siret(siret) == expected_siret
+
+
+class TestCleanNumber:
+    @pytest.mark.parametrize(
+        "number, expected_number",
+        [
+            (None, ""),
+            (np.nan, ""),
+            (pd.NA, ""),
+            ("12345.0", "12345"),
+            ("12345.67", "1234567"),
+            ("+33 1 23 45 67 89", "+33123456789"),
+            ("(123) 456-7890", "1234567890"),
+            ("123-456-7890", "1234567890"),
+            ("123 456 7890", "1234567890"),
+            ("123.456.7890", "1234567890"),
+            ("1234567890", "1234567890"),
+            ("12345", "12345"),
+            ("", ""),
+        ],
+    )
+    def test_clean_number(self, number, expected_number):
+        assert clean_number(number) == expected_number
+
+
+class TestStripString:
+
+    @pytest.mark.parametrize(
+        "input, output",
+        [
+            (None, ""),
+            (pd.NA, ""),
+            (np.nan, ""),
+            (" ", ""),
+            (75001, "75001"),
+            (" adresse postale ", "adresse postale"),
+        ],
+    )
+    def test_strip_string(self, input, output):
+        assert strip_string(input) == output
+
+
+class TestCleanActeurTypeCode:
+    # FIXME : Add tests
+    pass
+
+
+class TestCleanPublicAccueilli:
+    @pytest.mark.parametrize(
+        "value, expected_value",
+        [
+            (None, None),
+            ("fake", None),
+            ("PARTICULIERS", "Particuliers"),
+            ("Particuliers", "Particuliers"),
+            ("Particuliers et professionnels", "Particuliers et professionnels"),
+        ],
+    )
+    def test_clean_public_accueilli(
         self,
         value,
         expected_value,
     ):
 
-        assert cast_eo_boolean_or_string_to_boolean(value, None) == expected_value
+        assert clean_public_accueilli(value, None) == expected_value
 
 
 class TestCleanReprise:
@@ -144,21 +194,36 @@ class TestCleanReprise:
         assert clean_reprise(value, None) == expected_value
 
 
-class TestCleanPublicAccueilli:
+class TestCleanUrl:
     @pytest.mark.parametrize(
-        "value, expected_value",
+        "url, expected_url",
         [
-            (None, None),
-            ("fake", None),
-            ("PARTICULIERS", "Particuliers"),
-            ("Particuliers", "Particuliers"),
-            ("Particuliers et professionnels", "Particuliers et professionnels"),
+            (None, ""),
+            (pd.NA, ""),
+            ("", ""),
+            ("http://example.com", "http://example.com"),
+            ("https://example.com", "https://example.com"),
+            ("example.com", "https://example.com"),
         ],
     )
-    def test_clean_public_accueilli(
-        self,
-        value,
-        expected_value,
-    ):
+    def test_clean_url(self, url, expected_url):
+        assert clean_url(url, None) == expected_url
 
-        assert clean_public_accueilli(value, None) == expected_value
+
+class TestCleanCodePostal:
+    @pytest.mark.parametrize(
+        "cp, expected_cp",
+        [
+            (None, ""),
+            ("", ""),
+            ("75001", "75001"),
+            ("7501", "07501"),
+        ],
+    )
+    def test_clean_code_postal(self, cp, expected_cp):
+        assert clean_code_postal(cp, None) == expected_cp
+
+
+class TestCleanSousCategorieCodes:
+    # FIXME : Add tests
+    pass

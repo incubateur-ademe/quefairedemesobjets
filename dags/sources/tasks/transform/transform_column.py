@@ -1,24 +1,10 @@
 import re
-from typing import Any, Union
+from typing import Any
 
 import pandas as pd
 from sources.config import shared_constants as constants
 from sources.tasks.airflow_logic.config_management import DAGConfig
 from utils.formatter import format_libelle_to_code
-
-
-def mapping_try_or_fallback_column_value(
-    df_column: pd.Series,
-    values_mapping: dict,
-    default_value: Union[str, bool, None] = None,
-) -> pd.Series:
-    # set to default value if column is not one of keys or values in values_mapping
-    return (
-        df_column.str.strip()
-        .str.lower()
-        .replace(values_mapping)
-        .apply(lambda x: (default_value if x not in values_mapping.values() else x))
-    )
 
 
 def cast_eo_boolean_or_string_to_boolean(value: str | bool, _) -> bool:
@@ -153,7 +139,7 @@ def clean_reprise(value, _):
 
 
 def clean_url(url, _) -> str:
-    if pd.isna(url):
+    if pd.isna(url) or not url:
         return ""
     url = str(url)
 
@@ -164,6 +150,8 @@ def clean_url(url, _) -> str:
 
 
 def clean_code_postal(cp: str | None, _) -> str:
+    if pd.isna(cp) or not cp:
+        return ""
     # cast en str et ajout de 0 si le code postal est inférieur à 10000
     return f"0{cp}" if cp and len(str(cp)) == 4 else str(cp)
 

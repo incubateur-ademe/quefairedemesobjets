@@ -111,7 +111,7 @@ def clean_identifiant_unique(row, _):
 
 
 def merge_sous_categories_columns(row, _):
-    categories = [row[col] for col in row.keys() if pd.notna(row[col])]
+    categories = [row[col] for col in row.keys() if pd.notna(row[col]) and row[col]]
     row["produitsdechets_acceptes"] = " | ".join(categories)
     return row[["produitsdechets_acceptes"]]
 
