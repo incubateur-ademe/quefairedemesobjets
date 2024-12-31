@@ -75,13 +75,6 @@ def _transform_df(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
         df[column_to_transform_df.destination] = df[
             column_to_transform_df.origin
         ].apply(normalisation_function, axis=1)
-        # FIXME: Pour le moment, on ne souhaite pas supprimer les colonnes
-        #  columns_to_drop = [
-        #     column_origin
-        #     for column_origin in column_to_transform_df.origin
-        #     if column_origin not in column_to_transform_df.destination
-        # ]
-        # df.drop(columns=columns_to_drop, inplace=True)
     return df
 
 

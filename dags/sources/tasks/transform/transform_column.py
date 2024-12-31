@@ -209,7 +209,9 @@ def clean_souscategorie_codes_sinoe(
     ]
 
     sscat_list = [
-        dechet_mapping[v] for v in sscat_list if dechet_mapping[v] in product_mapping
+        dechet_mapping[v]
+        for v in sscat_list
+        if dechet_mapping[v].lower() in product_mapping
     ]
 
     return clean_souscategorie_codes("|".join(sscat_list), dag_config)
