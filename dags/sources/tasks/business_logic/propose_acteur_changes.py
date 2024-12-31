@@ -14,15 +14,6 @@ def propose_acteur_changes(
     df_acteurs: pd.DataFrame,
     column_to_drop: list = [],
 ):
-    # Supprimer les acteurs qui ne propose qu'un service à domicile
-    if "service_a_domicile" in df.columns:
-        df.loc[
-            df["service_a_domicile"] == "service à domicile uniquement", "statut"
-        ] = "SUPPRIME"
-
-    # filtre des service à domicile uniquement
-    if "service_a_domicile" in df.columns:
-        df = df[df["service_a_domicile"].str.lower() != "oui exclusivement"]
 
     # TODO: à déplacer dans la source_data_normalize
     # intersection of columns in df and column_to_drop

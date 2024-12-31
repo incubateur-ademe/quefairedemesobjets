@@ -11,6 +11,8 @@ from sources.tasks.transform.transform_column import (
     clean_siren,
     clean_siret,
     clean_souscategorie_codes,
+    clean_souscategorie_codes_sinoe,
+    clean_url,
     convert_opening_hours,
     strip_string,
 )
@@ -23,6 +25,7 @@ from sources.tasks.transform.transform_df import (
     clean_label_codes,
     clean_siret_and_siren,
     clean_telephone,
+    get_latlng_from_geopoint,
     merge_and_clean_souscategorie_codes,
     merge_sous_categories_columns,
 )
@@ -57,6 +60,9 @@ TRANSFORMATION_MAPPING = {
     "clean_action_codes": clean_action_codes,
     "clean_souscategorie_codes": clean_souscategorie_codes,
     "merge_and_clean_souscategorie_codes": merge_and_clean_souscategorie_codes,
+    "clean_url": clean_url,
+    "clean_souscategorie_codes_sinoe": clean_souscategorie_codes_sinoe,
+    "get_latlng_from_geopoint": get_latlng_from_geopoint,
 }
 
 

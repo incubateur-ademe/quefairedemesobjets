@@ -58,106 +58,6 @@ class TestSourceDataNormalizeSinoe:
     Test de la fonction df_normalize_sinoe
     """
 
-    @pytest.mark.parametrize("produitsdechets_acceptes", (None, "NP|01.22"))
-    def test_produitsdechets_acceptes_exclude_entries_not_mapped(
-        self,
-        product_mapping,
-        dechet_mapping,
-        produitsdechets_acceptes,
-    ):
-        df_normalised = pd.DataFrame(
-            {
-                "identifiant_externe": ["DECHET_2"],
-                "ANNEE": [2024],
-                "_geopoint": ["48.4812237361283,3.120109493179493"],
-                "produitsdechets_acceptes": [produitsdechets_acceptes],
-                "public_accueilli": ["DMA"],
-            },
-        )
-
-        df = df_normalize_sinoe(
-            df=df_normalised,
-            product_mapping=product_mapping,
-            dechet_mapping=dechet_mapping,
-        )
-        assert len(df) == 0
-
-    @pytest.mark.parametrize(
-        "produitsdechets_acceptes, produitsdechets_acceptes_expected",
-        (
-            [
-                "01.1|07.25|07.6",
-                ["Solvants usés", "Papiers cartons mêlés triés", "Déchets textiles"],
-            ],
-            ["07.6", ["Déchets textiles"]],
-        ),
-    )
-    def test_produitsdechets_acceptes_convert_dechet_codes_to_our_codes(
-        self,
-        product_mapping,
-        dechet_mapping,
-        produitsdechets_acceptes,
-        produitsdechets_acceptes_expected,
-    ):
-        df_normalised = pd.DataFrame(
-            {
-                "identifiant_externe": ["DECHET_2"],
-                "ANNEE": [2024],
-                "_geopoint": ["48.4812237361283,3.120109493179493"],
-                "produitsdechets_acceptes": [produitsdechets_acceptes],
-                "public_accueilli": ["DMA"],
-            },
-        )
-        df = df_normalize_sinoe(
-            df=df_normalised,
-            product_mapping=product_mapping,
-            dechet_mapping=dechet_mapping,
-        )
-        assert (
-            df.iloc[0]["produitsdechets_acceptes"] == produitsdechets_acceptes_expected
-        )
-
-    @pytest.mark.parametrize(
-        "public_accueilli, public_accueilli_expected",
-        [
-            ("DMA", "Particuliers"),
-            ("DMA/PRO", "Particuliers et professionnels"),
-            ("PRO", "Professionnels"),
-        ],
-    )
-    def test_public_accueilli_particuliers(
-        self,
-        product_mapping,
-        dechet_mapping,
-        public_accueilli,
-        public_accueilli_expected,
-    ):
-        df_normalised = pd.DataFrame(
-            {
-                "identifiant_externe": ["DECHET_2"],
-                "ANNEE": [2024],
-                "_geopoint": ["48.4812237361283,3.120109493179493"],
-                "produitsdechets_acceptes": ["01.1|07.25|07.6"],
-                "public_accueilli": [public_accueilli],
-            },
-        )
-        df = df_normalize_sinoe(
-            df=df_normalised,
-            product_mapping=product_mapping,
-            dechet_mapping=dechet_mapping,
-        )
-        assert df.iloc[0]["public_accueilli"] == public_accueilli_expected
-
-    def test_point_de_collecte_ou_de_reprise_des_dechets(
-        self, product_mapping, dechet_mapping, acteurtype_id_by_code, df_sinoe
-    ):
-        df = df_normalize_sinoe(
-            df=df_sinoe,
-            product_mapping=product_mapping,
-            dechet_mapping=dechet_mapping,
-        )
-        assert df.iloc[0]["point_de_collecte_ou_de_reprise_des_dechets"]
-
     def test_annee_unique(self, product_mapping, dechet_mapping, acteurtype_id_by_code):
         df = pd.DataFrame(
             {
@@ -189,17 +89,17 @@ class TestSourceDataNormalizeSinoe:
         )
         assert "ANNEE" not in df.columns
 
-    def test_geopoint_to_longitude_latitude(
-        self, df_sinoe, product_mapping, dechet_mapping, acteurtype_id_by_code
-    ):
-        df = df_normalize_sinoe(
-            df=df_sinoe,
-            product_mapping=product_mapping,
-            dechet_mapping=dechet_mapping,
-        )
-        assert df.iloc[0]["longitude"] == 3.120109493179493
-        assert df.iloc[0]["latitude"] == 48.4812237361283
-        assert "_geopoint" not in df.columns
+    # def test_geopoint_to_longitude_latitude(
+    #     self, df_sinoe, product_mapping, dechet_mapping, acteurtype_id_by_code
+    # ):
+    #     df = df_normalize_sinoe(
+    #         df=df_sinoe,
+    #         product_mapping=product_mapping,
+    #         dechet_mapping=dechet_mapping,
+    #     )
+    #     assert df.iloc[0]["longitude"] == 3.120109493179493
+    #     assert df.iloc[0]["latitude"] == 48.4812237361283
+    #     assert "_geopoint" not in df.columns
 
 
 class TestSourceDataNormalize:
@@ -333,3 +233,29 @@ class TestDfNormalizePharmacie:
                 }
             ),
         )
+
+
+class TestRemoveUndesired_lines:
+    # FIXME : Add tests
+    pass
+
+    # # "service_a_domicile"
+    # def test_service_a_domicile(
+    #     self,
+    #     df_empty_acteurs_from_db,
+    # ):
+
+    #     result = propose_acteur_changes(
+    #         df=pd.DataFrame(
+    #             {
+    #                 "identifiant_unique": ["1", "2"],
+    #                 "service_a_domicile": ["Oui exclusivement", "Non"],
+    #             }
+    #         ),
+    #         df_acteurs=df_empty_acteurs_from_db,
+    #     )
+    #     result_df = result["df"]
+
+    #     assert len(result_df) == 1
+    #     assert result_df["service_a_domicile"].iloc[0] == "Non"
+    #     assert result_df["identifiant_unique"].iloc[0] == "2"

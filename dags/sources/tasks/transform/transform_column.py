@@ -1,3 +1,4 @@
+import logging
 import re
 from typing import Any
 
@@ -5,6 +6,8 @@ import pandas as pd
 from sources.config import shared_constants as constants
 from sources.tasks.airflow_logic.config_management import DAGConfig
 from utils.formatter import format_libelle_to_code
+
+logger = logging.getLogger(__name__)
 
 
 def cast_eo_boolean_or_string_to_boolean(value: str | bool, _) -> bool:
@@ -83,7 +86,7 @@ def clean_number(number: Any) -> str:
     return number
 
 
-def strip_string(value: str | None) -> str:
+def strip_string(value: str | None, _) -> str:
     return str(value).strip() if not pd.isna(value) and value else ""
 
 
@@ -120,6 +123,10 @@ def clean_public_accueilli(value, _):
         "professionnels": constants.PUBLIC_PRO,
         "particuliers": constants.PUBLIC_PAR,
         "aucun": constants.PUBLIC_AUCUN,
+        "dma/pro": constants.PUBLIC_PRO_ET_PAR,
+        "dma": constants.PUBLIC_PAR,
+        "pro": constants.PUBLIC_PRO,
+        "np": None,
     }
 
     return values_mapping.get(value.lower().strip())
@@ -156,12 +163,53 @@ def clean_code_postal(cp: str | None, _) -> str:
     return f"0{cp}" if cp and len(str(cp)) == 4 else str(cp)
 
 
-def clean_souscategorie_codes(sscat_list: str, dag_config: DAGConfig) -> list[str]:
+def clean_souscategorie_codes(
+    sscat_list: str | None, dag_config: DAGConfig
+) -> list[str]:
     souscategorie_codes = []
 
+    if not sscat_list:
+        return souscategorie_codes
+
     product_mapping = dag_config.product_mapping
+    logger.warning(f"{sscat_list=}")
     for sscat in sscat_list.split("|"):
         sscat = sscat.strip().lower()
-        souscategorie_codes.append(product_mapping[sscat])
+        if not sscat:
+            continue
+        sscat = product_mapping[sscat]
+        if isinstance(sscat, str):
+            souscategorie_codes.append(sscat)
+        elif isinstance(sscat, list):
+            souscategorie_codes.extend(sscat)
+        else:
+            raise ValueError(f"Type {type(sscat)} not supported in product_mapping")
 
     return list(set(souscategorie_codes))
+
+
+def clean_souscategorie_codes_sinoe(
+    sscats: str | None, dag_config: DAGConfig
+) -> list[str]:
+
+    if not sscats:
+        return []
+
+    dechet_mapping = dag_config.dechet_mapping
+    product_mapping = dag_config.product_mapping
+
+    # on cinde les codes déchêts en liste (ex: "01.3|02.31" -> ["01.3", "02.31"])
+    sscat_list = sscats.split("|")
+
+    # nettoyage après cindage
+    sscat_list = [
+        v.strip()
+        for v in sscat_list
+        if v.strip().lower() not in ("", "nan", "np", "None")
+    ]
+
+    sscat_list = [
+        dechet_mapping[v] for v in sscat_list if dechet_mapping[v] in product_mapping
+    ]
+
+    return clean_souscategorie_codes("|".join(sscat_list), dag_config)

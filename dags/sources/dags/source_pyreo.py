@@ -22,6 +22,10 @@ with DAG(
                 "origin": "nom_de_lorganisme",
                 "destination": "nom",
             },
+            # {
+            #     "origin": "enseigne_commerciale",
+            #     "destination": "nom_commercial",
+            # },
             {
                 "origin": "longitudewgs84",
                 "destination": "longitude",
@@ -31,6 +35,11 @@ with DAG(
                 "destination": "latitude",
             },
             # 2. Transformation des colonnes
+            # {
+            #     "origin": "site_web",
+            #     "transformation": "clean_url",
+            #     "destination": "url",
+            # },
             {
                 "origin": "type_de_point_de_collecte",
                 "transformation": "clean_acteur_type_code",
@@ -41,13 +50,11 @@ with DAG(
                 "transformation": "clean_public_accueilli",
                 "destination": "public_accueilli",
             },
-            # uniquement_sur_rdv n'est pas renseigné pour pyreo
             # {
             #     "origin": "uniquement_sur_rdv",
             #     "transformation": "cast_eo_boolean_or_string_to_boolean",
             #     "destination": "uniquement_sur_rdv",
             # },
-            # exclusivite_de_reprisereparation n'est pas renseigné pour pyreo
             # {
             #     "origin": "exclusivite_de_reprisereparation",
             #     "transformation": "cast_eo_boolean_or_string_to_boolean",
@@ -68,6 +75,10 @@ with DAG(
                 "column": "statut",
                 "value": constants.ACTEUR_ACTIF,
             },
+            # {
+            #     "column": "label_codes",
+            #     "value": [],
+            # },
             # 4. Transformation du dataframe
             {
                 "origin": ["labels_etou_bonus", "acteur_type_code"],
@@ -97,6 +108,11 @@ with DAG(
                 "transformation": "clean_adresse",
                 "destination": ["adresse", "code_postal", "ville"],
             },
+            # {
+            #     "origin": ["telephone", "code_postal"],
+            #     "transformation": "clean_telephone",
+            #     "destination": ["telephone"],
+            # },
             {
                 "origin": [
                     "point_dapport_de_service_reparation",
