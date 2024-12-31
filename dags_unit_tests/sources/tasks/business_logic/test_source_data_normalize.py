@@ -89,18 +89,6 @@ class TestSourceDataNormalizeSinoe:
         )
         assert "ANNEE" not in df.columns
 
-    # def test_geopoint_to_longitude_latitude(
-    #     self, df_sinoe, product_mapping, dechet_mapping, acteurtype_id_by_code
-    # ):
-    #     df = df_normalize_sinoe(
-    #         df=df_sinoe,
-    #         product_mapping=product_mapping,
-    #         dechet_mapping=dechet_mapping,
-    #     )
-    #     assert df.iloc[0]["longitude"] == 3.120109493179493
-    #     assert df.iloc[0]["latitude"] == 48.4812237361283
-    #     assert "_geopoint" not in df.columns
-
 
 class TestSourceDataNormalize:
     # FIXME : Add tests to check all kind of transformation is applied
