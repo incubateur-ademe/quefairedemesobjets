@@ -86,6 +86,12 @@ class DAGConfig(BaseModel):
                 columns.add(transformation.column)
             elif isinstance(transformation, NormalizationColumnKeep):
                 columns.add(transformation.keep)
+        removed_columns = [
+            transformation.remove
+            for transformation in self.normalization_rules
+            if isinstance(transformation, NormalizationColumnRemove)
+        ]
+        columns -= set(removed_columns)
         return columns
 
 

@@ -22,7 +22,7 @@ LABEL_TO_IGNORE = ["non applicable", "na", "n/a", "null", "aucun", "non"]
 
 
 def merge_duplicates(
-    df, group_column="identifiant_unique", merge_column="produitsdechets_acceptes"
+    df, group_column="identifiant_unique", merge_column="souscategorie_codes"
 ):
 
     df_duplicates = df[df.duplicated(group_column, keep=False)]
@@ -52,13 +52,13 @@ def merge_duplicates(
 def _merge_columns_of_accepted_products(group):
     produits_sets = set()
     for produits in group:
-        produits_sets.update([produit.strip() for produit in produits.split("|")])
-    return "|".join(sorted(produits_sets))
+        produits_sets.update(produits)
+    return sorted(produits_sets)
 
 
 def clean_telephone(row: pd.Series, _):
-
-    number = clean_number(row["telephone"])
+    telephone_column = list(row.keys())[0]
+    number = clean_number(row[telephone_column])
 
     if number is None:
         row[["telephone"]] = None
@@ -73,7 +73,7 @@ def clean_telephone(row: pd.Series, _):
     if len(number) < 6:
         number = None
 
-    row[["telephone"]] = number
+    row["telephone"] = number
     return row[["telephone"]]
 
 
@@ -83,7 +83,7 @@ def clean_siret_and_siren(row, _):
         row["siret"] = clean_siret(row["siret"])
     else:
         row["siret"] = None
-    if "siren" in row:
+    if "siren" in row and row["siren"]:
         row["siren"] = clean_siren(row["siren"])
     else:
         row["siren"] = (
@@ -93,18 +93,27 @@ def clean_siret_and_siren(row, _):
 
 
 def clean_identifiant_externe(row, _):
-    # nom de la premièe colonne
+    # nom de la première colonne
     identifiant_externe_column = list(row.keys())[0]
     if not row[identifiant_externe_column] and "nom" in row:
-        row[identifiant_externe_column] = row[identifiant_externe_column].fillna(
-            row["nom"].str.replace("-", "").str.replace(" ", "_").str.replace("__", "_")
+        if not row["nom"]:
+            raise ValueError(
+                f"{identifiant_externe_column} or nom is required to generate"
+                " identifiant_externe"
+            )
+        row[identifiant_externe_column] = (
+            row["nom"].replace("-", "").replace(" ", "_").replace("__", "_")
         )
-    row["identifiant_externe"] = str(row[identifiant_externe_column])
+    row["identifiant_externe"] = str(row[identifiant_externe_column]).strip()
     return row[["identifiant_externe"]]
 
 
 def clean_identifiant_unique(row, _):
-    unique_str = row["identifiant_externe"].replace("/", "-")
+    if not row.get("identifiant_externe"):
+        raise ValueError(
+            "identifiant_externe is required to generate identifiant_unique"
+        )
+    unique_str = row["identifiant_externe"].replace("/", "-").strip()
     if row.get("acteur_type_code") == ACTEUR_TYPE_DIGITAL:
         unique_str = unique_str + "_d"
     row["identifiant_unique"] = row.get("source_code").lower() + "_" + unique_str
@@ -161,7 +170,7 @@ def clean_label_codes(row, dag_config):
     if row["acteur_type_code"] == ACTEUR_TYPE_ESS:
         label_codes.append(LABEL_ESS)
 
-    labels_etou_bonus = row.get(label_column, "")
+    labels_etou_bonus = row.get(label_column) or ""
 
     if (
         dag_config.label_bonus_reparation
@@ -199,6 +208,14 @@ def merge_and_clean_souscategorie_codes(
             )
     row["souscategorie_codes"] = list(set(souscategorie_codes))
     return row[["souscategorie_codes"]]
+
+
+def get_latlng_from_geopoint(row: pd.Series, _) -> pd.Series:
+    # GEO
+    geopoint = row["_geopoint"].split(",")
+    row["latitude"] = float(geopoint[0].strip())
+    row["longitude"] = float(geopoint[1].strip())
+    return row[["latitude", "longitude"]]
 
 
 ### Fonctions de résolution de l'adresse au format BAN et avec vérification via l'API

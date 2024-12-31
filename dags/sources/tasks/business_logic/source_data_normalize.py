@@ -115,8 +115,14 @@ def _remove_undesired_lines(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataF
         df = merge_duplicates(
             df,
             group_column="identifiant_unique",
-            merge_column="produitsdechets_acceptes",
+            merge_column="souscategorie_codes",
         )
+
+    # Supprimer les acteurs qui ne propose qu'un service à domicile
+    # filtre des service à domicile uniquement
+    if "service_a_domicile" in df.columns:
+        df = df[df["service_a_domicile"].str.lower() != "oui exclusivement"]
+        df = df[df["service_a_domicile"].str.lower() != "service à domicile uniquement"]
 
     # Suppression des lignes dont public_acceuilli est uniqueùent les professionnels
     if "public_accueilli" in df.columns:
@@ -155,7 +161,17 @@ def source_data_normalize(
         mais toujours en cohérence avec les règles de nommage et formatage
     - Ajout des colonnes avec valeurs par défaut
     """
+
     df = df_acteur_from_source
+
+    if dag_id == "pharmacies":
+        # Patch pour les pharmacies car l'apostrophe n'est pas bien géré dans la
+        # configuration de airflow
+        df.rename(
+            columns={"Numéro d'établissement": "identifiant_externe"},
+            inplace=True,
+        )
+
     df = _rename_columns(df, dag_config)
     df = _transform_columns(df, dag_config)
     df = _default_value_columns(df, dag_config)
@@ -209,6 +225,7 @@ def source_data_normalize(
 
 
 def df_normalize_pharmacie(df: pd.DataFrame) -> pd.DataFrame:
+    # FIXME : à déplacer dans une fonction df ?
     # controle des adresses et localisation des pharmacies
     df = df.apply(enrich_from_ban_api, axis=1)
     # On supprime les pharmacies sans localisation
@@ -227,18 +244,6 @@ def df_normalize_sinoe(
     product_mapping: dict,
     dechet_mapping: dict,
 ) -> pd.DataFrame:
-    """Normalisation spécifique à la dataframe SINOE"""
-
-    public_mapping = {
-        "DMA/PRO": constants.PUBLIC_PRO_ET_PAR,
-        "DMA": constants.PUBLIC_PAR,
-        "PRO": constants.PUBLIC_PRO,
-        "NP": None,
-    }
-
-    # Pour forcer l'action "trier"
-    df["point_de_collecte_ou_de_reprise_des_dechets"] = True
-    df["public_accueilli"] = df["public_accueilli"].map(public_mapping)
 
     # DOUBLONS: extra sécurité: même si on ne devrait pas obtenir
     # de doublon grâce à l'API (q_mode=simple&ANNEE_eq=2024)
@@ -247,44 +252,6 @@ def df_normalize_sinoe(
     if df["ANNEE"].nunique() != 1:
         raise ValueError("Plusieurs ANNEE, changer requête API pour n'en avoir qu'une")
     df = df.drop(columns=["ANNEE"])
-
-    # GEO
-    df["_geopoint"] = df["_geopoint"].str.split(",")
-    df["latitude"] = df["_geopoint"].map(lambda x: x[0].strip()).astype(float)
-    df["longitude"] = df["_geopoint"].map(lambda x: x[1].strip()).astype(float)
-    df = df.drop(columns=["_geopoint"])
-
-    # PRODUCT MAPPING:
-    # TODO: à sortir dans une fonction df pour tester/débugger plus facilement
-    logger.info(f"# déchetteries avant logique produitsdechets_acceptes: {len(df)}")
-    col = "produitsdechets_acceptes"
-
-    # on supprime les déchetteries qu'on peut pas categoriser
-    df = df[df[col].notnull()]
-
-    # on cinde les codes déchêts en liste (ex: "01.3|02.31" -> ["01.3", "02.31"])
-    df[col] = df[col].str.split("|")
-
-    # nettoyage après cindage
-    df[col] = df[col].apply(
-        # "NP": "Non précisé", on garde pas
-        lambda x: [v.strip() for v in x if v.strip().lower() not in ("", "nan", "np")]
-    )
-    # On map à des chaîne de caractères (ex: "01" -> "Déchets de composés chimiques")
-    # en ignorant les codes déchets qui ne sont pas dans notre product_mapping
-    df[col] = df[col].apply(
-        lambda x: [dechet_mapping[v] for v in x if dechet_mapping[v] in product_mapping]
-    )
-    # Encore une fois on supprime les déchetteries qu'on ne peut pas categoriser
-    df = df[df[col].apply(len) > 0]
-    logger.info(f"# déchetteries après logique produitsdechets_acceptes: {len(df)}")
-    souscats_dechet = set(df[col].explode())
-    souscats_mapping = set(product_mapping.keys())
-    souscats_invalid = souscats_dechet - souscats_mapping
-    log.preview("Sous-catégories du dechet_mapping", souscats_dechet)
-    log.preview("Sous-catégories du product_mapping", souscats_mapping)
-    if souscats_invalid:
-        raise ValueError(f"Sous-catégories invalides: {souscats_invalid}")
 
     return df
 

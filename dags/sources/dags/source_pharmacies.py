@@ -1,4 +1,5 @@
 from airflow import DAG
+from sources.config import shared_constants as constants
 from sources.config.airflow_params import get_mapping_config
 from sources.tasks.airflow_logic.operators import default_args, eo_task_chain
 
@@ -9,6 +10,12 @@ with DAG(
     description=("Téléchargement des pharmacies (Ordre National Des Pharmaciens)"),
     params={
         "normalization_rules": [
+            # 1. Renommage des colonnes
+            # { # fait en dur dans la code car l'apostrophe est mal géré par airflow
+            #     "origin": "Numéro d\\'établissement",
+            #     "destination": "identifiant_externe",
+            # },
+            # 2. Transformation des colonnes
             {
                 "origin": "Raison sociale",
                 "transformation": "strip_string",
@@ -34,21 +41,72 @@ with DAG(
                 "transformation": "strip_string",
                 "destination": "ville",
             },
+            {
+                "column": "source_code",
+                "value": "ordredespharmaciens",
+            },
+            # 3. Ajout des colonnes avec une valeur par défaut
+            {
+                "column": "statut",
+                "value": constants.ACTEUR_ACTIF,
+            },
+            {
+                "column": "uniquement_sur_rdv",
+                "value": "non",
+            },
+            {
+                "column": "acteurservice_codes",
+                "value": ["structure_de_collecte"],
+            },
+            {
+                "column": "action_codes",
+                "value": ["trier"],
+            },
+            {
+                "column": "label_codes",
+                "value": [],
+            },
+            {
+                "column": "souscategorie_codes",
+                "value": ["medicaments"],
+            },
+            {
+                "column": "public_accueilli",
+                "value": constants.PUBLIC_PAR,
+            },
+            {
+                "column": "acteur_type_code",
+                "value": "commerce",
+            },
+            # 4. Transformation du dataframe
+            {
+                "origin": ["Téléphone", "code_postal"],
+                "transformation": "clean_telephone",
+                "destination": ["telephone"],
+            },
+            {
+                "origin": ["identifiant_externe", "nom"],
+                "transformation": "clean_identifiant_externe",
+                "destination": ["identifiant_externe"],
+            },
+            {
+                "origin": [
+                    "identifiant_externe",
+                    "source_code",
+                ],
+                "transformation": "clean_identifiant_unique",
+                "destination": ["identifiant_unique"],
+            },
+            # 5. Supression des colonnes
+            {"remove": "Téléphone"},
+            {"remove": "Région"},
+            {"remove": "Fax"},
+            {"remove": "Département"},
+            {"remove": "Type établissement"},
+            # 6. Colonnes à garder (rien à faire, utilisé pour le controle)
         ],
-        "column_mapping": {
-            "Numéro d'établissement": "identifiant_externe",
-            "Téléphone": "telephone",
-        },
         "endpoint": "https://www.ordre.pharmacien.fr/download/annuaire_csv.zip",
-        "columns_to_add_by_default": {
-            "statut": "ACTIF",
-            "uniquement_sur_rdv": "non",
-            "public_accueilli": "Particuliers",
-            "produitsdechets_acceptes": "Médicaments & DASRI",
-            "acteur_type_id": "pharmacie",
-            "point_de_collecte_ou_de_reprise_des_dechets": True,
-        },
-        "source_code": "ordredespharmaciens",
+        "validate_address_with_ban": False,
         "product_mapping": get_mapping_config(),
     },
     schedule=None,

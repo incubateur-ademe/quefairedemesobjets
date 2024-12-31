@@ -2,8 +2,12 @@ import pandas as pd
 import pytest
 from sources.tasks.transform.transform_df import (
     clean_action_codes,
+    clean_identifiant_externe,
+    clean_identifiant_unique,
     clean_label_codes,
+    clean_siret_and_siren,
     clean_telephone,
+    get_latlng_from_geopoint,
     merge_duplicates,
     merge_sous_categories_columns,
 )
@@ -18,9 +22,9 @@ class TestMergeDuplicates:
                 pd.DataFrame(
                     {
                         "identifiant_unique": [1, 1],
-                        "produitsdechets_acceptes": [
-                            " Plastic Box | Metal | Aàèë l'test",
-                            " Plastic Box | Metal | Aàèë l'test",
+                        "souscategorie_codes": [
+                            ["Plastic Box", "Metal", "Aàèë l'test"],
+                            ["Plastic Box", "Metal", "Aàèë l'test"],
                         ],
                         "other_column": ["A", "B"],
                     }
@@ -28,7 +32,9 @@ class TestMergeDuplicates:
                 pd.DataFrame(
                     {
                         "identifiant_unique": [1],
-                        "produitsdechets_acceptes": ["Aàèë l'test|Metal|Plastic Box"],
+                        "souscategorie_codes": [
+                            ["Aàèë l'test", "Metal", "Plastic Box"]
+                        ],
                         "other_column": ["A"],
                     }
                 ),
@@ -37,10 +43,10 @@ class TestMergeDuplicates:
                 pd.DataFrame(
                     {
                         "identifiant_unique": [1, 2, 3],
-                        "produitsdechets_acceptes": [
-                            "Plastic|Metal",
-                            "Metal|Glass",
-                            "Paper",
+                        "souscategorie_codes": [
+                            ["Plastic", "Metal"],
+                            ["Metal", "Glass"],
+                            ["Paper"],
                         ],
                         "other_column": [
                             "A",
@@ -52,10 +58,10 @@ class TestMergeDuplicates:
                 pd.DataFrame(
                     {
                         "identifiant_unique": [1, 2, 3],
-                        "produitsdechets_acceptes": [
-                            "Plastic|Metal",
-                            "Metal|Glass",
-                            "Paper",
+                        "souscategorie_codes": [
+                            ["Plastic", "Metal"],
+                            ["Metal", "Glass"],
+                            ["Paper"],
                         ],
                         "other_column": [
                             "A",
@@ -69,10 +75,10 @@ class TestMergeDuplicates:
                 pd.DataFrame(
                     {
                         "identifiant_unique": [1, 1, 1],
-                        "produitsdechets_acceptes": [
-                            "Plastic|Metal",
-                            "Metal|Glass",
-                            "Paper",
+                        "souscategorie_codes": [
+                            ["Plastic", "Metal"],
+                            ["Metal", "Glass"],
+                            ["Paper"],
                         ],
                         "other_column": [
                             "A",
@@ -84,7 +90,7 @@ class TestMergeDuplicates:
                 pd.DataFrame(
                     {
                         "identifiant_unique": [1],
-                        "produitsdechets_acceptes": ["Glass|Metal|Paper|Plastic"],
+                        "souscategorie_codes": [["Glass", "Metal", "Paper", "Plastic"]],
                         "other_column": ["A"],
                     }
                 ),
@@ -93,13 +99,13 @@ class TestMergeDuplicates:
                 pd.DataFrame(
                     {
                         "identifiant_unique": [1, 1, 2, 3, 3, 3],
-                        "produitsdechets_acceptes": [
-                            "Plastic|Metal",
-                            "Metal|Glass",
-                            "Paper",
-                            "Glass|Plastic",
-                            "Plastic|Metal",
-                            "Metal",
+                        "souscategorie_codes": [
+                            ["Plastic", "Metal"],
+                            ["Metal", "Glass"],
+                            ["Paper"],
+                            ["Glass", "Plastic"],
+                            ["Plastic", "Metal"],
+                            ["Metal"],
                         ],
                         "other_column": ["A", "B", "C", "D", "E", "F"],
                     }
@@ -107,10 +113,10 @@ class TestMergeDuplicates:
                 pd.DataFrame(
                     {
                         "identifiant_unique": [1, 2, 3],
-                        "produitsdechets_acceptes": [
-                            "Glass|Metal|Plastic",
-                            "Paper",
-                            "Glass|Metal|Plastic",
+                        "souscategorie_codes": [
+                            ["Glass", "Metal", "Plastic"],
+                            ["Paper"],
+                            ["Glass", "Metal", "Plastic"],
                         ],
                         "other_column": ["A", "C", "D"],
                     }
@@ -152,18 +158,93 @@ class TestCleanTelephone:
 
 
 class TestCleanSiretAndSiren:
-    # FIXME : Add tests
-    pass
+    @pytest.mark.parametrize(
+        "siret, siren, expected_siret, expected_siren",
+        [
+            (None, None, None, None),
+            ("12345678901234", None, "12345678901234", "123456789"),
+            (None, "123456789", None, "123456789"),
+            ("98765432109876", "987654321", "98765432109876", "987654321"),
+            ("12345678901234", "123456789", "12345678901234", "123456789"),
+            ("12345678901234", "987654321", "12345678901234", "987654321"),
+        ],
+    )
+    def test_clean_siret_and_siren(self, siret, siren, expected_siret, expected_siren):
+        row = pd.Series({"siret": siret, "siren": siren})
+        result = clean_siret_and_siren(row, None)
+        assert result["siret"] == expected_siret
+        assert result["siren"] == expected_siren
 
 
 class TestCleanIdentifiantExterne:
-    # FIXME : Add tests
-    pass
+
+    @pytest.mark.parametrize(
+        "identifiant_externe, nom, expected_identifiant_externe",
+        [
+            (None, "nom", "nom"),
+            (None, "nom-nom nom_nom__nom", "nomnom_nom_nom_nom"),
+            ("12345", "nom", "12345"),
+            (" 12345 ", "nom", "12345"),
+            ("ABC123", "nom", "ABC123"),
+            (" abc123 ", "nom", "abc123"),
+        ],
+    )
+    def test_clean_identifiant_externe(
+        self, identifiant_externe, nom, expected_identifiant_externe
+    ):
+        row = pd.Series({"identifiant_externe": identifiant_externe, "nom": nom})
+        result = clean_identifiant_externe(row, None)
+        assert result["identifiant_externe"] == expected_identifiant_externe
+
+    def test_clean_identifiant_externe_raise(self):
+        row = pd.Series({"id": None, "nom": None})
+        with pytest.raises(ValueError) as erreur:
+            clean_identifiant_externe(row, None)
+        assert "id or nom" in str(erreur.value)
 
 
 class TestCleanIdentifiantUnique:
-    # FIXME : Add tests
-    pass
+    @pytest.mark.parametrize(
+        (
+            "identifiant_externe, acteur_type_code, source_code,"
+            " expected_identifiant_unique"
+        ),
+        [
+            ("12345", "commerce", "source", "source_12345"),
+            (" 12345 ", "commerce", "source", "source_12345"),
+            ("ABC123", "commerce", "source", "source_ABC123"),
+            (" abc123 ", "commerce", "source", "source_abc123"),
+            ("ABC123", "acteur_digital", "source", "source_ABC123_d"),
+            (" abc123 ", "acteur_digital", "source", "source_abc123_d"),
+        ],
+    )
+    def test_clean_identifiant_unique(
+        self,
+        identifiant_externe,
+        acteur_type_code,
+        source_code,
+        expected_identifiant_unique,
+    ):
+        row = pd.Series(
+            {
+                "identifiant_externe": identifiant_externe,
+                "source_code": source_code,
+                "acteur_type_code": acteur_type_code,
+            }
+        )
+        result = clean_identifiant_unique(row, None)
+        assert result["identifiant_unique"] == expected_identifiant_unique
+
+    def test_clean_identifiant_unique_failes(self):
+        row = pd.Series(
+            {
+                "source_code": "source",
+                "acteur_type_code": "commerce",
+            }
+        )
+        with pytest.raises(ValueError) as erreur:
+            clean_identifiant_unique(row, None)
+        assert "identifiant_externe" in str(erreur.value)
 
 
 class TestMergeSSCatColumns:
@@ -255,6 +336,8 @@ class TestCleanLabelCodes:
     @pytest.mark.parametrize(
         "value, expected_value",
         [
+            (None, []),
+            ("", []),
             ("label_et_bonus", ["label_et_bonus"]),
             ("label_et_bonus1|label_et_bonus2", ["label_et_bonus1", "label_et_bonus2"]),
             (
@@ -264,13 +347,12 @@ class TestCleanLabelCodes:
         ],
     )
     def test_clean_label_codes(self, value, expected_value, dag_config):
-        dag_config.label_bonus_reparation = ("bonus_reparation",)
+        dag_config.label_bonus_reparation = "bonus_reparation"
         result = clean_label_codes(
             pd.Series({"label_etou_bonus": value, "acteur_type_code": "commerce"}),
             dag_config=dag_config,
         )
-
-        assert result["label_codes"], expected_value
+        assert result["label_codes"] == expected_value
 
     def test_ess_label(self, dag_config):
         result = clean_label_codes(
@@ -286,3 +368,11 @@ class TestCleanLabelCodes:
 class TestMergeAndCleanSouscategorieCodes:
     # FIXME : Add tests
     pass
+
+
+class TestGetLatLngFromGeopoint:
+    def test_get_latlng_from_geopoint(self):
+        row = pd.Series({"_geopoint": "48.8588443,2.2943506"})
+        result = get_latlng_from_geopoint(row, None)
+        assert result["latitude"] == 48.8588443
+        assert result["longitude"] == 2.2943506

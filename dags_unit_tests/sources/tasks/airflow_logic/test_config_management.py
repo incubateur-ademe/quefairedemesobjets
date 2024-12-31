@@ -179,10 +179,11 @@ class TestDAGConfig:
                 origin="orig", transformation="", destination="dest2"
             ),
             NormalizationDFTransform(
-                origin=["orig"], transformation="", destination=["dest3"]
+                origin=["orig"], transformation="", destination=["dest3", "remove"]
             ),
             NormalizationColumnDefault(column="col", value="val"),
             NormalizationColumnKeep(keep="keep"),
+            NormalizationColumnRemove(remove="remove"),
         ]
         dag_config = DAGConfig.model_validate(
             {
