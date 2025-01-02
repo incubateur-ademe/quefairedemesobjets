@@ -51,7 +51,7 @@
     "devDependencies": {
         "@fullhuman/postcss-purgecss": "^7.0.2",
         "@parcel/optimizer-svgo": "^2.13.3",
-        "@parcel/transformer-inline-string": "^2.13.0",
+        "@parcel/transformer-inline-string": "^2.13.3",
         "@playwright/test": "^1.49.1",
         "@testing-library/jest-dom": "^6.6.3",
         "@types/jest": "^29.5.13",
