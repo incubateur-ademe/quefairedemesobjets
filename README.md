@@ -117,6 +117,16 @@ Conseil: utiliser `asdf` pour la gestion des environnement virtuel `node` et `py
 
 ### Installation & Exécution
 
+Configuration des variables d'environnement
+
+```sh
+cp .env.template .env
+
+# Ajoute (ou met à jour si existant) la variable AIRFLOW_UID
+# de telle sorte à ce que Docker lance Airflow avec notre utilisateur
+sed -i '/^AIRFLOW_UID=/d' .env && echo "AIRFLOW_UID=$(id -u)" >> .env
+```
+
 Les bases de données source `MySQL` et cible `Postgres + Postgis` sont executées et mises à disposition par le gestionnaire de conteneur Docker
 
 ```sh
@@ -135,12 +145,6 @@ Installation
 ```sh
 pip install -r requirements.txt -r dev-requirements.txt
 npm install
-```
-
-Configuration des variables d'environnement
-
-```sh
-cp .env.template .env
 ```
 
 // Modifier les variables dans le fichier .env si nécessaire

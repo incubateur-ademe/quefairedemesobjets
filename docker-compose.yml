@@ -8,8 +8,10 @@ x-airflow-common:
     - ./dags:/opt/airflow/dags
     - ./config:/opt/airflow/config
     - ./plugins:/opt/airflow/plugins
-  # Only for Linux
-  # user: "${AIRFLOW_UID:-50000}:0"
+  # Voir la doc et s'assurer que AIRFLOW_UID est
+  # définit dans le .env pour correspondre à votre UID
+  # sed -i '/^AIRFLOW_UID=/d' .env && echo "AIRFLOW_UID=$(id -u)" >> .env
+  user: "${AIRFLOW_UID:-50000}:0"
   extra_hosts:
     - "host.docker.internal:host-gateway"
   depends_on:
