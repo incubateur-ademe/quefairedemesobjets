@@ -15,6 +15,7 @@ ptpython
 pytest
 pytest-django
 pytest-dotenv
+pytest-mock
 python-Levenshtein
 ratelimit
 ruff

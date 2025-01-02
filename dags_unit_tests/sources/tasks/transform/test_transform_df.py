@@ -2,12 +2,14 @@ import pandas as pd
 import pytest
 from sources.tasks.transform.transform_df import (
     clean_action_codes,
+    clean_adresse,
     clean_identifiant_externe,
     clean_identifiant_unique,
     clean_label_codes,
     clean_siret_and_siren,
     clean_telephone,
     get_latlng_from_geopoint,
+    merge_and_clean_souscategorie_codes,
     merge_duplicates,
     merge_sous_categories_columns,
 )
@@ -274,9 +276,66 @@ class TestMergeSSCatColumns:
 
 
 class TestCleanAdresse:
-    # FIXME : Add tests
-    # @patch("sources.tasks.transform.transform_df._get_address")
-    pass
+    @pytest.mark.parametrize(
+        "adresse_format_ban, expected_adresse",
+        [
+            (
+                "123 Rue de Paris 75001 Paris",
+                {
+                    "adresse": "123 Rue de Paris",
+                    "code_postal": "75001",
+                    "ville": "Paris",
+                },
+            ),
+            (
+                " 123 Rue de Paris  75001  Paris ",
+                {
+                    "adresse": "123 Rue de Paris",
+                    "code_postal": "75001",
+                    "ville": "Paris",
+                },
+            ),
+            (
+                "75001 Paris",
+                {
+                    "adresse": None,
+                    "code_postal": "75001",
+                    "ville": "Paris",
+                },
+            ),
+            (
+                " 123 Rue de Paris 75001 Paris CEDEX 01123",
+                {
+                    "adresse": "123 Rue de Paris",
+                    "code_postal": "75001",
+                    "ville": "Paris",
+                },
+            ),
+        ],
+    )
+    def test_clean_adresse_without_ban(
+        self, adresse_format_ban, expected_adresse, dag_config
+    ):
+        dag_config.validate_address_with_ban = False
+        row = pd.Series({"adresse_format_ban": adresse_format_ban})
+        assert dict(clean_adresse(row, dag_config)) == expected_adresse
+
+    def test_clean_adresse_with_ban(self, dag_config, mocker):
+        def _get_address(_):
+            # Mock implementation of _get_address
+            return "Mock Address", "Mock Postal Code", "Mock City"
+
+        mocker.patch(
+            "sources.tasks.transform.transform_df._get_address",
+            side_effect=_get_address,
+        )
+        dag_config.validate_address_with_ban = True
+        row = pd.Series({"adresse_format_ban": "fake adresse"})
+        assert dict(clean_adresse(row, dag_config)) == {
+            "adresse": "Mock Address",
+            "code_postal": "Mock Postal Code",
+            "ville": "Mock City",
+        }
 
 
 class TestCleanActeurserviceCodes:
@@ -366,8 +425,24 @@ class TestCleanLabelCodes:
 
 
 class TestMergeAndCleanSouscategorieCodes:
-    # FIXME : Add tests
-    pass
+    @pytest.mark.parametrize(
+        "row_data, expected_output",
+        [
+            ({"col1": "sscat1", "col2": "sscat2"}, ["mapped1", "mapped2"]),
+            ({"col1": "sscat1", "col2": "sscat1"}, ["mapped1"]),
+            ({"col1": None, "col2": "sscat2"}, ["mapped2"]),
+            ({"col1": "sscat1", "col2": None}, ["mapped1"]),
+            ({"col1": None, "col2": None}, []),
+        ],
+    )
+    def test_merge_and_clean_souscategorie_codes(
+        self, row_data, expected_output, dag_config
+    ):
+        dag_config.product_mapping = {"sscat1": "mapped1", "sscat2": "mapped2"}
+
+        row = pd.Series(row_data)
+        result = merge_and_clean_souscategorie_codes(row, dag_config)
+        assert sorted(result["souscategorie_codes"]) == sorted(expected_output)
 
 
 class TestGetLatLngFromGeopoint:
