@@ -2,7 +2,7 @@ from datetime import timedelta
 
 import pandas as pd
 from airflow.models import DAG
-from airflow.operators.python import BranchPythonOperator, PythonOperator
+from airflow.operators.python import PythonOperator, ShortCircuitOperator
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.utils.dates import days_ago
@@ -39,14 +39,10 @@ def _get_first_dagrun_to_insert():
     return row
 
 
-def check_for_validation(**kwargs):
+def check_suggestion_to_process(**kwargs):
     # get first row from table qfdmo_dagrun with status TO_INSERT
     row = _get_first_dagrun_to_insert()
-
-    # Skip if row is None
-    if row is None:
-        return "skip_processing"
-    return "fetch_and_parse_data"
+    return bool(row)
 
 
 def fetch_and_parse_data(**context):
@@ -125,19 +121,9 @@ fetch_parse_task = PythonOperator(
 )
 
 
-def skip_processing(**kwargs):
-    print("No records to validate. DAG run completes successfully.")
-
-
-skip_processing_task = PythonOperator(
-    task_id="skip_processing",
-    python_callable=skip_processing,
-    dag=dag,
-)
-
-branch_task = BranchPythonOperator(
-    task_id="branch_processing",
-    python_callable=check_for_validation,
+check_suggestion_to_process_task = ShortCircuitOperator(
+    task_id="check_suggestion_to_process",
+    python_callable=check_suggestion_to_process,
     dag=dag,
 )
 
@@ -153,9 +139,8 @@ trigger_create_final_actors_dag = TriggerDagRunOperator(
     dag=dag,
 )
 
-branch_task >> skip_processing_task
 (
-    branch_task
+    check_suggestion_to_process_task
     >> fetch_parse_task
     >> write_to_postgres_task
     >> trigger_create_final_actors_dag
