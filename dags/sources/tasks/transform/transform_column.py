@@ -101,7 +101,6 @@ def clean_acteur_type_code(value, _):
         "association, entreprise de l'economie sociale et solidaire (ess)": "ess",
         "etablissement de sante": "ets_sante",
         "decheterie": "decheterie",
-        "pharmacie": "commerce",
         "point d'apport volontaire prive": "pav_prive",
         "plateforme inertes": "plateforme_inertes",
         "magasin / franchise, enseigne commerciale / distributeur / point de vente "
@@ -205,9 +204,9 @@ def clean_souscategorie_codes_sinoe(
     sscat_list = [
         v.strip()
         for v in sscat_list
-        if v.strip().lower() not in ("", "nan", "np", "None")
+        if v.strip().lower() not in ("", "nan", "np", "none")
     ]
-
+    print(sscat_list)
     sscat_list = [
         dechet_mapping[v]
         for v in sscat_list

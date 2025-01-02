@@ -3,6 +3,7 @@ import pandas as pd
 import pytest
 from sources.tasks.transform.transform_column import (
     cast_eo_boolean_or_string_to_boolean,
+    clean_acteur_type_code,
     clean_code_postal,
     clean_number,
     clean_public_accueilli,
@@ -10,6 +11,7 @@ from sources.tasks.transform.transform_column import (
     clean_siren,
     clean_siret,
     clean_souscategorie_codes,
+    clean_souscategorie_codes_sinoe,
     clean_url,
     convert_opening_hours,
     strip_string,
@@ -150,8 +152,47 @@ class TestStripString:
 
 
 class TestCleanActeurTypeCode:
-    # FIXME : Add tests
-    pass
+    @pytest.mark.parametrize(
+        "value, expected_code",
+        [
+            ("solution en ligne (site web, app. mobile)", "acteur_digital"),
+            ("artisan, commerce independant", "artisan"),
+            (
+                "magasin / franchise, enseigne commerciale / distributeur /"
+                " point de vente",
+                "commerce",
+            ),
+            ("point d'apport volontaire publique", "pav_public"),
+            ("association, entreprise de l'economie sociale et solidaire (ess)", "ess"),
+            ("etablissement de sante", "ets_sante"),
+            ("decheterie", "decheterie"),
+            ("point d'apport volontaire prive", "pav_prive"),
+            ("plateforme inertes", "plateforme_inertes"),
+            (
+                "magasin / franchise, enseigne commerciale / distributeur / "
+                "point de vente / franchise, enseigne commerciale / distributeur /"
+                " point de vente",
+                "commerce",
+            ),
+            ("point d'apport volontaire ephemere / ponctuel", "pav_ponctuel"),
+            (" Dèchëtérie ", "decheterie"),
+        ],
+    )
+    def test_clean_acteur_type_code(self, value, expected_code):
+        assert clean_acteur_type_code(value, None) == expected_code
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            ("unknown type"),
+            ("another unknown type"),
+        ],
+    )
+    def test_clean_acteur_type_code_invalid(self, value):
+        with pytest.raises(
+            ValueError, match=f"Acteur type `{value}` not found in mapping"
+        ):
+            clean_acteur_type_code(value, None)
 
 
 class TestCleanPublicAccueilli:
@@ -272,65 +313,68 @@ class TestCleanSousCategorieCodes:
 
 
 class TestCleanSouscategorieCodesSinoe:
-    # FIXME : Add tests
-    pass
+    @pytest.mark.parametrize(
+        "sscats, dechet_mapping, product_mapping, expected_output",
+        [
+            (None, {}, {}, []),
+            ("", {}, {}, []),
+            (
+                "01.3|02.31",
+                {"01.3": "mapped1", "02.31": "mapped2"},
+                {"mapped1": "product1", "mapped2": "product2"},
+                ["product1", "product2"],
+            ),
+            (
+                "01.3|02.31|01.3",
+                {"01.3": "mapped1", "02.31": "mapped2"},
+                {"mapped1": "product1", "mapped2": "product2"},
+                ["product1", "product2"],
+            ),
+            (
+                "01.3|02.31",
+                {"01.3": "mapped1", "02.31": "mapped2"},
+                {"mapped1": "product1"},
+                ["product1"],
+            ),
+            (
+                "01.3|02.31",
+                {"01.3": "mapped1", "02.31": "mapped2"},
+                {"mapped2": "product2"},
+                ["product2"],
+            ),
+            ("01.3|02.31", {"01.3": "mapped1", "02.31": "mapped2"}, {}, []),
+            (
+                "01.3|nan|02.31",
+                {"01.3": "mapped1", "02.31": "mapped2"},
+                {"mapped1": "product1", "mapped2": "product2"},
+                ["product1", "product2"],
+            ),
+            (
+                "01.3|np|02.31",
+                {"01.3": "mapped1", "02.31": "mapped2"},
+                {"mapped1": "product1", "mapped2": "product2"},
+                ["product1", "product2"],
+            ),
+            (
+                "01.3|None|02.31",
+                {"01.3": "mapped1", "02.31": "mapped2"},
+                {"mapped1": "product1", "mapped2": "product2"},
+                ["product1", "product2"],
+            ),
+            (
+                "01.3 | | 02.31",
+                {"01.3": "mapped1", "02.31": "mapped2"},
+                {"mapped1": "product1", "mapped2": "product2"},
+                ["product1", "product2"],
+            ),
+        ],
+    )
+    def test_clean_souscategorie_codes_sinoe(
+        self, sscats, dechet_mapping, product_mapping, expected_output, dag_config
+    ):
+        # Mock the DAGConfig
+        dag_config.dechet_mapping = dechet_mapping
+        dag_config.product_mapping = product_mapping
 
-    # @pytest.mark.parametrize("produitsdechets_acceptes", (None, "NP|01.22"))
-    # def test_produitsdechets_acceptes_exclude_entries_not_mapped(
-    #     self,
-    #     product_mapping,
-    #     dechet_mapping,
-    #     produitsdechets_acceptes,
-    # ):
-    #     df_normalised = pd.DataFrame(
-    #         {
-    #             "identifiant_externe": ["DECHET_2"],
-    #             "ANNEE": [2024],
-    #             "_geopoint": ["48.4812237361283,3.120109493179493"],
-    #             "produitsdechets_acceptes": [produitsdechets_acceptes],
-    #             "public_accueilli": ["DMA"],
-    #         },
-    #     )
-
-    #     df = df_normalize_sinoe(
-    #         df=df_normalised,
-    #         product_mapping=product_mapping,
-    #         dechet_mapping=dechet_mapping,
-    #     )
-    #     assert len(df) == 0
-
-    # @pytest.mark.parametrize(
-    #     "produitsdechets_acceptes, produitsdechets_acceptes_expected",
-    #     (
-    #         [
-    #             "01.1|07.25|07.6",
-    #             ["Solvants usés", "Papiers cartons mêlés triés", "Déchets textiles"],
-    #         ],
-    #         ["07.6", ["Déchets textiles"]],
-    #     ),
-    # )
-    # def test_produitsdechets_acceptes_convert_dechet_codes_to_our_codes(
-    #     self,
-    #     product_mapping,
-    #     dechet_mapping,
-    #     produitsdechets_acceptes,
-    #     produitsdechets_acceptes_expected,
-    # ):
-    #     df_normalised = pd.DataFrame(
-    #         {
-    #             "identifiant_externe": ["DECHET_2"],
-    #             "ANNEE": [2024],
-    #             "_geopoint": ["48.4812237361283,3.120109493179493"],
-    #             "produitsdechets_acceptes": [produitsdechets_acceptes],
-    #             "public_accueilli": ["DMA"],
-    #         },
-    #     )
-    #     df = df_normalize_sinoe(
-    #         df=df_normalised,
-    #         product_mapping=product_mapping,
-    #         dechet_mapping=dechet_mapping,
-    #     )
-    #     assert (
-    #         df.iloc[0]["produitsdechets_acceptes"] ==
-    # produitsdechets_acceptes_expected
-    #     )
+        result = clean_souscategorie_codes_sinoe(sscats, dag_config)
+        assert sorted(result) == sorted(expected_output)
