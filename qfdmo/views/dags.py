@@ -1,5 +1,6 @@
 import logging
 
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.shortcuts import render
@@ -21,12 +22,59 @@ class DagsValidation(IsStaffMixin, FormView):
     template_name = "qfdmo/dags_validations.html"
     success_url = "/dags/validations"
 
+    def form_valid(self, form):
+        # MANAGE search and display dagrun details
+        if self.request.POST.get("search"):
+            dagrun = form.cleaned_data["dagrun"]
+            context = {"form": form}
+            context["dagrun_instance"] = dagrun
+            dagrun_lines = dagrun.dagrunchanges.all().order_by("?")[:100]
+            context["dagrun_lines"] = dagrun_lines
+            return render(self.request, "qfdmo/dags_validations.html", context)
+
+        # ELSE: update the status of the dagrun and its dagrunlines
+        dagrun = form.cleaned_data["dagrun"]
+        new_status = (
+            DagRunStatus.TO_INSERT.value
+            if self.request.POST.get("dag_valid") == "1"
+            else DagRunStatus.REJECTED.value
+        )
+
+        # FIXME: I am not sure we need the filter here
+        dagrun.dagrunchanges.filter(status=DagRunStatus.TO_VALIDATE.value).update(
+            status=new_status
+        )
+        dagrun.status = new_status
+        dagrun.save()
+        messages.success(
+            self.request,
+            f"La cohorte {dagrun} a été mise à jour avec le statut {new_status}",
+        )
+
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Il y a des erreurs dans le formulaire.")
+        return super().form_invalid(form)
+
+    # def form_valid(self, form):
+    #     if self.request.POST.get("search"):
+    #         messages.add_message(self.request, messages.INFO, "Form Valid.")
+    #         return super().form_valid(form)
+
+
+class DagsValidation1(IsStaffMixin, FormView):
+    form_class = DagsForm
+    template_name = "qfdmo/dags_validations.html"
+    success_url = "/dags/validations"
+
     def get_initial(self):
         initial = super().get_initial()
         initial["dagrun"] = self.request.GET.get("dagrun")
         return initial
 
     def post(self, request, *args, **kwargs):
+
         dag_valid = request.POST.get("dag_valid")
         if dag_valid in ["1", "0"]:
             return self.form_valid(self.get_form())
