@@ -5,6 +5,8 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
+from dags.sources.tasks.airflow_logic.config_management import DAGConfig
+
 
 def pytest_configure(config):
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "dags"))
@@ -113,3 +115,23 @@ def df_acteurs_from_db():
 @pytest.fixture
 def souscategorieobjet_code_by_id():
     return {"ecran": 101, "smartphone, tablette et console": 102}
+
+
+@pytest.fixture
+def source_id_by_code():
+    return {
+        "source1": 1,
+        "source2": 2,
+        "source3": 3,
+    }
+
+
+@pytest.fixture
+def dag_config():
+    return DAGConfig.model_validate(
+        {
+            "normalization_rules": [],
+            "endpoint": "https://example.com/api",
+            "product_mapping": {},
+        }
+    )

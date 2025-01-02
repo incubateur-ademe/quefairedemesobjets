@@ -71,30 +71,6 @@ class TestProposeActeurChangesCreeLe:
         assert df_result["cree_le"][0].date() == expected_cree_le
 
 
-class TestActorServiceADomicile:
-
-    # "service_a_domicile"
-    def test_service_a_domicile(
-        self,
-        df_empty_acteurs_from_db,
-    ):
-
-        result = propose_acteur_changes(
-            df=pd.DataFrame(
-                {
-                    "identifiant_unique": ["1", "2"],
-                    "service_a_domicile": ["Oui exclusivement", "Non"],
-                }
-            ),
-            df_acteurs=df_empty_acteurs_from_db,
-        )
-        result_df = result["df"]
-
-        assert len(result_df) == 1
-        assert result_df["service_a_domicile"].iloc[0] == "Non"
-        assert result_df["identifiant_unique"].iloc[0] == "2"
-
-
 class TestActorsLocation:
     @pytest.mark.parametrize(
         "latitude, longitude",

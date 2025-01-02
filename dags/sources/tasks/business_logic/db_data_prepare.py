@@ -9,11 +9,13 @@ logger = logging.getLogger(__name__)
 
 def db_data_prepare(
     df_acteur_to_delete: pd.DataFrame,
-    df_actors: pd.DataFrame,
+    df_acteur: pd.DataFrame,
     df_ps: pd.DataFrame,
     df_pssc: pd.DataFrame,
     df_labels: pd.DataFrame,
     df_acteur_services: pd.DataFrame,
+    source_id_by_code: dict,
+    acteurtype_id_by_code: dict,
 ):
     update_actors_columns = ["identifiant_unique", "statut", "cree_le"]
     df_acteur_to_delete["row_updates"] = df_acteur_to_delete[
@@ -26,12 +28,18 @@ def db_data_prepare(
         else pd.DataFrame(columns=["acteur_id", "acteurservice_id"])
     )
 
-    if df_actors.empty:
+    if df_acteur.empty:
         raise ValueError("df_actors est vide")
     if df_ps.empty:
         raise ValueError("df_ps est vide")
     if df_pssc.empty:
         raise ValueError("df_pssc est vide")
+
+    # Convertir les codes des sources et des acteur_types en identifiants
+    df_acteur["source_id"] = df_acteur["source_code"].map(source_id_by_code)
+    df_acteur["acteur_type_id"] = df_acteur["acteur_type_code"].map(
+        acteurtype_id_by_code
+    )
 
     aggregated_pdsc = (
         df_pssc.groupby("propositionservice_id")
@@ -81,7 +89,7 @@ def db_data_prepare(
     )
 
     df_joined_with_pds = pd.merge(
-        df_actors,
+        df_acteur,
         aggregated_pds,
         how="left",
         left_on="identifiant_unique",

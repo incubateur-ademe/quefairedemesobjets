@@ -3,7 +3,6 @@ from datetime import datetime
 
 import numpy as np
 import pandas as pd
-from sources.tasks.transform.transform_df import clean_phone_number
 from utils.base_utils import transform_location
 from utils.mapping_utils import parse_float
 
@@ -15,15 +14,6 @@ def propose_acteur_changes(
     df_acteurs: pd.DataFrame,
     column_to_drop: list = [],
 ):
-    # Supprimer les acteurs qui ne propose qu'un service à domicile
-    if "service_a_domicile" in df.columns:
-        df.loc[
-            df["service_a_domicile"] == "service à domicile uniquement", "statut"
-        ] = "SUPPRIME"
-
-    # filtre des service à domicile uniquement
-    if "service_a_domicile" in df.columns:
-        df = df[df["service_a_domicile"].str.lower() != "oui exclusivement"]
 
     # TODO: à déplacer dans la source_data_normalize
     # intersection of columns in df and column_to_drop
@@ -49,22 +39,6 @@ def propose_acteur_changes(
 
     # On met à jour le modifie_le de qfdmo_acteur
     df["modifie_le"] = datetime.now()
-
-    # TODO : à déplacer dans la source_data_normalize
-    if "telephone" in df.columns and "code_postal" in df.columns:
-        df["telephone"] = df.apply(
-            lambda row: pd.Series(
-                clean_phone_number(row["telephone"], row["code_postal"])
-            ),
-            axis=1,
-        )
-
-    # TODO : à déplacer dans la source_data_normalize
-    if "code_postal" in df.columns:
-        # cast en str et ajout de 0 si le code postal est inférieur à 10000
-        df["code_postal"] = df["code_postal"].apply(
-            lambda x: f"0{x}" if x and len(str(x)) == 4 else str(x)
-        )
 
     df = df.replace({np.nan: None})
 

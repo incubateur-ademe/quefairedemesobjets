@@ -2,10 +2,10 @@ from datetime import datetime
 
 import pandas as pd
 import pytest
-from sources.tasks.business_logic.serialize_to_json import db_data_prepare
+from sources.tasks.business_logic.db_data_prepare import db_data_prepare
 
 
-class TestSerializeToJson:
+class TestDBDataPrepare:
 
     @pytest.mark.parametrize(
         "propose_labels, expected_labels",
@@ -42,12 +42,14 @@ class TestSerializeToJson:
             ),
         ],
     )
-    def test_serialize_to_json_labels(
+    def test_db_data_prepare_labels(
         self,
         df_proposition_services,
         df_proposition_services_sous_categories,
         propose_labels,
         expected_labels,
+        source_id_by_code,
+        acteurtype_id_by_code,
     ):
 
         df_result = db_data_prepare(
@@ -58,13 +60,21 @@ class TestSerializeToJson:
                     "cree_le": [datetime(2024, 1, 1)],
                 }
             ),
-            df_actors=pd.DataFrame({"identifiant_unique": [1, 2]}),
+            df_acteur=pd.DataFrame(
+                {
+                    "identifiant_unique": [1, 2],
+                    "source_code": ["source1", "source2"],
+                    "acteur_type_code": ["commerce", "commerce"],
+                }
+            ),
             df_ps=df_proposition_services,
             df_pssc=df_proposition_services_sous_categories,
             df_labels=propose_labels,
             df_acteur_services=pd.DataFrame(
                 columns=["acteur_id", "acteurservice_id", "acteurservice"]
             ),
+            source_id_by_code=source_id_by_code,
+            acteurtype_id_by_code=acteurtype_id_by_code,
         )
         result = df_result["all"]["df"].to_dict()
         labels = result["labels"]
@@ -116,12 +126,14 @@ class TestSerializeToJson:
             ),
         ],
     )
-    def test_serialize_to_json_acteur_services(
+    def test_db_data_prepare_acteur_services(
         self,
         df_proposition_services,
         df_proposition_services_sous_categories,
         propose_acteur_services,
         expected_acteur_services,
+        source_id_by_code,
+        acteurtype_id_by_code,
     ):
         df_result = db_data_prepare(
             df_acteur_to_delete=pd.DataFrame(
@@ -131,11 +143,19 @@ class TestSerializeToJson:
                     "cree_le": [datetime(2024, 1, 1)],
                 }
             ),
-            df_actors=pd.DataFrame({"identifiant_unique": [1, 2]}),
+            df_acteur=pd.DataFrame(
+                {
+                    "identifiant_unique": [1, 2],
+                    "source_code": ["source1", "source2"],
+                    "acteur_type_code": ["commerce", "commerce"],
+                }
+            ),
             df_ps=df_proposition_services,
             df_pssc=df_proposition_services_sous_categories,
             df_labels=pd.DataFrame(columns=["acteur_id", "labelqualite_id"]),
             df_acteur_services=propose_acteur_services,
+            source_id_by_code=source_id_by_code,
+            acteurtype_id_by_code=acteurtype_id_by_code,
         )
         result = df_result["all"]["df"].to_dict()
         acteur_services = result["acteur_services"]
