@@ -5,6 +5,7 @@ import pytest
 from sources.config.airflow_params import TRANSFORMATION_MAPPING
 from sources.tasks.airflow_logic.config_management import DAGConfig
 from sources.tasks.business_logic.source_data_normalize import (
+    _remove_undesired_lines,
     df_normalize_pharmacie,
     df_normalize_sinoe,
     source_data_normalize,
@@ -90,23 +91,33 @@ class TestSourceDataNormalizeSinoe:
         assert "ANNEE" not in df.columns
 
 
+NORMALIZATION_RULES = [
+    {
+        "origin": "col_to_rename",
+        "destination": "col_renamed",
+    },
+    {
+        "origin": "nom origin",
+        "transformation": "test_fct",
+        "destination": "nom destination",
+    },
+    {"column": "string_col", "value": "value of col"},
+    {"column": "list_col", "value": ["col1", "col2"]},
+    {
+        "origin": ["nom"],
+        "transformation": "test_fct",
+        "destination": ["nom"],
+    },
+    {"keep": "identifiant_unique"},
+    {"remove": "col_to_remove"},
+]
+
+
 class TestSourceDataNormalize:
-    # FIXME : Add tests to check all kind of transformation is applied
-    def test_normalization_rules_is_called(self):
+
+    def test_source_data_normalize_normalization_rules_are_called(self):
         dag_config_kwargs = {
-            "normalization_rules": [
-                {
-                    "origin": "nom origin",
-                    "transformation": "test_fct",
-                    "destination": "nom destination",
-                },
-                {
-                    "origin": "nom",
-                    "transformation": "test_fct",
-                    "destination": "nom",
-                },
-                {"keep": "identifiant_unique"},
-            ],
+            "normalization_rules": NORMALIZATION_RULES,
             "product_mapping": {},
             "endpoint": "http://example.com/api",
         }
@@ -115,6 +126,8 @@ class TestSourceDataNormalize:
             df_acteur_from_source=pd.DataFrame(
                 {
                     "identifiant_unique": ["id"],
+                    "col_to_remove": ["fake remove"],
+                    "col_to_rename": ["fake rename"],
                     "nom origin": ["nom origin 1"],
                     "nom": ["nom"],
                 }
@@ -122,11 +135,52 @@ class TestSourceDataNormalize:
             dag_config=DAGConfig.model_validate(dag_config_kwargs),
             dag_id="dag_id",
         )
+
+        assert "col_to_rename" not in df.columns
+        assert "col_renamed" in df.columns
+        assert df["col_renamed"].iloc[0] == "fake rename"
+
         assert "nom destination" in df.columns
         assert df["nom destination"].iloc[0] == "success"
 
+        assert "string_col" in df.columns
+        assert df["string_col"].iloc[0] == "value of col"
+
+        assert "list_col" in df.columns
+        assert df["list_col"].iloc[0] == ["col1", "col2"]
+
         assert "nom" in df.columns
         assert df["nom"].iloc[0] == "success"
+
+        assert "identifiant_unique" in df.columns
+        assert df["identifiant_unique"].iloc[0] == "id"
+
+        assert "col_to_remove" not in df.columns
+
+    def test_source_data_normalize_unhandles_column_raise(self):
+        dag_config_kwargs = {
+            "normalization_rules": NORMALIZATION_RULES,
+            "product_mapping": {},
+            "endpoint": "http://example.com/api",
+        }
+
+        with pytest.raises(ValueError) as erreur:
+            source_data_normalize(
+                df_acteur_from_source=pd.DataFrame(
+                    {
+                        "identifiant_unique": ["id"],
+                        "col_to_remove": ["fake remove"],
+                        "col_to_rename": ["fake rename"],
+                        "nom origin": ["nom origin 1"],
+                        "nom": ["nom"],
+                        "col_make_it_raise": ["fake"],
+                    }
+                ),
+                dag_config=DAGConfig.model_validate(dag_config_kwargs),
+                dag_id="dag_id",
+            )
+        assert "Le dataframe n'a pas les colonnes attendues" in str(erreur.value)
+        assert "col_make_it_raise" in str(erreur.value)
 
     # @pytest.mark.parametrize(
     #     "statut, statut_expected",
@@ -223,27 +277,163 @@ class TestDfNormalizePharmacie:
         )
 
 
-class TestRemoveUndesired_lines:
-    # FIXME : Add tests
-    pass
+class TestRemoveUndesiredLines:
+    @pytest.mark.parametrize(
+        "df, expected_df",
+        [
+            # Cas suppression service à domicile
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": ["id1", "id2", "id3"],
+                        "service_a_domicile": [
+                            "non",
+                            "oui exclusivement",
+                            "service à domicile uniquement",
+                        ],
+                        "public_accueilli": [
+                            "Particuliers",
+                            "Particuliers",
+                            "Particuliers",
+                        ],
+                        "souscategorie_codes": [["code1"], ["code2"], ["code3"]],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": ["id1"],
+                        "service_a_domicile": ["non"],
+                        "public_accueilli": ["Particuliers"],
+                        "souscategorie_codes": [["code1"]],
+                    }
+                ),
+            ),
+            # Cas suppression professionnele
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": ["id1", "id2", "id3", "id4"],
+                        "service_a_domicile": ["non", "non", "non", "oui"],
+                        "public_accueilli": [
+                            "Particuliers",
+                            "Particuliers et professionnels",
+                            "Professionnels",
+                            "Aucun",
+                        ],
+                        "souscategorie_codes": [
+                            ["code1"],
+                            ["code2"],
+                            ["code3"],
+                            ["code4"],
+                        ],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": ["id1", "id2", "id4"],
+                        "service_a_domicile": ["non", "non", "oui"],
+                        "public_accueilli": [
+                            "Particuliers",
+                            "Particuliers et professionnels",
+                            "Aucun",
+                        ],
+                        "souscategorie_codes": [["code1"], ["code2"], ["code4"]],
+                    }
+                ),
+            ),
+            # Cas avec suppression des lignes sans produits acceptés
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": ["id1", "id2", "id3"],
+                        "service_a_domicile": ["non", "non", "non"],
+                        "public_accueilli": [
+                            "Particuliers",
+                            "Particuliers",
+                            "Particuliers",
+                        ],
+                        "souscategorie_codes": [["code1"], [], ["code3"]],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": ["id1", "id3"],
+                        "service_a_domicile": ["non", "non"],
+                        "public_accueilli": ["Particuliers", "Particuliers"],
+                        "souscategorie_codes": [["code1"], ["code3"]],
+                    }
+                ),
+            ),
+        ],
+    )
+    def test_remove_undesired_lines_suppressions(self, df, expected_df, dag_config):
+        # Mock the DAGConfig
 
-    # # "service_a_domicile"
-    # def test_service_a_domicile(
-    #     self,
-    #     df_empty_acteurs_from_db,
-    # ):
+        result_df = _remove_undesired_lines(df, dag_config)
+        pd.testing.assert_frame_equal(
+            result_df.reset_index(drop=True), expected_df.reset_index(drop=True)
+        )
 
-    #     result = propose_acteur_changes(
-    #         df=pd.DataFrame(
-    #             {
-    #                 "identifiant_unique": ["1", "2"],
-    #                 "service_a_domicile": ["Oui exclusivement", "Non"],
-    #             }
-    #         ),
-    #         df_acteurs=df_empty_acteurs_from_db,
-    #     )
-    #     result_df = result["df"]
+    def test_merge_duplicated_acteurs(self, dag_config):
+        dag_config.merge_duplicated_acteurs = True
+        result = _remove_undesired_lines(
+            pd.DataFrame(
+                {
+                    "identifiant_unique": ["id1", "id1", "id2"],
+                    "service_a_domicile": ["non", "non", "non"],
+                    "public_accueilli": [
+                        "Particuliers",
+                        "Particuliers",
+                        "Particuliers",
+                    ],
+                    "souscategorie_codes": [["code1"], ["code2"], ["code3"]],
+                }
+            ),
+            dag_config,
+        )
+        result = result.sort_values("identifiant_unique")
+        result = result.reset_index(drop=True)
 
-    #     assert len(result_df) == 1
-    #     assert result_df["service_a_domicile"].iloc[0] == "Non"
-    #     assert result_df["identifiant_unique"].iloc[0] == "2"
+        expected_df = pd.DataFrame(
+            {
+                "identifiant_unique": ["id1", "id2"],
+                "service_a_domicile": ["non", "non"],
+                "public_accueilli": ["Particuliers", "Particuliers"],
+                "souscategorie_codes": [["code1", "code2"], ["code3"]],
+            }
+        )
+        expected_df.reset_index(drop=True)
+
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_ignore_duplicates(self, dag_config):
+        dag_config.ignore_duplicates = True
+        result = _remove_undesired_lines(
+            pd.DataFrame(
+                {
+                    "identifiant_unique": ["id1", "id1", "id2"],
+                    "service_a_domicile": ["non", "non", "non"],
+                    "public_accueilli": [
+                        "Particuliers",
+                        "Particuliers",
+                        "Particuliers",
+                    ],
+                    "souscategorie_codes": [["code1"], ["code2"], ["code3"]],
+                }
+            ),
+            dag_config,
+        )
+        result = result.sort_values("identifiant_unique")
+        result = result.reset_index(drop=True)
+
+        expected_df = pd.DataFrame(
+            {
+                "identifiant_unique": ["id1", "id2"],
+                "service_a_domicile": ["non", "non"],
+                "public_accueilli": ["Particuliers", "Particuliers"],
+                "souscategorie_codes": [["code1"], ["code3"]],
+            }
+        )
+        expected_df.reset_index(drop=True)
+
+        pd.testing.assert_frame_equal(result, expected_df)
