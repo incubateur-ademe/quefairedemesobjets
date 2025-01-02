@@ -206,7 +206,6 @@ def clean_souscategorie_codes_sinoe(
         for v in sscat_list
         if v.strip().lower() not in ("", "nan", "np", "none")
     ]
-    print(sscat_list)
     sscat_list = [
         dechet_mapping[v]
         for v in sscat_list

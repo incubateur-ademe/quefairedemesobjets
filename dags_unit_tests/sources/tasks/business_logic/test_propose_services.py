@@ -1,5 +1,3 @@
-# FIXME : ces tests sont à revoir, par très à propos depuis la refacto
-
 import pandas as pd
 import pytest
 from sources.tasks.business_logic.propose_services import propose_services
@@ -133,8 +131,6 @@ class TestCreatePropositionService:
             actions_id_by_code=actions_id_by_code,
         )
 
-        print(result["df"])
-        print(expected_df)
         assert result["df"].equals(expected_df)
         assert result["metadata"] == expected_metadata
 
