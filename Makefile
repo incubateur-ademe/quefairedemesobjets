@@ -62,6 +62,12 @@ run-django:
 	rm -rf .parcel-cache
 	honcho start -f Procfile.dev
 
+run-all:
+	docker compose --profile airflow up -d
+	rm -rf .parcel-cache
+	.venv/bin/python manage.py runserver 0.0.0.0:8000
+	npm run watch
+
 # Local django operations
 .PHONY: migrate
 migrate:
