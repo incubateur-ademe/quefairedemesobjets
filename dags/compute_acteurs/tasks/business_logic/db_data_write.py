@@ -16,7 +16,7 @@ def db_data_write(
         inplace=True,
     )
 
-    engine = PostgresConnectionManager().engine
+    engine = PostgresConnectionManager().django_engine
 
     original_table_name_actor = "qfdmo_displayedacteur"
     temp_table_name_actor = "qfdmo_displayedacteurtemp"
