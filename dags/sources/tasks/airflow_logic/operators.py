@@ -5,9 +5,7 @@ from airflow.models.baseoperator import chain
 from shared.tasks.airflow_logic.write_data_task import write_data_task
 from sources.tasks.airflow_logic.db_data_prepare_task import db_data_prepare_task
 from sources.tasks.airflow_logic.db_read_acteur_task import db_read_acteur_task
-from sources.tasks.airflow_logic.db_read_propositions_max_id_task import (
-    db_read_propositions_max_id_task,
-)
+from sources.tasks.airflow_logic.db_read_ps_max_id_task import db_read_ps_max_id_task
 from sources.tasks.airflow_logic.propose_acteur_changes_task import (
     propose_acteur_changes_task,
 )
@@ -18,10 +16,8 @@ from sources.tasks.airflow_logic.propose_acteur_to_delete_task import (
     propose_acteur_to_delete_task,
 )
 from sources.tasks.airflow_logic.propose_labels_task import propose_labels_task
-from sources.tasks.airflow_logic.propose_services_sous_categories_task import (
-    propose_services_sous_categories_task,
-)
-from sources.tasks.airflow_logic.propose_services_task import propose_services_task
+from sources.tasks.airflow_logic.propose_ps_sscat_task import propose_ps_sscat_task
+from sources.tasks.airflow_logic.propose_ps_task import propose_ps_task
 from sources.tasks.airflow_logic.read_mapping_from_postgres_task import (
     read_mapping_from_postgres_task,
 )
@@ -70,11 +66,11 @@ def eo_task_chain(dag: DAG) -> None:
             table_name="qfdmo_souscategorieobjet",
             task_id="db_read_souscategorieobjet",
         ),
-        db_read_propositions_max_id_task(dag),
+        db_read_ps_max_id_task(dag),
     ]
 
     create_tasks = [
-        propose_services_task(dag),
+        propose_ps_task(dag),
         propose_labels_task(dag),
         propose_acteur_services_task(dag),
     ]
@@ -89,7 +85,7 @@ def eo_task_chain(dag: DAG) -> None:
         propose_acteur_changes_task(dag),
         propose_acteur_to_delete_task(dag),
         create_tasks,
-        propose_services_sous_categories_task(dag),
+        propose_ps_sscat_task(dag),
         db_data_prepare_task(dag),
         write_data_task(dag),
     )

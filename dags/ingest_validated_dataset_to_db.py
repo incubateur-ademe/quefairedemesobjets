@@ -100,15 +100,15 @@ def write_data_to_postgres(**kwargs):
     df_actors = data_dict["actors"]
     df_labels = data_dict.get("labels")
     df_acteur_services = data_dict.get("acteur_services")
-    df_pds = data_dict.get("pds")
-    df_pdssc = data_dict.get("pds_sous_categories")
+    df_ps = data_dict.get("ps")
+    df_ps_sscat = data_dict.get("ps_sscat")
     dag_run_id = data_dict["dag_run_id"]
     change_type = data_dict.get("change_type", "CREATE")
 
     with engine.begin() as connection:
         if change_type == "CREATE":
             dag_ingest_validated_utils.handle_write_data_create_event(
-                connection, df_actors, df_labels, df_acteur_services, df_pds, df_pdssc
+                connection, df_actors, df_labels, df_acteur_services, df_ps, df_ps_sscat
             )
         elif change_type == "UPDATE_ACTOR":
             dag_ingest_validated_utils.handle_write_data_update_actor_event(

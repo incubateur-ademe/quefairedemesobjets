@@ -30,9 +30,9 @@ def write_data_wrapper(**kwargs) -> None:
         .xcom_pull(task_ids="propose_acteur_to_delete", key="return_value", default={})
         .get("metadata", {})
     )
-    metadata_pds = (
+    metadata_ps = (
         kwargs["ti"]
-        .xcom_pull(task_ids="propose_services", key="return_value", default={})
+        .xcom_pull(task_ids="ps", key="return_value", default={})
         .get("metadata", {})
     )
 
@@ -40,7 +40,7 @@ def write_data_wrapper(**kwargs) -> None:
     log.preview("run_id", run_id)
     log.preview("metadata_actors", metadata_actors)
     log.preview("metadata_acteur_to_delete", metadata_acteur_to_delete)
-    log.preview("metadata_pds", metadata_pds)
+    log.preview("metadata_ps", metadata_ps)
 
     return write_data(
         dag_name=dag_name,
@@ -48,5 +48,5 @@ def write_data_wrapper(**kwargs) -> None:
         dfs=dfs,
         metadata_actors=metadata_actors,
         metadata_acteur_to_delete=metadata_acteur_to_delete,
-        metadata_pds=metadata_pds,
+        metadata_ps=metadata_ps,
     )
