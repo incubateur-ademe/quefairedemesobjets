@@ -117,13 +117,11 @@ Conseil: utiliser `asdf` pour la gestion des environnement virtuel `node` et `py
 
 ### Installation & Exécution
 
-Configuration des variables d'environnement
+Configuration des variables d'environnement: ajouter (ou mettre à jour si existant)
+la variable AIRFLOW_UID de telle sorte à ce que Docker lance Airflow avec notre utilisateur
 
 ```sh
 cp .env.template .env
-
-# Ajoute (ou met à jour si existant) la variable AIRFLOW_UID
-# de telle sorte à ce que Docker lance Airflow avec notre utilisateur
 sed -i '/^AIRFLOW_UID=/d' .env && echo "AIRFLOW_UID=$(id -u)" >> .env
 ```
 
