@@ -18,12 +18,12 @@ def propose_acteur_services_task(dag: DAG) -> PythonOperator:
 
 def propose_acteur_services_wrapper(**kwargs):
     acteurservice_id_by_code = kwargs["ti"].xcom_pull(task_ids="db_read_acteurservice")
-    df_actors = kwargs["ti"].xcom_pull(task_ids="propose_acteur_changes")["df"]
+    df_acteur = kwargs["ti"].xcom_pull(task_ids="propose_acteur_changes")["df"]
 
-    log.preview(df_actors, "df_actors")
+    log.preview(df_acteur, "df_actors")
     log.preview(acteurservice_id_by_code, "acteurservice_id_by_code")
 
     return propose_acteur_services(
-        df_actors=df_actors,
+        df_acteur=df_acteur,
         acteurservice_id_by_code=acteurservice_id_by_code,
     )

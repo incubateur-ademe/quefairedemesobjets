@@ -1,6 +1,5 @@
 import logging
 
-import numpy as np
 import pandas as pd
 from utils import logging_utils as log
 
@@ -12,52 +11,23 @@ def propose_services(
     displayedpropositionservice_max_id: int,
     actions_id_by_code: dict,
 ) -> dict:
-    rows_dict = {}
     merged_count = 0
-
-    # TODO : à déplacer dans la source_data_normalize
-    conditions = [
-        ("point_dapport_de_service_reparation", "reparer"),
-        (
-            "point_dapport_pour_reemploi",
-            "donner",
-        ),
-        ("point_de_reparation", "reparer"),
-        (
-            "point_de_collecte_ou_de_reprise_des_dechets",
-            "trier",
-        ),
-    ]
+    rows_list = []
 
     for _, row in df.iterrows():
-        acteur_id = row["identifiant_unique"]
-        # TODO: ne pas gérer la données avec des str |, cinder en liste dès la norma
-        sous_categories = row["produitsdechets_acceptes"]
-
-        for condition, action_name in conditions:
-            if row.get(condition):
-                action_id = actions_id_by_code[action_name]
-                key = (action_id, acteur_id)
-
-                if key in rows_dict:
-                    if sous_categories not in rows_dict[key]["sous_categories"]:
-                        merged_count = +merged_count
-                        rows_dict[key]["sous_categories"] += " | " + sous_categories
-                else:
-                    rows_dict[key] = {
-                        "action_id": action_id,
-                        "acteur_id": acteur_id,
-                        "action": action_name,
-                        "sous_categories": sous_categories,
-                    }
-
-    rows_list = list(rows_dict.values())
+        for action_code in row["action_codes"]:
+            rows_list.append(
+                {
+                    "action_id": actions_id_by_code[action_code],
+                    "acteur_id": row["identifiant_unique"],
+                    "action": action_code,
+                    "sous_categories": row["souscategorie_codes"],
+                }
+            )
 
     df_pds = pd.DataFrame(rows_list)
     if df_pds.empty:
         raise ValueError("df_pds est vide")
-    if "sous_categories" in df_pds.columns:
-        df_pds["sous_categories"] = df_pds["sous_categories"].replace(np.nan, None)
     if indexes := range(
         displayedpropositionservice_max_id,
         displayedpropositionservice_max_id + len(df_pds),

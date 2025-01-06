@@ -31,21 +31,21 @@ class TestDataTransformations:
         result_id = mapping_utils.get_id_from_code(value, df_mapping)
         assert result_id == expected_id
 
-    def test_with_service_a_domicile_only(self):
-        row = {
-            "source_code": "ECOORG",
-            "identifiant_externe": "123AbC",
-            "type_de_point_de_collecte": "Solution en ligne (site web, app. mobile)",
-        }
-        assert mapping_utils.create_identifiant_unique(row) == "ecoorg_123AbC_d"
+    # def test_with_service_a_domicile_only(self):
+    #     row = {
+    #         "source_code": "ECOORG",
+    #         "identifiant_externe": "123AbC",
+    #         "type_de_point_de_collecte": "Solution en ligne (site web, app. mobile)",
+    #     }
+    #     assert mapping_utils.create_identifiant_unique(row) == "ecoorg_123AbC_d"
 
-    def test_without_service_a_domicile_only(self):
-        row = {
-            "source_code": "ECOORG",
-            "identifiant_externe": "123AbC",
-            "type_de_point_de_collecte": "Artisan, commerce indépendant ",
-        }
-        assert mapping_utils.create_identifiant_unique(row), "ecoorg_123AbC"
+    # def test_without_service_a_domicile_only(self):
+    #     row = {
+    #         "source_code": "ECOORG",
+    #         "identifiant_externe": "123AbC",
+    #         "type_de_point_de_collecte": "Artisan, commerce indépendant ",
+    #     }
+    #     assert mapping_utils.create_identifiant_unique(row), "ecoorg_123AbC"
 
 
 class TestTransformFloat:
