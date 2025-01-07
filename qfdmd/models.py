@@ -39,9 +39,6 @@ class Produit(AbstractBaseProduit):
     )
     nom = models.CharField(
         unique=True,
-        blank=True,
-        help_text="Ce champ est facultatif et n'est utilisé que "
-        "dans l'administration Django.",
         verbose_name="Libellé",
     )
     synonymes_existants = models.TextField(blank=True, help_text="Synonymes existants")
@@ -148,7 +145,10 @@ class Lien(models.Model):
     url = models.URLField(blank=True, help_text="URL", max_length=300)
     description = models.TextField(blank=True, help_text="Description")
     produits = models.ManyToManyField(
-        Produit, related_name="liens", help_text="Produits associés"
+        Produit,
+        through="qfdmd.ProduitLien",
+        related_name="liens",
+        help_text="Produits associés",
     )
     poids = models.IntegerField(default=0)
 
@@ -157,6 +157,16 @@ class Lien(models.Model):
 
     class Meta:
         ordering = ("poids",)
+
+
+class ProduitLien(models.Model):
+    produit = models.ForeignKey(Produit, on_delete=models.CASCADE)
+    lien = models.ForeignKey(Lien, on_delete=models.CASCADE)
+    poids = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ("poids",)
+        unique_together = ("produit", "lien")  # Prevent duplicate relations
 
 
 class Synonyme(AbstractBaseProduit):
