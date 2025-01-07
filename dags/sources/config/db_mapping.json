@@ -25,6 +25,7 @@
     ],
     "gem froid": "gros electromenager (refrigerant)",
     "gem hors froid": "gros electromenager (hors refrigerant)",
+    "grands cartons": "emballage_carton",
     "huisseries": "Huisseries (produits et matériaux de construction du bâtiment)",
     "jeux et jouets": "jouet",
     "laine de roche": "Laine de roche (produits et matériaux de construction du bâtiment)",
@@ -43,6 +44,16 @@
     "pam (petits appareils ménagers)": "petit electromenager",
     "panneaux photovoltaïques": "Panneaux photovoltaïques",
     "papiers graphiques": "papiers_graphiques",
+    "papiers graphiques et emballages papiers-carton": [
+      "autres_emballages_menagers",
+      "emballage_carton",
+      "papiers_graphiques"
+    ],
+    "papiers graphiques, emballages papiers-carton et briques alimentaires": [
+      "autres_emballages_menagers",
+      "emballage_carton",
+      "papiers_graphiques"
+    ],
     "plâtre": "Plâtre - PMCB (produits et matériaux de construction du bâtiment)",
     "pmcb - bois": "Bois - PMCB (produits et matériaux de construction du bâtiment)",
     "pmcb - métal": "Métal - PMCB (produits et matériaux de construction du bâtiment)",
