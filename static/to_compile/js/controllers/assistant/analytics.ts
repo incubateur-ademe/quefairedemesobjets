@@ -32,6 +32,7 @@ export default class extends Controller<HTMLElement> {
     api_host: "https://eu.posthog.com",
     autocapture: false,
     capture_pageview: false,
+    person_profiles: 'always',
     persistence: "memory",
   }
 
@@ -47,6 +48,10 @@ export default class extends Controller<HTMLElement> {
     this.#fillSessionStorageWithAction()
     this.#setupIntersectionObserverForPageView()
     this.#captureUserConversionScore()
+
+    if (this.posthogDebugValue) {
+      posthog.debug()
+    }
   }
 
   #fillSessionStorageWithAction() {
@@ -84,7 +89,6 @@ export default class extends Controller<HTMLElement> {
     if (document.referrer) {
       propertiesToSendToPostHog.iframe = true
     }
-
 
     posthog.capture("$set", {
       $set: propertiesToSendToPostHog
