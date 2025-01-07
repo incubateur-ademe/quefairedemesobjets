@@ -166,9 +166,13 @@ class Lien(models.Model):
     produits = models.ManyToManyField(
         Produit, related_name="liens", help_text="Produits associés"
     )
+    poids = models.IntegerField(default=0)
 
     def __str__(self):
         return self.titre_du_lien
+
+    class Meta:
+        ordering = ("poids",)
 
 
 class Synonyme(AbstractBaseProduit):
