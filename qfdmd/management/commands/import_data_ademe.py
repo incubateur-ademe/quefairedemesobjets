@@ -68,11 +68,12 @@ class Command(BaseCommand):
         data_ademe_liens_r = requests.get(ADEME_LIENS_URL)
         nb_lien_created = 0
         nb_lien_updated = 0
-        for line in data_ademe_liens_r.json()["results"]:
+        for index, line in enumerate(data_ademe_liens_r.json()["results"]):
             lien, created = Lien.objects.update_or_create(
                 titre_du_lien=line["Titre_du_lien"],
                 defaults={
                     "url": line["URL"],
+                    "poids": index,
                     "description": line.get("Description", ""),
                 },
             )
@@ -82,7 +83,8 @@ class Command(BaseCommand):
                     continue
                 try:
                     produit = Produit.objects.get(id=produit_id)
-                    lien.produits.add(produit)
+                    if produit not in lien.produits.all():
+                        lien.produits.add(produit)
                 except Produit.DoesNotExist:
                     self.stdout.write(
                         self.style.ERROR(f"Produit avec ID {produit_id} n'existe pas")

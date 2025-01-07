@@ -77,19 +77,13 @@ class Produit(AbstractBaseProduit):
 
         return (bon_etat, mauvais_etat)
 
-    @cached_property
-    def mauvais_etat(self) -> str:
-        if self.qu_est_ce_que_j_en_fais_mauvais_etat:
-            return self.qu_est_ce_que_j_en_fais_mauvais_etat
-        try:
-            return self.get_etats_descriptions()[0]
-        except KeyError:
-            return ""
-
     @property
     def carte_settings(self):
         # TODO : gérer plusieurs catégories ici
         sous_categorie = self.sous_categories.filter(afficher_carte=True).first()
+        if not sous_categorie:
+            return {}
+
         return {
             "carte": 1,
             "direction": "jai",
@@ -117,16 +111,6 @@ class Produit(AbstractBaseProduit):
     def url_carte_bon_etat(self):
         actions = "preter|emprunter|louer|mettreenlocation|donner|echanger|revendre"
         return self.get_url_carte(actions)
-
-    @cached_property
-    def bon_etat(self) -> str:
-        if self.qu_est_ce_que_j_en_fais_bon_etat:
-            return self.qu_est_ce_que_j_en_fais_bon_etat
-
-        try:
-            return self.get_etats_descriptions()[1]
-        except KeyError:
-            return ""
 
     @cached_property
     def en_savoir_plus(self):
@@ -166,9 +150,13 @@ class Lien(models.Model):
     produits = models.ManyToManyField(
         Produit, related_name="liens", help_text="Produits associés"
     )
+    poids = models.IntegerField(default=0)
 
     def __str__(self):
         return self.titre_du_lien
+
+    class Meta:
+        ordering = ("poids",)
 
 
 class Synonyme(AbstractBaseProduit):
@@ -198,6 +186,30 @@ class Synonyme(AbstractBaseProduit):
     @property
     def url(self) -> str:
         return self.get_absolute_url()
+
+    @cached_property
+    def bon_etat(self) -> str:
+        if self.qu_est_ce_que_j_en_fais_bon_etat:
+            return self.qu_est_ce_que_j_en_fais_bon_etat
+        if self.produit.qu_est_ce_que_j_en_fais_bon_etat:
+            return self.produit.qu_est_ce_que_j_en_fais_bon_etat
+
+        try:
+            return self.produit.get_etats_descriptions()[1]
+        except (KeyError, TypeError):
+            return ""
+
+    @cached_property
+    def mauvais_etat(self) -> str:
+        if self.qu_est_ce_que_j_en_fais_mauvais_etat:
+            return self.qu_est_ce_que_j_en_fais_mauvais_etat
+        if self.produit.qu_est_ce_que_j_en_fais_mauvais_etat:
+            return self.produit.qu_est_ce_que_j_en_fais_mauvais_etat
+
+        try:
+            return self.produit.get_etats_descriptions()[0]
+        except KeyError:
+            return ""
 
     def get_absolute_url(self) -> str:
         return reverse("qfdmd:synonyme-detail", args=[self.slug])

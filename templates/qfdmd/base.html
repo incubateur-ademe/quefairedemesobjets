@@ -59,7 +59,7 @@
         <script
             data-controller="analytics"
             data-analytics-posthog-key-value="{{ assistant.POSTHOG_KEY }}"
-            data-analytics-posthog-debug-value="{{ POSTHOG_DEBUG }}"
+            data-analytics-posthog-debug-value="{{ POSTHOG_DEBUG|lower }}"
             {% if request.user.is_authenticated %}
                 data-analytics-user-username-value="{{ request.user.username }}"
                 data-analytics-user-email-value="{{ request.user.email }}"

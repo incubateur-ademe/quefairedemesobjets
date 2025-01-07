@@ -1,6 +1,6 @@
 {% load dsfr_tags %}
 
-{% if produit.bon_etat and produit.mauvais_etat %}
+{% if bon_etat and mauvais_etat %}
     <div class="fr-tabs">
         <ul class="fr-tabs__list" role="tablist" aria-label="État du produit {{ produit }}">
             <li role="presentation">
@@ -29,10 +29,10 @@
             </li>
         </ul>
         <div id="mauvais-etat-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="mauvais-etat-tab" tabindex="0">
-            {% include "./_detail.html" with content=produit.mauvais_etat url_carte=produit.url_carte_mauvais_etat %}
+            {% include "./_detail.html" with content=mauvais_etat url_carte=produit.url_carte_mauvais_etat %}
         </div>
         <div id="bon-etat-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="bon-etat-tab" tabindex="0">
-            {% include "./_detail.html" with content=produit.bon_etat url_carte=produit.url_carte_bon_etat %}
+            {% include "./_detail.html" with content=bon_etat url_carte=produit.url_carte_bon_etat %}
         </div>
     </div>
 {% else %}

@@ -38,12 +38,26 @@ def source_data_validate(
         raise ValueError("Doublons sur identifiant_unique")
 
     # ------------------------------------
-    # acteur_type_id
-    ids_df = set(df["acteur_type_id"].unique())
-    ids_db = set(db_tasks.read_data_from_postgres(table_name="qfdmo_acteurtype")["id"])
-    ids_invalid = ids_df - ids_db
-    if ids_invalid:
-        raise ValueError(f"acteur_type_id: ids pas dans DB: {ids_invalid}")
+    # acteur_type_code
+    df_acteurtype_code = set(df["acteur_type_code"].unique())
+    db_acteurtype_code = set(
+        db_tasks.read_data_from_postgres(table_name="qfdmo_acteurtype")["code"]
+    )
+    invalid_acteurtype_codes = df_acteurtype_code - db_acteurtype_code
+    if invalid_acteurtype_codes:
+        raise ValueError(
+            f"acteur_type_code: codes pas dans DB: {invalid_acteurtype_codes}"
+        )
+
+    # ------------------------------------
+    # source_code
+    df_source_code = set(df["source_code"].unique())
+    db_source_code = set(
+        db_tasks.read_data_from_postgres(table_name="qfdmo_source")["code"]
+    )
+    invalid_source_codes = df_source_code - db_source_code
+    if invalid_source_codes:
+        raise ValueError(f"source_code: codes pas dans DB: {invalid_source_codes}")
 
     # ------------------------------------
     # product_mapping
@@ -64,19 +78,51 @@ def source_data_validate(
         raise ValueError(f"product_mapping: codes pas dans DB: {codes_invalid}")
 
     # ------------------------------------
-    # produitsdechets_acceptes
-    # - les valeurs de produits acceptés doivent être de type string ou list et non
-    #   vides
-    df_produits_invalid = df[
-        ~df["produitsdechets_acceptes"].apply(
-            lambda x: isinstance(x, (str, list)) and bool(x)
+    # vérification des codes des acteurservices
+    df_acteurservice_code = set(
+        chain.from_iterable(
+            x if isinstance(x, list) else [x] for x in df["acteurservice_codes"]
         )
-    ]
-    if not df_produits_invalid.empty:
-        log.preview("produitsdechets_acceptes invalid", df_produits_invalid)
-        raise ValueError("produitsdechets_acceptes invalid")
+    )
+    db_acteurservice_code = set(
+        db_tasks.read_data_from_postgres(table_name="qfdmo_acteurservice")["code"]
+    )
+    invalid_acteurservice_codes = df_acteurservice_code - db_acteurservice_code
+    if invalid_acteurservice_codes:
+        raise ValueError(
+            f"acteurservice_codes: codes pas dans DB: {invalid_acteurservice_codes}"
+        )
+
+    # ------------------------------------
+    # vérification des codes des labels
+    df_label_code = set(
+        chain.from_iterable(
+            x if isinstance(x, list) else [x] for x in df["label_codes"]
+        )
+    )
+    db_label_code = set(
+        db_tasks.read_data_from_postgres(table_name="qfdmo_labelqualite")["code"]
+    )
+    invalid_label_codes = df_label_code - db_label_code
+    if invalid_label_codes:
+        raise ValueError(f"label_codes: codes pas dans DB: {invalid_label_codes}")
+
+    # ------------------------------------
+    # vérification des codes des labels
+    df_sscat_code = set(
+        chain.from_iterable(
+            x if isinstance(x, list) else [x] for x in df["souscategorie_codes"]
+        )
+    )
+    db_sscat_code = set(
+        db_tasks.read_data_from_postgres(table_name="qfdmo_souscategorieobjet")["code"]
+    )
+    invalid_sscat_codes = df_sscat_code - db_sscat_code
+    if invalid_sscat_codes:
+        raise ValueError(f"sscat_codes: codes pas dans DB: {invalid_sscat_codes}")
 
     # Le but de la validation n'est pas de modifier les données
     # donc on retourn explicitement None et les tâches suivantes
     # devront se baser sur source_data_normalize
+
     return None
