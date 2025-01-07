@@ -508,7 +508,7 @@ class RevisionActeur(BaseActeur):
 
     @property
     def is_parent(self):
-        return self.duplicats.exists()
+        return self.pk and self.duplicats.exists()
 
     def save(self, *args, **kwargs):
         # OPTIMIZE: if we need to validate the main action in the service propositions
@@ -594,6 +594,56 @@ class RevisionActeur(BaseActeur):
         self.parent = revision_acteur_parent
         self.save()
         return revision_acteur_parent
+
+    def duplicate(self):
+        if self.is_parent:
+            raise Exception("Impossible de dupliquer un acteur parent")
+
+        # Get linked objects before removing pk
+        labels = self.labels.all()
+        acteur_services = self.acteur_services.all()
+        # Besoin de cette "list comprehension" pour executer la Queryset,
+        # sinon elle n'est pas executé avant que le revisionacteur soit modifié
+        proposition_services = [ps for ps in self.proposition_services.all()]
+
+        acteur = Acteur.objects.get(identifiant_unique=self.identifiant_unique)
+
+        nullable_fields = [
+            "identifiant_unique",
+            "identifiant_externe",
+            "source",
+        ]
+        ignore_fields = [
+            "labels",
+            "acteur_services",
+            "proposition_services",
+            "parent",
+        ]
+
+        for field in nullable_fields:
+            setattr(self, field, None)
+        for field in self._meta.fields:
+            if (
+                not getattr(self, field.name)
+                and field.name not in nullable_fields
+                and field.name not in ignore_fields
+            ):
+                setattr(self, field.name, getattr(acteur, field.name))
+        self.save()
+        self.labels.set(labels)
+        self.acteur_services.set(acteur_services)
+
+        # recreate proposition_services for the new self
+        for proposition_service in proposition_services:
+            revision_proposition_service = RevisionPropositionService(
+                acteur=self,
+                action=proposition_service.action,
+            )
+            revision_proposition_service.save()
+            revision_proposition_service.sous_categories.set(
+                proposition_service.sous_categories.all()
+            )
+        return self
 
     def __str__(self):
         return (

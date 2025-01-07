@@ -7,5 +7,10 @@
     {% else %}
         <input type="submit" value="Créer un parent (agrège les duplicats)" name="_get_or_create_parent" {% if original.is_parent %}disabled{% endif %}>
     {% endif %}
+    {% if duplicate_instance and not original.is_parent %}
+        <br>
+        <br>
+        <input type="submit" value="Dupliquer l'instance {{ original }}" name="_duplicate_instance">
+    {% endif %}
     {{ block.super }}
 {% endblock submit_buttons_bottom %}

@@ -11,7 +11,7 @@ from qfdmo.models import (
     RevisionActeur,
     RevisionPropositionService,
 )
-from qfdmo.models.acteur import DisplayedActeur, LabelQualite
+from qfdmo.models.acteur import DisplayedActeur, LabelQualite, Source
 from unit_tests.qfdmo.acteur_factory import (
     ActeurFactory,
     ActeurServiceFactory,
@@ -29,6 +29,7 @@ from unit_tests.qfdmo.action_factory import (
     ActionFactory,
     GroupeActionFactory,
 )
+from unit_tests.qfdmo.sscatobj_factory import SousCategorieObjetFactory
 
 
 @pytest.fixture()
@@ -153,7 +154,7 @@ class TestActeurOpeningHours:
 
 
 @pytest.mark.django_db
-class TestLocationValidation:
+class TestActeurLocationValidation:
     def test_location_validation_raise(self):
         acteur_type = ActeurTypeFactory()
         acteur = Acteur(
@@ -334,6 +335,80 @@ class TestCreateRevisionActeurCreateParent:
         revision_acteur_parent = revision_acteur.create_parent()
 
         assert revision_acteur_parent.proposition_services.count() == 0
+
+
+@pytest.mark.django_db
+class TestRevisionActeurDuplicate:
+    def test_duplicate(self):
+        acteur = ActeurFactory(nom_commercial="Nom commercial")
+        revision_acteur = RevisionActeurFactory(
+            identifiant_unique=acteur.identifiant_unique,
+            nom_commercial=None,
+            nom="Nom Revision",
+        )
+        revision_acteur_duplicate = revision_acteur.duplicate()
+
+        assert (
+            revision_acteur_duplicate.nom == "Nom Revision"
+        ), f"Should be the name of the revision : {revision_acteur.nom}"
+        assert (
+            revision_acteur_duplicate.acteur_type == revision_acteur.acteur_type
+        ), f"Should be the acteur type of the revision : {revision_acteur.acteur_type}"
+        assert (
+            revision_acteur_duplicate.location == revision_acteur.location
+        ), f"Should be the location of the revision : {revision_acteur.location}"
+        assert (
+            revision_acteur_duplicate.nom_commercial == "Nom commercial"
+        ), f"Should be the nom commercial of the acteur : {acteur.source}"
+
+    def test_duplicate_source(self):
+        revision_acteur = RevisionActeurFactory()
+        revision_acteur_duplicate = revision_acteur.duplicate()
+
+        assert revision_acteur_duplicate.source == Source.objects.get(code="equipe")
+
+    def test_duplicate_labels(self):
+        revision_acteur = RevisionActeurFactory()
+        label1 = LabelQualiteFactory()
+        label2 = LabelQualiteFactory()
+        revision_acteur.labels.add(label1)
+        revision_acteur.labels.add(label2)
+
+        print(revision_acteur.labels.all())
+
+        revision_acteur_duplicate = revision_acteur.duplicate()
+
+        assert revision_acteur_duplicate.labels.count() == 2
+        assert set(
+            [label.code for label in revision_acteur_duplicate.labels.all()]
+        ) == {
+            label1.code,
+            label2.code,
+        }
+
+    def test_duplicate_proposition_services(self):
+        revision_acteur = RevisionActeurFactory()
+        proposition_services1 = RevisionPropositionServiceFactory(
+            acteur=revision_acteur, action=ActionFactory(code="action1")
+        )
+        proposition_services2 = RevisionPropositionServiceFactory(
+            acteur=revision_acteur, action=ActionFactory(code="action2")
+        )
+        sous_categorie1 = SousCategorieObjetFactory()
+        sous_categorie2 = SousCategorieObjetFactory()
+        proposition_services1.sous_categories.add(sous_categorie1, sous_categorie2)
+        proposition_services2.sous_categories.add(sous_categorie1)
+        print(revision_acteur.proposition_services.all())
+
+        revision_acteur_duplicate = revision_acteur.duplicate()
+        print(revision_acteur_duplicate.proposition_services.all())
+        assert revision_acteur_duplicate.proposition_services.count() == 2
+        assert set(
+            [
+                (ps.action.code, ps.sous_categories.count())
+                for ps in revision_acteur_duplicate.proposition_services.all()
+            ]
+        ) == {("action1", 2), ("action2", 1)}
 
 
 @pytest.mark.django_db

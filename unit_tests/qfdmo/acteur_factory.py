@@ -32,8 +32,9 @@ class LabelQualiteFactory(Factory):
         model = LabelQualite
         django_get_or_create = ("code",)
 
+    libelle = Faker("word")
+    code = Faker("word")
     afficher = True
-    code = "a code"
 
 
 class ActeurTypeFactory(Factory):
