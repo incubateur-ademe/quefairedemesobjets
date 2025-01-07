@@ -15,26 +15,16 @@ class TestProposeServicesSousCategories:
                     "action_id": [1, 3, 1, 3],
                     "acteur_id": [1, 1, 2, 2],
                     "action": ["reparer", "trier", "reparer", "trier"],
-                    "acteur_service": [
-                        "Service de réparation",
-                        "Collecte par une structure spécialisée",
-                        "Service de réparation",
-                        "Collecte par une structure spécialisée",
-                    ],
                     "sous_categories": [
-                        "téléphones portables",
-                        "téléphones portables",
-                        "ecrans",
-                        "ecrans",
+                        ["smartphone, tablette et console"],
+                        ["smartphone, tablette et console"],
+                        ["ecran"],
+                        ["ecran"],
                     ],
                     "id": [1, 2, 3, 4],
                 }
             ),
             souscats_id_by_code=souscategorieobjet_code_by_id,
-            product_mapping={
-                "téléphones portables": "smartphone, tablette et console",
-                "ecrans": "ecran",
-            },
         )
 
         pd.testing.assert_frame_equal(
@@ -72,5 +62,4 @@ class TestProposeServicesSousCategories:
                     }
                 ),
                 souscats_id_by_code=souscategorieobjet_code_by_id,
-                product_mapping={},
             )
