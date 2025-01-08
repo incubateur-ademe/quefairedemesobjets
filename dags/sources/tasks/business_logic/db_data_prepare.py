@@ -18,7 +18,7 @@ def db_data_prepare(
     acteurtype_id_by_code: dict,
 ):
     update_actors_columns = ["identifiant_unique", "statut", "cree_le"]
-    df_acteur_to_delete["row_updates"] = df_acteur_to_delete[
+    df_acteur_to_delete["suggestion"] = df_acteur_to_delete[
         update_actors_columns
     ].apply(lambda row: json.dumps(row.to_dict(), default=str), axis=1)
     # Created or updated Acteurs
@@ -124,7 +124,7 @@ def db_data_prepare(
 
     df_joined = df_joined.where(pd.notna(df_joined), None)
 
-    df_joined["row_updates"] = df_joined.apply(
+    df_joined["suggestion"] = df_joined.apply(
         lambda row: json.dumps(row.to_dict(), default=str), axis=1
     )
     df_joined.drop_duplicates("identifiant_unique", keep="first", inplace=True)

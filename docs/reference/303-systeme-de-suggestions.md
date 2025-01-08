@@ -22,11 +22,14 @@ On a quelques problème de lisibilité des ces tables:
 
 ### Base de données
 
-- Renommage des tables : `dagrun` -> `suggestion_cohorte` , `dagrunchange` -> `suggestion_ligne`
+- Renommage des tables : `dagrun` -> `suggestion_cohorte` , `dagrunchange` -> `suggestion_unitaire`
 - Écrire les champs en français comme le reste des tables de l'application
 - Revu des statuts de `suggestion_cohorte` : à traiter, en cours de traitement, fini avec succès, fini avec succès partiel, fini en erreur
 - Ajout d'un type d'évenement à `suggestion_cohorte` : source, enrichissement
 - Ajout d'un sous-type d'évenement à `suggestion_cohorte` : source - ajout acteur, source - suppression acteur, source - modification acteur, enrichissement - déménagement…
+- Ajout de champ pour stocker le message de sortie (au moins en cas d'erreur)
+- Paramettre de tolérance d'erreur
+- 2 champs JSON, 1 context initial, 1 suggestion
 
 ### Interface
 
@@ -42,3 +45,33 @@ Si possible, utiliser l'interface d'administration de Django pour gérer les sug
 ### Pipeline
 
 - Le DAG de validation des cohortes doit intégrer la même architecture que les autres DAGs
+
+# Cible
+
+## Systeme de Suggestion
+
+Les suggestions sont crées par l'exécution d'un pipeline ou d'un script. Les suggestions sont faites par paquet qu'on appelle **Cohorte**, les Cohortes comprennent un ensemble de suggestion de mofification
+
+Les cohortes ont un type d'événement : `clustering`, `enrichissement`, `source` selon le type de l'action lancée à l'origine de la suggestion de modification
+
+Les cohortes et les suggestions ont un statut de traitement qui représente leur cycle de vie : `à valider`, `rejeter`, `à traiter`, `en cours de traitement`, `fini avec succès`, `fini avec succès partiel` (uniquement pour les cohortes), `fini en erreur`
+
+### Representation dans Django
+
+- SuggestionCohorte représente les cohortes
+- SuggestionUnitaire représente les propositions de modification
+
+### Cycle de vie d'une suggestion
+
+```mermaid
+---
+title: Cycle de vie d'une suggestion (cohorte et unitaire)
+---
+
+flowchart TB
+
+    AVALIDER[À valider] --> ATRAITER[À traiter] --> ENCOURS[En cours de traitement] --> SUCCES[Fini avec succès]
+    AVALIDER[À valider] --> REJETER[Rejeter]
+    ENCOURS --> PARTIEL[Fini avec succès partiel]
+    ENCOURS --> ERREUR[Fini en erreur]
+```
