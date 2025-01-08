@@ -76,7 +76,7 @@ def handle_update_actor_event(df_actors, dag_run_id):
     ]
 
     current_time = datetime.now().astimezone().isoformat(timespec="microseconds")
-    df_actors = df_actors[df_actors["status"] == shared_constants.DAGRUN_TOINSERT]
+    df_actors = df_actors[df_actors["status"] == shared_constants.SUGGESTION_ATRAITER]
     df_actors = df_actors.apply(mapping_utils.replace_with_selected_candidat, axis=1)
     df_actors[["adresse", "code_postal", "ville"]] = df_actors.apply(
         lambda row: base_utils.extract_details(row, col="adresse_candidat"), axis=1
@@ -312,7 +312,9 @@ def handle_write_data_update_actor_event(connection, df_actors):
 
 
 def update_dag_run_status(
-    connection, dag_run_id, statut=shared_constants.DAGRUN_FINISHED
+    connection, dag_run_id, statut=shared_constants.SUGGESTION_SUCCES
 ):
-    query = f"UPDATE qfdmo_dagrun SET status = '{statut}' WHERE id = {dag_run_id}"
+    query = f"""
+    UPDATE qfdmo_suggestioncohorte SET statut = '{statut}' WHERE id = {dag_run_id}
+    """
     connection.execute(query)

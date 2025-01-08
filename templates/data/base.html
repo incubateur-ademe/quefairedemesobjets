@@ -1,0 +1,61 @@
+{% load dsfr_tags qfdmd_tags static %}
+
+<!DOCTYPE html>
+<html
+    lang="fr"
+    class="qf-scroll-smooth"
+    {% if not is_carte %}data-formulaire{% endif %}
+>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="robots" content="{% block robots %}index, follow{% endblock %}">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+
+        {# Title and desc #}
+        <title>{% block page_title %}Longue vie aux objets{% endblock %}</title>
+        <meta name="description" content="{% block page_description %}Donnons une nouvelle vie aux objets{% endblock %}">
+
+        {% favicon %}
+
+        {# Css #}
+        {% dsfr_css %}
+        <link rel="stylesheet" href="{% static 'qfdmd.css' %}">
+
+        {% block css_extras %}{% endblock %}
+
+        {# Js #}
+        <script src="{% static 'qfdmo.js' %}"></script>
+        {% block javascript_extras %}{% endblock %}
+    </head>
+
+    <body
+        class="qf-flex qf-flex-col qf-h-svh qf-h-screen qf-overflow-hidden"
+        data-controller="analytics"
+    >
+
+        <main id="solutions" class="qf-overflow-auto qf-overscroll-none qf-scroll-smooth">
+            <noscript>
+                <div class="fr-container fr-my-3w">
+                    <div class="fr-alert fr-alert--error">
+                        <h3 class="fr-alert__title">L'application nécessite Javascript pour être exécutée correctement</h3>
+                        <p>Javascript est désactivé dans votre navigateur. Veuillez l'activer pour une meilleure expérience.</p>
+                        <p>Vous trouverez sur le lien suivant comment activer Javascript dans votre navigateur : <a href="https://www.enable-javascript.com/fr/" target="_blank" rel="noreferrer">https://www.enable-javascript.com/fr/</a></p>
+                    </div>
+                </div>
+            </noscript>
+            <div class="fr-container fr-my-3w qf-hidden" id='obsolete_browser_message'>
+                <div class="fr-alert fr-alert--warning">
+                    <h3 class="fr-alert__title">Une mise à jour de votre navigateur est nécessaire</h3>
+                    <p>La version de votre navigateur étant trop ancienne, nous ne pouvons vous garantir une expérience optimale sur la carte Longue vie aux objets. Si vous le souhaitez, vous pouvez aussi essayer de vous connecter sur un autre navigateur.</p>
+                </div>
+            </div>
+            {% block content %}{% endblock %}
+        </main>
+
+        {% block modals %}{% endblock %}
+        {% block js %}
+        {% endblock js %}
+    </body>
+</html>

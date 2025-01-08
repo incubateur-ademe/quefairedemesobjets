@@ -1,0 +1,39 @@
+{% extends 'data/base.html' %}
+
+{% block content %}
+
+    <div class="fr-m-3w">
+        <h1>Validations des «DAGs»</h1>
+
+        <p>
+            Cette page permet de valider les données des «DAGs».
+        </p>
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        <form method='POST'>
+            {% csrf_token %}
+            {{ form }}
+            <div class="fr-my-3w">
+                <button type="submit" class="fr-btn" method='POST' name='search' value=1>Afficher le résumé du dag</button>
+            </div>
+
+            {% if suggestion_cohorte_instance %}
+                {% if suggestion_cohorte_instance.is_source_type %}
+                    {% include 'data/_partials/source_event.html' %}
+                {% elif suggestion_cohorte_instance.is_enrichissement_type %}
+                    <i>L'interface de suggestions d'enrichissement n'est pas encore implémentée</i>
+                {% elif suggestion_cohorte_instance.is_clustering_type %}
+                    <i>L'interface de suggestion de clustering n'est pas encore implémentée</i>
+                {% endif %}
+
+            {% endif %}
+        </form>
+
+    </div>
+
+{% endblock content %}

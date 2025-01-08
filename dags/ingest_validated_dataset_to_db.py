@@ -19,68 +19,104 @@ default_args = {
 }
 
 dag = DAG(
-    dag_id="validate_and_process_dagruns",
+    dag_id="validate_and_process_suggestions",
     dag_display_name="Traitement des cohortes de données validées",
     default_args=default_args,
-    description="Check for VALIDATE in qfdmo_dagrun and process qfdmo_dagrunchange",
+    description="traiter les suggestions à traiter",
     schedule="*/5 * * * *",
     catchup=False,
     max_active_runs=1,
 )
 
 
-def _get_first_dagrun_to_insert():
+def _get_first_suggetsioncohorte_to_insert():
     hook = PostgresHook(postgres_conn_id="qfdmo_django_db")
-    # get first row from table qfdmo_dagrun with status TO_INSERT
     row = hook.get_first(
-        f"SELECT * FROM qfdmo_dagrun WHERE status = '{constants.DAGRUN_TOINSERT}'"
-        " LIMIT 1"
+        f"""
+        SELECT * FROM qfdmo_suggestioncohorte
+        WHERE statut = '{constants.SUGGESTION_ATRAITER}'
+        LIMIT 1
+        """
     )
     return row
 
 
 def check_suggestion_to_process(**kwargs):
-    # get first row from table qfdmo_dagrun with status TO_INSERT
-    row = _get_first_dagrun_to_insert()
+    row = _get_first_suggetsioncohorte_to_insert()
     return bool(row)
 
 
 def fetch_and_parse_data(**context):
-    row = _get_first_dagrun_to_insert()
-    dag_run_id = row[0]
+    row = _get_first_suggetsioncohorte_to_insert()
+    suggestion_cohorte_id = row[0]
 
     engine = PostgresConnectionManager().engine
 
     df_sql = pd.read_sql_query(
-        f"SELECT * FROM qfdmo_dagrunchange WHERE dag_run_id = '{dag_run_id}'",
+        f"""
+        SELECT * FROM qfdmo_suggestionunitaire
+        WHERE suggestion_cohorte_id = '{suggestion_cohorte_id}'
+        """,
         engine,
     )
 
-    df_create = df_sql[df_sql["change_type"] == "CREATE"]
-    df_update_actor = df_sql[df_sql["change_type"] == "UPDATE_ACTOR"]
+    df_acteur_to_create = df_sql[
+        df_sql["type_action"] == constants.SUGGESTION_SOURCE_AJOUT
+    ]
+    df_acteur_to_update = df_sql[
+        df_sql["type_action"] == constants.SUGGESTION_SOURCE_AJOUT
+    ]
+    df_acteur_to_delete = df_sql[
+        df_sql["type_action"] == constants.SUGGESTION_SOURCE_SUPRESSION
+    ]
+    df_acteur_to_enrich = df_sql[
+        df_sql["type_action"] == constants.SUGGESTION_ENRICHISSEMENT
+    ]
 
-    if not df_create.empty:
-        normalized_dfs = df_create["row_updates"].apply(pd.json_normalize)
-        df_actors_create = pd.concat(normalized_dfs.tolist(), ignore_index=True)
+    df_update_actor = df_sql[df_sql["type_action"] == "UPDATE_ACTOR"]
+
+    if not df_acteur_to_create.empty:
+        normalized_dfs = df_acteur_to_create["suggestion"].apply(pd.json_normalize)
+        df_acteur = pd.concat(normalized_dfs.tolist(), ignore_index=True)
         return dag_ingest_validated_utils.handle_create_event(
-            df_actors_create, dag_run_id, engine
+            df_acteur, suggestion_cohorte_id, engine
         )
-    if not df_update_actor.empty:
-
-        normalized_dfs = df_update_actor["row_updates"].apply(pd.json_normalize)
+    if not df_acteur_to_update.empty:
+        normalized_dfs = df_acteur_to_update["suggestion"].apply(pd.json_normalize)
+        df_acteur = pd.concat(normalized_dfs.tolist(), ignore_index=True)
+        return dag_ingest_validated_utils.handle_create_event(
+            df_acteur, suggestion_cohorte_id, engine
+        )
+    if not df_acteur_to_delete.empty:
+        normalized_dfs = df_acteur_to_delete["suggestion"].apply(pd.json_normalize)
         df_actors_update_actor = pd.concat(normalized_dfs.tolist(), ignore_index=True)
         status_repeated = (
-            df_update_actor["status"]
-            .repeat(df_update_actor["row_updates"].apply(len))
+            df_acteur_to_delete["status"]
+            .repeat(df_acteur_to_delete["suggestion"].apply(len))
             .reset_index(drop=True)
         )
         df_actors_update_actor["status"] = status_repeated
 
         return dag_ingest_validated_utils.handle_update_actor_event(
-            df_actors_update_actor, dag_run_id
+            df_actors_update_actor, suggestion_cohorte_id
+        )
+
+    if not df_acteur_to_enrich.empty:
+
+        normalized_dfs = df_update_actor["suggestion"].apply(pd.json_normalize)
+        df_actors_update_actor = pd.concat(normalized_dfs.tolist(), ignore_index=True)
+        status_repeated = (
+            df_update_actor["status"]
+            .repeat(df_update_actor["suggestion"].apply(len))
+            .reset_index(drop=True)
+        )
+        df_actors_update_actor["status"] = status_repeated
+
+        return dag_ingest_validated_utils.handle_update_actor_event(
+            df_actors_update_actor, suggestion_cohorte_id
         )
     return {
-        "dag_run_id": dag_run_id,
+        "dag_run_id": suggestion_cohorte_id,
     }
 
 

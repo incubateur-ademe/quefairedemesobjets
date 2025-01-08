@@ -1,0 +1,21 @@
+<h2>Instance du DAG : {{ suggestion_cohorte_instance }}</h2>
+<h3>Meta données</h3>
+{% for meta_title, meta_data in suggestion_cohorte_instance.display_meta_data.items %}
+    <p><strong>{{ meta_title }}</strong> : {{ meta_data }}</p>
+{% endfor %}
+<details>
+    <summary>meta_data brutes</summary>
+    <pre class="qf-text-wrap">{{ suggestion_cohorte_instance.metadata }}</pre>
+</details>
+<h3>Exemples</h3>
+
+<div class="fr-table">
+    <table>
+        <caption>Suggestion de source à valider</caption>
+        {% include 'data/_partials/create_actor_event.html' %}
+    </table>
+</div>
+<div class="fr-my-3w">
+    <button type="submit" class="fr-btn" name='dag_valid' value='1' formmethod='POST'>Valider les modifications</button>
+    <button type="submit" class="fr-btn fr-btn--secondary" name='dag_valid' value='0' formmethod='POST'>Refuser</button>
+</div>

@@ -9,7 +9,7 @@ from dsfr.forms import DsfrBaseForm
 
 from qfdmo.fields import GroupeActionChoiceField
 from qfdmo.geo_api import epcis_from, formatted_epcis_as_list_of_tuple
-from qfdmo.models import DagRun, DagRunStatus, SousCategorieObjet
+from qfdmo.models import SousCategorieObjet, SuggestionCohorte
 from qfdmo.models.action import (
     Action,
     GroupeAction,
@@ -17,6 +17,7 @@ from qfdmo.models.action import (
     get_directions,
     get_ordered_directions,
 )
+from qfdmo.models.data import SuggestionStatut
 from qfdmo.widgets import (
     AutoCompleteInput,
     DSFRCheckboxSelectMultiple,
@@ -342,14 +343,16 @@ class CarteForm(AddressesForm):
 
 
 class DagsForm(forms.Form):
-    dagrun = forms.ModelChoiceField(
+    suggestion_cohorte = forms.ModelChoiceField(
         label="Séléctionner l'execution d'un DAG",
         widget=forms.Select(
             attrs={
                 "class": "fr-select",
             }
         ),
-        queryset=DagRun.objects.filter(status=DagRunStatus.TO_VALIDATE.value),
+        queryset=SuggestionCohorte.objects.filter(
+            statut=SuggestionStatut.ATRAITER.value
+        ),
         required=True,
     )
 

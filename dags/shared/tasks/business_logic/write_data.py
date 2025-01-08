@@ -1,4 +1,4 @@
-from utils.dag_eo_utils import insert_dagrun_and_process_df
+from utils.dag_eo_utils import insert_suggestion_and_process_df
 
 
 def write_data(
@@ -20,4 +20,4 @@ def write_data(
         run_name = run_id.replace("__", " - ")
         df = data["df"]
         metadata.update(data.get("metadata", {}))
-        insert_dagrun_and_process_df(df, metadata, dag_name_suffixed, run_name)
+        insert_suggestion_and_process_df(df, metadata, dag_name_suffixed, run_name)

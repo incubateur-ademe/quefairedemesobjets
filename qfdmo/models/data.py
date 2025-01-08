@@ -2,73 +2,133 @@ from django.contrib.gis.db import models
 from django.db.models.functions import Now
 
 from dags.sources.config.shared_constants import (
-    DAGRUN_FINISHED,
-    DAGRUN_REJECTED,
-    DAGRUN_TOINSERT,
-    DAGRUN_TOVALIDATE,
+    SUGGESTION_ATRAITER,
+    SUGGESTION_AVALIDER,
+    SUGGESTION_CLUSTERING,
+    SUGGESTION_ENCOURS,
+    SUGGESTION_ERREUR,
+    SUGGESTION_PARTIEL,
+    SUGGESTION_REJETER,
+    SUGGESTION_SOURCE,
+    SUGGESTION_SOURCE_AJOUT,
+    SUGGESTION_SOURCE_MISESAJOUR,
+    SUGGESTION_SOURCE_SUPRESSION,
+    SUGGESTION_SUCCES,
 )
 from qfdmo.models.acteur import ActeurType, Source
 
 
-class DagRunStatus(models.TextChoices):
-    TO_VALIDATE = DAGRUN_TOVALIDATE
-    TO_INSERT = DAGRUN_TOINSERT
-    REJECTED = DAGRUN_REJECTED
-    FINISHED = DAGRUN_FINISHED
+class SuggestionStatut(models.TextChoices):
+    AVALIDER = SUGGESTION_AVALIDER, "À valider"
+    REJETER = SUGGESTION_REJETER, "Rejeter"
+    ATRAITER = SUGGESTION_ATRAITER, "À traiter"
+    ENCOURS = SUGGESTION_ENCOURS, "En cours de traitement"
+    ERREUR = SUGGESTION_ERREUR, "Fini en erreur"
+    PARTIEL = SUGGESTION_PARTIEL, "Fini avec succès partiel"
+    SUCCES = SUGGESTION_SUCCES, "Fini avec succès"
 
 
-class DagRun(models.Model):
-    id = models.AutoField(primary_key=True)
-    dag_id = models.CharField(max_length=250)
-    run_id = models.CharField(max_length=250)
-    created_date = models.DateTimeField(auto_now_add=True)
-    updated_date = models.DateTimeField(auto_now=True)
-    status = models.CharField(
-        max_length=50,
-        choices=DagRunStatus.choices,
-        default=DagRunStatus.TO_VALIDATE,
+class SuggestionAction(models.TextChoices):
+    CLUSTERING = SUGGESTION_CLUSTERING, "regroupement/déduplication des acteurs"
+    SOURCE = (
+        SUGGESTION_SOURCE,
+        "ingestion de source de données",
     )
-    # {to_create : 134, to_update : 0, to_delete : 0, to_ignore : 0, errors : 0}
-    meta_data = models.JSONField(null=True, blank=True)
+    SOURCE_AJOUT = (
+        SUGGESTION_SOURCE_AJOUT,
+        "ingestion de source de données - nouveau acteur",
+    )
+    SOURCE_MISESAJOUR = (
+        SUGGESTION_SOURCE_MISESAJOUR,
+        "ingestion de source de données - modification d'acteur existant",
+    )
+    SOURCE_SUPPRESSION = SUGGESTION_SOURCE_SUPRESSION, "ingestion de source de données"
+    # A venir
+    # ENRICHISSEMENT…
+
+
+class SuggestionCohorte(models.Model):
+    id = models.AutoField(primary_key=True)
+    # On utilise identifiant car le champ n'est pas utilisé pour résoudre une relation
+    # en base de données
+    identifiant_action = models.CharField(
+        max_length=250, help_text="Identifiant de l'action (ex : dag_id pour Airflow)"
+    )
+    identifiant_execution = models.CharField(
+        max_length=250,
+        help_text="Identifiant de l'execution (ex : run_id pour Airflow)",
+    )
+    type_action = models.CharField(
+        choices=SuggestionAction.choices,
+        max_length=250,
+        blank=True,
+    )
+    statut = models.CharField(
+        max_length=50,
+        choices=SuggestionStatut.choices,
+        default=SuggestionStatut.AVALIDER,
+    )
+    metadata = models.JSONField(
+        null=True, blank=True, help_text="Metadata de la cohorte, données statistiques"
+    )
+    cree_le = models.DateTimeField(auto_now_add=True, db_default=Now())
+    modifie_le = models.DateTimeField(auto_now=True, db_default=Now())
+
+    @property
+    def is_source_type(self) -> bool:
+        # FIXME: ajout de tests
+        return self.type_action in [
+            SuggestionAction.SOURCE,
+            SuggestionAction.SOURCE_AJOUT,
+            SuggestionAction.SOURCE_MISESAJOUR,
+            SuggestionAction.SOURCE_SUPPRESSION,
+        ]
+
+    @property
+    def is_clustering_type(self) -> bool:
+        # FIXME: ajout de tests
+        return self.type_action == SuggestionAction.CLUSTERING
 
     def __str__(self) -> str:
-        return f"{self.dag_id} - {self.run_id}"
+        return f"{self.identifiant_action} - {self.identifiant_execution}"
 
     def display_meta_data(self) -> dict:
         displayed_metadata = {}
-        displayed_metadata["Nombre d'acteur à créer"] = self.meta_data.get(
-            "added_rows", 0
+        displayed_metadata["Nombre d'acteur à créer ou mettre à jour"] = (
+            self.metadata.get("acteurs_to_add_or_update", 0)
         )
-        displayed_metadata["Nombre de duplicats"] = self.meta_data.get(
+        displayed_metadata["Nombre de duplicats"] = self.metadata.get(
             "number_of_duplicates", 0
         )
-        displayed_metadata["Nombre d'acteur MAJ"] = self.meta_data.get(
-            "updated_rows", 0
+        displayed_metadata["Nombre d'acteur à supprimer"] = self.metadata.get(
+            "number_of_removed_actors", 0
         )
         return displayed_metadata
 
 
-class DagRunChangeType(models.Choices):
-    CREATE = "CREATE"
-    UPDATE = "UPDATE"
-    DELETE = "DELETE"
-
-
-class DagRunChange(models.Model):
+class SuggestionUnitaire(models.Model):
     id = models.AutoField(primary_key=True)
-    dag_run = models.ForeignKey(
-        DagRun, on_delete=models.CASCADE, related_name="dagrunchanges"
+    suggestion_cohorte = models.ForeignKey(
+        SuggestionCohorte, on_delete=models.CASCADE, related_name="suggestion_unitaires"
     )
-    change_type = models.CharField(max_length=50, choices=DagRunChangeType.choices)
-    meta_data = models.JSONField(null=True, blank=True)
-    # metadata : JSON of any error or information about the line to change
-    row_updates = models.JSONField(null=True, blank=True)
-    status = models.CharField(
+    type_action = models.CharField(
+        choices=SuggestionAction.choices,
+        max_length=250,
+        blank=True,
+    )
+    statut = models.CharField(
         max_length=50,
-        choices=DagRunStatus.choices,
-        default=DagRunStatus.TO_VALIDATE,
+        choices=SuggestionStatut.choices,
+        default=SuggestionStatut.AVALIDER,
     )
+    context = models.JSONField(
+        null=True, blank=True, help_text="Contexte de la suggestion : données initiales"
+    )
+    suggestion = models.JSONField(blank=True, help_text="Suggestion de modification")
+    cree_le = models.DateTimeField(auto_now_add=True, db_default=Now())
+    modifie_le = models.DateTimeField(auto_now=True, db_default=Now())
 
+    # FIXME: A revoir
     def display_acteur_details(self) -> dict:
         displayed_details = {}
         for field, field_value in {
@@ -90,59 +150,28 @@ class DagRunChange(models.Model):
             "identifiant_unique": "identifiant_unique",
             "identifiant_externe": "identifiant_externe",
         }.items():
-            if value := self.row_updates.get(field):
+            if value := self.suggestion.get(field):
                 displayed_details[field_value] = value
-        if value := self.row_updates.get("acteur_type_id"):
+        if value := self.suggestion.get("acteur_type_id"):
             displayed_details["Type d'acteur"] = ActeurType.objects.get(
                 pk=value
             ).libelle
-        if value := self.row_updates.get("source_id"):
+        if value := self.suggestion.get("source_id"):
             displayed_details["Source"] = Source.objects.get(pk=value).libelle
-        if value := self.row_updates.get("labels"):
+        if value := self.suggestion.get("labels"):
             displayed_details["Labels"] = ", ".join(
                 [str(v["labelqualite_id"]) for v in value]
             )
-        if value := self.row_updates.get("acteur_services"):
+        if value := self.suggestion.get("acteur_services"):
             displayed_details["Acteur Services"] = ", ".join(
                 [str(v["acteurservice_id"]) for v in value]
             )
 
         return displayed_details
 
+    # FIXME: A revoir
     def display_proposition_service(self):
-        return self.row_updates.get("proposition_services", [])
-
-    def update_row_update_field(self, field_name, value):
-        if self.row_updates is None:
-            self.row_updates = {}
-
-        if field_name in self.row_updates and self.row_updates[field_name] == value:
-            del self.row_updates[field_name]
-        else:
-            self.row_updates[field_name] = value
-
-        self.save()
-
-    def update_row_update_candidate(self, status, index):
-        if self.row_updates is None:
-            self.row_updates = {}
-
-        if (
-            self.status == status
-            and "best_candidat_index" in self.row_updates
-            and self.row_updates["best_candidat_index"] == index
-        ):
-            self.status = DagRunStatus.TO_VALIDATE.value
-            del self.row_updates["best_candidat_index"]
-
-        else:
-            self.status = status
-            self.row_updates["best_candidat_index"] = index
-
-        self.save()
-
-    def get_candidat(self, index):
-        return self.row_updates["ae_result"][int(index) - 1]
+        return self.suggestion.get("proposition_services", [])
 
 
 class BANCache(models.Model):
