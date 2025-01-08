@@ -218,7 +218,7 @@ class Synonyme(AbstractBaseProduit):
 
         try:
             return self.produit.get_etats_descriptions()[0]
-        except KeyError:
+        except (KeyError, TypeError):
             return ""
 
     def get_absolute_url(self) -> str:
