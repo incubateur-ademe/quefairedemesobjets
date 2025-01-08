@@ -1,7 +1,7 @@
 import requests
 from django.core.management.base import BaseCommand
 
-from qfdmd.models import Lien, Produit, Synonyme
+from qfdmd.models import Lien, Produit, ProduitLien, Synonyme
 
 ADEME_PRODUITS_URL = (
     "https://data.ademe.fr/data-fair/api/v1/datasets/"
@@ -77,14 +77,16 @@ class Command(BaseCommand):
                     "description": line.get("Description", ""),
                 },
             )
+
             produit_ids = [p.strip() for p in line["Produits_associes"].split(";")]
             for produit_id in produit_ids:
                 if not produit_id.isnumeric():
                     continue
                 try:
                     produit = Produit.objects.get(id=produit_id)
-                    if produit not in lien.produits.all():
-                        lien.produits.add(produit)
+                    ProduitLien.objects.update_or_create(
+                        lien=lien, produit=produit, defaults={"poids": index}
+                    )
                 except Produit.DoesNotExist:
                     self.stdout.write(
                         self.style.ERROR(f"Produit avec ID {produit_id} n'existe pas")

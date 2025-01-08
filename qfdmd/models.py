@@ -39,9 +39,6 @@ class Produit(AbstractBaseProduit):
     )
     nom = models.CharField(
         unique=True,
-        blank=True,
-        help_text="Ce champ est facultatif et n'est utilisé que "
-        "dans l'administration Django.",
         verbose_name="Libellé",
     )
     synonymes_existants = models.TextField(blank=True, help_text="Synonymes existants")
@@ -77,19 +74,13 @@ class Produit(AbstractBaseProduit):
 
         return (bon_etat, mauvais_etat)
 
-    @cached_property
-    def mauvais_etat(self) -> str:
-        if self.qu_est_ce_que_j_en_fais_mauvais_etat:
-            return self.qu_est_ce_que_j_en_fais_mauvais_etat
-        try:
-            return self.get_etats_descriptions()[0]
-        except KeyError:
-            return ""
-
     @property
     def carte_settings(self):
         # TODO : gérer plusieurs catégories ici
         sous_categorie = self.sous_categories.filter(afficher_carte=True).first()
+        if not sous_categorie:
+            return {}
+
         return {
             "carte": 1,
             "direction": "jai",
@@ -117,16 +108,6 @@ class Produit(AbstractBaseProduit):
     def url_carte_bon_etat(self):
         actions = "preter|emprunter|louer|mettreenlocation|donner|echanger|revendre"
         return self.get_url_carte(actions)
-
-    @cached_property
-    def bon_etat(self) -> str:
-        if self.qu_est_ce_que_j_en_fais_bon_etat:
-            return self.qu_est_ce_que_j_en_fais_bon_etat
-
-        try:
-            return self.get_etats_descriptions()[1]
-        except KeyError:
-            return ""
 
     @cached_property
     def en_savoir_plus(self):
@@ -164,7 +145,10 @@ class Lien(models.Model):
     url = models.URLField(blank=True, help_text="URL", max_length=300)
     description = models.TextField(blank=True, help_text="Description")
     produits = models.ManyToManyField(
-        Produit, related_name="liens", help_text="Produits associés"
+        Produit,
+        through="qfdmd.ProduitLien",
+        related_name="liens",
+        help_text="Produits associés",
     )
     poids = models.IntegerField(default=0)
 
@@ -173,6 +157,16 @@ class Lien(models.Model):
 
     class Meta:
         ordering = ("poids",)
+
+
+class ProduitLien(models.Model):
+    produit = models.ForeignKey(Produit, on_delete=models.CASCADE)
+    lien = models.ForeignKey(Lien, on_delete=models.CASCADE)
+    poids = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ("poids",)
+        unique_together = ("produit", "lien")  # Prevent duplicate relations
 
 
 class Synonyme(AbstractBaseProduit):
@@ -202,6 +196,30 @@ class Synonyme(AbstractBaseProduit):
     @property
     def url(self) -> str:
         return self.get_absolute_url()
+
+    @cached_property
+    def bon_etat(self) -> str:
+        if self.qu_est_ce_que_j_en_fais_bon_etat:
+            return self.qu_est_ce_que_j_en_fais_bon_etat
+        if self.produit.qu_est_ce_que_j_en_fais_bon_etat:
+            return self.produit.qu_est_ce_que_j_en_fais_bon_etat
+
+        try:
+            return self.produit.get_etats_descriptions()[1]
+        except (KeyError, TypeError):
+            return ""
+
+    @cached_property
+    def mauvais_etat(self) -> str:
+        if self.qu_est_ce_que_j_en_fais_mauvais_etat:
+            return self.qu_est_ce_que_j_en_fais_mauvais_etat
+        if self.produit.qu_est_ce_que_j_en_fais_mauvais_etat:
+            return self.produit.qu_est_ce_que_j_en_fais_mauvais_etat
+
+        try:
+            return self.produit.get_etats_descriptions()[0]
+        except (KeyError, TypeError):
+            return ""
 
     def get_absolute_url(self) -> str:
         return reverse("qfdmd:synonyme-detail", args=[self.slug])
