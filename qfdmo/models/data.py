@@ -47,6 +47,9 @@ class DagRun(models.Model):
         )
         return displayed_metadata
 
+    class Meta:
+        app_label = "qfdmo"
+
 
 class DagRunChangeType(models.Choices):
     CREATE = "CREATE"
@@ -144,9 +147,13 @@ class DagRunChange(models.Model):
     def get_candidat(self, index):
         return self.row_updates["ae_result"][int(index) - 1]
 
+    class Meta:
+        app_label = "qfdmo"
+
 
 class BANCache(models.Model):
     class Meta:
+        app_label = "qfdmo"
         verbose_name = "Cache BAN"
         verbose_name_plural = "Cache BAN"
 

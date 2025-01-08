@@ -41,6 +41,7 @@ DEFAULT_SOURCE_CODE = "Communauté Longue Vie Aux Objets"
 
 class ActeurService(CodeAsNaturalKeyModel):
     class Meta:
+        app_label = "qfdmo"
         ordering = ["libelle"]
         verbose_name = "Service proposé"
         verbose_name_plural = "Services proposés"
@@ -94,6 +95,7 @@ class ActeurReprise(models.TextChoices):
 
 class ActeurType(CodeAsNaturalKeyModel):
     class Meta:
+        app_label = "qfdmo"
         verbose_name = "Type d'acteur"
         verbose_name_plural = "Types d'acteur"
 
@@ -126,6 +128,7 @@ def validate_logo(value: Any):
 
 class Source(CodeAsNaturalKeyModel):
     class Meta:
+        app_label = "qfdmo"
         verbose_name = "Source de données"
         verbose_name_plural = "Sources de données"
 
@@ -161,6 +164,7 @@ def validate_opening_hours(value):
 
 class LabelQualite(models.Model):
     class Meta:
+        app_label = "qfdmo"
         verbose_name = "Label qualité"
         verbose_name_plural = "Labels qualité"
 
@@ -267,6 +271,7 @@ class DisplayedActeurManager(NomAsNaturalKeyManager):
 class BaseActeur(NomAsNaturalKeyModel):
 
     class Meta:
+        app_label = "qfdmo"
         abstract = True
 
     nom = models.CharField(max_length=255, blank=False, null=False)
@@ -449,6 +454,7 @@ def clean_parent(parent):
 
 class Acteur(BaseActeur):
     class Meta:
+        app_label = "qfdmo"
         verbose_name = "ACTEUR de l'EC - IMPORTÉ"
         verbose_name_plural = "ACTEURS de l'EC - IMPORTÉ"
 
@@ -491,6 +497,7 @@ class Acteur(BaseActeur):
 
 class RevisionActeur(BaseActeur):
     class Meta:
+        app_label = "qfdmo"
         verbose_name = "ACTEUR de l'EC - CORRIGÉ"
         verbose_name_plural = "ACTEURS de l'EC - CORRIGÉ"
 
@@ -656,6 +663,7 @@ class DisplayedActeur(BaseActeur):
     objects = DisplayedActeurManager()
 
     class Meta:
+        app_label = "qfdmo"
         verbose_name = "ACTEUR de l'EC - AFFICHÉ"
         verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ"
 
@@ -777,6 +785,7 @@ class DisplayedActeurTemp(BaseActeur):
 
     class ActeurLabelQualite(models.Model):
         class Meta:
+            app_label = "qfdmo"
             db_table = "qfdmo_displayedacteurtemp_labels"
 
         id = models.BigAutoField(primary_key=True)
@@ -793,6 +802,7 @@ class DisplayedActeurTemp(BaseActeur):
 
     class ActeurActeurService(models.Model):
         class Meta:
+            app_label = "qfdmo"
             db_table = "qfdmo_displayedacteurtemp_acteur_services"
 
         id = models.BigAutoField(primary_key=True)
@@ -809,6 +819,7 @@ class DisplayedActeurTemp(BaseActeur):
 
     class DisplayedActeurTempSource(models.Model):
         class Meta:
+            app_label = "qfdmo"
             db_table = "qfdmo_displayedacteurtemp_sources"
             unique_together = ("acteur_id", "source_id")
 
@@ -827,6 +838,7 @@ class DisplayedActeurTemp(BaseActeur):
 
 class BasePropositionService(models.Model):
     class Meta:
+        app_label = "qfdmo"
         abstract = True
 
     id = models.AutoField(primary_key=True)
@@ -851,6 +863,7 @@ class BasePropositionService(models.Model):
 
 class PropositionService(BasePropositionService):
     class Meta:
+        app_label = "qfdmo"
         verbose_name = "PROPOSITION DE SERVICE - IMPORTÉ"
         verbose_name_plural = "PROPOSITIONS DE SERVICE - IMPORTÉ"
         constraints = [
@@ -874,6 +887,7 @@ class PropositionService(BasePropositionService):
 
 class RevisionPropositionService(BasePropositionService):
     class Meta:
+        app_label = "qfdmo"
         verbose_name = "PROPOSITION DE SERVICE - CORRIGÉ"
         verbose_name_plural = "PROPOSITIONS DE SERVICE - CORRIGÉ"
         constraints = [
@@ -897,6 +911,7 @@ class RevisionPropositionService(BasePropositionService):
 
 class DisplayedPropositionService(BasePropositionService):
     class Meta:
+        app_label = "qfdmo"
         verbose_name = "Proposition de service - AFFICHÉ"
         verbose_name_plural = "Proposition de service - AFFICHÉ"
 
@@ -923,6 +938,7 @@ class DisplayedPropositionServiceTemp(BasePropositionService):
 
     class DisplayedPropositionServiceTempSousCategorie(models.Model):
         class Meta:
+            app_label = "qfdmo"
             db_table = "qfdmo_displayedpropositionservicetemp_sous_categories"
 
         id = models.BigAutoField(primary_key=True)

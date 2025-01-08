@@ -13,6 +13,7 @@ from qfdmo.models.utils import CodeAsNaturalKeyManager, CodeAsNaturalKeyModel
 
 class ActionDirection(CodeAsNaturalKeyModel):
     class Meta:
+        app_label = "qfdmo"
         verbose_name = "Direction de l'action"
         verbose_name_plural = "Directions de l'action"
 
@@ -50,6 +51,7 @@ class GroupeAction(CodeAsNaturalKeyModel):
     objects = GroupeActionManager()
 
     class Meta:
+        app_label = "qfdmo"
         verbose_name = "Groupe d'actions"
         verbose_name_plural = "Groupes d'actions"
 
@@ -102,6 +104,7 @@ class GroupeAction(CodeAsNaturalKeyModel):
 
 class Action(CodeAsNaturalKeyModel):
     class Meta:
+        app_label = "qfdmo"
         ordering = ["order"]
 
     id = models.AutoField(primary_key=True)

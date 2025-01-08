@@ -14,7 +14,10 @@ opening-hours-py
 orjson
 pandas<2.2.0
 Pillow
-psycopg2
+# On remplace psycopg2 par psycopg2-binary
+# pour faciliter l'installation au sein de
+# l'environnement airflow
+psycopg2-binary
 python-decouple
 requests
 sentry-sdk

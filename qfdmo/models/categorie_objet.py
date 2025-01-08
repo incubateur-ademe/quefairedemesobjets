@@ -9,6 +9,7 @@ from qfdmo.models.utils import CodeAsNaturalKeyModel
 
 class CategorieObjet(CodeAsNaturalKeyModel):
     class Meta:
+        app_label = "qfdmo"
         verbose_name = "Catégorie d'objets"
         verbose_name_plural = "Catégories d'objets"
 
@@ -19,6 +20,7 @@ class CategorieObjet(CodeAsNaturalKeyModel):
 
 class SousCategorieObjet(CodeAsNaturalKeyModel):
     class Meta:
+        app_label = "qfdmo"
         verbose_name = "Sous catégorie d'objets"
         verbose_name_plural = "Sous catégories d'objets"
         ordering = ["libelle"]
@@ -81,3 +83,6 @@ class Objet(CodeAsNaturalKeyModel):
     identifiant_qfdmod = models.IntegerField(
         blank=True, null=True, verbose_name="Identifiant QFDMD"
     )
+
+    class Meta:
+        app_label = "qfdmo"
