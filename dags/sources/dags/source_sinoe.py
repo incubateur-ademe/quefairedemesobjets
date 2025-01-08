@@ -76,7 +76,7 @@ with DAG(
             },
             {
                 "column": "source_code",
-                "value": "ADEME_SINOE_Decheteries",
+                "value": "ademesinoedecheteries",
             },
             # 4. Transformation du dataframe
             {

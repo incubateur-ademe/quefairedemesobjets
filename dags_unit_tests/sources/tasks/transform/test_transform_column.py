@@ -14,6 +14,7 @@ from sources.tasks.transform.transform_column import (
     clean_souscategorie_codes_sinoe,
     clean_url,
     convert_opening_hours,
+    strip_lower_string,
     strip_string,
 )
 
@@ -149,6 +150,25 @@ class TestStripString:
     )
     def test_strip_string(self, input, output):
         assert strip_string(input, None) == output
+
+
+class TestStriplowerString:
+
+    @pytest.mark.parametrize(
+        "input, output",
+        [
+            (None, ""),
+            (pd.NA, ""),
+            (np.nan, ""),
+            (" ", ""),
+            (75001, "75001"),
+            (" adresse postale ", "adresse postale"),
+            ("AdreSse posTale", "adresse postale"),
+            (" AdreSse posTale ", "adresse postale"),
+        ],
+    )
+    def test_strip_lower_string(self, input, output):
+        assert strip_lower_string(input, None) == output
 
 
 class TestCleanActeurTypeCode:

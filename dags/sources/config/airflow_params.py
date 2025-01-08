@@ -14,6 +14,7 @@ from sources.tasks.transform.transform_column import (
     clean_souscategorie_codes_sinoe,
     clean_url,
     convert_opening_hours,
+    strip_lower_string,
     strip_string,
 )
 from sources.tasks.transform.transform_df import (
@@ -63,6 +64,7 @@ TRANSFORMATION_MAPPING = {
     "clean_url": clean_url,
     "clean_souscategorie_codes_sinoe": clean_souscategorie_codes_sinoe,
     "get_latlng_from_geopoint": get_latlng_from_geopoint,
+    "strip_lower_string": strip_lower_string,
 }
 
 

@@ -78,10 +78,6 @@ mapping = {
         "old_code": "collectivite_ambert_livradois_forez",
         "new_code": "alv",
     },
-    "CMA - Chambre des métiers et de l'artisanat": {
-        "old_code": "cma_reparacteur",
-        "new_code": "cma",
-    },
     "Fédération Envie": {"old_code": "", "new_code": "envie"},
     #    "equipe": {"old_code": "", "new_code": ""},
     "COREPILE": {"old_code": "", "new_code": "corepile"},
