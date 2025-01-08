@@ -610,25 +610,25 @@ class RevisionActeur(BaseActeur):
 
         acteur = Acteur.objects.get(identifiant_unique=self.identifiant_unique)
 
-        nullable_fields = [
+        fields_to_reset = [
             "identifiant_unique",
             "identifiant_externe",
             "source",
         ]
-        ignore_fields = [
+        fields_to_ignore = [
             "labels",
             "acteur_services",
             "proposition_services",
             "parent",
         ]
 
-        for field in nullable_fields:
+        for field in fields_to_reset:
             setattr(self, field, None)
         for field in self._meta.fields:
             if (
                 not getattr(self, field.name)
-                and field.name not in nullable_fields
-                and field.name not in ignore_fields
+                and field.name not in fields_to_reset
+                and field.name not in fields_to_ignore
             ):
                 setattr(self, field.name, getattr(acteur, field.name))
         self.save()
@@ -637,11 +637,12 @@ class RevisionActeur(BaseActeur):
 
         # recreate proposition_services for the new self
         for proposition_service in proposition_services:
-            revision_proposition_service = RevisionPropositionService(
-                acteur=self,
-                action=proposition_service.action,
+            revision_proposition_service = revision_proposition_service = (
+                RevisionPropositionService.objects.create(
+                    acteur=self,
+                    action=proposition_service.action,
+                )
             )
-            revision_proposition_service.save()
             revision_proposition_service.sous_categories.set(
                 proposition_service.sous_categories.all()
             )

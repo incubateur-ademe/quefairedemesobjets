@@ -3,14 +3,14 @@
 
 {% block submit_buttons_bottom %}
     {% if original.parent %}
-        <input type="submit" value="Accéder au parent « {{ original.parent }} »" name="_get_or_create_parent" {% if original.is_parent %}disabled{% endif %}>
+        <input type="submit" value="Accéder au parent « {{ original.parent }} »" name="get_or_create_parent" {% if original.is_parent %}disabled{% endif %}>
     {% else %}
-        <input type="submit" value="Créer un parent (agrège les duplicats)" name="_get_or_create_parent" {% if original.is_parent %}disabled{% endif %}>
+        <input type="submit" value="Créer un parent (agrège les duplicats)" name="get_or_create_parent" {% if original.is_parent %}disabled{% endif %}>
     {% endif %}
     {% if duplicate_instance and not original.is_parent %}
         <br>
         <br>
-        <input type="submit" value="Dupliquer l'instance {{ original }}" name="_duplicate_instance">
+        <input type="submit" value="Dupliquer l'instance {{ original }}" name="duplicate_instance">
     {% endif %}
     {{ block.super }}
 {% endblock submit_buttons_bottom %}
