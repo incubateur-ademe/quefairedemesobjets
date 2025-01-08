@@ -91,6 +91,7 @@ class TestActeurIsdigital:
 @pytest.mark.django_db
 class TestActeurDefaultOnSave:
     def test_empty(self):
+        SourceFactory(code="Communauté Longue Vie Aux Objets")
         acteur_type = ActeurTypeFactory(code="fake")
         acteur = ActeurFactory(
             nom="Test Object 1",
@@ -99,8 +100,11 @@ class TestActeurDefaultOnSave:
             source=None,
         )
         assert len(acteur.identifiant_externe) == 12
-        assert acteur.identifiant_unique == "equipe_" + acteur.identifiant_externe
-        assert acteur.source.code == "equipe"
+        assert (
+            acteur.identifiant_unique
+            == "communaute_longue_vie_aux_objets_" + acteur.identifiant_externe
+        )
+        assert acteur.source.code == "Communauté Longue Vie Aux Objets"
 
     def test_default_identifiantunique(self):
         source = SourceFactory(code="source_equipe")
@@ -362,10 +366,13 @@ class TestRevisionActeurDuplicate:
         ), f"Should be the nom commercial of the acteur : {acteur.source}"
 
     def test_duplicate_source(self):
+        SourceFactory(code="Communauté Longue Vie Aux Objets")
         revision_acteur = RevisionActeurFactory()
         revision_acteur_duplicate = revision_acteur.duplicate()
 
-        assert revision_acteur_duplicate.source == Source.objects.get(code="equipe")
+        assert revision_acteur_duplicate.source == Source.objects.get(
+            code="Communauté Longue Vie Aux Objets"
+        )
 
     def test_duplicate_labels(self):
         revision_acteur = RevisionActeurFactory()
@@ -387,6 +394,7 @@ class TestRevisionActeurDuplicate:
         }
 
     def test_duplicate_proposition_services(self):
+        SourceFactory(code="Communauté Longue Vie Aux Objets")
         revision_acteur = RevisionActeurFactory()
         proposition_services1 = RevisionPropositionServiceFactory(
             acteur=revision_acteur, action=ActionFactory(code="action1")
@@ -398,10 +406,8 @@ class TestRevisionActeurDuplicate:
         sous_categorie2 = SousCategorieObjetFactory()
         proposition_services1.sous_categories.add(sous_categorie1, sous_categorie2)
         proposition_services2.sous_categories.add(sous_categorie1)
-        print(revision_acteur.proposition_services.all())
 
         revision_acteur_duplicate = revision_acteur.duplicate()
-        print(revision_acteur_duplicate.proposition_services.all())
         assert revision_acteur_duplicate.proposition_services.count() == 2
         assert set(
             [

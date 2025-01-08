@@ -35,6 +35,8 @@ from qfdmo.validators import CodeValidator
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_SOURCE_CODE = "Communauté Longue Vie Aux Objets"
+
 
 class ActeurService(CodeAsNaturalKeyModel):
     class Meta:
@@ -480,7 +482,7 @@ class Acteur(BaseActeur):
                 random.choices(string.ascii_uppercase, k=12)
             )
         if self.source is None:
-            self.source = Source.objects.get_or_create(code="equipe")[0]
+            self.source = Source.objects.get_or_create(code=DEFAULT_SOURCE_CODE)[0]
         if not self.identifiant_unique:
             source_stub = unidecode(self.source.code.lower()).replace(" ", "_")
             self.identifiant_unique = source_stub + "_" + str(self.identifiant_externe)
