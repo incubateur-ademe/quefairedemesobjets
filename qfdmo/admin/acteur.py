@@ -329,9 +329,14 @@ class RevisionActeurChildInline(NotEditableInlineMixin, admin.TabularInline):
 
 class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin):
     change_form_template = "admin/revision_acteur/change_form.html"
-    save_as = True
     gis_widget = CustomOSMWidget
     inlines = []
+    save_as = False
+
+    def change_view(self, request, object_id, form_url="", extra_context=None):
+        extra_context = extra_context or {}
+        extra_context["duplicate_instance"] = True
+        return super().changeform_view(request, object_id, form_url, extra_context)
 
     def get_inline_instances(self, request, revision_acteur=None):
         inlines = []
@@ -381,12 +386,23 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
         return queryset, use_distinct
 
     def response_change(self, request, revision_acteur):
-        if "_get_or_create_parent" in request.POST:
+        if "get_or_create_parent" in request.POST:
             # Cloner l'objet actuel
             parent = revision_acteur.parent or revision_acteur.create_parent()
             return HttpResponseRedirect(
                 reverse("admin:qfdmo_revisionacteur_change", args=[parent.pk])
             )
+        if "duplicate_instance" in request.POST:
+            if not revision_acteur.parent:
+                revision_acteur.create_parent()
+            revision_acteur = revision_acteur.duplicate()
+            return HttpResponseRedirect(
+                reverse(
+                    "admin:qfdmo_revisionacteur_change",
+                    args=[revision_acteur.identifiant_unique],
+                )
+            )
+
         return super().response_change(request, revision_acteur)
 
     def get_form(
