@@ -107,13 +107,33 @@ class SuggestionAdmin(admin.ModelAdmin):
     autocomplete_fields = ["produit"]
 
 
+class MoveFieldsToFirstPositionMixin:
+    def get_fields(self, request, obj=None, **kwargs):
+        fields = super().get_fields(request, obj, **kwargs)
+
+        for field in self.fields_to_display_in_first_position:
+            if field not in fields:
+                raise ImproperlyConfigured(
+                    f"{field} is set in "
+                    "fields_to_display_in_first_position but does not belong "
+                    f"to the model to {self.model} admin model"
+                )
+            fields.remove(field)
+
+        fields = [*self.fields_to_display_in_first_position, *fields]
+        return fields
+
+
 @admin.register(Produit)
-class ProduitAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+class ProduitAdmin(
+    MoveFieldsToFirstPositionMixin, ImportExportModelAdmin, admin.ModelAdmin
+):
     resource_classes = [ProduitResource, KoumoulProduitResource]
     list_display = ("nom", "id", "synonymes_existants", "modifie_le")
     search_fields = ["nom__unaccent", "id", "synonymes_existants__unaccent"]
     # ajout des filtres de recherche sur bdd et code
     list_filter = ["bdd", "code"]
+    fields_to_display_in_first_position = ["id", "nom", "coucou"]
     inlines = [SynonymeInline, LienInline]
 
 
@@ -125,9 +145,12 @@ class LienAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 
 @admin.register(Synonyme)
-class SynonymeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+class SynonymeAdmin(
+    MoveFieldsToFirstPositionMixin, ImportExportModelAdmin, admin.ModelAdmin
+):
     resource_classes = [SynonymeResource]
     search_fields = ["nom__unaccent"]
     readonly_fields = ["slug"]
-    list_display = ("nom", "produit", "slug")
+    list_display = ("nom", "produit", "slug", "modifie_le")
     list_filter = ["pin_on_homepage"]
+    fields_to_display_in_first_position = ["nom", "produit"]
