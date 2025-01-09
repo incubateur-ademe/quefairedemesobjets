@@ -8,7 +8,6 @@ class CodeAsNaturalKeyManager(models.Manager):
 
 class CodeAsNaturalKeyModel(models.Model):
     class Meta:
-        app_label = "qfdmo"
         abstract = True
 
     objects = CodeAsNaturalKeyManager()
@@ -27,7 +26,6 @@ class NomAsNaturalKeyManager(models.Manager):
 
 class NomAsNaturalKeyModel(models.Model):
     class Meta:
-        app_label = "qfdmo"
         abstract = True
 
     objects = NomAsNaturalKeyManager()

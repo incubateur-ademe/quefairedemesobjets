@@ -81,7 +81,7 @@ def django_setup_partial() -> None:
     OU
 
     - définissant un modèle de base dont tous nos modèles héritent
-    - définissant _meta.app_label = "qfdmo" uniquement sur ce modèle de base
+    - définissant _meta.pass #app_label = "qfdmo" uniquement sur ce modèle de base
     """
 
     django_add_to_sys_path()
