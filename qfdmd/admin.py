@@ -141,6 +141,7 @@ class ProduitAdmin(
 class LienAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     resource_class = LienResource
     list_display = ("titre_du_lien", "url", "description")
+    search_fields = ["titre_du_lien__unaccent", "url", "description__unaccent"]
     inlines = [ProduitInline]
 
 
