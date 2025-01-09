@@ -89,17 +89,17 @@ class SynonymeResource(resources.ModelResource):
 
 class SynonymeInline(admin.StackedInline):
     model = Synonyme
-    extra = 1
+    extra = 0
 
 
 class LienInline(admin.StackedInline):
     model = Lien.produits.through
-    extra = 1
+    extra = 0
 
 
 class ProduitInline(admin.StackedInline):
     model = Produit.liens.through
-    extra = 1
+    extra = 0
 
 
 @admin.register(Suggestion)
@@ -110,7 +110,7 @@ class SuggestionAdmin(admin.ModelAdmin):
 @admin.register(Produit)
 class ProduitAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     resource_classes = [ProduitResource, KoumoulProduitResource]
-    list_display = ("nom", "id", "synonymes_existants")
+    list_display = ("nom", "id", "synonymes_existants", "modifie_le")
     search_fields = ["nom__unaccent", "id", "synonymes_existants__unaccent"]
     # ajout des filtres de recherche sur bdd et code
     list_filter = ["bdd", "code"]
