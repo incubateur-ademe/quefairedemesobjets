@@ -2,10 +2,9 @@ import { Controller } from "@hotwired/stimulus"
 import { InteractionType as PosthogUIInteractionType, PosthogEventType } from "./types"
 import posthog from "posthog-js"
 
-type PersonProperties=  {
+type PersonProperties = {
   iframe: boolean
   iframeReferrer?: string
-
 }
 
 export default class extends Controller<HTMLElement> {
