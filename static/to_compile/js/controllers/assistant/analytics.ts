@@ -2,6 +2,12 @@ import { Controller } from "@hotwired/stimulus"
 import { InteractionType as PosthogUIInteractionType, PosthogEventType } from "./types"
 import posthog from "posthog-js"
 
+type PersonProperties=  {
+  iframe: boolean
+  iframeReferrer?: string
+
+}
+
 export default class extends Controller<HTMLElement> {
   /**
   A Posthog user has some custom values that we set
@@ -17,6 +23,9 @@ export default class extends Controller<HTMLElement> {
   declare readonly userConversionScoreValue
   declare readonly userEmailValue
   declare readonly userUsernameValue
+  personProperties: PersonProperties = {
+    iframe: false
+  }
 
   static values = {
     action: String,
@@ -37,7 +46,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   userActionScore = {
-    homePageView: 1,
+    homePageView: 0,
     produitPageView: 1,
   }
 
@@ -70,29 +79,22 @@ export default class extends Controller<HTMLElement> {
   }
 
   #checkIfWeAreInAnIframe() {
-    const propertiesToSendToPostHog = {
-      iframe: false
-    }
     try {
       if (window.self !== window.top) {
-        propertiesToSendToPostHog.iframe = true
-        propertiesToSendToPostHog.iframeReferrer =
+        this.personProperties.iframe = true
+        this.personProperties.iframeReferrer =
           window.top?.location.href
       }
     } catch (e) {
       // Unable to access window.top
       // this might be due to cross-origin restrictions.
       // Assuming it's inside an iframe.
-      propertiesToSendToPostHog.iframe = true
+      this.personProperties.iframe = true
     }
 
     if (document.referrer) {
-      propertiesToSendToPostHog.iframe = true
+      this.personProperties.iframe = true
     }
-
-    posthog.capture("$set", {
-      $set: propertiesToSendToPostHog
-    })
   }
 
   async #captureUserConversionScore() {
@@ -108,6 +110,7 @@ export default class extends Controller<HTMLElement> {
 
       posthog.capture("$set", {
         $set: {
+          ...this.personProperties,
           conversionScore,
         },
       })
