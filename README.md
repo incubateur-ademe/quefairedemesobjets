@@ -131,21 +131,28 @@ Les bases de données source `MySQL` et cible `Postgres + Postgis` sont executé
 docker compose  --profile lvao up
 ```
 
-Création de l'environnement virtuel de votre choix (préférence pour asdf)
+Création de l'environnement virtuel de votre choix, Pipenv est requis.
+[asdf](https://asdf-vm.com) peut être utilisé pour gérer l'environnement (via les versions définies dans `.tool-versions`)
 
 ```sh
-python -m venv .venv --prompt $(basename $(pwd))
-source  .venv/bin/activate
+pip install pipenv --user
+-```
+
+Il va se charger de créer un environnement virtuel, qu'il est possible d'activer avec la commande
+```sh
+pipenv shell
 ```
 
 Installation
 
 ```sh
-pip install -r requirements.txt -r dev-requirements.txt
+pipenv install --categories=airflow,dev-package
 npm install
 ```
 
 // Modifier les variables dans le fichier .env si nécessaire
+
+Ces commandes doivent être lancées depuis un shell pipenv (voir ci-dessus) ou préfixée de `pipenv run`
 
 Migration
 

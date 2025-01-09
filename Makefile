@@ -5,14 +5,14 @@ ifneq (,$(wildcard ./.env))
 endif
 
 # Aliases
-PYTHON := .venv/bin/python
+PYTHON := pipenv run python
 DJANGO_ADMIN := $(PYTHON) manage.py
 PYTEST := $(PYTHON) -m pytest
 
 # Makefile config
 .PHONY: check
 check:
-	@source .venv/bin/activate; python --version; pip --version
+	@source pipenv run python --version; pipenv run pip --version
 	@npm --version
 	@node --version
 
@@ -22,19 +22,13 @@ update-requirements:
 	$(PYTHON) -m pip install --no-deps -r requirements.txt -r dev-requirements.txt
 
 
-.PHONY: init-venv
-init-venv:
-	python -m venv .venv --prompt $(basename $(CURDIR)) --clear
-
 .PHONY: init-dev
 init-dev:
 	# git
 	git config blame.ignoreRevsFile .git-blame-ignore-revs
 	pre-commit install
 	# python
-	make init-venv
-	$(PYTHON) -m pip install pip-tools
-	$(PYTHON) -m pip install --no-deps -r requirements.txt -r dev-requirements.txt
+	pipenv install --categories=dev-package,airflow
 	# javascript
 	npm install
 	npx playwright install --with-deps
@@ -106,9 +100,8 @@ clear-cache:
 
 # Dependencies management
 .PHONY: pip-update
-pip-update:
-	$(PYTHON) -m pip-compile dev-requirements.in --generate-hashes
-	$(PYTHON) -m pip-compile requirements.in --generate-hashes
+lock-python-dependencies:
+	pipenv lock
 
 .PHONY: npm-upgrade
 npm-upgrade:
