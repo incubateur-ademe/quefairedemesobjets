@@ -14,22 +14,26 @@ def db_data_prepare(
     df_pssc: pd.DataFrame,
     df_labels: pd.DataFrame,
     df_acteur_services: pd.DataFrame,
+    df_acteurs_from_db: pd.DataFrame,
     source_id_by_code: dict,
     acteurtype_id_by_code: dict,
 ):
+
     update_actors_columns = ["identifiant_unique", "statut", "cree_le"]
     df_acteur_to_delete["suggestion"] = df_acteur_to_delete[
         update_actors_columns
     ].apply(lambda row: json.dumps(row.to_dict(), default=str), axis=1)
     # Created or updated Acteurs
-    df_acteur_services = (
-        df_acteur_services
-        if df_acteur_services is not None
-        else pd.DataFrame(columns=["acteur_id", "acteurservice_id"])
-    )
+    # df_acteur_services = (
+    #     df_acteur_services
+    #     if df_acteur_services is not None
+    #     else pd.DataFrame(columns=["acteur_id", "acteurservice_id"])
+    # )
 
     if df_acteur.empty:
-        raise ValueError("df_actors est vide")
+        raise ValueError("df_acteur est vide")
+    if df_acteur_services.empty:
+        raise ValueError("df_acteur_services est vide")
     if df_ps.empty:
         raise ValueError("df_ps est vide")
     if df_pssc.empty:
@@ -41,6 +45,8 @@ def db_data_prepare(
         acteurtype_id_by_code
     )
 
+    # FIXME: A bouger dans un tache compute_ps qui remplacera propose_services et
+    # propose_services_sous_categories
     aggregated_pdsc = (
         df_pssc.groupby("propositionservice_id")
         .apply(lambda x: x.to_dict("records") if not x.empty else [])
@@ -57,11 +63,9 @@ def db_data_prepare(
     df_pds_joined["propositionservice_id"] = df_pds_joined[
         "propositionservice_id"
     ].astype(str)
-
     df_pds_joined["pds_sous_categories"] = df_pds_joined["pds_sous_categories"].apply(
         lambda x: x if isinstance(x, list) else []
     )
-
     df_pds_joined.drop("id", axis=1, inplace=True)
 
     aggregated_pds = (
@@ -128,7 +132,20 @@ def db_data_prepare(
         lambda row: json.dumps(row.to_dict(), default=str), axis=1
     )
     df_joined.drop_duplicates("identifiant_unique", keep="first", inplace=True)
-    log.preview("df_joined", df_joined)
+
+    df_acteur_to_create = df_joined[
+        ~df_joined["identifiant_unique"].isin(df_acteurs_from_db["identifiant_unique"])
+    ]
+    df_acteur_to_update = df_joined[
+        df_joined["identifiant_unique"].isin(df_acteurs_from_db["identifiant_unique"])
+    ]
+
+    log.preview("df_acteur_to_create", df_acteur_to_create)
+    log.preview("df_acteur_to_update", df_acteur_to_update)
     log.preview("df_acteur_to_delete", df_acteur_to_delete)
 
-    return {"all": {"df": df_joined}, "to_disable": {"df": df_acteur_to_delete}}
+    return {
+        "df_acteur_to_create": df_acteur_to_create,
+        "df_acteur_to_update": df_acteur_to_update,
+        "df_acteur_to_delete": df_acteur_to_delete,
+    }

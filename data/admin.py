@@ -1,6 +1,6 @@
 from django.contrib.gis import admin
 
-from qfdmo.models import SuggestionCohorte, SuggestionUnitaire
+from data.models import SuggestionCohorte, SuggestionUnitaire
 
 
 class SuggestionCohorteAdmin(admin.ModelAdmin):

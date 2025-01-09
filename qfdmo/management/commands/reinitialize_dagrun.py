@@ -7,13 +7,13 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         with connection.cursor() as cursor:
-            # Truncate the table qfdmo_suggestioncohorte and qfdmo_suggestionunitaire
-            cursor.execute("TRUNCATE TABLE qfdmo_suggestioncohorte CASCADE")
+            # Truncate the table data_suggestioncohorte and data_suggestionunitaire
+            cursor.execute("TRUNCATE TABLE data_suggestioncohorte CASCADE")
 
             # Set auto-increment to 1
             cursor.execute(
-                "ALTER SEQUENCE qfdmo_suggestioncohorte_id_seq RESTART WITH 1"
+                "ALTER SEQUENCE data_suggestioncohorte_id_seq RESTART WITH 1"
             )
             cursor.execute(
-                "ALTER SEQUENCE qfdmo_suggestionunitaire_id_seq RESTART WITH 1"
+                "ALTER SEQUENCE data_suggestionunitaire_id_seq RESTART WITH 1"
             )

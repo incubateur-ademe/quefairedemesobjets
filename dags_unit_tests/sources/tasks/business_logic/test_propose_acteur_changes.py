@@ -61,8 +61,8 @@ class TestProposeActeurChangesCreeLe:
         expected_cree_le,
     ):
         result = propose_acteur_changes(
-            df=df_data_from_api,
-            df_acteurs=df_acteur,
+            df_acteur=df_data_from_api,
+            df_acteur_from_db=df_acteur,
         )
         df_result = result["df"]
 
@@ -87,14 +87,14 @@ class TestActorsLocation:
         longitude,
     ):
         result = propose_acteur_changes(
-            df=pd.DataFrame(
+            df_acteur=pd.DataFrame(
                 {
                     "identifiant_unique": ["1"],
                     "latitude": [latitude],
                     "longitude": [longitude],
                 }
             ),
-            df_acteurs=df_empty_acteurs_from_db,
+            df_acteur_from_db=df_empty_acteurs_from_db,
         )
         df_result = result["df"]
 

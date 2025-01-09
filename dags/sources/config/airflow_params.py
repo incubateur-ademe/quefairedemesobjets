@@ -26,6 +26,7 @@ from sources.tasks.transform.transform_df import (
     clean_label_codes,
     clean_siret_and_siren,
     clean_telephone,
+    compute_location,
     get_latlng_from_geopoint,
     merge_and_clean_souscategorie_codes,
     merge_sous_categories_columns,
@@ -65,6 +66,7 @@ TRANSFORMATION_MAPPING = {
     "clean_souscategorie_codes_sinoe": clean_souscategorie_codes_sinoe,
     "get_latlng_from_geopoint": get_latlng_from_geopoint,
     "strip_lower_string": strip_lower_string,
+    "clean_location": compute_location,
 }
 
 

@@ -1,4 +1,5 @@
 from django.contrib.gis.db import models
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models.functions import Now
 
 from dags.sources.config.shared_constants import (
@@ -6,6 +7,7 @@ from dags.sources.config.shared_constants import (
     SUGGESTION_AVALIDER,
     SUGGESTION_CLUSTERING,
     SUGGESTION_ENCOURS,
+    SUGGESTION_ENRICHISSEMENT,
     SUGGESTION_ERREUR,
     SUGGESTION_PARTIEL,
     SUGGESTION_REJETER,
@@ -43,8 +45,7 @@ class SuggestionAction(models.TextChoices):
         "ingestion de source de données - modification d'acteur existant",
     )
     SOURCE_SUPPRESSION = SUGGESTION_SOURCE_SUPRESSION, "ingestion de source de données"
-    # A venir
-    # ENRICHISSEMENT…
+    SOURCE_ENRICHISSEMENT = SUGGESTION_ENRICHISSEMENT, "suggestion d'enrichissement"
 
 
 class SuggestionCohorte(models.Model):
@@ -70,6 +71,12 @@ class SuggestionCohorte(models.Model):
     )
     metadata = models.JSONField(
         null=True, blank=True, help_text="Metadata de la cohorte, données statistiques"
+    )
+    pourcentage_erreurs_tolerees = models.IntegerField(
+        default=0,
+        db_default=0,
+        help_text="Nombre d'erreurs tolérées en pourcentage",
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
     )
     cree_le = models.DateTimeField(auto_now_add=True, db_default=Now())
     modifie_le = models.DateTimeField(auto_now=True, db_default=Now())

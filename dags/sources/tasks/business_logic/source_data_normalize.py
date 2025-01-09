@@ -187,11 +187,7 @@ def source_data_normalize(
 
     # TODO: Remplacer par le dag_id
     if dag_id == "sinoe":
-        df = df_normalize_sinoe(
-            df,
-            product_mapping=dag_config.product_mapping,
-            dechet_mapping=dag_config.dechet_mapping,
-        )
+        df = df_normalize_sinoe(df)
 
     # Merge et suppression des lignes indésirables
     df = _remove_undesired_lines(df, dag_config)
@@ -200,21 +196,6 @@ def source_data_normalize(
     if df.empty:
         raise ValueError("Plus aucune donnée disponible après normalisation")
     return df
-
-    # # TODO: Je n'ai pas vu la source qui applique cette règle
-    # if "statut" in df.columns:
-    #     df["statut"] = df["statut"].map(
-    #         {
-    #             1: constants.ACTEUR_ACTIF,
-    #             0: constants.ACTEUR_SUPPRIME,
-    #             constants.ACTEUR_ACTIF: constants.ACTEUR_ACTIF,
-    #             "INACTIF": constants.ACTEUR_INACTIF,
-    #             "SUPPRIME": constants.ACTEUR_SUPPRIME,
-    #         }
-    #     )
-    #     df["statut"] = df["statut"].fillna(constants.ACTEUR_ACTIF)
-    # else:
-    #     df["statut"] = constants.ACTEUR_ACTIF
 
 
 def df_normalize_pharmacie(df: pd.DataFrame) -> pd.DataFrame:
@@ -234,8 +215,6 @@ def df_normalize_pharmacie(df: pd.DataFrame) -> pd.DataFrame:
 
 def df_normalize_sinoe(
     df: pd.DataFrame,
-    product_mapping: dict,
-    dechet_mapping: dict,
 ) -> pd.DataFrame:
 
     # DOUBLONS: extra sécurité: même si on ne devrait pas obtenir

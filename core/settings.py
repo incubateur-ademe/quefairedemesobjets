@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     "core",
     "qfdmd",
     "qfdmo",
+    "data",
     "corsheaders",
 ]
 

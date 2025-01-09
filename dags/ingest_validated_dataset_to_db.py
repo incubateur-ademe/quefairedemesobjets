@@ -33,7 +33,7 @@ def _get_first_suggetsioncohorte_to_insert():
     hook = PostgresHook(postgres_conn_id="qfdmo_django_db")
     row = hook.get_first(
         f"""
-        SELECT * FROM qfdmo_suggestioncohorte
+        SELECT * FROM data_suggestioncohorte
         WHERE statut = '{constants.SUGGESTION_ATRAITER}'
         LIMIT 1
         """
@@ -54,7 +54,7 @@ def fetch_and_parse_data(**context):
 
     df_sql = pd.read_sql_query(
         f"""
-        SELECT * FROM qfdmo_suggestionunitaire
+        SELECT * FROM data_suggestionunitaire
         WHERE suggestion_cohorte_id = '{suggestion_cohorte_id}'
         """,
         engine,
@@ -91,7 +91,7 @@ def fetch_and_parse_data(**context):
         normalized_dfs = df_acteur_to_delete["suggestion"].apply(pd.json_normalize)
         df_actors_update_actor = pd.concat(normalized_dfs.tolist(), ignore_index=True)
         status_repeated = (
-            df_acteur_to_delete["status"]
+            df_acteur_to_delete["statut"]
             .repeat(df_acteur_to_delete["suggestion"].apply(len))
             .reset_index(drop=True)
         )

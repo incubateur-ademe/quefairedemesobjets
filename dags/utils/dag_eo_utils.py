@@ -13,16 +13,11 @@ def insert_suggestion_and_process_df(df_acteur_updates, metadata, dag_name, run_
         return
     engine = PostgresConnectionManager().engine
     current_date = datetime.now()
-    logger.warning(dag_name)
-    logger.warning(run_name)
-    logger.warning(constants.SUGGESTION_SOURCE)
-    logger.warning(constants.SUGGESTION_ATRAITER)
-    logger.warning(json.dumps(metadata))
     with engine.connect() as conn:
         # Insert a new suggestion
         result = conn.execute(
             """
-            INSERT INTO qfdmo_suggestioncohorte
+            INSERT INTO data_suggestioncohorte
             (
                 identifiant_action,
                 identifiant_execution,
@@ -39,7 +34,7 @@ def insert_suggestion_and_process_df(df_acteur_updates, metadata, dag_name, run_
                 dag_name,
                 run_name,
                 constants.SUGGESTION_SOURCE,  # FIXME: spécialiser les sources
-                constants.SUGGESTION_ATRAITER,
+                constants.SUGGESTION_AVALIDER,
                 json.dumps(metadata),
                 current_date,
                 current_date,
@@ -50,11 +45,11 @@ def insert_suggestion_and_process_df(df_acteur_updates, metadata, dag_name, run_
     # Insert dag_run_change
     df_acteur_updates["type_action"] = df_acteur_updates["event"]
     df_acteur_updates["suggestion_cohorte_id"] = suggestion_cohorte_id
-    df_acteur_updates["statut"] = constants.SUGGESTION_ATRAITER
+    df_acteur_updates["statut"] = constants.SUGGESTION_AVALIDER
     df_acteur_updates[
         ["suggestion", "suggestion_cohorte_id", "type_action", "statut"]
     ].to_sql(
-        "qfdmo_suggestionunitaire",
+        "data_suggestionunitaire",
         engine,
         if_exists="append",
         index=False,

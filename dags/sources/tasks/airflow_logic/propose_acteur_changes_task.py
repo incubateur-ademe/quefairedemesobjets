@@ -13,18 +13,13 @@ def propose_acteur_changes_task(dag: DAG) -> PythonOperator:
 
 
 def propose_acteur_changes_wrapper(**kwargs):
-    df = kwargs["ti"].xcom_pull(task_ids="source_data_normalize")
-    df_acteurs = kwargs["ti"].xcom_pull(task_ids="db_read_acteur")
+    df_acteur = kwargs["ti"].xcom_pull(task_ids="source_data_normalize")
+    df_acteur_from_db = kwargs["ti"].xcom_pull(task_ids="db_read_acteur")
 
-    params = kwargs["params"]
-    column_to_drop = params.get("column_to_drop", [])
-
-    log.preview("df (source_data_normalize)", df)
-    log.preview("df_acteurs", df_acteurs)
-    log.preview("column_to_drop", column_to_drop)
+    log.preview("df (source_data_normalize)", df_acteur)
+    log.preview("df_acteurs", df_acteur_from_db)
 
     return propose_acteur_changes(
-        df=df,
-        df_acteurs=df_acteurs,
-        column_to_drop=column_to_drop,
+        df_acteur=df_acteur,
+        df_acteur_from_db=df_acteur_from_db,
     )
