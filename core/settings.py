@@ -23,7 +23,7 @@ from sentry_sdk.integrations.django import DjangoIntegration
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = decouple.config("SECRET_KEY", default="my-secret-key")
+SECRET_KEY = decouple.config("SECRET_KEY")
 
 BASE_URL = decouple.config("BASE_URL", default="http://localhost:8000")
 
