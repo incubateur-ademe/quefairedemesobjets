@@ -14,12 +14,7 @@ opening-hours-py
 orjson
 pandas<2.2.0
 Pillow
-# On remplace psycopg2 par psycopg3
-# pour se mettre au goût du jour.
-# On ne met pas psycopg3-binary pour
-# des raisons de sécurité, voir airflow-scheduler.Dockerfile
-# pour explications + installation dépendances
-psycopg3
+psycopg2-binary
 python-decouple
 requests
 sentry-sdk

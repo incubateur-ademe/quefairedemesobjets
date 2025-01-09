@@ -4,25 +4,15 @@ FROM apache/airflow:2.10.4
 # Installation GDAL
 #---------------------------------
 USER root
+RUN apt-get update
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
+RUN apt-get install -y --no-install-recommends \
     gdal-bin libgdal-dev && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
 ENV C_INCLUDE_PATH=/usr/include/gdal
-
-#---------------------------------
-# Dépendences pour compiler psycog3
-#---------------------------------
-# On ne veut pas utiliser psycog3-binary
-# pour des raisons de sécurité (les binaires
-# tardent à être mis à jour en cas de faille
-# ET ne techniquement ne sont pas vérifiables)
-# D'où les dépendences suivantes pour compiler psycog3
-RUN apt install libpq5
 
 #---------------------------------
 # Rebascule sur l'utilisateur airflow
