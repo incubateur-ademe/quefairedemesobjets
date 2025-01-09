@@ -2,6 +2,7 @@ import logging
 import random
 import string
 import uuid
+from copy import deepcopy
 from typing import Any, List, cast
 
 import opening_hours
@@ -601,12 +602,7 @@ class RevisionActeur(BaseActeur):
         if self.is_parent:
             raise Exception("Impossible de dupliquer un acteur parent")
 
-        # Get linked objects before removing pk
-        labels = self.labels.all()
-        acteur_services = self.acteur_services.all()
-        # Besoin de cette "list comprehension" pour executer la Queryset,
-        # sinon elle n'est pas executé avant que le revisionacteur soit modifié
-        proposition_services = [ps for ps in self.proposition_services.all()]
+        revision_acteur = deepcopy(self)
 
         acteur = Acteur.objects.get(identifiant_unique=self.identifiant_unique)
 
@@ -623,30 +619,30 @@ class RevisionActeur(BaseActeur):
         ]
 
         for field in fields_to_reset:
-            setattr(self, field, None)
-        for field in self._meta.fields:
+            setattr(revision_acteur, field, None)
+        for field in revision_acteur._meta.fields:
             if (
-                not getattr(self, field.name)
+                not getattr(revision_acteur, field.name)
                 and field.name not in fields_to_reset
                 and field.name not in fields_to_ignore
             ):
-                setattr(self, field.name, getattr(acteur, field.name))
-        self.save()
-        self.labels.set(labels)
-        self.acteur_services.set(acteur_services)
+                setattr(revision_acteur, field.name, getattr(acteur, field.name))
+        revision_acteur.save()
+        revision_acteur.labels.set(self.labels.all())
+        revision_acteur.acteur_services.set(self.acteur_services.all())
 
-        # recreate proposition_services for the new self
-        for proposition_service in proposition_services:
+        # recreate proposition_services for the new revision_acteur
+        for proposition_service in self.proposition_services.all():
             revision_proposition_service = revision_proposition_service = (
                 RevisionPropositionService.objects.create(
-                    acteur=self,
+                    acteur=revision_acteur,
                     action=proposition_service.action,
                 )
             )
             revision_proposition_service.sous_categories.set(
                 proposition_service.sous_categories.all()
             )
-        return self
+        return revision_acteur
 
     def __str__(self):
         return (
