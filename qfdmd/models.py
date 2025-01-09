@@ -159,7 +159,7 @@ class Lien(models.Model):
         return self.titre_du_lien
 
     class Meta:
-        ordering = ("poids",)
+        ordering = ("titre_du_lien",)
 
 
 class ProduitLien(models.Model):

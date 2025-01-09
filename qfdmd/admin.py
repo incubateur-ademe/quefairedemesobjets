@@ -88,11 +88,13 @@ class SynonymeResource(resources.ModelResource):
 
 
 class SynonymeInline(admin.StackedInline):
+    fields = ("nom",)
     model = Synonyme
     extra = 0
 
 
 class LienInline(admin.StackedInline):
+    autocomplete_fields = ("lien",)
     model = Lien.produits.through
     extra = 0
 
