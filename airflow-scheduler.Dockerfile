@@ -49,6 +49,7 @@ COPY sync_dags.sh /opt/airflow/sync_dags.sh
 # Nécessaire pour faire fonctionner Django dans Airflow
 COPY ./core/ /opt/airflow/core/
 COPY ./qfdmo/ /opt/airflow/qfdmo/
+COPY ./qfdmd/ /opt/airflow/qfdmd/
 COPY ./dsfr_hacks/ /opt/airflow/dsfr_hacks/
 
 # Classique Airflow

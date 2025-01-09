@@ -14,10 +14,10 @@ from sources.tasks.business_logic.read_mapping_from_postgres import (
 from utils.airflow_params import airflow_params_dropdown_from_mapping
 
 # On doit initialiser Django avant de pouvoir importer les modèles
-from utils.django import django_model_fields_attributes_get, django_setup_partial
+from utils.django import django_model_fields_attributes_get, django_setup_full
 
 # Obligé d'avoir la fonction setup avant l'import des modèles
-django_setup_partial()
+django_setup_full()
 from qfdmo.models import Acteur  # noqa: E402
 
 default_args["retries"] = 0

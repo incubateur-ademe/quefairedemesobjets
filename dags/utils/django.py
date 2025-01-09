@@ -40,22 +40,21 @@ def django_add_to_sys_path() -> None:
     # - core/
     # - dags/utils/django.py
 
-    # Preimer des 3x .parent sert à récupérer le dossier,
+    # Premier des 3x .parent sert à récupérer le dossier,
     # les 2 autres à remonter à la source de notre repo
     path_2_levels_up = str(Path(__file__).resolve().parent.parent.parent)
     sys.path.insert(0, path_2_levels_up)
 
 
 def django_setup_full() -> None:
-    """Initialisation de l'environement Django pour pouvoir,
+    """Initialisation complète de l'environement Django pour pouvoir,
     entre autres, importer et utiliser les modèles dans Airflow.
 
-    FIXME: la loqigue d'ajout du path et le déclenchement de django.setup()
-    marchent en soit, 🔴 mais on se retrouve bloquer par
-    les variables d'environements
+    Pour que l'init complète marche il faut que:
+    - les dépendences django (python, lib systèmes) soit installées sur Airflow
+    - les dossiers core/, qfdmo/ etc.. soient montés sur Airflow
 
-    On consèrve cette pour référence le jour où on cherche à essayer
-    de faire le setup complet de Django dans Airflow
+    Voir airflow-scheduler.Dockerfile pour plus de détails
     """
     django_add_to_sys_path()
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
@@ -67,21 +66,10 @@ def django_setup_full() -> None:
 
 def django_setup_partial() -> None:
     """Une initialisation partielle de l'environement Django
-    mais qui fonctionne pour ce qui est du chargement des modèles
 
-    TODO: pour que cette fonction marche j'ai du rajouter app_label
-    à tous nos modèles conformément au comportement de
-    https://docs.djangoproject.com/en/5.1/ref/models/options/#django.db.models.Options.app_label
-    "If a model is defined outside of an application in INSTALLED_APPS,
-    it must declare which app it belongs to:"
-
-    Ceci pourrait être amélioré en:
-    - réussissant à définir app_label via settings.configure (j'ai pas trouvé)
-
-    OU
-
-    - définissant un modèle de base dont tous nos modèles héritent
-    - définissant _meta.pass #app_label = "qfdmo" uniquement sur ce modèle de base
+    ⚠️ A ne pas utiliser par défaut (prendre django_setup_full)
+    mais à conserver au cas où un jour django_setup_full devient une
+    usine à gaz et qu'on ait besoin d'une version plus légère
     """
 
     django_add_to_sys_path()
@@ -96,14 +84,17 @@ def django_setup_partial() -> None:
     django.setup()
 
 
-def django_model_fields_attributes_get(model_class):
+def django_model_fields_attributes_get(model_class) -> list[str]:
+    """Retournes les noms des champs et des attributs
+    d'un modèle Django, par exemple pour offrir via
+    la UI Airflow des dropdowns de champs à sélectionner
+    pour des tâches de clustering."""
+
     if not issubclass(model_class, models.Model):
         raise ValueError("The provided class must be a subclass of models.Model.")
 
-    # Get all field names
     fields = [field.name for field in model_class._meta.get_fields()]
 
-    # Get all @property and @cached_property attributes
     attributes = []
     for attr_name in dir(model_class):
         attr = getattr(model_class, attr_name, None)

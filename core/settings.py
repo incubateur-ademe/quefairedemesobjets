@@ -23,7 +23,7 @@ from sentry_sdk.integrations.django import DjangoIntegration
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = decouple.config("SECRET_KEY")
+SECRET_KEY = decouple.config("SECRET_KEY", default="my-secret-key")
 
 BASE_URL = decouple.config("BASE_URL", default="http://localhost:8000")
 
@@ -200,7 +200,10 @@ WSGI_APPLICATION = "core.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-DATABASE_URL = decouple.config("DATABASE_URL")
+DATABASE_URL = decouple.config(
+    "DATABASE_URL",
+    default="postgis://qfdmo:qfdmo@localhost:6543/qfdmo",  # pragma: allowlist secret  # noqa: E501
+)
 default_settings = dj_database_url.parse(DATABASE_URL)
 default_settings["ENGINE"] = "django.contrib.gis.db.backends.postgis"
 
