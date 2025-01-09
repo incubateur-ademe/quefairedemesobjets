@@ -133,7 +133,7 @@ class ProduitAdmin(
     search_fields = ["nom__unaccent", "id", "synonymes_existants__unaccent"]
     # ajout des filtres de recherche sur bdd et code
     list_filter = ["bdd", "code"]
-    fields_to_display_in_first_position = ["id", "nom", "coucou"]
+    fields_to_display_in_first_position = ["id", "nom"]
     inlines = [SynonymeInline, LienInline]
 
 
