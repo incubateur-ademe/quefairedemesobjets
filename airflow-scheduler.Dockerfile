@@ -15,6 +15,16 @@ ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
 ENV C_INCLUDE_PATH=/usr/include/gdal
 
 #---------------------------------
+# Dépendences pour compiler psycog3
+#---------------------------------
+# On ne veut pas utiliser psycog3-binary
+# pour des raisons de sécurité (les binaires
+# tardent à être mis à jour en cas de faille
+# ET ne techniquement ne sont pas vérifiables)
+# D'où les dépendences suivantes pour compiler psycog3
+RUN apt install libpq5
+
+#---------------------------------
 # Rebascule sur l'utilisateur airflow
 #---------------------------------
 # On rebascule sur le dernier utilisateur fourni
