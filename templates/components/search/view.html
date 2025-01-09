@@ -1,5 +1,10 @@
 <turbo-frame id="search">
     <div
+        data-controller="search"
+        data-action="
+            keydown.esc->search#clear:prevent
+            keydown.up->search#up:prevent
+            keydown.down->search#down:prevent"
         class="
         {# Z-index here helps prevent autocomplete overlapping on the accordion on the homepage #}
         qf-relative qf-z-10
@@ -10,7 +15,7 @@
         qf-flex qf-flex-col"
     >
         <form
-            data-controller="search"
+            data-search-target="form"
             data-turbo-frame="search-results"
             action="{% url 'qfdmd:search' %}"
             class="qf-pl-4w {# should match the svg icon width #}
