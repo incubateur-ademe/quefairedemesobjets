@@ -11,7 +11,9 @@ from sources.tasks.transform.transform_column import (
     clean_siren,
     clean_siret,
 )
+from utils.base_utils import transform_location
 from utils.formatter import format_libelle_to_code
+from utils.mapping_utils import parse_float
 
 logger = logging.getLogger(__name__)
 
@@ -216,6 +218,17 @@ def get_latlng_from_geopoint(row: pd.Series, _) -> pd.Series:
     row["latitude"] = float(geopoint[0].strip())
     row["longitude"] = float(geopoint[1].strip())
     return row[["latitude", "longitude"]]
+
+
+def compute_location(row: pd.Series, _):
+    # FIXME : tests à déplacer
+    # first column is latitude, second is longitude
+    lat_column = row.keys()[0]
+    lng_column = row.keys()[1]
+    row[lat_column] = parse_float(row[lat_column])
+    row[lng_column] = parse_float(row[lng_column])
+    row["location"] = transform_location(row[lng_column], row[lat_column])
+    return row[["location"]]
 
 
 ### Fonctions de résolution de l'adresse au format BAN et avec vérification via l'API

@@ -315,6 +315,6 @@ def update_dag_run_status(
     connection, dag_run_id, statut=shared_constants.SUGGESTION_SUCCES
 ):
     query = f"""
-    UPDATE qfdmo_suggestioncohorte SET statut = '{statut}' WHERE id = {dag_run_id}
+    UPDATE data_suggestioncohorte SET statut = '{statut}' WHERE id = {dag_run_id}
     """
     connection.execute(query)

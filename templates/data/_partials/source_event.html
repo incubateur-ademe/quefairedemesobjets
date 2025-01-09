@@ -1,18 +1,22 @@
 <h2>Instance du DAG : {{ suggestion_cohorte_instance }}</h2>
 <h3>Meta données</h3>
-{% for meta_title, meta_data in suggestion_cohorte_instance.display_meta_data.items %}
-    <p><strong>{{ meta_title }}</strong> : {{ meta_data }}</p>
-{% endfor %}
-<details>
-    <summary>meta_data brutes</summary>
-    <pre class="qf-text-wrap">{{ suggestion_cohorte_instance.metadata }}</pre>
-</details>
-<h3>Exemples</h3>
 
+<p><strong>Source : </strong>{{ metadata.source }}
+<br><strong>Statut de la cohorte : </strong>{{ suggestion_cohorte_instance.get_statut_display }}
+<br><strong>Description : </strong>{{ metadata.description }}
+<br><strong>Nb de suggestions : </strong>{{ metadata.nb_suggestions }}</p>
+
+<h3>Exemples</h3>
 <div class="fr-table">
     <table>
         <caption>Suggestion de source à valider</caption>
-        {% include 'data/_partials/create_actor_event.html' %}
+        {% if suggestion_cohorte_instance.type_action == "SOURCE_AJOUT" or suggestion_cohorte_instance.type_action == "SOURCE_MISESAJOUR" %}
+            {% include 'data/_partials/source_ajout_event.html' %}
+        {% elif suggestion_cohorte_instance.type_action == "SOURCE_SUPRESSION" %}
+        {% include 'data/_partials/source_supression_event.html' %}
+        {% else %}
+            {% include 'data/_partials/create_actor_event.html' %}
+        {% endif %}
     </table>
 </div>
 <div class="fr-my-3w">

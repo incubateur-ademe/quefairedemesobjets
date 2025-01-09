@@ -1,0 +1,27 @@
+    <thead>
+
+        <tr>
+            <th scope="col">action_type</th>
+            <th scope="col">Acteur</th>
+            <th scope="col">suggestion</th>
+        </tr>
+
+    </thead>
+    <tbody>
+        {% for suggestion_unitaire in suggestion_unitaires %}
+            <tr>
+                <td>{{ suggestion_unitaire.get_action_type_display }}</td>
+                <td>
+                    {% for key, value in suggestion_unitaire.display_acteur_details.items %}
+                        <p><strong>{{ key }}</strong> : {{ value }}</p>
+                    {% endfor %}
+                </td>
+                <td>
+                    <details>
+                        <summary>Données brutes</summary>
+                        <pre class="qf-text-wrap">{{ suggestion_unitaire.suggestion }}</pre>
+                    </details>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>

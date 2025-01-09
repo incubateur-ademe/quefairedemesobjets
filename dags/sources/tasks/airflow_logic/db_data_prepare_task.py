@@ -28,6 +28,7 @@ def db_data_prepare_wrapper(**kwargs):
     df_pssc = kwargs["ti"].xcom_pull(task_ids="propose_services_sous_categories")
     df_labels = kwargs["ti"].xcom_pull(task_ids="propose_labels")
     df_acteur_services = kwargs["ti"].xcom_pull(task_ids="propose_acteur_services")
+    df_acteurs_from_db = kwargs["ti"].xcom_pull(task_ids="db_read_acteur")
     source_id_by_code = read_mapping_from_postgres(table_name="qfdmo_source")
     acteurtype_id_by_code = read_mapping_from_postgres(table_name="qfdmo_acteurtype")
 
@@ -37,6 +38,7 @@ def db_data_prepare_wrapper(**kwargs):
     log.preview("df_pssc", df_pssc)
     log.preview("df_labels", df_labels)
     log.preview("df_acteur_services", df_acteur_services)
+    log.preview("df_acteurs_from_db", df_acteurs_from_db)
     log.preview("source_id_by_code", source_id_by_code)
     log.preview("acteurtype_id_by_code", acteurtype_id_by_code)
 
@@ -47,6 +49,7 @@ def db_data_prepare_wrapper(**kwargs):
         df_pssc=df_pssc,
         df_labels=df_labels,
         df_acteur_services=df_acteur_services,
+        df_acteurs_from_db=df_acteurs_from_db,
         source_id_by_code=source_id_by_code,
         acteurtype_id_by_code=acteurtype_id_by_code,
     )

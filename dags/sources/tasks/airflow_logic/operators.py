@@ -2,11 +2,13 @@ from datetime import datetime
 
 from airflow import DAG
 from airflow.models.baseoperator import chain
-from shared.tasks.airflow_logic.write_data_task import write_data_task
 from sources.tasks.airflow_logic.db_data_prepare_task import db_data_prepare_task
 from sources.tasks.airflow_logic.db_read_acteur_task import db_read_acteur_task
 from sources.tasks.airflow_logic.db_read_propositions_max_id_task import (
     db_read_propositions_max_id_task,
+)
+from sources.tasks.airflow_logic.db_write_suggestion_task import (
+    db_write_suggestion_task,
 )
 from sources.tasks.airflow_logic.propose_acteur_changes_task import (
     propose_acteur_changes_task,
@@ -91,5 +93,5 @@ def eo_task_chain(dag: DAG) -> None:
         create_tasks,
         propose_services_sous_categories_task(dag),
         db_data_prepare_task(dag),
-        write_data_task(dag),
+        db_write_suggestion_task(dag),
     )
