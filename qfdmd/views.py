@@ -7,13 +7,8 @@ from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, FormView, ListView
 
-<<<<<<< HEAD
-from qfdmd.forms import SearchForm
-from qfdmd.models import CMSPage, Suggestion, Synonyme
-=======
 from qfdmd.forms import ContactForm, SearchForm
-from qfdmd.models import Suggestion, Synonyme
->>>>>>> b1807f4b (Ajout du formulaire de contact dans l'assistant)
+from qfdmd.models import CMSPage, Suggestion, Synonyme
 
 logger = logging.getLogger(__name__)
 
