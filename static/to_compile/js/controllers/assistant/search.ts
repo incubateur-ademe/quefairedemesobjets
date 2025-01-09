@@ -11,7 +11,6 @@ export default class extends Controller<HTMLFormElement> {
 
   clear() {
     for (const inputElement of this.formTarget.querySelectorAll("input")){
-      console.log("clear", { inputElement })
       inputElement.value =''
       this.submitForm()
     }
