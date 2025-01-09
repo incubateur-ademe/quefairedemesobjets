@@ -7,13 +7,18 @@ from clustering.tasks.airflow_logic.clustering_config_validate_task import (
 from clustering.tasks.airflow_logic.clustering_db_data_read_acteurs_task import (
     clustering_db_data_read_acteurs_task,
 )
-from shared.tasks.database_logic.db_manager import PostgresConnectionManager
 from sources.tasks.airflow_logic.operators import default_args
 from sources.tasks.business_logic.read_mapping_from_postgres import (
     read_mapping_from_postgres,
 )
-from sqlalchemy import inspect
 from utils.airflow_params import airflow_params_dropdown_from_mapping
+
+# On doit initialiser Django avant de pouvoir importer les modèles
+from utils.django import django_model_fields_attributes_get, django_setup_full
+
+# Obligé d'avoir la fonction setup avant l'import des modèles
+django_setup_full()
+from qfdmo.models import Acteur  # noqa: E402
 
 default_args["retries"] = 0
 
@@ -42,19 +47,7 @@ dropdown_acteur_types = airflow_params_dropdown_from_mapping(
     mapping_acteur_type_id_by_code
 )
 
-
-def table_columns_get(table_name: str) -> list[str]:
-    """
-    Récupère la liste des colonnes d'une table dans une base de données.
-    """
-    engine = PostgresConnectionManager().engine
-    inspector = inspect(engine)
-    columns = inspector.get_columns(table_name)  # type: ignore
-    return [column["name"] for column in columns]
-
-
-dropdown_acteur_columns = table_columns_get("qfdmo_revisionacteur")
-
+dropdown_acteur_columns = django_model_fields_attributes_get(Acteur)
 
 with DAG(
     dag_id="clustering_acteur",
