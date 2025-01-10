@@ -77,6 +77,11 @@ with DAG(
             },
             # 4. Transformation du dataframe
             {
+                "origin": ["latitude", "longitude"],
+                "transformation": "compute_location",
+                "destination": ["location"],
+            },
+            {
                 "origin": ["id_point_apport_ou_reparation", "nom"],
                 "transformation": "clean_identifiant_externe",
                 "destination": ["identifiant_externe"],

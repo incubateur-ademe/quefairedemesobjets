@@ -14,7 +14,7 @@ from sources.tasks.airflow_logic.config_management import (
     NormalizationColumnTransform,
     NormalizationDFTransform,
 )
-from sources.tasks.transform.transform_df import merge_duplicates
+from sources.tasks.transform.transform_df import compute_location, merge_duplicates
 from sqlalchemy import text
 from tenacity import retry, stop_after_attempt, wait_fixed
 from utils import logging_utils as log
@@ -238,7 +238,7 @@ def enrich_from_ban_api(row: pd.Series) -> pd.Series:
 
     ban_cache_row = engine.execute(
         text(
-            "SELECT * FROM qfdmo_bancache WHERE adresse = :adresse and code_postal = "
+            "SELECT * FROM data_bancache WHERE adresse = :adresse and code_postal = "
             ":code_postal and ville = :ville and modifie_le > now() - interval '30 day'"
             " order by modifie_le desc limit 1"
         ),
@@ -258,7 +258,7 @@ def enrich_from_ban_api(row: pd.Series) -> pd.Series:
         result = r.json()
         engine.execute(
             text(
-                "INSERT INTO qfdmo_bancache"
+                "INSERT INTO data_bancache"
                 " (adresse, code_postal, ville, ban_returned, modifie_le)"
                 " VALUES (:adresse, :code_postal, :ville, :result, NOW())"
             ),
@@ -291,6 +291,8 @@ def enrich_from_ban_api(row: pd.Series) -> pd.Series:
     else:
         row["longitude"] = 0
         row["latitude"] = 0
+
+    row["location"] = compute_location(row[["latitude", "longitude"]], None)
     return row
 
 

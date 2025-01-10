@@ -83,7 +83,7 @@ with DAG(
             # 4. Transformation du dataframe
             {
                 "origin": ["latitude", "longitude"],
-                "transformation": "clean_location",
+                "transformation": "compute_location",
                 "destination": ["location"],
             },
             {

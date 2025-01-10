@@ -95,6 +95,11 @@ with DAG(
             },
             # 4. Transformation du dataframe
             {
+                "origin": ["final_latitude", "final_longitude"],
+                "transformation": "compute_location",
+                "destination": ["location"],
+            },
+            {
                 "origin": ["telephone", "code_postal"],
                 "transformation": "clean_telephone",
                 "destination": ["telephone"],

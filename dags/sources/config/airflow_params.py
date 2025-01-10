@@ -66,7 +66,7 @@ TRANSFORMATION_MAPPING = {
     "clean_souscategorie_codes_sinoe": clean_souscategorie_codes_sinoe,
     "get_latlng_from_geopoint": get_latlng_from_geopoint,
     "strip_lower_string": strip_lower_string,
-    "clean_location": compute_location,
+    "compute_location": compute_location,
 }
 
 
