@@ -82,6 +82,11 @@ with DAG(
             # },
             # 4. Transformation du dataframe
             {
+                "origin": ["latitude", "longitude"],
+                "transformation": "compute_location",
+                "destination": ["location"],
+            },
+            {
                 "origin": ["labels_etou_bonus", "acteur_type_code"],
                 "transformation": "clean_label_codes",
                 "destination": ["label_codes"],
@@ -169,9 +174,6 @@ with DAG(
             "perimetre_dintervention": "perimetre_dintervention",
             "longitudewgs84": "longitude",
             "latitudewgs84": "latitude",
-        },
-        "columns_to_add_by_default": {
-            "statut": constants.ACTEUR_ACTIF,
         },
         "endpoint": (
             "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"

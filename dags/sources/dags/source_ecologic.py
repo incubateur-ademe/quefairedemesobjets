@@ -76,6 +76,11 @@ with DAG(
                 "value": [],
             },
             # 4. Transformation du dataframe
+            {
+                "origin": ["latitude", "longitude"],
+                "transformation": "compute_location",
+                "destination": ["location"],
+            },
             # {
             #     "origin": ["labels_etou_bonus", "acteur_type_code"],
             #     "transformation": "clean_label_codes",
@@ -145,9 +150,6 @@ with DAG(
             "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
             "donnees-eo-ecologic/lines?size=10000"
         ),
-        "columns_to_add_by_default": {
-            "statut": constants.ACTEUR_ACTIF,
-        },
         "ignore_duplicates": False,
         "validate_address_with_ban": False,
         "merge_duplicated_acteurs": True,  # In case of multi ecoorganisme or filiere
