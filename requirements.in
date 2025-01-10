@@ -14,7 +14,7 @@ opening-hours-py
 orjson
 pandas<2.2.0
 Pillow
-psycopg2
+psycopg2-binary
 python-decouple
 requests
 sentry-sdk

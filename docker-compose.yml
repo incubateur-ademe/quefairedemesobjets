@@ -76,6 +76,8 @@ services:
 
   airflow-scheduler:
     <<: *airflow-common
+    env_file:
+    - ./dags/.env
     build:
       context: .
       dockerfile: airflow-scheduler.Dockerfile
