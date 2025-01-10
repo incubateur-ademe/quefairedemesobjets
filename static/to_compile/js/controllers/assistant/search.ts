@@ -1,5 +1,4 @@
 import { Controller } from "@hotwired/stimulus"
-import { Z_VERSION_ERROR } from "zlib"
 
 export default class extends Controller<HTMLFormElement> {
   declare readonly formTarget: HTMLFormElement
