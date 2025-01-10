@@ -192,6 +192,19 @@ def source_data_normalize(
     # Merge et suppression des lignes indésirables
     df = _remove_undesired_lines(df, dag_config)
 
+    # TODO: A voir ce qu'on doit faire de ces acteurs non digitaus mais sans
+    # localisation (proposition : les afficher en erreur directement ?)
+    df_acteur_sans_loc = df[
+        (df["location"].isnull()) & (df["acteur_type_code"] != "acteur_digital")
+    ]
+    if not df_acteur_sans_loc.empty:
+        nb_acteurs = len(df)
+        logger.warning(
+            f"Nombre d'acteur sans localisation: {len(df_acteur_sans_loc)} / "
+            f"{nb_acteurs}"
+        )
+        log.preview("Acteurs sans localisation", df_acteur_sans_loc)
+
     log.preview("df après normalisation", df)
     if df.empty:
         raise ValueError("Plus aucune donnée disponible après normalisation")

@@ -175,7 +175,6 @@ def clean_souscategorie_codes(
         return souscategorie_codes
 
     product_mapping = dag_config.product_mapping
-    logger.warning(f"{sscat_list=}")
     for sscat in sscat_list.split("|"):
         sscat = sscat.strip().lower()
         if not sscat:

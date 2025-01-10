@@ -114,6 +114,8 @@ def extract_details(row, col="adresse_format_ban"):
 
 
 def transform_location(longitude, latitude):
+    if not longitude or not latitude:
+        return None
     return wkb.dumps(Point(longitude, latitude)).hex()
 
 
