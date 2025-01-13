@@ -72,7 +72,7 @@ def insert_suggestion(
             (
                 dag_name,
                 run_name,
-                action_type,  # FIXME: spécialiser les sources
+                action_type,
                 constants.SUGGESTION_AVALIDER,
                 json.dumps(metadata),
                 current_date,

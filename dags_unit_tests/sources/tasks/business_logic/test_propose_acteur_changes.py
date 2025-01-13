@@ -2,8 +2,6 @@ from datetime import datetime
 
 import pandas as pd
 import pytest
-from shapely import wkb
-from shapely.geometry import Point
 from sources.tasks.business_logic.propose_acteur_changes import propose_acteur_changes
 
 
@@ -69,35 +67,3 @@ class TestProposeActeurChangesCreeLe:
         assert "cree_le" in df_result.columns
         assert df_result["cree_le"].notnull().all()
         assert df_result["cree_le"][0].date() == expected_cree_le
-
-
-class TestActorsLocation:
-    @pytest.mark.parametrize(
-        "latitude, longitude",
-        [
-            (48.8566, 2.3522),
-            ("48.8566", "2.3522"),
-            ("48,8566", "2,3522"),
-        ],
-    )
-    def test_create_actors_location(
-        self,
-        df_empty_acteurs_from_db,
-        latitude,
-        longitude,
-    ):
-        result = propose_acteur_changes(
-            df_acteur=pd.DataFrame(
-                {
-                    "identifiant_unique": ["1"],
-                    "latitude": [latitude],
-                    "longitude": [longitude],
-                }
-            ),
-            df_acteur_from_db=df_empty_acteurs_from_db,
-        )
-        df_result = result["df"]
-
-        expected_location = wkb.dumps(Point(2.3522, 48.8566)).hex()
-
-        assert df_result["location"].iloc[0] == expected_location

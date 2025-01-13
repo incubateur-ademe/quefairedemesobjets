@@ -52,7 +52,7 @@ def _transform_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
     for column_to_transform in columns_to_transform:
         function_name = column_to_transform.transformation
         normalisation_function = get_transformation_function(function_name, dag_config)
-        logger.warning(f"Transformation {function_name}")
+        # logger.warning(f"Transformation {function_name}")
         df[column_to_transform.destination] = df[column_to_transform.origin].apply(
             normalisation_function
         )
@@ -70,8 +70,7 @@ def _transform_df(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
     for column_to_transform_df in columns_to_transform_df:
         function_name = column_to_transform_df.transformation
         normalisation_function = get_transformation_function(function_name, dag_config)
-
-        logger.warning(f"Transformation {function_name}")
+        # logger.warning(f"Transformation {function_name}")
         df[column_to_transform_df.destination] = df[
             column_to_transform_df.origin
         ].apply(normalisation_function, axis=1)
