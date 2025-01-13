@@ -33,7 +33,7 @@ def insert_suggestion_and_process_df(df_acteur_updates, metadata, dag_name, run_
             (
                 dag_name,
                 run_name,
-                constants.SUGGESTION_SOURCE,  # FIXME: spécialiser les sources
+                constants.SUGGESTION_SOURCE,
                 constants.SUGGESTION_AVALIDER,
                 json.dumps(metadata),
                 current_date,
