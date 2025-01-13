@@ -20,10 +20,6 @@ with DAG(
         "normalization_rules": [
             # 1. Renommage des colonnes
             {
-                "origin": "ecoorganisme",
-                "destination": "source_code",
-            },
-            {
                 "origin": "nom_de_lorganisme",
                 "destination": "nom",
             },
@@ -40,6 +36,11 @@ with DAG(
                 "destination": "latitude",
             },
             # 2. Transformation des colonnes
+            {
+                "origin": "ecoorganisme",
+                "transformation": "strip_lower_string",
+                "destination": "source_code",
+            },
             # {
             #     "origin": "site_web",
             #     "transformation": "clean_url",

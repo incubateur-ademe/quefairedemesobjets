@@ -91,7 +91,7 @@ with DAG(
             },
             {
                 "column": "source_code",
-                "value": "cma_reparacteur",
+                "value": "cmareparacteur",
             },
             # 4. Transformation du dataframe
             {

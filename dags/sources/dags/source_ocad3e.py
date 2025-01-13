@@ -14,10 +14,6 @@ with DAG(
     params={
         "normalization_rules": [
             # 1. Renommage des colonnes
-            # {
-            #     "origin": "ecoorganisme",
-            #     "destination": "source_code",
-            # },
             {
                 "origin": "nom_de_lorganisme",
                 "destination": "nom",

@@ -90,6 +90,10 @@ def strip_string(value: str | None, _) -> str:
     return str(value).strip() if not pd.isna(value) and value else ""
 
 
+def strip_lower_string(value: str | None, _) -> str:
+    return str(value).strip().lower() if not pd.isna(value) and value else ""
+
+
 def clean_acteur_type_code(value, _):
     mapping_dict = {
         # Here we store key without accents and special characters
