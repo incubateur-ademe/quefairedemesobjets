@@ -51,7 +51,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("meta_data", models.JSONField(blank=True, null=True)),
-                ("suggestion", models.JSONField(blank=True, null=True)),
+                ("row_updates", models.JSONField(blank=True, null=True)),
                 (
                     "dag_run",
                     models.ForeignKey(

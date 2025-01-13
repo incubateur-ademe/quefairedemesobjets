@@ -1,3 +1,5 @@
+# FIXME: intégrer ce dag dans l'architecture cible
+
 from datetime import timedelta
 
 import pandas as pd
