@@ -2,6 +2,7 @@ from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib.gis.db import models
+from django.db.models.functions import Now
 from django.template.loader import render_to_string
 from django.urls.base import reverse
 from django.utils.functional import cached_property
@@ -9,6 +10,7 @@ from django_extensions.db.fields import AutoSlugField
 
 
 class AbstractBaseProduit(models.Model):
+    modifie_le = models.DateTimeField(auto_now=True, db_default=Now())
     # Le nom des champs conserve ici délibérément l'ancienne nomenclature,
     # car le travail sur le nommage n'a pas encore été effectué.
     # TODO : renommer ces champs lorsque le métier + technique seront tombés
@@ -29,6 +31,7 @@ class AbstractBaseProduit(models.Model):
 
     class Meta:
         abstract = True
+        ordering = ("-modifie_le",)
 
 
 class Produit(AbstractBaseProduit):
@@ -156,7 +159,7 @@ class Lien(models.Model):
         return self.titre_du_lien
 
     class Meta:
-        ordering = ("poids",)
+        ordering = ("titre_du_lien",)
 
 
 class ProduitLien(models.Model):

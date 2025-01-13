@@ -37,6 +37,11 @@
         {% if STIMULUS_DEBUG %}data-stimulus-debug="true"{% endif %}
         {% block body_attrs %}{% endblock %}
     >
+        {% if request.user.is_authenticated %}
+        <div class="qf-bg-red-marianne-main-472 qf-text-white qf-text-center qf-w-screen qf-py-1v qf-text-xs">
+        Vous êtes bien authentifié, vos statistiques PostHog seront ignorées pour cette session | <a href="{% url 'admin:index' %}">accéder à l'administration</a>
+        </div>
+        {% endif %}
         {% block header %}
         {% include "components/header/header.html" %}
         {% endblock header %}
