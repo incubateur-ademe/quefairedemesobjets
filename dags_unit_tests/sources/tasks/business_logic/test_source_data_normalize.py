@@ -76,8 +76,6 @@ class TestSourceDataNormalizeSinoe:
         with pytest.raises(ValueError):
             df = df_normalize_sinoe(
                 df=df,
-                product_mapping=product_mapping,
-                dechet_mapping=dechet_mapping,
             )
 
     def test_drop_annee_column(
@@ -85,8 +83,6 @@ class TestSourceDataNormalizeSinoe:
     ):
         df = df_normalize_sinoe(
             df=df_sinoe,
-            product_mapping=product_mapping,
-            dechet_mapping=dechet_mapping,
         )
         assert "ANNEE" not in df.columns
 
