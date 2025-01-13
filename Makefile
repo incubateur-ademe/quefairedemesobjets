@@ -147,7 +147,7 @@ extract-dsfr:
 	$(PYTHON) ./dsfr_hacks/extract_used_colors.py
 	$(PYTHON) ./dsfr_hacks/extract_used_icons.py
 
-# RESTAURE DB LOCALLY
+# RESTORE DB LOCALLY
 .PHONY: db-restore
 db-restore:
 	mkdir -p tmpbackup
