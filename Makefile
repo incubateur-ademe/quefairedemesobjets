@@ -66,7 +66,7 @@ run-django:
 run-all:
 	docker compose --profile airflow up -d
 	rm -rf .parcel-cache
-	.venv/bin/python manage.py runserver 0.0.0.0:8000
+	$(DJANGO_ADMIN) runserver 0.0.0.0:8000
 	npm run watch
 
 # Local django operations
