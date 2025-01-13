@@ -114,8 +114,15 @@ class Produit(AbstractBaseProduit):
 
     @cached_property
     def en_savoir_plus(self):
+        produit_liens = (
+            ProduitLien.objects.filter(produit=self)
+            .select_related("lien")
+            .order_by("poids")
+        )
+
         return render_to_string(
-            "components/produit/_en_savoir_plus.html", {"produit": self}
+            "components/produit/_en_savoir_plus.html",
+            {"liens": [produit_lien.lien for produit_lien in produit_liens]},
         )
 
     @cached_property
@@ -153,7 +160,6 @@ class Lien(models.Model):
         related_name="liens",
         help_text="Produits associés",
     )
-    poids = models.IntegerField(default=0)
 
     def __str__(self):
         return self.titre_du_lien
