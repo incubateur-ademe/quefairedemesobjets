@@ -7,7 +7,7 @@ templates, it is placed under the produit directory.
 {% endcomment %}
 
 <div class="qf-flex qf-flex-col qf-gap-3w">
-    {% for lien in produit.liens.all %}
+    {% for lien in liens %}
         {% include "components/lien/lien.html" %}
     {% endfor %}
 </div>
