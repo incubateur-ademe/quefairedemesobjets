@@ -76,7 +76,7 @@
         "tailwindcss-animate": "^1.0.7",
         "ts-jest": "^29.2.5",
         "ts-node": "^10.9.2",
-        "typescript": "^5.7.2"
+        "typescript": "^5.7.3"
     },
     "optionalDependencies": {
         "@parcel/watcher-linux-x64-glibc": "^2.5.0"
