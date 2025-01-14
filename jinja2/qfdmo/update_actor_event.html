@@ -1,4 +1,4 @@
-{% if suggestion_unitaires|length > 0 and suggestion_unitaires[0].change_type == 'UPDATE_ACTOR' %}
+{% if dagrun_lines|length > 0 and dagrun_lines[0].change_type == 'UPDATE_ACTOR' %}
     <thead>
 
         <tr>
@@ -6,23 +6,23 @@
             <th scope="col">meta_data</th>
             <th scope="col">Identifiant Unique</th>
             <th scope="col">Candidats</th>
-            <th scope="col">suggestion</th>
+            <th scope="col">row_updates</th>
         </tr>
 
     </thead>
     <tbody>
-        {% for suggestion_unitaire in suggestion_unitaires if suggestion_unitaire.change_type == 'UPDATE_ACTOR' %}
+        {% for dagrun_line in dagrun_lines if dagrun_line.change_type == 'UPDATE_ACTOR' %}
             <tr>
-                <td>{{ suggestion_unitaire.get_change_type_display() }}</td>
-                <td>{{ suggestion_unitaire.meta_data if suggestion_unitaire.meta_data else "-" }}</td>
+                <td>{{ dagrun_line.get_change_type_display() }}</td>
+                <td>{{ dagrun_line.meta_data if dagrun_line.meta_data else "-" }}</td>
                 <td>
-                    {% with identifiant_unique=suggestion_unitaire.display_acteur_details().identifiant_unique %}
+                    {% with identifiant_unique=dagrun_line.display_acteur_details().identifiant_unique %}
                         <a href="{{ url('admin:qfdmo_displayedacteur_change', args=[identifiant_unique]) }}" target="_blank" rel="noreferrer">{{ identifiant_unique }}</a>
                     {% endwith %}
                 </td>
                 <td>
-                    {% with candidat=candidat, index=loop.index, suggestion_cohorte=request.GET.suggestion_cohorte,
-                    identifiant_unique=suggestion_unitaire.display_acteur_details().identifiant_unique %}
+                    {% with candidat=candidat, index=loop.index, dagrun=request.GET.dagrun,
+                    identifiant_unique=dagrun_line.display_acteur_details().identifiant_unique %}
                     {% include 'qfdmo/partials/candidat_row.html' %}
 
         {% endwith %}
@@ -30,23 +30,23 @@
     <td>
         <details>
             <summary>Données brutes</summary>
-            <pre class="qf-text-wrap">{{ suggestion_unitaire.suggestion }}</pre>
+            <pre class="qf-text-wrap">{{ dagrun_line.row_updates }}</pre>
         </details>
     </td>
     </tr>
 {% endfor %}
 </tbody>
-{% if suggestion_unitaires.has_other_pages %}
+{% if dagrun_lines.has_other_pages %}
     <form method="get" action="">
         <label for="page-select">Go to page:</label>
         <select id="page-select" class="fr-select" name="page" onchange="this.form.submit()">
-            {% for num in suggestion_unitaires.paginator.page_range %}
-                <option value="{{ num }}" {% if suggestion_unitaires.number == num %}selected{% endif %}>
+            {% for num in dagrun_lines.paginator.page_range %}
+                <option value="{{ num }}" {% if dagrun_lines.number == num %}selected{% endif %}>
                     {{ num }}
                 </option>
             {% endfor %}
         </select>
-        <input type="hidden" name="suggestion_cohorte" value="{{ request.GET.suggestion_cohorte }}">
+        <input type="hidden" name="dagrun" value="{{ request.GET.dagrun }}">
         <noscript>
             <input type="submit" value="Go">
         </noscript>

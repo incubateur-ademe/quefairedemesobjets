@@ -24,17 +24,17 @@
             <th>Meilleure proposition</th>
             <th>Map Link</th>
         </tr>
-        {% for candidat in suggestion_unitaire.suggestion.ae_result %}
+        {% for candidat in dagrun_line.row_updates.ae_result %}
             {% if candidat.etat_admin_candidat != 'F' %}
-                {% with comparison_result=(suggestion_unitaire.suggestion.best_candidat_index and loop.index == suggestion_unitaire.suggestion.best_candidat_index|int) %}
+                {% with comparison_result=(dagrun_line.row_updates.best_candidat_index and loop.index == dagrun_line.row_updates.best_candidat_index|int) %}
                     {# Ces valeurs sont définies dans dags/utils/shared_constants.py, à garder synchronisées entre Django et Airflow #}
-                    <tr class="{% if suggestion_unitaire.status == 'ATRAITER' and comparison_result %}validated{% elif suggestion_unitaire.status == 'REJETER' %}rejected{% endif %}">
+                    <tr class="{% if dagrun_line.status == 'TO_INSERT' and comparison_result %}validated{% elif dagrun_line.status == 'REJECTED' %}rejected{% endif %}">
 
                         <td>
                             <form method="post" action="{{ request.path }}" target="form-frame-{{identifiant_unique}}-{{ loop.index }}">
                                 {{ csrf_input }}
-                                <input type="hidden" name="id" value="{{ suggestion_unitaire.id }}">
-                                <input type="hidden" name="suggestion_cohorte" value="{{ suggestion_cohorte }}">
+                                <input type="hidden" name="id" value="{{ dagrun_line.id }}">
+                                <input type="hidden" name="dagrun" value="{{ dagrun }}">
                                 <input type="hidden" name="identifiant_unique" value="{{ identifiant_unique }}">
                                 <input type="hidden" name="index" value="{{ loop.index }}">
                                 <button class="fr-btn" type="submit" name="action" value="validate">O</button>
