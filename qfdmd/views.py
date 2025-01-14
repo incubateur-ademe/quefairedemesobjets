@@ -46,6 +46,7 @@ class BaseView:
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context.update(
+            footer_pages=CMSPage.objects.all(),
             search_form=SearchForm(),
             search_view_template_name=SEARCH_VIEW_TEMPLATE_NAME,
             iframe_script=generate_iframe_script(self.request),

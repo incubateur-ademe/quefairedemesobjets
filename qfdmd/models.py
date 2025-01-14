@@ -268,11 +268,15 @@ class CMSPage(models.Model):
         "Tous les autres champs seront automatiquement contribués à l'enregistrement"
         "de la page dans l'administration Django.",
     )
-    body = models.JSONField()
-    search_description = models.CharField()
-    seo_title = models.CharField()
-    title = models.CharField()
-    slug = models.CharField()
+    body = models.JSONField(default=dict)
+    search_description = models.CharField(default="")
+    seo_title = models.CharField(default="")
+    title = models.CharField(default="")
+    slug = models.CharField(default="")
+    poids = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.title
 
     def save(self, *args, **kwargs):
         fields_to_fetch_from_api_response = [

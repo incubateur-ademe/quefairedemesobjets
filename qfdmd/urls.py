@@ -19,7 +19,7 @@ urlpatterns = [
     # Gatsby website. If changed, a redirect need to be created to keep the
     # legacy behaviour.
     path("iframe.js", get_assistant_script, name="script"),
-    path("assistant/<slug:slug>", CMSPageDetailView.as_view(), name="cms-page-detail"),
+    path("assistant/<slug:slug>", CMSPageDetailView.as_view(), name="cms-page"),
     path(
         "assistant-enquete",
         RedirectView.as_view(
