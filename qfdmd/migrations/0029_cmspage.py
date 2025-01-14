@@ -7,7 +7,11 @@ def import_cms_pages(apps, schema_editor):
     CMSPage = apps.get_model("qfdmd", "CMSPage")
     ids = [223, 221, 226, 222, 230]
     for index, id in enumerate(ids):
-        CMSPage.objects.update_or_create(id=id, defaults={"poids": index})
+        page, created = CMSPage.objects.update_or_create(
+            id=id, defaults={"poids": index}
+        )
+        # Ensure the fields are populated
+        page.save()
 
 
 class Migration(migrations.Migration):
