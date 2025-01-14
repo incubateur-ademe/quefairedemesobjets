@@ -1,3 +1,4 @@
+import logging
 from urllib.parse import urlencode
 
 import requests
@@ -8,6 +9,8 @@ from django.template.loader import render_to_string
 from django.urls.base import reverse
 from django.utils.functional import cached_property
 from django_extensions.db.fields import AutoSlugField
+
+logger = logging.getLogger(__name__)
 
 
 class AbstractBaseProduit(models.Model):
@@ -257,8 +260,6 @@ class Suggestion(models.Model):
         return str(self.produit)
 
 
-
-
 class CMSPage(models.Model):
     id = models.IntegerField(
         primary_key=True,
@@ -289,15 +290,22 @@ class CMSPage(models.Model):
             "seo_title",
         ]
 
-        wagtail_response = requests.get(f"{settings.CMS_BASE_URL}/api/v2/pages/{self.id}")
-        wagtail_page_as_json = wagtail_response.json()
+        try:
+            wagtail_response = requests.get(
+                f"{settings.CMS_BASE_URL}/api/v2/pages/{self.id}"
+            )
+            wagtail_response.raise_for_status()
+            wagtail_page_as_json = wagtail_response.json()
 
-        for field in fields_to_fetch_from_api_response:
-            if value := wagtail_page_as_json.get(field):
-                setattr(self, field, value)
+            for field in fields_to_fetch_from_api_response:
+                if value := wagtail_page_as_json.get(field):
+                    setattr(self, field, value)
 
-        for field in fields_to_fetch_from_api_response_meta:
-            if value := wagtail_page_as_json["meta"].get(field):
-                setattr(self, field, value)
+            for field in fields_to_fetch_from_api_response_meta:
+                if value := wagtail_page_as_json["meta"].get(field):
+                    setattr(self, field, value)
+
+        except requests.exceptions.RequestException as exception:
+            logger.error(f"Error fetching data from CMS API: {exception}")
 
         super().save(*args, **kwargs)
