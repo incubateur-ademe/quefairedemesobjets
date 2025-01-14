@@ -257,7 +257,6 @@ class Suggestion(models.Model):
         return str(self.produit)
 
 
-CMS_BASE_URL = "https://longuevieauxobjets.ademe.fr"
 
 
 class CMSPage(models.Model):
