@@ -227,6 +227,7 @@ def compute_location(row: pd.Series, _):
     lng_column = row.keys()[1]
     row[lat_column] = parse_float(row[lat_column])
     row[lng_column] = parse_float(row[lng_column])
+    print(row[lat_column], row[lng_column])
     row["location"] = transform_location(row[lng_column], row[lat_column])
     return row[["location"]]
 

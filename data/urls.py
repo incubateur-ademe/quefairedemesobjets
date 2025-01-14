@@ -1,11 +1,11 @@
 from django.urls import path
 
-from data.views import DagsValidation
+from data.views import SuggestionManagment
 
 urlpatterns = [
     path(
-        "dags/validations",
-        DagsValidation.as_view(),
-        name="dags_validations",
+        "suggestions",
+        SuggestionManagment.as_view(),
+        name="suggestions",
     ),
 ]

@@ -9,7 +9,7 @@ from dsfr.forms import DsfrBaseForm
 
 from qfdmo.fields import GroupeActionChoiceField
 from qfdmo.geo_api import epcis_from, formatted_epcis_as_list_of_tuple
-from qfdmo.models import SousCategorieObjet
+from qfdmo.models import DagRun, DagRunStatus, SousCategorieObjet
 from qfdmo.models.action import (
     Action,
     GroupeAction,
@@ -338,6 +338,23 @@ class CarteForm(AddressesForm):
         choices=[],
         label="Groupes d'actions",
         required=False,
+    )
+
+
+class DagsForm(forms.Form):
+    """
+    DEPRECATED, should use the data django app
+    """
+
+    dagrun = forms.ModelChoiceField(
+        label="Séléctionner l'execution d'un DAG",
+        widget=forms.Select(
+            attrs={
+                "class": "fr-select",
+            }
+        ),
+        queryset=DagRun.objects.filter(status=DagRunStatus.TO_VALIDATE.value),
+        required=True,
     )
 
 

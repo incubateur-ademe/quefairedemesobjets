@@ -1,4 +1,4 @@
-{% if suggestion_unitaires|length > 0 and suggestion_unitaires[0].change_type == 'CREATE' %}
+{% if dagrun_lines|length > 0 and dagrun_lines[0].change_type == 'CREATE' %}
     <thead>
 
         <tr>
@@ -6,17 +6,17 @@
             <th scope="col">meta_data</th>
             <th scope="col">Acteur</th>
             <th scope="col">Proposition de service</th>
-            <th scope="col">suggestion</th>
+            <th scope="col">row_updates</th>
         </tr>
 
     </thead>
     <tbody>
-        {% for suggestion_unitaire in suggestion_unitaires if suggestion_unitaire.change_type == 'CREATE'  %}
+        {% for dagrun_line in dagrun_lines if dagrun_line.change_type == 'CREATE'  %}
             <tr>
-                <td>{{ suggestion_unitaire.get_change_type_display() }}</td>
-                <td>{{ suggestion_unitaire.meta_data if suggestion_unitaire.meta_data else "-" }}</td>
+                <td>{{ dagrun_line.get_change_type_display() }}</td>
+                <td>{{ dagrun_line.meta_data if dagrun_line.meta_data else "-" }}</td>
                 <td>
-                    {% for key, value in suggestion_unitaire.display_acteur_details().items() %}
+                    {% for key, value in dagrun_line.display_acteur_details().items() %}
                         <p><strong>{{ key }}</strong> : {{ value }}</p>
                     {% endfor %}
                 </td>
@@ -26,7 +26,7 @@
                             <th>Action</th>
                             <th>Sous-Catégories</th>
                         </tr>
-                        {% for service in suggestion_unitaire.display_proposition_service() %}
+                        {% for service in dagrun_line.display_proposition_service() %}
                             <tr>
                                 <td>{{ service.action }}</td>
                                 <td>
@@ -43,7 +43,7 @@
                 <td>
                     <details>
                         <summary>Données brutes</summary>
-                        <pre class="qf-text-wrap">{{ suggestion_unitaire.suggestion }}</pre>
+                        <pre class="qf-text-wrap">{{ dagrun_line.row_updates }}</pre>
                     </details>
                 </td>
             </tr>

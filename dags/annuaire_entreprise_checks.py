@@ -282,7 +282,7 @@ def db_data_prepare(**kwargs):
     serialized_data = {}
     for key, df in data.items():
         df["event"] = "UPDATE_ACTOR"
-        df["suggestion"] = df[columns].apply(
+        df["row_updates"] = df[columns].apply(
             lambda row: json.dumps(row.to_dict(), default=str), axis=1
         )
         serialized_data[key] = {"df": df, "metadata": {"updated_rows": len(df)}}

@@ -16,6 +16,7 @@ from qfdmo.views.adresses import (
 )
 from qfdmo.views.auth import LVAOLoginView
 from qfdmo.views.configurator import AdvancedConfiguratorView, ConfiguratorView
+from qfdmo.views.dags import DagsValidation
 
 urlpatterns = [
     path("", direct_access, name="direct_access"),
@@ -95,5 +96,11 @@ urlpatterns = [
         "iframe/configurateur",
         AdvancedConfiguratorView.as_view(),
         name="advanced_iframe_configurator",
+    ),
+    # DEPRECATED, should use the data django app
+    path(
+        "dags/validations",
+        DagsValidation.as_view(),
+        name="dags_validations",
     ),
 ]

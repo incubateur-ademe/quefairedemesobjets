@@ -21,7 +21,7 @@ ACTION_TO_VERB = {
 }
 
 
-class DagsValidation(IsStaffMixin, FormView):
+class SuggestionManagment(IsStaffMixin, FormView):
     form_class = SuggestionCohorteForm
     template_name = "data/dags_validations.html"
     success_url = "/dags/validations"
