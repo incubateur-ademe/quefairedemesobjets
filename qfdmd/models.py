@@ -290,7 +290,7 @@ class CMSPage(models.Model):
             "seo_title",
         ]
 
-        wagtail_response = requests.get(f"{CMS_BASE_URL}/api/v2/pages/{self.id}")
+        wagtail_response = requests.get(f"{settings.CMS_BASE_URL}/api/v2/pages/{self.id}")
         wagtail_page_as_json = wagtail_response.json()
 
         for field in fields_to_fetch_from_api_response:
