@@ -1,9 +1,9 @@
-{% load static %}
+{% load static url_extra %}
 <header class="qf-flex qf-flex-col fr-container qf-relative">
     <div class="qf-flex qf-justify-between qf-pt-3w">
         <a
             class="qf-bg-none qf-flex qf-gap-2w"
-            href="{% url 'qfdmd:home' %}"
+            href="{% url_keep_qs 'qfdmd:home' %}"
         >
             <img
                 src="{% static 'assistant/bloc-marque.svg' %}"
