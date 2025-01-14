@@ -1,0 +1,29 @@
+{% extends "qfdmd/base.html" %}
+
+{% block analytics_action %}produitPageView{% endblock %}
+
+{% block title %}
+{{ block.super }} | {{ object.seo_title }}
+{% endblock title %}
+
+{% block meta_description %}{{ object.search_description|default:block.super }}{% endblock %}
+
+{% block main %}
+<article
+    class="qf-flex qf-flex-col
+    qf-gap-4w max-lg:qf-pr-0 max-xl:qf-pr-6w"
+>
+    <header class="qf-mt-3w md:qf-mt-5w">
+        <h1 class="qf-m-0">
+            {{ object.title|capfirst }}
+        </h1>
+    </header>
+    <div>
+
+    {% for block in object.body %}
+        {{ block.value|safe }}
+    {% endfor %}
+    </div>
+
+</article>
+{% endblock main %}
