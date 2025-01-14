@@ -24,7 +24,7 @@ ACTION_TO_VERB = {
 class SuggestionManagment(IsStaffMixin, FormView):
     form_class = SuggestionCohorteForm
     template_name = "data/dags_validations.html"
-    success_url = "/dags/validations"
+    success_url = "/data/suggestions"
 
     def form_valid(self, form):
         # MANAGE search and display suggestion_cohorte details

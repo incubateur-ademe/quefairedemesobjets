@@ -1,10 +1,12 @@
-# FIXME: intégrer ce dag dans l'architecture cible
+"""
+DEPRECATED : utiliser le dag apply_suggestions
+"""
 
 from datetime import timedelta
 
 import pandas as pd
 from airflow.models import DAG
-from airflow.operators.python import PythonOperator, ShortCircuitOperator
+from airflow.operators.python import BranchPythonOperator, PythonOperator
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.utils.dates import days_ago
@@ -21,104 +23,75 @@ default_args = {
 }
 
 dag = DAG(
-    dag_id="validate_and_process_suggestions",
-    dag_display_name="Traitement des cohortes de données validées",
+    dag_id="validate_and_process_dagruns",
+    dag_display_name="DEPRECATED : Traitement des cohortes de données validées",
     default_args=default_args,
-    description="traiter les suggestions à traiter",
+    description="""
+    DEPRECATED : Check for VALIDATE in qfdmo_dagrun and process qfdmo_dagrunchange
+    util uniquement pour les cohortes de siretisations
+    """,
     schedule="*/5 * * * *",
     catchup=False,
     max_active_runs=1,
 )
 
 
-def _get_first_suggetsioncohorte_to_insert():
+def _get_first_dagrun_to_insert():
     hook = PostgresHook(postgres_conn_id="qfdmo_django_db")
+    # get first row from table qfdmo_dagrun with status TO_INSERT
     row = hook.get_first(
-        f"""
-        SELECT * FROM data_suggestioncohorte
-        WHERE statut = '{constants.SUGGESTION_ATRAITER}'
-        LIMIT 1
-        """
+        f"SELECT * FROM qfdmo_dagrun WHERE status = '{constants.DAGRUN_TOINSERT}'"
+        " LIMIT 1"
     )
     return row
 
 
-def check_suggestion_to_process(**kwargs):
-    row = _get_first_suggetsioncohorte_to_insert()
-    return bool(row)
+def check_for_validation(**kwargs):
+    # get first row from table qfdmo_dagrun with status TO_INSERT
+    row = _get_first_dagrun_to_insert()
+
+    # Skip if row is None
+    if row is None:
+        return "skip_processing"
+    return "fetch_and_parse_data"
 
 
 def fetch_and_parse_data(**context):
-    row = _get_first_suggetsioncohorte_to_insert()
-    suggestion_cohorte_id = row[0]
+    row = _get_first_dagrun_to_insert()
+    dag_run_id = row[0]
 
     engine = PostgresConnectionManager().engine
 
     df_sql = pd.read_sql_query(
-        f"""
-        SELECT * FROM data_suggestionunitaire
-        WHERE suggestion_cohorte_id = '{suggestion_cohorte_id}'
-        """,
+        f"SELECT * FROM qfdmo_dagrunchange WHERE dag_run_id = '{dag_run_id}'",
         engine,
     )
 
-    df_acteur_to_create = df_sql[
-        df_sql["type_action"] == constants.SUGGESTION_SOURCE_AJOUT
-    ]
-    df_acteur_to_update = df_sql[
-        df_sql["type_action"] == constants.SUGGESTION_SOURCE_AJOUT
-    ]
-    df_acteur_to_delete = df_sql[
-        df_sql["type_action"] == constants.SUGGESTION_SOURCE_SUPRESSION
-    ]
-    df_acteur_to_enrich = df_sql[
-        df_sql["type_action"] == constants.SUGGESTION_ENRICHISSEMENT
-    ]
+    df_create = df_sql[df_sql["change_type"] == "CREATE"]
+    df_update_actor = df_sql[df_sql["change_type"] == "UPDATE_ACTOR"]
 
-    df_update_actor = df_sql[df_sql["type_action"] == "UPDATE_ACTOR"]
-
-    if not df_acteur_to_create.empty:
-        normalized_dfs = df_acteur_to_create["suggestion"].apply(pd.json_normalize)
-        df_acteur = pd.concat(normalized_dfs.tolist(), ignore_index=True)
+    if not df_create.empty:
+        normalized_dfs = df_create["row_updates"].apply(pd.json_normalize)
+        df_actors_create = pd.concat(normalized_dfs.tolist(), ignore_index=True)
         return dag_ingest_validated_utils.handle_create_event(
-            df_acteur, suggestion_cohorte_id, engine
+            df_actors_create, dag_run_id, engine
         )
-    if not df_acteur_to_update.empty:
-        normalized_dfs = df_acteur_to_update["suggestion"].apply(pd.json_normalize)
-        df_acteur = pd.concat(normalized_dfs.tolist(), ignore_index=True)
-        return dag_ingest_validated_utils.handle_create_event(
-            df_acteur, suggestion_cohorte_id, engine
-        )
-    if not df_acteur_to_delete.empty:
-        normalized_dfs = df_acteur_to_delete["suggestion"].apply(pd.json_normalize)
-        df_actors_update_actor = pd.concat(normalized_dfs.tolist(), ignore_index=True)
-        status_repeated = (
-            df_acteur_to_delete["statut"]
-            .repeat(df_acteur_to_delete["suggestion"].apply(len))
-            .reset_index(drop=True)
-        )
-        df_actors_update_actor["status"] = status_repeated
+    if not df_update_actor.empty:
 
-        return dag_ingest_validated_utils.handle_update_actor_event(
-            df_actors_update_actor, suggestion_cohorte_id
-        )
-
-    if not df_acteur_to_enrich.empty:
-
-        normalized_dfs = df_update_actor["suggestion"].apply(pd.json_normalize)
+        normalized_dfs = df_update_actor["row_updates"].apply(pd.json_normalize)
         df_actors_update_actor = pd.concat(normalized_dfs.tolist(), ignore_index=True)
         status_repeated = (
             df_update_actor["status"]
-            .repeat(df_update_actor["suggestion"].apply(len))
+            .repeat(df_update_actor["row_updates"].apply(len))
             .reset_index(drop=True)
         )
         df_actors_update_actor["status"] = status_repeated
 
         return dag_ingest_validated_utils.handle_update_actor_event(
-            df_actors_update_actor, suggestion_cohorte_id
+            df_actors_update_actor, dag_run_id
         )
     return {
-        "dag_run_id": suggestion_cohorte_id,
+        "dag_run_id": dag_run_id,
     }
 
 
@@ -159,9 +132,19 @@ fetch_parse_task = PythonOperator(
 )
 
 
-check_suggestion_to_process_task = ShortCircuitOperator(
-    task_id="check_suggestion_to_process",
-    python_callable=check_suggestion_to_process,
+def skip_processing(**kwargs):
+    print("No records to validate. DAG run completes successfully.")
+
+
+skip_processing_task = PythonOperator(
+    task_id="skip_processing",
+    python_callable=skip_processing,
+    dag=dag,
+)
+
+branch_task = BranchPythonOperator(
+    task_id="branch_processing",
+    python_callable=check_for_validation,
     dag=dag,
 )
 
@@ -177,8 +160,9 @@ trigger_create_final_actors_dag = TriggerDagRunOperator(
     dag=dag,
 )
 
+branch_task >> skip_processing_task
 (
-    check_suggestion_to_process_task
+    branch_task
     >> fetch_parse_task
     >> write_to_postgres_task
     >> trigger_create_final_actors_dag
