@@ -7,7 +7,7 @@ from django.shortcuts import render
 from django.views.generic import DetailView, ListView
 
 from qfdmd.forms import SearchForm
-from qfdmd.models import Suggestion, Synonyme
+from qfdmd.models import CMSPage, Suggestion, Synonyme
 
 logger = logging.getLogger(__name__)
 
@@ -78,3 +78,7 @@ class HomeView(BaseView, ListView):
 
 class SynonymeDetailView(BaseView, DetailView):
     model = Synonyme
+
+
+class CMSPageDetailView(BaseView, DetailView):
+    model = CMSPage

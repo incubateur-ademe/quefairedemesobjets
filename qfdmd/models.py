@@ -1,5 +1,6 @@
 from urllib.parse import urlencode
 
+import requests
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.db.models.functions import Now
@@ -254,3 +255,46 @@ class Suggestion(models.Model):
 
     def __str__(self) -> str:
         return str(self.produit)
+
+
+CMS_BASE_URL = "https://longuevieauxobjets.ademe.fr"
+
+
+class CMSPage(models.Model):
+    id = models.IntegerField(
+        primary_key=True,
+        help_text="Ce champ est le seul contribuable.<br>"
+        "Il correspond à l'ID de la page Wagtail.<br>"
+        "Tous les autres champs seront automatiquement contribués à l'enregistrement"
+        "de la page dans l'administration Django.",
+    )
+    body = models.JSONField()
+    search_description = models.CharField()
+    seo_title = models.CharField()
+    title = models.CharField()
+    slug = models.CharField()
+
+    def save(self, *args, **kwargs):
+        fields_to_fetch_from_api_response = [
+            "body",
+            "title",
+        ]
+
+        fields_to_fetch_from_api_response_meta = [
+            "search_description",
+            "slug",
+            "seo_title",
+        ]
+
+        wagtail_response = requests.get(f"{CMS_BASE_URL}/api/v2/pages/{self.id}")
+        wagtail_page_as_json = wagtail_response.json()
+
+        for field in fields_to_fetch_from_api_response:
+            if value := wagtail_page_as_json.get(field):
+                setattr(self, field, value)
+
+        for field in fields_to_fetch_from_api_response_meta:
+            if value := wagtail_page_as_json["meta"].get(field):
+                setattr(self, field, value)
+
+        super().save(*args, **kwargs)
