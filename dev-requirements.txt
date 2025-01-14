@@ -544,9 +544,9 @@ django-browser-reload==1.17.0 \
     --hash=sha256:3667939cde0eee1a6d698dbe3b78cf10b573dabc4e711fb7933f1ba91fb98da4 \
     --hash=sha256:d372c12c1c5962c02279a53cac7e8a020c48f104592c637a06d0768b28d2d6be
     # via -r dev-requirements.in
-django-debug-toolbar==4.4.6 \
-    --hash=sha256:36e421cb908c2f0675e07f9f41e3d1d8618dc386392ec82d23bcfcd5d29c7044 \
-    --hash=sha256:3beb671c9ec44ffb817fad2780667f172bd1c067dbcabad6268ce39a81335f45
+django-debug-toolbar==5.0.1 \
+    --hash=sha256:296f6f18a80710e84fbb8361538ae5ec522a75ebe9ab67db34bcf1026cbeb420 \
+    --hash=sha256:7456cc2e951db37dab335686db7803c4a0ecb6736d120705f6668db9548bf49f
     # via -r dev-requirements.in
 django-stubs==5.1.1 \
     --hash=sha256:126d354bbdff4906c4e93e6361197f6fbfb6231c3df6def85a291dae6f9f577b \
