@@ -44,14 +44,18 @@ class Produit(AbstractBaseProduit):
         unique=True,
         verbose_name="Libellé",
     )
-    synonymes_existants = models.TextField(blank=True, help_text="Synonymes existants")
+    synonymes_existants = models.TextField(
+        blank=True,
+        help_text="Ce champ est obsolète,"
+        " il n'est actuellement pas mis à jour automatiquement.",
+    )
     code = models.CharField(blank=True, help_text="Code")
     bdd = models.CharField(blank=True, help_text="Bdd")
     qu_est_ce_que_j_en_fais = models.TextField(
         blank=True, help_text="Qu'est-ce que j'en fais ? - ANCIEN CHAMP."
     )
-    nom_eco_organisme = models.TextField(blank=True, help_text="Nom de l’éco-organisme")
-    filieres_rep = models.TextField(blank=True, help_text="Filière(s) REP concernée(s)")
+    nom_eco_organisme = models.CharField(blank=True, help_text="Nom de l’éco-organisme")
+    filieres_rep = models.CharField(blank=True, help_text="Filière(s) REP concernée(s)")
     slug = models.CharField(blank=True, help_text="Slug - ne pas modifier")
 
     def __str__(self):
@@ -171,7 +175,15 @@ class Lien(models.Model):
 class ProduitLien(models.Model):
     produit = models.ForeignKey(Produit, on_delete=models.CASCADE)
     lien = models.ForeignKey(Lien, on_delete=models.CASCADE)
-    poids = models.IntegerField(default=0)
+    poids = models.IntegerField(
+        default=0,
+        help_text=(
+            "Ce champ détermine la position d'un élément dans la liste affichée.<br>"
+            "Les éléments avec un poids plus élevé apparaissent plus bas dans "
+            "la liste.<br>"
+            "Les éléments avec un poids plus faible apparaissent plus haut."
+        ),
+    )
 
     class Meta:
         ordering = ("poids",)
