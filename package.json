@@ -55,7 +55,7 @@
         "@playwright/test": "^1.49.1",
         "@testing-library/jest-dom": "^6.6.3",
         "@types/jest": "^29.5.13",
-        "@types/leaflet": "^1.9.14",
+        "@types/leaflet": "^1.9.16",
         "@types/lodash": "^4.17.14",
         "@types/node": "^22.10.5",
         "@typescript-eslint/eslint-plugin": "^8.19.1",
