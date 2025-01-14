@@ -26,6 +26,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = decouple.config("SECRET_KEY")
 
 BASE_URL = decouple.config("BASE_URL", default="http://localhost:8000")
+CMS_BASE_URL = decouple.config(
+    "CMS_BASE_URL", default="https://longuevieauxobjets.ademe.fr"
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = decouple.config("DEBUG", default=False, cast=bool)
