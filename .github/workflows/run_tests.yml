@@ -35,8 +35,19 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install gdal-bin
-      - name: Install Dependencies
-        run: pip install --require-hashes --no-deps -r airflow-requirements.txt -r requirements.txt -r dev-requirements.txt
+      - name: Install poetry
+        uses: abatilo/actions-poetry@v4
+      - name: Setup a local virtual environment (if no poetry.toml file)
+        run: |
+          poetry config virtualenvs.create true --local
+          poetry config virtualenvs.in-project true --local
+      - uses: actions/cache@v3
+        name: Define a cache for the virtual environment based on the dependencies lock file
+        with:
+          path: ./.venv
+          key: venv-${{ hashFiles('poetry.lock') }}
+      - name: Install the project dependencies
+        run: poetry install --with dev,airflow
       - name: Run unit tests
         run: pytest unit_tests
       - name: Run integration tests
@@ -135,8 +146,6 @@ jobs:
 
       - name: Run Playwright tests
         run: npx playwright test --reporter=list --update-snapshots --shard=${{ matrix.shard }}
-
-
 
       - uses: actions/upload-artifact@v4
         if: always()
