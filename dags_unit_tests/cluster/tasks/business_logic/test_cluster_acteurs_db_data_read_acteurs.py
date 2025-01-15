@@ -60,6 +60,16 @@ class TestClusterActeursDbDataReadActeurs:
 
         # ------------------------------------------
         # 🟡 Acteurs qui devraient être exclus
+        # identique au 1er bon acteur MAIS INACTIF
+        ActeurFactory(
+            source=s1,
+            acteur_type=at1,
+            nom="correct_nom_mais_inactif",
+            adresse="une adresse pas redondante avec le nom",
+            ville="Paris",
+            code_postal="75000",
+            statut="INACTIF",
+        )
         # ville None alors que champ dans include_if_all_fields_filled
         ActeurFactory(
             source=s1,
@@ -180,6 +190,7 @@ class TestClusterActeursDbDataReadActeurs:
         "field",
         [
             "identifiant_unique",
+            "statut",
             "source_id",
             "source_code",  # enrichissement débug
             "acteur_type_id",
@@ -197,6 +208,16 @@ class TestClusterActeursDbDataReadActeurs:
         MAIS il est possible qu'il soit manquant des paramètres du
         fait des comportements par défaut)"""
         assert "nom" in df_ideal.columns
+
+    def test_statut_actif_hard_filter(self, df_ideal):
+        """On vérifie que le filtre sur le statut actif est bien appliqué"""
+        assert "correct_nom_mais_inactif" not in df_ideal["nom"].values
+
+        # On garde le test en dure "ACTIF" (et non pas répliquer la logique
+        # de la fonction) pour éviter de répliquer les erreurs fonctions/tests
+        # Ce statut ne devrait pas changer sauf décision métier exceptionnelle
+        # donc OK d'avoir du static
+        assert all(df_ideal["statut"] == "ACTIF")
 
     def test_df_properties_requested_included(self, df_ideal):
         """Bien que les propriétés (@property) ne soient pas supportées

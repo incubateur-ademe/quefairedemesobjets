@@ -6,6 +6,11 @@ from cluster.tasks.business_logic.cluster_acteurs_db_data_read_acteurs import (
     cluster_acteurs_db_data_read_acteurs,
 )
 from utils import logging_utils as log
+from utils.django import django_setup_full
+
+django_setup_full()
+
+from qfdmo.models import DisplayedActeur  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +55,7 @@ def cluster_acteurs_db_data_read_acteurs_wrapper(**kwargs) -> None:
     log.preview("Tous les champs reseignés", fields)
 
     df, query = cluster_acteurs_db_data_read_acteurs(
+        model_class=DisplayedActeur,
         include_source_ids=params["include_source_ids"],
         include_acteur_type_ids=params["include_acteur_type_ids"],
         include_only_if_regex_matches_nom=params["include_only_if_regex_matches_nom"],

@@ -12,6 +12,7 @@ django_setup_full()
 from django.db.models import Model  # noqa: E402
 
 from qfdmo.models import ActeurType, Source  # noqa: E402
+from qfdmo.models.acteur import ActeurStatus  # noqa: E402
 
 
 def cluster_acteurs_db_data_read_acteurs(
@@ -81,9 +82,9 @@ def cluster_acteurs_db_data_read_acteurs(
     query = query.filter(acteur_type_id__in=include_acteur_type_ids)
 
     # Un filtre en dur pour ne prendre que les acteurs actifs
-    query = query.filter(statut__in=["ACTIF", "actif"])
+    query = query.filter(statut=ActeurStatus.ACTIF)
 
-    fields = ["identifiant_unique", "source_id", "acteur_type_id", "nom"]
+    fields = ["identifiant_unique", "statut", "source_id", "acteur_type_id", "nom"]
     fields += include_if_all_fields_filled
     fields += exclude_if_any_field_filled
     fields += extra_dataframe_fields
