@@ -9,7 +9,7 @@ with DAG(
     default_args=default_args,
     description=(
         "Injestion des données de l'éco-organisme ECOPAE à partir des données"
-        " disponibles sur de Koumoul"
+        " disponibles sur Koumoul"
     ),
     params={
         "normalization_rules": [
