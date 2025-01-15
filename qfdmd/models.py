@@ -98,6 +98,7 @@ class Produit(AbstractBaseProduit):
             "first_dir": "jai",
             "limit": 25,
             "sc_id": sous_categorie.id,
+            "sous_categorie_objet": sous_categorie.libelle,
         }
 
     def get_url_carte(self, actions=None):
