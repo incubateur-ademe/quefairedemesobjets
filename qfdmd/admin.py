@@ -165,4 +165,5 @@ class CMSPageAdmin(admin.ModelAdmin):
     def readonly_fields(self):
         fields = [field.name for field in self.model._meta.get_fields()]
         fields.remove("id")
+        fields.remove("poids")
         return fields
