@@ -385,6 +385,16 @@ class BaseActeur(NomAsNaturalKeyModel):
             .distinct()
         )
 
+    @property
+    def adresse_display(self):
+        parts = []
+        fields = ["adresse", "adresse_complement", "code_postal", "ville"]
+        for field in fields:
+            if part := getattr(self, field):
+                parts.append(part)
+
+        return ", ".join(parts)
+
     @cached_property
     def acteur_services_display(self):
         return ", ".join(self.sorted_acteur_services_libelles)
