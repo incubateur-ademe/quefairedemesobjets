@@ -72,5 +72,10 @@
             {% endif %}
             data-analytics-action-value="{% block analytics_action %}{% endblock %}"
         ></script>
+        {% if assistant.is_iframe and request.user.is_authenticated %}
+        <div class="qf-bg-warning-425-625-hover qf-text-white qf-text-center qf-w-screen qf-py-1v qf-text-xs">
+        Le mode iframe de l'assistant est actif
+        </div>
+        {% endif %}
     </body>
 </html>
