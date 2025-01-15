@@ -16,7 +16,11 @@ from unit_tests.qfdmo.acteur_factory import (
 )
 
 
-@pytest.mark.django_db(transaction=True)
+# Ne pas mettre transaction=True car ceci recréer
+# les fixtures DB à chaque test ce qui ralentit
+# considérablement les tests pour rien (on fait
+# que de la lecture)
+@pytest.mark.django_db()
 class TestClusterActeursDbDataReadActeurs:
 
     @pytest.fixture
