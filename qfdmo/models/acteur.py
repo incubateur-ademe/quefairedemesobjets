@@ -405,10 +405,16 @@ class BaseActeur(NomAsNaturalKeyModel):
         score de similarité.
 
         Si après suppression de l'adresse/complément
-        il ne reste plus rien, on retourne le nom complet
-        pour éviter de perdre toute l'information.
+        il ne reste plus rien, on retourne None ce qui
+        permet à ce champ d'être utilisé dans les
+        critères d'inclusion/exclusion
         """
-        raise NotImplementedError("TODO: nom_sans_adresse_et_complement")
+        words_nom = (self.nom or "").lower().split()
+        words_adresse = (
+            ((self.adresse or "") + (self.adresse_complement or "")).lower().split()
+        )
+        words = [x for x in words_nom if x not in words_adresse and x.strip()]
+        return " ".join(words) if words else None
 
     @property
     def code_departement(self) -> str | None:

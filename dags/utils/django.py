@@ -30,7 +30,6 @@ from django.conf import settings
 from django.db import models
 from django.db.models import Model, Q, QuerySet
 from django.utils.functional import cached_property
-from rich import print
 from shared.tasks.database_logic.db_manager import PostgresConnectionManager
 
 
@@ -126,24 +125,26 @@ def django_model_queryset_generate(
     ]
     # select_fields = [field for field in fields_to_select if field in db_fields]
 
-    # Inclure uniquement si TOUS les champs qui sont tous remplis
+    # Inclure uniquement si TOUS les champs sont remplis
     include_all_filled_filter = Q()
     for field in include_fields:
         include_all_filled_filter &= ~Q(**{f"{field}__isnull": True})
 
-    # Exclude si N'IMPORTE QUEL champ est rempli
+    # Exclure si N'IMPORTE QUEL champ est rempli
+    # note: ce champ étant la négation de l'inclusion, on le construit
+    # comme l'incusion et on fait une négation d'ensemble ensuite
     exclude_any_filled_filter = Q()
     for field in exclude_fields:
         exclude_any_filled_filter &= ~Q(**{f"{field}__isnull": True})
+    exclude_any_filled_filter = ~exclude_any_filled_filter
 
-    # Combine filters
-    final_filter = include_all_filled_filter & ~exclude_any_filled_filter
+    final_filter = include_all_filled_filter & exclude_any_filled_filter
 
     return model_class.objects.filter(final_filter)
 
 
 def django_model_queryset_to_sql(query: QuerySet) -> str:
-    """Fonction pour obtenir la requête SQL d'un QuerySet Django"""
+    """Fonction pour obtenir la requête SQL d'une query Django"""
     return str(query.query)
 
 
@@ -151,7 +152,11 @@ def django_model_to_pandas_schema(model_class: type[Model]) -> dict[str, str]:
     """Génère un schema compatible avec pandas' dtype quand on construit
     une dataframe pour éviter que pandas ne fasse des inférences de type
     et ne vienne tout casser (ex: code_postal casté en float et qui créé
-    bcp de bruit quand on renormalise en string: 53000 -> 53000.0 -> "53000.0")"""
+    bcp de bruit quand on renormalise en string: 53000 -> 53000.0 -> "53000.0")
+    """
+    # TODO: support pour des types complexes du genre
+    # django.contrib.gis.db.models.fields.PointField pour lesquels
+    # on devra peut être utiliser des libraries genre https://geopandas.org/en/stable/
     dtype_mapping = {
         models.AutoField: "int64",
         models.IntegerField: "int64",
@@ -168,9 +173,6 @@ def django_model_to_pandas_schema(model_class: type[Model]) -> dict[str, str]:
         models.UUIDField: "object",
         models.BinaryField: "object",
         models.ForeignKey: "int64",
-        # TODO: support pour des types complexes du genre
-        # django.contrib.gis.db.models.fields.PointField pour lesquels
-        # on devra peut être utiliser des libraries genre https://geopandas.org/en/stable/
     }
 
     schema = {}
@@ -187,12 +189,10 @@ def django_model_queryset_to_df(query: QuerySet, fields: list[str]) -> pd.DataFr
     """Fonction pour obtenir un DataFrame Pandas à partir d'un QuerySet Django
     et de son modèle pour imposer un schema"""
     data = []
-    sql = django_model_queryset_to_sql(query)
-    print("sql", sql)
     for entry in query:
         data.append({field: getattr(entry, field) for field in set(fields)})
     if not data:
-        raise ValueError("Pas de données retournées par la query.")
+        raise ValueError("Pas de données retournées par la query Django.")
 
     # TODO: imposer le schema pour éviter les inférences de type
     # Pour l'instant on met dtype=object ce qui désactive l'inférence

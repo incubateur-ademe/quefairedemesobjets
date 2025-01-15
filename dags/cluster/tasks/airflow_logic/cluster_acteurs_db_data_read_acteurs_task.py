@@ -55,7 +55,7 @@ def cluster_acteurs_db_data_read_acteurs_wrapper(**kwargs) -> None:
         include_only_if_regex_matches_nom=params["include_only_if_regex_matches_nom"],
         include_if_all_fields_filled=params["include_if_all_fields_filled"] or [],
         exclude_if_any_field_filled=params["exclude_if_any_field_filled"] or [],
-        extra_selection_fields=fields,
+        extra_dataframe_fields=fields,
     )
     log.preview("requête SQL utilisée", query)
     log.preview("acteurs sélectionnés", df)
