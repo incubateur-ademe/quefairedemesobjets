@@ -73,9 +73,14 @@
             data-analytics-action-value="{% block analytics_action %}{% endblock %}"
         ></script>
         {% if assistant.is_iframe and request.user.is_authenticated %}
-        <div class="qf-bg-warning-425-625-hover qf-text-white qf-text-center qf-w-screen qf-py-1v qf-text-xs">
-        Le mode iframe de l'assistant est actif
-        </div>
+            <div class="qf-bg-warning-425-625-hover qf-text-white qf-text-center qf-w-screen qf-py-1v qf-text-xs">
+            Le mode iframe de l'assistant est actif
+            </div>
+        {% endif %}
+        {% if "posthog" in request.GET %}
+            <div class="qf-bg-green-bourgeon-main-640 qf-text-white qf-text-center qf-w-screen qf-py-1v qf-text-xs">
+            Identifiant PostHog : {{ assistant.POSTHOG_KEY }} | Score de conversion : <span id="posthog-banner-conversion-score"></span>
+             </div>
         {% endif %}
     </body>
 </html>
