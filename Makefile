@@ -8,7 +8,7 @@ endif
 PYTHON := .venv/bin/python
 DJANGO_ADMIN := $(PYTHON) manage.py
 PYTEST := $(PYTHON) -m pytest
-DB_URL := postgres://qfdmo:qfdmo@localhost:6543/qfdmo # pragma: allowlist secret
+DB_URL := postgres://qfdmo:qfdmo@localhost:6543/qfdmo# pragma: allowlist secret
 
 # Makefile config
 .PHONY: check
