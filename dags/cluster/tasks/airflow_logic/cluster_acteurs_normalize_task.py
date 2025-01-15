@@ -71,6 +71,9 @@ def cluster_acteurs_normalize_wrapper(**kwargs) -> None:
 
     log.preview("acteurs normalisés", df_norm)
 
+    logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
+    log.preview_df_as_markdown("acteurs normalisés", df_norm)
+
     # Les XCOM étant spécifiques à une tâche on peut pousser
     # le même nom sans risque de collision. Ainsi, pousse le nom "df"
     # et pas "df_norm" pour avoir toujours le nom "df" à travers

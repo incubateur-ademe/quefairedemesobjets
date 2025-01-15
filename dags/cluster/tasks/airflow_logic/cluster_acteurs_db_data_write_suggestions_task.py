@@ -43,7 +43,7 @@ def cluster_acteurs_db_data_write_suggestions_wrapper(**kwargs) -> None:
 
     if params["dry_run"]:
         raise AirflowSkipException(
-            log.banner_skip("Dry run activé, suggestions pas écrites en base")
+            log.banner_string("Dry run activé, suggestions pas écrites en base")
         )
 
     raise NotImplementedError(

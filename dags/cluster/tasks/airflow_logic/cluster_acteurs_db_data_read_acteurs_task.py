@@ -71,6 +71,9 @@ def cluster_acteurs_db_data_read_acteurs_wrapper(**kwargs) -> None:
     if df.empty:
         raise ValueError("Aucun acteur trouvé avec les critères de sélection")
 
+    logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
+    log.preview_df_as_markdown("acteurs sélectionnés", df)
+
     kwargs["ti"].xcom_push(key="df", value=df)
 
 

@@ -15,7 +15,6 @@ from cluster.tasks.airflow_logic import (
     cluster_acteurs_config_validate_task,
     cluster_acteurs_db_data_read_acteurs_task,
     cluster_acteurs_db_data_write_suggestions_task,
-    cluster_acteurs_info_size1_task,
     cluster_acteurs_normalize_task,
     cluster_acteurs_suggestions_task,
 )
@@ -264,7 +263,11 @@ with DAG(
         cluster_acteurs_config_validate_task(dag=dag),
         cluster_acteurs_db_data_read_acteurs_task(dag=dag),
         cluster_acteurs_normalize_task(dag=dag),
-        cluster_acteurs_info_size1_task(dag=dag),
+        # TODO: besoin de refactoriser cette tâche:
+        # - changer cluster_acteurs_suggestions pour obtenir une
+        #   df de clusters ignorés
+        # - utiliser cette df pour la tâche d'info
+        # cluster_acteurs_info_size1_task(dag=dag),
         cluster_acteurs_suggestions_task(dag=dag),
         cluster_acteurs_db_data_write_suggestions_task(dag=dag),
     )

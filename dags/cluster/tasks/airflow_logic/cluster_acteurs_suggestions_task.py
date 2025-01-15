@@ -59,7 +59,7 @@ def cluster_acteurs_suggestions_wrapper(**kwargs) -> None:
     )
     if df_suggestions.empty:
         raise AirflowSkipException(
-            log.banner_skip("Pas de suggestions de clusters générées")
+            log.banner_string("Pas de suggestions de clusters générées")
         )
 
     log.preview_df_as_markdown("suggestions de clusters", df_suggestions)

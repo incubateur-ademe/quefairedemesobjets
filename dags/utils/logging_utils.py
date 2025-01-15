@@ -87,32 +87,22 @@ def preview(value_name: str, value: Any) -> None:
     log.info("::endgroup::")
 
 
-def preview_df_as_markdown(value_name: str, value: pd.DataFrame) -> None:
+def preview_df_as_markdown(label: str, df: pd.DataFrame) -> None:
     """Variation de la preview pour une dataframe de manière à
-    obtenir une table"""
-    size = size_info_get(value)
-    log.info(f"::group::🔎 {value_name}: taille={size}, type={type(value).__name__}")
-    log.info("\n" + value.to_markdown(index=False))
+    obtenir une table lisible. On ne filtre pas la df ici, c'est
+    à l'appelant de décider (ex: this("me",df.head(10))"""
+    size = size_info_get(df)
+    log.info(f"::group::📦 {label}: taille={size}, 🔽 Cliquer pour révéler la table 🔽")
+    log.info("\n" + df.to_markdown(index=False))
     log.info("::endgroup::")
 
 
-def banner_skip(message: str) -> str:
-    """Génère un message de skip pour le statut AirflowSkipException
-    histoire qu'on ne le manque pas dans les logs et comprenne
-    bien pourquoi une tâche n'a rien produit"""
-    return f"""
-
-{'=' * 80}
-✋ {message}
-{'=' * 80}
-    """
-
-
 def banner_string(message: str) -> str:
-    """Retourne une bannière après quelques retours
+    """Retourne une bannière après retour
     de ligne pour qu'elle se retrouve visible tout à gauche
     (et pas en fin de ligne)"""
     return f"""
+
 {'=' * 80}
 {message}
 {'=' * 80}
