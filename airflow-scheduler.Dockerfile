@@ -1,3 +1,5 @@
+# Builder gdal
+# --- --- --- ---
 FROM apache/airflow:2.10.4 AS builder
 USER root
 
@@ -5,29 +7,27 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     gdal-bin libgdal-dev
 
-
-
-
+# Builder python
+# --- --- --- ---
 FROM apache/airflow:2.10.4 AS python-builder
-ARG POETRY_VERSION=2.0
-ENV POETRY_NO_INTERACTION=1 \
-    POETRY_CACHE_DIR=/opt/.cache
-
-USER ${AIRFLOW_UID:-50000}
-RUN pip install "poetry==${POETRY_VERSION}"
-
 
 USER root
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     libpq-dev gcc python3-dev
 
+ARG POETRY_VERSION=2.0
+ENV POETRY_NO_INTERACTION=1 \
+    POETRY_CACHE_DIR=/opt/.cache
+USER ${AIRFLOW_UID:-50000}
+RUN pip install "poetry==${POETRY_VERSION}"
+
 WORKDIR /opt/airflow/
 COPY pyproject.toml poetry.lock ./
-RUN --mount=type=cache,target=${POETRY_CACHE_DIR} poetry sync --with airflow --no-root
+RUN --mount=type=cache,target=${POETRY_CACHE_DIR} poetry sync --with airflow
 
-
-
+# Runtime
+# --- --- --- ---
 FROM apache/airflow:2.10.4 AS scheduler
 USER root
 WORKDIR /opt/
