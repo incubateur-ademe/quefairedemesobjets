@@ -15,7 +15,7 @@ RUN apt-get update && \
 
 WORKDIR /opt/airflow/
 COPY pyproject.toml poetry.lock ./
-RUN --mount=type=cache,target=${POETRY_CACHE_DIR} poetry sync --with airflow --no-root
+RUN --mount=type=cache,target=${POETRY_CACHE_DIR} poetry sync --with airflow
 
 # Runtime
 # --- --- --- ---
