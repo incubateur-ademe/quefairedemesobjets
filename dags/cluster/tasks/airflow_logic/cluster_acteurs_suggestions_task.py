@@ -4,6 +4,7 @@ import pandas as pd
 from airflow import DAG
 from airflow.exceptions import AirflowSkipException
 from airflow.operators.python import PythonOperator
+from cluster.tasks.business_logic.cluster_acteurs_df_sort import cluster_acteurs_df_sort
 from cluster.tasks.business_logic.cluster_acteurs_suggestions import (
     cluster_acteurs_suggestions,
 )
@@ -62,6 +63,7 @@ def cluster_acteurs_suggestions_wrapper(**kwargs) -> None:
             log.banner_string("Pas de suggestions de clusters générées")
         )
 
+    df_suggestions = cluster_acteurs_df_sort(df_suggestions)
     log.preview_df_as_markdown("suggestions de clusters", df_suggestions)
 
     # On pousse les suggestions dans xcom pour les tâches suivantes
