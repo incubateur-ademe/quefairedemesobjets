@@ -27,8 +27,18 @@ COPY pyproject.toml poetry.lock ./
 RUN --mount=type=cache,target=${POETRY_CACHE_DIR} poetry sync --with airflow --no-root
 
 
+
 FROM apache/airflow:2.10.4 AS scheduler
-USER ${AIRFLOW_UID:-50000}
+USER root
+WORKDIR /opt/
+RUN apt-get update
+RUN apt-get install unzip
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+RUN unzip awscliv2.zip
+RUN ./aws/install
+
+USER ${AIRFLOW_UID:-50000}:0
+WORKDIR /opt/airflow
 ENV CPLUS_INCLUDE_PATH=/usr/include/gdal \
     C_INCLUDE_PATH=/usr/include/gdal \
     VIRTUAL_ENV=/home/airflow/.local \
@@ -37,17 +47,11 @@ ENV CPLUS_INCLUDE_PATH=/usr/include/gdal \
 COPY --from=python-builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 COPY --from=builder ${CPLUS_INCLUDE_PATH} ${CPLUS_INCLUDE_PATH}
 
-# Use user airflow
-WORKDIR /opt/airflow
-USER ${AIRFLOW_UID:-50000}:0
-RUN chown -R ${AIRFLOW_UID:-50000}:0 .
 
 # Set current directory to airflow root
 # Copy the dags, logs, config, and plugins directories to the appropriate locations
 COPY sync_dags.sh /opt/airflow/sync_dags.sh
-RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
-    unzip awscliv2.zip  \
-    ./aws/install
+
 # Nécessaire pour faire fonctionner Django dans Airflow
 COPY core qfdmo qfdmd dsfr_hacks ./
 
