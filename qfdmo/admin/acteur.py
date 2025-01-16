@@ -3,6 +3,7 @@ from typing import Any, List
 import orjson
 from django import forms
 from django.conf import settings
+from django.contrib import admin as django_admin
 from django.contrib.gis import admin
 from django.contrib.gis.forms.fields import PointField
 from django.contrib.gis.geos import Point
@@ -15,6 +16,12 @@ from django.urls import reverse
 from django.utils.html import format_html
 from import_export import admin as import_export_admin
 from import_export import fields, resources, widgets
+from unfold.admin import ModelAdmin
+from unfold.contrib.filters.admin import (
+    DropdownFilter,
+    MultipleDropdownFilter,
+    TextFilter,
+)
 
 from qfdmo.admin.widgets import CategorieChoiceWidget, SousCategorieChoiceWidget
 from qfdmo.models import (
@@ -158,7 +165,7 @@ class BaseActeurForm(forms.ModelForm):
             self.fields["source"].queryset = Source.objects.all().order_by("libelle")
 
 
-class BaseActeurAdmin(admin.GISModelAdmin):
+class BaseActeurAdmin(admin.GISModelAdmin, ModelAdmin):
     form = BaseActeurForm
     gis_widget = CustomOSMWidget
     inlines = [
@@ -703,7 +710,6 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource):
     )
 
     def get_queryset(self):
-
         queryset = super().get_queryset()
 
         queryset = queryset.prefetch_related(
@@ -769,7 +775,71 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource):
         ]
 
 
+LOOKUP_VERBOSE_NAMES_FR = {
+    "exact": "Est égal à",
+    "iexact": "Est égal à (insensible à la casse)",
+    "contains": "Contient",
+    "icontains": "Contient (insensible à la casse)",
+    "gt": "Supérieur à",
+    "gte": "Supérieur ou égal à",
+    "lt": "Inférieur à",
+    "lte": "Inférieur ou égal à",
+    "startswith": "Commence par",
+    "istartswith": "Commence par (insensible à la casse)",
+    "endswith": "Se termine par",
+    "iendswith": "Se termine par (insensible à la casse)",
+    "in": "Est dans la liste",
+    "range": "Est dans la plage",
+    "isnull": "Est nul",
+    "regex": "Correspond à l'expression régulière",
+    "iregex": "Correspond à l'expression régulière (insensible à la casse)",
+}
+
+
+class QuerySetFilter(MultipleDropdownFilter):
+    # Human-readable title which will be displayed in the
+    # right admin sidebar just above the filter options.
+    title = "queryset"
+    parameter_name = "lookup"
+
+    def lookups(self, request, model_admin):
+        return list(LOOKUP_VERBOSE_NAMES_FR.items())
+
+    def queryset(self, request, queryset):
+        return queryset
+
+
+class ValueFilter(TextFilter):
+    title = "Valeur du filtre"
+    parameter_name = "value"
+
+    def queryset(self, request, queryset):
+        lookup = request.GET.get("lookup")
+        field = request.GET.get("field")
+        value = request.GET.get("value")
+        if lookup and field and value:
+            queryset = queryset.filter(**{f"{field}__{lookup}": value})
+        return queryset
+
+
+class FieldFilter(DropdownFilter):
+    title = "field"
+    parameter_name = "field"
+
+    def lookups(self, request, model_admin):
+        fields = model_admin.model._meta.get_fields()
+        return [
+            (field.name, field.verbose_name)
+            for field in fields
+            if not field.is_relation
+        ]
+
+    def queryset(self, request, queryset):
+        return queryset
+
+
 class DisplayedActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
+    list_filter_submit = True
     change_form_template = "admin/displayed_acteur/change_form.html"
     gis_widget = CustomOSMWidget
     base_fields = list(BaseActeurAdmin.fields)
@@ -779,6 +849,13 @@ class DisplayedActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
     readonly_fields = list(BaseActeurAdmin.readonly_fields)
     readonly_fields.insert(0, "uuid")
     fields = base_fields
+
+    list_filter = [
+        FieldFilter,
+        QuerySetFilter,
+        ValueFilter,
+    ]
+    # show_facets = django_admin.ShowFacets.ALWAYS
 
     inlines = [
         DisplayedPropositionServiceInline,

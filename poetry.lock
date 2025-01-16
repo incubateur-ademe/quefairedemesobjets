@@ -1583,6 +1583,21 @@ files = [
 Django = ">=3.2"
 
 [[package]]
+name = "django-filter"
+version = "24.3"
+description = "Django-filter is a reusable Django application for allowing users to filter querysets dynamically."
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "django_filter-24.3-py3-none-any.whl", hash = "sha256:c4852822928ce17fb699bcfccd644b3574f1a2d80aeb2b4ff4f16b02dd49dc64"},
+    {file = "django_filter-24.3.tar.gz", hash = "sha256:d8ccaf6732afd21ca0542f6733b11591030fa98669f8d15599b358e24a2cd9c3"},
+]
+
+[package.dependencies]
+Django = ">=4.2"
+
+[[package]]
 name = "django-import-export"
 version = "4.3.4"
 description = "Django application and library for importing and exporting data with included admin integration."
@@ -1724,6 +1739,21 @@ files = [
 [package.dependencies]
 django = "*"
 typing-extensions = "*"
+
+[[package]]
+name = "django-unfold"
+version = "0.44.0"
+description = "Modern Django admin theme for seamless interface development"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "django_unfold-0.44.0-py3-none-any.whl", hash = "sha256:94da205caad9d5ba0d1a0542c2bacaadbf23d90bf176472214e53cecfc2e9469"},
+    {file = "django_unfold-0.44.0.tar.gz", hash = "sha256:1a448c2ab993ab39811b5dede01f5b36066a2c7618b9db64c5f4b29aaa166b9c"},
+]
+
+[package.dependencies]
+django = ">=3.2"
 
 [[package]]
 name = "django-widget-tweaks"
@@ -6500,4 +6530,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12,<3.13"
-content-hash = "0f4be247a346cab1e374010d38818fac7155f19eaccda48b2702577a5429b509"
+content-hash = "9b158576ea57fab7ec1abb29d10b837384d20fa96b6317670455a403ea16db7a"
