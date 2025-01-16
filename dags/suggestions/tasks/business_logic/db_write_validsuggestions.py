@@ -25,7 +25,6 @@ def db_write_validsuggestions(data_from_db: dict):
 
     with engine.begin() as connection:
         if change_type in [
-            constants.SUGGESTION_SOURCE,
             constants.SUGGESTION_SOURCE_AJOUT,
             constants.SUGGESTION_SOURCE_MISESAJOUR,
         ]:

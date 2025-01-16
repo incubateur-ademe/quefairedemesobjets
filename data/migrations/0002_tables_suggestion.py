@@ -40,7 +40,6 @@ class Migration(migrations.Migration):
                         blank=True,
                         choices=[
                             ("CLUSTERING", "regroupement/déduplication des acteurs"),
-                            ("SOURCE", "ingestion de source de données"),
                             (
                                 "SOURCE_AJOUT",
                                 "ingestion de source de données - nouveau acteur",
@@ -50,7 +49,6 @@ class Migration(migrations.Migration):
                                 "ingestion de source de données - modification d'acteur existant",
                             ),
                             ("SOURCE_SUPRESSION", "ingestion de source de données"),
-                            ("ENRICHISSEMENT", "suggestion d'enrichissement"),
                         ],
                         max_length=250,
                     ),
@@ -99,27 +97,6 @@ class Migration(migrations.Migration):
             name="SuggestionUnitaire",
             fields=[
                 ("id", models.AutoField(primary_key=True, serialize=False)),
-                (
-                    "type_action",
-                    models.CharField(
-                        blank=True,
-                        choices=[
-                            ("CLUSTERING", "regroupement/déduplication des acteurs"),
-                            ("SOURCE", "ingestion de source de données"),
-                            (
-                                "SOURCE_AJOUT",
-                                "ingestion de source de données - nouveau acteur",
-                            ),
-                            (
-                                "SOURCE_MISESAJOUR",
-                                "ingestion de source de données - modification d'acteur existant",
-                            ),
-                            ("SOURCE_SUPRESSION", "ingestion de source de données"),
-                            ("ENRICHISSEMENT", "suggestion d'enrichissement"),
-                        ],
-                        max_length=250,
-                    ),
-                ),
                 (
                     "statut",
                     models.CharField(
