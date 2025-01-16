@@ -63,7 +63,11 @@ def cluster_acteurs_suggestions_wrapper(**kwargs) -> None:
             log.banner_string("Pas de suggestions de clusters générées")
         )
 
-    df_suggestions = cluster_acteurs_df_sort(df_suggestions)
+    df_suggestions = cluster_acteurs_df_sort(
+        df_suggestions,
+        cluster_fields_exact=params["cluster_fields_exact"],
+        cluster_fields_fuzzy=params["cluster_fields_fuzzy"] or [],
+    )
     log.preview_df_as_markdown("suggestions de clusters", df_suggestions)
 
     # On pousse les suggestions dans xcom pour les tâches suivantes

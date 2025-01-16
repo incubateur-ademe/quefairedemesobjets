@@ -31,11 +31,20 @@ def cluster_acteurs_df_sort(
     # On construit une liste de champs de tri
     # avec des champs par défauts (ex: cluster_id)
     # et des champs spécifiés dans la config du DAG
-    sort_ideal = ["cluster_id"]  # sera 1er dans l'étape de clustering
-    sort_ideal += cluster_fields_exact
-    sort_ideal += cluster_fields_fuzzy
+    sort_ideal = ["cluster_id"]  # la base du clustering
+
+    # pour déceler des erreurs de clustering rapidement (ex: intra-source)
+    # mais on le met pas pour les étapes de sélection et normalisation
+    # car cela casse notre ordre (on a pas de cluster_id et donc
+    # on préfère par sémantique business que des codes)
+    if cluster_fields_exact or cluster_fields_fuzzy:
+        sort_ideal += ["source_code", "acteur_type_code"]
+    sort_ideal += [x for x in cluster_fields_exact if x not in sort_ideal]
+    sort_ideal += [x for x in cluster_fields_fuzzy if x not in sort_ideal]
     # défaut quand on n'a pas de champs de clustering (étape de sélection)
-    sort_ideal += ["code_postal", "ville", "adresse", "nom"]
+    sort_ideal += [
+        x for x in ["code_postal", "ville", "adresse", "nom"] if x not in sort_ideal
+    ]
 
     # Puis on construit la liste actuelle des champs de tri
     # vs. la réalité des champs présents dans la dataframe
