@@ -11,47 +11,11 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = []
+    dependencies = [
+        ("data", "0001_bancache"),
+    ]
 
     operations = [
-        migrations.CreateModel(
-            name="BANCache",
-            fields=[
-                (
-                    "id",
-                    models.BigAutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
-                ),
-                ("adresse", models.CharField(blank=True, max_length=255, null=True)),
-                (
-                    "code_postal",
-                    models.CharField(blank=True, max_length=255, null=True),
-                ),
-                ("ville", models.CharField(blank=True, max_length=255, null=True)),
-                (
-                    "location",
-                    django.contrib.gis.db.models.fields.PointField(
-                        blank=True, null=True, srid=4326
-                    ),
-                ),
-                ("ban_returned", models.JSONField(blank=True, null=True)),
-                (
-                    "modifie_le",
-                    models.DateTimeField(
-                        auto_now=True,
-                        db_default=django.db.models.functions.datetime.Now(),
-                    ),
-                ),
-            ],
-            options={
-                "verbose_name": "Cache BAN",
-                "verbose_name_plural": "Cache BAN",
-            },
-        ),
         migrations.CreateModel(
             name="SuggestionCohorte",
             fields=[
@@ -113,18 +77,6 @@ class Migration(migrations.Migration):
                         blank=True,
                         help_text="Metadata de la cohorte, données statistiques",
                         null=True,
-                    ),
-                ),
-                (
-                    "pourcentage_erreurs_tolerees",
-                    models.IntegerField(
-                        db_default=0,
-                        default=0,
-                        help_text="Nombre d'erreurs tolérées en pourcentage",
-                        validators=[
-                            django.core.validators.MinValueValidator(0),
-                            django.core.validators.MaxValueValidator(100),
-                        ],
                     ),
                 ),
                 (

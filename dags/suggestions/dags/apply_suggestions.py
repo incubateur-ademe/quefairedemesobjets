@@ -2,16 +2,10 @@ from datetime import timedelta
 
 from airflow.models import DAG
 from airflow.utils.dates import days_ago
-from suggestions.airflow_logic.db_normalize_suggestion_task import (
+from suggestions.tasks.airflow_logic import (
     db_normalize_suggestion_task,
-)
-from suggestions.airflow_logic.db_read_suggestiontoprocess_task import (
     db_read_suggestiontoprocess_task,
-)
-from suggestions.airflow_logic.db_write_validsuggestions_task import (
     db_write_validsuggestions_task,
-)
-from suggestions.airflow_logic.launch_compute_carte_acteur_task import (
     launch_compute_carte_acteur_task,
 )
 

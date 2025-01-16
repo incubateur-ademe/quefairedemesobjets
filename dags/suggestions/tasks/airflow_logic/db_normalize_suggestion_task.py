@@ -1,6 +1,8 @@
 from airflow.models import DAG
 from airflow.operators.python import PythonOperator
-from suggestions.business_logic.db_normalize_suggestion import db_normalize_suggestion
+from suggestions.tasks.business_logic.db_normalize_suggestion import (
+    db_normalize_suggestion,
+)
 
 
 def db_normalize_suggestion_task(dag: DAG):

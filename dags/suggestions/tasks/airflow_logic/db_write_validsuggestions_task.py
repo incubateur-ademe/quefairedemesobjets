@@ -1,6 +1,6 @@
 from airflow.models import DAG
 from airflow.operators.python import PythonOperator
-from suggestions.business_logic.db_write_validsuggestions import (
+from suggestions.tasks.business_logic.db_write_validsuggestions import (
     db_write_validsuggestions,
 )
 from utils import logging_utils as log
