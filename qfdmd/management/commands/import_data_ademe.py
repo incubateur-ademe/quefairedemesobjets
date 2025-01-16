@@ -73,7 +73,6 @@ class Command(BaseCommand):
                 titre_du_lien=line["Titre_du_lien"],
                 defaults={
                     "url": line["URL"],
-                    "poids": index,
                     "description": line.get("Description", ""),
                 },
             )

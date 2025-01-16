@@ -3,7 +3,7 @@ from django_extensions.db.fields import ImproperlyConfigured
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from qfdmd.models import Lien, Produit, Suggestion, Synonyme
+from qfdmd.models import CMSPage, Lien, Produit, Suggestion, Synonyme
 
 
 class LienResource(resources.ModelResource):
@@ -131,7 +131,7 @@ class ProduitAdmin(
     MoveFieldsToFirstPositionMixin, ImportExportModelAdmin, admin.ModelAdmin
 ):
     resource_classes = [ProduitResource, KoumoulProduitResource]
-    list_display = ("nom", "id", "synonymes_existants", "modifie_le")
+    list_display = ("nom", "id", "modifie_le")
     search_fields = ["nom__unaccent", "id", "synonymes_existants__unaccent"]
     # ajout des filtres de recherche sur bdd et code
     list_filter = ["bdd", "code"]
@@ -157,3 +157,8 @@ class SynonymeAdmin(
     list_display = ("nom", "produit", "slug", "modifie_le")
     list_filter = ["pin_on_homepage"]
     fields_to_display_in_first_position = ["nom", "produit"]
+
+
+@admin.register(CMSPage)
+class CMSPageAdmin(admin.ModelAdmin):
+    readonly_fields = ["body", "search_description", "seo_title", "title", "slug"]

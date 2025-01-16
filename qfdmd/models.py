@@ -1,5 +1,7 @@
+import logging
 from urllib.parse import urlencode
 
+import requests
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.db.models.functions import Now
@@ -7,6 +9,8 @@ from django.template.loader import render_to_string
 from django.urls.base import reverse
 from django.utils.functional import cached_property
 from django_extensions.db.fields import AutoSlugField
+
+logger = logging.getLogger(__name__)
 
 
 class AbstractBaseProduit(models.Model):
@@ -44,14 +48,18 @@ class Produit(AbstractBaseProduit):
         unique=True,
         verbose_name="Libellé",
     )
-    synonymes_existants = models.TextField(blank=True, help_text="Synonymes existants")
+    synonymes_existants = models.TextField(
+        blank=True,
+        help_text="Ce champ est obsolète,"
+        " il n'est actuellement pas mis à jour automatiquement.",
+    )
     code = models.CharField(blank=True, help_text="Code")
     bdd = models.CharField(blank=True, help_text="Bdd")
     qu_est_ce_que_j_en_fais = models.TextField(
         blank=True, help_text="Qu'est-ce que j'en fais ? - ANCIEN CHAMP."
     )
-    nom_eco_organisme = models.TextField(blank=True, help_text="Nom de l’éco-organisme")
-    filieres_rep = models.TextField(blank=True, help_text="Filière(s) REP concernée(s)")
+    nom_eco_organisme = models.CharField(blank=True, help_text="Nom de l’éco-organisme")
+    filieres_rep = models.CharField(blank=True, help_text="Filière(s) REP concernée(s)")
     slug = models.CharField(blank=True, help_text="Slug - ne pas modifier")
 
     def __str__(self):
@@ -90,6 +98,7 @@ class Produit(AbstractBaseProduit):
             "first_dir": "jai",
             "limit": 25,
             "sc_id": sous_categorie.id,
+            "sous_categorie_objet": sous_categorie.libelle,
         }
 
     def get_url_carte(self, actions=None):
@@ -114,8 +123,15 @@ class Produit(AbstractBaseProduit):
 
     @cached_property
     def en_savoir_plus(self):
+        produit_liens = (
+            ProduitLien.objects.filter(produit=self)
+            .select_related("lien")
+            .order_by("poids")
+        )
+
         return render_to_string(
-            "components/produit/_en_savoir_plus.html", {"produit": self}
+            "components/produit/_en_savoir_plus.html",
+            {"liens": [produit_lien.lien for produit_lien in produit_liens]},
         )
 
     @cached_property
@@ -153,7 +169,6 @@ class Lien(models.Model):
         related_name="liens",
         help_text="Produits associés",
     )
-    poids = models.IntegerField(default=0)
 
     def __str__(self):
         return self.titre_du_lien
@@ -165,7 +180,15 @@ class Lien(models.Model):
 class ProduitLien(models.Model):
     produit = models.ForeignKey(Produit, on_delete=models.CASCADE)
     lien = models.ForeignKey(Lien, on_delete=models.CASCADE)
-    poids = models.IntegerField(default=0)
+    poids = models.IntegerField(
+        default=0,
+        help_text=(
+            "Ce champ détermine la position d'un élément dans la liste affichée.<br>"
+            "Les éléments avec un poids plus élevé apparaissent plus bas dans "
+            "la liste.<br>"
+            "Les éléments avec un poids plus faible apparaissent plus haut."
+        ),
+    )
 
     class Meta:
         ordering = ("poids",)
@@ -236,3 +259,62 @@ class Suggestion(models.Model):
 
     def __str__(self) -> str:
         return str(self.produit)
+
+
+class CMSPage(models.Model):
+    id = models.IntegerField(
+        primary_key=True,
+        help_text="Ce champ est le seul contribuable.<br>"
+        "Il correspond à l'ID de la page Wagtail.<br>"
+        "Tous les autres champs seront automatiquement contribués à l'enregistrement"
+        "de la page dans l'administration Django.",
+    )
+    body = models.JSONField(default=dict)
+    search_description = models.CharField(default="")
+    seo_title = models.CharField(default="")
+    title = models.CharField(default="")
+    slug = models.CharField(default="")
+    poids = models.IntegerField(
+        default=0,
+        help_text=(
+            "Ce champ détermine la position d'un élément dans la liste affichée.<br>"
+            "Les éléments avec un poids plus élevé apparaissent plus bas dans "
+            "la liste.<br>"
+            "Les éléments avec un poids plus faible apparaissent plus haut."
+        ),
+    )
+
+    def __str__(self):
+        return self.title
+
+    def save(self, *args, **kwargs):
+        fields_to_fetch_from_api_response = [
+            "body",
+            "title",
+        ]
+
+        fields_to_fetch_from_api_response_meta = [
+            "search_description",
+            "slug",
+            "seo_title",
+        ]
+
+        try:
+            wagtail_response = requests.get(
+                f"{settings.CMS_BASE_URL}/api/v2/pages/{self.id}"
+            )
+            wagtail_response.raise_for_status()
+            wagtail_page_as_json = wagtail_response.json()
+
+            for field in fields_to_fetch_from_api_response:
+                if value := wagtail_page_as_json.get(field):
+                    setattr(self, field, value)
+
+            for field in fields_to_fetch_from_api_response_meta:
+                if value := wagtail_page_as_json["meta"].get(field):
+                    setattr(self, field, value)
+
+        except requests.exceptions.RequestException as exception:
+            logger.error(f"Error fetching data from CMS API: {exception}")
+
+        super().save(*args, **kwargs)

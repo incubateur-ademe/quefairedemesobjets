@@ -11,6 +11,8 @@
     >
         {% include "./embed/action.html" %}
         {% include "./share/action.html" %}
-        {% include "./email/action.html" %}
+        {% if not assistant.is_iframe %}
+            {% include "./email/action.html" %}
+        {% endif %}
     </nav>
 </aside>

@@ -76,8 +76,10 @@ class ActeurSchema(ModelSchema):
         ..., alias="acteur_type", description="Le type d'acteur"
     )
     distance: Optional[float] = None
-
-    # (..., description="Distance en mètres")
+    nom: str = Field(..., alias="libelle", description="Le nom d'affichage de l'acteur")
+    adresse: str = Field(
+        ..., alias="adresse_display", description="l'adresse complète de l'acteur"
+    )
 
     @staticmethod
     def resolve_distance(obj):
@@ -87,7 +89,7 @@ class ActeurSchema(ModelSchema):
 
     class Meta:
         model = DisplayedActeur
-        fields = ["nom", "nom_commercial", "adresse", "identifiant_unique", "siret"]
+        fields = ["nom_commercial", "identifiant_unique", "siret"]
 
 
 class ActeurFilterSchema(FilterSchema):

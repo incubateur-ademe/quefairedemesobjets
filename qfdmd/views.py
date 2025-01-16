@@ -7,7 +7,7 @@ from django.shortcuts import render
 from django.views.generic import DetailView, ListView
 
 from qfdmd.forms import SearchForm
-from qfdmd.models import Suggestion, Synonyme
+from qfdmd.models import CMSPage, Suggestion, Synonyme
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +46,7 @@ class BaseView:
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context.update(
+            footer_pages=CMSPage.objects.all(),
             search_form=SearchForm(),
             search_view_template_name=SEARCH_VIEW_TEMPLATE_NAME,
             iframe_script=generate_iframe_script(self.request),
@@ -78,3 +79,7 @@ class HomeView(BaseView, ListView):
 
 class SynonymeDetailView(BaseView, DetailView):
     model = Synonyme
+
+
+class CMSPageDetailView(BaseView, DetailView):
+    model = CMSPage
