@@ -63,13 +63,16 @@ exclude = ["migrations/"]
 ignore_missing_imports = true
 warn_return_any = false
 
-[tool.poetry]
+[project]
 name = "quefairedemesobjets"
 version = "1.57.0"
 description = ""
-authors = ["Your Name <you@example.com>"]
 license = "MIT"
 readme = "README.md"
+requires-python = "^3.12,<3.13"
+
+[tool.poetry]
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.12,<3.13"

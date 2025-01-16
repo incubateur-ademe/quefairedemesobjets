@@ -6,18 +6,19 @@ ENV POETRY_NO_INTERACTION=1 \
 USER ${AIRFLOW_UID:-50000}
 RUN pip install "poetry==${POETRY_VERSION}"
 
+
 USER root
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     libpq-dev gcc python3-dev
 
 WORKDIR /opt/airflow/
-COPY pyproject.toml poetry.lock poetry.toml ./
+COPY pyproject.toml poetry.lock ./
 RUN --mount=type=cache,target=${POETRY_CACHE_DIR} poetry sync --with airflow --no-root
 
 FROM apache/airflow:2.10.4 AS webserver
 USER ${AIRFLOW_UID:-50000}
-ENV VIRTUAL_ENV=/opt/airflow/.venv \
+ENV VIRTUAL_ENV=/home/airflow/.local \
     PATH="/opt/airflow/.venv/bin:$PATH"
 
 COPY --from=python-builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
