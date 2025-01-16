@@ -166,7 +166,7 @@ def update_suggestion_status(
 ):
     query = f"""
     UPDATE data_suggestioncohorte
-    SET status = '{statut}'
+    SET statut = '{statut}'
     WHERE id = {suggestion_id};
     """
     connection.execute(query)
