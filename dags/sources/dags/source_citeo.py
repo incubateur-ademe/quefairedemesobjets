@@ -18,10 +18,6 @@ with DAG(
                 "origin": "nom_de_lorganisme",
                 "destination": "nom",
             },
-            # {
-            #     "origin": "enseigne_commerciale",
-            #     "destination": "nom_commercial",
-            # },
             {
                 "origin": "longitudewgs84",
                 "destination": "longitude",
@@ -46,21 +42,6 @@ with DAG(
                 "transformation": "clean_public_accueilli",
                 "destination": "public_accueilli",
             },
-            # {
-            #     "origin": "uniquement_sur_rdv",
-            #     "transformation": "cast_eo_boolean_or_string_to_boolean",
-            #     "destination": "uniquement_sur_rdv",
-            # },
-            # {
-            #     "origin": "exclusivite_de_reprisereparation",
-            #     "transformation": "cast_eo_boolean_or_string_to_boolean",
-            #     "destination": "exclusivite_de_reprisereparation",
-            # },
-            # {
-            #     "origin": "reprise",
-            #     "transformation": "clean_reprise",
-            #     "destination": "reprise",
-            # },
             {
                 "origin": "produitsdechets_acceptes",
                 "transformation": "clean_souscategorie_codes",

@@ -18,10 +18,6 @@ with DAG(
                 "origin": "nom_de_lorganisme",
                 "destination": "nom",
             },
-            # {
-            #     "origin": "enseigne_commerciale",
-            #     "destination": "nom_commercial",
-            # },
             {
                 "origin": "longitudewgs84",
                 "destination": "longitude",
@@ -36,11 +32,6 @@ with DAG(
                 "transformation": "strip_lower_string",
                 "destination": "source_code",
             },
-            # {
-            #     "origin": "site_web",
-            #     "transformation": "clean_url",
-            #     "destination": "url",
-            # },
             {
                 "origin": "horaires_douverture",
                 "transformation": "convert_opening_hours",
@@ -81,10 +72,6 @@ with DAG(
                 "column": "statut",
                 "value": constants.ACTEUR_ACTIF,
             },
-            # {
-            #     "column": "label_codes",
-            #     "value": [],
-            # },
             # 4. Transformation du dataframe
             {
                 "origin": ["latitude", "longitude"],
@@ -114,11 +101,6 @@ with DAG(
                 "transformation": "clean_adresse",
                 "destination": ["adresse", "code_postal", "ville"],
             },
-            # {
-            #     "origin": ["telephone", "code_postal"],
-            #     "transformation": "clean_telephone",
-            #     "destination": ["telephone"],
-            # },
             {
                 "origin": [
                     "point_dapport_de_service_reparation",

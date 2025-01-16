@@ -36,11 +36,6 @@ with DAG(
                 "transformation": "strip_lower_string",
                 "destination": "source_code",
             },
-            # {
-            #     "origin": "site_web",
-            #     "transformation": "clean_url",
-            #     "destination": "url",
-            # },
             {
                 "origin": "type_de_point_de_collecte",
                 "transformation": "clean_acteur_type_code",
@@ -76,10 +71,6 @@ with DAG(
                 "column": "statut",
                 "value": constants.ACTEUR_ACTIF,
             },
-            # {
-            #     "column": "label_codes",
-            #     "value": [],
-            # },
             # 4. Transformation du dataframe
             {
                 "origin": ["latitude", "longitude"],
@@ -156,25 +147,6 @@ with DAG(
             {"remove": "point_de_reparation"},
             # 6. Colonnes à garder (rien à faire, utilisé pour le controle)
         ],
-        "column_mapping": {
-            "id_point_apport_ou_reparation": "identifiant_externe",
-            "type_de_point_de_collecte": "acteur_type_id",
-            "exclusivite_de_reprisereparation": "exclusivite_de_reprisereparation",
-            "uniquement_sur_rdv": "uniquement_sur_rdv",
-            "public_accueilli": "public_accueilli",
-            "reprise": "reprise",
-            "siret": "siret",
-            "telephone": "telephone",
-            "produitsdechets_acceptes": "produitsdechets_acceptes",
-            "labels_etou_bonus": "labels_etou_bonus",
-            "point_de_reparation": "point_de_reparation",
-            "ecoorganisme": "source_id",
-            "adresse_format_ban": "adresse_format_ban",
-            "nom_de_lorganisme": "nom",
-            "perimetre_dintervention": "perimetre_dintervention",
-            "longitudewgs84": "longitude",
-            "latitudewgs84": "latitude",
-        },
         "endpoint": (
             "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
             "donnees-eo-valdelia/lines?size=10000"
