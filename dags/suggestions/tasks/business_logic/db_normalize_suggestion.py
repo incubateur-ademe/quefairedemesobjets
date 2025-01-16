@@ -25,7 +25,7 @@ def db_normalize_suggestion():
         df_sql["type_action"] == constants.SUGGESTION_SOURCE_AJOUT
     ]
     df_acteur_to_update = df_sql[
-        df_sql["type_action"] == constants.SUGGESTION_SOURCE_AJOUT
+        df_sql["type_action"] == constants.SUGGESTION_SOURCE_MISESAJOUR
     ]
     df_acteur_to_delete = df_sql[
         df_sql["type_action"] == constants.SUGGESTION_SOURCE_SUPRESSION
@@ -33,11 +33,18 @@ def db_normalize_suggestion():
     if not df_acteur_to_create.empty:
         normalized_dfs = df_acteur_to_create["suggestion"].apply(pd.json_normalize)
         df_acteur = pd.concat(normalized_dfs.tolist(), ignore_index=True)
-        return normalize_acteur_update_for_db(df_acteur, suggestion_cohorte_id, engine)
+        return normalize_acteur_update_for_db(
+            df_acteur, suggestion_cohorte_id, engine, constants.SUGGESTION_SOURCE_AJOUT
+        )
     if not df_acteur_to_update.empty:
         normalized_dfs = df_acteur_to_update["suggestion"].apply(pd.json_normalize)
         df_acteur = pd.concat(normalized_dfs.tolist(), ignore_index=True)
-        return normalize_acteur_update_for_db(df_acteur, suggestion_cohorte_id, engine)
+        return normalize_acteur_update_for_db(
+            df_acteur,
+            suggestion_cohorte_id,
+            engine,
+            constants.SUGGESTION_SOURCE_MISESAJOUR,
+        )
     if not df_acteur_to_delete.empty:
         normalized_dfs = df_acteur_to_delete["suggestion"].apply(pd.json_normalize)
         df_acteur = pd.concat(normalized_dfs.tolist(), ignore_index=True)
@@ -51,7 +58,7 @@ def db_normalize_suggestion():
     raise ValueError("No suggestion found")
 
 
-def normalize_acteur_update_for_db(df_actors, dag_run_id, engine):
+def normalize_acteur_update_for_db(df_actors, dag_run_id, engine, type_action):
     df_labels = process_many2many_df(df_actors, "labels")
     df_acteur_services = process_many2many_df(
         df_actors, "acteur_services", df_columns=["acteur_id", "acteurservice_id"]
@@ -85,7 +92,7 @@ def normalize_acteur_update_for_db(df_actors, dag_run_id, engine):
         "dag_run_id": dag_run_id,
         "labels": df_labels[["acteur_id", "labelqualite_id"]],
         "acteur_services": df_acteur_services[["acteur_id", "acteurservice_id"]],
-        "change_type": constants.SUGGESTION_SOURCE,
+        "change_type": type_action,
     }
 
 
@@ -102,12 +109,3 @@ def process_many2many_df(df, column_name, df_columns=["acteur_id", "labelqualite
     except KeyError:
         # Handle the case where the specified column does not exist
         return pd.DataFrame(columns=df_columns)
-
-
-def normalize_acteur_delete_for_db(df_actors, dag_run_id):
-
-    return {
-        "actors": df_actors,
-        "dag_run_id": dag_run_id,
-        "change_type": constants.SUGGESTION_SOURCE_SUPRESSION,
-    }

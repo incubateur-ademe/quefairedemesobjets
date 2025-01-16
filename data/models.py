@@ -6,11 +6,9 @@ from dags.sources.config.shared_constants import (
     SUGGESTION_AVALIDER,
     SUGGESTION_CLUSTERING,
     SUGGESTION_ENCOURS,
-    SUGGESTION_ENRICHISSEMENT,
     SUGGESTION_ERREUR,
     SUGGESTION_PARTIEL,
     SUGGESTION_REJETER,
-    SUGGESTION_SOURCE,
     SUGGESTION_SOURCE_AJOUT,
     SUGGESTION_SOURCE_MISESAJOUR,
     SUGGESTION_SOURCE_SUPRESSION,
@@ -31,10 +29,6 @@ class SuggestionStatut(models.TextChoices):
 
 class SuggestionAction(models.TextChoices):
     CLUSTERING = SUGGESTION_CLUSTERING, "regroupement/déduplication des acteurs"
-    SOURCE = (
-        SUGGESTION_SOURCE,
-        "ingestion de source de données",
-    )
     SOURCE_AJOUT = (
         SUGGESTION_SOURCE_AJOUT,
         "ingestion de source de données - nouveau acteur",
@@ -44,7 +38,6 @@ class SuggestionAction(models.TextChoices):
         "ingestion de source de données - modification d'acteur existant",
     )
     SOURCE_SUPPRESSION = SUGGESTION_SOURCE_SUPRESSION, "ingestion de source de données"
-    SOURCE_ENRICHISSEMENT = SUGGESTION_ENRICHISSEMENT, "suggestion d'enrichissement"
 
 
 class SuggestionCohorte(models.Model):
