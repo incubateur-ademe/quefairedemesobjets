@@ -1,7 +1,7 @@
 import pandas as pd
 from shared.tasks.database_logic.db_manager import PostgresConnectionManager
 from sources.config import shared_constants as constants
-from suggestions.business_logic.db_read_suggestiontoprocess import (
+from suggestions.tasks.business_logic.db_read_suggestiontoprocess import (
     get_first_suggetsioncohorte_to_insert,
 )
 from utils import logging_utils as log

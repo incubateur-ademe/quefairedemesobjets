@@ -26,26 +26,26 @@ def db_write_suggestion(
         metadata=metadata,
         dag_name=f"{dag_name} - AJOUT",
         run_name=run_name,
-        action_type=constants.SUGGESTION_SOURCE_AJOUT,
+        type_action=constants.SUGGESTION_SOURCE_AJOUT,
     )
     insert_suggestion(
         df=df_acteur_to_delete,
         metadata=metadata,
         dag_name=f"{dag_name} - SUPRESSION",
         run_name=run_name,
-        action_type=constants.SUGGESTION_SOURCE_SUPRESSION,
+        type_action=constants.SUGGESTION_SOURCE_SUPRESSION,
     )
     insert_suggestion(
         df=df_acteur_to_update,
         metadata=metadata,
         dag_name=f"{dag_name} - MISES A JOUR",
         run_name=run_name,
-        action_type=constants.SUGGESTION_SOURCE_MISESAJOUR,
+        type_action=constants.SUGGESTION_SOURCE_MISESAJOUR,
     )
 
 
 def insert_suggestion(
-    df: pd.DataFrame, metadata: dict, dag_name: str, run_name: str, action_type: str
+    df: pd.DataFrame, metadata: dict, dag_name: str, run_name: str, type_action: str
 ):
     if df.empty:
         return
@@ -72,7 +72,7 @@ def insert_suggestion(
             (
                 dag_name,
                 run_name,
-                action_type,
+                type_action,
                 constants.SUGGESTION_AVALIDER,
                 json.dumps(metadata),
                 current_date,
@@ -82,10 +82,9 @@ def insert_suggestion(
         suggestion_cohorte_id = result.fetchone()[0]
 
     # Insert dag_run_change
-    df["type_action"] = action_type
     df["suggestion_cohorte_id"] = suggestion_cohorte_id
     df["statut"] = constants.SUGGESTION_AVALIDER
-    df[["suggestion", "suggestion_cohorte_id", "type_action", "statut"]].to_sql(
+    df[["suggestion", "suggestion_cohorte_id", "statut"]].to_sql(
         "data_suggestionunitaire",
         engine,
         if_exists="append",

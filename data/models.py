@@ -1,5 +1,4 @@
 from django.contrib.gis.db import models
-from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models.functions import Now
 
 from dags.sources.config.shared_constants import (
@@ -72,12 +71,6 @@ class SuggestionCohorte(models.Model):
     metadata = models.JSONField(
         null=True, blank=True, help_text="Metadata de la cohorte, données statistiques"
     )
-    pourcentage_erreurs_tolerees = models.IntegerField(
-        default=0,
-        db_default=0,
-        help_text="Nombre d'erreurs tolérées en pourcentage",
-        validators=[MinValueValidator(0), MaxValueValidator(100)],
-    )
     cree_le = models.DateTimeField(auto_now_add=True, db_default=Now())
     modifie_le = models.DateTimeField(auto_now=True, db_default=Now())
 
@@ -99,29 +92,11 @@ class SuggestionCohorte(models.Model):
     def __str__(self) -> str:
         return f"{self.identifiant_action} - {self.identifiant_execution}"
 
-    def display_meta_data(self) -> dict:
-        displayed_metadata = {}
-        displayed_metadata["Nombre d'acteur à créer ou mettre à jour"] = (
-            self.metadata.get("acteurs_to_add_or_update", 0)
-        )
-        displayed_metadata["Nombre de duplicats"] = self.metadata.get(
-            "number_of_duplicates", 0
-        )
-        displayed_metadata["Nombre d'acteur à supprimer"] = self.metadata.get(
-            "number_of_removed_actors", 0
-        )
-        return displayed_metadata
-
 
 class SuggestionUnitaire(models.Model):
     id = models.AutoField(primary_key=True)
     suggestion_cohorte = models.ForeignKey(
         SuggestionCohorte, on_delete=models.CASCADE, related_name="suggestion_unitaires"
-    )
-    type_action = models.CharField(
-        choices=SuggestionAction.choices,
-        max_length=250,
-        blank=True,
     )
     statut = models.CharField(
         max_length=50,

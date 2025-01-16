@@ -1,7 +1,7 @@
     <thead>
 
         <tr>
-            <th scope="col">action_type</th>
+            <th scope="col">type_action</th>
             <th scope="col">Acteur</th>
             <th scope="col">suggestion</th>
         </tr>
@@ -10,7 +10,7 @@
     <tbody>
         {% for suggestion_unitaire in suggestion_unitaires %}
             <tr>
-                <td>{{ suggestion_unitaire.get_action_type_display }}</td>
+                <td>{{ suggestion_unitaire.get_type_action_display }}</td>
                 <td>
                     {% for key, value in suggestion_unitaire.display_acteur_details.items %}
                         <p><strong>{{ key }}</strong> : {{ value }}</p>
