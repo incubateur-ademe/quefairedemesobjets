@@ -18,10 +18,6 @@ with DAG(
                 "origin": "nom_de_lorganisme",
                 "destination": "nom",
             },
-            # {
-            #     "origin": "enseigne_commerciale",
-            #     "destination": "nom_commercial",
-            # },
             {
                 "origin": "longitudewgs84",
                 "destination": "longitude",
@@ -46,16 +42,6 @@ with DAG(
                 "transformation": "clean_public_accueilli",
                 "destination": "public_accueilli",
             },
-            # {
-            #     "origin": "uniquement_sur_rdv",
-            #     "transformation": "cast_eo_boolean_or_string_to_boolean",
-            #     "destination": "uniquement_sur_rdv",
-            # },
-            # {
-            #     "origin": "exclusivite_de_reprisereparation",
-            #     "transformation": "cast_eo_boolean_or_string_to_boolean",
-            #     "destination": "exclusivite_de_reprisereparation",
-            # },
             {
                 "origin": "reprise",
                 "transformation": "clean_reprise",
@@ -81,11 +67,6 @@ with DAG(
                 "transformation": "compute_location",
                 "destination": ["location"],
             },
-            # {
-            #     "origin": ["labels_etou_bonus", "acteur_type_code"],
-            #     "transformation": "clean_label_codes",
-            #     "destination": ["label_codes"],
-            # },
             {
                 "origin": ["id_point_apport_ou_reparation", "nom"],
                 "transformation": "clean_identifiant_externe",
@@ -99,11 +80,6 @@ with DAG(
                 "transformation": "clean_identifiant_unique",
                 "destination": ["identifiant_unique"],
             },
-            # {
-            #     "origin": ["siret"],
-            #     "transformation": "clean_siret_and_siren",
-            #     "destination": ["siret", "siren"],
-            # },
             {
                 "origin": ["adresse_format_ban"],
                 "transformation": "clean_adresse",
@@ -140,7 +116,6 @@ with DAG(
             {"remove": "adresse_format_ban"},
             {"remove": "id_point_apport_ou_reparation"},
             {"remove": "point_de_collecte_ou_de_reprise_des_dechets"},
-            # {"remove": "labels_etou_bonus"},
             {"remove": "point_dapport_de_service_reparation"},
             {"remove": "point_dapport_pour_reemploi"},
             {"remove": "point_de_reparation"},

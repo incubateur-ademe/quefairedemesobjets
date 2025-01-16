@@ -46,21 +46,6 @@ with DAG(
                 "transformation": "clean_public_accueilli",
                 "destination": "public_accueilli",
             },
-            # {
-            #     "origin": "uniquement_sur_rdv",
-            #     "transformation": "cast_eo_boolean_or_string_to_boolean",
-            #     "destination": "uniquement_sur_rdv",
-            # },
-            # {
-            #     "origin": "exclusivite_de_reprisereparation",
-            #     "transformation": "cast_eo_boolean_or_string_to_boolean",
-            #     "destination": "exclusivite_de_reprisereparation",
-            # },
-            # {
-            #     "origin": "reprise",
-            #     "transformation": "clean_reprise",
-            #     "destination": "reprise",
-            # },
             {
                 "origin": "produitsdechets_acceptes",
                 "transformation": "clean_souscategorie_codes",
@@ -81,11 +66,6 @@ with DAG(
                 "transformation": "compute_location",
                 "destination": ["location"],
             },
-            # {
-            #     "origin": ["labels_etou_bonus", "acteur_type_code"],
-            #     "transformation": "clean_label_codes",
-            #     "destination": ["label_codes"],
-            # },
             {
                 "origin": ["id_point_apport_ou_reparation", "nom"],
                 "transformation": "clean_identifiant_externe",
@@ -140,10 +120,7 @@ with DAG(
             {"remove": "adresse_format_ban"},
             {"remove": "id_point_apport_ou_reparation"},
             {"remove": "point_de_collecte_ou_de_reprise_des_dechets"},
-            # {"remove": "labels_etou_bonus"},
-            # {"remove": "point_dapport_de_service_reparation"},
             {"remove": "point_dapport_pour_reemploi"},
-            # {"remove": "point_de_reparation"},
             # 6. Colonnes à garder (rien à faire, utilisé pour le controle)
         ],
         "endpoint": (

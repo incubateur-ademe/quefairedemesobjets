@@ -165,7 +165,6 @@ with DAG(
         "ignore_duplicates": False,
         "validate_address_with_ban": False,
         "product_mapping": get_mapping_config(mapping_key="sous_categories_cma"),
-        "source_code": "cma_reparacteur",
     },
     schedule=None,
 ) as dag:
