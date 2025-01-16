@@ -1,7 +1,6 @@
 import pytest
-
-from dags.clustering.tasks.business_logic.clustering_config_validate import (
-    clustering_acteur_config_validate,
+from cluster.tasks.business_logic.cluster_acteurs_config_validate import (
+    cluster_acteurs_config_validate,
 )
 
 
@@ -39,21 +38,21 @@ class TestClusteringActeurConfigValidate:
         with pytest.raises(
             ValueError, match="Au moins une source doit être sélectionnée"
         ):
-            clustering_acteur_config_validate(**params)
+            cluster_acteurs_config_validate(**params)
 
     def test_include_acteur_type_ids_invalid(self, params):
         params["include_acteur_type_codes"] = []
         with pytest.raises(
             ValueError, match="Au moins un type d'acteur doit être sélectionné"
         ):
-            clustering_acteur_config_validate(**params)
+            cluster_acteurs_config_validate(**params)
 
     def test_include_if_fields_not_empty_invalid(self, params):
         params["include_if_all_fields_filled"] = []
         with pytest.raises(
             ValueError, match="Au moins un champ non vide doit être sélectionné"
         ):
-            clustering_acteur_config_validate(**params)
+            cluster_acteurs_config_validate(**params)
 
     def test_fields_incl_excl_invalid(self, params):
         params["include_if_all_fields_filled"] = ["nom"]
@@ -61,7 +60,7 @@ class TestClusteringActeurConfigValidate:
         with pytest.raises(
             ValueError, match="Champs à la fois à inclure et à exclure: {'nom'}"
         ):
-            clustering_acteur_config_validate(**params)
+            cluster_acteurs_config_validate(**params)
 
     def test_valid(self, params):
-        clustering_acteur_config_validate(**params)
+        cluster_acteurs_config_validate(**params)
