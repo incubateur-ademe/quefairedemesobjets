@@ -5,6 +5,7 @@ from airflow.operators.python import PythonOperator
 from cluster.tasks.business_logic.cluster_acteurs_db_data_read_acteurs import (
     cluster_acteurs_db_data_read_acteurs,
 )
+from cluster.tasks.business_logic.cluster_acteurs_df_sort import cluster_acteurs_df_sort
 from utils import logging_utils as log
 from utils.django import django_setup_full
 
@@ -72,6 +73,7 @@ def cluster_acteurs_db_data_read_acteurs_wrapper(**kwargs) -> None:
         raise ValueError("Aucun acteur trouvé avec les critères de sélection")
 
     logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
+    df = cluster_acteurs_df_sort(df)
     log.preview_df_as_markdown("acteurs sélectionnés", df)
 
     kwargs["ti"].xcom_push(key="df", value=df)
