@@ -25,7 +25,7 @@ def task_info_get():
     exacte soit fuzzy)
 
     🏗️ comment: les normalisations sont appliquées dans l'ordre
-    de la UI. Si on champ est spécifié dans plusieurs options,
+    de la UI. Si un champ est spécifié dans plusieurs options,
     toutes les normalisations sont appliquées à la suite.
     """
 
