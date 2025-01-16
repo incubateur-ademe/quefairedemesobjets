@@ -46,6 +46,13 @@ def cluster_acteurs_db_data_read_acteurs(
      => donc on préfère simplifier l'approche en soulevant des exceptions dès
         que possible via cette fonction
 
+    # TODO: une fois qu'on est confiant avec la pipeline (+ de tests unitaires
+    # et métiers):
+    # - enlever les exceptions
+    # - dans les tâches Airflow: raise AirflowSkipException si pas de données
+    # => ceci permettra à la pipeline de tourner en mode autopilot pour générer
+    # des suggestions en continues (et avoir du skip au lieu des erreurs si rien)
+
     Args:
         model_class (type[Model]): Le modèle Django à lire, le mettre en paramètre
             nous permet de choisir Acteur, RevisionActeur ou DisplayedActeur

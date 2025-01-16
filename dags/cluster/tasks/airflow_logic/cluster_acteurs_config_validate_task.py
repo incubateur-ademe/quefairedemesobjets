@@ -52,6 +52,9 @@ def cluster_acteurs_config_validate_wrapper(**kwargs) -> None:
     for key, value in params.items():
         log.preview(f"param: {key}", value)
 
+    # TODO: ceci devrait être déplacer dans la fonction de validation
+    # qui devrait être reprise de fond en comble avec du pydantic
+    # pour pas réinventer la roue
     if (
         len(params["include_source_codes"]) == 1
         and not params["cluster_intra_source_is_allowed"]
