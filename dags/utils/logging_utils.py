@@ -85,3 +85,25 @@ def preview(value_name: str, value: Any) -> None:
     else:
         log.info(str(value))
     log.info("::endgroup::")
+
+
+def preview_df_as_markdown(label: str, df: pd.DataFrame) -> None:
+    """Variation de la preview pour une dataframe de manière à
+    obtenir une table lisible. On ne filtre pas la df ici, c'est
+    à l'appelant de décider (ex: this("me",df.head(10))"""
+    size = size_info_get(df)
+    log.info(f"::group::📦 {label}: taille={size}, 🔽 Cliquer pour révéler la table 🔽")
+    log.info("\n" + df.to_markdown(index=False))
+    log.info("::endgroup::")
+
+
+def banner_string(message: str) -> str:
+    """Retourne une bannière après retour
+    de ligne pour qu'elle se retrouve visible tout à gauche
+    (et pas en fin de ligne)"""
+    return f"""
+
+{'=' * 80}
+{message}
+{'=' * 80}
+    """

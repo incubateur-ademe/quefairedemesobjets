@@ -1,5 +1,6 @@
 import logging
 import random
+import re
 import string
 import uuid
 from copy import deepcopy
@@ -355,6 +356,74 @@ class BaseActeur(NomAsNaturalKeyModel):
     @property
     def is_digital(self) -> bool:
         return self.acteur_type.code == DIGITAL_ACTEUR_CODE
+
+    @property
+    def numero_et_complement_de_rue(self) -> str | None:
+        """Extrait le numéro de rue (et complément si présent)
+        d'une adresse. Le complément est important car il peut
+        servir à distinguer des adresses différentes lors de
+        tâche telle le clustering (ex: "1" vs. "1 b").
+
+        TODO: il y a surement des améliorations à apporter,
+        notamment en étendant les différents possibilités de
+        compléments, mais avec le risque d'effets de bord.
+
+        Par exemple si on inclus les compléments de [a-z],
+        risque de confondre z de "15 z.i." (zone industrielle)
+        avec le complément.
+
+        La fonction est une 1ère version conservatrice qu'il
+        faudra revisiter données à l'appui, et potentiellement
+        basculer en LLM en background processing si c'est trop
+        complexe à gérer
+        """
+        adr = self.adresse
+        if not adr:
+            return None
+        # Mise en miniscule pour simplifier les regex sachant qu'on
+        # voulait le faire au final pour plus d'uniformité
+        match = re.match(r"^[\s]*([\d]+ ?(?:bis|a|b|c)?)\b", adr.lower())
+        if not match:
+            return None
+
+        # On essaye de faire un peu de normalisation en
+        # séparant le numéro du complément
+        result = match.group(0).strip()
+        match = re.search(r"(\d+)([a-z]+)", result)
+        if match:
+            result = f"{match.group(1)} {match.group(2)}"
+        # Remplacement du bis en b au cas où on a les 2 versions
+        # dans la data
+        return result.replace("bis", "b")
+
+    @property
+    def nom_sans_adresse_et_complement(self) -> str | None:
+        """Retourne le nom sans les mots présents
+        dans l'adresse ou le complément de rue, ceci
+        pour faciliter le clustering quand un nom répète
+        des éléments de l'adresse ce qui vient baisser le
+        score de similarité.
+
+        Si après suppression de l'adresse/complément
+        il ne reste plus rien, on retourne None ce qui
+        permet à ce champ d'être utilisé dans les
+        critères d'inclusion/exclusion
+        """
+        words_nom = (self.nom or "").lower().split()
+        words_adresse = (
+            ((self.adresse or "") + (self.adresse_complement or "")).lower().split()
+        )
+        words = [x for x in words_nom if x not in words_adresse and x.strip()]
+        return " ".join(words) if words else None
+
+    @property
+    def code_departement(self) -> str | None:
+        """Extrait le code départemental du code postal"""
+        cp = self.code_postal
+        if not cp:
+            return None
+        cp = str(cp).strip()
+        return None if not cp or len(cp) != 5 else cp[:2]
 
     @cached_property
     def sorted_proposition_services(self):

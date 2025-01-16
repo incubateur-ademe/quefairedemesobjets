@@ -52,7 +52,7 @@ class TestAirflowParamsDropdown:
             "code3 (id=3)",
             "code_not_found (id=999)",
         ]
-        with pytest.raises(KeyError, match="code_not_found"):
+        with pytest.raises(ValueError, match="Codes non trouvés.*code_not_found"):
             airflow_params_dropdown_selected_to_ids(mapping, selected)
 
     def test_to_ids_exception_if_dropdown_has_no_ids(self, mapping):
