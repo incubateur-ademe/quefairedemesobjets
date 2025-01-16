@@ -291,9 +291,9 @@ django-cryptography-django5==2.2 \
     --hash=sha256:73b5d4597d2fd4accca0c971dad7aacfcef24cb7322512f4f94b020cd55b57ff \
     --hash=sha256:b149685032cbbaf8b88c1b3ff6d8de7a107bb1b3cff9e84e9b32d0c61ca08346
     # via django-sql-explorer
-django-dsfr==1.4.5 \
-    --hash=sha256:1c58d0ac0de99f91a2585010e22c2ecaef50dbece954018005f45fd013cf0d1f \
-    --hash=sha256:9dbc60b6ca1a31dc6ca309a277c61c73b0a34e2b1dcc3bec6f32789c7720228e
+django-dsfr==2.0.0 \
+    --hash=sha256:817b6da948285dc5393f549ccacdf6cad6361cc50c9fe59f14cbc911235a7309 \
+    --hash=sha256:d2626565d4fa292bd279c7faf5f53f52bfd758204efb5e18b668602897e11766
     # via -r requirements.in
 django-extensions==3.2.3 \
     --hash=sha256:44d27919d04e23b3f40231c4ab7af4e61ce832ef46d610cc650d53e68328410a \
