@@ -1,7 +1,7 @@
 """
 Fonctions de clustering des acteurs
 
-TODO: améliorer le debug: en mode CLI on avant des print()
+TODO: améliorer le debug: en mode CLI on avant des logger.info()
 qui étaient suffisants, mais en mode Airflow, on va faire
 exploser la taille des logs, donc on a besoin de refactorer:
  - les fonctions doivent retourner des valeurs de debug
@@ -11,15 +11,17 @@ exploser la taille des logs, donc on a besoin de refactorer:
 """
 
 import json
+import logging
 import re
 
 import numpy as np
 import pandas as pd
-from rich import print
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from slugify import slugify
 from unidecode import unidecode
+
+logger = logging.getLogger(__name__)
 
 COLS_GROUP_EXACT_ALWAYS = [
     # "code_departement",
@@ -121,7 +123,7 @@ def similarity_matrix_to_tuples(
     tuples.sort(key=lambda x: x[2], reverse=True)
     if indexes:
         tuples = [(indexes[i], indexes[j], score) for i, j, score in tuples]
-    print(f"{tuples=}")
+    logger.info(f"{tuples=}")
     return tuples
 
 
@@ -179,7 +181,7 @@ def cluster_to_subclusters(
 ) -> list[list[int]]:
     """Scinde un cluster en 1+ sous-clusters en fonction de la similarité des valeurs
     d'une colonne donnée. On s'assure qu'il n'y a pas de sous-clusters dupliqués."""
-    print("\n\nrefine_cluster", f"{column=}, {cluster=}, {threshold=}")
+    logger.info(f"\n\nrefine_cluster, {column=}, {cluster=}, {threshold=}")
     df_cluster = df.loc[cluster]
     column_values = df_cluster[column].astype(str).values
     similarity_matrix = values_to_similarity_matrix(column_values)  # type: ignore
@@ -190,10 +192,10 @@ def cluster_to_subclusters(
         symbol = "🟢" if score >= threshold else "🔴"
         v_i = column_values[cluster.index(i)]
         v_j = column_values[cluster.index(j)]
-        print(f"{symbol} {i=}, {j=}, {v_i=}, {v_j=} {score=}")
+        logger.info(f"{symbol} {i=}, {j=}, {v_i=}, {v_j=} {score=}")
 
     sub_clusters = score_tuples_to_clusters(tuples, threshold)
-    print(f"{sub_clusters=}")
+    logger.info(f"{sub_clusters=}")
     return sub_clusters
 
 
@@ -216,7 +218,7 @@ def cluster_cols_group_fuzzy(df_src, columns, threshold):
         clusters_ref = []
         for cluster in clusters:
             clusters_ref_new = cluster_to_subclusters(df, column, cluster, threshold)
-            print(f"{column=}, {cluster=}, {clusters_ref_new=}")
+            logger.info(f"{column=}, {cluster=}, {clusters_ref_new=}")
             clusters_ref.extend(clusters_ref_new)
 
         # Only continue with valid clusters for the next refinement step
@@ -286,7 +288,7 @@ def cluster_acteurs_suggestions(
             + ["nom"]
         )
     )
-    print(f"{cols_to_keep=}")
+    logger.info(f"{cols_to_keep=}")
     df = df[cols_to_keep]
 
     # On groupe par les colonnes exactes
@@ -297,7 +299,7 @@ def cluster_acteurs_suggestions(
     ):
         # On ne considère que les clusters de taille 2+
         if len(exact_rows) < 2:
-            print(f"🔴 Ignoré: cluster de taille <2: {list(exact_keys)}")
+            logger.info(f"🔴 Ignoré: cluster de taille <2: {list(exact_keys)}")
             clusters_size1.append(exact_keys)
             continue
         keys = list(exact_keys)
@@ -321,39 +323,43 @@ def cluster_acteurs_suggestions(
         # Liste des clusters à considérer, on commence avec rien
         clusters_to_add = []
 
-        print(f"🟡 Cluster potentiel avant fuzzy: taille {len(exact_rows)}")
+        logger.info(f"🟡 Cluster potentiel avant fuzzy: taille {len(exact_rows)}")
         fields_debug = (
             cluster_fields_exact + cluster_fields_fuzzy + ["identifiant_unique"]
         )
-        print(json.dumps(exact_rows[fields_debug].to_dict(orient="list"), indent=4))
+        logger.info(
+            json.dumps(exact_rows[fields_debug].to_dict(orient="list"), indent=4)
+        )
 
         # Si on a des champs fuzzy, on cherche à
         # sous-clusteriser sur ces champs
         if cluster_fields_fuzzy:
-            print(f"fields_fuzzy={cluster_fields_fuzzy}")
-            print(f"threshold={cluster_fuzzy_threshold}")
+            logger.info(f"fields_fuzzy={cluster_fields_fuzzy}")
+            logger.info(f"threshold={cluster_fuzzy_threshold}")
 
             keys += cluster_fields_fuzzy
             subclusters = cluster_cols_group_fuzzy(
                 exact_rows, cluster_fields_fuzzy, threshold=cluster_fuzzy_threshold
             )
-            print(f"Sous-clusters après fuzzy: {len(subclusters)} sous-clusters")
+            logger.info(f"Sous-clusters après fuzzy: {len(subclusters)} sous-clusters")
             for i, fuzzy_rows in enumerate(subclusters):
                 fuzzy_keys = keys + [str(i + 1)]
-                print("🟢 Sous-cluster conservé:")
-                print(json.dumps(fuzzy_rows.to_dict(orient="list"), indent=4))
+                logger.info("🟢 Sous-cluster conservé:")
+                logger.info(json.dumps(fuzzy_rows.to_dict(orient="list"), indent=4))
                 clusters_to_add.append((fuzzy_keys, fuzzy_rows))
 
         else:
-            print("🟢 Cluster conservé (sur la base des champs exacts uniquement)")
-            print(exact_rows)
+            logger.info(
+                "🟢 Cluster conservé (sur la base des champs exacts uniquement)"
+            )
+            logger.info(exact_rows)
             clusters_to_add.append((keys, exact_rows))
 
         for keys, rows in clusters_to_add:
             cluster_id = cluster_id_from_strings(keys)
             rows["cluster_id"] = cluster_id
             values = rows[cluster_fields_fuzzy + ["nom"]]
-            print(f"\n🟢 CLUSTER: {cluster_id=}, {keys=}, {values=}")
+            logger.info(f"\n🟢 CLUSTER: {cluster_id=}, {keys=}, {values=}")
             clusters.append(rows.copy())
 
     if not clusters:
@@ -367,7 +373,7 @@ def cluster_acteurs_suggestions(
 
     """
     # Debug pour les clusters de taille 1
-    print("🔴 clusters_size1", clusters_size1)
+    logger.info("🔴 clusters_size1", clusters_size1)
     df_clusters_1 = pd.DataFrame(
         clusters_size1, columns=COLS_GROUP_EXACT_ALWAYS + cluster_fields_exact
     )
@@ -375,10 +381,10 @@ def cluster_acteurs_suggestions(
     # Show entries grouped by code_postal and acteur_type_code which have >1 entries
     issues_villes = df_clusters_1.groupby(["code_postal"]).filter(lambda x: len(x) >= 2)
 
-    print(f"🔴 {issues_villes=}")
+    logger.info(f"🔴 {issues_villes=}")
     """
-    print(f"🟢 {len(clusters_size1)=}")
-    print(f"🟢 {df_clusters["cluster_id"].nunique()=}")
-    print(f"🟢 {df_clusters["identifiant_unique"].nunique()=}")
+    logger.info(f"🟢 {len(clusters_size1)=}")
+    logger.info(f"🟢 {df_clusters["cluster_id"].nunique()=}")
+    logger.info(f"🟢 {df_clusters["identifiant_unique"].nunique()=}")
 
     return df_clusters
