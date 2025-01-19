@@ -8,7 +8,7 @@ from sources.tasks.airflow_logic.db_read_propositions_max_id_task import (
     db_read_propositions_max_id_task,
 )
 from sources.tasks.airflow_logic.db_write_suggestion_task import (
-    db_write_suggestion_task,
+    db_write_type_action_suggestions_task,
 )
 from sources.tasks.airflow_logic.propose_acteur_changes_task import (
     propose_acteur_changes_task,
@@ -93,5 +93,5 @@ def eo_task_chain(dag: DAG) -> None:
         create_tasks,
         propose_services_sous_categories_task(dag),
         db_data_prepare_task(dag),
-        db_write_suggestion_task(dag),
+        db_write_type_action_suggestions_task(dag),
     )

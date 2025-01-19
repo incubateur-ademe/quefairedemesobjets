@@ -23,12 +23,6 @@ def db_data_prepare(
     df_acteur_to_delete["suggestion"] = df_acteur_to_delete[
         update_actors_columns
     ].apply(lambda row: json.dumps(row.to_dict(), default=str), axis=1)
-    # Created or updated Acteurs
-    # df_acteur_services = (
-    #     df_acteur_services
-    #     if df_acteur_services is not None
-    #     else pd.DataFrame(columns=["acteur_id", "acteurservice_id"])
-    # )
 
     if df_acteur.empty:
         raise ValueError("df_acteur est vide")

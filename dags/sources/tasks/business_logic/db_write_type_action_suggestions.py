@@ -9,7 +9,7 @@ from sources.config import shared_constants as constants
 logger = logging.getLogger(__name__)
 
 
-def db_write_suggestion(
+def db_write_type_action_suggestions(
     dag_name: str,
     run_id: str,
     df_acteur_to_create: pd.DataFrame,
