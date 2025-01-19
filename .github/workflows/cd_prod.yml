@@ -6,11 +6,8 @@ on:
       - v*
 
 env:
-  S3_HOST: https://cellar-c2.services.clever-cloud.com
-  FOLDER_SOURCE: dags
-  S3_BUCKET_DESTINATION: s3://prod-dags/
-  AWS_ACCESS_KEY_ID: ${{ secrets.PROD_S3_ACCESS_KEY }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_S3_SECRET_KEY }}
+  CC_PROD_AIRFLOW_WEBSERVER_APP: app_efd2802a-1773-48e0-987e-7a6dffb929d1
+  CC_PROD_AIRFLOW_SCHEDULER_APP: app_fda5d606-44d9-485f-a1b4-1f7007bc3bec
 
 defaults:
   run:
@@ -42,11 +39,27 @@ jobs:
           known-host: ssh.osc-fr1.scalingo.com
           app-name: quefairedemesobjets
 
-  deploy_dags:
+  deploy_airflow-webserver:
+    name: Deploy Airflow webserver on Clever Cloud
     needs: [run_tests]
-    uses: ./.github/workflows/airflow_deploy_dags.yml
-    with:
-      S3_BUCKET_DESTINATION: s3://prod-dags/
-    secrets:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AIRFLOW_PROD_S3_ACCESS_KEY }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AIRFLOW_PROD_S3_SECRET_KEY }}
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: 47ng/actions-clever-cloud@v2.0.0
+        with:
+          alias: ${{ env.CC_PROD_AIRFLOW_WEBSERVER_APP }}
+        env:
+          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
+
+
+  deploy_airflow-scheduler:
+    name: Deploy Airflow scheduler on Clever Cloud
+    needs: [run_tests]
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: 47ng/actions-clever-cloud@v2.0.0
+        with:
+          alias: ${{ env.CC_PROD_AIRFLOW_SCHEDULER_APP }}
+        env:
+          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}

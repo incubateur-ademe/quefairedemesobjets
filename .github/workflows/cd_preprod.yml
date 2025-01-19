@@ -6,6 +6,10 @@ on:
     branches:
       - main
 
+env:
+  CC_PREPROD_AIRFLOW_WEBSERVER_APP: app_d3c229bf-be85-4dbd-aca2-c8df1c6166de
+  CC_PREPROD_AIRFLOW_SCHEDULER_APP: app_3d1f7d89-d7f0-433a-ac01-c663d4729143
+
 defaults:
   run:
     shell: bash
@@ -26,11 +30,27 @@ jobs:
           known-host: ssh.osc-fr1.scalingo.com
           app-name: quefairedemesobjets-preprod
 
-  deploy_dags:
+  deploy_airflow-webserver:
+    name: Deploy PREPROD Airflow webserver on Clever Cloud
     needs: [run_tests]
-    uses: ./.github/workflows/airflow_deploy_dags.yml
-    with:
-      S3_BUCKET_DESTINATION: s3://preprod-data-dags/
-    secrets:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AIRFLOW_PREPROD_S3_ACCESS_KEY }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AIRFLOW_PREPROD_S3_SECRET_KEY }}
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: 47ng/actions-clever-cloud@v2.0.0
+        with:
+          alias: ${{ env.CC_PREPROD_AIRFLOW_WEBSERVER_APP }}
+        env:
+          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
+
+
+  deploy_airflow-scheduler:
+    name: Deploy PREPROD Airflow scheduler on Clever Cloud
+    needs: [run_tests]
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: 47ng/actions-clever-cloud@v2.0.0
+        with:
+          alias: ${{ env.CC_PREPROD_AIRFLOW_SCHEDULER_APP }}
+        env:
+          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
