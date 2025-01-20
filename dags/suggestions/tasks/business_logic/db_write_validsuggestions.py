@@ -7,23 +7,23 @@ from utils import logging_utils as log
 logger = logging.getLogger(__name__)
 
 
-def db_write_validsuggestions(data_from_db: dict):
+def db_write_validsuggestions(data_acteurs_normalized: dict):
     # If data_set is empty, nothing to do
-    dag_run_id = data_from_db["dag_run_id"]
+    dag_run_id = data_acteurs_normalized["dag_run_id"]
     engine = PostgresConnectionManager().engine
-    if "actors" not in data_from_db:
+    if "actors" not in data_acteurs_normalized:
         with engine.begin() as connection:
             update_suggestion_status(
                 connection, dag_run_id, constants.SUGGESTION_ENCOURS
             )
         return
-    df_actors = data_from_db["actors"]
-    df_labels = data_from_db.get("labels")
-    df_acteur_services = data_from_db.get("acteur_services")
-    df_pds = data_from_db.get("pds")
-    df_pdssc = data_from_db.get("pds_sous_categories")
-    dag_run_id = data_from_db["dag_run_id"]
-    change_type = data_from_db.get("change_type", "CREATE")
+    df_actors = data_acteurs_normalized["actors"]
+    df_labels = data_acteurs_normalized.get("labels")
+    df_acteur_services = data_acteurs_normalized.get("acteur_services")
+    df_pds = data_acteurs_normalized.get("pds")
+    df_pdssc = data_acteurs_normalized.get("pds_sous_categories")
+    dag_run_id = data_acteurs_normalized["dag_run_id"]
+    change_type = data_acteurs_normalized.get("change_type", "CREATE")
 
     with engine.begin() as connection:
         if change_type in [

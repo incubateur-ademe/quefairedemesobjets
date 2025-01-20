@@ -15,9 +15,11 @@ def db_write_validsuggestions_task(dag: DAG) -> PythonOperator:
 
 
 def db_write_validsuggestions_wrapper(**kwargs):
-    data_from_db = kwargs["ti"].xcom_pull(task_ids="db_normalize_suggestion")
+    data_acteurs_normalized = kwargs["ti"].xcom_pull(task_ids="db_normalize_suggestion")
 
-    log.preview("data_from_db acteur", data_from_db["actors"])
-    log.preview("data_from_db change_type", data_from_db["change_type"])
+    log.preview("data_acteurs_normalized acteur", data_acteurs_normalized["actors"])
+    log.preview(
+        "data_acteurs_normalized change_type", data_acteurs_normalized["change_type"]
+    )
 
-    return db_write_validsuggestions(data_from_db=data_from_db)
+    return db_write_validsuggestions(data_acteurs_normalized=data_acteurs_normalized)
