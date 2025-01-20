@@ -388,3 +388,8 @@ ASSISTANT = {
         cast=str,
     ),
 }
+
+NOTION = {
+    "TOKEN": decouple.config("NOTION_TOKEN", default=""),
+    "CONTACT_FORM_DATABASE_ID": decouple.config("NOTION_CONTACT_FORM_DATABASE_ID"),
+}

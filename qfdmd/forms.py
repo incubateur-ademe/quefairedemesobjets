@@ -47,3 +47,39 @@ class SearchForm(DsfrBaseForm):
             .values("slug", "nom")[:10]
         )
         return self.results
+
+
+class ContactForm(DsfrBaseForm):
+    name = forms.CharField(label="Votre nom")
+    email = forms.EmailField(label="Votre email")
+    subject = forms.ChoiceField(
+        label="Votre sujet",
+        choices=[
+            ("", ""),
+            (
+                "integration",
+                "Je souhaite obtenir de l'aide pour intégrer le simulateur",
+            ),
+            (
+                "erreur",
+                "Je souhaite signaler une erreur pour un déchet",
+            ),
+            (
+                "manquant",
+                "Je souhaite signaler un déchet manquant",
+            ),
+            (
+                "bug",
+                "J'ai trouvé un bug",
+            ),
+            (
+                "amelioration",
+                "Je souhaite proposer une amélioration",
+            ),
+            (
+                "autre",
+                "Autre",
+            ),
+        ],
+    )
+    message = forms.CharField(label="Votre message", widget=forms.Textarea)

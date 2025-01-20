@@ -1,5 +1,7 @@
 {% extends "../action.html" %}
 
+{% load dsfr_tags %}
+
 {% block icon %}
 {% include "./icon.html" %}
 {% endblock icon %}
@@ -13,7 +15,10 @@ Nous contacter
 {% endblock modal_title %}
 
 {% block modal_content %}
-Formulaire de contact
+<turbo-frame id="contact-form"
+        src="{% url 'qfdmd:nous-contacter' %}"
+>
+</turbo-frame>
 {% endblock modal_content %}
 
 {% block modal_wrapper_for_id %}
