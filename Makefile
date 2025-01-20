@@ -131,6 +131,10 @@ e2e-test:
 	npx playwright test
 	$(PYTEST) ./integration_tests
 
+.PHONY: a11y
+a11y:
+	npx playwright test --reporter=list ./e2e_tests/accessibility.spec.ts
+
 .PHONY: js-test
 js-test:
 	npm run test
