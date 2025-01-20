@@ -51,7 +51,7 @@ class SuggestionManagement(IsStaffMixin, FormView):
         new_status = (
             SuggestionStatut.ATRAITER.value
             if self.request.POST.get("dag_valid") == "1"
-            else SuggestionStatut.REJETER.value
+            else SuggestionStatut.REJETEE.value
         )
 
         suggestion_cohorte.suggestion_unitaires.all().update(statut=new_status)

@@ -27,7 +27,7 @@ title: Cycle de vie d'une suggestion (cohorte et unitaire)
 flowchart TB
 
     AVALIDER[À valider] --> ATRAITER[À traiter] --> ENCOURS[En cours de traitement] --> SUCCES[Fini avec succès]
-    AVALIDER[À valider] --> REJETER[Rejeter]
+    AVALIDER[À valider] --> REJETEE[Rejetée]
     ENCOURS --> PARTIEL[Fini avec succès partiel]
     ENCOURS --> ERREUR[Fini en erreur]
 ```

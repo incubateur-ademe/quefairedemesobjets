@@ -58,7 +58,7 @@ class Migration(migrations.Migration):
                     models.CharField(
                         choices=[
                             ("AVALIDER", "À valider"),
-                            ("REJETER", "Rejeter"),
+                            ("REJETEE", "Rejetée"),
                             ("ATRAITER", "À traiter"),
                             ("ENCOURS", "En cours de traitement"),
                             ("ERREUR", "Fini en erreur"),
@@ -102,7 +102,7 @@ class Migration(migrations.Migration):
                     models.CharField(
                         choices=[
                             ("AVALIDER", "À valider"),
-                            ("REJETER", "Rejeter"),
+                            ("REJETEE", "Rejetée"),
                             ("ATRAITER", "À traiter"),
                             ("ENCOURS", "En cours de traitement"),
                             ("ERREUR", "Fini en erreur"),
