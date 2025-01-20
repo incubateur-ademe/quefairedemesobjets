@@ -4,6 +4,7 @@ import pandas as pd
 from airflow import DAG
 from airflow.exceptions import AirflowSkipException
 from airflow.operators.python import PythonOperator
+from cluster.config.model import ClusterConfig
 from cluster.tasks.business_logic.cluster_acteurs_df_sort import cluster_acteurs_df_sort
 from cluster.tasks.business_logic.cluster_acteurs_suggestions import (
     cluster_acteurs_suggestions,
@@ -33,9 +34,9 @@ def task_info_get():
 def cluster_acteurs_suggestions_wrapper(**kwargs) -> None:
     logger.info(task_info_get())
 
-    # use xcom to get the params from the previous task
-    params = kwargs["ti"].xcom_pull(
-        key="params", task_ids="cluster_acteurs_config_validate"
+    # use xcom to get the config from the previous task
+    config: ClusterConfig = kwargs["ti"].xcom_pull(
+        key="config", task_ids="cluster_acteurs_config_create"
     )
     df: pd.DataFrame = kwargs["ti"].xcom_pull(
         key="df", task_ids="cluster_acteurs_normalize"
@@ -43,20 +44,15 @@ def cluster_acteurs_suggestions_wrapper(**kwargs) -> None:
     if df.empty:
         raise ValueError("Pas de données acteurs normalisées récupérées")
 
-    log.preview("paramètres reçus", params)
+    log.preview("config reçue", config)
     log.preview("acteurs normalisés", df)
-
-    # Par défaut on ne clusterise pas les acteurs d'une même source
-    cluster_fields_separate = ["source_id"]
-    if params["cluster_intra_source_is_allowed"]:
-        cluster_fields_separate = []
 
     df_suggestions = cluster_acteurs_suggestions(
         df,
-        cluster_fields_exact=params["cluster_fields_exact"],
-        cluster_fields_fuzzy=params["cluster_fields_fuzzy"] or [],
-        cluster_fields_separate=cluster_fields_separate,
-        cluster_fuzzy_threshold=params["cluster_fuzzy_threshold"],
+        cluster_fields_exact=config.cluster_fields_exact,
+        cluster_fields_fuzzy=config.cluster_fields_fuzzy,
+        cluster_fields_separate=config.cluster_fields_separate,
+        cluster_fuzzy_threshold=config.cluster_fuzzy_threshold,
     )
     if df_suggestions.empty:
         raise AirflowSkipException(
@@ -65,9 +61,11 @@ def cluster_acteurs_suggestions_wrapper(**kwargs) -> None:
 
     df_suggestions = cluster_acteurs_df_sort(
         df_suggestions,
-        cluster_fields_exact=params["cluster_fields_exact"],
-        cluster_fields_fuzzy=params["cluster_fields_fuzzy"] or [],
+        cluster_fields_exact=config.cluster_fields_exact,
+        cluster_fields_fuzzy=config.cluster_fields_fuzzy,
     )
+
+    logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
     log.preview_df_as_markdown("suggestions de clusters", df_suggestions)
 
     # On pousse les suggestions dans xcom pour les tâches suivantes

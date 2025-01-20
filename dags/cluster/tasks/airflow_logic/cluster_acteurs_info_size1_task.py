@@ -3,6 +3,7 @@ import logging
 import pandas as pd
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+from cluster.config.model import ClusterConfig
 from cluster.tasks.business_logic.cluster_acteurs_info_size1 import (
     cluster_info_size1_exact_fields,
 )
@@ -35,20 +36,20 @@ def task_info_get():
 def cluster_info_size1_exact_fields_wrapper(**kwargs) -> None:
     logger.info(task_info_get())
 
-    # use xcom to get the params from the previous task
-    params = kwargs["ti"].xcom_pull(
-        key="params", task_ids="cluster_acteurs_config_validate"
+    # use xcom to get the config from the previous task
+    config: ClusterConfig = kwargs["ti"].xcom_pull(
+        key="config", task_ids="cluster_acteurs_config_create"
     )
     df: pd.DataFrame = kwargs["ti"].xcom_pull(
         key="df", task_ids="cluster_acteurs_db_data_read_acteurs"
     )
 
-    log.preview("paramètres reçus", params)
+    log.preview("config reçue", config)
     log.preview("acteurs sélectionnés", df)
 
     results = cluster_info_size1_exact_fields(
         df=df,
-        cluster_fields_exact=params["cluster_fields_exact"],
+        cluster_fields_exact=config.cluster_fields_exact,
     )
     for group, result in results.items():
         msg = log.banner_string(f"📦 Groupage sur: {group}")
