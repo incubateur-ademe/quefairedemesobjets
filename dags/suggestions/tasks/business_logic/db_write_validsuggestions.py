@@ -4,6 +4,8 @@ from shared.tasks.database_logic.db_manager import PostgresConnectionManager
 from sources.config import shared_constants as constants
 from utils import logging_utils as log
 
+logger = logging.getLogger(__name__)
+
 
 def db_write_validsuggestions(data_from_db: dict):
     # If data_set is empty, nothing to do
@@ -42,7 +44,7 @@ def db_write_validsuggestions(data_from_db: dict):
 def db_write_acteurupdate(
     connection, df_actors, df_labels, df_acteur_services, df_pds, df_pdssc
 ):
-    logging.warning("Création ou mise à jour des acteurs")
+    logger.warning("Création ou mise à jour des acteurs")
 
     df_actors[["identifiant_unique"]].to_sql(
         "temp_actors", connection, if_exists="replace"
@@ -141,7 +143,7 @@ def db_write_acteurupdate(
 
 def db_write_acteurdelete(connection, df_acteur_to_delete):
     # mettre le statut des acteur à "SUPPRIMER" pour tous les acteurs à supprimer
-    logging.warning("Suppression des acteurs")
+    logger.warning("Suppression des acteurs")
     identifiant_uniques = list(
         set(df_acteur_to_delete[["identifiant_unique"]].values.flatten())
     )

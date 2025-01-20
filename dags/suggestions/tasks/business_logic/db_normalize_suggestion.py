@@ -1,5 +1,3 @@
-import logging
-
 import pandas as pd
 from shared.tasks.database_logic.db_manager import PostgresConnectionManager
 from sources.config import shared_constants as constants
@@ -15,11 +13,6 @@ def db_normalize_suggestion():
         raise ValueError("No suggestion found")
     suggestion_cohorte_id = suggestion_cohorte["id"]
     type_action = suggestion_cohorte["type_action"]
-    logging.warning(f"Processing suggestion_cohorte_id: {suggestion_cohorte_id}")
-    logging.warning(f"Processing suggestion_cohorte: {suggestion_cohorte}")
-    logging.warning(
-        f"Processing suggestion_cohorte: {suggestion_cohorte['type_action']}"
-    )
 
     engine = PostgresConnectionManager().engine
 
