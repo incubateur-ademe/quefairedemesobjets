@@ -23,15 +23,15 @@ class Migration(migrations.Migration):
                 (
                     "identifiant_action",
                     models.CharField(
-                        help_text="Identifiant de l'action (ex : dag_id pour Airflow)",
-                        max_length=250,
+                        verbose_name="Identifiant de l'action",
+                        help_text="(ex : dag_id pour Airflow)",
                     ),
                 ),
                 (
                     "identifiant_execution",
                     models.CharField(
-                        help_text="Identifiant de l'execution (ex : run_id pour Airflow)",
-                        max_length=250,
+                        verbose_name="Identifiant de l'execution",
+                        help_text="(ex : run_id pour Airflow)",
                     ),
                 ),
                 (
@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
                             ),
                             ("SOURCE_SUPRESSION", "ingestion de source de données"),
                         ],
-                        max_length=250,
+                        max_length=50,
                     ),
                 ),
                 (
@@ -94,7 +94,7 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name="SuggestionUnitaire",
+            name="Suggestion",
             fields=[
                 ("id", models.AutoField(primary_key=True, serialize=False)),
                 (
@@ -117,14 +117,14 @@ class Migration(migrations.Migration):
                     "context",
                     models.JSONField(
                         blank=True,
-                        help_text="Contexte de la suggestion : données initiales",
+                        verbose_name="Contexte de la suggestion : données initiales",
                         null=True,
                     ),
                 ),
                 (
                     "suggestion",
                     models.JSONField(
-                        blank=True, help_text="Suggestion de modification"
+                        blank=True, verbose_name="Suggestion de modification"
                     ),
                 ),
                 (

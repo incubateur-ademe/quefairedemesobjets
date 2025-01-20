@@ -45,15 +45,15 @@ class SuggestionCohorte(models.Model):
     # On utilise identifiant car le champ n'est pas utilisé pour résoudre une relation
     # en base de données
     identifiant_action = models.CharField(
-        max_length=250, help_text="Identifiant de l'action (ex : dag_id pour Airflow)"
+        verbose_name="Identifiant de l'action", help_text="(ex : dag_id pour Airflow)"
     )
     identifiant_execution = models.CharField(
-        max_length=250,
-        help_text="Identifiant de l'execution (ex : run_id pour Airflow)",
+        verbose_name="Identifiant de l'execution",
+        help_text="(ex : run_id pour Airflow)",
     )
     type_action = models.CharField(
         choices=SuggestionAction.choices,
-        max_length=250,
+        max_length=50,
         blank=True,
     )
     statut = models.CharField(
@@ -62,7 +62,9 @@ class SuggestionCohorte(models.Model):
         default=SuggestionStatut.AVALIDER,
     )
     metadata = models.JSONField(
-        null=True, blank=True, help_text="Metadata de la cohorte, données statistiques"
+        null=True,
+        blank=True,
+        verbose_name="Metadata de la cohorte, données statistiques",
     )
     cree_le = models.DateTimeField(auto_now_add=True, db_default=Now())
     modifie_le = models.DateTimeField(auto_now=True, db_default=Now())
@@ -86,7 +88,7 @@ class SuggestionCohorte(models.Model):
         return f"{self.identifiant_action} - {self.identifiant_execution}"
 
 
-class SuggestionUnitaire(models.Model):
+class Suggestion(models.Model):
     id = models.AutoField(primary_key=True)
     suggestion_cohorte = models.ForeignKey(
         SuggestionCohorte, on_delete=models.CASCADE, related_name="suggestion_unitaires"
@@ -97,9 +99,11 @@ class SuggestionUnitaire(models.Model):
         default=SuggestionStatut.AVALIDER,
     )
     context = models.JSONField(
-        null=True, blank=True, help_text="Contexte de la suggestion : données initiales"
+        null=True,
+        blank=True,
+        verbose_name="Contexte de la suggestion : données initiales",
     )
-    suggestion = models.JSONField(blank=True, help_text="Suggestion de modification")
+    suggestion = models.JSONField(blank=True, verbose_name="Suggestion de modification")
     cree_le = models.DateTimeField(auto_now_add=True, db_default=Now())
     modifie_le = models.DateTimeField(auto_now=True, db_default=Now())
 
@@ -152,11 +156,11 @@ class SuggestionUnitaire(models.Model):
 class BANCache(models.Model):
     class Meta:
         verbose_name = "Cache BAN"
-        verbose_name_plural = "Cache BAN"
+        verbose_name_plural = "Caches BAN"
 
-    adresse = models.CharField(max_length=255, blank=True, null=True)
-    code_postal = models.CharField(max_length=255, blank=True, null=True)
-    ville = models.CharField(max_length=255, blank=True, null=True)
+    adresse = models.CharField(blank=True, null=True)
+    code_postal = models.CharField(blank=True, null=True)
+    ville = models.CharField(blank=True, null=True)
     location = models.PointField(blank=True, null=True)
     ban_returned = models.JSONField(blank=True, null=True)
     modifie_le = models.DateTimeField(auto_now=True, db_default=Now())

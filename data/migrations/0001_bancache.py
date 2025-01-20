@@ -26,12 +26,12 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
-                ("adresse", models.CharField(blank=True, max_length=255, null=True)),
+                ("adresse", models.CharField(blank=True, null=True)),
                 (
                     "code_postal",
-                    models.CharField(blank=True, max_length=255, null=True),
+                    models.CharField(blank=True, null=True),
                 ),
-                ("ville", models.CharField(blank=True, max_length=255, null=True)),
+                ("ville", models.CharField(blank=True, null=True)),
                 (
                     "location",
                     django.contrib.gis.db.models.fields.PointField(

@@ -4,20 +4,13 @@ DEPRECATED, should use the data django app
 
 import logging
 
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.shortcuts import render
 from django.views.generic.edit import FormView
 
+from core.views import IsStaffMixin
 from qfdmo.forms import DagsForm
 from qfdmo.models.data import DagRun, DagRunStatus
-
-
-class IsStaffMixin(LoginRequiredMixin):
-    def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_staff:
-            return self.handle_no_permission()
-        return super().dispatch(request, *args, **kwargs)
 
 
 class DagsValidation(IsStaffMixin, FormView):
