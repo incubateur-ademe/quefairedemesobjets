@@ -85,7 +85,7 @@ def insert_suggestion(
     df["suggestion_cohorte_id"] = suggestion_cohorte_id
     df["statut"] = constants.SUGGESTION_AVALIDER
     df[["suggestion", "suggestion_cohorte_id", "statut"]].to_sql(
-        "data_suggestionunitaire",
+        "data_suggestion",
         engine,
         if_exists="append",
         index=False,
