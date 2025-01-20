@@ -8,7 +8,7 @@ from dags.sources.config.shared_constants import (
     SUGGESTION_ENCOURS,
     SUGGESTION_ERREUR,
     SUGGESTION_PARTIEL,
-    SUGGESTION_REJETER,
+    SUGGESTION_REJETEE,
     SUGGESTION_SOURCE_AJOUT,
     SUGGESTION_SOURCE_MISESAJOUR,
     SUGGESTION_SOURCE_SUPRESSION,
@@ -19,7 +19,7 @@ from qfdmo.models.acteur import ActeurType, Source
 
 class SuggestionStatut(models.TextChoices):
     AVALIDER = SUGGESTION_AVALIDER, "À valider"
-    REJETER = SUGGESTION_REJETER, "Rejeter"
+    REJETEE = SUGGESTION_REJETEE, "Rejetée"
     ATRAITER = SUGGESTION_ATRAITER, "À traiter"
     ENCOURS = SUGGESTION_ENCOURS, "En cours de traitement"
     ERREUR = SUGGESTION_ERREUR, "Fini en erreur"
