@@ -4,6 +4,7 @@ import pandas as pd
 from airflow import DAG
 from airflow.exceptions import AirflowSkipException
 from airflow.operators.python import PythonOperator
+from cluster.config.model import ClusterConfig
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -31,19 +32,24 @@ def cluster_acteurs_db_data_write_suggestions_wrapper(**kwargs) -> None:
     logger.info(task_info_get())
 
     # use xcom to get the params from the previous task
-    params = kwargs["ti"].xcom_pull(
-        key="params", task_ids="cluster_acteurs_config_validate"
+    config: ClusterConfig = kwargs["ti"].xcom_pull(
+        key="config", task_ids="cluster_acteurs_config_create"
     )
     df: pd.DataFrame = kwargs["ti"].xcom_pull(
         key="df", task_ids="cluster_acteurs_suggestions"
     )
 
-    log.preview("paramètres reçus", params)
+    log.preview("config reçue", config)
     log.preview("suggestions de clustering", df)
 
-    if params["dry_run"]:
+    # "is not False" est plus sur que "is True" car on peut avoir None
+    # par erreur dans la config et on ne veut pas prendre celoa pour
+    # un signal de modifier la DB
+    if config.dry_run is not False:
         raise AirflowSkipException(
-            log.banner_string("Dry run activé, suggestions pas écrites en base")
+            log.banner_string(
+                f"Dry run ={config.dry_run} activé, suggestions pas écrites en base"
+            )
         )
 
     raise NotImplementedError(

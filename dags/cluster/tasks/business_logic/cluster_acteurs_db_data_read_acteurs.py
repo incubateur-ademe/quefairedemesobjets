@@ -19,7 +19,7 @@ def cluster_acteurs_db_data_read_acteurs(
     model_class: type[Model],
     include_source_ids: list[int],
     include_acteur_type_ids: list[int],
-    include_only_if_regex_matches_nom: str,
+    include_only_if_regex_matches_nom: str | None,
     include_if_all_fields_filled: list[str],
     exclude_if_any_field_filled: list[str],
     extra_dataframe_fields: list[str],

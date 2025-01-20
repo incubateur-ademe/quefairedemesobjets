@@ -5,6 +5,7 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
+from pydantic import BaseModel
 
 # TODO: improve by moving instantiation inside the functions
 # and using inspect to get the parent caller's name
@@ -31,7 +32,7 @@ class CustomJSONEncoder(json.JSONEncoder):
 
 def json_dumps(data: Any) -> str:
     """Fonction pour convertir un objet en JSON"""
-    return json.dumps(data, cls=CustomJSONEncoder, indent=2, ensure_ascii=False)
+    return json.dumps(data, cls=CustomJSONEncoder, indent=4, ensure_ascii=False)
 
 
 def size_info_get(value: Any) -> Any:
@@ -45,6 +46,8 @@ def size_info_get(value: Any) -> Any:
         return len(value)  # Number of entries
     elif isinstance(value, dict):
         return len(value.keys())  # Number of keys
+    elif isinstance(value, BaseModel):
+        return f"{len(value.model_fields.keys())} propriétés"
     elif isinstance(value, (str, bytes)):
         return len(value)  # Length of string or bytes
     else:
@@ -82,6 +85,8 @@ def preview(value_name: str, value: Any) -> None:
         log.info(json_dumps(value))
     elif isinstance(value, set):
         log.info(json_dumps(list(value)))
+    elif isinstance(value, BaseModel):
+        log.info(json_dumps(value.model_dump(mode="json")))
     else:
         log.info(str(value))
     log.info("::endgroup::")

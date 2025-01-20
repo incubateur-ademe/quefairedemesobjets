@@ -1,5 +1,5 @@
-from .cluster_acteurs_config_validate_task import (  # noqa
-    cluster_acteurs_config_validate_task,
+from .cluster_acteurs_config_create_task import (  # noqa
+    cluster_acteurs_config_create_task,
 )
 from .cluster_acteurs_db_data_read_acteurs_task import (  # noqa
     cluster_acteurs_db_data_read_acteurs_task,
