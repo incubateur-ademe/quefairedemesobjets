@@ -2,18 +2,19 @@ import logging
 
 import requests
 from django.conf import settings
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
 
-def create_new_row_in(database_id, data):
-    NOTION_TOKEN = settings.NOTION_TOKEN
-    if not NOTION_TOKEN:
+def create_new_row_in_notion_table(database_id, data):
+    notion_token = settings.NOTION.get("TOKEN")
+    if not notion_token:
         logging.warning("The notion token is not set in local environment")
         return
 
     headers = {
-        "Authorization": f"Bearer {NOTION_TOKEN}",
+        "Authorization": f"Bearer {notion_token}",
         "Content-Type": "application/json",
         "Notion-Version": "2022-06-28",
     }
@@ -21,9 +22,11 @@ def create_new_row_in(database_id, data):
     payload = {
         "parent": {"database_id": database_id},
         "properties": {
-            "Name": {"title": [{"text": {"content": "Sample Row"}}]},
-            "Status": {"select": {"name": "In Progress"}},
-            "Date": {"date": {"start": "2025-01-15"}},
+            "Nom": {"title": [{"text": {"content": data.get("name")}}]},
+            "Email": {"email": data.get("email")},
+            "Objet": {"rich_text": [{"text": {"content": data.get("subject")}}]},
+            "Message": {"rich_text": [{"text": {"content": data.get("message")}}]},
+            "Date": {"date": {"start": timezone.now().isoformat()}},
         },
     }
 
@@ -32,6 +35,6 @@ def create_new_row_in(database_id, data):
     )
 
     if response.status_code == 200:
-        logger.info("Row added successfully!")
+        logger.info("New contact form submission")
     else:
         logger.error(f"Failed to add row:{response.status_code=}, {response.text=}")

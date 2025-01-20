@@ -7,7 +7,7 @@ from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, FormView, ListView
 
-from core.notion import create_new_row_in
+from core.notion import create_new_row_in_notion_table
 from qfdmd.forms import ContactForm, SearchForm
 from qfdmd.models import CMSPage, Suggestion, Synonyme
 
@@ -47,8 +47,13 @@ class ContactFormView(FormView):
     success_url = reverse_lazy("qfdmd:nous-contacter-confirmation")
 
     def form_valid(self, form):
-        create_new_row_in(
-            settings.NOTION.get("CONTACT_FORM_DATABASE_ID"), form.cleaned_data
+        cleaned_data = form.cleaned_data
+        submitted_subject = cleaned_data.get("subject")
+        cleaned_data["subject"] = dict(self.form_class().fields["subject"].choices)[
+            submitted_subject
+        ]
+        create_new_row_in_notion_table(
+            settings.NOTION.get("CONTACT_FORM_DATABASE_ID"), cleaned_data
         )
         return super().form_valid(form)
 
