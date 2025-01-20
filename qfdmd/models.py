@@ -98,6 +98,7 @@ class Produit(AbstractBaseProduit):
             "first_dir": "jai",
             "limit": 25,
             "sc_id": sous_categorie.id,
+            "sous_categorie_objet": sous_categorie.libelle,
         }
 
     def get_url_carte(self, actions=None):
@@ -273,7 +274,15 @@ class CMSPage(models.Model):
     seo_title = models.CharField(default="")
     title = models.CharField(default="")
     slug = models.CharField(default="")
-    poids = models.IntegerField(default=0)
+    poids = models.IntegerField(
+        default=0,
+        help_text=(
+            "Ce champ détermine la position d'un élément dans la liste affichée.<br>"
+            "Les éléments avec un poids plus élevé apparaissent plus bas dans "
+            "la liste.<br>"
+            "Les éléments avec un poids plus faible apparaissent plus haut."
+        ),
+    )
 
     def __str__(self):
         return self.title

@@ -5,7 +5,7 @@ Fonction pour valider la configuration de clustering
 from utils.airflow_params import airflow_params_dropdown_selected_to_ids
 
 
-def clustering_acteur_config_validate(
+def cluster_acteurs_config_validate(
     mapping_source_id_by_code: dict[str, int],
     mapping_acteur_type_id_by_code: dict[str, int],
     include_source_codes: list[str],

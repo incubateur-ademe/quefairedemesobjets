@@ -10,3 +10,4 @@ python-decouple
 ratelimit
 shortuuid
 unidecode
+scikit-learn==1.3.2

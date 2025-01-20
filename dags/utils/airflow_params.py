@@ -56,4 +56,8 @@ def airflow_params_dropdown_selected_to_ids(
                          pour générer les dropdowns."""
         )
     codes = [re.sub(r" \(id=\d+\)$", "", v) for v in dropdown_selected]
+    # Si des codes n'ont pas bien étés extraits où ne sont pas dans le mapping
+    missing = [x for x in codes if x not in mapping_ids_by_codes]
+    if missing:
+        raise ValueError(f"Codes non trouvés dans le mapping: {missing}")
     return [mapping_ids_by_codes[x] for x in codes]

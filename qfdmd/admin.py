@@ -161,8 +161,4 @@ class SynonymeAdmin(
 
 @admin.register(CMSPage)
 class CMSPageAdmin(admin.ModelAdmin):
-    @property
-    def readonly_fields(self):
-        fields = [field.name for field in self.model._meta.get_fields()]
-        fields.remove("id")
-        return fields
+    readonly_fields = ["body", "search_description", "seo_title", "title", "slug"]
