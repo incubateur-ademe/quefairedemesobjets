@@ -479,7 +479,6 @@ class AdvancedConfiguratorForm(forms.Form):
                 "data-search-solution-form-target": "direction",
             },
         ),
-        # FIXME: I guess async error comes from here
         choices=[
             ("carte", "Carte"),
             ("form", "Formulaire"),

@@ -71,7 +71,6 @@ class SuggestionCohorte(models.Model):
 
     @property
     def is_source_type(self) -> bool:
-        # FIXME: ajout de tests
         return self.type_action in [
             SuggestionAction.SOURCE_AJOUT,
             SuggestionAction.SOURCE_MISESAJOUR,
@@ -80,7 +79,6 @@ class SuggestionCohorte(models.Model):
 
     @property
     def is_clustering_type(self) -> bool:
-        # FIXME: ajout de tests
         return self.type_action == SuggestionAction.CLUSTERING
 
     def __str__(self) -> str:

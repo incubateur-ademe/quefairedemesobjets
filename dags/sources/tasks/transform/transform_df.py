@@ -221,7 +221,6 @@ def get_latlng_from_geopoint(row: pd.Series, _) -> pd.Series:
 
 
 def compute_location(row: pd.Series, _):
-    # FIXME : tests à déplacer
     # first column is latitude, second is longitude
     lat_column = row.keys()[0]
     lng_column = row.keys()[1]
