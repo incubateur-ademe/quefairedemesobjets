@@ -17,7 +17,6 @@ from django.contrib.gis.geos.geometry import GEOSGeometry
 from django.core.cache import cache
 from django.core.files.images import get_image_dimensions
 from django.db.models import Case, Exists, Min, OuterRef, Q, Value, When
-from django.db.models.functions import Now
 from django.forms import ValidationError, model_to_dict
 from django.http import HttpRequest
 from django.urls import reverse
@@ -25,6 +24,7 @@ from django.utils.functional import cached_property
 from unidecode import unidecode
 
 from core.constants import DIGITAL_ACTEUR_CODE
+from core.models import TimestampedModel
 from dags.sources.config.shared_constants import REPRISE_1POUR0, REPRISE_1POUR1
 from qfdmo.models.action import Action, get_action_instances
 from qfdmo.models.categorie_objet import SousCategorieObjet
@@ -268,7 +268,7 @@ class DisplayedActeurManager(NomAsNaturalKeyManager):
         return DisplayedActeurQuerySet(self.model, using=self._db)
 
 
-class BaseActeur(NomAsNaturalKeyModel):
+class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
 
     class Meta:
         abstract = True
@@ -303,8 +303,6 @@ class BaseActeur(NomAsNaturalKeyModel):
     )
     naf_principal = models.CharField(max_length=255, blank=True, null=True)
     commentaires = models.TextField(blank=True, null=True)
-    cree_le = models.DateTimeField(auto_now_add=True, db_default=Now())
-    modifie_le = models.DateTimeField(auto_now=True, db_default=Now())
     horaires_osm = models.CharField(
         blank=True, null=True, validators=[validate_opening_hours]
     )

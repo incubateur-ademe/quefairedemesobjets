@@ -1,0 +1,44 @@
+<thead>
+    <tr>
+        <th scope="col">Acteur (après mise à jour)</th>
+        <th scope="col">Proposition de service</th>
+        <th scope="col">suggestion</th>
+    </tr>
+</thead>
+<tbody>
+    {% for suggestion_unitaire in suggestion_unitaires %}
+        <tr>
+            <td>
+                {% for key, value in suggestion_unitaire.display_acteur_details.items %}
+                    <p><strong>{{ key }}</strong> : {{ value }}</p>
+                {% endfor %}
+            </td>
+            <td>
+                <table>
+                    <tr>
+                        <th>Action</th>
+                        <th>Sous-Catégories</th>
+                    </tr>
+                    {% for service in suggestion_unitaire.display_proposition_service %}
+                        <tr>
+                            <td>{{ service.action }}</td>
+                            <td>
+                                <ul>
+                                    {% for sous_cat in service.pds_sous_categories %}
+                                        <li>{{ sous_cat.souscategorie }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </td>
+            <td>
+                <details>
+                    <summary>Données brutes</summary>
+                    <pre class="qf-text-wrap">{{ suggestion_unitaire.suggestion }}</pre>
+                </details>
+            </td>
+        </tr>
+    {% endfor %}
+</tbody>

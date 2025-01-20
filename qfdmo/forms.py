@@ -342,6 +342,10 @@ class CarteForm(AddressesForm):
 
 
 class DagsForm(forms.Form):
+    """
+    DEPRECATED, should use the data django app
+    """
+
     dagrun = forms.ModelChoiceField(
         label="Séléctionner l'execution d'un DAG",
         widget=forms.Select(
@@ -475,7 +479,6 @@ class AdvancedConfiguratorForm(forms.Form):
                 "data-search-solution-form-target": "direction",
             },
         ),
-        # FIXME: I guess async error comes from here
         choices=[
             ("carte", "Carte"),
             ("form", "Formulaire"),

@@ -61,10 +61,10 @@ INSTALLED_APPS = [
     "core",
     "qfdmd",
     "qfdmo",
+    "data",
     "corsheaders",
 ]
 
-# FIXME : check if we can manage django forms templating with jinja2
 FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 
 

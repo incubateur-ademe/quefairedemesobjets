@@ -80,11 +80,12 @@ with DAG(
                 "column": "statut",
                 "value": constants.ACTEUR_ACTIF,
             },
-            # {
-            #     "column": "label_codes",
-            #     "value": [],
-            # },
             # 4. Transformation du dataframe
+            {
+                "origin": ["latitude", "longitude"],
+                "transformation": "compute_location",
+                "destination": ["location"],
+            },
             {
                 "origin": ["labels_etou_bonus", "acteur_type_code"],
                 "transformation": "clean_label_codes",

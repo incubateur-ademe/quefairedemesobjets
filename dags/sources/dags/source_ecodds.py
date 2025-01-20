@@ -46,11 +46,6 @@ with DAG(
                 "transformation": "clean_public_accueilli",
                 "destination": "public_accueilli",
             },
-            # {
-            #     "origin": "uniquement_sur_rdv",
-            #     "transformation": "cast_eo_boolean_or_string_to_boolean",
-            #     "destination": "uniquement_sur_rdv",
-            # },
             {
                 "origin": "exclusivite_de_reprisereparation",
                 "transformation": "cast_eo_boolean_or_string_to_boolean",
@@ -73,6 +68,11 @@ with DAG(
             },
             # 4. Transformation du dataframe
             {
+                "origin": ["latitude", "longitude"],
+                "transformation": "compute_location",
+                "destination": ["location"],
+            },
+            {
                 "origin": ["labels_etou_bonus", "acteur_type_code"],
                 "transformation": "clean_label_codes",
                 "destination": ["label_codes"],
@@ -90,11 +90,6 @@ with DAG(
                 "transformation": "clean_identifiant_unique",
                 "destination": ["identifiant_unique"],
             },
-            # {
-            #     "origin": ["siret"],
-            #     "transformation": "clean_siret_and_siren",
-            #     "destination": ["siret", "siren"],
-            # },
             {
                 "origin": ["adresse_format_ban"],
                 "transformation": "clean_adresse",

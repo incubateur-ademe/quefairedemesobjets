@@ -24,6 +24,10 @@ def propose_acteur_to_delete(
     df_acteur_to_delete["statut"] = "SUPPRIME"
     df_acteur_to_delete["event"] = "UPDATE_ACTOR"
 
+    # FIXME: ajouter le contexte de la suppression
+    # ajouter une colonne context avec le contenu de df_acteurs_for_db en json pour
+    # chaque colonne en jonction sur identifiant_unique
+
     return {
         "metadata": {"number_of_removed_actors": len(df_acteur_to_delete)},
         "df_acteur_to_delete": df_acteur_to_delete,

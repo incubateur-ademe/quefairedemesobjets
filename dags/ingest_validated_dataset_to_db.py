@@ -1,3 +1,7 @@
+"""
+DEPRECATED : utiliser le dag apply_suggestions
+"""
+
 from datetime import timedelta
 
 import pandas as pd
@@ -20,9 +24,12 @@ default_args = {
 
 dag = DAG(
     dag_id="validate_and_process_dagruns",
-    dag_display_name="Traitement des cohortes de données validées",
+    dag_display_name="DEPRECATED : Traitement des cohortes de données validées",
     default_args=default_args,
-    description="Check for VALIDATE in qfdmo_dagrun and process qfdmo_dagrunchange",
+    description="""
+    DEPRECATED : Check for VALIDATE in qfdmo_dagrun and process qfdmo_dagrunchange
+    util uniquement pour les cohortes de siretisations
+    """,
     schedule="*/5 * * * *",
     catchup=False,
     max_active_runs=1,
