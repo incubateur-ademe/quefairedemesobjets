@@ -73,7 +73,6 @@ class SuggestionCohorte(models.Model):
     def is_source_type(self) -> bool:
         # FIXME: ajout de tests
         return self.type_action in [
-            SuggestionAction.SOURCE,
             SuggestionAction.SOURCE_AJOUT,
             SuggestionAction.SOURCE_MISESAJOUR,
             SuggestionAction.SOURCE_SUPPRESSION,

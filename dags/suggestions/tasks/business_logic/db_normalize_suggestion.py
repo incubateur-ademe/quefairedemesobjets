@@ -1,3 +1,5 @@
+import logging
+
 import pandas as pd
 from shared.tasks.database_logic.db_manager import PostgresConnectionManager
 from sources.config import shared_constants as constants
@@ -8,51 +10,49 @@ from utils import logging_utils as log
 
 
 def db_normalize_suggestion():
-    row = get_first_suggetsioncohorte_to_insert()
-    suggestion_cohorte_id = row[0]
+    suggestion_cohorte = get_first_suggetsioncohorte_to_insert()
+    if suggestion_cohorte is None:
+        raise ValueError("No suggestion found")
+    suggestion_cohorte_id = suggestion_cohorte["id"]
+    type_action = suggestion_cohorte["type_action"]
+    logging.warning(f"Processing suggestion_cohorte_id: {suggestion_cohorte_id}")
+    logging.warning(f"Processing suggestion_cohorte: {suggestion_cohorte}")
+    logging.warning(
+        f"Processing suggestion_cohorte: {suggestion_cohorte['type_action']}"
+    )
 
     engine = PostgresConnectionManager().engine
 
     df_sql = pd.read_sql_query(
         f"""
-        SELECT * FROM data_suggestionunitaire
+        SELECT * FROM data_suggestion
         WHERE suggestion_cohorte_id = '{suggestion_cohorte_id}'
         """,
         engine,
     )
+    log.preview("df_acteur_to_delete", df_sql)
 
-    df_acteur_to_create = df_sql[
-        df_sql["type_action"] == constants.SUGGESTION_SOURCE_AJOUT
-    ]
-    df_acteur_to_update = df_sql[
-        df_sql["type_action"] == constants.SUGGESTION_SOURCE_MISESAJOUR
-    ]
-    df_acteur_to_delete = df_sql[
-        df_sql["type_action"] == constants.SUGGESTION_SOURCE_SUPRESSION
-    ]
-    if not df_acteur_to_create.empty:
-        normalized_dfs = df_acteur_to_create["suggestion"].apply(pd.json_normalize)
-        df_acteur = pd.concat(normalized_dfs.tolist(), ignore_index=True)
-        return normalize_acteur_update_for_db(
-            df_acteur, suggestion_cohorte_id, engine, constants.SUGGESTION_SOURCE_AJOUT
-        )
-    if not df_acteur_to_update.empty:
-        normalized_dfs = df_acteur_to_update["suggestion"].apply(pd.json_normalize)
-        df_acteur = pd.concat(normalized_dfs.tolist(), ignore_index=True)
-        return normalize_acteur_update_for_db(
-            df_acteur,
-            suggestion_cohorte_id,
-            engine,
+    if (
+        type_action
+        in [
+            constants.SUGGESTION_SOURCE_AJOUT,
             constants.SUGGESTION_SOURCE_MISESAJOUR,
+        ]
+        and not df_sql.empty
+    ):
+        normalized_dfs = df_sql["suggestion"].apply(pd.json_normalize)
+        df_acteur = pd.concat(normalized_dfs.tolist(), ignore_index=True)
+        return normalize_acteur_update_for_db(
+            df_acteur, suggestion_cohorte_id, engine, type_action
         )
-    if not df_acteur_to_delete.empty:
-        normalized_dfs = df_acteur_to_delete["suggestion"].apply(pd.json_normalize)
+    if type_action == constants.SUGGESTION_SOURCE_SUPRESSION and not df_sql.empty:
+        normalized_dfs = df_sql["suggestion"].apply(pd.json_normalize)
         df_acteur = pd.concat(normalized_dfs.tolist(), ignore_index=True)
         log.preview("df_acteur_to_delete", df_acteur)
         return {
             "actors": df_acteur,
             "dag_run_id": suggestion_cohorte_id,
-            "change_type": constants.SUGGESTION_SOURCE_SUPRESSION,
+            "change_type": type_action,
         }
 
     raise ValueError("No suggestion found")
