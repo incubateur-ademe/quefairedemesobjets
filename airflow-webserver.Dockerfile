@@ -1,16 +1,35 @@
-FROM apache/airflow:2.10.4
+# Builder python
+# --- --- --- ---
+FROM apache/airflow:2.10.4 AS python-builder
+ARG POETRY_VERSION=2.0
+ENV POETRY_NO_INTERACTION=1 \
+    POETRY_CACHE_DIR=/opt/.cache
 
-# Use user airflow
-RUN chown -R ${AIRFLOW_UID:-50000}:0 /opt/airflow
-USER ${AIRFLOW_UID:-50000}:0
+USER ${AIRFLOW_UID:-50000}
+RUN pip install "poetry==${POETRY_VERSION}"
 
-COPY ./airflow-requirements.txt /opt/airflow/requirements.txt
-RUN pip install -r /opt/airflow/requirements.txt
+USER root
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    libpq-dev gcc python3-dev
 
-# Copy the dags, logs, config, and plugins directories to the appropriate locations
-COPY ./dags/ /opt/airflow/dags/
+WORKDIR /opt/airflow/
+COPY pyproject.toml poetry.lock ./
+RUN --mount=type=cache,target=${POETRY_CACHE_DIR} poetry sync --with airflow
 
-EXPOSE 8080
+# Runtime
+# --- --- --- ---
+FROM apache/airflow:2.10.4 AS webserver
+USER ${AIRFLOW_UID:-50000}
+ENV VIRTUAL_ENV=/home/airflow/.local \
+    PATH="/opt/airflow/.venv/bin:$PATH" \
+    PORT="8080"
 
-# Start the web server on port 8080
-CMD ["webserver", "--port", "8080"]
+COPY --from=python-builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
+
+WORKDIR /opt/airflow
+COPY ./dags .
+
+EXPOSE ${PORT}
+
+CMD ["webserver", "--port", ${PORT}]

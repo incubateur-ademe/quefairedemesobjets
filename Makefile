@@ -5,9 +5,9 @@ ifneq (,$(wildcard ./.env))
 endif
 
 # Aliases
-PYTHON := .venv/bin/python
+PYTHON := poetry run python
 DJANGO_ADMIN := $(PYTHON) manage.py
-PYTEST := $(PYTHON) -m pytest
+PYTEST := poetry run pytest
 DB_URL := postgres://qfdmo:qfdmo@localhost:6543/qfdmo# pragma: allowlist secret
 
 # Makefile config
@@ -17,15 +17,6 @@ check:
 	@npm --version
 	@node --version
 
-# Setup development environment
-.PHONY: update-requirements
-update-requirements:
-	$(PYTHON) -m pip install --no-deps -r requirements.txt -r dev-requirements.txt
-
-
-.PHONY: init-venv
-init-venv:
-	python -m venv .venv --prompt $(basename $(CURDIR)) --clear
 
 .PHONY: init-dev
 init-dev:
@@ -33,9 +24,8 @@ init-dev:
 	git config blame.ignoreRevsFile .git-blame-ignore-revs
 	pre-commit install
 	# python
-	make init-venv
-	$(PYTHON) -m pip install pip-tools
-	$(PYTHON) -m pip install --no-deps -r requirements.txt -r dev-requirements.txt
+	curl -sSL https://install.python-poetry.org | python3 -
+	poetry install --with dev,airflow
 	# javascript
 	npm install
 	npx playwright install --with-deps
@@ -49,8 +39,8 @@ init-dev:
 
 .PHONY: fix
 fix:
-	$(PYTHON) -m ruff check . --fix
-	$(PYTHON) -m black --exclude=.venv .
+	poetry run ruff check . --fix
+	poetry run black --exclude=.venv .
 
 
 # Run development servers
@@ -110,12 +100,6 @@ restore-prod:
 .PHONY: clear-cache
 clear-cache:
 	$(DJANGO_ADMIN) clear_cache --all
-
-# Dependencies management
-.PHONY: pip-update
-pip-update:
-	$(PYTHON) -m pip-compile dev-requirements.in --generate-hashes
-	$(PYTHON) -m pip-compile requirements.in --generate-hashes
 
 .PHONY: npm-upgrade
 npm-upgrade:
