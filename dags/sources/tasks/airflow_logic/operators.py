@@ -7,7 +7,7 @@ from sources.tasks.airflow_logic.db_read_acteur_task import db_read_acteur_task
 from sources.tasks.airflow_logic.db_read_propositions_max_id_task import (
     db_read_propositions_max_id_task,
 )
-from sources.tasks.airflow_logic.db_write_suggestion_task import (
+from sources.tasks.airflow_logic.db_write_type_action_suggestions_task import (
     db_write_type_action_suggestions_task,
 )
 from sources.tasks.airflow_logic.propose_acteur_changes_task import (

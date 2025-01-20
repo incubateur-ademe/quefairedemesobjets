@@ -1,11 +1,11 @@
 from django.urls import path
 
-from data.views import SuggestionManagment
+from data.views import SuggestionManagement
 
 urlpatterns = [
     path(
-        "suggestions",
-        SuggestionManagment.as_view(),
+        "suggestions/",
+        SuggestionManagement.as_view(),
         name="suggestions",
     ),
 ]

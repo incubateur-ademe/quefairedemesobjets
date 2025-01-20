@@ -52,7 +52,7 @@ def _transform_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
     for column_to_transform in columns_to_transform:
         function_name = column_to_transform.transformation
         normalisation_function = get_transformation_function(function_name, dag_config)
-        # logger.warning(f"Transformation {function_name}")
+        logger.warning(f"Transformation {function_name}")
         df[column_to_transform.destination] = df[column_to_transform.origin].apply(
             normalisation_function
         )
@@ -70,7 +70,7 @@ def _transform_df(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
     for column_to_transform_df in columns_to_transform_df:
         function_name = column_to_transform_df.transformation
         normalisation_function = get_transformation_function(function_name, dag_config)
-        # logger.warning(f"Transformation {function_name}")
+        logger.warning(f"Transformation {function_name}")
         df[column_to_transform_df.destination] = df[
             column_to_transform_df.origin
         ].apply(normalisation_function, axis=1)
@@ -141,6 +141,22 @@ def _remove_undesired_lines(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataF
     return df
 
 
+def _display_warning_about_missing_location(df: pd.DataFrame) -> None:
+    # TODO: A voir ce qu'on doit faire de ces acteurs non digitaux mais sans
+    # localisation (proposition : les afficher en erreur directement ?)
+    if "location" in df.columns and "acteur_type_code" in df.columns:
+        df_acteur_sans_loc = df[
+            (df["location"].isnull()) & (df["acteur_type_code"] != "acteur_digital")
+        ]
+        if not df_acteur_sans_loc.empty:
+            nb_acteurs = len(df)
+            logger.warning(
+                f"Nombre d'acteur sans localisation: {len(df_acteur_sans_loc)} / "
+                f"{nb_acteurs}"
+            )
+            log.preview("Acteurs sans localisation", df_acteur_sans_loc)
+
+
 def source_data_normalize(
     df_acteur_from_source: pd.DataFrame,
     dag_config: DAGConfig,
@@ -191,19 +207,8 @@ def source_data_normalize(
     # Merge et suppression des lignes indésirables
     df = _remove_undesired_lines(df, dag_config)
 
-    # TODO: A voir ce qu'on doit faire de ces acteurs non digitaux mais sans
-    # localisation (proposition : les afficher en erreur directement ?)
-    if "location" in df.columns and "acteur_type_code" in df.columns:
-        df_acteur_sans_loc = df[
-            (df["location"].isnull()) & (df["acteur_type_code"] != "acteur_digital")
-        ]
-        if not df_acteur_sans_loc.empty:
-            nb_acteurs = len(df)
-            logger.warning(
-                f"Nombre d'acteur sans localisation: {len(df_acteur_sans_loc)} / "
-                f"{nb_acteurs}"
-            )
-            log.preview("Acteurs sans localisation", df_acteur_sans_loc)
+    # Log si des localisations sont manquantes parmis les acteurs non digitaux
+    _display_warning_about_missing_location(df)
 
     log.preview("df après normalisation", df)
     if df.empty:
