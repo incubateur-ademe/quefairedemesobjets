@@ -40,7 +40,6 @@ def task_info_get():
 def cluster_acteurs_db_data_read_acteurs_wrapper(**kwargs) -> None:
     logger.info(task_info_get())
 
-    # use xcom to get the config from the previous task
     config: ClusterConfig = kwargs["ti"].xcom_pull(
         key="config", task_ids="cluster_acteurs_config_create"
     )
