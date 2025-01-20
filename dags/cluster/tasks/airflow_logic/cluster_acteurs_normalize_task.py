@@ -3,6 +3,7 @@ import logging
 import pandas as pd
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+from cluster.tasks.business_logic.cluster_acteurs_df_sort import cluster_acteurs_df_sort
 from cluster.tasks.business_logic.cluster_acteurs_normalize import (
     cluster_acteurs_normalize,
 )
@@ -72,6 +73,7 @@ def cluster_acteurs_normalize_wrapper(**kwargs) -> None:
     log.preview("acteurs normalisés", df_norm)
 
     logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
+    df_norm = cluster_acteurs_df_sort(df_norm)
     log.preview_df_as_markdown("acteurs normalisés", df_norm)
 
     # Les XCOM étant spécifiques à une tâche on peut pousser
