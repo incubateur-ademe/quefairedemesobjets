@@ -53,6 +53,15 @@ class BaseView:
         )
         return context
 
+    def setup(self, request, *args, **kwargs):
+        if "iframe" not in request.session:
+            request.session["iframe"] = "iframe" in request.GET
+            if not request.user.is_authenticated:
+                request.session.set_expiry(
+                    0
+                )  # set to 0 expires when the users closes its browser
+        super().setup(request, *args, **kwargs)
+
 
 class HomeView(BaseView, ListView):
     template_name = "qfdmd/home.html"
