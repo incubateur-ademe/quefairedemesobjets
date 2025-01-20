@@ -91,7 +91,7 @@ export default class extends Controller<HTMLElement> {
       this.personProperties.iframe = true
     }
 
-    if (document.referrer) {
+    if (document.referrer && !document.referrer.includes(document.location.origin)) {
       this.personProperties.iframe = true
     }
   }
