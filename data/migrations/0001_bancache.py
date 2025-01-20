@@ -49,7 +49,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "verbose_name": "Cache BAN",
-                "verbose_name_plural": "Cache BAN",
+                "verbose_name_plural": "Caches BAN",
             },
         ),
     ]

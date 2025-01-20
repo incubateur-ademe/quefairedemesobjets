@@ -73,7 +73,7 @@ class Migration(migrations.Migration):
                     "metadata",
                     models.JSONField(
                         blank=True,
-                        help_text="Metadata de la cohorte, données statistiques",
+                        verbose_name="Metadata de la cohorte, données statistiques",
                         null=True,
                     ),
                 ),
