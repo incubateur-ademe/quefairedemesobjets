@@ -1,6 +1,7 @@
 from django.contrib.gis.db import models
 from django.db.models.functions import Now
 
+from core.models import TimestampedModel
 from dags.sources.config.shared_constants import (
     SUGGESTION_ATRAITER,
     SUGGESTION_AVALIDER,
@@ -40,7 +41,7 @@ class SuggestionAction(models.TextChoices):
     SOURCE_SUPPRESSION = SUGGESTION_SOURCE_SUPRESSION, "ingestion de source de données"
 
 
-class SuggestionCohorte(models.Model):
+class SuggestionCohorte(TimestampedModel):
     id = models.AutoField(primary_key=True)
     # On utilise identifiant car le champ n'est pas utilisé pour résoudre une relation
     # en base de données
@@ -66,8 +67,6 @@ class SuggestionCohorte(models.Model):
         blank=True,
         verbose_name="Metadata de la cohorte, données statistiques",
     )
-    cree_le = models.DateTimeField(auto_now_add=True, db_default=Now())
-    modifie_le = models.DateTimeField(auto_now=True, db_default=Now())
 
     @property
     def is_source_type(self) -> bool:
