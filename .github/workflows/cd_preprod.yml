@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+  pull_request: # for test only
 
 env:
   CC_PREPROD_AIRFLOW_WEBSERVER_APP: app_d3c229bf-be85-4dbd-aca2-c8df1c6166de
