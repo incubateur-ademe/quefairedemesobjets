@@ -5,9 +5,6 @@ on:
     tags:
       - v*
 
-env:
-  CC_PROD_AIRFLOW_WEBSERVER_APP: app_efd2802a-1773-48e0-987e-7a6dffb929d1
-  CC_PROD_AIRFLOW_SCHEDULER_APP: app_fda5d606-44d9-485f-a1b4-1f7007bc3bec
 
 defaults:
   run:
@@ -44,9 +41,12 @@ jobs:
     needs: [run_tests]
     runs-on: "ubuntu-latest"
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: 47ng/actions-clever-cloud@v2.0.0
         with:
-          alias: ${{ env.CC_PROD_AIRFLOW_WEBSERVER_APP }}
+          alias: lvao-prod-airflow-webserver
         env:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
@@ -57,9 +57,12 @@ jobs:
     needs: [run_tests]
     runs-on: "ubuntu-latest"
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: 47ng/actions-clever-cloud@v2.0.0
         with:
-          alias: ${{ env.CC_PROD_AIRFLOW_SCHEDULER_APP }}
+          alias: lvao-prod-airflow-scheduler
         env:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}

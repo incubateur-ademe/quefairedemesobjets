@@ -7,10 +7,6 @@ on:
       - main
   pull_request: # for test only
 
-env:
-  CC_PREPROD_AIRFLOW_WEBSERVER_APP: app_d3c229bf-be85-4dbd-aca2-c8df1c6166de
-  CC_PREPROD_AIRFLOW_SCHEDULER_APP: app_3d1f7d89-d7f0-433a-ac01-c663d4729143
-
 defaults:
   run:
     shell: bash
@@ -41,7 +37,7 @@ jobs:
           fetch-depth: 0
       - uses: 47ng/actions-clever-cloud@v2.0.0
         with:
-          alias: ${{ env.CC_PREPROD_AIRFLOW_WEBSERVER_APP }}
+          alias: lvao-preprod-airflow-webserver
         env:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
@@ -57,7 +53,7 @@ jobs:
           fetch-depth: 0
       - uses: 47ng/actions-clever-cloud@v2.0.0
         with:
-          alias: ${{ env.CC_PREPROD_AIRFLOW_SCHEDULER_APP }}
+          alias: lvao-preprod-airflow-scheduler
         env:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
