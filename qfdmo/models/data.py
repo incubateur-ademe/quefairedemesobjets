@@ -1,5 +1,8 @@
+"""
+DEPRECATED, should use the data django app
+"""
+
 from django.contrib.gis.db import models
-from django.db.models.functions import Now
 
 from dags.sources.config.shared_constants import (
     DAGRUN_FINISHED,
@@ -143,16 +146,3 @@ class DagRunChange(models.Model):
 
     def get_candidat(self, index):
         return self.row_updates["ae_result"][int(index) - 1]
-
-
-class BANCache(models.Model):
-    class Meta:
-        verbose_name = "Cache BAN"
-        verbose_name_plural = "Cache BAN"
-
-    adresse = models.CharField(max_length=255, blank=True, null=True)
-    code_postal = models.CharField(max_length=255, blank=True, null=True)
-    ville = models.CharField(max_length=255, blank=True, null=True)
-    location = models.PointField(blank=True, null=True)
-    ban_returned = models.JSONField(blank=True, null=True)
-    modifie_le = models.DateTimeField(auto_now=True, db_default=Now())
