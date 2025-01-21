@@ -4,9 +4,11 @@ from typing import Any
 from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import render
-from django.views.generic import DetailView, ListView
+from django.urls import reverse_lazy
+from django.views.generic import DetailView, FormView, ListView
 
-from qfdmd.forms import SearchForm
+from core.notion import create_new_row_in_notion_table
+from qfdmd.forms import ContactForm, SearchForm
 from qfdmd.models import CMSPage, Suggestion, Synonyme
 
 logger = logging.getLogger(__name__)
@@ -37,6 +39,23 @@ def search_view(request) -> HttpResponse:
         context.update(search_form=form)
 
     return render(request, template_name, context=context)
+
+
+class ContactFormView(FormView):
+    template_name = "forms/contact.html"
+    form_class = ContactForm
+    success_url = reverse_lazy("qfdmd:nous-contacter-confirmation")
+
+    def form_valid(self, form):
+        cleaned_data = form.cleaned_data
+        submitted_subject = cleaned_data.get("subject")
+        cleaned_data["subject"] = dict(self.form_class().fields["subject"].choices)[
+            submitted_subject
+        ]
+        create_new_row_in_notion_table(
+            settings.NOTION.get("CONTACT_FORM_DATABASE_ID"), cleaned_data
+        )
+        return super().form_valid(form)
 
 
 class BaseView:
