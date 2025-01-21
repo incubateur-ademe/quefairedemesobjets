@@ -2,7 +2,7 @@ import pandas as pd
 import shortuuid
 
 
-def apply_corrections_acteur(df_acteur: pd.DataFrame, df_revisionacteur: pd.DataFrame):
+def compute_acteur(df_acteur: pd.DataFrame, df_revisionacteur: pd.DataFrame):
 
     revisionacteur_parent_ids = df_revisionacteur["parent_id"].unique()
 

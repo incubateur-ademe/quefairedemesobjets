@@ -17,12 +17,12 @@ def db_data_write_task(dag: DAG) -> PythonOperator:
 
 
 def db_data_write_wrapper(**kwargs):
-    df_acteur_merged = kwargs["ti"].xcom_pull(task_ids="apply_corrections_acteur")[
+    df_acteur_merged = kwargs["ti"].xcom_pull(task_ids="compute_acteur")[
         "df_acteur_merged"
     ]
     df_labels_updated = kwargs["ti"].xcom_pull(task_ids="deduplicate_labels")
     df_acteur_services_updated = kwargs["ti"].xcom_pull(
-        task_ids="deduplicate_acteur_serivces"
+        task_ids="deduplicate_acteur_services"
     )
     df_acteur_sources_updated = kwargs["ti"].xcom_pull(
         task_ids="deduplicate_acteur_sources"

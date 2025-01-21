@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def compute_parent_ps(
+def deduplicate_propositionservices(
     df_children: pd.DataFrame,
     df_ps: pd.DataFrame,
     df_ps_sscat: pd.DataFrame,

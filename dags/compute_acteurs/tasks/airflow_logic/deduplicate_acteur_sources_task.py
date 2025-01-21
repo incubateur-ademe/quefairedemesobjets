@@ -18,7 +18,7 @@ def deduplicate_acteur_sources_task(dag: DAG) -> PythonOperator:
 
 def deduplicate_acteur_sources_wrapper(**kwargs):
 
-    data_actors = kwargs["ti"].xcom_pull(task_ids="apply_corrections_acteur")
+    data_actors = kwargs["ti"].xcom_pull(task_ids="compute_acteur")
     df_children = data_actors["df_children"]
     df_acteur_merged = data_actors["df_acteur_merged"]
 

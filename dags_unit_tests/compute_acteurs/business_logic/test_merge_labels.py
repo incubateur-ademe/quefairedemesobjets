@@ -1,6 +1,6 @@
 import pandas as pd
 import pytest
-from compute_acteurs.tasks.business_logic.merge_labels import merge_labels
+from compute_acteurs.tasks.business_logic.compute_labels import compute_labels
 
 
 class TestMergeLabels:
@@ -87,7 +87,7 @@ class TestMergeLabels:
             ),
         ],
     )
-    def test_merge_labels(
+    def test_compute_labels(
         self,
         load_acteur_labels,
         load_revisionacteur_labels,
@@ -95,7 +95,7 @@ class TestMergeLabels:
         expected,
     ):
 
-        result = merge_labels(
+        result = compute_labels(
             df_acteur_labels=load_acteur_labels,
             df_revisionacteur_labels=load_revisionacteur_labels,
             df_revisionacteur=load_revisionacteur,

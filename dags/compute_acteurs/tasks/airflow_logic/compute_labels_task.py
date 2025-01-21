@@ -2,21 +2,21 @@ import logging
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from compute_acteurs.tasks.business_logic import merge_labels
+from compute_acteurs.tasks.business_logic import compute_labels
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
 
 
-def merge_labels_task(dag: DAG) -> PythonOperator:
+def compute_labels_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
-        task_id="merge_labels",
-        python_callable=merge_labels_wrapper,
+        task_id="compute_labels",
+        python_callable=compute_labels_wrapper,
         dag=dag,
     )
 
 
-def merge_labels_wrapper(**kwargs):
+def compute_labels_wrapper(**kwargs):
     df_acteur_labels = kwargs["ti"].xcom_pull(task_ids="load_acteur_labels")
     df_revisionacteur_labels = kwargs["ti"].xcom_pull(
         task_ids="load_revisionacteur_labels"
@@ -27,7 +27,7 @@ def merge_labels_wrapper(**kwargs):
     log.preview("df_revisionacteur_labels", df_revisionacteur_labels)
     log.preview("df_revisionacteur", df_revisionacteur)
 
-    return merge_labels(
+    return compute_labels(
         df_acteur_labels=df_acteur_labels,
         df_revisionacteur_labels=df_revisionacteur_labels,
         df_revisionacteur=df_revisionacteur,
