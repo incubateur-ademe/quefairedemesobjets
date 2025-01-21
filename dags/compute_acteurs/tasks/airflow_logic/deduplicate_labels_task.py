@@ -18,15 +18,13 @@ def deduplicate_labels_task(dag: DAG) -> PythonOperator:
 
 def deduplicate_labels_wrapper(**kwargs):
 
-    df_children = kwargs["ti"].xcom_pull(task_ids="apply_corrections_acteur")[
-        "df_children"
-    ]
-    df_merge_labels = kwargs["ti"].xcom_pull(task_ids="merge_labels")
+    df_children = kwargs["ti"].xcom_pull(task_ids="compute_acteur")["df_children"]
+    df_labels = kwargs["ti"].xcom_pull(task_ids="compute_labels")
 
     log.preview("df_children", df_children)
-    log.preview("df_merged_relationship", df_merge_labels)
+    log.preview("df_merged_relationship", df_labels)
 
     return deduplicate_labels(
         df_children=df_children,
-        df_merge_labels=df_merge_labels,
+        df_labels=df_labels,
     )

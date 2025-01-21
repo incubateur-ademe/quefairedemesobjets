@@ -6,10 +6,10 @@ from compute_acteurs.tasks.transform.merge_and_deduplicate import (
 
 def deduplicate_labels(
     df_children: pd.DataFrame,
-    df_merge_labels: pd.DataFrame,
+    df_labels: pd.DataFrame,
 ):
     return deduplicate_acteurs_many2many_relationship(
         df_children,
-        df_merge_labels,
+        df_labels,
         "labelqualite_id",
     )
