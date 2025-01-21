@@ -124,7 +124,7 @@ jobs:
 
       - name: Populate database
         run: |
-          python manage.py loaddata actions acteur_services acteur_types categories objets
+          python manage.py loaddata actions acteur_services acteur_types categories objets produits synonymes
 
       - name: Run serveur
         run: |

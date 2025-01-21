@@ -12,6 +12,7 @@ const iframeAttributes = {
   style: "border: none; width: 100%; display: block; margin: 0 auto;",
   allowfullscreen: true,
   allow: "geolocation; clipboard-write",
+  title: "Que faire de mes objets et déchets"
 };
 
 if (script?.dataset?.testid) {
