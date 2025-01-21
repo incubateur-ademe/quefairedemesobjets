@@ -11,7 +11,7 @@ from dags.sources.config.shared_constants import (
     SUGGESTION_PARTIEL,
     SUGGESTION_REJETEE,
     SUGGESTION_SOURCE_AJOUT,
-    SUGGESTION_SOURCE_MISESAJOUR,
+    SUGGESTION_SOURCE_MODIFICATION,
     SUGGESTION_SOURCE_SUPRESSION,
     SUGGESTION_SUCCES,
 )
@@ -34,8 +34,8 @@ class SuggestionAction(models.TextChoices):
         SUGGESTION_SOURCE_AJOUT,
         "ingestion de source de données - nouveau acteur",
     )
-    SOURCE_MISESAJOUR = (
-        SUGGESTION_SOURCE_MISESAJOUR,
+    SOURCE_MODIFICATION = (
+        SUGGESTION_SOURCE_MODIFICATION,
         "ingestion de source de données - modification d'acteur existant",
     )
     SOURCE_SUPPRESSION = SUGGESTION_SOURCE_SUPRESSION, "ingestion de source de données"
@@ -72,7 +72,7 @@ class SuggestionCohorte(TimestampedModel):
     def is_source_type(self) -> bool:
         return self.type_action in [
             SuggestionAction.SOURCE_AJOUT,
-            SuggestionAction.SOURCE_MISESAJOUR,
+            SuggestionAction.SOURCE_MODIFICATION,
             SuggestionAction.SOURCE_SUPPRESSION,
         ]
 

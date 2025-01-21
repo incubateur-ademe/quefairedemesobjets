@@ -10,7 +10,7 @@ from data.models import (  # Remplacez YourModel par le nom de votre modèle
     "type_action, expected_result",
     [
         (SuggestionAction.SOURCE_AJOUT, True),
-        (SuggestionAction.SOURCE_MISESAJOUR, True),
+        (SuggestionAction.SOURCE_MODIFICATION, True),
         (SuggestionAction.SOURCE_SUPPRESSION, True),
         (SuggestionAction.CLUSTERING, False),
         ("other_action", False),
@@ -26,7 +26,7 @@ def test_is_source_type(type_action, expected_result):
     [
         (SuggestionAction.CLUSTERING, True),
         (SuggestionAction.SOURCE_AJOUT, False),
-        (SuggestionAction.SOURCE_MISESAJOUR, False),
+        (SuggestionAction.SOURCE_MODIFICATION, False),
         (SuggestionAction.SOURCE_SUPPRESSION, False),
         ("other_action", False),
     ],

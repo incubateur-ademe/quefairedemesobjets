@@ -29,7 +29,7 @@ def db_normalize_suggestion():
         type_action
         in [
             constants.SUGGESTION_SOURCE_AJOUT,
-            constants.SUGGESTION_SOURCE_MISESAJOUR,
+            constants.SUGGESTION_SOURCE_MODIFICATION,
         ]
         and not df_sql.empty
     ):

@@ -40,7 +40,7 @@ def db_write_type_action_suggestions(
         metadata=metadata,
         dag_name=f"{dag_name} - MISES A JOUR",
         run_name=run_name,
-        type_action=constants.SUGGESTION_SOURCE_MISESAJOUR,
+        type_action=constants.SUGGESTION_SOURCE_MODIFICATION,
     )
 
 

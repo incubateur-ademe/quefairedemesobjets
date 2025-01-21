@@ -45,7 +45,7 @@ class Migration(migrations.Migration):
                                 "ingestion de source de données - nouveau acteur",
                             ),
                             (
-                                "SOURCE_MISESAJOUR",
+                                "SOURCE_MODIFICATION",
                                 "ingestion de source de données - modification d'acteur existant",
                             ),
                             ("SOURCE_SUPRESSION", "ingestion de source de données"),

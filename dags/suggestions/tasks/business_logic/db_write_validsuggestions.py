@@ -28,7 +28,7 @@ def db_write_validsuggestions(data_acteurs_normalized: dict):
     with engine.begin() as connection:
         if change_type in [
             constants.SUGGESTION_SOURCE_AJOUT,
-            constants.SUGGESTION_SOURCE_MISESAJOUR,
+            constants.SUGGESTION_SOURCE_MODIFICATION,
         ]:
             db_write_acteurupdate(
                 connection, df_actors, df_labels, df_acteur_services, df_pds, df_pdssc

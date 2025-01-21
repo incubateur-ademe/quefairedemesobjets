@@ -14,7 +14,7 @@ from data.models import SuggestionAction, SuggestionStatut
 ACTION_TO_VERB = {
     SuggestionAction.SOURCE_AJOUT: "ajoutera",
     SuggestionAction.SOURCE_SUPPRESSION: "supprimera",
-    SuggestionAction.SOURCE_MISESAJOUR: "mettra à jour",
+    SuggestionAction.SOURCE_MODIFICATION: "modifiera",
 }
 
 

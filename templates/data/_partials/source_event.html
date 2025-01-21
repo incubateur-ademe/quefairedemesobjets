@@ -10,7 +10,7 @@
 <div class="fr-table">
     <table>
         <caption>Suggestion de source à valider</caption>
-        {% if suggestion_cohorte_instance.type_action == "SOURCE_AJOUT" or suggestion_cohorte_instance.type_action == "SOURCE_MISESAJOUR" %}
+        {% if suggestion_cohorte_instance.type_action == "SOURCE_AJOUT" or suggestion_cohorte_instance.type_action == "SOURCE_MODIFICATION" %}
             {% include 'data/_partials/source_ajout_event.html' %}
         {% elif suggestion_cohorte_instance.type_action == "SOURCE_SUPRESSION" %}
         {% include 'data/_partials/source_supression_event.html' %}
