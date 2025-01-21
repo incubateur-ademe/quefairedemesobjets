@@ -88,11 +88,6 @@ urlpatterns = [
         name="test_iframe",
     ),
     path(
-        "dags/validations",
-        DagsValidation.as_view(),
-        name="dags_validations",
-    ),
-    path(
         "configurateur",
         ConfiguratorView.as_view(),
         name="iframe_configurator",
@@ -101,5 +96,11 @@ urlpatterns = [
         "iframe/configurateur",
         AdvancedConfiguratorView.as_view(),
         name="advanced_iframe_configurator",
+    ),
+    # DEPRECATED, should use the data django app
+    path(
+        "dags/validations",
+        DagsValidation.as_view(),
+        name="dags_validations",
     ),
 ]
