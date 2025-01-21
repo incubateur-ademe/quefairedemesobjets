@@ -8,6 +8,7 @@ from sources.tasks.transform.transform_df import (
     clean_label_codes,
     clean_siret_and_siren,
     clean_telephone,
+    compute_location,
     get_latlng_from_geopoint,
     merge_and_clean_souscategorie_codes,
     merge_duplicates,
@@ -451,3 +452,33 @@ class TestGetLatLngFromGeopoint:
         result = get_latlng_from_geopoint(row, None)
         assert result["latitude"] == 48.8588443
         assert result["longitude"] == 2.2943506
+
+
+PARIS_LOCATION = (
+    "0101000000a835cd3b4ed1024076e09c11a56d4840"  # pragma: allowlist secret
+)
+
+
+LONDON_LOCATION = (
+    "0101000000ebe2361ac05bc0bfc5feb27bf2c04940"  # pragma: allowlist secret
+)
+
+
+class TestComputeLocation:
+
+    @pytest.mark.parametrize(
+        "latitude, longitude, expected_location",
+        [
+            (48.8566, 2.3522, PARIS_LOCATION),
+            ("48.8566", "2.3522", PARIS_LOCATION),
+            (51.5074, -0.1278, LONDON_LOCATION),
+            (None, None, None),  # Missing lat and long
+        ],
+    )
+    def test_compute_location(self, latitude, longitude, expected_location):
+
+        result = compute_location(
+            pd.Series({"latitude": latitude, "longitude": longitude}), None
+        )
+        print(result["location"])
+        assert result["location"] == expected_location

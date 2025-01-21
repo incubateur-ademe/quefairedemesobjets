@@ -85,6 +85,11 @@ with DAG(
                 "destination": ["latitude", "longitude"],
             },
             {
+                "origin": ["latitude", "longitude"],
+                "transformation": "compute_location",
+                "destination": ["location"],
+            },
+            {
                 "origin": ["TEL_SERVICE", "code_postal"],
                 "transformation": "clean_telephone",
                 "destination": ["telephone"],
