@@ -78,6 +78,11 @@ export default class extends Controller<HTMLElement> {
   }
 
   #checkIfWeAreInAnIframe() {
+    // The iframe URL parameter is not always set :
+    // - After a navigaation (click on a link)
+    // - If the iframe integration does not use our script
+    // In all these cases, we still want to determine
+    // whether the user browse inside an iframe or not.
     try {
       if (window.self !== window.top) {
         this.personProperties.iframe = true
@@ -91,7 +96,7 @@ export default class extends Controller<HTMLElement> {
       this.personProperties.iframe = true
     }
 
-    if (document.referrer) {
+    if (document.referrer && !document.referrer.includes(document.location.origin)) {
       this.personProperties.iframe = true
     }
   }
