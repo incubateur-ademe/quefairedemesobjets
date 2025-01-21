@@ -95,7 +95,7 @@ class HomeView(BaseView, ListView):
                 "content": "Actuellement, l’ensemble des recommandations ne concerne "
                 "que les particuliers. Pour des informations à destination des "
                 "professionnels, veuillez consulter le site "
-                "<a href='https://economie-circulaire.ademe.fr/dechets-activites-economiques.'"
+                "<a href='https://economie-circulaire.ademe.fr/dechets-activites-economiques'"
                 "target='_blank' rel='noreferrer' "
                 "title='Économie Circulaire ADEME - Nouvelle fenêtre'>"
                 "https://economie-circulaire.ademe.fr/dechets-activites-economiques"
