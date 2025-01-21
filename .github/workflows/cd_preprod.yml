@@ -37,6 +37,8 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: 47ng/actions-clever-cloud@v2.0.0
         with:
           alias: ${{ env.CC_PREPROD_AIRFLOW_WEBSERVER_APP }}
@@ -51,6 +53,8 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: 47ng/actions-clever-cloud@v2.0.0
         with:
           alias: ${{ env.CC_PREPROD_AIRFLOW_SCHEDULER_APP }}
