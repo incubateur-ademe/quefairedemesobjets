@@ -417,6 +417,59 @@ class TestRevisionActeurDuplicate:
 
 
 @pytest.mark.django_db
+class TestRevisionActeurRemoveParentWithoutChildren:
+
+    def test_revision_acteur_remove_parent_without_children(self):
+        revision_acteur_original_parent = RevisionActeurFactory()
+        revision_acteur = RevisionActeurFactory(parent=revision_acteur_original_parent)
+
+        assert RevisionActeur.objects.filter(
+            pk=revision_acteur_original_parent.pk
+        ).exists(), "Parent exists"
+
+        revision_acteur_new_parent = RevisionActeurFactory()
+        revision_acteur.parent = revision_acteur_new_parent
+        revision_acteur.save()
+
+        assert not RevisionActeur.objects.filter(
+            pk=revision_acteur_original_parent.pk
+        ).exists(), "Old parent is removed because it doesn't have any child"
+
+    def test_revision_acteur_remove_parent_without_children2(self):
+        revision_acteur_original_parent = RevisionActeurFactory()
+        revision_acteur = RevisionActeurFactory(parent=revision_acteur_original_parent)
+
+        assert RevisionActeur.objects.filter(
+            pk=revision_acteur_original_parent.pk
+        ).exists(), "Parent exists"
+
+        revision_acteur.parent = None
+        revision_acteur.save()
+
+        assert not RevisionActeur.objects.filter(
+            pk=revision_acteur_original_parent.pk
+        ).exists(), "Old parent is removed because it doesn't have any child"
+
+    def test_revision_acteur_dont_remove_parent_with_children(self):
+        revision_acteur_original_parent = RevisionActeurFactory()
+        revision_acteur1 = RevisionActeurFactory(parent=revision_acteur_original_parent)
+        # Another child
+        RevisionActeurFactory(parent=revision_acteur_original_parent)
+
+        assert RevisionActeur.objects.filter(
+            pk=revision_acteur_original_parent.pk
+        ).exists(), "Parent exists"
+
+        revision_acteur_new_parent = RevisionActeurFactory()
+        revision_acteur1.parent = revision_acteur_new_parent
+        revision_acteur1.save()
+
+        assert RevisionActeur.objects.filter(
+            pk=revision_acteur_original_parent.pk
+        ).exists(), "Old parent isn't removed because it still have a child"
+
+
+@pytest.mark.django_db
 class TestActeurService:
 
     @pytest.fixture
