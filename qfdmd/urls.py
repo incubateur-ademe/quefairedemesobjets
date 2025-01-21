@@ -4,7 +4,13 @@ from django.templatetags.static import static
 from django.urls import path
 from django.views.generic import RedirectView
 
-from qfdmd.views import ContactFormView, CMSPageDetailView, HomeView, SynonymeDetailView, search_view
+from qfdmd.views import (
+    CMSPageDetailView,
+    ContactFormView,
+    HomeView,
+    SynonymeDetailView,
+    search_view,
+)
 
 
 def get_assistant_script(request):
