@@ -95,6 +95,11 @@ with DAG(
             },
             # 4. Transformation du dataframe
             {
+                "origin": ["final_latitude", "final_longitude"],
+                "transformation": "compute_location",
+                "destination": ["location"],
+            },
+            {
                 "origin": ["telephone", "code_postal"],
                 "transformation": "clean_telephone",
                 "destination": ["telephone"],
@@ -160,7 +165,6 @@ with DAG(
         "ignore_duplicates": False,
         "validate_address_with_ban": False,
         "product_mapping": get_mapping_config(mapping_key="sous_categories_cma"),
-        "source_code": "cma_reparacteur",
     },
     schedule=None,
 ) as dag:
