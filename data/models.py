@@ -94,7 +94,7 @@ class Suggestion(models.Model):
         choices=SuggestionStatut.choices,
         default=SuggestionStatut.AVALIDER,
     )
-    context = models.JSONField(
+    contexte = models.JSONField(
         null=True,
         blank=True,
         verbose_name="Contexte de la suggestion : données initiales",

@@ -22,12 +22,12 @@ def propose_acteur_to_delete_wrapper(**kwargs):
     df_acteurs_for_source = kwargs["ti"].xcom_pull(task_ids="propose_acteur_changes")[
         "df"
     ]
-    df_acteurs_from_db = kwargs["ti"].xcom_pull(task_ids="db_read_acteur")
+    df_acteur_from_db = kwargs["ti"].xcom_pull(task_ids="db_read_acteur")
 
     log.preview(df_acteurs_for_source, "df_acteurs_for_source")
-    log.preview(df_acteurs_from_db, "df_acteurs_from_db")
+    log.preview(df_acteur_from_db, "df_acteur_from_db")
 
     return propose_acteur_to_delete(
         df_acteurs_for_source=df_acteurs_for_source,
-        df_acteurs_from_db=df_acteurs_from_db,
+        df_acteur_from_db=df_acteur_from_db,
     )

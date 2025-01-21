@@ -91,8 +91,8 @@ def normalize_acteur_update_for_db(df_actors, dag_run_id, engine, type_action):
 
 def process_many2many_df(df, column_name, df_columns=["acteur_id", "labelqualite_id"]):
     try:
-        # Attempt to process the 'labels' column if it exists and is not empty
         normalized_df = df[column_name].dropna().apply(pd.json_normalize)
+        normalized_df = normalized_df[normalized_df.apply(lambda x: not x.empty)]
         if normalized_df.empty:
             return pd.DataFrame(
                 columns=df_columns

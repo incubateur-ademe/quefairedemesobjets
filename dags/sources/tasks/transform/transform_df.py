@@ -230,6 +230,26 @@ def compute_location(row: pd.Series, _):
     return row[["location"]]
 
 
+def clean_proposition_services(row, _):
+
+    # formater les propositions de service selon les colonnes
+    # action_codes and souscategorie_codes
+    #
+    # [{'action': 'CODE_ACTION','sous_categories': ['CODE_SSCAT']}] ou []
+    if row["souscategorie_codes"]:
+        row["proposition_services_codes"] = [
+            {
+                "action": action,
+                "sous_categories": row["souscategorie_codes"],
+            }
+            for action in row["action_codes"]
+        ]
+    else:
+        row["proposition_services_codes"] = []
+
+    return row[["proposition_services_codes"]]
+
+
 ### Fonctions de résolution de l'adresse au format BAN et avec vérification via l'API
 # adresse.data.gouv.fr en option
 # TODO : A déplacer ?

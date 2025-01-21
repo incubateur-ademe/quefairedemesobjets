@@ -100,7 +100,7 @@ def df_empty_acteurs_from_db():
 
 
 @pytest.fixture
-def df_acteurs_from_db():
+def df_acteur_from_db():
     return pd.DataFrame(
         {
             "identifiant_unique": ["id1", "id2"],

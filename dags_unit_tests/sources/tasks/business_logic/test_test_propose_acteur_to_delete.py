@@ -10,7 +10,7 @@ from sources.tasks.business_logic.propose_acteur_to_delete import (
 class TestActeurToDelete:
     @pytest.mark.parametrize(
         (
-            "df_acteurs_from_db1, df_acteurs_for_source, df_expected_acteur_to_delete,"
+            "df_acteur_from_db1, df_acteurs_for_source, df_expected_acteur_to_delete,"
             " expected_metadata"
         ),
         [
@@ -115,14 +115,14 @@ class TestActeurToDelete:
     )
     def test_propose_acteur_to_delete(
         self,
-        df_acteurs_from_db1,
+        df_acteur_from_db1,
         df_acteurs_for_source,
         df_expected_acteur_to_delete,
         expected_metadata,
     ):
         result = propose_acteur_to_delete(
             df_acteurs_for_source=df_acteurs_for_source,
-            df_acteurs_from_db=df_acteurs_from_db1,
+            df_acteur_from_db=df_acteur_from_db1,
         )
         df_returned_acteur_to_delete = result["df_acteur_to_delete"]
 
