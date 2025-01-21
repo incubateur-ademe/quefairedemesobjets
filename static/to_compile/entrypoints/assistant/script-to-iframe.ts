@@ -3,7 +3,8 @@ import { iframeResize } from "iframe-resizer";
 const script = document.currentScript as HTMLScriptElement
 const slug = script?.dataset?.objet;
 const origin = new URL(script?.getAttribute("src")).origin
-const src = `${origin}/${slug || ''}?iframe`;
+// TODO: mise en prod, remplacer dechet ci-dessous par une string vide
+const src = `${origin}/${slug || 'dechet'}?iframe`;
 const iframe = document.createElement("iframe");
 
 const iframeAttributes = {
