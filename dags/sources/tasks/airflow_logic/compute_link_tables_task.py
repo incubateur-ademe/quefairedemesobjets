@@ -3,7 +3,7 @@ import logging
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from sources.tasks.business_logic.compute_link_tables import compute_link_tables
-from sources.tasks.business_logic.read_mapping_from_postgres import (
+from sources.tasks.transform.read_mapping_from_postgres import (
     read_mapping_from_postgres,
 )
 from utils import logging_utils as log
