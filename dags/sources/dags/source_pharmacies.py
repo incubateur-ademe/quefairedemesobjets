@@ -11,10 +11,6 @@ with DAG(
     params={
         "normalization_rules": [
             # 1. Renommage des colonnes
-            # { # fait en dur dans la code car l'apostrophe est mal géré par airflow
-            #     "origin": "Numéro d\\'établissement",
-            #     "destination": "identifiant_externe",
-            # },
             # 2. Transformation des colonnes
             {
                 "origin": "Raison sociale",

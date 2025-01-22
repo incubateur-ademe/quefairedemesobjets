@@ -14,7 +14,7 @@ from sources.tasks.airflow_logic.config_management import (
     NormalizationColumnTransform,
     NormalizationDFTransform,
 )
-from sources.tasks.transform.transform_df import merge_duplicates
+from sources.tasks.transform.transform_df import compute_location, merge_duplicates
 from sqlalchemy import text
 from tenacity import retry, stop_after_attempt, wait_fixed
 from utils import logging_utils as log
@@ -70,7 +70,6 @@ def _transform_df(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
     for column_to_transform_df in columns_to_transform_df:
         function_name = column_to_transform_df.transformation
         normalisation_function = get_transformation_function(function_name, dag_config)
-
         logger.warning(f"Transformation {function_name}")
         df[column_to_transform_df.destination] = df[
             column_to_transform_df.origin
@@ -142,6 +141,22 @@ def _remove_undesired_lines(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataF
     return df
 
 
+def _display_warning_about_missing_location(df: pd.DataFrame) -> None:
+    # TODO: A voir ce qu'on doit faire de ces acteurs non digitaux mais sans
+    # localisation (proposition : les afficher en erreur directement ?)
+    if "location" in df.columns and "acteur_type_code" in df.columns:
+        df_acteur_sans_loc = df[
+            (df["location"].isnull()) & (df["acteur_type_code"] != "acteur_digital")
+        ]
+        if not df_acteur_sans_loc.empty:
+            nb_acteurs = len(df)
+            logger.warning(
+                f"Nombre d'acteur sans localisation: {len(df_acteur_sans_loc)} / "
+                f"{nb_acteurs}"
+            )
+            log.preview("Acteurs sans localisation", df_acteur_sans_loc)
+
+
 def source_data_normalize(
     df_acteur_from_source: pd.DataFrame,
     dag_config: DAGConfig,
@@ -187,34 +202,18 @@ def source_data_normalize(
 
     # TODO: Remplacer par le dag_id
     if dag_id == "sinoe":
-        df = df_normalize_sinoe(
-            df,
-            product_mapping=dag_config.product_mapping,
-            dechet_mapping=dag_config.dechet_mapping,
-        )
+        df = df_normalize_sinoe(df)
 
     # Merge et suppression des lignes indésirables
     df = _remove_undesired_lines(df, dag_config)
+
+    # Log si des localisations sont manquantes parmis les acteurs non digitaux
+    _display_warning_about_missing_location(df)
 
     log.preview("df après normalisation", df)
     if df.empty:
         raise ValueError("Plus aucune donnée disponible après normalisation")
     return df
-
-    # # TODO: Je n'ai pas vu la source qui applique cette règle
-    # if "statut" in df.columns:
-    #     df["statut"] = df["statut"].map(
-    #         {
-    #             1: constants.ACTEUR_ACTIF,
-    #             0: constants.ACTEUR_SUPPRIME,
-    #             constants.ACTEUR_ACTIF: constants.ACTEUR_ACTIF,
-    #             "INACTIF": constants.ACTEUR_INACTIF,
-    #             "SUPPRIME": constants.ACTEUR_SUPPRIME,
-    #         }
-    #     )
-    #     df["statut"] = df["statut"].fillna(constants.ACTEUR_ACTIF)
-    # else:
-    #     df["statut"] = constants.ACTEUR_ACTIF
 
 
 def df_normalize_pharmacie(df: pd.DataFrame) -> pd.DataFrame:
@@ -234,8 +233,6 @@ def df_normalize_pharmacie(df: pd.DataFrame) -> pd.DataFrame:
 
 def df_normalize_sinoe(
     df: pd.DataFrame,
-    product_mapping: dict,
-    dechet_mapping: dict,
 ) -> pd.DataFrame:
 
     # DOUBLONS: extra sécurité: même si on ne devrait pas obtenir
@@ -259,7 +256,7 @@ def enrich_from_ban_api(row: pd.Series) -> pd.Series:
 
     ban_cache_row = engine.execute(
         text(
-            "SELECT * FROM qfdmo_bancache WHERE adresse = :adresse and code_postal = "
+            "SELECT * FROM data_bancache WHERE adresse = :adresse and code_postal = "
             ":code_postal and ville = :ville and modifie_le > now() - interval '30 day'"
             " order by modifie_le desc limit 1"
         ),
@@ -279,7 +276,7 @@ def enrich_from_ban_api(row: pd.Series) -> pd.Series:
         result = r.json()
         engine.execute(
             text(
-                "INSERT INTO qfdmo_bancache"
+                "INSERT INTO data_bancache"
                 " (adresse, code_postal, ville, ban_returned, modifie_le)"
                 " VALUES (:adresse, :code_postal, :ville, :result, NOW())"
             ),
@@ -312,6 +309,8 @@ def enrich_from_ban_api(row: pd.Series) -> pd.Series:
     else:
         row["longitude"] = 0
         row["latitude"] = 0
+
+    row["location"] = compute_location(row[["latitude", "longitude"]], None)
     return row
 
 

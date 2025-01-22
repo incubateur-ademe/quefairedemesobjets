@@ -1,9 +1,7 @@
 import numpy as np
 import pandas as pd
 import pytest
-from compute_acteurs.tasks.business_logic.apply_corrections_acteur import (
-    apply_corrections_acteur,
-)
+from compute_acteurs.tasks.business_logic.compute_acteur import compute_acteur
 
 
 class TestApplyCorrections:
@@ -32,10 +30,10 @@ class TestApplyCorrections:
             }
         )
 
-    def test_apply_corrections_acteur(self, df_load_acteur, df_load_revisionacteur):
+    def test_compute_acteur(self, df_load_acteur, df_load_revisionacteur):
 
         # Call the function with the mocked ti
-        result = apply_corrections_acteur(
+        result = compute_acteur(
             df_acteur=df_load_acteur, df_revisionacteur=df_load_revisionacteur
         )
 
@@ -88,11 +86,11 @@ class TestApplyCorrections:
             }
         )
 
-    def test_apply_corrections_acteur_children(
+    def test_compute_acteur_children(
         self, df_load_acteur_with_children, df_load_revisionacteur_with_children
     ):
         # Call the function with the mocked ti
-        result = apply_corrections_acteur(
+        result = compute_acteur(
             df_acteur=df_load_acteur_with_children,
             df_revisionacteur=df_load_revisionacteur_with_children,
         )

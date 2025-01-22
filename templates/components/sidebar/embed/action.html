@@ -9,7 +9,7 @@ Intégrer
 {% endblock button_text %}
 
 {% block modal_title %}
-Intégrer ce simulateur
+Intégrer notre outil à votre site ou application
 {% endblock modal_title %}
 
 {% block modal_content %}
@@ -20,8 +20,8 @@ Intégrer ce simulateur
 
     {% include "components/code/code.html" with script=iframe_script %}
 
-    <p><strong>Vous souhaitez réutiliser le code du simulateur ?</strong>
-        Ce simulateur est développé de manière ouverte (open source). L’ensemble du code est <a
+    <p><strong>Vous souhaitez réutiliser le code de notre outil ?</strong>
+        Cet outil est développé de manière ouverte (open source). L’ensemble du code est <a
             href="https://github.com/incubateur-ademe/quefairedemesobjets/"
             target="_blank"
             rel="noreferrer"
@@ -32,7 +32,7 @@ Intégrer ce simulateur
 {% endblock modal_content %}
 
 {% block modal_wrapper_for_id %}
-    {% with id="integrer-le-simulateur" %}
+    {% with id="integrer-le-site" %}
     {{ block.super }}
     {% endwith %}
 {% endblock modal_wrapper_for_id %}

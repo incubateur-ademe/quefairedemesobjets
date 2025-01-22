@@ -3,15 +3,15 @@ from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from compute_acteurs.tasks.airflow_logic import (
-    apply_corrections_acteur_task,
-    compute_parent_ps_task,
+    compute_acteur_services_task,
+    compute_acteur_task,
+    compute_labels_task,
     compute_ps_task,
     db_data_write_task,
-    deduplicate_acteur_serivces_task,
+    deduplicate_acteur_services_task,
     deduplicate_acteur_sources_task,
     deduplicate_labels_task,
-    merge_acteur_services_task,
-    merge_labels_task,
+    deduplicate_propositionservices_task,
 )
 from utils.db_tasks import read_data_from_postgres
 
@@ -133,18 +133,20 @@ load_revisionacteur_acteur_services_task = PythonOperator(
 )
 
 
-apply_corrections_acteur_task_instance = apply_corrections_acteur_task(dag)
+compute_acteur_task_instance = compute_acteur_task(dag)
 compute_ps_task_instance = compute_ps_task(dag)
-compute_parent_ps_task_instance = compute_parent_ps_task(dag)
-deduplicate_acteur_serivces_task_instance = deduplicate_acteur_serivces_task(dag)
+deduplicate_propositionservices_task_instance = deduplicate_propositionservices_task(
+    dag
+)
+deduplicate_acteur_services_task_instance = deduplicate_acteur_services_task(dag)
 deduplicate_acteur_sources_task_instance = deduplicate_acteur_sources_task(dag)
 deduplicate_labels_task_instance = deduplicate_labels_task(dag)
-merge_acteur_services_task_instance = merge_acteur_services_task(dag)
-merge_labels_task_instance = merge_labels_task(dag)
+compute_acteur_services_task_instance = compute_acteur_services_task(dag)
+compute_labels_task_instance = compute_labels_task(dag)
 db_data_write_task_instance = db_data_write_task(dag)
 
 
-load_acteur_task >> apply_corrections_acteur_task_instance
+load_acteur_task >> compute_acteur_task_instance
 [
     load_propositionservice_task,
     load_revisionpropositionservice_task,
@@ -155,26 +157,20 @@ load_acteur_task >> apply_corrections_acteur_task_instance
     load_revisionacteur_task,
     load_acteur_labels_task,
     load_revisionacteur_labels_task,
-] >> merge_labels_task_instance
+] >> compute_labels_task_instance
 [
     load_revisionacteur_task,
     load_acteur_acteur_services_task,
     load_revisionacteur_acteur_services_task,
-] >> merge_acteur_services_task_instance
-apply_corrections_acteur_task_instance >> compute_parent_ps_task_instance
-apply_corrections_acteur_task_instance >> deduplicate_acteur_sources_task_instance
-(compute_ps_task_instance >> compute_parent_ps_task_instance)
+] >> compute_acteur_services_task_instance
+compute_acteur_task_instance >> deduplicate_propositionservices_task_instance
+compute_ps_task_instance >> deduplicate_propositionservices_task_instance
+(compute_labels_task_instance >> compute_acteur_task_instance)
+(compute_acteur_services_task_instance >> compute_acteur_task_instance)
 (
-    merge_labels_task_instance
-    >> apply_corrections_acteur_task_instance
+    deduplicate_propositionservices_task_instance
+    >> deduplicate_acteur_sources_task_instance
+    >> deduplicate_acteur_services_task_instance
     >> deduplicate_labels_task_instance
+    >> db_data_write_task_instance
 )
-(
-    merge_acteur_services_task_instance
-    >> apply_corrections_acteur_task_instance
-    >> deduplicate_acteur_serivces_task_instance
-)
-deduplicate_acteur_sources_task_instance >> db_data_write_task_instance
-compute_parent_ps_task_instance >> db_data_write_task_instance
-deduplicate_labels_task_instance >> db_data_write_task_instance
-deduplicate_acteur_serivces_task_instance >> db_data_write_task_instance
