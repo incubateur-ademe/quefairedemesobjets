@@ -237,7 +237,7 @@ def df_normalize_sinoe(
 ) -> pd.DataFrame:
 
     # DOUBLONS: extra sécurité: même si on ne devrait pas obtenir
-    # de doublon grâce à l'API (q_mode=simple&ANNEE_eq=2024)
+    # de doublon grâce à l'API (q_mode=simple&ANNEE_eq=2025)
     # on vérifie qu'on a qu'une année
     log.preview("ANNEE uniques", df["ANNEE"].unique().tolist())
     if df["ANNEE"].nunique() != 1:
