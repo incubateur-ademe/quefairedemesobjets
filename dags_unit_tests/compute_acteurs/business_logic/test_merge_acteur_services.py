@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
-from compute_acteurs.tasks.business_logic.merge_acteur_services import (
-    merge_acteur_services,
+from compute_acteurs.tasks.business_logic.compute_acteur_services import (
+    compute_acteur_services,
 )
 
 
@@ -91,7 +91,7 @@ class TestMergeActeurServices:
             ),
         ],
     )
-    def test_merge_acteur_services(
+    def test_compute_acteur_services(
         self,
         load_acteur_acteur_services,
         load_revisionacteur_acteur_services,
@@ -99,7 +99,7 @@ class TestMergeActeurServices:
         expected,
     ):
 
-        result = merge_acteur_services(
+        result = compute_acteur_services(
             df_acteur_acteur_services=load_acteur_acteur_services,
             df_revisionacteur_acteur_services=load_revisionacteur_acteur_services,
             df_revisionacteur=load_revisionacteur,

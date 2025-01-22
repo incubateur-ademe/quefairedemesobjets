@@ -61,10 +61,10 @@ INSTALLED_APPS = [
     "core",
     "qfdmd",
     "qfdmo",
+    "data",
     "corsheaders",
 ]
 
-# FIXME : check if we can manage django forms templating with jinja2
 FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 
 
@@ -386,5 +386,12 @@ ASSISTANT = {
         "ASSISTANT_POSTHOG_KEY",
         default="phc_fSfhoWDOUxZdKWty16Z3XfRiAoWd1qdJK0N0z9kQHJr",  # pragma: allowlist secret  # noqa: E501
         cast=str,
+    ),
+}
+
+NOTION = {
+    "TOKEN": decouple.config("NOTION_TOKEN", default=""),
+    "CONTACT_FORM_DATABASE_ID": decouple.config(
+        "NOTION_CONTACT_FORM_DATABASE_ID", default=""
     ),
 }

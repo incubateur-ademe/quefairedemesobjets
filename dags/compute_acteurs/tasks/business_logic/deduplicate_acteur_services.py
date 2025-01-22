@@ -4,12 +4,12 @@ from compute_acteurs.tasks.transform.merge_and_deduplicate import (
 )
 
 
-def deduplicate_acteur_serivces(
+def deduplicate_acteur_services(
     df_children: pd.DataFrame,
-    df_merge_acteur_services: pd.DataFrame,
+    df_acteur_services: pd.DataFrame,
 ):
     return deduplicate_acteurs_many2many_relationship(
         df_children,
-        df_merge_acteur_services,
+        df_acteur_services,
         "acteurservice_id",
     )

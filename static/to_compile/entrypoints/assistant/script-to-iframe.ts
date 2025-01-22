@@ -3,7 +3,8 @@ import { iframeResize } from "iframe-resizer";
 const script = document.currentScript as HTMLScriptElement
 const slug = script?.dataset?.objet;
 const origin = new URL(script?.getAttribute("src")).origin
-const src = `${origin}/${slug || ''}?iframe`;
+// TODO: mise en prod, remplacer dechet ci-dessous par une string vide
+const src = `${origin}/${slug || 'dechet'}?iframe`;
 const iframe = document.createElement("iframe");
 
 const iframeAttributes = {
@@ -11,6 +12,7 @@ const iframeAttributes = {
   style: "border: none; width: 100%; display: block; margin: 0 auto;",
   allowfullscreen: true,
   allow: "geolocation; clipboard-write",
+  title: "Que faire de mes objets et déchets"
 };
 
 if (script?.dataset?.testid) {
