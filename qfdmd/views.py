@@ -1,10 +1,13 @@
 import logging
+from functools import wraps
 from typing import Any
 
 from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from django.views.generic import DetailView, FormView, ListView
 
 from core.notion import create_new_row_in_notion_table
@@ -82,6 +85,23 @@ class BaseView:
         super().setup(request, *args, **kwargs)
 
 
+def cache_page_for_guests(*cache_args, **cache_kwargs):
+    def inner_decorator(func):
+        @wraps(func)
+        def inner_function(request, *args, **kwargs):
+            if not request.user.is_authenticated and "nocache" not in request.GET:
+                print("🤙 CACHE HIT")
+                return cache_page(*cache_args, **cache_kwargs)(func)(
+                    request, *args, **kwargs
+                )
+            return func(request, *args, **kwargs)
+
+        return inner_function
+
+    return inner_decorator
+
+
+@method_decorator(cache_page_for_guests(60 * 15), name="dispatch")
 class HomeView(BaseView, ListView):
     template_name = "qfdmd/home.html"
     model = Suggestion
@@ -105,9 +125,11 @@ class HomeView(BaseView, ListView):
         return context
 
 
+@method_decorator(cache_page_for_guests(60 * 15), name="dispatch")
 class SynonymeDetailView(BaseView, DetailView):
     model = Synonyme
 
 
+@method_decorator(cache_page_for_guests(60 * 15), name="dispatch")
 class CMSPageDetailView(BaseView, DetailView):
     model = CMSPage
