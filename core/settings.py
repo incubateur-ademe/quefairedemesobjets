@@ -34,7 +34,6 @@ CMS_BASE_URL = decouple.config(
 DEBUG = decouple.config("DEBUG", default=False, cast=bool)
 STIMULUS_DEBUG = decouple.config("STIMULUS_DEBUG", default=False, cast=bool)
 POSTHOG_DEBUG = decouple.config("POSTHOG_DEBUG", default=False, cast=bool)
-
 ALLOWED_HOSTS = decouple.config("ALLOWED_HOSTS", default="localhost", cast=str).split(
     ","
 )
@@ -330,13 +329,16 @@ NB_CORRECTION_DISPLAYED = decouple.config(
 
 SHELL_PLUS_PRINT_SQL = True
 
-# Object storage with Scaleway
 AWS_ACCESS_KEY_ID = decouple.config("AWS_ACCESS_KEY_ID", default="")
 AWS_SECRET_ACCESS_KEY = decouple.config("AWS_SECRET_ACCESS_KEY", default="")
 AWS_STORAGE_BUCKET_NAME = decouple.config("AWS_STORAGE_BUCKET_NAME", default="")
 AWS_S3_REGION_NAME = decouple.config("AWS_S3_REGION_NAME", default="")
 AWS_S3_ENDPOINT_URL = decouple.config("AWS_S3_ENDPOINT_URL", default="")
-
+USE_S3_FOR_STATIC = (
+    decouple.config("USE_S3_FOR_STATIC", cast=bool, default=False) and AWS_ACCESS_KEY_ID
+)
+AWS_DEFAULT_ACL = "public-read"
+AWS_QUERYSTRING_AUTH = False
 
 STORAGES = {
     "default": {
@@ -347,7 +349,11 @@ STORAGES = {
         ),
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": (
+            "storages.backends.s3.S3Storage"
+            if USE_S3_FOR_STATIC
+            else "whitenoise.storage.CompressedManifestStaticFilesStorage"
+        ),
     },
 }
 
