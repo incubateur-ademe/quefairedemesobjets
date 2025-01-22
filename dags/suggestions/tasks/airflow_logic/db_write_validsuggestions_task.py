@@ -17,7 +17,7 @@ def db_write_validsuggestions_task(dag: DAG) -> PythonOperator:
 def db_write_validsuggestions_wrapper(**kwargs):
     data_acteurs_normalized = kwargs["ti"].xcom_pull(task_ids="db_normalize_suggestion")
 
-    log.preview("data_acteurs_normalized acteur", data_acteurs_normalized["actors"])
+    log.preview("data_acteurs_normalized acteur", data_acteurs_normalized["acteur"])
     log.preview(
         "data_acteurs_normalized change_type", data_acteurs_normalized["change_type"]
     )
