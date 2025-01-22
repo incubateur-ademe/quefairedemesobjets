@@ -3,6 +3,7 @@ import logging
 import pandas as pd
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+from cluster.config.model import ClusterConfig
 from cluster.tasks.business_logic.cluster_acteurs_df_sort import cluster_acteurs_df_sort
 from cluster.tasks.business_logic.cluster_acteurs_normalize import (
     cluster_acteurs_normalize,
@@ -35,8 +36,8 @@ def cluster_acteurs_normalize_wrapper(**kwargs) -> None:
     logger.info(task_info_get())
 
     # use xcom to get the params from the previous task
-    params = kwargs["ti"].xcom_pull(
-        key="params", task_ids="cluster_acteurs_config_validate"
+    config: ClusterConfig = kwargs["ti"].xcom_pull(
+        key="config", task_ids="cluster_acteurs_config_create"
     )
     df: pd.DataFrame = kwargs["ti"].xcom_pull(
         key="df", task_ids="cluster_acteurs_db_data_read_acteurs"
@@ -44,28 +45,16 @@ def cluster_acteurs_normalize_wrapper(**kwargs) -> None:
     if df.empty:
         raise ValueError("Pas de données acteurs récupérées")
 
-    log.preview("paramètres reçus", params)
+    log.preview("config reçue", config)
     log.preview("acteurs sélectionnés", df)
 
     df_norm = cluster_acteurs_normalize(
         df,
-        # Par défaut si on ne précise pas de champs,
-        # on applique la normalisation basique à tous les champs
-        normalize_fields_basic=params["normalize_fields_basic"] or [],
-        normalize_fields_no_words_size1=params["normalize_fields_no_words_size1"] or [],
-        normalize_fields_no_words_size2_or_less=params[
-            "normalize_fields_no_words_size2_or_less"
-        ]
-        or [],
-        normalize_fields_no_words_size3_or_less=params[
-            "normalize_fields_no_words_size3_or_less"
-        ]
-        or [],
-        # Pareil, par défaut on applique à tous les champs
-        normalize_fields_order_unique_words=params[
-            "normalize_fields_order_unique_words"
-        ]
-        or [],
+        normalize_fields_basic=config.normalize_fields_basic,
+        normalize_fields_no_words_size1=config.normalize_fields_no_words_size1,
+        normalize_fields_no_words_size2_or_less=config.normalize_fields_no_words_size2_or_less,
+        normalize_fields_no_words_size3_or_less=config.normalize_fields_no_words_size3_or_less,
+        normalize_fields_order_unique_words=config.normalize_fields_order_unique_words,
     )
 
     # TODO: shows # uniques before and after per field

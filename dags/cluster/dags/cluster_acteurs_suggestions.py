@@ -12,7 +12,7 @@ from airflow import DAG
 from airflow.models.baseoperator import chain
 from airflow.models.param import Param
 from cluster.tasks.airflow_logic import (
-    cluster_acteurs_config_validate_task,
+    cluster_acteurs_config_create_task,
     cluster_acteurs_db_data_read_acteurs_task,
     cluster_acteurs_db_data_write_suggestions_task,
     cluster_acteurs_normalize_task,
@@ -113,13 +113,16 @@ with DAG(
         # TODO: permettre de ne sélectionner aucune source = toutes les sources
         "include_source_codes": Param(
             [],
-            type="array",
+            type=["null", "array"],
             # La terminologie Airflow n'est pas très heureuse
             # mais "examples" est bien la façon de faire des dropdowns
             # voir https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/params.html
             examples=dropdown_sources,
             description_md="""**➕ INCLUSION ACTEURS**: seuls ceux qui proviennent
-            de ces sources (opérateur **OU/OR**)""",
+            de ces sources (opérateur **OU/OR**)
+
+            💯 Si aucune valeur spécifiée =  tous les acteurs sont inclus
+            """,
         ),
         "include_acteur_type_codes": Param(
             [],
@@ -261,7 +264,7 @@ with DAG(
     schedule=None,
 ) as dag:
     chain(
-        cluster_acteurs_config_validate_task(dag=dag),
+        cluster_acteurs_config_create_task(dag=dag),
         cluster_acteurs_db_data_read_acteurs_task(dag=dag),
         cluster_acteurs_normalize_task(dag=dag),
         # TODO: besoin de refactoriser cette tâche:

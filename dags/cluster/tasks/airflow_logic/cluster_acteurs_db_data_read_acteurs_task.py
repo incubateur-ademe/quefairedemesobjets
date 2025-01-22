@@ -2,6 +2,7 @@ import logging
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+from cluster.config.model import ClusterConfig
 from cluster.tasks.business_logic.cluster_acteurs_db_data_read_acteurs import (
     cluster_acteurs_db_data_read_acteurs,
 )
@@ -39,30 +40,19 @@ def task_info_get():
 def cluster_acteurs_db_data_read_acteurs_wrapper(**kwargs) -> None:
     logger.info(task_info_get())
 
-    # use xcom to get the params from the previous task
-    params = kwargs["ti"].xcom_pull(
-        key="params", task_ids="cluster_acteurs_config_validate"
+    config: ClusterConfig = kwargs["ti"].xcom_pull(
+        key="config", task_ids="cluster_acteurs_config_create"
     )
-
-    # Boucle pour automatiser l'affichage des paramètres de champs
-    # et la construction d'un set de tous les champs (pour requête SQL)
-    fields = ["source_id", "acteur_type_id", "nom"]
-    for key, value in params.items():
-        if key.startswith("include_") or key.startswith("exclude_"):
-            log.preview(key, value)
-        if "fields" in key:
-            fields.extend(value or [])
-    fields = sorted(list(set(fields)))
-    log.preview("Tous les champs reseignés", fields)
+    log.preview("Config reçue", config)
 
     df, query = cluster_acteurs_db_data_read_acteurs(
         model_class=DisplayedActeur,
-        include_source_ids=params["include_source_ids"],
-        include_acteur_type_ids=params["include_acteur_type_ids"],
-        include_only_if_regex_matches_nom=params["include_only_if_regex_matches_nom"],
-        include_if_all_fields_filled=params["include_if_all_fields_filled"] or [],
-        exclude_if_any_field_filled=params["exclude_if_any_field_filled"] or [],
-        extra_dataframe_fields=fields,
+        include_source_ids=config.include_source_ids,
+        include_acteur_type_ids=config.include_acteur_type_ids,
+        include_only_if_regex_matches_nom=config.include_only_if_regex_matches_nom,
+        include_if_all_fields_filled=config.include_if_all_fields_filled,
+        exclude_if_any_field_filled=config.exclude_if_any_field_filled,
+        extra_dataframe_fields=config.fields_used,
     )
     log.preview("requête SQL utilisée", query)
     log.preview("acteurs sélectionnés", df)
