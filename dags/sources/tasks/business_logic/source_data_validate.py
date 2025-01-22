@@ -13,9 +13,7 @@ from utils import logging_utils as log
 logger = logging.getLogger(__name__)
 
 
-def source_data_validate(
-    df: pd.DataFrame,
-) -> None:
+def source_data_validate(df: pd.DataFrame, dag_config: DAGConfig) -> None:
     """Etape de validation des données source où on applique des règles
     métier scrictes. Par exemple, si un SIRET est malformé c'est qu'on
     pas bien fait notre travail à l'étape de normalisation"""
@@ -75,7 +73,7 @@ def source_data_validate(
     codes_mapping = set(
         chain.from_iterable(
             x if isinstance(x, list) else [x]
-            for x in DAGConfig.product_mapping.values()
+            for x in dag_config.product_mapping.values()
         )
     )
     codes_invalid = codes_mapping - codes_db
