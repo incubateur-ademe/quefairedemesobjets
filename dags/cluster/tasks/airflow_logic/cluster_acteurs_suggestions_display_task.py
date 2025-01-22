@@ -64,6 +64,16 @@ def cluster_acteurs_suggestions_wrapper(**kwargs) -> None:
         cluster_fields_fuzzy=config.cluster_fields_fuzzy,
     )
 
+    # TODO: créer une fonction dédiée qui permet de consolider:
+    # - la df de suggestions (données uniquement nécessaires aux clusters)
+    # - la df de sélection (données complètes des acteurs)
+    # pour pouvoir offrire en sortie de suggestion une df complète
+    # qui permettre + de validation/suivis au delà de ce qui est
+    # nécessaire pour le clustering lui-même
+    # En attendant un quick-fix pour récupérer le statut et passer la validation
+    statut_by_id = df.set_index("identifiant_unique")["statut"]
+    df_suggestions["statut"] = df_suggestions["identifiant_unique"].map(statut_by_id)
+
     logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
     log.preview_df_as_markdown("suggestions de clusters", df_suggestions)
 
@@ -71,9 +81,9 @@ def cluster_acteurs_suggestions_wrapper(**kwargs) -> None:
     kwargs["ti"].xcom_push(key="df", value=df_suggestions)
 
 
-def cluster_acteurs_suggestions_task(dag: DAG) -> PythonOperator:
+def cluster_acteurs_suggestions_display_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
-        task_id="cluster_acteurs_suggestions",
+        task_id="cluster_acteurs_suggestions_display",
         python_callable=cluster_acteurs_suggestions_wrapper,
         provide_context=True,
         dag=dag,

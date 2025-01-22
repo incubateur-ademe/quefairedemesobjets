@@ -15,7 +15,7 @@ def task_info_get():
 
 
     ============================================================
-    Description de la tâche "cluster_acteurs_db_data_write_suggestions"
+    Description de la tâche "cluster_acteurs_suggestions_to_db"
     ============================================================
 
     💡 quoi: écriture des suggestions en base de données
@@ -28,7 +28,7 @@ def task_info_get():
     """
 
 
-def cluster_acteurs_db_data_write_suggestions_wrapper(**kwargs) -> None:
+def cluster_acteurs_suggestions_to_db_wrapper(**kwargs) -> None:
     logger.info(task_info_get())
 
     # use xcom to get the params from the previous task
@@ -36,7 +36,7 @@ def cluster_acteurs_db_data_write_suggestions_wrapper(**kwargs) -> None:
         key="config", task_ids="cluster_acteurs_config_create"
     )
     df: pd.DataFrame = kwargs["ti"].xcom_pull(
-        key="df", task_ids="cluster_acteurs_suggestions"
+        key="df", task_ids="cluster_acteurs_suggestions_display"
     )
 
     log.preview("config reçue", config)
@@ -57,10 +57,10 @@ def cluster_acteurs_db_data_write_suggestions_wrapper(**kwargs) -> None:
     )
 
 
-def cluster_acteurs_db_data_write_suggestions_task(dag: DAG) -> PythonOperator:
+def cluster_acteurs_suggestions_to_db_task(dag: DAG) -> PythonOperator:
     """La tâche Airflow qui ne fait que appeler le wrapper"""
     return PythonOperator(
-        task_id="cluster_acteurs_db_data_write_suggestions",
-        python_callable=cluster_acteurs_db_data_write_suggestions_wrapper,
+        task_id="cluster_acteurs_suggestions_to_db",
+        python_callable=cluster_acteurs_suggestions_to_db_wrapper,
         dag=dag,
     )
