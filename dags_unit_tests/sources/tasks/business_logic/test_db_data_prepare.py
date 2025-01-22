@@ -86,12 +86,3 @@ def test_db_data_prepare(df_acteur, df_acteur_from_db, expected_output):
         result["df_acteur_to_update"].reset_index(drop=True),
         expected_output["df_acteur_to_update"].reset_index(drop=True),
     )
-
-
-def test_db_data_prepare_raise():
-    with pytest.raises(ValueError) as error:
-        db_data_prepare(
-            pd.DataFrame(columns=["identifiant_unique", "statut", "cree_le"]),
-            pd.DataFrame(columns=["identifiant_unique", "statut", "cree_le"]),
-        )
-        assert str(error.value) == "df_acteur est vide"

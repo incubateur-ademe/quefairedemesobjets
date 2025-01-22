@@ -21,6 +21,16 @@ ACTEUR_TYPE_DIGITAL = "acteur_digital"
 ACTEUR_TYPE_ESS = "ess"
 LABEL_ESS = "ess"
 LABEL_TO_IGNORE = ["non applicable", "na", "n/a", "null", "aucun", "non"]
+MANDATORY_COLUMNS_AFTER_NORMALISATION = [
+    "identifiant_unique",
+    "identifiant_externe",
+    "nom",
+    "acteurservice_codes",
+    "label_codes",
+    "proposition_services_codes",
+    "source_code",
+    "acteur_type_code",
+]
 
 
 def merge_duplicates(

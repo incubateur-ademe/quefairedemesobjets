@@ -2,9 +2,11 @@ import logging
 from itertools import chain
 
 import pandas as pd
+from sources.tasks.airflow_logic.config_management import DAGConfig
 from sources.tasks.business_logic.read_mapping_from_postgres import (
     read_mapping_from_postgres,
 )
+from sources.tasks.transform.transform_df import MANDATORY_COLUMNS_AFTER_NORMALISATION
 from utils import db_tasks
 from utils import logging_utils as log
 
@@ -13,17 +15,20 @@ logger = logging.getLogger(__name__)
 
 def source_data_validate(
     df: pd.DataFrame,
-    params: dict,
 ) -> None:
     """Etape de validation des données source où on applique des règles
     métier scrictes. Par exemple, si un SIRET est malformé c'est qu'on
     pas bien fait notre travail à l'étape de normalisation"""
 
-    # Il nous faut au moins 1 acteur sinon on à un problème avec le source
-    # TODO: règles d'anomalies plus avancées (ex: entre 80% et 100% vs. existant)
+    # We check that at least 1 actor exists, else we raise an error because we have
+    # an issue with source's data
     if df.empty:
-        raise ValueError("Aucune donnée reçue par source_data_normalize")
+        raise ValueError("No data in dataframe from normalisation")
     log.preview("df avant validation", df)
+
+    for col in MANDATORY_COLUMNS_AFTER_NORMALISATION:
+        if col not in df.columns:
+            raise ValueError(f"A mandatory column is missing: {col}")
 
     # ------------------------------------
     # identifiant_externe
@@ -63,14 +68,14 @@ def source_data_validate(
     # product_mapping
     # - les valeur du mapping des produit peuvent-être des listes vides quand aucun
     #   produit n'est à associer
-    product_mapping = params.get("product_mapping", {})
     souscats_codes_to_ids = read_mapping_from_postgres(
         table_name="qfdmo_souscategorieobjet"
     )
     codes_db = set(souscats_codes_to_ids.keys())
     codes_mapping = set(
         chain.from_iterable(
-            x if isinstance(x, list) else [x] for x in product_mapping.values()
+            x if isinstance(x, list) else [x]
+            for x in DAGConfig.product_mapping.values()
         )
     )
     codes_invalid = codes_mapping - codes_db

@@ -40,10 +40,6 @@ def db_data_prepare(
         how="inner",
     )
 
-    # FIXME : à faire avant dans la validation des données
-    if df_acteur.empty:
-        raise ValueError("df_acteur est vide")
-
     # FIXME : à faire avant dans la normalisation des données
     # Inactivate acteur if propositions_services is empty
     df_acteur.loc[

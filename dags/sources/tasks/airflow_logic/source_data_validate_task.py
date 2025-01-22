@@ -21,12 +21,9 @@ def source_data_validate_task(dag: DAG) -> PythonOperator:
 
 def source_data_validate_wrapper(**kwargs) -> None:
     df = kwargs["ti"].xcom_pull(task_ids="source_data_normalize")
-    params = kwargs["params"]
 
-    log.preview("df depuis source_data_normalize", df)
-    log.preview("paramètres du DAG", params)
+    log.preview("df before validation", df)
 
     return source_data_validate(
         df=df,
-        params=params,
     )
