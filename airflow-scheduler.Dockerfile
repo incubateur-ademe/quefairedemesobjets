@@ -40,6 +40,7 @@ COPY sync_dags.sh /opt/airflow/sync_dags.sh
 COPY ./core/ /opt/airflow/core/
 COPY ./qfdmo/ /opt/airflow/qfdmo/
 COPY ./qfdmd/ /opt/airflow/qfdmd/
+COPY ./data/ /opt/airflow/data/
 COPY ./dsfr_hacks/ /opt/airflow/dsfr_hacks/
 
 # Classique Airflow
