@@ -15,6 +15,7 @@ class TestApplyCorrections:
                 "cree_le": ["2022-01-01", "2022-01-02"],
                 "parent_id": [None, None],
                 "source_id": [1, 2],
+                "statut": ["ACTIF", "ACTIF"],
             }
         )
 
@@ -27,6 +28,7 @@ class TestApplyCorrections:
                 "cree_le": ["2022-01-03"],
                 "parent_id": [None],
                 "source_id": [1],
+                "statut": ["ACTIF"],
             }
         )
 
@@ -45,6 +47,7 @@ class TestApplyCorrections:
                 "cree_le": ["2022-01-01", "2022-01-02"],
                 "parent_id": [None, None],
                 "source_id": [1, 2],
+                "statut": ["ACTIF", "ACTIF"],
                 "uuid": ["Hogy2rqwtvgMUctiqUyYmH", "AS5wKPytvs9VjWEFQdqTwK"],
             }
         )
@@ -71,6 +74,7 @@ class TestApplyCorrections:
                 "cree_le": ["2022-01-01", "2022-01-02"],
                 "parent_id": [None, None],
                 "source_id": [1, 2],
+                "statut": ["ACTIF", "ACTIF"],
             }
         )
 
@@ -83,6 +87,7 @@ class TestApplyCorrections:
                 "cree_le": ["2022-01-03", "2022-01-03", "2022-01-03"],
                 "parent_id": ["actor3", "actor3", None],
                 "source_id": [1, 2, None],
+                "statut": ["ACTIF", "ACTIF", "ACTIF"],
             }
         )
 
@@ -103,6 +108,7 @@ class TestApplyCorrections:
                 "cree_le": ["2022-01-03"],
                 "parent_id": [None],
                 "source_id": [np.nan],
+                "statut": ["ACTIF"],
                 "uuid": ["Ad4fYCpSxc7rpzNvK8wCYr"],
             }
         )
