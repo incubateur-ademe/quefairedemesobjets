@@ -591,7 +591,7 @@ class RevisionActeur(BaseActeur):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._original_parent = self.parent
+        self._original_parent = self._original_parent or self.parent
 
     @property
     def is_parent(self):
