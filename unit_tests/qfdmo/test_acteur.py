@@ -101,10 +101,9 @@ class TestActeurDefaultOnSave:
         )
         assert len(acteur.identifiant_externe) == 12
         assert (
-            acteur.identifiant_unique
-            == "communaute_longue_vie_aux_objets_" + acteur.identifiant_externe
+            acteur.identifiant_unique == "communautelvao_" + acteur.identifiant_externe
         )
-        assert acteur.source.code == "Communauté Longue Vie Aux Objets"
+        assert acteur.source.code == "communautelvao"
 
     def test_default_identifiantunique(self):
         source = SourceFactory(code="source_equipe")
@@ -371,7 +370,7 @@ class TestRevisionActeurDuplicate:
         revision_acteur_duplicate = revision_acteur.duplicate()
 
         assert revision_acteur_duplicate.source == Source.objects.get(
-            code="Communauté Longue Vie Aux Objets"
+            code="communautelvao"
         )
 
     def test_duplicate_labels(self):

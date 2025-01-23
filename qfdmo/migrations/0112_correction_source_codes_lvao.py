@@ -21,6 +21,13 @@ def update_acteur_source_code(apps, schema_editor):
     Acteur = apps.get_model("qfdmo", "Acteur")
     RevisionActeur = apps.get_model("qfdmo", "RevisionActeur")
 
+    # filtre pour les tests
+    if (
+        not Source.objects.filter(code="Communauté Longue Vie Aux Objets").exists()
+        or not Source.objects.filter(code="communautelvao").exists()
+    ):
+        return
+
     RevisionActeur.objects.filter(
         source__code="Communauté Longue Vie Aux Objets"
     ).update(source=Source.objects.get(code="communautelvao"))
