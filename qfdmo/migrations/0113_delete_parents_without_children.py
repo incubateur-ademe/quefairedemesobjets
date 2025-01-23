@@ -9,7 +9,7 @@ def delete_parents_without_children(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("qfdmo", "0111_delete_bancache"),
+        ("qfdmo", "0112_correction_source_codes_lvao"),
     ]
 
     operations = [
