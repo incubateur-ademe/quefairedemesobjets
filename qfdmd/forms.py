@@ -82,4 +82,6 @@ class ContactForm(DsfrBaseForm):
             ),
         ],
     )
-    message = forms.CharField(label="Votre message", widget=forms.Textarea)
+    message = forms.CharField(
+        label="Votre message", widget=forms.Textarea(attrs={"rows": 4})
+    )

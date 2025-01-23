@@ -16,7 +16,7 @@ def patchwork() -> dict:
     produits = (
         Synonyme.objects.exclude(picto="")
         .exclude(picto=None)
-        .filter(pin_on_homepage=True)
+        .filter(pin_on_homepage=True)[:19]
     )
     return {"top": produits[:10], "left": produits[10:14], "right": produits[16:19]}
 

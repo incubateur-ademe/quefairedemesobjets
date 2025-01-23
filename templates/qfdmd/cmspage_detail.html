@@ -2,8 +2,8 @@
 
 {% block analytics_action %}produitPageView{% endblock %}
 
-{% block title %}
-{{ block.super }} | {{ object.seo_title }}
+% block title %}
+{{ object.seo_title }} | {{ block.super }}
 {% endblock title %}
 
 {% block meta_description %}{{ object.search_description|default:block.super }}{% endblock %}

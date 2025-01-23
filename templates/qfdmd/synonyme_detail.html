@@ -3,7 +3,7 @@
 {% block analytics_action %}produitPageView{% endblock %}
 
 {% block title %}
-{{ block.super }} | {{ object.nom }}
+{{ object.nom }} | {{ block.super }}
 {% endblock title %}
 
 {% block meta_description %}{{ object.meta_description|default:block.super }}{% endblock %}

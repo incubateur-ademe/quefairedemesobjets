@@ -19,6 +19,7 @@
             data-turbo-frame="search-results"
             action="{% url 'qfdmd:search' %}"
             class="qf-pl-4w {# should match the svg icon width #}
+            qf-flex
             md:group-data-[home]:qf-h-7w
             qf-h-5w
             qf-content-center
@@ -30,7 +31,7 @@
                 aria-label="Rechercher"
                 type="submit"
                 class="qf-absolute qf-left-0
-                group-data-[home]:-qf-mt-1v -qf-mt-1w qf-m-auto
+                qf-m-auto
                 fr-btn fr-icon-search-line fr-btn--tertiary-no-outline
                 qf-text-green-menthe-main-548
                 "

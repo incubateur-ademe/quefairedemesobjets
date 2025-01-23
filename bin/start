@@ -1,6 +1,6 @@
 #!/bin/bash
 
-gunicorn core.asgi --timeout 300 --worker-class=core.custom_uvicorn_worker.CustomUvicornWorker --max-requests 2000 --max-requests-jitter 200 --workers 3 --log-file -
+gunicorn core.wsgi --timeout 300 --max-requests 2000 --max-requests-jitter 200 --workers 3 --log-file -
 bin/run & # nginx as a reverse proxy
 
 # if the current shell is killed, also terminate all its children
