@@ -1,5 +1,6 @@
 import pandas as pd
 import shortuuid
+from sources.config import shared_constants as constants
 
 
 def compute_acteur(df_acteur: pd.DataFrame, df_revisionacteur: pd.DataFrame):
@@ -24,16 +25,21 @@ def compute_acteur(df_acteur: pd.DataFrame, df_revisionacteur: pd.DataFrame):
         .query("parent_id.notnull()")
         .drop_duplicates(subset=["parent_id", "identifiant_unique"])
     )
+    df_children = df_children[df_children["statut"] == constants.ACTEUR_ACTIF]
     df_children = pd.merge(
         df_children[["parent_id", "identifiant_unique"]],
         df_acteur_merged[["identifiant_unique", "source_id"]],
         on="identifiant_unique",
     )
+
     df_acteur_merged = df_acteur_merged[
         ~df_acteur_merged["identifiant_unique"].isin(
             df_children["identifiant_unique"].tolist()
         )
     ].copy()
+    df_acteur_merged = df_acteur_merged[
+        df_acteur_merged["statut"] == constants.ACTEUR_ACTIF
+    ]
 
     # Add a new column uuid to make the displayedacteur id without source name in id
     df_acteur_merged["uuid"] = df_acteur_merged["identifiant_unique"].apply(
