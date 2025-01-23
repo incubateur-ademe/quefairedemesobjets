@@ -589,6 +589,10 @@ class RevisionActeur(BaseActeur):
         validators=[clean_parent],
     )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._original_parent = self.parent
+
     @property
     def is_parent(self):
         return self.pk and self.duplicats.exists()
@@ -596,6 +600,7 @@ class RevisionActeur(BaseActeur):
     def save(self, *args, **kwargs):
         # OPTIMIZE: if we need to validate the main action in the service propositions
         # I guess it should be here
+
         acteur = self.set_default_fields_and_objects_before_save()
         self.full_clean()
         creating = self._state.adding  # Before calling save
@@ -615,6 +620,11 @@ class RevisionActeur(BaseActeur):
                 self.labels.add(label)
             for acteur_service in acteur.acteur_services.all():
                 self.acteur_services.add(acteur_service)
+
+        if self.parent != self._original_parent and self._original_parent:
+            if not self._original_parent.is_parent:
+                self._original_parent.delete()
+
         return super_result
 
     def save_as_parent(self, *args, **kwargs):
