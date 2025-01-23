@@ -91,7 +91,19 @@ def cluster_acteurs_selection_from_db(
     # Un filtre en dur pour ne prendre que les acteurs actifs
     query = query.filter(statut=ActeurStatus.ACTIF)
 
-    fields = ["identifiant_unique", "statut", "source_id", "acteur_type_id", "nom"]
+    # Les champs dont on a besoin pour la logique d'ensemble
+    # indépendamment de ce que métier souhaite sélectionner
+    fields = [
+        "identifiant_unique",
+        # note: on cherche à récupérer les acteurs de displayed
+        # MAIS parent_id n'est pas dispo sur cette table, on
+        # va donc la récupérer/enrichir plus tard
+        # "parent_id",
+        "statut",
+        "source_id",
+        "acteur_type_id",
+        "nom",
+    ]
     fields += include_if_all_fields_filled
     fields += exclude_if_any_field_filled
     fields += extra_dataframe_fields

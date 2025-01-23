@@ -83,6 +83,10 @@ class SuggestionCohorte(TimestampedModel):
     def __str__(self) -> str:
         return f"{self.identifiant_action} - {self.identifiant_execution}"
 
+    class Meta:
+        verbose_name = "📦 Cohorte"
+        verbose_name_plural = "📦 Cohortes"
+
 
 class Suggestion(models.Model):
     id = models.AutoField(primary_key=True)
@@ -94,7 +98,7 @@ class Suggestion(models.Model):
         choices=SuggestionStatut.choices,
         default=SuggestionStatut.AVALIDER,
     )
-    context = models.JSONField(
+    contexte = models.JSONField(
         null=True,
         blank=True,
         verbose_name="Contexte de la suggestion : données initiales",
@@ -147,6 +151,10 @@ class Suggestion(models.Model):
     # FIXME: A revoir
     def display_proposition_service(self):
         return self.suggestion.get("proposition_services", [])
+
+    class Meta:
+        verbose_name = "1️⃣ Suggestion"
+        verbose_name_plural = "1️⃣ Suggestions"
 
 
 class BANCache(models.Model):

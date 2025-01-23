@@ -1,110 +1,14 @@
-import pandas as pd
 import pytest
 
-from dags.cluster.tasks.business_logic.cluster_acteurs_metadata import (
-    cluster_acteurs_metadata,
-)
+from dags.cluster.tasks.business_logic import cluster_acteurs_metadata
+from dags_unit_tests.cluster.tasks.business_logic.test_data import df_get
 
 
 class TestClusterActeursMetadata:
 
     @pytest.fixture(scope="session")
     def df(self):
-        """
-        Cas de figures à couvrir:
-        Cluster 1 = 0 parent existant + 2 enfants
-        Cluster 2 = 1 parent existant + 2 enfants, dont 1 déjà rattaché
-        Cluster 3 = 2 parents existants + 2 enfants, dont 1 déjà rattaché
-
-        """
-        return pd.DataFrame(
-            {
-                "cluster_id": [
-                    # Cluster 1
-                    "c1_0parent_2act",
-                    "c1_0parent_2act",
-                    # Cluster 2
-                    "c2_1parent_3act",
-                    "c2_1parent_3act",
-                    "c2_1parent_3act",
-                    # Cluster 3
-                    "c3_2parent_4act",
-                    "c3_2parent_4act",
-                    "c3_2parent_4act",
-                    "c3_2parent_4act",
-                ],
-                "identifiant_unique": [
-                    # Cluster 1
-                    "A",
-                    "B",
-                    # Cluster 2
-                    "C",
-                    "D",
-                    "E",
-                    # Cluster 3
-                    "F",
-                    "G",
-                    "H",
-                    "I",
-                ],
-                "parent_id": [
-                    # Cluster 1
-                    None,
-                    None,
-                    # Cluster 2
-                    "C",
-                    None,
-                    None,
-                    # Cluster 3
-                    "F",
-                    None,
-                    None,
-                    None,
-                ],
-                "is_parent_current": [
-                    # Cluster 1
-                    False,
-                    False,
-                    # Cluster 2
-                    False,
-                    True,
-                    False,
-                    # Cluster 3
-                    False,
-                    True,
-                    True,
-                    False,
-                ],
-                "is_parent_to_delete": [
-                    # Cluster 1
-                    False,
-                    False,
-                    # Cluster 2
-                    False,
-                    False,
-                    False,
-                    # Cluster 3
-                    False,
-                    True,
-                    False,
-                    False,
-                ],
-                "is_parent_to_keep": [
-                    # Cluster 1
-                    True,
-                    False,
-                    # Cluster 2
-                    False,
-                    True,
-                    False,
-                    # Cluster 3
-                    False,
-                    False,
-                    True,
-                    False,
-                ],
-            }
-        )
+        return df_get()
 
     @pytest.fixture(scope="session")
     def meta(self, df):
@@ -130,11 +34,11 @@ class TestClusterActeursMetadata:
         # 3 acteurs déjà parent
         assert meta["nombre_acteurs_deja_parent"] == 3
 
-    def test_nombre_acteurs_deja_clusterises(self, meta):
+    def test_nombre_acteurs_deja_enfant(self, meta):
         # Ceux qui on un parent_id
-        assert meta["nombre_acteurs_deja_clusterises"] == 2
+        assert meta["nombre_acteurs_deja_enfant"] == 2
 
-    def test_nombre_acteurs_nouvellement_clusterises(self, meta):
+    def test_nombre_acteurs_nouveau_enfant(self, meta):
         # 2 acteurs nouvellement clusterisés
         # = 9 - 3 déjà parents - 2 déjà clusterisés
-        assert meta["nombre_acteurs_nouvellement_clusterises"] == 4
+        assert meta["nombre_acteurs_nouveau_enfant"] == 4

@@ -9,7 +9,7 @@ django_setup_full()
 from data.models import Suggestion, SuggestionCohorte, SuggestionStatut  # noqa: E402
 
 
-def cluster_acteur_suggestions_to_db(
+def cluster_acteurs_suggestions_to_db(
     df_clusters: pd.DataFrame,
     identifiant_action: str,
     identifiant_execution: str,
@@ -31,18 +31,23 @@ def cluster_acteur_suggestions_to_db(
         # TODO: déplacer "type_action" dans Suggestion
         # Je pense que fixer un type d'action au niveau
         # du cohorte est trop restrictif: par exemple dans
-        # le cade du clustering, on va pouvoir proposer
+        # le cadre du clustering, on veut pouvoir proposer
         # des clusters nouveaux ET des clusters à fusionner
+        # au sein d'une même cohorte et donc 2 types d'actions
+        # différents
         # type_action
         statut=SuggestionStatut.AVALIDER,
         metadata=cluster_acteurs_metadata(df),
     )
     cohorte.save()
-    for _, cluster in df.iterrows():
+    for cluster_id in df["cluster_id"].unique():
+        cluster = df[df["cluster_id"] == cluster_id].copy()
         suggestion = Suggestion(
-            cohorte=cohorte,
+            suggestion_cohorte=cohorte,
             statut=SuggestionStatut.AVALIDER,
-            context=cluster.to_dict(),
-            suggestion=cluster[["cluster_id", "identifiant_unique"]].to_dict(),
+            contexte=cluster.to_dict(orient="records"),
+            suggestion=cluster[["cluster_id", "identifiant_unique"]].to_dict(
+                orient="records"
+            ),
         )
         suggestion.save()

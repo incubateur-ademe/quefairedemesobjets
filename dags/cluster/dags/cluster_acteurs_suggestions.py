@@ -83,7 +83,7 @@ vont être regroupés en clusters.
 
 
 with DAG(
-    dag_id="cluster_acteurs_suggestions_display",
+    dag_id="cluster_acteurs_suggestions",
     dag_display_name="Cluster - Acteurs - Suggestions",
     default_args={
         "owner": "airflow",

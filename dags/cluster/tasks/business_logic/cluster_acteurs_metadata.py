@@ -32,12 +32,12 @@ def cluster_acteurs_metadata(df_clusters: pd.DataFrame) -> dict:
     meta["nombre_acteurs_deja_parent"] = df[df["is_parent_current"]][
         "identifiant_unique"
     ].nunique()
-    meta["nombre_acteurs_deja_clusterises"] = df[df["parent_id"].notnull()][
+    meta["nombre_acteurs_deja_enfant"] = df[df["parent_id"].notnull()][
         "identifiant_unique"
     ].nunique()
-    meta["nombre_acteurs_nouvellement_clusterises"] = (
+    meta["nombre_acteurs_nouveau_enfant"] = (
         meta["nombre_acteurs"]
-        - meta["nombre_acteurs_deja_clusterises"]
+        - meta["nombre_acteurs_deja_enfant"]
         - meta["nombre_acteurs_deja_parent"]
     )
 
