@@ -7,6 +7,7 @@ from sources.tasks.airflow_logic.config_management import (
     NormalizationColumnTransform,
     NormalizationDFTransform,
 )
+from sources.tasks.transform.transform_df import MANDATORY_COLUMNS_AFTER_NORMALISATION
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -20,9 +21,18 @@ def source_config_validate(
     pour éviter d'engendrer des coûts d'infra (et de fournisseurs API)
     si on peut déjà déterminer que le DAG ne pourra pas fonctionner
     """
-    # TODO: la validation de la structure même des paramètres devrait
-    # se faire avec un schéma de validation (dataclass, pydantic, etc.)
-    # potentiellement appliqué directement dans le fichier DAG
+
+    # check that all mandatory columns are present in dag_config.get_expected_columns
+    expected_columns = dag_config.get_expected_columns()
+    if not all(
+        col in expected_columns for col in MANDATORY_COLUMNS_AFTER_NORMALISATION
+    ):
+        raise ValueError(
+            f"""
+Mandatory columns are missing in dag_config,
+Mandatory columns are: {MANDATORY_COLUMNS_AFTER_NORMALISATION}
+Expected columns from dag_config: {expected_columns}"""
+        )
 
     # Validation des sous-catégories produit qui doivent être mappées
     # et toutes correspondre à des codes valides dans notre DB

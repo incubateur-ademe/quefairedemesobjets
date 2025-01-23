@@ -24,6 +24,7 @@ from sources.tasks.transform.transform_df import (
     clean_identifiant_externe,
     clean_identifiant_unique,
     clean_label_codes,
+    clean_proposition_services,
     clean_siret_and_siren,
     clean_telephone,
     compute_location,
@@ -67,6 +68,7 @@ TRANSFORMATION_MAPPING = {
     "get_latlng_from_geopoint": get_latlng_from_geopoint,
     "strip_lower_string": strip_lower_string,
     "compute_location": compute_location,
+    "clean_proposition_services": clean_proposition_services,
 }
 
 

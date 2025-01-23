@@ -36,7 +36,6 @@ def propose_acteur_changes(
     }
 
     df_acteur = df_acteur.drop_duplicates(subset="identifiant_unique", keep="first")
-    df_acteur["event"] = "CREATE"
     return {
         "df": df_acteur,
         "metadata": metadata,

@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
+from faker import Faker
 
 from dags.sources.tasks.airflow_logic.config_management import DAGConfig
 
@@ -100,7 +101,7 @@ def df_empty_acteurs_from_db():
 
 
 @pytest.fixture
-def df_acteurs_from_db():
+def df_acteur_from_db():
     return pd.DataFrame(
         {
             "identifiant_unique": ["id1", "id2"],
@@ -130,8 +131,23 @@ def source_id_by_code():
 def dag_config():
     return DAGConfig.model_validate(
         {
-            "normalization_rules": [],
+            "normalization_rules": [
+                {
+                    "column": col,
+                    "value": Faker().word(),
+                }
+                for col in [
+                    "identifiant_unique",
+                    "identifiant_externe",
+                    "nom",
+                    "acteurservice_codes",
+                    "label_codes",
+                    "proposition_services_codes",
+                    "source_code",
+                    "acteur_type_code",
+                ]
+            ],
             "endpoint": "https://example.com/api",
-            "product_mapping": {},
+            "product_mapping": {"product1": "code1"},
         }
     )

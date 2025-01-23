@@ -134,6 +134,7 @@ def _remove_undesired_lines(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataF
         )
         log.preview("Doublons sur identifiant_unique", dups)
     if dag_config.ignore_duplicates:
+        # FIXME: dedupliquer en mergeant proposition_services_codes ?
         # TODO: Attention aux lignes dupliquées à cause de de service en ligne
         #  + physique
         df = df.drop_duplicates(subset=["identifiant_unique"], keep="first")
