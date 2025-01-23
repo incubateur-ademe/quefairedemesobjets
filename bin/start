@@ -1,12 +1,4 @@
 #!/bin/bash
 
-gunicorn core.wsgi --timeout 300 --max-requests 2000 --max-requests-jitter 200 --workers 3 --log-file -
-bin/run & # nginx as a reverse proxy
-
-# if the current shell is killed, also terminate all its children
-trap "pkill SIGTERM -P $$" SIGTERM
-
-# wait for a single child to finish,
-wait -n
-# then kill all the other tasks
-pkill -P $$
+gunicorn core.wsgi --bind unix:/tmp/gunicorn.sock --workers 3 &
+/app/bin/run & # nginx as a reverse proxy
