@@ -37,7 +37,7 @@ from qfdmo.validators import CodeValidator
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_SOURCE_CODE = "Communauté Longue Vie Aux Objets"
+DEFAULT_SOURCE_CODE = "communautelvao"
 
 
 class ActeurService(CodeAsNaturalKeyModel):
