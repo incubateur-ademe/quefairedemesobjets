@@ -8,7 +8,7 @@ import qfdmo.validators
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("qfdmo", "0111_delete_bancache"),
+        ("qfdmo", "0113_delete_parents_without_children"),
     ]
 
     operations = [
