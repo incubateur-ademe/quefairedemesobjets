@@ -12,7 +12,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument(
             "--dry-run",
-            help="Run command and write changes to the database",
+            help="Run command without writing changes to the database",
             action=argparse.BooleanOptionalAction,
             default=False,
         )
