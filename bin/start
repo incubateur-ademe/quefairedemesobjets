@@ -1,4 +1,4 @@
 #!/bin/bash
 
 gunicorn core.wsgi --bind unix:/tmp/gunicorn.sock --workers 3 &
-/app/bin/run & # nginx as a reverse proxy
+/app/bin/run
