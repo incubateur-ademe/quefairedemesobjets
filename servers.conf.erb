@@ -1,8 +1,9 @@
+proxy_cache_path /tmp/nginx_assistant_cache levels=1:2 keys_zone=assistant:10m max_size=1g inactive=60m use_temp_path=off;
+
 server {
     listen <%= ENV["PORT"] %>;
     server_name _;
 
-    proxy_cache_path /tmp/nginx_assistant_cache levels=1:2 keys_zone=assistant:10m max_size=1g inactive=60m use_temp_path=off;
 
     location /static/ {
         expires max;

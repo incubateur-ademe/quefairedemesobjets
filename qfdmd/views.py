@@ -81,7 +81,6 @@ def cache_page_for_guests(*cache_args, **cache_kwargs):
         @wraps(func)
         def inner_function(request, *args, **kwargs):
             if not request.user.is_authenticated and "nocache" not in request.GET:
-                print("🤙 CACHE HIT")
                 return cache_page(*cache_args, **cache_kwargs)(func)(
                     request, *args, **kwargs
                 )
