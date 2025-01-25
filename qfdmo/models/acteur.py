@@ -16,7 +16,16 @@ from django.contrib.gis.geos import Point, Polygon
 from django.contrib.gis.geos.geometry import GEOSGeometry
 from django.core.cache import cache
 from django.core.files.images import get_image_dimensions
-from django.db.models import Case, Exists, Min, OuterRef, Q, Value, When
+from django.db.models import (
+    Case,
+    CheckConstraint,
+    Exists,
+    Min,
+    OuterRef,
+    Q,
+    Value,
+    When,
+)
 from django.forms import ValidationError, model_to_dict
 from django.http import HttpRequest
 from django.urls import reverse
@@ -45,6 +54,12 @@ class ActeurService(CodeAsNaturalKeyModel):
         ordering = ["libelle"]
         verbose_name = "Service proposé"
         verbose_name_plural = "Services proposés"
+        constraints = [
+            CheckConstraint(
+                check=Q(code__regex=CodeValidator.regex),
+                name="acteur_service_code_format",
+            ),
+        ]
 
     id = models.AutoField(primary_key=True)
     code = models.CharField(
@@ -97,6 +112,11 @@ class ActeurType(CodeAsNaturalKeyModel):
     class Meta:
         verbose_name = "Type d'acteur"
         verbose_name_plural = "Types d'acteur"
+        constraints = [
+            CheckConstraint(
+                check=Q(code__regex=CodeValidator.regex), name="acteur_type_code_format"
+            ),
+        ]
 
     id = models.AutoField(primary_key=True)
     code = models.CharField(
@@ -129,6 +149,11 @@ class Source(CodeAsNaturalKeyModel):
     class Meta:
         verbose_name = "Source de données"
         verbose_name_plural = "Sources de données"
+        constraints = [
+            CheckConstraint(
+                check=Q(code__regex=CodeValidator.regex), name="source_code_format"
+            ),
+        ]
 
     id = models.AutoField(primary_key=True)
     libelle = models.CharField(max_length=255)
