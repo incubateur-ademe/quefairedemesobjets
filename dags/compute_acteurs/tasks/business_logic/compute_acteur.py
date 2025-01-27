@@ -1,6 +1,11 @@
 import pandas as pd
 import shortuuid
 from sources.config import shared_constants as constants
+from utils.django import django_setup_full
+
+django_setup_full()
+
+from qfdmo.models.acteur import RevisionActeur  # noqa: E402
 
 
 def compute_acteur(df_acteur: pd.DataFrame, df_revisionacteur: pd.DataFrame):
@@ -59,6 +64,19 @@ def compute_acteur(df_acteur: pd.DataFrame, df_revisionacteur: pd.DataFrame):
     df_acteur_merged["uuid"] = df_acteur_merged["identifiant_unique"].apply(
         lambda x: shortuuid.uuid(name=x)
     )
+
+    # Get all charfield of Acteur model
+    string_fields = {
+        field.name
+        for field in RevisionActeur._meta.get_fields()
+        if field.get_internal_type() in ["CharField", "TextField"]
+    } - {"identifiant_unique", "statut"}
+    # For each charfield, replace __empty__ by ""
+    for string_field in string_fields:
+        if string_field in df_acteur_merged.columns:
+            df_acteur_merged[string_field] = df_acteur_merged[string_field].replace(
+                constants.EMPTY_ACTEUR_FIELD, ""
+            )
 
     return {
         "df_acteur_merged": df_acteur_merged,
