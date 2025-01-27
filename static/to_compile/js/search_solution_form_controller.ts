@@ -199,8 +199,7 @@ export default class extends Controller<HTMLElement> {
     }
 
     this.acteurDetailsPanelTarget.dataset.exitAnimationEnded = "false"
-    const top = this.acteurDetailsPanelTarget.getBoundingClientRect().top
-    this.acteurDetailsPanelTarget.scroll(0, top - 500)
+    this.acteurDetailsPanelTarget.scrollIntoView()
 
   }
 
