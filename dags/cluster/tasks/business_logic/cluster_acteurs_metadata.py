@@ -5,7 +5,7 @@ def cluster_acteurs_metadata(df_clusters: pd.DataFrame) -> dict:
     """Génère des statistiques sur les clusters, à noter que
     la fonction peut être utilisée dans 2 contextes:
      - cohorte: df_clusters cotient plusieurs clusters
-     - suggestion: df_clusters contient un 1 cluster, auquel cas
+     - suggestion: df_clusters contient un seul cluster, auquel cas
         les champs nombre_cluster* sont à 1 et pas utiles mais
         cela nous évite de faire une fonction spécifique
 
