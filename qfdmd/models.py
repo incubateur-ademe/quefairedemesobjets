@@ -140,14 +140,14 @@ class Produit(AbstractBaseProduit):
             item
             for item in [
                 {
-                    "id": "Comment consommer responsable ?",
-                    "title": "Comment consommer responsable ?",
-                    "content": self.comment_les_eviter,
-                },
-                {
                     "id": "Que va-t-il devenir ?",
                     "title": "Que va-t-il devenir ?",
                     "content": self.que_va_t_il_devenir,
+                },
+                {
+                    "id": "Comment consommer responsable ?",
+                    "title": "Comment consommer responsable ?",
+                    "content": self.comment_les_eviter,
                 },
                 {
                     "id": "En savoir plus",
