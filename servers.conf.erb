@@ -14,7 +14,7 @@ server {
         proxy_pass http://unix:/tmp/gunicorn.sock;
         proxy_cache assistant;
         proxy_set_header Host $http_host;
-        proxy_cache_key $request_method$request_uri;
+        proxy_cache_key $request_method$request_uri$is_args$args;
         proxy_cache_lock on;
         proxy_cache_lock_timeout 10s;
         proxy_cache_use_stale error timeout updating;
