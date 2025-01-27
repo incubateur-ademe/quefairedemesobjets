@@ -1,5 +1,6 @@
 from django.contrib.gis.db import models
 from django.db.models.functions import Now
+from django.template.loader import render_to_string
 
 from core.models import TimestampedModel
 from dags.sources.config.shared_constants import (
@@ -101,7 +102,7 @@ class Suggestion(models.Model):
     contexte = models.JSONField(
         null=True,
         blank=True,
-        verbose_name="Contexte de la suggestion : données initiales",
+        verbose_name="Données initiales",
     )
     suggestion = models.JSONField(blank=True, verbose_name="Suggestion de modification")
     cree_le = models.DateTimeField(auto_now_add=True, db_default=Now())
@@ -147,6 +148,13 @@ class Suggestion(models.Model):
             )
 
         return displayed_details
+
+    @property
+    def display_suggestion_details(self):
+        template_name = "data/_partials/suggestion_details.html"
+        if self.suggestion_cohorte.type_action == SuggestionAction.CLUSTERING:
+            template_name = "data/_partials/clustering_suggestion_details.html"
+        return render_to_string(template_name, {"suggestion": self.suggestion})
 
     # FIXME: A revoir
     def display_proposition_service(self):
