@@ -3,6 +3,7 @@ from utils.django import django_model_queryset_to_df, django_setup_full
 
 django_setup_full()
 from qfdmo.models import ActeurType, DisplayedActeur  # noqa: E402
+from qfdmo.models.acteur import ActeurStatus  # noqa: E402
 
 
 def cluster_acteurs_selection_acteur_type_parents(
@@ -25,7 +26,9 @@ def cluster_acteurs_selection_acteur_type_parents(
     # On récupère les parents des acteurs types donnés
     # qui sont censés être des acteurs sans source
     parents = DisplayedActeur.objects.filter(
-        acteur_type__id__in=acteur_type_ids
-    ).filter(source__id__isnull=True)
+        acteur_type__id__in=acteur_type_ids,
+        statut=ActeurStatus.ACTIF,
+        source__id__isnull=True,
+    )
 
     return django_model_queryset_to_df(parents, fields)

@@ -4,9 +4,7 @@ Fichier de test pour la fonction cluster_acteurs_selection_acteur_type_parents
 
 import pandas as pd
 import pytest
-from cluster.tasks.business_logic.cluster_acteurs_selection_acteur_type_parents import (
-    cluster_acteurs_selection_acteur_type_parents,
-)
+from cluster.tasks.business_logic import cluster_acteurs_selection_acteur_type_parents
 
 from qfdmo.models import DisplayedActeur
 from unit_tests.qfdmo.acteur_factory import ActeurTypeFactory, SourceFactory
@@ -17,6 +15,7 @@ class TestClusterActeursSelectionActeurTypeParents:
 
     @pytest.fixture
     def db_testdata_write(self) -> dict:
+        print("db_testdata_write")
         """Création des donnéees de test en DB"""
         data = {}
         data["at1"] = ActeurTypeFactory(code="at1")
@@ -28,11 +27,12 @@ class TestClusterActeursSelectionActeurTypeParents:
         # On fait exprès d'utiliser des UUIDs partout, y compris
         # pour les non-parents, pour démontrer que la requête ne
         # se base pas sur l'anatomie des IDs
-        data["id_at2_pas_parent"] = "10000000-0000-0000-0000-000000000000"
+        data["id_at2_pas_parent"] = "20000000-0000-0000-0000-000000000000"
         data["id_at2_parent_a"] = "20000000-0000-0000-0000-00000000000a"
         data["id_at2_parent_b"] = "20000000-0000-0000-0000-00000000000b"
         data["id_at3_pas_parent"] = "30000000-0000-0000-0000-000000000000"
         data["id_at4_parent"] = "40000000-0000-0000-0000-000000000000"
+        data["id_at4_parent_inactif"] = "40000000-0000-0000-0000-00000inactif"
 
         # at1
         # Parent MAIS d'un acteur type non sélectionné (at1)
@@ -70,11 +70,17 @@ class TestClusterActeursSelectionActeurTypeParents:
             acteur_type=data["at4"],
             identifiant_unique=data["id_at4_parent"],
         )
+        # On test le cas où il y a 1 parent mais inactif
+        DisplayedActeur.objects.create(
+            acteur_type=data["at4"],
+            identifiant_unique=data["id_at4_parent_inactif"],
+            statut="INACTIF",
+        )
 
         return data
 
     @pytest.fixture
-    def df(self, db_testdata_write) -> pd.DataFrame:
+    def df_working(self, db_testdata_write) -> pd.DataFrame:
         """On génère et retourne la df pour les tests"""
         data = db_testdata_write
         acteur_type_ids = [data["at2"].id, data["at3"].id, data["at4"].id]
@@ -84,23 +90,37 @@ class TestClusterActeursSelectionActeurTypeParents:
             fields=fields,
         )
 
-    def test_df_shape(self, df):
+    def test_df_shape(self, df_working):
         # 3 parents (2 parents pour at2 + 0 pour at3 + 1 pour at4)
         # 3 champs
-        assert df.shape == (3, 3)
+        assert df_working.shape == (3, 3)
 
-    def test_df_columns(self, df):
+    def test_df_columns(self, df_working):
         # Seules les colonnes demandées sont retournées
-        assert df.columns.tolist() == ["identifiant_unique", "statut", "latitude"]
+        assert sorted(df_working.columns.tolist()) == sorted(
+            [
+                "identifiant_unique",
+                "statut",
+                "latitude",
+            ]
+        )
 
-    def test_parents_are_valid(self, df, db_testdata_write):
+    def test_parents_are_valid(self, df_working, db_testdata_write):
         # Seuls les parents des acteurs types demandés
         # sont retournés
         data = db_testdata_write
-        assert sorted(df["identifiant_unique"].tolist()) == sorted(
+        assert sorted(df_working["identifiant_unique"].tolist()) == sorted(
             [
                 data["id_at2_parent_a"],
                 data["id_at2_parent_b"],
                 data["id_at4_parent"],
             ]
+        )
+
+    def test_parents_not_actif_excluded(self, df_working, db_testdata_write):
+        # Les parents inactifs ne sont pas retournés
+        data = db_testdata_write
+        assert (
+            data["id_at4_parent_inactif"]
+            not in df_working["identifiant_unique"].tolist()
         )
