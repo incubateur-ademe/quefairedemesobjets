@@ -129,6 +129,9 @@ class Produit(AbstractBaseProduit):
             .order_by("poids")
         )
 
+        if not produit_liens:
+            return
+
         return render_to_string(
             "components/produit/_en_savoir_plus.html",
             {"liens": [produit_lien.lien for produit_lien in produit_liens]},
