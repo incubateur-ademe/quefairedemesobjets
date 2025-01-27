@@ -5,6 +5,7 @@ from airflow import DAG
 from airflow.exceptions import AirflowSkipException
 from airflow.operators.python import PythonOperator
 from cluster.config.model import ClusterConfig
+from cluster.tasks.business_logic import cluster_acteurs_suggestions_to_db
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -15,7 +16,7 @@ def task_info_get():
 
 
     ============================================================
-    Description de la tâche "cluster_acteurs_db_data_write_suggestions"
+    Description de la tâche "cluster_acteurs_suggestions_to_db"
     ============================================================
 
     💡 quoi: écriture des suggestions en base de données
@@ -28,7 +29,7 @@ def task_info_get():
     """
 
 
-def cluster_acteurs_db_data_write_suggestions_wrapper(**kwargs) -> None:
+def cluster_acteurs_suggestions_to_db_wrapper(**kwargs) -> None:
     logger.info(task_info_get())
 
     # use xcom to get the params from the previous task
@@ -36,9 +37,13 @@ def cluster_acteurs_db_data_write_suggestions_wrapper(**kwargs) -> None:
         key="config", task_ids="cluster_acteurs_config_create"
     )
     df: pd.DataFrame = kwargs["ti"].xcom_pull(
-        key="df", task_ids="cluster_acteurs_suggestions"
+        key="df", task_ids="cluster_acteurs_suggestions_display"
     )
+    dag_id = kwargs["dag"].dag_id
+    run_id = kwargs["run_id"]
 
+    log.preview("DAG ID", dag_id)
+    log.preview("Run ID", run_id)
     log.preview("config reçue", config)
     log.preview("suggestions de clustering", df)
 
@@ -52,15 +57,22 @@ def cluster_acteurs_db_data_write_suggestions_wrapper(**kwargs) -> None:
             )
         )
 
-    raise NotImplementedError(
-        "Ecriture des suggestions en DB pas implémentée pour le moment"
+    cluster_acteurs_suggestions_to_db(
+        df_clusters=df,
+        identifiant_action=f"dag_id={dag_id}",
+        identifiant_execution=f"run_id={run_id}",
+    )
+
+    logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
+    logging.info(
+        f"{df["cluster_id"].nunique()} suggestions de clusters écrites en base"
     )
 
 
-def cluster_acteurs_db_data_write_suggestions_task(dag: DAG) -> PythonOperator:
+def cluster_acteurs_suggestions_to_db_task(dag: DAG) -> PythonOperator:
     """La tâche Airflow qui ne fait que appeler le wrapper"""
     return PythonOperator(
-        task_id="cluster_acteurs_db_data_write_suggestions",
-        python_callable=cluster_acteurs_db_data_write_suggestions_wrapper,
+        task_id="cluster_acteurs_suggestions_to_db",
+        python_callable=cluster_acteurs_suggestions_to_db_wrapper,
         dag=dag,
     )

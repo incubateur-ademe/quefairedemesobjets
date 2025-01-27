@@ -3,10 +3,10 @@ import logging
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from cluster.config.model import ClusterConfig
-from cluster.tasks.business_logic.cluster_acteurs_db_data_read_acteurs import (
-    cluster_acteurs_db_data_read_acteurs,
-)
 from cluster.tasks.business_logic.cluster_acteurs_df_sort import cluster_acteurs_df_sort
+from cluster.tasks.business_logic.cluster_acteurs_selection_from_db import (
+    cluster_acteurs_selection_from_db,
+)
 from utils import logging_utils as log
 from utils.django import django_setup_full
 
@@ -22,7 +22,7 @@ def task_info_get():
 
 
     ============================================================
-    Description de la tâche "cluster_acteurs_db_data_read_acteurs"
+    Description de la tâche "cluster_acteurs_selection_from_db"
     ============================================================
 
     💡 quoi: va chercher en base de données les acteurs correspondants
@@ -37,7 +37,7 @@ def task_info_get():
     """
 
 
-def cluster_acteurs_db_data_read_acteurs_wrapper(**kwargs) -> None:
+def cluster_acteurs_selection_from_db_wrapper(**kwargs) -> None:
     logger.info(task_info_get())
 
     config: ClusterConfig = kwargs["ti"].xcom_pull(
@@ -45,7 +45,7 @@ def cluster_acteurs_db_data_read_acteurs_wrapper(**kwargs) -> None:
     )
     log.preview("Config reçue", config)
 
-    df, query = cluster_acteurs_db_data_read_acteurs(
+    df, query = cluster_acteurs_selection_from_db(
         model_class=DisplayedActeur,
         include_source_ids=config.include_source_ids,
         include_acteur_type_ids=config.include_acteur_type_ids,
@@ -69,10 +69,10 @@ def cluster_acteurs_db_data_read_acteurs_wrapper(**kwargs) -> None:
     kwargs["ti"].xcom_push(key="df", value=df)
 
 
-def cluster_acteurs_db_data_read_acteurs_task(dag: DAG) -> PythonOperator:
+def cluster_acteurs_selection_from_db_task(dag: DAG) -> PythonOperator:
     """La tâche Airflow qui ne fait que appeler le wrapper"""
     return PythonOperator(
-        task_id="cluster_acteurs_db_data_read_acteurs",
-        python_callable=cluster_acteurs_db_data_read_acteurs_wrapper,
+        task_id="cluster_acteurs_selection_from_db",
+        python_callable=cluster_acteurs_selection_from_db_wrapper,
         dag=dag,
     )
