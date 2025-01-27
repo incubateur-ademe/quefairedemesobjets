@@ -14,6 +14,7 @@ with DAG(
         "DAG pour télécharger, standardiser, et charger dans notre base la source SINOE"
     ),
     tags=["source", "ademe", "sinoe", "déchèteries"],
+    max_active_runs=1,
     params={
         "endpoint": (
             "https://data.ademe.fr/data-fair/api/v1/datasets/"
