@@ -1,0 +1,14 @@
+<b>cluster_id:</b>
+<br/>
+<ul>
+    <li>{{ suggestion[0]["cluster_id"] }}</li>
+</ul>
+<b>acteurs:</b>
+<br/>
+<ul>
+    {% for x in suggestion %}
+        <li>
+            <a target='_blank' href="/admin/qfdmo/displayedacteur/{{ x['identifiant_unique'] }}/change/">{{ x['identifiant_unique'] }}</a>
+        </li>
+    {% endfor %}
+</ul>

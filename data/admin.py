@@ -2,6 +2,7 @@ from django.contrib.gis import admin
 from django.utils.html import format_html
 
 from data.models import Suggestion, SuggestionCohorte
+from data.models.suggestion import SuggestionStatut
 
 
 def dict_to_html_table(data):
@@ -26,6 +27,22 @@ class SuggestionCohorteAdmin(admin.ModelAdmin):
         return format_html(dict_to_html_table(obj.metadata or {}))
 
 
+@admin.action(description="REJETER les suggestions selectionnées")
+def mark_as_rejected(self, request, queryset):
+    queryset.update(statut=SuggestionStatut.REJETEE)
+    self.message_user(request, "Les suggestions sélectionnées ont été refusées")
+
+
+@admin.action(description="VALIDER les suggestions selectionnées")
+def mark_as_toproceed(self, request, queryset):
+    queryset.update(statut=SuggestionStatut.ATRAITER)
+    self.message_user(
+        request,
+        "Les suggestions sélectionnées ont été mises à jour"
+        " avec le statut «À traiter»",
+    )
+
+
 class SuggestionAdmin(admin.ModelAdmin):
     list_display = [
         "id",
@@ -34,7 +51,12 @@ class SuggestionAdmin(admin.ModelAdmin):
         "contexte",
         "changements",
     ]
-    list_filter = ["suggestion_cohorte"]
+    list_filter = ["suggestion_cohorte", "statut"]
+    actions = [mark_as_rejected, mark_as_toproceed]
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        return queryset.prefetch_related("suggestion_cohorte")
 
     def cohorte(self, obj):
         coh = obj.suggestion_cohorte
@@ -45,19 +67,7 @@ class SuggestionAdmin(admin.ModelAdmin):
         href='/admin/qfdmo/displayedacteur/{id}/change/'>{id}</a>"""
 
     def changements(self, obj):
-        data = obj.suggestion
-        return format_html(
-            f"""
-            <b>cluster_id:</b><br/>
-            <ul><li>{data[0]["cluster_id"]}</li></ul>
-            <b>acteurs:</b><br/><ul>
-            {''.join([
-                '<li>'+self.acteur_link_html(x["identifiant_unique"])+'</li>'
-                for x in data
-            ])}<br/>
-            </ul>
-            """
-        )
+        return obj.display_suggestion_details
 
 
 admin.site.register(SuggestionCohorte, SuggestionCohorteAdmin)
