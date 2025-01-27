@@ -117,7 +117,7 @@ class Migration(migrations.Migration):
                     "context",
                     models.JSONField(
                         blank=True,
-                        verbose_name="Contexte de la suggestion : données initiales",
+                        verbose_name="Données initiales",
                         null=True,
                     ),
                 ),
