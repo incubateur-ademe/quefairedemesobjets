@@ -11,6 +11,7 @@ with DAG(
         "A pipeline to fetch, process, and load to validate data into postgresql"
         " for OCAD3E dataset"
     ),
+    max_active_runs=1,
     params={
         "normalization_rules": [
             # 1. Renommage des colonnes

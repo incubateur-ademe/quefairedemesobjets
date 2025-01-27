@@ -39,6 +39,7 @@ dag = DAG(
         " plusieurs sources en cumulant leur services, sources et propositions"
         " services."
     ),
+    max_active_runs=1,
     schedule=None,
     max_active_runs=1,
 )

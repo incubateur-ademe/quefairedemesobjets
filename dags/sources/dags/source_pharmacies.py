@@ -8,6 +8,7 @@ with DAG(
     dag_display_name="Source - PHARMACIES",
     default_args=default_args,
     description=("Téléchargement des pharmacies (Ordre National Des Pharmaciens)"),
+    max_active_runs=1,
     params={
         "normalization_rules": [
             # 1. Renommage des colonnes

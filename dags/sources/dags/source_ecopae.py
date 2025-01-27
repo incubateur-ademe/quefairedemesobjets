@@ -11,6 +11,7 @@ with DAG(
         "Injestion des données de l'éco-organisme ECOPAE à partir des données"
         " disponibles sur Koumoul"
     ),
+    max_active_runs=1,
     params={
         "normalization_rules": [
             # 1. Renommage des colonnes

@@ -12,6 +12,7 @@ with DAG(
         " disponibles sur de Koumoul"
     ),
     tags=["source", "ademe", "piles", "batteries", "accumulateurs"],
+    max_active_runs=1,
     params={
         "endpoint": (
             "https://data.ademe.fr/data-fair/api/v1/datasets/"
