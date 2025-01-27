@@ -129,6 +129,9 @@ class Produit(AbstractBaseProduit):
             .order_by("poids")
         )
 
+        if not produit_liens:
+            return
+
         return render_to_string(
             "components/produit/_en_savoir_plus.html",
             {"liens": [produit_lien.lien for produit_lien in produit_liens]},
@@ -140,14 +143,14 @@ class Produit(AbstractBaseProduit):
             item
             for item in [
                 {
-                    "id": "Comment consommer responsable ?",
-                    "title": "Comment consommer responsable ?",
-                    "content": self.comment_les_eviter,
-                },
-                {
                     "id": "Que va-t-il devenir ?",
                     "title": "Que va-t-il devenir ?",
                     "content": self.que_va_t_il_devenir,
+                },
+                {
+                    "id": "Comment consommer responsable ?",
+                    "title": "Comment consommer responsable ?",
+                    "content": self.comment_les_eviter,
                 },
                 {
                     "id": "En savoir plus",

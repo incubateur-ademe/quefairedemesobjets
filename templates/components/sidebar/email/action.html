@@ -17,6 +17,7 @@ Nous contacter
 {% block modal_content %}
 <turbo-frame id="contact-form"
         src="{% url 'qfdmd:nous-contacter' %}"
+        loading="lazy"
 >
 </turbo-frame>
 {% endblock modal_content %}

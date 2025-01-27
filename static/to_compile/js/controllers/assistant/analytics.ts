@@ -54,8 +54,7 @@ export default class extends Controller<HTMLElement> {
     this.#checkAuthenticatedUser()
     this.#checkIfWeAreInAnIframe()
     this.#fillSessionStorageWithAction()
-    this.#setupIntersectionObserverForPageView()
-    this.#captureUserConversionScore()
+    this.#setupIntersectionObserverEvents()
 
     if (this.posthogDebugValue) {
       posthog.debug()
@@ -121,12 +120,13 @@ export default class extends Controller<HTMLElement> {
     }, 1000)
   }
 
-  #setupIntersectionObserverForPageView() {
+  #setupIntersectionObserverEvents() {
     const observer = new IntersectionObserver(
       (entries, observer) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             posthog.capture("$pageview")
+            this.#captureUserConversionScore()
             observer.unobserve(entry.target)
           }
         })

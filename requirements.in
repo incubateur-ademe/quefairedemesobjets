@@ -21,7 +21,6 @@ sentry-sdk
 shortuuid
 tqdm
 unidecode
-uvicorn
 whitenoise
 django-widget-tweaks
 django-cors-headers

@@ -20,7 +20,7 @@ def get_assistant_script(request):
 urlpatterns = [
     path("dechet/", HomeView.as_view(), name="home"),
     path("assistant/recherche", search_view, name="search"),
-    path("<slug:slug>/", SynonymeDetailView.as_view(), name="synonyme-detail"),
+    path("dechet/<slug:slug>/", SynonymeDetailView.as_view(), name="synonyme-detail"),
     path("assistant/nous-contacter", ContactFormView.as_view(), name="nous-contacter"),
     path(
         "assistant/nous-contacter/confirmation",
