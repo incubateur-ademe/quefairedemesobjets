@@ -43,7 +43,8 @@ class ChangeActeurUpdateParent(BaseModel):
     parent_id: str
 
     def apply(self):
-        _ = RevisionActeur.objects.filter(identifiant_unique=self.identifiant_unique)
+        raise NotImplementedError("Revoir logique d'ensemble")
+        # _ = RevisionActeur.objects.filter(identifiant_unique=self.identifiant_unique)
         # etc...
 
 
@@ -58,6 +59,7 @@ class ChangeActeurCreateAsParent(BaseModel):
     data: dict
 
     def apply(self) -> str:
+        raise NotImplementedError("Revoir logique d'ensemble")
         # Si ID fournit, on vérifie qu'il n'existe pas
         rev = RevisionActeur.objects.filter(identifiant_unique=self.identifiant_unique)
         if rev.exists():
@@ -80,6 +82,7 @@ class ChangeActeurDeleteAsParent(BaseModel):
     identifiant_unique: str
 
     def apply(self):
+        raise NotImplementedError("Revoir logique d'ensemble")
         # TODO: peut être déjà supprimé par https://github.com/incubateur-ademe/quefairedemesobjets/pull/1247
         # si oui condition inverse: il faut ordonner les changements de cluster
         # pour avoir les ChangeActeurUpdateParent en 1er et que l'observer
