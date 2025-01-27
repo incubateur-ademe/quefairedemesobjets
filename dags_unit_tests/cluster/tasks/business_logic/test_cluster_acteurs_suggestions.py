@@ -1,15 +1,14 @@
 import numpy as np
 import pandas as pd
 import pytest
-from rich import print
-
-from dags.cluster.tasks.business_logic.cluster_acteurs_suggestions import (
+from cluster.tasks.business_logic.cluster_acteurs_suggestions import (
     cluster_acteurs_suggestions,
     cluster_cols_group_fuzzy,
     cluster_strings,
     score_tuples_to_clusters,
     similarity_matrix_to_tuples,
 )
+from rich import print
 
 
 def df_clusters_to_dict(df: pd.DataFrame) -> dict[str, list[str]]:
