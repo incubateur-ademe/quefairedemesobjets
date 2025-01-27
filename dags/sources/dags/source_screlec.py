@@ -15,7 +15,7 @@ with DAG(
     params={
         "endpoint": (
             "https://data.ademe.fr/data-fair/api/v1/datasets/"
-            "donnees-eo-screlec/lines?size=10000"
+            "donnees-eo-batribox/lines?size=10000"
         ),
         "normalization_rules": [
             # 1. Renommage des colonnes
