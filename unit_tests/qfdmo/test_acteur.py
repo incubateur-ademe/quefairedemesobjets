@@ -91,7 +91,7 @@ class TestActeurIsdigital:
 @pytest.mark.django_db
 class TestActeurDefaultOnSave:
     def test_empty(self):
-        SourceFactory(code="Communauté Longue Vie Aux Objets")
+        SourceFactory(code="communautelvao")
         acteur_type = ActeurTypeFactory(code="fake")
         acteur = ActeurFactory(
             nom="Test Object 1",
@@ -101,10 +101,9 @@ class TestActeurDefaultOnSave:
         )
         assert len(acteur.identifiant_externe) == 12
         assert (
-            acteur.identifiant_unique
-            == "communaute_longue_vie_aux_objets_" + acteur.identifiant_externe
+            acteur.identifiant_unique == "communautelvao_" + acteur.identifiant_externe
         )
-        assert acteur.source.code == "Communauté Longue Vie Aux Objets"
+        assert acteur.source.code == "communautelvao"
 
     def test_default_identifiantunique(self):
         source = SourceFactory(code="source_equipe")
@@ -197,7 +196,7 @@ class TestActeurGetOrCreateRevisionActeur:
     def test_create_revisionacteur(self, acteur):
         revision_acteur = acteur.get_or_create_revision()
         revision_acteur.proposition_services.all().delete()
-        action = ActionFactory.create(code="action 2")
+        action = ActionFactory.create(code="action_2")
         proposition_service = RevisionPropositionService.objects.create(
             action=action,
             acteur=revision_acteur,
@@ -230,7 +229,7 @@ class TestCreateRevisionActeur:
 
     def test_new_revision_acteur_with_action_principale(self):
         acteur_type = ActeurTypeFactory(code="fake")
-        action_principale = ActionFactory(code="action 1")
+        action_principale = ActionFactory(code="action_1")
         revision_acteur = RevisionActeur.objects.create(
             nom="Test Object 1",
             location=Point(1, 1),
@@ -366,12 +365,12 @@ class TestRevisionActeurDuplicate:
         ), f"Should be the nom commercial of the acteur : {acteur.source}"
 
     def test_duplicate_source(self):
-        SourceFactory(code="Communauté Longue Vie Aux Objets")
+        SourceFactory(code="communautelvao")
         revision_acteur = RevisionActeurFactory()
         revision_acteur_duplicate = revision_acteur.duplicate()
 
         assert revision_acteur_duplicate.source == Source.objects.get(
-            code="Communauté Longue Vie Aux Objets"
+            code="communautelvao"
         )
 
     def test_duplicate_labels(self):
@@ -394,7 +393,7 @@ class TestRevisionActeurDuplicate:
         }
 
     def test_duplicate_proposition_services(self):
-        SourceFactory(code="Communauté Longue Vie Aux Objets")
+        SourceFactory(code="communautelvao")
         revision_acteur = RevisionActeurFactory()
         proposition_services1 = RevisionPropositionServiceFactory(
             acteur=revision_acteur, action=ActionFactory(code="action1")
@@ -415,6 +414,59 @@ class TestRevisionActeurDuplicate:
                 for ps in revision_acteur_duplicate.proposition_services.all()
             ]
         ) == {("action1", 2), ("action2", 1)}
+
+
+@pytest.mark.django_db
+class TestRevisionActeurRemoveParentWithoutChildren:
+
+    def test_revision_acteur_remove_parent_without_children(self):
+        revision_acteur_original_parent = RevisionActeurFactory()
+        revision_acteur = RevisionActeurFactory(parent=revision_acteur_original_parent)
+
+        assert RevisionActeur.objects.filter(
+            pk=revision_acteur_original_parent.pk
+        ).exists(), "Parent exists"
+
+        revision_acteur_new_parent = RevisionActeurFactory()
+        revision_acteur.parent = revision_acteur_new_parent
+        revision_acteur.save()
+
+        assert not RevisionActeur.objects.filter(
+            pk=revision_acteur_original_parent.pk
+        ).exists(), "Old parent is removed because it doesn't have any child"
+
+    def test_revision_acteur_remove_parent_without_children2(self):
+        revision_acteur_original_parent = RevisionActeurFactory()
+        revision_acteur = RevisionActeurFactory(parent=revision_acteur_original_parent)
+
+        assert RevisionActeur.objects.filter(
+            pk=revision_acteur_original_parent.pk
+        ).exists(), "Parent exists"
+
+        revision_acteur.parent = None
+        revision_acteur.save()
+
+        assert not RevisionActeur.objects.filter(
+            pk=revision_acteur_original_parent.pk
+        ).exists(), "Old parent is removed because it doesn't have any child"
+
+    def test_revision_acteur_dont_remove_parent_with_children(self):
+        revision_acteur_original_parent = RevisionActeurFactory()
+        revision_acteur1 = RevisionActeurFactory(parent=revision_acteur_original_parent)
+        # Another child
+        RevisionActeurFactory(parent=revision_acteur_original_parent)
+
+        assert RevisionActeur.objects.filter(
+            pk=revision_acteur_original_parent.pk
+        ).exists(), "Parent exists"
+
+        revision_acteur_new_parent = RevisionActeurFactory()
+        revision_acteur1.parent = revision_acteur_new_parent
+        revision_acteur1.save()
+
+        assert RevisionActeur.objects.filter(
+            pk=revision_acteur_original_parent.pk
+        ).exists(), "Old parent isn't removed because it still have a child"
 
 
 @pytest.mark.django_db

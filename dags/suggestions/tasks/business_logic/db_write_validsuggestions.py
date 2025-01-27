@@ -11,13 +11,13 @@ def db_write_validsuggestions(data_acteurs_normalized: dict):
     # If data_set is empty, nothing to do
     dag_run_id = data_acteurs_normalized["dag_run_id"]
     engine = PostgresConnectionManager().engine
-    if "actors" not in data_acteurs_normalized:
+    if "acteur" not in data_acteurs_normalized:
         with engine.begin() as connection:
             update_suggestion_status(
                 connection, dag_run_id, constants.SUGGESTION_ENCOURS
             )
         return
-    df_actors = data_acteurs_normalized["actors"]
+    df_acteur = data_acteurs_normalized["acteur"]
     df_labels = data_acteurs_normalized.get("labels")
     df_acteur_services = data_acteurs_normalized.get("acteur_services")
     df_pds = data_acteurs_normalized.get("pds")
@@ -31,10 +31,10 @@ def db_write_validsuggestions(data_acteurs_normalized: dict):
             constants.SUGGESTION_SOURCE_MODIFICATION,
         ]:
             db_write_acteurupdate(
-                connection, df_actors, df_labels, df_acteur_services, df_pds, df_pdssc
+                connection, df_acteur, df_labels, df_acteur_services, df_pds, df_pdssc
             )
         elif change_type == constants.SUGGESTION_SOURCE_SUPRESSION:
-            db_write_acteurdelete(connection, df_actors)
+            db_write_acteurdelete(connection, df_acteur)
         else:
             raise ValueError("Invalid change_type")
 
@@ -42,11 +42,11 @@ def db_write_validsuggestions(data_acteurs_normalized: dict):
 
 
 def db_write_acteurupdate(
-    connection, df_actors, df_labels, df_acteur_services, df_pds, df_pdssc
+    connection, df_acteur, df_labels, df_acteur_services, df_pds, df_pdssc
 ):
     logger.warning("Création ou mise à jour des acteurs")
 
-    df_actors[["identifiant_unique"]].to_sql(
+    df_acteur[["identifiant_unique"]].to_sql(
         "temp_actors", connection, if_exists="replace"
     )
 
@@ -88,10 +88,10 @@ def db_write_acteurupdate(
 
     # Filtrer les colonnes qui existent dans le DataFrame
     colonnes_existantes = [
-        col for col in colonnes_souhaitees if col in df_actors.columns
+        col for col in colonnes_souhaitees if col in df_acteur.columns
     ]
 
-    df_actors[colonnes_existantes].to_sql(
+    df_acteur[colonnes_existantes].to_sql(
         "qfdmo_acteur",
         connection,
         if_exists="append",

@@ -115,6 +115,11 @@ with DAG(
                 "transformation": "clean_action_codes",
                 "destination": ["action_codes"],
             },
+            {
+                "origin": ["action_codes", "souscategorie_codes"],
+                "transformation": "clean_proposition_services",
+                "destination": ["proposition_services_codes"],
+            },
             # 5. Supression des colonnes
             {"remove": "_i"},
             {"remove": "_id"},

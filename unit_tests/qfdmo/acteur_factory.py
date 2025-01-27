@@ -1,6 +1,9 @@
+import random
+import string
+
 import factory.fuzzy
 from django.contrib.gis.geos import Point
-from factory import Faker, SubFactory
+from factory import Faker, LazyFunction, SubFactory
 from factory.django import DjangoModelFactory as Factory
 
 from qfdmo.models import (
@@ -17,13 +20,19 @@ from qfdmo.models.acteur import RevisionActeur, RevisionPropositionService
 from unit_tests.qfdmo.action_factory import ActionFactory
 
 
+def generate_random_word():
+    length = 10
+    characters = string.ascii_lowercase + string.digits + "_"
+    return "".join(random.choice(characters) for _ in range(length))
+
+
 class SourceFactory(Factory):
     class Meta:
         model = Source
         django_get_or_create = ("code",)
 
     libelle = Faker("word")
-    code = Faker("word")
+    code = LazyFunction(generate_random_word)
     afficher = True
 
 
@@ -33,7 +42,7 @@ class LabelQualiteFactory(Factory):
         django_get_or_create = ("code",)
 
     libelle = Faker("word")
-    code = Faker("word")
+    code = LazyFunction(generate_random_word)
     afficher = True
 
 
@@ -42,7 +51,7 @@ class ActeurTypeFactory(Factory):
         model = ActeurType
         django_get_or_create = ("code",)
 
-    code = Faker("word")
+    code = LazyFunction(generate_random_word)
 
 
 class ActeurFactory(Factory):
@@ -81,7 +90,7 @@ class ActeurServiceFactory(Factory):
         model = ActeurService
         django_get_or_create = ("code",)
 
-    code = Faker("word")
+    code = LazyFunction(generate_random_word)
 
 
 class PropositionServiceFactory(Factory):

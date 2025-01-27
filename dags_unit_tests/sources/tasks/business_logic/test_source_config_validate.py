@@ -31,23 +31,33 @@ def test_source_config_validate_valid(codes_sc_db, dag_config):
     )
 
 
+def test_mandatory_columns(codes_sc_db, dag_config):
+    dag_config.normalization_rules = []
+    with pytest.raises(ValueError) as error:
+        source_config_validate(dag_config=dag_config, codes_sc_db=codes_sc_db)
+    assert "Mandatory columns are missing in dag_config" in str(error)
+
+
 def test_product_mapping_no_code(codes_sc_db, dag_config):
     dag_config.product_mapping["product3"] = ["code4"]
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as error:
         source_config_validate(dag_config=dag_config, codes_sc_db=codes_sc_db)
+    assert "Codes product_mapping invalides:" in str(error)
 
 
-def test_normalization_rules_not_list(codes_sc_db, dag_config):
-    dag_config.normalization_rules = "not_a_list"
-    with pytest.raises(ValueError):
+def test_product_mapping_missing(codes_sc_db, dag_config):
+    dag_config.product_mapping = {}
+    with pytest.raises(ValueError) as error:
         source_config_validate(dag_config=dag_config, codes_sc_db=codes_sc_db)
+    assert "product_mapping manquant pour la source" in str(error)
 
 
 def test_normalization_rules_invalid_function(codes_sc_db, dag_config):
-    dag_config.normalization_rules = [
+    dag_config.normalization_rules.append(
         NormalizationColumnTransform(
             origin="src", transformation="invalid_function", destination="dest"
         )
-    ]
-    with pytest.raises(ValueError):
+    )
+    with pytest.raises(ValueError) as error:
         source_config_validate(dag_config=dag_config, codes_sc_db=codes_sc_db)
+    assert "La fonction de transformation invalid_function n'existe pas" in str(error)

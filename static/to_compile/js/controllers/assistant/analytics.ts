@@ -118,11 +118,6 @@ export default class extends Controller<HTMLElement> {
           conversionScore,
         },
       })
-
-      const posthogBannerConversionScore = document.querySelector("#posthog-banner-conversion-score")
-      if (posthogBannerConversionScore) {
-        posthogBannerConversionScore.textContent = conversionScore.toString()
-      }
     }, 1000)
   }
 

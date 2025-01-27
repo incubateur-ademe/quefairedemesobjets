@@ -17,7 +17,7 @@ class TestActionNomAsNaturalKeyHeritage:
 
     @pytest.fixture
     def action(self):
-        return Action.objects.create(code="fake action")
+        return Action.objects.create(code="fake_action")
 
     @pytest.fixture
     def acteur(self):
@@ -75,10 +75,10 @@ class TestActionNomAsNaturalKeyHeritage:
 
     @pytest.mark.django_db
     def test_proposition_service_str(self, proposition_service):
-        assert str(proposition_service) == ("fake acteur - fake action")
+        assert str(proposition_service) == ("fake acteur - fake_action")
 
     @pytest.mark.django_db
     def test_revision_proposition_service_str(self, revision_proposition_service):
         assert str(revision_proposition_service) == (
-            "fake revision acteur (1) - fake action"
+            "fake revision acteur (1) - fake_action"
         )
