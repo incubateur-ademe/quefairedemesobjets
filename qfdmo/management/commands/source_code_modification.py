@@ -24,7 +24,8 @@ def update_source_code(old_code, new_code):
 
     # filtre pour les tests
     if not Source.objects.filter(code=old_code).exists():
-        raise ValueError(f"Source with old code {old_code} does not exist")
+        logging.warning(f"Source with old code {old_code} doesn't exist")
+        return
     if Source.objects.filter(code=new_code).exists():
         raise ValueError(f"Source with new code {new_code} already exist")
 
