@@ -17,7 +17,7 @@ with DAG(
     params={
         "endpoint": (
             "https://data.ademe.fr/data-fair/api/v1/datasets/"
-            "sinoe-(r)-annuaire-des-decheteries-dma/lines?size=10000&q_mode=simple&ANNEE_eq=2024"
+            "sinoe-(r)-annuaire-des-decheteries-dma/lines?size=10000&q_mode=simple&ANNEE_eq=2025"
         ),
         "normalization_rules": [
             # 1. Renommage des colonnes

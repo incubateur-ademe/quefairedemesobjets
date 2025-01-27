@@ -13,10 +13,11 @@ from airflow.models.baseoperator import chain
 from airflow.models.param import Param
 from cluster.tasks.airflow_logic import (
     cluster_acteurs_config_create_task,
-    cluster_acteurs_db_data_read_acteurs_task,
-    cluster_acteurs_db_data_write_suggestions_task,
     cluster_acteurs_normalize_task,
-    cluster_acteurs_suggestions_task,
+    cluster_acteurs_selection_from_db_task,
+    cluster_acteurs_suggestions_display_task,
+    cluster_acteurs_suggestions_to_db_task,
+    cluster_acteurs_suggestions_validate_task,
 )
 from utils.airflow_params import airflow_params_dropdown_from_mapping
 from utils.django import django_model_fields_attributes_get, django_setup_full
@@ -265,13 +266,14 @@ with DAG(
 ) as dag:
     chain(
         cluster_acteurs_config_create_task(dag=dag),
-        cluster_acteurs_db_data_read_acteurs_task(dag=dag),
+        cluster_acteurs_selection_from_db_task(dag=dag),
         cluster_acteurs_normalize_task(dag=dag),
         # TODO: besoin de refactoriser cette tâche:
-        # - changer cluster_acteurs_suggestions pour obtenir une
+        # - changer cluster_acteurs_suggestions_display pour obtenir une
         #   df de clusters ignorés
         # - utiliser cette df pour la tâche d'info
         # cluster_acteurs_info_size1_task(dag=dag),
-        cluster_acteurs_suggestions_task(dag=dag),
-        cluster_acteurs_db_data_write_suggestions_task(dag=dag),
+        cluster_acteurs_suggestions_display_task(dag=dag),
+        cluster_acteurs_suggestions_validate_task(dag=dag),
+        cluster_acteurs_suggestions_to_db_task(dag=dag),
     )

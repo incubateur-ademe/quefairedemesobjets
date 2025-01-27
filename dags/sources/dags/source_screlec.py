@@ -4,18 +4,18 @@ from sources.config.airflow_params import get_mapping_config
 from sources.tasks.airflow_logic.operators import default_args, eo_task_chain
 
 with DAG(
-    dag_id="eo-screlec",
+    dag_id="eo-batribox",
     dag_display_name="Source - SCRELEC",
     default_args=default_args,
     description=(
         "Injestion des données de l'éco-organisme SCRELEC à partir des données"
         " disponibles sur de Koumoul"
     ),
-    tags=["source", "ademe", "screlec", "piles", "batteries", "accumulateurs"],
+    tags=["source", "ademe", "piles", "batteries", "accumulateurs"],
     params={
         "endpoint": (
             "https://data.ademe.fr/data-fair/api/v1/datasets/"
-            "donnees-eo-screlec/lines?size=10000"
+            "donnees-eo-batribox/lines?size=10000"
         ),
         "normalization_rules": [
             # 1. Renommage des colonnes

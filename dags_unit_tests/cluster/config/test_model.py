@@ -106,6 +106,11 @@ class TestClusterConfigModel:
         assert "source_id" in config.fields_used
         assert "acteur_type_id" in config.fields_used
         assert "identifiant_unique" in config.fields_used
+        # Bien que le clustering ne devrait s'appliquer que sur les actifs
+        # le fait d'avoir le champ statut dispo permet justement de
+        # vérifier cette règle dans l'étape de validation post suggestion
+        # et avant écriture DB
+        assert "statut" in config.fields_used
 
     def test_fields_used_has_no_duplicates(self, params_working):
         # Les champs utilisés ne doivent pas contenir de doublons

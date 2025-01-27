@@ -5,11 +5,17 @@ from airflow import DAG
 from airflow.exceptions import AirflowSkipException
 from airflow.operators.python import PythonOperator
 from cluster.config.model import ClusterConfig
-from cluster.tasks.business_logic.cluster_acteurs_df_sort import cluster_acteurs_df_sort
-from cluster.tasks.business_logic.cluster_acteurs_suggestions import (
+from cluster.tasks.business_logic import (
+    cluster_acteurs_df_sort,
+    cluster_acteurs_parent_calculations,
     cluster_acteurs_suggestions,
 )
 from utils import logging_utils as log
+from utils.django import django_setup_full
+
+django_setup_full()
+
+from qfdmo.models import RevisionActeur  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
@@ -46,34 +52,58 @@ def cluster_acteurs_suggestions_wrapper(**kwargs) -> None:
     log.preview("config reçue", config)
     log.preview("acteurs normalisés", df)
 
-    df_suggestions = cluster_acteurs_suggestions(
+    df_clusters = cluster_acteurs_suggestions(
         df,
         cluster_fields_exact=config.cluster_fields_exact,
         cluster_fields_fuzzy=config.cluster_fields_fuzzy,
         cluster_fields_separate=config.cluster_fields_separate,
         cluster_fuzzy_threshold=config.cluster_fuzzy_threshold,
     )
-    if df_suggestions.empty:
+    if df_clusters.empty:
         raise AirflowSkipException(
             log.banner_string("Pas de suggestions de clusters générées")
         )
 
-    df_suggestions = cluster_acteurs_df_sort(
-        df_suggestions,
+    logger.info("Ajout des données calculées")
+    # TODO: créer une fonction dédiée qui permet de consolider:
+    # - la df de suggestions (données uniquement nécessaires aux clusters)
+    # - la df de sélection (données complètes des acteurs)
+    # pour pouvoir offrire en sortie de suggestion une df complète
+    # qui permettre + de validation/suivis au delà de ce qui est
+    # nécessaire pour le clustering lui-même
+    # En attendant un quick-fix pour récupérer le statut et passer la validation
+    status_by_id = df.set_index("identifiant_unique")["statut"]
+    df_clusters["statut"] = df_clusters["identifiant_unique"].map(status_by_id)
+
+    # Parent ID n'est pas présent dans DisplayedActeur (source des clusters)
+    # donc on reconstruit ce champ à partir de RevisionActeur
+    parent_ids_by_id = dict(
+        RevisionActeur.objects.filter(parent__isnull=False).values_list(
+            "identifiant_unique", "parent__identifiant_unique"
+        )
+    )
+    df_clusters["parent_id"] = df_clusters["identifiant_unique"].map(
+        lambda x: parent_ids_by_id.get(x, None)
+    )
+
+    df_clusters = cluster_acteurs_parent_calculations(df_clusters)
+
+    df_clusters = cluster_acteurs_df_sort(
+        df_clusters,
         cluster_fields_exact=config.cluster_fields_exact,
         cluster_fields_fuzzy=config.cluster_fields_fuzzy,
     )
 
     logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
-    log.preview_df_as_markdown("suggestions de clusters", df_suggestions)
+    log.preview_df_as_markdown("suggestions de clusters", df_clusters)
 
     # On pousse les suggestions dans xcom pour les tâches suivantes
-    kwargs["ti"].xcom_push(key="df", value=df_suggestions)
+    kwargs["ti"].xcom_push(key="df", value=df_clusters)
 
 
-def cluster_acteurs_suggestions_task(dag: DAG) -> PythonOperator:
+def cluster_acteurs_suggestions_display_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
-        task_id="cluster_acteurs_suggestions",
+        task_id="cluster_acteurs_suggestions_display",
         python_callable=cluster_acteurs_suggestions_wrapper,
         provide_context=True,
         dag=dag,

@@ -3,17 +3,44 @@ from shared.tasks.database_logic.db_manager import PostgresConnectionManager
 
 
 def db_data_write(
-    df_acteur_merged=pd.DataFrame,
-    df_labels_updated=pd.DataFrame,
-    df_acteur_services_updated=pd.DataFrame,
-    df_acteur_sources_updated=pd.DataFrame,
-    df_propositionservice_merged=pd.DataFrame,
-    df_propositionservice_sous_categories_merged=pd.DataFrame,
+    df_acteur_merged: pd.DataFrame,
+    df_labels_updated: pd.DataFrame,
+    df_acteur_services_updated: pd.DataFrame,
+    df_acteur_sources_updated: pd.DataFrame,
+    df_propositionservice_merged: pd.DataFrame,
+    df_propositionservice_sous_categories_merged: pd.DataFrame,
 ):
 
-    df_propositionservice_sous_categories_merged.rename(
-        columns={"propositionservice_id": "displayedpropositionservice_id"},
-        inplace=True,
+    df_labels_updated = df_labels_updated[
+        df_labels_updated["displayedacteur_id"].isin(
+            df_acteur_merged["identifiant_unique"]
+        )
+    ]
+
+    df_acteur_services_updated = df_acteur_services_updated[
+        df_acteur_services_updated["displayedacteur_id"].isin(
+            df_acteur_merged["identifiant_unique"]
+        )
+    ]
+
+    df_acteur_sources_updated = df_acteur_sources_updated[
+        df_acteur_sources_updated["displayedacteur_id"].isin(
+            df_acteur_merged["identifiant_unique"]
+        )
+    ]
+
+    df_propositionservice_merged = df_propositionservice_merged[
+        df_propositionservice_merged["acteur_id"].isin(
+            df_acteur_merged["identifiant_unique"]
+        )
+    ]
+
+    df_propositionservice_sous_categories_merged = (
+        df_propositionservice_sous_categories_merged[
+            df_propositionservice_sous_categories_merged[
+                "displayedpropositionservice_id"
+            ].isin(df_propositionservice_merged["id"])
+        ]
     )
 
     engine = PostgresConnectionManager().engine
