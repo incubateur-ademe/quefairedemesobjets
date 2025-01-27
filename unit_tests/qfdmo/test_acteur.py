@@ -91,7 +91,7 @@ class TestActeurIsdigital:
 @pytest.mark.django_db
 class TestActeurDefaultOnSave:
     def test_empty(self):
-        SourceFactory(code="Communauté Longue Vie Aux Objets")
+        SourceFactory(code="communautelvao")
         acteur_type = ActeurTypeFactory(code="fake")
         acteur = ActeurFactory(
             nom="Test Object 1",
@@ -196,7 +196,7 @@ class TestActeurGetOrCreateRevisionActeur:
     def test_create_revisionacteur(self, acteur):
         revision_acteur = acteur.get_or_create_revision()
         revision_acteur.proposition_services.all().delete()
-        action = ActionFactory.create(code="action 2")
+        action = ActionFactory.create(code="action_2")
         proposition_service = RevisionPropositionService.objects.create(
             action=action,
             acteur=revision_acteur,
@@ -229,7 +229,7 @@ class TestCreateRevisionActeur:
 
     def test_new_revision_acteur_with_action_principale(self):
         acteur_type = ActeurTypeFactory(code="fake")
-        action_principale = ActionFactory(code="action 1")
+        action_principale = ActionFactory(code="action_1")
         revision_acteur = RevisionActeur.objects.create(
             nom="Test Object 1",
             location=Point(1, 1),
@@ -365,7 +365,7 @@ class TestRevisionActeurDuplicate:
         ), f"Should be the nom commercial of the acteur : {acteur.source}"
 
     def test_duplicate_source(self):
-        SourceFactory(code="Communauté Longue Vie Aux Objets")
+        SourceFactory(code="communautelvao")
         revision_acteur = RevisionActeurFactory()
         revision_acteur_duplicate = revision_acteur.duplicate()
 
@@ -393,7 +393,7 @@ class TestRevisionActeurDuplicate:
         }
 
     def test_duplicate_proposition_services(self):
-        SourceFactory(code="Communauté Longue Vie Aux Objets")
+        SourceFactory(code="communautelvao")
         revision_acteur = RevisionActeurFactory()
         proposition_services1 = RevisionPropositionServiceFactory(
             acteur=revision_acteur, action=ActionFactory(code="action1")
