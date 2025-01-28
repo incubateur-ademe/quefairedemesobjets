@@ -18,7 +18,7 @@ server {
     }
 
     location / {
-        proxy_pass http://unix:/tmp/gunicorn.sock;
+        proxy_pass https://unix:/tmp/gunicorn.sock;
 
         proxy_cache_bypass $no_cache;
         proxy_no_cache $no_cache;
