@@ -37,15 +37,11 @@ server {
 
     location /static/carte.js {
         proxy_pass <%= $gunicorn_sock %>;
-
-        <%= proxy_cache_settings %>
         <%= nginx_headers %>
     }
 
     location /iframe.js {
         proxy_pass <%= $gunicorn_sock %>;
-
-        <%= proxy_cache_settings %>
         <%= nginx_headers %>
     }
 
