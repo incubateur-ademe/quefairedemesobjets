@@ -27,13 +27,8 @@ RUN chown -R ${AIRFLOW_UID:-50000}:0 /opt/airflow
 USER ${AIRFLOW_UID:-50000}:0
 
 COPY ./airflow-requirements.txt /opt/airflow/airflow-requirements.txt
-COPY ./requirements.txt /opt/airflow/django-requirements.txt
-RUN pip install -r /opt/airflow/airflow-requirements.txt
-RUN pip install -r /opt/airflow/django-requirements.txt
-
-
-# Copy the dags, logs, config, and plugins directories to the appropriate locations
-COPY sync_dags.sh /opt/airflow/sync_dags.sh
+COPY ./requirements.txt /opt/airflow/requirements.txt
+RUN pip install -r /opt/airflow/airflow-requirements.txt -r /opt/airflow/requirements.txt
 
 # Nécessaire pour faire fonctionner Django dans Airflow
 COPY ./core/ /opt/airflow/core/
