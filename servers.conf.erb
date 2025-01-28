@@ -1,5 +1,12 @@
 proxy_cache_path /tmp/nginx_assistant_cache levels=1:2 keys_zone=assistant:10m max_size=1g inactive=60m use_temp_path=off;
 
+# Define a variable to disable cache if the specific cookie is set
+map $http_cookie $no_cache {
+    default 0; # Enable caching by default
+    "~*logged_in=.*" 1; # Disable caching if 'logged_in' is set
+}
+
+
 server {
     listen <%= ENV["PORT"] %>;
     server_name _;
@@ -12,6 +19,10 @@ server {
 
     location / {
         proxy_pass http://unix:/tmp/gunicorn.sock;
+
+        proxy_cache_bypass $no_cache;
+        proxy_no_cache $no_cache;
+
         proxy_cache assistant;
         proxy_set_header Host $http_host;
         proxy_cache_key $request_method$request_uri$is_args$args;

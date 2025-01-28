@@ -39,6 +39,7 @@ services:
     volumes:
         - ./nginx/servers.conf:/etc/nginx/servers.conf
         - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+        - ./staticfiles:/app/staticfiles
     profiles: [proxy]
     ports:
       - "8080:80"
