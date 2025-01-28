@@ -34,3 +34,4 @@ airflow-pgdata/
 media
 
 _build
+.obsidian
