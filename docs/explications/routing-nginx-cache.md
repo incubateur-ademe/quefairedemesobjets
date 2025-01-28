@@ -1,3 +1,4 @@
+# 🚏 Routing, nginx et cache
 Le projet est actuellement déployé sur Scalingo.
 Ils imposent une limite de 50 requêtes/seconde sur un worker.
 
@@ -5,7 +6,8 @@ Dans l'hypothèse d'un pic de charge, nous avons décidé d'ajouter Nginx en jan
 - Le **cache** de certaines **vues Django**
 - Le **cache** des **fichiers statiques**
 
-Des images valant mille mots, ci-dessous un schéma résumant le parcours d'une requête lorsqu'elle atteint `lvao.ademe.fr` ou `quefairedemesdechets.ademe.fr
+Des images valant mille mots, ci-dessous un schéma résumant le parcours d'une requête lorsqu'elle atteint `lvao.ademe.fr` ou `quefairedemesdechets.ademe.fr`
+
 
 ```mermaid
 sequenceDiagram
@@ -45,5 +47,6 @@ Nginx-->>Client: Return Django response
 end
 ```
 # nginx
+
 # whitenoise
 # cache
