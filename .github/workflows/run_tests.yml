@@ -90,7 +90,6 @@ jobs:
           - 6543:5432
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".tool-versions"
@@ -135,8 +134,6 @@ jobs:
 
       - name: Run Playwright tests
         run: npx playwright test --reporter=list --update-snapshots --shard=${{ matrix.shard }}
-
-
 
       - uses: actions/upload-artifact@v4
         if: always()

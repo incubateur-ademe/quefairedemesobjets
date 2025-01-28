@@ -7,7 +7,8 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
+from django.views.decorators.cache import cache_control, cache_page
+from django.views.decorators.vary import vary_on_headers
 from django.views.generic import DetailView, FormView, ListView
 
 from core.notion import create_new_row_in_notion_table
@@ -91,7 +92,8 @@ def cache_page_for_guests(*cache_args, **cache_kwargs):
     return inner_decorator
 
 
-@method_decorator(cache_page_for_guests(60 * 15), name="dispatch")
+@method_decorator(cache_control(max_age=60 * 15), name="dispatch")
+@method_decorator(vary_on_headers("logged-in", "iframe"), name="dispatch")
 class HomeView(BaseView, ListView):
     template_name = "qfdmd/home.html"
     model = Suggestion
@@ -115,11 +117,9 @@ class HomeView(BaseView, ListView):
         return context
 
 
-@method_decorator(cache_page_for_guests(60 * 15), name="dispatch")
 class SynonymeDetailView(BaseView, DetailView):
     model = Synonyme
 
 
-@method_decorator(cache_page_for_guests(60 * 15), name="dispatch")
 class CMSPageDetailView(BaseView, DetailView):
     model = CMSPage

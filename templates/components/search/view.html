@@ -25,18 +25,14 @@
             qf-content-center
             "
         >
-            {% csrf_token %}
-
             <button
                 aria-label="Rechercher"
                 type="submit"
-                class="qf-absolute qf-left-0
-                qf-m-auto
+                class="qf-absolute qf-top-0 qf-bottom-0 qf-left-0
+                qf-m-auto qf-pl-1v
                 fr-btn fr-icon-search-line fr-btn--tertiary-no-outline
-                qf-text-green-menthe-main-548
-                "
-            >
-            </button>
+                qf-text-green-menthe-main-548"
+            ></button>
 
             {% for field in search_form %}
                 {{ field }}
