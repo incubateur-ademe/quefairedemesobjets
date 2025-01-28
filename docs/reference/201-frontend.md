@@ -1,4 +1,5 @@
-# Parcel
+# Frontend
+## Parcel
 [Parcel](https://parceljs.org) est utilisé pour compiler les fichiers statiques : **CSS, JS** notamment.
 Les sources sont configurées dans le fichier package.json`
 
