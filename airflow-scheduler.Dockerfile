@@ -30,7 +30,6 @@ COPY ./airflow-requirements.txt /opt/airflow/airflow-requirements.txt
 COPY ./requirements.txt /opt/airflow/django-requirements.txt
 RUN pip install -r /opt/airflow/airflow-requirements.txt
 RUN pip install -r /opt/airflow/django-requirements.txt
-RUN pip install awscli
 
 
 # Copy the dags, logs, config, and plugins directories to the appropriate locations
