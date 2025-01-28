@@ -12,7 +12,7 @@ server {
     server_name _;
 
 
-    location /static/ {
+    location ~ ^/static(?!/carte\.js) {
         expires max;
         alias /app/staticfiles/;
     }
