@@ -88,9 +88,19 @@ jobs:
           --health-retries 50
         ports:
           - 6543:5432
+      proxy:
+        image: nginx:latest
+        volumes:
+            - ${{ github.workspace }}/nginx/:/etc/nginx/
+        ports:
+          - "8080:80"
+        options: --name nginx
     steps:
       - uses: actions/checkout@v4
-
+      - name: Restart nginx
+        uses: docker://docker
+        with:
+          args: docker restart nginx
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".tool-versions"
