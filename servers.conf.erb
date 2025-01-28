@@ -2,30 +2,21 @@
 $gunicorn_sock = "http://unix:/tmp/gunicorn.sock"
 $cache_zone = "assistant"
 $staticfiles_path = "/app/staticfiles"
+
+proxy_cache_settings = <<-SETTINGS
+proxy_cache #{$cache_zone};
+        proxy_set_header Host $http_host;
+        proxy_cache_key $request_method$request_uri$is_args$args;
+        proxy_cache_lock on;
+        proxy_cache_lock_timeout 10s;
+        proxy_cache_use_stale error timeout updating;
+        proxy_cache_background_update on;
+SETTINGS
+
+nginx_headers = <<-HEADERS
+add_header X-Cache-Status $upstream_cache_status;
+HEADERS
 %>
-
-<% def proxy_cache_settings %>
-    proxy_cache <%= $cache_zone %>;
-    proxy_set_header Host $http_host;
-    proxy_cache_key $request_method$request_uri$is_args$args;
-    proxy_cache_lock on;
-    proxy_cache_lock_timeout 10s;
-    proxy_cache_use_stale error timeout updating;
-    proxy_cache_background_update on;
-<% end %>
-
-<% def nginx_headers %>
-    add_header X-Cache-Status $upstream_cache_status;
-<% end %>
-
-<% def js_proxy_block(file) %>
-location <%= file %> {
-    proxy_pass <%= $gunicorn_sock %>;
-
-    <%= proxy_cache_settings %>
-    <%= nginx_headers %>
-}
-<% end %>
 
 proxy_cache_path /tmp/nginx_assistant_cache levels=1:2 keys_zone=<%= $cache_zone %>:10m max_size=1g inactive=60m use_temp_path=off;
 
@@ -44,8 +35,19 @@ server {
         alias <%= $staticfiles_path %>;
     }
 
-    <%= js_proxy_block('/static/carte.js') %>
-    <%= js_proxy_block('/iframe.js') %>
+    location /static/carte.js {
+        proxy_pass <%= $gunicorn_sock %>;
+
+        <%= proxy_cache_settings %>
+        <%= nginx_headers %>
+    }
+
+    location /iframe.js {
+        proxy_pass <%= $gunicorn_sock %>;
+
+        <%= proxy_cache_settings %>
+        <%= nginx_headers %>
+    }
 
     # Dynamic route configurations
     location / {
