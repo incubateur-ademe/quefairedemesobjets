@@ -1,58 +1,48 @@
-<%
-$gunicorn_sock = "http://unix:/tmp/gunicorn.sock"
-$cache_zone = "assistant"
-$staticfiles_path = "/app/staticfiles"
+proxy_cache_path /tmp/nginx_assistant_cache levels=1:2 keys_zone=assistant:10m max_size=1g inactive=60m use_temp_path=off;
 
-proxy_cache_settings = <<-SETTINGS
-proxy_cache #{$cache_zone};
+# Define a variable to disable cache if the specific cookie is set
+map $http_cookie $no_cache {
+    default 0; # Enable caching by default
+    "~*logged_in=.*" 1; # Disable caching if 'logged_in' is set
+}
+
+
+server {
+    listen <%= ENV["PORT"] %>;
+    server_name _;
+
+
+    location /static/ {
+        expires max;
+        alias /app/staticfiles/;
+    }
+
+    location /iframe.js {
+        proxy_pass http://unix:/tmp/gunicorn.sock;
+        proxy_cache assistant;
+        add_header X-Cache-Status $upstream_cache_status;
+    }
+
+    location /static/carte.js {
+        proxy_pass http://unix:/tmp/gunicorn.sock;
+        proxy_cache assistant;
+        add_header X-Cache-Status $upstream_cache_status;
+    }
+
+    location / {
+        proxy_pass http://unix:/tmp/gunicorn.sock;
+
+        proxy_cache_bypass $no_cache;
+        proxy_no_cache $no_cache;
+
+        proxy_cache assistant;
         proxy_set_header Host $http_host;
         proxy_cache_key $request_method$request_uri$is_args$args;
         proxy_cache_lock on;
         proxy_cache_lock_timeout 10s;
         proxy_cache_use_stale error timeout updating;
         proxy_cache_background_update on;
-SETTINGS
-
-nginx_headers = <<-HEADERS
-add_header X-Cache-Status $upstream_cache_status;
-HEADERS
-%>
-
-proxy_cache_path /tmp/nginx_assistant_cache levels=1:2 keys_zone=<%= $cache_zone %>:10m max_size=1g inactive=60m use_temp_path=off;
-
-# Define a variable to disable cache if the logged_in is set
-map $http_cookie $no_cache {
-    default 0;
-    "~*logged_in=.*" 1;
-}
-
-server {
-    listen <%= ENV["PORT"] %>;
-    server_name _;
-
-    location /static/ {
-        expires max;
-        alias <%= $staticfiles_path %>;
-    }
-
-    location /static/carte.js {
-        proxy_pass <%= $gunicorn_sock %>;
-        <%= nginx_headers %>
-    }
-
-    location /iframe.js {
-        proxy_pass <%= $gunicorn_sock %>;
-        <%= nginx_headers %>
-    }
-
-    location / {
-        proxy_pass <%= $gunicorn_sock %>;
-
-        proxy_cache_bypass $no_cache;
-        proxy_no_cache $no_cache;
-
-        <%= proxy_cache_settings %>
-        <%= nginx_headers %>
+        add_header X-Cache-Status $upstream_cache_status;
     }
 
     location ~ ^/(favicon(?:-\d+)?.(?:jpe?g|png|ico))$ {
