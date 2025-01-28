@@ -9,7 +9,6 @@ from qfdmo.views.adresses import (
     FormulaireSearchActeursView,
     acteur_detail,
     acteur_detail_redirect,
-    direct_access,
     get_object_list,
     getorcreate_revisionacteur,
     solution_admin,
@@ -19,7 +18,6 @@ from qfdmo.views.configurator import AdvancedConfiguratorView, ConfiguratorView
 from qfdmo.views.dags import DagsValidation
 
 urlpatterns = [
-    path("", direct_access, name="direct_access"),
     # This route needs to be touched with care is it is embedded
     # on many website, enabling the load of LVAO as an iframe
     path("static/carte.js", get_carte_iframe_script, name="script"),
