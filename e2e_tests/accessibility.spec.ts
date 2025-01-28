@@ -31,7 +31,7 @@ test.describe("WCAG Compliance Tests", () => {
 
   test("Assistant Homepage | Desktop", async ({ page }) => {
     // TODO: Update the route for production
-    await page.goto(`${BASE_URL}/dechet`, { waitUntil: "networkidle" });
+    await page.goto(`${BASE_URL}/`, { waitUntil: "networkidle" });
 
     const accessibilityScanResults = await new AxeBuilder({ page })
       .exclude("[data-disable-axe]")
