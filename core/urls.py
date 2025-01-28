@@ -66,11 +66,14 @@ urlpatterns = [
 
 if settings.DEBUG:
     from django.conf.urls.static import static
+    from django.views.defaults import page_not_found, server_error
 
     urlpatterns.extend(
         [
             path("__debug__/", include("debug_toolbar.urls")),
             path("__reload__/", include("django_browser_reload.urls")),
+            path("500", server_error, {"template_name": "500.html"}),
+            path("404", page_not_found, {"template_name": "404.html"}),
         ]
     )
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
