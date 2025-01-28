@@ -1,6 +1,6 @@
 from django.conf import settings
-from django.shortcuts import redirect
-from django.templatetags.static import static
+from django.contrib.staticfiles import finders
+from django.http import HttpResponse
 from django.urls import path
 from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
@@ -22,7 +22,11 @@ from qfdmo.views.dags import DagsValidation
 
 
 def get_carte_iframe_script(request):
-    return redirect(static("carte.js"))
+    file_path = finders.find("carte.js")
+
+    with open(file_path, "r") as file:
+        file_content = file.read()
+        return HttpResponse(file_content, content_type="application/javascript")
 
 
 urlpatterns = [
