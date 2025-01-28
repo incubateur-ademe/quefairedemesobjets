@@ -1,6 +1,4 @@
 from django.conf import settings
-from django.shortcuts import redirect
-from django.templatetags.static import static
 from django.urls import path
 from django.views.generic import RedirectView
 
@@ -9,13 +7,9 @@ from qfdmd.views import (
     ContactFormView,
     HomeView,
     SynonymeDetailView,
+    get_assistant_script,
     search_view,
 )
-
-
-def get_assistant_script(request):
-    return redirect(request.build_absolute_uri(static("assistant/script-to-iframe.js")))
-
 
 urlpatterns = [
     path("dechet/", HomeView.as_view(), name="home"),

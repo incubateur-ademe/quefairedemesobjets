@@ -1,12 +1,9 @@
 from django.conf import settings
-from django.contrib.staticfiles import finders
-from django.http import HttpResponse
 from django.urls import path
-from django.views.decorators.cache import cache_control
 from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 
-from qfdmo.views import google_verification
+from qfdmo.views import get_carte_iframe_script, google_verification
 from qfdmo.views.adresses import (
     CarteSearchActeursView,
     FormulaireSearchActeursView,
@@ -20,16 +17,6 @@ from qfdmo.views.adresses import (
 from qfdmo.views.auth import LVAOLoginView
 from qfdmo.views.configurator import AdvancedConfiguratorView, ConfiguratorView
 from qfdmo.views.dags import DagsValidation
-
-
-@cache_control(max_age=604800)
-def get_carte_iframe_script(request):
-    file_path = finders.find("carte.js")
-
-    with open(file_path, "r") as file:
-        file_content = file.read()
-        return HttpResponse(file_content, content_type="application/javascript")
-
 
 urlpatterns = [
     path("", direct_access, name="direct_access"),

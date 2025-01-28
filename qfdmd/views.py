@@ -11,10 +11,16 @@ from django.views.decorators.vary import vary_on_headers
 from django.views.generic import DetailView, FormView, ListView
 
 from core.notion import create_new_row_in_notion_table
+from core.views import static_file_content_from
 from qfdmd.forms import ContactForm, SearchForm
 from qfdmd.models import CMSPage, Suggestion, Synonyme
 
 logger = logging.getLogger(__name__)
+
+
+@cache_control(max_age=31536000)
+def get_assistant_script(request):
+    return static_file_content_from("assistant/script-to-iframe.js")
 
 
 def generate_iframe_script(request) -> str:
