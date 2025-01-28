@@ -1,5 +1,4 @@
 import logging
-from functools import wraps
 from typing import Any
 
 from django.conf import settings
@@ -7,7 +6,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_control, cache_page
+from django.views.decorators.cache import cache_control
 from django.views.decorators.vary import vary_on_headers
 from django.views.generic import DetailView, FormView, ListView
 
@@ -75,21 +74,6 @@ class BaseView:
             iframe_script=generate_iframe_script(self.request),
         )
         return context
-
-
-def cache_page_for_guests(*cache_args, **cache_kwargs):
-    def inner_decorator(func):
-        @wraps(func)
-        def inner_function(request, *args, **kwargs):
-            if not request.user.is_authenticated and "nocache" not in request.GET:
-                return cache_page(*cache_args, **cache_kwargs)(func)(
-                    request, *args, **kwargs
-                )
-            return func(request, *args, **kwargs)
-
-        return inner_function
-
-    return inner_decorator
 
 
 @method_decorator(cache_control(max_age=60 * 15), name="dispatch")

@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.http import HttpResponse
 from django.urls import path
+from django.views.decorators.cache import cache_control
 from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 
@@ -21,6 +22,7 @@ from qfdmo.views.configurator import AdvancedConfiguratorView, ConfiguratorView
 from qfdmo.views.dags import DagsValidation
 
 
+@cache_control(max_age=604800)
 def get_carte_iframe_script(request):
     file_path = finders.find("carte.js")
 
