@@ -271,9 +271,9 @@ django-appconf==1.0.6 \
     --hash=sha256:c3ae442fba1ff7ec830412c5184b17169a7a1e71cf0864a4c3f93cf4c98a1993 \
     --hash=sha256:cfe87ea827c4ee04b9a70fab90b86d704cb02f2981f89da8423cb0fabf88efbf
     # via django-cryptography-django5
-django-colorfield==0.11.0 \
-    --hash=sha256:05c38c8eb2a94938b810a19b2011846391a4ce71d1c92e88a35974fbcc8fc62e \
-    --hash=sha256:460f40e6123b6ae0fb51a4eb86fc258fcdc0ea28f75102b685e8209b1eae9ec3
+django-colorfield==0.12.0 \
+    --hash=sha256:9fbace0e3bf7126acab33daa52a5ae2fe0b339aeee30233f52bf911b685c0c71 \
+    --hash=sha256:ceb9a312e01773a0d609847eb308e3b81ac18c33874d17b2c7135a8d1b2ec86d
     # via -r requirements.in
 django-cors-headers==4.6.0 \
     --hash=sha256:14d76b4b4c8d39375baeddd89e4f08899051eeaf177cb02a29bd6eae8cf63aa8 \
