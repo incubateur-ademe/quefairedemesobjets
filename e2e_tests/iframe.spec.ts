@@ -94,22 +94,23 @@ test("iframe can read the referrer when referrerPolicy is not set", async ({ pag
   expect(referrer).toBe('http://localhost:8000/test_iframe?carte=1');
 });
 
-test("Desktop | iframe mode is kept during navigation", async ({ browser, page }) => {
-  await page.goto("http://localhost:8080/dechet/chaussures?iframe", { waitUntil: "networkidle" });
-  page.getByTestId("header-logo-link").click()
-  await expect(page).toHaveURL("http://localhost:8080/dechet/")
-  expect(await page.$("body > footer")).toBeFalsy()
-  await page.close()
+// Need to be run locally with nginx running
+// test("Desktop | iframe mode is kept during navigation", async ({ browser, page }) => {
+//   await page.goto("http://localhost:8080/dechet/chaussures?iframe", { waitUntil: "networkidle" });
+//   page.getByTestId("header-logo-link").click()
+//   await expect(page).toHaveURL("http://localhost:8080/dechet/")
+//   expect(await page.$("body > footer")).toBeFalsy()
+//   await page.close()
 
-  const newPage = await browser.newPage()
-  await newPage.goto("http://localhost:8080/dechet/chaussures", { waitUntil: "networkidle" });
-  expect(browser.contexts)
-  expect(await newPage.$("body > footer")).toBeTruthy()
-  await newPage.close()
+//   const newPage = await browser.newPage()
+//   await newPage.goto("http://localhost:8080/dechet/chaussures", { waitUntil: "networkidle" });
+//   expect(browser.contexts)
+//   expect(await newPage.$("body > footer")).toBeTruthy()
+//   await newPage.close()
 
-  const yetAnotherPage = await browser.newPage()
-  await yetAnotherPage.goto("http://localhost:8080/dechet/chaussures?iframe", { waitUntil: "networkidle" });
-  await yetAnotherPage.goto("http://localhost:8080/dechet/", { waitUntil: "networkidle" });
-  await yetAnotherPage.goto("http://localhost:8080/dechet/chaussures", { waitUntil: "networkidle" });
-  expect(await yetAnotherPage.$("body > footer")).not.toBeTruthy()
-});
+//   const yetAnotherPage = await browser.newPage()
+//   await yetAnotherPage.goto("http://localhost:8080/dechet/chaussures?iframe", { waitUntil: "networkidle" });
+//   await yetAnotherPage.goto("http://localhost:8080/dechet/", { waitUntil: "networkidle" });
+//   await yetAnotherPage.goto("http://localhost:8080/dechet/chaussures", { waitUntil: "networkidle" });
+//   expect(await yetAnotherPage.$("body > footer")).not.toBeTruthy()
+// });
