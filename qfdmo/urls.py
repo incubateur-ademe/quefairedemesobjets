@@ -22,7 +22,7 @@ from qfdmo.views.dags import DagsValidation
 
 
 def get_carte_iframe_script(request):
-    return redirect(request.build_absolute_uri(static("carte.js")))
+    return redirect(static("carte.js"))
 
 
 urlpatterns = [
