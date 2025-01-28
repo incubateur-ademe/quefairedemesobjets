@@ -45,7 +45,6 @@ server {
         <%= nginx_headers %>
     }
 
-    # Dynamic route configurations
     location / {
         proxy_pass <%= $gunicorn_sock %>;
 
