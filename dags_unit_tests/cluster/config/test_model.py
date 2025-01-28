@@ -134,6 +134,11 @@ class TestClusterConfigModel:
         with pytest.raises(ValueError, match="dry_run à fournir"):
             ClusterConfig(**params_working)
 
+    """
+    Test supprimé le 2025-01-27 mais conservé pour référence:
+    - depuis l'ajout des parents indépendant des sources
+      via PR1265 on ne peut plus savoir si on héritera
+      uniquement d'une seule source au moment de la config
     def test_error_one_source_no_intra(self, params_working):
         # Si on ne founit qu'une source alors il faut autoriser
         # le clustering intra-source
@@ -142,6 +147,7 @@ class TestClusterConfigModel:
         msg = "1 source sélectionnée mais intra-source désactivé"
         with pytest.raises(ValueError, match=msg):
             ClusterConfig(**params_working)
+    """
 
     def test_error_must_provide_acteur_type(self, params_working):
         # Si aucun type d'acteur fourni alors on lève une erreur

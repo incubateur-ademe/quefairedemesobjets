@@ -23,11 +23,6 @@ from unidecode import unidecode
 
 logger = logging.getLogger(__name__)
 
-COLS_GROUP_EXACT_ALWAYS = [
-    # "code_departement",
-    "code_postal",
-]
-
 
 def cluster_id_from_strings(strings: list[str]) -> str:
     """
@@ -256,7 +251,7 @@ def cluster_acteurs_suggestions(
         )
 
     # Vérification des colonnes
-    for col in COLS_GROUP_EXACT_ALWAYS + cluster_fields_exact:
+    for col in cluster_fields_exact:
         if col not in df.columns:
             raise ValueError(f"Colonne match exacte '{col}' pas dans le DataFrame")
     for col in cluster_fields_fuzzy:
@@ -265,13 +260,10 @@ def cluster_acteurs_suggestions(
 
     # On supprime les lignes avec des valeurs nulles pour les colonnes exact
     df = df.dropna(
-        subset=COLS_GROUP_EXACT_ALWAYS
-        + cluster_fields_exact
-        + cluster_fields_separate
-        + cluster_fields_fuzzy
+        subset=cluster_fields_exact + cluster_fields_separate + cluster_fields_fuzzy
     )
     # Ordonne df sur les colonnes exactes
-    df = df.sort_values(COLS_GROUP_EXACT_ALWAYS + cluster_fields_exact)
+    df = df.sort_values(cluster_fields_exact)
 
     # On ne garde que les colonnes utiles
     cols_ids_codes = [
@@ -279,8 +271,7 @@ def cluster_acteurs_suggestions(
     ]
     cols_to_keep = list(
         set(
-            COLS_GROUP_EXACT_ALWAYS
-            + cols_ids_codes
+            cols_ids_codes
             + cluster_fields_exact
             + cluster_fields_separate
             + cluster_fields_fuzzy
@@ -294,9 +285,7 @@ def cluster_acteurs_suggestions(
     # On groupe par les colonnes exactes
     clusters_size1 = []
     clusters = []
-    for exact_keys, exact_rows in df.groupby(
-        COLS_GROUP_EXACT_ALWAYS + cluster_fields_exact
-    ):
+    for exact_keys, exact_rows in df.groupby(cluster_fields_exact):
         # On ne considère que les clusters de taille 2+
         if len(exact_rows) < 2:
             logger.info(f"🔴 Ignoré: cluster de taille <2: {list(exact_keys)}")
