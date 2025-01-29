@@ -41,6 +41,7 @@ from qfdmo.models.utils import (
     CodeAsNaturalKeyModel,
     NomAsNaturalKeyManager,
     NomAsNaturalKeyModel,
+    normalize_string_basic,
 )
 from qfdmo.validators import CodeValidator
 
@@ -476,10 +477,30 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
     @property
     def nom_sans_ville(self) -> str | None:
         """Retourne le nom sans la ville pour faciliter le clustering
-        ex: DECATHLON {VILLE} -> DECATHLON"""
+        ex: DECATHLON {VILLE} -> DECATHLON. Pour étendre la portée
+        de la fonction on passe par un état normalisé à la volée, mais
+        au final on retourne un nom construit à partir de l'original"""
         nom = (self.nom or "").strip()
         ville = (self.ville or "").strip()
-        return nom.replace(ville, "").strip() or None
+        # On scinde les champs en mots normalisés, on récupère les index
+        # des mots à conserver, et on reconstruit une chaîne à partir
+        # des mots d'origine
+        nom_norm = normalize_string_basic(nom)
+        ville_norm = normalize_string_basic(ville)
+        if ville_norm not in nom_norm:
+            return nom or None
+        words_nom = nom.split()
+        words_nom_norm = nom_norm.split()
+        words_ville_norm = ville_norm.split()
+        words_idx_kept = [
+            i for i, w in enumerate(words_nom_norm) if w not in words_ville_norm
+        ]
+        try:
+            return " ".join([words_nom[i] for i in words_idx_kept]) or None
+        except Exception:
+            # Si à cause de la norma on peut pas retomber sur nos pieds, on
+            # retourne le nom original
+            return nom or None
 
     @cached_property
     def sorted_proposition_services(self):

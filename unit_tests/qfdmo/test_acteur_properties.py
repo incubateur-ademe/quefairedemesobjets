@@ -119,11 +119,12 @@ class TestActeurProperties:
         [
             # Les cas remplis complètement
             # ville supprimée
-            ("  Decathlon CHALLANS ", "  CHALLANS  ", "Decathlon"),
+            ("  DECATHLON Clermond-Ferrand ", " CLéRMOND FErrAND", "DECATHLON"),
+            (" éclairage Lâvâl ", "  LAVAL ", "éclairage"),
             # ville non supprimée
             ("  Decathlon Laval ", "  CHALLANS  ", "Decathlon Laval"),
             # Les cas remplis partièllement
-            ("  foo   bar ", None, "foo   bar"),
+            ("  foo   bar ", None, "foo bar"),
             (" mon acteur ", " a b c ", "mon acteur"),
             # Les cas vides
             (None, None, None),
