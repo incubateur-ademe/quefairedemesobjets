@@ -335,9 +335,6 @@ AWS_SECRET_ACCESS_KEY = decouple.config("AWS_SECRET_ACCESS_KEY", default="")
 AWS_STORAGE_BUCKET_NAME = decouple.config("AWS_STORAGE_BUCKET_NAME", default="")
 AWS_S3_REGION_NAME = decouple.config("AWS_S3_REGION_NAME", default="")
 AWS_S3_ENDPOINT_URL = decouple.config("AWS_S3_ENDPOINT_URL", default="")
-USE_S3_FOR_STATIC = (
-    decouple.config("USE_S3_FOR_STATIC", cast=bool, default=False) and AWS_ACCESS_KEY_ID
-)
 
 STORAGES = {
     "default": {
@@ -348,11 +345,7 @@ STORAGES = {
         ),
     },
     "staticfiles": {
-        "BACKEND": (
-            "storages.backends.s3.S3Storage"
-            if USE_S3_FOR_STATIC
-            else "whitenoise.storage.CompressedManifestStaticFilesStorage"
-        ),
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
 
