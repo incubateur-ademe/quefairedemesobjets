@@ -3,9 +3,10 @@ function compileIframeAttributes(
   urlParams: URLSearchParams,
   maxWidth: string,
   height: string,
+  route: string
 ): { [Property in keyof HTMLIFrameElement]?: unknown } {
   return {
-    src: `${baseUrl}?${urlParams.toString()}`,
+    src: `${baseUrl}/${route}?${urlParams.toString()}`,
     id: "lvao_iframe",
     frameBorder: "0",
     scrolling: "no",
@@ -43,6 +44,7 @@ export function buildAndInsertIframeFrom(
 export function getIframeAttributesAndExtra(
   initialParameters: [string, string],
   scriptTag: HTMLScriptElement,
+  route: string,
   options?: { maxWidth: string },
 ) {
   let maxWidth = options?.maxWidth || "100%"
@@ -85,6 +87,7 @@ export function getIframeAttributesAndExtra(
     urlParams,
     maxWidth,
     height,
+    route
   )
   return [iframeAttributes, iframeExtraAttributes]
 }

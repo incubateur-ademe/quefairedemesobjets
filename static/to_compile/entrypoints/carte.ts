@@ -9,6 +9,7 @@ const setupIframe = () => {
     const [iframeAttributes, iframeExtraAttributes] = getIframeAttributesAndExtra(
         ["carte", "1"],
         scriptTag,
+        "carte"
     )
     buildAndInsertIframeFrom(iframeAttributes, iframeExtraAttributes, scriptTag)
 }

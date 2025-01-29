@@ -19,7 +19,7 @@ async function expectIframeAttributes(iframeElement) {
 
   expect(allow).toBe("geolocation; clipboard-write");
   expect(src).toBe(
-    "http://localhost:8000?iframe=1&direction=jai&first_dir=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre"
+    "http://localhost:8000/formulaire?iframe=1&direction=jai&first_dir=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre"
   );
   expect(frameborder).toBe("0");
   expect(scrolling).toBe("no");
