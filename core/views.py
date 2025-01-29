@@ -35,7 +35,8 @@ def direct_access(request):
     ):
         return Assistant.as_view()(request)
 
-    del get_params["BYPASS_ASSISTANT"]
+    if "BYPASS_ASSISTANT" in request.GET:
+        del get_params["BYPASS_ASSISTANT"]
 
     # add deprecation notice
     if "carte" in request.GET:
