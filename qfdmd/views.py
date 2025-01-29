@@ -32,7 +32,7 @@ def generate_iframe_script(request) -> str:
         script_parts.append(f'data-objet="{produit_slug}"')
 
     script_parts.append(
-        f'src="{settings.ASSISTANT['BASE_URL']}{reverse("qfdmd:script")}"></script>'
+        f'src="{settings.ASSISTANT["BASE_URL"]}{reverse("qfdmd:script")}"></script>'
     )
     return " ".join(script_parts)
 
