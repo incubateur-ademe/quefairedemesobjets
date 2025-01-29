@@ -48,7 +48,6 @@ export function getIframeAttributesAndExtra(
 ) {
   let maxWidth = options?.maxWidth || "100%"
   let height = "700px"
-  console.log({ scriptTag })
   const BASE_URL = new URL(scriptTag.getAttribute("src")!).origin
   const urlParams = new URLSearchParams()
 
