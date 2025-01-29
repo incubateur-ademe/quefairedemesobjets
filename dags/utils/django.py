@@ -57,7 +57,7 @@ def django_setup_full() -> None:
 
     Voir airflow-scheduler.Dockerfile pour plus de détails"""
     django_add_to_sys_path()
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.airflow_settings")
     django.setup()
 
 
