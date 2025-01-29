@@ -86,6 +86,7 @@ def cluster_acteurs_selection_from_db_wrapper(**kwargs) -> None:
     df_parents = cluster_acteurs_selection_acteur_type_parents(
         acteur_type_ids=config.include_acteur_type_ids,
         fields=config.fields_used,
+        include_only_if_regex_matches_nom=config.include_parents_only_if_regex_matches_nom,
     )
     df_parents = cluster_acteurs_df_sort(df_parents)
     log.preview_df_as_markdown("parents sélectionnés", df_parents)

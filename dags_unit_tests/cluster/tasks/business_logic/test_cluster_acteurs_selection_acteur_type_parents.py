@@ -50,10 +50,12 @@ class TestClusterActeursSelectionActeurTypeParents:
         )
         # Parents car sans source
         DisplayedActeur.objects.create(
+            nom="Mon parent at2 a",
             acteur_type=data["at2"],
             identifiant_unique=data["id_at2_parent_a"],
         )
         DisplayedActeur.objects.create(
+            nom="Mon PÂRËNT at2 b",
             acteur_type=data["at2"],
             identifiant_unique=data["id_at2_parent_b"],
         )
@@ -67,6 +69,7 @@ class TestClusterActeursSelectionActeurTypeParents:
         # at4
         # On test le cas où il y a 1 parent
         DisplayedActeur.objects.create(
+            nom="Mon parent at4",
             acteur_type=data["at4"],
             identifiant_unique=data["id_at4_parent"],
         )
@@ -92,8 +95,8 @@ class TestClusterActeursSelectionActeurTypeParents:
 
     def test_df_shape(self, df_working):
         # 3 parents (2 parents pour at2 + 0 pour at3 + 1 pour at4)
-        # 3 champs
-        assert df_working.shape == (3, 3)
+        # 4 champs (+nom)
+        assert df_working.shape == (3, 4)
 
     def test_df_columns(self, df_working):
         # Seules les colonnes demandées sont retournées
@@ -102,6 +105,7 @@ class TestClusterActeursSelectionActeurTypeParents:
                 "identifiant_unique",
                 "statut",
                 "latitude",
+                "nom",
             ]
         )
 
@@ -123,4 +127,26 @@ class TestClusterActeursSelectionActeurTypeParents:
         assert (
             data["id_at4_parent_inactif"]
             not in df_working["identifiant_unique"].tolist()
+        )
+
+    def test_with_regex(self, db_testdata_write):
+        """On génère et retourne la df avec la même config
+        MAIS cette fois si on ajoute l'expression régulière sur le nom"""
+        data = db_testdata_write
+        acteur_type_ids = [data["at2"].id, data["at3"].id, data["at4"].id]
+        fields = ["identifiant_unique", "statut", "latitude"]
+        df = cluster_acteurs_selection_acteur_type_parents(
+            acteur_type_ids=acteur_type_ids,
+            fields=fields,
+            # On démontre que les regex sont appliquées sur
+            # les versions normalisées à la volée des noms
+            include_only_if_regex_matches_nom=r"parent at(?:1|2) (?:a|b)",
+        )
+        assert sorted(df["nom"].tolist()) == sorted(
+            [
+                # La donnée n'est pas modifiée, uniquement normalisée
+                # à la volée pour l'application des regex
+                "Mon parent at2 a",
+                "Mon PÂRËNT at2 b",
+            ]
         )

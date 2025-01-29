@@ -14,16 +14,27 @@ class ClusterConfig(BaseModel):
     # et valeurs obligatoires, voir section validation
     # pour toutes les règles
     dry_run: bool
+
+    # SELECTION ACTEURS NON-PARENTS
     include_source_codes: list[str]
     include_acteur_type_codes: list[str]
     include_only_if_regex_matches_nom: str | None
     include_if_all_fields_filled: list[str]
     exclude_if_any_field_filled: list[str]
+
+    # SELECTION PARENTS EXISTANTS
+    # Pas de champ source car par définition parents = 0 source
+    # Pas de champ acteur type = on prend tous les acteur type ci-dessus
+    include_parents_only_if_regex_matches_nom: str | None
+
+    # NORMALISATION
     normalize_fields_basic: list[str]
     normalize_fields_no_words_size1: list[str]
     normalize_fields_no_words_size2_or_less: list[str]
     normalize_fields_no_words_size3_or_less: list[str]
     normalize_fields_order_unique_words: list[str]
+
+    # CLUSTERING
     cluster_intra_source_is_allowed: bool
     cluster_fields_exact: list[str]
     cluster_fields_fuzzy: list[str]

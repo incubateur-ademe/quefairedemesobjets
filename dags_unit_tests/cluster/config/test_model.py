@@ -15,6 +15,7 @@ class TestClusterConfigModel:
             "include_only_if_regex_matches_nom": "mon nom",
             "include_if_all_fields_filled": ["f1_incl", "f2_incl"],
             "exclude_if_any_field_filled": ["f3_excl", "f4_excl"],
+            "include_parents_only_if_regex_matches_nom": None,
             "normalize_fields_basic": ["basic1", "basic2"],
             "normalize_fields_no_words_size1": ["size1"],
             "normalize_fields_no_words_size2_or_less": ["size2"],
