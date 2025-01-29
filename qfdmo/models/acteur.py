@@ -448,6 +448,39 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
         cp = str(cp).strip()
         return None if not cp or len(cp) != 5 else cp[:2]
 
+    @property
+    def combine_adresses(self) -> str | None:
+        """Combine les valeurs de tous les champs adresses,
+        util notamment pour la clustering car les sources mélangent
+        un peut tout à travers ces champs et on veut tout regrouper
+        pour augmenter les chances de similarité (sachant qu'on
+        peut itiliser à posteriori fonctions de normalisations qui suppriment
+        les mots en doublons et augmentent encore la similarité)"""
+        result = (
+            (self.adresse or "").strip() + " " + (self.adresse_complement or "").strip()
+        ).strip()
+        return result or None
+
+    @property
+    def combine_noms(self) -> str | None:
+        """Même idée que combine_adresses mais pour les noms"""
+        result = (
+            (self.nom or "").strip()
+            + " "
+            + (self.nom_commercial or "").strip()
+            + " "
+            + (self.nom_officiel or "").strip()
+        ).strip()
+        return result or None
+
+    @property
+    def nom_sans_ville(self) -> str | None:
+        """Retourne le nom sans la ville pour faciliter le clustering
+        ex: DECATHLON {VILLE} -> DECATHLON"""
+        nom = (self.nom or "").strip()
+        ville = (self.ville or "").strip()
+        return nom.replace(ville, "").strip() or None
+
     @cached_property
     def sorted_proposition_services(self):
         proposition_services = (
