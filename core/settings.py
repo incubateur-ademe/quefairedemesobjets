@@ -390,7 +390,9 @@ SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 ASSISTANT = {
     "MATOMO_ID": decouple.config("ASSISTANT_MATOMO_ID", default=82, cast=int),
     "HOSTS": decouple.config(
-        "ASSISTANT_HOSTS", default="localhost:8000", cast=str
+        "ASSISTANT_HOSTS",
+        default="127.0.0.1:8000,0.0.0.0:8000,localhost:8000",
+        cast=str,
     ).split(","),
     "POSTHOG_KEY": decouple.config(
         "ASSISTANT_POSTHOG_KEY",
