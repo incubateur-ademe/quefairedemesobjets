@@ -19,7 +19,7 @@ async function expectIframeAttributes(iframeElement) {
 
   expect(allow).toBe("geolocation; clipboard-write");
   expect(src).toBe(
-    "http://localhost:8000/formulaire?iframe=1&direction=jai&first_dir=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre"
+    "http://localhost:8000/formulaire?direction=jai&first_dir=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre"
   );
   expect(frameborder).toBe("0");
   expect(scrolling).toBe("no");
@@ -30,7 +30,7 @@ async function expectIframeAttributes(iframeElement) {
   expect(title).toBe("Longue vie aux objets");
 }
 
-test("Desktop | iframe is loaded with correct parameters", async ({ page }) => {
+test("Desktop | iframe formulaire is loaded with correct parameters", async ({ page }) => {
   await page.goto("http://localhost:8000/test_iframe", { waitUntil: "networkidle" });
 
   const titlePage = await page.title();
@@ -38,6 +38,18 @@ test("Desktop | iframe is loaded with correct parameters", async ({ page }) => {
 
   const iframeElement = await page.$("iframe");
   await expectIframeAttributes(iframeElement);
+});
+
+test("Desktop | legacy iframe urls still work", async ({ page }) => {
+  await page.goto("http://localhost:8000/?iframe=1&direction=jai&first_dir=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre&BYPASS_ASSISTANT",
+    { waitUntil: "networkidle" }
+  )
+  await expect(page).toHaveURL("http://localhost:8000/formulaire?direction=jai&first_dir=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre")
+
+  await page.goto("http://localhost:8000/?carte=1&action_list=reparer%7Cdonner%7Cechanger%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cacheter%7Crevendre&epci_codes=200055887&limit=50&BYPASS_ASSISTANT"
+    , { waitUntil: "networkidle" }
+  )
+  await expect(page).toHaveURL("http://localhost:8000/carte?action_list=reparer%7Cdonner%7Cechanger%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cacheter%7Crevendre&epci_codes=200055887&limit=50")
 });
 
 test("Desktop | form is visible in the iframe", async ({ page }) => {

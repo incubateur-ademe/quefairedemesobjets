@@ -11,6 +11,7 @@ from qfdmd.views import (
 )
 
 urlpatterns = [
+    # path("dechet", RedirectView.as_view(url=reverse("home"))),
     path("assistant/recherche", search_view, name="search"),
     path("assistant/nous-contacter", ContactFormView.as_view(), name="nous-contacter"),
     path("assistant/<slug:slug>", CMSPageDetailView.as_view(), name="cms-page"),

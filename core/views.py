@@ -29,6 +29,15 @@ def direct_access(request):
 
     get_params = request.GET.copy()
 
+    if (
+        request.META.get("HTTP_HOST") in settings.ASSISTANT["HOSTS"]
+        and "BYPASS_ASSISTANT" not in request.GET
+    ):
+        return Assistant.as_view()(request)
+
+    del get_params["BYPASS_ASSISTANT"]
+
+    # add deprecation notice
     if "carte" in request.GET:
         # Order matters, this should be before iframe because iframe and carte
         # parameters can coexist
@@ -41,8 +50,11 @@ def direct_access(request):
         parts = [reverse("qfdmo:carte"), "?" if params else "", params]
         return redirect("".join(parts))
 
-    if request.META["HTTP_HOST"] in settings.ASSISTANT["HOSTS"]:
-        return Assistant.as_view()(request)
+    if "iframe" in request.GET:
+        del get_params["iframe"]
+        params = get_params.urlencode()
+        parts = [reverse("qfdmo:formulaire"), "?" if params else "", params]
+        return redirect("".join(parts))
 
     return redirect("https://longuevieauxobjets.ademe.fr/lacarte", permanent=True)
 

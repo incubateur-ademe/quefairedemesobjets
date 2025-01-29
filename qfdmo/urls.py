@@ -21,6 +21,7 @@ urlpatterns = [
     # This route needs to be touched with care is it is embedded
     # on many website, enabling the load of LVAO as an iframe
     path("static/carte.js", get_carte_iframe_script, name="script"),
+    path("static/iframe.js", get_carte_iframe_script, name="script"),
     path("carte", CarteSearchActeursView.as_view(), name="carte"),
     path("carte.json", CarteSearchActeursView.as_view(), name="carte_json"),
     path("formulaire", FormulaireSearchActeursView.as_view(), name="formulaire"),

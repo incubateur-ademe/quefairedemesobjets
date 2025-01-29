@@ -59,9 +59,9 @@ urlpatterns = [
         name="django.contrib.sitemaps.views.sitemap",
     ),
     path("dsfr/", include(("dsfr_hacks.urls", "dsfr_hacks"), namespace="dsfr_hacks")),
+    path("", direct_access, name="home"),
     path("", include(("qfdmo.urls", "qfdmo"), namespace="qfdmo")),
     path("", include(("qfdmd.urls", "qfdmd"), namespace="qfdmd")),
-    path("", direct_access, name="home"),
     path("data/", include(("data.urls", "data"), namespace="data")),
     path("docs/", TemplateView.as_view(template_name="techdocs.html"), name="techdocs"),
 ]
