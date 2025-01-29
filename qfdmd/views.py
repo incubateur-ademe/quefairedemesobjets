@@ -67,7 +67,7 @@ class ContactFormView(FormView):
         return super().form_valid(form)
 
 
-class BaseView:
+class AssistantBaseView:
     """Base view that provides templates used on all pages.
     It needs to be used by all views of the Assistant as it
     provides some routing rules based on the domain and provide
@@ -93,7 +93,7 @@ class BaseView:
 
 @method_decorator(cache_control(max_age=60 * 15), name="dispatch")
 @method_decorator(vary_on_headers("logged-in", "iframe"), name="dispatch")
-class HomeView(BaseView, ListView):
+class HomeView(AssistantBaseView, ListView):
     template_name = "qfdmd/home.html"
     model = Suggestion
 
@@ -116,9 +116,9 @@ class HomeView(BaseView, ListView):
         return context
 
 
-class SynonymeDetailView(BaseView, DetailView):
+class SynonymeDetailView(AssistantBaseView, DetailView):
     model = Synonyme
 
 
-class CMSPageDetailView(BaseView, DetailView):
+class CMSPageDetailView(AssistantBaseView, DetailView):
     model = CMSPage
