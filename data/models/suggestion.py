@@ -152,9 +152,19 @@ class Suggestion(models.Model):
     @property
     def display_suggestion_details(self):
         template_name = "data/_partials/suggestion_details.html"
-        if self.suggestion_cohorte.type_action == SuggestionAction.CLUSTERING:
+        suggestion = self.suggestion
+        if (
+            self.suggestion_cohorte.type_action == SuggestionAction.CLUSTERING
+            and isinstance(suggestion, list)
+        ):
+            cluster_id = suggestion[0].get("cluster_id")
+            identifiant_uniques = [s.get("identifiant_unique") for s in suggestion]
+            suggestion = {
+                "cluster_id": cluster_id,
+                "identifiant_uniques": identifiant_uniques,
+            }
             template_name = "data/_partials/clustering_suggestion_details.html"
-        return render_to_string(template_name, {"suggestion": self.suggestion})
+        return render_to_string(template_name, {"suggestion": suggestion})
 
     # FIXME: A revoir
     def display_proposition_service(self):
