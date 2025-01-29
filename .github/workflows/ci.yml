@@ -12,6 +12,9 @@ jobs:
   # run_tests:
   #   uses: ./.github/workflows/run_tests.yml
   deploy:
-    environment: preprod
-    url: https://quefairedemesobjets-preprod.osc-fr1.scalingo.io
-    uses: ./.github/workflows/deploy.yml
+    runs-on: ubuntu-latest
+    environment:
+      name: preprod
+      url: https://quefairedemesobjets-preprod.osc-fr1.scalingo.io
+    steps:
+      - uses: ./.github/workflows/deploy.yml

@@ -3,9 +3,6 @@ name: "Déploiement continu"
 
 on:
   workflow_call:
-  push:
-    branches:
-      - main
 
 defaults:
   run:
@@ -14,7 +11,6 @@ defaults:
 jobs:
   deploy:
     name: Deploy on Scalingo
-    needs: [run_tests]
     runs-on: ubuntu-latest
     steps:
       - uses: action/checkout@v4
@@ -34,33 +30,3 @@ jobs:
               "username": "Bipboop le robot de seconde main",
               "icon": "https://cdn3.iconfinder.com/data/icons/system-basic-vol-4-1/20/icon-note-attention-alt3-512.png"
             }
-  deploy_airflow-webserver:
-    name: Deploy PREPROD Airflow webserver on Clever Cloud
-    needs: [run_tests]
-    runs-on: "ubuntu-latest"
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: 47ng/actions-clever-cloud@v2.0.0
-        with:
-          alias: lvao-preprod-airflow-webserver
-        env:
-          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
-          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
-
-
-  deploy_airflow-scheduler:
-    name: Deploy PREPROD Airflow scheduler on Clever Cloud
-    needs: [run_tests]
-    runs-on: "ubuntu-latest"
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: 47ng/actions-clever-cloud@v2.0.0
-        with:
-          alias: lvao-preprod-airflow-scheduler
-        env:
-          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
-          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
