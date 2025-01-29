@@ -338,8 +338,6 @@ AWS_S3_ENDPOINT_URL = decouple.config("AWS_S3_ENDPOINT_URL", default="")
 USE_S3_FOR_STATIC = (
     decouple.config("USE_S3_FOR_STATIC", cast=bool, default=False) and AWS_ACCESS_KEY_ID
 )
-AWS_DEFAULT_ACL = "public-read"
-AWS_QUERYSTRING_AUTH = False
 
 STORAGES = {
     "default": {
