@@ -69,6 +69,10 @@ class ContactFormView(FormView):
 
 class BaseView:
     """Base view that provides templates used on all pages.
+    It needs to be used by all views of the Assistant as it
+    provides some routing rules based on the domain and provide
+    some context to templates.
+
     TODO: this could be moved to a context processor"""
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
