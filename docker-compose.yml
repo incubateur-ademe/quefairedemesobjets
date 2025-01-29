@@ -46,6 +46,7 @@ services:
     profiles: [proxy]
     ports:
       - "8001:80"
+      - "8002:80"
   airflow-db:
     image: postgres:15
     environment:

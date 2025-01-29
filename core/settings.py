@@ -385,6 +385,7 @@ ASSISTANT = {
         default="127.0.0.1:8000,0.0.0.0:8000,localhost:8000",
         cast=str,
     ).split(","),
+    "BASE_URL": decouple.config("ASSISTANT_BASE_URL", default="http://localhost:8000"),
     "POSTHOG_KEY": decouple.config(
         "ASSISTANT_POSTHOG_KEY",
         default="phc_fSfhoWDOUxZdKWty16Z3XfRiAoWd1qdJK0N0z9kQHJr",  # pragma: allowlist secret  # noqa: E501

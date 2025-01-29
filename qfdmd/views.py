@@ -31,7 +31,9 @@ def generate_iframe_script(request) -> str:
         produit_slug = request.resolver_match.kwargs["slug"]
         script_parts.append(f'data-objet="{produit_slug}"')
 
-    script_parts.append(f'src="{settings.BASE_URL}{reverse("qfdmd:script")}"></script>')
+    script_parts.append(
+        f'src="{settings.ASSISTANT['BASE_URL']}{reverse("qfdmd:script")}"></script>'
+    )
     return " ".join(script_parts)
 
 
@@ -85,10 +87,10 @@ class AssistantBaseView:
         )
         return context
 
-    # def dispatch(self, request, *args, **kwargs):
-    #     if request.META.get("HTTP_HOST") not in settings.ASSISTANT["HOSTS"]:
-    #         return redirect(reverse("home"))
-    #     return super().dispatch(request, *args, **kwargs)
+    def dispatch(self, request, *args, **kwargs):
+        if request.META.get("HTTP_HOST") not in settings.ASSISTANT["HOSTS"]:
+            return redirect(reverse("home"))
+        return super().dispatch(request, *args, **kwargs)
 
 
 @method_decorator(cache_control(max_age=60 * 15), name="dispatch")
