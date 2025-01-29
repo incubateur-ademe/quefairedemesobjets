@@ -11,7 +11,6 @@ from qfdmd.views import (
 )
 
 urlpatterns = [
-    # path("dechet", RedirectView.as_view(url=reverse("home"))),
     path("assistant/recherche", search_view, name="search"),
     path("assistant/nous-contacter", ContactFormView.as_view(), name="nous-contacter"),
     path("assistant/<slug:slug>", CMSPageDetailView.as_view(), name="cms-page"),
@@ -27,6 +26,7 @@ urlpatterns = [
         ContactFormView.as_view(),
         name="nous-contacter-confirmation",
     ),
+    path("dechet", RedirectView.as_view(url="/", query_string=True, permanent=True)),
     # The URL here needs to be kept as is because it was used in the previous
     # Gatsby website. If changed, a redirect need to be created to keep the
     # legacy behaviour.
