@@ -90,6 +90,25 @@ class TestActeurProperties:
         assert acteur.combine_adresses == expected
 
     @pytest.mark.parametrize(
+        "nom,adresse,adresse_complement,expected",
+        [
+            # Les cas remplis complètement
+            ("  à B C ", "  b  ", "  c  ", "à"),
+            (
+                "Décathlon rue des étangs za Rocher",
+                "RUE DES ETANGS",
+                " ZA rocher ",
+                "Décathlon",
+            ),
+        ],
+    )
+    def test_nom_sans_combine_adresses(
+        self, nom, adresse, adresse_complement, expected
+    ):
+        acteur = Acteur(nom=nom, adresse=adresse, adresse_complement=adresse_complement)
+        assert acteur.nom_sans_combine_adresses == expected
+
+    @pytest.mark.parametrize(
         "nom,nom_commercial,nom_officiel,expected",
         [
             # Les cas remplis complètement

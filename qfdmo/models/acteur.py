@@ -41,7 +41,7 @@ from qfdmo.models.utils import (
     CodeAsNaturalKeyModel,
     NomAsNaturalKeyManager,
     NomAsNaturalKeyModel,
-    normalize_string_basic,
+    string_remove_substring_via_normalization,
 )
 from qfdmo.validators import CodeValidator
 
@@ -421,26 +421,6 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
         return result.replace("bis", "b")
 
     @property
-    def nom_sans_adresse_et_complement(self) -> str | None:
-        """Retourne le nom sans les mots présents
-        dans l'adresse ou le complément de rue, ceci
-        pour faciliter le clustering quand un nom répète
-        des éléments de l'adresse ce qui vient baisser le
-        score de similarité.
-
-        Si après suppression de l'adresse/complément
-        il ne reste plus rien, on retourne None ce qui
-        permet à ce champ d'être utilisé dans les
-        critères d'inclusion/exclusion
-        """
-        words_nom = (self.nom or "").lower().split()
-        words_adresse = (
-            ((self.adresse or "") + (self.adresse_complement or "")).lower().split()
-        )
-        words = [x for x in words_nom if x not in words_adresse and x.strip()]
-        return " ".join(words) if words else None
-
-    @property
     def code_departement(self) -> str | None:
         """Extrait le code départemental du code postal"""
         cp = self.code_postal
@@ -463,6 +443,23 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
         return result or None
 
     @property
+    def nom_sans_combine_adresses(self) -> str | None:
+        """Retourne le nom sans les mots présents
+        dans l'adresse ou le complément de rue, ceci
+        pour faciliter le clustering quand un nom répète
+        des éléments de l'adresse ce qui vient baisser le
+        score de similarité.
+
+        Si après suppression de l'adresse/complément
+        il ne reste plus rien, on retourne None ce qui
+        permet à ce champ d'être utilisé dans les
+        critères d'inclusion/exclusion
+        """
+        return string_remove_substring_via_normalization(
+            self.nom, self.combine_adresses
+        )
+
+    @property
     def combine_noms(self) -> str | None:
         """Même idée que combine_adresses mais pour les noms"""
         result = (
@@ -480,27 +477,7 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
         ex: DECATHLON {VILLE} -> DECATHLON. Pour étendre la portée
         de la fonction on passe par un état normalisé à la volée, mais
         au final on retourne un nom construit à partir de l'original"""
-        nom = (self.nom or "").strip()
-        ville = (self.ville or "").strip()
-        # On scinde les champs en mots normalisés, on récupère les index
-        # des mots à conserver, et on reconstruit une chaîne à partir
-        # des mots d'origine
-        nom_norm = normalize_string_basic(nom)
-        ville_norm = normalize_string_basic(ville)
-        if ville_norm not in nom_norm:
-            return nom or None
-        words_nom = nom.split()
-        words_nom_norm = nom_norm.split()
-        words_ville_norm = ville_norm.split()
-        words_idx_kept = [
-            i for i, w in enumerate(words_nom_norm) if w not in words_ville_norm
-        ]
-        try:
-            return " ".join([words_nom[i] for i in words_idx_kept]) or None
-        except Exception:
-            # Si à cause de la norma on peut pas retomber sur nos pieds, on
-            # retourne le nom original
-            return nom or None
+        return string_remove_substring_via_normalization(self.nom, self.ville)
 
     @cached_property
     def sorted_proposition_services(self):

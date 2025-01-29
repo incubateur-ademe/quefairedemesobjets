@@ -64,3 +64,32 @@ def normalize_string_basic(s: str) -> str:
     s = unidecode(str(s).strip().lower())
     s = re.sub(r"[^a-z0-9]", " ", s)
     return re.sub(r"\s+", " ", s).strip()
+
+
+def string_remove_substring_via_normalization(
+    s1: str | None, s2: str | None
+) -> str | None:
+    """Supprime la sous-chaîne s2 de s1:
+    - en passant par les états normalisés pour la soustraction
+       pour la rendre plus robuste
+    - mais en retournant le résultat sur la base des mots d'origines
+       pour préserver l'info d'origine"""
+    # On scinde les champs en mots normalisés, on récupère les index
+    # des mots à conserver, et on reconstruit une chaîne à partir
+    # des mots d'origine
+    s1 = (s1 or "").strip()
+    s2 = (s2 or "").strip()
+    s1_norm = normalize_string_basic(s1)
+    s2_norm = normalize_string_basic(s2)
+    if s2_norm not in s1_norm:
+        return s1 or None
+    words_s1 = s1.split()
+    words_s1_norm = s1_norm.split()
+    words_s2_norm = s2_norm.split()
+    words_idx_kept = [i for i, w in enumerate(words_s1_norm) if w not in words_s2_norm]
+    try:
+        return " ".join([words_s1[i] for i in words_idx_kept]) or None
+    except Exception:
+        # Si à cause de la norma on peut pas retomber sur nos pieds, on
+        # retourne le nom original
+        return s1 or None
