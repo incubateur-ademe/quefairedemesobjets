@@ -85,10 +85,10 @@ class AssistantBaseView:
         )
         return context
 
-    def dispatch(self, request, *args, **kwargs):
-        if request.META.get("HTTP_HOST") not in settings.ASSISTANT["HOSTS"]:
-            return redirect(reverse("home"))
-        return super().dispatch(request, *args, **kwargs)
+    # def dispatch(self, request, *args, **kwargs):
+    #     if request.META.get("HTTP_HOST") not in settings.ASSISTANT["HOSTS"]:
+    #         return redirect(reverse("home"))
+    #     return super().dispatch(request, *args, **kwargs)
 
 
 @method_decorator(cache_control(max_age=60 * 15), name="dispatch")
