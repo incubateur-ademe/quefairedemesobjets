@@ -3,8 +3,8 @@ from typing import Any
 
 from django.conf import settings
 from django.http import HttpResponse
-from django.shortcuts import render
-from django.urls import reverse_lazy
+from django.shortcuts import redirect, render
+from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control
 from django.views.decorators.vary import vary_on_headers
@@ -80,6 +80,11 @@ class BaseView:
             iframe_script=generate_iframe_script(self.request),
         )
         return context
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.META.get("HTTP_HOST") not in settings.ASSISTANT["HOSTS"]:
+            return redirect(reverse("home"))
+        return super().dispatch(request, *args, **kwargs)
 
 
 @method_decorator(cache_control(max_age=60 * 15), name="dispatch")

@@ -34,9 +34,9 @@ CMS_BASE_URL = decouple.config(
 DEBUG = decouple.config("DEBUG", default=False, cast=bool)
 STIMULUS_DEBUG = decouple.config("STIMULUS_DEBUG", default=False, cast=bool)
 POSTHOG_DEBUG = decouple.config("POSTHOG_DEBUG", default=False, cast=bool)
-ALLOWED_HOSTS = decouple.config("ALLOWED_HOSTS", default="localhost", cast=str).split(
-    ","
-)
+ALLOWED_HOSTS = decouple.config(
+    "ALLOWED_HOSTS", default="127.0.0.1,localhost", cast=str
+).split(",")
 
 # Application definition
 
