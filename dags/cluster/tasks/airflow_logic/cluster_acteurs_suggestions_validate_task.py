@@ -2,9 +2,7 @@ import logging
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from cluster.tasks.business_logic.cluster_acteurs_suggestions_validate import (
-    cluster_acteurs_suggestions_validate,
-)
+from cluster.tasks.business_logic import cluster_acteurs_suggestions_validate
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)

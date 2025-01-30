@@ -4,8 +4,8 @@ import pandas as pd
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from cluster.config.model import ClusterConfig
-from cluster.tasks.business_logic.cluster_acteurs_df_sort import cluster_acteurs_df_sort
-from cluster.tasks.business_logic.cluster_acteurs_normalize import (
+from cluster.tasks.business_logic import (
+    cluster_acteurs_df_sort,
     cluster_acteurs_normalize,
 )
 from utils import logging_utils as log

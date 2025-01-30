@@ -1,5 +1,10 @@
+from .cluster_acteurs_choose_new_parents import (  # noqa
+    cluster_acteurs_choose_new_parents,
+)
 from .cluster_acteurs_df_sort import cluster_acteurs_df_sort  # noqa
+from .cluster_acteurs_info_size1 import cluster_info_size1_exact_fields  # noqa
 from .cluster_acteurs_metadata import cluster_acteurs_metadata  # noqa
+from .cluster_acteurs_normalize import cluster_acteurs_normalize  # noqa
 from .cluster_acteurs_parent_calculations import (  # noqa
     cluster_acteurs_parent_calculations,
 )

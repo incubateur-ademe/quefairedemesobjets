@@ -4,9 +4,7 @@ import pandas as pd
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from cluster.config.model import ClusterConfig
-from cluster.tasks.business_logic.cluster_acteurs_info_size1 import (
-    cluster_info_size1_exact_fields,
-)
+from cluster.tasks.business_logic import cluster_info_size1_exact_fields
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
