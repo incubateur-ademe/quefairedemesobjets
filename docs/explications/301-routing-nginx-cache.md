@@ -9,7 +9,7 @@ Dans l'hypothèse d'un pic de charge,
 Des images valant mille mots, ci-dessous un schéma résumant le parcours d'une requête lorsqu'elle atteint `lvao.ademe.fr` ou `quefairedemesdechets.ademe.fr`
 
 
-```mermaid
+```{mermaid}
 sequenceDiagram
 
 participant Client

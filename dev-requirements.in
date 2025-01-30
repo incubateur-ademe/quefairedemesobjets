@@ -21,6 +21,7 @@ ratelimit
 ruff
 shapely
 myst-parser
+sphinxcontrib-mermaid
 sphinx
 furo
 pandas==2.1.4
