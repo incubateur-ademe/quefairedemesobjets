@@ -86,9 +86,9 @@ class TestCluster:
         assert df_clusters["cluster_id"].nunique() == 3
         clusters = df_clusters_to_dict(df_clusters)
         assert clusters == {
-            "75000_paris": ["id1", "id2", "id3"],
-            "75000_paris-typo": ["id4-a", "id4-b"],
-            "53000_laval": ["id5-a", "id5-b"],
+            "paris": ["id1", "id2", "id3"],
+            "paris-typo": ["id4-a", "id4-b"],
+            "laval": ["id5-a", "id5-b"],
         }
 
     def test_validation_cols_group_exact(self, df_basic):
@@ -138,7 +138,7 @@ class TestCluster:
         assert len(df_clusters) == 2
         clusters = df_clusters_to_dict(df_clusters)
         assert clusters == {
-            "13000_marseille": ["id1", "id4"],
+            "marseille": ["id1", "id4"],
         }
 
     # -----------------------------------------------
@@ -168,7 +168,7 @@ class TestCluster:
         df_clusters = cluster_acteurs_suggestions(
             df_cols_group_fuzzy,
             # code_postal est en dur dans la fonction de clustering
-            cluster_fields_exact=[],
+            cluster_fields_exact=["code_postal"],
             cluster_fields_fuzzy=["nom"],
             cluster_fuzzy_threshold=0.7,
         )

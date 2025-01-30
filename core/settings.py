@@ -34,9 +34,9 @@ CMS_BASE_URL = decouple.config(
 DEBUG = decouple.config("DEBUG", default=False, cast=bool)
 STIMULUS_DEBUG = decouple.config("STIMULUS_DEBUG", default=False, cast=bool)
 POSTHOG_DEBUG = decouple.config("POSTHOG_DEBUG", default=False, cast=bool)
-ALLOWED_HOSTS = decouple.config("ALLOWED_HOSTS", default="localhost", cast=str).split(
-    ","
-)
+ALLOWED_HOSTS = decouple.config(
+    "ALLOWED_HOSTS", default="127.0.0.1,localhost", cast=str
+).split(",")
 
 # Application definition
 
@@ -335,11 +335,6 @@ AWS_SECRET_ACCESS_KEY = decouple.config("AWS_SECRET_ACCESS_KEY", default="")
 AWS_STORAGE_BUCKET_NAME = decouple.config("AWS_STORAGE_BUCKET_NAME", default="")
 AWS_S3_REGION_NAME = decouple.config("AWS_S3_REGION_NAME", default="")
 AWS_S3_ENDPOINT_URL = decouple.config("AWS_S3_ENDPOINT_URL", default="")
-USE_S3_FOR_STATIC = (
-    decouple.config("USE_S3_FOR_STATIC", cast=bool, default=False) and AWS_ACCESS_KEY_ID
-)
-AWS_DEFAULT_ACL = "public-read"
-AWS_QUERYSTRING_AUTH = False
 
 STORAGES = {
     "default": {
@@ -350,11 +345,7 @@ STORAGES = {
         ),
     },
     "staticfiles": {
-        "BACKEND": (
-            "storages.backends.s3.S3Storage"
-            if USE_S3_FOR_STATIC
-            else "whitenoise.storage.CompressedManifestStaticFilesStorage"
-        ),
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
 
@@ -389,6 +380,12 @@ QFDMO_GOOGLE_SEARCH_CONSOLE = "google9dfbbc61adbe3888.html"
 SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 ASSISTANT = {
     "MATOMO_ID": decouple.config("ASSISTANT_MATOMO_ID", default=82, cast=int),
+    "HOSTS": decouple.config(
+        "ASSISTANT_HOSTS",
+        default="127.0.0.1:8000,0.0.0.0:8000,localhost:8000",
+        cast=str,
+    ).split(","),
+    "BASE_URL": decouple.config("ASSISTANT_BASE_URL", default="http://localhost:8000"),
     "POSTHOG_KEY": decouple.config(
         "ASSISTANT_POSTHOG_KEY",
         default="phc_fSfhoWDOUxZdKWty16Z3XfRiAoWd1qdJK0N0z9kQHJr",  # pragma: allowlist secret  # noqa: E501

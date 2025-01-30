@@ -4,7 +4,13 @@ const script = document.currentScript as HTMLScriptElement
 const slug = script?.dataset?.objet;
 const origin = new URL(script?.getAttribute("src")).origin
 // TODO: mise en prod, remplacer dechet ci-dessous par une string vide
-const src = `${origin}/dechet/${slug || ''}?iframe`;
+const parts = [origin]
+if (slug) {
+  parts.push("dechet", slug)
+}
+parts.push("?iframe")
+const src = parts.join("/")
+
 const iframe = document.createElement("iframe");
 
 const iframeAttributes = {
