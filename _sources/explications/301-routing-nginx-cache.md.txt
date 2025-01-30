@@ -51,8 +51,3 @@ Les cookies définis expirent à la fin de la session, cela veut dire qu'ils ser
 
 # whitenoise
 # middleware
-
-```{mermaid}
-.. autoclasstree:: sphinx.util.DownloadFiles sphinx.util.ExtensionError
-   :full:
-```
