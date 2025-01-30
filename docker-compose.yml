@@ -55,8 +55,6 @@ services:
       POSTGRES_DB: airflow
     volumes:
       - ./airflow-pgdata:/var/lib/postgresql/data
-    expose:
-      - 5432
     ports:
       - 7654:5432
     healthcheck:
