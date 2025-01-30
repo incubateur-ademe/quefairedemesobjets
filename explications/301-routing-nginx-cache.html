@@ -279,7 +279,8 @@ Nous avons décidé d’ajouter <strong>Nginx</strong> en janvier 2025 afin d’
 <li><p>Le <strong>cache</strong> des <strong>fichiers statiques</strong> (CSS, JS…)</p></li>
 </ul>
 <p>Des images valant mille mots, ci-dessous un schéma résumant le parcours d’une requête lorsqu’elle atteint <code class="docutils literal notranslate"><span class="pre">lvao.ademe.fr</span></code> ou <code class="docutils literal notranslate"><span class="pre">quefairedemesdechets.ademe.fr</span></code></p>
-<div class="highlight-mermaid notranslate"><div class="highlight"><pre><span></span>sequenceDiagram
+<pre  class="mermaid">
+        sequenceDiagram
 
 participant Client
 participant Nginx
@@ -301,7 +302,7 @@ Django--&gt;&gt;Nginx: Generate response
 
 alt Authenticated User
 
-Django-&gt;&gt;Nginx: Add &#39;logged_in&#39; cookie
+Django-&gt;&gt;Nginx: Add 'logged_in' cookie
 
 end
 
@@ -314,15 +315,15 @@ end
 Nginx--&gt;&gt;Client: Return Django response
 
 end
-</pre></div>
-</div>
-<p>Les cookies définis expirent à la fin de la session, cela veut dire qu’ils seront re-générés si l’utilisateur ferme son navigateur.</p>
+    </pre><p>Les cookies définis expirent à la fin de la session, cela veut dire qu’ils seront re-générés si l’utilisateur ferme son navigateur.</p>
 </section>
 <section id="whitenoise">
 <h1>whitenoise<a class="headerlink" href="#whitenoise" title="Lien vers cette rubrique">¶</a></h1>
 </section>
 <section id="middleware">
 <h1>middleware<a class="headerlink" href="#middleware" title="Lien vers cette rubrique">¶</a></h1>
+<p>.. autoclasstree:: sphinx.util.DownloadFiles sphinx.util.ExtensionError
+:full:</p>
 </section>
 
         </article>
@@ -379,5 +380,13 @@ end
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=5fa4622c"></script>
     <script src="../_static/translations.js?v=e6b791cb"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs"></script>
+    <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";import elkLayouts from "https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs";mermaid.registerLayoutLoaders(elkLayouts);mermaid.initialize({startOnLoad:false});</script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+    <script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";
+window.addEventListener("load", () => mermaid.run());
+</script>
     </body>
 </html>
