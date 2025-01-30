@@ -68,3 +68,90 @@ class TestActeurProperties:
     def test_code_departement(self, input, expected):
         acteur = Acteur(code_postal=input)
         assert acteur.code_departement == expected
+
+    @pytest.mark.parametrize(
+        "adresse,adresse_complement,expected",
+        [
+            # Les cas remplis complètement
+            ("  a ", "  b  ", "a b"),
+            ("  foo   bar ", "  b  ", "foo   bar b"),
+            # Les cas remplis partièllement
+            ("  foo   bar ", None, "foo   bar"),
+            ("", " a b c ", "a b c"),
+            # Les cas vides
+            (None, None, None),
+            (None, "  ", None),
+            ("   ", None, None),
+            ("   ", "     ", None),
+        ],
+    )
+    def test_combine_adresses(self, adresse, adresse_complement, expected):
+        acteur = Acteur(adresse=adresse, adresse_complement=adresse_complement)
+        assert acteur.combine_adresses == expected
+
+    @pytest.mark.parametrize(
+        "nom,adresse,adresse_complement,expected",
+        [
+            # Les cas remplis complètement
+            ("  à B C ", "  b  ", "  c  ", "à"),
+            (
+                "Décathlon rue des étangs za Rocher",
+                "RUE DES ETANGS",
+                " ZA rocher ",
+                "Décathlon",
+            ),
+        ],
+    )
+    def test_nom_sans_combine_adresses(
+        self, nom, adresse, adresse_complement, expected
+    ):
+        acteur = Acteur(nom=nom, adresse=adresse, adresse_complement=adresse_complement)
+        assert acteur.nom_sans_combine_adresses == expected
+
+    @pytest.mark.parametrize(
+        "nom,nom_commercial,nom_officiel,expected",
+        [
+            # Les cas remplis complètement
+            ("  a ", "  b  ", "  c  ", "a b c"),
+            ("  foo   bar ", "  b  ", "  c  ", "foo   bar b c"),
+            # Les cas remplis partièllement
+            ("  foo   bar ", None, "  c  ", "foo   bar  c"),
+            ("", " a b c ", "  c  ", "a b c c"),
+            # Les cas vides
+            (None, None, None, None),
+            (None, "  ", None, None),
+            ("   ", None, None, None),
+            ("   ", "     ", None, None),
+            ("   ", "     ", "     ", None),
+        ],
+    )
+    def test_combine_noms(self, nom, nom_commercial, nom_officiel, expected):
+        acteur = Acteur(
+            nom=nom,
+            nom_commercial=nom_commercial,
+            nom_officiel=nom_officiel,
+        )
+        assert acteur.combine_noms == expected
+
+    @pytest.mark.parametrize(
+        "nom,ville,expected",
+        [
+            # Les cas remplis complètement
+            # ville supprimée
+            ("  DECATHLON Clermond-Ferrand ", " CLéRMOND FErrAND", "DECATHLON"),
+            (" éclairage Lâvâl ", "  LAVAL ", "éclairage"),
+            # ville non supprimée
+            ("  Decathlon Laval ", "  CHALLANS  ", "Decathlon Laval"),
+            # Les cas remplis partièllement
+            ("  foo   bar ", None, "foo bar"),
+            (" mon acteur ", " a b c ", "mon acteur"),
+            # Les cas vides
+            (None, None, None),
+            (None, "  ", None),
+            ("   ", None, None),
+            ("   ", "     ", None),
+        ],
+    )
+    def test_nom_sans_ville(self, nom, ville, expected):
+        acteur = Acteur(nom=nom, ville=ville)
+        assert acteur.nom_sans_ville == expected

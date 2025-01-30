@@ -41,6 +41,7 @@ from qfdmo.models.utils import (
     CodeAsNaturalKeyModel,
     NomAsNaturalKeyManager,
     NomAsNaturalKeyModel,
+    string_remove_substring_via_normalization,
 )
 from qfdmo.validators import CodeValidator
 
@@ -420,7 +421,29 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
         return result.replace("bis", "b")
 
     @property
-    def nom_sans_adresse_et_complement(self) -> str | None:
+    def code_departement(self) -> str | None:
+        """Extrait le code départemental du code postal"""
+        cp = self.code_postal
+        if not cp:
+            return None
+        cp = str(cp).strip()
+        return None if not cp or len(cp) != 5 else cp[:2]
+
+    @property
+    def combine_adresses(self) -> str | None:
+        """Combine les valeurs de tous les champs adresses,
+        utile notamment pour le clustering car les sources mélangent
+        un peut tout à travers ces champs et on veut tout regrouper
+        pour augmenter les chances de similarité (sachant qu'on
+        peut utiliser à posteriori fonctions de normalisation qui suppriment
+        les mots en doublons et augmentent encore la similarité)"""
+        result = (
+            f"{(self.adresse or "").strip()} {(self.adresse_complement or "").strip()}"
+        ).strip()
+        return result or None
+
+    @property
+    def nom_sans_combine_adresses(self) -> str | None:
         """Retourne le nom sans les mots présents
         dans l'adresse ou le complément de rue, ceci
         pour faciliter le clustering quand un nom répète
@@ -432,21 +455,29 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
         permet à ce champ d'être utilisé dans les
         critères d'inclusion/exclusion
         """
-        words_nom = (self.nom or "").lower().split()
-        words_adresse = (
-            ((self.adresse or "") + (self.adresse_complement or "")).lower().split()
+        return string_remove_substring_via_normalization(
+            self.nom, self.combine_adresses
         )
-        words = [x for x in words_nom if x not in words_adresse and x.strip()]
-        return " ".join(words) if words else None
 
     @property
-    def code_departement(self) -> str | None:
-        """Extrait le code départemental du code postal"""
-        cp = self.code_postal
-        if not cp:
-            return None
-        cp = str(cp).strip()
-        return None if not cp or len(cp) != 5 else cp[:2]
+    def combine_noms(self) -> str | None:
+        """Même idée que combine_adresses mais pour les noms"""
+        result = (
+            (self.nom or "").strip()
+            + " "
+            + (self.nom_commercial or "").strip()
+            + " "
+            + (self.nom_officiel or "").strip()
+        ).strip()
+        return result or None
+
+    @property
+    def nom_sans_ville(self) -> str | None:
+        """Retourne le nom sans la ville pour faciliter le clustering
+        ex: DECATHLON {VILLE} -> DECATHLON. Pour étendre la portée
+        de la fonction on passe par un état normalisé à la volée, mais
+        au final on retourne un nom construit à partir de l'original"""
+        return string_remove_substring_via_normalization(self.nom, self.ville)
 
     @cached_property
     def sorted_proposition_services(self):
