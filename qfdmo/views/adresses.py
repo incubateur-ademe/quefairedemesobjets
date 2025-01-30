@@ -14,7 +14,6 @@ from django.db.models.query import QuerySet
 from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
-from django.urls.base import reverse
 from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_GET
 from django.views.generic.edit import FormView
@@ -47,30 +46,6 @@ from qfdmo.thread.materialized_view import RefreshMateriazedViewThread
 logger = logging.getLogger(__name__)
 
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
-
-
-def direct_access(request):
-    get_params = request.GET.copy()
-
-    if "carte" in request.GET:
-        # Order matters, this should be before iframe because iframe and carte
-        # parameters can coexist
-        del get_params["carte"]
-        try:
-            del get_params["iframe"]
-        except KeyError:
-            pass
-        params = get_params.urlencode()
-        parts = [reverse("qfdmo:carte"), "?" if params else "", params]
-        return redirect("".join(parts))
-
-    if "iframe" in request.GET:
-        del get_params["iframe"]
-        params = get_params.urlencode()
-        parts = [reverse("qfdmo:formulaire"), "?" if params else "", params]
-        return redirect("".join(parts))
-
-    return redirect("https://longuevieauxobjets.ademe.fr/lacarte", permanent=True)
 
 
 class DigitalMixin:

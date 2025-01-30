@@ -17,6 +17,25 @@ server {
         alias /app/staticfiles/;
     }
 
+    location /iframe.js {
+        proxy_pass http://unix:/tmp/gunicorn.sock;
+        proxy_cache assistant;
+        add_header X-Cache-Status $upstream_cache_status;
+    }
+
+    location /static/iframe.js {
+        proxy_pass http://unix:/tmp/gunicorn.sock;
+        proxy_cache assistant;
+        add_header X-Cache-Status $upstream_cache_status;
+    }
+
+
+    location /static/carte.js {
+        proxy_pass http://unix:/tmp/gunicorn.sock;
+        proxy_cache assistant;
+        add_header X-Cache-Status $upstream_cache_status;
+    }
+
     location / {
         proxy_pass http://unix:/tmp/gunicorn.sock;
 

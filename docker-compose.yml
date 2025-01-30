@@ -4,6 +4,10 @@ x-airflow-common:
   env_file:
     - ./dags/.env
   volumes:
+    - ./core:/opt/airflow/core/
+    - ./qfdmo:/opt/airflow/qfdmo/
+    - ./qfdmd:/opt/airflow/qfdmd/
+    - ./data:/opt/airflow/data/
     - ./logs:/opt/airflow/logs
     - ./dags:/opt/airflow/dags
     - ./config:/opt/airflow/config
@@ -42,6 +46,7 @@ services:
     profiles: [proxy]
     ports:
       - "8001:80"
+      - "8002:80"
   airflow-db:
     image: postgres:15
     environment:
@@ -50,6 +55,8 @@ services:
       POSTGRES_DB: airflow
     volumes:
       - ./airflow-pgdata:/var/lib/postgresql/data
+    ports:
+      - 7654:5432
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "airflow"]
       interval: 10s
