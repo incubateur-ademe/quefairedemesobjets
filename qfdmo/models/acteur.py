@@ -435,7 +435,7 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
         utile notamment pour le clustering car les sources mélangent
         un peut tout à travers ces champs et on veut tout regrouper
         pour augmenter les chances de similarité (sachant qu'on
-        peut itiliser à posteriori fonctions de normalisations qui suppriment
+        peut utiliser à posteriori fonctions de normalisation qui suppriment
         les mots en doublons et augmentent encore la similarité)"""
         result = (
             (self.adresse or "").strip() + " " + (self.adresse_complement or "").strip()
