@@ -9,10 +9,11 @@ defaults:
     shell: bash
 
 jobs:
-  # run_tests:
-  #   uses: ./.github/workflows/run_tests.yml
+  run_tests:
+    uses: ./.github/workflows/run_tests.yml
   deploy:
     runs-on: ubuntu-latest
+    needs: [run_tests]
     environment:
       name: preprod
       url: https://quefairedemesobjets-preprod.osc-fr1.scalingo.io
