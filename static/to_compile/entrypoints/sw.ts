@@ -13,14 +13,3 @@ if ('serviceWorker' in navigator) {
     console.error('Error while fetching service workers:', error);
   });
 }
-if ('caches' in window) {
-  caches.keys().then(function(cacheNames) {
-    cacheNames.forEach(function(cacheName) {
-      caches.delete(cacheName).then(function(success) {
-        if (success) {
-          console.log('Cache deleted:', cacheName);
-        }
-      });
-    });
-  });
-}

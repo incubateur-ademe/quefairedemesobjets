@@ -34,5 +34,4 @@ urlpatterns = [
     path("dechet/<slug:slug>/", SynonymeDetailView.as_view(), name="synonyme-detail"),
     path("iframe.js", get_assistant_script, name="script"),
     path("sw.js", get_sw, name="script"),
-    path("service-worker.js", get_sw, name="script"),
 ]
