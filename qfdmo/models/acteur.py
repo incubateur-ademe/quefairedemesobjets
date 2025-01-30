@@ -432,7 +432,7 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
     @property
     def combine_adresses(self) -> str | None:
         """Combine les valeurs de tous les champs adresses,
-        util notamment pour la clustering car les sources mélangent
+        utile notamment pour le clustering car les sources mélangent
         un peut tout à travers ces champs et on veut tout regrouper
         pour augmenter les chances de similarité (sachant qu'on
         peut itiliser à posteriori fonctions de normalisations qui suppriment
