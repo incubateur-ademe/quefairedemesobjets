@@ -15,6 +15,7 @@ class TestClusterConfigModel:
             "include_only_if_regex_matches_nom": "mon nom",
             "include_if_all_fields_filled": ["f1_incl", "f2_incl"],
             "exclude_if_any_field_filled": ["f3_excl", "f4_excl"],
+            "include_parents_only_if_regex_matches_nom": None,
             "normalize_fields_basic": ["basic1", "basic2"],
             "normalize_fields_no_words_size1": ["size1"],
             "normalize_fields_no_words_size2_or_less": ["size2"],
@@ -134,6 +135,11 @@ class TestClusterConfigModel:
         with pytest.raises(ValueError, match="dry_run à fournir"):
             ClusterConfig(**params_working)
 
+    """
+    Test supprimé le 2025-01-27 mais conservé pour référence:
+    - depuis l'ajout des parents indépendant des sources
+      via PR1265 on ne peut plus savoir si on héritera
+      uniquement d'une seule source au moment de la config
     def test_error_one_source_no_intra(self, params_working):
         # Si on ne founit qu'une source alors il faut autoriser
         # le clustering intra-source
@@ -142,6 +148,7 @@ class TestClusterConfigModel:
         msg = "1 source sélectionnée mais intra-source désactivé"
         with pytest.raises(ValueError, match=msg):
             ClusterConfig(**params_working)
+    """
 
     def test_error_must_provide_acteur_type(self, params_working):
         # Si aucun type d'acteur fourni alors on lève une erreur
