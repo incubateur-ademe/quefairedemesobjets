@@ -16,3 +16,8 @@ def options_in_json(optgroups):
             ensure_ascii=False,
         )
     )
+
+
+@register.filter
+def valuetype(value):
+    return type(value).__name__

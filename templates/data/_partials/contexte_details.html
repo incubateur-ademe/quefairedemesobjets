@@ -1,0 +1,16 @@
+<p>
+    {% if identifiant_unique %}
+        <a href="{% url 'admin:qfdmo_acteur_change' identifiant_unique %}" target="_blank" rel="noreferrer">{{ identifiant_unique }}</a>
+    {% endif %}
+    {% if identifiant_uniques %}
+        <ul>
+            {% for identifiant in identifiant_uniques %}
+                <li><a href="{% url 'admin:qfdmo_acteur_change' identifiant %}" target="_blank" rel="noreferrer">{{ identifiant }}</a></li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</p>
+<details>
+    <summary>Details</summary>
+    {% include "data/_partials/value_details.html" with value=contexte %}
+</details>

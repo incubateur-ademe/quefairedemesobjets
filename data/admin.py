@@ -48,8 +48,8 @@ class SuggestionAdmin(admin.ModelAdmin):
         "id",
         "cohorte",
         "statut",
-        "contexte",
-        "changements",
+        "donnees_initiales",
+        "changements_suggerés",
     ]
     list_filter = ["suggestion_cohorte", "statut"]
     actions = [mark_as_rejected, mark_as_toproceed]
@@ -66,8 +66,11 @@ class SuggestionAdmin(admin.ModelAdmin):
         return f"""<a target='_blank'
         href='/admin/qfdmo/displayedacteur/{id}/change/'>{id}</a>"""
 
-    def changements(self, obj):
+    def changements_suggerés(self, obj):
         return obj.display_suggestion_details
+
+    def donnees_initiales(self, obj):
+        return obj.display_contexte_details
 
 
 admin.site.register(SuggestionCohorte, SuggestionCohorteAdmin)

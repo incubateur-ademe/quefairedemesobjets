@@ -150,21 +150,70 @@ class Suggestion(models.Model):
         return displayed_details
 
     @property
+    def display_contexte_details(self):
+        identifiant_unique = None
+        identifiant_uniques = []
+        if isinstance(self.contexte, dict) and "identifiant_unique" in self.contexte:
+            identifiant_unique = self.contexte.get("identifiant_unique")
+        if isinstance(self.contexte, list):
+            identifiant_uniques = [
+                item.get("identifiant_unique")
+                for item in self.contexte
+                if isinstance(item, dict)
+            ]
+        return render_to_string(
+            "data/_partials/contexte_details.html",
+            {
+                "contexte": self.contexte,
+                "identifiant_unique": identifiant_unique,
+                "identifiant_uniques": identifiant_uniques,
+            },
+        )
+
+    @property
     def display_suggestion_details(self):
         template_name = "data/_partials/suggestion_details.html"
-        suggestion = self.suggestion
+        template_context = {"suggestion": self.suggestion}
         if (
             self.suggestion_cohorte.type_action == SuggestionAction.CLUSTERING
-            and isinstance(suggestion, list)
+            and isinstance(self.suggestion, list)
         ):
-            cluster_id = suggestion[0].get("cluster_id")
-            identifiant_uniques = [s.get("identifiant_unique") for s in suggestion]
-            suggestion = {
+            cluster_id = self.suggestion[0].get("cluster_id")
+            identifiant_uniques = [s.get("identifiant_unique") for s in self.suggestion]
+            template_context = {
                 "cluster_id": cluster_id,
                 "identifiant_uniques": identifiant_uniques,
             }
             template_name = "data/_partials/clustering_suggestion_details.html"
-        return render_to_string(template_name, {"suggestion": suggestion})
+        if (
+            self.suggestion_cohorte.type_action == SuggestionAction.SOURCE_SUPPRESSION
+            and isinstance(self.suggestion, dict)
+        ):
+            template_name = "data/_partials/suppression_suggestion_details.html"
+            template_context = {
+                "identifiant_unique": self.suggestion.get("identifiant_unique")
+            }
+        if (
+            self.suggestion_cohorte.type_action == SuggestionAction.SOURCE_MODIFICATION
+            and isinstance(self.suggestion, dict)
+            and isinstance(self.contexte, dict)
+        ):
+            template_name = "data/_partials/modification_suggestion_details.html"
+            updated_fields = {}
+            unchanged_fields = {}
+            for key, value in self.suggestion.items():
+                if key not in self.contexte:
+                    continue
+                if self.contexte.get(key) != value:
+                    updated_fields[key] = {"new": value, "old": self.contexte.get(key)}
+                else:
+                    unchanged_fields[key] = value
+            template_context = {
+                "updated_fields": updated_fields,
+                "unchanged_fields": unchanged_fields,
+            }
+
+        return render_to_string(template_name, template_context)
 
     # FIXME: A revoir
     def display_proposition_service(self):

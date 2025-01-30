@@ -1,0 +1,12 @@
+<h3>Champs modifiés:</h3>
+<ul>
+    {% for field, value in updated_fields.items %}
+        <li><strong>{{ field }}</strong> : <strike>{{ value.old }}</strike> {{ value.new }}</li>
+    {% endfor %}
+</ul>
+
+
+<details>
+    <summary>Champs inchangés:</summary>
+    {% include "data/_partials/value_details.html" with value=unchanged_fields %}
+</details>

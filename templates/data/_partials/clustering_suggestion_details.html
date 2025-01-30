@@ -1,12 +1,12 @@
 <b>cluster_id:</b>
 <br/>
 <ul>
-    <li>{{ suggestion.cluster_id }}</li>
+    <li>{{ cluster_id }}</li>
 </ul>
 <b>acteurs:</b>
 <br/>
 <ul>
-    {% for identifiant_unique in suggestion.identifiant_uniques %}
+    {% for identifiant_unique in identifiant_uniques %}
         <li>
             <a target='_blank' href="/admin/qfdmo/displayedacteur/{{ identifiant_unique }}/change/">{{ identifiant_unique }}</a>
         </li>
