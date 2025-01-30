@@ -225,7 +225,7 @@ def cluster_cols_group_fuzzy(df_src, columns, threshold):
     return result_dfs
 
 
-def cluster_acteurs_suggestions(
+def cluster_acteurs_clusters(
     df: pd.DataFrame,
     cluster_fields_exact: list[str] = [],
     cluster_fields_fuzzy: list[str] = [],

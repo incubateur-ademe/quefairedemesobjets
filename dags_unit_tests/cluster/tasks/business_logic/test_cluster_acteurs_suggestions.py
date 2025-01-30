@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 import pytest
-from cluster.tasks.business_logic.cluster_acteurs_suggestions import (
-    cluster_acteurs_suggestions,
+from cluster.tasks.business_logic.cluster_acteurs_clusters import (
+    cluster_acteurs_clusters,
     cluster_cols_group_fuzzy,
     cluster_strings,
     score_tuples_to_clusters,
@@ -72,7 +72,7 @@ class TestCluster:
         )
 
     def test_cols_group_exact(self, df_basic):
-        df_clusters = cluster_acteurs_suggestions(
+        df_clusters = cluster_acteurs_clusters(
             df_basic,
             cluster_fields_exact=["ville"],
             cluster_fields_fuzzy=[],
@@ -95,13 +95,13 @@ class TestCluster:
         """On s'assure que la fonction soulève une exception
         pour les colonnes manquantes dans le DataFrame"""
         with pytest.raises(ValueError, match="'existe_pas' pas dans le DataFrame"):
-            cluster_acteurs_suggestions(df_basic, cluster_fields_exact=["existe_pas"])
+            cluster_acteurs_clusters(df_basic, cluster_fields_exact=["existe_pas"])
 
     def test_validation_cols_group_fuzzy(self, df_basic):
         """On s'assure que la fonction soulève une exception
         pour les colonnes manquantes dans le DataFrame"""
         with pytest.raises(ValueError, match="'existe_pas' pas dans le DataFrame"):
-            cluster_acteurs_suggestions(df_basic, cluster_fields_fuzzy=["existe_pas"])
+            cluster_acteurs_clusters(df_basic, cluster_fields_fuzzy=["existe_pas"])
 
     # -----------------------------------------------
     # Tests sur la suppression des clusters de taille 1
@@ -130,7 +130,7 @@ class TestCluster:
     def test_clusters_of_one_are_removed(self, df_some_clusters_of_one):
         """On vérifie qu'on supprime les clusters de taille 1 mais
         pas les autres de taille 2+"""
-        df_clusters = cluster_acteurs_suggestions(
+        df_clusters = cluster_acteurs_clusters(
             df_some_clusters_of_one,
             cluster_fields_exact=["ville"],
             cluster_fields_fuzzy=[],
@@ -165,7 +165,7 @@ class TestCluster:
         )
 
     def test_cols_group_fuzzy_single(self, df_cols_group_fuzzy):
-        df_clusters = cluster_acteurs_suggestions(
+        df_clusters = cluster_acteurs_clusters(
             df_cols_group_fuzzy,
             # code_postal est en dur dans la fonction de clustering
             cluster_fields_exact=["code_postal"],

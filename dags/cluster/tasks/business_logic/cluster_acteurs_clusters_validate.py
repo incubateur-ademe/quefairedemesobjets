@@ -13,7 +13,7 @@ def raise_if_df_not_empty(df: pd.DataFrame, error) -> None:
         raise ValueError(error)
 
 
-def cluster_acteurs_suggestions_validate(df_clusters: pd.DataFrame) -> None:
+def cluster_acteurs_clusters_validate(df_clusters: pd.DataFrame) -> None:
     """Validation des propositions de clusters
 
     Args:

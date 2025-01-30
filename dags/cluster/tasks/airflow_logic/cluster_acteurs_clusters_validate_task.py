@@ -2,7 +2,7 @@ import logging
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from cluster.tasks.business_logic import cluster_acteurs_suggestions_validate
+from cluster.tasks.business_logic import cluster_acteurs_clusters_validate
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -13,7 +13,7 @@ def task_info_get():
 
 
     ============================================================
-    Description de la tâche "cluster_acteurs_suggestions_validate"
+    Description de la tâche "cluster_acteurs_clusters_validate"
     ============================================================
 
     💡 quoi: validation des suggestions après l'affichage airflow mais
@@ -32,25 +32,23 @@ def task_info_get():
     """
 
 
-def cluster_acteurs_suggestions_validate_wrapper(**kwargs) -> None:
+def cluster_acteurs_clusters_validate_wrapper(**kwargs) -> None:
     logger.info(task_info_get())
 
-    df = kwargs["ti"].xcom_pull(
-        key="df", task_ids="cluster_acteurs_suggestions_display"
-    )
+    df = kwargs["ti"].xcom_pull(key="df", task_ids="cluster_acteurs_clusters_display")
 
     log.preview("suggestions de clustering", df)
 
-    cluster_acteurs_suggestions_validate(df)
+    cluster_acteurs_clusters_validate(df)
 
     logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
     logging.info(" - Validation des suggestions: succès ✅")
     logging.info(" - 0 modification de quoi que ce soit à ce stade (validation pure)")
 
 
-def cluster_acteurs_suggestions_validate_task(dag: DAG) -> PythonOperator:
+def cluster_acteurs_clusters_validate_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
-        task_id="cluster_acteurs_suggestions_validate",
-        python_callable=cluster_acteurs_suggestions_validate_wrapper,
+        task_id="cluster_acteurs_clusters_validate",
+        python_callable=cluster_acteurs_clusters_validate_wrapper,
         dag=dag,
     )

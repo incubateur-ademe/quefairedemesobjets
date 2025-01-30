@@ -18,12 +18,15 @@ from cluster.dags.ui import (
     UI_PARAMS_SEPARATOR_SELECTION_PARENTS,
 )
 from cluster.tasks.airflow_logic import (
+    cluster_acteurs_clusters_display_task,
+    cluster_acteurs_clusters_validate_task,
     cluster_acteurs_config_create_task,
     cluster_acteurs_normalize_task,
+    cluster_acteurs_parents_choose_data_task,
+    cluster_acteurs_parents_choose_new_task,
     cluster_acteurs_selection_from_db_task,
     cluster_acteurs_suggestions_display_task,
     cluster_acteurs_suggestions_to_db_task,
-    cluster_acteurs_suggestions_validate_task,
 )
 from utils.airflow_params import airflow_params_dropdown_from_mapping
 from utils.django import django_model_fields_attributes_get, django_setup_full
@@ -58,7 +61,7 @@ dropdown_acteur_types = airflow_params_dropdown_from_mapping(
 dropdown_acteur_columns = django_model_fields_attributes_get(Acteur)
 
 with DAG(
-    dag_id="cluster_acteurs_suggestions",
+    dag_id="cluster_acteurs_clusters",
     dag_display_name="Cluster - Acteurs - Suggestions",
     default_args={
         "owner": "airflow",
@@ -264,11 +267,14 @@ with DAG(
         cluster_acteurs_selection_from_db_task(dag=dag),
         cluster_acteurs_normalize_task(dag=dag),
         # TODO: besoin de refactoriser cette tâche:
-        # - changer cluster_acteurs_suggestions_display pour obtenir une
+        # - changer cluster_acteurs_clusters_display pour obtenir une
         #   df de clusters ignorés
         # - utiliser cette df pour la tâche d'info
         # cluster_acteurs_info_size1_task(dag=dag),
+        cluster_acteurs_clusters_display_task(dag=dag),
+        cluster_acteurs_clusters_validate_task(dag=dag),
+        cluster_acteurs_parents_choose_new_task(dag=dag),
+        cluster_acteurs_parents_choose_data_task(dag=dag),
         cluster_acteurs_suggestions_display_task(dag=dag),
-        cluster_acteurs_suggestions_validate_task(dag=dag),
         cluster_acteurs_suggestions_to_db_task(dag=dag),
     )

@@ -37,7 +37,7 @@ def cluster_acteurs_parents_choose_new_wrapper(**kwargs) -> None:
         key="config", task_ids="cluster_acteurs_config_create"
     )
     df: pd.DataFrame = kwargs["ti"].xcom_pull(
-        key="df", task_ids="cluster_acteurs_suggestions_display"
+        key="df", task_ids="cluster_acteurs_clusters_display"
     )
     if not isinstance(df, pd.DataFrame) or df.empty:
         raise ValueError("df vide: on devrait pas être ici")
