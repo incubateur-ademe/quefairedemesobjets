@@ -37,7 +37,7 @@ export class SolutionMap {
     L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png", {
       maxZoom: DEFAULT_MAX_ZOOM,
       attribution:
-        "© <a href='https://www.openstreetmap.org/copyright' rel='noopener'>OpenStreetMap</a>",
+        "© <a href='https://www.openstreetmap.org/copyright' target='_blank' rel='noopener'>OpenStreetMap</a>",
     }).addTo(this.map)
     L.control.scale({ imperial: false }).addTo(this.map)
     this.#manageZoomControl()
@@ -96,7 +96,7 @@ export class SolutionMap {
     bboxValue?: Array<Number>,
   ): void {
     const points: Array<Array<Number>> = []
-    actors.forEach(function (actor: DisplayedActeur) {
+    actors.forEach(function(actor: DisplayedActeur) {
       if (actor.location) {
         const markerHtmlString = this.#generateMarkerHTMLStringFrom(actor)
         const actorMarker = L.divIcon({

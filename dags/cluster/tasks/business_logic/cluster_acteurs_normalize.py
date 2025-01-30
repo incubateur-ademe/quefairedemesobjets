@@ -17,18 +17,35 @@ def cluster_acteurs_normalize(
         cluster_fields_exact (list[str]): Les champs sur lesquels
     """
     # Si aucun champ spécifié, on applique la normalisation basique à tous les champs
+
+    def field_to_not_normalize(field: str) -> bool:
+        # TODO: définir une liste de champs à exclure de la normalisation,
+        # qui devraient être en relation avec les champs rajoutés par défaut
+        # dans l'étape de sélection
+        if "identifiant" in field or "_id" in field or "_code" in field:
+            return True
+        return False
+
     if not normalize_fields_basic:
         normalize_fields_basic = df.columns.tolist()
     for field in normalize_fields_basic:
+        if field_to_not_normalize(field):
+            continue
         df[field] = df[field].map(normalize.string_basic)
 
     for field in normalize_fields_no_words_size1:
+        if field_to_not_normalize(field):
+            continue
         df[field] = df[field].map(lambda x: normalize.string_remove_small_words(x, 1))
 
     for field in normalize_fields_no_words_size2_or_less:
+        if field_to_not_normalize(field):
+            continue
         df[field] = df[field].map(lambda x: normalize.string_remove_small_words(x, 2))
 
     for field in normalize_fields_no_words_size3_or_less:
+        if field_to_not_normalize(field):
+            continue
         df[field] = df[field].map(lambda x: normalize.string_remove_small_words(x, 3))
 
     # Si aucun champ spécifié, on applique la normalisation des mots
@@ -36,6 +53,8 @@ def cluster_acteurs_normalize(
     if not normalize_fields_order_unique_words:
         normalize_fields_order_unique_words = df.columns.tolist()
     for field in normalize_fields_order_unique_words:
+        if field_to_not_normalize(field):
+            continue
         df[field] = df[field].map(normalize.string_order_unique_words)
 
     # TODO: à voir si on garde cette colonne: elle nous a servi au début

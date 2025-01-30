@@ -40,7 +40,7 @@ def cluster_acteurs_normalize_wrapper(**kwargs) -> None:
         key="config", task_ids="cluster_acteurs_config_create"
     )
     df: pd.DataFrame = kwargs["ti"].xcom_pull(
-        key="df", task_ids="cluster_acteurs_db_data_read_acteurs"
+        key="df", task_ids="cluster_acteurs_selection_from_db"
     )
     if df.empty:
         raise ValueError("Pas de données acteurs récupérées")

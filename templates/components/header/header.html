@@ -3,7 +3,8 @@
     <div class="qf-flex qf-justify-between qf-pt-3w">
         <a
             class="qf-bg-none qf-flex qf-gap-2w"
-            href="{% url 'qfdmd:home' %}"
+            data-testid="header-logo-link"
+            href="{% url 'home' %}"
         >
             <img
                 src="{% static 'assistant/bloc-marque.svg' %}"

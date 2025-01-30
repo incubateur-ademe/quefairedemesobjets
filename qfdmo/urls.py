@@ -3,13 +3,12 @@ from django.urls import path
 from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 
-from qfdmo.views import google_verification
+from qfdmo.views import get_carte_iframe_script, google_verification
 from qfdmo.views.adresses import (
     CarteSearchActeursView,
     FormulaireSearchActeursView,
     acteur_detail,
     acteur_detail_redirect,
-    direct_access,
     get_object_list,
     getorcreate_revisionacteur,
     solution_admin,
@@ -19,7 +18,10 @@ from qfdmo.views.configurator import AdvancedConfiguratorView, ConfiguratorView
 from qfdmo.views.dags import DagsValidation
 
 urlpatterns = [
-    path("", direct_access, name="direct_access"),
+    # This route needs to be touched with care is it is embedded
+    # on many website, enabling the load of LVAO as an iframe
+    path("static/carte.js", get_carte_iframe_script, name="script"),
+    path("static/iframe.js", get_carte_iframe_script, name="script"),
     path("carte", CarteSearchActeursView.as_view(), name="carte"),
     path("carte.json", CarteSearchActeursView.as_view(), name="carte_json"),
     path("formulaire", FormulaireSearchActeursView.as_view(), name="formulaire"),

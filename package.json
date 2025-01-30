@@ -11,6 +11,7 @@
     "source": [
         "static/to_compile/entrypoints/qfdmo.css",
         "static/to_compile/entrypoints/qfdmo.ts",
+        "static/to_compile/entrypoints/sw.ts",
         "static/to_compile/entrypoints/assistant/script-to-iframe.ts",
         "static/to_compile/entrypoints/admin-categorie-widget.ts",
         "static/to_compile/entrypoints/qfdmd.ts",
@@ -45,7 +46,7 @@
         "eslint-config-prettier": "^9.1.0",
         "iframe-resizer": "^4.4.5",
         "leaflet": "^1.9.4",
-        "posthog-js": "^1.205.1",
+        "posthog-js": "^1.211.0",
         "tailwindcss": "^3.4.17"
     },
     "devDependencies": {
@@ -58,7 +59,7 @@
         "@types/leaflet": "^1.9.16",
         "@types/lodash": "^4.17.14",
         "@types/node": "^22.10.7",
-        "@typescript-eslint/eslint-plugin": "^8.19.1",
+        "@typescript-eslint/eslint-plugin": "^8.22.0",
         "buffer": "^6.0.3",
         "eslint": "^9.18.0",
         "eslint-config-love": "^117.0.0",
@@ -79,6 +80,6 @@
         "typescript": "^5.7.3"
     },
     "optionalDependencies": {
-        "@parcel/watcher-linux-x64-glibc": "^2.5.0"
+        "@parcel/watcher-linux-x64-glibc": "^2.5.1"
     }
 }

@@ -49,8 +49,11 @@ def update_acteur_source_code(apps, schema_editor):
             f"Executing SQL: {sql} with params: {old_code}, {new_code}, {old_code}%"
         )
         schema_editor.execute(sql, [old_code, new_code, f"{old_code}%"])
+    # A supprimer plus tard : après que create_final_actor ai tourné
+    Source.objects.filter(code="Communauté Longue Vie Aux Objets").update(
+        code="deprecated_lvao"
+    )
     schema_editor.execute("SET CONSTRAINTS ALL IMMEDIATE;")
-    Source.objects.filter(code="Communauté Longue Vie Aux Objets").delete()
 
 
 class Migration(migrations.Migration):

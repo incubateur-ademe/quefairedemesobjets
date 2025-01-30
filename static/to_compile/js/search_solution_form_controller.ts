@@ -200,6 +200,7 @@ export default class extends Controller<HTMLElement> {
 
     this.acteurDetailsPanelTarget.dataset.exitAnimationEnded = "false"
     this.acteurDetailsPanelTarget.scrollIntoView()
+
   }
 
   hideActeurDetailsPanel() {

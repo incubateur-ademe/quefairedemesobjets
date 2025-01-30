@@ -14,5 +14,4 @@ stimulus.register("blink", BlinkController)
 stimulus.register("copy", CopyController)
 stimulus.register("analytics", AnalyticsController)
 
-
 Turbo.session.drive = false;

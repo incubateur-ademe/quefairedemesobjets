@@ -7,7 +7,9 @@
 aiohappyeyeballs==2.4.4 \
     --hash=sha256:5fdd7d87889c63183afc18ce9271f9b0a7d32c2303e394468dd45d514a757745 \
     --hash=sha256:a980909d50efcd44795c4afeca523296716d50cd756ddca6af8c65b996e27de8
-    # via aiohttp
+    # via
+    #   -c airflow-requirements.txt
+    #   aiohttp
 aiohttp==3.10.11 \
     --hash=sha256:0316e624b754dbbf8c872b62fe6dcb395ef20c70e59890dfa0de9eafccd2849d \
     --hash=sha256:099fd126bf960f96d34a760e747a629c27fb3634da5d05c7ef4d35ef4ea519fc \
@@ -100,11 +102,15 @@ aiohttp==3.10.11 \
     --hash=sha256:fc31820cfc3b2863c6e95e14fcf815dc7afe52480b4dc03393c4873bb5599f71 \
     --hash=sha256:fdf6429f0caabfd8a30c4e2eaecb547b3c340e4730ebfe25139779b9815ba138 \
     --hash=sha256:ffbfde2443696345e23a3c597049b1dd43049bb65337837574205e7368472177
-    # via apache-airflow-providers-http
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow-providers-http
 aiosignal==1.3.2 \
     --hash=sha256:45cde58e409a301715980c2b01d0c28bdde3770d8290b5eb2173759d9acb31a5 \
     --hash=sha256:a8c255c66fafb1e499c9351d0bf32ff2d8a0321595ebac3b93713656d2436f54
-    # via aiohttp
+    # via
+    #   -c airflow-requirements.txt
+    #   aiohttp
 alabaster==1.0.0 \
     --hash=sha256:c00dca57bca26fa62a6d7d0a9fcce65f3e026e9bfe33e9c538fd3fbb2144fd9e \
     --hash=sha256:fc6786402dc3fcb2de3cabd5fe455a2db534b371124f1f21de8731783dec828b
@@ -112,15 +118,20 @@ alabaster==1.0.0 \
 alembic==1.14.0 \
     --hash=sha256:99bd884ca390466db5e27ffccff1d179ec5c05c965cfefc0607e69f9e411cb25 \
     --hash=sha256:b00892b53b3642d0b8dbedba234dbf1924b69be83a9a769d5a624b01094e304b
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 anyio==4.7.0 \
     --hash=sha256:2f834749c602966b7d456a7567cafcb309f96482b5081d14ac93ccd457f9dd48 \
     --hash=sha256:ea60c3723ab42ba6fff7e8ccb0488c898ec538ff4df1f1d5e642c3601d07e352
-    # via httpx
+    # via
+    #   -c airflow-requirements.txt
+    #   httpx
 apache-airflow==2.10.4 \
     --hash=sha256:10ebf8b95c59ba229f06235665e92cc684577861cfd1e96bdbe3d3eb7cb5779a \
     --hash=sha256:9470a26479034ddede69fca913d7f84a32dd883368861b9421e2a692c0fc5ef4
     # via
+    #   -c airflow-requirements.txt
     #   -r dev-requirements.in
     #   apache-airflow-providers-common-compat
     #   apache-airflow-providers-common-io
@@ -132,55 +143,75 @@ apache-airflow==2.10.4 \
     #   apache-airflow-providers-postgres
     #   apache-airflow-providers-smtp
     #   apache-airflow-providers-sqlite
-apache-airflow-providers-common-compat==1.2.2 \
-    --hash=sha256:4094ef0226e5105516797cc19aa10bf76a1486ba81cb7e1ca478ed90d6b2a1cf \
-    --hash=sha256:ce050d9c8d9eba42e52855f986d6382b3d79f611c1ed05310a0c7466bf004dcd
+apache-airflow-providers-common-compat==1.3.0 \
+    --hash=sha256:f4e125eba88078bda95cec5144debe519460276f33e214260a7e471bbe8d8c5d \
+    --hash=sha256:fc63b30baa72c9aff810087898a957555e0f67281a7b2430f3a1d322a7abb9fb
     # via
+    #   -c airflow-requirements.txt
     #   apache-airflow
     #   apache-airflow-providers-fab
 apache-airflow-providers-common-io==1.4.2 \
     --hash=sha256:200a95f066ece40ef379de50ba96b7ffecdb6ceab4c4fbad5a47cca1f0a0456b \
     --hash=sha256:b427fb056eba87677d229646296832e71bd44ac29984b1e655d5eb356caae254
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 apache-airflow-providers-common-sql==1.20.0 \
     --hash=sha256:2bc7c4b85a3b37ab9d18da7024203e1521574ff0a7bda3efba232170ab1b7d5e \
     --hash=sha256:a2f5749ec15337128858e61d47a7ac9ffacab5a405ac58843d95600c99fe760c
     # via
+    #   -c airflow-requirements.txt
     #   apache-airflow
     #   apache-airflow-providers-postgres
     #   apache-airflow-providers-sqlite
 apache-airflow-providers-fab==1.5.2 \
     --hash=sha256:22744241fd8f5dfd4575f02775afa00b3a965b04799b67fd0a42678f994ec3ba \
     --hash=sha256:62180f0f2cab0060b4370bda43040fe1ebdeb656297de797b1bc846cfe7d63e3
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 apache-airflow-providers-ftp==3.11.1 \
     --hash=sha256:205086fc296f8cc255fb8f911049ed3aaf123c6f4749f2899faf60678b3b5cb3 \
     --hash=sha256:77754b44fc9e22773e9d7d160970d172fa7c2f8a19bceebcd4d2738871ef578f
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 apache-airflow-providers-http==4.13.3 \
     --hash=sha256:41d71adf40dcaa2481b721c27c5a43be2d4315475c41280c96c4c8846424de22 \
     --hash=sha256:4ae65f1ecfbc326dd85aec2bf1d73574375de846d0c394f010373a61c5765663
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 apache-airflow-providers-imap==3.7.0 \
     --hash=sha256:b3fae432280a07c9bd9f05eed5b500a6c080905c1403df342305e798dcf87754 \
     --hash=sha256:f7df79dd99a43fe18c009740aa7dd2c52e1d8caac173cf745e8d59b06e02adcf
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 apache-airflow-providers-postgres==5.14.0 \
     --hash=sha256:0159548d5dfc952eb70f0ab139171f294533a6438c607c2faf67d61cc4010ab8 \
     --hash=sha256:0c0d54512327a6e58d25c6f6bd03cfae6b8a4fd3576748009828a28582bba424
-    # via -r dev-requirements.in
+    # via
+    #   -c airflow-requirements.txt
+    #   -r dev-requirements.in
 apache-airflow-providers-smtp==1.8.1 \
     --hash=sha256:8144bc71c54cf03c165d2ea1364530e232ecc70b53847624400ba4786599ea6a \
     --hash=sha256:cdb0f1f19dff930a7f441d19a876f3a8e9782377328060e6bad8546e2171cf68
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 apache-airflow-providers-sqlite==3.9.1 \
     --hash=sha256:65459e0f1d54bfcb798d0b21050ce2348db018fa502c68e3c919b75e6bac9086 \
     --hash=sha256:774d947b9c0e9da564509124801f249bb8e9e9a15cde47b017953d0ea3c72e1a
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 apispec[yaml]==6.8.0 \
     --hash=sha256:09d0b43eaf95fb3e94b5b15ba6288e45ae8b9a922f73073345b606204589df34 \
     --hash=sha256:861cca82bbc0652ca9acea896921b254944580342fde849f86f6dac1acc6ca96
-    # via flask-appbuilder
+    # via
+    #   -c airflow-requirements.txt
+    #   flask-appbuilder
 appdirs==1.4.4 \
     --hash=sha256:7d5d0167b2b1ba821647616af46a749d1c653740dd0d2415100fe26e27afdf41 \
     --hash=sha256:a841dacd6b99318a741b166adb07e19ee71a274450e68237b4650ca1055ab128
@@ -188,12 +219,14 @@ appdirs==1.4.4 \
 argcomplete==3.5.2 \
     --hash=sha256:036d020d79048a5d525bc63880d7a4b8d1668566b8a76daf1144c0bbe0f63472 \
     --hash=sha256:23146ed7ac4403b70bd6026402468942ceba34a6732255b9edf5b7354f68a6bb
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 asgiref==3.8.1 \
     --hash=sha256:3e1e3ecc849832fe52ccf2cb6686b7a55f82bb1d6aee72a58826471390335e47 \
     --hash=sha256:c343bd80a0bec947a9860adb4c432ffa7db769836c64238fc34bdc3fec84d590
     # via
-    #   -c requirements.txt
+    #   -c airflow-requirements.txt
     #   apache-airflow
     #   apache-airflow-providers-http
     #   django
@@ -203,6 +236,7 @@ attrs==24.3.0 \
     --hash=sha256:8f5c07333d543103541ba7be0e2ce16eeee8130cb0b3f9238ab904ce1e85baff \
     --hash=sha256:ac96cd038792094f438ad1f6ff80837353805ac950cd2aa0e0625ef19850c308
     # via
+    #   -c airflow-requirements.txt
     #   aiohttp
     #   apache-airflow
     #   jsonschema
@@ -211,6 +245,7 @@ babel==2.16.0 \
     --hash=sha256:368b5b98b37c06b7daf6696391c3240c938b37767d4584413e8438c5c435fa8b \
     --hash=sha256:d1f3554ca26605fe173f3de0c65f750f5a42f924499bf134de6423582298e316
     # via
+    #   -c airflow-requirements.txt
     #   flask-babel
     #   sphinx
 beautifulsoup4==4.12.3 \
@@ -246,18 +281,21 @@ black==24.10.0 \
 blinker==1.9.0 \
     --hash=sha256:b4ce2265a7abece45e7cc896e98dbebe6cead56bcf805a3d23136d145f5445bf \
     --hash=sha256:ba0efaa9080b619ff2f3459d1d500c57bddea4a6b424b60a91141db6fd2f08bc
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 cachelib==0.9.0 \
     --hash=sha256:38222cc7c1b79a23606de5c2607f4925779e37cdcea1c2ad21b8bae94b5425a5 \
     --hash=sha256:811ceeb1209d2fe51cd2b62810bd1eccf70feba5c52641532498be5c675493b3
     # via
+    #   -c airflow-requirements.txt
     #   flask-caching
     #   flask-session
 certifi==2024.12.14 \
     --hash=sha256:1275f7a45be9464efc1173084eaa30f866fe2e47d389406136d332ed4967ec56 \
     --hash=sha256:b650d30f370c2b724812bee08008be0c4163b163ddaec3f2546c1caf65f191db
     # via
-    #   -c requirements.txt
+    #   -c airflow-requirements.txt
     #   httpcore
     #   httpx
     #   requests
@@ -330,7 +368,7 @@ cffi==1.17.1 \
     --hash=sha256:f7f5baafcc48261359e14bcd6d9bff6d4b28d9103847c9e136694cb0501aef87 \
     --hash=sha256:fc48c783f9c87e60831201f2cce7f3b2e4846bf4d8728eabe54d60700b318a0b
     # via
-    #   -c requirements.txt
+    #   -c airflow-requirements.txt
     #   cryptography
 cfgv==3.4.0 \
     --hash=sha256:b7265b1f29fd3316bfcd2b330d63d024f2bfd8bcb8b0272f8e19a504856c48f9 \
@@ -443,13 +481,13 @@ charset-normalizer==3.4.0 \
     --hash=sha256:fe9f97feb71aa9896b81973a7bbada8c49501dc73e58a10fcef6663af95e5079 \
     --hash=sha256:ffc519621dce0c767e96b9c53f09c5d215578e10b02c285809f76509a3931482
     # via
-    #   -c requirements.txt
+    #   -c airflow-requirements.txt
     #   requests
 click==8.1.7 \
     --hash=sha256:ae74fb96c20a0277a1d615f1e4d73c8414f5a98db8b799a7931d1582f3390c28 \
     --hash=sha256:ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de
     # via
-    #   -c requirements.txt
+    #   -c airflow-requirements.txt
     #   black
     #   clickclick
     #   flask
@@ -457,31 +495,45 @@ click==8.1.7 \
 clickclick==20.10.2 \
     --hash=sha256:4efb13e62353e34c5eef7ed6582c4920b418d7dedc86d819e22ee089ba01802c \
     --hash=sha256:c8f33e6d9ec83f68416dd2136a7950125bd256ec39ccc9a85c6e280a16be2bb5
-    # via connexion
+    # via
+    #   -c airflow-requirements.txt
+    #   connexion
 colorama==0.4.6 \
     --hash=sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44 \
     --hash=sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6
-    # via flask-appbuilder
+    # via
+    #   -c airflow-requirements.txt
+    #   flask-appbuilder
 colorlog==6.9.0 \
     --hash=sha256:5906e71acd67cb07a71e779c47c4bcb45fb8c2993eebe9e5adcd6a6f1b283eff \
     --hash=sha256:bfba54a1b93b94f54e1f4fe48395725a3d92fd2a4af702f6bd70946bdc0c6ac2
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 configupdater==3.2 \
     --hash=sha256:0f65a041627d7693840b4dd743581db4c441c97195298a29d075f91b79539df2 \
     --hash=sha256:9fdac53831c1b062929bf398b649b87ca30e7f1a735f3fbf482072804106306b
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 connexion[flask]==2.14.2 \
     --hash=sha256:a73b96a0e07b16979a42cde7c7e26afe8548099e352cf350f80c57185e0e0b36 \
     --hash=sha256:dbc06f52ebeebcf045c9904d570f24377e8bbd5a6521caef15a06f634cf85646
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 cron-descriptor==1.4.5 \
     --hash=sha256:736b3ae9d1a99bc3dbfc5b55b5e6e7c12031e7ba5de716625772f8b02dcd6013 \
     --hash=sha256:f51ce4ffc1d1f2816939add8524f206c376a42c87a5fca3091ce26725b3b1bca
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 croniter==6.0.0 \
     --hash=sha256:2f878c3856f17896979b2a4379ba1f09c83e374931ea15cc835c5dd2eee9b368 \
     --hash=sha256:37c504b313956114a983ece2c2b07790b1f1094fe9d81cc94739214748255577
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 cryptography==44.0.0 \
     --hash=sha256:1923cb251c04be85eec9fda837661c67c1049063305d6be5721643c22dd4e2b7 \
     --hash=sha256:37d76e6863da3774cd9db5b409a9ecfd2c71c981c38788d3fcfaf177f447b731 \
@@ -511,12 +563,13 @@ cryptography==44.0.0 \
     --hash=sha256:f5e7cb1e5e56ca0933b4873c0220a78b773b24d40d186b6738080b73d3d0a756 \
     --hash=sha256:f677e1268c4e23420c3acade68fac427fffcb8d19d7df95ed7ad17cdef8404f4
     # via
-    #   -c requirements.txt
+    #   -c airflow-requirements.txt
     #   apache-airflow
 deprecated==1.2.15 \
     --hash=sha256:353bc4a8ac4bfc96800ddab349d89c25dec1079f65fd53acdcc1e0b975b21320 \
     --hash=sha256:683e561a90de76239796e6b6feac66b99030d2dd3fcf61ef996330f14bbb9b0d
     # via
+    #   -c airflow-requirements.txt
     #   apache-airflow
     #   limits
     #   opentelemetry-api
@@ -526,7 +579,9 @@ deprecated==1.2.15 \
 dill==0.3.9 \
     --hash=sha256:468dff3b89520b474c0397703366b7b95eebe6303f108adf9b19da1f702be87a \
     --hash=sha256:81aa267dddf68cbfe8029c42ca9ec6a4ab3b22371d1c450abc54422577b4512c
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 distlib==0.3.9 \
     --hash=sha256:47f8c22fd27c27e25a65601af709b38e4f0a45ea4fc2e710f65755fa8caaaf87 \
     --hash=sha256:a60f20dea646b8a33f3e7772f74dc0b2d0772d2837ee1342a00645c81edf9403
@@ -535,7 +590,6 @@ django==5.1.4 \
     --hash=sha256:236e023f021f5ce7dee5779de7b286565fdea5f4ab86bae5338e3f7b69896cf0 \
     --hash=sha256:de450c09e91879fa5a307f696e57c851955c910a438a35e6b4c895e86bedc82a
     # via
-    #   -c requirements.txt
     #   django-browser-reload
     #   django-debug-toolbar
     #   django-stubs
@@ -559,7 +613,9 @@ django-stubs-ext==5.1.2 \
 dnspython==2.7.0 \
     --hash=sha256:b4c34b7d10b51bcc3a5071e7b8dee77939f1e878477eeecc965e9835f63c6c86 \
     --hash=sha256:ce9c432eda0dc91cf618a5cedf1a4e142651196bbcd2c80e89ed5a907e5cfaf1
-    # via email-validator
+    # via
+    #   -c airflow-requirements.txt
+    #   email-validator
 docutils==0.21.2 \
     --hash=sha256:3a6b18732edf182daa3cd12775bbb338cf5691468f91eeeb109deff6ebfa986f \
     --hash=sha256:dafca5b9e384f0e419294eb4d2ff9fa826435bf15f15b7bd45723e8ad76811b2
@@ -569,7 +625,9 @@ docutils==0.21.2 \
 email-validator==2.2.0 \
     --hash=sha256:561977c2d73ce3611850a06fa56b414621e0c8faa9d66f2611407d87465da631 \
     --hash=sha256:cb690f344c617a714f22e66ae771445a1ceb46821152df8e165c5f9a364582b7
-    # via flask-appbuilder
+    # via
+    #   -c airflow-requirements.txt
+    #   flask-appbuilder
 factory-boy==3.3.1 \
     --hash=sha256:7b1113c49736e1e9995bc2a18f4dbf2c52cf0f841103517010b1d825712ce3ca \
     --hash=sha256:8317aa5289cdfc45f9cae570feb07a6177316c82e34d14df3c2e1f22f26abef0
@@ -586,6 +644,7 @@ flask==2.2.5 \
     --hash=sha256:58107ed83443e86067e41eff4631b058178191a355886f8e479e347fa1285fdf \
     --hash=sha256:edee9b0a7ff26621bd5a8c10ff484ae28737a2410d99b0bb9a6850c7fb977aa0
     # via
+    #   -c airflow-requirements.txt
     #   apache-airflow
     #   apache-airflow-providers-fab
     #   connexion
@@ -601,41 +660,57 @@ flask==2.2.5 \
 flask-appbuilder==4.5.2 \
     --hash=sha256:4962a73eafb62b8790fc425970a2f09727974bcff31a1ded0c9eaa8d50b32580 \
     --hash=sha256:a2242386a7f77df7020654b4d546a9dbac105058d2cd058b7fd9b1db457c2f32
-    # via apache-airflow-providers-fab
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow-providers-fab
 flask-babel==2.0.0 \
     --hash=sha256:e6820a052a8d344e178cdd36dd4bb8aea09b4bda3d5f9fa9f008df2c7f2f5468 \
     --hash=sha256:f9faf45cdb2e1a32ea2ec14403587d4295108f35017a7821a2b1acb8cfd9257d
-    # via flask-appbuilder
+    # via
+    #   -c airflow-requirements.txt
+    #   flask-appbuilder
 flask-caching==2.3.0 \
     --hash=sha256:51771c75682e5abc1483b78b96d9131d7941dc669b073852edfa319dd4e29b6e \
     --hash=sha256:d7e4ca64a33b49feb339fcdd17e6ba25f5e01168cf885e53790e885f83a4d2cf
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 flask-jwt-extended==4.7.1 \
     --hash=sha256:52f35bf0985354d7fb7b876e2eb0e0b141aaff865a22ff6cc33d9a18aa987978 \
     --hash=sha256:8085d6757505b6f3291a2638c84d207e8f0ad0de662d1f46aa2f77e658a0c976
-    # via flask-appbuilder
+    # via
+    #   -c airflow-requirements.txt
+    #   flask-appbuilder
 flask-limiter==3.9.2 \
     --hash=sha256:b110049cf7f7b1c5e24f01c3c76e34357303ee64d27a9b32e88e84ea8a0fc97b \
     --hash=sha256:d1e98c58655703f0a30dbc7c69b6b14afb5a54845cedee3769525327473bfaeb
-    # via flask-appbuilder
+    # via
+    #   -c airflow-requirements.txt
+    #   flask-appbuilder
 flask-login==0.6.3 \
     --hash=sha256:5e23d14a607ef12806c699590b89d0f0e0d67baeec599d75947bf9c147330333 \
     --hash=sha256:849b25b82a436bf830a054e74214074af59097171562ab10bfa999e6b78aae5d
     # via
+    #   -c airflow-requirements.txt
     #   apache-airflow-providers-fab
     #   flask-appbuilder
 flask-session==0.5.0 \
     --hash=sha256:1619bcbc16f04f64e90f8e0b17145ba5c9700090bb1294e889956c1282d58631 \
     --hash=sha256:190875e6aebf2953c6803d42379ef3b934bc209ef8ef006f97aecb08f5aaeb86
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 flask-sqlalchemy==2.5.1 \
     --hash=sha256:2bda44b43e7cacb15d4e05ff3cc1f8bc97936cc464623424102bfc2c35e95912 \
     --hash=sha256:f12c3d4cc5cc7fdcc148b9527ea05671718c3ea45d50c7e732cceb33f574b390
-    # via flask-appbuilder
+    # via
+    #   -c airflow-requirements.txt
+    #   flask-appbuilder
 flask-wtf==1.2.2 \
     --hash=sha256:79d2ee1e436cf570bccb7d916533fa18757a2f18c290accffab1b9a0b684666b \
     --hash=sha256:e93160c5c5b6b571cf99300b6e01b72f9a101027cab1579901f8b10c5daf0b70
     # via
+    #   -c airflow-requirements.txt
     #   apache-airflow
     #   flask-appbuilder
 frozenlist==1.5.0 \
@@ -732,12 +807,14 @@ frozenlist==1.5.0 \
     --hash=sha256:fd74520371c3c4175142d02a976aee0b4cb4a7cc912a60586ffd8d5929979b30 \
     --hash=sha256:feeb64bc9bcc6b45c6311c9e9b99406660a9c05ca8a5b30d14a78555088b0b3a
     # via
+    #   -c airflow-requirements.txt
     #   aiohttp
     #   aiosignal
 fsspec==2024.10.0 \
     --hash=sha256:03b9a6785766a4de40368b88906366755e2819e758b83705c88cd7cb5fe81871 \
     --hash=sha256:eda2d8a4116d4f2429db8550f2457da57279247dd930bb12f821b58391359493
     # via
+    #   -c airflow-requirements.txt
     #   apache-airflow
     #   universal-pathlib
 furo==2024.8.6 \
@@ -747,7 +824,9 @@ furo==2024.8.6 \
 fuzzywuzzy==0.18.0 \
     --hash=sha256:45016e92264780e58972dca1b3d939ac864b78437422beecebb3095f8efd00e8 \
     --hash=sha256:928244b28db720d1e0ee7587acf660ea49d7e4c632569cad4f1cd7e68a5f0993
-    # via -r dev-requirements.in
+    # via
+    #   -c airflow-requirements.txt
+    #   -r dev-requirements.in
 google-re2==1.1.20240702 \
     --hash=sha256:00dcb09b15f92b490ae52f328cca229de2a157c8748f10df94dfea7637d32617 \
     --hash=sha256:05f5683e1bcfac8adcc0dbfe3ecb0866cec6eea2c7d419271dfd72930b368ce4 \
@@ -801,12 +880,14 @@ google-re2==1.1.20240702 \
     --hash=sha256:f853c3c68bed0d127e6ef8b29ee85461d9d0a4fa407e3f97e41ecd6803d24d88 \
     --hash=sha256:fb025d4bcd1a3032546da048a6dcb39359967f4df6b3514e76e983256235f694
     # via
+    #   -c airflow-requirements.txt
     #   apache-airflow
     #   apache-airflow-providers-fab
 googleapis-common-protos==1.66.0 \
     --hash=sha256:c3e7b33d15fdca5374cc0a7346dd92ffa847425cc4ea941d970f13680052ec8c \
     --hash=sha256:d7abcd75fabb2e0ec9f74466401f6c119a0b498e27370e9be4c94cb7e382b8ed
     # via
+    #   -c airflow-requirements.txt
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-exporter-otlp-proto-http
 greenlet==3.1.1 \
@@ -883,7 +964,9 @@ greenlet==3.1.1 \
     --hash=sha256:f1d4aeb8891338e60d1ab6127af1fe45def5259def8094b9c7e34690c8858803 \
     --hash=sha256:f406b22b7c9a9b4f8aa9d2ab13d6ae0ac3e85c9a809bd590ad53fed2bf70dc79 \
     --hash=sha256:f6ff3b14f2df4c41660a7dec01045a045653998784bf8cfcb5a525bdffffbc8f
-    # via sqlalchemy
+    # via
+    #   -c airflow-requirements.txt
+    #   sqlalchemy
 grpcio==1.68.1 \
     --hash=sha256:025f790c056815b3bf53da850dd70ebb849fd755a4b1ac822cb65cd631e37d43 \
     --hash=sha256:04cfd68bf4f38f5bb959ee2361a7546916bd9a50f78617a346b3aeb2b42e2161 \
@@ -940,18 +1023,20 @@ grpcio==1.68.1 \
     --hash=sha256:ee2e743e51cb964b4975de572aa8fb95b633f496f9fcb5e257893df3be854746 \
     --hash=sha256:eeb38ff04ab6e5756a2aef6ad8d94e89bb4a51ef96e20f45c44ba190fa0bcaad \
     --hash=sha256:f8261fa2a5f679abeb2a0a93ad056d765cdca1c47745eda3f2d87f874ff4b8c9
-    # via opentelemetry-exporter-otlp-proto-grpc
+    # via
+    #   -c airflow-requirements.txt
+    #   opentelemetry-exporter-otlp-proto-grpc
 gunicorn==23.0.0 \
     --hash=sha256:ec400d38950de4dfd418cff8328b2c8faed0edb0d517d3394e457c317908ca4d \
     --hash=sha256:f014447a0101dc57e294f6c18ca6b40227a4c90e9bdb586042628030cba004ec
     # via
-    #   -c requirements.txt
+    #   -c airflow-requirements.txt
     #   apache-airflow
 h11==0.14.0 \
     --hash=sha256:8f19fbbe99e72420ff35c00b27a34cb9937e902a8b810e2c88300c6f0a3b699d \
     --hash=sha256:e3fe4ac4b851c468cc8363d500db52c2ead036020723024a109d37346efaa761
     # via
-    #   -c requirements.txt
+    #   -c airflow-requirements.txt
     #   httpcore
 honcho==2.0.0 \
     --hash=sha256:56dcd04fc72d362a4befb9303b1a1a812cba5da283526fbc6509be122918ddf3 \
@@ -960,11 +1045,15 @@ honcho==2.0.0 \
 httpcore==1.0.7 \
     --hash=sha256:8551cb62a169ec7162ac7be8d4817d561f60e08eaa485234898414bb5a8a0b4c \
     --hash=sha256:a3fff8f43dc260d5bd363d9f9cf1830fa3a458b332856f34282de498ed420edd
-    # via httpx
+    # via
+    #   -c airflow-requirements.txt
+    #   httpx
 httpx==0.28.1 \
     --hash=sha256:75e98c5f16b0f35b567856f597f06ff2270a374470a5c2392242528e3e3e42fc \
     --hash=sha256:d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 identify==2.6.3 \
     --hash=sha256:62f5dae9b5fef52c84cc188514e9ea4f3f636b1d8799ab5ebc475471f9e47a02 \
     --hash=sha256:9edba65473324c2ea9684b1f944fe3191db3345e50b6d04571d10ed164f8d7bd
@@ -973,7 +1062,7 @@ idna==3.10 \
     --hash=sha256:12f65c9b470abda6dc35cf8e63cc574b1c52b11df2c86030af0ac09b01b13ea9 \
     --hash=sha256:946d195a0d259cbba61165e88e65941f16e9b36ea6ddb97f00452bae8b1287d3
     # via
-    #   -c requirements.txt
+    #   -c airflow-requirements.txt
     #   anyio
     #   email-validator
     #   httpx
@@ -986,11 +1075,15 @@ imagesize==1.4.1 \
 importlib-metadata==8.5.0 \
     --hash=sha256:45e54197d28b7a7f1559e60b95e7c567032b602131fbd588f1497f47880aa68b \
     --hash=sha256:71522656f0abace1d072b9e5481a48f07c138e00f079c38c8f883823f9c26bd7
-    # via opentelemetry-api
+    # via
+    #   -c airflow-requirements.txt
+    #   opentelemetry-api
 inflection==0.5.1 \
     --hash=sha256:1a29730d366e996aaacffb2f1f1cb9593dc38e2ddd30c91250c6dde09ea9b417 \
     --hash=sha256:f38b2b640938a4f35ade69ac3d053042959b62a0f1076a5bbaa1b9526605a8a2
-    # via connexion
+    # via
+    #   -c airflow-requirements.txt
+    #   connexion
 iniconfig==2.0.0 \
     --hash=sha256:2d91e135bf72d31a410b17c16da610a82cb55f6b0477d1a902134b24a455b8b3 \
     --hash=sha256:b6a85871a79d2e3b22d2d1b94ac2824226a63c6b741c88f7ae975f18b6778374
@@ -999,6 +1092,7 @@ itsdangerous==2.2.0 \
     --hash=sha256:c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef \
     --hash=sha256:e0050c0b7da1eea53ffaf149c0cfbb5c6e2e2b69c4bef22c81fa6eb73e5f6173
     # via
+    #   -c airflow-requirements.txt
     #   apache-airflow
     #   connexion
     #   flask
@@ -1011,7 +1105,7 @@ jinja2==3.1.5 \
     --hash=sha256:8fefff8dc3034e27bb80d67c671eb8a9bc424c0ef4c0826edbff304cceff43bb \
     --hash=sha256:aba0f4dc9ed8013c424088f68a5c226f7d6097ed89b246d7749c2ec4175c6adb
     # via
-    #   -c requirements.txt
+    #   -c airflow-requirements.txt
     #   apache-airflow
     #   flask
     #   flask-babel
@@ -1022,23 +1116,28 @@ jmespath==1.0.1 \
     --hash=sha256:02e2e4cc71b5bcab88332eebf907519190dd9e6e82107fa7f83b1003a6252980 \
     --hash=sha256:90261b206d6defd58fdd5e85f478bf633a2901798906be2ad389150c5c60edbe
     # via
-    #   -c requirements.txt
+    #   -c airflow-requirements.txt
     #   apache-airflow-providers-fab
 joblib==1.4.2 \
     --hash=sha256:06d478d5674cbc267e7496a410ee875abd68e4340feff4490bcb7afb88060ae6 \
     --hash=sha256:2382c5816b2636fbd20a09e0f4e9dad4736765fdfb7dca582943b9c1366b3f0e
-    # via scikit-learn
+    # via
+    #   -c airflow-requirements.txt
+    #   scikit-learn
 jsonschema==4.23.0 \
     --hash=sha256:d71497fef26351a33265337fa77ffeb82423f3ea21283cd9467bb03999266bc4 \
     --hash=sha256:fbadb6f8b144a8f8cf9f0b89ba94501d143e50411a1278633f56a7acf7fd5566
     # via
+    #   -c airflow-requirements.txt
     #   apache-airflow
     #   connexion
     #   flask-appbuilder
 jsonschema-specifications==2024.10.1 \
     --hash=sha256:0f38b83639958ce1152d02a7f062902c41c8fd20d558b0c34344292d417ae272 \
     --hash=sha256:a09a0680616357d9a0ecf05c12ad234479f549239d0f5b55f3deea67475da9bf
-    # via jsonschema
+    # via
+    #   -c airflow-requirements.txt
+    #   jsonschema
 lazy-object-proxy==1.10.0 \
     --hash=sha256:009e6bb1f1935a62889ddc8541514b6a9e1fcf302667dcb049a0be5c8f613e56 \
     --hash=sha256:02c83f957782cbbe8136bee26416686a6ae998c7b6191711a04da776dc9e47d4 \
@@ -1077,7 +1176,9 @@ lazy-object-proxy==1.10.0 \
     --hash=sha256:e98c8af98d5707dcdecc9ab0863c0ea6e88545d42ca7c3feffb6b4d1e370c7ba \
     --hash=sha256:edb45bb8278574710e68a6b021599a10ce730d156e5b254941754a9cc0b17d03 \
     --hash=sha256:fec03caabbc6b59ea4a638bee5fce7117be8e99a4103d9d5ad77f15d6f81020c
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 levenshtein==0.26.1 \
     --hash=sha256:04b7cabb82edf566b1579b3ed60aac0eec116655af75a3c551fee8754ffce2ea \
     --hash=sha256:07227281e12071168e6ae59238918a56d2a0682e529f747b5431664f302c0b42 \
@@ -1171,25 +1272,33 @@ levenshtein==0.26.1 \
 limits==3.14.1 \
     --hash=sha256:051aca02da56e6932599a25cb8e70543959294f5d587d57bcd7e38df234e697b \
     --hash=sha256:cad16a9b3cf3924e27da48e78bdab33ef312ecb7194fdb50e509cc8111c8d0bb
-    # via flask-limiter
+    # via
+    #   -c airflow-requirements.txt
+    #   flask-limiter
 linkify-it-py==2.0.3 \
     --hash=sha256:68cda27e162e9215c17d786649d1da0021a451bdc436ef9e0fa0ba5234b9b048 \
     --hash=sha256:6bcbc417b0ac14323382aef5c5192c0075bf8a9d6b41820a2b66371eac6b6d79
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 lockfile==0.12.2 \
     --hash=sha256:6aed02de03cba24efabcd600b30540140634fc06cfa603822d508d5361e9f799 \
     --hash=sha256:6c3cb24f344923d30b2785d5ad75182c8ea7ac1b6171b08657258ec7429d50fa
     # via
+    #   -c airflow-requirements.txt
     #   apache-airflow
     #   python-daemon
 mako==1.3.8 \
     --hash=sha256:42f48953c7eb91332040ff567eb7eea69b22e7a4affbc5ba8e845e8f730f6627 \
     --hash=sha256:577b97e414580d3e088d47c2dbbe9594aa7a5146ed2875d4dfa9075af2dd3cc8
-    # via alembic
+    # via
+    #   -c airflow-requirements.txt
+    #   alembic
 markdown-it-py==3.0.0 \
     --hash=sha256:355216845c60bd96232cd8d8c40e8f9765cc86f46880e43a8fd22dc1a1a8cab1 \
     --hash=sha256:e3f60a94fa066dc52ec76661e37c851cb232d92f9886b15cb560aaada2df8feb
     # via
+    #   -c airflow-requirements.txt
     #   apache-airflow
     #   mdit-py-plugins
     #   myst-parser
@@ -1257,7 +1366,7 @@ markupsafe==3.0.2 \
     --hash=sha256:f8b3d067f2e40fe93e1ccdd6b2e1d16c43140e76f02fb1319a05cf2b79d99430 \
     --hash=sha256:fcabf5ff6eea076f859677f5f0b6b5c1a51e70a376b0579e0eadef8db48c6b50
     # via
-    #   -c requirements.txt
+    #   -c airflow-requirements.txt
     #   apache-airflow
     #   jinja2
     #   mako
@@ -1267,35 +1376,47 @@ marshmallow==3.23.2 \
     --hash=sha256:bcaf2d6fd74fb1459f8450e85d994997ad3e70036452cbfa4ab685acb19479b3 \
     --hash=sha256:c448ac6455ca4d794773f00bae22c2f351d62d739929f761dce5eacb5c468d7f
     # via
+    #   -c airflow-requirements.txt
     #   flask-appbuilder
     #   marshmallow-oneofschema
     #   marshmallow-sqlalchemy
 marshmallow-oneofschema==3.1.1 \
     --hash=sha256:68b4a57d0281a04ac25d4eb7a4c5865a57090a0a8fd30fd6362c8e833ac6a6d9 \
     --hash=sha256:ff4cb2a488785ee8edd521a765682c2c80c78b9dc48894124531bdfa1ec9303b
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 marshmallow-sqlalchemy==0.28.2 \
     --hash=sha256:2ab0f1280c793e5aec81deab3e63ec23688ddfe05e5f38ac960368a1079520a1 \
     --hash=sha256:c31b3bdf794de1d78c53e1c495502cbb3eeb06ed216869980c71d6159e7e9e66
-    # via flask-appbuilder
+    # via
+    #   -c airflow-requirements.txt
+    #   flask-appbuilder
 mdit-py-plugins==0.4.2 \
     --hash=sha256:0c673c3f889399a33b95e88d2f0d111b4447bdfea7f237dab2d488f459835636 \
     --hash=sha256:5f2cd1fdb606ddf152d37ec30e46101a60512bc0e5fa1a7002c36647b09e26b5
     # via
+    #   -c airflow-requirements.txt
     #   apache-airflow
     #   myst-parser
 mdurl==0.1.2 \
     --hash=sha256:84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8 \
     --hash=sha256:bb413d29f5eea38f31dd4754dd7377d4465116fb207585f97bf925588687c1ba
-    # via markdown-it-py
+    # via
+    #   -c airflow-requirements.txt
+    #   markdown-it-py
 methodtools==0.4.7 \
     --hash=sha256:5e188c780b236adc12e75b5f078c5afb419ef99eb648569fc6d7071f053a1f11 \
     --hash=sha256:e213439dd64cfe60213f7015da6efe5dd4003fd89376db3baa09fe13ec2bb0ba
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 more-itertools==10.5.0 \
     --hash=sha256:037b0d3203ce90cca8ab1defbbdac29d5f993fc20131f3664dc8d6acfa872aef \
     --hash=sha256:5482bfef7849c25dc3c6dd53a6173ae4795da2a41a80faea6700d9f5846c5da6
-    # via apache-airflow-providers-common-sql
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow-providers-common-sql
 multidict==6.1.0 \
     --hash=sha256:052e10d2d37810b99cc170b785945421141bf7bb7d2f8799d431e7db229c385f \
     --hash=sha256:06809f4f0f7ab7ea2cabf9caca7d79c22c0758b58a71f9d32943ae13c7ace056 \
@@ -1390,6 +1511,7 @@ multidict==6.1.0 \
     --hash=sha256:f90c822a402cb865e396a504f9fc8173ef34212a342d92e362ca498cad308e28 \
     --hash=sha256:ff3827aef427c89a25cc96ded1759271a93603aba9fb977a6d264648ebf989db
     # via
+    #   -c airflow-requirements.txt
     #   aiohttp
     #   yarl
 mypy-extensions==1.0.0 \
@@ -1442,7 +1564,7 @@ numpy==1.26.4 \
     --hash=sha256:f870204a840a60da0b12273ef34f7051e98c3b5961b61b0c2c1be6dfd64fbcd3 \
     --hash=sha256:ffa75af20b44f8dba823498024771d5ac50620e6915abac414251bd971b4529f
     # via
-    #   -c requirements.txt
+    #   -c airflow-requirements.txt
     #   pandas
     #   scikit-learn
     #   scipy
@@ -1451,6 +1573,7 @@ opentelemetry-api==1.29.0 \
     --hash=sha256:5fcd94c4141cc49c736271f3e1efb777bebe9cc535759c54c936cca4f1b312b8 \
     --hash=sha256:d04a6cf78aad09614f52964ecb38021e248f5714dc32c2e0d8fd99517b4d69cf
     # via
+    #   -c airflow-requirements.txt
     #   apache-airflow
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-exporter-otlp-proto-http
@@ -1459,25 +1582,33 @@ opentelemetry-api==1.29.0 \
 opentelemetry-exporter-otlp==1.29.0 \
     --hash=sha256:b8da6e20f5b0ffe604154b1e16a407eade17ce310c42fb85bb4e1246fc3688ad \
     --hash=sha256:ee7dfcccbb5e87ad9b389908452e10b7beeab55f70a83f41ce5b8c4efbde6544
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 opentelemetry-exporter-otlp-proto-common==1.29.0 \
     --hash=sha256:a9d7376c06b4da9cf350677bcddb9618ed4b8255c3f6476975f5e38274ecd3aa \
     --hash=sha256:e7c39b5dbd1b78fe199e40ddfe477e6983cb61aa74ba836df09c3869a3e3e163
     # via
+    #   -c airflow-requirements.txt
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-exporter-otlp-proto-http
 opentelemetry-exporter-otlp-proto-grpc==1.29.0 \
     --hash=sha256:3d324d07d64574d72ed178698de3d717f62a059a93b6b7685ee3e303384e73ea \
     --hash=sha256:5a2a3a741a2543ed162676cf3eefc2b4150e6f4f0a193187afb0d0e65039c69c
-    # via opentelemetry-exporter-otlp
+    # via
+    #   -c airflow-requirements.txt
+    #   opentelemetry-exporter-otlp
 opentelemetry-exporter-otlp-proto-http==1.29.0 \
     --hash=sha256:b10d174e3189716f49d386d66361fbcf6f2b9ad81e05404acdee3f65c8214204 \
     --hash=sha256:b228bdc0f0cfab82eeea834a7f0ffdd2a258b26aa33d89fb426c29e8e934d9d0
-    # via opentelemetry-exporter-otlp
+    # via
+    #   -c airflow-requirements.txt
+    #   opentelemetry-exporter-otlp
 opentelemetry-proto==1.29.0 \
     --hash=sha256:3c136aa293782e9b44978c738fff72877a4b78b5d21a64e879898db7b2d93e5d \
     --hash=sha256:495069c6f5495cbf732501cdcd3b7f60fda2b9d3d4255706ca99b7ca8dec53ff
     # via
+    #   -c airflow-requirements.txt
     #   opentelemetry-exporter-otlp-proto-common
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-exporter-otlp-proto-http
@@ -1485,21 +1616,26 @@ opentelemetry-sdk==1.29.0 \
     --hash=sha256:173be3b5d3f8f7d671f20ea37056710217959e774e2749d984355d1f9391a30a \
     --hash=sha256:b0787ce6aade6ab84315302e72bd7a7f2f014b0fb1b7c3295b88afe014ed0643
     # via
+    #   -c airflow-requirements.txt
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-exporter-otlp-proto-http
 opentelemetry-semantic-conventions==0.50b0 \
     --hash=sha256:02dc6dbcb62f082de9b877ff19a3f1ffaa3c306300fa53bfac761c4567c83d38 \
     --hash=sha256:e87efba8fdb67fb38113efea6a349531e75ed7ffc01562f65b802fcecb5e115e
-    # via opentelemetry-sdk
+    # via
+    #   -c airflow-requirements.txt
+    #   opentelemetry-sdk
 ordered-set==4.1.0 \
     --hash=sha256:046e1132c71fcf3330438a539928932caf51ddbc582496833e23de611de14562 \
     --hash=sha256:694a8e44c87657c59292ede72891eb91d34131f6531463aab3009191c77364a8
-    # via flask-limiter
+    # via
+    #   -c airflow-requirements.txt
+    #   flask-limiter
 packaging==24.2 \
     --hash=sha256:09abb1bccd265c01f4a3aa3f7a7db064b36514d2cba19a2f694fe6150451a759 \
     --hash=sha256:c228a6dc5e932d346bc5739379109d49e8853dd8223571c7c5b55260edc0b97f
     # via
-    #   -c requirements.txt
+    #   -c airflow-requirements.txt
     #   apache-airflow
     #   apispec
     #   black
@@ -1537,7 +1673,7 @@ pandas==2.1.4 \
     --hash=sha256:f69b0c9bb174a2342818d3e2778584e18c740d56857fc5cdb944ec8bbe4082cf \
     --hash=sha256:fcb68203c833cc735321512e13861358079a96c174a61f5116a1de89c58c0ef7
     # via
-    #   -c requirements.txt
+    #   -c airflow-requirements.txt
     #   -r dev-requirements.in
 parso==0.8.4 \
     --hash=sha256:a418670a20291dacd2dddc80c377c5c3791378ee1e8d12bffc35420643d43f18 \
@@ -1547,6 +1683,7 @@ pathspec==0.12.1 \
     --hash=sha256:a0d503e138a4c123b27490a4f7beda6a01c6f288df0e4a8b79c7eb0dc7b4cc08 \
     --hash=sha256:a482d51503a1ab33b1c67a6c3813a26953dbdc71c31dacaef9a838c4e29f5712
     # via
+    #   -c airflow-requirements.txt
     #   apache-airflow
     #   black
 pendulum==3.0.0 \
@@ -1633,7 +1770,9 @@ pendulum==3.0.0 \
     --hash=sha256:fb551b9b5e6059377889d2d878d940fd0bbb80ae4810543db18e6f77b02c5ef6 \
     --hash=sha256:fd69b15374bef7e4b4440612915315cc42e8575fcda2a3d7586a0d88192d0c88 \
     --hash=sha256:fde4d0b2024b9785f66b7f30ed59281bd60d63d9213cda0eb0910ead777f6d37
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 platformdirs==4.3.6 \
     --hash=sha256:357fb2acbc885b0419afd3ce3ed34564c13c9b95c89360cd9563f73aa5e2b907 \
     --hash=sha256:73e575e1408ab8103900836b97580d5307456908a03e92031bab39e4554cc3fb
@@ -1644,16 +1783,19 @@ pluggy==1.5.0 \
     --hash=sha256:2cffa88e94fdc978c4c574f15f9e59b7f4201d439195c3715ca9e2486f1d0cf1 \
     --hash=sha256:44e1ad92c8ca002de6377e165f3e0f1be63266ab4d554740532335b9d75ea669
     # via
+    #   -c airflow-requirements.txt
     #   apache-airflow
     #   pytest
-pre-commit==4.0.1 \
-    --hash=sha256:80905ac375958c0444c65e9cebebd948b3cdb518f335a091a670a89d652139d2 \
-    --hash=sha256:efde913840816312445dc98787724647c65473daefe420785f885e8ed9a06878
+pre-commit==4.1.0 \
+    --hash=sha256:ae3f018575a588e30dfddfab9a05448bfbd6b73d78709617b5a2b853549716d4 \
+    --hash=sha256:d29e7cb346295bcc1cc75fc3e92e343495e3ea0196c9ec6ba53f49f10ab6ae7b
     # via -r dev-requirements.in
 prison==0.2.1 \
     --hash=sha256:e6cd724044afcb1a8a69340cad2f1e3151a5839fd3a8027fd1357571e797c599 \
     --hash=sha256:f90bab63fca497aa0819a852f64fb21a4e181ed9f6114deaa5dc04001a7555c5
-    # via flask-appbuilder
+    # via
+    #   -c airflow-requirements.txt
+    #   flask-appbuilder
 prompt-toolkit==3.0.48 \
     --hash=sha256:d6623ab0477a80df74e646bdbc93621143f5caf104206aa29294d53de1a03d90 \
     --hash=sha256:f49a827f90062e411f1ce1f854f2aedb3c23353244f8108b89283587397ac10e
@@ -1741,7 +1883,9 @@ propcache==0.2.1 \
     --hash=sha256:f508b0491767bb1f2b87fdfacaba5f7eddc2f867740ec69ece6d1946d29029a6 \
     --hash=sha256:f7a31fc1e1bd362874863fdeed71aed92d348f5336fd84f2197ba40c59f061bd \
     --hash=sha256:f9479aa06a793c5aeba49ce5c5692ffb51fcd9a7016e017d555d5e2b0045d212
-    # via yarl
+    # via
+    #   -c airflow-requirements.txt
+    #   yarl
 protobuf==5.29.2 \
     --hash=sha256:13d6d617a2a9e0e82a88113d7191a1baa1e42c2cc6f5f1398d3b054c8e7e714a \
     --hash=sha256:2d2e674c58a06311c8e99e74be43e7f3a8d1e2b2fdf845eaa347fbd866f23355 \
@@ -1755,6 +1899,7 @@ protobuf==5.29.2 \
     --hash=sha256:e621a98c0201a7c8afe89d9646859859be97cb22b8bf1d8eacfd90d5bda2eb19 \
     --hash=sha256:fde4554c0e578a5a0bcc9a276339594848d1e89f9ea47b4427c80e5d72f90181
     # via
+    #   -c airflow-requirements.txt
     #   googleapis-common-protos
     #   opentelemetry-proto
 psutil==6.1.0 \
@@ -1775,7 +1920,9 @@ psutil==6.1.0 \
     --hash=sha256:c0e0c00aa18ca2d3b2b991643b799a15fc8f0563d2ebb6040f64ce8dc027b942 \
     --hash=sha256:d905186d647b16755a800e7263d43df08b790d709d575105d419f8b6ef65423a \
     --hash=sha256:ff34df86226c0227c52f38b919213157588a678d049688eded74c76c8ba4a5d0
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 psycopg2-binary==2.9.10 \
     --hash=sha256:04392983d0bb89a8717772a193cfaac58871321e3ec69514e1c4e0d4957b5aff \
     --hash=sha256:056470c3dc57904bbf63d6f534988bafc4e970ffd50f6271fc4ee7daad9498a5 \
@@ -1845,7 +1992,7 @@ psycopg2-binary==2.9.10 \
     --hash=sha256:f8157bed2f51db683f31306aa497311b560f2265998122abe1dce6428bd86567 \
     --hash=sha256:ffe8ed017e4ed70f68b7b371d84b7d4a790368db9203dfc2d222febd3a9c8863
     # via
-    #   -c requirements.txt
+    #   -c airflow-requirements.txt
     #   apache-airflow-providers-postgres
 ptpython==3.0.29 \
     --hash=sha256:65d75c4871859e4305a020c9b9e204366dceb4d08e0e2bd7b7511bd5e917a402 \
@@ -1855,12 +2002,13 @@ pycparser==2.22 \
     --hash=sha256:491c8be9c040f5390f5bf44a5b07752bd07f56edf992381b05c701439eec10f6 \
     --hash=sha256:c3702b6d3dd8c7abc1afa565d7e63d53a1d0bd86cdc24edd75470f4de499cfcc
     # via
-    #   -c requirements.txt
+    #   -c airflow-requirements.txt
     #   cffi
 pygments==2.18.0 \
     --hash=sha256:786ff802f32e91311bff3889f6e9a86e81505fe99f2735bb6d60ae0c5004f199 \
     --hash=sha256:b8e6aca0523f3ab76fee51799c488e38782ac06eafcf95e7ba832985c8e7b13a
     # via
+    #   -c airflow-requirements.txt
     #   apache-airflow
     #   furo
     #   ptpython
@@ -1870,6 +2018,7 @@ pyjwt==2.10.1 \
     --hash=sha256:3cc5772eb20009233caf06e9d8a0577824723b44e6648ee0a2aedb6cf9381953 \
     --hash=sha256:dcdd193e30abefd5debf142f9adfcdd2b58004e644f25406ffaebd50bd98dacb
     # via
+    #   -c airflow-requirements.txt
     #   apache-airflow
     #   flask-appbuilder
     #   flask-jwt-extended
@@ -1896,12 +2045,14 @@ pytest-mock==3.14.0 \
 python-daemon==3.1.2 \
     --hash=sha256:b906833cef63502994ad48e2eab213259ed9bb18d54fa8774dcba2ff7864cec6 \
     --hash=sha256:f7b04335adc473de877f5117e26d5f1142f4c9f7cd765408f0877757be5afbf4
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 python-dateutil==2.9.0.post0 \
     --hash=sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3 \
     --hash=sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427
     # via
-    #   -c requirements.txt
+    #   -c airflow-requirements.txt
     #   apache-airflow
     #   croniter
     #   faker
@@ -1919,18 +2070,21 @@ python-levenshtein==0.26.1 \
     # via -r dev-requirements.in
 python-nvd3==0.16.0 \
     --hash=sha256:0115887289b3f751716ddd05c7b53ac5f05e71201e52496decdac453a50dcf7e
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 python-slugify==8.0.4 \
     --hash=sha256:276540b79961052b66b7d116620b36518847f52d5fd9e3a70164fc8c50faa6b8 \
     --hash=sha256:59202371d1d05b54a9e7720c5e038f928f45daaffe41dd10822f3907b937c856
     # via
+    #   -c airflow-requirements.txt
     #   apache-airflow
     #   python-nvd3
 pytz==2024.2 \
     --hash=sha256:2aa355083c50a0f93fa581709deac0c9ad65cca8a9e9beac660adcbd493c798a \
     --hash=sha256:31c7c1817eb7fae7ca4b8c7ee50c72f93aa2dd863de768e1ef4245d426aa0725
     # via
-    #   -c requirements.txt
+    #   -c airflow-requirements.txt
     #   croniter
     #   flask-babel
     #   pandas
@@ -1989,6 +2143,7 @@ pyyaml==6.0.2 \
     --hash=sha256:f753120cb8181e736c57ef7636e83f31b9c0d1722c516f7e86cf15b7aa57ff12 \
     --hash=sha256:ff3824dc5261f50c9b0dfb3be22b4567a6f938ccce4587b38952d85fd9e9afe4
     # via
+    #   -c airflow-requirements.txt
     #   apispec
     #   clickclick
     #   connexion
@@ -2083,23 +2238,24 @@ rapidfuzz==3.11.0 \
     --hash=sha256:fe7aaf5a54821d340d21412f7f6e6272a9b17a0cbafc1d68f77f2fc11009dcd5 \
     --hash=sha256:ff38378346b7018f42cbc1f6d1d3778e36e16d8595f79a312b31e7c25c50bd08 \
     --hash=sha256:ffa1bb0e26297b0f22881b219ffc82a33a3c84ce6174a9d69406239b14575bd5
-    # via
-    #   -c requirements.txt
-    #   levenshtein
+    # via levenshtein
 ratelimit==2.2.1 \
     --hash=sha256:af8a9b64b821529aca09ebaf6d8d279100d766f19e90b5059ac6a718ca6dee42
-    # via -r dev-requirements.in
+    # via
+    #   -c airflow-requirements.txt
+    #   -r dev-requirements.in
 referencing==0.35.1 \
     --hash=sha256:25b42124a6c8b632a425174f24087783efb348a6f1e0008e63cd4466fedf703c \
     --hash=sha256:eda6d3234d62814d1c64e305c1331c9a3a6132da475ab6382eaa997b21ee75de
     # via
+    #   -c airflow-requirements.txt
     #   jsonschema
     #   jsonschema-specifications
 requests==2.32.3 \
     --hash=sha256:55365417734eb18255590a9ff9eb97e9e1da868d4ccd6402399eaf68af20a760 \
     --hash=sha256:70761cfe03c773ceb22aa2f671b4757976145175cdfca038c02654d061d6dcc6
     # via
-    #   -c requirements.txt
+    #   -c airflow-requirements.txt
     #   apache-airflow
     #   apache-airflow-providers-http
     #   connexion
@@ -2110,23 +2266,29 @@ requests-toolbelt==1.0.0 \
     --hash=sha256:7681a0a3d047012b5bdc0ee37d7f8f07ebe76ab08caeccfc3921ce23c88d5bc6 \
     --hash=sha256:cccfdd665f0a24fcf4726e690f65639d272bb0637b9b92dfd91a5568ccf6bd06
     # via
+    #   -c airflow-requirements.txt
     #   apache-airflow
     #   apache-airflow-providers-http
 rfc3339-validator==0.1.4 \
     --hash=sha256:138a2abdf93304ad60530167e51d2dfb9549521a836871b88d7f4695d0022f6b \
     --hash=sha256:24f6ec1eda14ef823da9e36ec7113124b39c04d50a4d3d3a3c2859577e7791fa
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 rich==13.9.4 \
     --hash=sha256:439594978a49a09530cff7ebc4b5c7103ef57baf48d5ea3184f21d9a2befa098 \
     --hash=sha256:6049d5e6ec054bf2779ab3358186963bac2ea89175919d699e378b99738c2a90
     # via
+    #   -c airflow-requirements.txt
     #   apache-airflow
     #   flask-limiter
     #   rich-argparse
 rich-argparse==1.6.0 \
     --hash=sha256:092083c30da186f25bcdff8b1d47fdfb571288510fb051e0488a72cc3128de13 \
     --hash=sha256:fbe70a1d821b3f2fa8958cddf0cae131870a6e9faa04ab52b409cb1eda809bd7
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 rpds-py==0.22.3 \
     --hash=sha256:009de23c9c9ee54bf11303a966edf4d9087cd43a6003672e6aa7def643d06518 \
     --hash=sha256:02fbb9c288ae08bcb34fb41d516d5eeb0455ac35b5512d03181d755d80810059 \
@@ -2232,27 +2394,28 @@ rpds-py==0.22.3 \
     --hash=sha256:fda7cb070f442bf80b642cd56483b5548e43d366fe3f39b98e67cce780cded00 \
     --hash=sha256:feea821ee2a9273771bae61194004ee2fc33f8ec7db08117ef9147d4bbcbca8e
     # via
+    #   -c airflow-requirements.txt
     #   jsonschema
     #   referencing
-ruff==0.9.1 \
-    --hash=sha256:186c2313de946f2c22bdf5954b8dd083e124bcfb685732cfb0beae0c47233d9b \
-    --hash=sha256:1cd76c7f9c679e6e8f2af8f778367dca82b95009bc7b1a85a47f1521ae524fa7 \
-    --hash=sha256:2f312c86fb40c5c02b44a29a750ee3b21002bd813b5233facdaf63a51d9a85e1 \
-    --hash=sha256:342a824b46ddbcdddd3abfbb332fa7fcaac5488bf18073e841236aadf4ad5c19 \
-    --hash=sha256:39d0174ccc45c439093971cc06ed3ac4dc545f5e8bdacf9f067adf879544d969 \
-    --hash=sha256:3cae39ba5d137054b0e5b472aee3b78a7c884e61591b100aeb544bcd1fc38d4f \
-    --hash=sha256:3f94942a3bb767675d9a051867c036655fe9f6c8a491539156a6f7e6b5f31831 \
-    --hash=sha256:46ebf5cc106cf7e7378ca3c28ce4293b61b449cd121b98699be727d40b79ba72 \
-    --hash=sha256:50c647ff96f4ba288db0ad87048257753733763b409b2faf2ea78b45c8bb7fcb \
-    --hash=sha256:5dc40a378a0e21b4cfe2b8a0f1812a6572fc7b230ef12cd9fac9161aa91d807f \
-    --hash=sha256:69572926c0f0c9912288915214ca9b2809525ea263603370b9e00bed2ba56dbd \
-    --hash=sha256:728d791b769cc28c05f12c280f99e8896932e9833fef1dd8756a6af2261fd1ab \
-    --hash=sha256:84330dda7abcc270e6055551aca93fdde1b0685fc4fd358f26410f9349cf1743 \
-    --hash=sha256:937267afce0c9170d6d29f01fcd1f4378172dec6760a9f4dface48cdabf9610a \
-    --hash=sha256:ae017c3a29bee341ba584f3823f805abbe5fe9cd97f87ed07ecbf533c4c88366 \
-    --hash=sha256:beb3298604540c884d8b282fe7625651378e1986c25df51dec5b2f60cafc31ce \
-    --hash=sha256:f0c8b149e9c7353cace7d698e1656ffcf1e36e50f8ea3b5d5f7f87ff9986a7ca \
-    --hash=sha256:fd2b25ecaf907d6458fa842675382c8597b3c746a2dde6717fe3415425df0c17
+ruff==0.9.3 \
+    --hash=sha256:006e5de2621304c8810bcd2ee101587712fa93b4f955ed0985907a36c427e0c2 \
+    --hash=sha256:040ceb7f20791dfa0e78b4230ee9dce23da3b64dd5848e40e3bf3ab76468dcf4 \
+    --hash=sha256:2dc153c25e715be41bb228bc651c1e9b1a88d5c6e5ed0194fa0dfea02b026439 \
+    --hash=sha256:33866c3cc2a575cbd546f2cd02bdd466fed65118e4365ee538a3deffd6fcb730 \
+    --hash=sha256:5a5a46e09355695fbdbb30ed9889d6cf1c61b77b700a9fafc21b41f097bfbba4 \
+    --hash=sha256:646909a1e25e0dc28fbc529eab8eb7bb583079628e8cbe738192853dbbe43af5 \
+    --hash=sha256:7f39b879064c7d9670197d91124a75d118d00b0990586549949aae80cdc16624 \
+    --hash=sha256:800d773f6d4d33b0a3c60e2c6ae8f4c202ea2de056365acfa519aa48acf28e0b \
+    --hash=sha256:8293f89985a090ebc3ed1064df31f3b4b56320cdfcec8b60d3295bddb955c22a \
+    --hash=sha256:90230a6b8055ad47d3325e9ee8f8a9ae7e273078a66401ac66df68943ced029b \
+    --hash=sha256:96a87ec31dc1044d8c2da2ebbed1c456d9b561e7d087734336518181b26b3aa5 \
+    --hash=sha256:9bb7554aca6f842645022fe2d301c264e6925baa708b392867b7a62645304df4 \
+    --hash=sha256:a187171e7c09efa4b4cc30ee5d0d55a8d6c5311b3e1b74ac5cb96cc89bafc43c \
+    --hash=sha256:ba6eea4459dbd6b1be4e6bfc766079fb9b8dd2e5a35aff6baee4d9b1514ea519 \
+    --hash=sha256:c4bb09d2bbb394e3730d0918c00276e79b2de70ec2a5231cd4ebb51a57df9ba1 \
+    --hash=sha256:c59ab92f8e92d6725b7ded9d4a31be3ef42688a115c6d3da9457a5bda140e2b4 \
+    --hash=sha256:cabc332b7075a914ecea912cd1f3d4370489c8018f2c945a30bcc934e3bc06a6 \
+    --hash=sha256:eabe5eb2c19a42f4808c03b82bd313fc84d4e395133fb3fc1b1516170a31213c
     # via -r dev-requirements.in
 scikit-learn==1.3.2 \
     --hash=sha256:0402638c9a7c219ee52c94cbebc8fcb5eb9fe9c773717965c1f4185588ad3107 \
@@ -2281,7 +2444,9 @@ scikit-learn==1.3.2 \
     --hash=sha256:e326c0eb5cf4d6ba40f93776a20e9a7a69524c4db0757e7ce24ba222471ee8a1 \
     --hash=sha256:ed932ea780517b00dae7431e031faae6b49b20eb6950918eb83bd043237950e0 \
     --hash=sha256:fc4144a5004a676d5022b798d9e573b05139e77f271253a4703eed295bde0433
-    # via -r dev-requirements.in
+    # via
+    #   -c airflow-requirements.txt
+    #   -r dev-requirements.in
 scipy==1.15.1 \
     --hash=sha256:033a75ddad1463970c96a88063a1df87ccfddd526437136b6ee81ff0312ebdf6 \
     --hash=sha256:0458839c9f873062db69a03de9a9765ae2e694352c76a16be44f93ea45c28d2b \
@@ -2323,7 +2488,9 @@ scipy==1.15.1 \
     --hash=sha256:ce3a000cd28b4430426db2ca44d96636f701ed12e2b3ca1f2b1dd7abdd84b39a \
     --hash=sha256:f735bc41bd1c792c96bc426dece66c8723283695f02df61dcc4d0a707a42fc54 \
     --hash=sha256:f82fcf4e5b377f819542fbc8541f7b5fbcf1c0017d0df0bc22c781bf60abc4d8
-    # via scikit-learn
+    # via
+    #   -c airflow-requirements.txt
+    #   scikit-learn
 setproctitle==1.3.4 \
     --hash=sha256:020ea47a79b2bbd7bd7b94b85ca956ba7cb026e82f41b20d2e1dac4008cead25 \
     --hash=sha256:02ca3802902d91a89957f79da3ec44b25b5804c88026362cb85eea7c1fbdefd1 \
@@ -2410,7 +2577,9 @@ setproctitle==1.3.4 \
     --hash=sha256:fb693000b65842c85356b667d057ae0d0bac6519feca7e1c437cc2cfeb0afc59 \
     --hash=sha256:fc9d79b1bf833af63b7c720a6604eb16453ac1ad4e718eb8b59d1f97d986b98c \
     --hash=sha256:ffcb09d5c0ffa043254ec9a734a73f3791fec8bf6333592f906bb2e91ed2af1a
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 shapely==2.0.6 \
     --hash=sha256:0334bd51828f68cd54b87d80b3e7cee93f249d82ae55a0faf3ea21c9be7b323a \
     --hash=sha256:1bbc783529a21f2bd50c79cef90761f72d41c45622b3e57acf78d984c50a5d13 \
@@ -2459,7 +2628,7 @@ six==1.17.0 \
     --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274 \
     --hash=sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81
     # via
-    #   -c requirements.txt
+    #   -c airflow-requirements.txt
     #   prison
     #   python-dateutil
     #   rfc3339-validator
@@ -2467,7 +2636,9 @@ six==1.17.0 \
 sniffio==1.3.1 \
     --hash=sha256:2f6da418d1f1e0fddd844478f41680e794e6051915791a034ff65e5f100525a2 \
     --hash=sha256:f4324edc670a0f49750a81b895f35c3adb843cca46f0530f79fc1babb23789dc
-    # via anyio
+    # via
+    #   -c airflow-requirements.txt
+    #   anyio
 snowballstemmer==2.2.0 \
     --hash=sha256:09b16deb8547d3412ad7b590689584cd0fe25ec8db3be37788be3810cbf19cb1 \
     --hash=sha256:c8e1716e83cc398ae16824e5572ae04e0d9fc2c6b985fb0f900f5f0c96ecba1a
@@ -2558,6 +2729,7 @@ sqlalchemy==1.4.54 \
     --hash=sha256:fb59a11689ff3c58e7652260127f9e34f7f45478a2f3ef831ab6db7bcd72108f \
     --hash=sha256:fc9ffd9a38e21fad3e8c5a88926d57f94a32546e937e0be46142b2702003eba7
     # via
+    #   -c airflow-requirements.txt
     #   alembic
     #   apache-airflow
     #   flask-appbuilder
@@ -2568,39 +2740,53 @@ sqlalchemy==1.4.54 \
 sqlalchemy-jsonfield==1.0.2 \
     --hash=sha256:b2945fa1e60b07d5764a7c73b18da427948b35dd4c07c0e94939001dc2dacf77 \
     --hash=sha256:dab3abc9d75a1640e7f3d4875564a4199f665d27863da8d5a089e4eaca5e67f2
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 sqlalchemy-utils==0.41.2 \
     --hash=sha256:85cf3842da2bf060760f955f8467b87983fb2e30f1764fd0e24a48307dc8ec6e \
     --hash=sha256:bc599c8c3b3319e53ce6c5c3c471120bd325d0071fb6f38a10e924e3d07b9990
-    # via flask-appbuilder
+    # via
+    #   -c airflow-requirements.txt
+    #   flask-appbuilder
 sqlparse==0.5.3 \
     --hash=sha256:09f67787f56a0b16ecdbde1bfc7f5d9c3371ca683cfeaa8e6ff60b4807ec9272 \
     --hash=sha256:cf2196ed3418f3ba5de6af7e82c694a9fbdbfecccdfc72e281548517081f16ca
     # via
-    #   -c requirements.txt
+    #   -c airflow-requirements.txt
     #   apache-airflow-providers-common-sql
     #   django
     #   django-debug-toolbar
 tabulate==0.9.0 \
     --hash=sha256:0095b12bf5966de529c0feb1fa08671671b3368eec77d7ef7ab114be2c068b3c \
     --hash=sha256:024ca478df22e9340661486f85298cff5f6dcdba14f3813e8830015b9ed1948f
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 tenacity==9.0.0 \
     --hash=sha256:807f37ca97d62aa361264d497b0e31e92b8027044942bfa756160d908320d73b \
     --hash=sha256:93de0c98785b27fcf659856aa9f54bfbd399e29969b0621bc7f762bd441b4539
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 termcolor==2.5.0 \
     --hash=sha256:37b17b5fc1e604945c2642c872a3764b5d547a48009871aea3edd3afa180afb8 \
     --hash=sha256:998d8d27da6d48442e8e1f016119076b690d962507531df4890fcd2db2ef8a6f
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 text-unidecode==1.3 \
     --hash=sha256:1311f10e8b895935241623731c2ba64f4c455287888b18189350b67134a822e8 \
     --hash=sha256:bad6603bb14d279193107714b288be206cac565dfa49aa5b105294dd5c4aab93
-    # via python-slugify
+    # via
+    #   -c airflow-requirements.txt
+    #   python-slugify
 threadpoolctl==3.5.0 \
     --hash=sha256:082433502dd922bf738de0d8bcc4fdcbf0979ff44c42bd40f5af8a282f6fa107 \
     --hash=sha256:56c1e26c150397e58c4926da8eeee87533b1e32bef131bd4bf6a2f45f3185467
-    # via scikit-learn
+    # via
+    #   -c airflow-requirements.txt
+    #   scikit-learn
 time-machine==2.16.0 \
     --hash=sha256:01bc257e9418980a4922de94775be42a966e1a082fb01a1635917f9afc7b84ca \
     --hash=sha256:09531af59fdfb39bfd24d28bd1e837eff5a5d98318509a31b6cfd57d27801e52 \
@@ -2658,7 +2844,9 @@ time-machine==2.16.0 \
     --hash=sha256:eee7b0fc4fbab2c6585ea17606c6548be83919c70deea0865409fe9fc2d8cdce \
     --hash=sha256:ef768e14768eebe3bb1196c0dece8e14c1c6991605721214a0c3c68cf77eb216 \
     --hash=sha256:f6927dda86425f97ffda36131f297b1a601c64a6ee6838bfa0e6d3149c2f0d9f
-    # via pendulum
+    # via
+    #   -c airflow-requirements.txt
+    #   pendulum
 types-pyyaml==6.0.12.20240917 \
     --hash=sha256:392b267f1c0fe6022952462bf5d6523f31e37f6cea49b14cee7ad634b6301570 \
     --hash=sha256:d1405a86f9576682234ef83bcb4e6fff7c9305c8b1fbad5e0bcd4f7dbdc9c587
@@ -2667,7 +2855,7 @@ typing-extensions==4.12.2 \
     --hash=sha256:04e5ca0351e0f3f85c6853954072df659d0d13fac324d0072316b67d7794700d \
     --hash=sha256:1a7ead55c7e559dd4dee8856e3a88b41225abfe1ce8df57b7c13915fe121ffb8
     # via
-    #   -c requirements.txt
+    #   -c airflow-requirements.txt
     #   alembic
     #   anyio
     #   django-stubs
@@ -2680,22 +2868,26 @@ tzdata==2024.2 \
     --hash=sha256:7d85cc416e9382e69095b7bdf4afd9e3880418a2413feec7069d533d6b4e31cc \
     --hash=sha256:a48093786cdcde33cad18c2555e8532f34422074448fbc874186f0abd79565cd
     # via
-    #   -c requirements.txt
+    #   -c airflow-requirements.txt
     #   pandas
     #   pendulum
 uc-micro-py==1.0.3 \
     --hash=sha256:d321b92cff673ec58027c04015fcaa8bb1e005478643ff4a500882eaab88c48a \
     --hash=sha256:db1dffff340817673d7b466ec86114a9dc0e9d4d9b5ba229d9d60e5c12600cd5
-    # via linkify-it-py
+    # via
+    #   -c airflow-requirements.txt
+    #   linkify-it-py
 universal-pathlib==0.2.6 \
     --hash=sha256:50817aaeaa9f4163cb1e76f5bdf84207fa05ce728b23fd779479b3462e5430ac \
     --hash=sha256:700dec2b58ef34b87998513de6d2ae153b22f083197dfafb8544744edabd1b18
-    # via apache-airflow
+    # via
+    #   -c airflow-requirements.txt
+    #   apache-airflow
 urllib3==2.2.3 \
     --hash=sha256:ca899ca043dcb1bafa3e262d73aa25c465bfb49e0bd9dd5d59f1d0acba2f8fac \
     --hash=sha256:e7d814a81dad81e6caf2ec9fdedb284ecc9c73076b62654547cc64ccdcae26e9
     # via
-    #   -c requirements.txt
+    #   -c airflow-requirements.txt
     #   requests
 virtualenv==20.28.0 \
     --hash=sha256:23eae1b4516ecd610481eda647f3a7c09aea295055337331bb4e6892ecce47b0 \
@@ -2709,6 +2901,7 @@ werkzeug==2.2.3 \
     --hash=sha256:2e1ccc9417d4da358b9de6f174e3ac094391ea1d4fbef2d667865d819dfd0afe \
     --hash=sha256:56433961bc1f12533306c624f3be5e744389ac61d722175d543e1751285da612
     # via
+    #   -c airflow-requirements.txt
     #   apache-airflow
     #   connexion
     #   flask
@@ -2718,7 +2911,9 @@ werkzeug==2.2.3 \
 wirerope==0.4.8 \
     --hash=sha256:99e54b9bd9d3a8e18199b87e2c5edf58d7f64e3f7e2f5bb041034025f03a4e68 \
     --hash=sha256:fa172d09eff7534563f315e38712b5fa3b88a1aa3467b539a7510f2e427a7af4
-    # via methodtools
+    # via
+    #   -c airflow-requirements.txt
+    #   methodtools
 wrapt==1.17.0 \
     --hash=sha256:0229b247b0fc7dee0d36176cbb79dbaf2a9eb7ecc50ec3121f40ef443155fb1d \
     --hash=sha256:0698d3a86f68abc894d537887b9bbf84d29bcfbc759e23f4644be27acf6da301 \
@@ -2785,11 +2980,14 @@ wrapt==1.17.0 \
     --hash=sha256:f335579a1b485c834849e9075191c9898e0731af45705c2ebf70e0cd5d58beed \
     --hash=sha256:fce6fee67c318fdfb7f285c29a82d84782ae2579c0e1b385b7f36c6e8074fffb \
     --hash=sha256:fd136bb85f4568fffca995bd3c8d52080b1e5b225dbf1c2b17b66b4c5fa02838
-    # via deprecated
+    # via
+    #   -c airflow-requirements.txt
+    #   deprecated
 wtforms==3.2.1 \
     --hash=sha256:583bad77ba1dd7286463f21e11aa3043ca4869d03575921d1a1698d0715e0fd4 \
     --hash=sha256:df3e6b70f3192e92623128123ec8dca3067df9cfadd43d59681e210cfb8d4682
     # via
+    #   -c airflow-requirements.txt
     #   flask-appbuilder
     #   flask-wtf
 yarl==1.18.3 \
@@ -2875,8 +3073,12 @@ yarl==1.18.3 \
     --hash=sha256:fbd6748e8ab9b41171bb95c6142faf068f5ef1511935a0aa07025438dd9a9bc1 \
     --hash=sha256:fe57328fbc1bfd0bd0514470ac692630f3901c0ee39052ae47acd1d90a436719 \
     --hash=sha256:fea09ca13323376a2fdfb353a5fa2e59f90cd18d7ca4eaa1fd31f0a8b4f91e62
-    # via aiohttp
+    # via
+    #   -c airflow-requirements.txt
+    #   aiohttp
 zipp==3.21.0 \
     --hash=sha256:2c9958f6430a2040341a52eb608ed6dd93ef4392e02ffe219417c1b28b5dd1f4 \
     --hash=sha256:ac1bbe05fd2991f160ebce24ffbac5f6d11d83dc90891255885223d42b3cd931
-    # via importlib-metadata
+    # via
+    #   -c airflow-requirements.txt
+    #   importlib-metadata

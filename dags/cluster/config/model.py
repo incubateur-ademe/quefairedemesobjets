@@ -14,16 +14,27 @@ class ClusterConfig(BaseModel):
     # et valeurs obligatoires, voir section validation
     # pour toutes les règles
     dry_run: bool
+
+    # SELECTION ACTEURS NON-PARENTS
     include_source_codes: list[str]
     include_acteur_type_codes: list[str]
     include_only_if_regex_matches_nom: str | None
     include_if_all_fields_filled: list[str]
     exclude_if_any_field_filled: list[str]
+
+    # SELECTION PARENTS EXISTANTS
+    # Pas de champ source car par définition parents = 0 source
+    # Pas de champ acteur type = on prend tous les acteur type ci-dessus
+    include_parents_only_if_regex_matches_nom: str | None
+
+    # NORMALISATION
     normalize_fields_basic: list[str]
     normalize_fields_no_words_size1: list[str]
     normalize_fields_no_words_size2_or_less: list[str]
     normalize_fields_no_words_size3_or_less: list[str]
     normalize_fields_order_unique_words: list[str]
+
+    # CLUSTERING
     cluster_intra_source_is_allowed: bool
     cluster_fields_exact: list[str]
     cluster_fields_fuzzy: list[str]
@@ -96,12 +107,25 @@ class ClusterConfig(BaseModel):
             dropdown_selected=values["include_acteur_type_codes"],
         )
 
+        """
+        Logique supprimée le 2025-01-27 mais conservée pour référence:
+        - depuis l'ajout des parents indépendants des sources
+        via PR1265 on ne peut plus savoir si on héritera
+        uniquement d'une seule source au moment de la config, donc on
+        laisse passer au niveau de la sélection
+        TODO: on pourrait scinder la config en plusieurs sous-config:
+            - SelectionConfig
+            - NormalizationConfig
+            - ClusteringConfig
+            - EnrichmentConfig
+        Et ainsi avoir des validations plus fines à chaque étape
         # ACTEUR TYPE vs. INTRA-SOURCE
         if (
             len(values["include_source_ids"]) == 1
             and not values["cluster_intra_source_is_allowed"]
         ):
             raise ValueError("1 source sélectionnée mais intra-source désactivé")
+        """
 
         # Par défaut on ne clusterise pas les acteurs d'une même source
         # sauf si intra-source est activé
@@ -122,7 +146,11 @@ class ClusterConfig(BaseModel):
                 values[k] = []
 
         # Liste UNIQUE des champs utilisés
-        fields_used = ["source_id", "acteur_type_id", "identifiant_unique"]
+        # Certains champs tels "statut" ne sont pas utilisés en soit pour faire du
+        # clustering (on cluster que les actifs quoi qu'il arrive) mais
+        # sont à préserver de bout-en-bout pour des tâches de type validation
+        # et suivis des données
+        fields_used = ["source_id", "acteur_type_id", "identifiant_unique", "statut"]
         for k, v in values.items():
             if "fields" in k and k != "fields_all" and k != "source_id":
                 fields_used.extend(v)

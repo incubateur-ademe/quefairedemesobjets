@@ -3,15 +3,28 @@ from typing import Any
 
 from django.conf import settings
 from django.http import HttpResponse
-from django.shortcuts import render
-from django.urls import reverse_lazy
+from django.shortcuts import redirect, render
+from django.urls import reverse, reverse_lazy
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_control
+from django.views.decorators.vary import vary_on_headers
 from django.views.generic import DetailView, FormView, ListView
 
 from core.notion import create_new_row_in_notion_table
+from core.views import static_file_content_from
 from qfdmd.forms import ContactForm, SearchForm
 from qfdmd.models import CMSPage, Suggestion, Synonyme
 
 logger = logging.getLogger(__name__)
+
+
+@cache_control(max_age=31536000)
+def get_assistant_script(request):
+    return static_file_content_from("assistant/script-to-iframe.js")
+
+
+def get_sw(request):
+    return static_file_content_from("sw.js")
 
 
 def generate_iframe_script(request) -> str:
@@ -22,7 +35,9 @@ def generate_iframe_script(request) -> str:
         produit_slug = request.resolver_match.kwargs["slug"]
         script_parts.append(f'data-objet="{produit_slug}"')
 
-    script_parts.append(f'src="{settings.BASE_URL}/script.js"></script>')
+    script_parts.append(
+        f'src="{settings.ASSISTANT["BASE_URL"]}{reverse("qfdmd:script")}"></script>'
+    )
     return " ".join(script_parts)
 
 
@@ -58,8 +73,12 @@ class ContactFormView(FormView):
         return super().form_valid(form)
 
 
-class BaseView:
+class AssistantBaseView:
     """Base view that provides templates used on all pages.
+    It needs to be used by all views of the Assistant as it
+    provides some routing rules based on the domain and provide
+    some context to templates.
+
     TODO: this could be moved to a context processor"""
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
@@ -72,8 +91,15 @@ class BaseView:
         )
         return context
 
+    def dispatch(self, request, *args, **kwargs):
+        if request.META.get("HTTP_HOST") not in settings.ASSISTANT["HOSTS"]:
+            return redirect(reverse("home"))
+        return super().dispatch(request, *args, **kwargs)
 
-class HomeView(BaseView, ListView):
+
+@method_decorator(cache_control(max_age=60 * 15), name="dispatch")
+@method_decorator(vary_on_headers("logged-in", "iframe"), name="dispatch")
+class HomeView(AssistantBaseView, ListView):
     template_name = "qfdmd/home.html"
     model = Suggestion
 
@@ -96,9 +122,9 @@ class HomeView(BaseView, ListView):
         return context
 
 
-class SynonymeDetailView(BaseView, DetailView):
+class SynonymeDetailView(AssistantBaseView, DetailView):
     model = Synonyme
 
 
-class CMSPageDetailView(BaseView, DetailView):
+class CMSPageDetailView(AssistantBaseView, DetailView):
     model = CMSPage

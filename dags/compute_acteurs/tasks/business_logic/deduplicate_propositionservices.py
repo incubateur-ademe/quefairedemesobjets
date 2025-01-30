@@ -49,6 +49,10 @@ def deduplicate_propositionservices(
         [df_ps_sscat, df_parents_ps_sscat],
         ignore_index=True,
     )
+    df_ps_sscat.rename(
+        columns={"propositionservice_id": "displayedpropositionservice_id"},
+        inplace=True,
+    )
 
     # suppression des ps des enfants
     df_ps = df_ps[~df_ps["acteur_id"].isin(children_ids)]

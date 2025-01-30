@@ -4,6 +4,10 @@ x-airflow-common:
   env_file:
     - ./dags/.env
   volumes:
+    - ./core:/opt/airflow/core/
+    - ./qfdmo:/opt/airflow/qfdmo/
+    - ./qfdmd:/opt/airflow/qfdmd/
+    - ./data:/opt/airflow/data/
     - ./logs:/opt/airflow/logs
     - ./dags:/opt/airflow/dags
     - ./config:/opt/airflow/config
@@ -34,6 +38,15 @@ services:
     ports:
       - 6543:5432
     profiles: [lvao, airflow]
+  lvao-proxy:
+    image: nginx:latest
+    volumes:
+        - ./nginx/servers.conf:/etc/nginx/servers.conf
+        - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    profiles: [proxy]
+    ports:
+      - "8001:80"
+      - "8002:80"
   airflow-db:
     image: postgres:15
     environment:
@@ -42,6 +55,8 @@ services:
       POSTGRES_DB: airflow
     volumes:
       - ./airflow-pgdata:/var/lib/postgresql/data
+    ports:
+      - 7654:5432
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "airflow"]
       interval: 10s
@@ -63,7 +78,7 @@ services:
       context: .
       dockerfile: airflow-webserver.Dockerfile
     ports:
-      - "8080:8080"
+      - "8001:8080"
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
       interval: 30s

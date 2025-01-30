@@ -11,12 +11,19 @@ from datetime import datetime
 from airflow import DAG
 from airflow.models.baseoperator import chain
 from airflow.models.param import Param
+from cluster.dags.ui import (
+    UI_PARAMS_SEPARATOR_CLUSTERING,
+    UI_PARAMS_SEPARATOR_NORMALIZATION,
+    UI_PARAMS_SEPARATOR_SELECTION_ACTEURS,
+    UI_PARAMS_SEPARATOR_SELECTION_PARENTS,
+)
 from cluster.tasks.airflow_logic import (
     cluster_acteurs_config_create_task,
-    cluster_acteurs_db_data_read_acteurs_task,
-    cluster_acteurs_db_data_write_suggestions_task,
     cluster_acteurs_normalize_task,
-    cluster_acteurs_suggestions_task,
+    cluster_acteurs_selection_from_db_task,
+    cluster_acteurs_suggestions_display_task,
+    cluster_acteurs_suggestions_to_db_task,
+    cluster_acteurs_suggestions_validate_task,
 )
 from utils.airflow_params import airflow_params_dropdown_from_mapping
 from utils.django import django_model_fields_attributes_get, django_setup_full
@@ -50,37 +57,6 @@ dropdown_acteur_types = airflow_params_dropdown_from_mapping(
 
 dropdown_acteur_columns = django_model_fields_attributes_get(Acteur)
 
-UI_PARAMS_SEPARATOR_SELECTION = r"""
-
----
-
-# Paramètres de sélection
-Les paramètres suivants décident des acteurs à inclure
-ou exclure comme candidats au clustering. Ce n'est pas
-parce qu'un acteur est selectionné qu'il sera forcément clusterisé.
-(ex: si il se retrouve tout seul sachant qu'on supprime
-les clusters de taille 1)
-"""
-
-UI_PARAMS_SEPARATOR_NORMALIZATION = r"""
-
----
-
-# Paramètres de normalisation
-Les paramètres suivants définissent comment les valeurs
-des champs vont être transformées avant le clustering.
-"""
-
-UI_PARAMS_SEPARATOR_CLUSTERING = r"""
-
----
-
-# Paramètres de clustering
-Les paramètres suivants définissent comment les acteurs
-vont être regroupés en clusters.
-"""
-
-
 with DAG(
     dag_id="cluster_acteurs_suggestions",
     dag_display_name="Cluster - Acteurs - Suggestions",
@@ -106,9 +82,13 @@ with DAG(
         "dry_run": Param(
             True,
             type="boolean",
-            description_md=f"""🚱 Si coché, seules les tâches qui ne modifient pas
-            la base de données seront exécutées.
-            {UI_PARAMS_SEPARATOR_SELECTION}""",
+            description_md=f"""
+            🚱 Si coché, aucune tâche d'écriture ne sera effectuée.
+            Ceci permet de tester le DAG rapidement sans peur de
+            casser quoi que ce soit (itérer plus vite)
+            (ex: pas d'écriture des suggestions en DB,
+            donc pas visible dans Django Admin).
+            {UI_PARAMS_SEPARATOR_SELECTION_ACTEURS}""",
         ),
         # TODO: permettre de ne sélectionner aucune source = toutes les sources
         "include_source_codes": Param(
@@ -141,7 +121,7 @@ with DAG(
             champ avant l'application de la regex pour simplifier les expressions
 
             0️⃣ Si aucune valeur spécifiée =  cette option n'a PAS d'effet
-            """,
+            {UI_PARAMS_SEPARATOR_SELECTION_PARENTS}""",
         ),
         "include_if_all_fields_filled": Param(
             ["code_postal"],
@@ -163,8 +143,21 @@ with DAG(
             exemple: travailler uniquement sur les acteurs SANS SIRET
 
             0️⃣ Si aucune valeur spécifiée =  cette option n'a PAS d'effet
-            {UI_PARAMS_SEPARATOR_NORMALIZATION}
+            {UI_PARAMS_SEPARATOR_SELECTION_PARENTS}
             """,
+        ),
+        "include_parents_only_if_regex_matches_nom": Param(
+            "",
+            type=["null", "string"],
+            description_md=f"""**➕ INCLUSION PARENTS**: ceux dont le champ 'nom'
+            correspond à cette expression régulière ([voir recettes](https://www.notion.so/accelerateur-transition-ecologique-ademe/Expressions-r-guli-res-regex-1766523d57d780939a37edd60f367b75))
+
+            🧹 Note: la normalisation basique est appliquée à la volée sur ce
+            champ avant l'application de la regex pour simplifier les expressions
+
+            0️⃣ Si aucune valeur spécifiée =  cette option n'a PAS d'effet
+
+            {UI_PARAMS_SEPARATOR_NORMALIZATION}""",
         ),
         "normalize_fields_basic": Param(
             [],
@@ -209,7 +202,10 @@ with DAG(
             """,
         ),
         "normalize_fields_no_words_size3_or_less": Param(
-            ["nom"],
+            # Feedback métier: supprimer des mots de taille 3
+            # commence à devenir radical, donc on laisse ce champ
+            # vide par défaut
+            [],
             type=["null", "array"],
             examples=dropdown_acteur_columns,
             description_md=r"""Les champs à normaliser en supprimant les mots
@@ -265,13 +261,14 @@ with DAG(
 ) as dag:
     chain(
         cluster_acteurs_config_create_task(dag=dag),
-        cluster_acteurs_db_data_read_acteurs_task(dag=dag),
+        cluster_acteurs_selection_from_db_task(dag=dag),
         cluster_acteurs_normalize_task(dag=dag),
         # TODO: besoin de refactoriser cette tâche:
-        # - changer cluster_acteurs_suggestions pour obtenir une
+        # - changer cluster_acteurs_suggestions_display pour obtenir une
         #   df de clusters ignorés
         # - utiliser cette df pour la tâche d'info
         # cluster_acteurs_info_size1_task(dag=dag),
-        cluster_acteurs_suggestions_task(dag=dag),
-        cluster_acteurs_db_data_write_suggestions_task(dag=dag),
+        cluster_acteurs_suggestions_display_task(dag=dag),
+        cluster_acteurs_suggestions_validate_task(dag=dag),
+        cluster_acteurs_suggestions_to_db_task(dag=dag),
     )

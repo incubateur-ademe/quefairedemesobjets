@@ -19,23 +19,20 @@
             data-turbo-frame="search-results"
             action="{% url 'qfdmd:search' %}"
             class="qf-pl-4w {# should match the svg icon width #}
+            qf-flex qf-relative
             md:group-data-[home]:qf-h-7w
             qf-h-5w
             qf-content-center
             "
         >
-            {% csrf_token %}
-
             <button
                 aria-label="Rechercher"
                 type="submit"
-                class="qf-absolute qf-left-0
-                group-data-[home]:-qf-mt-1v -qf-mt-1w qf-m-auto
+                class="qf-absolute qf-top-0 qf-bottom-0 qf-left-0
+                qf-m-auto qf-pl-1v
                 fr-btn fr-icon-search-line fr-btn--tertiary-no-outline
-                qf-text-green-menthe-main-548
-                "
-            >
-            </button>
+                qf-text-green-menthe-main-548"
+            ></button>
 
             {% for field in search_form %}
                 {{ field }}

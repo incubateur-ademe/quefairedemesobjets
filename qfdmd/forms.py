@@ -58,7 +58,7 @@ class ContactForm(DsfrBaseForm):
             ("", ""),
             (
                 "integration",
-                "Je souhaite obtenir de l'aide pour intégrer le simulateur",
+                "Je souhaite obtenir de l'aide pour intégrer cet outil",
             ),
             (
                 "erreur",
@@ -82,4 +82,6 @@ class ContactForm(DsfrBaseForm):
             ),
         ],
     )
-    message = forms.CharField(label="Votre message", widget=forms.Textarea)
+    message = forms.CharField(
+        label="Votre message", widget=forms.Textarea(attrs={"rows": 4})
+    )

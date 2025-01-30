@@ -34,10 +34,9 @@ CMS_BASE_URL = decouple.config(
 DEBUG = decouple.config("DEBUG", default=False, cast=bool)
 STIMULUS_DEBUG = decouple.config("STIMULUS_DEBUG", default=False, cast=bool)
 POSTHOG_DEBUG = decouple.config("POSTHOG_DEBUG", default=False, cast=bool)
-
-ALLOWED_HOSTS = decouple.config("ALLOWED_HOSTS", default="localhost", cast=str).split(
-    ","
-)
+ALLOWED_HOSTS = decouple.config(
+    "ALLOWED_HOSTS", default="127.0.0.1,localhost", cast=str
+).split(",")
 
 # Application definition
 
@@ -77,6 +76,7 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "qfdmd.middleware.AssistantMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -330,13 +330,11 @@ NB_CORRECTION_DISPLAYED = decouple.config(
 
 SHELL_PLUS_PRINT_SQL = True
 
-# Object storage with Scaleway
 AWS_ACCESS_KEY_ID = decouple.config("AWS_ACCESS_KEY_ID", default="")
 AWS_SECRET_ACCESS_KEY = decouple.config("AWS_SECRET_ACCESS_KEY", default="")
 AWS_STORAGE_BUCKET_NAME = decouple.config("AWS_STORAGE_BUCKET_NAME", default="")
 AWS_S3_REGION_NAME = decouple.config("AWS_S3_REGION_NAME", default="")
 AWS_S3_ENDPOINT_URL = decouple.config("AWS_S3_ENDPOINT_URL", default="")
-
 
 STORAGES = {
     "default": {
@@ -382,6 +380,12 @@ QFDMO_GOOGLE_SEARCH_CONSOLE = "google9dfbbc61adbe3888.html"
 SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 ASSISTANT = {
     "MATOMO_ID": decouple.config("ASSISTANT_MATOMO_ID", default=82, cast=int),
+    "HOSTS": decouple.config(
+        "ASSISTANT_HOSTS",
+        default="127.0.0.1:8000,0.0.0.0:8000,localhost:8000",
+        cast=str,
+    ).split(","),
+    "BASE_URL": decouple.config("ASSISTANT_BASE_URL", default="http://localhost:8000"),
     "POSTHOG_KEY": decouple.config(
         "ASSISTANT_POSTHOG_KEY",
         default="phc_fSfhoWDOUxZdKWty16Z3XfRiAoWd1qdJK0N0z9kQHJr",  # pragma: allowlist secret  # noqa: E501

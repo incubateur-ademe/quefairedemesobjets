@@ -15,7 +15,7 @@ from qfdmo.models import ActeurType, Source  # noqa: E402
 from qfdmo.models.acteur import ActeurStatus  # noqa: E402
 
 
-def cluster_acteurs_db_data_read_acteurs(
+def cluster_acteurs_selection_from_db(
     model_class: type[Model],
     include_source_ids: list[int],
     include_acteur_type_ids: list[int],
@@ -91,7 +91,19 @@ def cluster_acteurs_db_data_read_acteurs(
     # Un filtre en dur pour ne prendre que les acteurs actifs
     query = query.filter(statut=ActeurStatus.ACTIF)
 
-    fields = ["identifiant_unique", "statut", "source_id", "acteur_type_id", "nom"]
+    # Les champs dont on a besoin pour la logique d'ensemble
+    # indépendamment de ce que métier souhaite sélectionner
+    fields = [
+        "identifiant_unique",
+        # note: on cherche à récupérer les acteurs de displayed
+        # MAIS parent_id n'est pas dispo sur cette table, on
+        # va donc la récupérer/enrichir plus tard
+        # "parent_id",
+        "statut",
+        "source_id",
+        "acteur_type_id",
+        "nom",
+    ]
     fields += include_if_all_fields_filled
     fields += exclude_if_any_field_filled
     fields += extra_dataframe_fields
