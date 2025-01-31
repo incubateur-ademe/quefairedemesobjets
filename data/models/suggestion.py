@@ -212,6 +212,11 @@ class Suggestion(models.Model):
                 "updated_fields": updated_fields,
                 "unchanged_fields": unchanged_fields,
             }
+        if (
+            self.suggestion_cohorte.type_action == SuggestionAction.SOURCE_AJOUT
+            and isinstance(self.suggestion, dict)
+        ):
+            template_name = "data/_partials/ajout_suggestion_details.html"
 
         return render_to_string(template_name, template_context)
 

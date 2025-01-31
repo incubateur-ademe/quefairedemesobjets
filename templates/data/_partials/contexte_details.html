@@ -10,7 +10,11 @@
         </ul>
     {% endif %}
 </p>
-<details>
-    <summary>Details</summary>
-    {% include "data/_partials/value_details.html" with value=contexte %}
-</details>
+{% if contexte %}
+    <details>
+        <summary>Details</summary>
+        {% include "data/_partials/value_details.html" with value=contexte %}
+    </details>
+{% else %}
+    -
+{% endif %}
