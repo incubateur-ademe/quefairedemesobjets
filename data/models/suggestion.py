@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib.gis.db import models
 from django.db.models.functions import Now
 from django.template.loader import render_to_string
@@ -16,7 +18,20 @@ from dags.sources.config.shared_constants import (
     SUGGESTION_SOURCE_SUPRESSION,
     SUGGESTION_SUCCES,
 )
-from qfdmo.models.acteur import ActeurType, Source
+from qfdmo.models.acteur import (
+    Acteur,
+    ActeurService,
+    ActeurStatus,
+    ActeurType,
+    LabelQualite,
+    PropositionService,
+    RevisionActeur,
+    Source,
+)
+from qfdmo.models.action import Action
+from qfdmo.models.categorie_objet import SousCategorieObjet
+
+logger = logging.getLogger(__name__)
 
 
 class SuggestionStatut(models.TextChoices):
@@ -90,6 +105,11 @@ class SuggestionCohorte(TimestampedModel):
 
 
 class Suggestion(models.Model):
+
+    class Meta:
+        verbose_name = "1️⃣ Suggestion"
+        verbose_name_plural = "1️⃣ Suggestions"
+
     id = models.AutoField(primary_key=True)
     suggestion_cohorte = models.ForeignKey(
         SuggestionCohorte, on_delete=models.CASCADE, related_name="suggestion_unitaires"
@@ -107,47 +127,6 @@ class Suggestion(models.Model):
     suggestion = models.JSONField(blank=True, verbose_name="Suggestion de modification")
     cree_le = models.DateTimeField(auto_now_add=True, db_default=Now())
     modifie_le = models.DateTimeField(auto_now=True, db_default=Now())
-
-    # FIXME: A revoir
-    def display_acteur_details(self) -> dict:
-        displayed_details = {}
-        for field, field_value in {
-            "nom": "Nom",
-            "nom_commercial": "Nom commercial",
-            "siret": "SIRET",
-            "siren": "SIREN",
-            "url": "Site web",
-            "email": "Email",
-            "telephone": "Téléphone",
-            "adresse": "Adresse",
-            "adresse_complement": "Complement d'adresse",
-            "code_postal": "Code postal",
-            "ville": "Ville",
-            "commentaires": "Commentaires",
-            "horaires_description": "Horaires",
-            "latitude": "latitude",
-            "longitude": "longitude",
-            "identifiant_unique": "identifiant_unique",
-            "identifiant_externe": "identifiant_externe",
-        }.items():
-            if value := self.suggestion.get(field):
-                displayed_details[field_value] = value
-        if value := self.suggestion.get("acteur_type_id"):
-            displayed_details["Type d'acteur"] = ActeurType.objects.get(
-                pk=value
-            ).libelle
-        if value := self.suggestion.get("source_id"):
-            displayed_details["Source"] = Source.objects.get(pk=value).libelle
-        if value := self.suggestion.get("labels"):
-            displayed_details["Labels"] = ", ".join(
-                [str(v["labelqualite_id"]) for v in value]
-            )
-        if value := self.suggestion.get("acteur_services"):
-            displayed_details["Acteur Services"] = ", ".join(
-                [str(v["acteurservice_id"]) for v in value]
-            )
-
-        return displayed_details
 
     @property
     def display_contexte_details(self):
@@ -170,6 +149,7 @@ class Suggestion(models.Model):
             },
         )
 
+    # TODO: A revoir avec l'utilisation des class pydantic
     @property
     def display_suggestion_details(self):
         template_name = "data/_partials/suggestion_details.html"
@@ -220,13 +200,117 @@ class Suggestion(models.Model):
 
         return render_to_string(template_name, template_context)
 
+    def _create_acteur(self, suggestion: dict):
+        acteur_fields = {
+            field.name: suggestion.get(field.name)
+            for field in Acteur._meta.get_fields()
+            if field.name in suggestion
+            and field.name
+            not in [
+                "source",
+                "acteur_type",
+                "labels",
+                "source_id",
+                "acteur_type_id",
+                "acteur_services",
+                "proposition_services",
+            ]
+        }
+        acteur = Acteur.objects.create(
+            **acteur_fields,
+            source=Source.objects.get(code=suggestion.get("source_code")),
+            acteur_type=ActeurType.objects.get(code=suggestion.get("acteur_type_code")),
+        )
+        for proposition_service_code in suggestion["proposition_services_codes"]:
+            proposition_service = PropositionService.objects.create(
+                action=Action.objects.get(code=proposition_service_code["action"]),
+                acteur=acteur,
+            )
+            for sous_categorie_code in proposition_service_code["sous_categories"]:
+                proposition_service.sous_categories.add(
+                    SousCategorieObjet.objects.get(code=sous_categorie_code)
+                )
+        for label_code in suggestion["label_codes"]:
+            label = LabelQualite.objects.get(code=label_code)
+            acteur.labels.add(label.id)
+
+        for acteurservice_code in suggestion["acteurservice_codes"]:
+            acteur_service = ActeurService.objects.get(code=acteurservice_code)
+            acteur.acteur_services.add(acteur_service.id)
+
+    def _update_acteur(self, suggestion: dict):
+        Acteur.objects.filter(
+            identifiant_unique=suggestion.get("identifiant_unique")
+        ).delete()
+        self._create_acteur(suggestion)
+
+    def apply(self):
+        if self.suggestion_cohorte.type_action == SuggestionAction.CLUSTERING:
+            raise NotImplementedError("Revoir logique d'ensemble")
+        elif self.suggestion_cohorte.type_action == SuggestionAction.SOURCE_AJOUT:
+            self._create_acteur(self.suggestion)
+        elif (
+            self.suggestion_cohorte.type_action == SuggestionAction.SOURCE_MODIFICATION
+        ):
+            self._update_acteur(self.suggestion)
+        elif self.suggestion_cohorte.type_action == SuggestionAction.SOURCE_SUPPRESSION:
+            identifiant_unique = self.suggestion["identifiant_unique"]
+            Acteur.objects.filter(identifiant_unique=identifiant_unique).update(
+                statut=ActeurStatus.SUPPRIME
+            )
+            RevisionActeur.objects.filter(identifiant_unique=identifiant_unique).update(
+                statut=ActeurStatus.SUPPRIME
+            )
+        else:
+            raise Exception(
+                "Suggestion cohorte statut is not implemented "
+                f"{self.suggestion_cohorte.type_action}"
+            )
+
     # FIXME: A revoir
     def display_proposition_service(self):
         return self.suggestion.get("proposition_services", [])
 
-    class Meta:
-        verbose_name = "1️⃣ Suggestion"
-        verbose_name_plural = "1️⃣ Suggestions"
+    # FIXME: A revoir
+    def display_acteur_details(self) -> dict:
+        displayed_details = {}
+        for field, field_value in {
+            "nom": "Nom",
+            "nom_commercial": "Nom commercial",
+            "siret": "SIRET",
+            "siren": "SIREN",
+            "url": "Site web",
+            "email": "Email",
+            "telephone": "Téléphone",
+            "adresse": "Adresse",
+            "adresse_complement": "Complement d'adresse",
+            "code_postal": "Code postal",
+            "ville": "Ville",
+            "commentaires": "Commentaires",
+            "horaires_description": "Horaires",
+            "latitude": "latitude",
+            "longitude": "longitude",
+            "identifiant_unique": "identifiant_unique",
+            "identifiant_externe": "identifiant_externe",
+        }.items():
+            if value := self.suggestion.get(field):
+                displayed_details[field_value] = value
+        if value := self.suggestion.get("acteur_type_id"):
+            displayed_details["Type d'acteur"] = ActeurType.objects.get(
+                pk=value
+            ).libelle
+        if value := self.suggestion.get("source_id"):
+            displayed_details["Source"] = Source.objects.get(pk=value).libelle
+        if value := self.suggestion.get("labels"):
+            displayed_details["Labels"] = ", ".join(
+                [str(v["labelqualite_id"]) for v in value]
+            )
+        if value := self.suggestion.get("acteur_services"):
+            displayed_details["Acteur Services"] = ", ".join(
+                [str(v["acteurservice_id"]) for v in value]
+            )
+
+        return displayed_details
 
 
 class BANCache(models.Model):

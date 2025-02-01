@@ -1,6 +1,6 @@
 {% load custom_filters %}
 
-{% if value|valuetype == "str" %}
+{% if value|valuetype != "list" and value|valuetype != "dict" %}
     {{ value }}
 {% elif value|valuetype == "list" %}
     <ul>
