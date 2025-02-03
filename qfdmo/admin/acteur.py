@@ -36,6 +36,7 @@ from qfdmo.models.acteur import (
     DisplayedActeur,
     DisplayedPropositionService,
     LabelQualite,
+    ToutActeur,
 )
 from qfdmo.models.categorie_objet import CategorieObjet
 from qfdmo.widgets import CustomOSMWidget
@@ -788,6 +789,10 @@ class CodeLibelleModelAdmin(admin.ModelAdmin):
         return []
 
 
+class ToutActeurAdmin(NotEditableInlineMixin, BaseActeurAdmin):
+    inlines = []
+
+
 admin.site.register(Acteur, ActeurAdmin)
 admin.site.register(ActeurService, CodeLibelleModelAdmin)
 admin.site.register(ActeurType, CodeLibelleModelAdmin)
@@ -797,3 +802,4 @@ admin.site.register(RevisionActeur, RevisionActeurAdmin)
 admin.site.register(RevisionPropositionService, RevisionPropositionServiceAdmin)
 admin.site.register(Source, CodeLibelleModelAdmin)
 admin.site.register(LabelQualite, CodeLibelleModelAdmin)
+admin.site.register(ToutActeur, ToutActeurAdmin)

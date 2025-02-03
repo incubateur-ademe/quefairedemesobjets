@@ -798,6 +798,30 @@ class RevisionActeur(BaseActeur):
         )
 
 
+"""
+Model to display all acteurs in admin
+"""
+
+
+class ToutActeur(BaseActeur):
+
+    parent = models.ForeignKey(
+        "self",
+        verbose_name="Dédupliqué par",
+        help_text="Acteur «chapeau» utilisé pour dédupliquer cet acteur",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="duplicats",
+        validators=[clean_parent],
+    )
+
+    class Meta:
+        managed = False
+        verbose_name = "Vue sur l'acteur"
+        verbose_name_plural = "Vues sur tous les acteurs"
+
+
 class DisplayedActeur(BaseActeur):
     objects = DisplayedActeurManager()
 
