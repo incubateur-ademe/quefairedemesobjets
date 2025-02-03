@@ -312,6 +312,22 @@ class TestCleanAdresse:
                     "ville": "Paris",
                 },
             ),
+            (
+                "Rue des Balmes,38540,HEYRIEUX",
+                {
+                    "adresse": "Rue des Balmes",
+                    "code_postal": "38540",
+                    "ville": "Heyrieux",
+                },
+            ),
+            (
+                "Rue des Balmes;38540;HEYRIEUX",
+                {
+                    "adresse": "Rue des Balmes",
+                    "code_postal": "38540",
+                    "ville": "Heyrieux",
+                },
+            ),
         ],
     )
     def test_clean_adresse_without_ban(

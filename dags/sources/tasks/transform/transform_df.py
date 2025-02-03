@@ -334,7 +334,7 @@ def _address_details_extract(
     address = postal_code = city = None
 
     # Pattern pour capturer les codes postaux et les noms de ville optionnels
-    pattern1 = re.compile(r"(.*)\s+(\d{4,5})\s*(.*)")
+    pattern1 = re.compile(r"(.*)[\s\,\;]+(\d{4,5})[\s\,\;]*(.*)")
     # Pattern pour capturer les codes postaux sans adresse
     pattern2 = re.compile(r"(\d{4,5})\s*(.*)")
     if match := pattern1.search(address_str):
