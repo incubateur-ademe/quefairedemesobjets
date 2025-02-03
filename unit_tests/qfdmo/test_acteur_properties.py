@@ -10,6 +10,10 @@ propriétés pour avoir une vue d'ensemble ici.
 import pytest
 
 from qfdmo.models import Acteur
+from unit_tests.qfdmo.acteur_factory import (
+    DisplayedActeurFactory,
+    RevisionActeurFactory,
+)
 
 
 class TestActeurProperties:
@@ -155,3 +159,42 @@ class TestActeurProperties:
     def test_nom_sans_ville(self, nom, ville, expected):
         acteur = Acteur(nom=nom, ville=ville)
         assert acteur.nom_sans_ville == expected
+
+
+class TestParentsCache:
+
+    @pytest.mark.django_db
+    def test_nombre_enfants_revision_and_diplayed(self):
+        # p1 = acteur parent avec 3 enfants, on démontre que la propriété
+        # calculée nombre_enfants fonctionne au niveau revision et displayed
+        r1 = RevisionActeurFactory(identifiant_unique="p1")
+        d1 = DisplayedActeurFactory(identifiant_unique="p1")
+        a = RevisionActeurFactory(identifiant_unique="a_r1", parent=r1)
+        b = RevisionActeurFactory(identifiant_unique="b_r1", parent=r1)
+        c = RevisionActeurFactory(identifiant_unique="c_r1", parent=r1)
+
+        # r2 = acteur non parent donc avec 0 enfants
+        r2 = RevisionActeurFactory(identifiant_unique="r2_pas_parent")
+
+        assert r1.nombre_enfants == 3
+        assert d1.nombre_enfants == 3
+        assert r2.nombre_enfants == 0
+
+        # On supprime un enfant et on démontre l'invalidation du cache
+        a.parent = r2  # p1--, r2++
+        a.save()
+        assert r1.nombre_enfants == 2
+        assert d1.nombre_enfants == 2
+        assert r2.nombre_enfants == 1
+
+        b.parent = None  # p1--, r2=
+        b.save()
+        assert r1.nombre_enfants == 1
+        assert d1.nombre_enfants == 1
+        assert r2.nombre_enfants == 1
+
+        c.parent = r2  # p1--, r2++
+        c.save()
+        assert r1.nombre_enfants == 0
+        assert d1.nombre_enfants == 0
+        assert r2.nombre_enfants == 2

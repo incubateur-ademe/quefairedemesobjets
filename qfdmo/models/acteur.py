@@ -19,6 +19,7 @@ from django.core.files.images import get_image_dimensions
 from django.db.models import (
     Case,
     CheckConstraint,
+    Count,
     Exists,
     Min,
     OuterRef,
@@ -625,6 +626,30 @@ class Acteur(BaseActeur):
             self.identifiant_unique = source_stub + "_" + str(self.identifiant_externe)
 
 
+# TODO: améliorer ci-dessous avec un gestionnaire de cache
+# pour l'ensemble des propriétés calculées de type enfants/parents,
+# y inclure la refacto de is_parent
+PARENTS_CACHE = None
+
+
+def parents_cache_get():
+    global PARENTS_CACHE
+    if PARENTS_CACHE is None:
+        PARENTS_CACHE = {
+            "nombre_enfants": dict(
+                RevisionActeur.objects.filter(parent__isnull=False)
+                .values_list("parent")
+                .annotate(count=Count("identifiant_unique"))
+            )
+        }
+    return PARENTS_CACHE
+
+
+def parents_cache_invalidate():
+    global PARENTS_CACHE
+    PARENTS_CACHE = None
+
+
 class RevisionActeur(BaseActeur):
     class Meta:
         verbose_name = "ACTEUR de l'EC - CORRIGÉ"
@@ -652,6 +677,12 @@ class RevisionActeur(BaseActeur):
     @property
     def is_parent(self):
         return self.pk and self.duplicats.exists()
+
+    @property
+    def nombre_enfants(self) -> int:
+        """Calcul le nombre d'enfants dont le parent_id
+        pointent vers l'identifiant_unique de cet acteur"""
+        return parents_cache_get()["nombre_enfants"].get(self.identifiant_unique, 0)
 
     def save(self, *args, **kwargs):
         # OPTIMIZE: if we need to validate the main action in the service propositions
@@ -681,6 +712,12 @@ class RevisionActeur(BaseActeur):
             if not self._original_parent.is_parent:
                 self._original_parent.delete()
 
+        # Dès qu'on fait des changements de révisions, quels qu'ils soient,
+        # on force le recalcul du nombre d'enfants
+        # TODO: améliorer cette logique en:
+        # - centralisant toutes les propriétés calculés enfants/parents dans 1 cache
+        # - en invalidant le cache uniquement si changements impactants ci-dessus
+        parents_cache_invalidate()
         return super_result
 
     def save_as_parent(self, *args, **kwargs):
@@ -813,6 +850,20 @@ class DisplayedActeur(BaseActeur):
         blank=True,
         related_name="displayed_acteurs",
     )
+
+    # La propriété au sein du Displayed se base sur Revision
+    # car c'est la seule façon de récupérer les enfants (n'existe pas
+    # dans Displayed) car on en a besoin pour le clustering (fonction
+    # qui se nourrit de la table Displayed, et on a pas envie de complexifier
+    # encore davantage le code de clustering)
+    # TODO: il faudrait dégager la table Displayed, en faire une vue, pour de
+    # fait avoir 1 seul table d'état (revision) et donc on aurait plus ces soucis
+    # de devoir piocher à droit/gauche pour reconstruire un état cohérent
+    @property
+    def nombre_enfants(self) -> int:
+        """Calcul le nombre d'enfants dont le parent_id
+        pointent vers l'identifiant_unique de cet acteur"""
+        return parents_cache_get()["nombre_enfants"].get(self.identifiant_unique, 0)
 
     def get_absolute_url(self):
         return reverse("qfdmo:acteur-detail", args=[self.uuid])
