@@ -17,6 +17,7 @@ from django.utils.html import format_html
 from import_export import admin as import_export_admin
 from import_export import fields, resources, widgets
 
+from core.admin import NotEditableInlineMixin
 from qfdmo.admin.widgets import CategorieChoiceWidget, SousCategorieChoiceWidget
 from qfdmo.models import (
     Acteur,
@@ -38,17 +39,6 @@ from qfdmo.models.acteur import (
 )
 from qfdmo.models.categorie_objet import CategorieObjet
 from qfdmo.widgets import CustomOSMWidget
-
-
-class NotEditableInlineMixin:
-    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
-
-    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
-
-    def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
 
 
 class ActeurLabelQualiteInline(admin.StackedInline):

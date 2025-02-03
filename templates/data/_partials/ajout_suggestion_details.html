@@ -1,9 +1,11 @@
-<h3>Ajout de l'acteur :</h3>
+{% extends "data/_partials/suggestion_details.html" %}
 
+{% block suggestion_title %}Ajout de l'acteur{% endblock %}</h3>
 
-<details>
-    <summary>
-        {{ suggestion.identifiant_unique }} - {{ suggestion.nom }}
-    </summary>
+{% block suggestion_summary %}
+    {{ suggestion.identifiant_unique }} - {{ suggestion.nom }}
+{% endblock suggestion_summary %}
+
+{% block suggestion_content %}
     {% include "data/_partials/value_details.html" with value=suggestion %}
-</details>
+{% endblock suggestion_content %}

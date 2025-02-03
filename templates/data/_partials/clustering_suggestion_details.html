@@ -1,14 +1,17 @@
-<b>cluster_id:</b>
-<br/>
-<ul>
-    <li>{{ cluster_id }}</li>
-</ul>
-<b>acteurs:</b>
-<br/>
+{% extends "data/_partials/suggestion_details.html" %}
+
+{% block suggestion_title %}
+    Cluster {{ cluster_id }}
+{% endblock suggestion_title %}</h3>
+
+{% block suggestion_details %}
 <ul>
     {% for identifiant_unique in identifiant_uniques %}
         <li>
-            <a target='_blank' href="/admin/qfdmo/displayedacteur/{{ identifiant_unique }}/change/">{{ identifiant_unique }}</a>
+            <a target='_blank' href="/admin/qfdmo/displayedacteur/{{ identifiant_unique }}/change/">
+                {{ identifiant_unique }}
+            </a>
         </li>
     {% endfor %}
 </ul>
+{% endblock suggestion_details %}

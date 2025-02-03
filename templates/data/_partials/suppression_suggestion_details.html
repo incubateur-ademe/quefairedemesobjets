@@ -1,4 +1,11 @@
-<h3>Acteur à supprimer:</h3>
+{% extends "data/_partials/suggestion_details.html" %}
+
+{% block suggestion_title %}
+    Acteur à supprimer
+{% endblock suggestion_title %}</h3>
+
+{% block suggestion_details %}
 <p>
     <a target='_blank' href="/admin/qfdmo/displayedacteur/{{ identifiant_unique }}/change/">{{ identifiant_unique }}</a>
 </p>
+{% endblock suggestion_details %}

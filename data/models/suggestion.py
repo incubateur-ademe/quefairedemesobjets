@@ -108,7 +108,6 @@ class Suggestion(models.Model):
 
     class Meta:
         verbose_name = "1️⃣ Suggestion"
-        verbose_name_plural = "1️⃣ Suggestions"
 
     id = models.AutoField(primary_key=True)
     suggestion_cohorte = models.ForeignKey(
@@ -149,7 +148,8 @@ class Suggestion(models.Model):
             },
         )
 
-    # TODO: A revoir avec l'utilisation des class pydantic
+    # FIXME: this display management will be reviewed with PYDANTIC classes which will
+    # be used to handle all specificities of suggestions
     @property
     def display_suggestion_details(self):
         template_name = "data/_partials/suggestion_details.html"
@@ -200,11 +200,13 @@ class Suggestion(models.Model):
 
         return render_to_string(template_name, template_context)
 
-    def _create_acteur(self, suggestion: dict):
-        acteur_fields = {
-            field.name: suggestion.get(field.name)
+    # FIXME: this acteur management will be reviewed with PYDANTIC classes which will
+    # be used to handle all specificities of suggestions
+    def _acteur_fields_to_update(self):
+        return {
+            field.name: self.suggestion.get(field.name)
             for field in Acteur._meta.get_fields()
-            if field.name in suggestion
+            if field.name in self.suggestion
             and field.name
             not in [
                 "source",
@@ -216,12 +218,18 @@ class Suggestion(models.Model):
                 "proposition_services",
             ]
         }
-        acteur = Acteur.objects.create(
-            **acteur_fields,
-            source=Source.objects.get(code=suggestion.get("source_code")),
-            acteur_type=ActeurType.objects.get(code=suggestion.get("acteur_type_code")),
-        )
-        for proposition_service_code in suggestion["proposition_services_codes"]:
+
+    # FIXME: this acteur management will be reviewed with PYDANTIC classes which will
+    # be used to handle all specificities of self.suggestions
+    def _remove_acteur_linked_objects(self, acteur):
+        acteur.proposition_services.all().delete()
+        acteur.labels.clear()
+        acteur.acteur_services.clear()
+
+    # FIXME: this acteur management will be reviewed with PYDANTIC classes which will
+    # be used to handle all specificities of self.suggestions
+    def _create_acteur_linked_objects(self, acteur):
+        for proposition_service_code in self.suggestion["proposition_services_codes"]:
             proposition_service = PropositionService.objects.create(
                 action=Action.objects.get(code=proposition_service_code["action"]),
                 acteur=acteur,
@@ -230,29 +238,55 @@ class Suggestion(models.Model):
                 proposition_service.sous_categories.add(
                     SousCategorieObjet.objects.get(code=sous_categorie_code)
                 )
-        for label_code in suggestion["label_codes"]:
+        for label_code in self.suggestion["label_codes"]:
             label = LabelQualite.objects.get(code=label_code)
             acteur.labels.add(label.id)
 
-        for acteurservice_code in suggestion["acteurservice_codes"]:
+        for acteurservice_code in self.suggestion["acteurservice_codes"]:
             acteur_service = ActeurService.objects.get(code=acteurservice_code)
             acteur.acteur_services.add(acteur_service.id)
 
-    def _update_acteur(self, suggestion: dict):
-        Acteur.objects.filter(
-            identifiant_unique=suggestion.get("identifiant_unique")
-        ).delete()
-        self._create_acteur(suggestion)
+    # FIXME: this acteur management will be reviewed with PYDANTIC classes which will
+    # be used to handle all specificities of self.suggestions
+    def _create_acteur(self):
+        acteur_fields = self._acteur_fields_to_update()
+        acteur = Acteur.objects.create(
+            **acteur_fields,
+            source=Source.objects.get(code=self.suggestion.get("source_code")),
+            acteur_type=ActeurType.objects.get(
+                code=self.suggestion.get("acteur_type_code")
+            ),
+        )
+        self._create_acteur_linked_objects(acteur)
 
+    # FIXME: this acteur management will be reviewed with PYDANTIC classes which will
+    # be used to handle all specificities of self.suggestions
+    def _update_acteur(self):
+        acteur = Acteur.objects.get(
+            identifiant_unique=self.suggestion.get("identifiant_unique")
+        )
+        for acteur_field in self._acteur_fields_to_update():
+            setattr(acteur, acteur_field, self.suggestion.get(acteur_field))
+        acteur.source = Source.objects.get(code=self.suggestion.get("source_code"))
+        acteur.acteur_type = ActeurType.objects.get(
+            code=self.suggestion.get("acteur_type_code")
+        )
+        acteur.save()
+
+        self._remove_acteur_linked_objects(acteur)
+        self._create_acteur_linked_objects(acteur)
+
+    # FIXME: this acteur management will be reviewed with PYDANTIC classes which will
+    # be used to handle all specificities of suggestions
     def apply(self):
         if self.suggestion_cohorte.type_action == SuggestionAction.CLUSTERING:
             raise NotImplementedError("Revoir logique d'ensemble")
         elif self.suggestion_cohorte.type_action == SuggestionAction.SOURCE_AJOUT:
-            self._create_acteur(self.suggestion)
+            self._create_acteur()
         elif (
             self.suggestion_cohorte.type_action == SuggestionAction.SOURCE_MODIFICATION
         ):
-            self._update_acteur(self.suggestion)
+            self._update_acteur()
         elif self.suggestion_cohorte.type_action == SuggestionAction.SOURCE_SUPPRESSION:
             identifiant_unique = self.suggestion["identifiant_unique"]
             Acteur.objects.filter(identifiant_unique=identifiant_unique).update(
@@ -267,11 +301,11 @@ class Suggestion(models.Model):
                 f"{self.suggestion_cohorte.type_action}"
             )
 
-    # FIXME: A revoir
+    # FIXME: DEPRECATED, to be removed
     def display_proposition_service(self):
         return self.suggestion.get("proposition_services", [])
 
-    # FIXME: A revoir
+    # FIXME: DEPRECATED, to be removed
     def display_acteur_details(self) -> dict:
         displayed_details = {}
         for field, field_value in {

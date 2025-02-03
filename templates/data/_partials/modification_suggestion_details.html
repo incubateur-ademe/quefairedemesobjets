@@ -1,12 +1,20 @@
-<h3>Champs modifiés:</h3>
-<ul>
-    {% for field, value in updated_fields.items %}
-        <li><strong>{{ field }}</strong> : <strike>{{ value.old }}</strike> {{ value.new }}</li>
-    {% endfor %}
-</ul>
+{% extends "data/_partials/suggestion_details.html" %}
 
+{% block suggestion_title %}Champs modifiés:{% endblock %}</h3>
 
-<details>
-    <summary>Champs inchangés:</summary>
+{% block suggestion_details %}
+    <ul>
+        {% for field, value in updated_fields.items %}
+            <li><strong>{{ field }}</strong> : <strike>{{ value.old }}</strike> {{ value.new }}</li>
+        {% endfor %}
+    </ul>
+    {{ block.super }}
+{% endblock suggestion_details %}
+
+{% block suggestion_summary %}
+    Champs inchangés:
+{% endblock suggestion_summary %}
+
+{% block suggestion_content %}
     {% include "data/_partials/value_details.html" with value=unchanged_fields %}
-</details>
+{% endblock suggestion_content %}

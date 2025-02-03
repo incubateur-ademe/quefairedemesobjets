@@ -84,6 +84,8 @@ def insert_suggestion(
     # Insert dag_run_change
     df["suggestion_cohorte_id"] = suggestion_cohorte_id
     df["statut"] = constants.SUGGESTION_AVALIDER
+    # TODO: here the Suggestion model could be used instead of using pandas to insert
+    # the data into the database
     df[["contexte", "suggestion", "suggestion_cohorte_id", "statut"]].to_sql(
         "data_suggestion",
         engine,
