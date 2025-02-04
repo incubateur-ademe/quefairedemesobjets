@@ -12,6 +12,7 @@ from qfdmo.models import Acteur  # noqa: E402
 logger = logging.getLogger(__name__)
 
 
+# TODO: To be factorized with PYDANTIC classes
 def db_read_acteur(df_normalized: pd.DataFrame, dag_config: DAGConfig):
     if "source_code" not in df_normalized.columns:
         raise ValueError(
@@ -35,7 +36,6 @@ def db_read_acteur(df_normalized: pd.DataFrame, dag_config: DAGConfig):
             "No acteurs found in the database, it is ok if it is the first time we"
             " ingest the source"
         )
-    # transformer acteurs en dataframe
     acteurs_list = []
     expected_columns = dag_config.get_expected_columns() - {
         "location",
@@ -66,7 +66,6 @@ def db_read_acteur(df_normalized: pd.DataFrame, dag_config: DAGConfig):
             for proposition_service in acteur.proposition_services.all()
         ]
         acteurs_list.append(acteur_dict)
-
     df_acteur = pd.DataFrame(acteurs_list)
 
     log.preview("df_acteur retourné par la tâche", df_acteur)
