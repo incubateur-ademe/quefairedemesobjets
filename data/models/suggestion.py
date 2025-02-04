@@ -108,6 +108,7 @@ class Suggestion(models.Model):
 
     class Meta:
         verbose_name = "1️⃣ Suggestion"
+        verbose_name = "1️⃣ Suggestions"
 
     id = models.AutoField(primary_key=True)
     suggestion_cohorte = models.ForeignKey(
