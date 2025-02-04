@@ -1,7 +1,7 @@
 from django.contrib.gis import admin
 from django.utils.html import format_html
 
-from core.admin import NotEditableInlineMixin
+from core.admin import NotEditableMixin
 from data.models import Suggestion, SuggestionCohorte
 from data.models.suggestion import SuggestionStatut
 
@@ -15,7 +15,7 @@ def dict_to_html_table(data):
     return table
 
 
-class SuggestionCohorteAdmin(NotEditableInlineMixin, admin.ModelAdmin):
+class SuggestionCohorteAdmin(NotEditableMixin, admin.ModelAdmin):
     list_display = [
         "id",
         "identifiant_action",

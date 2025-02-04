@@ -16,6 +16,13 @@ def compute_link_tables(
     acteurtype_id_by_code: dict,
 ) -> pd.DataFrame:
 
+    if df_acteur.empty:
+        # ajout de la colonne proposition_services
+        df_acteur["acteur_services"] = None
+        df_acteur["labels"] = None
+        df_acteur["proposition_services"] = None
+        return df_acteur
+
     # Compute qfdmo_acteur_acteurservice
     df_acteur["acteur_services"] = df_acteur.apply(
         lambda row: [
