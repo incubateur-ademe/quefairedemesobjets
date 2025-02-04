@@ -17,6 +17,7 @@ from django.utils.html import format_html
 from import_export import admin as import_export_admin
 from import_export import fields, resources, widgets
 
+from core.admin import NotMutableMixin
 from qfdmo.admin.widgets import CategorieChoiceWidget, SousCategorieChoiceWidget
 from qfdmo.models import (
     Acteur,
@@ -38,17 +39,6 @@ from qfdmo.models.acteur import (
 )
 from qfdmo.models.categorie_objet import CategorieObjet
 from qfdmo.widgets import CustomOSMWidget
-
-
-class NotEditableInlineMixin:
-    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
-
-    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
-
-    def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
 
 
 class ActeurLabelQualiteInline(admin.StackedInline):
@@ -132,7 +122,7 @@ class BasePropositionServiceInline(admin.TabularInline):
     )
 
 
-class PropositionServiceInline(NotEditableInlineMixin, BasePropositionServiceInline):
+class PropositionServiceInline(BasePropositionServiceInline):
     model = PropositionService
 
 
@@ -146,9 +136,7 @@ class RevisionPropositionServiceInline(BasePropositionServiceInline):
     )
 
 
-class DisplayedPropositionServiceInline(
-    NotEditableInlineMixin, BasePropositionServiceInline
-):
+class DisplayedPropositionServiceInline(NotMutableMixin, BasePropositionServiceInline):
     model = DisplayedPropositionService
 
 
@@ -288,17 +276,17 @@ class ActeurResource(resources.ModelResource):
 
 
 class ActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
-    change_form_template = "admin/acteur/change_form.html"
-    modifiable = False
+    #    change_form_template = "admin/acteur/change_form.html"
+    #    modifiable = False
     ordering = ("nom",)
     resource_classes = [ActeurResource]
     inlines = list(BaseActeurAdmin.inlines) + [ActeurLabelQualiteInline]
 
-    def get_readonly_fields(self, request, obj=None):
-        return [f.name for f in self.model._meta.fields if f.name != "location"]
+    # def get_readonly_fields(self, request, obj=None):
+    #     return [f.name for f in self.model._meta.fields if f.name != "location"]
 
-    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
+    # def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
+    #     return False
 
 
 class RevisionActeurResource(ActeurResource):
@@ -306,7 +294,7 @@ class RevisionActeurResource(ActeurResource):
         model = RevisionActeur
 
 
-class RevisionActeurChildInline(NotEditableInlineMixin, admin.TabularInline):
+class RevisionActeurChildInline(NotMutableMixin, admin.TabularInline):
     verbose_name = "Duplicat"
     model = RevisionActeur
     fk_name = "parent"
@@ -536,15 +524,6 @@ class PropositionServiceAdmin(
         "acteur__siren",
     ]
     search_help_text = "Recherche sur le nom, le siret ou le siren de l'acteur"
-
-    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
-
-    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
-
-    def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
 
 
 class RevisionPropositionServiceResource(BasePropositionServiceResource):

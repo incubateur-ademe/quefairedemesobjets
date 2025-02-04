@@ -28,7 +28,13 @@ Pour l'instant on voit que 🔴>>🟢 et on décide de:
  1) suggestion: on utilise le modèle UNIQUEMENT pour la validation,
     mais on stoque la donnée non modèlisée
  2) changement: on rejoue la donnée dans le modèle et on applique .apply()
-"""
+
+Notes:
+- Définir un modèle de changement dontles autres héritent
+- Stocker l'ordre des changements par type
+- Centralisation la résolution du template de la cellule changement dans l'admin dans
+chaque modèle pydantic
+ """
 
 from pydantic import BaseModel
 

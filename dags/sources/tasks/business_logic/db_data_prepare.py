@@ -52,10 +52,12 @@ def db_data_prepare(
 
     df_acteur_to_create = df_acteur[
         ~df_acteur["identifiant_unique"].isin(df_acteur_from_db["identifiant_unique"])
-    ]
+    ].copy()
+    df_acteur_to_create["contexte"] = None
+
     df_acteur_to_update = df_acteur[
         df_acteur["identifiant_unique"].isin(df_acteur_from_db["identifiant_unique"])
-    ]
+    ].copy()
     df_acteur_to_update = df_acteur_to_update.merge(
         df_acteur_from_db[["identifiant_unique", "contexte"]],
         on="identifiant_unique",

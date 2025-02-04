@@ -35,6 +35,7 @@ from dags.sources.tasks.business_logic.db_data_prepare import db_data_prepare
                             ' "cree_le": "2021-01-01",'
                             ' "proposition_services": [{"prop3": "val3"}]}'
                         ],
+                        "contexte": None,
                     }
                 ),
                 "df_acteur_to_update": pd.DataFrame(
