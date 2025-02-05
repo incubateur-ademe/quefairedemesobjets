@@ -28,13 +28,8 @@ class SuggestionCohorteAdmin(NotEditableMixin, admin.ModelAdmin):
         return format_html(dict_to_html_table(obj.metadata or {}))
 
 
-def _manage_suggestion_cohorte_statut(queryset):
-    distinct_suggestion_cohorte_ids = queryset.values_list(
-        "suggestion_cohorte", flat=True
-    ).distinct()
-    for suggestion_cohorte in SuggestionCohorte.objects.filter(
-        id__in=distinct_suggestion_cohorte_ids
-    ):
+def _manage_suggestion_cohorte_statut(cohorte_ids: list[int]):
+    for suggestion_cohorte in SuggestionCohorte.objects.filter(id__in=cohorte_ids):
         # On vérifie si toutes les suggestions de la cohorte sont rejetées
         if Suggestion.objects.filter(
             suggestion_cohorte=suggestion_cohorte,
@@ -48,8 +43,11 @@ def _manage_suggestion_cohorte_statut(queryset):
 
 @admin.action(description="REJETER les suggestions selectionnées")
 def mark_as_rejected(self, request, queryset):
+    distinct_suggestion_cohorte_ids = queryset.values_list(
+        "suggestion_cohorte", flat=True
+    ).distinct()
     queryset.update(statut=SuggestionStatut.REJETEE)
-    _manage_suggestion_cohorte_statut(queryset)
+    _manage_suggestion_cohorte_statut(distinct_suggestion_cohorte_ids)
     self.message_user(
         request, f"Les {queryset.count()} suggestions sélectionnées ont été refusées"
     )
@@ -57,8 +55,11 @@ def mark_as_rejected(self, request, queryset):
 
 @admin.action(description="VALIDER les suggestions selectionnées")
 def mark_as_toproceed(self, request, queryset):
+    distinct_suggestion_cohorte_ids = queryset.values_list(
+        "suggestion_cohorte", flat=True
+    ).distinct()
     queryset.update(statut=SuggestionStatut.ATRAITER)
-    _manage_suggestion_cohorte_statut(queryset)
+    _manage_suggestion_cohorte_statut(distinct_suggestion_cohorte_ids)
     self.message_user(
         request,
         f"Les {queryset.count()} suggestions sélectionnées ont été mises à jour"

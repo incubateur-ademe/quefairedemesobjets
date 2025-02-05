@@ -122,7 +122,7 @@ class BasePropositionServiceInline(admin.TabularInline):
     )
 
 
-class PropositionServiceInline(BasePropositionServiceInline):
+class PropositionServiceInline(NotMutableMixin, BasePropositionServiceInline):
     model = PropositionService
 
 
@@ -276,17 +276,17 @@ class ActeurResource(resources.ModelResource):
 
 
 class ActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
-    #    change_form_template = "admin/acteur/change_form.html"
-    #    modifiable = False
+    change_form_template = "admin/acteur/change_form.html"
+    modifiable = False
     ordering = ("nom",)
     resource_classes = [ActeurResource]
     inlines = list(BaseActeurAdmin.inlines) + [ActeurLabelQualiteInline]
 
-    # def get_readonly_fields(self, request, obj=None):
-    #     return [f.name for f in self.model._meta.fields if f.name != "location"]
+    def get_readonly_fields(self, request, obj=None):
+        return [f.name for f in self.model._meta.fields if f.name != "location"]
 
-    # def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
-    #     return False
+    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
 
 
 class RevisionActeurResource(ActeurResource):

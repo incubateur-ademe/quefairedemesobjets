@@ -1,4 +1,5 @@
 {% extends "data/_partials/suggestion_details.html" %}
+{% load custom_filters %}
 
 {% block suggestion_title %}
     Cluster {{ cluster_id }}
@@ -8,9 +9,7 @@
 <ul>
     {% for identifiant_unique in identifiant_uniques %}
         <li>
-            <a target='_blank' href="/admin/qfdmo/displayedacteur/{{ identifiant_unique }}/change/">
-                {{ identifiant_unique }}
-            </a>
+            <a href="{% url 'admin:qfdmo_displayedacteur_change' identifiant_unique|quote %}" target="_blank" rel="noreferrer">{{ identifiant_unique }}</a>
         </li>
     {% endfor %}
 </ul>
