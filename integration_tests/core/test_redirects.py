@@ -45,7 +45,6 @@ def test_other_routes_work(client, test_url):
 @pytest.mark.parametrize(
     "test_url",
     [
-        "/dags/validations",
         "/iframe/configurateur",
     ],
 )

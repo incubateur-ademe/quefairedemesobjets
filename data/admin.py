@@ -68,6 +68,7 @@ def mark_as_toproceed(self, request, queryset):
 
 
 class SuggestionAdmin(admin.ModelAdmin):
+    search_fields = ["contexte", "suggestion"]
     list_display = [
         "id",
         "cohorte",
