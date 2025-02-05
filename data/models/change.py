@@ -45,12 +45,12 @@ class ChangeActeurUpdateParent(BaseModel):
     """Un acteur est rattaché à un parent,
     l'acteur peut avoir ou pas un parent existant"""
 
-    identifiant_unique: str
+    id: str
     parent_id: str
 
     def apply(self):
         raise NotImplementedError("Revoir logique d'ensemble")
-        # _ = RevisionActeur.objects.filter(identifiant_unique=self.identifiant_unique)
+        # _ = RevisionActeur.objects.filter(id=self.id)
         # etc...
 
 
@@ -61,31 +61,31 @@ class ChangeActeurCreateAsParent(BaseModel):
     # L'identifiant unique peut être fournit
     # (ex: UUID à partir des ID des enfants)
     # et il sera utilisé, sinon on génère un
-    identifiant_unique: str | None
+    id: str | None
     data: dict
 
     def apply(self) -> str:
         raise NotImplementedError("Revoir logique d'ensemble")
         # Si ID fournit, on vérifie qu'il n'existe pas
-        rev = RevisionActeur.objects.filter(identifiant_unique=self.identifiant_unique)
+        rev = RevisionActeur.objects.filter(id=self.id)
         if rev.exists():
-            raise ValueError(f"Acteur {self.identifiant_unique} déjà existant")
+            raise ValueError(f"Acteur {self.id} déjà existant")
 
         rev = RevisionActeur(**self.data)
         rev.save()
 
-        return rev.identifiant_unique
+        return rev.id
 
 
 class ChangeActeurEnrichParent(BaseModel):
-    identifiant_unique: str
+    id: str
     data: dict
 
 
 class ChangeActeurDeleteAsParent(BaseModel):
     """Suppresion d'un acteur supposé parent"""
 
-    identifiant_unique: str
+    id: str
 
     def apply(self):
         raise NotImplementedError("Revoir logique d'ensemble")
@@ -93,9 +93,9 @@ class ChangeActeurDeleteAsParent(BaseModel):
         # si oui condition inverse: il faut ordonner les changements de cluster
         # pour avoir les ChangeActeurUpdateParent en 1er et que l'observer
         # fasse le nettoyage avant qu'on arrive ici
-        rev = RevisionActeur.objects.filter(identifiant_unique=self.identifiant_unique)
+        rev = RevisionActeur.objects.filter(id=self.id)
         if not rev.exists():
-            raise ValueError(f"Acteur à supprimer {self.identifiant_unique} non trouvé")
+            raise ValueError(f"Acteur à supprimer {self.id} non trouvé")
 
         rev.delete()
 

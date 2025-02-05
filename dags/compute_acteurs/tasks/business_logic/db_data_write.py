@@ -12,27 +12,19 @@ def db_data_write(
 ):
 
     df_labels_updated = df_labels_updated[
-        df_labels_updated["displayedacteur_id"].isin(
-            df_acteur_merged["identifiant_unique"]
-        )
+        df_labels_updated["displayedacteur_id"].isin(df_acteur_merged["id"])
     ]
 
     df_acteur_services_updated = df_acteur_services_updated[
-        df_acteur_services_updated["displayedacteur_id"].isin(
-            df_acteur_merged["identifiant_unique"]
-        )
+        df_acteur_services_updated["displayedacteur_id"].isin(df_acteur_merged["id"])
     ]
 
     df_acteur_sources_updated = df_acteur_sources_updated[
-        df_acteur_sources_updated["displayedacteur_id"].isin(
-            df_acteur_merged["identifiant_unique"]
-        )
+        df_acteur_sources_updated["displayedacteur_id"].isin(df_acteur_merged["id"])
     ]
 
     df_propositionservice_merged = df_propositionservice_merged[
-        df_propositionservice_merged["acteur_id"].isin(
-            df_acteur_merged["identifiant_unique"]
-        )
+        df_propositionservice_merged["acteur_id"].isin(df_acteur_merged["id"])
     ]
 
     df_propositionservice_sous_categories_merged = (
@@ -73,7 +65,7 @@ def db_data_write(
 
         df_acteur_merged[
             [
-                "identifiant_unique",
+                "id",
                 "nom",
                 "adresse",
                 "adresse_complement",

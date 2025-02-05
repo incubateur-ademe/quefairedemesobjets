@@ -31,7 +31,7 @@ class DagsValidation(IsStaffMixin, FormView):
             dagrun_obj = DagRun.objects.get(pk=request.POST.get("dagrun"))
             id = request.POST.get("id")
             dagrun_line = dagrun_obj.dagrunchanges.filter(id=id).first()
-            identifiant_unique = request.POST.get("identifiant_unique")
+            id = request.POST.get("id")
             index = request.POST.get("index")
             action = request.POST.get("action")
 
@@ -50,7 +50,7 @@ class DagsValidation(IsStaffMixin, FormView):
                 request,
                 "qfdmo/partials/candidat_row.html",
                 {
-                    "identifiant_unique": identifiant_unique,
+                    "id": id,
                     "candidat": updated_candidat,
                     "index": index,
                     "request": request,

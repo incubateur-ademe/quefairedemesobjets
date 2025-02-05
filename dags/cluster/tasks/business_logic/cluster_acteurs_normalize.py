@@ -62,7 +62,7 @@ def cluster_acteurs_normalize(
     # nos tests et qu'on voulait une façon fiable de savoir quelles lignes
     # avaient été clusterisées (indépendamment de l'ordre, filtrage, etc.)
     # Maintenant qu'on se rapproche de la prod, on pourrait décider de ré-écrire
-    # les tests en se basant sur identifiant_unique et ainsi supprimer __index_src
+    # les tests en se basant sur id et ainsi supprimer __index_src
     df["__index_src"] = range(1, len(df) + 1)
 
     return df

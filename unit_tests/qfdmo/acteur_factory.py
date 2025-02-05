@@ -78,7 +78,7 @@ class DisplayedActeurFactory(Factory):
     class Meta:
         model = DisplayedActeur
 
-    identifiant_unique = factory.fuzzy.FuzzyText(length=10)
+    id = factory.fuzzy.FuzzyText(length=10)
     nom = Faker("word")
     location = Point(3, 3)
     acteur_type = SubFactory(ActeurTypeFactory)

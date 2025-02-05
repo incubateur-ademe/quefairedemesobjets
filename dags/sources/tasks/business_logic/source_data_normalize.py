@@ -106,7 +106,7 @@ def _remove_undesired_lines(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataF
     if dag_config.merge_duplicated_acteurs:
         df = merge_duplicates(
             df,
-            group_column="identifiant_unique",
+            group_column="id",
             merge_column="souscategorie_codes",
         )
 
@@ -127,17 +127,17 @@ def _remove_undesired_lines(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataF
         df = df[df["souscategorie_codes"].apply(len) > 0]
 
     # Trouver les doublons pour les publier dans les logs
-    dups = df[df["identifiant_unique"].duplicated(keep=False)]
+    dups = df[df["id"].duplicated(keep=False)]
     if not dups.empty:
         logger.warning(
             f"==== DOUBLONS SUR LES IDENTIFIANTS UNIQUES {len(dups)/2} ====="
         )
-        log.preview("Doublons sur identifiant_unique", dups)
+        log.preview("Doublons sur id", dups)
     if dag_config.ignore_duplicates:
         # FIXME: dedupliquer en mergeant proposition_services_codes ?
         # TODO: Attention aux lignes dupliquées à cause de de service en ligne
         #  + physique
-        df = df.drop_duplicates(subset=["identifiant_unique"], keep="first")
+        df = df.drop_duplicates(subset=["id"], keep="first")
 
     return df
 

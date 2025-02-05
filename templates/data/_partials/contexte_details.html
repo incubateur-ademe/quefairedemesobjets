@@ -1,10 +1,10 @@
 <p>
-    {% if identifiant_unique %}
-        <a href="{% url 'admin:qfdmo_acteur_change' identifiant_unique %}" target="_blank" rel="noreferrer">{{ identifiant_unique }}</a>
+    {% if id %}
+        <a href="{% url 'admin:qfdmo_acteur_change' id %}" target="_blank" rel="noreferrer">{{ id }}</a>
     {% endif %}
-    {% if identifiant_uniques %}
+    {% if ids %}
         <ul>
-            {% for identifiant in identifiant_uniques %}
+            {% for identifiant in ids %}
                 <li><a href="{% url 'admin:qfdmo_acteur_change' identifiant %}" target="_blank" rel="noreferrer">{{ identifiant }}</a></li>
             {% endfor %}
         </ul>

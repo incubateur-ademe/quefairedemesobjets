@@ -28,13 +28,9 @@ def cluster_acteurs_metadata(df_clusters: pd.DataFrame) -> dict:
     meta["nombre_clusters_nouveaux"] = (
         meta["nombre_clusters"] - meta["nombre_clusters_existants"]
     )
-    meta["nombre_acteurs"] = df["identifiant_unique"].nunique()
-    meta["nombre_acteurs_deja_parent"] = df[df["is_parent_current"]][
-        "identifiant_unique"
-    ].nunique()
-    meta["nombre_acteurs_deja_enfant"] = df[df["parent_id"].notnull()][
-        "identifiant_unique"
-    ].nunique()
+    meta["nombre_acteurs"] = df["id"].nunique()
+    meta["nombre_acteurs_deja_parent"] = df[df["is_parent_current"]]["id"].nunique()
+    meta["nombre_acteurs_deja_enfant"] = df[df["parent_id"].notnull()]["id"].nunique()
     meta["nombre_acteurs_nouveau_enfant"] = (
         meta["nombre_acteurs"]
         - meta["nombre_acteurs_deja_enfant"]

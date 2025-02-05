@@ -32,7 +32,7 @@ def cluster_acteurs_suggestions_validate(df_clusters: pd.DataFrame) -> None:
     logger.info("100% acteurs actifs: 🟢")
 
     # Chaque acteur doit n'être définis qu'une seule fois
-    df_multiple_clusters = df.groupby("identifiant_unique").filter(lambda x: len(x) > 1)
+    df_multiple_clusters = df.groupby("id").filter(lambda x: len(x) > 1)
     raise_if_df_not_empty(df_multiple_clusters, "Acteurs définis plusieurs fois")
     logger.info("100% acteurs définis 1 seule fois: 🟢")
 

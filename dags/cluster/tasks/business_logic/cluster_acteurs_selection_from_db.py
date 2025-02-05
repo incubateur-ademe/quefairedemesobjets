@@ -94,7 +94,7 @@ def cluster_acteurs_selection_from_db(
     # Les champs dont on a besoin pour la logique d'ensemble
     # indépendamment de ce que métier souhaite sélectionner
     fields = [
-        "identifiant_unique",
+        "id",
         # note: on cherche à récupérer les acteurs de displayed
         # MAIS parent_id n'est pas dispo sur cette table, on
         # va donc la récupérer/enrichir plus tard

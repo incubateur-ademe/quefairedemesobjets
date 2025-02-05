@@ -10,7 +10,7 @@ from dags.sources.tasks.business_logic.db_data_prepare import db_data_prepare
         (
             pd.DataFrame(
                 {
-                    "identifiant_unique": ["2", "3"],
+                    "id": ["2", "3"],
                     "statut": ["ACTIF", "ACTIF"],
                     "cree_le": ["2021-01-01", "2021-01-01"],
                     "proposition_services": [[{"prop2": "val2"}], [{"prop3": "val3"}]],
@@ -18,7 +18,7 @@ from dags.sources.tasks.business_logic.db_data_prepare import db_data_prepare
             ),
             pd.DataFrame(
                 {
-                    "identifiant_unique": ["1", "2"],
+                    "id": ["1", "2"],
                     "statut": ["ACTIF", "ACTIF"],
                     "cree_le": ["2021-01-01", "2021-01-01"],
                 }
@@ -26,12 +26,12 @@ from dags.sources.tasks.business_logic.db_data_prepare import db_data_prepare
             {
                 "df_acteur_to_create": pd.DataFrame(
                     {
-                        "identifiant_unique": ["3"],
+                        "id": ["3"],
                         "statut": ["ACTIF"],
                         "cree_le": ["2021-01-01"],
                         "proposition_services": [[{"prop3": "val3"}]],
                         "suggestion": [
-                            '{"identifiant_unique": "3", "statut": "ACTIF",'
+                            '{"id": "3", "statut": "ACTIF",'
                             ' "cree_le": "2021-01-01",'
                             ' "proposition_services": [{"prop3": "val3"}]}'
                         ],
@@ -40,31 +40,27 @@ from dags.sources.tasks.business_logic.db_data_prepare import db_data_prepare
                 ),
                 "df_acteur_to_update": pd.DataFrame(
                     {
-                        "identifiant_unique": ["2"],
+                        "id": ["2"],
                         "statut": ["ACTIF"],
                         "cree_le": ["2021-01-01"],
                         "proposition_services": [[{"prop2": "val2"}]],
                         "suggestion": [
-                            '{"identifiant_unique": "2", "statut": "ACTIF",'
+                            '{"id": "2", "statut": "ACTIF",'
                             ' "cree_le": "2021-01-01",'
                             ' "proposition_services": [{"prop2": "val2"}]}'
                         ],
                         "contexte": [
-                            '{"identifiant_unique": "2", "statut": "ACTIF",'
-                            ' "cree_le": "2021-01-01"}'
+                            '{"id": "2", "statut": "ACTIF",' ' "cree_le": "2021-01-01"}'
                         ],
                     }
                 ),
                 "df_acteur_to_delete": pd.DataFrame(
                     {
-                        "identifiant_unique": ["1"],
+                        "id": ["1"],
                         "statut": ["SUPPRIME"],
-                        "suggestion": [
-                            '{"identifiant_unique": "1", "statut": "SUPPRIME"}'
-                        ],
+                        "suggestion": ['{"id": "1", "statut": "SUPPRIME"}'],
                         "contexte": [
-                            '{"identifiant_unique": "1", "statut": "ACTIF",'
-                            ' "cree_le": "2021-01-01"}'
+                            '{"id": "1", "statut": "ACTIF",' ' "cree_le": "2021-01-01"}'
                         ],
                     }
                 ),

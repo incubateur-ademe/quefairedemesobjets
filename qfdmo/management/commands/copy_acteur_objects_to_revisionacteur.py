@@ -27,11 +27,9 @@ Browse acteur correction and remov the acteur which doesn't have activity anymor
         nb_processed = 0
         total_revisionacteur = RevisionActeur.objects.count()
         for revisionacteur in RevisionActeur.objects.all():
-            acteur = Acteur.objects.filter(
-                identifiant_unique=revisionacteur.identifiant_unique
-            ).first()
+            acteur = Acteur.objects.filter(id=revisionacteur.id).first()
             if not acteur:
-                print(f"Acteur {revisionacteur.identifiant_unique} not found")
+                print(f"Acteur {revisionacteur.id} not found")
                 continue
             if nb_processed % 100 == 0:
                 print(f"Processed {nb_processed}/{total_revisionacteur}")

@@ -7,7 +7,7 @@ from sources.tasks.business_logic.compute_link_tables import compute_link_tables
 def df_acteur():
     return pd.DataFrame(
         {
-            "identifiant_unique": [1, 2, 3],
+            "id": [1, 2, 3],
             "acteurservice_codes": [[], [], []],
             "label_codes": [[], [], []],
             "proposition_services_codes": [[], [], []],
@@ -38,7 +38,7 @@ def test_compute_link_tables_success(
     )
     expected_result = pd.DataFrame(
         {
-            "identifiant_unique": [1, 2, 3],
+            "id": [1, 2, 3],
             "acteurservice_codes": [[], [], []],
             "label_codes": [[], [], []],
             "proposition_services_codes": [[], [], []],

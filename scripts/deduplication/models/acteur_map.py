@@ -20,7 +20,7 @@ from qfdmo.models.acteur import Acteur, RevisionActeur
 class ActeurMap:
     """Mapping pour 1 acteur"""
 
-    identifiant_unique: str
+    id: str
 
     # Un dict avec les différent objets Django pour chaque acteur
     table_states: dict[Literal["base", "revision"], RevisionActeur | Acteur | None]

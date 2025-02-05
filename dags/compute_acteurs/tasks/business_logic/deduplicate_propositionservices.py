@@ -10,7 +10,7 @@ def deduplicate_propositionservices(
 
     # df_children_ps -> uniquement les propositions de services des enfants
     df_children_ps = df_ps.merge(
-        df_children, left_on="acteur_id", right_on="identifiant_unique", how="inner"
+        df_children, left_on="acteur_id", right_on="id", how="inner"
     )
     # df_children_ps_sscat -> uniquement les liens sous catégories - propositions de
     # services des enfants
@@ -35,7 +35,7 @@ def deduplicate_propositionservices(
         ["propositionservice_id", "souscategorieobjet_id"]
     ]
 
-    children_ids = df_children["identifiant_unique"].unique()
+    children_ids = df_children["id"].unique()
 
     df_children_ps_ids = df_ps[df_ps["acteur_id"].isin(children_ids)]["id"].unique()
 

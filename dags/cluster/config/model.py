@@ -150,7 +150,7 @@ class ClusterConfig(BaseModel):
         # clustering (on cluster que les actifs quoi qu'il arrive) mais
         # sont à préserver de bout-en-bout pour des tâches de type validation
         # et suivis des données
-        fields_used = ["source_id", "acteur_type_id", "identifiant_unique", "statut"]
+        fields_used = ["source_id", "acteur_type_id", "id", "statut"]
         for k, v in values.items():
             if "fields" in k and k != "fields_all" and k != "source_id":
                 fields_used.extend(v)

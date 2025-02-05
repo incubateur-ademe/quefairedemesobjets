@@ -89,9 +89,7 @@ class Command(BaseCommand):
             DisplayedActeur.objects.annotate(siret_length=Length("siret"))
             .filter(siret_length=14, statut=ActeurStatus.ACTIF)
             .exclude(
-                identifiant_unique__in=CorrectionActeur.objects.values_list(
-                    "identifiant_unique", flat=True
-                ).filter(
+                id__in=CorrectionActeur.objects.values_list("id", flat=True).filter(
                     source=SOURCE,
                     cree_le__gte=datetime.datetime.now() - datetime.timedelta(days=31),
                 ),
@@ -140,8 +138,8 @@ class Command(BaseCommand):
                     **acteurfields_to_update,
                     source=SOURCE,
                     resultat_brute_source=insee_data,
-                    identifiant_unique=final_acteur.identifiant_unique,
-                    final_acteur_id=final_acteur.identifiant_unique,
+                    id=final_acteur.id,
+                    final_acteur_id=final_acteur.id,
                     correction_statut=(
                         CorrectionActeurStatus.ACTIF
                         if changed
@@ -152,7 +150,7 @@ class Command(BaseCommand):
                 CorrectionActeur.objects.create(
                     source=SOURCE,
                     resultat_brute_source="{}",
-                    identifiant_unique=final_acteur.identifiant_unique,
-                    final_acteur_id=final_acteur.identifiant_unique,
+                    id=final_acteur.id,
+                    final_acteur_id=final_acteur.id,
                     correction_statut=CorrectionActeurStatus.ACTIF,
                 )

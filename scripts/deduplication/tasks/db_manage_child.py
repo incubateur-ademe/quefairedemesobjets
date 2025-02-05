@@ -17,7 +17,7 @@ def db_manage_child(
     Args:
         db_engine: workaround pour faire de l'update DB manuelle
         child: ActeurMap d'un enfant
-        parent_id: identifiant_unique du parent
+        parent_id: id du parent
         is_dry_run: mode test
 
     Returns:
@@ -30,19 +30,17 @@ def db_manage_child(
     # et supprimer la révision de cette ancien parent
     if child.is_parent:
         print("\t🔴 Enfant ancien parent: changement FKs et suppression de sa revision")
-        change = Change(operation="parent_delete", acteur_id=child.identifiant_unique)
+        change = Change(operation="parent_delete", acteur_id=child.id)
         if is_dry_run:
             print("DB: pas de modif en dry run ✋")
             pass
         else:
             # On commence par migrer tous les enfants existants vers le nouveau parent
-            RevisionActeur.objects.filter(parent_id=child.identifiant_unique).update(
+            RevisionActeur.objects.filter(parent_id=child.id).update(
                 parent_id=parent_id
             )
             # Puis on supprime l'ancien parent
-            RevisionActeur.objects.filter(
-                identifiant_unique=child.identifiant_unique
-            ).delete()
+            RevisionActeur.objects.filter(id=child.id).delete()
             print("DB: modifiée via Django ✅")
     # D2: Est-ce que l'acteur était déjà un parent? = NON
     else:
@@ -50,38 +48,30 @@ def db_manage_child(
         # D3: Est-ce que l'acteur était déjà une revision? = OUI
         # alors on doit mettre à jour le parent_id
         if child.table_states["revision"] is not None:
-            change = Change(
-                operation="child_update_revision", acteur_id=child.identifiant_unique
-            )
+            change = Change(operation="child_update_revision", acteur_id=child.id)
             print(f"\t\t🟠 avec une révision existante: MAJ {parent_id=}")
             print("\t🟠 Enfant pas parent mais dans révision: MAJ du parent_id")
             if is_dry_run:
                 print("DB: pas de modif en dry run ✋")
             else:
-                RevisionActeur.objects.filter(
-                    identifiant_unique=child.identifiant_unique
-                ).update(parent_id=parent_id)
+                RevisionActeur.objects.filter(id=child.id).update(parent_id=parent_id)
                 print("DB: modifiée via Django ✅")
         # D3: Est-ce que l'acteur était déjà une revision? = NON
         # alors on doit créer une révision avec le parent_id
         else:
             print("\t\t🔴 sans révision: créer revision avec parent_id")
-            change = Change(
-                operation="child_create_revision", acteur_id=child.identifiant_unique
-            )
+            change = Change(operation="child_create_revision", acteur_id=child.id)
             if is_dry_run:
                 print("DB: pas de modif en dry run ✋")
                 pass
             else:
                 # Création de la révision si besoin (càd si l'acteur
                 # n'existe que dans la table de base qfdmo_acteur)
-                acteur = Acteur.objects.get(identifiant_unique=child.identifiant_unique)
+                acteur = Acteur.objects.get(id=child.id)
                 acteur_rev = acteur.get_or_create_revision()
                 acteur_rev.save()
-                print(f"{acteur_rev.identifiant_unique=}")
-                RevisionActeur.objects.filter(
-                    identifiant_unique=child.identifiant_unique
-                ).update(parent_id=parent_id)
+                print(f"{acteur_rev.id=}")
+                RevisionActeur.objects.filter(id=child.id).update(parent_id=parent_id)
                 print("DB: modifiée via Django ✅")
 
         if not is_dry_run:
@@ -89,9 +79,9 @@ def db_manage_child(
             # on devrait toujours avoir 1 révision enfant avec le parent_id
             # qui pointe vers le bon parent
             print("\t🔎 Vérification changement enfant en db:")
-            revision = RevisionActeur.objects.get(pk=child.identifiant_unique)
+            revision = RevisionActeur.objects.get(pk=child.id)
             print("\t\t- révision existe belle et bien: ✅")
-            parent_id_db = revision.parent.identifiant_unique  # type: ignore
+            parent_id_db = revision.parent.id  # type: ignore
             if parent_id_db != parent_id:
                 raise Exception(f"Erreur: {parent_id_db=} différent de {parent_id=}")
             print(f"\t\t- {parent_id_db=} pointe bien vers bon parent: ✅")

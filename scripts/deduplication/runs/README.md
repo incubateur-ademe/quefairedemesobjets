@@ -4,7 +4,7 @@ Un dossier pour stocker les fichiers liés à chaque nouvelle déduplication
 
 ## Fichiers à fournir
  - `./{RUN_ID}/clusters.csv` = fichier de dédup,
-    1 ligne = 1 cluster_id => identifiant_unique
+    1 ligne = 1 cluster_id => id
  - `./{RUN_ID}/verifications.py` = liste de certains changements
     attendus selon le modèle Change
 

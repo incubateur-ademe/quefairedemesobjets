@@ -12,7 +12,7 @@ class TestApplyCorrections:
     def df_load_acteur(self):
         return pd.DataFrame(
             {
-                "identifiant_unique": ["actor1", "actor2"],
+                "id": ["actor1", "actor2"],
                 "name": ["John Doe", "Jane Doe"],
                 "cree_le": ["2022-01-01", "2022-01-02"],
                 "parent_id": [None, None],
@@ -25,7 +25,7 @@ class TestApplyCorrections:
     def df_load_revisionacteur(self):
         return pd.DataFrame(
             {
-                "identifiant_unique": ["actor1"],
+                "id": ["actor1"],
                 "name": ["John Smith"],
                 "cree_le": ["2022-01-03"],
                 "parent_id": [None],
@@ -44,7 +44,7 @@ class TestApplyCorrections:
         # Check that the result is as expected
         df_acteur_expected = pd.DataFrame(
             {
-                "identifiant_unique": ["actor1", "actor2"],
+                "id": ["actor1", "actor2"],
                 "name": ["John Smith", "Jane Doe"],
                 "cree_le": ["2022-01-01", "2022-01-02"],
                 "parent_id": [None, None],
@@ -53,13 +53,11 @@ class TestApplyCorrections:
                 "uuid": ["Hogy2rqwtvgMUctiqUyYmH", "AS5wKPytvs9VjWEFQdqTwK"],
             }
         )
-        df_children_expected = pd.DataFrame(
-            columns=["parent_id", "identifiant_unique", "source_id"]
-        )
+        df_children_expected = pd.DataFrame(columns=["parent_id", "id", "source_id"])
         df_children_expected = df_children_expected.astype(
             {
                 "parent_id": object,
-                "identifiant_unique": object,
+                "id": object,
                 "source_id": int,
             }
         )
@@ -71,7 +69,7 @@ class TestApplyCorrections:
     def df_load_acteur_with_children(self):
         return pd.DataFrame(
             {
-                "identifiant_unique": ["actor1", "actor2"],
+                "id": ["actor1", "actor2"],
                 "name": ["John Doe", "Jane Doe"],
                 "cree_le": ["2022-01-01", "2022-01-02"],
                 "parent_id": [None, None],
@@ -84,7 +82,7 @@ class TestApplyCorrections:
     def df_load_revisionacteur_with_children(self):
         return pd.DataFrame(
             {
-                "identifiant_unique": ["actor1", "actor2", "actor3"],
+                "id": ["actor1", "actor2", "actor3"],
                 "name": ["John Doe", "Jane Doe", "Jane Doe"],
                 "cree_le": ["2022-01-03", "2022-01-03", "2022-01-03"],
                 "parent_id": ["actor3", "actor3", None],
@@ -105,7 +103,7 @@ class TestApplyCorrections:
         # Check that the result is as expected
         df_acteur_expected = pd.DataFrame(
             {
-                "identifiant_unique": ["actor3"],
+                "id": ["actor3"],
                 "name": ["Jane Doe"],
                 "cree_le": ["2022-01-03"],
                 "parent_id": [None],
@@ -117,7 +115,7 @@ class TestApplyCorrections:
         df_children_expected = pd.DataFrame(
             {
                 "parent_id": ["actor3", "actor3"],
-                "identifiant_unique": ["actor1", "actor2"],
+                "id": ["actor1", "actor2"],
                 # le merge cast en float car il existe des valeur nulles
                 "source_id": [1.0, 2.0],
             }
@@ -168,7 +166,7 @@ class TestOverrideValues:
             revisionacteur_fields[field] = ["__empty__"]
             expected_fields[field] = [""]
         for field_list in [acteur_fields, revisionacteur_fields, expected_fields]:
-            field_list["identifiant_unique"] = ["a1"]
+            field_list["id"] = ["a1"]
             field_list["statut"] = [constants.ACTEUR_ACTIF]
             field_list["parent_id"] = [None]
             field_list["source_id"] = [1]
@@ -189,7 +187,7 @@ class TestOverrideValues:
             acteur_fields[field] = [faker.word()]
             revisionacteur_fields[field] = [None]
         for field_list in [acteur_fields, revisionacteur_fields]:
-            field_list["identifiant_unique"] = ["a1"]
+            field_list["id"] = ["a1"]
             field_list["statut"] = [constants.ACTEUR_ACTIF]
             field_list["parent_id"] = [None]
             field_list["source_id"] = [1]
@@ -209,7 +207,7 @@ class TestOverrideValues:
             acteur_fields[field] = [faker.word()]
             revisionacteur_fields[field] = [faker.word()]
         for field_list in [acteur_fields, revisionacteur_fields]:
-            field_list["identifiant_unique"] = ["a1"]
+            field_list["id"] = ["a1"]
             field_list["statut"] = [constants.ACTEUR_ACTIF]
             field_list["parent_id"] = [None]
             field_list["source_id"] = [1]

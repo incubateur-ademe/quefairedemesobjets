@@ -100,9 +100,7 @@ class TestActeurDefaultOnSave:
             source=None,
         )
         assert len(acteur.identifiant_externe) == 12
-        assert (
-            acteur.identifiant_unique == "communautelvao_" + acteur.identifiant_externe
-        )
+        assert acteur.id == "communautelvao_" + acteur.identifiant_externe
         assert acteur.source.code == "communautelvao"
 
     def test_default_identifiantunique(self):
@@ -116,7 +114,7 @@ class TestActeurDefaultOnSave:
             source=source,
             identifiant_externe="123ABC",
         )
-        assert acteur.identifiant_unique == "source_equipe_123ABC"
+        assert acteur.id == "source_equipe_123ABC"
 
     def test_set_identifiantunique(self):
         acteur_type = ActeurTypeFactory(code="fake")
@@ -124,9 +122,9 @@ class TestActeurDefaultOnSave:
             nom="Test Object 1",
             acteur_type_id=acteur_type.id,
             location=Point(1, 1),
-            identifiant_unique="Unique",
+            id="Unique",
         )
-        assert acteur.identifiant_unique == "Unique"
+        assert acteur.id == "Unique"
 
 
 @pytest.mark.django_db
@@ -160,19 +158,15 @@ class TestActeurOpeningHours:
 class TestActeurLocationValidation:
     def test_location_validation_raise(self):
         acteur_type = ActeurTypeFactory()
-        acteur = Acteur(
-            nom="Test Object 1", identifiant_unique="123", acteur_type=acteur_type
-        )
+        acteur = Acteur(nom="Test Object 1", id="123", acteur_type=acteur_type)
         with pytest.raises(ValidationError):
             acteur.save()
 
     def test_location_validation_dont_raise(self):
         acteur_type = ActeurTypeFactory(code="acteur_digital")
-        acteur = Acteur(
-            nom="Test Object 1", identifiant_unique="123", acteur_type=acteur_type
-        )
+        acteur = Acteur(nom="Test Object 1", id="123", acteur_type=acteur_type)
         acteur.save()
-        assert acteur.identifiant_unique
+        assert acteur.id
         assert acteur.location is None
 
 
@@ -181,7 +175,7 @@ class TestActeurGetOrCreateRevisionActeur:
     def test_create_revisionacteur_copy1(self, acteur):
         revision_acteur = acteur.get_or_create_revision()
 
-        assert revision_acteur.identifiant_unique == acteur.identifiant_unique
+        assert revision_acteur.id == acteur.id
 
     def test_create_revisionacteur_copy2(self, acteur):
         revision_acteur = acteur.get_or_create_revision()
@@ -221,9 +215,7 @@ class TestCreateRevisionActeur:
             location=Point(1, 1),
             acteur_type=acteur_type,
         )
-        acteur = Acteur.objects.get(
-            identifiant_unique=revision_acteur.identifiant_unique
-        )
+        acteur = Acteur.objects.get(id=revision_acteur.id)
         assert revision_acteur.source == acteur.source
         assert revision_acteur.acteur_type == acteur.acteur_type
 
@@ -236,18 +228,14 @@ class TestCreateRevisionActeur:
             acteur_type=acteur_type,
             action_principale=action_principale,
         )
-        acteur = Acteur.objects.get(
-            identifiant_unique=revision_acteur.identifiant_unique
-        )
+        acteur = Acteur.objects.get(id=revision_acteur.id)
         assert revision_acteur.action_principale == acteur.action_principale
 
     def test_new_revision_acteur_on_acteur_with_proposition_services(self):
         acteur = ActeurFactory()
         proposition_service = PropositionServiceFactory()
         acteur.proposition_services.add(proposition_service)
-        revision_acteur = RevisionActeurFactory(
-            identifiant_unique=acteur.identifiant_unique
-        )
+        revision_acteur = RevisionActeurFactory(id=acteur.id)
         assert acteur.proposition_services.count() > 0
         assert revision_acteur.proposition_services.count() > 0
 
@@ -271,7 +259,7 @@ class TestCreateRevisionActeurCreateParent:
     def test_create_parent_from_acteur(self):
         acteur = ActeurFactory()
         revision_acteur = RevisionActeurFactory(
-            identifiant_unique=acteur.identifiant_unique,
+            id=acteur.id,
             nom=None,
             location=None,
             acteur_type=None,
@@ -289,9 +277,7 @@ class TestCreateRevisionActeurCreateParent:
 
     def test_create_parent_from_revision_acteur(self):
         acteur = ActeurFactory()
-        revision_acteur = RevisionActeurFactory(
-            identifiant_unique=acteur.identifiant_unique
-        )
+        revision_acteur = RevisionActeurFactory(id=acteur.id)
 
         revision_acteur_parent = revision_acteur.create_parent()
 
@@ -305,18 +291,14 @@ class TestCreateRevisionActeurCreateParent:
 
     def test_create_parent_source(self):
         acteur = ActeurFactory()
-        revision_acteur = RevisionActeurFactory(
-            identifiant_unique=acteur.identifiant_unique
-        )
+        revision_acteur = RevisionActeurFactory(id=acteur.id)
 
         revision_acteur_parent = revision_acteur.create_parent()
         assert revision_acteur_parent.source is None
 
     def test_create_parent_labels(self):
         acteur = ActeurFactory()
-        revision_acteur = RevisionActeurFactory(
-            identifiant_unique=acteur.identifiant_unique
-        )
+        revision_acteur = RevisionActeurFactory(id=acteur.id)
         labels = LabelQualiteFactory()
         acteur.labels.add(labels)
         revision_acteur.labels.add(labels)
@@ -327,9 +309,7 @@ class TestCreateRevisionActeurCreateParent:
 
     def test_create_parent_proposition_services(self):
         acteur = ActeurFactory()
-        revision_acteur = RevisionActeurFactory(
-            identifiant_unique=acteur.identifiant_unique
-        )
+        revision_acteur = RevisionActeurFactory(id=acteur.id)
         proposition_services = PropositionServiceFactory()
         acteur.proposition_services.add(proposition_services)
         revision_proposition_services = RevisionPropositionServiceFactory()
@@ -345,7 +325,7 @@ class TestRevisionActeurDuplicate:
     def test_duplicate(self):
         acteur = ActeurFactory(nom_commercial="Nom commercial")
         revision_acteur = RevisionActeurFactory(
-            identifiant_unique=acteur.identifiant_unique,
+            id=acteur.id,
             nom_commercial=None,
             nom="Nom Revision",
         )

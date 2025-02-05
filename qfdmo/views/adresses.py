@@ -565,19 +565,15 @@ class FormulaireSearchActeursView(SearchActeursView):
 
 # TODO : should be deprecated once all is moved to the displayed acteur
 def getorcreate_revisionacteur(request, acteur_identifiant):
-    acteur = Acteur.objects.get(identifiant_unique=acteur_identifiant)
+    acteur = Acteur.objects.get(id=acteur_identifiant)
     revision_acteur = acteur.get_or_create_revision()
-    return redirect(
-        "admin:qfdmo_revisionacteur_change", quote(revision_acteur.identifiant_unique)
-    )
+    return redirect("admin:qfdmo_revisionacteur_change", quote(revision_acteur.id))
 
 
 def getorcreate_correctionequipeacteur(request, acteur_identifiant):
-    acteur = Acteur.objects.get(identifiant_unique=acteur_identifiant)
+    acteur = Acteur.objects.get(id=acteur_identifiant)
     revision_acteur = acteur.get_or_create_correctionequipe()
-    return redirect(
-        "admin:qfdmo_revisionacteur_change", quote(revision_acteur.identifiant_unique)
-    )
+    return redirect("admin:qfdmo_revisionacteur_change", quote(revision_acteur.id))
 
 
 def refresh_acteur_view(request):
@@ -615,10 +611,8 @@ def get_object_list(request):
     )
 
 
-def acteur_detail_redirect(request, identifiant_unique):
-    displayed_acteur = DisplayedActeur.objects.get(
-        identifiant_unique=identifiant_unique
-    )
+def acteur_detail_redirect(request, id):
+    displayed_acteur = DisplayedActeur.objects.get(id=id)
     return redirect("qfdmo:acteur-detail", uuid=displayed_acteur.uuid, permanent=True)
 
 
@@ -673,14 +667,10 @@ def acteur_detail(request, uuid):
     return render(request, "qfdmo/acteur.html", context)
 
 
-def solution_admin(request, identifiant_unique):
-    acteur = RevisionActeur.objects.filter(
-        identifiant_unique=identifiant_unique
-    ).first()
+def solution_admin(request, id):
+    acteur = RevisionActeur.objects.filter(id=id).first()
 
     if acteur:
-        return redirect(
-            "admin:qfdmo_revisionacteur_change", quote(acteur.identifiant_unique)
-        )
-    acteur = Acteur.objects.get(identifiant_unique=identifiant_unique)
-    return redirect("admin:qfdmo_acteur_change", quote(acteur.identifiant_unique))
+        return redirect("admin:qfdmo_revisionacteur_change", quote(acteur.id))
+    acteur = Acteur.objects.get(id=id)
+    return redirect("admin:qfdmo_acteur_change", quote(acteur.id))

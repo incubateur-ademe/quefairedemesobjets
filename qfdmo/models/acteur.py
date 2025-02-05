@@ -301,9 +301,7 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
 
     nom = models.CharField(max_length=255, blank=False, null=False)
     description = models.TextField(blank=True, null=True)
-    identifiant_unique = models.CharField(
-        max_length=255, unique=True, primary_key=True, blank=True
-    )
+    id = models.CharField(max_length=255, unique=True, primary_key=True, blank=True)
     acteur_type = models.ForeignKey(ActeurType, on_delete=models.CASCADE)
     adresse = models.CharField(max_length=255, blank=True, null=True)
     adresse_complement = models.CharField(max_length=255, blank=True, null=True)
@@ -361,9 +359,7 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
 
     @property
     def change_url(self):
-        return reverse(
-            "admin:qfdmo_displayedacteur_change", args=[self.identifiant_unique]
-        )
+        return reverse("admin:qfdmo_displayedacteur_change", args=[self.id])
 
     @property
     def latitude(self):
@@ -560,7 +556,7 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
 
     def _get_dict_for_clone(self):
         excluded_fields = [
-            "identifiant_unique",
+            "id",
             "identifiant_externe",
             "proposition_services",
             "acteur_type",
@@ -575,7 +571,7 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
 
 def clean_parent(parent):
     try:
-        parent = RevisionActeur.objects.get(identifiant_unique=parent)
+        parent = RevisionActeur.objects.get(id=parent)
     except RevisionActeur.DoesNotExist:
         raise ValidationError("You can't define a Parent which does not exist.")
 
@@ -597,7 +593,7 @@ class Acteur(BaseActeur):
             ],
         )
         (revisionacteur, created) = RevisionActeur.objects.get_or_create(
-            identifiant_unique=self.identifiant_unique, defaults=fields
+            id=self.id, defaults=fields
         )
 
         return revisionacteur
@@ -620,9 +616,9 @@ class Acteur(BaseActeur):
             )
         if self.source is None:
             self.source = Source.objects.get_or_create(code=DEFAULT_SOURCE_CODE)[0]
-        if not self.identifiant_unique:
+        if not self.id:
             source_stub = unidecode(self.source.code.lower()).replace(" ", "_")
-            self.identifiant_unique = source_stub + "_" + str(self.identifiant_externe)
+            self.id = source_stub + "_" + str(self.identifiant_externe)
 
 
 class RevisionActeur(BaseActeur):
@@ -718,13 +714,13 @@ class RevisionActeur(BaseActeur):
         )
 
         (acteur, created) = Acteur.objects.get_or_create(
-            identifiant_unique=self.identifiant_unique,
+            id=self.id,
             defaults=default_acteur_fields,
         )
         if created:
             # Ici on ré-écrit les champs qui ont pu être généré automatiquement lors de
             # la création de l'Acteur
-            self.identifiant_unique = acteur.identifiant_unique
+            self.id = acteur.id
             self.identifiant_externe = acteur.identifiant_externe
             self.source = acteur.source
         return acteur
@@ -735,7 +731,7 @@ class RevisionActeur(BaseActeur):
         self_dict = self._get_dict_for_clone()
 
         revision_acteur_parent = RevisionActeur(
-            identifiant_unique=uuid.uuid4(),
+            id=uuid.uuid4(),
             **(acteur_dict | self_dict),
         )
         revision_acteur_parent.save_as_parent()
@@ -750,10 +746,10 @@ class RevisionActeur(BaseActeur):
 
         revision_acteur = deepcopy(self)
 
-        acteur = Acteur.objects.get(identifiant_unique=self.identifiant_unique)
+        acteur = Acteur.objects.get(id=self.id)
 
         fields_to_reset = [
-            "identifiant_unique",
+            "id",
             "identifiant_externe",
             "source",
         ]
@@ -791,11 +787,7 @@ class RevisionActeur(BaseActeur):
         return revision_acteur
 
     def __str__(self):
-        return (
-            f"{self.nom} ({self.identifiant_unique})"
-            if self.nom
-            else self.identifiant_unique
-        )
+        return f"{self.nom} ({self.id})" if self.nom else self.id
 
 
 class DisplayedActeur(BaseActeur):
@@ -1008,7 +1000,7 @@ class PropositionService(BasePropositionService):
 
     acteur = models.ForeignKey(
         Acteur,
-        to_field="identifiant_unique",
+        to_field="id",
         on_delete=models.CASCADE,
         null=False,
         related_name="proposition_services",
@@ -1031,7 +1023,7 @@ class RevisionPropositionService(BasePropositionService):
 
     acteur = models.ForeignKey(
         RevisionActeur,
-        to_field="identifiant_unique",
+        to_field="id",
         on_delete=models.CASCADE,
         null=False,
         related_name="proposition_services",

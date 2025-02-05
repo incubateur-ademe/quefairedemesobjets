@@ -28,7 +28,7 @@ def compute_link_tables(
         lambda row: [
             {
                 "acteurservice_id": acteurservice_id_by_code[acteurservice_code],
-                "acteur_id": row["identifiant_unique"],
+                "acteur_id": row["id"],
             }
             for acteurservice_code in row["acteurservice_codes"]
         ],
@@ -39,7 +39,7 @@ def compute_link_tables(
     df_acteur["labels"] = df_acteur.apply(
         lambda row: [
             {
-                "acteur_id": row["identifiant_unique"],
+                "acteur_id": row["id"],
                 "labelqualite_id": labelqualite_id_by_code[label_ou_bonus],
             }
             for label_ou_bonus in row["label_codes"]
@@ -50,7 +50,7 @@ def compute_link_tables(
     df_acteur["proposition_services"] = df_acteur.apply(
         lambda row: [
             {
-                "acteur_id": row["identifiant_unique"],
+                "acteur_id": row["id"],
                 "action_id": actions_id_by_code[action_code],
                 "action": action_code,
                 "sous_categories": sous_categories,

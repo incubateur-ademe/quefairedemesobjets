@@ -10,7 +10,7 @@ class TestMergeLabels:
             (
                 pd.DataFrame(columns=["id", "acteur_id", "labelqualite_id"]),
                 pd.DataFrame(columns=["id", "revisionacteur_id", "labelqualite_id"]),
-                pd.DataFrame(columns=["identifiant_unique"]),
+                pd.DataFrame(columns=["id"]),
                 pd.DataFrame(columns=["displayedacteur_id", "labelqualite_id"]),
             ),
             (
@@ -22,7 +22,7 @@ class TestMergeLabels:
                         "labelqualite_id": [1, 2],
                     },
                 ),
-                pd.DataFrame({"identifiant_unique": ["actor1", "actor2"]}),
+                pd.DataFrame({"id": ["actor1", "actor2"]}),
                 pd.DataFrame(
                     {
                         "displayedacteur_id": ["actor1", "actor2"],
@@ -40,7 +40,7 @@ class TestMergeLabels:
                     },
                 ),
                 pd.DataFrame(columns=["id", "revisionacteur_id", "labelqualite_id"]),
-                pd.DataFrame(columns=["identifiant_unique"]),
+                pd.DataFrame(columns=["id"]),
                 pd.DataFrame(
                     {
                         "displayedacteur_id": ["actor1", "actor2"],
@@ -64,7 +64,7 @@ class TestMergeLabels:
                         "labelqualite_id": [1],
                     },
                 ),
-                pd.DataFrame({"identifiant_unique": ["actor2"]}),
+                pd.DataFrame({"id": ["actor2"]}),
                 pd.DataFrame(
                     {
                         "displayedacteur_id": ["actor1", "actor2"],
@@ -82,7 +82,7 @@ class TestMergeLabels:
                     },
                 ),
                 pd.DataFrame(columns=["id", "revisionacteur_id", "labelqualite_id"]),
-                pd.DataFrame({"identifiant_unique": ["actor1"]}),
+                pd.DataFrame({"id": ["actor1"]}),
                 pd.DataFrame(columns=["displayedacteur_id", "labelqualite_id"]),
             ),
         ],

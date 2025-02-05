@@ -35,10 +35,10 @@ def source_data_validate(df: pd.DataFrame, dag_config: DAGConfig) -> None:
     # On vérifie que les identifiants uniques sont uniques, on ne se base pas sur
     # l'identifiant externe car il est parfois dupliqués pour des service physique et
     # en ligne
-    dups = df[df["identifiant_unique"].duplicated(keep=False)]
+    dups = df[df["id"].duplicated(keep=False)]
     if not dups.empty:
-        log.preview("Doublons sur identifiant_unique", dups)
-        raise ValueError("Doublons sur identifiant_unique")
+        log.preview("Doublons sur id", dups)
+        raise ValueError("Doublons sur id")
 
     # ------------------------------------
     # acteur_type_code
