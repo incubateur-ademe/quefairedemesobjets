@@ -11,7 +11,6 @@ from dags.sources.config.shared_constants import (
     SUGGESTION_CLUSTERING,
     SUGGESTION_ENCOURS,
     SUGGESTION_ERREUR,
-    SUGGESTION_PARTIEL,
     SUGGESTION_REJETEE,
     SUGGESTION_SOURCE_AJOUT,
     SUGGESTION_SOURCE_MODIFICATION,
@@ -40,8 +39,13 @@ class SuggestionStatut(models.TextChoices):
     ATRAITER = SUGGESTION_ATRAITER, "À traiter"
     ENCOURS = SUGGESTION_ENCOURS, "En cours de traitement"
     ERREUR = SUGGESTION_ERREUR, "Fini en erreur"
-    PARTIEL = SUGGESTION_PARTIEL, "Fini avec succès partiel"
     SUCCES = SUGGESTION_SUCCES, "Fini avec succès"
+
+
+class SuggestionCohorteStatut(models.TextChoices):
+    AVALIDER = SUGGESTION_AVALIDER, "Suggestions à valider"
+    ENCOURS = SUGGESTION_ENCOURS, "Suggestions en cours de traitement"
+    SUCCES = SUGGESTION_SUCCES, "Suggestions traitées"
 
 
 class SuggestionAction(models.TextChoices):
@@ -58,6 +62,9 @@ class SuggestionAction(models.TextChoices):
 
 
 class SuggestionCohorte(TimestampedModel):
+    class Meta:
+        verbose_name = "📦 Cohorte"
+
     id = models.AutoField(primary_key=True)
     # On utilise identifiant car le champ n'est pas utilisé pour résoudre une relation
     # en base de données
@@ -75,8 +82,8 @@ class SuggestionCohorte(TimestampedModel):
     )
     statut = models.CharField(
         max_length=50,
-        choices=SuggestionStatut.choices,
-        default=SuggestionStatut.AVALIDER,
+        choices=SuggestionCohorteStatut.choices,
+        default=SuggestionCohorteStatut.AVALIDER,
     )
     metadata = models.JSONField(
         null=True,
@@ -99,16 +106,11 @@ class SuggestionCohorte(TimestampedModel):
     def __str__(self) -> str:
         return f"{self.identifiant_action} - {self.identifiant_execution}"
 
-    class Meta:
-        verbose_name = "📦 Cohorte"
-        verbose_name_plural = "📦 Cohortes"
-
 
 class Suggestion(models.Model):
 
     class Meta:
         verbose_name = "1️⃣ Suggestion"
-        verbose_name = "1️⃣ Suggestions"
 
     id = models.AutoField(primary_key=True)
     suggestion_cohorte = models.ForeignKey(
