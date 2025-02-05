@@ -3,9 +3,8 @@ from datetime import timedelta
 from airflow.models import DAG
 from airflow.utils.dates import days_ago
 from suggestions.tasks.airflow_logic import (
-    db_normalize_suggestion_task,
-    db_read_suggestiontoprocess_task,
-    db_write_validsuggestions_task,
+    db_apply_suggestion_task,
+    db_check_suggestion_to_process_task,
     launch_compute_carte_acteur_task,
 )
 
@@ -29,8 +28,7 @@ dag = DAG(
 
 
 (
-    db_read_suggestiontoprocess_task(dag)
-    >> db_normalize_suggestion_task(dag)
-    >> db_write_validsuggestions_task(dag)
+    db_check_suggestion_to_process_task(dag)
+    >> db_apply_suggestion_task(dag)
     >> launch_compute_carte_acteur_task(dag)
 )

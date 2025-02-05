@@ -439,7 +439,7 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
         peut utiliser à posteriori fonctions de normalisation qui suppriment
         les mots en doublons et augmentent encore la similarité)"""
         result = (
-            f"{(self.adresse or "").strip()} {(self.adresse_complement or "").strip()}"
+            f"{(self.adresse or '').strip()} {(self.adresse_complement or '').strip()}"
         ).strip()
         return result or None
 

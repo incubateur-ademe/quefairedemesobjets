@@ -20,7 +20,7 @@ def compute_link_tables_task(dag: DAG) -> PythonOperator:
 
 
 def compute_link_tables_wrapper(**kwargs):
-    df_acteur = kwargs["ti"].xcom_pull(task_ids="propose_acteur_changes")["df"]
+    df_acteur = kwargs["ti"].xcom_pull(task_ids="propose_acteur_changes")["df_acteur"]
     acteurservice_id_by_code = read_mapping_from_postgres(
         table_name="qfdmo_acteurservice"
     )

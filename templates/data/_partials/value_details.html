@@ -1,0 +1,17 @@
+{% load custom_filters %}
+
+{% if value|valuetype != "list" and value|valuetype != "dict" %}
+    {{ value }}
+{% elif value|valuetype == "list" %}
+    <ul>
+        {% for item in value %}
+            <li>{% include "data/_partials/value_details.html" with value=item %}</li>
+        {% endfor %}
+    </ul>
+{% elif value|valuetype == "dict" %}
+    <ul>
+        {% for key, item in value.items %}
+            <li><strong>{{ key }}</strong> : {% include "data/_partials/value_details.html" with value=item %}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
