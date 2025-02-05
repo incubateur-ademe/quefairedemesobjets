@@ -14,7 +14,7 @@ class AssistantMiddleware:
     def _set_logged_in_cookie(self, request, response):
         """Set or update the 'logged-in' header based on authentication."""
         cookie_name = "logged_in"
-        if request.user.is_authenticated:
+        if hasattr(request, "user") and request.user.is_authenticated:
             response.set_cookie(cookie_name, "1")
         elif request.COOKIES.get(cookie_name):
             response.delete_cookie(cookie_name)
