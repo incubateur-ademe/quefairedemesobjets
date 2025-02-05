@@ -22,6 +22,10 @@ check:
 update-requirements:
 	$(PYTHON) -m pip install --no-deps -r requirements.txt -r dev-requirements.txt
 
+.PHONY: init-certs
+init-certs:
+	mkcert assistant.dev lvao.dev
+	mv *.pem ./nginx/certs
 
 .PHONY: init-venv
 init-venv:
@@ -61,6 +65,7 @@ run-airflow:
 .PHONY: run-django
 run-django:
 	rm -rf .parcel-cache
+	docker compose --profile lvao --profile proxy up -d
 	honcho start -f Procfile.dev
 
 run-all:

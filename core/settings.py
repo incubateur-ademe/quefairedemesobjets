@@ -35,7 +35,7 @@ DEBUG = decouple.config("DEBUG", default=False, cast=bool)
 STIMULUS_DEBUG = decouple.config("STIMULUS_DEBUG", default=False, cast=bool)
 POSTHOG_DEBUG = decouple.config("POSTHOG_DEBUG", default=False, cast=bool)
 ALLOWED_HOSTS = decouple.config(
-    "ALLOWED_HOSTS", default="127.0.0.1,localhost", cast=str
+    "ALLOWED_HOSTS", default="lvao.dev,assistant.dev,127.0.0.1,localhost", cast=str
 ).split(",")
 
 # Application definition
@@ -382,7 +382,7 @@ ASSISTANT = {
     "MATOMO_ID": decouple.config("ASSISTANT_MATOMO_ID", default=82, cast=int),
     "HOSTS": decouple.config(
         "ASSISTANT_HOSTS",
-        default="127.0.0.1:8000,0.0.0.0:8000,localhost:8000",
+        default="127.0.0.1:8000,0.0.0.0:8000,localhost:8000,assistant.deb",
         cast=str,
     ).split(","),
     "BASE_URL": decouple.config("ASSISTANT_BASE_URL", default="http://localhost:8000"),
