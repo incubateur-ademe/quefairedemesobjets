@@ -24,6 +24,8 @@ myst_enable_extensions = [
     "colon_fence",  # Supports ::: fenced blocks
 ]
 
+myst_fence_as_directive = ["mermaid"]
+
 master_doc = "README"
 
 # -- General configuration ---------------------------------------------------
