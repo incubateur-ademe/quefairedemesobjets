@@ -22,9 +22,7 @@ def compute_ps(
 
     # Remove the propositionservice for the acteur that have a revision
     df_propositionservice = df_propositionservice[
-        ~df_propositionservice["acteur_id"].isin(
-            df_revisionacteur["identifiant_unique"]
-        )
+        ~df_propositionservice["acteur_id"].isin(df_revisionacteur["id"])
     ]
 
     # Proposition de service de acteur et de revisionacteur mergées

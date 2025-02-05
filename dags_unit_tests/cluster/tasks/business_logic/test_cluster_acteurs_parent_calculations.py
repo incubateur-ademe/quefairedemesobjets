@@ -9,7 +9,7 @@ class TestClusterActeursParentCalculations:
     def df(self):
         return pd.DataFrame(
             {
-                "identifiant_unique": [
+                "id": [
                     "p1",
                     "enfant_p1",
                     "p2",

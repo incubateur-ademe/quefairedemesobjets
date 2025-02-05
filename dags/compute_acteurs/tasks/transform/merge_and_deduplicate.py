@@ -8,7 +8,7 @@ def deduplicate_acteurs_many2many_relationship(
     # Keep only the relationship of the children
     df_children_relationship = df_children.merge(
         df_merged_relationship,
-        left_on="identifiant_unique",
+        left_on="id",
         right_on="displayedacteur_id",
         how="inner",
     )
@@ -27,9 +27,7 @@ def deduplicate_acteurs_many2many_relationship(
         ignore_index=True,
     )
     df_relationship = df_relationship[
-        ~df_relationship["displayedacteur_id"].isin(
-            df_children["identifiant_unique"].tolist()
-        )
+        ~df_relationship["displayedacteur_id"].isin(df_children["id"].tolist())
     ]
 
     return df_relationship
@@ -42,7 +40,7 @@ def merge_acteurs_many2many_relationship(
 ):
     # Remove the link_with_acteur for the acteur that have a revision
     df_link_with_acteur = df_link_with_acteur[
-        ~df_link_with_acteur["acteur_id"].isin(df_revisionacteur["identifiant_unique"])
+        ~df_link_with_acteur["acteur_id"].isin(df_revisionacteur["id"])
     ].copy()
 
     # Rename 'acteur_id' column to 'displayedacteur_id' and drop 'id' column

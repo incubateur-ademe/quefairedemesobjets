@@ -168,9 +168,7 @@ With actions: {mapping['actions']}
             )
         )
 
-        acteurs = Acteur.objects.filter(
-            identifiant_unique__in=acteur_ids_in_mapping_without_revision
-        )
+        acteurs = Acteur.objects.filter(id__in=acteur_ids_in_mapping_without_revision)
         for acteur in acteurs:
             acteur.get_or_create_revision()
 

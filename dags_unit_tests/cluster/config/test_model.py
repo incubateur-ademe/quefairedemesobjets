@@ -106,7 +106,7 @@ class TestClusterConfigModel:
         config = ClusterConfig(**params_working)
         assert "source_id" in config.fields_used
         assert "acteur_type_id" in config.fields_used
-        assert "identifiant_unique" in config.fields_used
+        assert "id" in config.fields_used
         # Bien que le clustering ne devrait s'appliquer que sur les actifs
         # le fait d'avoir le champ statut dispo permet justement de
         # vérifier cette règle dans l'étape de validation post suggestion

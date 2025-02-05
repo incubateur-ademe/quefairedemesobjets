@@ -16,13 +16,13 @@
                 <td>{{ suggestion_unitaire.get_change_type_display() }}</td>
                 <td>{{ suggestion_unitaire.meta_data if suggestion_unitaire.meta_data else "-" }}</td>
                 <td>
-                    {% with identifiant_unique=suggestion_unitaire.display_acteur_details().identifiant_unique %}
-                        <a href="{{ url('admin:qfdmo_displayedacteur_change', args=[identifiant_unique]) }}" target="_blank" rel="noreferrer">{{ identifiant_unique }}</a>
+                    {% with id=suggestion_unitaire.display_acteur_details().id %}
+                        <a href="{{ url('admin:qfdmo_displayedacteur_change', args=[id]) }}" target="_blank" rel="noreferrer">{{ id }}</a>
                     {% endwith %}
                 </td>
                 <td>
                     {% with candidat=candidat, index=loop.index, suggestion_cohorte=request.GET.suggestion_cohorte,
-                    identifiant_unique=suggestion_unitaire.display_acteur_details().identifiant_unique %}
+                    id=suggestion_unitaire.display_acteur_details().id %}
                     {% include 'qfdmo/partials/candidat_row.html' %}
 
         {% endwith %}

@@ -36,7 +36,7 @@ def db_manage_cluster(
     """
     print(f"\nGESTION DU CLUSTER {cluster_id=}")
     print("Récupération des données des acteurs")
-    # On construit un dict avec l'identifiant_unique comme clef
+    # On construit un dict avec l'id comme clef
     # et pour chaque acteur, on récupère les données des 3 tables
     acteurs_revision = RevisionActeur.objects.filter(pk__in=identifiants_uniques)
     acteurs_base = Acteur.objects.filter(pk__in=identifiants_uniques)
@@ -49,7 +49,7 @@ def db_manage_cluster(
     for id in identifiants_uniques:
         acteurs_maps.append(
             ActeurMap(
-                identifiant_unique=id,
+                id=id,
                 # .first() retourne soit l'object soit None, ce qui
                 # est pratique pour les tests de présence et décider
                 # si on doit créer des révisions plus tards
@@ -78,7 +78,7 @@ def db_manage_cluster(
         # GESTION DES ENFANTS
         # --------------------------------------
         # Tous les acteurs qui ne sont pas le parent sont des enfants
-        children_maps = [x for x in acteurs_maps if x.identifiant_unique != parent_id]
+        children_maps = [x for x in acteurs_maps if x.id != parent_id]
         for child_map in children_maps:
             change = db_manage_child(child_map, parent_id, is_dry_run)
             changes.append(change)

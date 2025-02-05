@@ -3,8 +3,8 @@ import pytest
 from sources.tasks.transform.transform_df import (
     clean_action_codes,
     clean_adresse,
+    clean_id,
     clean_identifiant_externe,
-    clean_identifiant_unique,
     clean_label_codes,
     clean_siret_and_siren,
     clean_telephone,
@@ -24,7 +24,7 @@ class TestMergeDuplicates:
             (
                 pd.DataFrame(
                     {
-                        "identifiant_unique": [1, 1],
+                        "id": [1, 1],
                         "souscategorie_codes": [
                             ["Plastic Box", "Metal", "Aàèë l'test"],
                             ["Plastic Box", "Metal", "Aàèë l'test"],
@@ -34,7 +34,7 @@ class TestMergeDuplicates:
                 ),
                 pd.DataFrame(
                     {
-                        "identifiant_unique": [1],
+                        "id": [1],
                         "souscategorie_codes": [
                             ["Aàèë l'test", "Metal", "Plastic Box"]
                         ],
@@ -45,7 +45,7 @@ class TestMergeDuplicates:
             (
                 pd.DataFrame(
                     {
-                        "identifiant_unique": [1, 2, 3],
+                        "id": [1, 2, 3],
                         "souscategorie_codes": [
                             ["Plastic", "Metal"],
                             ["Metal", "Glass"],
@@ -60,7 +60,7 @@ class TestMergeDuplicates:
                 ),
                 pd.DataFrame(
                     {
-                        "identifiant_unique": [1, 2, 3],
+                        "id": [1, 2, 3],
                         "souscategorie_codes": [
                             ["Plastic", "Metal"],
                             ["Metal", "Glass"],
@@ -77,7 +77,7 @@ class TestMergeDuplicates:
             (
                 pd.DataFrame(
                     {
-                        "identifiant_unique": [1, 1, 1],
+                        "id": [1, 1, 1],
                         "souscategorie_codes": [
                             ["Plastic", "Metal"],
                             ["Metal", "Glass"],
@@ -92,7 +92,7 @@ class TestMergeDuplicates:
                 ),
                 pd.DataFrame(
                     {
-                        "identifiant_unique": [1],
+                        "id": [1],
                         "souscategorie_codes": [["Glass", "Metal", "Paper", "Plastic"]],
                         "other_column": ["A"],
                     }
@@ -101,7 +101,7 @@ class TestMergeDuplicates:
             (
                 pd.DataFrame(
                     {
-                        "identifiant_unique": [1, 1, 2, 3, 3, 3],
+                        "id": [1, 1, 2, 3, 3, 3],
                         "souscategorie_codes": [
                             ["Plastic", "Metal"],
                             ["Metal", "Glass"],
@@ -115,7 +115,7 @@ class TestMergeDuplicates:
                 ),
                 pd.DataFrame(
                     {
-                        "identifiant_unique": [1, 2, 3],
+                        "id": [1, 2, 3],
                         "souscategorie_codes": [
                             ["Glass", "Metal", "Plastic"],
                             ["Paper"],
@@ -131,12 +131,8 @@ class TestMergeDuplicates:
 
         result_df = merge_duplicates(df)
 
-        result_df = result_df.sort_values(by="identifiant_unique").reset_index(
-            drop=True
-        )
-        expected_df = expected_df.sort_values(by="identifiant_unique").reset_index(
-            drop=True
-        )
+        result_df = result_df.sort_values(by="id").reset_index(drop=True)
+        expected_df = expected_df.sort_values(by="id").reset_index(drop=True)
 
         pd.testing.assert_frame_equal(result_df, expected_df)
 
@@ -208,10 +204,7 @@ class TestCleanIdentifiantExterne:
 
 class TestCleanIdentifiantUnique:
     @pytest.mark.parametrize(
-        (
-            "identifiant_externe, acteur_type_code, source_code,"
-            " expected_identifiant_unique"
-        ),
+        ("identifiant_externe, acteur_type_code, source_code," " expected_id"),
         [
             ("12345", "commerce", "source", "source_12345"),
             (" 12345 ", "commerce", "source", "source_12345"),
@@ -221,12 +214,12 @@ class TestCleanIdentifiantUnique:
             (" abc123 ", "acteur_digital", "source", "source_abc123_d"),
         ],
     )
-    def test_clean_identifiant_unique(
+    def test_clean_id(
         self,
         identifiant_externe,
         acteur_type_code,
         source_code,
-        expected_identifiant_unique,
+        expected_id,
     ):
         row = pd.Series(
             {
@@ -235,10 +228,10 @@ class TestCleanIdentifiantUnique:
                 "acteur_type_code": acteur_type_code,
             }
         )
-        result = clean_identifiant_unique(row, None)
-        assert result["identifiant_unique"] == expected_identifiant_unique
+        result = clean_id(row, None)
+        assert result["id"] == expected_id
 
-    def test_clean_identifiant_unique_failes(self):
+    def test_clean_id_failes(self):
         row = pd.Series(
             {
                 "source_code": "source",
@@ -246,7 +239,7 @@ class TestCleanIdentifiantUnique:
             }
         )
         with pytest.raises(ValueError) as erreur:
-            clean_identifiant_unique(row, None)
+            clean_id(row, None)
         assert "identifiant_externe" in str(erreur.value)
 
 

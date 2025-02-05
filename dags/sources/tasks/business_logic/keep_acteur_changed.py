@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 def is_identique_row(row_source, row_db, columns_to_compare):
     is_identique = True
-    for column in columns_to_compare - {"identifiant_unique"}:
+    for column in columns_to_compare - {"id"}:
         if column == "proposition_services_codes":
             # on trie la list de dict par la clé action
             row_source[column] = sorted(row_source[column], key=lambda x: x["action"])
@@ -45,39 +45,33 @@ def keep_acteur_changed(
         - {"cree_le"}
     )
 
-    # grouper par identifiant_unique et comparer les colonnes
-    # si les colonnes sont identiques, on collecte l'identifiant_unique
-    identifiant_uniques_from_source = df_normalized["identifiant_unique"].tolist()
-    identifiant_uniques_from_db = df_acteur_from_db["identifiant_unique"].tolist()
+    # grouper par id et comparer les colonnes
+    # si les colonnes sont identiques, on collecte l'id
+    ids_from_source = df_normalized["id"].tolist()
+    ids_from_db = df_acteur_from_db["id"].tolist()
     df_updated_from_db = df_acteur_from_db[list(columns_to_compare)]
     df_from_source = df_normalized[list(columns_to_compare)]
     df_updated_from_db = df_updated_from_db[
-        df_updated_from_db["identifiant_unique"].isin(identifiant_uniques_from_source)
+        df_updated_from_db["id"].isin(ids_from_source)
     ]
-    df_from_source = df_from_source[
-        df_from_source["identifiant_unique"].isin(identifiant_uniques_from_db)
-    ]
+    df_from_source = df_from_source[df_from_source["id"].isin(ids_from_db)]
 
-    df_from_source = df_from_source.set_index("identifiant_unique")
-    df_updated_from_db = df_updated_from_db.set_index("identifiant_unique")
-    log.preview("df_from_source identifiant_unique identique", df_from_source)
-    log.preview("df_from_db identifiant_unique identique", df_updated_from_db)
+    df_from_source = df_from_source.set_index("id")
+    df_updated_from_db = df_updated_from_db.set_index("id")
+    log.preview("df_from_source id identique", df_from_source)
+    log.preview("df_from_db id identique", df_updated_from_db)
 
-    noupdate_identifiant_uniques = []
+    noupdate_ids = []
     for index, row_source in df_from_source.iterrows():
         row_source = row_source.to_dict()
         row_db = df_updated_from_db.loc[index]
         row_db = row_db.to_dict()
         if is_identique_row(row_source, row_db, columns_to_compare):
-            noupdate_identifiant_uniques.append(index)
-    log.preview("identifiant_uniques", noupdate_identifiant_uniques)
+            noupdate_ids.append(index)
+    log.preview("ids", noupdate_ids)
 
-    df_normalized = df_normalized[
-        ~df_normalized["identifiant_unique"].isin(noupdate_identifiant_uniques)
-    ]
-    df_acteur_from_db = df_acteur_from_db[
-        ~df_acteur_from_db["identifiant_unique"].isin(noupdate_identifiant_uniques)
-    ]
+    df_normalized = df_normalized[~df_normalized["id"].isin(noupdate_ids)]
+    df_acteur_from_db = df_acteur_from_db[~df_acteur_from_db["id"].isin(noupdate_ids)]
 
     log.preview("df_normalized après suppression", df_normalized)
     return {

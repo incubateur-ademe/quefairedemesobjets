@@ -57,7 +57,7 @@ RUN_FILEPATH_CLUSTERS_DONE = None  # laisser None, définit par le script
 # AUTRES PARAMETRES
 # ------------------------------------------
 # Colonnes pour le debug
-COLS_DEBUG = ["cluster_id", "identifiant_unique", "children_count", "source_id"]
+COLS_DEBUG = ["cluster_id", "id", "children_count", "source_id"]
 
 # Différent modes d'execution du script
 MODE_DRY_RUN = None  # laisser None, définit par le script
@@ -126,7 +126,7 @@ def main() -> None:
     # ------------------------------------------
     # DONNEES D'ENTREE
     # ------------------------------------------
-    # Chaque ligne est un cluster_id <-> acteur identifiant_unique
+    # Chaque ligne est un cluster_id <-> acteur id
     df_src = source_data_get(RUN_FILEPATH_CLUSTER_DATA)
 
     # ------------------------------------------
@@ -139,7 +139,7 @@ def main() -> None:
     parent_ids_to_children_count_db = (
         RevisionActeur.objects.filter(parent_id__isnull=False)
         .values("parent_id")
-        .annotate(count=Count("identifiant_unique"))
+        .annotate(count=Count("id"))
     )
     parent_ids_to_children_count_db = {
         x["parent_id"]: x["count"] for x in parent_ids_to_children_count_db
@@ -168,7 +168,7 @@ def main() -> None:
         # - split cluster_id et acteurs à partir du groupby
         # - récupération des identifiants uniques
         cluster_id, acteurs = cluster
-        identifiants_uniques = acteurs["identifiant_unique"].tolist()
+        identifiants_uniques = acteurs["id"].tolist()
 
         # On passe si le cluster est dans la liste à skip
         if cluster_id in RUN_CLUSTER_IDS_TO_SKIP:

@@ -310,7 +310,7 @@ classDiagram
     class DisplayedActeur {
         - nom: str
         - description: str
-        - identifiant_unique: str
+        - id: str
         - acteur_type: ActeurType
         - adresse: str
         - adresse_complement: str

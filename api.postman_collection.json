@@ -124,7 +124,7 @@
 												}
 											],
 											"cookie": [],
-											"body": "{\n  \"items\": [\n    {\n      \"latitude\": \"<number>\",\n      \"longitude\": \"<number>\",\n      \"distance\": \"<number>\",\n      \"services\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"nom\": \"<string>\",\n      \"nom_commercial\": \"<string>\",\n      \"adresse\": \"<string>\",\n      \"identifiant_unique\": \"<string>\",\n      \"siret\": \"<string>\"\n    },\n    {\n      \"latitude\": \"<number>\",\n      \"longitude\": \"<number>\",\n      \"distance\": \"<number>\",\n      \"services\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"nom\": \"<string>\",\n      \"nom_commercial\": \"<string>\",\n      \"adresse\": \"<string>\",\n      \"identifiant_unique\": \"<string>\",\n      \"siret\": \"<string>\"\n    }\n  ],\n  \"count\": \"<integer>\"\n}"
+											"body": "{\n  \"items\": [\n    {\n      \"latitude\": \"<number>\",\n      \"longitude\": \"<number>\",\n      \"distance\": \"<number>\",\n      \"services\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"nom\": \"<string>\",\n      \"nom_commercial\": \"<string>\",\n      \"adresse\": \"<string>\",\n      \"id\": \"<string>\",\n      \"siret\": \"<string>\"\n    },\n    {\n      \"latitude\": \"<number>\",\n      \"longitude\": \"<number>\",\n      \"distance\": \"<number>\",\n      \"services\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"nom\": \"<string>\",\n      \"nom_commercial\": \"<string>\",\n      \"adresse\": \"<string>\",\n      \"id\": \"<string>\",\n      \"siret\": \"<string>\"\n    }\n  ],\n  \"count\": \"<integer>\"\n}"
 										}
 									]
 								},
@@ -325,7 +325,7 @@
 									}
 								],
 								"url": {
-									"raw": "{{baseUrl}}/api/qfdmo/acteur?identifiant_unique=<string>",
+									"raw": "{{baseUrl}}/api/qfdmo/acteur?id=<string>",
 									"host": [
 										"{{baseUrl}}"
 									],
@@ -336,7 +336,7 @@
 									],
 									"query": [
 										{
-											"key": "identifiant_unique",
+											"key": "id",
 											"value": "<string>",
 											"description": "(Required) "
 										}
@@ -355,7 +355,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/api/qfdmo/acteur?identifiant_unique=<string>",
+											"raw": "{{baseUrl}}/api/qfdmo/acteur?id=<string>",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -366,7 +366,7 @@
 											],
 											"query": [
 												{
-													"key": "identifiant_unique",
+													"key": "id",
 													"value": "<string>"
 												}
 											]
@@ -382,7 +382,7 @@
 										}
 									],
 									"cookie": [],
-									"body": "{\n  \"latitude\": \"<number>\",\n  \"longitude\": \"<number>\",\n  \"distance\": \"<number>\",\n  \"services\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"nom\": \"<string>\",\n  \"nom_commercial\": \"<string>\",\n  \"adresse\": \"<string>\",\n  \"identifiant_unique\": \"<string>\",\n  \"siret\": \"<string>\"\n}"
+									"body": "{\n  \"latitude\": \"<number>\",\n  \"longitude\": \"<number>\",\n  \"distance\": \"<number>\",\n  \"services\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"nom\": \"<string>\",\n  \"nom_commercial\": \"<string>\",\n  \"adresse\": \"<string>\",\n  \"id\": \"<string>\",\n  \"siret\": \"<string>\"\n}"
 								}
 							]
 						}

@@ -19,7 +19,7 @@ from scripts.deduplication.utils.db import db_source_ids_by_code_get
 
 def parent_id_generate(ids: list[str]) -> str:
     """
-    Génère un UUID (pour l'identifiant_unique parent) à partir
+    Génère un UUID (pour l'id parent) à partir
     de la liste des identifiants des enfants du cluster.
     Le UUID généré doit être:
     - déterministe (même entrée donne même sortie)
@@ -29,7 +29,7 @@ def parent_id_generate(ids: list[str]) -> str:
         ids: liste des identifiants uniques des enfants
 
     Returns:
-        str: nouvel identifiant_unique du parent
+        str: nouvel id du parent
     """
     combined = ",".join(sorted(ids))
     parent_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, combined))
@@ -152,7 +152,7 @@ def parent_get_data_from_acteurs(
     # Ignore les champs d'identifications acteurs
     # car il doivent tous restés vides (générés ultérieurement)
     keys_to_ignore = [
-        "identifiant_unique",
+        "id",
         "identifiant_externe",
         "parent_id",
         "source_id",
@@ -169,7 +169,7 @@ def parent_get_data_from_acteurs(
         2 boucles"""
         source_id = acteur["source_id"]
         source_code = source_codes_by_id.get(source_id)
-        acteur_id = acteur["identifiant_unique"]
+        acteur_id = acteur["id"]
         parent_dict[field] = value
         sources_codes_picked[field] = source_code
         print(f"\t✅ {field=} {value=}")
@@ -273,14 +273,14 @@ def db_manage_parent(
         is_dry_run: mode test ou non
 
     Returns:
-        parent_id: identifiant_unique du parent (existing ou UUID généré)
+        parent_id: id du parent (existing ou UUID généré)
         change: changement effectué
     """
     print("PREPARATION DE LA DONNEE PARENT:")
     # Cette donnée nous est utile quel que soit le parent choisi
     # si existant: on le met à jour
     # si à créer: on utilise cette donnée pour créer le parent
-    identifiants_uniques = [x.identifiant_unique for x in acteurs_maps]
+    identifiants_uniques = [x.id for x in acteurs_maps]
     acteurs_dicts = acteurs_dict_to_list_of_dicts(acteurs_maps)
     # print(f"{acteurs_list=}")
     parent_data, _ = parent_get_data_from_acteurs(
@@ -298,10 +298,10 @@ def db_manage_parent(
     # Parent(s) existant(s)
     if parents_list:
         parent_chosen = max(parents_list, key=lambda x: x.children_count)
-        parent_id = parent_chosen.identifiant_unique
+        parent_id = parent_chosen.id
         change = Change(operation="parent_choose", acteur_id=parent_id)
         print("\t1) Priorité au parent existant avec le + d'enfant:")
-        print(f"{parent_chosen.identifiant_unique=}")
+        print(f"{parent_chosen.id=}")
         parent = parent_chosen.table_states["revision"]
         print("\t\t - mise à jour du parent existant:")
         for k, val_new in parent_data.items():
@@ -321,7 +321,7 @@ def db_manage_parent(
         parent_id = parent_id_generate(identifiants_uniques)
         change = Change(operation="parent_create", acteur_id=parent_id)
         parent = RevisionActeur(**parent_data)
-        parent.identifiant_unique = parent_id
+        parent.id = parent_id
         print(f"\t\t{parent=}")
         if is_dry_run:
             print("\t\tDB: pas de modif en dry run ✋")

@@ -14,8 +14,8 @@ def propose_acteur_changes(
     # On garde le cree_le de qfdmo_acteur
     df_acteur.drop(columns=["cree_le"], inplace=True, errors="ignore")
     df_acteur = df_acteur.merge(
-        df_acteur_from_db[["identifiant_unique", "cree_le"]],
-        on="identifiant_unique",
+        df_acteur_from_db[["id", "cree_le"]],
+        on="id",
         how="left",
     )
     df_acteur["cree_le"] = df_acteur["cree_le"].fillna(datetime.now())
@@ -25,8 +25,8 @@ def propose_acteur_changes(
 
     df_acteur = df_acteur.replace({np.nan: None})
 
-    duplicates_mask = df_acteur.duplicated("identifiant_unique", keep=False)
-    duplicate_ids = df_acteur.loc[duplicates_mask, "identifiant_unique"].unique()
+    duplicates_mask = df_acteur.duplicated("id", keep=False)
+    duplicate_ids = df_acteur.loc[duplicates_mask, "id"].unique()
     number_of_duplicates = len(duplicate_ids)
 
     metadata = {
@@ -35,7 +35,7 @@ def propose_acteur_changes(
         "acteurs_to_add_or_update": len(df_acteur),
     }
 
-    df_acteur = df_acteur.drop_duplicates(subset="identifiant_unique", keep="first")
+    df_acteur = df_acteur.drop_duplicates(subset="id", keep="first")
     return {
         "df_acteur": df_acteur,
         "metadata": metadata,

@@ -48,7 +48,7 @@ SOURCE_CODES_PICKED_EXPECTED = {
     "acteur_type_id": "Bon url",
 }
 PARENT_EXPECTED = {
-    # Intentionnellement pas de identifiant_unique retourné
+    # Intentionnellement pas de id retourné
     # pour nous forcer à gérer le ID séparément (ex: génréer un UUID)
     "nom": "nom de COREPILE",
     "url": "url_a",
@@ -68,7 +68,7 @@ class TestParentDataFromActeur:
         return [
             {
                 "identifiant_externe": "A",
-                "identifiant_unique": "a",
+                "id": "a",
                 "adresse_complement": None,
                 "nom": "Mon A",
                 "url": "url_a",
@@ -81,7 +81,7 @@ class TestParentDataFromActeur:
             },
             {
                 "identifiant_externe": "B",
-                "identifiant_unique": "b",
+                "id": "b",
                 "adresse_complement": None,
                 "nom": "Mon B",
                 "url": None,
@@ -95,7 +95,7 @@ class TestParentDataFromActeur:
             },
             {
                 "identifiant_externe": "C",
-                "identifiant_unique": "c",
+                "id": "c",
                 "nom": "nom de COREPILE",
                 "url": None,
                 "siret": None,
@@ -110,7 +110,7 @@ class TestParentDataFromActeur:
             },
             {
                 "identifiant_externe": "D",
-                "identifiant_unique": "d",
+                "id": "d",
                 "nom": "Mon D",
                 "url": None,
                 "siret": 11111111111111,
@@ -163,7 +163,7 @@ class TestParentDataFromActeur:
         """On ne renseigne pas les autres ids, qui seront
         assignés plus tard (id parent existant ou UUID pour nouveau)"""
         assert "parent_id" not in parent
-        assert "identifiant_unique" not in parent
+        assert "id" not in parent
 
     def test_email_picked_is_valid(self, parent):
         """On a réussi à exclure le mauvais email"""

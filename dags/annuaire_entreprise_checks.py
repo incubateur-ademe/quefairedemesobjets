@@ -97,11 +97,7 @@ def fetch_and_parse_data(**context):
     )
 
     df_a_siretiser = df_acteur[
-        (
-            ~df_acteur["identifiant_unique"].isin(
-                df_good_siret_closed["identifiant_unique"]
-            )
-        )
+        (~df_acteur["id"].isin(df_good_siret_closed["id"]))
         & (good_address_condition)
         & (df_acteur["siret"].str.len() != 14)
         & (df_acteur["siret"].str.len() != 9)
@@ -132,7 +128,7 @@ def check_actor_with_adresse(**kwargs):
 
     return df[
         [
-            "identifiant_unique",
+            "id",
             "siret",
             "nom",
             "statut",
@@ -153,7 +149,7 @@ def check_actor_with_siret(**kwargs):
     )
     return df_acteur[
         [
-            "identifiant_unique",
+            "id",
             "siret",
             "nom",
             "statut",
@@ -188,7 +184,7 @@ def combine_actors(**kwargs):
         df_acteur_with_siret,
         df_acteur_with_adresse,
         on=[
-            "identifiant_unique",
+            "id",
             "nom",
             "statut",
             "siret",
@@ -244,7 +240,7 @@ def combine_actors(**kwargs):
 
         cohort_dfs["siretitsation_with_adresse_bad_siret_empty"] = df_empty_ae_results
 
-    df = df[~df["identifiant_unique"].isin(df_bad_siret["identifiant_unique"])]
+    df = df[~df["id"].isin(df_bad_siret["id"])]
 
     df["ae_result"] = df.apply(siret_control_utils.combine_ae_result_dicts, axis=1)
     df[["statut", "categorie_naf", "ae_adresse"]] = df.apply(
@@ -278,7 +274,7 @@ def enrich_location(**kwargs):
 
 def db_data_prepare(**kwargs):
     data = kwargs["ti"].xcom_pull(task_ids="get_location")
-    columns = ["identifiant_unique", "statut", "ae_result", "admin_link"]
+    columns = ["id", "statut", "ae_result", "admin_link"]
     serialized_data = {}
     for key, df in data.items():
         df["event"] = "UPDATE_ACTOR"

@@ -97,7 +97,7 @@ class Command(BaseCommand):
                 return
 
         correction_subquery = CorrectionActeur.objects.filter(
-            final_acteur_id=OuterRef("identifiant_unique"),
+            final_acteur_id=OuterRef("id"),
             source=SOURCE,
             cree_le__gte=datetime.datetime.now() - datetime.timedelta(days=31),
         )
@@ -120,8 +120,8 @@ class Command(BaseCommand):
                 CorrectionActeur.objects.create(
                     source=SOURCE,
                     resultat_brute_source={"code": 404, "message": "Siret non trouvé"},
-                    identifiant_unique=final_acteur.identifiant_unique,
-                    final_acteur_id=final_acteur.identifiant_unique,
+                    id=final_acteur.id,
+                    final_acteur_id=final_acteur.id,
                     correction_statut=CorrectionActeurStatus.ACTIF,
                 )
                 continue
@@ -129,8 +129,8 @@ class Command(BaseCommand):
                 CorrectionActeur.objects.create(
                     source=SOURCE,
                     resultat_brute_source=siret_analyse["error"],
-                    identifiant_unique=final_acteur.identifiant_unique,
-                    final_acteur_id=final_acteur.identifiant_unique,
+                    id=final_acteur.id,
+                    final_acteur_id=final_acteur.id,
                     correction_statut=CorrectionActeurStatus.ACTIF,
                 )
                 continue
@@ -141,15 +141,15 @@ class Command(BaseCommand):
                 CorrectionActeur.objects.create(
                     source=SOURCE,
                     resultat_brute_source=siret_analyse,
-                    identifiant_unique=final_acteur.identifiant_unique,
-                    final_acteur_id=final_acteur.identifiant_unique,
+                    id=final_acteur.id,
+                    final_acteur_id=final_acteur.id,
                     correction_statut=CorrectionActeurStatus.PAS_DE_MODIF,
                 )
             else:
                 CorrectionActeur.objects.create(
                     source=SOURCE,
                     resultat_brute_source=siret_analyse,
-                    identifiant_unique=final_acteur.identifiant_unique,
-                    final_acteur_id=final_acteur.identifiant_unique,
+                    id=final_acteur.id,
+                    final_acteur_id=final_acteur.id,
                     correction_statut=CorrectionActeurStatus.ACTIF,
                 )

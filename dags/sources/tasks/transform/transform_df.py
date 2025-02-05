@@ -22,7 +22,7 @@ ACTEUR_TYPE_ESS = "ess"
 LABEL_ESS = "ess"
 LABEL_TO_IGNORE = ["non applicable", "na", "n/a", "null", "aucun", "non"]
 MANDATORY_COLUMNS_AFTER_NORMALISATION = [
-    "identifiant_unique",
+    "id",
     "identifiant_externe",
     "nom",
     "acteurservice_codes",
@@ -34,9 +34,7 @@ MANDATORY_COLUMNS_AFTER_NORMALISATION = [
 REGEX_BAN_SEPARATORS = r"\s,;"
 
 
-def merge_duplicates(
-    df, group_column="identifiant_unique", merge_column="souscategorie_codes"
-):
+def merge_duplicates(df, group_column="id", merge_column="souscategorie_codes"):
 
     df_duplicates = df[df.duplicated(group_column, keep=False)]
     df_non_duplicates = df[~df.duplicated(group_column, keep=False)]
@@ -121,16 +119,14 @@ def clean_identifiant_externe(row, _):
     return row[["identifiant_externe"]]
 
 
-def clean_identifiant_unique(row, _):
+def clean_id(row, _):
     if not row.get("identifiant_externe"):
-        raise ValueError(
-            "identifiant_externe is required to generate identifiant_unique"
-        )
+        raise ValueError("identifiant_externe is required to generate id")
     unique_str = row["identifiant_externe"].replace("/", "-").strip()
     if row.get("acteur_type_code") == ACTEUR_TYPE_DIGITAL:
         unique_str = unique_str + "_d"
-    row["identifiant_unique"] = row.get("source_code").lower() + "_" + unique_str
-    return row[["identifiant_unique"]]
+    row["id"] = row.get("source_code").lower() + "_" + unique_str
+    return row[["id"]]
 
 
 def merge_sous_categories_columns(row, _):

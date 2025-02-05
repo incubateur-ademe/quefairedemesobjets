@@ -63,7 +63,7 @@ def handle_create_event(df_actors, dag_run_id, engine):
 
 def handle_update_actor_event(df_actors, dag_run_id):
     update_required_columns = [
-        "identifiant_unique",
+        "id",
         "adresse",
         "location",
         "commentaires",
@@ -99,33 +99,31 @@ def handle_update_actor_event(df_actors, dag_run_id):
 def handle_write_data_create_event(
     connection, df_actors, df_labels, df_acteur_services, df_pds, df_pdssc
 ):
-    df_actors[["identifiant_unique"]].to_sql(
-        "temp_actors", connection, if_exists="replace"
-    )
+    df_actors[["id"]].to_sql("temp_actors", connection, if_exists="replace")
 
     delete_queries = [
         """
         DELETE FROM qfdmo_propositionservice_sous_categories
         WHERE propositionservice_id IN (
             SELECT id FROM qfdmo_propositionservice
-            WHERE acteur_id IN ( SELECT identifiant_unique FROM temp_actors )
+            WHERE acteur_id IN ( SELECT id FROM temp_actors )
         );
         """,
         """
         DELETE FROM qfdmo_acteur_labels
-        WHERE acteur_id IN ( SELECT identifiant_unique FROM temp_actors );
+        WHERE acteur_id IN ( SELECT id FROM temp_actors );
         """,
         """
         DELETE FROM qfdmo_acteur_acteur_services
-        WHERE acteur_id IN ( SELECT identifiant_unique FROM temp_actors );
+        WHERE acteur_id IN ( SELECT id FROM temp_actors );
         """,
         """
         DELETE FROM qfdmo_propositionservice
-        WHERE acteur_id IN ( SELECT identifiant_unique FROM temp_actors );
+        WHERE acteur_id IN ( SELECT id FROM temp_actors );
         """,
         """
-        DELETE FROM qfdmo_acteur WHERE identifiant_unique
-        IN ( SELECT identifiant_unique FROM temp_actors);
+        DELETE FROM qfdmo_acteur WHERE id
+        IN ( SELECT id FROM temp_actors);
         """,
     ]
 
@@ -206,13 +204,13 @@ def handle_write_data_update_actor_event(connection, df_actors):
 
     temp_tables_creation_query = """
         CREATE TEMP TABLE temp_existing_actors AS
-        SELECT * FROM qfdmo_revisionacteur WHERE identifiant_unique IN (
-            SELECT identifiant_unique FROM temp_actors
+        SELECT * FROM qfdmo_revisionacteur WHERE id IN (
+            SELECT id FROM temp_actors
         );
 
         CREATE TEMP TABLE temp_existing_pds AS
         SELECT * FROM qfdmo_revisionpropositionservice WHERE acteur_id IN (
-            SELECT identifiant_unique FROM temp_actors
+            SELECT id FROM temp_actors
         );
 
         CREATE TEMP TABLE temp_existing_pdssc AS
@@ -231,12 +229,12 @@ def handle_write_data_update_actor_event(connection, df_actors):
 
         DELETE FROM qfdmo_revisionpropositionservice
         WHERE acteur_id IN (
-            SELECT identifiant_unique FROM temp_actors
+            SELECT id FROM temp_actors
         );
 
         DELETE FROM qfdmo_revisionacteur
-        WHERE identifiant_unique IN (
-            SELECT identifiant_unique FROM temp_actors
+        WHERE id IN (
+            SELECT id FROM temp_actors
         );
     """
     connection.execute(delete_queries)
@@ -257,13 +255,13 @@ def handle_write_data_update_actor_event(connection, df_actors):
     combined_actors_df = pd.merge(
         temp_existing_actors_df,
         temp_actors_df,
-        on="identifiant_unique",
+        on="id",
         how="outer",
         suffixes=("_existing", "_new"),
     )
 
     for column in temp_existing_actors_df.columns:
-        if column != "identifiant_unique":
+        if column != "id":
             if column == "commentaires":
                 combined_actors_df[column] = combined_actors_df.apply(
                     lambda row: mapping_utils.combine_comments(

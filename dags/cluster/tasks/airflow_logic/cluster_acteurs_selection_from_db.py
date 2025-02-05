@@ -96,13 +96,13 @@ def cluster_acteurs_selection_from_db_wrapper(**kwargs) -> None:
     # --------------------------------
     logging.info(log.banner_string("Fusion acteurs + parents"))
     ids = set()
-    ids.update(df_acteurs["identifiant_unique"].values)
-    ids.update(df_parents["identifiant_unique"].values)
+    ids.update(df_acteurs["id"].values)
+    ids.update(df_parents["id"].values)
     log.preview("IDs avant la fusion", ids)
     df = pd.concat([df_acteurs, df_parents], ignore_index=True).replace({np.nan: None})
-    df = df.drop_duplicates(subset="identifiant_unique", keep="first")
+    df = df.drop_duplicates(subset="id", keep="first")
     df = cluster_acteurs_df_sort(df)
-    log.preview("IDs après la fusion", df["identifiant_unique"].tolist())
+    log.preview("IDs après la fusion", df["id"].tolist())
     log.preview_df_as_markdown("acteurs + parents sélectionnés", df)
 
     if df.empty:

@@ -16,7 +16,7 @@ def df_clusters_to_dict(df: pd.DataFrame) -> dict[str, list[str]]:
     en convertissant la DataFrame de clusters en dictionnaire
     cluster_id -> liste des identifiants uniques
     """
-    return df.groupby("cluster_id")["identifiant_unique"].apply(list).to_dict()
+    return df.groupby("cluster_id")["id"].apply(list).to_dict()
 
 
 class TestCluster:
@@ -30,7 +30,7 @@ class TestCluster:
         return pd.DataFrame(
             {
                 "__index_src": range(1, 8),
-                "identifiant_unique": [
+                "id": [
                     "id1",
                     "id2",
                     "id3",
@@ -114,7 +114,7 @@ class TestCluster:
         return pd.DataFrame(
             {
                 "__index_src": range(1, 5),
-                "identifiant_unique": [
+                "id": [
                     "id1",
                     "id2",
                     "id3",
@@ -150,7 +150,7 @@ class TestCluster:
             {
                 "__index_src": range(1, 8),
                 "code_postal": ["10000" for _ in range(7)],
-                "identifiant_unique": ["id" + str(i) for i in range(0, 7)],
+                "id": ["id" + str(i) for i in range(0, 7)],
                 "nom": [
                     "centre commercial auchan",
                     "artiste peintre auchan",

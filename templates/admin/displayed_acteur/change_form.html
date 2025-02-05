@@ -4,7 +4,7 @@
 {% block submit_buttons_bottom %}
     {% block submit-row %}
         <div class="submit-row">
-            <a class="closelink" href="{% url 'qfdmo:solution_admin' identifiant_unique=original.identifiant_unique %}">Modifier l'acteur</a>
+            <a class="closelink" href="{% url 'qfdmo:solution_admin' id=original.id %}">Modifier l'acteur</a>
             {% url opts|admin_urlname:'changelist' as changelist_url %}
             <a href="{% add_preserved_filters changelist_url %}" class="closelink">{% translate 'Close' %}</a>
         </div>

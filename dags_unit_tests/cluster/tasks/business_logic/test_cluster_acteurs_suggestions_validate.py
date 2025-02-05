@@ -16,7 +16,7 @@ class TestClusterActeursSuggestionsValidate:
             {
                 "statut": ["ACTIF"],
                 "cluster_id": ["I am alone"],
-                "identifiant_unique": ["A"],
+                "id": ["A"],
             }
         )
         with pytest.raises(ValueError, match="Clusters avec moins de 2 acteurs"):
@@ -26,7 +26,7 @@ class TestClusterActeursSuggestionsValidate:
         # Que l'acteur en question soit répété dans le même cluster
         df = pd.DataFrame(
             {
-                "identifiant_unique": ["A", "A"],
+                "id": ["A", "A"],
                 "statut": ["ACTIF", "ACTIF"],
                 "cluster_id": ["1", "1"],
             }
@@ -38,7 +38,7 @@ class TestClusterActeursSuggestionsValidate:
         # Que l'acteur en question soit répété dans différents clusters
         df = pd.DataFrame(
             {
-                "identifiant_unique": ["A", "A", "B", "C"],
+                "id": ["A", "A", "B", "C"],
                 "statut": ["ACTIF", "ACTIF", "ACTIF", "ACTIF"],
                 "cluster_id": ["1", "2", "1", "2"],
             }
@@ -52,7 +52,7 @@ class TestClusterActeursSuggestionsValidate:
         # des IDs
         df = pd.DataFrame(
             {
-                "identifiant_unique": ["A", "B", "C", "D"],
+                "id": ["A", "B", "C", "D"],
                 "statut": ["ACTIF", "ACTIF", "ACTIF", "ACTIF"],
                 "cluster_id": ["1", "2", "1", "2"],
             }
@@ -63,7 +63,7 @@ class TestClusterActeursSuggestionsValidate:
     def test_working_case(self):
         df = pd.DataFrame(
             {
-                "identifiant_unique": ["A", "B", "C", "D"],
+                "id": ["A", "B", "C", "D"],
                 "statut": ["ACTIF", "ACTIF", "ACTIF", "ACTIF"],
                 "cluster_id": ["1", "1", "2", "2"],
             }

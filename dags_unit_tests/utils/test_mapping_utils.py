@@ -37,7 +37,7 @@ class TestDataTransformations:
     #         "identifiant_externe": "123AbC",
     #         "type_de_point_de_collecte": "Solution en ligne (site web, app. mobile)",
     #     }
-    #     assert mapping_utils.create_identifiant_unique(row) == "ecoorg_123AbC_d"
+    #     assert mapping_utils.create_id(row) == "ecoorg_123AbC_d"
 
     # def test_without_service_a_domicile_only(self):
     #     row = {
@@ -45,7 +45,7 @@ class TestDataTransformations:
     #         "identifiant_externe": "123AbC",
     #         "type_de_point_de_collecte": "Artisan, commerce indépendant ",
     #     }
-    #     assert mapping_utils.create_identifiant_unique(row), "ecoorg_123AbC"
+    #     assert mapping_utils.create_id(row), "ecoorg_123AbC"
 
 
 class TestTransformFloat:

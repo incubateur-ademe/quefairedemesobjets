@@ -10,7 +10,7 @@
     }
 </style>
 
-<turbo-frame id="{{identifiant_unique}}">
+<turbo-frame id="{{id}}">
     <table>
         <tr>
             <th>Action</th>
@@ -31,11 +31,11 @@
                     <tr class="{% if dagrun_line.status == 'TO_INSERT' and comparison_result %}validated{% elif dagrun_line.status == 'REJECTED' %}rejected{% endif %}">
 
                         <td>
-                            <form method="post" action="{{ request.path }}" target="form-frame-{{identifiant_unique}}-{{ loop.index }}">
+                            <form method="post" action="{{ request.path }}" target="form-frame-{{id}}-{{ loop.index }}">
                                 {{ csrf_input }}
                                 <input type="hidden" name="id" value="{{ dagrun_line.id }}">
                                 <input type="hidden" name="dagrun" value="{{ dagrun }}">
-                                <input type="hidden" name="identifiant_unique" value="{{ identifiant_unique }}">
+                                <input type="hidden" name="id" value="{{ id }}">
                                 <input type="hidden" name="index" value="{{ loop.index }}">
                                 <button class="fr-btn" type="submit" name="action" value="validate">O</button>
                                 <button class="fr-btn fr-btn--secondary" type="submit" name="action" value="reject">N</button>

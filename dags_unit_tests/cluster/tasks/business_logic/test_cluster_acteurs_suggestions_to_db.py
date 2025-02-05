@@ -63,8 +63,8 @@ class TestClusterActeursSuggestionsToDb:
             cluster_id = change_list[0]["cluster_id"]
             cluster_ids_found.add(cluster_id)
             cluster = df[df["cluster_id"] == cluster_id]
-            assert sorted(cluster["identifiant_unique"].tolist()) == sorted(
-                [x["identifiant_unique"] for x in change_list]
+            assert sorted(cluster["id"].tolist()) == sorted(
+                [x["id"] for x in change_list]
             )
 
         # Et on doit avoir trouvé tous les clusters de la df

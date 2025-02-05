@@ -7,11 +7,11 @@ def deduplicate_acteur_sources(
 ):
 
     df_acteur_sources_without_parents = df_acteur_merged[
-        ~df_acteur_merged["identifiant_unique"].isin(df_children["parent_id"])
-    ][["identifiant_unique", "source_id"]]
+        ~df_acteur_merged["id"].isin(df_children["parent_id"])
+    ][["id", "source_id"]]
 
     df_acteur_sources_without_parents = df_acteur_sources_without_parents.rename(
-        columns={"identifiant_unique": "displayedacteur_id"}
+        columns={"id": "displayedacteur_id"}
     )
 
     parents_df = df_children[["parent_id", "source_id"]].drop_duplicates()
@@ -23,9 +23,7 @@ def deduplicate_acteur_sources(
     )
 
     result_df = result_df[
-        ~result_df["displayedacteur_id"].isin(
-            df_children["identifiant_unique"].tolist()
-        )
+        ~result_df["displayedacteur_id"].isin(df_children["id"].tolist())
     ]
 
     return result_df

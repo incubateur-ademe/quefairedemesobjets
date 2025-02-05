@@ -242,7 +242,7 @@ def cluster_acteurs_suggestions(
         cluster_fields_separate: champs pour séparer en plusieurs clusters si identique
 
     Returns:
-        DataFrame de cluster_id -> identifiant_unique
+        DataFrame de cluster_id -> id
     """
     if "__index_src" not in df.columns:
         raise ValueError(
@@ -313,9 +313,7 @@ def cluster_acteurs_suggestions(
         clusters_to_add = []
 
         logger.info(f"🟡 Cluster potentiel avant fuzzy: taille {len(exact_rows)}")
-        fields_debug = (
-            cluster_fields_exact + cluster_fields_fuzzy + ["identifiant_unique"]
-        )
+        fields_debug = cluster_fields_exact + cluster_fields_fuzzy + ["id"]
         logger.info(
             json.dumps(exact_rows[fields_debug].to_dict(orient="list"), indent=4)
         )
@@ -374,6 +372,6 @@ def cluster_acteurs_suggestions(
     """
     logger.info(f"🟢 {len(clusters_size1)=}")
     logger.info(f"🟢 {df_clusters["cluster_id"].nunique()=}")
-    logger.info(f"🟢 {df_clusters["identifiant_unique"].nunique()=}")
+    logger.info(f"🟢 {df_clusters["id"].nunique()=}")
 
     return df_clusters

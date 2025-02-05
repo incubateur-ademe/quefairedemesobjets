@@ -90,7 +90,7 @@ class DagRunChange(models.Model):
             "horaires_description": "Horaires",
             "latitude": "latitude",
             "longitude": "longitude",
-            "identifiant_unique": "identifiant_unique",
+            "id": "id",
             "identifiant_externe": "identifiant_externe",
         }.items():
             if value := self.row_updates.get(field):

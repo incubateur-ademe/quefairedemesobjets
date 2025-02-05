@@ -158,7 +158,7 @@ class BaseActeurAdmin(admin.GISModelAdmin):
         "nom",
         "siret",
         "siren",
-        "identifiant_unique",
+        "id",
         "code_postal",
         "ville",
         "adresse",
@@ -166,7 +166,7 @@ class BaseActeurAdmin(admin.GISModelAdmin):
     )
     search_fields = [
         "code_postal",
-        "identifiant_unique",
+        "id",
         "nom__unaccent",
         "siret",
         "siren",
@@ -178,7 +178,7 @@ class BaseActeurAdmin(admin.GISModelAdmin):
     )
     list_filter = ["statut"]
     fields = (
-        "identifiant_unique",
+        "id",
         "source",
         "identifiant_externe",
         "nom",
@@ -220,8 +220,8 @@ class BaseActeurAdmin(admin.GISModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = list(super().get_readonly_fields(request, obj))
-        if obj and "identifiant_unique" not in readonly_fields:
-            readonly_fields += ["identifiant_unique"]
+        if obj and "id" not in readonly_fields:
+            readonly_fields += ["id"]
         return readonly_fields
 
 
@@ -267,7 +267,7 @@ class ActeurResource(resources.ModelResource):
 
     class Meta:
         model = Acteur
-        import_id_fields = ["identifiant_unique"]
+        import_id_fields = ["id"]
         store_instance = True
         exclude = [
             "cree_le",
@@ -304,16 +304,16 @@ class RevisionActeurChildInline(NotMutableMixin, admin.TabularInline):
     extra = 0
 
     def view_link(self, obj):
-        if obj.identifiant_unique:
+        if obj.id:
             return format_html(
                 '<a href="{}">{} ({})</a>',
                 # Comme dans le code de django : https://github.com/django/django/blob/6cfe00ee438111af38f1e414bd01976e23b39715/django/contrib/admin/models.py#L243
                 reverse(
                     "admin:qfdmo_revisionacteur_change",
-                    args=[quote(obj.identifiant_unique)],
+                    args=[quote(obj.id)],
                 ),
                 obj.nom,
-                obj.identifiant_unique,
+                obj.id,
             )
         return None
 
@@ -366,8 +366,8 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
         if "field_name" in request.GET and request.GET["field_name"] == "parent":
             queryset = queryset.filter(
                 # filtrer les acteurs pour n'afficher que ceux qui sont déjà parents
-                # identifiant_unique in select distinct(parent_id) from revisionacteur
-                identifiant_unique__in=Subquery(
+                # id in select distinct(parent_id) from revisionacteur
+                id__in=Subquery(
                     RevisionActeur.objects.filter(parent_id__isnull=False)
                     .values("parent_id")
                     .distinct()
@@ -390,7 +390,7 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
             return HttpResponseRedirect(
                 reverse(
                     "admin:qfdmo_revisionacteur_change",
-                    args=[revision_acteur.identifiant_unique],
+                    args=[revision_acteur.id],
                 )
             )
 
@@ -405,8 +405,8 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
         revision_acteur_form = super().get_form(request, obj, change, **kwargs)
         if obj and obj.is_parent:
             return revision_acteur_form
-        if obj and obj.identifiant_unique:
-            acteur = Acteur.objects.get(identifiant_unique=obj.identifiant_unique)
+        if obj and obj.id:
+            acteur = Acteur.objects.get(id=obj.id)
             for field_name, form_field in revision_acteur_form.base_fields.items():
                 if field_name == "parent":
                     continue
@@ -507,7 +507,7 @@ class PropositionServiceResource(BasePropositionServiceResource):
     acteur = fields.Field(
         column_name="acteur",
         attribute="acteur",
-        widget=widgets.ForeignKeyWidget(Acteur, field="identifiant_unique"),
+        widget=widgets.ForeignKeyWidget(Acteur, field="id"),
     )
 
     class Meta:
@@ -530,7 +530,7 @@ class RevisionPropositionServiceResource(BasePropositionServiceResource):
     acteur = fields.Field(
         column_name="acteur",
         attribute="acteur",
-        widget=widgets.ForeignKeyWidget(RevisionActeur, field="identifiant_unique"),
+        widget=widgets.ForeignKeyWidget(RevisionActeur, field="id"),
     )
 
     class Meta:
@@ -706,9 +706,9 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource):
                 ActeurPublicAccueilli.PROFESSIONNELS,
             ],
         )
-        # filter les acteur qui on '_reparation_' dans le champ identifiant_unique
+        # filter les acteur qui on '_reparation_' dans le champ id
         queryset = queryset.exclude(
-            identifiant_unique__icontains="_reparation_",
+            id__icontains="_reparation_",
         )
         # Export only acteurs with expected licenses
         if self.licenses:

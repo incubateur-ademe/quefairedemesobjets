@@ -44,8 +44,6 @@ def cluster_acteurs_suggestions_to_db(
             suggestion_cohorte=cohorte,
             statut=SuggestionStatut.AVALIDER,
             contexte=cluster.to_dict(orient="records"),
-            suggestion=cluster[["cluster_id", "identifiant_unique"]].to_dict(
-                orient="records"
-            ),
+            suggestion=cluster[["cluster_id", "id"]].to_dict(orient="records"),
         )
         suggestion.save()

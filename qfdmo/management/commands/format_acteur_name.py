@@ -101,9 +101,7 @@ class Command(BaseCommand):
                 continue
 
             count += 1
-            acteur = Acteur.objects.get(
-                identifiant_unique=final_acteur.identifiant_unique
-            )
+            acteur = Acteur.objects.get(id=final_acteur.id)
             revision_acteur = acteur.get_or_create_correctionequipe()
             revision_acteur.nom = formatted_nom
             revision_acteur.nom_commercial = formatted_nom_commercial

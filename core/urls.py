@@ -29,7 +29,7 @@ from .views import direct_access
 
 info_dict = {
     "queryset": DisplayedActeur.objects.filter(statut=ActeurStatus.ACTIF).order_by(
-        "identifiant_unique"
+        "id"
     ),
     "date_field": "modifie_le",
 }

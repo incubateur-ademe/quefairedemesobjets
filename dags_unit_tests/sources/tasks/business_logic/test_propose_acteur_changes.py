@@ -13,7 +13,7 @@ class TestProposeActeurChangesCreeLe:
             (
                 pd.DataFrame(
                     columns=[
-                        "identifiant_unique",
+                        "id",
                         "source_id",
                         "statut",
                         "cree_le",
@@ -22,7 +22,7 @@ class TestProposeActeurChangesCreeLe:
                 ),
                 pd.DataFrame(
                     {
-                        "identifiant_unique": ["source1_id1"],
+                        "id": ["source1_id1"],
                         "produitsdechets_acceptes": ["12345678"],
                         "nom_de_lorganisme": ["Eco1"],
                         "ecoorganisme": ["source1"],
@@ -33,7 +33,7 @@ class TestProposeActeurChangesCreeLe:
             (
                 pd.DataFrame(
                     {
-                        "identifiant_unique": ["source1_id1"],
+                        "id": ["source1_id1"],
                         "source_id": [101],
                         "statut": ["ACTIF"],
                         "cree_le": [datetime(2024, 1, 1)],
@@ -42,7 +42,7 @@ class TestProposeActeurChangesCreeLe:
                 ),
                 pd.DataFrame(
                     {
-                        "identifiant_unique": ["source1_id1"],
+                        "id": ["source1_id1"],
                         "produitsdechets_acceptes": ["12345678"],
                         "nom_de_lorganisme": ["Eco1"],
                         "ecoorganisme": ["source1"],
