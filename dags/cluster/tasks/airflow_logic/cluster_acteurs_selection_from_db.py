@@ -62,7 +62,7 @@ def cluster_acteurs_selection_from_db_wrapper(**kwargs) -> None:
         include_only_if_regex_matches_nom=config.include_only_if_regex_matches_nom,
         include_if_all_fields_filled=config.include_if_all_fields_filled,
         exclude_if_any_field_filled=config.exclude_if_any_field_filled,
-        extra_dataframe_fields=config.fields_used,
+        extra_dataframe_fields=config.fields_used_data,
     )
     df_acteurs = cluster_acteurs_df_sort(df_acteurs)
     log.preview("requête SQL utilisée", query)
@@ -85,7 +85,7 @@ def cluster_acteurs_selection_from_db_wrapper(**kwargs) -> None:
     logging.info(log.banner_string("Sélection des parents"))
     df_parents = cluster_acteurs_selection_acteur_type_parents(
         acteur_type_ids=config.include_acteur_type_ids,
-        fields=config.fields_used,
+        fields=config.fields_used_meta + config.fields_used_data,
         include_only_if_regex_matches_nom=config.include_parents_only_if_regex_matches_nom,
     )
     df_parents = cluster_acteurs_df_sort(df_parents)

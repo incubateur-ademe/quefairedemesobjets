@@ -1,5 +1,21 @@
+"""
+Modèle pydantic pour gérer la configuration
+du DAG de clustering des acteurs. On utilise bien
+le terme "config" et pas seulement "params" car les
+"params" de la UI Airflow sont une sous-partie de ce qui
+créer la config finale.
+"""
+
 from pydantic import BaseModel, Field, field_validator, model_validator
 from utils.airflow_params import airflow_params_dropdown_selected_to_ids
+
+FIELDS_USED_META_ALL = [
+    "source_id",
+    "acteur_type_id",
+    "identifiant_unique",
+    "statut",
+    "nombre_enfants",
+]
 
 
 class ClusterConfig(BaseModel):
@@ -43,8 +59,16 @@ class ClusterConfig(BaseModel):
     # ---------------------------------------
     # Listings & Mappings
     # ---------------------------------------
-    fields_used: list[str]
-    fields_all: list[str]
+    # On fait la distinction entre les champs meta
+    # qu'on ne souhaite pas transformer
+    fields_used_meta: list[str]
+    # Et les champs data qui peuvent être transformés
+    # (ex: normalisation). Dans la validation de config
+    # on vient enrichir cette liste avec tous les champs
+    # sélectionnés par l'utilisateur du DAG Airflow
+    fields_used_data: list[str]
+    # Ajouter les mappings à la config facilite le debug
+    # et évite d'avoir à faire des requêtes DB plusieurs fois
     mapping_source_ids_by_codes: dict[str, int]
     mapping_acteur_type_ids_by_codes: dict[str, int]
 
@@ -145,21 +169,27 @@ class ClusterConfig(BaseModel):
             if not values.get(k):
                 values[k] = []
 
-        # Liste UNIQUE des champs utilisés
-        # Certains champs tels "statut" ne sont pas utilisés en soit pour faire du
-        # clustering (on cluster que les actifs quoi qu'il arrive) mais
-        # sont à préserver de bout-en-bout pour des tâches de type validation
-        # et suivis des données
-        fields_used = ["source_id", "acteur_type_id", "identifiant_unique", "statut"]
+        # Construction de la liste des champs meta et data
+        # qui permet à travers de la pipeline de faire la distinction
+        # entre ce qu'on peut transformer car étant de la donnée (data)
+        # et ce qu'on doit garder inchangé (meta)
+        values["fields_used_meta"] = FIELDS_USED_META_ALL
+        values["fields_used_data"] = []
         for k, v in values.items():
-            if "fields" in k and k != "fields_all" and k != "source_id":
-                fields_used.extend(v)
-        values["fields_used"] = fields_used
-        values["fields_used"] = list(set(fields_used))
+            # On enrichit la liste des champs data avec les champs
+            # sélectionnés dans les différent paramètres de config
+            # à condition qu'ils ne soient pas meta
+            if "fields" in k and k != "fields_used_meta":
+                values["fields_used_data"] += [
+                    x for x in v if x not in FIELDS_USED_META_ALL
+                ]
+        values["fields_used_data"] = list(set(values["fields_used_data"]))
 
         # Si aucun champ pour la normalisation basique = tous les champs
-        # utilisés seront normalisés
-        if values["normalize_fields_basic"]:
-            values["normalize_fields_basic"] = values["fields_used"]
+        # data seront normalisés, pareil pour la norma d'ordre/unicité
+        if not values["normalize_fields_basic"]:
+            values["normalize_fields_basic"] = values["fields_used_data"]
+        if not values["normalize_fields_order_unique_words"]:
+            values["normalize_fields_order_unique_words"] = values["fields_used_data"]
 
         return values

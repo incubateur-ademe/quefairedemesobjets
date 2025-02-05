@@ -1,6 +1,9 @@
 import pandas as pd
 import pytest
 from cluster.tasks.business_logic.cluster_acteurs_choose_new_parents import (
+    REASON_MULTI_PARENTS_KEEP_MOST_CHILDREN,
+    REASON_NO_PARENT_CREATE_ONE,
+    REASON_ONE_PARENT_KEPT,
     cluster_acteurs_choose_new_parents,
     cluster_acteurs_one_cluster_changes_mark,
     cluster_acteurs_one_cluster_parent_choose,
@@ -81,7 +84,7 @@ class TestClusterACteursOneClusterParentChoose:
         id, change, reason = cluster_acteurs_one_cluster_parent_choose(df_one_parent)
         assert id == "c1_b"
         assert change == CHANGE_ACTEUR_PARENT_KEEP
-        assert reason == "1 seul parent existant -> on le garde"
+        assert reason == REASON_ONE_PARENT_KEPT
 
     def test_case_two_parents(self, df_two_parents):
         # Cas de figure avec 2 parents existants:
@@ -90,14 +93,14 @@ class TestClusterACteursOneClusterParentChoose:
         id, change, reason = cluster_acteurs_one_cluster_parent_choose(df_two_parents)
         assert id == "c2_a"
         assert change == CHANGE_ACTEUR_PARENT_KEEP
-        assert reason == "2+ parents, on garde celui avec le + d'enfants"
+        assert reason == REASON_MULTI_PARENTS_KEEP_MOST_CHILDREN
 
     def test_case_no_parent(self, df_no_parent):
         # Cas de figure avec 0 parent
         id, change, reason = cluster_acteurs_one_cluster_parent_choose(df_no_parent)
         assert id == parent_id_generate(df_no_parent["identifiant_unique"].tolist())
         assert change == CHANGE_ACTEUR_CREATE_AS_PARENT
-        assert reason == "Pas de parent existant -> on en crée un"
+        assert reason == REASON_NO_PARENT_CREATE_ONE
 
 
 class TestClusterActeursOneClusterChangesMark:
@@ -246,3 +249,8 @@ class TestClusterActeursChooseAllParents:
             [c2, "c2_e", 2, POINT],  # 🔵 pointer
             [c2, "c2_b", 3, DELETE],  # 🔴 supprimer
         ]
+
+    def test_pandas_warning(self, df_one_parent, df_two_parents):
+        df = pd.concat([df_one_parent, df_two_parents], ignore_index=True)
+        df = df[df["cluster_id"] == "c1_1parent"]
+        cluster_acteurs_choose_new_parents(df)

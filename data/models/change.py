@@ -48,8 +48,8 @@ COL_CHANGE_REASON = "change_reason"  # = debug
 # Liste des changements possibles, l'avantage
 # de définir des noms est de restreindre et d'expliciter
 # au maximum les conséquences des changements (on pourrait
-# utiliser 1 seul modèle totallement abstrait mais on perdrait
-# en lisibilité)
+# utiliser 1 seul modèle totallement abstrait mais en traçabilité
+# et ça deviendrait vite difficile à maintenir)
 CHANGE_ACTEUR_PARENT_DELETE = "acteur_parent_delete"
 CHANGE_ACTEUR_PARENT_KEEP = "acteur_parent_keep"
 CHANGE_ACTEUR_POINT_TO_PARENT = "acteur_point_to_parent"
@@ -64,7 +64,7 @@ CHANGE_ACTEUR_CREATE_AS_PARENT = "acteur_create_as_parent"
 
 
 class ChangeActeur(BaseModel):
-    """Modèle de base pour les changements d'1 acteur'"""
+    """Modèle de base pour les changements d'un acteur'"""
 
     # On a besoin de savoir quel acteur changer
     identifiant_unique: str

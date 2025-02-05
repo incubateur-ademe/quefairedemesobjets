@@ -10,7 +10,6 @@ exploser la taille des logs, donc on a besoin de refactorer:
     qui afficheront une partie du debug
 """
 
-import json
 import logging
 import re
 
@@ -20,6 +19,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from slugify import slugify
 from unidecode import unidecode
+from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
 
@@ -286,6 +286,7 @@ def cluster_acteurs_clusters(
     clusters_size1 = []
     clusters = []
     for exact_keys, exact_rows in df.groupby(cluster_fields_exact):
+        logger.info("\n\n")
         # On ne considère que les clusters de taille 2+
         if len(exact_rows) < 2:
             logger.info(f"🔴 Ignoré: cluster de taille <2: {list(exact_keys)}")
@@ -293,32 +294,10 @@ def cluster_acteurs_clusters(
             continue
         keys = list(exact_keys)
 
-        # TODO: à déplacer après la logique de clustering
-        # pour pouvoir sélectionner l'acteur avec le meilleur match
-        if cluster_fields_separate:
-            # Le cas où on cherche à séparer les clusters
-            # On cherche d'abord à voir si dans le groupe existant (exact_rows)
-            # Si c'est le cas, on les sépare en plusieurs clusters
-            for _, rows_split in exact_rows.groupby(cluster_fields_separate):
-                if len(rows_split) > 1:
-                    # TODO: gérer le cas split, pour l'instant on exclue juste
-                    # toutes les lignes sauf la première
-                    exact_rows = exact_rows.drop(rows_split.index[1:])
-
-        # On ne considère que les clusters de taille 2+
-        if len(exact_rows) < 2:
-            continue
+        log.preview_df_as_markdown("🔵 Cluster potentiel exact", exact_rows)
 
         # Liste des clusters à considérer, on commence avec rien
         clusters_to_add = []
-
-        logger.info(f"🟡 Cluster potentiel avant fuzzy: taille {len(exact_rows)}")
-        fields_debug = (
-            cluster_fields_exact + cluster_fields_fuzzy + ["identifiant_unique"]
-        )
-        logger.info(
-            json.dumps(exact_rows[fields_debug].to_dict(orient="list"), indent=4)
-        )
 
         # Si on a des champs fuzzy, on cherche à
         # sous-clusteriser sur ces champs
@@ -333,16 +312,26 @@ def cluster_acteurs_clusters(
             logger.info(f"Sous-clusters après fuzzy: {len(subclusters)} sous-clusters")
             for i, fuzzy_rows in enumerate(subclusters):
                 fuzzy_keys = keys + [str(i + 1)]
-                logger.info("🟢 Sous-cluster conservé:")
-                logger.info(json.dumps(fuzzy_rows.to_dict(orient="list"), indent=4))
+                log.preview_df_as_markdown("🟢 Cluster fuzzy conservé", fuzzy_rows)
                 clusters_to_add.append((fuzzy_keys, fuzzy_rows))
 
         else:
-            logger.info(
-                "🟢 Cluster conservé (sur la base des champs exacts uniquement)"
-            )
-            logger.info(exact_rows)
+            log.preview_df_as_markdown("🟢 Cluster exact conservé", exact_rows)
             clusters_to_add.append((keys, exact_rows))
+
+        """
+        # TODO: à déplacer dans une sous-fonction qu'on appliquerai
+        # à chaque cluster_to_add
+        if cluster_fields_separate:
+            # Le cas où on cherche à séparer les clusters
+            # On cherche d'abord à voir si dans le groupe existant (exact_rows)
+            # Si c'est le cas, on les sépare en plusieurs clusters
+            for _, rows_split in cluster_to_add[1].groupby(cluster_fields_separate):
+                if len(rows_split) > 1:
+                    # TODO: gérer le cas split, pour l'instant on exclue juste
+                    # toutes les lignes sauf la première
+                    exact_rows = exact_rows.drop(rows_split.index[1:])
+        """
 
         for keys, rows in clusters_to_add:
             cluster_id = cluster_id_from_strings(keys)

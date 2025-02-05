@@ -93,6 +93,9 @@ def cluster_acteurs_selection_from_db(
 
     # Les champs dont on a besoin pour la logique d'ensemble
     # indépendamment de ce que métier souhaite sélectionner
+    # TODO: on devrait pas avoir a définir cette liste ici également,
+    # on devrait utiliser config.fields_used_data comme la fonction de
+    # sélection des parents fait déjà (car écrite après & mieux)
     fields = [
         "identifiant_unique",
         # note: on cherche à récupérer les acteurs de displayed
@@ -103,6 +106,7 @@ def cluster_acteurs_selection_from_db(
         "source_id",
         "acteur_type_id",
         "nom",
+        "nombre_enfants",
     ]
     fields += include_if_all_fields_filled
     fields += exclude_if_any_field_filled

@@ -6,9 +6,9 @@ from airflow.exceptions import AirflowSkipException
 from airflow.operators.python import PythonOperator
 from cluster.config.model import ClusterConfig
 from cluster.tasks.business_logic import (
+    cluster_acteurs_add_original_df_columns,
     cluster_acteurs_clusters,
     cluster_acteurs_df_sort,
-    cluster_acteurs_parent_calculations,
 )
 from utils import logging_utils as log
 from utils.django import django_setup_full
@@ -50,6 +50,10 @@ def cluster_acteurs_suggestions_wrapper(**kwargs) -> None:
         raise ValueError("Pas de données acteurs normalisées récupérées")
 
     log.preview("config reçue", config)
+    # Zoom sur les champs de config de clustering pour + de clarté
+    for key, value in config.__dict__.items():
+        if key.startswith("cluster_"):
+            log.preview(f"config.{key}", value)
     log.preview("acteurs normalisés", df)
 
     df_clusters = cluster_acteurs_clusters(
@@ -64,6 +68,9 @@ def cluster_acteurs_suggestions_wrapper(**kwargs) -> None:
             log.banner_string("Pas de suggestions de clusters générées")
         )
 
+    logger.info("Ajout des colonnes de la df d'origine (ignorées par le clustering)")
+    df_clusters = cluster_acteurs_add_original_df_columns(df_clusters, df)
+
     logger.info("Ajout des données calculées")
     # TODO: créer une fonction dédiée qui permet de consolider:
     # - la df de suggestions (données uniquement nécessaires aux clusters)
@@ -72,8 +79,8 @@ def cluster_acteurs_suggestions_wrapper(**kwargs) -> None:
     # qui permettre + de validation/suivis au delà de ce qui est
     # nécessaire pour le clustering lui-même
     # En attendant un quick-fix pour récupérer le statut et passer la validation
-    status_by_id = df.set_index("identifiant_unique")["statut"]
-    df_clusters["statut"] = df_clusters["identifiant_unique"].map(status_by_id)
+    # status_by_id = df.set_index("identifiant_unique")["statut"]
+    # df_clusters["statut"] = df_clusters["identifiant_unique"].map(status_by_id)
 
     # Parent ID n'est pas présent dans DisplayedActeur (source des clusters)
     # donc on reconstruit ce champ à partir de RevisionActeur
@@ -85,8 +92,6 @@ def cluster_acteurs_suggestions_wrapper(**kwargs) -> None:
     df_clusters["parent_id"] = df_clusters["identifiant_unique"].map(
         lambda x: parent_ids_by_id.get(x, None)
     )
-
-    df_clusters = cluster_acteurs_parent_calculations(df_clusters)
 
     df_clusters = cluster_acteurs_df_sort(
         df_clusters,

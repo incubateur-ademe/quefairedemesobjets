@@ -1,3 +1,4 @@
+import json
 import uuid
 from logging import getLogger
 
@@ -18,6 +19,14 @@ from data.models.change import (  # noqa: E402
 )
 
 logger = getLogger(__name__)
+
+REASON_ONE_PARENT_KEPT = "🟢 1 seul parent existant -> on le garde"
+REASON_MULTI_PARENTS_KEEP_MOST_CHILDREN = (
+    "🔼 2+ parents, on garde celui avec le + d'enfants"
+)
+REASON_NO_PARENT_CREATE_ONE = "🔵 Pas de parent -> on en crée un"
+REASON_POINT_TO_NEW_PARENT = "🔀 Pointe vers le nouveau parent"
+REASON_PARENT_TO_DELETE = "🔴 Parent non choisi -> supprimé"
 
 
 def parent_id_generate(ids: list[str]) -> str:
@@ -69,13 +78,13 @@ def cluster_acteurs_one_cluster_changes_mark(
     filter_point = (df["nombre_enfants"] == 0) & (df["identifiant_unique"] != parent_id)
     df.loc[filter_point, "parent_id"] = parent_id
     df.loc[filter_point, COL_CHANGE_TYPE] = CHANGE_ACTEUR_POINT_TO_PARENT
-    df.loc[filter_point, COL_CHANGE_REASON] = "Pointe vers le nouveau parent"
+    df.loc[filter_point, COL_CHANGE_REASON] = REASON_POINT_TO_NEW_PARENT
     df.loc[filter_point, COL_CHANGE_ORDER] = 2
 
     # Enfin tous les anciens parents (si il y en a) doivent être supprimés
     filter_delete = (df["nombre_enfants"] > 0) & (df["identifiant_unique"] != parent_id)
     df.loc[filter_delete, COL_CHANGE_TYPE] = CHANGE_ACTEUR_PARENT_DELETE
-    df.loc[filter_delete, COL_CHANGE_REASON] = "Parent non choisi -> supprimé"
+    df.loc[filter_delete, COL_CHANGE_REASON] = REASON_PARENT_TO_DELETE
     df.loc[filter_delete, COL_CHANGE_ORDER] = 3
 
     return df
@@ -84,35 +93,41 @@ def cluster_acteurs_one_cluster_changes_mark(
 def cluster_acteurs_one_cluster_parent_choose(df: pd.DataFrame) -> tuple[str, str, str]:
     """Décide de la sélection du parent sur 1 cluster"""
 
-    parents_count = df[df["nombre_enfants"] > 0]["identifiant_unique"].nunique()
+    try:
+        parents_count = df[df["nombre_enfants"] > 0]["identifiant_unique"].nunique()
 
-    if parents_count == 1:
-        # Cas: 1 parent = on le garde
-        index = df[df["nombre_enfants"] > 0].index[0]
-        parent_id = df.at[index, "identifiant_unique"]
-        change_type = CHANGE_ACTEUR_PARENT_KEEP
-        change_reason = "1 seul parent existant -> on le garde"
+        if parents_count == 1:
+            # Cas: 1 parent = on le garde
+            index = df[df["nombre_enfants"] > 0].index[0]
+            parent_id = df.at[index, "identifiant_unique"]
+            change_type = CHANGE_ACTEUR_PARENT_KEEP
+            change_reason = REASON_ONE_PARENT_KEPT
 
-    elif parents_count >= 2:
-        # Cas: 2+ parents = on en choisit le parent avec le + d'enfants
-        index = df["nombre_enfants"].idxmax()
-        parent_id = df.at[index, "identifiant_unique"]
-        change_type = CHANGE_ACTEUR_PARENT_KEEP
-        change_reason = "2+ parents, on garde celui avec le + d'enfants"
+        elif parents_count >= 2:
+            # Cas: 2+ parents = on en choisit le parent avec le + d'enfants
+            index = df["nombre_enfants"].idxmax()
+            parent_id = df.at[index, "identifiant_unique"]
+            change_type = CHANGE_ACTEUR_PARENT_KEEP
+            change_reason = REASON_MULTI_PARENTS_KEEP_MOST_CHILDREN
 
-    elif parents_count == 0:
-        # Cas: 0 parent = on en crée un
-        ids_non_parents = df[df["nombre_enfants"] == 0]["identifiant_unique"].tolist()
-        parent_id = parent_id_generate(ids_non_parents)
-        change_type = CHANGE_ACTEUR_CREATE_AS_PARENT
-        change_reason = "Pas de parent existant -> on en crée un"
+        elif parents_count == 0:
+            # Cas: 0 parent = on en crée un
+            ids_non_parents = df[df["nombre_enfants"] == 0][
+                "identifiant_unique"
+            ].tolist()
+            parent_id = parent_id_generate(ids_non_parents)
+            change_type = CHANGE_ACTEUR_CREATE_AS_PARENT
+            change_reason = REASON_NO_PARENT_CREATE_ONE
 
-    else:
-        # Safety net ou cas où la logique ci-dessus est mal refactorisée à l'avenir
-        # et q'uon oublie de gérer un cas
-        raise ValueError(f"Cas non géré/logique male pensée: {parents_count=}")
+        else:
+            # Safety net si logique mal refactorisée et q'uon oublie de gérer un cas
+            raise ValueError(f"Cas non géré/logique male pensée: {parents_count=}")
 
-    return parent_id, change_type, change_reason
+        return parent_id, change_type, change_reason
+    except Exception as e:
+        debug = json.dumps(df.to_dict(orient="records"), indent=2)
+        logger.error(f"Problème cluster:\n{debug}")
+        raise e
 
 
 def cluster_acteurs_choose_new_parents(df_clusters: pd.DataFrame) -> pd.DataFrame:

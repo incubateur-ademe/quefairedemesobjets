@@ -1,5 +1,7 @@
+import inspect
 import json
 import logging
+import os
 from datetime import date, datetime
 from typing import Any
 
@@ -7,9 +9,16 @@ import numpy as np
 import pandas as pd
 from pydantic import BaseModel
 
-# TODO: improve by moving instantiation inside the functions
-# and using inspect to get the parent caller's name
-log = logging.getLogger(__name__)
+
+def logger_get(levels: int = 2) -> logging.Logger:
+    """Utilitaire pour obtenir le logger avec nom du fichier appelant
+    source, sinon tous les logs ont le nom du fichier courant
+    (logging_utils) ce qui perd de l'intérêt pour le logging.
+
+    Ajuster levels en fonction du nestage des fonctions, par défaut
+    2 niveaux pour skipper logger_get + preview et obtenir la source"""
+    caller_name = os.path.basename(inspect.stack()[levels].filename)
+    return logging.getLogger(caller_name)
 
 
 class CustomJSONEncoder(json.JSONEncoder):
@@ -50,6 +59,8 @@ def size_info_get(value: Any) -> Any:
         return f"{len(value.model_fields.keys())} propriétés"
     elif isinstance(value, (str, bytes)):
         return len(value)  # Length of string or bytes
+    elif isinstance(value, (int, float, bool)):
+        return 1
     else:
         try:
             # Attempt to get the length for any other object with a length
@@ -63,6 +74,7 @@ def preview(value_name: str, value: Any) -> None:
     de manière cohérente et utile (ex: par défaut airflow xcom
     est tronqué lorsqu'il s'agit d'une dataframe).
     """
+    log = logger_get()
     size = size_info_get(value)
     log.info(f"::group::🔎 {value_name}: taille={size}, type={type(value).__name__}")
     if isinstance(value, pd.DataFrame):
@@ -97,6 +109,7 @@ def preview_df_as_markdown(label: str, df: pd.DataFrame) -> None:
     obtenir une table lisible. On ne filtre pas la df ici, c'est
     à l'appelant de décider (ex: this("me",df.head(10))"""
     size = size_info_get(df)
+    log = logger_get()
     log.info(f"::group::📦 {label}: taille={size}, 🔽 Cliquer pour révéler la table 🔽")
     log.info("\n" + df.to_markdown(index=False))
     log.info("::endgroup::")

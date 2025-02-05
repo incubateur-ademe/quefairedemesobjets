@@ -8,11 +8,11 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from cluster.config.model import ClusterConfig
 from utils import logging_utils as log
-from utils.django import django_model_fields_attributes_get, django_setup_full
+from utils.django import django_setup_full
 
 django_setup_full()
 
-from qfdmo.models import Acteur, ActeurType, Source  # noqa: E402
+from qfdmo.models import ActeurType, Source  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +42,6 @@ def cluster_acteurs_config_create_wrapper(**kwargs):
     logger.info(task_info_get())
     params = kwargs["params"]
     extra = {
-        "fields_all": django_model_fields_attributes_get(Acteur),
         "mapping_source_ids_by_codes": {x.code: x.id for x in Source.objects.all()},
         "mapping_acteur_type_ids_by_codes": {
             x.code: x.id for x in ActeurType.objects.all()

@@ -45,16 +45,17 @@ class TestClusteringActeursNormalize:
         )
 
     def test_default(self, df):
+        cols = df.columns.tolist()
         df_norm = cluster_acteurs_normalize(
             df,
-            # Par défaut si on ne précise pas de champs,
-            # on applique la normalisation basique à tous les champs
-            normalize_fields_basic=[],
+            # On enlève toute la logique de défaut de la fonction de
+            # norma: elle fait se qu'on lui dit, point barre. Toute
+            # la logique de défaut/métier est à gérer en amont dans la config
+            normalize_fields_basic=cols,
             normalize_fields_no_words_size1=["nom", "adresse"],
             normalize_fields_no_words_size2_or_less=["mots_remove_2"],
             normalize_fields_no_words_size3_or_less=["mots_remove_3"],
-            # Pareil, par défaut on applique à tous les champs
-            normalize_fields_order_unique_words=[],
+            normalize_fields_order_unique_words=cols,
         )
 
         assert df_norm["nom"].tolist() == [

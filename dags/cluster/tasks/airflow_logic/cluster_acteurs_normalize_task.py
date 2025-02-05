@@ -46,6 +46,10 @@ def cluster_acteurs_normalize_wrapper(**kwargs) -> None:
         raise ValueError("Pas de données acteurs récupérées")
 
     log.preview("config reçue", config)
+    # Zoom sur les champs de config de normalisation pour + de clarté
+    for key, value in config.__dict__.items():
+        if key.startswith("normalize_"):
+            log.preview(f"config.{key}", value)
     log.preview("acteurs sélectionnés", df)
 
     df_norm = cluster_acteurs_normalize(
@@ -63,6 +67,9 @@ def cluster_acteurs_normalize_wrapper(**kwargs) -> None:
 
     logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
     df_norm = cluster_acteurs_df_sort(df_norm)
+    # TODO: investiguer pourquoi le type du champ ci-dessous bascule de int->str
+    # pendant la norma alors que le champ n'est pas manipulé, en dessous = quick fix
+    df_norm["nombre_enfants"] = df_norm["nombre_enfants"].astype(int)
     log.preview_df_as_markdown("acteurs normalisés", df_norm)
 
     # Les XCOM étant spécifiques à une tâche on peut pousser

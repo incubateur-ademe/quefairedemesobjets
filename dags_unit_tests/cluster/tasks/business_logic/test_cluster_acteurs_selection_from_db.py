@@ -8,10 +8,10 @@ from cluster.tasks.business_logic.cluster_acteurs_selection_from_db import (
     cluster_acteurs_selection_from_db,
 )
 
-from qfdmo.models import Acteur
+from qfdmo.models import RevisionActeur
 from unit_tests.qfdmo.acteur_factory import (
-    ActeurFactory,
     ActeurTypeFactory,
+    RevisionActeurFactory,
     SourceFactory,
 )
 
@@ -37,7 +37,7 @@ class TestClusterActeursDbDataReadActeurs:
         # ------------------------------------------
         # 🟢 Acteurs qui devraient être inclus
         # 2 acteurs de la source 1 avec mix de type
-        ActeurFactory(
+        RevisionActeurFactory(
             source=s1,
             acteur_type=at1,
             nom="CORRêct_nom_s1_at1",
@@ -45,7 +45,7 @@ class TestClusterActeursDbDataReadActeurs:
             ville="Paris",
             code_postal="75000",
         )
-        ActeurFactory(
+        RevisionActeurFactory(
             source=s1,
             acteur_type=at2,
             nom="CORRêct_nom_s1_at2",
@@ -54,7 +54,7 @@ class TestClusterActeursDbDataReadActeurs:
             code_postal="75000",
         )
         # 1 acteur de la source 2
-        ActeurFactory(
+        RevisionActeurFactory(
             source=s2,
             acteur_type=at1,
             nom="!!correct_nom_s2_at1",
@@ -65,7 +65,7 @@ class TestClusterActeursDbDataReadActeurs:
         # ------------------------------------------
         # 🟡 Acteurs qui devraient être exclus
         # identique au 1er bon acteur MAIS INACTIF
-        ActeurFactory(
+        RevisionActeurFactory(
             source=s1,
             acteur_type=at1,
             nom="correct_nom_mais_inactif",
@@ -75,21 +75,21 @@ class TestClusterActeursDbDataReadActeurs:
             statut="INACTIF",
         )
         # ville None alors que champ dans include_if_all_fields_filled
-        ActeurFactory(
+        RevisionActeurFactory(
             source=s1,
             acteur_type=at1,
             nom="correct_nom_mais_ville_none",
             ville=None,
         )
         # ville "" alors que champ dans include_if_all_fields_filled
-        ActeurFactory(
+        RevisionActeurFactory(
             source=s1,
             acteur_type=at1,
             nom="correct_nom_mais_ville_vide",
             ville="",
         )
         # siret rempli alors que champ dans exclude_if_any_field_filled
-        ActeurFactory(
+        RevisionActeurFactory(
             source=s1,
             acteur_type=at1,
             nom="nom_correct_mais_siret",
@@ -97,18 +97,18 @@ class TestClusterActeursDbDataReadActeurs:
             siret="01234567891234",
         )
         # nom qui ne match pas include_only_if_regex_matches_nom
-        ActeurFactory(
+        RevisionActeurFactory(
             source=s1, acteur_type=at1, nom="nom_match_pas_regex", ville="Paris"
         )
         # source pas dans include_source_ids
-        ActeurFactory(
+        RevisionActeurFactory(
             source=source_pas_bonne,
             acteur_type=at1,
             nom="correct_nom_mais_mauvaise_source",
             ville="Paris",
         )
         # type pas dans include_acteur_type_ids
-        ActeurFactory(
+        RevisionActeurFactory(
             source=s1,
             acteur_type=atype_pas_bon,
             nom="correct_nom_mais_mauvais_type",
@@ -116,7 +116,7 @@ class TestClusterActeursDbDataReadActeurs:
         )
         # numero_et_complement_de_rue rempli
         # alors que champ dans exclude_if_any_field_filled
-        ActeurFactory(
+        RevisionActeurFactory(
             source=s1,
             acteur_type=at1,
             nom="correct_nom_mais_numero_rue",
@@ -126,7 +126,7 @@ class TestClusterActeursDbDataReadActeurs:
         # adresse redondante avec le nom
         # et nom_sans_combine_adresses dans
         # include_if_all_fields_filled
-        ActeurFactory(
+        RevisionActeurFactory(
             source=s1,
             acteur_type=at1,
             nom="correct nom mais redondant adresse",
@@ -152,7 +152,7 @@ class TestClusterActeursDbDataReadActeurs:
         s1, s2, at1, at2 = db_testdata_write
 
         return cluster_acteurs_selection_from_db(
-            model_class=Acteur,
+            model_class=RevisionActeur,
             include_source_ids=[s1.id, s2.id],
             include_acteur_type_ids=[at1.id, at2.id],
             include_only_if_regex_matches_nom="correct",
@@ -324,7 +324,7 @@ class TestClusterActeursDbDataReadActeurs:
             ValueError, match="Pas de données retournées par la query Django"
         ):
             cluster_acteurs_selection_from_db(
-                model_class=Acteur,
+                model_class=RevisionActeur,
                 # Sources et types inconnus au bataillon
                 # d'où l'échec de la query
                 include_source_ids=[-1],
@@ -341,7 +341,7 @@ class TestClusterActeursDbDataReadActeurs:
         s1, _, at1, _ = db_testdata_write
         with pytest.raises(ValueError, match="Dataframe vide après filtrage"):
             cluster_acteurs_selection_from_db(
-                model_class=Acteur,
+                model_class=RevisionActeur,
                 include_source_ids=[s1.id],
                 include_acteur_type_ids=[at1.id],
                 # Ce qui va rendre la dataframe vide c'est le filtre
