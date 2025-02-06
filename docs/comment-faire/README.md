@@ -4,6 +4,7 @@
 ```{toctree}
 :hidden:
 
-101-commandes-django
-201-production-rollback
+django/commandes.md
+prod/commandes.md
+prod/rollback.md
 ```
