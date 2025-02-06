@@ -14,7 +14,6 @@ from django.db.models.query import QuerySet
 from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
-from django.urls.base import reverse
 from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_GET
 from django.views.generic.edit import FormView
@@ -47,30 +46,6 @@ from qfdmo.thread.materialized_view import RefreshMateriazedViewThread
 logger = logging.getLogger(__name__)
 
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
-
-
-def direct_access(request):
-    get_params = request.GET.copy()
-
-    if "carte" in request.GET:
-        # Order matters, this should be before iframe because iframe and carte
-        # parameters can coexist
-        del get_params["carte"]
-        try:
-            del get_params["iframe"]
-        except KeyError:
-            pass
-        params = get_params.urlencode()
-        parts = [reverse("qfdmo:carte"), "?" if params else "", params]
-        return redirect("".join(parts))
-
-    if "iframe" in request.GET:
-        del get_params["iframe"]
-        params = get_params.urlencode()
-        parts = [reverse("qfdmo:formulaire"), "?" if params else "", params]
-        return redirect("".join(parts))
-
-    return redirect("https://longuevieauxobjets.ademe.fr/lacarte", permanent=True)
 
 
 class DigitalMixin:
@@ -640,7 +615,14 @@ def get_object_list(request):
     )
 
 
-def acteur_detail(request, identifiant_unique):
+def acteur_detail_redirect(request, identifiant_unique):
+    displayed_acteur = DisplayedActeur.objects.get(
+        identifiant_unique=identifiant_unique
+    )
+    return redirect("qfdmo:acteur-detail", uuid=displayed_acteur.uuid, permanent=True)
+
+
+def acteur_detail(request, uuid):
     base_template = "layout/base.html"
 
     if request.headers.get("Turbo-Frame"):
@@ -656,7 +638,11 @@ def acteur_detail(request, identifiant_unique):
         "proposition_services__action__groupe_action",
         "labels",
         "sources",
-    ).get(identifiant_unique=identifiant_unique)
+    ).get(uuid=uuid)
+
+    if displayed_acteur.statut != ActeurStatus.ACTIF:
+        return redirect("https://quefairedemesdechets.ademe.fr", permanent=True)
+
     context = {
         "base_template": base_template,
         "object": displayed_acteur,  # We can use object here so that switching

@@ -8,7 +8,6 @@ Les fichiers qui concerne la plateforme data :
 - `./dags` répertoire dans lequels sont stockés tous les dags executés sur le cluster Airflow
 - `airflow-scheduler.Dockerfile` et `airflow-webserver.Dockerfile`, fichier de configuration docker executer dans tous les environnements
 - `docker-compose.yml` orchestre les dockers en envronnemnt de développement
-- `sync_dags.sh` script de synchro des dags orchestré pas un DAG `dags/download_dags.py`
 - `./dags_unit_tests` répertoire qui contient les tests des dags
 
 ## Environnements
@@ -94,26 +93,33 @@ Lorsque la base de données est dockerisée, la connexion doit être configurée
 
 ![Configuration d'une connexion à Postgres dockerisé dans Airflow](./img/airflow-db-connection-configuration.png)
 
-### Déploiement des dags en preprod et en prod
+### Déploiement en preprod et en prod
 
-Les variables d'environnement dans Github Action nécessaires au déploiement des dags via la CI/CD sont:
+le déploiement est assuré en CI par le `job` 47ng/actions-clever-cloud
 
-- `PREPROD_AWS_ACCESS_KEY_ID` et `PREPROD_AWS_SECRET_ACCESS_KEY` du stockage s3 permettant le déploiement du dag en preprod
-- `PROD_AWS_ACCESS_KEY_ID` et `PROD_AWS_SECRET_ACCESS_KEY` du stockage s3 permettant le déploiement du dag en prod
+#### Forcer un déploiement
 
-Les dags sont déployés via un bucket s3, dans un bucket au nom de l'environnement sur clevercloud :
+Pour forcer le déploiement, il suffit de pousser la branche à déployer sur :
 
-- `s3://preprod-data-dags/` sur l'instance s3 `preprod-airflow-s3`
-- `s3://prod-dags/` sur l'instance s3 `prod-airflow-s3`
+- les 2 repo git des projets `webserver`et `scheduler`
+- en choisissant le bon environnement
+- sur la branche master
 
-Cette copie est faite via la CI/CD github action:
+1. Configuration
 
-- sur le s3 de `preprod` lors de l'intergration d'un PR à la branche `main`
-- sur le s3 de `prod` lors de la dépose d'un tag de version sur le repo git
+le repository git est disponible sur l'interface de clevercloud
 
-Ce process suit le même cicle de vie que l'interface et assure la cohérence des versions entre l'interface, la plateforme data et l'état de la base de donnée.
+```sh
+git remote add <ENV>-airflow-webserver <REPO_GIT_ENV_WEBSERVER>
+git remote add <ENV>-airflow-scheduler <REPO_GIT_ENV_SCHEDULER>
+```
 
-Airflow est déployé avec le DAG `download_dags_from_s3` qui synchronise les dags de l'environnement à partir des repo s3. Ce dag est executé toutes les 5 minutes ou à la demande.
+2. Déployement
+
+```sh
+git push preprod-airflow-webserver <BRANCH/TAG>:master
+git push preprod-airflow-scheduler <BRANCH/TAG>:master
+```
 
 ### Configurer l'environnement de développement
 

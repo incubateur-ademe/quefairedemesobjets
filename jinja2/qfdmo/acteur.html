@@ -9,7 +9,7 @@
                     {% include "qfdmo/acteur/_labels.html" %}
                 {% endif %}
 
-                <h2 class="qf-text-lg qf-m-0 qf-max-w-[90%]">{{ object.nom }}</h2>
+                <h2 class="qf-text-lg qf-m-0 qf-max-w-[90%]" data-testid="acteur-title">{{ object.libelle|title }}</h2>
                 <p class="qf-text-sm qf-m-0">
                     {{ object.acteur_services_display }} {{ distance }}
                 </p>

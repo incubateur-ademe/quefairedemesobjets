@@ -1,23 +1,51 @@
+from typing import cast
+
 from django import template
+from django.conf import settings
+from django.core.cache import cache
+from django.forms import FileField
+from django.utils.safestring import mark_safe
 
 register = template.Library()
 
 
-@register.inclusion_tag("components/carte/carte.html", takes_context=True)
-def carte_from(context, produit):
-    request = context["request"]
-    try:
-        return {
-            "carte_settings": produit.sous_categorie_with_carte_display.carte_settings.items(),  # noqa: E501
-            "request": request,
-        }
-    except AttributeError:
-        return {}
-
-
 @register.inclusion_tag("components/patchwork/patchwork.html")
-def patchwork():
-    from qfdmd.models import Produit
+def patchwork() -> dict:
+    from qfdmd.models import Synonyme
 
-    produits = Produit.objects.exclude(picto="").exclude(picto=None)
-    return {"top": produits[:24], "left": produits[24:30], "right": produits[30:36]}
+    produits = (
+        Synonyme.objects.exclude(picto="")
+        .exclude(picto=None)
+        .filter(pin_on_homepage=True)[:19]
+    )
+    return {"top": produits[:10], "left": produits[10:14], "right": produits[16:19]}
+
+
+@register.simple_tag
+def render_file_content(file_field: FileField) -> str:
+    """Renders the content of a Filefield as a safe HTML string
+    and caches the result."""
+
+    def get_file_content() -> str:
+        with file_field.open() as f:
+            return mark_safe(f.read().decode("utf-8"))  # noqa: S308
+
+    return cast(
+        str,
+        cache.get_or_set(
+            f"filefield-{file_field.name}-{file_field.size}", get_file_content
+        ),
+    )
+
+
+@register.inclusion_tag("head/favicon.html")
+def favicon() -> dict:
+    return {}
+
+
+@register.inclusion_tag("tracking/matomo.html")
+def matomo():
+    return {
+        "matomo_url": "stats.beta.gouv.fr",
+        "matomo_id": settings.ASSISTANT["MATOMO_ID"],
+    }

@@ -1,12 +1,18 @@
+"""
+DEPRECATED : utiliser le dag apply_suggestions
+"""
+
 from datetime import timedelta
 
 import pandas as pd
 from airflow.models import DAG
-from airflow.operators.dagrun_operator import TriggerDagRunOperator
-from airflow.operators.python_operator import BranchPythonOperator, PythonOperator
+from airflow.operators.python import BranchPythonOperator, PythonOperator
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.utils.dates import days_ago
-from utils import dag_ingest_validated_utils, shared_constants
+from shared.tasks.database_logic.db_manager import PostgresConnectionManager
+from sources.config import shared_constants as constants
+from utils import dag_ingest_validated_utils
 
 default_args = {
     "owner": "airflow",
@@ -18,9 +24,12 @@ default_args = {
 
 dag = DAG(
     dag_id="validate_and_process_dagruns",
-    dag_display_name="Traitement des cohortes de données validées",
+    dag_display_name="DEPRECATED : Traitement des cohortes de données validées",
     default_args=default_args,
-    description="Check for VALIDATE in qfdmo_dagrun and process qfdmo_dagrunchange",
+    description="""
+    DEPRECATED : Check for VALIDATE in qfdmo_dagrun and process qfdmo_dagrunchange
+    util uniquement pour les cohortes de siretisations
+    """,
     schedule="*/5 * * * *",
     catchup=False,
     max_active_runs=1,
@@ -31,7 +40,7 @@ def _get_first_dagrun_to_insert():
     hook = PostgresHook(postgres_conn_id="qfdmo_django_db")
     # get first row from table qfdmo_dagrun with status TO_INSERT
     row = hook.get_first(
-        f"SELECT * FROM qfdmo_dagrun WHERE status = '{shared_constants.TO_INSERT}'"
+        f"SELECT * FROM qfdmo_dagrun WHERE status = '{constants.DAGRUN_TOINSERT}'"
         " LIMIT 1"
     )
     return row
@@ -51,8 +60,7 @@ def fetch_and_parse_data(**context):
     row = _get_first_dagrun_to_insert()
     dag_run_id = row[0]
 
-    pg_hook = PostgresHook(postgres_conn_id="qfdmo_django_db")
-    engine = pg_hook.get_sqlalchemy_engine()
+    engine = PostgresConnectionManager().engine
 
     df_sql = pd.read_sql_query(
         f"SELECT * FROM qfdmo_dagrunchange WHERE dag_run_id = '{dag_run_id}'",
@@ -91,8 +99,7 @@ def write_data_to_postgres(**kwargs):
     data_dict = kwargs["ti"].xcom_pull(task_ids="fetch_and_parse_data")
     # If data_set is empty, nothing to do
     dag_run_id = data_dict["dag_run_id"]
-    pg_hook = PostgresHook(postgres_conn_id="qfdmo_django_db")
-    engine = pg_hook.get_sqlalchemy_engine()
+    engine = PostgresConnectionManager().engine
     if "actors" not in data_dict:
         with engine.begin() as connection:
             dag_ingest_validated_utils.update_dag_run_status(connection, dag_run_id)

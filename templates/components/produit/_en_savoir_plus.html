@@ -1,0 +1,13 @@
+{% comment %}
+Afin de tirer parti des composants DSFR de django-dsfr, ce template est rendu
+In order to take advantage of django-dsfr components, this template is rendered
+directly at the model-level.
+It is not directly included, however in order to maintain consistency accross
+templates, it is placed under the produit directory.
+{% endcomment %}
+
+<div class="qf-flex qf-flex-col qf-gap-3w">
+    {% for lien in liens %}
+        {% include "components/lien/lien.html" %}
+    {% endfor %}
+</div>

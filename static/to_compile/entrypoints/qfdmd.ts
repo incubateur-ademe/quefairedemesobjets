@@ -1,16 +1,17 @@
 import * as Turbo from "@hotwired/turbo"
+import 'iframe-resizer/js/iframeResizer.contentWindow.min.js';
 import { Application } from "@hotwired/stimulus"
 
 import SearchController from "../js/controllers/assistant/search"
+import BlinkController from "../js/controllers/assistant/blink"
+import AnalyticsController from "../js/controllers/assistant/analytics"
+import CopyController from "../js/copy_controller"
 
 window.stimulus = Application.start()
+stimulus.debug = document.body.dataset.stimulusDebug
 stimulus.register("search", SearchController)
-
-// TODO: remove once the map will be loaded using a turbo frame
-window.addEventListener("load", () => {
-  const iframe = document.querySelector("#ou-l-apporter iframe")
-  iframe.contentWindow.postMessage("ademe", "*");
-})
-
+stimulus.register("blink", BlinkController)
+stimulus.register("copy", CopyController)
+stimulus.register("analytics", AnalyticsController)
 
 Turbo.session.drive = false;

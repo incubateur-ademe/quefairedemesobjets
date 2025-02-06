@@ -1,5 +1,6 @@
 import json
 
+from django.contrib.admin.utils import quote
 from django.template.defaulttags import register
 from django.utils.safestring import mark_safe
 
@@ -16,3 +17,13 @@ def options_in_json(optgroups):
             ensure_ascii=False,
         )
     )
+
+
+@register.filter
+def valuetype(value):
+    return type(value).__name__
+
+
+@register.filter(name="quote")
+def quote_filter(value):
+    return quote(value)

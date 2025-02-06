@@ -3,21 +3,35 @@ from typing import List, cast
 from colorfield.fields import ColorField
 from django.contrib.gis.db import models
 from django.core.cache import cache
+from django.db.models import CheckConstraint, Q
 from django.db.models.query import QuerySet
 from django.forms import model_to_dict
 from django.utils.functional import cached_property
 
 from dsfr_hacks.colors import DSFRColors
 from qfdmo.models.utils import CodeAsNaturalKeyManager, CodeAsNaturalKeyModel
+from qfdmo.validators import CodeValidator
 
 
 class ActionDirection(CodeAsNaturalKeyModel):
     class Meta:
         verbose_name = "Direction de l'action"
         verbose_name_plural = "Directions de l'action"
+        constraints = [
+            CheckConstraint(
+                check=Q(code__regex=CodeValidator.regex),
+                name="action_direction_code_format",
+            ),
+        ]
 
     id = models.AutoField(primary_key=True)
-    code = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    code = models.CharField(
+        max_length=255,
+        unique=True,
+        blank=False,
+        null=False,
+        validators=[CodeValidator()],
+    )
     order = models.IntegerField(blank=False, null=False, default=0)
     libelle = models.CharField(max_length=255, unique=True, blank=False, null=False)
 
@@ -52,9 +66,21 @@ class GroupeAction(CodeAsNaturalKeyModel):
     class Meta:
         verbose_name = "Groupe d'actions"
         verbose_name_plural = "Groupes d'actions"
+        constraints = [
+            CheckConstraint(
+                check=Q(code__regex=CodeValidator.regex),
+                name="groupe_action_code_format",
+            ),
+        ]
 
     id = models.AutoField(primary_key=True)
-    code = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    code = models.CharField(
+        max_length=255,
+        unique=True,
+        blank=False,
+        null=False,
+        validators=[CodeValidator()],
+    )
     afficher = models.BooleanField(default=True)
     description = models.CharField(max_length=255, null=True, blank=True)
     order = models.IntegerField(blank=False, null=False, default=0)
@@ -103,9 +129,20 @@ class GroupeAction(CodeAsNaturalKeyModel):
 class Action(CodeAsNaturalKeyModel):
     class Meta:
         ordering = ["order"]
+        constraints = [
+            CheckConstraint(
+                check=Q(code__regex=CodeValidator.regex), name="action_code_format"
+            ),
+        ]
 
     id = models.AutoField(primary_key=True)
-    code = models.CharField(max_length=255, unique=True, blank=False, null=False)
+    code = models.CharField(
+        max_length=255,
+        unique=True,
+        blank=False,
+        null=False,
+        validators=[CodeValidator()],
+    )
     libelle = models.CharField(max_length=255, null=False, default="")
     libelle_groupe = models.CharField(
         max_length=255,

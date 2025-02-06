@@ -1,8 +1,13 @@
 {% extends "qfdmd/base.html" %}
+{% load dsfr_tags %}
 
 {% block header %}
 {% include "components/header/header_home.html" %}
 {% endblock header %}
+
+{% block analytics_action %}homePageView{% endblock %}
+
+{% block body_attrs %}data-home{% endblock %}
 
 {% block main %}
 <div class="qf-flex qf-flex-col qf-gap-7w">
@@ -26,7 +31,7 @@
             {% with suggestion.produit as produit %}
             <a
                 class="qf-btn"
-                href="{% url 'qfdmd:synonyme-detail' slug=produit.slug %}"
+                href="{% url 'qfdmd:synonyme-detail' slug=produit.slug %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}"
             >
                 {{ produit.nom|capfirst }}
             </a>
@@ -35,8 +40,8 @@
         </div>
     </div>
 
-    {# accordion #}
-    <div>
+    <div class="qf-max-w-3xl qf-mx-auto">
+        {% dsfr_accordion accordion %}
     </div>
 </div>
 {% endblock main %}

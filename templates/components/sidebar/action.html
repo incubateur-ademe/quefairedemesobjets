@@ -1,15 +1,30 @@
 {% block modal_wrapper_for_id %}
 <button
-    class="qf-rounded-l-full qf-py-2w qf-pl-2w
-    hover:!qf-bg-green-menthe-850-active qf-bg-green-menthe-850-hover
-    qf-flex qf-items-center qf-justify-center"
+    {# The rounded-full here need to match the one of the icon #}
+    class="qf-p-0 lg:qf-rounded-l-full"
     data-fr-opened="false"
     aria-controls="fr-modal-{{ id }}"
+    aria-labelledby="sidebar-action-{{ id }}"
 >
-    {% block icon %}{% endblock %}
+    <span class="
+        lg:qf-rounded-l-full lg:qf-py-2w lg:qf-pl-2w lg:qf-pr-1w
+        hover:!qf-bg-green-menthe-850-active qf-bg-green-menthe-850-hover
+        qf-flex qf-items-center qf-justify-center
+        max-lg:qf-aspect-square max-lg:qf-p-3v max-lg:qf-scale-75 max-lg:qf-rounded-full
+        max-lg:qf-mx-auto max-lg:qf-w-8w"
+    >{% block icon %}{% endblock %}</span>
+    <span id="sidebar-action-{{ id }}"
+        class="lg:qf-sr-only qf-font-bold qf-text-sm">
+        {% block button_text %}{% endblock %}
+    </span>
 </button>
 
-<dialog aria-labelledby="fr-modal-title-{{ id }}" role="dialog" id="fr-modal-{{ id }}" class="fr-modal">
+<dialog
+    aria-labelledby="fr-modal-title-{{ id }}"
+    role="dialog"
+    id="fr-modal-{{ id }}"
+    class="fr-modal z-40"
+>
     <div class="fr-container fr-container--fluid fr-container-md">
         <div class="fr-grid-row fr-grid-row--center">
             <div class="fr-col-12 fr-col-md-8 fr-col-lg-6">

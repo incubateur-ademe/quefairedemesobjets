@@ -60,7 +60,6 @@ class SousCategorieObjet(CodeAsNaturalKeyModel):
     def url_carte(self):
         if self.afficher_carte:
             params = urlencode(self.carte_settings)
-
             return f"{settings.BASE_URL}/?{params}"
 
     def natural_key(self) -> tuple[str]:

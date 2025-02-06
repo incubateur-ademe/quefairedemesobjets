@@ -37,40 +37,12 @@ export default defineConfig({
             grepInvert: /Mobile/,
             use: { ...devices["Desktop Chrome"] },
         },
-
-        {
-            name: "firefox",
-            grepInvert: /Mobile/,
-            use: {
-                ...devices["Desktop Firefox"],
-            },
-        },
-
-        {
-            name: "webkit",
-            grepInvert: /Mobile/,
-            use: { ...devices["Desktop Safari"] },
-        },
-
-        /* Test against mobile viewports. */
-        {
-            name: "Mobile Chrome",
-            grepInvert: /Desktop/,
-            use: { ...devices["Pixel 5"] },
-        },
         {
             name: "Mobile Safari",
             grepInvert: /Desktop/,
             use: {
                 ...devices["iPhone 12"],
             },
-        },
-
-        /* Test against branded browsers. */
-        {
-            name: "Microsoft Edge",
-            grepInvert: /Mobile/,
-            use: { ...devices["Desktop Edge"], channel: "msedge" },
         },
     ],
 

@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Any
 
 import pandas as pd
+from sources.config import shared_constants as constants
 from utils.formatter import format_libelle_to_code
 
 
@@ -50,7 +51,7 @@ def process_phone_number(number, code_postal):
     if number.startswith("33"):
         number = "0" + number[2:]
 
-    if len(number) < 6:
+    if len(number) < 5:
         return None
 
     return number
@@ -68,6 +69,7 @@ def transform_acteur_type_id(value, acteurtype_id_by_code):
         "association, entreprise de l'economie sociale et solidaire (ess)": "ess",
         "etablissement de sante": "ets_sante",
         "decheterie": "decheterie",
+        "pharmacie": "commerce",
         "point d'apport volontaire prive": "pav_prive",
         "plateforme inertes": "plateforme_inertes",
         "magasin / franchise, enseigne commerciale / distributeur / point de vente "
@@ -81,16 +83,6 @@ def transform_acteur_type_id(value, acteurtype_id_by_code):
         return acteurtype_id_by_code[code]
     else:
         raise ValueError(f"Acteur type {code.lower()} not found in database")
-
-
-def create_identifiant_unique(row):
-    unique_str = row["identifiant_externe"].replace("/", "-")
-    if (
-        row.get("type_de_point_de_collecte")
-        == "Solution en ligne (site web, app. mobile)"
-    ):
-        unique_str = unique_str + "_d"
-    return row.get("source_code").lower() + "_" + unique_str
 
 
 def get_id_from_code(code, df_mapping):
@@ -133,6 +125,7 @@ def combine_categories(row, combine_columns_categories):
     return " | ".join(categories)
 
 
+# DEPRECATED
 def prefix_url(url) -> str:
     if pd.isna(url):
         return ""
@@ -189,7 +182,7 @@ def replace_with_selected_candidat(row):
         best_candidat_index = row.get("best_candidat_index", None)
         if best_candidat_index is not None and pd.notna(best_candidat_index):
             selected_candidat = ae_result[int(best_candidat_index) - 1]
-            row["statut"] = "ACTIF"
+            row["statut"] = constants.ACTEUR_ACTIF
             row["adresse_candidat"] = selected_candidat.get("adresse_candidat")
             row["siret"] = selected_candidat.get("siret_candidat")
             row["nom"] = selected_candidat.get("nom_candidat")

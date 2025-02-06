@@ -19,7 +19,7 @@ async function expectIframeAttributes(iframeElement) {
 
   expect(allow).toBe("geolocation; clipboard-write");
   expect(src).toBe(
-    "http://localhost:8000?iframe=1&direction=jai&first_dir=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre"
+    "http://localhost:8000/formulaire?direction=jai&first_dir=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre"
   );
   expect(frameborder).toBe("0");
   expect(scrolling).toBe("no");
@@ -30,7 +30,7 @@ async function expectIframeAttributes(iframeElement) {
   expect(title).toBe("Longue vie aux objets");
 }
 
-test("iframe is loaded with correct parameters", async ({ page }) => {
+test("Desktop | iframe formulaire is loaded with correct parameters", async ({ page }) => {
   await page.goto("http://localhost:8000/test_iframe", { waitUntil: "networkidle" });
 
   const titlePage = await page.title();
@@ -40,7 +40,19 @@ test("iframe is loaded with correct parameters", async ({ page }) => {
   await expectIframeAttributes(iframeElement);
 });
 
-test("form is visible in the iframe", async ({ page }) => {
+test("Desktop | legacy iframe urls still work", async ({ page }) => {
+  await page.goto("http://localhost:8000/?iframe=1&direction=jai&first_dir=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre&BYPASS_ASSISTANT",
+    { waitUntil: "networkidle" }
+  )
+  await expect(page).toHaveURL("http://localhost:8000/formulaire?direction=jai&first_dir=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre")
+
+  await page.goto("http://localhost:8000/?carte=1&action_list=reparer%7Cdonner%7Cechanger%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cacheter%7Crevendre&epci_codes=200055887&limit=50&BYPASS_ASSISTANT"
+    , { waitUntil: "networkidle" }
+  )
+  await expect(page).toHaveURL("http://localhost:8000/carte?action_list=reparer%7Cdonner%7Cechanger%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cacheter%7Crevendre&epci_codes=200055887&limit=50")
+});
+
+test("Desktop | form is visible in the iframe", async ({ page }) => {
   await page.goto("http://localhost:8000/test_iframe", { waitUntil: "networkidle" });
 
   const iframeElement = await page.$("iframe");
@@ -52,7 +64,7 @@ test("form is visible in the iframe", async ({ page }) => {
   expect(formHeight).toBeGreaterThan(600);
 });
 
-test("iframe with 0px parent height displays correctly", async ({ page }) => {
+test("Desktop | iframe with 0px parent height displays correctly", async ({ page }) => {
   await page.goto("http://localhost:8000/test_iframe?carte=1", { waitUntil: "networkidle" });
   await expect(page).toHaveScreenshot("iframe.png");
 
@@ -63,3 +75,54 @@ test("iframe with 0px parent height displays correctly", async ({ page }) => {
   await page.waitForTimeout(1000);
   await expect(page).toHaveScreenshot("iframe.png");
 });
+
+test("Desktop | iframe cannot read the referrer when referrerPolicy is set to no-referrer", async ({ page }) => {
+  await page.goto("http://localhost:8000/test_iframe?carte=1&noreferrer", { waitUntil: "networkidle" });
+
+  // Get the content frame of the iframe
+  const iframeElement = await page.$("iframe[referrerpolicy='no-referrer']");
+  const iframe = await iframeElement?.contentFrame();
+  expect(iframe).toBeTruthy();
+
+  // Evaluate the referrer inside the iframe
+  const referrer = await iframe?.evaluate(() => document.referrer);
+
+  // Assert that the referrer is set and not undefined
+  expect(referrer).toBe('');
+});
+
+test("iframe can read the referrer when referrerPolicy is not set", async ({ page }) => {
+  await page.goto("http://localhost:8000/test_iframe?carte=1", { waitUntil: "networkidle" });
+
+  // Get the content frame of the iframe
+  const iframeElement = await page.$("iframe[data-testid='assistant']");
+  const iframe = await iframeElement?.contentFrame();
+  expect(iframe).not.toBeNull();
+
+  // Evaluate the referrer inside the iframe
+  const referrer = await iframe.evaluate(() => document.referrer);
+
+  // Assert that the referrer is set and not undefined
+  expect(referrer).toBe('http://localhost:8000/test_iframe?carte=1');
+});
+
+// Need to be run locally with nginx running
+// test("Desktop | iframe mode is kept during navigation", async ({ browser, page }) => {
+//   await page.goto("http://localhost:8001/dechet/chaussures?iframe", { waitUntil: "networkidle" });
+//   page.getByTestId("header-logo-link").click()
+//   await expect(page).toHaveURL("http://localhost:8001/dechet/")
+//   expect(await page.$("body > footer")).toBeFalsy()
+//   await page.close()
+
+//   const newPage = await browser.newPage()
+//   await newPage.goto("http://localhost:8001/dechet/chaussures", { waitUntil: "networkidle" });
+//   expect(browser.contexts)
+//   expect(await newPage.$("body > footer")).toBeTruthy()
+//   await newPage.close()
+
+//   const yetAnotherPage = await browser.newPage()
+//   await yetAnotherPage.goto("http://localhost:8001/dechet/chaussures?iframe", { waitUntil: "networkidle" });
+//   await yetAnotherPage.goto("http://localhost:8001/dechet/", { waitUntil: "networkidle" });
+//   await yetAnotherPage.goto("http://localhost:8001/dechet/chaussures", { waitUntil: "networkidle" });
+//   expect(await yetAnotherPage.$("body > footer")).not.toBeTruthy()
+// });

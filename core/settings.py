@@ -26,15 +26,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = decouple.config("SECRET_KEY")
 
 BASE_URL = decouple.config("BASE_URL", default="http://localhost:8000")
+CMS_BASE_URL = decouple.config(
+    "CMS_BASE_URL", default="https://longuevieauxobjets.ademe.fr"
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = decouple.config("DEBUG", default=False, cast=bool)
 
 WITH_WAGTAIL = decouple.config("WITH_WAGTAIL", default=False, cast=bool)
 
-ALLOWED_HOSTS = decouple.config("ALLOWED_HOSTS", default="localhost", cast=str).split(
-    ","
-)
+STIMULUS_DEBUG = decouple.config("STIMULUS_DEBUG", default=False, cast=bool)
+POSTHOG_DEBUG = decouple.config("POSTHOG_DEBUG", default=False, cast=bool)
+ALLOWED_HOSTS = decouple.config(
+    "ALLOWED_HOSTS", default="127.0.0.1,localhost", cast=str
+).split(",")
 
 # Application definition
 
@@ -58,11 +63,10 @@ INSTALLED_APPS = [
     "core",
     "qfdmd",
     "qfdmo",
+    "data",
     "corsheaders",
 ]
 
-
-# FIXME : check if we can manage django forms templating with jinja2
 FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 
 
@@ -70,6 +74,7 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "qfdmd.middleware.AssistantMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -156,6 +161,7 @@ def context_processors():
         "django.contrib.messages.context_processors.messages",
         "core.context_processors.environment",
         "core.context_processors.content",
+        "core.context_processors.assistant",
         "dsfr.context_processors.site_config",
     ]
 
@@ -186,7 +192,10 @@ WSGI_APPLICATION = "core.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-DATABASE_URL = decouple.config("DATABASE_URL")
+DATABASE_URL = decouple.config(
+    "DATABASE_URL",
+    default="postgis://qfdmo:qfdmo@localhost:6543/qfdmo",  # pragma: allowlist secret  # noqa: E501
+)
 default_settings = dj_database_url.parse(DATABASE_URL)
 default_settings["ENGINE"] = "django.contrib.gis.db.backends.postgis"
 
@@ -202,7 +211,7 @@ DB_READONLY = decouple.config(
 readonly_settings = dj_database_url.parse(DB_READONLY)
 
 DATABASES = {
-    "default": {**default_settings, "CONN_MAX_AGE": None, "CONN_HEALTH_CHECKS": True},
+    "default": default_settings,
     "readonly": readonly_settings,
 }
 
@@ -210,7 +219,7 @@ EXPLORER_CONNECTIONS = {"Default": "readonly"}
 EXPLORER_DEFAULT_CONNECTION = "readonly"
 
 CONN_HEALTH_CHECKS = True
-CONN_MAX_AGE = None
+CONN_MAX_AGE = decouple.config("CONN_MAX_AGE", cast=int, default=0)
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -310,13 +319,11 @@ NB_CORRECTION_DISPLAYED = decouple.config(
 
 SHELL_PLUS_PRINT_SQL = True
 
-# Object storage with Scaleway
 AWS_ACCESS_KEY_ID = decouple.config("AWS_ACCESS_KEY_ID", default="")
 AWS_SECRET_ACCESS_KEY = decouple.config("AWS_SECRET_ACCESS_KEY", default="")
 AWS_STORAGE_BUCKET_NAME = decouple.config("AWS_STORAGE_BUCKET_NAME", default="")
 AWS_S3_REGION_NAME = decouple.config("AWS_S3_REGION_NAME", default="")
 AWS_S3_ENDPOINT_URL = decouple.config("AWS_S3_ENDPOINT_URL", default="")
-
 
 STORAGES = {
     "default": {
@@ -353,6 +360,7 @@ FEEDBACK_FORM = decouple.config(
 CONTACT_FORM = decouple.config(
     "CONTACT_FORM", default="https://tally.so/r/wzYveR", cast=str
 )
+
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = DEBUG
     MIDDLEWARE.extend(
@@ -396,3 +404,31 @@ if WITH_WAGTAIL:
             "wagtail.contrib.redirects.middleware.RedirectMiddleware",
         ]
     )
+
+ASSISTANT_SURVEY_FORM = decouple.config(
+    "ASSISTANT_SURVEY_FORM", default="https://tally.so/r/wvNgx0", cast=str
+)
+
+QFDMO_GOOGLE_SEARCH_CONSOLE = "google9dfbbc61adbe3888.html"
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+ASSISTANT = {
+    "MATOMO_ID": decouple.config("ASSISTANT_MATOMO_ID", default=82, cast=int),
+    "HOSTS": decouple.config(
+        "ASSISTANT_HOSTS",
+        default="127.0.0.1:8000,0.0.0.0:8000,localhost:8000",
+        cast=str,
+    ).split(","),
+    "BASE_URL": decouple.config("ASSISTANT_BASE_URL", default="http://localhost:8000"),
+    "POSTHOG_KEY": decouple.config(
+        "ASSISTANT_POSTHOG_KEY",
+        default="phc_fSfhoWDOUxZdKWty16Z3XfRiAoWd1qdJK0N0z9kQHJr",  # pragma: allowlist secret  # noqa: E501
+        cast=str,
+    ),
+}
+
+NOTION = {
+    "TOKEN": decouple.config("NOTION_TOKEN", default=""),
+    "CONTACT_FORM_DATABASE_ID": decouple.config(
+        "NOTION_CONTACT_FORM_DATABASE_ID", default=""
+    ),
+}

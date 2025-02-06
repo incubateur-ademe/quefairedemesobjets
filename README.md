@@ -7,6 +7,12 @@ Longue vie aux objets propose des solutions pour promouvoir les gestes de consom
 
 Le site "Longue vie aux objets" est disponible à l'URL : [https://longuevieauxobjets.ademe.fr/](https://longuevieauxobjets.ademe.fr/)
 
+**Certaines pages disposent d'une page dédiée :
+- [Frontend](./docs/Frontend.md)
+- [Commandes utiles](./docs/Commands.md)
+- [Coding guidelines](./docs/Coding-guidelines.md)
+- [Organisations des fichiers dans dags](./docs/Organisations-des-fichiers-dans-dags.md)
+
 ## Afficher l'application dans une Iframe
 
 il suffit d'ajouter le script js suivant:
@@ -111,6 +117,14 @@ Conseil: utiliser `asdf` pour la gestion des environnement virtuel `node` et `py
 
 ### Installation & Exécution
 
+Configuration des variables d'environnement: ajouter (ou mettre à jour si existant)
+la variable AIRFLOW_UID de telle sorte à ce que Docker lance Airflow avec notre utilisateur
+
+```sh
+cp .env.template .env
+sed -i '/^AIRFLOW_UID=/d' .env && echo "AIRFLOW_UID=$(id -u)" >> .env
+```
+
 Les bases de données source `MySQL` et cible `Postgres + Postgis` sont executées et mises à disposition par le gestionnaire de conteneur Docker
 
 ```sh
@@ -129,12 +143,6 @@ Installation
 ```sh
 pip install -r requirements.txt -r dev-requirements.txt
 npm install
-```
-
-Configuration des variables d'environnement
-
-```sh
-cp .env.template .env
 ```
 
 // Modifier les variables dans le fichier .env si nécessaire
@@ -441,34 +449,6 @@ flowchart TB
     PropositionService --> CorrectionEquipePropositionService --> DisplayedPropositionService
     PropositionService --> DisplayedPropositionService
 ```
-
-## Conventions de code - Utilisation des langues françaises et anglaises
-
-Nous suivons les règles et standards de l'industrie que nous contrôlons à chaque commit et Pull Request grâce à des outils tel que `ruff` ou `eslint`.
-
-Cependant, ce projet est développé et propulsé par l'État français et doit être utilisable et administrable simplement par le plus grand nombre. Nous appliquons donc une règle spécifique quant à l'utilisation de la langue française versus la langue anglaise, nous avons donc défini les cas d'utilisation de ces 2 langues.
-
-### En Français
-
-A l'attention des administrés, administrations, administrateurs, et l'équipe Longue vie aux objets
-
-- Git/Github Les commits, les Pull Request
-- La documentation dans les markdowns
-- Les noms et les champs des tables en base de données
-
-### En Anglais
-
-Dans le code, à l'attention des équipes techniques
-
-- les fonctions
-- les noms de variables
-- les commentaires dans le code
-
-### Effets de bord acceptés
-
-Certaines variables combinant un nom d'objet et un suffixe ou préfixe peuvent être en franglais
-
-Ex :  `acteur_by_id`
 
 ## Data platform
 

@@ -1,4 +1,4 @@
-{% load dsfr_tags static %}
+{% load dsfr_tags qfdmd_tags static %}
 
 <!DOCTYPE html>
 <html
@@ -12,8 +12,10 @@
             name="viewport"
             content="width=device-width, initial-scale=1, shrink-to-fit=no"
         />
-        <title>{% block title %}Que faire de mes déchets{% endblock %}</title>
+        <title>{% block title %}Que Faire de mes déchets & objets : votre assistant au tri et à la réduction des déchets{% endblock %}</title>
         <meta name="description" content="{% block meta_description %}Donnons une nouvelle vie aux objets{% endblock %}">
+        <meta property="og:image" content="{% static 'assistant/og-image.jpg' %}" />
+        {% favicon %}
 
         {% comment %}
         Preload https://developer.mozilla.org/fr/docs/Web/HTML/Attributes/rel/preload
@@ -22,20 +24,25 @@
         {% dsfr_css %}
         <link rel="stylesheet" href="{% static 'qfdmd.css' %}">
 
+        {% matomo %}
+
         {% block extra_css %}
         {% endblock extra_css %}
 
-        {% comment %}
-        Ajouter
-        - iframe resizer
-        - posthog
-        - matomo
-        {% endcomment %}
+        {% block extra_js %}
+        {% endblock extra_js %}
     </head>
 
     <body
-        class="qf-flex qf-flex-col"
+        class="qf-flex qf-flex-col qf-group"
+        {% if STIMULUS_DEBUG %}data-stimulus-debug="true"{% endif %}
+        {% block body_attrs %}{% endblock %}
     >
+        {% if request.user.is_authenticated %}
+        <div class="qf-bg-red-marianne-main-472 qf-text-white qf-text-center qf-w-screen qf-py-1v qf-text-xs">
+        Vous êtes bien authentifié, vos statistiques PostHog seront ignorées pour cette session | <a href="{% url 'admin:index' %}">accéder à l'administration</a>
+        </div>
+        {% endif %}
         {% block header %}
         {% include "components/header/header.html" %}
         {% endblock header %}
@@ -55,5 +62,26 @@
 
         {% dsfr_js %}
         <script type="module" src="{% static 'qfdmd.js' %}"></script>
+        <script
+            data-controller="analytics"
+            data-analytics-posthog-key-value="{{ assistant.POSTHOG_KEY }}"
+            data-analytics-posthog-debug-value="{{ POSTHOG_DEBUG|lower }}"
+            {% if request.user.is_authenticated %}
+                data-analytics-user-username-value="{{ request.user.username }}"
+                data-analytics-user-email-value="{{ request.user.email }}"
+                data-analytics-user-admin-value="{{ request.user.is_superuser|lower }}"
+            {% endif %}
+            data-analytics-action-value="{% block analytics_action %}{% endblock %}"
+        ></script>
+        {% if assistant.is_iframe and request.user.is_authenticated %}
+            <div class="qf-bg-warning-425-625-hover qf-text-white qf-text-center qf-w-screen qf-py-1v qf-text-xs">
+            Le mode iframe de l'assistant est actif
+            </div>
+        {% endif %}
+        {% if "posthog" in request.GET %}
+            <div class="qf-bg-green-bourgeon-main-640 qf-text-white qf-text-center qf-w-screen qf-py-1v qf-text-xs">
+            Identifiant PostHog : {{ assistant.POSTHOG_KEY }} | Score de conversion : <span id="posthog-banner-conversion-score"></span>
+             </div>
+        {% endif %}
     </body>
 </html>

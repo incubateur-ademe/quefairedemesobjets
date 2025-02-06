@@ -1,6 +1,7 @@
 import pytest
 
 from qfdmo.admin.acteur import OpenSourceDisplayedActeurResource
+from qfdmo.models.acteur import DataLicense
 from unit_tests.qfdmo.acteur_factory import (
     DisplayedActeurFactory,
     DisplayedPropositionServiceFactory,
@@ -22,9 +23,10 @@ class TestOpenSourceDisplayedActeurResource:
         for row in dataset.dict:
             assert list(row.keys()) == [
                 "Identifiant",
-                "Contributeurs",
+                "Paternité",
                 "Nom",
                 "Nom commercial",
+                "SIREN",
                 "SIRET",
                 "Description",
                 "Type d'acteur",
@@ -98,18 +100,18 @@ class TestOpenSourceDisplayedActeurResource:
         )
 
     @pytest.mark.parametrize(
-        "source_data, expected_contributeurs",
+        "source_data, expected_other_contributeurs",
         [
             (
                 [],
-                "Longue Vie Aux Objets|ADEME",
+                [],
             ),
             (
                 [
                     {"libelle": "Source 1", "code": "source1"},
                     {"libelle": "Source 2", "code": "source2"},
                 ],
-                "Longue Vie Aux Objets|ADEME|Source 1|Source 2",
+                ["Source 1", "Source 2"],
             ),
             (
                 [
@@ -117,11 +119,11 @@ class TestOpenSourceDisplayedActeurResource:
                     {"libelle": "Source 2", "code": "source2"},
                     {"libelle": "Source 1", "code": "source3"},
                 ],
-                "Longue Vie Aux Objets|ADEME|Source 1|Source 2",
+                ["Source 1", "Source 2"],
             ),
         ],
     )
-    def test_sources(self, source_data, expected_contributeurs):
+    def test_sources(self, source_data, expected_other_contributeurs):
         displayedacteur = DisplayedActeurFactory()
         sources = [SourceFactory(**data) for data in source_data]
         displayedacteur.sources.set(sources)
@@ -130,8 +132,57 @@ class TestOpenSourceDisplayedActeurResource:
 
         dataset_dict = dataset.dict
 
-        contributeurs = dataset_dict[0]["Contributeurs"].split("|")
+        contributeurs = dataset_dict[0]["Paternité"].split("|")
         assert contributeurs[0] == "Longue Vie Aux Objets"
         assert contributeurs[1] == "ADEME"
-        other_contributeurs = set(contributeurs[2:])
-        assert sorted(contributeurs[2:]) == sorted(other_contributeurs)
+        assert sorted(contributeurs[2:]) == sorted(expected_other_contributeurs)
+
+    def test_filter_by_licenses(self):
+        source_open_licence = SourceFactory(licence=DataLicense.OPEN_LICENSE.value)
+        source_cc_by_nc_sa = SourceFactory(licence=DataLicense.CC_BY_NC_SA.value)
+        acteur_open_license = DisplayedActeurFactory()
+        acteur_open_license.sources.set([source_open_licence])
+        acteur_multi_licences = DisplayedActeurFactory()
+        acteur_multi_licences.sources.set([source_open_licence, source_cc_by_nc_sa])
+        acteur_cc_license = DisplayedActeurFactory.create()
+        acteur_cc_license.sources.set([source_cc_by_nc_sa])
+
+        dataset = OpenSourceDisplayedActeurResource(
+            licenses=[DataLicense.OPEN_LICENSE.value, DataLicense.CC_BY_NC_SA.value]
+        ).export()
+
+        identifiants = [row["Identifiant"] for row in dataset.dict]
+        assert len(dataset) == 3
+        assert acteur_open_license.uuid in identifiants
+        assert acteur_multi_licences.uuid in identifiants
+        assert acteur_cc_license.uuid in identifiants
+
+        dataset = OpenSourceDisplayedActeurResource(
+            licenses=[DataLicense.OPEN_LICENSE.value]
+        ).export()
+
+        identifiants = [row["Identifiant"] for row in dataset.dict]
+        assert len(dataset) == 2
+        assert acteur_open_license.uuid in identifiants
+        assert acteur_multi_licences.uuid in identifiants
+
+        # test acteur_multi doesn't refer license CC_BY_NC_SA
+        row_multi = next(
+            row
+            for row in dataset.dict
+            if row["Identifiant"] == acteur_multi_licences.uuid
+        )
+        assert row_multi["Identifiant"] == acteur_multi_licences.uuid
+        assert (
+            row_multi["Paternité"]
+            == f"Longue Vie Aux Objets|ADEME|{source_open_licence.libelle}"
+        )
+
+        dataset = OpenSourceDisplayedActeurResource(
+            licenses=[DataLicense.CC_BY_NC_SA.value]
+        ).export()
+
+        identifiants = [row["Identifiant"] for row in dataset.dict]
+        assert len(dataset) == 2
+        assert acteur_multi_licences.uuid in identifiants
+        assert acteur_cc_license.uuid in identifiants

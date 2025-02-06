@@ -1,0 +1,21 @@
+[
+{
+  "model": "qfdmd.produit",
+  "pk": 334,
+  "fields": {
+    "modifie_le": "2025-01-14T17:45:28.800Z",
+    "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+    "qu_est_ce_que_j_en_fais_bon_etat": "",
+    "comment_les_eviter": "Assurez-vous à l'achat qu'il bénéficie d'une bonne garantie réparation et faites le durer autant que possible.\nEn cas de panne, faites-le réparer. Pour faciliter la réparation, à l'achat, privilégiez un appareil démontable. Pour les smartphone, un indicateur simple vous permet de savoir si celui que vous voulez acheter est facilement réparable, grâce à une note sur 10 indiquant son \"indice de réparabilité\".\n<br /><br />\nRetrouvez des conseils d'entretien de votre téléphone pour prolonger sa durée de vie sur la <a href=\"https://epargnonsnosressources.gouv.fr/entretien/smartphone/\" target=\"_blank\">Bible de l'entretien des objets</a>.",
+    "que_va_t_il_devenir": "Remis à une structure de réemploi ou revendu, votre appareil poursuit une seconde vie. Déposé en déchèterie ou remis à un revendeur, il suit la filière des Déchets d'Équipements Électriques et Électroniques (DEEE). Il est alors acheminé jusqu'à un centre de traitement où il est démantelé et ses différents composants recyclables récupérés (métaux et plastiques). Les substances non-recyclables sont incinérées (avec le plus souvent récupération de chaleur pour produire de l'énergie) ou enfouies dans des installations de stockage de déchets.",
+    "nom": "Téléphone mobile",
+    "synonymes_existants": "Smartphone",
+    "code": "DEEE",
+    "bdd": "ocad3e",
+    "qu_est_ce_que_j_en_fais": "S'il est encore en bon état, donnez-le à une association caritative ou un proche, ou bien revendez-le.<br /><br />S’il est en panne, privilégiez la réparation. Certains réparateurs peuvent même vous faire bénéficier d'une réduction via le <a href=\"https://www.economie.gouv.fr/particuliers/bonus-reparation-comment-ca-marche\" target=\"_blank\">Bonus Réparation</a>.\n<br /><br />Qu'il soit hors service ou encore fonctionnel vous pouvez :<br /><br />-\tle déposer en boutique de téléphonie ou le renvoyer via le service de reprise à distance de votre opérateur.<br /><br />-\tl'envoyer par correspondance grâce aux services de certains éco-organismes (voir \"<b>En savoir plus</b>\" ci-dessous).<br /><br />\nSinon, apportez-le en déchèterie.",
+    "nom_eco_organisme": "Ecologic / Ecosystem",
+    "filieres_rep": "Equipements électriques et électroniques",
+    "slug": "Téléphone mobile"
+  }
+}
+]

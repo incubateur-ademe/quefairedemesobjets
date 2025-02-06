@@ -11,9 +11,9 @@ class TestEntiteServiceNomAsNaturalKeyHeritage:
 
     def test_str(self):
         acteur_service = ActeurServiceFactory.build(
-            code="My Code", libelle="My Libelle"
+            code="my_code", libelle="My Libelle"
         )
-        assert str(acteur_service) == "My Libelle (My Code)"
+        assert str(acteur_service) == "My Libelle (my_code)"
 
     @pytest.mark.parametrize("code", ["ESS", "Ess", "e s s"])
     def test_code_raise_on_bad_code(self, code):

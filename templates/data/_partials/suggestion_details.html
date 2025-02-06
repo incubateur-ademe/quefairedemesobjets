@@ -1,0 +1,12 @@
+<h3>{% block suggestion_title %}Suggestion{% endblock %}</h3>
+
+{% block suggestion_details %}
+    <details>
+        <summary>
+            {% block suggestion_summary %}Détails{% endblock %}
+        </summary>
+        {% block suggestion_content %}
+            {{ suggestion }}
+        {% endblock suggestion_content %}
+    </details>
+{% endblock suggestion_details %}

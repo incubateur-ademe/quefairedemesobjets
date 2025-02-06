@@ -1,6 +1,7 @@
 import pytest
 from bs4 import BeautifulSoup
 
+from qfdmo.models.acteur import ActeurStatus
 from unit_tests.qfdmo.acteur_factory import (
     DisplayedActeurFactory,
     LabelQualiteFactory,
@@ -10,8 +11,8 @@ from unit_tests.qfdmo.acteur_factory import (
 
 @pytest.fixture
 def get_response(client):
-    def _get_response(identifiant_unique):
-        url = f"/adresse/{identifiant_unique}"
+    def _get_response(uuid):
+        url = f"/adresse_details/{uuid}"
         response = client.get(url)
         assert response.status_code == 200
         return response, BeautifulSoup(response.content, "html.parser")
@@ -23,14 +24,29 @@ def get_response(client):
 class TestDisplaySource:
     def test_display_no_source(self, get_response):
         adresse = DisplayedActeurFactory()
-        response, _ = get_response(adresse.identifiant_unique)
+        response, _ = get_response(adresse.uuid)
         assert response.context["display_sources_panel"] is False
 
     def test_display_one_source(self, get_response):
         adresse = DisplayedActeurFactory()
         adresse.sources.add(SourceFactory(afficher=True))
-        response, _ = get_response(adresse.identifiant_unique)
+        response, _ = get_response(adresse.uuid)
         assert response.context["display_sources_panel"] is True
+
+
+@pytest.mark.django_db
+class TestDisplayNomCommercial:
+    def test_nom_is_capitalized(self, get_response):
+        adresse = DisplayedActeurFactory(nom="coucou", nom_commercial="")
+        response, soup = get_response(adresse.uuid)
+        acteur_title = soup.find(attrs={"data-testid": "acteur-title"})
+        assert "Coucou" in acteur_title.text, "Test that the nom field is capitalized"
+
+    def test_nom_commercial_is_displayed_if_present(self, get_response):
+        adresse = DisplayedActeurFactory(nom="coucou", nom_commercial="youpi")
+        response, soup = get_response(adresse.uuid)
+        acteur_title = soup.find(attrs={"data-testid": "acteur-title"})
+        assert "Youpi" in acteur_title.text, "Test that the nom commercial is displayed"
 
 
 @pytest.mark.django_db
@@ -52,7 +68,7 @@ class TestDisplayLabel:
             ),
             (
                 [("label", "Mon label", False, True)],
-                "Propose le bonus réparation",
+                "Propose le Bonus Réparation",
                 True,
             ),
         ],
@@ -71,7 +87,7 @@ class TestDisplayLabel:
                 )
             )
 
-        response, soup = get_response(adresse.identifiant_unique)
+        response, soup = get_response(adresse.uuid)
         assert response.context["display_labels_panel"] == should_display
         label_tag = soup.find(attrs={"data-testid": "acteur-detail-labels"})
         if expected_text:
@@ -100,7 +116,7 @@ class TestAboutPanel:
         adresse.uniquement_sur_rdv = uniquement_sur_rdv
         adresse.save()
 
-        response, soup = get_response(adresse.identifiant_unique)
+        response, soup = get_response(adresse.uuid)
         self.assert_about_panel_text(soup, expected_text, uniquement_sur_rdv)
 
     @pytest.mark.parametrize(
@@ -116,7 +132,54 @@ class TestAboutPanel:
         adresse.exclusivite_de_reprisereparation = exclusivite_de_reprisereparation
         adresse.save()
 
-        response, soup = get_response(adresse.identifiant_unique)
+        response, soup = get_response(adresse.uuid)
         self.assert_about_panel_text(
             soup, expected_text, exclusivite_de_reprisereparation
         )
+
+
+@pytest.mark.django_db
+class TestRedirects:
+    @pytest.mark.parametrize(
+        "statut, expected_status_code",
+        [
+            (ActeurStatus.INACTIF, 301),
+            (ActeurStatus.SUPPRIME, 301),
+            (ActeurStatus.ACTIF, 200),
+        ],
+    )
+    def test_acteur_status(self, client, statut, expected_status_code):
+        acteur = DisplayedActeurFactory(
+            identifiant_unique="coucou",
+            statut=statut,
+        )
+        url = f"/adresse_details/{acteur.uuid}"
+        response = client.get(url)
+        assert response.status_code == expected_status_code
+
+    def test_inactif_acteur_is_not_in_sitemap(self, client):
+        youpi = DisplayedActeurFactory(
+            identifiant_unique="youpi",
+            statut=ActeurStatus.ACTIF,
+        )
+        coucou = DisplayedActeurFactory(
+            identifiant_unique="coucou",
+            statut=ActeurStatus.INACTIF,
+        )
+        super = DisplayedActeurFactory(
+            identifiant_unique="super",
+            statut=ActeurStatus.SUPPRIME,
+        )
+        url = "/sitemap-items.xml"
+        response = client.get(url)
+        assert coucou.uuid not in str(response.content)
+        assert super.uuid not in str(response.content)
+        assert youpi.uuid in str(response.content)
+
+    def test_acteur_detail_redirect(self, client):
+        acteur = DisplayedActeurFactory(
+            identifiant_unique="coucou",
+        )
+        url = f"/adresse/{acteur.identifiant_unique}"
+        response = client.get(url)
+        assert response.status_code == 301

@@ -5,6 +5,7 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
+from pydantic import BaseModel
 
 # TODO: improve by moving instantiation inside the functions
 # and using inspect to get the parent caller's name
@@ -31,7 +32,7 @@ class CustomJSONEncoder(json.JSONEncoder):
 
 def json_dumps(data: Any) -> str:
     """Fonction pour convertir un objet en JSON"""
-    return json.dumps(data, cls=CustomJSONEncoder, indent=2, ensure_ascii=False)
+    return json.dumps(data, cls=CustomJSONEncoder, indent=4, ensure_ascii=False)
 
 
 def size_info_get(value: Any) -> Any:
@@ -45,6 +46,8 @@ def size_info_get(value: Any) -> Any:
         return len(value)  # Number of entries
     elif isinstance(value, dict):
         return len(value.keys())  # Number of keys
+    elif isinstance(value, BaseModel):
+        return f"{len(value.model_fields.keys())} propriétés"
     elif isinstance(value, (str, bytes)):
         return len(value)  # Length of string or bytes
     else:
@@ -82,6 +85,30 @@ def preview(value_name: str, value: Any) -> None:
         log.info(json_dumps(value))
     elif isinstance(value, set):
         log.info(json_dumps(list(value)))
+    elif isinstance(value, BaseModel):
+        log.info(json_dumps(value.model_dump(mode="json")))
     else:
         log.info(str(value))
     log.info("::endgroup::")
+
+
+def preview_df_as_markdown(label: str, df: pd.DataFrame) -> None:
+    """Variation de la preview pour une dataframe de manière à
+    obtenir une table lisible. On ne filtre pas la df ici, c'est
+    à l'appelant de décider (ex: this("me",df.head(10))"""
+    size = size_info_get(df)
+    log.info(f"::group::📦 {label}: taille={size}, 🔽 Cliquer pour révéler la table 🔽")
+    log.info("\n" + df.to_markdown(index=False))
+    log.info("::endgroup::")
+
+
+def banner_string(message: str) -> str:
+    """Retourne une bannière après retour
+    de ligne pour qu'elle se retrouve visible tout à gauche
+    (et pas en fin de ligne)"""
+    return f"""
+
+{'=' * 80}
+{message}
+{'=' * 80}
+    """

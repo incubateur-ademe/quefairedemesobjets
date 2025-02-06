@@ -20,13 +20,17 @@ from django.contrib import admin
 from django.contrib.sitemaps import GenericSitemap
 from django.contrib.sitemaps import views as sitemaps_views
 from django.urls import include, path
+from django.views.generic import TemplateView
 
-from qfdmo.models.acteur import DisplayedActeur
+from qfdmo.models.acteur import ActeurStatus, DisplayedActeur
 
 from .api import api
+from .views import direct_access
 
 info_dict = {
-    "queryset": DisplayedActeur.objects.all().order_by("identifiant_unique"),
+    "queryset": DisplayedActeur.objects.filter(statut=ActeurStatus.ACTIF).order_by(
+        "identifiant_unique"
+    ),
     "date_field": "modifie_le",
 }
 
@@ -55,17 +59,23 @@ urlpatterns = [
         name="django.contrib.sitemaps.views.sitemap",
     ),
     path("dsfr/", include(("dsfr_hacks.urls", "dsfr_hacks"), namespace="dsfr_hacks")),
+    path("", direct_access, name="home"),
     path("", include(("qfdmo.urls", "qfdmo"), namespace="qfdmo")),
     path("", include(("qfdmd.urls", "qfdmd"), namespace="qfdmd")),
+    path("data/", include(("data.urls", "data"), namespace="data")),
+    path("docs/", TemplateView.as_view(template_name="techdocs.html"), name="techdocs"),
 ]
 
 if settings.DEBUG:
     from django.conf.urls.static import static
+    from django.views.defaults import page_not_found, server_error
 
     urlpatterns.extend(
         [
             path("__debug__/", include("debug_toolbar.urls")),
             path("__reload__/", include("django_browser_reload.urls")),
+            path("500", server_error, {"template_name": "500.html"}),
+            path("404", page_not_found, {"template_name": "404.html"}),
         ]
     )
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,0 +1,12 @@
+{% extends "dsfr/footer.html" %}
+
+{% block footer_links %}
+{% for page in footer_pages %}
+<li class="fr-footer__bottom-item">
+  <a class="fr-footer__bottom-link" href="{% url 'qfdmd:cms-page' page.slug %}">
+    {{ page.title }}
+  </a>
+</li>
+{% endfor %}
+{% endblock footer_links %}
+{% load static %}

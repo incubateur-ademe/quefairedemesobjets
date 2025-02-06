@@ -1,0 +1,25 @@
+<h2>Instance du DAG : {{ suggestion_cohorte_instance }}</h2>
+<h3>Meta données</h3>
+
+<p><strong>Source : </strong>{{ metadata.source }}
+<br><strong>Statut de la cohorte : </strong>{{ suggestion_cohorte_instance.get_statut_display }}
+<br><strong>Description : </strong>{{ metadata.description }}
+<br><strong>Nb de suggestions : </strong>{{ metadata.nb_suggestions }}</p>
+
+<h3>Exemples</h3>
+<div class="fr-table">
+    <table>
+        <caption>Suggestion de source à valider</caption>
+        {% if suggestion_cohorte_instance.type_action == "SOURCE_AJOUT" or suggestion_cohorte_instance.type_action == "SOURCE_MODIFICATION" %}
+            {% include 'data/_partials/source_ajout_event.html' %}
+        {% elif suggestion_cohorte_instance.type_action == "SOURCE_SUPRESSION" %}
+        {% include 'data/_partials/source_supression_event.html' %}
+        {% else %}
+            {% include 'data/_partials/create_actor_event.html' %}
+        {% endif %}
+    </table>
+</div>
+<div class="fr-my-3w">
+    <button type="submit" class="fr-btn" name='dag_valid' value='1' formmethod='POST'>Valider les modifications</button>
+    <button type="submit" class="fr-btn fr-btn--secondary" name='dag_valid' value='0' formmethod='POST'>Refuser</button>
+</div>

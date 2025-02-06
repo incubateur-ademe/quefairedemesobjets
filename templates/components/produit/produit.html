@@ -1,0 +1,44 @@
+{% load dsfr_tags %}
+
+{% if bon_etat and mauvais_etat %}
+    <div class="fr-tabs">
+        <ul class="fr-tabs__list" role="tablist" aria-label="État du produit {{ produit }}">
+            <li role="presentation">
+                <button
+                    id="mauvais-etat-tab"
+                    class="fr-tabs__tab fr-icon-thumb-down-line fr-tabs__tab--icon-left"
+                    tabindex="0"
+                    role="tab"
+                    aria-selected="true"
+                    aria-controls="mauvais-etat-panel"
+                >
+                    Mauvais état
+                </button>
+            </li>
+            <li role="presentation">
+                <button
+                    id="bon-etat-tab"
+                    class="fr-tabs__tab fr-icon-thumb-up-line fr-tabs__tab--icon-left"
+                    tabindex="-1"
+                    role="tab"
+                    aria-selected="false"
+                    aria-controls="bon-etat-panel"
+                >
+                    Bon état
+                </button>
+            </li>
+        </ul>
+        <div id="mauvais-etat-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="mauvais-etat-tab" tabindex="0">
+            {% include "./_detail.html" with content=mauvais_etat url_carte=produit.url_carte_mauvais_etat %}
+        </div>
+        <div id="bon-etat-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="bon-etat-tab" tabindex="0">
+            {% include "./_detail.html" with content=bon_etat url_carte=produit.url_carte_bon_etat %}
+        </div>
+    </div>
+{% else %}
+    <div>
+        {% include "./_detail.html" %}
+    </div>
+{% endif %}
+
+{% dsfr_accordion_group produit.content_display %}

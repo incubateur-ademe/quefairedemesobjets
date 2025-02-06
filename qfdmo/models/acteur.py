@@ -1,7 +1,9 @@
 import logging
 import random
+import re
 import string
 import uuid
+from copy import deepcopy
 from typing import Any, List, cast
 
 import opening_hours
@@ -14,24 +16,38 @@ from django.contrib.gis.geos import Point, Polygon
 from django.contrib.gis.geos.geometry import GEOSGeometry
 from django.core.cache import cache
 from django.core.files.images import get_image_dimensions
-from django.db.models import Case, Exists, Min, OuterRef, Q, Value, When
-from django.db.models.functions import Now
+from django.db.models import (
+    Case,
+    CheckConstraint,
+    Exists,
+    Min,
+    OuterRef,
+    Q,
+    Value,
+    When,
+)
 from django.forms import ValidationError, model_to_dict
 from django.http import HttpRequest
 from django.urls import reverse
 from django.utils.functional import cached_property
 from unidecode import unidecode
 
+from core.constants import DIGITAL_ACTEUR_CODE
+from core.models import TimestampedModel
+from dags.sources.config.shared_constants import REPRISE_1POUR0, REPRISE_1POUR1
 from qfdmo.models.action import Action, get_action_instances
 from qfdmo.models.categorie_objet import SousCategorieObjet
 from qfdmo.models.utils import (
     CodeAsNaturalKeyModel,
     NomAsNaturalKeyManager,
     NomAsNaturalKeyModel,
+    string_remove_substring_via_normalization,
 )
 from qfdmo.validators import CodeValidator
 
 logger = logging.getLogger(__name__)
+
+DEFAULT_SOURCE_CODE = "communautelvao"
 
 
 class ActeurService(CodeAsNaturalKeyModel):
@@ -39,6 +55,12 @@ class ActeurService(CodeAsNaturalKeyModel):
         ordering = ["libelle"]
         verbose_name = "Service proposé"
         verbose_name_plural = "Services proposés"
+        constraints = [
+            CheckConstraint(
+                check=Q(code__regex=CodeValidator.regex),
+                name="acteur_service_code_format",
+            ),
+        ]
 
     id = models.AutoField(primary_key=True)
     code = models.CharField(
@@ -65,6 +87,13 @@ class ActeurStatus(models.TextChoices):
     SUPPRIME = "SUPPRIME", "supprimé"
 
 
+class DataLicense(models.TextChoices):
+    OPEN_LICENSE = "OPEN_LICENSE", "Licence Ouverte"
+    ODBL = "ODBL", "ODBL"
+    CC_BY_NC_SA = "CC_BY_NC_SA", "CC-BY-NC-SA"
+    NO_LICENSE = "NO_LICENSE", "Pas de licence"
+
+
 class ActeurPublicAccueilli(models.TextChoices):
     PROFESSIONNELS_ET_PARTICULIERS = (
         "Particuliers et professionnels",
@@ -76,16 +105,19 @@ class ActeurPublicAccueilli(models.TextChoices):
 
 
 class ActeurReprise(models.TextChoices):
-    UN_POUR_ZERO = "1 pour 0", "1 pour 0"
-    UN_POUR_UN = "1 pour 1", "1 pour 1"
+    UN_POUR_ZERO = REPRISE_1POUR0, "1 pour 0"
+    UN_POUR_UN = REPRISE_1POUR1, "1 pour 1"
 
 
 class ActeurType(CodeAsNaturalKeyModel):
-    _digital_acteur_type_id: int = 0
-
     class Meta:
         verbose_name = "Type d'acteur"
         verbose_name_plural = "Types d'acteur"
+        constraints = [
+            CheckConstraint(
+                check=Q(code__regex=CodeValidator.regex), name="acteur_type_code_format"
+            ),
+        ]
 
     id = models.AutoField(primary_key=True)
     code = models.CharField(
@@ -100,13 +132,6 @@ class ActeurType(CodeAsNaturalKeyModel):
         validators=[CodeValidator()],
     )
     libelle = models.CharField(max_length=255, blank=False, null=False, default="?")
-
-    @classmethod
-    def get_digital_acteur_type_id(cls) -> int:
-        if not cls._digital_acteur_type_id:
-            (digital_acteur_type, _) = cls.objects.get_or_create(code="acteur_digital")
-            cls._digital_acteur_type_id = digital_acteur_type.id
-        return cls._digital_acteur_type_id
 
 
 def validate_logo(value: Any):
@@ -125,21 +150,34 @@ class Source(CodeAsNaturalKeyModel):
     class Meta:
         verbose_name = "Source de données"
         verbose_name_plural = "Sources de données"
+        constraints = [
+            CheckConstraint(
+                check=Q(code__regex=CodeValidator.regex), name="source_code_format"
+            ),
+        ]
 
     id = models.AutoField(primary_key=True)
     libelle = models.CharField(max_length=255)
     code = models.CharField(
         max_length=255,
         unique=True,
+        blank=False,
+        null=False,
         help_text=(
-            "This field is used to manage the import of data."
-            " Any update can break the import data process"
+            "Ce champ est utilisé lors de l'import de données, il ne doit pas être"
+            " mis à jour sous peine de casser l'import de données"
         ),
+        validators=[CodeValidator()],
     )
     afficher = models.BooleanField(default=True)
     url = models.CharField(max_length=2048, blank=True, null=True)
     logo_file = models.ImageField(
         upload_to="logos", blank=True, null=True, validators=[validate_logo]
+    )
+    licence = models.CharField(
+        default=DataLicense.NO_LICENSE,
+        choices=DataLicense,
+        db_default=DataLicense.NO_LICENSE,
     )
 
 
@@ -200,13 +238,13 @@ class DisplayedActeurQuerySet(models.QuerySet):
 
     def digital(self):
         return (
-            self.filter(acteur_type__code="acteur_digital")
+            self.filter(acteur_type__code=DIGITAL_ACTEUR_CODE)
             .annotate(min_action_order=Min("proposition_services__action__order"))
             .order_by("min_action_order", "?")
         )
 
     def physical(self):
-        return self.exclude(acteur_type_id=ActeurType.get_digital_acteur_type_id())
+        return self.exclude(acteur_type__code=DIGITAL_ACTEUR_CODE)
 
     def in_geojson(self, geojson):
         if not geojson:
@@ -256,7 +294,7 @@ class DisplayedActeurManager(NomAsNaturalKeyManager):
         return DisplayedActeurQuerySet(self.model, using=self._db)
 
 
-class BaseActeur(NomAsNaturalKeyModel):
+class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
 
     class Meta:
         abstract = True
@@ -279,6 +317,7 @@ class BaseActeur(NomAsNaturalKeyModel):
     nom_officiel = models.CharField(max_length=255, blank=True, null=True)
     labels = models.ManyToManyField(LabelQualite)
     acteur_services = models.ManyToManyField(ActeurService, blank=True)
+    siren = models.CharField(max_length=9, blank=True, null=True)
     siret = models.CharField(max_length=14, blank=True, null=True)
     source = models.ForeignKey(Source, on_delete=models.CASCADE, blank=True, null=True)
     identifiant_externe = models.CharField(max_length=255, blank=True, null=True)
@@ -290,8 +329,6 @@ class BaseActeur(NomAsNaturalKeyModel):
     )
     naf_principal = models.CharField(max_length=255, blank=True, null=True)
     commentaires = models.TextField(blank=True, null=True)
-    cree_le = models.DateTimeField(auto_now_add=True, db_default=Now())
-    modifie_le = models.DateTimeField(auto_now=True, db_default=Now())
     horaires_osm = models.CharField(
         blank=True, null=True, validators=[validate_opening_hours]
     )
@@ -342,7 +379,105 @@ class BaseActeur(NomAsNaturalKeyModel):
 
     @property
     def is_digital(self) -> bool:
-        return self.acteur_type_id == ActeurType.get_digital_acteur_type_id()
+        return self.acteur_type.code == DIGITAL_ACTEUR_CODE
+
+    @property
+    def numero_et_complement_de_rue(self) -> str | None:
+        """Extrait le numéro de rue (et complément si présent)
+        d'une adresse. Le complément est important car il peut
+        servir à distinguer des adresses différentes lors de
+        tâche telle le clustering (ex: "1" vs. "1 b").
+
+        TODO: il y a surement des améliorations à apporter,
+        notamment en étendant les différents possibilités de
+        compléments, mais avec le risque d'effets de bord.
+
+        Par exemple si on inclus les compléments de [a-z],
+        risque de confondre z de "15 z.i." (zone industrielle)
+        avec le complément.
+
+        La fonction est une 1ère version conservatrice qu'il
+        faudra revisiter données à l'appui, et potentiellement
+        basculer en LLM en background processing si c'est trop
+        complexe à gérer
+        """
+        adr = self.adresse
+        if not adr:
+            return None
+        # Mise en miniscule pour simplifier les regex sachant qu'on
+        # voulait le faire au final pour plus d'uniformité
+        match = re.match(r"^[\s]*([\d]+ ?(?:bis|a|b|c)?)\b", adr.lower())
+        if not match:
+            return None
+
+        # On essaye de faire un peu de normalisation en
+        # séparant le numéro du complément
+        result = match.group(0).strip()
+        match = re.search(r"(\d+)([a-z]+)", result)
+        if match:
+            result = f"{match.group(1)} {match.group(2)}"
+        # Remplacement du bis en b au cas où on a les 2 versions
+        # dans la data
+        return result.replace("bis", "b")
+
+    @property
+    def code_departement(self) -> str | None:
+        """Extrait le code départemental du code postal"""
+        cp = self.code_postal
+        if not cp:
+            return None
+        cp = str(cp).strip()
+        return None if not cp or len(cp) != 5 else cp[:2]
+
+    @property
+    def combine_adresses(self) -> str | None:
+        """Combine les valeurs de tous les champs adresses,
+        utile notamment pour le clustering car les sources mélangent
+        un peut tout à travers ces champs et on veut tout regrouper
+        pour augmenter les chances de similarité (sachant qu'on
+        peut utiliser à posteriori fonctions de normalisation qui suppriment
+        les mots en doublons et augmentent encore la similarité)"""
+        result = (
+            f"{(self.adresse or '').strip()} {(self.adresse_complement or '').strip()}"
+        ).strip()
+        return result or None
+
+    @property
+    def nom_sans_combine_adresses(self) -> str | None:
+        """Retourne le nom sans les mots présents
+        dans l'adresse ou le complément de rue, ceci
+        pour faciliter le clustering quand un nom répète
+        des éléments de l'adresse ce qui vient baisser le
+        score de similarité.
+
+        Si après suppression de l'adresse/complément
+        il ne reste plus rien, on retourne None ce qui
+        permet à ce champ d'être utilisé dans les
+        critères d'inclusion/exclusion
+        """
+        return string_remove_substring_via_normalization(
+            self.nom, self.combine_adresses
+        )
+
+    @property
+    def combine_noms(self) -> str | None:
+        """Même idée que combine_adresses mais pour les noms"""
+        result = (
+            (self.nom or "").strip()
+            + " "
+            + (self.nom_commercial or "").strip()
+            + " "
+            + (self.nom_officiel or "").strip()
+        ).strip()
+        return result or None
+
+    @property
+    def nom_sans_ville(self) -> str | None:
+        """Retourne le nom sans la ville pour faciliter le clustering
+        ex: DECATHLON {VILLE} -> DECATHLON. Pour étendre la portée
+        de la fonction on passe par un état normalisé à la volée, mais
+        au final on retourne un nom construit à partir de l'original"""
+        return string_remove_substring_via_normalization(self.nom, self.ville)
 
     @cached_property
     def sorted_proposition_services(self):
@@ -372,6 +507,16 @@ class BaseActeur(NomAsNaturalKeyModel):
             .values_list("libelle", flat=True)
             .distinct()
         )
+
+    @property
+    def adresse_display(self):
+        parts = []
+        fields = ["adresse", "adresse_complement", "code_postal", "ville"]
+        for field in fields:
+            if part := getattr(self, field):
+                parts.append(part)
+
+        return ", ".join(parts)
 
     @cached_property
     def acteur_services_display(self):
@@ -454,26 +599,11 @@ class Acteur(BaseActeur):
         (revisionacteur, created) = RevisionActeur.objects.get_or_create(
             identifiant_unique=self.identifiant_unique, defaults=fields
         )
-        if created:
-            for proposition_service in self.proposition_services.all():  # type: ignore
-                revision_proposition_service = (
-                    RevisionPropositionService.objects.create(
-                        acteur=revisionacteur,
-                        action_id=proposition_service.action_id,
-                    )
-                )
-                revision_proposition_service.sous_categories.add(
-                    *proposition_service.sous_categories.all()
-                )
-            for label in self.labels.all():
-                revisionacteur.labels.add(label)
-            for acteur_service in self.acteur_services.all():
-                revisionacteur.acteur_services.add(acteur_service)
 
         return revisionacteur
 
     def clean_location(self):
-        if self.location is None and self.acteur_type.code != "acteur_digital":
+        if self.location is None and self.acteur_type.code != DIGITAL_ACTEUR_CODE:
             raise ValidationError(
                 {"location": "Location is mandatory when the actor is not digital"}
             )
@@ -489,7 +619,7 @@ class Acteur(BaseActeur):
                 random.choices(string.ascii_uppercase, k=12)
             )
         if self.source is None:
-            self.source = Source.objects.get_or_create(code="equipe")[0]
+            self.source = Source.objects.get_or_create(code=DEFAULT_SOURCE_CODE)[0]
         if not self.identifiant_unique:
             source_stub = unidecode(self.source.code.lower()).replace(" ", "_")
             self.identifiant_unique = source_stub + "_" + str(self.identifiant_externe)
@@ -515,16 +645,43 @@ class RevisionActeur(BaseActeur):
         validators=[clean_parent],
     )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._original_parent = self.parent
+
     @property
     def is_parent(self):
-        return self.duplicats.exists()
+        return self.pk and self.duplicats.exists()
 
     def save(self, *args, **kwargs):
         # OPTIMIZE: if we need to validate the main action in the service propositions
         # I guess it should be here
-        self.set_default_fields_and_objects_before_save()
+
+        acteur = self.set_default_fields_and_objects_before_save()
         self.full_clean()
-        return super().save(*args, **kwargs)
+        creating = self._state.adding  # Before calling save
+        super_result = super().save(*args, **kwargs)
+        if creating and acteur:
+            for proposition_service in acteur.proposition_services.all():  # type: ignore
+                revision_proposition_service = (
+                    RevisionPropositionService.objects.create(
+                        acteur=self,
+                        action_id=proposition_service.action_id,
+                    )
+                )
+                revision_proposition_service.sous_categories.add(
+                    *proposition_service.sous_categories.all()
+                )
+            for label in acteur.labels.all():
+                self.labels.add(label)
+            for acteur_service in acteur.acteur_services.all():
+                self.acteur_services.add(acteur_service)
+
+        if self.parent != self._original_parent and self._original_parent:
+            if not self._original_parent.is_parent:
+                self._original_parent.delete()
+
+        return super_result
 
     def save_as_parent(self, *args, **kwargs):
         """
@@ -533,41 +690,44 @@ class RevisionActeur(BaseActeur):
         self.full_clean()
         return super().save(*args, **kwargs)
 
-    def set_default_fields_and_objects_before_save(self):
+    def set_default_fields_and_objects_before_save(self) -> Acteur | None:
         if self.is_parent:
-            return
-        acteur_exists = True
-        if not self.identifiant_unique or not Acteur.objects.filter(
-            identifiant_unique=self.identifiant_unique
-        ):
-            acteur_exists = False
-        if not acteur_exists:
-            acteur = Acteur.objects.create(
-                **model_to_dict(
-                    self,
-                    exclude=[
-                        "id",
-                        "acteur_type",
-                        "source",
-                        "action_principale",
-                        "proposition_services",
-                        "acteur_services",
-                        "labels",
-                        "parent",
-                        "is_parent",
-                    ],
-                ),
-                acteur_type=(
-                    self.acteur_type
-                    if self.acteur_type
-                    else ActeurType.objects.get(code="commerce")
-                ),
-                source=self.source,
-                action_principale=self.action_principale,
-            )
+            return None
+
+        default_acteur_fields = model_to_dict(
+            self,
+            exclude=[
+                "id",
+                "acteur_type",
+                "source",
+                "action_principale",
+                "proposition_services",
+                "acteur_services",
+                "labels",
+                "parent",
+                "is_parent",
+            ],
+        )
+        default_acteur_fields.update(
+            {
+                "acteur_type": self.acteur_type
+                or ActeurType.objects.get(code="commerce"),
+                "source": self.source,
+                "action_principale": self.action_principale,
+            }
+        )
+
+        (acteur, created) = Acteur.objects.get_or_create(
+            identifiant_unique=self.identifiant_unique,
+            defaults=default_acteur_fields,
+        )
+        if created:
+            # Ici on ré-écrit les champs qui ont pu être généré automatiquement lors de
+            # la création de l'Acteur
             self.identifiant_unique = acteur.identifiant_unique
             self.identifiant_externe = acteur.identifiant_externe
             self.source = acteur.source
+        return acteur
 
     def create_parent(self):
         acteur = Acteur.objects.get(pk=self.pk)
@@ -583,6 +743,52 @@ class RevisionActeur(BaseActeur):
         self.parent = revision_acteur_parent
         self.save()
         return revision_acteur_parent
+
+    def duplicate(self):
+        if self.is_parent:
+            raise Exception("Impossible de dupliquer un acteur parent")
+
+        revision_acteur = deepcopy(self)
+
+        acteur = Acteur.objects.get(identifiant_unique=self.identifiant_unique)
+
+        fields_to_reset = [
+            "identifiant_unique",
+            "identifiant_externe",
+            "source",
+        ]
+        fields_to_ignore = [
+            "labels",
+            "acteur_services",
+            "proposition_services",
+            "parent",
+        ]
+
+        for field in fields_to_reset:
+            setattr(revision_acteur, field, None)
+        for field in revision_acteur._meta.fields:
+            if (
+                not getattr(revision_acteur, field.name)
+                and field.name not in fields_to_reset
+                and field.name not in fields_to_ignore
+            ):
+                setattr(revision_acteur, field.name, getattr(acteur, field.name))
+        revision_acteur.save()
+        revision_acteur.labels.set(self.labels.all())
+        revision_acteur.acteur_services.set(self.acteur_services.all())
+
+        # recreate proposition_services for the new revision_acteur
+        for proposition_service in self.proposition_services.all():
+            revision_proposition_service = revision_proposition_service = (
+                RevisionPropositionService.objects.create(
+                    acteur=revision_acteur,
+                    action=proposition_service.action,
+                )
+            )
+            revision_proposition_service.sous_categories.set(
+                proposition_service.sous_categories.all()
+            )
+        return revision_acteur
 
     def __str__(self):
         return (
@@ -609,7 +815,7 @@ class DisplayedActeur(BaseActeur):
     )
 
     def get_absolute_url(self):
-        return reverse("qfdmo:acteur-detail", args=[self.identifiant_unique])
+        return reverse("qfdmo:acteur-detail", args=[self.uuid])
 
     def acteur_actions(self, direction=None):
         ps_action_ids = list(
@@ -649,7 +855,7 @@ class DisplayedActeur(BaseActeur):
         actions = sorted(actions, key=sort_actions)
 
         acteur_dict = {
-            "identifiant_unique": self.identifiant_unique,
+            "uuid": self.uuid,
             "location": orjson.loads(self.location.geojson),
         }
 
