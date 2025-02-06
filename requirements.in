@@ -27,3 +27,4 @@ django-cors-headers
 django-dsfr
 django-colorfield
 rapidfuzz
+wagtail
