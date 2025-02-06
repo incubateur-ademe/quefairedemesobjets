@@ -257,8 +257,6 @@ class ActeurResource(resources.ModelResource):
         longitude = row.get("longitude")
         if latitude and longitude:
             row["location"] = Point(float(longitude), float(latitude), srid=4326)
-        else:
-            row["location"] = None
 
     def get_queryset(self):
         if self.limit:
