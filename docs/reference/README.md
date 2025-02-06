@@ -3,10 +3,15 @@
 ```{toctree}
 :hidden:
 
-101-coding-guidelines.md
-201-frontend.md
-301-db-guidelines.md
-302-organisations-des-fichiers-data.md
-901-documentation-technique.md
-902-utilisation-du-francais-et-de-l-anglais.md
+documentation-technique.md
+data/organisations-des-fichiers.md
+data/systeme-de-suggestions.md
+coding/coding-guidelines.md
+coding/francais-vs-anglais.md
+db/valeurs-defaut.md
+db/contraintes.md
+frontend/tailwind.md
+frontend/parcel.md
+frontend/templates.md
 ```
+
