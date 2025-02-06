@@ -21,6 +21,27 @@ from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
 
+REPLACE_NULL_MAPPING = {
+    "null": "",
+    "none": "",
+    "nan": "",
+    "na": "",
+    "n/a": "",
+    "non applicable": "",
+}
+
+
+def _replace_null_insensitive(value):
+    if isinstance(value, str) and value.strip().lower() in REPLACE_NULL_MAPPING:
+        return ""
+    if isinstance(value, list):
+        return [v for v in value if v.strip().lower() not in REPLACE_NULL_MAPPING]
+    return value
+
+
+def _replace_explicite_null_values(df: pd.DataFrame) -> pd.DataFrame:
+    return df.map(_replace_null_insensitive)
+
 
 def get_transformation_function(function_name, dag_config):
     def transformation_function(row):
@@ -181,11 +202,16 @@ def source_data_normalize(
             inplace=True,
         )
 
+    df = _replace_explicite_null_values(df)
+
     df = _rename_columns(df, dag_config)
     df = _transform_columns(df, dag_config)
     df = _default_value_columns(df, dag_config)
     df = _transform_df(df, dag_config)
     df = _remove_columns(df, dag_config)
+
+    # Merge et suppression des lignes indésirables
+    df = _remove_undesired_lines(df, dag_config)
 
     # Vérification que le dataframe a exactement les colonnes attendues
     expected_columns = dag_config.get_expected_columns()
@@ -204,9 +230,6 @@ def source_data_normalize(
     # TODO: Remplacer par le dag_id
     if dag_id == "sinoe":
         df = df_normalize_sinoe(df)
-
-    # Merge et suppression des lignes indésirables
-    df = _remove_undesired_lines(df, dag_config)
 
     # Log si des localisations sont manquantes parmis les acteurs non digitaux
     _display_warning_about_missing_location(df)
