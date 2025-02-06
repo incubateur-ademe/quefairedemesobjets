@@ -4,7 +4,10 @@ import pandas as pd
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from cluster.config.model import ClusterConfig
-from cluster.tasks.business_logic import cluster_acteurs_choose_new_parents
+from cluster.tasks.business_logic import (
+    cluster_acteurs_df_sort,
+    cluster_acteurs_parents_choose_new,
+)
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -45,10 +48,13 @@ def cluster_acteurs_parents_choose_new_wrapper(**kwargs) -> None:
     log.preview("config reçue", config)
     log.preview("acteurs groupés", df)
 
-    df = cluster_acteurs_choose_new_parents(df)
+    df = cluster_acteurs_parents_choose_new(df)
+    df = cluster_acteurs_df_sort(df)
 
     logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
-    log.preview_df_as_markdown("acteurs avec parents sélectionnés", df)
+    log.preview_df_as_markdown(
+        "acteurs avec parents sélectionnés", df, groupby="cluster_id"
+    )
 
     # Les XCOM étant spécifiques à une tâche on peut pousser
     # le même nom sans risque de collision. Ainsi, pousse le nom "df"

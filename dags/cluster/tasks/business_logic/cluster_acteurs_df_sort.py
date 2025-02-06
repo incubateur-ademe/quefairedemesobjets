@@ -1,4 +1,13 @@
 import pandas as pd
+from utils.django import django_setup_full
+
+django_setup_full()
+
+from data.models.change import (  # noqa: E402
+    COL_CHANGE_ORDER,
+    COL_CHANGE_REASON,
+    COL_CHANGE_TYPE,
+)
 
 
 def cluster_acteurs_df_sort(
@@ -6,11 +15,12 @@ def cluster_acteurs_df_sort(
     cluster_fields_exact: list[str] = [],
     cluster_fields_fuzzy: list[str] = [],
 ) -> pd.DataFrame:
-    """Fonction de tri d'une dataframe acteurs
-    pour favoriser la visualisation des clusters.
+    """Fonction de tri des lignes & colonnes d'un df d'acteurs:
+     - lignes: on favorise le groupement sémantique (ex: même ville)
+     - colonnes: on favorise le debug métier (ex: identifiants)
 
     La fonction peut fonctionner sur n'importe quel
-    état d'une dataframe acteurs (sélection, normalisation,
+    état d'un df acteurs (sélection, normalisation,
     clusterisation).
 
     De fait elle est utilisée tout au long du DAG
@@ -25,13 +35,16 @@ def cluster_acteurs_df_sort(
         pour le clustering. Defaults to [].
 
     Returns:
-        pd.DataFrame: DataFrame acteurs triée
+        pd.DataFrame: DataFrame triée
     """
 
+    # -----------------------------------------------
+    # Tri des lignes
+    # -----------------------------------------------
     # On construit une liste de champs de tri
     # avec des champs par défauts (ex: cluster_id)
     # et des champs spécifiés dans la config du DAG
-    sort_ideal = ["cluster_id"]  # la base du clustering
+    sort_ideal = ["cluster_id", COL_CHANGE_ORDER]  # la base du clustering
 
     # pour déceler des erreurs de clustering rapidement (ex: intra-source)
     # mais on le met pas pour les étapes de sélection et normalisation
@@ -54,4 +67,22 @@ def cluster_acteurs_df_sort(
     sort_actual += [
         x for x in df.columns if x not in cluster_fields_exact and x not in sort_actual
     ]
-    return df.sort_values(by=sort_actual, ascending=True)[sort_actual]
+    df = df.sort_values(by=sort_actual, ascending=True)[sort_actual]
+
+    # -----------------------------------------------
+    # Tri des colonnes
+    # -----------------------------------------------
+    cols_ideal = [
+        "cluster_id",
+        "identifiant_unique",
+        COL_CHANGE_TYPE,
+        COL_CHANGE_REASON,
+        COL_CHANGE_ORDER,
+        "acteur_type_code",
+    ]
+    cols = [x for x in cols_ideal if x in df.columns]
+    cols += [x for x in cluster_fields_exact if x not in cols]
+    cols += [x for x in cluster_fields_fuzzy if x not in cols]
+    cols += [x for x in df.columns if x not in cols]
+    df = df[cols]
+    return df

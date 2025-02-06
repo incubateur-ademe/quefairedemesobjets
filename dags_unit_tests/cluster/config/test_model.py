@@ -10,8 +10,8 @@ class TestClusterConfigModel:
         # Paramètres pour créer une config qui fonctionne
         return {
             "dry_run": True,
-            "include_source_codes": ["source1 (id=1)", "source3 (id=3)"],
-            "include_acteur_type_codes": ["atype2 (id=2)", "atype3 (id=3)"],
+            "include_sources": ["source1 (id=1)", "source3 (id=3)"],
+            "include_acteur_types": ["atype2 (id=2)", "atype3 (id=3)"],
             "include_only_if_regex_matches_nom": "mon nom",
             "include_if_all_fields_filled": ["f1_incl", "f2_incl"],
             "exclude_if_any_field_filled": ["f3_excl", "f4_excl"],
@@ -25,8 +25,8 @@ class TestClusterConfigModel:
             "cluster_fields_exact": ["exact1", "exact2"],
             "cluster_fields_fuzzy": ["fuzzy1", "fuzzy2"],
             "cluster_fuzzy_threshold": 0.5,
-            "mapping_source_ids_by_codes": {"source1": 1, "source2": 2, "source3": 3},
-            "mapping_acteur_type_ids_by_codes": {"atype1": 1, "atype2": 2, "atype3": 3},
+            "mapping_sources": {"source1": 1, "source2": 2, "source3": 3},
+            "mapping_acteur_types": {"atype1": 1, "atype2": 2, "atype3": 3},
         }
 
     @pytest.fixture
@@ -46,7 +46,7 @@ class TestClusterConfigModel:
 
     def test_working_no_sources_equals_all_sources(self, params_working):
         # Si aucun code source fourni alors on inclut toutes les sources
-        params_working["include_source_codes"] = None
+        params_working["include_sources"] = None
         config = ClusterConfig(**params_working)
         assert config.include_source_ids == [1, 2, 3]
 
@@ -129,24 +129,24 @@ class TestClusterConfigModel:
         # Si aucun type d'acteur fourni alors on lève une erreur
         # car on ne veut pas clustering sur tous les types d'acteurs
         # à la fois = trop de risques de faux positifs
-        params_working["include_acteur_type_codes"] = []
+        params_working["include_acteur_types"] = []
         with pytest.raises(ValueError, match="Au moins un type d'acteur"):
             ClusterConfig(**params_working)
 
     def test_error_must_provide_acteur_type_none(self, params_working):
         # Variation ci-dessus avec None
-        params_working["include_acteur_type_codes"] = None
+        params_working["include_acteur_types"] = None
         with pytest.raises(ValueError, match="Au moins un type d'acteur"):
             ClusterConfig(**params_working)
 
     def test_error_source_codes_invalid(self, params_working):
         # Erreur si un code source n'existe pas dans le mapping
-        params_working["include_source_codes"] = ["MAUVAISE SOURCE (id=666)"]
+        params_working["include_sources"] = ["MAUVAISE SOURCE (id=666)"]
         with pytest.raises(ValueError, match="Codes non trouvés dans le mapping"):
             ClusterConfig(**params_working)
 
     def test_error_acteur_type_codes_invalid(self, params_working):
         # Erreur si un code acteur type n'existe pas dans le mapping
-        params_working["include_acteur_type_codes"] = ["MAUVAIS TYPE (id=666)"]
+        params_working["include_acteur_types"] = ["MAUVAIS TYPE (id=666)"]
         with pytest.raises(ValueError, match="Codes non trouvés dans le mapping"):
             ClusterConfig(**params_working)

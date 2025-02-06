@@ -2,6 +2,7 @@ import json
 import uuid
 from logging import getLogger
 
+import numpy as np
 import pandas as pd
 from rich import print
 from utils.django import django_setup_full
@@ -20,7 +21,7 @@ from data.models.change import (  # noqa: E402
 
 logger = getLogger(__name__)
 
-REASON_ONE_PARENT_KEPT = "🟢 1 seul parent existant -> on le garde"
+REASON_ONE_PARENT_KEPT = "🎖️ 1 seul parent existant -> on le garde"
 REASON_MULTI_PARENTS_KEEP_MOST_CHILDREN = (
     "🔼 2+ parents, on garde celui avec le + d'enfants"
 )
@@ -76,6 +77,7 @@ def cluster_acteurs_one_cluster_changes_mark(
 
     # Ensuite tous les enfants (non-parents) doivent pointer vers le nouveau parent
     filter_point = (df["nombre_enfants"] == 0) & (df["identifiant_unique"] != parent_id)
+    df["parent_id_before"] = df["parent_id"]  # Pour debug
     df.loc[filter_point, "parent_id"] = parent_id
     df.loc[filter_point, COL_CHANGE_TYPE] = CHANGE_ACTEUR_POINT_TO_PARENT
     df.loc[filter_point, COL_CHANGE_REASON] = REASON_POINT_TO_NEW_PARENT
@@ -130,7 +132,7 @@ def cluster_acteurs_one_cluster_parent_choose(df: pd.DataFrame) -> tuple[str, st
         raise e
 
 
-def cluster_acteurs_choose_new_parents(df_clusters: pd.DataFrame) -> pd.DataFrame:
+def cluster_acteurs_parents_choose_new(df_clusters: pd.DataFrame) -> pd.DataFrame:
     """Choisit et assigne les nouveaux parents d'une dataframe
     comprenant 1 ou plusieurs clusters.'"""
 
@@ -169,7 +171,7 @@ def cluster_acteurs_choose_new_parents(df_clusters: pd.DataFrame) -> pd.DataFram
                     ),
                 ],
                 ignore_index=True,
-            )
+            ).replace({np.nan: None})
             df_cluster = df[df["cluster_id"] == cluster_id]
         # Enfin on vient marquer les changements sur la df filtrée du cluster
         df_cluster_marked = cluster_acteurs_one_cluster_changes_mark(

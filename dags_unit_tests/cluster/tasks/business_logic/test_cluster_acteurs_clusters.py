@@ -39,6 +39,7 @@ class TestCluster:
                     "id5-a",
                     "id5-b",
                 ],
+                "source_id": range(1, 8),
                 "source_code": ["s1", "s2", "s3", "s4", "s5", "s6", "s7"],
                 "code_departement": ["75", "75", "75", "75", "75", "53", "53"],
                 "code_postal": [
@@ -120,6 +121,7 @@ class TestCluster:
                     "id3",
                     "id4",
                 ],
+                "source_id": range(1, 5),
                 "code_departement": ["13", "75", "53", "13"],
                 "code_postal": ["13000", "75000", "53000", "13000"],
                 "ville": ["Marseille", "Paris", "Laval", "Marseille"],
@@ -149,6 +151,7 @@ class TestCluster:
         return pd.DataFrame(
             {
                 "__index_src": range(1, 8),
+                "source_id": range(1, 8),
                 "code_postal": ["10000" for _ in range(7)],
                 "identifiant_unique": ["id" + str(i) for i in range(0, 7)],
                 "nom": [
@@ -243,6 +246,7 @@ class TestClusterColsGroupFuzzy:
     def df_cols_group_fuzzy(self):
         data = {
             "__index_src": range(0, 8),
+            "source_id": range(0, 8),
             "col1": [
                 # cluster 1
                 "apple orange",

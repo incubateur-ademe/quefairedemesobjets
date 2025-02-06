@@ -100,7 +100,9 @@ def cluster_acteurs_suggestions_wrapper(**kwargs) -> None:
     )
 
     logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
-    log.preview_df_as_markdown("suggestions de clusters", df_clusters)
+    log.preview_df_as_markdown(
+        "suggestions de clusters", df_clusters, groupby="cluster_id"
+    )
 
     # On pousse les suggestions dans xcom pour les tâches suivantes
     kwargs["ti"].xcom_push(key="df", value=df_clusters)

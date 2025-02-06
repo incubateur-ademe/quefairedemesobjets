@@ -1,12 +1,12 @@
 import pandas as pd
 import pytest
-from cluster.tasks.business_logic.cluster_acteurs_choose_new_parents import (
+from cluster.tasks.business_logic.cluster_acteurs_parents_choose_new import (
     REASON_MULTI_PARENTS_KEEP_MOST_CHILDREN,
     REASON_NO_PARENT_CREATE_ONE,
     REASON_ONE_PARENT_KEPT,
-    cluster_acteurs_choose_new_parents,
     cluster_acteurs_one_cluster_changes_mark,
     cluster_acteurs_one_cluster_parent_choose,
+    cluster_acteurs_parents_choose_new,
     parent_id_generate,
 )
 from rich import print
@@ -110,7 +110,7 @@ class TestClusterActeursOneClusterChangesMark:
         df = df_no_parent
         # On doit simuler le fait d'avoir ajouter la ligne
         # correspondant au nouveau parent, qui est effectué
-        # automatiquement dans la fonction cluster_acteurs_choose_new_parents
+        # automatiquement dans la fonction cluster_acteurs_parents_choose_new
         df = pd.concat(
             [
                 df,
@@ -200,12 +200,18 @@ class TestClusterActeursOneClusterChangesMark:
 class TestClusterActeursChooseAllParents:
 
     @pytest.fixture(scope="session")
-    def df_working(self, df_one_parent, df_two_parents, df_no_parent) -> pd.DataFrame:
+    def df_combined(self, df_one_parent, df_two_parents, df_no_parent) -> pd.DataFrame:
         # Création d'un dataframe qui rassemble tous les cas de figures
         df = pd.concat([df_one_parent, df_two_parents, df_no_parent], ignore_index=True)
         # On mélange les lignes pour tester la robustesse de l'algo
         df = df.sample(frac=1).reset_index(drop=True)
-        return cluster_acteurs_choose_new_parents(df)
+        # Pour tester les nan quand on ajoute des enfants
+        df["extra_column"] = "extra_value"
+        return df
+
+    @pytest.fixture(scope="session")
+    def df_working(self, df_combined) -> pd.DataFrame:
+        return cluster_acteurs_parents_choose_new(df_combined)
 
     def test_working_one_entry_added(
         self, df_working, df_one_parent, df_two_parents, df_no_parent
@@ -218,7 +224,7 @@ class TestClusterActeursChooseAllParents:
             == len(df_one_parent) + len(df_two_parents) + len(df_no_parent) + 1
         )
 
-    def test_working_overall_changes(self, df_working, parent_id_new):
+    def test_working_overall_changes(self, df_working, parent_id_new, df_combined):
         # Notations raccourcies pour préserver la lisibilité
         c0 = "c0_0parent"
         c1 = "c1_1parent"
@@ -249,8 +255,23 @@ class TestClusterActeursChooseAllParents:
             [c2, "c2_e", 2, POINT],  # 🔵 pointer
             [c2, "c2_b", 3, DELETE],  # 🔴 supprimer
         ]
+        # On veut aucune valeur nan résultant des divers manipulations
+        # On ne peut pas juste faire df.isna().any().any() car isna
+        # inclut les None qu'on tolère
+        df_nan = df_working.map(lambda x: 1 if pd.isna(x) and x is not None else 0)
+        assert df_nan.values.sum() == 0
+
+        # On vérifie que la colonne de débug parent_id_before à
+        # été ajoutée pour le debug
+        assert "parent_id_before" in df_working.columns
+        # A l'exception du nouveau parent, on confirme qu'elle
+        # contient les mêmes valeurs que parent_id de la df d'origine
+        df_a = df_working[df_working["identifiant_unique"] != parent_id_new]
+        df_a = df_a.sort_values(by="identifiant_unique")
+        db_b = df_combined.sort_values(by="identifiant_unique")
+        assert df_a["parent_id_before"].tolist() == db_b["parent_id"].tolist()
 
     def test_pandas_warning(self, df_one_parent, df_two_parents):
         df = pd.concat([df_one_parent, df_two_parents], ignore_index=True)
         df = df[df["cluster_id"] == "c1_1parent"]
-        cluster_acteurs_choose_new_parents(df)
+        cluster_acteurs_parents_choose_new(df)

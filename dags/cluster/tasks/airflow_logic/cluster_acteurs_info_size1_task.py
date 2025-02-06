@@ -38,7 +38,7 @@ def cluster_info_size1_exact_fields_wrapper(**kwargs) -> None:
         key="config", task_ids="cluster_acteurs_config_create"
     )
     df: pd.DataFrame = kwargs["ti"].xcom_pull(
-        key="df", task_ids="cluster_acteurs_selection_from_db"
+        key="df", task_ids="cluster_acteurs_selection_children"
     )
 
     log.preview("config reçue", config)

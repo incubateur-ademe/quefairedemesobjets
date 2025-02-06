@@ -32,8 +32,8 @@ class ClusterConfig(BaseModel):
     dry_run: bool
 
     # SELECTION ACTEURS NON-PARENTS
-    include_source_codes: list[str]
-    include_acteur_type_codes: list[str]
+    include_sources: list[str]
+    include_acteur_types: list[str]
     include_only_if_regex_matches_nom: str | None
     include_if_all_fields_filled: list[str]
     exclude_if_any_field_filled: list[str]
@@ -69,8 +69,8 @@ class ClusterConfig(BaseModel):
     fields_used_data: list[str]
     # Ajouter les mappings à la config facilite le debug
     # et évite d'avoir à faire des requêtes DB plusieurs fois
-    mapping_source_ids_by_codes: dict[str, int]
-    mapping_acteur_type_ids_by_codes: dict[str, int]
+    mapping_sources: dict[str, int]
+    mapping_acteur_types: dict[str, int]
 
     # ---------------------------------------
     # Champs calculés
@@ -111,24 +111,22 @@ class ClusterConfig(BaseModel):
 
         # SOURCE CODES
         # Si aucun code source fourni alors on inclut toutes les sources
-        if not values.get("include_source_codes"):
-            values["include_source_codes"] = []
-            values["include_source_ids"] = values[
-                "mapping_source_ids_by_codes"
-            ].values()
+        if not values.get("include_sources"):
+            values["include_sources"] = []
+            values["include_source_ids"] = values["mapping_sources"].values()
         else:
             # Sinon on résout les codes sources en ids à partir de la sélection
             values["include_source_ids"] = airflow_params_dropdown_selected_to_ids(
-                mapping_ids_by_codes=values["mapping_source_ids_by_codes"],
-                dropdown_selected=values["include_source_codes"],
+                mapping_ids_by_codes=values["mapping_sources"],
+                dropdown_selected=values["include_sources"],
             )
 
         # ACTEUR TYPE CODES
-        if not values.get("include_acteur_type_codes"):
+        if not values.get("include_acteur_types"):
             raise ValueError("Au moins un type d'acteur doit être sélectionné")
         values["include_acteur_type_ids"] = airflow_params_dropdown_selected_to_ids(
-            mapping_ids_by_codes=values["mapping_acteur_type_ids_by_codes"],
-            dropdown_selected=values["include_acteur_type_codes"],
+            mapping_ids_by_codes=values["mapping_acteur_types"],
+            dropdown_selected=values["include_acteur_types"],
         )
 
         """

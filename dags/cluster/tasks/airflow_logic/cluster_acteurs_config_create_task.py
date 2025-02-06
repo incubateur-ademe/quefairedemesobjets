@@ -42,7 +42,7 @@ def cluster_acteurs_config_create_wrapper(**kwargs):
     logger.info(task_info_get())
     params = kwargs["params"]
     extra = {
-        "mapping_source_ids_by_codes": {x.code: x.id for x in Source.objects.all()},
+        "mapping_sources": {x.code: x.id for x in Source.objects.all()},
         "mapping_acteur_type_ids_by_codes": {
             x.code: x.id for x in ActeurType.objects.all()
         },

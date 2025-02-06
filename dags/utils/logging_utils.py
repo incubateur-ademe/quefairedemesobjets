@@ -10,7 +10,7 @@ import pandas as pd
 from pydantic import BaseModel
 
 
-def logger_get(levels: int = 2) -> logging.Logger:
+def logger_get(levels: int = 3) -> logging.Logger:
     """Utilitaire pour obtenir le logger avec nom du fichier appelant
     source, sinon tous les logs ont le nom du fichier courant
     (logging_utils) ce qui perd de l'intérêt pour le logging.
@@ -104,14 +104,33 @@ def preview(value_name: str, value: Any) -> None:
     log.info("::endgroup::")
 
 
-def preview_df_as_markdown(label: str, df: pd.DataFrame) -> None:
+def lst(lst: list) -> str:
+    """Petit utilitaire pour afficher une liste"""
+    return ", ".join([str(x) for x in lst])
+
+
+def preview_df_as_markdown(label: str, df: pd.DataFrame, groupby=None) -> None:
     """Variation de la preview pour une dataframe de manière à
     obtenir une table lisible. On ne filtre pas la df ici, c'est
-    à l'appelant de décider (ex: this("me",df.head(10))"""
+    à l'appelant de décider (ex: this("me",df.head(10))
+
+    groupby: permet par exemple de grouper la df en sous df pour
+    l'affichage du clustering
+    """
     size = size_info_get(df)
     log = logger_get()
     log.info(f"::group::📦 {label}: taille={size}, 🔽 Cliquer pour révéler la table 🔽")
-    log.info("\n" + df.to_markdown(index=False))
+    # groupby: on affiche les groupes séparément sans répéter les colonnes
+    # du groupby pour chaque groupe
+    if groupby:
+        cols_groupby = [groupby] if isinstance(groupby, str) else groupby
+        cols_other = [col for col in df.columns if col not in cols_groupby]
+        for group, group_df in df.groupby(cols_groupby):
+            df_md = group_df[cols_other].to_markdown(index=False)
+            log.info(f"\n\n📦 GROUP: {lst(cols_groupby)}={lst(group)}\n\n{df_md}\n\n")
+    else:
+        # Pas de groupby: affichage en une seule table
+        log.info("\n" + df.to_markdown(index=False))
     log.info("::endgroup::")
 
 

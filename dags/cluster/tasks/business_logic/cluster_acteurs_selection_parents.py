@@ -7,7 +7,7 @@ from qfdmo.models import ActeurType, DisplayedActeur  # noqa: E402
 from qfdmo.models.acteur import ActeurStatus  # noqa: E402
 
 
-def cluster_acteurs_selection_acteur_type_parents(
+def cluster_acteurs_selection_parents(
     acteur_type_ids: list[int],
     fields: list[str],
     include_only_if_regex_matches_nom: str | None = None,

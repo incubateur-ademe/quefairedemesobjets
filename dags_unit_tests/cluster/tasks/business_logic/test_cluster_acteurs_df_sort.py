@@ -33,15 +33,16 @@ class TestClusterActeursDfSort:
         """
 
         df_sorted = cluster_acteurs_df_sort(df)
-        # Les champs par défauts sont bien présents
+        # L'odre des colonnes n'est pas forcément celui utiliser
+        # pour ordonner les lignes, car pour les lignes on favorise
+        # sémantique (ex: ville) alors que pour les colonnes on favorise
+        # le debug
         assert df_sorted.columns.tolist() == [
-            "code_postal",
+            "acteur_type_code",  # très utile pour debug
+            "code_postal",  # très utile pour sémantique
             "ville",
             "adresse",
-            # Pour les étapes de sélection et normalisation
-            # les codes restent en fin, on privilégie la sémantique
             "source_code",
-            "acteur_type_code",
         ]
         # On a pas rajouté de colonnes non présentes (surtout le cluster_id)
         assert "cluster_id" not in df_sorted.columns
@@ -67,13 +68,13 @@ class TestClusterActeursDfSort:
             "cluster_id",
             # Les codes sont remontés en haut car très
             # importants pour la phase de clustering
-            "source_code",
             "acteur_type_code",
             # On voit que les champs de clustering prennent le dessus
             # sur le champ par défaut "code_postal" (même si d'un point
             # de vue métier on ferait l'inverse, ça démontre que ça marche)
             "ville",
             "adresse",
+            "source_code",
             "code_postal",
         ]
         # Toujours pas de modification de la structure de la df
