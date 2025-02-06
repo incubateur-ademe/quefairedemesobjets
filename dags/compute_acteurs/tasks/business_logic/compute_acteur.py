@@ -10,7 +10,10 @@ from qfdmo.models.acteur import RevisionActeur  # noqa: E402
 
 def compute_acteur(df_acteur: pd.DataFrame, df_revisionacteur: pd.DataFrame):
 
-    revisionacteur_parent_ids = df_revisionacteur["parent_id"].unique()
+    # Collect parent_id among active revisionacteurs
+    revisionacteur_parent_ids = df_revisionacteur[
+        df_revisionacteur["statut"] == constants.ACTEUR_ACTIF
+    ]["parent_id"].unique()
 
     df_revisionacteur_parents = df_revisionacteur[
         df_revisionacteur["identifiant_unique"].isin(revisionacteur_parent_ids)
