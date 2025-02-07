@@ -129,6 +129,11 @@ class Suggestion(models.Model):
     suggestion = models.JSONField(blank=True, verbose_name="Suggestion de modification")
     cree_le = models.DateTimeField(auto_now_add=True, db_default=Now())
     modifie_le = models.DateTimeField(auto_now=True, db_default=Now())
+    metadata = models.JSONField(
+        null=True,
+        blank=True,
+        verbose_name="Metadata de la cohorte, données statistiques",
+    )
 
     @property
     def display_contexte_details(self):
