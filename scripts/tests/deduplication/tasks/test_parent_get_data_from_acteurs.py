@@ -1,4 +1,4 @@
-""""
+"""
 Test de la fonction parent_get_data_from_acteurs qui permet de fusionner
 les données de plusieurs acteurs pour en faire un parent, en priorisant
 les sources de préférence puis les données les plus complètes.

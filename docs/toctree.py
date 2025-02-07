@@ -1,10 +1,10 @@
 """Script pour mettre à jour les toctree des README.md:
-    - Récupère les sous-dossiers directs de docs/
-    - Pour chaque sous-dossier:
-        - Récupère les fichiers .md
-        - Génère un toctree
-        - Met à jour le README.md du sous-dossier avec le toctree
- """
+- Récupère les sous-dossiers directs de docs/
+- Pour chaque sous-dossier:
+    - Récupère les fichiers .md
+    - Génère un toctree
+    - Met à jour le README.md du sous-dossier avec le toctree
+"""
 
 import os
 import re
