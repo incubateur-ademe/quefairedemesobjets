@@ -137,8 +137,19 @@ class Migration(migrations.Migration):
                 ("uniquement_sur_rdv", models.BooleanField(blank=True, null=True)),
             ],
             options={
-                "verbose_name": "ACTEUR de l'EC - AFFICHÉ",
-                "verbose_name_plural": "ACTEURS de l'EC - AFFICHÉ",
+                "managed": False,
+                "verbose_name": "Vue sur l'acteur",
+                "verbose_name_plural": "Vues sur tous les acteurs",
+            },
+        ),
+        migrations.CreateModel(
+            name="ToutPropositionService",
+            fields=[
+                ("id", models.AutoField(primary_key=True, serialize=False)),
+            ],
+            options={
+                "verbose_name": "Vue sur la proposition de service",
+                "verbose_name_plural": "Vue sur toutes les propositions de service",
                 "managed": False,
             },
         ),

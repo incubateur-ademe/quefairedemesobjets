@@ -37,6 +37,7 @@ from qfdmo.models.acteur import (
     DisplayedPropositionService,
     LabelQualite,
     ToutActeur,
+    ToutPropositionService,
 )
 from qfdmo.models.categorie_objet import CategorieObjet
 from qfdmo.widgets import CustomOSMWidget
@@ -61,18 +62,9 @@ class RevisionActeurLabelQualiteInline(admin.StackedInline):
     extra = 0
 
 
-class DisplayedActeurLabelQualiteInline(admin.StackedInline):
+class DisplayedActeurLabelQualiteInline(NotEditableInlineMixin, admin.StackedInline):
     model = DisplayedActeur.labels.through
     extra = 0
-
-    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
-        return False
 
 
 class BasePropositionServiceForm(forms.ModelForm):
@@ -789,8 +781,22 @@ class CodeLibelleModelAdmin(admin.ModelAdmin):
         return []
 
 
+class ToutPropositionServiceInline(
+    NotEditableInlineMixin, BasePropositionServiceInline
+):
+    model = ToutPropositionService
+
+
+class ToutActeurLabelQualiteInline(NotEditableInlineMixin, admin.StackedInline):
+    model = ToutActeur.labels.through
+    extra = 0
+
+
 class ToutActeurAdmin(NotEditableInlineMixin, BaseActeurAdmin):
-    inlines = []
+    inlines = [
+        ToutPropositionServiceInline,
+        ToutActeurLabelQualiteInline,
+    ]
 
 
 admin.site.register(Acteur, ActeurAdmin)

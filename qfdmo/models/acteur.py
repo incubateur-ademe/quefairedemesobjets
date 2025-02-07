@@ -1065,6 +1065,22 @@ class RevisionPropositionService(BasePropositionService):
         return f"{self.acteur} - {super().__str__()}"
 
 
+class ToutPropositionService(BasePropositionService):
+    class Meta:
+        verbose_name = "Vue sur la proposition de service"
+        verbose_name_plural = "Vue sur toutes les propositions de service"
+        managed = False
+
+    id = models.CharField(primary_key=True)
+
+    acteur = models.ForeignKey(
+        ToutActeur,
+        on_delete=models.CASCADE,
+        null=False,
+        related_name="proposition_services",
+    )
+
+
 class DisplayedPropositionService(BasePropositionService):
     class Meta:
         verbose_name = "Proposition de service - AFFICHÉ"
