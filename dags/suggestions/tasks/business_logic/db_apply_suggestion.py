@@ -26,5 +26,8 @@ def db_apply_suggestion():
 
         except Exception as e:
             logger.warning(f"Error while applying suggestion {suggestion.id}: {e}")
+            suggestion.metadata = {
+                "error": e.args[0] if e.args else str(e),
+            }
             suggestion.statut = constants.SUGGESTION_ERREUR
             suggestion.save()

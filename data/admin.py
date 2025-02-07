@@ -71,7 +71,7 @@ class SuggestionAdmin(admin.ModelAdmin):
     list_display = [
         "id",
         "cohorte",
-        "statut",
+        "enrich_statut",
         "donnees_initiales",
         "changements_suggeres",
     ]
@@ -95,6 +95,18 @@ class SuggestionAdmin(admin.ModelAdmin):
 
     def donnees_initiales(self, obj):
         return obj.display_contexte_details
+
+    def enrich_statut(self, obj):
+        if (
+            obj.statut == SuggestionStatut.ERREUR
+            and obj.metadata
+            and "error" in obj.metadata
+        ):
+            return format_html(
+                f"<span style='color: red;'>{obj.get_statut_display()}</span>"
+                f"<br>{obj.metadata['error']}"
+            )
+        return obj.get_statut_display()
 
 
 admin.site.register(SuggestionCohorte, SuggestionCohorteAdmin)
