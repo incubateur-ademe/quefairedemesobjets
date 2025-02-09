@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from cluster.tasks.business_logic import (
     cluster_acteurs_df_sort,
-    cluster_acteurs_selection_children,
+    cluster_acteurs_selection_orphans,
     cluster_acteurs_selection_parents,
 )
 from utils import logging_utils as log
@@ -31,7 +31,7 @@ def cluster_acteurs_selection(
     # base de tous les critères d'inclusion/exclusion
     # fournis au niveau du DAG
     logging.info(log.banner_string("Sélection des acteurs"))
-    df_acteurs, query = cluster_acteurs_selection_children(
+    df_acteurs, query = cluster_acteurs_selection_orphans(
         model_class=DisplayedActeur,
         include_source_ids=include_source_ids,
         include_acteur_type_ids=include_acteur_type_ids,

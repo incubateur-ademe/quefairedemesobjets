@@ -1,12 +1,10 @@
 """
-Fichier de test pour la fonction cluster_acteurs_selection_children
+Fichier de test pour la fonction cluster_acteurs_selection_orphans
 """
 
 import pandas as pd
 import pytest
-from cluster.tasks.business_logic.cluster_acteurs_selection_children import (
-    cluster_acteurs_selection_children,
-)
+from cluster.tasks.business_logic import cluster_acteurs_selection_orphans
 
 from qfdmo.models import RevisionActeur
 from unit_tests.qfdmo.acteur_factory import (
@@ -21,7 +19,7 @@ from unit_tests.qfdmo.acteur_factory import (
 # considérablement les tests pour rien (on fait
 # que de la lecture)
 @pytest.mark.django_db()
-class TestClusterActeursDbDataReadActeurs:
+class TestClusterActeursSelectionOrphans:
 
     @pytest.fixture
     def db_testdata_write(self):
@@ -151,7 +149,7 @@ class TestClusterActeursDbDataReadActeurs:
         test correspondant"""
         s1, s2, at1, at2 = db_testdata_write
 
-        return cluster_acteurs_selection_children(
+        return cluster_acteurs_selection_orphans(
             model_class=RevisionActeur,
             include_source_ids=[s1.id, s2.id],
             include_acteur_type_ids=[at1.id, at2.id],
@@ -315,7 +313,7 @@ class TestClusterActeursDbDataReadActeurs:
     # ----------------------------------------------------
     # Tests sur les cas que l'on ne tolère pas
     # ----------------------------------------------------
-    # Voir commentaires dans la fonction cluster_acteurs_selection_children
+    # Voir commentaires dans la fonction cluster_acteurs_selection_orphans
     # sur le pourquoi des exceptions et pas simplement retourner None
     def test_exception_if_query_returns_nothing(self):
         """Si aucun acteur n'est sélectionné en base de données,
@@ -323,7 +321,7 @@ class TestClusterActeursDbDataReadActeurs:
         with pytest.raises(
             ValueError, match="Pas de données retournées par la query Django"
         ):
-            cluster_acteurs_selection_children(
+            cluster_acteurs_selection_orphans(
                 model_class=RevisionActeur,
                 # Sources et types inconnus au bataillon
                 # d'où l'échec de la query
@@ -340,7 +338,7 @@ class TestClusterActeursDbDataReadActeurs:
         on vérfie aussi qu'un dataframe vide est source d'erreur"""
         s1, _, at1, _ = db_testdata_write
         with pytest.raises(ValueError, match="Dataframe vide après filtrage"):
-            cluster_acteurs_selection_children(
+            cluster_acteurs_selection_orphans(
                 model_class=RevisionActeur,
                 include_source_ids=[s1.id],
                 include_acteur_type_ids=[at1.id],
