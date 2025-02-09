@@ -57,9 +57,7 @@ def cluster_acteurs_suggestions_to_db_wrapper(**kwargs) -> None:
     # un signal de modifier la DB
     if config.dry_run is not False:
         raise AirflowSkipException(
-            log.banner_string(
-                f"Dry run ={config.dry_run} activé, suggestions pas écrites en base"
-            )
+            log.banner_string(f"Dry run ={config.dry_run}, on passe")
         )
 
     cluster_acteurs_suggestions_to_db(

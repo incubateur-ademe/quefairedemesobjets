@@ -12,6 +12,12 @@ from data.models import (  # noqa: E402
     SuggestionCohorte,
     SuggestionStatut,
 )
+from data.models.change import (
+    COL_CHANGE_ORDER,
+    COL_CHANGE_REASON,
+    COL_CHANGE_TYPE,
+    COL_ENTITY_TYPE,
+)
 
 
 def cluster_acteurs_suggestions_to_db(
@@ -38,14 +44,24 @@ def cluster_acteurs_suggestions_to_db(
         metadata=cluster_acteurs_metadata(df),
     )
     cohorte.save()
+
+    cols_changes = [
+        COL_CHANGE_ORDER,
+        COL_ENTITY_TYPE,
+        "identifiant_unique",
+        COL_CHANGE_TYPE,
+        COL_CHANGE_REASON,
+    ]
+
     for cluster_id in df["cluster_id"].unique():
         cluster = df[df["cluster_id"] == cluster_id].copy()
         suggestion = Suggestion(
             suggestion_cohorte=cohorte,
             statut=SuggestionStatut.AVALIDER,
             contexte=cluster.to_dict(orient="records"),
-            suggestion=cluster[["cluster_id", "identifiant_unique"]].to_dict(
-                orient="records"
-            ),
+            suggestion={
+                "cluster_id": cluster_id,
+                "changes": cluster[cols_changes].to_dict(orient="records"),
+            },
         )
         suggestion.save()

@@ -1,8 +1,13 @@
 import logging
 
+import pandas as pd
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from cluster.tasks.airflow_logic.task_ids import TASK_SUGGESTIONS_DISPLAY
+from cluster.tasks.airflow_logic.task_ids import (
+    TASK_PARENTS_CHOOSE_NEW,
+    TASK_SUGGESTIONS_DISPLAY,
+)
+from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +35,19 @@ def task_info_get():
 
 def cluster_acteurs_suggestions_display_wrapper(**kwargs) -> None:
     logger.info(task_info_get())
+
+    df: pd.DataFrame = kwargs["ti"].xcom_pull(
+        key="df", task_ids=TASK_PARENTS_CHOOSE_NEW
+    )
+    if df.empty:
+        raise ValueError("Pas de données clusters récupérées")
+
+    logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
+    log.preview_df_as_markdown(
+        "acteurs avec parents sélectionnés", df, groupby="cluster_id"
+    )
+
+    kwargs["ti"].xcom_push(key="df", value=df)
 
 
 def cluster_acteurs_suggestions_display_task(dag: DAG) -> PythonOperator:

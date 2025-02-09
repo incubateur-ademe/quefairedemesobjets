@@ -47,6 +47,14 @@ from qfdmo.models import RevisionActeur
 COL_CHANGE_TYPE = "change_type"  # = description + lien vers modèles
 COL_CHANGE_ORDER = "change_order"  # = ordre d'application
 COL_CHANGE_REASON = "change_reason"  # = debug
+COL_ENTITY_TYPE = "entity_type"  # = où appliquer le changement
+
+# -----------------------------
+# 0) entity_type
+# -----------------------------
+ENTITY_ACTEUR_REVISION = "acteur_revision"
+ENTITY_ACTEUR_DISPLAYED = "acteur_displayed"
+
 
 # -----------------------------
 # 1) change_type
@@ -60,7 +68,7 @@ CHANGE_ACTEUR_PARENT_DELETE = "acteur_parent_delete"
 CHANGE_ACTEUR_PARENT_KEEP = "acteur_parent_keep"
 CHANGE_ACTEUR_POINT_TO_PARENT = "acteur_point_to_parent"
 CHANGE_ACTEUR_CREATE_AS_PARENT = "acteur_create_as_parent"
-
+CHANGE_ACTEUR_NOTHING_TO_DO = "acteur_nothing_to_do"
 
 # -----------------------------
 # 2) Modèles pydantic

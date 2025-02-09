@@ -1,4 +1,25 @@
 import pandas as pd
+from utils.django import django_setup_full
+
+django_setup_full()
+
+from data.models.change import (  # noqa: E402
+    CHANGE_ACTEUR_CREATE_AS_PARENT,
+    CHANGE_ACTEUR_PARENT_DELETE,
+    CHANGE_ACTEUR_PARENT_KEEP,
+    CHANGE_ACTEUR_POINT_TO_PARENT,
+    COL_CHANGE_ORDER,
+    COL_CHANGE_REASON,
+    COL_CHANGE_TYPE,
+)
+
+ID = "identifiant_unique"
+COUNT_CLUSTERS = "1) 📦 Nombre Clusters Proposés"
+COUNT_CLUSTERS_CURRENT = "2) 📦 Nombre Clusters Existants"
+COUNT_CLUSTERS_NET = "3) 📦 Nombre Clusters Net"
+COUNT_ACTEURS = "4) 🎭 Nombre Acteurs Total"
+COUNT_ACTEURS_CURRENT = "5) 🎭 Nombre Acteurs Existants"
+COUNT_ACTEURS_NEW = "6) 🎭 Nombre Acteurs Nouveaux"
 
 
 def cluster_acteurs_metadata(df_clusters: pd.DataFrame) -> dict:
@@ -17,28 +38,12 @@ def cluster_acteurs_metadata(df_clusters: pd.DataFrame) -> dict:
     """
     df = df_clusters
     meta = {}
-    # TODO: on pourrait surement définir un fichier de traduction avec
-    # les clefs en anglais et les valeurs en français, pour l'instant
-    # je mets la meta en FR (pour métier) de façon à toute afficher
-    # en dynamique dans Django Admin sans avoir à se soucier de tradu là bas
-    meta["nombre_clusters"] = df["cluster_id"].nunique()
-    meta["nombre_clusters_existants"] = df[df["is_parent_current"]][
-        "cluster_id"
-    ].nunique()
-    meta["nombre_clusters_nouveaux"] = (
-        meta["nombre_clusters"] - meta["nombre_clusters_existants"]
-    )
-    meta["nombre_acteurs"] = df["identifiant_unique"].nunique()
-    meta["nombre_acteurs_deja_parent"] = df[df["is_parent_current"]][
-        "identifiant_unique"
-    ].nunique()
-    meta["nombre_acteurs_deja_enfant"] = df[df["parent_id"].notnull()][
-        "identifiant_unique"
-    ].nunique()
-    meta["nombre_acteurs_nouveau_enfant"] = (
-        meta["nombre_acteurs"]
-        - meta["nombre_acteurs_deja_enfant"]
-        - meta["nombre_acteurs_deja_parent"]
-    )
+    meta[COUNT_CLUSTERS] = df["cluster_id"].nunique()
+    # Chaque parent existant est de fait un cluster existant
+    meta[COUNT_CLUSTERS_CURRENT] = df[df["nombre_enfants"] > 0][ID].nunique()
+    meta[COUNT_CLUSTERS_NET] = meta[COUNT_CLUSTERS] - meta[COUNT_CLUSTERS_CURRENT]
+    meta[COUNT_ACTEURS_CURRENT] = int(df["nombre_enfants"].sum())
+    meta[COUNT_ACTEURS] = df[ID].nunique()
+    meta[COUNT_ACTEURS_NEW] = meta[COUNT_ACTEURS] - meta[COUNT_ACTEURS_CURRENT]
 
     return meta

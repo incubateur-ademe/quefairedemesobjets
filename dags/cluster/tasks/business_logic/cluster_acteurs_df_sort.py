@@ -7,6 +7,7 @@ from data.models.change import (  # noqa: E402
     COL_CHANGE_ORDER,
     COL_CHANGE_REASON,
     COL_CHANGE_TYPE,
+    COL_ENTITY_TYPE,
 )
 
 
@@ -51,7 +52,7 @@ def cluster_acteurs_df_sort(
     # car cela casse notre ordre (on a pas de cluster_id et donc
     # on préfère par sémantique business que des codes)
     if cluster_fields_exact or cluster_fields_fuzzy:
-        sort_ideal += ["source_code", "acteur_type_code"]
+        sort_ideal += [COL_ENTITY_TYPE, "source_code", "acteur_type_code"]
     sort_ideal += [x for x in cluster_fields_exact if x not in sort_ideal]
     sort_ideal += [x for x in cluster_fields_fuzzy if x not in sort_ideal]
     # défaut quand on n'a pas de champs de clustering (étape de sélection)
@@ -75,6 +76,8 @@ def cluster_acteurs_df_sort(
     cols_ideal = [
         "cluster_id",
         "identifiant_unique",
+        "statut",
+        COL_ENTITY_TYPE,
         COL_CHANGE_TYPE,
         COL_CHANGE_REASON,
         COL_CHANGE_ORDER,

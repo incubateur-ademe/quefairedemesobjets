@@ -15,9 +15,7 @@ import re
 
 import numpy as np
 import pandas as pd
-from cluster.tasks.business_logic.cluster_acteurs_exclude_intra_source import (
-    cluster_acteurs_exclude_intra_source,
-)
+from cluster.tasks.business_logic import cluster_acteurs_exclude_intra_source
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from slugify import slugify
@@ -55,7 +53,9 @@ def cluster_strings(
     Returns:
         liste de clusters sous forme de tuples (indices, strings)
     """
-    vectorizer = TfidfVectorizer(tokenizer=str.split, binary=False)
+    vectorizer = TfidfVectorizer(
+        tokenizer=str.split, binary=False, token_pattern=None
+    )  # type: ignore
     tfidf_matrix = vectorizer.fit_transform(strings)
 
     # Compute pairwise cosine similarity between strings
@@ -87,7 +87,9 @@ def cluster_strings(
 def values_to_similarity_matrix(values: list[str]) -> np.ndarray:
     """Compute similarity matrix using TF-IDF vectorization
     on a list of values."""
-    vectorizer = TfidfVectorizer(tokenizer=str.split, binary=False)
+    vectorizer = TfidfVectorizer(
+        tokenizer=str.split, binary=False, token_pattern=None
+    )  # type: ignore
     tfidf_matrix = vectorizer.fit_transform(values)
     return cosine_similarity(tfidf_matrix)
 
@@ -121,7 +123,6 @@ def similarity_matrix_to_tuples(
     tuples.sort(key=lambda x: x[2], reverse=True)
     if indexes:
         tuples = [(indexes[i], indexes[j], score) for i, j, score in tuples]
-    logger.info(f"{tuples=}")
     return tuples
 
 
@@ -355,7 +356,6 @@ def cluster_acteurs_clusters(
     # (intra source, manque de similarité, etc)
     # et retourner in dict pour pouvoir afficher dans airflow
     # df_lost = pd.concat(dfs_lost) if dfs_lost else None
-
     logger.info(f"🟢 {len(clusters_size1)=}")
     logger.info(f"🟢 {df_clusters["cluster_id"].nunique()=}")
     logger.info(f"🟢 {df_clusters["identifiant_unique"].nunique()=}")

@@ -4,12 +4,14 @@ from logging import getLogger
 
 import numpy as np
 import pandas as pd
+from rich import print
 from utils.django import django_setup_full
 
 django_setup_full()
 
 from data.models.change import (  # noqa: E402
     CHANGE_ACTEUR_CREATE_AS_PARENT,
+    CHANGE_ACTEUR_NOTHING_TO_DO,
     CHANGE_ACTEUR_PARENT_DELETE,
     CHANGE_ACTEUR_PARENT_KEEP,
     CHANGE_ACTEUR_POINT_TO_PARENT,
@@ -20,11 +22,12 @@ from data.models.change import (  # noqa: E402
 
 logger = getLogger(__name__)
 
-REASON_ONE_PARENT_KEPT = "1️⃣ 1 seul parent existant -> conservé"
-REASON_PARENTS_KEEP_MOST_CHILDREN = "🎖️ 2+ parents -> celui avec + d'enfants -> conservé"
+REASON_ONE_PARENT_KEPT = "1️⃣ 1 seul parent existant -> à garder"
+REASON_PARENTS_KEEP_MOST_CHILDREN = "🎖️ 2+ parents -> celui avec + d'enfants -> à garder"
 REASON_NO_PARENT_CREATE_ONE = "➕ Pas de parent -> à créer"
-REASON_POINT_TO_NEW_PARENT = "🔀 Pointe vers nouveau parent"
-REASON_PARENT_TO_DELETE = "🔴 2+ parents -> non choisi -> supprimé"
+REASON_POINT_TO_NEW_PARENT = "🔀 A pointer vers nouveau parent"
+REASON_ALREADY_POINT_TO_PARENT = "🟰 Pointe déjà vers nouveau parent"
+REASON_PARENT_TO_DELETE = "🔴 2+ parents -> non choisi -> à supprimer"
 
 
 def parent_id_generate(ids: list[str]) -> str:
@@ -59,7 +62,7 @@ def cluster_acteurs_one_cluster_changes_mark(
     Ne modifie aucun acteur, marque juste les changements.
 
     """
-    df = df_one_cluster
+    df = df_one_cluster.copy()
 
     # Validation d'entrée pour faciliter le stop/debug
     parent_index = df[df["identifiant_unique"] == parent_id].index[0]
@@ -79,6 +82,14 @@ def cluster_acteurs_one_cluster_changes_mark(
     df.loc[filter_point, COL_CHANGE_TYPE] = CHANGE_ACTEUR_POINT_TO_PARENT
     df.loc[filter_point, COL_CHANGE_REASON] = REASON_POINT_TO_NEW_PARENT
     df.loc[filter_point, COL_CHANGE_ORDER] = 2
+
+    # On identifie le cas particulier des enfants qui
+    # pointent déjà vers le parent pour lesquels on a rien à changer
+    filter_unchanged = df[
+        df["parent_id"].notnull() & (df["parent_id"] == df["parent_id_before"])
+    ].index
+    df.loc[filter_unchanged, COL_CHANGE_TYPE] = CHANGE_ACTEUR_NOTHING_TO_DO
+    df.loc[filter_unchanged, COL_CHANGE_REASON] = REASON_ALREADY_POINT_TO_PARENT
 
     # Enfin tous les anciens parents (si il y en a) doivent être supprimés
     filter_delete = (df["nombre_enfants"] > 0) & (df["identifiant_unique"] != parent_id)
@@ -136,7 +147,7 @@ def cluster_acteurs_parents_choose_new(df_clusters: pd.DataFrame) -> pd.DataFram
     # Pour stocker et reconstruire les nouveaux clusters
     dfs_marked = []
 
-    df = df_clusters
+    df = df_clusters.copy()
     for cluster_id in df["cluster_id"].unique():
 
         # Pour chaque cluster on travaille sur sa df filtrée

@@ -1,5 +1,6 @@
 import logging
 
+import numpy as np
 import pandas as pd
 from airflow import DAG
 from airflow.exceptions import AirflowSkipException
@@ -14,12 +15,18 @@ from cluster.tasks.business_logic import (
     cluster_acteurs_add_original_df_columns,
     cluster_acteurs_clusters,
     cluster_acteurs_df_sort,
+    cluster_acteurs_selection_children,
 )
 from utils import logging_utils as log
 from utils.django import django_setup_full
 
 django_setup_full()
 
+from data.models.change import (  # noqa: E402
+    COL_ENTITY_TYPE,
+    ENTITY_ACTEUR_DISPLAYED,
+    ENTITY_ACTEUR_REVISION,
+)
 from qfdmo.models import RevisionActeur  # noqa: E402
 
 logger = logging.getLogger(__name__)
@@ -67,12 +74,12 @@ def cluster_acteurs_suggestions_wrapper(**kwargs) -> None:
         cluster_fuzzy_threshold=config.cluster_fuzzy_threshold,
     )
     if df_clusters.empty:
-        raise AirflowSkipException(
-            log.banner_string("Pas de suggestions de clusters générées")
-        )
+        raise AirflowSkipException(log.banner_string("Pas de clusters trouvés -> stop"))
+    log.preview_df_as_markdown("Clusters orphelins+parents", df_clusters)
 
     logger.info("Ajout des colonnes de la df d'origine (ignorées par le clustering)")
     df_clusters = cluster_acteurs_add_original_df_columns(df_clusters, df)
+    df_clusters[COL_ENTITY_TYPE] = ENTITY_ACTEUR_DISPLAYED
 
     logger.info("Ajout des données calculées")
     # TODO: créer une fonction dédiée qui permet de consolider:
@@ -96,19 +103,39 @@ def cluster_acteurs_suggestions_wrapper(**kwargs) -> None:
         lambda x: parent_ids_by_id.get(x, None)
     )
 
-    df_clusters = cluster_acteurs_df_sort(
-        df_clusters,
+    logger.info("Ajout des enfants des parents existants")
+    df_parents = df_clusters[df_clusters["nombre_enfants"] > 0]
+    parent_to_cluster_ids = df_parents.set_index("identifiant_unique")[
+        "cluster_id"
+    ].to_dict()
+    parent_ids = df_parents["identifiant_unique"].tolist()
+    log.preview("parent_ids", parent_ids)
+    df_children = cluster_acteurs_selection_children(
+        parent_ids=parent_ids,
+        fields_to_include=config.fields_used_meta
+        + config.fields_used_data
+        + ["parent_id"],
+    )
+    df_children["cluster_id"] = df_children["parent_id"].map(parent_to_cluster_ids)
+    df_children[COL_ENTITY_TYPE] = ENTITY_ACTEUR_REVISION
+
+    log.preview_df_as_markdown("enfants des parents", df_children)
+
+    df_all = pd.concat([df_clusters, df_children], ignore_index=True).replace(
+        {np.nan: None}
+    )
+
+    df_all = cluster_acteurs_df_sort(
+        df_all,
         cluster_fields_exact=config.cluster_fields_exact,
         cluster_fields_fuzzy=config.cluster_fields_fuzzy,
     )
 
     logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
-    log.preview_df_as_markdown(
-        "suggestions de clusters", df_clusters, groupby="cluster_id"
-    )
+    log.preview_df_as_markdown("suggestions de clusters", df_all, groupby="cluster_id")
 
     # On pousse les suggestions dans xcom pour les tâches suivantes
-    kwargs["ti"].xcom_push(key="df", value=df_clusters)
+    kwargs["ti"].xcom_push(key="df", value=df_all)
 
 
 def cluster_acteurs_clusters_display_task(dag: DAG) -> PythonOperator:

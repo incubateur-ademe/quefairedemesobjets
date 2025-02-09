@@ -1,9 +1,12 @@
 import pandas as pd
 import pytest
 from cluster.tasks.business_logic.cluster_acteurs_parents_choose_new import (
+    REASON_ALREADY_POINT_TO_PARENT,
     REASON_NO_PARENT_CREATE_ONE,
     REASON_ONE_PARENT_KEPT,
+    REASON_PARENT_TO_DELETE,
     REASON_PARENTS_KEEP_MOST_CHILDREN,
+    REASON_POINT_TO_NEW_PARENT,
     cluster_acteurs_one_cluster_changes_mark,
     cluster_acteurs_one_cluster_parent_choose,
     cluster_acteurs_parents_choose_new,
@@ -13,12 +16,34 @@ from rich import print
 
 from data.models.change import (
     CHANGE_ACTEUR_CREATE_AS_PARENT,
+    CHANGE_ACTEUR_NOTHING_TO_DO,
     CHANGE_ACTEUR_PARENT_DELETE,
     CHANGE_ACTEUR_PARENT_KEEP,
     CHANGE_ACTEUR_POINT_TO_PARENT,
     COL_CHANGE_ORDER,
+    COL_CHANGE_REASON,
     COL_CHANGE_TYPE,
 )
+
+# Raccourcis pour les tests
+CHANGE_KEEP = CHANGE_ACTEUR_PARENT_KEEP
+CHANGE_CREATE = CHANGE_ACTEUR_CREATE_AS_PARENT
+CHANGE_DELETE = CHANGE_ACTEUR_PARENT_DELETE
+CHANGE_POINT = CHANGE_ACTEUR_POINT_TO_PARENT
+CHANGE_NOTHING = CHANGE_ACTEUR_NOTHING_TO_DO
+REASON_CREATE = REASON_NO_PARENT_CREATE_ONE
+REASON_KEEP_ONLY = REASON_ONE_PARENT_KEPT
+REASON_KEEP_MOST = REASON_PARENTS_KEEP_MOST_CHILDREN
+REASON_NOTHING = REASON_ALREADY_POINT_TO_PARENT
+REASON_POINT = REASON_POINT_TO_NEW_PARENT
+REASON_DELETE = REASON_PARENT_TO_DELETE
+COLS_ASSERT = [
+    "identifiant_unique",
+    "parent_id",
+    COL_CHANGE_TYPE,
+    COL_CHANGE_ORDER,
+    COL_CHANGE_REASON,
+]
 
 
 def test_parent_id_generate():
@@ -83,8 +108,8 @@ class TestClusterACteursOneClusterParentChoose:
         # et un nouvel enfant rattaché au cluster (a)
         id, change, reason = cluster_acteurs_one_cluster_parent_choose(df_one_parent)
         assert id == "c1_b"
-        assert change == CHANGE_ACTEUR_PARENT_KEEP
-        assert reason == REASON_ONE_PARENT_KEPT
+        assert change == CHANGE_KEEP
+        assert reason == REASON_KEEP_ONLY
 
     def test_case_two_parents(self, df_two_parents):
         # Cas de figure avec 2 parents existants:
@@ -92,15 +117,15 @@ class TestClusterACteursOneClusterParentChoose:
         # b = 1 enfant = on le marque pour suppression
         id, change, reason = cluster_acteurs_one_cluster_parent_choose(df_two_parents)
         assert id == "c2_a"
-        assert change == CHANGE_ACTEUR_PARENT_KEEP
-        assert reason == REASON_PARENTS_KEEP_MOST_CHILDREN
+        assert change == CHANGE_KEEP
+        assert reason == REASON_KEEP_MOST
 
     def test_case_no_parent(self, df_no_parent):
         # Cas de figure avec 0 parent
         id, change, reason = cluster_acteurs_one_cluster_parent_choose(df_no_parent)
         assert id == parent_id_generate(df_no_parent["identifiant_unique"].tolist())
-        assert change == CHANGE_ACTEUR_CREATE_AS_PARENT
-        assert reason == REASON_NO_PARENT_CREATE_ONE
+        assert change == CHANGE_CREATE
+        assert reason == REASON_CREATE
 
 
 class TestClusterActeursOneClusterChangesMark:
@@ -128,73 +153,51 @@ class TestClusterActeursOneClusterChangesMark:
             ignore_index=True,
         )
         print(f"{df=}")
-        cluster_acteurs_one_cluster_changes_mark(
-            df, parent_id_new, CHANGE_ACTEUR_CREATE_AS_PARENT, "Nouveau parent"
+        df = cluster_acteurs_one_cluster_changes_mark(
+            df, parent_id_new, CHANGE_CREATE, "Nouveau parent"
         )
         assert len(df) == 4, "Pas de ligne ajoutée ou supprimée"
-        assert df["parent_id"].tolist() == [
-            parent_id_new,
-            parent_id_new,
-            parent_id_new,
-            None,
-        ], "Les enfants pointent tous vers le nouveau parent"
-        assert df[COL_CHANGE_TYPE].tolist() == [
-            CHANGE_ACTEUR_POINT_TO_PARENT,
-            CHANGE_ACTEUR_POINT_TO_PARENT,
-            CHANGE_ACTEUR_POINT_TO_PARENT,
-            CHANGE_ACTEUR_CREATE_AS_PARENT,
+        cols = ["identifiant_unique", "parent_id", COL_CHANGE_TYPE, COL_CHANGE_ORDER]
+        assert df[COLS_ASSERT].values.tolist() == [
+            ["c0_a", parent_id_new, CHANGE_POINT, 2, REASON_POINT],
+            ["c0_b", parent_id_new, CHANGE_POINT, 2, REASON_POINT],
+            ["c0_c", parent_id_new, CHANGE_POINT, 2, REASON_POINT],
+            [parent_id_new, None, CHANGE_CREATE, 1, "Nouveau parent"],
         ]
-        assert df[COL_CHANGE_ORDER].tolist() == [2, 2, 2, 1]
 
     def test_case_one_parent(self, df_one_parent):
         # Cas de figure avec 1 parent existant (b qui a 1 enfant c)
         # et un nouvel enfant rattaché au cluster (a)
         df = df_one_parent
-        cluster_acteurs_one_cluster_changes_mark(
-            df,
-            "c1_b",
-            CHANGE_ACTEUR_PARENT_KEEP,
-            "b est le seul parent, on le garde",
+        df = cluster_acteurs_one_cluster_changes_mark(
+            df_one_cluster=df,
+            parent_id="c1_b",
+            change_type=CHANGE_ACTEUR_PARENT_KEEP,
+            parent_change_reason="b est seul",
         )
         assert len(df) == 3, "Pas de ligne ajoutée ou supprimée"
-        assert df["parent_id"].tolist() == [
-            "c1_b",
-            None,
-            "c1_b",
-        ], "Le parent est assigné"
-        assert df[COL_CHANGE_TYPE].tolist() == [
-            CHANGE_ACTEUR_POINT_TO_PARENT,
-            CHANGE_ACTEUR_PARENT_KEEP,
-            CHANGE_ACTEUR_POINT_TO_PARENT,
+        assert df[COLS_ASSERT].values.tolist() == [
+            ["c1_a", "c1_b", CHANGE_POINT, 2, REASON_POINT],
+            ["c1_b", None, CHANGE_KEEP, 1, "b est seul"],
+            ["c1_c", "c1_b", CHANGE_NOTHING, 2, REASON_NOTHING],
         ]
-        # MAJ parent -> MAJ enfants
-        assert df[COL_CHANGE_ORDER].tolist() == [2, 1, 2]
 
     def test_case_two_parents(self, df_two_parents):
         # Cas de figure avec 2 parents existants:
         # a = 2 enfants = on le garde
         # b = 1 enfant = on le marque pour suppression
         df = df_two_parents
-        cluster_acteurs_one_cluster_changes_mark(
-            df, "c2_a", CHANGE_ACTEUR_PARENT_KEEP, "a=2 enfants, one le garde"
+        df = cluster_acteurs_one_cluster_changes_mark(
+            df, "c2_a", CHANGE_KEEP, "a=2 enfants"
         )
         assert len(df) == 5, "Pas de ligne ajoutée ou supprimée"
-        assert df["parent_id"].tolist() == [
-            None,
-            None,
-            "c2_a",
-            "c2_a",
-            "c2_a",
-        ], "Les enfants pointent tous vers a"
-        assert df[COL_CHANGE_TYPE].tolist() == [
-            CHANGE_ACTEUR_PARENT_KEEP,
-            CHANGE_ACTEUR_PARENT_DELETE,
-            CHANGE_ACTEUR_POINT_TO_PARENT,
-            CHANGE_ACTEUR_POINT_TO_PARENT,
-            CHANGE_ACTEUR_POINT_TO_PARENT,
+        assert df[COLS_ASSERT].values.tolist() == [
+            ["c2_a", None, CHANGE_KEEP, 1, "a=2 enfants"],
+            ["c2_b", None, CHANGE_DELETE, 3, REASON_DELETE],
+            ["c2_c", "c2_a", CHANGE_POINT, 2, REASON_POINT],
+            ["c2_d", "c2_a", CHANGE_NOTHING, 2, REASON_NOTHING],
+            ["c2_e", "c2_a", CHANGE_NOTHING, 2, REASON_NOTHING],
         ]
-        # MAJ parent -> MAJ enfants -> suppression anciens parents
-        assert df[COL_CHANGE_ORDER].tolist() == [1, 3, 2, 2, 2]
 
 
 class TestClusterActeursChooseAllParents:
@@ -229,31 +232,32 @@ class TestClusterActeursChooseAllParents:
         c0 = "c0_0parent"
         c1 = "c1_1parent"
         c2 = "c2_2parents"
-        KEEP = CHANGE_ACTEUR_PARENT_KEEP
-        CREATE = CHANGE_ACTEUR_CREATE_AS_PARENT
-        DELETE = CHANGE_ACTEUR_PARENT_DELETE
-        POINT = CHANGE_ACTEUR_POINT_TO_PARENT
 
         # On a bien tous les changements, ordonnés par cluster_id
         # et par ordre de changement
-        assert df_working[
-            ["cluster_id", "identifiant_unique", COL_CHANGE_ORDER, COL_CHANGE_TYPE]
-        ].values.tolist() == [
+        cols_assert = [
+            "cluster_id",
+            "identifiant_unique",
+            COL_CHANGE_ORDER,
+            COL_CHANGE_TYPE,
+            COL_CHANGE_REASON,
+        ]
+        assert df_working[cols_assert].values.tolist() == [
             # Cluster 0: 0 parent -> 1 créé
-            [c0, parent_id_new, 1, CREATE],  # 🟡 créer
-            [c0, "c0_a", 2, POINT],  # 🔵 pointer
-            [c0, "c0_b", 2, POINT],  # 🔵 pointer
-            [c0, "c0_c", 2, POINT],  # 🔵 pointer
+            [c0, parent_id_new, 1, CHANGE_CREATE, REASON_CREATE],  # 🟡 créer
+            [c0, "c0_a", 2, CHANGE_POINT, REASON_POINT],  # 🔵 pointer
+            [c0, "c0_b", 2, CHANGE_POINT, REASON_POINT],  # 🔵 pointer
+            [c0, "c0_c", 2, CHANGE_POINT, REASON_POINT],  # 🔵 pointer
             # Cluster 1: 1 parent -> 1 gardé
-            [c1, "c1_b", 1, KEEP],  # 🟢 garder
-            [c1, "c1_a", 2, POINT],  # 🔵 pointer
-            [c1, "c1_c", 2, POINT],  # 🔵 pointer
+            [c1, "c1_b", 1, CHANGE_KEEP, REASON_KEEP_ONLY],  # 🟢 garder
+            [c1, "c1_a", 2, CHANGE_POINT, REASON_POINT],  # 🔵 pointer
+            [c1, "c1_c", 2, CHANGE_NOTHING, REASON_NOTHING],  # ⚪️ rien à faire
             # Cluster 2: 2 parents -> 1 gardé, 1 supprimé
-            [c2, "c2_a", 1, KEEP],  # 🟢 garder
-            [c2, "c2_c", 2, POINT],  # 🔵 pointer
-            [c2, "c2_d", 2, POINT],  # 🔵 pointer
-            [c2, "c2_e", 2, POINT],  # 🔵 pointer
-            [c2, "c2_b", 3, DELETE],  # 🔴 supprimer
+            [c2, "c2_a", 1, CHANGE_KEEP, REASON_KEEP_MOST],  # 🟢 garder
+            [c2, "c2_c", 2, CHANGE_POINT, REASON_POINT],  # 🔵 pointer
+            [c2, "c2_d", 2, CHANGE_NOTHING, REASON_NOTHING],  # ⚪️ rien à faire
+            [c2, "c2_e", 2, CHANGE_NOTHING, REASON_NOTHING],  # ⚪️ rien à faire
+            [c2, "c2_b", 3, CHANGE_DELETE, REASON_DELETE],  # 🔴 supprimer
         ]
         # On veut aucune valeur nan résultant des divers manipulations
         # On ne peut pas juste faire df.isna().any().any() car isna
