@@ -3,6 +3,7 @@ import logging
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from cluster.config.model import ClusterConfig
+from cluster.tasks.airflow_logic.task_ids import TASK_CONFIG_CREATE, TASK_SELECTION
 from cluster.tasks.business_logic import cluster_acteurs_selection
 from utils import logging_utils as log
 
@@ -10,11 +11,11 @@ logger = logging.getLogger(__name__)
 
 
 def task_info_get():
-    return """
+    return f"""
 
 
     ============================================================
-    Description de la tâche "cluster_acteurs_selection_from_db"
+    Description de la tâche "{TASK_SELECTION}"
     ============================================================
 
     💡 quoi: va chercher en base de données les acteurs correspondants
@@ -33,7 +34,7 @@ def cluster_acteurs_selection_from_db_wrapper(**kwargs) -> None:
     logger.info(task_info_get())
 
     config: ClusterConfig = kwargs["ti"].xcom_pull(
-        key="config", task_ids="cluster_acteurs_config_create"
+        key="config", task_ids=TASK_CONFIG_CREATE
     )
     log.preview("Config reçue", config)
 
@@ -60,7 +61,7 @@ def cluster_acteurs_selection_from_db_wrapper(**kwargs) -> None:
 def cluster_acteurs_selection_from_db_task(dag: DAG) -> PythonOperator:
     """La tâche Airflow qui ne fait que appeler le wrapper"""
     return PythonOperator(
-        task_id="cluster_acteurs_selection_from_db",
+        task_id=TASK_SELECTION,
         python_callable=cluster_acteurs_selection_from_db_wrapper,
         dag=dag,
     )

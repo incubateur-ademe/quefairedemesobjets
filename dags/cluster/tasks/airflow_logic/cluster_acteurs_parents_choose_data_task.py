@@ -3,16 +3,17 @@ import logging
 from airflow import DAG
 from airflow.exceptions import AirflowSkipException
 from airflow.operators.python import PythonOperator
+from cluster.tasks.airflow_logic.task_ids import TASK_PARENTS_CHOOSE_DATA
 
 logger = logging.getLogger(__name__)
 
 
 def task_info_get():
-    return """
+    return f"""
 
 
     ============================================================
-    Description de la tâche "cluster_acteurs_parents_choose_data"
+    Description de la tâche "{TASK_PARENTS_CHOOSE_DATA}"
     ============================================================
 
     💡 quoi: sélectionne la donnée à assigner au parent
@@ -33,7 +34,7 @@ def cluster_acteurs_parents_choose_data_wrapper(**kwargs) -> None:
 def cluster_acteurs_parents_choose_data_task(dag: DAG) -> PythonOperator:
     """La tâche Airflow qui ne fait que appeler le wrapper"""
     return PythonOperator(
-        task_id="cluster_acteurs_parents_choose_data",
+        task_id=TASK_PARENTS_CHOOSE_DATA,
         python_callable=cluster_acteurs_parents_choose_data_wrapper,
         dag=dag,
     )

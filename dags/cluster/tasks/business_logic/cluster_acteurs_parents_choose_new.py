@@ -4,7 +4,6 @@ from logging import getLogger
 
 import numpy as np
 import pandas as pd
-from rich import print
 from utils.django import django_setup_full
 
 django_setup_full()
@@ -21,13 +20,11 @@ from data.models.change import (  # noqa: E402
 
 logger = getLogger(__name__)
 
-REASON_ONE_PARENT_KEPT = "🎖️ 1 seul parent existant -> on le garde"
-REASON_MULTI_PARENTS_KEEP_MOST_CHILDREN = (
-    "🔼 2+ parents, on garde celui avec le + d'enfants"
-)
-REASON_NO_PARENT_CREATE_ONE = "🔵 Pas de parent -> on en crée un"
-REASON_POINT_TO_NEW_PARENT = "🔀 Pointe vers le nouveau parent"
-REASON_PARENT_TO_DELETE = "🔴 Parent non choisi -> supprimé"
+REASON_ONE_PARENT_KEPT = "1️⃣ 1 seul parent existant -> conservé"
+REASON_PARENTS_KEEP_MOST_CHILDREN = "🎖️ 2+ parents -> celui avec + d'enfants -> conservé"
+REASON_NO_PARENT_CREATE_ONE = "➕ Pas de parent -> à créer"
+REASON_POINT_TO_NEW_PARENT = "🔀 Pointe vers nouveau parent"
+REASON_PARENT_TO_DELETE = "🔴 2+ parents -> non choisi -> supprimé"
 
 
 def parent_id_generate(ids: list[str]) -> str:
@@ -110,7 +107,7 @@ def cluster_acteurs_one_cluster_parent_choose(df: pd.DataFrame) -> tuple[str, st
             index = df["nombre_enfants"].idxmax()
             parent_id = df.at[index, "identifiant_unique"]
             change_type = CHANGE_ACTEUR_PARENT_KEEP
-            change_reason = REASON_MULTI_PARENTS_KEEP_MOST_CHILDREN
+            change_reason = REASON_PARENTS_KEEP_MOST_CHILDREN
 
         elif parents_count == 0:
             # Cas: 0 parent = on en crée un
@@ -148,14 +145,10 @@ def cluster_acteurs_parents_choose_new(df_clusters: pd.DataFrame) -> pd.DataFram
         parent_id, change_type, change_reason = (
             cluster_acteurs_one_cluster_parent_choose(df_cluster)
         )
-        logger.info(
-            f"Cluster {cluster_id=}: {parent_id=} {change_type=} {change_reason=}"
-        )
         # Si la décision est de créer un nouveau parent, alors
         # on ajoute 1 ligne à la df principale avec l'entrée
         # pour le nouveau parent (puis on récupère la df filtrée)
         if change_type == CHANGE_ACTEUR_CREATE_AS_PARENT:
-            print("inside CHANGE_ACTEUR_CREATE_AS_PARENT")
             df = pd.concat(
                 [
                     df,
@@ -175,7 +168,7 @@ def cluster_acteurs_parents_choose_new(df_clusters: pd.DataFrame) -> pd.DataFram
             df_cluster = df[df["cluster_id"] == cluster_id]
         # Enfin on vient marquer les changements sur la df filtrée du cluster
         df_cluster_marked = cluster_acteurs_one_cluster_changes_mark(
-            df_cluster, parent_id, change_type, change_reason
+            df_cluster.copy(), parent_id, change_type, change_reason
         )
         dfs_marked.append(df_cluster_marked)
 

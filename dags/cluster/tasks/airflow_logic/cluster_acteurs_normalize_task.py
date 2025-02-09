@@ -4,6 +4,11 @@ import pandas as pd
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from cluster.config.model import ClusterConfig
+from cluster.tasks.airflow_logic.task_ids import (
+    TASK_CONFIG_CREATE,
+    TASK_NORMALIZE,
+    TASK_SELECTION,
+)
 from cluster.tasks.business_logic import (
     cluster_acteurs_df_sort,
     cluster_acteurs_normalize,
@@ -14,11 +19,11 @@ logger = logging.getLogger(__name__)
 
 
 def task_info_get():
-    return """
+    return f"""
 
 
     ============================================================
-    Description de la tâche "cluster_acteurs_normalize_task"
+    Description de la tâche "{TASK_NORMALIZE}"
     ============================================================
 
     💡 quoi: normalise les valeurs des champs normalize_fields
@@ -37,11 +42,9 @@ def cluster_acteurs_normalize_wrapper(**kwargs) -> None:
 
     # use xcom to get the params from the previous task
     config: ClusterConfig = kwargs["ti"].xcom_pull(
-        key="config", task_ids="cluster_acteurs_config_create"
+        key="config", task_ids=TASK_CONFIG_CREATE
     )
-    df: pd.DataFrame = kwargs["ti"].xcom_pull(
-        key="df", task_ids="cluster_acteurs_selection_children"
-    )
+    df: pd.DataFrame = kwargs["ti"].xcom_pull(key="df", task_ids=TASK_SELECTION)
     if df.empty:
         raise ValueError("Pas de données acteurs récupérées")
 
@@ -83,7 +86,7 @@ def cluster_acteurs_normalize_wrapper(**kwargs) -> None:
 def cluster_acteurs_normalize_task(dag: DAG) -> PythonOperator:
     """La tâche Airflow qui ne fait que appeler le wrapper"""
     return PythonOperator(
-        task_id="cluster_acteurs_normalize",
+        task_id=TASK_NORMALIZE,
         python_callable=cluster_acteurs_normalize_wrapper,
         dag=dag,
     )

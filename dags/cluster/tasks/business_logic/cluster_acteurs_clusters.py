@@ -264,9 +264,10 @@ def cluster_acteurs_clusters(
             raise ValueError(f"Colonne match fuzzy '{col}' pas dans le DataFrame")
 
     # On supprime les lignes avec des valeurs nulles pour les colonnes exact
-    df = df.dropna(
-        subset=cluster_fields_exact + cluster_fields_separate + cluster_fields_fuzzy
-    )
+    # TODO: subtilités à gérer, ex on peut pas drop sur cluster_fields_separate
+    # à cause de source_id qui nulle sur les parents, on devrait certainement
+    # définir config.fields_to_drop_na avec des tests pour + de robustesse
+    df = df.dropna(subset=cluster_fields_exact + cluster_fields_fuzzy)
     # Ordonne df sur les colonnes exactes
     df = df.sort_values(cluster_fields_exact)
 

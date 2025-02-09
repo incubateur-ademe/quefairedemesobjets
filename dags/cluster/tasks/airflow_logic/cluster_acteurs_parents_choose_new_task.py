@@ -4,6 +4,11 @@ import pandas as pd
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from cluster.config.model import ClusterConfig
+from cluster.tasks.airflow_logic.task_ids import (
+    TASK_CLUSTERS_DISPLAY,
+    TASK_CONFIG_CREATE,
+    TASK_PARENTS_CHOOSE_NEW,
+)
 from cluster.tasks.business_logic import (
     cluster_acteurs_df_sort,
     cluster_acteurs_parents_choose_new,
@@ -14,11 +19,11 @@ logger = logging.getLogger(__name__)
 
 
 def task_info_get():
-    return """
+    return f"""
 
 
     ============================================================
-    Description de la tâche "cluster_acteurs_parents_choose_new_task"
+    Description de la tâche "{TASK_PARENTS_CHOOSE_NEW}"
     ============================================================
 
     💡 quoi: sélection du parent d'un cluster
@@ -37,11 +42,9 @@ def cluster_acteurs_parents_choose_new_wrapper(**kwargs) -> None:
 
     # use xcom to get the params from the previous task
     config: ClusterConfig = kwargs["ti"].xcom_pull(
-        key="config", task_ids="cluster_acteurs_config_create"
+        key="config", task_ids=TASK_CONFIG_CREATE
     )
-    df: pd.DataFrame = kwargs["ti"].xcom_pull(
-        key="df", task_ids="cluster_acteurs_clusters_display"
-    )
+    df: pd.DataFrame = kwargs["ti"].xcom_pull(key="df", task_ids=TASK_CLUSTERS_DISPLAY)
     if not isinstance(df, pd.DataFrame) or df.empty:
         raise ValueError("df vide: on devrait pas être ici")
 
@@ -67,7 +70,7 @@ def cluster_acteurs_parents_choose_new_wrapper(**kwargs) -> None:
 def cluster_acteurs_parents_choose_new_task(dag: DAG) -> PythonOperator:
     """La tâche Airflow qui ne fait que appeler le wrapper"""
     return PythonOperator(
-        task_id="cluster_acteurs_parents_choose_new",
+        task_id=TASK_PARENTS_CHOOSE_NEW,
         python_callable=cluster_acteurs_parents_choose_new_wrapper,
         dag=dag,
     )

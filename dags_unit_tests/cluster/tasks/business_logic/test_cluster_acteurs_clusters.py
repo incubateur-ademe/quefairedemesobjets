@@ -19,7 +19,7 @@ def df_clusters_to_dict(df: pd.DataFrame) -> dict[str, list[str]]:
     return df.groupby("cluster_id")["identifiant_unique"].apply(list).to_dict()
 
 
-class TestCluster:
+class TestClusterActeursClusters:
 
     # -----------------------------------------------
     # Tests de base
@@ -194,6 +194,68 @@ class TestCluster:
                 "id5",  # "centre commercial carrefour"
             ],
         }
+
+    def test_parent_not_discarded(self):
+        """On vérifie que les parents ne sont pas ignorés
+        si les enfants sont ignorés"""
+        df_norm = pd.DataFrame(
+            [
+                {
+                    "identifiant_unique": "id15",
+                    "acteur_type_code": "at1",
+                    "code_postal": "00004",
+                    "ville": "v4",
+                    "nom": "acteur c4 my s1",
+                    "acteur_type_id": 3144,
+                    "nombre_enfants": 0,
+                    "statut": "ACTIF",
+                    "source_id": 2513,
+                    "source_code": "s2",
+                    "__index_src": 6,
+                },
+                {
+                    "identifiant_unique": "id13",
+                    "acteur_type_code": None,
+                    "code_postal": "00004",
+                    "ville": "v4",
+                    "nom": "acteur c4 my p1 s1",
+                    "acteur_type_id": 3144,
+                    "nombre_enfants": 0,
+                    "statut": "ACTIF",
+                    "source_id": None,
+                    "source_code": None,
+                    "__index_src": 7,
+                },
+                {
+                    "identifiant_unique": "id14",
+                    "acteur_type_code": "at1",
+                    "code_postal": "00004",
+                    "ville": "v4",
+                    "nom": "acteur c4 my s1",
+                    "acteur_type_id": 3144,
+                    "nombre_enfants": 0,
+                    "statut": "ACTIF",
+                    "source_id": 2512,
+                    "source_code": "s1",
+                    "__index_src": 8,
+                },
+            ]
+        )
+        df_clusters = cluster_acteurs_clusters(
+            df=df_norm,
+            cluster_fields_exact=["code_postal", "ville"],
+            cluster_fields_fuzzy=["nom"],
+            cluster_fields_separate=["source_id"],
+            cluster_fuzzy_threshold=0.5,
+        )
+        print("df_clusters")
+        print(df_clusters.to_dict(orient="records"))
+        assert df_clusters["cluster_id"].nunique() == 1
+        assert sorted(df_clusters["identifiant_unique"].tolist()) == [
+            "id13",
+            "id14",
+            "id15",
+        ]
 
     # -----------------------------------------------
     # Tests sur la séparation des clusters

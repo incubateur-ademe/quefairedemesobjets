@@ -7,22 +7,19 @@ import logging
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from cluster.config.model import ClusterConfig
+from cluster.tasks.airflow_logic.task_ids import TASK_CONFIG_CREATE
+from cluster.tasks.business_logic import cluster_acteurs_config_create
 from utils import logging_utils as log
-from utils.django import django_setup_full
-
-django_setup_full()
-
-from qfdmo.models import ActeurType, Source  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
 
 def task_info_get():
-    return """
+    return f"""
 
 
     ============================================================
-    Description de la tâche "cluster_acteurs_config_create"
+    Description de la tâche "{TASK_CONFIG_CREATE}"
     ============================================================
 
     💡 quoi: valide la configuration fournie par la UI (+ défauts si il y en a)
@@ -40,14 +37,7 @@ def cluster_acteurs_config_create_wrapper(**kwargs):
     """Wrapper de la tâche Airflow pour créer une configuration à
     partir des params du DAG + autre logique métier / valeurs DB."""
     logger.info(task_info_get())
-    params = kwargs["params"]
-    extra = {
-        "mapping_sources": {x.code: x.id for x in Source.objects.all()},
-        "mapping_acteur_type_ids_by_codes": {
-            x.code: x.id for x in ActeurType.objects.all()
-        },
-    }
-    config = ClusterConfig(**(params | extra))
+    config: ClusterConfig = cluster_acteurs_config_create(kwargs["params"])
     log.preview("Config", config)
     kwargs["ti"].xcom_push(key="config", value=config)
 
@@ -55,7 +45,7 @@ def cluster_acteurs_config_create_wrapper(**kwargs):
 def cluster_acteurs_config_create_task(dag: DAG) -> PythonOperator:
     """La tâche Airflow qui ne fait que appeler le wrapper"""
     return PythonOperator(
-        task_id="cluster_acteurs_config_create",
+        task_id=TASK_CONFIG_CREATE,
         python_callable=cluster_acteurs_config_create_wrapper,
         dag=dag,
     )

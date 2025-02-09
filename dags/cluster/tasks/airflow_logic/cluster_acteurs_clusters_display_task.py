@@ -5,6 +5,11 @@ from airflow import DAG
 from airflow.exceptions import AirflowSkipException
 from airflow.operators.python import PythonOperator
 from cluster.config.model import ClusterConfig
+from cluster.tasks.airflow_logic.task_ids import (
+    TASK_CLUSTERS_DISPLAY,
+    TASK_CONFIG_CREATE,
+    TASK_NORMALIZE,
+)
 from cluster.tasks.business_logic import (
     cluster_acteurs_add_original_df_columns,
     cluster_acteurs_clusters,
@@ -21,11 +26,11 @@ logger = logging.getLogger(__name__)
 
 
 def task_info_get():
-    return """
+    return f"""
 
 
     ============================================================
-    Description de la tâche "cluster_acteurs_clusters"
+    Description de la tâche "{TASK_CLUSTERS_DISPLAY}"
     ============================================================
 
     💡 quoi: génère des suggestions de clusters pour les acteurs
@@ -41,11 +46,9 @@ def cluster_acteurs_suggestions_wrapper(**kwargs) -> None:
     logger.info(task_info_get())
 
     config: ClusterConfig = kwargs["ti"].xcom_pull(
-        key="config", task_ids="cluster_acteurs_config_create"
+        key="config", task_ids=TASK_CONFIG_CREATE
     )
-    df: pd.DataFrame = kwargs["ti"].xcom_pull(
-        key="df", task_ids="cluster_acteurs_normalize"
-    )
+    df: pd.DataFrame = kwargs["ti"].xcom_pull(key="df", task_ids=TASK_NORMALIZE)
     if df.empty:
         raise ValueError("Pas de données acteurs normalisées récupérées")
 
@@ -110,7 +113,7 @@ def cluster_acteurs_suggestions_wrapper(**kwargs) -> None:
 
 def cluster_acteurs_clusters_display_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
-        task_id="cluster_acteurs_clusters_display",
+        task_id=TASK_CLUSTERS_DISPLAY,
         python_callable=cluster_acteurs_suggestions_wrapper,
         provide_context=True,
         dag=dag,

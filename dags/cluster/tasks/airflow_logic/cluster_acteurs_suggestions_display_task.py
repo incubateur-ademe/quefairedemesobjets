@@ -2,16 +2,17 @@ import logging
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+from cluster.tasks.airflow_logic.task_ids import TASK_SUGGESTIONS_DISPLAY
 
 logger = logging.getLogger(__name__)
 
 
 def task_info_get():
-    return """
+    return f"""
 
 
     ============================================================
-    Description de la tâche "cluster_acteurs_suggestions_display"
+    Description de la tâche "{TASK_SUGGESTIONS_DISPLAY}"
     ============================================================
 
     💡 quoi: affichage de l'état final des suggestions avant
@@ -34,7 +35,7 @@ def cluster_acteurs_suggestions_display_wrapper(**kwargs) -> None:
 def cluster_acteurs_suggestions_display_task(dag: DAG) -> PythonOperator:
     """La tâche Airflow qui ne fait que appeler le wrapper"""
     return PythonOperator(
-        task_id="cluster_acteurs_suggestions_display",
+        task_id=TASK_SUGGESTIONS_DISPLAY,
         python_callable=cluster_acteurs_suggestions_display_wrapper,
         dag=dag,
     )

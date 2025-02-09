@@ -1,9 +1,9 @@
 import pandas as pd
 import pytest
 from cluster.tasks.business_logic.cluster_acteurs_parents_choose_new import (
-    REASON_MULTI_PARENTS_KEEP_MOST_CHILDREN,
     REASON_NO_PARENT_CREATE_ONE,
     REASON_ONE_PARENT_KEPT,
+    REASON_PARENTS_KEEP_MOST_CHILDREN,
     cluster_acteurs_one_cluster_changes_mark,
     cluster_acteurs_one_cluster_parent_choose,
     cluster_acteurs_parents_choose_new,
@@ -93,7 +93,7 @@ class TestClusterACteursOneClusterParentChoose:
         id, change, reason = cluster_acteurs_one_cluster_parent_choose(df_two_parents)
         assert id == "c2_a"
         assert change == CHANGE_ACTEUR_PARENT_KEEP
-        assert reason == REASON_MULTI_PARENTS_KEEP_MOST_CHILDREN
+        assert reason == REASON_PARENTS_KEEP_MOST_CHILDREN
 
     def test_case_no_parent(self, df_no_parent):
         # Cas de figure avec 0 parent

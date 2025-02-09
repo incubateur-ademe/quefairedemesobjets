@@ -5,6 +5,11 @@ from airflow import DAG
 from airflow.exceptions import AirflowSkipException
 from airflow.operators.python import PythonOperator
 from cluster.config.model import ClusterConfig
+from cluster.tasks.airflow_logic.task_ids import (
+    TASK_CONFIG_CREATE,
+    TASK_SUGGESTIONS_DISPLAY,
+    TASK_SUGGESTIONS_TO_DB,
+)
 from cluster.tasks.business_logic import cluster_acteurs_suggestions_to_db
 from utils import logging_utils as log
 
@@ -12,11 +17,11 @@ logger = logging.getLogger(__name__)
 
 
 def task_info_get():
-    return """
+    return f"""
 
 
     ============================================================
-    Description de la tâche "cluster_acteurs_suggestions_to_db"
+    Description de la tâche "{TASK_SUGGESTIONS_TO_DB}"
     ============================================================
 
     💡 quoi: écriture des suggestions en base de données
@@ -34,10 +39,10 @@ def cluster_acteurs_suggestions_to_db_wrapper(**kwargs) -> None:
 
     # use xcom to get the params from the previous task
     config: ClusterConfig = kwargs["ti"].xcom_pull(
-        key="config", task_ids="cluster_acteurs_config_create"
+        key="config", task_ids=TASK_CONFIG_CREATE
     )
     df: pd.DataFrame = kwargs["ti"].xcom_pull(
-        key="df", task_ids="cluster_acteurs_clusters_display"
+        key="df", task_ids=TASK_SUGGESTIONS_DISPLAY
     )
     dag_id = kwargs["dag"].dag_id
     run_id = kwargs["run_id"]
@@ -47,7 +52,7 @@ def cluster_acteurs_suggestions_to_db_wrapper(**kwargs) -> None:
     log.preview("config reçue", config)
     log.preview("suggestions de clustering", df)
 
-    # "is not False" est plus sur que "is True" car on peut avoir None
+    # "is not False" est plus robuste que "is True" car on peut avoir None
     # par erreur dans la config et on ne veut pas prendre celoa pour
     # un signal de modifier la DB
     if config.dry_run is not False:
@@ -72,7 +77,7 @@ def cluster_acteurs_suggestions_to_db_wrapper(**kwargs) -> None:
 def cluster_acteurs_suggestions_to_db_task(dag: DAG) -> PythonOperator:
     """La tâche Airflow qui ne fait que appeler le wrapper"""
     return PythonOperator(
-        task_id="cluster_acteurs_suggestions_to_db",
+        task_id=TASK_SUGGESTIONS_TO_DB,
         python_callable=cluster_acteurs_suggestions_to_db_wrapper,
         dag=dag,
     )

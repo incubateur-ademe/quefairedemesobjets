@@ -25,6 +25,28 @@ from unit_tests.qfdmo.acteur_factory import (
 
 ACTIF = "ACTIF"
 INACTIF = "INACTIF"
+(
+    ID1,
+    ID2,
+    ID3,
+    ID4,
+    ID5,
+    ID6,
+    ID7,
+    ID8,
+    ID9,
+    ID10,
+    ID11,
+    ID12,
+    ID13,
+    ID14,
+    ID15,
+    ID16,
+    ID17,
+    ID18,
+    ID19,
+) = [f"id{x}" for x in range(1, 20)]
+
 
 """
 Légende:
@@ -49,45 +71,46 @@ class TestClusterActeursE2E:
             # 🔴 EXCLUS à la sélection
             # -----------------------------------
             # 🇪 source exclue
-            (s3, at1, "s3_at1", "00001", "v1", ACTIF),
+            (ID1, s3, at1, "s3_at1", "00001", "v1", ACTIF),
             # 🇪 acteur type exclu
-            (s1, at3, "s1_at3", "00001", "v1", ACTIF),
+            (ID2, s1, at3, "s1_at3", "00001", "v1", ACTIF),
             # 🇪 statut inactif
-            (s1, at1, "s1_at1_inactif", "00001", "v1", INACTIF),
+            (ID3, s1, at1, "s1_at1_inactif", "00001", "v1", INACTIF),
             # 🇪 nom ne match pas le regex
-            (s1, at1, "nom pas bon", "00001", "v1", ACTIF),
+            (ID4, s1, at1, "nom pas bon", "00001", "v1", ACTIF),
             # 🇪 sans code postal (dans include)
-            (s1, at1, "s1 pas de cp", None, "v1", ACTIF),
+            (ID5, s1, at1, "s1 pas de cp", None, "v1", ACTIF),
             # 🇪 sans ville (dans include)
-            (s1, at1, "s1 pas de ville", "00001", None, ACTIF),
+            (ID6, s1, at1, "s1 pas de ville", "00001", None, ACTIF),
             # 🇵: nom ne match pas le regex, ne devrait pas être
             # sur le cluster c5
-            (None, at1, "parent nom pas bon", "00005", "v5", ACTIF),
+            (ID7, None, at1, "parent nom pas bon", "00005", "v5", ACTIF),
             # -----------------------------------
             # 🟢 INCLUS à la sélection
             # -----------------------------------
             # 🇪 Cluster taille 1 = 🔴 exclu
-            (s1, at1, "s1_at1_1 tout seul", "00001", "v1", ACTIF),
+            (ID8, s1, at1, "s1_at1_1 tout seul", "00001", "v1", ACTIF),
             # 🇪 Cluster taille 2 mais intra-source = 🔴 exclu
-            (s1, at1, "s1_at1_2a", "00002", "v2", ACTIF),
-            (s1, at1, "s1_at1_2b", "00002", "v2", ACTIF),
+            (ID9, s1, at1, "s1_at1_2a", "00002", "v2", ACTIF),
+            (ID10, s1, at1, "s1_at1_2b", "00002", "v2", ACTIF),
             # 🇪 Cluster taille 2 avec 0 parent = 🟢 inclus
-            (s1, at1, "s1 c3 MY âCTEUR a", "00003", "v3", ACTIF),
-            (s2, at1, "s1 c3 mÿ ACTèUR b", "00003", "v3", ACTIF),
+            (ID11, s1, at1, "s1 c3 MY âCTEUR a", "00003", "v3", ACTIF),
+            (ID12, s2, at1, "s1 c3 mÿ ACTèUR b", "00003", "v3", ACTIF),
             # 🇵+🇪 Cluster taille 3 avec 1 parent = 🟢 inclus
-            (None, at1, "s1 c4 MY âCTEUR p1", "00004", "v4", ACTIF),
-            (s1, at1, "s1 c4 MY äCTéUR a", "00004", "v4", ACTIF),
-            (s2, at1, "s1 c4 MY ACTEûR b", "00004", "v4", ACTIF),
+            (ID13, None, at1, "s1 c4 MY âCTEUR p1", "00004", "v4", ACTIF),
+            (ID14, s1, at1, "s1 c4 MY äCTéUR a", "00004", "v4", ACTIF),
+            (ID15, s2, at1, "s1 c4 MY ACTEûR b", "00004", "v4", ACTIF),
             # 🇵+🇪 Cluster taille 4 avec 2 parent = 🟢 inclus
             # et un mixe d'acteur type
-            (None, at1, "s1 c5 MY âCTEUR p1", "00005", "v5", ACTIF),
-            (None, at2, "s1 c5 MY âCTEUR p2", "00005", "v5", ACTIF),
-            (s1, at1, "s1 c5 MY äCTéUR a", "00005", "v5", ACTIF),
-            (s2, at2, "s1 c5 MY äCTéûR b", "00005", "v5", ACTIF),
+            (ID16, None, at1, "s1 c5 MY âCTEUR p1", "00005", "v5", ACTIF),
+            (ID17, None, at2, "s1 c5 MY âCTEUR p2", "00005", "v5", ACTIF),
+            (ID18, s1, at1, "s1 c5 MY äCTéUR a", "00005", "v5", ACTIF),
+            (ID19, s2, at2, "s1 c5 MY äCTéûR b", "00005", "v5", ACTIF),
         ]
         for acteur in acteurs:
-            s, at, nom, cp, ville, statut = acteur
+            id, s, at, nom, cp, ville, statut = acteur
             DisplayedActeurFactory(
+                identifiant_unique=id,
                 source=s,
                 acteur_type=at,
                 nom=nom,
@@ -133,7 +156,7 @@ class TestClusterActeursE2E:
             cluster_fields_exact=["code_postal", "ville"],
             cluster_fields_fuzzy=["nom"],
             cluster_fuzzy_threshold=0.5,
-        )
+        )  # type: ignore
 
         df = cluster_acteurs_selection(
             include_source_ids=config.include_source_ids,
@@ -190,16 +213,16 @@ class TestClusterActeursE2E:
         print(df_clusters.to_dict(orient="records"))
 
         assert df_clusters["cluster_id"].nunique() == 3
-        # TODO: rajouter des ID aux acteurs pour checker + facilement ici
-        return
-        assert df_clusters["cluster_id"].tolist() == [
-            "00003_v3_nom_1",
-            "00003_v3_nom_1",
-            "00004_v4_nom_1",
-            "00004_v4_nom_1",
-            "00004_v4_nom_1",
-            "00005_v5_nom_1",
-            "00005_v5_nom_1",
-            "00005_v5_nom_1",
-            "00005_v5_nom_1",
+        assert sorted(
+            df_clusters[["cluster_id", "identifiant_unique"]].values.tolist()
+        ) == [
+            ["00003_v3_nom_1", ID11],
+            ["00003_v3_nom_1", ID12],
+            ["00004_v4_nom_1", ID13],
+            ["00004_v4_nom_1", ID14],
+            ["00004_v4_nom_1", ID15],
+            ["00005_v5_nom_1", ID16],
+            ["00005_v5_nom_1", ID17],
+            ["00005_v5_nom_1", ID18],
+            ["00005_v5_nom_1", ID19],
         ]
