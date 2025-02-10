@@ -1,13 +1,6 @@
 import numpy as np
 import pandas as pd
 import pytest
-from cluster.tasks.business_logic.cluster_acteurs_clusters import (
-    cluster_acteurs_clusters,
-    cluster_cols_group_fuzzy,
-    cluster_strings,
-    score_tuples_to_clusters,
-    similarity_matrix_to_tuples,
-)
 from rich import print
 
 
@@ -73,6 +66,10 @@ class TestClusterActeursClusters:
         )
 
     def test_cols_group_exact(self, df_basic):
+        from cluster.tasks.business_logic.cluster_acteurs_clusters import (
+            cluster_acteurs_clusters,
+        )
+
         df_clusters = cluster_acteurs_clusters(
             df_basic,
             cluster_fields_exact=["ville"],
@@ -93,12 +90,20 @@ class TestClusterActeursClusters:
         }
 
     def test_validation_cols_group_exact(self, df_basic):
+        from cluster.tasks.business_logic.cluster_acteurs_clusters import (
+            cluster_acteurs_clusters,
+        )
+
         """On s'assure que la fonction soulève une exception
         pour les colonnes manquantes dans le DataFrame"""
         with pytest.raises(ValueError, match="'existe_pas' pas dans le DataFrame"):
             cluster_acteurs_clusters(df_basic, cluster_fields_exact=["existe_pas"])
 
     def test_validation_cols_group_fuzzy(self, df_basic):
+        from cluster.tasks.business_logic.cluster_acteurs_clusters import (
+            cluster_acteurs_clusters,
+        )
+
         """On s'assure que la fonction soulève une exception
         pour les colonnes manquantes dans le DataFrame"""
         with pytest.raises(ValueError, match="'existe_pas' pas dans le DataFrame"):
@@ -130,6 +135,10 @@ class TestClusterActeursClusters:
         )
 
     def test_clusters_of_one_are_removed(self, df_some_clusters_of_one):
+        from cluster.tasks.business_logic.cluster_acteurs_clusters import (
+            cluster_acteurs_clusters,
+        )
+
         """On vérifie qu'on supprime les clusters de taille 1 mais
         pas les autres de taille 2+"""
         df_clusters = cluster_acteurs_clusters(
@@ -168,6 +177,10 @@ class TestClusterActeursClusters:
         )
 
     def test_cols_group_fuzzy_single(self, df_cols_group_fuzzy):
+        from cluster.tasks.business_logic.cluster_acteurs_clusters import (
+            cluster_acteurs_clusters,
+        )
+
         df_clusters = cluster_acteurs_clusters(
             df_cols_group_fuzzy,
             # code_postal est en dur dans la fonction de clustering
@@ -196,6 +209,10 @@ class TestClusterActeursClusters:
         }
 
     def test_parent_not_discarded(self):
+        from cluster.tasks.business_logic.cluster_acteurs_clusters import (
+            cluster_acteurs_clusters,
+        )
+
         """On vérifie que les parents ne sont pas ignorés
         si les enfants sont ignorés"""
         df_norm = pd.DataFrame(
@@ -286,6 +303,10 @@ class TestClusterStrings:
         ]
 
     def test_cluster_strings(self, strings):
+        from cluster.tasks.business_logic.cluster_acteurs_clusters import (
+            cluster_strings,
+        )
+
         """On vérifie que les chaînes sont bien regroupées
         et que "je suis tout seul :(" est ignoré car tout seul
         dans son cluster
@@ -348,6 +369,10 @@ class TestClusterColsGroupFuzzy:
         return pd.DataFrame(data)
 
     def test_cols_group_fuzzy_multi(self, df_cols_group_fuzzy):
+        from cluster.tasks.business_logic.cluster_acteurs_clusters import (
+            cluster_cols_group_fuzzy,
+        )
+
         clusters = cluster_cols_group_fuzzy(
             df_cols_group_fuzzy,
             columns=["col1", "col2", "col3"],
@@ -358,6 +383,10 @@ class TestClusterColsGroupFuzzy:
         assert clusters[1]["__index_src"].tolist() == [5, 6]
 
     def test_cols_group_fuzzy_multi_handles_empties(self):
+        from cluster.tasks.business_logic.cluster_acteurs_clusters import (
+            cluster_cols_group_fuzzy,
+        )
+
         df = pd.DataFrame(
             {
                 "__index_src": range(1, 3),
@@ -377,6 +406,10 @@ class TestClusterColsGroupFuzzy:
 class TestSimilarityMatrixToTuples:
 
     def test_basic(self):
+        from cluster.tasks.business_logic.cluster_acteurs_clusters import (
+            similarity_matrix_to_tuples,
+        )
+
         matrix = np.array([[1, 0.8, 0.4], [0.8, 1, 0.9], [0.4, 0.9, 1]])
         expected = [
             (1, 2, 0.9),
@@ -386,6 +419,10 @@ class TestSimilarityMatrixToTuples:
         assert similarity_matrix_to_tuples(matrix) == expected
 
     def test_index_replacements(self):
+        from cluster.tasks.business_logic.cluster_acteurs_clusters import (
+            similarity_matrix_to_tuples,
+        )
+
         matrix = np.array([[1, 0.8, 0.4], [0.8, 1, 0.9], [0.4, 0.9, 1]])
         expected = [
             ("b", "c", 0.9),
@@ -399,6 +436,10 @@ class TestScoreTuplesToClusters:
 
     # Test cases
     def test_score_tuples_to_clusters(self):
+        from cluster.tasks.business_logic.cluster_acteurs_clusters import (
+            score_tuples_to_clusters,
+        )
+
         data = [
             (1, 2, 0.6),
             (2, 3, 0.6),
@@ -410,6 +451,10 @@ class TestScoreTuplesToClusters:
         assert score_tuples_to_clusters(data, threshold) == expected
 
     def test_score_tuples_to_clusters_applies_sorting(self):
+        from cluster.tasks.business_logic.cluster_acteurs_clusters import (
+            score_tuples_to_clusters,
+        )
+
         """On vérifie que les clusters sont triés par score décroissant
         même si la data de source n'est pas triée"""
         data = [
@@ -423,17 +468,29 @@ class TestScoreTuplesToClusters:
         assert score_tuples_to_clusters(data, threshold) == expected
 
     def test_score_tuples_to_clusters_empty_exception(self):
+        from cluster.tasks.business_logic.cluster_acteurs_clusters import (
+            score_tuples_to_clusters,
+        )
+
         data = []
         threshold = 0.5
         with pytest.raises(ValueError, match="Liste de tuples d'entrée vide"):
             score_tuples_to_clusters(data, threshold)
 
     def test_score_tuples_to_clusters_no_clusters_below_threshold(self):
+        from cluster.tasks.business_logic.cluster_acteurs_clusters import (
+            score_tuples_to_clusters,
+        )
+
         data = [(1, 2, 0.3), (3, 4, 0.2)]
         threshold = 0.5
         assert score_tuples_to_clusters(data, threshold) == []
 
     def test_score_tuples_to_clusters_all_in_one_cluster(self):
+        from cluster.tasks.business_logic.cluster_acteurs_clusters import (
+            score_tuples_to_clusters,
+        )
+
         data = [(1, 2, 0.9), (2, 3, 0.8), (3, 4, 0.7)]
         threshold = 0.5
         expected = [[1, 2, 3, 4]]

@@ -11,11 +11,6 @@ import pytest
 from rich import print
 
 from dags.cluster.config.model import ClusterConfig
-from dags.cluster.tasks.business_logic import (
-    cluster_acteurs_clusters,
-    cluster_acteurs_normalize,
-    cluster_acteurs_selection,
-)
 from dags.utils.airflow_params import airflow_params_dropdown_from_mapping
 from unit_tests.qfdmo.acteur_factory import (
     ActeurTypeFactory,
@@ -121,6 +116,12 @@ class TestClusterActeursE2E:
         return s1, s2, s3, at1, at2, at3, acteurs
 
     def test_e2e(self, acteurs_create):
+        from dags.cluster.tasks.business_logic import (
+            cluster_acteurs_clusters,
+            cluster_acteurs_normalize,
+            cluster_acteurs_selection,
+        )
+
         s1, s2, s3, at1, at2, at3, acteurs = acteurs_create
 
         mapping_sources = {x.code: x.id for x in (s1, s2, s3)}
