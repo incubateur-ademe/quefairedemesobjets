@@ -41,9 +41,7 @@ class TestClusteringActeursNormalize:
         )
 
     def test_default(self, df):
-        from dags.cluster.tasks.business_logic.cluster_acteurs_normalize import (
-            cluster_acteurs_normalize,
-        )
+        from dags.cluster.tasks.business_logic import cluster_acteurs_normalize
 
         cols = df.columns.tolist()
         df_norm = cluster_acteurs_normalize(
@@ -95,9 +93,7 @@ class TestClusteringActeursNormalize:
         ]
 
     def test_specific_fields_for_all_normalization(self, df):
-        from dags.cluster.tasks.business_logic.cluster_acteurs_normalize import (
-            cluster_acteurs_normalize,
-        )
+        from dags.cluster.tasks.business_logic import cluster_acteurs_normalize
 
         df_norm = cluster_acteurs_normalize(
             df,

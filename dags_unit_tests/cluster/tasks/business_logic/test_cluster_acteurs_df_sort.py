@@ -23,9 +23,7 @@ class TestClusterActeursDfSort:
         return df
 
     def test_at_selection_and_normalisation_stages(self, df):
-        from dags.cluster.tasks.business_logic.cluster_acteurs_df_sort import (
-            cluster_acteurs_df_sort,
-        )
+        from dags.cluster.tasks.business_logic import cluster_acteurs_df_sort
 
         """Démontrer que la fonction de tri fonctionne
         pour l'étape de sélection et normalisation des acteurs
@@ -57,9 +55,7 @@ class TestClusterActeursDfSort:
         assert df_sorted["adresse"].tolist() == ["c", "a", "d", "b"]
 
     def test_at_clustering_stage(self, df_clusters):
-        from dags.cluster.tasks.business_logic.cluster_acteurs_df_sort import (
-            cluster_acteurs_df_sort,
-        )
+        from dags.cluster.tasks.business_logic import cluster_acteurs_df_sort
 
         """Utilisation de la fonction en contexte clustering"""
         df_sorted = cluster_acteurs_df_sort(
