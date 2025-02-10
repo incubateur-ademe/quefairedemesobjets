@@ -248,8 +248,6 @@ class TestClusterActeursClusters:
             cluster_fields_separate=["source_id"],
             cluster_fuzzy_threshold=0.5,
         )
-        print("df_clusters")
-        print(df_clusters.to_dict(orient="records"))
         assert df_clusters["cluster_id"].nunique() == 1
         assert sorted(df_clusters["identifiant_unique"].tolist()) == [
             "id13",

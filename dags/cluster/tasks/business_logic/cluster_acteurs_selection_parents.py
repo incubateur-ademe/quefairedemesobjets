@@ -43,8 +43,6 @@ def cluster_acteurs_selection_parents(
     # Si une regexp de nom est fournie, on l'applique
     # pour filtrer la df, sinon on garde toute la df
     if include_only_if_regex_matches_nom:
-        print(f"{include_only_if_regex_matches_nom=}")
-        print(df["nom"].map(normalize.string_basic).tolist())
         df = df[
             df["nom"]
             # On applique la normalisation de base à la volée

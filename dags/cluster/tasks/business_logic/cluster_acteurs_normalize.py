@@ -1,5 +1,4 @@
 import pandas as pd
-from rich import print
 from shared.tasks.business_logic import normalize
 
 
@@ -21,7 +20,6 @@ def cluster_acteurs_normalize(
         df (pd.DataFrame): Le DataFrame contenant les acteurs
         cluster_fields_exact (list[str]): Les champs sur lesquels
     """
-    print(f"{normalize_fields_basic=}")
     for field in normalize_fields_basic:
         df[field] = df[field].map(normalize.string_basic)
 
