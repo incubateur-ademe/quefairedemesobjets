@@ -2,11 +2,6 @@ import logging
 
 import numpy as np
 import pandas as pd
-from cluster.tasks.business_logic import (
-    cluster_acteurs_df_sort,
-    cluster_acteurs_selection_orphans,
-    cluster_acteurs_selection_parents,
-)
 from utils import logging_utils as log
 from utils.django import django_setup_full
 
@@ -23,6 +18,12 @@ def cluster_acteurs_selection(
     fields_used_meta: list[str],
     fields_used_data: list[str],
 ) -> pd.DataFrame:
+    from cluster.tasks.business_logic import (
+        cluster_acteurs_df_sort,
+        cluster_acteurs_selection_orphans,
+        cluster_acteurs_selection_parents,
+    )
+
     from qfdmo.models import DisplayedActeur
 
     # --------------------------------

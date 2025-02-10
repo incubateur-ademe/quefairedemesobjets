@@ -4,7 +4,6 @@ from logging import getLogger
 
 import numpy as np
 import pandas as pd
-from rich import print
 from utils.django import django_setup_full
 
 django_setup_full()
