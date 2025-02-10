@@ -9,9 +9,7 @@ def cluster_acteurs_suggestions_to_db(
     identifiant_action: str,
     identifiant_execution: str,
 ) -> None:
-    from cluster.tasks.business_logic.cluster_acteurs_metadata import (
-        cluster_acteurs_metadata,
-    )
+    from cluster.tasks.business_logic import cluster_acteurs_metadata
 
     from data.models import (
         Suggestion,
