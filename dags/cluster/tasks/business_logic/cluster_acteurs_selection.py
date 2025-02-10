@@ -11,7 +11,6 @@ from utils import logging_utils as log
 from utils.django import django_setup_full
 
 django_setup_full()
-from qfdmo.models import DisplayedActeur  # noqa: E402
 
 
 def cluster_acteurs_selection(
@@ -24,6 +23,8 @@ def cluster_acteurs_selection(
     fields_used_meta: list[str],
     fields_used_data: list[str],
 ) -> pd.DataFrame:
+    from qfdmo.models import DisplayedActeur
+
     # --------------------------------
     # 1) Sélection des acteurs
     # --------------------------------

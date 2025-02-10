@@ -3,14 +3,14 @@ import pandas as pd
 from utils.django import django_setup_full
 
 django_setup_full()
-from qfdmo.models.acteur import ActeurStatus  # noqa: E402
-from qfdmo.models.acteur import RevisionActeur  # noqa: E402
 
 
 def cluster_acteurs_selection_children(
     parent_ids: list[str],
     fields_to_include: list[str],
 ) -> pd.DataFrame:
+    from qfdmo.models.acteur import ActeurStatus, RevisionActeur
+
     """Sélectionne les enfants des parents donnés
 
     Args:
