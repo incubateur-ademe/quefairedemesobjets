@@ -1,10 +1,6 @@
 import pandas as pd
 import pytest
 
-from dags.cluster.tasks.business_logic.cluster_acteurs_normalize import (
-    cluster_acteurs_normalize,
-)
-
 
 class TestClusteringActeursNormalize:
 
@@ -45,6 +41,10 @@ class TestClusteringActeursNormalize:
         )
 
     def test_default(self, df):
+        from dags.cluster.tasks.business_logic.cluster_acteurs_normalize import (
+            cluster_acteurs_normalize,
+        )
+
         cols = df.columns.tolist()
         df_norm = cluster_acteurs_normalize(
             df,
@@ -95,6 +95,10 @@ class TestClusteringActeursNormalize:
         ]
 
     def test_specific_fields_for_all_normalization(self, df):
+        from dags.cluster.tasks.business_logic.cluster_acteurs_normalize import (
+            cluster_acteurs_normalize,
+        )
+
         df_norm = cluster_acteurs_normalize(
             df,
             normalize_fields_basic=["adresse"],

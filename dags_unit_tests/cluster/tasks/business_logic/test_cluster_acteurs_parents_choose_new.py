@@ -1,6 +1,6 @@
 import pandas as pd
 import pytest
-from cluster.tasks.business_logic.cluster_acteurs_parents_choose_new import (
+from cluster.tasks.business_logic._cluster_acteurs_parents_choose_new import (
     REASON_ALREADY_POINT_TO_PARENT,
     REASON_NO_PARENT_CREATE_ONE,
     REASON_ONE_PARENT_KEPT,
@@ -157,7 +157,6 @@ class TestClusterActeursOneClusterChangesMark:
             df, parent_id_new, CHANGE_CREATE, "Nouveau parent"
         )
         assert len(df) == 4, "Pas de ligne ajoutée ou supprimée"
-        cols = ["identifiant_unique", "parent_id", COL_CHANGE_TYPE, COL_CHANGE_ORDER]
         assert df[COLS_ASSERT].values.tolist() == [
             ["c0_a", parent_id_new, CHANGE_POINT, 2, REASON_POINT],
             ["c0_b", parent_id_new, CHANGE_POINT, 2, REASON_POINT],
