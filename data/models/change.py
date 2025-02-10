@@ -34,7 +34,7 @@ Notes:
 - Stocker l'ordre des changements par type
 - Centralisation la résolution du template de la cellule changement dans l'admin dans
 chaque modèle pydantic
- """
+"""
 
 from pydantic import BaseModel
 
