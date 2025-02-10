@@ -291,7 +291,7 @@ class TestClusterStrings:
         ]
 
     def test_cluster_strings(self, strings):
-        from cluster.tasks.business_logic._cluster_acteurs_clusters import (
+        from cluster.tasks.business_logic.cluster_acteurs_clusters import (
             cluster_strings,
         )
 
@@ -357,7 +357,7 @@ class TestClusterColsGroupFuzzy:
         return pd.DataFrame(data)
 
     def test_cols_group_fuzzy_multi(self, df_cols_group_fuzzy):
-        from cluster.tasks.business_logic._cluster_acteurs_clusters import (
+        from cluster.tasks.business_logic.cluster_acteurs_clusters import (
             cluster_cols_group_fuzzy,
         )
 
@@ -371,7 +371,7 @@ class TestClusterColsGroupFuzzy:
         assert clusters[1]["__index_src"].tolist() == [5, 6]
 
     def test_cols_group_fuzzy_multi_handles_empties(self):
-        from cluster.tasks.business_logic._cluster_acteurs_clusters import (
+        from cluster.tasks.business_logic.cluster_acteurs_clusters import (
             cluster_cols_group_fuzzy,
         )
 
@@ -394,7 +394,7 @@ class TestClusterColsGroupFuzzy:
 class TestSimilarityMatrixToTuples:
 
     def test_basic(self):
-        from cluster.tasks.business_logic._cluster_acteurs_clusters import (
+        from cluster.tasks.business_logic.cluster_acteurs_clusters import (
             similarity_matrix_to_tuples,
         )
 
@@ -407,7 +407,7 @@ class TestSimilarityMatrixToTuples:
         assert similarity_matrix_to_tuples(matrix) == expected
 
     def test_index_replacements(self):
-        from cluster.tasks.business_logic._cluster_acteurs_clusters import (
+        from cluster.tasks.business_logic.cluster_acteurs_clusters import (
             similarity_matrix_to_tuples,
         )
 
@@ -424,7 +424,7 @@ class TestScoreTuplesToClusters:
 
     # Test cases
     def test_score_tuples_to_clusters(self):
-        from cluster.tasks.business_logic._cluster_acteurs_clusters import (
+        from cluster.tasks.business_logic.cluster_acteurs_clusters import (
             score_tuples_to_clusters,
         )
 
@@ -439,7 +439,7 @@ class TestScoreTuplesToClusters:
         assert score_tuples_to_clusters(data, threshold) == expected
 
     def test_score_tuples_to_clusters_applies_sorting(self):
-        from cluster.tasks.business_logic._cluster_acteurs_clusters import (
+        from cluster.tasks.business_logic.cluster_acteurs_clusters import (
             score_tuples_to_clusters,
         )
 
@@ -456,7 +456,7 @@ class TestScoreTuplesToClusters:
         assert score_tuples_to_clusters(data, threshold) == expected
 
     def test_score_tuples_to_clusters_empty_exception(self):
-        from cluster.tasks.business_logic._cluster_acteurs_clusters import (
+        from cluster.tasks.business_logic.cluster_acteurs_clusters import (
             score_tuples_to_clusters,
         )
 
@@ -466,7 +466,7 @@ class TestScoreTuplesToClusters:
             score_tuples_to_clusters(data, threshold)
 
     def test_score_tuples_to_clusters_no_clusters_below_threshold(self):
-        from cluster.tasks.business_logic._cluster_acteurs_clusters import (
+        from cluster.tasks.business_logic.cluster_acteurs_clusters import (
             score_tuples_to_clusters,
         )
 
@@ -475,7 +475,7 @@ class TestScoreTuplesToClusters:
         assert score_tuples_to_clusters(data, threshold) == []
 
     def test_score_tuples_to_clusters_all_in_one_cluster(self):
-        from cluster.tasks.business_logic._cluster_acteurs_clusters import (
+        from cluster.tasks.business_logic.cluster_acteurs_clusters import (
             score_tuples_to_clusters,
         )
 

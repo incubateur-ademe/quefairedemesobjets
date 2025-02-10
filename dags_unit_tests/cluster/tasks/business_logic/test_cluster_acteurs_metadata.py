@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from dags.cluster.tasks.business_logic._cluster_acteurs_metadata import (
+from dags.cluster.tasks.business_logic.cluster_acteurs_metadata import (
     COUNT_ACTEURS,
     COUNT_ACTEURS_CURRENT,
     COUNT_ACTEURS_NEW,
