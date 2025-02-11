@@ -1,8 +1,6 @@
-@import '../css/base.css' layer(base);
-
 @import 'tailwindcss' prefix(qf);
-
 @config "../../../tailwind.config.js";
+@import '../css/base.css' layer(base);
 
 /*
   The default border color has changed to `currentColor` in Tailwind CSS v4,

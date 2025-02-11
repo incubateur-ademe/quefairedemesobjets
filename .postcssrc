@@ -1,6 +1,6 @@
 {
   "plugins": {
-    "tailwindcss": true,
+    "@tailwindcss/postcss": true,
     "postcss-nesting": true
   }
 }

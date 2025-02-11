@@ -1,12 +1,9 @@
-@import 'npm:leaflet/dist/leaflet.css' layer(base);
-
+@import 'tailwindcss' prefix(qf);
+@config "../../../tailwind.config.js";
+@import 'leaflet/dist/leaflet.css' layer(base);
 @import '../css/base.css' layer(base);
 @import '../css/leaflet-overrides.css' layer(base);
 @import '../css/dsfr-overrides.css' layer(base);
-
-@import 'tailwindcss' prefix(qf);
-
-@config "../../../tailwind.config.js";
 
 /*
   The default border color has changed to `currentColor` in Tailwind CSS v4,
