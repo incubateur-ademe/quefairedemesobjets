@@ -1,20 +1,20 @@
 {% block modal_wrapper_for_id %}
 <button
     {# The rounded-full here need to match the one of the icon #}
-    class="qf-p-0 lg:qf-rounded-l-full"
+    class="qf:p-0 qf:lg:rounded-l-full"
     data-fr-opened="false"
     aria-controls="fr-modal-{{ id }}"
     aria-labelledby="sidebar-action-{{ id }}"
 >
     <span class="
-        lg:qf-rounded-l-full lg:qf-py-2w lg:qf-pl-2w lg:qf-pr-1w
-        hover:!qf-bg-green-menthe-850-active qf-bg-green-menthe-850-hover
-        qf-flex qf-items-center qf-justify-center
-        max-lg:qf-aspect-square max-lg:qf-p-3v max-lg:qf-scale-75 max-lg:qf-rounded-full
-        max-lg:qf-mx-auto max-lg:qf-w-8w"
+        qf:lg:rounded-l-full qf:lg:py-2w qf:lg:pl-2w qf:lg:pr-1w
+        qf:hover:bg-green-menthe-850-active! qf:bg-green-menthe-850-hover
+        qf:flex qf:items-center qf:justify-center
+        qf:max-lg:aspect-square qf:max-lg:p-3v qf:max-lg:scale-75 qf:max-lg:rounded-full
+        qf:max-lg:mx-auto qf:max-lg:w-8w"
     >{% block icon %}{% endblock %}</span>
     <span id="sidebar-action-{{ id }}"
-        class="lg:qf-sr-only qf-font-bold qf-text-sm">
+        class="qf:lg:sr-only qf:font-bold qf:text-sm">
         {% block button_text %}{% endblock %}
     </span>
 </button>

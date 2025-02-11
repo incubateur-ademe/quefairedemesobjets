@@ -45,7 +45,7 @@ class AddressesForm(forms.Form):
         queryset=SousCategorieObjet.objects.all(),
         widget=AutoCompleteInput(
             attrs={
-                "class": "fr-input fr-icon-search-line sm:qf-w-[596px]",
+                "class": "fr-input fr-icon-search-line qf:sm:w-[596px]",
                 "autocomplete": "off",
                 "aria-label": "Indiquer un objet - obligatoire",
             },
@@ -91,7 +91,7 @@ class AddressesForm(forms.Form):
         widget=SegmentedControlSelect(
             attrs={
                 "data-action": "click -> search-solution-form#changeDirection",
-                "class": "qf-w-full sm:qf-w-fit",
+                "class": "qf:w-full qf:sm:w-fit",
             },
             fieldset_attrs={
                 "data-search-solution-form-target": "direction",
@@ -135,8 +135,8 @@ class AddressesForm(forms.Form):
             """Afficher uniquement les artisans labellisés
             (uniquement valable lorsque l'action « réparer » est sélectionnée).
             Les <span
-                class="qf-underline qf-cursor-pointer
-                qf-underline-offset-[3px] hover:qf-decoration-[1.5px]"
+                class="qf:underline qf:cursor-pointer
+                qf:underline-offset-[3px] qf:hover:decoration-[1.5px]"
                 title="Ouvre la modale Répar'Acteurs"
                 onclick="document
                 .getElementById('display_modale_reparacteur')
@@ -207,7 +207,7 @@ class AddressesForm(forms.Form):
     digital = forms.ChoiceField(
         widget=SegmentedControlSelect(
             attrs={
-                "class": "qf-w-full sm:qf-w-fit",
+                "class": "qf:w-full qf:sm:w-fit",
                 "data-action": "click -> search-solution-form#advancedSubmit",
                 "data-with-controls": "true",
             },
@@ -216,14 +216,14 @@ class AddressesForm(forms.Form):
             (
                 "0",
                 mark_safe(
-                    '<span class="fr-icon-road-map-line sm:qf-mx-1w">'
+                    '<span class="fr-icon-road-map-line qf:sm:mx-1w">'
                     " à proximité</span>"
                 ),
             ),
             (
                 "1",
                 mark_safe(
-                    '<span class="fr-icon-global-line sm:qf-mx-1w"> en ligne</span>'
+                    '<span class="fr-icon-global-line qf:sm:mx-1w"> en ligne</span>'
                 ),
             ),
         ],
@@ -248,7 +248,7 @@ class FormulaireForm(AddressesForm):
     adresse = forms.CharField(
         widget=AutoCompleteInput(
             attrs={
-                "class": "fr-input sm:qf-w-[596px]",
+                "class": "fr-input qf:sm:w-[596px]",
                 "autocomplete": "off",
                 "aria-label": "Autour de l'adresse suivante - obligatoire",
             },
@@ -329,7 +329,7 @@ class CarteForm(AddressesForm):
     legend_grouped_action = forms.MultipleChoiceField(
         widget=DSFRCheckboxSelectMultiple(
             attrs={
-                "class": "fr-fieldset qf-mb-0",
+                "class": "fr-fieldset qf:mb-0",
                 "data-action": (
                     "click -> search-solution-form#applyLegendGroupedAction"
                 ),
@@ -388,7 +388,7 @@ class ConfiguratorForm(DsfrBaseForm):
         # L'utilisation de lazy(all_epci_codes(...)) génère une erreur côté Django DSFR
         choices=formatted_epcis_as_list_of_tuple,
         widget=GenericAutoCompleteInput(
-            attrs={"data-autocomplete-target": "hiddenInput", "class": "qf-hidden"},
+            attrs={"data-autocomplete-target": "hiddenInput", "class": "qf:hidden"},
             extra_attrs={
                 "selected_label": "Vos EPCI sélectionnés",
                 "empty_label": "Il n’y a pas d’EPCI sélectionné pour le moment",
@@ -473,7 +473,7 @@ class AdvancedConfiguratorForm(forms.Form):
     iframe_mode = forms.ChoiceField(
         widget=SegmentedControlSelect(
             attrs={
-                "class": "qf-w-full sm:qf-w-fit",
+                "class": "qf:w-full qf:sm:w-fit",
             },
             fieldset_attrs={
                 "data-search-solution-form-target": "direction",
@@ -492,7 +492,7 @@ class AdvancedConfiguratorForm(forms.Form):
     direction = forms.ChoiceField(
         widget=SegmentedControlSelect(
             attrs={
-                "class": "qf-w-full sm:qf-w-fit",
+                "class": "qf:w-full qf:sm:w-fit",
             },
             fieldset_attrs={},
         ),
@@ -507,7 +507,7 @@ class AdvancedConfiguratorForm(forms.Form):
     first_dir = forms.ChoiceField(
         widget=SegmentedControlSelect(
             attrs={
-                "class": "qf-w-full sm:qf-w-fit",
+                "class": "qf:w-full qf:sm:w-fit",
             },
             fieldset_attrs={},
         ),
@@ -520,7 +520,7 @@ class AdvancedConfiguratorForm(forms.Form):
         widget=DSFRCheckboxSelectMultiple(
             attrs={
                 "class": (
-                    "fr-checkbox qf-inline-grid qf-grid-cols-4 qf-gap-4" " qf-m-1w"
+                    "fr-checkbox qf:inline-grid qf:grid-cols-4 qf:gap-4" " qf:m-1w"
                 ),
             },
         ),
@@ -548,7 +548,7 @@ class AdvancedConfiguratorForm(forms.Form):
         widget=DSFRCheckboxSelectMultiple(
             attrs={
                 "class": (
-                    "fr-checkbox qf-inline-grid qf-grid-cols-4 qf-gap-4" " qf-m-1w"
+                    "fr-checkbox qf:inline-grid qf:grid-cols-4 qf:gap-4" " qf:m-1w"
                 ),
             },
         ),

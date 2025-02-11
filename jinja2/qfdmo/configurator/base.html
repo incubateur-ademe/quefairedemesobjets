@@ -6,7 +6,7 @@ Réutiliser la carte | {{ super() }}
 
 {% block content %}
     <div class="fr-container fr-my-3w">
-        <h1 class='qf-sr-only'>Réutiliser la carte sur mon site Internet</h1>
+        <h1 class='qf:sr-only'>Réutiliser la carte sur mon site Internet</h1>
         <h2>Paramètres de l’intégration</h2>
         <form action="{{ url('qfdmo:iframe_configurator') }}" method="post">
             {{ csrf_input }}
@@ -21,7 +21,7 @@ Réutiliser la carte | {{ super() }}
         {% if form.cleaned_data %}
             <hr>
             <div
-                class="qf-max-w-screen-lg"
+                class="qf:max-w-(--breakpoint-lg)"
                 data-controller="scroll"
             >
                 <h2>Résultat</h2>
@@ -39,20 +39,20 @@ Réutiliser la carte | {{ super() }}
                 {# REFACTO JINJA : when Jinja will be dropped, use components/code/code.html here #}
                 <div
                     data-controller="copy"
-                    class="qf-flex
-                    qf-p-2w qf-bg-grey-975
+                    class="qf:flex
+                    qf:p-2w qf:bg-grey-975
                     "
                 >
                     <pre
                         data-copy-target="toCopy"
                         class="
-                        qf-m-0 qf-pr-1w
-                        qf-text-blue-france-sun-113
-                        qf-whitespace-break-spaces
-                        qf-break-all
+                        qf:m-0 qf:pr-1w
+                        qf:text-blue-france-sun-113
+                        qf:whitespace-break-spaces
+                        qf:break-all
                     ">{{ iframe_script }}</pre>
                     <button
-                        class="fr-btn qf-mb-auto qf-ml-auto"
+                        class="fr-btn qf:mb-auto qf:ml-auto"
                         title="Copier"
                         data-action="click->copy#toClipboard"
                         data-copy-target="button"
@@ -61,7 +61,7 @@ Réutiliser la carte | {{ super() }}
                     </button>
                 </div>
 
-                <div class="fr-alert fr-alert--info qf-mt-1w qf-mb-4w">
+                <div class="fr-alert fr-alert--info qf:mt-1w qf:mb-4w">
                     <p>
                         Cette balise HTML vous permet d'afficher le site à l'intérieur d'une page de votre site internet.
                         Le module sera automatiquement mis à jour avec les dernières nouveautés.

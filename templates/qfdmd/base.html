@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html
     lang="fr"
-    class="qf-scroll-smooth"
+    class="qf:scroll-smooth"
     {% if not is_carte %}data-formulaire{% endif %}
 >
     <head>
@@ -34,12 +34,12 @@
     </head>
 
     <body
-        class="qf-flex qf-flex-col qf-group"
+        class="qf:flex qf:flex-col qf:group"
         {% if STIMULUS_DEBUG %}data-stimulus-debug="true"{% endif %}
         {% block body_attrs %}{% endblock %}
     >
         {% if request.user.is_authenticated %}
-        <div class="qf-bg-red-marianne-main-472 qf-text-white qf-text-center qf-w-screen qf-py-1v qf-text-xs">
+        <div class="qf:bg-red-marianne-main-472 qf:text-white qf:text-center qf:w-screen qf:py-1v qf:text-xs">
         Vous êtes bien authentifié, vos statistiques PostHog seront ignorées pour cette session | <a href="{% url 'admin:index' %}">accéder à l'administration</a>
         </div>
         {% endif %}
@@ -47,7 +47,7 @@
         {% include "components/header/header.html" %}
         {% endblock header %}
 
-        <main class="fr-container qf-pb-7w">
+        <main class="fr-container qf:pb-7w">
             {% block main %}
             {% endblock main %}
         </main>
@@ -74,12 +74,12 @@
             data-analytics-action-value="{% block analytics_action %}{% endblock %}"
         ></script>
         {% if assistant.is_iframe and request.user.is_authenticated %}
-            <div class="qf-bg-warning-425-625-hover qf-text-white qf-text-center qf-w-screen qf-py-1v qf-text-xs">
+            <div class="qf:bg-warning-425-625-hover qf:text-white qf:text-center qf:w-screen qf:py-1v qf:text-xs">
             Le mode iframe de l'assistant est actif
             </div>
         {% endif %}
         {% if "posthog" in request.GET %}
-            <div class="qf-bg-green-bourgeon-main-640 qf-text-white qf-text-center qf-w-screen qf-py-1v qf-text-xs">
+            <div class="qf:bg-green-bourgeon-main-640 qf:text-white qf:text-center qf:w-screen qf:py-1v qf:text-xs">
             Identifiant PostHog : {{ assistant.POSTHOG_KEY }} | Score de conversion : <span id="posthog-banner-conversion-score"></span>
              </div>
         {% endif %}
