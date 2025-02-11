@@ -1,6 +1,6 @@
 import { iframeResize } from "iframe-resizer";
 
-const initScript() {
+function initScript() {
   const script = document.currentScript as HTMLScriptElement
   const slug = script?.dataset?.objet;
   const origin = new URL(script?.getAttribute("src")).origin
