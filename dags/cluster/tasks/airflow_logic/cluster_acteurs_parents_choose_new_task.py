@@ -9,8 +9,8 @@ from cluster.tasks.airflow_logic.task_ids import (
     TASK_CONFIG_CREATE,
     TASK_PARENTS_CHOOSE_NEW,
 )
-from cluster.tasks.business_logic import (
-    cluster_acteurs_df_sort,
+from cluster.tasks.business_logic.cluster_acteurs_df_sort import cluster_acteurs_df_sort
+from cluster.tasks.business_logic.cluster_acteurs_parents_choose_new import (
     cluster_acteurs_parents_choose_new,
 )
 from utils import logging_utils as log

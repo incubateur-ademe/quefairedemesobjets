@@ -8,7 +8,9 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from cluster.config.model import ClusterConfig
 from cluster.tasks.airflow_logic.task_ids import TASK_CONFIG_CREATE
-from cluster.tasks.business_logic import cluster_acteurs_config_create
+from cluster.tasks.business_logic.cluster_acteurs_config_create import (
+    cluster_acteurs_config_create,
+)
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)

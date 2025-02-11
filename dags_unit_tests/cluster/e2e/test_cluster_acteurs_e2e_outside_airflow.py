@@ -8,6 +8,15 @@ et convertir ce test en test bout-en-bout via Airflow
 import re
 
 import pytest
+from cluster.tasks.business_logic.cluster_acteurs_clusters import (
+    cluster_acteurs_clusters,
+)
+from cluster.tasks.business_logic.cluster_acteurs_normalize import (
+    cluster_acteurs_normalize,
+)
+from cluster.tasks.business_logic.cluster_acteurs_selection import (
+    cluster_acteurs_selection,
+)
 from rich import print
 
 from dags.cluster.config.model import ClusterConfig
@@ -116,11 +125,6 @@ class TestClusterActeursE2E:
         return s1, s2, s3, at1, at2, at3, acteurs
 
     def test_e2e(self, acteurs_create):
-        from dags.cluster.tasks.business_logic import (
-            cluster_acteurs_clusters,
-            cluster_acteurs_normalize,
-            cluster_acteurs_selection,
-        )
 
         s1, s2, s3, at1, at2, at3, acteurs = acteurs_create
 

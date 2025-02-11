@@ -4,7 +4,9 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from cluster.config.model import ClusterConfig
 from cluster.tasks.airflow_logic.task_ids import TASK_CONFIG_CREATE, TASK_SELECTION
-from cluster.tasks.business_logic import cluster_acteurs_selection
+from cluster.tasks.business_logic.cluster_acteurs_selection import (
+    cluster_acteurs_selection,
+)
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)

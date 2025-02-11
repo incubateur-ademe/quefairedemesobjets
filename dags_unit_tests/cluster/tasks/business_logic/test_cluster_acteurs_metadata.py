@@ -8,6 +8,7 @@ from dags.cluster.tasks.business_logic.cluster_acteurs_metadata import (
     COUNT_CLUSTERS,
     COUNT_CLUSTERS_CURRENT,
     COUNT_CLUSTERS_NET,
+    cluster_acteurs_metadata,
 )
 
 
@@ -39,8 +40,6 @@ class TestClusterActeursMetadata:
 
     @pytest.fixture(scope="session")
     def meta(self, df):
-        from dags.cluster.tasks.business_logic import cluster_acteurs_metadata
-
         return cluster_acteurs_metadata(df)
 
     def test_nombre_clusters(self, meta):

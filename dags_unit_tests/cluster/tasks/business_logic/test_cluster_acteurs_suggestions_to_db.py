@@ -2,8 +2,10 @@ from datetime import datetime
 
 import pandas as pd
 import pytest
+from cluster.tasks.business_logic.cluster_acteurs_suggestions_to_db import (
+    cluster_acteurs_suggestions_to_db,
+)
 
-from dags.cluster.tasks.business_logic import cluster_acteurs_suggestions_to_db
 from data.models import Suggestion, SuggestionCohorte
 from data.models.change import (
     COL_CHANGE_ORDER,

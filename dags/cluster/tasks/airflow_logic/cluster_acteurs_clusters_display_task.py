@@ -11,6 +11,16 @@ from cluster.tasks.airflow_logic.task_ids import (
     TASK_CONFIG_CREATE,
     TASK_NORMALIZE,
 )
+from cluster.tasks.business_logic.cluster_acteurs_add_original_df_columns import (
+    cluster_acteurs_add_original_df_columns,
+)
+from cluster.tasks.business_logic.cluster_acteurs_clusters import (
+    cluster_acteurs_clusters,
+)
+from cluster.tasks.business_logic.cluster_acteurs_df_sort import cluster_acteurs_df_sort
+from cluster.tasks.business_logic.cluster_acteurs_selection_children import (
+    cluster_acteurs_selection_children,
+)
 from utils import logging_utils as log
 from utils.django import django_setup_full
 
@@ -38,12 +48,6 @@ def task_info_get():
 
 
 def cluster_acteurs_suggestions_wrapper(**kwargs) -> None:
-    from cluster.tasks.business_logic import (
-        cluster_acteurs_add_original_df_columns,
-        cluster_acteurs_clusters,
-        cluster_acteurs_df_sort,
-        cluster_acteurs_selection_children,
-    )
 
     from data.models.change import (
         COL_ENTITY_TYPE,

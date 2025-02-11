@@ -1,4 +1,7 @@
 import pandas as pd
+from cluster.tasks.business_logic.cluster_acteurs_metadata import (
+    cluster_acteurs_metadata,
+)
 from utils.django import django_setup_full
 
 django_setup_full()
@@ -9,7 +12,6 @@ def cluster_acteurs_suggestions_to_db(
     identifiant_action: str,
     identifiant_execution: str,
 ) -> None:
-    from cluster.tasks.business_logic import cluster_acteurs_metadata
 
     from data.models import (
         Suggestion,

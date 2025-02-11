@@ -10,6 +10,9 @@ from cluster.tasks.airflow_logic.task_ids import (
     TASK_SUGGESTIONS_DISPLAY,
     TASK_SUGGESTIONS_TO_DB,
 )
+from cluster.tasks.business_logic.cluster_acteurs_suggestions_to_db import (
+    cluster_acteurs_suggestions_to_db,
+)
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -34,7 +37,6 @@ def task_info_get():
 
 
 def cluster_acteurs_suggestions_to_db_wrapper(**kwargs) -> None:
-    from cluster.tasks.business_logic import cluster_acteurs_suggestions_to_db
 
     logger.info(task_info_get())
 
