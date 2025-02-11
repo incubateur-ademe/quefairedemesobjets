@@ -4,6 +4,8 @@
 @import "../css/leaflet-overrides.css";
 @import "../css/dsfr-overrides.css";
 
+@config "../../../tailwind.config.js";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
