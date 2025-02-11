@@ -5,7 +5,7 @@
 {% block aria_labelledby %}sourcesPanel{% endblock aria_labelledby %}
 
 {% block content %}
-<div class="qf-pt-1w">
+<div class="qf:pt-1w">
 {% with border=True %}
     {% for source_or_label in object.sources.all() %}
         {% include "qfdmo/acteur/_label.html" %}

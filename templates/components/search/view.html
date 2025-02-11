@@ -7,31 +7,31 @@
             keydown.down->search#down:prevent"
         class="
         {# Z-index here helps prevent autocomplete overlapping on the accordion on the homepage #}
-        qf-relative qf-z-10
-        qf-rounded-3xl qf-overflow-hidden
-        group-data-[home]:qf-rounded-[2rem]
-        max-md:qf-rounded-[2rem]
-        qf-border-solid qf-border-[3px] qf-border-green-menthe-850-hover qf-bg-white
-        qf-flex qf-flex-col"
+        qf:relative qf:z-10
+        qf:rounded-3xl qf:overflow-hidden
+        qf:group-data-home:rounded-[2rem]
+        qf:max-md:rounded-[2rem]
+        qf:border-solid qf:border-[3px] qf:border-green-menthe-850-hover qf:bg-white
+        qf:flex qf:flex-col"
     >
         <form
             data-search-target="form"
             data-turbo-frame="search-results"
             action="{% url 'qfdmd:search' %}"
-            class="qf-pl-4w {# should match the svg icon width #}
-            qf-flex qf-relative
-            md:group-data-[home]:qf-h-7w
-            qf-h-5w
-            qf-content-center
+            class="qf:pl-4w {# should match the svg icon width #}
+            qf:flex qf:relative
+            qf:md:group-data-home:h-7w
+            qf:h-5w
+            qf:content-center
             "
         >
             <button
                 aria-label="Rechercher"
                 type="submit"
-                class="qf-absolute qf-top-0 qf-bottom-0 qf-left-0
-                qf-m-auto qf-pl-1v
+                class="qf:absolute qf:top-0 qf:bottom-0 qf:left-0
+                qf:m-auto qf:pl-1v
                 fr-btn fr-icon-search-line fr-btn--tertiary-no-outline
-                qf-text-green-menthe-main-548"
+                qf:text-green-menthe-main-548"
             ></button>
 
             {% for field in search_form %}
@@ -41,7 +41,7 @@
 
         <turbo-frame
             id="search-results"
-            class="qf-flex qf-flex-col"
+            class="qf:flex qf:flex-col"
         >
             {% if search_form.results %}
                 {% for result in search_form.results %}

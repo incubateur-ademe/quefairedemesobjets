@@ -1,16 +1,16 @@
 <div class='fr-container
-            qf-px-0
-            qf-fixed qf-z-50 qf-top-auto qf-left-0 qf-right-0 qf-mt-auto
-            qf-h-[90vh] qf-h-[90svh] {# Keep both values help keep support for vh in firefox #}
-            qf-inset-0 qf-font-black qf-bg-white
-            qf-flex qf-flex-col
-            qf-overflow-auto
-            qf-origin-bottom
-            qf-drop-shadow-[0_0_100px_#5555]
-            data-[visible=false]:qf-hidden
-            data-[visible=true]:qf-animate-modal-appear
-            data-[visible=exit]:qf-animate-out
-            data-[visible=exit]:qf-fade-out
+            qf:px-0
+            qf:fixed qf:z-50 qf:top-auto qf:left-0 qf:right-0 qf:mt-auto
+            qf:h-[90vh] qf:h-[90svh] {# Keep both values help keep support for vh in firefox #}
+            qf:inset-0 qf:font-black qf:bg-white
+            qf:flex qf:flex-col
+            qf:overflow-auto
+            qf:origin-bottom
+            qf:drop-shadow-[0_0_100px_#5555]
+            qf:data-[visible=false]:hidden
+            qf:data-[visible=true]:animate-modal-appear
+            qf:data-[visible=exit]:animate-out
+            qf:data-[visible=exit]:fade-out
            '
      data-visible="false"
      {% block wrapper_attrs %}
@@ -21,8 +21,8 @@
     {% endblock modal_header %}
     </div>
 
-    <div class="fr-modal__content fr-text--normal qf-font-normal">
-        <h2 class="qf-text-center fr-h4">
+    <div class="fr-modal__content fr-text--normal qf:font-normal">
+        <h2 class="qf:text-center fr-h4">
             {% block modal_title %}
             {% endblock modal_title %}
         </h2>
@@ -32,7 +32,7 @@
         {% endblock modal_content %}
     </div>
 
-    <div class="fr-modal__footer qf-flex qf-flex-col empty:qf-hidden">
+    <div class="fr-modal__footer qf:flex qf:flex-col qf:empty:hidden">
         {% block modal_footer %}
         {% endblock modal_footer %}
     </div>

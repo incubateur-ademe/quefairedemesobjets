@@ -1,19 +1,19 @@
 <div
-    class="qf-flex qf-flex-col qf-gap-5w"
+    class="qf:flex qf:flex-col qf:gap-5w"
 >
     <section id="qu-est-ce-que-j-en-fais">
-        <p class="qf-text-base md:qf-text-lg">
+        <p class="qf:text-base qf:md:text-lg">
             {{ content|default:produit.qu_est_ce_que_j_en_fais|safe }}
         </p>
     </section>
 
     {% if produit.sous_categorie_with_carte_display %}
-    <section id="ou-l-apporter" class="qf-mb-4w">
+    <section id="ou-l-apporter" class="qf:mb-4w">
         <h2>Où l'apporter ?</h2>
         <iframe
             allow="geolocation; clipboard-write"
-            class="max-md:qf-aspect-[9/20] qf-max-h-[90vh] md:qf-max-h-[90svh]
-            md:qf-max-h-[90vh] md:qf-h-[50em] qf-w-full"
+            class="qf:max-md:aspect-9/20 qf:max-h-[90vh] qf:md:max-h-[90svh]
+            qf:md:max-h-[90vh] qf:md:h-[50em] qf:w-full"
             title="Carte Longue Vie Aux Objets - Où l'apporter"
             src="{{ url_carte|default:produit.sous_categories.first.url_carte }}"></iframe>
     </section>

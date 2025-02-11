@@ -1,10 +1,10 @@
 <a
     class="
-    qf-flex qf-flex-col qf-items-center
-    qf-bg-none qf-no-external-link-icon
-    qf-space-y-1v
+    qf:flex qf:flex-col qf:items-center
+    qf:bg-none qf-no-external-link-icon
+    qf:space-y-1v
     {% if mobile_only %}
-    md:qf-hidden
+    qf:md:hidden
     {% endif %}
     "
     href="{% block href %}{{ url }}{% endblock href %}"
@@ -15,9 +15,9 @@
 >
     <span class="
         fr-btn fr-btn--sm
-        qf-rounded-full
+        qf:rounded-full
         {% if icon %}{{ icon }}{% endif %}
         {% if extra_classes %}{{ extra_classes }}{% endif %}">
     </span>
-    <span class="fr-text--xs fr-mb-0 qf-whitespace-nowrap">{{ text }}</span>
+    <span class="fr-text--xs fr-mb-0 qf:whitespace-nowrap">{{ text }}</span>
 </a>

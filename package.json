@@ -47,7 +47,7 @@
         "iframe-resizer": "^4.4.5",
         "leaflet": "^1.9.4",
         "posthog-js": "^1.211.0",
-        "tailwindcss": "^4.0.6"
+        "tailwindcss": "^4.0.0"
     },
     "devDependencies": {
         "@fullhuman/postcss-purgecss": "^7.0.2",

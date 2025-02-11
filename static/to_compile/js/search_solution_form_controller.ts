@@ -324,11 +324,11 @@ export default class extends Controller<HTMLElement> {
     let errorExists = false
     if (!this.sousCategoryObjetIDTarget.value) {
       this.sousCategoryObjetGroupTarget.classList.add("fr-input-group--error")
-      this.sousCategoryObjetErrorTarget.classList.remove("qf-hidden")
+      this.sousCategoryObjetErrorTarget.classList.remove("qf:hidden")
       errorExists = true
     } else {
       this.sousCategoryObjetGroupTarget.classList.remove("fr-input-group--error")
-      this.sousCategoryObjetErrorTarget.classList.add("qf-hidden")
+      this.sousCategoryObjetErrorTarget.classList.add("qf:hidden")
     }
     return errorExists
   }
@@ -337,11 +337,11 @@ export default class extends Controller<HTMLElement> {
     let errorExists = false
     if (!this.latitudeInputTarget.value || !this.longitudeInputTarget.value) {
       this.adresseGroupTarget.classList.add("fr-input-group--error")
-      this.adresseErrorTarget.classList.remove("qf-hidden")
+      this.adresseErrorTarget.classList.remove("qf:hidden")
       errorExists = true
     } else {
       this.adresseGroupTarget.classList.remove("fr-input-group--error")
-      this.adresseErrorTarget.classList.add("qf-hidden")
+      this.adresseErrorTarget.classList.add("qf:hidden")
     }
     return errorExists
   }
@@ -354,15 +354,15 @@ export default class extends Controller<HTMLElement> {
   }
 
   closeAdvancedFilters() {
-    this.advancedFiltersSaveAndSubmitButtonTarget.classList.remove("qf-hidden")
-    this.advancedFiltersSaveButtonTarget.classList.add("qf-hidden")
+    this.advancedFiltersSaveAndSubmitButtonTarget.classList.remove("qf:hidden")
+    this.advancedFiltersSaveButtonTarget.classList.add("qf:hidden")
     this.#hideAdvancedFilters()
     this.scrollToContent()
   }
 
   toggleAdvancedFilters() {
-    this.advancedFiltersSaveAndSubmitButtonTarget.classList.remove("qf-hidden")
-    this.advancedFiltersSaveButtonTarget.classList.add("qf-hidden")
+    this.advancedFiltersSaveAndSubmitButtonTarget.classList.remove("qf:hidden")
+    this.advancedFiltersSaveButtonTarget.classList.add("qf:hidden")
     if (this.advancedFiltersMainPanelTarget.dataset.visible === "false") {
       this.#showAdvancedFilters()
     } else {
@@ -391,35 +391,35 @@ export default class extends Controller<HTMLElement> {
   }
 
   showLegend() {
-    this.legendMainPanelTarget.classList.remove("qf-hidden")
+    this.legendMainPanelTarget.classList.remove("qf:hidden")
     setTimeout(() => {
-      this.legendFormPanelTarget.classList.remove("qf-h-0", "qf-invisible")
-      this.legendFormPanelTarget.classList.add("qf-h-[95%]")
+      this.legendFormPanelTarget.classList.remove("qf:h-0", "qf:invisible")
+      this.legendFormPanelTarget.classList.add("qf:h-[95%]")
     }, 100)
     this.scrollToContent()
   }
 
   hideLegend() {
     if (this.hasLegendFormPanelTarget) {
-      this.legendFormPanelTarget.classList.remove("qf-h-[95%]")
-      this.legendFormPanelTarget.classList.add("qf-h-0", "qf-invisible")
+      this.legendFormPanelTarget.classList.remove("qf:h-[95%]")
+      this.legendFormPanelTarget.classList.add("qf:h-0", "qf:invisible")
       setTimeout(() => {
-        this.legendMainPanelTarget.classList.add("qf-hidden")
+        this.legendMainPanelTarget.classList.add("qf:hidden")
       }, 300)
     }
   }
 
   #showSearchFormPanel() {
     this.element.dataset.searchFormVisible = ""
-    this.searchFormPanelTarget.classList.add("qf-flex-grow")
-    this.searchFormPanelTarget.classList.remove("qf-h-0", "qf-invisible")
+    this.searchFormPanelTarget.classList.add("qf:grow")
+    this.searchFormPanelTarget.classList.remove("qf:h-0", "qf:invisible")
   }
 
   #hideSearchFormPanel() {
     delete this.element.dataset.searchFormVisible
     this.searchFormPanelTarget.dataset.visible = "false"
-    this.searchFormPanelTarget.classList.remove("qf-flex-grow")
-    this.searchFormPanelTarget.classList.add("qf-h-0", "qf-invisible")
+    this.searchFormPanelTarget.classList.remove("qf:grow")
+    this.searchFormPanelTarget.classList.add("qf:h-0", "qf:invisible")
   }
 
   advancedSubmit(event: Event) {

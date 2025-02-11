@@ -1,150 +1,300 @@
-@import "../css/base.css";
+@import '../css/base.css' layer(base);
+
+@import 'tailwindcss' prefix(qf);
 
 @config "../../../tailwind.config.js";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+}
+
+@utility patchwork {
+  @apply qf:grid qf:pt-4w qf:relative;
+  grid-template-rows: auto auto;
+  grid-template-columns: auto 50% auto;
+  grid-template-areas:
+    'top top top'
+    'left middle right';
+
+  .top {
+    --col-size: 7.5rem;
+    --row-size: 7rem;
+    @apply qf:grid;
+    grid-area: top;
+    grid-template-columns: repeat(auto-fit, minmax(var(--col-size), 1fr));
+    grid-auto-rows: var(--row-size);
+  }
+
+  .middle {
+    /* @apply qf-text-center qf-flex qf-justify-center qf-items-center; */
+    grid-area: middle;
+    @apply qf:flex qf:flex-wrap qf:items-center qf:justify-center qf:flex-row-reverse;
+  }
+
+  .right,
+  .left {
+    @apply qf:flex qf:flex-wrap qf:items-center qf:justify-center qf:flex-row-reverse;
+    > .icon {
+      flex: 0 1 calc(50% - 16px);
+    }
+  }
+
+  .icon {
+    --scale: 1;
+    --rotate-factor: 1;
+    @apply qf:md:p-2w;
+
+    a {
+      &:hover {
+        --scale: 1.2;
+        --rotate-factor: 1.5;
+      }
+
+      @apply qf:origin-center qf:transition-transform qf:bg-none! qf:inline-flex;
+
+      &:active {
+        background-color: transparent;
+      }
+
+      transform: translate(
+          calc(var(--random-x, 0) * 1px),
+          calc(var(--random-y, 0) * 1px)
+        )
+        scale(var(--scale))
+        rotate(calc(var(--rotate-factor) * var(--random-rotate, 0) * 2deg));
+    }
+  }
+  @media (max-width: 768px) {
+    & .top {
+      --col-size: 5rem;
+      --row-size: 5rem;
+      /* @apply qf-pb-6w; */
+    }
+  }
+  @media (max-width: 1247px) {
+    & .top .icon:nth-last-child(-n + 1) {
+      @apply qf:hidden;
+    }
+  }
+  @media (max-width: 1127px) {
+    & .top .icon:nth-last-child(-n + 2) {
+      @apply qf:hidden;
+    }
+  }
+  @media (max-width: 1008px) {
+    & .top .icon:nth-last-child(-n + 3) {
+      @apply qf:hidden;
+    }
+    & .right .icon:nth-child(n + 2) {
+      @apply qf:hidden;
+    }
+    & .left .icon:nth-child(n + 3) {
+      @apply qf:hidden;
+    }
+  }
+  @media (min-width: 768px) and (max-width: 860px) {
+    & .top .icon:nth-last-child(-n + 5) {
+      @apply qf:hidden;
+    }
+  }
+  @media (max-width: 591px) {
+    & .top .icon:nth-last-child(-n + 4) {
+      @apply qf:hidden;
+    }
+  }
+  @media (max-width: 512px) {
+    & .top .icon:nth-last-child(-n + 5) {
+      @apply qf:hidden;
+    }
+  }
+  @media (max-width: 480px) {
+    & .top .icon:nth-last-child(-n + 6) {
+      @apply qf:hidden;
+    }
+  }
+  @media (max-width: 360px) {
+    & .top .icon:nth-last-child(-n + 7) {
+      @apply qf:hidden;
+    }
+  }
+  @media (max-width: 860px) {
+    & .right {
+      @apply qf:hidden;
+    }
+    & .left {
+      @apply qf:hidden;
+    }
+  }
+}
+
+@utility top {
+  @media (max-width: 768px) {
+    .patchwork & {
+      --col-size: 5rem;
+      --row-size: 5rem;
+      /* @apply qf-pb-6w; */
+    }
+  }
+  @media (max-width: 1247px) {
+    .patchwork & .icon:nth-last-child(-n + 1) {
+      @apply qf:hidden;
+    }
+  }
+  @media (max-width: 1127px) {
+    .patchwork & .icon:nth-last-child(-n + 2) {
+      @apply qf:hidden;
+    }
+  }
+  @media (max-width: 1008px) {
+    .patchwork & .icon:nth-last-child(-n + 3) {
+      @apply qf:hidden;
+    }
+  }
+  @media (min-width: 768px) and (max-width: 860px) {
+    .patchwork & .icon:nth-last-child(-n + 5) {
+      @apply qf:hidden;
+    }
+  }
+  @media (max-width: 591px) {
+    .patchwork & .icon:nth-last-child(-n + 4) {
+      @apply qf:hidden;
+    }
+  }
+  @media (max-width: 512px) {
+    .patchwork & .icon:nth-last-child(-n + 5) {
+      @apply qf:hidden;
+    }
+  }
+  @media (max-width: 480px) {
+    .patchwork & .icon:nth-last-child(-n + 6) {
+      @apply qf:hidden;
+    }
+  }
+  @media (max-width: 360px) {
+    .patchwork & .icon:nth-last-child(-n + 7) {
+      @apply qf:hidden;
+    }
+  }
+}
+
+@utility icon {
+  @media (max-width: 768px) {
+    & a {
+      --scale: 0.75;
+
+      &:hover {
+        --scale: 0.75;
+      }
+    }
+  }
+  @media (max-width: 1247px) {
+    .patchwork .top &:nth-last-child(-n + 1) {
+      @apply qf:hidden;
+    }
+  }
+  @media (max-width: 1127px) {
+    .patchwork .top &:nth-last-child(-n + 2) {
+      @apply qf:hidden;
+    }
+  }
+  @media (max-width: 1008px) {
+    .patchwork .top &:nth-last-child(-n + 3) {
+      @apply qf:hidden;
+    }
+
+    .patchwork .right &:nth-child(n + 2) {
+      @apply qf:hidden;
+    }
+
+    .patchwork .left &:nth-child(n + 3) {
+      @apply qf:hidden;
+    }
+  }
+  @media (min-width: 768px) and (max-width: 860px) {
+    .patchwork .top &:nth-last-child(-n + 5) {
+      @apply qf:hidden;
+    }
+  }
+  @media (max-width: 591px) {
+    .patchwork .top &:nth-last-child(-n + 4) {
+      @apply qf:hidden;
+    }
+  }
+  @media (max-width: 512px) {
+    .patchwork .top &:nth-last-child(-n + 5) {
+      @apply qf:hidden;
+    }
+  }
+  @media (max-width: 480px) {
+    .patchwork .top &:nth-last-child(-n + 6) {
+      @apply qf:hidden;
+    }
+  }
+  @media (max-width: 360px) {
+    .patchwork .top &:nth-last-child(-n + 7) {
+      @apply qf:hidden;
+    }
+  }
+}
+
+@utility right {
+  @media (max-width: 1008px) {
+    .patchwork & .icon:nth-child(n + 2) {
+      @apply qf:hidden;
+    }
+  }
+  @media (max-width: 860px) {
+    .patchwork & {
+      @apply qf:hidden;
+    }
+  }
+}
+
+@utility left {
+  @media (max-width: 1008px) {
+    .patchwork & .icon:nth-child(n + 3) {
+      @apply qf:hidden;
+    }
+  }
+  @media (max-width: 860px) {
+    .patchwork & {
+      @apply qf:hidden;
+    }
+  }
+}
+
+@utility qf-btn {
+  @apply qf:rounded-full qf:py-3v qf:px-3w qf:bg-none qf:bg-green-menthe-sun-373-moon-652;
+  @apply qf:text-blue-france-975-75 qf:font-bold;
+  @apply qf:hover:bg-green-menthe-sun-373-moon-652-hover! qf:transition-colors;
+}
 
 @layer base {
     p a {
-        @apply qf-text-blue-france-sun-113-625;
+        @apply qf:text-blue-france-sun-113-625;
     }
 
     pre,
     code {
-        @apply qf-text-blue-france-sun-113-625 qf-font-bold;
+        @apply qf:text-blue-france-sun-113-625 qf:font-bold;
     }
 
-}
-
-@layer components {
-    .patchwork {
-        @apply qf-grid qf-pt-4w qf-relative;
-        grid-template-rows: auto auto;
-        grid-template-columns: auto 50% auto;
-        grid-template-areas:
-        "top top top"
-        "left middle right";
-
-        .top {
-            --col-size: 7.5rem;
-            --row-size: 7rem;
-            @apply qf-grid;
-            grid-area: top;
-            grid-template-columns: repeat(auto-fit, minmax(var(--col-size), 1fr));
-            grid-auto-rows: var(--row-size);
-        }
-
-        .middle {
-            /* @apply qf-text-center qf-flex qf-justify-center qf-items-center; */
-            grid-area: middle;
-            @apply qf-flex qf-flex-wrap qf-items-center qf-justify-center qf-flex-row-reverse;
-        }
-
-        .right, .left {
-            @apply qf-flex qf-flex-wrap qf-items-center qf-justify-center qf-flex-row-reverse;
-            > .icon {
-                flex: 0 1 calc(50% - 16px);
-            }
-        }
-
-        .icon {
-            --scale: 1;
-            --rotate-factor: 1;
-            @apply md:qf-p-2w;
-
-            a {
-                &:hover {
-                --scale: 1.2;
-                --rotate-factor: 1.5;
-                }
-
-                @apply qf-origin-center qf-transition-transform !qf-bg-none qf-inline-flex;
-
-                &:active {
-                    background-color: transparent;
-                }
-
-                transform: translate(
-                    calc(var(--random-x, 0) * 1px),
-                    calc(var(--random-y, 0) * 1px)
-                )
-                scale(var(--scale))
-                rotate(calc(var(--rotate-factor) * var(--random-rotate, 0) * 2deg));
-            }
-        }
-    }
-    @media (max-width: 768px) {
-        .patchwork .top {
-            --col-size: 5rem;
-            --row-size: 5rem;
-            /* @apply qf-pb-6w; */
-        }
-        .icon a {
-            --scale: 0.75;
-
-            &:hover {
-                --scale: 0.75;
-            }
-        }
-    }
-    @media (max-width: 1247px) {
-        .patchwork .top .icon:nth-last-child(-n + 1) {
-            @apply qf-hidden;
-        }
-    }
-    @media (max-width: 1127px) {
-        .patchwork .top .icon:nth-last-child(-n + 2) {
-            @apply qf-hidden;
-        }
-    }
-    @media (max-width: 1008px) {
-        .patchwork .top .icon:nth-last-child(-n + 3),
-        .patchwork .right .icon:nth-child(n + 2),
-        .patchwork .left .icon:nth-child(n + 3) {
-            @apply qf-hidden;
-        }
-    }
-    @media (min-width: 768px) and (max-width: 860px) {
-        .patchwork .top .icon:nth-last-child(-n + 5) {
-            @apply qf-hidden;
-        }
-    }
-    @media (max-width: 591px) {
-        .patchwork .top .icon:nth-last-child(-n + 4) {
-            @apply qf-hidden;
-        }
-    }
-    @media (max-width: 512px) {
-        .patchwork .top .icon:nth-last-child(-n + 5) {
-            @apply qf-hidden;
-        }
-    }
-    @media (max-width: 480px) {
-        .patchwork .top .icon:nth-last-child(-n + 6) {
-            @apply qf-hidden;
-        }
-    }
-    @media (max-width: 360px) {
-        .patchwork .top .icon:nth-last-child(-n + 7) {
-            @apply qf-hidden;
-        }
-    }
-    @media (max-width: 860px) {
-        .patchwork .right,
-        .patchwork .left {
-            @apply qf-hidden;
-        }
-    }
-
-    .qf-btn {
-        @apply qf-rounded-full qf-py-3v qf-px-3w qf-bg-none qf-bg-green-menthe-sun-373-moon-652;
-        @apply qf-text-blue-france-975-75 qf-font-bold;
-        @apply hover:!qf-bg-green-menthe-sun-373-moon-652-hover qf-transition-colors;
-    }
 }
 
 .fr-footer__logo {
-    @apply qf-max-h-12w;
+    @apply qf:max-h-12w;
 }

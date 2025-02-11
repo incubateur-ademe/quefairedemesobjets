@@ -1,4 +1,3 @@
-
 .fr-enlarge-link a::before {
   position: relative !important;
 }
@@ -116,23 +115,23 @@ DSFR customization for tabs
 .fr-tabs--noborder {
   &:before,
   & {
-    @apply qf-shadow-none;
+    @apply qf:shadow-none;
   }
 
   .fr-tabs__list {
-    @apply qf-p-0;
+    @apply qf:p-0;
   }
 
   .fr-tabs__panel {
-    @apply qf-py-1w qf-px-0;
+    @apply qf:py-1w qf:px-0;
   }
 
   .fr-tabs__list {
-    @apply qf-space-x-1w qf-min-h-min;
+    @apply qf:space-x-1w qf:min-h-min;
   }
 
   .fr-tabs__tab {
-    @apply qf-m-0;
+    @apply qf:m-0;
   }
 }
 

@@ -1,15 +1,30 @@
-@import "npm:leaflet/dist/leaflet.css";
+@import 'npm:leaflet/dist/leaflet.css' layer(base);
 
-@import "../css/base.css";
-@import "../css/leaflet-overrides.css";
-@import "../css/dsfr-overrides.css";
+@import '../css/base.css' layer(base);
+@import '../css/leaflet-overrides.css' layer(base);
+@import '../css/dsfr-overrides.css' layer(base);
+
+@import 'tailwindcss' prefix(qf);
 
 @config "../../../tailwind.config.js";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
 
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+}
 
 pre {
   font-family: Marianne, arial, sans-serif;
@@ -51,13 +66,13 @@ Style the autocomplete container:
 }
 
 .active-pinpoint [data-animated] {
-  @apply qf-animate-wave qf-fill-mode-forwards;
+  @apply qf:animate-wave qf:fill-mode-forwards;
 }
 
 .map-grid {
-  @apply qf-min-h-screen md:qf-grid qf-gap-0;
-  @apply qf-grid-flow-row-dense;
-  @apply qf-transition-[grid-template-columns] qf-ease-in qf-duration-200;
+  @apply qf:min-h-screen qf:md:grid qf:gap-0;
+  @apply qf:grid-flow-row-dense;
+  @apply qf:transition-[grid-template-columns] qf:ease-in qf:duration-200;
   grid-template-columns: auto var(--sidebar-width);
   grid-template-rows: var(--header-height) 1.5fr var(--footer-height);
   grid-template-areas:
@@ -66,7 +81,7 @@ Style the autocomplete container:
     "footer footer";
 
   &:has(> aside[aria-hidden="false"]) {
-    @apply qf-ease-out;
+    @apply qf:ease-out;
     --sidebar-width: 400px;
   }
 

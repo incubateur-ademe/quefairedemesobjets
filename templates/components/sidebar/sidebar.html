@@ -1,12 +1,12 @@
 <aside
     {# The z-index is used to prevent the search input overlapping with the sidebar #}
-    class="lg:qf-fixed qf-z-20 qf-right-0 qf-top-1/4
-    max-lg:qf-bg-grey-1000-50-hover
-    max-lg:qf-pt-4w max-lg:qf-px-15w max-md:qf-px-2w"
+    class="qf:lg:fixed qf:z-20 qf:right-0 qf:top-1/4
+    qf:max-lg:bg-grey-1000-50-hover
+    qf:max-lg:pt-4w qf:max-lg:px-15w qf:max-md:px-2w"
 >
     <nav
-        class="qf-flex lg:qf-flex-col qf-gap-3w
-        qf-flex-row max-lg:qf-justify-between"
+        class="qf:flex qf:lg:flex-col qf:gap-3w
+        qf:flex-row qf:max-lg:justify-between"
     >
         {% include "./embed/action.html" %}
         {% include "./share/action.html" %}
