@@ -62,7 +62,7 @@ class RevisionActeurLabelQualiteInline(admin.StackedInline):
     extra = 0
 
 
-class DisplayedActeurLabelQualiteInline(NotEditableInlineMixin, admin.StackedInline):
+class DisplayedActeurLabelQualiteInline(NotMutableMixin, admin.StackedInline):
     model = DisplayedActeur.labels.through
     extra = 0
 
@@ -293,6 +293,7 @@ class RevisionActeurChildInline(NotMutableMixin, admin.TabularInline):
     readonly_fields = ["view_link", "statut"]
     can_delete = False
     extra = 0
+    child_url_namespace = "admin:qfdmo_revisionacteur_change"
 
     def view_link(self, obj):
         if obj.identifiant_unique:
@@ -300,13 +301,18 @@ class RevisionActeurChildInline(NotMutableMixin, admin.TabularInline):
                 '<a href="{}">{} ({})</a>',
                 # Comme dans le code de django : https://github.com/django/django/blob/6cfe00ee438111af38f1e414bd01976e23b39715/django/contrib/admin/models.py#L243
                 reverse(
-                    "admin:qfdmo_revisionacteur_change",
+                    self.child_url_namespace,
                     args=[quote(obj.identifiant_unique)],
                 ),
                 obj.nom,
                 obj.identifiant_unique,
             )
         return None
+
+
+class ToutActeurChildInline(RevisionActeurChildInline):
+    model = ToutActeur
+    child_url_namespace = "admin:qfdmo_toutacteur_change"
 
 
 class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin):
@@ -781,22 +787,30 @@ class CodeLibelleModelAdmin(admin.ModelAdmin):
         return []
 
 
-class ToutPropositionServiceInline(
-    NotEditableInlineMixin, BasePropositionServiceInline
-):
+class ToutPropositionServiceInline(NotMutableMixin, BasePropositionServiceInline):
     model = ToutPropositionService
 
 
-class ToutActeurLabelQualiteInline(NotEditableInlineMixin, admin.StackedInline):
+class ToutActeurLabelQualiteInline(NotMutableMixin, admin.StackedInline):
     model = ToutActeur.labels.through
     extra = 0
 
 
-class ToutActeurAdmin(NotEditableInlineMixin, BaseActeurAdmin):
+class ToutActeurAdmin(NotMutableMixin, BaseActeurAdmin):
     inlines = [
         ToutPropositionServiceInline,
         ToutActeurLabelQualiteInline,
     ]
+    fields = list(BaseActeurAdmin.fields) + ["parent"]
+
+    def get_inline_instances(self, request, revision_acteur=None):
+        inlines = []
+        if revision_acteur and revision_acteur.is_parent:
+            inlines.append(ToutActeurChildInline(self.model, self.admin_site))
+        else:
+            inlines.append(ToutPropositionServiceInline(self.model, self.admin_site))
+            inlines.append(ToutActeurLabelQualiteInline(self.model, self.admin_site))
+        return inlines
 
 
 admin.site.register(Acteur, ActeurAdmin)
