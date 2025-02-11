@@ -10,7 +10,7 @@ module.exports = {
     "./**/forms.py",
     "./dsfr_hacks/used_icons.js",
   ],
-  prefix: "qf-",
+  prefix: "qf",
   corePlugins: {
     preflight: false,
   },
@@ -19,9 +19,9 @@ module.exports = {
     "sm:qf-min-w-[600px]",
     "sm:qf-w-[250px]",
     "sm:qf-w-[400px]",
-    "qf-scale-115",
+    "qf:scale-115",
     {
-      pattern: new RegExp(`qf-(border|bg)-(${usedColors.join("|")})`),
+      pattern: new RegExp(`qf:(border|bg)-(${usedColors.join("|")})`),
     },
   ],
   theme: {
