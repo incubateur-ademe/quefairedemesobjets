@@ -160,9 +160,9 @@ with DAG(
             {"remove": "point_dapport_pour_reemploi"},
             {"remove": "point_de_reparation"},
             {"remove": "perimetre_dintervention"},
+            {"remove": "service_a_domicile"},
             # 6. Colonnes à garder (rien à faire, utilisé pour le controle)
             {"keep": "adresse_complement"},
-            {"keep": "service_a_domicile"},
         ],
         "endpoint": (
             "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
