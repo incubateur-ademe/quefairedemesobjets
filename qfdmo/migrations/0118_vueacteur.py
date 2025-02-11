@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name="ToutActeur",
+            name="VueActeur",
             fields=[
                 (
                     "cree_le",
@@ -143,7 +143,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name="ToutPropositionService",
+            name="VuePropositionService",
             fields=[
                 ("id", models.AutoField(primary_key=True, serialize=False)),
             ],

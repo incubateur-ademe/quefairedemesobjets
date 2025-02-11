@@ -9,7 +9,7 @@ import qfdmo.models.acteur
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("qfdmo", "0119_toutacteur_views"),
+        ("qfdmo", "0119_vueacteur_views"),
     ]
 
     operations = [

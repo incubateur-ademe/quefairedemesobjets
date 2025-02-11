@@ -36,8 +36,8 @@ from qfdmo.models.acteur import (
     DisplayedActeur,
     DisplayedPropositionService,
     LabelQualite,
-    ToutActeur,
-    ToutPropositionService,
+    VueActeur,
+    VuePropositionService,
 )
 from qfdmo.models.categorie_objet import CategorieObjet
 from qfdmo.widgets import CustomOSMWidget
@@ -293,7 +293,7 @@ class RevisionActeurChildInline(NotMutableMixin, admin.TabularInline):
     readonly_fields = ["view_link", "statut"]
     can_delete = False
     extra = 0
-    child_url_namespace = "admin:qfdmo_revisionacteur_change"
+    change_form_url = "admin:qfdmo_revisionacteur_change"
 
     def view_link(self, obj):
         if obj.identifiant_unique:
@@ -301,7 +301,7 @@ class RevisionActeurChildInline(NotMutableMixin, admin.TabularInline):
                 '<a href="{}">{} ({})</a>',
                 # Comme dans le code de django : https://github.com/django/django/blob/6cfe00ee438111af38f1e414bd01976e23b39715/django/contrib/admin/models.py#L243
                 reverse(
-                    self.child_url_namespace,
+                    self.change_form_url,
                     args=[quote(obj.identifiant_unique)],
                 ),
                 obj.nom,
@@ -310,9 +310,9 @@ class RevisionActeurChildInline(NotMutableMixin, admin.TabularInline):
         return None
 
 
-class ToutActeurChildInline(RevisionActeurChildInline):
-    model = ToutActeur
-    child_url_namespace = "admin:qfdmo_toutacteur_change"
+class VueActeurChildInline(RevisionActeurChildInline):
+    model = VueActeur
+    change_form_url = "admin:qfdmo_vueacteur_change"
 
 
 class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin):
@@ -327,17 +327,13 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
         return super().changeform_view(request, object_id, form_url, extra_context)
 
     def get_inline_instances(self, request, revision_acteur=None):
-        inlines = []
         if revision_acteur and revision_acteur.is_parent:
-            inlines.append(RevisionActeurChildInline(self.model, self.admin_site))
+            return [RevisionActeurChildInline(self.model, self.admin_site)]
         else:
-            inlines.append(
-                RevisionPropositionServiceInline(self.model, self.admin_site)
-            )
-            inlines.append(
-                RevisionActeurLabelQualiteInline(self.model, self.admin_site)
-            )
-        return inlines
+            return [
+                RevisionPropositionServiceInline(self.model, self.admin_site),
+                RevisionActeurLabelQualiteInline(self.model, self.admin_site),
+            ]
 
     exclude = ["id"]
     resource_classes = [RevisionActeurResource]
@@ -787,30 +783,30 @@ class CodeLibelleModelAdmin(admin.ModelAdmin):
         return []
 
 
-class ToutPropositionServiceInline(NotMutableMixin, BasePropositionServiceInline):
-    model = ToutPropositionService
+class VuePropositionServiceInline(NotMutableMixin, BasePropositionServiceInline):
+    model = VuePropositionService
 
 
-class ToutActeurLabelQualiteInline(NotMutableMixin, admin.StackedInline):
-    model = ToutActeur.labels.through
+class VueActeurLabelQualiteInline(NotMutableMixin, admin.StackedInline):
+    model = VueActeur.labels.through
     extra = 0
 
 
-class ToutActeurAdmin(NotMutableMixin, BaseActeurAdmin):
+class VueActeurAdmin(NotMutableMixin, BaseActeurAdmin):
     inlines = [
-        ToutPropositionServiceInline,
-        ToutActeurLabelQualiteInline,
+        VuePropositionServiceInline,
+        VueActeurLabelQualiteInline,
     ]
     fields = list(BaseActeurAdmin.fields) + ["parent"]
 
-    def get_inline_instances(self, request, revision_acteur=None):
-        inlines = []
-        if revision_acteur and revision_acteur.is_parent:
-            inlines.append(ToutActeurChildInline(self.model, self.admin_site))
+    def get_inline_instances(self, request, vue_acteur=None):
+        if vue_acteur and vue_acteur.is_parent:
+            return [VueActeurChildInline(self.model, self.admin_site)]
         else:
-            inlines.append(ToutPropositionServiceInline(self.model, self.admin_site))
-            inlines.append(ToutActeurLabelQualiteInline(self.model, self.admin_site))
-        return inlines
+            return [
+                VuePropositionServiceInline(self.model, self.admin_site),
+                VueActeurLabelQualiteInline(self.model, self.admin_site),
+            ]
 
 
 admin.site.register(Acteur, ActeurAdmin)
@@ -822,4 +818,4 @@ admin.site.register(RevisionActeur, RevisionActeurAdmin)
 admin.site.register(RevisionPropositionService, RevisionPropositionServiceAdmin)
 admin.site.register(Source, CodeLibelleModelAdmin)
 admin.site.register(LabelQualite, CodeLibelleModelAdmin)
-admin.site.register(ToutActeur, ToutActeurAdmin)
+admin.site.register(VueActeur, VueActeurAdmin)

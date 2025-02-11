@@ -809,7 +809,7 @@ Model to display all acteurs in admin
 """
 
 
-class ToutActeur(WithParentActeurMixin, BaseActeur):
+class VueActeur(WithParentActeurMixin, BaseActeur):
     class Meta:
         managed = False
         verbose_name = "Vue sur l'acteur"
@@ -1059,7 +1059,7 @@ class RevisionPropositionService(BasePropositionService):
         return f"{self.acteur} - {super().__str__()}"
 
 
-class ToutPropositionService(BasePropositionService):
+class VuePropositionService(BasePropositionService):
     class Meta:
         verbose_name = "Vue sur la proposition de service"
         verbose_name_plural = "Vue sur toutes les propositions de service"
@@ -1068,7 +1068,7 @@ class ToutPropositionService(BasePropositionService):
     id = models.CharField(primary_key=True)
 
     acteur = models.ForeignKey(
-        ToutActeur,
+        VueActeur,
         on_delete=models.CASCADE,
         null=False,
         related_name="proposition_services",

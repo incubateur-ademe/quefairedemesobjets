@@ -6,15 +6,15 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("qfdmo", "0118_toutacteur"),
+        ("qfdmo", "0118_vueacteur"),
     ]
 
     operations = [
         migrations.RunSQL(
             """
-DROP VIEW IF EXISTS qfdmo_toutacteur;
+DROP VIEW IF EXISTS qfdmo_vueacteur;
 
-CREATE VIEW qfdmo_toutacteur AS (
+CREATE VIEW qfdmo_vueacteur AS (
     SELECT
         COALESCE(ra.identifiant_unique, a.identifiant_unique) AS identifiant_unique,
         COALESCE(ra.nom, a.nom) AS nom,
@@ -53,15 +53,15 @@ CREATE VIEW qfdmo_toutacteur AS (
 );
 """,
             reverse_sql="""
-DROP VIEW IF EXISTS qfdmo_toutacteur;
+DROP VIEW IF EXISTS qfdmo_vueacteur;
 """,
         ),
         migrations.RunSQL(
             """
-DROP VIEW IF EXISTS qfdmo_toutacteur_labels;
+DROP VIEW IF EXISTS qfdmo_vueacteur_labels;
 
 -- Créer la vue
-CREATE VIEW qfdmo_toutacteur_labels AS (
+CREATE VIEW qfdmo_vueacteur_labels AS (
     SELECT
         CASE
             WHEN ra.identifiant_unique IS NULL THEN al.id
@@ -70,15 +70,15 @@ CREATE VIEW qfdmo_toutacteur_labels AS (
         CASE
             WHEN ra.identifiant_unique IS NOT NULL THEN ral.revisionacteur_id
             ELSE al.acteur_id
-        END AS toutacteur_id,
+        END AS vueacteur_id,
         CASE
             WHEN ra.identifiant_unique IS NOT NULL THEN ral.labelqualite_id
             ELSE al.labelqualite_id
         END AS labelqualite_id
     FROM qfdmo_acteur_labels AS al
-    LEFT JOIN qfdmo_revisionacteur_labels AS ral
-        ON al.acteur_id = ral.revisionacteur_id --was FULL JOIN
-    LEFT JOIN qfdmo_revisionacteur AS ra ON al.acteur_id = ra.identifiant_unique
+    FULL JOIN qfdmo_revisionacteur_labels AS ral
+        ON al.acteur_id = ral.revisionacteur_id
+    LEFT JOIN qfdmo_revisionacteur AS ra ON ral.revisionacteur_id = ra.identifiant_unique
     WHERE CASE
             WHEN ra.identifiant_unique IS NULL THEN al.id
             ELSE ral.id
@@ -86,14 +86,14 @@ CREATE VIEW qfdmo_toutacteur_labels AS (
 );
 """,
             reverse_sql="""
-DROP VIEW IF EXISTS qfdmo_toutacteur_labels;
+DROP VIEW IF EXISTS qfdmo_vueacteur_labels;
 """,
         ),
         migrations.RunSQL(
             """
-DROP VIEW IF EXISTS qfdmo_toutacteur_acteur_services;
+DROP VIEW IF EXISTS qfdmo_vueacteur_acteur_services;
 
-CREATE VIEW qfdmo_toutacteur_acteur_services AS (
+CREATE VIEW qfdmo_vueacteur_acteur_services AS (
     SELECT
         CASE
             WHEN ra.identifiant_unique IS NULL THEN aas.id
@@ -102,15 +102,15 @@ CREATE VIEW qfdmo_toutacteur_acteur_services AS (
         CASE
             WHEN ra.identifiant_unique IS NOT NULL THEN raas.revisionacteur_id
             ELSE aas.acteur_id
-        END AS toutacteur_id,
+        END AS vueacteur_id,
         CASE
             WHEN ra.identifiant_unique IS NOT NULL THEN raas.acteurservice_id
             ELSE aas.acteurservice_id
         END AS acteurservice_id
     FROM qfdmo_acteur_acteur_services AS aas
-    LEFT JOIN qfdmo_revisionacteur_acteur_services AS raas
-        ON aas.acteur_id = raas.revisionacteur_id --was FULL JOIN
-    LEFT JOIN qfdmo_revisionacteur AS ra ON aas.acteur_id = ra.identifiant_unique
+    FULL JOIN qfdmo_revisionacteur_acteur_services AS raas
+        ON aas.acteur_id = raas.revisionacteur_id
+    LEFT JOIN qfdmo_revisionacteur AS ra ON raas.revisionacteur_id = ra.identifiant_unique
     WHERE CASE
             WHEN ra.identifiant_unique IS NULL THEN aas.id
             ELSE raas.id
@@ -118,15 +118,15 @@ CREATE VIEW qfdmo_toutacteur_acteur_services AS (
 );
 """,
             reverse_sql="""
-DROP VIEW IF EXISTS qfdmo_toutacteur_acteur_services;
+DROP VIEW IF EXISTS qfdmo_vueacteur_acteur_services;
 """,
         ),
         migrations.RunSQL(
             """
-DROP VIEW IF EXISTS qfdmo_toutpropositionservice;
+DROP VIEW IF EXISTS qfdmo_vuepropositionservice;
 
 -- Créer la vue
-CREATE VIEW qfdmo_toutpropositionservice AS (
+CREATE VIEW qfdmo_vuepropositionservice AS (
     SELECT
         CASE
             WHEN ra.identifiant_unique IS NULL THEN CONCAT('PS_', ps.id::text)
@@ -149,9 +149,9 @@ CREATE VIEW qfdmo_toutpropositionservice AS (
             ELSE true
         END AS est_revision
     FROM qfdmo_propositionservice AS ps
-    LEFT JOIN qfdmo_revisionpropositionservice AS rps
-        ON ps.acteur_id = rps.acteur_id --was FULL JOIN
-    LEFT JOIN qfdmo_revisionacteur AS ra ON ps.acteur_id = ra.identifiant_unique
+    FULL JOIN qfdmo_revisionpropositionservice AS rps
+        ON ps.acteur_id = rps.acteur_id
+    LEFT JOIN qfdmo_revisionacteur AS ra ON rps.acteur_id = ra.identifiant_unique
     WHERE CASE
             WHEN ra.identifiant_unique IS NULL THEN ps.id
             ELSE rps.id
@@ -159,28 +159,24 @@ CREATE VIEW qfdmo_toutpropositionservice AS (
 );
 """,
             reverse_sql="""
-DROP VIEW IF EXISTS qfdmo_toutpropositionservice;
+DROP VIEW IF EXISTS qfdmo_vuepropositionservice;
 """,
         ),
         migrations.RunSQL(
             """
-DROP VIEW IF EXISTS qfdmo_toutpropositionservice_sous_categories;
+DROP VIEW IF EXISTS qfdmo_vuepropositionservice_sous_categories;
 
 -- Créer la vue
-CREATE VIEW qfdmo_toutpropositionservice_sous_categories AS (
+CREATE VIEW qfdmo_vuepropositionservice_sous_categories AS (
     SELECT
         CONCAT(tps.id, '_', pssscat.id::text, '_', pssscat.id::text) AS id,
-        CASE
-            WHEN tps.est_revision IS TRUE
-            THEN CONCAT('RPS_', rpssscat.revisionpropositionservice_id::text)
-            ELSE CONCAT('PS_', pssscat.propositionservice_id::text)
-        END AS toutpropositionservice_id,
+        tps.id AS vuepropositionservice_id,
         CASE
             WHEN tps.est_revision IS TRUE
             THEN rpssscat.souscategorieobjet_id
             ELSE pssscat.souscategorieobjet_id
         END AS souscategorieobjet_id
-    FROM qfdmo_toutpropositionservice AS tps
+    FROM qfdmo_vuepropositionservice AS tps
     LEFT JOIN qfdmo_propositionservice_sous_categories AS pssscat
         ON tps.ext_id = pssscat.propositionservice_id AND tps.est_revision = false
     LEFT JOIN qfdmo_revisionpropositionservice_sous_categories AS rpssscat
@@ -189,7 +185,7 @@ CREATE VIEW qfdmo_toutpropositionservice_sous_categories AS (
 );
 """,
             reverse_sql="""
-DROP VIEW IF EXISTS qfdmo_toutpropositionservice_sous_categories;
+DROP VIEW IF EXISTS qfdmo_vuepropositionservice_sous_categories;
 """,
         ),
     ]
