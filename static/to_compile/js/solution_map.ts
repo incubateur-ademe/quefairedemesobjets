@@ -72,7 +72,7 @@ export class SolutionMap {
     const background = acteur?.reparer ? pinBackgroundFillSvg : pinBackgroundSvg
     const cornerIcon = acteur?.bonus ? bonusIconSvg : ""
     const icon = acteur?.icon || "fr-icon-checkbox-circle-line"
-    const markerIconClasses = `qf:absolute qf:top-10 qf:left-[10.5] qf-margin-auto
+    const markerIconClasses = `qf:absolute qf:top-10 qf:left-[10.5] qf:margin-auto
       ${icon} ${acteur?.reparer ? "qf:text-white" : ""}
     `
     const htmlTree = [
