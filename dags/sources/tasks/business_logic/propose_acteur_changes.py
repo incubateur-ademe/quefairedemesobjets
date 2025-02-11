@@ -37,6 +37,6 @@ def propose_acteur_changes(
 
     df_acteur = df_acteur.drop_duplicates(subset="identifiant_unique", keep="first")
     return {
-        "df": df_acteur,
+        "df_acteur": df_acteur,
         "metadata": metadata,
     }

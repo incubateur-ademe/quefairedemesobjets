@@ -13,8 +13,10 @@ def propose_acteur_changes_task(dag: DAG) -> PythonOperator:
 
 
 def propose_acteur_changes_wrapper(**kwargs):
-    df_acteur = kwargs["ti"].xcom_pull(task_ids="source_data_normalize")
-    df_acteur_from_db = kwargs["ti"].xcom_pull(task_ids="db_read_acteur")
+    df_acteur = kwargs["ti"].xcom_pull(task_ids="keep_acteur_changed")["df_acteur"]
+    df_acteur_from_db = kwargs["ti"].xcom_pull(task_ids="keep_acteur_changed")[
+        "df_acteur_from_db"
+    ]
 
     log.preview("df (source_data_normalize)", df_acteur)
     log.preview("df_acteurs", df_acteur_from_db)

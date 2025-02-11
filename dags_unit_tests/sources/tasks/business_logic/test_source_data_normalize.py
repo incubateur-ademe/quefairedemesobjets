@@ -178,52 +178,96 @@ class TestSourceDataNormalize:
         assert "Le dataframe n'a pas les colonnes attendues" in str(erreur.value)
         assert "col_make_it_raise" in str(erreur.value)
 
-    # @pytest.mark.parametrize(
-    #     "statut, statut_expected",
-    #     [
-    #         (None, "ACTIF"),
-    #         ("fake", "ACTIF"),
-    #         (np.nan, "ACTIF"),
-    #         (0, "SUPPRIME"),
-    #         (1, "ACTIF"),
-    #         ("ACTIF", "ACTIF"),
-    #         ("INACTIF", "INACTIF"),
-    #         ("SUPPRIME", "SUPPRIME"),
-    #     ],
-    # )
-    # def test_statut(self, statut, statut_expected, source_data_normalize_kwargs):
-    #     source_data_normalize_kwargs["df_acteur_from_source"] = pd.DataFrame(
-    #         {
-    #             "identifiant_externe": ["1"],
-    #             "ecoorganisme": ["source1"],
-    #             "source_id": ["source_id1"],
-    #             "acteur_type_id": ["decheterie"],
-    #             "produitsdechets_acceptes": ["Plastic Box"],
-    #             "statut": [statut],
-    #         }
-    #     )
-    #     df = source_data_normalize(**source_data_normalize_kwargs)
-
-    #     assert df["statut"].iloc[0] == statut_expected
-
-    @pytest.mark.parametrize(
-        "public_accueilli",
-        [
-            "PROFESSIONNELS",
-            "Professionnels",
-        ],
-    )
     def test_public_accueilli_filtre_pro(
         self,
-        public_accueilli,
         dag_config,
     ):
-        with pytest.raises(ValueError):
-            source_data_normalize(
-                dag_config=dag_config,
-                df_acteur_from_source=pd.DataFrame({"identifiant_externe": ["1"]}),
-                dag_id="id",
-            )
+        dag_config = DAGConfig.model_validate(
+            {
+                "normalization_rules": [
+                    {
+                        "keep": "identifiant_unique",
+                    },
+                    {
+                        "keep": "public_accueilli",
+                    },
+                ],
+                "endpoint": "https://example.com/api",
+                "product_mapping": {"product1": "code1"},
+            }
+        )
+        df = source_data_normalize(
+            dag_config=dag_config,
+            df_acteur_from_source=pd.DataFrame(
+                {
+                    "identifiant_unique": ["1", "2"],
+                    "public_accueilli": ["Professionnels", "Other"],
+                }
+            ),
+            dag_id="id",
+        )
+        pd.testing.assert_frame_equal(
+            df.reset_index(drop=True),
+            pd.DataFrame(
+                {
+                    "identifiant_unique": ["2"],
+                    "public_accueilli": ["Other"],
+                }
+            ).reset_index(drop=True),
+        )
+
+    # TODO : ajout des valeurs avec parametrize
+    @pytest.mark.parametrize(
+        "null_value",
+        [
+            "Null",
+            "null",
+            "NULL",
+            "None",
+            "none",
+            "NONE",
+            "nan",
+            "NAN",
+            "NaN",
+            "na",
+            "n/a",
+            "non applicable",
+            "NON APPLICABLE",
+        ],
+    )
+    def test_remove_explicit_null(self, null_value):
+        dag_config = DAGConfig.model_validate(
+            {
+                "normalization_rules": [
+                    {"keep": "identifiant_unique"},
+                    {"keep": "nom"},
+                    {"keep": "liste"},
+                ],
+                "endpoint": "https://example.com/api",
+                "product_mapping": {"product1": "code1"},
+            }
+        )
+        df = source_data_normalize(
+            dag_config=dag_config,
+            df_acteur_from_source=pd.DataFrame(
+                {
+                    "identifiant_unique": ["1", "2"],
+                    "nom": ["fake nom", null_value],
+                    "liste": [["fake nom"], ["fake nom", null_value]],
+                }
+            ),
+            dag_id="id",
+        )
+        pd.testing.assert_frame_equal(
+            df.reset_index(drop=True),
+            pd.DataFrame(
+                {
+                    "identifiant_unique": ["1", "2"],
+                    "nom": ["fake nom", ""],
+                    "liste": [["fake nom"], ["fake nom"]],
+                }
+            ).reset_index(drop=True),
+        )
 
 
 class TestDfNormalizePharmacie:

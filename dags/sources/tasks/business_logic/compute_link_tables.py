@@ -1,3 +1,8 @@
+"""
+DEPRECATED, link tables aren't used anymore
+we are using codes instead of ids when ingest suggestion data
+"""
+
 import pandas as pd
 
 
@@ -11,8 +16,12 @@ def compute_link_tables(
     acteurtype_id_by_code: dict,
 ) -> pd.DataFrame:
 
-    # FIXME: ajout du controle de la présence des colonnes dand l'action validate data
-    # (après la normalisation)
+    if df_acteur.empty:
+        # ajout de la colonne proposition_services
+        df_acteur["acteur_services"] = None
+        df_acteur["labels"] = None
+        df_acteur["proposition_services"] = None
+        return df_acteur
 
     # Compute qfdmo_acteur_acteurservice
     df_acteur["acteur_services"] = df_acteur.apply(

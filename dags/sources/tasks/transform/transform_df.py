@@ -31,6 +31,7 @@ MANDATORY_COLUMNS_AFTER_NORMALISATION = [
     "source_code",
     "acteur_type_code",
 ]
+REGEX_BAN_SEPARATORS = r"\s,;"
 
 
 def merge_duplicates(
@@ -333,10 +334,11 @@ def _address_details_extract(
     """Extrait les détails de l'adresse, y compris le code postal et la ville."""
     address = postal_code = city = None
 
-    # Pattern pour capturer les codes postaux et les noms de ville optionnels
-    pattern1 = re.compile(r"(.*)\s+(\d{4,5})\s*(.*)")
+    pattern1 = re.compile(
+        rf"(.*)[{REGEX_BAN_SEPARATORS}]+(\d{{4,5}})[{REGEX_BAN_SEPARATORS}]*(.*)"
+    )
     # Pattern pour capturer les codes postaux sans adresse
-    pattern2 = re.compile(r"(\d{4,5})\s*(.*)")
+    pattern2 = re.compile(rf"(\d{{4,5}})[{REGEX_BAN_SEPARATORS}]*(.*)")
     if match := pattern1.search(address_str):
         address = match.group(1).strip() if match.group(1) else None
         postal_code = match.group(2).strip() if match.group(2) else None

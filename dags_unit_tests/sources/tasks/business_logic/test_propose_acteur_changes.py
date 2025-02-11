@@ -62,7 +62,7 @@ class TestProposeActeurChangesCreeLe:
             df_acteur=df_data_from_api,
             df_acteur_from_db=df_acteur,
         )
-        df_result = result["df"]
+        df_result = result["df_acteur"]
 
         assert "cree_le" in df_result.columns
         assert df_result["cree_le"].notnull().all()

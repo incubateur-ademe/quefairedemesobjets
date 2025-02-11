@@ -155,7 +155,8 @@
     "gem hors froid": [
       "gros electromenager (hors refrigerant)",
       "ABJ_electrique",
-      "JELS_Mobilite_electrique"
+      "JELS_Mobilite_electrique",
+      "materiel informatique"
     ],
     "huisseries": "Huisseries (produits et matériaux de construction du bâtiment)",
     "jeux et jouets": "jouet",
@@ -173,7 +174,6 @@
     "pae (petits appareils extincteurs)": "Petits appareils extincteurs",
     "pam (petits appareils ménagers)": [
       "petit electromenager",
-      "materiel informatique",
       "materiel hifi et video",
       "materiel photo et cinema",
       "autre equipement electronique",

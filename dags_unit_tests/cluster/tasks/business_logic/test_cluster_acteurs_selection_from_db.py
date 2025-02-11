@@ -124,7 +124,7 @@ class TestClusterActeursDbDataReadActeurs:
             adresse="1 rue de la paix",
         )
         # adresse redondante avec le nom
-        # et nom_sans_adresse_et_complement dans
+        # et nom_sans_combine_adresses dans
         # include_if_all_fields_filled
         ActeurFactory(
             source=s1,
@@ -160,7 +160,7 @@ class TestClusterActeursDbDataReadActeurs:
                 "nom",
                 "ville",
                 "code_postal",
-                "nom_sans_adresse_et_complement",
+                "nom_sans_combine_adresses",
             ],
             exclude_if_any_field_filled=["siret", "numero_et_complement_de_rue"],
             extra_dataframe_fields=["longitude", "latitude"],

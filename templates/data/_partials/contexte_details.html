@@ -1,0 +1,29 @@
+{% load custom_filters %}
+
+<p>
+    {% if identifiant_unique %}
+        <a href="{% url 'admin:qfdmo_acteur_change' identifiant_unique|quote %}" target="_blank" rel="noreferrer">
+
+            {% if contexte.nom %}
+                {{ contexte.nom }} ({{ identifiant_unique }})
+            {% else %}
+                {{ identifiant_unique }}
+            {% endif %}
+        </a>
+    {% endif %}
+    {% if identifiant_uniques %}
+        <ul>
+            {% for identifiant in identifiant_uniques %}
+                <li><a href="{% url 'admin:qfdmo_acteur_change' identifiant|quote %}" target="_blank" rel="noreferrer">{{ identifiant }}</a></li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</p>
+{% if contexte %}
+    <details>
+        <summary>Details</summary>
+        {% include "data/_partials/value_details.html" with value=contexte %}
+    </details>
+{% else %}
+    -
+{% endif %}

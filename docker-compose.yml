@@ -55,6 +55,8 @@ services:
       POSTGRES_DB: airflow
     volumes:
       - ./airflow-pgdata:/var/lib/postgresql/data
+    ports:
+      - 7654:5432
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "airflow"]
       interval: 10s
@@ -76,7 +78,7 @@ services:
       context: .
       dockerfile: airflow-webserver.Dockerfile
     ports:
-      - "8001:8080"
+      - "8080:8080"
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
       interval: 30s

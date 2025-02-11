@@ -3,5 +3,5 @@
 ```{toctree}
 :hidden:
 
-101-push-to-prod
+prod/mise-en-prod.md
 ```

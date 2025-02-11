@@ -47,6 +47,7 @@ jobs:
       - uses: 47ng/actions-clever-cloud@v2.0.0
         with:
           alias: lvao-prod-airflow-webserver
+          force: true
         env:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
@@ -63,6 +64,7 @@ jobs:
       - uses: 47ng/actions-clever-cloud@v2.0.0
         with:
           alias: lvao-prod-airflow-scheduler
+          force: true
         env:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
