@@ -36,22 +36,25 @@
       "@type": "QAPage",
       "mainEntity": {
         "@type": "Question",
-        "name": "Que faire de mon {{ object.nom|capfirst }} ?",
+        "name": "{{ object.nom|capfirst }}",
+        "text": "Que faire de mon {{ object.nom|capfirst }} ?",
         "answerCount": 2,
         "datePublished": "2025-02-02T15:34-05:00",
       "url": "{{ request.build_absolute_uri }}",
         "author": {
           "@type": "Organization",
-          "name": "ADEME"
+          "name": "ADEME",
+        "url": "https://www.ademe.fr/"
         },
         "acceptedAnswer": {
           "@type": "Answer",
-            "text": "{{ object.qu_est_ce_que_j_en_fais|striptags }}",
+          "text": "Je le répare pardi !",
           "url": "{{ request.build_absolute_uri }}",
           "datePublished": "2024-02-14T16:34-05:00",
             "author": {
-              "@type": "Organization",
-              "name": "ADEME"
+          "@type": "Organization",
+          "name": "ADEME",
+        "url": "https://www.ademe.fr/"
             }
         },
         "suggestedAnswer": [
@@ -61,8 +64,10 @@
             "url": "{{ request.build_absolute_uri }}#bonetat",
             "datePublished": "2024-02-14T15:39-05:00",
             "author": {
-              "@type": "Organization",
-              "name": "ADEME"
+          "@type": "Organization",
+          "name": "ADEME",
+        "url": "https://www.ademe.fr/"
+
             }
           }, {
             "@type": "Answer",
@@ -70,8 +75,9 @@
             "url": "{{ request.build_absolute_uri }}#mauvaisetat",
             "datePublished": "2024-02-14T16:02-05:00",
             "author": {
-              "@type": "Organization",
-              "name": "ADEME"
+          "@type": "Organization",
+          "name": "ADEME",
+        "url": "https://www.ademe.fr/"
             }
           }
         ]
