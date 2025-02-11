@@ -13,38 +13,19 @@ defaults:
 jobs:
   run_tests:
     uses: ./.github/workflows/run_tests.yml
+
   deploy:
     name: Deploy on Scalingo
     needs: [run_tests]
     runs-on: ubuntu-latest
     steps:
-      - uses: mattermost/action-mattermost-notify@master
-        with:
-          MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK_URL }}
-          PAYLOAD: |-
-            {
-              "text": "Nouveau déploiement en cours de l'application Django - [PR #${{ github.event.number }}](https://github.com/incubateur-ademe/quefairedemesobjets/pull/${{ github.event.number }})",
-              "channel": "lvao-tour-de-controle",
-              "username": "Bipboop le robot de seconde main",
-              "icon": "https://cdn3.iconfinder.com/data/icons/system-basic-vol-4-1/20/icon-note-attention-alt3-512.png"
-            }
-      - uses: action/checkout@v4
+      - uses: actions/checkout@v4
       - uses: kolok/deploy-to-scalingo@v1
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
           known-host: ssh.osc-fr1.scalingo.com
           app-name: quefairedemesobjets-preprod
 
-      - uses: mattermost/action-mattermost-notify@master
-        with:
-          MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK_URL }}
-          PAYLOAD: |-
-            {
-              "text": "Le déploiement s'est déroulé avec succès. Il est visible sur https://quefairedemesobjets-preprod.osc-fr1.scalingo.io",
-              "channel": "lvao-tour-de-controle",
-              "username": "Bipboop le robot de seconde main",
-              "icon": "https://cdn3.iconfinder.com/data/icons/system-basic-vol-4-1/20/icon-note-attention-alt3-512.png"
-            }
   deploy_airflow-webserver:
     name: Deploy PREPROD Airflow webserver on Clever Cloud
     needs: [run_tests]
