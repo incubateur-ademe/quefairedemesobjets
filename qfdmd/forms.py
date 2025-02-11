@@ -55,7 +55,7 @@ class ContactForm(DsfrBaseForm):
     subject = forms.ChoiceField(
         label="Votre sujet",
         choices=[
-            ("", ""),
+            ("", "Sélectionner une option"),
             (
                 "integration",
                 "Je souhaite obtenir de l'aide pour intégrer cet outil",
