@@ -587,6 +587,10 @@ def refresh_acteur_view(request):
 
 @require_GET
 def get_object_list(request):
+    q = request.GET.get("q")
+    if not q:
+        return JsonResponse([], safe=False)
+
     query = unidecode.unidecode(request.GET.get("q"))
     objets = (
         Objet.objects.annotate(
