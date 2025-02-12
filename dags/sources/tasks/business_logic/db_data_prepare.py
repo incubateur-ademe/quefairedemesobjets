@@ -13,10 +13,13 @@ def db_data_prepare(
     df_acteur: pd.DataFrame,
     df_acteur_from_db: pd.DataFrame,
 ):
+    # Before apply json.dumps, replace NaN by None
+    df_acteur = df_acteur.replace({np.nan: None})
+    df_acteur_from_db = df_acteur_from_db.replace({np.nan: None})
+
     # Create the "contexte" column which contain a json version of the df_acteur_from_db
     # NaN should be replaced by None to be able to convert the dataframe to db
     # compatible json
-    df_acteur_from_db = df_acteur_from_db.replace({np.nan: None})
     df_acteur_from_db["contexte"] = df_acteur_from_db.apply(
         lambda row: json.dumps(row.to_dict(), default=str), axis=1
     )
@@ -46,7 +49,7 @@ def db_data_prepare(
     # FIXME : à faire avant dans la normalisation des données
     # Inactivate acteur if propositions_services is empty
     df_acteur.loc[
-        df_acteur["proposition_services"].apply(lambda x: x == []), "statut"
+        df_acteur["proposition_services_codes"].apply(lambda x: x == []), "statut"
     ] = "INACTIF"
 
     df_acteur["suggestion"] = df_acteur.apply(
