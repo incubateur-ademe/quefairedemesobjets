@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("qfdmo", "0117_update_empty_url"),
+        ("qfdmo", "0123_revisionacteurparent_alter_revisionacteur_parent"),
     ]
 
     operations = [
