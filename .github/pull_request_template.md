@@ -4,13 +4,13 @@ Carte Notion/Mattermost/Sentry : [Titre](__url__)
 
 **N'oublier pas de taguer** : `bug`, `enhancement`, `documentation`, `technical`, `dependencies`
 
-- **🗺️ contexte**: <!-- Quelle épic / opportinuté est concernée ? -->
+**🗺️ contexte**: <!-- Quelle épic / opportinuté est concernée ? -->
 
-- **💡 quoi**: <!-- description de ce qu'on est en train de changer -->
+**💡 quoi**: <!-- description de ce qu'on est en train de changer -->
 
-- **🎯 pourquoi**: <!-- pourquoi on fait ce changement -->
+**🎯 pourquoi**: <!-- pourquoi on fait ce changement -->
 
-- **🤔 comment**: <!-- Descrire l'ensemble des tâches réalisées (bullet points) -->
+**🤔 comment**: <!-- Descrire l'ensemble des tâches réalisées (bullet points) -->
 
 ## Exemple résultats / UI / Data
 
