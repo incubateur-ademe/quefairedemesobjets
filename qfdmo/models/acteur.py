@@ -680,15 +680,15 @@ class RevisionActeur(WithParentActeurMixin, BaseActeur):
         ActeurType, on_delete=models.CASCADE, blank=True, null=True
     )
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._original_parent = self.parent
-
     @property
     def nombre_enfants(self) -> int:
         """Calcul le nombre d'enfants dont le parent_id
         pointent vers l'identifiant_unique de cet acteur"""
         return parents_cache_get()["nombre_enfants"].get(self.identifiant_unique, 0)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._original_parent = self.parent
 
     def save(self, *args, **kwargs):
         # OPTIMIZE: if we need to validate the main action in the service propositions
