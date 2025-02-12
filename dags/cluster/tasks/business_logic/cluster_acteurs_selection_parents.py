@@ -3,8 +3,6 @@ from shared.tasks.business_logic import normalize
 from utils.django import django_model_queryset_to_df, django_setup_full
 
 django_setup_full()
-from qfdmo.models import ActeurType, DisplayedActeur  # noqa: E402
-from qfdmo.models.acteur import ActeurStatus  # noqa: E402
 
 
 def cluster_acteurs_selection_parents(
@@ -12,6 +10,9 @@ def cluster_acteurs_selection_parents(
     fields: list[str],
     include_only_if_regex_matches_nom: str | None = None,
 ) -> pd.DataFrame:
+    from qfdmo.models import ActeurType, DisplayedActeur
+    from qfdmo.models.acteur import ActeurStatus
+
     """Sélectionne tous les parents des acteurs types donnés,
     pour pouvoir notamment permettre de clusteriser avec
     ces parents existant indépendemment des critères de sélection

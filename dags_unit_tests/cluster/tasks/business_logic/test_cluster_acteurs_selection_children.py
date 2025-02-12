@@ -1,6 +1,8 @@
 import pytest
+from cluster.tasks.business_logic.cluster_acteurs_selection_children import (
+    cluster_acteurs_selection_children,
+)
 
-from dags.cluster.tasks.business_logic import cluster_acteurs_selection_children
 from unit_tests.qfdmo.acteur_factory import RevisionActeurFactory
 
 

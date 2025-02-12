@@ -4,7 +4,9 @@ Fichier de test pour la fonction cluster_acteurs_selection_orphans
 
 import pandas as pd
 import pytest
-from cluster.tasks.business_logic import cluster_acteurs_selection_orphans
+from cluster.tasks.business_logic.cluster_acteurs_selection_orphans import (
+    cluster_acteurs_selection_orphans,
+)
 
 from qfdmo.models import RevisionActeur
 from unit_tests.qfdmo.acteur_factory import (

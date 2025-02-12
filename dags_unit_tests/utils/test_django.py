@@ -9,12 +9,12 @@ from dags.utils.django import (
 )
 
 django_setup_full()
-from qfdmo.models import Acteur  # noqa: E402
 
 
 # Test function
 @pytest.mark.django_db
 def test_django_model_queryset_generate():
+    from qfdmo.models import Acteur
 
     # On vérifie qu'on est capable de sélectionner des champs
     # et des propriétés
@@ -46,6 +46,8 @@ def test_django_model_queryset_generate():
 
 
 def test_django_model_to_pandas_schema():
+    from qfdmo.models import Acteur
+
     schema = django_model_to_pandas_schema(Acteur)
     assert schema["nom"] == "object"
     assert schema["adresse"] == "object"

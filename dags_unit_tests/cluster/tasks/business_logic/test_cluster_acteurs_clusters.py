@@ -73,6 +73,7 @@ class TestClusterActeursClusters:
         )
 
     def test_cols_group_exact(self, df_basic):
+
         df_clusters = cluster_acteurs_clusters(
             df_basic,
             cluster_fields_exact=["ville"],
@@ -168,6 +169,7 @@ class TestClusterActeursClusters:
         )
 
     def test_cols_group_fuzzy_single(self, df_cols_group_fuzzy):
+
         df_clusters = cluster_acteurs_clusters(
             df_cols_group_fuzzy,
             # code_postal est en dur dans la fonction de clustering
@@ -358,6 +360,7 @@ class TestClusterColsGroupFuzzy:
         assert clusters[1]["__index_src"].tolist() == [5, 6]
 
     def test_cols_group_fuzzy_multi_handles_empties(self):
+
         df = pd.DataFrame(
             {
                 "__index_src": range(1, 3),
@@ -377,6 +380,7 @@ class TestClusterColsGroupFuzzy:
 class TestSimilarityMatrixToTuples:
 
     def test_basic(self):
+
         matrix = np.array([[1, 0.8, 0.4], [0.8, 1, 0.9], [0.4, 0.9, 1]])
         expected = [
             (1, 2, 0.9),
@@ -386,6 +390,7 @@ class TestSimilarityMatrixToTuples:
         assert similarity_matrix_to_tuples(matrix) == expected
 
     def test_index_replacements(self):
+
         matrix = np.array([[1, 0.8, 0.4], [0.8, 1, 0.9], [0.4, 0.9, 1]])
         expected = [
             ("b", "c", 0.9),
@@ -423,17 +428,20 @@ class TestScoreTuplesToClusters:
         assert score_tuples_to_clusters(data, threshold) == expected
 
     def test_score_tuples_to_clusters_empty_exception(self):
+
         data = []
         threshold = 0.5
         with pytest.raises(ValueError, match="Liste de tuples d'entrée vide"):
             score_tuples_to_clusters(data, threshold)
 
     def test_score_tuples_to_clusters_no_clusters_below_threshold(self):
+
         data = [(1, 2, 0.3), (3, 4, 0.2)]
         threshold = 0.5
         assert score_tuples_to_clusters(data, threshold) == []
 
     def test_score_tuples_to_clusters_all_in_one_cluster(self):
+
         data = [(1, 2, 0.9), (2, 3, 0.8), (3, 4, 0.7)]
         threshold = 0.5
         expected = [[1, 2, 3, 4]]

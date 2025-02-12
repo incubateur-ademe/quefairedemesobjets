@@ -1,9 +1,6 @@
 import pandas as pd
 import pytest
-
-from dags.cluster.tasks.business_logic.cluster_acteurs_df_sort import (
-    cluster_acteurs_df_sort,
-)
+from cluster.tasks.business_logic.cluster_acteurs_df_sort import cluster_acteurs_df_sort
 
 
 class TestClusterActeursDfSort:

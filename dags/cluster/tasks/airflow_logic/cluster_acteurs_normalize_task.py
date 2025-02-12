@@ -9,8 +9,8 @@ from cluster.tasks.airflow_logic.task_ids import (
     TASK_NORMALIZE,
     TASK_SELECTION,
 )
-from cluster.tasks.business_logic import (
-    cluster_acteurs_df_sort,
+from cluster.tasks.business_logic.cluster_acteurs_df_sort import cluster_acteurs_df_sort
+from cluster.tasks.business_logic.cluster_acteurs_normalize import (
     cluster_acteurs_normalize,
 )
 from utils import logging_utils as log

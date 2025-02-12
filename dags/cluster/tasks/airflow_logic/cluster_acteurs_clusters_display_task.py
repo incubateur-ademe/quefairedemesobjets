@@ -11,10 +11,14 @@ from cluster.tasks.airflow_logic.task_ids import (
     TASK_CONFIG_CREATE,
     TASK_NORMALIZE,
 )
-from cluster.tasks.business_logic import (
+from cluster.tasks.business_logic.cluster_acteurs_add_original_df_columns import (
     cluster_acteurs_add_original_df_columns,
+)
+from cluster.tasks.business_logic.cluster_acteurs_clusters import (
     cluster_acteurs_clusters,
-    cluster_acteurs_df_sort,
+)
+from cluster.tasks.business_logic.cluster_acteurs_df_sort import cluster_acteurs_df_sort
+from cluster.tasks.business_logic.cluster_acteurs_selection_children import (
     cluster_acteurs_selection_children,
 )
 from utils import logging_utils as log
@@ -22,12 +26,6 @@ from utils.django import django_setup_full
 
 django_setup_full()
 
-from data.models.change import (  # noqa: E402
-    COL_ENTITY_TYPE,
-    ENTITY_ACTEUR_DISPLAYED,
-    ENTITY_ACTEUR_REVISION,
-)
-from qfdmo.models import RevisionActeur  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +48,14 @@ def task_info_get():
 
 
 def cluster_acteurs_suggestions_wrapper(**kwargs) -> None:
+
+    from data.models.change import (
+        COL_ENTITY_TYPE,
+        ENTITY_ACTEUR_DISPLAYED,
+        ENTITY_ACTEUR_REVISION,
+    )
+    from qfdmo.models import RevisionActeur
+
     logger.info(task_info_get())
 
     config: ClusterConfig = kwargs["ti"].xcom_pull(
