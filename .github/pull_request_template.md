@@ -1,17 +1,20 @@
 # Description succincte du problème résolu
 
-Carte Notion : [Titre de la carte](https://notion.so/...)
+Carte Notion/Mattermost/Sentry : [Titre](__url__)
 
-Description plus détaillée de l'intention, l'approche ou de l'implémentation (ce qui n’est pas visible directement en lisant le code)
+**N'oublier pas de taguer** : `bug`, `enhancement`, `documentation`, `technical`, `dependencies`
 
-<!-- Cocher la/les case.s appropriée.s -->
-**Type de changement** :
+**🗺️ contexte**: <!-- Quelle épic / opportinuté est concernée ? -->
 
-- [ ] Bug fix
-- [ ] Nouvelle fonctionnalité
-- [ ] Mise à jour de données / DAG
-- [ ] Les changements nécessitent une mise à jour de documentation
-- [ ] Refactoring de code (explication à retrouver dans la description)
+**💡 quoi**: <!-- description de ce qu'on est en train de changer -->
+
+**🎯 pourquoi**: <!-- pourquoi on fait ce changement -->
+
+**🤔 comment**: <!-- Descrire l'ensemble des tâches réalisées (bullet points) -->
+
+## Exemple résultats / UI / Data
+
+![image](__url__)
 
 ## Auto-review
 
@@ -22,25 +25,10 @@ Les trucs à faire avant de demander une review :
 - [ ] En cas d'ajout de variable d'environnement, j'ai bien mis à jour le `.env.template`
 - [ ] J'ai ajouté des tests qui couvrent le nouveau code
 
-## Comment tester
+## ✅ Reste à faire (PR en cours)
 
-En local / staging :
-- …
+- [ ] <!-- Ajouter les tâches qui restent à faire dans cette PR -->
 
-<!--
+## 📆 A faire (prochaine PR)
 
-## Développement local
-
-Dans le cas où il y a des instructions spécifiques pour garantir un local fonctionnel pour le reste de l'équipe
-
-- …
- -->
-
-<!--
-
-## Déploiement
-
- Dans le cas où il y a des instructions spécifiques de déploiement
-
-- …
- -->
+- [ ] <!-- Ajouter les tâches qui devront être faites dans une prochaine PR -->
