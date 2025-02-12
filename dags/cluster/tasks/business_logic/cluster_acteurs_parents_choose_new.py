@@ -6,6 +6,17 @@ import numpy as np
 import pandas as pd
 from utils.django import django_setup_full
 
+from data.models.change import (
+    CHANGE_ACTEUR_CREATE_AS_PARENT,
+    CHANGE_ACTEUR_NOTHING_TO_DO,
+    CHANGE_ACTEUR_PARENT_DELETE,
+    CHANGE_ACTEUR_PARENT_KEEP,
+    CHANGE_ACTEUR_POINT_TO_PARENT,
+    COL_CHANGE_ORDER,
+    COL_CHANGE_REASON,
+    COL_CHANGE_TYPE,
+)
+
 django_setup_full()
 
 logger = getLogger(__name__)
@@ -51,15 +62,6 @@ def cluster_acteurs_one_cluster_changes_mark(
 
     """
     df = df_one_cluster.copy()
-
-    from data.models.change import (  # Validation d'entrée pour faciliter le stop/debug
-        CHANGE_ACTEUR_NOTHING_TO_DO,
-        CHANGE_ACTEUR_PARENT_DELETE,
-        CHANGE_ACTEUR_POINT_TO_PARENT,
-        COL_CHANGE_ORDER,
-        COL_CHANGE_REASON,
-        COL_CHANGE_TYPE,
-    )
 
     parent_index = df[df["identifiant_unique"] == parent_id].index[0]
     if parent_index is None:
