@@ -40,6 +40,7 @@ dag = DAG(
         " services."
     ),
     schedule=None,
+    max_active_runs=1,
 )
 
 load_acteur_task = PythonOperator(
@@ -152,6 +153,7 @@ load_acteur_task >> compute_acteur_task_instance
     load_revisionpropositionservice_task,
     load_propositionservice_sous_categories_task,
     load_revisionpropositionservice_sous_categories_task,
+    load_revisionacteur_task,
 ] >> compute_ps_task_instance
 [
     load_revisionacteur_task,
