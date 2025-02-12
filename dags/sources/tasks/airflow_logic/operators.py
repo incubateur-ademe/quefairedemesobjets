@@ -2,9 +2,6 @@ from datetime import datetime
 
 from airflow import DAG
 from airflow.models.baseoperator import chain
-from sources.tasks.airflow_logic.compute_link_tables_task import (
-    compute_link_tables_task,
-)
 from sources.tasks.airflow_logic.db_data_prepare_task import db_data_prepare_task
 from sources.tasks.airflow_logic.db_read_acteur_task import db_read_acteur_task
 from sources.tasks.airflow_logic.db_write_type_action_suggestions_task import (
@@ -12,9 +9,6 @@ from sources.tasks.airflow_logic.db_write_type_action_suggestions_task import (
 )
 from sources.tasks.airflow_logic.keep_acteur_changed_task import (
     keep_acteur_changed_task,
-)
-from sources.tasks.airflow_logic.propose_acteur_changes_task import (
-    propose_acteur_changes_task,
 )
 from sources.tasks.airflow_logic.source_config_validate_task import (
     source_config_validate_task,
@@ -48,8 +42,6 @@ def eo_task_chain(dag: DAG) -> None:
         source_data_validate_task(dag),
         db_read_acteur_task(dag),
         keep_acteur_changed_task(dag),
-        propose_acteur_changes_task(dag),
-        compute_link_tables_task(dag),
         db_data_prepare_task(dag),
         db_write_type_action_suggestions_task(dag),
     )

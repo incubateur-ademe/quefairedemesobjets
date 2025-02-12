@@ -62,7 +62,6 @@ urlpatterns = [
     path("", direct_access, name="home"),
     path("", include(("qfdmo.urls", "qfdmo"), namespace="qfdmo")),
     path("", include(("qfdmd.urls", "qfdmd"), namespace="qfdmd")),
-    path("data/", include(("data.urls", "data"), namespace="data")),
     path("docs/", TemplateView.as_view(template_name="techdocs.html"), name="techdocs"),
 ]
 
