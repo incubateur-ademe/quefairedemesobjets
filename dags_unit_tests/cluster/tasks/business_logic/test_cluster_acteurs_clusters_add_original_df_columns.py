@@ -1,8 +1,10 @@
 import pandas as pd
-from cluster.tasks.business_logic import cluster_acteurs_add_original_df_columns
+from cluster.tasks.business_logic.cluster_acteurs_add_original_df_columns import (
+    cluster_acteurs_add_original_df_columns,
+)
 
 
-def test_cluster_acteurs_clusters_add_original_df_columns():
+def testcluster_acteurs_clusters_add_original_df_columns():
     df_clusters = pd.DataFrame(
         {
             "identifiant_unique": ["1", "3"],

@@ -1,7 +1,8 @@
 import pandas as pd
 import pytest
-
-from dags.cluster.tasks.business_logic import cluster_acteurs_clusters_validate
+from cluster.tasks.business_logic.cluster_acteurs_clusters_validate import (
+    cluster_acteurs_clusters_validate,
+)
 
 
 class TestClusterActeursSuggestionsValidate:

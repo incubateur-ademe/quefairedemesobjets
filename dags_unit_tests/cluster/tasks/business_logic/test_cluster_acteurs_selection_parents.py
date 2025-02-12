@@ -4,7 +4,9 @@ Fichier de test pour la fonction cluster_acteurs_selection_parents
 
 import pandas as pd
 import pytest
-from cluster.tasks.business_logic import cluster_acteurs_selection_parents
+from cluster.tasks.business_logic.cluster_acteurs_selection_parents import (
+    cluster_acteurs_selection_parents,
+)
 
 from qfdmo.models import DisplayedActeur
 from unit_tests.qfdmo.acteur_factory import ActeurTypeFactory, SourceFactory

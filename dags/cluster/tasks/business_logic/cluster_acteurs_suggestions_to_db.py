@@ -6,25 +6,26 @@ from utils.django import django_setup_full
 
 django_setup_full()
 
-from data.models import (  # noqa: E402
-    Suggestion,
-    SuggestionAction,
-    SuggestionCohorte,
-    SuggestionStatut,
-)
-from data.models.change import (
-    COL_CHANGE_ORDER,
-    COL_CHANGE_REASON,
-    COL_CHANGE_TYPE,
-    COL_ENTITY_TYPE,
-)
-
 
 def cluster_acteurs_suggestions_to_db(
     df_clusters: pd.DataFrame,
     identifiant_action: str,
     identifiant_execution: str,
 ) -> None:
+
+    from data.models import (
+        Suggestion,
+        SuggestionAction,
+        SuggestionCohorte,
+        SuggestionStatut,
+    )
+    from data.models.change import (
+        COL_CHANGE_ORDER,
+        COL_CHANGE_REASON,
+        COL_CHANGE_TYPE,
+        COL_ENTITY_TYPE,
+    )
+
     """Ecriture des suggestions de clusters en base de données
 
     Args:

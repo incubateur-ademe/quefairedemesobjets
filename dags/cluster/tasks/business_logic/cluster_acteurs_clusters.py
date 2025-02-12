@@ -15,7 +15,9 @@ import re
 
 import numpy as np
 import pandas as pd
-from cluster.tasks.business_logic import cluster_acteurs_exclude_intra_source
+from cluster.tasks.business_logic.cluster_acteurs_exclude_intra_source import (
+    cluster_acteurs_exclude_intra_source,
+)
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from slugify import slugify
@@ -250,6 +252,7 @@ def cluster_acteurs_clusters(
     Returns:
         DataFrame de cluster_id -> identifiant_unique
     """
+
     if "__index_src" not in df.columns:
         raise ValueError(
             """La colonne '__index_src' doit être ajoutée à df

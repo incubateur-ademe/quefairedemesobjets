@@ -1,7 +1,8 @@
 import pandas as pd
 import pytest
-
-from dags.cluster.tasks.business_logic import cluster_acteurs_exclude_intra_source
+from cluster.tasks.business_logic.cluster_acteurs_exclude_intra_source import (
+    cluster_acteurs_exclude_intra_source,
+)
 
 ID = "identifiant_unique"
 

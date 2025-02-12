@@ -4,21 +4,9 @@ from logging import getLogger
 
 import numpy as np
 import pandas as pd
-from rich import print
 from utils.django import django_setup_full
 
 django_setup_full()
-
-from data.models.change import (  # noqa: E402
-    CHANGE_ACTEUR_CREATE_AS_PARENT,
-    CHANGE_ACTEUR_NOTHING_TO_DO,
-    CHANGE_ACTEUR_PARENT_DELETE,
-    CHANGE_ACTEUR_PARENT_KEEP,
-    CHANGE_ACTEUR_POINT_TO_PARENT,
-    COL_CHANGE_ORDER,
-    COL_CHANGE_REASON,
-    COL_CHANGE_TYPE,
-)
 
 logger = getLogger(__name__)
 
@@ -64,7 +52,15 @@ def cluster_acteurs_one_cluster_changes_mark(
     """
     df = df_one_cluster.copy()
 
-    # Validation d'entrée pour faciliter le stop/debug
+    from data.models.change import (  # Validation d'entrée pour faciliter le stop/debug
+        CHANGE_ACTEUR_NOTHING_TO_DO,
+        CHANGE_ACTEUR_PARENT_DELETE,
+        CHANGE_ACTEUR_POINT_TO_PARENT,
+        COL_CHANGE_ORDER,
+        COL_CHANGE_REASON,
+        COL_CHANGE_TYPE,
+    )
+
     parent_index = df[df["identifiant_unique"] == parent_id].index[0]
     if parent_index is None:
         raise ValueError(f"Parent non trouvé: {parent_id=}")
@@ -102,6 +98,11 @@ def cluster_acteurs_one_cluster_changes_mark(
 
 def cluster_acteurs_one_cluster_parent_choose(df: pd.DataFrame) -> tuple[str, str, str]:
     """Décide de la sélection du parent sur 1 cluster"""
+
+    from data.models.change import (  # noqa: E402
+        CHANGE_ACTEUR_CREATE_AS_PARENT,
+        CHANGE_ACTEUR_PARENT_KEEP,
+    )
 
     try:
         parents_count = df[df["nombre_enfants"] > 0]["identifiant_unique"].nunique()
@@ -144,7 +145,8 @@ def cluster_acteurs_parents_choose_new(df_clusters: pd.DataFrame) -> pd.DataFram
     """Choisit et assigne les nouveaux parents d'une dataframe
     comprenant 1 ou plusieurs clusters.'"""
 
-    # Pour stocker et reconstruire les nouveaux clusters
+    from data.models.change import CHANGE_ACTEUR_CREATE_AS_PARENT, COL_CHANGE_ORDER
+
     dfs_marked = []
 
     df = df_clusters.copy()

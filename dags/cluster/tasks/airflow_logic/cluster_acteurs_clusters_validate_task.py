@@ -6,7 +6,9 @@ from cluster.tasks.airflow_logic.task_ids import (
     TASK_CLUSTERS_DISPLAY,
     TASK_CLUSTERS_VALIDATE,
 )
-from cluster.tasks.business_logic import cluster_acteurs_clusters_validate
+from cluster.tasks.business_logic.cluster_acteurs_clusters_validate import (
+    cluster_acteurs_clusters_validate,
+)
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)

@@ -3,13 +3,6 @@ from utils.django import django_setup_full
 
 django_setup_full()
 
-from data.models.change import (  # noqa: E402
-    COL_CHANGE_ORDER,
-    COL_CHANGE_REASON,
-    COL_CHANGE_TYPE,
-    COL_ENTITY_TYPE,
-)
-
 
 def cluster_acteurs_df_sort(
     df: pd.DataFrame,
@@ -39,12 +32,13 @@ def cluster_acteurs_df_sort(
         pd.DataFrame: DataFrame triée
     """
 
-    # -----------------------------------------------
-    # Tri des lignes
-    # -----------------------------------------------
-    # On construit une liste de champs de tri
-    # avec des champs par défauts (ex: cluster_id)
-    # et des champs spécifiés dans la config du DAG
+    from data.models.change import (
+        COL_CHANGE_ORDER,
+        COL_CHANGE_REASON,
+        COL_CHANGE_TYPE,
+        COL_ENTITY_TYPE,
+    )
+
     sort_ideal = ["cluster_id", COL_CHANGE_ORDER]  # la base du clustering
 
     # pour déceler des erreurs de clustering rapidement (ex: intra-source)
