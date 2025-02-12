@@ -112,8 +112,8 @@ def cluster_acteurs_suggestions_wrapper(**kwargs) -> None:
     log.preview("parent_ids", parent_ids)
     df_children = cluster_acteurs_selection_children(
         parent_ids=parent_ids,
-        fields_to_include=config.fields_used_meta
-        + config.fields_used_data
+        fields_to_include=config.fields_protected
+        + config.fields_transformed
         + ["parent_id"],
     )
     df_children["cluster_id"] = df_children["parent_id"].map(parent_to_cluster_ids)

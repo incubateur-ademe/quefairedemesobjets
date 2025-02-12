@@ -78,7 +78,7 @@ class TestClusterConfigModel:
         # (sauf field_all) seront rajoutés à la liste
         params_working["normalize_fields_basic"] = None
         config = ClusterConfig(**params_working)
-        expected = config.fields_used_data
+        expected = config.fields_transformed
         diff = set(config.normalize_fields_basic) - set(expected)
         assert not diff, f"Différence: {diff}"
 
@@ -94,27 +94,27 @@ class TestClusterConfigModel:
             "nombre_enfants",
         ]
         for field in fields:
-            assert field in config.fields_used_meta
-            assert field not in config.fields_used_data
+            assert field in config.fields_protected
+            assert field not in config.fields_transformed
 
     def test_fields_meta_no_duplicates(self, params_working):
         # Les champs meta ne doivent pas contenir de doublons
-        params_working["fields_used_meta"] = ["source_id", "source_id"]
+        params_working["fields_protected"] = ["source_id", "source_id"]
         config = ClusterConfig(**params_working)
-        assert len(config.fields_used_meta) == len(set(config.fields_used_meta))
+        assert len(config.fields_protected) == len(set(config.fields_protected))
 
     def test_fields_data_no_duplicates(self, params_working):
         # Les champs data ne doivent pas contenir de doublons
         params_working["normalize_fields_basic"] = ["basic1", "basic1"]
         params_working["normalize_fields_no_words_size1"] = ["basic1", "basic1"]
         config = ClusterConfig(**params_working)
-        assert len(config.fields_used_data) == len(set(config.fields_used_data))
+        assert len(config.fields_transformed) == len(set(config.fields_transformed))
 
     def test_optional_normalize_fields_order_unique_words(self, params_working):
         # Si aucun champ fourni => appliquer à tous les champs data
         params_working["normalize_fields_order_unique_words"] = None
         config = ClusterConfig(**params_working)
-        assert config.normalize_fields_order_unique_words == config.fields_used_data
+        assert config.normalize_fields_order_unique_words == config.fields_transformed
 
     def test_default_dry_run_is_true(self, params_working):
         # On veut forcer l'init du dry_run pour limiter

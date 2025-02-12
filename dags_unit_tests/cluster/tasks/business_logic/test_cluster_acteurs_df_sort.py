@@ -33,7 +33,7 @@ class TestClusterActeursDfSort:
         """
 
         df_sorted = cluster_acteurs_df_sort(df)
-        # L'odre des colonnes n'est pas forcément celui utiliser
+        # L'ordre des colonnes n'est pas forcément celui utiliser
         # pour ordonner les lignes, car pour les lignes on favorise
         # sémantique (ex: ville) alors que pour les colonnes on favorise
         # le debug

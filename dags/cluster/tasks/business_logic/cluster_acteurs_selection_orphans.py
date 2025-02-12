@@ -94,7 +94,7 @@ def cluster_acteurs_selection_orphans(
     # Les champs dont on a besoin pour la logique d'ensemble
     # indépendamment de ce que métier souhaite sélectionner
     # TODO: on devrait pas avoir a définir cette liste ici également,
-    # on devrait utiliser config.fields_used_data comme la fonction de
+    # on devrait utiliser config.fields_transformed comme la fonction de
     # sélection des parents fait déjà (car écrite après & mieux)
     fields = [
         "identifiant_unique",

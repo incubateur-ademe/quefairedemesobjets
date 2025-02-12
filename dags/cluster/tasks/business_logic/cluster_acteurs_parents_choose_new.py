@@ -4,7 +4,6 @@ from logging import getLogger
 
 import numpy as np
 import pandas as pd
-from rich import print
 from utils.django import django_setup_full
 
 django_setup_full()
@@ -190,3 +189,35 @@ def cluster_acteurs_parents_choose_new(df_clusters: pd.DataFrame) -> pd.DataFram
         by=["cluster_id", COL_CHANGE_ORDER, "identifiant_unique"], ascending=True
     )
     return df
+
+
+def clusters_to_parents_get(df_clusters: pd.DataFrame) -> dict[str, str]:
+    """Retrieve the selected parents from given clusters"""
+    df_parents = df_clusters[
+        df_clusters[COL_CHANGE_TYPE].isin(
+            [
+                CHANGE_ACTEUR_PARENT_KEEP,
+                CHANGE_ACTEUR_CREATE_AS_PARENT,
+            ]
+        )
+    ]
+    return df_parents.set_index("cluster_id")["identifiant_unique"].to_dict()
+
+
+def clusters_to_children_and_orphans_get(
+    df_clusters: pd.DataFrame,
+) -> dict[str, list[str]]:
+    """Retrieve the children and orphans from given clusters"""
+    df_acteurs = df_clusters[
+        # To construct a mutually exclusive list more robustly with
+        # clusters_to_parents_get we just take the opposite rule,
+        # since there are only 2 parents conditions (create, keep),
+        # and many more children/orphans conditions, it's easier that way
+        ~df_clusters[COL_CHANGE_TYPE].isin(
+            [
+                CHANGE_ACTEUR_PARENT_KEEP,
+                CHANGE_ACTEUR_CREATE_AS_PARENT,
+            ]
+        )
+    ]
+    return df_acteurs.groupby("cluster_id")["identifiant_unique"].apply(list).to_dict()

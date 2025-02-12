@@ -165,8 +165,8 @@ class TestClusterActeursE2E:
             include_if_all_fields_filled=config.include_if_all_fields_filled,
             exclude_if_any_field_filled=config.exclude_if_any_field_filled,
             include_parents_only_if_regex_matches_nom=config.include_parents_only_if_regex_matches_nom,
-            fields_used_meta=config.fields_used_meta,
-            fields_used_data=config.fields_used_data,
+            fields_protected=config.fields_protected,
+            fields_transformed=config.fields_transformed,
         )
 
         assert sorted(df["nom"].tolist()) == sorted(

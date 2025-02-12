@@ -9,7 +9,7 @@ créer la config finale.
 from pydantic import BaseModel, Field, field_validator, model_validator
 from utils.airflow_params import airflow_params_dropdown_selected_to_ids
 
-FIELDS_USED_META_ALL = [
+FIELDS_PROTECTED_ALL = [
     "source_id",
     "acteur_type_id",
     "identifiant_unique",
@@ -61,12 +61,12 @@ class ClusterConfig(BaseModel):
     # ---------------------------------------
     # On fait la distinction entre les champs meta
     # qu'on ne souhaite pas transformer
-    fields_used_meta: list[str]
+    fields_protected: list[str]
     # Et les champs data qui peuvent être transformés
     # (ex: normalisation). Dans la validation de config
     # on vient enrichir cette liste avec tous les champs
     # sélectionnés par l'utilisateur du DAG Airflow
-    fields_used_data: list[str]
+    fields_transformed: list[str]
     # Ajouter les mappings à la config facilite le debug
     # et évite d'avoir à faire des requêtes DB plusieurs fois
     mapping_sources: dict[str, int]
@@ -171,23 +171,23 @@ class ClusterConfig(BaseModel):
         # qui permet à travers de la pipeline de faire la distinction
         # entre ce qu'on peut transformer car étant de la donnée (data)
         # et ce qu'on doit garder inchangé (meta)
-        values["fields_used_meta"] = FIELDS_USED_META_ALL
-        values["fields_used_data"] = []
+        values["fields_protected"] = FIELDS_PROTECTED_ALL
+        values["fields_transformed"] = []
         for k, v in values.items():
             # On enrichit la liste des champs data avec les champs
             # sélectionnés dans les différent paramètres de config
             # à condition qu'ils ne soient pas meta
-            if "fields" in k and k != "fields_used_meta":
-                values["fields_used_data"] += [
-                    x for x in v if x not in FIELDS_USED_META_ALL
+            if "fields" in k and k != "fields_protected":
+                values["fields_transformed"] += [
+                    x for x in v if x not in FIELDS_PROTECTED_ALL
                 ]
-        values["fields_used_data"] = list(set(values["fields_used_data"]))
+        values["fields_transformed"] = list(set(values["fields_transformed"]))
 
         # Si aucun champ pour la normalisation basique = tous les champs
         # data seront normalisés, pareil pour la norma d'ordre/unicité
         if not values["normalize_fields_basic"]:
-            values["normalize_fields_basic"] = values["fields_used_data"]
+            values["normalize_fields_basic"] = values["fields_transformed"]
         if not values["normalize_fields_order_unique_words"]:
-            values["normalize_fields_order_unique_words"] = values["fields_used_data"]
+            values["normalize_fields_order_unique_words"] = values["fields_transformed"]
 
         return values

@@ -21,8 +21,8 @@ def cluster_acteurs_selection(
     include_if_all_fields_filled: list[str],
     exclude_if_any_field_filled: list[str],
     include_parents_only_if_regex_matches_nom: str | None,
-    fields_used_meta: list[str],
-    fields_used_data: list[str],
+    fields_protected: list[str],
+    fields_transformed: list[str],
 ) -> pd.DataFrame:
     # --------------------------------
     # 1) Sélection des acteurs
@@ -38,7 +38,7 @@ def cluster_acteurs_selection(
         include_only_if_regex_matches_nom=include_only_if_regex_matches_nom,
         include_if_all_fields_filled=include_if_all_fields_filled,
         exclude_if_any_field_filled=exclude_if_any_field_filled,
-        extra_dataframe_fields=fields_used_data,
+        extra_dataframe_fields=fields_transformed,
     )
     df_acteurs = cluster_acteurs_df_sort(df_acteurs)
     log.preview("requête SQL utilisée", query)
@@ -61,7 +61,7 @@ def cluster_acteurs_selection(
     logging.info(log.banner_string("Sélection des parents"))
     df_parents = cluster_acteurs_selection_parents(
         acteur_type_ids=include_acteur_type_ids,
-        fields=fields_used_meta + fields_used_data,
+        fields=fields_protected + fields_transformed,
         include_only_if_regex_matches_nom=include_parents_only_if_regex_matches_nom,
     )
     df_parents = cluster_acteurs_df_sort(df_parents)
