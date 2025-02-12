@@ -1,6 +1,6 @@
 import pandas as pd
 import pytest
-from cluster.tasks.business_logic.cluster_acteurs_df_sort import cluster_acteurs_df_sort
+from cluster.tasks.business_logic.misc.df_sort import df_sort
 
 
 class TestClusterActeursDfSort:
@@ -29,7 +29,7 @@ class TestClusterActeursDfSort:
         hors contexte clustering.
         """
 
-        df_sorted = cluster_acteurs_df_sort(df)
+        df_sorted = df_sort(df)
         # L'ordre des colonnes n'est pas forcément celui utiliser
         # pour ordonner les lignes, car pour les lignes on favorise
         # sémantique (ex: ville) alors que pour les colonnes on favorise
@@ -55,7 +55,7 @@ class TestClusterActeursDfSort:
 
     def test_at_clustering_stage(self, df_clusters):
         """Utilisation de la fonction en contexte clustering"""
-        df_sorted = cluster_acteurs_df_sort(
+        df_sorted = df_sort(
             df_clusters,
             cluster_fields_exact=["ville"],
             cluster_fields_fuzzy=["adresse"],

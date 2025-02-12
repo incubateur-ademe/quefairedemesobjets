@@ -1,7 +1,5 @@
 import pandas as pd
-from cluster.tasks.business_logic.cluster_acteurs_metadata import (
-    cluster_acteurs_metadata,
-)
+from cluster.tasks.business_logic.misc.df_metadata_get import df_metadata_get
 from utils.django import django_setup_full
 
 django_setup_full()
@@ -42,7 +40,7 @@ def cluster_acteurs_suggestions_to_db(
         identifiant_execution=identifiant_execution,
         type_action=SuggestionAction.CLUSTERING,
         statut=SuggestionStatut.AVALIDER,
-        metadata=cluster_acteurs_metadata(df),
+        metadata=df_metadata_get(df),
     )
     cohorte.save()
 

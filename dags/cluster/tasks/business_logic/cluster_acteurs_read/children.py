@@ -5,13 +5,13 @@ from utils.django import django_setup_full
 django_setup_full()
 
 
-def cluster_acteurs_selection_children(
+def cluster_acteurs_read_children(
     parent_ids: list[str],
     fields_to_include: list[str],
 ) -> pd.DataFrame:
     from qfdmo.models.acteur import ActeurStatus, RevisionActeur
 
-    """Sélectionne les enfants des parents donnés
+    """Reading children from DB (acteurs already pointing to parents).
 
     Args:
         parent_ids (list[str]): les identifiants des parents

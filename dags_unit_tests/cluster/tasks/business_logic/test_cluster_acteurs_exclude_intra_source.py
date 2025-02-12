@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
-from cluster.tasks.business_logic.cluster_acteurs_exclude_intra_source import (
-    cluster_acteurs_exclude_intra_source,
+from cluster.tasks.business_logic.misc.cluster_exclude_intra_source import (
+    cluster_exclude_intra_source,
 )
 
 ID = "identifiant_unique"
@@ -18,7 +18,7 @@ class TestClusterActeursExcludeIntraSource:
                 "cluster_id": [1, 1, 1, 1, 1, 1, 1, 1],
             }
         )
-        df_kept, df_lost = cluster_acteurs_exclude_intra_source(df)
+        df_kept, df_lost = cluster_exclude_intra_source(df)
         # On doit avoir conservé le premier acteur de chaque source
         # + les acteurs parents qui se retrouve à la fin due à la
         # logique fonction (concat children + parents)
@@ -56,7 +56,7 @@ class TestClusterActeursExcludeIntraSource:
                 "cluster_id": [1, 1, 1],
             }
         )
-        df_kept, df_lost = cluster_acteurs_exclude_intra_source(df)
+        df_kept, df_lost = cluster_exclude_intra_source(df)
         pd.testing.assert_frame_equal(df_kept, df)
         assert df_lost is None
 
@@ -72,7 +72,7 @@ class TestClusterActeursExcludeIntraSource:
                 "cluster_id": [1, 1, 1],
             }
         )
-        df_kept, df_lost = cluster_acteurs_exclude_intra_source(df)
+        df_kept, df_lost = cluster_exclude_intra_source(df)
         assert df_kept[ID].tolist() == ["a1"]
         assert df_lost[ID].tolist() == ["a2", "a3"]  # type: ignore
 
@@ -85,4 +85,4 @@ class TestClusterActeursExcludeIntraSource:
             }
         )
         with pytest.raises(ValueError, match="Fonction à utiliser sur 1 seul cluster"):
-            cluster_acteurs_exclude_intra_source(df)
+            cluster_exclude_intra_source(df)

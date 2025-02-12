@@ -43,4 +43,9 @@ def cluster_acteurs_normalize(
     # les tests en se basant sur identifiant_unique et ainsi supprimer __index_src
     df["__index_src"] = range(1, len(df) + 1)
 
+    # TODO: investiguer pourquoi le type du champ ci-dessous bascule de int->str
+    # pendant la norma alors que le champ n'est pas manipulé, en dessous = quick fix
+    if "nombre_enfants" in df.columns:
+        df["nombre_enfants"] = df["nombre_enfants"].astype(int)
+
     return df

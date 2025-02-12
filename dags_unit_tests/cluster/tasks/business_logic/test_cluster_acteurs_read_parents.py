@@ -1,11 +1,11 @@
 """
-Fichier de test pour la fonction cluster_acteurs_selection_parents
+Fichier de test pour la fonction cluster_acteurs_read_parents
 """
 
 import pandas as pd
 import pytest
-from cluster.tasks.business_logic.cluster_acteurs_selection_parents import (
-    cluster_acteurs_selection_parents,
+from cluster.tasks.business_logic.cluster_acteurs_read.parents import (
+    cluster_acteurs_read_parents,
 )
 
 from qfdmo.models import DisplayedActeur
@@ -90,7 +90,7 @@ class TestClusterActeursSelectionActeurTypeParents:
         data = db_testdata_write
         acteur_type_ids = [data["at2"].id, data["at3"].id, data["at4"].id]
         fields = ["identifiant_unique", "statut", "latitude"]
-        return cluster_acteurs_selection_parents(
+        return cluster_acteurs_read_parents(
             acteur_type_ids=acteur_type_ids,
             fields=fields,
         )
@@ -137,7 +137,7 @@ class TestClusterActeursSelectionActeurTypeParents:
         data = db_testdata_write
         acteur_type_ids = [data["at2"].id, data["at3"].id, data["at4"].id]
         fields = ["identifiant_unique", "statut", "latitude"]
-        df = cluster_acteurs_selection_parents(
+        df = cluster_acteurs_read_parents(
             acteur_type_ids=acteur_type_ids,
             fields=fields,
             # On démontre que les regex sont appliquées sur

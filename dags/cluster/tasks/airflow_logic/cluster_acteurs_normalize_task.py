@@ -9,10 +9,10 @@ from cluster.tasks.airflow_logic.task_ids import (
     TASK_NORMALIZE,
     TASK_SELECTION,
 )
-from cluster.tasks.business_logic.cluster_acteurs_df_sort import cluster_acteurs_df_sort
 from cluster.tasks.business_logic.cluster_acteurs_normalize import (
     cluster_acteurs_normalize,
 )
+from cluster.tasks.business_logic.misc.df_sort import df_sort
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -69,10 +69,7 @@ def cluster_acteurs_normalize_wrapper(**kwargs) -> None:
     log.preview("acteurs normalisés", df_norm)
 
     logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
-    df_norm = cluster_acteurs_df_sort(df_norm)
-    # TODO: investiguer pourquoi le type du champ ci-dessous bascule de int->str
-    # pendant la norma alors que le champ n'est pas manipulé, en dessous = quick fix
-    df_norm["nombre_enfants"] = df_norm["nombre_enfants"].astype(int)
+    df_norm = df_sort(df_norm)
     log.preview_df_as_markdown("acteurs normalisés", df_norm)
 
     # Les XCOM étant spécifiques à une tâche on peut pousser

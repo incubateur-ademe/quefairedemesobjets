@@ -4,6 +4,7 @@ from logging import getLogger
 
 import numpy as np
 import pandas as pd
+from cluster.tasks.business_logic.misc.df_sort import df_sort
 from utils.django import django_setup_full
 
 from data.models.change import (
@@ -101,11 +102,6 @@ def cluster_acteurs_one_cluster_changes_mark(
 def cluster_acteurs_one_cluster_parent_choose(df: pd.DataFrame) -> tuple[str, str, str]:
     """Décide de la sélection du parent sur 1 cluster"""
 
-    from data.models.change import (  # noqa: E402
-        CHANGE_ACTEUR_CREATE_AS_PARENT,
-        CHANGE_ACTEUR_PARENT_KEEP,
-    )
-
     try:
         parents_count = df[df["nombre_enfants"] > 0]["identifiant_unique"].nunique()
 
@@ -147,7 +143,7 @@ def cluster_acteurs_parents_choose_new(df_clusters: pd.DataFrame) -> pd.DataFram
     """Choisit et assigne les nouveaux parents d'une dataframe
     comprenant 1 ou plusieurs clusters.'"""
 
-    from data.models.change import CHANGE_ACTEUR_CREATE_AS_PARENT, COL_CHANGE_ORDER
+    from data.models.change import COL_CHANGE_ORDER
 
     dfs_marked = []
 
@@ -193,36 +189,4 @@ def cluster_acteurs_parents_choose_new(df_clusters: pd.DataFrame) -> pd.DataFram
     df = df.sort_values(
         by=["cluster_id", COL_CHANGE_ORDER, "identifiant_unique"], ascending=True
     )
-    return df
-
-
-def clusters_to_parents_get(df_clusters: pd.DataFrame) -> dict[str, str]:
-    """Retrieve the selected parents from given clusters"""
-    df_parents = df_clusters[
-        df_clusters[COL_CHANGE_TYPE].isin(
-            [
-                CHANGE_ACTEUR_PARENT_KEEP,
-                CHANGE_ACTEUR_CREATE_AS_PARENT,
-            ]
-        )
-    ]
-    return df_parents.set_index("cluster_id")["identifiant_unique"].to_dict()
-
-
-def clusters_to_children_and_orphans_get(
-    df_clusters: pd.DataFrame,
-) -> dict[str, list[str]]:
-    """Retrieve the children and orphans from given clusters"""
-    df_acteurs = df_clusters[
-        # To construct a mutually exclusive list more robustly with
-        # clusters_to_parents_get we just take the opposite rule,
-        # since there are only 2 parents conditions (create, keep),
-        # and many more children/orphans conditions, it's easier that way
-        ~df_clusters[COL_CHANGE_TYPE].isin(
-            [
-                CHANGE_ACTEUR_PARENT_KEEP,
-                CHANGE_ACTEUR_CREATE_AS_PARENT,
-            ]
-        )
-    ]
-    return df_acteurs.groupby("cluster_id")["identifiant_unique"].apply(list).to_dict()
+    return df_sort(df)

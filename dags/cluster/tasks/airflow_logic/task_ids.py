@@ -1,5 +1,5 @@
 TASK_CONFIG_CREATE = "cluster_acteurs_config_create"
-TASK_SELECTION = "cluster_acteurs_selection_from_db"
+TASK_SELECTION = "cluster_acteurs_read"
 TASK_NORMALIZE = "cluster_acteurs_normalize"
 TASK_PARENTS_CHOOSE_NEW = "cluster_acteurs_parents_choose_new"
 TASK_PARENTS_CHOOSE_DATA = "cluster_acteurs_parents_choose_data"

@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def cluster_acteurs_exclude_intra_source(
+def cluster_exclude_intra_source(
     df: pd.DataFrame,
 ) -> tuple[pd.DataFrame, pd.DataFrame | None]:
     """

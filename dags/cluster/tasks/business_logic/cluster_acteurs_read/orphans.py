@@ -11,11 +11,10 @@ from utils.django import (
 django_setup_full()
 from django.db.models import Model  # noqa: E402
 
-from qfdmo.models import ActeurType, Source  # noqa: E402
-from qfdmo.models.acteur import ActeurStatus  # noqa: E402
 
-
-def cluster_acteurs_selection_orphans(
+def cluster_acteurs_read_orphans(
+    # TODO: too much risk to pass the wrong class, and we always
+    # want to get from Displayed, so remove below argument
     model_class: type[Model],
     include_source_ids: list[int],
     include_acteur_type_ids: list[int],
@@ -24,8 +23,7 @@ def cluster_acteurs_selection_orphans(
     exclude_if_any_field_filled: list[str],
     extra_dataframe_fields: list[str],
 ) -> tuple[pd.DataFrame, str]:
-    """Lire les données des acteurs depuis la DB et retourner un DataFrame
-    (+ requête SQL pour débug)
+    """Reading orphans from DB (acteurs not pointing to parents).
 
     Sachant qu'on travaille potentiellement avec des propriétés dérivées (ex: @property)
     qui n'existent pas en DB, le queryset de Django ne peut pas gérer ces propriétés.
@@ -77,6 +75,8 @@ def cluster_acteurs_selection_orphans(
     Returns:
         tuple[pd.DataFrame, str]: Le DataFrame des acteurs et la requête SQL utilisée
     """
+    from qfdmo.models import ActeurType, Source
+    from qfdmo.models.acteur import ActeurStatus
 
     # -----------------------------------
     # 1) Etape Django queryset
@@ -135,13 +135,12 @@ def cluster_acteurs_selection_orphans(
     df = df.replace({"": None, np.nan: None})
 
     # On ne garde que les lignes où TOUS les champs sont remplis
-    df = df[df[include_if_all_fields_filled].notna().all(axis=1)].copy()
+    # This is consequence of allowing "" strings in DB, need to exclude
+    # both None and ""
+    df = df[df[include_if_all_fields_filled].notnull().all(axis=1)].copy()
 
     # On exclude les lignes où N'IMPORTE QUEL champ est rempli
-    df = df[~df[exclude_if_any_field_filled].notna().any(axis=1)].copy()
-
-    if df.empty:
-        raise ValueError("Dataframe vide après filtrage")
+    df = df[~df[exclude_if_any_field_filled].notnull().any(axis=1)].copy()
 
     # -----------------------------------
     # Bonus debug

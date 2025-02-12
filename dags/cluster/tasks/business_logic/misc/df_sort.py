@@ -4,7 +4,7 @@ from utils.django import django_setup_full
 django_setup_full()
 
 
-def cluster_acteurs_df_sort(
+def df_sort(
     df: pd.DataFrame,
     cluster_fields_exact: list[str] = [],
     cluster_fields_fuzzy: list[str] = [],

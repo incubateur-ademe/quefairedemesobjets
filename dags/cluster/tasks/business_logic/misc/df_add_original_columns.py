@@ -5,7 +5,7 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 
-def cluster_acteurs_add_original_df_columns(
+def df_add_original_columns(
     df_clusters: pd.DataFrame,
     df_original: pd.DataFrame,
 ) -> pd.DataFrame:

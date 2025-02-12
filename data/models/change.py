@@ -47,6 +47,7 @@ from qfdmo.models import RevisionActeur
 COL_CHANGE_TYPE = "change_type"  # = description + lien vers modèles
 COL_CHANGE_ORDER = "change_order"  # = ordre d'application
 COL_CHANGE_REASON = "change_reason"  # = debug
+COL_CHANGE_DATA = "change_data"  # = data de la suggestion
 COL_ENTITY_TYPE = "entity_type"  # = où appliquer le changement
 
 # -----------------------------

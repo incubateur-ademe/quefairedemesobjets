@@ -1,11 +1,7 @@
-"""
-Fichier de test pour la fonction cluster_acteurs_selection_orphans
-"""
-
 import pandas as pd
 import pytest
-from cluster.tasks.business_logic.cluster_acteurs_selection_orphans import (
-    cluster_acteurs_selection_orphans,
+from cluster.tasks.business_logic.cluster_acteurs_read.orphans import (
+    cluster_acteurs_read_orphans,
 )
 
 from qfdmo.models import RevisionActeur
@@ -151,7 +147,7 @@ class TestClusterActeursSelectionOrphans:
         test correspondant"""
         s1, s2, at1, at2 = db_testdata_write
 
-        return cluster_acteurs_selection_orphans(
+        return cluster_acteurs_read_orphans(
             model_class=RevisionActeur,
             include_source_ids=[s1.id, s2.id],
             include_acteur_type_ids=[at1.id, at2.id],
@@ -315,7 +311,7 @@ class TestClusterActeursSelectionOrphans:
     # ----------------------------------------------------
     # Tests sur les cas que l'on ne tolère pas
     # ----------------------------------------------------
-    # Voir commentaires dans la fonction cluster_acteurs_selection_orphans
+    # Voir commentaires dans la fonction cluster_acteurs_read_orphans
     # sur le pourquoi des exceptions et pas simplement retourner None
     def test_exception_if_query_returns_nothing(self):
         """Si aucun acteur n'est sélectionné en base de données,
@@ -323,30 +319,13 @@ class TestClusterActeursSelectionOrphans:
         with pytest.raises(
             ValueError, match="Pas de données retournées par la query Django"
         ):
-            cluster_acteurs_selection_orphans(
+            cluster_acteurs_read_orphans(
                 model_class=RevisionActeur,
                 # Sources et types inconnus au bataillon
                 # d'où l'échec de la query
                 include_source_ids=[-1],
                 include_acteur_type_ids=[-1],
                 include_only_if_regex_matches_nom="correct",
-                include_if_all_fields_filled=["nom", "ville"],
-                exclude_if_any_field_filled=["siret", "numero_et_complement_de_rue"],
-                extra_dataframe_fields=["longitude", "latitude"],
-            )
-
-    def test_exception_if_dataframe_is_empty(self, db_testdata_write):
-        """Sachant que le traitement est une double étape Django DB -> Dataframe,
-        on vérfie aussi qu'un dataframe vide est source d'erreur"""
-        s1, _, at1, _ = db_testdata_write
-        with pytest.raises(ValueError, match="Dataframe vide après filtrage"):
-            cluster_acteurs_selection_orphans(
-                model_class=RevisionActeur,
-                include_source_ids=[s1.id],
-                include_acteur_type_ids=[at1.id],
-                # Ce qui va rendre la dataframe vide c'est le filtre
-                # nom qui correspond à aucun acteur
-                include_only_if_regex_matches_nom="CE NOM N'EXISTE PAS",
                 include_if_all_fields_filled=["nom", "ville"],
                 exclude_if_any_field_filled=["siret", "numero_et_complement_de_rue"],
                 extra_dataframe_fields=["longitude", "latitude"],

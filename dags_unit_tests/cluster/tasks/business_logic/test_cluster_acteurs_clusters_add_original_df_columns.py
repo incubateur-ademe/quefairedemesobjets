@@ -1,6 +1,6 @@
 import pandas as pd
-from cluster.tasks.business_logic.cluster_acteurs_add_original_df_columns import (
-    cluster_acteurs_add_original_df_columns,
+from cluster.tasks.business_logic.misc.df_add_original_columns import (
+    df_add_original_columns,
 )
 
 
@@ -19,9 +19,7 @@ def testcluster_acteurs_clusters_add_original_df_columns():
             "colonne_original": ["foo", "foo", "bar", "bar"],
         }
     )
-    df = cluster_acteurs_add_original_df_columns(
-        df_clusters=df_clusters, df_original=df_original
-    )
+    df = df_add_original_columns(df_clusters=df_clusters, df_original=df_original)
     print(df)
     assert df.shape == (2, 4)
     assert df["identifiant_unique"].tolist() == ["1", "3"]

@@ -1,6 +1,6 @@
 import pytest
-from cluster.tasks.business_logic.cluster_acteurs_selection_children import (
-    cluster_acteurs_selection_children,
+from cluster.tasks.business_logic.cluster_acteurs_read.children import (
+    cluster_acteurs_read_children,
 )
 
 from unit_tests.qfdmo.acteur_factory import RevisionActeurFactory
@@ -32,7 +32,7 @@ class TestClusterActeursSelectionChildren:
         p1, p2 = db_testdata_write
         parent_ids = [p1.identifiant_unique, p2.identifiant_unique]
         fields_to_include = ["nom", "parent", "nombre_enfants", "source_id"]
-        df = cluster_acteurs_selection_children(parent_ids, fields_to_include)
+        df = cluster_acteurs_read_children(parent_ids, fields_to_include)
         assert df.shape == (3, 4)
         assert df["nom"].tolist() == ["Enfant p1 a", "Enfant p2 a", "Enfant p2 b"]
         assert df.columns.tolist() == fields_to_include

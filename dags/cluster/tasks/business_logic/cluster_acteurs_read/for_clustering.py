@@ -2,20 +2,20 @@ import logging
 
 import numpy as np
 import pandas as pd
-from cluster.tasks.business_logic.cluster_acteurs_df_sort import cluster_acteurs_df_sort
-from cluster.tasks.business_logic.cluster_acteurs_selection_orphans import (
-    cluster_acteurs_selection_orphans,
+from cluster.tasks.business_logic.cluster_acteurs_read.orphans import (
+    cluster_acteurs_read_orphans,
 )
-from cluster.tasks.business_logic.cluster_acteurs_selection_parents import (
-    cluster_acteurs_selection_parents,
+from cluster.tasks.business_logic.cluster_acteurs_read.parents import (
+    cluster_acteurs_read_parents,
 )
+from cluster.tasks.business_logic.misc.df_sort import df_sort
 from utils import logging_utils as log
 from utils.django import django_setup_full
 
 django_setup_full()
 
 
-def cluster_acteurs_selection(
+def cluster_acteurs_read_for_clustering(
     include_source_ids: list[int],
     include_acteur_type_ids: list[int],
     include_only_if_regex_matches_nom: str | None,
@@ -25,17 +25,29 @@ def cluster_acteurs_selection(
     fields_protected: list[str],
     fields_transformed: list[str],
 ) -> pd.DataFrame:
+    """Reading from DB what is needed for clustering. Right now it is:
+    - orphans
+    - parents
+
+    Because we only want to add to existing clusters.
+
+    However in the future if we decide we want to
+    re-cluster everything we might add to that:
+    - children
+
+    Hence the abstracted name "read_for_clustering"
+    """
 
     from qfdmo.models import DisplayedActeur
 
     # --------------------------------
-    # 1) Sélection des acteurs
+    # 1) Sélection des orphelins
     # --------------------------------
     # Quels qu'ils soient (enfants ou parents) sur la
     # base de tous les critères d'inclusion/exclusion
     # fournis au niveau du DAG
-    logging.info(log.banner_string("Sélection des acteurs"))
-    df_acteurs, query = cluster_acteurs_selection_orphans(
+    logging.info(log.banner_string("Sélection des orphelins"))
+    df_acteurs, query = cluster_acteurs_read_orphans(
         model_class=DisplayedActeur,
         include_source_ids=include_source_ids,
         include_acteur_type_ids=include_acteur_type_ids,
@@ -44,7 +56,7 @@ def cluster_acteurs_selection(
         exclude_if_any_field_filled=exclude_if_any_field_filled,
         extra_dataframe_fields=fields_transformed,
     )
-    df_acteurs = cluster_acteurs_df_sort(df_acteurs)
+    df_acteurs = df_sort(df_acteurs)
     log.preview("requête SQL utilisée", query)
     log.preview("# acteurs par source_id", df_acteurs.groupby("source_id").size())
     log.preview(
@@ -63,25 +75,25 @@ def cluster_acteurs_selection(
     # TOUS les parents des acteurs types sélectionnés, et en ignorant
     # les autres paramètres de sélection
     logging.info(log.banner_string("Sélection des parents"))
-    df_parents = cluster_acteurs_selection_parents(
+    df_parents = cluster_acteurs_read_parents(
         acteur_type_ids=include_acteur_type_ids,
         fields=fields_protected + fields_transformed,
         include_only_if_regex_matches_nom=include_parents_only_if_regex_matches_nom,
     )
-    df_parents = cluster_acteurs_df_sort(df_parents)
+    df_parents = df_sort(df_parents)
     log.preview_df_as_markdown("parents sélectionnés", df_parents)
 
     # --------------------------------
-    # 3) Fusion acteurs + parents
+    # 3) Fusion acteurs + orphelins
     # --------------------------------
-    logging.info(log.banner_string("Fusion acteurs + parents"))
+    logging.info(log.banner_string("Fusion parents + orphelins"))
     ids = set()
     ids.update(df_acteurs["identifiant_unique"].values)
     ids.update(df_parents["identifiant_unique"].values)
     log.preview("IDs avant la fusion", ids)
     df = pd.concat([df_acteurs, df_parents], ignore_index=True).replace({np.nan: None})
     df = df.drop_duplicates(subset="identifiant_unique", keep="first")
-    df = cluster_acteurs_df_sort(df)
+    df = df_sort(df)
     log.preview("IDs après la fusion", df["identifiant_unique"].tolist())
     log.preview_df_as_markdown("acteurs + parents sélectionnés", df)
 

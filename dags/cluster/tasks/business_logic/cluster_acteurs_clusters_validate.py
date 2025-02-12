@@ -1,6 +1,9 @@
 from logging import getLogger
 
 import pandas as pd
+from utils.django import django_setup_full
+
+django_setup_full()
 
 logger = getLogger(__name__)
 
@@ -19,6 +22,8 @@ def cluster_acteurs_clusters_validate(df_clusters: pd.DataFrame) -> None:
     Args:
         df_clusters (pd.DataFrame): les clusters à valider
     """
+    from qfdmo.models.acteur import ActeurStatus
+
     df = df_clusters
 
     # ------------------------------------
@@ -27,7 +32,7 @@ def cluster_acteurs_clusters_validate(df_clusters: pd.DataFrame) -> None:
     # On ne tolère aucun acteur non-ACTIF: si on fait bien notre
     # travail, on doit partir des acteurs actifs tels qu'affichés
     # sur la carte et donc jamais on doit se retrouver avec des non-actifs
-    df_non_actifs = df[df["statut"].str.lower() != "actif"]
+    df_non_actifs = df[df["statut"].str.upper() != ActeurStatus.ACTIF.upper()]
     raise_if_df_not_empty(df_non_actifs, "Clusters avec acteurs non-ACTIF")
     logger.info("100% acteurs actifs: 🟢")
 

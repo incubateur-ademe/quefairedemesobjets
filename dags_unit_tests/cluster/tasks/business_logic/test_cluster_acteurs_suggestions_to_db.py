@@ -49,7 +49,7 @@ class TestClusterActeursSuggestionsToDb:
                 [2, "acteur", "a8", "point", "r_point", "c4", 0],
                 [3, "acteur", "a9", "delete", "r_delete", "c4", 1],
                 [3, "acteur", "a10", "delete", "r_delete", "c4", 1],
-                # On ajoute nombre_enfants requis par cluster_acteurs_metadata
+                # On ajoute nombre_enfants requis par df_metadata_get
             ],
             columns=COLS + ["cluster_id", "nombre_enfants"],
         )

@@ -1,14 +1,13 @@
 import pandas as pd
 import pytest
-
-from dags.cluster.tasks.business_logic.cluster_acteurs_metadata import (
+from cluster.tasks.business_logic.misc.df_metadata_get import (
     COUNT_ACTEURS,
     COUNT_ACTEURS_CURRENT,
     COUNT_ACTEURS_NEW,
     COUNT_CLUSTERS,
     COUNT_CLUSTERS_CURRENT,
     COUNT_CLUSTERS_NET,
-    cluster_acteurs_metadata,
+    df_metadata_get,
 )
 
 
@@ -40,7 +39,7 @@ class TestClusterActeursMetadata:
 
     @pytest.fixture(scope="session")
     def meta(self, df):
-        return cluster_acteurs_metadata(df)
+        return df_metadata_get(df)
 
     def test_nombre_clusters(self, meta):
         # Clusters 1 & 2

@@ -1,14 +1,20 @@
 import pandas as pd
 from cluster.config.model import FIELDS_PROTECTED_ALL
-from cluster.tasks.business_logic.cluster_acteurs_parents_choose_new import (
-    clusters_to_children_and_orphans_get,
-    clusters_to_parents_get,
-)
-from rich import print
+from django.forms.models import model_to_dict
 from utils.django import django_setup_full
 
 django_setup_full()
-from qfdmo.models.acteur import BaseActeur, RevisionActeur  # noqa: E402
+from data.models.change import (  # noqa: E402
+    CHANGE_ACTEUR_CREATE_AS_PARENT,
+    CHANGE_ACTEUR_PARENT_KEEP,
+    COL_CHANGE_DATA,
+    COL_CHANGE_TYPE,
+)
+from qfdmo.models.acteur import (  # noqa: E402
+    BaseActeur,
+    DisplayedActeur,
+    RevisionActeur,
+)
 
 
 def fields_to_include_clean(
@@ -19,151 +25,131 @@ def fields_to_include_clean(
     return [x for x in fields_to_include if x not in FIELDS_PROTECTED_ALL]
 
 
-def acteurs_field_result_assign(
-    result_try: dict,
-    result_final: dict,
+def value_is_empty(value) -> bool:
+    """Consequence of allowing empty strings in DB"""
+    return value is None or isinstance(value, str) and value.strip() == ""
+
+
+def acteurs_field_value_get_one(
     acteurs: list[dict],
     field: str,
-    priority_always_source_ids: list[int],
-    keep_none: bool = False,
+    prioritize_source_ids: list[int],
+    consider_empty: bool = False,
 ):
     """Get the values of a field from a list of acteurs"""
     for acteur in acteurs:
         value = acteur.get(field)
-        if value is not None or (
-            value is None
-            and acteur["source_id"] in priority_always_source_ids
-            and keep_none
+        if not value_is_empty(value) or (
+            acteur["source_id"] in prioritize_source_ids and consider_empty
         ):
-            # Where we try to make it work
-            # and only keep what works
-            result_try[field] = value
-            try:
-                print(f"\n\n{field=}")
-                print(f"{str(value)=}")
-                rev = RevisionActeur(**result_try)
-                rev.full_clean()
-                # act = Acteur(**result_try)
-                # act.full_clean()
-                print(f"{str(getattr(rev, field))=}")
-                # We take the rev version as it might have
-                # changed after full_clean
-                result_final[field] = getattr(rev, field)
-                break
-            except Exception as e:
-                print(f"Error: {e}")
-                pass
+            return value
+    return None
 
 
 def cluster_acteurs_one_parent_choose_data(
+    parent_data_before: dict,
     acteurs_revision: list[dict],
     acteurs_base: list[dict],
     fields_to_include: list[str],
-    exclusion_always_source_ids: list[int],
-    priority_always_source_ids: list[int],
-    keep_none: bool = False,
+    exclude_source_ids: list[int],
+    prioritize_source_ids: list[int],
+    consider_empty: bool = False,
 ) -> dict:
     """Selects and assigns data for a parent. Since the data is
     intended to create or enrich a revision, we ensure that the chosen data
     satisfies the RevisionActor model.
 
     Args:
-        acteurs (list[dict]): list of acteurs to consider
-        fields_to_include (list[str]): fields to include in the result
+        acteurs (list[dict]): list of acteurs to consider = Priority 1
+        fields_to_include (list[str]): fields to include in the result = Fallback
         exclusion_always_sources (list[str]): sources to exclude for all fields
         priority_always_sources (list[str]): sources to prioritize for all fields
-        keep_none (bool): if True, keep None values in the result if they come
+        consider_empty (bool): if True, keep None values in the result if they come
             from priority sources
     """
-    # One for trying on RevisionActeur
-    # and the other with what's working
-    result_try = {}
-    result_final = {}
-
-    # Acteurs to consider
-    rev_valid = [
-        a for a in acteurs_revision if a["source_id"] not in exclusion_always_source_ids
-    ]
-    base_valid = [
-        a for a in acteurs_base if a["source_id"] not in exclusion_always_source_ids
-    ]
 
     # Priority = as per priority list OR rest by default
     def source_priority(a):
         return (
-            priority_always_source_ids.index(a["source_id"])
-            if a["source_id"] in priority_always_source_ids
+            prioritize_source_ids.index(a["source_id"])
+            if a["source_id"] in prioritize_source_ids
             else float("inf")
         )
 
-    rev_valid.sort(key=source_priority)
-    base_valid.sort(key=source_priority)
+    # Acteurs to consider: first revisions, then base, but not from excluded sources
+    acteurs = []
+    acteurs += [a for a in acteurs_revision if a["source_id"] not in exclude_source_ids]
+    acteurs.sort(key=source_priority)
+    acteurs += [a for a in acteurs_base if a["source_id"] not in exclude_source_ids]
+    acteurs.sort(key=source_priority)
 
     # Fields: make sure we don't include unwanted fields
     fields = fields_to_include_clean(fields_to_include)
 
+    result = {}
     for field in fields:
-        acteurs_field_result_assign(
-            result_try=result_try,
-            result_final=result_final,
-            acteurs=rev_valid,
+        value_old = parent_data_before.get(field)
+        value_new = acteurs_field_value_get_one(
+            acteurs=acteurs,
             field=field,
-            priority_always_source_ids=priority_always_source_ids,
-            keep_none=keep_none,
+            prioritize_source_ids=prioritize_source_ids,
+            consider_empty=consider_empty,
         )
-        acteurs_field_result_assign(
-            result_try=result_try,
-            result_final=result_final,
-            acteurs=base_valid,
-            field=field,
-            priority_always_source_ids=priority_always_source_ids,
-            keep_none=keep_none,
-        )
+        if value_new is not None and value_new != value_old:
+            result[field] = value_new
 
-    return result_final
+    return result
 
 
 def cluster_acteurs_parents_choose_data(
     df_clusters: pd.DataFrame,
     fields_to_include: list[str],
-    exclusion_always_source_ids: list[int],
-    priority_always_source_ids: list[int],
-    keep_none: bool = False,
-) -> dict:
+    exclude_source_ids: list[int],
+    prioritize_source_ids: list[int],
+    consider_empty: bool = False,
+) -> pd.DataFrame:
     """For all selected parents in clusters, select the data to use"""
-    results = {}
-
     fields = fields_to_include_clean(fields_to_include)
 
-    # Cluster ID -> Parent ID
-    # Cluster ID -> Children and Orphans IDs
-    c_ids_to_parent_id = clusters_to_parents_get(df_clusters)
-    c_ids_to_children_and_orphans_ids = clusters_to_children_and_orphans_get(
-        df_clusters
-    )
-
-    for cluster_id, parent_id in c_ids_to_parent_id.items():
-        acteur_ids = c_ids_to_children_and_orphans_ids[cluster_id]
+    df_clusters[COL_CHANGE_DATA] = None
+    for cluster_id in df_clusters.groupby("cluster_id"):
+        df_cluster = df_clusters[df_clusters["cluster_id"] == cluster_id]
+        filter_parent = df_cluster[COL_CHANGE_TYPE].isin(
+            [
+                CHANGE_ACTEUR_CREATE_AS_PARENT,
+                CHANGE_ACTEUR_PARENT_KEEP,
+            ]
+        )
+        df_acteurs = df_cluster[~filter_parent]
+        df_parents = df_cluster[filter_parent]
+        # TODO: remove below once we have added validation functions and e2e tests
+        # which should cover this case
+        assert len(df_parents) == 1, "Should have 1 parent per cluster"
+        parent_iloc = df_parents.index[0]
+        parent_id = df_parents["identifiant_unique"].iloc[0]
+        acteur_ids = df_acteurs["identifiant_unique"].unique()
 
         # We construct a list of acteurs, 1st from revision (higher prio
         # as might contain business-approved changes) and then from base
-        acteurs_revision = RevisionActeur.objects.filter(
-            identifiant_unique__in=acteur_ids
-        ).values(*fields)
-        acteurs_base = BaseActeur.objects.filter(
-            identifiant_unique__in=acteur_ids
-        ).values(*fields)
+        parent = DisplayedActeur.objects.get(pk=parent_id)
+        parent_data_before = model_to_dict(parent)
+        acteurs_revision = RevisionActeur.objects.filter(pk__in=acteur_ids).values(
+            *fields
+        )
+        acteurs_base = BaseActeur.objects.filter(pk__in=acteur_ids).values(*fields)
 
-        results[cluster_id] = {
+        parent_data_after = {
             "identifiant_unique": parent_id,
             "data": cluster_acteurs_one_parent_choose_data(
+                parent_data_before=parent_data_before,
                 acteurs_revision=list(acteurs_revision),
                 acteurs_base=list(acteurs_base),
                 fields_to_include=fields,
-                exclusion_always_source_ids=exclusion_always_source_ids,
-                priority_always_source_ids=priority_always_source_ids,
-                keep_none=keep_none,
+                exclude_source_ids=exclude_source_ids,
+                prioritize_source_ids=prioritize_source_ids,
+                consider_empty=consider_empty,
             ),
         }
+        df_clusters.iloc[parent_iloc, COL_CHANGE_DATA] = parent_data_after
 
-    return results
+    return df_clusters

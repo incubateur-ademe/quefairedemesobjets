@@ -33,8 +33,8 @@ from cluster.tasks.airflow_logic.cluster_acteurs_normalize_task import (
 from cluster.tasks.airflow_logic.cluster_acteurs_parents_choose_new_task import (
     cluster_acteurs_parents_choose_new_task,
 )
-from cluster.tasks.airflow_logic.cluster_acteurs_selection_from_db import (
-    cluster_acteurs_selection_from_db_task,
+from cluster.tasks.airflow_logic.cluster_acteurs_read_task import (
+    cluster_acteurs_read_task,
 )
 from cluster.tasks.airflow_logic.cluster_acteurs_suggestions_display_task import (
     cluster_acteurs_suggestions_display_task,
@@ -283,7 +283,7 @@ with DAG(
 ) as dag:
     chain(
         cluster_acteurs_config_create_task(dag=dag),
-        cluster_acteurs_selection_from_db_task(dag=dag),
+        cluster_acteurs_read_task(dag=dag),
         cluster_acteurs_normalize_task(dag=dag),
         cluster_acteurs_clusters_display_task(dag=dag),
         cluster_acteurs_clusters_validate_task(dag=dag),

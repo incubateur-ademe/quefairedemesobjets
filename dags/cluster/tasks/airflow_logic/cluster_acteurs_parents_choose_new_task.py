@@ -9,7 +9,6 @@ from cluster.tasks.airflow_logic.task_ids import (
     TASK_CONFIG_CREATE,
     TASK_PARENTS_CHOOSE_NEW,
 )
-from cluster.tasks.business_logic.cluster_acteurs_df_sort import cluster_acteurs_df_sort
 from cluster.tasks.business_logic.cluster_acteurs_parents_choose_new import (
     cluster_acteurs_parents_choose_new,
 )
@@ -52,7 +51,6 @@ def cluster_acteurs_parents_choose_new_wrapper(**kwargs) -> None:
     log.preview("acteurs groupés", df)
 
     df = cluster_acteurs_parents_choose_new(df)
-    df = cluster_acteurs_df_sort(df)
 
     logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
     log.preview_df_as_markdown(

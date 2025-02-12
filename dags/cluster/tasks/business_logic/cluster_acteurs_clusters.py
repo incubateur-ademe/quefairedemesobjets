@@ -15,8 +15,8 @@ import re
 
 import numpy as np
 import pandas as pd
-from cluster.tasks.business_logic.cluster_acteurs_exclude_intra_source import (
-    cluster_acteurs_exclude_intra_source,
+from cluster.tasks.business_logic.misc.cluster_exclude_intra_source import (
+    cluster_exclude_intra_source,
 )
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -337,7 +337,7 @@ def cluster_acteurs_clusters(
             values = rows[cluster_fields_fuzzy + ["nom"]]
             logger.info(f"\n🟢 CLUSTER: {cluster_id=}, {keys=}, {values=}")
 
-            kept, lost = cluster_acteurs_exclude_intra_source(rows)
+            kept, lost = cluster_exclude_intra_source(rows)
             if isinstance(lost, pd.DataFrame):
                 log.preview_df_as_markdown("❌ Acteurs intra-source exclus", lost)
             if len(kept) < 2:

@@ -4,8 +4,8 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from cluster.config.model import ClusterConfig
 from cluster.tasks.airflow_logic.task_ids import TASK_CONFIG_CREATE, TASK_SELECTION
-from cluster.tasks.business_logic.cluster_acteurs_selection import (
-    cluster_acteurs_selection,
+from cluster.tasks.business_logic.cluster_acteurs_read.for_clustering import (
+    cluster_acteurs_read_for_clustering,
 )
 from utils import logging_utils as log
 
@@ -32,7 +32,7 @@ def task_info_get():
     """
 
 
-def cluster_acteurs_selection_from_db_wrapper(**kwargs) -> None:
+def cluster_acteurs_read_wrapper(**kwargs) -> None:
     logger.info(task_info_get())
 
     config: ClusterConfig = kwargs["ti"].xcom_pull(
@@ -40,7 +40,7 @@ def cluster_acteurs_selection_from_db_wrapper(**kwargs) -> None:
     )
     log.preview("Config reçue", config)
 
-    df = cluster_acteurs_selection(
+    df = cluster_acteurs_read_for_clustering(
         include_source_ids=config.include_source_ids,
         include_acteur_type_ids=config.include_acteur_type_ids,
         include_only_if_regex_matches_nom=config.include_only_if_regex_matches_nom,
@@ -52,6 +52,7 @@ def cluster_acteurs_selection_from_db_wrapper(**kwargs) -> None:
     )
 
     if df.empty:
+        # TODO: replace by AirflowSkipException
         raise ValueError("Aucun acteur trouvé avec les critères de sélection")
 
     logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
@@ -60,10 +61,10 @@ def cluster_acteurs_selection_from_db_wrapper(**kwargs) -> None:
     kwargs["ti"].xcom_push(key="df", value=df)
 
 
-def cluster_acteurs_selection_from_db_task(dag: DAG) -> PythonOperator:
+def cluster_acteurs_read_task(dag: DAG) -> PythonOperator:
     """La tâche Airflow qui ne fait que appeler le wrapper"""
     return PythonOperator(
         task_id=TASK_SELECTION,
-        python_callable=cluster_acteurs_selection_from_db_wrapper,
+        python_callable=cluster_acteurs_read_wrapper,
         dag=dag,
     )

@@ -9,7 +9,7 @@ COUNT_ACTEURS_CURRENT = "5) 🎭 Nombre Acteurs Existants"
 COUNT_ACTEURS_NEW = "6) 🎭 Nombre Acteurs Nouveaux"
 
 
-def cluster_acteurs_metadata(df_clusters: pd.DataFrame) -> dict:
+def df_metadata_get(df_clusters: pd.DataFrame) -> dict:
     """Génère des statistiques sur les clusters, à noter que
     la fonction peut être utilisée dans 2 contextes:
      - cohorte: df_clusters cotient plusieurs clusters

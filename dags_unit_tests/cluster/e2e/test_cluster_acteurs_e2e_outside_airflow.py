@@ -14,8 +14,8 @@ from cluster.tasks.business_logic.cluster_acteurs_clusters import (
 from cluster.tasks.business_logic.cluster_acteurs_normalize import (
     cluster_acteurs_normalize,
 )
-from cluster.tasks.business_logic.cluster_acteurs_selection import (
-    cluster_acteurs_selection,
+from cluster.tasks.business_logic.cluster_acteurs_read.for_clustering import (
+    cluster_acteurs_read_for_clustering,
 )
 from rich import print
 
@@ -163,7 +163,7 @@ class TestClusterActeursE2E:
             cluster_fuzzy_threshold=0.5,
         )  # type: ignore
 
-        df = cluster_acteurs_selection(
+        df = cluster_acteurs_read_for_clustering(
             include_source_ids=config.include_source_ids,
             include_acteur_type_ids=config.include_acteur_type_ids,
             include_only_if_regex_matches_nom=config.include_only_if_regex_matches_nom,
