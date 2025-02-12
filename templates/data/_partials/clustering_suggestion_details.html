@@ -2,15 +2,30 @@
 {% load custom_filters %}
 
 {% block suggestion_title %}
-    Cluster {{ cluster_id }}
+📦 Cluster: {{ cluster_id }}
 {% endblock suggestion_title %}</h3>
 
 {% block suggestion_details %}
-<ul>
-    {% for identifiant_unique in identifiant_uniques %}
-        <li>
-            <a href="{% url 'admin:qfdmo_displayedacteur_change' identifiant_unique|quote %}" target="_blank" rel="noreferrer">{{ identifiant_unique }}</a>
-        </li>
+<table>
+    <thead>
+    <tr>
+        <th>Ordre</th>
+        <th>Type d'entité</th>
+        <th>ID de l'entité</th>
+        <th>Changement</th>
+        <th>Raison</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for change in changes %}
+        <tr>
+            <td>{{ change.change_order }}</td>
+            <td>{{ change.entity_type }}</td>
+            <td><a href="{% url 'admin:qfdmo_displayedacteur_change' change.identifiant_unique|quote %}" target="_blank" rel="noreferrer">{{ change.identifiant_unique }}</a></td>
+            <td>{{ change.change_type }}</td>
+            <td>{{ change.change_reason }}</td>
+        </tr>
     {% endfor %}
-</ul>
+    </tbody>
+</table>
 {% endblock suggestion_details %}
