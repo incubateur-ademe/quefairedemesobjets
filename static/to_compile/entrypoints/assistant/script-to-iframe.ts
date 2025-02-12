@@ -1,9 +1,10 @@
 import { iframeResize } from "iframe-resizer";
 
+const script = document.currentScript as HTMLScriptElement
+const slug = script?.dataset?.objet;
+const origin = new URL(script?.getAttribute("src")).origin
+
 function initScript() {
-  const script = document.currentScript as HTMLScriptElement
-  const slug = script?.dataset?.objet;
-  const origin = new URL(script?.getAttribute("src")).origin
   const parts = [origin]
   if (slug) {
     parts.push("dechet", slug)
@@ -12,7 +13,6 @@ function initScript() {
   const src = parts.join("/")
 
   const iframe = document.createElement("iframe");
-
   const iframeAttributes = {
     src,
     style: "border: none; width: 100%; display: block; margin: 0 auto;",
