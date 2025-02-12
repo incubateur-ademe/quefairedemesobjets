@@ -587,7 +587,11 @@ def refresh_acteur_view(request):
 
 @require_GET
 def get_object_list(request):
-    query = unidecode.unidecode(request.GET.get("q"))
+    query = request.GET.get("q")
+    if not query:
+        return JsonResponse([], safe=False)
+
+    query = unidecode.unidecode(query)
     objets = (
         Objet.objects.annotate(
             libelle_unaccent=Unaccent(Lower("libelle")),
