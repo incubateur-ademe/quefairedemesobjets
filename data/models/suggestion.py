@@ -162,18 +162,10 @@ class Suggestion(models.Model):
     def display_suggestion_details(self):
         template_name = "data/_partials/suggestion_details.html"
         template_context = {"suggestion": self.suggestion}
-        if (
-            self.suggestion_cohorte.type_action == SuggestionAction.CLUSTERING
-            and isinstance(self.suggestion, list)
-        ):
-            cluster_id = self.suggestion[0].get("cluster_id")
-            identifiant_uniques = [s.get("identifiant_unique") for s in self.suggestion]
-            template_context = {
-                "cluster_id": cluster_id,
-                "identifiant_uniques": identifiant_uniques,
-            }
+        if self.suggestion_cohorte.type_action == SuggestionAction.CLUSTERING:
+            template_context = self.suggestion
             template_name = "data/_partials/clustering_suggestion_details.html"
-        if (
+        elif (
             self.suggestion_cohorte.type_action == SuggestionAction.SOURCE_SUPPRESSION
             and isinstance(self.suggestion, dict)
         ):
@@ -181,7 +173,7 @@ class Suggestion(models.Model):
             template_context = {
                 "identifiant_unique": self.suggestion.get("identifiant_unique")
             }
-        if (
+        elif (
             self.suggestion_cohorte.type_action == SuggestionAction.SOURCE_MODIFICATION
             and isinstance(self.suggestion, dict)
             and isinstance(self.contexte, dict)
@@ -200,7 +192,7 @@ class Suggestion(models.Model):
                 "updated_fields": updated_fields,
                 "unchanged_fields": unchanged_fields,
             }
-        if (
+        elif (
             self.suggestion_cohorte.type_action == SuggestionAction.SOURCE_AJOUT
             and isinstance(self.suggestion, dict)
         ):

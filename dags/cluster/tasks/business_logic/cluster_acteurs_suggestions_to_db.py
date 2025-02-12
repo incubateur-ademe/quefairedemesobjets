@@ -1,17 +1,8 @@
 import pandas as pd
-from cluster.tasks.business_logic.cluster_acteurs_metadata import (
-    cluster_acteurs_metadata,
-)
+from cluster.tasks.business_logic.misc.df_metadata_get import df_metadata_get
 from utils.django import django_setup_full
 
 django_setup_full()
-
-from data.models import (  # noqa: E402
-    Suggestion,
-    SuggestionAction,
-    SuggestionCohorte,
-    SuggestionStatut,
-)
 
 
 def cluster_acteurs_suggestions_to_db(
@@ -19,6 +10,20 @@ def cluster_acteurs_suggestions_to_db(
     identifiant_action: str,
     identifiant_execution: str,
 ) -> None:
+
+    from data.models import (
+        Suggestion,
+        SuggestionAction,
+        SuggestionCohorte,
+        SuggestionStatut,
+    )
+    from data.models.change import (
+        COL_CHANGE_ORDER,
+        COL_CHANGE_REASON,
+        COL_CHANGE_TYPE,
+        COL_ENTITY_TYPE,
+    )
+
     """Ecriture des suggestions de clusters en base de données
 
     Args:
@@ -35,17 +40,27 @@ def cluster_acteurs_suggestions_to_db(
         identifiant_execution=identifiant_execution,
         type_action=SuggestionAction.CLUSTERING,
         statut=SuggestionStatut.AVALIDER,
-        metadata=cluster_acteurs_metadata(df),
+        metadata=df_metadata_get(df),
     )
     cohorte.save()
+
+    cols_changes = [
+        COL_CHANGE_ORDER,
+        COL_ENTITY_TYPE,
+        "identifiant_unique",
+        COL_CHANGE_TYPE,
+        COL_CHANGE_REASON,
+    ]
+
     for cluster_id in df["cluster_id"].unique():
         cluster = df[df["cluster_id"] == cluster_id].copy()
         suggestion = Suggestion(
             suggestion_cohorte=cohorte,
             statut=SuggestionStatut.AVALIDER,
             contexte=cluster.to_dict(orient="records"),
-            suggestion=cluster[["cluster_id", "identifiant_unique"]].to_dict(
-                orient="records"
-            ),
+            suggestion={
+                "cluster_id": cluster_id,
+                "changes": cluster[cols_changes].to_dict(orient="records"),
+            },
         )
         suggestion.save()

@@ -22,7 +22,8 @@ from utils import logging_utils as log
 logger = logging.getLogger(__name__)
 
 REPLACE_NULL_MAPPING = {
-    key: "" for key in ["null", "none", "nan", "na", "n/a", "non applicable"]
+    key: ""
+    for key in ["null", "none", "nan", "na", "n/a", "non applicable", "aucun", "-"]
 }
 
 

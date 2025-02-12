@@ -233,6 +233,9 @@ class TestSourceDataNormalize:
             "n/a",
             "non applicable",
             "NON APPLICABLE",
+            "-",
+            "aucun",
+            "Aucun",
         ],
     )
     def test_remove_explicit_null(self, null_value):

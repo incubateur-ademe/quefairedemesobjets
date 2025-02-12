@@ -11,19 +11,36 @@ from datetime import datetime
 from airflow import DAG
 from airflow.models.baseoperator import chain
 from airflow.models.param import Param
+from cluster.config.model import ClusterConfig
 from cluster.dags.ui import (
     UI_PARAMS_SEPARATOR_CLUSTERING,
     UI_PARAMS_SEPARATOR_NORMALIZATION,
     UI_PARAMS_SEPARATOR_SELECTION_ACTEURS,
     UI_PARAMS_SEPARATOR_SELECTION_PARENTS,
 )
-from cluster.tasks.airflow_logic import (
+from cluster.tasks.airflow_logic.cluster_acteurs_clusters_display_task import (
+    cluster_acteurs_clusters_display_task,
+)
+from cluster.tasks.airflow_logic.cluster_acteurs_clusters_validate_task import (
+    cluster_acteurs_clusters_validate_task,
+)
+from cluster.tasks.airflow_logic.cluster_acteurs_config_create_task import (
     cluster_acteurs_config_create_task,
+)
+from cluster.tasks.airflow_logic.cluster_acteurs_normalize_task import (
     cluster_acteurs_normalize_task,
-    cluster_acteurs_selection_from_db_task,
+)
+from cluster.tasks.airflow_logic.cluster_acteurs_parents_choose_new_task import (
+    cluster_acteurs_parents_choose_new_task,
+)
+from cluster.tasks.airflow_logic.cluster_acteurs_read_task import (
+    cluster_acteurs_read_task,
+)
+from cluster.tasks.airflow_logic.cluster_acteurs_suggestions_display_task import (
     cluster_acteurs_suggestions_display_task,
+)
+from cluster.tasks.airflow_logic.cluster_acteurs_suggestions_to_db_task import (
     cluster_acteurs_suggestions_to_db_task,
-    cluster_acteurs_suggestions_validate_task,
 )
 from utils.airflow_params import airflow_params_dropdown_from_mapping
 from utils.django import django_model_fields_attributes_get, django_setup_full
@@ -57,8 +74,191 @@ dropdown_acteur_types = airflow_params_dropdown_from_mapping(
 
 dropdown_acteur_columns = django_model_fields_attributes_get(Acteur)
 
+PARAMS = {
+    "dry_run": Param(
+        True,
+        type="boolean",
+        description_md=f"""
+            🚱 Si coché, aucune tâche d'écriture ne sera effectuée.
+            Ceci permet de tester le DAG rapidement sans peur de
+            casser quoi que ce soit (itérer plus vite)
+            (ex: pas d'écriture des suggestions en DB,
+            donc pas visible dans Django Admin).
+            {UI_PARAMS_SEPARATOR_SELECTION_ACTEURS}""",
+    ),
+    # TODO: permettre de ne sélectionner aucune source = toutes les sources
+    "include_sources": Param(
+        [],
+        type=["null", "array"],
+        # La terminologie Airflow n'est pas très heureuse
+        # mais "examples" est bien la façon de faire des dropdowns
+        # voir https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/params.html
+        examples=dropdown_sources,
+        description_md="""**➕ INCLUSION ACTEURS**: seuls ceux qui proviennent
+            de ces sources (opérateur **OU/OR**)
+
+            💯 Si aucune valeur spécifiée =  tous les acteurs sont inclus
+            """,
+    ),
+    "include_acteur_types": Param(
+        [],
+        type="array",
+        examples=dropdown_acteur_types,
+        description_md="""**➕ INCLUSION ACTEURS**: ceux qui sont de ces types
+             (opérateur **OU/OR**)""",
+    ),
+    "include_only_if_regex_matches_nom": Param(
+        "",
+        type=["null", "string"],
+        description_md="""**➕ INCLUSION ACTEURS**: ceux dont le champ 'nom'
+            correspond à cette expression régulière ([voir recettes](https://www.notion.so/accelerateur-transition-ecologique-ademe/Expressions-r-guli-res-regex-1766523d57d780939a37edd60f367b75))
+
+            🧹 Note: la normalisation basique est appliquée à la volée sur ce
+            champ avant l'application de la regex pour simplifier les expressions
+
+            0️⃣ Si aucune valeur spécifiée =  cette option n'a PAS d'effet
+            {UI_PARAMS_SEPARATOR_SELECTION_PARENTS}""",
+    ),
+    "include_if_all_fields_filled": Param(
+        ["code_postal"],
+        type="array",
+        examples=dropdown_acteur_columns,
+        description_md="""**➕ INCLUSION ACTEURS**: ceux dont tous ces champs
+            sont **remplis** (opérateur **ET/AND**)
+
+            exemple: travailler uniquement sur les acteurs avec SIRET
+             """,
+    ),
+    "exclude_if_any_field_filled": Param(
+        [],
+        type=["null", "array"],
+        examples=dropdown_acteur_columns,
+        description_md=f"""**🛑 EXCLUSION ACTEURS**: ceux dont n'importe quel
+            de ces champs est **rempli** (opérateur **OU/OR**)
+
+            exemple: travailler uniquement sur les acteurs SANS SIRET
+
+            0️⃣ Si aucune valeur spécifiée =  cette option n'a PAS d'effet
+            {UI_PARAMS_SEPARATOR_SELECTION_PARENTS}
+            """,
+    ),
+    "include_parents_only_if_regex_matches_nom": Param(
+        "",
+        type=["null", "string"],
+        description_md=f"""**➕ INCLUSION PARENTS**: ceux dont le champ 'nom'
+            correspond à cette expression régulière ([voir recettes](https://www.notion.so/accelerateur-transition-ecologique-ademe/Expressions-r-guli-res-regex-1766523d57d780939a37edd60f367b75))
+
+            🧹 Note: la normalisation basique est appliquée à la volée sur ce
+            champ avant l'application de la regex pour simplifier les expressions
+
+            0️⃣ Si aucune valeur spécifiée =  cette option n'a PAS d'effet
+
+            {UI_PARAMS_SEPARATOR_NORMALIZATION}""",
+    ),
+    "normalize_fields_basic": Param(
+        [],
+        type=["null", "array"],
+        examples=dropdown_acteur_columns,
+        description_md=r"""Les champs à normaliser de manière basique:
+             - minuscule
+             - conversion des accents
+             - suppression des caractères spéciaux et espaces superflus
+
+            exemple: ' Château de l'île' -> 'chateau de l ile'
+
+            💯 Si aucun champ spécifié =  s'applique à TOUS les champs
+
+            💡 Les normalisations de cette option et des options suivantes
+            sont appliquées dans l'ordre de la UI. Plusieurs normalisations
+            peuvent être appliquées à un même champ à la suite.
+            """,
+    ),
+    "normalize_fields_no_words_size1": Param(
+        ["nom"],
+        type=["null", "array"],
+        examples=dropdown_acteur_columns,
+        description_md=r"""Les champs à normaliser en supprimant les mots
+            de taille 1.
+
+            exemple: 'Place à la montagne' -> 'Place la montagne'
+
+            0️⃣ Si aucun champ spécifié = s'applique à AUCUN champ
+            """,
+    ),
+    "normalize_fields_no_words_size2_or_less": Param(
+        ["nom"],
+        type=["null", "array"],
+        examples=dropdown_acteur_columns,
+        description_md="""Les champs à normaliser en supprimant les mots
+            de taille 2 ou moins.
+
+            exemple: "Place à la montagne" -> "Place montagne"
+
+            0️⃣ Si aucun champ spécifié = s'applique à AUCUN champ
+            """,
+    ),
+    "normalize_fields_no_words_size3_or_less": Param(
+        # Feedback métier: supprimer des mots de taille 3
+        # commence à devenir radical, donc on laisse ce champ
+        # vide par défaut
+        [],
+        type=["null", "array"],
+        examples=dropdown_acteur_columns,
+        description_md=r"""Les champs à normaliser en supprimant les mots
+            de taille 3 ou moins.
+
+            exemple: 'rue de la montagne' -> 'montagne'
+
+            0️⃣ Si aucun champ spécifié = s'applique à AUCUN champ
+            """,
+    ),
+    "normalize_fields_order_unique_words": Param(
+        [],
+        type=["null", "array"],
+        examples=dropdown_acteur_columns,
+        description_md=f"""Les champs à normaliser en ordonnant les mots
+            par ordre alphabétique et en supprimant les doublons.
+
+            exemple: 'rue de la montagne rue' -> 'de la montagne rue'
+
+            💯 Si aucun champ spécifié =  s'applique à TOUS les champs
+
+            {UI_PARAMS_SEPARATOR_CLUSTERING}
+            """,
+    ),
+    "cluster_intra_source_is_allowed": Param(
+        False,
+        type="boolean",
+        description_md="""**🔄 INTRA-SOURCE**: si coché, les acteurs d'une même
+            source peuvent être clusterisés ensemble""",
+    ),
+    "cluster_fields_exact": Param(
+        ["code_postal", "ville"],
+        type="array",
+        examples=dropdown_acteur_columns,
+        description_md=r"""Les champs sur lesquels on fait le groupage exact.
+            exemple: ["code_postal", "ville"]""",
+    ),
+    "cluster_fields_fuzzy": Param(
+        ["nom", "adresse"],
+        type="array",
+        examples=dropdown_acteur_columns,
+        description_md=r"""Les champs sur lesquels on fait le groupage fuzzy.
+            exemple: ["code_postal", "ville"]""",
+    ),
+    "cluster_fuzzy_threshold": Param(
+        0.5,
+        type="number",
+        description_md="""Seuil de similarité pour le groupage fuzzy.
+            0 = pas de similarité, 1 = similarité parfaite""",
+    ),
+}
+for key, param in PARAMS.items():
+    if key not in ClusterConfig.model_fields:
+        raise ValueError(f"Param Airflow {key} non trouvé dans la config")
+
 with DAG(
-    dag_id="cluster_acteurs_suggestions",
+    dag_id="cluster_acteurs_clusters",
     dag_display_name="Cluster - Acteurs - Suggestions",
     default_args={
         "owner": "airflow",
@@ -78,197 +278,17 @@ with DAG(
     },
     description=("Un DAG pour générer des suggestions de clustering pour les acteurs"),
     tags=["cluster", "acteurs", "suggestions"],
-    params={
-        "dry_run": Param(
-            True,
-            type="boolean",
-            description_md=f"""
-            🚱 Si coché, aucune tâche d'écriture ne sera effectuée.
-            Ceci permet de tester le DAG rapidement sans peur de
-            casser quoi que ce soit (itérer plus vite)
-            (ex: pas d'écriture des suggestions en DB,
-            donc pas visible dans Django Admin).
-            {UI_PARAMS_SEPARATOR_SELECTION_ACTEURS}""",
-        ),
-        # TODO: permettre de ne sélectionner aucune source = toutes les sources
-        "include_source_codes": Param(
-            [],
-            type=["null", "array"],
-            # La terminologie Airflow n'est pas très heureuse
-            # mais "examples" est bien la façon de faire des dropdowns
-            # voir https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/params.html
-            examples=dropdown_sources,
-            description_md="""**➕ INCLUSION ACTEURS**: seuls ceux qui proviennent
-            de ces sources (opérateur **OU/OR**)
-
-            💯 Si aucune valeur spécifiée =  tous les acteurs sont inclus
-            """,
-        ),
-        "include_acteur_type_codes": Param(
-            [],
-            type="array",
-            examples=dropdown_acteur_types,
-            description_md="""**➕ INCLUSION ACTEURS**: ceux qui sont de ces types
-             (opérateur **OU/OR**)""",
-        ),
-        "include_only_if_regex_matches_nom": Param(
-            "",
-            type=["null", "string"],
-            description_md="""**➕ INCLUSION ACTEURS**: ceux dont le champ 'nom'
-            correspond à cette expression régulière ([voir recettes](https://www.notion.so/accelerateur-transition-ecologique-ademe/Expressions-r-guli-res-regex-1766523d57d780939a37edd60f367b75))
-
-            🧹 Note: la normalisation basique est appliquée à la volée sur ce
-            champ avant l'application de la regex pour simplifier les expressions
-
-            0️⃣ Si aucune valeur spécifiée =  cette option n'a PAS d'effet
-            {UI_PARAMS_SEPARATOR_SELECTION_PARENTS}""",
-        ),
-        "include_if_all_fields_filled": Param(
-            ["code_postal"],
-            type="array",
-            examples=dropdown_acteur_columns,
-            description_md="""**➕ INCLUSION ACTEURS**: ceux dont tous ces champs
-            sont **remplis** (opérateur **ET/AND**)
-
-            exemple: travailler uniquement sur les acteurs avec SIRET
-             """,
-        ),
-        "exclude_if_any_field_filled": Param(
-            [],
-            type=["null", "array"],
-            examples=dropdown_acteur_columns,
-            description_md=f"""**🛑 EXCLUSION ACTEURS**: ceux dont n'importe quel
-            de ces champs est **rempli** (opérateur **OU/OR**)
-
-            exemple: travailler uniquement sur les acteurs SANS SIRET
-
-            0️⃣ Si aucune valeur spécifiée =  cette option n'a PAS d'effet
-            {UI_PARAMS_SEPARATOR_SELECTION_PARENTS}
-            """,
-        ),
-        "include_parents_only_if_regex_matches_nom": Param(
-            "",
-            type=["null", "string"],
-            description_md=f"""**➕ INCLUSION PARENTS**: ceux dont le champ 'nom'
-            correspond à cette expression régulière ([voir recettes](https://www.notion.so/accelerateur-transition-ecologique-ademe/Expressions-r-guli-res-regex-1766523d57d780939a37edd60f367b75))
-
-            🧹 Note: la normalisation basique est appliquée à la volée sur ce
-            champ avant l'application de la regex pour simplifier les expressions
-
-            0️⃣ Si aucune valeur spécifiée =  cette option n'a PAS d'effet
-
-            {UI_PARAMS_SEPARATOR_NORMALIZATION}""",
-        ),
-        "normalize_fields_basic": Param(
-            [],
-            type=["null", "array"],
-            examples=dropdown_acteur_columns,
-            description_md=r"""Les champs à normaliser de manière basique:
-             - minuscule
-             - conversion des accents
-             - suppression des caractères spéciaux et espaces superflus
-
-            exemple: ' Château de l'île' -> 'chateau de l ile'
-
-            💯 Si aucun champ spécifié =  s'applique à TOUS les champs
-
-            💡 Les normalisations de cette option et des options suivantes
-            sont appliquées dans l'ordre de la UI. Plusieurs normalisations
-            peuvent être appliquées à un même champ à la suite.
-            """,
-        ),
-        "normalize_fields_no_words_size1": Param(
-            ["nom"],
-            type=["null", "array"],
-            examples=dropdown_acteur_columns,
-            description_md=r"""Les champs à normaliser en supprimant les mots
-            de taille 1.
-
-            exemple: 'Place à la montagne' -> 'Place la montagne'
-
-            0️⃣ Si aucun champ spécifié = s'applique à AUCUN champ
-            """,
-        ),
-        "normalize_fields_no_words_size2_or_less": Param(
-            ["nom"],
-            type=["null", "array"],
-            examples=dropdown_acteur_columns,
-            description_md="""Les champs à normaliser en supprimant les mots
-            de taille 2 ou moins.
-
-            exemple: "Place à la montagne" -> "Place montagne"
-
-            0️⃣ Si aucun champ spécifié = s'applique à AUCUN champ
-            """,
-        ),
-        "normalize_fields_no_words_size3_or_less": Param(
-            # Feedback métier: supprimer des mots de taille 3
-            # commence à devenir radical, donc on laisse ce champ
-            # vide par défaut
-            [],
-            type=["null", "array"],
-            examples=dropdown_acteur_columns,
-            description_md=r"""Les champs à normaliser en supprimant les mots
-            de taille 3 ou moins.
-
-            exemple: 'rue de la montagne' -> 'montagne'
-
-            0️⃣ Si aucun champ spécifié = s'applique à AUCUN champ
-            """,
-        ),
-        "normalize_fields_order_unique_words": Param(
-            [],
-            type=["null", "array"],
-            examples=dropdown_acteur_columns,
-            description_md=f"""Les champs à normaliser en ordonnant les mots
-            par ordre alphabétique et en supprimant les doublons.
-
-            exemple: 'rue de la montagne rue' -> 'de la montagne rue'
-
-            💯 Si aucun champ spécifié =  s'applique à TOUS les champs
-
-            {UI_PARAMS_SEPARATOR_CLUSTERING}
-            """,
-        ),
-        "cluster_intra_source_is_allowed": Param(
-            False,
-            type="boolean",
-            description_md="""**🔄 INTRA-SOURCE**: si coché, les acteurs d'une même
-            source peuvent être clusterisés ensemble""",
-        ),
-        "cluster_fields_exact": Param(
-            ["code_postal", "ville"],
-            type="array",
-            examples=dropdown_acteur_columns,
-            description_md=r"""Les champs sur lesquels on fait le groupage exact.
-            exemple: ["code_postal", "ville"]""",
-        ),
-        "cluster_fields_fuzzy": Param(
-            ["nom", "adresse"],
-            type="array",
-            examples=dropdown_acteur_columns,
-            description_md=r"""Les champs sur lesquels on fait le groupage fuzzy.
-            exemple: ["code_postal", "ville"]""",
-        ),
-        "cluster_fuzzy_threshold": Param(
-            0.5,
-            type="number",
-            description_md="""Seuil de similarité pour le groupage fuzzy.
-            0 = pas de similarité, 1 = similarité parfaite""",
-        ),
-    },
+    params=PARAMS,
     schedule=None,
 ) as dag:
     chain(
         cluster_acteurs_config_create_task(dag=dag),
-        cluster_acteurs_selection_from_db_task(dag=dag),
+        cluster_acteurs_read_task(dag=dag),
         cluster_acteurs_normalize_task(dag=dag),
-        # TODO: besoin de refactoriser cette tâche:
-        # - changer cluster_acteurs_suggestions_display pour obtenir une
-        #   df de clusters ignorés
-        # - utiliser cette df pour la tâche d'info
-        # cluster_acteurs_info_size1_task(dag=dag),
+        cluster_acteurs_clusters_display_task(dag=dag),
+        cluster_acteurs_clusters_validate_task(dag=dag),
+        cluster_acteurs_parents_choose_new_task(dag=dag),
+        # cluster_acteurs_parents_choose_data_task(dag=dag),
         cluster_acteurs_suggestions_display_task(dag=dag),
-        cluster_acteurs_suggestions_validate_task(dag=dag),
         cluster_acteurs_suggestions_to_db_task(dag=dag),
     )

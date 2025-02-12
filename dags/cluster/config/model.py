@@ -1,5 +1,21 @@
+"""
+Modèle pydantic pour gérer la configuration
+du DAG de clustering des acteurs. On utilise bien
+le terme "config" et pas seulement "params" car les
+"params" de la UI Airflow sont une sous-partie de ce qui
+créer la config finale.
+"""
+
 from pydantic import BaseModel, Field, field_validator, model_validator
 from utils.airflow_params import airflow_params_dropdown_selected_to_ids
+
+FIELDS_PROTECTED_ALL = [
+    "source_id",
+    "acteur_type_id",
+    "identifiant_unique",
+    "statut",
+    "nombre_enfants",
+]
 
 
 class ClusterConfig(BaseModel):
@@ -16,8 +32,8 @@ class ClusterConfig(BaseModel):
     dry_run: bool
 
     # SELECTION ACTEURS NON-PARENTS
-    include_source_codes: list[str]
-    include_acteur_type_codes: list[str]
+    include_sources: list[str]
+    include_acteur_types: list[str]
     include_only_if_regex_matches_nom: str | None
     include_if_all_fields_filled: list[str]
     exclude_if_any_field_filled: list[str]
@@ -43,10 +59,18 @@ class ClusterConfig(BaseModel):
     # ---------------------------------------
     # Listings & Mappings
     # ---------------------------------------
-    fields_used: list[str]
-    fields_all: list[str]
-    mapping_source_ids_by_codes: dict[str, int]
-    mapping_acteur_type_ids_by_codes: dict[str, int]
+    # On fait la distinction entre les champs meta
+    # qu'on ne souhaite pas transformer
+    fields_protected: list[str]
+    # Et les champs data qui peuvent être transformés
+    # (ex: normalisation). Dans la validation de config
+    # on vient enrichir cette liste avec tous les champs
+    # sélectionnés par l'utilisateur du DAG Airflow
+    fields_transformed: list[str]
+    # Ajouter les mappings à la config facilite le debug
+    # et évite d'avoir à faire des requêtes DB plusieurs fois
+    mapping_sources: dict[str, int]
+    mapping_acteur_types: dict[str, int]
 
     # ---------------------------------------
     # Champs calculés
@@ -87,24 +111,22 @@ class ClusterConfig(BaseModel):
 
         # SOURCE CODES
         # Si aucun code source fourni alors on inclut toutes les sources
-        if not values.get("include_source_codes"):
-            values["include_source_codes"] = []
-            values["include_source_ids"] = values[
-                "mapping_source_ids_by_codes"
-            ].values()
+        if not values.get("include_sources"):
+            values["include_sources"] = []
+            values["include_source_ids"] = values["mapping_sources"].values()
         else:
             # Sinon on résout les codes sources en ids à partir de la sélection
             values["include_source_ids"] = airflow_params_dropdown_selected_to_ids(
-                mapping_ids_by_codes=values["mapping_source_ids_by_codes"],
-                dropdown_selected=values["include_source_codes"],
+                mapping_ids_by_codes=values["mapping_sources"],
+                dropdown_selected=values["include_sources"],
             )
 
         # ACTEUR TYPE CODES
-        if not values.get("include_acteur_type_codes"):
+        if not values.get("include_acteur_types"):
             raise ValueError("Au moins un type d'acteur doit être sélectionné")
         values["include_acteur_type_ids"] = airflow_params_dropdown_selected_to_ids(
-            mapping_ids_by_codes=values["mapping_acteur_type_ids_by_codes"],
-            dropdown_selected=values["include_acteur_type_codes"],
+            mapping_ids_by_codes=values["mapping_acteur_types"],
+            dropdown_selected=values["include_acteur_types"],
         )
 
         """
@@ -145,21 +167,27 @@ class ClusterConfig(BaseModel):
             if not values.get(k):
                 values[k] = []
 
-        # Liste UNIQUE des champs utilisés
-        # Certains champs tels "statut" ne sont pas utilisés en soit pour faire du
-        # clustering (on cluster que les actifs quoi qu'il arrive) mais
-        # sont à préserver de bout-en-bout pour des tâches de type validation
-        # et suivis des données
-        fields_used = ["source_id", "acteur_type_id", "identifiant_unique", "statut"]
+        # Construction de la liste des champs meta et data
+        # qui permet à travers de la pipeline de faire la distinction
+        # entre ce qu'on peut transformer car étant de la donnée (data)
+        # et ce qu'on doit garder inchangé (meta)
+        values["fields_protected"] = FIELDS_PROTECTED_ALL
+        values["fields_transformed"] = []
         for k, v in values.items():
-            if "fields" in k and k != "fields_all" and k != "source_id":
-                fields_used.extend(v)
-        values["fields_used"] = fields_used
-        values["fields_used"] = list(set(fields_used))
+            # On enrichit la liste des champs data avec les champs
+            # sélectionnés dans les différent paramètres de config
+            # à condition qu'ils ne soient pas meta
+            if "fields" in k and k != "fields_protected":
+                values["fields_transformed"] += [
+                    x for x in v if x not in FIELDS_PROTECTED_ALL
+                ]
+        values["fields_transformed"] = list(set(values["fields_transformed"]))
 
         # Si aucun champ pour la normalisation basique = tous les champs
-        # utilisés seront normalisés
-        if values["normalize_fields_basic"]:
-            values["normalize_fields_basic"] = values["fields_used"]
+        # data seront normalisés, pareil pour la norma d'ordre/unicité
+        if not values["normalize_fields_basic"]:
+            values["normalize_fields_basic"] = values["fields_transformed"]
+        if not values["normalize_fields_order_unique_words"]:
+            values["normalize_fields_order_unique_words"] = values["fields_transformed"]
 
         return values

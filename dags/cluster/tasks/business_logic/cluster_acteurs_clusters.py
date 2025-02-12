@@ -10,16 +10,19 @@ exploser la taille des logs, donc on a besoin de refactorer:
     qui afficheront une partie du debug
 """
 
-import json
 import logging
 import re
 
 import numpy as np
 import pandas as pd
+from cluster.tasks.business_logic.misc.cluster_exclude_intra_source import (
+    cluster_exclude_intra_source,
+)
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from slugify import slugify
 from unidecode import unidecode
+from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +55,9 @@ def cluster_strings(
     Returns:
         liste de clusters sous forme de tuples (indices, strings)
     """
-    vectorizer = TfidfVectorizer(tokenizer=str.split, binary=False)
+    vectorizer = TfidfVectorizer(
+        tokenizer=str.split, binary=False, token_pattern=None
+    )  # type: ignore
     tfidf_matrix = vectorizer.fit_transform(strings)
 
     # Compute pairwise cosine similarity between strings
@@ -84,7 +89,9 @@ def cluster_strings(
 def values_to_similarity_matrix(values: list[str]) -> np.ndarray:
     """Compute similarity matrix using TF-IDF vectorization
     on a list of values."""
-    vectorizer = TfidfVectorizer(tokenizer=str.split, binary=False)
+    vectorizer = TfidfVectorizer(
+        tokenizer=str.split, binary=False, token_pattern=None
+    )  # type: ignore
     tfidf_matrix = vectorizer.fit_transform(values)
     return cosine_similarity(tfidf_matrix)
 
@@ -118,7 +125,6 @@ def similarity_matrix_to_tuples(
     tuples.sort(key=lambda x: x[2], reverse=True)
     if indexes:
         tuples = [(indexes[i], indexes[j], score) for i, j, score in tuples]
-    logger.info(f"{tuples=}")
     return tuples
 
 
@@ -176,21 +182,23 @@ def cluster_to_subclusters(
 ) -> list[list[int]]:
     """Scinde un cluster en 1+ sous-clusters en fonction de la similarité des valeurs
     d'une colonne donnée. On s'assure qu'il n'y a pas de sous-clusters dupliqués."""
-    logger.info(f"\n\nrefine_cluster, {column=}, {cluster=}, {threshold=}")
+    # logger.info(f"\n\nrefine_cluster, {column=}, {cluster=}, {threshold=}")
     df_cluster = df.loc[cluster]
     column_values = df_cluster[column].astype(str).values
     similarity_matrix = values_to_similarity_matrix(column_values)  # type: ignore
     tuples = similarity_matrix_to_tuples(similarity_matrix, indexes=cluster)
 
     # Debug
+    """
     for i, j, score in tuples:
         symbol = "🟢" if score >= threshold else "🔴"
         v_i = column_values[cluster.index(i)]
         v_j = column_values[cluster.index(j)]
-        logger.info(f"{symbol} {i=}, {j=}, {v_i=}, {v_j=} {score=}")
+        # logger.info(f"{symbol} {i=}, {j=}, {v_i=}, {v_j=} {score=}")
+    """
 
     sub_clusters = score_tuples_to_clusters(tuples, threshold)
-    logger.info(f"{sub_clusters=}")
+    # logger.info(f"{sub_clusters=}")
     return sub_clusters
 
 
@@ -213,7 +221,7 @@ def cluster_cols_group_fuzzy(df_src, columns, threshold):
         clusters_ref = []
         for cluster in clusters:
             clusters_ref_new = cluster_to_subclusters(df, column, cluster, threshold)
-            logger.info(f"{column=}, {cluster=}, {clusters_ref_new=}")
+            # logger.info(f"{column=}, {cluster=}, {clusters_ref_new=}")
             clusters_ref.extend(clusters_ref_new)
 
         # Only continue with valid clusters for the next refinement step
@@ -225,7 +233,7 @@ def cluster_cols_group_fuzzy(df_src, columns, threshold):
     return result_dfs
 
 
-def cluster_acteurs_suggestions(
+def cluster_acteurs_clusters(
     df: pd.DataFrame,
     cluster_fields_exact: list[str] = [],
     cluster_fields_fuzzy: list[str] = [],
@@ -244,6 +252,7 @@ def cluster_acteurs_suggestions(
     Returns:
         DataFrame de cluster_id -> identifiant_unique
     """
+
     if "__index_src" not in df.columns:
         raise ValueError(
             """La colonne '__index_src' doit être ajoutée à df
@@ -259,9 +268,10 @@ def cluster_acteurs_suggestions(
             raise ValueError(f"Colonne match fuzzy '{col}' pas dans le DataFrame")
 
     # On supprime les lignes avec des valeurs nulles pour les colonnes exact
-    df = df.dropna(
-        subset=cluster_fields_exact + cluster_fields_separate + cluster_fields_fuzzy
-    )
+    # TODO: subtilités à gérer, ex on peut pas drop sur cluster_fields_separate
+    # à cause de source_id qui nulle sur les parents, on devrait certainement
+    # définir config.fields_to_drop_na avec des tests pour + de robustesse
+    df = df.dropna(subset=cluster_fields_exact + cluster_fields_fuzzy)
     # Ordonne df sur les colonnes exactes
     df = df.sort_values(cluster_fields_exact)
 
@@ -279,13 +289,14 @@ def cluster_acteurs_suggestions(
             + ["nom"]
         )
     )
-    logger.info(f"{cols_to_keep=}")
+    # logger.info(f"{cols_to_keep=}")
     df = df[cols_to_keep]
 
     # On groupe par les colonnes exactes
     clusters_size1 = []
     clusters = []
     for exact_keys, exact_rows in df.groupby(cluster_fields_exact):
+        logger.info("\n\n")
         # On ne considère que les clusters de taille 2+
         if len(exact_rows) < 2:
             logger.info(f"🔴 Ignoré: cluster de taille <2: {list(exact_keys)}")
@@ -293,63 +304,47 @@ def cluster_acteurs_suggestions(
             continue
         keys = list(exact_keys)
 
-        # TODO: à déplacer après la logique de clustering
-        # pour pouvoir sélectionner l'acteur avec le meilleur match
-        if cluster_fields_separate:
-            # Le cas où on cherche à séparer les clusters
-            # On cherche d'abord à voir si dans le groupe existant (exact_rows)
-            # Si c'est le cas, on les sépare en plusieurs clusters
-            for _, rows_split in exact_rows.groupby(cluster_fields_separate):
-                if len(rows_split) > 1:
-                    # TODO: gérer le cas split, pour l'instant on exclue juste
-                    # toutes les lignes sauf la première
-                    exact_rows = exact_rows.drop(rows_split.index[1:])
-
-        # On ne considère que les clusters de taille 2+
-        if len(exact_rows) < 2:
-            continue
+        log.preview_df_as_markdown("🔵 Cluster potentiel exact", exact_rows)
 
         # Liste des clusters à considérer, on commence avec rien
         clusters_to_add = []
 
-        logger.info(f"🟡 Cluster potentiel avant fuzzy: taille {len(exact_rows)}")
-        fields_debug = (
-            cluster_fields_exact + cluster_fields_fuzzy + ["identifiant_unique"]
-        )
-        logger.info(
-            json.dumps(exact_rows[fields_debug].to_dict(orient="list"), indent=4)
-        )
-
         # Si on a des champs fuzzy, on cherche à
         # sous-clusteriser sur ces champs
         if cluster_fields_fuzzy:
-            logger.info(f"fields_fuzzy={cluster_fields_fuzzy}")
-            logger.info(f"threshold={cluster_fuzzy_threshold}")
+            # logger.info(f"fields_fuzzy={cluster_fields_fuzzy}")
+            # logger.info(f"threshold={cluster_fuzzy_threshold}")
 
             keys += cluster_fields_fuzzy
             subclusters = cluster_cols_group_fuzzy(
                 exact_rows, cluster_fields_fuzzy, threshold=cluster_fuzzy_threshold
             )
-            logger.info(f"Sous-clusters après fuzzy: {len(subclusters)} sous-clusters")
+            cnt = len(subclusters)
+            status = "🔵" if cnt else "🔴"
+            logger.info(f"{status} Après fuzzy: #{cnt} sous-clusters")
             for i, fuzzy_rows in enumerate(subclusters):
                 fuzzy_keys = keys + [str(i + 1)]
-                logger.info("🟢 Sous-cluster conservé:")
-                logger.info(json.dumps(fuzzy_rows.to_dict(orient="list"), indent=4))
-                clusters_to_add.append((fuzzy_keys, fuzzy_rows))
+                # log.preview_df_as_markdown("🟢 Cluster fuzzy conservé", fuzzy_rows)
+                clusters_to_add.append(("fuzzy", fuzzy_keys, fuzzy_rows))
 
         else:
-            logger.info(
-                "🟢 Cluster conservé (sur la base des champs exacts uniquement)"
-            )
-            logger.info(exact_rows)
-            clusters_to_add.append((keys, exact_rows))
+            # log.preview_df_as_markdown("🟢 Cluster exact conservé", exact_rows)
+            clusters_to_add.append(("exact", keys, exact_rows))
 
-        for keys, rows in clusters_to_add:
+        for ctype, keys, rows in clusters_to_add:
             cluster_id = cluster_id_from_strings(keys)
             rows["cluster_id"] = cluster_id
             values = rows[cluster_fields_fuzzy + ["nom"]]
             logger.info(f"\n🟢 CLUSTER: {cluster_id=}, {keys=}, {values=}")
-            clusters.append(rows.copy())
+
+            kept, lost = cluster_exclude_intra_source(rows)
+            if isinstance(lost, pd.DataFrame):
+                log.preview_df_as_markdown("❌ Acteurs intra-source exclus", lost)
+            if len(kept) < 2:
+                log.preview_df_as_markdown("🔴 Cluster de taille <2", kept)
+                continue
+            log.preview_df_as_markdown(f"🟢 Cluster {ctype} conservé", kept)
+            clusters.append(kept.copy())
 
     if not clusters:
         return pd.DataFrame()
@@ -360,18 +355,10 @@ def cluster_acteurs_suggestions(
     # On ne garde que les clusters de taille 2+
     df_clusters = df_clusters.groupby("cluster_id").filter(lambda x: len(x) >= 2)
 
-    """
-    # Debug pour les clusters de taille 1
-    logger.info("🔴 clusters_size1", clusters_size1)
-    df_clusters_1 = pd.DataFrame(
-        clusters_size1, columns=COLS_GROUP_EXACT_ALWAYS + cluster_fields_exact
-    )
-
-    # Show entries grouped by code_postal and acteur_type_code which have >1 entries
-    issues_villes = df_clusters_1.groupby(["code_postal"]).filter(lambda x: len(x) >= 2)
-
-    logger.info(f"🔴 {issues_villes=}")
-    """
+    # TODO: définir plusieurs type d'acteurs non perdus
+    # (intra source, manque de similarité, etc)
+    # et retourner in dict pour pouvoir afficher dans airflow
+    # df_lost = pd.concat(dfs_lost) if dfs_lost else None
     logger.info(f"🟢 {len(clusters_size1)=}")
     logger.info(f"🟢 {df_clusters["cluster_id"].nunique()=}")
     logger.info(f"🟢 {df_clusters["identifiant_unique"].nunique()=}")

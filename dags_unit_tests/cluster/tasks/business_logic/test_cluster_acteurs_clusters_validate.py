@@ -1,7 +1,8 @@
 import pandas as pd
 import pytest
-
-from dags.cluster.tasks.business_logic import cluster_acteurs_suggestions_validate
+from cluster.tasks.business_logic.cluster_acteurs_clusters_validate import (
+    cluster_acteurs_clusters_validate,
+)
 
 
 class TestClusterActeursSuggestionsValidate:
@@ -9,7 +10,7 @@ class TestClusterActeursSuggestionsValidate:
     def test_issue_acteurs_non_actifs(self):
         df = pd.DataFrame({"statut": ["ACTIF", "INACTIF"]})
         with pytest.raises(ValueError, match="Clusters avec acteurs non-ACTIF"):
-            cluster_acteurs_suggestions_validate(df)
+            cluster_acteurs_clusters_validate(df)
 
     def test_issue_clusters_size1(self):
         df = pd.DataFrame(
@@ -20,7 +21,7 @@ class TestClusterActeursSuggestionsValidate:
             }
         )
         with pytest.raises(ValueError, match="Clusters avec moins de 2 acteurs"):
-            cluster_acteurs_suggestions_validate(df)
+            cluster_acteurs_clusters_validate(df)
 
     def test_issue_acteurs_defined_multiple_times_same_cluster(self):
         # Que l'acteur en question soit répété dans le même cluster
@@ -32,7 +33,7 @@ class TestClusterActeursSuggestionsValidate:
             }
         )
         with pytest.raises(ValueError, match="Acteurs définis plusieurs fois"):
-            cluster_acteurs_suggestions_validate(df)
+            cluster_acteurs_clusters_validate(df)
 
     def test_issue_acteurs_defined_multiple_times_different_clusters(self):
         # Que l'acteur en question soit répété dans différents clusters
@@ -44,7 +45,7 @@ class TestClusterActeursSuggestionsValidate:
             }
         )
         with pytest.raises(ValueError, match="Acteurs définis plusieurs fois"):
-            cluster_acteurs_suggestions_validate(df)
+            cluster_acteurs_clusters_validate(df)
 
     def test_issue_cluster_ids_not_ordered(self):
         # Des cluster_ids non ordonnés (par convention de manière croissante)
@@ -58,7 +59,7 @@ class TestClusterActeursSuggestionsValidate:
             }
         )
         with pytest.raises(ValueError, match="Cluster IDs non ordonnés"):
-            cluster_acteurs_suggestions_validate(df)
+            cluster_acteurs_clusters_validate(df)
 
     def test_working_case(self):
         df = pd.DataFrame(
@@ -68,4 +69,4 @@ class TestClusterActeursSuggestionsValidate:
                 "cluster_id": ["1", "1", "2", "2"],
             }
         )
-        cluster_acteurs_suggestions_validate(df)
+        cluster_acteurs_clusters_validate(df)

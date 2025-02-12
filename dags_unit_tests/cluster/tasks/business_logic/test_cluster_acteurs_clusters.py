@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 import pytest
-from cluster.tasks.business_logic.cluster_acteurs_suggestions import (
-    cluster_acteurs_suggestions,
+from cluster.tasks.business_logic.cluster_acteurs_clusters import (
+    cluster_acteurs_clusters,
     cluster_cols_group_fuzzy,
     cluster_strings,
     score_tuples_to_clusters,
@@ -19,7 +19,7 @@ def df_clusters_to_dict(df: pd.DataFrame) -> dict[str, list[str]]:
     return df.groupby("cluster_id")["identifiant_unique"].apply(list).to_dict()
 
 
-class TestCluster:
+class TestClusterActeursClusters:
 
     # -----------------------------------------------
     # Tests de base
@@ -39,6 +39,7 @@ class TestCluster:
                     "id5-a",
                     "id5-b",
                 ],
+                "source_id": range(1, 8),
                 "source_code": ["s1", "s2", "s3", "s4", "s5", "s6", "s7"],
                 "code_departement": ["75", "75", "75", "75", "75", "53", "53"],
                 "code_postal": [
@@ -72,7 +73,8 @@ class TestCluster:
         )
 
     def test_cols_group_exact(self, df_basic):
-        df_clusters = cluster_acteurs_suggestions(
+
+        df_clusters = cluster_acteurs_clusters(
             df_basic,
             cluster_fields_exact=["ville"],
             cluster_fields_fuzzy=[],
@@ -95,13 +97,13 @@ class TestCluster:
         """On s'assure que la fonction soulève une exception
         pour les colonnes manquantes dans le DataFrame"""
         with pytest.raises(ValueError, match="'existe_pas' pas dans le DataFrame"):
-            cluster_acteurs_suggestions(df_basic, cluster_fields_exact=["existe_pas"])
+            cluster_acteurs_clusters(df_basic, cluster_fields_exact=["existe_pas"])
 
     def test_validation_cols_group_fuzzy(self, df_basic):
         """On s'assure que la fonction soulève une exception
         pour les colonnes manquantes dans le DataFrame"""
         with pytest.raises(ValueError, match="'existe_pas' pas dans le DataFrame"):
-            cluster_acteurs_suggestions(df_basic, cluster_fields_fuzzy=["existe_pas"])
+            cluster_acteurs_clusters(df_basic, cluster_fields_fuzzy=["existe_pas"])
 
     # -----------------------------------------------
     # Tests sur la suppression des clusters de taille 1
@@ -120,6 +122,7 @@ class TestCluster:
                     "id3",
                     "id4",
                 ],
+                "source_id": range(1, 5),
                 "code_departement": ["13", "75", "53", "13"],
                 "code_postal": ["13000", "75000", "53000", "13000"],
                 "ville": ["Marseille", "Paris", "Laval", "Marseille"],
@@ -130,7 +133,7 @@ class TestCluster:
     def test_clusters_of_one_are_removed(self, df_some_clusters_of_one):
         """On vérifie qu'on supprime les clusters de taille 1 mais
         pas les autres de taille 2+"""
-        df_clusters = cluster_acteurs_suggestions(
+        df_clusters = cluster_acteurs_clusters(
             df_some_clusters_of_one,
             cluster_fields_exact=["ville"],
             cluster_fields_fuzzy=[],
@@ -149,6 +152,7 @@ class TestCluster:
         return pd.DataFrame(
             {
                 "__index_src": range(1, 8),
+                "source_id": range(1, 8),
                 "code_postal": ["10000" for _ in range(7)],
                 "identifiant_unique": ["id" + str(i) for i in range(0, 7)],
                 "nom": [
@@ -165,7 +169,8 @@ class TestCluster:
         )
 
     def test_cols_group_fuzzy_single(self, df_cols_group_fuzzy):
-        df_clusters = cluster_acteurs_suggestions(
+
+        df_clusters = cluster_acteurs_clusters(
             df_cols_group_fuzzy,
             # code_postal est en dur dans la fonction de clustering
             cluster_fields_exact=["code_postal"],
@@ -191,6 +196,66 @@ class TestCluster:
                 "id5",  # "centre commercial carrefour"
             ],
         }
+
+    def test_parent_not_discarded(self):
+        """On vérifie que les parents ne sont pas ignorés
+        si les enfants sont ignorés"""
+        df_norm = pd.DataFrame(
+            [
+                {
+                    "identifiant_unique": "id15",
+                    "acteur_type_code": "at1",
+                    "code_postal": "00004",
+                    "ville": "v4",
+                    "nom": "acteur c4 my s1",
+                    "acteur_type_id": 3144,
+                    "nombre_enfants": 0,
+                    "statut": "ACTIF",
+                    "source_id": 2513,
+                    "source_code": "s2",
+                    "__index_src": 6,
+                },
+                {
+                    "identifiant_unique": "id13",
+                    "acteur_type_code": None,
+                    "code_postal": "00004",
+                    "ville": "v4",
+                    "nom": "acteur c4 my p1 s1",
+                    "acteur_type_id": 3144,
+                    "nombre_enfants": 0,
+                    "statut": "ACTIF",
+                    "source_id": None,
+                    "source_code": None,
+                    "__index_src": 7,
+                },
+                {
+                    "identifiant_unique": "id14",
+                    "acteur_type_code": "at1",
+                    "code_postal": "00004",
+                    "ville": "v4",
+                    "nom": "acteur c4 my s1",
+                    "acteur_type_id": 3144,
+                    "nombre_enfants": 0,
+                    "statut": "ACTIF",
+                    "source_id": 2512,
+                    "source_code": "s1",
+                    "__index_src": 8,
+                },
+            ]
+        )
+        df_clusters = cluster_acteurs_clusters(
+            df=df_norm,
+            cluster_fields_exact=["code_postal", "ville"],
+            cluster_fields_fuzzy=["nom"],
+            cluster_fields_separate=["source_id"],
+            cluster_fuzzy_threshold=0.5,
+        )
+        assert df_clusters["cluster_id"].nunique() == 1
+        assert sorted(df_clusters["identifiant_unique"].tolist()) == [
+            "id13",
+            "id14",
+            "id15",
+        ]
 
     # -----------------------------------------------
     # Tests sur la séparation des clusters
@@ -243,6 +308,7 @@ class TestClusterColsGroupFuzzy:
     def df_cols_group_fuzzy(self):
         data = {
             "__index_src": range(0, 8),
+            "source_id": range(0, 8),
             "col1": [
                 # cluster 1
                 "apple orange",
@@ -294,6 +360,7 @@ class TestClusterColsGroupFuzzy:
         assert clusters[1]["__index_src"].tolist() == [5, 6]
 
     def test_cols_group_fuzzy_multi_handles_empties(self):
+
         df = pd.DataFrame(
             {
                 "__index_src": range(1, 3),
@@ -313,6 +380,7 @@ class TestClusterColsGroupFuzzy:
 class TestSimilarityMatrixToTuples:
 
     def test_basic(self):
+
         matrix = np.array([[1, 0.8, 0.4], [0.8, 1, 0.9], [0.4, 0.9, 1]])
         expected = [
             (1, 2, 0.9),
@@ -322,6 +390,7 @@ class TestSimilarityMatrixToTuples:
         assert similarity_matrix_to_tuples(matrix) == expected
 
     def test_index_replacements(self):
+
         matrix = np.array([[1, 0.8, 0.4], [0.8, 1, 0.9], [0.4, 0.9, 1]])
         expected = [
             ("b", "c", 0.9),
@@ -359,17 +428,20 @@ class TestScoreTuplesToClusters:
         assert score_tuples_to_clusters(data, threshold) == expected
 
     def test_score_tuples_to_clusters_empty_exception(self):
+
         data = []
         threshold = 0.5
         with pytest.raises(ValueError, match="Liste de tuples d'entrée vide"):
             score_tuples_to_clusters(data, threshold)
 
     def test_score_tuples_to_clusters_no_clusters_below_threshold(self):
+
         data = [(1, 2, 0.3), (3, 4, 0.2)]
         threshold = 0.5
         assert score_tuples_to_clusters(data, threshold) == []
 
     def test_score_tuples_to_clusters_all_in_one_cluster(self):
+
         data = [(1, 2, 0.9), (2, 3, 0.8), (3, 4, 0.7)]
         threshold = 0.5
         expected = [[1, 2, 3, 4]]
