@@ -650,6 +650,17 @@ class WithParentActeurMixin(models.Model):
 
 
 class RevisionActeur(WithParentActeurMixin, BaseActeur):
+    fields_to_exclude_from_clone = [
+        "identifiant_unique",
+        "identifiant_externe",
+        "proposition_services",
+        "acteur_type",
+        "acteur_services",
+        "action_principale",
+        "source",
+        "labels",
+    ]
+
     class Meta:
         verbose_name = "ACTEUR de l'EC - CORRIGÉ"
         verbose_name_plural = "ACTEURS de l'EC - CORRIGÉ"
@@ -738,17 +749,6 @@ class RevisionActeur(WithParentActeurMixin, BaseActeur):
             self.identifiant_externe = acteur.identifiant_externe
             self.source = acteur.source
         return acteur
-
-    fields_to_exclude_from_clone = [
-        "identifiant_unique",
-        "identifiant_externe",
-        "proposition_services",
-        "acteur_type",
-        "acteur_services",
-        "action_principale",
-        "source",
-        "labels",
-    ]
 
     def create_parent(self):
         acteur = Acteur.objects.get(pk=self.pk)
