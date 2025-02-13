@@ -200,12 +200,13 @@ class LabelQualite(models.Model):
     code = models.CharField(
         max_length=255,
         unique=True,
-        blank=True,
-        null=True,
+        blank=False,
+        null=False,
         help_text=(
-            "This field is used to manage the import of data."
-            " Any update can break the import data process"
+            "Ce champ est utilisé lors de l'import de données, il ne doit pas être"
+            " mis à jour sous peine de casser l'import de données"
         ),
+        validators=[CodeValidator()],
     )
     afficher = models.BooleanField(default=True)
     bonus = models.BooleanField(
