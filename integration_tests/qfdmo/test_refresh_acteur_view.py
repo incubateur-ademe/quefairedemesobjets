@@ -7,4 +7,4 @@ class TestRefreshActorView:
         url = "/qfdmo/refresh_acteur_view"
         response = client.get(url, HTTP_REFERER="http://example.com")
         assert response.status_code == 302
-        assert response["Location"] == "http://localhost:8080"
+        assert response["Location"] == "https://lvao.dev"

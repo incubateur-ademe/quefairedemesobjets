@@ -22,6 +22,10 @@ check:
 update-requirements:
 	$(PYTHON) -m pip install --no-deps -r requirements.txt -r dev-requirements.txt
 
+.PHONY: init-certs
+init-certs:
+	mkcert assistant.dev lvao.dev
+	mv *.pem ./nginx/certs
 
 .PHONY: init-venv
 init-venv:
