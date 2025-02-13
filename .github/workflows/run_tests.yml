@@ -94,7 +94,6 @@ jobs:
       - name: Add hosts to /etc/hosts
         run: |
             sudo echo "127.0.0.1 lvao.dev" | sudo tee -a /etc/hosts
-            sudo echo "127.0.0.1 assistant.dev" | sudo tee -a /etc/hosts
       - run: >-
           docker run -d -p 80:80
           -v ${{ github.workspace }}/nginx/servers.conf:/etc/nginx/servers.conf:ro
