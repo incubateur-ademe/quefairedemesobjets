@@ -1,3 +1,4 @@
+from django.contrib import admin
 from django.contrib.postgres.lookups import Unaccent
 from django.db.models import CharField, TextField
 from django.http import HttpRequest
@@ -45,3 +46,7 @@ class CodeLibelleModelMixin:
         if obj:
             return ["code"]
         return []
+
+
+class CodeLibelleModelAdmin(CodeLibelleModelMixin, admin.ModelAdmin):
+    pass

@@ -655,14 +655,17 @@ def parents_cache_invalidate():
     PARENTS_CACHE = None
 
 
-class WithParentActeurMixin(models.Model):
+class RevisionActeur(BaseActeur):
+    parent_model_name = "RevisionActeurParent"
+
     class Meta:
-        abstract = True
+        verbose_name = "ACTEUR de l'EC - CORRIGÉ"
+        verbose_name_plural = "ACTEURS de l'EC - CORRIGÉ"
 
     parent = models.ForeignKey(
-        "self",
+        "RevisionActeurParent",
         verbose_name="Dédupliqué par",
-        help_text="Acteur «chapeau» utilisé pour dédupliquer cet acteur",
+        help_text="RevisionActeur «chapeau» utilisé pour dédupliquer cet acteur",
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
@@ -673,12 +676,6 @@ class WithParentActeurMixin(models.Model):
     @property
     def is_parent(self):
         return self.pk and self.duplicats.exists()
-
-
-class RevisionActeur(WithParentActeurMixin, BaseActeur):
-    class Meta:
-        verbose_name = "ACTEUR de l'EC - CORRIGÉ"
-        verbose_name_plural = "ACTEURS de l'EC - CORRIGÉ"
 
     nom = models.CharField(max_length=255, blank=True, null=True)
     acteur_type = models.ForeignKey(
@@ -865,16 +862,38 @@ class RevisionActeur(WithParentActeurMixin, BaseActeur):
         )
 
 
+class RevisionActeurParent(RevisionActeur):
+    class Meta:
+        proxy = True
+        verbose_name = "Parent"
+        verbose_name_plural = "Parents"
+
+
 """
 Model to display all acteurs in admin
 """
 
 
-class VueActeur(WithParentActeurMixin, BaseActeur):
+class VueActeur(BaseActeur):
     class Meta:
         managed = False
         verbose_name = "Vue sur l'acteur"
         verbose_name_plural = "Vues sur tous les acteurs"
+
+    parent = models.ForeignKey(
+        "self",
+        verbose_name="Dédupliqué par",
+        help_text="Acteur «chapeau» utilisé pour dédupliquer cet acteur",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="duplicats",
+        validators=[clean_parent],
+    )
+
+    @property
+    def is_parent(self):
+        return self.pk and self.duplicats.exists()
 
 
 class DisplayedActeur(BaseActeur):
