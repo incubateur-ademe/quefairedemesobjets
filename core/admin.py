@@ -25,3 +25,23 @@ class NotEditableMixin:
 
     def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
         return False
+
+
+class OnlyEditableMixin:
+    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+
+class CodeLibelleModelMixin:
+    list_display = ("libelle", "code")
+    search_fields = ["libelle", "code"]
+    search_help_text = "Recherche sur le libellé ou le code"
+
+    # le champ code ne doit pas être modifiable
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return ["code"]
+        return []
