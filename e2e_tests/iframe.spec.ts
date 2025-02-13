@@ -31,7 +31,7 @@ async function expectIframeAttributes(iframeElement) {
 }
 
 test("Desktop | iframe formulaire is loaded with correct parameters", async ({ page }) => {
-  await page.goto("https://lvao.dev/test_iframe", { waitUntil: "networkidle" });
+  await page.goto("https://assistant.dev/test_iframe", { waitUntil: "networkidle" });
 
   const titlePage = await page.title();
   expect(titlePage).toBe("IFrame test : QFDMO");
@@ -53,7 +53,7 @@ test("Desktop | legacy iframe urls still work", async ({ page }) => {
 });
 
 test("Desktop | form is visible in the iframe", async ({ page }) => {
-  await page.goto("https://lvao.dev/test_iframe", { waitUntil: "networkidle" });
+  await page.goto("https://assistant.dev/test_iframe", { waitUntil: "networkidle" });
 
   const iframeElement = await page.$("iframe");
   const iframe = await iframeElement?.contentFrame();
@@ -65,10 +65,10 @@ test("Desktop | form is visible in the iframe", async ({ page }) => {
 });
 
 test("Desktop | iframe with 0px parent height displays correctly", async ({ page }) => {
-  await page.goto("https://lvao.dev/test_iframe?carte=1", { waitUntil: "networkidle" });
+  await page.goto("https://assistant.dev/test_iframe?carte=1", { waitUntil: "networkidle" });
   await expect(page).toHaveScreenshot("iframe.png");
 
-  await page.goto("https://lvao.dev/test_iframe?no-height=1&carte=1", { waitUntil: "networkidle" });
+  await page.goto("https://assistant.dev/test_iframe?no-height=1&carte=1", { waitUntil: "networkidle" });
   await page.evaluate(() => {
     document.querySelector("[data-testid=iframe-no-height-wrapper]")?.setAttribute("style", "");
   });
@@ -77,7 +77,7 @@ test("Desktop | iframe with 0px parent height displays correctly", async ({ page
 });
 
 test("Desktop | iframe cannot read the referrer when referrerPolicy is set to no-referrer", async ({ page }) => {
-  await page.goto("https://lvao.dev/test_iframe?carte=1&noreferrer", { waitUntil: "networkidle" });
+  await page.goto("https://assistant.dev/test_iframe?carte=1&noreferrer", { waitUntil: "networkidle" });
 
   // Get the content frame of the iframe
   const iframeElement = await page.$("iframe[referrerpolicy='no-referrer']");
@@ -92,7 +92,7 @@ test("Desktop | iframe cannot read the referrer when referrerPolicy is set to no
 });
 
 test("iframe can read the referrer when referrerPolicy is not set", async ({ page }) => {
-  await page.goto("https://lvao.dev/test_iframe?carte=1", { waitUntil: "networkidle" });
+  await page.goto("https://assistant.dev/test_iframe?carte=1", { waitUntil: "networkidle" });
 
   // Get the content frame of the iframe
   const iframeElement = await page.$("iframe[data-testid='assistant']");
@@ -103,7 +103,7 @@ test("iframe can read the referrer when referrerPolicy is not set", async ({ pag
   const referrer = await iframe.evaluate(() => document.referrer);
 
   // Assert that the referrer is set and not undefined
-  expect(referrer).toBe('https://lvao.dev/test_iframe?carte=1');
+  expect(referrer).toBe('https://assistant.dev/test_iframe?carte=1');
 });
 
 test("Desktop | iframe mode is kept during navigation", async ({ browser, page }) => {
