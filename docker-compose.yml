@@ -47,7 +47,7 @@ services:
       - ./nginx/servers.conf:/etc/nginx/servers.conf
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/certs:/etc/nginx/ssl
-    profiles: [proxy]
+    profiles: [lvao]
   airflow-db:
     image: postgres:15
     environment:
