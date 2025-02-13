@@ -11,7 +11,7 @@ from qfdmo.models import (
     RevisionActeur,
     RevisionPropositionService,
 )
-from qfdmo.models.acteur import DisplayedActeur, LabelQualite, Source
+from qfdmo.models.acteur import ActeurReprise, DisplayedActeur, LabelQualite, Source
 from unit_tests.qfdmo.acteur_factory import (
     ActeurFactory,
     ActeurServiceFactory,
@@ -268,9 +268,79 @@ class TestCreateRevisionActeur:
 
 @pytest.mark.django_db
 class TestCreateRevisionActeurCreateParent:
-    def test_create_parent_from_acteur(self):
+
+    @pytest.fixture
+    def acteurs_fields(self):
+        acteur_type = ActeurTypeFactory()
+        action_principale = ActionFactory()
+        return {
+            "nom": "Test Nom",
+            "description": "Test Description",
+            "acteur_type": acteur_type,
+            "adresse": "123 rue Test",
+            "adresse_complement": "Apt 4B",
+            "code_postal": "75001",
+            "ville": "Paris",
+            "url": "https://test.com",
+            "email": "test@test.com",
+            "location": Point(2.349014, 48.864716),  # Paris
+            "telephone": "0123456789",
+            "nom_commercial": "Test Commercial",
+            "nom_officiel": "Test Officiel",
+            "siren": "123456789",
+            "siret": "12345678901234",
+            "identifiant_externe": "TEST123",
+            "statut": "ACTIF",
+            "naf_principal": "4791A",
+            "commentaires": "Test Commentaires",
+            "horaires_osm": "Mo-Fr 09:00-18:00",
+            "horaires_description": "Ouvert en semaine",
+            "public_accueilli": "Particuliers",
+            "reprise": ActeurReprise.UN_POUR_UN,
+            "exclusivite_de_reprisereparation": True,
+            "uniquement_sur_rdv": True,
+            "action_principale": action_principale,
+        }
+
+    def test_create_parent_from_revision_acteur(self, acteurs_fields):
         acteur = ActeurFactory()
         revision_acteur = RevisionActeurFactory(
+            **acteurs_fields, identifiant_unique=acteur.identifiant_unique
+        )
+
+        # Create parent
+        revision_acteur_parent = revision_acteur.create_parent()
+        for field in set(acteurs_fields.keys()) - {"identifiant_externe"}:
+            assert getattr(revision_acteur_parent, field) == getattr(
+                revision_acteur, field
+            )
+            if field != "statut":
+                assert getattr(revision_acteur_parent, field) != getattr(acteur, field)
+
+        assert (
+            revision_acteur_parent.identifiant_unique
+            != revision_acteur.identifiant_unique
+        )
+
+        # reset values
+        assert revision_acteur_parent.source is None
+        assert revision_acteur_parent.identifiant_externe is None
+
+        # parent is not linked to any labels, services or proposition services
+        assert revision_acteur_parent.labels.count() == 0
+        assert revision_acteur_parent.acteur_services.count() == 0
+        assert revision_acteur_parent.proposition_services.count() == 0
+
+        # Parent is well set on child
+        assert revision_acteur.parent == revision_acteur_parent
+
+    def test_create_parent_from_acteur(self, acteurs_fields):
+        acteur = ActeurFactory()
+        del acteurs_fields["nom"]
+        del acteurs_fields["location"]
+        del acteurs_fields["acteur_type"]
+        revision_acteur = RevisionActeurFactory(
+            **acteurs_fields,
             identifiant_unique=acteur.identifiant_unique,
             nom=None,
             location=None,
@@ -278,6 +348,13 @@ class TestCreateRevisionActeurCreateParent:
         )
 
         revision_acteur_parent = revision_acteur.create_parent()
+
+        for field in set(acteurs_fields.keys()) - {
+            "identifiant_externe",
+        }:
+            assert getattr(revision_acteur_parent, field) == getattr(
+                revision_acteur, field
+            )
 
         assert revision_acteur_parent.nom == acteur.nom
         assert revision_acteur_parent.acteur_type == acteur.acteur_type
@@ -287,21 +364,17 @@ class TestCreateRevisionActeurCreateParent:
         assert revision_acteur_parent.acteur_type != revision_acteur.acteur_type
         assert revision_acteur_parent.location != revision_acteur.location
 
-    def test_create_parent_from_revision_acteur(self):
-        acteur = ActeurFactory()
-        revision_acteur = RevisionActeurFactory(
-            identifiant_unique=acteur.identifiant_unique
-        )
+        # reset values
+        assert revision_acteur_parent.source is None
+        assert revision_acteur_parent.identifiant_externe is None
 
-        revision_acteur_parent = revision_acteur.create_parent()
+        # parent is not linked to any labels, services or proposition services
+        assert revision_acteur_parent.labels.count() == 0
+        assert revision_acteur_parent.acteur_services.count() == 0
+        assert revision_acteur_parent.proposition_services.count() == 0
 
-        assert revision_acteur_parent.nom != acteur.nom
-        assert revision_acteur_parent.acteur_type != acteur.acteur_type
-        assert revision_acteur_parent.location != acteur.location
-
-        assert revision_acteur_parent.nom == revision_acteur.nom
-        assert revision_acteur_parent.acteur_type == revision_acteur.acteur_type
-        assert revision_acteur_parent.location == revision_acteur.location
+        # Parent is well set on child
+        assert revision_acteur.parent == revision_acteur_parent
 
     def test_create_parent_source(self):
         acteur = ActeurFactory()
@@ -344,10 +417,14 @@ class TestCreateRevisionActeurCreateParent:
 class TestRevisionActeurDuplicate:
     def test_duplicate(self):
         acteur = ActeurFactory(nom_commercial="Nom commercial")
+        action = ActionFactory()
+        acteur_type = ActeurTypeFactory()
         revision_acteur = RevisionActeurFactory(
             identifiant_unique=acteur.identifiant_unique,
             nom_commercial=None,
             nom="Nom Revision",
+            action_principale=action,
+            acteur_type=acteur_type,
         )
         revision_acteur_duplicate = revision_acteur.duplicate()
 
