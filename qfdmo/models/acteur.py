@@ -295,7 +295,6 @@ class DisplayedActeurManager(NomAsNaturalKeyManager):
 
 
 class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
-
     class Meta:
         abstract = True
 
@@ -558,21 +557,24 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
     def has_label_reparacteur(self):
         return self.labels.filter(code="reparacteur").exists()
 
+    fields_to_exclude_from_clone = [
+        # TODO : adapteur
+        "identifiant_unique",
+        "identifiant_externe",
+        "proposition_services",
+        "acteur_type",
+        "acteur_services",
+        "source",
+        "labels",
+    ]
+
     def _get_dict_for_clone(self):
-        excluded_fields = [
-            "identifiant_unique",
-            "identifiant_externe",
-            "proposition_services",
-            "acteur_type",
-            "acteur_services",
-            "action_principale",
-            "source",
-            "labels",
-        ]
-        acteur_dict = model_to_dict(self, exclude=excluded_fields)
-        acteur_dict["acteur_type"] = self.acteur_type
-        acteur_dict["action_principale"] = self.action_principale
-        return {k: v for k, v in acteur_dict.items() if v}
+        acteur = type(self)(pk=self.pk)
+        return {
+            field.name: getattr(acteur, field.name)
+            for field in self._meta.fields
+            if field.name not in self.fields_to_exclude_from_clone
+        }
 
 
 def clean_parent(parent):
@@ -736,6 +738,17 @@ class RevisionActeur(WithParentActeurMixin, BaseActeur):
             self.identifiant_externe = acteur.identifiant_externe
             self.source = acteur.source
         return acteur
+
+    fields_to_exclude_from_clone = [
+        "identifiant_unique",
+        "identifiant_externe",
+        "proposition_services",
+        "acteur_type",
+        "acteur_services",
+        "action_principale",
+        "source",
+        "labels",
+    ]
 
     def create_parent(self):
         acteur = Acteur.objects.get(pk=self.pk)
@@ -919,7 +932,6 @@ class DisplayedActeur(BaseActeur):
 
 
 class DisplayedActeurTemp(BaseActeur):
-
     uuid = models.CharField(max_length=255, default=shortuuid.uuid, editable=False)
 
     labels = models.ManyToManyField(
