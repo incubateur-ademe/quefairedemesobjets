@@ -374,7 +374,7 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
             # Cloner l'objet actuel
             parent = revision_acteur.parent or revision_acteur.create_parent()
             return HttpResponseRedirect(
-                reverse("admin:qfdmo_revisionacteur_change", args=[parent.pk])
+                reverse("admin:qfdmo_revisionacteur_change", args=[quote(parent.pk)])
             )
         if "duplicate_instance" in request.POST:
             if not revision_acteur.parent:
@@ -383,7 +383,7 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
             return HttpResponseRedirect(
                 reverse(
                     "admin:qfdmo_revisionacteur_change",
-                    args=[revision_acteur.identifiant_unique],
+                    args=[quote(revision_acteur.identifiant_unique)],
                 )
             )
 

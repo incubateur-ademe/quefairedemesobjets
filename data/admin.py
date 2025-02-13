@@ -84,11 +84,16 @@ class SuggestionAdmin(admin.ModelAdmin):
 
     def cohorte(self, obj):
         coh = obj.suggestion_cohorte
-        return format_html(f"{coh.identifiant_action}<br/>{coh.identifiant_execution}")
+        return format_html(
+            "{}<br/>{}", coh.identifiant_action, coh.identifiant_execution
+        )
 
     def acteur_link_html(self, id):
-        return f"""<a target='_blank'
-        href='/admin/qfdmo/displayedacteur/{id}/change/'>{id}</a>"""
+        return format_html(
+            '<a target="_blank" href="/admin/qfdmo/displayedacteur/{}/change/">{}</a>',
+            id,
+            id,
+        )
 
     def changements_suggeres(self, obj):
         return obj.display_suggestion_details
@@ -103,8 +108,9 @@ class SuggestionAdmin(admin.ModelAdmin):
             and "error" in obj.metadata
         ):
             return format_html(
-                f"<span style='color: red;'>{obj.get_statut_display()}</span>"
-                f"<br>{obj.metadata['error']}"
+                '<span style="color: red;">{}</span><br>{}',
+                obj.get_statut_display(),
+                obj.metadata["error"],
             )
         return obj.get_statut_display()
 

@@ -10,6 +10,7 @@ import opening_hours
 import orjson
 import shortuuid
 from django.conf import settings
+from django.contrib.admin.utils import quote
 from django.contrib.gis.db import models
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point, Polygon
@@ -363,7 +364,7 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
     @property
     def change_url(self):
         return reverse(
-            "admin:qfdmo_displayedacteur_change", args=[self.identifiant_unique]
+            "admin:qfdmo_displayedacteur_change", args=[quote(self.identifiant_unique)]
         )
 
     @property
