@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = decouple.config("SECRET_KEY")
 
-BASE_URL = decouple.config("BASE_URL", default="http://localhost:8000")
+BASE_URL = decouple.config("BASE_URL", default="https://lvao.dev")
 CMS_BASE_URL = decouple.config(
     "CMS_BASE_URL", default="https://longuevieauxobjets.ademe.fr"
 )
@@ -35,7 +35,7 @@ DEBUG = decouple.config("DEBUG", default=False, cast=bool)
 STIMULUS_DEBUG = decouple.config("STIMULUS_DEBUG", default=False, cast=bool)
 POSTHOG_DEBUG = decouple.config("POSTHOG_DEBUG", default=False, cast=bool)
 ALLOWED_HOSTS = decouple.config(
-    "ALLOWED_HOSTS", default="lvao.dev,assistant.dev,127.0.0.1,localhost", cast=str
+    "ALLOWED_HOSTS", default="lvao.dev,assistant.dev", cast=str
 ).split(",")
 
 # Application definition
@@ -350,7 +350,7 @@ STORAGES = {
 }
 
 AIRFLOW_WEBSERVER_REFRESHACTEUR_URL = decouple.config(
-    "AIRFLOW_WEBSERVER_REFRESHACTEUR_URL", cast=str, default="http://localhost:8080"
+    "AIRFLOW_WEBSERVER_REFRESHACTEUR_URL", cast=str, default="https://lvao.dev"
 )
 
 USE_I18N = True
@@ -382,10 +382,10 @@ ASSISTANT = {
     "MATOMO_ID": decouple.config("ASSISTANT_MATOMO_ID", default=82, cast=int),
     "HOSTS": decouple.config(
         "ASSISTANT_HOSTS",
-        default="127.0.0.1:8000,0.0.0.0:8000,localhost:8000,assistant.deb",
+        default="assistant.dev",
         cast=str,
     ).split(","),
-    "BASE_URL": decouple.config("ASSISTANT_BASE_URL", default="http://localhost:8000"),
+    "BASE_URL": decouple.config("ASSISTANT_BASE_URL", default="https://assistant.dev"),
     "POSTHOG_KEY": decouple.config(
         "ASSISTANT_POSTHOG_KEY",
         default="phc_fSfhoWDOUxZdKWty16Z3XfRiAoWd1qdJK0N0z9kQHJr",  # pragma: allowlist secret  # noqa: E501
