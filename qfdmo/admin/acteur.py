@@ -312,6 +312,7 @@ class VueActeurChildInline(RevisionActeurChildInline):
 
 
 class RevisionActeurParentAdmin(admin.ModelAdmin):
+    search_fields = list(BaseActeurAdmin.search_fields)
 
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
