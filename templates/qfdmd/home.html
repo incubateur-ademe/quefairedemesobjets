@@ -23,21 +23,23 @@
         <p class="qf-m-0">
         En panne d’inspiration ? Essayez une des suggestions ci‑dessous.
         </p>
-        <div
+        <ul
             class="qf-flex qf-gap-x-2w qf-gap-y-3w
             qf-flex-wrap qf-items-center qf-justify-center "
         >
             {% for suggestion in object_list %}
             {% with suggestion.produit as produit %}
+            <li class="qf-list-none qf-p-0">
             <a
                 class="qf-btn"
                 href="{% url 'qfdmd:synonyme-detail' slug=produit.slug %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}"
             >
                 {{ produit.nom|capfirst }}
             </a>
+            </li>
             {% endwith %}
             {% endfor %}
-        </div>
+        </ul>
     </div>
 
     <div class="qf-max-w-3xl qf-mx-auto">
