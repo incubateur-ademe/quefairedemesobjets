@@ -21,6 +21,23 @@ from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
 
+REPLACE_NULL_MAPPING = {
+    key: ""
+    for key in ["null", "none", "nan", "na", "n/a", "non applicable", "aucun", "-"]
+}
+
+
+def _replace_null_insensitive(value):
+    if isinstance(value, str) and value.strip().lower() in REPLACE_NULL_MAPPING:
+        return ""
+    if isinstance(value, list):
+        return [v for v in value if v.strip().lower() not in REPLACE_NULL_MAPPING]
+    return value
+
+
+def _replace_explicit_null_values(df: pd.DataFrame) -> pd.DataFrame:
+    return df.map(_replace_null_insensitive)
+
 
 def get_transformation_function(function_name, dag_config):
     def transformation_function(row):
@@ -110,23 +127,21 @@ def _remove_undesired_lines(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataF
             merge_column="souscategorie_codes",
         )
 
-    # Supprimer les acteurs qui ne propose qu'un service à domicile
-    # filtre des service à domicile uniquement
+    # Remove acteurs which propose only service à domicile
     if "service_a_domicile" in df.columns:
         df = df[df["service_a_domicile"].str.lower() != "oui exclusivement"]
         df = df[df["service_a_domicile"].str.lower() != "service à domicile uniquement"]
 
-    # Suppression des lignes dont public_acceuilli est uniqueùent les professionnels
+    # Remove acteurs which are for professionals only
     if "public_accueilli" in df.columns:
         df = df[df["public_accueilli"] != constants.PUBLIC_PRO]
 
-    # Après les appels aux fonctions de normalisation spécifiques aux sources
-    # On supprime les acteurs qui n'ont pas de produits acceptés
+    # Remove acteurs which have no souscategorie_codes
     if "souscategorie_codes" in df.columns:
         df = df[df["souscategorie_codes"].notnull()]
         df = df[df["souscategorie_codes"].apply(len) > 0]
 
-    # Trouver les doublons pour les publier dans les logs
+    # Find duplicates for logging
     dups = df[df["identifiant_unique"].duplicated(keep=False)]
     if not dups.empty:
         logger.warning(
@@ -181,13 +196,18 @@ def source_data_normalize(
             inplace=True,
         )
 
+    df = _replace_explicit_null_values(df)
+
     df = _rename_columns(df, dag_config)
     df = _transform_columns(df, dag_config)
     df = _default_value_columns(df, dag_config)
     df = _transform_df(df, dag_config)
     df = _remove_columns(df, dag_config)
 
-    # Vérification que le dataframe a exactement les colonnes attendues
+    # Merge and delete undesired lines
+    df = _remove_undesired_lines(df, dag_config)
+
+    # Check that the dataframe has the expected columns
     expected_columns = dag_config.get_expected_columns()
 
     if set(df.columns) != expected_columns:
@@ -204,9 +224,6 @@ def source_data_normalize(
     # TODO: Remplacer par le dag_id
     if dag_id == "sinoe":
         df = df_normalize_sinoe(df)
-
-    # Merge et suppression des lignes indésirables
-    df = _remove_undesired_lines(df, dag_config)
 
     # Log si des localisations sont manquantes parmis les acteurs non digitaux
     _display_warning_about_missing_location(df)

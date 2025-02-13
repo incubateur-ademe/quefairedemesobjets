@@ -14,6 +14,8 @@ La confiuration doit suivre le format de la class [DAGConfig](../../dags/sources
 
 ### Normalisation
 
+Certaine valeurs des données sources sont considérées comme nulles : "null", "none", "nan", "na", "n/a", "non applicable", "-", "aucun". Elle sont remplacées par une chaîne vide ou supprimées des listes.
+
 Les règles de nomalisation décrite dans le paramètre du DAG dans la section `normalization_rules`
 
 les règles sont de différent type et appliquée dans l'ordre suivant:
