@@ -97,10 +97,11 @@ jobs:
       - run: >-
           docker run -d -p 80:80
           -v ${{ github.workspace }}/nginx/servers.conf:/etc/nginx/servers.conf:ro
+          -v ${{ github.workspace }}/nginx/certs:/etc/nginx/ssl
           --add-host=host.docker.internal:host-gateway
-          --health-cmd "curl -fs https://assistant.dev"
-          --health-interval 2s --health-timeout 5s --health-retries 5
           -e GITHUB_ACTIONS=true -e CI=true nginx:1.18
+          # --health-cmd "curl -fs https://assistant.dev"
+          # --health-interval 2s --health-timeout 5s --health-retries 5
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".tool-versions"
