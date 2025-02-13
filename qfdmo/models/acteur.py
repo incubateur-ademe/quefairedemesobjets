@@ -568,13 +568,16 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
         "labels",
     ]
 
-    def _get_dict_for_clone(self):
-        acteur = type(self)(pk=self.pk)
-        return {
+    @classmethod
+    def _get_dict_for_clone(cls, acteur_pk):
+        acteur = cls(pk=acteur_pk)
+        fields = {
             field.name: getattr(acteur, field.name)
-            for field in self._meta.fields
-            if field.name not in self.fields_to_exclude_from_clone
+            for field in cls._meta.get_fields()
+            if field.name not in cls.fields_to_exclude_from_clone
         }
+        print(f"{acteur=} {fields=}")
+        return fields
 
 
 def clean_parent(parent):
@@ -751,13 +754,12 @@ class RevisionActeur(WithParentActeurMixin, BaseActeur):
         return acteur
 
     def create_parent(self):
-        acteur = Acteur.objects.get(pk=self.pk)
-        acteur_dict = acteur._get_dict_for_clone()
-        self_dict = self._get_dict_for_clone()
+        acteur_dict = Acteur._get_dict_for_clone(self.pk)
+        revision_acteur_dict = self._get_dict_for_clone(self.pk)
 
         revision_acteur_parent = RevisionActeur(
             identifiant_unique=uuid.uuid4(),
-            **(acteur_dict | self_dict),
+            **(acteur_dict | revision_acteur_dict),
         )
         revision_acteur_parent.save_as_parent()
 
