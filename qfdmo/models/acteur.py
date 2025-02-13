@@ -565,11 +565,13 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
             "proposition_services",
             "acteur_type",
             "acteur_services",
+            "action_principale",
             "source",
             "labels",
         ]
         acteur_dict = model_to_dict(self, exclude=excluded_fields)
         acteur_dict["acteur_type"] = self.acteur_type
+        acteur_dict["action_principale"] = self.action_principale
         return {k: v for k, v in acteur_dict.items() if v}
 
 
