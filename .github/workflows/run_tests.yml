@@ -90,6 +90,10 @@ jobs:
           - 6543:5432
     steps:
       - uses: actions/checkout@v4
+      - name: Add hosts to /etc/hosts
+        run: |
+            sudo echo "127.0.0.1 lvao.dev" | sudo tee -a /etc/hosts
+            sudo echo "127.0.0.1 assistant.dev" | sudo tee -a /etc/hosts
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".tool-versions"
