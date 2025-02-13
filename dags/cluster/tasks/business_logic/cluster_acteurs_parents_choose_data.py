@@ -5,10 +5,12 @@ from utils.django import django_setup_full
 
 django_setup_full()
 from data.models.change import (  # noqa: E402
-    CHANGE_ACTEUR_CREATE_AS_PARENT,
-    CHANGE_ACTEUR_PARENT_KEEP,
-    COL_CHANGE_DATA,
-    COL_CHANGE_TYPE,
+    COL_CHANGE_MODEL_NAME,
+    COL_CHANGE_MODEL_PARAMS,
+)
+from data.models.change_models import (  # noqa: E402
+    ChangeActeurCreateAsParent,
+    ChangeActeurKeepAsParent,
 )
 from qfdmo.models.acteur import (  # noqa: E402
     BaseActeur,
@@ -111,13 +113,13 @@ def cluster_acteurs_parents_choose_data(
     """For all selected parents in clusters, select the data to use"""
     fields = fields_to_include_clean(fields_to_include)
 
-    df_clusters[COL_CHANGE_DATA] = None
+    df_clusters[COL_CHANGE_MODEL_PARAMS] = None
     for cluster_id in df_clusters.groupby("cluster_id"):
         df_cluster = df_clusters[df_clusters["cluster_id"] == cluster_id]
-        filter_parent = df_cluster[COL_CHANGE_TYPE].isin(
+        filter_parent = df_cluster[COL_CHANGE_MODEL_NAME].isin(
             [
-                CHANGE_ACTEUR_CREATE_AS_PARENT,
-                CHANGE_ACTEUR_PARENT_KEEP,
+                ChangeActeurCreateAsParent.name(),
+                ChangeActeurKeepAsParent.name(),
             ]
         )
         df_acteurs = df_cluster[~filter_parent]
@@ -138,7 +140,7 @@ def cluster_acteurs_parents_choose_data(
         )
         acteurs_base = BaseActeur.objects.filter(pk__in=acteur_ids).values(*fields)
 
-        parent_data_after = {
+        model_params = {
             "identifiant_unique": parent_id,
             "data": cluster_acteurs_one_parent_choose_data(
                 parent_data_before=parent_data_before,
@@ -150,6 +152,6 @@ def cluster_acteurs_parents_choose_data(
                 consider_empty=consider_empty,
             ),
         }
-        df_clusters.iloc[parent_iloc, COL_CHANGE_DATA] = parent_data_after
+        df_clusters.iloc[parent_iloc, COL_CHANGE_MODEL_PARAMS] = model_params
 
     return df_clusters

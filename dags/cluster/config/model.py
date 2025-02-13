@@ -129,31 +129,19 @@ class ClusterConfig(BaseModel):
             dropdown_selected=values["include_acteur_types"],
         )
 
-        """
-        Logique supprimée le 2025-01-27 mais conservée pour référence:
-        - depuis l'ajout des parents indépendants des sources
-        via PR1265 on ne peut plus savoir si on héritera
-        uniquement d'une seule source au moment de la config, donc on
-        laisse passer au niveau de la sélection
-        TODO: on pourrait scinder la config en plusieurs sous-config:
-            - SelectionConfig
-            - NormalizationConfig
-            - ClusteringConfig
-            - EnrichmentConfig
-        Et ainsi avoir des validations plus fines à chaque étape
-        # ACTEUR TYPE vs. INTRA-SOURCE
-        if (
-            len(values["include_source_ids"]) == 1
-            and not values["cluster_intra_source_is_allowed"]
-        ):
-            raise ValueError("1 source sélectionnée mais intra-source désactivé")
-        """
-
         # Par défaut on ne clusterise pas les acteurs d'une même source
         # sauf si intra-source est activé
         values["cluster_fields_separate"] = ["source_id"]
         if values["cluster_intra_source_is_allowed"]:
             values["cluster_fields_separate"] = []
+
+        cluster_fields_common = set(values["cluster_fields_exact"]) & set(
+            values["cluster_fields_fuzzy"]
+        )
+        if cluster_fields_common:
+            raise ValueError(
+                "Champs en double dans exact/fuzzy: " + str(cluster_fields_common)
+            )
 
         # Fields avec default []
         optionals = [

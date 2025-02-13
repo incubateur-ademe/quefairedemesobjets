@@ -150,3 +150,12 @@ class TestClusterConfigModel:
         params_working["include_acteur_types"] = ["MAUVAIS TYPE (id=666)"]
         with pytest.raises(ValueError, match="Codes non trouvés dans le mapping"):
             ClusterConfig(**params_working)
+
+    def test_error_if_same_field_in_cluster_exact_and_fuzzy(self, params_working):
+        # Because Airflow v2 UI doesn't have dynamic logic in between its params
+        # (which would allow us to remove selected fields from 1 option from the other)
+        # we need a config check to bail if same field selected in both exact and fuzzy
+        params_working["cluster_fields_exact"] = ["foo"]
+        params_working["cluster_fields_fuzzy"] = ["foo"]
+        with pytest.raises(ValueError, match="Champs en double dans exact/fuzzy"):
+            ClusterConfig(**params_working)

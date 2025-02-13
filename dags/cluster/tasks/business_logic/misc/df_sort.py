@@ -33,9 +33,9 @@ def df_sort(
     """
 
     from data.models.change import (
+        COL_CHANGE_MODEL_NAME,
         COL_CHANGE_ORDER,
         COL_CHANGE_REASON,
-        COL_CHANGE_TYPE,
         COL_ENTITY_TYPE,
     )
 
@@ -72,7 +72,7 @@ def df_sort(
         "identifiant_unique",
         "statut",
         COL_ENTITY_TYPE,
-        COL_CHANGE_TYPE,
+        COL_CHANGE_MODEL_NAME,
         COL_CHANGE_REASON,
         COL_CHANGE_ORDER,
         "acteur_type_code",

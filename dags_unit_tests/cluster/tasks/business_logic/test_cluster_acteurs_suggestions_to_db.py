@@ -8,9 +8,9 @@ from cluster.tasks.business_logic.cluster_acteurs_suggestions_to_db import (
 
 from data.models import Suggestion, SuggestionCohorte
 from data.models.change import (
+    COL_CHANGE_MODEL_NAME,
     COL_CHANGE_ORDER,
     COL_CHANGE_REASON,
-    COL_CHANGE_TYPE,
     COL_ENTITY_TYPE,
 )
 
@@ -20,7 +20,7 @@ COLS = [
     COL_CHANGE_ORDER,
     COL_ENTITY_TYPE,
     "identifiant_unique",
-    COL_CHANGE_TYPE,
+    COL_CHANGE_MODEL_NAME,
     COL_CHANGE_REASON,
 ]
 

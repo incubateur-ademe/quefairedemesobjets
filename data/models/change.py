@@ -36,167 +36,69 @@ Notes:
 chaque modèle pydantic
 """
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, model_validator
 
-from qfdmo.models import RevisionActeur
+from data.models.change_models import CHANGE_MODELS
+
+MODEL_NAMES = list(CHANGE_MODELS.keys())
 
 # -----------------------------
-# COLONNES
+# Optional namespace convenience columns
 # -----------------------------
-# Colonnes utilisées pour définir les changements
-COL_CHANGE_TYPE = "change_type"  # = description + lien vers modèles
-COL_CHANGE_ORDER = "change_order"  # = ordre d'application
-COL_CHANGE_REASON = "change_reason"  # = debug
-COL_CHANGE_DATA = "change_data"  # = data de la suggestion
-COL_ENTITY_TYPE = "entity_type"  # = où appliquer le changement
+# Columns prefixed with "change_" namespace so they can be
+# used to prepare suggestions inside dataframes without causing
+# conflicts (ex: in clustering we can attach those columns to clusters)
+# You do NOT HAVE to use those, as long as you provide
+# a final suggestion which fields match that of SuggestionChange
+COL_CHANGE_MODEL_NAME = "change_model_name"
+COL_CHANGE_ORDER = "change_order"
+COL_CHANGE_REASON = "change_reason"
+COL_CHANGE_MODEL_PARAMS = "change_data"
+COL_ENTITY_TYPE = "entity_type"
+
+
+class SuggestionChange(BaseModel):
+    """Model for 1 suggestion change, a suggestion
+    can be composed of 1 or more changes"""
+
+    # Some suggestions are composed of multiple changes
+    # which MUST be executed in a specific order (ex: clustering
+    # we need to create a parent before attaching children to it)
+    order: int = Field(ge=1)
+    # Debug only, but we should provide a clear explanation
+    # as to why we're doing a change
+    reason: str = Field(min_length=5)
+    # Name of the pydantic model we will use to make the change
+    # Reference to change_models/{my_class}.py/{MyClass}.name()
+    name: str = Field(min_length=1)
+    # The params passed to the pydantic model
+    model_params: dict = {}
+
+    @model_validator(mode="after")  # type: ignore
+    def check_model(self) -> None:
+        # name must be in the list of available models
+        name = self.name
+        if name not in MODEL_NAMES:
+            raise ValueError(f"Invalid name: {name}, must be in {MODEL_NAMES}")
+
+        # Validate the given data when constructing the suggestion.
+        # This allows catching problems when preparing suggestions
+        # and not wait until they are approved and applied to find out
+        model = CHANGE_MODELS[name]
+        model(**self.model_params).validate()
+
+        # Required by Pydantic
+        # UserWarning: A custom validator is returning a value other than `self`
+        return self  # type: ignore
+
+    def apply(self):
+        model = CHANGE_MODELS[self.name]
+        # Models are constructed to call validate() within apply()
+        model(**self.model_params).apply()
+
 
 # -----------------------------
 # 0) entity_type
 # -----------------------------
 ENTITY_ACTEUR_REVISION = "acteur_revision"
 ENTITY_ACTEUR_DISPLAYED = "acteur_displayed"
-
-
-# -----------------------------
-# 1) change_type
-# -----------------------------
-# Liste des changements possibles, l'avantage
-# de définir des noms est de restreindre et d'expliciter
-# au maximum les conséquences des changements (on pourrait
-# utiliser 1 seul modèle totallement abstrait mais en traçabilité
-# et ça deviendrait vite difficile à maintenir)
-CHANGE_ACTEUR_PARENT_DELETE = "acteur_parent_delete"
-CHANGE_ACTEUR_PARENT_KEEP = "acteur_parent_keep"
-CHANGE_ACTEUR_POINT_TO_PARENT = "acteur_point_to_parent"
-CHANGE_ACTEUR_CREATE_AS_PARENT = "acteur_create_as_parent"
-CHANGE_ACTEUR_NOTHING_TO_DO = "acteur_nothing_to_do"
-
-# -----------------------------
-# 2) Modèles pydantic
-# -----------------------------
-# Pour gérer les changements, en utilisant
-# l'héritage selon les besoins
-
-
-class ChangeActeur(BaseModel):
-    """Modèle de base pour les changements d'un acteur'"""
-
-    # On a besoin de savoir quel acteur changer
-    identifiant_unique: str
-    # Et quelle donnée changer (si c'est une update)
-    data: dict = {}
-
-    def data_validate(self):
-        # Validation à définir au cas par cas
-        raise NotImplementedError("Méthode à implémenter")
-
-    def apply(self):
-        # Modification à définir au cas par cas
-        raise NotImplementedError("Méthode à implémenter")
-
-
-class ChangeActeurUpdateData(ChangeActeur):
-    """Modèle de mise à jour d'un acteur"""
-
-    def apply(self):
-        self.data_validate()
-        rev = RevisionActeur.objects.get(identifiant_unique=self.identifiant_unique)
-        for key, value in self.data.items():
-            setattr(rev, key, value)
-        rev.save()
-
-
-class ChangeActeurCreateRevision(ChangeActeur):
-    """Création de la révision d'un acteur"""
-
-    def data_validate(self):
-        pass
-
-    def apply(self):
-        self.data_validate()
-        rev = RevisionActeur(**self.data)
-        rev.save()
-
-
-class ChangeActeurDeleteRevision(ChangeActeur):
-    """Suppresion d'un acteur supposé parent"""
-
-    def data_validate(self):
-        pass
-
-    def apply(self):
-        self.data_validate()
-        # Rien à faire, le parent doit être supprimé automatiquement
-        # par les observers enfants
-        pass
-
-
-class ChangeActeurPointToParent(ChangeActeurUpdateData):
-    """🔀 Pour pointer un acteur vers un parent,
-    on MAJ sa data, donc on part du modèle d'update
-    et on ajoute juste une validtion sur data"""
-
-    def data_validate(self):
-        # Si on doit rediriger un acteur vers un parent
-        # alors on s'attend à ce que le parent existe
-        parent = RevisionActeur.objects.filter(
-            identifiant_unique=self.data["parent_id"]
-        )
-        if not parent.exists():
-            raise ValueError(f"Parent {self.data['parent_id']} non trouvé")
-
-
-class ChangeActeurCreateAsParent(ChangeActeurCreateRevision):
-    """➕ Pour la création d'un parent, on créer une révision,
-    donc on part du modèle de révision et on ajoute juste
-    une validation data"""
-
-    def data_validate(self):
-        # Si le parent est a créer, alors on s'attend à ce qu'il n'existe pas
-        rev = RevisionActeur.objects.filter(identifiant_unique=self.identifiant_unique)
-        if rev.exists():
-            raise ValueError(f"Parent à créer {self.identifiant_unique} déjà existant")
-
-
-class ChangeActeurParentKeep(ChangeActeurUpdateData):
-    """🟢 Pour la MAJ d'un parent existant, on le met à jour
-    comme on MAJ un acteur mais avec la data qui nous intéresse"""
-
-    def data_validate(self):
-        # On fait confiance à la donnée qu'on reçoit,
-        # on laisse les modèles Django se plaindre si pas content
-        # MAIS on vérifie juste qu'on ne vient pas donner de source
-        # à un parent
-        if "source" in self.data or "source_id" in self.data:
-            raise ValueError("Pas de source pour un parent")
-
-
-class ChangeActeurParentDelete(ChangeActeurDeleteRevision):
-    """🔴 Pour la suppression d'un parent, on supprime sa révision,
-    donc on part du modèle de revision et on ajoute juste
-    une validation data"""
-
-    def data_validate(self):
-        # Si notre logique de suppression automatique
-        # des parents sans enfants fonctionne, alors
-        # quand on arrive ici, le parent doit avoir été supprimé
-        # par les observers
-        rev = RevisionActeur.objects.filter(identifiant_unique=self.identifiant_unique)
-        if rev.exists():
-            raise ValueError(
-                f"Parent {self.identifiant_unique} devrait déjà être supprimé"
-            )
-
-
-# -----------------------------
-# 3) Mapping change_type ➡️ modèle
-# -----------------------------
-MAPPING_TYPES_TO_MODELS = {
-    # -----------------------------
-    # Changements de type clustering/déduplication
-    # -----------------------------
-    CHANGE_ACTEUR_POINT_TO_PARENT: ChangeActeurPointToParent,
-    CHANGE_ACTEUR_CREATE_AS_PARENT: ChangeActeurCreateAsParent,
-    CHANGE_ACTEUR_PARENT_KEEP: ChangeActeurParentKeep,
-    CHANGE_ACTEUR_PARENT_DELETE: ChangeActeurParentDelete,
-}

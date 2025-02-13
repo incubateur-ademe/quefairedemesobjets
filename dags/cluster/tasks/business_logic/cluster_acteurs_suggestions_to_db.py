@@ -18,9 +18,9 @@ def cluster_acteurs_suggestions_to_db(
         SuggestionStatut,
     )
     from data.models.change import (
+        COL_CHANGE_MODEL_NAME,
         COL_CHANGE_ORDER,
         COL_CHANGE_REASON,
-        COL_CHANGE_TYPE,
         COL_ENTITY_TYPE,
     )
 
@@ -48,7 +48,7 @@ def cluster_acteurs_suggestions_to_db(
         COL_CHANGE_ORDER,
         COL_ENTITY_TYPE,
         "identifiant_unique",
-        COL_CHANGE_TYPE,
+        COL_CHANGE_MODEL_NAME,
         COL_CHANGE_REASON,
     ]
 

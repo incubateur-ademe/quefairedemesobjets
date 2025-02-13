@@ -10,9 +10,8 @@
     <thead>
     <tr>
         <th>Ordre</th>
-        <th>Type d'entité</th>
-        <th>ID de l'entité</th>
         <th>Changement</th>
+        <th>ID de l'entité</th>
         <th>Raison</th>
     </tr>
     </thead>
@@ -20,9 +19,8 @@
     {% for change in changes %}
         <tr>
             <td>{{ change.change_order }}</td>
-            <td>{{ change.entity_type }}</td>
+            <td>{{ change.change_model_name }}</td>
             <td><a href="{% url 'admin:qfdmo_displayedacteur_change' change.identifiant_unique|quote %}" target="_blank" rel="noreferrer">{{ change.identifiant_unique }}</a></td>
-            <td>{{ change.change_type }}</td>
             <td>{{ change.change_reason }}</td>
         </tr>
     {% endfor %}

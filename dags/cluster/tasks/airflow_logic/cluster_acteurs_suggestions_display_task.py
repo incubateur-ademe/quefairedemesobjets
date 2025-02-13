@@ -7,6 +7,9 @@ from cluster.tasks.airflow_logic.task_ids import (
     TASK_PARENTS_CHOOSE_NEW,
     TASK_SUGGESTIONS_DISPLAY,
 )
+from cluster.tasks.business_logic.cluster_acteurs_suggestions.display import (
+    cluster_acteurs_suggestions_display,
+)
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -39,15 +42,21 @@ def cluster_acteurs_suggestions_display_wrapper(**kwargs) -> None:
     df: pd.DataFrame = kwargs["ti"].xcom_pull(
         key="df", task_ids=TASK_PARENTS_CHOOSE_NEW
     )
+    # Not a Skip: we should never get here if we don't have data to work w/
     if df.empty:
         raise ValueError("Pas de données clusters récupérées")
 
-    logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
-    log.preview_df_as_markdown(
-        "acteurs avec parents sélectionnés", df, groupby="cluster_id"
-    )
+    suggestions = cluster_acteurs_suggestions_display(df)
 
-    kwargs["ti"].xcom_push(key="df", value=df)
+    logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
+    for suggestion in suggestions:
+        cluster_id = suggestion["cluster_id"]
+        df_changes = pd.DataFrame(suggestion["changes"])
+        log.preview_df_as_markdown(
+            f"Suggestion pour cluster_id={cluster_id}", df_changes
+        )
+
+    kwargs["ti"].xcom_push(key="suggestions", value=suggestions)
 
 
 def cluster_acteurs_suggestions_display_task(dag: DAG) -> PythonOperator:
