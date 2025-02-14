@@ -1,0 +1,7 @@
+# From exhaustive_acteurs, build acteurs tables which will be used to display them in the carte
+
+version: 2
+
+models:
+  - name: carte_acteurs
+    description: "Vue sur les acteurs en OpenData"
