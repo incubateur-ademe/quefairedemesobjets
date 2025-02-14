@@ -1,0 +1,7 @@
+# From exhaustive_acteurs, build acteurs tables which will be used to be shared in open-data
+
+version: 2
+
+models:
+  - name: opendata_acteur
+    description: "Vue sur les acteurs en OpenData"
