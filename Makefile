@@ -55,7 +55,7 @@ run-django:
 	honcho start -f Procfile.dev
 
 run-all:
-	docker compose --profile airflow up --build -d
+	docker compose --profile airflow up -d
 	rm -rf .parcel-cache
 	honcho start -f Procfile.dev
 

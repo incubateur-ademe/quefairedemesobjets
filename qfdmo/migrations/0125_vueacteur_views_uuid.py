@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("qfdmo", "0120_alter_revisionacteur_parent"),
+        ("qfdmo", "0124_remove_dagrunchange_dag_run_delete_dagrun_and_more"),
     ]
 
     operations = [
