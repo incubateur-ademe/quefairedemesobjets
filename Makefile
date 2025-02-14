@@ -64,7 +64,7 @@ run-django:
 	honcho start -f Procfile.dev
 
 run-all:
-	docker compose --profile airflow up -d
+	docker compose --profile airflow up --build -d
 	rm -rf .parcel-cache
 	$(DJANGO_ADMIN) runserver 0.0.0.0:8000
 	npm run watch
