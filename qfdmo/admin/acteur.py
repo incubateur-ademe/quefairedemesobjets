@@ -745,6 +745,8 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource):
 
 
 class DisplayedActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
+    list_display = list(BaseActeurAdmin.list_display) + ["uuid"]
+    search_fields = list(BaseActeurAdmin.search_fields) + ["uuid"]
     change_form_template = "admin/displayed_acteur/change_form.html"
     gis_widget = CustomOSMWidget
     base_fields = list(BaseActeurAdmin.fields)
@@ -793,6 +795,8 @@ class VueActeurLabelQualiteInline(NotMutableMixin, admin.StackedInline):
 
 
 class VueActeurAdmin(NotMutableMixin, BaseActeurAdmin):
+    list_display = list(BaseActeurAdmin.list_display) + ["uuid"]
+    search_fields = list(BaseActeurAdmin.search_fields) + ["uuid"]
     inlines = [
         VuePropositionServiceInline,
         VueActeurLabelQualiteInline,
