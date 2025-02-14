@@ -1,0 +1,253 @@
+# Create a exhaustive vue of all acteurs and theirs linked objects
+# Applying corrections
+
+version: 2
+
+models:
+  - name: qfdmo_vueacteur
+    description: "Vue Acteur model"
+    columns:
+      - name: identifiant_unique
+        description: "The primary key for this table"
+        data_tests:
+          - unique
+          - not_null
+    config:
+      materialized: table
+      indexes:
+        - columns: ['modifie_le', 'identifiant_unique']
+          type: btree
+        - columns: ['identifiant_unique']
+          type: btree
+          unique: true
+        - columns: ['code_postal']
+          type: btree
+        - columns: ['nom']
+          type: btree
+        - columns: ['siren']
+          type: btree
+        - columns: ['siret']
+          type: btree
+        - columns: ['source_id']
+          type: btree
+        - columns: ['ville']
+          type: btree
+        - columns: ['acteur_type_id']
+          type: btree
+        - columns: ['location']
+          type: gist
+        - columns: ['parent_id']
+          type: btree
+      constraints:
+        - type: foreign_key
+          columns: [acteur_type_id]
+          ref_columns: [id]
+          ref_table: qfdmo_acteurtype
+          deferrable: true
+          initially_deferred: true
+
+        - type: foreign_key
+          columns: [action_principale_id]
+          ref_columns: [id]
+          ref_table: qfdmo_action
+          deferrable: true
+          initially_deferred: true
+
+        - type: foreign_key
+          columns: [source_id]
+          ref_columns: [id]
+          ref_table: qfdmo_source
+          deferrable: true
+          initially_deferred: true
+
+  - name: qfdmo_vueacteur_labels
+    description: "Vue Acteur Labels model"
+    columns:
+      - name: id
+        description: "The primary key for this table"
+        data_tests:
+          - unique
+          - not_null
+      - name: vueacteur_id
+        description: "The vueacteur_id for this table"
+        data_tests:
+          - not_null
+      - name: labelqualite_id
+        description: "The labelqualite_id for this table"
+        data_tests:
+          - not_null
+    config:
+      materialized: table
+      indexes:
+        - columns: ['vueacteur_id', 'labelqualite_id']
+          type: btree
+          unique: true
+        - columns: ['vueacteur_id']
+          type: btree
+        - columns: ['labelqualite_id']
+          type: btree
+      constraints:
+        - type: foreign_key
+          columns: [vueacteur_id]
+          ref_columns: [identifiant_unique]
+          ref_table: qfdmo_vueacteur
+          deferrable: true
+          initially_deferred: true
+        - type: foreign_key
+          columns: [labelqualite_id]
+          ref_columns: [id]
+          ref_table: qfdmo_labelqualite
+          deferrable: true
+          initially_deferred: true
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - vueacteur_id
+            - labelqualite_id
+    depends_on:
+      - ref('qfdmo_vueacteur')
+
+  - name: qfdmo_vueacteur_acteur_services
+    description: "Vue Acteur Acteur Services model"
+    columns:
+      - name: id
+        description: "The primary key for this table"
+        data_tests:
+          - not_null
+      - name: vueacteur_id
+        description: "The vueacteur_id for this table"
+        data_tests:
+          - not_null
+      - name: acteurservice_id
+        description: "The acteurservice_id for this table"
+        data_tests:
+          - not_null
+    config:
+      materialized: table
+      indexes:
+        - columns: ['vueacteur_id', 'acteurservice_id']
+          type: btree
+          unique: true
+        - columns: ['vueacteur_id']
+          type: btree
+        - columns: ['acteurservice_id']
+          type: btree
+      constraints:
+        - type: foreign_key
+          columns: [vueacteur_id]
+          ref_columns: [identifiant_unique]
+          ref_table: qfdmo_vueacteur
+          deferrable: true
+          initially_deferred: true
+        - type: foreign_key
+          columns: [acteurservice_id]
+          ref_columns: [id]
+          ref_table: qfdmo_acteurservice
+          deferrable: true
+          initially_deferred: true
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - vueacteur_id
+            - acteurservice_id
+    depends_on:
+      - ref('qfdmo_vueacteur')
+
+  - name: qfdmo_vuepropositionservice
+    description: "Vue Proposition Service model"
+    columns:
+      - name: id
+        description: "The primary key for this table"
+        data_tests:
+          - unique
+          - not_null
+      - name: acteur_id
+        description: "The vueacteur_id for this table"
+        data_tests:
+          - not_null
+      - name: action_id
+        description: "The action_id for this table"
+        data_tests:
+          - not_null
+      - name: ps_id
+        description: "The ps_id for this table"
+      - name: rps_id
+        description: "The rps_id for this table"
+      - name: revision_existe
+        description: "The revision_existe for this table"
+    config:
+      materialized: table
+      indexes:
+        - columns: ['acteur_id', 'action_id']
+          type: btree
+          unique: true
+        - columns: ['acteur_id']
+          type: btree
+        - columns: ['action_id']
+          type: btree
+        - columns: ['id']
+          type: btree
+      constraints:
+        - type: foreign_key
+          columns: [acteur_id]
+          ref_columns: [identifiant_unique]
+          ref_table: qfdmo_vueacteur
+          deferrable: true
+          initially_deferred: true
+        - type: foreign_key
+          columns: [action_id]
+          ref_columns: [id]
+          ref_table: qfdmo_action
+          deferrable: true
+          initially_deferred: true
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - acteur_id
+            - action_id
+    depends_on:
+      - ref('qfdmo_vueacteur')
+
+  - name: qfdmo_vuepropositionservice_sous_categories
+    description: "Vue Proposition Service Sous Categories model"
+    columns:
+      - name: id
+        description: "The primary key for this table"
+        data_tests:
+          - not_null
+      - name: vuepropositionservice_id
+        description: "The vuepropositionservice_id for this table"
+        data_tests:
+          - not_null
+      - name: souscategorieobjet_id
+        description: "The souscategorieobjet_id for this table"
+        data_tests:
+          - not_null
+    config:
+      materialized: table
+      indexes:
+        - columns: ['vuepropositionservice_id', 'souscategorieobjet_id']
+          type: btree
+          unique: true
+        - columns: ['vuepropositionservice_id']
+          type: btree
+        - columns: ['souscategorieobjet_id']
+          type: btree
+      constraints:
+        - type: foreign_key
+          columns: [vuepropositionservice_id]
+          ref_columns: [id]
+          ref_table: qfdmo_vuepropositionservice
+          deferrable: true
+          initially_deferred: true
+        - type: foreign_key
+          columns: [souscategorieobjet_id]
+          ref_columns: [id]
+          ref_table: qfdmo_souscategorieobjet
+          deferrable: true
+          initially_deferred: true
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - vuepropositionservice_id
+            - souscategorieobjet_id
