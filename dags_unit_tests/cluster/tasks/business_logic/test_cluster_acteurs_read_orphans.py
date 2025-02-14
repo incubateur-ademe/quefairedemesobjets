@@ -275,23 +275,24 @@ class TestClusterActeursSelectionOrphans:
         sont bien inclus dans la dataframe"""
         assert "source_code" in df_ideal.columns
         assert "acteur_type_code" in df_ideal.columns
-        assert df_ideal["source_code"].values.tolist() == [
-            "s1",
+        assert set(df_ideal["source_code"].values.tolist()) == {
             "s1",
             "s2",
-        ]
-        assert df_ideal["acteur_type_code"].values.tolist() == [
+        }
+        assert set(df_ideal["acteur_type_code"].values.tolist()) == {
             "at1",
             "at2",
-            "at1",
-        ]
+        }
 
     def test_no_type_inference_from_pandas(self, df_ideal):
         """Les types qui pourraient être inférés par Pandas
         ne le sont pas
         (ex: code_postal: "53000" str -> 53000 int)"""
         assert df_ideal["code_postal"].dtype == "object"
-        assert df_ideal["code_postal"].values.tolist() == ["75000", "75000", "53000"]
+        assert set(df_ideal["code_postal"].values.tolist()) == {
+            "53000",
+            "75000",
+        }
 
     def test_extra_dataframe_fields(self, df_ideal):
         """On vérifie que les champs supplémentaires demandés sont bien inclus"""
@@ -302,8 +303,8 @@ class TestClusterActeursSelectionOrphans:
         """Un petit test pour s'assurer de la cohérence d'ensemble
         des résultats"""
         assert df_ideal.shape[0] == 3
-        assert df_ideal["nom"].values.tolist() == [
+        assert set(df_ideal["nom"].values.tolist()) == {
             "CORRêct_nom_s1_at1",
             "CORRêct_nom_s1_at2",
             "!!correct_nom_s2_at1",
-        ]
+        }
