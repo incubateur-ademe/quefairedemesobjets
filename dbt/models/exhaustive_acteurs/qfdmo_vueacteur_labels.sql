@@ -1,18 +1,18 @@
 WITH acteur_labels AS (
     SELECT
-        al.id as id,
-        al.acteur_id as vueacteur_id,
-        al.labelqualite_id as labelqualite_id
-    from qfdmo_acteur_labels al
-    inner join dbtvue_acteur as a on al.acteur_id = a.identifiant_unique and a.revision_existe = false
+        al.id AS id,
+        al.acteur_id AS vueacteur_id,
+        al.labelqualite_id AS labelqualite_id
+    FROM qfdmo_acteur_labels al
+    INNER JOIN dbtvue_acteur AS a ON al.acteur_id = a.identifiant_unique AND a.revision_existe = false
 ),
 revisionacteur_labels AS (
     SELECT
-        ral.id as id,
-        ral.revisionacteur_id as vueacteur_id,
-        ral.labelqualite_id as labelqualite_id
-    from qfdmo_revisionacteur_labels ral
-    join dbtvue_acteur as a on ral.revisionacteur_id = a.identifiant_unique and a.revision_existe = true
+        ral.id AS id,
+        ral.revisionacteur_id AS vueacteur_id,
+        ral.labelqualite_id AS labelqualite_id
+    FROM qfdmo_revisionacteur_labels ral
+    JOIN dbtvue_acteur AS a ON ral.revisionacteur_id = a.identifiant_unique AND a.revision_existe = true
 )
 
 SELECT * FROM acteur_labels
