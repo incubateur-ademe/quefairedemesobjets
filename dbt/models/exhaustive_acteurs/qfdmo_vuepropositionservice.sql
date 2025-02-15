@@ -1,24 +1,24 @@
 WITH propositionservice AS (
     SELECT
-        CONCAT('PS_', ps.id::text) as id,
-        ps.acteur_id as acteur_id,
-        ps.action_id as action_id,
-        ps.id::integer as ps_id,
-        NULL::integer as rps_id,
-        false as revision_existe
-    from qfdmo_propositionservice ps
-    inner join dbtvue_acteur as a on ps.acteur_id = a.identifiant_unique and a.revision_existe = false
+        CONCAT('PS_', ps.id::text) AS id,
+        ps.acteur_id AS acteur_id,
+        ps.action_id AS action_id,
+        ps.id::integer AS ps_id,
+        NULL::integer AS rps_id,
+        false AS revision_existe
+    FROM qfdmo_propositionservice ps
+    INNER JOIN dbtvue_acteur AS a ON ps.acteur_id = a.identifiant_unique AND a.revision_existe = false
 ),
 revisionpropositionservice AS (
     SELECT
-        CONCAT('RPS_', rps.id::text) as id,
-        rps.acteur_id as vueacteur_id,
-        rps.action_id as action_id,
-        NULL::integer as ps_id,
-        rps.id::integer as rps_id,
-        true as revision_existe
-    from qfdmo_revisionpropositionservice rps
-    join dbtvue_acteur as a on rps.acteur_id = a.identifiant_unique and a.revision_existe = true
+        CONCAT('RPS_', rps.id::text) AS id,
+        rps.acteur_id AS vueacteur_id,
+        rps.action_id AS action_id,
+        NULL::integer AS ps_id,
+        rps.id::integer AS rps_id,
+        true AS revision_existe
+    FROM qfdmo_revisionpropositionservice rps
+    JOIN dbtvue_acteur AS a ON rps.acteur_id = a.identifiant_unique AND a.revision_existe = true
 )
 
 SELECT * FROM propositionservice

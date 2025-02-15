@@ -1,1 +1,1 @@
-select * from qfdmo_displayedacteur
+SELECT * FROM qfdmo_displayedacteur

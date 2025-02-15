@@ -1,4 +1,4 @@
-# Create a exhaustive vue of all acteurs and theirs linked objects
+# Create a exhaustive vue of all acteurs AND theirs linked objects
 # Applying corrections
 
 version: 2
@@ -9,6 +9,11 @@ models:
     columns:
       - name: identifiant_unique
         description: "The primary key for this table"
+        data_tests:
+          - unique
+          - not_null
+      - name: uuid
+        description: "The uuid for this table"
         data_tests:
           - unique
           - not_null
