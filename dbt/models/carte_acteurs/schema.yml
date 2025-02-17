@@ -3,7 +3,7 @@
 version: 2
 
 models:
-  - name: temp_cartefilteredacteur
+  - name: temp_filteredacteur
     description: "Vue sur les acteurs affichés sur la carte"
     columns:
       - name: identifiant_unique
@@ -75,7 +75,7 @@ models:
         data_tests:
           - not_null
     config:
-      materialized: table #ephemeral
+      materialized: ephemeral
   - name: temp_parentpropositionservice
     description: "Table temporaire pour calculer les parents des propositions de service"
     columns:
@@ -96,9 +96,25 @@ models:
         data_tests:
           - not_null
     config:
-      materialized: table #ephemeral
-    depends_on:
-      - ref('temp_cartefilteredacteur')
+      materialized: ephemeral
+  - name: temp_propositionservice
+    description: "Vue sur les propositions de service affichées sur la carte"
+    columns:
+      - name: id
+        description: "L'identifiant de la proposition de service"
+        data_tests:
+          - not_null
+          - unique
+      - name: acteur_id
+        description: "L'identifiant de l'acteur"
+        data_tests:
+          - not_null
+      - name: action_id
+        description: "L'identifiant de l'action"
+        data_tests:
+          - not_null
+    config:
+      materialized: ephemeral
   - name: carte_propositionservice
     description: "Vue sur les propositions de service affichées sur la carte"
     columns:
@@ -115,9 +131,35 @@ models:
         description: "L'identifiant de l'action"
         data_tests:
           - not_null
-    depends_on:
-      - ref('temp_parentpropositionservice')
-      - ref('temp_cartefilteredacteur')
+    config:
+      materialized: table
+      indexes:
+        - columns: ['acteur_id', 'action_id']
+          unique: true
+        - columns: ['acteur_id']
+          type: hash
+        - columns: ['action_id']
+          type: hash
+        - columns: ['id']
+          type: hash
+      constraints:
+        - type: foreign_key
+          columns: [acteur_id]
+          ref_columns: [identifiant_unique]
+          ref_table: carte_acteur
+          deferrable: true
+          initially_deferred: true
+        - type: foreign_key
+          columns: [action_id]
+          ref_columns: [id]
+          ref_table: qfdmo_action
+          deferrable: true
+          initially_deferred: true
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - acteur_id
+            - action_id
   - name: carte_propositionservice_sous_categories
     description: "Vue sur les sous-catégories des propositions de service affichées sur la carte"
     columns:
@@ -133,9 +175,156 @@ models:
         description: "L'identifiant de la sous-catégorie"
         data_tests:
           - not_null
-    depends_on:
-      - ref('temp_parentpropositionservice')
-      - ref('temp_cartefilteredacteur')
+    config:
+      materialized: table
+      indexes:
+        - columns: ['propositionservice_id', 'souscategorieobjet_id']
+          unique: true
+        - columns: ['propositionservice_id']
+          type: hash
+        - columns: ['souscategorieobjet_id']
+          type: hash
+      constraints:
+        - type: foreign_key
+          columns: [propositionservice_id]
+          ref_columns: [id]
+          ref_table: carte_propositionservice
+          deferrable: true
+          initially_deferred: true
+        - type: foreign_key
+          columns: [souscategorieobjet_id]
+          ref_columns: [id]
+          ref_table: qfdmo_souscategorieobjet
+          deferrable: true
+          initially_deferred: true
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - propositionservice_id
+            - souscategorieobjet_id
+
+  - name: carte_acteur_acteur_services
+    description: "Lien entre acteur de la carte et acteur_services"
+    columns:
+      - name: id
+        description: "L'identifiant du lien entre acteur et acteur_services"
+        data_tests:
+          - not_null
+      - name: acteur_id
+        description: "L'identifiant de l'acteur"
+        data_tests:
+          - not_null
+      - name: acteurservice_id
+        description: "L'identifiant du service"
+        data_tests:
+          - not_null
+    config:
+      materialized: table
+      indexes:
+        - columns: ['acteur_id', 'acteurservice_id']
+          unique: true
+        - columns: ['acteur_id']
+          type: hash
+        - columns: ['acteurservice_id']
+          type: hash
+      constraints:
+        - type: foreign_key
+          columns: [acteur_id]
+          ref_columns: [identifiant_unique]
+          ref_table: carte_acteur
+          deferrable: true
+          initially_deferred: true
+        - type: foreign_key
+          columns: [acteurservice_id]
+          ref_columns: [id]
+          ref_table: qfdmo_acteurservice
+          deferrable: true
+          initially_deferred: true
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - acteur_id
+            - acteurservice_id
+
+  - name: carte_acteur_labels
+    description: "Lien entre acteur de la carte et labels"
+    columns:
+      - name: id
+        description: "L'identifiant du lien entre acteur et label"
+        data_tests:
+          - not_null
+      - name: acteur_id
+        description: "L'identifiant de l'acteur"
+        data_tests:
+          - not_null
+      - name: labelqualite_id
+        description: "L'identifiant du label"
+        data_tests:
+          - not_null
+    config:
+      materialized: table
+      indexes:
+        - columns: ['acteur_id', 'labelqualite_id']
+          unique: true
+        - columns: ['acteur_id']
+          type: hash
+        - columns: ['labelqualite_id']
+          type: hash
+      constraints:
+        - type: foreign_key
+          columns: [acteur_id]
+          ref_columns: [identifiant_unique]
+          ref_table: carte_acteur
+          deferrable: true
+          initially_deferred: true
+        - type: foreign_key
+          columns: [labelqualite_id]
+          ref_columns: [id]
+          ref_table: qfdmo_labelqualite
+          deferrable: true
+          initially_deferred: true
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - acteur_id
+            - labelqualite_id
+
+  - name: carte_acteur_sources
+    description: "Lien entre acteur de la carte et sources"
+    columns:
+      - name: id
+        description: "L'identifiant de la source"
+        data_tests:
+          - not_null
+      - name: acteur_id
+        description: "L'identifiant de l'acteur"
+        data_tests:
+          - not_null
+      - name: source_id
+        description: "L'identifiant de la source"
+        data_tests:
+          - not_null
+    config:
+      materialized: table
+      indexes:
+        - columns: ['acteur_id', 'source_id']
+          unique: true
+        - columns: ['acteur_id']
+          type: hash
+        - columns: ['source_id']
+          type: hash
+      constraints:
+        - type: foreign_key
+          columns: [acteur_id]
+          ref_columns: [identifiant_unique]
+          ref_table: carte_acteur
+          deferrable: true
+          initially_deferred: true
+        - type: foreign_key
+          columns: [source_id]
+          ref_columns: [id]
+          ref_table: qfdmo_source
+          deferrable: true
   - name: carte_acteur
     description: "Vue sur les acteurs affichés sur la carte"
     columns:
@@ -151,6 +340,46 @@ models:
           - unique
     config:
       materialized: table
-    depends_on:
-      - ref('carte_propositionservice')
-      - ref('temp_cartefilteredacteur')
+      indexes:
+        - columns: ['modifie_le', 'identifiant_unique']
+          type: btree
+        - columns: ['identifiant_unique']
+          type: btree
+          unique: true
+        - columns: ['code_postal']
+          type: btree
+        - columns: ['nom']
+          type: btree
+        - columns: ['siren']
+          type: btree
+        - columns: ['siret']
+          type: btree
+        - columns: ['source_id']
+          type: hash
+        - columns: ['ville']
+          type: btree
+        - columns: ['acteur_type_id']
+          type: hash
+        - columns: ['location']
+          type: gist
+        - columns: ['parent_id']
+          type: hash
+      constraints:
+        - type: foreign_key
+          columns: [acteur_type_id]
+          ref_columns: [id]
+          ref_table: qfdmo_acteurtype
+          deferrable: true
+          initially_deferred: true
+        - type: foreign_key
+          columns: [action_principale_id]
+          ref_columns: [id]
+          ref_table: qfdmo_action
+          deferrable: true
+          initially_deferred: true
+        - type: foreign_key
+          columns: [source_id]
+          ref_columns: [id]
+          ref_table: qfdmo_source
+          deferrable: true
+          initially_deferred: true

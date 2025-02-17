@@ -1,18 +1,20 @@
 WITH acteur_acteur_services AS (
     SELECT
-        al.id AS id,
+        MIN(al.id) AS id,
         al.acteur_id AS vueacteur_id,
         al.acteurservice_id AS acteurservice_id
     FROM qfdmo_acteur_acteur_services al
-    INNER JOIN dbtvue_acteur AS a ON al.acteur_id = a.identifiant_unique AND a.revision_existe = false
+    INNER JOIN {{ ref('temp_filteredacteur') }} AS a ON al.acteur_id = a.identifiant_unique AND a.revision_existe = false
+    GROUP BY al.acteur_id, al.acteurservice_id
 ),
 revisionacteur_acteur_services AS (
     SELECT
-        ral.id AS id,
+        MIN(ral.id) AS id,
         ral.revisionacteur_id AS vueacteur_id,
         ral.acteurservice_id AS acteurservice_id
     FROM qfdmo_revisionacteur_acteur_services ral
-    JOIN dbtvue_acteur AS a ON ral.revisionacteur_id = a.identifiant_unique AND a.revision_existe = true
+    INNER JOIN {{ ref('temp_filteredacteur') }} AS a ON ral.revisionacteur_id = a.identifiant_unique AND a.revision_existe = true
+    GROUP BY ral.revisionacteur_id, ral.acteurservice_id
 )
 
 SELECT * FROM acteur_acteur_services

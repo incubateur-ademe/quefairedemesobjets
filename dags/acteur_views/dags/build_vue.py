@@ -26,18 +26,33 @@ with DAG(
     max_active_runs=1,
 ) as dag:
 
-    run_dbt_model = BashOperator(
+    run_dbt_exhaustive_acteurs_model = BashOperator(
         task_id="build_exhaustive_acteur",
         bash_command=(
             "cd /opt/airflow/dbt/ && dbt run --select qfdmo.exhaustive_acteurs"
         ),
         dag=dag,
     )
-    test_dbt_model = BashOperator(
+    test_dbt_exhaustive_acteurs_model = BashOperator(
         task_id="test_exhaustive_acteur",
         bash_command=(
             "cd /opt/airflow/dbt/ && dbt test --select qfdmo.exhaustive_acteurs"
         ),
         dag=dag,
     )
-    run_dbt_model >> test_dbt_model
+    run_dbt_carte_acteurs_model = BashOperator(
+        task_id="build_exhaustive_acteur",
+        bash_command=("cd /opt/airflow/dbt/ && dbt run --select qfdmo.carte_acteurs"),
+        dag=dag,
+    )
+    test_dbt_carte_acteurs_model = BashOperator(
+        task_id="test_exhaustive_acteur",
+        bash_command=("cd /opt/airflow/dbt/ && dbt test --select qfdmo.carte_acteurs"),
+        dag=dag,
+    )
+    (
+        run_dbt_exhaustive_acteurs_model
+        >> test_dbt_exhaustive_acteurs_model
+        >> run_dbt_carte_acteurs_model
+        >> test_dbt_carte_acteurs_model
+    )
