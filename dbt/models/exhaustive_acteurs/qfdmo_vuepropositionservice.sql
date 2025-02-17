@@ -7,7 +7,7 @@ WITH propositionservice AS (
         NULL::integer AS rps_id,
         false AS revision_existe
     FROM qfdmo_propositionservice ps
-    INNER JOIN dbtvue_acteur AS a ON ps.acteur_id = a.identifiant_unique AND a.revision_existe = false
+    INNER JOIN {{ ref('qfdmo_vueacteur') }} AS a ON ps.acteur_id = a.identifiant_unique AND a.revision_existe = false
 ),
 revisionpropositionservice AS (
     SELECT
@@ -18,7 +18,7 @@ revisionpropositionservice AS (
         rps.id::integer AS rps_id,
         true AS revision_existe
     FROM qfdmo_revisionpropositionservice rps
-    JOIN dbtvue_acteur AS a ON rps.acteur_id = a.identifiant_unique AND a.revision_existe = true
+    JOIN {{ ref('qfdmo_vueacteur') }} AS a ON rps.acteur_id = a.identifiant_unique AND a.revision_existe = true
 )
 
 SELECT * FROM propositionservice

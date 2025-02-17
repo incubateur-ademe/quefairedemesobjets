@@ -34,15 +34,15 @@ models:
         - columns: ['siret']
           type: btree
         - columns: ['source_id']
-          type: btree
+          type: hash
         - columns: ['ville']
           type: btree
         - columns: ['acteur_type_id']
-          type: btree
+          type: hash
         - columns: ['location']
           type: gist
         - columns: ['parent_id']
-          type: btree
+          type: hash
       constraints:
         - type: foreign_key
           columns: [acteur_type_id]
@@ -85,12 +85,11 @@ models:
       materialized: table
       indexes:
         - columns: ['vueacteur_id', 'labelqualite_id']
-          type: btree
           unique: true
         - columns: ['vueacteur_id']
-          type: btree
+          type: hash
         - columns: ['labelqualite_id']
-          type: btree
+          type: hash
       constraints:
         - type: foreign_key
           columns: [vueacteur_id]
@@ -109,8 +108,6 @@ models:
           combination_of_columns:
             - vueacteur_id
             - labelqualite_id
-    depends_on:
-      - ref('qfdmo_vueacteur')
 
   - name: qfdmo_vueacteur_acteur_services
     description: "Vue Acteur Acteur Services model"
@@ -131,12 +128,11 @@ models:
       materialized: table
       indexes:
         - columns: ['vueacteur_id', 'acteurservice_id']
-          type: btree
           unique: true
         - columns: ['vueacteur_id']
-          type: btree
+          type: hash
         - columns: ['acteurservice_id']
-          type: btree
+          type: hash
       constraints:
         - type: foreign_key
           columns: [vueacteur_id]
@@ -155,8 +151,6 @@ models:
           combination_of_columns:
             - vueacteur_id
             - acteurservice_id
-    depends_on:
-      - ref('qfdmo_vueacteur')
 
   - name: qfdmo_vuepropositionservice
     description: "Vue Proposition Service model"
@@ -184,14 +178,13 @@ models:
       materialized: table
       indexes:
         - columns: ['acteur_id', 'action_id']
-          type: btree
           unique: true
         - columns: ['acteur_id']
-          type: btree
+          type: hash
         - columns: ['action_id']
-          type: btree
+          type: hash
         - columns: ['id']
-          type: btree
+          type: hash
       constraints:
         - type: foreign_key
           columns: [acteur_id]
@@ -210,8 +203,6 @@ models:
           combination_of_columns:
             - acteur_id
             - action_id
-    depends_on:
-      - ref('qfdmo_vueacteur')
 
   - name: qfdmo_vuepropositionservice_sous_categories
     description: "Vue Proposition Service Sous Categories model"
@@ -232,12 +223,11 @@ models:
       materialized: table
       indexes:
         - columns: ['vuepropositionservice_id', 'souscategorieobjet_id']
-          type: btree
           unique: true
         - columns: ['vuepropositionservice_id']
-          type: btree
+          type: hash
         - columns: ['souscategorieobjet_id']
-          type: btree
+          type: hash
       constraints:
         - type: foreign_key
           columns: [vuepropositionservice_id]
