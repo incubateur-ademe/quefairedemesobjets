@@ -51,7 +51,9 @@ class SearchForm(DsfrBaseForm):
 
 class ContactForm(DsfrBaseForm):
     name = forms.CharField(label="Votre nom")
+    name.widget.attrs["autocomplete"] = "name"
     email = forms.EmailField(label="Votre email")
+    email.widget.attrs["autocomplete"] = "email"
     subject = forms.ChoiceField(
         label="Votre sujet",
         choices=[
