@@ -6,16 +6,9 @@ le terme "config" et pas seulement "params" car les
 créer la config finale.
 """
 
+from cluster.config.constants import FIELDS_PROTECTED
 from pydantic import BaseModel, Field, field_validator, model_validator
 from utils.airflow_params import airflow_params_dropdown_selected_to_ids
-
-FIELDS_PROTECTED_ALL = [
-    "source_id",
-    "acteur_type_id",
-    "identifiant_unique",
-    "statut",
-    "nombre_enfants",
-]
 
 
 class ClusterConfig(BaseModel):
@@ -55,6 +48,14 @@ class ClusterConfig(BaseModel):
     cluster_fields_exact: list[str]
     cluster_fields_fuzzy: list[str]
     cluster_fuzzy_threshold: float = Field(0.5, ge=0, le=1)
+
+    # DEDUP
+    dedup_enrich_fields: list[str]
+    dedup_enrich_exclude_sources: list[str]
+    dedup_enrich_exclude_source_ids: list[int]  # to calculate from above
+    dedup_enrich_priority_sources: list[str]
+    dedup_enrich_priority_source_ids: list[int]  # to calculate from above
+    dedup_enrich_keep_empty: bool
 
     # ---------------------------------------
     # Listings & Mappings
@@ -105,9 +106,29 @@ class ClusterConfig(BaseModel):
             return []
         return v
 
+    @field_validator("include_only_if_regex_matches_nom", mode="before")
+    def check_include_only_if_regex_matches_nom(cls, v):
+        # Prevent empty string regex which would select all by mistake
+        if isinstance(v, str) and v.strip() == "":
+            return None
+        return v
+
     # Logique multi-champs
     @model_validator(mode="before")
     def check_model(cls, values):
+
+        # Fields avec default []
+        optionals = [
+            "normalize_fields_basic",
+            "normalize_fields_no_words_size1",
+            "normalize_fields_no_words_size2_or_less",
+            "normalize_fields_no_words_size3_or_less",
+            "normalize_fields_order_unique_words",
+            "dedup_enrich_exclude_sources",
+        ]
+        for k in optionals:
+            if not values.get(k):
+                values[k] = []
 
         # SOURCE CODES
         # Si aucun code source fourni alors on inclut toutes les sources
@@ -129,59 +150,47 @@ class ClusterConfig(BaseModel):
             dropdown_selected=values["include_acteur_types"],
         )
 
-        """
-        Logique supprimée le 2025-01-27 mais conservée pour référence:
-        - depuis l'ajout des parents indépendants des sources
-        via PR1265 on ne peut plus savoir si on héritera
-        uniquement d'une seule source au moment de la config, donc on
-        laisse passer au niveau de la sélection
-        TODO: on pourrait scinder la config en plusieurs sous-config:
-            - SelectionConfig
-            - NormalizationConfig
-            - ClusteringConfig
-            - EnrichmentConfig
-        Et ainsi avoir des validations plus fines à chaque étape
-        # ACTEUR TYPE vs. INTRA-SOURCE
-        if (
-            len(values["include_source_ids"]) == 1
-            and not values["cluster_intra_source_is_allowed"]
-        ):
-            raise ValueError("1 source sélectionnée mais intra-source désactivé")
-        """
-
         # Par défaut on ne clusterise pas les acteurs d'une même source
         # sauf si intra-source est activé
         values["cluster_fields_separate"] = ["source_id"]
         if values["cluster_intra_source_is_allowed"]:
             values["cluster_fields_separate"] = []
 
-        # Fields avec default []
-        optionals = [
-            "normalize_fields_basic",
-            "normalize_fields_no_words_size1",
-            "normalize_fields_no_words_size2_or_less",
-            "normalize_fields_no_words_size3_or_less",
-            "normalize_fields_order_unique_words",
-        ]
-        for k in optionals:
-            if not values.get(k):
-                values[k] = []
+        # To bail out when same field in exact/fuzzy, which the Airflow UI
+        # cannot help prevent (since it has no in-between-params validation)
+        cluster_fields_common = set(values["cluster_fields_exact"]) & set(
+            values["cluster_fields_fuzzy"]
+        )
+        if cluster_fields_common:
+            raise ValueError(
+                "Champs en double dans exact/fuzzy: " + str(cluster_fields_common)
+            )
 
-        # Construction de la liste des champs meta et data
-        # qui permet à travers de la pipeline de faire la distinction
-        # entre ce qu'on peut transformer car étant de la donnée (data)
-        # et ce qu'on doit garder inchangé (meta)
-        values["fields_protected"] = FIELDS_PROTECTED_ALL
+        # Constructing a list of fields to transform from all the
+        # clustering related fields
+        values["fields_protected"] = FIELDS_PROTECTED
         values["fields_transformed"] = []
         for k, v in values.items():
-            # On enrichit la liste des champs data avec les champs
-            # sélectionnés dans les différent paramètres de config
-            # à condition qu'ils ne soient pas meta
-            if "fields" in k and k != "fields_protected":
+            # Exclude protected & enrichment fields
+            if "fields" in k and k not in ["fields_protected", "dedup_enrich_fields"]:
                 values["fields_transformed"] += [
-                    x for x in v if x not in FIELDS_PROTECTED_ALL
+                    x for x in v if x not in FIELDS_PROTECTED
                 ]
         values["fields_transformed"] = list(set(values["fields_transformed"]))
+
+        # DEDUP
+        values["dedup_enrich_exclude_source_ids"] = (
+            airflow_params_dropdown_selected_to_ids(
+                mapping_ids_by_codes=values["mapping_sources"],
+                dropdown_selected=values["dedup_enrich_exclude_sources"],
+            )
+        )
+        values["dedup_enrich_priority_source_ids"] = (
+            airflow_params_dropdown_selected_to_ids(
+                mapping_ids_by_codes=values["mapping_sources"],
+                dropdown_selected=values["dedup_enrich_priority_sources"],
+            )
+        )
 
         # Si aucun champ pour la normalisation basique = tous les champs
         # data seront normalisés, pareil pour la norma d'ordre/unicité

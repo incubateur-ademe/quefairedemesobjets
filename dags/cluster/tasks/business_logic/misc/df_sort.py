@@ -1,4 +1,5 @@
 import pandas as pd
+from cluster.config.constants import COL_INDEX_SRC, COL_PARENT_DATA_NEW
 from utils.django import django_setup_full
 
 django_setup_full()
@@ -33,10 +34,10 @@ def df_sort(
     """
 
     from data.models.change import (
+        COL_CHANGE_ENTITY_TYPE,
+        COL_CHANGE_MODEL_NAME,
         COL_CHANGE_ORDER,
         COL_CHANGE_REASON,
-        COL_CHANGE_TYPE,
-        COL_ENTITY_TYPE,
     )
 
     sort_ideal = ["cluster_id", COL_CHANGE_ORDER]  # la base du clustering
@@ -46,7 +47,7 @@ def df_sort(
     # car cela casse notre ordre (on a pas de cluster_id et donc
     # on préfère par sémantique business que des codes)
     if cluster_fields_exact or cluster_fields_fuzzy:
-        sort_ideal += [COL_ENTITY_TYPE, "source_code", "acteur_type_code"]
+        sort_ideal += [COL_CHANGE_ENTITY_TYPE, "source_code", "acteur_type_code"]
     sort_ideal += [x for x in cluster_fields_exact if x not in sort_ideal]
     sort_ideal += [x for x in cluster_fields_fuzzy if x not in sort_ideal]
     # défaut quand on n'a pas de champs de clustering (étape de sélection)
@@ -71,15 +72,18 @@ def df_sort(
         "cluster_id",
         "identifiant_unique",
         "statut",
-        COL_ENTITY_TYPE,
-        COL_CHANGE_TYPE,
+        COL_CHANGE_ENTITY_TYPE,
+        COL_CHANGE_MODEL_NAME,
         COL_CHANGE_REASON,
         COL_CHANGE_ORDER,
         "acteur_type_code",
+        COL_PARENT_DATA_NEW,
     ]
+    cols_last = [COL_INDEX_SRC]
     cols = [x for x in cols_ideal if x in df.columns]
     cols += [x for x in cluster_fields_exact if x not in cols]
     cols += [x for x in cluster_fields_fuzzy if x not in cols]
     cols += [x for x in df.columns if x not in cols]
-    df = df[cols]
-    return df
+    # Moving cols_last which are present to end
+    cols = [x for x in cols if x not in cols_last] + [x for x in cols_last if x in cols]
+    return df[cols]

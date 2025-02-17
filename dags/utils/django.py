@@ -20,6 +20,7 @@ des fonctions d'initialisation django:
     🟠 Si il y a des erreurs, elles seront affichées
 """
 
+import logging
 import os
 import sys
 from pathlib import Path
@@ -31,6 +32,9 @@ from django.db import models
 from django.db.models import Model, Q, QuerySet
 from django.utils.functional import cached_property
 from shared.tasks.database_logic.db_manager import PostgresConnectionManager
+from utils import logging_utils as log
+
+logger = logging.getLogger(__name__)
 
 
 def django_add_to_sys_path() -> None:
@@ -81,24 +85,40 @@ def django_setup_partial() -> None:
     django.setup()
 
 
-def django_model_fields_attributes_get(model_class) -> list[str]:
-    """Retournes les noms des champs et des attributs
-    d'un modèle Django, par exemple pour offrir via
-    la UI Airflow des dropdowns de champs à sélectionner
-    pour des tâches de cluster."""
+def django_model_fields_get(model_class, include_properties=True) -> list[str]:
+    """Returns fields from Django model matching certain criteria
+    to help us:
+     - construct dropdowns in Airflow UI (ex: select clustering fields)
+     - pick some fields we want to construct dataframes
+
+    Always excluded: internals & ManyToMany
+    """
+
+    # Internal Django fields retrieved when inspecting model
+    # but we don't want to keep
+    excluded = ["pk"]
 
     if not issubclass(model_class, models.Model):
         raise ValueError("The provided class must be a subclass of models.Model.")
 
-    fields = [field.name for field in model_class._meta.get_fields()]
+    fields = [
+        x.name
+        for x in model_class._meta.get_fields()
+        # ManyToMany case causing massive performance issues (e.g. on "sources")
+        # and would require a different approach, maybe working via prepared
+        # views
+        if not isinstance(x, models.ManyToManyField)
+    ]
 
     attributes = []
-    for attr_name in dir(model_class):
-        attr = getattr(model_class, attr_name, None)
-        if isinstance(attr, property) or isinstance(attr, cached_property):
-            attributes.append(attr_name)
+    if include_properties:
+        for attr_name in dir(model_class):
+            attr = getattr(model_class, attr_name, None)
+            if isinstance(attr, property) or isinstance(attr, cached_property):
+                attributes.append(attr_name)
 
-    return fields + attributes
+    results = fields + attributes
+    return [x for x in results if x not in excluded]
 
 
 def django_model_queryset_generate(
@@ -186,17 +206,25 @@ def django_model_to_pandas_schema(model_class: type[Model]) -> dict[str, str]:
 
 
 def django_model_queryset_to_df(query: QuerySet, fields: list[str]) -> pd.DataFrame:
-    """Fonction pour obtenir un DataFrame Pandas à partir d'un QuerySet Django
-    et de son modèle pour imposer un schema"""
-    data = []
-    for entry in query:
-        data.append({field: getattr(entry, field) for field in set(fields)})
-    if not data:
-        raise ValueError("Pas de données retournées par la query Django.")
+    """Converts a Django QuerySet into a dataframe"""
+    fn = "django_model_queryset_to_df"
+    log.preview(f"{fn}: query", django_model_queryset_to_sql(query))
+    """
+    # To make function more reliable we always exclude fields not
+    # present in DB
+    fields_in_db = django_model_fields_get(query.model, include_properties=False)
+    fields_used = [x for x in fields if x in fields_in_db]
 
-    # TODO: imposer le schema pour éviter les inférences de type
-    # Pour l'instant on met dtype=object ce qui désactive l'inférence
-    # et donc on consèrve les valeurs telles que fournies par Django
-    # ce qui devrait suffire
-    # dtype = django_model_to_pandas_schema(query.model)
+    data = list(query.values(*fields_used))
+    """
+    fields = list(set(fields))
+    data = []
+    # Reason we have to go for a loop and can't do list(query.values(*fields))
+    # is because some of the fields are calculated props and don't exist in DB
+    for n, entry in enumerate(query):
+        data.append({field: getattr(entry, field) for field in fields})
+        if n % 100 == 0:
+            logger.info(f"{fn}: {n} entrées récupérées")
+    log.preview(f"{fn}: entrées retournées", data)
+    # dtype=object => don't try to infer type
     return pd.DataFrame(data, dtype=object)

@@ -17,6 +17,7 @@ from dags.sources.config.shared_constants import (
     SUGGESTION_SOURCE_SUPRESSION,
     SUGGESTION_SUCCES,
 )
+from data.models.change import SuggestionChange
 from qfdmo.models.acteur import (
     Acteur,
     ActeurService,
@@ -280,7 +281,10 @@ class Suggestion(models.Model):
     # be used to handle all specificities of suggestions
     def apply(self):
         if self.suggestion_cohorte.type_action == SuggestionAction.CLUSTERING:
-            raise NotImplementedError("Revoir logique d'ensemble")
+            changes = self.suggestion["changes"]
+            changes.sort(key=lambda x: x["order"])
+            for change in changes:
+                SuggestionChange(**change).apply()
         elif self.suggestion_cohorte.type_action == SuggestionAction.SOURCE_AJOUT:
             self._create_acteur()
         elif (

@@ -11,13 +11,8 @@ from datetime import datetime
 from airflow import DAG
 from airflow.models.baseoperator import chain
 from airflow.models.param import Param
+from cluster.config.constants import FIELDS_PROTECTED
 from cluster.config.model import ClusterConfig
-from cluster.dags.ui import (
-    UI_PARAMS_SEPARATOR_CLUSTERING,
-    UI_PARAMS_SEPARATOR_NORMALIZATION,
-    UI_PARAMS_SEPARATOR_SELECTION_ACTEURS,
-    UI_PARAMS_SEPARATOR_SELECTION_PARENTS,
-)
 from cluster.tasks.airflow_logic.cluster_acteurs_clusters_display_task import (
     cluster_acteurs_clusters_display_task,
 )
@@ -29,6 +24,9 @@ from cluster.tasks.airflow_logic.cluster_acteurs_config_create_task import (
 )
 from cluster.tasks.airflow_logic.cluster_acteurs_normalize_task import (
     cluster_acteurs_normalize_task,
+)
+from cluster.tasks.airflow_logic.cluster_acteurs_parents_choose_data_task import (
+    cluster_acteurs_parents_choose_data_task,
 )
 from cluster.tasks.airflow_logic.cluster_acteurs_parents_choose_new_task import (
     cluster_acteurs_parents_choose_new_task,
@@ -42,8 +40,9 @@ from cluster.tasks.airflow_logic.cluster_acteurs_suggestions_display_task import
 from cluster.tasks.airflow_logic.cluster_acteurs_suggestions_to_db_task import (
     cluster_acteurs_suggestions_to_db_task,
 )
+from cluster.ui import params_separators as UI_PARAMS_SEPARATORS
 from utils.airflow_params import airflow_params_dropdown_from_mapping
-from utils.django import django_model_fields_attributes_get, django_setup_full
+from utils.django import django_model_fields_get, django_setup_full
 
 # Setup Django avant import des modèles
 django_setup_full()
@@ -72,8 +71,20 @@ dropdown_acteur_types = airflow_params_dropdown_from_mapping(
     mapping_acteur_type_id_by_code
 )
 
-dropdown_acteur_columns = django_model_fields_attributes_get(Acteur)
+acteur_fields_all = django_model_fields_get(Acteur)
+acteur_fields_enrich = sorted(
+    list(
+        set(django_model_fields_get(Acteur, include_properties=False))
+        - set(FIELDS_PROTECTED)
+    )
+)
+# To display protected fields in UI without breaking it
+# (Airflow UI doesn't wrap, it creates a long line which messes up inputs)
+fields_protected_ui = [
+    FIELDS_PROTECTED[i : i + 5] for i in range(0, len(FIELDS_PROTECTED), 5)
+]
 
+DAG_ID = "cluster_acteur_suggestions"
 PARAMS = {
     "dry_run": Param(
         True,
@@ -84,7 +95,7 @@ PARAMS = {
             casser quoi que ce soit (itérer plus vite)
             (ex: pas d'écriture des suggestions en DB,
             donc pas visible dans Django Admin).
-            {UI_PARAMS_SEPARATOR_SELECTION_ACTEURS}""",
+            {UI_PARAMS_SEPARATORS.READ_ACTEURS}""",
     ),
     # TODO: permettre de ne sélectionner aucune source = toutes les sources
     "include_sources": Param(
@@ -116,13 +127,12 @@ PARAMS = {
             🧹 Note: la normalisation basique est appliquée à la volée sur ce
             champ avant l'application de la regex pour simplifier les expressions
 
-            0️⃣ Si aucune valeur spécifiée =  cette option n'a PAS d'effet
-            {UI_PARAMS_SEPARATOR_SELECTION_PARENTS}""",
+            0️⃣ Si aucune valeur spécifiée =  cette option n'a PAS d'effet""",
     ),
     "include_if_all_fields_filled": Param(
         ["code_postal"],
         type="array",
-        examples=dropdown_acteur_columns,
+        examples=acteur_fields_all,
         description_md="""**➕ INCLUSION ACTEURS**: ceux dont tous ces champs
             sont **remplis** (opérateur **ET/AND**)
 
@@ -132,14 +142,14 @@ PARAMS = {
     "exclude_if_any_field_filled": Param(
         [],
         type=["null", "array"],
-        examples=dropdown_acteur_columns,
+        examples=acteur_fields_all,
         description_md=f"""**🛑 EXCLUSION ACTEURS**: ceux dont n'importe quel
             de ces champs est **rempli** (opérateur **OU/OR**)
 
             exemple: travailler uniquement sur les acteurs SANS SIRET
 
             0️⃣ Si aucune valeur spécifiée =  cette option n'a PAS d'effet
-            {UI_PARAMS_SEPARATOR_SELECTION_PARENTS}
+            {UI_PARAMS_SEPARATORS.READ_PARENTS}
             """,
     ),
     "include_parents_only_if_regex_matches_nom": Param(
@@ -153,12 +163,12 @@ PARAMS = {
 
             0️⃣ Si aucune valeur spécifiée =  cette option n'a PAS d'effet
 
-            {UI_PARAMS_SEPARATOR_NORMALIZATION}""",
+            {UI_PARAMS_SEPARATORS.NORMALIZATION}""",
     ),
     "normalize_fields_basic": Param(
         [],
         type=["null", "array"],
-        examples=dropdown_acteur_columns,
+        examples=acteur_fields_all,
         description_md=r"""Les champs à normaliser de manière basique:
              - minuscule
              - conversion des accents
@@ -176,7 +186,7 @@ PARAMS = {
     "normalize_fields_no_words_size1": Param(
         ["nom"],
         type=["null", "array"],
-        examples=dropdown_acteur_columns,
+        examples=acteur_fields_all,
         description_md=r"""Les champs à normaliser en supprimant les mots
             de taille 1.
 
@@ -188,7 +198,7 @@ PARAMS = {
     "normalize_fields_no_words_size2_or_less": Param(
         ["nom"],
         type=["null", "array"],
-        examples=dropdown_acteur_columns,
+        examples=acteur_fields_all,
         description_md="""Les champs à normaliser en supprimant les mots
             de taille 2 ou moins.
 
@@ -203,7 +213,7 @@ PARAMS = {
         # vide par défaut
         [],
         type=["null", "array"],
-        examples=dropdown_acteur_columns,
+        examples=acteur_fields_all,
         description_md=r"""Les champs à normaliser en supprimant les mots
             de taille 3 ou moins.
 
@@ -215,7 +225,7 @@ PARAMS = {
     "normalize_fields_order_unique_words": Param(
         [],
         type=["null", "array"],
-        examples=dropdown_acteur_columns,
+        examples=acteur_fields_all,
         description_md=f"""Les champs à normaliser en ordonnant les mots
             par ordre alphabétique et en supprimant les doublons.
 
@@ -223,7 +233,7 @@ PARAMS = {
 
             💯 Si aucun champ spécifié =  s'applique à TOUS les champs
 
-            {UI_PARAMS_SEPARATOR_CLUSTERING}
+            {UI_PARAMS_SEPARATORS.CLUSTERING}
             """,
     ),
     "cluster_intra_source_is_allowed": Param(
@@ -235,30 +245,71 @@ PARAMS = {
     "cluster_fields_exact": Param(
         ["code_postal", "ville"],
         type="array",
-        examples=dropdown_acteur_columns,
+        examples=acteur_fields_all,
         description_md=r"""Les champs sur lesquels on fait le groupage exact.
             exemple: ["code_postal", "ville"]""",
     ),
     "cluster_fields_fuzzy": Param(
         ["nom", "adresse"],
         type="array",
-        examples=dropdown_acteur_columns,
+        examples=acteur_fields_all,
         description_md=r"""Les champs sur lesquels on fait le groupage fuzzy.
             exemple: ["code_postal", "ville"]""",
     ),
     "cluster_fuzzy_threshold": Param(
         0.5,
         type="number",
-        description_md="""Seuil de similarité pour le groupage fuzzy.
-            0 = pas de similarité, 1 = similarité parfaite""",
+        description_md=f"""Seuil de similarité pour le groupage fuzzy.
+            0 = pas de similarité, 1 = similarité parfaite
+
+            {UI_PARAMS_SEPARATORS.DEDUP_CHOOSE_PARENT}
+
+            {UI_PARAMS_SEPARATORS.DEDUP_ENRICH_PARENT}""",
+    ),
+    "dedup_enrich_fields": Param(
+        acteur_fields_enrich,
+        type=["array"],
+        examples=acteur_fields_enrich,
+        description_md=f"""✍️ Champs à enrichir.
+
+            Sont toujours exclus:
+             - les champs calculés (ex: numero_et_complement)
+             - les champs protégés:
+             {'  \n'.join([', '.join(chunck) for chunck in fields_protected_ui])}
+            """,
+    ),
+    "dedup_enrich_exclude_sources": Param(
+        [],
+        type=["null", "array"],
+        examples=dropdown_sources,
+        description_md="""**❌ EXCLUSIONS SOURCES**: sources sur lequelles
+            ne **JAMAIS** prendre de données""",
+    ),
+    "dedup_enrich_priority_sources": Param(
+        [],
+        type=["array"],
+        examples=dropdown_sources,
+        description_md=r"""**🔢 PRIORITES SOURCES**: sources sur lequelles
+            on **PRÉFÈRE** prendre de données
+
+            Ce n'est pas parce qu'une source est prioritaire qu'on va
+            nécessairement en tirer de la donnée
+            """,
+    ),
+    "dedup_enrich_keep_empty": Param(
+        False,
+        type="boolean",
+        description_md=r"""**🗋 CONSERVER LE VIDE**: si OUI et qu'une valeur
+        vide est rencontrée sur une source prioritaire, alors elle sera
+        conservée""",
     ),
 }
-for key, param in PARAMS.items():
-    if key not in ClusterConfig.model_fields:
-        raise ValueError(f"Param Airflow {key} non trouvé dans la config")
+keys_missing_in_conf = list(set(PARAMS.keys()) - set(ClusterConfig.model_fields))
+if keys_missing_in_conf:
+    raise ValueError(f"Param Airflow {keys_missing_in_conf} non trouvé(s) en config")
 
 with DAG(
-    dag_id="cluster_acteurs_clusters",
+    dag_id=DAG_ID,
     dag_display_name="Cluster - Acteurs - Suggestions",
     default_args={
         "owner": "airflow",
@@ -288,7 +339,7 @@ with DAG(
         cluster_acteurs_clusters_display_task(dag=dag),
         cluster_acteurs_clusters_validate_task(dag=dag),
         cluster_acteurs_parents_choose_new_task(dag=dag),
-        # cluster_acteurs_parents_choose_data_task(dag=dag),
+        cluster_acteurs_parents_choose_data_task(dag=dag),
         cluster_acteurs_suggestions_display_task(dag=dag),
         cluster_acteurs_suggestions_to_db_task(dag=dag),
     )

@@ -72,16 +72,10 @@ def cluster_acteurs_normalize_wrapper(**kwargs) -> None:
     df_norm = df_sort(df_norm)
     log.preview_df_as_markdown("acteurs normalisés", df_norm)
 
-    # Les XCOM étant spécifiques à une tâche on peut pousser
-    # le même nom sans risque de collision. Ainsi, pousse le nom "df"
-    # et pas "df_norm" pour avoir toujours le nom "df" à travers
-    # toutes les tâches et pas avoir à se rappeler de la nomenclature
-    # des tâches précédentes.
     kwargs["ti"].xcom_push(key="df", value=df_norm)
 
 
 def cluster_acteurs_normalize_task(dag: DAG) -> PythonOperator:
-    """La tâche Airflow qui ne fait que appeler le wrapper"""
     return PythonOperator(
         task_id=TASK_NORMALIZE,
         python_callable=cluster_acteurs_normalize_wrapper,

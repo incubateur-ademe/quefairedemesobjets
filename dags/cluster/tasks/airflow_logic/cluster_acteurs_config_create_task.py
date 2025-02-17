@@ -1,5 +1,5 @@
 """
-Tâche Airflow pour valider la configuration de clustering
+Tâche Airflow pour créer la configuration de clustering
 """
 
 import logging
@@ -45,7 +45,6 @@ def cluster_acteurs_config_create_wrapper(**kwargs):
 
 
 def cluster_acteurs_config_create_task(dag: DAG) -> PythonOperator:
-    """La tâche Airflow qui ne fait que appeler le wrapper"""
     return PythonOperator(
         task_id=TASK_CONFIG_CREATE,
         python_callable=cluster_acteurs_config_create_wrapper,

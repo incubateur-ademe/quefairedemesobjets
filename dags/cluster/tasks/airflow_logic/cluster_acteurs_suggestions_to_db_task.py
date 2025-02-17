@@ -1,16 +1,16 @@
 import logging
 
-import pandas as pd
 from airflow import DAG
 from airflow.exceptions import AirflowSkipException
 from airflow.operators.python import PythonOperator
 from cluster.config.model import ClusterConfig
 from cluster.tasks.airflow_logic.task_ids import (
     TASK_CONFIG_CREATE,
+    TASK_PARENTS_CHOOSE_DATA,
     TASK_SUGGESTIONS_DISPLAY,
     TASK_SUGGESTIONS_TO_DB,
 )
-from cluster.tasks.business_logic.cluster_acteurs_suggestions_to_db import (
+from cluster.tasks.business_logic.cluster_acteurs_suggestions.to_db import (
     cluster_acteurs_suggestions_to_db,
 )
 from utils import logging_utils as log
@@ -40,43 +40,35 @@ def cluster_acteurs_suggestions_to_db_wrapper(**kwargs) -> None:
 
     logger.info(task_info_get())
 
-    # use xcom to get the params from the previous task
     config: ClusterConfig = kwargs["ti"].xcom_pull(
         key="config", task_ids=TASK_CONFIG_CREATE
     )
-    df: pd.DataFrame = kwargs["ti"].xcom_pull(
-        key="df", task_ids=TASK_SUGGESTIONS_DISPLAY
+    df_clusters = kwargs["ti"].xcom_pull(key="df", task_ids=TASK_PARENTS_CHOOSE_DATA)
+    suggestions = kwargs["ti"].xcom_pull(
+        key="suggestions", task_ids=TASK_SUGGESTIONS_DISPLAY
     )
-    dag_id = kwargs["dag"].dag_id
-    run_id = kwargs["run_id"]
 
-    log.preview("DAG ID", dag_id)
-    log.preview("Run ID", run_id)
-    log.preview("config reçue", config)
-    log.preview("suggestions de clustering", df)
+    log.preview("config", config)
+    log.preview("df_clusters", df_clusters)
+    log.preview("suggestions", suggestions)
 
-    # "is not False" est plus robuste que "is True" car on peut avoir None
-    # par erreur dans la config et on ne veut pas prendre celoa pour
-    # un signal de modifier la DB
+    # "is not False" more robust than "is true" due to potential None
     if config.dry_run is not False:
-        raise AirflowSkipException(
-            log.banner_string(f"Dry run ={config.dry_run}, on passe")
-        )
+        msg = log.banner_string(f"Dry run ={config.dry_run}, on n'écrit pas en DB")
+        raise AirflowSkipException(msg)
 
     cluster_acteurs_suggestions_to_db(
-        df_clusters=df,
-        identifiant_action=f"dag_id={dag_id}",
-        identifiant_execution=f"run_id={run_id}",
+        df_clusters=df_clusters,
+        suggestions=suggestions,
+        identifiant_action=f"dag_id={kwargs['dag'].dag_id}",
+        identifiant_execution=f"run_id={kwargs['run_id']}",
     )
 
     logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
-    logging.info(
-        f"{df["cluster_id"].nunique()} suggestions de clusters écrites en base"
-    )
+    logging.info(f"{len(suggestions)} suggestions de clusters écrites en base")
 
 
 def cluster_acteurs_suggestions_to_db_task(dag: DAG) -> PythonOperator:
-    """La tâche Airflow qui ne fait que appeler le wrapper"""
     return PythonOperator(
         task_id=TASK_SUGGESTIONS_TO_DB,
         python_callable=cluster_acteurs_suggestions_to_db_wrapper,

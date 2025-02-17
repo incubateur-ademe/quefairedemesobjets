@@ -7,7 +7,7 @@ from cluster.tasks.business_logic.cluster_acteurs_parents_choose_new import (
     REASON_PARENT_TO_DELETE,
     REASON_PARENTS_KEEP_MOST_CHILDREN,
     REASON_POINT_TO_NEW_PARENT,
-    cluster_acteurs_one_cluster_changes_mark,
+    cluster_acteurs_one_cluster_parent_changes_mark,
     cluster_acteurs_one_cluster_parent_choose,
     cluster_acteurs_parents_choose_new,
     parent_id_generate,
@@ -15,22 +15,26 @@ from cluster.tasks.business_logic.cluster_acteurs_parents_choose_new import (
 from rich import print
 
 from data.models.change import (
-    CHANGE_ACTEUR_CREATE_AS_PARENT,
-    CHANGE_ACTEUR_NOTHING_TO_DO,
-    CHANGE_ACTEUR_PARENT_DELETE,
-    CHANGE_ACTEUR_PARENT_KEEP,
-    CHANGE_ACTEUR_POINT_TO_PARENT,
+    COL_CHANGE_ENTITY_TYPE,
+    COL_CHANGE_MODEL_NAME,
     COL_CHANGE_ORDER,
     COL_CHANGE_REASON,
-    COL_CHANGE_TYPE,
+    ENTITY_ACTEUR_REVISION,
+)
+from data.models.changes import (
+    ChangeActeurCreateAsParent,
+    ChangeActeurDeleteAsParent,
+    ChangeActeurKeepAsParent,
+    ChangeActeurUpdateParentId,
+    ChangeActeurVerifyRevision,
 )
 
-# Raccourcis pour les tests
-CHANGE_KEEP = CHANGE_ACTEUR_PARENT_KEEP
-CHANGE_CREATE = CHANGE_ACTEUR_CREATE_AS_PARENT
-CHANGE_DELETE = CHANGE_ACTEUR_PARENT_DELETE
-CHANGE_POINT = CHANGE_ACTEUR_POINT_TO_PARENT
-CHANGE_NOTHING = CHANGE_ACTEUR_NOTHING_TO_DO
+# Shorthands for tests
+CHANGE_KEEP = ChangeActeurKeepAsParent.name()
+CHANGE_CREATE = ChangeActeurCreateAsParent.name()
+CHANGE_DELETE = ChangeActeurDeleteAsParent.name()
+CHANGE_POINT = ChangeActeurUpdateParentId.name()
+CHANGE_NOTHING = ChangeActeurVerifyRevision.name()
 REASON_CREATE = REASON_NO_PARENT_CREATE_ONE
 REASON_KEEP_ONLY = REASON_ONE_PARENT_KEPT
 REASON_KEEP_MOST = REASON_PARENTS_KEEP_MOST_CHILDREN
@@ -40,7 +44,7 @@ REASON_DELETE = REASON_PARENT_TO_DELETE
 COLS_ASSERT = [
     "identifiant_unique",
     "parent_id",
-    COL_CHANGE_TYPE,
+    COL_CHANGE_MODEL_NAME,
     COL_CHANGE_ORDER,
     COL_CHANGE_REASON,
 ]
@@ -63,6 +67,7 @@ def df_no_parent() -> pd.DataFrame:
             "identifiant_unique": ["c0_a", "c0_b", "c0_c"],
             "parent_id": [None, None, None],
             "nombre_enfants": [0, 0, 0],
+            COL_CHANGE_ENTITY_TYPE: [ENTITY_ACTEUR_REVISION] * 3,
         }
     )
 
@@ -78,6 +83,7 @@ def df_one_parent() -> pd.DataFrame:
             # n'a pas de parent et est rattaché au cluster
             "parent_id": [None, None, "c1_b"],
             "nombre_enfants": [0, 1, 0],
+            COL_CHANGE_ENTITY_TYPE: [ENTITY_ACTEUR_REVISION] * 3,
         }
     )
 
@@ -92,6 +98,7 @@ def df_two_parents() -> pd.DataFrame:
             # a=2 enfants, b=1 enfant
             "parent_id": [None, None, "c2_b", "c2_a", "c2_a"],
             "nombre_enfants": [2, 1, 0, 0, 0],
+            COL_CHANGE_ENTITY_TYPE: [ENTITY_ACTEUR_REVISION] * 5,
         }
     )
 
@@ -153,7 +160,7 @@ class TestClusterActeursOneClusterChangesMark:
             ignore_index=True,
         )
         print(f"{df=}")
-        df = cluster_acteurs_one_cluster_changes_mark(
+        df = cluster_acteurs_one_cluster_parent_changes_mark(
             df, parent_id_new, CHANGE_CREATE, "Nouveau parent"
         )
         assert len(df) == 4, "Pas de ligne ajoutée ou supprimée"
@@ -168,10 +175,10 @@ class TestClusterActeursOneClusterChangesMark:
         # Cas de figure avec 1 parent existant (b qui a 1 enfant c)
         # et un nouvel enfant rattaché au cluster (a)
         df = df_one_parent
-        df = cluster_acteurs_one_cluster_changes_mark(
+        df = cluster_acteurs_one_cluster_parent_changes_mark(
             df_one_cluster=df,
             parent_id="c1_b",
-            change_type=CHANGE_ACTEUR_PARENT_KEEP,
+            change_model_name=ChangeActeurKeepAsParent.name(),
             parent_change_reason="b est seul",
         )
         assert len(df) == 3, "Pas de ligne ajoutée ou supprimée"
@@ -186,7 +193,7 @@ class TestClusterActeursOneClusterChangesMark:
         # a = 2 enfants = on le garde
         # b = 1 enfant = on le marque pour suppression
         df = df_two_parents
-        df = cluster_acteurs_one_cluster_changes_mark(
+        df = cluster_acteurs_one_cluster_parent_changes_mark(
             df, "c2_a", CHANGE_KEEP, "a=2 enfants"
         )
         assert len(df) == 5, "Pas de ligne ajoutée ou supprimée"
@@ -238,7 +245,7 @@ class TestClusterActeursChooseAllParents:
             "cluster_id",
             "identifiant_unique",
             COL_CHANGE_ORDER,
-            COL_CHANGE_TYPE,
+            COL_CHANGE_MODEL_NAME,
             COL_CHANGE_REASON,
         ]
         assert df_working[cols_assert].values.tolist() == [
@@ -261,6 +268,7 @@ class TestClusterActeursChooseAllParents:
         # On veut aucune valeur nan résultant des divers manipulations
         # On ne peut pas juste faire df.isna().any().any() car isna
         # inclut les None qu'on tolère
+        print(df_working.to_dict(orient="records"))
         df_nan = df_working.map(lambda x: 1 if pd.isna(x) and x is not None else 0)
         assert df_nan.values.sum() == 0
 

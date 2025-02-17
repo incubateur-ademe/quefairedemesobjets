@@ -14,6 +14,8 @@ from utils.django import django_setup_full
 
 django_setup_full()
 
+logger = logging.getLogger(__name__)
+
 
 def cluster_acteurs_read_for_clustering(
     include_source_ids: list[int],
@@ -47,7 +49,7 @@ def cluster_acteurs_read_for_clustering(
     # base de tous les critères d'inclusion/exclusion
     # fournis au niveau du DAG
     logging.info(log.banner_string("Sélection des orphelins"))
-    df_acteurs, query = cluster_acteurs_read_orphans(
+    df_orphans, query = cluster_acteurs_read_orphans(
         model_class=DisplayedActeur,
         include_source_ids=include_source_ids,
         include_acteur_type_ids=include_acteur_type_ids,
@@ -56,13 +58,16 @@ def cluster_acteurs_read_for_clustering(
         exclude_if_any_field_filled=exclude_if_any_field_filled,
         extra_dataframe_fields=fields_transformed,
     )
-    df_acteurs = df_sort(df_acteurs)
     log.preview("requête SQL utilisée", query)
-    log.preview("# acteurs par source_id", df_acteurs.groupby("source_id").size())
+    logger.info(f"# orphelins récupérées: {len(df_orphans)}")
+    if df_orphans.empty:
+        return df_orphans
+    log.preview("# acteurs par source_id", df_orphans.groupby("source_id").size())
     log.preview(
-        "# acteurs par acteur_type_id", df_acteurs.groupby("acteur_type_id").size()
+        "# acteurs par acteur_type_id", df_orphans.groupby("acteur_type_id").size()
     )
-    log.preview_df_as_markdown("acteurs sélectionnés", df_acteurs)
+    log.preview_df_as_markdown("acteurs sélectionnés", df_orphans)
+    df_orphans = df_sort(df_orphans)
 
     # --------------------------------
     # 2) Sélection des parents uniquements
@@ -88,10 +93,10 @@ def cluster_acteurs_read_for_clustering(
     # --------------------------------
     logging.info(log.banner_string("Fusion parents + orphelins"))
     ids = set()
-    ids.update(df_acteurs["identifiant_unique"].values)
+    ids.update(df_orphans["identifiant_unique"].values)
     ids.update(df_parents["identifiant_unique"].values)
     log.preview("IDs avant la fusion", ids)
-    df = pd.concat([df_acteurs, df_parents], ignore_index=True).replace({np.nan: None})
+    df = pd.concat([df_orphans, df_parents], ignore_index=True).replace({np.nan: None})
     df = df.drop_duplicates(subset="identifiant_unique", keep="first")
     df = df_sort(df)
     log.preview("IDs après la fusion", df["identifiant_unique"].tolist())

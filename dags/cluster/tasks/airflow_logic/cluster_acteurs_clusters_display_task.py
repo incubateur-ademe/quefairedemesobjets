@@ -65,6 +65,8 @@ def cluster_acteurs_suggestions_wrapper(**kwargs) -> None:
         fields_protected=config.fields_protected,
         fields_transformed=config.fields_transformed,
     )
+    if df.empty:
+        raise AirflowSkipException("Pas de clusters trouvés")
 
     # On pousse les suggestions dans xcom pour les tâches suivantes
     kwargs["ti"].xcom_push(key="df", value=df)

@@ -54,19 +54,13 @@ def cluster_acteurs_parents_choose_new_wrapper(**kwargs) -> None:
 
     logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
     log.preview_df_as_markdown(
-        "acteurs avec parents sélectionnés", df, groupby="cluster_id"
+        "clusters avec parents sélectionnés", df, groupby="cluster_id"
     )
 
-    # Les XCOM étant spécifiques à une tâche on peut pousser
-    # le même nom sans risque de collision. Ainsi, pousse le nom "df"
-    # et pas "df_norm" pour avoir toujours le nom "df" à travers
-    # toutes les tâches et pas avoir à se rappeler de la nomenclature
-    # des tâches précédentes.
     kwargs["ti"].xcom_push(key="df", value=df)
 
 
 def cluster_acteurs_parents_choose_new_task(dag: DAG) -> PythonOperator:
-    """La tâche Airflow qui ne fait que appeler le wrapper"""
     return PythonOperator(
         task_id=TASK_PARENTS_CHOOSE_NEW,
         python_callable=cluster_acteurs_parents_choose_new_wrapper,

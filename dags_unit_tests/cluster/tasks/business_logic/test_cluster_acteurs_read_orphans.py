@@ -307,26 +307,3 @@ class TestClusterActeursSelectionOrphans:
             "CORRêct_nom_s1_at2",
             "!!correct_nom_s2_at1",
         ]
-
-    # ----------------------------------------------------
-    # Tests sur les cas que l'on ne tolère pas
-    # ----------------------------------------------------
-    # Voir commentaires dans la fonction cluster_acteurs_read_orphans
-    # sur le pourquoi des exceptions et pas simplement retourner None
-    def test_exception_if_query_returns_nothing(self):
-        """Si aucun acteur n'est sélectionné en base de données,
-        on soulève une exception"""
-        with pytest.raises(
-            ValueError, match="Pas de données retournées par la query Django"
-        ):
-            cluster_acteurs_read_orphans(
-                model_class=RevisionActeur,
-                # Sources et types inconnus au bataillon
-                # d'où l'échec de la query
-                include_source_ids=[-1],
-                include_acteur_type_ids=[-1],
-                include_only_if_regex_matches_nom="correct",
-                include_if_all_fields_filled=["nom", "ville"],
-                exclude_if_any_field_filled=["siret", "numero_et_complement_de_rue"],
-                extra_dataframe_fields=["longitude", "latitude"],
-            )

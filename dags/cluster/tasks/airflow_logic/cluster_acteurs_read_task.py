@@ -1,6 +1,7 @@
 import logging
 
 from airflow import DAG
+from airflow.exceptions import AirflowSkipException
 from airflow.operators.python import PythonOperator
 from cluster.config.model import ClusterConfig
 from cluster.tasks.airflow_logic.task_ids import TASK_CONFIG_CREATE, TASK_SELECTION
@@ -52,8 +53,7 @@ def cluster_acteurs_read_wrapper(**kwargs) -> None:
     )
 
     if df.empty:
-        # TODO: replace by AirflowSkipException
-        raise ValueError("Aucun acteur trouvé avec les critères de sélection")
+        raise AirflowSkipException("Aucun orphelin trouvé pour le clustering")
 
     logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
     log.preview_df_as_markdown("acteurs sélectionnés", df)
@@ -62,7 +62,6 @@ def cluster_acteurs_read_wrapper(**kwargs) -> None:
 
 
 def cluster_acteurs_read_task(dag: DAG) -> PythonOperator:
-    """La tâche Airflow qui ne fait que appeler le wrapper"""
     return PythonOperator(
         task_id=TASK_SELECTION,
         python_callable=cluster_acteurs_read_wrapper,

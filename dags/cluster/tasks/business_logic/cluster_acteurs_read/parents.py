@@ -10,6 +10,7 @@ def cluster_acteurs_read_parents(
     fields: list[str],
     include_only_if_regex_matches_nom: str | None = None,
 ) -> pd.DataFrame:
+    from data.models.change import COL_CHANGE_ENTITY_TYPE, ENTITY_ACTEUR_DISPLAYED
     from qfdmo.models import ActeurType, DisplayedActeur
     from qfdmo.models.acteur import ActeurStatus
 
@@ -48,4 +49,5 @@ def cluster_acteurs_read_parents(
             )
         ].copy()
 
+    df[COL_CHANGE_ENTITY_TYPE] = ENTITY_ACTEUR_DISPLAYED
     return df

@@ -2,6 +2,7 @@ import pandas as pd
 import pytest
 
 from dags.utils.django import (
+    django_model_fields_get,
     django_model_queryset_generate,
     django_model_queryset_to_sql,
     django_model_to_pandas_schema,
@@ -9,6 +10,36 @@ from dags.utils.django import (
 )
 
 django_setup_full()
+
+
+@pytest.mark.django_db
+class TestDjangoModelFieldsGet:
+
+    @pytest.fixture
+    def without_props(self):
+        from qfdmo.models import DisplayedActeur
+
+        return django_model_fields_get(DisplayedActeur, include_properties=False)
+
+    @pytest.fixture
+    def with_props(self):
+        from qfdmo.models import DisplayedActeur
+
+        return django_model_fields_get(DisplayedActeur, include_properties=True)
+
+    def test_without_props(self, without_props):
+        assert "nom" in without_props
+        assert "combine_adresses" not in without_props
+
+    def test_with_props(self, with_props):
+        assert "nom" in with_props
+        assert "combine_adresses" in with_props
+
+    def test_internal_fields_excluded(self, with_props):
+        assert "pk" not in with_props
+
+    def test_many_to_many_excluded(self, with_props):
+        assert "sources" not in with_props
 
 
 # Test function
