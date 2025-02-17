@@ -58,7 +58,7 @@ DATA_ACTEURS = [
         COL_CHANGE_ENTITY_TYPE: ENTITY_CREATE,
         COL_CHANGE_MODEL_NAME: CHANGE_CREATE,
         COL_CHANGE_REASON: "r_create",
-        COL_PARENT_DATA_NEW: {"nom": "changed a1"},
+        COL_PARENT_DATA_NEW: {"nom": "new name c1pcreate"},
     },
     {
         "cluster_id": C1,
@@ -321,5 +321,38 @@ class TestClusterActeursSuggestionsToDb:
         assert not cluster_ids_missing
 
     def test_apply_suggestions(self, suggestions_from_db):
+        from qfdmo.models.acteur import RevisionActeur
+
         for suggestion in suggestions_from_db:
             suggestion.apply()
+
+        # Once suggestions have been applied, all acteurs
+        # should be in the desired state
+
+        # Cluster 1
+        c1pcreate = RevisionActeur.objects.get(pk="c1pcreate")
+        assert c1pcreate.nom == "new name c1pcreate"
+        c1orphan1 = RevisionActeur.objects.get(pk="c1orphan1")
+        assert c1orphan1.parent.identifiant_unique == c1pcreate.identifiant_unique
+
+        # Cluster 2
+        c2pkeep = RevisionActeur.objects.get(pk="c2pkeep")
+        assert c2pkeep.nom == "new name c2pkeep"
+        c2child1 = RevisionActeur.objects.get(pk="c2child1")
+        assert c2child1.parent.identifiant_unique == c2pkeep.identifiant_unique
+
+        # Cluster 3
+        c3pkeep = RevisionActeur.objects.get(pk="c3pkeep")
+        assert c3pkeep.nom == "new name c3pkeep"
+        c3child1_pkeep = RevisionActeur.objects.get(pk="c3child1_pkeep")
+        assert c3child1_pkeep.parent.identifiant_unique == c3pkeep.identifiant_unique
+        c3child2_pkeep = RevisionActeur.objects.get(pk="c3child2_pkeep")
+        assert c3child2_pkeep.parent.identifiant_unique == c3pkeep.identifiant_unique
+        c3child1_pdelete = RevisionActeur.objects.get(pk="c3child1_pdelete")
+        assert c3child1_pdelete.parent.identifiant_unique == c3pkeep.identifiant_unique
+        c3orphan = RevisionActeur.objects.get(pk="c3orphan")
+        assert c3orphan.parent.identifiant_unique == c3pkeep.identifiant_unique
+
+        # The all important test of unkept parent which
+        # must be deleted
+        assert not RevisionActeur.objects.filter(pk="c3pdelete").exists()
