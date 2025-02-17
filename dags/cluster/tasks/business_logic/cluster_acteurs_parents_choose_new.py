@@ -4,6 +4,7 @@ from logging import getLogger
 
 import numpy as np
 import pandas as pd
+from cluster.config.constants import COL_PARENT_ID_BEFORE
 from cluster.tasks.business_logic.misc.df_sort import df_sort
 from utils.django import django_setup_full
 
@@ -78,7 +79,7 @@ def cluster_acteurs_one_cluster_parent_changes_mark(
 
     # Ensuite tous les enfants (non-parents) doivent pointer vers le nouveau parent
     filter_point = (df["nombre_enfants"] == 0) & (df["identifiant_unique"] != parent_id)
-    df["parent_id_before"] = df["parent_id"]  # Pour debug
+    df[COL_PARENT_ID_BEFORE] = df["parent_id"]  # Pour debug
     df.loc[filter_point, "parent_id"] = parent_id
     df.loc[filter_point, COL_CHANGE_MODEL_NAME] = ChangeActeurUpdateParentId.name()
     df.loc[filter_point, COL_CHANGE_REASON] = REASON_POINT_TO_NEW_PARENT
@@ -87,7 +88,7 @@ def cluster_acteurs_one_cluster_parent_changes_mark(
     # On identifie le cas particulier des enfants qui
     # pointent déjà vers le parent pour lesquels on a rien à changer
     filter_unchanged = df[
-        df["parent_id"].notnull() & (df["parent_id"] == df["parent_id_before"])
+        df["parent_id"].notnull() & (df["parent_id"] == df[COL_PARENT_ID_BEFORE])
     ].index
     df.loc[filter_unchanged, COL_CHANGE_MODEL_NAME] = ChangeActeurVerifyRevision.name()
     df.loc[filter_unchanged, COL_CHANGE_REASON] = REASON_ALREADY_POINT_TO_PARENT

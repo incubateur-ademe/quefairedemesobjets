@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pandas as pd
 import pytest
-from cluster.config.constants import COL_PARENT_DATA_NEW
+from cluster.config.constants import COL_PARENT_DATA_NEW, COL_PARENT_ID_BEFORE
 from cluster.helpers.shorthands.change_model_name import (
     CHANGE_CREATE,
     CHANGE_DELETE,
@@ -41,17 +41,6 @@ ENTITY_CREATE = ENTITY_ACTEUR_TO_CREATE
 ENTITY_DISPLAY = ENTITY_ACTEUR_DISPLAYED
 ENTITY_REVISION = ENTITY_ACTEUR_REVISION
 ENTITY_BASE = ENTITY_ACTEUR_BASE
-
-COLS = [
-    COL_CHANGE_ORDER,
-    COL_CHANGE_ENTITY_TYPE,
-    "identifiant_unique",
-    COL_CHANGE_MODEL_NAME,
-    COL_CHANGE_REASON,
-    "cluster_id",
-    "parent_id",
-    COL_PARENT_DATA_NEW,
-]
 C1 = "cluster_1"
 C2 = "cluster_2"
 C3 = "cluster_3"
@@ -64,6 +53,7 @@ DATA_ACTEURS = [
         "nom": "c1pcreate",
         "parent_id": None,
         "nombre_enfants": 0,
+        COL_PARENT_ID_BEFORE: None,
         COL_CHANGE_ORDER: O1,
         COL_CHANGE_ENTITY_TYPE: ENTITY_CREATE,
         COL_CHANGE_MODEL_NAME: CHANGE_CREATE,
@@ -76,6 +66,7 @@ DATA_ACTEURS = [
         "nom": "c1orphan1",
         "parent_id": "c1pcreate",
         "nombre_enfants": 0,
+        COL_PARENT_ID_BEFORE: None,
         COL_CHANGE_ORDER: O2,
         COL_CHANGE_ENTITY_TYPE: ENTITY_DISPLAY,
         COL_CHANGE_MODEL_NAME: CHANGE_POINT,
@@ -89,6 +80,7 @@ DATA_ACTEURS = [
         "nom": "c2pkeep",
         "parent_id": None,
         "nombre_enfants": 1,
+        COL_PARENT_ID_BEFORE: None,
         COL_CHANGE_ORDER: O1,
         COL_CHANGE_ENTITY_TYPE: ENTITY_REVISION,
         COL_CHANGE_MODEL_NAME: CHANGE_KEEP,
@@ -101,6 +93,7 @@ DATA_ACTEURS = [
         "nom": "c2child1",
         "parent_id": "c2pkeep",
         "nombre_enfants": 0,
+        COL_PARENT_ID_BEFORE: "c2pkeep",
         COL_CHANGE_ORDER: O2,
         COL_CHANGE_ENTITY_TYPE: ENTITY_REVISION,
         COL_CHANGE_MODEL_NAME: CHANGE_NOTHING,
@@ -115,6 +108,7 @@ DATA_ACTEURS = [
         "nom": "c3pkeep",
         "parent_id": None,
         "nombre_enfants": 2,
+        COL_PARENT_ID_BEFORE: None,
         COL_CHANGE_ORDER: O1,
         COL_CHANGE_ENTITY_TYPE: ENTITY_DISPLAY,
         COL_CHANGE_MODEL_NAME: CHANGE_KEEP,
@@ -127,6 +121,7 @@ DATA_ACTEURS = [
         "nom": "c3child1_pkeep",
         "parent_id": "c3pkeep",
         "nombre_enfants": 0,
+        COL_PARENT_ID_BEFORE: "c3pkeep",
         COL_CHANGE_ORDER: O2,
         COL_CHANGE_ENTITY_TYPE: ENTITY_REVISION,
         COL_CHANGE_MODEL_NAME: CHANGE_NOTHING,
@@ -139,6 +134,7 @@ DATA_ACTEURS = [
         "nom": "c3child2_pkeep",
         "parent_id": "c3pkeep",
         "nombre_enfants": 0,
+        COL_PARENT_ID_BEFORE: "c3pkeep",
         COL_CHANGE_ORDER: O2,
         COL_CHANGE_ENTITY_TYPE: ENTITY_REVISION,
         COL_CHANGE_MODEL_NAME: CHANGE_NOTHING,
@@ -149,8 +145,9 @@ DATA_ACTEURS = [
         "cluster_id": C3,
         "identifiant_unique": "c3child1_pdelete",
         "nom": "c3child1_pdelete",
-        "parent_id": "c3pdelete",
+        "parent_id": "c3pkeep",
         "nombre_enfants": 0,
+        COL_PARENT_ID_BEFORE: "c3pdelete",
         COL_CHANGE_ORDER: O2,
         COL_CHANGE_ENTITY_TYPE: ENTITY_REVISION,
         COL_CHANGE_MODEL_NAME: CHANGE_POINT,
@@ -170,6 +167,7 @@ DATA_ACTEURS = [
         # then should have 0 conditional logic (just packaging suggestions)
         "parent_id": "c3pkeep",
         "nombre_enfants": 0,
+        COL_PARENT_ID_BEFORE: None,
         COL_CHANGE_ORDER: O2,
         COL_CHANGE_ENTITY_TYPE: ENTITY_DISPLAY,
         COL_CHANGE_MODEL_NAME: CHANGE_POINT,
@@ -182,6 +180,7 @@ DATA_ACTEURS = [
         "nom": "c3pdelete",
         "parent_id": None,
         "nombre_enfants": 1,
+        COL_PARENT_ID_BEFORE: None,
         COL_CHANGE_ORDER: O3,
         COL_CHANGE_ENTITY_TYPE: ENTITY_DISPLAY,
         COL_CHANGE_MODEL_NAME: CHANGE_DELETE,
@@ -233,8 +232,11 @@ class TestClusterActeursSuggestionsToDb:
                 # We should create distinct change models for each case
                 # to reduce confusion & conditional code
                 parent = (
-                    parents[row["parent_id"]]
-                    if (row["parent_id"] and "create" not in row["parent_id"])
+                    parents[row[COL_PARENT_ID_BEFORE]]
+                    if (
+                        row[COL_PARENT_ID_BEFORE]
+                        and "create" not in row[COL_PARENT_ID_BEFORE]
+                    )
                     else None
                 )
                 RevisionActeurFactory(
@@ -245,7 +247,7 @@ class TestClusterActeursSuggestionsToDb:
                     parent=parent,
                 )
             elif model_name == CHANGE_NOTHING:
-                parent = parents[row["parent_id"]]
+                parent = parents[row[COL_PARENT_ID_BEFORE]]
                 RevisionActeurFactory(
                     source=s1,
                     acteur_type=at1,

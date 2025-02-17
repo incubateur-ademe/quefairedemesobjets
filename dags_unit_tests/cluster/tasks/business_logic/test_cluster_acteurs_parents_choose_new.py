@@ -1,12 +1,22 @@
 import pandas as pd
 import pytest
+from cluster.config.constants import COL_PARENT_ID_BEFORE
+from cluster.helpers.shorthands.change_model_name import (
+    CHANGE_CREATE,
+    CHANGE_DELETE,
+    CHANGE_KEEP,
+    CHANGE_NOTHING,
+    CHANGE_POINT,
+)
+from cluster.helpers.shorthands.change_reason import (
+    REASON_CREATE,
+    REASON_DELETE,
+    REASON_KEEP_MOST,
+    REASON_KEEP_ONLY,
+    REASON_NOTHING,
+    REASON_POINT,
+)
 from cluster.tasks.business_logic.cluster_acteurs_parents_choose_new import (
-    REASON_ALREADY_POINT_TO_PARENT,
-    REASON_NO_PARENT_CREATE_ONE,
-    REASON_ONE_PARENT_KEPT,
-    REASON_PARENT_TO_DELETE,
-    REASON_PARENTS_KEEP_MOST_CHILDREN,
-    REASON_POINT_TO_NEW_PARENT,
     cluster_acteurs_one_cluster_parent_changes_mark,
     cluster_acteurs_one_cluster_parent_choose,
     cluster_acteurs_parents_choose_new,
@@ -21,26 +31,7 @@ from data.models.change import (
     COL_CHANGE_REASON,
     ENTITY_ACTEUR_REVISION,
 )
-from data.models.changes import (
-    ChangeActeurCreateAsParent,
-    ChangeActeurDeleteAsParent,
-    ChangeActeurKeepAsParent,
-    ChangeActeurUpdateParentId,
-    ChangeActeurVerifyRevision,
-)
 
-# Shorthands for tests
-CHANGE_KEEP = ChangeActeurKeepAsParent.name()
-CHANGE_CREATE = ChangeActeurCreateAsParent.name()
-CHANGE_DELETE = ChangeActeurDeleteAsParent.name()
-CHANGE_POINT = ChangeActeurUpdateParentId.name()
-CHANGE_NOTHING = ChangeActeurVerifyRevision.name()
-REASON_CREATE = REASON_NO_PARENT_CREATE_ONE
-REASON_KEEP_ONLY = REASON_ONE_PARENT_KEPT
-REASON_KEEP_MOST = REASON_PARENTS_KEEP_MOST_CHILDREN
-REASON_NOTHING = REASON_ALREADY_POINT_TO_PARENT
-REASON_POINT = REASON_POINT_TO_NEW_PARENT
-REASON_DELETE = REASON_PARENT_TO_DELETE
 COLS_ASSERT = [
     "identifiant_unique",
     "parent_id",
@@ -178,7 +169,7 @@ class TestClusterActeursOneClusterChangesMark:
         df = cluster_acteurs_one_cluster_parent_changes_mark(
             df_one_cluster=df,
             parent_id="c1_b",
-            change_model_name=ChangeActeurKeepAsParent.name(),
+            change_model_name=CHANGE_KEEP,
             parent_change_reason="b est seul",
         )
         assert len(df) == 3, "Pas de ligne ajoutée ou supprimée"
@@ -274,13 +265,13 @@ class TestClusterActeursChooseAllParents:
 
         # On vérifie que la colonne de débug parent_id_before à
         # été ajoutée pour le debug
-        assert "parent_id_before" in df_working.columns
+        assert COL_PARENT_ID_BEFORE in df_working.columns
         # A l'exception du nouveau parent, on confirme qu'elle
         # contient les mêmes valeurs que parent_id de la df d'origine
         df_a = df_working[df_working["identifiant_unique"] != parent_id_new]
         df_a = df_a.sort_values(by="identifiant_unique")
         db_b = df_combined.sort_values(by="identifiant_unique")
-        assert df_a["parent_id_before"].tolist() == db_b["parent_id"].tolist()
+        assert df_a[COL_PARENT_ID_BEFORE].tolist() == db_b["parent_id"].tolist()
 
     def test_pandas_warning(self, df_one_parent, df_two_parents):
         df = pd.concat([df_one_parent, df_two_parents], ignore_index=True)

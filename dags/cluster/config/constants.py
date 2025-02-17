@@ -31,6 +31,11 @@ FIELDS_DATA_NOT_CHOSEN = FIELDS_PROTECTED + [
 # "columns" is the terminology for pandas dataframes
 # Stores the data used for changes
 COL_PARENT_DATA_NEW = "parent_data_new"
+
+# TODO: it would be better to have this as _new, more
+# consistent with above AND more importantly: we don't
+# touch what's current, we add columns for what's new
+COL_PARENT_ID_BEFORE = "parent_id_before"
 # TODO: to help us debug the original index within dfs
 # as they go through the clustering process
 COL_INDEX_SRC = "__index_src"

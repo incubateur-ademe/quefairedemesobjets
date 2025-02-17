@@ -7,9 +7,7 @@ from django.contrib.gis.geos import Point
 from rich import print
 
 from dags.cluster.config.model import ClusterConfig
-from dags_unit_tests.cluster.helpers.configs import CONF_BASE_DICT, DATE_IN_PAST
-from dags_unit_tests.cluster.helpers.loaders import airflow_init, dag_get, ti_get
-from dags_unit_tests.cluster.helpers.tasks import (
+from dags.cluster.tasks.airflow_logic.task_ids import (
     TASK_CLUSTERS_DISPLAY,
     TASK_CLUSTERS_VALIDATE,
     TASK_CONFIG_CREATE,
@@ -20,6 +18,8 @@ from dags_unit_tests.cluster.helpers.tasks import (
     TASK_SUGGESTIONS_DISPLAY,
     TASK_SUGGESTIONS_TO_DB,
 )
+from dags_unit_tests.cluster.helpers.configs import CONF_BASE_DICT, DATE_IN_PAST
+from dags_unit_tests.cluster.helpers.loaders import airflow_init, dag_get, ti_get
 from unit_tests.qfdmo.acteur_factory import (
     ActeurTypeFactory,
     DisplayedActeur,
@@ -64,7 +64,6 @@ class TestClusterDedupSkipped:
         # properties such as include_source_ids are present
         # with the good values
         ti = ti_get(tis, TASK_CONFIG_CREATE)
-        # ti = tis[TASKS_ORDERED.index(TASK_CONFIG_CREATE)]
         assert ti.state == State.SUCCESS
         config = ti.xcom_pull(key="config", task_ids=TASK_CONFIG_CREATE)
         assert config.include_source_ids == [252, 90]

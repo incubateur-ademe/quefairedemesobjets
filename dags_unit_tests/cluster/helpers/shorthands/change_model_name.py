@@ -1,3 +1,5 @@
+# Shorthands to make writing tests shorter and more explicit
+
 from data.models.changes import (
     ChangeActeurCreateAsParent,
     ChangeActeurDeleteAsParent,
