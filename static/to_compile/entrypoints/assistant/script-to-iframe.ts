@@ -33,9 +33,10 @@ function initScript() {
     iframe.setAttribute(key, iframeAttributes[key]);
   }
 
-  iframeResize({}, iframe);
-
   script.parentNode?.insertBefore(iframe, script);
+  iframe.onload = () => {
+    iframeResize({}, iframe)
+  }
 }
 if (document.readyState === "loading") {
   // Loading hasn't finished yet
