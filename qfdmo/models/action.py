@@ -15,11 +15,10 @@ from qfdmo.validators import CodeValidator
 
 class ActionDirection(CodeAsNaturalKeyModel):
     class Meta:
-        verbose_name = "Direction de l'action"
-        verbose_name_plural = "Directions de l'action"
+        verbose_name = "Action - Direction"
         constraints = [
             CheckConstraint(
-                check=Q(code__regex=CodeValidator.regex),
+                condition=Q(code__regex=CodeValidator.regex),
                 name="action_direction_code_format",
             ),
         ]
@@ -30,6 +29,10 @@ class ActionDirection(CodeAsNaturalKeyModel):
         unique=True,
         blank=False,
         null=False,
+        help_text=(
+            "Ce champ est utilisé lors de l'import de données, il ne doit pas être"
+            " mis à jour sous peine de casser l'import de données"
+        ),
         validators=[CodeValidator()],
     )
     order = models.IntegerField(blank=False, null=False, default=0)
@@ -64,11 +67,12 @@ class GroupeAction(CodeAsNaturalKeyModel):
     objects = GroupeActionManager()
 
     class Meta:
-        verbose_name = "Groupe d'actions"
-        verbose_name_plural = "Groupes d'actions"
+        # Prefix to group action objects in the admin side panel
+        verbose_name = "Action - Groupe d'action"
+        verbose_name_plural = "Action - Groupes d'action"
         constraints = [
             CheckConstraint(
-                check=Q(code__regex=CodeValidator.regex),
+                condition=Q(code__regex=CodeValidator.regex),
                 name="groupe_action_code_format",
             ),
         ]
@@ -79,6 +83,10 @@ class GroupeAction(CodeAsNaturalKeyModel):
         unique=True,
         blank=False,
         null=False,
+        help_text=(
+            "Ce champ est utilisé lors de l'import de données, il ne doit pas être"
+            " mis à jour sous peine de casser l'import de données"
+        ),
         validators=[CodeValidator()],
     )
     afficher = models.BooleanField(default=True)
@@ -128,10 +136,13 @@ class GroupeAction(CodeAsNaturalKeyModel):
 
 class Action(CodeAsNaturalKeyModel):
     class Meta:
+        # Prefix to group action objects in the admin side panel
+        verbose_name = "Action - Action"
         ordering = ["order"]
         constraints = [
             CheckConstraint(
-                check=Q(code__regex=CodeValidator.regex), name="action_code_format"
+                condition=Q(code__regex=CodeValidator.regex),
+                name="action_code_format",
             ),
         ]
 
@@ -141,6 +152,10 @@ class Action(CodeAsNaturalKeyModel):
         unique=True,
         blank=False,
         null=False,
+        help_text=(
+            "Ce champ est utilisé lors de l'import de données, il ne doit pas être"
+            " mis à jour sous peine de casser l'import de données"
+        ),
         validators=[CodeValidator()],
     )
     libelle = models.CharField(max_length=255, null=False, default="")
