@@ -2,7 +2,7 @@ import { AxeBuilder } from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
 // Shared variables
-const BASE_URL = "https://assistant.dev";
+const BASE_URL = "http://localhost:8000";
 const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
 const IFRAME_SELECTOR = "iframe";
 

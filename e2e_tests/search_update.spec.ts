@@ -5,7 +5,7 @@ test("Recherche et modification d'une recherche", async ({ page }) => {
   // Helper function to handle autocomplete inputs
 
   // Navigate to the formulaire page
-  await page.goto(`https://lvao.dev/formulaire`, { waitUntil: "networkidle" })
+  await page.goto(`http://localhost:8000/formulaire`, { waitUntil: "networkidle" })
 
   // Hide the Django debug toolbar
   await hideDjangoToolbar(page)
