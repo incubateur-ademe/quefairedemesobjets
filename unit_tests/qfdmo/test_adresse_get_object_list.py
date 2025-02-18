@@ -21,6 +21,14 @@ def objet2(sous_categorie):
     return ObjetFactory(libelle="Test Object 2", sous_categorie=sous_categorie)
 
 
+def test_get_object_list_noquery(client):
+    url = reverse("qfdmo:get_object_list")
+    response = client.get(url)
+    assert response.status_code == 200
+    data = json.loads(response.content)
+    assert data == []
+
+
 @pytest.mark.django_db
 def test_get_object_list(client, objet1, objet2):
     url = reverse("qfdmo:get_object_list")
