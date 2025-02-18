@@ -14,6 +14,13 @@ class AssistantMiddleware:
     def _set_logged_in_cookie(self, request, response):
         """Set or update the 'logged-in' header based on authentication."""
         cookie_name = "logged_in"
+
+        # In some cases, gunicorn can be reached directly without going through
+        # nginx, when reaching http://localhost:8000 directly for example, that
+        # triggers a DisallowedHost error as localhost is not in
+        # settings.ALLOWED_HOSTS.
+        # This causes user to not be defined on request object and raises an
+        # AttributeError hiding the underlying DisallowedHost error.
         if hasattr(request, "user") and request.user.is_authenticated:
             response.set_cookie(cookie_name, "1")
         elif request.COOKIES.get(cookie_name):
