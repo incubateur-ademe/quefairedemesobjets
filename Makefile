@@ -37,6 +37,7 @@ init-dev:
 	pre-commit install
 	# python
 	make init-venv
+	make init-certs
 	$(PYTHON) -m pip install pip-tools
 	$(PYTHON) -m pip install --no-deps -r requirements.txt -r dev-requirements.txt
 	# javascript
