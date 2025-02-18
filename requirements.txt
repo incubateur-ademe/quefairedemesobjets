@@ -17,13 +17,13 @@ asgiref==3.8.1 \
     # via
     #   django
     #   django-cors-headers
-boto3==1.35.98 \
-    --hash=sha256:4b6274b4fe9d7113f978abea66a1f20c8a397c268c9d1b2a6c96b14a256da4a5 \
-    --hash=sha256:d0224e1499d7189b47aa7f469d96522d98df6f5702fccb20a95a436582ebcd9d
+boto3==1.36.22 \
+    --hash=sha256:39957eabdce009353d72d131046489fbbfa15891865d5f069f1e8bfa414e6b81 \
+    --hash=sha256:768c8a4d4a6227fe2258105efa086f1424cba5ca915a5eb2305b2cd979306ad1
     # via -r requirements.in
-botocore==1.35.98 \
-    --hash=sha256:4f1c0b687488663a774ad3a5e81a5f94fae1bcada2364cfdc48482c4dbf794d5 \
-    --hash=sha256:d11742b3824bdeac3c89eeeaf5132351af41823bbcef8fc15e95c8250b1de09c
+botocore==1.36.22 \
+    --hash=sha256:59520247d5a479731724f97c995d5a1c2aae3b303b324f39d99efcfad1d3019e \
+    --hash=sha256:75d6b34acb0686ee4d54ff6eb285e78ccfe318407428769d1e3e13351714d890
     # via
     #   boto3
     #   s3transfer
@@ -995,9 +995,9 @@ requests==2.32.3 \
     #   -r requirements.in
     #   django-dsfr
     #   django-sql-explorer
-s3transfer==0.10.4 \
-    --hash=sha256:244a76a24355363a68164241438de1b72f8781664920260c48465896b712a41e \
-    --hash=sha256:29edc09801743c21eb5ecbc617a152df41d3c287f67b615f73e5f750583666a7
+s3transfer==0.11.2 \
+    --hash=sha256:3b39185cb72f5acc77db1a58b6e25b977f28d20496b6e58d6813d75f464d632f \
+    --hash=sha256:be6ecb39fadd986ef1701097771f87e4d2f821f27f6071c872143884d2950fbc
     # via boto3
 sentry-sdk==2.20.0 \
     --hash=sha256:afa82713a92facf847df3c6f63cec71eb488d826a50965def3d7722aa6f0fdab \
