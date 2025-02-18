@@ -17,6 +17,7 @@ from django.contrib.gis.geos import Point, Polygon
 from django.contrib.gis.geos.geometry import GEOSGeometry
 from django.core.cache import cache
 from django.core.files.images import get_image_dimensions
+from django.core.validators import EmailValidator
 from django.db.models import (
     Case,
     CheckConstraint,
@@ -670,6 +671,13 @@ class WithParentActeurMixin(models.Model):
         return self.pk and self.duplicats.exists()
 
 
+def email_or_empty_validator(value):
+    if value == "__empty__":
+        return
+    validator = EmailValidator()
+    validator(value)
+
+
 class RevisionActeur(WithParentActeurMixin, BaseActeur):
     class Meta:
         verbose_name = "ACTEUR de l'EC - CORRIGÉ"
@@ -678,6 +686,9 @@ class RevisionActeur(WithParentActeurMixin, BaseActeur):
     nom = models.CharField(max_length=255, blank=True, null=True)
     acteur_type = models.ForeignKey(
         ActeurType, on_delete=models.CASCADE, blank=True, null=True
+    )
+    email = models.CharField(
+        max_length=254, blank=True, null=True, validators=[email_or_empty_validator]
     )
 
     @property
@@ -758,6 +769,11 @@ class RevisionActeur(WithParentActeurMixin, BaseActeur):
                 "is_parent",
             ],
         )
+
+        default_acteur_fields = {
+            k: None if v == "__empty__" else v for k, v in default_acteur_fields.items()
+        }
+
         default_acteur_fields.update(
             {
                 "acteur_type": self.acteur_type

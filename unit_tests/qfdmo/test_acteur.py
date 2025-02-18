@@ -227,6 +227,22 @@ class TestCreateRevisionActeur:
         assert revision_acteur.source == acteur.source
         assert revision_acteur.acteur_type == acteur.acteur_type
 
+    def test_empty_email_acteur(self):
+        acteur = ActeurFactory()
+        acteur.email = "__empty__"
+        with pytest.raises(ValidationError):
+            acteur.full_clean()
+
+    def test_empty_email_revision_acteur(self):
+        revision_acteur = RevisionActeurFactory(email="__empty__")
+        revision_acteur.email = "__empty__"
+        assert revision_acteur.full_clean() is None
+
+        acteur = Acteur.objects.get(
+            identifiant_unique=revision_acteur.identifiant_unique
+        )
+        assert acteur.full_clean() is None
+
     def test_new_revision_acteur_with_action_principale(self):
         acteur_type = ActeurTypeFactory(code="fake")
         action_principale = ActionFactory(code="action_1")
