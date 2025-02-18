@@ -1,7 +1,5 @@
 # Description des flux DBT
 
-**Statut : ❓ À approuver**
-
 DBT est utilisé pour construire les "vues" sur les acteurs. on a 3 vues à calculer :
 
 Actuellement, les flux sont les suivants :
@@ -28,7 +26,11 @@ Calcule et formatte les acteurs à partager en open-data.
 
 ## Découpage par concepts
 
-La cible est de découper le calcul des vues par concepts
+**Statut : ❓ À approuver**
+
+Objet : Organiser les fichiers selon des concepts et non selon les finalités.
+
+La cible est de découper le calcul des vues par concepts.
 
 ```mermaid
 graph LR
