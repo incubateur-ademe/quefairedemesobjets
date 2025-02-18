@@ -61,7 +61,7 @@
         "@types/node": "^22.10.7",
         "@typescript-eslint/eslint-plugin": "^8.22.0",
         "buffer": "^6.0.3",
-        "eslint": "^9.19.0",
+        "eslint": "^9.20.1",
         "eslint-config-love": "^117.0.0",
         "eslint-plugin-import": "^2.31.0",
         "eslint-plugin-n": "^17.15.1",
