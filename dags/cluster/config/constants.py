@@ -17,12 +17,21 @@ FIELDS_PROTECTED = [
     "identifiant_externe",
 ]
 
-FIELDS_DATA_NOT_CHOSEN = FIELDS_PROTECTED + [
-    "proposition_services"
+FIELDS_PARENT_DATA_EXCLUDED = [
     # Depending on contexte, foreign keys are sometimes
     # represented in their Django model form without _id
+    "proposition_services",
     "source",
-    "acteur_type",
+    "source_id",
+    "statut",
+    # TODO: we can't set cree_le consistently
+    # (see test_data_serialize_reconstruct), thus
+    # we exclude it for now (maybe solution is to compute)
+    # it via a view from all children for each parent
+    "cree_le",
+    "modifie_le",
+    "identifiant_unique",
+    "identifiant_externe",
 ]
 
 # ---------------------------------------

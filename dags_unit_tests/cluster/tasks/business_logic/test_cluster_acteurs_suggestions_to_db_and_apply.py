@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import numpy as np
 import pandas as pd
 import pytest
 from cluster.config.constants import COL_PARENT_DATA_NEW, COL_PARENT_ID_BEFORE
@@ -188,13 +189,24 @@ DATA_ACTEURS = [
         COL_PARENT_DATA_NEW: None,
     },
 ]
+# Adding clustering details needed for suggestion contexte
+for i, acteur in enumerate(DATA_ACTEURS):
+    # We intentionally do not set data on parents to
+    # create because in the pipelien that's how they
+    # are represented (with 0 actual data, only proposition
+    # data in the suggestion's change model params)
+    if acteur[COL_CHANGE_MODEL_NAME] != CHANGE_CREATE:
+        acteur["ville"] = "laval"
+        acteur["adresse"] = f"mon adresse {i}"
+CLUSTER_FIELDS_EXACT = ["ville"]
+CLUSTER_FIELDS_FUZZY = ["adresse"]
 
 
 @pytest.mark.django_db()
 class TestClusterActeursSuggestionsToDb:
     @pytest.fixture
     def df(self):
-        return pd.DataFrame(DATA_ACTEURS)
+        return pd.DataFrame(DATA_ACTEURS).replace({np.nan: None})
 
     @pytest.fixture
     def db_acteurs_mock(self, df):
@@ -281,6 +293,8 @@ class TestClusterActeursSuggestionsToDb:
             suggestions=suggestions_list,
             identifiant_action=id_action,
             identifiant_execution=id_execution,
+            cluster_fields_exact=CLUSTER_FIELDS_EXACT,
+            cluster_fields_fuzzy=CLUSTER_FIELDS_FUZZY,
         )
 
     @pytest.fixture

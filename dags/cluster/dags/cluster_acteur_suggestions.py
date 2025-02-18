@@ -11,7 +11,7 @@ from datetime import datetime
 from airflow import DAG
 from airflow.models.baseoperator import chain
 from airflow.models.param import Param
-from cluster.config.constants import FIELDS_PROTECTED
+from cluster.config.constants import FIELDS_PARENT_DATA_EXCLUDED
 from cluster.config.model import ClusterConfig
 from cluster.tasks.airflow_logic.cluster_acteurs_clusters_display_task import (
     cluster_acteurs_clusters_display_task,
@@ -71,17 +71,22 @@ dropdown_acteur_types = airflow_params_dropdown_from_mapping(
     mapping_acteur_type_id_by_code
 )
 
-acteur_fields_all = django_model_fields_get(Acteur)
-acteur_fields_enrich = sorted(
+fields_all = django_model_fields_get(Acteur)
+fields_enrich = sorted(
     list(
+        # We don't want to enrich calculated properties obviously
+        # since these are computer
         set(django_model_fields_get(Acteur, include_properties=False))
-        - set(FIELDS_PROTECTED)
+        # And we exclude some fields based on business rules (ex: source)
+        - set(FIELDS_PARENT_DATA_EXCLUDED)
     )
 )
+fields_enrich_excluded = list(set(fields_all) - set(fields_enrich))
+
 # To display protected fields in UI without breaking it
 # (Airflow UI doesn't wrap, it creates a long line which messes up inputs)
-fields_protected_ui = [
-    FIELDS_PROTECTED[i : i + 5] for i in range(0, len(FIELDS_PROTECTED), 5)
+fields_enrich_excluded_ui = [
+    fields_enrich_excluded[i : i + 5] for i in range(0, len(fields_enrich_excluded), 5)
 ]
 
 DAG_ID = "cluster_acteur_suggestions"
@@ -132,7 +137,7 @@ PARAMS = {
     "include_if_all_fields_filled": Param(
         ["code_postal"],
         type="array",
-        examples=acteur_fields_all,
+        examples=fields_all,
         description_md="""**➕ INCLUSION ACTEURS**: ceux dont tous ces champs
             sont **remplis** (opérateur **ET/AND**)
 
@@ -142,7 +147,7 @@ PARAMS = {
     "exclude_if_any_field_filled": Param(
         [],
         type=["null", "array"],
-        examples=acteur_fields_all,
+        examples=fields_all,
         description_md=f"""**🛑 EXCLUSION ACTEURS**: ceux dont n'importe quel
             de ces champs est **rempli** (opérateur **OU/OR**)
 
@@ -168,7 +173,7 @@ PARAMS = {
     "normalize_fields_basic": Param(
         [],
         type=["null", "array"],
-        examples=acteur_fields_all,
+        examples=fields_all,
         description_md=r"""Les champs à normaliser de manière basique:
              - minuscule
              - conversion des accents
@@ -186,7 +191,7 @@ PARAMS = {
     "normalize_fields_no_words_size1": Param(
         ["nom"],
         type=["null", "array"],
-        examples=acteur_fields_all,
+        examples=fields_all,
         description_md=r"""Les champs à normaliser en supprimant les mots
             de taille 1.
 
@@ -198,7 +203,7 @@ PARAMS = {
     "normalize_fields_no_words_size2_or_less": Param(
         ["nom"],
         type=["null", "array"],
-        examples=acteur_fields_all,
+        examples=fields_all,
         description_md="""Les champs à normaliser en supprimant les mots
             de taille 2 ou moins.
 
@@ -213,7 +218,7 @@ PARAMS = {
         # vide par défaut
         [],
         type=["null", "array"],
-        examples=acteur_fields_all,
+        examples=fields_all,
         description_md=r"""Les champs à normaliser en supprimant les mots
             de taille 3 ou moins.
 
@@ -225,7 +230,7 @@ PARAMS = {
     "normalize_fields_order_unique_words": Param(
         [],
         type=["null", "array"],
-        examples=acteur_fields_all,
+        examples=fields_all,
         description_md=f"""Les champs à normaliser en ordonnant les mots
             par ordre alphabétique et en supprimant les doublons.
 
@@ -245,14 +250,14 @@ PARAMS = {
     "cluster_fields_exact": Param(
         ["code_postal", "ville"],
         type="array",
-        examples=acteur_fields_all,
+        examples=fields_all,
         description_md=r"""Les champs sur lesquels on fait le groupage exact.
             exemple: ["code_postal", "ville"]""",
     ),
     "cluster_fields_fuzzy": Param(
         ["nom", "adresse"],
         type="array",
-        examples=acteur_fields_all,
+        examples=fields_all,
         description_md=r"""Les champs sur lesquels on fait le groupage fuzzy.
             exemple: ["code_postal", "ville"]""",
     ),
@@ -267,16 +272,15 @@ PARAMS = {
             {UI_PARAMS_SEPARATORS.DEDUP_ENRICH_PARENT}""",
     ),
     "dedup_enrich_fields": Param(
-        acteur_fields_enrich,
+        fields_enrich,
         type=["array"],
-        examples=acteur_fields_enrich,
-        description_md=f"""✍️ Champs à enrichir.
+        examples=fields_enrich,
+        description_md=f"""✍️ Champs à enrichir (cartains champs de type calculés ou id
+        sont exclus)
 
-            Sont toujours exclus:
-             - les champs calculés (ex: numero_et_complement)
-             - les champs protégés:
-             {'  \n'.join([', '.join(chunck) for chunck in fields_protected_ui])}
-            """,
+        Exclus:
+        {'  \n'.join([', '.join(chunck) for chunck in fields_enrich_excluded_ui])}
+        """,
     ),
     "dedup_enrich_exclude_sources": Param(
         [],
@@ -291,6 +295,10 @@ PARAMS = {
         examples=dropdown_sources,
         description_md=r"""**🔢 PRIORITES SOURCES**: sources sur lequelles
             on **PRÉFÈRE** prendre de données
+
+            🔴 BUG UI AIRFLOW: ne sélectionner qu'une valeur car l'ordre
+            n'est pas garanti 🔴
+            voir https://github.com/apache/airflow/discussions/46475
 
             Ce n'est pas parce qu'une source est prioritaire qu'on va
             nécessairement en tirer de la donnée

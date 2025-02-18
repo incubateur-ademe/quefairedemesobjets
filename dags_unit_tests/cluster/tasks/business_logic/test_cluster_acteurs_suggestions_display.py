@@ -24,9 +24,12 @@ from data.models.change import (
 )
 from unit_tests.qfdmo.acteur_factory import (
     ActeurFactory,
+    ActeurTypeFactory,
     DisplayedActeurFactory,
     RevisionActeurFactory,
 )
+
+ACTEUR_TYPE_ID = 123456
 
 
 @pytest.mark.django_db
@@ -47,6 +50,7 @@ class TestClusterActeursSuggestionsDisplay:
         RevisionActeurFactory(identifiant_unique="revision to keep")
         ActeurFactory(identifiant_unique="update parent id")
         RevisionActeurFactory(identifiant_unique="update parent id")
+        at1 = ActeurTypeFactory(code="at1", id=ACTEUR_TYPE_ID)
 
         return pd.DataFrame(
             [
@@ -58,7 +62,7 @@ class TestClusterActeursSuggestionsDisplay:
                     COL_CHANGE_REASON: "because",
                     COL_CHANGE_ENTITY_TYPE: ENTITY_ACTEUR_TO_CREATE,
                     COL_CHANGE_MODEL_NAME: CHANGE_CREATE,
-                    COL_PARENT_DATA_NEW: {"foo1": "bar1", "location": Point(1, 2)},
+                    COL_PARENT_DATA_NEW: {"acteur_type": at1, "location": Point(1, 2)},
                 },
                 {
                     "cluster_id": "c1",
@@ -78,7 +82,7 @@ class TestClusterActeursSuggestionsDisplay:
                     COL_CHANGE_REASON: "because",
                     COL_CHANGE_ENTITY_TYPE: ENTITY_ACTEUR_DISPLAYED,
                     COL_CHANGE_MODEL_NAME: CHANGE_KEEP,
-                    COL_PARENT_DATA_NEW: {"foo2": "bar2"},
+                    COL_PARENT_DATA_NEW: {"acteur_type": at1},
                 },
                 {
                     "cluster_id": "c3",
@@ -135,14 +139,14 @@ class TestClusterActeursSuggestionsDisplay:
         c1 = suggestions[0]
         assert c1["changes"][0]["model_params"] == {
             "id": "new parent",
-            "data": {"foo1": "bar1", "longitude": 1.0, "latitude": 2.0},
+            "data": {"acteur_type": ACTEUR_TYPE_ID, "longitude": 1.0, "latitude": 2.0},
         }
         assert c1["changes"][1]["model_params"] == {"id": "parent to delete"}
 
         c2 = suggestions[1]
         assert c2["changes"][0]["model_params"] == {
             "id": "parent to keep",
-            "data": {"foo2": "bar2"},
+            "data": {"acteur_type": ACTEUR_TYPE_ID},
         }
 
         c3 = suggestions[2]

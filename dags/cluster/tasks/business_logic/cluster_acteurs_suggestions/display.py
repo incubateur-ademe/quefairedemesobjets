@@ -1,5 +1,6 @@
 import pandas as pd
 from cluster.config.constants import COL_PARENT_DATA_NEW
+from cluster.tasks.business_logic.misc.data_serialize_reconstruct import data_serialize
 from utils import logging_utils as log
 from utils.django import django_setup_full
 
@@ -22,7 +23,6 @@ def cluster_acteurs_suggestions_display(
         pd.DataFrame: a df where each row represents 1 suggestion
         containing a "changes" column with a list of changes
     """
-
     from data.models.change import (
         COL_CHANGE_ENTITY_TYPE,
         COL_CHANGE_MODEL_NAME,
@@ -39,6 +39,7 @@ def cluster_acteurs_suggestions_display(
         ChangeActeurUpdateParentId,
         ChangeActeurVerifyRevision,
     )
+    from qfdmo.models.acteur import RevisionActeur
 
     suggestions = []
     for cluster_id, cluster in df_clusters.groupby("cluster_id"):
@@ -68,15 +69,9 @@ def cluster_acteurs_suggestions_display(
             # Adapting the data to make it JSON-compatible
             # TODO: move this to a dedicated function
             if "data" in model_params:
-                data = model_params["data"]
-                if "location" in data:
-                    data["longitude"] = data["location"].x
-                    data["latitude"] = data["location"].y
-                    del data["location"]
-                # FIXME: I don't understand how this creeps in here
-                # despite having it in FIELDS_DATA_NOT_CHOSEN
-                if "proposition_services" in data:
-                    del data["proposition_services"]
+                model_params["data"] = data_serialize(
+                    RevisionActeur, model_params["data"]
+                )
 
             # Validating the change
             row[COL_CHANGE_MODEL_PARAMS] = model_params

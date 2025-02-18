@@ -1,7 +1,7 @@
 from typing import Any
 
 import pandas as pd
-from cluster.config.constants import COL_PARENT_DATA_NEW, FIELDS_DATA_NOT_CHOSEN
+from cluster.config.constants import COL_PARENT_DATA_NEW, FIELDS_PARENT_DATA_EXCLUDED
 from django.forms.models import model_to_dict
 from rich import print
 from utils.django import django_setup_full
@@ -20,7 +20,7 @@ def fields_to_include_clean(
 ) -> list[str]:
     """To make more explicit and systematically excluded unwanted fields
     (internal, calculated, etc.) from the fields to include."""
-    return [x for x in fields_to_include if x not in FIELDS_DATA_NOT_CHOSEN]
+    return [x for x in fields_to_include if x not in FIELDS_PARENT_DATA_EXCLUDED]
 
 
 def value_is_empty(value) -> bool:
@@ -46,6 +46,8 @@ def field_pick_value(
     Returns:
         value: the value of the field
     """
+    # TODO: we do want to inherit from the oldest cree_le
+    # from cluster acteurs
     for value in values:
         if not value_is_empty(value) or keep_empty:
             try:

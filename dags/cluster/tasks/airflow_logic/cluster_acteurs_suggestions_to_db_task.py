@@ -62,6 +62,11 @@ def cluster_acteurs_suggestions_to_db_wrapper(**kwargs) -> None:
         suggestions=suggestions,
         identifiant_action=f"dag_id={kwargs['dag'].dag_id}",
         identifiant_execution=f"run_id={kwargs['run_id']}",
+        # Rest assured: we are no longer clustering, but
+        # we use cluster config to generate useful context
+        # data for the Django Admin UI
+        cluster_fields_exact=config.cluster_fields_exact,
+        cluster_fields_fuzzy=config.cluster_fields_fuzzy,
     )
 
     logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
