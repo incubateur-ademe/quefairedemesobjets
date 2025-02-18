@@ -24,8 +24,7 @@ update-requirements:
 
 .PHONY: init-certs
 init-certs:
-	mkcert assistant.dev lvao.dev
-	mv *.pem ./nginx/certs
+	docker run -ti -v ./nginx/certs:/app/certs -w /app/certs --rm alpine/mkcert assistant.dev lvao.dev
 
 .PHONY: init-venv
 init-venv:
