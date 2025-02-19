@@ -36,5 +36,3 @@ SELECT
 FROM qfdmo_acteur AS a
 FULL JOIN qfdmo_revisionacteur AS ra
   ON a.identifiant_unique = ra.identifiant_unique
-LEFT JOIN qfdmo_displayedacteur AS da
-  ON a.identifiant_unique = da.identifiant_unique
