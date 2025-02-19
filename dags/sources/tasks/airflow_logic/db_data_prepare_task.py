@@ -17,7 +17,7 @@ def db_data_prepare_task(dag: DAG) -> PythonOperator:
 
 
 def db_data_prepare_wrapper(**kwargs):
-    df_acteur = kwargs["ti"].xcom_pull(task_ids="compute_link_tables")
+    df_acteur = kwargs["ti"].xcom_pull(task_ids="keep_acteur_changed")["df_acteur"]
     df_acteur_from_db = kwargs["ti"].xcom_pull(task_ids="keep_acteur_changed")[
         "df_acteur_from_db"
     ]

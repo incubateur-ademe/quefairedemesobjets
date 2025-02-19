@@ -13,7 +13,10 @@ from dags.sources.tasks.business_logic.db_data_prepare import db_data_prepare
                     "identifiant_unique": ["2", "3"],
                     "statut": ["ACTIF", "ACTIF"],
                     "cree_le": ["2021-01-01", "2021-01-01"],
-                    "proposition_services": [[{"prop2": "val2"}], [{"prop3": "val3"}]],
+                    "proposition_services_codes": [
+                        [{"prop2": "val2"}],
+                        [{"prop3": "val3"}],
+                    ],
                 }
             ),
             pd.DataFrame(
@@ -29,11 +32,11 @@ from dags.sources.tasks.business_logic.db_data_prepare import db_data_prepare
                         "identifiant_unique": ["3"],
                         "statut": ["ACTIF"],
                         "cree_le": ["2021-01-01"],
-                        "proposition_services": [[{"prop3": "val3"}]],
+                        "proposition_services_codes": [[{"prop3": "val3"}]],
                         "suggestion": [
                             '{"identifiant_unique": "3", "statut": "ACTIF",'
                             ' "cree_le": "2021-01-01",'
-                            ' "proposition_services": [{"prop3": "val3"}]}'
+                            ' "proposition_services_codes": [{"prop3": "val3"}]}'
                         ],
                         "contexte": None,
                     }
@@ -43,11 +46,11 @@ from dags.sources.tasks.business_logic.db_data_prepare import db_data_prepare
                         "identifiant_unique": ["2"],
                         "statut": ["ACTIF"],
                         "cree_le": ["2021-01-01"],
-                        "proposition_services": [[{"prop2": "val2"}]],
+                        "proposition_services_codes": [[{"prop2": "val2"}]],
                         "suggestion": [
                             '{"identifiant_unique": "2", "statut": "ACTIF",'
                             ' "cree_le": "2021-01-01",'
-                            ' "proposition_services": [{"prop2": "val2"}]}'
+                            ' "proposition_services_codes": [{"prop2": "val2"}]}'
                         ],
                         "contexte": [
                             '{"identifiant_unique": "2", "statut": "ACTIF",'

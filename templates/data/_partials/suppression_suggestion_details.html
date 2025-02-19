@@ -6,6 +6,6 @@
 
 {% block suggestion_details %}
 <p>
-    <a target='_blank' href="/admin/qfdmo/displayedacteur/{{ identifiant_unique }}/change/">{{ identifiant_unique }}</a>
+    <a href="{% url 'admin:qfdmo_acteur_change' identifiant_unique|quote %}" target="_blank" rel="noreferrer">{{ identifiant_unique }}</a>
 </p>
 {% endblock suggestion_details %}
