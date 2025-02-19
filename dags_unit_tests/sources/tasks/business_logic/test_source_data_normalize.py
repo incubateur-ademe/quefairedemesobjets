@@ -417,8 +417,7 @@ class TestRemoveUndesiredLines:
             result_df.reset_index(drop=True), expected_df.reset_index(drop=True)
         )
 
-    def test_merge_duplicated_acteurs(self, dag_config):
-        dag_config.merge_duplicated_acteurs = True
+    def test_merge_duplicated(self, dag_config):
         result = _remove_undesired_lines(
             pd.DataFrame(
                 {

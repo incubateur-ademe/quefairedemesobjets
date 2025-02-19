@@ -35,12 +35,11 @@ MANDATORY_COLUMNS_AFTER_NORMALISATION = [
 REGEX_BAN_SEPARATORS = r"\s,;"
 
 
-# TODO: return some metadata about the duplicates
 def merge_duplicates(
     df: pd.DataFrame,
-    group_column: str = "identifiant_unique",
-    merge_as_list_columns: list = [],
-    merge_as_proposition_service_columns: list = [],
+    group_column: str,
+    merge_as_list_columns: list,
+    merge_as_proposition_service_columns: list,
 ) -> pd.DataFrame:
 
     for col in merge_as_list_columns + merge_as_proposition_service_columns:
@@ -51,8 +50,7 @@ def merge_duplicates(
     if df_duplicates.empty:
         logger.warning("No duplicate found")
         return df
-    logger.warning(f"{len(df_duplicates)/2} duplicates found")
-    log.preview("df_duplicates", df_duplicates)
+    log.preview(f"{len(df_duplicates)/2} duplicates found", df_duplicates)
 
     df_non_duplicates = df[~df.duplicated(group_column, keep=False)]
 
@@ -84,24 +82,17 @@ def merge_duplicates(
     return df_final
 
 
-# FIXME: remove logs
 def _merge_list_columns(group):
     result_sets = set()
-    logger.warning(f"=== {group=}")
     for result in group:
         result_sets.update(result)
-    logger.warning(f"=== {result_sets=}")
     return sorted(list(result_sets))
 
 
-# FIXME: remove logs
 def _merge_proposition_service_columns(group):
     sscat_by_action = {}
-    logger.warning(f"=== {group=}")
     for pss in group:
-        logger.warning(f"=== {pss=}")
         for ps in pss:
-            logger.warning(f"=== {ps=}")
             if ps["action"] not in sscat_by_action:
                 sscat_by_action[ps["action"]] = []
             sscat_by_action[ps["action"]].extend(ps["sous_categories"])

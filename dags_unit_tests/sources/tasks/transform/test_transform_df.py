@@ -131,6 +131,7 @@ class TestMergeDuplicates:
             df,
             group_column="identifiant_unique",
             merge_as_list_columns=["label_codes"],
+            merge_as_proposition_service_columns=[],
         )
 
         result_df = result_df.sort_values(by="identifiant_unique").reset_index(
@@ -301,6 +302,7 @@ class TestMergeDuplicates:
         result_df = merge_duplicates(
             df,
             group_column="identifiant_unique",
+            merge_as_list_columns=[],
             merge_as_proposition_service_columns=["proposition_services_codes"],
         )
 

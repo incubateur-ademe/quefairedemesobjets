@@ -152,7 +152,6 @@ with DAG(
             "donnees-eo-ecomaison/lines?size=10000"
         ),
         "validate_address_with_ban": False,
-        "merge_duplicated_acteurs": True,
         "product_mapping": get_mapping_config(),
     },
     schedule=None,

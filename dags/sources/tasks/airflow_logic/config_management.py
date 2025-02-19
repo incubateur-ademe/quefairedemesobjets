@@ -57,7 +57,6 @@ class DAGConfig(BaseModel):
     dechet_mapping: dict = {}
     endpoint: HttpUrl
     label_bonus_reparation: Optional[str] = None
-    merge_duplicated_acteurs: bool = False
     product_mapping: dict
     source_code: Optional[str] = None
     validate_address_with_ban: bool = False
