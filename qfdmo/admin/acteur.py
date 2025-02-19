@@ -16,7 +16,7 @@ from django.utils.html import format_html
 from import_export import admin as import_export_admin
 from import_export import fields, resources, widgets
 
-from core.admin import NotMutableMixin
+from core.admin import CodeLibelleModelAdmin, NotMutableMixin
 from qfdmo.admin.widgets import CategorieChoiceWidget, SousCategorieChoiceWidget
 from qfdmo.models import (
     Acteur,
@@ -35,6 +35,7 @@ from qfdmo.models.acteur import (
     DisplayedActeur,
     DisplayedPropositionService,
     LabelQualite,
+    RevisionActeurParent,
     VueActeur,
     VuePropositionService,
 )
@@ -310,11 +311,30 @@ class VueActeurChildInline(RevisionActeurChildInline):
     change_form_url = "admin:qfdmo_vueacteur_change"
 
 
+class RevisionActeurParentAdmin(admin.ModelAdmin):
+    search_fields = list(BaseActeurAdmin.search_fields)
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
+        return False
+
+    # ne pas afficher le modèle dans le menu admin
+    def get_model_perms(self, request):
+        # Cache ce modèle du menu admin tout en permettant l'autocomplétion
+        return {}
+
+
 class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin):
     change_form_template = "admin/revision_acteur/change_form.html"
     gis_widget = CustomOSMWidget
     inlines = []
     save_as = False
+    exclude = ["id"]
+    resource_classes = [RevisionActeurResource]
+    fields = list(BaseActeurAdmin.fields) + ["parent"]
+    autocomplete_fields = ["parent"]
 
     def change_view(self, request, object_id, form_url="", extra_context=None):
         extra_context = extra_context or {}
@@ -329,11 +349,6 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
                 RevisionPropositionServiceInline(self.model, self.admin_site),
                 RevisionActeurLabelQualiteInline(self.model, self.admin_site),
             ]
-
-    exclude = ["id"]
-    resource_classes = [RevisionActeurResource]
-    fields = list(BaseActeurAdmin.fields) + ["parent"]
-    autocomplete_fields = ["parent"]
 
     # update readlonly fields following statut of object
     def get_readonly_fields(self, request, revision_acteur=None):
@@ -759,18 +774,6 @@ class DisplayedActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
         return False
 
 
-class CodeLibelleModelAdmin(admin.ModelAdmin):
-    list_display = ("libelle", "code")
-    search_fields = ["libelle", "code"]
-    search_help_text = "Recherche sur le libellé ou le code"
-
-    # le champ code ne doit pas être modifiable
-    def get_readonly_fields(self, request, obj=None):
-        if obj:
-            return ["code"]
-        return []
-
-
 class VuePropositionServiceInline(NotMutableMixin, BasePropositionServiceInline):
     model = VuePropositionService
 
@@ -803,6 +806,7 @@ admin.site.register(ActeurType, CodeLibelleModelAdmin)
 admin.site.register(DisplayedActeur, DisplayedActeurAdmin)
 admin.site.register(PropositionService, PropositionServiceAdmin)
 admin.site.register(RevisionActeur, RevisionActeurAdmin)
+admin.site.register(RevisionActeurParent, RevisionActeurParentAdmin)
 admin.site.register(RevisionPropositionService, RevisionPropositionServiceAdmin)
 admin.site.register(Source, CodeLibelleModelAdmin)
 admin.site.register(LabelQualite, CodeLibelleModelAdmin)
