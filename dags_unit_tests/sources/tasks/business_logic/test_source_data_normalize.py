@@ -417,8 +417,7 @@ class TestRemoveUndesiredLines:
             result_df.reset_index(drop=True), expected_df.reset_index(drop=True)
         )
 
-    def test_merge_duplicated_acteurs(self, dag_config):
-        dag_config.merge_duplicated_acteurs = True
+    def test_merge_duplicated(self, dag_config):
         result = _remove_undesired_lines(
             pd.DataFrame(
                 {
@@ -429,7 +428,26 @@ class TestRemoveUndesiredLines:
                         "Particuliers",
                         "Particuliers",
                     ],
-                    "souscategorie_codes": [["code1"], ["code2"], ["code3"]],
+                    "label_codes": [["label1"], ["label2"], ["label3"]],
+                    "acteurservice_codes": [
+                        ["acteurservice1"],
+                        ["acteurservice2"],
+                        ["acteurservice3"],
+                    ],
+                    "proposition_services_codes": [
+                        [
+                            {
+                                "action": "action1",
+                                "sous_categories": ["sscat1", "sscat3"],
+                            },
+                            {"action": "action2", "sous_categories": ["sscat1"]},
+                        ],
+                        [
+                            {"action": "action2", "sous_categories": ["sscat2"]},
+                            {"action": "action3", "sous_categories": ["sscat3"]},
+                        ],
+                        [{"action": "action3", "sous_categories": ["sscat3"]}],
+                    ],
                 }
             ),
             dag_config,
@@ -442,39 +460,19 @@ class TestRemoveUndesiredLines:
                 "identifiant_unique": ["id1", "id2"],
                 "service_a_domicile": ["non", "non"],
                 "public_accueilli": ["Particuliers", "Particuliers"],
-                "souscategorie_codes": [["code1", "code2"], ["code3"]],
-            }
-        )
-        expected_df.reset_index(drop=True)
-
-        pd.testing.assert_frame_equal(result, expected_df)
-
-    def test_ignore_duplicates(self, dag_config):
-        dag_config.ignore_duplicates = True
-        result = _remove_undesired_lines(
-            pd.DataFrame(
-                {
-                    "identifiant_unique": ["id1", "id1", "id2"],
-                    "service_a_domicile": ["non", "non", "non"],
-                    "public_accueilli": [
-                        "Particuliers",
-                        "Particuliers",
-                        "Particuliers",
+                "label_codes": [["label1", "label2"], ["label3"]],
+                "acteurservice_codes": [
+                    ["acteurservice1", "acteurservice2"],
+                    ["acteurservice3"],
+                ],
+                "proposition_services_codes": [
+                    [
+                        {"action": "action1", "sous_categories": ["sscat1", "sscat3"]},
+                        {"action": "action2", "sous_categories": ["sscat1", "sscat2"]},
+                        {"action": "action3", "sous_categories": ["sscat3"]},
                     ],
-                    "souscategorie_codes": [["code1"], ["code2"], ["code3"]],
-                }
-            ),
-            dag_config,
-        )
-        result = result.sort_values("identifiant_unique")
-        result = result.reset_index(drop=True)
-
-        expected_df = pd.DataFrame(
-            {
-                "identifiant_unique": ["id1", "id2"],
-                "service_a_domicile": ["non", "non"],
-                "public_accueilli": ["Particuliers", "Particuliers"],
-                "souscategorie_codes": [["code1"], ["code3"]],
+                    [{"action": "action3", "sous_categories": ["sscat3"]}],
+                ],
             }
         )
         expected_df.reset_index(drop=True)

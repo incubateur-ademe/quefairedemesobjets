@@ -56,9 +56,7 @@ class DAGConfig(BaseModel):
     combine_columns_categories: list[str] = []
     dechet_mapping: dict = {}
     endpoint: HttpUrl
-    ignore_duplicates: bool = False
     label_bonus_reparation: Optional[str] = None
-    merge_duplicated_acteurs: bool = False
     product_mapping: dict
     source_code: Optional[str] = None
     validate_address_with_ban: bool = False

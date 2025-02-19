@@ -153,7 +153,6 @@ with DAG(
             {"remove": "accessible"},
             # 6. Colonnes à garder (rien à faire, utilisé pour le controle)
         ],
-        "ignore_duplicates": False,
         "validate_address_with_ban": False,
         "product_mapping": get_mapping_config("sous_categories"),
     },

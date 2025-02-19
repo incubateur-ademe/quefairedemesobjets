@@ -171,7 +171,6 @@ with DAG(
         "endpoint": (
             "https://data.artisanat.fr/api/explore/v2.1/catalog/datasets/reparacteurs/records"
         ),
-        "ignore_duplicates": False,
         "validate_address_with_ban": False,
         "product_mapping": get_mapping_config(mapping_key="sous_categories_cma"),
     },

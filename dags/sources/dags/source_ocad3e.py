@@ -147,7 +147,6 @@ with DAG(
             "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
             "donnees-eo-ocad3e/lines?size=10000"
         ),
-        "ignore_duplicates": False,
         "validate_address_with_ban": False,
         "label_bonus_reparation": "qualirepar",
         "product_mapping": get_mapping_config(mapping_key="sous_categories_qualirepar"),

@@ -63,9 +63,7 @@ class TestDAGConfig:
         assert dag_config.normalization_rules == []
         assert dag_config.combine_columns_categories == []
         assert dag_config.dechet_mapping == {}
-        assert dag_config.ignore_duplicates is False
         assert dag_config.label_bonus_reparation is None
-        assert dag_config.merge_duplicated_acteurs is False
         assert dag_config.product_mapping == {}
         assert dag_config.source_code is None
         assert dag_config.validate_address_with_ban is False

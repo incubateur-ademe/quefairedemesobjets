@@ -134,7 +134,6 @@ with DAG(
             "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
             "donnees-eo-corepile/lines?size=10000"
         ),
-        "ignore_duplicates": False,
         "validate_address_with_ban": False,
         "product_mapping": get_mapping_config(),
     },

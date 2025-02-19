@@ -11,6 +11,7 @@ from sources.tasks.transform.transform_column import (
     clean_siren,
     clean_siret,
 )
+from utils import logging_utils as log
 from utils.base_utils import transform_location
 from utils.formatter import format_libelle_to_code
 from utils.mapping_utils import parse_float
@@ -35,38 +36,74 @@ REGEX_BAN_SEPARATORS = r"\s,;"
 
 
 def merge_duplicates(
-    df, group_column="identifiant_unique", merge_column="souscategorie_codes"
-):
+    df: pd.DataFrame,
+    group_column: str,
+    merge_as_list_columns: list,
+    merge_as_proposition_service_columns: list,
+) -> pd.DataFrame:
+
+    for col in merge_as_list_columns + merge_as_proposition_service_columns:
+        if col not in df.columns:
+            raise ValueError(f"Column {col} not found in DataFrame")
 
     df_duplicates = df[df.duplicated(group_column, keep=False)]
+    if df_duplicates.empty:
+        logger.warning("No duplicate found")
+        return df
+    log.preview(f"{len(df_duplicates)/2} duplicates found", df_duplicates)
+
     df_non_duplicates = df[~df.duplicated(group_column, keep=False)]
 
+    merge_as_first_columns = [
+        col
+        for col in df.columns
+        if col
+        not in merge_as_list_columns
+        + merge_as_proposition_service_columns
+        + [group_column]
+    ]
     df_merged_duplicates = (
         df_duplicates.groupby(group_column)
         .agg(
             {
+                **{col: "first" for col in merge_as_first_columns},
+                **{col: _merge_list_columns for col in merge_as_list_columns},
                 **{
-                    col: "first"
-                    for col in df.columns
-                    if col != merge_column and col != group_column
+                    col: _merge_proposition_service_columns
+                    for col in merge_as_proposition_service_columns
                 },
-                merge_column: _merge_columns_of_accepted_products,
             }
         )
         .reset_index()
     )
 
-    # Concatenate the non-duplicates and merged duplicates
     df_final = pd.concat([df_non_duplicates, df_merged_duplicates], ignore_index=True)
 
     return df_final
 
 
-def _merge_columns_of_accepted_products(group):
-    produits_sets = set()
-    for produits in group:
-        produits_sets.update(produits)
-    return sorted(produits_sets)
+def _merge_list_columns(group):
+    result_sets = set()
+    for result in group:
+        result_sets.update(result)
+    return sorted(list(result_sets))
+
+
+def _merge_proposition_service_columns(group):
+    sscat_by_action = {}
+    for pss in group:
+        for ps in pss:
+            if ps["action"] not in sscat_by_action:
+                sscat_by_action[ps["action"]] = []
+            sscat_by_action[ps["action"]].extend(ps["sous_categories"])
+
+    return [
+        {
+            "action": action,
+            "sous_categories": sorted(list(set(sscat))),
+        }
+        for action, sscat in sscat_by_action.items()
+    ]
 
 
 def clean_telephone(row: pd.Series, _):

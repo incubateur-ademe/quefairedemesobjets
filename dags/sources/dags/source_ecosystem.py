@@ -130,7 +130,6 @@ with DAG(
             "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
             "donnees-eo-ecosystem/lines?size=10000"
         ),
-        "ignore_duplicates": False,
         "validate_address_with_ban": False,
         "product_mapping": get_mapping_config(mapping_key="sous_categories_3eee"),
     },
