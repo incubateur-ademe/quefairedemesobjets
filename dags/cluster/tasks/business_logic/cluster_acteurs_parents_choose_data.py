@@ -189,7 +189,4 @@ def cluster_acteurs_parents_choose_data(
 
         df_clusters.at[parent_iloc, COL_PARENT_DATA_NEW] = parent_data_new
 
-    # Issue on COL_PARENT_DATA_NEW
-    # TypeError: unhashable type: 'dict'
-    # return df_sort(df_clusters)
     return df_clusters
