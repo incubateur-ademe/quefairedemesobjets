@@ -38,8 +38,6 @@ ALLOWED_HOSTS = decouple.config(
     "ALLOWED_HOSTS", default="127.0.0.1,localhost", cast=str
 ).split(",")
 
-WITH_WAGTAIL = decouple.config("WITH_WAGTAIL", default=False, cast=bool)
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -404,33 +402,30 @@ if DEBUG:
     MEDIA_URL = "/media/"
 
 
-if WITH_WAGTAIL:
-    import os
+# Wagtail settings
+# ----------------
+WAGTAIL_SITE_NAME = "Longue vie aux objets"
+WAGTAILADMIN_BASE_URL = BASE_URL
+INSTALLED_APPS.extend(
+    [
+        "wagtail.contrib.forms",
+        "wagtail.contrib.redirects",
+        "wagtail.embeds",
+        "wagtail.sites",
+        "wagtail.users",
+        "wagtail.snippets",
+        "wagtail.documents",
+        "wagtail.images",
+        "wagtail.search",
+        "wagtail.admin",
+        "wagtail",
+        "modelcluster",
+        "taggit",
+    ]
+)
 
-    WAGTAIL_SITE_NAME = "Longue vie aux objets"
-    WAGTAILADMIN_BASE_URL = BASE_URL
-    MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-    MEDIA_URL = "/media/"
-    INSTALLED_APPS.extend(
-        [
-            "wagtail.contrib.forms",
-            "wagtail.contrib.redirects",
-            "wagtail.embeds",
-            "wagtail.sites",
-            "wagtail.users",
-            "wagtail.snippets",
-            "wagtail.documents",
-            "wagtail.images",
-            "wagtail.search",
-            "wagtail.admin",
-            "wagtail",
-            "modelcluster",
-            "taggit",
-        ]
-    )
-
-    MIDDLEWARE.extend(
-        [
-            "wagtail.contrib.redirects.middleware.RedirectMiddleware",
-        ]
-    )
+MIDDLEWARE.extend(
+    [
+        "wagtail.contrib.redirects.middleware.RedirectMiddleware",
+    ]
+)
