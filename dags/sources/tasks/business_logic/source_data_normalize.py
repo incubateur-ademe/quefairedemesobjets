@@ -120,11 +120,20 @@ def _remove_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
 
 
 def _remove_undesired_lines(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
-    if dag_config.merge_duplicated_acteurs:
+
+    if all(
+        column in df.columns
+        for column in [
+            "label_codes",
+            "acteurservice_codes",
+            "proposition_services_codes",
+        ]
+    ):
         df = merge_duplicates(
             df,
             group_column="identifiant_unique",
-            merge_column="souscategorie_codes",
+            merge_as_list_columns=["label_codes", "acteurservice_codes"],
+            merge_as_proposition_service_columns=["proposition_services_codes"],
         )
 
     # Remove acteurs which propose only service à domicile
@@ -148,11 +157,6 @@ def _remove_undesired_lines(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataF
             f"==== DOUBLONS SUR LES IDENTIFIANTS UNIQUES {len(dups)/2} ====="
         )
         log.preview("Doublons sur identifiant_unique", dups)
-    if dag_config.ignore_duplicates:
-        # FIXME: dedupliquer en mergeant proposition_services_codes ?
-        # TODO: Attention aux lignes dupliquées à cause de de service en ligne
-        #  + physique
-        df = df.drop_duplicates(subset=["identifiant_unique"], keep="first")
 
     return df
 

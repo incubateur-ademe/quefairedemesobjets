@@ -25,7 +25,7 @@ class TestMergeDuplicates:
                 pd.DataFrame(
                     {
                         "identifiant_unique": [1, 1],
-                        "souscategorie_codes": [
+                        "label_codes": [
                             ["Plastic Box", "Metal", "Aàèë l'test"],
                             ["Plastic Box", "Metal", "Aàèë l'test"],
                         ],
@@ -35,9 +35,7 @@ class TestMergeDuplicates:
                 pd.DataFrame(
                     {
                         "identifiant_unique": [1],
-                        "souscategorie_codes": [
-                            ["Aàèë l'test", "Metal", "Plastic Box"]
-                        ],
+                        "label_codes": [["Aàèë l'test", "Metal", "Plastic Box"]],
                         "other_column": ["A"],
                     }
                 ),
@@ -46,7 +44,7 @@ class TestMergeDuplicates:
                 pd.DataFrame(
                     {
                         "identifiant_unique": [1, 2, 3],
-                        "souscategorie_codes": [
+                        "label_codes": [
                             ["Plastic", "Metal"],
                             ["Metal", "Glass"],
                             ["Paper"],
@@ -61,7 +59,7 @@ class TestMergeDuplicates:
                 pd.DataFrame(
                     {
                         "identifiant_unique": [1, 2, 3],
-                        "souscategorie_codes": [
+                        "label_codes": [
                             ["Plastic", "Metal"],
                             ["Metal", "Glass"],
                             ["Paper"],
@@ -78,7 +76,7 @@ class TestMergeDuplicates:
                 pd.DataFrame(
                     {
                         "identifiant_unique": [1, 1, 1],
-                        "souscategorie_codes": [
+                        "label_codes": [
                             ["Plastic", "Metal"],
                             ["Metal", "Glass"],
                             ["Paper"],
@@ -93,7 +91,7 @@ class TestMergeDuplicates:
                 pd.DataFrame(
                     {
                         "identifiant_unique": [1],
-                        "souscategorie_codes": [["Glass", "Metal", "Paper", "Plastic"]],
+                        "label_codes": [["Glass", "Metal", "Paper", "Plastic"]],
                         "other_column": ["A"],
                     }
                 ),
@@ -102,7 +100,7 @@ class TestMergeDuplicates:
                 pd.DataFrame(
                     {
                         "identifiant_unique": [1, 1, 2, 3, 3, 3],
-                        "souscategorie_codes": [
+                        "label_codes": [
                             ["Plastic", "Metal"],
                             ["Metal", "Glass"],
                             ["Paper"],
@@ -116,7 +114,7 @@ class TestMergeDuplicates:
                 pd.DataFrame(
                     {
                         "identifiant_unique": [1, 2, 3],
-                        "souscategorie_codes": [
+                        "label_codes": [
                             ["Glass", "Metal", "Plastic"],
                             ["Paper"],
                             ["Glass", "Metal", "Plastic"],
@@ -127,9 +125,184 @@ class TestMergeDuplicates:
             ),
         ],
     )
-    def test_merge_duplicates(self, df, expected_df):
+    def test_merge_duplicates_list(self, df, expected_df):
 
-        result_df = merge_duplicates(df)
+        result_df = merge_duplicates(
+            df,
+            group_column="identifiant_unique",
+            merge_as_list_columns=["label_codes"],
+        )
+
+        result_df = result_df.sort_values(by="identifiant_unique").reset_index(
+            drop=True
+        )
+        expected_df = expected_df.sort_values(by="identifiant_unique").reset_index(
+            drop=True
+        )
+
+        pd.testing.assert_frame_equal(result_df, expected_df)
+
+    @pytest.mark.parametrize(
+        "df, expected_df",
+        [
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1, 1],
+                        "proposition_services_codes": [[], []],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1],
+                        "proposition_services_codes": [[]],
+                    }
+                ),
+            ),
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1, 1],
+                        "proposition_services_codes": [
+                            [
+                                {
+                                    "action": "action1",
+                                    "sous_categories": ["sscat1", "sscat2"],
+                                }
+                            ],
+                            [],
+                        ],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1],
+                        "proposition_services_codes": [
+                            [
+                                {
+                                    "action": "action1",
+                                    "sous_categories": ["sscat1", "sscat2"],
+                                }
+                            ]
+                        ],
+                    }
+                ),
+            ),
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1, 1],
+                        "proposition_services_codes": [
+                            [
+                                {
+                                    "action": "action1",
+                                    "sous_categories": ["sscat1", "sscat2"],
+                                }
+                            ],
+                            [
+                                {
+                                    "action": "action1",
+                                    "sous_categories": ["sscat1", "sscat2"],
+                                }
+                            ],
+                        ],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1],
+                        "proposition_services_codes": [
+                            [
+                                {
+                                    "action": "action1",
+                                    "sous_categories": ["sscat1", "sscat2"],
+                                }
+                            ]
+                        ],
+                    }
+                ),
+            ),
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1, 1],
+                        "proposition_services_codes": [
+                            [
+                                {
+                                    "action": "action1",
+                                    "sous_categories": ["sscat2"],
+                                }
+                            ],
+                            [
+                                {
+                                    "action": "action1",
+                                    "sous_categories": ["sscat1"],
+                                }
+                            ],
+                        ],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1],
+                        "proposition_services_codes": [
+                            [
+                                {
+                                    "action": "action1",
+                                    "sous_categories": ["sscat1", "sscat2"],
+                                }
+                            ]
+                        ],
+                    }
+                ),
+            ),
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1, 1],
+                        "proposition_services_codes": [
+                            [
+                                {
+                                    "action": "action1",
+                                    "sous_categories": ["sscat1", "sscat2"],
+                                }
+                            ],
+                            [
+                                {
+                                    "action": "action2",
+                                    "sous_categories": ["sscat1"],
+                                }
+                            ],
+                        ],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1],
+                        "proposition_services_codes": [
+                            [
+                                {
+                                    "action": "action1",
+                                    "sous_categories": ["sscat1", "sscat2"],
+                                },
+                                {
+                                    "action": "action2",
+                                    "sous_categories": ["sscat1"],
+                                },
+                            ],
+                        ],
+                    }
+                ),
+            ),
+        ],
+    )
+    def test_merge_duplicates_ps_dict(self, df, expected_df):
+
+        result_df = merge_duplicates(
+            df,
+            group_column="identifiant_unique",
+            merge_as_proposition_service_columns=["proposition_services_codes"],
+        )
 
         result_df = result_df.sort_values(by="identifiant_unique").reset_index(
             drop=True

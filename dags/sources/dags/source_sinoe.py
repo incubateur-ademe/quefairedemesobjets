@@ -149,7 +149,6 @@ with DAG(
             {"keep": "ANNEE"},
         ],
         "dechet_mapping": source_sinoe_dechet_mapping_get(),
-        "ignore_duplicates": False,
         "validate_address_with_ban": False,
         "product_mapping": get_mapping_config("sous_categories_sinoe"),
     },

@@ -168,7 +168,6 @@ with DAG(
             "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
             "donnees-eo-refashion/lines?size=10000"
         ),
-        "ignore_duplicates": False,
         "validate_address_with_ban": False,
         "label_bonus_reparation": "refashion",
         "product_mapping": get_mapping_config(),

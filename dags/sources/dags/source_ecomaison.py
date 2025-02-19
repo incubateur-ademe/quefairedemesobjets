@@ -151,7 +151,6 @@ with DAG(
             "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
             "donnees-eo-ecomaison/lines?size=10000"
         ),
-        "ignore_duplicates": False,
         "validate_address_with_ban": False,
         "merge_duplicated_acteurs": True,
         "product_mapping": get_mapping_config(),
