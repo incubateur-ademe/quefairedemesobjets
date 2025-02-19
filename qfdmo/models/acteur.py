@@ -17,7 +17,6 @@ from django.contrib.gis.geos import Point, Polygon
 from django.contrib.gis.geos.geometry import GEOSGeometry
 from django.core.cache import cache
 from django.core.files.images import get_image_dimensions
-from django.core.validators import EmailValidator
 from django.db.models import (
     Case,
     CheckConstraint,
@@ -37,6 +36,7 @@ from unidecode import unidecode
 
 from core.constants import DIGITAL_ACTEUR_CODE
 from core.models import TimestampedModel
+from core.validators import EmptyEmailValidator
 from dags.sources.config.shared_constants import (
     EMPTY_ACTEUR_FIELD,
     REPRISE_1POUR0,
@@ -675,13 +675,6 @@ class WithParentActeurMixin(models.Model):
         return self.pk and self.duplicats.exists()
 
 
-def email_or_empty_validator(value):
-    if value == EMPTY_ACTEUR_FIELD:
-        return
-    validator = EmailValidator()
-    validator(value)
-
-
 class RevisionActeur(WithParentActeurMixin, BaseActeur):
     class Meta:
         verbose_name = "ACTEUR de l'EC - CORRIGÉ"
@@ -692,7 +685,7 @@ class RevisionActeur(WithParentActeurMixin, BaseActeur):
         ActeurType, on_delete=models.CASCADE, blank=True, null=True
     )
     email = models.CharField(
-        max_length=254, blank=True, null=True, validators=[email_or_empty_validator]
+        max_length=254, blank=True, null=True, validators=[EmptyEmailValidator()]
     )
 
     @property

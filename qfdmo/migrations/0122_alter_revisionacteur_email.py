@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                 blank=True,
                 max_length=254,
                 null=True,
-                validators=[qfdmo.models.acteur.email_or_empty_validator],
+                validators=[qfdmo.models.acteur.EmptyEmailValidator()],
             ),
         ),
     ]
