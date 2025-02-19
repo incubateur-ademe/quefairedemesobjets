@@ -36,7 +36,12 @@ from unidecode import unidecode
 
 from core.constants import DIGITAL_ACTEUR_CODE
 from core.models import TimestampedModel
-from dags.sources.config.shared_constants import REPRISE_1POUR0, REPRISE_1POUR1
+from core.validators import EmptyEmailValidator
+from dags.sources.config.shared_constants import (
+    EMPTY_ACTEUR_FIELD,
+    REPRISE_1POUR0,
+    REPRISE_1POUR1,
+)
 from qfdmo.models.action import Action, get_action_instances
 from qfdmo.models.categorie_objet import SousCategorieObjet
 from qfdmo.models.utils import (
@@ -679,6 +684,9 @@ class RevisionActeur(WithParentActeurMixin, BaseActeur):
     acteur_type = models.ForeignKey(
         ActeurType, on_delete=models.CASCADE, blank=True, null=True
     )
+    email = models.CharField(
+        max_length=254, blank=True, null=True, validators=[EmptyEmailValidator()]
+    )
 
     @property
     def change_url(self):
@@ -758,6 +766,12 @@ class RevisionActeur(WithParentActeurMixin, BaseActeur):
                 "is_parent",
             ],
         )
+
+        default_acteur_fields = {
+            k: None if v == EMPTY_ACTEUR_FIELD else v
+            for k, v in default_acteur_fields.items()
+        }
+
         default_acteur_fields.update(
             {
                 "acteur_type": self.acteur_type
