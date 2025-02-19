@@ -1,23 +1,21 @@
 from django.contrib.gis import admin
 
+from core.admin import CodeLibelleModelMixin, OnlyEditableMixin
 from qfdmo.models import Action, ActionDirection, GroupeAction
 
 
-class ActionAdmin(admin.ModelAdmin):
+class ActionAdmin(OnlyEditableMixin, CodeLibelleModelMixin, admin.ModelAdmin):
+    list_display = ("code", "libelle", "order", "get_directions")
+
     def get_directions(self, obj):
         return ", ".join([d.code for d in obj.directions.all()])
 
-    list_display = ("code", "libelle", "order", "get_directions")
-    search_fields = ["code", "libelle"]
 
-
-class ActionDirectionAdmin(admin.ModelAdmin):
-
+class ActionDirectionAdmin(OnlyEditableMixin, CodeLibelleModelMixin, admin.ModelAdmin):
     list_display = ("code", "libelle", "order")
-    search_fields = ["code", "libelle"]
 
 
-class GroupeActionAdmin(admin.ModelAdmin):
+class GroupeActionAdmin(OnlyEditableMixin, CodeLibelleModelMixin, admin.ModelAdmin):
     list_display = ("code", "libelle", "order")
     search_fields = ["code", "libelle"]
 

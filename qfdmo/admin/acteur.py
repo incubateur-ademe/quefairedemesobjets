@@ -3,7 +3,6 @@ from typing import Any, List
 import orjson
 from django import forms
 from django.conf import settings
-from django.contrib.admin.utils import quote
 from django.contrib.gis import admin
 from django.contrib.gis.forms.fields import PointField
 from django.contrib.gis.geos import Point
@@ -299,11 +298,7 @@ class RevisionActeurChildInline(NotMutableMixin, admin.TabularInline):
         if obj.identifiant_unique:
             return format_html(
                 '<a href="{}">{} ({})</a>',
-                # Comme dans le code de django : https://github.com/django/django/blob/6cfe00ee438111af38f1e414bd01976e23b39715/django/contrib/admin/models.py#L243
-                reverse(
-                    self.change_form_url,
-                    args=[quote(obj.identifiant_unique)],
-                ),
+                obj.change_url,
                 obj.nom,
                 obj.identifiant_unique,
             )

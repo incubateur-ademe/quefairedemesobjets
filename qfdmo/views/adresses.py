@@ -4,7 +4,6 @@ from typing import List, cast
 
 import unidecode
 from django.conf import settings
-from django.contrib.admin.utils import quote
 from django.contrib.postgres.lookups import Unaccent
 from django.contrib.postgres.search import TrigramWordDistance
 from django.core.cache import cache
@@ -567,17 +566,13 @@ class FormulaireSearchActeursView(SearchActeursView):
 def getorcreate_revisionacteur(request, acteur_identifiant):
     acteur = Acteur.objects.get(identifiant_unique=acteur_identifiant)
     revision_acteur = acteur.get_or_create_revision()
-    return redirect(
-        "admin:qfdmo_revisionacteur_change", quote(revision_acteur.identifiant_unique)
-    )
+    return redirect(revision_acteur.change_url)
 
 
 def getorcreate_correctionequipeacteur(request, acteur_identifiant):
     acteur = Acteur.objects.get(identifiant_unique=acteur_identifiant)
     revision_acteur = acteur.get_or_create_correctionequipe()
-    return redirect(
-        "admin:qfdmo_revisionacteur_change", quote(revision_acteur.identifiant_unique)
-    )
+    return redirect(revision_acteur.change_url)
 
 
 def refresh_acteur_view(request):
@@ -678,13 +673,11 @@ def acteur_detail(request, uuid):
 
 
 def solution_admin(request, identifiant_unique):
-    acteur = RevisionActeur.objects.filter(
+    revision_acteur = RevisionActeur.objects.filter(
         identifiant_unique=identifiant_unique
     ).first()
 
-    if acteur:
-        return redirect(
-            "admin:qfdmo_revisionacteur_change", quote(acteur.identifiant_unique)
-        )
+    if revision_acteur:
+        return redirect(revision_acteur.change_url)
     acteur = Acteur.objects.get(identifiant_unique=identifiant_unique)
-    return redirect("admin:qfdmo_acteur_change", quote(acteur.identifiant_unique))
+    return redirect(acteur.change_url)
