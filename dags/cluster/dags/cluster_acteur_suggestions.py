@@ -75,7 +75,7 @@ fields_all = django_model_fields_get(Acteur)
 fields_enrich = sorted(
     list(
         # We don't want to enrich calculated properties obviously
-        # since these are computer
+        # since these are computed
         set(django_model_fields_get(Acteur, include_properties=False))
         # And we exclude some fields based on business rules (ex: source)
         - set(FIELDS_PARENT_DATA_EXCLUDED)
