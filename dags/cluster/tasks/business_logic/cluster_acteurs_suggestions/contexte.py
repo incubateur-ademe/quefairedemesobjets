@@ -2,9 +2,6 @@
 
 import pandas as pd
 
-from data.models.change import COL_CHANGE_MODEL_NAME
-from data.models.changes import ChangeActeurCreateAsParent
-
 
 def suggestion_contexte_generate(
     df_cluster: pd.DataFrame,
@@ -12,6 +9,8 @@ def suggestion_contexte_generate(
     cluster_fields_fuzzy: list[str],
 ) -> dict:
     """Generates a dict for use in Suggestion.contexte field"""
+    from data.models.change import COL_CHANGE_MODEL_NAME
+    from data.models.changes import ChangeActeurCreateAsParent
 
     clusters_cnt = df_cluster["cluster_id"].nunique()
     if clusters_cnt != 1:

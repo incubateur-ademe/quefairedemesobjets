@@ -24,14 +24,9 @@ import logging
 import os
 import sys
 from pathlib import Path
+from typing import Any
 
-import django
 import pandas as pd
-from django.conf import settings
-from django.db import models
-from django.db.models import Model, Q, QuerySet
-from django.utils.functional import cached_property
-from shared.tasks.database_logic.db_manager import PostgresConnectionManager
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -62,26 +57,9 @@ def django_setup_full() -> None:
     Voir airflow-scheduler.Dockerfile pour plus de détails"""
     django_add_to_sys_path()
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.airflow_settings")
-    django.setup()
 
+    import django
 
-def django_setup_partial() -> None:
-    """Une initialisation partielle de l'environement Django
-
-    ⚠️ A ne pas utiliser par défaut (prendre django_setup_full)
-    mais à conserver au cas où un jour django_setup_full devient une
-    usine à gaz et qu'on ait besoin d'une version plus légère."""
-    import dj_database_url
-
-    django_add_to_sys_path()
-    db_url = str(PostgresConnectionManager().engine.url)
-    default_settings = dj_database_url.parse(db_url)
-    default_settings["ENGINE"] = "django.contrib.gis.db.backends.postgis"
-    if not settings.configured:
-        settings.configure(
-            INSTALLED_APPS=["qfdmo"],
-            DATABASES={"default": default_settings},
-        )
     django.setup()
 
 
@@ -93,6 +71,8 @@ def django_model_fields_get(model_class, include_properties=True) -> list[str]:
 
     Always excluded: internals & ManyToMany
     """
+    from django.db import models
+    from django.utils.functional import cached_property
 
     # Internal Django fields retrieved when inspecting model
     # but we don't want to keep
@@ -122,16 +102,18 @@ def django_model_fields_get(model_class, include_properties=True) -> list[str]:
 
 
 def django_model_queryset_generate(
-    model_class: type[Model],
+    model_class,
     fields_include_all_filled: list[str],
     fields_exclude_any_filled: list[str],
-    # fields_to_select: list[str],
-) -> QuerySet:
+):
     """Génère une requête Django à partir d'une liste de champs
     et de filtres pour un modèle donné.
 
     Utile pour des tâches Airflow qui doivent récupérer des données
     de la DB pour les traiter."""
+
+    from django.db.models import Q
+
     # Pour faciliter l'utilisation de cette fonction on
     # exclude automatiquement les champs qui ne sont pas dans la
     # DB (ex: @property)
@@ -163,12 +145,12 @@ def django_model_queryset_generate(
     return model_class.objects.filter(final_filter)
 
 
-def django_model_queryset_to_sql(query: QuerySet) -> str:
+def django_model_queryset_to_sql(query: Any) -> str:
     """Fonction pour obtenir la requête SQL d'une query Django"""
     return str(query.query)
 
 
-def django_model_to_pandas_schema(model_class: type[Model]) -> dict[str, str]:
+def django_model_to_pandas_schema(model_class: Any) -> dict[str, str]:
     """Génère un schema compatible avec pandas' dtype quand on construit
     une dataframe pour éviter que pandas ne fasse des inférences de type
     et ne vienne tout casser (ex: code_postal casté en float et qui créé
@@ -177,6 +159,8 @@ def django_model_to_pandas_schema(model_class: type[Model]) -> dict[str, str]:
     # TODO: support pour des types complexes du genre
     # django.contrib.gis.db.models.fields.PointField pour lesquels
     # on devra peut être utiliser des libraries genre https://geopandas.org/en/stable/
+    from django.db import models
+
     dtype_mapping = {
         models.AutoField: "int64",
         models.IntegerField: "int64",
@@ -205,7 +189,7 @@ def django_model_to_pandas_schema(model_class: type[Model]) -> dict[str, str]:
     return schema
 
 
-def django_model_queryset_to_df(query: QuerySet, fields: list[str]) -> pd.DataFrame:
+def django_model_queryset_to_df(query: Any, fields: list[str]) -> pd.DataFrame:
     """Converts a Django QuerySet into a dataframe"""
     fn = "django_model_queryset_to_df"
     log.preview(f"{fn}: query", django_model_queryset_to_sql(query))
