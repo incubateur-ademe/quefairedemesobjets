@@ -1,7 +1,11 @@
 from airflow import DAG
 from sources.config import shared_constants as constants
 from sources.config.airflow_params import get_mapping_config
-from sources.tasks.airflow_logic.operators import default_args, eo_task_chain
+from sources.tasks.airflow_logic.operators import (
+    default_args,
+    default_params,
+    eo_task_chain,
+)
 
 with DAG(
     dag_id="eo-citeo",
@@ -11,7 +15,7 @@ with DAG(
         "Injestion des données de l'éco-organisme CITEO à partir des données disponible"
         " sur de Koumoul"
     ),
-    max_active_runs=1,
+    **default_params,
     params={
         "normalization_rules": [
             # 1. Renommage des colonnes
@@ -133,6 +137,5 @@ with DAG(
         "validate_address_with_ban": False,
         "product_mapping": get_mapping_config(),
     },
-    schedule=None,
 ) as dag:
     eo_task_chain(dag)

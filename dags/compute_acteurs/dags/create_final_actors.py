@@ -41,7 +41,6 @@ dag = DAG(
     ),
     max_active_runs=1,
     schedule=None,
-    max_active_runs=1,
 )
 
 load_acteur_task = PythonOperator(
