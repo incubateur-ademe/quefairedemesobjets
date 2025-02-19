@@ -399,3 +399,7 @@ NOTION = {
         "NOTION_CONTACT_FORM_DATABASE_ID", default=""
     ),
 }
+
+DATA_UPLOAD_MAX_NUMBER_FIELDS = decouple.config(
+    "DATA_UPLOAD_MAX_NUMBER_FIELDS", default=10000, cast=int
+)
