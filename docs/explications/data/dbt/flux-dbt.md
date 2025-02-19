@@ -34,7 +34,7 @@ La cible est de découper le calcul des vues par concepts.
 
 ```mermaid
 graph LR
-    A[Application des corrections] --> B[Filtres des acteurs à afficher] --> C[Compilation des parents] --> D[Filtres des acteurs à partager] --> E[Formattage des entités à partager] --> F[Optimisation des tables]
+    A[Application des corrections] --> B[Filtres des acteurs à afficher] --> C[Compilation des parents] --> E[Formattage des entités à partager] --> F[Optimisation des tables]
 ```
 
 ### Application des corrections
