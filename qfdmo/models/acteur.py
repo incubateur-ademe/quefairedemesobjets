@@ -37,7 +37,11 @@ from unidecode import unidecode
 
 from core.constants import DIGITAL_ACTEUR_CODE
 from core.models import TimestampedModel
-from dags.sources.config.shared_constants import REPRISE_1POUR0, REPRISE_1POUR1
+from dags.sources.config.shared_constants import (
+    EMPTY_ACTEUR_FIELD,
+    REPRISE_1POUR0,
+    REPRISE_1POUR1,
+)
 from qfdmo.models.action import Action, get_action_instances
 from qfdmo.models.categorie_objet import SousCategorieObjet
 from qfdmo.models.utils import (
@@ -672,7 +676,7 @@ class WithParentActeurMixin(models.Model):
 
 
 def email_or_empty_validator(value):
-    if value == "__empty__":
+    if value == EMPTY_ACTEUR_FIELD:
         return
     validator = EmailValidator()
     validator(value)
@@ -771,7 +775,8 @@ class RevisionActeur(WithParentActeurMixin, BaseActeur):
         )
 
         default_acteur_fields = {
-            k: None if v == "__empty__" else v for k, v in default_acteur_fields.items()
+            k: None if v == EMPTY_ACTEUR_FIELD else v
+            for k, v in default_acteur_fields.items()
         }
 
         default_acteur_fields.update(
