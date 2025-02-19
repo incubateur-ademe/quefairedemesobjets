@@ -32,6 +32,11 @@ default_args = {
     "retries": 1,
 }
 
+default_params = {
+    "schedule": None,
+    "max_active_runs": 1,
+}
+
 
 def eo_task_chain(dag: DAG) -> None:
 

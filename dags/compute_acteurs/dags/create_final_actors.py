@@ -39,8 +39,8 @@ dag = DAG(
         " plusieurs sources en cumulant leur services, sources et propositions"
         " services."
     ),
-    schedule=None,
     max_active_runs=1,
+    schedule=None,
 )
 
 load_acteur_task = PythonOperator(

@@ -3,7 +3,11 @@ from sources.config.airflow_params import (
     get_mapping_config,
     source_sinoe_dechet_mapping_get,
 )
-from sources.tasks.airflow_logic.operators import default_args, eo_task_chain
+from sources.tasks.airflow_logic.operators import (
+    default_args,
+    default_params,
+    eo_task_chain,
+)
 
 default_args["retries"] = 0
 with DAG(
@@ -14,6 +18,7 @@ with DAG(
         "DAG pour télécharger, standardiser, et charger dans notre base la source SINOE"
     ),
     tags=["source", "ademe", "sinoe", "déchèteries"],
+    **default_params,
     params={
         "endpoint": (
             "https://data.ademe.fr/data-fair/api/v1/datasets/"
@@ -152,6 +157,5 @@ with DAG(
         "validate_address_with_ban": False,
         "product_mapping": get_mapping_config("sous_categories_sinoe"),
     },
-    schedule=None,
 ) as dag:
     eo_task_chain(dag)

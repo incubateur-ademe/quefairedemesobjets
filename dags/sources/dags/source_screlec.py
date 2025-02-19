@@ -1,7 +1,11 @@
 from airflow import DAG
 from sources.config import shared_constants as constants
 from sources.config.airflow_params import get_mapping_config
-from sources.tasks.airflow_logic.operators import default_args, eo_task_chain
+from sources.tasks.airflow_logic.operators import (
+    default_args,
+    default_params,
+    eo_task_chain,
+)
 
 with DAG(
     dag_id="eo-batribox",
@@ -12,6 +16,7 @@ with DAG(
         " disponibles sur de Koumoul"
     ),
     tags=["source", "ademe", "piles", "batteries", "accumulateurs"],
+    **default_params,
     params={
         "endpoint": (
             "https://data.ademe.fr/data-fair/api/v1/datasets/"
@@ -156,6 +161,5 @@ with DAG(
         "validate_address_with_ban": False,
         "product_mapping": get_mapping_config("sous_categories"),
     },
-    schedule=None,
 ) as dag:
     eo_task_chain(dag)

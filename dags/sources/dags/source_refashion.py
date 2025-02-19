@@ -1,7 +1,11 @@
 from airflow import DAG
 from sources.config import shared_constants as constants
 from sources.config.airflow_params import get_mapping_config
-from sources.tasks.airflow_logic.operators import default_args, eo_task_chain
+from sources.tasks.airflow_logic.operators import (
+    default_args,
+    default_params,
+    eo_task_chain,
+)
 
 with DAG(
     dag_id="eo-refashion",
@@ -11,6 +15,7 @@ with DAG(
         "A pipeline to fetch, process, and load to validate data into postgresql"
         " for Refashion dataset"
     ),
+    **default_params,
     params={
         "normalization_rules": [
             # 1. Renommage des colonnes
@@ -172,6 +177,5 @@ with DAG(
         "label_bonus_reparation": "refashion",
         "product_mapping": get_mapping_config(),
     },
-    schedule=None,
 ) as dag:
     eo_task_chain(dag)
