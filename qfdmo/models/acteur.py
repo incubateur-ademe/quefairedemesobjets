@@ -200,12 +200,13 @@ class LabelQualite(models.Model):
     code = models.CharField(
         max_length=255,
         unique=True,
-        blank=True,
-        null=True,
+        blank=False,
+        null=False,
         help_text=(
-            "This field is used to manage the import of data."
-            " Any update can break the import data process"
+            "Ce champ est utilisé lors de l'import de données, il ne doit pas être"
+            " mis à jour sous peine de casser l'import de données"
         ),
+        validators=[CodeValidator()],
     )
     afficher = models.BooleanField(default=True)
     bonus = models.BooleanField(
@@ -559,19 +560,15 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
     def has_label_reparacteur(self):
         return self.labels.filter(code="reparacteur").exists()
 
-    def _get_dict_for_clone(self):
-        excluded_fields = [
+    @classmethod
+    def get_fields_for_clone(cls):
+        return {field.name for field in cls._meta.get_fields()} - {
             "identifiant_unique",
             "identifiant_externe",
             "proposition_services",
-            "acteur_type",
             "acteur_services",
-            "source",
             "labels",
-        ]
-        acteur_dict = model_to_dict(self, exclude=excluded_fields)
-        acteur_dict["acteur_type"] = self.acteur_type
-        return {k: v for k, v in acteur_dict.items() if v}
+        }
 
 
 def clean_parent(parent):
@@ -730,6 +727,7 @@ class RevisionActeur(WithParentActeurMixin, BaseActeur):
         """
         Won't create an Acteur instance
         """
+        self.source = None
         self.full_clean()
         return super().save(*args, **kwargs)
 
@@ -774,12 +772,15 @@ class RevisionActeur(WithParentActeurMixin, BaseActeur):
 
     def create_parent(self):
         acteur = Acteur.objects.get(pk=self.pk)
-        acteur_dict = acteur._get_dict_for_clone()
-        self_dict = self._get_dict_for_clone()
+
+        computed_fields = {
+            field: getattr(self, field) or getattr(acteur, field)
+            for field in Acteur.get_fields_for_clone()
+        }
 
         revision_acteur_parent = RevisionActeur(
             identifiant_unique=uuid.uuid4(),
-            **(acteur_dict | self_dict),
+            **computed_fields,
         )
         revision_acteur_parent.save_as_parent()
 

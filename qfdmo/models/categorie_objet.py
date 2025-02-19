@@ -2,15 +2,14 @@ from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib.gis.db import models
-from django.db.utils import cached_property
+from django.utils.functional import cached_property
 
 from qfdmo.models.utils import CodeAsNaturalKeyModel
 
 
 class CategorieObjet(CodeAsNaturalKeyModel):
     class Meta:
-        verbose_name = "Catégorie d'objets"
-        verbose_name_plural = "Catégories d'objets"
+        verbose_name = "Objet - Catégorie"
 
     id = models.AutoField(primary_key=True)
     libelle = models.CharField(max_length=255, blank=False, null=False)
@@ -19,8 +18,7 @@ class CategorieObjet(CodeAsNaturalKeyModel):
 
 class SousCategorieObjet(CodeAsNaturalKeyModel):
     class Meta:
-        verbose_name = "Sous catégorie d'objets"
-        verbose_name_plural = "Sous catégories d'objets"
+        verbose_name = "Objet - Sous catégorie"
         ordering = ["libelle"]
 
     id = models.AutoField(primary_key=True)
@@ -67,6 +65,9 @@ class SousCategorieObjet(CodeAsNaturalKeyModel):
 
 
 class Objet(CodeAsNaturalKeyModel):
+    class Meta:
+        verbose_name = "Objet - Objet"
+
     id = models.AutoField(primary_key=True)
     libelle = models.CharField(max_length=255, blank=False, null=False)
     code = models.CharField(max_length=255, unique=True, blank=False, null=False)
