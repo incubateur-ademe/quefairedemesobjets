@@ -10,6 +10,7 @@ import opening_hours
 import orjson
 import shortuuid
 from django.conf import settings
+from django.contrib.admin.utils import quote
 from django.contrib.gis.db import models
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point, Polygon
@@ -362,12 +363,6 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
     )
 
     @property
-    def change_url(self):
-        return reverse(
-            "admin:qfdmo_displayedacteur_change", args=[self.identifiant_unique]
-        )
-
-    @property
     def latitude(self):
         return self.location.y if self.location else None
 
@@ -586,6 +581,14 @@ class Acteur(BaseActeur):
         verbose_name = "ACTEUR de l'EC - IMPORTÉ"
         verbose_name_plural = "ACTEURS de l'EC - IMPORTÉ"
 
+    @property
+    def change_url(self):
+        # quote() Comme dans le code de django
+        # https://github.com/django/django/blob/6cfe00ee438111af38f1e414bd01976e23b39715/django/contrib/admin/models.py#L243
+        return reverse(
+            "admin:qfdmo_acteur_change", args=[quote(self.identifiant_unique)]
+        )
+
     def get_or_create_revision(self):
         # TODO : to be deprecated
         fields = model_to_dict(
@@ -676,6 +679,12 @@ class RevisionActeur(WithParentActeurMixin, BaseActeur):
     acteur_type = models.ForeignKey(
         ActeurType, on_delete=models.CASCADE, blank=True, null=True
     )
+
+    @property
+    def change_url(self):
+        return reverse(
+            "admin:qfdmo_revisionacteur_change", args=[quote(self.identifiant_unique)]
+        )
 
     @property
     def nombre_enfants(self) -> int:
@@ -869,6 +878,12 @@ class DisplayedActeur(BaseActeur):
         blank=True,
         related_name="displayed_acteurs",
     )
+
+    @property
+    def change_url(self):
+        return reverse(
+            "admin:qfdmo_displayedacteur_change", args=[quote(self.identifiant_unique)]
+        )
 
     # La propriété au sein du Displayed se base sur Revision
     # car c'est la seule façon de récupérer les enfants (n'existe pas
