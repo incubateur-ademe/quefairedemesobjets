@@ -275,7 +275,7 @@ PARAMS = {
         fields_enrich,
         type=["array"],
         examples=fields_enrich,
-        description_md=f"""✍️ Champs à enrichir (cartains champs de type calculés ou id
+        description_md=f"""✍️ Champs à enrichir (certains champs de type calculés ou id
         sont exclus)
 
         Exclus:
