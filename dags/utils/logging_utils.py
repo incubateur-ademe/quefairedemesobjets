@@ -36,7 +36,7 @@ class CustomJSONEncoder(json.JSONEncoder):
             return obj.tolist()
         elif pd.isna(obj):  # Handle np.nan, pd.NA, None
             return None
-        return super().default(obj)
+        return str(obj)
 
 
 def json_dumps(data: Any) -> str:
@@ -92,7 +92,8 @@ def preview(value_name: str, value: Any) -> None:
         log.info("Dernière ligne:")
         log.info(json_dumps(value.tail(1).to_dict(orient="records")))
     elif isinstance(value, list):
-        log.info(json_dumps(value))
+        log.info("3 premières entrées:")
+        log.info(json_dumps(value[:3]))
     elif isinstance(value, dict):
         log.info(json_dumps(value))
     elif isinstance(value, set):

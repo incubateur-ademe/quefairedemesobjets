@@ -48,6 +48,8 @@ def airflow_params_dropdown_selected_to_ids(
     Returns:
         list[int]: IDs correspondant aux valeurs sélectionnées
     """
+    if not dropdown_selected:
+        return []
     invalid = [x for x in dropdown_selected if ID_PREFIX not in x]
     if invalid:
         raise ValueError(

@@ -15,6 +15,7 @@ import re
 
 import numpy as np
 import pandas as pd
+from cluster.config.constants import COL_INDEX_SRC
 from cluster.tasks.business_logic.misc.cluster_exclude_intra_source import (
     cluster_exclude_intra_source,
 )
@@ -56,8 +57,8 @@ def cluster_strings(
         liste de clusters sous forme de tuples (indices, strings)
     """
     vectorizer = TfidfVectorizer(
-        tokenizer=str.split, binary=False, token_pattern=None
-    )  # type: ignore
+        tokenizer=str.split, binary=False, token_pattern=None  # type: ignore
+    )
     tfidf_matrix = vectorizer.fit_transform(strings)
 
     # Compute pairwise cosine similarity between strings
@@ -90,7 +91,7 @@ def values_to_similarity_matrix(values: list[str]) -> np.ndarray:
     """Compute similarity matrix using TF-IDF vectorization
     on a list of values."""
     vectorizer = TfidfVectorizer(
-        tokenizer=str.split, binary=False, token_pattern=None
+        tokenizer=str.split, binary=False, token_pattern=None  # type: ignore
     )  # type: ignore
     tfidf_matrix = vectorizer.fit_transform(values)
     return cosine_similarity(tfidf_matrix)
@@ -253,7 +254,7 @@ def cluster_acteurs_clusters(
         DataFrame de cluster_id -> identifiant_unique
     """
 
-    if "__index_src" not in df.columns:
+    if COL_INDEX_SRC not in df.columns:
         raise ValueError(
             """La colonne '__index_src' doit être ajoutée à df
                 pour faire le lien avant/après clusterisation"""
@@ -285,7 +286,7 @@ def cluster_acteurs_clusters(
             + cluster_fields_exact
             + cluster_fields_separate
             + cluster_fields_fuzzy
-            + ["__index_src"]
+            + [COL_INDEX_SRC]
             + ["nom"]
         )
     )

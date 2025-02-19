@@ -25,6 +25,10 @@ class TestClusterConfigModel:
             "cluster_fields_exact": ["exact1", "exact2"],
             "cluster_fields_fuzzy": ["fuzzy1", "fuzzy2"],
             "cluster_fuzzy_threshold": 0.5,
+            "dedup_enrich_fields": ["f1_incl", "f2_incl", "f3_excl"],
+            "dedup_enrich_exclude_sources": ["source1 (id=1)"],
+            "dedup_enrich_priority_sources": ["source1 (id=1)"],
+            "dedup_enrich_keep_empty": False,
             "mapping_sources": {"source1": 1, "source2": 2, "source3": 3},
             "mapping_acteur_types": {"atype1": 1, "atype2": 2, "atype3": 3},
         }
@@ -44,9 +48,10 @@ class TestClusterConfigModel:
         # pour démontrer qu'on à bien pioché
         assert config_working.include_acteur_type_ids == [2, 3]
 
-    def test_working_no_sources_equals_all_sources(self, params_working):
+    @pytest.mark.parametrize("input", [None, []])
+    def test_working_no_sources_equals_all_sources(self, params_working, input):
         # Si aucun code source fourni alors on inclut toutes les sources
-        params_working["include_sources"] = None
+        params_working["include_sources"] = input
         config = ClusterConfig(**params_working)
         assert config.include_source_ids == [1, 2, 3]
 
@@ -60,23 +65,26 @@ class TestClusterConfigModel:
         config = ClusterConfig(**params_working)
         assert config.cluster_fields_separate == []
 
-    def test_optional_include_only_if_regex_matches_nom(self, params_working):
+    @pytest.mark.parametrize("input", [None, ""])
+    def test_optional_include_only_if_regex_matches_nom(self, params_working, input):
         # On peut ne pas fournir de regex
-        params_working["include_only_if_regex_matches_nom"] = None
+        params_working["include_only_if_regex_matches_nom"] = input
         config = ClusterConfig(**params_working)
         assert config.include_only_if_regex_matches_nom is None
 
-    def test_optional_exclude_if_any_field_filled(self, params_working):
+    @pytest.mark.parametrize("input", [None, []])
+    def test_optional_exclude_if_any_field_filled(self, params_working, input):
         # On peut ne pas fournir de champs à exclure
-        params_working["exclude_if_any_field_filled"] = None
+        params_working["exclude_if_any_field_filled"] = input
         config = ClusterConfig(**params_working)
         assert config.exclude_if_any_field_filled == []
 
-    def test_optional_normalize_fields_basic(self, params_working):
+    @pytest.mark.parametrize("input", [None, []])
+    def test_optional_normalize_fields_basic(self, params_working, input):
         # On peut ne pas fournir de champs à normaliser
         # et tous les champs présent dans les champs "fields"
         # (sauf field_all) seront rajoutés à la liste
-        params_working["normalize_fields_basic"] = None
+        params_working["normalize_fields_basic"] = input
         config = ClusterConfig(**params_working)
         expected = config.fields_transformed
         diff = set(config.normalize_fields_basic) - set(expected)
@@ -110,9 +118,10 @@ class TestClusterConfigModel:
         config = ClusterConfig(**params_working)
         assert len(config.fields_transformed) == len(set(config.fields_transformed))
 
-    def test_optional_normalize_fields_order_unique_words(self, params_working):
+    @pytest.mark.parametrize("input", [None, []])
+    def test_optional_normalize_fields_order_unique_words(self, params_working, input):
         # Si aucun champ fourni => appliquer à tous les champs data
-        params_working["normalize_fields_order_unique_words"] = None
+        params_working["normalize_fields_order_unique_words"] = input
         config = ClusterConfig(**params_working)
         assert config.normalize_fields_order_unique_words == config.fields_transformed
 
@@ -133,9 +142,10 @@ class TestClusterConfigModel:
         with pytest.raises(ValueError, match="Au moins un type d'acteur"):
             ClusterConfig(**params_working)
 
-    def test_error_must_provide_acteur_type_none(self, params_working):
+    @pytest.mark.parametrize("input", [None, []])
+    def test_error_must_provide_acteur_type_none(self, params_working, input):
         # Variation ci-dessus avec None
-        params_working["include_acteur_types"] = None
+        params_working["include_acteur_types"] = input
         with pytest.raises(ValueError, match="Au moins un type d'acteur"):
             ClusterConfig(**params_working)
 
@@ -150,3 +160,21 @@ class TestClusterConfigModel:
         params_working["include_acteur_types"] = ["MAUVAIS TYPE (id=666)"]
         with pytest.raises(ValueError, match="Codes non trouvés dans le mapping"):
             ClusterConfig(**params_working)
+
+    def test_error_if_same_field_in_cluster_exact_and_fuzzy(self, params_working):
+        # Because Airflow v2 UI doesn't have dynamic logic in between its params
+        # (which would allow us to remove selected fields from 1 option from the other)
+        # we need a config check to bail if same field selected in both exact and fuzzy
+        params_working["cluster_fields_exact"] = ["foo"]
+        params_working["cluster_fields_fuzzy"] = ["foo"]
+        with pytest.raises(ValueError, match="Champs en double dans exact/fuzzy"):
+            ClusterConfig(**params_working)
+
+    @pytest.mark.parametrize("input", [None, []])
+    def test_ok_to_not_provide_dedup_enrich_exclude_sources(
+        self, params_working, input
+    ):
+        # If we don't exclude any source, then source_ids should be []
+        params_working["dedup_enrich_exclude_sources"] = input
+        config = ClusterConfig(**params_working)
+        assert config.dedup_enrich_exclude_source_ids == []

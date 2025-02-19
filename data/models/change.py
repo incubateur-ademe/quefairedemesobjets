@@ -1,202 +1,132 @@
 """
-💡 QUOI:
-Modèles pydantic liés aux changements atomiques
-apportés par les suggestions
+💡 WHAT:
+Pydantic model to define 1 suggestion change
+(a suggestion being composed of 1 or more changes)
 
-🎯 POURQUOI:
- - pydantic nous permet de découpler les suggestions
-   de la DB
- - mais la méthode .apply() nous permet d'utiliser
-    les modèles qfdmo pour appliquer les changements
-    au moment voulu
+So we have:
+Suggestion.suggestion["changes"] = list[SuggestionChange]
 
-🚧 COMMENT APPLIQUER UN CHANGEMENT:
- - Faire passer la donner de suggestion dans le modèle
- - Appeler .apply()
+TODO: I propose to rename Suggestion.suggestion to .changes
+to have Suggestion.changes = list[SuggestionChange], whatever
+is currently in .suggestion and not destined to .changes should
+be moved to some metadata field
 
+🎯 WHY:
+The change being nested within a suggestion field,
+we don't want to use Django models to validate the data
+(DB model = Django, Non-DB Models = Pydantic)
 
-🧊 MODELISATION DES SUGGESTIONS:
-On pourrait stocker les changements des suggestions
-sous forme modélisée:
- 🟢 avantage: prêt a l'emploi (plus qu'a récupérer et faire apply
- au moment de l'approbation), mais au final gain marginal
- 🔴 incovénient: les suggestions en DB deviennent dépendentes
- des modèles, si les modèles changent on perd potentiellement
- les suggestions OU il faut en faire des migrations
+🔢 HOW:
+If we step back and look at the bigger picture:
+ - we start with a Suggestion
+ - on which we do Suggestion.apply()
+ - which does:
 
-Pour l'instant on voit que 🔴>>🟢 et on décide de:
- 1) suggestion: on utilise le modèle UNIQUEMENT pour la validation,
-    mais on stoque la donnée non modèlisée
- 2) changement: on rejoue la donnée dans le modèle et on applique .apply()
-
-Notes:
-- Définir un modèle de changement dontles autres héritent
-- Stocker l'ordre des changements par type
-- Centralisation la résolution du template de la cellule changement dans l'admin dans
-chaque modèle pydantic
+changes = self.suggestion["changes"]
+changes.sort(key=lambda x: x["order"])
+for change in changes:
+     SuggestionChange(**change).apply()
 """
 
-from pydantic import BaseModel
+import logging
 
-from qfdmo.models import RevisionActeur
+from pydantic import BaseModel, Field, model_validator
+
+# This is where we store individual change models
+# referenced by SuggestionChange.model_name
+from data.models.changes import CHANGE_MODELS
+
+logger = logging.getLogger(__name__)
+
+# To validate chosen model names
+MODEL_NAMES = list(CHANGE_MODELS.keys())
 
 # -----------------------------
-# COLONNES
+# Optional/convenience constants
 # -----------------------------
-# Colonnes utilisées pour définir les changements
-COL_CHANGE_TYPE = "change_type"  # = description + lien vers modèles
-COL_CHANGE_ORDER = "change_order"  # = ordre d'application
-COL_CHANGE_REASON = "change_reason"  # = debug
-COL_CHANGE_DATA = "change_data"  # = data de la suggestion
-COL_ENTITY_TYPE = "entity_type"  # = où appliquer le changement
+# Columns prefixed with "change_" namespace so they can be
+# used to prepare suggestions inside data pipelines df without causing
+# conflicts (ex: in clustering we can attach those columns to clusters)
+COL_CHANGE_NAMESPACE = "change_"
+COL_CHANGE_ORDER = f"{COL_CHANGE_NAMESPACE}order"
+COL_CHANGE_REASON = f"{COL_CHANGE_NAMESPACE}reason"
+COL_CHANGE_MODEL_NAME = f"{COL_CHANGE_NAMESPACE}model_name"
+COL_CHANGE_MODEL_PARAMS = f"{COL_CHANGE_NAMESPACE}model_params"
+COL_CHANGE_ENTITY_TYPE = f"{COL_CHANGE_NAMESPACE}entity_type"
 
 # -----------------------------
-# 0) entity_type
+# Entity types
 # -----------------------------
+# Defining entity types serves several purposes:
+# - ℹ️ Show useful info in both Airflow/Django UI
+#   (e.g. explain to métier whether we are working on an
+#    acteur that's in base or revision)
+# - ✅ Validate intention vs. reality (e.g. if we thought
+#    we were dealing with an acteur in base but are using
+#    methods for acteurs which must be in revision)
+ENTITY_ACTEUR_BASE = "acteur_base"
 ENTITY_ACTEUR_REVISION = "acteur_revision"
 ENTITY_ACTEUR_DISPLAYED = "acteur_displayed"
+ENTITY_ACTEUR_TO_CREATE = "acteur_to_create"
+ENTITY_TYPES = [
+    ENTITY_ACTEUR_BASE,
+    ENTITY_ACTEUR_REVISION,
+    ENTITY_ACTEUR_DISPLAYED,
+    ENTITY_ACTEUR_TO_CREATE,
+]
 
 
-# -----------------------------
-# 1) change_type
-# -----------------------------
-# Liste des changements possibles, l'avantage
-# de définir des noms est de restreindre et d'expliciter
-# au maximum les conséquences des changements (on pourrait
-# utiliser 1 seul modèle totallement abstrait mais en traçabilité
-# et ça deviendrait vite difficile à maintenir)
-CHANGE_ACTEUR_PARENT_DELETE = "acteur_parent_delete"
-CHANGE_ACTEUR_PARENT_KEEP = "acteur_parent_keep"
-CHANGE_ACTEUR_POINT_TO_PARENT = "acteur_point_to_parent"
-CHANGE_ACTEUR_CREATE_AS_PARENT = "acteur_create_as_parent"
-CHANGE_ACTEUR_NOTHING_TO_DO = "acteur_nothing_to_do"
+class SuggestionChange(BaseModel):
+    """Model for 1 suggestion change, a suggestion
+    can be composed of 1 or more changes"""
 
-# -----------------------------
-# 2) Modèles pydantic
-# -----------------------------
-# Pour gérer les changements, en utilisant
-# l'héritage selon les besoins
+    # Some suggestions are composed of multiple changes
+    # which MUST be executed in a specific order (ex: clustering
+    # we need to create a parent before attaching children to it)
+    order: int = Field(ge=1)
+    # Debug only, but we should provide a clear explanation
+    # as to why we're doing a change
+    reason: str = Field(min_length=5)
+    # The type of entity we're changing (notably needed in clustering
+    # as acteurs are scattered across 3 state tables)
+    entity_type: str
+    # Name of the pydantic model we will use to make the change
+    # Reference to change_models/{my_class}.py/{MyClass}.name()
+    model_name: str
+    # The params passed to the pydantic model
+    model_params: dict = {}
 
+    @model_validator(mode="after")  # type: ignore
+    def check_model(self) -> None:
+        entity_type = self.entity_type
+        if entity_type not in ENTITY_TYPES:
+            raise ValueError(f"Invalid {entity_type=}, must be in {ENTITY_TYPES=}")
 
-class ChangeActeur(BaseModel):
-    """Modèle de base pour les changements d'un acteur'"""
+        # name must be in the list of available models
+        model_name = self.model_name
+        if model_name not in MODEL_NAMES:
+            raise ValueError(f"Invalid {model_name=}, must be in {MODEL_NAMES}")
 
-    # On a besoin de savoir quel acteur changer
-    identifiant_unique: str
-    # Et quelle donnée changer (si c'est une update)
-    data: dict = {}
+        # Validate the given data when constructing the suggestion.
+        # This allows catching problems when preparing suggestions
+        # and not wait until they are approved and applied to find out
+        Model = CHANGE_MODELS[model_name]
+        Model(**self.model_params).validate()
 
-    def data_validate(self):
-        # Validation à définir au cas par cas
-        raise NotImplementedError("Méthode à implémenter")
-
-    def apply(self):
-        # Modification à définir au cas par cas
-        raise NotImplementedError("Méthode à implémenter")
-
-
-class ChangeActeurUpdateData(ChangeActeur):
-    """Modèle de mise à jour d'un acteur"""
-
-    def apply(self):
-        self.data_validate()
-        rev = RevisionActeur.objects.get(identifiant_unique=self.identifiant_unique)
-        for key, value in self.data.items():
-            setattr(rev, key, value)
-        rev.save()
-
-
-class ChangeActeurCreateRevision(ChangeActeur):
-    """Création de la révision d'un acteur"""
-
-    def data_validate(self):
-        pass
+        # Required by Pydantic
+        # UserWarning: A custom validator is returning a value other than `self`
+        return self  # type: ignore
 
     def apply(self):
-        self.data_validate()
-        rev = RevisionActeur(**self.data)
-        rev.save()
-
-
-class ChangeActeurDeleteRevision(ChangeActeur):
-    """Suppresion d'un acteur supposé parent"""
-
-    def data_validate(self):
-        pass
-
-    def apply(self):
-        self.data_validate()
-        # Rien à faire, le parent doit être supprimé automatiquement
-        # par les observers enfants
-        pass
-
-
-class ChangeActeurPointToParent(ChangeActeurUpdateData):
-    """🔀 Pour pointer un acteur vers un parent,
-    on MAJ sa data, donc on part du modèle d'update
-    et on ajoute juste une validtion sur data"""
-
-    def data_validate(self):
-        # Si on doit rediriger un acteur vers un parent
-        # alors on s'attend à ce que le parent existe
-        parent = RevisionActeur.objects.filter(
-            identifiant_unique=self.data["parent_id"]
-        )
-        if not parent.exists():
-            raise ValueError(f"Parent {self.data['parent_id']} non trouvé")
-
-
-class ChangeActeurCreateAsParent(ChangeActeurCreateRevision):
-    """➕ Pour la création d'un parent, on créer une révision,
-    donc on part du modèle de révision et on ajoute juste
-    une validation data"""
-
-    def data_validate(self):
-        # Si le parent est a créer, alors on s'attend à ce qu'il n'existe pas
-        rev = RevisionActeur.objects.filter(identifiant_unique=self.identifiant_unique)
-        if rev.exists():
-            raise ValueError(f"Parent à créer {self.identifiant_unique} déjà existant")
-
-
-class ChangeActeurParentKeep(ChangeActeurUpdateData):
-    """🟢 Pour la MAJ d'un parent existant, on le met à jour
-    comme on MAJ un acteur mais avec la data qui nous intéresse"""
-
-    def data_validate(self):
-        # On fait confiance à la donnée qu'on reçoit,
-        # on laisse les modèles Django se plaindre si pas content
-        # MAIS on vérifie juste qu'on ne vient pas donner de source
-        # à un parent
-        if "source" in self.data or "source_id" in self.data:
-            raise ValueError("Pas de source pour un parent")
-
-
-class ChangeActeurParentDelete(ChangeActeurDeleteRevision):
-    """🔴 Pour la suppression d'un parent, on supprime sa révision,
-    donc on part du modèle de revision et on ajoute juste
-    une validation data"""
-
-    def data_validate(self):
-        # Si notre logique de suppression automatique
-        # des parents sans enfants fonctionne, alors
-        # quand on arrive ici, le parent doit avoir été supprimé
-        # par les observers
-        rev = RevisionActeur.objects.filter(identifiant_unique=self.identifiant_unique)
-        if rev.exists():
-            raise ValueError(
-                f"Parent {self.identifiant_unique} devrait déjà être supprimé"
-            )
-
-
-# -----------------------------
-# 3) Mapping change_type ➡️ modèle
-# -----------------------------
-MAPPING_TYPES_TO_MODELS = {
-    # -----------------------------
-    # Changements de type clustering/déduplication
-    # -----------------------------
-    CHANGE_ACTEUR_POINT_TO_PARENT: ChangeActeurPointToParent,
-    CHANGE_ACTEUR_CREATE_AS_PARENT: ChangeActeurCreateAsParent,
-    CHANGE_ACTEUR_PARENT_KEEP: ChangeActeurParentKeep,
-    CHANGE_ACTEUR_PARENT_DELETE: ChangeActeurParentDelete,
-}
+        order = self.order
+        reason = self.reason
+        model_name = self.model_name
+        model_params = self.model_params
+        Model = CHANGE_MODELS[model_name]
+        info = f"{order=} {reason=} {model_name=} {model_params=}"
+        try:
+            Model(**model_params).apply()
+            logger.info(f"🟢 SuggestionChange.apply() SUCCESS on {info}")
+        except Exception as e:
+            logger.error(f"🔴 SuggestionChange.apply() ERROR {e} on {info}")
+            raise e

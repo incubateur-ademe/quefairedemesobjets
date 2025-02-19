@@ -75,6 +75,7 @@ def cluster_acteurs_read_orphans(
     Returns:
         tuple[pd.DataFrame, str]: Le DataFrame des acteurs et la requête SQL utilisée
     """
+    from data.models.change import COL_CHANGE_ENTITY_TYPE, ENTITY_ACTEUR_DISPLAYED
     from qfdmo.models import ActeurType, Source
     from qfdmo.models.acteur import ActeurStatus
 
@@ -116,7 +117,11 @@ def cluster_acteurs_read_orphans(
     # 2) Etape DataFrame
     # -----------------------------------
     # Pour appliquer les traitements non gérés en étape 1 (ex: @property)
+    sql = django_model_queryset_to_sql(query)
     df = django_model_queryset_to_df(query, fields)
+
+    if df.empty:
+        return df, sql
 
     # Si une regexp de nom est fournie, on l'applique
     # pour filtrer la df, sinon on garde toute la df
@@ -152,5 +157,5 @@ def cluster_acteurs_read_orphans(
     mapping_acteur_type_codes_by_ids = {x.id: x.code for x in ActeurType.objects.all()}
     df["source_code"] = df["source_id"].map(mapping_source_codes_by_ids)
     df["acteur_type_code"] = df["acteur_type_id"].map(mapping_acteur_type_codes_by_ids)
-
-    return df, django_model_queryset_to_sql(query)
+    df[COL_CHANGE_ENTITY_TYPE] = ENTITY_ACTEUR_DISPLAYED
+    return df, sql

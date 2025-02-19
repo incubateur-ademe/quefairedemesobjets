@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+from cluster.config.constants import COL_INDEX_SRC
 from cluster.tasks.business_logic.cluster_acteurs_clusters import (
     cluster_acteurs_clusters,
     cluster_cols_group_fuzzy,
@@ -29,7 +30,7 @@ class TestClusterActeursClusters:
     def df_basic(self):
         return pd.DataFrame(
             {
-                "__index_src": range(1, 8),
+                COL_INDEX_SRC: range(1, 8),
                 "identifiant_unique": [
                     "id1",
                     "id2",
@@ -115,7 +116,7 @@ class TestClusterActeursClusters:
         les autres sont des clusters de 1 et donc à supprimer"""
         return pd.DataFrame(
             {
-                "__index_src": range(1, 5),
+                COL_INDEX_SRC: range(1, 5),
                 "identifiant_unique": [
                     "id1",
                     "id2",
@@ -151,7 +152,7 @@ class TestClusterActeursClusters:
     def df_cols_group_fuzzy(self):
         return pd.DataFrame(
             {
-                "__index_src": range(1, 8),
+                COL_INDEX_SRC: range(1, 8),
                 "source_id": range(1, 8),
                 "code_postal": ["10000" for _ in range(7)],
                 "identifiant_unique": ["id" + str(i) for i in range(0, 7)],
@@ -213,7 +214,7 @@ class TestClusterActeursClusters:
                     "statut": "ACTIF",
                     "source_id": 2513,
                     "source_code": "s2",
-                    "__index_src": 6,
+                    COL_INDEX_SRC: 6,
                 },
                 {
                     "identifiant_unique": "id13",
@@ -226,7 +227,7 @@ class TestClusterActeursClusters:
                     "statut": "ACTIF",
                     "source_id": None,
                     "source_code": None,
-                    "__index_src": 7,
+                    COL_INDEX_SRC: 7,
                 },
                 {
                     "identifiant_unique": "id14",
@@ -239,7 +240,7 @@ class TestClusterActeursClusters:
                     "statut": "ACTIF",
                     "source_id": 2512,
                     "source_code": "s1",
-                    "__index_src": 8,
+                    COL_INDEX_SRC: 8,
                 },
             ]
         )
@@ -307,7 +308,7 @@ class TestClusterColsGroupFuzzy:
     @pytest.fixture(scope="session")
     def df_cols_group_fuzzy(self):
         data = {
-            "__index_src": range(0, 8),
+            COL_INDEX_SRC: range(0, 8),
             "source_id": range(0, 8),
             "col1": [
                 # cluster 1
@@ -356,14 +357,14 @@ class TestClusterColsGroupFuzzy:
             threshold=0.5,
         )
         assert len(clusters) == 2
-        assert clusters[0]["__index_src"].tolist() == [0, 4]
-        assert clusters[1]["__index_src"].tolist() == [5, 6]
+        assert clusters[0][COL_INDEX_SRC].tolist() == [0, 4]
+        assert clusters[1][COL_INDEX_SRC].tolist() == [5, 6]
 
     def test_cols_group_fuzzy_multi_handles_empties(self):
 
         df = pd.DataFrame(
             {
-                "__index_src": range(1, 3),
+                COL_INDEX_SRC: range(1, 3),
                 "col1": ["", ""],
                 "col2": ["", ""],
                 "col3": ["", ""],

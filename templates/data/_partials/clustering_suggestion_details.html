@@ -10,20 +10,38 @@
     <thead>
     <tr>
         <th>Ordre</th>
+        <th>Changement</th>
         <th>Type d'entité</th>
         <th>ID de l'entité</th>
-        <th>Changement</th>
         <th>Raison</th>
+        <th>Données</th>
     </tr>
     </thead>
     <tbody>
     {% for change in changes %}
         <tr>
-            <td>{{ change.change_order }}</td>
+            <td>{{ change.order }}</td>
+            <td>{{ change.model_name }}</td>
             <td>{{ change.entity_type }}</td>
-            <td><a href="{% url 'admin:qfdmo_displayedacteur_change' change.identifiant_unique|quote %}" target="_blank" rel="noreferrer">{{ change.identifiant_unique }}</a></td>
-            <td>{{ change.change_type }}</td>
-            <td>{{ change.change_reason }}</td>
+            <td>{% if change.entity_type == "acteur_displayed" %}
+                    <a href="{% url 'admin:qfdmo_displayedacteur_change' change.model_params.id|quote %}" target="_blank" rel="noreferrer">{{ change.model_params.id }}</a>
+                {% elif change.entity_type == "acteur_revision" %}
+                    <a href="{% url 'admin:qfdmo_revisionacteur_change' change.model_params.id|quote %}" target="_blank" rel="noreferrer">{{ change.model_params.id }}</a>
+                {% elif change.entity_type == "acteur_base" %}
+                    <a href="{% url 'admin:qfdmo_acteur_change' change.model_params.id|quote %}" target="_blank" rel="noreferrer">{{ change.model_params.id }}</a>
+                {% else %}
+                    {{ change.model_params.id }}
+                {% endif %}
+            </td>
+            <td>{{ change.reason }}</td>
+            <td>{% if change.model_params.data %}
+                <ul>
+                {% for key, value in change.model_params.data.items %}
+                <li><strong>{{ key }}:</strong> {{ value }}</li>
+                {% endfor %}
+                </ul>
+                {% endif %}
+            </td>
         </tr>
     {% endfor %}
     </tbody>
