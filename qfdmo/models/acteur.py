@@ -583,7 +583,7 @@ class Acteur(BaseActeur):
 
     @property
     def change_url(self):
-        # quote() Comme dans le code de django
+        # quote() taken from django source
         # https://github.com/django/django/blob/6cfe00ee438111af38f1e414bd01976e23b39715/django/contrib/admin/models.py#L243
         return reverse(
             "admin:qfdmo_acteur_change", args=[quote(self.identifiant_unique)]
