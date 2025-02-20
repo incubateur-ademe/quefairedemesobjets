@@ -1,5 +1,6 @@
 import pandas as pd
 import pytest
+from cluster.config.constants import COL_PARENT_ID_BEFORE
 from cluster.helpers.shorthands.change_model_name import CHANGE_CREATE, CHANGE_NOTHING
 from cluster.tasks.business_logic.cluster_acteurs_suggestions.contexte import (
     suggestion_contexte_generate,
@@ -28,6 +29,7 @@ class TestSuggestionContexteGenerate:
                 "nom": [None, f"{nom} 2", f"{nom} 3"],
                 "adresse": [None, f"{adr} 2", f"{adr} 3"],
                 COL_CHANGE_MODEL_NAME: [CHANGE_CREATE] + [CHANGE_NOTHING] * 2,
+                COL_PARENT_ID_BEFORE: [None] * 3,
             }
         )
 
@@ -66,8 +68,29 @@ class TestSuggestionContexteGenerate:
             suggestion_contexte_generate(df, [], [])
 
     def test_raise_if_not_exact(self):
-        data = {"cluster_id": ["c1", "c1"], "ville": ["A", "B"]}
-        data[COL_CHANGE_MODEL_NAME] = [CHANGE_NOTHING] * 2
+        data = {
+            "identifiant_unique": ["a1", "a2"],
+            "cluster_id": ["c1", "c1"],
+            "ville": ["A", "B"],
+            COL_CHANGE_MODEL_NAME: [CHANGE_NOTHING] * 2,
+            COL_PARENT_ID_BEFORE: [None] * 2,
+        }
         df = pd.DataFrame(data)
         with pytest.raises(ValueError, match="should have 1 exact group"):
             suggestion_contexte_generate(df, ["ville"], [])
+
+    def test_exclude_existing_children_from_exact_check(self):
+        # Added on 2025-02-20 following this issue:
+        # IF children have inconsistent data (e.g. missing in revision)
+        # then we would be failing exact check whereas we should simply
+        # ignore children from contexte because they are just re-attached
+        data = {
+            "identifiant_unique": ["a1", "a2", "a3"],
+            "cluster_id": ["c1", "c1", "c1"],
+            "ville": ["A", None, "Another A"],
+            COL_CHANGE_MODEL_NAME: [CHANGE_NOTHING] * 3,
+            COL_PARENT_ID_BEFORE: [None, "p1", "p1"],
+        }
+        df = pd.DataFrame(data)
+        suggestion_contexte_generate(df, ["ville"], [])
+        pass
