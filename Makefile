@@ -9,6 +9,8 @@ PYTHON := .venv/bin/python
 DJANGO_ADMIN := $(PYTHON) manage.py
 PYTEST := $(PYTHON) -m pytest
 DB_URL := postgres://qfdmo:qfdmo@localhost:6543/qfdmo# pragma: allowlist secret
+ASSISTANT_URL := quefairedemesdechets.ademe.local
+LVAO_URL := lvao.ademe.local
 
 # Makefile config
 .PHONY: check
@@ -22,6 +24,9 @@ check:
 update-requirements:
 	$(PYTHON) -m pip install --no-deps -r requirements.txt -r dev-requirements.txt
 
+.PHONY: init-certs
+init-certs:
+	docker run -ti -v ./nginx-local-only/certs:/app/certs -w /app/certs --rm alpine/mkcert $(LVAO_URL) $(ASSISTANT_URL)
 
 .PHONY: init-venv
 init-venv:
@@ -34,6 +39,7 @@ init-dev:
 	pre-commit install
 	# python
 	make init-venv
+	make init-certs
 	$(PYTHON) -m pip install pip-tools
 	$(PYTHON) -m pip install --no-deps -r requirements.txt -r dev-requirements.txt
 	# javascript
