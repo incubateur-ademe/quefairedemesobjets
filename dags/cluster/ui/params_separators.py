@@ -49,14 +49,14 @@ vont être regroupés en clusters.
 
 DEDUP_CHOOSE_PARENT = r"""
 
-# 1️⃣ DEDUP: **choix tu parent** ⬇️
+# 1️⃣ DEDUP: **choix du parent** ⬇️
 
-Pas de paramètres customisable.
+Pas de paramètres customisables.
 
 📏 Règles:
- - Si 0 parent -> on en créé un
- - Si 1 parent -> on le consèrve
- - Si 2+ parents -> on consèrve celui avec le + d'enfants
+ - Si 0 parent -> on en crée un
+ - Si 1 parent -> on le conserve
+ - Si 2+ parents -> on conserve celui avec le + d'enfants
 """
 
 DEDUP_ENRICH_PARENT = r"""
@@ -72,5 +72,5 @@ vont être proposées pour enrichir le parent choisi
  - Si donnée vide ET `keep_empty = False` ne **PAS** prendre
  - Si donnée vide ET `keep_empty = True` ET source prio = **PRENDRE**
  - Si source prio = prendre **DE PREFERENCE** en fonction de ci-dessus
- - Si source non-prio = prendre **EN DERNIER RECOUR** après sources prio
+ - Si source non-prio = prendre **EN DERNIER RECOURS** après sources prio
 """
