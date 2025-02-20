@@ -3,7 +3,7 @@ import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import pytest
-from crawl.tasks.business_logic.crawl_url import CrawlUrlModel, crawl_url
+from crawl.tasks.business_logic.solve.reach import CrawlUrlModel, crawl_url
 
 
 class TestHandler(BaseHTTPRequestHandler):
