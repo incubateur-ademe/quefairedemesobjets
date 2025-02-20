@@ -6,7 +6,7 @@ export default class extends Controller<HTMLFormElement> {
 
   syncSousCategorie(event) {
     const sousCategories: HTMLSelectElement = this.element
-      .closest("fieldset")
+      .closest("tr")
       .querySelector(`select[multiple]:not(#${this.element.id})`)!
 
     const categoriesSelected = [...event.target.options]
