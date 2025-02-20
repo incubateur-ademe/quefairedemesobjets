@@ -3,15 +3,26 @@ from datetime import datetime
 from airflow import DAG
 from airflow.models.baseoperator import chain
 from airflow.models.param import Param
-from crawl.tasks.airflow_logic import (
-    crawl_urls_filter_syntax_task,
-    crawl_urls_select_from_db_task,
-    crawl_urls_try_to_solve_task,
+from crawl.tasks.airflow_logic.candidates.groupby_url_task import (
+    crawl_urls_candidates_groupby_url_task,
+)
+from crawl.tasks.airflow_logic.candidates.read_from_db_task import (
+    crawl_urls_candidates_read_from_db_task,
+)
+from crawl.tasks.airflow_logic.solve.reach_task import crawl_urls_solve_reach_task
+from crawl.tasks.airflow_logic.solve.syntax_task import crawl_urls_solve_syntax_task
+from crawl.tasks.airflow_logic.suggestions.metadata_task import (
+    crawl_urls_suggestions_metadata_task,
+)
+from crawl.tasks.airflow_logic.suggestions.prepare_task import (
+    crawl_urls_suggestions_prepare_task,
+)
+from crawl.tasks.airflow_logic.suggestions.write_to_db import (
+    crawl_urls_suggestions_write_to_db_task,
 )
 
 URL_TYPES = [
     "qfdmo_displayedacteur.url",
-    # "qfdmd_lien.url",
 ]
 URL_CRAWL_MIN = 1
 URL_CRAWL_MAX = 1000
@@ -69,7 +80,11 @@ with DAG(
     },
 ) as dag:
     chain(
-        crawl_urls_select_from_db_task(dag),
-        crawl_urls_filter_syntax_task(dag),
-        crawl_urls_try_to_solve_task(dag),
+        crawl_urls_candidates_read_from_db_task(dag),
+        crawl_urls_candidates_groupby_url_task(dag),
+        crawl_urls_solve_syntax_task(dag),
+        crawl_urls_solve_reach_task(dag),
+        crawl_urls_suggestions_metadata_task(dag),
+        crawl_urls_suggestions_prepare_task(dag),
+        crawl_urls_suggestions_write_to_db_task(dag),
     )

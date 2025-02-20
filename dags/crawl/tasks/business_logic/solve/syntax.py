@@ -1,13 +1,17 @@
 import re
 from urllib.parse import urlparse
 
+import pandas as pd
+from crawl.config.constants import COL_URL_ORIGINAL, COL_URLS_TO_TRY
+from crawl.tasks.business_logic.misc.df_sort import df_sort
+
 
 def is_valid_url(url):
     parsed = urlparse(url)
     return all([parsed.scheme, parsed.netloc]) and parsed.scheme in ["http", "https"]
 
 
-def url_suggest_urls_to_crawl(url: str) -> list[str] | None:
+def url_solve_syntax(url: str) -> list[str] | None:
     """Suggère des remplacements d'URL sur une base syntaxique"""
     if not (url or "").strip():
         return None
@@ -42,3 +46,14 @@ def url_suggest_urls_to_crawl(url: str) -> list[str] | None:
     valid = list(set([x for x in results if is_valid_url(x)]))
     prio = sorted(valid, key=lambda x: x.startswith("https://"), reverse=True)
     return prio
+
+
+def crawl_urls_solve_syntax(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Tries to solve syntax on URLs, and returns 2 subsets:
+    - urls we should try to crawl (= at least one suggestion)
+    - urls we should discard (= no suggestion)
+    """
+    df[COL_URLS_TO_TRY] = df[COL_URL_ORIGINAL].apply(url_solve_syntax)
+    df_discarded = df[df[COL_URLS_TO_TRY].isnull()]
+    df_try = df[df[COL_URLS_TO_TRY].notnull()]
+    return df_sort(df_try), df_sort(df_discarded)

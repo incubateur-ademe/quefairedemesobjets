@@ -1,0 +1,47 @@
+{% extends "data/_partials/suggestion_details.html" %}
+{% load custom_filters %}
+
+{% block suggestion_title %}
+🔗 Changement d'URL
+{% endblock suggestion_title %}</h3>
+
+{% block suggestion_details %}
+
+<ul>
+  <li><b>scénario</b> : {{ scenario }}</li>
+  <li><b>avant</b>:
+    {% if url_original|slice:":4" == "http" %}
+    <a target="_blank" href="{{ url_original }}">{{ url_original }}</a>
+    {% else %}
+    <span>{{ url_original }}</span>
+    {% endif %}
+</li>
+  <li><b>après</b>: {% if url_proposed == "__empty__" %}
+    <span>__empty__</span>
+    {% else %}
+    <a target="_blank" href="{{ url_proposed }}">{{ url_proposed }}</a>
+    {% endif %}
+</li>
+ </ul>
+<h3 style="margin-top: 1.5em">💡 Raison</h3>
+
+<ul>
+    <li><b>Succès?</b>: {% if reason_was_success %}
+        🟢 OUI
+        {% else %}
+        🔴 NON
+        {% endif %}
+    </li>
+    <li><b>Code</b>: {{ reason_code }}</li>
+    {% if reason_error %}
+    <li><b>Erreur</b>: {{ reason_error }}</li>
+    {% endif %}
+</ul>
+
+<h3 style="margin-top: 1.5em">🔢 {{ changes|length }} acteur(s) impacté(s):</h3>
+<ul>
+    {% for change in changes %}
+    <li><a href="{% url 'admin:qfdmo_displayedacteur_change' change.model_params.id|quote %}" target="_blank" rel="noreferrer">{{ change.model_params.id }}</a></li>
+    {% endfor %}
+</ul>
+{% endblock suggestion_details %}

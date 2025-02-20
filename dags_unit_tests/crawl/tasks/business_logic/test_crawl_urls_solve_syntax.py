@@ -1,6 +1,5 @@
 import pytest
-
-from dags.crawl.tasks.business_logic import url_suggest_urls_to_crawl
+from crawl.tasks.business_logic.solve.syntax import url_solve_syntax
 
 
 class TestUrlSyntaxSuggestReplacements:
@@ -20,5 +19,5 @@ class TestUrlSyntaxSuggestReplacements:
             ("   ", None),
         ],
     )
-    def test_url_suggest_urls_to_crawl(self, url, expected):
-        assert url_suggest_urls_to_crawl(url) == expected
+    def test_crawl_urls_solve_syntax(self, url, expected):
+        assert url_solve_syntax(url) == expected
