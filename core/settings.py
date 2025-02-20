@@ -178,7 +178,17 @@ TEMPLATES = [
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
-        "OPTIONS": {"context_processors": context_processors()},
+        "OPTIONS": {
+            "context_processors": [
+                *context_processors(),
+                # Sites faciles
+                # These are not fully compatible with jinja
+                "wagtail.contrib.settings.context_processors.settings",
+                "wagtailmenus.context_processors.wagtailmenus",
+                "sites_faciles_content_manager.context_processors.skiplinks",
+                "sites_faciles_content_manager.context_processors.mega_menus",
+            ],
+        },
     },
 ]
 
@@ -409,6 +419,15 @@ WAGTAIL_SITE_NAME = "Longue vie aux objets"
 WAGTAILADMIN_BASE_URL = BASE_URL
 INSTALLED_APPS.extend(
     [
+        # Sites faciles
+        "sites_faciles",
+        "sites_faciles.blog",
+        "sites_faciles.content_manager",
+        "sites_faciles.events",
+        "wagtail.contrib.settings",
+        "wagtail_modeladmin",
+        "wagtailmenus",
+        # wagtail
         "wagtail.contrib.forms",
         "wagtail.contrib.redirects",
         "wagtail.embeds",
