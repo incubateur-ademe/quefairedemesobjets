@@ -64,13 +64,9 @@ INSTALLED_APPS = [
     "corsheaders",
 ]
 
+
 FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 
-
-if DEBUG:
-    INSTALLED_APPS.extend(["debug_toolbar", "django_browser_reload"])
-    MEDIA_ROOT = "media"
-    MEDIA_URL = "/media/"
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -105,15 +101,6 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https:\/\/deploy-preview-\d*--quefairedemesdechets\.netlify\.app$",
 ]
 
-if DEBUG:
-    MIDDLEWARE.extend(
-        [
-            "debug_toolbar.middleware.DebugToolbarMiddleware",
-            "django_browser_reload.middleware.BrowserReloadMiddleware",
-        ]
-    )
-
-    CORS_ALLOW_ALL_ORIGINS = DEBUG
 
 with suppress(ModuleNotFoundError):
     from debug_toolbar.settings import CONFIG_DEFAULTS
@@ -190,7 +177,17 @@ TEMPLATES = [
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
-        "OPTIONS": {"context_processors": context_processors()},
+        "OPTIONS": {
+            "context_processors": [
+                *context_processors(),
+                # Sites faciles
+                # These are not fully compatible with jinja
+                "wagtail.contrib.settings.context_processors.settings",
+                "wagtailmenus.context_processors.wagtailmenus",
+                "sites_faciles_content_manager.context_processors.skiplinks",
+                "sites_faciles_content_manager.context_processors.mega_menus",
+            ],
+        },
     },
 ]
 
@@ -371,7 +368,6 @@ FEEDBACK_FORM = decouple.config(
 CONTACT_FORM = decouple.config(
     "CONTACT_FORM", default="https://tally.so/r/wzYveR", cast=str
 )
-
 ASSISTANT_SURVEY_FORM = decouple.config(
     "ASSISTANT_SURVEY_FORM", default="https://tally.so/r/wvNgx0", cast=str
 )
@@ -402,4 +398,53 @@ NOTION = {
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = decouple.config(
     "DATA_UPLOAD_MAX_NUMBER_FIELDS", default=10000, cast=int
+)
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = DEBUG
+    MIDDLEWARE.extend(
+        [
+            "debug_toolbar.middleware.DebugToolbarMiddleware",
+            "django_browser_reload.middleware.BrowserReloadMiddleware",
+        ]
+    )
+    INSTALLED_APPS.extend(["debug_toolbar", "django_browser_reload"])
+    MEDIA_ROOT = "media"
+    MEDIA_URL = "/media/"
+
+
+# Wagtail settings
+# ----------------
+WAGTAIL_SITE_NAME = "Longue vie aux objets"
+WAGTAILADMIN_BASE_URL = BASE_URL
+INSTALLED_APPS.extend(
+    [
+        # Sites faciles
+        "sites_faciles",
+        "sites_faciles.blog",
+        "sites_faciles.content_manager",
+        "sites_faciles.events",
+        "wagtail.contrib.settings",
+        "wagtail_modeladmin",
+        "wagtailmenus",
+        # wagtail
+        "wagtail.contrib.forms",
+        "wagtail.contrib.redirects",
+        "wagtail.embeds",
+        "wagtail.sites",
+        "wagtail.users",
+        "wagtail.snippets",
+        "wagtail.documents",
+        "wagtail.images",
+        "wagtail.search",
+        "wagtail.admin",
+        "wagtail",
+        "modelcluster",
+        "taggit",
+    ]
+)
+
+MIDDLEWARE.extend(
+    [
+        "wagtail.contrib.redirects.middleware.RedirectMiddleware",
+    ]
 )
