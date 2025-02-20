@@ -8,6 +8,10 @@ export default class extends Controller<HTMLFormElement> {
     this.formTarget.requestSubmit()
   }
 
+  submitFirstItem() {
+    document.querySelector<HTMLAnchorElement>("#search-results > a").click()
+  }
+
   clear() {
     for (const inputElement of this.formTarget.querySelectorAll("input")){
       inputElement.value =''
