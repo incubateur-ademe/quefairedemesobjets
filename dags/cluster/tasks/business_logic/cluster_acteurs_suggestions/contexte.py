@@ -1,6 +1,7 @@
 """Generates the data stored in Suggestion.contexte field"""
 
 import pandas as pd
+from cluster.config.constants import COL_PARENT_ID_BEFORE
 
 
 def suggestion_contexte_generate(
@@ -23,6 +24,15 @@ def suggestion_contexte_generate(
     df_cluster = df_cluster[
         df_cluster[COL_CHANGE_MODEL_NAME] != ChangeActeurCreateAsParent.name()
     ]
+    # We exclude existing children because these were are as-is
+    # purely based on their previous parent_id. Right now if we include
+    # them here they can break the exacts.groups.keys() == 1 check because:
+    # - they might be missing data (Revisions only have changes)
+    # - we didn't do ANY normalization on them since they are re-attached as-is
+    # Once we introduce the feature to re-cluster children:
+    # - the issue will naturally go away (beacuse we will be forced to process them)
+    # - TODO: we will need to make the below exclusion conditional on above feature
+    df_cluster = df_cluster[df_cluster[COL_PARENT_ID_BEFORE].isnull()]
 
     # Ensuring we have 1 exact group:
     # - intentionally NOT dropping NAs (we shouldn't have any)
