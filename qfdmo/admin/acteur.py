@@ -11,7 +11,6 @@ from django.db.models import Subquery
 from django.db.models.functions import Lower
 from django.forms import CharField
 from django.http import HttpRequest, HttpResponseRedirect
-from django.urls import reverse
 from django.utils.html import format_html
 from import_export import admin as import_export_admin
 from import_export import fields, resources, widgets
@@ -388,7 +387,7 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
             if not revision_acteur.parent:
                 revision_acteur.create_parent()
             revision_acteur = revision_acteur.duplicate()
-            return HttpResponseRedirect(reverse(revision_acteur.change_url))
+            return HttpResponseRedirect(revision_acteur.change_url)
 
         return super().response_change(request, revision_acteur)
 
