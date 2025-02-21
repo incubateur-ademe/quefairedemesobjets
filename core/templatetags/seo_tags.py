@@ -10,6 +10,7 @@ register = template.Library()
 def get_sharer_content(request, object, social_network=None):
     """This "dummy" function is defined here to provide
     similar features for jinja and django templating language.
+    As jinja does not support the takes_context approach of template.
     Once jinja will be removed from the project, this can be merged in
     share_url function below
     """
