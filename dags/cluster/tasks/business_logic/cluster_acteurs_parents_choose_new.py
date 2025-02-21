@@ -27,12 +27,12 @@ django_setup_full()
 
 logger = getLogger(__name__)
 
-REASON_ONE_PARENT_KEPT = "1️⃣ 1 seul parent existant -> à garder"
-REASON_PARENTS_KEEP_MOST_CHILDREN = "🎖️ 2+ parents -> celui avec + d'enfants -> à garder"
-REASON_NO_PARENT_CREATE_ONE = "➕ Pas de parent -> à créer"
+REASON_ONE_PARENT_KEPT = "1️⃣ 1 seul parent existant → à garder"
+REASON_PARENTS_KEEP_MOST_CHILDREN = "🎖️ 2+ parents → celui avec + d'enfants → à garder"
+REASON_NO_PARENT_CREATE_ONE = "➕ Pas de parent → à créer"
 REASON_POINT_TO_NEW_PARENT = "🔀 A pointer vers nouveau parent"
 REASON_ALREADY_POINT_TO_PARENT = "🟰 Pointe déjà vers nouveau parent"
-REASON_PARENT_TO_DELETE = "🔴 2+ parents -> non choisi -> à supprimer"
+REASON_PARENT_TO_DELETE = "🔴 2+ parents → non choisi → à supprimer"
 
 
 def parent_id_generate(ids: list[str]) -> str:
