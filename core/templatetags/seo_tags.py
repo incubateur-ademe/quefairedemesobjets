@@ -1,9 +1,8 @@
+from urllib.parse import quote, quote_plus
+
 from django import template
-from urllib.parse import quote
-from urllib.parse import quote_plus
 
-from core.constants import SHARE_INTRO, SHARE_BODY
-
+from core.constants import SHARE_BODY, SHARE_INTRO
 
 register = template.Library()
 
@@ -27,7 +26,8 @@ def get_sharer_content(request, object, social_network=None):
         },
         "twitter": {
             "title": f"partager {object} sur X - nouvelle fenêtre",
-            "url": f"https://twitter.com/intent/tweet?url={url}&text={SHARE_INTRO}&via=Longue+vie+aux+objets&hashtags=longuevieauxobjets,ademe",
+            "url": f"https://twitter.com/intent/tweet?url={url}"
+            "&text={SHARE_INTRO}&via=Longue+vie+aux+objets&hashtags=longuevieauxobjets,ademe",
         },
         "linkedin": {
             "title": f"partager {object} sur LinkedIn - nouvelle fenêtre",
@@ -35,7 +35,8 @@ def get_sharer_content(request, object, social_network=None):
         },
         "email": {
             "title": f"partager {object} par email - nouvelle fenêtre",
-            "url": f"mailto:?subject={quote(SHARE_INTRO)}&body={quote(SHARE_BODY)} {url}",
+            "url": f"mailto:?subject={quote(SHARE_INTRO)}"
+            f"&body={quote(SHARE_BODY)} {url}",
         },
     }
     if not social_network:
@@ -48,7 +49,10 @@ def get_sharer_content(request, object, social_network=None):
 def configure_sharer(context):
     """This template tag enriches the context of a Dechet/Produit/Synonyme.
     Once Jinja will be dropped, it could be merged with the function above."""
-    object = context["object"].produit
+    try:
+        object = context.get("object").produit
+    except AttributeError:
+        object = None
     request = context["request"]
     context["sharer"] = get_sharer_content(request, object)
     return ""
