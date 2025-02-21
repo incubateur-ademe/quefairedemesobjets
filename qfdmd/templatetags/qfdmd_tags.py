@@ -26,6 +26,7 @@ def render_file_content(file_field: FileField) -> str:
     """Renders the content of a Filefield as a safe HTML string
     and caches the result."""
 
+    return ""
     def get_file_content() -> str:
         with file_field.open() as f:
             return mark_safe(f.read().decode("utf-8"))  # noqa: S308

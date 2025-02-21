@@ -37,6 +37,7 @@ POSTHOG_DEBUG = decouple.config("POSTHOG_DEBUG", default=False, cast=bool)
 ALLOWED_HOSTS = decouple.config(
     "ALLOWED_HOSTS", default="127.0.0.1,localhost", cast=str
 ).split(",")
+BLOCK_ROBOTS = decouple.config("BLOCK_ROBOTS", default=False, cast=bool)
 
 # Application definition
 
