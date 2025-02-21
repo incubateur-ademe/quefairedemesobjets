@@ -14,28 +14,27 @@ Partager ce site
 {% endblock modal_title %}
 
 {% block modal_content %}
+{% configure_sharer %}
 <div class="fr-share" role="toolbar">
     <ul class="fr-btns-group">
         <li>
-        {% with sharer=sharer 'facebook' %}
             <a class="fr-btn--facebook fr-btn"
             target="_blank"
             rel="noreferrer"
-            title="{{ sharer.title }}"
-            href="{{ sharer.href }}"
+            title="{{ sharer.facebook.title }}"
+            href="{{ sharer.facebook.url }}"
             tabindex="-1"
             >
                 Partager sur Facebook
             </a>
-        {% endwith %}
         </li>
         <li>
             {# Les paramètres de la reqûete doivent être URI-encodés (ex: encodeURIComponent() en js) #}
             <a  class="fr-btn--twitter-x fr-btn"
             target="_blank"
             rel="noreferrer"
-            title="partager cette page sur X - nouvelle fenêtre"
-            href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri|urlencode }}&text=Super object trouvée grâce à l'ADEME&via=Longue+vie+aux+objets&hashtags=longuevieauxobjets,ademe"
+            title="{{ sharer.twitter.title }}"
+            href="{{ sharer.twitter.url }}"
             tabindex="-1"
             >
                 Partager sur X (anciennement Twitter)
@@ -45,9 +44,9 @@ Partager ce site
             <a  class="fr-btn--linkedin fr-btn"
             target="_blank"
             rel="noreferrer"
-            title="partager cette page sur LinkedIn - nouvelle fenêtre"
             onclick="window.open(this.href,'Partager sur LinkedIn','toolbar=no,location=yes,status=no,menubar=no,scrollbars=yes,resizable=yes,width=550,height=550'); event.preventDefault();"
-            href="https://www.linkedin.com/shareArticle?url={{ request.build_absolute_uri|urlencode }}&title=Super object trouvée grâce à l'ADEME"
+            title="{{ sharer.linkedin.title }}"
+            href="{{ sharer.linkedin.url }}"
             tabindex="-1"
             >
                 Partager sur LinkedIn
@@ -57,8 +56,8 @@ Partager ce site
             <a  class="fr-btn--mail fr-btn"
             target="_blank"
             rel="noreferrer"
-            title="partager cette page par email - nouvelle fenêtre"
-            href="mailto:?subject=Super object trouvée grâce à l'ADEME&body=Super object trouvée grâce à l'ADEME : {{ request.build_absolute_uri|urlencode }}"
+            title="{{ sharer.email.title }}"
+            href="{{ sharer.email.url }}"
             tabindex="-1"
             >
                 Partager par email
