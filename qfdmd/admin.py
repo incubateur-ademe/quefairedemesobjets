@@ -101,6 +101,7 @@ class LienInline(admin.StackedInline):
 
 class ProduitInline(admin.StackedInline):
     model = Produit.liens.through
+    autocomplete_fields = ["produit"]
     extra = 0
 
 
@@ -156,6 +157,7 @@ class SynonymeAdmin(
     readonly_fields = ["slug"]
     list_display = ("nom", "produit", "slug", "modifie_le")
     list_filter = ["pin_on_homepage"]
+    autocomplete_fields = ["produit"]
     fields_to_display_in_first_position = ["nom", "produit"]
 
 
