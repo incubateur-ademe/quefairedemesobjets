@@ -9,7 +9,10 @@ export default class extends Controller<HTMLFormElement> {
   }
 
   submitFirstItem() {
-    document.querySelector<HTMLAnchorElement>("#search-results > a").click()
+    const firstResult = document.querySelector<HTMLAnchorElement>("#search-results > a")
+    if (firstResult) {
+      result.click()
+    }
   }
 
   clear() {
