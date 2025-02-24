@@ -1,4 +1,5 @@
-from datetime import datetime
+import time
+from datetime import datetime, timedelta
 from logging import getLogger
 from pathlib import Path
 
@@ -11,8 +12,7 @@ logger = getLogger(__name__)
 DEFAULT_ARGS = {
     "owner": "airflow",
     "depends_on_past": False,
-    "start_date": datetime(2024, 11, 24),
-    "catchup": False,
+    "start_date": (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d"),
     "email_on_failure": False,
     "email_on_retry": False,
     "retries": 0,
@@ -33,6 +33,7 @@ with DAG(
     dag_id="view_acteur_all",
     tags=["view", "vue", "acteur", "displayed", "revision", "all", "tout", "sql"],
     default_args=DEFAULT_ARGS,
+    catchup=False,
     schedule=SCHEDULE,
     dag_display_name="Vue - Acteur - Tous les acteurs",
     description=DESCRIPTION,
@@ -43,6 +44,10 @@ with DAG(
     ```{SQL_VIEW_CREATE_QUERY}```
     """,
 ):
+
+    def show_enable_parallel_hash(cursor, message):
+        cursor.execute("SHOW enable_parallel_hash;")
+        logger.info(f"{message}: enable_parallel_hash: {cursor.fetchone()}")
 
     @task
     def view_acteur_tous_drop_if_exists_and_create_task():
@@ -56,12 +61,29 @@ with DAG(
 
         with pg_hook.get_conn() as conn:
             with conn.cursor() as cursor:
+                # Workaround for
+                # https://stackoverflow.com/questions/54351783/duplicate-key-value-violates-unique-constraint-postgres-error-when-trying-to-c
+                show_enable_parallel_hash(cursor, "before changing")
+                cursor.execute("SET enable_parallel_hash = off;")
+                show_enable_parallel_hash(cursor, "after changing")
+
+                logger.info("Dropping view: started 🟡")
                 logger.info(f"SQL_VIEW_DROP_QUERY:\n{SQL_VIEW_DROP_QUERY}")
                 cursor.execute(SQL_VIEW_DROP_QUERY)
                 conn.commit()
+                logger.info("Dropping view: completed 🟢")
 
+                # A pause to ensure PostgreSQL internal state is fully updated
+                # and ready to accept new view creation
+                time.sleep(5)
+
+                logger.info("Creating view: started 🟡")
                 logger.info(f"SQL_VIEW_CREATE_QUERY:\n{SQL_VIEW_CREATE_QUERY}")
                 cursor.execute(SQL_VIEW_CREATE_QUERY)
                 conn.commit()
+                logger.info("Creating view: completed 🟢")
+
+                cursor.execute("SET enable_parallel_hash = on;")
+                show_enable_parallel_hash(cursor, "setting back")
 
     view_acteur_tous_drop_if_exists_and_create_task()
