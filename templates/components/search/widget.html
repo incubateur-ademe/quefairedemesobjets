@@ -22,7 +22,7 @@ It is used mainly for styles, to add clasnames.
     type="{{ widget.type }}"
     name="{{ widget.name }}"{% if widget.value != None %}
     value="{{ widget.value|stringformat:'s' }}"{% endif %}
-    data-action="search#submitForm"
+    data-action="search#submitForm keydown.enter->search#submitFirstItem"
     data-search-target="input"
     role="search"
     {% include "django/forms/widgets/attrs.html" %}
