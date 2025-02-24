@@ -24,9 +24,6 @@ from crawl.tasks.airflow_logic.suggestions.write_to_db import (
 URL_TYPES = [
     "qfdmo_displayedacteur.url",
 ]
-URL_CRAWL_MIN = 1
-URL_CRAWL_MAX = 1000
-URL_CRAWL_DEFAULT = 50
 UI_PARAMS_SEPARATOR_SELECTION = r"""
 
 # Sélection des d'URLs
@@ -69,13 +66,11 @@ with DAG(
             alterne les différents types""",
         ),
         "urls_limit": Param(
-            URL_CRAWL_DEFAULT,
-            type="integer",
+            None,
+            type=["null", "integer"],
             minimum=1,
-            maximum=URL_CRAWL_MAX,
-            description_md=f"""**🔢 Nombre d'URLs** à parcourir
-            minimum={URL_CRAWL_MIN}
-            maximum={URL_CRAWL_MAX}""",
+            description_md="""**🔢 Nombre d'URLs** à parcourir.
+            Si pas spécifié = toutes les URLs""",
         ),
     },
 ) as dag:
