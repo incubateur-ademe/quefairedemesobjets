@@ -26,7 +26,9 @@ URL_TYPES_TO_EXTRA_FIELDS = {
 }
 
 
-def crawl_urls_candidates_read_from_db(url_type: str, limit: int = 50) -> pd.DataFrame:
+def crawl_urls_candidates_read_from_db(
+    url_type: str, limit: int | None = None
+) -> pd.DataFrame:
     logger.info(f"{url_type=}")
     logger.info(f"{limit=}")
 
@@ -40,8 +42,10 @@ def crawl_urls_candidates_read_from_db(url_type: str, limit: int = 50) -> pd.Dat
         model.objects.filter(Q(url__isnull=False) & ~Q(url__exact=""))
         .filter(statut=ActeurStatus.ACTIF)
         .order_by(COL_URL_DB)
-        .values(pk, COL_URL_DB, *extra_fields)[:limit]
+        .values(pk, COL_URL_DB, *extra_fields)
     )
+    if limit is not None:
+        entries = entries[:limit]
     df = pd.DataFrame(list(entries))
     # renaming "url" to "url_original" to avoid confusion
     # as there will be a lot of URL columns (to try, success...)
