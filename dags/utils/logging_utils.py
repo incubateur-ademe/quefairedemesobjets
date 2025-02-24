@@ -59,8 +59,8 @@ def size_info_get(value: Any) -> Any:
         return f"{len(value.model_fields.keys())} propriétés"
     elif isinstance(value, (str, bytes)):
         return len(value)  # Length of string or bytes
-    elif isinstance(value, (int, float, bool)):
-        return 1
+    elif isinstance(value, (int, float, bool, np.integer, np.floating)):
+        return value
     else:
         try:
             # Attempt to get the length for any other object with a length
