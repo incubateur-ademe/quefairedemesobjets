@@ -18,7 +18,7 @@ from dags.crawl.tasks.business_logic.crawl_urls_suggestions_prepare import (
     crawl_urls_suggestions_prepare,
 )
 from dags.crawl.tasks.business_logic.crawl_urls_suggestions_to_db import (
-    crawl_urls_suggestions_write_to_db,
+    crawl_urls_suggestions_to_db,
 )
 
 
@@ -31,7 +31,7 @@ class TestCrawlUrlsSuggestionsWriteToDb:
     ):
         acteurs_create([df_syntax_fail, df_dns_fail, df_urls_ok_diff, df_urls_fail])
 
-    def test_crawl_urls_suggestions_write_to_db(
+    def test_crawl_urls_suggestions_to_db(
         self,
         df_syntax_fail,  # noqa
         df_dns_fail,  # noqa
@@ -53,7 +53,7 @@ class TestCrawlUrlsSuggestionsWriteToDb:
             df_urls_ok_diff=df_urls_ok_diff,
             df_urls_fail=df_urls_fail,
         )
-        crawl_urls_suggestions_write_to_db(
+        crawl_urls_suggestions_to_db(
             metadata=metadata,  # type: ignore
             suggestions=suggestions,
             identifiant_action="test_crawl_urls_action",

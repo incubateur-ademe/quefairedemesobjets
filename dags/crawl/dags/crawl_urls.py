@@ -19,7 +19,7 @@ from crawl.tasks.airflow_logic.crawl_urls_suggestions_prepare_task import (
     crawl_urls_suggestions_prepare_task,
 )
 from crawl.tasks.airflow_logic.crawl_urls_suggestions_to_db_task import (
-    crawl_urls_suggestions_write_to_db_task,
+    crawl_urls_suggestions_to_db_task,
 )
 
 URL_TYPES = [
@@ -101,10 +101,9 @@ with DAG(
 ) as dag:
     chain(
         crawl_urls_candidates_read_from_db_task(dag),
-        # crawl_urls_candidates_groupby_url_task(dag),
         crawl_urls_check_syntax_task(dag),
         crawl_urls_check_dns_task(dag),
         crawl_urls_suggestions_metadata_task(dag),
         crawl_urls_suggestions_prepare_task(dag),
-        crawl_urls_suggestions_write_to_db_task(dag),
+        crawl_urls_suggestions_to_db_task(dag),
     )
