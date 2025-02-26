@@ -1,7 +1,0 @@
-READ = "crawl_urls_candidates_read_from_db"
-GROUPBY_URL = "crawl_urls_candidates_groupby_url"
-SOLVE_SYNTAX = "crawl_urls_solve_syntax"
-SOLVE_REACH = "crawl_urls_solve_reach"
-SUGGESTIONS_METADATA = "crawl_urls_suggestions_metadata"
-SUGGESTIONS_PREPARE = "crawl_urls_suggestions_prepare"
-SUGGESTIONS_TO_DB = "crawl_urls_suggestions_write_to_db"

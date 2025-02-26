@@ -1,9 +1,11 @@
 import logging
 
-import crawl.tasks.airflow_logic.task_ids as TASK_IDS
+import crawl.config.tasks as TASKS
 from airflow import DAG
+from airflow.exceptions import AirflowSkipException
 from airflow.operators.python import PythonOperator
-from crawl.tasks.business_logic.suggestions.write_to_db import (
+from crawl.config.xcom import XCOM_SUGGESTIONS_META, XCOM_SUGGESTIONS_PREP, xcom_pull
+from crawl.tasks.business_logic.crawl_urls_suggestions_to_db import (
     crawl_urls_suggestions_write_to_db,
 )
 
@@ -15,7 +17,7 @@ def task_info_get():
 
 
     ============================================================
-    Description de la tâche "{TASK_IDS.SUGGESTIONS_PREPARE}"
+    Description de la tâche "{TASKS.SUGGESTIONS_PREP}"
     ============================================================
 
     💡 quoi: on génère les suggestions (mais on les écrit pas en DB)
@@ -28,26 +30,23 @@ def task_info_get():
     """
 
 
-def crawl_urls_suggestions_write_to_db_wrapper(**kwargs) -> None:
+def crawl_urls_suggestions_write_to_db_wrapper(params, ti, dag, run_id) -> None:
     logger.info(task_info_get())
 
-    metadata = kwargs["ti"].xcom_pull(
-        key="metadata", task_ids=TASK_IDS.SUGGESTIONS_METADATA
-    )
-    suggestions = kwargs["ti"].xcom_pull(
-        key="suggestions", task_ids=TASK_IDS.SUGGESTIONS_PREPARE
-    )
+    if params["dry_run"] is not False:
+        raise AirflowSkipException("Dry run, on s'arrête là")
+
     crawl_urls_suggestions_write_to_db(
-        metadata=metadata,
-        suggestions=suggestions,
-        identifiant_action=f"dag_id={kwargs['dag'].dag_id}",
-        identifiant_execution=f"run_id={kwargs['run_id']}",
+        metadata=xcom_pull(ti, XCOM_SUGGESTIONS_META),
+        suggestions=xcom_pull(ti, XCOM_SUGGESTIONS_PREP),
+        identifiant_action=f"dag_id={dag.dag_id}",
+        identifiant_execution=f"run_id={run_id}",
     )
 
 
 def crawl_urls_suggestions_write_to_db_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
-        task_id=TASK_IDS.SUGGESTIONS_TO_DB,
+        task_id=TASKS.SUGGESTIONS_TO_DB,
         python_callable=crawl_urls_suggestions_write_to_db_wrapper,
         dag=dag,
     )
