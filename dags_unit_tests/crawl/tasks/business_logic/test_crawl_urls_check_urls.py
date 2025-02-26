@@ -3,7 +3,11 @@ import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import pytest
-from crawl.tasks.business_logic.solve.reach import CrawlUrlModel, crawl_url
+
+from dags.crawl.tasks.business_logic.crawl_urls_check_urls import (
+    CrawlUrlModel,
+    crawl_url,
+)
 
 
 class TestHandler(BaseHTTPRequestHandler):
@@ -44,19 +48,19 @@ def test_server():
 def test_fetch_200(test_server):
     result: CrawlUrlModel = crawl_url(f"{test_server}/200")
     assert result.status_code == 200
-    assert result.url_resolved.endswith("/200")
+    assert result.url_recheckd.endswith("/200")
 
 
 def test_fetch_404(test_server):
     result: CrawlUrlModel = crawl_url(f"{test_server}/404")
     assert result.status_code == 404
-    assert result.url_resolved.endswith("/404")
+    assert result.url_recheckd.endswith("/404")
 
 
 def test_fetch_500(test_server):
     result: CrawlUrlModel = crawl_url(f"{test_server}/500")
     assert result.status_code == 500
-    assert result.url_resolved.endswith("/500")
+    assert result.url_recheckd.endswith("/500")
 
 
 def test_fetch_timeout(test_server):
@@ -68,4 +72,4 @@ def test_fetch_timeout(test_server):
 def test_fetch_redirect(test_server):
     result: CrawlUrlModel = crawl_url(f"{test_server}/redirect")
     assert result.status_code == 200
-    assert result.url_resolved.endswith("/200")
+    assert result.url_recheckd.endswith("/200")

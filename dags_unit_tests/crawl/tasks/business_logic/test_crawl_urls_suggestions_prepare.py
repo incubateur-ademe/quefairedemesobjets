@@ -1,9 +1,20 @@
+import pandas as pd
 import pytest
-from crawl.config.constants import SCENARIO_FAIL, SCENARIO_OK_DIFF
-from crawl.fixtures import acteurs_create, df_fail, df_ok_diff  # noqa
-from sources.config.shared_constants import EMPTY_ACTEUR_FIELD
+from crawl.fixtures import (  # noqa
+    acteurs_create,
+    df_dns_fail,
+    df_syntax_fail,
+    df_urls_fail,
+    df_urls_ok_diff,
+)
 
-from dags.crawl.tasks.business_logic.suggestions.prepare import (
+from dags.crawl.config.constants import (
+    SCENARIO_DNS_FAIL,
+    SCENARIO_SYNTAX_FAIL,
+    SCENARIO_URL_FAIL,
+    SCENARIO_URL_OK_DIFF,
+)
+from dags.crawl.tasks.business_logic.crawl_urls_suggestions_prepare import (
     crawl_urls_suggestions_prepare,
 )
 from dags.utils import logging_utils as log
@@ -15,39 +26,57 @@ ID = "identifiant_unique"
 class TestCrawlUrlsSuggestionsPepare:
 
     @pytest.fixture(autouse=True)
-    def acteurs(self, df_ok_diff, df_fail):  # noqa
-        acteurs_create([df_ok_diff, df_fail])
+    def acteurs(
+        self, df_syntax_fail, df_dns_fail, df_urls_ok_diff, df_urls_fail  # noqa
+    ):
+        acteurs_create([df_syntax_fail, df_dns_fail, df_urls_ok_diff, df_urls_fail])
 
     @pytest.fixture
-    def prepare(self, df_ok_diff, df_fail) -> list[dict]:  # noqa
-        suggestions = crawl_urls_suggestions_prepare(df_ok_diff, df_fail)
-        return suggestions
+    def suggestions(
+        self, df_syntax_fail, df_dns_fail, df_urls_ok_diff, df_urls_fail  # noqa
+    ) -> list[dict] | None:
+        return crawl_urls_suggestions_prepare(
+            df_syntax_fail=df_syntax_fail,
+            df_dns_fail=df_dns_fail,
+            df_urls_ok_diff=df_urls_ok_diff,
+            df_urls_fail=df_urls_fail,
+        )
 
-    def test_total_suggestions(self, prepare):
-        assert len(prepare) == 5
+    @pytest.fixture
+    def sdata(self, suggestions):
+        # Our suggestion model is a bit repetitive in naming
+        # as we have Suggestion.suggestion (instead of e.g. Suggestion.changes)
+        return [x["suggestion"] for x in suggestions]
 
-    def test_ok_diff(self, prepare):
-        ok = prepare[:2]
-        assert all(x["contexte"]["Scénario"] == SCENARIO_OK_DIFF for x in ok)
-        assert [x["contexte"]["URL proposée"] for x in ok] == [
-            "https://a.com",
-            "https://b.com",
-        ]
-        assert all("scenario" in x["suggestion"] for x in ok)
-        assert all("reason" in x["suggestion"] for x in ok)
-        assert all("url_original" in x["suggestion"] for x in ok)
-        assert all("url_proposed" in x["suggestion"] for x in ok)
-        assert all("changes" in x["suggestion"] for x in ok)
+    def test_syntax_fail(self, sdata, df_syntax_fail):  # noqa
+        subset = [x for x in sdata if x["scenario"] == SCENARIO_SYNTAX_FAIL]
+        assert len(subset) == len(df_syntax_fail)
 
-    def test_fail(self, prepare):
-        fail = prepare[-3:]
-        assert all(x["contexte"]["Scénario"] == SCENARIO_FAIL for x in fail)
-        assert [x["contexte"]["URL proposée"] for x in fail] == [
-            EMPTY_ACTEUR_FIELD,
-            EMPTY_ACTEUR_FIELD,
-            EMPTY_ACTEUR_FIELD,
-        ]
+    def test_dns_fail(self, sdata, df_dns_fail):  # noqa
+        subset = [x for x in sdata if x["scenario"] == SCENARIO_DNS_FAIL]
+        assert len(subset) == len(df_dns_fail)
 
-    def test_prepare_is_json_serializable(self, prepare):
-        log.json_dumps(prepare)
+    def test_urls_ok_diff(self, sdata, df_urls_ok_diff):  # noqa
+        subset = [x for x in sdata if x["scenario"] == SCENARIO_URL_OK_DIFF]
+        assert len(subset) == len(df_urls_ok_diff)
+
+    def test_urls_fail(self, sdata, df_urls_fail):  # noqa
+        subset = [x for x in sdata if x["scenario"] == SCENARIO_URL_FAIL]
+        assert len(subset) == len(df_urls_fail)
+
+    def test_suggestions_are_json_serializable(self, suggestions):
+        log.json_dumps(suggestions)
         pass
+
+    def test_raise_if_no_suggestions(self):
+        """We should never reach the suggestions_prepare step
+        as the previous suggestions_metadata step should return
+        None to skip, so we ensure we raise exceptions if no
+        suggestions are available"""
+        with pytest.raises(ValueError):
+            crawl_urls_suggestions_prepare(
+                df_syntax_fail=pd.DataFrame(),
+                df_dns_fail=pd.DataFrame(),
+                df_urls_ok_diff=pd.DataFrame(),
+                df_urls_fail=pd.DataFrame(),
+            )
