@@ -21,113 +21,113 @@
 - 1️⃣ **Déduplication**: convertir un **cluster** en **1 seul acteur** pour ne **plus avoir de doublons**
 - 🎏 **Etat final idéal d’un acteur**: on se concentre sur les acteurs statut=ACTIF
 
-<table class="tg"><thead>
+<table><thead>
   <tr>
-    <th class="tg-c3ow">Etat 🇫🇷</th>
-    <th class="tg-c3ow">Code 🇬🇧</th>
-    <th class="tg-c3ow">Définition</th>
-    <th class="tg-c3ow">Correspond à une source en particulier</th>
-    <th class="tg-c3ow">Visible sur la carte</th>
+    <th>Etat 🇫🇷</th>
+    <th>Code 🇬🇧</th>
+    <th>Définition</th>
+    <th>Correspond à une source en particulier</th>
+    <th>Visible sur la carte</th>
   </tr></thead>
 <tbody>
   <tr>
-    <td class="tg-0pky">parent(s)</td>
-    <td class="tg-0pky">parent(s)</td>
-    <td class="tg-0pky">acteur qui a 1 ou plusieurs enfants rattachés à lui</td>
-    <td class="tg-0pky">🟠 NON<br>on créé un parent “artificiel” pour que celui-ci vive de manière détachée de ses enfants = plus robuste à travers le temps, pas besoin de changer le parent à chaque fois que les enfants changent<br></td>
-    <td class="tg-0pky">🟢 OUI</td>
+    <td>parent(s)</td>
+    <td>parent(s)</td>
+    <td>acteur qui a 1 ou plusieurs enfants rattachés à lui</td>
+    <td>🟠 NON<br>on créé un parent “artificiel” pour que celui-ci vive de manière détachée de ses enfants = plus robuste à travers le temps, pas besoin de changer le parent à chaque fois que les enfants changent<br></td>
+    <td>🟢 OUI</td>
   </tr>
   <tr>
-    <td class="tg-0pky">enfant(s)</td>
-    <td class="tg-0pky">child / children</td>
-    <td class="tg-0pky">acteur rattaché à 1 parent (1 est le maximum)</td>
-    <td class="tg-0pky">🟢 OUI<br>C’est de cette source que vient l’acteur<br></td>
-    <td class="tg-0pky">🟠 NON<br>C’est le parent qui est affiché<br></td>
+    <td>enfant(s)</td>
+    <td>child / children</td>
+    <td>acteur rattaché à 1 parent (1 est le maximum)</td>
+    <td>🟢 OUI<br>C’est de cette source que vient l’acteur<br></td>
+    <td>🟠 NON<br>C’est le parent qui est affiché<br></td>
   </tr>
   <tr>
-    <td class="tg-0pky">orphelin(s)</td>
-    <td class="tg-0pky">orphan(s)</td>
-    <td class="tg-0pky">acteur rattaché à 0 parent</td>
-    <td class="tg-0pky">🟢 OUI<br>C’est de cette source que vient l’acteur<br></td>
-    <td class="tg-0pky">🟢 OUI</td>
+    <td>orphelin(s)</td>
+    <td>orphan(s)</td>
+    <td>acteur rattaché à 0 parent</td>
+    <td>🟢 OUI<br>C’est de cette source que vient l’acteur<br></td>
+    <td>🟢 OUI</td>
   </tr>
 </tbody></table>
 
 ## ➡️ Transitions d’états: scénarios
 
-<table class="tg"><thead>
+<table><thead>
   <tr>
-    <th class="tg-amwm">modèle de changement</th>
-    <th class="tg-amwm">Etat avant</th>
-    <th class="tg-amwm">Etat après</th>
-    <th class="tg-amwm">Scénario</th>
-    <th class="tg-amwm">Conséquences dans revision</th>
-    <th class="tg-amwm">Conséquences dans displayed</th>
+    <th>modèle de changement</th>
+    <th>Etat avant</th>
+    <th>Etat après</th>
+    <th>Scénario</th>
+    <th>Conséquences dans revision</th>
+    <th>Conséquences dans displayed</th>
   </tr></thead>
 <tbody>
   <tr>
-    <td class="tg-cly1"><a href="/incubateur-ademe/quefairedemesobjets/blob/main/data/models/changes/acteur_create_as_parent.py">acteur_create_as_parent</a></td>
-    <td class="tg-aiub">Orphelin</td>
-    <td class="tg-aiub">Parent</td>
-    <td class="tg-cly1">➕ Nouveau parent pour nouveau cluster</td>
-    <td class="tg-cly1">➕ Parent à créer<br>➕ Donnée enrichie au mieux<br></td>
-    <td class="tg-8zwo">pareil que révision</td>
+    <td><a href="/incubateur-ademe/quefairedemesobjets/blob/main/data/models/changes/acteur_create_as_parent.py">acteur_create_as_parent</a></td>
+    <td>Orphelin</td>
+    <td>Parent</td>
+    <td>➕ Nouveau parent pour nouveau cluster</td>
+    <td>➕ Parent à créer<br>➕ Donnée enrichie au mieux<br></td>
+    <td>pareil que révision</td>
   </tr>
   <tr>
-    <td class="tg-cly1"><a href="/incubateur-ademe/quefairedemesobjets/blob/main/data/models/changes/acteur_keep_as_parent.py">acteur_keep_as_parent</a></td>
-    <td class="tg-aiub">Parent</td>
-    <td class="tg-aiub">Parent</td>
-    <td class="tg-cly1">1️⃣ 1 seul parent existant -&gt; à garder</td>
-    <td class="tg-cly1"> 🟰 Toujours parent du cluster<br>➕ Donnée enrichie au mieux<br></td>
-    <td class="tg-8zwo">pareil que révision</td>
+    <td><a href="/incubateur-ademe/quefairedemesobjets/blob/main/data/models/changes/acteur_keep_as_parent.py">acteur_keep_as_parent</a></td>
+    <td>Parent</td>
+    <td>Parent</td>
+    <td>1️⃣ 1 seul parent existant -&gt; à garder</td>
+    <td> 🟰 Toujours parent du cluster<br>➕ Donnée enrichie au mieux<br></td>
+    <td>pareil que révision</td>
   </tr>
   <tr>
-    <td class="tg-cly1"><a href="/incubateur-ademe/quefairedemesobjets/blob/main/data/models/changes/acteur_keep_as_parent.py">acteur_keep_as_parent</a></td>
-    <td class="tg-aiub">Parent</td>
-    <td class="tg-aiub">Parent</td>
-    <td class="tg-cly1">🎖️ 2+ parents dans cluster -&gt; celui avec + d'enfants -&gt; à garder</td>
-    <td class="tg-cly1"> 🟰 Toujours parent du cluster<br>➕ Donnée enrichie au mieux<br></td>
-    <td class="tg-8zwo">pareil que révision</td>
+    <td><a href="/incubateur-ademe/quefairedemesobjets/blob/main/data/models/changes/acteur_keep_as_parent.py">acteur_keep_as_parent</a></td>
+    <td>Parent</td>
+    <td>Parent</td>
+    <td>🎖️ 2+ parents dans cluster -&gt; celui avec + d'enfants -&gt; à garder</td>
+    <td> 🟰 Toujours parent du cluster<br>➕ Donnée enrichie au mieux<br></td>
+    <td>pareil que révision</td>
   </tr>
   <tr>
-    <td class="tg-cly1"><a href="/incubateur-ademe/quefairedemesobjets/blob/main/data/models/changes/acteur_delete_as_parent.py">acteur_delete_as_parent</a></td>
-    <td class="tg-aiub">Parent</td>
-    <td class="tg-cly1">N’existera plus</td>
-    <td class="tg-cly1">🔴 2+ parents dans cluster -&gt; non choisi -&gt; à supprimer</td>
-    <td class="tg-cly1">🛑 Devrait être automatiquement supprimé suite à la mise à jour de ces enfants (voir <a href="https://github.com/incubateur-ademe/quefairedemesobjets/pull/1247">PR1247</a>)</td>
-    <td class="tg-cly1">🛑 Devrait disparaitre de displayed</td>
+    <td><a href="/incubateur-ademe/quefairedemesobjets/blob/main/data/models/changes/acteur_delete_as_parent.py">acteur_delete_as_parent</a></td>
+    <td>Parent</td>
+    <td>N’existera plus</td>
+    <td>🔴 2+ parents dans cluster -&gt; non choisi -&gt; à supprimer</td>
+    <td>🛑 Devrait être automatiquement supprimé suite à la mise à jour de ces enfants (voir <a href="https://github.com/incubateur-ademe/quefairedemesobjets/pull/1247">PR1247</a>)</td>
+    <td>🛑 Devrait disparaitre de displayed</td>
   </tr>
   <tr>
-    <td class="tg-cly1"><a href="/incubateur-ademe/quefairedemesobjets/blob/main/data/models/changes/acteur_verify_in_revision.py">acteur_verify_in_revision</a></td>
-    <td class="tg-aiub">Enfant</td>
-    <td class="tg-aiub">Enfant</td>
-    <td class="tg-cly1">🟰 Pointe déjà vers nouveau parent → rien à faire</td>
-    <td class="tg-zz43">Aucune</td>
-    <td class="tg-zz43">Aucune</td>
+    <td><a href="/incubateur-ademe/quefairedemesobjets/blob/main/data/models/changes/acteur_verify_in_revision.py">acteur_verify_in_revision</a></td>
+    <td>Enfant</td>
+    <td>Enfant</td>
+    <td>🟰 Pointe déjà vers nouveau parent → rien à faire</td>
+    <td>Aucune</td>
+    <td>Aucune</td>
   </tr>
   <tr>
-    <td class="tg-cly1"><a href="/incubateur-ademe/quefairedemesobjets/blob/main/data/models/changes/acteur_update_parent_id.py">acteur_update_parent_id</a></td>
-    <td class="tg-aiub">Enfant</td>
-    <td class="tg-aiub">Enfant</td>
-    <td class="tg-cly1">🔀 Pointait vers un parent qui n’a pas été choisi → à pointer vers nouveau parent</td>
-    <td class="tg-cly1"> 🔀 Mettre à jour parent_id pour pointer vers nouveau parent</td>
-    <td class="tg-zz43">Aucune</td>
+    <td><a href="/incubateur-ademe/quefairedemesobjets/blob/main/data/models/changes/acteur_update_parent_id.py">acteur_update_parent_id</a></td>
+    <td>Enfant</td>
+    <td>Enfant</td>
+    <td>🔀 Pointait vers un parent qui n’a pas été choisi → à pointer vers nouveau parent</td>
+    <td> 🔀 Mettre à jour parent_id pour pointer vers nouveau parent</td>
+    <td>Aucune</td>
   </tr>
   <tr>
-    <td class="tg-cly1"><a href="/incubateur-ademe/quefairedemesobjets/blob/main/data/models/changes/acteur_update_parent_id.py">acteur_update_parent_id</a></td>
-    <td class="tg-aiub">Orphelin</td>
-    <td class="tg-aiub">Enfant</td>
-    <td class="tg-cly1">🔀 à pointer vers un parent</td>
-    <td class="tg-cly1"> 🔀 Mettre à jour parent_id pour pointer vers nouveau parent</td>
-    <td class="tg-cly1">🛑 Devrait disparaitre de displayed</td>
+    <td><a href="/incubateur-ademe/quefairedemesobjets/blob/main/data/models/changes/acteur_update_parent_id.py">acteur_update_parent_id</a></td>
+    <td>Orphelin</td>
+    <td>Enfant</td>
+    <td>🔀 à pointer vers un parent</td>
+    <td> 🔀 Mettre à jour parent_id pour pointer vers nouveau parent</td>
+    <td>🛑 Devrait disparaitre de displayed</td>
   </tr>
   <tr>
-    <td class="tg-cly1"></td>
-    <td class="tg-aiub">Orphelin</td>
-    <td class="tg-aiub">Orphelin</td>
-    <td class="tg-cly1">Ne fais toujours pas parti d’un cluster (pas de changement)</td>
-    <td class="tg-zz43">Aucune</td>
-    <td class="tg-zz43">Aucune</td>
+    <td></td>
+    <td>Orphelin</td>
+    <td>Orphelin</td>
+    <td>Ne fais toujours pas parti d’un cluster (pas de changement)</td>
+    <td>Aucune</td>
+    <td>Aucune</td>
   </tr>
 </tbody></table>
 
