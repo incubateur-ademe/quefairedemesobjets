@@ -1,6 +1,8 @@
-"""Prepares suggestions as a list of dicts:
- - suggestions are only validated as far as their SuggestionChange model
-    because Suggestion depends on creating a SuggestionCohorte in DB"""
+"""Prepares suggestions as a list of dicts. Suggestions are
+validated ONLY with their SuggestionChange pydantic model
+and NOT the Suggestion Django model which depends on creating
+a SuggestionCohorte in DB which we want to keep for last when
+we know all suggestions are ready to be written in DB"""
 
 import logging
 
@@ -24,7 +26,6 @@ logger = logging.getLogger(__name__)
 
 def task_info_get():
     return f"""
-
 
     ============================================================
     Description de la tâche "{TASKS.SUGGESTIONS_PREP}"

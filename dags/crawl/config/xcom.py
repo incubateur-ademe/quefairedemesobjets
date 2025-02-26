@@ -15,7 +15,6 @@ XCOM_DF_URLS_OK_SAME = "df_urls_ok_same"
 XCOM_DF_URLS_OK_DIFF = "df_urls_ok_diff"
 XCOM_DF_URLS_FAIL = "df_urls_fail"
 XCOM_SUGGESTIONS_META = "suggestions_metadata"
-XCOM_SUGGESTIONS_CTX = "suggestions_context"
 XCOM_SUGGESTIONS_PREP = "suggestions"
 
 
