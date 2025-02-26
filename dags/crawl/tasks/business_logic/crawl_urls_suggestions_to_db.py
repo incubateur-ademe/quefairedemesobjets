@@ -9,7 +9,7 @@ django_setup_full()
 logger = logging.getLogger(__name__)
 
 
-def crawl_urls_suggestions_write_to_db(
+def crawl_urls_suggestions_to_db(
     metadata: dict,
     suggestions: list[dict],
     identifiant_action: str,
