@@ -6,7 +6,6 @@ from airflow.utils.state import State
 from django.contrib.gis.geos import Point
 from rich import print
 
-from dags.cluster.config.model import ClusterConfig
 from dags.cluster.tasks.airflow_logic.task_ids import (
     TASK_CLUSTERS_DISPLAY,
     TASK_CLUSTERS_VALIDATE,
@@ -18,8 +17,8 @@ from dags.cluster.tasks.airflow_logic.task_ids import (
     TASK_SUGGESTIONS_DISPLAY,
     TASK_SUGGESTIONS_TO_DB,
 )
-from dags_unit_tests.cluster.helpers.configs import CONF_BASE_DICT, DATE_IN_PAST
-from dags_unit_tests.cluster.helpers.loaders import airflow_init, dag_get, ti_get
+from dags_unit_tests.cluster.helpers.configs import CONF_BASE_DICT
+from dags_unit_tests.e2e.utils import DATE_IN_PAST, airflow_init, dag_get, ti_get
 from unit_tests.qfdmo.acteur_factory import (
     ActeurTypeFactory,
     DisplayedActeur,
@@ -28,6 +27,9 @@ from unit_tests.qfdmo.acteur_factory import (
 )
 
 airflow_init()
+
+# Need to wait for airflow_init() to be called before importing
+from dags.cluster.config.model import ClusterConfig  # noqa: E402
 
 
 @pytest.mark.django_db()
@@ -53,7 +55,7 @@ class TestClusterDedupSkipped:
 
     @pytest.fixture
     def dag(self):
-        return dag_get()
+        return dag_get(dag_id="cluster_acteur_suggestions")
 
     def test_up_to_config(self, dag, db_sources_acteur_types, conf):
         """DAG run should stop at config because data acteurs data available"""

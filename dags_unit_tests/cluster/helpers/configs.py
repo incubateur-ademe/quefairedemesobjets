@@ -6,11 +6,6 @@ We represent the confs in dict format because:
  - We can more easily create custom configs by tweaking others' dict
 """
 
-from airflow.utils.dates import days_ago
-
-# So Airflow doesn't wait for the task's date to occur
-DATE_IN_PAST = days_ago(2)
-
 CONF_BASE_DICT = {
     "dry_run": True,
     "include_sources": ["ecopae (id=252)", "cyclevia (id=90)"],

@@ -3,6 +3,7 @@ import pandas as pd
 import pytest
 from django.contrib.gis.geos import Point
 from rich import print
+from utils.django import django_setup_full
 
 from dags.cluster.config.constants import COL_PARENT_DATA_NEW
 from dags.cluster.tasks.business_logic.cluster_acteurs_parents_choose_data import (
@@ -10,7 +11,6 @@ from dags.cluster.tasks.business_logic.cluster_acteurs_parents_choose_data impor
     field_pick_value,
     parent_choose_data,
 )
-from dags.utils.django import django_setup_full
 
 django_setup_full()
 
