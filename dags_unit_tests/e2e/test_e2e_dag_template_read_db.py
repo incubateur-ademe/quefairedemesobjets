@@ -1,6 +1,6 @@
 """A test to ensure our test DB integration is working properly:
- - create acteurs outside DAG (should write into test DB)
- - read acteurs inside DAG (should read from test DB)"""
+- create acteurs outside DAG (should write into test DB)
+- read acteurs inside DAG (should read from test DB)"""
 
 import pytest
 
