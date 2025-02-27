@@ -14,30 +14,32 @@ class TestE2ETemplateReadDb:
 
     @pytest.fixture
     def create_acteurs(self):
-        # from unit_tests.qfdmo.acteur_factory import ActeurFactory, ActeurTypeFactory
-        # at = ActeurTypeFactory(code="my_at")
-        # ActeurFactory(nom="dummy acteur", acteur_type=at)
         from django.contrib.gis.geos import Point
 
         from qfdmo.models import Acteur, ActeurType
 
         at = ActeurType(code="my_at")
         at.save()
-        Acteur(
-            nom="dummy acteur 1",
-            acteur_type=at,
-            location=Point(2, 3),
-        ).save()
-        Acteur(
-            nom="dummy acteur 2",
-            acteur_type=at,
-            location=Point(4, 5),
-        ).save()
+        loc = Point(1, 2)
+        Acteur(nom="🟢 included 1", acteur_type=at, location=loc).save()
+        Acteur(nom="🔴 excluded 1", acteur_type=at, location=loc).save()
+        Acteur(nom="🟢 included 2", acteur_type=at, location=loc).save()
 
     @pytest.fixture
     def dag_test(self, create_acteurs):
         dag = dag_get("template_read_db")
-        dag.test(execution_date=DATE_IN_PAST, run_conf={})
+        # We use .test() and not the tempting .run()
+        # which has a richer API but was removed
+        # on Oct 2024 for Airflow 3:
+        # https://github.com/apache/airflow/pull/42761
+        dag.test(
+            execution_date=DATE_IN_PAST,
+            # Values put here will be available under "params"
+            # argument of Airflow task functions
+            run_conf={
+                "include_acteurs_nom_contains": "included",
+            },
+        )
         return dag
 
     @pytest.fixture
@@ -68,7 +70,7 @@ class TestE2ETemplateReadDb:
         # We should we able to retrieve acteurs created via models outside Airflow
         assert len(ti_acteurs_list) == 2
         names = sorted([a["nom"] for a in ti_acteurs_list])
-        assert names == ["dummy acteur 1", "dummy acteur 2"]
+        assert names == ["🟢 included 1", "🟢 included 2"]
 
     def test_acteurs_query_fails(self, ti_acteurs_query):
         # Reading a queryset from XCOM fails as Django is unable
