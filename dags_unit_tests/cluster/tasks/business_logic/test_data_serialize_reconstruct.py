@@ -66,7 +66,33 @@ class TestDataSerializeReconstruct:
         # "Automatically set the field to now when the object is first created"
         assert rev.cree_le.isoformat() != DATETIME.isoformat()
 
-        # Now cree_la is properly updated
+        # Now cree_le is properly updated
         rev.cree_le = data_reconstructed["cree_le"]
         rev.save()
         assert rev.cree_le.isoformat() == DATETIME.isoformat()
+
+    def test_none_cases(self, data_init):
+        # Special case for location which is forbidden
+        # non non-digital acteurs BUT we have no way of
+        # knowing what type of acteur we're dealing with
+        # as data could be partial (e.g. in the clustering
+        # pipeline where we only suggest diffs for parents)
+        data = data_init.copy()
+        data["location"] = None
+        # Special case on foreign key fields
+        data["parent"] = None
+        data = data_serialize(RevisionActeur, data)
+        data = data_reconstruct(RevisionActeur, data)
+
+        # Consequence for location=None is that we don't
+        # reflect it in the reconstructed data
+        assert "location" not in data
+
+        # For parent=None we keep value as None
+        assert data["parent"] is None
+
+        # We ensure that the location bypass isn't possible
+        # if we try to reconstruct directly
+        data = {"location": None}
+        data = data_reconstruct(RevisionActeur, data)
+        assert data == {}
