@@ -17,18 +17,27 @@ with DAG(
     tags=["template"],
 ) as dag:
 
-    def read_db(ti):
+    def read_db(ti, params):
         from utils.django import django_setup_full
 
         settings = django_setup_full()
         from qfdmo.models import Acteur
 
+        # Returning some settings info to help test
+        # that Airflow uses the local DB when running
+        # e2e tests
         ti.xcom_push(key="settings", value=settings)
-        # This works because it's JSON-serializable
-        ti.xcom_push(key="acteurs_list", value=list(Acteur.objects.values("nom")))
-        # This returns None and causes task to fail because XCOM
+
+        # Returning some acteur data to demonstrate
+        # we can read from the test DB in e2e mode
+        query = Acteur.objects.filter(
+            nom__contains=params["include_acteurs_nom_contains"]
+        )
+        # Works because it's JSON-serializable
+        ti.xcom_push(key="acteurs_list", value=list(query.values("nom")))
+        # Returns None and causes task to fail because XCOM
         # cannot serialize a QuerySet
-        ti.xcom_push(key="acteurs_query", value=Acteur.objects.all())
+        ti.xcom_push(key="acteurs_query", value=query.all())
 
     def read_db_task(dag: DAG) -> PythonOperator:
         return PythonOperator(
