@@ -1,12 +1,14 @@
 import logging
 from dataclasses import dataclass
-from typing import Dict, List, Set, Tuple
 
 import pandas as pd
 from sources.tasks.airflow_logic.config_management import DAGConfig
 from sources.tasks.transform.transform_df import compute_identifiant_unique
+from utils.django import django_setup_full, get_model_fields
 
 logger = logging.getLogger(__name__)
+
+django_setup_full()
 
 
 @dataclass
@@ -15,21 +17,21 @@ class ColumnDiff:
     sup: int = 0
     ajout: int = 0
 
-    def add(self, values: List[int]) -> None:
+    def add(self, values: list[int]) -> None:
         self.modif += values[0]
         self.sup += values[1]
         self.ajout += values[2]
 
 
 class ActeurComparator:
-    def __init__(self, columns_to_compare: Set[str]):
+    def __init__(self, columns_to_compare: set[str]):
         self.columns_to_compare = columns_to_compare - {"identifiant_unique"}
-        self.metadata: Dict[str, ColumnDiff] = {}
+        self.metadata: dict[str, ColumnDiff] = {}
 
-    def _compare_lists(self, source: List, db: List) -> bool:
+    def _compare_lists(self, source: list, db: list) -> bool:
         return sorted(source) != sorted(db)
 
-    def _compare_proposition_services(self, source: List[Dict], db: List[Dict]) -> bool:
+    def _compare_proposition_services(self, source: list[dict], db: list[dict]) -> bool:
         source_sorted = sorted(source, key=lambda x: x["action"])
         db_sorted = sorted(db, key=lambda x: x["action"])
 
@@ -40,14 +42,14 @@ class ActeurComparator:
 
         return source_sorted != db_sorted
 
-    def _get_diff_type(self, source_val, db_val) -> List[int]:
+    def _get_diff_type(self, source_val, db_val) -> list[int]:
         if not source_val:
             return [0, 1, 0]  # SUP
         if not db_val:
             return [0, 0, 1]  # AJOUT
         return [1, 0, 0]  # MODIF
 
-    def compare_rows(self, row_source: Dict, row_db: Dict) -> Dict[str, List[int]]:
+    def compare_rows(self, row_source: dict, row_db: dict) -> dict[str, list[int]]:
         columns_updated = {}
         for column in self.columns_to_compare:
             source_val = row_source[column]
@@ -126,7 +128,10 @@ def retrieve_identifiant_unique_from_existing_acteur(
 
 def keep_acteur_changed(
     df_normalized: pd.DataFrame, df_acteur_from_db: pd.DataFrame, dag_config: DAGConfig
-) -> Tuple[pd.DataFrame, pd.DataFrame, Dict]:
+) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
+
+    from qfdmo.models import Acteur
+
     metadata = {}
     if df_acteur_from_db.empty:
         return df_normalized, df_acteur_from_db, metadata
@@ -135,12 +140,13 @@ def keep_acteur_changed(
         df_normalized, df_acteur_from_db
     )
 
-    columns_to_compare = dag_config.get_expected_columns() - {
-        "location",
-        "sous_categorie_codes",
-        "action_codes",
-        "cree_le",
-    }
+    available_model_fields_to_compare = set(
+        get_model_fields(Acteur, with_relationships=True, latlong=True)
+    )
+
+    columns_to_compare = (
+        available_model_fields_to_compare & dag_config.get_expected_columns()
+    )
 
     # Préparer les dataframes pour la comparaison
     source_ids = set(df_normalized["identifiant_unique"])
