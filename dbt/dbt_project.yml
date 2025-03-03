@@ -23,12 +23,25 @@ clean-targets:
   - "dbt_packages"
 
 models:
-  qfdmo:
-    exhaustive_acteurs:
-      materialized: table
-
-    opendata_acteurs:
-      materialized: table
-
-    carte_acteurs:
-      materialized: table
+  base:
+    schema: public
+    +materialized: view
+  intermediate:
+    schema: public
+    +materialized: view
+  marts:
+    +materialized: table
+    exhaustive:
+      schema: public
+    carte:
+      schema: public
+    opendata:
+      schema: public
+  exposure:
+    +materialized: table
+    exhaustive:
+      schema: public
+    carte:
+      schema: public
+    opendata:
+      schema: public
