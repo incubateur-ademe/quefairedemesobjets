@@ -1,4 +1,5 @@
 from airflow import DAG
+from sources.config import shared_constants as constants
 from sources.config.airflow_params import (
     get_mapping_config,
     source_sinoe_dechet_mapping_get,
@@ -82,6 +83,10 @@ with DAG(
             {
                 "column": "source_code",
                 "value": "ademesinoedecheteries",
+            },
+            {
+                "column": "statut",
+                "value": constants.ACTEUR_ACTIF,
             },
             # 4. Transformation du dataframe
             {
