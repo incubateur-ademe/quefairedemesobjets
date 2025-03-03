@@ -21,6 +21,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "acteur_type_code": [],
                     "acteur_service_codes": [],
                     "proposition_service_codes": [],
+                    "statut": [],
                 }
             ),
             pd.DataFrame(
@@ -33,6 +34,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "acteur_type_code": [],
                     "acteur_service_codes": [],
                     "proposition_service_codes": [],
+                    "statut": [],
                 }
             ),
             pd.DataFrame(
@@ -45,6 +47,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "acteur_type_code": [],
                     "acteur_service_codes": [],
                     "proposition_service_codes": [],
+                    "statut": [],
                 }
             ),
             pd.DataFrame(
@@ -57,6 +60,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "acteur_type_code": [],
                     "acteur_service_codes": [],
                     "proposition_service_codes": [],
+                    "statut": [],
                 }
             ),
             {},
@@ -93,6 +97,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                             },
                         ],
                     ],
+                    "statut": ["actif", "actif"],
                 }
             ),
             pd.DataFrame(
@@ -125,6 +130,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                             },
                         ],
                     ],
+                    "statut": ["actif", "actif"],
                 }
             ),
             pd.DataFrame(
@@ -137,6 +143,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "acteur_type_code": pd.Series([], dtype="object"),
                     "acteur_service_codes": pd.Series([], dtype="object"),
                     "proposition_service_codes": pd.Series([], dtype="object"),
+                    "statut": pd.Series([], dtype="object"),
                 }
             ),
             pd.DataFrame(
@@ -149,6 +156,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "acteur_type_code": pd.Series([], dtype="object"),
                     "acteur_service_codes": pd.Series([], dtype="object"),
                     "proposition_service_codes": pd.Series([], dtype="object"),
+                    "statut": pd.Series([], dtype="object"),
                 }
             ),
             {},
@@ -185,6 +193,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                             },
                         ],
                     ],
+                    "statut": ["actif", "actif"],
                 }
             ),
             pd.DataFrame(
@@ -217,6 +226,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                             },
                         ],
                     ],
+                    "statut": ["actif", "actif"],
                 }
             ),
             pd.DataFrame(
@@ -229,6 +239,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "acteur_type_code": pd.Series([], dtype="object"),
                     "acteur_service_codes": pd.Series([], dtype="object"),
                     "proposition_service_codes": pd.Series([], dtype="object"),
+                    "statut": pd.Series([], dtype="object"),
                 }
             ),
             pd.DataFrame(
@@ -241,6 +252,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "acteur_type_code": pd.Series([], dtype="object"),
                     "acteur_service_codes": pd.Series([], dtype="object"),
                     "proposition_service_codes": pd.Series([], dtype="object"),
+                    "statut": pd.Series([], dtype="object"),
                 }
             ),
             {},
@@ -266,6 +278,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                             }
                         ],
                     ],
+                    "statut": ["actif"],
                 }
             ),
             pd.DataFrame(
@@ -287,6 +300,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                             }
                         ],
                     ],
+                    "statut": ["actif"],
                 }
             ),
             pd.DataFrame(
@@ -308,6 +322,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                             }
                         ],
                     ],
+                    "statut": ["actif"],
                 }
             ),
             pd.DataFrame(
@@ -329,6 +344,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                             }
                         ],
                     ],
+                    "statut": ["actif"],
                 }
             ),
             {
@@ -359,6 +375,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                             }
                         ],
                     ],
+                    "statut": ["actif"],
                 }
             ),
             pd.DataFrame(
@@ -380,6 +397,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                             }
                         ],
                     ],
+                    "statut": ["actif"],
                 }
             ),
             pd.DataFrame(
@@ -401,6 +419,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                             }
                         ],
                     ],
+                    "statut": ["actif"],
                 }
             ),
             pd.DataFrame(
@@ -422,6 +441,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                             }
                         ],
                     ],
+                    "statut": ["actif"],
                 }
             ),
             {
@@ -452,6 +472,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                             }
                         ],
                     ],
+                    "statut": ["actif"],
                 }
             ),
             pd.DataFrame(
@@ -473,6 +494,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                             }
                         ],
                     ],
+                    "statut": ["actif"],
                 }
             ),
             pd.DataFrame(
@@ -494,6 +516,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                             }
                         ],
                     ],
+                    "statut": ["actif"],
                 }
             ),
             pd.DataFrame(
@@ -515,6 +538,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                             }
                         ],
                     ],
+                    "statut": ["actif"],
                 }
             ),
             {
@@ -545,6 +569,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                             }
                         ],
                     ],
+                    "statut": ["actif"],
                 }
             ),
             pd.DataFrame(
@@ -566,6 +591,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                             }
                         ],
                     ],
+                    "statut": ["actif"],
                 }
             ),
             pd.DataFrame(
@@ -587,6 +613,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                             }
                         ],
                     ],
+                    "statut": ["actif"],
                 }
             ),
             pd.DataFrame(
@@ -608,6 +635,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                             }
                         ],
                     ],
+                    "statut": ["actif"],
                 }
             ),
             {
@@ -629,6 +657,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "acteur_type_code": [],
                     "acteur_service_codes": [],
                     "proposition_service_codes": [],
+                    "statut": [],
                 }
             ),
             pd.DataFrame(
@@ -650,6 +679,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                             }
                         ],
                     ],
+                    "statut": ["actif"],
                 }
             ),
             pd.DataFrame(
@@ -662,6 +692,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "acteur_type_code": [],
                     "acteur_service_codes": [],
                     "proposition_service_codes": [],
+                    "statut": [],
                 }
             ),
             pd.DataFrame(
@@ -683,6 +714,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                             }
                         ],
                     ],
+                    "statut": ["actif"],
                 }
             ),
             {},
@@ -708,6 +740,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                             }
                         ],
                     ],
+                    "statut": ["actif"],
                 }
             ),
             pd.DataFrame(
@@ -720,6 +753,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "acteur_type_code": [],
                     "acteur_service_codes": [],
                     "proposition_service_codes": [],
+                    "statut": [],
                 }
             ),
             pd.DataFrame(
@@ -741,6 +775,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                             }
                         ],
                     ],
+                    "statut": ["actif"],
                 }
             ),
             pd.DataFrame(
@@ -753,6 +788,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "acteur_type_code": [],
                     "acteur_service_codes": [],
                     "proposition_service_codes": [],
+                    "statut": [],
                 }
             ),
             {},
@@ -778,6 +814,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                             }
                         ],
                     ],
+                    "statut": ["actif"],
                 }
             ),
             pd.DataFrame(
@@ -792,6 +829,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                         ["service1", "service2"],
                     ],
                     "proposition_service_codes": [[]],
+                    "statut": ["actif"],
                 }
             ),
             pd.DataFrame(
@@ -813,6 +851,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                             }
                         ],
                     ],
+                    "statut": ["actif"],
                 }
             ),
             pd.DataFrame(
@@ -827,6 +866,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                         ["service1", "service2"],
                     ],
                     "proposition_service_codes": [[]],
+                    "statut": ["actif"],
                 }
             ),
             {
@@ -852,6 +892,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                         ["service1", "service2"],
                     ],
                     "proposition_service_codes": [[]],
+                    "statut": ["actif"],
                 }
             ),
             pd.DataFrame(
@@ -873,6 +914,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                             }
                         ],
                     ],
+                    "statut": ["actif"],
                 }
             ),
             pd.DataFrame(
@@ -887,6 +929,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                         ["service1", "service2"],
                     ],
                     "proposition_service_codes": [[]],
+                    "statut": ["actif"],
                 }
             ),
             pd.DataFrame(
@@ -908,6 +951,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                             }
                         ],
                     ],
+                    "statut": ["actif"],
                 }
             ),
             {

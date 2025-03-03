@@ -222,3 +222,21 @@ def django_schema_create_and_check(schema_name: str, sql: str, dry_run=True) -> 
     if schema_name not in tables_all:
         raise SystemError(f"Table pas crée malgré execution SQL OK: {schema_name}")
     logger.info(f"Création schema pour {schema_name=}: succès 🟢")
+
+
+def get_model_fields(model, with_relationships=True, latlong=False):
+    fields = []
+    for field in model._meta.get_fields():
+        if field.is_relation and not with_relationships:
+            continue
+        if field.one_to_many or field.many_to_many:
+            fields.append(field.name[0:-1] + "_codes")
+        elif field.many_to_one:
+            fields.append(field.name + "_code")
+        else:
+            fields.append(field.name)
+    if latlong:
+        fields.extend(["latitude", "longitude"])
+        if "location" in fields:
+            fields.remove("location")
+    return fields
