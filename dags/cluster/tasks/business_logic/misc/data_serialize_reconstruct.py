@@ -24,7 +24,19 @@ def data_serialize(model: type[models.Model], data: dict) -> dict:
     for key, value in data.items():
         field = model._meta.get_field(key)
 
-        if isinstance(field, models.ForeignKey):
+        # We don't try to be fancy with None, it's None
+        if value is None:
+            # Due to clean_location check on Acteur model
+            # which prevents None if acteur is non-digital
+            # AND the fact that we can't know for sure whether
+            # acteur is digital or not, we just skip None locations
+            # TODO: we need to revamp the validation architecture
+            # as those if-elses all over the code are not maintainable
+            if key == "location":
+                continue
+            else:
+                result[key] = value
+        elif isinstance(field, models.ForeignKey):
             if isinstance(value, (str, int)):
                 result[key] = value
             else:
@@ -63,7 +75,14 @@ def data_reconstruct(model: type[models.Model], data_src: dict) -> dict:
     for key, value in data.items():
         field = model._meta.get_field(key)
 
-        if isinstance(field, models.ForeignKey):
+        # We don't try to be fancy with None, it's None
+        if value is None:
+            # Same explanation as in data_serialize
+            if key == "location":
+                continue
+            else:
+                result[key] = value
+        elif isinstance(field, models.ForeignKey):
             # If it's a foreign key, fetch the related entity
             related_instance = field.related_model.objects.get(pk=value)  # type: ignore
             result[key] = related_instance
