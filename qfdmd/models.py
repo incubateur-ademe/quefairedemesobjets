@@ -199,7 +199,7 @@ class ProduitLien(models.Model):
 
 
 class Synonyme(AbstractBaseProduit):
-    slug = AutoSlugField(populate_from=["nom"])
+    slug = AutoSlugField(populate_from=["nom"], max_length=255)
     nom = models.CharField(blank=True, unique=True, help_text="Nom du produit")
     produit = models.ForeignKey(
         Produit, related_name="synonymes", on_delete=models.CASCADE
