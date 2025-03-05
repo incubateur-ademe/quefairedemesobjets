@@ -238,7 +238,6 @@ def cluster_acteurs_clusters(
     df: pd.DataFrame,
     cluster_fields_exact: list[str] = [],
     cluster_fields_fuzzy: list[str] = [],
-    cluster_fields_separate: list[str] = [],
     cluster_fuzzy_threshold: float = 0.5,
     cluster_intra_source_is_allowed: bool = False,
 ) -> pd.DataFrame:
@@ -249,7 +248,8 @@ def cluster_acteurs_clusters(
         df: DataFrame à clusteriser
         cluster_fields_exact: champs pour grouper en 1 cluster si identique
         cluster_fields_fuzzy: champs pour grouper en 1 cluster si similaire
-        cluster_fields_separate: champs pour séparer en plusieurs clusters si identique
+        cluster_fuzzy_threshold: seuil de similarité pour les champs fuzzy
+        cluster_intra_source_is_allowed: autoriser les clusters intra-source
 
     Returns:
         DataFrame de cluster_id -> identifiant_unique
@@ -270,11 +270,12 @@ def cluster_acteurs_clusters(
             raise ValueError(f"Colonne match fuzzy '{col}' pas dans le DataFrame")
 
     # On supprime les lignes avec des valeurs nulles pour les colonnes exact
-    # TODO: subtilités à gérer, ex on peut pas drop sur cluster_fields_separate
-    # à cause de source_id qui nulle sur les parents, on devrait certainement
+    # Attention à ne pas faire de drop sur des champs qui peuvent être nuls
+    # genre source_id sur les parents
+    # TODO: on devrait certainement
     # définir config.fields_to_drop_na avec des tests pour + de robustesse
     df = df.dropna(subset=cluster_fields_exact + cluster_fields_fuzzy)
-    # Ordonne df sur les colonnes exactes
+
     df = df.sort_values(cluster_fields_exact)
 
     # On ne garde que les colonnes utiles
@@ -285,7 +286,6 @@ def cluster_acteurs_clusters(
         set(
             cols_ids_codes
             + cluster_fields_exact
-            + cluster_fields_separate
             + cluster_fields_fuzzy
             + [COL_INDEX_SRC]
             + ["nom"]

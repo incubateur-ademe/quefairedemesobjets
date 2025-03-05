@@ -81,8 +81,6 @@ class ClusterConfig(BaseModel):
     # Conversion des codes en ids
     include_source_ids: list[int]
     include_acteur_type_ids: list[int]
-    # Champs sur lesquels on sépare les clusters
-    cluster_fields_separate: list[str]
 
     # ---------------------------------------
     # Validation
@@ -125,6 +123,7 @@ class ClusterConfig(BaseModel):
             "normalize_fields_no_words_size3_or_less",
             "normalize_fields_order_unique_words",
             "dedup_enrich_exclude_sources",
+            "cluster_fields_fuzzy",
         ]
         for k in optionals:
             if not values.get(k):
@@ -149,12 +148,6 @@ class ClusterConfig(BaseModel):
             mapping_ids_by_codes=values["mapping_acteur_types"],
             dropdown_selected=values["include_acteur_types"],
         )
-
-        # Par défaut on ne clusterise pas les acteurs d'une même source
-        # sauf si intra-source est activé
-        values["cluster_fields_separate"] = ["source_id"]
-        if values["cluster_intra_source_is_allowed"]:
-            values["cluster_fields_separate"] = []
 
         # To bail out when same field in exact/fuzzy, which the Airflow UI
         # cannot help prevent (since it has no in-between-params validation)
