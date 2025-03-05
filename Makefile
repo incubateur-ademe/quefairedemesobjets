@@ -60,14 +60,14 @@ run-airflow:
 
 .PHONY: run-django
 run-django:
+	docker compose --profile lvao up -d
 	rm -rf .parcel-cache
 	honcho start -f Procfile.dev
 
 run-all:
 	docker compose --profile airflow up -d
 	rm -rf .parcel-cache
-	$(DJANGO_ADMIN) runserver 0.0.0.0:8000
-	npm run watch
+	honcho start -f Procfile.dev
 
 # Local django operations
 .PHONY: migrate

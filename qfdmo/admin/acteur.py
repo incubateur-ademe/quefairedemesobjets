@@ -10,7 +10,8 @@ from django.contrib.postgres.lookups import Unaccent
 from django.db.models import Subquery
 from django.db.models.functions import Lower
 from django.forms import CharField
-from django.http import HttpRequest, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.urls import reverse
 from django.utils.html import format_html
 from import_export import admin as import_export_admin
 from import_export import fields, resources, widgets
@@ -316,13 +317,40 @@ class RevisionActeurParentAdmin(admin.ModelAdmin):
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
+    def has_change_permission(self, request: HttpRequest) -> bool:
+        return False
+
     def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
         return False
+
+    def change_view(
+        self,
+        request: HttpRequest,
+        object_id: str,
+        **kwargs: Any,
+    ) -> HttpResponse:
+        return HttpResponseRedirect(
+            reverse("admin:qfdmo_revisionacteur_change", args=(object_id,))
+        )
 
     # ne pas afficher le modèle dans le menu admin
     def get_model_perms(self, request):
         # Cache ce modèle du menu admin tout en permettant l'autocomplétion
         return {}
+
+    def get_queryset(self, request: HttpRequest) -> resources.QuerySet:
+        return (
+            super()
+            .get_queryset(request)
+            .filter(
+                statut=ActeurStatus.ACTIF,
+                identifiant_unique__in=Subquery(
+                    RevisionActeur.objects.filter(parent_id__isnull=False)
+                    .values("parent_id")
+                    .distinct()
+                ),
+            )
+        )
 
 
 class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin):
@@ -360,23 +388,6 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
                 "labels",
             ]
         return super().get_readonly_fields(request, revision_acteur)
-
-    def get_search_results(self, request, queryset, search_term):
-        queryset, use_distinct = super().get_search_results(
-            request, queryset, search_term
-        )
-        if "field_name" in request.GET and request.GET["field_name"] == "parent":
-            queryset = queryset.filter(
-                # filtrer les acteurs pour n'afficher que ceux qui sont déjà parents
-                # identifiant_unique in select distinct(parent_id) from revisionacteur
-                identifiant_unique__in=Subquery(
-                    RevisionActeur.objects.filter(parent_id__isnull=False)
-                    .values("parent_id")
-                    .distinct()
-                ),
-                statut=ActeurStatus.ACTIF,
-            )
-        return queryset, use_distinct
 
     def response_change(self, request, revision_acteur):
         if "get_or_create_parent" in request.POST:
