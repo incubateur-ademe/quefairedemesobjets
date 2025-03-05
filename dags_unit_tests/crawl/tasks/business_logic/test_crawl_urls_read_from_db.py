@@ -1,10 +1,10 @@
 import pytest
-from sources.config.shared_constants import EMPTY_ACTEUR_FIELD
 
-from dags.crawl.config.constants import COL_ACTEURS, COL_ID, COL_URL_ORIGINAL
-from dags.crawl.tasks.business_logic.crawl_urls_read_from_db import (
-    crawl_urls_candidates_read_from_db,
+from dags.crawl.config.columns import COLS
+from dags.crawl.tasks.business_logic.crawl_urls_read_urls_from_db import (
+    crawl_urls_read_urls_from_db,
 )
+from dags.sources.config.shared_constants import EMPTY_ACTEUR_FIELD
 from unit_tests.qfdmo.acteur_factory import DisplayedActeurFactory
 
 
@@ -28,15 +28,15 @@ class TestCrawlUrlsSelectFromDb:
         )
 
         limit = 3
-        df = crawl_urls_candidates_read_from_db(url_type, limit)
-        assert df[COL_URL_ORIGINAL].tolist() == [
+        df = crawl_urls_read_urls_from_db(url_type, limit)
+        assert df[COLS.URL_ORIGIN].tolist() == [
             "https://test.com/1",
             "https://test.com/2",
         ]
-        assert df[COL_ACTEURS].tolist() == [
-            [{COL_ID: a1.pk, "nom": "Acteur 1"}],
+        assert df[COLS.ACTEURS].tolist() == [
+            [{COLS.ID: a1.pk, "nom": "Acteur 1"}],
             [
-                {COL_ID: a2a.pk, "nom": "Acteur 2a"},
-                {COL_ID: a2b.pk, "nom": "Acteur 2b"},
+                {COLS.ID: a2a.pk, "nom": "Acteur 2a"},
+                {COLS.ID: a2b.pk, "nom": "Acteur 2b"},
             ],
         ]

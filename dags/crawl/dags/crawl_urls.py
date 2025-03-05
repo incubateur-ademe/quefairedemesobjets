@@ -1,25 +1,31 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from airflow import DAG
 from airflow.models.baseoperator import chain
 from airflow.models.param import Param
+from crawl.tasks.airflow_logic.crawl_urls_check_crawl_task import (
+    crawl_urls_check_crawl_task,
+)
 from crawl.tasks.airflow_logic.crawl_urls_check_dns_task import (
     crawl_urls_check_dns_task,
 )
 from crawl.tasks.airflow_logic.crawl_urls_check_syntax_task import (
     crawl_urls_check_syntax_task,
 )
-from crawl.tasks.airflow_logic.crawl_urls_read_from_db_task import (
-    crawl_urls_candidates_read_from_db_task,
+from crawl.tasks.airflow_logic.crawl_urls_read_urls_from_db_task import (
+    crawl_urls_read_urls_from_db_task,
 )
-from crawl.tasks.airflow_logic.crawl_urls_suggestions_metadata_task import (
-    crawl_urls_suggestions_metadata_task,
+from crawl.tasks.airflow_logic.crawl_urls_suggest_crawl_diff_https_task import (
+    crawl_urls_suggest_crawl_diff_https_task,
 )
-from crawl.tasks.airflow_logic.crawl_urls_suggestions_prepare_task import (
-    crawl_urls_suggestions_prepare_task,
+from crawl.tasks.airflow_logic.crawl_urls_suggest_crawl_diff_other_task import (
+    crawl_urls_suggest_crawl_diff_other_task,
 )
-from crawl.tasks.airflow_logic.crawl_urls_suggestions_to_db_task import (
-    crawl_urls_suggestions_to_db_task,
+from crawl.tasks.airflow_logic.crawl_urls_suggest_dns_fail_task import (
+    crawl_urls_suggest_dns_fail_task,
+)
+from crawl.tasks.airflow_logic.crawl_urls_suggest_syntax_fail_task import (
+    crawl_urls_suggest_syntax_fail_task,
 )
 
 URL_TYPES = [
@@ -41,8 +47,7 @@ with DAG(
     default_args={
         "owner": "airflow",
         "depends_on_past": False,
-        "start_date": datetime(2025, 1, 1),
-        "catchup": False,
+        "start_date": datetime(2025, 1, 1) - timedelta(days=1),
         "email_on_failure": False,
         "email_on_retry": False,
         "retries": 0,
@@ -97,13 +102,33 @@ with DAG(
             que les domaines sont joignables, sinon on ne cherche même pas à
             parcourir leur URLs""",
         ),
+        "urls_check_crawl": Param(
+            False,
+            type="boolean",
+            description_md="""**🤖 Vérification CRAWL**: on cherche à parcourir
+            les URLs pour voir si leurs pages sont accessibles
+            et/ou si elles redirigent""",
+        ),
     },
 ) as dag:
     chain(
-        crawl_urls_candidates_read_from_db_task(dag),
+        # Although we could parallelize some of below
+        # tasks, we keep linear to reduce crawl & DB load
+        crawl_urls_read_urls_from_db_task(dag),
+        # ✅ Checks
         crawl_urls_check_syntax_task(dag),
         crawl_urls_check_dns_task(dag),
-        crawl_urls_suggestions_metadata_task(dag),
-        crawl_urls_suggestions_prepare_task(dag),
-        crawl_urls_suggestions_to_db_task(dag),
+        crawl_urls_check_crawl_task(dag),
+        # 🤔 Suggestions
+        # Could also be optimized by grouping
+        # suggestions with their corresponding checks (e.g.
+        # business receives quick DNS suggestions to review before
+        # potentially long crawls)
+        # Keeping them at the end for now as a failing pipeline
+        # on any of the above checks could be a reason to not
+        # make any suggestion
+        crawl_urls_suggest_syntax_fail_task(dag),
+        crawl_urls_suggest_dns_fail_task(dag),
+        crawl_urls_suggest_crawl_diff_https_task(dag),
+        crawl_urls_suggest_crawl_diff_other_task(dag),
     )

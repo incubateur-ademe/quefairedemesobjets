@@ -5,7 +5,8 @@ unnecessarily"""
 import logging
 
 import pandas as pd
-from crawl.config.constants import COL_ACTEURS, COL_URL_ORIGINAL, SORT_COLS
+from crawl.config.columns import COLS
+from crawl.config.constants import SORT_COLS
 from django.db.models import Q
 from sources.config.shared_constants import EMPTY_ACTEUR_FIELD
 from utils import logging_utils as log
@@ -17,7 +18,7 @@ django_setup_full()
 logger = logging.getLogger(__name__)
 
 
-def crawl_urls_candidates_read_from_db(
+def crawl_urls_read_urls_from_db(
     url_type: str, limit: int | None = None
 ) -> pd.DataFrame:
     logger.info(f"{url_type=}")
@@ -28,6 +29,10 @@ def crawl_urls_candidates_read_from_db(
         DisplayedActeur.objects.filter(Q(url__isnull=False) & ~Q(url__exact=""))
         .filter(~Q(url__exact=EMPTY_ACTEUR_FIELD))
         .filter(statut=ActeurStatus.ACTIF)
+        # To help with lru caching DNS checks without
+        # having to implement yet another level of grouping
+        # (i.e. acteurs -> by URL -> by domain)
+        .order_by("url")
         .values("url", "identifiant_unique", "nom")
     )
     if limit is not None:
@@ -38,7 +43,7 @@ def crawl_urls_candidates_read_from_db(
         .apply(lambda x: x.drop(columns="url").to_dict(orient="records"))
         .reset_index()
     )
-    df.columns = [COL_URL_ORIGINAL, COL_ACTEURS]
+    df.columns = [COLS.URL_ORIGIN, COLS.ACTEURS]
     df = df_sort(df, sort_cols=SORT_COLS)
     logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
     log.preview_df_as_markdown("URLs à parcourir", df)

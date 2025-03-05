@@ -2,20 +2,22 @@
 
 import logging
 import socket
+from functools import lru_cache
 
 import pandas as pd
-from crawl.config.constants import (
-    COL_DOMAIN_SUCCESS,
-    COL_DOMAINS_RESULTS,
-    COL_DOMAINS_TO_TRY,
-    COL_URLS_TO_TRY,
-)
+from crawl.config.cohorts import COHORTS
+from crawl.config.columns import COLS
 from crawl.tasks.business_logic.crawl_urls_check_syntax import url_domain_get
+from sources.config.shared_constants import EMPTY_ACTEUR_FIELD
 from utils import logging_utils as log
+from utils.dataframes import df_split_on_filter
 
 logger = logging.getLogger(__name__)
 
 
+# To avoid re-checking the same domain
+# when we have sorted URLs by domain
+@lru_cache(maxsize=1)
 def dns_is_ok(domain: str) -> bool:
     """Checks if a domain is reachable so we don't
     waste time trying to crawl URLs for unreachable domains"""
@@ -36,39 +38,42 @@ def crawl_urls_check_dns(
 
     log.preview_df_as_markdown("🔎 Domaines à résoudre", df)
 
-    df[COL_DOMAINS_TO_TRY] = df[COL_URLS_TO_TRY].apply(
-        lambda urls: list(set([url_domain_get(x) for x in urls])) if urls else None
+    df[COLS.DOMAINS_TO_TRY] = df[COLS.URLS_TO_TRY].apply(
+        lambda urls: list(set([url_domain_get(x) for x in urls if x])) if urls else None
     )
 
-    df[COL_DOMAINS_RESULTS] = df[COL_DOMAINS_TO_TRY].apply(
-        lambda domains: (
-            [{"domain": x, "is_ok": dns_is_ok(x)} for x in domains] if domains else None
-        )
-    )
+    # Only keep rows with at least 1 domain to try
+    df = df[df[COLS.DOMAINS_TO_TRY].notnull() & df[COLS.DOMAINS_TO_TRY].apply(bool)]
+
+    # Sort by 1st domain to maximize DNS cache hits
+    df = df.sort_values(by=COLS.DOMAINS_TO_TRY, key=lambda x: x.str[0])
 
     # We use a loop so we can show progress
-    cnt, cnt_rows = 0, len(df)
-    for index, row in df.iterrows():
-        cnt += 1
-        domains = row[COL_DOMAINS_TO_TRY]
-        if not domains:
-            continue
-        logger.info(log.progress_string(cnt, cnt_rows))
+    total = len(df)
+    for counter, (index, row) in enumerate(df.iterrows(), start=1):
+        domains = row[COLS.DOMAINS_TO_TRY]
+        logger.info(log.progress_string(counter, total))
         results = [{"domain": x, "is_ok": dns_is_ok(x)} for x in domains]
         msg = [f"{x['domain']} -> {'🟢' if x['is_ok'] else '🔴'}" for x in results]
         logger.info(f"🔍 Domaines: {msg}")
-        df.at[index, COL_DOMAINS_RESULTS] = results
+        df.at[index, COLS.DOMAINS_RESULTS] = results
 
-    df[COL_DOMAIN_SUCCESS] = df[COL_DOMAINS_RESULTS].apply(
+    df[COLS.DNS_OK] = df[COLS.DOMAINS_RESULTS].apply(
         lambda domains: (
             True if domains and any([x["is_ok"] for x in domains]) else False
         )
     )
 
-    df_dns_ok = df[df[COL_DOMAIN_SUCCESS]]
-    df_dns_fail = df[~df[COL_DOMAIN_SUCCESS]]
+    # Splitting success vs. failure
+    filter_dns_ok = df[COLS.DNS_OK]
+    df_dns_ok, df_dns_fail = df_split_on_filter(df, filter_dns_ok)
+    df_dns_ok[COLS.COHORT] = COHORTS.DNS_OK
+    df_dns_fail[COLS.COHORT] = COHORTS.DNS_FAIL
+
+    # Assigning suggestion values
+    df_dns_fail[COLS.SUGGEST_VALUE] = EMPTY_ACTEUR_FIELD
 
     logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
-    log.preview_df_as_markdown("🟢 Domaines en succès", df_dns_ok)
-    log.preview_df_as_markdown("🔴 Domaines en échec", df_dns_fail)
+    log.preview_df_as_markdown(COHORTS.DNS_OK, df_dns_ok)
+    log.preview_df_as_markdown(COHORTS.DNS_FAIL, df_dns_fail)
     return df_dns_ok, df_dns_fail

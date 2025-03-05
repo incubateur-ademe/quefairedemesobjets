@@ -1,9 +1,15 @@
-"""Constants to shorten & refer to Airflow Task IDs consistently"""
+"""Task IDs for Crawl DAG"""
 
-READ = "crawl_urls_candidates_read_from_db"
-CHECK_SYNTAX = "crawl_urls_check_syntax"
-CHECK_DNS = "crawl_urls_check_dns"
-CHECK_URLS = "crawl_urls_check_reach_urls"
-SUGGESTIONS_META = "crawl_urls_suggestions_metadata"
-SUGGESTIONS_PREP = "crawl_urls_suggestions_prepare"
-SUGGESTIONS_TO_DB = "crawl_urls_suggestions_to_db"
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class TASKS:
+    READ: str = "crawl_urls_read_urls_from_db"
+    CHECK_SYNTAX: str = "crawl_urls_check_syntax"
+    CHECK_DNS: str = "crawl_urls_check_dns"
+    CHECK_CRAWL: str = "crawl_urls_check_crawl"
+    SUGGEST_SYNTAX_FAIL: str = "crawl_urls_suggest_syntax_fail"
+    SUGGEST_DNS_FAIL: str = "crawl_urls_suggest_dns_fail"
+    SUGGEST_CRAWL_DIFF_HTTPS: str = "crawl_urls_suggest_crawl_diff_https"
+    SUGGEST_CRAWL_DIFF_OTHER: str = "crawl_urls_suggest_crawl_diff_other"

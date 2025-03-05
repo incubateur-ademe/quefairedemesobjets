@@ -1,18 +1,13 @@
-import pandas as pd
 import pytest
+from crawl.fixtures import UNREACHABLE, df_read  # noqa: F401
+from sources.config.shared_constants import EMPTY_ACTEUR_FIELD
 
-from dags.crawl.config.constants import (
-    COL_DOMAIN_SUCCESS,
-    COL_DOMAINS_RESULTS,
-    COL_DOMAINS_TO_TRY,
-    COL_URLS_TO_TRY,
-)
+from dags.crawl.config.cohorts import COHORTS
+from dags.crawl.config.columns import COLS
 from dags.crawl.tasks.business_logic.crawl_urls_check_dns import (
     crawl_urls_check_dns,
     dns_is_ok,
 )
-
-INVALID_DOMAIN = "azoei1111iqlsk33333nazoienazoiuqoicsu.com"
 
 
 class TestDomainIsReachable:
@@ -20,9 +15,14 @@ class TestDomainIsReachable:
     @pytest.mark.parametrize(
         ("domain", "expected"),
         [
+            # Valid syntax & DNS resolution
             ("example.org", True),
-            ("azpeoiazpeoiazpncvaozieuaozieulqksqcnaze.fr", False),
-            ("", False),
+            # Valid syntax but no DNS resolution
+            (f"{UNREACHABLE}.fr", False),
+            # Invalid syntax
+            ("google", False),
+            # Empty cases
+            ("  ", False),
             (None, False),
         ],
     )
@@ -30,26 +30,11 @@ class TestDomainIsReachable:
         assert dns_is_ok(domain) == expected
 
 
-class TestCrawUrlsSolveReachDomains:
+class TestCrawUrlsCheckDns:
 
     @pytest.fixture
-    def df(self):
-        return pd.DataFrame(
-            {
-                "debug_id": ["fail1", "fail2", "success1", "fail3", "fail4"],
-                COL_URLS_TO_TRY: [
-                    None,
-                    ["", ""],
-                    ["https://example.org", "http://example.org"],
-                    [],
-                    [f"https://{INVALID_DOMAIN}", f"http://{INVALID_DOMAIN}"],
-                ],
-            }
-        )
-
-    @pytest.fixture
-    def df_results(self, df):
-        return crawl_urls_check_dns(df)
+    def df_results(self, df_read):  # noqa: F811
+        return crawl_urls_check_dns(df_read)
 
     @pytest.fixture
     def df_domains_ok(self, df_results):
@@ -60,17 +45,17 @@ class TestCrawUrlsSolveReachDomains:
         return df_results[1]
 
     def test_columns(self, df_domains_ok, df_domains_fail):
-        assert COL_DOMAINS_TO_TRY in df_domains_ok.columns
-        assert COL_DOMAINS_RESULTS in df_domains_ok.columns
-        assert COL_DOMAIN_SUCCESS in df_domains_ok.columns
-        assert COL_DOMAINS_TO_TRY in df_domains_fail.columns
-        assert COL_DOMAINS_RESULTS in df_domains_fail.columns
-        assert COL_DOMAIN_SUCCESS in df_domains_fail.columns
+        assert COLS.DOMAINS_TO_TRY in df_domains_ok.columns
+        assert COLS.DOMAINS_RESULTS in df_domains_ok.columns
+        assert COLS.DNS_OK in df_domains_ok.columns
+        assert COLS.DOMAINS_TO_TRY in df_domains_fail.columns
+        assert COLS.DOMAINS_RESULTS in df_domains_fail.columns
+        assert COLS.DNS_OK in df_domains_fail.columns
 
     def test_no_duplicate_domains(self, df_domains_ok):
         # Even if there are multiple candidate URLs, we don't
         # try to reach the same domain multiple times
-        assert df_domains_ok[COL_DOMAINS_TO_TRY].tolist() == [
+        assert df_domains_ok[COLS.DOMAINS_TO_TRY].tolist() == [
             ["example.org"],
         ]
 
@@ -78,9 +63,28 @@ class TestCrawUrlsSolveReachDomains:
         assert df_domains_ok["debug_id"].tolist() == ["success1"]
 
     def test_domains_fail(self, df_domains_fail):
-        assert df_domains_fail["debug_id"].tolist() == [
-            "fail1",
-            "fail2",
-            "fail3",
-            "fail4",
-        ]
+        assert sorted(df_domains_fail["debug_id"].tolist()) == sorted(
+            [
+                "fail1",
+                "fail2",
+            ]
+        )
+
+    def test_empty_domains_not_evaluated(self, df_domains_ok, df_domains_fail):
+        # We shouldn't consider invalid URLs (thus no domains) neither
+        # as part of DNS success or failure, they are just things we ignore
+        # as they are not a DNS issue per se
+        assert "empty1" not in df_domains_ok["debug_id"].tolist()
+        assert "empty2" not in df_domains_ok["debug_id"].tolist()
+        assert "empty1" not in df_domains_fail["debug_id"].tolist()
+        assert "empty2" not in df_domains_fail["debug_id"].tolist()
+
+    def test_suggestion_cohort_and_values(self, df_domains_ok, df_domains_fail):
+        # We have no suggestion to make if DNS is OK
+        assert COLS.SUGGEST_VALUE not in df_domains_ok.columns
+        # We have cohort for the same of consistency
+        assert all(df_domains_ok[COLS.COHORT] == COHORTS.DNS_OK)
+
+        # And for the failed case, suggestion is to set empty
+        assert all(df_domains_fail[COLS.SUGGEST_VALUE] == EMPTY_ACTEUR_FIELD)
+        assert all(df_domains_fail[COLS.COHORT] == COHORTS.DNS_FAIL)
