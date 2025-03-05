@@ -1,10 +1,65 @@
 import pytest
+from crawl.fixtures import df_read  # noqa: F401
+from sources.config.shared_constants import EMPTY_ACTEUR_FIELD
 
+from dags.crawl.config.cohorts import COHORTS
+from dags.crawl.config.columns import COLS
 from dags.crawl.tasks.business_logic.crawl_urls_check_syntax import (
+    crawl_urls_check_syntax,
     url_domain_get,
+    url_is_valid,
     url_protocol_fix,
     url_to_urls_to_try,
+    urls_are_http_https_versions,
 )
+
+
+class TestUrlIsValid:
+
+    @pytest.mark.parametrize(
+        ("url", "expected"),
+        [
+            # Valid cases
+            ("http://a.com", True),
+            ("https://b.com", True),
+            # Although technically valid, we don't want to support
+            # ports in our URLs, so we flag these
+            ("https://www.c.com:8080", False),
+            # Empty cases
+            (None, False),
+            ("", False),
+            ("   ", False),
+            # Invalid cases
+            ("a.com", False),
+            ("https://", False),
+            ("https://.", False),
+            ("https://.com", False),
+        ],
+    )
+    def test_crawl_url_is_valid(self, url, expected):
+        assert url_is_valid(url) == expected
+
+
+class TestUrlsAreHttpAndHttpsVersions:
+
+    @pytest.mark.parametrize(
+        ("url1", "url2", "expected"),
+        [
+            # Valid cases
+            ("http://a.com", "https://a.com", True),
+            ("https://b.com", "http://b.com", True),
+            ("https://c.com", "https://c.com", True),
+            # Empty cases
+            ("  ", "", False),
+            ("", "https://a.com", False),
+            ("http://a.com", "", False),
+            # Different domains
+            ("http://a.com", "http://b.com", False),
+            ("https://a.com", "https://b.com", False),
+        ],
+    )
+    def test_crawl_urls_are_http_and_https_versions(self, url1, url2, expected):
+        assert urls_are_http_https_versions(url1, url2) == expected
 
 
 class TestUrlProtocolFix:
@@ -47,7 +102,9 @@ class TestUrlDomainGet:
             # Valid cases
             ("http://a.com", "a.com"),
             ("https://b.com", "b.com"),
-            ("https://www.c.com:8080", "www.c.com"),
+            # We don't tolerate ports in URLs, thus we
+            # don't try to extract the domain
+            ("https://www.c.com:8080", None),
             # Empty
             (None, None),
             ("", None),
@@ -88,3 +145,26 @@ class TestUrlSyntaxSuggestReplacements:
     )
     def test_url_to_urls_to_try(self, url, expected):
         assert url_to_urls_to_try(url) == expected
+
+
+class TestCrawlUrlsCheckSyntax:
+
+    @pytest.fixture
+    def df_results(self, df_read):  # noqa: F811
+        return crawl_urls_check_syntax(df=df_read)
+
+    @pytest.fixture
+    def df_syntax_ok(self, df_results):
+        return df_results[0]
+
+    @pytest.fixture
+    def df_syntax_fail(self, df_results):
+        return df_results[1]
+
+    def test_df_syntax_ok(self, df_syntax_ok):
+        assert all(df_syntax_ok[COLS.COHORT] == COHORTS.SYNTAX_OK)
+        assert COLS.SUGGEST_VALUE not in df_syntax_ok.columns
+
+    def test_df_syntax_fail(self, df_syntax_fail):
+        assert all(df_syntax_fail[COLS.COHORT] == COHORTS.SYNTAX_FAIL)
+        assert all(df_syntax_fail[COLS.SUGGEST_VALUE] == EMPTY_ACTEUR_FIELD)

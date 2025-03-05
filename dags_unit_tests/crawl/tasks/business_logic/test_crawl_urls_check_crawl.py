@@ -3,10 +3,12 @@ import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import pytest
+from crawl.fixtures import df_dns_ok  # noqa
 
-from dags.crawl.tasks.business_logic.crawl_urls_check_urls import (
+from dags.crawl.tasks.business_logic.crawl_urls_check_crawl import (
     CrawlUrlModel,
     crawl_url,
+    crawl_urls_check_crawl,
 )
 
 
@@ -48,19 +50,19 @@ def test_server():
 def test_fetch_200(test_server):
     result: CrawlUrlModel = crawl_url(f"{test_server}/200")
     assert result.status_code == 200
-    assert result.url_recheckd.endswith("/200")
+    assert result.url_reached.endswith("/200")
 
 
 def test_fetch_404(test_server):
     result: CrawlUrlModel = crawl_url(f"{test_server}/404")
     assert result.status_code == 404
-    assert result.url_recheckd.endswith("/404")
+    assert result.url_reached.endswith("/404")
 
 
 def test_fetch_500(test_server):
     result: CrawlUrlModel = crawl_url(f"{test_server}/500")
     assert result.status_code == 500
-    assert result.url_recheckd.endswith("/500")
+    assert result.url_reached.endswith("/500")
 
 
 def test_fetch_timeout(test_server):
@@ -72,4 +74,11 @@ def test_fetch_timeout(test_server):
 def test_fetch_redirect(test_server):
     result: CrawlUrlModel = crawl_url(f"{test_server}/redirect")
     assert result.status_code == 200
-    assert result.url_recheckd.endswith("/200")
+    assert result.url_reached.endswith("/200")
+
+
+class TestCrawlUrlsCheckCrawl:
+
+    def test_crawl_urls_check_crawl(self, df_dns_ok):  # noqa
+        df = crawl_urls_check_crawl(df=df_dns_ok)
+        assert df

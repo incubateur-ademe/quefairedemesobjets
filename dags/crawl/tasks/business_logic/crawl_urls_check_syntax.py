@@ -1,4 +1,4 @@
-"""Performs syntax checks URLs and tries
+"""Perform syntax checks URLs and tries
 to fix them/propose alternatives following
 some business logic (e.g. if http -> first try https)"""
 
@@ -7,14 +7,12 @@ import re
 from urllib.parse import urlparse
 
 import pandas as pd
-from crawl.config.constants import (
-    COL_DOMAINS_TO_TRY,
-    COL_URL_ORIGINAL,
-    COL_URLS_TO_TRY,
-    SORT_COLS,
-)
+from crawl.config.cohorts import COHORTS
+from crawl.config.columns import COLS
+from crawl.config.constants import SORT_COLS
+from sources.config.shared_constants import EMPTY_ACTEUR_FIELD
 from utils import logging_utils as log
-from utils.dataframes import df_sort
+from utils.dataframes import df_sort, df_split_on_filter
 
 logger = logging.getLogger(__name__)
 
@@ -22,18 +20,37 @@ logger = logging.getLogger(__name__)
 def url_is_valid(url) -> bool:
     """Checks if URL is valid"""
     try:
-        parsed = urlparse(url)
-        return all([parsed.scheme, parsed.netloc]) and parsed.scheme in [
-            "http",
-            "https",
-        ]
+        # Not using urlparse which was too permissive
+        # (e.g. it accepts "http://")
+        # Using a regex also allows us to be more specific
+        # with what we consider a valid URL vs. pure technical
+        # aspect
+        pattern = re.compile(
+            r"^(https?):\/\/"  # Protocol (http, https)
+            r"([a-zA-Z0-9_-]+\.)+"  # Domain name
+            r"[a-zA-Z]{2,}"  # Top-level domain (e.g., .com, .org)
+            r"(\/[^\s]*)?$"  # Optional path
+        )
+        return re.match(pattern, url) is not None
     except Exception:
         return False
+
+
+def urls_are_http_https_versions(url1, url2) -> bool:
+    """Check if 2 URLs are http and https versions of each other,
+    which helps us create a special cohort of "safe" recommendations
+    of HTTP -> HTTPS URLs"""
+    if not url1 or not url1.strip() or not url2 or not url2.strip():
+        return False
+    return re.sub(r"^https?://", "", url1) == re.sub(r"^https?://", "", url2)
 
 
 def url_domain_get(url: str) -> str | None:
     """Returns domain from URL"""
     try:
+        is_valid = url_is_valid(url)
+        if not is_valid:
+            return None
         parsed_url = urlparse(url)
         domain = parsed_url.netloc
         if ":" in domain:  # Remove port if present
@@ -113,17 +130,28 @@ def crawl_urls_check_syntax(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFram
     - urls we should try to crawl (= at least one suggestion)
     - urls we should discard (= no suggestion)
     """
-    df[COL_URLS_TO_TRY] = df[COL_URL_ORIGINAL].apply(url_to_urls_to_try)
-    df[COL_DOMAINS_TO_TRY] = df[COL_URLS_TO_TRY].apply(
+    df[COLS.URLS_TO_TRY] = df[COLS.URL_ORIGIN].apply(url_to_urls_to_try)
+    df[COLS.DOMAINS_TO_TRY] = df[COLS.URLS_TO_TRY].apply(
         lambda x: url_to_dns_to_try(x[0]) if x else None
     )
-    df_syntax_fail = df[
-        (df[COL_URLS_TO_TRY].isnull()) | (df[COL_DOMAINS_TO_TRY].isnull())
-    ]
-    df_syntax_ok = df[df[COL_URLS_TO_TRY].notnull()]
+
+    # Splitting success vs. failure
+    filter_syntax = (df[COLS.URLS_TO_TRY].notnull()) & (
+        df[COLS.DOMAINS_TO_TRY].notnull()
+    )
+    df_syntax_ok, df_syntax_fail = df_split_on_filter(df, filter_syntax)
+    df_syntax_ok[COLS.COHORT] = COHORTS.SYNTAX_OK
+    df_syntax_fail[COLS.COHORT] = COHORTS.SYNTAX_FAIL
+
+    #  Assigning suggestion values
+    df_syntax_fail[COLS.SUGGEST_VALUE] = EMPTY_ACTEUR_FIELD
+
+    # Sorting
     df_syntax_ok = df_sort(df_syntax_ok, sort_cols=SORT_COLS)
     df_syntax_fail = df_sort(df_syntax_fail, sort_cols=SORT_COLS)
+
+    # Debug
     logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
-    log.preview_df_as_markdown("🟢 Syntaxes en succès", df_syntax_ok)
-    log.preview_df_as_markdown("🔴 Syntaxes en échec", df_syntax_fail)
+    log.preview_df_as_markdown(COHORTS.SYNTAX_OK, df_syntax_ok)
+    log.preview_df_as_markdown(COHORTS.SYNTAX_FAIL, df_syntax_fail)
     return df_syntax_ok, df_syntax_fail
