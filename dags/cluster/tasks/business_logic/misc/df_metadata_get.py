@@ -5,8 +5,8 @@ COUNT_CLUSTERS = "1) 📦 Nombre Clusters Proposés"
 COUNT_CLUSTERS_CURRENT = "2) 📦 Nombre Clusters Existants"
 COUNT_CLUSTERS_NET = "3) 📦 Nombre Clusters Net"
 COUNT_ACTEURS = "4) 🎭 Nombre Acteurs Total"
-COUNT_ACTEURS_CURRENT = "5) 🎭 Nombre Acteurs Existants"
-COUNT_ACTEURS_NEW = "6) 🎭 Nombre Acteurs Nouveaux"
+COUNT_ACTEURS_CURRENT = "5) 🎭 Nombre Acteurs Déjà Clusterisés"
+COUNT_ACTEURS_NEW = "6) 🎭 Nombre Acteurs Nouvellement Clusterisés"
 
 
 def df_metadata_get(df_clusters: pd.DataFrame) -> dict:
