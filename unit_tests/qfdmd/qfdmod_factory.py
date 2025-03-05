@@ -1,4 +1,4 @@
-from factory import Faker
+from factory import Faker, SubFactory
 from factory.django import DjangoModelFactory as Factory
 
 from qfdmd.models import Lien, Produit, Synonyme
@@ -18,8 +18,14 @@ class ProduitFactory(Factory):
         model = Produit
         django_get_or_create = ("nom",)
 
+    id = Faker("pyint", min_value=1)  # Ajout d'un ID unique
+    nom = Faker("sentence", nb_words=3)
+
 
 class SynonymeFactory(Factory):
     class Meta:
         model = Synonyme
         django_get_or_create = ("nom",)
+
+    nom = Faker("sentence", nb_words=3)
+    produit = SubFactory(ProduitFactory)
