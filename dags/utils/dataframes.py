@@ -80,3 +80,15 @@ def df_discard_if_col_vals_frequent(
         msg = f"🔴 Lignes supprimées car colonne={col} répétée >= {threshold} fois"
         log.preview_df_as_markdown(msg, df_discarded)
     return df, df_discarded
+
+
+def dfs_assert_add_up_to_df(dfs: list[pd.DataFrame], df: pd.DataFrame) -> None:
+    """Asserts that the sum of the dfs equals the original df
+    (e.g. using in crawling DAG where we end up with 4 crawling cohorts
+    and want to ensure our filters were all properly exclusive/complementary)"""
+    len_dfs = sum(len(d) for d in dfs)
+    len_df = len(df)
+    if len_dfs != len_df:
+        raise ValueError(f"Somme lignes des dfs {len_dfs} != df originale {len_df}")
+    if set(df.index) != set(index for d in dfs for index in d.index):
+        raise ValueError("Indexes des dfs ne correspondent pas à l'original")

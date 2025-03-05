@@ -6,7 +6,6 @@ from crawl.config.cohorts import COHORTS
 from crawl.config.tasks import TASKS
 from crawl.config.xcoms import XCOMS, xcom_pull
 from crawl.tasks.business_logic.crawl_urls_suggest import crawl_urls_suggest
-from utils.dataframes import df_none_or_empty
 
 logger = logging.getLogger(__name__)
 
@@ -31,13 +30,11 @@ def task_info_get():
 def crawl_urls_suggest_crawl_diff_other_wrapper(ti, params, dag, run_id) -> None:
     logger.info(task_info_get())
 
-    df = xcom_pull(ti, XCOMS.DF_CRAWL_DIFF_OTHER)
-    # TODO: refactor below with task dependencies once DAG is no longer linear
-    if df_none_or_empty(df):
-        logger.info("Pas d'URLs différentes HTTPs, on s'arrête là")
-        return
     crawl_urls_suggest(
-        df=df, dag_id=dag.dag_id, run_id=run_id, dry_run=params.get("dry_run", True)
+        df=xcom_pull(ti, XCOMS.DF_CRAWL_DIFF_OTHER, skip_if_empty=True),
+        dag_id=dag.dag_id,
+        run_id=run_id,
+        dry_run=params.get("dry_run", True),
     )
 
 

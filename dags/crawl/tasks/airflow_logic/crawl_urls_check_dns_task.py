@@ -38,7 +38,7 @@ def crawl_urls_check_dns_wrapper(ti) -> None:
     logger.info(task_info_get())
 
     df_dns_ok, df_dns_fail = crawl_urls_check_dns(
-        df=xcom_pull(ti, XCOMS.DF_SYNTAX_OK),
+        df=xcom_pull(ti, XCOMS.DF_SYNTAX_OK, skip_if_empty=True),
     )
 
     ti.xcom_push(key=XCOMS.DF_DNS_OK, value=df_dns_ok)

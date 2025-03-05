@@ -29,9 +29,11 @@ def task_info_get():
 def crawl_urls_suggest_dns_fail_wrapper(ti, params, dag, run_id) -> None:
     logger.info(task_info_get())
 
-    df = xcom_pull(ti, XCOMS.DF_DNS_FAIL, skip_if_empty=True)
     crawl_urls_suggest(
-        df=df, dag_id=dag.dag_id, run_id=run_id, dry_run=params.get("dry_run", True)
+        df=xcom_pull(ti, XCOMS.DF_DNS_FAIL, skip_if_empty=True),
+        dag_id=dag.dag_id,
+        run_id=run_id,
+        dry_run=params.get("dry_run", True),
     )
 
 

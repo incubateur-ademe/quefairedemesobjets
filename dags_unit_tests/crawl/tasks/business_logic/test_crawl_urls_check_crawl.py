@@ -2,13 +2,15 @@ import threading
 import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
+import pandas as pd
 import pytest
-from crawl.fixtures import df_dns_ok  # noqa
+from crawl.config.cohorts import COHORTS
+from crawl.config.columns import COLS
 
 from dags.crawl.tasks.business_logic.crawl_urls_check_crawl import (
     CrawlUrlModel,
     crawl_url,
-    crawl_urls_check_crawl,
+    df_cohorts_split,
 )
 
 
@@ -79,6 +81,47 @@ def test_fetch_redirect(test_server):
 
 class TestCrawlUrlsCheckCrawl:
 
-    def test_crawl_urls_check_crawl(self, df_dns_ok):  # noqa
-        df = crawl_urls_check_crawl(df=df_dns_ok)
-        assert df
+    def test_df_cohorts_split(self):  # noqa
+        df = pd.DataFrame(
+            [
+                # 🟢 URL en succès ET inchangée
+                {
+                    COLS.CRAWL_WAS_SUCCESS: True,
+                    COLS.URL_ORIGIN: "http://localhost:0/200",
+                    COLS.URLS_TO_TRY: ["http://localhost:0/200"],
+                    COLS.CRAWL_URL_SUCCESS: "http://localhost:0/200",
+                    COLS.DOMAINS_TO_TRY: ["localhost"],
+                },
+                # 🟡 URL différente HTTPs dispo -> HTTPs proposée
+                {
+                    COLS.CRAWL_WAS_SUCCESS: True,
+                    COLS.URL_ORIGIN: "http://www.google.com/",
+                    COLS.URLS_TO_TRY: ["https://www.google.com/"],
+                    COLS.CRAWL_URL_SUCCESS: "https://www.google.com/",
+                    COLS.DOMAINS_TO_TRY: ["www.google.com"],
+                },
+                # 🟡 URL différente (et pas juste HTTPs) -> nouvelle proposée
+                {
+                    COLS.CRAWL_WAS_SUCCESS: True,
+                    COLS.URL_ORIGIN: "http://localhost:0/redirect",
+                    COLS.URLS_TO_TRY: ["http://localhost:0/redirect"],
+                    COLS.CRAWL_URL_SUCCESS: "http://localhost:0/200",
+                    COLS.DOMAINS_TO_TRY: ["localhost"],
+                },
+                # 🔴 URL inaccessible -> mise à vide
+                {
+                    COLS.CRAWL_WAS_SUCCESS: False,
+                    COLS.URL_ORIGIN: "http://localhost:0/404",
+                    COLS.URLS_TO_TRY: ["http://localhost:0/404"],
+                    COLS.CRAWL_URL_SUCCESS: None,
+                    COLS.DOMAINS_TO_TRY: ["localhost"],
+                },
+            ]
+        )
+        df_ok_diff_https, df_ok_diff_other, df_fail = df_cohorts_split(df=df)
+        assert len(df_ok_diff_https) == 1
+        assert len(df_ok_diff_other) == 1
+        assert len(df_fail) == 1
+        assert df_ok_diff_https[COLS.COHORT].iloc[0] == COHORTS.CRAWL_DIFF_HTTPS
+        assert df_ok_diff_other[COLS.COHORT].iloc[0] == COHORTS.CRAWL_DIFF_OTHER
+        assert df_fail[COLS.COHORT].iloc[0] == COHORTS.CRAWL_FAIL
