@@ -10,6 +10,7 @@ def environment(request):
         "DEBUG": settings.DEBUG,
         "STIMULUS_DEBUG": settings.STIMULUS_DEBUG,
         "POSTHOG_DEBUG": settings.POSTHOG_DEBUG,
+        "BLOCK_ROBOTS": settings.BLOCK_ROBOTS,
         "is_embedded": True,
         "turbo": request.headers.get("Turbo-Frame"),
     }
@@ -28,4 +29,5 @@ def assistant(request) -> dict:
             "POSTHOG_KEY": settings.ASSISTANT["POSTHOG_KEY"],
             "MATOMO_ID": settings.ASSISTANT["MATOMO_ID"],
         },
+        **constants.ASSISTANT,
     }

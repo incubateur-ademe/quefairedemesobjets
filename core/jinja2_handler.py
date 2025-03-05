@@ -1,11 +1,11 @@
 from math import sqrt
-from urllib.parse import quote_plus
 
 from django.conf import settings
 from django.http import HttpRequest
 from django.templatetags.static import static
 from django.urls import reverse
 
+from core.templatetags.seo_tags import get_sharer_content
 from core.utils import get_direction
 from jinja2 import Environment
 from qfdmo.models import DisplayedActeur
@@ -71,7 +71,7 @@ def environment(**options):
             "display_exclusivite_reparation": display_exclusivite_reparation,
             "url": reverse,
             "static": static,
-            "quote_plus": lambda u: quote_plus(u),
+            "sharer": get_sharer_content,
             "AIRFLOW_WEBSERVER_REFRESHACTEUR_URL": (
                 settings.AIRFLOW_WEBSERVER_REFRESHACTEUR_URL
             ),
