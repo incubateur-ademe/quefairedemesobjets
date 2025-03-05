@@ -24,6 +24,7 @@ def cluster_acteurs_clusters_display(
     cluster_fields_fuzzy: list[str],
     cluster_fields_separate: list[str],
     cluster_fuzzy_threshold: float,
+    cluster_intra_source_is_allowed: bool,
     fields_protected: list[str],
     fields_transformed: list[str],
 ) -> pd.DataFrame:
@@ -35,6 +36,7 @@ def cluster_acteurs_clusters_display(
         cluster_fields_fuzzy=cluster_fields_fuzzy,
         cluster_fields_separate=cluster_fields_separate,
         cluster_fuzzy_threshold=cluster_fuzzy_threshold,
+        cluster_intra_source_is_allowed=cluster_intra_source_is_allowed,
     )
     log.preview_df_as_markdown("Clusters orphelins+parents", df_clusters)
     if df_clusters.empty:

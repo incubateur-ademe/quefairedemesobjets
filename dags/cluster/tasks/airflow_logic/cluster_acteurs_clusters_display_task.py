@@ -62,6 +62,7 @@ def cluster_acteurs_suggestions_wrapper(**kwargs) -> None:
         cluster_fields_fuzzy=config.cluster_fields_fuzzy,
         cluster_fields_separate=config.cluster_fields_separate,
         cluster_fuzzy_threshold=config.cluster_fuzzy_threshold,
+        cluster_intra_source_is_allowed=config.cluster_intra_source_is_allowed,
         fields_protected=config.fields_protected,
         fields_transformed=config.fields_transformed,
     )

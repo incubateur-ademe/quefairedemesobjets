@@ -240,6 +240,7 @@ def cluster_acteurs_clusters(
     cluster_fields_fuzzy: list[str] = [],
     cluster_fields_separate: list[str] = [],
     cluster_fuzzy_threshold: float = 0.5,
+    cluster_intra_source_is_allowed: bool = False,
 ) -> pd.DataFrame:
     """
     Génère des suggestions de clusters sur un DataFrame
@@ -308,14 +309,10 @@ def cluster_acteurs_clusters(
         log.preview_df_as_markdown("🔵 Cluster potentiel exact", exact_rows)
 
         # Liste des clusters à considérer, on commence avec rien
-        clusters_to_add = []
+        clusters_potential = []
 
-        # Si on a des champs fuzzy, on cherche à
-        # sous-clusteriser sur ces champs
+        # Fuzzy clustering activated
         if cluster_fields_fuzzy:
-            # logger.info(f"fields_fuzzy={cluster_fields_fuzzy}")
-            # logger.info(f"threshold={cluster_fuzzy_threshold}")
-
             keys += cluster_fields_fuzzy
             subclusters = cluster_cols_group_fuzzy(
                 exact_rows, cluster_fields_fuzzy, threshold=cluster_fuzzy_threshold
@@ -325,27 +322,30 @@ def cluster_acteurs_clusters(
             logger.info(f"{status} Après fuzzy: #{cnt} sous-clusters")
             for i, fuzzy_rows in enumerate(subclusters):
                 fuzzy_keys = keys + [str(i + 1)]
-                # log.preview_df_as_markdown("🟢 Cluster fuzzy conservé", fuzzy_rows)
-                clusters_to_add.append(("fuzzy", fuzzy_keys, fuzzy_rows))
+                clusters_potential.append(("fuzzy", fuzzy_keys, fuzzy_rows))
 
         else:
-            # log.preview_df_as_markdown("🟢 Cluster exact conservé", exact_rows)
-            clusters_to_add.append(("exact", keys, exact_rows))
+            # Fuzzy clustering not activated
+            clusters_potential.append(("exact", keys, exact_rows))
 
-        for ctype, keys, rows in clusters_to_add:
+        # For all potential clusters, we apply the intra-source logic
+        for ctype, keys, rows in clusters_potential:
             cluster_id = cluster_id_from_strings(keys)
             rows["cluster_id"] = cluster_id
             values = rows[cluster_fields_fuzzy + ["nom"]]
             logger.info(f"\n🟢 CLUSTER: {cluster_id=}, {keys=}, {values=}")
 
-            kept, lost = cluster_exclude_intra_source(rows)
-            if isinstance(lost, pd.DataFrame):
-                log.preview_df_as_markdown("❌ Acteurs intra-source exclus", lost)
-            if len(kept) < 2:
-                log.preview_df_as_markdown("🔴 Cluster de taille <2", kept)
-                continue
-            log.preview_df_as_markdown(f"🟢 Cluster {ctype} conservé", kept)
-            clusters.append(kept.copy())
+            if cluster_intra_source_is_allowed:
+                clusters.append(rows.copy())
+            else:
+                kept, lost = cluster_exclude_intra_source(rows)
+                if isinstance(lost, pd.DataFrame):
+                    log.preview_df_as_markdown("❌ Acteurs intra-source exclus", lost)
+                if len(kept) < 2:
+                    log.preview_df_as_markdown("🔴 Cluster de taille <2", kept)
+                    continue
+                log.preview_df_as_markdown(f"🟢 Cluster {ctype} conservé", kept)
+                clusters.append(kept.copy())
 
     if not clusters:
         return pd.DataFrame()
