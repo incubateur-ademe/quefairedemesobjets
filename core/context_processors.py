@@ -29,5 +29,5 @@ def assistant(request) -> dict:
             "POSTHOG_KEY": settings.ASSISTANT["POSTHOG_KEY"],
             "MATOMO_ID": settings.ASSISTANT["MATOMO_ID"],
         },
-        **constants.ASSISTANT
+        **constants.ASSISTANT,
     }
