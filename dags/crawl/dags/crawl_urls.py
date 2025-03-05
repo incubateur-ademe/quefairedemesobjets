@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 
 from airflow import DAG
-from airflow.models.baseoperator import chain
 from airflow.models.param import Param
 from crawl.tasks.airflow_logic.crawl_urls_check_crawl_task import (
     crawl_urls_check_crawl_task,
@@ -111,6 +110,23 @@ with DAG(
         ),
     },
 ) as dag:
+    read = crawl_urls_read_urls_from_db_task(dag)
+    check_syntax = crawl_urls_check_syntax_task(dag)
+    check_dns = crawl_urls_check_dns_task(dag)
+    check_crawl = crawl_urls_check_crawl_task(dag)
+    suggest_syntax = crawl_urls_suggest_syntax_fail_task(dag)
+    suggest_dns = crawl_urls_suggest_dns_fail_task(dag)
+    suggest_diff_https = crawl_urls_suggest_crawl_diff_https_task(dag)
+    suggest_diff_other = crawl_urls_suggest_crawl_diff_other_task(dag)
+
+    # Always reading and checking syntax
+    read >> check_syntax >> suggest_syntax  # type: ignore
+    # DNS depends on syntax
+    check_syntax >> check_dns >> suggest_dns  # type: ignore
+    # Crawl depends on DNS
+    check_dns >> check_crawl >> [suggest_diff_https, suggest_diff_other]  # type: ignore
+
+    """
     chain(
         # Although we could parallelize some of below
         # tasks, we keep linear to reduce crawl & DB load
@@ -132,3 +148,4 @@ with DAG(
         crawl_urls_suggest_crawl_diff_https_task(dag),
         crawl_urls_suggest_crawl_diff_other_task(dag),
     )
+    """

@@ -6,6 +6,7 @@ happily gives None without complaining)"""
 from dataclasses import dataclass
 from typing import Any
 
+import pandas as pd
 from airflow.exceptions import AirflowSkipException
 from airflow.models.taskinstance import TaskInstance
 from crawl.config.tasks import TASKS
@@ -58,8 +59,10 @@ def xcom_pull(ti: TaskInstance, key: str, skip_if_empty: bool = False) -> Any:
     else:
         raise ValueError(f"{msg} key inconnue")
 
-    if skip_if_empty and value is None:
-        raise AirflowSkipException(f"{msg} est vide, on s'arrête là")
+    if skip_if_empty and (
+        value is None or (isinstance(value, pd.DataFrame) and value.empty)
+    ):
+        raise AirflowSkipException(f"✋ {msg} est vide, on s'arrête là")
     log.preview(f"{msg} value = ", value)
     return value
 

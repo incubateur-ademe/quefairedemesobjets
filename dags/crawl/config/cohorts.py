@@ -15,4 +15,4 @@ class COHORTS:
     # Cohorts for display purposes only
     SYNTAX_OK = "🟢 Syntaxe en succès"
     DNS_OK = "🟢 Domaines en succès"
-    CRAWL_OK_SAME = "🟢 URLs en succès ET inchangées"
+    CRAWL_OK_SAME = "🟢 URL en succès ET inchangée"
