@@ -82,46 +82,56 @@ def test_fetch_redirect(test_server):
 class TestCrawlUrlsCheckCrawl:
 
     def test_df_cohorts_split(self):  # noqa
+        # 🟢 URL en succès ET inchangée
+        case_ok_same = {
+            COLS.CRAWL_WAS_SUCCESS: True,
+            COLS.URL_ORIGIN: "http://localhost:0/200",
+            COLS.URLS_TO_TRY: ["http://localhost:0/200"],
+            COLS.CRAWL_URL_SUCCESS: "http://localhost:0/200",
+            COLS.DOMAINS_TO_TRY: ["localhost"],
+        }
+        # 🟡 URL différente HTTPs dispo -> HTTPs proposée
+        case_diff_https = {
+            COLS.CRAWL_WAS_SUCCESS: True,
+            COLS.URL_ORIGIN: "http://www.google.com/",
+            COLS.URLS_TO_TRY: ["https://www.google.com/"],
+            COLS.CRAWL_URL_SUCCESS: "https://www.google.com/",
+            COLS.DOMAINS_TO_TRY: ["www.google.com"],
+        }
+        # 🟡 URL différente (et pas juste HTTPs) -> nouvelle proposée
+        case_diff_other = {
+            COLS.CRAWL_WAS_SUCCESS: True,
+            COLS.URL_ORIGIN: "http://localhost:0/redirect",
+            COLS.URLS_TO_TRY: ["http://localhost:0/redirect"],
+            COLS.CRAWL_URL_SUCCESS: "http://localhost:0/200",
+            COLS.DOMAINS_TO_TRY: ["localhost"],
+        }
+        # 🔴 URL inaccessible -> mise à vide
+        case_fail = {
+            COLS.CRAWL_WAS_SUCCESS: False,
+            COLS.URL_ORIGIN: "http://localhost:0/404",
+            COLS.URLS_TO_TRY: ["http://localhost:0/404"],
+            COLS.CRAWL_URL_SUCCESS: None,
+            COLS.DOMAINS_TO_TRY: ["localhost"],
+        }
         df = pd.DataFrame(
             [
-                # 🟢 URL en succès ET inchangée
-                {
-                    COLS.CRAWL_WAS_SUCCESS: True,
-                    COLS.URL_ORIGIN: "http://localhost:0/200",
-                    COLS.URLS_TO_TRY: ["http://localhost:0/200"],
-                    COLS.CRAWL_URL_SUCCESS: "http://localhost:0/200",
-                    COLS.DOMAINS_TO_TRY: ["localhost"],
-                },
-                # 🟡 URL différente HTTPs dispo -> HTTPs proposée
-                {
-                    COLS.CRAWL_WAS_SUCCESS: True,
-                    COLS.URL_ORIGIN: "http://www.google.com/",
-                    COLS.URLS_TO_TRY: ["https://www.google.com/"],
-                    COLS.CRAWL_URL_SUCCESS: "https://www.google.com/",
-                    COLS.DOMAINS_TO_TRY: ["www.google.com"],
-                },
-                # 🟡 URL différente (et pas juste HTTPs) -> nouvelle proposée
-                {
-                    COLS.CRAWL_WAS_SUCCESS: True,
-                    COLS.URL_ORIGIN: "http://localhost:0/redirect",
-                    COLS.URLS_TO_TRY: ["http://localhost:0/redirect"],
-                    COLS.CRAWL_URL_SUCCESS: "http://localhost:0/200",
-                    COLS.DOMAINS_TO_TRY: ["localhost"],
-                },
-                # 🔴 URL inaccessible -> mise à vide
-                {
-                    COLS.CRAWL_WAS_SUCCESS: False,
-                    COLS.URL_ORIGIN: "http://localhost:0/404",
-                    COLS.URLS_TO_TRY: ["http://localhost:0/404"],
-                    COLS.CRAWL_URL_SUCCESS: None,
-                    COLS.DOMAINS_TO_TRY: ["localhost"],
-                },
+                case_ok_same,
+                # x 1
+                case_diff_https,
+                # x 2
+                case_diff_other,
+                case_diff_other,
+                # x 3
+                case_fail,
+                case_fail,
+                case_fail,
             ]
         )
         df_ok_diff_https, df_ok_diff_other, df_fail = df_cohorts_split(df=df)
         assert len(df_ok_diff_https) == 1
-        assert len(df_ok_diff_other) == 1
-        assert len(df_fail) == 1
+        assert len(df_ok_diff_other) == 2
+        assert len(df_fail) == 3
         assert df_ok_diff_https[COLS.COHORT].iloc[0] == COHORTS.CRAWL_DIFF_HTTPS
         assert df_ok_diff_other[COLS.COHORT].iloc[0] == COHORTS.CRAWL_DIFF_OTHER
         assert df_fail[COLS.COHORT].iloc[0] == COHORTS.CRAWL_FAIL
