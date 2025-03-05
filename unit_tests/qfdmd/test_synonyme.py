@@ -12,10 +12,8 @@ class TestSynonyme:
 
     @pytest.mark.django_db
     def test_slug_max_length(self):
-        synonyme = SynonymeFactory(nom="X" * 255)
-        assert synonyme.slug == "x" * 255
+        synonyme255 = SynonymeFactory(nom="X" * 255)
+        assert synonyme255.slug == "x" * 255
 
-    @pytest.mark.django_db
-    def test_slug_max_length_with_special_characters(self):
-        synonyme = SynonymeFactory(nom="X" * 255 + "é")
-        assert synonyme.slug == "x" * 255
+        synonyme256 = SynonymeFactory(nom="Y" * 256)
+        assert synonyme256.slug == "y" * 255
