@@ -43,8 +43,8 @@ class TestClusterActeursClustersDisplay:
             df=df,
             cluster_fields_exact=["ville"],
             cluster_fields_fuzzy=[],
-            cluster_fields_separate=["source_id"],
             cluster_fuzzy_threshold=0.5,
+            cluster_intra_source_is_allowed=False,
             fields_protected=["source_id"],
             fields_transformed=["ville"],
         )
@@ -81,8 +81,8 @@ class TestClusterActeursClustersDisplay:
             df=df,
             cluster_fields_exact=["ville"],
             cluster_fields_fuzzy=[],
-            cluster_fields_separate=["source_id"],
             cluster_fuzzy_threshold=0.5,
+            cluster_intra_source_is_allowed=False,
             fields_protected=["source_id"],
             fields_transformed=["ville"],
         )

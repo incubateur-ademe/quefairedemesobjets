@@ -55,16 +55,6 @@ class TestClusterConfigModel:
         config = ClusterConfig(**params_working)
         assert config.include_source_ids == [1, 2, 3]
 
-    def test_working_cluster_fields_separate(self, config_working, params_working):
-        # Par défaut on ne clusterise pas sur la même source
-        assert config_working.cluster_intra_source_is_allowed is False
-        assert config_working.cluster_fields_separate == ["source_id"]
-        # En revanche si on autorise le clustering intra-source
-        # on ne sépare pas sur la source
-        params_working["cluster_intra_source_is_allowed"] = True
-        config = ClusterConfig(**params_working)
-        assert config.cluster_fields_separate == []
-
     @pytest.mark.parametrize("input", [None, ""])
     def test_optional_include_only_if_regex_matches_nom(self, params_working, input):
         # On peut ne pas fournir de regex

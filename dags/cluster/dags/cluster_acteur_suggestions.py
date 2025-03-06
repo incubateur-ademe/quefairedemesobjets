@@ -256,7 +256,7 @@ PARAMS = {
     ),
     "cluster_fields_fuzzy": Param(
         ["nom", "adresse"],
-        type="array",
+        type=["null", "array"],
         examples=fields_all,
         description_md=r"""Les champs sur lesquels on fait le groupage fuzzy.
             exemple: ["code_postal", "ville"]""",

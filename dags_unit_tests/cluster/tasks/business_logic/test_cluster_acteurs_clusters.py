@@ -20,6 +20,7 @@ def df_clusters_to_dict(df: pd.DataFrame) -> dict[str, list[str]]:
     return df.groupby("cluster_id")["identifiant_unique"].apply(list).to_dict()
 
 
+@pytest.mark.django_db
 class TestClusterActeursClusters:
 
     # -----------------------------------------------
@@ -79,11 +80,6 @@ class TestClusterActeursClusters:
             df_basic,
             cluster_fields_exact=["ville"],
             cluster_fields_fuzzy=[],
-            # On spécifie 1 colonne à séparer
-            # pour s'assurer qu'il n'y a pas de régression
-            # sur notre test de base par rapport à cette fonctionalité
-            # mais voir test_cols_split_exact pour la gestion de ce cas
-            cluster_fields_separate=["source_code"],
         )
         assert len(df_clusters) == len(df_basic)
         assert df_clusters["cluster_id"].nunique() == 3
@@ -248,7 +244,6 @@ class TestClusterActeursClusters:
             df=df_norm,
             cluster_fields_exact=["code_postal", "ville"],
             cluster_fields_fuzzy=["nom"],
-            cluster_fields_separate=["source_id"],
             cluster_fuzzy_threshold=0.5,
         )
         assert df_clusters["cluster_id"].nunique() == 1
@@ -261,17 +256,48 @@ class TestClusterActeursClusters:
     # -----------------------------------------------
     # Tests sur la séparation des clusters
     # -----------------------------------------------
+    def test_cluster_instra_source(self):
+        from unit_tests.qfdmo.acteur_factory import (
+            ActeurTypeFactory,
+            DisplayedActeurFactory,
+            SourceFactory,
+        )
 
-    @pytest.fixture(scope="session")
-    def df_cols_split_exact(self):
-        """On définit des clusters qui doivent être séparés
-        quand ils ont le même code source. Cas à couvrir:
-        - 1 cluster avec 2
+        at1 = ActeurTypeFactory(code="at1")
+        s1 = SourceFactory(code="s1")
+        DisplayedActeurFactory(
+            identifiant_unique="orphan1", acteur_type=at1, ville="Laval"
+        )
+        DisplayedActeurFactory(
+            identifiant_unique="orphan2", acteur_type=at1, ville="Laval", source=s1
+        )
+        df = pd.DataFrame(
+            {
+                "identifiant_unique": ["orphan1", "orphan2"],
+                "source_id": [s1.id, s1.id],
+                "acteur_type_id": [at1.id, at1.id],
+                "ville": ["Laval", "Laval"],
+                COL_INDEX_SRC: [0, 1],
+                "nombre_enfants": [0, 0],
+                "nom": ["orphan1", "orphan2"],
+            }
+        )
+        conf = {
+            "df": df,
+            "cluster_fields_exact": ["ville"],
+            "cluster_fields_fuzzy": [],
+            "cluster_fuzzy_threshold": 0.5,
+        }
+        # First testing without intra-source to show
+        # we are getting no clusters
+        conf["cluster_intra_source_is_allowed"] = False
+        df_clusters = cluster_acteurs_clusters(**conf)
+        assert len(df_clusters) == 0
 
-        """
-
-    def test_cols_split_exact(self, df_cols_split_exact):
-        pass
+        # Now testing with intra-source so get our cluster
+        conf["cluster_intra_source_is_allowed"] = True
+        df_clusters = cluster_acteurs_clusters(**conf)
+        assert len(df_clusters) == 2
 
 
 class TestClusterStrings:
