@@ -5,7 +5,6 @@ some business logic (e.g. if http -> first try https)"""
 import logging
 
 from airflow import DAG
-from airflow.exceptions import AirflowSkipException
 from airflow.operators.python import PythonOperator
 from crawl.config.tasks import TASKS
 from crawl.config.xcoms import XCOMS, xcom_pull
@@ -40,9 +39,6 @@ def crawl_urls_check_syntax_wrapper(ti) -> None:
     df_syntax_ok, df_syntax_fail = crawl_urls_check_syntax(
         df=xcom_pull(ti, XCOMS.DF_READ, skip_if_empty=True),
     )
-
-    if df_syntax_ok.empty:
-        raise AirflowSkipException("0 URLs avec syntaxe OK, on s'arrête là")
 
     ti.xcom_push(key=XCOMS.DF_SYNTAX_OK, value=df_syntax_ok)
     ti.xcom_push(key=XCOMS.DF_SYNTAX_FAIL, value=df_syntax_fail)
