@@ -26,16 +26,18 @@ def render_file_content(file_field: FileField) -> str:
     """Renders the content of a Filefield as a safe HTML string
     and caches the result."""
 
-    return ""
-
     def get_file_content() -> str:
-        with file_field.open() as f:
+        if not file_field or not file_field.storage.exists(file_field.name):
+            return ""
+        with file_field.storage.open(file_field.name) as f:
             return mark_safe(f.read().decode("utf-8"))  # noqa: S308
 
     return cast(
         str,
         cache.get_or_set(
-            f"filefield-{file_field.name}-{file_field.size}", get_file_content
+            f"filefield-{file_field.name}-"
+            f"{file_field.size if hasattr(file_field, 'size') else 0}",
+            get_file_content,
         ),
     )
 
