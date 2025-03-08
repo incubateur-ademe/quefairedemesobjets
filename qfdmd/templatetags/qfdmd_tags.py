@@ -1,3 +1,4 @@
+import logging
 from typing import cast
 
 from django import template
@@ -27,10 +28,14 @@ def render_file_content(file_field: FileField) -> str:
     and caches the result."""
 
     def get_file_content() -> str:
-        if not file_field or not file_field.storage.exists(file_field.name):
+        # file_field.storage.exists(file_field.name) doesn't work with CleverCloud s3
+        # So we use a try except to catch FileNotFoundError error
+        try:
+            with file_field.storage.open(file_field.name) as f:
+                return mark_safe(f.read().decode("utf-8"))  # noqa: S308
+        except FileNotFoundError as e:
+            logging.error(f"file not found {file_field.name=}, original error : {e}")
             return ""
-        with file_field.storage.open(file_field.name) as f:
-            return mark_safe(f.read().decode("utf-8"))  # noqa: S308
 
     return cast(
         str,
