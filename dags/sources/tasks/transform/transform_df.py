@@ -31,6 +31,7 @@ MANDATORY_COLUMNS_AFTER_NORMALISATION = [
     "proposition_services_codes",
     "source_code",
     "acteur_type_code",
+    "statut",
 ]
 REGEX_BAN_SEPARATORS = r"\s,;"
 

@@ -35,15 +35,28 @@ def is_identique_row(row_source, row_db, columns_to_compare):
 def keep_acteur_changed(
     df_normalized: pd.DataFrame, df_acteur_from_db: pd.DataFrame, dag_config: DAGConfig
 ):
-    columns_to_compare = (
-        dag_config.get_expected_columns()
-        - {
-            "location",
-            "souscategorie_codes",
-            "action_codes",
-        }
-        - {"cree_le"}
-    )
+    from qfdmo.models import Acteur
+
+    available_model_fields_to_compare = {
+        field.name for field in Acteur._meta.get_fields()
+    }
+    available_model_fields_to_compare = available_model_fields_to_compare | {
+        "latitude",
+        "longitude",
+    }
+    available_model_fields_to_compare = available_model_fields_to_compare - {
+        "location",
+        "cree_le",
+        "modifie_le",
+    }
+    available_fields_to_compare = available_model_fields_to_compare | {
+        "source_code",
+        "acteur_type_code",
+        "proposition_services_codes",
+        "acteurservice_codes",
+        "label_codes",
+    }
+    columns_to_compare = available_fields_to_compare & dag_config.get_expected_columns()
 
     # grouper par identifiant_unique et comparer les colonnes
     # si les colonnes sont identiques, on collecte l'identifiant_unique
@@ -65,12 +78,13 @@ def keep_acteur_changed(
 
     noupdate_identifiant_uniques = []
     for index, row_source in df_from_source.iterrows():
+        #        log.preview("row_source", row_source)
         row_source = row_source.to_dict()
         row_db = df_updated_from_db.loc[index]
         row_db = row_db.to_dict()
         if is_identique_row(row_source, row_db, columns_to_compare):
             noupdate_identifiant_uniques.append(index)
-    log.preview("identifiant_uniques", noupdate_identifiant_uniques)
+    log.preview("noupdate_identifiant_uniques", noupdate_identifiant_uniques)
 
     df_normalized = df_normalized[
         ~df_normalized["identifiant_unique"].isin(noupdate_identifiant_uniques)

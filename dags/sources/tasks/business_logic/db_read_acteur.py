@@ -7,13 +7,15 @@ from utils.django import django_setup_full
 
 # Setup Django avant import des modèles
 django_setup_full()
-from qfdmo.models import Acteur  # noqa: E402
+
 
 logger = logging.getLogger(__name__)
 
 
 # TODO: To be factorized with PYDANTIC classes
 def db_read_acteur(df_normalized: pd.DataFrame, dag_config: DAGConfig):
+    from qfdmo.models import Acteur
+
     if "source_code" not in df_normalized.columns:
         raise ValueError(
             "La colonne source_codes est requise dans la dataframe normalisée"
@@ -37,16 +39,14 @@ def db_read_acteur(df_normalized: pd.DataFrame, dag_config: DAGConfig):
             " ingest the source"
         )
     acteurs_list = []
-    expected_columns = dag_config.get_expected_columns() - {
-        "location",
-        "souscategorie_codes",
-        "label_codes",
-        "acteurservice_codes",
-        "action_codes",
-        "proposition_services_codes",
-        "source_code",
-        "acteur_type_code",
-    } | {"cree_le"}
+    available_model_fields = {field.name for field in Acteur._meta.get_fields()} | {
+        "latitude",
+        "longitude",
+    } - {"location"}
+    expected_model_fields = available_model_fields & set(
+        dag_config.get_expected_columns()
+    )
+    expected_columns = expected_model_fields | {"cree_le"}
     for acteur in acteurs:
         acteur_dict = {k: getattr(acteur, k) for k in expected_columns}
         acteur_dict["source_code"] = acteur.source.code
