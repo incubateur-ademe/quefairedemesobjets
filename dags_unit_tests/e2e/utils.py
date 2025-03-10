@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 import pendulum
-from airflow.models import DagBag, DagModel, TaskInstance
+from airflow.models import TaskInstance
 
 logger = logging.getLogger(__name__)
 
@@ -37,32 +37,6 @@ def airflow_init() -> None:
     from airflow.utils.db import initdb
 
     initdb()
-
-
-def dag_get(dag_id: str) -> DagModel:
-    """Looks for a DAG ID in all DAG folders and returns the DAG Model.
-    Looking at: dags/{subfolder}/dags/{dag_id}.py
-
-    🟢 pros: only parses the 1 DAG we need = time saved
-    🟠 cons: requires DAG filename & ID to align
-
-    TODO: we have in the backlog to refactor our directory
-    structure into pipelines/dags which would contain all
-    DAGS, in which case could simplify below to just reading
-    from the only DAG folder.
-    """
-    logger.info(f"dag_get: 🔎 {dag_id=} searching in {PIPELINES_ROOT}")
-    for path in PIPELINES_ROOT.iterdir():
-        path_dag = path / "dags" / f"{dag_id}.py"
-        path_rel = path_dag.relative_to(PIPELINES_ROOT)
-        if path_dag.exists():
-            logger.info(f"dag_get: 🟢 {dag_id=} found in {path_rel}")
-            dag_bag = DagBag(dag_folder=path)
-            dag_bag.collect_dags(include_examples=False, safe_mode=True)
-            return dag_bag.get_dag(dag_id=dag_id)  # type: ignore
-        else:
-            logger.info(f"dag_get: 🟡 {dag_id=} not found in {path_rel}")
-    raise ValueError(f"dag_get: 🔴 {dag_id=} not found in {PIPELINES_ROOT}")
 
 
 def ti_get(tis: list[TaskInstance], task_id: str) -> TaskInstance:
