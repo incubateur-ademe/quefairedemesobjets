@@ -11,7 +11,7 @@ export default class extends Controller<HTMLFormElement> {
   submitFirstItem() {
     const firstResult = document.querySelector<HTMLAnchorElement>("#search-results > a")
     if (firstResult) {
-      result.click()
+      firstResult.click()
     }
   }
 
