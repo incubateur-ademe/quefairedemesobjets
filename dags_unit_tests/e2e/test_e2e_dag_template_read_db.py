@@ -3,10 +3,54 @@
 - read acteurs inside DAG (should read from test DB)"""
 
 import pytest
+from airflow import DAG
+from airflow.operators.python import PythonOperator
 
-from dags_unit_tests.e2e.utils import DATE_IN_PAST, airflow_init, dag_get, ti_get
+from dags_unit_tests.e2e.utils import DATE_IN_PAST, airflow_init, ti_get
 
 airflow_init()
+
+
+with DAG(
+    dag_id="template_read_db",
+    dag_display_name="Template - Read DB",
+    schedule=None,
+    catchup=False,
+    tags=["template"],
+) as dag:
+
+    def read_db(ti, params):
+        from utils.django import django_settings_to_dict, django_setup_full
+
+        django_setup_full()
+        settings = django_settings_to_dict()
+        from qfdmo.models import Acteur
+
+        # Returning some settings info to help test
+        # that Airflow uses the local DB when running
+        # e2e tests
+        ti.xcom_push(key="settings", value=settings)
+
+        # Returning some acteur data to demonstrate
+        # we can read from the test DB in e2e mode
+        query = Acteur.objects.filter(
+            nom__contains=params["include_acteurs_nom_contains"]
+        )
+        # Works because it's JSON-serializable
+        ti.xcom_push(key="acteurs_list", value=list(query.values("nom")))
+        # Returns None and causes task to fail because XCOM
+        # cannot serialize a QuerySet
+        ti.xcom_push(key="acteurs_query", value=query.all())
+
+    def read_db_task(dag: DAG) -> PythonOperator:
+        return PythonOperator(
+            task_id="read_db",
+            python_callable=read_db,
+            provide_context=True,
+            dag=dag,
+        )
+
+    read_db_task(dag)
 
 
 @pytest.mark.django_db()
@@ -27,7 +71,6 @@ class TestE2ETemplateReadDb:
 
     @pytest.fixture
     def dag_test(self, create_acteurs):
-        dag = dag_get("template_read_db")
         # We use .test() and not the tempting .run()
         # which has a richer API but was removed
         # on Oct 2024 for Airflow 3:

@@ -26,10 +26,12 @@ def django_add_to_sys_path() -> None:
     sys.path.insert(0, django_root)
 
 
-def django_settings_to_dict(settings) -> dict:
+def django_settings_to_dict() -> dict:
     """Returns useful information from settings
     as a JSON-compatible dict to help us debug
     (e.g. when setting up e2e Airflow tests)"""
+    from django.conf import settings
+
     return {
         "DATABASES": {
             alias: {
@@ -42,19 +44,14 @@ def django_settings_to_dict(settings) -> dict:
     }
 
 
-def django_setup_full() -> dict:
-    """Full init of our Django environment and
-    return some useful info about the loaded settings"""
+def django_setup_full() -> None:
+    """Full init of our Django environment"""
     django_add_to_sys_path()
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.airflow_settings")
 
     import django
 
     django.setup()
-
-    from django.conf import settings
-
-    return django_settings_to_dict(settings)
 
 
 def django_model_fields_get(model_class, include_properties=True) -> list[str]:

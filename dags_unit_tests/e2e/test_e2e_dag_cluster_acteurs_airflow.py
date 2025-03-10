@@ -18,7 +18,7 @@ from dags.cluster.tasks.airflow_logic.task_ids import (
     TASK_SUGGESTIONS_TO_DB,
 )
 from dags_unit_tests.cluster.helpers.configs import CONF_BASE_DICT
-from dags_unit_tests.e2e.utils import DATE_IN_PAST, airflow_init, dag_get, ti_get
+from dags_unit_tests.e2e.utils import DATE_IN_PAST, airflow_init, ti_get
 from unit_tests.qfdmo.acteur_factory import (
     ActeurTypeFactory,
     DisplayedActeur,
@@ -53,12 +53,10 @@ class TestClusterDedupSkipped:
         # And we return dict because that's what's used by .test()
         return myconf
 
-    @pytest.fixture
-    def dag(self):
-        return dag_get(dag_id="cluster_acteur_suggestions")
-
-    def test_up_to_config(self, dag, db_sources_acteur_types, conf):
+    def test_up_to_config(self, db_sources_acteur_types, conf):
         """DAG run should stop at config because data acteurs data available"""
+        from dags.cluster.dags.cluster_acteur_suggestions import dag
+
         dag.test(execution_date=DATE_IN_PAST, run_conf=conf)
         tis = dag.get_task_instances()
 
@@ -81,10 +79,11 @@ class TestClusterDedupSkipped:
         assert ti_get(tis, TASK_SUGGESTIONS_DISPLAY).state == State.SKIPPED
         assert ti_get(tis, TASK_SUGGESTIONS_TO_DB).state == State.SKIPPED
 
-    def test_up_to_selection_and_normalize(self, dag, db_sources_acteur_types, conf):
+    def test_up_to_selection_and_normalize(self, db_sources_acteur_types, conf):
         """Now we create some acteurs and we expect them to be selected
         but we intentionally set them in different cities so they can't be clustered"""
         s1, s2, at1 = db_sources_acteur_types
+        from dags.cluster.dags.cluster_acteur_suggestions import dag
 
         # The parent which exists in both Revision & Displayed
         p1 = RevisionActeur(
