@@ -32,8 +32,8 @@ from clone.tasks.airflow_logic.clone_ae_views_in_use_switch_task import (
 )
 
 with DAG(
-    dag_id="clone_annuaire_entreprise",
-    dag_display_name="Cloner - Annuaire Entreprise",
+    dag_id="clone_ae_annuaire_entreprise",
+    dag_display_name="Cloner - Annuaire Entreprise (AE)",
     default_args={
         "owner": "airflow",
         "depends_on_past": False,
@@ -43,8 +43,8 @@ with DAG(
         "email_on_retry": False,
         "retries": 0,
     },
-    description=("Un DAG pour répliquer l'annuaire entreprise dans notre DB"),
-    tags=["clone", "annuaire", "entreprise", "siret", "siren"],
+    description=("Un DAG pour répliquer l'Annuaire Entreprise (AE) dans notre DB"),
+    tags=["clone", "annuaire", "entreprise", "siret", "siren", "ae"],
     params={
         "dry_run": Param(
             False,
