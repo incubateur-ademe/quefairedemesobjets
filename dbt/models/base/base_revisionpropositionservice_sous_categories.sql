@@ -1,0 +1,1 @@
+select * from {{ source('qfdmo', 'qfdmo_revisionpropositionservice_sous_categories') }}

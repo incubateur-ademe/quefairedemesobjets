@@ -1,0 +1,18 @@
+version: 2
+
+sources:
+  - name: qfdmo
+    database: qfdmo
+    schema: public
+    tables:
+      - name : qfdmo_acteur
+      - name : qfdmo_acteur_acteur_services
+      - name : qfdmo_acteur_labels
+      - name : qfdmo_propositionservice
+      - name : qfdmo_propositionservice_sous_categories
+      - name : qfdmo_revisionacteur
+      - name : qfdmo_revisionacteur_acteur_services
+      - name : qfdmo_revisionacteur_labels
+      - name : qfdmo_revisionpropositionservice
+      - name : qfdmo_revisionpropositionservice_sous_categories
+      - name : qfdmo_source

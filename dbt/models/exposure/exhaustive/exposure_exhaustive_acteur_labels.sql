@@ -1,0 +1,1 @@
+select * from {{ ref('marts_exhaustive_acteur_labels') }}

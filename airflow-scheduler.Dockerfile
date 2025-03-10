@@ -35,12 +35,24 @@ COPY ./core/ /opt/airflow/core/
 COPY ./qfdmo/ /opt/airflow/qfdmo/
 COPY ./qfdmd/ /opt/airflow/qfdmd/
 COPY ./data/ /opt/airflow/data/
+COPY ./dbt/ /opt/airflow/dbt/
 COPY ./dsfr_hacks/ /opt/airflow/dsfr_hacks/
 
 # Classique Airflow
 COPY ./dags/ /opt/airflow/dags/
 COPY ./config/ /opt/airflow/config/
 COPY ./plugins/ /opt/airflow/plugins/
-RUN mkdir -p /opt/airflow/logs/
+
+WORKDIR /opt/airflow/dbt
+USER 0
+RUN chown -R ${AIRFLOW_UID:-50000}:0 /opt/airflow/dbt
+USER ${AIRFLOW_UID:-50000}:0
+
+# RUN mkdir -p /opt/airflow/.dbt/logs
+# ENV DBT_LOG_PATH=/opt/airflow/.dbt/logs/dbt.log
+ENV DBT_PROFILES_DIR=/opt/airflow/dbt
+ENV DBT_PROJECT_DIR=/opt/airflow/dbt
+
+RUN dbt deps
 
 CMD ["scheduler"]

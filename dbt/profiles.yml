@@ -1,0 +1,11 @@
+dbt_test:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('POSTGRES_HOST', 'localhost') }}"
+      port: "{{ env_var('POSTGRES_PORT', 6543) | as_number }}"
+      user: "{{ env_var('POSTGRES_USER', 'qfdmo') }}"
+      password: "{{ env_var('POSTGRES_PASSWORD', 'qfdmo') }}"
+      dbname: "{{ env_var('POSTGRES_DB', 'qfdmo') }}"
+      schema: "{{ env_var('POSTGRES_SCHEMA', 'public') }}"
