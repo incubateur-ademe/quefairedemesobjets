@@ -64,10 +64,6 @@ CREATE TABLE {{table_name}} (
 );
 
 /* Constraints */
-/*
-Tested on 2025-03-10: we cannot add this constraint
-as there are duplicate SIRETS, ex: 00032517500016
-*/
 ALTER TABLE {{table_name}}
 ADD CONSTRAINT pk_{{table_name}} PRIMARY KEY (siret);
 

@@ -14,7 +14,8 @@ URL_ETAB = "https://files.data.gouv.fr/insee-sirene/StockEtablissement_utf8.zip"
 
 class Table(BaseModel):
     kind: str
-    url: AnyHttpUrl
+    csv_url: AnyHttpUrl
+    csv_filestem: str
     # Name is not defined because it's generated dynamically
     # from prefix, kind, and timestamp
 
@@ -25,8 +26,16 @@ class Tables(NamedTuple):
 
 
 TABLES = Tables(
-    UNITE=Table(kind="unite_legale", url=URL_UNITE),  # type: ignore
-    ETAB=Table(kind="etablissement", url=URL_ETAB),  # type: ignore
+    UNITE=Table(
+        kind="unite_legale",
+        csv_url=URL_UNITE,  # type: ignore
+        csv_filestem="StockUniteLegale_utf8",
+    ),
+    ETAB=Table(
+        kind="etablissement",
+        csv_url=URL_ETAB,  # type: ignore
+        csv_filestem="StockEtablissement_utf8",
+    ),
 )
 
 

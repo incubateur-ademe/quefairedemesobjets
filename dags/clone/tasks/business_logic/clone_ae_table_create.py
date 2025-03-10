@@ -40,27 +40,37 @@ def schema_create_and_check(schema_name: str, sql: str, dry_run=True) -> None:
     logger.info(f"Création schema pour {schema_name=}: succès 🟢")
 
 
-def csv_from_url_to_table(csv_url: AnyHttpUrl, table_name: str, dry_run: bool = False):
+def csv_from_url_to_table(
+    csv_url: AnyHttpUrl, csv_filestem: str, table_name: str, dry_run: bool = False
+):
     r"""Streams a CSV from a remote ZIP file directly into a PG.
     🔴 Requires the table schema to be created prior to this"""
     from django.db import connection
 
     # DB settings
     db = connection.settings_dict
-    dv_env = {"PGPASSWORD": db["PASSWORD"]}  # to hide from cmd
+    db_env = {"PGPASSWORD": db["PASSWORD"]}  # to hide from cmd
     cmd_psql = f"psql -h {db['HOST']} -p {db['PORT']} -U {db['USER']} -d {db['NAME']}"
 
-    cmd_clone = (
-        f'curl -sSL "{csv_url}" '
-        "| zcat "
-        f"| {cmd_psql} "
-        f'-c "\\copy {table_name} FROM stdin WITH (FORMAT csv, HEADER true)"'
+    cmd_fs_cleanup = f"rm -f /tmp/{csv_filestem}.zip && rm -f /tmp/{csv_filestem}.csv"
+    cmd_download = f"curl -sSL {csv_url} -o /tmp/{csv_filestem}.zip"
+    cmd_unzip = f"unzip /tmp/{csv_filestem}.zip -d /tmp/"
+    cmd_psql = (
+        f"cat /tmp/{csv_filestem}.csv | "
+        f"psql -h {db['HOST']} -p {db['PORT']} -U {db['USER']} -d {db['NAME']} "
+        f"-c '\\copy {table_name} FROM stdin WITH (FORMAT csv, HEADER true)'"
     )
-    cmd_run(cmd=cmd_clone, dry_run=dry_run, env=dv_env)
+
+    cmd_run(cmd=cmd_fs_cleanup, dry_run=dry_run)
+    cmd_run(cmd=cmd_download, dry_run=dry_run)
+    cmd_run(cmd=cmd_unzip, dry_run=dry_run)
+    cmd_run(cmd=cmd_psql, dry_run=dry_run, env=db_env)
+    cmd_run(cmd=cmd_fs_cleanup, dry_run=dry_run)
 
 
 def clone_ae_table_create(
     csv_url: AnyHttpUrl,
+    csv_filestem: str,
     table_kind: str,
     table_name: str,
     dry_run: bool = True,
@@ -75,7 +85,12 @@ def clone_ae_table_create(
 
     # Write tasks
     schema_create_and_check(table_name, sql, dry_run=dry_run)
-    csv_from_url_to_table(csv_url, table_name, dry_run=dry_run)
+    csv_from_url_to_table(
+        csv_url=csv_url,
+        csv_filestem=csv_filestem,
+        table_name=table_name,
+        dry_run=dry_run,
+    )
 
     # Final log
     logger.info(log.banner_string("🏁 Résultat final de la tâche"))
