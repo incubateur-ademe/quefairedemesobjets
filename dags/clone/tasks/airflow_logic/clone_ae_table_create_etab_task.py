@@ -16,12 +16,12 @@ def task_info_get():
     Description de la tâche "{TASKS.TABLE_CREATE_ETAB}"
     ============================================================
     💡 quoi: créer la table {TABLES.ETAB.kind} à partir
-    de {TABLES.ETAB.url}
+    de {TABLES.ETAB.csv_url}
 
     🎯 pourquoi: c'est le but de ce DAG, pouvoir mettre à jour
     l'annuaire entreprise périodiquement
 
-    🏗️ comment: on stream {TABLES.ETAB.url} directement
+    🏗️ comment: on stream {TABLES.ETAB.csv_url} directement
     vers notre DB en utilisant zcat & psql
     """
 
@@ -32,7 +32,8 @@ def clone_ea_table_create_etab_wrapper(ti, params) -> None:
     table_names = xcom_pull(ti, XCOMS.TABLE_NAMES)
     table_name = table_names[TABLES.ETAB.kind]
     clone_ae_table_create(
-        csv_url=TABLES.ETAB.url,
+        csv_url=TABLES.ETAB.csv_url,
+        csv_filestem=TABLES.ETAB.csv_filestem,
         table_kind=TABLES.ETAB.kind,
         table_name=table_name,
         dry_run=params.get("dry_run", True),

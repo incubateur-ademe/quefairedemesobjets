@@ -15,6 +15,12 @@ ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
 ENV C_INCLUDE_PATH=/usr/include/gdal
 
 #---------------------------------
+# Dépendance pour Annuaire Entreprise
+#---------------------------------
+RUN echo "deb http://deb.debian.org/debian stable main" > /etc/apt/sources.list
+RUN apt-get update && apt-get install -y unzip
+
+#---------------------------------
 # Rebascule sur l'utilisateur airflow
 #---------------------------------
 # On rebascule sur le dernier utilisateur fourni

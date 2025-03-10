@@ -16,12 +16,12 @@ def task_info_get():
     Description de la tâche "{TASKS.TABLE_CREATE_UNITE}"
     ============================================================
     💡 quoi: créer la table {TABLES.UNITE.kind} à partir
-    de {TABLES.UNITE.url}
+    de {TABLES.UNITE.csv_url}
 
     🎯 pourquoi: c'est le but de ce DAG, pouvoir mettre à jour
     l'annuaire entreprise périodiquement
 
-    🏗️ comment: on stream {TABLES.UNITE.url} directement
+    🏗️ comment: on stream {TABLES.UNITE.csv_url} directement
     vers notre DB en utilisant zcat & psql
     """
 
@@ -32,7 +32,8 @@ def clone_ea_table_create_unite_wrapper(ti, params) -> None:
     table_names = xcom_pull(ti, XCOMS.TABLE_NAMES)
     table_name = table_names[TABLES.UNITE.kind]
     clone_ae_table_create(
-        csv_url=TABLES.UNITE.url,
+        csv_url=TABLES.UNITE.csv_url,
+        csv_filestem=TABLES.UNITE.csv_filestem,
         table_kind=TABLES.UNITE.kind,
         table_name=table_name,
         dry_run=params.get("dry_run", True),
