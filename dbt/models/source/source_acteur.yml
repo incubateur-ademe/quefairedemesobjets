@@ -2,7 +2,6 @@ version: 2
 
 sources:
   - name: qfdmo
-    database: qfdmo
     schema: public
     tables:
       - name : qfdmo_acteur
