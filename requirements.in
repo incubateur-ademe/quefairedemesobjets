@@ -30,5 +30,4 @@ rapidfuzz
 wagtail
 wagtailmenus
 wagtail-modeladmin
-sites_faciles @ git+ssh://git@github.com/fabienheureux/sites-faciles
-
+django-sass-processor

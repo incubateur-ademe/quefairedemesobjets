@@ -185,8 +185,8 @@ TEMPLATES = [
                 # These are not fully compatible with jinja
                 "wagtail.contrib.settings.context_processors.settings",
                 "wagtailmenus.context_processors.wagtailmenus",
-                "sites_faciles_content_manager.context_processors.skiplinks",
-                "sites_faciles_content_manager.context_processors.mega_menus",
+                "sites_faciles.content_manager.context_processors.skiplinks",
+                "sites_faciles.content_manager.context_processors.mega_menus",
             ],
         },
     },
@@ -424,9 +424,11 @@ INSTALLED_APPS.extend(
         "sites_faciles.blog",
         "sites_faciles.content_manager",
         "sites_faciles.events",
+        "sass_processor",
         "wagtail.contrib.settings",
         "wagtail_modeladmin",
         "wagtailmenus",
+        "wagtailmarkdown",
         # wagtail
         "wagtail.contrib.forms",
         "wagtail.contrib.redirects",
@@ -443,6 +445,19 @@ INSTALLED_APPS.extend(
         "taggit",
     ]
 )
+
+
+# SITES FACILES
+# Django Sass
+# SASS_PROCESSOR_ROOT = os.path.join(BASE_DIR, "sites_faciles/static/css")
+# SASS_PROCESSOR_AUTO_INCLUDE = False
+# SASS_OUTPUT_STYLE = "compressed"
+STATICFILES_FINDERS = [
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+    "sass_processor.finders.CssFinder",
+]
+
 
 MIDDLEWARE.extend(
     [
