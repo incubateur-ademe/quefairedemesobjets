@@ -5,7 +5,7 @@
 A la racine du projet
 
 ```sh
-pip install -r airflow-requirements.txt -r requirements.txt -r dev-requirements.txt
+poetry install --with dev,airflow
 ```
 
 Puis dans le dossier dbt
