@@ -12,6 +12,7 @@ from dags.sources.config.shared_constants import (
     SUGGESTION_ENCOURS,
     SUGGESTION_ERREUR,
     SUGGESTION_REJETEE,
+    SUGGESTION_RGPD_ANONYMIZE,
     SUGGESTION_SOURCE_AJOUT,
     SUGGESTION_SOURCE_MODIFICATION,
     SUGGESTION_SOURCE_SUPRESSION,
@@ -50,7 +51,7 @@ class SuggestionCohorteStatut(models.TextChoices):
 
 
 class SuggestionAction(models.TextChoices):
-    RGPD_ANONYMIZE = "RGPD_ANONYMISATION", "Anonymisation RGPD"
+    RGPD_ANONYMIZE = SUGGESTION_RGPD_ANONYMIZE, "Anonymisation RGPD"
     CLUSTERING = SUGGESTION_CLUSTERING, "regroupement/déduplication des acteurs"
     SOURCE_AJOUT = (
         SUGGESTION_SOURCE_AJOUT,
