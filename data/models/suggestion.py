@@ -203,6 +203,8 @@ class Suggestion(models.Model):
             template_name = "data/_partials/ajout_suggestion_details.html"
         elif self.suggestion_cohorte.type_action == SuggestionAction.CRAWL_URLS:
             template_name = "data/_partials/crawl_urls_suggestion_details.html"
+        elif self.suggestion_cohorte.type_action == SuggestionAction.RGPD_ANONYMIZE:
+            template_name = "data/_partials/generic_suggestion_details.html"
             template_context = self.suggestion.copy()
 
         return render_to_string(template_name, template_context)
@@ -289,6 +291,7 @@ class Suggestion(models.Model):
         if self.suggestion_cohorte.type_action in [
             SuggestionAction.CLUSTERING,
             SuggestionAction.CRAWL_URLS,
+            SuggestionAction.RGPD_ANONYMIZE,
         ]:
             changes = self.suggestion["changes"]
             changes.sort(key=lambda x: x["order"])
