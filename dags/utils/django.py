@@ -18,10 +18,9 @@ logger = logging.getLogger(__name__)
 
 
 def django_add_to_sys_path() -> None:
-    """Adds Django project root to sys.path, based on
-    current directory structure:
-     - core/ = Django root
-     - dags/utils/django.py"""
+    """
+    Adds Django project root to sys.path, based on current file path
+    """
     django_root = str(Path(__file__).resolve().parent.parent.parent)
     sys.path.insert(0, django_root)
 
