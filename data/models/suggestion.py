@@ -199,6 +199,9 @@ class Suggestion(models.Model):
             and isinstance(self.suggestion, dict)
         ):
             template_name = "data/_partials/ajout_suggestion_details.html"
+        elif self.suggestion_cohorte.type_action == SuggestionAction.RGPD_ANONYMIZE:
+            template_name = "data/_partials/generic_suggestion_details.html"
+            template_context = self.suggestion.copy()
 
         return render_to_string(template_name, template_context)
 
@@ -281,7 +284,10 @@ class Suggestion(models.Model):
     # FIXME: this acteur management will be reviewed with PYDANTIC classes which will
     # be used to handle all specificities of suggestions
     def apply(self):
-        if self.suggestion_cohorte.type_action == SuggestionAction.CLUSTERING:
+        if self.suggestion_cohorte.type_action in [
+            SuggestionAction.CLUSTERING,
+            SuggestionAction.RGPD_ANONYMIZE,
+        ]:
             changes = self.suggestion["changes"]
             changes.sort(key=lambda x: x["order"])
             for change in changes:
