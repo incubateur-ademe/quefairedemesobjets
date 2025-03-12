@@ -166,6 +166,12 @@ def clean_code_postal(cp: str | None, _) -> str:
     return f"0{cp}" if cp and len(str(cp)) == 4 else str(cp)
 
 
+def clean_code_list(codes: str | None, _) -> list[str]:
+    if codes is None:
+        return []
+    return [code.strip().lower() for code in codes.split("|") if code.strip().lower()]
+
+
 def clean_souscategorie_codes(
     sscat_list: str | None, dag_config: DAGConfig
 ) -> list[str]:

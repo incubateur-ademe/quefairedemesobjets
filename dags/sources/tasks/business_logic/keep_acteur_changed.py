@@ -35,6 +35,12 @@ def is_identique_row(row_source, row_db, columns_to_compare):
 def keep_acteur_changed(
     df_normalized: pd.DataFrame, df_acteur_from_db: pd.DataFrame, dag_config: DAGConfig
 ):
+    if df_acteur_from_db.empty:
+        return {
+            "df_acteur": df_normalized,
+            "df_acteur_from_db": df_acteur_from_db,
+        }
+
     columns_to_compare = (
         dag_config.get_expected_columns()
         - {

@@ -175,7 +175,10 @@ class TestSourceDataNormalize:
                 dag_config=DAGConfig.model_validate(dag_config_kwargs),
                 dag_id="dag_id",
             )
-        assert "Le dataframe n'a pas les colonnes attendues" in str(erreur.value)
+        assert (
+            "Le dataframe normalisé (données sources) n'a pas les colonnes attendues"
+            in str(erreur.value)
+        )
         assert "col_make_it_raise" in str(erreur.value)
 
     def test_public_accueilli_filtre_pro(

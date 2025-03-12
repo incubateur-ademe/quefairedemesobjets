@@ -216,8 +216,9 @@ def source_data_normalize(
 
     if set(df.columns) != expected_columns:
         raise ValueError(
-            "Le dataframe n'a pas les colonnes attendues: "
-            f"{set(df.columns)} != {expected_columns}"
+            f"""Le dataframe normalisé (données sources) n'a pas les colonnes attendues.
+            Colonnes en trop: {set(df.columns) - expected_columns}
+            Colonnes manquantes: {expected_columns - set(df.columns)}"""
         )
 
     # Etapes de normalisation spécifiques aux sources

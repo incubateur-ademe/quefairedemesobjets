@@ -66,7 +66,11 @@ def db_read_acteur(df_normalized: pd.DataFrame, dag_config: DAGConfig):
             for proposition_service in acteur.proposition_services.all()
         ]
         acteurs_list.append(acteur_dict)
-    df_acteur = pd.DataFrame(acteurs_list)
+    if acteurs_list:
+        df_acteur = pd.DataFrame(acteurs_list)
+    else:
+        # Set an empty dataframe with the expected columns to avoid errors on next tasks
+        df_acteur = pd.DataFrame(columns=list(dag_config.get_expected_columns()))
 
     log.preview("df_acteur retourné par la tâche", df_acteur)
     return df_acteur
