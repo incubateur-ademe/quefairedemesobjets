@@ -9,6 +9,8 @@ from django.utils.safestring import mark_safe
 
 register = template.Library()
 
+logger = logging.getLogger(__name__)
+
 
 @register.inclusion_tag("components/patchwork/patchwork.html")
 def patchwork() -> dict:
@@ -34,7 +36,7 @@ def render_file_content(file_field: FileField) -> str:
             with file_field.storage.open(file_field.name) as f:
                 return mark_safe(f.read().decode("utf-8"))  # noqa: S308
         except FileNotFoundError as e:
-            logging.error(f"file not found {file_field.name=}, original error : {e}")
+            logger.error(f"file not found {file_field.name=}, original error : {e}")
             return ""
 
     return cast(
