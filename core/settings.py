@@ -447,14 +447,10 @@ INSTALLED_APPS.extend(
 )
 
 
-# SITES FACILES
-# Django Sass
-# SASS_PROCESSOR_ROOT = os.path.join(BASE_DIR, "sites_faciles/static/css")
-# SASS_PROCESSOR_AUTO_INCLUDE = False
-# SASS_OUTPUT_STYLE = "compressed"
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+    # Sites faciles
     "sass_processor.finders.CssFinder",
 ]
 
