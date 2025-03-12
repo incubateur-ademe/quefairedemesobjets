@@ -54,6 +54,7 @@ class SuggestionCohorteStatut(models.TextChoices):
 
 class SuggestionAction(models.TextChoices):
     CRAWL_URLS = SUGGESTION_CRAWL_URLS, "🔗 URLs scannées"
+    RGPD_ANONYMIZE = "RGPD_ANONYMISATION", "Anonymisation RGPD"
     CLUSTERING = SUGGESTION_CLUSTERING, "regroupement/déduplication des acteurs"
     SOURCE_AJOUT = (
         SUGGESTION_SOURCE_AJOUT,
