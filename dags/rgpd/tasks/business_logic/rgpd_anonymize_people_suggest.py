@@ -65,10 +65,10 @@ def rgpd_anonymize_people_suggest(
             "contexte": "Idem suggestion",
             "suggestion": {
                 "title": "🕵️ RGPD: anonymiser les noms des acteurs",
-                "details": {
-                    "noms_origine": row[COLS.QFDMO_ACTEUR_NOMS_ORIGIN],
-                    "mots_de_match": row[COLS.MATCH_WORDS],
-                    "score_de_match": row[COLS.MATCH_SCORE],
+                "summary": {
+                    "noms d'origine": row[COLS.QFDMO_ACTEUR_NOMS_ORIGIN],
+                    "mots de match": row[COLS.MATCH_WORDS],
+                    "score de match": row[COLS.MATCH_SCORE],
                     "changement": f"""{field_nom} & {field_nom_officiel} &
                     {field_nom_commercial} -> {INFO_TO_HIDE}""",
                 },
@@ -87,7 +87,7 @@ def rgpd_anonymize_people_suggest(
             identifiant_action=identifiant_action,
             identifiant_execution=identifiant_execution,
             type_action=SuggestionAction.RGPD_ANONYMIZE,
-            metadata={"Nombre de suggestions": len(suggestions)},
+            metadata={"🔢 Nombre de suggestions": len(suggestions)},
         )
         cohort.save()
         for suggestion in suggestions:
