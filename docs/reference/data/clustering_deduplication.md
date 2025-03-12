@@ -17,7 +17,7 @@
 
 ## 📜 Définition
 
-- 📦 **Clustering:** fait de **regrouper** des ****acteurs via leur **similarité**
+- 📦 **Clustering:** fait de **regrouper** des acteurs via leur **similarité**
 - 1️⃣ **Déduplication**: convertir un **cluster** en **1 seul acteur** pour ne **plus avoir de doublons**
 - 🎏 **Etat final idéal d’un acteur**: on se concentre sur les acteurs statut=ACTIF
 
