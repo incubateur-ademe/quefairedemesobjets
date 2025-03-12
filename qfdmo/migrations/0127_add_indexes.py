@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("qfdmo", "0125_vueacteur_views_uuid"),
+        ("qfdmo", "0126_vueacteur_views_uuid"),
     ]
 
     operations = [
