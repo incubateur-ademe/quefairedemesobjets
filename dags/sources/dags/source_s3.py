@@ -30,9 +30,9 @@ with DAG(
             # 1. Renommage des colonnes
             # 2. Transformation des colonnes
             {
-                "origin": "souscategorie_codes",
-                "transformation": "clean_souscategorie_codes",
-                "destination": "souscategorie_codes",
+                "origin": "sous_categorie_codes",
+                "transformation": "clean_sous_categorie_codes",
+                "destination": "sous_categorie_codes",
             },
             {
                 "origin": "nom",
@@ -55,9 +55,9 @@ with DAG(
                 "destination": "source_code",
             },
             {
-                "origin": "acteurservice_codes",
+                "origin": "acteur_service_codes",
                 "transformation": "clean_code_list",
-                "destination": "acteurservice_codes",
+                "destination": "acteur_service_codes",
             },
             {
                 "origin": "action_codes",
@@ -135,9 +135,9 @@ with DAG(
                 "destination": ["telephone"],
             },
             {
-                "origin": ["action_codes", "souscategorie_codes"],
+                "origin": ["action_codes", "sous_categorie_codes"],
                 "transformation": "clean_proposition_services",
-                "destination": ["proposition_services_codes"],
+                "destination": ["proposition_service_codes"],
             },
             # 5. Supression des colonnes
             {"remove": "action_principale"},

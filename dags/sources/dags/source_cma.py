@@ -83,7 +83,7 @@ with DAG(
                 "value": "commerce",
             },
             {
-                "column": "acteurservice_codes",
+                "column": "acteur_service_codes",
                 "value": ["service_de_reparation"],
             },
             {
@@ -129,13 +129,13 @@ with DAG(
             },
             {
                 "origin": ["categorie", "categorie2", "categorie3"],
-                "transformation": "merge_and_clean_souscategorie_codes",
-                "destination": ["souscategorie_codes"],
+                "transformation": "merge_and_clean_sous_categorie_codes",
+                "destination": ["sous_categorie_codes"],
             },
             {
-                "origin": ["action_codes", "souscategorie_codes"],
+                "origin": ["action_codes", "sous_categorie_codes"],
                 "transformation": "clean_proposition_services",
-                "destination": ["proposition_services_codes"],
+                "destination": ["proposition_service_codes"],
             },
             # 5. Supression des colonnes
             {"remove": "activite"},

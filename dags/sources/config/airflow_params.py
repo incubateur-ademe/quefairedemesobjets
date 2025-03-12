@@ -11,15 +11,15 @@ from sources.tasks.transform.transform_column import (
     clean_reprise,
     clean_siren,
     clean_siret,
-    clean_souscategorie_codes,
-    clean_souscategorie_codes_sinoe,
+    clean_sous_categorie_codes,
+    clean_sous_categorie_codes_sinoe,
     clean_url,
     convert_opening_hours,
     strip_lower_string,
     strip_string,
 )
 from sources.tasks.transform.transform_df import (
-    clean_acteurservice_codes,
+    clean_acteur_service_codes,
     clean_action_codes,
     clean_adresse,
     clean_identifiant_externe,
@@ -30,7 +30,7 @@ from sources.tasks.transform.transform_df import (
     clean_telephone,
     compute_location,
     get_latlng_from_geopoint,
-    merge_and_clean_souscategorie_codes,
+    merge_and_clean_sous_categorie_codes,
     merge_sous_categories_columns,
 )
 from utils.django import django_setup_full
@@ -52,8 +52,8 @@ TRANSFORM_COLUMN_MAPPING = {
     "clean_reprise": clean_reprise,
     "clean_siren": clean_siren,
     "clean_siret": clean_siret,
-    "clean_souscategorie_codes_sinoe": clean_souscategorie_codes_sinoe,
-    "clean_souscategorie_codes": clean_souscategorie_codes,
+    "clean_sous_categorie_codes_sinoe": clean_sous_categorie_codes_sinoe,
+    "clean_sous_categorie_codes": clean_sous_categorie_codes,
     "clean_url": clean_url,
     "convert_opening_hours": convert_opening_hours,
     "strip_lower_string": strip_lower_string,
@@ -61,7 +61,7 @@ TRANSFORM_COLUMN_MAPPING = {
 }
 
 TRANSFORM_DF_MAPPING = {
-    "clean_acteurservice_codes": clean_acteurservice_codes,
+    "clean_acteur_service_codes": clean_acteur_service_codes,
     "clean_action_codes": clean_action_codes,
     "clean_adresse": clean_adresse,
     "clean_identifiant_externe": clean_identifiant_externe,
@@ -72,7 +72,7 @@ TRANSFORM_DF_MAPPING = {
     "clean_telephone": clean_telephone,
     "compute_location": compute_location,
     "get_latlng_from_geopoint": get_latlng_from_geopoint,
-    "merge_and_clean_souscategorie_codes": merge_and_clean_souscategorie_codes,
+    "merge_and_clean_sous_categorie_codes": merge_and_clean_sous_categorie_codes,
     "merge_sous_categories_columns": merge_sous_categories_columns,
 }
 

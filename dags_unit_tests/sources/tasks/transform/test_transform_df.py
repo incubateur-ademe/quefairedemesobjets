@@ -10,7 +10,7 @@ from sources.tasks.transform.transform_df import (
     clean_telephone,
     compute_location,
     get_latlng_from_geopoint,
-    merge_and_clean_souscategorie_codes,
+    merge_and_clean_sous_categorie_codes,
     merge_duplicates,
     merge_sous_categories_columns,
 )
@@ -150,13 +150,13 @@ class TestMergeDuplicates:
                 pd.DataFrame(
                     {
                         "identifiant_unique": [1, 1],
-                        "proposition_services_codes": [[], []],
+                        "proposition_service_codes": [[], []],
                     }
                 ),
                 pd.DataFrame(
                     {
                         "identifiant_unique": [1],
-                        "proposition_services_codes": [[]],
+                        "proposition_service_codes": [[]],
                     }
                 ),
             ),
@@ -164,7 +164,7 @@ class TestMergeDuplicates:
                 pd.DataFrame(
                     {
                         "identifiant_unique": [1, 1],
-                        "proposition_services_codes": [
+                        "proposition_service_codes": [
                             [
                                 {
                                     "action": "action1",
@@ -178,7 +178,7 @@ class TestMergeDuplicates:
                 pd.DataFrame(
                     {
                         "identifiant_unique": [1],
-                        "proposition_services_codes": [
+                        "proposition_service_codes": [
                             [
                                 {
                                     "action": "action1",
@@ -193,7 +193,7 @@ class TestMergeDuplicates:
                 pd.DataFrame(
                     {
                         "identifiant_unique": [1, 1],
-                        "proposition_services_codes": [
+                        "proposition_service_codes": [
                             [
                                 {
                                     "action": "action1",
@@ -212,7 +212,7 @@ class TestMergeDuplicates:
                 pd.DataFrame(
                     {
                         "identifiant_unique": [1],
-                        "proposition_services_codes": [
+                        "proposition_service_codes": [
                             [
                                 {
                                     "action": "action1",
@@ -227,7 +227,7 @@ class TestMergeDuplicates:
                 pd.DataFrame(
                     {
                         "identifiant_unique": [1, 1],
-                        "proposition_services_codes": [
+                        "proposition_service_codes": [
                             [
                                 {
                                     "action": "action1",
@@ -246,7 +246,7 @@ class TestMergeDuplicates:
                 pd.DataFrame(
                     {
                         "identifiant_unique": [1],
-                        "proposition_services_codes": [
+                        "proposition_service_codes": [
                             [
                                 {
                                     "action": "action1",
@@ -261,7 +261,7 @@ class TestMergeDuplicates:
                 pd.DataFrame(
                     {
                         "identifiant_unique": [1, 1],
-                        "proposition_services_codes": [
+                        "proposition_service_codes": [
                             [
                                 {
                                     "action": "action1",
@@ -280,7 +280,7 @@ class TestMergeDuplicates:
                 pd.DataFrame(
                     {
                         "identifiant_unique": [1],
-                        "proposition_services_codes": [
+                        "proposition_service_codes": [
                             [
                                 {
                                     "action": "action1",
@@ -303,7 +303,7 @@ class TestMergeDuplicates:
             df,
             group_column="identifiant_unique",
             merge_as_list_columns=[],
-            merge_as_proposition_service_columns=["proposition_services_codes"],
+            merge_as_proposition_service_columns=["proposition_service_codes"],
         )
 
         result_df = result_df.sort_values(by="identifiant_unique").reset_index(
@@ -532,7 +532,7 @@ class TestCleanAdresse:
 
 class TestCleanActeurserviceCodes:
     @pytest.mark.parametrize(
-        "row_columns, expected_acteurservice_codes",
+        "row_columns, expected_acteur_service_codes",
         [
             ({}, []),
             ({"point_dapport_de_service_reparation": True}, ["service_de_reparation"]),
@@ -553,7 +553,7 @@ class TestCleanActeurserviceCodes:
             ),
         ],
     )
-    def clean_acteurservice_codes(self, row_columns, expected_action_codes):
+    def clean_acteur_service_codes(self, row_columns, expected_action_codes):
         result = clean_action_codes(pd.Series(row_columns), None)
         assert result["action_codes"] == expected_action_codes
 
@@ -627,14 +627,14 @@ class TestMergeAndCleanSouscategorieCodes:
             ({"col1": None, "col2": None}, []),
         ],
     )
-    def test_merge_and_clean_souscategorie_codes(
+    def test_merge_and_clean_sous_categorie_codes(
         self, row_data, expected_output, dag_config
     ):
         dag_config.product_mapping = {"sscat1": "mapped1", "sscat2": "mapped2"}
 
         row = pd.Series(row_data)
-        result = merge_and_clean_souscategorie_codes(row, dag_config)
-        assert sorted(result["souscategorie_codes"]) == sorted(expected_output)
+        result = merge_and_clean_sous_categorie_codes(row, dag_config)
+        assert sorted(result["sous_categorie_codes"]) == sorted(expected_output)
 
 
 class TestGetLatLngFromGeopoint:
