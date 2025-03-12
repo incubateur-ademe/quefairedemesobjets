@@ -30,3 +30,6 @@ REPRISE_1POUR1 = "1 pour 1"
 
 # Special field values
 EMPTY_ACTEUR_FIELD = "__empty__"
+
+# To handle data we don't want to show on frontend
+INFO_TO_HIDE = "[Information masquée]"
