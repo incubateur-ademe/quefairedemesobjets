@@ -64,26 +64,22 @@ class DAGConfig(BaseModel):
     validate_address_with_ban: bool = False
 
     @field_validator("endpoint")
-    def validate_endpoint(cls, v):
-        if v.startswith("s3://"):
-            # We only accept xlsx files from s3
-            if not v.endswith(".xlsx"):
-                raise ValueError("L'URL S3 doit se terminer par '.xlsx'")
+    def validate_endpoint(cls, endpoint):
+        if endpoint.startswith("s3://"):
+            if not endpoint.endswith(".xlsx"):
+                raise ValueError("S3 URL must end with '.xlsx'")
 
-            # Check if the endpoint is a valid s3 file url
-            s3_pattern = r"^s3://[a-zA-Z0-9.\-_]+(/[a-zA-Z0-9.\-_]+)*$"
-            if not re.match(s3_pattern, v):
-                raise ValueError("Format d'URL S3 invalide")
+            if not re.match(r"^s3://[a-zA-Z0-9.\-_]+(/[a-zA-Z0-9.\-_]+)*$", endpoint):
+                raise ValueError("Invalid S3 URL format")
 
-        elif v.startswith("https://") or v.startswith("http://"):
-            # check if the endpoint is a valid http url
-            if not re.match(r"^https?://[^/\s]+[^\s]*$", v):
-                raise ValueError("Format d'URL HTTP invalide")
+        elif endpoint.startswith("https://") or endpoint.startswith("http://"):
+            if not re.match(r"^https?://[^/\s]+[^\s]*$", endpoint):
+                raise ValueError("Invalid HTTP URL format")
 
         else:
-            raise ValueError("L'URL doit commencer par 's3://' ou 'http(s)://'")
+            raise ValueError("URL must start with 's3://' or 'http(s)://'")
 
-        return v
+        return endpoint
 
     @classmethod
     def from_airflow_params(

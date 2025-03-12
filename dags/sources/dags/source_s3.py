@@ -1,4 +1,5 @@
 from airflow import DAG
+from airflow.models.param import Param
 from sources.config.airflow_params import get_souscategorie_mapping_from_db
 from sources.tasks.airflow_logic.operators import (
     default_args,
@@ -15,8 +16,16 @@ with DAG(
     ),
     **default_params,
     params={
-        "s3_connection_id": "s3data",
-        "endpoint": ("s3://lvao-data-source/unique/unique_20250310.xlsx"),
+        "s3_connection_id": Param(
+            "s3data",
+            type="string",
+            description="ID de la connexion S3 à utiliser",
+        ),
+        "endpoint": Param(
+            "s3://lvao-data-source/unique/unique_20250310.xlsx",
+            type="string",
+            description="Remplacer par l'URL S3 du fichier à récupérer",
+        ),
         "normalization_rules": [
             # 1. Renommage des colonnes
             # 2. Transformation des colonnes
