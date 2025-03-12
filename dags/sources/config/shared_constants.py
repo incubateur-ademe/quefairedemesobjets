@@ -32,3 +32,6 @@ REPRISE_NP = ""
 
 # Special field values
 EMPTY_ACTEUR_FIELD = "__empty__"
+
+# To handle data we don't want to show on frontend
+INFO_TO_HIDE = "[Information masquée]"
