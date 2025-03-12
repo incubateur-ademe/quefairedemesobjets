@@ -54,8 +54,8 @@ with DAG(
             },
             {
                 "origin": "LST_TYPE_DECHET",
-                "transformation": "clean_souscategorie_codes_sinoe",
-                "destination": "souscategorie_codes",
+                "transformation": "clean_sous_categorie_codes_sinoe",
+                "destination": "sous_categorie_codes",
             },
             {
                 "origin": "ORIGINE_DECHET_ACC",
@@ -72,7 +72,7 @@ with DAG(
                 "value": [],
             },
             {
-                "column": "acteurservice_codes",
+                "column": "acteur_service_codes",
                 "value": ["structure_de_collecte"],
             },
             {
@@ -113,9 +113,9 @@ with DAG(
                 "destination": ["identifiant_unique"],
             },
             {
-                "origin": ["action_codes", "souscategorie_codes"],
+                "origin": ["action_codes", "sous_categorie_codes"],
                 "transformation": "clean_proposition_services",
-                "destination": ["proposition_services_codes"],
+                "destination": ["proposition_service_codes"],
             },
             # 5. Supression des colonnes
             {"remove": "_geopoint"},

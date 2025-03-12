@@ -11,8 +11,8 @@ from sources.tasks.transform.transform_column import (
     clean_reprise,
     clean_siren,
     clean_siret,
-    clean_souscategorie_codes,
-    clean_souscategorie_codes_sinoe,
+    clean_sous_categorie_codes,
+    clean_sous_categorie_codes_sinoe,
     clean_url,
     convert_opening_hours,
     strip_lower_string,
@@ -320,17 +320,17 @@ class TestCleanSousCategorieCodes:
             ),
         ],
     )
-    def test_clean_souscategorie_codes(
+    def test_clean_sous_categorie_codes(
         self, sscat_list, product_mapping, expected_output, dag_config
     ):
         dag_config.product_mapping = product_mapping
-        result = clean_souscategorie_codes(sscat_list, dag_config)
+        result = clean_sous_categorie_codes(sscat_list, dag_config)
         assert sorted(result) == sorted(expected_output)
 
-    def test_clean_souscategorie_codes_raise(self, dag_config):
+    def test_clean_sous_categorie_codes_raise(self, dag_config):
         dag_config.product_mapping = {"sscat1": 1.0}
         with pytest.raises(ValueError):
-            clean_souscategorie_codes("sscat1", dag_config)
+            clean_sous_categorie_codes("sscat1", dag_config)
 
 
 class TestCleanSouscategorieCodesSinoe:
@@ -390,14 +390,14 @@ class TestCleanSouscategorieCodesSinoe:
             ),
         ],
     )
-    def test_clean_souscategorie_codes_sinoe(
+    def test_clean_sous_categorie_codes_sinoe(
         self, sscats, dechet_mapping, product_mapping, expected_output, dag_config
     ):
         # Mock the DAGConfig
         dag_config.dechet_mapping = dechet_mapping
         dag_config.product_mapping = product_mapping
 
-        result = clean_souscategorie_codes_sinoe(sscats, dag_config)
+        result = clean_sous_categorie_codes_sinoe(sscats, dag_config)
         assert sorted(result) == sorted(expected_output)
 
 

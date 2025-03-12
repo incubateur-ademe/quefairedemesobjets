@@ -84,16 +84,16 @@ def source_data_validate(df: pd.DataFrame, dag_config: DAGConfig) -> None:
     # vérification des codes des acteurservices
     df_acteurservice_code = set(
         chain.from_iterable(
-            x if isinstance(x, list) else [x] for x in df["acteurservice_codes"]
+            x if isinstance(x, list) else [x] for x in df["acteur_service_codes"]
         )
     )
     db_acteurservice_code = set(
         db_tasks.read_data_from_postgres(table_name="qfdmo_acteurservice")["code"]
     )
-    invalid_acteurservice_codes = df_acteurservice_code - db_acteurservice_code
-    if invalid_acteurservice_codes:
+    invalid_acteur_service_codes = df_acteurservice_code - db_acteurservice_code
+    if invalid_acteur_service_codes:
         raise ValueError(
-            f"acteurservice_codes: codes pas dans DB: {invalid_acteurservice_codes}"
+            f"acteur_service_codes: codes pas dans DB: {invalid_acteur_service_codes}"
         )
 
     # ------------------------------------
@@ -114,7 +114,7 @@ def source_data_validate(df: pd.DataFrame, dag_config: DAGConfig) -> None:
     # vérification des codes des labels
     df_sscat_code = set(
         chain.from_iterable(
-            x if isinstance(x, list) else [x] for x in df["souscategorie_codes"]
+            x if isinstance(x, list) else [x] for x in df["sous_categorie_codes"]
         )
     )
     db_sscat_code = set(

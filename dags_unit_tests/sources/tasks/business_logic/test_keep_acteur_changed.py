@@ -18,8 +18,8 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": [],
                     "identifiant_externe": [],
                     "acteur_type_code": [],
-                    "acteurservice_codes": [],
-                    "proposition_services_codes": [],
+                    "acteur_service_codes": [],
+                    "proposition_service_codes": [],
                 }
             ),
             pd.DataFrame(
@@ -30,8 +30,8 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": [],
                     "identifiant_externe": [],
                     "acteur_type_code": [],
-                    "acteurservice_codes": [],
-                    "proposition_services_codes": [],
+                    "acteur_service_codes": [],
+                    "proposition_service_codes": [],
                 }
             ),
             pd.DataFrame(
@@ -42,8 +42,8 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": [],
                     "identifiant_externe": [],
                     "acteur_type_code": [],
-                    "acteurservice_codes": [],
-                    "proposition_services_codes": [],
+                    "acteur_service_codes": [],
+                    "proposition_service_codes": [],
                 }
             ),
             pd.DataFrame(
@@ -54,8 +54,8 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": [],
                     "identifiant_externe": [],
                     "acteur_type_code": [],
-                    "acteurservice_codes": [],
-                    "proposition_services_codes": [],
+                    "acteur_service_codes": [],
+                    "proposition_service_codes": [],
                 }
             ),
         ),
@@ -69,11 +69,11 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": ["source1", "source2"],
                     "identifiant_externe": ["id1", "id2"],
                     "acteur_type_code": ["commerce", "ess"],
-                    "acteurservice_codes": [
+                    "acteur_service_codes": [
                         ["service1", "service2"],
                         ["service2", "service1"],
                     ],
-                    "proposition_services_codes": [
+                    "proposition_service_codes": [
                         [
                             {
                                 "action": "action1",
@@ -101,11 +101,11 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": ["source1", "source2"],
                     "identifiant_externe": ["id1", "id2"],
                     "acteur_type_code": ["commerce", "ess"],
-                    "acteurservice_codes": [
+                    "acteur_service_codes": [
                         ["service1", "service2"],
                         ["service2", "service1"],
                     ],
-                    "proposition_services_codes": [
+                    "proposition_service_codes": [
                         [
                             {
                                 "action": "action1",
@@ -133,8 +133,8 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": pd.Series([], dtype="object"),
                     "identifiant_externe": pd.Series([], dtype="object"),
                     "acteur_type_code": pd.Series([], dtype="object"),
-                    "acteurservice_codes": pd.Series([], dtype="object"),
-                    "proposition_services_codes": pd.Series([], dtype="object"),
+                    "acteur_service_codes": pd.Series([], dtype="object"),
+                    "proposition_service_codes": pd.Series([], dtype="object"),
                 }
             ),
             pd.DataFrame(
@@ -145,8 +145,8 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": pd.Series([], dtype="object"),
                     "identifiant_externe": pd.Series([], dtype="object"),
                     "acteur_type_code": pd.Series([], dtype="object"),
-                    "acteurservice_codes": pd.Series([], dtype="object"),
-                    "proposition_services_codes": pd.Series([], dtype="object"),
+                    "acteur_service_codes": pd.Series([], dtype="object"),
+                    "proposition_service_codes": pd.Series([], dtype="object"),
                 }
             ),
         ),
@@ -160,11 +160,11 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": ["source1", "source2"],
                     "identifiant_externe": ["id1", "id2"],
                     "acteur_type_code": ["commerce", "ess"],
-                    "acteurservice_codes": [
+                    "acteur_service_codes": [
                         ["service1", "service2"],
                         ["service2", "service1"],
                     ],
-                    "proposition_services_codes": [
+                    "proposition_service_codes": [
                         [
                             {
                                 "action": "action1",
@@ -192,11 +192,11 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": ["source1", "source2"],
                     "identifiant_externe": ["id1", "id2"],
                     "acteur_type_code": ["commerce", "ess"],
-                    "acteurservice_codes": [
+                    "acteur_service_codes": [
                         ["service1", "service2"],
                         ["service1", "service2"],
                     ],
-                    "proposition_services_codes": [
+                    "proposition_service_codes": [
                         [
                             {
                                 "action": "action1",
@@ -224,8 +224,8 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": pd.Series([], dtype="object"),
                     "identifiant_externe": pd.Series([], dtype="object"),
                     "acteur_type_code": pd.Series([], dtype="object"),
-                    "acteurservice_codes": pd.Series([], dtype="object"),
-                    "proposition_services_codes": pd.Series([], dtype="object"),
+                    "acteur_service_codes": pd.Series([], dtype="object"),
+                    "proposition_service_codes": pd.Series([], dtype="object"),
                 }
             ),
             pd.DataFrame(
@@ -236,8 +236,8 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": pd.Series([], dtype="object"),
                     "identifiant_externe": pd.Series([], dtype="object"),
                     "acteur_type_code": pd.Series([], dtype="object"),
-                    "acteurservice_codes": pd.Series([], dtype="object"),
-                    "proposition_services_codes": pd.Series([], dtype="object"),
+                    "acteur_service_codes": pd.Series([], dtype="object"),
+                    "proposition_service_codes": pd.Series([], dtype="object"),
                 }
             ),
         ),
@@ -251,10 +251,10 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": ["source1"],
                     "identifiant_externe": ["id1"],
                     "acteur_type_code": ["commerce"],
-                    "acteurservice_codes": [
+                    "acteur_service_codes": [
                         ["service1", "service2"],
                     ],
-                    "proposition_services_codes": [
+                    "proposition_service_codes": [
                         [
                             {
                                 "action": "action1",
@@ -272,10 +272,10 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": ["source1"],
                     "identifiant_externe": ["id1"],
                     "acteur_type_code": ["commerce"],
-                    "acteurservice_codes": [
+                    "acteur_service_codes": [
                         ["service1", "service2"],
                     ],
-                    "proposition_services_codes": [
+                    "proposition_service_codes": [
                         [
                             {
                                 "action": "action1",
@@ -293,10 +293,10 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": ["source1"],
                     "identifiant_externe": ["id1"],
                     "acteur_type_code": ["commerce"],
-                    "acteurservice_codes": [
+                    "acteur_service_codes": [
                         ["service1", "service2"],
                     ],
-                    "proposition_services_codes": [
+                    "proposition_service_codes": [
                         [
                             {
                                 "action": "action1",
@@ -314,10 +314,10 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": ["source1"],
                     "identifiant_externe": ["id1"],
                     "acteur_type_code": ["commerce"],
-                    "acteurservice_codes": [
+                    "acteur_service_codes": [
                         ["service1", "service2"],
                     ],
-                    "proposition_services_codes": [
+                    "proposition_service_codes": [
                         [
                             {
                                 "action": "action1",
@@ -328,7 +328,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                 }
             ),
         ),
-        # 5. LIST (acteurservice_codes) updated
+        # 5. LIST (acteur_service_codes) updated
         (
             pd.DataFrame(
                 {
@@ -338,10 +338,10 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": ["source1"],
                     "identifiant_externe": ["id1"],
                     "acteur_type_code": ["commerce"],
-                    "acteurservice_codes": [
+                    "acteur_service_codes": [
                         ["service1", "service2"],
                     ],
-                    "proposition_services_codes": [
+                    "proposition_service_codes": [
                         [
                             {
                                 "action": "action1",
@@ -359,10 +359,10 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": ["source1"],
                     "identifiant_externe": ["id1"],
                     "acteur_type_code": ["commerce"],
-                    "acteurservice_codes": [
+                    "acteur_service_codes": [
                         ["service1", "service3"],
                     ],
-                    "proposition_services_codes": [
+                    "proposition_service_codes": [
                         [
                             {
                                 "action": "action1",
@@ -380,10 +380,10 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": ["source1"],
                     "identifiant_externe": ["id1"],
                     "acteur_type_code": ["commerce"],
-                    "acteurservice_codes": [
+                    "acteur_service_codes": [
                         ["service1", "service2"],
                     ],
-                    "proposition_services_codes": [
+                    "proposition_service_codes": [
                         [
                             {
                                 "action": "action1",
@@ -401,10 +401,10 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": ["source1"],
                     "identifiant_externe": ["id1"],
                     "acteur_type_code": ["commerce"],
-                    "acteurservice_codes": [
+                    "acteur_service_codes": [
                         ["service1", "service3"],
                     ],
-                    "proposition_services_codes": [
+                    "proposition_service_codes": [
                         [
                             {
                                 "action": "action1",
@@ -415,7 +415,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                 }
             ),
         ),
-        # 6. LIST length (acteurservice_codes) updated
+        # 6. LIST length (acteur_service_codes) updated
         (
             pd.DataFrame(
                 {
@@ -425,10 +425,10 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": ["source1"],
                     "identifiant_externe": ["id1"],
                     "acteur_type_code": ["commerce"],
-                    "acteurservice_codes": [
+                    "acteur_service_codes": [
                         ["service1", "service2"],
                     ],
-                    "proposition_services_codes": [
+                    "proposition_service_codes": [
                         [
                             {
                                 "action": "action1",
@@ -446,10 +446,10 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": ["source1"],
                     "identifiant_externe": ["id1"],
                     "acteur_type_code": ["commerce"],
-                    "acteurservice_codes": [
+                    "acteur_service_codes": [
                         ["service1"],
                     ],
-                    "proposition_services_codes": [
+                    "proposition_service_codes": [
                         [
                             {
                                 "action": "action1",
@@ -467,10 +467,10 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": ["source1"],
                     "identifiant_externe": ["id1"],
                     "acteur_type_code": ["commerce"],
-                    "acteurservice_codes": [
+                    "acteur_service_codes": [
                         ["service1", "service2"],
                     ],
-                    "proposition_services_codes": [
+                    "proposition_service_codes": [
                         [
                             {
                                 "action": "action1",
@@ -488,10 +488,10 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": ["source1"],
                     "identifiant_externe": ["id1"],
                     "acteur_type_code": ["commerce"],
-                    "acteurservice_codes": [
+                    "acteur_service_codes": [
                         ["service1"],
                     ],
-                    "proposition_services_codes": [
+                    "proposition_service_codes": [
                         [
                             {
                                 "action": "action1",
@@ -502,7 +502,7 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                 }
             ),
         ),
-        # 7. DICT (proposition_services_codes) updated
+        # 7. DICT (proposition_service_codes) updated
         (
             pd.DataFrame(
                 {
@@ -512,10 +512,10 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": ["source1"],
                     "identifiant_externe": ["id1"],
                     "acteur_type_code": ["commerce"],
-                    "acteurservice_codes": [
+                    "acteur_service_codes": [
                         ["service1", "service2"],
                     ],
-                    "proposition_services_codes": [
+                    "proposition_service_codes": [
                         [
                             {
                                 "action": "action1",
@@ -533,10 +533,10 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": ["source1"],
                     "identifiant_externe": ["id1"],
                     "acteur_type_code": ["commerce"],
-                    "acteurservice_codes": [
+                    "acteur_service_codes": [
                         ["service1", "service2"],
                     ],
-                    "proposition_services_codes": [
+                    "proposition_service_codes": [
                         [
                             {
                                 "action": "action1",
@@ -554,10 +554,10 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": ["source1"],
                     "identifiant_externe": ["id1"],
                     "acteur_type_code": ["commerce"],
-                    "acteurservice_codes": [
+                    "acteur_service_codes": [
                         ["service1", "service2"],
                     ],
-                    "proposition_services_codes": [
+                    "proposition_service_codes": [
                         [
                             {
                                 "action": "action1",
@@ -575,10 +575,10 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": ["source1"],
                     "identifiant_externe": ["id1"],
                     "acteur_type_code": ["commerce"],
-                    "acteurservice_codes": [
+                    "acteur_service_codes": [
                         ["service1", "service2"],
                     ],
-                    "proposition_services_codes": [
+                    "proposition_service_codes": [
                         [
                             {
                                 "action": "action1",
@@ -599,8 +599,8 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": [],
                     "identifiant_externe": [],
                     "acteur_type_code": [],
-                    "acteurservice_codes": [],
-                    "proposition_services_codes": [],
+                    "acteur_service_codes": [],
+                    "proposition_service_codes": [],
                 }
             ),
             pd.DataFrame(
@@ -611,10 +611,10 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": ["source1"],
                     "identifiant_externe": ["id1"],
                     "acteur_type_code": ["commerce"],
-                    "acteurservice_codes": [
+                    "acteur_service_codes": [
                         ["service1", "service2"],
                     ],
-                    "proposition_services_codes": [
+                    "proposition_service_codes": [
                         [
                             {
                                 "action": "action1",
@@ -632,8 +632,8 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": [],
                     "identifiant_externe": [],
                     "acteur_type_code": [],
-                    "acteurservice_codes": [],
-                    "proposition_services_codes": [],
+                    "acteur_service_codes": [],
+                    "proposition_service_codes": [],
                 }
             ),
             pd.DataFrame(
@@ -644,10 +644,10 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": ["source1"],
                     "identifiant_externe": ["id1"],
                     "acteur_type_code": ["commerce"],
-                    "acteurservice_codes": [
+                    "acteur_service_codes": [
                         ["service1", "service2"],
                     ],
-                    "proposition_services_codes": [
+                    "proposition_service_codes": [
                         [
                             {
                                 "action": "action1",
@@ -668,10 +668,10 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": ["source1"],
                     "identifiant_externe": ["id1"],
                     "acteur_type_code": ["commerce"],
-                    "acteurservice_codes": [
+                    "acteur_service_codes": [
                         ["service1", "service2"],
                     ],
-                    "proposition_services_codes": [
+                    "proposition_service_codes": [
                         [
                             {
                                 "action": "action1",
@@ -689,8 +689,8 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": [],
                     "identifiant_externe": [],
                     "acteur_type_code": [],
-                    "acteurservice_codes": [],
-                    "proposition_services_codes": [],
+                    "acteur_service_codes": [],
+                    "proposition_service_codes": [],
                 }
             ),
             pd.DataFrame(
@@ -701,10 +701,10 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": ["source1"],
                     "identifiant_externe": ["id1"],
                     "acteur_type_code": ["commerce"],
-                    "acteurservice_codes": [
+                    "acteur_service_codes": [
                         ["service1", "service2"],
                     ],
-                    "proposition_services_codes": [
+                    "proposition_service_codes": [
                         [
                             {
                                 "action": "action1",
@@ -722,8 +722,8 @@ from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_ch
                     "source_code": [],
                     "identifiant_externe": [],
                     "acteur_type_code": [],
-                    "acteurservice_codes": [],
-                    "proposition_services_codes": [],
+                    "acteur_service_codes": [],
+                    "proposition_service_codes": [],
                 }
             ),
         ),
