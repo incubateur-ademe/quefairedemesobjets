@@ -26,7 +26,7 @@ def content(request):
 
 def assistant(request) -> dict:
     if request.META.get("HTTP_HOST") not in settings.ASSISTANT["HOSTS"]:
-        return
+        return {}
 
     return {
         "assistant": {
