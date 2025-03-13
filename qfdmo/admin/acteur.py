@@ -530,6 +530,7 @@ class PropositionServiceAdmin(
         "acteur__siren",
     ]
     search_help_text = "Recherche sur le nom, le siret ou le siren de l'acteur"
+    autocomplete_fields = ["acteur"]
 
 
 class RevisionPropositionServiceResource(BasePropositionServiceResource):
@@ -556,6 +557,7 @@ class RevisionPropositionServiceAdmin(
         "acteur__siret",
     ]
     search_help_text = "Recherche sur le nom ou le siret de l'acteur"
+    autocomplete_fields = ["acteur"]
 
 
 class DisplayedActeurResource(ActeurResource):
