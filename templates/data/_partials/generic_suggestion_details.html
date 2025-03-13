@@ -1,0 +1,23 @@
+{% extends "data/_partials/suggestion_details.html" %}
+{% load custom_filters %}
+
+{% block suggestion_title %}
+{{ title }}
+{% endblock suggestion_title %}</h3>
+
+{% block suggestion_details %}
+
+<h3 style="margin-top: 1.5em">💡 Résumé des changements:</h3>
+<ul>
+    {% for key,value in summary.items %}
+    <li><b>{{ key }}</b>: {{ value }}</li>
+    {% endfor %}
+</ul>
+
+<h3 style="margin-top: 1.5em">🔢 {{ changes|length }} acteur(s) impacté(s):</h3>
+<ul>
+    {% for change in changes %}
+    <li><a href="{% url 'admin:qfdmo_displayedacteur_change' change.model_params.id|quote %}" target="_blank" rel="noreferrer">{{ change.model_params.id }}</a></li>
+    {% endfor %}
+</ul>
+{% endblock suggestion_details %}

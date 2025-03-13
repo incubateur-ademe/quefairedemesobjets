@@ -13,6 +13,7 @@ SUGGESTION_ERREUR = "ERREUR"
 SUGGESTION_SUCCES = "SUCCES"
 
 # SuggestionCohorte type_action
+SUGGESTION_RGPD_ANONYMIZE = "RGPD_ANONYMIZE"
 SUGGESTION_CLUSTERING = "CLUSTERING"
 SUGGESTION_SOURCE_AJOUT = "SOURCE_AJOUT"
 SUGGESTION_SOURCE_MODIFICATION = "SOURCE_MODIFICATION"
@@ -35,3 +36,6 @@ REPRISE_1POUR1 = "1 pour 1"
 
 # Special field values
 EMPTY_ACTEUR_FIELD = "__empty__"
+
+# To handle data we don't want to show on frontend
+INFO_TO_HIDE = "[Information masquée]"

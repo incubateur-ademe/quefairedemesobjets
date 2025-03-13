@@ -12,6 +12,7 @@ from dags.sources.config.shared_constants import (
     SUGGESTION_ENCOURS,
     SUGGESTION_ERREUR,
     SUGGESTION_REJETEE,
+    SUGGESTION_RGPD_ANONYMIZE,
     SUGGESTION_SOURCE_AJOUT,
     SUGGESTION_SOURCE_MODIFICATION,
     SUGGESTION_SOURCE_SUPRESSION,
@@ -50,6 +51,7 @@ class SuggestionCohorteStatut(models.TextChoices):
 
 
 class SuggestionAction(models.TextChoices):
+    RGPD_ANONYMIZE = SUGGESTION_RGPD_ANONYMIZE, "Anonymisation RGPD"
     CLUSTERING = SUGGESTION_CLUSTERING, "regroupement/déduplication des acteurs"
     SOURCE_AJOUT = (
         SUGGESTION_SOURCE_AJOUT,
@@ -198,6 +200,9 @@ class Suggestion(models.Model):
             and isinstance(self.suggestion, dict)
         ):
             template_name = "data/_partials/ajout_suggestion_details.html"
+        elif self.suggestion_cohorte.type_action == SuggestionAction.RGPD_ANONYMIZE:
+            template_name = "data/_partials/generic_suggestion_details.html"
+            template_context = self.suggestion.copy()
 
         return render_to_string(template_name, template_context)
 
@@ -280,7 +285,10 @@ class Suggestion(models.Model):
     # FIXME: this acteur management will be reviewed with PYDANTIC classes which will
     # be used to handle all specificities of suggestions
     def apply(self):
-        if self.suggestion_cohorte.type_action == SuggestionAction.CLUSTERING:
+        if self.suggestion_cohorte.type_action in [
+            SuggestionAction.CLUSTERING,
+            SuggestionAction.RGPD_ANONYMIZE,
+        ]:
             changes = self.suggestion["changes"]
             changes.sort(key=lambda x: x["order"])
             for change in changes:
