@@ -76,7 +76,7 @@ class ContactFormView(FormView):
 class AssistantBaseView:
     """Base view that provides templates used on all pages.
     It needs to be used by all views of the Assistant as it
-    adds a handles a redirect that prevents accessing a produit
+    handles a redirect that prevents accessing a produit
     with a Carte domain name.
 
     TODO: move to a middleware
