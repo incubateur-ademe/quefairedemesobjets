@@ -1,6 +1,10 @@
 from django.conf import settings
 from django.urls import reverse
 
+from qfdmd.forms import SearchForm
+from qfdmd.models import CMSPage
+from qfdmd.views import SEARCH_VIEW_TEMPLATE_NAME, generate_iframe_script
+
 from . import constants
 
 
@@ -21,6 +25,9 @@ def content(request):
 
 
 def assistant(request) -> dict:
+    if request.META.get("HTTP_HOST") not in settings.ASSISTANT["HOSTS"]:
+        return
+
     return {
         "assistant": {
             "is_home": request.path == reverse("home"),
@@ -29,5 +36,9 @@ def assistant(request) -> dict:
             "POSTHOG_KEY": settings.ASSISTANT["POSTHOG_KEY"],
             "MATOMO_ID": settings.ASSISTANT["MATOMO_ID"],
         },
+        "footer_pages": CMSPage.objects.all(),
+        "search_form": SearchForm(),
+        "search_view_template_name": SEARCH_VIEW_TEMPLATE_NAME,
+        "iframe_script": generate_iframe_script(request),
         **constants.ASSISTANT,
     }
