@@ -105,6 +105,7 @@ django-dsfr = "^2.0.0"
 django-colorfield = "^0.11.0"
 rapidfuzz = "^3.11.0"
 sites-faciles-experiment = "^0.0.1"
+django-sass-processor = "^1.4.1"
 
 
 [tool.poetry.group.dev.dependencies]

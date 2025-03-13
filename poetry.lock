@@ -1964,6 +1964,21 @@ Django = "*"
 testing = ["django-modelcluster"]
 
 [[package]]
+name = "django-sass-processor"
+version = "1.4.1"
+description = "SASS processor to compile SCSS files into *.css, while rendering, or offline."
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "django_sass_processor-1.4.1-py3-none-any.whl", hash = "sha256:7b76560172f72519cfcda944feeb517b37f40f5562196298245f5569c2d02f91"},
+    {file = "django_sass_processor-1.4.1.tar.gz", hash = "sha256:1e9d04769f76d89bbf77b9b279ba83dfacad9c98c03ca8a58ecfc29d997e6fcf"},
+]
+
+[package.extras]
+management-command = ["django-compressor (>=2.4)"]
+
+[[package]]
 name = "django-sql-explorer"
 version = "5.3"
 description = "SQL Reporting that Just Works. Fast, simple, and confusion-free.Write and share queries in a delightful SQL editor, with AI assistance"
@@ -7309,4 +7324,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12,<3.13"
-content-hash = "313c84573dbe6872a72663e0bcb5da85287a3ddb44f4ebb8e70c40f90f08053c"
+content-hash = "0e2872028f272ee9597cbc949523ff46e10cb9ee5686f160e3f401e4766303d9"
