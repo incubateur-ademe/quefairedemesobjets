@@ -2,11 +2,15 @@
 # --- --- --- ---
 FROM apache/airflow:2.10.4 AS python-builder
 
-# system dependencies
+#---------------------------------
+# Extra dependencies
+#---------------------------------
+# unzip = airflow DAGs to ingest zip files into DB
+# gdal = Django geo
 USER root
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    libpq-dev gcc python3-dev
+RUN echo "deb http://deb.debian.org/debian stable main" > /etc/apt/sources.list
+RUN apt-get update
+RUN apt-get install -y unzip
 
 # python dependencies
 RUN apt-get install -y --no-install-recommends \
@@ -16,12 +20,6 @@ RUN apt-get install -y --no-install-recommends \
 
 ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
 ENV C_INCLUDE_PATH=/usr/include/gdal
-
-#---------------------------------
-# Dépendance pour Annuaire Entreprise
-#---------------------------------
-RUN echo "deb http://deb.debian.org/debian stable main" > /etc/apt/sources.list
-RUN apt-get update && apt-get install -y unzip
 
 #---------------------------------
 # Rebascule sur l'utilisateur airflow
