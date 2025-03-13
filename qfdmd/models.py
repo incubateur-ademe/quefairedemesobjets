@@ -9,10 +9,6 @@ from django.template.loader import render_to_string
 from django.urls.base import reverse
 from django.utils.functional import cached_property
 from django_extensions.db.fields import AutoSlugField
-from wagtail.fields import StreamField
-from wagtail.models import Page
-
-from sites_faciles.content_manager.blocks import STREAMFIELD_COMMON_BLOCKS
 
 logger = logging.getLogger(__name__)
 
@@ -268,12 +264,19 @@ class Suggestion(models.Model):
         return str(self.produit)
 
 
-class CMSPage(Page):
-    body = StreamField(
-        STREAMFIELD_COMMON_BLOCKS,
-        blank=True,
-        use_json_field=True,
+class CMSPage(models.Model):
+    id = models.IntegerField(
+        primary_key=True,
+        help_text="Ce champ est le seul contribuable.<br>"
+        "Il correspond à l'ID de la page Wagtail.<br>"
+        "Tous les autres champs seront automatiquement contribués à l'enregistrement"
+        "de la page dans l'administration Django.",
     )
+    body = models.JSONField(default=dict)
+    search_description = models.CharField(default="")
+    seo_title = models.CharField(default="")
+    title = models.CharField(default="")
+    slug = models.CharField(default="")
     poids = models.IntegerField(
         default=0,
         help_text=(
