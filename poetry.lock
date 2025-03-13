@@ -2246,18 +2246,18 @@ doc = ["Sphinx", "sphinx-rtd-theme", "sphinxcontrib-spelling"]
 
 [[package]]
 name = "faker"
-version = "37.0.0"
+version = "24.14.1"
 description = "Faker is a Python package that generates fake data for you."
 optional = false
-python-versions = ">=3.9"
-groups = ["dev"]
+python-versions = ">=3.8"
+groups = ["main", "dev"]
 files = [
-    {file = "faker-37.0.0-py3-none-any.whl", hash = "sha256:2598f78b76710a4ed05e197dda5235be409b4c291ba5c9c7514989cfbc7a5144"},
-    {file = "faker-37.0.0.tar.gz", hash = "sha256:d2e4e2a30d459a8ec0ae52a552aa51c48973cb32cf51107dee90f58a8322a880"},
+    {file = "Faker-24.14.1-py3-none-any.whl", hash = "sha256:a5edba3aa17a1d689c8907e5b0cd1653079c2466a4807f083aa7b5f80a00225d"},
+    {file = "Faker-24.14.1.tar.gz", hash = "sha256:380a3697e696ae4fcf50a93a3d9e0286fab7dfbf05a9caa4421fa4727c6b1e89"},
 ]
 
 [package.dependencies]
-tzdata = "*"
+python-dateutil = ">=2.4"
 
 [[package]]
 name = "filelock"
@@ -3005,6 +3005,22 @@ cli = ["click (==8.*)", "pygments (==2.*)", "rich (>=10,<14)"]
 http2 = ["h2 (>=3,<5)"]
 socks = ["socksio (==1.*)"]
 zstd = ["zstandard (>=0.18.0)"]
+
+[[package]]
+name = "icalendar"
+version = "5.0.13"
+description = "iCalendar parser/generator"
+optional = false
+python-versions = ">=3.7"
+groups = ["main"]
+files = [
+    {file = "icalendar-5.0.13-py3-none-any.whl", hash = "sha256:5ded5415e2e1edef5ab230024a75878a7a81d518a3b1ae4f34bf20b173c84dc2"},
+    {file = "icalendar-5.0.13.tar.gz", hash = "sha256:92799fde8cce0b61daa8383593836d1e19136e504fa1671f471f98be9b029706"},
+]
+
+[package.dependencies]
+python-dateutil = "*"
+pytz = "*"
 
 [[package]]
 name = "identify"
@@ -5299,7 +5315,7 @@ version = "2.9.0.post0"
 description = "Extensions to the standard Python datetime module"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
-groups = ["main", "airflow"]
+groups = ["main", "airflow", "dev"]
 files = [
     {file = "python-dateutil-2.9.0.post0.tar.gz", hash = "sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3"},
     {file = "python_dateutil-2.9.0.post0-py2.py3-none-any.whl", hash = "sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427"},
@@ -5386,7 +5402,7 @@ version = "2025.1"
 description = "World timezone definitions, modern and historical"
 optional = false
 python-versions = "*"
-groups = ["airflow"]
+groups = ["main", "airflow"]
 files = [
     {file = "pytz-2025.1-py2.py3-none-any.whl", hash = "sha256:89dd22dca55b46eac6eda23b2d72721bf1bdfef212645d81513ef5d03038de57"},
     {file = "pytz-2025.1.tar.gz", hash = "sha256:c2db42be2a2518b28e65f9207c4d05e6ff547d1efa4086469ef855e4ab70178e"},
@@ -6191,14 +6207,14 @@ files = [
 
 [[package]]
 name = "sites-faciles-experiment"
-version = "0.0.3"
+version = "0.0.4"
 description = "Gestionnaire de contenu permettant de créer et gérer un site internet basé sur le Système de design de l’État, accessible et responsive"
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "sites_faciles_experiment-0.0.3-py3-none-any.whl", hash = "sha256:abde6a74c16f50f671178a1e44a2ad16b44d7d84dc7f8590c94b92dd46918528"},
-    {file = "sites_faciles_experiment-0.0.3.tar.gz", hash = "sha256:efbd744e2fbcc7d9e33ad5f71d8246c52d1105b04ab86150478fa1cd4fcb77cb"},
+    {file = "sites_faciles_experiment-0.0.4-py3-none-any.whl", hash = "sha256:a359f85085b416bd1262016c7bc27baa18f0bb30727857794f673da20732b103"},
+    {file = "sites_faciles_experiment-0.0.4.tar.gz", hash = "sha256:df3bbfba53ec38f0e1b2bd74bab6ff80aa06f7bcad3d65836c3312d4871d964d"},
 ]
 
 [package.dependencies]
@@ -6210,6 +6226,8 @@ django-dsfr = ">=2.1.0,<3.0.0"
 django-sass-processor = ">=1.3,<2.0"
 django-storages = {version = ">=1.14.2,<2.0.0", extras = ["s3"]}
 django-taggit = ">=5.0.1,<6.0.0"
+faker = ">=24.3.0,<25.0.0"
+icalendar = ">=5.0.13,<6.0.0"
 libsass = ">=0.22.0,<1.0.0"
 python-dotenv = ">=1.0.0,<2.0.0"
 unidecode = ">=1.3.8,<2.0.0"
@@ -6225,7 +6243,7 @@ version = "1.17.0"
 description = "Python 2 and 3 compatibility utilities"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
-groups = ["main", "airflow"]
+groups = ["main", "airflow", "dev"]
 files = [
     {file = "six-1.17.0-py2.py3-none-any.whl", hash = "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274"},
     {file = "six-1.17.0.tar.gz", hash = "sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81"},
@@ -6761,7 +6779,7 @@ files = [
     {file = "tzdata-2025.1-py2.py3-none-any.whl", hash = "sha256:7e127113816800496f027041c570f50bcd464a020098a3b6b199517772303639"},
     {file = "tzdata-2025.1.tar.gz", hash = "sha256:24894909e88cdb28bd1636c6887801df64cb485bd593f2fd83ef29075a81d694"},
 ]
-markers = {main = "sys_platform == \"win32\""}
+markers = {main = "sys_platform == \"win32\"", dev = "sys_platform == \"win32\""}
 
 [[package]]
 name = "uc-micro-py"
@@ -7342,4 +7360,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12,<3.13"
-content-hash = "a876693cda65c564c1fae2de4511baddb92991b21aac7aff21fad85de8c75874"
+content-hash = "62e5d44ec397404c4e0a698c5eaa848ecb053fd97d2c663b0b61c96fe7f5ea4b"
