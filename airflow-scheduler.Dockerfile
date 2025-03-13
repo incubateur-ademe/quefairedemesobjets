@@ -2,16 +2,38 @@
 # --- --- --- ---
 FROM apache/airflow:2.10.4 AS python-builder
 
-# system dependencies
+#---------------------------------
+# Extra dependencies
+#---------------------------------
+# unzip = airflow DAGs to ingest zip files into DB
+# gdal = Django geo
 USER root
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    libpq-dev gcc python3-dev
+RUN echo "deb http://deb.debian.org/debian stable main" > /etc/apt/sources.list
+RUN apt-get update
+RUN apt-get install -y unzip
 
 # python dependencies
+RUN apt-get install -y --no-install-recommends \
+    gdal-bin libgdal-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
+ENV C_INCLUDE_PATH=/usr/include/gdal
+
+#---------------------------------
+# Rebascule sur l'utilisateur airflow
+#---------------------------------
+# On rebascule sur le dernier utilisateur fourni
+# dans l'image de base
+# https://hub.docker.com/layers/apache/airflow/2.10.4/images/sha256-94b74c8b65924179b961b8838e9eaff2406d72085c612e0f29b72f886df0677e
+USER 50000
+
+# Use user airflow
+RUN chown -R ${AIRFLOW_UID:-50000}:0 /opt/airflow
+USER ${AIRFLOW_UID:-50000}:0
 ARG POETRY_VERSION=2.0
 ENV POETRY_NO_INTERACTION=1
-USER ${AIRFLOW_UID:-50000}:0
 RUN pip install "poetry==${POETRY_VERSION}"
 WORKDIR /opt/airflow/
 COPY pyproject.toml poetry.lock ./
