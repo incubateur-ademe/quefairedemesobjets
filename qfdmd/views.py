@@ -74,6 +74,13 @@ class ContactFormView(FormView):
 
 
 class AssistantBaseView:
+    """Base view that provides templates used on all pages.
+    It needs to be used by all views of the Assistant as it
+    adds a handles a redirect that prevents accessing a produit
+    with a Carte domain name.
+
+    TODO: move to a middleware
+    """
     def dispatch(self, request, *args, **kwargs):
         if request.META.get("HTTP_HOST") not in settings.ASSISTANT["HOSTS"]:
             return redirect(reverse("home"))
