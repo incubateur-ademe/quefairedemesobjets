@@ -27,9 +27,6 @@ from crawl.tasks.airflow_logic.crawl_urls_suggest_syntax_fail_task import (
     crawl_urls_suggest_syntax_fail_task,
 )
 
-URL_TYPES = [
-    "qfdmo_displayedacteur.url",
-]
 UI_PARAMS_SEPARATOR_SELECTION = r"""
 
 # 🔎 Sélection des d'URLs ⬇️
@@ -63,13 +60,6 @@ with DAG(
             mais les suggestions pas écrites en base.
             {UI_PARAMS_SEPARATOR_SELECTION}""",
         ),
-        "urls_type": Param(
-            URL_TYPES[0],
-            enum=URL_TYPES,
-            description_md="""**🔗 Type d'URL** à parcourir.
-            On pourra faire fonctionner le DAG en mode automatique qui
-            alterne les différents types""",
-        ),
         "urls_limit": Param(
             None,
             type=["null", "integer"],
@@ -78,28 +68,6 @@ with DAG(
             Si pas spécifié = toutes les URLs
 
             {UI_PARAMS_SEPARATOR_VERIFICATION}""",
-        ),
-        "urls_check_syntax": Param(
-            True,
-            # Airflow v2 doesn't support read-only params, to achieve
-            # the equivalent, we use enum with only [True], which
-            # does render a checkbox which can be changed BUT will prevent
-            # launching DAG if set to False
-            enum=[True],
-            description_md="""**✍️ Vérification syntaxe**: on vérifie **toujours**
-            que la syntaxe des URLs est bonne, sinon on ne cherche même pas à
-            les parcourir""",
-        ),
-        "urls_check_dns": Param(
-            True,
-            # Airflow v2 doesn't support read-only params, to achieve
-            # the equivalent, we use enum with only [True], which
-            # does render a checkbox which can be changed BUT will prevent
-            # launching DAG if set to False
-            enum=[True],
-            description_md="""**🔤 Vérification DNS**: on vérifie **toujours**
-            que les domaines sont joignables, sinon on ne cherche même pas à
-            parcourir leur URLs""",
         ),
         "urls_check_crawl": Param(
             False,
@@ -125,27 +93,3 @@ with DAG(
     check_syntax >> check_dns >> suggest_dns  # type: ignore
     # Crawl depends on DNS
     check_dns >> check_crawl >> [suggest_diff_https, suggest_diff_other]  # type: ignore
-
-    """
-    chain(
-        # Although we could parallelize some of below
-        # tasks, we keep linear to reduce crawl & DB load
-        crawl_urls_read_urls_from_db_task(dag),
-        # ✅ Checks
-        crawl_urls_check_syntax_task(dag),
-        crawl_urls_check_dns_task(dag),
-        crawl_urls_check_crawl_task(dag),
-        # 🤔 Suggestions
-        # Could also be optimized by grouping
-        # suggestions with their corresponding checks (e.g.
-        # business receives quick DNS suggestions to review before
-        # potentially long crawls)
-        # Keeping them at the end for now as a failing pipeline
-        # on any of the above checks could be a reason to not
-        # make any suggestion
-        crawl_urls_suggest_syntax_fail_task(dag),
-        crawl_urls_suggest_dns_fail_task(dag),
-        crawl_urls_suggest_crawl_diff_https_task(dag),
-        crawl_urls_suggest_crawl_diff_other_task(dag),
-    )
-    """

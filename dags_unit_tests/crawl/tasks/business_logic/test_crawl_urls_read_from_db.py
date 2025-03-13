@@ -11,8 +11,6 @@ from unit_tests.qfdmo.acteur_factory import DisplayedActeurFactory
 @pytest.mark.django_db()
 class TestCrawlUrlsSelectFromDb:
     def test_qfdmo_displayedacteur_url(self):
-        url_type = "qfdmo_displayedacteur.url"
-
         DisplayedActeurFactory(url="")
         DisplayedActeurFactory(url=None)
         # The special empty case we don't want to retrieve
@@ -28,7 +26,7 @@ class TestCrawlUrlsSelectFromDb:
         )
 
         limit = 3
-        df = crawl_urls_read_urls_from_db(url_type, limit)
+        df = crawl_urls_read_urls_from_db(limit)
         assert df[COLS.URL_ORIGIN].tolist() == [
             "https://test.com/1",
             "https://test.com/2",

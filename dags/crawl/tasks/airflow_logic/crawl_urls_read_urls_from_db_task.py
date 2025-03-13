@@ -16,7 +16,7 @@ from crawl.tasks.business_logic.crawl_urls_read_urls_from_db import (
 logger = logging.getLogger(__name__)
 
 
-def task_info_get(url_type: str):
+def task_info_get():
     return f"""
 
 
@@ -24,7 +24,7 @@ def task_info_get(url_type: str):
     Description de la tâche "{TASKS.READ}"
     ============================================================
 
-    💡 quoi: sélection d'URLs à parcourir dans {url_type}
+    💡 quoi: sélection d'URLs à parcourir
 
     🎯 pourquoi: pour pouvoir les parcourir
 
@@ -33,12 +33,9 @@ def task_info_get(url_type: str):
 
 
 def crawl_urls_read_urls_from_db_wrapper(ti, params) -> None:
-    logger.info(task_info_get(params["urls_type"]))
+    logger.info(task_info_get())
 
-    df = crawl_urls_read_urls_from_db(
-        url_type=params["urls_type"],
-        limit=params["urls_limit"],
-    )
+    df = crawl_urls_read_urls_from_db(limit=params["urls_limit"])
 
     if df.empty:
         raise AirflowSkipException("Pas d'URLs à parcourir = on s'arrête là")

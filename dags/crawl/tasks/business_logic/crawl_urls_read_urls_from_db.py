@@ -18,10 +18,8 @@ django_setup_full()
 logger = logging.getLogger(__name__)
 
 
-def crawl_urls_read_urls_from_db(
-    url_type: str, limit: int | None = None
-) -> pd.DataFrame:
-    logger.info(f"{url_type=}")
+def crawl_urls_read_urls_from_db(limit: int | None = None) -> pd.DataFrame:
+    """Get URLs to crawl from DB"""
     logger.info(f"{limit=}")
     from qfdmo.models import ActeurStatus, DisplayedActeur
 
