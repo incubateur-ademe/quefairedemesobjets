@@ -69,15 +69,6 @@ urlpatterns = [
     path("docs/", TemplateView.as_view(template_name="techdocs.html"), name="techdocs"),
 ]
 
-# Wagtail urls
-urlpatterns.extend(
-    [
-        path("cms/", include(wagtailadmin_urls)),
-        path("documents/", include(wagtaildocs_urls)),
-        path("", include(wagtail_urls)),
-    ]
-)
-
 if settings.DEBUG:
     from django.conf.urls.static import static
     from django.views.defaults import page_not_found, server_error
@@ -91,4 +82,13 @@ if settings.DEBUG:
         ]
     )
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# Wagtail urls
+urlpatterns.extend(
+    [
+        path("cms/", include(wagtailadmin_urls)),
+        path("documents/", include(wagtaildocs_urls)),
+        path("", include(wagtail_urls)),
+    ]
+)
 
