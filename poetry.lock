@@ -6207,14 +6207,14 @@ files = [
 
 [[package]]
 name = "sites-faciles-experiment"
-version = "0.0.9"
+version = "0.0.10"
 description = "Gestionnaire de contenu permettant de créer et gérer un site internet basé sur le Système de design de l’État, accessible et responsive"
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "sites_faciles_experiment-0.0.9-py3-none-any.whl", hash = "sha256:3b7cf7bc69a1a84c84d3f4f333400fae2c2ea366d0f92f9c7ed4c56aad4bc470"},
-    {file = "sites_faciles_experiment-0.0.9.tar.gz", hash = "sha256:b6462bdf70ba9d05a9e567db6454462108ae6e0f8ad2bcea41b56ae60108b494"},
+    {file = "sites_faciles_experiment-0.0.10-py3-none-any.whl", hash = "sha256:9da504f479172093d6c5ddf3e3b171b2f0a37ac89f67f365827e21f41cf6bcef"},
+    {file = "sites_faciles_experiment-0.0.10.tar.gz", hash = "sha256:85c10d543d1b5369809688f96fedeaa9f7ca5506d3d85d16bf61c807d0bcb84e"},
 ]
 
 [package.dependencies]
@@ -7359,4 +7359,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12,<3.13"
-content-hash = "96bae34e476a6c7b4ee7b4fe1a9b3c7c129ebe6e4ccf4652cab29a02825327f4"
+content-hash = "aac9e8e8e6d1212a51c8bd4586a0de80221b327fd065a210925338634d06b6df"
