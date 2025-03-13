@@ -445,6 +445,7 @@ INSTALLED_APPS.extend(
         "taggit",
     ]
 )
+WAGTAILIMAGES_EXTENSIONS = ["gif", "jpg", "jpeg", "png", "webp", "svg"]
 
 
 STATICFILES_FINDERS = [
