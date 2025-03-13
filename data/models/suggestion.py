@@ -230,7 +230,7 @@ class Suggestion(models.Model):
     # FIXME: this acteur management will be reviewed with PYDANTIC classes which will
     # be used to handle all specificities of self.suggestions
     def _create_acteur_linked_objects(self, acteur):
-        for proposition_service_code in self.suggestion["proposition_services_codes"]:
+        for proposition_service_code in self.suggestion["proposition_service_codes"]:
             proposition_service = PropositionService.objects.create(
                 action=Action.objects.get(code=proposition_service_code["action"]),
                 acteur=acteur,
@@ -243,7 +243,7 @@ class Suggestion(models.Model):
             label = LabelQualite.objects.get(code=label_code)
             acteur.labels.add(label.id)
 
-        for acteurservice_code in self.suggestion["acteurservice_codes"]:
+        for acteurservice_code in self.suggestion["acteur_service_codes"]:
             acteur_service = ActeurService.objects.get(code=acteurservice_code)
             acteur.acteur_services.add(acteur_service.id)
 

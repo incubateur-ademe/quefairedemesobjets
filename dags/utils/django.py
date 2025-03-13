@@ -1,23 +1,8 @@
-"""Utilitaires pour utiliser notre environement Django
-dans Airflow.
+"""Utilities to work with Django from Airflow
 
-⚠️ ATTENTION ⚠️ Pour que ceci fonctionne, il faut que
-le code django de la repo soit disponible sur le serveur
-qui fait tourner Airflow (ce qui est le cas au 2025-01-08)
-ET que les dossiers core/ et qfdmo/ etc... soient montés dans
-l'environement de Airflow si on passe par docker
-
-Pour itérer en dev plus rapidement sur la conception/test
-des fonctions d'initialisation django:
-
- - lancer le docker airflow
- - executer la commande ci-dessous qui affichera les
-    problèmes de chargement des dags si il y en a
-
-    docker exec -it qfdmo-airflow-scheduler-1 airflow dags list-import-errors
-
-    🟢 Si aucune erreur la commande retourne: "No data found"
-    🟠 Si il y a des erreurs, elles seront affichées
+🟠 For Django to work in Airflow, the various django
+folders (e.g. qfdmo/, data/ etc...) must be mounted
+on the Airflow container.
 """
 
 import logging
@@ -33,28 +18,33 @@ logger = logging.getLogger(__name__)
 
 
 def django_add_to_sys_path() -> None:
-    """Fonction qui ajoute la racine de notre projet Django à sys.path"""
-    # On ajoute le dossier de 2 niveaux au dessus de celui du script
-    # pour pouvoir importer le settings.py
-    # Arborecence actuelle:
-    # - core/
-    # - dags/utils/django.py
+    """
+    Adds Django project root to sys.path, based on current file path
+    """
+    django_root = str(Path(__file__).resolve().parent.parent.parent)
+    sys.path.insert(0, django_root)
 
-    # Premier des 3x .parent sert à récupérer le dossier,
-    # les 2 autres à remonter à la source de notre repo
-    path_2_levels_up = str(Path(__file__).resolve().parent.parent.parent)
-    sys.path.insert(0, path_2_levels_up)
+
+def django_settings_to_dict() -> dict:
+    """Returns useful information from settings
+    as a JSON-compatible dict to help us debug
+    (e.g. when setting up e2e Airflow tests)"""
+    from django.conf import settings
+
+    return {
+        "DATABASES": {
+            alias: {
+                "HOST": config.get("HOST", ""),
+                "PORT": config.get("PORT", ""),
+                "NAME": config.get("NAME", ""),
+            }
+            for alias, config in settings.DATABASES.items()
+        }
+    }
 
 
 def django_setup_full() -> None:
-    """Initialisation complète de l'environement Django pour pouvoir,
-    entre autres, importer et utiliser les modèles dans Airflow.
-
-    Pour que l'init complète marche il faut que:
-    - les dépendences django (python, lib systèmes) soit installées sur Airflow
-    - les dossiers core/, qfdmo/ etc.. soient montés sur Airflow
-
-    Voir airflow-scheduler.Dockerfile pour plus de détails"""
+    """Full init of our Django environment"""
     django_add_to_sys_path()
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.airflow_settings")
 

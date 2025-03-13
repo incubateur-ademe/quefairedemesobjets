@@ -56,7 +56,7 @@ with DAG(
                 "value": "non",
             },
             {
-                "column": "acteurservice_codes",
+                "column": "acteur_service_codes",
                 "value": ["structure_de_collecte"],
             },
             {
@@ -68,7 +68,7 @@ with DAG(
                 "value": [],
             },
             {
-                "column": "souscategorie_codes",
+                "column": "sous_categorie_codes",
                 "value": ["medicaments"],
             },
             {
@@ -99,9 +99,9 @@ with DAG(
                 "destination": ["identifiant_unique"],
             },
             {
-                "origin": ["action_codes", "souscategorie_codes"],
+                "origin": ["action_codes", "sous_categorie_codes"],
                 "transformation": "clean_proposition_services",
-                "destination": ["proposition_services_codes"],
+                "destination": ["proposition_service_codes"],
             },
             # 5. Supression des colonnes
             {"remove": "Téléphone"},

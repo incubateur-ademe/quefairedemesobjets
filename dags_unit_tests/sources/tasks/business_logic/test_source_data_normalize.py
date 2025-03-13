@@ -175,7 +175,10 @@ class TestSourceDataNormalize:
                 dag_config=DAGConfig.model_validate(dag_config_kwargs),
                 dag_id="dag_id",
             )
-        assert "Le dataframe n'a pas les colonnes attendues" in str(erreur.value)
+        assert (
+            "Le dataframe normalisé (données sources) n'a pas les colonnes attendues"
+            in str(erreur.value)
+        )
         assert "col_make_it_raise" in str(erreur.value)
 
     def test_public_accueilli_filtre_pro(
@@ -339,7 +342,7 @@ class TestRemoveUndesiredLines:
                             "Particuliers",
                             "Particuliers",
                         ],
-                        "souscategorie_codes": [["code1"], ["code2"], ["code3"]],
+                        "sous_categorie_codes": [["code1"], ["code2"], ["code3"]],
                     }
                 ),
                 pd.DataFrame(
@@ -347,7 +350,7 @@ class TestRemoveUndesiredLines:
                         "identifiant_unique": ["id1"],
                         "service_a_domicile": ["non"],
                         "public_accueilli": ["Particuliers"],
-                        "souscategorie_codes": [["code1"]],
+                        "sous_categorie_codes": [["code1"]],
                     }
                 ),
             ),
@@ -363,7 +366,7 @@ class TestRemoveUndesiredLines:
                             "Professionnels",
                             "Aucun",
                         ],
-                        "souscategorie_codes": [
+                        "sous_categorie_codes": [
                             ["code1"],
                             ["code2"],
                             ["code3"],
@@ -380,7 +383,7 @@ class TestRemoveUndesiredLines:
                             "Particuliers et professionnels",
                             "Aucun",
                         ],
-                        "souscategorie_codes": [["code1"], ["code2"], ["code4"]],
+                        "sous_categorie_codes": [["code1"], ["code2"], ["code4"]],
                     }
                 ),
             ),
@@ -395,7 +398,7 @@ class TestRemoveUndesiredLines:
                             "Particuliers",
                             "Particuliers",
                         ],
-                        "souscategorie_codes": [["code1"], [], ["code3"]],
+                        "sous_categorie_codes": [["code1"], [], ["code3"]],
                     }
                 ),
                 pd.DataFrame(
@@ -403,7 +406,7 @@ class TestRemoveUndesiredLines:
                         "identifiant_unique": ["id1", "id3"],
                         "service_a_domicile": ["non", "non"],
                         "public_accueilli": ["Particuliers", "Particuliers"],
-                        "souscategorie_codes": [["code1"], ["code3"]],
+                        "sous_categorie_codes": [["code1"], ["code3"]],
                     }
                 ),
             ),
@@ -429,12 +432,12 @@ class TestRemoveUndesiredLines:
                         "Particuliers",
                     ],
                     "label_codes": [["label1"], ["label2"], ["label3"]],
-                    "acteurservice_codes": [
+                    "acteur_service_codes": [
                         ["acteurservice1"],
                         ["acteurservice2"],
                         ["acteurservice3"],
                     ],
-                    "proposition_services_codes": [
+                    "proposition_service_codes": [
                         [
                             {
                                 "action": "action1",
@@ -461,11 +464,11 @@ class TestRemoveUndesiredLines:
                 "service_a_domicile": ["non", "non"],
                 "public_accueilli": ["Particuliers", "Particuliers"],
                 "label_codes": [["label1", "label2"], ["label3"]],
-                "acteurservice_codes": [
+                "acteur_service_codes": [
                     ["acteurservice1", "acteurservice2"],
                     ["acteurservice3"],
                 ],
-                "proposition_services_codes": [
+                "proposition_service_codes": [
                     [
                         {"action": "action1", "sous_categories": ["sscat1", "sscat3"]},
                         {"action": "action2", "sous_categories": ["sscat1", "sscat2"]},

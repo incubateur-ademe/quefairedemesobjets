@@ -39,11 +39,11 @@ def db_read_acteur(df_normalized: pd.DataFrame, dag_config: DAGConfig):
     acteurs_list = []
     expected_columns = dag_config.get_expected_columns() - {
         "location",
-        "souscategorie_codes",
+        "sous_categorie_codes",
         "label_codes",
-        "acteurservice_codes",
+        "acteur_service_codes",
         "action_codes",
-        "proposition_services_codes",
+        "proposition_service_codes",
         "source_code",
         "acteur_type_code",
     } | {"cree_le"}
@@ -52,10 +52,10 @@ def db_read_acteur(df_normalized: pd.DataFrame, dag_config: DAGConfig):
         acteur_dict["source_code"] = acteur.source.code
         acteur_dict["acteur_type_code"] = acteur.acteur_type.code
         acteur_dict["label_codes"] = [label.code for label in acteur.labels.all()]
-        acteur_dict["acteurservice_codes"] = [
+        acteur_dict["acteur_service_codes"] = [
             acteur_service.code for acteur_service in acteur.acteur_services.all()
         ]
-        acteur_dict["proposition_services_codes"] = [
+        acteur_dict["proposition_service_codes"] = [
             {
                 "action": proposition_service.action.code,
                 "sous_categories": [
@@ -66,7 +66,11 @@ def db_read_acteur(df_normalized: pd.DataFrame, dag_config: DAGConfig):
             for proposition_service in acteur.proposition_services.all()
         ]
         acteurs_list.append(acteur_dict)
-    df_acteur = pd.DataFrame(acteurs_list)
+    if acteurs_list:
+        df_acteur = pd.DataFrame(acteurs_list)
+    else:
+        # Set an empty dataframe with the expected columns to avoid errors on next tasks
+        df_acteur = pd.DataFrame(columns=list(dag_config.get_expected_columns()))
 
     log.preview("df_acteur retourné par la tâche", df_acteur)
     return df_acteur

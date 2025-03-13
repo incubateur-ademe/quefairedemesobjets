@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 def is_identique_row(row_source, row_db, columns_to_compare):
     is_identique = True
     for column in columns_to_compare - {"identifiant_unique"}:
-        if column == "proposition_services_codes":
+        if column == "proposition_service_codes":
             # on trie la list de dict par la clé action
             row_source[column] = sorted(row_source[column], key=lambda x: x["action"])
             row_db[column] = sorted(row_db[column], key=lambda x: x["action"])
@@ -35,11 +35,17 @@ def is_identique_row(row_source, row_db, columns_to_compare):
 def keep_acteur_changed(
     df_normalized: pd.DataFrame, df_acteur_from_db: pd.DataFrame, dag_config: DAGConfig
 ):
+    if df_acteur_from_db.empty:
+        return {
+            "df_acteur": df_normalized,
+            "df_acteur_from_db": df_acteur_from_db,
+        }
+
     columns_to_compare = (
         dag_config.get_expected_columns()
         - {
             "location",
-            "souscategorie_codes",
+            "sous_categorie_codes",
             "action_codes",
         }
         - {"cree_le"}

@@ -27,10 +27,13 @@ def source_config_validate(
     if not all(
         col in expected_columns for col in MANDATORY_COLUMNS_AFTER_NORMALISATION
     ):
+        missing_mandatory_columns = (
+            set(MANDATORY_COLUMNS_AFTER_NORMALISATION) - expected_columns
+        )
         raise ValueError(
             f"""
 Mandatory columns are missing in dag_config,
-Mandatory columns are: {MANDATORY_COLUMNS_AFTER_NORMALISATION}
+Missing mandatory columns are: {missing_mandatory_columns}
 Expected columns from dag_config: {expected_columns}"""
         )
 
