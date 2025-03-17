@@ -28,6 +28,12 @@ RUN poetry sync --with airflow
 FROM apache/airflow:2.10.4 AS scheduler
 
 USER root
+
+# unzip for Airflow DAG
+RUN echo "deb http://deb.debian.org/debian stable main" > /etc/apt/sources.list
+RUN apt-get update
+RUN apt-get install -y unzip
+
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     gdal-bin libgdal-dev
