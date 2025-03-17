@@ -76,20 +76,11 @@ class ContactFormView(FormView):
 class AssistantBaseView:
     """Base view that provides templates used on all pages.
     It needs to be used by all views of the Assistant as it
-    provides some routing rules based on the domain and provide
-    some context to templates.
+    handles a redirect that prevents accessing a produit
+    with a Carte domain name.
 
-    TODO: this could be moved to a context processor"""
-
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        context.update(
-            footer_pages=CMSPage.objects.all(),
-            search_form=SearchForm(),
-            search_view_template_name=SEARCH_VIEW_TEMPLATE_NAME,
-            iframe_script=generate_iframe_script(self.request),
-        )
-        return context
+    TODO: move to a middleware
+    """
 
     def dispatch(self, request, *args, **kwargs):
         if request.META.get("HTTP_HOST") not in settings.ASSISTANT["HOSTS"]:

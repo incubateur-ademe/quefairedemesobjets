@@ -3,15 +3,15 @@
 {% block analytics_action %}produitPageView{% endblock %}
 
 {% block title %}
-{{ object.nom }} | {{ block.super }}
+<title>{{ object.nom }} | {{ block.super }}</title>
 {% endblock title %}
 
 {% block meta_description %}{{ object.meta_description|default:block.super }}{% endblock %}
 
 {% block main %}
-{% with object.produit as produit %}
-{% with object.bon_etat as bon_etat %}
-{% with object.mauvais_etat as mauvais_etat %}
+{% with produit=object.produit %}
+{% with bon_etat=object.bon_etat %}
+{% with mauvais_etat=object.mauvais_etat %}
 <article
     class="qf-flex qf-flex-col
     qf-gap-4w max-lg:qf-pr-0 max-xl:qf-pr-6w"
