@@ -9,6 +9,10 @@ from django.template.loader import render_to_string
 from django.urls.base import reverse
 from django.utils.functional import cached_property
 from django_extensions.db.fields import AutoSlugField
+from wagtail.admin.panels import FieldPanel
+from wagtail.fields import StreamField
+from wagtail.images.blocks import ImageBlock
+from wagtail.snippets.models import register_snippet
 
 logger = logging.getLogger(__name__)
 
@@ -198,6 +202,7 @@ class ProduitLien(models.Model):
         unique_together = ("produit", "lien")  # Prevent duplicate relations
 
 
+@register_snippet
 class Synonyme(AbstractBaseProduit):
     slug = AutoSlugField(populate_from=["nom"], max_length=255)
     nom = models.CharField(blank=True, unique=True, help_text="Nom du produit")
@@ -221,6 +226,10 @@ class Synonyme(AbstractBaseProduit):
     meta_description = models.TextField(
         "Description lue et affichée par les moteurs de recherche.", blank=True
     )
+
+    infotri = StreamField([("image", ImageBlock())], blank=True)
+
+    panels = [FieldPanel("infotri")]
 
     @property
     def url(self) -> str:
