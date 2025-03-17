@@ -211,8 +211,8 @@
 <li class="toctree-l2"><a class="reference internal" href="intro.html">🎨 Frontend</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">🚏 Routing, nginx et cache</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#nginx">nginx</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#whitenoise">whitenoise</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#middleware">middleware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#whitenoise">Whitenoise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#middlewares">Middlewares</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tech.html">Technologies employées</a></li>
 <li class="toctree-l2"><a class="reference internal" href="historique.html">Historique</a></li>
 </ul>
@@ -326,10 +326,22 @@ end
     </pre><p>Les cookies définis expirent à la fin de la session, cela veut dire qu’ils seront re-générés si l’utilisateur ferme son navigateur.</p>
 </section>
 <section id="whitenoise">
-<h1>whitenoise<a class="headerlink" href="#whitenoise" title="Lien vers cette rubrique">¶</a></h1>
+<h1>Whitenoise<a class="headerlink" href="#whitenoise" title="Lien vers cette rubrique">¶</a></h1>
+<p>Les fichiers statiques sont servis via Whitenoise, cela afin de gérer finement le cache de ceux-ci.
+La <a class="reference external" href="https://whitenoise.readthedocs.io/en/latest/index.html#infrequently-asked-questions">documentation officielle</a> répond aux principales questions que l’on peut se poser à ce sujet :</p>
+<ul class="simple">
+<li><p>Pourquoi pas charger les statiques depuis un S3 ?</p></li>
+<li><p>Comment servir les fichiers statiques derrière une reverse proxy ?</p></li>
+</ul>
+<p>Dans notre cas, Whitenoise fonctionne de la manière suivante :</p>
+<ul class="simple">
+<li><p>À chaque déploiement, les fichiers statiques sont suffixés d’un hash de leur contenu</p></li>
+<li><p>La durée de mise en cache est infinie pour ces fichiers. Cela peut être fait sans risque car s’ils sont modifiés, le hash changera</p></li>
+</ul>
 </section>
-<section id="middleware">
-<h1>middleware<a class="headerlink" href="#middleware" title="Lien vers cette rubrique">¶</a></h1>
+<section id="middlewares">
+<h1>Middlewares<a class="headerlink" href="#middlewares" title="Lien vers cette rubrique">¶</a></h1>
+<p>Le fonctionnement décrit ci-dessous concernant Nginx est défini dans un <a class="reference external" href="https://docs.djangoproject.com/en/5.1/topics/http/middleware/">middleware Django</a> (<code class="docutils literal notranslate"><span class="pre">qfdmd/middleware.py</span></code>).</p>
 </section>
 
         </article>

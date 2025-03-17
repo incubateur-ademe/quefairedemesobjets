@@ -49,5 +49,17 @@ end
 
 Les cookies définis expirent à la fin de la session, cela veut dire qu'ils seront re-générés si l'utilisateur ferme son navigateur.
 
-# whitenoise
-# middleware
+# Whitenoise
+
+Les fichiers statiques sont servis via Whitenoise, cela afin de gérer finement le cache de ceux-ci.
+La [documentation officielle](https://whitenoise.readthedocs.io/en/latest/index.html#infrequently-asked-questions) répond aux principales questions que l'on peut se poser à ce sujet :
+- Pourquoi pas charger les statiques depuis un S3 ?
+- Comment servir les fichiers statiques derrière une reverse proxy ?
+
+Dans notre cas, Whitenoise fonctionne de la manière suivante :
+- À chaque déploiement, les fichiers statiques sont suffixés d'un hash de leur contenu
+- La durée de mise en cache est infinie pour ces fichiers. Cela peut être fait sans risque car s'ils sont modifiés, le hash changera
+
+# Middlewares
+
+Le fonctionnement décrit ci-dessous concernant Nginx est défini dans un [middleware Django](https://docs.djangoproject.com/en/5.1/topics/http/middleware/) (`qfdmd/middleware.py`).
