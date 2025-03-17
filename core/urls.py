@@ -88,6 +88,8 @@ urlpatterns.extend(
     [
         path("cms/", include(wagtailadmin_urls)),
         path("documents/", include(wagtaildocs_urls)),
+        # This URL should not be move above other "" paths in order to prevent
+        # Wagtail pages' slugs to override internal routes defined in the project
         path("", include(wagtail_urls)),
     ]
 )
