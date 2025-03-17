@@ -283,10 +283,10 @@
 <h3>En cas de conflits sur <code class="docutils literal notranslate"><span class="pre">.secrets.baseline</span></code><a class="headerlink" href="#en-cas-de-conflits-sur-secrets-baseline" title="Lien vers cette rubrique">¶</a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># installer detect-secrets s&#39;il n&#39;est pas présent dans l&#39;environnement virtuel</span>
 <span class="c1"># ou en local</span>
-pip<span class="w"> </span>install<span class="w"> </span>detect-secrets
+poetry<span class="w"> </span>add<span class="w"> </span>detect-secrets
 <span class="c1"># re-générer .secrets.baseline</span>
-detect-secrets<span class="w"> </span>scan<span class="w"> </span>&gt;<span class="w"> </span>.secrets.baseline
-<span class="c1"># ajout au rebase en courts</span>
+poetry<span class="w"> </span>run<span class="w"> </span>detect-secrets<span class="w"> </span>scan<span class="w"> </span>&gt;<span class="w"> </span>.secrets.baseline
+<span class="c1"># ajout au rebase en cours</span>
 git<span class="w"> </span>add<span class="w"> </span>.secrets.baseline
 <span class="c1"># continuer le rebase si aucun autre conflit n&#39;est présent</span>
 git<span class="w"> </span>rebase<span class="w"> </span>--continue
@@ -298,7 +298,6 @@ git<span class="w"> </span>rebase<span class="w"> </span>--continue
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># ou avec poetry</span>
 rm<span class="w"> </span>poetry.lock
 poetry<span class="w"> </span>lock
-
 git<span class="w"> </span>add<span class="w"> </span>poetry.lock
 
 <span class="c1"># si c&#39;est pendant un rebase...</span>
