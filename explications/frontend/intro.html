@@ -178,7 +178,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -213,7 +213,6 @@
 <li class="toctree-l2"><a class="reference internal" href="routing-nginx-cache.html#nginx">nginx</a></li>
 <li class="toctree-l2"><a class="reference internal" href="routing-nginx-cache.html#whitenoise">Whitenoise</a></li>
 <li class="toctree-l2"><a class="reference internal" href="routing-nginx-cache.html#middlewares">Middlewares</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tech.html">Technologies employées</a></li>
 <li class="toctree-l2"><a class="reference internal" href="historique.html">Historique</a></li>
 </ul>
 </li>
@@ -268,7 +267,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
@@ -289,6 +288,16 @@ L’objectif à terme est d’en mutualiser une majeure partie au travers de ref
 <li><p>La <strong>carte</strong>, intégrée au sein de l’assistant et par de nombreuses collectivités sous forme d’iframe
 Les différences sont <a class="reference external" href="https://www.notion.so/accelerateur-transition-ecologique-ademe/Sp-cifications-de-la-carte-170dcd6cdaee4a62b9f70c2040b363e2?pvs=4">détaillées ici</a></p></li>
 </ul>
+<section id="technologies-employees">
+<h2>Technologies employées<a class="headerlink" href="#technologies-employees" title="Lien vers cette rubrique">¶</a></h2>
+<p><strong>Les technologies employées dans l’assistant sont à prendre comme référence pour l’intégralité des développements futurs sur le frontend</strong>, à savoir :</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.djangoproject.com/en/5.1/topics/templates/"><strong>templating Django</strong></a>
+Jinja est encore utilisé dans la carte mais est progressivement déprévié</p></li>
+<li><p><strong>Parcel</strong> pour la compilation des fichiers JS/CSS</p></li>
+<li><p><strong>Tailwind</strong></p></li>
+</ul>
+</section>
 </section>
 
         </article>
@@ -334,8 +343,27 @@ Les différences sont <a class="reference external" href="https://www.notion.so/
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">🎨 Frontend</a><ul>
+<li><a class="reference internal" href="#technologies-employees">Technologies employées</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
