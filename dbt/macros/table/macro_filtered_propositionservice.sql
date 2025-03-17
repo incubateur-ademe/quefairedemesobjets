@@ -16,6 +16,7 @@ nochild_propositionservice AS (
     FROM qfdmo_vuepropositionservice AS vps
     INNER JOIN {{ ref(ephemeral_filtered_acteur) }} AS cfa
         ON vps.acteur_id = cfa.identifiant_unique AND cfa.parent_id is null
+    GROUP BY 1,2,3
 )
 
 SELECT * FROM parent_propositionservice
