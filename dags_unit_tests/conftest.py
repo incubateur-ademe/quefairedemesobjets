@@ -140,9 +140,9 @@ def dag_config():
                     "identifiant_unique",
                     "identifiant_externe",
                     "nom",
-                    "acteurservice_codes",
+                    "acteur_service_codes",
                     "label_codes",
-                    "proposition_services_codes",
+                    "proposition_service_codes",
                     "source_code",
                     "acteur_type_code",
                 ]

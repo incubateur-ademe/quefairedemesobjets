@@ -58,8 +58,8 @@ with DAG(
             },
             {
                 "origin": "produitsdechets_acceptes",
-                "transformation": "clean_souscategorie_codes",
-                "destination": "souscategorie_codes",
+                "transformation": "clean_sous_categorie_codes",
+                "destination": "sous_categorie_codes",
             },
             # 3. Ajout des colonnes avec une valeur par défaut
             {
@@ -114,8 +114,8 @@ with DAG(
                     "point_dapport_de_service_reparation",
                     "point_de_reparation",
                 ],
-                "transformation": "clean_acteurservice_codes",
-                "destination": ["acteurservice_codes"],
+                "transformation": "clean_acteur_service_codes",
+                "destination": ["acteur_service_codes"],
             },
             {
                 "origin": [
@@ -126,9 +126,9 @@ with DAG(
                 "destination": ["action_codes"],
             },
             {
-                "origin": ["action_codes", "souscategorie_codes"],
+                "origin": ["action_codes", "sous_categorie_codes"],
                 "transformation": "clean_proposition_services",
-                "destination": ["proposition_services_codes"],
+                "destination": ["proposition_service_codes"],
             },
             # 5. Supression des colonnes
             {"remove": "_i"},

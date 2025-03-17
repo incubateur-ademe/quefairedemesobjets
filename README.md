@@ -125,27 +125,21 @@ cp .env.template .env
 sed -i '/^AIRFLOW_UID=/d' .env && echo "AIRFLOW_UID=$(id -u)" >> .env
 ```
 
+Modifier les variables dans le fichier .env si nécessaire
+
 Les bases de données source `MySQL` et cible `Postgres + Postgis` sont executées et mises à disposition par le gestionnaire de conteneur Docker
 
 ```sh
 docker compose  --profile lvao up
 ```
 
-Création de l'environnement virtuel de votre choix (préférence pour asdf)
+Installation des dépendances python et javascript
 
 ```sh
-python -m venv .venv --prompt $(basename $(pwd))
-source  .venv/bin/activate
-```
-
-Installation
-
-```sh
-pip install -r requirements.txt -r dev-requirements.txt
+poetry env activate
+poetry install --with dev,airflow
 npm install
 ```
-
-// Modifier les variables dans le fichier .env si nécessaire
 
 Migration
 
@@ -168,6 +162,7 @@ python manage.py createsuperuser
 ### Lancement
 
 ```sh
+docker compose --profile airflow up -d
 honcho start -f Procfile.dev
 ```
 
@@ -176,7 +171,7 @@ Une fois les processus démarrés, le serveur web sera accessible à l'adresse h
 
 ### Test
 
-python avec pytest
+Test python avec pytest
 
 ```sh
 pytest
@@ -195,16 +190,27 @@ npx playwright install --with-deps
 npx playwright test
 ```
 
-### Ajout et modification de package pip-tools
+### Ajout et modification de package
 
-Ajouter les dépendances aux fichiers `requirements.in` et `dev-requirements.in`
+#### Python
 
-Compiler les dépendances:
+Utiliser poetry
 
 ```sh
-pip-compile dev-requirements.in --generate-hashes
-pip-compile requirements.in --generate-hashes
+poetry add <package>
 ```
+
+option `--group dev` pour les dépendances de développement et `--group airflow` pour les dépendances de airflow
+
+#### Javascript
+
+Utiliser npm
+
+```sh
+npm install <package>
+```
+
+option `--dev` pour les dépendances de développement
 
 ### Installer les hooks de pre-commit
 

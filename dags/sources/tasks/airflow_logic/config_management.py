@@ -1,8 +1,9 @@
 import json
+import re
 from typing import Optional, Union
 
 # types.py
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel, field_validator
 
 
 # Renommage des colonnes
@@ -55,11 +56,30 @@ class DAGConfig(BaseModel):
     ]
     combine_columns_categories: list[str] = []
     dechet_mapping: dict = {}
-    endpoint: HttpUrl
+    s3_connection_id: str | None = None
+    endpoint: str  # HttpURL or s3URL
     label_bonus_reparation: Optional[str] = None
     product_mapping: dict
     source_code: Optional[str] = None
     validate_address_with_ban: bool = False
+
+    @field_validator("endpoint")
+    def validate_endpoint(cls, endpoint):
+        if endpoint.startswith("s3://"):
+            if not endpoint.endswith(".xlsx"):
+                raise ValueError("S3 URL must end with '.xlsx'")
+
+            if not re.match(r"^s3://[a-zA-Z0-9.\-_]+(/[a-zA-Z0-9.\-_]+)*$", endpoint):
+                raise ValueError("Invalid S3 URL format")
+
+        elif endpoint.startswith("https://") or endpoint.startswith("http://"):
+            if not re.match(r"^https?://[^/\s]+[^\s]*$", endpoint):
+                raise ValueError("Invalid HTTP URL format")
+
+        else:
+            raise ValueError("URL must start with 's3://' or 'http(s)://'")
+
+        return endpoint
 
     @classmethod
     def from_airflow_params(

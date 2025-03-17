@@ -1,3 +1,4 @@
+import logging
 from typing import Any, List
 
 import orjson
@@ -41,6 +42,8 @@ from qfdmo.models.acteur import (
 )
 from qfdmo.models.categorie_objet import CategorieObjet
 from qfdmo.widgets import CustomOSMWidget
+
+logger = logging.getLogger(__name__)
 
 
 class ActeurLabelQualiteInline(admin.StackedInline):
@@ -256,6 +259,13 @@ class ActeurResource(resources.ModelResource):
             return super().get_queryset()[: self.limit]
         return super().get_queryset()
 
+    def skip_row(self, instance, original, row, import_validation_errors=None):
+        if all(value is None for value in row.values()):
+            return True
+        return super().skip_row(
+            instance, original, row, import_validation_errors=import_validation_errors
+        )
+
     class Meta:
         model = Acteur
         import_id_fields = ["identifiant_unique"]
@@ -281,6 +291,7 @@ class ActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
 
 
 class RevisionActeurResource(ActeurResource):
+
     class Meta:
         model = RevisionActeur
 
@@ -530,6 +541,7 @@ class PropositionServiceAdmin(
         "acteur__siren",
     ]
     search_help_text = "Recherche sur le nom, le siret ou le siren de l'acteur"
+    autocomplete_fields = ["acteur"]
 
 
 class RevisionPropositionServiceResource(BasePropositionServiceResource):
@@ -556,6 +568,7 @@ class RevisionPropositionServiceAdmin(
         "acteur__siret",
     ]
     search_help_text = "Recherche sur le nom ou le siret de l'acteur"
+    autocomplete_fields = ["acteur"]
 
 
 class DisplayedActeurResource(ActeurResource):

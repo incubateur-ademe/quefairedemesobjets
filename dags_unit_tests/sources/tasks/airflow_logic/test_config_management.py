@@ -197,3 +197,39 @@ class TestDAGConfig:
             "col",
             "keep",
         }
+
+    @pytest.mark.parametrize(
+        "url,is_valid",
+        [
+            # Valid endpoints
+            ("s3://mon-bucket/chemin/fichier.xlsx", True),
+            ("s3://bucket123/dossier-test/sous_dossier/data.xlsx", True),
+            ("https://bucket123/dossier-test/sous_dossier/data.xlsx", True),
+            ("http://bucket123/dossier-test/sous_dossier/data.xlsx", True),
+            ("https://bucket123/dossier-test/sous_dossier/test", True),
+            (
+                "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
+                "donnees-eo/lines?size=10000",
+                True,
+            ),
+            (
+                "https://data.pointsapport.ademe.fr?size=10000",
+                True,
+            ),
+            # Invalid endpoints
+            ("s3://bucket/fichier.txt", False),  # Wrong extension
+            (
+                "s3://bucket/dossier@invalide/fichier.xlsx",
+                False,
+            ),  # Invalid characters
+            ("s3://", False),  # URL incomplete
+            ("s3://bucket", False),  # No file .xlsx
+            ("fichier.xlsx", False),  # No s3://
+        ],
+    )
+    def test_validate_endpoint(self, url: str, is_valid: bool, dag_config: DAGConfig):
+        if is_valid:
+            assert DAGConfig.validate_endpoint(url) == url
+        else:
+            with pytest.raises(ValueError):
+                DAGConfig.validate_endpoint(url)

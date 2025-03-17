@@ -11,14 +11,16 @@ from utils import logging_utils as log
 logger = logging.getLogger(__name__)
 
 
-def source_data_download(endpoint: str) -> pd.DataFrame:
+def source_data_download(
+    endpoint: str, s3_connection_id: str | None = None
+) -> pd.DataFrame:
     """Téléchargement de la données source sans lui apporter de modification"""
     logger.info("Téléchargement données de l'API : début...")
     # TODO: changer de logique, plutôt que de tout charger en mémoire et se
     # trimballer des dataframes en XCOM, on devrait plutôt streamer les données
     # directement dans la base de données et déléguer le traitement à la DB
     # tant que possible
-    data = fetch_data_from_endpoint(endpoint)
+    data = fetch_data_from_endpoint(endpoint, s3_connection_id)
     logger.info("Téléchargement données de l'API : ✅ succès.")
     df = pd.DataFrame(data).replace({pd.NA: None, np.nan: None})
     if df.empty:
@@ -27,8 +29,10 @@ def source_data_download(endpoint: str) -> pd.DataFrame:
     return df
 
 
-def fetch_data_from_endpoint(endpoint):
-    if "pointsapport.ademe.fr" in endpoint or "data.ademe.fr" in endpoint:
+def fetch_data_from_endpoint(endpoint, s3_connection_id):
+    if endpoint.startswith("s3://"):
+        return fetch_dataset_from_s3(endpoint, s3_connection_id)
+    elif "pointsapport.ademe.fr" in endpoint or "data.ademe.fr" in endpoint:
         return fetch_dataset_from_point_apport(endpoint)
     elif "artisanat.fr" in endpoint:
         return fetch_dataset_from_artisanat(endpoint)
@@ -38,6 +42,20 @@ def fetch_data_from_endpoint(endpoint):
     # Si on ne récupére pas de données, on sait qu'on à un problème,
     # et donc il faut échouer explicitement au plus tôt
     raise NotImplementedError(f"Pas de fonction de récupération pour l'url {endpoint}")
+
+
+def fetch_dataset_from_s3(endpoint, s3_connection_id):
+    from airflow.providers.amazon.aws.hooks.s3 import S3Hook
+
+    s3_hook = S3Hook(aws_conn_id=s3_connection_id)
+
+    bucket = endpoint.split("//")[1].split("/")[0]
+    key = "/".join(endpoint.split("//")[1].split("/")[1:])
+
+    temp_file_path = s3_hook.download_file(key=key, bucket_name=bucket)
+
+    df = pd.read_excel(temp_file_path)
+    return df
 
 
 def fetch_dataset_from_point_apport(url):

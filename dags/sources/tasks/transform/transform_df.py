@@ -26,9 +26,9 @@ MANDATORY_COLUMNS_AFTER_NORMALISATION = [
     "identifiant_unique",
     "identifiant_externe",
     "nom",
-    "acteurservice_codes",
+    "acteur_service_codes",
     "label_codes",
-    "proposition_services_codes",
+    "proposition_service_codes",
     "source_code",
     "acteur_type_code",
 ]
@@ -189,16 +189,16 @@ def clean_adresse(row, dag_config):
     return row[["adresse", "code_postal", "ville"]]
 
 
-def clean_acteurservice_codes(row, _):
-    acteurservice_codes = []
+def clean_acteur_service_codes(row, _):
+    acteur_service_codes = []
     if row.get("point_dapport_de_service_reparation") or row.get("point_de_reparation"):
-        acteurservice_codes.append("service_de_reparation")
+        acteur_service_codes.append("service_de_reparation")
     if row.get("point_dapport_pour_reemploi") or row.get(
         "point_de_collecte_ou_de_reprise_des_dechets"
     ):
-        acteurservice_codes.append("structure_de_collecte")
-    row["acteurservice_codes"] = acteurservice_codes
-    return row[["acteurservice_codes"]]
+        acteur_service_codes.append("structure_de_collecte")
+    row["acteur_service_codes"] = acteur_service_codes
+    return row[["acteur_service_codes"]]
 
 
 def clean_action_codes(row, _):
@@ -239,25 +239,25 @@ def clean_label_codes(row, dag_config):
     return row[["label_codes"]]
 
 
-def merge_and_clean_souscategorie_codes(
+def merge_and_clean_sous_categorie_codes(
     row: pd.Series, dag_config: DAGConfig
 ) -> pd.Series:
     categories = [row[col] for col in row.keys() if pd.notna(row[col]) and row[col]]
-    souscategorie_codes = []
+    sous_categorie_codes = []
     product_mapping = dag_config.product_mapping
     for sscat in categories:
         sscat = sscat.strip().lower()
         sscat = product_mapping[sscat]
         if isinstance(sscat, str):
-            souscategorie_codes.append(sscat)
+            sous_categorie_codes.append(sscat)
         elif isinstance(sscat, list):
-            souscategorie_codes.extend(sscat)
+            sous_categorie_codes.extend(sscat)
         else:
             raise ValueError(
-                f"Type {type(sscat)} not supported for souscategorie_codes"
+                f"Type {type(sscat)} not supported for sous_categorie_codes"
             )
-    row["souscategorie_codes"] = list(set(souscategorie_codes))
-    return row[["souscategorie_codes"]]
+    row["sous_categorie_codes"] = list(set(sous_categorie_codes))
+    return row[["sous_categorie_codes"]]
 
 
 def get_latlng_from_geopoint(row: pd.Series, _) -> pd.Series:
@@ -281,21 +281,21 @@ def compute_location(row: pd.Series, _):
 def clean_proposition_services(row, _):
 
     # formater les propositions de service selon les colonnes
-    # action_codes and souscategorie_codes
+    # action_codes and sous_categorie_codes
     #
     # [{'action': 'CODE_ACTION','sous_categories': ['CODE_SSCAT']}] ou []
-    if row["souscategorie_codes"]:
-        row["proposition_services_codes"] = [
+    if row["sous_categorie_codes"]:
+        row["proposition_service_codes"] = [
             {
                 "action": action,
-                "sous_categories": row["souscategorie_codes"],
+                "sous_categories": row["sous_categorie_codes"],
             }
             for action in row["action_codes"]
         ]
     else:
-        row["proposition_services_codes"] = []
+        row["proposition_service_codes"] = []
 
-    return row[["proposition_services_codes"]]
+    return row[["proposition_service_codes"]]
 
 
 ### Fonctions de résolution de l'adresse au format BAN et avec vérification via l'API

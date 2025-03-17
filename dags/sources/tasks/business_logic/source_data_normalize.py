@@ -125,15 +125,15 @@ def _remove_undesired_lines(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataF
         column in df.columns
         for column in [
             "label_codes",
-            "acteurservice_codes",
-            "proposition_services_codes",
+            "acteur_service_codes",
+            "proposition_service_codes",
         ]
     ):
         df = merge_duplicates(
             df,
             group_column="identifiant_unique",
-            merge_as_list_columns=["label_codes", "acteurservice_codes"],
-            merge_as_proposition_service_columns=["proposition_services_codes"],
+            merge_as_list_columns=["label_codes", "acteur_service_codes"],
+            merge_as_proposition_service_columns=["proposition_service_codes"],
         )
 
     # Remove acteurs which propose only service à domicile
@@ -145,10 +145,10 @@ def _remove_undesired_lines(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataF
     if "public_accueilli" in df.columns:
         df = df[df["public_accueilli"] != constants.PUBLIC_PRO]
 
-    # Remove acteurs which have no souscategorie_codes
-    if "souscategorie_codes" in df.columns:
-        df = df[df["souscategorie_codes"].notnull()]
-        df = df[df["souscategorie_codes"].apply(len) > 0]
+    # Remove acteurs which have no sous_categorie_codes
+    if "sous_categorie_codes" in df.columns:
+        df = df[df["sous_categorie_codes"].notnull()]
+        df = df[df["sous_categorie_codes"].apply(len) > 0]
 
     # Find duplicates for logging
     dups = df[df["identifiant_unique"].duplicated(keep=False)]
@@ -216,8 +216,9 @@ def source_data_normalize(
 
     if set(df.columns) != expected_columns:
         raise ValueError(
-            "Le dataframe n'a pas les colonnes attendues: "
-            f"{set(df.columns)} != {expected_columns}"
+            f"""Le dataframe normalisé (données sources) n'a pas les colonnes attendues.
+            Colonnes en trop: {set(df.columns) - expected_columns}
+            Colonnes manquantes: {expected_columns - set(df.columns)}"""
         )
 
     # Etapes de normalisation spécifiques aux sources

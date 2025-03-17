@@ -4,6 +4,7 @@ import pandas as pd
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.utils.trigger_rule import TriggerRule
+from sources.tasks.airflow_logic.config_management import DAGConfig
 from sources.tasks.business_logic.source_data_download import source_data_download
 from utils import logging_utils as log
 
@@ -21,9 +22,12 @@ def source_data_download_task(dag: DAG) -> PythonOperator:
 
 
 def source_data_download_wrapper(**kwargs) -> pd.DataFrame:
-    params = kwargs["params"]
-    endpoint = params["endpoint"]
+    dag_config = DAGConfig.from_airflow_params(kwargs["params"])
+    endpoint = dag_config.endpoint
+    s3_connection_id = dag_config.s3_connection_id
 
     log.preview("API end point", endpoint)
+    if s3_connection_id:
+        log.preview("S3 connection id", s3_connection_id)
 
-    return source_data_download(endpoint=endpoint)
+    return source_data_download(endpoint=endpoint, s3_connection_id=s3_connection_id)

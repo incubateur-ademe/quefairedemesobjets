@@ -166,13 +166,19 @@ def clean_code_postal(cp: str | None, _) -> str:
     return f"0{cp}" if cp and len(str(cp)) == 4 else str(cp)
 
 
-def clean_souscategorie_codes(
+def clean_code_list(codes: str | None, _) -> list[str]:
+    if codes is None:
+        return []
+    return [code.strip().lower() for code in codes.split("|") if code.strip().lower()]
+
+
+def clean_sous_categorie_codes(
     sscat_list: str | None, dag_config: DAGConfig
 ) -> list[str]:
-    souscategorie_codes = []
+    sous_categorie_codes = []
 
     if not sscat_list:
-        return souscategorie_codes
+        return sous_categorie_codes
 
     product_mapping = dag_config.product_mapping
     for sscat in sscat_list.split("|"):
@@ -181,16 +187,16 @@ def clean_souscategorie_codes(
             continue
         sscat = product_mapping[sscat]
         if isinstance(sscat, str):
-            souscategorie_codes.append(sscat)
+            sous_categorie_codes.append(sscat)
         elif isinstance(sscat, list):
-            souscategorie_codes.extend(sscat)
+            sous_categorie_codes.extend(sscat)
         else:
             raise ValueError(f"Type {type(sscat)} not supported in product_mapping")
 
-    return list(set(souscategorie_codes))
+    return list(set(sous_categorie_codes))
 
 
-def clean_souscategorie_codes_sinoe(
+def clean_sous_categorie_codes_sinoe(
     sscats: str | None, dag_config: DAGConfig
 ) -> list[str]:
 
@@ -215,4 +221,4 @@ def clean_souscategorie_codes_sinoe(
         if dechet_mapping[v].lower() in product_mapping
     ]
 
-    return clean_souscategorie_codes("|".join(sscat_list), dag_config)
+    return clean_sous_categorie_codes("|".join(sscat_list), dag_config)

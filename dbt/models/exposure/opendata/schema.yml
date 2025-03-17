@@ -1,0 +1,64 @@
+version: 2
+
+models:
+  - name: exposure_opendata_acteur
+    description: "Vue sur les acteurs affichés sur la carte"
+    columns:
+      - name: identifiant
+        description: "L'identifiant unique de l'acteur"
+        data_tests:
+          - unique
+          - not_null
+      - name: paternite
+        description: "La paternité de l'acteur"
+        data_tests:
+          - not_null
+      - name: nom
+        description: "Le nom de l'acteur"
+      - name: nom commercial
+        description: "Le nom commercial de l'acteur"
+      - name: siren
+        description: "Le SIREN de l'acteur"
+      - name: siret
+        description: "Le SIRET de l'acteur"
+      - name: description
+        description: "La description de l'acteur"
+      - name: type_acteur
+        description: "Le type d'acteur"
+      - name: site_web
+        description: "Le site web de l'acteur"
+      - name: telephone
+        description: "Le téléphone de l'acteur"
+      - name: adresse
+        description: "L'adresse de l'acteur"
+      - name: complement_adresse
+        description: "Le complément d'adresse de l'acteur"
+      - name: code_postal
+        description: "Le code postal de l'acteur"
+      - name: ville
+        description: "La ville de l'acteur"
+      - name: latitude
+        description: "La latitude de l'acteur"
+      - name: longitude
+        description: "La longitude de l'acteur"
+      - name: qualites_labels
+        description: "Les qualités et labels de l'acteur"
+      - name: public_accueilli
+        description: "Le public accueilli par l'acteur"
+      - name: reprise
+        description: "La reprise de l'acteur"
+      - name: exclusivite_reprise
+        description: "L'exclusivité de reprise/réparation de l'acteur"
+      - name: uniquement_sur_rdv
+        description: "L'uniquement sur RDV de l'acteur"
+      - name: type_services
+        description: "Le type de services de l'acteur"
+      - name: propositions_services
+        description: "Les propositions de services de l'acteur"
+      - name: date_modification
+        description: "La date de dernière modification de l'acteur"
+    config:
+      materialized: table
+      indexes:
+        - columns: ['identifiant']
+          type: btree
