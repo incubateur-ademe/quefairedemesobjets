@@ -28,7 +28,7 @@
             qf-flex-wrap qf-items-center qf-justify-center "
         >
             {% for suggestion in object_list %}
-            {% with suggestion.produit as produit %}
+            {% with produit=suggestion.produit %}
             <li class="qf-list-none qf-p-0">
             <a
                 class="qf-btn"

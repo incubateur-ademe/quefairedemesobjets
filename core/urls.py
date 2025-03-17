@@ -91,4 +91,3 @@ urlpatterns.extend(
         path("", include(wagtail_urls)),
     ]
 )
-

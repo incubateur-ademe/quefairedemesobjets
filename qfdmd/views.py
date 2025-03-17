@@ -26,6 +26,7 @@ def get_assistant_script(request):
 def get_sw(request):
     return static_file_content_from("sw.js")
 
+
 def generate_iframe_script(request) -> str:
     """Generates a <script> tag used to embed Assistant website."""
     script_parts = ["<script"]
@@ -38,7 +39,6 @@ def generate_iframe_script(request) -> str:
         f'src="{settings.ASSISTANT["BASE_URL"]}{reverse("qfdmd:script")}"></script>'
     )
     return " ".join(script_parts)
-
 
 
 SEARCH_VIEW_TEMPLATE_NAME = "components/search/view.html"
@@ -81,6 +81,7 @@ class AssistantBaseView:
 
     TODO: move to a middleware
     """
+
     def dispatch(self, request, *args, **kwargs):
         if request.META.get("HTTP_HOST") not in settings.ASSISTANT["HOSTS"]:
             return redirect(reverse("home"))
