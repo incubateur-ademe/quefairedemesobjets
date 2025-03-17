@@ -290,11 +290,12 @@ detect-secrets<span class="w"> </span>scan<span class="w"> </span>&gt;<span clas
 git<span class="w"> </span>add<span class="w"> </span>.secrets.baseline
 <span class="c1"># continuer le rebase si aucun autre conflit n&#39;est présent</span>
 git<span class="w"> </span>rebase<span class="w"> </span>--continue
-
-<span class="c1">### En cas de conflits sur `poetry.lock`</span>
-
-<span class="sb">```</span>bash
-<span class="c1"># ou avec poetry</span>
+</pre></div>
+</div>
+</section>
+<section id="en-cas-de-conflits-sur-poetry-lock">
+<h3>En cas de conflits sur <code class="docutils literal notranslate"><span class="pre">poetry.lock</span></code><a class="headerlink" href="#en-cas-de-conflits-sur-poetry-lock" title="Lien vers cette rubrique">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># ou avec poetry</span>
 rm<span class="w"> </span>poetry.lock
 poetry<span class="w"> </span>lock
 
@@ -366,6 +367,7 @@ git<span class="w"> </span>rebase<span class="w"> </span>--continue
 <li><a class="reference internal" href="#">3615 jaidesproblemes</a><ul>
 <li><a class="reference internal" href="#git">git</a><ul>
 <li><a class="reference internal" href="#en-cas-de-conflits-sur-secrets-baseline">En cas de conflits sur <code class="docutils literal notranslate"><span class="pre">.secrets.baseline</span></code></a></li>
+<li><a class="reference internal" href="#en-cas-de-conflits-sur-poetry-lock">En cas de conflits sur <code class="docutils literal notranslate"><span class="pre">poetry.lock</span></code></a></li>
 </ul>
 </li>
 </ul>

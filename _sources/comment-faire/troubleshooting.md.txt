@@ -14,6 +14,7 @@ detect-secrets scan > .secrets.baseline
 git add .secrets.baseline
 # continuer le rebase si aucun autre conflit n'est présent
 git rebase --continue
+```
 
 ### En cas de conflits sur `poetry.lock`
 
