@@ -76,10 +76,6 @@ models:
         description: "La date de création de l'acteur"
       - name: statut
         description: "Le statut de l'acteur"
-      - name: revision_existe
-        description: "Le fait que l'acteur est une révision"
-        data_tests:
-          - not_null
     config:
       materialized: table
       indexes:
