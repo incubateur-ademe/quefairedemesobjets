@@ -11,7 +11,7 @@
   ajouter des nouveaux enfants. Pour changer il faudra [CLUSTERING & DEDUP: re-clusteriser les enfants existants](https://www.notion.so/CLUSTERING-DEDUP-re-clusteriser-les-enfants-existants-1956523d57d7801abe3bc132ec7e33b0?pvs=21). Pour l’instant:
   - 🟢 **avantage**: pas de risque d’endommager des clusters existants
   - 🟠 **inconvénient**: pas d’opportunité de re-clustering les mauvais cluster existants
- 
+
 - **Pas de re-clustering enfants = pas de contexte enfant**: conséquence du dessus, les enfants n’ont pas leur donnée récupérée ni
   normalisée, ce qui peut poser des problèmes de contexte, donc on à fait https://github.com/incubateur-ademe/quefairedemesobjets/pull/1379 en attendant
 
@@ -141,15 +141,15 @@ graph TD
       orphans
       children
    end
-   
+
    subgraph normalization["🧹 <b>normalization</b>"]
 	    norma["lower case, no accents etc..."]
    end
-   
+
    subgraph clustering["📦 <b>clustering</b>"]
 		  similar["exact + fuzzy silimarity"]
    end
-   
+
    subgraph dedup["1️⃣ <b>deduplication</b>"]
 		  parents_choose["🥇 Choose new parents"]
 		  parents_data["🗄️ Choose parents' data (from non-normalized data)"]
@@ -157,11 +157,11 @@ graph TD
 		  parents_data-->children_feed["⬅️ Add existing children"]
 		  children_feed-->changes_mark["📋 Define changes"]
    end
-   
+
    subgraph suggestions[" <b>suggestions</b>"]
       propose
 	 end
-   
+
    parents-->|displayed| normalization
    orphans-->|displayed| normalization
    normalization --> clustering

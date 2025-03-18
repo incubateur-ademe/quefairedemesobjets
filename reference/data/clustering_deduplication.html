@@ -423,15 +423,15 @@ normalisée, ce qui peut poser des problèmes de contexte, donc on à fait https
       orphans
       children
    end
-   
+
    subgraph normalization[&quot;🧹 &lt;b&gt;normalization&lt;/b&gt;&quot;]
 	    norma[&quot;lower case, no accents etc...&quot;]
    end
-   
+
    subgraph clustering[&quot;📦 &lt;b&gt;clustering&lt;/b&gt;&quot;]
 		  similar[&quot;exact + fuzzy silimarity&quot;]
    end
-   
+
    subgraph dedup[&quot;1️⃣ &lt;b&gt;deduplication&lt;/b&gt;&quot;]
 		  parents_choose[&quot;🥇 Choose new parents&quot;]
 		  parents_data[&quot;🗄️ Choose parents' data (from non-normalized data)&quot;]
@@ -439,11 +439,11 @@ normalisée, ce qui peut poser des problèmes de contexte, donc on à fait https
 		  parents_data--&gt;children_feed[&quot;⬅️ Add existing children&quot;]
 		  children_feed--&gt;changes_mark[&quot;📋 Define changes&quot;]
    end
-   
+
    subgraph suggestions[&quot; &lt;b&gt;suggestions&lt;/b&gt;&quot;]
       propose
 	 end
-   
+
    parents--&gt;|displayed| normalization
    orphans--&gt;|displayed| normalization
    normalization --&gt; clustering
