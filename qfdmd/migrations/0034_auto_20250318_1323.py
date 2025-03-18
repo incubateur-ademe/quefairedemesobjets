@@ -16,6 +16,7 @@ def create_footer_assistant_menu(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
+        ("wagtailmenus", "0001_initial"),
         ("qfdmd", "0033_alter_synonyme_slug"),
     ]
 
