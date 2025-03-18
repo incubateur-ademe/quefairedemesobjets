@@ -17,6 +17,11 @@ seed-paths: ["seeds"]
 macro-paths: ["macros"]
 snapshot-paths: ["snapshots"]
 
+on-run-start:
+  - "{{ create_encode_base57() }}"
+  - "{{ create_uuid_to_int() }}"
+  - "{{ create_safe_divmod() }}"
+
 clean-targets:
   - "target"
   - "dbt_packages"
