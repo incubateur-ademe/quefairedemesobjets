@@ -1,6 +1,5 @@
 import logging
 from typing import cast
-import logging
 
 from django import template
 from django.conf import settings
@@ -9,8 +8,6 @@ from django.forms import FileField
 from django.utils.safestring import mark_safe
 
 register = template.Library()
-logger = logging.getLogger(__name__)
-
 logger = logging.getLogger(__name__)
 
 
