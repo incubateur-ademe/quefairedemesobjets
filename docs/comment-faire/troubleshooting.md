@@ -1,4 +1,4 @@
-# 3615 jaidesproblemes
+# ☎️ 3615 jaidesproblemes
 
 Une liste de solutions à des situations fréquentes qui peuvent se produire en local, en staging, en prod...
 
