@@ -307,16 +307,16 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
     class Meta:
         abstract = True
 
-    nom = models.CharField(max_length=255, blank=False, null=False)
+    nom = models.CharField(max_length=255, blank=False, null=False, db_index=True)
     description = models.TextField(blank=True, null=True)
     identifiant_unique = models.CharField(
-        max_length=255, unique=True, primary_key=True, blank=True
+        max_length=255, unique=True, primary_key=True, blank=True, db_index=True
     )
     acteur_type = models.ForeignKey(ActeurType, on_delete=models.CASCADE)
     adresse = models.CharField(max_length=255, blank=True, null=True)
     adresse_complement = models.CharField(max_length=255, blank=True, null=True)
-    code_postal = models.CharField(max_length=10, blank=True, null=True)
-    ville = models.CharField(max_length=255, blank=True, null=True)
+    code_postal = models.CharField(max_length=10, blank=True, null=True, db_index=True)
+    ville = models.CharField(max_length=255, blank=True, null=True, db_index=True)
     url = models.CharField(max_length=2048, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
     location = models.PointField(blank=True, null=True)
@@ -325,8 +325,8 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
     nom_officiel = models.CharField(max_length=255, blank=True, null=True)
     labels = models.ManyToManyField(LabelQualite)
     acteur_services = models.ManyToManyField(ActeurService, blank=True)
-    siren = models.CharField(max_length=9, blank=True, null=True)
-    siret = models.CharField(max_length=14, blank=True, null=True)
+    siren = models.CharField(max_length=9, blank=True, null=True, db_index=True)
+    siret = models.CharField(max_length=14, blank=True, null=True, db_index=True)
     source = models.ForeignKey(Source, on_delete=models.CASCADE, blank=True, null=True)
     identifiant_externe = models.CharField(max_length=255, blank=True, null=True)
     statut = models.CharField(
@@ -880,6 +880,8 @@ class VueActeur(BaseActeur):
         verbose_name = "Vue sur l'acteur"
         verbose_name_plural = "Vues sur tous les acteurs"
 
+    uuid = models.CharField(max_length=255, default=shortuuid.uuid, editable=False)
+
     parent = models.ForeignKey(
         "self",
         verbose_name="Dédupliqué par",
@@ -903,7 +905,9 @@ class DisplayedActeur(BaseActeur):
         verbose_name = "ACTEUR de l'EC - AFFICHÉ"
         verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ"
 
-    uuid = models.CharField(max_length=255, default=shortuuid.uuid, editable=False)
+    uuid = models.CharField(
+        max_length=255, default=shortuuid.uuid, editable=False, db_index=True
+    )
 
     # Table name qfdmo_displayedacteur_sources
     sources = models.ManyToManyField(
