@@ -107,7 +107,7 @@ rapidfuzz = "^3.11.0"
 sites-faciles-experiment = "^0.0.10"
 
 [tool.poetry.group.dev.dependencies]
-black = "^24.10.0"
+black = "^25.1.0"
 django-browser-reload = "^1.17.0"
 django-debug-toolbar = "^4.4.6"
 django-stubs = "^5.1.1"
