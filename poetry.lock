@@ -608,14 +608,14 @@ apache-airflow = ">=2.9.0"
 
 [[package]]
 name = "apache-airflow-providers-postgres"
-version = "6.1.0"
+version = "6.1.1"
 description = "Provider package apache-airflow-providers-postgres for Apache Airflow"
 optional = false
 python-versions = "~=3.9"
 groups = ["airflow"]
 files = [
-    {file = "apache_airflow_providers_postgres-6.1.0-py3-none-any.whl", hash = "sha256:9210984cb1e6c8cd68198b4e758035d836be3027508d7d26463a5fc629bbd389"},
-    {file = "apache_airflow_providers_postgres-6.1.0.tar.gz", hash = "sha256:2433b41ef891cbe3ad952dda86c3b1e3b1ac91a4794e5ac41581a22ac0c7cc4e"},
+    {file = "apache_airflow_providers_postgres-6.1.1-py3-none-any.whl", hash = "sha256:5ae9472a4aa138b439b81fa3ebca2b201836e22b52ebe3937fb62939cdc054a1"},
+    {file = "apache_airflow_providers_postgres-6.1.1.tar.gz", hash = "sha256:abb1571f34f120307ff0a01d4c9a37ca0aec6ab503d2a9f7fd5b6ab2607cc9fe"},
 ]
 
 [package.dependencies]
@@ -7359,4 +7359,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12,<3.13"
-content-hash = "8535595a386e882a97e2f6bf2a49ff819e8f7e9552180a5e126340539bd87a6e"
+content-hash = "1259c1a4029ed31f16a0c85c62ccfa7e56dedb85a7612d0d843fee9a48e35018"
