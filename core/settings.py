@@ -23,7 +23,6 @@ from sentry_sdk.integrations.django import DjangoIntegration
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-
 # Assistant settings
 # ------------------
 ASSISTANT = {
@@ -47,7 +46,7 @@ ASSISTANT = {
 # --------------
 LVAO = {
     "BASE_URL": decouple.config("LVAO_BASE_URL", default="https://lvao.ademe.local"),
-    "GOOGLE_SEARCH_CONSOLE": "google9dfbbc61adbe3888.html"
+    "GOOGLE_SEARCH_CONSOLE": "google9dfbbc61adbe3888.html",
 }
 DEFAULT_MAX_SOLUTION_DISPLAYED = decouple.config(
     "DEFAULT_MAX_SOLUTION_DISPLAYED", cast=int, default=10
@@ -436,17 +435,6 @@ NOTION = {
 DATA_UPLOAD_MAX_NUMBER_FIELDS = decouple.config(
     "DATA_UPLOAD_MAX_NUMBER_FIELDS", default=10000, cast=int
 )
-if DEBUG:
-    CORS_ALLOW_ALL_ORIGINS = DEBUG
-    MIDDLEWARE.extend(
-        [
-            "debug_toolbar.middleware.DebugToolbarMiddleware",
-            "django_browser_reload.middleware.BrowserReloadMiddleware",
-        ]
-    )
-    INSTALLED_APPS.extend(["debug_toolbar", "django_browser_reload"])
-    MEDIA_ROOT = "media"
-    MEDIA_URL = "/media/"
 
 
 # Wagtail settings
