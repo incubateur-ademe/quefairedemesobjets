@@ -8,7 +8,7 @@ from django.core.files.images import ImageFile
 from django.core.management.base import BaseCommand
 from wagtail.images.models import Image
 
-from qfdmd.models import Synonyme
+from qfdmd.models import Produit
 
 
 class Command(BaseCommand):
@@ -17,7 +17,7 @@ class Command(BaseCommand):
     def copy(self, source, target):
         target.write_bytes(source.read_bytes())
 
-    def create_wagtail_image(self, path, synonyme):
+    def create_wagtail_image(self, path, produit):
         img_bytes = path.read_bytes()
         filename = path.name
         with path.open(mode="rb") as f:
@@ -25,7 +25,7 @@ class Command(BaseCommand):
             im = willow.Image.open(f)
             width, height = im.get_size()
             img_obj = Image(
-                title=f"Infotri pour {synonyme.nom}",
+                title=f"Infotri pour {produit.nom}",
                 file=img_file,
                 width=width,
                 height=height,
@@ -45,10 +45,10 @@ class Command(BaseCommand):
                 # alphabétiques des fichiers suffit à sa prise en compte.
                 id = id.split("_")[0]
 
-            synonyme = Synonyme.objects.get(id=id)
-            image = self.create_wagtail_image(path)
-            synonyme.infotri.append(("image", image))
-            synonyme.save()
+            produit = Produit.objects.get(id=id)
+            image = self.create_wagtail_image(path, produit)
+            produit.infotri.append(("image", image))
+            produit.save()
 
     def rename_pictos(self):
         infotris = Path(settings.BASE_DIR / "infotris")
@@ -62,7 +62,7 @@ class Command(BaseCommand):
 
             try:
                 # We first test if the filename matches a synonyme
-                synonyme = Synonyme.objects.get(nom=filename)
+                synonyme = Produit.objects.get(nom=filename)
                 self.copy(
                     path,
                     Path(
@@ -73,12 +73,12 @@ class Command(BaseCommand):
                     ),
                 )
                 continue
-            except Synonyme.DoesNotExist:
+            except Produit.DoesNotExist:
                 pass
 
             try:
                 # Then if it is a prefix...in some cases the filename was truncated
-                synonyme = Synonyme.objects.get(nom__startswith=filename)
+                synonyme = Produit.objects.get(nom__startswith=filename)
                 self.copy(
                     path,
                     Path(
@@ -89,12 +89,12 @@ class Command(BaseCommand):
                     ),
                 )
                 continue
-            except Synonyme.DoesNotExist:
+            except Produit.DoesNotExist:
                 pass
 
             try:
                 # Then we try to replace colon as they might be used instead of slashes
-                synonyme = Synonyme.objects.get(
+                synonyme = Produit.objects.get(
                     nom__startswith=filename.replace(":", "/")
                 )
                 self.copy(
@@ -107,7 +107,7 @@ class Command(BaseCommand):
                     ),
                 )
                 continue
-            except Synonyme.DoesNotExist:
+            except Produit.DoesNotExist:
                 pass
 
             try:
@@ -115,7 +115,7 @@ class Command(BaseCommand):
                 # synonyme has several infotris
                 nom = filename.split("_")[0]
                 index = filename.split("_")[1]
-                synonyme = Synonyme.objects.get(nom=nom)
+                synonyme = Produit.objects.get(nom=nom)
 
                 self.copy(
                     path,
@@ -127,7 +127,7 @@ class Command(BaseCommand):
                     ),
                 )
                 continue
-            except (IndexError, Synonyme.DoesNotExist):
+            except (IndexError, Produit.DoesNotExist):
                 pass
 
             self.stdout.write(self.style.ERROR(filename))

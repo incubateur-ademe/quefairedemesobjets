@@ -1,5 +1,26 @@
-{% load dsfr_tags %}
+{% load dsfr_tags wagtailimages_tags %}
 
+<header class="qf-mt-3w md:qf-mt-5w">
+    <h1 class="qf-m-0">
+        {{ object.nom|capfirst }}
+    </h1>
+
+    {% if produit.infotri %}
+        <div class="qf-flex qf-flex-col qf-gap-2v">
+            <ul class="qf-list-none qf-h-[65px] qf-flex qf-gap-2v">
+                {% for infotri in produit.infotri %}
+                    <li>
+                    {% image infotri.value original preserve-svg class="qf-w-auto qf-h-full" %}
+                    </li>
+                {% endfor %}
+            </ul>
+
+            <p>
+                <a href="{{ infotri.lien }}">{{ infotri.texte_du_lien }}</a>
+            </p>
+        </div>
+    {% endif %}
+</header>
 {% if bon_etat and mauvais_etat %}
     <div class="fr-tabs">
         <ul class="fr-tabs__list" role="tablist" aria-label="État du produit {{ produit }}">
