@@ -21,15 +21,13 @@ on-run-start:
   - "{{ create_encode_base57() }}"
   - "{{ create_uuid_to_int() }}"
   - "{{ create_safe_divmod() }}"
+  - "{{ create_udf_columns_concat_unique_non_empty() }}"
+  - "{{ create_udf_normalize_string_alpha_for_match() }}"
 
 clean-targets:
   - "target"
   - "dbt_packages"
 
-# Creating our UDFs
-on-run-start:
-  - "{{create_udf_columns_concat_unique_non_empty()}}"
-  - "{{create_udf_normalize_string_alpha_for_match()}}"
 
 models:
   base:

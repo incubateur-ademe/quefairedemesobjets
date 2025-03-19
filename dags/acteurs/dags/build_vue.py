@@ -50,23 +50,23 @@ with DAG(
     """
     dbt_run_base = BashOperator(
         task_id="run_base",
-        bash_command=("cd /opt/airflow/dbt/ && dbt run --models base"),
+        bash_command=("cd /opt/airflow/dbt/ && dbt run --models base.acteurs"),
         dag=dag,
     )
     dbt_test_base = BashOperator(
         task_id="test_base",
-        bash_command=("cd /opt/airflow/dbt/ && dbt test --models base"),
+        bash_command=("cd /opt/airflow/dbt/ && dbt test --models base.acteurs"),
         #        dag=dag,
     )
 
     dbt_run_intermediate = BashOperator(
         task_id="run_intermediate",
-        bash_command=("cd /opt/airflow/dbt/ && dbt run --models intermediate"),
+        bash_command=("cd /opt/airflow/dbt/ && dbt run --models intermediate.acteurs"),
         #        dag=dag,
     )
     dbt_test_intermediate = BashOperator(
         task_id="test_intermediate",
-        bash_command=("cd /opt/airflow/dbt/ && dbt test --models intermediate"),
+        bash_command=("cd /opt/airflow/dbt/ && dbt test --models intermediate.acteurs"),
         #        dag=dag,
     )
 
