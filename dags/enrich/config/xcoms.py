@@ -23,6 +23,9 @@ class XCOMS:
     DF_CLOSED_REPLACED_OTHER_SIREN: str = "df_acteurs_closed_replaced_other_siren"
     DF_CLOSED_NOT_REPLACED: str = "df_acteurs_closed_not_replaced"
 
+    DF_READ: str = "df_read"
+    DF_MATCH: str = "df_match"
+
 
 def xcom_pull(ti: TaskInstance, key: str, skip_if_empty: bool = False) -> Any:
     """For pulls, we create a helper to constrain keys

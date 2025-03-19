@@ -46,3 +46,4 @@ class COLS:
     # Matching
     MATCH_WORDS: str = "match_words"
     MATCH_SCORE: str = "match_score"
+    MATCH_THRESHOLD: str = "match_threshold"

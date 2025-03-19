@@ -5,9 +5,9 @@ import logging
 from airflow import DAG
 from airflow.exceptions import AirflowSkipException
 from airflow.operators.python import PythonOperator
-from rgpd.config import COLS, TASKS, XCOMS
-from rgpd.tasks.business_logic.rgpd_anonymize_people_suggest import (
-    rgpd_anonymize_people_suggest,
+from enrich.config import COLS, TASKS, XCOMS
+from enrich.tasks.business_logic.enrich_ae_rgpd_suggest import (
+    enrich_ae_rgpd_suggest,
 )
 
 logger = logging.getLogger(__name__)
@@ -29,10 +29,10 @@ def task_info_get():
     """
 
 
-def rgpd_anonymize_people_suggest_wrapper(ti, params, dag, run_id) -> None:
+def enrich_ae_rgpd_suggest_wrapper(ti, params, dag, run_id) -> None:
     logger.info(task_info_get())
 
-    rgpd_anonymize_people_suggest(
+    enrich_ae_rgpd_suggest(
         df=ti.xcom_pull(key=XCOMS.DF_MATCH),
         identifiant_action=dag.dag_id,
         identifiant_execution=run_id,
@@ -43,9 +43,9 @@ def rgpd_anonymize_people_suggest_wrapper(ti, params, dag, run_id) -> None:
         raise AirflowSkipException("Pas de données DB, on s'arrête là")
 
 
-def rgpd_anonymize_people_suggest_task(dag: DAG) -> PythonOperator:
+def enrich_ae_rgpd_suggest_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id=TASKS.SUGGEST,
-        python_callable=rgpd_anonymize_people_suggest_wrapper,
+        python_callable=enrich_ae_rgpd_suggest_wrapper,
         dag=dag,
     )

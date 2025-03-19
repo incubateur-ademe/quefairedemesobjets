@@ -3,7 +3,7 @@
 import logging
 
 import pandas as pd
-from rgpd.config import COLS
+from enrich.config import COLS
 from sources.config.shared_constants import INFO_TO_HIDE
 from utils import logging_utils as log
 from utils.django import django_setup_full
@@ -13,7 +13,7 @@ django_setup_full()
 logger = logging.getLogger(__name__)
 
 
-def rgpd_anonymize_people_suggest(
+def enrich_ae_rgpd_suggest(
     df: pd.DataFrame,
     identifiant_action: str,
     identifiant_execution: str,
@@ -41,7 +41,7 @@ def rgpd_anonymize_people_suggest(
         changes = []
 
         # Preparing & validating the change params
-        acteur_id = row[COLS.QFDMO_ACTEUR_ID]
+        acteur_id = row[COLS.ACTEUR_ID]
         model_params = {
             "id": acteur_id,
             "data": {
@@ -66,7 +66,7 @@ def rgpd_anonymize_people_suggest(
             "suggestion": {
                 "title": "🕵️ RGPD: anonymiser les noms des acteurs",
                 "summary": {
-                    "noms d'origine": row[COLS.QFDMO_ACTEUR_NOMS_ORIGIN],
+                    "noms d'origine": row[COLS.ACTEUR_NOMS_ORIGINE],
                     "mots de match": row[COLS.MATCH_WORDS],
                     "score de match": row[COLS.MATCH_SCORE],
                     "changement": f"""{field_nom} & {field_nom_officiel} &
