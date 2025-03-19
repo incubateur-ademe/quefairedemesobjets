@@ -8,72 +8,72 @@ defaults:
     shell: bash
 
 jobs:
-  # unit_tests:
-  #   runs-on: ubuntu-latest
-  #   services:
-  #     postgres:
-  #       image: postgis/postgis:15-3.3-alpine
-  #       env:
-  #         POSTGRES_USER: qfdmo
-  #         POSTGRES_PASSWORD: qfdmo # pragma: allowlist secret
-  #         POSTGRES_DB: qfdmo
-  #       options: >-
-  #         --health-cmd pg_isready
-  #         --health-interval 1s
-  #         --health-timeout 1s
-  #         --health-retries 50
-  #       ports:
-  #         - 6543:5432
+  unit_tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:15-3.3-alpine
+        env:
+          POSTGRES_USER: qfdmo
+          POSTGRES_PASSWORD: qfdmo # pragma: allowlist secret
+          POSTGRES_DB: qfdmo
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 1s
+          --health-timeout 1s
+          --health-retries 50
+        ports:
+          - 6543:5432
 
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-python@v5
-  #       with:
-  #         cache: "pip"
-  #     - name: Install GIS Packages
-  #       run: |
-  #         sudo apt-get update
-  #         sudo apt-get install gdal-bin
-  #     - name: Install poetry
-  #       uses: abatilo/actions-poetry@v4
-  #     - uses: actions/cache@v4
-  #       name: Define a cache for the virtual environment based on the dependencies lock file
-  #       with:
-  #         path: ./.venv
-  #         key: venv-dev-airflow-${{ hashFiles('poetry.lock') }}
-  #     - name: Install the project dependencies
-  #       run: poetry sync --with dev,airflow --no-root
-  #     - name: Run unit tests
-  #       run: poetry run pytest unit_tests
-  #     - name: Run integration tests
-  #       run: poetry run pytest integration_tests
-  #     - name: Run data tests
-  #       run: poetry run pytest dags_unit_tests
-  #     - name: Check code formatting
-  #       run: poetry run black --check --diff .
-  #     - uses: chartboost/ruff-action@v1
-  #     - name: Check for missing migrations
-  #       run: poetry run python manage.py makemigrations --check --no-input --settings=core.test_settings
-  #       env:
-  #         SECRET_KEY: votre_blanquette_est_bonne # pragma: allowlist secret
-  #         DATABASE_URL: "postgres://fakeusername:fakepassword@postgres:5432/database" # pragma: allowlist secret
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          cache: "pip"
+      - name: Install GIS Packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install gdal-bin
+      - name: Install poetry
+        uses: abatilo/actions-poetry@v4
+      - uses: actions/cache@v4
+        name: Define a cache for the virtual environment based on the dependencies lock file
+        with:
+          path: ./.venv
+          key: venv-dev-airflow-${{ hashFiles('poetry.lock') }}
+      - name: Install the project dependencies
+        run: poetry sync --with dev,airflow --no-root
+      - name: Run unit tests
+        run: poetry run pytest unit_tests
+      - name: Run integration tests
+        run: poetry run pytest integration_tests
+      - name: Run data tests
+        run: poetry run pytest dags_unit_tests
+      - name: Check code formatting
+        run: poetry run black --check --diff .
+      - uses: chartboost/ruff-action@v1
+      - name: Check for missing migrations
+        run: poetry run python manage.py makemigrations --check --no-input --settings=core.test_settings
+        env:
+          SECRET_KEY: votre_blanquette_est_bonne # pragma: allowlist secret
+          DATABASE_URL: "postgres://fakeusername:fakepassword@postgres:5432/database" # pragma: allowlist secret
 
-  # frontend_tests:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-node@v4
-  #       with:
-  #         node-version-file: ".tool-versions"
-  #         cache: "npm"
-  #     - name: Build assets
-  #       run: |
-  #         npm ci
-  #         npm run build
-  #     - name: Check code formatting
-  #       run: npm run lint
-  #     - name: Run tests
-  #       run: npm run test
+  frontend_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".tool-versions"
+          cache: "npm"
+      - name: Build assets
+        run: |
+          npm ci
+          npm run build
+      - name: Check code formatting
+        run: npm run lint
+      - name: Run tests
+        run: npm run test
 
   e2e:
     runs-on: ubuntu-latest
