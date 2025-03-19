@@ -94,7 +94,4 @@ INNER JOIN deduplicated_opened_sources AS ds ON da.uuid = ds.uuid
 LEFT JOIN proposition_services AS ps ON da.uuid = ps.uuid
 LEFT JOIN acteur_labels AS al ON da.uuid = al.uuid
 LEFT JOIN acteur_services AS acs ON da.uuid = acs.uuid
-WHERE da.statut = 'ACTIF'
-AND da.public_accueilli NOT IN ('AUCUN', 'PROFESSIONNELS')
-AND da.identifiant_unique NOT LIKE '%_reparation_%'
 ORDER BY da.uuid
