@@ -1,0 +1,1 @@
+{% macro acteur_status_is_active() %}statut = 'ACTIF'{% endmacro %}

@@ -1,0 +1,75 @@
+version: 2
+
+models:
+  - name: base_ae_unite_legale
+    description: "Unités légales de l'Annuaire Entreprises (AE)"
+    columns:
+      - name: siren
+        description: "Numéro SIREN"
+        data_type: varchar(9)
+        data_tests:
+          - not_null
+          - unique
+      - name: etat_administratif
+        description: "État administratif: A = Active, C = Cessée"
+        data_type: varchar(1)
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ["A", "C"]
+      - name: activite_principale
+        description: "Code NAF Rev2"
+        # Test failing on 2025-03-17 due to missing data in source table
+        # data_tests:
+        #   - not_null
+      - name: denomination
+        description: "Dénomination"
+        # Test failing on 2025-03-17 due to missing data in source table
+        # data_tests:
+        #   - not_null
+      - name: prenom1
+        description: "Prénom 1 du dirigeant"
+      - name: prenom2
+        description: "Prénom 2 du dirigeant"
+      - name: prenom3
+        description: "Prénom 3 du dirigeant"
+      - name: prenom4
+        description: "Prénom 4 du dirigeant"
+      - name: prenom_usuel
+        description: "Prénom usuel du dirigeant"
+      - name: pseudonyme
+        description: "Pseudonyme du dirigeant"
+      - name: nom
+        description: "Nom du dirigeant"
+      - name: nom_usage
+        description: "Nom d'usage du dirigeant"
+  - name: base_ae_etablissement
+    description: "Établissements de l'Annuaire Entreprises (AE)"
+    columns:
+      - name: siret
+        description: "Numéro SIRET"
+        data_type: varchar(14)
+        data_tests:
+          - not_null
+          - unique
+      - name: etat_administratif
+        description: "A = Actif, F = Fermé"
+        data_type: varchar(1)
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ["A", "F"]
+      - name: activite_principale
+        description: "Code NAF Rev2"
+      - name: numero_voie
+        description: "Numéro de voie"
+      - name: complement_adresse
+        description: "Complement d'adresse (ex: étage, bâtiment)"
+      - name: type_voie
+        description: "Type de voie (ex: rue, avenue)"
+      - name: libelle_voie
+        description: "Nom de la voie"
+      - name: code_postal
+        description: "Postal code"
+      - name: libelle_commune
+        description: "Nom de la ville"

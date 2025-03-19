@@ -47,12 +47,15 @@ CREATE TABLE {{table_name}} (
   "caractereEmployeurUniteLegale" VARCHAR(50)  -- None -> 50
 );
 
-/* Constraints */
+/* Constraints
+Just to verify that our import is working correctly
+*/
 ALTER TABLE {{table_name}}
 ADD CONSTRAINT pk_{{table_name}} PRIMARY KEY (siren);
 
-/* Indexes */
--- "" needed due to camelCase column names
--- Needed for DAG on closed acteurs and NAF
-CREATE INDEX "idx_{{table_name}}_activitePrincipaleUniteLegale" ON {{table_name}} ("activitePrincipaleUniteLegale");
-CREATE INDEX "idx_{{table_name}}_etatAdministratifUniteLegale" ON {{table_name}} ("etatAdministratifUniteLegale");
+/* Indexes
+🔴 DO NOT USE indexes on those import tables: they can easily
+reach > 1 GB per index (e.g. SIRET on etablissement = 1.2GB)
+and these tables are not intended for direct use. Instead we
+will implement indexes on the desired DBT models
+*/
