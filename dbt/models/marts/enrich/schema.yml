@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: marts_enrich_ea_rgpd
+  - name: marts_enrich_ae_rgpd
     description: Unités légales de l'Annuaire Entreprises (AE) préfiltrés
       | et prématchés sur la base des noms/prénoms de dirigeants dont au
       | moins 1 apparait dans le nom de nos acteurs (le modèle sera ensuite
@@ -22,9 +22,13 @@ models:
         description: Identifiant unique de l'acteur
         data_tests:
           - not_null
-      - name: acteur_noms
-        description: Nom, nom officiel et nom commercial de l'acteur
-         | regroupés & normalisés pour réduire la taille de la table, sachant
+      - name: acteur_noms_origine
+        description: Nom, nom officiel et nom commercial de l'acteur regroupés
+        data_tests:
+          - not_null
+      - name: acteur_noms_normalises
+        description: Nom, nom officiel et nom commercial de l'acteur regroupés
+         | & normalisés pour réduire la taille de la table, sachant
          | qu'on fait un matching plus poussés avec python par la suite
         # Ensuring we are not matching empty strings
         data_tests:
@@ -32,7 +36,7 @@ models:
       - name: acteur_commentaires
         description: Commentaires de l'acteur pour debug ET si on veut faire
          | filtering avec des paramètres de DAG
-      - name: dirigeants_noms_prenoms
+      - name: ae_dirigeants_noms_prenoms
         description: Noms & prénoms de tous les dirigeants
          | regroupés & normalisés pour réduire la taille de la table, sachant
          | qu'on fait un matching plus poussés avec python par la suite

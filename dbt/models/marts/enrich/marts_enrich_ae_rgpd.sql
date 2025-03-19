@@ -17,7 +17,12 @@ WITH acteurs_with_siren AS (
 	SELECT
 		LEFT(siret,9) AS siren,
 		identifiant_unique AS acteur_id,
-		udf_normalize_string_alpha_for_match(CONCAT(nom || ' ' || nom_officiel || ' ' || nom_commercial)) AS acteur_noms,
+		TRIM(REGEXP_REPLACE(
+			CONCAT(nom || ', ' || nom_officiel || ', ' || nom_commercial),
+			', , ',
+			'')
+		) AS acteur_noms_origine,
+		udf_normalize_string_alpha_for_match(CONCAT(nom || ' ' || nom_officiel || ' ' || nom_commercial)) AS acteur_noms_normalises,
 		commentaires AS acteur_commentaires
 	FROM {{ ref('marts_carte_acteur') }}
 	/*
@@ -33,7 +38,8 @@ SELECT
 
 	-- Acteur fields
 	acteur_id,
-	acteur_noms,
+	acteur_noms_origine,
+	acteur_noms_normalises,
 	acteur_commentaires,
 
 	-- Unite legale fields
@@ -50,7 +56,7 @@ SELECT
 		dirigeant_prenom2,
 		dirigeant_prenom3,
 		dirigeant_prenom4
-	) AS dirigeants_noms_prenoms
+	) AS ae_dirigeants_noms_prenoms
 
 FROM {{ ref('int_ae_unite_legale') }} AS unite
 LEFT JOIN acteurs_with_siren AS acteurs ON acteurs.siren = unite.siren
@@ -58,11 +64,11 @@ WHERE
 	acteurs.siren IS NOT NULL -- i.e. we have a match
     AND a_dirigeant_noms_ou_prenoms_non_null -- we have some directors names
 	AND ( -- Any of the directors names appear in the acteur names
-		position(dirigeant_nom IN acteur_noms) > 0
-		OR position(dirigeant_nom_usage IN acteur_noms) > 0
-		OR position(dirigeant_pseudonyme IN acteur_noms) > 0
-		OR position(dirigeant_prenom1 IN acteur_noms) > 0
-		OR position(dirigeant_prenom2 IN acteur_noms) > 0
-		OR position(dirigeant_prenom3 IN acteur_noms) > 0
-		OR position(dirigeant_prenom4 IN acteur_noms) > 0
+		position(dirigeant_nom IN acteur_noms_normalises) > 0
+		OR position(dirigeant_nom_usage IN acteur_noms_normalises) > 0
+		OR position(dirigeant_pseudonyme IN acteur_noms_normalises) > 0
+		OR position(dirigeant_prenom1 IN acteur_noms_normalises) > 0
+		OR position(dirigeant_prenom2 IN acteur_noms_normalises) > 0
+		OR position(dirigeant_prenom3 IN acteur_noms_normalises) > 0
+		OR position(dirigeant_prenom4 IN acteur_noms_normalises) > 0
 	)
