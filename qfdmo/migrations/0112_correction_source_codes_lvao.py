@@ -17,6 +17,9 @@ MAPPING_ACTEUR_ID_TABLE = {
 
 
 def update_acteur_source_code(apps, schema_editor):
+    # CI ran again, and executed this despite the migrations.RunPython.noop
+    # hence the brutal return to avoid running this completely
+    return
     Source = apps.get_model("qfdmo", "Source")
     Acteur = apps.get_model("qfdmo", "Acteur")
     RevisionActeur = apps.get_model("qfdmo", "RevisionActeur")
