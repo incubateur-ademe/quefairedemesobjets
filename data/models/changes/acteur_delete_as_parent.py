@@ -26,6 +26,6 @@ class ChangeActeurDeleteAsParent(ChangeActeurAbstract):
          - we should first take care of its children (e.g. pointing to new parent)
          - consequently the parent should be automatically deleted (see PR1247)
         """
-        rev = RevisionActeur.objects.filter(identifiant_unique=self.id)
+        rev = RevisionActeur.objects.filter(id=self.id)
         if rev.exists():
             raise ValueError(f"Parent '{self.id}' should already be deleted")

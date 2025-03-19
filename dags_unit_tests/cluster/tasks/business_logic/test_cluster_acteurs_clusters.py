@@ -17,7 +17,7 @@ def df_clusters_to_dict(df: pd.DataFrame) -> dict[str, list[str]]:
     en convertissant la DataFrame de clusters en dictionnaire
     cluster_id -> liste des identifiants uniques
     """
-    return df.groupby("cluster_id")["identifiant_unique"].apply(list).to_dict()
+    return df.groupby("cluster_id")["id"].apply(list).to_dict()
 
 
 @pytest.mark.django_db
@@ -32,7 +32,7 @@ class TestClusterActeursClusters:
         return pd.DataFrame(
             {
                 COL_INDEX_SRC: range(1, 8),
-                "identifiant_unique": [
+                "id": [
                     "id1",
                     "id2",
                     "id3",
@@ -113,7 +113,7 @@ class TestClusterActeursClusters:
         return pd.DataFrame(
             {
                 COL_INDEX_SRC: range(1, 5),
-                "identifiant_unique": [
+                "id": [
                     "id1",
                     "id2",
                     "id3",
@@ -151,7 +151,7 @@ class TestClusterActeursClusters:
                 COL_INDEX_SRC: range(1, 8),
                 "source_id": range(1, 8),
                 "code_postal": ["10000" for _ in range(7)],
-                "identifiant_unique": ["id" + str(i) for i in range(0, 7)],
+                "id": ["id" + str(i) for i in range(0, 7)],
                 "nom": [
                     "centre commercial auchan",
                     "artiste peintre auchan",
@@ -200,7 +200,7 @@ class TestClusterActeursClusters:
         df_norm = pd.DataFrame(
             [
                 {
-                    "identifiant_unique": "id15",
+                    "id": "id15",
                     "acteur_type_code": "at1",
                     "code_postal": "00004",
                     "ville": "v4",
@@ -213,7 +213,7 @@ class TestClusterActeursClusters:
                     COL_INDEX_SRC: 6,
                 },
                 {
-                    "identifiant_unique": "id13",
+                    "id": "id13",
                     "acteur_type_code": None,
                     "code_postal": "00004",
                     "ville": "v4",
@@ -226,7 +226,7 @@ class TestClusterActeursClusters:
                     COL_INDEX_SRC: 7,
                 },
                 {
-                    "identifiant_unique": "id14",
+                    "id": "id14",
                     "acteur_type_code": "at1",
                     "code_postal": "00004",
                     "ville": "v4",
@@ -247,7 +247,7 @@ class TestClusterActeursClusters:
             cluster_fuzzy_threshold=0.5,
         )
         assert df_clusters["cluster_id"].nunique() == 1
-        assert sorted(df_clusters["identifiant_unique"].tolist()) == [
+        assert sorted(df_clusters["id"].tolist()) == [
             "id13",
             "id14",
             "id15",
@@ -265,15 +265,11 @@ class TestClusterActeursClusters:
 
         at1 = ActeurTypeFactory(code="at1")
         s1 = SourceFactory(code="s1")
-        DisplayedActeurFactory(
-            identifiant_unique="orphan1", acteur_type=at1, ville="Laval"
-        )
-        DisplayedActeurFactory(
-            identifiant_unique="orphan2", acteur_type=at1, ville="Laval", source=s1
-        )
+        DisplayedActeurFactory(id="orphan1", acteur_type=at1, ville="Laval")
+        DisplayedActeurFactory(id="orphan2", acteur_type=at1, ville="Laval", source=s1)
         df = pd.DataFrame(
             {
-                "identifiant_unique": ["orphan1", "orphan2"],
+                "id": ["orphan1", "orphan2"],
                 "source_id": [s1.id, s1.id],
                 "acteur_type_id": [at1.id, at1.id],
                 "ville": ["Laval", "Laval"],

@@ -125,9 +125,7 @@ def send_batch_to_api(batch):
     """
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(
-        ["identifiant_unique", "adresse", "adresse_complement", "code_postal", "ville"]
-    )
+    writer.writerow(["id", "adresse", "adresse_complement", "code_postal", "ville"])
     for element in batch:
         row = element.values()
         writer.writerow(row)
@@ -194,7 +192,7 @@ def normalize_address(df, batch_size=10000):
         address_data = df.loc[
             start_idx:end_idx,
             [
-                "identifiant_unique",
+                "id",
                 "adresse",
                 "adresse_complement",
                 "code_postal",
@@ -304,10 +302,8 @@ def normalize_url(url):
 
 
 def find_differences(df_act, df_rev_act, columns_to_exclude, normalization_map):
-    # Join the DataFrames on 'identifiant_unique'
-    df_merged = pd.merge(
-        df_act, df_rev_act, on="identifiant_unique", suffixes=("_act", "_rev_act")
-    )
+    # Join the DataFrames on 'id'
+    df_merged = pd.merge(df_act, df_rev_act, on="id", suffixes=("_act", "_rev_act"))
     df_merged["code_postal_act"] = pd.to_numeric(
         df_merged["code_postal_act"], errors="coerce"
     ).astype(pd.Int64Dtype())
@@ -327,7 +323,7 @@ def find_differences(df_act, df_rev_act, columns_to_exclude, normalization_map):
                 print(f"Column {col} not found in DataFrame.")
     # Initialize a DataFrame to hold the differences
     df_differences = pd.DataFrame()
-    df_differences["identifiant_unique"] = df_merged["identifiant_unique"]
+    df_differences["id"] = df_merged["id"]
 
     columns_to_exclude = columns_to_exclude
 
@@ -353,7 +349,7 @@ def find_differences(df_act, df_rev_act, columns_to_exclude, normalization_map):
     # Remove rows where all elements are None (no differences found)
     df_differences = df_differences.dropna(
         how="all",
-        subset=[col for col in df_differences.columns if col != "identifiant_unique"],
+        subset=[col for col in df_differences.columns if col != "id"],
     )
     return df_differences
 

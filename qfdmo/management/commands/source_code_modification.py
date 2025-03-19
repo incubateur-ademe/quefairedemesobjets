@@ -8,8 +8,8 @@ from django.db import connection, transaction
 from qfdmo.models.acteur import Source
 
 MAPPING_ACTEUR_ID_TABLE = {
-    "qfdmo_acteur": "identifiant_unique",
-    "qfdmo_revisionacteur": "identifiant_unique",
+    "qfdmo_acteur": "id",
+    "qfdmo_revisionacteur": "id",
     "qfdmo_acteur_acteur_services": "acteur_id",
     "qfdmo_acteur_labels": "acteur_id",
     "qfdmo_propositionservice": "acteur_id",

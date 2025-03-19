@@ -23,13 +23,11 @@ class TestClusterActeursClustersDisplay:
         the clustering function must return early with empty df"""
         at1 = ActeurTypeFactory(code="at1")
         s1 = SourceFactory(code="s1")
-        DisplayedActeurFactory(identifiant_unique="p1", acteur_type=at1, ville="Paris")
-        DisplayedActeurFactory(
-            identifiant_unique="orphan1", acteur_type=at1, ville="Laval", source=s1
-        )
+        DisplayedActeurFactory(id="p1", acteur_type=at1, ville="Paris")
+        DisplayedActeurFactory(id="orphan1", acteur_type=at1, ville="Laval", source=s1)
         df = pd.DataFrame(
             {
-                "identifiant_unique": ["p1", "orphan1"],
+                "id": ["p1", "orphan1"],
                 "source_id": [None, s1.id],
                 "acteur_type_id": [at1.id, at1.id],
                 "ville": ["Paris", "Laval"],
@@ -58,16 +56,12 @@ class TestClusterActeursClustersDisplay:
         at1 = ActeurTypeFactory(code="at1")
         s1 = SourceFactory(code="s1")
         s2 = SourceFactory(code="s2")
-        DisplayedActeurFactory(identifiant_unique="p1", acteur_type=at1, ville="Paris")
-        DisplayedActeurFactory(
-            identifiant_unique="orphan1", acteur_type=at1, ville="Laval", source=s1
-        )
-        DisplayedActeurFactory(
-            identifiant_unique="orphan2", acteur_type=at1, ville="Laval", source=s2
-        )
+        DisplayedActeurFactory(id="p1", acteur_type=at1, ville="Paris")
+        DisplayedActeurFactory(id="orphan1", acteur_type=at1, ville="Laval", source=s1)
+        DisplayedActeurFactory(id="orphan2", acteur_type=at1, ville="Laval", source=s2)
         df = pd.DataFrame(
             {
-                "identifiant_unique": ["p1", "orphan1", "orphan2"],
+                "id": ["p1", "orphan1", "orphan2"],
                 "source_id": [None, s1.id, s2.id],
                 "acteur_type_id": [at1.id, at1.id, at1.id],
                 "ville": ["Paris", "Laval", "Laval"],

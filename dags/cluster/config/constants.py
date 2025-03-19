@@ -7,7 +7,7 @@
 FIELDS_PROTECTED = [
     "source_id",
     "acteur_type_id",
-    "identifiant_unique",
+    "id",
     "statut",
     "nombre_enfants",
     "cree_le",
@@ -30,7 +30,7 @@ FIELDS_PARENT_DATA_EXCLUDED = [
     # it via a view from all children for each parent
     "cree_le",
     "modifie_le",
-    "identifiant_unique",
+    "id",
     "identifiant_externe",
 ]
 

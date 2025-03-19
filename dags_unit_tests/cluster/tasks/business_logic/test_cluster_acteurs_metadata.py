@@ -34,7 +34,7 @@ class TestClusterActeursMetadata:
                 ["c2", 0, "c2d3"],
                 ["c2", 0, "c2d4"],
             ],
-            columns=["cluster_id", "nombre_enfants", "identifiant_unique"],
+            columns=["cluster_id", "nombre_enfants", "id"],
         )
 
     @pytest.fixture(scope="session")

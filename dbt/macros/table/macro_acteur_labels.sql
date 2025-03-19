@@ -5,7 +5,7 @@ WITH nochild_acteur_labels AS (
         al.vueacteur_id AS acteur_id,
         al.labelqualite_id AS labelqualite_id
     FROM qfdmo_vueacteur_labels al
-    INNER JOIN {{ ref(ephemeral_filtered_acteur) }} AS a ON al.vueacteur_id = a.identifiant_unique AND a.parent_id is null
+    INNER JOIN {{ ref(ephemeral_filtered_acteur) }} AS a ON al.vueacteur_id = a.id AND a.parent_id is null
     GROUP BY al.vueacteur_id, al.labelqualite_id
 ),
 parentacteur_labels AS (
@@ -13,7 +13,7 @@ parentacteur_labels AS (
         a.parent_id AS acteur_id,
         al.labelqualite_id AS labelqualite_id
     FROM qfdmo_vueacteur_labels al
-    INNER JOIN {{ ref(ephemeral_filtered_acteur) }} AS a ON al.vueacteur_id = a.identifiant_unique AND a.parent_id is not null
+    INNER JOIN {{ ref(ephemeral_filtered_acteur) }} AS a ON al.vueacteur_id = a.id AND a.parent_id is not null
     GROUP BY a.parent_id, al.labelqualite_id
 ),
 acteur_labels AS (
@@ -24,6 +24,6 @@ acteur_labels AS (
 
 SELECT ROW_NUMBER() OVER (ORDER BY acteur_id, al.labelqualite_id) AS id, al.*
 FROM acteur_labels AS al
-INNER JOIN {{ ref(acteur) }} AS a ON a.identifiant_unique = acteur_id
+INNER JOIN {{ ref(acteur) }} AS a ON a.id = acteur_id
 
 {%- endmacro -%}

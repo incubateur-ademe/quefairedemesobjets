@@ -140,22 +140,18 @@ class Suggestion(models.Model):
 
     @property
     def display_contexte_details(self):
-        identifiant_unique = None
-        identifiant_uniques = []
-        if isinstance(self.contexte, dict) and "identifiant_unique" in self.contexte:
-            identifiant_unique = self.contexte.get("identifiant_unique")
+        id = None
+        ids = []
+        if isinstance(self.contexte, dict) and "id" in self.contexte:
+            id = self.contexte.get("id")
         if isinstance(self.contexte, list):
-            identifiant_uniques = [
-                item.get("identifiant_unique")
-                for item in self.contexte
-                if isinstance(item, dict)
-            ]
+            ids = [item.get("id") for item in self.contexte if isinstance(item, dict)]
         return render_to_string(
             "data/_partials/contexte_details.html",
             {
                 "contexte": self.contexte,
-                "identifiant_unique": identifiant_unique,
-                "identifiant_uniques": identifiant_uniques,
+                "id": id,
+                "ids": ids,
             },
         )
 
@@ -173,9 +169,7 @@ class Suggestion(models.Model):
             and isinstance(self.suggestion, dict)
         ):
             template_name = "data/_partials/suppression_suggestion_details.html"
-            template_context = {
-                "identifiant_unique": self.suggestion.get("identifiant_unique")
-            }
+            template_context = {"id": self.suggestion.get("id")}
         elif (
             self.suggestion_cohorte.type_action == SuggestionAction.SOURCE_MODIFICATION
             and isinstance(self.suggestion, dict)
@@ -268,9 +262,7 @@ class Suggestion(models.Model):
     # FIXME: this acteur management will be reviewed with PYDANTIC classes which will
     # be used to handle all specificities of self.suggestions
     def _update_acteur(self):
-        acteur = Acteur.objects.get(
-            identifiant_unique=self.suggestion.get("identifiant_unique")
-        )
+        acteur = Acteur.objects.get(id=self.suggestion.get("id"))
         for acteur_field in self._acteur_fields_to_update():
             setattr(acteur, acteur_field, self.suggestion.get(acteur_field))
         acteur.source = Source.objects.get(code=self.suggestion.get("source_code"))
@@ -300,13 +292,9 @@ class Suggestion(models.Model):
         ):
             self._update_acteur()
         elif self.suggestion_cohorte.type_action == SuggestionAction.SOURCE_SUPPRESSION:
-            identifiant_unique = self.suggestion["identifiant_unique"]
-            Acteur.objects.filter(identifiant_unique=identifiant_unique).update(
-                statut=ActeurStatus.SUPPRIME
-            )
-            RevisionActeur.objects.filter(identifiant_unique=identifiant_unique).update(
-                statut=ActeurStatus.SUPPRIME
-            )
+            id = self.suggestion["id"]
+            Acteur.objects.filter(id=id).update(statut=ActeurStatus.SUPPRIME)
+            RevisionActeur.objects.filter(id=id).update(statut=ActeurStatus.SUPPRIME)
         else:
             raise Exception(
                 "Suggestion cohorte statut is not implemented "
@@ -336,7 +324,7 @@ class Suggestion(models.Model):
             "horaires_description": "Horaires",
             "latitude": "latitude",
             "longitude": "longitude",
-            "identifiant_unique": "identifiant_unique",
+            "id": "id",
             "identifiant_externe": "identifiant_externe",
         }.items():
             if value := self.suggestion.get(field):

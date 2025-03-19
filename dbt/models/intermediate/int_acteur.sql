@@ -1,6 +1,6 @@
 SELECT
-    uuid_generate_v5('6ba7b810-9dad-11d1-80b4-00c04fd430c8'::uuid, COALESCE(ra.identifiant_unique, a.identifiant_unique)) as uuid,
-    COALESCE(ra.identifiant_unique, a.identifiant_unique) AS identifiant_unique,
+    uuid_generate_v5('6ba7b810-9dad-11d1-80b4-00c04fd430c8'::uuid, COALESCE(ra.id, a.id)) as uuid,
+    COALESCE(ra.id, a.id) AS id,
     COALESCE(ra.nom, a.nom) AS nom,
     COALESCE(ra.description, a.description) AS description,
     COALESCE(ra.acteur_type_id, a.acteur_type_id) AS acteur_type_id,
@@ -32,7 +32,7 @@ SELECT
     ra.parent_id AS parent_id,
     COALESCE(a.cree_le, ra.cree_le) AS cree_le,
     -- avec_revision est true si la table revisionacteur existe
-    ra.identifiant_unique IS NOT NULL AS revision_existe
+    ra.id IS NOT NULL AS revision_existe
 FROM {{ ref('base_acteur') }} AS a
 FULL JOIN {{ ref('base_revisionacteur') }} AS ra
-  ON a.identifiant_unique = ra.identifiant_unique
+  ON a.id = ra.id

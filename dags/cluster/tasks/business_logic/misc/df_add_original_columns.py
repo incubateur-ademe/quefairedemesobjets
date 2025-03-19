@@ -21,5 +21,5 @@ def df_add_original_columns(
     """
     cols_add = [x for x in df_original.columns if x not in df_clusters.columns]
     logger.info(f"Colonnes à rajouter: {cols_add}")
-    cols = ["identifiant_unique"] + cols_add
-    return df_clusters.merge(df_original[cols], on="identifiant_unique", how="left")
+    cols = ["id"] + cols_add
+    return df_clusters.merge(df_original[cols], on="id", how="left")

@@ -25,7 +25,7 @@ class TestChangeActeurDeleteAsParent:
 
     def test_raise_if_present(self):
         # We expect acteur management to automatically delete parent for us
-        RevisionActeurFactory(identifiant_unique="p1")
+        RevisionActeurFactory(id="p1")
         change = ChangeActeurDeleteAsParent(id="p1")
         with pytest.raises(ValueError, match="Parent 'p1' should already be deleted"):
             change.apply()  # calling apply to ensure it calls validate
@@ -37,8 +37,8 @@ class TestChangeActeurDeleteAsParent:
 
         # Create 1 parent and 2 children pointing to it
         ChangeActeurCreateAsParent(id="p1").apply()
-        ActeurFactory(identifiant_unique="a1")
-        ActeurFactory(identifiant_unique="a2")
+        ActeurFactory(id="a1")
+        ActeurFactory(id="a2")
         data = {"parent_id": "p1"}
         ChangeActeurUpdateParentId(id="a1", data=data).apply()
         ChangeActeurUpdateParentId(id="a2", data=data).apply()

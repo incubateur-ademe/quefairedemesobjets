@@ -64,7 +64,7 @@ class TestSuggestionChange:
             )
 
     def test_pass_if_all_valid(self):
-        RevisionActeurFactory(identifiant_unique="acteur1")
+        RevisionActeurFactory(id="acteur1")
         SuggestionChange(
             order=1,
             reason="because I want it to work",

@@ -1,19 +1,19 @@
 {% load custom_filters %}
 
 <p>
-    {% if identifiant_unique %}
-        <a href="{% url 'admin:qfdmo_acteur_change' identifiant_unique|quote %}" target="_blank" rel="noreferrer">
+    {% if id %}
+        <a href="{% url 'admin:qfdmo_acteur_change' id|quote %}" target="_blank" rel="noreferrer">
 
             {% if contexte.nom %}
-                {{ contexte.nom }} ({{ identifiant_unique }})
+                {{ contexte.nom }} ({{ id }})
             {% else %}
-                {{ identifiant_unique }}
+                {{ id }}
             {% endif %}
         </a>
     {% endif %}
-    {% if identifiant_uniques %}
+    {% if ids %}
         <ul>
-            {% for identifiant in identifiant_uniques %}
+            {% for identifiant in ids %}
                 <li><a href="{% url 'admin:qfdmo_acteur_change' identifiant|quote %}" target="_blank" rel="noreferrer">{{ identifiant }}</a></li>
             {% endfor %}
         </ul>

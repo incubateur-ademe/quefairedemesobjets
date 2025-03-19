@@ -89,9 +89,7 @@ class Command(BaseCommand):
             DisplayedActeur.objects.annotate(url_length=Length("url"))
             .filter(url_length__gte=1, statut=ActeurStatus.ACTIF)
             .exclude(
-                identifiant_unique__in=CorrectionActeur.objects.values_list(
-                    "identifiant_unique", flat=True
-                ).filter(
+                id__in=CorrectionActeur.objects.values_list("id", flat=True).filter(
                     source=SOURCE,
                     cree_le__gte=datetime.datetime.now() - datetime.timedelta(days=31),
                 ),
@@ -116,8 +114,8 @@ class Command(BaseCommand):
             CorrectionActeur.objects.create(
                 source=SOURCE,
                 url=url,
-                identifiant_unique=final_acteur.identifiant_unique,
-                final_acteur_id=final_acteur.identifiant_unique,
+                id=final_acteur.id,
+                final_acteur_id=final_acteur.id,
                 resultat_brute_source="{}",
                 correction_statut=(
                     CorrectionActeurStatus.ACTIF

@@ -56,10 +56,8 @@ Browse acteur correction and remov the acteur which doesn't have activity anymor
                 correction.resultat_brute_source["etablissement_actif"] is False
                 and correction.resultat_brute_source["nb_etablissements"] == 1
             ):
-                print(f"inactive {correction.identifiant_unique}")
-                acteur = Acteur.objects.get(
-                    identifiant_unique=correction.identifiant_unique
-                )
+                print(f"inactive {correction.id}")
+                acteur = Acteur.objects.get(id=correction.id)
                 revision_acteur = acteur.get_or_create_correctionequipe()
                 revision_acteur.statut = ActeurStatus.INACTIF
                 revision_acteur.save()

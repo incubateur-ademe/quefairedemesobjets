@@ -29,7 +29,7 @@ class TestDataSerializeReconstruct:
         at = ActeurTypeFactory(code="my_action")
         data = {
             "nom": "un acteur",
-            "identifiant_unique": "test",
+            "id": "test",
             "source": s,
             "acteur_type": at,
             "action_principale": action,

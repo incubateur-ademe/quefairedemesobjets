@@ -31,7 +31,7 @@ def crawl_urls_read_urls_from_db(limit: int | None = None) -> pd.DataFrame:
         # having to implement yet another level of grouping
         # (i.e. acteurs -> by URL -> by domain)
         .order_by("url")
-        .values("url", "identifiant_unique", "nom")
+        .values("url", "id", "nom")
     )
     if limit is not None:
         results = results[:limit]

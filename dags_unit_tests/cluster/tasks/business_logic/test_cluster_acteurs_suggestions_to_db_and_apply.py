@@ -50,7 +50,7 @@ DATA_ACTEURS = [
     # & orphan to link
     {
         "cluster_id": C1,
-        "identifiant_unique": "c1pcreate",
+        "id": "c1pcreate",
         "nom": "c1pcreate",
         "parent_id": None,
         "nombre_enfants": 0,
@@ -63,7 +63,7 @@ DATA_ACTEURS = [
     },
     {
         "cluster_id": C1,
-        "identifiant_unique": "c1orphan1",
+        "id": "c1orphan1",
         "nom": "c1orphan1",
         "parent_id": "c1pcreate",
         "nombre_enfants": 0,
@@ -77,7 +77,7 @@ DATA_ACTEURS = [
     # c2 = unchanged except for updating parent's data
     {
         "cluster_id": C2,
-        "identifiant_unique": "c2pkeep",
+        "id": "c2pkeep",
         "nom": "c2pkeep",
         "parent_id": None,
         "nombre_enfants": 1,
@@ -90,7 +90,7 @@ DATA_ACTEURS = [
     },
     {
         "cluster_id": C2,
-        "identifiant_unique": "c2child1",
+        "id": "c2child1",
         "nom": "c2child1",
         "parent_id": "c2pkeep",
         "nombre_enfants": 0,
@@ -105,7 +105,7 @@ DATA_ACTEURS = [
     # all children/orphans updated to point to kept parent
     {
         "cluster_id": C3,
-        "identifiant_unique": "c3pkeep",
+        "id": "c3pkeep",
         "nom": "c3pkeep",
         "parent_id": None,
         "nombre_enfants": 2,
@@ -118,7 +118,7 @@ DATA_ACTEURS = [
     },
     {
         "cluster_id": C3,
-        "identifiant_unique": "c3child1_pkeep",
+        "id": "c3child1_pkeep",
         "nom": "c3child1_pkeep",
         "parent_id": "c3pkeep",
         "nombre_enfants": 0,
@@ -131,7 +131,7 @@ DATA_ACTEURS = [
     },
     {
         "cluster_id": C3,
-        "identifiant_unique": "c3child2_pkeep",
+        "id": "c3child2_pkeep",
         "nom": "c3child2_pkeep",
         "parent_id": "c3pkeep",
         "nombre_enfants": 0,
@@ -144,7 +144,7 @@ DATA_ACTEURS = [
     },
     {
         "cluster_id": C3,
-        "identifiant_unique": "c3child1_pdelete",
+        "id": "c3child1_pdelete",
         "nom": "c3child1_pdelete",
         "parent_id": "c3pkeep",
         "nombre_enfants": 0,
@@ -157,7 +157,7 @@ DATA_ACTEURS = [
     },
     {
         "cluster_id": C3,
-        "identifiant_unique": "c3orphan",
+        "id": "c3orphan",
         "nom": "c3orphan",
         # TODO: it is confusing to use the same column
         # interchangeably to refer to a child's existing parent
@@ -177,7 +177,7 @@ DATA_ACTEURS = [
     },
     {
         "cluster_id": C3,
-        "identifiant_unique": "c3pdelete",
+        "id": "c3pdelete",
         "nom": "c3pdelete",
         "parent_id": None,
         "nombre_enfants": 1,
@@ -224,16 +224,16 @@ class TestClusterActeursSuggestionsToDb:
                 rev = RevisionActeurFactory(
                     source=None,
                     acteur_type=at1,
-                    identifiant_unique=row["identifiant_unique"],
-                    nom=row["identifiant_unique"],
+                    id=row["id"],
+                    nom=row["id"],
                 )
                 DisplayedActeurFactory(
                     source=s1,
                     acteur_type=at1,
-                    identifiant_unique=row["identifiant_unique"],
-                    nom=row["identifiant_unique"],
+                    id=row["id"],
+                    nom=row["id"],
                 )
-                parents[row["identifiant_unique"]] = rev
+                parents[row["id"]] = rev
             # No acteur to mock if it's to be created
             elif model_name == CHANGE_CREATE:
                 pass
@@ -254,8 +254,8 @@ class TestClusterActeursSuggestionsToDb:
                 RevisionActeurFactory(
                     source=s1,
                     acteur_type=at1,
-                    identifiant_unique=row["identifiant_unique"],
-                    nom=row["identifiant_unique"],
+                    id=row["id"],
+                    nom=row["id"],
                     parent=parent,
                 )
             elif model_name == CHANGE_NOTHING:
@@ -263,8 +263,8 @@ class TestClusterActeursSuggestionsToDb:
                 RevisionActeurFactory(
                     source=s1,
                     acteur_type=at1,
-                    identifiant_unique=row["identifiant_unique"],
-                    nom=row["identifiant_unique"],
+                    id=row["id"],
+                    nom=row["id"],
                     parent=parent,
                 )
             else:
@@ -326,7 +326,7 @@ class TestClusterActeursSuggestionsToDb:
             # We should have 1 change matching each of the cluster's acteurs ID
             cluster = df[df["cluster_id"] == cluster_id]
             assert len(cluster) == len(changes)
-            assert sorted(cluster["identifiant_unique"].tolist()) == sorted(
+            assert sorted(cluster["id"].tolist()) == sorted(
                 [x["model_params"]["id"] for x in changes]
             )
 
@@ -347,25 +347,25 @@ class TestClusterActeursSuggestionsToDb:
         c1pcreate = RevisionActeur.objects.get(pk="c1pcreate")
         assert c1pcreate.nom == "new name c1pcreate"
         c1orphan1 = RevisionActeur.objects.get(pk="c1orphan1")
-        assert c1orphan1.parent.identifiant_unique == c1pcreate.identifiant_unique
+        assert c1orphan1.parent.id == c1pcreate.id
 
         # Cluster 2
         c2pkeep = RevisionActeur.objects.get(pk="c2pkeep")
         assert c2pkeep.nom == "new name c2pkeep"
         c2child1 = RevisionActeur.objects.get(pk="c2child1")
-        assert c2child1.parent.identifiant_unique == c2pkeep.identifiant_unique
+        assert c2child1.parent.id == c2pkeep.id
 
         # Cluster 3
         c3pkeep = RevisionActeur.objects.get(pk="c3pkeep")
         assert c3pkeep.nom == "new name c3pkeep"
         c3child1_pkeep = RevisionActeur.objects.get(pk="c3child1_pkeep")
-        assert c3child1_pkeep.parent.identifiant_unique == c3pkeep.identifiant_unique
+        assert c3child1_pkeep.parent.id == c3pkeep.id
         c3child2_pkeep = RevisionActeur.objects.get(pk="c3child2_pkeep")
-        assert c3child2_pkeep.parent.identifiant_unique == c3pkeep.identifiant_unique
+        assert c3child2_pkeep.parent.id == c3pkeep.id
         c3child1_pdelete = RevisionActeur.objects.get(pk="c3child1_pdelete")
-        assert c3child1_pdelete.parent.identifiant_unique == c3pkeep.identifiant_unique
+        assert c3child1_pdelete.parent.id == c3pkeep.id
         c3orphan = RevisionActeur.objects.get(pk="c3orphan")
-        assert c3orphan.parent.identifiant_unique == c3pkeep.identifiant_unique
+        assert c3orphan.parent.id == c3pkeep.id
 
         # The all important test of unkept parent which
         # must be deleted

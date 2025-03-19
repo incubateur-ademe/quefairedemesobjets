@@ -189,7 +189,7 @@ class TestClusterActeursSelectionOrphans:
     @pytest.mark.parametrize(
         "field",
         [
-            "identifiant_unique",
+            "id",
             "statut",
             "source_id",
             "source_code",  # enrichissement débug

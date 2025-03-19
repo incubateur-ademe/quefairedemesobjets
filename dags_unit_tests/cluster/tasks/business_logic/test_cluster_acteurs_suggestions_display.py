@@ -44,19 +44,19 @@ class TestClusterActeursSuggestionsDisplay:
 
         # However we must have valid data in DB as validations
         # are validated
-        DisplayedActeurFactory(identifiant_unique="parent to delete")
-        DisplayedActeurFactory(identifiant_unique="parent to keep")
-        RevisionActeurFactory(identifiant_unique="parent to keep")
-        RevisionActeurFactory(identifiant_unique="revision to keep")
-        ActeurFactory(identifiant_unique="update parent id")
-        RevisionActeurFactory(identifiant_unique="update parent id")
+        DisplayedActeurFactory(id="parent to delete")
+        DisplayedActeurFactory(id="parent to keep")
+        RevisionActeurFactory(id="parent to keep")
+        RevisionActeurFactory(id="revision to keep")
+        ActeurFactory(id="update parent id")
+        RevisionActeurFactory(id="update parent id")
         at1 = ActeurTypeFactory(code="at1", id=ACTEUR_TYPE_ID)
 
         return pd.DataFrame(
             [
                 {
                     "cluster_id": "c1",
-                    "identifiant_unique": "new parent",
+                    "id": "new parent",
                     "parent_id": None,
                     COL_CHANGE_ORDER: 1,
                     COL_CHANGE_REASON: "because",
@@ -66,7 +66,7 @@ class TestClusterActeursSuggestionsDisplay:
                 },
                 {
                     "cluster_id": "c1",
-                    "identifiant_unique": "parent to delete",
+                    "id": "parent to delete",
                     "parent_id": None,
                     COL_CHANGE_ORDER: 1,
                     COL_CHANGE_REASON: "because",
@@ -76,7 +76,7 @@ class TestClusterActeursSuggestionsDisplay:
                 },
                 {
                     "cluster_id": "c2",
-                    "identifiant_unique": "parent to keep",
+                    "id": "parent to keep",
                     "parent_id": None,
                     COL_CHANGE_ORDER: 1,
                     COL_CHANGE_REASON: "because",
@@ -86,7 +86,7 @@ class TestClusterActeursSuggestionsDisplay:
                 },
                 {
                     "cluster_id": "c3",
-                    "identifiant_unique": "revision to keep",
+                    "id": "revision to keep",
                     "parent_id": "parent to keep",
                     COL_CHANGE_ORDER: 1,
                     COL_CHANGE_REASON: "because",
@@ -96,7 +96,7 @@ class TestClusterActeursSuggestionsDisplay:
                 },
                 {
                     "cluster_id": "c3",
-                    "identifiant_unique": "update parent id",
+                    "id": "update parent id",
                     "parent_id": "parent to keep",
                     COL_CHANGE_ORDER: 1,
                     COL_CHANGE_REASON: "because",

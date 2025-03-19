@@ -52,17 +52,17 @@ def cluster_acteurs_clusters_display(
     # qui permettre + de validation/suivis au delà de ce qui est
     # nécessaire pour le clustering lui-même
     # En attendant un quick-fix pour récupérer le statut et passer la validation
-    # status_by_id = df.set_index("identifiant_unique")["statut"]
-    # df_clusters["statut"] = df_clusters["identifiant_unique"].map(status_by_id)
+    # status_by_id = df.set_index("id")["statut"]
+    # df_clusters["statut"] = df_clusters["id"].map(status_by_id)
 
     # Parent ID n'est pas présent dans DisplayedActeur (source des clusters)
     # donc on reconstruit ce champ à partir de RevisionActeur
     acteur_to_parent_ids_all = dict(
         RevisionActeur.objects.filter(parent__isnull=False).values_list(
-            "identifiant_unique", "parent__identifiant_unique"
+            "id", "parent__id"
         )
     )
-    df_clusters["parent_id"] = df_clusters["identifiant_unique"].map(
+    df_clusters["parent_id"] = df_clusters["id"].map(
         lambda x: acteur_to_parent_ids_all.get(x, None)
     )
 
@@ -75,10 +75,8 @@ def cluster_acteurs_clusters_display(
         df_combined = df_clusters
     else:
         logger.info("Ajout des enfants des parents existants")
-        parent_to_cluster_ids = df_parents.set_index("identifiant_unique")[
-            "cluster_id"
-        ].to_dict()
-        parent_ids = df_parents["identifiant_unique"].tolist()
+        parent_to_cluster_ids = df_parents.set_index("id")["cluster_id"].to_dict()
+        parent_ids = df_parents["id"].tolist()
         log.preview("parent_ids", parent_ids)
         df_children = cluster_acteurs_read_children(
             parent_ids=parent_ids,

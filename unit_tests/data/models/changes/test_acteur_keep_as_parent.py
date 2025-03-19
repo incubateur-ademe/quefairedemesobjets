@@ -25,7 +25,7 @@ class TestChangeActeurKeepAsParent:
     @pytest.fixture
     def change_applied(self):
         id = "parent_created"
-        RevisionActeur(identifiant_unique=id).save_as_parent()
+        RevisionActeur(id=id).save_as_parent()
         at = ActeurType(code="my_at")
         action = Action(code="my_action")
         at.save()

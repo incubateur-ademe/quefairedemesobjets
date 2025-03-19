@@ -33,7 +33,7 @@ def cluster_exclude_intra_source(
     df_children_kept = df_children.groupby("source_id").first().reset_index()
 
     # Résultat final: acteurs conservés vs. exclus
-    id = "identifiant_unique"
+    id = "id"
     df_kept = pd.concat([df_children_kept, df_parents], ignore_index=True)
     df_lost = df_children[~df_children[id].isin(df_kept[id])].reset_index(drop=True)
 

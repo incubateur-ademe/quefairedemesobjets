@@ -564,13 +564,13 @@ class FormulaireSearchActeursView(SearchActeursView):
 
 # TODO : should be deprecated once all is moved to the displayed acteur
 def getorcreate_revisionacteur(request, acteur_identifiant):
-    acteur = Acteur.objects.get(identifiant_unique=acteur_identifiant)
+    acteur = Acteur.objects.get(id=acteur_identifiant)
     revision_acteur = acteur.get_or_create_revision()
     return redirect(revision_acteur.change_url)
 
 
 def getorcreate_correctionequipeacteur(request, acteur_identifiant):
-    acteur = Acteur.objects.get(identifiant_unique=acteur_identifiant)
+    acteur = Acteur.objects.get(id=acteur_identifiant)
     revision_acteur = acteur.get_or_create_correctionequipe()
     return redirect(revision_acteur.change_url)
 
@@ -614,10 +614,8 @@ def get_object_list(request):
     )
 
 
-def acteur_detail_redirect(request, identifiant_unique):
-    displayed_acteur = DisplayedActeur.objects.get(
-        identifiant_unique=identifiant_unique
-    )
+def acteur_detail_redirect(request, id):
+    displayed_acteur = DisplayedActeur.objects.get(id=id)
     return redirect("qfdmo:acteur-detail", uuid=displayed_acteur.uuid, permanent=True)
 
 
@@ -672,12 +670,10 @@ def acteur_detail(request, uuid):
     return render(request, "qfdmo/acteur.html", context)
 
 
-def solution_admin(request, identifiant_unique):
-    revision_acteur = RevisionActeur.objects.filter(
-        identifiant_unique=identifiant_unique
-    ).first()
+def solution_admin(request, id):
+    revision_acteur = RevisionActeur.objects.filter(id=id).first()
 
     if revision_acteur:
         return redirect(revision_acteur.change_url)
-    acteur = Acteur.objects.get(identifiant_unique=identifiant_unique)
+    acteur = Acteur.objects.get(id=id)
     return redirect(acteur.change_url)

@@ -1,7 +1,7 @@
 {%- macro acteur(ephemeral_filtered_acteur, propositionservice ) -%}
 
 SELECT DISTINCT efa.uuid,
-    efa.identifiant_unique,
+    efa.id,
     efa.nom,
     {{ field_empty('efa.description') }} AS description,
     efa.acteur_type_id,
@@ -34,6 +34,6 @@ SELECT DISTINCT efa.uuid,
     efa.statut
 FROM {{ ref(ephemeral_filtered_acteur) }} AS efa
 INNER JOIN {{ ref(propositionservice) }} AS cps
-    ON efa.identifiant_unique = cps.acteur_id
+    ON efa.id = cps.acteur_id
 
 {%- endmacro -%}

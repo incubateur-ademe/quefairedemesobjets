@@ -1,6 +1,6 @@
 import pandas as pd
 
-ID = "identifiant_unique"
+ID = "id"
 COUNT_CLUSTERS = "1) 📦 Nombre Clusters Proposés"
 COUNT_CLUSTERS_CURRENT = "2) 📦 Nombre Clusters Existants"
 COUNT_CLUSTERS_NET = "3) 📦 Nombre Clusters Net"

@@ -5,7 +5,7 @@ WITH nochild_acteur_acteur_services AS (
         aas.vueacteur_id AS acteur_id,
         aas.acteurservice_id AS acteurservice_id
     FROM qfdmo_vueacteur_acteur_services aas
-    INNER JOIN {{ ref(ephemeral_filtered_acteur) }} AS a ON aas.vueacteur_id = a.identifiant_unique AND a.parent_id is null
+    INNER JOIN {{ ref(ephemeral_filtered_acteur) }} AS a ON aas.vueacteur_id = a.id AND a.parent_id is null
     GROUP BY aas.vueacteur_id, aas.acteurservice_id
 ),
 parentacteur_acteur_services AS (
@@ -13,7 +13,7 @@ parentacteur_acteur_services AS (
         a.parent_id AS acteur_id,
         aas.acteurservice_id AS acteurservice_id
     FROM qfdmo_vueacteur_acteur_services aas
-    INNER JOIN {{ ref(ephemeral_filtered_acteur) }} AS a ON aas.vueacteur_id = a.identifiant_unique AND a.parent_id is not null
+    INNER JOIN {{ ref(ephemeral_filtered_acteur) }} AS a ON aas.vueacteur_id = a.id AND a.parent_id is not null
     GROUP BY a.parent_id, aas.acteurservice_id
 ),
 acteur_acteur_services AS (
@@ -24,6 +24,6 @@ acteur_acteur_services AS (
 
 SELECT ROW_NUMBER() OVER (ORDER BY acteur_id, aas.acteurservice_id) AS id, aas.*
 FROM acteur_acteur_services AS aas
-INNER JOIN {{ ref(acteur) }} AS a ON a.identifiant_unique = acteur_id
+INNER JOIN {{ ref(acteur) }} AS a ON a.id = acteur_id
 
 {%- endmacro -%}

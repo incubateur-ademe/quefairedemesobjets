@@ -91,7 +91,7 @@ def acteurservice_id_by_code():
 def df_empty_acteurs_from_db():
     return pd.DataFrame(
         columns=[
-            "identifiant_unique",
+            "id",
             "source_id",
             "statut",
             "cree_le",
@@ -104,7 +104,7 @@ def df_empty_acteurs_from_db():
 def df_acteur_from_db():
     return pd.DataFrame(
         {
-            "identifiant_unique": ["id1", "id2"],
+            "id": ["id1", "id2"],
             "source_id": [101, 102],
             "statut": ["ACTIF", "ACTIF"],
             "cree_le": [datetime(2024, 1, 1), datetime(2024, 1, 1)],
@@ -137,7 +137,7 @@ def dag_config():
                     "value": Faker().word(),
                 }
                 for col in [
-                    "identifiant_unique",
+                    "id",
                     "identifiant_externe",
                     "nom",
                     "acteur_service_codes",

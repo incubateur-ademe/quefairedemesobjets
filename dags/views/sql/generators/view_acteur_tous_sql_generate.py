@@ -15,7 +15,7 @@ def view_acteur_tous_sql_generate() -> str:
     # Champs communs à toutes les tables, on prend au mieux avec COALESCE
     fields_on_all = [
         # IDs
-        "identifiant_unique",
+        "id",
         "identifiant_externe",
         "acteur_type_id",
         "source_id",
@@ -52,15 +52,15 @@ def view_acteur_tous_sql_generate() -> str:
     selected += """-- Si l'identifiant est dans parent_ids, alors c'est un parent
             CASE
                 WHEN COALESCE(
-                    da.identifiant_unique,
-                    ra.identifiant_unique,
-                    a.identifiant_unique)
+                    da.id,
+                    ra.id,
+                    a.id)
                     IN (SELECT id FROM parent_ids) THEN TRUE
                 ELSE FALSE
             END AS est_parent,\n"""
-    selected += """da.identifiant_unique IS NOT NULL AS est_dans_displayedacteur,
-                    ra.identifiant_unique IS NOT NULL AS est_dans_revisionacteur,
-                    a.identifiant_unique IS NOT NULL AS est_dans_acteur"""
+    selected += """da.id IS NOT NULL AS est_dans_displayedacteur,
+                    ra.id IS NOT NULL AS est_dans_revisionacteur,
+                    a.id IS NOT NULL AS est_dans_acteur"""
 
     query = f"""
     -- Il n'existe pas aujourdhui de CREATE OR REPLACE MATERIALIZED VIEW
@@ -76,8 +76,8 @@ def view_acteur_tous_sql_generate() -> str:
         parent_ids_to_enfants AS (
             SELECT
                 parent_id,
-                ARRAY_AGG (identifiant_unique) AS enfants_liste,
-                CARDINALITY(ARRAY_AGG (identifiant_unique)) AS enfants_nombre
+                ARRAY_AGG (id) AS enfants_liste,
+                CARDINALITY(ARRAY_AGG (id)) AS enfants_nombre
             FROM
                 qfdmo_revisionacteur AS ra
             WHERE
@@ -92,9 +92,9 @@ def view_acteur_tous_sql_generate() -> str:
                 {selected}
                     FROM qfdmo_displayedacteur AS da
                     FULL OUTER JOIN qfdmo_revisionacteur AS ra
-                        ON da.identifiant_unique = ra.identifiant_unique
+                        ON da.id = ra.id
                     FULL OUTER JOIN qfdmo_acteur AS a
-                        ON da.identifiant_unique = a.identifiant_unique
+                        ON da.id = a.id
         )
         SELECT
             -- ne pas faire un lazy * car ceci sélectionne des champs génériques
@@ -107,14 +107,14 @@ def view_acteur_tous_sql_generate() -> str:
                 WHEN est_parent THEN (SELECT
                     enfants_nombre
                     FROM parent_ids_to_enfants
-                    WHERE parent_id = acteur_all.identifiant_unique)
+                    WHERE parent_id = acteur_all.id)
                 ELSE NULL
             END AS enfants_nombre,
             CASE
                 WHEN est_parent THEN (SELECT
                     enfants_liste
                     FROM parent_ids_to_enfants
-                    WHERE parent_id = acteur_all.identifiant_unique)
+                    WHERE parent_id = acteur_all.id)
                 ELSE NULL
             END AS enfants_liste,
             -- Les codes pour être plus pratique ques les ids
