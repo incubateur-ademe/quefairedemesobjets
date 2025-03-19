@@ -154,7 +154,7 @@ class BaseActeurAdmin(admin.GISModelAdmin):
         "nom",
         "siret",
         "siren",
-        "identifiant_unique",
+        "id",
         "code_postal",
         "ville",
         "adresse",
@@ -162,7 +162,7 @@ class BaseActeurAdmin(admin.GISModelAdmin):
     )
     search_fields = [
         "code_postal",
-        "identifiant_unique",
+        "id",
         "nom__unaccent",
         "siret",
         "siren",
@@ -174,7 +174,7 @@ class BaseActeurAdmin(admin.GISModelAdmin):
     )
     list_filter = ["statut"]
     fields = (
-        "identifiant_unique",
+        "id",
         "source",
         "identifiant_externe",
         "nom",
@@ -216,8 +216,8 @@ class BaseActeurAdmin(admin.GISModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = list(super().get_readonly_fields(request, obj))
-        if obj and "identifiant_unique" not in readonly_fields:
-            readonly_fields += ["identifiant_unique"]
+        if obj and "id" not in readonly_fields:
+            readonly_fields += ["id"]
         return readonly_fields
 
 
@@ -268,7 +268,7 @@ class ActeurResource(resources.ModelResource):
 
     class Meta:
         model = Acteur
-        import_id_fields = ["identifiant_unique"]
+        import_id_fields = ["id"]
         store_instance = True
         exclude = [
             "cree_le",
@@ -307,12 +307,12 @@ class RevisionActeurChildInline(NotMutableMixin, admin.TabularInline):
     change_form_url = "admin:qfdmo_revisionacteur_change"
 
     def view_link(self, obj):
-        if obj.identifiant_unique:
+        if obj.id:
             return format_html(
                 '<a href="{}">{} ({})</a>',
                 obj.change_url,
                 obj.nom,
-                obj.identifiant_unique,
+                obj.id,
             )
         return None
 
@@ -355,7 +355,7 @@ class RevisionActeurParentAdmin(admin.ModelAdmin):
             .get_queryset(request)
             .filter(
                 statut=ActeurStatus.ACTIF,
-                identifiant_unique__in=Subquery(
+                id__in=Subquery(
                     RevisionActeur.objects.filter(parent_id__isnull=False)
                     .values("parent_id")
                     .distinct()
@@ -423,8 +423,8 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
         revision_acteur_form = super().get_form(request, obj, change, **kwargs)
         if obj and obj.is_parent:
             return revision_acteur_form
-        if obj and obj.identifiant_unique:
-            acteur = Acteur.objects.get(identifiant_unique=obj.identifiant_unique)
+        if obj and obj.id:
+            acteur = Acteur.objects.get(id=obj.id)
             for field_name, form_field in revision_acteur_form.base_fields.items():
                 if field_name == "parent":
                     continue
@@ -525,7 +525,7 @@ class PropositionServiceResource(BasePropositionServiceResource):
     acteur = fields.Field(
         column_name="acteur",
         attribute="acteur",
-        widget=widgets.ForeignKeyWidget(Acteur, field="identifiant_unique"),
+        widget=widgets.ForeignKeyWidget(Acteur, field="id"),
     )
 
     class Meta:
@@ -549,7 +549,7 @@ class RevisionPropositionServiceResource(BasePropositionServiceResource):
     acteur = fields.Field(
         column_name="acteur",
         attribute="acteur",
-        widget=widgets.ForeignKeyWidget(RevisionActeur, field="identifiant_unique"),
+        widget=widgets.ForeignKeyWidget(RevisionActeur, field="id"),
     )
 
     class Meta:
@@ -726,9 +726,9 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource):
                 ActeurPublicAccueilli.PROFESSIONNELS,
             ],
         )
-        # filter les acteur qui on '_reparation_' dans le champ identifiant_unique
+        # filter les acteur qui on '_reparation_' dans le champ id
         queryset = queryset.exclude(
-            identifiant_unique__icontains="_reparation_",
+            id__icontains="_reparation_",
         )
         # Export only acteurs with expected licenses
         if self.licenses:

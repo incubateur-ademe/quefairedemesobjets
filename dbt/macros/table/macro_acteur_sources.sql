@@ -2,11 +2,11 @@
 
 WITH nochild_acteur_labels AS (
     SELECT
-        a.identifiant_unique AS acteur_id,
+        a.id AS acteur_id,
         a.source_id AS source_id
     FROM {{ ref(ephemeral_filtered_acteur) }} AS a
     WHERE a.parent_id is null AND a.source_id is not null
-    GROUP BY a.identifiant_unique, a.source_id
+    GROUP BY a.id, a.source_id
 ),
 parentacteur_labels AS (
     SELECT
@@ -24,6 +24,6 @@ acteur_sources AS (
 
 SELECT ROW_NUMBER() OVER (ORDER BY acteur_id, s.source_id) AS id, s.*
 FROM acteur_sources AS s
-INNER JOIN {{ ref(acteur) }} AS a ON a.identifiant_unique = acteur_id
+INNER JOIN {{ ref(acteur) }} AS a ON a.id = acteur_id
 
 {%- endmacro -%}

@@ -167,14 +167,14 @@ class TestParentsCache:
     def test_nombre_enfants_revision_and_diplayed(self):
         # p1 = acteur parent avec 3 enfants, on démontre que la propriété
         # calculée nombre_enfants fonctionne au niveau revision et displayed
-        r1 = RevisionActeurFactory(identifiant_unique="p1")
-        d1 = DisplayedActeurFactory(identifiant_unique="p1")
-        a = RevisionActeurFactory(identifiant_unique="a_r1", parent=r1)
-        b = RevisionActeurFactory(identifiant_unique="b_r1", parent=r1)
-        c = RevisionActeurFactory(identifiant_unique="c_r1", parent=r1)
+        r1 = RevisionActeurFactory(id="p1")
+        d1 = DisplayedActeurFactory(id="p1")
+        a = RevisionActeurFactory(id="a_r1", parent=r1)
+        b = RevisionActeurFactory(id="b_r1", parent=r1)
+        c = RevisionActeurFactory(id="c_r1", parent=r1)
 
         # r2 = acteur non parent donc avec 0 enfants
-        r2 = RevisionActeurFactory(identifiant_unique="r2_pas_parent")
+        r2 = RevisionActeurFactory(id="r2_pas_parent")
 
         assert r1.nombre_enfants == 3
         assert d1.nombre_enfants == 3

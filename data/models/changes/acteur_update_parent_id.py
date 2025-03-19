@@ -25,7 +25,7 @@ class ChangeActeurUpdateParentId(ChangeActeurAbstract):
         parent = RevisionActeur.objects.get(pk=self.data["parent_id"])
         rev = RevisionActeur.objects.filter(pk=self.id)
         if not rev.exists():
-            rev = RevisionActeur(identifiant_unique=self.id)
+            rev = RevisionActeur(id=self.id)
         else:
             rev = rev.first()
         rev.parent = parent  # type: ignore

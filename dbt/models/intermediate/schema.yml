@@ -4,7 +4,7 @@ models:
   - name: int_acteur
     description: "Acteur model"
     columns:
-      - name: identifiant_unique
+      - name: id
         description: "The primary key for this table"
         data_tests:
           - unique

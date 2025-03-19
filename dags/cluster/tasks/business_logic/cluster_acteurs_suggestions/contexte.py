@@ -45,7 +45,7 @@ def suggestion_contexte_generate(
 
     result = {}
     result["exact_match"] = dict(zip(cluster_fields_exact, groups[0]))  # type: ignore
-    cols = ["identifiant_unique"] + cluster_fields_fuzzy
+    cols = ["id"] + cluster_fields_fuzzy
     result["fuzzy_details"] = df_cluster[cols].to_dict(orient="records")
 
     return result

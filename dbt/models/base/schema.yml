@@ -4,7 +4,7 @@ models:
   - name: base_acteur
     description: "Acteurs Importés"
     columns:
-      - name: identifiant_unique
+      - name: id
         description: "L'identifiant unique de l'acteur"
         data_tests:
           - not_null
@@ -162,7 +162,7 @@ models:
   - name: base_revisionacteur
     description: "Correction sur les acteurs"
     columns:
-      - name: identifiant_unique
+      - name: id
         description: "L'identifiant unique de l'acteur"
       - name: nom
         description: "Le nom de l'acteur"

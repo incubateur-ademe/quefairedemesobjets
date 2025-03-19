@@ -82,8 +82,8 @@ with DAG(
                     "identifiant_externe",
                     "source_code",
                 ],
-                "transformation": "clean_identifiant_unique",
-                "destination": ["identifiant_unique"],
+                "transformation": "clean_id",
+                "destination": ["id"],
             },
             {
                 "origin": ["adresse_format_ban"],

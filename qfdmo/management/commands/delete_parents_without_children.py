@@ -21,15 +21,15 @@ class Command(BaseCommand):
         dry_run = options["dry_run"]
         # execute a sql query
         sql = """
-        SELECT revision_acteur.identifiant_unique
+        SELECT revision_acteur.id
         FROM qfdmo_revisionacteur revision_acteur
         LEFT OUTER JOIN "qfdmo_revisionacteur" AS "child"
-            ON ("revision_acteur"."identifiant_unique" = "child"."parent_id")
+            ON ("revision_acteur"."id" = "child"."parent_id")
         LEFT OUTER JOIN "qfdmo_acteur" AS "acteur"
-            ON ("revision_acteur"."identifiant_unique" = "acteur"."identifiant_unique")
-        WHERE "acteur"."identifiant_unique" IS NULL
-        GROUP BY "revision_acteur"."identifiant_unique"
-        HAVING COUNT("child"."identifiant_unique") = 0;
+            ON ("revision_acteur"."id" = "acteur"."id")
+        WHERE "acteur"."id" IS NULL
+        GROUP BY "revision_acteur"."id"
+        HAVING COUNT("child"."id") = 0;
         """
         with connection.cursor() as cursor:
             cursor.execute(sql)
@@ -40,9 +40,7 @@ class Command(BaseCommand):
             self.style.SUCCESS(f"Parents sans enfants: {identifiants_uniques}")
         )
         if not dry_run:
-            RevisionActeur.objects.filter(
-                identifiant_unique__in=identifiants_uniques
-            ).delete()
+            RevisionActeur.objects.filter(id__in=identifiants_uniques).delete()
             self.stdout.write(
                 self.style.SUCCESS(
                     f"Revision acteurs supprimés: {identifiants_uniques}"

@@ -23,7 +23,7 @@ class TestSuggestionContexteGenerate:
         return pd.DataFrame(
             {
                 "cluster_id": ["c1"] * 3,
-                "identifiant_unique": ["parent to be created", "b", "c"],
+                "id": ["parent to be created", "b", "c"],
                 "code_postal": [None] + ["53000"] * 2,
                 "ville": [None] + ["laval"] * 2,
                 "nom": [None, f"{nom} 2", f"{nom} 3"],
@@ -58,7 +58,7 @@ class TestSuggestionContexteGenerate:
     def test_working_content(self, working):
         assert working["exact_match"]["code_postal"] == "53000"
         assert working["exact_match"]["ville"] == "laval"
-        ids = [x["identifiant_unique"] for x in working["fuzzy_details"]]
+        ids = [x["id"] for x in working["fuzzy_details"]]
         # Parent to be created should not be in fuzzy details
         assert ids == ["b", "c"]
 
@@ -69,7 +69,7 @@ class TestSuggestionContexteGenerate:
 
     def test_raise_if_not_exact(self):
         data = {
-            "identifiant_unique": ["a1", "a2"],
+            "id": ["a1", "a2"],
             "cluster_id": ["c1", "c1"],
             "ville": ["A", "B"],
             COL_CHANGE_MODEL_NAME: [CHANGE_NOTHING] * 2,
@@ -85,7 +85,7 @@ class TestSuggestionContexteGenerate:
         # then we would be failing exact check whereas we should simply
         # ignore children from contexte because they are just re-attached
         data = {
-            "identifiant_unique": ["a1", "a2", "a3"],
+            "id": ["a1", "a2", "a3"],
             "cluster_id": ["c1", "c1", "c1"],
             "ville": ["A", None, "Another A"],
             COL_CHANGE_MODEL_NAME: [CHANGE_NOTHING] * 3,

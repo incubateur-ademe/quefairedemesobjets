@@ -23,7 +23,7 @@ ACTEUR_TYPE_ESS = "ess"
 LABEL_ESS = "ess"
 LABEL_TO_IGNORE = ["non applicable", "na", "n/a", "null", "aucun", "non"]
 MANDATORY_COLUMNS_AFTER_NORMALISATION = [
-    "identifiant_unique",
+    "id",
     "identifiant_externe",
     "nom",
     "acteur_service_codes",
@@ -158,16 +158,14 @@ def clean_identifiant_externe(row, _):
     return row[["identifiant_externe"]]
 
 
-def clean_identifiant_unique(row, _):
+def clean_id(row, _):
     if not row.get("identifiant_externe"):
-        raise ValueError(
-            "identifiant_externe is required to generate identifiant_unique"
-        )
+        raise ValueError("identifiant_externe is required to generate id")
     unique_str = row["identifiant_externe"].replace("/", "-").strip()
     if row.get("acteur_type_code") == ACTEUR_TYPE_DIGITAL:
         unique_str = unique_str + "_d"
-    row["identifiant_unique"] = row.get("source_code").lower() + "_" + unique_str
-    return row[["identifiant_unique"]]
+    row["id"] = row.get("source_code").lower() + "_" + unique_str
+    return row[["id"]]
 
 
 def merge_sous_categories_columns(row, _):

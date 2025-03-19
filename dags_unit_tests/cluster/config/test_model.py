@@ -87,7 +87,7 @@ class TestClusterConfigModel:
         fields = [
             "source_id",
             "acteur_type_id",
-            "identifiant_unique",
+            "id",
             "statut",
             "nombre_enfants",
         ]

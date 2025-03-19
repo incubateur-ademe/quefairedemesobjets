@@ -23,4 +23,4 @@ class COLS:
     ACTEURS: str = "acteurs"
     SUGGEST_VALUE: str = "suggest_value"
     COHORT: str = "suggest_cohort"
-    ID: str = "identifiant_unique"
+    ID: str = "id"

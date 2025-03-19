@@ -309,7 +309,7 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
 
     nom = models.CharField(max_length=255, blank=False, null=False, db_index=True)
     description = models.TextField(blank=True, null=True)
-    identifiant_unique = models.CharField(
+    id = models.CharField(
         max_length=255, unique=True, primary_key=True, blank=True, db_index=True
     )
     acteur_type = models.ForeignKey(ActeurType, on_delete=models.CASCADE)
@@ -563,7 +563,7 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
     @classmethod
     def get_fields_for_clone(cls):
         return {field.name for field in cls._meta.get_fields()} - {
-            "identifiant_unique",
+            "id",
             "identifiant_externe",
             "proposition_services",
             "acteur_services",
@@ -573,7 +573,7 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
 
 def clean_parent(parent):
     try:
-        parent = RevisionActeur.objects.get(identifiant_unique=parent)
+        parent = RevisionActeur.objects.get(id=parent)
     except RevisionActeur.DoesNotExist:
         raise ValidationError("You can't define a Parent which does not exist.")
 
@@ -590,9 +590,7 @@ class Acteur(BaseActeur):
     def change_url(self):
         # quote() taken from django source
         # https://github.com/django/django/blob/6cfe00ee438111af38f1e414bd01976e23b39715/django/contrib/admin/models.py#L243
-        return reverse(
-            "admin:qfdmo_acteur_change", args=[quote(self.identifiant_unique)]
-        )
+        return reverse("admin:qfdmo_acteur_change", args=[quote(self.id)])
 
     def get_or_create_revision(self):
         # TODO : to be deprecated
@@ -603,7 +601,7 @@ class Acteur(BaseActeur):
             ],
         )
         (revisionacteur, created) = RevisionActeur.objects.get_or_create(
-            identifiant_unique=self.identifiant_unique, defaults=fields
+            id=self.id, defaults=fields
         )
 
         return revisionacteur
@@ -626,9 +624,9 @@ class Acteur(BaseActeur):
             )
         if self.source is None:
             self.source = Source.objects.get_or_create(code=DEFAULT_SOURCE_CODE)[0]
-        if not self.identifiant_unique:
+        if not self.id:
             source_stub = unidecode(self.source.code.lower()).replace(" ", "_")
-            self.identifiant_unique = source_stub + "_" + str(self.identifiant_externe)
+            self.id = source_stub + "_" + str(self.identifiant_externe)
 
 
 # TODO: améliorer ci-dessous avec un gestionnaire de cache
@@ -644,7 +642,7 @@ def parents_cache_get():
             "nombre_enfants": dict(
                 RevisionActeur.objects.filter(parent__isnull=False)
                 .values_list("parent")
-                .annotate(count=Count("identifiant_unique"))
+                .annotate(count=Count("id"))
             )
         }
     return PARENTS_CACHE
@@ -687,15 +685,13 @@ class RevisionActeur(BaseActeur):
 
     @property
     def change_url(self):
-        return reverse(
-            "admin:qfdmo_revisionacteur_change", args=[quote(self.identifiant_unique)]
-        )
+        return reverse("admin:qfdmo_revisionacteur_change", args=[quote(self.id)])
 
     @property
     def nombre_enfants(self) -> int:
         """Calcul le nombre d'enfants dont le parent_id
-        pointent vers l'identifiant_unique de cet acteur"""
-        return parents_cache_get()["nombre_enfants"].get(self.identifiant_unique, 0)
+        pointent vers l'id de cet acteur"""
+        return parents_cache_get()["nombre_enfants"].get(self.id, 0)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -779,13 +775,13 @@ class RevisionActeur(BaseActeur):
         )
 
         (acteur, created) = Acteur.objects.get_or_create(
-            identifiant_unique=self.identifiant_unique,
+            id=self.id,
             defaults=default_acteur_fields,
         )
         if created:
             # Ici on ré-écrit les champs qui ont pu être généré automatiquement lors de
             # la création de l'Acteur
-            self.identifiant_unique = acteur.identifiant_unique
+            self.id = acteur.id
             self.identifiant_externe = acteur.identifiant_externe
             self.source = acteur.source
         return acteur
@@ -799,7 +795,7 @@ class RevisionActeur(BaseActeur):
         }
 
         revision_acteur_parent = RevisionActeur(
-            identifiant_unique=uuid.uuid4(),
+            id=uuid.uuid4(),
             **computed_fields,
         )
         revision_acteur_parent.save_as_parent()
@@ -814,10 +810,10 @@ class RevisionActeur(BaseActeur):
 
         revision_acteur = deepcopy(self)
 
-        acteur = Acteur.objects.get(identifiant_unique=self.identifiant_unique)
+        acteur = Acteur.objects.get(id=self.id)
 
         fields_to_reset = [
-            "identifiant_unique",
+            "id",
             "identifiant_externe",
             "source",
         ]
@@ -855,11 +851,7 @@ class RevisionActeur(BaseActeur):
         return revision_acteur
 
     def __str__(self):
-        return (
-            f"{self.nom} ({self.identifiant_unique})"
-            if self.nom
-            else self.identifiant_unique
-        )
+        return f"{self.nom} ({self.id})" if self.nom else self.id
 
 
 class RevisionActeurParent(RevisionActeur):
@@ -918,9 +910,7 @@ class DisplayedActeur(BaseActeur):
 
     @property
     def change_url(self):
-        return reverse(
-            "admin:qfdmo_displayedacteur_change", args=[quote(self.identifiant_unique)]
-        )
+        return reverse("admin:qfdmo_displayedacteur_change", args=[quote(self.id)])
 
     # La propriété au sein du Displayed se base sur Revision
     # car c'est la seule façon de récupérer les enfants (n'existe pas
@@ -933,8 +923,8 @@ class DisplayedActeur(BaseActeur):
     @property
     def nombre_enfants(self) -> int:
         """Calcul le nombre d'enfants dont le parent_id
-        pointent vers l'identifiant_unique de cet acteur"""
-        return parents_cache_get()["nombre_enfants"].get(self.identifiant_unique, 0)
+        pointent vers l'id de cet acteur"""
+        return parents_cache_get()["nombre_enfants"].get(self.id, 0)
 
     def get_absolute_url(self):
         return reverse("qfdmo:acteur-detail", args=[self.uuid])
@@ -1130,7 +1120,7 @@ class PropositionService(BasePropositionService):
 
     acteur = models.ForeignKey(
         Acteur,
-        to_field="identifiant_unique",
+        to_field="id",
         on_delete=models.CASCADE,
         null=False,
         related_name="proposition_services",
@@ -1153,7 +1143,7 @@ class RevisionPropositionService(BasePropositionService):
 
     acteur = models.ForeignKey(
         RevisionActeur,
-        to_field="identifiant_unique",
+        to_field="id",
         on_delete=models.CASCADE,
         null=False,
         related_name="proposition_services",

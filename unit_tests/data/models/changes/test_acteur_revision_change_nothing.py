@@ -19,7 +19,7 @@ class TestChangeActeurVerifyRevision:
         assert ChangeActeurVerifyRevision.name() == "acteur_verify_presence_in_revision"
 
     def test_raise_if_data_present(self):
-        RevisionActeurFactory(identifiant_unique="acteur1")
+        RevisionActeurFactory(id="acteur1")
         change = ChangeActeurVerifyRevision(id="acteur1", data={"foo": "bar"})
         with pytest.raises(ValueError, match="No data expected"):
             change.apply()  # calling apply to ensure it calls validate
@@ -30,6 +30,6 @@ class TestChangeActeurVerifyRevision:
             change.apply()
 
     def test_pass_nothing_done(self):
-        RevisionActeurFactory(identifiant_unique="acteur3")
+        RevisionActeurFactory(id="acteur3")
         change = ChangeActeurVerifyRevision(id="acteur3")
         change.apply()

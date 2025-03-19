@@ -15,7 +15,7 @@ class TestChangeActeurCreateAsParent:
         assert ChangeActeurCreateAsParent.name() == "acteur_create_as_parent"
 
     def test_raise_if_existing(self):
-        RevisionActeur(identifiant_unique="p1").save_as_parent()
+        RevisionActeur(id="p1").save_as_parent()
         change = ChangeActeurCreateAsParent(id="p1")
         with pytest.raises(ValueError, match="Parent to create 'p1' already exists"):
             change.apply()  # calling apply to ensure it calls validate

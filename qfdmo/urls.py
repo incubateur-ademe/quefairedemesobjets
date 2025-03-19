@@ -74,7 +74,7 @@ urlpatterns = [
         name="get_object_list",
     ),
     path(
-        "adresse/<str:identifiant_unique>",
+        "adresse/<str:id>",
         acteur_detail_redirect,
     ),
     path(
@@ -83,7 +83,7 @@ urlpatterns = [
         name="acteur-detail",
     ),
     path(
-        "solution_admin/<str:identifiant_unique>",
+        "solution_admin/<str:id>",
         solution_admin,
         name="solution_admin",
     ),

@@ -37,7 +37,7 @@ REASON_PARENT_TO_DELETE = "🔴 2+ parents → non choisi → à supprimer"
 
 def parent_id_generate(ids: list[str]) -> str:
     """
-    Génère un UUID (pour l'identifiant_unique parent) à partir
+    Génère un UUID (pour l'id parent) à partir
     de la liste des identifiants des enfants du cluster.
     Le UUID généré doit être:
     - déterministe (même entrée donne même sortie)
@@ -47,7 +47,7 @@ def parent_id_generate(ids: list[str]) -> str:
         ids: liste des identifiants uniques des enfants
 
     Returns:
-        str: nouvel identifiant_unique du parent
+        str: nouvel id du parent
     """
     combined = ",".join(sorted(ids))
     return str(uuid.uuid5(uuid.NAMESPACE_DNS, combined))
@@ -67,7 +67,7 @@ def cluster_acteurs_one_cluster_parent_changes_mark(
     """
     df = df_one_cluster.copy()
 
-    parent_index = df[df["identifiant_unique"] == parent_id].index[0]
+    parent_index = df[df["id"] == parent_id].index[0]
     if parent_index is None:
         raise ValueError(f"Parent non trouvé: {parent_id=}")
 
@@ -78,7 +78,7 @@ def cluster_acteurs_one_cluster_parent_changes_mark(
     df.loc[parent_index, COL_CHANGE_ORDER] = 1
 
     # Ensuite tous les enfants (non-parents) doivent pointer vers le nouveau parent
-    filter_point = (df["nombre_enfants"] == 0) & (df["identifiant_unique"] != parent_id)
+    filter_point = (df["nombre_enfants"] == 0) & (df["id"] != parent_id)
     df[COL_PARENT_ID_BEFORE] = df["parent_id"]  # Pour debug
     df.loc[filter_point, "parent_id"] = parent_id
     df.loc[filter_point, COL_CHANGE_MODEL_NAME] = ChangeActeurUpdateParentId.name()
@@ -94,7 +94,7 @@ def cluster_acteurs_one_cluster_parent_changes_mark(
     df.loc[filter_unchanged, COL_CHANGE_REASON] = REASON_ALREADY_POINT_TO_PARENT
 
     # Enfin tous les anciens parents (si il y en a) doivent être supprimés
-    filter_delete = (df["nombre_enfants"] > 0) & (df["identifiant_unique"] != parent_id)
+    filter_delete = (df["nombre_enfants"] > 0) & (df["id"] != parent_id)
     df.loc[filter_delete, COL_CHANGE_MODEL_NAME] = ChangeActeurDeleteAsParent.name()
     df.loc[filter_delete, COL_CHANGE_REASON] = REASON_PARENT_TO_DELETE
     df.loc[filter_delete, COL_CHANGE_ORDER] = 3
@@ -106,27 +106,25 @@ def cluster_acteurs_one_cluster_parent_choose(df: pd.DataFrame) -> tuple[str, st
     """Décide de la sélection du parent sur 1 cluster"""
 
     try:
-        parents_count = df[df["nombre_enfants"] > 0]["identifiant_unique"].nunique()
+        parents_count = df[df["nombre_enfants"] > 0]["id"].nunique()
 
         if parents_count == 1:
             # Cas: 1 parent = on le garde
             index = df[df["nombre_enfants"] > 0].index[0]
-            parent_id = df.at[index, "identifiant_unique"]
+            parent_id = df.at[index, "id"]
             change_model_name = ChangeActeurKeepAsParent.name()
             change_reason = REASON_ONE_PARENT_KEPT
 
         elif parents_count >= 2:
             # Cas: 2+ parents = on en choisit le parent avec le + d'enfants
             index = df["nombre_enfants"].idxmax()
-            parent_id = df.at[index, "identifiant_unique"]
+            parent_id = df.at[index, "id"]
             change_model_name = ChangeActeurKeepAsParent.name()
             change_reason = REASON_PARENTS_KEEP_MOST_CHILDREN
 
         elif parents_count == 0:
             # Cas: 0 parent = on en crée un
-            ids_non_parents = df[df["nombre_enfants"] == 0][
-                "identifiant_unique"
-            ].tolist()
+            ids_non_parents = df[df["nombre_enfants"] == 0]["id"].tolist()
             parent_id = parent_id_generate(ids_non_parents)
             change_model_name = ChangeActeurCreateAsParent.name()
             change_reason = REASON_NO_PARENT_CREATE_ONE
@@ -170,7 +168,7 @@ def cluster_acteurs_parents_choose_new(df_clusters: pd.DataFrame) -> pd.DataFram
                     pd.DataFrame(
                         [
                             {
-                                "identifiant_unique": parent_id,
+                                "id": parent_id,
                                 "parent_id": None,
                                 "cluster_id": cluster_id,
                                 "nombre_enfants": 0,

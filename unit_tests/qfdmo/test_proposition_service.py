@@ -25,7 +25,7 @@ class TestActionNomAsNaturalKeyHeritage:
         return Acteur.objects.create(
             nom="fake acteur",
             location=Point(1, 1),
-            identifiant_unique="1",
+            id="1",
             acteur_type_id=acteur_type.id,
         )
 
@@ -58,7 +58,7 @@ class TestActionNomAsNaturalKeyHeritage:
         return RevisionActeur.objects.create(
             nom="fake revision acteur",
             location=Point(1, 1),
-            identifiant_unique="1",
+            id="1",
             acteur_type_id=acteur_type.id,
         )
 

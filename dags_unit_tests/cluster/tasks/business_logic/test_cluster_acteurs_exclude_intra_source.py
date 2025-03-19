@@ -4,7 +4,7 @@ from cluster.tasks.business_logic.misc.cluster_exclude_intra_source import (
     cluster_exclude_intra_source,
 )
 
-ID = "identifiant_unique"
+ID = "id"
 
 
 class TestClusterActeursExcludeIntraSource:

@@ -13,7 +13,7 @@ class TestMergeActeurServices:
             (
                 pd.DataFrame(columns=["id", "acteur_id", "acteurservice_id"]),
                 pd.DataFrame(columns=["id", "revisionacteur_id", "acteurservice_id"]),
-                pd.DataFrame(columns=["identifiant_unique"]),
+                pd.DataFrame(columns=["id"]),
                 pd.DataFrame(columns=["displayedacteur_id", "acteurservice_id"]),
             ),
             (
@@ -25,7 +25,7 @@ class TestMergeActeurServices:
                         "acteurservice_id": [1, 2],
                     },
                 ),
-                pd.DataFrame({"identifiant_unique": ["actor1", "actor2"]}),
+                pd.DataFrame({"id": ["actor1", "actor2"]}),
                 pd.DataFrame(
                     {
                         "displayedacteur_id": ["actor1", "actor2"],
@@ -43,7 +43,7 @@ class TestMergeActeurServices:
                     },
                 ),
                 pd.DataFrame(columns=["id", "revisionacteur_id", "acteurservice_id"]),
-                pd.DataFrame(columns=["identifiant_unique"]),
+                pd.DataFrame(columns=["id"]),
                 pd.DataFrame(
                     {
                         "displayedacteur_id": ["actor1", "actor2"],
@@ -67,8 +67,8 @@ class TestMergeActeurServices:
                         "acteurservice_id": [1],
                     },
                 ),
-                # pd.DataFrame({"identifiant_unique": ["actor2"]}),
-                pd.DataFrame({"identifiant_unique": ["actor2"]}),
+                # pd.DataFrame({"id": ["actor2"]}),
+                pd.DataFrame({"id": ["actor2"]}),
                 pd.DataFrame(
                     {
                         "displayedacteur_id": ["actor1", "actor2"],
@@ -86,7 +86,7 @@ class TestMergeActeurServices:
                     },
                 ),
                 pd.DataFrame(columns=["id", "revisionacteur_id", "acteurservice_id"]),
-                pd.DataFrame({"identifiant_unique": ["actor1"]}),
+                pd.DataFrame({"id": ["actor1"]}),
                 pd.DataFrame(columns=["displayedacteur_id", "acteurservice_id"]),
             ),
         ],

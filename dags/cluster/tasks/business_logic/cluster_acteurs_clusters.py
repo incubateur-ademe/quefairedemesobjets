@@ -252,7 +252,7 @@ def cluster_acteurs_clusters(
         cluster_intra_source_is_allowed: autoriser les clusters intra-source
 
     Returns:
-        DataFrame de cluster_id -> identifiant_unique
+        DataFrame de cluster_id -> id
     """
 
     if COL_INDEX_SRC not in df.columns:
@@ -280,7 +280,9 @@ def cluster_acteurs_clusters(
 
     # On ne garde que les colonnes utiles
     cols_ids_codes = [
-        col for col in df.columns if re.search(r"identifiant|_code|_id", col, re.I)
+        col
+        for col in df.columns
+        if re.search(r"(^id|^identifiant|_code$|_id$)", col, re.I)
     ]
     cols_to_keep = list(
         set(
@@ -362,6 +364,6 @@ def cluster_acteurs_clusters(
     # df_lost = pd.concat(dfs_lost) if dfs_lost else None
     logger.info(f"🟢 {len(clusters_size1)=}")
     logger.info(f"🟢 {df_clusters["cluster_id"].nunique()=}")
-    logger.info(f"🟢 {df_clusters["identifiant_unique"].nunique()=}")
+    logger.info(f"🟢 {df_clusters["id"].nunique()=}")
 
     return df_clusters

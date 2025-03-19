@@ -39,7 +39,7 @@ def acteurs_revision():
     locations = [Point(0, 0), Point(1, 1), Point(2, 2), Point(3, 3)]
     return [
         {
-            "identifiant_unique": i,
+            "id": i,
             "nom": n,
             "siret": s,
             "email": e,
@@ -63,7 +63,7 @@ def acteurs_base():
     locations = [Point(0, 0), Point(1, 1), Point(2, 2)]
     return [
         {
-            "identifiant_unique": i,
+            "id": i,
             "nom": n,
             "siret": s,
             "email": e,
@@ -80,7 +80,7 @@ def acteurs_base():
 @pytest.fixture
 def parent():
     return {
-        "identifiant_unique": "p1",
+        "id": "p1",
         "nom": "my name",
         "siret": "11111111111111",
         "email": "i@me.com",
@@ -181,13 +181,13 @@ class TestClusterActeursParentsChooseData:
         acteurs = [parent] + acteurs_revision + acteurs_base
         df = pd.DataFrame(acteurs, dtype="object").replace({np.nan: None})
         df[COL_CHANGE_MODEL_NAME] = None
-        filter_parent = df["identifiant_unique"] == "p1"
+        filter_parent = df["id"] == "p1"
         df.loc[filter_parent, COL_CHANGE_MODEL_NAME] = ChangeActeurKeepAsParent.name()
         df.loc[~filter_parent, COL_CHANGE_MODEL_NAME] = (
             ChangeActeurUpdateParentId.name()
         )
         df["cluster_id"] = "c1"
-        return df.drop_duplicates(subset=["identifiant_unique"], keep="first")
+        return df.drop_duplicates(subset=["id"], keep="first")
 
     @pytest.fixture
     def df_clusters_parent_create(self, parent, acteurs_revision, acteurs_base):
@@ -203,14 +203,14 @@ class TestClusterActeursParentsChooseData:
         acteurs = [parent] + acteurs_revision + acteurs_base
         df = pd.DataFrame(acteurs, dtype="object").replace({np.nan: None})
         df[COL_CHANGE_MODEL_NAME] = None
-        filter_parent = df["identifiant_unique"] == "p1"
+        filter_parent = df["id"] == "p1"
         df.loc[filter_parent, COL_CHANGE_MODEL_NAME] = ChangeActeurCreateAsParent.name()
         df.loc[~filter_parent, COL_CHANGE_MODEL_NAME] = (
             ChangeActeurUpdateParentId.name()
         )
         df["cluster_id"] = "c1"
         print("df_clusters_parent_create before drops", df.to_dict(orient="records"))
-        df = df.drop_duplicates(subset=["identifiant_unique"], keep="first")
+        df = df.drop_duplicates(subset=["id"], keep="first")
         print("df_clusters_parent_create", df.to_dict(orient="records"))
         return df
 
@@ -270,7 +270,7 @@ class TestClusterActeursParentsChooseData:
             keep_empty=EMPTY_IGNORE,
         )
         print("AFTER", df_after.to_dict(orient="records"))
-        filter_parent = df_after["identifiant_unique"] == "p1"
+        filter_parent = df_after["id"] == "p1"
         parent_data = df_after[filter_parent][COL_PARENT_DATA_NEW].values[0]
         df_children = df_after[~filter_parent]
         if scenario == "parent_create":
@@ -302,7 +302,7 @@ class TestClusterActeursParentsChooseData:
             keep_empty=EMPTY_IGNORE,
         )
         print("AFTER", df_after.to_dict(orient="records"))
-        filter_parent = df_after["identifiant_unique"] == "p1"
+        filter_parent = df_after["id"] == "p1"
         parent_data = df_after[filter_parent][COL_PARENT_DATA_NEW].values[0]
         df_children = df_after[~filter_parent]
         # Since this parent is to create, it doesn't have a siret so we expect

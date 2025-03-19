@@ -98,7 +98,7 @@ def cluster_acteurs_read_orphans(
     # on devrait utiliser config.fields_transformed comme la fonction de
     # sélection des parents fait déjà (car écrite après & mieux)
     fields = [
-        "identifiant_unique",
+        "id",
         # note: on cherche à récupérer les acteurs de displayed
         # MAIS parent_id n'est pas dispo sur cette table, on
         # va donc la récupérer/enrichir plus tard

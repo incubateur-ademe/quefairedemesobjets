@@ -93,13 +93,13 @@ def cluster_acteurs_read_for_clustering(
     # --------------------------------
     logging.info(log.banner_string("Fusion parents + orphelins"))
     ids = set()
-    ids.update(df_orphans["identifiant_unique"].values)
-    ids.update(df_parents["identifiant_unique"].values)
+    ids.update(df_orphans["id"].values)
+    ids.update(df_parents["id"].values)
     log.preview("IDs avant la fusion", ids)
     df = pd.concat([df_orphans, df_parents], ignore_index=True).replace({np.nan: None})
-    df = df.drop_duplicates(subset="identifiant_unique", keep="first")
+    df = df.drop_duplicates(subset="id", keep="first")
     df = df_sort(df)
-    log.preview("IDs après la fusion", df["identifiant_unique"].tolist())
+    log.preview("IDs après la fusion", df["id"].tolist())
     log.preview_df_as_markdown("acteurs + parents sélectionnés", df)
 
     return df

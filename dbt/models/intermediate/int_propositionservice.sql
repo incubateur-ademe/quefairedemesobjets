@@ -7,7 +7,7 @@ WITH propositionservice AS (
         NULL::integer AS rps_id,
         false AS revision_existe
     FROM {{ ref('base_propositionservice') }} AS ps
-    INNER JOIN {{ ref('int_acteur') }} AS a ON ps.acteur_id = a.identifiant_unique AND a.revision_existe = false
+    INNER JOIN {{ ref('int_acteur') }} AS a ON ps.acteur_id = a.id AND a.revision_existe = false
 ),
 revisionpropositionservice AS (
     SELECT
@@ -19,7 +19,7 @@ revisionpropositionservice AS (
         true AS revision_existe
     FROM {{ ref('base_revisionpropositionservice') }} AS rps
     -- FIXME : test the INNER JOIN, is it necessary ?
-    INNER JOIN {{ ref('int_acteur') }} AS a ON rps.acteur_id = a.identifiant_unique AND a.revision_existe = true
+    INNER JOIN {{ ref('int_acteur') }} AS a ON rps.acteur_id = a.id AND a.revision_existe = true
 )
 
 SELECT * FROM propositionservice

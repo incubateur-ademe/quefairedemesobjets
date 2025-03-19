@@ -104,7 +104,7 @@ NORMALIZATION_RULES = [
         "transformation": "test_fct",
         "destination": ["nom"],
     },
-    {"keep": "identifiant_unique"},
+    {"keep": "id"},
     {"remove": "col_to_remove"},
 ]
 
@@ -121,7 +121,7 @@ class TestSourceDataNormalize:
         df = source_data_normalize(
             df_acteur_from_source=pd.DataFrame(
                 {
-                    "identifiant_unique": ["id"],
+                    "id": ["id"],
                     "col_to_remove": ["fake remove"],
                     "col_to_rename": ["fake rename"],
                     "nom origin": ["nom origin 1"],
@@ -148,8 +148,8 @@ class TestSourceDataNormalize:
         assert "nom" in df.columns
         assert df["nom"].iloc[0] == "success"
 
-        assert "identifiant_unique" in df.columns
-        assert df["identifiant_unique"].iloc[0] == "id"
+        assert "id" in df.columns
+        assert df["id"].iloc[0] == "id"
 
         assert "col_to_remove" not in df.columns
 
@@ -164,7 +164,7 @@ class TestSourceDataNormalize:
             source_data_normalize(
                 df_acteur_from_source=pd.DataFrame(
                     {
-                        "identifiant_unique": ["id"],
+                        "id": ["id"],
                         "col_to_remove": ["fake remove"],
                         "col_to_rename": ["fake rename"],
                         "nom origin": ["nom origin 1"],
@@ -189,7 +189,7 @@ class TestSourceDataNormalize:
             {
                 "normalization_rules": [
                     {
-                        "keep": "identifiant_unique",
+                        "keep": "id",
                     },
                     {
                         "keep": "public_accueilli",
@@ -203,7 +203,7 @@ class TestSourceDataNormalize:
             dag_config=dag_config,
             df_acteur_from_source=pd.DataFrame(
                 {
-                    "identifiant_unique": ["1", "2"],
+                    "id": ["1", "2"],
                     "public_accueilli": ["Professionnels", "Other"],
                 }
             ),
@@ -213,7 +213,7 @@ class TestSourceDataNormalize:
             df.reset_index(drop=True),
             pd.DataFrame(
                 {
-                    "identifiant_unique": ["2"],
+                    "id": ["2"],
                     "public_accueilli": ["Other"],
                 }
             ).reset_index(drop=True),
@@ -245,7 +245,7 @@ class TestSourceDataNormalize:
         dag_config = DAGConfig.model_validate(
             {
                 "normalization_rules": [
-                    {"keep": "identifiant_unique"},
+                    {"keep": "id"},
                     {"keep": "nom"},
                     {"keep": "liste"},
                 ],
@@ -257,7 +257,7 @@ class TestSourceDataNormalize:
             dag_config=dag_config,
             df_acteur_from_source=pd.DataFrame(
                 {
-                    "identifiant_unique": ["1", "2"],
+                    "id": ["1", "2"],
                     "nom": ["fake nom", null_value],
                     "liste": [["fake nom"], ["fake nom", null_value]],
                 }
@@ -268,7 +268,7 @@ class TestSourceDataNormalize:
             df.reset_index(drop=True),
             pd.DataFrame(
                 {
-                    "identifiant_unique": ["1", "2"],
+                    "id": ["1", "2"],
                     "nom": ["fake nom", ""],
                     "liste": [["fake nom"], ["fake nom"]],
                 }
@@ -331,7 +331,7 @@ class TestRemoveUndesiredLines:
             (
                 pd.DataFrame(
                     {
-                        "identifiant_unique": ["id1", "id2", "id3"],
+                        "id": ["id1", "id2", "id3"],
                         "service_a_domicile": [
                             "non",
                             "oui exclusivement",
@@ -347,7 +347,7 @@ class TestRemoveUndesiredLines:
                 ),
                 pd.DataFrame(
                     {
-                        "identifiant_unique": ["id1"],
+                        "id": ["id1"],
                         "service_a_domicile": ["non"],
                         "public_accueilli": ["Particuliers"],
                         "sous_categorie_codes": [["code1"]],
@@ -358,7 +358,7 @@ class TestRemoveUndesiredLines:
             (
                 pd.DataFrame(
                     {
-                        "identifiant_unique": ["id1", "id2", "id3", "id4"],
+                        "id": ["id1", "id2", "id3", "id4"],
                         "service_a_domicile": ["non", "non", "non", "oui"],
                         "public_accueilli": [
                             "Particuliers",
@@ -376,7 +376,7 @@ class TestRemoveUndesiredLines:
                 ),
                 pd.DataFrame(
                     {
-                        "identifiant_unique": ["id1", "id2", "id4"],
+                        "id": ["id1", "id2", "id4"],
                         "service_a_domicile": ["non", "non", "oui"],
                         "public_accueilli": [
                             "Particuliers",
@@ -391,7 +391,7 @@ class TestRemoveUndesiredLines:
             (
                 pd.DataFrame(
                     {
-                        "identifiant_unique": ["id1", "id2", "id3"],
+                        "id": ["id1", "id2", "id3"],
                         "service_a_domicile": ["non", "non", "non"],
                         "public_accueilli": [
                             "Particuliers",
@@ -403,7 +403,7 @@ class TestRemoveUndesiredLines:
                 ),
                 pd.DataFrame(
                     {
-                        "identifiant_unique": ["id1", "id3"],
+                        "id": ["id1", "id3"],
                         "service_a_domicile": ["non", "non"],
                         "public_accueilli": ["Particuliers", "Particuliers"],
                         "sous_categorie_codes": [["code1"], ["code3"]],
@@ -424,7 +424,7 @@ class TestRemoveUndesiredLines:
         result = _remove_undesired_lines(
             pd.DataFrame(
                 {
-                    "identifiant_unique": ["id1", "id1", "id2"],
+                    "id": ["id1", "id1", "id2"],
                     "service_a_domicile": ["non", "non", "non"],
                     "public_accueilli": [
                         "Particuliers",
@@ -455,12 +455,12 @@ class TestRemoveUndesiredLines:
             ),
             dag_config,
         )
-        result = result.sort_values("identifiant_unique")
+        result = result.sort_values("id")
         result = result.reset_index(drop=True)
 
         expected_df = pd.DataFrame(
             {
-                "identifiant_unique": ["id1", "id2"],
+                "id": ["id1", "id2"],
                 "service_a_domicile": ["non", "non"],
                 "public_accueilli": ["Particuliers", "Particuliers"],
                 "label_codes": [["label1", "label2"], ["label3"]],

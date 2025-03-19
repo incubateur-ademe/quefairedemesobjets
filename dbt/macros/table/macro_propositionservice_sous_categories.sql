@@ -23,7 +23,7 @@ with
             pssscat.souscategorieobjet_id AS souscategorieobjet_id
         FROM {{ ref("int_propositionservice_sous_categories") }} AS pssscat
             INNER JOIN {{ ref(ephemeral_filtered_propositionservice) }} AS ps ON pssscat.propositionservice_id = ps.id
-            INNER JOIN {{ ref(ephemeral_filtered_acteur) }} AS cfa ON ps.acteur_id = cfa.identifiant_unique AND cfa.parent_id is null
+            INNER JOIN {{ ref(ephemeral_filtered_acteur) }} AS cfa ON ps.acteur_id = cfa.id AND cfa.parent_id is null
         GROUP BY
             pssscat.propositionservice_id,
             pssscat.souscategorieobjet_id

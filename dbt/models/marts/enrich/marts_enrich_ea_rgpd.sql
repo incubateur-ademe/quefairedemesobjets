@@ -16,7 +16,7 @@ Notes:
 WITH acteurs_with_siren AS (
 	SELECT
 		LEFT(siret,9) AS siren,
-		identifiant_unique AS acteur_id,
+		id AS acteur_id,
 		udf_normalize_string_alpha_for_match(CONCAT(nom || ' ' || nom_officiel || ' ' || nom_commercial)) AS acteur_noms,
 		commentaires AS acteur_commentaires
 	FROM {{ ref('marts_carte_acteur') }}

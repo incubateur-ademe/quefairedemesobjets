@@ -150,7 +150,7 @@ class TestRedirects:
     )
     def test_acteur_status(self, client, statut, expected_status_code):
         acteur = DisplayedActeurFactory(
-            identifiant_unique="coucou",
+            id="coucou",
             statut=statut,
         )
         url = f"/adresse_details/{acteur.uuid}"
@@ -159,15 +159,15 @@ class TestRedirects:
 
     def test_inactif_acteur_is_not_in_sitemap(self, client):
         youpi = DisplayedActeurFactory(
-            identifiant_unique="youpi",
+            id="youpi",
             statut=ActeurStatus.ACTIF,
         )
         coucou = DisplayedActeurFactory(
-            identifiant_unique="coucou",
+            id="coucou",
             statut=ActeurStatus.INACTIF,
         )
         super = DisplayedActeurFactory(
-            identifiant_unique="super",
+            id="super",
             statut=ActeurStatus.SUPPRIME,
         )
         url = "/sitemap-items.xml"
@@ -178,8 +178,8 @@ class TestRedirects:
 
     def test_acteur_detail_redirect(self, client):
         acteur = DisplayedActeurFactory(
-            identifiant_unique="coucou",
+            id="coucou",
         )
-        url = f"/adresse/{acteur.identifiant_unique}"
+        url = f"/adresse/{acteur.id}"
         response = client.get(url)
         assert response.status_code == 301

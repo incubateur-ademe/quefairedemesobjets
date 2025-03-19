@@ -9,8 +9,8 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS qfdmo_vue_acteur_tous AS (
         parent_ids_to_enfants AS (
             SELECT
                 parent_id,
-                ARRAY_AGG (identifiant_unique) AS enfants_liste,
-                CARDINALITY(ARRAY_AGG (identifiant_unique)) AS enfants_nombre
+                ARRAY_AGG (id) AS enfants_liste,
+                CARDINALITY(ARRAY_AGG (id)) AS enfants_nombre
             FROM
                 qfdmo_revisionacteur AS ra
             WHERE
@@ -23,10 +23,10 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS qfdmo_vue_acteur_tous AS (
         acteur_all AS (
             SELECT
                 COALESCE(
-                    da.identifiant_unique,
-                    ra.identifiant_unique,
-                    a.identifiant_unique
-                ) AS identifiant_unique,
+                    da.id,
+                    ra.id,
+                    a.id
+                ) AS id,
                 COALESCE(
                     da.identifiant_externe,
                     ra.identifiant_externe,
@@ -94,9 +94,9 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS qfdmo_vue_acteur_tous AS (
                 -- Si l'identifiant est dans la liste des parent_ids, alors c'est un parent
                 CASE
                     WHEN COALESCE(
-                        da.identifiant_unique,
-                        ra.identifiant_unique,
-                        a.identifiant_unique
+                        da.id,
+                        ra.id,
+                        a.id
                     ) IN (
                         SELECT
                             id
@@ -105,13 +105,13 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS qfdmo_vue_acteur_tous AS (
                     ) THEN TRUE
                     ELSE FALSE
                 END AS est_parent,
-                da.identifiant_unique IS NOT NULL AS est_dans_displayedacteur,
-                ra.identifiant_unique IS NOT NULL AS est_dans_revisionacteur,
-                a.identifiant_unique IS NOT NULL AS est_dans_acteur
+                da.id IS NOT NULL AS est_dans_displayedacteur,
+                ra.id IS NOT NULL AS est_dans_revisionacteur,
+                a.id IS NOT NULL AS est_dans_acteur
             FROM
                 qfdmo_displayedacteur AS da
-                FULL OUTER JOIN qfdmo_revisionacteur AS ra ON da.identifiant_unique = ra.identifiant_unique
-                FULL OUTER JOIN qfdmo_acteur AS a ON da.identifiant_unique = a.identifiant_unique
+                FULL OUTER JOIN qfdmo_revisionacteur AS ra ON da.id = ra.id
+                FULL OUTER JOIN qfdmo_acteur AS a ON da.id = a.id
         )
     SELECT
         -- ne pas faire un lazy * car ceci sélectionne des champs génériques
@@ -127,7 +127,7 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS qfdmo_vue_acteur_tous AS (
                 FROM
                     parent_ids_to_enfants
                 WHERE
-                    parent_id = acteur_all.identifiant_unique
+                    parent_id = acteur_all.id
             )
             ELSE NULL
         END AS enfants_nombre,
@@ -138,7 +138,7 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS qfdmo_vue_acteur_tous AS (
                 FROM
                     parent_ids_to_enfants
                 WHERE
-                    parent_id = acteur_all.identifiant_unique
+                    parent_id = acteur_all.id
             )
             ELSE NULL
         END AS enfants_liste,

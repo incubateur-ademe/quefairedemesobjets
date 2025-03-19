@@ -6,7 +6,7 @@ from dags.crawl.config.cohorts import COHORTS
 from dags.crawl.config.columns import COLS
 from unit_tests.qfdmo.acteur_factory import RevisionActeurFactory
 
-ID = "identifiant_unique"
+ID = "id"
 UNREACHABLE = "azoei1111iqlsk33333nazoienazoiuqoicsu"
 
 
@@ -133,4 +133,4 @@ def acteurs_create(dfs: list[pd.DataFrame]) -> None:
     df = pd.concat(dfs, ignore_index=True)
     for _, row in df.iterrows():
         for acteur in row[COLS.ACTEURS]:
-            RevisionActeurFactory(identifiant_unique=acteur[ID])
+            RevisionActeurFactory(id=acteur[ID])

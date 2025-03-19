@@ -6,7 +6,7 @@ models:
   - name: marts_carte_filtered_acteur
     description: "Vue sur les acteurs affichés sur la carte"
     columns:
-      - name: identifiant_unique
+      - name: id
         description: "L'identifiant unique de l'acteur"
       - name: nom
         description: "Le nom de l'acteur"
@@ -145,7 +145,7 @@ models:
       constraints:
         - type: foreign_key
           columns: [acteur_id]
-          ref_columns: [identifiant_unique]
+          ref_columns: [id]
           ref_table: marts_carte_acteur
           deferrable: true
           initially_deferred: true
@@ -230,7 +230,7 @@ models:
       constraints:
         - type: foreign_key
           columns: [acteur_id]
-          ref_columns: [identifiant_unique]
+          ref_columns: [id]
           ref_table: marts_carte_acteur
           deferrable: true
           initially_deferred: true
@@ -273,7 +273,7 @@ models:
       constraints:
         - type: foreign_key
           columns: [acteur_id]
-          ref_columns: [identifiant_unique]
+          ref_columns: [id]
           ref_table: marts_carte_acteur
           deferrable: true
           initially_deferred: true
@@ -316,7 +316,7 @@ models:
       constraints:
         - type: foreign_key
           columns: [acteur_id]
-          ref_columns: [identifiant_unique]
+          ref_columns: [id]
           ref_table: marts_carte_acteur
           deferrable: true
           initially_deferred: true
@@ -333,7 +333,7 @@ models:
         data_tests:
           - not_null
           - unique
-      - name: identifiant_unique
+      - name: id
         description: "L'identifiant unique de l'acteur"
         data_tests:
           - not_null
@@ -341,9 +341,9 @@ models:
     config:
       materialized: table
       indexes:
-        - columns: ['modifie_le', 'identifiant_unique']
+        - columns: ['modifie_le', 'id']
           type: btree
-        - columns: ['identifiant_unique']
+        - columns: ['id']
           type: btree
           unique: true
         - columns: ['code_postal']

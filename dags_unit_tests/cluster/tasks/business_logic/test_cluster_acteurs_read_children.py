@@ -31,7 +31,7 @@ class TestClusterActeursSelectionChildren:
 
     def test_selection_children(self, db_testdata_write):
         p1, p2 = db_testdata_write
-        parent_ids = [p1.identifiant_unique, p2.identifiant_unique]
+        parent_ids = [p1.id, p2.id]
         fields_to_include = ["nom", "parent", "nombre_enfants", "source_id"]
         df = cluster_acteurs_read_children(parent_ids, fields_to_include)
         assert df["nom"].tolist() == ["Enfant p1 a", "Enfant p2 a", "Enfant p2 b"]

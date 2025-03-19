@@ -4,7 +4,7 @@ models:
   - name: exposure_exhaustive_acteur
     description: "Acteur model"
     columns:
-      - name: identifiant_unique
+      - name: id
         description: "The primary key for this table"
         data_tests:
           - unique
@@ -83,9 +83,9 @@ models:
     config:
       materialized: table
       indexes:
-        - columns: ['modifie_le', 'identifiant_unique']
+        - columns: ['modifie_le', 'id']
           type: btree
-        - columns: ['identifiant_unique']
+        - columns: ['id']
           type: btree
           unique: true
         - columns: ['code_postal']
@@ -161,7 +161,7 @@ models:
       constraints:
         - type: foreign_key
           columns: [acteur_id]
-          ref_columns: [identifiant_unique]
+          ref_columns: [id]
           ref_table: exposure_exhaustive_acteur
           deferrable: true
           initially_deferred: true
@@ -245,7 +245,7 @@ models:
       constraints:
         - type: foreign_key
           columns: [acteur_id]
-          ref_columns: [identifiant_unique]
+          ref_columns: [id]
           ref_table: exposure_exhaustive_acteur
           deferrable: true
           initially_deferred: true
@@ -288,7 +288,7 @@ models:
       constraints:
         - type: foreign_key
           columns: [acteur_id]
-          ref_columns: [identifiant_unique]
+          ref_columns: [id]
           ref_table: exposure_exhaustive_acteur
           deferrable: true
           initially_deferred: true
@@ -330,7 +330,7 @@ models:
       constraints:
         - type: foreign_key
           columns: [acteur_id]
-          ref_columns: [identifiant_unique]
+          ref_columns: [id]
           ref_table: exposure_exhaustive_acteur
           deferrable: true
           initially_deferred: true

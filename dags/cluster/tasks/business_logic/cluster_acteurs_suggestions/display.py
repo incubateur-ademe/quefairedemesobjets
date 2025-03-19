@@ -47,8 +47,8 @@ def cluster_acteurs_suggestions_display(
         for _, row in cluster.iterrows():
             row = row.to_dict()
             model_name = row[COL_CHANGE_MODEL_NAME]
-            # All acteur-related changes have an "identifiant_unique"
-            model_params = {"id": row["identifiant_unique"]}
+            # All acteur-related changes have an "id"
+            model_params = {"id": row["id"]}
             # Then params data depends on the type of changes
             if model_name == ChangeActeurUpdateParentId.name():
                 model_params["data"] = {"parent_id": row["parent_id"]}

@@ -21,14 +21,14 @@ class ChangeActeurCreateAsParent(ChangeActeurAbstract):
 
     def validate(self):
         """The parent shouldn't already exist"""
-        rev = RevisionActeur.objects.filter(identifiant_unique=self.id)
+        rev = RevisionActeur.objects.filter(id=self.id)
         if rev.exists():
             raise ValueError(f"Parent to create '{self.id}' already exists")
 
     def apply(self):
         self.validate()
         data = self.data
-        data.update({"identifiant_unique": self.id})
+        data.update({"id": self.id})
         data = data_reconstruct(RevisionActeur, data)
         data["statut"] = ActeurStatus.ACTIF
         rev = RevisionActeur(**data)

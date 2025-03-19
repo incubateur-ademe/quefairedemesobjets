@@ -70,7 +70,7 @@ def df_sort(
     # -----------------------------------------------
     cols_ideal = [
         "cluster_id",
-        "identifiant_unique",
+        "id",
         "statut",
         COL_CHANGE_ENTITY_TYPE,
         COL_CHANGE_MODEL_NAME,

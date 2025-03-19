@@ -33,7 +33,7 @@ from data.models.change import (
 )
 
 COLS_ASSERT = [
-    "identifiant_unique",
+    "id",
     "parent_id",
     COL_CHANGE_MODEL_NAME,
     COL_CHANGE_ORDER,
@@ -55,7 +55,7 @@ def df_no_parent() -> pd.DataFrame:
     return pd.DataFrame(
         {
             "cluster_id": [cid0, cid0, cid0],
-            "identifiant_unique": ["c0_a", "c0_b", "c0_c"],
+            "id": ["c0_a", "c0_b", "c0_c"],
             "parent_id": [None, None, None],
             "nombre_enfants": [0, 0, 0],
             COL_CHANGE_ENTITY_TYPE: [ENTITY_ACTEUR_REVISION] * 3,
@@ -69,7 +69,7 @@ def df_one_parent() -> pd.DataFrame:
     return pd.DataFrame(
         {
             "cluster_id": [cid1, cid1, cid1],
-            "identifiant_unique": ["c1_a", "c1_b", "c1_c"],
+            "id": ["c1_a", "c1_b", "c1_c"],
             # b est le parent avec 1 enfant (c), a
             # n'a pas de parent et est rattaché au cluster
             "parent_id": [None, None, "c1_b"],
@@ -85,7 +85,7 @@ def df_two_parents() -> pd.DataFrame:
     return pd.DataFrame(
         {
             "cluster_id": [cid2, cid2, cid2, cid2, cid2],
-            "identifiant_unique": ["c2_a", "c2_b", "c2_c", "c2_d", "c2_e"],
+            "id": ["c2_a", "c2_b", "c2_c", "c2_d", "c2_e"],
             # a=2 enfants, b=1 enfant
             "parent_id": [None, None, "c2_b", "c2_a", "c2_a"],
             "nombre_enfants": [2, 1, 0, 0, 0],
@@ -96,7 +96,7 @@ def df_two_parents() -> pd.DataFrame:
 
 @pytest.fixture(scope="session")
 def parent_id_new(df_no_parent) -> str:
-    return parent_id_generate(df_no_parent["identifiant_unique"].tolist())
+    return parent_id_generate(df_no_parent["id"].tolist())
 
 
 class TestClusterACteursOneClusterParentChoose:
@@ -121,7 +121,7 @@ class TestClusterACteursOneClusterParentChoose:
     def test_case_no_parent(self, df_no_parent):
         # Cas de figure avec 0 parent
         id, change, reason = cluster_acteurs_one_cluster_parent_choose(df_no_parent)
-        assert id == parent_id_generate(df_no_parent["identifiant_unique"].tolist())
+        assert id == parent_id_generate(df_no_parent["id"].tolist())
         assert change == CHANGE_CREATE
         assert reason == REASON_CREATE
 
@@ -141,7 +141,7 @@ class TestClusterActeursOneClusterChangesMark:
                     [
                         {
                             "cluster_id": "c0_0parent",
-                            "identifiant_unique": parent_id_new,
+                            "id": parent_id_new,
                             "nombre_enfants": 0,
                             "parent_id": None,
                         }
@@ -234,7 +234,7 @@ class TestClusterActeursChooseAllParents:
         # et par ordre de changement
         cols_assert = [
             "cluster_id",
-            "identifiant_unique",
+            "id",
             COL_CHANGE_ORDER,
             COL_CHANGE_MODEL_NAME,
             COL_CHANGE_REASON,
@@ -268,9 +268,9 @@ class TestClusterActeursChooseAllParents:
         assert COL_PARENT_ID_BEFORE in df_working.columns
         # A l'exception du nouveau parent, on confirme qu'elle
         # contient les mêmes valeurs que parent_id de la df d'origine
-        df_a = df_working[df_working["identifiant_unique"] != parent_id_new]
-        df_a = df_a.sort_values(by="identifiant_unique")
-        db_b = df_combined.sort_values(by="identifiant_unique")
+        df_a = df_working[df_working["id"] != parent_id_new]
+        df_a = df_a.sort_values(by="id")
+        db_b = df_combined.sort_values(by="id")
         assert df_a[COL_PARENT_ID_BEFORE].tolist() == db_b["parent_id"].tolist()
 
     def test_pandas_warning(self, df_one_parent, df_two_parents):

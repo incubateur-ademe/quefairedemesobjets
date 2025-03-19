@@ -26,7 +26,7 @@ class ChangeActeurUpdateData(ChangeActeurAbstract):
     def apply(self):
         acteur = self.validate()
         if isinstance(acteur, Acteur):
-            acteur = RevisionActeur(identifiant_unique=acteur.identifiant_unique)
+            acteur = RevisionActeur(id=acteur.id)
         data = data_reconstruct(RevisionActeur, self.data)
         for key, value in data.items():
             setattr(acteur, key, value)

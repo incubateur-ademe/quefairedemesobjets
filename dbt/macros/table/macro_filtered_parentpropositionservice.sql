@@ -7,7 +7,7 @@ SELECT
     tvps.action_id AS action_id
 FROM qfdmo_vuepropositionservice AS tvps
     INNER JOIN {{ ref(ephemeral_filtered_acteur) }} AS tcfa
-        ON tvps.acteur_id = tcfa.identifiant_unique
+        ON tvps.acteur_id = tcfa.id
             AND tcfa.parent_id IS NOT NULL
 
 {%- endmacro -%}

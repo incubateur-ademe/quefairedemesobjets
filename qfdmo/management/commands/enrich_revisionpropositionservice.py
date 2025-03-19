@@ -47,9 +47,7 @@ class Command(BaseCommand):
 
         for acteur in Acteur.objects.filter(source=source):
             try:
-                revision_acteur = RevisionActeur.objects.get(
-                    identifiant_unique=acteur.identifiant_unique
-                )
+                revision_acteur = RevisionActeur.objects.get(id=acteur.id)
             except RevisionActeur.DoesNotExist:
                 continue
 
@@ -80,7 +78,7 @@ class Command(BaseCommand):
 
             action_by_code = {a.code: a for a in Action.objects.all()}
             if pss_to_add or pss_to_update:
-                message = f"Acteur {acteur.identifiant_unique}:\n"
+                message = f"Acteur {acteur.id}:\n"
                 if pss_to_add:
                     displayed_ps = [
                         {k: [s.code for s in v] for k, v in ps.items()}

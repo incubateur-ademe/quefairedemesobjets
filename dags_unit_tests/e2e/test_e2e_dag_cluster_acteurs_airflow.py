@@ -88,7 +88,7 @@ class TestClusterDedupSkipped:
         # The parent which exists in both Revision & Displayed
         p1 = RevisionActeur(
             nom="my only parent",
-            identifiant_unique="my only parent",
+            id="my only parent",
             acteur_type=at1,
             ville="Paris",
             code_postal="75000",
@@ -97,7 +97,7 @@ class TestClusterDedupSkipped:
         ).save_as_parent()
         DisplayedActeur(
             nom="my only parent",
-            identifiant_unique="my only parent",
+            id="my only parent",
             acteur_type=at1,
             ville="Paris",
             code_postal="75000",
@@ -108,7 +108,7 @@ class TestClusterDedupSkipped:
         # Its child in revision
         RevisionActeur(
             nom="child of p1",
-            identifiant_unique="child of p1",
+            id="child of p1",
             acteur_type=at1,
             ville="Paris",
             parent=p1,
@@ -121,7 +121,7 @@ class TestClusterDedupSkipped:
         # And the only orphelin in a different city
         RevisionActeur(
             nom="déchetterie 1",
-            identifiant_unique="déchetterie 1",
+            id="déchetterie 1",
             acteur_type=at1,
             ville="Laval",
             code_postal="53000",

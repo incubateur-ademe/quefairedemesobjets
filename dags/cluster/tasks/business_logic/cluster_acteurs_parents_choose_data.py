@@ -152,11 +152,11 @@ def cluster_acteurs_parents_choose_data(
         # identify breaking points easily/automatically)
         assert len(df_parents) == 1, "Should have 1 parent per cluster"
         parent_iloc = df_parents.index[0]
-        parent_id = df_parents["identifiant_unique"].iloc[0]
+        parent_id = df_parents["id"].iloc[0]
         parent_data_before = {}
 
         df_acteurs = df_cluster[~filter_parent]
-        acteur_ids = df_acteurs["identifiant_unique"].unique()
+        acteur_ids = df_acteurs["id"].unique()
 
         # We only need to get the parent's before data IF
         # it was an existing one (i.e. one to keep)
