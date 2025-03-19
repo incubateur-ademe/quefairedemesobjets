@@ -5,9 +5,9 @@ import logging
 from airflow import DAG
 from airflow.exceptions import AirflowSkipException
 from airflow.operators.python import PythonOperator
-from rgpd.config import COLS, TASKS, XCOMS
-from rgpd.tasks.business_logic.rgpd_anonymize_people_match import (
-    rgpd_anonymize_people_match,
+from enrich.config import COLS, TASKS, XCOMS
+from enrich.tasks.business_logic.enrich_ae_rgpd_match import (
+    enrich_ae_rgpd_match,
 )
 
 logger = logging.getLogger(__name__)
@@ -29,10 +29,10 @@ def task_info_get():
     """
 
 
-def rgpd_anonymize_people_match_wrapper(ti, params) -> None:
+def enrich_ae_rgpd_match_wrapper(ti, params) -> None:
     logger.info(task_info_get())
 
-    df = rgpd_anonymize_people_match(
+    df = enrich_ae_rgpd_match(
         df=ti.xcom_pull(key=XCOMS.DF_READ),
         match_threshold=params[COLS.MATCH_THRESHOLD],
     )
@@ -42,9 +42,9 @@ def rgpd_anonymize_people_match_wrapper(ti, params) -> None:
     ti.xcom_push(key=XCOMS.DF_MATCH, value=df)
 
 
-def rgpd_anonymize_people_match_task(dag: DAG) -> PythonOperator:
+def enrich_ae_rgpd_match_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id=TASKS.MATCH_SCORE,
-        python_callable=rgpd_anonymize_people_match_wrapper,
+        python_callable=enrich_ae_rgpd_match_wrapper,
         dag=dag,
     )
