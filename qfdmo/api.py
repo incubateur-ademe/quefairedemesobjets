@@ -77,6 +77,9 @@ class ActeurSchema(ModelSchema):
     )
     distance: Optional[float] = None
     nom: str = Field(..., alias="libelle", description="Le nom d'affichage de l'acteur")
+    identifiant_unique: str = Field(
+        ..., alias="id", description="Le nom d'affichage de l'acteur"
+    )
     adresse: str = Field(
         ..., alias="adresse_display", description="l'adresse complète de l'acteur"
     )
@@ -89,7 +92,7 @@ class ActeurSchema(ModelSchema):
 
     class Meta:
         model = DisplayedActeur
-        fields = ["nom_commercial", "identifiant_unique", "siret"]
+        fields = ["nom_commercial", "id", "siret"]
 
 
 class ActeurFilterSchema(FilterSchema):
@@ -192,7 +195,7 @@ def services(request):
     response=ActeurSchema,
     summary="Retrouver un acteur actif",
 )
-def acteur(request, identifiant_unique: str):
+def acteur(request, id: str):
     return get_object_or_404(DisplayedActeur, pk=id, statut=ActeurStatus.ACTIF)
 
 
