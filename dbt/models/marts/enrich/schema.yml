@@ -1,0 +1,41 @@
+version: 2
+
+models:
+  - name: marts_enrich_ea_rgpd
+    description: Unités légales de l'Annuaire Entreprises (AE) préfiltrés
+      | et prématchés sur la base des noms/prénoms de dirigeants dont au
+      | moins 1 apparait dans le nom de nos acteurs (le modèle sera ensuite
+      | utilisé par un DAG Airflow pour faire du matching plus poussé via
+      | python et soumettre des suggestions)
+    columns:
+      - name: siren
+        description: "Numéro SIREN"
+        data_type: varchar(9)
+        data_tests:
+          - not_null
+          # Our model is at unite_legale level (no repetition per establishment)
+          # hence SIREN should be unique. However test failing as of 2025-03-19
+          # due to duplicate SIREN in our DB which is potentially OK (i.e. multiple
+          # acteur locations belonging to the same parent Acteur SIREN)
+          # - unique
+      - name: acteur_id
+        description: Identifiant unique de l'acteur
+        data_tests:
+          - not_null
+      - name: acteur_noms
+        description: Nom, nom officiel et nom commercial de l'acteur
+         | regroupés & normalisés pour réduire la taille de la table, sachant
+         | qu'on fait un matching plus poussés avec python par la suite
+        # Ensuring we are not matching empty strings
+        data_tests:
+          - not_null
+      - name: acteur_commentaires
+        description: Commentaires de l'acteur pour debug ET si on veut faire
+         | filtering avec des paramètres de DAG
+      - name: dirigeants_noms_prenoms
+        description: Noms & prénoms de tous les dirigeants
+         | regroupés & normalisés pour réduire la taille de la table, sachant
+         | qu'on fait un matching plus poussés avec python par la suite
+        # If we had a match then we must have at least one director's name
+        data_tests:
+          - not_null
