@@ -361,6 +361,7 @@ class RevisionActeurParentAdmin(admin.ModelAdmin):
                     .distinct()
                 ),
             )
+            .order_by("-modifie_le")
         )
 
 
