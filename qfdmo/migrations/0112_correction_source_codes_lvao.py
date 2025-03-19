@@ -63,5 +63,9 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(update_acteur_source_code, migrations.RunPython.noop),
+        # Deactivated on 2025-03-19 due to conflict caused by PR1446 renaming
+        # identifiant_unique to id. We do not understand clearly WHY, but we know
+        # this migration was a one-off and can be deactivated
+        # migrations.RunPython(update_acteur_source_code, migrations.RunPython.noop),
+        migrations.RunPython(migrations.RunPython.noop, migrations.RunPython.noop),
     ]
