@@ -134,58 +134,25 @@ with DAG(
     )
 
     # Définir la séquence principale
-    dbt_run_base >> dbt_test_base >> dbt_run_intermediate >> dbt_test_intermediate
-
-    # Après intermediate, brancher en parallèle
-    # Branche exhaustive
     (
-        dbt_test_intermediate
+        dbt_run_base
+        >> dbt_test_base
+        >> dbt_run_intermediate
+        >> dbt_test_intermediate
+        # Après intermediate, brancher en parallèle
+        # Branche exhaustive
         >> dbt_run_marts_exhaustive
         >> dbt_test_marts_exhaustive
         >> dbt_run_exposure_exhaustive
         >> dbt_test_exposure_exhaustive
-    )
-
-    # Branche carte
-    (
-        dbt_test_intermediate
+        # Branche carte
         >> dbt_run_marts_carte
         >> dbt_test_marts_carte
         >> dbt_run_exposure_carte
         >> dbt_test_exposure_carte
-    )
-
-    # Branche opendata
-    (
-        dbt_test_intermediate
+        # Branche opendata
         >> dbt_run_marts_opendata
         >> dbt_test_marts_opendata
         >> dbt_run_exposure_opendata
         >> dbt_test_exposure_opendata
     )
-    # chain(
-    #     dbt_run_base,
-    #     dbt_test_base,
-    #     dbt_run_intermediate,
-    #     dbt_test_intermediate,
-    #     [
-    #         chain(
-    #             dbt_run_marts_exhaustive,
-    #             dbt_test_marts_exhaustive,
-    #             dbt_run_exposure_exhaustive,
-    #             dbt_test_exposure_exhaustive,
-    #         ),
-    #         chain(
-    #             dbt_run_marts_carte,
-    #             dbt_test_marts_carte,
-    #             dbt_run_exposure_carte,
-    #             dbt_test_exposure_carte,
-    #         ),
-    #         chain(
-    #             dbt_run_marts_opendata,
-    #             dbt_test_marts_opendata,
-    #             dbt_run_exposure_opendata,
-    #             dbt_test_exposure_opendata,
-    #         ),
-    #     ],
-    # )
