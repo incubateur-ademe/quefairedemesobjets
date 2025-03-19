@@ -8,25 +8,20 @@ from datetime import datetime
 from airflow import DAG
 from airflow.models.baseoperator import chain
 from airflow.models.param import Param
-from rgpd.config import COLS
-from rgpd.tasks.airflow_logic.rgpd_anonymize_people_match_task import (
-    rgpd_anonymize_people_match_task,
+from enrich.config import COLS
+from enrich.tasks.airflow_logic.enrich_ae_rgpd_match_task import (
+    enrich_ae_rgpd_match_task,
 )
-from rgpd.tasks.airflow_logic.rgpd_anonymize_people_read_task import (
-    rgpd_anonymize_people_read_task,
+from enrich.tasks.airflow_logic.enrich_ae_rgpd_read_task import (
+    enrich_ae_rgpd_read_task,
 )
-from rgpd.tasks.airflow_logic.rgpd_anonymize_people_suggest_task import (
-    rgpd_anonymize_people_suggest_task,
-)
-
-FILTER_COMMENTS_CONTAIN_DEFAULT = (
-    "source changee le 18-07-2024. Ancienne source CMA non-reparActeur. "
-    "Nouvelle source : LVAO"
+from enrich.tasks.airflow_logic.enrich_ae_rgpd_suggest_task import (
+    enrich_ae_rgpd_suggest_task,
 )
 
 with DAG(
-    dag_id="rgpd_anonymize_people",
-    dag_display_name="RGPD - Anonymiser les personnes acteurs",
+    dag_id="enrich_ae_rgpd",
+    dag_display_name="Enrichir - AE - RGPD",
     default_args={
         "owner": "airflow",
         "depends_on_past": False,
@@ -40,7 +35,7 @@ with DAG(
         "Un DAG pour anonymiser les acteurs QFDMO dont"
         "le nom contient des personnes de l'Annuaire Entreprise (AE)"
     ),
-    tags=["rgpd", "annuaire", "entreprise", "siren", "ae", "acteurs"],
+    tags=["enrich", "annuaire", "entreprise", "siren", "ae", "acteurs"],
     params={
         COLS.DRY_RUN: Param(
             True,
@@ -48,8 +43,8 @@ with DAG(
             description_md="🚱 Si coché, aucune tâche d'écriture ne sera effectuée",
         ),
         "filter_comments_contain": Param(
-            FILTER_COMMENTS_CONTAIN_DEFAULT,
-            type="string",
+            "",
+            type=["null", "string"],
             description_md="🔍 Filtre sur les commentaires pour la lecture des données",
         ),
         COLS.MATCH_THRESHOLD: Param(
@@ -67,7 +62,7 @@ with DAG(
     catchup=False,
 ) as dag:
     chain(
-        rgpd_anonymize_people_read_task(dag),
-        rgpd_anonymize_people_match_task(dag),
-        rgpd_anonymize_people_suggest_task(dag),
+        enrich_ae_rgpd_read_task(dag),
+        enrich_ae_rgpd_match_task(dag),
+        enrich_ae_rgpd_suggest_task(dag),
     )
