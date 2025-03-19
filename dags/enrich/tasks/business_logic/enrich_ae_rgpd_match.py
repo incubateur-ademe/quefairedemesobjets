@@ -1,10 +1,9 @@
 """Match acteurs from QFDMO vs. AE based on people names"""
 
 import pandas as pd
-from rgpd.config import COLS
+from enrich.config import COLS
 from shared.tasks.business_logic import normalize
 from utils import logging_utils as log
-from utils.raisers import raise_if
 
 
 def word_overlap_ratio(
@@ -34,24 +33,21 @@ def word_overlap_ratio(
     return (words_matched, ratio)
 
 
-def rgpd_anonymize_people_match(
+def enrich_ae_rgpd_match(
     df: pd.DataFrame,
-    match_threshold: float = 0.6,
+    match_threshold: float,
 ) -> pd.DataFrame:
     """Identify matches between QFDMO company names and AE's people names."""
-    # TODO: remove first below once métier happy with trying thresholds < 1
-    raise_if(match_threshold < 1, f"Seuil de match < 1: {match_threshold}")
-    raise_if(match_threshold <= 0, f"Seuil de match <= 0: {match_threshold}")
+    if df.empty:
+        raise ValueError("df vide, on devrait pas être là")
+    if match_threshold < 0 or match_threshold > 1:
+        raise ValueError(f"match_threshold invalide: {match_threshold}")
 
     df = df.copy()
 
-    # Defining columns
-    cols_names_qfdmo = [COLS.QFDMO_ACTEUR_NOMS_COMPARISON]
-    cols_names_ae = [
-        x
-        for x in df.columns
-        if x.startswith(COLS.AE_NOM_PREFIX) or x.startswith(COLS.AE_PRENOM_PREFIX)
-    ]
+    # Matching columns
+    cols_names_qfdmo = [COLS.ACTEUR_NOMS_NORMALISES]
+    cols_names_ae = [COLS.AE_DIRIGEANTS_NOMS]
 
     # Normalization
     cols_to_norm = cols_names_qfdmo + cols_names_ae
