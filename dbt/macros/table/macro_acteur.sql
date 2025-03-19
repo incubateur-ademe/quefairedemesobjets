@@ -35,5 +35,6 @@ SELECT DISTINCT efa.uuid,
 FROM {{ ref(ephemeral_filtered_acteur) }} AS efa
 INNER JOIN {{ ref(propositionservice) }} AS cps
     ON efa.identifiant_unique = cps.acteur_id
-
+-- filter to apply on resolved parent + children acteur
+WHERE (efa.public_accueilli IS NULL OR efa.public_accueilli NOT IN ('AUCUN', 'PROFESSIONNELS'))
 {%- endmacro -%}
