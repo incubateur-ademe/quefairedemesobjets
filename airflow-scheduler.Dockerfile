@@ -5,12 +5,7 @@ FROM apache/airflow:2.10.4 AS python-builder
 # system dependencies
 USER root
 
-# unzip for Airflow DAG
-RUN echo "deb http://deb.debian.org/debian stable main" > /etc/apt/sources.list
-RUN apt-get update
-RUN apt-get install -y unzip
-
-RUN apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev gcc python3-dev
 
 # python dependencies
@@ -34,8 +29,7 @@ RUN echo "deb http://deb.debian.org/debian stable main" > /etc/apt/sources.list
 RUN apt-get update
 RUN apt-get install -y unzip
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
+RUN apt-get install -y --no-install-recommends \
     gdal-bin libgdal-dev
 
 USER ${AIRFLOW_UID:-50000}:0

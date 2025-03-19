@@ -25,6 +25,7 @@ WITH acteurs_with_siren AS (
 	and we obtain better matching by reconstructing SIREN via SIRET
 	 */
 	WHERE siret IS NOT NULL AND siret != '' AND LENGTH(siret) = 14
+	AND {{ acteur_status_is_active() }}
 )
 SELECT
 	-- Common fields
