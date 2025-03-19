@@ -2,12 +2,12 @@ import logging
 from itertools import chain
 
 import pandas as pd
+from shared.tasks.database_logic import db_tasks
 from sources.tasks.airflow_logic.config_management import DAGConfig
 from sources.tasks.transform.read_mapping_from_postgres import (
     read_mapping_from_postgres,
 )
 from sources.tasks.transform.transform_df import MANDATORY_COLUMNS_AFTER_NORMALISATION
-from utils import db_tasks
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)

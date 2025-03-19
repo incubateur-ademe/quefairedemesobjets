@@ -1,7 +1,52 @@
-import pandas as pd
-from fuzzywuzzy import fuzz
-from sources.config import shared_constants as constants
+# Souvenir
 
+Ici, on peut garder quelques morceaux de code mort dont-on veut se souvenir
+
+## gestion des prefix / suffixe des noms d'établissement
+
+```py
+def formatted_string(string: str) -> str:
+    result = string.title().strip().replace("  ", " ").replace("/", "")
+
+    if result.upper().startswith("SA "):
+        result = "SA " + result[3:]
+    if result.upper().startswith("SA."):
+        result = "SA." + result[3:]
+    if result.upper().endswith(" SA"):
+        result = result[:-3] + " SA"
+
+    if result.upper().startswith("SAS "):
+        result = "SAS " + result[4:]
+    if result.upper().startswith("SAS."):
+        result = "SAS." + result[4:]
+    if result.upper().endswith(" SAS"):
+        result = result[:-4] + " SAS"
+
+    for word in result.split(" "):
+        if len(word) >= 3 and re.match("^[^aeiouAEIOU]+$", word):
+            result = result.replace(word, word.upper())
+
+    if result.upper().startswith("SARL "):
+        result = "SARL " + result[5:]
+    if result.upper().endswith(" SARL"):
+        result = result[:-5] + " SARL"
+    result = result.replace(" Sarl ", " SARL ")
+
+    if result.upper().startswith("ETS "):
+        result = "Éts " + result[4:]
+    if result.upper().endswith(" ETS"):
+        result = result[:-4] + " Éts"
+    result = result.replace(" Ets ", " Éts ")
+
+    result = result.replace("Boîte À Lire", "Boîte à lire")
+    result = result.replace("D Or", "D'Or")
+
+    return result
+```
+
+## Differents cas de gestion des entreprises avec annuaire entreprise
+
+```py
 
 def set_cohort_id(row):
     current_nom = row["nom"]
@@ -162,44 +207,4 @@ def set_cohort_id(row):
         row["ae_result"][best_candidate_index]["used_for_decision"] = True
 
     return best_outcome
-
-
-def combine_ae_result_dicts(row):
-    ae_result_siret = (
-        row["ae_result_siret"] if isinstance(row["ae_result_siret"], list) else []
-    )
-    ae_result_adresse = (
-        row["ae_result_adresse"] if isinstance(row["ae_result_adresse"], list) else []
-    )
-
-    siret_tuples = [tuple(sorted(d.items())) for d in ae_result_siret]
-    adresse_tuples = [tuple(sorted(d.items())) for d in ae_result_adresse]
-
-    unique_dicts = set(siret_tuples + adresse_tuples)
-
-    return [dict(t) for t in unique_dicts]
-
-
-def update_statut(row):
-    for result in row["ae_result"]:
-        if (
-            row["siret"] == result.get("siret_candidat")
-            and result["search_by_siret_candidat"]
-        ):
-            if result["etat_admin_candidat"] == "A":
-                return pd.Series(
-                    [
-                        constants.ACTEUR_ACTIF,
-                        result["categorie_naf_candidat"],
-                        result["adresse_candidat"],
-                    ]
-                )
-            else:
-                return pd.Series(
-                    [
-                        "SUPPRIME",
-                        result["categorie_naf_candidat"],
-                        result["adresse_candidat"],
-                    ]
-                )
-    return pd.Series(["SUPPRIME", None, row["full_adresse"]])
+```

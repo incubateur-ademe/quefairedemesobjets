@@ -13,7 +13,7 @@ from compute_acteurs.tasks.airflow_logic import (
     deduplicate_labels_task,
     deduplicate_propositionservices_task,
 )
-from utils.db_tasks import read_data_from_postgres
+from shared.tasks.database_logic.db_tasks import read_data_from_postgres
 
 default_args = {
     "owner": "airflow",
