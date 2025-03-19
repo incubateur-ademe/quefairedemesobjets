@@ -1,7 +1,0 @@
-map $host $assistant_url {
-  default "$ASSISTANT_URL";
-}
-
-map $host $lvao_url {
-  default "$LVAO_URL";
-}

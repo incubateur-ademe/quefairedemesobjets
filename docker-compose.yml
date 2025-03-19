@@ -52,7 +52,6 @@ services:
       - ./nginx-local-only/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx-local-only/cache.conf:/etc/nginx/conf.d/cache.conf
       - ./nginx-local-only/certs:/etc/nginx/ssl
-      - ./nginx-local-only/template-variables:/etc/nginx/templates/10-variables.conf.template:ro
     profiles: [lvao]
   airflow-db:
     image: postgres:15
