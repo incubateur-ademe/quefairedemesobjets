@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from acteur_views.tasks.airflow_logic.export_opendata_csv_to_s3_task import (
+from acteurs.tasks.airflow_logic.export_opendata_csv_to_s3_task import (
     export_opendata_csv_to_s3_task,
 )
 from airflow import DAG

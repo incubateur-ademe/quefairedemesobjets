@@ -80,6 +80,8 @@ models:
         description: "Le fait que l'acteur est une révision"
         data_tests:
           - not_null
+    config:
+      materialized: table
   - name: int_acteur_acteur_services
     description: "Acteur Acteur Services model"
     columns:
@@ -95,6 +97,8 @@ models:
         description: "The acteurservice_id for this table"
         data_tests:
           - not_null
+    config:
+      materialized: table
     tests:
       - dbt_utils.unique_combination_of_columns:
           combination_of_columns:
@@ -116,6 +120,8 @@ models:
         description: "The labelqualite_id for this table"
         data_tests:
           - not_null
+    config:
+      materialized: table
     tests:
       - dbt_utils.unique_combination_of_columns:
           combination_of_columns:
@@ -143,6 +149,8 @@ models:
         description: "The rps_id for this table"
       - name: revision_existe
         description: "The revision_existe for this table"
+    config:
+      materialized: table
     tests:
       - dbt_utils.unique_combination_of_columns:
           combination_of_columns:
@@ -163,6 +171,8 @@ models:
         description: "The souscategorieobjet_id for this table"
         data_tests:
           - not_null
+    config:
+      materialized: table
     tests:
       - dbt_utils.unique_combination_of_columns:
           combination_of_columns:

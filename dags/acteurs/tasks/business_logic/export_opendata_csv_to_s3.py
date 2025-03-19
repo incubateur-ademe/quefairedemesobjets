@@ -5,7 +5,7 @@ import tempfile
 from datetime import datetime
 from pathlib import Path
 
-from acteur_views.tasks.airflow_logic.config_management import ExportOpendataConfig
+from acteurs.tasks.airflow_logic.config_management import ExportOpendataConfig
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 
 logger = logging.getLogger(__name__)

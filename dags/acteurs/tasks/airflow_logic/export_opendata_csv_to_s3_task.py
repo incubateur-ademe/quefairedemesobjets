@@ -2,8 +2,8 @@
 
 import logging
 
-from acteur_views.tasks.airflow_logic.config_management import ExportOpendataConfig
-from acteur_views.tasks.business_logic.export_opendata_csv_to_s3 import (
+from acteurs.tasks.airflow_logic.config_management import ExportOpendataConfig
+from acteurs.tasks.business_logic.export_opendata_csv_to_s3 import (
     export_opendata_csv_to_s3,
 )
 from airflow import DAG
