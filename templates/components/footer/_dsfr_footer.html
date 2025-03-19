@@ -1,12 +1,8 @@
 {% extends "dsfr/footer.html" %}
+{% load menu_tags %}
 
 {% block footer_links %}
-{% for page in footer_pages %}
-<li class="fr-footer__bottom-item">
-  <a class="fr-footer__bottom-link" href="{% url 'qfdmd:cms-page' page.slug %}">
-    {{ page.title }}
-  </a>
-</li>
-{% endfor %}
+{% flat_menu handle="footer_assistant" template="components/footer/footer-menu.html" %}
+
 {% endblock footer_links %}
 {% load static %}

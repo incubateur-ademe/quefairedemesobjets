@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 def table_schema_get(table_kind: str, table_name: str) -> str:
     """Get schema for a table kind while replacing its placeholder name"""
-    path = DIR_SQL_SCHEMAS / f"schema_ae_{table_kind}.sql"
+    path = DIR_SQL_SCHEMAS / "tables" / f"schema_table_ae_{table_kind}.sql"
     return path.read_text().replace(r"{{table_name}}", table_name)
 
 

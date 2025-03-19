@@ -1,0 +1,9 @@
+{% load menu_tags %}
+
+{% for item in menu_items %}
+<li class="fr-footer__bottom-item">
+  <a class="fr-footer__bottom-link" href="{{ item.href }}">
+    {{ item.text }}
+  </a>
+</li>
+{% endfor %}

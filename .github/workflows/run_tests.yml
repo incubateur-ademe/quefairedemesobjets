@@ -30,14 +30,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           cache: "pip"
-          python-version: "3.12.1"
       - name: Install GIS Packages
         run: |
           sudo apt-get update
           sudo apt-get install gdal-bin
       - name: Install poetry
         uses: abatilo/actions-poetry@v4
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         name: Define a cache for the virtual environment based on the dependencies lock file
         with:
           path: ./.venv
@@ -111,7 +110,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           cache: "pip"
-          python-version: "3.12.1"
 
       - name: Install GIS Packages
         run: |
@@ -120,7 +118,7 @@ jobs:
 
       - name: Install poetry
         uses: abatilo/actions-poetry@v4
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         name: Define a cache for the virtual environment based on the dependencies lock file
         with:
           path: ./.venv

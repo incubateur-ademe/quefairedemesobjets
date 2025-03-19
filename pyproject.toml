@@ -93,7 +93,7 @@ pillow = "^11.1.0"
 psycopg2 = "^2.9.10"
 python-decouple = "^3.8"
 requests = "^2.32.3"
-sentry-sdk = "^2.19.2"
+sentry-sdk = "^2.23.1"
 shortuuid = "^1.0.13"
 tqdm = "^4.67.1"
 unidecode = "^1.3.8"
@@ -121,15 +121,18 @@ pytest-django = "^4.9.0"
 pytest-dotenv = "^0.5.2"
 pytest-mock = "^3.14.0"
 ruff = "^0.8.6"
-myst-parser = "^4.0.0"
 shapely = "^2.0.6" # notebook
+
+[tool.poetry.group.docs.dependencies]
+myst-parser = "^4.0.0"
 sphinx = "^8.1.3" # docs
 furo = "^2024.8.6" # docs theme
 detect-secrets = "^1.5.0"
+sphinxcontrib-mermaid = "^1.0.0"
 
 
 [tool.poetry.group.airflow.dependencies]
-apache-airflow-providers-postgres = "^6.0.0"
+apache-airflow-providers-postgres = "^6.1.1"
 fuzzywuzzy = "^0.18.0"
 pyproj = "^3.7.0"
 python-decouple = "^3.8"

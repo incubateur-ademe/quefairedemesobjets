@@ -5,7 +5,7 @@ import logging
 from datetime import datetime
 from typing import Optional
 
-from clone.config.tables import SCHEMAS_PREFIX, TABLES
+from clone.config.schemas import SCHEMAS_PREFIX, TABLES
 from utils.raisers import raise_if
 
 logger = logging.getLogger(__name__)

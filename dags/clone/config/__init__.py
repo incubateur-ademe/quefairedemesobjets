@@ -1,5 +1,5 @@
 from .paths import DIR_SQL_SCHEMAS, DIR_SQL_VALIDATIONS  # noqa: F401
-from .tables import (  # noqa: F401
+from .schemas import (  # noqa: F401
     SCHEMAS_PREFIX,
     TABLES,
     VIEW_NAME_ETAB,
