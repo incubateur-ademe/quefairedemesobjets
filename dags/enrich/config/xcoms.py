@@ -9,7 +9,7 @@ from typing import Any
 import pandas as pd
 from airflow.exceptions import AirflowSkipException
 from airflow.models.taskinstance import TaskInstance
-from rgpd.config.tasks import TASKS
+from enrich.config.tasks import TASKS
 from utils import logging_utils as log
 
 

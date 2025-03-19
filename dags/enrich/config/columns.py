@@ -10,15 +10,17 @@ class COLS:
     # Dry run
     DRY_RUN: str = "dry_run"
 
+    # COMMON
+    SIREN: str = "siren"
+
     # QFDMO
-    QFDMO_ACTEUR_NOMS_ORIGIN: str = "qfdmo_acteur_noms_origine"
-    QFDMO_ACTEUR_NOMS_MATCH: str = "qfdmo_acteur_noms_match"
-    QFDMO_ACTEUR_NOMS_COMPARISON: str = "qfdmo_acteur_noms_comparaison"
-    QFDMO_ACTEUR_ID: str = "qfdmo_acteur_id"
+    ACTEUR_ID: str = "acteur_id"
+    ACTEUR_NOMS_ORIGINE: str = "acteur_noms_origine"
+    ACTEUR_NOMS_NORMALISES: str = "acteur_noms_normalises"
+    ACTEUR_COMMENTAIRES: str = "acteur_commentaires"
 
     # Annuaire Entreprise
-    AE_NOM_PREFIX: str = "ae_nom"
-    AE_PRENOM_PREFIX: str = "ae_prenom"
+    AE_DIRIGEANTS_NOMS: str = "ae_dirigeants_noms_prenoms"
 
     # Matching
     MATCH_SCORE: str = "match_score"
