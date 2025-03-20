@@ -8,26 +8,26 @@ import pendulum
 from airflow import DAG
 from airflow.models.baseoperator import chain
 from airflow.models.param import Param
-from clone.tasks.airflow_logic.clone_ae_table_create_etab_task import (
+from clone.tasks.airflow_logic.clone_ae_old_tables_remove_task import (
+    clone_ea_old_tables_remove_task,
+)
+from clone.tasks.airflow_logic.clone_ae_table_create_task import (
     clone_ea_table_create_etab_task,
 )
 from clone.tasks.airflow_logic.clone_ae_table_create_unite_task import (
-    clone_ea_table_create_unite_task,
+    clone_ea_table_create_task,
 )
-from clone.tasks.airflow_logic.clone_ae_table_names_prepare_task import (
-    clone_ea_table_names_prepare_task,
+from clone.tasks.airflow_logic.clone_ae_table_name_prepare_task import (
+    clone_ea_table_name_prepare_task,
 )
 from clone.tasks.airflow_logic.clone_ae_table_validate_etab_task import (
     clone_ea_table_validate_etab_task,
 )
-from clone.tasks.airflow_logic.clone_ae_table_validate_unite_task import (
+from clone.tasks.airflow_logic.clone_ae_table_validate_task import (
     clone_ea_table_validate_unite_task,
 )
-from clone.tasks.airflow_logic.clone_ae_tables_old_remove_task import (
-    clone_ea_tables_old_remove_task,
-)
-from clone.tasks.airflow_logic.clone_ae_views_in_use_switch_task import (
-    clone_ea_views_in_use_switch_task,
+from clone.tasks.airflow_logic.clone_ae_view_in_use_switch_task import (
+    clone_ea_view_in_use_switch_task,
 )
 
 with DAG(
@@ -55,11 +55,11 @@ with DAG(
     catchup=False,
 ) as dag:
     chain(
-        clone_ea_table_names_prepare_task(dag),
-        clone_ea_table_create_unite_task(dag),
+        clone_ea_table_name_prepare_task(dag),
+        clone_ea_table_create_task(dag),
         clone_ea_table_create_etab_task(dag),
         clone_ea_table_validate_unite_task(dag),
         clone_ea_table_validate_etab_task(dag),
-        clone_ea_views_in_use_switch_task(dag),
-        clone_ea_tables_old_remove_task(dag),
+        clone_ea_view_in_use_switch_task(dag),
+        clone_ea_old_tables_remove_task(dag),
     )
