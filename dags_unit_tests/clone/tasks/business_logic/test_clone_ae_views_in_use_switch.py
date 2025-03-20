@@ -1,5 +1,6 @@
+from clone.tasks.business_logic.clone_view_in_use_switch import view_schema_get
+
 from dags.clone.config import VIEW_NAME_ETAB, VIEW_NAME_UNITE
-from dags.clone.tasks.business_logic.clone_ae_views_in_use_switch import view_schema_get
 
 
 class TestTableSchemaGet:

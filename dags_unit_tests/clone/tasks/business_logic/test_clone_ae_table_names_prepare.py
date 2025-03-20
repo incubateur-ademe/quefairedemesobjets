@@ -2,13 +2,13 @@ import re
 from datetime import datetime
 
 import pytest
-
-from dags.clone.config import SCHEMAS_PREFIX, TABLES
-from dags.clone.tasks.business_logic.clone_ae_table_names_prepare import (
+from clone.tasks.business_logic.clone_table_name_prepare import (
     build_timestamp_from_table_name,
     build_timestamp_is_valid,
     clone_ae_table_names_prepare,
 )
+
+from dags.clone.config import SCHEMAS_PREFIX, TABLES
 
 
 class TestBuildTimestamp:
