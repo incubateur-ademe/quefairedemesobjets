@@ -100,21 +100,21 @@ test("iframe can read the referrer when referrerPolicy is not set", async ({ pag
 });
 
 // Need to be run locally with nginx running
-test("Desktop | iframe mode is kept during navigation", async ({ browser, page, carteUrl, assistantUrl }) => {
-  await page.goto(`/dechet/chaussures?iframe`, { waitUntil: "networkidle" });
-  page.getByTestId("header-logo-link").click()
-  await expect(page).toHaveURL(`${assistantUrl}`)
-  expect(await page.$("body > footer")).toBeFalsy()
-  await page.close()
+// test("Desktop | iframe mode is kept during navigation", async ({ browser, page, carteUrl, assistantUrl }) => {
+//   await page.goto(`/dechet/chaussures?iframe`, { waitUntil: "networkidle" });
+//   page.getByTestId("header-logo-link").click()
+//   await expect(page).toHaveURL(`${assistantUrl}`)
+//   expect(await page.$("body > footer")).toBeFalsy()
+//   await page.close()
 
-  const newPage = await browser.newPage()
-  await newPage.goto(`/dechet/chaussures`, { waitUntil: "networkidle" });
-  expect(browser.contexts)
-  expect(await newPage.$("body > footer")).toBeTruthy()
-  await newPage.close()
-  const yetAnotherPage = await browser.newPage()
-  await yetAnotherPage.goto(`/dechet/chaussures?iframe`, { waitUntil: "networkidle" });
-  await yetAnotherPage.goto(`/`, { waitUntil: "networkidle" });
-  await yetAnotherPage.goto(`/dechet/chaussures`, { waitUntil: "networkidle" });
-  expect(await yetAnotherPage.$("body > footer")).not.toBeTruthy()
-});
+//   const newPage = await browser.newPage()
+//   await newPage.goto(`/dechet/chaussures`, { waitUntil: "networkidle" });
+//   expect(browser.contexts)
+//   expect(await newPage.$("body > footer")).toBeTruthy()
+//   await newPage.close()
+//   const yetAnotherPage = await browser.newPage()
+//   await yetAnotherPage.goto(`/dechet/chaussures?iframe`, { waitUntil: "networkidle" });
+//   await yetAnotherPage.goto(`/`, { waitUntil: "networkidle" });
+//   await yetAnotherPage.goto(`/dechet/chaussures`, { waitUntil: "networkidle" });
+//   expect(await yetAnotherPage.$("body > footer")).not.toBeTruthy()
+// });
