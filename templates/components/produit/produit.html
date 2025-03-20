@@ -1,5 +1,11 @@
 {% load dsfr_tags %}
 
+<header class="qf-mt-3w md:qf-mt-5w qf-flex qf-flex-col  qf-gap-2w">
+    <h1 class="qf-m-0">
+        {{ object.nom|capfirst }}
+    </h1>
+    {% include "components/produit/_infotri.html" %}
+</header>
 {% if bon_etat and mauvais_etat %}
     <div class="fr-tabs">
         <ul class="fr-tabs__list" role="tablist" aria-label="État du produit {{ produit }}">

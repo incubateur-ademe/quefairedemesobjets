@@ -9,6 +9,11 @@ from django.template.loader import render_to_string
 from django.urls.base import reverse
 from django.utils.functional import cached_property
 from django_extensions.db.fields import AutoSlugField
+from wagtail.admin.panels import FieldPanel
+from wagtail.fields import StreamField
+from wagtail.images.blocks import ImageBlock
+from wagtail.search import index
+from wagtail.snippets.models import register_snippet
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +43,8 @@ class AbstractBaseProduit(models.Model):
         ordering = ("-modifie_le",)
 
 
-class Produit(AbstractBaseProduit):
+@register_snippet
+class Produit(index.Indexed, AbstractBaseProduit):
     id = models.IntegerField(
         primary_key=True,
         help_text="Correspond à l'identifiant ID défini dans les données "
@@ -61,9 +67,16 @@ class Produit(AbstractBaseProduit):
     nom_eco_organisme = models.CharField(blank=True, help_text="Nom de l’éco-organisme")
     filieres_rep = models.CharField(blank=True, help_text="Filière(s) REP concernée(s)")
     slug = models.CharField(blank=True, help_text="Slug - ne pas modifier")
+    infotri = StreamField([("image", ImageBlock())], blank=True)
+
+    panels = [FieldPanel("infotri")]
 
     def __str__(self):
         return f"{self.id} - {self.nom}"
+
+    search_fields = [
+        index.SearchField("nom"),
+    ]
 
     @cached_property
     def sous_categorie_with_carte_display(self):

@@ -31,5 +31,9 @@ ASSISTANT = {
         # description définie sur le produit
         "description": "Ne jetez pas vos objets ! Découvrez des adresses "
         "pour les donner, les réparer ou les remplacer.",
-    }
+    },
+    "infotri": {
+        "lien": "https://www.ecologie.gouv.fr/info-tri",
+        "texte_du_lien": "En savoir plus sur l’Info-tri",
+    },
 }
