@@ -110,7 +110,7 @@ jobs:
 
       - name: Generate certificates
         run: |
-            cd certs
+            cd nginx-local-only/certs
             mkcert lvao.ademe.local
       - name: Add hosts to /etc/hosts
         run: |
