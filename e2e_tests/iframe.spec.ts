@@ -3,7 +3,7 @@ import { expect } from "@playwright/test"
 import { test } from "./config"
 
 test("Desktop | iframe formulaire is loaded with correct parameters", async ({ page, carteUrl }) => {
-  await page.goto(`${carteUrl}/test_iframe`, { waitUntil: "networkidle" });
+  await page.goto(`/test_iframe`, { waitUntil: "networkidle" });
 
   const titlePage = await page.title();
   expect(titlePage).toBe("IFrame test : QFDMO");
