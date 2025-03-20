@@ -97,6 +97,7 @@ jobs:
           - 6543:5432
     steps:
       - uses: actions/checkout@v4
+
       - name: Prepare environment
         run: |
           cp .env.template .env
@@ -132,9 +133,6 @@ jobs:
           key: venv-dev-${{ hashFiles('poetry.lock') }}
       - name: Install the project dependencies
         run: poetry sync --with dev --no-root
-
-      - name: Set env variables
-        run: cp .env.template .env
 
       - name: Migrate database
         run: |
