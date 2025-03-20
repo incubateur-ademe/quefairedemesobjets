@@ -40,7 +40,7 @@ def enrich_ae_rgpd_match(
     """Identify matches between QFDMO company names and AE's people names."""
     if df.empty:
         raise ValueError("df vide, on devrait pas être là")
-    if match_threshold < 0 or match_threshold > 1:
+    if match_threshold < 0.5 or match_threshold > 1:
         raise ValueError(f"match_threshold invalide: {match_threshold}")
 
     df = df.copy()
