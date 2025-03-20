@@ -5,6 +5,7 @@ from django.views.generic import RedirectView
 from qfdmd.views import (
     CMSPageDetailView,
     ContactFormView,
+    HomeView,
     SynonymeDetailView,
     get_assistant_script,
     get_sw,
@@ -34,4 +35,5 @@ urlpatterns = [
     path("dechet/<slug:slug>/", SynonymeDetailView.as_view(), name="synonyme-detail"),
     path("iframe.js", get_assistant_script, name="script"),
     path("sw.js", get_sw, name="service-worker"),
+    path("", HomeView.as_view(), name="home"),
 ]

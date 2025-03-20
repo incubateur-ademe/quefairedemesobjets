@@ -15,14 +15,14 @@
         </div>
 
         <h2>TEST DE L'IFRAME ADRESSE</h2>
-        {% if request.GET.get('no-height') %}
+        {% if request.GET.noheight %}
             <h3>SANS HAUTEUR DÉFINIE</h3>
             <div data-testid="iframe-no-height-wrapper" style="display: none;">
         {% endif %}
 
-        {% if request.GET.get('carte') %}
+        {% if request.GET.carte %}
             <h3>LA CARTE</h3>
-            <script src="http://localhost:8000/static/carte.js"
+            <script src="{{ lvao.BASE_URL }}/static/carte.js"
                     data-action_displayed="preter|emprunter|louer|mettreenlocation|reparer|donner|echanger|acheter|revendre"
                     data-max-width="800px"
                     data-height="720px"
@@ -30,7 +30,7 @@
             </script>
         {% else %}
             <h3>LE FORMULAIRE</h3>
-            <script src="http://localhost:8000/static/iframe.js"
+            <script src="{{ lvao.BASE_URL }}/static/iframe.js"
                     data-max_width="100%"
                     data-height="720px"
                     data-direction="jai"
@@ -40,7 +40,7 @@
             ></script>
         {% endif %}
 
-        {% if request.GET.get('no-height') %}
+        {% if request.GET.noheight %}
             </div>
         {% endif %}
 
@@ -50,10 +50,10 @@
 
         {% if "noreferrer" in request.GET %}
         <h3>Avec referrerpolicy="noreferrer"</h3>
-        <script src="http://localhost:8000/iframe.js" data-debug-referrer></script>
+        <script src="{{ assistant.BASE_URL }}/iframe.js" data-debug-referrer></script>
         {% else %}
         <h3>Par défaut</h3>
-        <script src="http://localhost:8000/iframe.js" data-testid='assistant'></script>
+        <script src="{{ assistant.BASE_URL }}/iframe.js" data-testid='assistant'></script>
         {% endif %}
 
         <div>
