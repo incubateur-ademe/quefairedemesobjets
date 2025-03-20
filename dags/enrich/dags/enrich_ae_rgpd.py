@@ -50,11 +50,14 @@ with DAG(
         COLS.MATCH_THRESHOLD: Param(
             1,
             type="number",
+            minimum=0.5,
+            maximum=1,
             description_md=r"""🎯 Seuil de match pour considérer un acteur
-            anonymisable.
+            anonymisable:
              - **match** = ratio du nombre de mots du nom de l'acteur qui correspondent
             à des mots de nom/prénom des personnes de l'AE
-             - **threshold** = contrainte en dur de ==1 pour la v1
+             - **minimum** = 0.5
+             - **maximum** = 1
             """,
         ),
     },
