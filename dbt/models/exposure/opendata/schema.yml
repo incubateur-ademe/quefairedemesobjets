@@ -6,59 +6,126 @@ models:
     columns:
       - name: identifiant
         description: "L'identifiant unique de l'acteur"
-        data_tests:
+        tests:
           - unique
           - not_null
+          - dbt_expectations.expect_column_to_exist
       - name: paternite
         description: "La paternité de l'acteur"
-        data_tests:
+        tests:
           - not_null
+          - dbt_expectations.expect_column_to_exist
       - name: nom
         description: "Le nom de l'acteur"
-      - name: nom commercial
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_to_exist
+      - name: nom_commercial
         description: "Le nom commercial de l'acteur"
+        tests:
+          - dbt_expectations.expect_column_to_exist
       - name: siren
         description: "Le SIREN de l'acteur"
+        tests:
+          - dbt_expectations.expect_column_to_exist
       - name: siret
         description: "Le SIRET de l'acteur"
+        tests:
+          - dbt_expectations.expect_column_to_exist
       - name: description
         description: "La description de l'acteur"
-      - name: type_acteur
+        tests:
+          - dbt_expectations.expect_column_to_exist
+      - name: type_dacteur
         description: "Le type d'acteur"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_to_exist
       - name: site_web
         description: "Le site web de l'acteur"
+        tests:
+          - dbt_expectations.expect_column_to_exist
       - name: telephone
         description: "Le téléphone de l'acteur"
+        tests:
+          - dbt_expectations.expect_column_to_exist
       - name: adresse
         description: "L'adresse de l'acteur"
-      - name: complement_adresse
+        tests:
+          - dbt_expectations.expect_column_to_exist
+      - name: complement_dadresse
         description: "Le complément d'adresse de l'acteur"
+        tests:
+          - dbt_expectations.expect_column_to_exist
       - name: code_postal
         description: "Le code postal de l'acteur"
+        tests:
+          - dbt_expectations.expect_column_to_exist
       - name: ville
         description: "La ville de l'acteur"
+        tests:
+          - dbt_expectations.expect_column_to_exist
       - name: latitude
         description: "La latitude de l'acteur"
+        tests:
+          - dbt_expectations.expect_column_to_exist
       - name: longitude
         description: "La longitude de l'acteur"
+        tests:
+          - dbt_expectations.expect_column_to_exist
       - name: qualites_labels
         description: "Les qualités et labels de l'acteur"
+        tests:
+          - dbt_expectations.expect_column_to_exist
       - name: public_accueilli
         description: "Le public accueilli par l'acteur"
+        tests:
+          - dbt_expectations.expect_column_to_exist
       - name: reprise
         description: "La reprise de l'acteur"
-      - name: exclusivite_reprise
+        data_type: text
+        tests:
+          - dbt_expectations.expect_column_to_exist
+          - accepted_values:
+              values: ['','1 pour 1', '1 pour 0']
+      - name: exclusivite_de_reprisereparation
         description: "L'exclusivité de reprise/réparation de l'acteur"
+        data_type: boolean
+        tests:
+          - dbt_expectations.expect_column_to_exist
+          - accepted_values:
+              values: [true, false]
       - name: uniquement_sur_rdv
         description: "L'uniquement sur RDV de l'acteur"
-      - name: type_services
+        data_type: boolean
+        tests:
+          - dbt_expectations.expect_column_to_exist
+          - accepted_values:
+              values: [true, false]
+      - name: type_de_services
         description: "Le type de services de l'acteur"
-      - name: propositions_services
+        tests:
+          - dbt_expectations.expect_column_to_exist
+      - name: propositions_de_services
         description: "Les propositions de services de l'acteur"
-      - name: date_modification
+        tests:
+          - dbt_expectations.expect_column_to_exist
+      - name: date_de_derniere_modification
         description: "La date de dernière modification de l'acteur"
+        tests:
+          - dbt_expectations.expect_column_to_exist
+    tests:
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          min_value: 100000
+          max_value: 500000
+      - dbt_expectations.expect_table_column_count_to_equal:
+          value: 24
+      # I wanted to use `dbt_expectations.expect_column_to_exist` but it doesn't work as I expected
+      - dbt_expectations.expect_table_columns_to_contain_set:
+          column_list: ["identifiant", "paternite", "nom", "nom_commercial", "siren", "siret", "description", "type_dacteur", "site_web", "telephone", "adresse", "complement_dadresse", "code_postal", "ville", "latitude", "longitude", "qualites_labels", "public_accueilli", "reprise", "exclusivite_de_reprisereparation", "uniquement_sur_rdv", "type_de_services", "propositions_de_services", "date_de_derniere_modification"]
     config:
       materialized: table
       indexes:
         - columns: ['identifiant']
+          unique: true
           type: btree
