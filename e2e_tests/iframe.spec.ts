@@ -37,11 +37,11 @@ test("Desktop | iframe formulaire is loaded with correct parameters", async ({ p
 });
 
 test("Desktop | legacy iframe urls still work", async ({ page, carteUrl }) => {
-  await page.goto(`${carteUrl}/?iframe=1&direction=jai&first_dir=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre&BYPASS_ASSISTANT`,
+  await page.goto(`${carteUrl}/?iframe=1&direction=jai&first_dir=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`,
     { waitUntil: "networkidle" }
   )
   await expect(page).toHaveURL(`${carteUrl}/formulaire?direction=jai&first_dir=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`)
-  await page.goto(`${carteUrl}/?carte=1&action_list=reparer%7Cdonner%7Cechanger%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cacheter%7Crevendre&epci_codes=200055887&limit=50&BYPASS_ASSISTANT`, { waitUntil: "networkidle" })
+  await page.goto(`${carteUrl}/?carte=1&action_list=reparer%7Cdonner%7Cechanger%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cacheter%7Crevendre&epci_codes=200055887&limit=50`, { waitUntil: "networkidle" })
   await expect(page).toHaveURL(`${carteUrl}/carte?action_list=reparer%7Cdonner%7Cechanger%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cacheter%7Crevendre&epci_codes=200055887&limit=50`)
 });
 
