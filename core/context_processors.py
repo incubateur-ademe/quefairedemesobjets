@@ -27,7 +27,7 @@ def content(request):
 def assistant(request) -> dict:
     base = {
         "assistant": {
-            "is_home": request.path == reverse("qfdmd:home"),
+            "is_home": request.path == reverse("home"),
             "is_iframe": request.COOKIES.get("iframe") == "1"
             or "iframe" in request.GET,
             "POSTHOG_KEY": settings.ASSISTANT["POSTHOG_KEY"],

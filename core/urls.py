@@ -26,6 +26,7 @@ from wagtail import urls as wagtail_urls
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail.documents import urls as wagtaildocs_urls
 
+from core.views import direct_access
 from qfdmo.models.acteur import ActeurStatus, DisplayedActeur
 
 from .api import api
@@ -62,8 +63,9 @@ urlpatterns = [
         name="django.contrib.sitemaps.views.sitemap",
     ),
     path("dsfr/", include(("dsfr_hacks.urls", "dsfr_hacks"), namespace="dsfr_hacks")),
+    path("", direct_access, name="home"),
     path("", include(("qfdmo.urls", "qfdmo"), namespace="qfdmo")),
-    path("", include(("qfdmd.urls", "qfdmd"), namespace="home")),
+    path("", include(("qfdmd.urls", "qfdmd"), namespace="qfdmd")),
     path("docs/", TemplateView.as_view(template_name="techdocs.html"), name="techdocs"),
 ]
 

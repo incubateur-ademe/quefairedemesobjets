@@ -3,6 +3,34 @@ import mimetypes
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.staticfiles import finders
 from django.http import HttpResponse
+from django.shortcuts import redirect
+from django.urls.base import reverse
+
+
+def direct_access(request):
+    from qfdmd.views import HomeView as Assistant  # avoid circular dependency
+
+    get_params = request.GET.copy()
+
+    if "carte" in request.GET:
+        # Order matters, this should be before iframe because iframe and carte
+        # parameters can coexist
+        del get_params["carte"]
+        try:
+            del get_params["iframe"]
+        except KeyError:
+            pass
+        params = get_params.urlencode()
+        parts = [reverse("qfdmo:carte"), "?" if params else "", params]
+        return redirect("".join(parts))
+
+    if "iframe" in request.GET:
+        del get_params["iframe"]
+        params = get_params.urlencode()
+        parts = [reverse("qfdmo:formulaire"), "?" if params else "", params]
+        return redirect("".join(parts))
+
+    return Assistant.as_view()(request)
 
 
 def static_file_content_from(path):
