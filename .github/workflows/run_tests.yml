@@ -97,11 +97,6 @@ jobs:
           - 6543:5432
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: ".tool-versions"
-          cache: "npm"
-
       - name: Install mkcert
         run: |
             curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64"
@@ -111,16 +106,19 @@ jobs:
       - name: Generate certificates
         run: |
             cd nginx-local-only/certs
-            mkcert lvao.ademe.local
+            mkcert lvao.ademe.local quefairedemesdechets.ademe.local
+
       - name: Add hosts to /etc/hosts
         run: |
+            docker ps
             sudo echo "127.0.0.1 quefairedemesdechets.ademe.local" | sudo tee -a /etc/hosts
             sudo echo "127.0.0.1 lvao.ademe.local" | sudo tee -a /etc/hosts
-      - name: CHECK 1 2
-        run: |
-            cat /etc/hosts
-            grep -q "lvao.ademe.local" /etc/hosts || { echo "Error: String not found" >&2; exit 1; }
-            # ping lvao.ademe.local
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".tool-versions"
+          cache: "npm"
+
       - name: Build assets
         run: |
           npm ci
@@ -165,11 +163,11 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run Playwright tests
-        run: npx playwright test --reporter=list --update-snapshots --shard=${{ matrix.shard }}
-
-      - uses: actions/upload-artifact@v4
-        if: always()
+        uses: addnab/docker-run-action@v3
         with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 30
+          image: nginx:latest
+          options: -v ${{ github.workspace }}/nginx-local-only/servers.conf:/etc/nginx/servers.conf -v ${{ github.workspace }}/nginx-local-only/nginx.conf:/etc/nginx/nginx.conf -v ${{ github.workspace }}/nginx-local-only/cache.conf:/etc/nginx/conf.d/cache.conf -v ${{ github.workspace }}/nginx-local-only/certs:/etc/nginx/ssl -p 80:80 -p 443:443
+          run: |
+            curl -I "https://lvao.ademe.local"
+            curl -I "https://quefairedemesdechets.ademe.local"
+            npx playwright test --reporter=list --update-snapshots --shard=${{ matrix.shard }}
