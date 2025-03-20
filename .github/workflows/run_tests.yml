@@ -102,8 +102,8 @@ jobs:
         run: |
           cp .env.template .env
           echo BASE_URL=http://localhost:8000 >> .env
-          echo ALLOWED_HOSTS=localhost:8000 >> .env
-          echo ASSISTANT_HOSTS=localhost:8000 >> .env
+          echo ALLOWED_HOSTS=localhost >> .env
+          echo ASSISTANT_HOSTS=localhost >> .env
 
       - uses: actions/setup-node@v4
         with:
