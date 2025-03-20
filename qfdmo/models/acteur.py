@@ -1,3 +1,4 @@
+import json
 import logging
 import random
 import re
@@ -569,6 +570,33 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
             "acteur_services",
             "labels",
         }
+
+    def commentaires_ajouter(self, added):
+        """Historically this field has been defined as TextField
+        but has contained a mix of free text and JSON data, hence
+        method to help append data in a JSON format"""
+        existing = self.commentaires
+
+        # If empty we overwrite
+        if existing is None or existing.strip() == "":
+            self.commentaires = json.dumps([{"message": added}])
+        else:
+            try:
+                # If not empty, trying to parse as JSON
+                existing_data = json.loads(existing)
+                if not isinstance(existing_data, list):
+                    raise NotImplementedError(
+                        "Cas de commentaires JSON non-liste pas prévu"
+                    )
+            except (json.JSONDecodeError, ValueError):
+                # If existing not JSON we turn it into a list
+                existing_data = [{"message": existing}]
+
+            # Appending new data
+            existing_data.append({"message": added})
+            self.commentaires = json.dumps(existing_data)
+
+        self.save()
 
 
 def clean_parent(parent):

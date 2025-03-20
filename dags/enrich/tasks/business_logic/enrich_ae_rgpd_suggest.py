@@ -1,15 +1,22 @@
 """Generate suggestions from matches"""
 
 import logging
+from typing import Any
 
 import pandas as pd
-from enrich.config import COLS, RGPD
+from enrich.config import COLS
 from utils import logging_utils as log
 from utils.django import django_setup_full
 
 django_setup_full()
 
 logger = logging.getLogger(__name__)
+
+
+# TODO: create a utility + model which helps us generate
+# structured & consistent details for generic_suggestion_details.html
+def sumline(label: str, value: Any, value_type: str):
+    return locals()
 
 
 def enrich_ae_rgpd_suggest(
@@ -26,7 +33,10 @@ def enrich_ae_rgpd_suggest(
         SuggestionStatut,
     )
     from data.models.change import SuggestionChange
-    from data.models.changes import ChangeActeurUpdateData
+    from data.models.changes.acteur_rgpd_anonymize import (
+        ACTEUR_FIELDS_TO_ANONYMIZE,
+        ChangeActeurRgpdAnonymize,
+    )
 
     # Prepare suggestions
     suggestions = []
@@ -35,33 +45,32 @@ def enrich_ae_rgpd_suggest(
 
         # Preparing & validating the change params
         acteur_id = row[COLS.ACTEUR_ID]
-        data = {
-            x: RGPD.ACTEUR_FIELD_ANONYMIZED for x in RGPD.ACTEUR_FIELDS_TO_ANONYMIZE
-        }
-        data["statut"] = RGPD.ACTEUR_STATUS
-        model_params = {"id": acteur_id, "data": data}
-        ChangeActeurUpdateData(**model_params).validate()
+        model_params = {"id": acteur_id}
+        ChangeActeurRgpdAnonymize(**model_params).validate()
 
         # Preparing suggestion with change and ensuring we can JSON serialize it
         change = SuggestionChange(
             order=1,
             reason="Noms/prénoms détectés dans l'Annuaire Entreprise (AE)",
             entity_type="acteur_displayed",
-            model_name=ChangeActeurUpdateData.name(),
+            model_name=ChangeActeurRgpdAnonymize.name(),
             model_params=model_params,
         ).model_dump()
         changes.append(change)
+        contexte_changes = ACTEUR_FIELDS_TO_ANONYMIZE.copy()
+        contexte_changes["commentaires"] = "➕ Ajout mention avec 📆 date & ⏰ heure"
         suggestion = {
-            "contexte": "Idem suggestion",
+            "contexte": {
+                "changements": contexte_changes,
+            },
             "suggestion": {
-                "title": "🕵️ RGPD: anonymiser les noms des acteurs",
-                "summary": {
-                    "noms d'origine": row[COLS.ACTEUR_NOMS_ORIGINE],
-                    "mots de match": row[COLS.MATCH_WORDS],
-                    "score de match": row[COLS.MATCH_SCORE],
-                    "changement": f"""{','.join(RGPD.ACTEUR_FIELDS_TO_ANONYMIZE)}
-                    -> {RGPD.ACTEUR_FIELD_ANONYMIZED}""",
-                },
+                "title": "🕵️ Anonymisation RGPD",
+                "summary": [
+                    sumline("noms d'origine", row[COLS.ACTEUR_NOMS_ORIGINE], "text"),
+                    sumline("mots de match", row[COLS.MATCH_WORDS], "text_list"),
+                    sumline("score de match", row[COLS.MATCH_SCORE], "score_0_to_1"),
+                    sumline("changements", "voir contexte/détails", "text"),
+                ],
                 "changes": changes,
             },
         }
