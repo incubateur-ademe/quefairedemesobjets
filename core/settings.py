@@ -394,7 +394,7 @@ STORAGES = {
 # Airflow settings
 # ----------------
 AIRFLOW_WEBSERVER_REFRESHACTEUR_URL = decouple.config(
-    "AIRFLOW_WEBSERVER_REFRESHACTEUR_URL", cast=str, default="https://lvao.dev"
+    "AIRFLOW_WEBSERVER_REFRESHACTEUR_URL", cast=str, default="https://lvao.ademe.local"
 )
 
 # Import / export settings
