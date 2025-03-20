@@ -102,6 +102,16 @@ jobs:
           node-version-file: ".tool-versions"
           cache: "npm"
 
+      - name: Install mkcert
+        run: |
+            curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64"
+            chmod +x mkcert-v*-linux-amd64
+            sudo cp mkcert-v*-linux-amd64 /usr/local/bin/mkcert
+
+      - name: Generate certificates
+        run: |
+            cd certs
+            mkcert lvao.ademe.local
       - name: Add hosts to /etc/hosts
         run: |
             sudo echo "127.0.0.1 quefairedemesdechets.ademe.local" | sudo tee -a /etc/hosts

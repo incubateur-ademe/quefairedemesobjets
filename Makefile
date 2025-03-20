@@ -57,7 +57,6 @@ run-airflow:
 
 .PHONY: run-django
 run-django:
-	docker compose --profile lvao up -d
 	rm -rf .parcel-cache
 	honcho start -f Procfile.dev
 
@@ -119,7 +118,7 @@ unit-test:
 
 .PHONY: e2e-test
 e2e-test:
-	npx playwright test
+	npx playwright test --ui
 	$(PYTEST) ./integration_tests
 
 .PHONY: a11y

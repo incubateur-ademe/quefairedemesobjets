@@ -25,17 +25,23 @@ def content(request):
 
 
 def assistant(request) -> dict:
-    if request.META.get("HTTP_HOST") not in settings.ASSISTANT["HOSTS"]:
-        return {}
-
-    return {
+    base = {
         "assistant": {
             "is_home": request.path == reverse("home"),
             "is_iframe": request.COOKIES.get("iframe") == "1"
             or "iframe" in request.GET,
             "POSTHOG_KEY": settings.ASSISTANT["POSTHOG_KEY"],
             "MATOMO_ID": settings.ASSISTANT["MATOMO_ID"],
+            "BASE_URL": settings.ASSISTANT["BASE_URL"],
         },
+        "lvao": {"BASE_URL": settings.ASSISTANT["BASE_URL"]},
+    }
+
+    if request.META.get("HTTP_HOST") not in settings.ASSISTANT["HOSTS"]:
+        return base
+
+    return {
+        **base,
         "footer_pages": CMSPage.objects.all(),
         "search_form": SearchForm(),
         "search_view_template_name": SEARCH_VIEW_TEMPLATE_NAME,
