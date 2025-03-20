@@ -3,7 +3,6 @@
 import logging
 
 from clone.config import DIR_SQL_SCHEMAS
-from pydantic.networks import AnyHttpUrl
 from utils import logging_utils as log
 from utils.cmd import cmd_run
 from utils.django import django_setup_full
@@ -11,6 +10,45 @@ from utils.django import django_setup_full
 django_setup_full()
 
 logger = logging.getLogger(__name__)
+
+
+def csv_url_to_commands(
+    csv_url: str, csv_downloaded, csv_unpacked: str, table_name
+) -> list[dict]:
+    """Generates a list of commands to run to replicate the data locally"""
+    from django.db import connection
+
+    # Initial setup
+    db = connection.settings_dict
+    results = []
+
+    # Starting with commands which don't require the DB
+    cmds = []
+    cmds.append(f"curl -sSL {csv_url} -o /tmp/{csv_downloaded}")
+    if csv_url.endswith(".zip"):
+        cmds.append(f"unzip /tmp/{csv_downloaded} -d /tmp/{csv_unpacked}")
+    elif csv_url.endswith(".gz"):
+        cmds.append(f"gunzip -c /tmp/{csv_downloaded} > /tmp/{csv_unpacked}")
+    elif csv_url.endswith(".csv"):
+        pass
+    else:
+        raise NotImplementedError(f"URL non supportée: {csv_url}")
+    # Converting commands so far into results format
+    results.extend([{"cmd": cmd, "env": {}} for cmd in cmds])
+
+    # Finally the command to load the CSV into the DB
+    results.append(
+        {
+            "cmd": (
+                f"cat /tmp/{csv_unpacked} | "
+                f"psql -h {db['HOST']} -p {db['PORT']} -U {db['USER']} -d {db['NAME']} "
+                f"-c '\\copy {table_name} FROM stdin WITH (FORMAT csv, HEADER true)'"
+            ),
+            "env": {"PGPASSWORD": db["PASSWORD"]},
+        }
+    )
+
+    return results
 
 
 def table_schema_get(table_kind: str, table_name: str) -> str:
@@ -41,36 +79,28 @@ def schema_create_and_check(schema_name: str, sql: str, dry_run=True) -> None:
 
 
 def csv_from_url_to_table(
-    csv_url: AnyHttpUrl, csv_filestem: str, table_name: str, dry_run: bool = False
+    csv_url: str,
+    csv_downloaded: str,
+    csv_unpacked: str,
+    table_name: str,
+    dry_run: bool = False,
 ):
-    r"""Streams a CSV from a remote ZIP file directly into a PG.
+    r"""Streams a CSV from a URL directly into a PG.
     🔴 Requires the table schema to be created prior to this"""
-    from django.db import connection
-
-    # DB settings
-    db = connection.settings_dict
-    db_env = {"PGPASSWORD": db["PASSWORD"]}  # to hide from cmd
-    cmd_psql = f"psql -h {db['HOST']} -p {db['PORT']} -U {db['USER']} -d {db['NAME']}"
-
-    cmd_fs_cleanup = f"rm -f /tmp/{csv_filestem}.zip && rm -f /tmp/{csv_filestem}.csv"
-    cmd_download = f"curl -sSL {csv_url} -o /tmp/{csv_filestem}.zip"
-    cmd_unzip = f"unzip /tmp/{csv_filestem}.zip -d /tmp/"
-    cmd_psql = (
-        f"cat /tmp/{csv_filestem}.csv | "
-        f"psql -h {db['HOST']} -p {db['PORT']} -U {db['USER']} -d {db['NAME']} "
-        f"-c '\\copy {table_name} FROM stdin WITH (FORMAT csv, HEADER true)'"
+    commands = csv_url_to_commands(
+        csv_url=csv_url,
+        csv_downloaded=csv_downloaded,
+        csv_unpacked=csv_unpacked,
+        table_name=table_name,
     )
-
-    cmd_run(cmd=cmd_fs_cleanup, dry_run=dry_run)
-    cmd_run(cmd=cmd_download, dry_run=dry_run)
-    cmd_run(cmd=cmd_unzip, dry_run=dry_run)
-    cmd_run(cmd=cmd_psql, dry_run=dry_run, env=db_env)
-    cmd_run(cmd=cmd_fs_cleanup, dry_run=dry_run)
+    for command in commands:
+        cmd_run(command["cmd"], env=command["env"], dry_run=dry_run)
 
 
 def clone_ae_table_create(
-    csv_url: AnyHttpUrl,
-    csv_filestem: str,
+    csv_url: str,
+    csv_downloaded: str,
+    csv_unpacked: str,
     table_kind: str,
     table_name: str,
     dry_run: bool = True,
@@ -87,7 +117,8 @@ def clone_ae_table_create(
     schema_create_and_check(table_name, sql, dry_run=dry_run)
     csv_from_url_to_table(
         csv_url=csv_url,
-        csv_filestem=csv_filestem,
+        csv_downloaded=csv_downloaded,
+        csv_unpacked=csv_unpacked,
         table_name=table_name,
         dry_run=dry_run,
     )
