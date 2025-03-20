@@ -99,18 +99,11 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Prepare environment
-        run: cp .env.template .env
-
-      - name: Install mkcert
         run: |
-            curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64"
-            chmod +x mkcert-v*-linux-amd64
-            sudo cp mkcert-v*-linux-amd64 /usr/local/bin/mkcert
-
-      - name: Add hosts to /etc/hosts
-        run: |
-            sudo echo "127.0.0.1 quefairedemesdechets.ademe.local" | sudo tee -a /etc/hosts
-            sudo echo "127.0.0.1 lvao.ademe.local" | sudo tee -a /etc/hosts
+          cp .env.template .env
+          echo BASE_URL=http://localhost:8000 >> .env
+          echo ALLOWED_HOSTS=http://localhost:8000
+          echo ASSISTANT_HOSTS=http://localhost:8000
 
       - uses: actions/setup-node@v4
         with:
