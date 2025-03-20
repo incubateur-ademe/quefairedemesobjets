@@ -116,8 +116,8 @@ models:
           - dbt_expectations.expect_column_to_exist
     tests:
       - dbt_expectations.expect_table_row_count_to_be_between:
-          min_value: 100000
-          max_value: 500000
+          min_value: 250000
+          max_value: 400000
       - dbt_expectations.expect_table_column_count_to_equal:
           value: 24
       # I wanted to use `dbt_expectations.expect_column_to_exist` but it doesn't work as I expected
