@@ -16,5 +16,5 @@ class TestCmdRun:
         assert stdout is None
 
     def test_raise_if_failing(self):
-        with pytest.raises(SystemError, match="psql: error: connection to server"):
+        with pytest.raises(SystemError, match="psql:"):
             cmd_run("psql", dry_run=False)

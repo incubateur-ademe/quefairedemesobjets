@@ -1,9 +1,12 @@
 import logging
+import math
 import re
 
 import pandas as pd
 import requests
 from fuzzywuzzy import fuzz
+from shapely import wkb
+from shapely.geometry import Point
 from sources.tasks.airflow_logic.config_management import DAGConfig
 from sources.tasks.transform.transform_column import (
     clean_code_postal,
@@ -12,9 +15,7 @@ from sources.tasks.transform.transform_column import (
     clean_siret,
 )
 from utils import logging_utils as log
-from utils.base_utils import transform_location
 from utils.formatter import format_libelle_to_code
-from utils.mapping_utils import parse_float
 
 logger = logging.getLogger(__name__)
 
@@ -268,14 +269,33 @@ def get_latlng_from_geopoint(row: pd.Series, _) -> pd.Series:
     return row[["latitude", "longitude"]]
 
 
+def _parse_float(value):
+    if isinstance(value, float):
+        return None if math.isnan(value) else value
+    if not isinstance(value, str):
+        return None
+    value = re.sub(r",$", "", value).replace(",", ".")
+    try:
+        f = float(value)
+        return None if math.isnan(f) else f
+    except ValueError:
+        return None
+
+
 def compute_location(row: pd.Series, _):
     # first column is latitude, second is longitude
     lat_column = row.keys()[0]
     lng_column = row.keys()[1]
-    row[lat_column] = parse_float(row[lat_column])
-    row[lng_column] = parse_float(row[lng_column])
-    row["location"] = transform_location(row[lng_column], row[lat_column])
+    row[lat_column] = _parse_float(row[lat_column])
+    row[lng_column] = _parse_float(row[lng_column])
+    row["location"] = get_point_from_location(row[lng_column], row[lat_column])
     return row[["location"]]
+
+
+def get_point_from_location(longitude, latitude):
+    if not longitude or not latitude or math.isnan(longitude) or math.isnan(latitude):
+        return None
+    return wkb.dumps(Point(longitude, latitude)).hex()
 
 
 def clean_proposition_services(row, _):

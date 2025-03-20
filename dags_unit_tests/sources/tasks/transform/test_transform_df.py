@@ -1,6 +1,7 @@
 import pandas as pd
 import pytest
 from sources.tasks.transform.transform_df import (
+    _parse_float,
     clean_action_codes,
     clean_adresse,
     clean_identifiant_externe,
@@ -673,3 +674,30 @@ class TestComputeLocation:
         )
         print(result["location"])
         assert result["location"] == expected_location
+
+
+class TestParseFloat:
+    def test_parse_float_with_french_decimal(self):
+        assert _parse_float("1234,56") == 1234.56
+        assert _parse_float("-1234,56") == -1234.56
+        assert _parse_float("0,0") == 0
+        assert _parse_float("1,234") == 1.234
+
+    def test_parse_float_with_trailing_comma(self):
+        assert _parse_float("1234,") == 1234.0
+        assert _parse_float("1234,56,") == 1234.56
+
+    def test_parse_float_with_valid_float(self):
+        assert _parse_float(1234.56) == 1234.56
+        assert _parse_float(-1234.56) == -1234.56
+
+    def test_parse_float_with_nan(self):
+        assert _parse_float(float("nan")) is None
+
+    def test_parse_float_with_none(self):
+        assert _parse_float(None) is None
+
+    def test_parse_float_with_invalid_string(self):
+        assert _parse_float("abc") is None
+        assert _parse_float("1234abc") is None
+        assert _parse_float("12,34,56") is None

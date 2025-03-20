@@ -1,8 +1,8 @@
 import logging
 
 import pandas as pd
+from shared.tasks.database_logic.db_tasks import read_data_from_postgres
 from utils import logging_utils as log
-from utils.db_tasks import read_data_from_postgres
 
 logger = logging.getLogger(__name__)
 
