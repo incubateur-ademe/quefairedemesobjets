@@ -5,10 +5,10 @@ DECLARE
     q numeric;
     r numeric;
 BEGIN
-    q := trunc(n/d);  -- Essayons trunc au lieu de floor
-    r := n - (q * d); -- Calculons le reste par soustraction
+    q := trunc(n/d);  -- Use trunc instead of floor
+    r := n - (q * d); -- Calculate the remainder by subtraction
 
-    -- Ajustons si nécessaire pour garantir 0 ≤ r < d
+    -- Adjust if necessary to ensure 0 ≤ r < d
     IF r < 0 THEN
         r := r + d;
         q := q - 1;

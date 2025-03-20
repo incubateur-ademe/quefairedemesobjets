@@ -7,11 +7,11 @@ DECLARE
     result numeric := 0;
     hex_digit text;
 BEGIN
-    -- Enlever les tirets de l'UUID
+    -- Remove dashes from the UUID
     uuid_str := replace(uuid::text, '-', '');
 
-    -- Conversion hex vers numeric en traitant chaque digit
-    -- uuid.int en Python traite l'UUID comme un nombre hexadécimal de 128 bits
+    -- Convert hex to numeric by processing each digit
+    -- uuid.int in Python treats the UUID as a 128-bit hexadecimal number
     FOR i IN 1..32 LOOP
         hex_digit := substr(uuid_str, i, 1);
         result := result * 16 + (
