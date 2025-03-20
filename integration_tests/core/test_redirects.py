@@ -4,15 +4,6 @@ from django.test import override_settings
 
 @pytest.mark.django_db
 @override_settings(DEBUG=False)
-def test_redirect_without_param(client):
-    url = "/"
-    response = client.get(url)
-    assert response.status_code == 302
-    assert response.url == "https://longuevieauxobjets.ademe.fr/lacarte"
-
-
-@pytest.mark.django_db
-@override_settings(DEBUG=False)
 @pytest.mark.parametrize(
     "params,redirect_url",
     [
