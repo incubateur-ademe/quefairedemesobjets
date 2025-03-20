@@ -33,7 +33,7 @@ ASSISTANT = {
         cast=str,
     ).split(","),
     "BASE_URL": decouple.config(
-        "ASSISTANT_BASE_URL", default="https://assistant.ademe.local"
+        "BASE_URL", default="https://quefairedemesdechets.ademe.local"
     ),
     "POSTHOG_KEY": decouple.config(
         "ASSISTANT_POSTHOG_KEY",
@@ -45,7 +45,9 @@ ASSISTANT = {
 # Carte settings
 # --------------
 LVAO = {
-    "BASE_URL": decouple.config("LVAO_BASE_URL", default="https://lvao.ademe.local"),
+    "BASE_URL": decouple.config(
+        "BASE_URL", default="https://quefairedemesdechets.ademe.local"
+    ),
     "GOOGLE_SEARCH_CONSOLE": "google9dfbbc61adbe3888.html",
 }
 DEFAULT_MAX_SOLUTION_DISPLAYED = decouple.config(

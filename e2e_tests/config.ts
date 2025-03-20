@@ -12,6 +12,6 @@ dotenv.config({ path: path.resolve(__dirname, '.env') });
 export const test = base.extend<TestOptions>({
   // Define an option and provide a default value.
   // We can later override it in the config.
-  assistantUrl: [process.env.ASSISTANT_BASE_URL!, { option: true }],
-  carteUrl: [process.env.LVAO_BASE_URL!, { option: true }],
+  assistantUrl: [process.env.BASE_URL!, { option: true }],
+  carteUrl: [process.env.BASE_URL!, { option: true }],
 });

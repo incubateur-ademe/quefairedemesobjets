@@ -29,7 +29,6 @@ from wagtail.documents import urls as wagtaildocs_urls
 from qfdmo.models.acteur import ActeurStatus, DisplayedActeur
 
 from .api import api
-from .views import direct_access
 
 info_dict = {
     "queryset": DisplayedActeur.objects.filter(statut=ActeurStatus.ACTIF).order_by(
@@ -63,9 +62,8 @@ urlpatterns = [
         name="django.contrib.sitemaps.views.sitemap",
     ),
     path("dsfr/", include(("dsfr_hacks.urls", "dsfr_hacks"), namespace="dsfr_hacks")),
-    path("", direct_access, name="home"),
     path("", include(("qfdmo.urls", "qfdmo"), namespace="qfdmo")),
-    path("", include(("qfdmd.urls", "qfdmd"), namespace="qfdmd")),
+    path("", include(("qfdmd.urls", "qfdmd"), namespace="home")),
     path("docs/", TemplateView.as_view(template_name="techdocs.html"), name="techdocs"),
 ]
 

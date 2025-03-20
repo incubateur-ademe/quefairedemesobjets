@@ -97,20 +97,18 @@ jobs:
           - 6543:5432
     steps:
       - uses: actions/checkout@v4
+
+      - name: Prepare environment
+        run: cp .env.template .env
+
       - name: Install mkcert
         run: |
             curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64"
             chmod +x mkcert-v*-linux-amd64
             sudo cp mkcert-v*-linux-amd64 /usr/local/bin/mkcert
 
-      - name: Generate certificates
-        run: |
-            cd nginx-local-only/certs
-            mkcert lvao.ademe.local quefairedemesdechets.ademe.local
-
       - name: Add hosts to /etc/hosts
         run: |
-            docker ps
             sudo echo "127.0.0.1 quefairedemesdechets.ademe.local" | sudo tee -a /etc/hosts
             sudo echo "127.0.0.1 lvao.ademe.local" | sudo tee -a /etc/hosts
 
@@ -163,11 +161,4 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run Playwright tests
-        uses: addnab/docker-run-action@v3
-        with:
-          image: nginx:latest
-          options: -v ${{ github.workspace }}/nginx-local-only/servers.conf:/etc/nginx/servers.conf -v ${{ github.workspace }}/nginx-local-only/nginx.conf:/etc/nginx/nginx.conf -v ${{ github.workspace }}/nginx-local-only/cache.conf:/etc/nginx/conf.d/cache.conf -v ${{ github.workspace }}/nginx-local-only/certs:/etc/nginx/ssl -p 80:80 -p 443:443
-          run: |
-            curl -I "https://lvao.ademe.local"
-            curl -I "https://quefairedemesdechets.ademe.local"
-            npx playwright test --reporter=list --update-snapshots --shard=${{ matrix.shard }}
+        run: npx playwright test --reporter=list --update-snapshots --shard=${{ matrix.shard }}
