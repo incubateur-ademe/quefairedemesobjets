@@ -70,13 +70,6 @@ class TestClusterActeursSelectionOrphans:
             code_postal="75000",
             statut="INACTIF",
         )
-        # ville None alors que champ dans include_if_all_fields_filled
-        RevisionActeurFactory(
-            source=s1,
-            acteur_type=at1,
-            nom="correct_nom_mais_ville_none",
-            ville=None,
-        )
         # ville "" alors que champ dans include_if_all_fields_filled
         RevisionActeurFactory(
             source=s1,

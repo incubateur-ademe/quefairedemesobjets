@@ -321,8 +321,8 @@ class TestCleanTelephone:
     @pytest.mark.parametrize(
         "phone_number, code_postal, expected_phone_number",
         [
-            (None, None, None),
-            (pd.NA, None, None),
+            (None, None, ""),
+            (pd.NA, None, ""),
             ("1 23 45 67 89", "75001", "0123456789"),
             ("33 1 23 45 67 89", "75001", "0123456789"),
             ("0612345678", "75001", "0612345678"),
@@ -475,7 +475,7 @@ class TestCleanAdresse:
             (
                 "75001 Paris",
                 {
-                    "adresse": None,
+                    "adresse": "",
                     "code_postal": "75001",
                     "ville": "Paris",
                 },

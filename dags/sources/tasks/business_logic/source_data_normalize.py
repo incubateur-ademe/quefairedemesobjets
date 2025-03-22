@@ -36,7 +36,7 @@ def _replace_null_insensitive(value):
 
 
 def _replace_explicit_null_values(df: pd.DataFrame) -> pd.DataFrame:
-    return df.map(_replace_null_insensitive)
+    return df.map(_replace_null_insensitive).replace({None: ""})
 
 
 def get_transformation_function(function_name, dag_config):

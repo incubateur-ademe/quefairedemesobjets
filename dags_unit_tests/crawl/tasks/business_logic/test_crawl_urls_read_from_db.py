@@ -12,7 +12,6 @@ from unit_tests.qfdmo.acteur_factory import DisplayedActeurFactory
 class TestCrawlUrlsSelectFromDb:
     def test_qfdmo_displayedacteur_url(self):
         DisplayedActeurFactory(url="")
-        DisplayedActeurFactory(url=None)
         # The special empty case we don't want to retrieve
         DisplayedActeurFactory(url=EMPTY_ACTEUR_FIELD, nom="url déjà mise à vide")
         a1 = DisplayedActeurFactory(url="https://test.com/1", nom="Acteur 1")
