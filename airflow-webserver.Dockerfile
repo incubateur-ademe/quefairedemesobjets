@@ -6,7 +6,7 @@ FROM apache/airflow:2.10.4 AS python-builder
 USER root
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    libpq-dev gcc python3-dev
+    libpq-dev python3-dev g++
 
 # python dependencies
 ARG POETRY_VERSION=2.0
