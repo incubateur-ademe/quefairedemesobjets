@@ -1,8 +1,9 @@
 """Creates the actual tables replicating AE in our DB"""
 
 import logging
+from pathlib import Path
 
-from clone.config import DIR_SQL_SCHEMAS
+from pydantic import AnyHttpUrl
 from utils import logging_utils as log
 from utils.cmd import cmd_run
 from utils.django import django_setup_full
@@ -13,34 +14,42 @@ logger = logging.getLogger(__name__)
 
 
 def csv_url_to_commands(
-    csv_url: str, csv_downloaded, csv_unpacked: str, table_name
-) -> list[dict]:
+    data_url: AnyHttpUrl,
+    file_downloaded: str,
+    file_unpacked: str,
+    table_name: str,
+    run_timestamp: str,
+) -> tuple[list[dict], dict]:
     """Generates a list of commands to run to replicate the data locally"""
     from django.db import connection
 
-    # Initial setup
-    db = connection.settings_dict
-    results = []
-
-    # Starting with commands which don't require the DB
-    cmds = []
-    cmds.append(f"curl -sSL {csv_url} -o /tmp/{csv_downloaded}")
-    if csv_url.endswith(".zip"):
-        cmds.append(f"unzip /tmp/{csv_downloaded} -d /tmp/{csv_unpacked}")
-    elif csv_url.endswith(".gz"):
-        cmds.append(f"gunzip -c /tmp/{csv_downloaded} > /tmp/{csv_unpacked}")
-    elif csv_url.endswith(".csv"):
+    # File download and unpacking: all done within a temporary folder
+    # so cleanup is easier
+    folder = f"/tmp/{run_timestamp}"
+    cmds_create = []
+    cmds_create.append(f"mkdir {folder}")
+    cmds_create.append(f"curl -sSL {data_url} -o {folder}/{file_downloaded}")
+    if str(data_url).endswith(".zip"):
+        cmds_create.append(f"unzip {folder}/{file_downloaded} -d {folder}/")
+    elif str(data_url).endswith(".gz"):
+        cmds_create.append(
+            f"gunzip -c {folder}/{file_downloaded} > {folder}/{file_unpacked}"
+        )
+    elif str(data_url).endswith(".csv"):
         pass
     else:
-        raise NotImplementedError(f"URL non supportée: {csv_url}")
+        raise NotImplementedError(f"URL non supportée: {data_url}")
+    cmds_create.append(f"wc -l {folder}/{file_unpacked}")
+
     # Converting commands so far into results format
-    results.extend([{"cmd": cmd, "env": {}} for cmd in cmds])
+    cmds_create = [{"cmd": cmd, "env": {}} for cmd in cmds_create]
 
     # Finally the command to load the CSV into the DB
-    results.append(
+    db = connection.settings_dict
+    cmds_create.append(
         {
             "cmd": (
-                f"cat /tmp/{csv_unpacked} | "
+                f"cat {folder}/{file_unpacked} | "
                 f"psql -h {db['HOST']} -p {db['PORT']} -U {db['USER']} -d {db['NAME']} "
                 f"-c '\\copy {table_name} FROM stdin WITH (FORMAT csv, HEADER true)'"
             ),
@@ -48,13 +57,10 @@ def csv_url_to_commands(
         }
     )
 
-    return results
+    # Cleanup
+    cmd_cleanup = {"cmd": f"rm -rf {folder}", "env": {}}
 
-
-def table_schema_get(table_kind: str, table_name: str) -> str:
-    """Get schema for a table kind while replacing its placeholder name"""
-    path = DIR_SQL_SCHEMAS / "tables" / f"schema_table_ae_{table_kind}.sql"
-    return path.read_text().replace(r"{{table_name}}", table_name)
+    return cmds_create, cmd_cleanup
 
 
 # TODO: move to utils/django.py
@@ -79,47 +85,58 @@ def schema_create_and_check(schema_name: str, sql: str, dry_run=True) -> None:
 
 
 def csv_from_url_to_table(
-    csv_url: str,
-    csv_downloaded: str,
-    csv_unpacked: str,
+    data_url: AnyHttpUrl,
+    file_downloaded: str,
+    file_unpacked: str,
     table_name: str,
-    dry_run: bool = False,
+    run_timestamp: str,
+    dry_run: bool,
 ):
     r"""Streams a CSV from a URL directly into a PG.
     🔴 Requires the table schema to be created prior to this"""
-    commands = csv_url_to_commands(
-        csv_url=csv_url,
-        csv_downloaded=csv_downloaded,
-        csv_unpacked=csv_unpacked,
+    cmds_create, cmd_cleanup = csv_url_to_commands(
+        data_url=data_url,
+        file_downloaded=file_downloaded,
+        file_unpacked=file_unpacked,
         table_name=table_name,
+        run_timestamp=run_timestamp,
     )
-    for command in commands:
-        cmd_run(command["cmd"], env=command["env"], dry_run=dry_run)
+
+    # Trying creation commands
+    for command in cmds_create:
+        try:
+            cmd_run(command["cmd"], env=command["env"], dry_run=dry_run)
+        except Exception as e:
+            logger.error(e)
+            break
+
+    # Cleanup: always performing to avoid leaving a mess on server
+    cmd_run(cmd_cleanup["cmd"], env=cmd_cleanup["env"], dry_run=dry_run)
 
 
 def clone_ae_table_create(
-    csv_url: str,
-    csv_downloaded: str,
-    csv_unpacked: str,
-    table_kind: str,
+    data_url: AnyHttpUrl,
+    file_downloaded: str,
+    file_unpacked: str,
     table_name: str,
-    dry_run: bool = True,
-    sql: str | None = None,
+    table_schema_file_path: Path,
+    run_timestamp: str,
+    dry_run: bool,
 ) -> None:
     """Create a table in the DB from a CSV file downloaded via URL"""
 
     # Read tasks
     logger.info(log.banner_string(f"Création du schema de la table {table_name}"))
-    if not sql:
-        sql = table_schema_get(table_kind, table_name)
+    sql = table_schema_file_path.read_text().replace(r"{{table_name}}", table_name)
 
     # Write tasks
     schema_create_and_check(table_name, sql, dry_run=dry_run)
     csv_from_url_to_table(
-        csv_url=csv_url,
-        csv_downloaded=csv_downloaded,
-        csv_unpacked=csv_unpacked,
+        data_url=data_url,
+        file_downloaded=file_downloaded,
+        file_unpacked=file_unpacked,
         table_name=table_name,
+        run_timestamp=run_timestamp,
         dry_run=dry_run,
     )
 
