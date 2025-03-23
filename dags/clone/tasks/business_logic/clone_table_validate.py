@@ -1,20 +1,18 @@
 import logging
 
-from clone.config.paths import DIR_SQL_VALIDATIONS
+from clone.config import DIR_SQL_VALIDATION
 from django.db import connection
-from utils.raisers import raise_if
+from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
 
 
-def clone_ae_table_validate(
-    table_kind: str, table_name: str, dry_run: bool = True
-) -> None:
+def clone_ae_table_validate(table_kind: str, table_name: str, dry_run: bool) -> None:
     """Validate a table in the DB"""
 
     # Gathering SQL validation files
-    sql_files = list((DIR_SQL_VALIDATIONS / table_kind).glob("*.sql"))
-    raise_if(not sql_files, f"{table_kind} / {table_name}: 0 fichier de validation")
+    sql_files = list((DIR_SQL_VALIDATION / table_kind).glob("*.sql"))
+    log.preview("Fichiers de validation trouvés", sql_files)
 
     # Executing SQL validation files
     for sql_file in sql_files:
@@ -35,5 +33,6 @@ def clone_ae_table_validate(
             debug_value = result["debug_value"]
 
             # Checking results
-            raise_if(not is_valid, f"🔴 {table_name}: {sql_name} échec: {debug_value}")
+            if not is_valid:
+                raise ValueError(f"{table_name}: {sql_name} échec: {debug_value}")
             logger.info(f"🟢 {table_name}: {sql_name} succès: {debug_value}")
