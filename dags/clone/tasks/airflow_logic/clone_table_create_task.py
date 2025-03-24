@@ -38,6 +38,7 @@ def clone_table_create_wrapper(ti) -> None:
         data_url=config.data_url,
         file_downloaded=config.file_downloaded,
         file_unpacked=config.file_unpacked,
+        delimiter=config.delimiter,
         table_name=config.table_name,
         table_schema_file_path=config.table_schema_file_path,
         run_timestamp=config.run_timestamp,

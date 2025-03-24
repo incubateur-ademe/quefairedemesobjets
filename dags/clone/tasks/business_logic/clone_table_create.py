@@ -6,7 +6,7 @@ from pathlib import Path
 from pydantic import AnyHttpUrl
 from utils import logging_utils as log
 from utils.cmd import cmd_run
-from utils.django import django_setup_full
+from utils.django import django_setup_full, django_schema_create_and_check
 
 django_setup_full()
 
@@ -14,18 +14,18 @@ logger = logging.getLogger(__name__)
 
 
 def csv_url_to_commands(
-    data_url: AnyHttpUrl,
+    data_url: str,
     file_downloaded: str,
     file_unpacked: str,
+    delimiter: str,
     table_name: str,
-    run_timestamp: str,
 ) -> tuple[list[dict], dict]:
     """Generates a list of commands to run to replicate the data locally"""
     from django.db import connection
 
     # File download and unpacking: all done within a temporary folder
-    # so cleanup is easier
-    folder = f"/tmp/{run_timestamp}"
+    # so cleanup is easier AND to avoid collisions (table name contains timestamp)
+    folder = f"/tmp/{table_name}"
     cmds_create = []
     cmds_create.append(f"mkdir {folder}")
     cmds_create.append(f"curl -sSL {data_url} -o {folder}/{file_downloaded}")
@@ -51,7 +51,7 @@ def csv_url_to_commands(
             "cmd": (
                 f"cat {folder}/{file_unpacked} | "
                 f"psql -h {db['HOST']} -p {db['PORT']} -U {db['USER']} -d {db['NAME']} "
-                f"-c '\\copy {table_name} FROM stdin WITH (FORMAT csv, HEADER true)'"
+                f"-c '\\copy {table_name} FROM stdin WITH (FORMAT csv, HEADER true, DELIMITER \"{delimiter}\");'"
             ),
             "env": {"PGPASSWORD": db["PASSWORD"]},
         }
@@ -63,31 +63,11 @@ def csv_url_to_commands(
     return cmds_create, cmd_cleanup
 
 
-# TODO: move to utils/django.py
-def schema_create_and_check(schema_name: str, sql: str, dry_run=True) -> None:
-    """Create a table in the DB from a schema"""
-    from django.db import connection
-
-    # Creation
-    logger.info(f"Création schema pour {schema_name=}: début")
-    log.preview("Schema", sql)
-    if dry_run:
-        logger.info("Mode dry-run, on ne crée pas le schema")
-        return
-    with connection.cursor() as cursor:
-        cursor.execute(sql)
-
-    # Validation
-    tables_all = connection.introspection.table_names()
-    if schema_name not in tables_all:
-        raise SystemError(f"Table pas crée malgré execution SQL OK: {schema_name}")
-    logger.info(f"Création schema pour {schema_name=}: succès 🟢")
-
-
 def csv_from_url_to_table(
     data_url: AnyHttpUrl,
     file_downloaded: str,
     file_unpacked: str,
+    delimiter: str,
     table_name: str,
     run_timestamp: str,
     dry_run: bool,
@@ -98,26 +78,32 @@ def csv_from_url_to_table(
         data_url=data_url,
         file_downloaded=file_downloaded,
         file_unpacked=file_unpacked,
+        delimiter=delimiter,
         table_name=table_name,
-        run_timestamp=run_timestamp,
     )
 
     # Trying creation commands
+    error = None
     for command in cmds_create:
         try:
             cmd_run(command["cmd"], env=command["env"], dry_run=dry_run)
         except Exception as e:
             logger.error(e)
+            error = str(e)
             break
 
     # Cleanup: always performing to avoid leaving a mess on server
     cmd_run(cmd_cleanup["cmd"], env=cmd_cleanup["env"], dry_run=dry_run)
+
+    if error:
+        raise SystemError(f"Erreur rencontrée: {error}")
 
 
 def clone_ae_table_create(
     data_url: AnyHttpUrl,
     file_downloaded: str,
     file_unpacked: str,
+    delimiter: str,
     table_name: str,
     table_schema_file_path: Path,
     run_timestamp: str,
@@ -130,11 +116,12 @@ def clone_ae_table_create(
     sql = table_schema_file_path.read_text().replace(r"{{table_name}}", table_name)
 
     # Write tasks
-    schema_create_and_check(table_name, sql, dry_run=dry_run)
+    django_schema_create_and_check(table_name, sql, dry_run=dry_run)
     csv_from_url_to_table(
         data_url=data_url,
         file_downloaded=file_downloaded,
         file_unpacked=file_unpacked,
+        delimiter=delimiter,
         table_name=table_name,
         run_timestamp=run_timestamp,
         dry_run=dry_run,

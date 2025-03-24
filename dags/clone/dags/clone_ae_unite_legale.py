@@ -4,11 +4,10 @@ DAG to clone AE's unite_legale table in our DB.
 running into DB table name length limits.
 """
 
-from datetime import datetime
-
 from airflow import DAG
 from airflow.models.param import Param
 from clone.tasks.airflow_logic.chain_tasks import chain_tasks
+from shared.config import SCHEDULES, START_DATES, CATCHUPS
 
 with DAG(
     dag_id="clone_ae_unite_legale",
@@ -16,13 +15,16 @@ with DAG(
     default_args={
         "owner": "airflow",
         "depends_on_past": False,
-        "start_date": datetime(2025, 3, 5),
-        "catchup": False,
         "email_on_failure": False,
         "email_on_retry": False,
         "retries": 0,
     },
-    description=("Un DAG pour répliquer l'Annuaire Entreprise (AE) dans notre DB"),
+    schedule=SCHEDULES.NONE,
+    catchup=CATCHUPS.AWLAYS_FALSE,
+    start_date=START_DATES.YESTERDAY,
+    description=(
+        "Clone la table 'unite_legale' de l'Annuaire Entreprises (AE) dans notre DB"
+    ),
     tags=["clone", "annuaire", "entreprise", "unite_legale", "siren", "ae"],
     params={
         "dry_run": Param(
@@ -50,8 +52,11 @@ with DAG(
             type="string",
             description_md="📦 Nom du fichier décompressé",
         ),
+        "delimiter": Param(
+            ",",
+            type="string",
+            description_md="🔤 Délimiteur utilisé dans le fichier",
+        ),
     },
-    schedule=None,
-    catchup=False,
 ) as dag:
     chain_tasks(dag)
