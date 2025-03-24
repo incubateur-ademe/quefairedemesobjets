@@ -20,6 +20,9 @@ udf_ae_string_cleanup(activite_principale) AS activite_principale,
 -- Names
 udf_ae_string_cleanup(denomination_usuelle) AS denomination_usuelle,
 
+-- Names
+denomination_usuelle,
+
 -- Status
 udf_ae_string_cleanup(etat_administratif) AS etat_administratif,
 
