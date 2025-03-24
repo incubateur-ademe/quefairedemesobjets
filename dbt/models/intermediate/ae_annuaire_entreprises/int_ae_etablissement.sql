@@ -17,8 +17,15 @@ Notes:
 
 SELECT
     -- Codes
-    siret,
-    activite_principale AS naf, -- Making NAF explicit since it's a code
+    etab.siret,
+    etab.activite_principale AS naf, -- Making NAF explicit being a well-known code
+
+    -- Names
+    CASE
+      WHEN etab.denomination_usuelle = '[ND]' AND unite.denomination IS NOT NULL THEN unite.denomination
+      WHEN etab.denomination_usuelle IS NULL AND unite.denomination IS NOT NULL THEN unite.denomination
+      ELSE etab.denomination_usuelle
+    END AS nom,
 
     /*
     Is active or not: converting this field to BOOLEAN to:
@@ -27,19 +34,28 @@ SELECT
        using different flags
      - create more efficient data type and index
     */
-    CASE etat_administratif
+    CASE etab.etat_administratif
       WHEN 'A' THEN TRUE
       ELSE FALSE
     END AS est_actif,
+    CASE unite.etat_administratif
+      WHEN 'A' THEN TRUE
+      ELSE FALSE
+    END AS unite_est_actif,
 
     -- Addresse
     udf_columns_concat_unique_non_empty(
-      numero_voie,
-      type_voie,
-      libelle_voie
+      etab.numero_voie,
+      etab.type_voie,
+      etab.libelle_voie
     ) AS adresse,
-    complement_adresse AS adresse_complement,
-    code_postal,
-    libelle_commune AS ville
+    etab.complement_adresse AS adresse_complement,
+    etab.code_postal,
+    etab.libelle_commune AS ville
 
-FROM {{ ref('base_ae_etablissement') }}
+FROM {{ ref('base_ae_etablissement') }} AS etab
+/* Joining with unite_legale to bring some essential
+data from parent unite into each etablissement to save
+us from making expensive JOINS in downstream models */
+JOIN {{ ref('base_ae_unite_legale') }} AS unite
+ON unite.siren = LEFT(etab.siret,9)

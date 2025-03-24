@@ -24,6 +24,7 @@ clean-targets:
 # Creating our UDFs
 on-run-start:
   - "{{create_udf_columns_concat_unique_non_empty()}}"
+  - "{{create_udf_columns_words_in_common_count()}}"
   - "{{create_udf_normalize_string_alpha_for_match()}}"
 
 models:
