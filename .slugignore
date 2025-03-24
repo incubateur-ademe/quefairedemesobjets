@@ -4,3 +4,4 @@ node_modules
 integration_tests
 static
 .parcel-cache
+.cache # Used by poetry
