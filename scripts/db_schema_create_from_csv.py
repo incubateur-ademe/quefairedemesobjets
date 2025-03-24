@@ -3,6 +3,7 @@
 """Script to read a CSV, infer its schema, and test it in a PostgreSQL database."""
 import csv
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -22,10 +23,10 @@ print(f"{DATABASE_URL=}")
 ENGINE = create_engine(DATABASE_URL, isolation_level="AUTOCOMMIT")
 
 
-def df_infer_schema_fast(csv_path: Path) -> dict[str, str]:
+def df_infer_schema_fast(csv_path: Path, delimiter) -> dict[str, str]:
     print("\nCSV reading 1st line: started 🟡")
     with csv_path.open("r", newline="", encoding="utf-8") as csvfile:
-        reader = csv.reader(csvfile)
+        reader = csv.reader(csvfile, delimiter=delimiter)
         fields = next(reader)  # Read the first line
     print("CSV reading 1st line: completed 🟢")
     schema = {k: "VARCHAR(255)" for k in fields}
@@ -74,7 +75,7 @@ def db_table_schema_create(table_name: str, schema: dict[str, str]) -> None:
             conn.execute(sql)
 
 
-def db_table_load_csv(csv_path: Path, table_name: str) -> None:
+def db_table_load_csv(csv_path: Path, delimiter: str, table_name: str) -> None:
     """Loading CSV into database. We intentionally use the STDIN method
     because when we load CSVs via our Airflow DAGs that's how we proceed
     (we stream download -> unpack -> load into DB that way)."""
@@ -82,12 +83,11 @@ def db_table_load_csv(csv_path: Path, table_name: str) -> None:
         return
 
     # Preparing command
-    cmd_copy = f"COPY {table_name} FROM stdin WITH (FORMAT csv, HEADER true);"
+    cmd_copy = f"COPY {table_name} FROM stdin WITH (FORMAT csv, HEADER true, DELIMITER '{delimiter}');"
     cmd_psql = f'psql {DATABASE_URL} -c "{cmd_copy}"'
-    cmd_final = f'cat "{csv_path}" | {cmd_psql}'
+    cmd_final = f"cat '{csv_path}' | {cmd_psql}"
     print(f"{cmd_final=}")
 
-    # Running command
     process = subprocess.Popen(
         cmd_final,
         shell=True,
@@ -104,10 +104,14 @@ def db_table_inspect(table_name: str, schema: dict[str, str]) -> None:
     cols = [k for k, v in schema.items() if v.startswith("VARCHAR")]
     results = []
     for col in track(cols):
-        sql = f"""SELECT '{col}' AS column, MAX(LENGTH("{col}")) AS max_length
+        sql = f"""SELECT
+                    '{col}' AS column,
+                    MIN(LENGTH("{col}")) AS min_length,
+                    MAX(LENGTH("{col}")) AS max_length
                 FROM {table_name};"""
         df_result = pd.read_sql(sql, ENGINE)
-        print(df_result)
+        print(f"\n{col=}")
+        print(df_result.drop(columns=["column"]))
         results += df_result.to_dict(orient="records")
     schema_loaded = {x["column"]: f"VARCHAR({x['max_length']})" for x in results}
     db_table_schema_create(f"{table_name}", schema_loaded)
@@ -115,14 +119,15 @@ def db_table_inspect(table_name: str, schema: dict[str, str]) -> None:
 
 def csv_schema_to_db(
     csv_path: Path,
+    delimiter: str,
     table_name: str,
 ) -> None:
     """Load a CSV file into a PostgreSQL table."""
     # Load CSV
 
-    schema = df_infer_schema_fast(csv_path)
+    schema = df_infer_schema_fast(csv_path, delimiter)
     db_table_schema_create(table_name, schema)
-    db_table_load_csv(csv_path, table_name)
+    db_table_load_csv(csv_path, delimiter, table_name)
     db_table_inspect(table_name, schema)
 
 
@@ -134,18 +139,21 @@ def main():
     print(f"{csv_path=}")
     assert csv_path.exists(), f"File not found: {csv_path}"
 
+    delimiter = Prompt.ask("Délimiteur CSV:", default=",")
+    print(f"{delimiter=}")
+
     # Database connection
     print("\nDatabase connection:")
     print(f"{DATABASE_URL=}")
 
     # Table name
     print("\nTable name:")
-    table_name = f"test_schema_{csv_path.stem.lower()}"
+    table_name = f"test_schema_{re.sub(r"[ -]","_",csv_path.stem.lower())}"
     table_name = Prompt.ask("Enter table name:", default=table_name)
     print(f"{table_name=}")
 
     # Load CSV into DB
-    csv_schema_to_db(csv_path, table_name)
+    csv_schema_to_db(csv_path, delimiter, table_name)
 
 
 if __name__ == "__main__":
