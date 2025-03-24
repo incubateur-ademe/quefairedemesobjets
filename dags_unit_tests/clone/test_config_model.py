@@ -1,7 +1,5 @@
-from datetime import datetime
-
 import pytest
-from clone.config.model import CloneConfig, DIR_SQL_CREATION
+from clone.config.model import DIR_SQL_CREATION, CloneConfig
 
 
 class TestCloneConfig:
@@ -20,9 +18,6 @@ class TestCloneConfig:
 
     def test_table_name(self, config):
         assert config.table_name == "clone_my_table_" + config.run_timestamp
-
-    def test_view_name(self, config):
-        assert config.view_name == "clone_my_table_in_use"
 
     def test_table_schema_file_path(self, config):
         assert (

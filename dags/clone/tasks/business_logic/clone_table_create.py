@@ -6,7 +6,7 @@ from pathlib import Path
 from pydantic import AnyHttpUrl
 from utils import logging_utils as log
 from utils.cmd import cmd_run
-from utils.django import django_setup_full, django_schema_create_and_check
+from utils.django import django_schema_create_and_check, django_setup_full
 
 django_setup_full()
 
@@ -46,12 +46,13 @@ def csv_url_to_commands(
 
     # Finally the command to load the CSV into the DB
     db = connection.settings_dict
+    cmd_from = f'stdin WITH (FORMAT csv, HEADER true, DELIMITER "{delimiter}");'
     cmds_create.append(
         {
             "cmd": (
                 f"cat {folder}/{file_unpacked} | "
                 f"psql -h {db['HOST']} -p {db['PORT']} -U {db['USER']} -d {db['NAME']} "
-                f"-c '\\copy {table_name} FROM stdin WITH (FORMAT csv, HEADER true, DELIMITER \"{delimiter}\");'"
+                f"-c '\\copy {table_name} FROM {cmd_from}'"
             ),
             "env": {"PGPASSWORD": db["PASSWORD"]},
         }
