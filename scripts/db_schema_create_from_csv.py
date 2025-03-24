@@ -83,7 +83,8 @@ def db_table_load_csv(csv_path: Path, delimiter: str, table_name: str) -> None:
         return
 
     # Preparing command
-    cmd_copy = f"COPY {table_name} FROM stdin WITH (FORMAT csv, HEADER true, DELIMITER '{delimiter}');"
+    cmd_from = f"stdin WITH (FORMAT csv, HEADER true, DELIMITER '{delimiter}');"
+    cmd_copy = f"COPY {table_name} FROM {cmd_from}"
     cmd_psql = f'psql {DATABASE_URL} -c "{cmd_copy}"'
     cmd_final = f"cat '{csv_path}' | {cmd_psql}"
     print(f"{cmd_final=}")
