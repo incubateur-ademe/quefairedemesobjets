@@ -1,7 +1,11 @@
 docs
 unit_tests
+dags_unit_tests
+notebooks
 node_modules
 integration_tests
 static
 .parcel-cache
 .cache # Used by poetry
+.npm
+.vscode
