@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from clone.tasks.business_logic.clone_table_create import schema_create_and_check
+from utils.django import django_schema_create_and_check
 
 
 def clone_ae_view_in_use_switch(
@@ -15,4 +15,4 @@ def clone_ae_view_in_use_switch(
         .replace(r"{{view_name}}", view_name)
         .replace(r"{{table_name}}", table_name)
     )
-    schema_create_and_check(schema_name=table_name, sql=sql, dry_run=dry_run)
+    django_schema_create_and_check(schema_name=table_name, sql=sql, dry_run=dry_run)

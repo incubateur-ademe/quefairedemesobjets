@@ -1,7 +1,7 @@
 from datetime import datetime
 
 import pytest
-from clone.config.model import CloneConfig
+from clone.config.model import CloneConfig, DIR_SQL_CREATION
 
 
 class TestCloneConfig:
@@ -14,21 +14,33 @@ class TestCloneConfig:
             data_url="https://example.org/data.zip",  # type: ignore
             file_downloaded="data.zip",
             file_unpacked="data.csv",
+            delimiter=",",
             run_timestamp="20220305120000",
         )
-
-    def test_run_timestamp(self, config):
-        # Is a valid and stable timestamp
-        ts = config.run_timestamp
-        assert datetime.strptime(ts, "%Y%m%d%H%M%S")
-        assert ts == config.run_timestamp
-        assert ts == config.run_timestamp
 
     def test_table_name(self, config):
         assert config.table_name == "clone_my_table_" + config.run_timestamp
 
+    def test_view_name(self, config):
+        assert config.view_name == "clone_my_table_in_use"
+
+    def test_table_schema_file_path(self, config):
+        assert (
+            config.table_schema_file_path
+            == DIR_SQL_CREATION / "tables" / "create_table_my_table.sql"
+        )
+
     def test_table_name_pattern(self, config):
-        assert config.table_name_pattern.match("clone_my_table_20250000000000")
+        pattern = config.table_name_pattern
+        assert pattern.match("clone_my_table_20250000000000")
+        assert not pattern.match("clone_my_table_20250000000000_other")
+        assert not pattern.match("clone_not_my_table_2025000000000")
+
+    def test_view_schema_file_path(self, config):
+        assert (
+            config.view_schema_file_path
+            == DIR_SQL_CREATION / "views" / "create_view_my_table_in_use.sql"
+        )
 
     def test_view_name(self, config):
         assert config.view_name == "clone_my_table_in_use"

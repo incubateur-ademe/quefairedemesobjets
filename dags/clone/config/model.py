@@ -19,6 +19,7 @@ class CloneConfig(BaseModel):
     data_url: AnyHttpUrl
     file_downloaded: str
     file_unpacked: str
+    delimiter: str
     run_timestamp: str
 
     @computed_field
