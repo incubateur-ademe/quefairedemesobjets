@@ -2,3 +2,4 @@ docs
 unit_tests
 node_modules
 integration_tests
+static
