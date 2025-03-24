@@ -41,52 +41,6 @@ def cluster_id_from_strings(strings: list[str]) -> str:
     return "_".join(str(slugify(unidecode(str(x)))).lower() for x in strings)
 
 
-def cluster_strings(
-    strings: list[str], threshold: float = 0.5
-) -> list[tuple[list[int], list[str]]]:
-    """Groupe des chaînes de caractères similaires en clusters
-    sur la base de l'algo TF IDF
-
-    Les clusters de 1 sont ignorés
-
-    Args:
-        strings: liste de chaînes de caractères
-        threshold: seuil de similarité pour grouper les chaînes
-
-    Returns:
-        liste de clusters sous forme de tuples (indices, strings)
-    """
-    vectorizer = TfidfVectorizer(
-        tokenizer=str.split, binary=False, token_pattern=None  # type: ignore
-    )
-    tfidf_matrix = vectorizer.fit_transform(strings)
-
-    # Compute pairwise cosine similarity between strings
-    similarity_matrix = cosine_similarity(tfidf_matrix)
-
-    # Sort pairs by similarity score in descending order
-    indices = np.triu_indices_from(similarity_matrix, k=1)
-    tuples = [
-        (i, j, similarity_matrix[i, j])
-        for i, j in zip(*indices)
-        if similarity_matrix[i, j] >= threshold
-    ]
-    tuples.sort(key=lambda x: x[2], reverse=True)  # type: ignore
-
-    visited = set()
-    clusters = []
-
-    for i, j, _ in tuples:
-        if i not in visited and j not in visited:
-            cluster = np.where(similarity_matrix[i] >= threshold)[0]
-            cluster = [int(idx) for idx in cluster if idx not in visited]
-            if cluster:
-                visited.update(cluster)
-                clusters.append((cluster, [strings[k] for k in cluster]))
-
-    return clusters
-
-
 def values_to_similarity_matrix(values: list[str]) -> np.ndarray:
     """Compute similarity matrix using TF-IDF vectorization
     on a list of values."""
