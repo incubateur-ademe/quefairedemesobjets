@@ -17,6 +17,9 @@ SELECT
 siret,
 activite_principale,
 
+-- Names
+denomination_usuelle,
+
 -- Status
 etat_administratif,
 
