@@ -5,7 +5,6 @@ from cluster.config.constants import COL_INDEX_SRC
 from cluster.tasks.business_logic.cluster_acteurs_clusters import (
     cluster_acteurs_clusters,
     cluster_cols_group_fuzzy,
-    cluster_strings,
     score_tuples_to_clusters,
     similarity_matrix_to_tuples,
 )
@@ -312,19 +311,6 @@ class TestClusterStrings:
             "artiste peintre",
             "centre commercial carrefour",
             "je suis tout seul :(",
-        ]
-
-    def test_cluster_strings(self, strings):
-        """On vérifie que les chaînes sont bien regroupées
-        et que "je suis tout seul :(" est ignoré car tout seul
-        dans son cluster
-        """
-        clusters = cluster_strings(strings)
-        print(clusters)
-        assert clusters == [
-            ([1, 4], ["artiste peintre auchan", "artiste peintre"]),
-            ([3, 5], ["centre carrefour", "centre commercial carrefour"]),
-            ([0, 2], ["centre commercial auchan", "centre auchan"]),
         ]
 
 
