@@ -18,16 +18,15 @@ macro-paths: ["macros"]
 snapshot-paths: ["snapshots"]
 
 on-run-start:
-  - "{{ create_encode_base57() }}"
-  - "{{ create_uuid_to_int() }}"
-  - "{{ create_safe_divmod() }}"
+  - "{{ create_udf_encode_base57() }}"
+  - "{{ create_udf_uuid_to_int() }}"
+  - "{{ create_udf_safe_divmod() }}"
   - "{{ create_udf_columns_concat_unique_non_empty() }}"
   - "{{ create_udf_normalize_string_alpha_for_match() }}"
 
 clean-targets:
   - "target"
   - "dbt_packages"
-
 
 models:
   base:

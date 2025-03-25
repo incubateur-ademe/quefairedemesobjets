@@ -1,4 +1,4 @@
-{% macro create_encode_base57() %}
+{% macro create_udf_encode_base57() %}
 
 CREATE OR REPLACE FUNCTION {{ target.schema }}.encode_base57(uuid UUID)
 RETURNS text AS $$

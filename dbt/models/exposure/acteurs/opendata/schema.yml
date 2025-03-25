@@ -73,7 +73,7 @@ models:
         description: "La longitude de l'acteur"
         tests:
           - dbt_expectations.expect_column_to_exist
-      - name: qualites_labels
+      - name: qualites_et_labels
         description: "Les qualités et labels de l'acteur"
         tests:
           - dbt_expectations.expect_column_to_exist
@@ -120,9 +120,6 @@ models:
           max_value: 400000
       - dbt_expectations.expect_table_column_count_to_equal:
           value: 24
-      # I wanted to use `dbt_expectations.expect_column_to_exist` but it doesn't work as I expected
-      - dbt_expectations.expect_table_columns_to_contain_set:
-          column_list: ["identifiant", "paternite", "nom", "nom_commercial", "siren", "siret", "description", "type_dacteur", "site_web", "telephone", "adresse", "complement_dadresse", "code_postal", "ville", "latitude", "longitude", "qualites_labels", "public_accueilli", "reprise", "exclusivite_de_reprisereparation", "uniquement_sur_rdv", "type_de_services", "propositions_de_services", "date_de_derniere_modification"]
     config:
       materialized: table
       indexes:

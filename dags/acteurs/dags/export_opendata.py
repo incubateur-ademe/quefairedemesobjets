@@ -4,6 +4,7 @@ from acteurs.tasks.airflow_logic.export_opendata_csv_to_s3_task import (
     export_opendata_csv_to_s3_task,
 )
 from airflow import DAG
+from shared.config.schedules import SCHEDULES
 
 default_args = {
     "owner": "airflow",
@@ -30,7 +31,7 @@ with DAG(
         "s3_connection_id": "s3data",
         "opendata_table": "exposure_opendata_acteur",
     },
-    schedule=None,
+    schedule=SCHEDULES.WEEKLY_AT_1AM,
     max_active_runs=1,
 ) as dag:
 

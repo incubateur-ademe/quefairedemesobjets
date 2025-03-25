@@ -1,4 +1,4 @@
-{% macro create_uuid_to_int() %}
+{% macro create_udf_uuid_to_int() %}
 
 CREATE OR REPLACE FUNCTION {{ target.schema }}.uuid_to_int(uuid UUID)
 RETURNS numeric AS $$

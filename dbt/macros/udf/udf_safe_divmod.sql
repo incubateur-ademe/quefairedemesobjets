@@ -1,4 +1,4 @@
-{% macro create_safe_divmod() %}
+{% macro create_udf_safe_divmod() %}
 CREATE OR REPLACE FUNCTION {{ target.schema }}.safe_divmod(n numeric, d numeric)
 RETURNS TABLE(quotient numeric, remainder numeric) AS $$
 DECLARE

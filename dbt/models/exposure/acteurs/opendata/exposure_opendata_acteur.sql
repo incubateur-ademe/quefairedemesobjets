@@ -79,7 +79,7 @@ SELECT
   da.ville as "ville",
   ST_Y(da.location::geometry) as "latitude",
   ST_X(da.location::geometry) as "longitude",
-  al.labels as "qualites_labels",
+  al.labels as "qualites_et_labels",
   da.public_accueilli as "public_accueilli",
   da.reprise as "reprise",
   da.exclusivite_de_reprisereparation as "exclusivite_de_reprisereparation",
