@@ -60,7 +60,7 @@ SELECT
   da.siren as "siren",
   da.siret as "siret",
   da.description as "description",
-  at.code as "type_acteur",
+  at.code as "type_dacteur",
   da.url as "site_web",
   CASE
     WHEN da.telephone ~ '^0[67]' THEN NULL
@@ -74,19 +74,19 @@ SELECT
     ELSE da.telephone
   END as "telephone",
   da.adresse as "adresse",
-  da.adresse_complement as "complement_adresse",
+  da.adresse_complement as "complement_dadresse",
   da.code_postal as "code_postal",
   da.ville as "ville",
   ST_Y(da.location::geometry) as "latitude",
   ST_X(da.location::geometry) as "longitude",
-  al.labels as "qualites_labels",
+  al.labels as "qualites_et_labels",
   da.public_accueilli as "public_accueilli",
   da.reprise as "reprise",
-  da.exclusivite_de_reprisereparation as "exclusivite_reprise",
+  da.exclusivite_de_reprisereparation as "exclusivite_de_reprisereparation",
   da.uniquement_sur_rdv as "uniquement_sur_rdv",
-  acs.services as "type_services",
-  ps.services::text as "propositions_services",
-  to_char(da.modifie_le, 'YYYY-MM-DD') as "date_modification"
+  acs.services as "type_de_services",
+  ps.services::text as "propositions_de_services",
+  to_char(da.modifie_le, 'YYYY-MM-DD') as "date_de_derniere_modification"
 FROM {{ ref('marts_opendata_acteur') }}  AS da
 LEFT JOIN qfdmo_acteurtype AS at ON da.acteur_type_id = at.id
 -- INNER JOIN : Only open lisense
@@ -94,7 +94,4 @@ INNER JOIN deduplicated_opened_sources AS ds ON da.uuid = ds.uuid
 LEFT JOIN proposition_services AS ps ON da.uuid = ps.uuid
 LEFT JOIN acteur_labels AS al ON da.uuid = al.uuid
 LEFT JOIN acteur_services AS acs ON da.uuid = acs.uuid
-WHERE da.statut = 'ACTIF'
-AND da.public_accueilli NOT IN ('AUCUN', 'PROFESSIONNELS')
-AND da.identifiant_unique NOT LIKE '%_reparation_%'
 ORDER BY da.uuid

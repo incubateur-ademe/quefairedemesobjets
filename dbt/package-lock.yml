@@ -1,4 +1,8 @@
 packages:
   - package: dbt-labs/dbt_utils
     version: 1.3.0
-sha1_hash: 226ae69cdfbc9367e2aa2c472b01f99dbce11de0 # pragma: allowlist secret
+  - package: calogica/dbt_expectations
+    version: 0.10.4
+  - package: calogica/dbt_date
+    version: 0.10.1
+sha1_hash: 76849041a61d4fb6a69694f11b1e8d3decc17def
