@@ -1,7 +1,6 @@
-from datetime import datetime
-
 from airflow import DAG
 from airflow.models.baseoperator import chain
+from airflow.utils.dates import days_ago
 from sources.tasks.airflow_logic.db_data_prepare_task import db_data_prepare_task
 from sources.tasks.airflow_logic.db_read_acteur_task import db_read_acteur_task
 from sources.tasks.airflow_logic.db_write_type_action_suggestions_task import (
@@ -26,7 +25,7 @@ from sources.tasks.airflow_logic.source_data_validate_task import (
 default_args = {
     "owner": "airflow",
     "depends_on_past": False,
-    "start_date": datetime(2024, 3, 23),
+    "start_date": days_ago(1),
     "email_on_failure": False,
     "email_on_retry": False,
     "retries": 1,

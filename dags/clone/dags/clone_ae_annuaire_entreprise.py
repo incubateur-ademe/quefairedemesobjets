@@ -4,11 +4,10 @@ DAG to clone the Annuaire Entreprise in our DB.
 running into DB table name length limits.
 """
 
-from datetime import datetime
-
 from airflow import DAG
 from airflow.models.baseoperator import chain
 from airflow.models.param import Param
+from airflow.utils.dates import days_ago
 from clone.tasks.airflow_logic.clone_ae_table_create_etab_task import (
     clone_ea_table_create_etab_task,
 )
@@ -37,7 +36,7 @@ with DAG(
     default_args={
         "owner": "airflow",
         "depends_on_past": False,
-        "start_date": datetime(2025, 3, 5),
+        "start_date": days_ago(1),
         "catchup": False,
         "email_on_failure": False,
         "email_on_retry": False,

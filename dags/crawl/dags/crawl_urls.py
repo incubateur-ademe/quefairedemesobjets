@@ -1,7 +1,6 @@
-from datetime import datetime, timedelta
-
 from airflow import DAG
 from airflow.models.param import Param
+from airflow.utils.dates import days_ago
 from crawl.tasks.airflow_logic.crawl_urls_check_crawl_task import (
     crawl_urls_check_crawl_task,
 )
@@ -43,7 +42,7 @@ with DAG(
     default_args={
         "owner": "airflow",
         "depends_on_past": False,
-        "start_date": datetime(2025, 1, 1) - timedelta(days=1),
+        "start_date": days_ago(1),
         "email_on_failure": False,
         "email_on_retry": False,
         "retries": 0,
