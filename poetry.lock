@@ -3970,27 +3970,27 @@ files = [
 
 [[package]]
 name = "opening-hours-py"
-version = "0.11.1"
+version = "1.1.2"
 description = "A parser and toolkit for the opening_hours in OpenStreetMap written in Rust."
 optional = false
 python-versions = "*"
 groups = ["main"]
 files = [
-    {file = "opening_hours_py-0.11.1-cp39-abi3-macosx_10_12_x86_64.whl", hash = "sha256:8fe3d5d5077e8288515885c8f9b88c26d5c3a5debf1be16ece65b90119ba35bb"},
-    {file = "opening_hours_py-0.11.1-cp39-abi3-macosx_11_0_arm64.whl", hash = "sha256:4091fca57a43bea129fd3dde4ec6a81dc8415993d66df0cb06aa0f410175e401"},
-    {file = "opening_hours_py-0.11.1-cp39-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:9fc7faa4a86fa647f8271dd4bcdb532e237c4fbbaac03da3caa4a017072279a4"},
-    {file = "opening_hours_py-0.11.1-cp39-abi3-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:8b221210235e4e81594148367a764cfa5a75564a3fa91f70cc02b1222014c607"},
-    {file = "opening_hours_py-0.11.1-cp39-abi3-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:6076c797329ceb94c7ecf8217ed521d93d6ba127b9475e26b4f44c41334055c5"},
-    {file = "opening_hours_py-0.11.1-cp39-abi3-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:1fa536f4feb2d8e756f52a6ffff59f190e1d3bacc0f706c1b85927a172e0b778"},
-    {file = "opening_hours_py-0.11.1-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:1c9db7f1e7e3d91f03d7c9f67eb3b4a808a395035f4e8512fdc5d42ac1ab8051"},
-    {file = "opening_hours_py-0.11.1-cp39-abi3-manylinux_2_5_i686.manylinux1_i686.whl", hash = "sha256:15bb4f31de1104cd1253e8cacfd27ea707b44ac0bca82875709b9e663e6b573f"},
-    {file = "opening_hours_py-0.11.1-cp39-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:8dbc6f4c8956fa84db390410a167d06d7707a51f078356c9a8b579c1207da282"},
-    {file = "opening_hours_py-0.11.1-cp39-abi3-musllinux_1_2_armv7l.whl", hash = "sha256:4cd8d2186f15ce072c542b629d5f3b87e86e72f34f320f915c2b50679172102e"},
-    {file = "opening_hours_py-0.11.1-cp39-abi3-musllinux_1_2_i686.whl", hash = "sha256:489345b29ba1a94b29b4eada75b485212ae5f9dd003af70c52c41ba2922531e6"},
-    {file = "opening_hours_py-0.11.1-cp39-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:ec13e82babfef5c86ef8a6e6534b259bcc9e4eae1408574f0daccd2103418896"},
-    {file = "opening_hours_py-0.11.1-cp39-abi3-win32.whl", hash = "sha256:a19e482072913822449de422495fdc3d0351fbdf691391a135f7b3bbcee6101f"},
-    {file = "opening_hours_py-0.11.1-cp39-abi3-win_amd64.whl", hash = "sha256:668f187179625d7fbe04a675a43701c841ccf376da15c8d4807890d5dc21549e"},
-    {file = "opening_hours_py-0.11.1.tar.gz", hash = "sha256:0e1a297e802421ef4b58222fd64ecf4c9d34e86f3813b7ad29a14d1bf7b83e17"},
+    {file = "opening_hours_py-1.1.2-cp39-abi3-macosx_10_12_x86_64.whl", hash = "sha256:d6cdda8dc7e1a8c834fe3fdd6a32d001169168094845efa913cf78d4aaf3e155"},
+    {file = "opening_hours_py-1.1.2-cp39-abi3-macosx_11_0_arm64.whl", hash = "sha256:a632205efaea51f119f15e6051e0f1b1f4035d97a3b7034386a601ca808138ab"},
+    {file = "opening_hours_py-1.1.2-cp39-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:6a58d37b33596c11fb8affb2ee0dc11d3edceb0c2cbe33f2b33316eed69cc1e8"},
+    {file = "opening_hours_py-1.1.2-cp39-abi3-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:21ef27f4a03399b8d50e6a288a299f177cb6014d8548c0fab2474962ca322ab7"},
+    {file = "opening_hours_py-1.1.2-cp39-abi3-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:3ef1044141862c1aa5728a51695a79680369a06a27cb13c6372ce0cab7a267a7"},
+    {file = "opening_hours_py-1.1.2-cp39-abi3-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:5bd87bb138160a50ab61a45136a218f3a3c29bec6e42ac464fe0c7a55ba265bc"},
+    {file = "opening_hours_py-1.1.2-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:449e59edf6f5197313ad3e7184c3d7e6705943b06c06ce0672db0adf375be1ca"},
+    {file = "opening_hours_py-1.1.2-cp39-abi3-manylinux_2_5_i686.manylinux1_i686.whl", hash = "sha256:2351a8fd50a15e8fbb8a4259a05166c1adb3357d3813cb3a674d1982c67941f2"},
+    {file = "opening_hours_py-1.1.2-cp39-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:669cd2922f91c485006901c5ab5946423f6be75e687a576ba6bd239495363ce7"},
+    {file = "opening_hours_py-1.1.2-cp39-abi3-musllinux_1_2_armv7l.whl", hash = "sha256:93dc9a6f8ccb50666016c65bd9bebfe882e0a79c7bcc1c161e80b3e7685127f5"},
+    {file = "opening_hours_py-1.1.2-cp39-abi3-musllinux_1_2_i686.whl", hash = "sha256:43a51b9e90788959fed91bdcccd93754e0e7ee74bf29b95d8cf0ee7a9a75a9ff"},
+    {file = "opening_hours_py-1.1.2-cp39-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:fd6ab63314d07a03109c6a7dfaeaa05403d4dc08fb20467570feb30a717fd778"},
+    {file = "opening_hours_py-1.1.2-cp39-abi3-win32.whl", hash = "sha256:af99b913cbee7fbfbc80c71d8240ff1ada2b3e1adb02a148ba6787d8b889a02e"},
+    {file = "opening_hours_py-1.1.2-cp39-abi3-win_amd64.whl", hash = "sha256:9e9561cd5f368acebdb37b9d8f2979f8ff2fd323d58348c4d5c848b29e982ebe"},
+    {file = "opening_hours_py-1.1.2.tar.gz", hash = "sha256:84bc094bcf23794cafac6ae963fd3bcab7fdf853f306821763dbfa0470633287"},
 ]
 
 [[package]]
@@ -7381,4 +7381,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12,<3.13"
-content-hash = "0aab9f3060987ce6e1458859ffd276e58937b33c5f9a09569b3562a1e87f65d4"
+content-hash = "d04dfce656d2160e9a11ce9d44df8676bebb59d3963a58393608fbbccb261286"
