@@ -138,6 +138,7 @@ class ProduitAdmin(
     list_filter = ["bdd", "code"]
     fields_to_display_in_first_position = ["id", "nom"]
     inlines = [SynonymeInline, LienInline]
+    exclude = ("infotri",)
 
 
 @admin.register(Lien)
