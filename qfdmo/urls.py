@@ -18,6 +18,7 @@ from qfdmo.views.adresses import (
     solution_admin,
 )
 from qfdmo.views.auth import LVAOLoginView
+from qfdmo.views.carte import CustomCarteView
 from qfdmo.views.configurator import AdvancedConfiguratorView, ConfiguratorView
 
 urlpatterns = [
@@ -26,6 +27,7 @@ urlpatterns = [
     path("static/carte.js", get_carte_iframe_script, name="carte_script"),
     path("static/iframe.js", get_formulaire_iframe_script, name="formulaire_script"),
     path("carte", CarteSearchActeursView.as_view(), name="carte"),
+    path("carte/<slug:slug>", CustomCarteView.as_view(), name="carte_custom"),
     path("carte.json", CarteSearchActeursView.as_view(), name="carte_json"),
     path("formulaire", FormulaireSearchActeursView.as_view(), name="formulaire"),
     path("connexion", LVAOLoginView.as_view(), name="login"),
