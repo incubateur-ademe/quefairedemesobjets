@@ -5,7 +5,7 @@ name: "qfdmo"
 version: "1.0.0"
 
 # This setting configures which "profile" dbt uses for this project.
-profile: "dbt_test"
+profile: "default"
 
 # These configurations specify where dbt should look for different types of files.
 # The `model-paths` config, for example, states that models in this project can be
@@ -17,14 +17,16 @@ seed-paths: ["seeds"]
 macro-paths: ["macros"]
 snapshot-paths: ["snapshots"]
 
+on-run-start:
+  - "{{ create_udf_encode_base57() }}"
+  - "{{ create_udf_uuid_to_int() }}"
+  - "{{ create_udf_safe_divmod() }}"
+  - "{{ create_udf_columns_concat_unique_non_empty() }}"
+  - "{{ create_udf_normalize_string_alpha_for_match() }}"
+
 clean-targets:
   - "target"
   - "dbt_packages"
-
-# Creating our UDFs
-on-run-start:
-  - "{{create_udf_columns_concat_unique_non_empty()}}"
-  - "{{create_udf_normalize_string_alpha_for_match()}}"
 
 models:
   base:
