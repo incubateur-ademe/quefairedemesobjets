@@ -417,7 +417,6 @@ if DEBUG:
 # ----------------
 WAGTAIL_SITE_NAME = "Longue vie aux objets"
 WAGTAILADMIN_BASE_URL = BASE_URL
-WAGTAIL_APPEND_SLASH = True
 INSTALLED_APPS.extend(
     [
         # Sites faciles
