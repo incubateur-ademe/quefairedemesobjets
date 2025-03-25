@@ -524,6 +524,7 @@ class SearchActeursView(
         ]
 
 
+# TODO: move in views/carte.py
 class CarteSearchActeursView(SearchActeursView):
     is_carte = True
     template_name = "qfdmo/carte.html"
