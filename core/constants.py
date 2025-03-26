@@ -25,8 +25,7 @@ SHARE_BODY = (
 ASSISTANT = {
     "seo": {
         # Utilisé comme balise <title> dans les pages d'accueil et produit
-        "title": "Que Faire de mes déchets & objets : votre assistant au tri "
-        "et à la consommation responsable",
+        "title": "Que Faire de mes objets & déchets : votre assistant au tri",
         # Utilisé comme meta-description en l'absence de meta
         # description définie sur le produit
         "description": "Ne jetez pas vos objets ! Découvrez des adresses "
