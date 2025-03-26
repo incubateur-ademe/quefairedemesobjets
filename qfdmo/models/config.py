@@ -41,7 +41,14 @@ class CarteConfig(models.Model):
     sous_categorie_objet = models.ManyToManyField(
         "qfdmo.SousCategorieObjet",
         verbose_name="Sous-catégories d'objets filtrés",
-        help_text="Seules les sources sélectionnées s'afficheront sur la carte"
+        help_text="Seules les objets sélectionnés s'afficheront sur la carte"
+        "\nSi le champ n'est pas renseigné il sera ignoré",
+        blank=True,
+    )
+    groupe_action = models.ManyToManyField(
+        "qfdmo.GroupeAction",
+        verbose_name="Groupe d'actions",
+        help_text="Seules les actions sélectionnées s'afficheront sur la carte"
         "\nSi le champ n'est pas renseigné il sera ignoré",
         blank=True,
     )
