@@ -1,5 +1,5 @@
 SELECT
-    encode_base57(uuid_generate_v5('6ba7b810-9dad-11d1-80b4-00c04fd430c8'::uuid, COALESCE(ra.identifiant_unique, a.identifiant_unique)::text)) AS uuid,
+    CAST({{ target.schema }}.encode_base57(uuid_generate_v5('6ba7b810-9dad-11d1-80b4-00c04fd430c8'::uuid, COALESCE(ra.identifiant_unique, a.identifiant_unique)::text)) AS varchar(22)) AS uuid,
     COALESCE(ra.identifiant_unique, a.identifiant_unique) AS identifiant_unique,
     COALESCE(ra.nom, a.nom) AS nom,
     COALESCE(ra.description, a.description) AS description,
