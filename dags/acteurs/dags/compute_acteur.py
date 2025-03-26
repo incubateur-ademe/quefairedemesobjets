@@ -1,21 +1,26 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
+from acteurs.tasks.airflow_logic.check_model_table_consistency_task import (
+    check_model_table_consistency_task,
+)
 from airflow import DAG
 from airflow.operators.bash import BashOperator
+from airflow.utils.dates import days_ago
 from shared.config.schedules import SCHEDULES
 
 default_args = {
     "owner": "airflow",
     "depends_on_past": False,
-    "start_date": datetime(2025, 2, 14),
+    "start_date": days_ago(1),
     "email_on_failure": False,
     "email_on_retry": False,
     "retries": 3,
     "retry_delay": timedelta(minutes=2),
 }
 
+
 with DAG(
-    "build_view_dag",
+    "compute_acteurs",
     default_args=default_args,
     dag_display_name="DBT - Rafraîchir les acteurs affichés",
     description=(
@@ -114,23 +119,29 @@ with DAG(
         ),
     )
 
+    check_model_table_acteur_task = check_model_table_consistency_task(
+        dag, "DisplayedActeur", "exposure_carte_acteur"
+    )
+    check_model_table_propositionservice_task = check_model_table_consistency_task(
+        dag, "DisplayedPropositionService", "exposure_carte_propositionservice"
+    )
+
     # Définir la séquence principale
     (
         dbt_run_base_acteurs
         >> dbt_test_base_acteurs
         >> dbt_run_intermediate_acteurs
         >> dbt_test_intermediate_acteurs
-        # Branche exhaustive
         >> dbt_run_marts_acteurs_exhaustive
         >> dbt_test_marts_acteurs_exhaustive
         >> dbt_run_exposure_acteurs_exhaustive
         >> dbt_test_exposure_acteurs_exhaustive
-        # Branche carte
         >> dbt_run_marts_acteurs_carte
         >> dbt_test_marts_acteurs_carte
         >> dbt_run_exposure_acteurs_carte
         >> dbt_test_exposure_acteurs_carte
-        # Branche opendata
+        >> check_model_table_acteur_task
+        >> check_model_table_propositionservice_task
         >> dbt_run_marts_acteurs_opendata
         >> dbt_test_marts_acteurs_opendata
         >> dbt_run_exposure_acteurs_opendata

@@ -113,5 +113,6 @@ class DisplayedPropositionServiceFactory(Factory):
     class Meta:
         model = DisplayedPropositionService
 
+    id = Faker("word")
     action = SubFactory(ActionFactory)
     acteur = SubFactory(DisplayedActeurFactory)
