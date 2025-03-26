@@ -643,7 +643,7 @@ def acteur_detail(request, uuid):
         return redirect(settings.ASSISTANT["BASE_URL"], permanent=True)
 
     if displayed_acteur.statut != ActeurStatus.ACTIF:
-        return redirect("https://quefairedemesdechets.ademe.fr", permanent=True)
+        return redirect(settings.ASSISTANT["BASE_URL"], permanent=True)
 
     context = {
         "base_template": base_template,
