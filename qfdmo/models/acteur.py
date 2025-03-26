@@ -35,7 +35,7 @@ from django.utils.functional import cached_property
 from unidecode import unidecode
 
 from core.constants import DIGITAL_ACTEUR_CODE
-from core.models import TimestampedModel
+from core.models.mixin import TimestampedModel
 from core.validators import EmptyEmailValidator
 from dags.sources.config.shared_constants import (
     EMPTY_ACTEUR_FIELD,
@@ -1214,6 +1214,7 @@ class DisplayedPropositionService(BasePropositionService):
         verbose_name = "Proposition de service - AFFICHÉ"
         verbose_name_plural = "Proposition de service - AFFICHÉ"
 
+    id = models.CharField(primary_key=True)
     acteur = models.ForeignKey(
         DisplayedActeur,
         on_delete=models.CASCADE,
