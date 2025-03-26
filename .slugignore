@@ -5,4 +5,5 @@ notebooks
 node_modules
 integration_tests
 .parcel-cache
+.npm
 .vscode
