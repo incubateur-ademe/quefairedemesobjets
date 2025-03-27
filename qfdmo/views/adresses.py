@@ -631,16 +631,19 @@ def acteur_detail(request, uuid):
     longitude = request.GET.get("longitude")
     direction = request.GET.get("direction")
 
-    displayed_acteur = DisplayedActeur.objects.prefetch_related(
-        "proposition_services__sous_categories",
-        "proposition_services__sous_categories__categorie",
-        "proposition_services__action__groupe_action",
-        "labels",
-        "sources",
-    ).get(uuid=uuid)
+    try:
+        displayed_acteur = DisplayedActeur.objects.prefetch_related(
+            "proposition_services__sous_categories",
+            "proposition_services__sous_categories__categorie",
+            "proposition_services__action__groupe_action",
+            "labels",
+            "sources",
+        ).get(uuid=uuid)
+    except DisplayedActeur.DoesNotExist:
+        return redirect(settings.ASSISTANT["BASE_URL"], permanent=True)
 
     if displayed_acteur.statut != ActeurStatus.ACTIF:
-        return redirect("https://quefairedemesdechets.ademe.fr", permanent=True)
+        return redirect(settings.ASSISTANT["BASE_URL"], permanent=True)
 
     context = {
         "base_template": base_template,

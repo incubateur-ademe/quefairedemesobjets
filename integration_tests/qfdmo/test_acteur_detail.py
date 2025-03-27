@@ -183,3 +183,6 @@ class TestRedirects:
         url = f"/adresse/{acteur.identifiant_unique}"
         response = client.get(url)
         assert response.status_code == 301
+
+    def not_found_actor_do_not_raise_error(self, client):
+        pass
