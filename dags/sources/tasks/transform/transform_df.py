@@ -112,7 +112,7 @@ def clean_telephone(row: pd.Series, _):
     number = clean_number(row[telephone_column])
 
     if number is None:
-        row[["telephone"]] = None
+        row[["telephone"]] = ""
         return row[["telephone"]]
 
     if len(number) == 9 and row["code_postal"] and int(row["code_postal"]) < 96000:
@@ -122,7 +122,7 @@ def clean_telephone(row: pd.Series, _):
         number = "0" + number[2:]
 
     if len(number) < 6:
-        number = None
+        number = ""
 
     row["telephone"] = number
     return row[["telephone"]]
@@ -387,9 +387,9 @@ def _address_details_clean_cedex(address_str: str) -> str:
 
 def _address_details_extract(
     address_str: str,
-) -> tuple[str | None, str | None, str | None]:
+) -> tuple[str, str, str]:
     """Extrait les détails de l'adresse, y compris le code postal et la ville."""
-    address = postal_code = city = None
+    address = postal_code = city = ""
 
     pattern1 = re.compile(
         rf"(.*)[{REGEX_BAN_SEPARATORS}]+(\d{{4,5}})[{REGEX_BAN_SEPARATORS}]*(.*)"
@@ -397,12 +397,12 @@ def _address_details_extract(
     # Pattern pour capturer les codes postaux sans adresse
     pattern2 = re.compile(rf"(\d{{4,5}})[{REGEX_BAN_SEPARATORS}]*(.*)")
     if match := pattern1.search(address_str):
-        address = match.group(1).strip() if match.group(1) else None
-        postal_code = match.group(2).strip() if match.group(2) else None
-        city = match.group(3).strip() if match.group(3) else None
+        address = match.group(1).strip() if match.group(1) else ""
+        postal_code = match.group(2).strip() if match.group(2) else ""
+        city = match.group(3).strip() if match.group(3) else ""
     elif match := pattern2.search(address_str):
-        postal_code = match.group(1).strip() if match.group(1) else None
-        city = match.group(2).strip() if match.group(2) else None
+        postal_code = match.group(1).strip() if match.group(1) else ""
+        city = match.group(2).strip() if match.group(2) else ""
 
     if city:
         city = city.title()
@@ -416,7 +416,7 @@ def _address_details_extract(
 
 def _extract_details(
     adresse_format_ban: str,
-) -> tuple[str | None, str | None, str | None]:
+) -> tuple[str, str, str]:
     """Extrait les détails de l'adresse à partir d'une ligne de DataFrame."""
     if adresse_format_ban:
         address_str = _address_details_clean_cedex(adresse_format_ban)

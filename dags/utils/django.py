@@ -120,14 +120,14 @@ def django_model_queryset_generate(
     # Inclure uniquement si TOUS les champs sont remplis
     include_all_filled_filter = Q()
     for field in include_fields:
-        include_all_filled_filter &= ~Q(**{f"{field}__isnull": True})
+        include_all_filled_filter &= ~Q(**{f"{field}": ""})
 
     # Exclure si N'IMPORTE QUEL champ est rempli
     # note: ce champ étant la négation de l'inclusion, on le construit
     # comme l'incusion et on fait une négation d'ensemble ensuite
     exclude_any_filled_filter = Q()
     for field in exclude_fields:
-        exclude_any_filled_filter &= ~Q(**{f"{field}__isnull": True})
+        exclude_any_filled_filter &= ~Q(**{f"{field}": ""})
     exclude_any_filled_filter = ~exclude_any_filled_filter
 
     final_filter = include_all_filled_filter & exclude_any_filled_filter

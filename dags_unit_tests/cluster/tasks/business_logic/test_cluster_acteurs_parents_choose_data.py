@@ -32,9 +32,9 @@ def acteurs_revision():
     noms = ["❌", "prio 2", "prio 1", "prio 3"]
     # With SIRET we are testing picking that data won't be
     # proposed because it's the same
-    sirets = ["❌", "11111111111111", None, None]
+    sirets = ["❌", "11111111111111", "", ""]
     # With emails we are testing the fallback to base acteurs
-    emails = [None, None, None, None]
+    emails = ["", "", "", ""]
     source_ids = [5, 20, 10, 30]
     locations = [Point(0, 0), Point(1, 1), Point(2, 2), Point(3, 3)]
     return [
@@ -57,7 +57,7 @@ def acteurs_revision():
 def acteurs_base():
     ids = ["a1", "a2", "a3"]
     noms = ["❌", "prio 2", "prio 1"]
-    sirets = ["❌", None, None]
+    sirets = ["❌", "", ""]
     emails = ["❌", "prio2@fallback.base", "prio1@fallback.base"]
     source_ids = [5, 20, 10]
     locations = [Point(0, 0), Point(1, 1), Point(2, 2)]

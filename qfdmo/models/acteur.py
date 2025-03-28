@@ -109,11 +109,13 @@ class ActeurPublicAccueilli(models.TextChoices):
     PROFESSIONNELS = "Professionnels", "Professionnels"
     PARTICULIERS = "Particuliers", "Particuliers"
     AUCUN = "Aucun", "Aucun"
+    UNKNOWN = "", ""
 
 
 class ActeurReprise(models.TextChoices):
     UN_POUR_ZERO = REPRISE_1POUR0, "1 pour 0"
     UN_POUR_UN = REPRISE_1POUR1, "1 pour 1"
+    UNKNOWN = "", ""
 
 
 class ActeurType(CodeAsNaturalKeyModel):
@@ -308,50 +310,68 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
         abstract = True
 
     nom = models.CharField(max_length=255, blank=False, null=False, db_index=True)
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True, default="", db_default="")
     identifiant_unique = models.CharField(
         max_length=255, unique=True, primary_key=True, blank=True, db_index=True
     )
     acteur_type = models.ForeignKey(ActeurType, on_delete=models.CASCADE)
-    adresse = models.CharField(max_length=255, blank=True, null=True)
-    adresse_complement = models.CharField(max_length=255, blank=True, null=True)
-    code_postal = models.CharField(max_length=10, blank=True, null=True, db_index=True)
-    ville = models.CharField(max_length=255, blank=True, null=True, db_index=True)
-    url = models.CharField(max_length=2048, blank=True, null=True)
-    email = models.EmailField(blank=True, null=True)
+    adresse = models.CharField(max_length=255, blank=True, default="", db_default="")
+    adresse_complement = models.CharField(
+        max_length=255, blank=True, default="", db_default=""
+    )
+    code_postal = models.CharField(
+        max_length=10, blank=True, default="", db_default="", db_index=True
+    )
+    ville = models.CharField(
+        max_length=255, blank=True, default="", db_default="", db_index=True
+    )
+    url = models.CharField(max_length=2048, blank=True, default="", db_default="")
+    email = models.EmailField(blank=True, default="", db_default="")
     location = models.PointField(blank=True, null=True)
-    telephone = models.CharField(max_length=255, blank=True, null=True)
-    nom_commercial = models.CharField(max_length=255, blank=True, null=True)
-    nom_officiel = models.CharField(max_length=255, blank=True, null=True)
+    telephone = models.CharField(max_length=255, blank=True, default="", db_default="")
+    nom_commercial = models.CharField(
+        max_length=255, blank=True, default="", db_default=""
+    )
+    nom_officiel = models.CharField(
+        max_length=255, blank=True, default="", db_default=""
+    )
     labels = models.ManyToManyField(LabelQualite)
     acteur_services = models.ManyToManyField(ActeurService, blank=True)
-    siren = models.CharField(max_length=9, blank=True, null=True, db_index=True)
-    siret = models.CharField(max_length=14, blank=True, null=True, db_index=True)
+    siren = models.CharField(
+        max_length=9, blank=True, default="", db_default="", db_index=True
+    )
+    siret = models.CharField(
+        max_length=14, blank=True, default="", db_default="", db_index=True
+    )
     source = models.ForeignKey(Source, on_delete=models.CASCADE, blank=True, null=True)
-    identifiant_externe = models.CharField(max_length=255, blank=True, null=True)
+    identifiant_externe = models.CharField(
+        max_length=255, blank=True, default="", db_default=""
+    )
     statut = models.CharField(
         max_length=255,
         default=ActeurStatus.ACTIF,
         choices=ActeurStatus.choices,
         db_default=ActeurStatus.ACTIF,
     )
-    naf_principal = models.CharField(max_length=255, blank=True, null=True)
-    commentaires = models.TextField(blank=True, null=True)
-    horaires_osm = models.CharField(
-        blank=True, null=True, validators=[validate_opening_hours]
+    naf_principal = models.CharField(
+        max_length=255, blank=True, default="", db_default=""
     )
-    horaires_description = models.TextField(blank=True, null=True)
+    commentaires = models.TextField(blank=True, default="", db_default="")
+    horaires_osm = models.CharField(
+        blank=True, default="", db_default="", validators=[validate_opening_hours]
+    )
+    horaires_description = models.TextField(blank=True, default="", db_default="")
 
     public_accueilli = models.CharField(
         max_length=255,
         choices=ActeurPublicAccueilli.choices,
-        null=True,
+        default=ActeurPublicAccueilli.UNKNOWN,
         blank=True,
     )
     reprise = models.CharField(
         max_length=255,
         choices=ActeurReprise.choices,
-        null=True,
+        default=ActeurReprise.UNKNOWN,
         blank=True,
     )
     exclusivite_de_reprisereparation = models.BooleanField(
@@ -677,12 +697,16 @@ class RevisionActeur(BaseActeur):
     def is_parent(self):
         return self.pk and self.duplicats.exists()
 
-    nom = models.CharField(max_length=255, blank=True, null=True)
+    nom = models.CharField(max_length=255, blank=True, default="", db_default="")
     acteur_type = models.ForeignKey(
         ActeurType, on_delete=models.CASCADE, blank=True, null=True
     )
     email = models.CharField(
-        max_length=254, blank=True, null=True, validators=[EmptyEmailValidator()]
+        max_length=254,
+        blank=True,
+        default="",
+        db_default="",
+        validators=[EmptyEmailValidator()],
     )
 
     @property
@@ -765,7 +789,7 @@ class RevisionActeur(BaseActeur):
         )
 
         default_acteur_fields = {
-            k: None if v == EMPTY_ACTEUR_FIELD else v
+            k: "" if v == EMPTY_ACTEUR_FIELD else v
             for k, v in default_acteur_fields.items()
         }
 

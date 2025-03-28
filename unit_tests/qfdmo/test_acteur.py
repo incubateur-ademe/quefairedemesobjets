@@ -205,7 +205,7 @@ class TestActeurGetOrCreateRevisionActeur:
         revision_acteur2 = acteur.get_or_create_revision()
 
         assert revision_acteur2 == revision_acteur
-        assert revision_acteur2.nom is None
+        assert revision_acteur2.nom == ""
         assert (
             revision_acteur2.proposition_services.values_list("action__code").all()
             != acteur.proposition_services.values_list("action__code").all()
@@ -340,7 +340,7 @@ class TestCreateRevisionActeurCreateParent:
 
         # reset values
         assert revision_acteur_parent.source is None
-        assert revision_acteur_parent.identifiant_externe is None
+        assert revision_acteur_parent.identifiant_externe == ""
 
         # parent is not linked to any labels, services or proposition services
         assert revision_acteur_parent.labels.count() == 0
@@ -358,7 +358,7 @@ class TestCreateRevisionActeurCreateParent:
         revision_acteur = RevisionActeurFactory(
             **acteurs_fields,
             identifiant_unique=acteur.identifiant_unique,
-            nom=None,
+            nom="",
             location=None,
             acteur_type=None,
         )
@@ -382,7 +382,7 @@ class TestCreateRevisionActeurCreateParent:
 
         # reset values
         assert revision_acteur_parent.source is None
-        assert revision_acteur_parent.identifiant_externe is None
+        assert revision_acteur_parent.identifiant_externe == ""
 
         # parent is not linked to any labels, services or proposition services
         assert revision_acteur_parent.labels.count() == 0
@@ -437,7 +437,7 @@ class TestRevisionActeurDuplicate:
         acteur_type = ActeurTypeFactory()
         revision_acteur = RevisionActeurFactory(
             identifiant_unique=acteur.identifiant_unique,
-            nom_commercial=None,
+            nom_commercial="",
             nom="Nom Revision",
             action_principale=action,
             acteur_type=acteur_type,
