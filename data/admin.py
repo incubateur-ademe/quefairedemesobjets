@@ -76,6 +76,7 @@ class SuggestionAdmin(admin.ModelAdmin):
         "donnees_initiales",
         "changements_suggeres",
     ]
+    readonly_fields = ["cree_le", "modifie_le"]
     list_filter = ["suggestion_cohorte", "statut"]
     actions = [mark_as_rejected, mark_as_toproceed]
 

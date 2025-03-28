@@ -4,8 +4,7 @@ DAG to clone the Annuaire Entreprise in our DB.
 running into DB table name length limits.
 """
 
-from datetime import datetime
-
+import pendulum
 from airflow import DAG
 from airflow.models.baseoperator import chain
 from airflow.models.param import Param
@@ -37,7 +36,7 @@ with DAG(
     default_args={
         "owner": "airflow",
         "depends_on_past": False,
-        "start_date": datetime(2025, 3, 5),
+        "start_date": pendulum.today("UTC").add(days=-1),
         "catchup": False,
         "email_on_failure": False,
         "email_on_retry": False,

@@ -1,6 +1,6 @@
 import logging
-from datetime import datetime
 
+import pendulum
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from utils.django import django_setup_full
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 default_args = {
     "owner": "airflow",
     "depends_on_past": False,
-    "start_date": datetime(2024, 2, 7),
+    "start_date": pendulum.today("UTC").add(days=-1),
     "email_on_failure": False,
     "email_on_retry": False,
 }

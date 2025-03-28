@@ -1,5 +1,6 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
+import pendulum
 from acteurs.tasks.airflow_logic.export_opendata_csv_to_s3_task import (
     export_opendata_csv_to_s3_task,
 )
@@ -9,7 +10,7 @@ from shared.config.schedules import SCHEDULES
 default_args = {
     "owner": "airflow",
     "depends_on_past": False,
-    "start_date": datetime(2025, 2, 14),
+    "start_date": pendulum.today("UTC").add(days=-1),
     "email_on_failure": False,
     "email_on_retry": False,
     "retries": 3,

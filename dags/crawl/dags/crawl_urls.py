@@ -1,5 +1,4 @@
-from datetime import datetime, timedelta
-
+import pendulum
 from airflow import DAG
 from airflow.models.param import Param
 from crawl.tasks.airflow_logic.crawl_urls_check_crawl_task import (
@@ -43,7 +42,7 @@ with DAG(
     default_args={
         "owner": "airflow",
         "depends_on_past": False,
-        "start_date": datetime(2025, 1, 1) - timedelta(days=1),
+        "start_date": pendulum.today("UTC").add(days=-1),
         "email_on_failure": False,
         "email_on_retry": False,
         "retries": 0,
