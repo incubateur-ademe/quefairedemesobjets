@@ -1,14 +1,14 @@
 from datetime import timedelta
 
+import pendulum
 from airflow import DAG
 from airflow.operators.bash import BashOperator
-from airflow.utils.dates import days_ago
 from shared.config.schedules import SCHEDULES
 
 default_args = {
     "owner": "airflow",
     "depends_on_past": False,
-    "start_date": days_ago(1),
+    "start_date": pendulum.today("UTC").add(days=-1),
     "email_on_failure": False,
     "email_on_retry": False,
     "retries": 3,

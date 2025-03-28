@@ -1,8 +1,8 @@
 from datetime import timedelta
 
+import pendulum
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from airflow.utils.dates import days_ago
 from compute_acteurs.tasks.airflow_logic import (
     compute_acteur_services_task,
     compute_acteur_task,
@@ -19,7 +19,7 @@ from shared.tasks.database_logic.db_tasks import read_data_from_postgres
 default_args = {
     "owner": "airflow",
     "depends_on_past": False,
-    "start_date": days_ago(1),
+    "start_date": pendulum.today("UTC").add(days=-1),
     "email_on_failure": False,
     "email_on_retry": False,
     "retries": 1,

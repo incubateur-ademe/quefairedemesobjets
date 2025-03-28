@@ -2,17 +2,17 @@ import time
 from logging import getLogger
 from pathlib import Path
 
+import pendulum
 from airflow import DAG
 from airflow.decorators import task
 from airflow.providers.postgres.hooks.postgres import PostgresHook
-from airflow.utils.dates import days_ago
 
 logger = getLogger(__name__)
 
 DEFAULT_ARGS = {
     "owner": "airflow",
     "depends_on_past": False,
-    "start_date": days_ago(1),
+    "start_date": pendulum.today("UTC").add(days=-1),
     "email_on_failure": False,
     "email_on_retry": False,
     "retries": 0,

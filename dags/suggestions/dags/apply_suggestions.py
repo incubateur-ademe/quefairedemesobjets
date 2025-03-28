@@ -1,7 +1,7 @@
 from datetime import timedelta
 
+import pendulum
 from airflow.models import DAG
-from airflow.utils.dates import days_ago
 from suggestions.tasks.airflow_logic import (
     db_apply_suggestion_task,
     db_check_suggestion_to_process_task,
@@ -11,7 +11,7 @@ from suggestions.tasks.airflow_logic import (
 default_args = {
     "owner": "airflow",
     "depends_on_past": False,
-    "start_date": days_ago(1),
+    "start_date": pendulum.today("UTC").add(days=-1),
     "retries": 1,
     "retry_delay": timedelta(minutes=5),
 }

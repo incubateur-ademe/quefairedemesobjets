@@ -6,10 +6,11 @@ Le traitement des suggestions est géré hors de ce DAG par
 l'app django data_management
 """
 
+from datetime import datetime
+
 from airflow import DAG
 from airflow.models.baseoperator import chain
 from airflow.models.param import Param
-from airflow.utils.dates import days_ago
 from cluster.config.constants import FIELDS_PARENT_DATA_EXCLUDED
 from cluster.config.model import ClusterConfig
 from cluster.tasks.airflow_logic.cluster_acteurs_clusters_display_task import (
@@ -324,7 +325,7 @@ with DAG(
         # Une date bidon dans le passée pour
         # par que Airflow "attende" que la date
         # soit atteinte
-        "start_date": days_ago(1),
+        "start_date": datetime(2025, 1, 1),
         # Notre donnée n'étant pas versionnée dans le temps,
         # faire du catchup n'a pas de sense
         "catchup": False,

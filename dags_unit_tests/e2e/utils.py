@@ -11,7 +11,7 @@ from airflow.models import TaskInstance
 logger = logging.getLogger(__name__)
 
 # Function `days_ago` is deprecated and will be removed in Airflow 3.0.
-# from airflow.utils.dates import days_ago
+# import pendulum
 # TODO: remove above once we migrated to Airflow 3.0
 DATE_IN_PAST = pendulum.today("UTC").add(days=-2)
 
