@@ -3,6 +3,7 @@
 ```{toctree}
 :hidden:
 
+data/data-platform.md
 data/ingestion-de-source.md
 data/dbt/flux-dbt.md
 frontend/intro.md

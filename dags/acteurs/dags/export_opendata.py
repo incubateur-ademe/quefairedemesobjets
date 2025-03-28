@@ -4,7 +4,10 @@ from acteurs.tasks.airflow_logic.export_opendata_csv_to_s3_task import (
     export_opendata_csv_to_s3_task,
 )
 from airflow import DAG
+from decouple import config
 from shared.config.schedules import SCHEDULES
+
+ENVIRONMENT = config("ENVIRONMENT", default="development")
 
 default_args = {
     "owner": "airflow",
@@ -27,7 +30,7 @@ with DAG(
     ),
     params={
         "bucket_name": "lvao-opendata",
-        "remote_dir": "acteurs",
+        "remote_dir": "acteurs" if ENVIRONMENT == "prod" else f"acteurs-{ENVIRONMENT}",
         "s3_connection_id": "s3data",
         "opendata_table": "exposure_opendata_acteur",
     },
