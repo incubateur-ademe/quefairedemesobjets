@@ -362,8 +362,6 @@ models:
           type: hash
         - columns: ['location']
           type: gist
-        - columns: ['parent_id']
-          type: hash
       constraints:
         - type: foreign_key
           columns: [acteur_type_id]

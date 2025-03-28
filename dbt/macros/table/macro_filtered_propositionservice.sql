@@ -2,7 +2,7 @@
 
 with parent_propositionservice AS (
     SELECT
-    concat(pps.parent_id::text, '_', pps.action_id::text) AS id,
+    concat(pps.parent_id::varchar, '_', pps.action_id::varchar)::varchar AS id,
     pps.parent_id AS acteur_id,
     pps.action_id AS action_id
     FROM {{ ref(ephemeral_filtered_parentpropositionservice) }} AS pps

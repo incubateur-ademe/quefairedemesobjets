@@ -29,7 +29,6 @@ SELECT DISTINCT efa.uuid,
     efa.uniquement_sur_rdv,
     efa.action_principale_id,
     efa.modifie_le,
-    efa.parent_id,
     efa.cree_le,
     efa.statut
 FROM {{ ref(ephemeral_filtered_acteur) }} AS efa
