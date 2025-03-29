@@ -1,0 +1,71 @@
+from django.db import models
+from django.urls import reverse
+
+
+class GroupeActionConfig(models.Model):
+    carte_config = models.ForeignKey(
+        "qfdmo.CarteConfig",
+        on_delete=models.SET_NULL,
+        related_name="groupe_action_config",
+        null=True,
+        blank=True,
+    )
+    groupe_action = models.OneToOneField(
+        "qfdmo.GroupeAction",
+        on_delete=models.CASCADE,
+        verbose_name="Groupe d'actions",
+    )
+
+    icon = models.FileField(
+        upload_to="config/groupeaction/icones/",
+        verbose_name="Supplanter l'icône utilisée pour l'action",
+        blank=True,
+        null=True,
+    )
+    acteur_type = models.ManyToManyField(
+        "qfdmo.ActeurType",
+        verbose_name="Types d'acteur concernés par la configuration",
+        help_text="Si la configuration de l'action est spécifique à un ou plusieurs"
+        " types d'acteurs, ceux-ci peuvent être renseignés ici",
+        blank=True,
+    )
+
+
+class CarteConfig(models.Model):
+    nom = models.CharField(unique=True)
+    slug = models.SlugField(
+        unique=True,
+        help_text="Le slug est utilisé pour générer l'url de carte, "
+        "par exemple: https://quefairedemesobjets.fr/carte/<strong>cyclevia</strong>",
+    )
+    sous_categorie_objet = models.ManyToManyField(
+        "qfdmo.SousCategorieObjet",
+        verbose_name="Sous-catégories d'objets filtrés",
+        help_text="Seules les objets sélectionnés s'afficheront sur la carte"
+        "\nSi le champ n'est pas renseigné il sera ignoré",
+        blank=True,
+    )
+    groupe_action = models.ManyToManyField(
+        "qfdmo.GroupeAction",
+        verbose_name="Groupe d'actions",
+        help_text="Seules les actions sélectionnées s'afficheront sur la carte"
+        "\nSi le champ n'est pas renseigné il sera ignoré",
+        blank=True,
+    )
+    source = models.ManyToManyField(
+        "qfdmo.Source",
+        verbose_name="Source(s)",
+        help_text="Seules les sources sélectionnées s'afficheront sur la carte"
+        "\nSi le champ n'est pas renseigné il sera ignoré",
+        blank=True,
+    )
+
+    def get_absolute_url(self):
+        return reverse("qfdmo:carte_custom", kwargs={"slug": self.slug})
+
+    def __str__(self):
+        return self.nom
+
+    class Meta:
+        verbose_name = "Carte sur mesure"
+        verbose_name_plural = "Cartes sur mesure"
