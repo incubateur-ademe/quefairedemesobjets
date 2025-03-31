@@ -150,14 +150,21 @@ class Suggestion(models.Model):
                 for item in self.contexte
                 if isinstance(item, dict)
             ]
-        return render_to_string(
-            "data/_partials/contexte_details.html",
-            {
-                "contexte": self.contexte,
-                "identifiant_unique": identifiant_unique,
-                "identifiant_uniques": identifiant_uniques,
-            },
-        )
+
+        context = {
+            "contexte": self.contexte,
+            "identifiant_unique": identifiant_unique,
+            "identifiant_uniques": identifiant_uniques,
+        }
+
+        # Opening details toggle by default
+        if self.suggestion_cohorte.type_action in [
+            SuggestionAction.CLUSTERING,
+            SuggestionAction.CRAWL_URLS,
+        ]:
+            context["details_open"] = True
+
+        return render_to_string("data/_partials/contexte_details.html", context)
 
     # FIXME: this display management will be reviewed with PYDANTIC classes which will
     # be used to handle all specificities of suggestions
