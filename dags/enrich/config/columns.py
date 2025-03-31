@@ -23,6 +23,6 @@ class COLS:
     AE_DIRIGEANTS_NOMS: str = "ae_dirigeants_noms_prenoms"
 
     # Matching
-    MATCH_SCORE: str = "match_score"
+    MATCH_SCORE_AE_RGPD: str = "match_score"
     MATCH_WORDS: str = "match_words"
     MATCH_THRESHOLD: str = "match_threshold"
