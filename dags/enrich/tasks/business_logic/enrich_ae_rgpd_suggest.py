@@ -68,7 +68,9 @@ def enrich_ae_rgpd_suggest(
                 "summary": [
                     sumline("noms d'origine", row[COLS.ACTEUR_NOMS_ORIGINE], "text"),
                     sumline("mots de match", row[COLS.MATCH_WORDS], "text_list"),
-                    sumline("score de match", row[COLS.MATCH_SCORE], "score_0_to_1"),
+                    sumline(
+                        "score de match", row[COLS.MATCH_SCORE_AE_RGPD], "score_0_to_1"
+                    ),
                     sumline("changements", "voir contexte/détails", "text"),
                 ],
                 "changes": changes,

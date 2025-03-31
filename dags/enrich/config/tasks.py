@@ -24,3 +24,13 @@ class TASKS:
         "enrich_acteurs_closed_suggestions_not_replaced"
     )
     ENRICH_DBT_MODELS_REFRESH: str = "enrich_dbt_models_refresh"
+    # Read tasks
+    READ_AE_RGPD: str = "enrich_ae_rgpd_read"
+    READ_AE_CLOSED_CANDIDATES: str = "enrich_read_ae_closed_candidates"
+    READ_AE_CLOSED_REPLACED: str = "enrich_read_ae_closed_replaced"
+
+    # Matching tasks
+    MATCH_SCORE_AE_RGPD: str = "enrich_ae_rgpd_match"
+
+    # Suggestion tasks
+    SUGGEST_AE_RGPD: str = "enrich_ae_rgpd_suggest"

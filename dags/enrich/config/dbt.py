@@ -16,3 +16,5 @@ class DBT:
         "marts_enrich_acteurs_closed_suggest_not_replaced"
     )
     MARTS_ENRICH_AE_RGPD: str = "marts_enrich_ae_rgpd"
+    MARTS_ENRICH_AE_CLOSED_CANDIDATES: str = "marts_enrich_ae_closed_candidates"
+    MARTS_ENRICH_AE_CLOSED_REPLACED: str = "marts_enrich_ae_closed_replaced"
