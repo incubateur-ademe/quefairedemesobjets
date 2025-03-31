@@ -12,7 +12,7 @@ from dags.crawl.tasks.business_logic.crawl_urls_check_syntax import (
     url_fix_www,
     url_is_valid,
     url_to_urls_to_try,
-    urls_are_standard_redirect,
+    urls_are_diff_standard,
 )
 
 
@@ -62,8 +62,8 @@ class TestUrlsAreStandardRedirect:
             ("https://a.com", "https://b.com", False),
         ],
     )
-    def test_urls_are_standard_redirect(self, url1, url2, expected):
-        assert urls_are_standard_redirect(url1, url2) == expected
+    def test_urls_are_diff_standard(self, url1, url2, expected):
+        assert urls_are_diff_standard(url1, url2) == expected
 
 
 class TestUrlDomainGet:

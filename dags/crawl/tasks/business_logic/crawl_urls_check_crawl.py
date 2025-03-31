@@ -8,7 +8,7 @@ from crawl.config.cohorts import COHORTS
 from crawl.config.columns import COLS
 from crawl.config.constants import SORT_COLS
 from crawl.tasks.business_logic.crawl_urls_check_syntax import (
-    urls_are_standard_redirect,
+    urls_are_diff_standard,
 )
 from pydantic import BaseModel
 from sources.config.shared_constants import EMPTY_ACTEUR_FIELD
@@ -139,7 +139,7 @@ def df_cohorts_split(
             # - those which are just HTTP -> HTTPS redirects
             # - those which are more subtantially different
             df_ok_diff[COLS.URL_HTTPS] = df_ok_diff.apply(
-                lambda x: urls_are_standard_redirect(
+                lambda x: urls_are_diff_standard(
                     x[COLS.URL_ORIGIN], x[COLS.CRAWL_URL_SUCCESS]
                 ),
                 axis=1,

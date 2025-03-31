@@ -36,7 +36,7 @@ def url_is_valid(url) -> bool:
         return False
 
 
-def urls_are_standard_redirect(url1, url2) -> bool:
+def urls_are_diff_standard(url1, url2) -> bool:
     """Check if 2 URLs a "standard" redirection of each other, defined as:
     - case insensitive
     - http vs. https
