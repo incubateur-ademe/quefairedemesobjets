@@ -29,9 +29,9 @@ def xcom_pull(ti: TaskInstance, key: str, skip_if_empty: bool = False) -> Any:
 
     # Reading values
     if key == XCOMS.DF_READ:
-        value: pd.DataFrame = ti.xcom_pull(key=key, task_ids=TASKS.READ)
+        value: pd.DataFrame = ti.xcom_pull(key=key, task_ids=TASKS.READ_AE_RGPD)
     elif key == XCOMS.DF_MATCH:
-        value: pd.DataFrame = ti.xcom_pull(key=key, task_ids=TASKS.MATCH_SCORE)
+        value: pd.DataFrame = ti.xcom_pull(key=key, task_ids=TASKS.MATCH_SCORE_AE_RGPD)
     else:
         raise ValueError(f"{msg} key inconnue")
 

@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 def task_info_get():
     return f"""
     ============================================================
-    Description de la tâche "{TASKS.SUGGEST}"
+    Description de la tâche "{TASKS.SUGGEST_AE_RGPD}"
     ============================================================
     💡 quoi: on cherche à déterminer quels acteurs QFDMO ont un
     nom qui correspond à des noms de personnes dans l'AE
@@ -45,7 +45,7 @@ def enrich_ae_rgpd_suggest_wrapper(ti, params, dag, run_id) -> None:
 
 def enrich_ae_rgpd_suggest_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
-        task_id=TASKS.SUGGEST,
+        task_id=TASKS.SUGGEST_AE_RGPD,
         python_callable=enrich_ae_rgpd_suggest_wrapper,
         dag=dag,
     )
