@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django_extensions.db.fields import ImproperlyConfigured
-from import_export import resources
+from import_export import fields, resources
 from import_export.admin import ImportExportModelAdmin
 
 from qfdmd.models import CMSPage, Lien, Produit, Suggestion, Synonyme
@@ -16,9 +16,9 @@ class KoumoulModelResource(resources.ModelResource):
 
     koumoul_mapping: dict[str, str] = {}
 
-    def get_export_fields(self):
+    def get_export_fields(self, *args, **kwargs):
         """Update column names based on koumoul_mapping."""
-        fields = super().get_export_fields()
+        fields = super().get_export_fields(*args, **kwargs)
         for field in fields:
             field.column_name = self.koumoul_mapping.get(
                 field.attribute, field.column_name
@@ -77,12 +77,27 @@ class KoumoulProduitResource(KoumoulModelResource):
 
 
 class ProduitResource(resources.ModelResource):
+    def dehydrate_infotri(self, instance):
+        if instance.infotri:
+            return "oui"
+        return "non"
+
     class Meta:
         model = Produit
         name = "Import/export de tous les champs Produit"
 
 
 class SynonymeResource(resources.ModelResource):
+    infotri = fields.Field(
+        attribute="produit__infotri",
+        column_name="Infotri",
+    )
+
+    def dehydrate_infotri(self, instance):
+        if instance.produit.infotri:
+            return "oui"
+        return "non"
+
     class Meta:
         model = Synonyme
 
