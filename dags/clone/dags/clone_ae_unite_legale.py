@@ -7,7 +7,7 @@ running into DB table name length limits.
 from airflow import DAG
 from airflow.models.param import Param
 from clone.tasks.airflow_logic.chain_tasks import chain_tasks
-from shared.config import SCHEDULES, START_DATES, CATCHUPS
+from shared.config import CATCHUPS, SCHEDULES, START_DATES
 
 with DAG(
     dag_id="clone_ae_unite_legale",
@@ -56,6 +56,11 @@ with DAG(
             ",",
             type="string",
             description_md="🔤 Délimiteur utilisé dans le fichier",
+        ),
+        "dbt_command": Param(
+            "dbt build --select tag:ae,tag:unite_legale",
+            type="string",
+            description_md="🔨 Commande DBT à exécuter",
         ),
     },
 ) as dag:

@@ -15,6 +15,9 @@ from clone.tasks.airflow_logic.clone_table_validate_task import (
 from clone.tasks.airflow_logic.clone_view_in_use_switch_task import (
     clone_view_in_use_switch_task,
 )
+from shared.tasks.airflow_logic.dbt_command_task import (
+    dbt_command_task,
+)
 
 
 def chain_tasks(dag: DAG) -> None:
@@ -25,4 +28,5 @@ def chain_tasks(dag: DAG) -> None:
         clone_table_validate_task(dag),
         clone_view_in_use_switch_task(dag),
         clone_old_tables_remove_task(dag),
+        dbt_command_task(dag),
     )

@@ -21,6 +21,7 @@ class CloneConfig(BaseModel):
     file_unpacked: str
     delimiter: str
     run_timestamp: str
+    dbt_command: str
 
     @computed_field
     @property
