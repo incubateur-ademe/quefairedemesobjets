@@ -1,0 +1,3 @@
+azerty = "foo"
+
+print(azerty)

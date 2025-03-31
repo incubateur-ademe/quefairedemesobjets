@@ -6,8 +6,8 @@ from airflow import DAG
 from airflow.exceptions import AirflowSkipException
 from airflow.operators.python import PythonOperator
 from enrich.config import DBT, TASKS, XCOMS
-from enrich.tasks.business_logic.enrich_ae_rgpd_read import (
-    enrich_ae_rgpd_read,
+from enrich.tasks.business_logic.enrich_read import (
+    enrich_read,
 )
 
 logger = logging.getLogger(__name__)
@@ -30,11 +30,11 @@ def task_info_get():
     """
 
 
-def enrich_ae_rgpd_read_wrapper(ti, params) -> None:
+def enrich_read_ae_closed_candidates_wrapper(ti, params) -> None:
     logger.info(task_info_get())
 
-    df = enrich_ae_rgpd_read(
-        dbt_model_name=DBT.MARTS_ENRICH_AE_RGPD,
+    df = enrich_read(
+        dbt_model_name=DBT.MARTS_ENRICH_AE_CLOSED_CANDIDATES,
         filter_comments_contain=params["filter_comments_contain"],
     )
     if df.empty:
@@ -43,9 +43,9 @@ def enrich_ae_rgpd_read_wrapper(ti, params) -> None:
     ti.xcom_push(key=XCOMS.DF_READ, value=df)
 
 
-def enrich_ae_rgpd_read_task(dag: DAG) -> PythonOperator:
+def enrich_read_ae_closed_candidates_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id=TASKS.READ_AE_RGPD,
-        python_callable=enrich_ae_rgpd_read_wrapper,
+        python_callable=enrich_read_ae_closed_candidates_wrapper,
         dag=dag,
     )
