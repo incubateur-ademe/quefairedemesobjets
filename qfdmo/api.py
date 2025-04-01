@@ -64,9 +64,11 @@ class ActeurServiceSchema(ModelSchema):
 
 
 class SourceSchema(ModelSchema):
+    logo: Optional[str] = Field(..., alias="logo_file_absolute_url")
+
     class Meta:
         model = Source
-        fields = ["id", "code", "libelle", "logo_fiel", "url"]
+        fields = ["id", "code", "libelle", "url"]
 
 
 class ActeurSchema(ModelSchema):
