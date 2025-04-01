@@ -1030,11 +1030,11 @@ class DisplayedActeur(BaseActeur):
         # here
         if carte_config:
             try:
-                # groupe_action_config = carte_config.groupe_action_config.get(
-                # groupe_action=displayed_action, acteur_type=)
-                # acteur_dict.update(icon_file=groupe_action_config.icon)
-                # del acteur_dict["icon"]
-                pass
+                groupe_action_config = carte_config.groupe_action_config.get(
+                    groupe_action=displayed_action, acteur_type=self.acteur_type
+                )
+                acteur_dict.update(icon_file=groupe_action_config.icon)
+                del acteur_dict["icon"]
 
             except GroupeActionConfig.DoesNotExist:
                 pass
