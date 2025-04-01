@@ -44,6 +44,11 @@ from dags.sources.config.shared_constants import (
 )
 from qfdmo.models.action import Action, get_action_instances
 from qfdmo.models.categorie_objet import SousCategorieObjet
+
+# Explicit imports from models config, action, categories, utils
+# and not from qfdmo.models are required here to prevent circular
+# dependency import error.
+from qfdmo.models.config import CarteConfig, GroupeActionConfig
 from qfdmo.models.utils import (
     CodeAsNaturalKeyModel,
     NomAsNaturalKeyManager,
@@ -988,6 +993,7 @@ class DisplayedActeur(BaseActeur):
         direction: str | None = None,
         action_list: str | None = None,
         carte: bool = False,
+        carte_config: CarteConfig = None,
     ) -> str:
         # TODO: refacto jinja: once the shared/results.html template
         # will be migrated to django template, this method should
@@ -1018,9 +1024,20 @@ class DisplayedActeur(BaseActeur):
         if carte and displayed_action.groupe_action:
             displayed_action = displayed_action.groupe_action
 
+        acteur_dict.update(icon=displayed_action.icon, couleur=displayed_action.couleur)
+
         # TODO: in case we have a carteConfig, customize carteConfig
         # here
-        acteur_dict.update(icon=displayed_action.icon, couleur=displayed_action.couleur)
+        if carte_config:
+            try:
+                # groupe_action_config = carte_config.groupe_action_config.get(
+                # groupe_action=displayed_action, acteur_type=)
+                # acteur_dict.update(icon_file=groupe_action_config.icon)
+                # del acteur_dict["icon"]
+                pass
+
+            except GroupeActionConfig.DoesNotExist:
+                pass
 
         if carte and displayed_action.code == "reparer":
             acteur_dict.update(

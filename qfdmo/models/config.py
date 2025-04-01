@@ -1,3 +1,4 @@
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.urls import reverse
 
@@ -5,30 +6,45 @@ from django.urls import reverse
 class GroupeActionConfig(models.Model):
     carte_config = models.ForeignKey(
         "qfdmo.CarteConfig",
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         related_name="groupe_action_config",
         null=True,
         blank=True,
     )
-    groupe_action = models.OneToOneField(
+    groupe_action = models.ForeignKey(
         "qfdmo.GroupeAction",
         on_delete=models.CASCADE,
-        verbose_name="Groupe d'actions",
+        verbose_name="Groupe d'action",
+        help_text="La configuration peut être limitée à un type d'actaction "
+        "spécifique. Auquel cas il doit être indiqué ici.\n"
+        "Si aucune action n'est renseignée, cette configuration "
+        "s'appliquera à tout type d'acteur.",
+        null=True,
+        blank=True,
+    )
+    acteur_type = models.ForeignKey(
+        "qfdmo.ActeurType",
+        on_delete=models.CASCADE,
+        verbose_name="Types d'acteur concernés par la configuration",
+        help_text="La configuration peut être limitée à un type d'acteur "
+        "spécifique. Auquel cas il doit être indiqué ici.\n"
+        "Si aucun type d'acteur n'est renseigné, cette configuration "
+        "s'appliquera à tout type d'acteur.",
+        null=True,
+        blank=True,
     )
 
     icon = models.FileField(
         upload_to="config/groupeaction/icones/",
         verbose_name="Supplanter l'icône utilisée pour l'action",
+        help_text="L'icône doit être au format SVG. ",
+        validators=[FileExtensionValidator(allowed_extensions=["svg"])],
         blank=True,
         null=True,
     )
-    acteur_type = models.ManyToManyField(
-        "qfdmo.ActeurType",
-        verbose_name="Types d'acteur concernés par la configuration",
-        help_text="Si la configuration de l'action est spécifique à un ou plusieurs"
-        " types d'acteurs, ceux-ci peuvent être renseignés ici",
-        blank=True,
-    )
+
+    class Meta:
+        unique_together = ["carte_config", "groupe_action", "acteur_type"]
 
 
 class CarteConfig(models.Model):
