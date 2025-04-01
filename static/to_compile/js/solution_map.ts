@@ -69,9 +69,18 @@ export class SolutionMap {
 
   #generateMarkerHTMLStringFrom(acteur?: DisplayedActeur): string {
     const markerHtmlStyles = `color: ${acteur?.couleur};`
-    const background = acteur?.reparer ? pinBackgroundFillSvg : pinBackgroundSvg
+    const background = acteur?.fillBackground ? pinBackgroundFillSvg : pinBackgroundSvg
     const cornerIcon = acteur?.bonus ? bonusIconSvg : ""
-    const icon = acteur?.icon || "fr-icon-checkbox-circle-line"
+    let icon = ""
+    let iconSvg = ""
+
+    console.log({ acteur })
+
+    if (acteur?.iconFile) {
+      iconSvg = `<img class="qf-absolute qf-top-[10] qf-left-[10.5] qf-margin-auto" height="61" width="46" src="${acteur.iconFile}">`
+    } else {
+      icon = acteur?.icon || "fr-icon-checkbox-circle-line"
+    }
     const markerIconClasses = `qf-absolute qf-top-[10] qf-left-[10.5] qf-margin-auto
       ${icon} ${acteur?.reparer ? "qf-text-white" : ""}
     `
@@ -79,6 +88,7 @@ export class SolutionMap {
       `<div data-animated class="qf-scale-75">`,
       `<div class="qf--translate-y-2/4" style="${markerHtmlStyles}">`,
       background,
+      iconSvg,
     ]
     if (cornerIcon) {
       htmlTree.push(

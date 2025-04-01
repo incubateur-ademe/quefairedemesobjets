@@ -12,6 +12,11 @@ logger = logging.getLogger(__name__)
 class CustomCarteView(DetailView, CarteSearchActeursView):
     model = CarteConfig
 
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+
+        return ctx
+
     @property
     def groupe_actions(self):
         # TODO: cache
