@@ -142,6 +142,7 @@ dump-production:
 load-production-dump:
 	@DUMP_FILE=$$(find tmpbackup -type f -name "*.pgsql" -print -quit); \
 	pg_restore -d "$(DB_URL)" --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
+	rm -rf tmpbackup
 
 .PHONY: db-restore
 db-restore:
@@ -149,5 +150,4 @@ db-restore:
 	make create-db
 	make dump-production
 	make load-production-dump
-	rm -rf tmpbackup
-	$(DJANGO_ADMIN) migrate
+	make migrate
