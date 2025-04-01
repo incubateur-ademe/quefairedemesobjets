@@ -25,6 +25,7 @@
             Infos
         </button>
         <div class="qf-flex qf-flex-row-reverse">
+            {% if form.legend_grouped_action.field.choices|length > 1 %}
             <button
                 class="fr-btn fr-btn--sm fr-btn--secondary fr-ml-1w fr-btn--icon-left fr-icon-eye-line"
                 type="button"
@@ -32,6 +33,7 @@
             >
                 Légende
             </button>
+            {% endif %}
             <button
                 class="fr-btn fr-btn--sm fr-btn--secondary fr-ml-1w fr-btn--icon-left fr-icon-equalizer-line"
                 type="button"

@@ -985,7 +985,7 @@ class DisplayedActeur(BaseActeur):
         if actions_codes:
             pss = pss.filter(action__code__in=actions_codes)
 
-        action_ids_to_display = pss.values_list("action", flat=True).distinct()
+        action_ids_to_display = pss.values_list("action", flat=True)
         return cached_action_instances.filter(id__in=action_ids_to_display)
 
     def json_acteur_for_display(
