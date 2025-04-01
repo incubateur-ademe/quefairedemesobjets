@@ -4,7 +4,7 @@ from qfdmo.models import CarteConfig, GroupeActionConfig
 
 
 class GroupeActionConfigInline(admin.StackedInline):
-    fields = ("groupe_action", "acteur_type", "icon", "couleur")
+    fields = ("groupe_action", "acteur_type", "icon")
     autocomplete_fields = ["groupe_action", "acteur_type"]
     model = GroupeActionConfig
     extra = 0

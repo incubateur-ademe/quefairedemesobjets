@@ -1,4 +1,3 @@
-from colorfield.fields import ColorField
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.urls import reverse
@@ -43,16 +42,6 @@ class GroupeActionConfig(models.Model):
         validators=[FileExtensionValidator(allowed_extensions=["svg"])],
         blank=True,
         null=True,
-    )
-
-    couleur = ColorField(
-        null=True,
-        blank=True,
-        verbose_name="Couleur de fond utilisée pour le pictogramme",
-        help_text="Si aucune couleur n'est renseignée ici, la couleur "
-        "par défaut de l'action sélectionnée sera utilisée pour "
-        "la bordure du pictogramme. La couleur de remplissage du"
-        "pictogramme utilisera celle définie dans le .svg fourni.",
     )
 
     class Meta:
