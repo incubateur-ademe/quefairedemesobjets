@@ -43,8 +43,8 @@ class GroupeActionConfig(models.Model):
         null=True,
     )
 
-    class Meta:
-        unique_together = ["carte_config", "groupe_action", "acteur_type"]
+    # class Meta:
+    #     unique_together = ["carte_config", "groupe_action", "acteur_type"]
 
 
 class CarteConfig(models.Model):
