@@ -128,17 +128,16 @@ def clean_telephone(row: pd.Series, _):
     return row[["telephone"]]
 
 
-# TODO : Ajouter des tests
 def clean_siret_and_siren(row, _):
     if "siret" in row:
         row["siret"] = clean_siret(row["siret"])
     else:
-        row["siret"] = None
+        row["siret"] = ""
     if "siren" in row and row["siren"]:
         row["siren"] = clean_siren(row["siren"])
     else:
         row["siren"] = (
-            row["siret"][:9] if "siret" in row and row["siret"] is not None else None
+            row["siret"][:9] if "siret" in row and row["siret"] is not None else ""
         )
     return row[["siret", "siren"]]
 
@@ -179,7 +178,7 @@ def merge_sous_categories_columns(row, _):
 
 def clean_adresse(row, dag_config):
     row["adresse"] = row["adresse_format_ban"]
-    address = postal_code = city = None
+    address = postal_code = city = ""
     if dag_config.validate_address_with_ban:
         address, postal_code, city = _get_address(row["adresse_format_ban"])
     else:
@@ -325,9 +324,9 @@ def clean_proposition_services(row, _):
 
 def _get_address(
     adresse_format_ban: str,
-) -> tuple[str | None, str | None, str | None]:
+) -> tuple[str, str, str]:
     if not adresse_format_ban:
-        return (None, None, None)
+        return ("", "", "")
 
     res = _get_address_from_ban(str(adresse_format_ban))
     match_percentage = res.get("match_percentage", 0)
@@ -421,4 +420,4 @@ def _extract_details(
     if adresse_format_ban:
         address_str = _address_details_clean_cedex(adresse_format_ban)
         return _address_details_extract(address_str)
-    return None, None, None
+    return "", "", ""
