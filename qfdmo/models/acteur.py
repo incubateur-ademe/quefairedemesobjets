@@ -312,7 +312,6 @@ class DisplayedActeurManager(NomAsNaturalKeyManager):
 
 
 class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
-
     class Meta:
         abstract = True
 
@@ -969,20 +968,20 @@ class DisplayedActeur(BaseActeur):
     def get_absolute_url(self):
         return reverse("qfdmo:acteur-detail", args=[self.uuid])
 
-    def acteur_actions(self, direction=None):
-        ps_action_ids = list(
-            {ps.action_id for ps in self.proposition_services.all()}  # type: ignore
-        )
+    def acteur_actions(self, direction=None, actions_codes=None):
+        pss = self.proposition_services.all()
         # Cast needed because of the cache
         cached_action_instances = cast(
             List[Action], cache.get_or_set("_action_instances", get_action_instances)
         )
-        return [
-            action
-            for action in cached_action_instances
-            if (not direction or direction in [d.code for d in action.directions.all()])
-            and action.id in ps_action_ids
-        ]
+
+        if direction:
+            pss = pss.filter(action__direction__id__in=direction)
+        if actions_codes:
+            pss = pss.filter(action__code__in=actions_codes)
+
+        action_ids_to_display = pss.values_list("action", flat=True).distinct()
+        return cached_action_instances.filter(id__in=action_ids_to_display)
 
     def json_acteur_for_display(
         self,
@@ -990,12 +989,14 @@ class DisplayedActeur(BaseActeur):
         action_list: str | None = None,
         carte: bool = False,
     ) -> str:
-        actions = self.acteur_actions(direction=direction)
-
-        if action_list:
-            actions = [a for a in actions if a.code in action_list.split("|")]
+        # TODO: refacto jinja: once the shared/results.html template
+        # will be migrated to django template, this method should
+        # live in a template_tags instead.
+        actions_codes = action_list.split("|")
+        actions = self.acteur_actions(direction=direction, actions_codes=actions_codes)
 
         def sort_actions(a):
+            # TODO: explain this function ???
             if a == self.action_principale:
                 return -1
 
@@ -1003,8 +1004,6 @@ class DisplayedActeur(BaseActeur):
             if carte and a.groupe_action:
                 base_order += (a.groupe_action.order or 0) * 100
             return base_order
-
-        actions = sorted(actions, key=sort_actions)
 
         acteur_dict = {
             "uuid": self.uuid,
@@ -1014,11 +1013,13 @@ class DisplayedActeur(BaseActeur):
         if not actions:
             return orjson.dumps(acteur_dict).decode("utf-8")
 
-        displayed_action = actions[0]
+        displayed_action = sorted(actions, key=sort_actions)[0]
 
         if carte and displayed_action.groupe_action:
             displayed_action = displayed_action.groupe_action
 
+        # TODO: in case we have a carteConfig, customize carteConfig
+        # here
         acteur_dict.update(icon=displayed_action.icon, couleur=displayed_action.couleur)
 
         if carte and displayed_action.code == "reparer":
@@ -1051,7 +1052,6 @@ class DisplayedActeur(BaseActeur):
 
 
 class DisplayedActeurTemp(BaseActeur):
-
     uuid = models.CharField(max_length=255, default=shortuuid.uuid, editable=False)
 
     labels = models.ManyToManyField(
