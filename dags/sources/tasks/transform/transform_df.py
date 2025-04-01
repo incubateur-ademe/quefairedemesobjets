@@ -163,7 +163,7 @@ def clean_identifiant_unique(row, _):
         raise ValueError(
             "identifiant_externe is required to generate identifiant_unique"
         )
-    unique_str = row["identifiant_externe"].replace("/", "-").strip()
+    unique_str = str(row["identifiant_externe"]).replace("/", "-").strip()
     if row.get("acteur_type_code") == ACTEUR_TYPE_DIGITAL:
         unique_str = unique_str + "_d"
     row["identifiant_unique"] = row.get("source_code").lower() + "_" + unique_str
