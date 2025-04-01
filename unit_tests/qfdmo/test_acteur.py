@@ -7,6 +7,7 @@ from factory import Faker
 
 from qfdmo.models import (
     Acteur,
+    Action,
     NomAsNaturalKeyModel,
     RevisionActeur,
     RevisionPropositionService,
@@ -284,7 +285,6 @@ class TestCreateRevisionActeur:
 
 @pytest.mark.django_db
 class TestCreateRevisionActeurCreateParent:
-
     @pytest.fixture
     def acteurs_fields(self):
         acteur_type = ActeurTypeFactory()
@@ -444,18 +444,18 @@ class TestRevisionActeurDuplicate:
         )
         revision_acteur_duplicate = revision_acteur.duplicate()
 
-        assert (
-            revision_acteur_duplicate.nom == "Nom Revision"
-        ), f"Should be the name of the revision : {revision_acteur.nom}"
-        assert (
-            revision_acteur_duplicate.acteur_type == revision_acteur.acteur_type
-        ), f"Should be the acteur type of the revision : {revision_acteur.acteur_type}"
-        assert (
-            revision_acteur_duplicate.location == revision_acteur.location
-        ), f"Should be the location of the revision : {revision_acteur.location}"
-        assert (
-            revision_acteur_duplicate.nom_commercial == "Nom commercial"
-        ), f"Should be the nom commercial of the acteur : {acteur.source}"
+        assert revision_acteur_duplicate.nom == "Nom Revision", (
+            f"Should be the name of the revision : {revision_acteur.nom}"
+        )
+        assert revision_acteur_duplicate.acteur_type == revision_acteur.acteur_type, (
+            f"Should be the acteur type of the revision : {revision_acteur.acteur_type}"
+        )
+        assert revision_acteur_duplicate.location == revision_acteur.location, (
+            f"Should be the location of the revision : {revision_acteur.location}"
+        )
+        assert revision_acteur_duplicate.nom_commercial == "Nom commercial", (
+            f"Should be the nom commercial of the acteur : {acteur.source}"
+        )
 
     def test_duplicate_source(self):
         SourceFactory(code="communautelvao")
@@ -511,7 +511,6 @@ class TestRevisionActeurDuplicate:
 
 @pytest.mark.django_db
 class TestRevisionActeurRemoveParentWithoutChildren:
-
     def test_revision_acteur_remove_parent_without_children(self):
         revision_acteur_original_parent = RevisionActeurFactory()
         revision_acteur = RevisionActeurFactory(parent=revision_acteur_original_parent)
@@ -564,7 +563,6 @@ class TestRevisionActeurRemoveParentWithoutChildren:
 
 @pytest.mark.django_db
 class TestActeurService:
-
     @pytest.fixture
     def displayed_acteur(self):
         return DisplayedActeurFactory()
@@ -618,7 +616,6 @@ class TestActeurLabel:
 
 @pytest.mark.django_db
 class TestDisplayActeurActeurActions:
-
     def test_basic(self):
         displayed_acteur = DisplayedActeurFactory()
         direction = ActionDirectionFactory(code="jai")
@@ -649,7 +646,9 @@ class TestDisplayActeurActeurActions:
         action = ActionFactory()
         action.directions.add(direction)
         DisplayedPropositionServiceFactory(action=action, acteur=displayed_acteur)
-        assert displayed_acteur.acteur_actions(direction="fake").count() == 0
+        assert (
+            displayed_acteur.acteur_actions(direction="fake") == Action.objects.none()
+        )
         assert [
             model_to_dict(a, exclude=["directions"])
             for a in displayed_acteur.acteur_actions(direction="jai")
@@ -683,7 +682,6 @@ class TestDisplayActeurActeurActions:
 
 @pytest.mark.django_db
 class TestDisplayedActeurJsonActeurForDisplay:
-
     @pytest.fixture
     def displayed_acteur(self):
         displayed_acteur = DisplayedActeurFactory()
@@ -875,7 +873,6 @@ class TestDisplayedActeurJsonActeurForDisplay:
 
 
 class TestDisplayedActeurDisplayPostalAddress:
-
     def test_should_display_adresse(self):
         displayed_acteur = DisplayedActeurFactory.build()
 
