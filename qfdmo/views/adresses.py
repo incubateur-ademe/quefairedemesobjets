@@ -543,7 +543,6 @@ class CarteSearchActeursView(SearchActeursView):
         initial["action_list"] = "|".join(
             [a for ga in initial["grouped_action"] for a in ga.split("|")]
         )
-        logger.info(f"{initial=}")
         return initial
 
     def get_context_data(self, **kwargs):

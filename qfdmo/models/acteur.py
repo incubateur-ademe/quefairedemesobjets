@@ -1017,6 +1017,7 @@ class DisplayedActeur(BaseActeur):
         }
 
         if not actions:
+            # TODO: explain why we need to decode here
             return orjson.dumps(acteur_dict).decode("utf-8")
 
         displayed_action = sorted(actions, key=sort_actions)[0]
@@ -1024,17 +1025,28 @@ class DisplayedActeur(BaseActeur):
         if carte and displayed_action.groupe_action:
             displayed_action = displayed_action.groupe_action
 
-        acteur_dict.update(icon=displayed_action.icon, couleur=displayed_action.couleur)
+        acteur_dict.update(
+            icon=displayed_action.icon,
+            couleur=displayed_action.couleur,
+        )
 
         # TODO: in case we have a carteConfig, customize carteConfig
         # here
         if carte_config:
             try:
                 groupe_action_config = carte_config.groupe_action_config.get(
-                    groupe_action=displayed_action, acteur_type=self.acteur_type
+                    groupe_action__actions__code__in=[displayed_action],
+                    acteur_type=self.acteur_type,
                 )
-                acteur_dict.update(icon_file=groupe_action_config.icon)
-                del acteur_dict["icon"]
+                if groupe_action_config.icon:
+                    # Property is camelcased as it is used in javascript
+                    acteur_dict.update(
+                        iconFile=groupe_action_config.icon.url, fillBackground=True
+                    )
+                    del acteur_dict["icon"]
+
+                if groupe_action_config.couleur:
+                    acteur_dict.update(couleur=groupe_action_config.couleur)
 
             except GroupeActionConfig.DoesNotExist:
                 pass
@@ -1043,6 +1055,7 @@ class DisplayedActeur(BaseActeur):
             acteur_dict.update(
                 bonus=getattr(self, "bonus", False),
                 reparer=getattr(self, "reparer", False),
+                fillBackground=True,
             )
 
         return orjson.dumps(acteur_dict).decode("utf-8")
