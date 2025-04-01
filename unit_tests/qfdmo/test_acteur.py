@@ -7,6 +7,7 @@ from factory import Faker
 
 from qfdmo.models import (
     Acteur,
+    Action,
     NomAsNaturalKeyModel,
     RevisionActeur,
     RevisionPropositionService,
@@ -649,7 +650,9 @@ class TestDisplayActeurActeurActions:
         action = ActionFactory()
         action.directions.add(direction)
         DisplayedPropositionServiceFactory(action=action, acteur=displayed_acteur)
-        assert displayed_acteur.acteur_actions(direction="fake") == []
+        assert (
+            displayed_acteur.acteur_actions(direction="fake") == Action.objects.none()
+        )
         assert [
             model_to_dict(a, exclude=["directions"])
             for a in displayed_acteur.acteur_actions(direction="jai")

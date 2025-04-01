@@ -981,9 +981,9 @@ class DisplayedActeur(BaseActeur):
         )
 
         if direction:
-            pss = pss.filter(action__direction__id__in=direction)
+            pss = pss.filter(action__directions__code__in=[direction])
         if actions_codes:
-            pss = pss.filter(action__code__in=actions_codes)
+            pss = pss.filter(action__code__in=actions_codes.split("|"))
 
         action_ids_to_display = pss.values_list("action", flat=True)
         return cached_action_instances.filter(id__in=action_ids_to_display)
@@ -998,8 +998,7 @@ class DisplayedActeur(BaseActeur):
         # TODO: refacto jinja: once the shared/results.html template
         # will be migrated to django template, this method should
         # live in a template_tags instead.
-        actions_codes = action_list.split("|")
-        actions = self.acteur_actions(direction=direction, actions_codes=actions_codes)
+        actions = self.acteur_actions(direction=direction, actions_codes=action_list)
 
         def sort_actions(a):
             # TODO: explain this function ???
