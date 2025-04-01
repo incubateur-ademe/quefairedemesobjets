@@ -391,6 +391,7 @@ class TestCleanIdentifiantUnique:
             " expected_identifiant_unique"
         ),
         [
+            (12345, "commerce", "source", "source_12345"),
             ("12345", "commerce", "source", "source_12345"),
             (" 12345 ", "commerce", "source", "source_12345"),
             ("ABC123", "commerce", "source", "source_ABC123"),
