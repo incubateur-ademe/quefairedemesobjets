@@ -15,4 +15,4 @@ class GroupeActionConfigInline(admin.StackedInline):
 class CarteConfigAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ["nom"]}
     autocomplete_fields = ["sous_categorie_objet", "source", "groupe_action"]
-    # inlines = [GroupeActionConfigInline]
+    inlines = [GroupeActionConfigInline]
