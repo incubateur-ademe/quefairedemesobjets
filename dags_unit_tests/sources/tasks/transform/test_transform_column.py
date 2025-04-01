@@ -222,14 +222,14 @@ class TestCleanPublicAccueilli:
     @pytest.mark.parametrize(
         "value, expected_value",
         [
-            (None, None),
-            ("fake", None),
+            (None, ""),
+            ("fake", ""),
             ("PARTICULIERS", "Particuliers"),
             ("Particuliers", "Particuliers"),
             ("DMA", "Particuliers"),
             ("DMA/PRO", "Particuliers et professionnels"),
             ("PRO", "Professionnels"),
-            ("NP", None),
+            ("NP", ""),
             ("Particuliers et professionnels", "Particuliers et professionnels"),
         ],
     )
@@ -247,12 +247,12 @@ class TestCleanReprise:
     @pytest.mark.parametrize(
         "value,expected_value",
         [
-            (None, None),
+            (None, ""),
             ("1 pour 0", "1 pour 0"),
             ("1 pour 1", "1 pour 1"),
             ("non", "1 pour 0"),
             ("oui", "1 pour 1"),
-            ("fake", None),
+            ("fake", ""),
         ],
     )
     def test_clean_reprise(
