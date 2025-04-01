@@ -30,8 +30,12 @@ def get_sw(request):
 def generate_iframe_script(request) -> str:
     """Generates a <script> tag used to embed Assistant website."""
     script_parts = ["<script"]
-
-    if request.resolver_match.view_name == "qfdmd:synonyme-detail":
+    if (
+        request
+        and request.resolver_match
+        and request.resolver_match.view_name == "qfdmd:synonyme-detail"
+    ):
+        logger.warning("generate_iframe_script")
         produit_slug = request.resolver_match.kwargs["slug"]
         script_parts.append(f'data-objet="{produit_slug}"')
 
