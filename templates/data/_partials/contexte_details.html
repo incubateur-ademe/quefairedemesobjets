@@ -20,7 +20,7 @@
     {% endif %}
 </p>
 {% if contexte %}
-    <details>
+    <details {% if details_open %}open{% endif %}>
         <summary>Details</summary>
         {% include "data/_partials/value_details.html" with value=contexte %}
     </details>
