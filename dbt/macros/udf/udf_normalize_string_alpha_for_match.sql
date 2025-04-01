@@ -9,7 +9,9 @@
     E.g. to test this function:
     SELECT udf_normalize_string_alpha_for_match(' Héllo-Wørld! Ça va? 123 ');
  */
-CREATE OR REPLACE FUNCTION udf_normalize_string_alpha_for_match(input_text TEXT) RETURNS TEXT AS $$
+
+DROP FUNCTION IF EXISTS {{ target.schema }}.udf_normalize_string_alpha_for_match(input_text TEXT);
+CREATE FUNCTION {{ target.schema }}.udf_normalize_string_alpha_for_match(input_text TEXT) RETURNS TEXT AS $$
 DECLARE
     normalized TEXT;
 BEGIN
