@@ -85,18 +85,6 @@ createsuperuser:
 seed-database:
 	$(DJANGO_ADMIN) loaddata categories actions acteur_services acteur_types acteurs objets
 
-.PHONY: drop-db
-drop-db:
-	docker compose exec lvao-db dropdb -f -i -U qfdmo -e qfdmo
-
-.PHONY: create-db
-create-db:
-	docker compose exec lvao-db createdb -U qfdmo -e qfdmo
-
-.PHONY: restore-prod
-restore-prod:
-	./scripts/restore_prod_locally.sh
-
 .PHONY: clear-cache
 clear-cache:
 	$(DJANGO_ADMIN) clear_cache --all
@@ -135,17 +123,31 @@ extract-dsfr:
 	$(PYTHON) ./dsfr_hacks/extract_used_colors.py
 	$(PYTHON) ./dsfr_hacks/extract_used_icons.py
 
-# RESTORE DB LOCALLY
-.PHONY: db-restore
-db-restore:
+# Postgres database utilities: restore, drop database etc
+.PHONY: drop-db
+drop-db:
+	docker compose exec lvao-db dropdb -f -i -U qfdmo -e qfdmo
+
+.PHONY: create-db
+create-db:
+	docker compose exec lvao-db createdb -U qfdmo -e qfdmo
+
+.PHONY: dump-production
+dump-production:
 	mkdir -p tmpbackup
 	scalingo --app quefairedemesobjets --addon postgresql backups-download --output tmpbackup/backup.tar.gz
 	tar xfz tmpbackup/backup.tar.gz --directory tmpbackup
-	@DUMP_FILE=$$(find tmpbackup -type f -name "*.pgsql" -print -quit); \
-	for table in $$(psql "$(DB_URL)" -t -c "SELECT tablename FROM pg_tables WHERE schemaname='public'"); do \
-	    psql "$(DB_URL)" -c "DROP TABLE IF EXISTS $$table CASCADE"; \
-	done || true
+
+.PHONY: load-production-dump
+load-production-dump:
 	@DUMP_FILE=$$(find tmpbackup -type f -name "*.pgsql" -print -quit); \
 	pg_restore -d "$(DB_URL)" --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
+
+.PHONY: db-restore
+db-restore:
+	make drop-db
+	make create-db
+	make dump-production
+	make load-production-dump
 	rm -rf tmpbackup
 	$(DJANGO_ADMIN) migrate
