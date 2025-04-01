@@ -23,36 +23,43 @@ class CustomCarteView(DetailView, CarteSearchActeursView):
         return self.get_object().groupe_action.all().order_by("order")
 
     def _set_action_list(self, *args, **kwargs):
-        return self.groupe_actions
+        if self.groupe_actions:
+            return self.groupe_actions
+        return super()._set_action_list(*args, **kwargs)
 
     def _set_action_displayed(self, *args, **kwargs):
-        return self.groupe_actions
+        if self.groupe_actions:
+            return self.groupe_actions
+
+        return super()._set_action_displayed(*args, **kwargs)
 
     def _get_selected_action_code(self, *args, **kwargs):
-        return self.groupe_actions
+        if self.groupe_actions:
+            return self.groupe_actions
+
+        return super()._get_selected_action_code(*args, **kwargs)
 
     def get_cached_groupe_action_with_displayed_actions(self, *args, **kwargs):
-        return [
-            [groupe_action, groupe_action.actions.all()]
-            for groupe_action in self.groupe_actions
-        ]
+        if self.groupe_actions:
+            return [
+                [groupe_action, groupe_action.actions.all()]
+                for groupe_action in self.groupe_actions
+            ]
+        else:
+            return super().get_cached_groupe_action_with_displayed_actions(
+                *args, **kwargs
+            )
 
     def _grouped_action_from(self, *args, **kwargs):
-        return [
-            "|".join(groupe_action.actions.all().values_list("code", flat=True))
-            for groupe_action in self.get_object().groupe_action.all()
-        ]
+        if self.groupe_actions:
+            return [
+                "|".join(groupe_action.actions.all().values_list("code", flat=True))
+                for groupe_action in self.groupe_actions
+            ]
+        return super()._grouped_action_from(*args, **kwargs)
 
     def _compile_acteurs_queryset(self, *args, **kwargs):
         filters, excludes = super()._compile_acteurs_queryset(*args, **kwargs)
-
-        # acteur_types_to_filter = (
-        #     self.get_object()
-        #     .groupe_action_config.all()
-        #     .values_list("acteur_type", flat=True)
-        # )
-        # if acteur_types_to_filter:
-        #     filters &= Q(acteur_type__in=acteur_types_to_filter)
 
         if source_filter := self.get_object().source.all():
             filters &= Q(source__in=source_filter)
