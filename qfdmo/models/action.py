@@ -213,7 +213,7 @@ class Action(CodeAsNaturalKeyModel):
 
 
 def get_action_instances() -> List[Action]:
-    return list(Action.objects.prefetch_related("directions", "groupe_action"))
+    return Action.objects.prefetch_related("directions", "groupe_action")
 
 
 def get_reparer_action_id() -> int:
