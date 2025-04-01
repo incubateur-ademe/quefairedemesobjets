@@ -40,10 +40,10 @@ export default class extends Controller<HTMLElement> {
     })
     //fixme : find how do not allow undefined from map
     const actors: Array<Actor> = this.acteurTargets
-      .map((ecoCirTarget: HTMLScriptElement) => {
-        if (ecoCirTarget.textContent !== null) {
-          const actor_fields: DisplayedActeur = JSON.parse(ecoCirTarget.textContent)
-          return new Actor(actor_fields)
+      .map((actorTarget: HTMLScriptElement) => {
+        if (actorTarget.textContent !== null) {
+          const actorFields: DisplayedActeur = JSON.parse(actorTarget.textContent)
+          return new Actor(actorFields)
         }
       })
       .filter((actor) => actor !== undefined)
