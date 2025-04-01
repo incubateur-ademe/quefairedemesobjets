@@ -1040,13 +1040,8 @@ class DisplayedActeur(BaseActeur):
                 )
                 if groupe_action_config.icon:
                     # Property is camelcased as it is used in javascript
-                    acteur_dict.update(
-                        iconFile=groupe_action_config.icon.url, fillBackground=True
-                    )
+                    acteur_dict.update(iconFile=groupe_action_config.icon.url)
                     del acteur_dict["icon"]
-
-                if groupe_action_config.couleur:
-                    acteur_dict.update(couleur=groupe_action_config.couleur)
 
             except GroupeActionConfig.DoesNotExist:
                 pass
