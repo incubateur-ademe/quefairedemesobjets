@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404
 from ninja import Field, FilterSchema, ModelSchema, Query, Router
 from ninja.pagination import paginate
 
-from qfdmo.admin.acteur import OpenSourceDisplayedActeurResource
+from qfdmo.admin.acteur import GenericExporterMixin
 from qfdmo.geo_api import search_epci_code
 from qfdmo.models import (
     ActeurService,
@@ -90,12 +90,12 @@ class ActeurSchema(ModelSchema):
     adresse: str = Field(
         ..., alias="adresse_display", description="l'adresse complète de l'acteur"
     )
-    sources: str = Field(..., description="La paternité de l'acteur")
+    sources: List[str] = Field(..., description="La paternité de l'acteur")
 
     @staticmethod
     def resolve_sources(obj):
-        resource = OpenSourceDisplayedActeurResource()
-        return resource.dehydrate_sources(obj)
+        exporter = GenericExporterMixin()
+        return exporter.get_sources(obj)
 
     @staticmethod
     def resolve_distance(obj):
