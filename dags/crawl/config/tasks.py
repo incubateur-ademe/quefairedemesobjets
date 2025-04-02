@@ -11,5 +11,5 @@ class TASKS:
     CHECK_CRAWL: str = "crawl_urls_check_crawl"
     SUGGEST_SYNTAX_FAIL: str = "crawl_urls_suggest_syntax_fail"
     SUGGEST_DNS_FAIL: str = "crawl_urls_suggest_dns_fail"
-    SUGGEST_CRAWL_DIFF_HTTPS: str = "crawl_urls_suggest_crawl_diff_https"
+    SUGGEST_CRAWL_DIFF_STANDARD: str = "crawl_urls_suggest_crawl_diff_standard"
     SUGGEST_CRAWL_DIFF_OTHER: str = "crawl_urls_suggest_crawl_diff_other"

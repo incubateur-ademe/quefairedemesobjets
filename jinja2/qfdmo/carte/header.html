@@ -1,4 +1,8 @@
-<div class="qf-items-center qf-hidden md:qf-flex qf-flex-row" id="logo">
+<div
+    class="qf-items-center qf-hidden md:qf-flex qf-flex-row"
+    id="logo"
+    data-remove-if-internal
+>
     {% include 'layout/_partials/header_logos.html' %}
 </div>
 
@@ -16,8 +20,9 @@
             type="button"
             title="À propos"
             data-action="click -> search-solution-form#toggleAPropos"
+            data-remove-if-internal
         >
-            À propos
+            Infos
         </button>
         <div class="qf-flex qf-flex-row-reverse">
             <button
