@@ -35,7 +35,6 @@ def generate_iframe_script(request) -> str:
         and request.resolver_match
         and request.resolver_match.view_name == "qfdmd:synonyme-detail"
     ):
-        logger.warning("generate_iframe_script")
         produit_slug = request.resolver_match.kwargs["slug"]
         script_parts.append(f'data-objet="{produit_slug}"')
 
