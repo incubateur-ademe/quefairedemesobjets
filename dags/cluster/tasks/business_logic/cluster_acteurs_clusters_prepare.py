@@ -18,7 +18,7 @@ from utils import logging_utils as log
 logger = logging.getLogger(__name__)
 
 
-def cluster_acteurs_clusters_display(
+def cluster_acteurs_clusters_prepare(
     df: pd.DataFrame,
     cluster_fields_exact: list[str],
     cluster_fields_fuzzy: list[str],
@@ -27,6 +27,13 @@ def cluster_acteurs_clusters_display(
     fields_protected: list[str],
     fields_transformed: list[str],
 ) -> pd.DataFrame:
+    """Overall clustering preparation:
+    - Clustering of actors
+    - Adding original columns
+    - Adding calculated columns
+    - Adding children of parents
+    - Sorting the final dataframe"""
+
     from qfdmo.models import RevisionActeur
 
     df_clusters = cluster_acteurs_clusters(
@@ -45,18 +52,10 @@ def cluster_acteurs_clusters_display(
     df_clusters = df_add_original_columns(df_clusters, df)
 
     logger.info("Ajout des données calculées")
-    # TODO: créer une fonction dédiée qui permet de consolider:
-    # - la df de suggestions (données uniquement nécessaires aux clusters)
-    # - la df de sélection (données complètes des acteurs)
-    # pour pouvoir offrire en sortie de suggestion une df complète
-    # qui permettre + de validation/suivis au delà de ce qui est
-    # nécessaire pour le clustering lui-même
-    # En attendant un quick-fix pour récupérer le statut et passer la validation
-    # status_by_id = df.set_index("identifiant_unique")["statut"]
-    # df_clusters["statut"] = df_clusters["identifiant_unique"].map(status_by_id)
 
-    # Parent ID n'est pas présent dans DisplayedActeur (source des clusters)
-    # donc on reconstruit ce champ à partir de RevisionActeur
+    # TODO: remove this entire logic by using a unified django model
+    # abstracting/resolving the location/computation of acteurs
+    # and thus not needing any of this
     acteur_to_parent_ids_all = dict(
         RevisionActeur.objects.filter(parent__isnull=False).values_list(
             "identifiant_unique", "parent__identifiant_unique"
@@ -66,14 +65,15 @@ def cluster_acteurs_clusters_display(
         lambda x: acteur_to_parent_ids_all.get(x, None)
     )
 
+    # Case with no parents (no existing parents found or clustered)
     df_parents = df_clusters[df_clusters["nombre_enfants"] > 0]
-    # It's possible to have no parents in df_clusters IF we didn't manage
-    # to cluster existing parents
     logger.info(f"# parents trouvés dans les clusters: {len(df_parents)}")
     if df_parents.empty:
         logger.info("Pas de parents dans clusters -> pas d'enfants à ajouter")
         df_combined = df_clusters
     else:
+
+        # Case with parents
         logger.info("Ajout des enfants des parents existants")
         parent_to_cluster_ids = df_parents.set_index("identifiant_unique")[
             "cluster_id"
@@ -84,18 +84,14 @@ def cluster_acteurs_clusters_display(
             parent_ids=parent_ids,
             fields_to_include=fields_protected + fields_transformed + ["parent_id"],
         )
+
+        # Validation
+        # we should either enter df_parents.empty or be here with children
         if df_children.empty:
-            # Either we have no parents in df_clusters which is OK but we shouldn't
-            # enter the df_children logic, or we're in that logic and it should
-            # work smoothly
             raise AirflowFailException(
                 "Pas d'enfants trouvés pour les parents, ce qui ne devrait pas arriver"
             )
-        log.preview_df_as_markdown("enfants des parents A", df_children)
         df_children["cluster_id"] = df_children["parent_id"].map(parent_to_cluster_ids)
-
-        log.preview_df_as_markdown("enfants des parents B", df_children)
-
         df_combined = pd.concat([df_clusters, df_children], ignore_index=True).replace(
             {np.nan: None}
         )

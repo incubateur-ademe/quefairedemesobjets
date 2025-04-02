@@ -8,11 +8,11 @@ from cluster.helpers.shorthands.change_model_name import (
     CHANGE_NOTHING,
     CHANGE_POINT,
 )
+from cluster.tasks.business_logic.cluster_acteurs_suggestions.prepare import (
+    cluster_acteurs_suggestions_prepare,
+)
 from shapely.geometry import Point
 
-from dags.cluster.tasks.business_logic.cluster_acteurs_suggestions.display import (
-    cluster_acteurs_suggestions_display,
-)
 from data.models.change import (
     COL_CHANGE_ENTITY_TYPE,
     COL_CHANGE_MODEL_NAME,
@@ -110,7 +110,7 @@ class TestClusterActeursSuggestionsDisplay:
     @pytest.fixture
     def suggestions(self, df_clusters):
         # The function should have everything it needs from the df
-        return cluster_acteurs_suggestions_display(df_clusters)
+        return cluster_acteurs_suggestions_prepare(df_clusters)
 
     def test_structure_and_type(self, suggestions):
         assert isinstance(suggestions, list)

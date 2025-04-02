@@ -1,71 +1,29 @@
-"""
-DAG de suggestions de clusters pour les acteurs
-
-Les suggestions sont écrites dans la table qfdmo_suggestions
-Le traitement des suggestions est géré hors de ce DAG par
-l'app django data_management
-"""
-
-from datetime import datetime
+"""DAG which generates clustering suggestions for acteurs"""
 
 from airflow import DAG
-from airflow.models.baseoperator import chain
 from airflow.models.param import Param
-from cluster.config.constants import FIELDS_PARENT_DATA_EXCLUDED
-from cluster.config.model import ClusterConfig
-from cluster.tasks.airflow_logic.cluster_acteurs_clusters_display_task import (
-    cluster_acteurs_clusters_display_task,
-)
-from cluster.tasks.airflow_logic.cluster_acteurs_clusters_validate_task import (
-    cluster_acteurs_clusters_validate_task,
-)
-from cluster.tasks.airflow_logic.cluster_acteurs_config_create_task import (
-    cluster_acteurs_config_create_task,
-)
-from cluster.tasks.airflow_logic.cluster_acteurs_normalize_task import (
-    cluster_acteurs_normalize_task,
-)
-from cluster.tasks.airflow_logic.cluster_acteurs_parents_choose_data_task import (
-    cluster_acteurs_parents_choose_data_task,
-)
-from cluster.tasks.airflow_logic.cluster_acteurs_parents_choose_new_task import (
-    cluster_acteurs_parents_choose_new_task,
-)
-from cluster.tasks.airflow_logic.cluster_acteurs_read_task import (
-    cluster_acteurs_read_task,
-)
-from cluster.tasks.airflow_logic.cluster_acteurs_suggestions_display_task import (
-    cluster_acteurs_suggestions_display_task,
-)
-from cluster.tasks.airflow_logic.cluster_acteurs_suggestions_to_db_task import (
-    cluster_acteurs_suggestions_to_db_task,
-)
+from cluster.config import FIELDS_PARENT_DATA_EXCLUDED, ClusterConfig
+from cluster.tasks.airflow_logic.chain_tasks import chain_tasks
 from cluster.ui import params_separators as UI_PARAMS_SEPARATORS
+from shared.config import CATCHUPS, SCHEDULES, START_DATES
 from utils.airflow_params import airflow_params_dropdown_from_mapping
 from utils.django import django_model_fields_get, django_setup_full
 
-# Setup Django avant import des modèles
 django_setup_full()
 from qfdmo.models import Acteur, ActeurType, Source  # noqa: E402
 
 # -------------------------------------------
-# Gestion des dropdowns des paramètres
+# Manage dropdowns in Airflow
 # -------------------------------------------
-# A noter que ce design pattern est a éviter au maximum
-# car le code est executé au parsing des fichiers DAG
-# selon min_file_process_interval
+# Beware of performance impact, see min_file_process_interval
 # https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html#config-scheduler-min-file-process-interval
 # https://airflow.apache.org/docs/apache-airflow/stable/best-practices.html#top-level-python-code
-# En revanche sans cette approche, il va falloir:
-# - soit laisser le métier rentrer des paramètres complexes à la main
-# - soit maintenir des mapping statiques ici
-# Ces deux options semblent pires que l'inconvénient du top-level code
-# sachant que le code executé demeure assez légé
+# But OK for now given low amount of requested data
 
-# Récupération données DB
+# Get data from DB
 mapping_source_id_by_code = {obj.code: obj.id for obj in Source.objects.all()}
 mapping_acteur_type_id_by_code = {obj.code: obj.id for obj in ActeurType.objects.all()}
-# Création des dropdowns
+# Create dropdowns
 dropdown_sources = airflow_params_dropdown_from_mapping(mapping_source_id_by_code)
 dropdown_acteur_types = airflow_params_dropdown_from_mapping(
     mapping_acteur_type_id_by_code
@@ -74,10 +32,9 @@ dropdown_acteur_types = airflow_params_dropdown_from_mapping(
 fields_all = django_model_fields_get(Acteur)
 fields_enrich = sorted(
     list(
-        # We don't want to enrich calculated properties obviously
-        # since these are computed
+        # Can't want to enrich calculated properties
         set(django_model_fields_get(Acteur, include_properties=False))
-        # And we exclude some fields based on business rules (ex: source)
+        # Exclude some fields based on business rules (ex: source)
         - set(FIELDS_PARENT_DATA_EXCLUDED)
     )
 )
@@ -312,6 +269,8 @@ PARAMS = {
         conservée""",
     ),
 }
+
+# Detect if Airflow params aren't aligned with Conf model without running DAG
 keys_missing_in_conf = list(set(PARAMS.keys()) - set(ClusterConfig.model_fields))
 if keys_missing_in_conf:
     raise ValueError(f"Param Airflow {keys_missing_in_conf} non trouvé(s) en config")
@@ -322,32 +281,15 @@ with DAG(
     default_args={
         "owner": "airflow",
         "depends_on_past": False,
-        # Une date bidon dans le passée pour
-        # par que Airflow "attende" que la date
-        # soit atteinte
-        "start_date": datetime(2025, 1, 1),
-        # Notre donnée n'étant pas versionnée dans le temps,
-        # faire du catchup n'a pas de sense
-        "catchup": False,
         "email_on_failure": False,
         "email_on_retry": False,
-        # Les tâches de ce DAG ne devrait pas avoir de problème
-        # de perf donc 0 retries par défaut
         "retries": 0,
     },
+    start_date=START_DATES.FOR_SCHEDULE_NONE,
+    catchup=CATCHUPS.AWLAYS_FALSE,
+    schedule=SCHEDULES.NONE,
     description=("Un DAG pour générer des suggestions de clustering pour les acteurs"),
     tags=["cluster", "acteurs", "suggestions"],
     params=PARAMS,
-    schedule=None,
 ) as dag:
-    chain(
-        cluster_acteurs_config_create_task(dag=dag),
-        cluster_acteurs_read_task(dag=dag),
-        cluster_acteurs_normalize_task(dag=dag),
-        cluster_acteurs_clusters_display_task(dag=dag),
-        cluster_acteurs_clusters_validate_task(dag=dag),
-        cluster_acteurs_parents_choose_new_task(dag=dag),
-        cluster_acteurs_parents_choose_data_task(dag=dag),
-        cluster_acteurs_suggestions_display_task(dag=dag),
-        cluster_acteurs_suggestions_to_db_task(dag=dag),
-    )
+    chain_tasks(dag)

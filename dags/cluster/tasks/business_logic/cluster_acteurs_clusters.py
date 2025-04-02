@@ -232,7 +232,7 @@ def cluster_acteurs_clusters(
 
     df = df.sort_values(cluster_fields_exact)
 
-    # On ne garde que les colonnes utiles
+    # Only keep columns needed for clustering
     cols_ids_codes = [
         col for col in df.columns if re.search(r"identifiant|_code|_id", col, re.I)
     ]

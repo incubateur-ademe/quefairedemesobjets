@@ -4,14 +4,9 @@ import pandas as pd
 from airflow import DAG
 from airflow.exceptions import AirflowSkipException
 from airflow.operators.python import PythonOperator
-from cluster.config.model import ClusterConfig
-from cluster.tasks.airflow_logic.task_ids import (
-    TASK_CLUSTERS_DISPLAY,
-    TASK_CONFIG_CREATE,
-    TASK_NORMALIZE,
-)
-from cluster.tasks.business_logic.cluster_acteurs_clusters_display import (
-    cluster_acteurs_clusters_display,
+from cluster.config import TASKS, XCOMS, ClusterConfig, xcom_pull
+from cluster.tasks.business_logic.cluster_acteurs_clusters_prepare import (
+    cluster_acteurs_clusters_prepare,
 )
 from utils import logging_utils as log
 from utils.django import django_setup_full
@@ -27,7 +22,7 @@ def task_info_get():
 
 
     ============================================================
-    Description de la tâche "{TASK_CLUSTERS_DISPLAY}"
+    Description de la tâche "{TASKS.CLUSTERS_PREPARE}"
     ============================================================
 
     💡 quoi: génère des suggestions de clusters pour les acteurs
@@ -39,24 +34,20 @@ def task_info_get():
     """
 
 
-def cluster_acteurs_suggestions_wrapper(**kwargs) -> None:
+def cluster_acteurs_suggestions_wrapper(ti) -> None:
     logger.info(task_info_get())
 
-    config: ClusterConfig = kwargs["ti"].xcom_pull(
-        key="config", task_ids=TASK_CONFIG_CREATE
-    )
-    df: pd.DataFrame = kwargs["ti"].xcom_pull(key="df", task_ids=TASK_NORMALIZE)
+    config: ClusterConfig = xcom_pull(ti, XCOMS.CONFIG)
+    df: pd.DataFrame = xcom_pull(ti, XCOMS.DF_NORMALIZE)
+
     if df.empty:
-        raise AirflowSkipException("Pas de données acteurs normalisées récupérées")
+        raise AirflowSkipException("Pas d'acteurs normalisés, on devrait pas être là")
 
     log.preview("config reçue", config)
-    # Zoom sur les champs de config de clustering pour + de clarté
-    for key, value in config.__dict__.items():
-        if key.startswith("cluster_"):
-            log.preview(f"config.{key}", value)
+    log.preview_dict_subsets(config.__dict__, key_pattern="cluster_")
     log.preview("acteurs normalisés", df)
 
-    df = cluster_acteurs_clusters_display(
+    df = cluster_acteurs_clusters_prepare(
         df=df,
         cluster_fields_exact=config.cluster_fields_exact,
         cluster_fields_fuzzy=config.cluster_fields_fuzzy,
@@ -65,16 +56,16 @@ def cluster_acteurs_suggestions_wrapper(**kwargs) -> None:
         fields_protected=config.fields_protected,
         fields_transformed=config.fields_transformed,
     )
+
     if df.empty:
-        raise AirflowSkipException("Pas de clusters trouvés")
+        raise AirflowSkipException("Pas de clusters trouvés, on s'arrête là")
 
-    # On pousse les suggestions dans xcom pour les tâches suivantes
-    kwargs["ti"].xcom_push(key="df", value=df)
+    ti.xcom_push(key=XCOMS.DF_CLUSTERS_PREPARE, value=df)
 
 
-def cluster_acteurs_clusters_display_task(dag: DAG) -> PythonOperator:
+def cluster_acteurs_clusters_prepare_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
-        task_id=TASK_CLUSTERS_DISPLAY,
+        task_id=TASKS.CLUSTERS_PREPARE,
         python_callable=cluster_acteurs_suggestions_wrapper,
         provide_context=True,
         dag=dag,

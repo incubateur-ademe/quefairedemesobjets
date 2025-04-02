@@ -1,4 +1,4 @@
-from cluster.config.model import ClusterConfig
+from cluster.config import ClusterConfig
 from utils.django import django_setup_full
 
 django_setup_full()
