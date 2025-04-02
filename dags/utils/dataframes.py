@@ -8,15 +8,9 @@ from utils import logging_utils as log
 def df_sort(
     df: pd.DataFrame, sort_rows: list[str] = [], sort_cols: list[str] = []
 ) -> pd.DataFrame:
-    """Sorts a dataframe according to rows & column order,
-    while keeping other columns and not crashing if some
-    columns are missing. This is useful in pipelines like
-    clustering where dataframes go through various stages
-    (normalization, clustering, etc) and we want a convenient
-    way of displaying dfs without worrying about their state.
-
-    note: for clustering we want sort_rows to reflect clustering but
-    we want sort_cols to prioritize certain debug columns (statut)"""
+    """Sorts rows & columns of df based on desired order vs. what's available
+    (e.g. useful to debug DFs throughout DAGs without worrying about what's
+    in them at each step)"""
     if df.empty:
         return df
 
