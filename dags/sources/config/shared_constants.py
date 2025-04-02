@@ -18,6 +18,7 @@ PUBLIC_PAR = "Particuliers"
 PUBLIC_PRO = "Professionnels"
 PUBLIC_PRO_ET_PAR = "Particuliers et professionnels"
 PUBLIC_AUCUN = "Aucun"
+PUBLIC_NP = ""
 
 # Acteur statut
 ACTEUR_ACTIF = "ACTIF"
@@ -27,6 +28,7 @@ ACTEUR_SUPPRIME = "SUPPRIME"
 # Reprise
 REPRISE_1POUR0 = "1 pour 0"
 REPRISE_1POUR1 = "1 pour 1"
+REPRISE_NP = ""
 
 # Special field values
 EMPTY_ACTEUR_FIELD = "__empty__"

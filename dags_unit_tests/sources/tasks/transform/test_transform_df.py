@@ -340,10 +340,12 @@ class TestCleanSiretAndSiren:
     @pytest.mark.parametrize(
         "siret, siren, expected_siret, expected_siren",
         [
-            (None, None, None, None),
+            (None, None, "", ""),
             ("12345678901234", None, "12345678901234", "123456789"),
-            (None, "123456789", None, "123456789"),
+            (" 12345678901234 ", None, "12345678901234", "123456789"),
+            (None, "123456789", "", "123456789"),
             ("98765432109876", "987654321", "98765432109876", "987654321"),
+            (" 98765432109876 ", " 987654321 ", "98765432109876", "987654321"),
             ("12345678901234", "123456789", "12345678901234", "123456789"),
             ("12345678901234", "987654321", "12345678901234", "987654321"),
         ],
@@ -389,6 +391,7 @@ class TestCleanIdentifiantUnique:
             " expected_identifiant_unique"
         ),
         [
+            (12345, "commerce", "source", "source_12345"),
             ("12345", "commerce", "source", "source_12345"),
             (" 12345 ", "commerce", "source", "source_12345"),
             ("ABC123", "commerce", "source", "source_ABC123"),

@@ -23,7 +23,7 @@ class XCOMS:
     DF_SYNTAX_FAIL: str = "df_syntax_fail"
     DF_DNS_OK: str = "df_dns_ok"
     DF_DNS_FAIL: str = "df_dns_fail"
-    DF_CRAWL_DIFF_HTTPS: str = "df_crawl_diff_https"
+    DF_CRAWL_DIFF_STANDARD: str = "df_crawl_diff_standard"
     DF_CRAWL_DIFF_OTHER: str = "df_crawl_diff_other"
     DF_CRAWL_FAIL: str = "df_crawl_fail"
 
@@ -31,7 +31,7 @@ class XCOMS:
     SUGGEST_META: str = "suggestions_metadata"
     SUGGEST_SYNTAX_FAIL: str = "suggestions_syntax_fail"
     SUGGEST_DNS_FAIL: str = "suggestions_dns_fail"
-    SUGGEST_CRAWL_DIFF_HTTPS: str = "suggestions_crawl_diff_https"
+    SUGGEST_CRAWL_DIFF_STANDARD: str = "suggestions_crawl_diff_standard"
     SUGGEST_CRAWL_DIFF_OTHER: str = "suggestions_crawl_diff_other"
 
 
@@ -50,7 +50,7 @@ def xcom_pull(ti: TaskInstance, key: str, skip_if_empty: bool = False) -> Any:
         value = ti.xcom_pull(key=key, task_ids=TASKS.CHECK_DNS)
     elif key == XCOMS.DF_DNS_FAIL:
         value = ti.xcom_pull(key=key, task_ids=TASKS.CHECK_DNS)
-    elif key == XCOMS.DF_CRAWL_DIFF_HTTPS:
+    elif key == XCOMS.DF_CRAWL_DIFF_STANDARD:
         value = ti.xcom_pull(key=key, task_ids=TASKS.CHECK_CRAWL)
     elif key == XCOMS.DF_CRAWL_DIFF_OTHER:
         value = ti.xcom_pull(key=key, task_ids=TASKS.CHECK_CRAWL)

@@ -21,8 +21,8 @@ def url_is_valid(url) -> bool:
     """Checks if URL is valid"""
     try:
         # Not using urlparse which was too permissive
-        # (e.g. it accepts "http://")
-        # Using a regex also allows us to be more specific
+        # (e.g. it accepts "http://" only)
+        # Using a regex also allows to be more specific
         # with what we consider a valid URL vs. pure technical
         # aspect
         pattern = re.compile(
@@ -36,13 +36,18 @@ def url_is_valid(url) -> bool:
         return False
 
 
-def urls_are_http_https_versions(url1, url2) -> bool:
-    """Check if 2 URLs are http and https versions of each other,
-    which helps us create a special cohort of "safe" recommendations
-    of HTTP -> HTTPS URLs"""
+def urls_are_diff_standard(url1, url2) -> bool:
+    """Check if 2 URLs a "standard" redirection of each other, defined as:
+    - case insensitive
+    - http vs. https
+    - www vs. no www
+    - tolerate trailing slashes
+    """
     if not url1 or not url1.strip() or not url2 or not url2.strip():
         return False
-    return re.sub(r"^https?://", "", url1) == re.sub(r"^https?://", "", url2)
+    url1 = re.sub(r"^https?://(www\.)?|/$", "", url1.strip(), flags=re.I).lower()
+    url2 = re.sub(r"^https?://(www\.)?|/$", "", url2.strip(), flags=re.I).lower()
+    return url1 == url2
 
 
 def url_domain_get(url: str) -> str | None:
@@ -68,13 +73,16 @@ def url_to_dns_to_try(url: str) -> list[str] | None:
     return [domain] if domain else None
 
 
-def url_protocol_fix(url: str) -> str:
+def url_fix_protocol(url: str) -> str:
     """Tries to fix protocol from URL as we
     have encountered several examples of urls
     with missing or extra : or /"""
     # Removing noise before http
     if not url.startswith("http"):
         url = re.sub(r".*http", r"http", url)
+
+    # Duplicate protocols (replace up to 2nd http takes care of optional s)
+    url = re.sub(r"(https?(?:://)?http)", r"http", url)
 
     # Adding https if protocol totally missing
     if not url.startswith("http"):
@@ -95,6 +103,24 @@ def url_protocol_fix(url: str) -> str:
     return url
 
 
+def url_fix_www(url: str) -> str:
+    """Attempts to fix the www as we have had many cases of:
+    - missing dot
+    - too many or too few www"""
+    return re.sub(r"^(https?://)((?:ww\.?|wwww+\.?))([^w])", r"\1www.\3", url)
+
+
+def url_fix_language(url: str) -> str:
+    """Replacing the common English language code
+    coming out of using a crawler"""
+    return re.sub("/en/?$", "/", url)
+
+
+def url_fix_consecutive_dots(url: str) -> str:
+    """Fix multiple consecutive dots"""
+    return re.sub(r"\.{2,}", ".", url)
+
+
 def url_to_urls_to_try(url: str) -> list[str] | None:
     """Suggests URLs to try from a given URL,
     return None if no suggestion can be made"""
@@ -108,7 +134,11 @@ def url_to_urls_to_try(url: str) -> list[str] | None:
     if "." not in url:
         return None
 
-    url = url_protocol_fix(url)
+    # Various fixes
+    url = url_fix_protocol(url)
+    url = url_fix_www(url)
+    url = url_fix_consecutive_dots(url)
+    url = url_fix_language(url)
 
     results = []
 

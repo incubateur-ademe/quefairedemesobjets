@@ -8,7 +8,7 @@ from crawl.config.cohorts import COHORTS
 from crawl.config.columns import COLS
 from crawl.config.constants import SORT_COLS
 from crawl.tasks.business_logic.crawl_urls_check_syntax import (
-    urls_are_http_https_versions,
+    urls_are_diff_standard,
 )
 from pydantic import BaseModel
 from sources.config.shared_constants import EMPTY_ACTEUR_FIELD
@@ -24,7 +24,10 @@ logger = logging.getLogger(__name__)
 
 # Bear minimum to pretend we're a browser
 USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko)"
-HEADERS = {"User-Agent": USER_AGENT}
+HEADERS = {
+    "User-Agent": USER_AGENT,
+    "Accept-Language": "fr;q=1.0, *;q=0.0",
+}
 
 
 class CrawlUrlModel(BaseModel):
@@ -105,10 +108,10 @@ def df_cohorts_split(
     # and we have several successive splitings to create cohorts. Maybe
     # we could refactor this to be more elegant.
 
-    # Final df for each cohort we we initialize to None due to the nested
+    # Final df for each cohort: init to None due to nested
     # if structure meaning certain dfs might never be set
     empty = pd.DataFrame()
-    df_ok_same, df_ok_diff_https, df_ok_diff_other = empty, empty, empty
+    df_ok_same, df_ok_diff_standard, df_ok_diff_other = empty, empty, empty
 
     # Splitting success vs. failure
     filter_success = df[COLS.CRAWL_WAS_SUCCESS]
@@ -136,38 +139,38 @@ def df_cohorts_split(
             # - those which are just HTTP -> HTTPS redirects
             # - those which are more subtantially different
             df_ok_diff[COLS.URL_HTTPS] = df_ok_diff.apply(
-                lambda x: urls_are_http_https_versions(
+                lambda x: urls_are_diff_standard(
                     x[COLS.URL_ORIGIN], x[COLS.CRAWL_URL_SUCCESS]
                 ),
                 axis=1,
             )
             filter_https = df_ok_diff[COLS.URL_HTTPS]
-            df_ok_diff_https, df_ok_diff_other = df_split_on_filter(
+            df_ok_diff_standard, df_ok_diff_other = df_split_on_filter(
                 df_ok_diff, filter_https
             )
 
             # Final cohorts
-            df_ok_diff_https[COLS.COHORT] = COHORTS.CRAWL_DIFF_HTTPS
+            df_ok_diff_standard[COLS.COHORT] = COHORTS.CRAWL_DIFF_STANDARD
             df_ok_diff_other[COLS.COHORT] = COHORTS.CRAWL_DIFF_OTHER
 
             # Sorting
-            df_ok_diff_https = df_sort(df_ok_diff_https, sort_cols=SORT_COLS)
+            df_ok_diff_standard = df_sort(df_ok_diff_standard, sort_cols=SORT_COLS)
             df_ok_diff_other = df_sort(df_ok_diff_other, sort_cols=SORT_COLS)
 
     logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
     log.preview_df_as_markdown(COHORTS.CRAWL_OK_SAME, df_ok_same)
-    log.preview_df_as_markdown(COHORTS.CRAWL_DIFF_HTTPS, df_ok_diff_https)
+    log.preview_df_as_markdown(COHORTS.CRAWL_DIFF_STANDARD, df_ok_diff_standard)
     log.preview_df_as_markdown(COHORTS.CRAWL_DIFF_OTHER, df_ok_diff_other)
     log.preview_df_as_markdown(COHORTS.CRAWL_FAIL, df_crawl_fail)
 
     # Validation: all cohorts should add up to the original df
     dfs_assert_add_up_to_df(
-        dfs=[df_ok_same, df_ok_diff_https, df_ok_diff_other, df_crawl_fail],
+        dfs=[df_ok_same, df_ok_diff_standard, df_ok_diff_other, df_crawl_fail],
         df=df,
     )
 
     # We only return what we make suggestions for, thus df_ok_same left out
-    return df_ok_diff_https, df_ok_diff_other, df_crawl_fail
+    return df_ok_diff_standard, df_ok_diff_other, df_crawl_fail
 
 
 def crawl_urls_check_crawl(

@@ -13,11 +13,11 @@ from crawl.tasks.airflow_logic.crawl_urls_check_syntax_task import (
 from crawl.tasks.airflow_logic.crawl_urls_read_urls_from_db_task import (
     crawl_urls_read_urls_from_db_task,
 )
-from crawl.tasks.airflow_logic.crawl_urls_suggest_crawl_diff_https_task import (
-    crawl_urls_suggest_crawl_diff_https_task,
-)
 from crawl.tasks.airflow_logic.crawl_urls_suggest_crawl_diff_other_task import (
     crawl_urls_suggest_crawl_diff_other_task,
+)
+from crawl.tasks.airflow_logic.crawl_urls_suggest_crawl_diff_standard_task import (
+    crawl_urls_suggest_crawl_diff_standard_task,
 )
 from crawl.tasks.airflow_logic.crawl_urls_suggest_dns_fail_task import (
     crawl_urls_suggest_dns_fail_task,
@@ -83,7 +83,7 @@ with DAG(
     check_crawl = crawl_urls_check_crawl_task(dag)
     suggest_syntax = crawl_urls_suggest_syntax_fail_task(dag)
     suggest_dns = crawl_urls_suggest_dns_fail_task(dag)
-    suggest_diff_https = crawl_urls_suggest_crawl_diff_https_task(dag)
+    suggest_diff_standard = crawl_urls_suggest_crawl_diff_standard_task(dag)
     suggest_diff_other = crawl_urls_suggest_crawl_diff_other_task(dag)
 
     # Always reading and checking syntax
@@ -91,4 +91,4 @@ with DAG(
     # DNS depends on syntax
     check_syntax >> check_dns >> suggest_dns  # type: ignore
     # Crawl depends on DNS
-    check_dns >> check_crawl >> [suggest_diff_https, suggest_diff_other]  # type: ignore
+    check_dns >> check_crawl >> [suggest_diff_standard, suggest_diff_other]  # type: ignore

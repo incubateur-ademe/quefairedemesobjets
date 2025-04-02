@@ -14,7 +14,7 @@ from dags.crawl.tasks.business_logic.crawl_urls_check_crawl import (
 )
 
 
-class TestHandler(BaseHTTPRequestHandler):
+class MockHTTPHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/200":
             self.send_response(200)
@@ -41,7 +41,7 @@ class TestHandler(BaseHTTPRequestHandler):
 
 @pytest.fixture(scope="module")
 def test_server():
-    server = HTTPServer(("localhost", 0), TestHandler)
+    server = HTTPServer(("localhost", 0), MockHTTPHandler)
     port = server.server_address[1]
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
@@ -91,7 +91,7 @@ class TestCrawlUrlsCheckCrawl:
             COLS.DOMAINS_TO_TRY: ["localhost"],
         }
         # 🟡 URL différente HTTPs dispo -> HTTPs proposée
-        case_diff_https = {
+        case_diff_standard = {
             COLS.CRAWL_WAS_SUCCESS: True,
             COLS.URL_ORIGIN: "http://www.google.com/",
             COLS.URLS_TO_TRY: ["https://www.google.com/"],
@@ -118,7 +118,7 @@ class TestCrawlUrlsCheckCrawl:
             [
                 case_ok_same,
                 # x 1
-                case_diff_https,
+                case_diff_standard,
                 # x 2
                 case_diff_other,
                 case_diff_other,
@@ -128,10 +128,10 @@ class TestCrawlUrlsCheckCrawl:
                 case_fail,
             ]
         )
-        df_ok_diff_https, df_ok_diff_other, df_fail = df_cohorts_split(df=df)
-        assert len(df_ok_diff_https) == 1
+        df_ok_diff_standard, df_ok_diff_other, df_fail = df_cohorts_split(df=df)
+        assert len(df_ok_diff_standard) == 1
         assert len(df_ok_diff_other) == 2
         assert len(df_fail) == 3
-        assert df_ok_diff_https[COLS.COHORT].iloc[0] == COHORTS.CRAWL_DIFF_HTTPS
+        assert df_ok_diff_standard[COLS.COHORT].iloc[0] == COHORTS.CRAWL_DIFF_STANDARD
         assert df_ok_diff_other[COLS.COHORT].iloc[0] == COHORTS.CRAWL_DIFF_OTHER
         assert df_fail[COLS.COHORT].iloc[0] == COHORTS.CRAWL_FAIL

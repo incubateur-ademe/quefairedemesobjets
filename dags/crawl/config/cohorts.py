@@ -9,8 +9,8 @@ class COHORTS:
     SYNTAX_FAIL = "🔴 Syntaxe invalide → mise à vide"
     DNS_FAIL = "🔴 Domaine inaccessible → mise à vide"
     CRAWL_FAIL = "🔴 URL inaccessible → mise à vide"
-    CRAWL_DIFF_HTTPS = "🟡 URL différente HTTPs dispo → HTTPs proposée"
-    CRAWL_DIFF_OTHER = "🟡 URL différente (et pas juste HTTPs) → nouvelle proposée"
+    CRAWL_DIFF_STANDARD = "🟢 URL diff standard (ex: http->https) → nouvelle proposée"
+    CRAWL_DIFF_OTHER = "🟠 URL diff non-standard → nouvelle proposée"
 
     # Cohorts for display purposes only
     SYNTAX_OK = "🟢 Syntaxe en succès"
