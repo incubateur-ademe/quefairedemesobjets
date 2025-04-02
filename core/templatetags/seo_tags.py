@@ -25,19 +25,20 @@ def get_sharer_content(request, object, social_network=None):
     share_body = ""
     share_intro = ""
     quoted_url = quote_plus(url)
-    replacements = [("[URL]", url)]
+    format_template = {
+        "URL": url,
+    }
 
     if carte:
         share_intro = CARTE["partage"]["titre"]
         share_body = CARTE["partage"]["corps"]
-        replacements.append(("[NOM]", object.libelle))
+        format_template["NOM"] = object.libelle
     else:
         share_intro = ASSISTANT["partage"]["titre"]
         share_body = ASSISTANT["partage"]["corps"]
 
-    for search_string, replacement in replacements:
-        share_intro = share_intro.replace(search_string, replacement)
-        share_body = share_body.replace(search_string, replacement)
+    share_intro = share_intro.format(**format_template)
+    share_body = share_body.format(**format_template)
 
     template = {
         "url": url,

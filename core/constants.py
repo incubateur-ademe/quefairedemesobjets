@@ -13,8 +13,8 @@ SHARE_BODY = ()
 
 CARTE = {
     "partage": {
-        "titre": "[NOM] : L’ADEME partage ses bonnes adresses",
-        "corps": "J’ai trouvé une bonne adresse [NOM] grâce à l’ADEME : [URL]",
+        "titre": "{NOM} : L’ADEME partage ses bonnes adresses",
+        "corps": "J’ai trouvé une bonne adresse {NOM} grâce à l’ADEME : {URL}",
     }
 }
 
@@ -29,7 +29,7 @@ ASSISTANT = {
         "le site de l’ADEME Que faire de mes objets & déchets accompagne "
         "les citoyens grâce à des bonnes pratiques et adresses près de chez eux,"
         " pour éviter l'achat neuf et réduire les déchets.\n"
-        "Découvrez le ici : [URL]",
+        "Découvrez le ici : {URL}",
     },
     "seo": {
         # Utilisé comme balise <title> dans les pages d'accueil et produit
