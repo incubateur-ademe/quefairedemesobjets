@@ -10,8 +10,10 @@ export interface ActorLocation {
 }
 
 export interface DisplayedActeur {
+  fillBackground: boolean
   uuid: string
   icon: string
+  iconFile: string
   couleur: string
   location: ActorLocation
   bonus: boolean

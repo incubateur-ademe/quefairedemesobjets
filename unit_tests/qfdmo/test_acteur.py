@@ -649,7 +649,7 @@ class TestDisplayActeurActeurActions:
         action = ActionFactory()
         action.directions.add(direction)
         DisplayedPropositionServiceFactory(action=action, acteur=displayed_acteur)
-        assert displayed_acteur.acteur_actions(direction="fake") == []
+        assert displayed_acteur.acteur_actions(direction="fake").count() == 0
         assert [
             model_to_dict(a, exclude=["directions"])
             for a in displayed_acteur.acteur_actions(direction="jai")

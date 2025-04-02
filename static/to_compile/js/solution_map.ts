@@ -68,8 +68,27 @@ export class SolutionMap {
   }
 
   #generateMarkerHTMLStringFrom(acteur?: DisplayedActeur): string {
+    /**
+    This method uses complex scale and translate css attributes in
+    order to compensate an issue that causes the marker to not be
+    at the location it is supposed to be when zooming in / out.
+
+    This could definitely be fixed by using appropriately sized
+    svg, but works fine as is.
+
+    If you need to add a new marker's design in the future, it
+    is advised to follow the approach to not this bug.
+    */
+    if (acteur?.iconFile) {
+      return [
+        `<div data-animated class="qf-scale-75">`,
+        `<img class="qf--translate-y-2/4" height="61" width="46" src="${acteur.iconFile}">`,
+        `</div>`
+      ].join("")
+    }
+
     const markerHtmlStyles = `color: ${acteur?.couleur};`
-    const background = acteur?.reparer ? pinBackgroundFillSvg : pinBackgroundSvg
+    const background = acteur?.fillBackground ? pinBackgroundFillSvg : pinBackgroundSvg
     const cornerIcon = acteur?.bonus ? bonusIconSvg : ""
     const icon = acteur?.icon || "fr-icon-checkbox-circle-line"
     const markerIconClasses = `qf-absolute qf-top-[10] qf-left-[10.5] qf-margin-auto
