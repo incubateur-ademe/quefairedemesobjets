@@ -1,5 +1,5 @@
 <p class="qf-inline-flex qf-gap-1w qf-m-0">
     <span class="fr-px-1v qf-text-{{ groupe_action.primary }} {{ groupe_action.icon }}
-        fr-icon--sm qf-rounded-full qf-bg-white qf-border-{{ groupe_action.primary }} qf-border-2 qf-border-solid" aria-hidden="true"></span>
+        fr-icon--sm qf-rounded-full {% if groupe.action.fill %}qf-bg-{{ groupe_action.primary }}{% else %}qf-bg-white{% endif %} qf-border-{{ groupe_action.primary }} qf-border-2 qf-border-solid" aria-hidden="true"></span>
         {{ groupe_action.libelle }}
 </p>
