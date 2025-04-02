@@ -871,6 +871,18 @@ class TestDisplayedActeurJsonActeurForDisplay:
         assert acteur_for_display["icon"] == "icon-actionjai1"
         assert acteur_for_display["couleur"] == "couleur-actionjai1"
 
+    def test_json_acteur_for_display_with_sous_categorie(self, displayed_acteur):
+        displayed_acteur.action_principale = ActionFactory(code="actionjai2")
+        displayed_acteur.save()
+
+        acteur_for_display = json.loads(
+            displayed_acteur.json_acteur_for_display(action_list="actionjai1")
+        )
+
+        print(acteur_for_display)
+
+        assert acteur_for_display["icon"] is None
+
 
 class TestDisplayedActeurDisplayPostalAddress:
     def test_should_display_adresse(self):
