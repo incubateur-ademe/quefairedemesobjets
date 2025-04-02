@@ -985,6 +985,9 @@ class DisplayedActeur(BaseActeur):
         if sous_categorie_id:
             pss = pss.filter(sous_categories__id__in=[sous_categorie_id])
 
+        if direction:
+            pss = pss.filter(action__directions__code__in=[direction])
+
         if actions_codes:
             pss = pss.filter(action__code__in=actions_codes.split("|"))
 
