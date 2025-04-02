@@ -54,7 +54,7 @@ def cluster_acteurs_suggestions_to_db(
         logging.info(f"suggestion {cluster_id=}")
         df_cluster = df_clusters[df_clusters["cluster_id"] == cluster_id]
 
-        # Fixed following PR but comment to help debug in case of regression
+        # Fixed following PR1501 but comment/raise to help debug in case of regression
         if df_cluster.empty:
             msg = "Cluster vide = présent en suggestion mais plus dans df_clusters!!!"
             raise ValueError(msg)

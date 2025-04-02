@@ -76,7 +76,7 @@ class TestSuggestionContexteGenerate:
             COL_PARENT_ID_BEFORE: [None] * 2,
         }
         df = pd.DataFrame(data)
-        with pytest.raises(ValueError, match="should have 1 exact group"):
+        with pytest.raises(ValueError, match="pas 1 groupe de valeur non vide"):
             suggestion_context_generate(df, ["ville"], [])
 
     def test_exclude_existing_children_from_exact_check(self):
