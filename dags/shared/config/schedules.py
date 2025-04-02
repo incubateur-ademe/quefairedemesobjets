@@ -10,3 +10,4 @@ class SCHEDULES:
     WEEKLY: str = "0 0 * * 1"
     WEEKLY_AT_1AM: str = "0 1 * * 1"
     MONTHLY: str = "0 0 1 * *"
+    NONE = None

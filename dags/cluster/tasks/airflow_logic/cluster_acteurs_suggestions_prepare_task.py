@@ -3,12 +3,9 @@ import logging
 import pandas as pd
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from cluster.tasks.airflow_logic.task_ids import (
-    TASK_PARENTS_CHOOSE_DATA,
-    TASK_SUGGESTIONS_DISPLAY,
-)
-from cluster.tasks.business_logic.cluster_acteurs_suggestions.display import (
-    cluster_acteurs_suggestions_display,
+from cluster.config import TASKS, XCOMS, xcom_pull
+from cluster.tasks.business_logic.cluster_acteurs_suggestions.prepare import (
+    cluster_acteurs_suggestions_prepare,
 )
 from utils import logging_utils as log
 
@@ -20,7 +17,7 @@ def task_info_get():
 
 
     ============================================================
-    Description de la tâche "{TASK_SUGGESTIONS_DISPLAY}"
+    Description de la tâche "{TASKS.SUGGESTIONS_PREPARE}"
     ============================================================
 
     💡 quoi: affichage de l'état final des suggestions avant
@@ -36,17 +33,15 @@ def task_info_get():
     """
 
 
-def cluster_acteurs_suggestions_display_wrapper(**kwargs) -> None:
+def cluster_acteurs_suggestions_prepare_wrapper(ti) -> None:
     logger.info(task_info_get())
 
-    df: pd.DataFrame = kwargs["ti"].xcom_pull(
-        key="df", task_ids=TASK_PARENTS_CHOOSE_DATA
-    )
-    # Not a Skip: we should never get here if we don't have data to work w/
-    if df.empty:
-        raise ValueError("Pas de données clusters récupérées")
+    df: pd.DataFrame = xcom_pull(ti, XCOMS.DF_PARENTS_CHOOSE_DATA)
 
-    suggestions = cluster_acteurs_suggestions_display(df)
+    if df.empty:
+        raise ValueError("Pas de clusters récupérés, on ne devrait pas être là")
+
+    suggestions = cluster_acteurs_suggestions_prepare(df)
 
     logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
     for suggestion in suggestions:
@@ -56,12 +51,12 @@ def cluster_acteurs_suggestions_display_wrapper(**kwargs) -> None:
             f"Suggestion pour cluster_id={cluster_id}", df_changes
         )
 
-    kwargs["ti"].xcom_push(key="suggestions", value=suggestions)
+    ti.xcom_push(key=XCOMS.SUGGESTIONS, value=suggestions)
 
 
-def cluster_acteurs_suggestions_display_task(dag: DAG) -> PythonOperator:
+def cluster_acteurs_suggestions_prepare_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
-        task_id=TASK_SUGGESTIONS_DISPLAY,
-        python_callable=cluster_acteurs_suggestions_display_wrapper,
+        task_id=TASKS.SUGGESTIONS_PREPARE,
+        python_callable=cluster_acteurs_suggestions_prepare_wrapper,
         dag=dag,
     )
