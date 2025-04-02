@@ -9,20 +9,28 @@ Tout ce qui n'est pas sous ASSISTANT est commun à la carte et à l'assistant.
 bonus_reparation = "Propose le Bonus Réparation"
 DIGITAL_ACTEUR_CODE = "acteur_digital"
 
-# Introduction utilisé lors du partage d'un acteur ou d'un produit / déchet
-SHARE_INTRO = "Découvrez le site de l'ADEME “Que faire de mes objets & déchets”"
-# Texte utilisé lors du partage d'un acteur ou d'un produit / déchet.
-# sert essentiellement pour le partage par email
-SHARE_BODY = (
-    "Bonjour,\n "
-    "Vous souhaitez encourager au tri et la consommation responsable, "
-    "le site de l’ADEME Que faire de mes objets & déchets accompagne "
-    "les citoyens grâce à des bonnes pratiques et adresses près de chez eux,"
-    " pour éviter l'achat neuf et réduire les déchets.\n"
-    "Découvrez le ici : "
-)
+SHARE_BODY = ()
+
+CARTE = {
+    "partage": {
+        "titre": "[NOM] : L’ADEME partage ses bonnes adresses",
+        "corps": "J’ai trouvé une bonne adresse [NOM] grâce à l’ADEME : [URL]",
+    }
+}
 
 ASSISTANT = {
+    "partage": {
+        # Introduction utilisé lors du partage d'un acteur ou d'un produit / déchet
+        "titre": "Découvrez le site de l'ADEME “Que faire de mes objets & déchets”",
+        # Texte utilisé lors du partage d'un acteur ou d'un produit / déchet.
+        # sert essentiellement pour le partage par email
+        "corps": "Bonjour,\n "
+        "Vous souhaitez encourager au tri et la consommation responsable, "
+        "le site de l’ADEME Que faire de mes objets & déchets accompagne "
+        "les citoyens grâce à des bonnes pratiques et adresses près de chez eux,"
+        " pour éviter l'achat neuf et réduire les déchets.\n"
+        "Découvrez le ici : [URL]",
+    },
     "seo": {
         # Utilisé comme balise <title> dans les pages d'accueil et produit
         "title": "Que Faire de mes objets & déchets : votre assistant au tri",
