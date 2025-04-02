@@ -36,11 +36,11 @@ def crawl_urls_check_crawl_wrapper(ti, params) -> None:
     if not urls_check_crawl:
         raise AirflowSkipException(f"{urls_check_crawl=}, on s'arrête là")
 
-    df_crawl_diff_https, df_crawl_diff_other, df_crawl_fail = crawl_urls_check_crawl(
+    df_crawl_diff_standard, df_crawl_diff_other, df_crawl_fail = crawl_urls_check_crawl(
         df=xcom_pull(ti, XCOMS.DF_DNS_OK, skip_if_empty=True),
     )
 
-    ti.xcom_push(key=XCOMS.DF_CRAWL_DIFF_HTTPS, value=df_crawl_diff_https)
+    ti.xcom_push(key=XCOMS.DF_CRAWL_DIFF_STANDARD, value=df_crawl_diff_standard)
     ti.xcom_push(key=XCOMS.DF_CRAWL_DIFF_OTHER, value=df_crawl_diff_other)
     ti.xcom_push(key=XCOMS.DF_CRAWL_FAIL, value=df_crawl_fail)
 
