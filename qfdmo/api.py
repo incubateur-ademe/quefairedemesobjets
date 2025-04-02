@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from ninja import Field, FilterSchema, ModelSchema, Query, Router
 from ninja.pagination import paginate
 
+from qfdmo.admin.acteur import GenericExporterMixin
 from qfdmo.geo_api import search_epci_code
 from qfdmo.models import (
     ActeurService,
@@ -16,6 +17,7 @@ from qfdmo.models import (
     Action,
     DisplayedActeur,
     GroupeAction,
+    Source,
 )
 
 router = Router()
@@ -61,6 +63,14 @@ class ActeurServiceSchema(ModelSchema):
         fields = ["id", "code", "libelle"]
 
 
+class SourceSchema(ModelSchema):
+    logo: Optional[str] = Field(..., alias="logo_file_absolute_url")
+
+    class Meta:
+        model = Source
+        fields = ["id", "code", "libelle", "url"]
+
+
 class ActeurSchema(ModelSchema):
     latitude: float
     longitude: float
@@ -80,6 +90,12 @@ class ActeurSchema(ModelSchema):
     adresse: str = Field(
         ..., alias="adresse_display", description="l'adresse complète de l'acteur"
     )
+    sources: List[str] = Field(..., description="La paternité de l'acteur")
+
+    @staticmethod
+    def resolve_sources(obj):
+        exporter = GenericExporterMixin()
+        return exporter.get_sources(obj)
 
     @staticmethod
     def resolve_distance(obj):
@@ -96,6 +112,15 @@ class ActeurFilterSchema(FilterSchema):
     types: Optional[List[int]] = Field(None, q="acteur_type__in")
     services: Optional[List[int]] = Field(None, q="acteur_services__in")
     actions: Optional[List[int]] = Field(None, q="proposition_services__action_id__in")
+
+
+@router.get("/sources", response=List[SourceSchema], summary="Liste des sources")
+def sources(request):
+    """
+    Liste l'ensemble des <i>sources</i> possibles pour un acteur.
+    """  # noqa
+    qs = Source.objects.filter(afficher=True)
+    return qs
 
 
 @router.get(

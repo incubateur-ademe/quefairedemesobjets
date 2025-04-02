@@ -189,6 +189,13 @@ class Source(CodeAsNaturalKeyModel):
         db_default=DataLicense.NO_LICENSE,
     )
 
+    @property
+    def logo_file_absolute_url(self) -> str:
+        if not self.logo_file:
+            return ""
+
+        return f"{settings.BASE_URL}{self.logo_file.url}"
+
 
 def validate_opening_hours(value):
     if value and not opening_hours.validate(value):
