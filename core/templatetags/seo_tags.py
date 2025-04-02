@@ -16,7 +16,6 @@ def get_sharer_content(request, object, social_network=None):
     share_url function below
     """
     carte = request.META.get("HTTP_HOST") not in settings.ASSISTANT["HOSTS"]
-    return ""
 
     try:
         url = object.get_share_url(request)
@@ -26,7 +25,7 @@ def get_sharer_content(request, object, social_network=None):
     share_body = ""
     share_intro = ""
     quoted_url = quote_plus(url)
-    replacements = []
+    replacements = [("[URL]", url)]
 
     if carte:
         share_intro = CARTE["partage"]["titre"]
