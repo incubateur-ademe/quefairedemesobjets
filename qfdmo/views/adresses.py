@@ -14,6 +14,7 @@ from django.db.models.query import QuerySet
 from django.forms import model_to_dict
 from django.http import Http404, JsonResponse
 from django.shortcuts import redirect, render
+from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_GET
 from django.views.generic.edit import FormView
@@ -500,16 +501,10 @@ class SearchActeursView(
         for [groupe, groupe_displayed_actions] in groupe_with_displayed_actions:
             libelle = ""
             if groupe.icon:
-                libelle = (
-                    f'<span class="fr-px-1v qf-text-white {groupe.icon}'
-                    f' fr-icon--sm qf-rounded-full qf-bg-{groupe.primary}"'
-                    ' aria-hidden="true"></span>'
+                libelle = render_to_string(
+                    "forms/widgets/groupe_action_label.html", {"groupe_action": groupe}
                 )
-            libelles: List[str] = []
-            for gda in groupe_displayed_actions:
-                if gda.libelle_groupe not in libelles:
-                    libelles.append(gda.libelle_groupe)
-            libelle += ", ".join(libelles).capitalize()
+
             code = "|".join([a.code for a in groupe_displayed_actions])
             grouped_action_choices.append([code, mark_safe(libelle)])
         return grouped_action_choices

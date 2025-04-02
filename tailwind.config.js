@@ -21,7 +21,7 @@ module.exports = {
     "sm:qf-w-[400px]",
     "qf-scale-115",
     {
-      pattern: new RegExp(`qf-(border|bg)-(${usedColors.join("|")})`),
+      pattern: new RegExp(`qf-(text|border|bg)-(${usedColors.join("|")})`),
     },
   ],
   theme: {
