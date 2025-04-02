@@ -41,7 +41,6 @@ from qfdmo.models.action import (
     get_groupe_action_instances,
     get_reparer_action_id,
 )
-from qfdmo.thread.materialized_view import RefreshMateriazedViewThread
 
 logger = logging.getLogger(__name__)
 
@@ -563,22 +562,18 @@ class FormulaireSearchActeursView(SearchActeursView):
         return [model_to_dict(a, exclude=["directions"]) for a in actions]
 
 
-# TODO : should be deprecated once all is moved to the displayed acteur
 def getorcreate_revisionacteur(request, acteur_identifiant):
-    acteur = Acteur.objects.get(identifiant_unique=acteur_identifiant)
-    revision_acteur = acteur.get_or_create_revision()
+    try:
+        acteur = Acteur.objects.get(identifiant_unique=acteur_identifiant)
+        revision_acteur = acteur.get_or_create_revision()
+    except Acteur.DoesNotExist as e:
+        # Case of Parent Acteur
+        revision_acteur = RevisionActeur.objects.get(
+            identifiant_unique=acteur_identifiant
+        )
+        if not revision_acteur.is_parent:
+            raise e
     return redirect(revision_acteur.change_url)
-
-
-def getorcreate_correctionequipeacteur(request, acteur_identifiant):
-    acteur = Acteur.objects.get(identifiant_unique=acteur_identifiant)
-    revision_acteur = acteur.get_or_create_correctionequipe()
-    return redirect(revision_acteur.change_url)
-
-
-def refresh_acteur_view(request):
-    RefreshMateriazedViewThread().start()
-    return redirect("admin:index")
 
 
 @require_GET

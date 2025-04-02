@@ -622,7 +622,6 @@ class Acteur(BaseActeur):
         )
 
     def get_or_create_revision(self):
-        # TODO : to be deprecated
         fields = model_to_dict(
             self,
             fields=[
