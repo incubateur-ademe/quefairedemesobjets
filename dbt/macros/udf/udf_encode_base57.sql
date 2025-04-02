@@ -1,6 +1,7 @@
 {% macro create_udf_encode_base57() %}
 
-CREATE OR REPLACE FUNCTION {{ target.schema }}.encode_base57(uuid UUID)
+DROP FUNCTION IF EXISTS {{ target.schema }}.encode_base57(uuid UUID);
+CREATE FUNCTION {{ target.schema }}.encode_base57(uuid UUID)
 RETURNS text AS $$
 DECLARE
     alphabet text := '23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'; -- pragma: allowlist secret
