@@ -271,12 +271,18 @@ PARAMS = {
 
             {UI_PARAMS_SEPARATORS.DEDUP_ENRICH_PARENT}""",
     ),
+    "dedup_enrich_enabled": Param(
+        True,
+        type="boolean",
+        description_md="""**ACTIVATION ENRICHISSEMENT**: si décoché = enrichissement
+        désactivé ET reste des **champs dedup_enrich_ ignorés**""",
+    ),
     "dedup_enrich_fields": Param(
         fields_enrich,
         type=["array"],
         examples=fields_enrich,
-        description_md=f"""✍️ Champs à enrichir (certains champs de type calculés ou id
-        sont exclus)
+        description_md=f"""**✍️ Champs à enrichir** (certains champs de type
+        calculés ou id sont exclus)
 
         Exclus:
         {'  \n'.join([', '.join(chunck) for chunck in fields_enrich_excluded_ui])}
@@ -291,7 +297,9 @@ PARAMS = {
     ),
     "dedup_enrich_priority_sources": Param(
         [],
-        type=["array"],
+        # Must keep default NULL as we can't prefill (don't know what users will choose)
+        # BUT we allow dedup_enrich to be disabled
+        type=["null", "array"],
         examples=dropdown_sources,
         description_md=r"""**🔢 PRIORITES SOURCES**: sources sur lequelles
             on **PRÉFÈRE** prendre de données

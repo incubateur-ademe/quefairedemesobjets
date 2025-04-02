@@ -50,6 +50,7 @@ class ClusterConfig(BaseModel):
     cluster_fuzzy_threshold: float = Field(0.5, ge=0, le=1)
 
     # DEDUP
+    dedup_enrich_enabled: bool
     dedup_enrich_fields: list[str]
     dedup_enrich_exclude_sources: list[str]
     dedup_enrich_exclude_source_ids: list[int]  # to calculate from above
@@ -171,7 +172,13 @@ class ClusterConfig(BaseModel):
                 ]
         values["fields_transformed"] = list(set(values["fields_transformed"]))
 
-        # DEDUP
+        # Enrichment
+        if (
+            values["dedup_enrich_enabled"]
+            and not values["dedup_enrich_priority_sources"]
+        ):
+            raise ValueError("Enrichissement désactivé mais pas de sources définies")
+
         values["dedup_enrich_exclude_source_ids"] = (
             airflow_params_dropdown_selected_to_ids(
                 mapping_ids_by_codes=values["mapping_sources"],

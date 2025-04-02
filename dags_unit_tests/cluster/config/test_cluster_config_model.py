@@ -25,6 +25,7 @@ class TestClusterConfigModel:
             "cluster_fields_exact": ["exact1", "exact2"],
             "cluster_fields_fuzzy": ["fuzzy1", "fuzzy2"],
             "cluster_fuzzy_threshold": 0.5,
+            "dedup_enrich_enabled": True,
             "dedup_enrich_fields": ["f1_incl", "f2_incl", "f3_excl"],
             "dedup_enrich_exclude_sources": ["source1 (id=1)"],
             "dedup_enrich_priority_sources": ["source1 (id=1)"],
@@ -158,6 +159,15 @@ class TestClusterConfigModel:
         params_working["cluster_fields_exact"] = ["foo"]
         params_working["cluster_fields_fuzzy"] = ["foo"]
         with pytest.raises(ValueError, match="Champs en double dans exact/fuzzy"):
+            ClusterConfig(**params_working)
+
+    def test_error_if_dedup_enrich_enabled_but_no_sources(self, params_working):
+        # Because we allow dedup to be deactivated AND we can't prefill the sources
+        # (no way to know what user will select) we must prevent below case
+        params_working["dedup_enrich_enabled"] = True
+        params_working["dedup_enrich_priority_sources"] = []
+        msg = "Enrichissement désactivé mais pas de sources définies"
+        with pytest.raises(ValueError, match=msg):
             ClusterConfig(**params_working)
 
     @pytest.mark.parametrize("input", [None, []])

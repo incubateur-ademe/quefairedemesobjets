@@ -8,7 +8,7 @@ django_setup_full()
 
 
 def cluster_acteurs_suggestions_display(
-    df_clusters: pd.DataFrame,
+    df_clusters: pd.DataFrame, dedup_enrich_enabled: bool
 ) -> list[dict]:
     """Generate suggestion changes from a df of clusters. At
     this stage we don't work with the Cohorte & Suggestion models
@@ -56,7 +56,9 @@ def cluster_acteurs_suggestions_display(
                 ChangeActeurCreateAsParent.name(),
                 ChangeActeurKeepAsParent.name(),
             ]:
-                model_params["data"] = row[COL_PARENT_DATA_NEW]
+                model_params["data"] = (
+                    row[COL_PARENT_DATA_NEW] if dedup_enrich_enabled else None
+                )
             elif model_name == ChangeActeurVerifyRevision.name():
                 # no extra params to pass for this one
                 pass
