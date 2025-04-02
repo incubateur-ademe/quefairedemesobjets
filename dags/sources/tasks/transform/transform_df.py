@@ -98,12 +98,13 @@ def _merge_proposition_service_columns(group):
                 sscat_by_action[ps["action"]] = []
             sscat_by_action[ps["action"]].extend(ps["sous_categories"])
 
+    # sort sscat_by_action by action code
     return [
         {
             "action": action,
-            "sous_categories": sorted(list(set(sscat))),
+            "sous_categories": sorted(list(set(sscat_by_action[action]))),
         }
-        for action, sscat in sscat_by_action.items()
+        for action in sorted(sscat_by_action.keys())
     ]
 
 
@@ -307,9 +308,9 @@ def clean_proposition_services(row, _):
         row["proposition_service_codes"] = [
             {
                 "action": action,
-                "sous_categories": row["sous_categorie_codes"],
+                "sous_categories": sorted(row["sous_categorie_codes"]),
             }
-            for action in row["action_codes"]
+            for action in sorted(row["action_codes"])
         ]
     else:
         row["proposition_service_codes"] = []
