@@ -20,8 +20,8 @@ from enrich.tasks.airflow_logic.enrich_ae_rgpd_suggest_task import (
 )
 
 with DAG(
-    dag_id="enrich_ae_rgpd",
-    dag_display_name="Enrichir - AE - RGPD",
+    dag_id="enrich_ae_acteurs_rgpd",
+    dag_display_name="Enrichir - AE - Acteurs RGPD",
     default_args={
         "owner": "airflow",
         "depends_on_past": False,
