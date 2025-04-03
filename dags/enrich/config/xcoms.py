@@ -16,8 +16,6 @@ from utils import logging_utils as log
 @dataclass(frozen=True)
 class XCOMS:
     CONFIG: str = "config"
-    DF_READ: str = "df_read"
-    DF_MATCH: str = "df_match"
 
     DF_CLOSED_REPLACED_SAME_SIREN: str = "df_acteurs_closed_replaced_same_siren"
     DF_CLOSED_REPLACED_OTHER_SIREN: str = "df_acteurs_closed_replaced_other_siren"
