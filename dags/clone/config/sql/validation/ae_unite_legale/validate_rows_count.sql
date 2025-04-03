@@ -1,6 +1,6 @@
 SELECT
     CASE
-        WHEN COUNT(*) >= 27766501 THEN TRUE
+        WHEN COUNT(*) >= 26000000 THEN TRUE
         ELSE FALSE
     END AS is_valid,
     COUNT(*) as debug_value

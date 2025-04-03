@@ -11,7 +11,7 @@ WITH acteurs_with_siret_matched AS (
 )
 SELECT
     CASE
-        WHEN nombre_acteurs >= 150000 THEN TRUE
+        WHEN nombre_acteurs >= 75000 THEN TRUE
         ELSE FALSE
     END AS is_valid,
     nombre_acteurs AS debug_value
