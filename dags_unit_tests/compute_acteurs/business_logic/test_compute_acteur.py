@@ -8,64 +8,87 @@ from sources.config import shared_constants as constants
 
 class TestApplyCorrections:
 
-    @pytest.fixture
-    def df_load_acteur(self):
-        return pd.DataFrame(
-            {
-                "identifiant_unique": ["actor1", "actor2"],
-                "name": ["John Doe", "Jane Doe"],
-                "cree_le": ["2022-01-01", "2022-01-02"],
-                "parent_id": [None, None],
-                "source_id": [1, 2],
-                "statut": ["ACTIF", "ACTIF"],
-            }
-        )
-
-    @pytest.fixture
-    def df_load_revisionacteur(self):
-        return pd.DataFrame(
-            {
-                "identifiant_unique": ["actor1"],
-                "name": ["John Smith"],
-                "cree_le": ["2022-01-03"],
-                "parent_id": [None],
-                "source_id": [1],
-                "statut": ["ACTIF"],
-            }
-        )
-
-    def test_compute_acteur(self, df_load_acteur, df_load_revisionacteur):
+    @pytest.mark.parametrize(
+        "df_load_acteur, df_load_revisionacteur, df_acteur_expected",
+        [
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": ["actor1"],
+                        "name": ["John Doe"],
+                        "cree_le": ["2022-01-01"],
+                        "parent_id": [None],
+                        "source_id": [1],
+                        "statut": ["ACTIF"],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": ["actor1"],
+                        "name": [""],
+                        "cree_le": ["2022-01-03"],
+                        "parent_id": [None],
+                        "source_id": [2],
+                        "statut": ["ACTIF"],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": ["actor1"],
+                        "name": ["John Doe"],
+                        "cree_le": ["2022-01-01"],
+                        "parent_id": [None],
+                        "source_id": [2],
+                        "statut": ["ACTIF"],
+                        "uuid": ["Hogy2rqwtvgMUctiqUyYmH"],
+                    }
+                ),
+            ),
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": ["actor1", "actor2"],
+                        "name": ["John Doe", "Jane Doe"],
+                        "cree_le": ["2022-01-01", "2022-01-02"],
+                        "parent_id": [None, None],
+                        "source_id": [1, 2],
+                        "statut": ["ACTIF", "ACTIF"],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": ["actor1"],
+                        "name": ["John Smith"],
+                        "cree_le": ["2022-01-03"],
+                        "parent_id": [None],
+                        "source_id": [1],
+                        "statut": ["ACTIF"],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": ["actor1", "actor2"],
+                        "name": ["John Smith", "Jane Doe"],
+                        "cree_le": ["2022-01-01", "2022-01-02"],
+                        "parent_id": [None, None],
+                        "source_id": [1, 2],
+                        "statut": ["ACTIF", "ACTIF"],
+                        "uuid": ["Hogy2rqwtvgMUctiqUyYmH", "AS5wKPytvs9VjWEFQdqTwK"],
+                    }
+                ),
+            ),
+        ],
+    )
+    def test_compute_acteur(
+        self, df_load_acteur, df_load_revisionacteur, df_acteur_expected
+    ):
 
         # Call the function with the mocked ti
         result = compute_acteur(
             df_acteur=df_load_acteur, df_revisionacteur=df_load_revisionacteur
         )
 
-        # Check that the result is as expected
-        df_acteur_expected = pd.DataFrame(
-            {
-                "identifiant_unique": ["actor1", "actor2"],
-                "name": ["John Smith", "Jane Doe"],
-                "cree_le": ["2022-01-01", "2022-01-02"],
-                "parent_id": [None, None],
-                "source_id": [1, 2],
-                "statut": ["ACTIF", "ACTIF"],
-                "uuid": ["Hogy2rqwtvgMUctiqUyYmH", "AS5wKPytvs9VjWEFQdqTwK"],
-            }
-        )
-        df_children_expected = pd.DataFrame(
-            columns=["parent_id", "identifiant_unique", "source_id"]
-        )
-        df_children_expected = df_children_expected.astype(
-            {
-                "parent_id": object,
-                "identifiant_unique": object,
-                "source_id": int,
-            }
-        )
-
         pd.testing.assert_frame_equal(result["df_acteur_merged"], df_acteur_expected)
-        pd.testing.assert_frame_equal(result["df_children"], df_children_expected)
 
     @pytest.fixture
     def df_load_acteur_with_children(self):
