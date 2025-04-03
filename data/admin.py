@@ -1,9 +1,12 @@
+from django.contrib import messages
 from django.contrib.gis import admin
 from django.utils.html import format_html
 
 from core.admin import NotEditableMixin
 from data.models import Suggestion, SuggestionCohorte
 from data.models.suggestion import SuggestionStatut
+
+NB_SUGGESTIONS_DISPLAYED_WHEN_DELETING = 100
 
 
 def dict_to_html_table(data):
@@ -26,6 +29,34 @@ class SuggestionCohorteAdmin(NotEditableMixin, admin.ModelAdmin):
 
     def metadonnees(self, obj):
         return format_html(dict_to_html_table(obj.metadata or {}))
+
+    def get_deleted_objects(self, objs, request):
+        """
+        Override the Objetcs to delete while removing a SuggestionCohorte because
+        in some cases, the list is huge and it is not possible to display it.
+        """
+        (deletable_objects, model_count, perms_needed, protected) = (
+            super().get_deleted_objects(objs, request)
+        )
+        display_warning = False
+        display_deletable_objects = []
+        for obj in deletable_objects:
+            if (
+                isinstance(obj, list | tuple)
+                and len(obj) > NB_SUGGESTIONS_DISPLAYED_WHEN_DELETING
+            ):
+                obj = obj[:NB_SUGGESTIONS_DISPLAYED_WHEN_DELETING]
+                display_warning = True
+            display_deletable_objects.append(obj)
+        if display_warning:
+            messages.warning(
+                request,
+                "Attention : la suppression de cette cohorte entraînera également "
+                "la suppression de nombreuses suggestions associées. "
+                "Celle-ci ne sont pas toutes listées ici.",
+            )
+
+        return display_deletable_objects, model_count, perms_needed, protected
 
 
 def _manage_suggestion_cohorte_statut(cohorte_ids: list[int]):

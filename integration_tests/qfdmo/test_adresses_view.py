@@ -4,13 +4,15 @@ from django.http import HttpRequest
 from django.test import override_settings
 
 from qfdmo.leaflet import compile_leaflet_bbox
-from qfdmo.models.acteur import ActeurStatus, DisplayedActeur
+from qfdmo.models.acteur import ActeurStatus, DisplayedActeur, RevisionActeur
 from qfdmo.views.adresses import CarteSearchActeursView
 from unit_tests.core.test_utils import query_dict_from
 from unit_tests.qfdmo.acteur_factory import (
+    ActeurFactory,
     DisplayedActeurFactory,
     DisplayedPropositionServiceFactory,
     LabelQualiteFactory,
+    RevisionActeurFactory,
 )
 from unit_tests.qfdmo.action_factory import ActionFactory
 from unit_tests.qfdmo.sscatobj_factory import SousCategorieObjetFactory
@@ -504,3 +506,53 @@ class TestLayers:
         url = "/carte?action_list=reparer%7Cdonner%7Cechanger%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cacheter%7Crevendre&epci_codes=200055887&limit=50"  # noqa: E501
         response = client.get(url)
         assert 'data-testid="adresse-missing"' not in str(response.content)
+
+
+@pytest.mark.django_db
+class TestGetOrCreateRevisionActeur:
+    def test_get_or_create_revision_acteur_only_acteur(self, client):
+        acteur = ActeurFactory()
+        url = f"/qfdmo/getorcreate_revisionacteur/{acteur.identifiant_unique}"
+
+        response = client.get(url)
+        assert response.status_code == 302
+        revision_acteur = RevisionActeur.objects.get(
+            identifiant_unique=acteur.identifiant_unique
+        )
+        assert response.url == revision_acteur.change_url
+
+    def test_get_or_create_revision_acteur_acteur_and_revision(self, client):
+        acteur = ActeurFactory()
+        revision_acteur = RevisionActeurFactory(
+            identifiant_unique=acteur.identifiant_unique
+        )
+        url = f"/qfdmo/getorcreate_revisionacteur/{acteur.identifiant_unique}"
+
+        response = client.get(url)
+        assert response.status_code == 302
+        revision_acteur = RevisionActeur.objects.get(
+            identifiant_unique=acteur.identifiant_unique
+        )
+        assert response.url == revision_acteur.change_url
+
+    def test_get_or_create_revision_acteur_revision_parent(self, client):
+        acteur = ActeurFactory()
+        parent = RevisionActeur(identifiant_unique="parent12345")
+        parent.save_as_parent()
+        parent = RevisionActeur.objects.get(identifiant_unique="parent12345")
+        print("parent", parent)
+        RevisionActeurFactory(
+            identifiant_unique=acteur.identifiant_unique,
+            parent=parent,
+        )
+        url = f"/qfdmo/getorcreate_revisionacteur/{parent.identifiant_unique}"
+
+        response = client.get(url)
+        assert response.status_code == 302
+        assert response.url == parent.change_url
+
+    def test_get_or_create_revision_acteur_no_acteur(self, client):
+        url = "/qfdmo/getorcreate_revisionacteur/1234567890"  # pragma: allowlist secret
+
+        with pytest.raises(RevisionActeur.DoesNotExist):
+            client.get(url)

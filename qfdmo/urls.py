@@ -64,11 +64,6 @@ urlpatterns = [
         name="getorcreate_revisionacteur",
     ),
     path(
-        "qfdmo/refresh_acteur_view",
-        RedirectView.as_view(url=settings.AIRFLOW_WEBSERVER_REFRESHACTEUR_URL),
-        name="refresh_acteur_view",
-    ),
-    path(
         "qfdmo/get_object_list",
         get_object_list,
         name="get_object_list",
