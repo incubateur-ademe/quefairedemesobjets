@@ -34,7 +34,7 @@ def task_info_get():
     """
 
 
-def cluster_acteurs_suggestions_wrapper(ti) -> None:
+def cluster_acteurs_clusters_prepare_wrapper(ti) -> None:
     logger.info(task_info_get())
 
     config: ClusterConfig = xcom_pull(ti, XCOMS.CONFIG)
@@ -66,7 +66,7 @@ def cluster_acteurs_suggestions_wrapper(ti) -> None:
 def cluster_acteurs_clusters_prepare_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id=TASKS.CLUSTERS_PREPARE,
-        python_callable=cluster_acteurs_suggestions_wrapper,
+        python_callable=cluster_acteurs_clusters_prepare_wrapper,
         provide_context=True,
         dag=dag,
     )

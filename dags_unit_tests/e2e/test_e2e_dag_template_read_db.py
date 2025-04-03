@@ -6,7 +6,7 @@ import pytest
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 
-from dags_unit_tests.e2e.utils import DATE_IN_PAST, airflow_init, ti_get
+from dags_unit_tests.e2e.e2e_utils import DATE_IN_PAST, airflow_init, ti_get
 
 airflow_init()
 
