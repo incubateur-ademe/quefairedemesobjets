@@ -60,8 +60,8 @@ def cluster_acteurs_suggestions_to_db_wrapper(**kwargs) -> None:
     cluster_acteurs_suggestions_to_db(
         df_clusters=df_clusters,
         suggestions=suggestions,
-        identifiant_action=f"dag_id={kwargs['dag'].dag_id}",
-        identifiant_execution=f"run_id={kwargs['run_id']}",
+        identifiant_action=kwargs["dag"].dag_display_name,
+        identifiant_execution=kwargs["run_id"],
         # Rest assured: we are no longer clustering, but
         # we use cluster config to generate useful context
         # data for the Django Admin UI

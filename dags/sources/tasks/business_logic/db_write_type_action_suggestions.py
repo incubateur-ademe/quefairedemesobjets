@@ -31,14 +31,14 @@ def db_write_type_action_suggestions(
     insert_suggestion(
         df=df_acteur_to_delete,
         metadata=metadata,
-        dag_name=f"{dag_name} - SUPRESSION",
+        dag_name=f"{dag_name} - SUP",
         run_name=run_name,
         type_action=constants.SUGGESTION_SOURCE_SUPRESSION,
     )
     insert_suggestion(
         df=df_acteur_to_update,
         metadata=metadata,
-        dag_name=f"{dag_name} - MISES A JOUR",
+        dag_name=f"{dag_name} - MODIF",
         run_name=run_name,
         type_action=constants.SUGGESTION_SOURCE_MODIFICATION,
     )
