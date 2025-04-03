@@ -23,7 +23,8 @@ def compute_acteur(df_acteur: pd.DataFrame, df_revisionacteur: pd.DataFrame):
     df_revisionacteur = df_revisionacteur.set_index("identifiant_unique")
     # suppression du if et ajout de errors="ignore" pour éviter les erreurs
     df_revisionacteur = df_revisionacteur.drop(columns=["cree_le"], errors="ignore")
-    df_acteur.update(df_revisionacteur)
+    df_revisionacteur_for_update = df_revisionacteur.replace({"": pd.NA})
+    df_acteur.update(df_revisionacteur_for_update)
 
     df_acteur_merged = pd.concat(
         [df_acteur, df_revisionacteur_parents.set_index("identifiant_unique")]
