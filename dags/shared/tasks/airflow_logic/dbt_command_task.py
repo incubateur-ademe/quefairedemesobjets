@@ -1,6 +1,4 @@
-"""Reusable task to run a dbt command in a DAG
-(ex: after clone DAGs -> rebuild the corresponding DBT models).
-TODO: to reuse multiple times in 1 DAG, add a prefix to make task_id unique"""
+"""Reusable task to run a dbt command in a DAG"""
 
 import logging
 
@@ -10,7 +8,7 @@ from airflow.operators.bash import BashOperator
 logger = logging.getLogger(__name__)
 
 
-def dbt_command_task(dag: DAG) -> BashOperator:
+def dbt_command_task(dag: DAG, task_id: str) -> BashOperator:
     params = dag.params
     dbt_command = params.get("dbt_command", "").strip()
 
@@ -18,13 +16,15 @@ def dbt_command_task(dag: DAG) -> BashOperator:
 
     if not dbt_command:
         raise ValueError("Paramètre dbt_command requis")
+    if not dbt_command.startswith("dbt "):
+        raise ValueError("La commande DBT doit commencer par 'dbt '")
 
     if params.get("dry_run") is True:
         logger.info("Mode dry_run activé, commande DBT non exécutée")
-        dbt_command = ""
+        dbt_command = "echo 'dry_run: commande DBT non exécutée'"
 
     return BashOperator(
-        task_id="dbt_command",
+        task_id=task_id,
         bash_command=dbt_command,
         dag=dag,
     )

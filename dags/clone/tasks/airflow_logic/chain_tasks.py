@@ -28,5 +28,5 @@ def chain_tasks(dag: DAG) -> None:
         clone_table_validate_task(dag),
         clone_view_in_use_switch_task(dag),
         clone_old_tables_remove_task(dag),
-        dbt_command_task(dag),
+        dbt_command_task(dag, task_id="clone_dbt_build"),
     )
