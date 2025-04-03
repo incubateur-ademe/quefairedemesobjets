@@ -29,6 +29,7 @@ def test_redirect_with_carte_param(client, params, redirect_url):
     assert response.status_code == 200
 
 
+@pytest.mark.skip("TODO: temporarly disabled because geo.api.gouv.fr is down")
 @pytest.mark.django_db
 @override_settings(DEBUG=False)
 @pytest.mark.parametrize(

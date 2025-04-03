@@ -500,6 +500,7 @@ class TestLayers:
         response = client.get(url)
         assert 'data-testid="adresse-missing"' not in str(response.content)
 
+    @pytest.mark.skip("TODO: temporarly disabled because geo.api.gouv.fr is down")
     def test_adresse_missing_layer_is_not_displayed_for_epcis(self, client):
         url = "/carte?action_list=reparer%7Cdonner%7Cechanger%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cacheter%7Crevendre&epci_codes=200055887&limit=50"  # noqa: E501
         response = client.get(url)
