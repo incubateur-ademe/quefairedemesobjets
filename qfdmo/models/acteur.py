@@ -355,6 +355,14 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
     siret = models.CharField(
         max_length=14, blank=True, default="", db_default="", db_index=True
     )
+    # To backfill SIRET status into our DB from AE and avoid having to evaluate
+    # AE's DB at runtime (which has 40M rows), also helping with Django admin info
+    siret_is_closed = models.BooleanField(
+        default=None,  # by default we can't assume a SIRET is opened
+        blank=True,
+        verbose_name="SIRET fermé",
+        help_text="Indique si le SIRET est fermé ou non dans l'Annuaire Entreprises",
+    )
     source = models.ForeignKey(Source, on_delete=models.CASCADE, blank=True, null=True)
     identifiant_externe = models.CharField(
         max_length=255, blank=True, default="", db_default=""
@@ -729,6 +737,13 @@ class RevisionActeur(BaseActeur):
         null=True,
         related_name="duplicats",
         validators=[clean_parent],
+    )
+    parent_reason = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+        db_default="",
+        help_text="Raison du rattachement au parent",
     )
 
     @property
