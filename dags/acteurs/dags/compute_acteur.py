@@ -4,6 +4,9 @@ import pendulum
 from acteurs.tasks.airflow_logic.check_model_table_consistency_task import (
     check_model_table_consistency_task,
 )
+from acteurs.tasks.airflow_logic.replace_acteur_table_task import (
+    replace_acteur_table_task,
+)
 from airflow import DAG
 from airflow.operators.bash import BashOperator
 from shared.config.schedules import SCHEDULES
@@ -119,11 +122,26 @@ with DAG(
         ),
     )
 
-    check_model_table_acteur_task = check_model_table_consistency_task(
+    check_model_table_displayedacteur_task = check_model_table_consistency_task(
         dag, "DisplayedActeur", "exposure_carte_acteur"
     )
-    check_model_table_propositionservice_task = check_model_table_consistency_task(
-        dag, "DisplayedPropositionService", "exposure_carte_propositionservice"
+    check_model_table_displayedpropositionservice_task = (
+        check_model_table_consistency_task(
+            dag, "DisplayedPropositionService", "exposure_carte_propositionservice"
+        )
+    )
+    replace_displayedacteur_table_task = replace_acteur_table_task(
+        dag, "qfdmo_displayed", "exposure_carte_"
+    )
+
+    check_model_table_vueacteur_task = check_model_table_consistency_task(
+        dag, "VueActeur", "exposure_exhaustive_acteur"
+    )
+    check_model_table_vuepropositionservice_task = check_model_table_consistency_task(
+        dag, "VuePropositionService", "exposure_exhaustive_propositionservice"
+    )
+    replace_vueacteur_table_task = replace_acteur_table_task(
+        dag, "qfdmo_vue", "exposure_exhaustive_"
     )
 
     # Définir la séquence principale
@@ -140,10 +158,23 @@ with DAG(
         >> dbt_test_marts_acteurs_carte
         >> dbt_run_exposure_acteurs_carte
         >> dbt_test_exposure_acteurs_carte
-        >> check_model_table_acteur_task
-        >> check_model_table_propositionservice_task
         >> dbt_run_marts_acteurs_opendata
         >> dbt_test_marts_acteurs_opendata
         >> dbt_run_exposure_acteurs_opendata
         >> dbt_test_exposure_acteurs_opendata
+    )
+
+    # Définir la séquence de vérification en parallèle
+    (
+        dbt_test_exposure_acteurs_carte
+        >> check_model_table_displayedacteur_task
+        >> check_model_table_displayedpropositionservice_task
+        >> replace_displayedacteur_table_task
+    )
+
+    (
+        dbt_test_exposure_acteurs_exhaustive
+        >> check_model_table_vueacteur_task
+        >> check_model_table_vuepropositionservice_task
+        >> replace_vueacteur_table_task
     )
