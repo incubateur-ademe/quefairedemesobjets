@@ -199,16 +199,11 @@ class Suggestion(models.Model):
             template_name = "data/_partials/clustering_suggestion_details.html"
         elif self.suggestion_cohorte.type_action == SuggestionAction.CRAWL_URLS:
             template_name = "data/_partials/crawl_urls_suggestion_details.html"
-<<<<<<< HEAD
         elif self.suggestion_cohorte.type_action in [
             SuggestionAction.ENRICH_ACTEURS_CLOSED,
             SuggestionAction.ENRICH_ACTEURS_RGPD,
         ]:
             template_name = "data/_partials/suggestion_details_changes.html"
-=======
-        elif self.suggestion_cohorte.type_action == SuggestionAction.RGPD_ANONYMIZE:
-            template_name = "data/_partials/generic_suggestion_details.html"
->>>>>>> 43981af4 (modèle RGPD, tests & migration)
             template_context = self.suggestion
 
         # TODO: suggestions to migrate to PYDANTIC classes
