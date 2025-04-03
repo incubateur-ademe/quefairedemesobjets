@@ -1,14 +1,9 @@
-"""
-Modèle pydantic pour gérer la configuration
-du DAG de clustering des acteurs. On utilise bien
-le terme "config" et pas seulement "params" car les
-"params" de la UI Airflow sont une sous-partie de ce qui
-créer la config finale.
-"""
+"""Configuration model for the clustering DAG"""
 
 from cluster.config.constants import FIELDS_PROTECTED
 from pydantic import BaseModel, Field, field_validator, model_validator
-from utils.airflow_params import airflow_params_dropdown_selected_to_ids
+
+from dags.utils.airflow_params import airflow_params_dropdown_selected_to_ids
 
 
 class ClusterConfig(BaseModel):

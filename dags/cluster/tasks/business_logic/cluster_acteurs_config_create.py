@@ -1,12 +1,11 @@
-from cluster.config.model import ClusterConfig
+from cluster.config import ClusterConfig
 from utils.django import django_setup_full
 
 django_setup_full()
 
 
 def cluster_acteurs_config_create(params: dict) -> ClusterConfig:
-    """Création de la config en fusionnant les params airflow
-    et autres valeurs métier / DB."""
+    """Create config by merging params with extra data from DB"""
     from qfdmo.models import ActeurType, Source
 
     extra = {

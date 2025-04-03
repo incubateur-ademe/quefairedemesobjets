@@ -2,8 +2,8 @@ import pandas as pd
 import pytest
 from cluster.config.constants import COL_PARENT_ID_BEFORE
 from cluster.helpers.shorthands.change_model_name import CHANGE_CREATE, CHANGE_NOTHING
-from cluster.tasks.business_logic.cluster_acteurs_suggestions.contexte import (
-    suggestion_contexte_generate,
+from cluster.tasks.business_logic.cluster_acteurs_suggestions.context import (
+    suggestion_context_generate,
 )
 
 from data.models.change import COL_CHANGE_MODEL_NAME
@@ -35,7 +35,7 @@ class TestSuggestionContexteGenerate:
 
     @pytest.fixture
     def working(self, df_cluster) -> dict:
-        return suggestion_contexte_generate(
+        return suggestion_context_generate(
             df_cluster=df_cluster,
             cluster_fields_exact=["code_postal", "ville"],
             cluster_fields_fuzzy=["nom", "adresse"],
@@ -65,7 +65,7 @@ class TestSuggestionContexteGenerate:
     def test_raise_if_not_one_cluster(self):
         df = pd.DataFrame({"cluster_id": ["c1", "c2"]})
         with pytest.raises(ValueError, match="1 cluster at a time"):
-            suggestion_contexte_generate(df, [], [])
+            suggestion_context_generate(df, [], [])
 
     def test_raise_if_not_exact(self):
         data = {
@@ -76,8 +76,8 @@ class TestSuggestionContexteGenerate:
             COL_PARENT_ID_BEFORE: [None] * 2,
         }
         df = pd.DataFrame(data)
-        with pytest.raises(ValueError, match="should have 1 exact group"):
-            suggestion_contexte_generate(df, ["ville"], [])
+        with pytest.raises(ValueError, match="pas 1 groupe de valeur non vide"):
+            suggestion_context_generate(df, ["ville"], [])
 
     def test_exclude_existing_children_from_exact_check(self):
         # Added on 2025-02-20 following this issue:
@@ -92,5 +92,5 @@ class TestSuggestionContexteGenerate:
             COL_PARENT_ID_BEFORE: [None, "p1", "p1"],
         }
         df = pd.DataFrame(data)
-        suggestion_contexte_generate(df, ["ville"], [])
+        suggestion_context_generate(df, ["ville"], [])
         pass

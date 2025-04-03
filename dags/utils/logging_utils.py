@@ -3,6 +3,7 @@ import json
 import logging
 import math
 import os
+import re
 from datetime import date, datetime
 from typing import Any
 
@@ -109,6 +110,13 @@ def preview(value_name: str, value: Any) -> None:
 def lst(lst: list) -> str:
     """Petit utilitaire pour afficher une liste"""
     return ", ".join([str(x) for x in lst])
+
+
+def preview_dict_subsets(d: dict, key_pattern: str) -> None:
+    """To visualize subsets of large dicts more easily"""
+    for key, value in d.items():
+        if re.search(key_pattern, key):
+            preview(f"config.{key}", value)
 
 
 def preview_df_as_markdown(label: str, df: pd.DataFrame, groupby=None) -> None:

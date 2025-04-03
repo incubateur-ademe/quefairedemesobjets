@@ -1,8 +1,8 @@
 import logging
 
 import pandas as pd
-from cluster.tasks.business_logic.cluster_acteurs_suggestions.contexte import (
-    suggestion_contexte_generate,
+from cluster.tasks.business_logic.cluster_acteurs_suggestions.context import (
+    suggestion_context_generate,
 )
 from cluster.tasks.business_logic.misc.df_metadata_get import df_metadata_get
 from utils import logging_utils as log
@@ -50,9 +50,14 @@ def cluster_acteurs_suggestions_to_db(
     cohorte.save()
 
     for sugg_dict in suggestions:
-        # cluster = df_clusters[df_clusters["cluster_id"] == sugg_dict["cluster_id"]]
         cluster_id = sugg_dict["cluster_id"]
+        logging.info(f"suggestion {cluster_id=}")
         df_cluster = df_clusters[df_clusters["cluster_id"] == cluster_id]
+
+        # Fixed following PR1501 but comment/raise to help debug in case of regression
+        if df_cluster.empty:
+            msg = "Cluster vide = présent en suggestion mais plus dans df_clusters!!!"
+            raise ValueError(msg)
 
         sugg_obj = Suggestion(
             suggestion_cohorte=cohorte,
@@ -61,7 +66,7 @@ def cluster_acteurs_suggestions_to_db(
             # This is causing serialization issues due to certain values
             # being of Django type (e.g. ActeurType)
             # contexte=cluster.to_dict(orient="records"),
-            contexte=suggestion_contexte_generate(
+            contexte=suggestion_context_generate(
                 df_cluster=df_cluster,
                 cluster_fields_exact=cluster_fields_exact,
                 cluster_fields_fuzzy=cluster_fields_fuzzy,
