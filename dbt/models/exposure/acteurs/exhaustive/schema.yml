@@ -183,8 +183,8 @@ models:
         description: "The primary key for this table"
         data_tests:
           - not_null
-      - name: propositionservice_id
-        description: "The propositionservice_id for this table"
+      - name: vuepropositionservice_id
+        description: "The vuepropositionservice_id for this table"
         data_tests:
           - not_null
       - name: souscategorieobjet_id
@@ -194,15 +194,15 @@ models:
     config:
       materialized: table
       indexes:
-        - columns: ['propositionservice_id', 'souscategorieobjet_id']
+        - columns: ['vuepropositionservice_id', 'souscategorieobjet_id']
           unique: true
-        - columns: ['propositionservice_id']
+        - columns: ['vuepropositionservice_id']
           type: hash
         - columns: ['souscategorieobjet_id']
           type: hash
       constraints:
         - type: foreign_key
-          columns: [propositionservice_id]
+          columns: [vuepropositionservice_id]
           ref_columns: [id]
           ref_table: exposure_exhaustive_propositionservice
           deferrable: true
@@ -216,7 +216,7 @@ models:
     tests:
       - dbt_utils.unique_combination_of_columns:
           combination_of_columns:
-            - propositionservice_id
+            - vuepropositionservice_id
             - souscategorieobjet_id
   - name: exposure_exhaustive_acteur_acteur_services
     description: "Acteur Acteur Services model"
@@ -225,8 +225,8 @@ models:
         description: "The primary key for this table"
         data_tests:
           - not_null
-      - name: acteur_id
-        description: "The acteur_id for this table"
+      - name: vueacteur_id
+        description: "The vueacteur_id for this table"
         data_tests:
           - not_null
       - name: acteurservice_id
@@ -236,15 +236,15 @@ models:
     config:
       materialized: table
       indexes:
-        - columns: ['acteur_id', 'acteurservice_id']
+        - columns: ['vueacteur_id', 'acteurservice_id']
           unique: true
-        - columns: ['acteur_id']
+        - columns: ['vueacteur_id']
           type: hash
         - columns: ['acteurservice_id']
           type: hash
       constraints:
         - type: foreign_key
-          columns: [acteur_id]
+          columns: [vueacteur_id]
           ref_columns: [identifiant_unique]
           ref_table: exposure_exhaustive_acteur
           deferrable: true
@@ -258,7 +258,7 @@ models:
     tests:
       - dbt_utils.unique_combination_of_columns:
           combination_of_columns:
-            - acteur_id
+            - vueacteur_id
             - acteurservice_id
   - name: exposure_exhaustive_acteur_labels
     description: "Acteur Labels model"
@@ -268,8 +268,8 @@ models:
         data_tests:
           - unique
           - not_null
-      - name: acteur_id
-        description: "The acteur_id for this table"
+      - name: vueacteur_id
+        description: "The vueacteur_id for this table"
         data_tests:
           - not_null
       - name: labelqualite_id
@@ -279,15 +279,15 @@ models:
     config:
       materialized: table
       indexes:
-        - columns: ['acteur_id', 'labelqualite_id']
+        - columns: ['vueacteur_id', 'labelqualite_id']
           unique: true
-        - columns: ['acteur_id']
+        - columns: ['vueacteur_id']
           type: hash
         - columns: ['labelqualite_id']
           type: hash
       constraints:
         - type: foreign_key
-          columns: [acteur_id]
+          columns: [vueacteur_id]
           ref_columns: [identifiant_unique]
           ref_table: exposure_exhaustive_acteur
           deferrable: true
@@ -301,7 +301,7 @@ models:
     tests:
       - dbt_utils.unique_combination_of_columns:
           combination_of_columns:
-            - acteur_id
+            - vueacteur_id
             - labelqualite_id
   - name: exposure_exhaustive_acteur_sources
     description: "Lien entre acteur de la exhaustive et sources"
@@ -310,7 +310,7 @@ models:
         description: "L'identifiant de la source"
         data_tests:
           - not_null
-      - name: acteur_id
+      - name: vueacteur_id
         description: "L'identifiant de l'acteur"
         data_tests:
           - not_null
@@ -321,15 +321,15 @@ models:
     config:
       materialized: table
       indexes:
-        - columns: ['acteur_id', 'source_id']
+        - columns: ['vueacteur_id', 'source_id']
           unique: true
-        - columns: ['acteur_id']
+        - columns: ['vueacteur_id']
           type: hash
         - columns: ['source_id']
           type: hash
       constraints:
         - type: foreign_key
-          columns: [acteur_id]
+          columns: [vueacteur_id]
           ref_columns: [identifiant_unique]
           ref_table: exposure_exhaustive_acteur
           deferrable: true

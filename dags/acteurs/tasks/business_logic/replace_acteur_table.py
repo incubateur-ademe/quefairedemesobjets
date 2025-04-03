@@ -31,7 +31,7 @@ def replace_acteur_table(
                     f" to {prefix_django}{table}_to_remove"
                 )
                 cursor.execute(
-                    f"ALTER TABLE {prefix_django}{table}"
+                    f"ALTER TABLE IF EXISTS {prefix_django}{table}"
                     f" RENAME TO {prefix_django}{table}_to_remove"
                 )
                 logger.warning(
@@ -41,7 +41,9 @@ def replace_acteur_table(
                     f"ALTER TABLE {prefix_dbt}{table} RENAME TO {prefix_django}{table}"
                 )
                 logger.warning(f"Removing {prefix_django}{table}_to_remove")
-                cursor.execute(f"DROP TABLE {prefix_django}{table}_to_remove CASCADE")
+                cursor.execute(
+                    f"DROP TABLE IF EXISTS {prefix_django}{table}_to_remove CASCADE"
+                )
             logger.warning("Commit the transaction")
             cursor.execute("COMMIT")
         except Exception as e:

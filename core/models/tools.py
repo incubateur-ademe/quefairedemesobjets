@@ -37,7 +37,7 @@ def compare_model_vs_table(cls, table_name: str) -> bool:
             info.name: {
                 "type": connection.introspection.get_field_type(info.type_code, info),
                 "null_ok": info.null_ok,
-                "display_size": info.display_size,
+                "display_size": info.display_size if info.display_size > 0 else None,
             }
             for info in table_description
         }
@@ -68,7 +68,32 @@ def compare_model_vs_table(cls, table_name: str) -> bool:
                 db_type = db_columns[field_name]["type"]
 
                 field_matches = are_fields_matched(db_type, model_type)
+                if not field_matches:
+                    logger.error(
+                        f"✗ Champ '{field_name}' ({db_type}) n'a pas la même"
+                        " configuration de type : "
+                        f"DB : {db_type} vs Model : {model_type}"
+                    )
                 all_fields_match &= field_matches
+
+                # No check of not Null constraint because DBT doesn't handle this
+                # constraint
+
+                # Check length of CharFields and TextFields
+                if (
+                    hasattr(field, "max_length")
+                    and db_type in ["CharField", "TextField"]
+                    and db_columns[field_name]["display_size"] != field.max_length
+                ):
+                    all_fields_match = False
+                    logger.error(
+                        f"✗ Champ '{field_name}' ({db_type}) n'a pas la même"
+                        " configuration de longueur : "
+                        f"DB : {db_columns[field_name]['display_size']}"
+                        f" vs Model : {field.max_length}"
+                    )
+
+                # # Check db_default
 
                 status = "✓" if field_matches else "✗"
                 logger.info(
@@ -79,6 +104,7 @@ def compare_model_vs_table(cls, table_name: str) -> bool:
             else:
                 all_fields_match = False
                 logger.error(f"✗ Champ '{field_name}' manquant dans la table")
+
         # Vérifier les colonnes de la table non présentes dans le modèle
         model_db_columns = {
             (
