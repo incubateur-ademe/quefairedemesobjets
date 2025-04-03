@@ -57,6 +57,11 @@ with DAG(
             type="string",
             description_md="🔤 Délimiteur utilisé dans le fichier",
         ),
+        "dbt_command": Param(
+            "dbt build --select tag:ban,tag:lieux_dits",
+            type="string",
+            description_md="🔨 Commande DBT à exécuter",
+        ),
     },
 ) as dag:
     chain_tasks(dag)

@@ -4,7 +4,7 @@ import logging
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from clone.config import TASKS, XCOMS
+from clone.config import TASKS, XCOMS, CloneConfig
 from clone.tasks.business_logic.clone_config_create import clone_config_create
 from utils import logging_utils as log
 
@@ -26,7 +26,7 @@ def task_info_get():
 
 def clone_config_create_wrapper(ti, params) -> None:
 
-    config = clone_config_create(params)
+    config: CloneConfig = clone_config_create(params)
 
     logger.info(task_info_get())
     log.preview("Configuration générée", config.model_dump())
