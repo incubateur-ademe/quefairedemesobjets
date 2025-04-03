@@ -23,6 +23,7 @@
             "description": null,
             "order": 1,
             "couleur": "green-menthe-main-548",
+            "fill": true,
             "icon": "fr-icon-tools-fill"
         }
     },
