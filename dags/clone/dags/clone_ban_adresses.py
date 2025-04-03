@@ -7,7 +7,7 @@ running into DB table name length limits.
 from airflow import DAG
 from airflow.models.param import Param
 from clone.tasks.airflow_logic.chain_tasks import chain_tasks
-from shared.config import SCHEDULES, START_DATES, CATCHUPS
+from shared.config import CATCHUPS, SCHEDULES, START_DATES
 
 with DAG(
     dag_id="clone_ban_adresses",
@@ -21,7 +21,7 @@ with DAG(
     },
     schedule=SCHEDULES.NONE,
     catchup=CATCHUPS.AWLAYS_FALSE,
-    start_date=START_DATES.YESTERDAY,
+    start_date=START_DATES.FOR_SCHEDULE_NONE,
     description=(
         "Clone la table 'adresses' de la Base Adresse Nationale (BAN) dans notre DB"
     ),
@@ -37,7 +37,7 @@ with DAG(
             type="string",
             description_md="📊 Le genre de table à créer",
         ),
-        "data_url": Param(
+        "data_endpoint": Param(
             "https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/adresses-france.csv.gz",
             type="string",
             description_md="📥 URL pour télécharger les données",

@@ -11,7 +11,7 @@ from clone.config import (
     xcom_pull,
 )
 from clone.tasks.business_logic.clone_old_tables_remove import (
-    clone_ae_old_tables_remove,
+    clone_old_tables_remove,
 )
 from utils import logging_utils as log
 
@@ -40,7 +40,7 @@ def clone_old_tables_remove_wrapper(ti) -> None:
     logger.info(task_info_get(config))
     log.preview("Configuration", config.model_dump())
 
-    clone_ae_old_tables_remove(
+    clone_old_tables_remove(
         keep_table_name=config.table_name,
         remove_table_name_pattern=config.table_name_pattern,
         dry_run=config.dry_run,

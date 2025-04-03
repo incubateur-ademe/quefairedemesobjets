@@ -7,7 +7,7 @@ from utils.django import django_setup_full
 logger = logging.getLogger(__name__)
 
 
-def clone_ae_old_tables_remove(
+def clone_old_tables_remove(
     keep_table_name: str,
     remove_table_name_pattern: re.Pattern,
     dry_run: bool,

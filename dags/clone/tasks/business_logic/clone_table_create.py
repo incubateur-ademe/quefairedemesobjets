@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 def csv_url_to_commands(
-    data_url: str,
+    data_endpoint: str,
     file_downloaded: str,
     file_unpacked: str,
     delimiter: str,
@@ -28,17 +28,17 @@ def csv_url_to_commands(
     folder = f"/tmp/{table_name}"
     cmds_create = []
     cmds_create.append(f"mkdir {folder}")
-    cmds_create.append(f"curl -sSL {data_url} -o {folder}/{file_downloaded}")
-    if str(data_url).endswith(".zip"):
+    cmds_create.append(f"curl -sSL {data_endpoint} -o {folder}/{file_downloaded}")
+    if str(data_endpoint).endswith(".zip"):
         cmds_create.append(f"unzip {folder}/{file_downloaded} -d {folder}/")
-    elif str(data_url).endswith(".gz"):
+    elif str(data_endpoint).endswith(".gz"):
         cmds_create.append(
             f"gunzip -c {folder}/{file_downloaded} > {folder}/{file_unpacked}"
         )
-    elif str(data_url).endswith(".csv"):
+    elif str(data_endpoint).endswith(".csv"):
         pass
     else:
-        raise NotImplementedError(f"URL non supportée: {data_url}")
+        raise NotImplementedError(f"URL non supportée: {data_endpoint}")
     cmds_create.append(f"wc -l {folder}/{file_unpacked}")
 
     # Converting commands so far into results format
@@ -65,7 +65,7 @@ def csv_url_to_commands(
 
 
 def csv_from_url_to_table(
-    data_url: AnyHttpUrl,
+    data_endpoint: AnyHttpUrl,
     file_downloaded: str,
     file_unpacked: str,
     delimiter: str,
@@ -76,7 +76,7 @@ def csv_from_url_to_table(
     r"""Streams a CSV from a URL directly into a PG.
     🔴 Requires the table schema to be created prior to this"""
     cmds_create, cmd_cleanup = csv_url_to_commands(
-        data_url=data_url,
+        data_endpoint=data_endpoint,
         file_downloaded=file_downloaded,
         file_unpacked=file_unpacked,
         delimiter=delimiter,
@@ -100,8 +100,8 @@ def csv_from_url_to_table(
         raise SystemError(f"Erreur rencontrée: {error}")
 
 
-def clone_ae_table_create(
-    data_url: AnyHttpUrl,
+def clone_table_create(
+    data_endpoint: AnyHttpUrl,
     file_downloaded: str,
     file_unpacked: str,
     delimiter: str,
@@ -119,7 +119,7 @@ def clone_ae_table_create(
     # Write tasks
     django_schema_create_and_check(table_name, sql, dry_run=dry_run)
     csv_from_url_to_table(
-        data_url=data_url,
+        data_endpoint=data_endpoint,
         file_downloaded=file_downloaded,
         file_unpacked=file_unpacked,
         delimiter=delimiter,

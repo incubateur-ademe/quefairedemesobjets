@@ -3,7 +3,7 @@ from pathlib import Path
 from utils.django import django_schema_create_and_check
 
 
-def clone_ae_view_in_use_switch(
+def clone_view_in_use_switch(
     view_schema_file_path: Path,
     view_name: str,
     table_name: str,

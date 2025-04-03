@@ -16,7 +16,7 @@ SUFFIX_VIEW_IN_USE = "in_use"
 class CloneConfig(BaseModel):
     dry_run: bool
     table_kind: str
-    data_url: AnyHttpUrl
+    data_endpoint: AnyHttpUrl
     file_downloaded: str
     file_unpacked: str
     delimiter: str

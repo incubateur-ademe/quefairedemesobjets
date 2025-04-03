@@ -7,7 +7,7 @@ from utils import logging_utils as log
 logger = logging.getLogger(__name__)
 
 
-def clone_ae_table_validate(table_kind: str, table_name: str, dry_run: bool) -> None:
+def clone_table_validate(table_kind: str, table_name: str, dry_run: bool) -> None:
     """Validate a table in the DB"""
 
     # Gathering SQL validation files

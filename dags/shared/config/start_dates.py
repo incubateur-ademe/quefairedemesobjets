@@ -12,4 +12,4 @@ from datetime import datetime, timedelta
 @dataclass(frozen=True)
 class START_DATES:
     FOR_SCHEDULE_DAILY: datetime = datetime.now() - timedelta(days=1)
-    YESTERDAY: datetime = datetime.now() - timedelta(days=1)
+    FOR_SCHEDULE_NONE: datetime = datetime.now() - timedelta(days=1)

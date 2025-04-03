@@ -9,7 +9,7 @@ class TestCloneConfig:
         return CloneConfig(
             dry_run=False,
             table_kind="my_table",
-            data_url="https://example.org/data.zip",  # type: ignore
+            data_endpoint="https://example.org/data.zip",  # type: ignore
             file_downloaded="data.zip",
             file_unpacked="data.csv",
             delimiter=",",

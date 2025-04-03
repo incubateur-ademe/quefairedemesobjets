@@ -3,7 +3,6 @@ from clone.config import DIR_SQL_CREATION
 from clone.tasks.business_logic.clone_table_create import (
     csv_url_to_commands,
 )
-from rich import print
 
 
 class TestSqlTablesCreation:
@@ -25,13 +24,12 @@ class DISABLEDTestCsvUrlToCommands:
             # Testing a case similar to Annuaire Entreprises where
             # the URL filename doesn't match the extracted filename
             # (StockUniteLegale_utf8.zip -> StockUniteLegale_utf8.csv)
-            data_url="https://example.com/StockUniteLegale_utf8.zip",
+            data_endpoint="https://example.com/StockUniteLegale_utf8.zip",
             file_downloaded="StockUniteLegale_utf8.zip",
             file_unpacked="StockUniteLegale_utf8.csv",
             delimiter=",",
             table_name="my_table",
         )
-        print(commands)
         assert len(commands) == 3
         # only last command has some env
         assert commands[0]["env"] == {}
@@ -41,11 +39,10 @@ class DISABLEDTestCsvUrlToCommands:
     def test_gz(self):
         commands = csv_url_to_commands(
             # Testing case for BAN: adresses-france.csv.gz
-            data_url="https://example.com/adresses-france.csv.gz",
+            data_endpoint="https://example.com/adresses-france.csv.gz",
             file_downloaded="adresses-france.csv.gz",
             file_unpacked="adresses-france.csv",
             delimiter=";",
             table_name="my_table",
         )
-        print(commands)
         assert len(commands) == 3
