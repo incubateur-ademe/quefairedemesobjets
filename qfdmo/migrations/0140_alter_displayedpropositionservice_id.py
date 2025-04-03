@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("qfdmo", "0127_add_indexes"),
+        ("qfdmo", "0139_alter_acteur_not_nullable_char_fields_tel_url_ville"),
     ]
 
     operations = [
