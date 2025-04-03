@@ -117,9 +117,7 @@ class SuggestionAdmin(admin.ModelAdmin):
 
     def cohorte(self, obj):
         coh = obj.suggestion_cohorte
-        return format_html(
-            "{}<br/>{}", coh.identifiant_action, coh.identifiant_execution
-        )
+        return format_html(str(coh).replace(" -- ", "<br/>"))
 
     def acteur_link_html(self, id):
         return format_html(

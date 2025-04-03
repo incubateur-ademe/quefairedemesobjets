@@ -31,7 +31,7 @@ def crawl_urls_suggest_crawl_diff_standard_wrapper(ti, params, dag, run_id) -> N
 
     crawl_urls_suggest(
         df=xcom_pull(ti, XCOMS.DF_CRAWL_DIFF_STANDARD, skip_if_empty=True),
-        dag_id=dag.dag_id,
+        dag_display_name=dag.dag_display_name,
         run_id=run_id,
         dry_run=params.get("dry_run", True),
     )
