@@ -15,6 +15,7 @@ class ChangeActeurCreateAsParent(ChangeActeurAbstract):
 
     def validate(self):
         """The parent shouldn't already exist"""
+        print(f"ChangeActeurCreateAsParent.validate: {self.id=} {self.data=}")
         rev = RevisionActeur.objects.filter(identifiant_unique=self.id)
         if rev.exists():
             raise ValueError(f"Parent to create '{self.id}' already exists")

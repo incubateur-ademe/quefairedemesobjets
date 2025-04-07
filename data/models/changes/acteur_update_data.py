@@ -12,6 +12,7 @@ class ChangeActeurUpdateData(ChangeActeurAbstract):
         return "acteur_update_data"
 
     def validate(self) -> Acteur | RevisionActeur:
+        print(f"ChangeActeurUpdateData.validate: {self.id=} {self.data=}")
         if not self.data:
             raise ValueError("No data provided")
         # The parent should already exist in revision or base
