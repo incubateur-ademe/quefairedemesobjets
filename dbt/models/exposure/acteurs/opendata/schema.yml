@@ -10,16 +10,19 @@ models:
           - unique
           - not_null
           - dbt_expectations.expect_column_to_exist
+          - not_empty_string
       - name: paternite
         description: "La paternité de l'acteur"
         tests:
           - not_null
           - dbt_expectations.expect_column_to_exist
+          - not_empty_string
       - name: nom
         description: "Le nom de l'acteur"
         tests:
           - not_null
           - dbt_expectations.expect_column_to_exist
+          - not_empty_string
       - name: nom_commercial
         description: "Le nom commercial de l'acteur"
         tests:
