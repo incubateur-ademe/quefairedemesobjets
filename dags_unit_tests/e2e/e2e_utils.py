@@ -5,15 +5,9 @@ import os
 import sys
 from pathlib import Path
 
-import pendulum
 from airflow.models import TaskInstance
 
 logger = logging.getLogger(__name__)
-
-# Function `days_ago` is deprecated and will be removed in Airflow 3.0.
-# import pendulum
-# TODO: remove above once we migrated to Airflow 3.0
-DATE_IN_PAST = pendulum.today("UTC").add(days=-2)
 
 PIPELINES_ROOT = Path(__file__).resolve().parent.parent.parent / "dags/"
 

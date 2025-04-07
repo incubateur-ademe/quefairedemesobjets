@@ -1,6 +1,4 @@
-from dags.cluster.tasks.business_logic.misc.data_serialize_reconstruct import (
-    data_reconstruct,
-)
+from dags.utils.data_serialize_reconstruct import data_reconstruct
 from data.models.changes.acteur_abstract import ChangeActeurAbstract
 from qfdmo.models import RevisionActeur
 

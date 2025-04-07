@@ -6,7 +6,8 @@ import pytest
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 
-from dags_unit_tests.e2e.e2e_utils import DATE_IN_PAST, airflow_init, ti_get
+from dags.shared.config import START_DATES
+from dags_unit_tests.e2e.e2e_utils import airflow_init, ti_get
 
 airflow_init()
 
@@ -76,7 +77,7 @@ class TestE2ETemplateReadDb:
         # on Oct 2024 for Airflow 3:
         # https://github.com/apache/airflow/pull/42761
         dag.test(
-            execution_date=DATE_IN_PAST,
+            execution_date=START_DATES.YESTERDAY,
             # Values put here will be available under "params"
             # argument of Airflow task functions
             run_conf={

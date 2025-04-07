@@ -7,8 +7,9 @@ from django.contrib.gis.geos import Point
 from rich import print
 
 from dags.cluster.config import TASKS
+from dags.shared.config import START_DATES
 from dags_unit_tests.cluster.helpers.configs import CONF_BASE_DICT
-from dags_unit_tests.e2e.e2e_utils import DATE_IN_PAST, airflow_init, ti_get
+from dags_unit_tests.e2e.e2e_utils import airflow_init, ti_get
 from unit_tests.qfdmo.acteur_factory import (
     ActeurTypeFactory,
     DisplayedActeur,
@@ -47,7 +48,7 @@ class TestClusterDedupSkipped:
         """DAG run should stop at config because data acteurs data available"""
         from dags.cluster.dags.cluster_acteur_suggestions import dag
 
-        dag.test(execution_date=DATE_IN_PAST, run_conf=conf)
+        dag.test(execution_date=START_DATES.YESTERDAY, run_conf=conf)
         tis = dag.get_task_instances()
 
         # Conf was sucesssfully created and some of the calculated
@@ -120,7 +121,7 @@ class TestClusterDedupSkipped:
             source=s1,
         ).save()
 
-        dag.test(execution_date=DATE_IN_PAST, run_conf=conf)
+        dag.test(execution_date=START_DATES.YESTERDAY, run_conf=conf)
         tis = dag.get_task_instances()
         for ti in tis:
             print(f"{ti.task_id}", f"{ti.state=}")

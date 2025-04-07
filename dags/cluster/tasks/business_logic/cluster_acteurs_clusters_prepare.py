@@ -9,11 +9,9 @@ from cluster.tasks.business_logic.cluster_acteurs_clusters import (
 from cluster.tasks.business_logic.cluster_acteurs_read.children import (
     cluster_acteurs_read_children,
 )
-from cluster.tasks.business_logic.misc.df_add_original_columns import (
-    df_add_original_columns,
-)
 from cluster.tasks.business_logic.misc.df_sort import df_sort
 from utils import logging_utils as log
+from utils.dataframes import df_add_original_columns
 
 logger = logging.getLogger(__name__)
 

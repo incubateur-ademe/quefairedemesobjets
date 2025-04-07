@@ -1,8 +1,12 @@
 """Utilities to avoid repeating ourselves when dealing
 with dataframes in our pipelines"""
 
+import logging
+
 import pandas as pd
 from utils import logging_utils as log
+
+logger = logging.getLogger(__name__)
 
 
 def df_sort(
@@ -86,3 +90,15 @@ def dfs_assert_add_up_to_df(dfs: list[pd.DataFrame], df: pd.DataFrame) -> None:
         raise ValueError(f"Somme lignes des dfs {len_dfs} != df originale {len_df}")
     if set(df.index) != set(index for d in dfs for index in d.index):
         raise ValueError("Indexes des dfs ne correspondent pas à l'original")
+
+
+def df_add_original_columns(
+    df_modify: pd.DataFrame,
+    df_original: pd.DataFrame,
+    on: str = "identifiant_unique",
+) -> pd.DataFrame:
+    """Add columns from original missing in modified dataframe"""
+    cols_add = [x for x in df_original.columns if x not in df_modify.columns]
+    logger.info(f"Colonnes à rajouter: {cols_add} via {on}")
+    cols = ["identifiant_unique"] + cols_add
+    return df_modify.merge(df_original[cols], on="identifiant_unique", how="left")

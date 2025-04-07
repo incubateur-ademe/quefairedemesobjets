@@ -285,7 +285,7 @@ with DAG(
         "email_on_retry": False,
         "retries": 0,
     },
-    start_date=START_DATES.FOR_SCHEDULE_NONE,
+    start_date=START_DATES.YESTERDAY,
     catchup=CATCHUPS.AWLAYS_FALSE,
     schedule=SCHEDULES.NONE,
     description=("Un DAG pour générer des suggestions de clustering pour les acteurs"),
