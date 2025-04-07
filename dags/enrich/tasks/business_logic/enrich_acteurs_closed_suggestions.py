@@ -39,10 +39,6 @@ def enrich_acteurs_closed_suggestions(
     ]:
         raise ValueError(f"Mauvaise cohorte: {cohort_type=}")
 
-    cohortes = df[COLS.REMPLACER_COHORTE].unique()
-    if len(cohortes) > 1:
-        raise ValueError(f"Une seule cohorte à la fois: {cohortes=}")
-
     # Suggestions
     suggestions = []
     for _, row in df.iterrows():
@@ -52,7 +48,25 @@ def enrich_acteurs_closed_suggestions(
         # NOT REPLACED
         # -----------------------------------------
         if cohort_type == COHORTS.ACTEURS_CLOSED_NOT_REPLACED:
-            raise NotImplementedError("Pas encore implémenté")
+            changes = []
+            model_params = {
+                "id": row[COLS.ACTEUR_ID],
+                "data": {
+                    "statut": ActeurStatus.INACTIF,
+                    "siret_is_closed": True,
+                    "acteur_type": row[COLS.ACTEUR_TYPE],
+                    "source": row[COLS.ACTEUR_SOURCE],
+                },
+            }
+            ChangeActeurUpdateData(**model_params).validate()
+            change = SuggestionChange(
+                order=1,
+                reason=cohort_type,
+                entity_type="acteur_displayed",
+                model_name=ChangeActeurUpdateData.name(),
+                model_params=model_params,
+            ).model_dump()
+            changes.append(change)
 
         # -----------------------------------------
         # REPLACED
@@ -61,7 +75,10 @@ def enrich_acteurs_closed_suggestions(
             COHORTS.ACTEURS_CLOSED_REP_DIFF_SIREN,
             COHORTS.ACTEURS_CLOSED_REP_SAME_SIREN,
         ]:
-            logger.info(f"{cohort_type}: suggestion pour acteur {row[COLS.ACTEUR_ID]}")
+            cohortes = df[COLS.REMPLACER_COHORTE].unique()
+            if len(cohortes) > 1:
+                raise ValueError(f"Une seule cohorte à la fois: {cohortes=}")
+            logger.info(f"{cohort_type}: suggestion acteur id={row[COLS.ACTEUR_ID]}")
 
             changes = []
 
@@ -70,6 +87,7 @@ def enrich_acteurs_closed_suggestions(
             model_params = {
                 "id": parent_id,
                 "data": {
+                    "identifiant_unique": parent_id,
                     "nom": row[COLS.REMPLACER_NOM],
                     "adresse": row[COLS.REMPLACER_ADRESSE],
                     "code_postal": row[COLS.REMPLACER_CODE_POSTAL],
@@ -96,10 +114,12 @@ def enrich_acteurs_closed_suggestions(
                 "id": row[COLS.ACTEUR_ID],
                 "data": {
                     "statut": ActeurStatus.INACTIF,
-                    "parent_id": parent_id,
-                    "parent_reason": f"""SIRET {row[COLS.ACTEUR_SIRET]}
-                    détecté le {today} comme fermé dans AE,
-                    remplacé par SIRET {row[COLS.REMPLACER_SIRET]}""",
+                    "parent": parent_id,
+                    "parent_reason": (
+                        f"SIRET {row[COLS.ACTEUR_SIRET]} "
+                        f"détecté le {today} comme fermé dans AE, "
+                        f"remplacé par SIRET {row[COLS.REMPLACER_SIRET]}"
+                    ),
                     "siret_is_closed": True,
                     "acteur_type": row[COLS.ACTEUR_TYPE],
                     "source": row[COLS.ACTEUR_SOURCE],
@@ -115,23 +135,22 @@ def enrich_acteurs_closed_suggestions(
             ).model_dump()
             changes.append(change)
 
-            # -----------------------------------------
-            # SUGGESTION: PREPARE
-            # -----------------------------------------
-            suggestions.append(
-                {
-                    # TODO: free format thanks to recursive model
-                    "contexte": {},
-                    "suggestion": {
-                        "title": cohort_type,
-                        "summary": [],
-                        "changes": changes,
-                    },
-                }
-            )
-
         else:
             raise ValueError(f"Mauvaise cohorte: {cohort_type=}")
+
+        # Generic to all cohorts
+        suggestions.append(
+            {
+                # TODO: free format thanks to recursive model
+                "contexte": {},
+                "suggestion": {
+                    "title": cohort_type,
+                    "summary": [],
+                    "changes": changes,
+                },
+            }
+        )
+
     # -----------------------------------------
     # DRY RUN: STOP HERE
     # -----------------------------------------
@@ -151,11 +170,9 @@ def enrich_acteurs_closed_suggestions(
     )
     cohort.save()
     for suggestion in suggestions:
-
-        for suggestion in suggestions:
-            Suggestion(
-                suggestion_cohorte=cohort,
-                statut=SuggestionStatut.AVALIDER,
-                contexte=suggestion["contexte"],
-                suggestion=suggestion["suggestion"],
-            ).save()
+        Suggestion(
+            suggestion_cohorte=cohort,
+            statut=SuggestionStatut.AVALIDER,
+            contexte=suggestion["contexte"],
+            suggestion=suggestion["suggestion"],
+        ).save()
