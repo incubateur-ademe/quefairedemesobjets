@@ -134,7 +134,6 @@ class TestDfAddOriginalColumns:
             }
         )
         df = df_add_original_columns(df_modify=df_clusters, df_original=df_original)
-        print(df)
         assert df.shape == (2, 4)
         assert df["identifiant_unique"].tolist() == ["1", "3"]
         assert df["cluster_id"].tolist() == ["c1", "c1"]
