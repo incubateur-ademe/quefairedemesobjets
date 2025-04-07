@@ -54,4 +54,6 @@ def enrich_read_dbt_model_task(
         python_callable=enrich_read_dbt_model_wrapper,
         op_args=[dbt_model_name, xcom_push_key],
         dag=dag,
+        # pool="dbt_model_read",
+        # pool_slots=1,
     )
