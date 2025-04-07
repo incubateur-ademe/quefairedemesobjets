@@ -1,8 +1,4 @@
-"""
-change_model to use as template for acteur changes
-
-
-"""
+"""change model to use as template for acteur changes"""
 
 from pydantic import BaseModel
 

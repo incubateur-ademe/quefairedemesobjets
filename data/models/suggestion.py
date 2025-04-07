@@ -52,6 +52,8 @@ class SuggestionCohorteStatut(models.TextChoices):
 
 class SuggestionAction(models.TextChoices):
     CRAWL_URLS = SUGGESTION_CRAWL_URLS, "🔗 URLs scannées"
+    ENRICH_ACTEURS_RGPD = "RGPD_ANONYMISATION", "🕵️ Anonymisation RGPD"
+    ENRICH_ACTEURS_CLOSED = "ENRICH_ACTEURS_CLOSED", "🚪 Acteurs fermés"
     CLUSTERING = SUGGESTION_CLUSTERING, "regroupement/déduplication des acteurs"
     SOURCE_AJOUT = (
         SUGGESTION_SOURCE_AJOUT,
@@ -172,9 +174,20 @@ class Suggestion(models.Model):
     def display_suggestion_details(self):
         template_name = "data/_partials/suggestion_details.html"
         template_context = {"suggestion": self.suggestion}
+
+        # Suggestions leveraging the PYDANTIC SuggestionChange model
         if self.suggestion_cohorte.type_action == SuggestionAction.CLUSTERING:
             template_context = self.suggestion
             template_name = "data/_partials/clustering_suggestion_details.html"
+        elif self.suggestion_cohorte.type_action == SuggestionAction.CRAWL_URLS:
+            template_name = "data/_partials/crawl_urls_suggestion_details.html"
+        elif (
+            self.suggestion_cohorte.type_action == SuggestionAction.ENRICH_ACTEURS_RGPD
+        ):
+            template_name = "data/_partials/generic_suggestion_details.html"
+            template_context = self.suggestion
+
+        # TODO: suggestions to migrate to PYDANTIC classes
         elif (
             self.suggestion_cohorte.type_action == SuggestionAction.SOURCE_SUPPRESSION
             and isinstance(self.suggestion, dict)
@@ -207,9 +220,6 @@ class Suggestion(models.Model):
             and isinstance(self.suggestion, dict)
         ):
             template_name = "data/_partials/ajout_suggestion_details.html"
-        elif self.suggestion_cohorte.type_action == SuggestionAction.CRAWL_URLS:
-            template_name = "data/_partials/crawl_urls_suggestion_details.html"
-            template_context = self.suggestion.copy()
 
         return render_to_string(template_name, template_context)
 
@@ -289,17 +299,21 @@ class Suggestion(models.Model):
         self._remove_acteur_linked_objects(acteur)
         self._create_acteur_linked_objects(acteur)
 
-    # FIXME: this acteur management will be reviewed with PYDANTIC classes which will
-    # be used to handle all specificities of suggestions
     def apply(self):
+
+        # Suggestions leveraging the PYDANTIC SuggestionChange model
         if self.suggestion_cohorte.type_action in [
             SuggestionAction.CLUSTERING,
             SuggestionAction.CRAWL_URLS,
+            SuggestionAction.ENRICH_ACTEURS_RGPD,
+            SuggestionAction.ENRICH_ACTEURS_CLOSED,
         ]:
             changes = self.suggestion["changes"]
             changes.sort(key=lambda x: x["order"])
             for change in changes:
                 SuggestionChange(**change).apply()
+
+        # FIXME: this acteur management will be reviewed with PYDANTIC classes
         elif self.suggestion_cohorte.type_action == SuggestionAction.SOURCE_AJOUT:
             self._create_acteur()
         elif (
