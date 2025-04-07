@@ -1,0 +1,70 @@
+name: "[🔴 Prod] Déploiement continu"
+
+on:
+  push:
+    tags:
+      - v*
+
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  run_tests:
+    uses: ./.github/workflows/run_tests.yml
+
+  create-release:
+    name: Create GitHub Release
+    needs: [run_tests]
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "marvinpinto/action-automatic-releases@v1.2.1"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
+
+  deploy:
+    name: Deploy on Scalingo
+    needs: [run_tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: kolok/deploy-to-scalingo@v1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known-host: ssh.osc-fr1.scalingo.com
+          app-name: quefairedemesobjets
+
+  deploy_airflow-webserver:
+    name: Deploy Airflow webserver on Clever Cloud
+    needs: [run_tests]
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: 47ng/actions-clever-cloud@v2.0.0
+        with:
+          alias: lvao-prod-airflow-webserver
+          force: true
+        env:
+          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
+
+
+  deploy_airflow-scheduler:
+    name: Deploy Airflow scheduler on Clever Cloud
+    needs: [run_tests]
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: 47ng/actions-clever-cloud@v2.0.0
+        with:
+          alias: lvao-prod-airflow-scheduler
+          force: true
+        env:
+          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
