@@ -4,7 +4,6 @@ contains people from Annuaire Entreprise (AE)
 """
 
 from airflow import DAG
-from airflow.models.baseoperator import chain
 from enrich.config import DBT, TASKS, XCOMS, EnrichActeursClosedConfig
 from enrich.tasks.airflow_logic.enrich_config_create_task import (
     enrich_config_create_task,
@@ -38,6 +37,7 @@ with DAG(
         )
     ),
 ) as dag:
+    """
     chain(
         enrich_config_create_task(dag),
         enrich_read_dbt_model_task(
@@ -53,3 +53,19 @@ with DAG(
             xcom_push_key=XCOMS.DF_CLOSED_REPLACED,
         ),
     )
+    """
+    config = enrich_config_create_task(dag)
+    closed_candidates = enrich_read_dbt_model_task(
+        dag,
+        task_id=TASKS.READ_AE_CLOSED_CANDIDATES,
+        dbt_model_name=DBT.MARTS_ENRICH_AE_CLOSED_CANDIDATES,
+        xcom_push_key=XCOMS.DF_CLOSED_CANDIDATES,
+    )
+    closed_replaced = enrich_read_dbt_model_task(
+        dag,
+        task_id=TASKS.READ_AE_CLOSED_REPLACED,
+        dbt_model_name=DBT.MARTS_ENRICH_AE_CLOSED_REPLACED,
+        xcom_push_key=XCOMS.DF_CLOSED_REPLACED,
+    )
+    config >> closed_candidates
+    config >> closed_replaced
