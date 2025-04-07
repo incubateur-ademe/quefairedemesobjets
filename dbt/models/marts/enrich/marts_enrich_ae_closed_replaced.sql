@@ -12,9 +12,9 @@ WITH potential_replacements AS (
 		candidates.siret AS acteur_siret,
 		replacements.siret AS remplacer_siret,
 		CASE
-			WHEN LEFT(candidates.siret,9) = LEFT(replacements.siret,9) THEN 1
-			ELSE 0
-		END AS remplacer_meme_siren,
+			WHEN LEFT(candidates.siret,9) = LEFT(replacements.siret,9) THEN 'meme_siret'
+			ELSE 'autre_siret'
+		END AS remplacer_cohorte,
 		candidates.acteur_nom,
 		replacements.nom AS remplacer_nom,
 		columns_words_in_common_count(
@@ -49,3 +49,5 @@ WITH potential_replacements AS (
 )
 SELECT * FROM potential_replacements
 WHERE replacement_priority=1
+/* We don't want to propose replacements with unavailable names */
+AND remplacer_nom != {{ value_unavailable() }}
