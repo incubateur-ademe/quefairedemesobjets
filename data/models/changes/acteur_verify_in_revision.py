@@ -1,16 +1,4 @@
-"""
-change_model to make no change to an acteur
-
-Reason for having such a model is that we can
-follow the same pattern to be consistent across the board.
-
-For instance in the clustering pipeline, we might decide
-that some acteurs do not need to be changed as they already point
-to the chosen parent, yes we want to reflect all decisions made
-in the cluster summary, this model allows us to do just that
-without havint to create messy conditional code in pipelines
-
-"""
+"""change model to verify an acteur's presence in revision"""
 
 from data.models.changes.acteur_abstract import ChangeActeurAbstract
 from qfdmo.models import RevisionActeur
