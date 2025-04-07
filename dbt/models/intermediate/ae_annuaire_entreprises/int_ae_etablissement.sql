@@ -53,17 +53,13 @@ SELECT
       etab.type_voie,
       etab.libelle_voie
     ) AS adresse,
-<<<<<<< HEAD
     etab.numero_voie AS adresse_numero,
-=======
->>>>>>> 83246d66 (v1 qui fonctionne)
     etab.complement_adresse AS adresse_complement,
     etab.code_postal,
     etab.libelle_commune AS ville
 
 FROM {{ ref('base_ae_etablissement') }} AS etab
 /* Joining with unite_legale to bring some essential
-<<<<<<< HEAD
 data from parent unite into each etablissement (saves
 us from making expensive JOINS in downstream models) */
 JOIN {{ ref('base_ae_unite_legale') }} AS unite
@@ -72,9 +68,3 @@ ON unite.siren = LEFT(etab.siret,9)
 responsible for business logic. Keeping allows investigating
 AND nom != {{ value_unavailable() }}
 */
-=======
-data from parent unite into each etablissement to save
-us from making expensive JOINS in downstream models */
-JOIN {{ ref('base_ae_unite_legale') }} AS unite
-ON unite.siren = LEFT(etab.siret,9)
->>>>>>> 83246d66 (v1 qui fonctionne)
