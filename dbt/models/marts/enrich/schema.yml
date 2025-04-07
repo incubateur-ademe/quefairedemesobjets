@@ -43,3 +43,88 @@ models:
         # If we had a match then we must have at least one director's name
         data_tests:
           - not_null
+
+  - name: marts_enrich_ae_closed_replaced
+    description: Etablissements de l'Annuaire Entreprises (AE) qui ont été
+      | fermés et remplacés par un autre établissement
+    columns:
+      - name: acteur_id
+        description: Identifiant unique de l'acteur
+        data_tests:
+          - not_null
+      - name: acteur_statut
+        description: Statut de l'acteur dans QFDMO
+      - name: acteur_siret
+        description: SIRET de l'acteur fermé
+        data_tests:
+          - not_null
+      - name: remplacer_siret
+        description: SIRET de l'établissement qui remplace l'acteur fermé
+        data_tests:
+          - not_null
+      - name: remplacer_cohorte
+        description: "Si le SIRET de remplacement appartient à la même entreprise (meme_siret) ou non (autre_siret)"
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['meme_siret', 'autre_siret']
+      - name: acteur_nom
+        description: Nom de l'acteur fermé
+      - name: remplacer_nom
+        description: Nom de l'établissement qui remplace l'acteur fermé
+      - name: noms_nombre_mots_commun
+        description: Nombre de mots en commun entre le nom de l'acteur et celui du remplaçant
+        data_type: integer
+      - name: acteur_commentaires
+        description: Commentaires de l'acteur pour debug
+      - name: naf
+        description: Code NAF de l'établissement remplaçant
+      - name: ville
+        description: Ville de l'établissement remplaçant
+      - name: code_postal
+        description: Code postal de l'établissement remplaçant
+      - name: adresse
+        description: Adresse de l'établissement remplaçant
+      - name: replacement_priority
+        description: "Priorité du remplacement (1 = meilleur match)"
+        data_type: integer
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [1]
+
+  - name: marts_enrich_ae_closed_candidates
+    description: Etablissements fermés de l'Annuaire Entreprises (AE) qui pourraient être remplacés
+    columns:
+      - name: siret
+        description: SIRET de l'établissement fermé
+        data_tests:
+          - not_null
+      - name: unite_est_actif
+        description: Si l'unité légale est toujours active
+        data_type: boolean
+      - name: etab_est_actif
+        description: Si l'établissement est toujours actif (toujours FALSE ici)
+        data_type: boolean
+        data_tests:
+          - accepted_values:
+              values: [false]
+      - name: etab_code_postal
+        description: Code postal de l'établissement fermé
+      - name: etab_adresse
+        description: Adresse de l'établissement fermé
+      - name: etab_naf
+        description: Code NAF de l'établissement fermé
+      - name: acteur_id
+        description: Identifiant unique de l'acteur dans QFDMO
+        data_tests:
+          - not_null
+      - name: acteur_statut
+        description: Statut de l'acteur dans QFDMO
+      - name: acteur_nom
+        description: Nom de l'acteur dans QFDMO
+      - name: acteur_nom_normalise
+        description: Nom de l'acteur normalisé pour faciliter les comparaisons
+      - name: acteur_commentaires
+        description: Commentaires de l'acteur pour debug
+
