@@ -27,7 +27,8 @@ WITH acteurs_with_siret AS (
         udf_normalize_string_alpha_for_match(nom) AS acteur_nom_normalise,
         identifiant_unique AS acteur_id,
         commentaires AS acteur_commentaires,
-        statut AS acteur_statut
+        statut AS acteur_statut,
+		acteur_type AS acteur_type
 	FROM {{ ref('marts_carte_acteur') }}
 	WHERE siret IS NOT NULL AND siret != '' AND LENGTH(siret) = 14
 ),
@@ -46,7 +47,8 @@ SELECT
 	acteurs.acteur_statut,
 	acteurs.acteur_nom,
 	acteurs.acteur_nom_normalise,
-	acteurs.acteur_commentaires
+	acteurs.acteur_commentaires,
+	acteurs.acteur_type
 FROM acteurs_with_siret AS acteurs
 JOIN {{ ref('int_ae_etablissement') }} AS etab ON acteurs.siret = etab.siret
 WHERE etab.est_actif = FALSE

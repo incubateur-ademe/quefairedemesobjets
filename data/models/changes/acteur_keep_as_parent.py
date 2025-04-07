@@ -1,3 +1,5 @@
+"""change model to keep an acteur as parent but potentially update its data"""
+
 from dags.cluster.tasks.business_logic.misc.data_serialize_reconstruct import (
     data_reconstruct,
 )
