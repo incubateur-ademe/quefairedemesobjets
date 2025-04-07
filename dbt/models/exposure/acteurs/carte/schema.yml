@@ -9,6 +9,7 @@ models:
         data_tests:
           - unique
           - not_null
+          - not_empty_string
       - name: uuid
         description: "The uuid for this table"
         data_tests:
@@ -18,6 +19,7 @@ models:
         description: "Le nom de l'acteur"
         data_tests:
           - not_null
+          - not_empty_string
       - name: description
         description: "La description de l'acteur"
       - name: acteur_type_id
