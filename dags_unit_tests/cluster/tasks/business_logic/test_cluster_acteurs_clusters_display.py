@@ -1,8 +1,7 @@
 import pandas as pd
 import pytest
-from cluster.config.constants import COL_INDEX_SRC
-from cluster.tasks.business_logic.cluster_acteurs_clusters_display import (
-    cluster_acteurs_clusters_display,
+from cluster.tasks.business_logic.cluster_acteurs_clusters_prepare import (
+    cluster_acteurs_clusters_prepare,
 )
 
 from unit_tests.qfdmo.acteur_factory import (
@@ -33,13 +32,12 @@ class TestClusterActeursClustersDisplay:
                 "source_id": [None, s1.id],
                 "acteur_type_id": [at1.id, at1.id],
                 "ville": ["Paris", "Laval"],
-                COL_INDEX_SRC: [0, 1],
                 "nombre_enfants": [1, 0],
                 "nom": ["p1", "orphan1"],
             }
         )
 
-        df_clusters = cluster_acteurs_clusters_display(
+        df_clusters = cluster_acteurs_clusters_prepare(
             df=df,
             cluster_fields_exact=["ville"],
             cluster_fields_fuzzy=[],
@@ -71,13 +69,12 @@ class TestClusterActeursClustersDisplay:
                 "source_id": [None, s1.id, s2.id],
                 "acteur_type_id": [at1.id, at1.id, at1.id],
                 "ville": ["Paris", "Laval", "Laval"],
-                COL_INDEX_SRC: [0, 1, 2],
                 "nombre_enfants": [1, 0, 0],
                 "nom": ["p1", "orphan1", "orphan2"],
             }
         )
 
-        df_clusters = cluster_acteurs_clusters_display(
+        df_clusters = cluster_acteurs_clusters_prepare(
             df=df,
             cluster_fields_exact=["ville"],
             cluster_fields_fuzzy=[],
