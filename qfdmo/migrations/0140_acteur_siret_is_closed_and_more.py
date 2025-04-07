@@ -15,6 +15,7 @@ class Migration(migrations.Migration):
             name="siret_is_closed",
             field=models.BooleanField(
                 blank=True,
+                null=True,
                 default=None,
                 help_text="Indique si le SIRET est fermé ou non dans l'Annuaire Entreprises",
                 verbose_name="SIRET fermé",
@@ -25,6 +26,7 @@ class Migration(migrations.Migration):
             name="siret_is_closed",
             field=models.BooleanField(
                 blank=True,
+                null=True,
                 default=None,
                 help_text="Indique si le SIRET est fermé ou non dans l'Annuaire Entreprises",
                 verbose_name="SIRET fermé",
@@ -35,6 +37,7 @@ class Migration(migrations.Migration):
             name="siret_is_closed",
             field=models.BooleanField(
                 blank=True,
+                null=True,
                 default=None,
                 help_text="Indique si le SIRET est fermé ou non dans l'Annuaire Entreprises",
                 verbose_name="SIRET fermé",
@@ -56,6 +59,7 @@ class Migration(migrations.Migration):
             name="siret_is_closed",
             field=models.BooleanField(
                 blank=True,
+                null=True,
                 default=None,
                 help_text="Indique si le SIRET est fermé ou non dans l'Annuaire Entreprises",
                 verbose_name="SIRET fermé",

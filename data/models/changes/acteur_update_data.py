@@ -1,6 +1,8 @@
-"""Generic change model which should allow updating anything
-about an acteur, taking care of handling Acteur vs. RevisionActeur
-and data reconstruction."""
+"""Generic change model to update an acteur's data. If your use-case
+is very specific (e.g. RGPD), use a dedicated model fore more clarity/robustness,
+else you can use this model."""
+
+from rich import print
 
 from data.models.changes.acteur_abstract import ChangeActeurAbstract
 from data.models.changes.utils import data_reconstruct
@@ -13,6 +15,7 @@ class ChangeActeurUpdateData(ChangeActeurAbstract):
         return "acteur_update_data"
 
     def validate(self) -> Acteur | RevisionActeur:
+        print(f"ChangeActeurUpdateData.validate: {self.id=} {self.data=}")
         if not self.data:
             raise ValueError("No data provided")
         # The parent should already exist in revision or base

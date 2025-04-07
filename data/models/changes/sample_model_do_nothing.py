@@ -1,5 +1,4 @@
-"""A sample model which does nothing BUT
-helps us create test cases for the
+"""A sample model which does nothing BUT helps us create test cases for the
 overall SuggestionChange model"""
 
 from pydantic import BaseModel

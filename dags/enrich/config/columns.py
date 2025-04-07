@@ -15,6 +15,8 @@ class COLS:
 
     # QFDMO
     ACTEUR_ID: str = "acteur_id"
+    ACTEUR_TYPE: str = "acteur_type"
+    ACTEUR_SOURCE: str = "acteur_source"
     ACTEUR_SIRET: str = "acteur_siret"
     ACTEUR_NOM: str = "acteur_nom"
     ACTEUR_NOMS_ORIGINE: str = "acteur_noms_origine"

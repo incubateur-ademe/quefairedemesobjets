@@ -87,7 +87,7 @@ def enrich_ae_rgpd_suggest(
         cohort = SuggestionCohorte(
             identifiant_action=identifiant_action,
             identifiant_execution=identifiant_execution,
-            type_action=SuggestionAction.RGPD_ANONYMIZE,
+            type_action=SuggestionAction.ENRICH_ACTEURS_RGPD,
             metadata={"🔢 Nombre de suggestions": len(suggestions)},
         )
         cohort.save()

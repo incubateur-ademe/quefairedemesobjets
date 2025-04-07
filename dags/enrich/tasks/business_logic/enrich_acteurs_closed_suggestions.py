@@ -14,7 +14,6 @@ def enrich_acteurs_closed_suggestions(
     df: pd.DataFrame,
     cohort_type: str,
     identifiant_action: str,
-    identifiant_execution: str,
     dry_run: bool = True,
 ) -> None:
     from data.models import (
@@ -29,6 +28,10 @@ def enrich_acteurs_closed_suggestions(
 
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
+    # Validation
+    if df is None or df.empty:
+        raise ValueError("df vide: on devrait pas être ici")
+
     if cohort_type not in [
         COHORTS.ACTEURS_CLOSED_NOT_REPLACED,
         COHORTS.ACTEURS_CLOSED_REP_DIFF_SIREN,
@@ -36,10 +39,14 @@ def enrich_acteurs_closed_suggestions(
     ]:
         raise ValueError(f"Mauvaise cohorte: {cohort_type=}")
 
-    suggestions = []
+    cohortes = df[COLS.REMPLACER_COHORTE].unique()
+    if len(cohortes) > 1:
+        raise ValueError(f"Une seule cohorte à la fois: {cohortes=}")
 
+    # Suggestions
+    suggestions = []
     for _, row in df.iterrows():
-        row = row._asdict()
+        row = dict(row)
 
         # -----------------------------------------
         # NOT REPLACED
@@ -50,18 +57,16 @@ def enrich_acteurs_closed_suggestions(
         # -----------------------------------------
         # REPLACED
         # -----------------------------------------
-        elif cohort_type not in [
+        elif cohort_type in [
             COHORTS.ACTEURS_CLOSED_REP_DIFF_SIREN,
             COHORTS.ACTEURS_CLOSED_REP_SAME_SIREN,
         ]:
-            cohorts = row[COLS.REMPLACER_COHORTE].unique()
-            if len(cohorts) > 1:
-                raise ValueError(f"Une seule cohorte à la fois: {cohorts=}")
+            logger.info(f"{cohort_type}: suggestion pour acteur {row[COLS.ACTEUR_ID]}")
 
             changes = []
 
             # Parent
-            parent_id = parent_id_generate([row[COLS.REMPLACER_SIRET]])
+            parent_id = parent_id_generate([str(row[COLS.REMPLACER_SIRET])])
             model_params = {
                 "id": parent_id,
                 "data": {
@@ -71,7 +76,9 @@ def enrich_acteurs_closed_suggestions(
                     "ville": row[COLS.REMPLACER_VILLE],
                     "siren": row[COLS.REMPLACER_SIRET][:9],
                     "siret": row[COLS.REMPLACER_SIRET],
-                    "naf": row[COLS.REMPLACER_NAF],
+                    "naf_principal": row[COLS.REMPLACER_NAF],
+                    "acteur_type": row[COLS.ACTEUR_TYPE],
+                    "source": None,
                 },
             }
             ChangeActeurCreateAsParent(**model_params).validate()
@@ -86,13 +93,16 @@ def enrich_acteurs_closed_suggestions(
 
             # Child
             model_params = {
-                "id": row.acteur_id,
+                "id": row[COLS.ACTEUR_ID],
                 "data": {
                     "statut": ActeurStatus.INACTIF,
                     "parent_id": parent_id,
-                    "parent_reason": f"""SIRET {row.acteur_siret} détecté le {today}
-                    comme fermé dans AE, remplacé par SIRET {row.remplacer_siret}""",
+                    "parent_reason": f"""SIRET {row[COLS.ACTEUR_SIRET]}
+                    détecté le {today} comme fermé dans AE,
+                    remplacé par SIRET {row[COLS.REMPLACER_SIRET]}""",
                     "siret_is_closed": True,
+                    "acteur_type": row[COLS.ACTEUR_TYPE],
+                    "source": row[COLS.ACTEUR_SOURCE],
                 },
             }
             ChangeActeurUpdateData(**model_params).validate()
@@ -120,6 +130,8 @@ def enrich_acteurs_closed_suggestions(
                 }
             )
 
+        else:
+            raise ValueError(f"Mauvaise cohorte: {cohort_type=}")
     # -----------------------------------------
     # DRY RUN: STOP HERE
     # -----------------------------------------
@@ -132,9 +144,9 @@ def enrich_acteurs_closed_suggestions(
     # -----------------------------------------
     cohort = SuggestionCohorte(
         identifiant_action=identifiant_action,
-        identifiant_execution=f"{cohort_type} {identifiant_execution}",
+        identifiant_execution=f"{cohort_type}",
         statut=SuggestionStatut.AVALIDER,
-        type_action=SuggestionAction.ACTEURS_CLOSED,
+        type_action=SuggestionAction.ENRICH_ACTEURS_CLOSED,
         metadata={"🔢 Nombre de suggestions": len(suggestions)},
     )
     cohort.save()
