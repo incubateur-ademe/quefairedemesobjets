@@ -10,11 +10,13 @@ class TestCloneConfig:
             dry_run=False,
             table_kind="my_table",
             data_endpoint="https://example.org/data.zip",  # type: ignore
+            clone_method="download_to_disk_first",
             file_downloaded="data.zip",
             file_unpacked="data.csv",
             delimiter=",",
             run_timestamp="20220305120000",
-            dbt_command="not tested for now",
+            dbt_build_skip=False,
+            dbt_build_command="dbt build --select tag:nothing_to_do",
         )
 
     def test_table_name(self, config):

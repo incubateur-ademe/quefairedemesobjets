@@ -36,12 +36,12 @@ def clone_table_create_wrapper(ti) -> None:
 
     clone_table_create(
         data_endpoint=config.data_endpoint,
+        clone_method=config.clone_method,
         file_downloaded=config.file_downloaded,
         file_unpacked=config.file_unpacked,
         delimiter=config.delimiter,
         table_name=config.table_name,
         table_schema_file_path=config.table_schema_file_path,
-        run_timestamp=config.run_timestamp,
         dry_run=config.dry_run,
     )
 

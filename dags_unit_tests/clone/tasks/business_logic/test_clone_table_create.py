@@ -1,8 +1,10 @@
 import pytest
 from clone.config import DIR_SQL_CREATION
 from clone.tasks.business_logic.clone_table_create import (
-    csv_url_to_commands,
+    commands_download_to_disk_first,
+    commands_stream_directly,
 )
+from pydantic import AnyUrl
 
 
 class TestSqlTablesCreation:
@@ -17,32 +19,51 @@ class TestSqlTablesCreation:
         assert "CREATE TABLE my_table" in sql
 
 
-class DISABLEDTestCsvUrlToCommands:
+class TestCommands:
 
-    def test_zip(self):
-        commands = csv_url_to_commands(
+    def test_stream_zip(self):
+        # Stream a file directly to DB
+        cmds_create, cmd_cleanup = commands_stream_directly(
+            data_endpoint=AnyUrl(url="https://example.com/StockUniteLegale_utf8.zip"),
+            delimiter=",",
+            table_name="my_table",
+        )
+        assert len(cmds_create) == 1
+        assert all(x in cmds_create[0]["cmd"] for x in ["curl", "zcat", "psql"])
+        assert "rm -rf" not in cmd_cleanup["cmd"]
+        assert "echo" in cmd_cleanup["cmd"]
+
+    def test_download_zip(self):
+        cmds_create, cmd_cleanup = commands_download_to_disk_first(
             # Testing a case similar to Annuaire Entreprises where
             # the URL filename doesn't match the extracted filename
             # (StockUniteLegale_utf8.zip -> StockUniteLegale_utf8.csv)
-            data_endpoint="https://example.com/StockUniteLegale_utf8.zip",
+            data_endpoint=AnyUrl(url="https://example.com/StockUniteLegale_utf8.zip"),
             file_downloaded="StockUniteLegale_utf8.zip",
             file_unpacked="StockUniteLegale_utf8.csv",
             delimiter=",",
             table_name="my_table",
         )
-        assert len(commands) == 3
-        # only last command has some env
-        assert commands[0]["env"] == {}
-        assert commands[1]["env"] == {}
-        assert commands[2]["env"]["PGPASSWORD"]
+        assert len(cmds_create) == 5
+        assert "mkdir" in cmds_create[0]["cmd"]
+        assert "curl" in cmds_create[1]["cmd"]
+        assert "unzip" in cmds_create[2]["cmd"]
+        assert "wc" in cmds_create[3]["cmd"]
+        assert "psql" in cmds_create[4]["cmd"]
+        assert "rm -rf" in cmd_cleanup["cmd"]
 
-    def test_gz(self):
-        commands = csv_url_to_commands(
-            # Testing case for BAN: adresses-france.csv.gz
-            data_endpoint="https://example.com/adresses-france.csv.gz",
+    def test_download_gz(self):
+        cmds_create, cmd_cleanup = commands_download_to_disk_first(
+            data_endpoint=AnyUrl(url="https://example.com/adresses-france.csv.gz"),
             file_downloaded="adresses-france.csv.gz",
             file_unpacked="adresses-france.csv",
             delimiter=";",
             table_name="my_table",
         )
-        assert len(commands) == 3
+        assert len(cmds_create) == 5
+        assert "mkdir" in cmds_create[0]["cmd"]
+        assert "curl" in cmds_create[1]["cmd"]
+        assert "gunzip" in cmds_create[2]["cmd"]
+        assert "wc" in cmds_create[3]["cmd"]
+        assert "psql" in cmds_create[4]["cmd"]
+        assert "rm -rf" in cmd_cleanup["cmd"]

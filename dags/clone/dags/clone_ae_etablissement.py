@@ -42,6 +42,15 @@ with DAG(
             type="string",
             description_md="📥 URL pour télécharger les données",
         ),
+        "clone_method": Param(
+            "download_to_disk_first",
+            type="string",
+            description_md=r"""📥 **Méthode de création** de la table:
+            - `download_to_disk_first`: télécharge/unpack sur disque avant import DB
+            - `stream_directly`: télécharge/unpack/charge en DB à la volée
+            """,
+            enum=["download_to_disk_first", "stream_directly"],
+        ),
         "file_downloaded": Param(
             "StockEtablissement_utf8.zip",
             type="string",
@@ -57,7 +66,12 @@ with DAG(
             type="string",
             description_md="🔤 Délimiteur utilisé dans le fichier",
         ),
-        "dbt_command": Param(
+        "dbt_build_skip": Param(
+            False,
+            type="boolean",
+            description_md="🚫 Si coché, le build DBT ne sera pas exécuté",
+        ),
+        "dbt_build_command": Param(
             "dbt build --select tag:ae,tag:etablissement",
             type="string",
             description_md="🔨 Commande DBT à exécuter",
