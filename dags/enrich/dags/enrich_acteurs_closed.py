@@ -3,8 +3,6 @@ DAG to anonymize QFDMO acteur which names
 contains people from Annuaire Entreprise (AE)
 """
 
-from datetime import datetime
-
 from airflow import DAG
 from airflow.models.baseoperator import chain
 from enrich.config import DBT, TASKS, XCOMS, EnrichActeursClosedConfig
@@ -14,7 +12,7 @@ from enrich.tasks.airflow_logic.enrich_config_create_task import (
 from enrich.tasks.airflow_logic.enrich_read_dbt_model_task import (
     enrich_read_dbt_model_task,
 )
-from shared.config.models import config_to_airflow_params
+from shared.config import CATCHUPS, SCHEDULES, START_DATES, config_to_airflow_params
 
 with DAG(
     dag_id="enrich_acteurs_closed",
@@ -22,8 +20,6 @@ with DAG(
     default_args={
         "owner": "airflow",
         "depends_on_past": False,
-        "start_date": datetime(2025, 3, 5),
-        "catchup": False,
         "email_on_failure": False,
         "email_on_retry": False,
         "retries": 0,
@@ -33,8 +29,9 @@ with DAG(
         "dans l'Annuaire Entreprises (AE)"
     ),
     tags=["annuaire", "entreprises", "ae", "siren", "siret", "acteurs", "fermés"],
-    schedule=None,
-    catchup=False,
+    schedule=SCHEDULES.NONE,
+    catchup=CATCHUPS.AWLAYS_FALSE,
+    start_date=START_DATES.FOR_SCHEDULE_NONE,
     params=config_to_airflow_params(
         EnrichActeursClosedConfig(
             filter_equals__acteur_statut="ACTIF",
