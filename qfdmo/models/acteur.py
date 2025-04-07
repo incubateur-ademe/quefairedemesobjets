@@ -359,6 +359,7 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
     # AE's DB at runtime (which has 40M rows), also helping with Django admin info
     siret_is_closed = models.BooleanField(
         default=None,  # by default we can't assume a SIRET is opened
+        null=True,
         blank=True,
         verbose_name="SIRET fermé",
         help_text="Indique si le SIRET est fermé ou non dans l'Annuaire Entreprises",

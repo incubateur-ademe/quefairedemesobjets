@@ -1,8 +1,6 @@
-"""
-change_model to create a parent acteur
+"""change model to create a parent acteur"""
 
-
-"""
+from rich import print
 
 from data.models.changes.acteur_abstract import ChangeActeurAbstract
 from data.models.changes.utils import data_reconstruct
@@ -19,6 +17,7 @@ class ChangeActeurCreateAsParent(ChangeActeurAbstract):
 
     def validate(self):
         """The parent shouldn't already exist"""
+        print(f"ChangeActeurCreateAsParent.validate: {self.id=} {self.data=}")
         rev = RevisionActeur.objects.filter(identifiant_unique=self.id)
         if rev.exists():
             raise ValueError(f"Parent to create '{self.id}' already exists")
