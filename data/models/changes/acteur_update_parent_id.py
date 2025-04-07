@@ -1,8 +1,4 @@
-"""
-change_model to update an acteur's parent
-
-
-"""
+"""change model to update an acteur's parent"""
 
 from data.models.changes.acteur_abstract import ChangeActeurAbstract
 from qfdmo.models import Acteur, RevisionActeur
