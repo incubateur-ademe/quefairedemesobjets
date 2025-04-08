@@ -1,5 +1,4 @@
-from django.contrib import messages
-from django.contrib.gis import admin
+from django.contrib import admin, messages
 from django.utils.html import format_html
 
 from core.admin import NotEditableMixin
@@ -99,6 +98,11 @@ def mark_as_toproceed(self, request, queryset):
 
 
 class SuggestionAdmin(admin.ModelAdmin):
+
+    class SuggestionCohorteFilter(admin.RelatedFieldListFilter):
+        def field_choices(self, field, request, model_admin):
+            return field.get_choices(include_blank=False, ordering=("-cree_le",))
+
     search_fields = ["contexte", "suggestion"]
     list_display = [
         "id",
@@ -108,7 +112,10 @@ class SuggestionAdmin(admin.ModelAdmin):
         "changements_suggeres",
     ]
     readonly_fields = ["cree_le", "modifie_le"]
-    list_filter = ["suggestion_cohorte", "statut"]
+    list_filter = [
+        ("suggestion_cohorte", SuggestionCohorteFilter),
+        ("statut", admin.ChoicesFieldListFilter),
+    ]
     actions = [mark_as_rejected, mark_as_toproceed]
 
     def get_queryset(self, request):
@@ -117,9 +124,7 @@ class SuggestionAdmin(admin.ModelAdmin):
 
     def cohorte(self, obj):
         coh = obj.suggestion_cohorte
-        return format_html(
-            "{}<br/>{}", coh.identifiant_action, coh.identifiant_execution
-        )
+        return format_html(str(coh).replace(" -- ", "<br/>"))
 
     def acteur_link_html(self, id):
         return format_html(
