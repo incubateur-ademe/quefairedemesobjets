@@ -1,5 +1,4 @@
-from django.contrib import messages
-from django.contrib.gis import admin
+from django.contrib import admin, messages
 from django.utils.html import format_html
 
 from core.admin import NotEditableMixin
@@ -108,7 +107,10 @@ class SuggestionAdmin(admin.ModelAdmin):
         "changements_suggeres",
     ]
     readonly_fields = ["cree_le", "modifie_le"]
-    list_filter = ["suggestion_cohorte", "statut"]
+    list_filter = [
+        ("suggestion_cohorte", admin.RelatedFieldListFilter),
+        ("statut", admin.ChoicesFieldListFilter),
+    ]
     actions = [mark_as_rejected, mark_as_toproceed]
 
     def get_queryset(self, request):
