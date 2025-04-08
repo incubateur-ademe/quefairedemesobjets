@@ -1,5 +1,5 @@
-from dags.utils.data_serialize_reconstruct import data_reconstruct
 from data.models.changes.acteur_abstract import ChangeActeurAbstract
+from data.models.changes.utils import data_reconstruct
 from qfdmo.models import RevisionActeur
 
 

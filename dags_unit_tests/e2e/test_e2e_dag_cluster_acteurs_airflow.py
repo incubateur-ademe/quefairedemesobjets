@@ -6,7 +6,7 @@ from airflow.utils.state import State
 from django.contrib.gis.geos import Point
 from rich import print
 
-from dags.cluster.config import TASKS
+from dags.cluster.config.tasks import TASKS
 from dags.shared.config import START_DATES
 from dags_unit_tests.cluster.helpers.configs import CONF_BASE_DICT
 from dags_unit_tests.e2e.e2e_utils import airflow_init, ti_get

@@ -1,9 +1,8 @@
 import pandas as pd
 from cluster.config.constants import COL_PARENT_DATA_NEW
 from utils import logging_utils as log
+from utils.data_serialize_reconstruct import data_serialize
 from utils.django import django_setup_full
-
-from dags.utils.data_serialize_reconstruct import data_serialize
 
 django_setup_full()
 

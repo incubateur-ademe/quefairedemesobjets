@@ -2,8 +2,7 @@
 
 from cluster.config.constants import FIELDS_PROTECTED
 from pydantic import BaseModel, Field, field_validator, model_validator
-
-from dags.utils.airflow_params import airflow_params_dropdown_selected_to_ids
+from utils.airflow_params import airflow_params_dropdown_selected_to_ids
 
 
 class ClusterConfig(BaseModel):

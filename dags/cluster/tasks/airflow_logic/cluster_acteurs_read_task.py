@@ -3,7 +3,9 @@ import logging
 from airflow import DAG
 from airflow.exceptions import AirflowSkipException
 from airflow.operators.python import PythonOperator
-from cluster.config import TASKS, XCOMS, ClusterConfig, xcom_pull
+from cluster.config.model import ClusterConfig
+from cluster.config.tasks import TASKS
+from cluster.config.xcoms import XCOMS, xcom_pull
 from cluster.tasks.business_logic.cluster_acteurs_read.for_clustering import (
     cluster_acteurs_read_for_clustering,
 )

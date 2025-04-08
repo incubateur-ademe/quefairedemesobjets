@@ -3,8 +3,9 @@ from datetime import datetime
 import pytest
 from django.contrib.gis.geos import Point
 from rich import print
-from utils.data_serialize_reconstruct import data_reconstruct, data_serialize
+from utils.data_serialize_reconstruct import data_serialize
 
+from data.models.changes.utils import data_reconstruct
 from qfdmo.models.acteur import RevisionActeur
 from unit_tests.qfdmo.acteur_factory import (
     ActeurTypeFactory,

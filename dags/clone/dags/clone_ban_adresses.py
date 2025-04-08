@@ -21,7 +21,7 @@ with DAG(
     },
     schedule=SCHEDULES.NONE,
     catchup=CATCHUPS.AWLAYS_FALSE,
-    start_date=START_DATES.FOR_SCHEDULE_NONE,
+    start_date=START_DATES.YESTERDAY,
     description=(
         "Clone la table 'adresses' de la Base Adresse Nationale (BAN) dans notre DB"
     ),

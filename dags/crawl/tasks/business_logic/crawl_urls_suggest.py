@@ -111,7 +111,7 @@ def crawl_urls_suggestions_to_db(
     logger.info(f"{identifiant_action=}")
     logger.info(f"{identifiant_execution=}")
 
-    from data.models import (
+    from data.models.suggestion import (
         Suggestion,
         SuggestionAction,
         SuggestionCohorte,

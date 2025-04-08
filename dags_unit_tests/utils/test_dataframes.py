@@ -1,8 +1,7 @@
 import numpy as np
 import pandas as pd
 import pytest
-
-from dags.utils.dataframes import (
+from utils.dataframes import (
     df_add_original_columns,
     df_col_assert_get_unique,
     df_discard_if_col_vals_frequent,

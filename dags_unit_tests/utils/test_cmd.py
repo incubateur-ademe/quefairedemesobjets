@@ -1,6 +1,5 @@
 import pytest
-
-from dags.utils.cmd import cmd_run
+from utils.cmd import cmd_run
 
 
 class TestCmdRun:

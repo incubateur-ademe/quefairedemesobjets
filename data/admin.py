@@ -2,8 +2,7 @@ from django.contrib import admin, messages
 from django.utils.html import format_html
 
 from core.admin import NotEditableMixin
-from data.models import Suggestion, SuggestionCohorte
-from data.models.suggestion import SuggestionStatut
+from data.models.suggestion import Suggestion, SuggestionCohorte, SuggestionStatut
 
 NB_SUGGESTIONS_DISPLAYED_WHEN_DELETING = 100
 

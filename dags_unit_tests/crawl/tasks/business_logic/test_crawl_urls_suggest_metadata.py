@@ -1,10 +1,10 @@
 import pandas as pd
 import pytest
+from utils import logging_utils as log
 
 from dags.crawl.config.cohorts import COHORTS
 from dags.crawl.config.columns import COLS
 from dags.crawl.tasks.business_logic.crawl_urls_suggest import suggestions_metadata
-from dags.utils import logging_utils as log
 
 
 class TestCrawlUrlsSuggestionsMetadata:
