@@ -122,7 +122,7 @@ class SuggestionCohorte(TimestampedModel):
         return execution_datetime
 
     def __str__(self) -> str:
-        return f"""{self.identifiant_action} -- {self.execution_datetime}"""
+        return f"""{self.id} - {self.identifiant_action} -- {self.execution_datetime}"""
 
 
 class Suggestion(models.Model):

@@ -277,7 +277,7 @@ if keys_missing_in_conf:
 
 with DAG(
     dag_id=DAG_ID,
-    dag_display_name="Cluster - Acteurs - Suggestions",
+    dag_display_name="Cluster - Suggestions",
     default_args={
         "owner": "airflow",
         "depends_on_past": False,

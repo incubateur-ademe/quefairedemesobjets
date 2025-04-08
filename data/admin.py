@@ -98,6 +98,11 @@ def mark_as_toproceed(self, request, queryset):
 
 
 class SuggestionAdmin(admin.ModelAdmin):
+
+    class SuggestionCohorteFilter(admin.RelatedFieldListFilter):
+        def field_choices(self, field, request, model_admin):
+            return field.get_choices(include_blank=False, ordering=("-cree_le",))
+
     search_fields = ["contexte", "suggestion"]
     list_display = [
         "id",
@@ -108,7 +113,7 @@ class SuggestionAdmin(admin.ModelAdmin):
     ]
     readonly_fields = ["cree_le", "modifie_le"]
     list_filter = [
-        ("suggestion_cohorte", admin.RelatedFieldListFilter),
+        ("suggestion_cohorte", SuggestionCohorteFilter),
         ("statut", admin.ChoicesFieldListFilter),
     ]
     actions = [mark_as_rejected, mark_as_toproceed]
