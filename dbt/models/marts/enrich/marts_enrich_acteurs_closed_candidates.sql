@@ -65,6 +65,7 @@ SELECT
 FROM acteurs_with_siret AS acteurs
 JOIN {{ ref('int_ae_etablissement') }} AS etab ON acteurs.acteur_siret = etab.siret
 WHERE etab.est_actif IS FALSE
+AND etab.numero_voie
 )
 
 SELECT * FROM etab_closed_candidates
