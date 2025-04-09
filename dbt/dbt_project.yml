@@ -7,6 +7,9 @@ version: "1.0.0"
 # This setting configures which "profile" dbt uses for this project.
 profile: "default"
 
+flags:
+  send_anonymous_usage_stats: false
+
 # These configurations specify where dbt should look for different types of files.
 # The `model-paths` config, for example, states that models in this project can be
 # found in the "models/" directory. You probably won't need to change these!
@@ -22,8 +25,9 @@ on-run-start:
   - "{{ create_udf_uuid_to_int() }}"
   - "{{ create_udf_safe_divmod() }}"
   - "{{ create_udf_columns_concat_unique_non_empty() }}"
-  - "{{create_udf_columns_words_in_common_count()}}"
+  - "{{ create_udf_columns_words_in_common_count() }}"
   - "{{ create_udf_normalize_string_alpha_for_match() }}"
+  - "{{ create_udf_ae_string_cleanup() }}"
 
 clean-targets:
   - "target"
