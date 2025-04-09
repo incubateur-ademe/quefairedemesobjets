@@ -12,7 +12,7 @@ django_setup_full()
 logger = logging.getLogger(__name__)
 
 
-def enrich_read_dbt_model(
+def enrich_dbt_model_read(
     dbt_model_name: str, filters: list[dict] = []
 ) -> pd.DataFrame:
     """Reads necessary QFDMO acteurs and AE entries from DB"""

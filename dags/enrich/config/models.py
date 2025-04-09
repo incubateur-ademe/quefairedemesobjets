@@ -41,6 +41,15 @@ class EnrichBaseConfig(BaseModel):
         default=True,
         description="🚱 Si coché, aucune tâche d'écriture ne sera effectuée",
     )
+    dbt_models_refresh: bool = Field(
+        default=True,
+        description="""🔄 Si coché, les modèles DBT seront rafraîchis.
+        🔴 Désactiver uniquement pour des tests.""",
+    )
+    dbt_models_refresh_command: str = Field(
+        default="dbt build --select tag:marts,tag:enrich,tag:closed",
+        description="🔄 Commande DBT à exécuter pour rafraîchir les modèles",
+    )
     filter_contains__acteur_commentaires: Optional[str] = Field(
         default=None,
         description="🔍 Filtre sur **acteur_commentaires**",
