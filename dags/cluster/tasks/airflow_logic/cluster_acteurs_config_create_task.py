@@ -6,7 +6,8 @@ import logging
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from cluster.config import TASKS, ClusterConfig
+from cluster.config.model import ClusterConfig
+from cluster.config.tasks import TASKS
 from cluster.tasks.business_logic.cluster_acteurs_config_create import (
     cluster_acteurs_config_create,
 )

@@ -19,7 +19,6 @@ from cluster.tasks.business_logic.cluster_acteurs_suggestions.to_db import (
     cluster_acteurs_suggestions_to_db,
 )
 
-from data.models import Suggestion, SuggestionCohorte
 from data.models.change import (
     COL_CHANGE_ENTITY_TYPE,
     COL_CHANGE_MODEL_NAME,
@@ -30,6 +29,7 @@ from data.models.change import (
     ENTITY_ACTEUR_REVISION,
     ENTITY_ACTEUR_TO_CREATE,
 )
+from data.models.suggestion import Suggestion, SuggestionCohorte
 from unit_tests.qfdmo.acteur_factory import (
     ActeurTypeFactory,
     DisplayedActeurFactory,
