@@ -37,4 +37,5 @@ def enrich_config_create_task(dag: DAG) -> PythonOperator:
         task_id=TASKS.CONFIG_CREATE,
         python_callable=enrich_config_create_wrapper,
         dag=dag,
+        doc_md="📖 **Création de la config**",
     )
