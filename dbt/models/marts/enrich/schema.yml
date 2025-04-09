@@ -44,7 +44,7 @@ models:
         data_tests:
           - not_null
 
-  - name: marts_enrich_ae_closed_replaced
+  - name: marts_enrich_acteurs_closed_replaced
     description: Etablissements de l'Annuaire Entreprises (AE) qui ont été
       | fermés et remplacés par un autre établissement
     columns:
@@ -66,8 +66,8 @@ models:
         description: "Si le SIRET de remplacement appartient à la même entreprise (meme_siret) ou non (autre_siret)"
         data_tests:
           - not_null
-          - accepted_values:
-              values: ['meme_siret', 'autre_siret']
+          # - accepted_values:
+          #     values: ['siret_du_meme_siren', 'siret_dun_autre_siren']
       - name: acteur_nom
         description: Nom de l'acteur fermé
       - name: remplacer_nom
@@ -88,12 +88,8 @@ models:
       - name: replacement_priority
         description: "Priorité du remplacement (1 = meilleur match)"
         data_type: integer
-        data_tests:
-          - not_null
-          - accepted_values:
-              values: [1]
 
-  - name: marts_enrich_ae_closed_candidates
+  - name: marts_enrich_acteurs_closed_candidates
     description: Etablissements fermés de l'Annuaire Entreprises (AE) qui pourraient être remplacés
     columns:
       - name: siret

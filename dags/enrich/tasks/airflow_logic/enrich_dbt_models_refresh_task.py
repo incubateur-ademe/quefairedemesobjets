@@ -4,11 +4,9 @@ import logging
 
 from airflow import DAG
 from airflow.exceptions import AirflowSkipException
+from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
 from enrich.config import DBT, TASKS, XCOMS, xcom_pull
-from enrich.tasks.business_logic.enrich_dbt_model_read import (
-    enrich_dbt_model_read,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +14,7 @@ logger = logging.getLogger(__name__)
 def task_info_get():
     return f"""
     ============================================================
-    Description de la tâche "{TASKS.READ_AE_RGPD}"
+    Description de la tâche "{TASKS.ENRICH_DBT_MODELS_REFRESH}"
     ============================================================
     💡 quoi: lecture des données via le modèle DBT
     {DBT.MARTS_ENRICH_AE_RGPD}
@@ -30,29 +28,31 @@ def task_info_get():
     """
 
 
-def enrich_dbt_model_read_wrapper(dbt_model_name, xcom_push_key, ti) -> None:
+def enrich_dbt_models_refresh_wrapper(ti) -> None:
     logger.info(task_info_get())
 
     # Config
     config = xcom_pull(ti, XCOMS.CONFIG)
     logger.info(f"📖 Configuration:\n{config.model_dump_json(indent=2)}")
 
-    # Processing
-    df = enrich_dbt_model_read(dbt_model_name=dbt_model_name, filters=config.filters)
-    if df.empty:
-        raise AirflowSkipException("Pas de données DB, on s'arrête là")
+    if not config.dbt_models_refresh:
+        raise AirflowSkipException("🚫 Rafraîchissement des modèles DBT désactivé")
 
-    # Result
-    ti.xcom_push(key=xcom_push_key, value=df)
+    logger.info(
+        f"🔄 Rafraîchissement des modèles DBT: {config.dbt_models_refresh_command}"
+    )
+    bash = BashOperator(
+        task_id=TASKS.ENRICH_DBT_MODELS_REFRESH + "_bash",
+        bash_command=config.dbt_build_command,
+    )
+    bash.execute(context=ti.get_template_context())
 
 
-def enrich_dbt_model_read_task(
-    dag: DAG, task_id: str, dbt_model_name: str, xcom_push_key: str
+def enrich_dbt_models_refresh_task(
+    dag: DAG,
 ) -> PythonOperator:
     return PythonOperator(
-        task_id=task_id,
-        python_callable=enrich_dbt_model_read_wrapper,
-        op_args=[dbt_model_name, xcom_push_key],
+        task_id=TASKS.ENRICH_DBT_MODELS_REFRESH,
+        python_callable=enrich_dbt_models_refresh_wrapper,
         dag=dag,
-        doc_md=f"**Lecture du modèle DBT**: `{dbt_model_name}`",
     )

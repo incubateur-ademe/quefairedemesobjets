@@ -1,21 +1,14 @@
 /*
-Model to find entries from AE's etablissement which are
-potential replacements for etab_closed acteurs.
-
-Code is repetitive (e.g. same logic in SELECT and ROW_NUMBER) and
-could be made more concise with an intermediary CTE. However from experience,
-intermediate CTEs lead to slower performance (we constraint the planner)
-than just letting the query planner do its job. Thus for now, I focus
-on performance given the 40M rows
+Acteurs which SIRET is closed in AE's etablissement
 
 Notes:
- - 🧹 Pre-matching/filtering at SQL level to reduce data size (40M rows)
- - 👁️‍🗨️ Keeping as view to always re-evaluate vs. ever changing QFDMO data
+ - 📦 Materialized as table but refreshed by DAG enrich_acteurs_closed
+	as many models/tests depending on each other = would take too long
 */
 {{
   config(
-    materialized = 'view',
-    tags=['marts', 'ae', 'annuaire_entreprises', 'etablissement'],
+    materialized = 'table',
+    tags=['marts', 'enrich', 'closed', 'ae', 'annuaire_entreprises', 'etablissement'],
   )
 }}
 -- Starting from our acteurs we can match via SIRET
@@ -28,7 +21,7 @@ WITH acteurs_with_siret AS (
         identifiant_unique AS acteur_id,
         commentaires AS acteur_commentaires,
         statut AS acteur_statut,
-		acteur_type AS acteur_type
+		acteur_type_id
 	FROM {{ ref('marts_carte_acteur') }}
 	WHERE siret IS NOT NULL AND siret != '' AND LENGTH(siret) = 14
 ),
@@ -48,9 +41,9 @@ SELECT
 	acteurs.acteur_nom,
 	acteurs.acteur_nom_normalise,
 	acteurs.acteur_commentaires,
-	acteurs.acteur_type
+	acteurs.acteur_type_id
 FROM acteurs_with_siret AS acteurs
 JOIN {{ ref('int_ae_etablissement') }} AS etab ON acteurs.siret = etab.siret
-WHERE etab.est_actif = FALSE
+WHERE etab.est_actif IS FALSE
 )
 SELECT * FROM etab_closed_candidates
