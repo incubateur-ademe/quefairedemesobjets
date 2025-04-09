@@ -110,7 +110,7 @@ class TestEnrichActeursClosedSuggestions:
         # Write suggestions to DB
         enrich_acteurs_closed_suggestions(
             df=df_not_replaced,
-            cohort_type=COHORTS.ACTEURS_CLOSED_NOT_REPLACED,
+            cohort_type=COHORTS.CLOSED_NOT_REPLACED,
             identifiant_action="test_not_replaced",
             dry_run=False,
         )
@@ -145,7 +145,7 @@ class TestEnrichActeursClosedSuggestions:
         # Write suggestions to DB
         enrich_acteurs_closed_suggestions(
             df=df_replaced_meme_siret,
-            cohort_type=COHORTS.ACTEURS_CLOSED_REP_SAME_SIREN,
+            cohort_type=COHORTS.CLOSED_REP_SAME_SIREN,
             identifiant_action="test_meme_siren",
             dry_run=False,
         )
@@ -189,7 +189,7 @@ class TestEnrichActeursClosedSuggestions:
         # Write suggestions to DB
         enrich_acteurs_closed_suggestions(
             df=df_replaced_autre_siret,
-            cohort_type=COHORTS.ACTEURS_CLOSED_REP_DIFF_SIREN,
+            cohort_type=COHORTS.CLOSED_REP_OTHER_SIREN,
             identifiant_action="test_autre_siren",
             dry_run=False,
         )

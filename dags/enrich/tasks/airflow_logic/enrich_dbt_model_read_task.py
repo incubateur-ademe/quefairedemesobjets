@@ -5,6 +5,7 @@ import logging
 from airflow import DAG
 from airflow.exceptions import AirflowSkipException
 from airflow.operators.python import PythonOperator
+from airflow.utils.trigger_rule import TriggerRule
 from enrich.config import DBT, TASKS, XCOMS, xcom_pull
 from enrich.tasks.business_logic.enrich_dbt_model_read import (
     enrich_dbt_model_read,
@@ -55,4 +56,5 @@ def enrich_dbt_model_read_task(
         op_args=[dbt_model_name, xcom_push_key],
         dag=dag,
         doc_md=f"**Lecture du modèle DBT**: `{dbt_model_name}`",
+        trigger_rule=TriggerRule.ALL_DONE,
     )

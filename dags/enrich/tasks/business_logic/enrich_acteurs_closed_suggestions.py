@@ -33,9 +33,9 @@ def enrich_acteurs_closed_suggestions(
         raise ValueError("df vide: on devrait pas être ici")
 
     if cohort_type not in [
-        COHORTS.ACTEURS_CLOSED_NOT_REPLACED,
-        COHORTS.ACTEURS_CLOSED_REP_DIFF_SIREN,
-        COHORTS.ACTEURS_CLOSED_REP_SAME_SIREN,
+        COHORTS.CLOSED_NOT_REPLACED,
+        COHORTS.CLOSED_REP_OTHER_SIREN,
+        COHORTS.CLOSED_REP_SAME_SIREN,
     ]:
         raise ValueError(f"Mauvaise cohorte: {cohort_type=}")
 
@@ -47,7 +47,7 @@ def enrich_acteurs_closed_suggestions(
         # -----------------------------------------
         # NOT REPLACED
         # -----------------------------------------
-        if cohort_type == COHORTS.ACTEURS_CLOSED_NOT_REPLACED:
+        if cohort_type == COHORTS.CLOSED_NOT_REPLACED:
             changes = []
             model_params = {
                 "id": row[COLS.ACTEUR_ID],
@@ -72,8 +72,8 @@ def enrich_acteurs_closed_suggestions(
         # REPLACED
         # -----------------------------------------
         elif cohort_type in [
-            COHORTS.ACTEURS_CLOSED_REP_DIFF_SIREN,
-            COHORTS.ACTEURS_CLOSED_REP_SAME_SIREN,
+            COHORTS.CLOSED_REP_OTHER_SIREN,
+            COHORTS.CLOSED_REP_SAME_SIREN,
         ]:
             cohortes = df[COLS.REMPLACER_COHORTE].unique()
             if len(cohortes) > 1:
