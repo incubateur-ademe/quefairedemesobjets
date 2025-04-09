@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib import admin, messages
 from django.utils.html import format_html
 
@@ -6,11 +8,18 @@ from data.models.suggestion import Suggestion, SuggestionCohorte, SuggestionStat
 
 NB_SUGGESTIONS_DISPLAYED_WHEN_DELETING = 100
 
+logger = logging.getLogger(__name__)
 
-def dict_to_html_table(data):
+
+def dict_to_html_table(data: dict):
     table = "<table class'table-metadata'>"
     for key in sorted(data.keys()):
-        value = data[key]
+        if isinstance(data[key], dict):
+            value = dict_to_html_table(data[key])
+        elif isinstance(data[key], list):
+            value = "</td><td>".join([str(item) for item in data[key]])
+        else:
+            value = data[key]
         table += f"<tr><td>{key}</td><td>{value}</td></tr>"
     table += "</table>"
     return table
@@ -19,8 +28,7 @@ def dict_to_html_table(data):
 class SuggestionCohorteAdmin(NotEditableMixin, admin.ModelAdmin):
     list_display = [
         "id",
-        "identifiant_action",
-        "identifiant_execution",
+        "__str__",
         "statut",
         "metadonnees",
     ]
