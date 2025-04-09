@@ -18,7 +18,7 @@ WITH potential_replacements AS (
 		END AS remplacer_cohorte,
 		candidates.acteur_nom,
 		replacements.nom AS remplacer_nom,
-		columns_words_in_common_count(
+		udf_columns_words_in_common_count(
 			candidates.acteur_nom_normalise,
 			udf_normalize_string_alpha_for_match(replacements.nom)
 		) AS noms_nombre_mots_commun,
@@ -36,7 +36,7 @@ WITH potential_replacements AS (
 					ELSE 0
 				END DESC,
 				-- Then etablissements with more words in common
-				columns_words_in_common_count(
+				udf_columns_words_in_common_count(
 					candidates.acteur_nom_normalise,
 					udf_normalize_string_alpha_for_match(replacements.nom)
 				) DESC
