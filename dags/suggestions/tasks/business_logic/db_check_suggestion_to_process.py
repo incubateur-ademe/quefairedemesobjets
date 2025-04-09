@@ -3,7 +3,6 @@ from utils.django import django_setup_full
 
 django_setup_full()
 
-from data.models import Suggestion  # noqa: E402
 
 # Here we get only the suggestion with AVALIDER status
 # ENCOURS status is for suggestion that are being processed, it can remain sommes
@@ -12,6 +11,8 @@ from data.models import Suggestion  # noqa: E402
 
 
 def get_suggestions_toprocess():
+    from data.models.suggestion import Suggestion
+
     return Suggestion.objects.prefetch_related("suggestion_cohorte").filter(
         statut=constants.SUGGESTION_ATRAITER
     )
