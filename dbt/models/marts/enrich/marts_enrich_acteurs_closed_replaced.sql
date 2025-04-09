@@ -1,19 +1,20 @@
 {{
   config(
-    materialized = 'view',
-    tags=['marts', 'ae', 'annuaire_entreprises', 'etablissement'],
+    materialized = 'table',
+    tags=['marts', 'enrich', 'closed', 'ae', 'annuaire_entreprises', 'etablissement'],
   )
 }}
 
 WITH potential_replacements AS (
 	SELECT
 		candidates.acteur_id AS acteur_id,
+		candidates.acteur_type_id AS acteur_type_id,
 		candidates.acteur_statut AS acteur_statut,
 		candidates.siret AS acteur_siret,
 		replacements.siret AS remplacer_siret,
 		CASE
-			WHEN LEFT(candidates.siret,9) = LEFT(replacements.siret,9) THEN 'meme_siret'
-			ELSE 'autre_siret'
+			WHEN LEFT(candidates.siret,9) = LEFT(replacements.siret,9) THEN 'siret_du_meme_siren'
+			ELSE 'siret_dun_autre_siren'
 		END AS remplacer_cohorte,
 		candidates.acteur_nom,
 		replacements.nom AS remplacer_nom,
@@ -40,7 +41,7 @@ WITH potential_replacements AS (
 					udf_normalize_string_alpha_for_match(replacements.nom)
 				) DESC
 		) AS replacement_priority
-	FROM {{ ref('marts_enrich_ae_closed_candidates') }} AS candidates
+	FROM {{ ref('marts_enrich_acteurs_closed_candidates') }} AS candidates
 	INNER JOIN {{ ref('int_ae_etablissement') }} AS replacements
 	ON replacements.naf = candidates.etab_naf
 	AND replacements.code_postal = candidates.etab_code_postal
