@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 """Generic task to create configuration"""
-=======
-"""Read data from DB needed for RGPD anonymization"""
->>>>>>> 89fd9c71 (début refacto et progrès vers décision métier)
 
 import logging
 
@@ -41,8 +37,5 @@ def enrich_config_create_task(dag: DAG) -> PythonOperator:
         task_id=TASKS.CONFIG_CREATE,
         python_callable=enrich_config_create_wrapper,
         dag=dag,
-<<<<<<< HEAD
         doc_md="📖 **Création de la config**",
-=======
->>>>>>> 89fd9c71 (début refacto et progrès vers décision métier)
     )
