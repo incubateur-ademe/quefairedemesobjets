@@ -4,6 +4,8 @@ from typing import Dict, List, Set, Tuple
 
 import pandas as pd
 from sources.tasks.airflow_logic.config_management import DAGConfig
+from sources.tasks.transform.transform_df import compute_identifiant_unique
+from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
 
@@ -69,12 +71,59 @@ class ActeurComparator:
         return columns_updated
 
 
+def retrieve_identifiant_unique_from_existing_acteur(
+    df_normalized: pd.DataFrame, df_acteur_from_db: pd.DataFrame
+):
+    if df_normalized.empty or df_acteur_from_db.empty:
+        return df_normalized, df_acteur_from_db
+
+    # Adding identifiant column to compare using identifiant_externe and source_code
+    # instead of identifiant_unique (for the usecase of external_ids were updated)
+    print("df_normalized", df_normalized)
+    df_normalized["identifiant"] = df_normalized.apply(
+        lambda row: compute_identifiant_unique(
+            row["identifiant_externe"], row["source_code"], row["acteur_type_code"]
+        ),
+        axis=1,
+    )
+    df_acteur_from_db["identifiant"] = df_acteur_from_db.apply(
+        lambda row: compute_identifiant_unique(
+            row["identifiant_externe"], row["source_code"], row["acteur_type_code"]
+        ),
+        axis=1,
+    )
+
+    # Replace identifiant_unique (from source) by identifiant (from db) for acteur
+    # which doesn't have corelation between source, external_id and identifiant_unique
+    df_normalized.set_index("identifiant", inplace=True)
+    df_acteur_from_db.set_index("identifiant", inplace=True)
+    df_normalized["identifiant_unique"] = df_normalized.index.map(
+        lambda x: (
+            df_acteur_from_db.loc[x, "identifiant_unique"]
+            if x in df_acteur_from_db.index
+            else df_normalized.loc[x, "identifiant_unique"]
+        )
+    )
+
+    # Cleanup
+    df_normalized.reset_index(inplace=True)
+    df_acteur_from_db.reset_index(inplace=True)
+    df_normalized.drop(columns=["identifiant"], inplace=True)
+    df_acteur_from_db.drop(columns=["identifiant"], inplace=True)
+
+    return df_normalized, df_acteur_from_db
+
+
 def keep_acteur_changed(
     df_normalized: pd.DataFrame, df_acteur_from_db: pd.DataFrame, dag_config: DAGConfig
 ) -> Tuple[pd.DataFrame, pd.DataFrame, Dict]:
     metadata = {}
     if df_acteur_from_db.empty:
         return df_normalized, df_acteur_from_db, metadata
+
+    df_normalized, df_acteur_from_db = retrieve_identifiant_unique_from_existing_acteur(
+        df_normalized, df_acteur_from_db
+    )
 
     columns_to_compare = dag_config.get_expected_columns() - {
         "location",
