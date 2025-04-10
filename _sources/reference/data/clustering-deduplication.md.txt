@@ -66,7 +66,7 @@
   </tr></thead>
 <tbody>
   <tr>
-    <td><a href="/incubateur-ademe/quefairedemesobjets/blob/main/data/models/changes/acteur_create_as_parent.py">acteur_create_as_parent</a></td>
+    <td><a href="data/models/changes/acteur_create_as_parent.py">acteur_create_as_parent</a></td>
     <td>Orphelin</td>
     <td>Parent</td>
     <td>➕ Nouveau parent pour nouveau cluster</td>
@@ -74,7 +74,7 @@
     <td>pareil que révision</td>
   </tr>
   <tr>
-    <td><a href="/incubateur-ademe/quefairedemesobjets/blob/main/data/models/changes/acteur_keep_as_parent.py">acteur_keep_as_parent</a></td>
+    <td><a href="data/models/changes/acteur_keep_as_parent.py">acteur_keep_as_parent</a></td>
     <td>Parent</td>
     <td>Parent</td>
     <td>1️⃣ 1 seul parent existant -&gt; à garder</td>
@@ -82,7 +82,7 @@
     <td>pareil que révision</td>
   </tr>
   <tr>
-    <td><a href="/incubateur-ademe/quefairedemesobjets/blob/main/data/models/changes/acteur_keep_as_parent.py">acteur_keep_as_parent</a></td>
+    <td><a href="data/models/changes/acteur_keep_as_parent.py">acteur_keep_as_parent</a></td>
     <td>Parent</td>
     <td>Parent</td>
     <td>🎖️ 2+ parents dans cluster -&gt; celui avec + d'enfants -&gt; à garder</td>
@@ -90,7 +90,7 @@
     <td>pareil que révision</td>
   </tr>
   <tr>
-    <td><a href="/incubateur-ademe/quefairedemesobjets/blob/main/data/models/changes/acteur_delete_as_parent.py">acteur_delete_as_parent</a></td>
+    <td><a href="data/models/changes/acteur_delete_as_parent.py">acteur_delete_as_parent</a></td>
     <td>Parent</td>
     <td>N’existera plus</td>
     <td>🔴 2+ parents dans cluster -&gt; non choisi -&gt; à supprimer</td>
@@ -98,7 +98,7 @@
     <td>🛑 Devrait disparaitre de displayed</td>
   </tr>
   <tr>
-    <td><a href="/incubateur-ademe/quefairedemesobjets/blob/main/data/models/changes/acteur_verify_in_revision.py">acteur_verify_in_revision</a></td>
+    <td><a href="data/models/changes/acteur_verify_in_revision.py">acteur_verify_in_revision</a></td>
     <td>Enfant</td>
     <td>Enfant</td>
     <td>🟰 Pointe déjà vers nouveau parent → rien à faire</td>
@@ -106,7 +106,7 @@
     <td>Aucune</td>
   </tr>
   <tr>
-    <td><a href="/incubateur-ademe/quefairedemesobjets/blob/main/data/models/changes/acteur_update_parent_id.py">acteur_update_parent_id</a></td>
+    <td><a href="data/models/changes/acteur_update_parent_id.py">acteur_update_parent_id</a></td>
     <td>Enfant</td>
     <td>Enfant</td>
     <td>🔀 Pointait vers un parent qui n’a pas été choisi → à pointer vers nouveau parent</td>
@@ -114,7 +114,7 @@
     <td>Aucune</td>
   </tr>
   <tr>
-    <td><a href="/incubateur-ademe/quefairedemesobjets/blob/main/data/models/changes/acteur_update_parent_id.py">acteur_update_parent_id</a></td>
+    <td><a href="data/models/changes/acteur_update_parent_id.py">acteur_update_parent_id</a></td>
     <td>Orphelin</td>
     <td>Enfant</td>
     <td>🔀 à pointer vers un parent</td>
@@ -130,6 +130,42 @@
     <td>Aucune</td>
   </tr>
 </tbody></table>
+
+## 🧪 Algorithme
+
+### 🗓️ Tentatives passées
+
+ - **Considération de https://github.com/dedupeio/dedupe**: mais en voyant que le [comparateur](https://github.com/search?q=repo%3Adedupeio%2Fdedupe+comparator&type=code) évalue 2 valeurs à la fois = **complexité O(n2)** au moment du runtime, et sachant nos volumes (~500K acteurs) = peur de s'orentier vers du non-vectorisé. On voit des [retours utilisateurs qui vont dans ce sens](https://github.com/dedupeio/dedupe/issues/940) (temps de matching qui explose en passant d'un échantillon de 1K à 5K).
+ - **Tentative vectorisée**: tenté de faire du vectorisé de base (ex: TF-IDF pour naturellement dépriorisé le bruit / la redondance) mais n'ayant pas d'infra de compute (ex: startup état = frugale) l'idée a été abandonnée (le risque de créer des modèles qu'on ne pouvait pas gérer via Airflow).
+
+### 👉🏻 Actuellement
+
+ - **Très primitif**: avec de la normalisation et du TF-IDF mais qui tourne à une échelle trop réduite pour être vraiment pertinent. Manque de tolérance fuzzy.
+
+### 💡 Améliorations
+
+ - **Continuer la normalisation en amont**: car celle-ci fait bénéficier non seulement le clustering, mais la qualité des données sur la carte:
+    - **conversion anciennes -> nouvelles villes**: grâce à la [BAN](https://github.com/incubateur-ademe/quefairedemesobjets/pull/1451)
+    - **normalisation des adresses**: toujours avec la BAN
+    - **enrichissement des noms** au moment du matching pour plus d'embeddings via l'[AE](https://github.com/incubateur-ademe/quefairedemesobjets/pulls?q=Annuaire+entreprise)
+ - **Etendre le scope vectorisé**: par exemple à l'échelle d'un département, pour offrir un compromis pertinence vs. taille du modèle
+ - **Reconsidérer https://github.com/dedupeio/dedupe**: encore une fois sur des sous-ensembles (e.g. ville) pour bénéficier de la librairie (qui offre des choses intéressantes genre distances) sans souffrir trop du O(n2)
+ - **Embeddings**: à cause des représentations vraiment diverses (ex: centre de collècte des déchets vs. décheteries)
+ - **Mappings de conversion** pour les cas limités/connus (ex: abbrévation des noms de voies, ex: ESP -> ESPLANADE)
+ - **Algo phonétiques** pour les typos
+ - **Modèles de langues**: potentiellement les modèles compact (SLMs) qui offrirait des performances supérieur à tout ce qu'on peut faire au dessus en posant la question simple ("merci de clusteriser ces échantillons")
+
+## 🚤 Performance
+
+### 👉🏻 Actuellement
+
+ - **Mauvaises mais suffisantes pour métier**: qui fait tourner l'algo sur Airflow et fait autre chose en attendant
+ - **Raison principale**: les boucles et aller-retour successifs pour choisir les parents et leur données
+ - **Exemple** d'un clustering de 150K acteurs qui prenait ~6 heures
+
+### 💡 Améliorations
+
+ - **Réécrire les tâches** en passant par des modèles DBT qui s'occupe de préparer la data = finit les boucles / aller-retour DB via python.
 
 ## 🔀 Schéma
 

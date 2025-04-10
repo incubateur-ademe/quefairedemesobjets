@@ -6,6 +6,7 @@
 documentation-technique.md
 data/organisations-des-fichiers.md
 data/systeme-de-suggestions.md
+data/clustering-deduplication.md
 coding/coding-guidelines.md
 coding/francais-vs-anglais.md
 db/valeurs-defaut.md
