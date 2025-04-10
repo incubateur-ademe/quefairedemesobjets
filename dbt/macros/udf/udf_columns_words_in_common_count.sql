@@ -2,7 +2,8 @@
 /*
     Count number of words in common between 2 columns
 */
-CREATE OR REPLACE FUNCTION {{ target.schema }}.udf_columns_words_in_common_count(col1 text, col2 text)
+DROP FUNCTION IF EXISTS {{ target.schema }}.udf_columns_words_in_common_count(text, text) CASCADE;
+CREATE FUNCTION {{ target.schema }}.udf_columns_words_in_common_count(col1 text, col2 text)
 RETURNS integer AS $$
 DECLARE
     word text;

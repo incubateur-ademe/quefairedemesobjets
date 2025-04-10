@@ -11,6 +11,10 @@ Notes:
     indexes=[
       {'columns': ['siret'], 'unique': True},
       {'columns': ['est_actif']},
+      {'columns': ['code_postal']},
+    ],
+    post_hook=[
+      "CREATE INDEX ON {{ this }}(adresse_numero) WHERE adresse_numero IS NOT NULL"
     ]
   )
 }}
@@ -24,7 +28,7 @@ SELECT
     CASE
       WHEN etab.denomination_usuelle IS NOT NULL THEN etab.denomination_usuelle
       WHEN etab.denomination_usuelle IS NULL AND unite.denomination IS NOT NULL THEN unite.denomination
-      ELSE {{ value_unavailable() }} -- To make this case explicit
+      ELSE {{ value_unavailable() }}
     END AS nom,
 
     /*
