@@ -64,7 +64,11 @@ WITH potential_replacements AS (
 	-- Fields which must be non-NULL for a replacement to be considered
 	AND replacements.code_postal IS NOT NULL
 	AND replacements.adresse IS NOT NULL
-	-- Number is crucial to avoid mismatches on generic addresses (e.g. ZA, ZI...)
+	/* To reduce false positives with generic addresses
+	such as ZA, ZI containing multiple instances of similar
+	stores (e.g. supermarkets), we force presence
+	of street number, which later will be used
+	as condition for matching */
 	AND replacements.adresse_numero IS NOT NULL
 )
 SELECT * FROM potential_replacements
