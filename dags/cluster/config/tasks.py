@@ -14,3 +14,4 @@ class TASKS:
     CLUSTERS_VALIDATE = "cluster_acteurs_clusters_validate"
     SUGGESTIONS_PREPARE = "cluster_acteurs_suggestions_prepare"
     SUGGESTIONS_TO_DB = "cluster_acteurs_suggestions_to_db"
+    SUGGESTIONS_FAILING = "cluster_acteurs_suggestions_failing"

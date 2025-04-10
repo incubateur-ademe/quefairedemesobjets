@@ -8,7 +8,6 @@ from cluster.config.xcoms import XCOMS, xcom_pull
 from cluster.tasks.business_logic.cluster_acteurs_suggestions.prepare import (
     cluster_acteurs_suggestions_prepare,
 )
-from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
 
@@ -42,17 +41,9 @@ def cluster_acteurs_suggestions_prepare_wrapper(ti) -> None:
     if df.empty:
         raise ValueError("Pas de clusters récupérés, on ne devrait pas être là")
 
-    suggestions = cluster_acteurs_suggestions_prepare(df)
-
-    logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
-    for suggestion in suggestions:
-        cluster_id = suggestion["cluster_id"]
-        df_changes = pd.DataFrame(suggestion["changes"])
-        log.preview_df_as_markdown(
-            f"Suggestion pour cluster_id={cluster_id}", df_changes
-        )
-
-    ti.xcom_push(key=XCOMS.SUGGESTIONS, value=suggestions)
+    working, failing = cluster_acteurs_suggestions_prepare(df)
+    ti.xcom_push(key=XCOMS.SUGGESTIONS_WORKING, value=working)
+    ti.xcom_push(key=XCOMS.SUGGESTIONS_FAILING, value=failing)
 
 
 def cluster_acteurs_suggestions_prepare_task(dag: DAG) -> PythonOperator:
