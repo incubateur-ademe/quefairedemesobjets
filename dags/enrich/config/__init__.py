@@ -1,4 +1,4 @@
-from .cohorts import COHORTS  # noqa: F401
+from .cohorts import COHORTS, Cohort  # noqa: F401
 from .columns import COLS  # noqa: F401
 from .dbt import DBT  # noqa: F401
 from .models import DAG_ID_TO_CONFIG_MODEL, EnrichActeursClosedConfig  # noqa: F401

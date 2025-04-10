@@ -14,14 +14,24 @@ Notes:
 -- Starting from our acteurs we can match via SIRET
 WITH acteurs_with_siret AS (
 	SELECT
+		-- Common columns
         LEFT(siret,9) AS siren,
         siret,
+
+		-- Acteur columns
         nom AS acteur_nom,
-        udf_normalize_string_alpha_for_match(nom) AS acteur_nom_normalise,
+        udf_normalize_string_for_match(nom) AS acteur_nom_normalise,
         identifiant_unique AS acteur_id,
         commentaires AS acteur_commentaires,
         statut AS acteur_statut,
-		acteur_type_id
+		acteur_type_id,
+		acteur_type_code,
+		source_id AS acteur_source_id,
+		source_code AS acteur_source_code,
+		adresse AS acteur_adresse,
+		code_postal AS acteur_code_postal,
+		ville AS acteur_ville
+
 	FROM {{ ref('marts_carte_acteur') }}
 	WHERE siret IS NOT NULL AND siret != '' AND LENGTH(siret) = 14
 ),
@@ -30,21 +40,42 @@ not on unite closed (NOT unite_est_actif) because
 open unite might bring potential replacements */
 etab_closed_candidates AS (
 SELECT
-	etab.siret,
-	etab.unite_est_actif AS unite_est_actif,
-	etab.est_actif AS etab_est_actif,
-	etab.code_postal AS etab_code_postal,
-	etab.adresse AS etab_adresse,
-  	etab.naf AS etab_naf,
+	-- Common columns (need to specify to avoid ambiguity)
+	acteurs.siren,
+	acteurs.siret,
+
+	-- acteurs
 	acteurs.acteur_id,
+	acteurs.acteur_type_id,
+	acteurs.acteur_type_code,
+	acteurs.acteur_source_id,
+	acteurs.acteur_source_code,
 	acteurs.acteur_statut,
 	acteurs.acteur_nom,
 	acteurs.acteur_nom_normalise,
 	acteurs.acteur_commentaires,
-	acteurs.acteur_type_id
+	acteurs.acteur_adresse,
+	acteurs.acteur_code_postal,
+	acteurs.acteur_ville,
+
+	-- etablissement
+	etab.unite_est_actif AS unite_est_actif,
+	etab.est_actif AS etab_est_actif,
+	etab.code_postal AS etab_code_postal,
+	etab.adresse_numero AS etab_adresse_numero,
+	etab.adresse AS etab_adresse,
+	etab.adresse_complement AS etab_adresse_complement,
+  	etab.naf AS etab_naf
+
 FROM acteurs_with_siret AS acteurs
 JOIN {{ ref('int_ae_etablissement') }} AS etab ON acteurs.siret = etab.siret
 WHERE etab.est_actif IS FALSE
-AND etab.numero_voie
+/* To reduce false positives with generic addresses
+such as ZA, ZI containing multiple instances of similar
+stores (e.g. supermarkets), we force presence
+of street number, which later will be used
+as condition for matching */
+AND etab.adresse_numero IS NOT NULL
 )
+
 SELECT * FROM etab_closed_candidates

@@ -7,19 +7,28 @@
     with directors' names, hence normalization for a pre-filtering in SQL
 
     E.g. to test this function:
-    SELECT udf_normalize_string_alpha_for_match(' Héllo-Wørld! Ça va? 123 ');
+    SELECT udf_normalize_string_for_match(' Héllo-Wørld! Ça va? 123 ');
  */
-
-DROP FUNCTION IF EXISTS {{ target.schema }}.udf_normalize_string_alpha_for_match(input_text TEXT);
-CREATE FUNCTION {{ target.schema }}.udf_normalize_string_alpha_for_match(input_text TEXT) RETURNS TEXT AS $$
+DROP FUNCTION IF EXISTS {{ target.schema }}.udf_normalize_string_for_match(TEXT) CASCADE;
+CREATE FUNCTION {{ target.schema }}.udf_normalize_string_for_match(input_text TEXT) RETURNS TEXT AS $$
 DECLARE
     normalized TEXT;
+    words TEXT[];
 BEGIN
+    -- Step 1: Normalize the string
     normalized := unaccent(input_text);
     normalized := lower(normalized);
     normalized := regexp_replace(normalized, '[^a-z]', ' ', 'g');
     normalized := regexp_replace(normalized, '\s+', ' ', 'g');
     normalized := trim(normalized);
+
+    -- Step 2: Split into words, sort alphabetically, and rejoin
+    words := string_to_array(normalized, ' ');
+    SELECT string_agg(word, ' ') INTO normalized
+    FROM (
+        SELECT unnest(words) AS word
+        ORDER BY word
+    ) AS words_sorted;
 
     RETURN normalized;
 END;
