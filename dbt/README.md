@@ -30,6 +30,24 @@ Lancer les tests
 dbt run --select qfdmo.exhaustive_acteurs
 ```
 
+## Sampling
+
+ - 💡 **quoi**: utiliser une sous-partie de la donnée
+ - 🎯 **pourquoi**: itérer plus rapidement
+ - 🤔 **comment**:
+   - **Variable d'environement** `DBT_SAMPLING` à mettre à `true`
+   - **Liberté par modèle**: d'implémenter du sampling ou pas, ex: `base_ae_etablissement.sql`
+        ```sql
+        {% if env_var('DBT_SAMPLING', 'false') == 'true' %}
+        ORDER BY siret DESC
+        LIMIT 1000000
+        {% endif %}
+        ```
+   - **Appliquer le sampling**: en préfixant la commande dbt
+        ```bash
+        export DBT_SAMPLING='true' && dbt ...
+        ```
+
 ### Resources:
 - Learn more about dbt [in the docs](https://docs.getdbt.com/docs/introduction)
 - Check out [Discourse](https://discourse.getdbt.com/) for commonly asked questions and answers

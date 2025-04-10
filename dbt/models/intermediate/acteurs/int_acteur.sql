@@ -1,9 +1,22 @@
+WITH acteur_type_id_to_code AS (
+    SELECT
+        id,
+        code
+    FROM {{ ref('base_acteur_type') }}
+), source_id_to_code AS (
+    SELECT
+        id,
+        code
+    FROM {{ ref('base_source') }}
+)
+
 SELECT
     CAST({{ target.schema }}.encode_base57(uuid_generate_v5('6ba7b810-9dad-11d1-80b4-00c04fd430c8'::uuid, COALESCE(ra.identifiant_unique, a.identifiant_unique)::text)) AS varchar(22)) AS uuid,
     {{ coalesce_empty('ra.identifiant_unique', 'a.identifiant_unique') }} AS identifiant_unique,
     {{ coalesce_empty('ra.nom', 'a.nom') }} AS nom,
     {{ coalesce_empty('ra.description', 'a.description') }} AS description,
     COALESCE(ra.acteur_type_id, a.acteur_type_id) AS acteur_type_id,
+    (SELECT code FROM acteur_type_id_to_code WHERE id = COALESCE(ra.acteur_type_id, a.acteur_type_id)) AS acteur_type_code,
     {{ coalesce_empty('ra.adresse', 'a.adresse') }} AS adresse,
     {{ coalesce_empty('ra.adresse_complement', 'a.adresse_complement') }} AS adresse_complement,
     {{ coalesce_empty('ra.code_postal', 'a.code_postal') }} AS code_postal,
@@ -17,6 +30,7 @@ SELECT
     {{ coalesce_empty('ra.siren', 'a.siren') }} AS siren,
     {{ coalesce_empty('ra.siret', 'a.siret') }} AS siret,
     COALESCE(ra.source_id, a.source_id) AS source_id,
+    (SELECT code FROM source_id_to_code WHERE id = COALESCE(ra.source_id, a.source_id)) AS source_code,
     {{ coalesce_empty('ra.identifiant_externe', 'a.identifiant_externe') }} AS identifiant_externe,
     {{ coalesce_empty('ra.statut', 'a.statut') }} AS statut,
     {{ coalesce_empty('ra.naf_principal', 'a.naf_principal') }} AS naf_principal,
