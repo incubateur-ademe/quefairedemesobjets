@@ -28,8 +28,12 @@ BEGIN
     FROM (
         SELECT unnest(words) AS word
         ORDER BY word
+<<<<<<< HEAD
     ) AS words_sorted
     WHERE length(word) >= remove_words_smaller_size;
+=======
+    ) AS words_sorted;
+>>>>>>> 00ec04b2 (DAG & Admin UI fonctionnels)
 
     RETURN normalized;
 END;

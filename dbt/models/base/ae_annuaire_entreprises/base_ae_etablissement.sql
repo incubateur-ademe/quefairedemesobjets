@@ -13,7 +13,6 @@ Notes:
 
 SELECT
 
-
 -- Codes
 udf_ae_string_cleanup(siret) AS siret,
 udf_ae_string_cleanup(activite_principale) AS activite_principale,
@@ -22,7 +21,7 @@ udf_ae_string_cleanup(activite_principale) AS activite_principale,
 udf_ae_string_cleanup(denomination_usuelle) AS denomination_usuelle,
 
 -- Names
-{{ udf_ae_string_cleanup(denomination_usuelle) }} AS denomination_usuelle,
+udf_ae_string_cleanup(denomination_usuelle) AS denomination_usuelle,
 
 -- Status
 udf_ae_string_cleanup(etat_administratif) AS etat_administratif,
