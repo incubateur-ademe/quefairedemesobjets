@@ -6,10 +6,9 @@ from cluster.tasks.business_logic.cluster_acteurs_parents_choose_new import (
     parent_id_generate,
 )
 from django.contrib.gis.geos import Point
-
-from dags.enrich.config import COHORTS, COLS
-from dags.enrich.tasks.business_logic.enrich_acteurs_closed_suggestions import (
-    enrich_acteurs_closed_suggestions,
+from enrich.config import COHORTS, COLS
+from enrich.tasks.business_logic.enrich_dbt_model_to_suggestions import (
+    enrich_dbt_model_to_suggestions,
 )
 
 TODAY = datetime.now(timezone.utc).strftime("%Y-%m-%d")
@@ -38,8 +37,8 @@ class TestEnrichActeursClosedSuggestions:
                 COLS.ACTEUR_ID: ["a01", "a02"],
                 COLS.ACTEUR_SIRET: ["00000000000001", "00000000000002"],
                 COLS.ACTEUR_NOM: ["AVANT a01", "AVANT a02"],
-                COLS.ACTEUR_TYPE: [atype.pk, atype.pk],
-                COLS.ACTEUR_SOURCE: [source.pk, source.pk],
+                COLS.ACTEUR_TYPE_ID: [atype.pk, atype.pk],
+                COLS.ACTEUR_SOURCE_ID: [source.pk, source.pk],
             }
         )
 
@@ -54,8 +53,8 @@ class TestEnrichActeursClosedSuggestions:
                     "22222222200001",
                     "44444444400001",
                 ],
-                COLS.ACTEUR_TYPE: [atype.pk, atype.pk, atype.pk],
-                COLS.ACTEUR_SOURCE: [source.pk, source.pk, source.pk],
+                COLS.ACTEUR_TYPE_ID: [atype.pk, atype.pk, atype.pk],
+                COLS.ACTEUR_SOURCE_ID: [source.pk, source.pk, source.pk],
                 # Replacement data
                 COLS.REMPLACER_SIRET: [
                     "11111111100002",
@@ -63,7 +62,11 @@ class TestEnrichActeursClosedSuggestions:
                     "55555555500001",
                 ],
                 COLS.REMPLACER_NOM: ["APRES a1", "APRES a2", "APRES a3"],
-                COLS.REMPLACER_COHORTE: ["meme_siret", "autre_siret", "autre_siret"],
+                COLS.SUGGEST_COHORT_LABEL: [
+                    "meme_siret",
+                    "autre_siret",
+                    "autre_siret",
+                ],
                 COLS.REMPLACER_ADRESSE: ["Adresse1", "Adresse2", "Adresse3"],
                 COLS.REMPLACER_CODE_POSTAL: ["12345", "67890", "12345"],
                 COLS.REMPLACER_VILLE: ["Ville1", "Ville2", "Ville3"],
@@ -72,7 +75,7 @@ class TestEnrichActeursClosedSuggestions:
         )
 
     def test_df_replaced(self, df_replaced):
-        assert sorted(df_replaced[COLS.REMPLACER_COHORTE].unique()) == sorted(
+        assert sorted(df_replaced[COLS.SUGGEST_COHORT_LABEL].unique()) == sorted(
             [
                 "meme_siret",
                 "autre_siret",
@@ -81,11 +84,11 @@ class TestEnrichActeursClosedSuggestions:
 
     @pytest.fixture
     def df_replaced_meme_siret(self, df_replaced):
-        return df_replaced[df_replaced[COLS.REMPLACER_COHORTE] == "meme_siret"]
+        return df_replaced[df_replaced[COLS.SUGGEST_COHORT_LABEL] == "meme_siret"]
 
     @pytest.fixture
     def df_replaced_autre_siret(self, df_replaced):
-        return df_replaced[df_replaced[COLS.REMPLACER_COHORTE] == "autre_siret"]
+        return df_replaced[df_replaced[COLS.SUGGEST_COHORT_LABEL] == "autre_siret"]
 
     @pytest.fixture
     def acteurs(self, df_not_replaced, df_replaced, atype, source):
@@ -108,9 +111,9 @@ class TestEnrichActeursClosedSuggestions:
         from qfdmo.models import ActeurStatus, RevisionActeur
 
         # Write suggestions to DB
-        enrich_acteurs_closed_suggestions(
+        enrich_dbt_model_to_suggestions(
             df=df_not_replaced,
-            cohort_type=COHORTS.CLOSED_NOT_REPLACED,
+            cohort_code=COHORTS.CLOSED_NOT_REPLACED,
             identifiant_action="test_not_replaced",
             dry_run=False,
         )
@@ -143,9 +146,9 @@ class TestEnrichActeursClosedSuggestions:
         from qfdmo.models import ActeurStatus, RevisionActeur
 
         # Write suggestions to DB
-        enrich_acteurs_closed_suggestions(
+        enrich_dbt_model_to_suggestions(
             df=df_replaced_meme_siret,
-            cohort_type=COHORTS.CLOSED_REP_SAME_SIREN,
+            cohort_code=COHORTS.CLOSED_REP_SAME_SIREN,
             identifiant_action="test_meme_siren",
             dry_run=False,
         )
@@ -187,9 +190,9 @@ class TestEnrichActeursClosedSuggestions:
         from qfdmo.models import ActeurStatus, RevisionActeur
 
         # Write suggestions to DB
-        enrich_acteurs_closed_suggestions(
+        enrich_dbt_model_to_suggestions(
             df=df_replaced_autre_siret,
-            cohort_type=COHORTS.CLOSED_REP_OTHER_SIREN,
+            cohort_code=COHORTS.CLOSED_REP_OTHER_SIREN,
             identifiant_action="test_autre_siren",
             dry_run=False,
         )

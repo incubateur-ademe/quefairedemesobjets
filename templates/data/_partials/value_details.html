@@ -1,15 +1,50 @@
 {% load custom_filters %}
 
 {% if value|valuetype != "list" and value|valuetype != "dict" %}
-    {{ value }}
+
+    {# Generic case to highlight specific values #}
+    {% if value is None %}
+        <span style="color: orange"><i>NONE</i></span>
+    {% elif value == "" %}
+        <span style="color: orange"><i>EMPTY STRING</i></span>
+
+    {# Source #}
+    {% elif key == "source" %}
+        <a href="{% url 'admin:qfdmo_source_change' value|quote %}" target="_blank" rel="noreferrer">{{ value }}</a>
+
+    {# Acteur Type #}
+    {% elif key == "acteur_type" %}
+        <a href="{% url 'admin:qfdmo_acteurtype_change' value|quote %}" target="_blank" rel="noreferrer">{{ value }}</a>
+
+    {# Acteur #}
+    {% elif key == "identifiant_unique" %}
+        {{ value }}
+        (<a href="{% url 'admin:qfdmo_acteur_change' value|quote %}" target="_blank" rel="noreferrer">base</a>,
+        <a href="{% url 'qfdmo:getorcreate_revisionacteur' value|quote %}" target="_blank" rel="noreferrer">rev</a>,
+        <a href="{% url 'admin:qfdmo_displayedacteur_change' value|quote %}" target="_blank" rel="noreferrer">disp</a>)
+    {% elif key == "statut" %}
+        <span style="color: {% if value == "ACTIF" %}green{% elif value == "INACTIF" %}red{% else %}orange{% endif %}">{{ value }}</span>
+    {% elif key == "siret_is_closed" %}
+        <span style="color: {% if value %}red{% else %}green{% endif %}">{{ value }}</span>
+
+    {# Annuaire Entreprises links #}
+    {% elif key == "siren" %}
+        <a href="https://annuaire-entreprises.data.gouv.fr/entreprise/{{ value }}" target="_blank">{{ value }}</a>
+    {% elif key == "siret" %}
+        <a href="https://annuaire-entreprises.data.gouv.fr/etablissement/{{ value }}" target="_blank">{{ value }}</a>
+
+    {# Fallback #}
+    {% else %}
+        {{ value }}
+    {% endif %}
 {% elif value|valuetype == "list" and value %}
     <ul>
         {% for item in value %}
-            <li>{% include "data/_partials/value_details.html" with value=item %}</li>
+            <li>{% include "data/_partials/value_details.html" with key=key value=item %}</li>
         {% endfor %}
     </ul>
 {% elif value|valuetype == "dict" %}
         {% for key, item in value.items %}
-            <p><strong>{{ key }}</strong> : {% include "data/_partials/value_details.html" with value=item %}</p>
+            <p><strong>{{ key }}</strong> : {% include "data/_partials/value_details.html" with key=key value=item %}</p>
         {% endfor %}
 {% endif %}

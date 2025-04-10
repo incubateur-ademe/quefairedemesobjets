@@ -2,8 +2,7 @@
 /*
     Concatenate strings from various columns while only retaining non-empty values
 */
-
-DROP FUNCTION IF EXISTS {{ target.schema }}.udf_columns_concat_unique_non_empty(VARIADIC input_columns TEXT[]);
+DROP FUNCTION IF EXISTS {{ target.schema }}.udf_columns_concat_unique_non_empty(VARIADIC input_columns TEXT[]) CASCADE;
 CREATE FUNCTION {{ target.schema }}.udf_columns_concat_unique_non_empty(VARIADIC input_columns TEXT[])
 RETURNS TEXT AS $$
 DECLARE
