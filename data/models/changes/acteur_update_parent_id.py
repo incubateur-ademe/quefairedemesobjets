@@ -16,6 +16,7 @@ class ChangeActeurUpdateParentId(ChangeActeurAbstract):
         # - Can't test if parent exists as maybe it's to be created
 
     def apply(self):
+        self.validate()
         # By the time we apply changes to update parent_ids, the
         # corresponding parents must exist
         parent = RevisionActeur.objects.get(pk=self.data["parent_id"])

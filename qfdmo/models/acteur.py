@@ -838,6 +838,7 @@ class RevisionActeur(BaseActeur):
                 "acteur_services",
                 "labels",
                 "parent",
+                "parent_reason",
                 "is_parent",
             ],
         )

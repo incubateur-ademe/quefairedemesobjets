@@ -26,6 +26,9 @@
         <span style="color: {% if value == "ACTIF" %}green{% elif value == "INACTIF" %}red{% else %}orange{% endif %}">{{ value }}</span>
     {% elif key == "siret_is_closed" %}
         <span style="color: {% if value %}red{% else %}green{% endif %}">{{ value }}</span>
+    {% elif key == "parent" %}
+        {{ value }} (futur parent)
+
 
     {# Annuaire Entreprises links #}
     {% elif key == "siren" %}

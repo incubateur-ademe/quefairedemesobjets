@@ -23,7 +23,11 @@ def enrich_dbt_model_to_suggestions(
         SuggestionStatut,
     )
     from data.models.change import SuggestionChange
-    from data.models.changes import ChangeActeurCreateAsParent, ChangeActeurUpdateData
+    from data.models.changes import (
+        ChangeActeurCreateAsChild,
+        ChangeActeurCreateAsParent,
+        ChangeActeurUpdateData,
+    )
     from qfdmo.models import ActeurStatus
 
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
@@ -90,7 +94,7 @@ def enrich_dbt_model_to_suggestions(
 
             # Parent
             parent_id = parent_id_generate([str(row[COLS.REMPLACER_SIRET])])
-            model_params = {
+            model_params_parent = {
                 "id": parent_id,
                 "data": {
                     "identifiant_unique": parent_id,
@@ -106,18 +110,44 @@ def enrich_dbt_model_to_suggestions(
                     "statut": ActeurStatus.ACTIF,
                 },
             }
-            ChangeActeurCreateAsParent(**model_params).validate()
+            ChangeActeurCreateAsParent(**model_params_parent).validate()
             change = SuggestionChange(
                 order=1,
-                reason="besoin d'un parent pour nouvel acteur",
+                reason="besoin d'un parent pour rattaché acteur fermé",
                 entity_type="acteur_displayed",
                 model_name=ChangeActeurCreateAsParent.name(),
-                model_params=model_params,
+                model_params=model_params_parent,
             ).model_dump()
             changes.append(change)
 
-            # Child
-            model_params = {
+            # New child to hold the reference data as standalone
+            # as parents are surrogates (e.g. they can be deleted
+            # during clustering)
+            now = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+            child_new_id = f"{row[COLS.ACTEUR_ID]}_{row[COLS.ACTEUR_SIRET]}_{now}"
+            model_params_child_new = model_params_parent.copy()
+            model_params_child_new["id"] = child_new_id
+            model_params_child_new["data"]["identifiant_unique"] = child_new_id
+            model_params_child_new["data"]["source"] = row[COLS.ACTEUR_SOURCE_ID]
+            model_params_child_new["data"]["parent"] = parent_id
+            model_params_child_new["data"]["parent_reason"] = (
+                f"Nouvel enfant pour conserver les données suite à: "
+                f"SIRET {row[COLS.ACTEUR_SIRET]} "
+                f"détecté le {today} comme fermé dans AE, "
+                f"remplacé par SIRET {row[COLS.REMPLACER_SIRET]}"
+            )
+            ChangeActeurCreateAsChild(**model_params_child_new).validate()
+            change = SuggestionChange(
+                order=2,
+                reason="besoin nouvel enfant pour conserver les données",
+                entity_type="acteur_displayed",
+                model_name=ChangeActeurCreateAsChild.name(),
+                model_params=model_params_child_new,
+            ).model_dump()
+            changes.append(change)
+
+            # Existing Child
+            model_params_child_old = {
                 "id": row[COLS.ACTEUR_ID],
                 "data": {
                     "identifiant_unique": row[COLS.ACTEUR_ID],
@@ -135,13 +165,13 @@ def enrich_dbt_model_to_suggestions(
                     "statut": ActeurStatus.INACTIF,
                 },
             }
-            ChangeActeurUpdateData(**model_params).validate()
+            ChangeActeurUpdateData(**model_params_child_old).validate()
             change = SuggestionChange(
-                order=2,
-                reason="rattaché au parent",
+                order=3,
+                reason="rattacher enfant fermé à un parent",
                 entity_type="acteur_displayed",
                 model_name=ChangeActeurUpdateData.name(),
-                model_params=model_params,
+                model_params=model_params_child_old,
             ).model_dump()
             changes.append(change)
 
