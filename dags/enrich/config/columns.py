@@ -10,13 +10,20 @@ class COLS:
     # Dry run
     DRY_RUN: str = "dry_run"
 
+    # Suggestions
+    SUGGEST_COHORT_CODE: str = "suggestion_cohorte_code"
+    SUGGEST_COHORT_LABEL: str = "suggestion_cohorte_label"
+
     # COMMON
     SIREN: str = "siren"
+    SIRET: str = "siret"
 
     # QFDMO
     ACTEUR_ID: str = "acteur_id"
-    ACTEUR_TYPE: str = "acteur_type"
-    ACTEUR_SOURCE: str = "acteur_source"
+    ACTEUR_TYPE_ID: str = "acteur_type_id"
+    ACTEUR_TYPE_CODE: str = "acteur_type_code"
+    ACTEUR_SOURCE_ID: str = "acteur_source_id"
+    ACTEUR_SOURCE_CODE: str = "acteur_source_code"
     ACTEUR_SIRET: str = "acteur_siret"
     ACTEUR_NOM: str = "acteur_nom"
     ACTEUR_NOMS_ORIGINE: str = "acteur_noms_origine"
@@ -27,7 +34,6 @@ class COLS:
     AE_DIRIGEANTS_NOMS: str = "ae_dirigeants_noms_prenoms"
     REMPLACER_SIRET: str = "remplacer_siret"
     REMPLACER_NOM: str = "remplacer_nom"
-    REMPLACER_COHORTE: str = "remplacer_cohorte"
 
     # Fields identical between acteurs and remplacements
     # hence replacer_ prefix not present on the model column names

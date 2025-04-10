@@ -1,6 +1,5 @@
 {% macro create_udf_uuid_to_int() %}
-
-DROP FUNCTION IF EXISTS {{ target.schema }}.uuid_to_int(uuid UUID);
+DROP FUNCTION IF EXISTS {{ target.schema }}.uuid_to_int(uuid) CASCADE;
 CREATE FUNCTION {{ target.schema }}.uuid_to_int(uuid UUID)
 RETURNS numeric AS $$
 DECLARE
