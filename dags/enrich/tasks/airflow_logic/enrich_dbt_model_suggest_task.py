@@ -62,6 +62,6 @@ def enrich_dbt_model_suggest_task(
         python_callable=enrich_dbt_model_suggest_wrapper,
         op_args=[task_id, cohort, dbt_model_name],
         dag=dag,
-        doc_md=f"**Suggestions** pour la cohorte: {cohort.label}**",
+        doc_md=f"**Suggestions** pour la cohorte: **{cohort.label}**",
         trigger_rule=TriggerRule.ALL_DONE,
     )
