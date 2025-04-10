@@ -17,15 +17,17 @@ def db_data_prepare_task(dag: DAG) -> PythonOperator:
 
 
 def db_data_prepare_wrapper(**kwargs):
-    df_acteur = kwargs["ti"].xcom_pull(task_ids="keep_acteur_changed")["df_acteur"]
-    df_acteur_from_db = kwargs["ti"].xcom_pull(task_ids="keep_acteur_changed")[
-        "df_acteur_from_db"
-    ]
+    df_acteur_from_source = kwargs["ti"].xcom_pull(
+        task_ids="keep_acteur_changed", key="df_acteur_from_source"
+    )
+    df_acteur_from_db = kwargs["ti"].xcom_pull(
+        task_ids="keep_acteur_changed", key="df_acteur_from_db"
+    )
 
-    log.preview("df_acteur", df_acteur)
+    log.preview("df_acteur", df_acteur_from_source)
     log.preview("df_acteur_from_db", df_acteur_from_db)
 
     return db_data_prepare(
-        df_acteur=df_acteur,
+        df_acteur=df_acteur_from_source,
         df_acteur_from_db=df_acteur_from_db,
     )

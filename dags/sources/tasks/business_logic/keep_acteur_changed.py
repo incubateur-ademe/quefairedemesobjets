@@ -1,92 +1,123 @@
 import logging
+from dataclasses import dataclass
+from typing import Dict, List, Set, Tuple
 
 import pandas as pd
 from sources.tasks.airflow_logic.config_management import DAGConfig
-from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
 
 
-def is_identique_row(row_source, row_db, columns_to_compare):
-    is_identique = True
-    for column in columns_to_compare - {"identifiant_unique"}:
-        if column == "proposition_service_codes":
-            # on trie la list de dict par la clé action
-            row_source[column] = sorted(row_source[column], key=lambda x: x["action"])
-            row_db[column] = sorted(row_db[column], key=lambda x: x["action"])
-            # on trie les sous_categories dans chaque dict
-            for item in row_source[column]:
-                item["sous_categories"] = sorted(item["sous_categories"])
-            for item in row_db[column]:
-                item["sous_categories"] = sorted(item["sous_categories"])
-            if row_source[column] != row_db[column]:
-                is_identique = False
-                break
-        elif isinstance(row_source[column], list) and isinstance(row_db[column], list):
-            if sorted(row_source[column]) != sorted(row_db[column]):
-                is_identique = False
-                break
-        elif row_source[column] != row_db[column]:
-            is_identique = False
-            break
-    return is_identique
+@dataclass
+class ColumnDiff:
+    modif: int = 0
+    sup: int = 0
+    ajout: int = 0
+
+    def add(self, values: List[int]) -> None:
+        self.modif += values[0]
+        self.sup += values[1]
+        self.ajout += values[2]
+
+
+class ActeurComparator:
+    def __init__(self, columns_to_compare: Set[str]):
+        self.columns_to_compare = columns_to_compare - {"identifiant_unique"}
+        self.metadata: Dict[str, ColumnDiff] = {}
+
+    def _compare_lists(self, source: List, db: List) -> bool:
+        return sorted(source) != sorted(db)
+
+    def _compare_proposition_services(self, source: List[Dict], db: List[Dict]) -> bool:
+        source_sorted = sorted(source, key=lambda x: x["action"])
+        db_sorted = sorted(db, key=lambda x: x["action"])
+
+        for item in source_sorted:
+            item["sous_categories"] = sorted(item["sous_categories"])
+        for item in db_sorted:
+            item["sous_categories"] = sorted(item["sous_categories"])
+
+        return source_sorted != db_sorted
+
+    def _get_diff_type(self, source_val, db_val) -> List[int]:
+        if not source_val:
+            return [0, 1, 0]  # SUP
+        if not db_val:
+            return [0, 0, 1]  # AJOUT
+        return [1, 0, 0]  # MODIF
+
+    def compare_rows(self, row_source: Dict, row_db: Dict) -> Dict[str, List[int]]:
+        columns_updated = {}
+        for column in self.columns_to_compare:
+            source_val = row_source[column]
+            db_val = row_db[column]
+
+            is_updated = False
+            if column == "proposition_service_codes":
+                is_updated = self._compare_proposition_services(source_val, db_val)
+            elif isinstance(source_val, list) and isinstance(db_val, list):
+                is_updated = self._compare_lists(source_val, db_val)
+            else:
+                is_updated = source_val != db_val
+
+            if is_updated:
+                columns_updated[column] = self._get_diff_type(source_val, db_val)
+                if column not in self.metadata:
+                    self.metadata[column] = ColumnDiff()
+                self.metadata[column].add(columns_updated[column])
+
+        return columns_updated
 
 
 def keep_acteur_changed(
     df_normalized: pd.DataFrame, df_acteur_from_db: pd.DataFrame, dag_config: DAGConfig
-):
+) -> Tuple[pd.DataFrame, pd.DataFrame, Dict]:
+    metadata = {}
     if df_acteur_from_db.empty:
-        return {
-            "df_acteur": df_normalized,
-            "df_acteur_from_db": df_acteur_from_db,
-        }
+        return df_normalized, df_acteur_from_db, metadata
 
-    columns_to_compare = (
-        dag_config.get_expected_columns()
-        - {
-            "location",
-            "sous_categorie_codes",
-            "action_codes",
-        }
-        - {"cree_le"}
-    )
+    columns_to_compare = dag_config.get_expected_columns() - {
+        "location",
+        "sous_categorie_codes",
+        "action_codes",
+        "cree_le",
+    }
 
-    # grouper par identifiant_unique et comparer les colonnes
-    # si les colonnes sont identiques, on collecte l'identifiant_unique
-    identifiant_uniques_from_source = df_normalized["identifiant_unique"].tolist()
-    identifiant_uniques_from_db = df_acteur_from_db["identifiant_unique"].tolist()
-    df_updated_from_db = df_acteur_from_db[list(columns_to_compare)]
-    df_from_source = df_normalized[list(columns_to_compare)]
-    df_updated_from_db = df_updated_from_db[
-        df_updated_from_db["identifiant_unique"].isin(identifiant_uniques_from_source)
-    ]
-    df_from_source = df_from_source[
-        df_from_source["identifiant_unique"].isin(identifiant_uniques_from_db)
-    ]
+    # Préparer les dataframes pour la comparaison
+    source_ids = set(df_normalized["identifiant_unique"])
+    db_ids = set(df_acteur_from_db["identifiant_unique"])
 
-    df_from_source = df_from_source.set_index("identifiant_unique")
-    df_updated_from_db = df_updated_from_db.set_index("identifiant_unique")
-    log.preview("df_from_source identifiant_unique identique", df_from_source)
-    log.preview("df_from_db identifiant_unique identique", df_updated_from_db)
+    df_source = df_normalized[df_normalized["identifiant_unique"].isin(db_ids)]
+    df_db = df_acteur_from_db[df_acteur_from_db["identifiant_unique"].isin(source_ids)]
 
-    noupdate_identifiant_uniques = []
-    for index, row_source in df_from_source.iterrows():
-        row_source = row_source.to_dict()
-        row_db = df_updated_from_db.loc[index]
-        row_db = row_db.to_dict()
-        if is_identique_row(row_source, row_db, columns_to_compare):
-            noupdate_identifiant_uniques.append(index)
-    log.preview("identifiant_uniques", noupdate_identifiant_uniques)
+    df_source = df_source.set_index("identifiant_unique")
+    df_db = df_db.set_index("identifiant_unique")
 
+    # Comparer les acteurs
+    comparator = ActeurComparator(columns_to_compare)
+    noupdate_ids = []
+
+    for identifiant, row_source in df_source.iterrows():
+        row_db = df_db.loc[identifiant]
+        if not comparator.compare_rows(row_source.to_dict(), row_db.to_dict()):
+            noupdate_ids.append(identifiant)
+
+    # Filtrer les dataframes
     df_normalized = df_normalized[
-        ~df_normalized["identifiant_unique"].isin(noupdate_identifiant_uniques)
+        ~df_normalized["identifiant_unique"].isin(noupdate_ids)
     ]
     df_acteur_from_db = df_acteur_from_db[
-        ~df_acteur_from_db["identifiant_unique"].isin(noupdate_identifiant_uniques)
+        ~df_acteur_from_db["identifiant_unique"].isin(noupdate_ids)
     ]
 
-    log.preview("df_normalized après suppression", df_normalized)
-    return {
-        "df_acteur": df_normalized,
-        "df_acteur_from_db": df_acteur_from_db,
-    }
+    # Préparer les métadonnées
+    if comparator.metadata:
+        metadata = {"Nombre de mise à jour par champ": {" ": ["MODIF", "SUP", "AJOUT"]}}
+        for column, diff in comparator.metadata.items():
+            metadata["Nombre de mise à jour par champ"][column] = [
+                diff.modif,
+                diff.sup,
+                diff.ajout,
+            ]
+
+    return df_normalized, df_acteur_from_db, metadata

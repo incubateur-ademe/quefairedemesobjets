@@ -119,7 +119,40 @@ def _remove_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
     return df.drop(columns=columns_to_remove)
 
 
-def _remove_undesired_lines(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
+def _remove_undesired_lines(
+    df: pd.DataFrame, dag_config: DAGConfig
+) -> tuple[pd.DataFrame, dict]:
+    metadata = {}
+
+    # Compute metadata
+    if "service_a_domicile" in df.columns:
+        metadata["nb acteurs filtrés car service à domicile uniquement"] = str(
+            (
+                df["service_a_domicile"]
+                .str.lower()
+                .str.contains("service à domicile uniquement")
+                .sum()
+            )
+            + (
+                df["service_a_domicile"]
+                .str.lower()
+                .str.contains("oui exclusivement")
+                .sum()
+            )
+        )
+    if "public_accueilli" in df.columns:
+        metadata["nb acteurs filtrés car professionnels uniquement"] = str(
+            df["public_accueilli"].str.contains(constants.PUBLIC_PRO).sum()
+        )
+    if "sous_categorie_codes" in df.columns:
+        if (
+            nb_empty_sous_categorie := df["sous_categorie_codes"]
+            .apply(lambda x: x.count([]))
+            .sum()
+        ):
+            metadata["nb acteurs filtrés car sans sous_categorie"] = str(
+                nb_empty_sous_categorie
+            )
 
     if all(
         column in df.columns
@@ -135,7 +168,6 @@ def _remove_undesired_lines(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataF
             merge_as_list_columns=["label_codes", "acteur_service_codes"],
             merge_as_proposition_service_columns=["proposition_service_codes"],
         )
-
     # Remove acteurs which propose only service à domicile
     if "service_a_domicile" in df.columns:
         df = df[df["service_a_domicile"].str.lower() != "oui exclusivement"]
@@ -157,8 +189,11 @@ def _remove_undesired_lines(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataF
             f"==== DOUBLONS SUR LES IDENTIFIANTS UNIQUES {len(dups)/2} ====="
         )
         log.preview("Doublons sur identifiant_unique", dups)
+        metadata["nb acteurs filtrés car doublons sur identifiant_unique"] = str(
+            len(dups) / 2
+        )
 
-    return df
+    return df, metadata
 
 
 def _display_warning_about_missing_location(df: pd.DataFrame) -> None:
@@ -181,7 +216,7 @@ def source_data_normalize(
     df_acteur_from_source: pd.DataFrame,
     dag_config: DAGConfig,
     dag_id: str,
-) -> pd.DataFrame:
+) -> tuple[pd.DataFrame, dict]:
     """
     Normalisation des données source. Passée cette étape:
     - toutes les sources doivent avoir une nomenclature et formatage alignés
@@ -209,7 +244,7 @@ def source_data_normalize(
     df = _remove_columns(df, dag_config)
 
     # Merge and delete undesired lines
-    df = _remove_undesired_lines(df, dag_config)
+    df, metadata = _remove_undesired_lines(df, dag_config)
 
     # Check that the dataframe has the expected columns
     expected_columns = dag_config.get_expected_columns()
@@ -236,7 +271,7 @@ def source_data_normalize(
     log.preview("df après normalisation", df)
     if df.empty:
         raise ValueError("Plus aucune donnée disponible après normalisation")
-    return df
+    return df, metadata
 
 
 def df_normalize_pharmacie(df: pd.DataFrame) -> pd.DataFrame:
