@@ -32,7 +32,6 @@ class COLS:
     AE_DIRIGEANTS_NOMS: str = "ae_dirigeants_noms_prenoms"
     REMPLACER_SIRET: str = "remplacer_siret"
     REMPLACER_NOM: str = "remplacer_nom"
-    REMPLACER_COHORTE: str = "remplacer_cohorte"
 
     # Fields identical between acteurs and remplacements
     # hence replacer_ prefix not present on the model column names

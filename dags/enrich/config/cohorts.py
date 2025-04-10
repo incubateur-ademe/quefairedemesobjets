@@ -4,6 +4,12 @@ from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
+class Cohort:
+    code: str
+    label: str
+
+
+@dataclass(frozen=True)
 class COHORTS:
     CLOSED_NOT_REPLACED = "🚪 Acteurs Fermés: 🔴 non remplacés"
     CLOSED_REP_OTHER_SIREN = (

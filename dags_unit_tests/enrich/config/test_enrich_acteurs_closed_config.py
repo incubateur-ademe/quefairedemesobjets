@@ -1,10 +1,5 @@
 import pytest
-<<<<<<< HEAD
-from enrich.config.models import EnrichActeursClosedConfig
-=======
-
 from dags.enrich.config.models import EnrichActeursClosedConfig
->>>>>>> 89fd9c71 (début refacto et progrès vers décision métier)
 
 
 class TestEnrichClosedConfig:

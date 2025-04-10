@@ -13,7 +13,6 @@ Notes:
 
 SELECT
 
-
 -- Codes
 udf_ae_string_cleanup(siret) AS siret,
 udf_ae_string_cleanup(activite_principale) AS activite_principale,
@@ -21,11 +20,7 @@ udf_ae_string_cleanup(activite_principale) AS activite_principale,
 -- Names
 udf_ae_string_cleanup(denomination_usuelle) AS denomination_usuelle,
 
--- Names
-{{ udf_ae_string_cleanup(denomination_usuelle) }} AS denomination_usuelle,
-
 -- Status
-<<<<<<< HEAD
 udf_ae_string_cleanup(etat_administratif) AS etat_administratif,
 
 -- Address
@@ -35,27 +30,12 @@ udf_ae_string_cleanup(type_voie) AS type_voie,
 udf_ae_string_cleanup(libelle_voie) AS libelle_voie,
 udf_ae_string_cleanup(code_postal) AS code_postal,
 udf_ae_string_cleanup(libelle_commune) AS libelle_commune
-=======
-{{ udf_ae_string_cleanup(etat_administratif) }} AS etat_administratif,
-
--- Address
-{{ udf_ae_string_cleanup(numero_voie) }} AS numero_voie,
-{{ udf_ae_string_cleanup(complement_adresse) }} AS complement_adresse,
-{{ udf_ae_string_cleanup(type_voie) }} AS type_voie,
-{{ udf_ae_string_cleanup(libelle_voie) }} AS libelle_voie,
-{{ udf_ae_string_cleanup(code_postal) }} AS code_postal,
-{{ udf_ae_string_cleanup(libelle_commune) }} AS libelle_commune
->>>>>>> 43ea9842 (dbt: nettoyage & sampling)
 
 FROM {{ source('ae', 'clone_ae_etablissement_in_use') }}
 -- Filtering out foreign establishments as our focus is France
 -- On 2025-03-17 this allows excluding ~316K rows
 WHERE code_pays_etranger IS NULL
-<<<<<<< HEAD
 {% if env_var('DBT_SAMPLING', 'false') == 'true' %}
-=======
-{% if target.name == 'sampling' %}
->>>>>>> 43ea9842 (dbt: nettoyage & sampling)
 /* We can't do random sampling else we risk having
 no matching etablissement vs. unite legale. Can't
 sample on location as not available in unite to match,
