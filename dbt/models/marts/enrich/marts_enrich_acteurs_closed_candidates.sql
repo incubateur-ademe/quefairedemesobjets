@@ -65,12 +65,6 @@ SELECT
 FROM acteurs_with_siret AS acteurs
 JOIN {{ ref('int_ae_etablissement') }} AS etab ON acteurs.acteur_siret = etab.siret
 WHERE etab.est_actif IS FALSE
-/* To reduce false positives with generic addresses
-such as ZA, ZI containing multiple instances of similar
-stores (e.g. supermarkets), we force presence
-of street number, which later will be used
-as condition for matching */
-AND etab.adresse_numero IS NOT NULL
 )
 
 SELECT * FROM etab_closed_candidates

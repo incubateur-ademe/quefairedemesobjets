@@ -1,7 +1,10 @@
 from pydantic import BaseModel
 
+<<<<<<< HEAD
 from data.models.changes.utils import data_reconstruct
 
+=======
+>>>>>>> 63eec9bb (create_as_child, numéro rue, UI)
 
 class ChangeActeurCreateAsChild(BaseModel):
     id: str
