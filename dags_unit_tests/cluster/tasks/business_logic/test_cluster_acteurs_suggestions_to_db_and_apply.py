@@ -284,7 +284,8 @@ class TestClusterActeursSuggestionsToDb:
 
     @pytest.fixture
     def suggestions_list(self, df, db_acteurs_mock) -> list[dict]:
-        return cluster_acteurs_suggestions_prepare(df)
+        working, failing = cluster_acteurs_suggestions_prepare(df)
+        return working
 
     @pytest.fixture(autouse=True)
     def suggestions_to_db(self, df, id_action, id_execution, suggestions_list):

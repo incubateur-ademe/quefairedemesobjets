@@ -37,7 +37,7 @@ def cluster_acteurs_suggestions_to_db_wrapper(ti, dag, run_id) -> None:
 
     config: ClusterConfig = xcom_pull(ti, XCOMS.CONFIG)
     df_clusters = xcom_pull(ti, XCOMS.DF_PARENTS_CHOOSE_DATA)
-    suggestions = xcom_pull(ti, XCOMS.SUGGESTIONS)
+    suggestions = xcom_pull(ti, XCOMS.SUGGESTIONS_WORKING)
 
     log.preview("config", config)
     log.preview("df_clusters", df_clusters)
