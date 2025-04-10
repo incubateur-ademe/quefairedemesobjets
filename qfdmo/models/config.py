@@ -15,7 +15,7 @@ class GroupeActionConfig(models.Model):
         "qfdmo.GroupeAction",
         on_delete=models.CASCADE,
         verbose_name="Groupe d'action",
-        help_text="La configuration peut être limitée à un type d'actaction "
+        help_text="La configuration peut être limitée à un groupe d'action "
         "spécifique. Auquel cas il doit être indiqué ici.\n"
         "Si aucune action n'est renseignée, cette configuration "
         "s'appliquera à tout type d'acteur.",
