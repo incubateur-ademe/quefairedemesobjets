@@ -1,9 +1,9 @@
-<p class="qf-inline-flex qf-gap-1w qf-m-0">
-    <span class="fr-px-1v {{ groupe_action.icon }}
+<p class="qf-flex-row qf-gap-1w qf-m-0">
+    <div class="fr-px-1v {{ groupe_action.icon }}
         fr-icon--sm qf-rounded-full
         {% if groupe_action.fill %}qf-text-white qf-bg-{{ groupe_action.primary }}
         {% else %}qf-text-{{ groupe_action.primary }} qf-bg-white{% endif %}
         qf-border-{{ groupe_action.primary }} qf-border-2 qf-border-solid"
-        aria-hidden="true"></span>
-        {{ groupe_action.libelle }}
+        aria-hidden="true"></div>
+    <div class="fr-ml-1w">{{ groupe_action.libelle }}</div>
 </p>
