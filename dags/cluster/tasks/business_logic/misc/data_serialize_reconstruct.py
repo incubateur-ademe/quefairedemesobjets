@@ -67,10 +67,7 @@ def data_reconstruct(model: type[models.Model], data_src: dict) -> dict:
     data = data_src.copy()
 
     if "longitude" in data and "latitude" in data:
-        result["location"] = Point(data["longitude"], data["latitude"])
-        # so we don't evaluate in below loop
-        del data["longitude"]
-        del data["latitude"]
+        result["location"] = Point(data.pop("longitude"), data.pop("latitude"))
 
     for key, value in data.items():
         field = model._meta.get_field(key)
@@ -83,9 +80,20 @@ def data_reconstruct(model: type[models.Model], data_src: dict) -> dict:
             else:
                 result[key] = value
         elif isinstance(field, models.ForeignKey):
-            # If it's a foreign key, fetch the related entity
+            # Django seems to handle both {field}_id and {field} transparently
+            # but since we reconstruct for Django, we favor the {field} flavour,
+            # this prevents having inconsistent representations when we work with
+            # Django vs. DBT models
+            if key.endswith("_id"):
+                try:
+                    key_no_id = key.rstrip("_id")
+                    field = model._meta.get_field(key_no_id)
+                    key = key_no_id
+                except Exception:
+                    pass
             related_instance = field.related_model.objects.get(pk=value)  # type: ignore
             result[key] = related_instance
+
         else:
             result[key] = value
 
