@@ -1,6 +1,12 @@
 from datetime import timedelta
 
 import pendulum
+from acteurs.tasks.airflow_logic.check_model_table_consistency_task import (
+    check_model_table_consistency_task,
+)
+from acteurs.tasks.airflow_logic.replace_acteur_table_task import (
+    replace_acteur_table_task,
+)
 from airflow import DAG
 from airflow.operators.bash import BashOperator
 from shared.config.schedules import SCHEDULES
@@ -15,8 +21,9 @@ default_args = {
     "retry_delay": timedelta(minutes=2),
 }
 
+
 with DAG(
-    "build_view_dag",
+    "compute_acteurs",
     default_args=default_args,
     dag_display_name="DBT - Rafraîchir les acteurs affichés",
     description=(
@@ -115,25 +122,60 @@ with DAG(
         ),
     )
 
+    check_model_table_displayedacteur_task = check_model_table_consistency_task(
+        dag, "DisplayedActeur", "exposure_carte_acteur"
+    )
+    check_model_table_displayedpropositionservice_task = (
+        check_model_table_consistency_task(
+            dag, "DisplayedPropositionService", "exposure_carte_propositionservice"
+        )
+    )
+    # The publication isn't handled by DBT yet
+    # replace_displayedacteur_table_task = replace_acteur_table_task(
+    #     dag, "qfdmo_displayed", "exposure_carte_"
+    # )
+
+    check_model_table_vueacteur_task = check_model_table_consistency_task(
+        dag, "VueActeur", "exposure_exhaustive_acteur"
+    )
+    check_model_table_vuepropositionservice_task = check_model_table_consistency_task(
+        dag, "VuePropositionService", "exposure_exhaustive_propositionservice"
+    )
+    replace_vueacteur_table_task = replace_acteur_table_task(
+        dag, "qfdmo_vue", "exposure_exhaustive_"
+    )
+
     # Définir la séquence principale
     (
         dbt_run_base_acteurs
         >> dbt_test_base_acteurs
         >> dbt_run_intermediate_acteurs
         >> dbt_test_intermediate_acteurs
-        # Branche exhaustive
         >> dbt_run_marts_acteurs_exhaustive
         >> dbt_test_marts_acteurs_exhaustive
         >> dbt_run_exposure_acteurs_exhaustive
         >> dbt_test_exposure_acteurs_exhaustive
-        # Branche carte
         >> dbt_run_marts_acteurs_carte
         >> dbt_test_marts_acteurs_carte
         >> dbt_run_exposure_acteurs_carte
         >> dbt_test_exposure_acteurs_carte
-        # Branche opendata
         >> dbt_run_marts_acteurs_opendata
         >> dbt_test_marts_acteurs_opendata
         >> dbt_run_exposure_acteurs_opendata
         >> dbt_test_exposure_acteurs_opendata
+    )
+
+    # Définir la séquence de vérification en parallèle
+    (
+        dbt_test_exposure_acteurs_carte
+        >> check_model_table_displayedacteur_task
+        >> check_model_table_displayedpropositionservice_task
+        # >> replace_displayedacteur_table_task
+    )
+
+    (
+        dbt_test_exposure_acteurs_exhaustive
+        >> check_model_table_vueacteur_task
+        >> check_model_table_vuepropositionservice_task
+        >> replace_vueacteur_table_task
     )

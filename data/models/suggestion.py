@@ -6,7 +6,7 @@ from django.contrib.gis.db import models
 from django.db.models.functions import Now
 from django.template.loader import render_to_string
 
-from core.models import TimestampedModel
+from core.models.mixin import TimestampedModel
 from dags.sources.config.shared_constants import (
     SUGGESTION_ATRAITER,
     SUGGESTION_AVALIDER,
