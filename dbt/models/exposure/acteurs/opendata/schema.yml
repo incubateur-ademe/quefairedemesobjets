@@ -122,7 +122,7 @@ models:
           min_value: 250000
           max_value: 400000
       - dbt_expectations.expect_table_column_count_to_equal:
-          value: 24
+          value: 34
     config:
       materialized: table
       indexes:
