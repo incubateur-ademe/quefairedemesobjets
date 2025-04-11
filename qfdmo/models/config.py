@@ -22,7 +22,6 @@ class GroupeActionConfig(models.Model):
         null=True,
         blank=True,
     )
-
     acteur_type = models.ForeignKey(
         "qfdmo.ActeurType",
         on_delete=models.CASCADE,
