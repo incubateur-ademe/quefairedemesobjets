@@ -21,6 +21,9 @@ from cluster.tasks.airflow_logic.cluster_acteurs_parents_choose_new_task import 
 from cluster.tasks.airflow_logic.cluster_acteurs_read_task import (
     cluster_acteurs_read_task,
 )
+from cluster.tasks.airflow_logic.cluster_acteurs_suggestions_failing_task import (
+    cluster_acteurs_suggestions_failing_task,
+)
 from cluster.tasks.airflow_logic.cluster_acteurs_suggestions_prepare_task import (
     cluster_acteurs_suggestions_prepare_task,
 )
@@ -41,4 +44,5 @@ def chain_tasks(dag: DAG) -> None:
         cluster_acteurs_parents_choose_data_task(dag),
         cluster_acteurs_suggestions_prepare_task(dag),
         cluster_acteurs_suggestions_to_db_task(dag),
+        cluster_acteurs_suggestions_failing_task(dag),
     )

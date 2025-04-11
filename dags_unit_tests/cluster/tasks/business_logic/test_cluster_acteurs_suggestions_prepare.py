@@ -110,7 +110,8 @@ class TestClusterActeursSuggestionsDisplay:
     @pytest.fixture
     def suggestions(self, df_clusters):
         # The function should have everything it needs from the df
-        return cluster_acteurs_suggestions_prepare(df_clusters)
+        working, failing = cluster_acteurs_suggestions_prepare(df_clusters)
+        return working
 
     def test_structure_and_type(self, suggestions):
         assert isinstance(suggestions, list)
