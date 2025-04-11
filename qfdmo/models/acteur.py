@@ -1214,7 +1214,7 @@ class DisplayedPropositionService(BasePropositionService):
         verbose_name = "Proposition de service - AFFICHÉ"
         verbose_name_plural = "Proposition de service - AFFICHÉ"
 
-    id = models.CharField(primary_key=True)
+    # id = models.CharField(primary_key=True)
     acteur = models.ForeignKey(
         DisplayedActeur,
         on_delete=models.CASCADE,

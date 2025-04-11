@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("qfdmo", "0140_alter_displayedpropositionservice_id"),
+        ("qfdmo", "0139_alter_acteur_not_nullable_char_fields_tel_url_ville"),
     ]
 
     operations = [
