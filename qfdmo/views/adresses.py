@@ -115,19 +115,6 @@ class SearchActeursView(
         action_list = self._set_action_list(action_displayed)
         initial["action_list"] = "|".join([a.code for a in action_list])
 
-        if self.is_carte:
-            grouped_action_choices = self._get_grouped_action_choices(action_displayed)
-            actions_to_select = self._get_selected_action()
-            initial["grouped_action"] = self._grouped_action_from(
-                grouped_action_choices, actions_to_select
-            )
-            # TODO : refacto forms, merge with grouped_action field
-            initial["legend_grouped_action"] = initial["grouped_action"]
-
-            initial["action_list"] = "|".join(
-                [a for ga in initial["grouped_action"] for a in ga.split("|")]
-            )
-
         return initial
 
     def get_form(self, form_class=None):
@@ -473,19 +460,18 @@ class SearchActeursView(
 
         return filters, excludes
 
-    def _get_grouped_action_choices(
-        self, action_displayed: list[Action]
-    ) -> list[list[str]]:
-        groupe_with_displayed_actions = []
-
+    def get_cached_groupe_action_with_displayed_actions(self, action_displayed):
         # Cast needed because of the cache
         cached_groupe_action_instances = cast(
             QuerySet[GroupeAction],
             cache.get_or_set("groupe_action_instances", get_groupe_action_instances),
         )
 
+        # Fetch actions from cache only if they are displayed
+        # for the end user
+        cached_groupe_action_with_displayed_actions = []
         for cached_groupe in cached_groupe_action_instances:
-            if groupe_actions := [
+            if displayed_actions_from_groupe_actions := [
                 action
                 # TODO : à optimiser avec le cache
                 for action in cached_groupe.actions.all().order_by(  # type: ignore
@@ -493,10 +479,24 @@ class SearchActeursView(
                 )
                 if action in action_displayed
             ]:
-                groupe_with_displayed_actions.append([cached_groupe, groupe_actions])
+                cached_groupe_action_with_displayed_actions.append(
+                    [cached_groupe, displayed_actions_from_groupe_actions]
+                )
+        return cached_groupe_action_with_displayed_actions
 
+    def _get_grouped_action_choices(
+        self, action_displayed: list[Action]
+    ) -> list[list[str]]:
+        """Generate a list of choices for form field
+        used in legend"""
+        # Generate a tuple of (code, libelle) used in the frontend.
+        # The libelle is automatically picked up by django templating
+        # when generating the form.
         grouped_action_choices = []
-        for [groupe, groupe_displayed_actions] in groupe_with_displayed_actions:
+        for [
+            groupe,
+            groupe_displayed_actions,
+        ] in self.get_cached_groupe_action_with_displayed_actions(action_displayed):
             libelle = ""
             if groupe.icon:
                 libelle = (
@@ -523,10 +523,27 @@ class SearchActeursView(
         ]
 
 
+# TODO: move in views/carte.py
 class CarteSearchActeursView(SearchActeursView):
     is_carte = True
     template_name = "qfdmo/carte.html"
     form_class = CarteForm
+
+    def get_initial(self, *args, **kwargs):
+        initial = super().get_initial(*args, **kwargs)
+        action_displayed = self._set_action_displayed()
+        grouped_action_choices = self._get_grouped_action_choices(action_displayed)
+        actions_to_select = self._get_selected_action()
+        initial["grouped_action"] = self._grouped_action_from(
+            grouped_action_choices, actions_to_select
+        )
+        # TODO : refacto forms, merge with grouped_action field
+        initial["legend_grouped_action"] = initial["grouped_action"]
+
+        initial["action_list"] = "|".join(
+            [a for ga in initial["grouped_action"] for a in ga.split("|")]
+        )
+        return initial
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

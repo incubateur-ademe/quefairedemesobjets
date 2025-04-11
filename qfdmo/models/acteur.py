@@ -44,6 +44,11 @@ from dags.sources.config.shared_constants import (
 )
 from qfdmo.models.action import Action, get_action_instances
 from qfdmo.models.categorie_objet import SousCategorieObjet
+
+# Explicit imports from models config, action, categories, utils
+# and not from qfdmo.models are required here to prevent circular
+# dependency import error.
+from qfdmo.models.config import CarteConfig, GroupeActionConfig
 from qfdmo.models.utils import (
     CodeAsNaturalKeyModel,
     NomAsNaturalKeyManager,
@@ -312,7 +317,6 @@ class DisplayedActeurManager(NomAsNaturalKeyManager):
 
 
 class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
-
     class Meta:
         abstract = True
 
@@ -969,33 +973,35 @@ class DisplayedActeur(BaseActeur):
     def get_absolute_url(self):
         return reverse("qfdmo:acteur-detail", args=[self.uuid])
 
-    def acteur_actions(self, direction=None):
-        ps_action_ids = list(
-            {ps.action_id for ps in self.proposition_services.all()}  # type: ignore
-        )
+    def acteur_actions(self, direction=None, actions_codes=None):
+        pss = self.proposition_services.all()
         # Cast needed because of the cache
         cached_action_instances = cast(
             List[Action], cache.get_or_set("_action_instances", get_action_instances)
         )
-        return [
-            action
-            for action in cached_action_instances
-            if (not direction or direction in [d.code for d in action.directions.all()])
-            and action.id in ps_action_ids
-        ]
+
+        if direction:
+            pss = pss.filter(action__directions__code__in=[direction])
+        if actions_codes:
+            pss = pss.filter(action__code__in=actions_codes.split("|"))
+
+        action_ids_to_display = pss.values_list("action__id", flat=True)
+        return cached_action_instances.filter(id__in=action_ids_to_display)
 
     def json_acteur_for_display(
         self,
         direction: str | None = None,
         action_list: str | None = None,
         carte: bool = False,
+        carte_config: CarteConfig = None,
     ) -> str:
-        actions = self.acteur_actions(direction=direction)
-
-        if action_list:
-            actions = [a for a in actions if a.code in action_list.split("|")]
+        # TODO: refacto jinja: once the shared/results.html template
+        # will be migrated to django template, this method should
+        # live in a template_tags instead.
+        actions = self.acteur_actions(direction=direction, actions_codes=action_list)
 
         def sort_actions(a):
+            # TODO: explain this function ???
             if a == self.action_principale:
                 return -1
 
@@ -1004,27 +1010,46 @@ class DisplayedActeur(BaseActeur):
                 base_order += (a.groupe_action.order or 0) * 100
             return base_order
 
-        actions = sorted(actions, key=sort_actions)
-
         acteur_dict = {
             "uuid": self.uuid,
             "location": orjson.loads(self.location.geojson),
         }
 
         if not actions:
+            # TODO: explain why we need to decode here
             return orjson.dumps(acteur_dict).decode("utf-8")
 
-        displayed_action = actions[0]
+        displayed_action = sorted(actions, key=sort_actions)[0]
 
         if carte and displayed_action.groupe_action:
             displayed_action = displayed_action.groupe_action
 
-        acteur_dict.update(icon=displayed_action.icon, couleur=displayed_action.couleur)
+        acteur_dict.update(
+            icon=displayed_action.icon,
+            couleur=displayed_action.couleur,
+        )
+
+        # TODO: in case we have a carteConfig, customize carteConfig
+        # here
+        if carte_config:
+            try:
+                groupe_action_config = carte_config.groupe_action_config.get(
+                    groupe_action__actions__code__in=[displayed_action],
+                    acteur_type=self.acteur_type,
+                )
+                if groupe_action_config.icon:
+                    # Property is camelcased as it is used in javascript
+                    acteur_dict.update(iconFile=groupe_action_config.icon.url)
+                    del acteur_dict["icon"]
+
+            except GroupeActionConfig.DoesNotExist:
+                pass
 
         if carte and displayed_action.code == "reparer":
             acteur_dict.update(
                 bonus=getattr(self, "bonus", False),
                 reparer=getattr(self, "reparer", False),
+                fillBackground=True,
             )
 
         return orjson.dumps(acteur_dict).decode("utf-8")
@@ -1051,7 +1076,6 @@ class DisplayedActeur(BaseActeur):
 
 
 class DisplayedActeurTemp(BaseActeur):
-
     uuid = models.CharField(max_length=255, default=shortuuid.uuid, editable=False)
 
     labels = models.ManyToManyField(
