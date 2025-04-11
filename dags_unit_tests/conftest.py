@@ -145,6 +145,7 @@ def dag_config():
                     "proposition_service_codes",
                     "source_code",
                     "acteur_type_code",
+                    "statut",
                 ]
             ],
             "endpoint": "https://example.com/api",

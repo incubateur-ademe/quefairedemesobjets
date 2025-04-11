@@ -4,8 +4,11 @@ from typing import Dict, List, Set, Tuple
 
 import pandas as pd
 from sources.tasks.airflow_logic.config_management import DAGConfig
+from utils.django import django_setup_full, get_model_fields
 
 logger = logging.getLogger(__name__)
+
+django_setup_full()
 
 
 @dataclass
@@ -71,17 +74,21 @@ class ActeurComparator:
 
 def keep_acteur_changed(
     df_normalized: pd.DataFrame, df_acteur_from_db: pd.DataFrame, dag_config: DAGConfig
-) -> Tuple[pd.DataFrame, pd.DataFrame, Dict]:
+) -> tuple[pd.DataFrame, pd.DataFrame, Dict]:
+
+    from qfdmo.models import Acteur
+
     metadata = {}
     if df_acteur_from_db.empty:
         return df_normalized, df_acteur_from_db, metadata
 
-    columns_to_compare = dag_config.get_expected_columns() - {
-        "location",
-        "sous_categorie_codes",
-        "action_codes",
-        "cree_le",
-    }
+    available_model_fields_to_compare = set(
+        get_model_fields(Acteur, with_relationships=True, latlong=True)
+    )
+
+    columns_to_compare = (
+        available_model_fields_to_compare & dag_config.get_expected_columns()
+    )
 
     # Préparer les dataframes pour la comparaison
     source_ids = set(df_normalized["identifiant_unique"])

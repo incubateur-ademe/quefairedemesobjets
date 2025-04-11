@@ -3,17 +3,19 @@ import logging
 import pandas as pd
 from sources.tasks.airflow_logic.config_management import DAGConfig
 from utils import logging_utils as log
-from utils.django import django_setup_full
+from utils.django import django_setup_full, get_model_fields
 
 # Setup Django avant import des modèles
 django_setup_full()
-from qfdmo.models import Acteur  # noqa: E402
+
 
 logger = logging.getLogger(__name__)
 
 
 # TODO: To be factorized with PYDANTIC classes
 def db_read_acteur(df_normalized: pd.DataFrame, dag_config: DAGConfig):
+    from qfdmo.models import Acteur
+
     if "source_code" not in df_normalized.columns:
         raise ValueError(
             "La colonne source_codes est requise dans la dataframe normalisée"
@@ -37,16 +39,12 @@ def db_read_acteur(df_normalized: pd.DataFrame, dag_config: DAGConfig):
             " ingest the source"
         )
     acteurs_list = []
-    expected_columns = dag_config.get_expected_columns() - {
-        "location",
-        "sous_categorie_codes",
-        "label_codes",
-        "acteur_service_codes",
-        "action_codes",
-        "proposition_service_codes",
-        "source_code",
-        "acteur_type_code",
-    } | {"cree_le"}
+
+    # we need expected_columns which exists in the model
+    # The relationships are resolved in the loop
+    expected_columns = (dag_config.get_expected_columns()) & set(
+        get_model_fields(Acteur, with_relationships=False, latlong=True)
+    )
     for acteur in acteurs:
         acteur_dict = {k: getattr(acteur, k) for k in expected_columns}
         acteur_dict["source_code"] = acteur.source.code
