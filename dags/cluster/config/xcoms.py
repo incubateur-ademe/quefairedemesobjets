@@ -18,7 +18,8 @@ class XCOMS:
     DF_CLUSTERS_PREPARE: str = "df_clusters_prepare"
     DF_PARENTS_CHOOSE_NEW: str = "df_parents_choose_new"
     DF_PARENTS_CHOOSE_DATA: str = "df_parents_choose_data"
-    SUGGESTIONS: str = "suggestions"
+    SUGGESTIONS_WORKING: str = "suggestions_working"
+    SUGGESTIONS_FAILING: str = "suggestions_failing"
 
 
 def xcom_pull(ti: TaskInstance, key: str, skip_if_empty: bool = False) -> Any:
@@ -38,7 +39,9 @@ def xcom_pull(ti: TaskInstance, key: str, skip_if_empty: bool = False) -> Any:
         value = ti.xcom_pull(key=key, task_ids=TASKS.PARENTS_CHOOSE_NEW)
     elif key == XCOMS.DF_PARENTS_CHOOSE_DATA:
         value = ti.xcom_pull(key=key, task_ids=TASKS.PARENTS_CHOOSE_DATA)
-    elif key == XCOMS.SUGGESTIONS:
+    elif key == XCOMS.SUGGESTIONS_WORKING:
+        value = ti.xcom_pull(key=key, task_ids=TASKS.SUGGESTIONS_PREPARE)
+    elif key == XCOMS.SUGGESTIONS_FAILING:
         value = ti.xcom_pull(key=key, task_ids=TASKS.SUGGESTIONS_PREPARE)
     else:
         raise ValueError(f"{msg}: key inconnue")
