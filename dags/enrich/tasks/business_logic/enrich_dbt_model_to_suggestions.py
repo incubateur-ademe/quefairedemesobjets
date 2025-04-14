@@ -6,6 +6,7 @@ from cluster.tasks.business_logic.cluster_acteurs_parents_choose_new import (
     parent_id_generate,
 )
 from enrich.config import COHORTS, COLS, Cohort
+from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
 
@@ -185,28 +186,30 @@ def enrich_dbt_model_to_suggestions(
     for _, row in df.iterrows():
         row = dict(row)
 
-        # -----------------------------------------
-        # NOT REPLACED
-        # -----------------------------------------
-        if cohort == COHORTS.CLOSED_NOT_REPLACED:
-            changes = suggestion_change_prepare_closed_not_replaced(row)
+        try:
+            # -----------------------------------------
+            # NOT REPLACED
+            # -----------------------------------------
+            if cohort == COHORTS.CLOSED_NOT_REPLACED:
+                changes = suggestion_change_prepare_closed_not_replaced(row)
 
-        # -----------------------------------------
-        # REPLACED
-        # -----------------------------------------
-        elif cohort in [
-            COHORTS.CLOSED_REP_OTHER_SIREN,
-            COHORTS.CLOSED_REP_SAME_SIREN,
-        ]:
-            changes = suggestion_change_prepare_closed_replaced(row)
+            # -----------------------------------------
+            # REPLACED
+            # -----------------------------------------
+            elif cohort in [
+                COHORTS.CLOSED_REP_OTHER_SIREN,
+                COHORTS.CLOSED_REP_SAME_SIREN,
+            ]:
+                changes = suggestion_change_prepare_closed_replaced(row)
 
-        else:
-            raise NotImplementedError(f"Cohorte non implémentée: {cohort=}")
+        except Exception as e:
+            log.preview("🔴 Suggestion problématique", row)
+            logger.error(f"Erreur de préparation des changements: {e}")
+            continue
 
         # Creating a suggestion with the given changes
         suggestions.append(
             {
-                # TODO: free format thanks to recursive model
                 "contexte": {},
                 "suggestion": {
                     "title": cohort.label,
@@ -215,6 +218,9 @@ def enrich_dbt_model_to_suggestions(
                 },
             }
         )
+
+    if not suggestions:
+        raise ValueError("Aucune suggestion à écrire, pas normal")
 
     # -----------------------------------------
     # DRY RUN: STOP HERE
