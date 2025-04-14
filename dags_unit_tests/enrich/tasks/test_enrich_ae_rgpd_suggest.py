@@ -26,6 +26,7 @@ class TestEnrichAeRgpdSuggest:
                 COLS.ACTEUR_NOMS_ORIGINE: ["acteur1", "acteur2"],
                 COLS.MATCH_WORDS: ["acteur1", "acteur2"],
                 COLS.MATCH_SCORE: [1.0, 1.0],
+                COLS.ACTEUR_SIRET: ["11111111100001", "22222222200001"],
             }
         )
 
@@ -96,7 +97,7 @@ class TestEnrichAeRgpdSuggest:
         assert acteur.nom == "ANONYMISE POUR RAISON RGPD"
         assert acteur.nom_officiel == "ANONYMISE POUR RAISON RGPD"
         assert acteur.nom_commercial == "ANONYMISE POUR RAISON RGPD"
-        assert acteur.email is None
+        assert acteur.email == ""
         assert acteur.telephone == "ANONYMISE POUR RAISON RGPD"
         assert acteur.adresse == "ANONYMISE POUR RAISON RGPD"
         assert acteur.adresse_complement == "ANONYMISE POUR RAISON RGPD"

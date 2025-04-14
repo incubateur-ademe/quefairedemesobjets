@@ -37,7 +37,7 @@ with DAG(
     ),
     tags=["enrich", "annuaire", "entreprise", "siren", "ae", "acteurs"],
     params={
-        COLS.DRY_RUN: Param(
+        "dry_run": Param(
             True,
             type="boolean",
             description_md="🚱 Si coché, aucune tâche d'écriture ne sera effectuée",
@@ -47,7 +47,7 @@ with DAG(
             type=["null", "string"],
             description_md="🔍 Filtre sur les commentaires pour la lecture des données",
         ),
-        COLS.MATCH_THRESHOLD: Param(
+        COLS.MATCH_SCORE: Param(
             1,
             type="number",
             minimum=0.5,

@@ -14,14 +14,12 @@ Notes:
 -- Starting from our acteurs we can match via SIRET
 WITH acteurs_with_siret AS (
 	SELECT
-		-- Common columns
-        LEFT(siret,9) AS siren,
-        siret,
-
 		-- Acteur columns
+        identifiant_unique AS acteur_id,
+		siret AS acteur_siret,
+		LEFT(siret,9) AS acteur_siren,
         nom AS acteur_nom,
         udf_normalize_string_for_match(nom) AS acteur_nom_normalise,
-        identifiant_unique AS acteur_id,
         commentaires AS acteur_commentaires,
         statut AS acteur_statut,
 		acteur_type_id,
@@ -30,7 +28,8 @@ WITH acteurs_with_siret AS (
 		source_code AS acteur_source_code,
 		adresse AS acteur_adresse,
 		code_postal AS acteur_code_postal,
-		ville AS acteur_ville
+		ville AS acteur_ville,
+		location AS acteur_location
 
 	FROM {{ ref('marts_carte_acteur') }}
 	WHERE siret IS NOT NULL AND siret != '' AND LENGTH(siret) = 14
@@ -40,12 +39,10 @@ not on unite closed (NOT unite_est_actif) because
 open unite might bring potential replacements */
 etab_closed_candidates AS (
 SELECT
-	-- Common columns (need to specify to avoid ambiguity)
-	acteurs.siren,
-	acteurs.siret,
-
 	-- acteurs
 	acteurs.acteur_id,
+	acteurs.acteur_siret,
+	acteurs.acteur_siren,
 	acteurs.acteur_type_id,
 	acteurs.acteur_type_code,
 	acteurs.acteur_source_id,
@@ -57,6 +54,8 @@ SELECT
 	acteurs.acteur_adresse,
 	acteurs.acteur_code_postal,
 	acteurs.acteur_ville,
+	CASE WHEN acteurs.acteur_location IS NULL THEN NULL ELSE ST_X(acteurs.acteur_location) END AS acteur_longitude,
+	CASE WHEN acteurs.acteur_location IS NULL THEN NULL ELSE ST_Y(acteurs.acteur_location) END AS acteur_latitude,
 
 	-- etablissement
 	etab.unite_est_actif AS unite_est_actif,
@@ -68,7 +67,7 @@ SELECT
   	etab.naf AS etab_naf
 
 FROM acteurs_with_siret AS acteurs
-JOIN {{ ref('int_ae_etablissement') }} AS etab ON acteurs.siret = etab.siret
+JOIN {{ ref('int_ae_etablissement') }} AS etab ON acteurs.acteur_siret = etab.siret
 WHERE etab.est_actif IS FALSE
 )
 

@@ -55,6 +55,7 @@ class TestChangeActeurCreateAsChild:
         )
         change.apply()
 
+        # Acteur created in base to hold the core data
         base = Acteur.objects.get(pk="child1")
         assert base.identifiant_unique == "child1"
         assert base.nom == "my child1"
@@ -63,6 +64,8 @@ class TestChangeActeurCreateAsChild:
         assert base.statut == "ACFIF"
         assert base.location.x == 1
         assert base.location.y == 1
+
+        # Acteur created in revision to hold the parent reference
         revision = RevisionActeur.objects.get(pk="child1")
         assert revision.parent.pk == parent.pk
         assert revision.parent_reason == "test"

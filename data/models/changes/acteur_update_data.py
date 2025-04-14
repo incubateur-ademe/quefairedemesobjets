@@ -35,7 +35,10 @@ class ChangeActeurUpdateData(ChangeActeurAbstract):
         acteur = self.validate()
         # If acteur is only in base, we need to create a revision
         if isinstance(acteur, Acteur):
-            acteur = RevisionActeur(identifiant_unique=acteur.identifiant_unique)
+            acteur = RevisionActeur(
+                identifiant_unique=acteur.identifiant_unique,
+                acteur_type=acteur.acteur_type,
+            )
         data = data_reconstruct(RevisionActeur, self.data)
         for key, value in data.items():
             setattr(acteur, key, value)

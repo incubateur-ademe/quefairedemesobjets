@@ -80,10 +80,8 @@ def data_reconstruct(model: type[models.Model], data_src: dict) -> dict:
             else:
                 result[key] = value
         elif isinstance(field, models.ForeignKey):
-            # Django seems to handle both {field}_id and {field} transparently
-            # but since we reconstruct for Django, we favor the {field} flavour,
-            # this prevents having inconsistent representations when we work with
-            # Django vs. DBT models
+            # Normalizing to {field} from {field}_id so all fields are
+            # represented in their Django flavour
             if key.endswith("_id"):
                 try:
                     key_no_id = key.rstrip("_id")
@@ -91,8 +89,12 @@ def data_reconstruct(model: type[models.Model], data_src: dict) -> dict:
                     key = key_no_id
                 except Exception:
                     pass
-            related_instance = field.related_model.objects.get(pk=value)  # type: ignore
-            result[key] = related_instance
+
+            # Retrieving the related instance if it's not already an instance
+            if not isinstance(value, field.related_model):  # type: ignore
+                value = field.related_model.objects.get(pk=value)  # type: ignore
+
+            result[key] = value
 
         else:
             result[key] = value
