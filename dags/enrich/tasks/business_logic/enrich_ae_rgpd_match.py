@@ -59,19 +59,17 @@ def enrich_ae_rgpd_match(
         lambda x: word_overlap_ratio(x, cols_names_qfdmo, cols_names_ae), axis=1
     )
     df[COLS.MATCH_WORDS] = df["temp"].apply(lambda x: x[0])
-    df[COLS.MATCH_SCORE_AE_RGPD] = df["temp"].apply(lambda x: x[1])
+    df[COLS.MATCH_SCORE] = df["temp"].apply(lambda x: x[1])
     df.drop(columns=["temp"], inplace=True)
 
     # Selecting & previewing matches
-    df_no_match = df[df[COLS.MATCH_SCORE_AE_RGPD] == 0]
-    df_partial = df[
-        (df[COLS.MATCH_SCORE_AE_RGPD] > 0) & (df[COLS.MATCH_SCORE_AE_RGPD] < 1)
-    ]
-    df_perfect = df[df[COLS.MATCH_SCORE_AE_RGPD] == 1]
-    df_retained = df[df[COLS.MATCH_SCORE_AE_RGPD] >= match_threshold].copy()
+    df_no_match = df[df[COLS.MATCH_SCORE] == 0]
+    df_partial = df[(df[COLS.MATCH_SCORE] > 0) & (df[COLS.MATCH_SCORE] < 1)]
+    df_perfect = df[df[COLS.MATCH_SCORE] == 1]
+    df_retained = df[df[COLS.MATCH_SCORE] >= match_threshold].copy()
     log.preview_df_as_markdown("🔴 Matches non-existant (==0)", df_no_match)
     log.preview_df_as_markdown("🟡 Matches partiel (>0 & <1)", df_partial)
     log.preview_df_as_markdown("🟢 Matches parfait (==1)", df_perfect)
     log.preview_df_as_markdown(f"💾 Matches retenus (>={match_threshold})", df_retained)
 
-    return df_retained.sort_values(COLS.MATCH_SCORE_AE_RGPD, ascending=False)
+    return df_retained.sort_values(COLS.MATCH_SCORE, ascending=False)

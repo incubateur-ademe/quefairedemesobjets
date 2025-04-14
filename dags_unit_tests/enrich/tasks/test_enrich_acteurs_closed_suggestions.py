@@ -39,6 +39,8 @@ class TestEnrichActeursClosedSuggestions:
                 COLS.ACTEUR_NOM: ["AVANT a01", "AVANT a02"],
                 COLS.ACTEUR_TYPE_ID: [atype.pk, atype.pk],
                 COLS.ACTEUR_SOURCE_ID: [source.pk, source.pk],
+                COLS.SUGGEST_COHORT_CODE: [COHORTS.CLOSED_NOT_REPLACED.code] * 2,
+                COLS.SUGGEST_COHORT_LABEL: [COHORTS.CLOSED_NOT_REPLACED.label] * 2,
             }
         )
 
@@ -55,6 +57,8 @@ class TestEnrichActeursClosedSuggestions:
                 ],
                 COLS.ACTEUR_TYPE_ID: [atype.pk, atype.pk, atype.pk],
                 COLS.ACTEUR_SOURCE_ID: [source.pk, source.pk, source.pk],
+                COLS.ACTEUR_LONGITUDE: [1, 1, 1],
+                COLS.ACTEUR_LATITUDE: [2, 2, 2],
                 # Replacement data
                 COLS.REMPLACER_SIRET: [
                     "11111111100002",
@@ -62,10 +66,15 @@ class TestEnrichActeursClosedSuggestions:
                     "55555555500001",
                 ],
                 COLS.REMPLACER_NOM: ["APRES a1", "APRES a2", "APRES a3"],
+                COLS.SUGGEST_COHORT_CODE: [
+                    COHORTS.CLOSED_REP_SAME_SIREN.code,
+                    COHORTS.CLOSED_REP_OTHER_SIREN.code,
+                    COHORTS.CLOSED_REP_OTHER_SIREN.code,
+                ],
                 COLS.SUGGEST_COHORT_LABEL: [
-                    "meme_siret",
-                    "autre_siret",
-                    "autre_siret",
+                    COHORTS.CLOSED_REP_SAME_SIREN.label,
+                    COHORTS.CLOSED_REP_OTHER_SIREN.label,
+                    COHORTS.CLOSED_REP_OTHER_SIREN.label,
                 ],
                 COLS.REMPLACER_ADRESSE: ["Adresse1", "Adresse2", "Adresse3"],
                 COLS.REMPLACER_CODE_POSTAL: ["12345", "67890", "12345"],
@@ -77,18 +86,24 @@ class TestEnrichActeursClosedSuggestions:
     def test_df_replaced(self, df_replaced):
         assert sorted(df_replaced[COLS.SUGGEST_COHORT_LABEL].unique()) == sorted(
             [
-                "meme_siret",
-                "autre_siret",
+                COHORTS.CLOSED_REP_SAME_SIREN.label,
+                COHORTS.CLOSED_REP_OTHER_SIREN.label,
             ]
         )
 
     @pytest.fixture
     def df_replaced_meme_siret(self, df_replaced):
-        return df_replaced[df_replaced[COLS.SUGGEST_COHORT_LABEL] == "meme_siret"]
+        return df_replaced[
+            df_replaced[COLS.SUGGEST_COHORT_LABEL]
+            == COHORTS.CLOSED_REP_SAME_SIREN.label
+        ]
 
     @pytest.fixture
     def df_replaced_autre_siret(self, df_replaced):
-        return df_replaced[df_replaced[COLS.SUGGEST_COHORT_LABEL] == "autre_siret"]
+        return df_replaced[
+            df_replaced[COLS.SUGGEST_COHORT_LABEL]
+            == COHORTS.CLOSED_REP_OTHER_SIREN.label
+        ]
 
     @pytest.fixture
     def acteurs(self, df_not_replaced, df_replaced, atype, source):
@@ -113,7 +128,7 @@ class TestEnrichActeursClosedSuggestions:
         # Write suggestions to DB
         enrich_dbt_model_to_suggestions(
             df=df_not_replaced,
-            cohort_code=COHORTS.CLOSED_NOT_REPLACED,
+            cohort=COHORTS.CLOSED_NOT_REPLACED,
             identifiant_action="test_not_replaced",
             dry_run=False,
         )
@@ -148,7 +163,7 @@ class TestEnrichActeursClosedSuggestions:
         # Write suggestions to DB
         enrich_dbt_model_to_suggestions(
             df=df_replaced_meme_siret,
-            cohort_code=COHORTS.CLOSED_REP_SAME_SIREN,
+            cohort=COHORTS.CLOSED_REP_SAME_SIREN,
             identifiant_action="test_meme_siren",
             dry_run=False,
         )
@@ -192,7 +207,7 @@ class TestEnrichActeursClosedSuggestions:
         # Write suggestions to DB
         enrich_dbt_model_to_suggestions(
             df=df_replaced_autre_siret,
-            cohort_code=COHORTS.CLOSED_REP_OTHER_SIREN,
+            cohort=COHORTS.CLOSED_REP_OTHER_SIREN,
             identifiant_action="test_autre_siren",
             dry_run=False,
         )

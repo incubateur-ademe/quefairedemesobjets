@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 def task_info_get():
     return f"""
     ============================================================
-    Description de la tâche "{TASKS.MATCH_SCORE_AE_RGPD}"
+    Description de la tâche "{TASKS.MATCH_SCORE}"
     ============================================================
     💡 quoi: on cherche à déterminer quels acteurs QFDMO ont un
     nom qui correspond à des noms de personnes dans l'AE
@@ -34,7 +34,7 @@ def enrich_ae_rgpd_match_wrapper(ti, params) -> None:
 
     df = enrich_ae_rgpd_match(
         df=ti.xcom_pull(key=XCOMS.DF_READ),
-        match_threshold=params[COLS.MATCH_THRESHOLD],
+        match_threshold=params[COLS.MATCH_SCORE],
     )
     if df.empty:
         raise AirflowSkipException("Pas de matches, on s'arrête là")
@@ -44,7 +44,7 @@ def enrich_ae_rgpd_match_wrapper(ti, params) -> None:
 
 def enrich_ae_rgpd_match_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
-        task_id=TASKS.MATCH_SCORE_AE_RGPD,
+        task_id=TASKS.MATCH_SCORE,
         python_callable=enrich_ae_rgpd_match_wrapper,
         dag=dag,
     )

@@ -8,28 +8,17 @@
 WITH potential_replacements AS (
 	SELECT
 
-		-- Candidates
-		candidates.acteur_id AS acteur_id,
-		candidates.acteur_type_id AS acteur_type_id,
-		candidates.acteur_type_code AS acteur_type_code,
-		candidates.acteur_source_id AS acteur_source_id,
-		candidates.acteur_source_code AS acteur_source_code,
-		candidates.acteur_statut AS acteur_statut,
-		candidates.siret AS acteur_siret,
-		candidates.acteur_nom,
-		candidates.acteur_commentaires AS acteur_commentaires,
-		candidates.acteur_adresse AS acteur_adresse,
-		candidates.acteur_code_postal AS acteur_code_postal,
-		candidates.acteur_ville AS acteur_ville,
+		-- Candidates acteur data
+		candidates.*,
 
 		-- Replacements
 		replacements.siret AS remplacer_siret,
-		LEFT(candidates.siret,9) = LEFT(replacements.siret,9) AS remplacer_siret_is_from_same_siren,
+		LEFT(candidates.acteur_siret,9) = LEFT(replacements.siret,9) AS remplacer_siret_is_from_same_siren,
 		replacements.nom AS remplacer_nom,
-		replacements.naf AS naf,
-		replacements.ville AS ville,
-		replacements.code_postal AS code_postal,
-		replacements.adresse AS adresse,
+		replacements.naf AS remplacer_naf,
+		replacements.ville AS remplacer_ville,
+		replacements.code_postal AS remplacer_code_postal,
+		replacements.adresse AS remplacer_adresse,
 
 		-- Matching
 		udf_columns_words_in_common_count(
@@ -37,11 +26,11 @@ WITH potential_replacements AS (
 			udf_normalize_string_for_match(replacements.nom)
 		) AS noms_nombre_mots_commun,
 		ROW_NUMBER() OVER (
-			PARTITION BY candidates.siret
+			PARTITION BY candidates.acteur_siret
 			ORDER BY
 				-- Prioritize replacements from same company
 				CASE
-					WHEN LEFT(candidates.siret,9) = LEFT(replacements.siret,9) THEN 1
+					WHEN LEFT(candidates.acteur_siret,9) = LEFT(replacements.siret,9) THEN 1
 					ELSE 0
 				END DESC,
 				-- Then etablissements with more words in common

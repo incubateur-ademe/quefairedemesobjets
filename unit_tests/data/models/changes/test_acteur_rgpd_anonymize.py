@@ -36,7 +36,7 @@ CHANGES_EXPECTED = {
     "nom": CHANGE_ANON,
     "nom_officiel": CHANGE_ANON,
     "nom_commercial": CHANGE_ANON,
-    "email": None,  # due to email constraint
+    "email": "",  # Consequence of allowing empty strings in DB
     "telephone": CHANGE_ANON,
     "adresse": CHANGE_ANON,
     "adresse_complement": CHANGE_ANON,
