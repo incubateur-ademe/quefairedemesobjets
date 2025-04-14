@@ -76,6 +76,7 @@ with DAG(
                 "origin": [
                     "identifiant_externe",
                     "source_code",
+                    "acteur_type_code",
                 ],
                 "transformation": "clean_identifiant_unique",
                 "destination": ["identifiant_unique"],
