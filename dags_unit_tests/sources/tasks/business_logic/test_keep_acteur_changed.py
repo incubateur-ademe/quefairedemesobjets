@@ -942,3 +942,52 @@ def test_keep_acteur_changed(
     metadata = {k: sorted(v.items()) for k, v in metadata.items()}
     metadata_expected = {k: sorted(v.items()) for k, v in metadata_expected.items()}
     assert metadata == metadata_expected
+
+
+def test_keep_acteur_changed_same_acteur_but_different_identifiant_unique(dag_config):
+    df_normalized = pd.DataFrame(
+        {
+            "nom": ["nom 1"],
+            "identifiant_unique": ["source1_id1"],
+            "source_code": ["source1"],
+            "identifiant_externe": ["id1"],
+            "label_codes": [[]],
+            "acteur_type_code": [[]],
+            "acteur_service_codes": [[]],
+            "proposition_service_codes": [[]],
+        }
+    )
+    df_acteur_from_db = pd.DataFrame(
+        {
+            "nom": ["nom 1"],
+            "identifiant_unique": ["source1_id_old"],
+            "source_code": ["source1"],
+            "identifiant_externe": ["id1"],
+            "label_codes": [[]],
+            "acteur_type_code": [[]],
+            "acteur_service_codes": [[]],
+            "proposition_service_codes": [[]],
+        }
+    )
+    df_expected = pd.DataFrame(
+        {
+            "nom": [],
+            "identifiant_unique": [],
+            "source_code": [],
+            "identifiant_externe": [],
+            "label_codes": [],
+            "acteur_type_code": [],
+            "acteur_service_codes": [],
+            "proposition_service_codes": [],
+        }
+    )
+
+    df_acteur, df_acteur_from_db, metadata = keep_acteur_changed(
+        df_normalized=df_normalized,
+        df_acteur_from_db=df_acteur_from_db,
+        dag_config=dag_config,
+    )
+
+    pd.testing.assert_frame_equal(df_acteur, df_expected, check_dtype=False)
+    pd.testing.assert_frame_equal(df_acteur_from_db, df_expected, check_dtype=False)
+    assert metadata == {}

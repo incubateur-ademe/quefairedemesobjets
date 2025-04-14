@@ -257,12 +257,10 @@ def source_data_normalize(
         )
 
     # Etapes de normalisation spécifiques aux sources
-    # TODO: Remplacer par le dag_id
     if dag_id == "pharmacies":
         df = df_normalize_pharmacie(df)
 
-    # TODO: Remplacer par le dag_id
-    if dag_id == "sinoe":
+    if dag_id == "source_sinoe":
         df = df_normalize_sinoe(df)
 
     # Log si des localisations sont manquantes parmis les acteurs non digitaux
