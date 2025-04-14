@@ -27,7 +27,7 @@ class TASKS:
     ENRICH_DBT_MODELS_REFRESH: str = "enrich_dbt_models_refresh"
 
     # Matching tasks
-    MATCH_SCORE_AE_RGPD: str = "enrich_ae_rgpd_match"
+    MATCH_SCORE: str = "enrich_ae_rgpd_match"
 
     # Suggestion tasks
     SUGGEST_AE_RGPD: str = "enrich_ae_rgpd_suggest"
