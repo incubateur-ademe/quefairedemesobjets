@@ -5,7 +5,6 @@ from typing import Dict, List, Set, Tuple
 import pandas as pd
 from sources.tasks.airflow_logic.config_management import DAGConfig
 from sources.tasks.transform.transform_df import compute_identifiant_unique
-from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +78,6 @@ def retrieve_identifiant_unique_from_existing_acteur(
 
     # Adding identifiant column to compare using identifiant_externe and source_code
     # instead of identifiant_unique (for the usecase of external_ids were updated)
-    print("df_normalized", df_normalized)
     df_normalized["identifiant"] = df_normalized.apply(
         lambda row: compute_identifiant_unique(
             row["identifiant_externe"], row["source_code"], row["acteur_type_code"]

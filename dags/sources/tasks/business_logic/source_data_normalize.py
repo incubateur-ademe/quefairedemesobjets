@@ -260,7 +260,7 @@ def source_data_normalize(
     if dag_id == "pharmacies":
         df = df_normalize_pharmacie(df)
 
-    if dag_id == "sinoe":
+    if dag_id == "source_sinoe":
         df = df_normalize_sinoe(df)
 
     # Log si des localisations sont manquantes parmis les acteurs non digitaux
