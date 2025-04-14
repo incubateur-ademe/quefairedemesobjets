@@ -37,7 +37,7 @@ def xcom_pull(ti: TaskInstance, key: str, skip_if_empty: bool = False) -> Any:
     elif key == XCOMS.DF_READ:
         value = ti.xcom_pull(key=key, task_ids=TASKS.READ_AE_RGPD)
     elif key == XCOMS.DF_MATCH:
-        value = ti.xcom_pull(key=key, task_ids=TASKS.MATCH_SCORE_AE_RGPD)
+        value = ti.xcom_pull(key=key, task_ids=TASKS.MATCH_SCORE)
     elif key == XCOMS.DF_CLOSED_REPLACED_SAME_SIREN:
         value = ti.xcom_pull(key=key, task_ids=TASKS.ENRICH_CLOSED_REPLACED_SAME_SIREN)
     elif key == XCOMS.DF_CLOSED_REPLACED_OTHER_SIREN:

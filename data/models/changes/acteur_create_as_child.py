@@ -1,4 +1,9 @@
 from pydantic import BaseModel
+from rich import print
+
+from dags.cluster.tasks.business_logic.misc.data_serialize_reconstruct import (
+    data_reconstruct,
+)
 
 
 class ChangeActeurCreateAsChild(BaseModel):
@@ -35,24 +40,29 @@ class ChangeActeurCreateAsChild(BaseModel):
         # Ensure parent exists in RevisionActeur
         parent = RevisionActeur.objects.get(pk=self.data["parent"])
 
-        # Create child in Acteur
-        data_base = self.data.copy()
+        # Reconstruct data from RevisionActeur
+        print(f"data before reconstruct: {self.data}")
+        data = data_reconstruct(RevisionActeur, self.data)
+        print(f"data after reconstruct: {data}")
+
+        # Create child in Acteur to hold data
+        data_base = data.copy()
         del data_base["parent"]
         del data_base["parent_reason"]
+        # TODO: if we flatten our pydantic models, then we wouldn't
+        if "identifiant_unique" in data_base:
+            del data_base["identifiant_unique"]
         Acteur.objects.create(
             identifiant_unique=self.id,
             **data_base,
         )
 
-        # In Revision we only store what is different, i.e. parent
-        # FIXME: should we use get_or_create_revision?
-        # I tried, it was failing, started to look at the code and went
-        # down a rabbit hole
+        # Create child in RevisionActeur to hold reference to parent
         RevisionActeur.objects.create(
             identifiant_unique=self.id,
+            parent_reason=data["parent_reason"],
             parent=parent,
-            parent_reason=self.data["parent_reason"],
             statut="ACTIF",
-            source=self.data["source"],
-            acteur_type=self.data["acteur_type"],
+            source=data["source"],
+            acteur_type=data["acteur_type"],
         )

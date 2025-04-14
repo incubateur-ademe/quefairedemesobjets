@@ -23,7 +23,7 @@ ACTEUR_FIELDS_TO_ANONYMIZE = {
     "nom": VALUE_ANONYMIZED,
     "nom_officiel": VALUE_ANONYMIZED,
     "nom_commercial": VALUE_ANONYMIZED,
-    "email": None,  # due to email constraint
+    "email": "",  # Consequence of allowing empty strings in DB
     "telephone": VALUE_ANONYMIZED,
     "adresse": VALUE_ANONYMIZED,
     "adresse_complement": VALUE_ANONYMIZED,
