@@ -99,8 +99,12 @@ def cluster_acteurs_suggestions_prepare(
                 f"Suggestion pour cluster_id={cluster_id}", df_changes
             )
             working.append(suggestion)
-        except Exception as e:
-            failing.append({"cluster_id": cluster_id, "error": e})
+        except Exception:
+            import traceback
+
+            error = traceback.format_exc()
+            failing.append({"cluster_id": cluster_id, "error": error})
+            log.preview(f"🔴 Erreur sur {cluster_id=} 🔴", error)
 
     logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
     logger.info(f"🟢 {len(working)} suggestions réussies")

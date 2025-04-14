@@ -1,8 +1,9 @@
 import logging
 
 from airflow import DAG
-from airflow.exceptions import AirflowSkipException
+from airflow.exceptions import AirflowFailException, AirflowSkipException
 from airflow.operators.python import PythonOperator
+from airflow.utils.trigger_rule import TriggerRule
 from cluster.config.tasks import TASKS
 from cluster.config.xcoms import XCOMS, xcom_pull
 from utils import logging_utils as log
@@ -40,7 +41,9 @@ def cluster_acteurs_suggestions_failing_wrapper(ti) -> None:
         raise AirflowSkipException("Pas de suggestions échouées")
 
     for suggestion in failing:
-        log.preview("Suggestion échouée", suggestion)
+        msg = f"🔴 Erreur sur cluster_id={suggestion['cluster_id']} 🔴"
+        log.preview(msg, suggestion["error"])
+    raise AirflowFailException("Voir suggestions de clusters échouées ci-dessus")
 
 
 def cluster_acteurs_suggestions_failing_task(dag: DAG) -> PythonOperator:
@@ -48,4 +51,5 @@ def cluster_acteurs_suggestions_failing_task(dag: DAG) -> PythonOperator:
         task_id=TASKS.SUGGESTIONS_FAILING,
         python_callable=cluster_acteurs_suggestions_failing_wrapper,
         dag=dag,
+        trigger_rule=TriggerRule.ALL_DONE,
     )

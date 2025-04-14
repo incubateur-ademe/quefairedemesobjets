@@ -37,13 +37,8 @@ class TestClusterActeursSuggestionsDisplay:
 
     @pytest.fixture
     def df_clusters(self):
-        """Intentionally creating technically invalid clusters
-        to demonstrate that at this point the suggestions task
-        no longer performs cluster-wide validation, it just looks
-        at individual changes"""
-
-        # However we must have valid data in DB as validations
-        # are validated
+        # Cluster data used for tests, presence of data needed in DB
+        # as prepare task does some DB validation
         DisplayedActeurFactory(identifiant_unique="parent to delete")
         DisplayedActeurFactory(identifiant_unique="parent to keep")
         RevisionActeurFactory(identifiant_unique="parent to keep")
@@ -104,55 +99,96 @@ class TestClusterActeursSuggestionsDisplay:
                     COL_CHANGE_MODEL_NAME: CHANGE_POINT,
                     COL_PARENT_DATA_NEW: None,
                 },
+                # A failing cluster:
+                # - the parent creation in itself is good
+                # - however there is a typo in the parent id of the child to attach
+                # Thus the entire cluster should be rejected
+                {
+                    "cluster_id": "c4",
+                    "identifiant_unique": "c4 new parent",
+                    "parent_id": None,
+                    COL_CHANGE_ORDER: 1,
+                    COL_CHANGE_REASON: "because",
+                    COL_CHANGE_ENTITY_TYPE: ENTITY_ACTEUR_TO_CREATE,
+                    COL_CHANGE_MODEL_NAME: CHANGE_CREATE,
+                    COL_PARENT_DATA_NEW: {"acteur_type": at1, "location": Point(1, 2)},
+                },
+                {
+                    "cluster_id": "c4",
+                    "identifiant_unique": "🔴🔴🔴 c4 child FORGOT TO CREATE 🔴🔴🔴",
+                    "parent_id": "c4 new parent",
+                    COL_CHANGE_ORDER: 1,
+                    COL_CHANGE_REASON: "attach to parent c4",
+                    COL_CHANGE_ENTITY_TYPE: ENTITY_ACTEUR_REVISION,
+                    COL_CHANGE_MODEL_NAME: CHANGE_POINT,
+                    COL_PARENT_DATA_NEW: None,
+                },
             ]
         )
 
     @pytest.fixture
     def suggestions(self, df_clusters):
-        # The function should have everything it needs from the df
         working, failing = cluster_acteurs_suggestions_prepare(df_clusters)
-        return working
+        return working, failing
 
-    def test_structure_and_type(self, suggestions):
-        assert isinstance(suggestions, list)
-        assert isinstance(suggestions[0], dict)
-        assert list(suggestions[0].keys()) == ["cluster_id", "changes"]
-        assert isinstance(suggestions[0]["cluster_id"], str)
-        assert isinstance(suggestions[0]["changes"], list)
-        assert isinstance(suggestions[0]["changes"][0], dict)
+    @pytest.fixture
+    def working(self, suggestions):
+        return suggestions[0]
 
-    def test_one_suggestion_per_cluster(self, df_clusters, suggestions):
-        assert len(suggestions) == df_clusters["cluster_id"].nunique()
+    @pytest.fixture
+    def failing(self, suggestions):
+        return suggestions[1]
 
-    def test_verify_clusters(self, suggestions):
-        assert suggestions[0]["cluster_id"] == "c1"
-        assert suggestions[1]["cluster_id"] == "c2"
-        assert suggestions[2]["cluster_id"] == "c3"
+    def test_structure_and_type(self, working):
+        assert isinstance(working, list)
+        assert isinstance(working[0], dict)
+        assert list(working[0].keys()) == ["cluster_id", "changes"]
+        assert isinstance(working[0]["cluster_id"], str)
+        assert isinstance(working[0]["changes"], list)
+        assert isinstance(working[0]["changes"][0], dict)
 
-    def test_model_params_location_converted(self, suggestions):
-        c1 = suggestions[0]
+    def test_one_suggestion_per_cluster(self, df_clusters, working):
+        # 1 suggestion per cluster EXCEPT for failing c4
+        assert len(working) == df_clusters["cluster_id"].nunique() - 1
+
+    def test_verify_clusters(self, working):
+        assert working[0]["cluster_id"] == "c1"
+        assert working[1]["cluster_id"] == "c2"
+        assert working[2]["cluster_id"] == "c3"
+
+    def test_model_params_location_converted(self, working):
+        c1 = working[0]
         data = c1["changes"][0]["model_params"]["data"]
         assert "location" not in data
         assert data["longitude"] == 1.0
         assert data["latitude"] == 2.0
 
-    def test_verify_model_params(self, suggestions):
-        c1 = suggestions[0]
+    def test_verify_model_params(self, working):
+        c1 = working[0]
         assert c1["changes"][0]["model_params"] == {
             "id": "new parent",
             "data": {"acteur_type": ACTEUR_TYPE_ID, "longitude": 1.0, "latitude": 2.0},
         }
         assert c1["changes"][1]["model_params"] == {"id": "parent to delete"}
 
-        c2 = suggestions[1]
+        c2 = working[1]
         assert c2["changes"][0]["model_params"] == {
             "id": "parent to keep",
             "data": {"acteur_type": ACTEUR_TYPE_ID},
         }
 
-        c3 = suggestions[2]
+        c3 = working[2]
         assert c3["changes"][0]["model_params"] == {"id": "revision to keep"}
         assert c3["changes"][1]["model_params"] == {
             "id": "update parent id",
             "data": {"parent_id": "parent to keep"},
         }
+
+    def test_failing_clusters(self, working, failing):
+        # The entire cluster c4 should be rejected
+        assert len(failing) == 1
+        assert failing[0]["cluster_id"] == "c4"
+        assert "Acteur matching query does not exist" in failing[0]["error"]
+
+        # We should find no trace of c4 in the working suggestions
+        assert "c4" not in [x["cluster_id"] for x in working]
