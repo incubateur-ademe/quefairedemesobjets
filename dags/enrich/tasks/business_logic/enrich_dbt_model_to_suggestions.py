@@ -212,6 +212,9 @@ def enrich_dbt_model_to_suggestions(
     if not suggestions:
         raise ValueError("Aucune suggestion à écrire, pas normal")
 
+    if not suggestions:
+        raise ValueError("Aucune suggestion à écrire, pas normal")
+
     # -----------------------------------------
     # DRY RUN: STOP HERE
     # -----------------------------------------
