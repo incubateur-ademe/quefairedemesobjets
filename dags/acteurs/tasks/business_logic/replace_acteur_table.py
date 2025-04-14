@@ -28,13 +28,18 @@ def replace_acteur_table(
         cursor.execute("BEGIN")
         try:
             for table in tables:
-                logger.warning(
-                    f"Update schema of {prefix_dbt}{table} from {schema_dbt}"
-                    f" to {schema_django}"
+                # copie de la table de schema public -> schema warehouse
+                # including indexes
+                cursor.execute(
+                    f"DROP TABLE IF EXISTS {schema_django}.{prefix_dbt}{table}"
                 )
                 cursor.execute(
-                    f"ALTER TABLE {schema_dbt}.{prefix_dbt}{table}"
-                    f" SET SCHEMA {schema_django}"
+                    f"CREATE TABLE {schema_django}.{prefix_dbt}{table}"
+                    f" (LIKE {schema_dbt}.{prefix_dbt}{table} INCLUDING INDEXES)"
+                )
+                cursor.execute(
+                    f"INSERT INTO {schema_django}.{prefix_dbt}{table} "
+                    f"SELECT * FROM {schema_dbt}.{prefix_dbt}{table}"
                 )
 
                 logger.warning(
