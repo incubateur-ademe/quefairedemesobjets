@@ -30,15 +30,18 @@ class COLS:
 
     # Annuaire Entreprise
     AE_DIRIGEANTS_NOMS: str = "ae_dirigeants_noms_prenoms"
+
+    # Suggestions
+    SUGGEST_COHORT_CODE: str = "suggestion_cohorte_code"
+    SUGGEST_COHORT_LABEL: str = "suggestion_cohorte_label"
+
+    # Replacements
     REMPLACER_SIRET: str = "remplacer_siret"
     REMPLACER_NOM: str = "remplacer_nom"
-
-    # Fields identical between acteurs and remplacements
-    # hence replacer_ prefix not present on the model column names
-    REMPLACER_ADRESSE: str = "adresse"
-    REMPLACER_CODE_POSTAL: str = "code_postal"
-    REMPLACER_VILLE: str = "ville"
-    REMPLACER_NAF: str = "naf"
+    REMPLACER_ADRESSE: str = "remplacer_adresse"
+    REMPLACER_CODE_POSTAL: str = "remplacer_code_postal"
+    REMPLACER_VILLE: str = "remplacer_ville"
+    REMPLACER_NAF: str = "remplacer_naf"
 
     # Suggestions
     SUGGEST_COHORT: str = f"{SUGGEST_PREFIX}_cohort"

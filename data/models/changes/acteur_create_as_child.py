@@ -1,10 +1,12 @@
 from pydantic import BaseModel
+from rich import print
 
-<<<<<<< HEAD
+from dags.cluster.tasks.business_logic.misc.data_serialize_reconstruct import (
+    data_reconstruct,
+)
+
 from data.models.changes.utils import data_reconstruct
 
-=======
->>>>>>> 63eec9bb (create_as_child, numéro rue, UI)
 
 class ChangeActeurCreateAsChild(BaseModel):
     id: str
