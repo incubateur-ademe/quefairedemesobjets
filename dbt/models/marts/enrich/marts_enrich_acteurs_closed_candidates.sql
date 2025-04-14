@@ -14,17 +14,7 @@ Notes:
 -- Starting from our acteurs we can match via SIRET
 WITH acteurs_with_siret AS (
 	SELECT
-<<<<<<< HEAD
 		-- Acteur columns
-=======
-		-- Common columns
-        LEFT(siret,9) AS siren,
-        siret,
-
-		-- Acteur columns
-        nom AS acteur_nom,
-        udf_normalize_string_for_match(nom) AS acteur_nom_normalise,
->>>>>>> 00ec04b2 (DAG & Admin UI fonctionnels)
         identifiant_unique AS acteur_id,
 		siret AS acteur_siret,
 		LEFT(siret,9) AS acteur_siren,
@@ -33,20 +23,11 @@ WITH acteurs_with_siret AS (
         commentaires AS acteur_commentaires,
         statut AS acteur_statut,
 		acteur_type_id,
-<<<<<<< HEAD
 		source_id AS acteur_source_id,
 		adresse AS acteur_adresse,
 		code_postal AS acteur_code_postal,
 		ville AS acteur_ville,
 		location AS acteur_location
-=======
-		acteur_type_code,
-		source_id AS acteur_source_id,
-		source_code AS acteur_source_code,
-		adresse AS acteur_adresse,
-		code_postal AS acteur_code_postal,
-		ville AS acteur_ville
->>>>>>> 00ec04b2 (DAG & Admin UI fonctionnels)
 
 	FROM {{ ref('marts_carte_acteur') }}
 	WHERE siret IS NOT NULL AND siret != '' AND LENGTH(siret) = 14
