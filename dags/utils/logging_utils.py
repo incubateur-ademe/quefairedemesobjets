@@ -102,6 +102,9 @@ def preview(value_name: str, value: Any) -> None:
         log.info(json_dumps(list(value)))
     elif isinstance(value, BaseModel):
         log.info(json_dumps(value.model_dump(mode="json")))
+    elif isinstance(value, str):
+        for line in value.splitlines():
+            log.info(line)
     else:
         log.info(str(value))
     log.info("::endgroup::")
