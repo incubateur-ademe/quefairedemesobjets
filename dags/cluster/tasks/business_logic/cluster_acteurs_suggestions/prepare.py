@@ -106,7 +106,7 @@ def cluster_acteurs_suggestions_prepare(
             failing.append({"cluster_id": cluster_id, "error": error})
             log.preview(f"🔴 Erreur sur {cluster_id=} 🔴", error)
 
-    logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
+    logger.info(log.banner_string("🏁 Résultat final de cette tâche"))
     logger.info(f"🟢 {len(working)} suggestions réussies")
     logger.info(f"🔴 {len(failing)} suggestions échouées")
 
