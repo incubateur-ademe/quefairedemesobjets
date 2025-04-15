@@ -75,7 +75,10 @@ class Produit(index.Indexed, AbstractBaseProduit):
         return f"{self.id} - {self.nom}"
 
     search_fields = [
-        index.SearchField("nom"),
+        index.AutocompleteField("nom"),
+        index.RelatedFields("synonymes", [index.SearchField("nom")]),
+        index.SearchField("synonyme__nom"),
+        index.SearchField("id"),
     ]
 
     @cached_property
