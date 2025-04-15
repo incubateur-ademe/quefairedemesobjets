@@ -77,6 +77,10 @@ class KoumoulProduitResource(KoumoulModelResource):
 
 
 class ProduitResource(resources.ModelResource):
+    infotri = fields.Field(
+        column_name="Infotri",
+    )
+
     def dehydrate_infotri(self, instance):
         if instance.infotri:
             return "oui"
@@ -89,7 +93,6 @@ class ProduitResource(resources.ModelResource):
 
 class SynonymeResource(resources.ModelResource):
     infotri = fields.Field(
-        attribute="produit__infotri",
         column_name="Infotri",
     )
 
