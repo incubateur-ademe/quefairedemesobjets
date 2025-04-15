@@ -6,20 +6,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     replaces = [
         ("qfdmo", "0140_carteconfig_groupeactionconfig"),
         ("qfdmo", "0141_groupeactionconfig_couleur"),
         ("qfdmo", "0142_alter_groupeactionconfig_unique_together"),
         ("qfdmo", "0143_remove_groupeactionconfig_couleur"),
         ("qfdmo", "0144_alter_groupeactionconfig_groupe_action"),
-        ("qfdmo", "0140_drop_views"),
         ("qfdmo", "0145_merge_20250411_1423"),
         ("qfdmo", "0146_alter_groupeactionconfig_carte_config"),
     ]
 
     dependencies = [
-        ("qfdmo", "0139_alter_acteur_not_nullable_char_fields_tel_url_ville"),
+        ("qfdmo", "0140_drop_views"),
     ]
 
     operations = [
@@ -139,26 +137,6 @@ class Migration(migrations.Migration):
             options={
                 "unique_together": {("carte_config", "groupe_action", "acteur_type")},
             },
-        ),
-        migrations.RunSQL(
-            sql="\nDROP VIEW IF EXISTS qfdmo_vueacteur;\n",
-            reverse_sql="\nDROP VIEW IF EXISTS qfdmo_vueacteur;\n\nCREATE VIEW qfdmo_vueacteur AS (\n    SELECT\n        da.uuid AS uuid,\n        COALESCE(ra.identifiant_unique, a.identifiant_unique) AS identifiant_unique,\n        COALESCE(ra.nom, a.nom) AS nom,\n        COALESCE(ra.description, a.description) AS description,\n        COALESCE(ra.acteur_type_id, a.acteur_type_id) AS acteur_type_id,\n        COALESCE(ra.adresse, a.adresse) AS adresse,\n        COALESCE(ra.adresse_complement, a.adresse_complement) AS adresse_complement,\n        COALESCE(ra.code_postal, a.code_postal) AS code_postal,\n        COALESCE(ra.ville, a.ville) AS ville,\n        COALESCE(ra.url, a.url) AS url,\n        COALESCE(ra.email, a.email) AS email,\n        COALESCE(ra.location, a.location) AS location,\n        COALESCE(ra.telephone, a.telephone) AS telephone,\n        COALESCE(ra.nom_commercial, a.nom_commercial) AS nom_commercial,\n        COALESCE(ra.nom_officiel, a.nom_officiel) AS nom_officiel,\n        COALESCE(ra.siren, a.siren) AS siren,\n        COALESCE(ra.siret, a.siret) AS siret,\n        COALESCE(ra.source_id, a.source_id) AS source_id,\n        COALESCE(ra.identifiant_externe, a.identifiant_externe) AS identifiant_externe,\n        COALESCE(ra.statut, a.statut) AS statut,\n        COALESCE(ra.naf_principal, a.naf_principal) AS naf_principal,\n        COALESCE(ra.commentaires, a.commentaires) AS commentaires,\n        COALESCE(ra.horaires_osm, a.horaires_osm) AS horaires_osm,\n        COALESCE(ra.horaires_description, a.horaires_description) AS horaires_description,\n        COALESCE(ra.public_accueilli, a.public_accueilli) AS public_accueilli,\n        COALESCE(ra.reprise, a.reprise) AS reprise,\n        COALESCE(ra.exclusivite_de_reprisereparation, a.exclusivite_de_reprisereparation) AS exclusivite_de_reprisereparation,\n        COALESCE(ra.uniquement_sur_rdv, a.uniquement_sur_rdv) AS uniquement_sur_rdv,\n        COALESCE(ra.action_principale_id, a.action_principale_id) AS action_principale_id,\n        COALESCE(ra.modifie_le, a.modifie_le) AS modifie_le,\n        ra.parent_id AS parent_id,\n        COALESCE(a.cree_le, ra.cree_le) AS cree_le\n    FROM qfdmo_acteur AS a\n    FULL JOIN qfdmo_revisionacteur AS ra\n      ON a.identifiant_unique = ra.identifiant_unique\n    LEFT JOIN qfdmo_displayedacteur AS da\n      ON a.identifiant_unique = da.identifiant_unique\n);\n",
-        ),
-        migrations.RunSQL(
-            sql="\nDROP VIEW IF EXISTS qfdmo_vueacteur_labels;\n",
-            reverse_sql="\nDROP VIEW IF EXISTS qfdmo_vueacteur_labels;\n\n-- Créer la vue\nCREATE VIEW qfdmo_vueacteur_labels AS (\n    SELECT\n        CASE\n            WHEN ra.identifiant_unique IS NULL THEN al.id\n            ELSE ral.id\n        END AS id,\n        CASE\n            WHEN ra.identifiant_unique IS NOT NULL THEN ral.revisionacteur_id\n            ELSE al.acteur_id\n        END AS vueacteur_id,\n        CASE\n            WHEN ra.identifiant_unique IS NOT NULL THEN ral.labelqualite_id\n            ELSE al.labelqualite_id\n        END AS labelqualite_id\n    FROM qfdmo_acteur_labels AS al\n    FULL JOIN qfdmo_revisionacteur_labels AS ral\n        ON al.acteur_id = ral.revisionacteur_id\n    LEFT JOIN qfdmo_revisionacteur AS ra ON ral.revisionacteur_id = ra.identifiant_unique\n    WHERE CASE\n            WHEN ra.identifiant_unique IS NULL THEN al.id\n            ELSE ral.id\n        END  is not null\n);\n",
-        ),
-        migrations.RunSQL(
-            sql="\nDROP VIEW IF EXISTS qfdmo_vueacteur_acteur_services;\n",
-            reverse_sql="\nDROP VIEW IF EXISTS qfdmo_vueacteur_acteur_services;\n\nCREATE VIEW qfdmo_vueacteur_acteur_services AS (\n    SELECT\n        CASE\n            WHEN ra.identifiant_unique IS NULL THEN aas.id\n            ELSE raas.id\n        END AS id,\n        CASE\n            WHEN ra.identifiant_unique IS NOT NULL THEN raas.revisionacteur_id\n            ELSE aas.acteur_id\n        END AS vueacteur_id,\n        CASE\n            WHEN ra.identifiant_unique IS NOT NULL THEN raas.acteurservice_id\n            ELSE aas.acteurservice_id\n        END AS acteurservice_id\n    FROM qfdmo_acteur_acteur_services AS aas\n    FULL JOIN qfdmo_revisionacteur_acteur_services AS raas\n        ON aas.acteur_id = raas.revisionacteur_id\n    LEFT JOIN qfdmo_revisionacteur AS ra ON raas.revisionacteur_id = ra.identifiant_unique\n    WHERE CASE\n            WHEN ra.identifiant_unique IS NULL THEN aas.id\n            ELSE raas.id\n        END  is not null\n);\n",
-        ),
-        migrations.RunSQL(
-            sql="\nDROP VIEW IF EXISTS qfdmo_vuepropositionservice_sous_categories;\n",
-            reverse_sql="\nDROP VIEW IF EXISTS qfdmo_vuepropositionservice_sous_categories;\n\n-- Créer la vue\nCREATE VIEW qfdmo_vuepropositionservice_sous_categories AS (\n    SELECT\n        CONCAT(tps.id, '_', pssscat.id::text, '_', pssscat.id::text) AS id,\n        tps.id AS vuepropositionservice_id,\n        CASE\n            WHEN tps.est_revision IS TRUE\n            THEN rpssscat.souscategorieobjet_id\n            ELSE pssscat.souscategorieobjet_id\n        END AS souscategorieobjet_id\n    FROM qfdmo_vuepropositionservice AS tps\n    LEFT JOIN qfdmo_propositionservice_sous_categories AS pssscat\n        ON tps.ext_id = pssscat.propositionservice_id AND tps.est_revision = false\n    LEFT JOIN qfdmo_revisionpropositionservice_sous_categories AS rpssscat\n        ON tps.ext_id = rpssscat.revisionpropositionservice_id\n            AND tps.est_revision = true\n);\n",
-        ),
-        migrations.RunSQL(
-            sql="\nDROP VIEW IF EXISTS qfdmo_vuepropositionservice CASCADE;\n",
-            reverse_sql="\nDROP VIEW IF EXISTS qfdmo_vuepropositionservice;\n\n-- Créer la vue\nCREATE VIEW qfdmo_vuepropositionservice AS (\n    SELECT\n        CASE\n            WHEN ra.identifiant_unique IS NULL THEN CONCAT('PS_', ps.id::text)\n            ELSE CONCAT('RPS_', rps.id::text)\n        END AS id,\n        CASE\n            WHEN ra.identifiant_unique IS NOT NULL THEN rps.acteur_id\n            ELSE ps.acteur_id\n        END AS acteur_id,\n        CASE\n            WHEN ra.identifiant_unique IS NOT NULL THEN rps.action_id\n            ELSE ps.action_id\n        END AS action_id,\n        CASE\n            WHEN ra.identifiant_unique IS NULL THEN ps.id\n            ELSE rps.id\n        END AS ext_id,\n        CASE\n            WHEN ra.identifiant_unique IS NULL THEN false\n            ELSE true\n        END AS est_revision\n    FROM qfdmo_propositionservice AS ps\n    FULL JOIN qfdmo_revisionpropositionservice AS rps\n        ON ps.acteur_id = rps.acteur_id\n    LEFT JOIN qfdmo_revisionacteur AS ra ON rps.acteur_id = ra.identifiant_unique\n    WHERE CASE\n            WHEN ra.identifiant_unique IS NULL THEN ps.id\n            ELSE rps.id\n        END is not null\n);\n",
         ),
         migrations.AlterField(
             model_name="groupeactionconfig",
