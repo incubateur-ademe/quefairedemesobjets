@@ -3,7 +3,7 @@ import json
 
 from django.core.management.base import BaseCommand
 
-from qfdmo.models.acteur import Acteur, ActeurStatus, RevisionActeur
+from qfdmo.models.acteur import Acteur, RevisionActeur
 
 CHUNK = 1000
 
@@ -53,22 +53,6 @@ class Command(BaseCommand):
                 )
                 continue
 
-            # test acteur with this new external id already exists
-            acteur_from_db = Acteur.objects.filter(
-                identifiant_externe=new_id, source__code=source_code
-            ).first()
-            id_index = 0
-            while acteur_from_db:
-                id_index += 1
-                new_id_indexed = f"{new_id}_{id_index}"
-                acteur_from_db = Acteur.objects.filter(
-                    identifiant_externe=new_id_indexed, source__code=source_code
-                ).first()
-            statut = ActeurStatus.ACTIF
-            if id_index:
-                new_id = f"{new_id}_{id_index}"
-                statut = ActeurStatus.INACTIF
-
             # Update acteur if exists
             acteur = Acteur.objects.filter(
                 identifiant_externe=old_id, source__code=source_code
@@ -85,7 +69,6 @@ class Command(BaseCommand):
                     )
                 )
                 acteur.identifiant_externe = new_id
-                acteur.statut = statut
                 acteur.save()
             else:
                 self.stdout.write(
@@ -107,7 +90,6 @@ class Command(BaseCommand):
                     )
                 )
                 revision_acteur.identifiant_externe = new_id
-                revision_acteur.statut = statut
                 revision_acteur.save()
             if revision_acteur and dry_run:
                 self.stdout.write(

@@ -91,18 +91,6 @@ def retrieve_identifiant_unique_from_existing_acteur(
         axis=1,
     )
 
-    # find the duplicated identifiant in df_acteur_from_db and raise if any because
-    # we can't resolve simply the mapping between source and db
-    duplicates = df_acteur_from_db[
-        df_acteur_from_db.duplicated("identifiant", keep=False)
-    ]
-    if not duplicates.empty:
-        logger.warning(
-            "Duplicated identifiant in df_acteur_from_db"
-            f" {duplicates["identifiant"].tolist()}"
-        )
-        raise ValueError("Duplicated identifiant in df_acteur_from_db")
-
     # Replace identifiant_unique (from source) by identifiant (from db) for acteur
     # which doesn't have corelation between source, external_id and identifiant_unique
     df_normalized.set_index("identifiant", inplace=True)

@@ -155,7 +155,6 @@ class BaseActeurAdmin(admin.GISModelAdmin):
         "siret",
         "siren",
         "identifiant_unique",
-        "identifiant_externe",
         "code_postal",
         "ville",
         "adresse",
@@ -164,7 +163,6 @@ class BaseActeurAdmin(admin.GISModelAdmin):
     search_fields = [
         "code_postal",
         "identifiant_unique",
-        "identifiant_externe",
         "nom__unaccent",
         "siret",
         "siren",
