@@ -1000,8 +1000,7 @@ class DisplayedActeur(BaseActeur):
         # live in a template_tags instead.
         actions = self.acteur_actions(direction=direction, actions_codes=action_list)
 
-        def sort_actions(a):
-            # TODO: explain this function ???
+        def sort_actions_by_action_principale_and_order(a):
             if a == self.action_principale:
                 return -1
 
@@ -1019,14 +1018,16 @@ class DisplayedActeur(BaseActeur):
             # TODO: explain why we need to decode here
             return orjson.dumps(acteur_dict).decode("utf-8")
 
-        displayed_action = sorted(actions, key=sort_actions)[0]
+        action_to_display = sorted(
+            actions, key=sort_actions_by_action_principale_and_order
+        )[0]
 
-        if carte and displayed_action.groupe_action:
-            displayed_action = displayed_action.groupe_action
+        if carte and action_to_display.groupe_action:
+            action_display = action_to_display.groupe_action
 
         acteur_dict.update(
-            icon=displayed_action.icon,
-            couleur=displayed_action.couleur,
+            icon=action_display.icon,
+            couleur=action_to_display.couleur,
         )
 
         # TODO: in case we have a carteConfig, customize carteConfig
@@ -1034,7 +1035,7 @@ class DisplayedActeur(BaseActeur):
         if carte_config:
             try:
                 groupe_action_config = carte_config.groupe_action_config.get(
-                    groupe_action__actions__code__in=[displayed_action],
+                    groupe_action__actions__code__in=[action_to_display],
                     acteur_type=self.acteur_type,
                 )
                 if groupe_action_config.icon:
@@ -1045,7 +1046,7 @@ class DisplayedActeur(BaseActeur):
             except GroupeActionConfig.DoesNotExist:
                 pass
 
-        if carte and displayed_action.code == "reparer":
+        if carte and action_to_display.code == "reparer":
             acteur_dict.update(
                 bonus=getattr(self, "bonus", False),
                 reparer=getattr(self, "reparer", False),

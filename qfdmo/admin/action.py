@@ -17,7 +17,7 @@ class ActionDirectionAdmin(OnlyEditableMixin, CodeLibelleModelMixin, admin.Model
 
 class GroupeActionAdmin(OnlyEditableMixin, CodeLibelleModelMixin, admin.ModelAdmin):
     list_display = ("code", "libelle", "order")
-    search_fields = ["code", "libelle"]
+    search_fields = ["code"]
 
 
 admin.site.register(Action, ActionAdmin)
