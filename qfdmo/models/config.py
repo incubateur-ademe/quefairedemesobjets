@@ -7,7 +7,7 @@ class GroupeActionConfig(models.Model):
     carte_config = models.ForeignKey(
         "qfdmo.CarteConfig",
         on_delete=models.CASCADE,
-        related_name="groupe_action_config",
+        related_name="groupe_action_configs",
         null=True,
         blank=True,
     )
