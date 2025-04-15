@@ -120,7 +120,7 @@ pytest = "^8.3.4"
 pytest-django = "^4.9.0"
 pytest-dotenv = "^0.5.2"
 pytest-mock = "^3.14.0"
-ruff = "^0.11.2"
+ruff = "^0.11.5"
 shapely = "^2.0.6" # notebook
 
 [tool.poetry.group.docs.dependencies]
