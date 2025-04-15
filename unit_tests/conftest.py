@@ -5,10 +5,8 @@ import pytest
 
 @pytest.fixture(autouse=True)
 def disable_whitenoise(settings):
-    settings.STORAGES = {
-        "staticfiles": {
-            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
-        }
+    settings.STORAGES["staticfiles"] = {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
     }
     settings.MIDDLEWARE = [
         middleware

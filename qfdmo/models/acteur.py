@@ -1034,23 +1034,23 @@ class DisplayedActeur(BaseActeur):
             couleur=action_to_display.couleur,
         )
 
-        # TODO: in case we have a carteConfig, customize carteConfig
-        # here
         if carte_config:
+            queryset = Q()
+            if action_to_display:
+                queryset &= Q(groupe_action__actions__code__in=[action_to_display]) | Q(
+                    groupe_action__actions__code=None
+                )
+
+            if self.acteur_type:
+                queryset &= Q(acteur_type=self.acteur_type) | Q(acteur_type=None)
+
             try:
-                queryset = Q()
-                if action_to_display:
-                    queryset &= Q(
-                        groupe_action__actions__code__in=[action_to_display]
-                    ) | Q(groupe_action__actions__code=None)
-
-                if self.acteur_type:
-                    queryset &= Q(acteur_type=self.acteur_type) | Q(acteur_type=None)
-
                 groupe_action_config = carte_config.groupe_action_configs.get(queryset)
                 if groupe_action_config.icon:
                     # Property is camelcased as it is used in javascript
                     acteur_dict.update(iconFile=groupe_action_config.icon.url)
+                    # In this case, a svg file uploaded by a user is used
+                    # in place of the DSFR's icon code.
                     del acteur_dict["icon"]
 
             except GroupeActionConfig.DoesNotExist:
