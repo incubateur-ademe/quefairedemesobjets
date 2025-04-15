@@ -1034,10 +1034,16 @@ class DisplayedActeur(BaseActeur):
         # here
         if carte_config:
             try:
-                groupe_action_config = carte_config.groupe_action_config.get(
-                    groupe_action__actions__code__in=[action_to_display],
-                    acteur_type=self.acteur_type,
-                )
+                queryset = Q()
+                if action_to_display:
+                    queryset &= Q(
+                        groupe_action__actions__code__in=[action_to_display]
+                    ) | Q(groupe_action__actions__code=None)
+
+                if self.acteur_type:
+                    queryset &= Q(acteur_type=self.acteur_type) | Q(acteur_type=None)
+
+                groupe_action_config = carte_config.groupe_action_configs.get(queryset)
                 if groupe_action_config.icon:
                     # Property is camelcased as it is used in javascript
                     acteur_dict.update(iconFile=groupe_action_config.icon.url)
