@@ -284,7 +284,6 @@ class TestCreateRevisionActeur:
 
 @pytest.mark.django_db
 class TestCreateRevisionActeurCreateParent:
-
     @pytest.fixture
     def acteurs_fields(self):
         acteur_type = ActeurTypeFactory()
@@ -511,7 +510,6 @@ class TestRevisionActeurDuplicate:
 
 @pytest.mark.django_db
 class TestRevisionActeurRemoveParentWithoutChildren:
-
     def test_revision_acteur_remove_parent_without_children(self):
         revision_acteur_original_parent = RevisionActeurFactory()
         revision_acteur = RevisionActeurFactory(parent=revision_acteur_original_parent)
@@ -564,7 +562,6 @@ class TestRevisionActeurRemoveParentWithoutChildren:
 
 @pytest.mark.django_db
 class TestActeurService:
-
     @pytest.fixture
     def displayed_acteur(self):
         return DisplayedActeurFactory()
@@ -618,7 +615,6 @@ class TestActeurLabel:
 
 @pytest.mark.django_db
 class TestDisplayActeurActeurActions:
-
     def test_basic(self):
         displayed_acteur = DisplayedActeurFactory()
         direction = ActionDirectionFactory(code="jai")
@@ -649,7 +645,7 @@ class TestDisplayActeurActeurActions:
         action = ActionFactory()
         action.directions.add(direction)
         DisplayedPropositionServiceFactory(action=action, acteur=displayed_acteur)
-        assert displayed_acteur.acteur_actions(direction="fake").count() == 0
+        assert len(displayed_acteur.acteur_actions(direction="fake")) == 0
         assert [
             model_to_dict(a, exclude=["directions"])
             for a in displayed_acteur.acteur_actions(direction="jai")
@@ -683,7 +679,6 @@ class TestDisplayActeurActeurActions:
 
 @pytest.mark.django_db
 class TestDisplayedActeurJsonActeurForDisplay:
-
     @pytest.fixture
     def displayed_acteur(self):
         displayed_acteur = DisplayedActeurFactory()
@@ -875,7 +870,6 @@ class TestDisplayedActeurJsonActeurForDisplay:
 
 
 class TestDisplayedActeurDisplayPostalAddress:
-
     def test_should_display_adresse(self):
         displayed_acteur = DisplayedActeurFactory.build()
 
