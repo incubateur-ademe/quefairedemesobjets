@@ -1023,10 +1023,10 @@ class DisplayedActeur(BaseActeur):
         )[0]
 
         if carte and action_to_display.groupe_action:
-            action_display = action_to_display.groupe_action
+            action_to_display = action_to_display.groupe_action
 
         acteur_dict.update(
-            icon=action_display.icon,
+            icon=action_to_display.icon,
             couleur=action_to_display.couleur,
         )
 
