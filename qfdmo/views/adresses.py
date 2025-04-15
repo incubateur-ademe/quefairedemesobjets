@@ -7,11 +7,12 @@ from django.conf import settings
 from django.contrib.postgres.lookups import Unaccent
 from django.contrib.postgres.search import TrigramWordDistance
 from django.core.cache import cache
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from django.db.models.functions import Length, Lower
 from django.db.models.query import QuerySet
 from django.forms import model_to_dict
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 from django.shortcuts import redirect, render
 from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_GET
@@ -40,7 +41,6 @@ from qfdmo.models.action import (
     get_groupe_action_instances,
     get_reparer_action_id,
 )
-from qfdmo.thread.materialized_view import RefreshMateriazedViewThread
 
 logger = logging.getLogger(__name__)
 
@@ -562,22 +562,18 @@ class FormulaireSearchActeursView(SearchActeursView):
         return [model_to_dict(a, exclude=["directions"]) for a in actions]
 
 
-# TODO : should be deprecated once all is moved to the displayed acteur
 def getorcreate_revisionacteur(request, acteur_identifiant):
-    acteur = Acteur.objects.get(identifiant_unique=acteur_identifiant)
-    revision_acteur = acteur.get_or_create_revision()
+    try:
+        acteur = Acteur.objects.get(identifiant_unique=acteur_identifiant)
+        revision_acteur = acteur.get_or_create_revision()
+    except Acteur.DoesNotExist as e:
+        # Case of Parent Acteur
+        revision_acteur = RevisionActeur.objects.get(
+            identifiant_unique=acteur_identifiant
+        )
+        if not revision_acteur.is_parent:
+            raise e
     return redirect(revision_acteur.change_url)
-
-
-def getorcreate_correctionequipeacteur(request, acteur_identifiant):
-    acteur = Acteur.objects.get(identifiant_unique=acteur_identifiant)
-    revision_acteur = acteur.get_or_create_correctionequipe()
-    return redirect(revision_acteur.change_url)
-
-
-def refresh_acteur_view(request):
-    RefreshMateriazedViewThread().start()
-    return redirect("admin:index")
 
 
 @require_GET
@@ -614,10 +610,20 @@ def get_object_list(request):
     )
 
 
+def _get_acteur_or_parent(**query_kwargs) -> DisplayedActeur | None:
+    try:
+        return DisplayedActeur.objects.get(**query_kwargs)
+    except DisplayedActeur.DoesNotExist:
+        revision_acteur = RevisionActeur.objects.get(**query_kwargs)
+        return DisplayedActeur.objects.get(identifiant_unique=revision_acteur.parent_id)
+
+
 def acteur_detail_redirect(request, identifiant_unique):
-    displayed_acteur = DisplayedActeur.objects.get(
-        identifiant_unique=identifiant_unique
-    )
+    try:
+        displayed_acteur = _get_acteur_or_parent(identifiant_unique=identifiant_unique)
+    except ObjectDoesNotExist:
+        raise Http404("L'adresse que vous cherchez n'existe plus")
+
     return redirect("qfdmo:acteur-detail", uuid=displayed_acteur.uuid, permanent=True)
 
 
@@ -640,9 +646,14 @@ def acteur_detail(request, uuid):
             "sources",
         ).get(uuid=uuid)
     except DisplayedActeur.DoesNotExist:
-        return redirect(settings.ASSISTANT["BASE_URL"], permanent=True)
+        # FIXME: it is impossible to get check if the revisionacteur has a parent
+        # because the revision_acteur doesn't have any UUID
+        # to resolve it we need compute uuid on revisionacteur layer
+        raise Http404("L'adresse que vous cherchez n'existe plus")
 
-    if displayed_acteur.statut != ActeurStatus.ACTIF:
+    # FIXME: This case shouldn't occure because we compute only active displayed
+    # acteurs in dislayedacteur table
+    if displayed_acteur is None or displayed_acteur.statut != ActeurStatus.ACTIF:
         return redirect(settings.ASSISTANT["BASE_URL"], permanent=True)
 
     context = {

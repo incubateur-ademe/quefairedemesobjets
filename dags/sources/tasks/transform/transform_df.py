@@ -98,12 +98,13 @@ def _merge_proposition_service_columns(group):
                 sscat_by_action[ps["action"]] = []
             sscat_by_action[ps["action"]].extend(ps["sous_categories"])
 
+    # sort sscat_by_action by action code
     return [
         {
             "action": action,
-            "sous_categories": sorted(list(set(sscat))),
+            "sous_categories": sorted(list(set(sscat_by_action[action]))),
         }
-        for action, sscat in sscat_by_action.items()
+        for action in sorted(sscat_by_action.keys())
     ]
 
 
@@ -128,17 +129,16 @@ def clean_telephone(row: pd.Series, _):
     return row[["telephone"]]
 
 
-# TODO : Ajouter des tests
 def clean_siret_and_siren(row, _):
     if "siret" in row:
         row["siret"] = clean_siret(row["siret"])
     else:
-        row["siret"] = None
+        row["siret"] = ""
     if "siren" in row and row["siren"]:
         row["siren"] = clean_siren(row["siren"])
     else:
         row["siren"] = (
-            row["siret"][:9] if "siret" in row and row["siret"] is not None else None
+            row["siret"][:9] if "siret" in row and row["siret"] is not None else ""
         )
     return row[["siret", "siren"]]
 
@@ -159,15 +159,21 @@ def clean_identifiant_externe(row, _):
     return row[["identifiant_externe"]]
 
 
+def compute_identifiant_unique(identifiant_externe, source_code, acteur_type_code):
+    unique_str = str(identifiant_externe).replace("/", "-").strip()
+    if acteur_type_code == ACTEUR_TYPE_DIGITAL:
+        unique_str = unique_str + "_d"
+    return source_code.lower() + "_" + unique_str
+
+
 def clean_identifiant_unique(row, _):
     if not row.get("identifiant_externe"):
         raise ValueError(
             "identifiant_externe is required to generate identifiant_unique"
         )
-    unique_str = row["identifiant_externe"].replace("/", "-").strip()
-    if row.get("acteur_type_code") == ACTEUR_TYPE_DIGITAL:
-        unique_str = unique_str + "_d"
-    row["identifiant_unique"] = row.get("source_code").lower() + "_" + unique_str
+    row["identifiant_unique"] = compute_identifiant_unique(
+        row["identifiant_externe"], row["source_code"], row["acteur_type_code"]
+    )
     return row[["identifiant_unique"]]
 
 
@@ -179,7 +185,7 @@ def merge_sous_categories_columns(row, _):
 
 def clean_adresse(row, dag_config):
     row["adresse"] = row["adresse_format_ban"]
-    address = postal_code = city = None
+    address = postal_code = city = ""
     if dag_config.validate_address_with_ban:
         address, postal_code, city = _get_address(row["adresse_format_ban"])
     else:
@@ -308,9 +314,9 @@ def clean_proposition_services(row, _):
         row["proposition_service_codes"] = [
             {
                 "action": action,
-                "sous_categories": row["sous_categorie_codes"],
+                "sous_categories": sorted(row["sous_categorie_codes"]),
             }
-            for action in row["action_codes"]
+            for action in sorted(row["action_codes"])
         ]
     else:
         row["proposition_service_codes"] = []
@@ -325,9 +331,9 @@ def clean_proposition_services(row, _):
 
 def _get_address(
     adresse_format_ban: str,
-) -> tuple[str | None, str | None, str | None]:
+) -> tuple[str, str, str]:
     if not adresse_format_ban:
-        return (None, None, None)
+        return ("", "", "")
 
     res = _get_address_from_ban(str(adresse_format_ban))
     match_percentage = res.get("match_percentage", 0)
@@ -421,4 +427,4 @@ def _extract_details(
     if adresse_format_ban:
         address_str = _address_details_clean_cedex(adresse_format_ban)
         return _address_details_extract(address_str)
-    return None, None, None
+    return "", "", ""

@@ -7,6 +7,7 @@ from sources.tasks.transform.transform_df import (
     clean_identifiant_externe,
     clean_identifiant_unique,
     clean_label_codes,
+    clean_proposition_services,
     clean_siret_and_siren,
     clean_telephone,
     compute_location,
@@ -296,6 +297,65 @@ class TestMergeDuplicates:
                     }
                 ),
             ),
+            # Validation of the order while merge duplicates
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1, 1],
+                        "proposition_service_codes": [
+                            [
+                                {
+                                    "action": "action3",
+                                    "sous_categories": ["sscat2", "sscat1"],
+                                },
+                                {
+                                    "action": "action2",
+                                    "sous_categories": ["sscat3", "sscat2"],
+                                },
+                                {
+                                    "action": "action1",
+                                    "sous_categories": ["sscat1", "sscat3"],
+                                },
+                            ],
+                            [
+                                {
+                                    "action": "action2",
+                                    "sous_categories": ["sscat1", "sscat3"],
+                                },
+                                {
+                                    "action": "action1",
+                                    "sous_categories": ["sscat2", "sscat3"],
+                                },
+                                {
+                                    "action": "action3",
+                                    "sous_categories": ["sscat3", "sscat2"],
+                                },
+                            ],
+                        ],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1],
+                        "proposition_service_codes": [
+                            [
+                                {
+                                    "action": "action1",
+                                    "sous_categories": ["sscat1", "sscat2", "sscat3"],
+                                },
+                                {
+                                    "action": "action2",
+                                    "sous_categories": ["sscat1", "sscat2", "sscat3"],
+                                },
+                                {
+                                    "action": "action3",
+                                    "sous_categories": ["sscat1", "sscat2", "sscat3"],
+                                },
+                            ],
+                        ],
+                    }
+                ),
+            ),
         ],
     )
     def test_merge_duplicates_ps_dict(self, df, expected_df):
@@ -315,6 +375,59 @@ class TestMergeDuplicates:
         )
 
         pd.testing.assert_frame_equal(result_df, expected_df)
+
+
+class TestCleanPropositionServiceCodes:
+    @pytest.mark.parametrize(
+        "action_codes, sous_categorie_codes, expected_proposition_service_codes",
+        [
+            ([], [], []),
+            (
+                ["action1"],
+                ["sscat1"],
+                [{"action": "action1", "sous_categories": ["sscat1"]}],
+            ),
+            (
+                ["action1", "action2"],
+                ["sscat1", "sscat2"],
+                [
+                    {"action": "action1", "sous_categories": ["sscat1", "sscat2"]},
+                    {"action": "action2", "sous_categories": ["sscat1", "sscat2"]},
+                ],
+            ),
+            (
+                ["action3", "action1", "action2"],
+                ["sscat3", "sscat2", "sscat1"],
+                [
+                    {
+                        "action": "action1",
+                        "sous_categories": ["sscat1", "sscat2", "sscat3"],
+                    },
+                    {
+                        "action": "action2",
+                        "sous_categories": ["sscat1", "sscat2", "sscat3"],
+                    },
+                    {
+                        "action": "action3",
+                        "sous_categories": ["sscat1", "sscat2", "sscat3"],
+                    },
+                ],
+            ),
+        ],
+    )
+    def test_clean_proposition_service_codes(
+        self, action_codes, sous_categorie_codes, expected_proposition_service_codes
+    ):
+        result = clean_proposition_services(
+            pd.Series(
+                {
+                    "action_codes": action_codes,
+                    "sous_categorie_codes": sous_categorie_codes,
+                }
+            ),
+            None,
+        )
+        assert result["proposition_service_codes"] == expected_proposition_service_codes
 
 
 class TestCleanTelephone:
@@ -340,10 +453,12 @@ class TestCleanSiretAndSiren:
     @pytest.mark.parametrize(
         "siret, siren, expected_siret, expected_siren",
         [
-            (None, None, None, None),
+            (None, None, "", ""),
             ("12345678901234", None, "12345678901234", "123456789"),
-            (None, "123456789", None, "123456789"),
+            (" 12345678901234 ", None, "12345678901234", "123456789"),
+            (None, "123456789", "", "123456789"),
             ("98765432109876", "987654321", "98765432109876", "987654321"),
+            (" 98765432109876 ", " 987654321 ", "98765432109876", "987654321"),
             ("12345678901234", "123456789", "12345678901234", "123456789"),
             ("12345678901234", "987654321", "12345678901234", "987654321"),
         ],
@@ -389,6 +504,7 @@ class TestCleanIdentifiantUnique:
             " expected_identifiant_unique"
         ),
         [
+            (12345, "commerce", "source", "source_12345"),
             ("12345", "commerce", "source", "source_12345"),
             (" 12345 ", "commerce", "source", "source_12345"),
             ("ABC123", "commerce", "source", "source_ABC123"),

@@ -35,7 +35,7 @@ from django.utils.functional import cached_property
 from unidecode import unidecode
 
 from core.constants import DIGITAL_ACTEUR_CODE
-from core.models import TimestampedModel
+from core.models.mixin import TimestampedModel
 from core.validators import EmptyEmailValidator
 from dags.sources.config.shared_constants import (
     EMPTY_ACTEUR_FIELD,
@@ -188,6 +188,13 @@ class Source(CodeAsNaturalKeyModel):
         choices=DataLicense,
         db_default=DataLicense.NO_LICENSE,
     )
+
+    @property
+    def logo_file_absolute_url(self) -> str:
+        if not self.logo_file:
+            return ""
+
+        return f"{settings.BASE_URL}{self.logo_file.url}"
 
 
 def validate_opening_hours(value):
@@ -615,7 +622,6 @@ class Acteur(BaseActeur):
         )
 
     def get_or_create_revision(self):
-        # TODO : to be deprecated
         fields = model_to_dict(
             self,
             fields=[
@@ -1208,6 +1214,7 @@ class DisplayedPropositionService(BasePropositionService):
         verbose_name = "Proposition de service - AFFICHÉ"
         verbose_name_plural = "Proposition de service - AFFICHÉ"
 
+    # id = models.CharField(primary_key=True)
     acteur = models.ForeignKey(
         DisplayedActeur,
         on_delete=models.CASCADE,

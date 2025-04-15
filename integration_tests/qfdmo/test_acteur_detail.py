@@ -5,6 +5,7 @@ from qfdmo.models.acteur import ActeurStatus
 from unit_tests.qfdmo.acteur_factory import (
     DisplayedActeurFactory,
     LabelQualiteFactory,
+    RevisionActeurFactory,
     SourceFactory,
 )
 
@@ -183,6 +184,33 @@ class TestRedirects:
         url = f"/adresse/{acteur.identifiant_unique}"
         response = client.get(url)
         assert response.status_code == 301
+
+    def test_redirect_to_parent_acteur(self, client):
+        parent_revision_acteur = RevisionActeurFactory(
+            identifiant_unique="parent",
+        )
+        child_revision_acteur = RevisionActeurFactory(
+            identifiant_unique="child",
+            parent=parent_revision_acteur,
+        )
+        parent_displayed_acteur = DisplayedActeurFactory(
+            identifiant_unique=parent_revision_acteur.identifiant_unique,
+        )
+
+        url = f"/adresse/{child_revision_acteur.identifiant_unique}"
+        response = client.get(url)
+        assert response.status_code == 301
+        assert response.url == f"/adresse_details/{parent_displayed_acteur.uuid}"
+
+    def test_adresse_details_404_not_found(self, client):
+        url = "/adresse_details/doesnt_exist"
+        response = client.get(url)
+        assert response.status_code == 404
+
+    def test_adresse_404_not_found(self, client):
+        url = "/adresse/doesnt_exist"
+        response = client.get(url)
+        assert response.status_code == 404
 
     def not_found_actor_do_not_raise_error(self, client):
         pass

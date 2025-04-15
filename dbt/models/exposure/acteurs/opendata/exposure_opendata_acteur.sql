@@ -86,6 +86,16 @@ SELECT
   da.uniquement_sur_rdv as "uniquement_sur_rdv",
   acs.services as "type_de_services",
   ps.services::text as "propositions_de_services",
+  {{ sscat_from_action('ps.services', 'emprunter') }} as "emprunter",
+  {{ sscat_from_action('ps.services', 'preter') }} as "preter",
+  {{ sscat_from_action('ps.services', 'louer') }} as "louer",
+  {{ sscat_from_action('ps.services', 'mettreenlocation') }} as "mettreenlocation",
+  {{ sscat_from_action('ps.services', 'reparer') }} as "reparer",
+  {{ sscat_from_action('ps.services', 'donner') }} as "donner",
+  {{ sscat_from_action('ps.services', 'trier') }} as "trier",
+  {{ sscat_from_action('ps.services', 'echanger') }} as "echanger",
+  {{ sscat_from_action('ps.services', 'revendre') }} as "revendre",
+  {{ sscat_from_action('ps.services', 'acheter') }} as "acheter",
   to_char(da.modifie_le, 'YYYY-MM-DD') as "date_de_derniere_modification"
 FROM {{ ref('marts_opendata_acteur') }}  AS da
 LEFT JOIN qfdmo_acteurtype AS at ON da.acteur_type_id = at.id
