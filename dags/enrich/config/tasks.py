@@ -9,7 +9,6 @@ class TASKS:
     CONFIG_CREATE: str = "enrich_config_create"
 
     # Read tasks
-    READ_AE_RGPD: str = "enrich_ae_rgpd_read"
     ENRICH_CLOSED_REPLACED_SAME_SIREN: str = "enrich_acteurs_closed_replaced_same_siren"
     ENRICH_CLOSED_REPLACED_OTHER_SIREN: str = (
         "enrich_acteurs_closed_replaced_other_siren"
@@ -25,9 +24,3 @@ class TASKS:
         "enrich_acteurs_closed_suggestions_not_replaced"
     )
     ENRICH_DBT_MODELS_REFRESH: str = "enrich_dbt_models_refresh"
-
-    # Matching tasks
-    MATCH_SCORE: str = "enrich_ae_rgpd_match"
-
-    # Suggestion tasks
-    SUGGEST_AE_RGPD: str = "enrich_ae_rgpd_suggest"
