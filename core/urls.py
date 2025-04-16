@@ -29,7 +29,7 @@ from wagtail.documents import urls as wagtaildocs_urls
 from qfdmo.models.acteur import ActeurStatus, DisplayedActeur
 
 from .api import api
-from .views import direct_access
+from .views import direct_access, robots_txt
 
 info_dict = {
     "queryset": DisplayedActeur.objects.filter(statut=ActeurStatus.ACTIF).order_by(
@@ -50,10 +50,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", api.urls),
     path("explorer/", include("explorer.urls")),
-    path(
-        "robots.txt",
-        TemplateView.as_view(template_name="robots.txt", content_type="text/plain"),
-    ),
+    path("robots.txt", robots_txt),
     path(
         "sitemap.xml",
         sitemaps_views.index,
