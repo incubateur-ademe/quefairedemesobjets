@@ -1,0 +1,7 @@
+# Allow everything for everyone
+User-agent: *
+Allow: /
+
+# Sitemap
+# https://longuevieauxobjets.ademe.fr/sitemap.xml
+Sitemap: {{ request.scheme }}://{{ request.get_host }}/sitemap.xml
