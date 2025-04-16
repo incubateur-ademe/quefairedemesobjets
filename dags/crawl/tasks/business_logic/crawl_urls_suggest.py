@@ -111,7 +111,7 @@ def crawl_urls_suggestions_to_db(
     logger.info(f"{identifiant_action=}")
     logger.info(f"{identifiant_execution=}")
 
-    from data.models import (
+    from data.models.suggestion import (
         Suggestion,
         SuggestionAction,
         SuggestionCohorte,
@@ -139,7 +139,7 @@ def crawl_urls_suggestions_to_db(
 
 
 def crawl_urls_suggest(
-    df: pd.DataFrame, dag_id: str, run_id: str, dry_run: bool = True
+    df: pd.DataFrame, dag_display_name: str, run_id: str, dry_run: bool = True
 ) -> int:
     """Main function to generate suggestions for URLs"""
     if df_none_or_empty(df):
@@ -160,8 +160,8 @@ def crawl_urls_suggest(
         crawl_urls_suggestions_to_db(
             metadata=metadata,
             suggestions=suggestions,
-            identifiant_action=f"dag={dag_id}",
-            identifiant_execution=f"run={run_id}, cohorte={cohort}",
+            identifiant_action=f"{dag_display_name} - {cohort}",
+            identifiant_execution=f"{run_id}",
         )
         written_to_db_count = len(suggestions)
     return written_to_db_count

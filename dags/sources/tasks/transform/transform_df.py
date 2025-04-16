@@ -98,12 +98,13 @@ def _merge_proposition_service_columns(group):
                 sscat_by_action[ps["action"]] = []
             sscat_by_action[ps["action"]].extend(ps["sous_categories"])
 
+    # sort sscat_by_action by action code
     return [
         {
             "action": action,
-            "sous_categories": sorted(list(set(sscat))),
+            "sous_categories": sorted(list(set(sscat_by_action[action]))),
         }
-        for action, sscat in sscat_by_action.items()
+        for action in sorted(sscat_by_action.keys())
     ]
 
 
@@ -158,15 +159,21 @@ def clean_identifiant_externe(row, _):
     return row[["identifiant_externe"]]
 
 
+def compute_identifiant_unique(identifiant_externe, source_code, acteur_type_code):
+    unique_str = str(identifiant_externe).replace("/", "-").strip()
+    if acteur_type_code == ACTEUR_TYPE_DIGITAL:
+        unique_str = unique_str + "_d"
+    return source_code.lower() + "_" + unique_str
+
+
 def clean_identifiant_unique(row, _):
     if not row.get("identifiant_externe"):
         raise ValueError(
             "identifiant_externe is required to generate identifiant_unique"
         )
-    unique_str = str(row["identifiant_externe"]).replace("/", "-").strip()
-    if row.get("acteur_type_code") == ACTEUR_TYPE_DIGITAL:
-        unique_str = unique_str + "_d"
-    row["identifiant_unique"] = row.get("source_code").lower() + "_" + unique_str
+    row["identifiant_unique"] = compute_identifiant_unique(
+        row["identifiant_externe"], row["source_code"], row["acteur_type_code"]
+    )
     return row[["identifiant_unique"]]
 
 
@@ -307,9 +314,9 @@ def clean_proposition_services(row, _):
         row["proposition_service_codes"] = [
             {
                 "action": action,
-                "sous_categories": row["sous_categorie_codes"],
+                "sous_categories": sorted(row["sous_categorie_codes"]),
             }
-            for action in row["action_codes"]
+            for action in sorted(row["action_codes"])
         ]
     else:
         row["proposition_service_codes"] = []

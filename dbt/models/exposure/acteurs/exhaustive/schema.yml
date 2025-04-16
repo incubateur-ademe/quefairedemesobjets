@@ -6,81 +6,119 @@ models:
     columns:
       - name: identifiant_unique
         description: "The primary key for this table"
-        data_tests:
+        data_type: varchar(255)
+        null_ok: false
+        tests:
           - unique
           - not_null
+          - not_empty_string
       - name: uuid
         description: "The uuid for this table"
-        data_tests:
+        data_type: varchar(255)
+        tests:
           - unique
           - not_null
       - name: nom
         description: "Le nom de l'acteur"
-        data_tests:
+        data_type: varchar(255)
+        tests:
           - not_null
+          - not_empty_string
       - name: description
         description: "La description de l'acteur"
+        data_type: text
       - name: acteur_type_id
         description: "Le type d'acteur"
+        data_type: integer
+        tests:
+          - not_null
       - name: adresse
         description: "L'adresse de l'acteur"
+        data_type: varchar(255)
       - name: adresse_complement
         description: "L'adresse complémentaire de l'acteur"
+        data_type: varchar(255)
       - name: code_postal
         description: "Le code postal de l'acteur"
+        data_type: varchar(10)
       - name: ville
         description: "La ville de l'acteur"
+        data_type: varchar(255)
       - name: url
         description: "L'URL de l'acteur"
+        data_type: varchar(2048)
       - name: email
         description: "L'email de l'acteur"
+        data_type: varchar(254)
       - name: location
         description: "La localisation de l'acteur"
+        data_type: geometry(Point,4326)
       - name: telephone
         description: "Le numéro de téléphone de l'acteur"
+        data_type: varchar(255)
       - name: nom_commercial
         description: "Le nom commercial de l'acteur"
+        data_type: varchar(255)
       - name: nom_officiel
         description: "Le nom officiel de l'acteur"
+        data_type: varchar(255)
       - name: siren
         description: "Le numéro SIREN de l'acteur"
+        data_type: varchar(9)
       - name: siret
         description: "Le numéro SIRET de l'acteur"
+        data_type: varchar(14)
       - name: source_id
         description: "L'identifiant source de l'acteur"
+        data_type: integer
       - name: identifiant_externe
         description: "L'identifiant externe de l'acteur"
+        data_type: varchar(255)
       - name: naf_principal
         description: "Le code NAF principal de l'acteur"
+        data_type: varchar(255)
       - name: commentaires
         description: "Les commentaires de l'acteur"
+        data_type: text
       - name: horaires_osm
         description: "Les horaires OSM de l'acteur"
+        data_type: varchar
       - name: horaires_description
         description: "La description des horaires de l'acteur"
+        data_type: text
       - name: public_accueilli
         description: "Le public accueilli par l'acteur"
+        data_type: varchar(255)
       - name: reprise
         description: "La reprise de l'acteur"
+        data_type: varchar(255)
       - name: exclusivite_de_reprisereparation
         description: "L'exclusivité de la réparation de l'acteur"
+        data_type: boolean
       - name: uniquement_sur_rdv
         description: "Le fait que l'acteur soit uniquement sur RDV"
+        data_type: boolean
       - name: action_principale_id
         description: "L'action principale de l'acteur"
+        data_type: integer
       - name: modifie_le
         description: "La date de modification de l'acteur"
-      - name: parent_id
-        description: "L'identifiant du parent de l'acteur"
+        data_type: timestamp with time zone
       - name: cree_le
         description: "La date de création de l'acteur"
+        data_type: timestamp with time zone
       - name: statut
         description: "Le statut de l'acteur"
+        data_type: varchar(255)
+      - name: parent_id
+        description: "L'identifiant du parent de l'acteur"
+        data_type: varchar
       - name: revision_existe
-        description: "Le fait que l'acteur est une révision"
-        data_tests:
-          - not_null
+        description: "Le fait que l'acteur ait une révision"
+        data_type: boolean
     config:
+      contract:
+        enforced: true
       materialized: table
       indexes:
         - columns: ['modifie_le', 'identifiant_unique']
@@ -104,8 +142,6 @@ models:
           type: hash
         - columns: ['location']
           type: gist
-        - columns: ['parent_id']
-          type: hash
       constraints:
         - type: foreign_key
           columns: [acteur_type_id]
@@ -129,26 +165,25 @@ models:
     description: "Proposition Service model"
     columns:
       - name: id
-        description: "The primary key for this table"
-        data_tests:
-          - unique
+        description: "L'identifiant de la proposition de service"
+        data_type: varchar
+        tests:
           - not_null
+          - unique
       - name: acteur_id
-        description: "The acteur_id for this table"
-        data_tests:
+        description: "L'identifiant de l'acteur"
+        data_type: varchar
+        tests:
           - not_null
       - name: action_id
-        description: "The action_id for this table"
-        data_tests:
+        description: "L'identifiant de l'action"
+        data_type: integer
+        tests:
           - not_null
-      - name: ps_id
-        description: "The ps_id for this table"
-      - name: rps_id
-        description: "The rps_id for this table"
-      - name: revision_existe
-        description: "The revision_existe for this table"
     config:
       materialized: table
+      contract:
+        enforced: true
       indexes:
         - columns: ['acteur_id', 'action_id']
           unique: true
@@ -162,7 +197,7 @@ models:
         - type: foreign_key
           columns: [acteur_id]
           ref_columns: [identifiant_unique]
-          ref_table: exposure_exhaustive_acteur
+          ref_table: exposure_carte_acteur
           deferrable: true
           initially_deferred: true
         - type: foreign_key
@@ -180,31 +215,36 @@ models:
     description: "Proposition Service Sous Categories model"
     columns:
       - name: id
-        description: "The primary key for this table"
-        data_tests:
+        description: "L'identifiant de la sous-catégorie"
+        data_type: bigint
+        tests:
           - not_null
-      - name: propositionservice_id
-        description: "The propositionservice_id for this table"
-        data_tests:
+      - name: vuepropositionservice_id
+        description: "L'identifiant de la proposition de service"
+        data_type: varchar
+        tests:
           - not_null
       - name: souscategorieobjet_id
-        description: "The souscategorieobjet_id for this table"
-        data_tests:
+        description: "L'identifiant de la sous-catégorie"
+        data_type: integer
+        tests:
           - not_null
     config:
       materialized: table
+      contract:
+        enforced: true
       indexes:
-        - columns: ['propositionservice_id', 'souscategorieobjet_id']
+        - columns: ['vuepropositionservice_id', 'souscategorieobjet_id']
           unique: true
-        - columns: ['propositionservice_id']
+        - columns: ['vuepropositionservice_id']
           type: hash
         - columns: ['souscategorieobjet_id']
           type: hash
       constraints:
         - type: foreign_key
-          columns: [propositionservice_id]
+          columns: [vuepropositionservice_id]
           ref_columns: [id]
-          ref_table: exposure_exhaustive_propositionservice
+          ref_table: exposure_carte_propositionservice
           deferrable: true
           initially_deferred: true
         - type: foreign_key
@@ -216,37 +256,42 @@ models:
     tests:
       - dbt_utils.unique_combination_of_columns:
           combination_of_columns:
-            - propositionservice_id
+            - vuepropositionservice_id
             - souscategorieobjet_id
   - name: exposure_exhaustive_acteur_acteur_services
     description: "Acteur Acteur Services model"
     columns:
       - name: id
-        description: "The primary key for this table"
-        data_tests:
+        description: "L'identifiant du lien entre acteur et acteur_services"
+        data_type: bigint
+        tests:
           - not_null
-      - name: acteur_id
-        description: "The acteur_id for this table"
-        data_tests:
+      - name: vueacteur_id
+        description: "L'identifiant de l'acteur"
+        data_type: varchar
+        tests:
           - not_null
       - name: acteurservice_id
-        description: "The acteurservice_id for this table"
-        data_tests:
+        description: "L'identifiant du service"
+        data_type: integer
+        tests:
           - not_null
     config:
       materialized: table
+      contract:
+        enforced: true
       indexes:
-        - columns: ['acteur_id', 'acteurservice_id']
+        - columns: ['vueacteur_id', 'acteurservice_id']
           unique: true
-        - columns: ['acteur_id']
+        - columns: ['vueacteur_id']
           type: hash
         - columns: ['acteurservice_id']
           type: hash
       constraints:
         - type: foreign_key
-          columns: [acteur_id]
+          columns: [vueacteur_id]
           ref_columns: [identifiant_unique]
-          ref_table: exposure_exhaustive_acteur
+          ref_table: exposure_carte_acteur
           deferrable: true
           initially_deferred: true
         - type: foreign_key
@@ -258,38 +303,44 @@ models:
     tests:
       - dbt_utils.unique_combination_of_columns:
           combination_of_columns:
-            - acteur_id
+            - vueacteur_id
             - acteurservice_id
+
   - name: exposure_exhaustive_acteur_labels
     description: "Acteur Labels model"
     columns:
       - name: id
-        description: "The primary key for this table"
-        data_tests:
+        description: "L'identifiant du lien entre acteur et label"
+        data_type: bigint
+        tests:
           - unique
           - not_null
-      - name: acteur_id
-        description: "The acteur_id for this table"
-        data_tests:
+      - name: vueacteur_id
+        description: "L'identifiant de l'acteur"
+        data_type: varchar
+        tests:
           - not_null
       - name: labelqualite_id
-        description: "The labelqualite_id for this table"
-        data_tests:
+        description: "L'identifiant du label"
+        data_type: integer
+        tests:
           - not_null
     config:
       materialized: table
+      contract:
+        enforced: true
       indexes:
-        - columns: ['acteur_id', 'labelqualite_id']
+        - columns: ['vueacteur_id', 'labelqualite_id']
           unique: true
-        - columns: ['acteur_id']
+        - columns: ['vueacteur_id']
           type: hash
         - columns: ['labelqualite_id']
           type: hash
       constraints:
         - type: foreign_key
-          columns: [acteur_id]
+          columns: [vueacteur_id]
           ref_columns: [identifiant_unique]
-          ref_table: exposure_exhaustive_acteur
+          ref_table: exposure_carte_acteur
           deferrable: true
           initially_deferred: true
         - type: foreign_key
@@ -301,37 +352,42 @@ models:
     tests:
       - dbt_utils.unique_combination_of_columns:
           combination_of_columns:
-            - acteur_id
+            - vueacteur_id
             - labelqualite_id
   - name: exposure_exhaustive_acteur_sources
     description: "Lien entre acteur de la exhaustive et sources"
     columns:
       - name: id
         description: "L'identifiant de la source"
-        data_tests:
+        data_type: bigint
+        tests:
           - not_null
-      - name: acteur_id
+      - name: vueacteur_id
         description: "L'identifiant de l'acteur"
-        data_tests:
+        data_type: varchar
+        tests:
           - not_null
       - name: source_id
         description: "L'identifiant de la source"
-        data_tests:
+        data_type: integer
+        tests:
           - not_null
     config:
       materialized: table
+      contract:
+        enforced: true
       indexes:
-        - columns: ['acteur_id', 'source_id']
+        - columns: ['vueacteur_id', 'source_id']
           unique: true
-        - columns: ['acteur_id']
+        - columns: ['vueacteur_id']
           type: hash
         - columns: ['source_id']
           type: hash
       constraints:
         - type: foreign_key
-          columns: [acteur_id]
+          columns: [vueacteur_id]
           ref_columns: [identifiant_unique]
-          ref_table: exposure_exhaustive_acteur
+          ref_table: exposure_carte_acteur
           deferrable: true
           initially_deferred: true
         - type: foreign_key

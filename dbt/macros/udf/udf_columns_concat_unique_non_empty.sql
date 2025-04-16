@@ -3,7 +3,9 @@
     Function to concatenate strings from various
     columns while only retaining non-empty values
 */
-CREATE OR REPLACE FUNCTION udf_columns_concat_unique_non_empty(VARIADIC input_columns TEXT[])
+
+DROP FUNCTION IF EXISTS {{ target.schema }}.udf_columns_concat_unique_non_empty(VARIADIC input_columns TEXT[]);
+CREATE FUNCTION {{ target.schema }}.udf_columns_concat_unique_non_empty(VARIADIC input_columns TEXT[])
 RETURNS TEXT AS $$
 DECLARE
     unique_values TEXT;

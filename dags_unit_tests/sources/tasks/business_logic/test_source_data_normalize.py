@@ -118,7 +118,7 @@ class TestSourceDataNormalize:
             "endpoint": "http://example.com/api",
         }
         TRANSFORMATION_MAPPING["test_fct"] = lambda x, y: "success"
-        df = source_data_normalize(
+        df, metadata = source_data_normalize(
             df_acteur_from_source=pd.DataFrame(
                 {
                     "identifiant_unique": ["id"],
@@ -199,7 +199,7 @@ class TestSourceDataNormalize:
                 "product_mapping": {"product1": "code1"},
             }
         )
-        df = source_data_normalize(
+        df, metadata = source_data_normalize(
             dag_config=dag_config,
             df_acteur_from_source=pd.DataFrame(
                 {
@@ -253,7 +253,7 @@ class TestSourceDataNormalize:
                 "product_mapping": {"product1": "code1"},
             }
         )
-        df = source_data_normalize(
+        df, metadata = source_data_normalize(
             dag_config=dag_config,
             df_acteur_from_source=pd.DataFrame(
                 {
@@ -415,13 +415,13 @@ class TestRemoveUndesiredLines:
     def test_remove_undesired_lines_suppressions(self, df, expected_df, dag_config):
         # Mock the DAGConfig
 
-        result_df = _remove_undesired_lines(df, dag_config)
+        result_df, metadata = _remove_undesired_lines(df, dag_config)
         pd.testing.assert_frame_equal(
             result_df.reset_index(drop=True), expected_df.reset_index(drop=True)
         )
 
     def test_merge_duplicated(self, dag_config):
-        result = _remove_undesired_lines(
+        result, metadata = _remove_undesired_lines(
             pd.DataFrame(
                 {
                     "identifiant_unique": ["id1", "id1", "id2"],

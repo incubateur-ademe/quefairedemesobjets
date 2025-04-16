@@ -12,14 +12,13 @@ from cluster.helpers.shorthands.change_model_name import (
     CHANGE_POINT,
 )
 from cluster.helpers.shorthands.change_order import O1, O2, O3
-from cluster.tasks.business_logic.cluster_acteurs_suggestions.display import (
-    cluster_acteurs_suggestions_display,
+from cluster.tasks.business_logic.cluster_acteurs_suggestions.prepare import (
+    cluster_acteurs_suggestions_prepare,
 )
 from cluster.tasks.business_logic.cluster_acteurs_suggestions.to_db import (
     cluster_acteurs_suggestions_to_db,
 )
 
-from data.models import Suggestion, SuggestionCohorte
 from data.models.change import (
     COL_CHANGE_ENTITY_TYPE,
     COL_CHANGE_MODEL_NAME,
@@ -30,6 +29,7 @@ from data.models.change import (
     ENTITY_ACTEUR_REVISION,
     ENTITY_ACTEUR_TO_CREATE,
 )
+from data.models.suggestion import Suggestion, SuggestionCohorte
 from unit_tests.qfdmo.acteur_factory import (
     ActeurTypeFactory,
     DisplayedActeurFactory,
@@ -164,7 +164,7 @@ DATA_ACTEURS = [
         # AND an orphan's new parent. Refactor dedup_parent_choose
         # to reflect the change of parent in COL_CHANGE_MODEL_PARAMS
         # just like any other data the change model is relying on
-        # AND simplify cluster_acteurs_suggestions_display which
+        # AND simplify cluster_acteurs_suggestions_prepare which
         # then should have 0 conditional logic (just packaging suggestions)
         "parent_id": "c3pkeep",
         "nombre_enfants": 0,
@@ -284,7 +284,8 @@ class TestClusterActeursSuggestionsToDb:
 
     @pytest.fixture
     def suggestions_list(self, df, db_acteurs_mock) -> list[dict]:
-        return cluster_acteurs_suggestions_display(df)
+        working, failing = cluster_acteurs_suggestions_prepare(df)
+        return working
 
     @pytest.fixture(autouse=True)
     def suggestions_to_db(self, df, id_action, id_execution, suggestions_list):

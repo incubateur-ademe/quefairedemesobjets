@@ -37,7 +37,16 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
             class="qf-inset-0 qf-h-full qf-relative qf-z-0"
             data-action="map:captureInteraction->analytics#captureInteractionWithMap"
         >
+            {% for acteur in acteurs %}
+                <script type="application/json" data-map-target="acteur">
+                    {{ acteur.json_acteur_for_display(direction=form.initial.direction, action_list=form.initial.action_list, carte=carte, carte_config=object, sous_categorie_id=form.initial.sc_id) | safe }}
+                </script>
+            {% endfor %}
+        </div>
+
+        {% if address_ok %}
             {% if is_carte %}
+                {% include "qfdmo/carte/panels/legend.html" %}
                 <a class="qf-flex lg:qf-hidden
                             qf-bg-white
                             fr-mb-1w fr-btn fr-btn--icon-left fr-icon-epingle-plus fr-btn--tertiary qf-whitespace-nowrap qf-w-auto qf-justify-center
@@ -51,21 +60,10 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
                 </a>
             {% endif %}
 
-            {% for acteur in acteurs %}
-                <script type="application/json" data-map-target="acteur">
-                    {{ acteur.json_acteur_for_display(direction=form.initial.direction, action_list=form.initial.action_list, carte=carte) | safe }}
-                </script>
-            {% endfor %}
-        </div>
-
-        {% if address_ok %}
-            {% if is_carte %}
-                {% include "qfdmo/carte/panels/legend.html" %}
-            {% endif %}
-
             {% if not acteurs %}
                 {% include "qfdmo/shared/disclaimers/no_local_solution.html" %}
             {% endif %}
+
         {% else %}
             {% include "qfdmo/shared/disclaimers/adresse_missing.html" %}
         {% endif %}

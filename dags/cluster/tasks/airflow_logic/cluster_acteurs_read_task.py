@@ -4,7 +4,8 @@ from airflow import DAG
 from airflow.exceptions import AirflowSkipException
 from airflow.operators.python import PythonOperator
 from cluster.config.model import ClusterConfig
-from cluster.tasks.airflow_logic.task_ids import TASK_CONFIG_CREATE, TASK_SELECTION
+from cluster.config.tasks import TASKS
+from cluster.config.xcoms import XCOMS, xcom_pull
 from cluster.tasks.business_logic.cluster_acteurs_read.for_clustering import (
     cluster_acteurs_read_for_clustering,
 )
@@ -18,7 +19,7 @@ def task_info_get():
 
 
     ============================================================
-    Description de la tâche "{TASK_SELECTION}"
+    Description de la tâche "{TASKS.SELECTION}"
     ============================================================
 
     💡 quoi: va chercher en base de données les acteurs correspondants
@@ -33,12 +34,10 @@ def task_info_get():
     """
 
 
-def cluster_acteurs_read_wrapper(**kwargs) -> None:
+def cluster_acteurs_read_wrapper(ti) -> None:
     logger.info(task_info_get())
 
-    config: ClusterConfig = kwargs["ti"].xcom_pull(
-        key="config", task_ids=TASK_CONFIG_CREATE
-    )
+    config: ClusterConfig = xcom_pull(ti, XCOMS.CONFIG)
     log.preview("Config reçue", config)
 
     df = cluster_acteurs_read_for_clustering(
@@ -53,17 +52,17 @@ def cluster_acteurs_read_wrapper(**kwargs) -> None:
     )
 
     if df.empty:
-        raise AirflowSkipException("Aucun orphelin trouvé pour le clustering")
+        raise AirflowSkipException("Aucun orphelin trouvé, on s'arrête là")
 
     logging.info(log.banner_string("🏁 Résultat final de cette tâche"))
     log.preview_df_as_markdown("acteurs sélectionnés", df)
 
-    kwargs["ti"].xcom_push(key="df", value=df)
+    ti.xcom_push(key=XCOMS.DF_READ, value=df)
 
 
 def cluster_acteurs_read_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
-        task_id=TASK_SELECTION,
+        task_id=TASKS.SELECTION,
         python_callable=cluster_acteurs_read_wrapper,
         dag=dag,
     )

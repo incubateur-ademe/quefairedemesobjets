@@ -1,6 +1,6 @@
 WITH propositionservice AS (
     SELECT
-        CONCAT('PS_', ps.id::text) AS id,
+        CONCAT('PS_', ps.id::varchar)::varchar AS id,
         ps.acteur_id AS acteur_id,
         ps.action_id AS action_id,
         ps.id::integer AS ps_id,
@@ -11,7 +11,7 @@ WITH propositionservice AS (
 ),
 revisionpropositionservice AS (
     SELECT
-        CONCAT('RPS_', rps.id::text) AS id,
+        CONCAT('RPS_', rps.id::varchar)::varchar AS id,
         rps.acteur_id AS acteur_id,
         rps.action_id AS action_id,
         NULL::integer AS ps_id,

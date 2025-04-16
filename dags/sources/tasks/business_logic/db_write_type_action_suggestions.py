@@ -15,30 +15,31 @@ def db_write_type_action_suggestions(
     df_acteur_to_create: pd.DataFrame,
     df_acteur_to_delete: pd.DataFrame,
     df_acteur_to_update: pd.DataFrame,
+    metadata_to_create: dict,
+    metadata_to_update: dict,
+    metadata_to_delete: dict,
 ):
-
-    metadata = {}
 
     run_name = run_id.replace("__", " - ")
 
     insert_suggestion(
         df=df_acteur_to_create,
-        metadata=metadata,
+        metadata=metadata_to_create,
         dag_name=f"{dag_name} - AJOUT",
         run_name=run_name,
         type_action=constants.SUGGESTION_SOURCE_AJOUT,
     )
     insert_suggestion(
         df=df_acteur_to_delete,
-        metadata=metadata,
-        dag_name=f"{dag_name} - SUPRESSION",
+        metadata=metadata_to_delete,
+        dag_name=f"{dag_name} - SUP",
         run_name=run_name,
         type_action=constants.SUGGESTION_SOURCE_SUPRESSION,
     )
     insert_suggestion(
         df=df_acteur_to_update,
-        metadata=metadata,
-        dag_name=f"{dag_name} - MISES A JOUR",
+        metadata=metadata_to_update,
+        dag_name=f"{dag_name} - MODIF",
         run_name=run_name,
         type_action=constants.SUGGESTION_SOURCE_MODIFICATION,
     )

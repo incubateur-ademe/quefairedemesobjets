@@ -1,15 +1,25 @@
-from django.contrib.gis import admin
+import logging
+
+from django.contrib import admin, messages
 from django.utils.html import format_html
 
 from core.admin import NotEditableMixin
-from data.models import Suggestion, SuggestionCohorte
-from data.models.suggestion import SuggestionStatut
+from data.models.suggestion import Suggestion, SuggestionCohorte, SuggestionStatut
+
+NB_SUGGESTIONS_DISPLAYED_WHEN_DELETING = 100
+
+logger = logging.getLogger(__name__)
 
 
-def dict_to_html_table(data):
+def dict_to_html_table(data: dict):
     table = "<table class'table-metadata'>"
     for key in sorted(data.keys()):
-        value = data[key]
+        if isinstance(data[key], dict):
+            value = dict_to_html_table(data[key])
+        elif isinstance(data[key], list):
+            value = "</td><td>".join([str(item) for item in data[key]])
+        else:
+            value = data[key]
         table += f"<tr><td>{key}</td><td>{value}</td></tr>"
     table += "</table>"
     return table
@@ -18,14 +28,41 @@ def dict_to_html_table(data):
 class SuggestionCohorteAdmin(NotEditableMixin, admin.ModelAdmin):
     list_display = [
         "id",
-        "identifiant_action",
-        "identifiant_execution",
+        "__str__",
         "statut",
         "metadonnees",
     ]
 
     def metadonnees(self, obj):
         return format_html(dict_to_html_table(obj.metadata or {}))
+
+    def get_deleted_objects(self, objs, request):
+        """
+        Override the Objetcs to delete while removing a SuggestionCohorte because
+        in some cases, the list is huge and it is not possible to display it.
+        """
+        (deletable_objects, model_count, perms_needed, protected) = (
+            super().get_deleted_objects(objs, request)
+        )
+        display_warning = False
+        display_deletable_objects = []
+        for obj in deletable_objects:
+            if (
+                isinstance(obj, list | tuple)
+                and len(obj) > NB_SUGGESTIONS_DISPLAYED_WHEN_DELETING
+            ):
+                obj = obj[:NB_SUGGESTIONS_DISPLAYED_WHEN_DELETING]
+                display_warning = True
+            display_deletable_objects.append(obj)
+        if display_warning:
+            messages.warning(
+                request,
+                "Attention : la suppression de cette cohorte entraînera également "
+                "la suppression de nombreuses suggestions associées. "
+                "Celle-ci ne sont pas toutes listées ici.",
+            )
+
+        return display_deletable_objects, model_count, perms_needed, protected
 
 
 def _manage_suggestion_cohorte_statut(cohorte_ids: list[int]):
@@ -68,6 +105,11 @@ def mark_as_toproceed(self, request, queryset):
 
 
 class SuggestionAdmin(admin.ModelAdmin):
+
+    class SuggestionCohorteFilter(admin.RelatedFieldListFilter):
+        def field_choices(self, field, request, model_admin):
+            return field.get_choices(include_blank=False, ordering=("-cree_le",))
+
     search_fields = ["contexte", "suggestion"]
     list_display = [
         "id",
@@ -77,7 +119,10 @@ class SuggestionAdmin(admin.ModelAdmin):
         "changements_suggeres",
     ]
     readonly_fields = ["cree_le", "modifie_le"]
-    list_filter = ["suggestion_cohorte", "statut"]
+    list_filter = [
+        ("suggestion_cohorte", SuggestionCohorteFilter),
+        ("statut", admin.ChoicesFieldListFilter),
+    ]
     actions = [mark_as_rejected, mark_as_toproceed]
 
     def get_queryset(self, request):
@@ -86,9 +131,7 @@ class SuggestionAdmin(admin.ModelAdmin):
 
     def cohorte(self, obj):
         coh = obj.suggestion_cohorte
-        return format_html(
-            "{}<br/>{}", coh.identifiant_action, coh.identifiant_execution
-        )
+        return format_html(str(coh).replace(" -- ", "<br/>"))
 
     def acteur_link_html(self, id):
         return format_html(

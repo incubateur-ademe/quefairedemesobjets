@@ -1,10 +1,12 @@
 import logging
+import re
+from datetime import datetime
 
 from django.contrib.gis.db import models
 from django.db.models.functions import Now
 from django.template.loader import render_to_string
 
-from core.models import TimestampedModel
+from core.models.mixin import TimestampedModel
 from dags.sources.config.shared_constants import (
     SUGGESTION_ATRAITER,
     SUGGESTION_AVALIDER,
@@ -106,8 +108,21 @@ class SuggestionCohorte(TimestampedModel):
     def is_clustering_type(self) -> bool:
         return self.type_action == SuggestionAction.CLUSTERING
 
+    @property
+    def execution_datetime(self) -> str:
+        execution_datetime = self.identifiant_execution
+        date_match = re.search(
+            r"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})", execution_datetime
+        )
+        if date_match:
+            # Conversion et formatage de la date en une seule ligne
+            execution_datetime = datetime.fromisoformat(date_match.group(1)).strftime(
+                "%d/%m/%Y %H:%M"
+            )
+        return execution_datetime
+
     def __str__(self) -> str:
-        return f"{self.identifiant_action} - {self.identifiant_execution}"
+        return f"""{self.id} - {self.identifiant_action} -- {self.execution_datetime}"""
 
 
 class Suggestion(models.Model):

@@ -31,7 +31,7 @@ class TestCrawlUrlsSuggest:
         written_to_db_count = crawl_urls_suggest(
             df=df_syntax_fail,
             dry_run=dry_run,
-            dag_id=f"test_crawl_urls_action_{dry_run=}",
+            dag_display_name=f"test_crawl_urls_action_{dry_run=}",
             run_id=f"test_crawl_urls_execution_{dry_run=}",
         )
         assert written_to_db_count == db_cnt_sugg
@@ -40,9 +40,9 @@ class TestCrawlUrlsSuggest:
 
     def test_raise_if_df_none_or_empty(self):
         with pytest.raises(ValueError, match="DF vide ou None"):
-            crawl_urls_suggest(df=None, dry_run=True, dag_id="a", run_id="b")  # type: ignore
+            crawl_urls_suggest(df=None, dry_run=True, dag_display_name="a", run_id="b")
 
     def test_raise_if_multiple_cohorts(self):
         df = pd.DataFrame({COLS.COHORT: ["a", "b"]})
         with pytest.raises(ValueError, match=f"Colonne {COLS.COHORT} doit être unique"):
-            crawl_urls_suggest(df=df, dry_run=True, dag_id="a", run_id="b")
+            crawl_urls_suggest(df=df, dry_run=True, dag_display_name="a", run_id="b")
