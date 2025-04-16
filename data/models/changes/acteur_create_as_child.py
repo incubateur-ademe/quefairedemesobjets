@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from rich import print
 
 from data.models.changes.utils import data_reconstruct
 
@@ -39,9 +38,7 @@ class ChangeActeurCreateAsChild(BaseModel):
         parent = RevisionActeur.objects.get(pk=self.data["parent"])
 
         # Reconstruct data from RevisionActeur
-        print(f"data before reconstruct: {self.data}")
         data = data_reconstruct(RevisionActeur, self.data)
-        print(f"data after reconstruct: {data}")
 
         # Create child in Acteur to hold data
         data_base = data.copy()
