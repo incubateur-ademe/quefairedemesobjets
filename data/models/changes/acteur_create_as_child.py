@@ -1,9 +1,7 @@
 from pydantic import BaseModel
 from rich import print
 
-from dags.cluster.tasks.business_logic.misc.data_serialize_reconstruct import (
-    data_reconstruct,
-)
+from data.models.changes.utils import data_reconstruct
 
 from data.models.changes.utils import data_reconstruct
 
