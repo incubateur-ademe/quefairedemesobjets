@@ -7,6 +7,7 @@ from airflow.exceptions import AirflowSkipException
 from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
 from enrich.config import TASKS, XCOMS, xcom_pull
+from enrich.config.models import EnrichBaseConfig
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +28,7 @@ def task_info_get(dbt_model_refresh_command: str):
 def enrich_dbt_models_refresh_wrapper(ti) -> None:
 
     # Config
-    config = xcom_pull(ti, XCOMS.CONFIG)
+    config: EnrichBaseConfig = xcom_pull(ti, XCOMS.CONFIG)
 
     logger.info(task_info_get(config.dbt_models_refresh_command))
     logger.info(f"📖 Configuration:\n{config.model_dump_json(indent=2)}")
@@ -40,7 +41,7 @@ def enrich_dbt_models_refresh_wrapper(ti) -> None:
     )
     bash = BashOperator(
         task_id=TASKS.ENRICH_DBT_MODELS_REFRESH + "_bash",
-        bash_command=config.dbt_build_command,
+        bash_command=config.dbt_models_refresh_command,
     )
     bash.execute(context=ti.get_template_context())
 
