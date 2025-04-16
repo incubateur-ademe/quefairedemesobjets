@@ -997,7 +997,7 @@ class DisplayedActeur(BaseActeur):
         direction: str | None = None,
         action_list: str | None = None,
         carte: bool = False,
-        carte_config: CarteConfig = None,
+        carte_config: CarteConfig | None = None,
     ) -> str:
         # TODO: refacto jinja: once the shared/results.html template
         # will be migrated to django template, this method should

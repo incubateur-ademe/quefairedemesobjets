@@ -9,6 +9,12 @@ from qfdmo.models import (
 )
 from unit_tests.qfdmo.acteur_factory import (
     DisplayedActeurFactory,
+    DisplayedPropositionServiceFactory,
+)
+from unit_tests.qfdmo.action_factory import (
+    ActionDirectionFactory,
+    ActionFactory,
+    GroupeActionFactory,
 )
 
 
@@ -16,7 +22,20 @@ from unit_tests.qfdmo.acteur_factory import (
 class TestCarteConfig:
     @pytest.fixture
     def displayed_acteur(self):
-        return DisplayedActeurFactory()
+        displayed_acteur = DisplayedActeurFactory()
+        direction = ActionDirectionFactory()
+        groupe_action = GroupeActionFactory(
+            icon="icon-groupe_action",
+            order=1,
+        )
+        action = ActionFactory(
+            icon="icon-actionjai1",
+            groupe_action=groupe_action,
+            order=1,
+        )
+        action.directions.add(direction)
+        DisplayedPropositionServiceFactory(action=action, acteur=displayed_acteur)
+        return displayed_acteur
 
     def test_json_acteur_for_display_carte_config(self, displayed_acteur):
         carte_config = CarteConfig.objects.create(
