@@ -157,7 +157,7 @@ class TestEnrichActeursClosedSuggestions:
         assert a02.siret_is_closed is True
 
     def test_cohorte_meme_siren(self, acteurs, atype, source, df_replaced_meme_siret):
-        from data.models import Suggestion, SuggestionCohorte
+        from data.models.suggestion import Suggestion, SuggestionCohorte
         from qfdmo.models import ActeurStatus, RevisionActeur
 
         # Write suggestions to DB
@@ -201,7 +201,7 @@ class TestEnrichActeursClosedSuggestions:
         assert child.siret_is_closed is True
 
     def test_cohorte_autre_siren(self, acteurs, df_replaced_autre_siret):
-        from data.models import Suggestion, SuggestionCohorte
+        from data.models.suggestion import Suggestion, SuggestionCohorte
         from qfdmo.models import ActeurStatus, RevisionActeur
 
         # Write suggestions to DB
