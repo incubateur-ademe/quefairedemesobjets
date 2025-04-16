@@ -251,6 +251,15 @@ def enrich_dbt_model_to_suggestions(
     # -----------------------------------------
     # SUGGESTION: WRITE TO DB
     # -----------------------------------------
+    if cohort in [
+        COHORTS.CLOSED_NOT_REPLACED,
+        COHORTS.CLOSED_REP_OTHER_SIREN,
+        COHORTS.CLOSED_REP_SAME_SIREN,
+    ]:
+        type_action = SuggestionAction.ENRICH_ACTEURS_CLOSED
+    elif cohort == COHORTS.RGPD:
+        type_action = SuggestionAction.ENRICH_ACTEURS_RGPD
+
     db_cohort = SuggestionCohorte(
         identifiant_action=identifiant_action,
         identifiant_execution=f"{cohort}",
