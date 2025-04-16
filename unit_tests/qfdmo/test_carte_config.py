@@ -49,5 +49,6 @@ class TestCarteConfig:
         acteur_for_display = json.loads(
             displayed_acteur.json_acteur_for_display(carte_config=carte_config)
         )
+
         assert "icon" not in acteur_for_display
         assert acteur_for_display["iconFile"] == groupe_action_config.icon.url

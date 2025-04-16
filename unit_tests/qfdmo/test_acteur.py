@@ -566,7 +566,7 @@ class TestActeurService:
     def displayed_acteur(self):
         return DisplayedActeurFactory()
 
-    def test_acteur_actions_basic(self, displayed_acteur):
+    def test_acteur_services_basic(self, displayed_acteur):
         displayed_acteur.acteur_services.add(
             ActeurServiceFactory(libelle="Par un professionnel")
         )
@@ -575,7 +575,7 @@ class TestActeurService:
             "Par un professionnel"
         ]
 
-    def test_acteur_actions_multiple(self, displayed_acteur):
+    def test_acteur_services_multiple(self, displayed_acteur):
         displayed_acteur.acteur_services.add(
             ActeurServiceFactory(code="pro", libelle="Par un professionnel"),
             ActeurServiceFactory(
@@ -587,6 +587,27 @@ class TestActeurService:
             "Atelier pour réparer soi-même",
             "Par un professionnel",
         ]
+
+
+@pytest.mark.django_db
+class TestActeurActions:
+    @pytest.fixture
+    def displayed_acteur(self):
+
+        return DisplayedActeurFactory()
+
+    def test_acteur_actions_filtered(self, displayed_acteur):
+        direction_jai = ActionDirectionFactory(code="jai")
+        action = ActionFactory(code="reparer")
+        action.directions.add(direction_jai)
+        DisplayedPropositionServiceFactory(acteur=displayed_acteur, action=action)
+
+        assert len(displayed_acteur.acteur_actions()) == 1
+        assert len(displayed_acteur.acteur_actions(direction="jai")) == 1
+        assert len(displayed_acteur.acteur_actions(direction="jecherche")) == 0
+        assert len(displayed_acteur.acteur_actions(actions_codes="reparer|vendre")) == 1
+        assert len(displayed_acteur.acteur_actions(actions_codes="reparer|vendre")) == 1
+        assert len(displayed_acteur.acteur_actions(actions_codes="trier|vendre")) == 0
 
 
 class TestActeurPropositionServicesByDirection:
