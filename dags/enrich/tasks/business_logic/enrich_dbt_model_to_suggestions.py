@@ -35,10 +35,36 @@ def changes_prepare(
     ).model_dump()
 
 
+def changes_prepare_rgpd(
+    row: dict,
+) -> tuple[list[dict], dict]:
+    """Prepare suggestions for RGPD cohorts"""
+    from data.models.changes import ChangeActeurRgpdAnonymize
+
+    changes = []
+    model_params = {
+        "id": row[COLS.ACTEUR_ID],
+    }
+    changes.append(
+        changes_prepare(
+            model=ChangeActeurRgpdAnonymize,
+            model_params=model_params,
+            order=1,
+            reason="🕵 Anonymisation RGPD",
+            entity_type="acteur_displayed",
+        )
+    )
+    contexte = {
+        "statut": row[COLS.ACTEUR_STATUT],
+        "noms d'origine": row[COLS.ACTEUR_NOMS_ORIGINE],
+    }
+    return changes, contexte
+
+
 def changes_prepare_closed_not_replaced(
     row: dict,
 ) -> tuple[list[dict], dict]:
-    """Prepare suggestion changes for closed not replaced cohorts"""
+    """Prepare suggestions for closed not replaced cohorts"""
     from data.models.changes import ChangeActeurUpdateData
     from qfdmo.models import ActeurStatus
 
@@ -157,6 +183,7 @@ COHORTS_TO_PREPARE_CHANGES = {
     COHORTS.CLOSED_NOT_REPLACED: changes_prepare_closed_not_replaced,
     COHORTS.CLOSED_REP_OTHER_SIREN: changes_prepare_closed_replaced,
     COHORTS.CLOSED_REP_SAME_SIREN: changes_prepare_closed_replaced,
+    COHORTS.RGPD: changes_prepare_rgpd,
 }
 
 
@@ -177,6 +204,7 @@ def enrich_dbt_model_to_suggestions(
         COHORTS.CLOSED_NOT_REPLACED: SuggestionAction.ENRICH_ACTEURS_CLOSED,
         COHORTS.CLOSED_REP_OTHER_SIREN: SuggestionAction.ENRICH_ACTEURS_CLOSED,
         COHORTS.CLOSED_REP_SAME_SIREN: SuggestionAction.ENRICH_ACTEURS_CLOSED,
+        COHORTS.RGPD: SuggestionAction.ENRICH_ACTEURS_RGPD,
     }
 
     # Validation
@@ -223,6 +251,15 @@ def enrich_dbt_model_to_suggestions(
     # -----------------------------------------
     # SUGGESTION: WRITE TO DB
     # -----------------------------------------
+    if cohort in [
+        COHORTS.CLOSED_NOT_REPLACED,
+        COHORTS.CLOSED_REP_OTHER_SIREN,
+        COHORTS.CLOSED_REP_SAME_SIREN,
+    ]:
+        type_action = SuggestionAction.ENRICH_ACTEURS_CLOSED
+    elif cohort == COHORTS.RGPD:
+        type_action = SuggestionAction.ENRICH_ACTEURS_RGPD
+
     db_cohort = SuggestionCohorte(
         identifiant_action=identifiant_action,
         identifiant_execution=f"{cohort}",

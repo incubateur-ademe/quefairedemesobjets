@@ -27,7 +27,7 @@ class COLS:
     ACTEUR_NAF: str = "acteur_naf"
     ACTEUR_LONGITUDE: str = "acteur_longitude"
     ACTEUR_LATITUDE: str = "acteur_latitude"
-
+    ACTEUR_STATUT: str = "acteur_statut"
     # Annuaire Entreprise
     AE_DIRIGEANTS_NOMS: str = "ae_dirigeants_noms_prenoms"
 
