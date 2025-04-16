@@ -15,7 +15,7 @@ class TestActeurMethods:
     @pytest.mark.parametrize(
         "initial,expected",
         [
-            (None, [{"message": "test"}]),
+            ("", [{"message": "test"}]),
             ("  ", [{"message": "test"}]),
             ("foo", [{"message": "foo"}, {"message": "test"}]),
             ('[{"message": "bar"}]', [{"message": "bar"}, {"message": "test"}]),

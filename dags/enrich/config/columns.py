@@ -1,6 +1,4 @@
-"""Column names for RGPD anonymize DAG. Columns
-are used in conf, dataframes and SQL queries. These
-don't include Acteur fields (for this we stick to Acteur models)"""
+"""Column names enrichment DAGs"""
 
 from dataclasses import dataclass
 
