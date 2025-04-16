@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from rich import print
 
 from data.models.changes.utils import data_reconstruct
 
