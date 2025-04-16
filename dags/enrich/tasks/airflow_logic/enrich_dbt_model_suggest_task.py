@@ -1,4 +1,4 @@
-"""Read data from DB needed for RGPD anonymization"""
+"""Generate suggestions for enrichment DAGs"""
 
 import logging
 

@@ -905,6 +905,7 @@ class RevisionActeur(BaseActeur):
             "acteur_services",
             "proposition_services",
             "parent",
+            "parent_reason",
         ]
 
         for field in fields_to_reset:

@@ -1,4 +1,4 @@
-"""Read data from DB needed for RGPD anonymization"""
+"""Read data from DBT models"""
 
 import logging
 

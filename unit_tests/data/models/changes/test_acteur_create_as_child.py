@@ -1,8 +1,8 @@
 import pytest
 from django.contrib.gis.geos import Point
 
-from data.models import Acteur, RevisionActeur
 from data.models.changes.acteur_create_as_child import ChangeActeurCreateAsChild
+from qfdmo.models import Acteur, RevisionActeur
 from unit_tests.qfdmo.acteur_factory import (
     ActeurFactory,
     ActeurTypeFactory,
