@@ -13,6 +13,11 @@ class Cohort:
 
 @dataclass(frozen=True)
 class COHORTS:
+    RGPD = Cohort(
+        code="acteurs_rgpd",
+        label="🕵️ Anonymisation RGPD",
+    )
+
     CLOSED_NOT_REPLACED: Cohort = Cohort(
         code="acteurs_closed_not_replaced",
         label=f"{INTRO} 🔴 non remplacés",

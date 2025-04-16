@@ -32,9 +32,38 @@ def suggestion_change_prepare(
     ).model_dump()
 
 
+def suggestion_change_prepare_rgpd(
+    row: dict,
+) -> tuple[list[dict], dict]:
+    """Prepare suggestions for RGPD cohorts"""
+    from data.models.changes import ChangeActeurRgpdAnonymize
+
+    changes = []
+    model_params = {
+        "id": row[COLS.ACTEUR_ID],
+    }
+    changes.append(
+        suggestion_change_prepare(
+            model=ChangeActeurRgpdAnonymize,
+            model_params=model_params,
+            order=1,
+            reason="🕵 Anonymisation RGPD",
+            entity_type="acteur_displayed",
+        )
+    )
+    contexte = {
+        "statut": row[COLS.ACTEUR_STATUT],
+        "noms d'origine": row[COLS.ACTEUR_NOMS_ORIGINE],
+        # TODO: add back to dbt model and here
+        # "mots de match": row[COLS.MATCH_WORDS],
+        # "score de match": row[COLS.MATCH_SCORE],
+    }
+    return changes, contexte
+
+
 def suggestion_change_prepare_closed_not_replaced(
     row: dict,
-) -> list[dict]:
+) -> tuple[list[dict], dict]:
     """Prepare suggestions for closed not replaced cohorts"""
     from data.models.changes import ChangeActeurUpdateData
     from qfdmo.models import ActeurStatus
@@ -62,12 +91,13 @@ def suggestion_change_prepare_closed_not_replaced(
             entity_type="acteur_displayed",
         )
     )
-    return changes
+    contexte = {}  # changes are self-explanatory
+    return changes, contexte
 
 
 def suggestion_change_prepare_closed_replaced(
     row: dict,
-) -> list[dict]:
+) -> tuple[list[dict], dict]:
     """Prepare suggestions for closed replaced cohorts"""
     from data.models.changes import (
         ChangeActeurCreateAsChild,
@@ -156,7 +186,9 @@ def suggestion_change_prepare_closed_replaced(
             entity_type="acteur_displayed",
         )
     )
-    return changes
+
+    contexte = {}  # changes are self-explanatory
+    return changes, contexte
 
 
 def enrich_dbt_model_to_suggestions(
@@ -188,10 +220,10 @@ def enrich_dbt_model_to_suggestions(
 
         try:
             # -----------------------------------------
-            # NOT REPLACED
+            # CLOSED NOT REPLACED
             # -----------------------------------------
             if cohort == COHORTS.CLOSED_NOT_REPLACED:
-                changes = suggestion_change_prepare_closed_not_replaced(row)
+                changes, contexte = suggestion_change_prepare_closed_not_replaced(row)
 
             # -----------------------------------------
             # REPLACED
@@ -200,7 +232,13 @@ def enrich_dbt_model_to_suggestions(
                 COHORTS.CLOSED_REP_OTHER_SIREN,
                 COHORTS.CLOSED_REP_SAME_SIREN,
             ]:
-                changes = suggestion_change_prepare_closed_replaced(row)
+                changes, contexte = suggestion_change_prepare_closed_replaced(row)
+
+            # -----------------------------------------
+            # RGPD
+            # -----------------------------------------
+            elif cohort == COHORTS.RGPD:
+                changes, contexte = suggestion_change_prepare_rgpd(row)
 
         except Exception as e:
             log.preview("🔴 Suggestion problématique", row)
@@ -210,10 +248,9 @@ def enrich_dbt_model_to_suggestions(
         # Creating a suggestion with the given changes
         suggestions.append(
             {
-                "contexte": {},
+                "contexte": contexte,
                 "suggestion": {
                     "title": cohort.label,
-                    "summary": [],
                     "changes": changes,
                 },
             }
@@ -233,11 +270,20 @@ def enrich_dbt_model_to_suggestions(
     # -----------------------------------------
     # SUGGESTION: WRITE TO DB
     # -----------------------------------------
+    if cohort in [
+        COHORTS.CLOSED_NOT_REPLACED,
+        COHORTS.CLOSED_REP_OTHER_SIREN,
+        COHORTS.CLOSED_REP_SAME_SIREN,
+    ]:
+        type_action = SuggestionAction.ENRICH_ACTEURS_CLOSED
+    elif cohort == COHORTS.RGPD:
+        type_action = SuggestionAction.ENRICH_ACTEURS_RGPD
+
     db_cohort = SuggestionCohorte(
         identifiant_action=identifiant_action,
         identifiant_execution=f"{cohort.label}",
         statut=SuggestionStatut.AVALIDER,
-        type_action=SuggestionAction.ENRICH_ACTEURS_CLOSED,
+        type_action=type_action,
         metadata={"🔢 Nombre de suggestions": len(suggestions)},
     )
     db_cohort.save()

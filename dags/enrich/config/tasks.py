@@ -8,6 +8,9 @@ class TASKS:
     # Config
     CONFIG_CREATE: str = "enrich_config_create"
 
+    # RGPD
+    ENRICH_RGPD_SUGGESTIONS: str = "enrich_acteurs_rgpd_suggestions"
+
     # Read tasks
     ENRICH_CLOSED_REPLACED_SAME_SIREN: str = "enrich_acteurs_closed_replaced_same_siren"
     ENRICH_CLOSED_REPLACED_OTHER_SIREN: str = (
