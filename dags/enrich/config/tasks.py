@@ -1,4 +1,4 @@
-"""Task IDs for RGPD anonymize people DAG"""
+"""Task IDs for enrichment DAGs"""
 
 from dataclasses import dataclass
 
