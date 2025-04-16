@@ -2,14 +2,6 @@
 is very specific (e.g. RGPD), use a dedicated model fore more clarity/robustness,
 else you can use this model."""
 
-<<<<<<< HEAD
-from rich import print
-
-=======
-from dags.cluster.tasks.business_logic.misc.data_serialize_reconstruct import (
-    data_reconstruct,
-)
->>>>>>> b8c92032 (suggestions: tests qui fonctionnent)
 from data.models.changes.acteur_abstract import ChangeActeurAbstract
 from data.models.changes.utils import data_reconstruct
 from qfdmo.models import Acteur, RevisionActeur
