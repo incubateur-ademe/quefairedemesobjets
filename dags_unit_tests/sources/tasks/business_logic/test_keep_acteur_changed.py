@@ -991,3 +991,72 @@ def test_keep_acteur_changed_same_acteur_but_different_identifiant_unique(dag_co
     pd.testing.assert_frame_equal(df_acteur, df_expected, check_dtype=False)
     pd.testing.assert_frame_equal(df_acteur_from_db, df_expected, check_dtype=False)
     assert metadata == {}
+
+
+def test_keep_acteur_changed_same_acteur_but_different_identifiant_unique2(dag_config):
+    df_normalized = pd.DataFrame(
+        {
+            "nom": ["nom 1", "nom 2"],
+            "identifiant_unique": ["source1_id1", "source1_id2"],
+            "source_code": ["source1", "source1"],
+            "identifiant_externe": ["id1", "id2"],
+            "label_codes": [[], []],
+            "acteur_type_code": [[], []],
+            "acteur_service_codes": [[], []],
+            "proposition_service_codes": [[], []],
+        }
+    )
+    df_acteur_from_db = pd.DataFrame(
+        {
+            "nom": ["nom 1", "nom 3"],
+            "identifiant_unique": ["source1_id_old", "source1_id3"],
+            "source_code": ["source1", "source1"],
+            "identifiant_externe": ["id1", "id3"],
+            "label_codes": [[], []],
+            "acteur_type_code": [[], []],
+            "acteur_service_codes": [[], []],
+            "proposition_service_codes": [[], []],
+        }
+    )
+    df_expected = pd.DataFrame(
+        {
+            "nom": ["nom 2"],
+            "identifiant_unique": ["source1_id2"],
+            "source_code": ["source1"],
+            "identifiant_externe": ["id2"],
+            "label_codes": [[]],
+            "acteur_type_code": [[]],
+            "acteur_service_codes": [[]],
+            "proposition_service_codes": [[]],
+        }
+    )
+    df_expected_from_db = pd.DataFrame(
+        {
+            "nom": ["nom 3"],
+            "identifiant_unique": ["source1_id3"],
+            "source_code": ["source1"],
+            "identifiant_externe": ["id3"],
+            "label_codes": [[]],
+            "acteur_type_code": [[]],
+            "acteur_service_codes": [[]],
+            "proposition_service_codes": [[]],
+        }
+    )
+
+    df_acteur, df_acteur_from_db, metadata = keep_acteur_changed(
+        df_normalized=df_normalized,
+        df_acteur_from_db=df_acteur_from_db,
+        dag_config=dag_config,
+    )
+
+    pd.testing.assert_frame_equal(
+        df_acteur.reset_index(drop=True),
+        df_expected.reset_index(drop=True),
+        check_dtype=False,
+    )
+    pd.testing.assert_frame_equal(
+        df_acteur_from_db.reset_index(drop=True),
+        df_expected_from_db.reset_index(drop=True),
+        check_dtype=False,
+    )
+    assert metadata == {}
