@@ -19,7 +19,7 @@ class TestEnrichActeursClosedSuggestions:
 
     @pytest.fixture
     def source(self):
-        from data.models import Source
+        from qfdmo.models import Source
 
         return Source.objects.create(code="s1")
 
@@ -122,7 +122,7 @@ class TestEnrichActeursClosedSuggestions:
             )
 
     def test_cohorte_not_replaced(self, acteurs, df_not_replaced):
-        from data.models import Suggestion, SuggestionCohorte
+        from data.models.suggestion import Suggestion, SuggestionCohorte
         from qfdmo.models import ActeurStatus, RevisionActeur
 
         # Write suggestions to DB
