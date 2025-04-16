@@ -11,7 +11,7 @@ from sources.tasks.airflow_logic.operators import (
 
 default_args["retries"] = 0
 with DAG(
-    dag_id="sinoe",
+    dag_id="source_sinoe",
     dag_display_name="Source - SINOE",
     default_args=default_args,
     description=(
@@ -108,6 +108,7 @@ with DAG(
                 "origin": [
                     "identifiant_externe",
                     "source_code",
+                    "acteur_type_code",
                 ],
                 "transformation": "clean_identifiant_unique",
                 "destination": ["identifiant_unique"],

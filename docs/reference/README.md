@@ -5,6 +5,7 @@
 
 documentation-technique.md
 data/organisations-des-fichiers.md
+data/gestion-des-identifiants.md
 data/systeme-de-suggestions.md
 data/clustering-deduplication.md
 coding/coding-guidelines.md

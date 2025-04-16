@@ -7,7 +7,6 @@ from factory import Faker
 
 from qfdmo.models import (
     Acteur,
-    Action,
     NomAsNaturalKeyModel,
     RevisionActeur,
     RevisionPropositionService,
@@ -444,18 +443,18 @@ class TestRevisionActeurDuplicate:
         )
         revision_acteur_duplicate = revision_acteur.duplicate()
 
-        assert revision_acteur_duplicate.nom == "Nom Revision", (
-            f"Should be the name of the revision : {revision_acteur.nom}"
-        )
-        assert revision_acteur_duplicate.acteur_type == revision_acteur.acteur_type, (
-            f"Should be the acteur type of the revision : {revision_acteur.acteur_type}"
-        )
-        assert revision_acteur_duplicate.location == revision_acteur.location, (
-            f"Should be the location of the revision : {revision_acteur.location}"
-        )
-        assert revision_acteur_duplicate.nom_commercial == "Nom commercial", (
-            f"Should be the nom commercial of the acteur : {acteur.source}"
-        )
+        assert (
+            revision_acteur_duplicate.nom == "Nom Revision"
+        ), f"Should be the name of the revision : {revision_acteur.nom}"
+        assert (
+            revision_acteur_duplicate.acteur_type == revision_acteur.acteur_type
+        ), f"Should be the acteur type of the revision : {revision_acteur.acteur_type}"
+        assert (
+            revision_acteur_duplicate.location == revision_acteur.location
+        ), f"Should be the location of the revision : {revision_acteur.location}"
+        assert (
+            revision_acteur_duplicate.nom_commercial == "Nom commercial"
+        ), f"Should be the nom commercial of the acteur : {acteur.source}"
 
     def test_duplicate_source(self):
         SourceFactory(code="communautelvao")
@@ -567,7 +566,7 @@ class TestActeurService:
     def displayed_acteur(self):
         return DisplayedActeurFactory()
 
-    def test_acteur_actions_basic(self, displayed_acteur):
+    def test_acteur_services_basic(self, displayed_acteur):
         displayed_acteur.acteur_services.add(
             ActeurServiceFactory(libelle="Par un professionnel")
         )
@@ -576,7 +575,7 @@ class TestActeurService:
             "Par un professionnel"
         ]
 
-    def test_acteur_actions_multiple(self, displayed_acteur):
+    def test_acteur_services_multiple(self, displayed_acteur):
         displayed_acteur.acteur_services.add(
             ActeurServiceFactory(code="pro", libelle="Par un professionnel"),
             ActeurServiceFactory(
@@ -588,6 +587,44 @@ class TestActeurService:
             "Atelier pour réparer soi-même",
             "Par un professionnel",
         ]
+
+
+@pytest.mark.django_db
+class TestActeurActions:
+    @pytest.fixture
+    def displayed_acteur(self):
+        return DisplayedActeurFactory()
+
+    def test_acteur_actions_filtered(self, displayed_acteur):
+        direction_jai = ActionDirectionFactory(code="jai")
+        action = ActionFactory(code="reparer")
+        action.directions.add(direction_jai)
+        DisplayedPropositionServiceFactory(acteur=displayed_acteur, action=action)
+
+        assert len(displayed_acteur.acteur_actions()) == 1, (
+            "ensure no filters on the action or direction"
+            "generates a non-empty list of acteurs"
+        )
+        assert len(displayed_acteur.acteur_actions(direction="jai")) == 1, (
+            "a filter with acteurs providing services for this action direct"
+            "for this direction generates an empty list of acteurs",
+        )
+        assert len(displayed_acteur.acteur_actions(direction="jecherche")) == 0, (
+            "a filter without acteurs providing services for this action direct"
+            "for this direction generates an empty list of acteurs",
+        )
+        assert (
+            len(displayed_acteur.acteur_actions(actions_codes="reparer|vendre")) == 1
+        ), (
+            "a filter with acteur providing services for this action code returns",
+            "a non-empty list",
+        )
+        assert (
+            len(displayed_acteur.acteur_actions(actions_codes="trier|vendre")) == 0
+        ), (
+            "a filter without acteurs providing services for this action code returns",
+            "an empty list",
+        )
 
 
 class TestActeurPropositionServicesByDirection:
@@ -646,9 +683,7 @@ class TestDisplayActeurActeurActions:
         action = ActionFactory()
         action.directions.add(direction)
         DisplayedPropositionServiceFactory(action=action, acteur=displayed_acteur)
-        assert (
-            displayed_acteur.acteur_actions(direction="fake") == Action.objects.none()
-        )
+        assert len(displayed_acteur.acteur_actions(direction="fake")) == 0
         assert [
             model_to_dict(a, exclude=["directions"])
             for a in displayed_acteur.acteur_actions(direction="jai")

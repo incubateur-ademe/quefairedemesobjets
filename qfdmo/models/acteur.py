@@ -984,15 +984,17 @@ class DisplayedActeur(BaseActeur):
 
         if sous_categorie_id:
             pss = pss.filter(sous_categories__id__in=[sous_categorie_id])
-
         if direction:
             pss = pss.filter(action__directions__code__in=[direction])
-
         if actions_codes:
             pss = pss.filter(action__code__in=actions_codes.split("|"))
 
         action_ids_to_display = pss.values_list("action__id", flat=True)
-        return cached_action_instances.filter(id__in=action_ids_to_display)
+        return [
+            action
+            for action in cached_action_instances
+            if action.id in action_ids_to_display
+        ]
 
     def json_acteur_for_display(
         self,
@@ -1011,8 +1013,7 @@ class DisplayedActeur(BaseActeur):
             sous_categorie_id=sous_categorie_id,
         )
 
-        def sort_actions(a):
-            # TODO: explain this function ???
+        def sort_actions_by_action_principale_and_order(a):
             if a == self.action_principale:
                 return -1
 
@@ -1030,33 +1031,41 @@ class DisplayedActeur(BaseActeur):
             # TODO: explain why we need to decode here
             return orjson.dumps(acteur_dict).decode("utf-8")
 
-        displayed_action = sorted(actions, key=sort_actions)[0]
+        action_to_display = sorted(
+            actions, key=sort_actions_by_action_principale_and_order
+        )[0]
 
-        if carte and displayed_action.groupe_action:
-            displayed_action = displayed_action.groupe_action
+        if carte and action_to_display.groupe_action:
+            action_to_display = action_to_display.groupe_action
 
         acteur_dict.update(
-            icon=displayed_action.icon,
-            couleur=displayed_action.couleur,
+            icon=action_to_display.icon,
+            couleur=action_to_display.couleur,
         )
 
-        # TODO: in case we have a carteConfig, customize carteConfig
-        # here
         if carte_config:
-            try:
-                groupe_action_config = carte_config.groupe_action_config.get(
-                    groupe_action__actions__code__in=[displayed_action],
-                    acteur_type=self.acteur_type,
+            queryset = Q()
+            if action_to_display:
+                queryset &= Q(groupe_action__actions__code__in=[action_to_display]) | Q(
+                    groupe_action__actions__code=None
                 )
+
+            if self.acteur_type:
+                queryset &= Q(acteur_type=self.acteur_type) | Q(acteur_type=None)
+
+            try:
+                groupe_action_config = carte_config.groupe_action_configs.get(queryset)
                 if groupe_action_config.icon:
                     # Property is camelcased as it is used in javascript
                     acteur_dict.update(iconFile=groupe_action_config.icon.url)
+                    # In this case, a svg file uploaded by a user is used
+                    # in place of the DSFR's icon code.
                     del acteur_dict["icon"]
 
             except GroupeActionConfig.DoesNotExist:
                 pass
 
-        if carte and displayed_action.code == "reparer":
+        if carte and action_to_display.code == "reparer":
             acteur_dict.update(
                 bonus=getattr(self, "bonus", False),
                 reparer=getattr(self, "reparer", False),

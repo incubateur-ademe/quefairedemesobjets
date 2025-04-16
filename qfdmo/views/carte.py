@@ -1,6 +1,7 @@
 import logging
 
 from django.db.models import Q
+from django.utils.functional import cached_property
 from django.views.generic import DetailView
 
 from qfdmo.models import CarteConfig
@@ -17,7 +18,7 @@ class CustomCarteView(DetailView, CarteSearchActeursView):
 
         return ctx
 
-    @property
+    @cached_property
     def groupe_actions(self):
         # TODO: cache
         return self.get_object().groupe_action.all().order_by("order")
