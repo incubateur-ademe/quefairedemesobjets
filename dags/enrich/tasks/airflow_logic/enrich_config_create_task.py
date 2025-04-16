@@ -1,4 +1,4 @@
-"""Read data from DB needed for RGPD anonymization"""
+"""Generic task to create configuration"""
 
 import logging
 
