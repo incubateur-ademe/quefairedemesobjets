@@ -35,7 +35,7 @@ with DAG(
     start_date=START_DATES.YESTERDAY,
     params=config_to_airflow_params(
         EnrichActeursRGPDConfig(
-            dbt_models_refresh=False,
+            dbt_models_refresh=True,
             filter_equals__acteur_statut="ACTIF",
         )
     ),
@@ -47,9 +47,6 @@ with DAG(
         dag,
         task_id=TASKS.ENRICH_RGPD_SUGGESTIONS,
         cohort=COHORTS.RGPD,
-        dbt_model_name=DBT.MARTS_ENRICH_AE_RGPD_CANDIDATES,
+        dbt_model_name=DBT.MARTS_ENRICH_RGPD_SUGGESTIONS,
     )
-
-    # Graph
-    config >> dbt_refresh  # type: ignore
-    dbt_refresh >> suggest_rgpd  # type: ignore
+    config >> dbt_refresh >> suggest_rgpd  # type: ignore
