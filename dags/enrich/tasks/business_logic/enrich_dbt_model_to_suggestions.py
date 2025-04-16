@@ -165,7 +165,7 @@ def enrich_dbt_model_to_suggestions(
     identifiant_action: str,
     dry_run: bool = True,
 ) -> bool:
-    from data.models import (
+    from data.models.suggestion import (
         Suggestion,
         SuggestionAction,
         SuggestionCohorte,
