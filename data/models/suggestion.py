@@ -54,7 +54,6 @@ class SuggestionCohorteStatut(models.TextChoices):
 
 class SuggestionAction(models.TextChoices):
     CRAWL_URLS = SUGGESTION_CRAWL_URLS, "🔗 URLs scannées"
-    ENRICH_ACTEURS_RGPD = "RGPD_ANONYMISATION", "🕵️ Anonymisation RGPD"
     ENRICH_ACTEURS_CLOSED = "ENRICH_ACTEURS_CLOSED", "🚪 Acteurs fermés"
     CLUSTERING = SUGGESTION_CLUSTERING, "regroupement/déduplication des acteurs"
     SOURCE_AJOUT = (
@@ -320,7 +319,6 @@ class Suggestion(models.Model):
         if self.suggestion_cohorte.type_action in [
             SuggestionAction.CLUSTERING,
             SuggestionAction.CRAWL_URLS,
-            SuggestionAction.ENRICH_ACTEURS_RGPD,
             SuggestionAction.ENRICH_ACTEURS_CLOSED,
         ]:
             changes = self.suggestion["changes"]
