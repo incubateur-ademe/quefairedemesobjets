@@ -593,7 +593,6 @@ class TestActeurService:
 class TestActeurActions:
     @pytest.fixture
     def displayed_acteur(self):
-
         return DisplayedActeurFactory()
 
     def test_acteur_actions_filtered(self, displayed_acteur):
@@ -602,12 +601,30 @@ class TestActeurActions:
         action.directions.add(direction_jai)
         DisplayedPropositionServiceFactory(acteur=displayed_acteur, action=action)
 
-        assert len(displayed_acteur.acteur_actions()) == 1
-        assert len(displayed_acteur.acteur_actions(direction="jai")) == 1
-        assert len(displayed_acteur.acteur_actions(direction="jecherche")) == 0
-        assert len(displayed_acteur.acteur_actions(actions_codes="reparer|vendre")) == 1
-        assert len(displayed_acteur.acteur_actions(actions_codes="reparer|vendre")) == 1
-        assert len(displayed_acteur.acteur_actions(actions_codes="trier|vendre")) == 0
+        assert len(displayed_acteur.acteur_actions()) == 1, (
+            "ensure no filters on the action or direction"
+            "generates a non-empty list of acteurs"
+        )
+        assert len(displayed_acteur.acteur_actions(direction="jai")) == 1, (
+            "a filter with acteurs providing services for this action direct"
+            "for this direction generates an empty list of acteurs",
+        )
+        assert len(displayed_acteur.acteur_actions(direction="jecherche")) == 0, (
+            "a filter without acteurs providing services for this action direct"
+            "for this direction generates an empty list of acteurs",
+        )
+        assert (
+            len(displayed_acteur.acteur_actions(actions_codes="reparer|vendre")) == 1
+        ), (
+            "a filter with acteur providing services for this action code returns",
+            "a non-empty list",
+        )
+        assert (
+            len(displayed_acteur.acteur_actions(actions_codes="trier|vendre")) == 0
+        ), (
+            "a filter without acteurs providing services for this action code returns",
+            "an empty list",
+        )
 
 
 class TestActeurPropositionServicesByDirection:
