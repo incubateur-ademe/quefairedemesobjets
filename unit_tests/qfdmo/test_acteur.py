@@ -906,6 +906,54 @@ class TestDisplayedActeurJsonActeurForDisplay:
         assert acteur_for_display["icon"] == "icon-actionjai1"
         assert acteur_for_display["couleur"] == "couleur-actionjai1"
 
+    def test_json_acteur_for_display_with_sous_categorie(self, displayed_acteur):
+        action_1 = ActionFactory(code="actionjai1")
+        action_2 = ActionFactory(code="actionjai2")
+
+        displayed_acteur.action_principale = action_2
+        displayed_acteur.save()
+        sous_categorie = SousCategorieObjetFactory()
+
+        acteur_for_display = json.loads(
+            displayed_acteur.json_acteur_for_display(
+                action_list="actionjai1|actionjai2", sous_categorie_id=sous_categorie.id
+            )
+        )
+
+        assert "icon" not in acteur_for_display, (
+            "No icon is displayed if "
+            "it does not match the sous categorie filtered on the map"
+        )
+
+        pss = DisplayedPropositionServiceFactory(
+            action=action_1, acteur=displayed_acteur
+        )
+        pss.sous_categories.add(sous_categorie)
+
+        acteur_for_display = json.loads(
+            displayed_acteur.json_acteur_for_display(
+                action_list="actionjai1|actionjai2", sous_categorie_id=sous_categorie.id
+            )
+        )
+        assert acteur_for_display["icon"] == "icon-actionjai1", (
+            "The icon matching the sous categorie of map's sous categorie filter"
+            " is displayed on the pinpoint."
+        )
+
+        another_pss = DisplayedPropositionServiceFactory(
+            action=action_2, acteur=displayed_acteur
+        )
+        another_pss.sous_categories.add(sous_categorie)
+        acteur_for_display = json.loads(
+            displayed_acteur.json_acteur_for_display(
+                action_list="actionjai1|actionjai2", sous_categorie_id=sous_categorie.id
+            )
+        )
+        assert acteur_for_display["icon"] == "icon-actionjai2", (
+            "The pinpoint of action_principale is displayed if multiple"
+            " actions match the map's sous categorie filter"
+        )
+
 
 class TestDisplayedActeurDisplayPostalAddress:
     def test_should_display_adresse(self):

@@ -973,13 +973,17 @@ class DisplayedActeur(BaseActeur):
     def get_absolute_url(self):
         return reverse("qfdmo:acteur-detail", args=[self.uuid])
 
-    def acteur_actions(self, direction=None, actions_codes=None):
+    def acteur_actions(
+        self, direction=None, actions_codes=None, sous_categorie_id=None
+    ):
         pss = self.proposition_services.all()
         # Cast needed because of the cache
         cached_action_instances = cast(
             List[Action], cache.get_or_set("_action_instances", get_action_instances)
         )
 
+        if sous_categorie_id:
+            pss = pss.filter(sous_categories__id__in=[sous_categorie_id])
         if direction:
             pss = pss.filter(action__directions__code__in=[direction])
         if actions_codes:
@@ -997,12 +1001,17 @@ class DisplayedActeur(BaseActeur):
         direction: str | None = None,
         action_list: str | None = None,
         carte: bool = False,
-        carte_config: CarteConfig | None = None,
+        carte_config: CarteConfig = None,
+        sous_categorie_id: str | None = None,
     ) -> str:
         # TODO: refacto jinja: once the shared/results.html template
         # will be migrated to django template, this method should
         # live in a template_tags instead.
-        actions = self.acteur_actions(direction=direction, actions_codes=action_list)
+        actions = self.acteur_actions(
+            direction=direction,
+            actions_codes=action_list,
+            sous_categorie_id=sous_categorie_id,
+        )
 
         def sort_actions_by_action_principale_and_order(a):
             if a == self.action_principale:
