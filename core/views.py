@@ -12,7 +12,7 @@ from django.views.decorators.cache import cache_control
 
 @cache_control(max_age=31536000)
 def robots_txt(request):
-    text_content = render_to_string("robots.txt")
+    text_content = render_to_string("robots.txt", request=request)
     return HttpResponse(text_content, content_type="text/plain")
 
 
