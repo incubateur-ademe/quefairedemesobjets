@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     dependencies = [
         (
             "qfdmo",
-            "0140_carteconfig_groupeactionconfig_squashed_0146_alter_groupeactionconfig_carte_config",
+            "0141_carteconfig_groupeactionconfig_squashed_0146_alter_groupeactionconfig_carte_config",
         ),
     ]
 
