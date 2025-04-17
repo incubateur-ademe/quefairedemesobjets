@@ -39,6 +39,7 @@ jobs:
       environment: preprod
 
   healthchecks:
+    runs-on: "ubuntu-latest"
     needs: [deploy-django]
-    environment: preprod
     uses: ./.github/workflows/_healthchecks.yml
+    environment: preprod

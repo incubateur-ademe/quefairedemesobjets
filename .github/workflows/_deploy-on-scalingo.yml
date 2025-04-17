@@ -20,8 +20,8 @@ defaults:
 
 jobs:
   deploy-on-scalingo:
-    name: Deploy on Scalingo
     runs-on: "ubuntu-latest"
+    name: Deploy on Scalingo
     environment: ${{ inputs.environment }}
     steps:
       - uses: mattermost/action-mattermost-notify@master
