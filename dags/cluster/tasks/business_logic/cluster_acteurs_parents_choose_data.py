@@ -1,18 +1,21 @@
+import logging
 from typing import Any
 
 import pandas as pd
 from cluster.config.constants import COL_PARENT_DATA_NEW, FIELDS_PARENT_DATA_EXCLUDED
 from django.forms.models import model_to_dict
-from rich import print
 from utils.django import django_setup_full
 
 django_setup_full()
+
 from data.models.change import COL_CHANGE_MODEL_NAME  # noqa: E402
 from data.models.changes import (  # noqa: E402
     ChangeActeurCreateAsParent,
     ChangeActeurKeepAsParent,
 )
 from qfdmo.models.acteur import Acteur, DisplayedActeur, RevisionActeur  # noqa: E402
+
+logger = logging.getLogger(__name__)
 
 
 def fields_to_include_clean(
@@ -63,7 +66,7 @@ def field_pick_value(
                 """
                 return value
             except Exception as e:
-                print(f"Invalid value for field {field}: {value}: {e}")
+                logging.error(f"Invalid value for field {field}: {value}: {e}")
                 pass
     return None
 

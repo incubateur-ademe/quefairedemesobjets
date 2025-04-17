@@ -1,3 +1,4 @@
+import json
 import logging
 import random
 import re
@@ -354,6 +355,15 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
     siret = models.CharField(
         max_length=14, blank=True, default="", db_default="", db_index=True
     )
+    # To backfill SIRET status into our DB from AE and avoid having to evaluate
+    # AE's DB at runtime (which has 40M rows), also helping with Django admin info
+    siret_is_closed = models.BooleanField(
+        default=None,  # by default we can't assume a SIRET is opened
+        null=True,
+        blank=True,
+        verbose_name="SIRET fermé",
+        help_text="Indique si le SIRET est fermé ou non dans l'Annuaire Entreprises",
+    )
     source = models.ForeignKey(Source, on_delete=models.CASCADE, blank=True, null=True)
     identifiant_externe = models.CharField(
         max_length=255, blank=True, default="", db_default=""
@@ -601,6 +611,33 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
             "labels",
         }
 
+    def commentaires_ajouter(self, added):
+        """Historically this field has been defined as TextField
+        but has contained a mix of free text and JSON data, hence
+        method to help append data in a JSON format"""
+        existing = self.commentaires
+
+        # If empty we overwrite
+        if existing is None or existing.strip() == "":
+            self.commentaires = json.dumps([{"message": added}])
+        else:
+            try:
+                # If not empty, trying to parse as JSON
+                existing_data = json.loads(existing)
+                if not isinstance(existing_data, list):
+                    raise NotImplementedError(
+                        "Cas de commentaires JSON non-liste pas prévu"
+                    )
+            except (json.JSONDecodeError, ValueError):
+                # If existing not JSON we turn it into a list
+                existing_data = [{"message": existing}]
+
+            # Appending new data
+            existing_data.append({"message": added})
+            self.commentaires = json.dumps(existing_data)
+
+        self.save()
+
 
 def clean_parent(parent):
     try:
@@ -702,6 +739,13 @@ class RevisionActeur(BaseActeur):
         related_name="duplicats",
         validators=[clean_parent],
     )
+    parent_reason = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+        db_default="",
+        help_text="Raison du rattachement au parent",
+    )
 
     @property
     def is_parent(self):
@@ -794,6 +838,7 @@ class RevisionActeur(BaseActeur):
                 "acteur_services",
                 "labels",
                 "parent",
+                "parent_reason",
                 "is_parent",
             ],
         )
@@ -860,6 +905,7 @@ class RevisionActeur(BaseActeur):
             "acteur_services",
             "proposition_services",
             "parent",
+            "parent_reason",
         ]
 
         for field in fields_to_reset:

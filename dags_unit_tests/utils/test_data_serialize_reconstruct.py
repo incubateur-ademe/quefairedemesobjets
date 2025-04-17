@@ -34,19 +34,16 @@ class TestDataSerializeReconstruct:
             "location": POINT,
             "cree_le": DATETIME,
         }
-        print("data_init", f"{data=}")
         return data
 
     @pytest.fixture
     def data_serialized(self, data_init) -> dict:
         data = data_serialize(RevisionActeur, data_init)
-        print("data_serialized", f"{data=}")
         return data
 
     @pytest.fixture
     def data_reconstructed(self, data_serialized) -> dict:
         data = data_reconstruct(RevisionActeur, data_serialized)
-        print("data_reconstructed", f"{data=}")
         return data
 
     def test_data_reconstructed(self, data_reconstructed):
@@ -94,3 +91,18 @@ class TestDataSerializeReconstruct:
         data = {"location": None}
         data = data_reconstruct(RevisionActeur, data)
         assert data == {}
+
+    def test_working_with_id_fields(self, data_init):
+        # When working with DBT, we have foreign keys being
+        # expressed as {field}_id fields (and not {field} like
+        # in Django models), and we test that data_reconstruct
+        # handles this transparently and forces {field} representation
+        data = data_init.copy()
+        # We switch from the Django reprentation (source) to the
+        # DBT representation (source_id)
+        data["source_id"] = data["source"].id
+        del data["source"]
+        ser = data_serialize(RevisionActeur, data)
+        rec = data_reconstruct(RevisionActeur, ser)
+        # The reconstruction should be in {field} format
+        assert rec["source"].id == data_init["source"].id

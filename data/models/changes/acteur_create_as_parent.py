@@ -1,8 +1,4 @@
-"""
-change_model to create a parent acteur
-
-
-"""
+"""change model to create a parent acteur"""
 
 from data.models.changes.acteur_abstract import ChangeActeurAbstract
 from data.models.changes.utils import data_reconstruct
