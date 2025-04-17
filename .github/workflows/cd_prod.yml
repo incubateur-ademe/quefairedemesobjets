@@ -11,39 +11,7 @@ defaults:
     shell: bash
 
 jobs:
-  run_tests:
-    uses: ./.github/workflows/run_tests.yml
-
-  create-release:
-    name: Create GitHub Release
-    needs: [run_tests]
-    runs-on: "ubuntu-latest"
-    steps:
-      - uses: "marvinpinto/action-automatic-releases@v1.2.1"
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: false
-
-  deploy:
-    name: Deploy on Scalingo
-    environment: prod
-    needs: [run_tests]
-    uses: ./.github/workflows/_deploy-on-scalingo.yml
+  cd:
+    uses: ./.github/workflows/_cd.yml
     with:
-      app: ${{ vars.DJANGO_SCALINGO_APP_NAME }}
-
-  deploy_airflow-webserver:
-    name: Deploy Airflow webserver on Clever Cloud
-    needs: [run_tests]
-    environment: prod
-    uses: ./.github/workflows/_deploy-on-clever-cloud.yml
-    with:
-      app: ${{ vars.AIRFLOW_WEBSERVER_CLEVERCLOUD_APP_NAME }}
-
-  deploy_airflow-scheduler:
-    name: Deploy Airflow scheduler on Clever Cloud
-    needs: [run_tests]
-    environment: prod
-    uses: ./.github/workflows/_deploy-on-clever-cloud.yml
-    with:
-      app: ${{ vars.AIRFLOW_SCHEDULER_CLEVERCLOUD_APP_NAME }}
+      environment: preprod

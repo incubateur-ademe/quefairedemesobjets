@@ -12,46 +12,7 @@ defaults:
     shell: bash
 
 jobs:
-  # run_tests:
-  #   uses: ./.github/workflows/_run-tests.yml
-
-  display-variables:
-    runs-on: "ubuntu-latest"
-    steps:
-      - name: ${{ vars.DJANGO_SCALINGO_APP_NAME }}
-        uses: actions/hello-world-javascript-action@main
-        with:
-          who-to-greet: ${{ vars.AIRFLOW_WEBSERVER_CLEVERCLOUD_APP_NAME }}
-  deploy-django:
-    name: Deploy on Scalingo
-    uses: ./.github/workflows/_deploy-on-scalingo.yml
-    secrets: inherit # pragma: allowlist secret`
-    # needs: [run_tests]
+  cd:
+    uses: ./.github/workflows/_cd.yml
     with:
-      app: ${{ vars.DJANGO_SCALINGO_APP_NAME }}
-      environment: preprod
-
-  deploy_airflow-webserver:
-    name: Deploy PREPROD Airflow webserver on Clever Cloud
-    uses: ./.github/workflows/_deploy-on-clever-cloud.yml
-    secrets: inherit # pragma: allowlist secret`
-    # needs: [run_tests]
-    with:
-      app: ${{ vars.AIRFLOW_WEBSERVER_CLEVERCLOUD_APP_NAME }}
-      environment: preprod
-
-  deploy_airflow-scheduler:
-    name: Deploy PREPROD Airflow scheduler on Clever Cloud
-    uses: ./.github/workflows/_deploy-on-clever-cloud.yml
-    secrets: inherit # pragma: allowlist secret`
-    # needs: [run_tests]
-    with:
-      app: ${{ vars.AIRFLOW_SCHEDULER_CLEVERCLOUD_APP_NAME }}
-      environment: preprod
-
-  healthchecks:
-    needs: [deploy-django]
-    uses: ./.github/workflows/_healthchecks.yml
-    with:
-      app: ${{ vars.AIRFLOW_SCHEDULER_CLEVERCLOUD_APP_NAME }}
       environment: preprod

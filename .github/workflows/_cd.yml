@@ -1,0 +1,44 @@
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  # run_tests:
+  #   uses: ./.github/workflows/_run-tests.yml
+
+  deploy-django:
+    name: Deploy on Scalingo
+    uses: ./.github/workflows/_deploy-on-scalingo.yml
+    secrets: inherit # pragma: allowlist secret`
+    # needs: [run_tests]
+    with:
+      environment: ${{ inputs.environment }}
+
+  # deploy_airflow-webserver:
+  #   name: Deploy PREPROD Airflow webserver on Clever Cloud
+  #   uses: ./.github/workflows/_deploy-on-clever-cloud.yml
+  #   secrets: inherit # pragma: allowlist secret`
+  #   # needs: [run_tests]
+  #   with:
+  #     environment: preprod
+
+  # deploy_airflow-scheduler:
+  #   name: Deploy PREPROD Airflow scheduler on Clever Cloud
+  #   uses: ./.github/workflows/_deploy-on-clever-cloud.yml
+  #   secrets: inherit # pragma: allowlist secret`
+  #   # needs: [run_tests]
+  #   with:
+  #     environment: preprod
+
+  healthchecks:
+    needs: [deploy-django]
+    uses: ./.github/workflows/_healthchecks.yml
+    with:
+      environment: ${{ vars.environment }}

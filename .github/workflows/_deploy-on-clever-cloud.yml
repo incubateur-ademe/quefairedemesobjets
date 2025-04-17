@@ -3,9 +3,6 @@ name: "Deploy on Clever Cloud"
 on:
   workflow_call:
     inputs:
-      environment:
-        type: string
-        required: true
       app:
         required: true
         type: string
