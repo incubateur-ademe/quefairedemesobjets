@@ -15,9 +15,10 @@ defaults:
 jobs:
   deploy-on-scalingo:
     runs-on: "ubuntu-latest"
-    name: Deploy on Scalingo
+    name: Deploy ${{ vars[inputs.app_name_key] }} on Scalingo
     environment:
       name: ${{ inputs.environment }}
+      coucou: coucou
     steps:
       - uses: mattermost/action-mattermost-notify@master
         with:
@@ -29,8 +30,6 @@ jobs:
               "username": "Bipboop le robot de seconde main",
               "icon": "https://cdn3.iconfinder.com/data/icons/system-basic-vol-4-1/20/icon-note-attention-alt3-512.png"
             }
-          env:
-            coucou: "coucou"
       - uses: actions/checkout@v4
       - uses: kolok/deploy-to-scalingo@v1
         with:
