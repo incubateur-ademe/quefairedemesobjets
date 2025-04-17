@@ -2,10 +2,10 @@ name: "Intégration continue"
 
 on:
   workflow_call:
-
-defaults:
-  run:
-    shell: bash
+    inputs:
+      environment:
+        required: true
+        type: string
 
 jobs:
   unit_tests:
@@ -77,82 +77,83 @@ jobs:
       - name: Run tests
         run: npm run test
 
-  # e2e:
-      # name: Tests de bout-en-bout
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       shard: [1/5, 2/5, 3/5, 4/5, 5/5]
-  #   services:
-  #     postgres:
-  #       image: postgis/postgis:15-3.3-alpine
-  #       env:
-  #         POSTGRES_USER: qfdmo
-  #         POSTGRES_PASSWORD: qfdmo # pragma: allowlist secret
-  #         POSTGRES_DB: qfdmo
-  #       options: >-
-  #         --health-cmd pg_isready
-  #         --health-interval 1s
-  #         --health-timeout 1s
-  #         --health-retries 50
-  #       ports:
-  #         - 6543:5432
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-node@v4
-  #       with:
-  #         node-version-file: ".tool-versions"
-  #         cache: "npm"
+  e2e:
+    # name: Tests de bout-en-bout
+    runs-on: ubuntu-latest
+    if: github.event.label.name == 'frontend' || inputs.environment == 'production'
+    strategy:
+      matrix:
+        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
+    services:
+      postgres:
+        image: postgis/postgis:15-3.3-alpine
+        env:
+          POSTGRES_USER: qfdmo
+          POSTGRES_PASSWORD: qfdmo # pragma: allowlist secret
+          POSTGRES_DB: qfdmo
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 1s
+          --health-timeout 1s
+          --health-retries 50
+        ports:
+          - 6543:5432
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".tool-versions"
+          cache: "npm"
 
-  #     - name: Build assets
-  #       run: |
-  #         npm ci
-  #         npm run build
+      - name: Build assets
+        run: |
+          npm ci
+          npm run build
 
-  #     - uses: actions/setup-python@v5
-  #       with:
-  #         cache: "pip"
+      - uses: actions/setup-python@v5
+        with:
+          cache: "pip"
 
-  #     - name: Install GIS Packages
-  #       run: |
-  #         sudo apt-get update
-  #         sudo apt-get install gdal-bin
+      - name: Install GIS Packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install gdal-bin
 
-  #     - name: Install poetry
-  #       uses: abatilo/actions-poetry@v4
-  #     - uses: actions/cache@v4
-  #       name: Define a cache for the virtual environment based on the dependencies lock file
-  #       with:
-  #         path: ./.venv
-  #         key: venv-dev-${{ hashFiles('poetry.lock') }}
-  #     - name: Install the project dependencies
-  #       run: poetry sync --with dev --no-root
+      - name: Install poetry
+        uses: abatilo/actions-poetry@v4
+      - uses: actions/cache@v4
+        name: Define a cache for the virtual environment based on the dependencies lock file
+        with:
+          path: ./.venv
+          key: venv-dev-${{ hashFiles('poetry.lock') }}
+      - name: Install the project dependencies
+        run: poetry sync --with dev --no-root
 
-  #     - name: Set env variables
-  #       run: cp .env.template .env
+      - name: Set env variables
+        run: cp .env.template .env
 
-  #     - name: Migrate database
-  #       run: |
-  #         poetry run python manage.py createcachetable
-  #         poetry run python manage.py migrate
+      - name: Migrate database
+        run: |
+          poetry run python manage.py createcachetable
+          poetry run python manage.py migrate
 
-  #     - name: Populate database
-  #       run: |
-  #         poetry run python manage.py loaddata actions acteur_services acteur_types categories objets produits synonymes
+      - name: Populate database
+        run: |
+          poetry run python manage.py loaddata actions acteur_services acteur_types categories objets produits synonymes
 
-  #     - name: Run serveur
-  #       run: |
-  #         poetry run python manage.py runserver &
+      - name: Run serveur
+        run: |
+          poetry run python manage.py runserver &
 
-  #     - name: Install Playwright Browsers
-  #       run: npx playwright install --with-deps
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
 
-  #     - name: Run Playwright tests
-  #       run: npx playwright test --reporter=list --update-snapshots --shard=${{ matrix.shard }}
+      - name: Run Playwright tests
+        run: npx playwright test --reporter=list --update-snapshots --shard=${{ matrix.shard }}
 
-  #     - uses: actions/upload-artifact@v4
-  #       if: always()
-  #       with:
-  #         name: playwright-report
-  #         path: playwright-report/
-  #         retention-days: 30
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30

@@ -13,6 +13,8 @@ jobs:
   ci:
     name: 🔨 Intégration continue
     uses: ./.github/workflows/_ci.yml
+    with:
+      environment: ${{ inputs.environment }}
 
   deploy-django:
     name: 🗺️ Déploiement de l'application django | ${{ inputs.environment}}
@@ -35,7 +37,7 @@ jobs:
       app_name_key: AIRFLOW_SCHEDULER_CLEVERCLOUD_APP_NAME
 
   deploy_airflow-scheduler:
-    name: ⏳ Déploiement de Airflow scheduler[${{ inputs.environment}}]
+    name: ⏳ Déploiement de Airflow scheduler | ${{ inputs.environment}}
     uses: ./.github/workflows/_deploy-on-clever-cloud.yml
     secrets: inherit # pragma: allowlist secret`
     needs: [ci]

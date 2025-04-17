@@ -10,10 +10,6 @@ on:
         required: true
         type: string
 
-defaults:
-  run:
-    shell: bash
-
 jobs:
   deploy-on-clever-cloud:
     name: Deploy on Clever Cloud
