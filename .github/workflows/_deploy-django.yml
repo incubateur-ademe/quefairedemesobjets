@@ -1,0 +1,21 @@
+name: "Deploy Django application"
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  deploy-on-scalingo:
+    runs-on: "ubuntu-latest"
+    name: Deploy on Scalingo
+    steps:
+      - uses: .github/workflows/_deploy-on-scalingo.yml
+        with:
+          app: ${{ vars.DJANGO_SCALINGO_APP_NAME }}

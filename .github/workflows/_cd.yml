@@ -15,7 +15,7 @@ jobs:
 
   deploy-django:
     name: Deploy on Scalingo
-    uses: ./.github/workflows/_deploy-on-scalingo.yml
+    uses: ./.github/workflows/_deploy-django.yml
     secrets: inherit # pragma: allowlist secret`
     # needs: [run_tests]
     with:
