@@ -10,6 +10,7 @@ defaults:
 
 jobs:
   cd:
+    name: 🚀 Déploiement continu
     uses: ./.github/workflows/_cd.yml
     with:
-      environment: preprod
+      environment: prod
