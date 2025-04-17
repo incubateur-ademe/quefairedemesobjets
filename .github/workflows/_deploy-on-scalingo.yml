@@ -1,9 +1,12 @@
-name: "Deploy Django application"
+name: "Deploy on Scalingo"
 
 on:
   workflow_call:
     inputs:
       environment:
+        required: true
+        type: string
+      app_name_key:
         required: true
         type: string
 
@@ -29,13 +32,13 @@ jobs:
             }
         env:
           PR: ${{ github.event.number }}
-          APP: ${{ vars.DJANGO_SCALINGO_APP_NAME }}
+          APP: ${{ vars[inputs.app_name_key] }}
       - uses: actions/checkout@v4
       - uses: kolok/deploy-to-scalingo@v1
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
           known-host: ssh.osc-fr1.scalingo.com
-          app-name: ${{ vars.DJANGO_SCALINGO_APP_NAME }}
+          app-name: ${{ vars[inputs.app_name_key] }}
 
       - uses: mattermost/action-mattermost-notify@master
         with:
