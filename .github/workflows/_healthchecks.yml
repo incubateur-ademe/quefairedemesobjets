@@ -7,9 +7,6 @@ on:
         type: string
         required: true
         description: Environment used to deploy
-      app:
-        required: true
-        type: string
 
 defaults:
   run:
@@ -18,6 +15,7 @@ defaults:
 jobs:
   check-urls:
     runs-on: "ubuntu-latest"
+    environment: ${{ inputs.environment }}
     steps:
       - name: Check the deployed service URL
         uses: jtalk/url-health-check-action@v4
