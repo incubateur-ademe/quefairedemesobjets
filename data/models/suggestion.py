@@ -56,6 +56,14 @@ class SuggestionAction(models.TextChoices):
     CRAWL_URLS = SUGGESTION_CRAWL_URLS, "🔗 URLs scannées"
     ENRICH_ACTEURS_CLOSED = "ENRICH_ACTEURS_CLOSED", "🚪 Acteurs fermés"
     ENRICH_ACTEURS_RGPD = "ENRICH_ACTEURS_RGPD", "🕵 Anonymisation RGPD"
+    ENRICH_ACTEURS_VILLES_TYPO = (
+        "ENRICH_ACTEURS_VILLES_TYPO",
+        "🏙️ Acteurs villes typographiques",
+    )
+    ENRICH_ACTEURS_VILLES_NEW = (
+        "ENRICH_ACTEURS_VILLES_NEW",
+        "🏙️ Acteurs villes nouvelles",
+    )
     CLUSTERING = SUGGESTION_CLUSTERING, "regroupement/déduplication des acteurs"
     SOURCE_AJOUT = (
         SUGGESTION_SOURCE_AJOUT,
