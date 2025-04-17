@@ -17,6 +17,7 @@ defaults:
 
 jobs:
   check-urls:
+    runs-on: "ubuntu-latest"
     steps:
       - name: Check the deployed service URL
         uses: jtalk/url-health-check-action@v4
