@@ -21,6 +21,7 @@ jobs:
     needs: [ci]
     with:
       environment: ${{ inputs.environment }}
+      name: 🗺️ Déploiement de l'application django | ${{ inputs.environment}}
       # Name of environment variable set in github environment
       app_name_key: DJANGO_SCALINGO_APP_NAME
 

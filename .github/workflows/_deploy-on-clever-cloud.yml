@@ -19,9 +19,6 @@ jobs:
     name: Deploy on Clever Cloud
     runs-on: "ubuntu-latest"
     environment: ${{ inputs.environment }}
-    env:
-      CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
-      CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
     steps:
       - uses: actions/checkout@v4
         with:
