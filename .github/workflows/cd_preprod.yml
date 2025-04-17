@@ -16,6 +16,7 @@ jobs:
   #   uses: ./.github/workflows/_run-tests.yml
 
   display-variables:
+    runs-on: "ubuntu-latest"
     steps:
       - name: ${{ vars.DJANGO_SCALINGO_APP_NAME }}
         uses: actions/hello-world-javascript-action@main
