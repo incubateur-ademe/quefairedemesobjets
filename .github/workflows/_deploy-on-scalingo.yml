@@ -15,7 +15,7 @@ defaults:
 jobs:
   deploy-on-scalingo:
     runs-on: "ubuntu-latest"
-    name: Deploy ${{ vars[inputs.app_name_key] }} on Scalingo
+    name: Deploy on Scalingo
     environment:
       name: ${{ inputs.environment }}
     steps:
