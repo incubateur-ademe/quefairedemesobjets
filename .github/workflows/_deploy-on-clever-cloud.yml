@@ -27,7 +27,7 @@ jobs:
           fetch-depth: 0
       - uses: 47ng/actions-clever-cloud@v2.0.0
         with:
-          alias: ${{inputs.app}}
+          alias: ${{ inputs.app }}
           force: true
         env:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}

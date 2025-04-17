@@ -15,6 +15,11 @@ jobs:
   # run_tests:
   #   uses: ./.github/workflows/_run-tests.yml
 
+  display-variables:
+    name: ${{ vars.DJANGO_SCALINGO_APP_NAME }}
+    uses: actions/hello-world-javascript-action@main
+    with:
+      who-to-greet: ${{ vars.AIRFLOW_WEBSERVER_CLEVERCLOUD_APP_NAME }}
   deploy-django:
     name: Deploy on Scalingo
     uses: ./.github/workflows/_deploy-on-scalingo.yml
