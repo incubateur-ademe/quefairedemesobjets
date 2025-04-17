@@ -1,3 +1,7 @@
+/*
+post_hook = partial indexes on high-cardinality columns only for NOT NULL
+so we can still speed up the JOINS/FILTERS
+*/
 {{
   config(
     materialized = 'table',
@@ -14,4 +18,5 @@
 }}
 
 
-SELECT * FROM {{ ref('base_ban_adresses') }}
+SELECT *
+FROM {{ ref('base_ban_adresses') }}
