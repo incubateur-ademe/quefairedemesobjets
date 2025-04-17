@@ -17,26 +17,26 @@ jobs:
   deploy-django:
     name: Deploy on Scalingo
     uses: ./.github/workflows/_deploy-on-scalingo.yml
-    environment: preprod
     needs: [run_tests]
     with:
       app: ${{ vars.DJANGO_SCALINGO_APP_NAME }}
+      environment: preprod
 
   deploy_airflow-webserver:
     name: Deploy PREPROD Airflow webserver on Clever Cloud
     uses: ./.github/workflows/_deploy-on-clever-cloud.yml
     needs: [run_tests]
-    environment: preprod
     with:
       app: ${{ vars.AIRFLOW_WEBSERVER_CLEVERCLOUD_APP_NAME }}
+      environment: preprod
 
   deploy_airflow-scheduler:
     name: Deploy PREPROD Airflow scheduler on Clever Cloud
     uses: ./.github/workflows/_deploy-on-clever-cloud.yml
     needs: [run_tests]
-    environment: preprod
     with:
       app: ${{ vars.AIRFLOW_SCHEDULER_CLEVERCLOUD_APP_NAME }}
+      environment: preprod
 
   healthchecks:
     needs: [deploy-django]

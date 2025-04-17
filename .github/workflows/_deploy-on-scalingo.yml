@@ -3,6 +3,13 @@ name: "Deploy on Scalingo"
 on:
   workflow_call:
     inputs:
+      environment:
+        type: choice
+        required: true
+        description: Environment used to deploy
+        options:
+          - prod
+          - preprod
       app:
         required: true
         type: string
@@ -15,6 +22,7 @@ jobs:
   deploy-on-scalingo:
     name: Deploy on Scalingo
     runs-on: "ubuntu-latest"
+    environment: ${{ inputs.environment }}
     steps:
       - uses: mattermost/action-mattermost-notify@master
         with:
