@@ -14,5 +14,6 @@ defaults:
 jobs:
   cd:
     uses: ./.github/workflows/_cd.yml
+    secrets: inherit # pragma: allowlist secret`
     with:
       environment: preprod
