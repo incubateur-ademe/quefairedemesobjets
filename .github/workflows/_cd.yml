@@ -5,10 +5,6 @@ on:
         type: string
         required: true
 
-defaults:
-  run:
-    shell: bash
-
 jobs:
   # ci:
   #   name: 🔨 Intégration continue
