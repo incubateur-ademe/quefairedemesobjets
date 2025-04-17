@@ -26,7 +26,7 @@ jobs:
           MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK_URL }}
           PAYLOAD: |-
             {
-              "text": format("🚨 {0} Nouveau déploiement en cours de l'application ${{ vars[inputs.app_name_key] }} - [PR #${{ github.event.number }}](https://github.com/incubateur-ademe/quefairedemesobjets/pull/${{ github.event.number }})", $coucou),
+              "text": "🚨 Nouveau déploiement en cours de l'application ${{ vars[inputs.app_name_key] }} - [PR #${{ github.event.number }}](https://github.com/incubateur-ademe/quefairedemesobjets/pull/${{ github.event.number }})",
               "channel": "lvao-tour-de-controle",
               "username": "Bipboop le robot de seconde main",
               "icon": "https://cdn3.iconfinder.com/data/icons/system-basic-vol-4-1/20/icon-note-attention-alt3-512.png"
