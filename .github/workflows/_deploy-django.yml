@@ -40,7 +40,7 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
           known-host: ssh.osc-fr1.scalingo.com
-          app-name: ${{ vers.DJANGO_SCALINGO_APP_NAME }}
+          app-name: ${{ vars.DJANGO_SCALINGO_APP_NAME }}
 
       - uses: mattermost/action-mattermost-notify@master
         with:
