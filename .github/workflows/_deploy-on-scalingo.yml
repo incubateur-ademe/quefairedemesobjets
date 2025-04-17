@@ -4,12 +4,8 @@ on:
   workflow_call:
     inputs:
       environment:
-        type: choice
+        type: string
         required: true
-        description: Environment used to deploy
-        options:
-          - prod
-          - preprod
       app:
         required: true
         type: string
