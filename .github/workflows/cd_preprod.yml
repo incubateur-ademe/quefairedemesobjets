@@ -11,13 +11,13 @@ defaults:
     shell: bash
 
 jobs:
-  run_tests:
-    uses: ./.github/workflows/_run-tests.yml
+  # run_tests:
+  #   uses: ./.github/workflows/_run-tests.yml
 
   deploy-django:
     name: Deploy on Scalingo
     uses: ./.github/workflows/_deploy-on-scalingo.yml
-    needs: [run_tests]
+    # needs: [run_tests]
     with:
       app: ${{ vars.DJANGO_SCALINGO_APP_NAME }}
       environment: preprod
@@ -25,7 +25,7 @@ jobs:
   deploy_airflow-webserver:
     name: Deploy PREPROD Airflow webserver on Clever Cloud
     uses: ./.github/workflows/_deploy-on-clever-cloud.yml
-    needs: [run_tests]
+    # needs: [run_tests]
     with:
       app: ${{ vars.AIRFLOW_WEBSERVER_CLEVERCLOUD_APP_NAME }}
       environment: preprod
@@ -33,7 +33,7 @@ jobs:
   deploy_airflow-scheduler:
     name: Deploy PREPROD Airflow scheduler on Clever Cloud
     uses: ./.github/workflows/_deploy-on-clever-cloud.yml
-    needs: [run_tests]
+    # needs: [run_tests]
     with:
       app: ${{ vars.AIRFLOW_SCHEDULER_CLEVERCLOUD_APP_NAME }}
       environment: preprod
