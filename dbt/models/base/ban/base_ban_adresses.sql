@@ -13,7 +13,11 @@ SELECT
     as it's a common suggestion filter */
     numero AS adresse_numero,
     nom_commune AS ville,
-    nom_ancienne_commune AS ville_ancienne,
+    /* We only keep ville_ancienne if it's different from current ville */
+    CASE
+      WHEN nom_ancienne_commune = nom_commune THEN NULL
+      ELSE nom_ancienne_commune
+    END AS ville_ancienne,
     code_postal,
     LEFT(code_postal, 2) AS code_departement,
     lat as latitude,
