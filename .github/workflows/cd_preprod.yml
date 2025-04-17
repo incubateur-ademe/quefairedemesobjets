@@ -13,7 +13,8 @@ defaults:
 jobs:
   run_tests:
     uses: ./.github/workflows/_run_tests.yml
-  deploy:
+
+  deploy-django:
     name: Deploy on Scalingo
     environment: preprod
     needs: [run_tests]
@@ -38,11 +39,6 @@ jobs:
       app: ${{ vars.AIRFLOW_SCHEDULER_CLEVERCLOUD_APP_NAME }}
 
   healthchecks:
-    name: Check the deployed service URL
-    uses: jtalk/url-health-check-action@v4
-    with:
-      url: ${{ vars.HEALTHCHECK_URLS }}
-      max-attempts: 3
-      retry-delay: 5s
-      retry-all: true
-
+    needs: [deploy-django]
+    environment: preprod
+    uses: ./.github/workflows/_healthchecks.yml
