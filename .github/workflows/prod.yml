@@ -1,0 +1,15 @@
+name: "🔴 Déploiement continu | prod"
+
+on:
+  release:
+    types: [published]
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  cd:
+    uses: ./.github/workflows/_cd.yml
+    with:
+      environment: preprod

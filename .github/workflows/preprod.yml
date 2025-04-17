@@ -1,0 +1,20 @@
+name: "🟠 Déploiement continu | preprod"
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  cd:
+    name: 🚀 Déploiement continu
+    uses: ./.github/workflows/_cd.yml
+    secrets: inherit # pragma: allowlist secret`
+    with:
+      environment: preprod
