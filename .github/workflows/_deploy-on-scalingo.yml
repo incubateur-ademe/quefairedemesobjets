@@ -24,7 +24,7 @@ jobs:
           MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK_URL }}
           PAYLOAD: |-
             {
-              "text": "🚨 ${{ format("{0}", $coucou)}} Nouveau déploiement en cours de l'application ${{ vars[inputs.app_name_key] }} - [PR #${{ github.event.number }}](https://github.com/incubateur-ademe/quefairedemesobjets/pull/${{ github.event.number }})",
+              "text": format("🚨 {0} Nouveau déploiement en cours de l'application ${{ vars[inputs.app_name_key] }} - [PR #${{ github.event.number }}](https://github.com/incubateur-ademe/quefairedemesobjets/pull/${{ github.event.number }})", $coucou),
               "channel": "lvao-tour-de-controle",
               "username": "Bipboop le robot de seconde main",
               "icon": "https://cdn3.iconfinder.com/data/icons/system-basic-vol-4-1/20/icon-note-attention-alt3-512.png"
@@ -46,7 +46,7 @@ jobs:
           # TODO: use app name here from environment
           PAYLOAD: |-
             {
-              "text": "🛑 Le déploiement a échoué. ${{ format("{0}, $RUN_URL) }}",
+              "text": "🛑 Le déploiement a échoué. ",
               "channel": "lvao-tour-de-controle",
               "username": "Bipboop le robot de seconde main",
               "icon": "https://cdn3.iconfinder.com/data/icons/system-basic-vol-4-1/20/icon-note-attention-alt3-512.png"
