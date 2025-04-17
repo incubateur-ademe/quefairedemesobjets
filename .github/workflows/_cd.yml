@@ -17,27 +17,33 @@ jobs:
 
   deploy-django:
     name: Deploy on Scalingo
-    uses: ./.github/workflows/_deploy-django.yml
+    uses: ./.github/workflows/_deploy-on-scalingo.yml
     secrets: inherit # pragma: allowlist secret`
     # needs: [run_tests]
     with:
       environment: ${{ inputs.environment }}
+      # Name of environment variable set in github environment
+      app_name_key: DJANGO_SCALINGO_APP_NAME
 
-  # deploy_airflow-webserver:
-  #   name: Deploy PREPROD Airflow webserver on Clever Cloud
-  #   uses: ./.github/workflows/_deploy-on-clever-cloud.yml
-  #   secrets: inherit # pragma: allowlist secret`
-  #   # needs: [run_tests]
-  #   with:
-  #     environment: preprod
+  deploy_airflow-webserver:
+    name: Deploy PREPROD Airflow webserver on Clever Cloud
+    uses: ./.github/workflows/_deploy-on-clever-cloud.yml
+    secrets: inherit # pragma: allowlist secret`
+    # needs: [run_tests]
+    with:
+      environment: ${{ inputs.environment }}
+      # Name of environment variable set in github environment
+      app_name_key: AIRFLOW_SCHEDULER_CLEVERCLOUD_APP_NAME
 
-  # deploy_airflow-scheduler:
-  #   name: Deploy PREPROD Airflow scheduler on Clever Cloud
-  #   uses: ./.github/workflows/_deploy-on-clever-cloud.yml
-  #   secrets: inherit # pragma: allowlist secret`
-  #   # needs: [run_tests]
-  #   with:
-  #     environment: preprod
+  deploy_airflow-scheduler:
+    name: Deploy PREPROD Airflow scheduler on Clever Cloud
+    uses: ./.github/workflows/_deploy-airflow-scheduler.yml
+    secrets: inherit # pragma: allowlist secret`
+    # needs: [run_tests]
+    with:
+      environment: ${{ inputs.environment }}
+      # Name of environment variable set in github environment
+      app_name_key: AIRFLOW_WEBSERVER_CLEVERCLOUD_APP_NAME
 
   healthchecks:
     needs: [deploy-django]
