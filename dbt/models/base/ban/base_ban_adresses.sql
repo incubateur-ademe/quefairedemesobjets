@@ -19,5 +19,5 @@ SELECT
     lat as latitude,
     lon as longitude
 FROM {{ source('ban', 'clone_ban_adresses_in_use') }}
-WHERE code_postal NOT IN ('',NULL)
+WHERE code_postal IS NOT NULL AND code_postal != ''
 ORDER BY code_postal ASC
