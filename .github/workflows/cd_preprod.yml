@@ -39,7 +39,8 @@ jobs:
       environment: preprod
 
   healthchecks:
-    runs-on: "ubuntu-latest"
     needs: [deploy-django]
     uses: ./.github/workflows/_healthchecks.yml
-    environment: preprod
+    with:
+      app: ${{ vars.AIRFLOW_SCHEDULER_CLEVERCLOUD_APP_NAME }}
+      environment: preprod

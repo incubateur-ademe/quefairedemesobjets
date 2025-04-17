@@ -2,6 +2,17 @@ name: "🩻 Healthchecks"
 
 on:
   workflow_call:
+    inputs:
+      environment:
+        type: choice
+        required: true
+        description: Environment used to deploy
+        options:
+          - prod
+          - preprod
+      app:
+        required: true
+        type: string
 
 defaults:
   run:
