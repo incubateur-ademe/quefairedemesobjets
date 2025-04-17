@@ -37,7 +37,7 @@ jobs:
 
   deploy_airflow-scheduler:
     name: Deploy PREPROD Airflow scheduler on Clever Cloud
-    uses: ./.github/workflows/_deploy-airflow-scheduler.yml
+    uses: ./.github/workflows/_deploy-on-clever-cloud.yml
     secrets: inherit # pragma: allowlist secret`
     # needs: [run_tests]
     with:
