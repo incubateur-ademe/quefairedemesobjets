@@ -14,7 +14,6 @@ defaults:
 
 jobs:
   deploy-on-scalingo:
-    name: Déploiement de ${{vars[inputs.app_name_key]}} [${{inputs.environment}}]sur Scalingo
     runs-on: "ubuntu-latest"
     environment:
       name: ${{ inputs.environment }}
@@ -39,8 +38,7 @@ jobs:
           known-host: ssh.osc-fr1.scalingo.com
           app-name: ${{ vars[inputs.app_name_key] }}
 
-      - name: Check the deployed service URL
-        uses: jtalk/url-health-check-action@v4
+      - uses: jtalk/url-health-check-action@v4
         with:
           url: ${{ vars.HEALTHCHECK_URLS }}
           max-attempts: 3
@@ -60,7 +58,7 @@ jobs:
               "icon": "https://cdn3.iconfinder.com/data/icons/system-basic-vol-4-1/20/icon-note-attention-alt3-512.png"
             }
 
-      - name: Override page_url
+      - name: Set environment URL
         id: url
         run: echo "url=${{ vars.URL }}" >> $GITHUB_OUTPUT
 

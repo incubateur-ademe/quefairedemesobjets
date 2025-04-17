@@ -1,4 +1,4 @@
-name: "[🟠 Preprod] Déploiement continu"
+name: "🟠 Déploiement continu | preprod"
 
 on:
   workflow_dispatch:
@@ -13,7 +13,7 @@ defaults:
 
 jobs:
   cd:
-    name: Intégration continue
+    name: 🚀 Déploiement continu
     uses: ./.github/workflows/_cd.yml
     secrets: inherit # pragma: allowlist secret`
     with:

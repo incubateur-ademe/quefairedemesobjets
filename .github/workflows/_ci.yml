@@ -1,4 +1,4 @@
-name: "_Tests"
+name: "Intégration continue"
 
 on:
   workflow_call:
@@ -9,6 +9,7 @@ defaults:
 
 jobs:
   unit_tests:
+    name: Tests unitaires | backend
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -59,6 +60,7 @@ jobs:
           DATABASE_URL: "postgres://fakeusername:fakepassword@postgres:5432/database" # pragma: allowlist secret
 
   frontend_tests:
+    name: Tests unitaires | frontend
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -76,6 +78,7 @@ jobs:
         run: npm run test
 
   # e2e:
+      # name: Tests de bout-en-bout
   #   runs-on: ubuntu-latest
   #   strategy:
   #     matrix:
