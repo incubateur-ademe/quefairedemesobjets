@@ -18,7 +18,7 @@ jobs:
     name: Deploy ${{ vars[inputs.app_name_key] }} on Scalingo
     environment:
       name: ${{ inputs.environment }}
-      coucou: coucou
+      coucou: "coucou"
     steps:
       - uses: mattermost/action-mattermost-notify@master
         with:
