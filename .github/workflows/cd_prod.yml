@@ -26,45 +26,24 @@ jobs:
 
   deploy:
     name: Deploy on Scalingo
+    environment: prod
     needs: [run_tests]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: kolok/deploy-to-scalingo@v1
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          known-host: ssh.osc-fr1.scalingo.com
-          app-name: quefairedemesobjets
+    uses: ./.github/workflows/_deploy-on-scalingo.yml
+    with:
+      app: ${{ vars.DJANGO_SCALINGO_APP_NAME }}
 
   deploy_airflow-webserver:
     name: Deploy Airflow webserver on Clever Cloud
     needs: [run_tests]
-    runs-on: "ubuntu-latest"
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: 47ng/actions-clever-cloud@v2.0.0
-        with:
-          alias: lvao-prod-airflow-webserver
-          force: true
-        env:
-          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
-          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
-
+    environment: prod
+    uses: ./.github/workflows/_deploy-on-clever-cloud.yml
+    with:
+      app: ${{ vars.AIRFLOW_WEBSERVER_CLEVERCLOUD_APP_NAME }}
 
   deploy_airflow-scheduler:
     name: Deploy Airflow scheduler on Clever Cloud
     needs: [run_tests]
-    runs-on: "ubuntu-latest"
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: 47ng/actions-clever-cloud@v2.0.0
-        with:
-          alias: lvao-prod-airflow-scheduler
-          force: true
-        env:
-          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
-          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
+    environment: prod
+    uses: ./.github/workflows/_deploy-on-clever-cloud.yml
+    with:
+      app: ${{ vars.AIRFLOW_SCHEDULER_CLEVERCLOUD_APP_NAME }}

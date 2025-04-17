@@ -1,0 +1,27 @@
+name: "Deploy on Clever Cloud"
+
+on:
+  workflow_call:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  deploy-on-clever-cloud:
+    name: Deploy on Clever Cloud
+    runs-on: "ubuntu-latest"
+    env:
+      CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+      CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: 47ng/actions-clever-cloud@v2.0.0
+        with:
+          alias: ${{inputs.app}}
+          force: true
+        env:
+          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}

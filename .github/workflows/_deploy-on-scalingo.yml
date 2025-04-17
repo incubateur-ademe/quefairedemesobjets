@@ -1,0 +1,45 @@
+name: "Deploy on Scalingo"
+
+on:
+  workflow_call:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  deploy-on-scalingo:
+    name: Deploy on Scalingo
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: mattermost/action-mattermost-notify@master
+        with:
+          MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK_URL }}
+          PAYLOAD: |-
+            {
+              "text": "Nouveau déploiement en cours de l'application $APP - [PR #$PR](https://github.com/incubateur-ademe/quefairedemesobjets/pull/$PR)",
+              "channel": "lvao-tour-de-controle",
+              "username": "Bipboop le robot de seconde main",
+              "icon": "https://cdn3.iconfinder.com/data/icons/system-basic-vol-4-1/20/icon-note-attention-alt3-512.png"
+            }
+        env:
+          PR: ${{ github.event.number }}
+          APP: ${{ inputs.app }}
+      - uses: actions/checkout@v4
+      - uses: kolok/deploy-to-scalingo@v1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known-host: ssh.osc-fr1.scalingo.com
+          app-name: ${{ inputs.app }}
+
+      - uses: mattermost/action-mattermost-notify@master
+        with:
+          MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK_URL }}
+          # TODO: use app name here from environment
+          PAYLOAD: |-
+            {
+              "text": "Le déploiement s'est déroulé avec succès. Il est visible sur https://quefairedemesobjets-preprod.osc-fr1.scalingo.io",
+              "channel": "lvao-tour-de-controle",
+              "username": "Bipboop le robot de seconde main",
+              "icon": "https://cdn3.iconfinder.com/data/icons/system-basic-vol-4-1/20/icon-note-attention-alt3-512.png"
+            }
