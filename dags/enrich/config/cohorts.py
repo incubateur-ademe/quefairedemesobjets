@@ -25,3 +25,12 @@ class COHORTS:
         code="acteurs_closed_replaced_same_siren",
         label=f"{INTRO} 🟢 remplacés par SIRET du même SIREN",
     )
+
+    ACTEURS_VILLES_TYPO: Cohort = Cohort(
+        code="acteurs_villes_variation_ortographe",
+        label="🌆 Changement de ville: 🟢 variation d'ortographe",
+    )
+    ACTEURS_VILLES_NEW: Cohort = Cohort(
+        code="acteurs_villes_anciennes_nouvelles",
+        label="🌆 Changement de ville: 🟡 ancienne -> nouvelle",
+    )

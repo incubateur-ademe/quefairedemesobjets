@@ -82,6 +82,11 @@ class EnrichActeursClosedConfig(EnrichBaseConfig):
     )
 
 
+class EnrichActeursVillesConfig(EnrichBaseConfig):
+    pass
+
+
 DAG_ID_TO_CONFIG_MODEL = {
     "enrich_acteurs_closed": EnrichActeursClosedConfig,
+    "enrich_acteurs_villes": EnrichActeursVillesConfig,
 }
