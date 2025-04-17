@@ -86,6 +86,7 @@ class AssistantBaseView:
     """
 
     def dispatch(self, request, *args, **kwargs):
+        raise Exception("hu oh")
         if request.META.get("HTTP_HOST") not in settings.ASSISTANT["HOSTS"]:
             return redirect(reverse("home"))
         return super().dispatch(request, *args, **kwargs)
