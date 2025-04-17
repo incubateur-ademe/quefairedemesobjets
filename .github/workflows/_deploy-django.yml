@@ -18,6 +18,6 @@ jobs:
     environment: ${{ inputs.environment }}
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/workflows/_deploy-on-scalingo.yml
+      - uses: ./.github/workflows/deploy-on-scalingo.yml
         with:
           app: ${{ vars.DJANGO_SCALINGO_APP_NAME }}
