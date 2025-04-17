@@ -12,7 +12,7 @@ defaults:
 
 jobs:
   run_tests:
-    uses: ./.github/workflows/_run_tests.yml
+    uses: ./.github/workflows/_run-tests.yml
 
   deploy-django:
     name: Deploy on Scalingo
