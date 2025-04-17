@@ -32,6 +32,29 @@ def suggestion_change_prepare(
     ).model_dump()
 
 
+def suggestion_change_prepare_villes(row: dict) -> list[dict]:
+    """Prepare suggestions for villes cohorts"""
+    from data.models.changes import ChangeActeurUpdateData
+
+    changes = []
+    model_params = {
+        "id": row[COLS.ACTEUR_ID],
+        "data": {
+            "ville": row[COLS.REMPLACER_VILLE],
+        },
+    }
+    changes.append(
+        suggestion_change_prepare(
+            model=ChangeActeurUpdateData,
+            model_params=model_params,
+            order=1,
+            reason="On fait confiance à la BAN",
+            entity_type="acteur_displayed",
+        )
+    )
+    return changes
+
+
 def suggestion_change_prepare_closed_not_replaced(
     row: dict,
 ) -> list[dict]:
@@ -201,6 +224,12 @@ def enrich_dbt_model_to_suggestions(
                 COHORTS.CLOSED_REP_SAME_SIREN,
             ]:
                 changes = suggestion_change_prepare_closed_replaced(row)
+
+            elif cohort in [
+                COHORTS.ACTEURS_VILLES_TYPO,
+                COHORTS.ACTEURS_VILLES_NEW,
+            ]:
+                changes = suggestion_change_prepare_villes(row)
 
         except Exception as e:
             log.preview("🔴 Suggestion problématique", row)

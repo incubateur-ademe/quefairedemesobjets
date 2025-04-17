@@ -24,3 +24,7 @@ class TASKS:
         "enrich_acteurs_closed_suggestions_not_replaced"
     )
     ENRICH_DBT_MODELS_REFRESH: str = "enrich_dbt_models_refresh"
+
+    # Villes
+    ENRICH_ACTEURS_VILLES_TYPO: str = "enrich_acteurs_villes_typo"
+    ENRICH_ACTEURS_VILLES_NEW: str = "enrich_acteurs_villes_new"
