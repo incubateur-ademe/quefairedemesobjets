@@ -13,6 +13,7 @@ defaults:
 
 jobs:
   cd:
+    name: Intégration continue
     uses: ./.github/workflows/_cd.yml
     secrets: inherit # pragma: allowlist secret`
     with:

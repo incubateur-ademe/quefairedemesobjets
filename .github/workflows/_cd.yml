@@ -1,5 +1,3 @@
-name: "Continuous deployment"
-
 on:
   workflow_call:
     inputs:
@@ -12,34 +10,35 @@ defaults:
     shell: bash
 
 jobs:
-  # run_tests:
-  #   uses: ./.github/workflows/_run-tests.yml
+  ci:
+    name: Intégration continue
+    uses: ./.github/workflows/_ci.yml
 
   deploy-django:
-    name: Deploy on Scalingo
+    name: Deploiement de l'application  Django sur Scalingo
     uses: ./.github/workflows/_deploy-on-scalingo.yml
     secrets: inherit # pragma: allowlist secret`
-    # needs: [run_tests]
+    needs: [run_tests]
     with:
       environment: ${{ inputs.environment }}
       # Name of environment variable set in github environment
       app_name_key: DJANGO_SCALINGO_APP_NAME
 
   deploy_airflow-webserver:
-    name: Deploy PREPROD Airflow webserver on Clever Cloud
+    name: Deploy Airflow webserver on Clever Cloud
     uses: ./.github/workflows/_deploy-on-clever-cloud.yml
     secrets: inherit # pragma: allowlist secret`
-    # needs: [run_tests]
+    needs: [run_tests]
     with:
       environment: ${{ inputs.environment }}
       # Name of environment variable set in github environment
       app_name_key: AIRFLOW_SCHEDULER_CLEVERCLOUD_APP_NAME
 
   deploy_airflow-scheduler:
-    name: Deploy PREPROD Airflow scheduler on Clever Cloud
+    name: Deploy Airflow scheduler on Clever Cloud
     uses: ./.github/workflows/_deploy-on-clever-cloud.yml
     secrets: inherit # pragma: allowlist secret`
-    # needs: [run_tests]
+    needs: [run_tests]
     with:
       environment: ${{ inputs.environment }}
       # Name of environment variable set in github environment

@@ -1,5 +1,3 @@
-name: "Deploy on Scalingo"
-
 on:
   workflow_call:
     inputs:
@@ -26,14 +24,13 @@ jobs:
           MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK_URL }}
           PAYLOAD: |-
             {
-              "text": "Nouveau déploiement en cours de l'application $APP - [PR #$PR](https://github.com/incubateur-ademe/quefairedemesobjets/pull/$PR)",
+              "text": "🚨 ${{ format("{0}", $coucou)}} Nouveau déploiement en cours de l'application ${{ vars[inputs.app_name_key] }} - [PR #${{ github.event.number }}](https://github.com/incubateur-ademe/quefairedemesobjets/pull/${{ github.event.number }})",
               "channel": "lvao-tour-de-controle",
               "username": "Bipboop le robot de seconde main",
               "icon": "https://cdn3.iconfinder.com/data/icons/system-basic-vol-4-1/20/icon-note-attention-alt3-512.png"
             }
-        env:
-          PR: ${{ github.event.number }}
-          APP: ${{ vars[inputs.app_name_key] }}
+          env:
+            coucou: "coucou"
       - uses: actions/checkout@v4
       - uses: kolok/deploy-to-scalingo@v1
         with:
@@ -42,12 +39,28 @@ jobs:
           app-name: ${{ vars[inputs.app_name_key] }}
 
       - uses: mattermost/action-mattermost-notify@master
+        if: failure()
+        name:  Notify about failed deployment
         with:
           MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK_URL }}
           # TODO: use app name here from environment
           PAYLOAD: |-
             {
-              "text": "Le déploiement s'est déroulé avec succès. Il est visible sur https://quefairedemesobjets-preprod.osc-fr1.scalingo.io",
+              "text": "🛑 Le déploiement a échoué. ${{ format("{0}, $RUN_URL) }}",
+              "channel": "lvao-tour-de-controle",
+              "username": "Bipboop le robot de seconde main",
+              "icon": "https://cdn3.iconfinder.com/data/icons/system-basic-vol-4-1/20/icon-note-attention-alt3-512.png"
+            }
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      - uses: mattermost/action-mattermost-notify@master
+        name: Notify about successful deployment
+        with:
+          MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK_URL }}
+          # TODO: use app name here from environment
+          PAYLOAD: |-
+            {
+              "text": "✅ Le déploiement s'est déroulé avec succès. Il est visible sur https://quefairedemesobjets-preprod.osc-fr1.scalingo.io",
               "channel": "lvao-tour-de-controle",
               "username": "Bipboop le robot de seconde main",
               "icon": "https://cdn3.iconfinder.com/data/icons/system-basic-vol-4-1/20/icon-note-attention-alt3-512.png"
