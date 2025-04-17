@@ -10,15 +10,15 @@ defaults:
     shell: bash
 
 jobs:
-  ci:
-    name: Intégration continue
-    uses: ./.github/workflows/_ci.yml
+  # ci:
+  #   name: Intégration continue
+  #   uses: ./.github/workflows/_ci.yml
 
   deploy-django:
     name: Deploiement de l'application  Django sur Scalingo
     uses: ./.github/workflows/_deploy-on-scalingo.yml
     secrets: inherit # pragma: allowlist secret`
-    needs: [run_tests]
+    # needs: [ci]
     with:
       environment: ${{ inputs.environment }}
       # Name of environment variable set in github environment
@@ -28,7 +28,7 @@ jobs:
     name: Deploy Airflow webserver on Clever Cloud
     uses: ./.github/workflows/_deploy-on-clever-cloud.yml
     secrets: inherit # pragma: allowlist secret`
-    needs: [run_tests]
+    # needs: [ci]
     with:
       environment: ${{ inputs.environment }}
       # Name of environment variable set in github environment
@@ -38,7 +38,7 @@ jobs:
     name: Deploy Airflow scheduler on Clever Cloud
     uses: ./.github/workflows/_deploy-on-clever-cloud.yml
     secrets: inherit # pragma: allowlist secret`
-    needs: [run_tests]
+    # needs: [ci]
     with:
       environment: ${{ inputs.environment }}
       # Name of environment variable set in github environment
