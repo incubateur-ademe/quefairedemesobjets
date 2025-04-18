@@ -1,5 +1,3 @@
-name: "Deploy on Clever Cloud name en haut"
-
 on:
   workflow_call:
     inputs:
@@ -12,7 +10,9 @@ on:
 
 jobs:
   deploy-on-clever-cloud:
-    name: Clever Cloud name dans le body
+    # Displayed in workflow graph in GitHub UI
+    # and in left sidebar
+    name: Clever Cloud
     runs-on: "ubuntu-latest"
     environment: ${{ inputs.environment }}
     steps:

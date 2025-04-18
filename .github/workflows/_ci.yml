@@ -5,7 +5,7 @@ on:
 
 jobs:
   unit_tests:
-    name: Tests unitaires backend
+    name: tests unitaires backend
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -56,7 +56,7 @@ jobs:
           DATABASE_URL: "postgres://fakeusername:fakepassword@postgres:5432/database" # pragma: allowlist secret
 
   frontend_tests:
-    name: Tests unitaires frontend
+    name: tests unitaires frontend
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
