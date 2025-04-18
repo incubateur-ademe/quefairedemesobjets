@@ -10,7 +10,6 @@ jobs:
     name: 🗺️ Déploiement de l'application django | ${{ inputs.environment}}
     uses: ./.github/workflows/_deploy-on-scalingo.yml
     secrets: inherit # pragma: allowlist secret`
-    needs: [ci]
     with:
       environment: ${{ inputs.environment }}
       # Name of environment variable set in github environment
@@ -20,7 +19,6 @@ jobs:
     name: 🔄 Déploiement de Airflow webserver | ${{ inputs.environment}}
     uses: ./.github/workflows/_deploy-on-clever-cloud.yml
     secrets: inherit # pragma: allowlist secret`
-    needs: [ci]
     with:
       environment: ${{ inputs.environment }}
       # Name of environment variable set in github environment
@@ -30,7 +28,6 @@ jobs:
     name: ⏳ Déploiement de Airflow scheduler | ${{ inputs.environment}}
     uses: ./.github/workflows/_deploy-on-clever-cloud.yml
     secrets: inherit # pragma: allowlist secret`
-    needs: [ci]
     with:
       environment: ${{ inputs.environment }}
       # Name of environment variable set in github environment

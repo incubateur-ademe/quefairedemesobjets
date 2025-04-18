@@ -21,6 +21,7 @@ jobs:
     name: Preprod
     uses: ./.github/workflows/_cd.yml
     secrets: inherit # pragma: allowlist secret`
+    needs: [ci]
     with:
       environment: preprod
 
@@ -29,6 +30,7 @@ jobs:
     # so that it only triggers when ran on main branch
     # See https://github.com/incubateur-ademe/quefairedemesobjets/settings/environments/4163451271/edit
     name: Prod
+    needs: [preprod]
     uses: ./.github/workflows/_cd.yml
     secrets: inherit # pragma: allowlist secret`
     with:
