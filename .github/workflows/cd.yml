@@ -3,7 +3,6 @@ name: 🚀 CD
 on:
   workflow_dispatch:
   pull_request:
-    branches: [ $default-branch ]
   release:
     types: [published]
 
