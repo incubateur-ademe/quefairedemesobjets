@@ -19,7 +19,7 @@ jobs:
 
   preprod:
     name: 🟠 Preprod
-    uses: ./.github/workflows/_cd.yml
+    uses: ./.github/workflows/_cd-by-environment.yml
     secrets: inherit # pragma: allowlist secret`
     needs: [ci]
     with:
@@ -31,7 +31,7 @@ jobs:
     # See https://github.com/incubateur-ademe/quefairedemesobjets/settings/environments/4163451271/edit
     name: 🔴 Prod
     needs: [preprod]
-    uses: ./.github/workflows/_cd.yml
+    uses: ./.github/workflows/_cd-by-environment.yml
     secrets: inherit # pragma: allowlist secret`
     with:
       environment: prod
