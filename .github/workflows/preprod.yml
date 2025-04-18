@@ -24,14 +24,3 @@ jobs:
     needs: [ci]
     with:
       environment: preprod
-
-  prod:
-    # A rule protection has been set on this environment
-    # so that it only triggers when ran on main branch
-    # See https://github.com/incubateur-ademe/quefairedemesobjets/settings/environments/4163451271/edit
-    name: 🔴 Prod
-    needs: [preprod]
-    uses: ./.github/workflows/_cd-by-environment.yml
-    secrets: inherit # pragma: allowlist secret`
-    with:
-      environment: prod
