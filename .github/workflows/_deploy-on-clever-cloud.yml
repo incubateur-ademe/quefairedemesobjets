@@ -1,4 +1,4 @@
-name: "Deploy on Clever Cloud"
+name: "Deploy on Clever Cloud name en haut"
 
 on:
   workflow_call:
@@ -12,7 +12,7 @@ on:
 
 jobs:
   deploy-on-clever-cloud:
-    name: Deploy on Clever Cloud
+    name: Clever Cloud name dans le body
     runs-on: "ubuntu-latest"
     environment: ${{ inputs.environment }}
     steps:

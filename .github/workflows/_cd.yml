@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy-django:
-    name: 🗺️ Déploiement de l'application django | ${{ inputs.environment}}
+    name: 🗺️ Carte & assistant
     uses: ./.github/workflows/_deploy-on-scalingo.yml
     secrets: inherit # pragma: allowlist secret`
     with:
@@ -16,7 +16,7 @@ jobs:
       app_name_key: DJANGO_SCALINGO_APP_NAME
 
   deploy_airflow-webserver:
-    name: 🔄 Déploiement de Airflow webserver | ${{ inputs.environment}}
+    name: 🔄 Airflow webserver
     uses: ./.github/workflows/_deploy-on-clever-cloud.yml
     secrets: inherit # pragma: allowlist secret`
     with:
@@ -25,7 +25,7 @@ jobs:
       app_name_key: AIRFLOW_SCHEDULER_CLEVERCLOUD_APP_NAME
 
   deploy_airflow-scheduler:
-    name: ⏳ Déploiement de Airflow scheduler | ${{ inputs.environment}}
+    name: ⏳ Airflow scheduler
     uses: ./.github/workflows/_deploy-on-clever-cloud.yml
     secrets: inherit # pragma: allowlist secret`
     with:

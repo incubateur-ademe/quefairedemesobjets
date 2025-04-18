@@ -25,12 +25,18 @@ jobs:
     with:
       environment: preprod
 
+  release:
+    name: Prod
+    needs: [release]
+    uses: ./.github/workflows/_release.yml
+    secrets: inherit # pragma: allowlist secret`
+
   prod:
     # A rule protection has been set on this environment
     # so that it only triggers when ran on main branch
     # See https://github.com/incubateur-ademe/quefairedemesobjets/settings/environments/4163451271/edit
     name: Prod
-    needs: [preprod]
+    needs: [release]
     uses: ./.github/workflows/_cd.yml
     secrets: inherit # pragma: allowlist secret`
     with:
