@@ -6,12 +6,6 @@ on:
         required: true
 
 jobs:
-  ci:
-    name: 🔨 Intégration continue
-    uses: ./.github/workflows/_ci.yml
-    with:
-      environment: ${{ inputs.environment }}
-
   deploy-django:
     name: 🗺️ Déploiement de l'application django | ${{ inputs.environment}}
     uses: ./.github/workflows/_deploy-on-scalingo.yml

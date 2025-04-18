@@ -1,0 +1,32 @@
+name: 🚀 Déploiement continu
+
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  ci:
+    name: 🔨 Intégration continue
+    uses: ./.github/workflows/_ci.yml
+
+  preprod:
+    name: Preprod
+    uses: ./.github/workflows/_cd.yml
+    secrets: inherit # pragma: allowlist secret`
+    with:
+      environment: preprod
+
+  prod:
+    name: Prod
+    uses: ./.github/workflows/_cd.yml
+    secrets: inherit # pragma: allowlist secret`
+    with:
+      environment: prod
