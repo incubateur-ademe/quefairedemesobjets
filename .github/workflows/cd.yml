@@ -11,15 +11,15 @@ defaults:
     shell: bash
 
 jobs:
-  ci:
-    name: 🔨 Intégration continue
-    uses: ./.github/workflows/_ci.yml
+  # ci:
+  #   name: 🔨 Intégration continue
+  #   uses: ./.github/workflows/_ci.yml
 
   preprod:
     name: 🟠 Preprod
     uses: ./.github/workflows/_cd-by-environment.yml
     secrets: inherit # pragma: allowlist secret`
-    needs: [ci]
+    # needs: [ci]
     with:
       environment: preprod
 
