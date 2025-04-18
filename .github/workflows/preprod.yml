@@ -14,7 +14,7 @@ defaults:
 
 jobs:
   ci:
-    name: 🔨 Intégration continue
+    name: 🤖 CI
     uses: ./.github/workflows/_ci.yml
 
   preprod:
