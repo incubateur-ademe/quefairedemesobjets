@@ -4,7 +4,6 @@ on:
 jobs:
   release:
     name: Release
-    needs: [preprod]
     runs-on: "ubuntu-latest"
     # Run only on main branch
     if: github.ref == 'refs/heads/main'
