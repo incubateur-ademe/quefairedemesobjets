@@ -2,10 +2,6 @@ name: "Intégration continue"
 
 on:
   workflow_call:
-    inputs:
-      environment:
-        required: true
-        type: string
 
 jobs:
   unit_tests:
