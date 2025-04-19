@@ -1,0 +1,22 @@
+name: 💣 Review
+
+on:
+  workflow_dispatch:
+  pull_request:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  ci:
+    name: 🤖 CI
+    uses: ./.github/workflows/ci.yml
+
+  preprod:
+    name: 🟠 Preprod
+    uses: ./.github/workflows/_cd-by-environment.yml
+    secrets: inherit # pragma: allowlist secret`
+    needs: [ci]
+    with:
+      environment: preprod

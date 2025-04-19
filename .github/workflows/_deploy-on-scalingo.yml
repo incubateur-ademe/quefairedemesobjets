@@ -1,0 +1,89 @@
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      app_name_key:
+        required: true
+        type: string
+
+jobs:
+  deploy-on-scalingo:
+    name: Scalingo
+    runs-on: "ubuntu-latest"
+    environment:
+      name: ${{ inputs.environment }}
+      url: ${{ steps.url.outputs.url }}
+
+    steps:
+      - uses: mattermost/action-mattermost-notify@master
+        with:
+          MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK_URL }}
+          PAYLOAD: |-
+            {
+              "text": "🚨 Nouveau déploiement #${{ github.run_id }} en cours de l'application **${{ vars[inputs.app_name_key] }}**. Déclenché par la [PR #${{ github.event.number }}](https://github.com/incubateur-ademe/quefairedemesobjets/pull/${{ github.event.number }}). [Suivre les logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})",
+              "channel": "lvao-tour-de-controle",
+              "username": "Bipboop le robot de seconde main",
+              "icon": "https://cdn3.iconfinder.com/data/icons/system-basic-vol-4-1/20/icon-note-attention-alt3-512.png"
+            }
+      - uses: actions/checkout@v4
+
+      - uses: kolok/deploy-to-scalingo@v1
+        id: deploy
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known-host: ssh.osc-fr1.scalingo.com
+          app-name: ${{ vars[inputs.app_name_key] }}
+
+      - name: Set environment URL
+        id: url
+        run: echo "url=${{ vars.URL }}" >> $GITHUB_OUTPUT
+
+      - uses: mattermost/action-mattermost-notify@master
+        name: Notify about successful deployment
+
+        with:
+          MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK_URL }}
+          PAYLOAD: |-
+            {
+              "text": "✅ Le déploiement #${{github.run_id}} s'est déroulé avec succès. Il est visible sur ${{ steps.url.outputs.url }}",
+              "channel": "lvao-tour-de-controle",
+              "username": "Bipboop le robot de seconde main",
+              "icon": "https://cdn3.iconfinder.com/data/icons/system-basic-vol-4-1/20/icon-note-attention-alt3-512.png"
+            }
+
+      - uses: jtalk/url-health-check-action@v4
+        id: healthcheck
+        with:
+          url: ${{ vars.HEALTHCHECK_URLS }}
+          max-attempts: 3
+          retry-delay: 5s
+          retry-all: true
+
+      - uses: mattermost/action-mattermost-notify@master
+        if: ${{ failure() && steps.deploy.conclusion == 'failure' }}
+        name:  Notify about failed deployment
+        with:
+          MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK_URL }}
+          PAYLOAD: |-
+            {
+              "text": "🛑 Le déploiement #${{github.run_id}} a échoué. [Voir les logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})",
+              "channel": "lvao-tour-de-controle",
+              "username": "Bipboop le robot de seconde main",
+              "icon": "https://cdn3.iconfinder.com/data/icons/system-basic-vol-4-1/20/icon-note-attention-alt3-512.png"
+            }
+
+      - uses: mattermost/action-mattermost-notify@master
+        if: ${{ failure() && steps.healthcheck.conclusion == 'failure' }}
+        name:  Notify about url not working
+        with:
+          MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK_URL }}
+          PAYLOAD: |-
+            {
+              "text": "⚠️ Le déploiement #${{github.run_id}} a fonctionné mais le site est down @fabien.lefrapper @nicoo. [Voir les logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})",
+              "channel": "lvao-tour-de-controle",
+              "username": "Bipboop le robot de seconde main",
+              "icon": "https://cdn3.iconfinder.com/data/icons/system-basic-vol-4-1/20/icon-note-attention-alt3-512.png"
+            }
+

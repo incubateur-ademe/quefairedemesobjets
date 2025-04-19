@@ -1,0 +1,34 @@
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+
+jobs:
+  deploy-django:
+    name: 🗺️ Carte & assistant
+    uses: ./.github/workflows/_deploy-on-scalingo.yml
+    secrets: inherit # pragma: allowlist secret`
+    with:
+      environment: ${{ inputs.environment }}
+      # Name of environment variable set in github environment
+      app_name_key: DJANGO_SCALINGO_APP_NAME
+
+  deploy_airflow-webserver:
+    name: 🔄 Airflow webserver
+    uses: ./.github/workflows/_deploy-on-clever-cloud.yml
+    secrets: inherit # pragma: allowlist secret`
+    with:
+      environment: ${{ inputs.environment }}
+      # Name of environment variable set in github environment
+      app_name_key: AIRFLOW_SCHEDULER_CLEVERCLOUD_APP_NAME
+
+  deploy_airflow-scheduler:
+    name: ⏳ Airflow scheduler
+    uses: ./.github/workflows/_deploy-on-clever-cloud.yml
+    secrets: inherit # pragma: allowlist secret`
+    with:
+      environment: ${{ inputs.environment }}
+      # Name of environment variable set in github environment
+      app_name_key: AIRFLOW_WEBSERVER_CLEVERCLOUD_APP_NAME

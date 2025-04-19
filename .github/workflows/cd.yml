@@ -1,0 +1,34 @@
+name: 🚀 CD
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  ci:
+    name: 🤖 CI
+    uses: ./.github/workflows/ci.yml
+
+  preprod:
+    name: 🟠 Preprod
+    uses: ./.github/workflows/_cd-by-environment.yml
+    secrets: inherit # pragma: allowlist secret`
+    needs: [ci]
+    with:
+      environment: preprod
+
+  prod:
+    # A rule protection has been set on this environment
+    # so that it only triggers when ran on main branch
+    # See https://github.com/incubateur-ademe/quefairedemesobjets/settings/environments/4163451271/edit
+    name: 🔴 Prod
+    needs: [ci]
+    uses: ./.github/workflows/_cd-by-environment.yml
+    secrets: inherit # pragma: allowlist secret`
+    with:
+      environment: prod
