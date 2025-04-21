@@ -64,6 +64,7 @@ class TestEnrichActeursClosedSuggestions:
                     "33333333300001",
                     "55555555500001",
                 ],
+                COLS.SUGGEST_SIREN: ["111111111", "333333333", "555555555"],
                 COLS.SUGGEST_NOM: ["APRES a1", "APRES a2", "APRES a3"],
                 COLS.SUGGEST_COHORT: [
                     COHORTS.CLOSED_REP_SAME_SIREN,
@@ -74,6 +75,9 @@ class TestEnrichActeursClosedSuggestions:
                 COLS.SUGGEST_CODE_POSTAL: ["12345", "67890", "12345"],
                 COLS.SUGGEST_VILLE: ["Ville1", "Ville2", "Ville3"],
                 COLS.SUGGEST_NAF: ["naf1", "naf2", "naf3"],
+                COLS.SUGGEST_LONGITUDE: [1, 2, 3],
+                COLS.SUGGEST_LATITUDE: [11, 22, 33],
+                COLS.SUGGEST_ACTEUR_TYPE_ID: [atype.pk, atype.pk, atype.pk],
             }
         )
 
@@ -182,6 +186,8 @@ class TestEnrichActeursClosedSuggestions:
         assert parent.naf_principal == "naf1"
         assert parent.acteur_type == atype
         assert parent.source is None
+        assert parent.location.x == 1
+        assert parent.location.y == 11
 
         child = RevisionActeur.objects.get(pk="a1")
         assert child.statut == ActeurStatus.INACTIF
@@ -191,6 +197,8 @@ class TestEnrichActeursClosedSuggestions:
             f"remplacé par SIRET 11111111100002"
         )
         assert child.siret_is_closed is True
+        assert child.location.x == 1
+        assert child.location.y == 11
 
     def test_cohorte_autre_siren(self, acteurs, df_replaced_autre_siret):
         from data.models.suggestion import Suggestion, SuggestionCohorte
@@ -223,6 +231,8 @@ class TestEnrichActeursClosedSuggestions:
         assert parent.code_postal == "67890"
         assert parent.ville == "Ville2"
         assert parent.naf_principal == "naf2"
+        assert parent.location.x == 2
+        assert parent.location.y == 22
 
         child = RevisionActeur.objects.get(pk="a2")
         assert child.statut == ActeurStatus.INACTIF
@@ -232,6 +242,8 @@ class TestEnrichActeursClosedSuggestions:
             f"remplacé par SIRET 33333333300001"
         )
         assert child.siret_is_closed is True
+        assert child.location.x == 2
+        assert child.location.y == 22
 
         parent_id = parent_id_generate(["55555555500001"])
         parent = RevisionActeur.objects.get(pk=parent_id)
@@ -240,6 +252,8 @@ class TestEnrichActeursClosedSuggestions:
         assert parent.code_postal == "12345"
         assert parent.ville == "Ville3"
         assert parent.naf_principal == "naf3"
+        assert parent.location.x == 3
+        assert parent.location.y == 33
 
         child = RevisionActeur.objects.get(pk="a3")
         assert child.statut == ActeurStatus.INACTIF
@@ -248,3 +262,5 @@ class TestEnrichActeursClosedSuggestions:
             f"SIRET 44444444400001 détecté le {TODAY} comme fermé dans AE, "
             f"remplacé par SIRET 55555555500001"
         )
+        assert child.location.x == 3
+        assert child.location.y == 33
