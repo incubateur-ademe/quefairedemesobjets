@@ -39,8 +39,7 @@ class TestEnrichActeursClosedSuggestions:
                 COLS.ACTEUR_NOM: ["AVANT a01", "AVANT a02"],
                 COLS.ACTEUR_TYPE_ID: [atype.pk, atype.pk],
                 COLS.ACTEUR_SOURCE_ID: [source.pk, source.pk],
-                COLS.SUGGEST_COHORT_CODE: [COHORTS.CLOSED_NOT_REPLACED.code] * 2,
-                COLS.SUGGEST_COHORT_LABEL: [COHORTS.CLOSED_NOT_REPLACED.label] * 2,
+                COLS.SUGGEST_COHORT: [COHORTS.CLOSED_NOT_REPLACED] * 2,
             }
         )
 
@@ -66,15 +65,10 @@ class TestEnrichActeursClosedSuggestions:
                     "55555555500001",
                 ],
                 COLS.SUGGEST_NOM: ["APRES a1", "APRES a2", "APRES a3"],
-                COLS.SUGGEST_COHORT_CODE: [
-                    COHORTS.CLOSED_REP_SAME_SIREN.code,
-                    COHORTS.CLOSED_REP_OTHER_SIREN.code,
-                    COHORTS.CLOSED_REP_OTHER_SIREN.code,
-                ],
-                COLS.SUGGEST_COHORT_LABEL: [
-                    COHORTS.CLOSED_REP_SAME_SIREN.label,
-                    COHORTS.CLOSED_REP_OTHER_SIREN.label,
-                    COHORTS.CLOSED_REP_OTHER_SIREN.label,
+                COLS.SUGGEST_COHORT: [
+                    COHORTS.CLOSED_REP_SAME_SIREN,
+                    COHORTS.CLOSED_REP_OTHER_SIREN,
+                    COHORTS.CLOSED_REP_OTHER_SIREN,
                 ],
                 COLS.SUGGEST_ADRESSE: ["Adresse1", "Adresse2", "Adresse3"],
                 COLS.SUGGEST_CODE_POSTAL: ["12345", "67890", "12345"],
@@ -84,25 +78,23 @@ class TestEnrichActeursClosedSuggestions:
         )
 
     def test_df_replaced(self, df_replaced):
-        assert sorted(df_replaced[COLS.SUGGEST_COHORT_LABEL].unique()) == sorted(
+        assert sorted(df_replaced[COLS.SUGGEST_COHORT].unique()) == sorted(
             [
-                COHORTS.CLOSED_REP_SAME_SIREN.label,
-                COHORTS.CLOSED_REP_OTHER_SIREN.label,
+                COHORTS.CLOSED_REP_SAME_SIREN,
+                COHORTS.CLOSED_REP_OTHER_SIREN,
             ]
         )
 
     @pytest.fixture
     def df_replaced_meme_siret(self, df_replaced):
         return df_replaced[
-            df_replaced[COLS.SUGGEST_COHORT_LABEL]
-            == COHORTS.CLOSED_REP_SAME_SIREN.label
+            df_replaced[COLS.SUGGEST_COHORT] == COHORTS.CLOSED_REP_SAME_SIREN
         ]
 
     @pytest.fixture
     def df_replaced_autre_siret(self, df_replaced):
         return df_replaced[
-            df_replaced[COLS.SUGGEST_COHORT_LABEL]
-            == COHORTS.CLOSED_REP_OTHER_SIREN.label
+            df_replaced[COLS.SUGGEST_COHORT] == COHORTS.CLOSED_REP_OTHER_SIREN
         ]
 
     @pytest.fixture

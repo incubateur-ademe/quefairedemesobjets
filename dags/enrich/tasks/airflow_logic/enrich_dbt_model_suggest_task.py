@@ -7,7 +7,7 @@ from airflow.exceptions import AirflowSkipException
 from airflow.models.taskinstance import TaskInstance
 from airflow.operators.python import PythonOperator
 from airflow.utils.trigger_rule import TriggerRule
-from enrich.config import XCOMS, Cohort, xcom_pull
+from enrich.config import XCOMS, xcom_pull
 from enrich.tasks.business_logic.enrich_dbt_model_suggest import (
     enrich_dbt_model_suggest,
 )
@@ -31,7 +31,7 @@ def task_info_get(task_id, df_xcom_key):
 
 def enrich_dbt_model_suggest_wrapper(
     task_id: str,
-    cohort: Cohort,
+    cohort: str,
     dbt_model_name: str,
     ti: TaskInstance,
     dag: DAG,
@@ -55,13 +55,13 @@ def enrich_dbt_model_suggest_wrapper(
 
 
 def enrich_dbt_model_suggest_task(
-    dag: DAG, task_id: str, cohort: Cohort, dbt_model_name: str
+    dag: DAG, task_id: str, cohort: str, dbt_model_name: str
 ) -> PythonOperator:
     return PythonOperator(
         task_id=task_id,
         python_callable=enrich_dbt_model_suggest_wrapper,
         op_args=[task_id, cohort, dbt_model_name],
         dag=dag,
-        doc_md=f"**Suggestions** pour la cohorte: **{cohort.label}**",
+        doc_md=f"**Suggestions** pour la cohorte: **{cohort}**",
         trigger_rule=TriggerRule.ALL_DONE,
     )

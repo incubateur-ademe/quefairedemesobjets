@@ -1,6 +1,5 @@
 import logging
 
-from enrich.config import Cohort
 from enrich.tasks.business_logic.enrich_dbt_model_read import enrich_dbt_model_read
 from enrich.tasks.business_logic.enrich_dbt_model_to_suggestions import (
     enrich_dbt_model_to_suggestions,
@@ -12,7 +11,7 @@ logger = logging.getLogger(__name__)
 def enrich_dbt_model_suggest(
     dbt_model_name: str,
     filters: list[dict],
-    cohort: Cohort,
+    cohort: str,
     identifiant_action: str,
     dry_run: bool = True,
 ) -> bool:
