@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("qfdmo", "0140_drop_views"),
+        ("qfdmo", "0147_groupeaction_fill_alter_action_couleur_and_more"),
     ]
 
     operations = [
