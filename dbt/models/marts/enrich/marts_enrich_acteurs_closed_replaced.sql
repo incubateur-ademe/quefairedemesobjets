@@ -12,13 +12,13 @@ WITH potential_replacements AS (
 		candidates.*,
 
 		-- Replacements
-		replacements.siret AS remplacer_siret,
-		LEFT(candidates.acteur_siret,9) = LEFT(replacements.siret,9) AS remplacer_siret_is_from_same_siren,
-		replacements.nom AS remplacer_nom,
-		replacements.naf AS remplacer_naf,
-		replacements.ville AS remplacer_ville,
-		replacements.code_postal AS remplacer_code_postal,
-		replacements.adresse AS remplacer_adresse,
+		replacements.siret AS suggest_siret,
+		LEFT(candidates.acteur_siret,9) = LEFT(replacements.siret,9) AS suggest_siret_is_from_same_siren,
+		replacements.nom AS suggest_nom,
+		replacements.naf AS suggest_naf,
+		replacements.ville AS suggest_ville,
+		replacements.code_postal AS suggest_code_postal,
+		replacements.adresse AS suggest_adresse,
 
 		-- Matching
 		udf_columns_words_in_common_count(
@@ -63,4 +63,4 @@ WITH potential_replacements AS (
 SELECT * FROM potential_replacements
 WHERE replacement_priority=1
 /* We don't want to propose replacements with unavailable names */
-AND remplacer_nom != {{ value_unavailable() }}
+AND suggest_nom != {{ value_unavailable() }}

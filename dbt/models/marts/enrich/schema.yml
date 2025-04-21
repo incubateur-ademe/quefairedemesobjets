@@ -15,11 +15,11 @@ models:
         description: SIRET de l'acteur fermé
         data_tests:
           - not_null
-      - name: remplacer_siret
+      - name: suggest_siret
         description: SIRET de l'établissement qui remplace l'acteur fermé
         data_tests:
           - not_null
-      - name: remplacer_cohorte
+      - name: suggest_cohorte
         description: "Si le SIRET de remplacement appartient à la même entreprise (meme_siret) ou non (autre_siret)"
         data_tests:
           - not_null
@@ -27,7 +27,7 @@ models:
           #     values: ['siret_du_meme_siren', 'siret_dun_autre_siren']
       - name: acteur_nom
         description: Nom de l'acteur fermé
-      - name: remplacer_nom
+      - name: suggest_nom
         description: Nom de l'établissement qui remplace l'acteur fermé
       - name: noms_nombre_mots_commun
         description: Nombre de mots en commun entre le nom de l'acteur et celui du remplaçant

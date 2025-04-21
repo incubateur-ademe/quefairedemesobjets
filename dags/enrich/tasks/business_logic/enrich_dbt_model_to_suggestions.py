@@ -79,18 +79,18 @@ def suggestion_change_prepare_closed_replaced(
     changes = []
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     # Parent
-    parent_id = parent_id_generate([str(row[COLS.REMPLACER_SIRET])])
+    parent_id = parent_id_generate([str(row[COLS.SUGGEST_SIRET])])
     params_parent = {
         "id": parent_id,
         "data": {
             "identifiant_unique": parent_id,
-            "nom": row[COLS.REMPLACER_NOM],
-            "adresse": row[COLS.REMPLACER_ADRESSE],
-            "code_postal": row[COLS.REMPLACER_CODE_POSTAL],
-            "ville": row[COLS.REMPLACER_VILLE],
-            "siren": row[COLS.REMPLACER_SIRET][:9],
-            "siret": row[COLS.REMPLACER_SIRET],
-            "naf_principal": row[COLS.REMPLACER_NAF],
+            "nom": row[COLS.SUGGEST_NOM],
+            "adresse": row[COLS.SUGGEST_ADRESSE],
+            "code_postal": row[COLS.SUGGEST_CODE_POSTAL],
+            "ville": row[COLS.SUGGEST_VILLE],
+            "siren": row[COLS.SUGGEST_SIRET][:9],
+            "siret": row[COLS.SUGGEST_SIRET],
+            "naf_principal": row[COLS.SUGGEST_NAF],
             "acteur_type": row[COLS.ACTEUR_TYPE_ID],
             "source": None,
             "statut": ActeurStatus.ACTIF,
@@ -120,7 +120,7 @@ def suggestion_change_prepare_closed_replaced(
         f"Nouvel enfant pour conserver les données suite à: "
         f"SIRET {row[COLS.ACTEUR_SIRET]} "
         f"détecté le {today} comme fermé dans AE, "
-        f"remplacé par SIRET {row[COLS.REMPLACER_SIRET]}"
+        f"remplacé par SIRET {row[COLS.SUGGEST_SIRET]}"
     )
     if row[COLS.ACTEUR_LONGITUDE] is not None and row[COLS.ACTEUR_LATITUDE] is not None:
         params_child_new["data"]["longitude"] = row[COLS.ACTEUR_LONGITUDE]
@@ -143,7 +143,7 @@ def suggestion_change_prepare_closed_replaced(
     params_child_old["data"]["parent_reason"] = (
         f"SIRET {row[COLS.ACTEUR_SIRET]} "
         f"détecté le {today} comme fermé dans AE, "
-        f"remplacé par SIRET {row[COLS.REMPLACER_SIRET]}"
+        f"remplacé par SIRET {row[COLS.SUGGEST_SIRET]}"
     )
     params_child_old["data"]["siret_is_closed"] = True
     params_child_old["data"]["statut"] = ActeurStatus.INACTIF

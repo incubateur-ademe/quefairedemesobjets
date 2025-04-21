@@ -60,12 +60,12 @@ class TestEnrichActeursClosedSuggestions:
                 COLS.ACTEUR_LONGITUDE: [1, 1, 1],
                 COLS.ACTEUR_LATITUDE: [2, 2, 2],
                 # Replacement data
-                COLS.REMPLACER_SIRET: [
+                COLS.SUGGEST_SIRET: [
                     "11111111100002",
                     "33333333300001",
                     "55555555500001",
                 ],
-                COLS.REMPLACER_NOM: ["APRES a1", "APRES a2", "APRES a3"],
+                COLS.SUGGEST_NOM: ["APRES a1", "APRES a2", "APRES a3"],
                 COLS.SUGGEST_COHORT_CODE: [
                     COHORTS.CLOSED_REP_SAME_SIREN.code,
                     COHORTS.CLOSED_REP_OTHER_SIREN.code,
@@ -76,10 +76,10 @@ class TestEnrichActeursClosedSuggestions:
                     COHORTS.CLOSED_REP_OTHER_SIREN.label,
                     COHORTS.CLOSED_REP_OTHER_SIREN.label,
                 ],
-                COLS.REMPLACER_ADRESSE: ["Adresse1", "Adresse2", "Adresse3"],
-                COLS.REMPLACER_CODE_POSTAL: ["12345", "67890", "12345"],
-                COLS.REMPLACER_VILLE: ["Ville1", "Ville2", "Ville3"],
-                COLS.REMPLACER_NAF: ["naf1", "naf2", "naf3"],
+                COLS.SUGGEST_ADRESSE: ["Adresse1", "Adresse2", "Adresse3"],
+                COLS.SUGGEST_CODE_POSTAL: ["12345", "67890", "12345"],
+                COLS.SUGGEST_VILLE: ["Ville1", "Ville2", "Ville3"],
+                COLS.SUGGEST_NAF: ["naf1", "naf2", "naf3"],
             }
         )
 
