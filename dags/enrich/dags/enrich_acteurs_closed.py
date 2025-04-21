@@ -42,6 +42,9 @@ with DAG(
     params=config_to_airflow_params(
         EnrichActeursClosedConfig(
             dbt_models_refresh=False,
+            dbt_models_refresh_command=(
+                "dbt build --select tag:marts,tag:enrich,tag:closed"
+            ),
             filter_equals__acteur_statut="ACTIF",
         )
     ),
