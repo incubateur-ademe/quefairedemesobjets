@@ -27,6 +27,8 @@ x-airflow-common:
 services:
   lvao-db:
     image: postgis/postgis:15-3.3-alpine
+    # Needed to run VACUUM ANALYZE and optimize the database
+    shm_size: 2g
     environment:
       - POSTGRES_USER=qfdmo
       - POSTGRES_PASSWORD=qfdmo # pragma: allowlist secret
@@ -34,7 +36,7 @@ services:
       - POSTGRES_MULTIPLE_EXTENSIONS=postgis
     volumes:
       - ./pgdata:/var/lib/postgresql/data:delegated
-      - ./postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./config/postgresql.conf:/etc/postgresql/postgresql.conf
     command: postgres -c config_file=/etc/postgresql/postgresql.conf
     deploy:
       resources:
