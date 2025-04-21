@@ -11,6 +11,7 @@ WITH potential_replacements AS (
 		-- Candidates acteur data
 		candidates.*,
 
+<<<<<<< HEAD
 		-- Suggestions
 		acteur_type_id AS suggest_acteur_type_id,
 		acteur_longitude AS suggest_longitude,
@@ -23,6 +24,16 @@ WITH potential_replacements AS (
 		suggests.ville AS suggest_ville,
 		suggests.code_postal AS suggest_code_postal,
 		suggests.adresse AS suggest_adresse,
+=======
+		-- Replacements
+		replacements.siret AS suggest_siret,
+		LEFT(candidates.acteur_siret,9) = LEFT(replacements.siret,9) AS suggest_siret_is_from_same_siren,
+		replacements.nom AS suggest_nom,
+		replacements.naf AS suggest_naf,
+		replacements.ville AS suggest_ville,
+		replacements.code_postal AS suggest_code_postal,
+		replacements.adresse AS suggest_adresse,
+>>>>>>> e806eaf4 (renommage replace -> suggest)
 
 		-- Matching
 		udf_columns_words_in_common_count(
