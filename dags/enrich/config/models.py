@@ -47,7 +47,7 @@ class EnrichBaseConfig(BaseModel):
         🔴 Désactiver uniquement pour des tests.""",
     )
     dbt_models_refresh_command: str = Field(
-        default="dbt build --select tag:marts,tag:enrich,tag:closed",
+        default="",
         description="🔄 Commande DBT à exécuter pour rafraîchir les modèles",
     )
     filter_contains__acteur_commentaires: Optional[str] = Field(
