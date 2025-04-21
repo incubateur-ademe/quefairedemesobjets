@@ -5,13 +5,13 @@ import pandas as pd
 from cluster.tasks.business_logic.cluster_acteurs_parents_choose_new import (
     parent_id_generate,
 )
-from enrich.config import COHORTS, COLS, Cohort
+from enrich.config import COHORTS, COLS
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
 
 
-def suggestion_change_prepare(
+def changes_prepare(
     model,
     model_params: dict,
     order: int,
@@ -19,7 +19,7 @@ def suggestion_change_prepare(
     entity_type: str,
 ) -> dict:
     """Generic utility to prepare, validate and
-    serialize 1 suggestion change for all suggestion types"""
+    serialize 1 suggestion change for ANY suggestion types"""
     from data.models.change import SuggestionChange
 
     model(**model_params).validate()
@@ -32,10 +32,10 @@ def suggestion_change_prepare(
     ).model_dump()
 
 
-def suggestion_change_prepare_closed_not_replaced(
+def changes_prepare_closed_not_replaced(
     row: dict,
 ) -> list[dict]:
-    """Prepare suggestions for closed not replaced cohorts"""
+    """Prepare suggestion changes for closed not replaced cohorts"""
     from data.models.changes import ChangeActeurUpdateData
     from qfdmo.models import ActeurStatus
 
@@ -54,7 +54,7 @@ def suggestion_change_prepare_closed_not_replaced(
         },
     }
     changes.append(
-        suggestion_change_prepare(
+        changes_prepare(
             model=ChangeActeurUpdateData,
             model_params=model_params,
             order=1,
@@ -65,10 +65,10 @@ def suggestion_change_prepare_closed_not_replaced(
     return changes
 
 
-def suggestion_change_prepare_closed_replaced(
+def changes_prepare_closed_replaced(
     row: dict,
 ) -> list[dict]:
-    """Prepare suggestions for closed replaced cohorts"""
+    """Prepare suggestion changes for closed replaced cohorts"""
     from data.models.changes import (
         ChangeActeurCreateAsChild,
         ChangeActeurCreateAsParent,
@@ -97,7 +97,7 @@ def suggestion_change_prepare_closed_replaced(
         },
     }
     changes.append(
-        suggestion_change_prepare(
+        changes_prepare(
             model=ChangeActeurCreateAsParent,
             model_params=params_parent,
             order=1,
@@ -126,7 +126,7 @@ def suggestion_change_prepare_closed_replaced(
         params_child_new["data"]["longitude"] = row[COLS.ACTEUR_LONGITUDE]
         params_child_new["data"]["latitude"] = row[COLS.ACTEUR_LATITUDE]
     changes.append(
-        suggestion_change_prepare(
+        changes_prepare(
             model=ChangeActeurCreateAsChild,
             model_params=params_child_new,
             order=2,
@@ -148,7 +148,7 @@ def suggestion_change_prepare_closed_replaced(
     params_child_old["data"]["siret_is_closed"] = True
     params_child_old["data"]["statut"] = ActeurStatus.INACTIF
     changes.append(
-        suggestion_change_prepare(
+        changes_prepare(
             model=ChangeActeurUpdateData,
             model_params=params_child_old,
             order=3,
@@ -159,9 +159,17 @@ def suggestion_change_prepare_closed_replaced(
     return changes
 
 
+# Mapping cohorts with their respective changes preparation function
+COHORTS_TO_PREPARE_CHANGES = {
+    COHORTS.CLOSED_NOT_REPLACED: changes_prepare_closed_not_replaced,
+    COHORTS.CLOSED_REP_OTHER_SIREN: changes_prepare_closed_replaced,
+    COHORTS.CLOSED_REP_SAME_SIREN: changes_prepare_closed_replaced,
+}
+
+
 def enrich_dbt_model_to_suggestions(
     df: pd.DataFrame,
-    cohort: Cohort,
+    cohort: str,
     identifiant_action: str,
     dry_run: bool = True,
 ) -> bool:
@@ -176,9 +184,9 @@ def enrich_dbt_model_to_suggestions(
     if df is None or df.empty:
         raise ValueError("df vide: on devrait pas être ici")
 
-    cohort_codes = list(df[COLS.SUGGEST_COHORT_CODE].unique())
-    if len(cohort_codes) != 1 or cohort_codes[0] != cohort.code:
-        msg = f"Problème cohorte: obtenu {cohort_codes=} vs. attendu {cohort.code=}"
+    cohorts = list(df[COLS.SUGGEST_COHORT].unique())
+    if len(cohorts) != 1 or cohorts[0] != cohort:
+        msg = f"Problème cohorte: obtenu {cohorts=} vs. attendu {cohort=}"
         raise ValueError(msg)
 
     # Suggestions
@@ -187,21 +195,9 @@ def enrich_dbt_model_to_suggestions(
         row = dict(row)
 
         try:
-            # -----------------------------------------
-            # NOT REPLACED
-            # -----------------------------------------
-            if cohort == COHORTS.CLOSED_NOT_REPLACED:
-                changes = suggestion_change_prepare_closed_not_replaced(row)
+            changes = COHORTS_TO_PREPARE_CHANGES[cohort](row)
 
-            # -----------------------------------------
-            # REPLACED
-            # -----------------------------------------
-            elif cohort in [
-                COHORTS.CLOSED_REP_OTHER_SIREN,
-                COHORTS.CLOSED_REP_SAME_SIREN,
-            ]:
-                changes = suggestion_change_prepare_closed_replaced(row)
-
+        # We tolerate some errors
         except Exception as e:
             log.preview("🔴 Suggestion problématique", row)
             logger.error(f"Erreur de préparation des changements: {e}")
@@ -212,13 +208,14 @@ def enrich_dbt_model_to_suggestions(
             {
                 "contexte": {},
                 "suggestion": {
-                    "title": cohort.label,
+                    "title": cohort,
                     "summary": [],
                     "changes": changes,
                 },
             }
         )
 
+    # we need some working suggestions, can't have it all fail
     if not suggestions:
         raise ValueError("Aucune suggestion à écrire, pas normal")
 
@@ -235,7 +232,7 @@ def enrich_dbt_model_to_suggestions(
     # -----------------------------------------
     db_cohort = SuggestionCohorte(
         identifiant_action=identifiant_action,
-        identifiant_execution=f"{cohort.label}",
+        identifiant_execution=f"{cohort}",
         statut=SuggestionStatut.AVALIDER,
         type_action=SuggestionAction.ENRICH_ACTEURS_CLOSED,
         metadata={"🔢 Nombre de suggestions": len(suggestions)},

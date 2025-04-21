@@ -7,8 +7,7 @@
 }}
 
 SELECT
-  'acteurs_villes_other' AS suggestion_cohorte_code,
-  '🌆 Changement de ville: 🔴 autre' AS suggestion_cohorte_label,
+  '🌆 Changement de ville: 🔴 autre' AS suggest_cohort,
   *
 FROM {{ ref('marts_enrich_acteurs_villes_suggest') }}
 WHERE udf_normalize_string_for_match(acteur_ville,3) != udf_normalize_string_for_match(suggest_ville,3)
