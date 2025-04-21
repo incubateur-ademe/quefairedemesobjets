@@ -143,6 +143,7 @@ apache-airflow = "^2.10.4"
 pandas = "<2.2"
 dbt-core = "^1.9.3"
 dbt-postgres = "^1.9.0"
+ydata-profiling = "^4.16.1"
 
 [build-system]
 requires = ["poetry-core"]
