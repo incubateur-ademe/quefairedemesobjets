@@ -47,15 +47,15 @@ with DAG(
     dbt_refresh = enrich_dbt_models_refresh_task(dag)
     suggest_typo = enrich_dbt_model_suggest_task(
         dag,
-        task_id=TASKS.ENRICH_ACTEURS_VILLES_TYPO,
-        cohort=COHORTS.ACTEURS_VILLES_TYPO,
-        dbt_model_name=DBT.MARTS_ENRICH_ACTEURS_VILLES_TYPO,
+        task_id=TASKS.ENRICH_VILLES_TYPO,
+        cohort=COHORTS.VILLES_TYPO,
+        dbt_model_name=DBT.MARTS_ENRICH_VILLES_TYPO,
     )
     suggest_new = enrich_dbt_model_suggest_task(
         dag,
-        task_id=TASKS.ENRICH_ACTEURS_VILLES_NEW,
-        cohort=COHORTS.ACTEURS_VILLES_NEW,
-        dbt_model_name=DBT.MARTS_ENRICH_ACTEURS_VILLES_NEW,
+        task_id=TASKS.ENRICH_VILLES_NEW,
+        cohort=COHORTS.VILLES_NEW,
+        dbt_model_name=DBT.MARTS_ENRICH_VILLES_NEW,
     )
     config >> dbt_refresh  # type: ignore
     dbt_refresh >> suggest_typo  # type: ignore

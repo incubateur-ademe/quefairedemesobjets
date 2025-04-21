@@ -12,7 +12,7 @@ SELECT
   ban.ville_ancienne AS ban_ville_ancienne,
   ban.ville AS ban_ville,
   ban.code_postal AS ban_code_postal,
-  ban.ville AS remplacer_ville
+  ban.ville AS suggest_ville
 FROM {{ ref('marts_carte_acteur') }} AS acteurs
 JOIN {{ ref('int_ban_villes') }} AS ban ON ban.code_postal = acteurs.code_postal
 WHERE acteurs.statut = 'ACTIF'

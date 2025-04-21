@@ -189,6 +189,8 @@ class Suggestion(models.Model):
             SuggestionAction.CLUSTERING,
             SuggestionAction.CRAWL_URLS,
             SuggestionAction.ENRICH_ACTEURS_RGPD,
+            SuggestionAction.ENRICH_ACTEURS_VILLES_TYPO,
+            SuggestionAction.ENRICH_ACTEURS_VILLES_NEW,
         ]:
             context["details_open"] = True
 
@@ -210,6 +212,8 @@ class Suggestion(models.Model):
         elif self.suggestion_cohorte.type_action in [
             SuggestionAction.ENRICH_ACTEURS_CLOSED,
             SuggestionAction.ENRICH_ACTEURS_RGPD,
+            SuggestionAction.ENRICH_ACTEURS_VILLES_TYPO,
+            SuggestionAction.ENRICH_ACTEURS_VILLES_NEW,
         ]:
             template_name = "data/_partials/suggestion_details_changes.html"
             template_context = self.suggestion
@@ -336,6 +340,8 @@ class Suggestion(models.Model):
             SuggestionAction.CRAWL_URLS,
             SuggestionAction.ENRICH_ACTEURS_CLOSED,
             SuggestionAction.ENRICH_ACTEURS_RGPD,
+            SuggestionAction.ENRICH_ACTEURS_VILLES_TYPO,
+            SuggestionAction.ENRICH_ACTEURS_VILLES_NEW,
         ]:
             changes = self.suggestion["changes"]
             changes.sort(key=lambda x: x["order"])

@@ -61,7 +61,7 @@ def changes_prepare_rgpd(
     return changes, contexte
 
 
-def changes_prepare_villes(row: dict) -> list[dict]:
+def changes_prepare_villes(row: dict) -> tuple[list[dict], dict]:
     """Prepare suggestions for villes cohorts"""
     from data.models.changes import ChangeActeurUpdateData
 
@@ -81,7 +81,8 @@ def changes_prepare_villes(row: dict) -> list[dict]:
             entity_type="acteur_displayed",
         )
     )
-    return changes
+    contexte = {}  # changes are self-explanatory
+    return changes, contexte
 
 
 def changes_prepare_closed_not_replaced(
@@ -207,8 +208,8 @@ COHORTS_TO_PREPARE_CHANGES = {
     COHORTS.CLOSED_REP_OTHER_SIREN: changes_prepare_closed_replaced,
     COHORTS.CLOSED_REP_SAME_SIREN: changes_prepare_closed_replaced,
     COHORTS.RGPD: changes_prepare_rgpd,
-    COHORTS.ACTEURS_VILLES_TYPO: changes_prepare_villes,
-    COHORTS.ACTEURS_VILLES_NEW: changes_prepare_villes,
+    COHORTS.VILLES_TYPO: changes_prepare_villes,
+    COHORTS.VILLES_NEW: changes_prepare_villes,
 }
 
 
@@ -225,12 +226,16 @@ def enrich_dbt_model_to_suggestions(
         SuggestionStatut,
     )
 
+    # TODO: once all suggestions have been migrated to pydantic, we no
+    # longer need SuggestionCohorte.type_action and any of the following
+    # identifiant_execution = cohort AND pydantic models take care of
+    # handling the specifics
     COHORTS_TO_SUGGESTION_ACTION = {
         COHORTS.CLOSED_NOT_REPLACED: SuggestionAction.ENRICH_ACTEURS_CLOSED,
         COHORTS.CLOSED_REP_OTHER_SIREN: SuggestionAction.ENRICH_ACTEURS_CLOSED,
         COHORTS.CLOSED_REP_SAME_SIREN: SuggestionAction.ENRICH_ACTEURS_CLOSED,
-        COHORTS.ACTEURS_VILLES_TYPO: SuggestionAction.ENRICH_ACTEURS_VILLES_TYPO,
-        COHORTS.ACTEURS_VILLES_NEW: SuggestionAction.ENRICH_ACTEURS_VILLES_NEW,
+        COHORTS.VILLES_TYPO: SuggestionAction.ENRICH_ACTEURS_VILLES_TYPO,
+        COHORTS.VILLES_NEW: SuggestionAction.ENRICH_ACTEURS_VILLES_NEW,
     }
 
     # Validation
