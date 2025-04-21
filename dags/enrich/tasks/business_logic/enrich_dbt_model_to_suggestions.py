@@ -187,6 +187,14 @@ COHORTS_TO_PREPARE_CHANGES = {
 }
 
 
+# Mapping cohorts with their respective changes preparation function
+COHORTS_TO_PREPARE_CHANGES = {
+    COHORTS.CLOSED_NOT_REPLACED: changes_prepare_closed_not_replaced,
+    COHORTS.CLOSED_REP_OTHER_SIREN: changes_prepare_closed_replaced,
+    COHORTS.CLOSED_REP_SAME_SIREN: changes_prepare_closed_replaced,
+}
+
+
 def enrich_dbt_model_to_suggestions(
     df: pd.DataFrame,
     cohort: str,
@@ -237,9 +245,6 @@ def enrich_dbt_model_to_suggestions(
             continue
 
     # we need some working suggestions, can't have it all fail
-    if not suggestions:
-        raise ValueError("Aucune suggestion à écrire, pas normal")
-
     if not suggestions:
         raise ValueError("Aucune suggestion à écrire, pas normal")
 

@@ -33,7 +33,7 @@ class COLS:
 
     # Suggestions
     SUGGEST_COHORT_CODE: str = "suggestion_cohorte_code"
-    SUGGEST_COHORT_LABEL: str = "suggestion_cohorte_label"
+    SUGGEST_COHORT: str = "suggest_cohort"
 
     # Replacements
     SUGGEST_SIRET: str = "suggest_siret"
