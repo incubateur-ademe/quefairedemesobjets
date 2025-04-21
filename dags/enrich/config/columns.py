@@ -36,12 +36,12 @@ class COLS:
     SUGGEST_COHORT_LABEL: str = "suggestion_cohorte_label"
 
     # Replacements
-    REMPLACER_SIRET: str = "remplacer_siret"
-    REMPLACER_NOM: str = "remplacer_nom"
-    REMPLACER_ADRESSE: str = "remplacer_adresse"
-    REMPLACER_CODE_POSTAL: str = "remplacer_code_postal"
-    REMPLACER_VILLE: str = "remplacer_ville"
-    REMPLACER_NAF: str = "remplacer_naf"
+    SUGGEST_SIRET: str = "suggest_siret"
+    SUGGEST_NOM: str = "suggest_nom"
+    SUGGEST_ADRESSE: str = "suggest_adresse"
+    SUGGEST_CODE_POSTAL: str = "suggest_code_postal"
+    SUGGEST_VILLE: str = "suggest_ville"
+    SUGGEST_NAF: str = "suggest_naf"
 
     # Suggestions
     SUGGEST_COHORT_CODE: str = "suggestion_cohorte_code"
