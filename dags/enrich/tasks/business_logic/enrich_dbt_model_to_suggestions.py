@@ -5,30 +5,13 @@ import pandas as pd
 from cluster.tasks.business_logic.cluster_acteurs_parents_choose_new import (
     parent_id_generate,
 )
-from enrich.config import COHORTS, COLS, SUGGEST_PREFIX
+from enrich.config import COHORTS, COLS
+from enrich.tasks.business_logic.enrich_dbt_model_row_to_suggest_data import (
+    dbt_model_row_to_suggest_data,
+)
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
-
-
-def row_to_suggest_data(row: dict) -> dict:
-    """Construct the data dict from all row props starting with SUGGEST_PREFIX"""
-    pre = SUGGEST_PREFIX
-    keys_ok = [k for k in row.keys() if k.startswith(f"{pre}_")]
-    keys_ok.remove(f"{pre}_cohort")
-
-    # Validation
-    keys_fail = [
-        k
-        for k in row.keys()
-        if pre in k and k not in keys_ok and not k.startswith(f"{pre}_")
-    ]
-    if keys_fail:
-        msg = f"Colonnes invalides avec {pre} mais sans {pre}_: {keys_fail}"
-        raise KeyError(msg)
-
-    # Construct the data dict
-    return {k.replace(pre + "_", ""): row[k] for k in keys_ok}
 
 
 def changes_prepare(
@@ -100,7 +83,7 @@ def changes_prepare_closed_replaced(
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     # Parent
     parent_id = parent_id_generate([str(row[COLS.SUGGEST_SIRET])])
-    parent_data = row_to_suggest_data(row)
+    parent_data = dbt_model_row_to_suggest_data(row)
     parent_data["identifiant_unique"] = parent_id
     parent_data["source"] = None
     parent_data["statut"] = ActeurStatus.ACTIF

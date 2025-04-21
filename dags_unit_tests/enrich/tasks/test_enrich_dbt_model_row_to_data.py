@@ -1,10 +1,10 @@
 import pytest
-from enrich.tasks.business_logic.enrich_dbt_model_to_suggestions import (
-    row_to_suggest_data,
+from enrich.tasks.business_logic.enrich_dbt_model_row_to_suggest_data import (
+    dbt_model_row_to_suggest_data,
 )
 
 
-class TestEnrichSuggestionsRowToSuggestData:
+class TestEnrichDbtModelRowToData:
 
     def test_row_to_suggest_data(self):
         row = {
@@ -12,7 +12,7 @@ class TestEnrichSuggestionsRowToSuggestData:
             "suggest_siret": "12345678901234",
             "foo": "bar",
         }
-        data = row_to_suggest_data(row)
+        data = dbt_model_row_to_suggest_data(row)
         assert data == {"siret": "12345678901234"}
 
     @pytest.mark.parametrize(
@@ -23,9 +23,9 @@ class TestEnrichSuggestionsRowToSuggestData:
         row = {"suggest_cohort": "cohort"}  # must always be present
         row[key] = "12345678901234"
         with pytest.raises(KeyError, match="Colonnes invalides"):
-            row_to_suggest_data(row)
+            dbt_model_row_to_suggest_data(row)
 
     def test_raise_if_missing_cohort(self):
         row = {"suggest_siret": "12345678901234"}
         with pytest.raises(ValueError, match="not in list"):
-            row_to_suggest_data(row)
+            dbt_model_row_to_suggest_data(row)
