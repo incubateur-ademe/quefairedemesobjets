@@ -34,7 +34,7 @@ def changes_prepare(
 
 def changes_prepare_closed_not_replaced(
     row: dict,
-) -> list[dict]:
+) -> tuple[list[dict], dict]:
     """Prepare suggestion changes for closed not replaced cohorts"""
     from data.models.changes import ChangeActeurUpdateData
     from qfdmo.models import ActeurStatus
@@ -62,12 +62,13 @@ def changes_prepare_closed_not_replaced(
             entity_type="acteur_displayed",
         )
     )
-    return changes
+    contexte = {}  # changes are self-explanatory
+    return changes, contexte
 
 
 def changes_prepare_closed_replaced(
     row: dict,
-) -> list[dict]:
+) -> tuple[list[dict], dict]:
     """Prepare suggestion changes for closed replaced cohorts"""
     from data.models.changes import (
         ChangeActeurCreateAsChild,
@@ -156,7 +157,8 @@ def changes_prepare_closed_replaced(
             entity_type="acteur_displayed",
         )
     )
-    return changes
+    contexte = {}  # changes are self-explanatory
+    return changes, contexte
 
 
 # Mapping cohorts with their respective changes preparation function
@@ -180,6 +182,12 @@ def enrich_dbt_model_to_suggestions(
         SuggestionStatut,
     )
 
+    COHORTS_TO_SUGGESTION_ACTION = {
+        COHORTS.CLOSED_NOT_REPLACED: SuggestionAction.ENRICH_ACTEURS_CLOSED,
+        COHORTS.CLOSED_REP_OTHER_SIREN: SuggestionAction.ENRICH_ACTEURS_CLOSED,
+        COHORTS.CLOSED_REP_SAME_SIREN: SuggestionAction.ENRICH_ACTEURS_CLOSED,
+    }
+
     # Validation
     if df is None or df.empty:
         raise ValueError("df vide: on devrait pas être ici")
@@ -195,7 +203,7 @@ def enrich_dbt_model_to_suggestions(
         row = dict(row)
 
         try:
-            changes = COHORTS_TO_PREPARE_CHANGES[cohort](row)
+            changes, contexte = COHORTS_TO_PREPARE_CHANGES[cohort](row)
 
         # We tolerate some errors
         except Exception as e:
@@ -206,10 +214,9 @@ def enrich_dbt_model_to_suggestions(
         # Creating a suggestion with the given changes
         suggestions.append(
             {
-                "contexte": {},
+                "contexte": contexte,
                 "suggestion": {
                     "title": cohort,
-                    "summary": [],
                     "changes": changes,
                 },
             }
@@ -234,7 +241,7 @@ def enrich_dbt_model_to_suggestions(
         identifiant_action=identifiant_action,
         identifiant_execution=f"{cohort}",
         statut=SuggestionStatut.AVALIDER,
-        type_action=SuggestionAction.ENRICH_ACTEURS_CLOSED,
+        type_action=COHORTS_TO_SUGGESTION_ACTION[cohort],
         metadata={"🔢 Nombre de suggestions": len(suggestions)},
     )
     db_cohort.save()
