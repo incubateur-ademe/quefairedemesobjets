@@ -65,9 +65,8 @@ def changes_prepare_closed_not_replaced(
         "data": {
             "identifiant_unique": row[COLS.ACTEUR_ID],
             "statut": ActeurStatus.INACTIF,
-            # TODO: fix inconsistency between acteur_siret and siret
-            # in non-replaced model
             "siret": row[COLS.ACTEUR_SIRET],
+            "siren": row[COLS.ACTEUR_SIRET][:9],
             "siret_is_closed": True,
             "acteur_type": row[COLS.ACTEUR_TYPE_ID],
             "source": row[COLS.ACTEUR_SOURCE_ID],
