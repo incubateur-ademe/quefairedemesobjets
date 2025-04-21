@@ -197,30 +197,25 @@ def enrich_dbt_model_to_suggestions(
         msg = f"Problème cohorte: obtenu {cohorts=} vs. attendu {cohort=}"
         raise ValueError(msg)
 
-    # Suggestions
+    # Creating suggestion
     suggestions = []
     for _, row in df.iterrows():
         row = dict(row)
 
         try:
             changes, contexte = COHORTS_TO_PREPARE_CHANGES[cohort](row)
+            suggestions.append(
+                {
+                    "contexte": contexte,
+                    "suggestion": {"title": cohort, "changes": changes},
+                }
+            )
 
         # We tolerate some errors
         except Exception as e:
             log.preview("🔴 Suggestion problématique", row)
             logger.error(f"Erreur de préparation des changements: {e}")
             continue
-
-        # Creating a suggestion with the given changes
-        suggestions.append(
-            {
-                "contexte": contexte,
-                "suggestion": {
-                    "title": cohort,
-                    "changes": changes,
-                },
-            }
-        )
 
     # we need some working suggestions, can't have it all fail
     if not suggestions:
