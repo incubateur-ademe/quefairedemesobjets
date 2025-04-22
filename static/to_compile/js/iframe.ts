@@ -7,7 +7,6 @@ function removeUnwantedElements() {
   const domain = new URL(document.referrer).hostname
   if (domain === 'localhost' || domain.endsWith(".ademe.fr") || domain.endsWith(".ademe.dev")) {
     for (const elementToRemove of document.querySelectorAll("[data-remove-if-internal]")) {
-      console.log(elementToRemove)
       elementToRemove.remove()
     }
   }
