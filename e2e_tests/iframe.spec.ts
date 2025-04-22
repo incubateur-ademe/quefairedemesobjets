@@ -93,7 +93,7 @@ test("iframe can read the referrer when referrerPolicy is not set", async ({ pag
   expect(iframe).not.toBeNull();
 
   // Evaluate the referrer inside the iframe
-  const referrer = await iframe.evaluate(() => document.referrer);
+  const referrer = await iframe!.evaluate(() => document.referrer);
 
   // Assert that the referrer is set and not undefined
   expect(referrer).toBe(`${assistantUrl}/test_iframe?carte=1`);

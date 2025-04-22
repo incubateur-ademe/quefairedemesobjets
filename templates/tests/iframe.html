@@ -50,7 +50,7 @@
 
         {% if "noreferrer" in request.GET %}
         <h3>Avec referrerpolicy="noreferrer"</h3>
-        <script src="{{ assistant.BASE_URL }}/iframe.js" data-debug-referrer></script>
+        <script src="{{ assistant.BASE_URL }}/iframe.js" data-debug-referrer data-testid='assistant'></script>
         {% else %}
         <h3>Par défaut</h3>
         <script src="{{ assistant.BASE_URL }}/iframe.js" data-testid='assistant'></script>
