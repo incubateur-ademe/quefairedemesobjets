@@ -24,7 +24,7 @@ def content(request):
     return vars(constants)
 
 
-def assistant(request) -> dict:
+def global_context(request) -> dict:
     base = {
         "assistant": {
             "is_home": request.path == reverse("home"),
