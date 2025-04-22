@@ -26,11 +26,10 @@ from wagtail import urls as wagtail_urls
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail.documents import urls as wagtaildocs_urls
 
-from core.views import direct_access
 from qfdmo.models.acteur import ActeurStatus, DisplayedActeur
 
 from .api import api
-from .views import robots_txt
+from .views import direct_access, robots_txt
 
 info_dict = {
     "queryset": DisplayedActeur.objects.filter(statut=ActeurStatus.ACTIF).order_by(

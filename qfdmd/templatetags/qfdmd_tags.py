@@ -8,6 +8,7 @@ from django.forms import FileField
 from django.utils.safestring import mark_safe
 
 register = template.Library()
+
 logger = logging.getLogger(__name__)
 
 
@@ -28,24 +29,24 @@ def render_file_content(file_field: FileField) -> str:
     """Renders the content of a Filefield as a safe HTML string
     and caches the result."""
 
-    try:
-
-        def get_file_content() -> str:
-            with file_field.open() as f:
+    def get_file_content() -> str:
+        # file_field.storage.exists(file_field.name) doesn't work with CleverCloud s3
+        # So we use a try except to catch FileNotFoundError error
+        try:
+            with file_field.storage.open(file_field.name) as f:
                 return mark_safe(f.read().decode("utf-8"))  # noqa: S308
+        except FileNotFoundError as e:
+            logger.error(f"file not found {file_field.name=}, original error : {e}")
+            return ""
 
-        return cast(
-            str,
-            cache.get_or_set(
-                f"filefield-{file_field.name}-{file_field.size}", get_file_content
-            ),
-        )
-    except FileNotFoundError as exception:
-        # We silent the error here to prevent crashing a page for a missing svg
-        logger.warning("An error was quietly ignored")
-        logger.error(exception)
-
-        return ""
+    return cast(
+        str,
+        cache.get_or_set(
+            f"filefield-{file_field.name}-"
+            f"{file_field.size if hasattr(file_field, 'size') else 0}",
+            get_file_content,
+        ),
+    )
 
 
 @register.inclusion_tag("head/favicon.html")
