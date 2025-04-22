@@ -5,9 +5,8 @@ near future (around january 2025)
 */
 function removeUnwantedElements() {
   const domain = new URL(document.referrer).hostname
-  if (domain === 'localhost' || domain.endsWith(".ademe.fr") || domain === "quefairedemesobjets-preprod.osc-fr1.scalingo.io") {
+  if (domain === 'localhost' || domain.endsWith(".ademe.fr") || domain.endsWith(".ademe.dev")) {
     for (const elementToRemove of document.querySelectorAll("[data-remove-if-internal]")) {
-      console.log(elementToRemove)
       elementToRemove.remove()
     }
   }
