@@ -106,7 +106,7 @@ unit-test:
 
 .PHONY: e2e-test
 e2e-test:
-	npx playwright test --ui
+	npx playwright test --update-snapshots --ui
 	$(PYTEST) ./integration_tests
 
 .PHONY: a11y

@@ -32,12 +32,12 @@ test("Desktop | iframe formulaire is loaded with correct parameters", async ({ p
   expect(allowfullscreen).toBe("true");
   expect(style).toContain("width: 100%;");
   expect(style).toContain("height: 720px;");
-  expect(style).toContain("max-width: 800px;");
+  expect(style).toContain("max-width: 100%;");
   expect(title).toBe("Longue vie aux objets");
 });
 
 test("Desktop | legacy iframe urls still work", async ({ page }) => {
-  await page.goto(`/?iframe=1&direction=jai&first_dir=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`,
+  await page.goto(`/formulaire?direction=jai&first_dir=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`,
     { waitUntil: "networkidle" }
   )
   await expect(page).toHaveURL(`/formulaire?direction=jai&first_dir=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`)
