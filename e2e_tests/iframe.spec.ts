@@ -41,7 +41,7 @@ test("Desktop | legacy iframe urls still work", async ({ page }) => {
     { waitUntil: "networkidle" }
   )
   await expect(page).toHaveURL(`/formulaire?direction=jai&first_dir=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`)
-  await page.goto(`/?carte=1&action_list=reparer%7Cdonner%7Cechanger%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cacheter%7Crevendre&epci_codes=200055887&limit=50`, { waitUntil: "networkidle" })
+  await page.goto(`/carte?action_list=reparer%7Cdonner%7Cechanger%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cacheter%7Crevendre&epci_codes=200055887&limit=50`, { waitUntil: "networkidle" })
   await expect(page).toHaveURL(`/carte?action_list=reparer%7Cdonner%7Cechanger%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cacheter%7Crevendre&epci_codes=200055887&limit=50`)
 });
 
