@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test"
 
 test("Action list by default", async ({ page }) => {
-    await page.goto(`http://localhost:8000/formulaire`, {
+    await page.goto(`/formulaire`, {
         waitUntil: "networkidle",
     })
 
@@ -12,7 +12,7 @@ test("Action list by default", async ({ page }) => {
 })
 
 test("Action list is well set with jai", async ({ page }) => {
-    await page.goto(`http://localhost:8000/formulaire?direction=jai&action_list=preter`, {
+    await page.goto(`/formulaire?direction=jai&action_list=preter`, {
         waitUntil: "networkidle",
     })
 
@@ -33,7 +33,7 @@ test("Action list is well set with jai", async ({ page }) => {
 
 test("Action list is well set with jecherche", async ({ page }) => {
     await page.goto(
-        `http://localhost:8000/formulaire?direction=jecherche&action_list=emprunter`,
+        `/formulaire?direction=jecherche&action_list=emprunter`,
         {
             waitUntil: "networkidle",
         },

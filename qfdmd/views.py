@@ -3,7 +3,7 @@ from typing import Any
 
 from django.conf import settings
 from django.http import HttpResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control
@@ -86,8 +86,6 @@ class AssistantBaseView:
     """
 
     def dispatch(self, request, *args, **kwargs):
-        if request.META.get("HTTP_HOST") not in settings.ASSISTANT["HOSTS"]:
-            return redirect(reverse("home"))
         return super().dispatch(request, *args, **kwargs)
 
 
