@@ -84,8 +84,8 @@ test("Desktop | iframe cannot read the referrer when referrerPolicy is set to no
   expect(referrer).toBe('');
 });
 
-test("iframe can read the referrer when referrerPolicy is not set", async ({ page, carteUrl }) => {
-  await page.goto(`/test_iframe?carte=1`, { waitUntil: "networkidle" });
+test("iframe can read the referrer when referrerPolicy is not set", async ({ page, assistantUrl }) => {
+  await page.goto(`${assistantUrl}/test_iframe?carte=1`, { waitUntil: "networkidle" });
 
   // Get the content frame of the iframe
   const iframeElement = await page.$("iframe[data-testid='assistant']");
@@ -96,7 +96,7 @@ test("iframe can read the referrer when referrerPolicy is not set", async ({ pag
   const referrer = await iframe.evaluate(() => document.referrer);
 
   // Assert that the referrer is set and not undefined
-  expect(referrer).toBe(`${carteUrl}/test_iframe?carte=1`);
+  expect(referrer).toBe(`${assistantUrl}/test_iframe?carte=1`);
 });
 
 // Need to be run locally with nginx running
