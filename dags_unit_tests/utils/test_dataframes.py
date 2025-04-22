@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 import pytest
-
-from dags.utils.dataframes import (
+from utils.dataframes import (
+    df_add_original_columns,
     df_col_assert_get_unique,
     df_discard_if_col_vals_frequent,
     df_sort,
@@ -113,3 +113,28 @@ class TestDfDiscardIfColValuesTooFrequent:
         df, df_discarded = df_discard_if_col_vals_frequent(df, "foo", 3)
         assert df["foo"].tolist() == ["a", "a", "c"]
         assert df_discarded["foo"].tolist() == ["b", "b", "b"]
+
+
+class TestDfAddOriginalColumns:
+
+    def test_df_add_original_df_columns(self):
+        df_clusters = pd.DataFrame(
+            {
+                "identifiant_unique": ["1", "3"],
+                "cluster_id": ["c1", "c1"],
+                "colonne_cluster": ["v1", "v3"],
+            }
+        )
+
+        df_original = pd.DataFrame(
+            {
+                "identifiant_unique": ["1", "2", "3", "4"],
+                "colonne_original": ["foo", "foo", "bar", "bar"],
+            }
+        )
+        df = df_add_original_columns(df_modify=df_clusters, df_original=df_original)
+        assert df.shape == (2, 4)
+        assert df["identifiant_unique"].tolist() == ["1", "3"]
+        assert df["cluster_id"].tolist() == ["c1", "c1"]
+        assert df["colonne_cluster"].tolist() == ["v1", "v3"]
+        assert df["colonne_original"].tolist() == ["foo", "bar"]

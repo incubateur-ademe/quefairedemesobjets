@@ -1,1 +1,0 @@
-select * from {{ ref('marts_exhaustive_acteur_acteur_services') }}

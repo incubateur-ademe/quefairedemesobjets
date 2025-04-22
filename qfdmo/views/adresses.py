@@ -7,12 +7,14 @@ from django.conf import settings
 from django.contrib.postgres.lookups import Unaccent
 from django.contrib.postgres.search import TrigramWordDistance
 from django.core.cache import cache
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from django.db.models.functions import Length, Lower
 from django.db.models.query import QuerySet
 from django.forms import model_to_dict
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 from django.shortcuts import redirect, render
+from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_GET
 from django.views.generic.edit import FormView
@@ -40,7 +42,6 @@ from qfdmo.models.action import (
     get_groupe_action_instances,
     get_reparer_action_id,
 )
-from qfdmo.thread.materialized_view import RefreshMateriazedViewThread
 
 logger = logging.getLogger(__name__)
 
@@ -114,19 +115,6 @@ class SearchActeursView(
 
         action_list = self._set_action_list(action_displayed)
         initial["action_list"] = "|".join([a.code for a in action_list])
-
-        if self.is_carte:
-            grouped_action_choices = self._get_grouped_action_choices(action_displayed)
-            actions_to_select = self._get_selected_action()
-            initial["grouped_action"] = self._grouped_action_from(
-                grouped_action_choices, actions_to_select
-            )
-            # TODO : refacto forms, merge with grouped_action field
-            initial["legend_grouped_action"] = initial["grouped_action"]
-
-            initial["action_list"] = "|".join(
-                [a for ga in initial["grouped_action"] for a in ga.split("|")]
-            )
 
         return initial
 
@@ -473,19 +461,18 @@ class SearchActeursView(
 
         return filters, excludes
 
-    def _get_grouped_action_choices(
-        self, action_displayed: list[Action]
-    ) -> list[list[str]]:
-        groupe_with_displayed_actions = []
-
+    def get_cached_groupe_action_with_displayed_actions(self, action_displayed):
         # Cast needed because of the cache
         cached_groupe_action_instances = cast(
             QuerySet[GroupeAction],
             cache.get_or_set("groupe_action_instances", get_groupe_action_instances),
         )
 
+        # Fetch actions from cache only if they are displayed
+        # for the end user
+        cached_groupe_action_with_displayed_actions = []
         for cached_groupe in cached_groupe_action_instances:
-            if groupe_actions := [
+            if displayed_actions_from_groupe_actions := [
                 action
                 # TODO : à optimiser avec le cache
                 for action in cached_groupe.actions.all().order_by(  # type: ignore
@@ -493,22 +480,30 @@ class SearchActeursView(
                 )
                 if action in action_displayed
             ]:
-                groupe_with_displayed_actions.append([cached_groupe, groupe_actions])
+                cached_groupe_action_with_displayed_actions.append(
+                    [cached_groupe, displayed_actions_from_groupe_actions]
+                )
+        return cached_groupe_action_with_displayed_actions
 
+    def _get_grouped_action_choices(
+        self, action_displayed: list[Action]
+    ) -> list[list[str]]:
+        """Generate a list of choices for form field
+        used in legend"""
+        # Generate a tuple of (code, libelle) used in the frontend.
+        # The libelle is automatically picked up by django templating
+        # when generating the form.
         grouped_action_choices = []
-        for [groupe, groupe_displayed_actions] in groupe_with_displayed_actions:
+        for [
+            groupe,
+            groupe_displayed_actions,
+        ] in self.get_cached_groupe_action_with_displayed_actions(action_displayed):
             libelle = ""
             if groupe.icon:
-                libelle = (
-                    f'<span class="fr-px-1v qf-text-white {groupe.icon}'
-                    f' fr-icon--sm qf-rounded-full qf-bg-{groupe.primary}"'
-                    ' aria-hidden="true"></span>'
+                libelle = render_to_string(
+                    "forms/widgets/groupe_action_label.html", {"groupe_action": groupe}
                 )
-            libelles: List[str] = []
-            for gda in groupe_displayed_actions:
-                if gda.libelle_groupe not in libelles:
-                    libelles.append(gda.libelle_groupe)
-            libelle += ", ".join(libelles).capitalize()
+
             code = "|".join([a.code for a in groupe_displayed_actions])
             grouped_action_choices.append([code, mark_safe(libelle)])
         return grouped_action_choices
@@ -523,10 +518,27 @@ class SearchActeursView(
         ]
 
 
+# TODO: move in views/carte.py
 class CarteSearchActeursView(SearchActeursView):
     is_carte = True
     template_name = "qfdmo/carte.html"
     form_class = CarteForm
+
+    def get_initial(self, *args, **kwargs):
+        initial = super().get_initial(*args, **kwargs)
+        action_displayed = self._set_action_displayed()
+        grouped_action_choices = self._get_grouped_action_choices(action_displayed)
+        actions_to_select = self._get_selected_action()
+        initial["grouped_action"] = self._grouped_action_from(
+            grouped_action_choices, actions_to_select
+        )
+        # TODO : refacto forms, merge with grouped_action field
+        initial["legend_grouped_action"] = initial["grouped_action"]
+
+        initial["action_list"] = "|".join(
+            [a for ga in initial["grouped_action"] for a in ga.split("|")]
+        )
+        return initial
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -562,22 +574,18 @@ class FormulaireSearchActeursView(SearchActeursView):
         return [model_to_dict(a, exclude=["directions"]) for a in actions]
 
 
-# TODO : should be deprecated once all is moved to the displayed acteur
 def getorcreate_revisionacteur(request, acteur_identifiant):
-    acteur = Acteur.objects.get(identifiant_unique=acteur_identifiant)
-    revision_acteur = acteur.get_or_create_revision()
+    try:
+        acteur = Acteur.objects.get(identifiant_unique=acteur_identifiant)
+        revision_acteur = acteur.get_or_create_revision()
+    except Acteur.DoesNotExist as e:
+        # Case of Parent Acteur
+        revision_acteur = RevisionActeur.objects.get(
+            identifiant_unique=acteur_identifiant
+        )
+        if not revision_acteur.is_parent:
+            raise e
     return redirect(revision_acteur.change_url)
-
-
-def getorcreate_correctionequipeacteur(request, acteur_identifiant):
-    acteur = Acteur.objects.get(identifiant_unique=acteur_identifiant)
-    revision_acteur = acteur.get_or_create_correctionequipe()
-    return redirect(revision_acteur.change_url)
-
-
-def refresh_acteur_view(request):
-    RefreshMateriazedViewThread().start()
-    return redirect("admin:index")
 
 
 @require_GET
@@ -614,10 +622,20 @@ def get_object_list(request):
     )
 
 
+def _get_acteur_or_parent(**query_kwargs) -> DisplayedActeur | None:
+    try:
+        return DisplayedActeur.objects.get(**query_kwargs)
+    except DisplayedActeur.DoesNotExist:
+        revision_acteur = RevisionActeur.objects.get(**query_kwargs)
+        return DisplayedActeur.objects.get(identifiant_unique=revision_acteur.parent_id)
+
+
 def acteur_detail_redirect(request, identifiant_unique):
-    displayed_acteur = DisplayedActeur.objects.get(
-        identifiant_unique=identifiant_unique
-    )
+    try:
+        displayed_acteur = _get_acteur_or_parent(identifiant_unique=identifiant_unique)
+    except ObjectDoesNotExist:
+        raise Http404("L'adresse que vous cherchez n'existe plus")
+
     return redirect("qfdmo:acteur-detail", uuid=displayed_acteur.uuid, permanent=True)
 
 
@@ -631,16 +649,24 @@ def acteur_detail(request, uuid):
     longitude = request.GET.get("longitude")
     direction = request.GET.get("direction")
 
-    displayed_acteur = DisplayedActeur.objects.prefetch_related(
-        "proposition_services__sous_categories",
-        "proposition_services__sous_categories__categorie",
-        "proposition_services__action__groupe_action",
-        "labels",
-        "sources",
-    ).get(uuid=uuid)
+    try:
+        displayed_acteur = DisplayedActeur.objects.prefetch_related(
+            "proposition_services__sous_categories",
+            "proposition_services__sous_categories__categorie",
+            "proposition_services__action__groupe_action",
+            "labels",
+            "sources",
+        ).get(uuid=uuid)
+    except DisplayedActeur.DoesNotExist:
+        # FIXME: it is impossible to get check if the revisionacteur has a parent
+        # because the revision_acteur doesn't have any UUID
+        # to resolve it we need compute uuid on revisionacteur layer
+        raise Http404("L'adresse que vous cherchez n'existe plus")
 
-    if displayed_acteur.statut != ActeurStatus.ACTIF:
-        return redirect("https://quefairedemesdechets.ademe.fr", permanent=True)
+    # FIXME: This case shouldn't occure because we compute only active displayed
+    # acteurs in dislayedacteur table
+    if displayed_acteur is None or displayed_acteur.statut != ActeurStatus.ACTIF:
+        return redirect(settings.ASSISTANT["BASE_URL"], permanent=True)
 
     context = {
         "base_template": base_template,

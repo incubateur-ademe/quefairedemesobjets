@@ -125,9 +125,9 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
-    "qfdmd.middleware.AssistantMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "qfdmd.middleware.AssistantMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -443,7 +443,6 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = decouple.config(
 # ----------------
 WAGTAIL_SITE_NAME = "Longue vie aux objets"
 WAGTAILADMIN_BASE_URL = BASE_URL
-WAGTAIL_APPEND_SLASH = True
 INSTALLED_APPS.extend(
     [
         # Sites faciles

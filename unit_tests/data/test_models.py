@@ -1,9 +1,6 @@
 import pytest
 
-from data.models import (  # Remplacez YourModel par le nom de votre modèle
-    SuggestionAction,
-    SuggestionCohorte,
-)
+from data.models.suggestion import SuggestionAction, SuggestionCohorte
 
 
 @pytest.mark.parametrize(

@@ -25,6 +25,10 @@ def db_write_type_action_suggestions_wrapper(**kwargs) -> None:
     df_acteur_to_delete = dfs_acteur["df_acteur_to_delete"]
     df_acteur_to_create = dfs_acteur["df_acteur_to_create"]
     df_acteur_to_update = dfs_acteur["df_acteur_to_update"]
+    metadata = kwargs["ti"].xcom_pull(task_ids="source_data_normalize", key="metadata")
+    metadata_columns_updated = kwargs["ti"].xcom_pull(
+        task_ids="keep_acteur_changed", key="metadata_columns_updated"
+    )
 
     log.preview("dag_name", dag_name)
     log.preview("run_id", run_id)
@@ -48,4 +52,7 @@ def db_write_type_action_suggestions_wrapper(**kwargs) -> None:
         df_acteur_to_create=df_acteur_to_create,
         df_acteur_to_delete=df_acteur_to_delete,
         df_acteur_to_update=df_acteur_to_update,
+        metadata_to_create=metadata,
+        metadata_to_update={**metadata, **metadata_columns_updated},
+        metadata_to_delete=metadata,
     )

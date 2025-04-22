@@ -26,8 +26,15 @@ def keep_acteur_changed_wrapper(**kwargs):
     log.preview("df_acteur_from_db", df_acteur_from_db)
     log.preview("dag_config", dag_config)
 
-    return keep_acteur_changed(
-        df_normalized=df_normalized,
-        df_acteur_from_db=df_acteur_from_db,
-        dag_config=dag_config,
+    df_acteur_from_source, df_acteur_from_db, metadata_columns_updated = (
+        keep_acteur_changed(
+            df_normalized=df_normalized,
+            df_acteur_from_db=df_acteur_from_db,
+            dag_config=dag_config,
+        )
+    )
+    kwargs["ti"].xcom_push(key="df_acteur_from_source", value=df_acteur_from_source)
+    kwargs["ti"].xcom_push(key="df_acteur_from_db", value=df_acteur_from_db)
+    kwargs["ti"].xcom_push(
+        key="metadata_columns_updated", value=metadata_columns_updated
     )

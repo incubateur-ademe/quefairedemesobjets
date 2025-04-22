@@ -2,11 +2,11 @@ import pandas as pd
 import pytest
 from crawl.fixtures import acteurs_create, df_syntax_fail  # noqa
 from sources.config.shared_constants import EMPTY_ACTEUR_FIELD
+from utils import logging_utils as log
 
 from dags.crawl.config.cohorts import COHORTS
 from dags.crawl.config.columns import COLS
 from dags.crawl.tasks.business_logic.crawl_urls_suggest import suggestions_prepare
-from dags.utils import logging_utils as log
 
 
 @pytest.mark.django_db

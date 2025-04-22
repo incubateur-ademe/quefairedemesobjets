@@ -60,7 +60,7 @@ class GroupeActionManager(CodeAsNaturalKeyManager):
         return GroupeActionQueryset(self.model, using=self._db)
 
 
-COLOR_PALETTE = list(DSFRColors.items())
+COLOR_PALETTE = [(hexa.upper(), color) for color, hexa in DSFRColors.items()]
 
 
 class GroupeAction(CodeAsNaturalKeyModel):
@@ -98,6 +98,13 @@ class GroupeAction(CodeAsNaturalKeyModel):
 
     couleur_claire = ColorField(
         null=True, blank=True, default="#C3992A", max_length=255, choices=COLOR_PALETTE
+    )
+    fill = models.BooleanField(
+        default=False,
+        verbose_name="Remplissage du fond",
+        help_text="Ce champ permet de configurer un groupe d'action"
+        " pour que son icône dispose d'un fond plein plutôt qu'un fond ajouré.\n"
+        "C'est ce qui est utilisé par exemple sur l'action réparer",
     )
 
     @cached_property
@@ -213,7 +220,7 @@ class Action(CodeAsNaturalKeyModel):
 
 
 def get_action_instances() -> List[Action]:
-    return list(Action.objects.prefetch_related("directions", "groupe_action"))
+    return Action.objects.prefetch_related("directions", "groupe_action")
 
 
 def get_reparer_action_id() -> int:

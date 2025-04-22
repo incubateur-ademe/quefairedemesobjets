@@ -4,12 +4,8 @@ from airflow import DAG
 from airflow.exceptions import AirflowSkipException
 from airflow.operators.python import PythonOperator
 from cluster.config.model import ClusterConfig
-from cluster.tasks.airflow_logic.task_ids import (
-    TASK_CONFIG_CREATE,
-    TASK_PARENTS_CHOOSE_DATA,
-    TASK_SUGGESTIONS_DISPLAY,
-    TASK_SUGGESTIONS_TO_DB,
-)
+from cluster.config.tasks import TASKS
+from cluster.config.xcoms import XCOMS, xcom_pull
 from cluster.tasks.business_logic.cluster_acteurs_suggestions.to_db import (
     cluster_acteurs_suggestions_to_db,
 )
@@ -23,30 +19,25 @@ def task_info_get():
 
 
     ============================================================
-    Description de la tâche "{TASK_SUGGESTIONS_TO_DB}"
+    Description de la tâche "{TASKS.SUGGESTIONS_TO_DB}"
     ============================================================
 
     💡 quoi: écriture des suggestions en base de données
 
-    🎯 pourquoi: pour que le métier puisse revoir ces suggestions
-    et décider les approuver ou non
+    🎯 pourquoi: l'objectif final du DAG
 
-    🏗️ comment: on utilise les tables définies par l'app django
-    data_management
+    🏗️ comment: suggestions préparées par la tâche précédente écrite
+    en DB via modèles Django
     """
 
 
-def cluster_acteurs_suggestions_to_db_wrapper(**kwargs) -> None:
+def cluster_acteurs_suggestions_to_db_wrapper(ti, dag, run_id) -> None:
 
     logger.info(task_info_get())
 
-    config: ClusterConfig = kwargs["ti"].xcom_pull(
-        key="config", task_ids=TASK_CONFIG_CREATE
-    )
-    df_clusters = kwargs["ti"].xcom_pull(key="df", task_ids=TASK_PARENTS_CHOOSE_DATA)
-    suggestions = kwargs["ti"].xcom_pull(
-        key="suggestions", task_ids=TASK_SUGGESTIONS_DISPLAY
-    )
+    config: ClusterConfig = xcom_pull(ti, XCOMS.CONFIG)
+    df_clusters = xcom_pull(ti, XCOMS.DF_PARENTS_CHOOSE_DATA)
+    suggestions = xcom_pull(ti, XCOMS.SUGGESTIONS_WORKING)
 
     log.preview("config", config)
     log.preview("df_clusters", df_clusters)
@@ -60,8 +51,8 @@ def cluster_acteurs_suggestions_to_db_wrapper(**kwargs) -> None:
     cluster_acteurs_suggestions_to_db(
         df_clusters=df_clusters,
         suggestions=suggestions,
-        identifiant_action=f"dag_id={kwargs['dag'].dag_id}",
-        identifiant_execution=f"run_id={kwargs['run_id']}",
+        identifiant_action=dag.dag_display_name,
+        identifiant_execution=run_id,
         # Rest assured: we are no longer clustering, but
         # we use cluster config to generate useful context
         # data for the Django Admin UI
@@ -75,7 +66,7 @@ def cluster_acteurs_suggestions_to_db_wrapper(**kwargs) -> None:
 
 def cluster_acteurs_suggestions_to_db_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
-        task_id=TASK_SUGGESTIONS_TO_DB,
+        task_id=TASKS.SUGGESTIONS_TO_DB,
         python_callable=cluster_acteurs_suggestions_to_db_wrapper,
         dag=dag,
     )

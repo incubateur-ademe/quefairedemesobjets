@@ -6,8 +6,10 @@ import { ActorLocation, DisplayedActeur } from "./types"
 
 export class Actor implements DisplayedActeur {
   uuid: string
+  fillBackground: boolean
   location: ActorLocation
   icon: string
+  iconFile: string
   couleur: string
   bonus: boolean
   reparer: boolean
@@ -16,6 +18,8 @@ export class Actor implements DisplayedActeur {
     this.uuid = actorFields.uuid
     this.location = actorFields.location
     this.icon = actorFields.icon
+    this.iconFile = actorFields.iconFile
+    this.fillBackground = actorFields.fillBackground
     this.couleur = actorFields.couleur
     this.bonus = actorFields.bonus
     this.reparer = actorFields.reparer
@@ -40,10 +44,10 @@ export default class extends Controller<HTMLElement> {
     })
     //fixme : find how do not allow undefined from map
     const actors: Array<Actor> = this.acteurTargets
-      .map((ecoCirTarget: HTMLScriptElement) => {
-        if (ecoCirTarget.textContent !== null) {
-          const actor_fields: DisplayedActeur = JSON.parse(ecoCirTarget.textContent)
-          return new Actor(actor_fields)
+      .map((actorTarget: HTMLScriptElement) => {
+        if (actorTarget.textContent !== null) {
+          const actorFields: DisplayedActeur = JSON.parse(actorTarget.textContent)
+          return new Actor(actorFields)
         }
       })
       .filter((actor) => actor !== undefined)

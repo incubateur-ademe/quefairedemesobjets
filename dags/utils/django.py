@@ -120,14 +120,14 @@ def django_model_queryset_generate(
     # Inclure uniquement si TOUS les champs sont remplis
     include_all_filled_filter = Q()
     for field in include_fields:
-        include_all_filled_filter &= ~Q(**{f"{field}__isnull": True})
+        include_all_filled_filter &= ~Q(**{f"{field}": ""})
 
     # Exclure si N'IMPORTE QUEL champ est rempli
     # note: ce champ étant la négation de l'inclusion, on le construit
     # comme l'incusion et on fait une négation d'ensemble ensuite
     exclude_any_filled_filter = Q()
     for field in exclude_fields:
-        exclude_any_filled_filter &= ~Q(**{f"{field}__isnull": True})
+        exclude_any_filled_filter &= ~Q(**{f"{field}": ""})
     exclude_any_filled_filter = ~exclude_any_filled_filter
 
     final_filter = include_all_filled_filter & exclude_any_filled_filter
@@ -202,3 +202,23 @@ def django_model_queryset_to_df(query: Any, fields: list[str]) -> pd.DataFrame:
     log.preview(f"{fn}: entrées retournées", data)
     # dtype=object => don't try to infer type
     return pd.DataFrame(data, dtype=object)
+
+
+def django_schema_create_and_check(schema_name: str, sql: str, dry_run=True) -> None:
+    """Create a table in the DB from a schema"""
+    from django.db import connection
+
+    # Creation
+    logger.info(f"Création schema pour {schema_name=}: début")
+    log.preview("Schema", sql)
+    if dry_run:
+        logger.info("Mode dry-run, on ne crée pas le schema")
+        return
+    with connection.cursor() as cursor:
+        cursor.execute(sql)
+
+    # Validation
+    tables_all = connection.introspection.table_names()
+    if schema_name not in tables_all:
+        raise SystemError(f"Table pas crée malgré execution SQL OK: {schema_name}")
+    logger.info(f"Création schema pour {schema_name=}: succès 🟢")

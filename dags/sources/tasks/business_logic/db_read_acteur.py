@@ -57,13 +57,12 @@ def db_read_acteur(df_normalized: pd.DataFrame, dag_config: DAGConfig):
         ]
         acteur_dict["proposition_service_codes"] = [
             {
-                "action": proposition_service.action.code,
+                "action": ps.action.code,
                 "sous_categories": [
-                    sous_categorie.code
-                    for sous_categorie in proposition_service.sous_categories.all()
+                    sscat.code for sscat in ps.sous_categories.all().order_by("code")
                 ],
             }
-            for proposition_service in acteur.proposition_services.all()
+            for ps in acteur.proposition_services.all().order_by("action__code")
         ]
         acteurs_list.append(acteur_dict)
     if acteurs_list:
