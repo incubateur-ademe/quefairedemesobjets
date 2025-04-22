@@ -157,3 +157,4 @@ db-restore:
 	make dump-production
 	make load-production-dump
 	make migrate
+

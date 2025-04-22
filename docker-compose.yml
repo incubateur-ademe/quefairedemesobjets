@@ -44,9 +44,6 @@ services:
     ports:
       - 80:80
       - 443:443
-    environment:
-      - LVAO_URL="lvao.ademe.local"
-      - ASSISTANT_URL="quefairedemesdechets.ademe.local"
     volumes:
       - ./nginx-local-only/servers.conf:/etc/nginx/servers.conf
       - ./nginx-local-only/nginx.conf:/etc/nginx/nginx.conf
