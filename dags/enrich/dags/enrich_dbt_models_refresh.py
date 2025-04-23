@@ -9,7 +9,7 @@ from airflow import DAG
 from airflow.models.baseoperator import chain
 from airflow.operators.bash import BashOperator
 from enrich.config import (
-    EnrichActeursClosedConfig,
+    EnrichDbtModelsRefreshConfig,
 )
 from shared.config import CATCHUPS, SCHEDULES, START_DATES, config_to_airflow_params
 
@@ -32,29 +32,26 @@ with DAG(
     catchup=CATCHUPS.AWLAYS_FALSE,
     start_date=START_DATES.YESTERDAY,
     params=config_to_airflow_params(
-        EnrichActeursClosedConfig(
-            dbt_models_refresh=True,
-            dbt_models_refresh_command="""
-                dbt build --select +int_ae_unite_legale
-                dbt build --select int_ae_etablissement
-                dbt build --select +int_ban_adresses
-                dbt build --select int_ban_villes
-            """,
+        EnrichDbtModelsRefreshConfig(
+            dbt_models_refresh_commands=[
+                "dbt build --select +int_ae_unite_legale",
+                "dbt build --select int_ae_etablissement",
+                "dbt build --select +int_ban_adresses",
+                "dbt build --select int_ban_villes",
+            ],
         )
     ),
 ) as dag:
-    commands = [
-        x.strip()
-        for x in dag.params.get("dbt_models_refresh_command").split("\n")  # type: ignore
-        if x.strip()
-    ]
-    ops = []
-    for command in commands:
-        cmd_id = re.sub(r"__+", "_", re.sub(r"[^a-zA-Z0-9]+", "_", command))
-        ops.append(
+    tasks = []
+    for command in dag.params.get("dbt_models_refresh_commands", []):
+        cmd = command.strip()
+        if not cmd:
+            continue
+        cmd_id = re.sub(r"__+", "_", re.sub(r"[^a-zA-Z0-9]+", "_", cmd))
+        tasks.append(
             BashOperator(
                 task_id=f"enrich_{cmd_id}",
                 bash_command=command,
             )
         )
-    chain(*ops)
+    chain(*tasks)

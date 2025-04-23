@@ -7,6 +7,7 @@ PYDANTIC_TYPE_TO_AIRFLOW_TYPE = {
     bool: "boolean",
     str: "string",
     typing.Optional[str]: ["null", "string"],
+    list[str]: ["array"],
 }
 
 
