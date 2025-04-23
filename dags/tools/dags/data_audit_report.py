@@ -2,14 +2,13 @@ import json
 import logging
 from datetime import datetime
 from io import BytesIO, StringIO
-from pathlib import Path
 
 import pandas as pd
 import requests
 from airflow import DAG
 from airflow.decorators import task
 from airflow.models import Param
-from airflow.providers.amazon.aws.hooks.s3 import S3Hook
+from airflow.providers.amazon.aws.hooks.s3 import S3Hook  # type: ignore
 from airflow.utils.dates import days_ago
 from slugify import slugify
 from utils import logging_utils as log
@@ -54,7 +53,20 @@ with DAG(
         "data_json_nested_key": Param(
             "results",
             type=["null", "string"],
-            description="""Si JSON et que la donnée est nestée, fournir le path""",
+            description_md=r"""Si **format json** et que la donnée est **nestée**,
+            fournir la **clef d'accès**.
+            Par exemple pour
+            ```json
+            {
+                "current_page": 1,
+                "page_size": 100,
+                "data": [
+                    {
+                    "id": 8117,
+                    "code_postal": "43700",
+            ```
+            Fournir `data`
+            """,
         ),
         "data_separator": Param("", type=["null", "string"]),
         "data_sampling": Param(
@@ -69,8 +81,7 @@ with DAG(
         ),
         # For the report we want to save
         "report_s3_connection_id": Param("s3data", type="string"),
-        "report_s3_bucket": Param("lvao-opendata", type="string"),
-        "report_s3_folder": Param("data_audit_reports", type="string"),
+        "report_s3_bucket": Param("data-audit-reports", type="string"),
     },
     catchup=False,
     tags=["data", "audit", "report", "profiling", "s3"],
@@ -159,17 +170,14 @@ with DAG(
         logger.info(log.banner_string("📤 Upload du rapport sur S3"))
         logger.info("Upload du rapport sur S3: commencé 🟡")
 
-        filename = (
-            f"{now}_{slugify(data_endpoint.split('//')[-1].replace('/', '_'))}.html"
-        )
-        key = str(Path(params["report_s3_folder"], filename))
-        url = f"https://s3.fr-par.scw.cloud/{params['report_s3_bucket']}/{params['report_s3_folder']}/{filename}"
+        endpoint_slug = slugify(data_endpoint.split("//")[-1].replace("/", "_"))
+        filename = f"{now}_{endpoint_slug}.html"
+        url = f"https://s3.fr-par.scw.cloud/{params['report_s3_bucket']}/{filename}"
         logger.info(f"{filename=}")
-        logger.info(f"{key=}")
         logger.info(f"{url=}")
         S3Hook(aws_conn_id=params["report_s3_connection_id"]).load_string(
             string_data=report_html,
-            key=key,
+            key=filename,
             bucket_name=params["report_s3_bucket"],
             acl_policy="public-read",
         )
@@ -180,8 +188,7 @@ with DAG(
         # List all the reports on S3 in ascending order
         logger.info(log.banner_string("📂 Liste des rapports sur S3"))
         reports = S3Hook(aws_conn_id=params["report_s3_connection_id"]).list_keys(
-            bucket_name=params["report_s3_bucket"],
-            prefix=params["report_s3_folder"],
+            bucket_name=params["report_s3_bucket"]
         )
         reports = sorted(reports)
         log.preview("Liste des rapports précédents", reports)
