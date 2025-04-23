@@ -109,7 +109,6 @@ class Produit(index.Indexed, AbstractBaseProduit):
             return {}
 
         return {
-            "carte": 1,
             "direction": "jai",
             "first_dir": "jai",
             "limit": 25,
@@ -125,7 +124,8 @@ class Produit(index.Indexed, AbstractBaseProduit):
                 action_displayed=actions,
             )
         params = urlencode(carte_settings)
-        return f"{settings.BASE_URL}/?{params}"
+        url = reverse("qfdmo:carte")
+        return f"{url}?{params}"
 
     @cached_property
     def url_carte_mauvais_etat(self):

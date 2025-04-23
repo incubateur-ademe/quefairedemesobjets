@@ -32,16 +32,16 @@ test("Desktop | iframe formulaire is loaded with correct parameters", async ({ p
   expect(allowfullscreen).toBe("true");
   expect(style).toContain("width: 100%;");
   expect(style).toContain("height: 720px;");
-  expect(style).toContain("max-width: 800px;");
+  expect(style).toContain("max-width: 100%;");
   expect(title).toBe("Longue vie aux objets");
 });
 
 test("Desktop | legacy iframe urls still work", async ({ page }) => {
-  await page.goto(`/?iframe=1&direction=jai&first_dir=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`,
+  await page.goto(`/formulaire?direction=jai&first_dir=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`,
     { waitUntil: "networkidle" }
   )
   await expect(page).toHaveURL(`/formulaire?direction=jai&first_dir=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`)
-  await page.goto(`/?carte=1&action_list=reparer%7Cdonner%7Cechanger%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cacheter%7Crevendre&epci_codes=200055887&limit=50`, { waitUntil: "networkidle" })
+  await page.goto(`/carte?action_list=reparer%7Cdonner%7Cechanger%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cacheter%7Crevendre&epci_codes=200055887&limit=50`, { waitUntil: "networkidle" })
   await expect(page).toHaveURL(`/carte?action_list=reparer%7Cdonner%7Cechanger%7Cpreter%7Cemprunter%7Clouer%7Cmettreenlocation%7Cacheter%7Crevendre&epci_codes=200055887&limit=50`)
 });
 
@@ -84,8 +84,8 @@ test("Desktop | iframe cannot read the referrer when referrerPolicy is set to no
   expect(referrer).toBe('');
 });
 
-test("iframe can read the referrer when referrerPolicy is not set", async ({ page, carteUrl }) => {
-  await page.goto(`/test_iframe?carte=1`, { waitUntil: "networkidle" });
+test("iframe can read the referrer when referrerPolicy is not set", async ({ page, assistantUrl }) => {
+  await page.goto(`${assistantUrl}/test_iframe?carte=1`, { waitUntil: "networkidle" });
 
   // Get the content frame of the iframe
   const iframeElement = await page.$("iframe[data-testid='assistant']");
@@ -93,10 +93,10 @@ test("iframe can read the referrer when referrerPolicy is not set", async ({ pag
   expect(iframe).not.toBeNull();
 
   // Evaluate the referrer inside the iframe
-  const referrer = await iframe.evaluate(() => document.referrer);
+  const referrer = await iframe!.evaluate(() => document.referrer);
 
   // Assert that the referrer is set and not undefined
-  expect(referrer).toBe(`${carteUrl}/test_iframe?carte=1`);
+  expect(referrer).toBe(`${assistantUrl}/test_iframe?carte=1`);
 });
 
 // Need to be run locally with nginx running

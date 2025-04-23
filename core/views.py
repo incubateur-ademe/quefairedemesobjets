@@ -1,5 +1,6 @@
 import mimetypes
 
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.staticfiles import finders
 from django.http import HttpResponse
@@ -19,6 +20,8 @@ def direct_access(request):
     from qfdmd.views import HomeView as Assistant  # avoid circular dependency
 
     get_params = request.GET.copy()
+    if request.META.get("HTTP_HOST") in settings.ASSISTANT["HOSTS"]:
+        return Assistant.as_view()(request)
 
     if "carte" in request.GET:
         # Order matters, this should be before iframe because iframe and carte

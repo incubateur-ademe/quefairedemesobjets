@@ -50,7 +50,7 @@
 
         {% if "noreferrer" in request.GET %}
         <h3>Avec referrerpolicy="noreferrer"</h3>
-        <script src="{{ assistant.BASE_URL }}/iframe.js" data-debug-referrer></script>
+        <script src="{{ assistant.BASE_URL }}/iframe.js" data-debug-referrer data-testid='assistant'></script>
         {% else %}
         <h3>Par défaut</h3>
         <script src="{{ assistant.BASE_URL }}/iframe.js" data-testid='assistant'></script>
@@ -87,14 +87,5 @@
 
         Rutrum urna nascetur conubia torquent parturient fusce mus curabitur ultrices curae rhoncus posuere nibh neque lacus tempor cras torquent suspendisse vestibulum facilisis mus. Adipiscing a lacus mi turpis ut nascetur placerat mattis tempus ultricies augue consectetur parturient adipiscing tempor eget mattis laoreet scelerisque et aliquam vivamus parturient habitasse malesuada justo aptent. At eu erat sed ridiculus suspendisse velit a est a eleifend molestie interdum a parturient diam a at commodo sapien dictumst. Ut est a risus accumsan netus a nec porta dictum a himenaeos parturient ullamcorper pharetra curabitur nascetur ornare quisque dui sodales vivamus accumsan arcu vestibulum erat vestibulum ac lorem.
         </div>
-
-        <script>
-           iFrameResize({
-              checkOrigin: false,
-              log: true,
-              heightCalculationMethod: 'bodyScroll',
-              maxWidth: 800,
-            }, '#resize')
-        </script>
     </body>
 </html>
