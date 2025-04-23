@@ -1,0 +1,58 @@
+"""
+DAG to anonymize QFDMO acteur which names
+contains people from Annuaire Entreprise (AE)
+"""
+
+import re
+
+from airflow import DAG
+from airflow.models.baseoperator import chain
+from airflow.operators.bash import BashOperator
+from enrich.config import (
+    EnrichActeursClosedConfig,
+)
+from shared.config import CATCHUPS, SCHEDULES, START_DATES, config_to_airflow_params
+
+with DAG(
+    dag_id="enrich_dbt_models_refresh",
+    dag_display_name="🔄 Enrichir - Rafraîchir les modèles DBT",
+    default_args={
+        "owner": "airflow",
+        "depends_on_past": False,
+        "email_on_failure": False,
+        "email_on_retry": False,
+        "retries": 0,
+    },
+    description=(
+        "Un DAG pour rafraîchir les modèles DBT nécessaires"
+        "à l'enrichissement des acteurs"
+    ),
+    tags=["dbt", "annuaire", "entreprises", "ae", "ban", "marts"],
+    schedule=SCHEDULES.DAILY,
+    catchup=CATCHUPS.AWLAYS_FALSE,
+    start_date=START_DATES.YESTERDAY,
+    params=config_to_airflow_params(
+        EnrichActeursClosedConfig(
+            dbt_models_refresh=True,
+            dbt_models_refresh_command="""
+                dbt build --select model1
+                dbt build --select model2
+            """,
+        )
+    ),
+) as dag:
+    commands = [
+        x.strip()
+        for x in dag.params.get("dbt_models_refresh_command").split("\n")  # type: ignore
+        if x.strip()
+    ]
+    ops = []
+    for command in commands:
+        cmd_id = re.sub(r"__+", "_", re.sub(r"[^a-zA-Z0-9]+", "_", command))
+        ops.append(
+            BashOperator(
+                task_id=f"enrich_{cmd_id}",
+                bash_command=command,
+            )
+        )
+    chain(*ops)
