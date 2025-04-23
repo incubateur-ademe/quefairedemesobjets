@@ -13,7 +13,10 @@
   - 🟠 **inconvénient**: pas d’opportunité de re-clustering les mauvais cluster existants
 
 - **Pas de re-clustering enfants = pas de contexte enfant**: conséquence du dessus, les enfants n’ont pas leur donnée récupérée ni
-  normalisée, ce qui peut poser des problèmes de contexte, donc on à fait https://github.com/incubateur-ademe/quefairedemesobjets/pull/1379 en attendant
+  normalisée, ce qui peut poser des problèmes de contexte, donc on à fait [PR1379](https://github.com/incubateur-ademe/quefairedemesobjets/pull/1379) en attendant
+
+- **Pas de priorisation de multiple sources pour l'enrichissement**: on voudrait pouvoir définir **plusieurs sources selon un ordre spécifique**, mais pas possible actuellement, conséquence de ce [bug présent en v2](https://github.com/apache/airflow/discussions/46475) qui fait que 🔴 **l'ordre de sélection UI est écrasé/remplacé par l'ordre de définition du code**
+  - [bug solutionné en v3](https://github.com/apache/airflow/discussions/46475#discussioncomment-12922818), d'où l'intérêt de le [migration v3](../../comment-faire/data/airflow-v3-migration.md)
 
 ## 📜 Définition
 
