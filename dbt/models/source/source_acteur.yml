@@ -16,4 +16,3 @@ sources:
       - name : qfdmo_revisionpropositionservice
       - name : qfdmo_revisionpropositionservice_sous_categories
       - name : qfdmo_source
-      - name : qfdmo_acteurtype

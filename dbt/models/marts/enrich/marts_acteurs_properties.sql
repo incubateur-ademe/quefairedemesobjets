@@ -1,6 +1,20 @@
 /*
 Table which combines the displayedacteur, revisionacteur and acteur tables
 */
+{{
+  config(
+    materialized = 'table',
+    tags=['intermediate', 'acteurs'],
+    indexes=[
+      {'columns': ['identifiant_unique'], 'unique': True},
+      {'columns': ['est_parent']},
+      {'columns': ['enfants_nombre']},
+      {'columns': ['est_dans_displayedacteur']},
+      {'columns': ['est_dans_revisionacteur']},
+      {'columns': ['est_dans_acteur']},
+    ],
+  )
+}}
 WITH
     parent_ids AS (
         SELECT DISTINCT
@@ -111,7 +125,7 @@ WITH
             ra.identifiant_unique IS NOT NULL AS est_dans_revisionacteur,
             a.identifiant_unique IS NOT NULL AS est_dans_acteur
         FROM
-            {{ ref("base_displayedacteur") }} AS da
+            {{ ref("int_acteur") }} AS da
             FULL OUTER JOIN {{ ref("base_revisionacteur") }} AS ra ON da.identifiant_unique = ra.identifiant_unique
             FULL OUTER JOIN {{ ref("base_acteur") }} AS a ON da.identifiant_unique = a.identifiant_unique
     )
@@ -150,4 +164,4 @@ SELECT
 FROM
     acteur_all
     LEFT JOIN {{ ref("base_source") }} AS s ON s.id = acteur_all.source_id
-    LEFT JOIN {{ ref("base_acteurtype") }} AS atype ON atype.id = acteur_all.acteur_type_id
+    LEFT JOIN {{ ref("base_acteur_type") }} AS atype ON atype.id = acteur_all.acteur_type_id
