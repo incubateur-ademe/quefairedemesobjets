@@ -50,6 +50,12 @@ class GroupeActionConfig(models.Model):
 
 class CarteConfig(models.Model):
     nom = models.CharField(unique=True)
+    hide_legend = models.BooleanField(
+        default=False,
+        verbose_name="Cacher la légende",
+        help_text="Cocher cette case cache la légende affichée en bas à gauche de la "
+        "carte en desktop et au dessus de celle-ci en mobile",
+    )
     slug = models.SlugField(
         unique=True,
         help_text="Le slug est utilisé pour générer l'url de carte, "
