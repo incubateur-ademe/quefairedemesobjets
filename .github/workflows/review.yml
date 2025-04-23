@@ -15,7 +15,7 @@ jobs:
     uses: ./.github/workflows/ci.yml
 
   preprod:
-    if: ${{ github.event_name == 'workflow_dispatch' || contains( github.event.pull_request.labels.*.name, 'deploy')}}
+    # if: ${{ github.event_name == 'workflow_dispatch' || contains( github.event.pull_request.labels.*.name, 'deploy')}}
     name: 🟠 Preprod
     uses: ./.github/workflows/_cd-by-environment.yml
     secrets: inherit # pragma: allowlist secret`
