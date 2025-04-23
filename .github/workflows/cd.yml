@@ -32,3 +32,8 @@ jobs:
     secrets: inherit # pragma: allowlist secret`
     with:
       environment: prod
+
+# Address actions/missing-workflow-permissions rule in
+# code scanning alerts
+permissions:
+  contents: read
