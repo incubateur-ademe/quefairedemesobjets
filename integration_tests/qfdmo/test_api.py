@@ -1,10 +1,24 @@
 import pytest
 from django.contrib.gis.geos import Point
+from django.core.management import call_command
 
-from qfdmo.models.acteur import ActeurStatus
+from qfdmo.models.acteur import ActeurService, ActeurStatus
+from qfdmo.models.action import GroupeAction
 from unit_tests.qfdmo.acteur_factory import DisplayedActeurFactory
 
 BASE_URL = "http://localhost:8000/api/qfdmo"
+
+
+@pytest.fixture(scope="session")
+def django_db_setup(django_db_setup, django_db_blocker):
+    with django_db_blocker.unblock():
+        call_command(
+            "loaddata",
+            "categories",
+            "actions",
+            "acteur_services",
+            "acteur_types",
+        )
 
 
 @pytest.mark.django_db
@@ -21,6 +35,7 @@ def test_get_groupe_actions(client):
     response = client.get(f"{BASE_URL}/actions/groupes")
     assert response.status_code == 200
     assert isinstance(response.json(), list)
+    assert len(response.json()) == GroupeAction.objects.filter(afficher=True).count()
 
 
 @pytest.mark.django_db
@@ -66,6 +81,7 @@ def test_get_acteurs_services(client):
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)
+    assert len(data) == ActeurService.objects.all().count()
     assert "code" in data[0]
     assert "id" in data[0]
     assert "libelle" in data[0]
