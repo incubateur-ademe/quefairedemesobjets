@@ -3,10 +3,7 @@ name: 🔢 Release
 
 on:
   push:
-    branches: [ $default-branch ]
-
-  pull_request:
-    types: [opened, reopened, synchronize]
+    branches: [ "main" ]
 
 permissions:
   contents: read
@@ -15,7 +12,6 @@ jobs:
   update_release_draft:
     permissions:
       contents: write
-      pull-requests: write
     runs-on: ubuntu-latest
     steps:
       - uses: release-drafter/release-drafter@v6
