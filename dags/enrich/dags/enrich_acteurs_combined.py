@@ -14,8 +14,8 @@ from enrich.tasks.airflow_logic.enrich_dbt_models_refresh_task import (
 from shared.config import CATCHUPS, SCHEDULES, START_DATES, config_to_airflow_params
 
 with DAG(
-    dag_id="enrich_acteurs_properties",
-    dag_display_name="🔢 Enrichir - Acteurs avec propriétés calculées",
+    dag_id="enrich_acteurs_combined",
+    dag_display_name="🔢 Enrichir - Acteurs combinés (base + rev + displayed)",
     default_args={
         "owner": "airflow",
         "depends_on_past": False,
@@ -23,18 +23,15 @@ with DAG(
         "email_on_retry": False,
         "retries": 0,
     },
-    description=(
-        "Un DAG pour détécter et remplacer les acteurs fermés"
-        "dans l'Annuaire Entreprises (AE)"
-    ),
-    tags=["acteurs", "base", "revision", "displayed"],
+    description=("Un DAG des acteurs combinés (base + rev + displayed)"),
+    tags=["acteurs", "base", "revision", "displayed", "combined"],
     schedule=SCHEDULES.DAILY,
     catchup=CATCHUPS.AWLAYS_FALSE,
     start_date=START_DATES.YESTERDAY,
     params=config_to_airflow_params(
         EnrichActeursPropertiesConfig(
             dbt_models_refresh=True,
-            dbt_models_refresh_command=("dbt build --select marts_acteurs_properties"),
+            dbt_models_refresh_command=("dbt build --select marts_acteurs_combined"),
         )
     ),
 ) as dag:
