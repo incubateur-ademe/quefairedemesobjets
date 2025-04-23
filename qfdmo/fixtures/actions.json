@@ -23,6 +23,7 @@
             "description": null,
             "order": 1,
             "couleur": "#C3992A",
+            "fill": true,
             "icon": "fr-icon-tools-fill"
         }
     },

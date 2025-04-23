@@ -9,6 +9,8 @@ PYTHON := poetry run python
 DJANGO_ADMIN := $(PYTHON) manage.py
 PYTEST := poetry run pytest
 DB_URL := postgres://qfdmo:qfdmo@localhost:6543/qfdmo# pragma: allowlist secret
+ASSISTANT_URL := quefairedemesdechets.ademe.local
+LVAO_URL := lvao.ademe.local
 
 # Makefile config
 .PHONY: check
@@ -16,6 +18,10 @@ check:
 	@source .venv/bin/activate; python --version; pip --version
 	@npm --version
 	@node --version
+
+.PHONY: init-certs
+init-certs:
+	docker run -ti -v ./nginx-local-only/certs:/app/certs -w /app/certs --rm alpine/mkcert $(LVAO_URL) $(ASSISTANT_URL)
 
 
 .PHONY: init-dev
@@ -26,6 +32,7 @@ init-dev:
 	# python
 	curl -sSL https://install.python-poetry.org | python3 -
 	poetry install --with dev,airflow
+	make init-certs
 	# javascript
 	npm install
 	npx playwright install --with-deps
@@ -50,7 +57,6 @@ run-airflow:
 
 .PHONY: run-django
 run-django:
-	docker compose --profile lvao up -d
 	rm -rf .parcel-cache
 	honcho start -f Procfile.dev
 
@@ -85,18 +91,6 @@ createsuperuser:
 seed-database:
 	$(DJANGO_ADMIN) loaddata categories actions acteur_services acteur_types acteurs objets
 
-.PHONY: drop-db
-drop-db:
-	docker compose exec lvao-db dropdb -f -i -U qfdmo -e qfdmo
-
-.PHONY: create-db
-create-db:
-	docker compose exec lvao-db createdb -U qfdmo -e qfdmo
-
-.PHONY: restore-prod
-restore-prod:
-	./scripts/restore_prod_locally.sh
-
 .PHONY: clear-cache
 clear-cache:
 	$(DJANGO_ADMIN) clear_cache --all
@@ -112,7 +106,7 @@ unit-test:
 
 .PHONY: e2e-test
 e2e-test:
-	npx playwright test
+	npx playwright test --update-snapshots --ui
 	$(PYTEST) ./integration_tests
 
 .PHONY: a11y
@@ -135,17 +129,32 @@ extract-dsfr:
 	$(PYTHON) ./dsfr_hacks/extract_used_colors.py
 	$(PYTHON) ./dsfr_hacks/extract_used_icons.py
 
-# RESTORE DB LOCALLY
-.PHONY: db-restore
-db-restore:
+# Postgres database utilities: restore, drop database etc
+.PHONY: drop-db
+drop-db:
+	docker compose exec lvao-db dropdb -f -i -U qfdmo -e qfdmo
+
+.PHONY: create-db
+create-db:
+	docker compose exec lvao-db createdb -U qfdmo -e qfdmo
+
+.PHONY: dump-production
+dump-production:
 	mkdir -p tmpbackup
 	scalingo --app quefairedemesobjets --addon postgresql backups-download --output tmpbackup/backup.tar.gz
 	tar xfz tmpbackup/backup.tar.gz --directory tmpbackup
-	@DUMP_FILE=$$(find tmpbackup -type f -name "*.pgsql" -print -quit); \
-	for table in $$(psql "$(DB_URL)" -t -c "SELECT tablename FROM pg_tables WHERE schemaname='public'"); do \
-	    psql "$(DB_URL)" -c "DROP TABLE IF EXISTS $$table CASCADE"; \
-	done || true
+
+.PHONY: load-production-dump
+load-production-dump:
 	@DUMP_FILE=$$(find tmpbackup -type f -name "*.pgsql" -print -quit); \
 	pg_restore -d "$(DB_URL)" --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
 	rm -rf tmpbackup
-	$(DJANGO_ADMIN) migrate
+
+.PHONY: db-restore
+db-restore:
+	make drop-db
+	make create-db
+	make dump-production
+	make load-production-dump
+	make migrate
+

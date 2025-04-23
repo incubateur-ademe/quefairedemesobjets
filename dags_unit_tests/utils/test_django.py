@@ -1,7 +1,6 @@
 import pandas as pd
 import pytest
-
-from dags.utils.django import (
+from utils.django import (
     django_model_fields_get,
     django_model_queryset_generate,
     django_model_queryset_to_sql,

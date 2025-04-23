@@ -1,5 +1,10 @@
 <p class="qf-inline-flex qf-gap-1w qf-m-0">
-    <span class="fr-px-1v qf-text-white {{ groupe_action.icon }}
-        fr-icon--sm qf-rounded-full qf-bg-{{ groupe_action.primary }}" aria-hidden="true"></span>
-    {{ groupe_action.libelle }}
+    <span class="fr-px-1v {{ groupe_action.icon }}
+        qf-mb-auto
+        fr-icon--sm qf-rounded-full
+        {% if groupe_action.fill %}qf-text-white qf-bg-{{ groupe_action.primary }}
+        {% else %}qf-text-{{ groupe_action.primary }} qf-bg-white{% endif %}
+        qf-border-{{ groupe_action.primary }} qf-border-2 qf-border-solid"
+        aria-hidden="true"></span>
+        {{ groupe_action.libelle }}
 </p>

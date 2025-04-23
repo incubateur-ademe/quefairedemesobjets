@@ -199,7 +199,10 @@ export default class extends Controller<HTMLElement> {
     }
 
     this.acteurDetailsPanelTarget.dataset.exitAnimationEnded = "false"
-    this.acteurDetailsPanelTarget.scrollIntoView()
+    if (window.matchMedia('screen and (max-width:768px)').matches) {
+      this.acteurDetailsPanelTarget.scrollIntoView()
+    }
+
 
   }
 

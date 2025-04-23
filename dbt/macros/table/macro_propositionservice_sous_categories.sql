@@ -5,7 +5,7 @@ with
     AS
     (
         SELECT
-            CONCAT(pps.parent_id::text, '_', pps.action_id::text) AS propositionservice_id,
+            CONCAT(pps.parent_id::varchar, '_', pps.action_id::varchar)::varchar AS propositionservice_id,
             pssscat.souscategorieobjet_id AS souscategorieobjet_id
         FROM {{ ref("int_propositionservice_sous_categories") }} AS pssscat
             INNER JOIN {{ ref(ephemeral_filtered_parentpropositionservice) }} AS pps

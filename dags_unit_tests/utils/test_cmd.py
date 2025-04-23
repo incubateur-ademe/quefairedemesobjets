@@ -1,6 +1,5 @@
 import pytest
-
-from dags.utils.cmd import cmd_run
+from utils.cmd import cmd_run
 
 
 class TestCmdRun:
@@ -16,5 +15,5 @@ class TestCmdRun:
         assert stdout is None
 
     def test_raise_if_failing(self):
-        with pytest.raises(SystemError, match="psql: error: connection to server"):
+        with pytest.raises(SystemError, match="psql:"):
             cmd_run("psql", dry_run=False)

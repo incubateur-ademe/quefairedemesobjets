@@ -1,7 +1,7 @@
 from urllib.parse import urlencode
 
-from django.conf import settings
 from django.contrib.gis.db import models
+from django.urls.base import reverse
 from django.utils.functional import cached_property
 
 from qfdmo.models.utils import CodeAsNaturalKeyModel
@@ -58,7 +58,8 @@ class SousCategorieObjet(CodeAsNaturalKeyModel):
     def url_carte(self):
         if self.afficher_carte:
             params = urlencode(self.carte_settings)
-            return f"{settings.BASE_URL}/?{params}"
+            url = reverse("qfdmo:carte")
+            return f"{url}?{params}"
 
     def natural_key(self) -> tuple[str]:
         return (self.code,)

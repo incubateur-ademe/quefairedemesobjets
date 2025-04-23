@@ -1,16 +1,20 @@
+{% if carte_config and not carte_config.hide_legend %}
 <aside
     data-testid="carte-legend"
     class="
-    qf-pl-3w qf-pb-2w qf-pr-2w qf-max-w-[17rem]
+    qf-pl-3w qf-py-2w qf-pr-2w qf-max-w-[17rem]
     qf-hidden lg:qf-block
     qf-absolute qf-bottom-0 qf-left-0 qf-z-10
     qf-bg-white qf-drop-shadow-lg"
 >
-    <h2 class="fr-h4 fr-my-2w">
+
+    {% if form.legend_grouped_action|length > 1 %}
+    <h2 class="fr-h4 fr-mb-2w">
         Actions possibles
     </h2>
     {{form.legend_grouped_action}}
     <hr class="qf-pb-2w qf-pt-0">
+    {% endif %}
     <button
         class="fr-mb-1w fr-btn fr-btn--sm fr-btn--secondary fr-btn--icon-left
         fr-icon-equalizer-line
@@ -39,7 +43,9 @@
         qf-w-full qf-flex qf-justify-center"
         type="button"
         data-action="click -> search-solution-form#toggleAPropos"
+        data-remove-if-internal
     >
         Infos
     </button>
 </aside>
+{% endif %}

@@ -205,7 +205,7 @@ class TestActeurGetOrCreateRevisionActeur:
         revision_acteur2 = acteur.get_or_create_revision()
 
         assert revision_acteur2 == revision_acteur
-        assert revision_acteur2.nom is None
+        assert revision_acteur2.nom == ""
         assert (
             revision_acteur2.proposition_services.values_list("action__code").all()
             != acteur.proposition_services.values_list("action__code").all()
@@ -284,7 +284,6 @@ class TestCreateRevisionActeur:
 
 @pytest.mark.django_db
 class TestCreateRevisionActeurCreateParent:
-
     @pytest.fixture
     def acteurs_fields(self):
         acteur_type = ActeurTypeFactory()
@@ -340,7 +339,7 @@ class TestCreateRevisionActeurCreateParent:
 
         # reset values
         assert revision_acteur_parent.source is None
-        assert revision_acteur_parent.identifiant_externe is None
+        assert revision_acteur_parent.identifiant_externe == ""
 
         # parent is not linked to any labels, services or proposition services
         assert revision_acteur_parent.labels.count() == 0
@@ -358,7 +357,7 @@ class TestCreateRevisionActeurCreateParent:
         revision_acteur = RevisionActeurFactory(
             **acteurs_fields,
             identifiant_unique=acteur.identifiant_unique,
-            nom=None,
+            nom="",
             location=None,
             acteur_type=None,
         )
@@ -382,7 +381,7 @@ class TestCreateRevisionActeurCreateParent:
 
         # reset values
         assert revision_acteur_parent.source is None
-        assert revision_acteur_parent.identifiant_externe is None
+        assert revision_acteur_parent.identifiant_externe == ""
 
         # parent is not linked to any labels, services or proposition services
         assert revision_acteur_parent.labels.count() == 0
@@ -437,7 +436,7 @@ class TestRevisionActeurDuplicate:
         acteur_type = ActeurTypeFactory()
         revision_acteur = RevisionActeurFactory(
             identifiant_unique=acteur.identifiant_unique,
-            nom_commercial=None,
+            nom_commercial="",
             nom="Nom Revision",
             action_principale=action,
             acteur_type=acteur_type,
@@ -511,7 +510,6 @@ class TestRevisionActeurDuplicate:
 
 @pytest.mark.django_db
 class TestRevisionActeurRemoveParentWithoutChildren:
-
     def test_revision_acteur_remove_parent_without_children(self):
         revision_acteur_original_parent = RevisionActeurFactory()
         revision_acteur = RevisionActeurFactory(parent=revision_acteur_original_parent)
@@ -564,12 +562,11 @@ class TestRevisionActeurRemoveParentWithoutChildren:
 
 @pytest.mark.django_db
 class TestActeurService:
-
     @pytest.fixture
     def displayed_acteur(self):
         return DisplayedActeurFactory()
 
-    def test_acteur_actions_basic(self, displayed_acteur):
+    def test_acteur_services_basic(self, displayed_acteur):
         displayed_acteur.acteur_services.add(
             ActeurServiceFactory(libelle="Par un professionnel")
         )
@@ -578,7 +575,7 @@ class TestActeurService:
             "Par un professionnel"
         ]
 
-    def test_acteur_actions_multiple(self, displayed_acteur):
+    def test_acteur_services_multiple(self, displayed_acteur):
         displayed_acteur.acteur_services.add(
             ActeurServiceFactory(code="pro", libelle="Par un professionnel"),
             ActeurServiceFactory(
@@ -590,6 +587,44 @@ class TestActeurService:
             "Atelier pour réparer soi-même",
             "Par un professionnel",
         ]
+
+
+@pytest.mark.django_db
+class TestActeurActions:
+    @pytest.fixture
+    def displayed_acteur(self):
+        return DisplayedActeurFactory()
+
+    def test_acteur_actions_filtered(self, displayed_acteur):
+        direction_jai = ActionDirectionFactory(code="jai")
+        action = ActionFactory(code="reparer")
+        action.directions.add(direction_jai)
+        DisplayedPropositionServiceFactory(acteur=displayed_acteur, action=action)
+
+        assert len(displayed_acteur.acteur_actions()) == 1, (
+            "ensure no filters on the action or direction"
+            "generates a non-empty list of acteurs"
+        )
+        assert len(displayed_acteur.acteur_actions(direction="jai")) == 1, (
+            "a filter with acteurs providing services for this action direct"
+            "for this direction generates an empty list of acteurs",
+        )
+        assert len(displayed_acteur.acteur_actions(direction="jecherche")) == 0, (
+            "a filter without acteurs providing services for this action direct"
+            "for this direction generates an empty list of acteurs",
+        )
+        assert (
+            len(displayed_acteur.acteur_actions(actions_codes="reparer|vendre")) == 1
+        ), (
+            "a filter with acteur providing services for this action code returns",
+            "a non-empty list",
+        )
+        assert (
+            len(displayed_acteur.acteur_actions(actions_codes="trier|vendre")) == 0
+        ), (
+            "a filter without acteurs providing services for this action code returns",
+            "an empty list",
+        )
 
 
 class TestActeurPropositionServicesByDirection:
@@ -618,7 +653,6 @@ class TestActeurLabel:
 
 @pytest.mark.django_db
 class TestDisplayActeurActeurActions:
-
     def test_basic(self):
         displayed_acteur = DisplayedActeurFactory()
         direction = ActionDirectionFactory(code="jai")
@@ -649,7 +683,7 @@ class TestDisplayActeurActeurActions:
         action = ActionFactory()
         action.directions.add(direction)
         DisplayedPropositionServiceFactory(action=action, acteur=displayed_acteur)
-        assert displayed_acteur.acteur_actions(direction="fake") == []
+        assert len(displayed_acteur.acteur_actions(direction="fake")) == 0
         assert [
             model_to_dict(a, exclude=["directions"])
             for a in displayed_acteur.acteur_actions(direction="jai")
@@ -683,7 +717,6 @@ class TestDisplayActeurActeurActions:
 
 @pytest.mark.django_db
 class TestDisplayedActeurJsonActeurForDisplay:
-
     @pytest.fixture
     def displayed_acteur(self):
         displayed_acteur = DisplayedActeurFactory()
@@ -873,9 +906,56 @@ class TestDisplayedActeurJsonActeurForDisplay:
         assert acteur_for_display["icon"] == "icon-actionjai1"
         assert acteur_for_display["couleur"] == "couleur-actionjai1"
 
+    def test_json_acteur_for_display_with_sous_categorie(self, displayed_acteur):
+        action_1 = ActionFactory(code="actionjai1")
+        action_2 = ActionFactory(code="actionjai2")
+
+        displayed_acteur.action_principale = action_2
+        displayed_acteur.save()
+        sous_categorie = SousCategorieObjetFactory()
+
+        acteur_for_display = json.loads(
+            displayed_acteur.json_acteur_for_display(
+                action_list="actionjai1|actionjai2", sous_categorie_id=sous_categorie.id
+            )
+        )
+
+        assert "icon" not in acteur_for_display, (
+            "No icon is displayed if "
+            "it does not match the sous categorie filtered on the map"
+        )
+
+        pss = DisplayedPropositionServiceFactory(
+            action=action_1, acteur=displayed_acteur
+        )
+        pss.sous_categories.add(sous_categorie)
+
+        acteur_for_display = json.loads(
+            displayed_acteur.json_acteur_for_display(
+                action_list="actionjai1|actionjai2", sous_categorie_id=sous_categorie.id
+            )
+        )
+        assert acteur_for_display["icon"] == "icon-actionjai1", (
+            "The icon matching the sous categorie of map's sous categorie filter"
+            " is displayed on the pinpoint."
+        )
+
+        another_pss = DisplayedPropositionServiceFactory(
+            action=action_2, acteur=displayed_acteur
+        )
+        another_pss.sous_categories.add(sous_categorie)
+        acteur_for_display = json.loads(
+            displayed_acteur.json_acteur_for_display(
+                action_list="actionjai1|actionjai2", sous_categorie_id=sous_categorie.id
+            )
+        )
+        assert acteur_for_display["icon"] == "icon-actionjai2", (
+            "The pinpoint of action_principale is displayed if multiple"
+            " actions match the map's sous categorie filter"
+        )
+
 
 class TestDisplayedActeurDisplayPostalAddress:
-
     def test_should_display_adresse(self):
         displayed_acteur = DisplayedActeurFactory.build()
 

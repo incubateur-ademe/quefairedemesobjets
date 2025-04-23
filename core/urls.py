@@ -16,16 +16,20 @@ Including another URLconf
 """
 
 from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.sitemaps import GenericSitemap
 from django.contrib.sitemaps import views as sitemaps_views
 from django.urls import include, path
 from django.views.generic import TemplateView
+from wagtail import urls as wagtail_urls
+from wagtail.admin import urls as wagtailadmin_urls
+from wagtail.documents import urls as wagtaildocs_urls
 
 from qfdmo.models.acteur import ActeurStatus, DisplayedActeur
 
 from .api import api
-from .views import direct_access
+from .views import direct_access, robots_txt
 
 info_dict = {
     "queryset": DisplayedActeur.objects.filter(statut=ActeurStatus.ACTIF).order_by(
@@ -46,6 +50,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", api.urls),
     path("explorer/", include("explorer.urls")),
+    path("robots.txt", robots_txt),
     path(
         "sitemap.xml",
         sitemaps_views.index,
@@ -78,3 +83,14 @@ if settings.DEBUG:
         ]
     )
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# Wagtail urls
+urlpatterns.extend(
+    [
+        path("cms/", include(wagtailadmin_urls)),
+        path("documents/", include(wagtaildocs_urls)),
+        # This URL should not be move above other "" paths in order to prevent
+        # Wagtail pages' slugs to override internal routes defined in the project
+        path("", include(wagtail_urls)),
+    ]
+)

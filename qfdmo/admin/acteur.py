@@ -361,6 +361,7 @@ class RevisionActeurParentAdmin(admin.ModelAdmin):
                     .distinct()
                 ),
             )
+            .order_by("-modifie_le")
         )
 
 
@@ -576,14 +577,31 @@ class DisplayedActeurResource(ActeurResource):
         model = DisplayedActeur
 
 
-class OpenSourceDisplayedActeurResource(resources.ModelResource):
+class GenericExporterMixin:
+    licenses = []
+
+    def get_sources(self, acteur):
+        sources = ["Longue Vie Aux Objets", "ADEME"]
+        acteur_sources = acteur.sources.all()
+        if self.licenses:
+            acteur_sources = acteur_sources.filter(licence__in=self.licenses)
+        sources.extend([f"{source.libelle}" for source in acteur_sources])
+        seen = set()
+        deduplicated_sources = []
+        for source in sources:
+            if source not in seen:
+                deduplicated_sources.append(source)
+                seen.add(source)
+        return deduplicated_sources
+
+
+class OpenSourceDisplayedActeurResource(resources.ModelResource, GenericExporterMixin):
     """
     Only used to export data to open-source in Koumoul
     """
 
     limit = 0
     offset = 0
-    licenses = []
 
     def __init__(
         self, limit: int = 0, offset: int = 0, licenses: List[str] = [], **kwargs
@@ -597,18 +615,8 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource):
     sources = fields.Field(column_name="Paternité", attribute="sources", readonly=True)
 
     def dehydrate_sources(self, acteur):
-        sources = ["Longue Vie Aux Objets", "ADEME"]
-        acteur_sources = acteur.sources.all()
-        if self.licenses:
-            acteur_sources = acteur_sources.filter(licence__in=self.licenses)
-        sources.extend([f"{source.libelle}" for source in acteur_sources])
-        seen = set()
-        deduplicated_sources = []
-        for source in sources:
-            if source not in seen:
-                deduplicated_sources.append(source)
-                seen.add(source)
-        return "|".join(deduplicated_sources)
+        sources = self.get_sources(acteur)
+        return "|".join(sources)
 
     nom = fields.Field(column_name="Nom", attribute="nom", readonly=True)
     nom_commercial = fields.Field(
@@ -771,7 +779,9 @@ class OpenSourceDisplayedActeurResource(resources.ModelResource):
 
 
 class DisplayedActeurAdmin(import_export_admin.ExportMixin, BaseActeurAdmin):
-    change_form_template = "admin/displayed_acteur/change_form.html"
+    list_display = list(BaseActeurAdmin.list_display) + ["uuid"]
+    search_fields = list(BaseActeurAdmin.search_fields) + ["uuid"]
+    change_form_template = "admin/acteur/change_form.html"
     gis_widget = CustomOSMWidget
     base_fields = list(BaseActeurAdmin.fields)
     base_fields.remove("source")
@@ -807,6 +817,8 @@ class VueActeurLabelQualiteInline(NotMutableMixin, admin.StackedInline):
 
 
 class VueActeurAdmin(NotMutableMixin, BaseActeurAdmin):
+    list_display = list(BaseActeurAdmin.list_display) + ["uuid"]
+    search_fields = list(BaseActeurAdmin.search_fields) + ["uuid"]
     inlines = [
         VuePropositionServiceInline,
         VueActeurLabelQualiteInline,

@@ -1,0 +1,1 @@
+select id, acteur_id, action_id from {{ ref('marts_exhaustive_propositionservice') }}

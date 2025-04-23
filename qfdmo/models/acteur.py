@@ -35,7 +35,7 @@ from django.utils.functional import cached_property
 from unidecode import unidecode
 
 from core.constants import DIGITAL_ACTEUR_CODE
-from core.models import TimestampedModel
+from core.models.mixin import TimestampedModel
 from core.validators import EmptyEmailValidator
 from dags.sources.config.shared_constants import (
     EMPTY_ACTEUR_FIELD,
@@ -44,6 +44,11 @@ from dags.sources.config.shared_constants import (
 )
 from qfdmo.models.action import Action, get_action_instances
 from qfdmo.models.categorie_objet import SousCategorieObjet
+
+# Explicit imports from models config, action, categories, utils
+# and not from qfdmo.models are required here to prevent circular
+# dependency import error.
+from qfdmo.models.config import CarteConfig, GroupeActionConfig
 from qfdmo.models.utils import (
     CodeAsNaturalKeyModel,
     NomAsNaturalKeyManager,
@@ -109,11 +114,13 @@ class ActeurPublicAccueilli(models.TextChoices):
     PROFESSIONNELS = "Professionnels", "Professionnels"
     PARTICULIERS = "Particuliers", "Particuliers"
     AUCUN = "Aucun", "Aucun"
+    UNKNOWN = "", ""
 
 
 class ActeurReprise(models.TextChoices):
     UN_POUR_ZERO = REPRISE_1POUR0, "1 pour 0"
     UN_POUR_UN = REPRISE_1POUR1, "1 pour 1"
+    UNKNOWN = "", ""
 
 
 class ActeurType(CodeAsNaturalKeyModel):
@@ -186,6 +193,13 @@ class Source(CodeAsNaturalKeyModel):
         choices=DataLicense,
         db_default=DataLicense.NO_LICENSE,
     )
+
+    @property
+    def logo_file_absolute_url(self) -> str:
+        if not self.logo_file:
+            return ""
+
+        return f"{settings.BASE_URL}{self.logo_file.url}"
 
 
 def validate_opening_hours(value):
@@ -303,55 +317,72 @@ class DisplayedActeurManager(NomAsNaturalKeyManager):
 
 
 class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
-
     class Meta:
         abstract = True
 
-    nom = models.CharField(max_length=255, blank=False, null=False)
-    description = models.TextField(blank=True, null=True)
+    nom = models.CharField(max_length=255, blank=False, null=False, db_index=True)
+    description = models.TextField(blank=True, default="", db_default="")
     identifiant_unique = models.CharField(
-        max_length=255, unique=True, primary_key=True, blank=True
+        max_length=255, unique=True, primary_key=True, blank=True, db_index=True
     )
     acteur_type = models.ForeignKey(ActeurType, on_delete=models.CASCADE)
-    adresse = models.CharField(max_length=255, blank=True, null=True)
-    adresse_complement = models.CharField(max_length=255, blank=True, null=True)
-    code_postal = models.CharField(max_length=10, blank=True, null=True)
-    ville = models.CharField(max_length=255, blank=True, null=True)
-    url = models.CharField(max_length=2048, blank=True, null=True)
-    email = models.EmailField(blank=True, null=True)
+    adresse = models.CharField(max_length=255, blank=True, default="", db_default="")
+    adresse_complement = models.CharField(
+        max_length=255, blank=True, default="", db_default=""
+    )
+    code_postal = models.CharField(
+        max_length=10, blank=True, default="", db_default="", db_index=True
+    )
+    ville = models.CharField(
+        max_length=255, blank=True, default="", db_default="", db_index=True
+    )
+    url = models.CharField(max_length=2048, blank=True, default="", db_default="")
+    email = models.EmailField(blank=True, default="", db_default="")
     location = models.PointField(blank=True, null=True)
-    telephone = models.CharField(max_length=255, blank=True, null=True)
-    nom_commercial = models.CharField(max_length=255, blank=True, null=True)
-    nom_officiel = models.CharField(max_length=255, blank=True, null=True)
+    telephone = models.CharField(max_length=255, blank=True, default="", db_default="")
+    nom_commercial = models.CharField(
+        max_length=255, blank=True, default="", db_default=""
+    )
+    nom_officiel = models.CharField(
+        max_length=255, blank=True, default="", db_default=""
+    )
     labels = models.ManyToManyField(LabelQualite)
     acteur_services = models.ManyToManyField(ActeurService, blank=True)
-    siren = models.CharField(max_length=9, blank=True, null=True)
-    siret = models.CharField(max_length=14, blank=True, null=True)
+    siren = models.CharField(
+        max_length=9, blank=True, default="", db_default="", db_index=True
+    )
+    siret = models.CharField(
+        max_length=14, blank=True, default="", db_default="", db_index=True
+    )
     source = models.ForeignKey(Source, on_delete=models.CASCADE, blank=True, null=True)
-    identifiant_externe = models.CharField(max_length=255, blank=True, null=True)
+    identifiant_externe = models.CharField(
+        max_length=255, blank=True, default="", db_default=""
+    )
     statut = models.CharField(
         max_length=255,
         default=ActeurStatus.ACTIF,
         choices=ActeurStatus.choices,
         db_default=ActeurStatus.ACTIF,
     )
-    naf_principal = models.CharField(max_length=255, blank=True, null=True)
-    commentaires = models.TextField(blank=True, null=True)
-    horaires_osm = models.CharField(
-        blank=True, null=True, validators=[validate_opening_hours]
+    naf_principal = models.CharField(
+        max_length=255, blank=True, default="", db_default=""
     )
-    horaires_description = models.TextField(blank=True, null=True)
+    commentaires = models.TextField(blank=True, default="", db_default="")
+    horaires_osm = models.CharField(
+        blank=True, default="", db_default="", validators=[validate_opening_hours]
+    )
+    horaires_description = models.TextField(blank=True, default="", db_default="")
 
     public_accueilli = models.CharField(
         max_length=255,
         choices=ActeurPublicAccueilli.choices,
-        null=True,
+        default=ActeurPublicAccueilli.UNKNOWN,
         blank=True,
     )
     reprise = models.CharField(
         max_length=255,
         choices=ActeurReprise.choices,
-        null=True,
+        default=ActeurReprise.UNKNOWN,
         blank=True,
     )
     exclusivite_de_reprisereparation = models.BooleanField(
@@ -595,7 +626,6 @@ class Acteur(BaseActeur):
         )
 
     def get_or_create_revision(self):
-        # TODO : to be deprecated
         fields = model_to_dict(
             self,
             fields=[
@@ -677,12 +707,16 @@ class RevisionActeur(BaseActeur):
     def is_parent(self):
         return self.pk and self.duplicats.exists()
 
-    nom = models.CharField(max_length=255, blank=True, null=True)
+    nom = models.CharField(max_length=255, blank=True, default="", db_default="")
     acteur_type = models.ForeignKey(
         ActeurType, on_delete=models.CASCADE, blank=True, null=True
     )
     email = models.CharField(
-        max_length=254, blank=True, null=True, validators=[EmptyEmailValidator()]
+        max_length=254,
+        blank=True,
+        default="",
+        db_default="",
+        validators=[EmptyEmailValidator()],
     )
 
     @property
@@ -765,7 +799,7 @@ class RevisionActeur(BaseActeur):
         )
 
         default_acteur_fields = {
-            k: None if v == EMPTY_ACTEUR_FIELD else v
+            k: "" if v == EMPTY_ACTEUR_FIELD else v
             for k, v in default_acteur_fields.items()
         }
 
@@ -880,6 +914,8 @@ class VueActeur(BaseActeur):
         verbose_name = "Vue sur l'acteur"
         verbose_name_plural = "Vues sur tous les acteurs"
 
+    uuid = models.CharField(max_length=255, default=shortuuid.uuid, editable=False)
+
     parent = models.ForeignKey(
         "self",
         verbose_name="Dédupliqué par",
@@ -903,7 +939,9 @@ class DisplayedActeur(BaseActeur):
         verbose_name = "ACTEUR de l'EC - AFFICHÉ"
         verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ"
 
-    uuid = models.CharField(max_length=255, default=shortuuid.uuid, editable=False)
+    uuid = models.CharField(
+        max_length=255, default=shortuuid.uuid, editable=False, db_index=True
+    )
 
     # Table name qfdmo_displayedacteur_sources
     sources = models.ManyToManyField(
@@ -935,19 +973,27 @@ class DisplayedActeur(BaseActeur):
     def get_absolute_url(self):
         return reverse("qfdmo:acteur-detail", args=[self.uuid])
 
-    def acteur_actions(self, direction=None):
-        ps_action_ids = list(
-            {ps.action_id for ps in self.proposition_services.all()}  # type: ignore
-        )
+    def acteur_actions(
+        self, direction=None, actions_codes=None, sous_categorie_id=None
+    ):
+        pss = self.proposition_services.all()
         # Cast needed because of the cache
         cached_action_instances = cast(
             List[Action], cache.get_or_set("_action_instances", get_action_instances)
         )
+
+        if sous_categorie_id:
+            pss = pss.filter(sous_categories__id__in=[sous_categorie_id])
+        if direction:
+            pss = pss.filter(action__directions__code__in=[direction])
+        if actions_codes:
+            pss = pss.filter(action__code__in=actions_codes.split("|"))
+
+        action_ids_to_display = pss.values_list("action__id", flat=True)
         return [
             action
             for action in cached_action_instances
-            if (not direction or direction in [d.code for d in action.directions.all()])
-            and action.id in ps_action_ids
+            if action.id in action_ids_to_display
         ]
 
     def json_acteur_for_display(
@@ -955,13 +1001,19 @@ class DisplayedActeur(BaseActeur):
         direction: str | None = None,
         action_list: str | None = None,
         carte: bool = False,
+        carte_config: CarteConfig = None,
+        sous_categorie_id: str | None = None,
     ) -> str:
-        actions = self.acteur_actions(direction=direction)
+        # TODO: refacto jinja: once the shared/results.html template
+        # will be migrated to django template, this method should
+        # live in a template_tags instead.
+        actions = self.acteur_actions(
+            direction=direction,
+            actions_codes=action_list,
+            sous_categorie_id=sous_categorie_id,
+        )
 
-        if action_list:
-            actions = [a for a in actions if a.code in action_list.split("|")]
-
-        def sort_actions(a):
+        def sort_actions_by_action_principale_and_order(a):
             if a == self.action_principale:
                 return -1
 
@@ -970,27 +1022,54 @@ class DisplayedActeur(BaseActeur):
                 base_order += (a.groupe_action.order or 0) * 100
             return base_order
 
-        actions = sorted(actions, key=sort_actions)
-
         acteur_dict = {
             "uuid": self.uuid,
             "location": orjson.loads(self.location.geojson),
         }
 
         if not actions:
+            # TODO: explain why we need to decode here
             return orjson.dumps(acteur_dict).decode("utf-8")
 
-        displayed_action = actions[0]
+        action_to_display = sorted(
+            actions, key=sort_actions_by_action_principale_and_order
+        )[0]
 
-        if carte and displayed_action.groupe_action:
-            displayed_action = displayed_action.groupe_action
+        if carte and action_to_display.groupe_action:
+            action_to_display = action_to_display.groupe_action
 
-        acteur_dict.update(icon=displayed_action.icon, couleur=displayed_action.couleur)
+        acteur_dict.update(
+            icon=action_to_display.icon,
+            couleur=action_to_display.couleur,
+        )
 
-        if carte and displayed_action.code == "reparer":
+        if carte_config:
+            queryset = Q()
+            if action_to_display:
+                queryset &= Q(groupe_action__actions__code__in=[action_to_display]) | Q(
+                    groupe_action__actions__code=None
+                )
+
+            if self.acteur_type:
+                queryset &= Q(acteur_type=self.acteur_type) | Q(acteur_type=None)
+
+            try:
+                groupe_action_config = carte_config.groupe_action_configs.get(queryset)
+                if groupe_action_config.icon:
+                    # Property is camelcased as it is used in javascript
+                    acteur_dict.update(iconFile=groupe_action_config.icon.url)
+                    # In this case, a svg file uploaded by a user is used
+                    # in place of the DSFR's icon code.
+                    del acteur_dict["icon"]
+
+            except GroupeActionConfig.DoesNotExist:
+                pass
+
+        if carte and action_to_display.code == "reparer":
             acteur_dict.update(
                 bonus=getattr(self, "bonus", False),
                 reparer=getattr(self, "reparer", False),
+                fillBackground=True,
             )
 
         return orjson.dumps(acteur_dict).decode("utf-8")
@@ -1017,7 +1096,6 @@ class DisplayedActeur(BaseActeur):
 
 
 class DisplayedActeurTemp(BaseActeur):
-
     uuid = models.CharField(max_length=255, default=shortuuid.uuid, editable=False)
 
     labels = models.ManyToManyField(
@@ -1180,6 +1258,7 @@ class DisplayedPropositionService(BasePropositionService):
         verbose_name = "Proposition de service - AFFICHÉ"
         verbose_name_plural = "Proposition de service - AFFICHÉ"
 
+    # id = models.CharField(primary_key=True)
     acteur = models.ForeignKey(
         DisplayedActeur,
         on_delete=models.CASCADE,

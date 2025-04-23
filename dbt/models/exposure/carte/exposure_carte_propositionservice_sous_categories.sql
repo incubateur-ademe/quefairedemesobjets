@@ -1,1 +1,0 @@
-select * from {{ ref('marts_carte_propositionservice_sous_categories') }}

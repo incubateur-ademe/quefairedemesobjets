@@ -11,13 +11,20 @@ copyright = "2024, Fabien Le Frapper (@fabienheureux), Nicolas Oudard, Max Corbe
 author = "Fabien Le Frapper, Nicolas Oudard, Max Corbeaux"
 
 # Add MyST Parser extension
-extensions = ["myst_parser"]
+extensions = ["sphinxcontrib.mermaid", "myst_parser"]
 
 # Configure source suffix to recognize Markdown files
 source_suffix = {
     ".rst": "restructuredtext",
     ".md": "markdown",
 }
+
+# Enable MyST options for diagrams and other rich features
+myst_enable_extensions = [
+    "colon_fence",  # Supports ::: fenced blocks
+]
+
+myst_fence_as_directive = ["mermaid"]
 
 master_doc = "README"
 

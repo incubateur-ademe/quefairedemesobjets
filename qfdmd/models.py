@@ -9,6 +9,11 @@ from django.template.loader import render_to_string
 from django.urls.base import reverse
 from django.utils.functional import cached_property
 from django_extensions.db.fields import AutoSlugField
+from wagtail.admin.panels import FieldPanel
+from wagtail.fields import StreamField
+from wagtail.images.blocks import ImageBlock
+from wagtail.search import index
+from wagtail.snippets.models import register_snippet
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +43,8 @@ class AbstractBaseProduit(models.Model):
         ordering = ("-modifie_le",)
 
 
-class Produit(AbstractBaseProduit):
+@register_snippet
+class Produit(index.Indexed, AbstractBaseProduit):
     id = models.IntegerField(
         primary_key=True,
         help_text="Correspond à l'identifiant ID défini dans les données "
@@ -61,9 +67,19 @@ class Produit(AbstractBaseProduit):
     nom_eco_organisme = models.CharField(blank=True, help_text="Nom de l’éco-organisme")
     filieres_rep = models.CharField(blank=True, help_text="Filière(s) REP concernée(s)")
     slug = models.CharField(blank=True, help_text="Slug - ne pas modifier")
+    infotri = StreamField([("image", ImageBlock())], blank=True)
+
+    panels = [FieldPanel("infotri")]
 
     def __str__(self):
         return f"{self.id} - {self.nom}"
+
+    search_fields = [
+        index.AutocompleteField("nom"),
+        index.RelatedFields("synonymes", [index.SearchField("nom")]),
+        index.SearchField("synonyme__nom"),
+        index.SearchField("id"),
+    ]
 
     @cached_property
     def sous_categorie_with_carte_display(self):
@@ -93,7 +109,6 @@ class Produit(AbstractBaseProduit):
             return {}
 
         return {
-            "carte": 1,
             "direction": "jai",
             "first_dir": "jai",
             "limit": 25,
@@ -109,7 +124,8 @@ class Produit(AbstractBaseProduit):
                 action_displayed=actions,
             )
         params = urlencode(carte_settings)
-        return f"{settings.BASE_URL}/?{params}"
+        url = reverse("qfdmo:carte")
+        return f"{url}?{params}"
 
     @cached_property
     def url_carte_mauvais_etat(self):
@@ -304,7 +320,7 @@ class CMSPage(models.Model):
 
         try:
             wagtail_response = requests.get(
-                f"{settings.CMS_BASE_URL}/api/v2/pages/{self.id}"
+                f"{settings.CMS.get('BASE_URL')}/api/v2/pages/{self.id}"
             )
             wagtail_response.raise_for_status()
             wagtail_page_as_json = wagtail_response.json()

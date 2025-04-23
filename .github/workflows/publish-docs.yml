@@ -1,0 +1,39 @@
+name: Deploy Sphinx Documentation to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # Adjust this to your default branch name, if necessary
+      - document-frontend
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out the code
+      uses: actions/checkout@v4
+
+    - uses: actions/setup-python@v5
+      with:
+        cache: "pip"
+    - name: Install poetry
+      uses: abatilo/actions-poetry@v4
+    - uses: actions/cache@v4
+      name: Define a cache for the virtual environment based on the dependencies lock file
+      with:
+        path: ./.venv
+        key: venv-dev-docs-${{ hashFiles('poetry.lock') }}
+    - name: Install the project dependencies
+      run: poetry sync --only docs --no-root
+
+    - name: Build the documentation
+      run: |
+        cd docs
+        poetry run make html
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs/_build/html  # Path to your built HTML files

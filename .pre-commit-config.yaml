@@ -8,29 +8,30 @@ repos:
           - id: check-yaml
           - id: check-added-large-files
     - repo: https://github.com/ambv/black
-      rev: 24.10.0
+      rev: 25.1.0
       hooks:
           - id: black
     - repo: https://github.com/astral-sh/ruff-pre-commit
       # Ruff version.
-      rev: v0.8.3
+      rev: v0.11.0
       hooks:
           - id: ruff
-    -   repo: https://github.com/adamchainz/djade-pre-commit
-        rev: 1.0.0  # Replace with the latest tag on GitHub
-        hooks:
-        -   id: djade
-            args: [--target-version, "5.1"]
+    - repo: https://github.com/adamchainz/djade-pre-commit
+      rev: 1.3.2  # Replace with the latest tag on GitHub
+      hooks:
+      - id: djade
+        args: [--target-version, "5.1"]
     - repo: https://github.com/Yelp/detect-secrets
       rev: v1.5.0
       hooks:
         - id: detect-secrets
+          exclude: ^dbt/package-lock\.yml$
           name: Detect secrets
           language: python
           entry: detect-secrets-hook
           args: ['--baseline', '.secrets.baseline']
     - repo: https://github.com/pycqa/isort
-      rev: 5.13.2
+      rev: 6.0.1
       hooks:
         - id: isort
           name: isort (python)

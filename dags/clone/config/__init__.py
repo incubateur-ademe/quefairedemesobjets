@@ -1,9 +1,7 @@
-from .paths import DIR_SQL_SCHEMAS, DIR_SQL_VALIDATIONS  # noqa: F401
-from .tables import (  # noqa: F401
-    SCHEMAS_PREFIX,
-    TABLES,
-    VIEW_NAME_ETAB,
-    VIEW_NAME_UNITE,
+from .model import (  # noqa: F401 (unused import)
+    DIR_SQL_CREATION,
+    DIR_SQL_VALIDATION,
+    CloneConfig,
 )
-from .tasks import TASKS  # noqa: F401
-from .xcoms import XCOMS, xcom_pull  # noqa: F401
+from .tasks import TASKS  # noqa: F401 (unused import)
+from .xcoms import XCOMS, xcom_pull  # noqa: F401 (unused import)

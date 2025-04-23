@@ -1,9 +1,12 @@
 import logging
+import math
 import re
 
 import pandas as pd
 import requests
 from fuzzywuzzy import fuzz
+from shapely import wkb
+from shapely.geometry import Point
 from sources.tasks.airflow_logic.config_management import DAGConfig
 from sources.tasks.transform.transform_column import (
     clean_code_postal,
@@ -12,9 +15,7 @@ from sources.tasks.transform.transform_column import (
     clean_siret,
 )
 from utils import logging_utils as log
-from utils.base_utils import transform_location
 from utils.formatter import format_libelle_to_code
-from utils.mapping_utils import parse_float
 
 logger = logging.getLogger(__name__)
 
@@ -97,12 +98,13 @@ def _merge_proposition_service_columns(group):
                 sscat_by_action[ps["action"]] = []
             sscat_by_action[ps["action"]].extend(ps["sous_categories"])
 
+    # sort sscat_by_action by action code
     return [
         {
             "action": action,
-            "sous_categories": sorted(list(set(sscat))),
+            "sous_categories": sorted(list(set(sscat_by_action[action]))),
         }
-        for action, sscat in sscat_by_action.items()
+        for action in sorted(sscat_by_action.keys())
     ]
 
 
@@ -111,7 +113,7 @@ def clean_telephone(row: pd.Series, _):
     number = clean_number(row[telephone_column])
 
     if number is None:
-        row[["telephone"]] = None
+        row[["telephone"]] = ""
         return row[["telephone"]]
 
     if len(number) == 9 and row["code_postal"] and int(row["code_postal"]) < 96000:
@@ -121,23 +123,22 @@ def clean_telephone(row: pd.Series, _):
         number = "0" + number[2:]
 
     if len(number) < 6:
-        number = None
+        number = ""
 
     row["telephone"] = number
     return row[["telephone"]]
 
 
-# TODO : Ajouter des tests
 def clean_siret_and_siren(row, _):
     if "siret" in row:
         row["siret"] = clean_siret(row["siret"])
     else:
-        row["siret"] = None
+        row["siret"] = ""
     if "siren" in row and row["siren"]:
         row["siren"] = clean_siren(row["siren"])
     else:
         row["siren"] = (
-            row["siret"][:9] if "siret" in row and row["siret"] is not None else None
+            row["siret"][:9] if "siret" in row and row["siret"] is not None else ""
         )
     return row[["siret", "siren"]]
 
@@ -158,15 +159,21 @@ def clean_identifiant_externe(row, _):
     return row[["identifiant_externe"]]
 
 
+def compute_identifiant_unique(identifiant_externe, source_code, acteur_type_code):
+    unique_str = str(identifiant_externe).replace("/", "-").strip()
+    if acteur_type_code == ACTEUR_TYPE_DIGITAL:
+        unique_str = unique_str + "_d"
+    return source_code.lower() + "_" + unique_str
+
+
 def clean_identifiant_unique(row, _):
     if not row.get("identifiant_externe"):
         raise ValueError(
             "identifiant_externe is required to generate identifiant_unique"
         )
-    unique_str = row["identifiant_externe"].replace("/", "-").strip()
-    if row.get("acteur_type_code") == ACTEUR_TYPE_DIGITAL:
-        unique_str = unique_str + "_d"
-    row["identifiant_unique"] = row.get("source_code").lower() + "_" + unique_str
+    row["identifiant_unique"] = compute_identifiant_unique(
+        row["identifiant_externe"], row["source_code"], row["acteur_type_code"]
+    )
     return row[["identifiant_unique"]]
 
 
@@ -178,7 +185,7 @@ def merge_sous_categories_columns(row, _):
 
 def clean_adresse(row, dag_config):
     row["adresse"] = row["adresse_format_ban"]
-    address = postal_code = city = None
+    address = postal_code = city = ""
     if dag_config.validate_address_with_ban:
         address, postal_code, city = _get_address(row["adresse_format_ban"])
     else:
@@ -268,14 +275,33 @@ def get_latlng_from_geopoint(row: pd.Series, _) -> pd.Series:
     return row[["latitude", "longitude"]]
 
 
+def _parse_float(value):
+    if isinstance(value, float):
+        return None if math.isnan(value) else value
+    if not isinstance(value, str):
+        return None
+    value = re.sub(r",$", "", value).replace(",", ".")
+    try:
+        f = float(value)
+        return None if math.isnan(f) else f
+    except ValueError:
+        return None
+
+
 def compute_location(row: pd.Series, _):
     # first column is latitude, second is longitude
     lat_column = row.keys()[0]
     lng_column = row.keys()[1]
-    row[lat_column] = parse_float(row[lat_column])
-    row[lng_column] = parse_float(row[lng_column])
-    row["location"] = transform_location(row[lng_column], row[lat_column])
+    row[lat_column] = _parse_float(row[lat_column])
+    row[lng_column] = _parse_float(row[lng_column])
+    row["location"] = get_point_from_location(row[lng_column], row[lat_column])
     return row[["location"]]
+
+
+def get_point_from_location(longitude, latitude):
+    if not longitude or not latitude or math.isnan(longitude) or math.isnan(latitude):
+        return None
+    return wkb.dumps(Point(longitude, latitude)).hex()
 
 
 def clean_proposition_services(row, _):
@@ -288,9 +314,9 @@ def clean_proposition_services(row, _):
         row["proposition_service_codes"] = [
             {
                 "action": action,
-                "sous_categories": row["sous_categorie_codes"],
+                "sous_categories": sorted(row["sous_categorie_codes"]),
             }
-            for action in row["action_codes"]
+            for action in sorted(row["action_codes"])
         ]
     else:
         row["proposition_service_codes"] = []
@@ -305,9 +331,9 @@ def clean_proposition_services(row, _):
 
 def _get_address(
     adresse_format_ban: str,
-) -> tuple[str | None, str | None, str | None]:
+) -> tuple[str, str, str]:
     if not adresse_format_ban:
-        return (None, None, None)
+        return ("", "", "")
 
     res = _get_address_from_ban(str(adresse_format_ban))
     match_percentage = res.get("match_percentage", 0)
@@ -367,9 +393,9 @@ def _address_details_clean_cedex(address_str: str) -> str:
 
 def _address_details_extract(
     address_str: str,
-) -> tuple[str | None, str | None, str | None]:
+) -> tuple[str, str, str]:
     """Extrait les détails de l'adresse, y compris le code postal et la ville."""
-    address = postal_code = city = None
+    address = postal_code = city = ""
 
     pattern1 = re.compile(
         rf"(.*)[{REGEX_BAN_SEPARATORS}]+(\d{{4,5}})[{REGEX_BAN_SEPARATORS}]*(.*)"
@@ -377,12 +403,12 @@ def _address_details_extract(
     # Pattern pour capturer les codes postaux sans adresse
     pattern2 = re.compile(rf"(\d{{4,5}})[{REGEX_BAN_SEPARATORS}]*(.*)")
     if match := pattern1.search(address_str):
-        address = match.group(1).strip() if match.group(1) else None
-        postal_code = match.group(2).strip() if match.group(2) else None
-        city = match.group(3).strip() if match.group(3) else None
+        address = match.group(1).strip() if match.group(1) else ""
+        postal_code = match.group(2).strip() if match.group(2) else ""
+        city = match.group(3).strip() if match.group(3) else ""
     elif match := pattern2.search(address_str):
-        postal_code = match.group(1).strip() if match.group(1) else None
-        city = match.group(2).strip() if match.group(2) else None
+        postal_code = match.group(1).strip() if match.group(1) else ""
+        city = match.group(2).strip() if match.group(2) else ""
 
     if city:
         city = city.title()
@@ -396,9 +422,9 @@ def _address_details_extract(
 
 def _extract_details(
     adresse_format_ban: str,
-) -> tuple[str | None, str | None, str | None]:
+) -> tuple[str, str, str]:
     """Extrait les détails de l'adresse à partir d'une ligne de DataFrame."""
     if adresse_format_ban:
         address_str = _address_details_clean_cedex(adresse_format_ban)
         return _address_details_extract(address_str)
-    return None, None, None
+    return "", "", ""

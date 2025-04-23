@@ -104,6 +104,11 @@ with DAG(
                 "transformation": "strip_string",
                 "destination": "ville",
             },
+            {
+                "origin": "identifiant_externe",
+                "transformation": "strip_string",
+                "destination": "identifiant_externe",
+            },
             # 3. Ajout des colonnes avec une valeur par défaut
             # 4. Transformation du dataframe
             {
@@ -120,6 +125,7 @@ with DAG(
                 "origin": [
                     "identifiant_externe",
                     "source_code",
+                    "acteur_type_code",
                 ],
                 "transformation": "clean_identifiant_unique",
                 "destination": ["identifiant_unique"],
@@ -140,8 +146,6 @@ with DAG(
                 "destination": ["proposition_service_codes"],
             },
             # 5. Supression des colonnes
-            {"remove": "action_principale"},
-            {"remove": "parent"},
             # 6. Colonnes à garder (rien à faire, utilisé pour le controle)
             {"keep": "acteur_type_code"},
             {"keep": "commentaires"},

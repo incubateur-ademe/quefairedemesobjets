@@ -15,7 +15,6 @@ import re
 
 import numpy as np
 import pandas as pd
-from cluster.config.constants import COL_INDEX_SRC
 from cluster.tasks.business_logic.misc.cluster_exclude_intra_source import (
     cluster_exclude_intra_source,
 )
@@ -39,52 +38,6 @@ def cluster_id_from_strings(strings: list[str]) -> str:
         cluster_id
     """
     return "_".join(str(slugify(unidecode(str(x)))).lower() for x in strings)
-
-
-def cluster_strings(
-    strings: list[str], threshold: float = 0.5
-) -> list[tuple[list[int], list[str]]]:
-    """Groupe des chaînes de caractères similaires en clusters
-    sur la base de l'algo TF IDF
-
-    Les clusters de 1 sont ignorés
-
-    Args:
-        strings: liste de chaînes de caractères
-        threshold: seuil de similarité pour grouper les chaînes
-
-    Returns:
-        liste de clusters sous forme de tuples (indices, strings)
-    """
-    vectorizer = TfidfVectorizer(
-        tokenizer=str.split, binary=False, token_pattern=None  # type: ignore
-    )
-    tfidf_matrix = vectorizer.fit_transform(strings)
-
-    # Compute pairwise cosine similarity between strings
-    similarity_matrix = cosine_similarity(tfidf_matrix)
-
-    # Sort pairs by similarity score in descending order
-    indices = np.triu_indices_from(similarity_matrix, k=1)
-    tuples = [
-        (i, j, similarity_matrix[i, j])
-        for i, j in zip(*indices)
-        if similarity_matrix[i, j] >= threshold
-    ]
-    tuples.sort(key=lambda x: x[2], reverse=True)  # type: ignore
-
-    visited = set()
-    clusters = []
-
-    for i, j, _ in tuples:
-        if i not in visited and j not in visited:
-            cluster = np.where(similarity_matrix[i] >= threshold)[0]
-            cluster = [int(idx) for idx in cluster if idx not in visited]
-            if cluster:
-                visited.update(cluster)
-                clusters.append((cluster, [strings[k] for k in cluster]))
-
-    return clusters
 
 
 def values_to_similarity_matrix(values: list[str]) -> np.ndarray:
@@ -132,23 +85,18 @@ def similarity_matrix_to_tuples(
 def score_tuples_to_clusters(
     tuples: list[tuple[int, int, float]], threshold
 ) -> list[list[int]]:
-    """Convertit une liste de tuples d'acteurs (index_a, index_b, score) en clusters"""
+    """Convert tuples (index_a, index_b, score) into clusters if score >= threshold"""
 
-    # On ne devrait jamais converver des clusters vides, donc si on appelle
-    # cette fonction avec une liste vide, c'est qu'on a un problème
-    # en amont
+    # We should discard empty clusters and never find ourselves here
     if not tuples:
         raise ValueError("Liste de tuples d'entrée vide, on ne devrait pas être ici")
 
-    # Trier la liste par score décroissant même si elle est déjà triée
-    # car cela n'est pas garanti par l'appelant ET nous avons
-    # une optimisation avec "break" dans la boucle
+    # Sorting to work on most to least similar
     tuples.sort(key=lambda x: x[2], reverse=True)
 
     clusters = []
     for index_a, index_b, score in tuples:
-        # Ayant trié la liste par score décroissant, on peut sortir
-        # de la boucle dès qu'on a un score inférieur au seuil
+        # Being sorted, we know we can exist if below threshold
         if score < threshold:
             break
 
@@ -156,20 +104,20 @@ def score_tuples_to_clusters(
         cluster_a = next((c for c in clusters if index_a in c), None)
         cluster_b = next((c for c in clusters if index_b in c), None)
 
-        # a et b sont déjà dans un cluster: on les fusionne
+        # a and b are in the same cluster = merge
         if cluster_a and cluster_b:
             if cluster_a != cluster_b:
                 # Merge the clusters if they are different
                 cluster_a.update(cluster_b)
                 clusters.remove(cluster_b)
-        # a est dans un cluster, on ajoute b dedans
+        # a already in a cluster, add b to it
         elif cluster_a:
             cluster_a.add(index_b)
-        # b est dans un cluster, on ajoute a dedans
+        # b already in a cluster, add a to it
         elif cluster_b:
             cluster_b.add(index_a)
         else:
-            # a et b ne sont dans aucun cluster: on crée un nouveau cluster
+            # a and b are not in any cluster, create a new one
             clusters.append(set([index_a, index_b]))
 
     return [list(cluster) for cluster in clusters]
@@ -181,33 +129,23 @@ def cluster_to_subclusters(
     cluster: list[int],
     threshold: float,
 ) -> list[list[int]]:
-    """Scinde un cluster en 1+ sous-clusters en fonction de la similarité des valeurs
-    d'une colonne donnée. On s'assure qu'il n'y a pas de sous-clusters dupliqués."""
-    # logger.info(f"\n\nrefine_cluster, {column=}, {cluster=}, {threshold=}")
+    """Split 1 cluster into subclusters based on a column matching threshold"""
     df_cluster = df.loc[cluster]
     column_values = df_cluster[column].astype(str).values
     similarity_matrix = values_to_similarity_matrix(column_values)  # type: ignore
     tuples = similarity_matrix_to_tuples(similarity_matrix, indexes=cluster)
-
-    # Debug
-    """
-    for i, j, score in tuples:
-        symbol = "🟢" if score >= threshold else "🔴"
-        v_i = column_values[cluster.index(i)]
-        v_j = column_values[cluster.index(j)]
-        # logger.info(f"{symbol} {i=}, {j=}, {v_i=}, {v_j=} {score=}")
-    """
-
     sub_clusters = score_tuples_to_clusters(tuples, threshold)
-    # logger.info(f"{sub_clusters=}")
     return sub_clusters
 
 
-def cluster_cols_group_fuzzy(df_src, columns, threshold):
+def cluster_cols_group_fuzzy(
+    df_src: pd.DataFrame, columns_fuzzy: list[str], threshold: float
+) -> list[pd.DataFrame]:
+    """Apply fuzzy clustering to split a df into subclusters"""
 
     # Initialize with all rows as a single cluster
     df = df_src.copy()
-    for column in columns:
+    for column in columns_fuzzy:
         # Remove rows with None or empty string values
         df = df.dropna(subset=[column])
         df = df[df[column].astype(str).str.strip() != ""]
@@ -218,11 +156,10 @@ def cluster_cols_group_fuzzy(df_src, columns, threshold):
 
     clusters = [list(df.index)]
 
-    for column in columns:
+    for column in columns_fuzzy:
         clusters_ref = []
         for cluster in clusters:
             clusters_ref_new = cluster_to_subclusters(df, column, cluster, threshold)
-            # logger.info(f"{column=}, {cluster=}, {clusters_ref_new=}")
             clusters_ref.extend(clusters_ref_new)
 
         # Only continue with valid clusters for the next refinement step
@@ -241,27 +178,10 @@ def cluster_acteurs_clusters(
     cluster_fuzzy_threshold: float = 0.5,
     cluster_intra_source_is_allowed: bool = False,
 ) -> pd.DataFrame:
-    """
-    Génère des suggestions de clusters sur un DataFrame
+    """Core clustering logic (_prepare and _validate being additional
+    logic such as combining clusters with their original data)"""
 
-    Args:
-        df: DataFrame à clusteriser
-        cluster_fields_exact: champs pour grouper en 1 cluster si identique
-        cluster_fields_fuzzy: champs pour grouper en 1 cluster si similaire
-        cluster_fuzzy_threshold: seuil de similarité pour les champs fuzzy
-        cluster_intra_source_is_allowed: autoriser les clusters intra-source
-
-    Returns:
-        DataFrame de cluster_id -> identifiant_unique
-    """
-
-    if COL_INDEX_SRC not in df.columns:
-        raise ValueError(
-            """La colonne '__index_src' doit être ajoutée à df
-                pour faire le lien avant/après clusterisation"""
-        )
-
-    # Vérification des colonnes
+    # Validation
     for col in cluster_fields_exact:
         if col not in df.columns:
             raise ValueError(f"Colonne match exacte '{col}' pas dans le DataFrame")
@@ -269,53 +189,46 @@ def cluster_acteurs_clusters(
         if col not in df.columns:
             raise ValueError(f"Colonne match fuzzy '{col}' pas dans le DataFrame")
 
-    # On supprime les lignes avec des valeurs nulles pour les colonnes exact
-    # Attention à ne pas faire de drop sur des champs qui peuvent être nuls
-    # genre source_id sur les parents
-    # TODO: on devrait certainement
-    # définir config.fields_to_drop_na avec des tests pour + de robustesse
+    # DO NOT apply on potentially empty fields such as source_id (empty on parents)
     df = df.dropna(subset=cluster_fields_exact + cluster_fields_fuzzy)
-
     df = df.sort_values(cluster_fields_exact)
 
-    # On ne garde que les colonnes utiles
+    # Only keep columns needed for clustering
+    # TODO: replace re.search with fields coming from config
     cols_ids_codes = [
-        col for col in df.columns if re.search(r"identifiant|_code|_id", col, re.I)
+        col
+        for col in df.columns
+        if re.search(r"(^id|^identifiant|_code$|_id$)", col, re.I)
     ]
     cols_to_keep = list(
-        set(
-            cols_ids_codes
-            + cluster_fields_exact
-            + cluster_fields_fuzzy
-            + [COL_INDEX_SRC]
-            + ["nom"]
-        )
+        set(cols_ids_codes + cluster_fields_exact + cluster_fields_fuzzy + ["nom"])
     )
-    # logger.info(f"{cols_to_keep=}")
     df = df[cols_to_keep]
 
-    # On groupe par les colonnes exactes
+    # Start with exact clustering with a simple groupby
     clusters_size1 = []
     clusters = []
     for exact_keys, exact_rows in df.groupby(cluster_fields_exact):
         logger.info("\n\n")
-        # On ne considère que les clusters de taille 2+
+
+        # Keep only clusters of size 2+
         if len(exact_rows) < 2:
             logger.info(f"🔴 Ignoré: cluster de taille <2: {list(exact_keys)}")
             clusters_size1.append(exact_keys)
             continue
         keys = list(exact_keys)
-
         log.preview_df_as_markdown("🔵 Cluster potentiel exact", exact_rows)
 
-        # Liste des clusters à considérer, on commence avec rien
+        # Potential (sub)clusters for that exact group
         clusters_potential = []
 
         # Fuzzy clustering activated
         if cluster_fields_fuzzy:
             keys += cluster_fields_fuzzy
             subclusters = cluster_cols_group_fuzzy(
-                exact_rows, cluster_fields_fuzzy, threshold=cluster_fuzzy_threshold
+                df_src=exact_rows,
+                columns_fuzzy=cluster_fields_fuzzy,
+                threshold=cluster_fuzzy_threshold,
             )
             cnt = len(subclusters)
             status = "🔵" if cnt else "🔴"
@@ -325,15 +238,13 @@ def cluster_acteurs_clusters(
                 clusters_potential.append(("fuzzy", fuzzy_keys, fuzzy_rows))
 
         else:
-            # Fuzzy clustering not activated
+            # Only relying on exact clustering
             clusters_potential.append(("exact", keys, exact_rows))
 
         # For all potential clusters, we apply the intra-source logic
         for ctype, keys, rows in clusters_potential:
             cluster_id = cluster_id_from_strings(keys)
             rows["cluster_id"] = cluster_id
-            values = rows[cluster_fields_fuzzy + ["nom"]]
-            logger.info(f"\n🟢 CLUSTER: {cluster_id=}, {keys=}, {values=}")
 
             if cluster_intra_source_is_allowed:
                 clusters.append(rows.copy())
@@ -350,16 +261,13 @@ def cluster_acteurs_clusters(
     if not clusters:
         return pd.DataFrame()
 
-    # On combine tous les clusters ensemble
+    # Combining all cluster
     df_clusters = pd.concat(clusters)
 
-    # On ne garde que les clusters de taille 2+
+    # Extra safety to only keep 2+
     df_clusters = df_clusters.groupby("cluster_id").filter(lambda x: len(x) >= 2)
 
-    # TODO: définir plusieurs type d'acteurs non perdus
-    # (intra source, manque de similarité, etc)
-    # et retourner in dict pour pouvoir afficher dans airflow
-    # df_lost = pd.concat(dfs_lost) if dfs_lost else None
+    # Info
     logger.info(f"🟢 {len(clusters_size1)=}")
     logger.info(f"🟢 {df_clusters["cluster_id"].nunique()=}")
     logger.info(f"🟢 {df_clusters["identifiant_unique"].nunique()=}")

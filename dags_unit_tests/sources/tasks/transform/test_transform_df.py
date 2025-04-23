@@ -1,11 +1,13 @@
 import pandas as pd
 import pytest
 from sources.tasks.transform.transform_df import (
+    _parse_float,
     clean_action_codes,
     clean_adresse,
     clean_identifiant_externe,
     clean_identifiant_unique,
     clean_label_codes,
+    clean_proposition_services,
     clean_siret_and_siren,
     clean_telephone,
     compute_location,
@@ -295,6 +297,65 @@ class TestMergeDuplicates:
                     }
                 ),
             ),
+            # Validation of the order while merge duplicates
+            (
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1, 1],
+                        "proposition_service_codes": [
+                            [
+                                {
+                                    "action": "action3",
+                                    "sous_categories": ["sscat2", "sscat1"],
+                                },
+                                {
+                                    "action": "action2",
+                                    "sous_categories": ["sscat3", "sscat2"],
+                                },
+                                {
+                                    "action": "action1",
+                                    "sous_categories": ["sscat1", "sscat3"],
+                                },
+                            ],
+                            [
+                                {
+                                    "action": "action2",
+                                    "sous_categories": ["sscat1", "sscat3"],
+                                },
+                                {
+                                    "action": "action1",
+                                    "sous_categories": ["sscat2", "sscat3"],
+                                },
+                                {
+                                    "action": "action3",
+                                    "sous_categories": ["sscat3", "sscat2"],
+                                },
+                            ],
+                        ],
+                    }
+                ),
+                pd.DataFrame(
+                    {
+                        "identifiant_unique": [1],
+                        "proposition_service_codes": [
+                            [
+                                {
+                                    "action": "action1",
+                                    "sous_categories": ["sscat1", "sscat2", "sscat3"],
+                                },
+                                {
+                                    "action": "action2",
+                                    "sous_categories": ["sscat1", "sscat2", "sscat3"],
+                                },
+                                {
+                                    "action": "action3",
+                                    "sous_categories": ["sscat1", "sscat2", "sscat3"],
+                                },
+                            ],
+                        ],
+                    }
+                ),
+            ),
         ],
     )
     def test_merge_duplicates_ps_dict(self, df, expected_df):
@@ -316,12 +377,65 @@ class TestMergeDuplicates:
         pd.testing.assert_frame_equal(result_df, expected_df)
 
 
+class TestCleanPropositionServiceCodes:
+    @pytest.mark.parametrize(
+        "action_codes, sous_categorie_codes, expected_proposition_service_codes",
+        [
+            ([], [], []),
+            (
+                ["action1"],
+                ["sscat1"],
+                [{"action": "action1", "sous_categories": ["sscat1"]}],
+            ),
+            (
+                ["action1", "action2"],
+                ["sscat1", "sscat2"],
+                [
+                    {"action": "action1", "sous_categories": ["sscat1", "sscat2"]},
+                    {"action": "action2", "sous_categories": ["sscat1", "sscat2"]},
+                ],
+            ),
+            (
+                ["action3", "action1", "action2"],
+                ["sscat3", "sscat2", "sscat1"],
+                [
+                    {
+                        "action": "action1",
+                        "sous_categories": ["sscat1", "sscat2", "sscat3"],
+                    },
+                    {
+                        "action": "action2",
+                        "sous_categories": ["sscat1", "sscat2", "sscat3"],
+                    },
+                    {
+                        "action": "action3",
+                        "sous_categories": ["sscat1", "sscat2", "sscat3"],
+                    },
+                ],
+            ),
+        ],
+    )
+    def test_clean_proposition_service_codes(
+        self, action_codes, sous_categorie_codes, expected_proposition_service_codes
+    ):
+        result = clean_proposition_services(
+            pd.Series(
+                {
+                    "action_codes": action_codes,
+                    "sous_categorie_codes": sous_categorie_codes,
+                }
+            ),
+            None,
+        )
+        assert result["proposition_service_codes"] == expected_proposition_service_codes
+
+
 class TestCleanTelephone:
     @pytest.mark.parametrize(
         "phone_number, code_postal, expected_phone_number",
         [
-            (None, None, None),
-            (pd.NA, None, None),
+            (None, None, ""),
+            (pd.NA, None, ""),
             ("1 23 45 67 89", "75001", "0123456789"),
             ("33 1 23 45 67 89", "75001", "0123456789"),
             ("0612345678", "75001", "0612345678"),
@@ -339,10 +453,12 @@ class TestCleanSiretAndSiren:
     @pytest.mark.parametrize(
         "siret, siren, expected_siret, expected_siren",
         [
-            (None, None, None, None),
+            (None, None, "", ""),
             ("12345678901234", None, "12345678901234", "123456789"),
-            (None, "123456789", None, "123456789"),
+            (" 12345678901234 ", None, "12345678901234", "123456789"),
+            (None, "123456789", "", "123456789"),
             ("98765432109876", "987654321", "98765432109876", "987654321"),
+            (" 98765432109876 ", " 987654321 ", "98765432109876", "987654321"),
             ("12345678901234", "123456789", "12345678901234", "123456789"),
             ("12345678901234", "987654321", "12345678901234", "987654321"),
         ],
@@ -388,6 +504,7 @@ class TestCleanIdentifiantUnique:
             " expected_identifiant_unique"
         ),
         [
+            (12345, "commerce", "source", "source_12345"),
             ("12345", "commerce", "source", "source_12345"),
             (" 12345 ", "commerce", "source", "source_12345"),
             ("ABC123", "commerce", "source", "source_ABC123"),
@@ -474,7 +591,7 @@ class TestCleanAdresse:
             (
                 "75001 Paris",
                 {
-                    "adresse": None,
+                    "adresse": "",
                     "code_postal": "75001",
                     "ville": "Paris",
                 },
@@ -673,3 +790,30 @@ class TestComputeLocation:
         )
         print(result["location"])
         assert result["location"] == expected_location
+
+
+class TestParseFloat:
+    def test_parse_float_with_french_decimal(self):
+        assert _parse_float("1234,56") == 1234.56
+        assert _parse_float("-1234,56") == -1234.56
+        assert _parse_float("0,0") == 0
+        assert _parse_float("1,234") == 1.234
+
+    def test_parse_float_with_trailing_comma(self):
+        assert _parse_float("1234,") == 1234.0
+        assert _parse_float("1234,56,") == 1234.56
+
+    def test_parse_float_with_valid_float(self):
+        assert _parse_float(1234.56) == 1234.56
+        assert _parse_float(-1234.56) == -1234.56
+
+    def test_parse_float_with_nan(self):
+        assert _parse_float(float("nan")) is None
+
+    def test_parse_float_with_none(self):
+        assert _parse_float(None) is None
+
+    def test_parse_float_with_invalid_string(self):
+        assert _parse_float("abc") is None
+        assert _parse_float("1234abc") is None
+        assert _parse_float("12,34,56") is None
