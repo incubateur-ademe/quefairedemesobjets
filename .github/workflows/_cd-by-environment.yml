@@ -32,3 +32,9 @@ jobs:
       environment: ${{ inputs.environment }}
       # Name of environment variable set in github environment
       app_name_key: AIRFLOW_WEBSERVER_CLEVERCLOUD_APP_NAME
+
+# Address actions/missing-workflow-permissions rule in
+# code scanning alerts
+permissions:
+  contents: read
+

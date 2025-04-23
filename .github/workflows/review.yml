@@ -22,3 +22,9 @@ jobs:
     needs: [ci]
     with:
       environment: preprod
+
+# Address actions/missing-workflow-permissions rule in
+# code scanning alerts
+permissions:
+  contents: read
+
