@@ -98,6 +98,14 @@ jobs:
           - 6543:5432
     steps:
       - uses: actions/checkout@v4
+
+      - name: Prepare environment
+        run: |
+          cp .env.template .env
+          echo LVAO_BASE_URL=http://localhost:8000 >> .env
+          echo ASSISTANT_BASE_URL=http://127.0.0.1:8000 >> .env
+          echo ASSISTANT_HOSTS=127.0.0.1 >> .env
+
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".tool-versions"
@@ -127,9 +135,6 @@ jobs:
       - name: Install the project dependencies
         run: poetry sync --with dev --no-root
 
-      - name: Set env variables
-        run: cp .env.template .env
-
       - name: Migrate database
         run: |
           poetry run python manage.py createcachetable
@@ -148,10 +153,3 @@ jobs:
 
       - name: Run Playwright tests
         run: npx playwright test --reporter=list --update-snapshots --shard=${{ matrix.shard }}
-
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 30

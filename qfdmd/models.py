@@ -109,7 +109,6 @@ class Produit(index.Indexed, AbstractBaseProduit):
             return {}
 
         return {
-            "carte": 1,
             "direction": "jai",
             "first_dir": "jai",
             "limit": 25,
@@ -125,7 +124,8 @@ class Produit(index.Indexed, AbstractBaseProduit):
                 action_displayed=actions,
             )
         params = urlencode(carte_settings)
-        return f"{settings.BASE_URL}/?{params}"
+        url = reverse("qfdmo:carte")
+        return f"{url}?{params}"
 
     @cached_property
     def url_carte_mauvais_etat(self):
@@ -320,7 +320,7 @@ class CMSPage(models.Model):
 
         try:
             wagtail_response = requests.get(
-                f"{settings.CMS_BASE_URL}/api/v2/pages/{self.id}"
+                f"{settings.CMS.get('BASE_URL')}/api/v2/pages/{self.id}"
             )
             wagtail_response.raise_for_status()
             wagtail_page_as_json = wagtail_response.json()

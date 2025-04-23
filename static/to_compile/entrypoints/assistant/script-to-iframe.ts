@@ -1,4 +1,4 @@
-import { iframeResize } from "iframe-resizer";
+import iframeResize from '@iframe-resizer/parent'
 
 const script = document.currentScript as HTMLScriptElement
 const slug = script?.dataset?.objet;
@@ -6,6 +6,7 @@ const origin = new URL(script?.getAttribute("src")).origin
 
 function initScript() {
   const parts = [origin]
+  const options = { license: 'GPLv3' }
   if (slug) {
     parts.push("dechet", slug)
   }
@@ -35,7 +36,7 @@ function initScript() {
 
   script.parentNode?.insertBefore(iframe, script);
   iframe.onload = () => {
-    iframeResize({}, iframe)
+    iframeResize(options, iframe)
   }
 }
 if (document.readyState === "loading") {

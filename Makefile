@@ -9,6 +9,8 @@ PYTHON := poetry run python
 DJANGO_ADMIN := $(PYTHON) manage.py
 PYTEST := poetry run pytest
 DB_URL := postgres://qfdmo:qfdmo@localhost:6543/qfdmo# pragma: allowlist secret
+ASSISTANT_URL := quefairedemesdechets.ademe.local
+LVAO_URL := lvao.ademe.local
 
 # Makefile config
 .PHONY: check
@@ -16,6 +18,10 @@ check:
 	@source .venv/bin/activate; python --version; pip --version
 	@npm --version
 	@node --version
+
+.PHONY: init-certs
+init-certs:
+	docker run -ti -v ./nginx-local-only/certs:/app/certs -w /app/certs --rm alpine/mkcert $(LVAO_URL) $(ASSISTANT_URL)
 
 
 .PHONY: init-dev
@@ -26,6 +32,7 @@ init-dev:
 	# python
 	curl -sSL https://install.python-poetry.org | python3 -
 	poetry install --with dev,airflow
+	make init-certs
 	# javascript
 	npm install
 	npx playwright install --with-deps
@@ -50,7 +57,6 @@ run-airflow:
 
 .PHONY: run-django
 run-django:
-	docker compose --profile lvao up -d
 	rm -rf .parcel-cache
 	honcho start -f Procfile.dev
 
@@ -100,7 +106,7 @@ unit-test:
 
 .PHONY: e2e-test
 e2e-test:
-	npx playwright test
+	npx playwright test --update-snapshots --ui
 	$(PYTEST) ./integration_tests
 
 .PHONY: a11y
@@ -151,3 +157,4 @@ db-restore:
 	make dump-production
 	make load-production-dump
 	make migrate
+

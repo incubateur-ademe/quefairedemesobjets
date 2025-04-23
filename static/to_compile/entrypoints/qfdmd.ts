@@ -1,6 +1,6 @@
 import * as Turbo from "@hotwired/turbo"
-import 'iframe-resizer/js/iframeResizer.contentWindow.min.js';
 import { Application } from "@hotwired/stimulus"
+import '@iframe-resizer/child'
 
 import SearchController from "../js/controllers/assistant/search"
 import BlinkController from "../js/controllers/assistant/blink"
