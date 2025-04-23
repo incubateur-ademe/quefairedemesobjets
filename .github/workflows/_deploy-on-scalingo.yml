@@ -40,7 +40,7 @@ jobs:
         id: url
         run: echo "url=${{ vars.URL }}" >> $GITHUB_OUTPUT
 
-      - uses: mattermost/action-mattermost-notify@master
+      - uses: mattermost/action-mattermost-notify@b7d118e440bf2749cd18a4a8c88e7092e696257a
         name: Notify about successful deployment
 
         with:
