@@ -18,6 +18,7 @@ from qfdmo.models import (
     DisplayedActeur,
     GroupeAction,
     Source,
+    SousCategorieObjet,
 )
 
 router = Router()
@@ -71,6 +72,12 @@ class SourceSchema(ModelSchema):
         fields = ["id", "code", "libelle", "url"]
 
 
+class SousCategorieObjetSchema(ModelSchema):
+    class Meta:
+        model = SousCategorieObjet
+        fields = ["id", "code", "libelle"]
+
+
 class ActeurSchema(ModelSchema):
     latitude: float
     longitude: float
@@ -112,6 +119,10 @@ class ActeurFilterSchema(FilterSchema):
     types: Optional[List[int]] = Field(None, q="acteur_type__in")
     services: Optional[List[int]] = Field(None, q="acteur_services__in")
     actions: Optional[List[int]] = Field(None, q="proposition_services__action_id__in")
+    sous_categories: Optional[List[int]] = Field(
+        None,
+        q="proposition_services__sous_categories__id__in",
+    )
 
 
 @router.get("/sources", response=List[SourceSchema], summary="Liste des sources")
@@ -120,6 +131,19 @@ def sources(request):
     Liste l'ensemble des <i>sources</i> possibles pour un acteur.
     """  # noqa
     qs = Source.objects.filter(afficher=True)
+    return qs
+
+
+@router.get(
+    "/sous-categories",
+    response=List[SousCategorieObjetSchema],
+    summary="Liste des catégories d'objets",
+)
+def sous_categories(request):
+    """
+    Liste l'ensemble des <i>sous-catégories d'objet</i> possibles pour un acteur.
+    """  # noqa
+    qs = SousCategorieObjet.objects.filter(afficher=True)
     return qs
 
 
