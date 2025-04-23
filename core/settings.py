@@ -80,7 +80,7 @@ STIMULUS_DEBUG = decouple.config("STIMULUS_DEBUG", default=False, cast=bool)
 POSTHOG_DEBUG = decouple.config("POSTHOG_DEBUG", default=False, cast=bool)
 BLOCK_ROBOTS = decouple.config("BLOCK_ROBOTS", default=False, cast=bool)
 ENVIRONMENT = decouple.config("ENVIRONMENT", default="development", cast=str)
-BASE_URL = LVAO.get("BASE_URL")
+BASE_URL = ASSISTANT.get("BASE_URL")
 BASE_ALLOWED_HOSTS = [
     config.get("BASE_URL").split("://")[1] for config in [ASSISTANT, LVAO]
 ]

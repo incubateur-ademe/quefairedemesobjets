@@ -101,9 +101,9 @@ jobs:
       - name: Prepare environment
         run: |
           cp .env.template .env
-          echo BASE_URL=http://localhost:8000 >> .env
-          echo ALLOWED_HOSTS=localhost >> .env
-          echo ASSISTANT_HOSTS=localhost >> .env
+          echo LVAO_BASE_URL=http://localhost:8000 >> .env
+          echo ASSISTANT_BASE_URL=http://127.0.0.1:8000 >> .env
+          echo ASSISTANT_HOSTS=127.0.0.1 >> .env
 
       - uses: actions/setup-node@v4
         with:
