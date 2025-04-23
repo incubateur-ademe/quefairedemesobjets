@@ -8,9 +8,7 @@ import re
 from airflow import DAG
 from airflow.models.baseoperator import chain
 from airflow.operators.bash import BashOperator
-from enrich.config import (
-    EnrichDbtModelsRefreshConfig,
-)
+from enrich.config import EnrichDbtModelsRefreshConfig
 from shared.config import CATCHUPS, SCHEDULES, START_DATES, config_to_airflow_params
 
 with DAG(
@@ -43,8 +41,8 @@ with DAG(
     ),
 ) as dag:
     tasks = []
-    for command in dag.params.get("dbt_models_refresh_commands", []):
-        cmd = command.strip()
+    for cmd in dag.params.get("dbt_models_refresh_commands", []):
+        cmd = cmd.strip()
         if not cmd:
             continue
         cmd_id = re.sub(r"__+", "_", re.sub(r"[^a-zA-Z0-9]+", "_", cmd))
@@ -52,7 +50,7 @@ with DAG(
         tasks.append(
             BashOperator(
                 task_id=f"enrich_{cmd_id}",
-                bash_command=command,
+                bash_command=cmd,
             )
         )
     chain(*tasks)
