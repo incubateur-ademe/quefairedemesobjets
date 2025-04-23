@@ -5,6 +5,11 @@ on:
   push:
     branches: [ $default-branch ]
 
+# Address actions/missing-workflow-permissions rule in
+# code scanning alerts
+permissions:
+  contents: read
+
 jobs:
   unit_tests:
     name: tests unitaires backend

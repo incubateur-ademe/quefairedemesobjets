@@ -6,6 +6,11 @@ on:
       - main  # Adjust this to your default branch name, if necessary
       - document-frontend
 
+# Address actions/missing-workflow-permissions rule in
+# code scanning alerts
+permissions:
+  contents: read
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
