@@ -34,7 +34,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install gdal-bin
       - name: Install poetry
-        uses: abatilo/actions-poetry@v4
+        uses: abatilo/actions-poetry@3765cf6 # v4
       - uses: actions/cache@v4
         name: Define a cache for the virtual environment based on the dependencies lock file
         with:
@@ -50,7 +50,7 @@ jobs:
         run: poetry run pytest dags_unit_tests
       - name: Check code formatting
         run: poetry run black --check --diff .
-      - uses: chartboost/ruff-action@v1
+      - uses: chartboost/ruff-action@9828f49 # v3.2.2
       - name: Check for missing migrations
         run: poetry run python manage.py makemigrations --check --no-input --settings=core.test_settings
         env:
@@ -126,7 +126,7 @@ jobs:
           sudo apt-get install gdal-bin
 
       - name: Install poetry
-        uses: abatilo/actions-poetry@v4
+        uses: abatilo/actions-poetry@3765cf6 # v4
       - uses: actions/cache@v4
         name: Define a cache for the virtual environment based on the dependencies lock file
         with:
