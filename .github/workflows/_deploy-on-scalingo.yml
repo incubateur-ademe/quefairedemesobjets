@@ -81,7 +81,7 @@ jobs:
           MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK_URL }}
           PAYLOAD: |-
             {
-              "text": "⚠️ Le déploiement #${{github.run_id}} a fonctionné mais le site est down @fabien.lefrapper @nicoo. [Voir les logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})",
+              "text": "⚠️ Le déploiement #${{github.run_id}} a fonctionné mais le site est down @here. [Voir les logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})",
               "channel": "lvao-tour-de-controle",
               "username": "Bipboop le robot de seconde main",
               "icon": "https://cdn3.iconfinder.com/data/icons/system-basic-vol-4-1/20/icon-note-attention-alt3-512.png"
