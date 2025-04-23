@@ -39,7 +39,7 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
         >
             {% for acteur in acteurs %}
                 <script type="application/json" data-map-target="acteur">
-                    {{ acteur.json_acteur_for_display(direction=form.initial.direction, action_list=form.initial.action_list, carte=carte, carte_config=object, sous_categorie_id=form.initial.sc_id) | safe }}
+                    {{ acteur.json_acteur_for_display(direction=form.initial.direction, action_list=form.initial.action_list, carte=carte, carte_config=carte_config, sous_categorie_id=form.initial.sc_id) | safe }}
                 </script>
             {% endfor %}
         </div>

@@ -26,13 +26,16 @@
         </button>
         <div class="qf-flex qf-flex-row-reverse">
             {% if form.legend_grouped_action|length > 1 %}
+            {% if carte_config and not carte_config.hide_legend %}
             <button
                 class="fr-btn fr-btn--sm fr-btn--secondary fr-ml-1w fr-btn--icon-left fr-icon-eye-line"
                 type="button"
+                data-testid="legend-mobile-button"
                 data-action="click -> search-solution-form#showLegend"
             >
                 Légende
             </button>
+            {% endif %}
             {% endif %}
             <button
                 class="fr-btn fr-btn--sm fr-btn--secondary fr-ml-1w fr-btn--icon-left fr-icon-equalizer-line"
