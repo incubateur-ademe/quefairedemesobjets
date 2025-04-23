@@ -1,3 +1,5 @@
+-- depends_on: {{ ref('base_ae_unite_legale') }}
+
 /*
 Notes:
  - 🖊️ Renaming columns to follow our naming convention

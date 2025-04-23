@@ -35,7 +35,7 @@ with DAG(
         EnrichDbtModelsRefreshConfig(
             dbt_models_refresh_commands=[
                 "dbt build --select +int_ae_unite_legale",
-                "dbt build --select int_ae_etablissement",
+                "dbt build --select +int_ae_etablissement",
                 "dbt build --select +int_ban_adresses",
                 "dbt build --select int_ban_villes",
             ],
@@ -48,6 +48,7 @@ with DAG(
         if not cmd:
             continue
         cmd_id = re.sub(r"__+", "_", re.sub(r"[^a-zA-Z0-9]+", "_", cmd))
+        cmd += " --debug --threads 1"
         tasks.append(
             BashOperator(
                 task_id=f"enrich_{cmd_id}",
