@@ -105,6 +105,16 @@ def test_get_acteur_by_identifiant(client):
 
 
 @pytest.mark.django_db
+def test_get_acteur_inacteur_returns_404(client):
+    identifiant_unique = "INACTIF_ACT12345"
+    DisplayedActeurFactory(pk=identifiant_unique, statut=ActeurStatus.INACTIF)
+    response = client.get(
+        f"{BASE_URL}/acteur", query_params={"identifiant_unique": identifiant_unique}
+    )
+    assert response.status_code == 404
+
+
+@pytest.mark.django_db
 def test_autocomplete_epci(client):
     """Test the /autocomplete/configurateur endpoint"""
     response = client.get(
