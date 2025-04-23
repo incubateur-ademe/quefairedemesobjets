@@ -23,7 +23,7 @@ jobs:
       with:
         cache: "pip"
     - name: Install poetry
-      uses: abatilo/actions-poetry@3765cf6 # v4
+      uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1 # v4
     - uses: actions/cache@v4
       name: Define a cache for the virtual environment based on the dependencies lock file
       with:
