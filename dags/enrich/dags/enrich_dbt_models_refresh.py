@@ -35,8 +35,10 @@ with DAG(
         EnrichActeursClosedConfig(
             dbt_models_refresh=True,
             dbt_models_refresh_command="""
-                dbt build --select model1
-                dbt build --select model2
+                dbt build --select +int_ae_unite_legale
+                dbt build --select int_ae_etablissement
+                dbt build --select +int_ban_adresses
+                dbt build --select int_ban_villes
             """,
         )
     ),
