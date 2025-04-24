@@ -338,3 +338,17 @@ models:
         description: "The logo_file for this table"
       - name: licence
         description: "The licence for this table"
+  - name: base_acteur_type
+    description: "Types d'acteurs"
+    columns:
+      - name: id
+        description: "clef primaire"
+        data_tests:
+          - not_null
+      - name: libelle
+        description: "Nom/description du type d'acteur (ex: Association, entreprise de l'ESS)"
+      - name: code
+        description: "Code du type d'acteur (ex: ess)"
+        data_tests:
+          - not_null
+          - unique

@@ -45,14 +45,14 @@ SELECT
      - normalize to increase chances of matching
      - keep each column separate for a potential substring match
     */
-    udf_normalize_string_alpha_for_match(nom) AS dirigeant_nom,
-    udf_normalize_string_alpha_for_match(nom_usage) AS dirigeant_nom_usage,
-    udf_normalize_string_alpha_for_match(pseudonyme) AS dirigeant_pseudonyme,
-    udf_normalize_string_alpha_for_match(prenom1) AS dirigeant_prenom1,
-    udf_normalize_string_alpha_for_match(prenom2) AS dirigeant_prenom2,
-    udf_normalize_string_alpha_for_match(prenom3) AS dirigeant_prenom3,
-    udf_normalize_string_alpha_for_match(prenom4) AS dirigeant_prenom4,
-    udf_normalize_string_alpha_for_match(prenom_usuel) AS dirigeant_prenom_usuel,
+    nom AS dirigeant_nom,
+    nom_usage AS dirigeant_nom_usage,
+    pseudonyme AS dirigeant_pseudonyme,
+    prenom1 AS dirigeant_prenom1,
+    prenom2 AS dirigeant_prenom2,
+    prenom3 AS dirigeant_prenom3,
+    prenom4 AS dirigeant_prenom4,
+    prenom_usuel AS dirigeant_prenom_usuel,
     -- TRUE if ANY names NOT NULL for more efficient pre-filtering
     COALESCE(
       nom,

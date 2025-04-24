@@ -1,8 +1,4 @@
-"""
-change_model to delete a parent acteur
-
-
-"""
+"""change model to delete a parent"""
 
 from data.models.changes.acteur_abstract import ChangeActeurAbstract
 from qfdmo.models import RevisionActeur

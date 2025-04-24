@@ -1,6 +1,6 @@
 {% macro create_udf_encode_base57() %}
 
-DROP FUNCTION IF EXISTS {{ target.schema }}.encode_base57(uuid);
+DROP FUNCTION IF EXISTS {{ target.schema }}.encode_base57 CASCADE;
 CREATE FUNCTION {{ target.schema }}.encode_base57(uuid UUID)
 RETURNS varchar(22) AS $$
 DECLARE
