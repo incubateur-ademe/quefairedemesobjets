@@ -1,7 +1,7 @@
 {{
   config(
     materialized = 'table',
-    tags=['marts', 'enrich', 'ville','cities', 'ban'],
+    tags=['marts', 'enrich', 'villes', 'cities', 'ban'],
   )
 }}
 

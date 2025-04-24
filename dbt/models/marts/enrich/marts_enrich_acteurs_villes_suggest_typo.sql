@@ -2,7 +2,7 @@
   config(
     materialized = 'view',
     alias = 'marts_enrich_acteurs_villes_suggest_typo',
-    tags=['marts', 'enrich', 'ville', 'ban','acteurs','typo','ortographe'],
+    tags=['marts', 'enrich', 'villes', 'cities', 'ban','acteurs','typo','ortographe'],
   )
 }}
 
