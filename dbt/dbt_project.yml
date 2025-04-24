@@ -32,6 +32,7 @@ clean-targets:
   - "dbt_packages"
 
 models:
+  +unlogged: true
   base:
     schema: public
     +materialized: view
