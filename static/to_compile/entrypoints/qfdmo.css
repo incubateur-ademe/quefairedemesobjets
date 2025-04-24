@@ -90,7 +90,7 @@ Style the autocomplete container:
   --header-height: 120px;
 }
 
-:root[data-legend="hidden"] {
+:root[data-legend-hidden] {
   --header-height: 0;
 }
 
