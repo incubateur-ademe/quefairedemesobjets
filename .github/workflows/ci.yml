@@ -3,7 +3,7 @@ name: 🤖 CI
 on:
   workflow_call:
   push:
-    branches: [ $default-branch ]
+    branches: [ "main" ]
 
 jobs:
   backend_tests:
