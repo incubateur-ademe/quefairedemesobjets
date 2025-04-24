@@ -201,7 +201,6 @@ class Suggestion(models.Model):
             template_name = "data/_partials/crawl_urls_suggestion_details.html"
         elif self.suggestion_cohorte.type_action in [
             SuggestionAction.ENRICH_ACTEURS_CLOSED,
-            SuggestionAction.RGPD_ANONYMIZE,
             SuggestionAction.ENRICH_ACTEURS_RGPD,
         ]:
             template_name = "data/_partials/suggestion_details_changes.html"
