@@ -6,8 +6,8 @@ on:
     branches: [ $default-branch ]
 
 jobs:
-  unit_tests:
-    name: tests unitaires backend
+  backend_tests:
+    name: tests backend
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -58,7 +58,7 @@ jobs:
           DATABASE_URL: "postgres://fakeusername:fakepassword@postgres:5432/database" # pragma: allowlist secret
 
   frontend_tests:
-    name: tests unitaires frontend
+    name: tests frontend
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -76,7 +76,7 @@ jobs:
         run: npm run test
 
   e2e:
-    # name: Tests de bout-en-bout
+    name: tests de bout-en-bout
     runs-on: ubuntu-latest
     if: contains( github.event.pull_request.labels.*.name, 'frontend') || github.ref == 'refs/head/main'
     strategy:
