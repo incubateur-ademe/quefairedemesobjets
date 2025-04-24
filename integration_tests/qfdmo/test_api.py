@@ -1,9 +1,12 @@
+from urllib.parse import urlencode
+
 import pytest
 from django.contrib.gis.geos import Point
 from django.core.management import call_command
 
 from qfdmo.models.acteur import ActeurService, ActeurStatus, DisplayedActeur
 from qfdmo.models.action import GroupeAction
+from qfdmo.models.categorie_objet import SousCategorieObjet
 from unit_tests.qfdmo.acteur_factory import (
     DisplayedActeurFactory,
     DisplayedPropositionServiceFactory,
@@ -67,7 +70,7 @@ def test_get_acteurs(client, displayed_acteur):
         "longitude": 2.3,
         "rayon": 5,
     }
-    response = client.get(f"{BASE_URL}/acteurs", params=params)
+    response = client.get(f"{BASE_URL}/acteurs?{urlencode(params)}")
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data["items"], list)
@@ -82,16 +85,26 @@ def test_get_acteurs(client, displayed_acteur):
 @pytest.mark.django_db
 def test_get_acteurs_sous_categorie_filter(client, displayed_acteur):
     """Test the /acteurs endpoint with sous categorie filter"""
+    acteur = DisplayedActeurFactory(
+        pk="UN-AUTRE-ACTEUR", location=Point(2.3, 48.86), statut=ActeurStatus.ACTIF
+    )
     sous_categorie = SousCategorieObjetFactory(id=666)
-    proposition_service = DisplayedPropositionServiceFactory()
+    proposition_service = DisplayedPropositionServiceFactory(acteur=acteur)
     proposition_service.sous_categories.add(sous_categorie)
 
     params = {"latitude": 48.86, "longitude": 2.3, "rayon": 5, "sous_categories": 666}
-    response = client.get(f"{BASE_URL}/acteurs", params=params)
+    response = client.get(f"{BASE_URL}/acteurs?{urlencode(params)}")
     data = response.json()
 
+    assert SousCategorieObjet.objects.filter(id=666).exists()
     assert DisplayedActeur.objects.filter(statut=ActeurStatus.ACTIF).count() == 2
-    print(data)
+    assert (
+        DisplayedActeur.objects.filter(
+            statut=ActeurStatus.ACTIF,
+            proposition_services__sous_categories__id__in=[666],
+        ).count()
+        == 1
+    )
     assert data["count"] == 1
 
 

@@ -192,6 +192,7 @@ def acteurs(
     qs = DisplayedActeur.objects.filter(
         statut=ActeurStatus.ACTIF,
     ).order_by("nom")
+    print(filters)
     qs = filters.filter(qs)
 
     if latitude and longitude:
