@@ -1,26 +1,47 @@
-name: 🚀 CD
+name: 🌚 CD
 
 on:
   workflow_dispatch:
-  release:
-    types: [published]
+  push:
+    branches: [main]
 
-defaults:
-  run:
-    shell: bash
-
-jobs:
-  prod:
-    # A rule protection has been set on this environment
-    # so that it only triggers when ran on main branch
-    # See https://github.com/incubateur-ademe/quefairedemesobjets/settings/environments/4163451271/edit
-    name: 🔴 Prod
-    uses: ./.github/workflows/_cd-by-environment.yml
-    secrets: inherit # pragma: allowlist secret`
-    with:
-      environment: prod
-
-# Address actions/missing-workflow-permissions rule in
-# code scanning alerts
 permissions:
   contents: read
+
+jobs:
+  ci:
+    name: 🤖 CI
+    uses: ./.github/workflows/ci.yml
+
+  preprod:
+    name: 🟠 Preprod
+    uses: ./.github/workflows/_cd-by-environment.yml
+    secrets: inherit # pragma: allowlist secret`
+    needs: [ci]
+    with:
+      environment: preprod
+
+
+  # Common release-drafter configuration
+  # From https://github.com/marketplace/actions/release-drafter
+  _release_drafter: &release_drafter
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    name: 🔢 Release
+    steps:
+      - uses: release-drafter/release-drafter@b1476f6e6eb133afa41ed8589daba6dc69b4d3f5 # v6.1.0
+        with:
+          config-name: release-config.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Standard release draft update
+  update_release_draft:
+    <<: *release_drafter
+    needs: [preprod]
+
+  # Hotfix-only release draft update
+  update_release_draft_for_hotfix:
+    <<: *release_drafter
+    if: ! (contains("hotfix", github.ref))
