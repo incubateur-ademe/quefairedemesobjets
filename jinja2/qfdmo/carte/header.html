@@ -14,6 +14,7 @@
 >
     {% include 'qfdmo/_addresses_partials/adresse_input_form.html' %}
 
+    {% if not carte_config or not carte_config.hide_legend %}
     <div class="lg:qf-hidden fr-mt-1w qf-flex qf-justify-between">
         <button
             class="fr-btn fr-btn--sm fr-btn--tertiary"
@@ -26,7 +27,6 @@
         </button>
         <div class="qf-flex qf-flex-row-reverse">
             {% if form.legend_grouped_action|length > 1 %}
-            {% if carte_config and not carte_config.hide_legend %}
             <button
                 class="fr-btn fr-btn--sm fr-btn--secondary fr-ml-1w fr-btn--icon-left fr-icon-eye-line"
                 type="button"
@@ -35,7 +35,6 @@
             >
                 Légende
             </button>
-            {% endif %}
             {% endif %}
             <button
                 class="fr-btn fr-btn--sm fr-btn--secondary fr-ml-1w fr-btn--icon-left fr-icon-equalizer-line"
@@ -47,4 +46,5 @@
             </button>
         </div>
     </div>
+    {% endif %}
 </div>
