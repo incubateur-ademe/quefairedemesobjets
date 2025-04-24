@@ -2,7 +2,7 @@
 
 DROP FUNCTION IF EXISTS {{ target.schema }}.encode_base57 CASCADE;
 CREATE FUNCTION {{ target.schema }}.encode_base57(uuid UUID)
-RETURNS text AS $$
+RETURNS varchar(22) AS $$
 DECLARE
     alphabet text := '23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'; -- pragma: allowlist secret
     result text := '';
