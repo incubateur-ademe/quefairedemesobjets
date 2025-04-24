@@ -1,14 +1,31 @@
-from unittest.mock import patch
-
 import pytest
 from django.contrib.gis.geos import Point
 from django.core.management import call_command
 
-from qfdmo.models.acteur import ActeurService, ActeurStatus
+from qfdmo.models.acteur import ActeurService, ActeurStatus, DisplayedActeur
 from qfdmo.models.action import GroupeAction
-from unit_tests.qfdmo.acteur_factory import DisplayedActeurFactory
+from unit_tests.qfdmo.acteur_factory import (
+    DisplayedActeurFactory,
+    DisplayedPropositionServiceFactory,
+)
+from unit_tests.qfdmo.sscatobj_factory import SousCategorieObjetFactory
 
 BASE_URL = "http://localhost:8000/api/qfdmo"
+
+
+# Fixtures
+# --------
+@pytest.fixture
+def sous_categorie():
+    sous_categorie = SousCategorieObjetFactory()
+    return sous_categorie
+
+
+@pytest.fixture
+def displayed_acteur():
+    DisplayedActeurFactory(
+        pk="UN-ACTEUR", location=Point(2.3, 48.86), statut=ActeurStatus.ACTIF
+    )
 
 
 @pytest.fixture(scope="session")
@@ -23,6 +40,8 @@ def django_db_setup(django_db_setup, django_db_blocker):
         )
 
 
+# Tests
+# -----
 @pytest.mark.django_db
 def test_get_actions(client):
     """Test the /actions endpoint"""
@@ -41,11 +60,8 @@ def test_get_groupe_actions(client):
 
 
 @pytest.mark.django_db
-def test_get_acteurs(client):
+def test_get_acteurs(client, displayed_acteur):
     """Test the /acteurs endpoint with filters"""
-    DisplayedActeurFactory(
-        pk="UN-ACTEUR", location=Point(2.3, 48.86), statut=ActeurStatus.ACTIF
-    )
     params = {
         "latitude": 48.86,
         "longitude": 2.3,
@@ -61,6 +77,22 @@ def test_get_acteurs(client):
     assert "nom" in returned_acteur
     assert "adresse" in returned_acteur
     assert returned_acteur["identifiant_unique"] == "UN-ACTEUR"
+
+
+@pytest.mark.django_db
+def test_get_acteurs_sous_categorie_filter(client, displayed_acteur):
+    """Test the /acteurs endpoint with sous categorie filter"""
+    sous_categorie = SousCategorieObjetFactory(id=666)
+    proposition_service = DisplayedPropositionServiceFactory()
+    proposition_service.sous_categories.add(sous_categorie)
+
+    params = {"latitude": 48.86, "longitude": 2.3, "rayon": 5, "sous_categories": 666}
+    response = client.get(f"{BASE_URL}/acteurs", params=params)
+    data = response.json()
+
+    assert DisplayedActeur.objects.filter(statut=ActeurStatus.ACTIF).count() == 2
+    print(data)
+    assert data["count"] == 1
 
 
 @pytest.mark.django_db
@@ -117,23 +149,24 @@ def test_get_acteur_inacteur_returns_404(client):
 
 
 @pytest.mark.django_db
-@patch("qfdmo.geo_api.fetch_epci_codes")
-def test_autocomplete_epci(client, mock_get):
+def test_autocomplete_epci(client, mocker):
     """Test the /autocomplete/configurateur endpoint"""
     # Mock setup
-    mock_response = mock_get.return_value
-    mock_response.status_code = 200
-    mock_response.json.return_value = [
-        {"code": "200043123", "nom": "CC Auray Quiberon Terre Atlantique"},
-        {"code": "200043156", "nom": "CC du Pays Rethélois"},
+    mock_formatted_epcis_list = mocker.patch("qfdmo.geo_api.formatted_epcis_list")
+    mock_formatted_epcis_list.return_value = [
+        "200043123 - CC Auray Quiberon Terre Atlantique",
+        "200043156 - CC du Pays Rethélois",
     ]
 
+    # Simulate a successful response
     response = client.get(
         f"{BASE_URL}/autocomplete/configurateur", query_params={"query": "Quiberon"}
     )
+
+    # Assertions
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)
-    assert len(data) == 5
+    assert len(data) == 2
     if data:
         assert "Quiberon" in data[0]
