@@ -13,9 +13,7 @@ class COLS:
     # Acteurs
     ACTEUR_ID: str = "acteur_id"
     ACTEUR_TYPE_ID: str = "acteur_type_id"
-    ACTEUR_TYPE_CODE: str = "acteur_type_code"
     ACTEUR_SOURCE_ID: str = "acteur_source_id"
-    ACTEUR_SOURCE_CODE: str = "acteur_source_code"
     ACTEUR_SIRET: str = "acteur_siret"
     ACTEUR_NOM: str = "acteur_nom"
     ACTEUR_NOMS_ORIGINE: str = "acteur_noms_origine"
