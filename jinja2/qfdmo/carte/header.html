@@ -14,7 +14,7 @@
 >
     {% include 'qfdmo/_addresses_partials/adresse_input_form.html' %}
 
-    {% if carte_config and not carte_config.hide_legend %}
+    {% if not carte_config or not carte_config.hide_legend %}
     <div class="lg:qf-hidden fr-mt-1w qf-flex qf-justify-between">
         <button
             class="fr-btn fr-btn--sm fr-btn--tertiary"
