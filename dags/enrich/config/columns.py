@@ -27,9 +27,21 @@ class COLS:
     ACTEUR_NAF: str = "acteur_naf"
     ACTEUR_LONGITUDE: str = "acteur_longitude"
     ACTEUR_LATITUDE: str = "acteur_latitude"
-
+    ACTEUR_STATUT: str = "acteur_statut"
     # Annuaire Entreprise
     AE_DIRIGEANTS_NOMS: str = "ae_dirigeants_noms_prenoms"
+
+    # Suggestions
+    SUGGEST_COHORT_CODE: str = "suggestion_cohorte_code"
+    SUGGEST_COHORT: str = "suggest_cohort"
+
+    # Replacements
+    SUGGEST_SIRET: str = "suggest_siret"
+    SUGGEST_NOM: str = "suggest_nom"
+    SUGGEST_ADRESSE: str = "suggest_adresse"
+    SUGGEST_CODE_POSTAL: str = "suggest_code_postal"
+    SUGGEST_VILLE: str = "suggest_ville"
+    SUGGEST_NAF: str = "suggest_naf"
 
     # Suggestions
     SUGGEST_COHORT: str = f"{SUGGEST_PREFIX}_cohort"
@@ -46,3 +58,4 @@ class COLS:
     # Matching
     MATCH_WORDS: str = "match_words"
     MATCH_SCORE: str = "match_score"
+    MATCH_THRESHOLD: str = "match_threshold"

@@ -91,7 +91,9 @@ Style the autocomplete container:
 }
 
 :root[data-legend-hidden] {
-  --header-height: 0;
+  @media (max-width: 768px) {
+    --header-height: 72px;
+  }
 }
 
 :root[data-formulaire] {
