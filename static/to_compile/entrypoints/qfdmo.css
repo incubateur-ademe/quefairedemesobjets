@@ -8,7 +8,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 pre {
   font-family: Marianne, arial, sans-serif;
   font-weight: 500;
@@ -86,12 +85,16 @@ Style the autocomplete container:
 }
 
 :root {
-    --footer-height: 0;
-    --sidebar-width: 0;
-    --header-height: 120px;
+  --footer-height: 0;
+  --sidebar-width: 0;
+  --header-height: 120px;
+}
+
+:root[data-legend-hidden] {
+  --header-height: 0;
 }
 
 :root[data-formulaire] {
-    --footer-height: 100px;
-    --header-height: 135px;
+  --footer-height: 100px;
+  --header-height: 135px;
 }

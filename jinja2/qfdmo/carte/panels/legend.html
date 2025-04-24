@@ -1,4 +1,4 @@
-{% if carte_config and not carte_config.hide_legend %}
+{% if not carte_config or not carte_config.hide_legend %}
 <aside
     data-testid="carte-legend"
     class="
