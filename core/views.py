@@ -20,6 +20,7 @@ def direct_access(request):
     from qfdmd.views import HomeView as Assistant  # avoid circular dependency
 
     get_params = request.GET.copy()
+
     if request.META.get("HTTP_HOST") in settings.ASSISTANT["HOSTS"]:
         return Assistant.as_view()(request)
 
@@ -41,7 +42,7 @@ def direct_access(request):
         parts = [reverse("qfdmo:formulaire"), "?" if params else "", params]
         return redirect("".join(parts))
 
-    return Assistant.as_view()(request)
+    return redirect(f"{settings.CMS['BASE_URL']}/lacarte", permanent=False)
 
 
 def static_file_content_from(path):
