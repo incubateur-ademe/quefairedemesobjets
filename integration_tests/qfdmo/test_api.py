@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 from django.contrib.gis.geos import Point
 from django.core.management import call_command
@@ -115,8 +117,17 @@ def test_get_acteur_inacteur_returns_404(client):
 
 
 @pytest.mark.django_db
-def test_autocomplete_epci(client):
+@patch("qfdmo.geo_api.fetch_epci_codes")
+def test_autocomplete_epci(client, mock_get):
     """Test the /autocomplete/configurateur endpoint"""
+    # Mock setup
+    mock_response = mock_get.return_value
+    mock_response.status_code = 200
+    mock_response.json.return_value = [
+        {"code": "200043123", "nom": "CC Auray Quiberon Terre Atlantique"},
+        {"code": "200043156", "nom": "CC du Pays Rethélois"},
+    ]
+
     response = client.get(
         f"{BASE_URL}/autocomplete/configurateur", query_params={"query": "Quiberon"}
     )
