@@ -9,7 +9,6 @@ filterwarnings = [
 ]
 
 [tool.pyright]
-include = ["unit_tests", "code", "qfdmo", "qfdmd", "integration_tests"]
 venvPath = "."
 venv = ".venv"
 
