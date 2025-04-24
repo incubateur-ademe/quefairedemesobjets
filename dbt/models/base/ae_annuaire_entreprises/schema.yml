@@ -52,6 +52,10 @@ models:
         data_tests:
           - not_null
           - unique
+      - name: activite_principale
+        description: "Code NAF Rev2"
+      - name: denomination_usuelle
+        description: "Nom de l'établissement"
       - name: etat_administratif
         description: "A = Actif, F = Fermé"
         data_type: varchar(1)
@@ -59,8 +63,6 @@ models:
           - not_null
           - accepted_values:
               values: ["A", "F"]
-      - name: activite_principale
-        description: "Code NAF Rev2"
       - name: numero_voie
         description: "Numéro de voie"
       - name: complement_adresse

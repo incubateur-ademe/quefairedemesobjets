@@ -1,0 +1,13 @@
+{# Generic template for suggestions following suggestion.changes:list[SuggestionChange] #}
+{% extends "data/_partials/suggestion_details.html" %}
+{% load custom_filters %}
+
+{% block suggestion_title %}
+{{ title }}
+{% endblock suggestion_title %}</h3>
+
+{% block suggestion_details %}
+
+<h3 style="margin-top: 1.5em">🔢 {{ changes|length }} acteur(s) impacté(s):</h3>
+{% include "data/_partials/dicts_to_table.html" with data=changes %}
+{% endblock suggestion_details %}

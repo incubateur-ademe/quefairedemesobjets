@@ -50,13 +50,17 @@ models:
         data_tests:
           - not_null
           - unique
+      - name: activite_principale
+        description: "Code NAF Rev2"
+      - name: nom
+        description: "Nom de l'établissement"
+        data_tests:
+          - not_null
       - name: est_actif
         description: "OUI si A = Actif"
         data_type: boolean
         data_tests:
           - not_null
-      - name: activite_principale
-        description: "Code NAF Rev2"
       - name: numero_voie
         description: "Numéro de voie"
       - name: complement_adresse
