@@ -1,4 +1,4 @@
-"""DAG to anonymize QFDMO acteurs for RGPD"""
+"""DAG to suggestion city corrections based on BAN data"""
 
 from airflow import DAG
 from enrich.config import (
@@ -28,8 +28,8 @@ with DAG(
         "email_on_retry": False,
         "retries": 0,
     },
-    description=("Un DAG pour anonymiser les acteurs vs. RGPD"),
-    tags=["annuaire", "entreprises", "ae", "rgpd", "acteurs", "juridique"],
+    description=("Un DAG pour suggérer des corrections de villes"),
+    tags=["annuaire", "entreprises", "ae", "acteurs", "juridique"],
     schedule=SCHEDULES.NONE,
     catchup=CATCHUPS.AWLAYS_FALSE,
     start_date=START_DATES.YESTERDAY,

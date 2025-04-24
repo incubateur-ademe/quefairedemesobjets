@@ -76,10 +76,6 @@ class EnrichBaseConfig(BaseModel):
 
 
 class EnrichActeursClosedConfig(EnrichBaseConfig):
-    dbt_models_refresh_command: str = Field(
-        default="dbt build --select tag:marts,tag:enrich,tag:closed",
-        description="🔄 Commande DBT à exécuter pour rafraîchir les modèles",
-    )
     filter_contains__etab_naf: Optional[str] = Field(
         default=None,
         description="🔍 Filtre sur **NAF AE Etablissement**",

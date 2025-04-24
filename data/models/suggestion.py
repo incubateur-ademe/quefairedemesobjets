@@ -55,7 +55,6 @@ class SuggestionCohorteStatut(models.TextChoices):
 class SuggestionAction(models.TextChoices):
     CRAWL_URLS = SUGGESTION_CRAWL_URLS, "🔗 URLs scannées"
     ENRICH_ACTEURS_CLOSED = "ENRICH_ACTEURS_CLOSED", "🚪 Acteurs fermés"
-    ENRICH_ACTEURS_RGPD = "ENRICH_ACTEURS_RGPD", "🕵 Anonymisation RGPD"
     ENRICH_ACTEURS_VILLES_TYPO = (
         "ENRICH_ACTEURS_VILLES_TYPO",
         "🏙️ Acteurs villes typographiques",
@@ -188,7 +187,6 @@ class Suggestion(models.Model):
         if self.suggestion_cohorte.type_action in [
             SuggestionAction.CLUSTERING,
             SuggestionAction.CRAWL_URLS,
-            SuggestionAction.ENRICH_ACTEURS_RGPD,
             SuggestionAction.ENRICH_ACTEURS_VILLES_TYPO,
             SuggestionAction.ENRICH_ACTEURS_VILLES_NEW,
         ]:
@@ -211,7 +209,6 @@ class Suggestion(models.Model):
             template_name = "data/_partials/crawl_urls_suggestion_details.html"
         elif self.suggestion_cohorte.type_action in [
             SuggestionAction.ENRICH_ACTEURS_CLOSED,
-            SuggestionAction.ENRICH_ACTEURS_RGPD,
             SuggestionAction.ENRICH_ACTEURS_VILLES_TYPO,
             SuggestionAction.ENRICH_ACTEURS_VILLES_NEW,
         ]:
@@ -339,7 +336,6 @@ class Suggestion(models.Model):
             SuggestionAction.CLUSTERING,
             SuggestionAction.CRAWL_URLS,
             SuggestionAction.ENRICH_ACTEURS_CLOSED,
-            SuggestionAction.ENRICH_ACTEURS_RGPD,
             SuggestionAction.ENRICH_ACTEURS_VILLES_TYPO,
             SuggestionAction.ENRICH_ACTEURS_VILLES_NEW,
         ]:

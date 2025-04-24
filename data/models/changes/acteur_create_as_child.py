@@ -2,8 +2,6 @@ from pydantic import BaseModel
 
 from data.models.changes.utils import data_reconstruct
 
-from data.models.changes.utils import data_reconstruct
-
 
 class ChangeActeurCreateAsChild(BaseModel):
     id: str
