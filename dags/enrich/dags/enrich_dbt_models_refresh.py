@@ -8,6 +8,7 @@ import re
 from airflow import DAG
 from airflow.models.baseoperator import chain
 from airflow.operators.bash import BashOperator
+from airflow.utils.trigger_rule import TriggerRule
 from enrich.config import EnrichDbtModelsRefreshConfig
 from shared.config import CATCHUPS, SCHEDULES, START_DATES, config_to_airflow_params
 
@@ -51,6 +52,7 @@ with DAG(
             BashOperator(
                 task_id=f"enrich_{cmd_id}",
                 bash_command=cmd,
+                trigger_rule=TriggerRule.ALL_DONE,
             )
         )
     chain(*tasks)
