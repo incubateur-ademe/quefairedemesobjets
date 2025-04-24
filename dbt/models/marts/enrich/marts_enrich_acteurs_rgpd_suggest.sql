@@ -8,7 +8,7 @@ Notes:
 {{
   config(
     materialized = 'view',
-    tags=['marts', 'ae', 'annuaire_entreprises', 'unite_legale', 'rgpd'],
+    tags=['marts', 'enrich', 'ae', 'annuaire_entreprises', 'unite_legale', 'rgpd'],
   )
 }}
 
@@ -82,7 +82,6 @@ WITH acteurs_with_siren AS (
 	)
 )
 SELECT
-	'acteurs_rgpd' AS suggestion_cohorte_code,
-	'🕵 Anonymisation RGPD' AS suggestion_cohorte_label,
+	'Anonymisation RGPD' AS suggest_cohort,
 	*
 FROM suggestions_with_minimum_matching_words
