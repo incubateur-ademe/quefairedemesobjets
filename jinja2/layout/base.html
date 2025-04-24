@@ -3,6 +3,9 @@
     lang="fr"
     class="qf-scroll-smooth"
     {% if not is_carte %}data-formulaire{% endif %}
+    {% if carte_config and carte_config.hide_legend %}
+    data-legend-hidden
+    {% endif %}
 >
     <head>
         <meta charset="utf-8">

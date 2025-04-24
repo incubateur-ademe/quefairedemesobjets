@@ -25,13 +25,16 @@ on-run-start:
   - "{{ create_udf_uuid_to_int() }}"
   - "{{ create_udf_safe_divmod() }}"
   - "{{ create_udf_columns_concat_unique_non_empty() }}"
+  - "{{ create_udf_columns_words_in_common_count() }}"
   - "{{ create_udf_normalize_string_alpha_for_match() }}"
+  - "{{ create_udf_ae_string_cleanup() }}"
 
 clean-targets:
   - "target"
   - "dbt_packages"
 
 models:
+  +unlogged: true
   base:
     schema: public
     +materialized: view

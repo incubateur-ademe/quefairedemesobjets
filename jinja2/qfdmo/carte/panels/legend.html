@@ -1,3 +1,4 @@
+{% if not carte_config or not carte_config.hide_legend %}
 <aside
     data-testid="carte-legend"
     class="
@@ -47,3 +48,4 @@
         Infos
     </button>
 </aside>
+{% endif %}

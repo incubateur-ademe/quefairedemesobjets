@@ -1,5 +1,4 @@
-"""
-change_model to make no change to an acteur
+"""change model to make no change to an acteur
 
 Reason for having such a model is that we can
 follow the same pattern to be consistent across the board.
