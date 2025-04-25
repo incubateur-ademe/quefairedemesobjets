@@ -651,6 +651,14 @@ def clean_parent(parent):
 
 class Acteur(BaseActeur):
     class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["source_id", "identifiant_externe"],
+                condition=Q(statut=ActeurStatus.ACTIF),
+                name="acteur_unique_by_source_and_external_id",
+            )
+        ]
+
         verbose_name = "ACTEUR de l'EC - IMPORTÉ"
         verbose_name_plural = "ACTEURS de l'EC - IMPORTÉ"
 
