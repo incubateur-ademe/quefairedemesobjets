@@ -173,10 +173,6 @@ def _remove_undesired_lines(
         df = df[df["service_a_domicile"].str.lower() != "oui exclusivement"]
         df = df[df["service_a_domicile"].str.lower() != "service à domicile uniquement"]
 
-    # Remove acteurs which are for professionals only
-    if "public_accueilli" in df.columns:
-        df = df[df["public_accueilli"] != constants.PUBLIC_PRO]
-
     # Remove acteurs which have no sous_categorie_codes
     if "sous_categorie_codes" in df.columns:
         df = df[df["sous_categorie_codes"].notnull()]
