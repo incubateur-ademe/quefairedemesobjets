@@ -73,7 +73,7 @@ with DAG(
                 "destination": ["location"],
             },
             {
-                "origin": ["id_point_apport_ou_reparation", "nom"],
+                "origin": ["id_point_apport_ou_reparation", "nom", "acteur_type_code"],
                 "transformation": "clean_identifiant_externe",
                 "destination": ["identifiant_externe"],
             },
@@ -81,7 +81,6 @@ with DAG(
                 "origin": [
                     "identifiant_externe",
                     "source_code",
-                    "acteur_type_code",
                 ],
                 "transformation": "clean_identifiant_unique",
                 "destination": ["identifiant_unique"],

@@ -473,20 +473,29 @@ class TestCleanSiretAndSiren:
 class TestCleanIdentifiantExterne:
 
     @pytest.mark.parametrize(
-        "identifiant_externe, nom, expected_identifiant_externe",
+        "identifiant_externe, acteur_type_code, nom, expected_identifiant_externe",
         [
-            (None, "nom", "nom"),
-            (None, "nom-nom nom_nom__nom", "nomnom_nom_nom_nom"),
-            ("12345", "nom", "12345"),
-            (" 12345 ", "nom", "12345"),
-            ("ABC123", "nom", "ABC123"),
-            (" abc123 ", "nom", "abc123"),
+            (None, "commerce", "nom", "nom"),
+            (None, "commerce", "nom-nom nom_nom__nom", "nomnom_nom_nom_nom"),
+            ("12345", "commerce", "12345", "12345"),
+            (" 12345 ", "commerce", "12345", "12345"),
+            ("ABC123", "commerce", "ABC123", "ABC123"),
+            (" abc123 ", "commerce", "abc123", "abc123"),
+            (None, "acteur_digital", "nom", "nom_d"),
+            ("ABC123", "acteur_digital", "ABC123", "ABC123_d"),
+            (" abc123 ", "acteur_digital", "abc123", "abc123_d"),
         ],
     )
     def test_clean_identifiant_externe(
-        self, identifiant_externe, nom, expected_identifiant_externe
+        self, identifiant_externe, acteur_type_code, nom, expected_identifiant_externe
     ):
-        row = pd.Series({"identifiant_externe": identifiant_externe, "nom": nom})
+        row = pd.Series(
+            {
+                "identifiant_externe": identifiant_externe,
+                "acteur_type_code": acteur_type_code,
+                "nom": nom,
+            }
+        )
         result = clean_identifiant_externe(row, None)
         assert result["identifiant_externe"] == expected_identifiant_externe
 
@@ -499,24 +508,18 @@ class TestCleanIdentifiantExterne:
 
 class TestCleanIdentifiantUnique:
     @pytest.mark.parametrize(
-        (
-            "identifiant_externe, acteur_type_code, source_code,"
-            " expected_identifiant_unique"
-        ),
+        ("identifiant_externe, source_code, expected_identifiant_unique"),
         [
-            (12345, "commerce", "source", "source_12345"),
-            ("12345", "commerce", "source", "source_12345"),
-            (" 12345 ", "commerce", "source", "source_12345"),
-            ("ABC123", "commerce", "source", "source_ABC123"),
-            (" abc123 ", "commerce", "source", "source_abc123"),
-            ("ABC123", "acteur_digital", "source", "source_ABC123_d"),
-            (" abc123 ", "acteur_digital", "source", "source_abc123_d"),
+            (12345, "source", "source_12345"),
+            ("12345", "source", "source_12345"),
+            (" 12345 ", "source", "source_12345"),
+            ("ABC123", "source", "source_ABC123"),
+            (" abc123 ", "source", "source_abc123"),
         ],
     )
     def test_clean_identifiant_unique(
         self,
         identifiant_externe,
-        acteur_type_code,
         source_code,
         expected_identifiant_unique,
     ):
@@ -524,7 +527,6 @@ class TestCleanIdentifiantUnique:
             {
                 "identifiant_externe": identifiant_externe,
                 "source_code": source_code,
-                "acteur_type_code": acteur_type_code,
             }
         )
         result = clean_identifiant_unique(row, None)
