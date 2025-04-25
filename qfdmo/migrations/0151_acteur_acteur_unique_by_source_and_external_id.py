@@ -69,6 +69,7 @@ class Migration(migrations.Migration):
         migrations.AddConstraint(
             model_name="acteur",
             constraint=models.UniqueConstraint(
+                condition=models.Q(("statut", "ACTIF")),
                 fields=("source_id", "identifiant_externe"),
                 name="acteur_unique_by_source_and_external_id",
             ),
