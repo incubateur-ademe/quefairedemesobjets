@@ -8,7 +8,7 @@ from qfdmo.models.acteur import ActeurStatus
 
 def suffix_external_id_for_digitals(apps, schema_editor):
     Acteur = apps.get_model("qfdmo", "Acteur")
-    for acteur in Acteur.objects.filter(acteur_type__code="digital"):
+    for acteur in Acteur.objects.filter(acteur_type__code="acteur_digital"):
         if (
             not acteur.identifiant_externe.endswith("_d")
             and acteur.identifiant_unique.endswith("_d")
