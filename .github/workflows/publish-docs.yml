@@ -6,6 +6,11 @@ on:
       - main  # Adjust this to your default branch name, if necessary
       - document-frontend
 
+# Address actions/missing-workflow-permissions rule in
+# code scanning alerts
+permissions:
+  contents: read
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -18,7 +23,7 @@ jobs:
       with:
         cache: "pip"
     - name: Install poetry
-      uses: abatilo/actions-poetry@v4
+      uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1 # v4
     - uses: actions/cache@v4
       name: Define a cache for the virtual environment based on the dependencies lock file
       with:
