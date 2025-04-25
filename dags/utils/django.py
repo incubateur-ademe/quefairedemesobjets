@@ -230,7 +230,7 @@ def get_model_fields(model, with_relationships=True, latlong=False):
         if field.is_relation and not with_relationships:
             continue
         if field.one_to_many or field.many_to_many:
-            fields.append(field.name[0:-1] + "_codes")
+            fields.append(field.name.rstrip("s") + "_codes")
         elif field.many_to_one:
             fields.append(field.name + "_code")
         else:

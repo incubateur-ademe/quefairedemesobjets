@@ -999,6 +999,7 @@ def test_keep_acteur_changed_same_acteur_but_different_identifiant_unique(dag_co
             "acteur_type_code": [[]],
             "acteur_service_codes": [[]],
             "proposition_service_codes": [[]],
+            "statut": ["actif"],
         }
     )
     df_acteur_from_db = pd.DataFrame(
@@ -1011,6 +1012,7 @@ def test_keep_acteur_changed_same_acteur_but_different_identifiant_unique(dag_co
             "acteur_type_code": [[]],
             "acteur_service_codes": [[]],
             "proposition_service_codes": [[]],
+            "statut": ["actif"],
         }
     )
     df_expected = pd.DataFrame(
@@ -1023,6 +1025,7 @@ def test_keep_acteur_changed_same_acteur_but_different_identifiant_unique(dag_co
             "acteur_type_code": [],
             "acteur_service_codes": [],
             "proposition_service_codes": [],
+            "statut": [],
         }
     )
 

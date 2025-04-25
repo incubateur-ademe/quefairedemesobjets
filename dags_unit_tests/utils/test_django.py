@@ -138,6 +138,7 @@ def test_get_model_fields():
         "acteur_service_codes",
         "latitude",
         "longitude",
+        "siret_is_closed",
     }
 
     fields = get_model_fields(Acteur, with_relationships=False, latlong=False)
@@ -169,4 +170,5 @@ def test_get_model_fields():
         "exclusivite_de_reprisereparation",
         "uniquement_sur_rdv",
         "location",
+        "siret_is_closed",
     }
