@@ -64,10 +64,12 @@ class Command(BaseCommand):
                 acteur_from_db = Acteur.objects.filter(
                     identifiant_externe=new_id_indexed, source__code=source_code
                 ).first()
-            statut = ActeurStatus.ACTIF
-            if id_index:
-                new_id = f"{new_id}_{id_index}"
+
+            try:
+                new_id = new_id_indexed
                 statut = ActeurStatus.INACTIF
+            except NameError:
+                statut = ActeurStatus.ACTIF
 
             # Update acteur if exists
             acteur = Acteur.objects.filter(
