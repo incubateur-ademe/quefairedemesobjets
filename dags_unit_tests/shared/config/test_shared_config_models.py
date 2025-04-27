@@ -23,6 +23,10 @@ class MyModel(BaseModel):
         default=None,
         description="OPT STRING CHANGED",
     )
+    some_list: list[str] = Field(
+        default=["foo", "bar"],
+        description="SOME LIST",
+    )
 
 
 class TestConfigModelToAirflowParams:
@@ -44,6 +48,11 @@ class TestConfigModelToAirflowParams:
         param = params["some_string"]
         assert param.value == "foo"
         assert param.schema["type"] == "string"
+
+    def test_list(self, params):
+        param = params["some_list"]
+        assert param.value == ["foo", "bar"]
+        assert param.schema["type"] == "array"
 
     def test_opt_string_untouched(self, params):
         param = params["opt_string_untouched"]
