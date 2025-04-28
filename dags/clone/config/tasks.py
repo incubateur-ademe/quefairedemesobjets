@@ -10,4 +10,3 @@ class TASKS:
     TABLE_VALIDATE = "clone_table_validate"
     VIEW_IN_USE_SWITCH = "clone_view_in_use_switch"
     OLD_TABLES_REMOVE = "clone_old_tables_remove"
-    DBT_BUILD = "clone_dbt_build"

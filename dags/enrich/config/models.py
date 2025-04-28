@@ -93,7 +93,20 @@ class EnrichActeursRGPDConfig(EnrichBaseConfig):
     )
 
 
+class EnrichDbtModelsRefreshConfig(BaseModel):
+    dbt_models_refresh_commands: list[str] = Field(
+        default=[],
+        description="🔄 Liste de commandes DBT à exécuter pour rafraîchir les modèles",
+    )
+
+
+class EnrichActeursVillesConfig(EnrichBaseConfig):
+    pass
+
+
 DAG_ID_TO_CONFIG_MODEL = {
     "enrich_acteurs_closed": EnrichActeursClosedConfig,
     "enrich_acteurs_rgpd": EnrichActeursRGPDConfig,
+    "enrich_dbt_models_refresh": EnrichDbtModelsRefreshConfig,
+    "enrich_acteurs_villes": EnrichActeursVillesConfig,
 }

@@ -24,6 +24,14 @@ with DAG(
                 "destination": "nom",
             },
             {
+                "origin": "enseigne_commerciale",
+                "destination": "nom_commercial",
+            },
+            {
+                "origin": "consignes_dacces",
+                "destination": "description",
+            },
+            {
                 "origin": "longitudewgs84",
                 "destination": "longitude",
             },
@@ -32,6 +40,11 @@ with DAG(
                 "destination": "latitude",
             },
             # 2. Transformation des colonnes
+            {
+                "origin": "site_web",
+                "transformation": "clean_url",
+                "destination": "url",
+            },
             {
                 "origin": "ecoorganisme",
                 "transformation": "strip_lower_string",
@@ -79,6 +92,11 @@ with DAG(
             },
             # 4. Transformation du dataframe
             {
+                "origin": ["siret", "siren"],
+                "transformation": "clean_siret_and_siren",
+                "destination": ["siret", "siren"],
+            },
+            {
                 "origin": ["latitude", "longitude"],
                 "transformation": "compute_location",
                 "destination": ["location"],
@@ -105,6 +123,11 @@ with DAG(
                 "origin": ["adresse_format_ban"],
                 "transformation": "clean_adresse",
                 "destination": ["adresse", "code_postal", "ville"],
+            },
+            {
+                "origin": ["telephone", "code_postal"],
+                "transformation": "clean_telephone",
+                "destination": ["telephone"],
             },
             {
                 "origin": [
@@ -146,8 +169,11 @@ with DAG(
             {"remove": "point_dapport_de_service_reparation"},
             {"remove": "point_dapport_pour_reemploi"},
             {"remove": "point_de_reparation"},
+            {"remove": "perimetre_dintervention"},
+            {"remove": "service_a_domicile"},
             # 6. Colonnes à garder (rien à faire, utilisé pour le controle)
             {"keep": "email"},
+            {"keep": "adresse_complement"},
         ],
         "endpoint": (
             "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"

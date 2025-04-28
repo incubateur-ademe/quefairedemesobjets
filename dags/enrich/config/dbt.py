@@ -19,4 +19,5 @@ class DBT:
     MARTS_ENRICH_AE_CLOSED_NOT_REPLACED: str = (
         "marts_enrich_acteurs_closed_suggest_not_replaced"
     )
-    MARTS_ENRICH_AE_RGPD: str = "marts_enrich_ae_rgpd"
+    MARTS_ENRICH_VILLES_TYPO: str = "marts_enrich_acteurs_villes_suggest_typo"
+    MARTS_ENRICH_VILLES_NEW: str = "marts_enrich_acteurs_villes_suggest_new"

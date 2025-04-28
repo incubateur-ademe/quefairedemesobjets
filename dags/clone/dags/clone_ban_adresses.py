@@ -66,16 +66,6 @@ with DAG(
             type="string",
             description_md="🔤 Délimiteur utilisé dans le fichier",
         ),
-        "dbt_build_skip": Param(
-            False,
-            type="boolean",
-            description_md="🚫 Si coché, le build DBT ne sera pas exécuté",
-        ),
-        "dbt_build_command": Param(
-            "dbt build --select tag:ban,tag:adresses",
-            type="string",
-            description_md="🔨 Commande DBT à exécuter",
-        ),
     },
 ) as dag:
     chain_tasks(dag)

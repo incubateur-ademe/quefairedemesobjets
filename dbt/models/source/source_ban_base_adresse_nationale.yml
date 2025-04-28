@@ -1,0 +1,9 @@
+version: 2
+
+sources:
+  - name: ban
+    description: "Base Adresse Nationale (BAN)"
+    schema: public
+    tables:
+      - name: clone_ban_adresses_in_use
+      - name: clone_ban_lieux_dits_in_use

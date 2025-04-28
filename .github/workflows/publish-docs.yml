@@ -1,15 +1,13 @@
-name: Deploy Sphinx Documentation to GitHub Pages
+name: 📚 Deploy Documentation
 
 on:
   push:
-    branches:
-      - main  # Adjust this to your default branch name, if necessary
-      - document-frontend
+    branches: [main]
 
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   deploy:

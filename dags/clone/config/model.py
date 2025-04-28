@@ -4,7 +4,7 @@ import re
 from pathlib import Path
 from typing import Literal
 
-from pydantic import AnyUrl, BaseModel, computed_field, field_validator
+from pydantic import AnyUrl, BaseModel, computed_field
 
 DIR_CURRENT = Path(__file__).resolve()
 DIR_SQL_CREATION = DIR_CURRENT.parent / "sql" / "creation"
@@ -23,8 +23,6 @@ class CloneConfig(BaseModel):
     file_unpacked: str
     delimiter: str
     run_timestamp: str
-    dbt_build_skip: bool
-    dbt_build_command: str
 
     @computed_field
     @property
@@ -63,12 +61,3 @@ class CloneConfig(BaseModel):
             raise FileNotFoundError(f"{self.table_schema_file_path=} pas trouvé")
         if not self.view_schema_file_path.exists():
             raise FileNotFoundError(f"{self.view_schema_file_path=} pas trouvé")
-
-    @field_validator("dbt_build_command", mode="after")
-    @classmethod
-    def validate_dbt_build_command(cls, value: str) -> str:
-        if not value.strip():
-            raise ValueError("dbt_build_command ne peut pas être vide")
-        if not value.startswith("dbt "):
-            raise ValueError("dbt_build_command doit commencer par 'dbt'")
-        return value.strip()
