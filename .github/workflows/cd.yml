@@ -24,7 +24,25 @@ jobs:
 
   # Common release-drafter configuration
   # From https://github.com/marketplace/actions/release-drafter
-  _release_drafter: &release_drafter
+  # Uncomment when anchor are supported in GitHub Actions
+  # See : https://github.com/actions/runner/issues/1182
+  # _release_drafter: &release_drafter
+  #   permissions:
+  #     contents: write
+  #   runs-on: ubuntu-latest
+  #   name: 🔢 Release
+  #   steps:
+  #     - uses: release-drafter/release-drafter@b1476f6e6eb133afa41ed8589daba6dc69b4d3f5 # v6.1.0
+  #       with:
+  #         config-name: release-config.yml
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Standard release draft update
+  update_release_draft:
+    # Uncomment when anchor are supported in GitHub Actions
+    # See : https://github.com/actions/runner/issues/1182
+    # <<: *release_drafter
     permissions:
       contents: write
     runs-on: ubuntu-latest
@@ -35,13 +53,21 @@ jobs:
           config-name: release-config.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  # Standard release draft update
-  update_release_draft:
-    <<: *release_drafter
     needs: [preprod]
 
   # Hotfix-only release draft update
   update_release_draft_for_hotfix:
-    <<: *release_drafter
-    if: ! (contains("hotfix", github.ref))
+    # Uncomment when anchor are supported in GitHub Actions
+    # See : https://github.com/actions/runner/issues/1182
+    # <<: *release_drafter
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    name: 🔢 Release
+    steps:
+      - uses: release-drafter/release-drafter@b1476f6e6eb133afa41ed8589daba6dc69b4d3f5 # v6.1.0
+        with:
+          config-name: release-config.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    if: ! (contains("hotfix", github.ref_name))
