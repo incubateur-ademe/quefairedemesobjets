@@ -21,6 +21,7 @@ class TestEnrichSuggestionsCities:
     def df_new(self):
         return pd.DataFrame(
             {
+                # last entry is INACTIF to test acteur status filter
                 COLS.SUGGEST_COHORT: [COHORTS.VILLES_NEW] * 3,
                 COLS.SUGGEST_VILLE: ["new town 1", "new town 2", "closed"],
                 COLS.ACTEUR_ID: ["new1", "new2", "closed 1"],
@@ -33,6 +34,7 @@ class TestEnrichSuggestionsCities:
     def df_typo(self):
         return pd.DataFrame(
             {
+                # last entry is INACTIF to test acteur status filter
                 COLS.SUGGEST_COHORT: [COHORTS.VILLES_TYPO] * 3,
                 COLS.SUGGEST_VILLE: ["Paris", "Laval", "closed"],
                 COLS.ACTEUR_ID: ["typo1", "typo2", "closed 2"],
@@ -43,10 +45,12 @@ class TestEnrichSuggestionsCities:
 
     @pytest.fixture
     def df_new_filtered(self, df_new, config):
+        # To test that config works (e.g. filter_equals__acteur_statut)
         return df_filter(df_new, config.filters)
 
     @pytest.fixture
     def df_typo_filtered(self, df_typo, config):
+        # To test that config works (e.g. filter_equals__acteur_statut)
         return df_filter(df_typo, config.filters)
 
     @pytest.fixture
