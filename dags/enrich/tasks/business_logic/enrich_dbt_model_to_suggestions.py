@@ -59,6 +59,32 @@ def changes_prepare_villes(row: dict) -> tuple[list[dict], dict]:
     return changes, contexte
 
 
+def changes_prepare_rgpd(
+    row: dict,
+) -> tuple[list[dict], dict]:
+    """Prepare suggestions for RGPD cohorts"""
+    from data.models.changes import ChangeActeurRgpdAnonymize
+
+    changes = []
+    model_params = {
+        "id": row[COLS.ACTEUR_ID],
+    }
+    changes.append(
+        changes_prepare(
+            model=ChangeActeurRgpdAnonymize,
+            model_params=model_params,
+            order=1,
+            reason="🕵 Anonymisation RGPD",
+            entity_type="acteur_displayed",
+        )
+    )
+    contexte = {
+        "statut": row[COLS.ACTEUR_STATUT],
+        "noms d'origine": row[COLS.ACTEUR_NOMS_ORIGINE],
+    }
+    return changes, contexte
+
+
 def changes_prepare_closed_not_replaced(
     row: dict,
 ) -> tuple[list[dict], dict]:
@@ -181,6 +207,7 @@ COHORTS_TO_PREPARE_CHANGES = {
     COHORTS.CLOSED_NOT_REPLACED: changes_prepare_closed_not_replaced,
     COHORTS.CLOSED_REP_OTHER_SIREN: changes_prepare_closed_replaced,
     COHORTS.CLOSED_REP_SAME_SIREN: changes_prepare_closed_replaced,
+    COHORTS.RGPD: changes_prepare_rgpd,
     COHORTS.VILLES_TYPO: changes_prepare_villes,
     COHORTS.VILLES_NEW: changes_prepare_villes,
 }
@@ -207,6 +234,7 @@ def enrich_dbt_model_to_suggestions(
         COHORTS.CLOSED_NOT_REPLACED: SuggestionAction.ENRICH_ACTEURS_CLOSED,
         COHORTS.CLOSED_REP_OTHER_SIREN: SuggestionAction.ENRICH_ACTEURS_CLOSED,
         COHORTS.CLOSED_REP_SAME_SIREN: SuggestionAction.ENRICH_ACTEURS_CLOSED,
+        COHORTS.RGPD: SuggestionAction.ENRICH_ACTEURS_RGPD,
         COHORTS.VILLES_TYPO: SuggestionAction.ENRICH_ACTEURS_VILLES_TYPO,
         COHORTS.VILLES_NEW: SuggestionAction.ENRICH_ACTEURS_VILLES_NEW,
     }
