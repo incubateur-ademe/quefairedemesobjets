@@ -70,4 +70,4 @@ jobs:
           config-name: release-config.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    if: ! (contains("hotfix", github.ref_name))
+    if: ${{ !(contains("hotfix", github.ref_name)) }}
