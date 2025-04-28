@@ -3,6 +3,7 @@ from .acteur_create_as_child import ChangeActeurCreateAsChild
 from .acteur_create_as_parent import ChangeActeurCreateAsParent
 from .acteur_delete_as_parent import ChangeActeurDeleteAsParent
 from .acteur_keep_as_parent import ChangeActeurKeepAsParent
+from .acteur_rgpd_anonymize import ChangeActeurRgpdAnonymize
 from .acteur_update_data import ChangeActeurUpdateData
 from .acteur_update_parent_id import ChangeActeurUpdateParentId
 from .acteur_verify_in_revision import ChangeActeurVerifyRevision
@@ -18,4 +19,5 @@ CHANGE_MODELS = {
     ChangeActeurNothingBase.name(): ChangeActeurNothingBase,
     ChangeActeurKeepAsParent.name(): ChangeActeurKeepAsParent,
     SampleModelDoNothing.name(): SampleModelDoNothing,
+    ChangeActeurRgpdAnonymize.name(): ChangeActeurRgpdAnonymize,
 }

@@ -5,6 +5,7 @@ from .models import (  # noqa: F401
     DAG_ID_TO_CONFIG_MODEL,
     EnrichActeursClosedConfig,
     EnrichActeursRGPDConfig,
+    EnrichActeursVillesConfig,
     EnrichDbtModelsRefreshConfig,
 )
 from .tasks import TASKS  # noqa: F401

@@ -227,12 +227,12 @@ def enrich_dbt_model_to_suggestions(
 
         try:
             changes, contexte = COHORTS_TO_PREPARE_CHANGES[cohort](row)
-            suggestions.append(
-                {
-                    "contexte": contexte,
-                    "suggestion": {"title": cohort, "changes": changes},
-                }
-            )
+            suggestion = {
+                "contexte": contexte,
+                "suggestion": {"title": cohort, "changes": changes},
+            }
+            log.preview("🔢 Suggestion", suggestion)
+            suggestions.append(suggestion)
 
         # We tolerate some errors
         except Exception as e:
