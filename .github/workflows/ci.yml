@@ -79,7 +79,7 @@ jobs:
     name: tests de bout-en-bout
     runs-on: ubuntu-latest
     # if: ${{ github.ref == 'refs/head/main' || (github.event_name ==  'pull_request' && contains( github.event.pull_request.labels.*.name, 'frontend')) }}
-    if: ${{ github.event.coucou == 'coucou' || github.ref == 'refs/head/main' || (github.event_name ==  'pull_request' && contains( github.event.pull_request.labels.*.name, 'frontend')) }}
+    if: ${{ contains(github.event.coucou.labels.*.name, 'coucou') || github.ref == 'refs/head/main' || (github.event_name ==  'pull_request' && contains( github.event.pull_request.labels.*.name, 'frontend')) }}
     strategy:
       matrix:
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
