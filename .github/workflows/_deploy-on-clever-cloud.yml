@@ -1,0 +1,33 @@
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      app_name_key:
+        required: true
+        type: string
+
+jobs:
+  deploy-on-clever-cloud:
+    # Displayed in workflow graph in GitHub UI
+    # and in left sidebar
+    name: Clever Cloud
+    runs-on: "ubuntu-latest"
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: 47ng/actions-clever-cloud@722af6e119bb584f59e81fcc8d09f90ae8d42170 # v2.0.0
+        with:
+          alias: ${{ vars[inputs.app_name_key] }}
+          force: true
+        env:
+          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
+
+# Address actions/missing-workflow-permissions rule in
+# code scanning alerts
+permissions:
+  contents: read

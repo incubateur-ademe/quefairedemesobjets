@@ -18,6 +18,7 @@ from qfdmo.models import (
     DisplayedActeur,
     GroupeAction,
     Source,
+    SousCategorieObjet,
 )
 
 router = Router()
@@ -45,7 +46,7 @@ class ActeurTypeSchema(ModelSchema):
 
 
 class ActionSchema(ModelSchema):
-    services: str = Field(..., alias="primary")
+    couleur: str = Field(..., alias="primary")
 
     class Meta:
         model = Action
@@ -69,6 +70,12 @@ class SourceSchema(ModelSchema):
     class Meta:
         model = Source
         fields = ["id", "code", "libelle", "url"]
+
+
+class SousCategorieObjetSchema(ModelSchema):
+    class Meta:
+        model = SousCategorieObjet
+        fields = ["id", "code", "libelle"]
 
 
 class ActeurSchema(ModelSchema):
@@ -112,6 +119,10 @@ class ActeurFilterSchema(FilterSchema):
     types: Optional[List[int]] = Field(None, q="acteur_type__in")
     services: Optional[List[int]] = Field(None, q="acteur_services__in")
     actions: Optional[List[int]] = Field(None, q="proposition_services__action_id__in")
+    sous_categories: Optional[List[int]] = Field(
+        None,
+        q="proposition_services__sous_categories__id__in",
+    )
 
 
 @router.get("/sources", response=List[SourceSchema], summary="Liste des sources")
@@ -120,6 +131,19 @@ def sources(request):
     Liste l'ensemble des <i>sources</i> possibles pour un acteur.
     """  # noqa
     qs = Source.objects.filter(afficher=True)
+    return qs
+
+
+@router.get(
+    "/sous-categories",
+    response=List[SousCategorieObjetSchema],
+    summary="Liste des catégories d'objets",
+)
+def sous_categories(request):
+    """
+    Liste l'ensemble des <i>sous-catégories d'objet</i> possibles pour un acteur.
+    """  # noqa
+    qs = SousCategorieObjet.objects.filter(afficher=True)
     return qs
 
 
@@ -218,7 +242,9 @@ def services(request):
     summary="Retrouver un acteur actif",
 )
 def acteur(request, identifiant_unique: str):
-    return get_object_or_404(DisplayedActeur, pk=id, statut=ActeurStatus.ACTIF)
+    return get_object_or_404(
+        DisplayedActeur, pk=identifiant_unique, statut=ActeurStatus.ACTIF
+    )
 
 
 @router.get("/autocomplete/configurateur")

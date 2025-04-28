@@ -35,10 +35,60 @@ def changes_prepare(
     ).model_dump()
 
 
+def changes_prepare_villes(row: dict) -> tuple[list[dict], dict]:
+    """Prepare suggestions for villes cohorts"""
+    from data.models.changes import ChangeActeurUpdateData
+
+    changes = []
+    model_params = {
+        "id": row[COLS.ACTEUR_ID],
+        "data": {
+            "ville": row[COLS.SUGGEST_VILLE],
+        },
+    }
+    changes.append(
+        changes_prepare(
+            model=ChangeActeurUpdateData,
+            model_params=model_params,
+            order=1,
+            reason="On fait confiance à la BAN",
+            entity_type="acteur_displayed",
+        )
+    )
+    contexte = {}  # changes are self-explanatory
+    return changes, contexte
+
+
+def changes_prepare_rgpd(
+    row: dict,
+) -> tuple[list[dict], dict]:
+    """Prepare suggestions for RGPD cohorts"""
+    from data.models.changes import ChangeActeurRgpdAnonymize
+
+    changes = []
+    model_params = {
+        "id": row[COLS.ACTEUR_ID],
+    }
+    changes.append(
+        changes_prepare(
+            model=ChangeActeurRgpdAnonymize,
+            model_params=model_params,
+            order=1,
+            reason="🕵 Anonymisation RGPD",
+            entity_type="acteur_displayed",
+        )
+    )
+    contexte = {
+        "statut": row[COLS.ACTEUR_STATUT],
+        "noms d'origine": row[COLS.ACTEUR_NOMS_ORIGINE],
+    }
+    return changes, contexte
+
+
 def changes_prepare_closed_not_replaced(
     row: dict,
 ) -> tuple[list[dict], dict]:
-    """Prepare suggestion changes for closed not replaced cohorts"""
+    """Prepare suggestions for closed not replaced cohorts"""
     from data.models.changes import ChangeActeurUpdateData
     from qfdmo.models import ActeurStatus
 
@@ -157,6 +207,9 @@ COHORTS_TO_PREPARE_CHANGES = {
     COHORTS.CLOSED_NOT_REPLACED: changes_prepare_closed_not_replaced,
     COHORTS.CLOSED_REP_OTHER_SIREN: changes_prepare_closed_replaced,
     COHORTS.CLOSED_REP_SAME_SIREN: changes_prepare_closed_replaced,
+    COHORTS.RGPD: changes_prepare_rgpd,
+    COHORTS.VILLES_TYPO: changes_prepare_villes,
+    COHORTS.VILLES_NEW: changes_prepare_villes,
 }
 
 
@@ -173,10 +226,17 @@ def enrich_dbt_model_to_suggestions(
         SuggestionStatut,
     )
 
+    # TODO: once all suggestions have been migrated to pydantic, we no
+    # longer need SuggestionCohorte.type_action and any of the following
+    # identifiant_execution = cohort AND pydantic models take care of
+    # handling the specifics
     COHORTS_TO_SUGGESTION_ACTION = {
         COHORTS.CLOSED_NOT_REPLACED: SuggestionAction.ENRICH_ACTEURS_CLOSED,
         COHORTS.CLOSED_REP_OTHER_SIREN: SuggestionAction.ENRICH_ACTEURS_CLOSED,
         COHORTS.CLOSED_REP_SAME_SIREN: SuggestionAction.ENRICH_ACTEURS_CLOSED,
+        COHORTS.RGPD: SuggestionAction.ENRICH_ACTEURS_RGPD,
+        COHORTS.VILLES_TYPO: SuggestionAction.ENRICH_ACTEURS_VILLES_TYPO,
+        COHORTS.VILLES_NEW: SuggestionAction.ENRICH_ACTEURS_VILLES_NEW,
     }
 
     # Validation
@@ -195,12 +255,12 @@ def enrich_dbt_model_to_suggestions(
 
         try:
             changes, contexte = COHORTS_TO_PREPARE_CHANGES[cohort](row)
-            suggestions.append(
-                {
-                    "contexte": contexte,
-                    "suggestion": {"title": cohort, "changes": changes},
-                }
-            )
+            suggestion = {
+                "contexte": contexte,
+                "suggestion": {"title": cohort, "changes": changes},
+            }
+            log.preview("🔢 Suggestion", suggestion)
+            suggestions.append(suggestion)
 
         # We tolerate some errors
         except Exception as e:

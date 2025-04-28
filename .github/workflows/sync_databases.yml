@@ -20,6 +20,11 @@ defaults:
   run:
     shell: bash
 
+# Address actions/missing-workflow-permissions rule in
+# code scanning alerts
+permissions:
+  contents: read
+
 jobs:
   sync_prod_to_preprod:
     name: Sync production database to preprod

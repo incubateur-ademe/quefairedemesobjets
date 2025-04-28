@@ -1,5 +1,5 @@
 import pytest
-from enrich.config.models import EnrichActeursClosedConfig
+from dags.enrich.config.models import EnrichActeursClosedConfig
 
 
 class TestEnrichClosedConfig:
