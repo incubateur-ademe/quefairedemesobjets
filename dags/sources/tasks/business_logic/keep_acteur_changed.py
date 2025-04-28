@@ -80,13 +80,13 @@ def retrieve_identifiant_unique_from_existing_acteur(
     # instead of identifiant_unique (for the usecase of external_ids were updated)
     df_normalized["identifiant"] = df_normalized.apply(
         lambda row: compute_identifiant_unique(
-            row["identifiant_externe"], row["source_code"], row["acteur_type_code"]
+            row["identifiant_externe"], row["source_code"]
         ),
         axis=1,
     )
     df_acteur_from_db["identifiant"] = df_acteur_from_db.apply(
         lambda row: compute_identifiant_unique(
-            row["identifiant_externe"], row["source_code"], row["acteur_type_code"]
+            row["identifiant_externe"], row["source_code"]
         ),
         axis=1,
     )

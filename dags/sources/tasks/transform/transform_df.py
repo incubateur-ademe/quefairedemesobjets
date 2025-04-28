@@ -156,13 +156,15 @@ def clean_identifiant_externe(row, _):
             row["nom"].replace("-", "").replace(" ", "_").replace("__", "_")
         )
     row["identifiant_externe"] = str(row[identifiant_externe_column]).strip()
+
+    if "acteur_type_code" in row and row["acteur_type_code"] == ACTEUR_TYPE_DIGITAL:
+        row["identifiant_externe"] += "_d"
+
     return row[["identifiant_externe"]]
 
 
-def compute_identifiant_unique(identifiant_externe, source_code, acteur_type_code):
+def compute_identifiant_unique(identifiant_externe, source_code):
     unique_str = str(identifiant_externe).replace("/", "-").strip()
-    if acteur_type_code == ACTEUR_TYPE_DIGITAL:
-        unique_str = unique_str + "_d"
     return source_code.lower() + "_" + unique_str
 
 
@@ -172,7 +174,7 @@ def clean_identifiant_unique(row, _):
             "identifiant_externe is required to generate identifiant_unique"
         )
     row["identifiant_unique"] = compute_identifiant_unique(
-        row["identifiant_externe"], row["source_code"], row["acteur_type_code"]
+        row["identifiant_externe"], row["source_code"]
     )
     return row[["identifiant_unique"]]
 
