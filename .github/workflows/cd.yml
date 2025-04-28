@@ -55,7 +55,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     needs: [preprod]
     if: ${{ !contains( github.ref_name, 'hotfix') }}
-
+    
   # Hotfix-only release draft update
   update_release_draft_for_hotfix:
     # Uncomment when anchor are supported in GitHub Actions
