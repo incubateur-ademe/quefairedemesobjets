@@ -158,7 +158,7 @@ def clean_identifiant_externe(row, _):
     row["identifiant_externe"] = str(row[identifiant_externe_column]).strip()
 
     if "acteur_type_code" in row and row["acteur_type_code"] == ACTEUR_TYPE_DIGITAL:
-        row["identifiant_externe"] = row["identifiant_externe"] + "_d"
+        row["identifiant_externe"] += "_d"
 
     return row[["identifiant_externe"]]
 
