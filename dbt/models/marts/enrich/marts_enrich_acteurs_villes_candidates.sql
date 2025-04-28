@@ -9,6 +9,7 @@ SELECT
   acteurs.identifiant_unique AS acteur_id,
   acteurs.ville AS acteur_ville,
   acteurs.code_postal AS acteur_code_postal,
+  acteurs.statut AS acteur_statut,
   ban.ville_ancienne AS ban_ville_ancienne,
   ban.ville AS ban_ville,
   ban.code_postal AS ban_code_postal,

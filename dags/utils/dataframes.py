@@ -9,6 +9,39 @@ from utils import logging_utils as log
 logger = logging.getLogger(__name__)
 
 
+def df_filter(df: pd.DataFrame, filters: list[dict]) -> pd.DataFrame:
+    """Filters a dataframe given some filters"""
+    log.preview_df_as_markdown("Données SANS filtre", df)
+    log.preview("Filtres", filters)
+    filter_applied = False
+    if not df.empty:
+        for filter in filters:
+            filter_applied = True
+            field = filter["field"]
+            operator = filter["operator"]
+            value = filter["value"]
+            logger.info(f"\n🔽 Filtre sur {field=} {operator=} {value=}")
+            logger.info(f"Avant filtre : {df.shape[0]} lignes")
+
+            # Filtering
+            if filter["operator"] == "equals":
+                logger.info(f"Filtre sur {field} EQUALS {value}")
+                df = df[df[field] == value].copy()
+            elif filter["operator"] == "contains":
+                df = df[df[field].str.contains(value, regex=True, case=False)].copy()
+            else:
+                raise NotImplementedError(f"{filter['operator']=} non implémenté")
+
+            logger.info(f"Après filtre : {df.shape[0]} lignes")
+
+    if filter_applied:
+        log.preview_df_as_markdown("Données APRES filtre(s)", df)
+    else:
+        logger.info("Aucun filtre appliqué")
+
+    return df
+
+
 def df_sort(
     df: pd.DataFrame, sort_rows: list[str] = [], sort_cols: list[str] = []
 ) -> pd.DataFrame:
