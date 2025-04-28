@@ -122,7 +122,7 @@ def changes_prepare_closed_replaced(
             model=ChangeActeurCreateAsParent,
             model_params=params_parent,
             order=1,
-            reason="besoin d'un parent pour rattaché acteur fermé",
+            reason="besoin d'un parent pour rattacher acteur fermé",
             entity_type="acteur_displayed",
         )
     )
