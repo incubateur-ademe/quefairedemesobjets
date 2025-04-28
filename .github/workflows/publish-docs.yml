@@ -6,9 +6,7 @@ permissions:
 
 on:
   push:
-    branches:
-      - main  # Adjust this to your default branch name, if necessary
-      - document-frontend
+    branches: [main]
 
 jobs:
   deploy:
