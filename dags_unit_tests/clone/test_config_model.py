@@ -15,8 +15,6 @@ class TestCloneConfig:
             file_unpacked="data.csv",
             delimiter=",",
             run_timestamp="20220305120000",
-            dbt_build_skip=False,
-            dbt_build_command="dbt build --select tag:nothing_to_do",
         )
 
     def test_table_name(self, config):
