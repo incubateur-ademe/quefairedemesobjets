@@ -322,14 +322,15 @@ class SearchActeursView(
         """
         Get the action to include in the request
         """
+        # FIXME : est-ce possible d'optimiser en accédant au valeur initial du form ?
+
         # selection from interface
-        selected_user_actions = self.get_data_from_request_or_bounded_form(
-            "grouped_action"
-        ) or self.get_data_from_request_or_bounded_form("legend_grouped_action")
-        if selected_user_actions:
+        if self.get_data_from_request_or_bounded_form("grouped_action"):
             return [
                 code
-                for new_groupe_action in selected_user_actions
+                for new_groupe_action in self.get_data_from_request_or_bounded_form(
+                    "grouped_action"
+                )
                 for code in new_groupe_action.split("|")
             ]
         # Selection is not set in interface, get all available from
@@ -354,13 +355,10 @@ class SearchActeursView(
 
         codes = []
         # selection from interface
-        selected_user_actions = self.request.GET.getlist(
-            "grouped_action"
-        ) or self.request.GET.getlist("legend_grouped_action")
-        if selected_user_actions:
+        if self.request.GET.get("grouped_action"):
             codes = [
                 code
-                for new_groupe_action in selected_user_actions
+                for new_groupe_action in self.request.GET.getlist("grouped_action")
                 for code in new_groupe_action.split("|")
             ]
         # Selection is not set in interface, get all available from
@@ -692,9 +690,9 @@ def acteur_detail(request, uuid):
     if latitude and longitude and not displayed_acteur.is_digital:
         context.update(
             itineraire_url="https://www.google.com/maps/dir/?api=1&origin="
-            f"{latitude},{longitude}"
-            f"&destination={displayed_acteur.latitude},"
-            f"{displayed_acteur.longitude}&travelMode=WALKING"
+            f"{latitude},{ longitude }"
+            f"&destination={ displayed_acteur.latitude },"
+            f"{ displayed_acteur.longitude }&travelMode=WALKING"
         )
 
     return render(request, "qfdmo/acteur.html", context)
