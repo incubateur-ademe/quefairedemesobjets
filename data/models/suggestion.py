@@ -56,6 +56,14 @@ class SuggestionAction(models.TextChoices):
     CRAWL_URLS = SUGGESTION_CRAWL_URLS, "🔗 URLs scannées"
     ENRICH_ACTEURS_CLOSED = "ENRICH_ACTEURS_CLOSED", "🚪 Acteurs fermés"
     ENRICH_ACTEURS_RGPD = "ENRICH_ACTEURS_RGPD", "🕵 Anonymisation RGPD"
+    ENRICH_ACTEURS_VILLES_TYPO = (
+        "ENRICH_ACTEURS_VILLES_TYPO",
+        "🏙️ Acteurs villes typographiques",
+    )
+    ENRICH_ACTEURS_VILLES_NEW = (
+        "ENRICH_ACTEURS_VILLES_NEW",
+        "🏙️ Acteurs villes nouvelles",
+    )
     CLUSTERING = SUGGESTION_CLUSTERING, "regroupement/déduplication des acteurs"
     SOURCE_AJOUT = (
         SUGGESTION_SOURCE_AJOUT,
@@ -181,6 +189,8 @@ class Suggestion(models.Model):
             SuggestionAction.CLUSTERING,
             SuggestionAction.CRAWL_URLS,
             SuggestionAction.ENRICH_ACTEURS_RGPD,
+            SuggestionAction.ENRICH_ACTEURS_VILLES_TYPO,
+            SuggestionAction.ENRICH_ACTEURS_VILLES_NEW,
         ]:
             context["details_open"] = True
 
@@ -202,6 +212,8 @@ class Suggestion(models.Model):
         elif self.suggestion_cohorte.type_action in [
             SuggestionAction.ENRICH_ACTEURS_CLOSED,
             SuggestionAction.ENRICH_ACTEURS_RGPD,
+            SuggestionAction.ENRICH_ACTEURS_VILLES_TYPO,
+            SuggestionAction.ENRICH_ACTEURS_VILLES_NEW,
         ]:
             template_name = "data/_partials/suggestion_details_changes.html"
             template_context = self.suggestion
@@ -328,6 +340,8 @@ class Suggestion(models.Model):
             SuggestionAction.CRAWL_URLS,
             SuggestionAction.ENRICH_ACTEURS_CLOSED,
             SuggestionAction.ENRICH_ACTEURS_RGPD,
+            SuggestionAction.ENRICH_ACTEURS_VILLES_TYPO,
+            SuggestionAction.ENRICH_ACTEURS_VILLES_NEW,
         ]:
             changes = self.suggestion["changes"]
             changes.sort(key=lambda x: x["order"])

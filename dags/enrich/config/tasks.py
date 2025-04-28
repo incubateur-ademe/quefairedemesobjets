@@ -28,3 +28,7 @@ class TASKS:
     )
     ENRICH_DBT_MODELS_REFRESH: str = "enrich_dbt_models_refresh"
     READ_AE_RGPD: str = "enrich_ae_rgpd_read"
+
+    # Villes
+    ENRICH_VILLES_TYPO: str = "enrich_acteurs_villes_typo"
+    ENRICH_VILLES_NEW: str = "enrich_acteurs_villes_new"

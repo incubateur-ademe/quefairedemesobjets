@@ -10,7 +10,6 @@ from .acteur_verify_in_revision import ChangeActeurVerifyRevision
 from .sample_model_do_nothing import SampleModelDoNothing
 
 CHANGE_MODELS = {
-    ChangeActeurRgpdAnonymize.name(): ChangeActeurRgpdAnonymize,
     ChangeActeurUpdateData.name(): ChangeActeurUpdateData,
     ChangeActeurCreateAsChild.name(): ChangeActeurCreateAsChild,
     ChangeActeurCreateAsParent.name(): ChangeActeurCreateAsParent,
@@ -20,4 +19,5 @@ CHANGE_MODELS = {
     ChangeActeurNothingBase.name(): ChangeActeurNothingBase,
     ChangeActeurKeepAsParent.name(): ChangeActeurKeepAsParent,
     SampleModelDoNothing.name(): SampleModelDoNothing,
+    ChangeActeurRgpdAnonymize.name(): ChangeActeurRgpdAnonymize,
 }

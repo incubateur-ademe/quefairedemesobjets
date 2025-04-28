@@ -11,3 +11,5 @@ class COHORTS:
     )
     CLOSED_REP_SAME_SIREN = "🚪 Acteurs Fermés: 🟢 remplacés par SIRET du même SIREN"
     RGPD = "Anonymisation RGPD"
+    VILLES_TYPO = "🌆 Changement de ville: 🟢 variation d'ortographe"
+    VILLES_NEW = "🌆 Changement de ville: 🟡 ancienne -> nouvelle"
