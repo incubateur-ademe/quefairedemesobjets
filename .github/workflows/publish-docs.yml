@@ -1,9 +1,5 @@
 name: 📚 Deploy Documentation
 
-permissions:
-  contents: write
-
-
 on:
   push:
     branches: [main]
@@ -11,7 +7,7 @@ on:
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   deploy:
