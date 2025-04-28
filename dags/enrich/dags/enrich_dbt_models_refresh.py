@@ -30,10 +30,8 @@ with DAG(
     params=config_to_airflow_params(
         EnrichDbtModelsRefreshConfig(
             dbt_models_refresh_commands=[
-                "dbt build --select +int_ae_unite_legale",
-                "dbt build --select +int_ae_etablissement",
-                "dbt build --select +int_ban_adresses",
-                "dbt build --select int_ban_villes",
+                "dbt build --select +tag:intermediate,tag:ae",
+                "dbt build --select +tag:intermediate,tag:ban",
             ],
         )
     ),
