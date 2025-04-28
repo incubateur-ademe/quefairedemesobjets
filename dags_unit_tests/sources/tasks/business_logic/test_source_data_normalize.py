@@ -181,44 +181,6 @@ class TestSourceDataNormalize:
         )
         assert "col_make_it_raise" in str(erreur.value)
 
-    def test_public_accueilli_filtre_pro(
-        self,
-        dag_config,
-    ):
-        dag_config = DAGConfig.model_validate(
-            {
-                "normalization_rules": [
-                    {
-                        "keep": "identifiant_unique",
-                    },
-                    {
-                        "keep": "public_accueilli",
-                    },
-                ],
-                "endpoint": "https://example.com/api",
-                "product_mapping": {"product1": "code1"},
-            }
-        )
-        df, metadata = source_data_normalize(
-            dag_config=dag_config,
-            df_acteur_from_source=pd.DataFrame(
-                {
-                    "identifiant_unique": ["1", "2"],
-                    "public_accueilli": ["Professionnels", "Other"],
-                }
-            ),
-            dag_id="id",
-        )
-        pd.testing.assert_frame_equal(
-            df.reset_index(drop=True),
-            pd.DataFrame(
-                {
-                    "identifiant_unique": ["2"],
-                    "public_accueilli": ["Other"],
-                }
-            ).reset_index(drop=True),
-        )
-
     # TODO : ajout des valeurs avec parametrize
     @pytest.mark.parametrize(
         "null_value",
@@ -351,39 +313,6 @@ class TestRemoveUndesiredLines:
                         "service_a_domicile": ["non"],
                         "public_accueilli": ["Particuliers"],
                         "sous_categorie_codes": [["code1"]],
-                    }
-                ),
-            ),
-            # Cas suppression professionnele
-            (
-                pd.DataFrame(
-                    {
-                        "identifiant_unique": ["id1", "id2", "id3", "id4"],
-                        "service_a_domicile": ["non", "non", "non", "oui"],
-                        "public_accueilli": [
-                            "Particuliers",
-                            "Particuliers et professionnels",
-                            "Professionnels",
-                            "Aucun",
-                        ],
-                        "sous_categorie_codes": [
-                            ["code1"],
-                            ["code2"],
-                            ["code3"],
-                            ["code4"],
-                        ],
-                    }
-                ),
-                pd.DataFrame(
-                    {
-                        "identifiant_unique": ["id1", "id2", "id4"],
-                        "service_a_domicile": ["non", "non", "oui"],
-                        "public_accueilli": [
-                            "Particuliers",
-                            "Particuliers et professionnels",
-                            "Aucun",
-                        ],
-                        "sous_categorie_codes": [["code1"], ["code2"], ["code4"]],
                     }
                 ),
             ),

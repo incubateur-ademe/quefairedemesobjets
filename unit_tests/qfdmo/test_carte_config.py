@@ -3,10 +3,7 @@ import json
 import pytest
 from django.core.files.base import ContentFile
 
-from qfdmo.models import (
-    CarteConfig,
-    GroupeActionConfig,
-)
+from qfdmo.models import CarteConfig, GroupeActionConfig
 from unit_tests.qfdmo.acteur_factory import (
     DisplayedActeurFactory,
     DisplayedPropositionServiceFactory,

@@ -11,9 +11,14 @@ from qfdmo.models.acteur import RevisionActeur  # noqa: E402
 def compute_acteur(df_acteur: pd.DataFrame, df_revisionacteur: pd.DataFrame):
 
     # Collect parent_id among active revisionacteurs
-    revisionacteur_parent_ids = df_revisionacteur[
+    df_revisionacteur_parents = df_revisionacteur[
         df_revisionacteur["statut"] == constants.ACTEUR_ACTIF
-    ]["parent_id"].unique()
+    ]
+    if "public_accueilli" in df_revisionacteur.columns:
+        df_revisionacteur_parents = df_revisionacteur_parents[
+            df_revisionacteur["public_accueilli"] != constants.PUBLIC_PRO
+        ]
+    revisionacteur_parent_ids = df_revisionacteur_parents["parent_id"].unique()
 
     df_revisionacteur_parents = df_revisionacteur[
         df_revisionacteur["identifiant_unique"].isin(revisionacteur_parent_ids)
@@ -37,6 +42,11 @@ def compute_acteur(df_acteur: pd.DataFrame, df_revisionacteur: pd.DataFrame):
 
     all_parent_ids = set(df_acteur_merged["parent_id"].tolist())
     df_children = df_children[df_children["statut"] == constants.ACTEUR_ACTIF]
+    if "public_accueilli" in df_children.columns:
+        df_children = df_children[
+            df_children["public_accueilli"] != constants.PUBLIC_PRO
+        ]
+
     active_parent_ids = set(df_acteur_merged["parent_id"].tolist())
     parent_without_children_ids = all_parent_ids - active_parent_ids
 
@@ -63,6 +73,10 @@ def compute_acteur(df_acteur: pd.DataFrame, df_revisionacteur: pd.DataFrame):
     df_acteur_merged = df_acteur_merged[
         df_acteur_merged["statut"] == constants.ACTEUR_ACTIF
     ]
+    if "public_accueilli" in df_acteur_merged.columns:
+        df_acteur_merged = df_acteur_merged[
+            df_acteur_merged["public_accueilli"] != constants.PUBLIC_PRO
+        ]
 
     # Add a new column uuid to make the displayedacteur id without source name in id
     df_acteur_merged["uuid"] = df_acteur_merged["identifiant_unique"].apply(
