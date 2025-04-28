@@ -2,17 +2,11 @@ import logging
 from datetime import datetime, timezone
 
 import pandas as pd
-from cluster.tasks.business_logic.cluster_acteurs_parents_choose_new import (
-    parent_id_generate,
-)
 from enrich.config.cohorts import COHORTS
 from enrich.config.columns import COLS
-from enrich.tasks.business_logic.enrich_dbt_model_row_to_suggest_data import (
-    dbt_model_row_to_suggest_data,
-)
-from utils import logging_utils as log
 
 from data.models.changes.acteur_rgpd_anonymize import rgpd_data_get
+from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
 
@@ -130,79 +124,72 @@ def changes_prepare_closed_replaced(
     row: dict,
 ) -> tuple[list[dict], dict]:
     """Prepare suggestion changes for closed replaced cohorts"""
-    from data.models.changes import (
-        ChangeActeurCreateAsChild,
-        ChangeActeurCreateAsParent,
-        ChangeActeurUpdateData,
-    )
+    from data.models.changes import ChangeActeurCreateAsChild, ChangeActeurUpdateData
     from qfdmo.models import ActeurStatus
 
     changes = []
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    # Parent
-    parent_id = parent_id_generate([str(row[COLS.SUGGEST_SIRET])])
-    parent_data = dbt_model_row_to_suggest_data(row)
-    parent_data["source"] = None
-    parent_data["statut"] = ActeurStatus.ACTIF
-    params_parent = {
-        "id": parent_id,
-        "data": parent_data,
+
+    # We don't create a parent because we decided it was
+    # not a good idea (1 parent for 1 child will only create
+    # complications for the clustering and no added value)
+
+    # Existing Child: must be updated BEFORE new child to prevent
+    # conflict on same external ID having 2+ active children
+    child_old = {
+        "id": row[COLS.ACTEUR_ID],
+        "data": {
+            "identifiant_unique": row[COLS.ACTEUR_ID],
+            "identifiant_externe": row[COLS.ACTEUR_ID_EXTERNE],
+            "parent_reason": (
+                f"SIRET {row[COLS.ACTEUR_SIRET]} "
+                f"détecté le {today} comme fermé dans AE, "
+                f"remplacé par SIRET {row[COLS.SUGGEST_SIRET]}"
+            ),
+            "siret_is_closed": True,
+            "statut": ActeurStatus.INACTIF,
+        },
     }
     changes.append(
         changes_prepare(
-            model=ChangeActeurCreateAsParent,
-            model_params=params_parent,
+            model=ChangeActeurUpdateData,
+            model_params=child_old,
             order=1,
-            reason="besoin d'un parent pour rattaché acteur fermé",
+            reason="ancien enfant fermé",
             entity_type="acteur_displayed",
         )
     )
-
     # New child to hold the reference data as standalone
-    # as parents are surrogates (e.g. they can be deleted
-    # during clustering)
+    # (since old child will be closed)
     now = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
     child_new_id = f"{row[COLS.ACTEUR_ID]}_{row[COLS.ACTEUR_SIRET]}_{now}"
-    params_child_new = params_parent.copy()
-    params_child_new["id"] = child_new_id
-    params_child_new["data"]["source"] = row[COLS.ACTEUR_SOURCE_ID]
-    params_child_new["data"]["parent"] = parent_id
-    params_child_new["data"]["parent_reason"] = (
-        f"Nouvel enfant pour conserver les données suite à: "
-        f"SIRET {row[COLS.ACTEUR_SIRET]} "
-        f"détecté le {today} comme fermé dans AE, "
-        f"remplacé par SIRET {row[COLS.SUGGEST_SIRET]}"
-    )
+    child_new = {
+        "id": child_new_id,
+        "data": {
+            "identifiant_unique": child_new_id,
+            "identifiant_externe": row[COLS.ACTEUR_ID_EXTERNE],
+            "source": row[COLS.ACTEUR_SOURCE_ID],
+            "parent": row[COLS.ACTEUR_PARENT_ID],
+            "parent_reason": (
+                f"Nouvel enfant pour conserver les données suite à: "
+                f"SIRET {row[COLS.ACTEUR_SIRET]} "
+                f"détecté le {today} comme fermé dans AE, "
+                f"remplacé par SIRET {row[COLS.SUGGEST_SIRET]}, "
+                "= même parent que l'ancien enfant"
+            ),
+            "statut": ActeurStatus.ACTIF,
+        },
+    }
     changes.append(
         changes_prepare(
             model=ChangeActeurCreateAsChild,
-            model_params=params_child_new,
+            model_params=child_new,
             order=2,
-            reason="besoin nouvel enfant pour conserver les données",
+            reason="nouvel enfant pour conserver les données",
             entity_type="acteur_displayed",
         )
     )
 
-    # Existing Child
-    params_child_old = params_child_new.copy()
-    params_child_old["id"] = row[COLS.ACTEUR_ID]
-    params_child_old["data"]["parent"] = parent_id
-    params_child_old["data"]["parent_reason"] = (
-        f"SIRET {row[COLS.ACTEUR_SIRET]} "
-        f"détecté le {today} comme fermé dans AE, "
-        f"remplacé par SIRET {row[COLS.SUGGEST_SIRET]}"
-    )
-    params_child_old["data"]["siret_is_closed"] = True
-    params_child_old["data"]["statut"] = ActeurStatus.INACTIF
-    changes.append(
-        changes_prepare(
-            model=ChangeActeurUpdateData,
-            model_params=params_child_old,
-            order=3,
-            reason="rattacher enfant fermé à un parent",
-            entity_type="acteur_displayed",
-        )
-    )
     contexte = {}  # changes are self-explanatory
     return changes, contexte
 

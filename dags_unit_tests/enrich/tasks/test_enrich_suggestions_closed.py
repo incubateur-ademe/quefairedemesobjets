@@ -2,9 +2,6 @@ from datetime import datetime, timezone
 
 import pandas as pd
 import pytest
-from cluster.tasks.business_logic.cluster_acteurs_parents_choose_new import (
-    parent_id_generate,
-)
 from django.contrib.gis.geos import Point
 from enrich.config.cohorts import COHORTS
 from enrich.config.columns import COLS
@@ -31,11 +28,23 @@ class TestEnrichActeursClosedSuggestions:
         return ActeurType.objects.create(code="at1")
 
     @pytest.fixture
+    def parent(self):
+        from unit_tests.qfdmo.acteur_factory import RevisionActeurFactory
+
+        return RevisionActeurFactory(
+            nom="Parent",
+            adresse="Adresse parent",
+            code_postal="12345",
+            ville="Ville parent",
+        )
+
+    @pytest.fixture
     def df_not_replaced(self, atype, source):
         return pd.DataFrame(
             {
                 # Acteurs data
                 COLS.ACTEUR_ID: ["a01", "a02"],
+                COLS.ACTEUR_ID_EXTERNE: ["ext_a01", "ext_a02"],
                 COLS.ACTEUR_SIRET: ["00000000000001", "00000000000002"],
                 COLS.ACTEUR_NOM: ["AVANT a01", "AVANT a02"],
                 COLS.ACTEUR_TYPE_ID: [atype.pk, atype.pk],
@@ -45,11 +54,15 @@ class TestEnrichActeursClosedSuggestions:
         )
 
     @pytest.fixture
-    def df_replaced(self, atype, source):
+    def df_replaced(self, atype, source, parent):
         return pd.DataFrame(
             {
                 # Acteurs data
                 COLS.ACTEUR_ID: ["a1", "a2", "a3"],
+                COLS.ACTEUR_ID_EXTERNE: ["ext_a1", "ext_a2", "ext_a3"],
+                # We test 1 acteur of each cohort with a parent, and
+                # the case with no parent
+                COLS.ACTEUR_PARENT_ID: [parent.pk, parent.pk, None],
                 COLS.ACTEUR_SIRET: [
                     "11111111100001",
                     "22222222200001",
@@ -146,14 +159,18 @@ class TestEnrichActeursClosedSuggestions:
         assert a01.parent is None
         assert a01.parent_reason == ""  # consequence of empty strings in DB
         assert a01.siret_is_closed is True
+        assert a01.identifiant_externe == "ext_a01"
 
         a02 = RevisionActeur.objects.get(pk="a02")
         assert a02.statut == ActeurStatus.INACTIF
         assert a02.parent is None
         assert a02.parent_reason == ""
         assert a02.siret_is_closed is True
+        assert a02.identifiant_externe == "ext_a02"
 
-    def test_cohorte_meme_siren(self, acteurs, atype, source, df_replaced_meme_siret):
+    def test_cohorte_meme_siren(
+        self, acteurs, parent, atype, source, df_replaced_meme_siret
+    ):
         from data.models.suggestion import Suggestion, SuggestionCohorte
         from qfdmo.models import ActeurStatus, RevisionActeur
 
@@ -174,34 +191,25 @@ class TestEnrichActeursClosedSuggestions:
         for suggestion in suggestions:
             suggestion.apply()
 
-        # Verify changes
-        # 1 parent should be created in revision with replacement data
-        # 1 child should be created in revision with status=INACT and parent_id pointing
-        parent_id = parent_id_generate(["11111111100002"])
-        parent = RevisionActeur.objects.get(pk=parent_id)
-        assert parent.pk == parent_id
-        assert parent.nom == "APRES a1"
-        assert parent.adresse == "Adresse1"
-        assert parent.code_postal == "12345"
-        assert parent.ville == "Ville1"
-        assert parent.naf_principal == "naf1"
-        assert parent.acteur_type == atype
-        assert parent.source is None
-        assert parent.location.x == 1
-        assert parent.location.y == 11
-
-        child = RevisionActeur.objects.get(pk="a1")
-        assert child.statut == ActeurStatus.INACTIF
-        assert child.parent == parent
-        assert child.parent_reason == (
+        # Closed acteur
+        closed = RevisionActeur.objects.get(pk="a1")
+        assert closed.statut == ActeurStatus.INACTIF
+        assert closed.parent_reason == (
             f"SIRET 11111111100001 détecté le {TODAY} comme fermé dans AE, "
             f"remplacé par SIRET 11111111100002"
         )
-        assert child.siret_is_closed is True
-        assert child.location.x == 1
-        assert child.location.y == 11
+        assert closed.siret_is_closed is True
+        assert closed.location.x == 1
+        assert closed.location.y == 11
 
-    def test_cohorte_autre_siren(self, acteurs, df_replaced_autre_siret):
+        # Replacement acteur
+        new = RevisionActeur.objects.get(identifiant_externe="ext_a1")
+        assert new.statut == ActeurStatus.ACTIF
+        assert new.parent.pk == parent.pk
+        assert new.source.pk == source.pk
+        assert "même parent que l'ancien enfant" in new.parent_reason
+
+    def test_cohorte_autre_siren(self, acteurs, parent, df_replaced_autre_siret):
         from data.models.suggestion import Suggestion, SuggestionCohorte
         from qfdmo.models import ActeurStatus, RevisionActeur
 
@@ -223,21 +231,12 @@ class TestEnrichActeursClosedSuggestions:
             suggestion.apply()
 
         # Verify changes
-        # 1 parent should be created in revision with replacement data
-        # 1 child should be created in revision with status=INACT and parent_id pointing
-        parent_id = parent_id_generate(["33333333300001"])
-        parent = RevisionActeur.objects.get(pk=parent_id)
-        assert parent.nom == "APRES a2"
-        assert parent.adresse == "Adresse2"
-        assert parent.code_postal == "67890"
-        assert parent.ville == "Ville2"
-        assert parent.naf_principal == "naf2"
-        assert parent.location.x == 2
-        assert parent.location.y == 22
-
+        # TODO: repeat the comparison between closed and replacements
+        # for both acteurs, the only different is the first has a parent
+        # and not the second
         child = RevisionActeur.objects.get(pk="a2")
         assert child.statut == ActeurStatus.INACTIF
-        assert child.parent == parent
+        assert child.parent.pk == parent.pk
         assert child.parent_reason == (
             f"SIRET 22222222200001 détecté le {TODAY} comme fermé dans AE, "
             f"remplacé par SIRET 33333333300001"
@@ -245,23 +244,15 @@ class TestEnrichActeursClosedSuggestions:
         assert child.siret_is_closed is True
         assert child.location.x == 2
         assert child.location.y == 22
-
-        parent_id = parent_id_generate(["55555555500001"])
-        parent = RevisionActeur.objects.get(pk=parent_id)
-        assert parent.nom == "APRES a3"
-        assert parent.adresse == "Adresse3"
-        assert parent.code_postal == "12345"
-        assert parent.ville == "Ville3"
-        assert parent.naf_principal == "naf3"
-        assert parent.location.x == 3
-        assert parent.location.y == 33
+        assert child.identifiant_externe == "ext_a2"
 
         child = RevisionActeur.objects.get(pk="a3")
         assert child.statut == ActeurStatus.INACTIF
-        assert child.parent == parent
+        assert child.parent is None  # 2nd child had no parent
         assert child.parent_reason == (
             f"SIRET 44444444400001 détecté le {TODAY} comme fermé dans AE, "
             f"remplacé par SIRET 55555555500001"
         )
         assert child.location.x == 3
         assert child.location.y == 33
+        assert child.identifiant_externe == "ext_a3"
