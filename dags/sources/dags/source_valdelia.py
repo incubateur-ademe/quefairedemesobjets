@@ -51,11 +51,11 @@ with DAG(
                 "transformation": "clean_public_accueilli",
                 "destination": "public_accueilli",
             },
-            {
-                "origin": "uniquement_sur_rdv",
-                "transformation": "cast_eo_boolean_or_string_to_boolean",
-                "destination": "uniquement_sur_rdv",
-            },
+            # {
+            #     "origin": "uniquement_sur_rdv",
+            #     "transformation": "cast_eo_boolean_or_string_to_boolean",
+            #     "destination": "uniquement_sur_rdv",
+            # },
             {
                 "origin": "exclusivite_de_reprisereparation",
                 "transformation": "cast_eo_boolean_or_string_to_boolean",
@@ -76,6 +76,9 @@ with DAG(
                 "column": "statut",
                 "value": constants.ACTEUR_ACTIF,
             },
+            {"column": "point_dapport_de_service_reparation", "value": False},
+            {"column": "point_de_reparation", "value": False},
+            {"column": "point_dapport_pour_reemploi", "value": False},
             # 4. Transformation du dataframe
             {
                 "origin": ["latitude", "longitude"],
