@@ -3,11 +3,16 @@ import re
 from typing import Any
 
 import pandas as pd
+from opening_hours import OpeningHours, ParserError
 from sources.config import shared_constants as constants
 from sources.tasks.airflow_logic.config_management import DAGConfig
+from sources.tasks.transform.opening_hours import interprete_opening_hours
+
 from utils.formatter import format_libelle_to_code
 
 logger = logging.getLogger(__name__)
+
+CLOSED_THIS_DAY = "Fermé"
 
 
 def cast_eo_boolean_or_string_to_boolean(value: str | bool, _) -> bool:
@@ -19,7 +24,10 @@ def cast_eo_boolean_or_string_to_boolean(value: str | bool, _) -> bool:
 
 
 def convert_opening_hours(opening_hours: str | None, _) -> str:
-    french_days = {
+    opening_hours_by_day_of_week = interprete_opening_hours(opening_hours)
+    displayed_opening_hours = []
+
+    days = {
         "Mo": "lundi",
         "Tu": "mardi",
         "We": "mercredi",
@@ -28,28 +36,22 @@ def convert_opening_hours(opening_hours: str | None, _) -> str:
         "Sa": "samedi",
         "Su": "dimanche",
     }
+    for day, hours in opening_hours_by_day_of_week.items():
+        displayed_opening_hours_day = f"{days[day]}: "
+        displayed_opening_hours_hours = []
 
-    def translate_hour(hour):
-        return hour.replace(":", "h").zfill(5)
+        if hours:
+            for hour in hours:
+                displayed_opening_hours_hours.append(
+                    f"{hour[0].strftime('%H:%M')} - {hour[1].strftime('%H:%M')}"
+                )
+            displayed_opening_hours_day += "; ".join(displayed_opening_hours_hours)
+        else:
+            displayed_opening_hours_day += CLOSED_THIS_DAY
 
-    def process_schedule(schedule):
-        parts = schedule.split(",")
-        translated = []
-        for part in parts:
-            start, end = part.split("-")
-            translated.append(f"de {translate_hour(start)} à {translate_hour(end)}")
-        return " et ".join(translated)
+        displayed_opening_hours.append(displayed_opening_hours_day)
 
-    def process_entry(entry):
-        days, hours = entry.split(" ")
-        day_range = " au ".join(french_days[day] for day in days.split("-"))
-        hours_translated = process_schedule(hours)
-        return f"du {day_range} {hours_translated}"
-
-    if pd.isna(opening_hours) or not opening_hours:
-        return ""
-
-    return process_entry(opening_hours)
+    return "\n".join(displayed_opening_hours)
 
 
 def clean_siren(siren: int | str | None) -> str:
@@ -164,6 +166,20 @@ def clean_code_postal(cp: str | None, _) -> str:
         return ""
     # cast en str et ajout de 0 si le code postal est inférieur à 10000
     return f"0{cp}" if cp and len(str(cp)) == 4 else str(cp)
+
+
+def clean_horaires_osm(horaires_osm: str | None, _) -> str:
+    if not horaires_osm:
+        return ""
+    # sometimes, hours are writen HHhMM instead of HH:MM
+    # replace h using regex
+    horaires_osm = re.sub(r"(\d{2})h(\d{2})", r"\1:\2", horaires_osm)
+    try:
+        OpeningHours(horaires_osm)
+    except ParserError as e:
+        logger.warning(f"Error parsing opening hours: {e}")
+        return ""
+    return horaires_osm
 
 
 def clean_code_list(codes: str | None, _) -> list[str]:

@@ -17,6 +17,7 @@ from sources.tasks.airflow_logic.config_management import (
 from sources.tasks.transform.transform_df import compute_location, merge_duplicates
 from sqlalchemy import text
 from tenacity import retry, stop_after_attempt, wait_fixed
+
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -73,7 +74,7 @@ def _transform_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
         df[column_to_transform.destination] = df[column_to_transform.origin].apply(
             normalisation_function
         )
-        if column_to_transform.destination != column_to_transform.origin:
+        if column_to_transform.origin not in dag_config.get_expected_columns():
             df.drop(columns=[column_to_transform.origin], inplace=True)
     return df
 
