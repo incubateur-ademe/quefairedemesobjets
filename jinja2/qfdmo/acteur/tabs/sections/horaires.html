@@ -16,6 +16,6 @@ Horaires
         {% include "qfdmo/acteur/tabs/_separator.html" %}
     {% endif %}
 
-    {{ object.horaires_description|safe }}
+    {{ object.horaires_description|replace("\n", "<br>")|safe }}
 </div>
 {% endblock content %}

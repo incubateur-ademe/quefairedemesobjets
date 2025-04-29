@@ -55,23 +55,68 @@ class TestConvertOpeningHours:
             # chaine vide ou Nulle
             ("", ""),
             (None, ""),
-            (pd.NA, ""),
-            (np.nan, ""),
             # chaines valides
-            ("Mo-Fr 09:00-16:00", "du lundi au vendredi de 09h00 à 16h00"),
+            (
+                "Mo-Fr 09:00-16:00",
+                """lundi: 09:00 - 16:00
+mardi: 09:00 - 16:00
+mercredi: 09:00 - 16:00
+jeudi: 09:00 - 16:00
+vendredi: 09:00 - 16:00
+samedi: Fermé
+dimanche: Fermé""",
+            ),
             (
                 "Mo-Fr 09:00-12:00,14:00-17:00",
-                "du lundi au vendredi de 09h00 à 12h00 et de 14h00 à 17h00",
+                """lundi: 09:00 - 12:00; 14:00 - 17:00
+mardi: 09:00 - 12:00; 14:00 - 17:00
+mercredi: 09:00 - 12:00; 14:00 - 17:00
+jeudi: 09:00 - 12:00; 14:00 - 17:00
+vendredi: 09:00 - 12:00; 14:00 - 17:00
+samedi: Fermé
+dimanche: Fermé""",
             ),
-            # TODO : à implémenter
-            # (
-            #     "Mo,Fr 09:00-12:00,15:00-17:00",
-            #     "le lundi et le vendredi de 09h00 à 12h00 et de 15h00 à 17h00"
-            # ),
-            # (
-            #     "Mo,Tu,We 09:00-12:00",
-            #     "le lundi, mardi et le mercredi de 09h00 à 12h00"
-            # ),
+            (
+                "Mo,Fr 09:00-12:00,15:00-17:00",
+                """lundi: 09:00 - 12:00; 15:00 - 17:00
+mardi: Fermé
+mercredi: Fermé
+jeudi: Fermé
+vendredi: 09:00 - 12:00; 15:00 - 17:00
+samedi: Fermé
+dimanche: Fermé""",
+            ),
+            (
+                "Mo,Tu,We 09:00-12:00",
+                """lundi: 09:00 - 12:00
+mardi: 09:00 - 12:00
+mercredi: 09:00 - 12:00
+jeudi: Fermé
+vendredi: Fermé
+samedi: Fermé
+dimanche: Fermé""",
+            ),
+            (
+                "24/7",
+                """lundi: 00:00 - 23:59
+mardi: 00:00 - 23:59
+mercredi: 00:00 - 23:59
+jeudi: 00:00 - 23:59
+vendredi: 00:00 - 23:59
+samedi: 00:00 - 23:59
+dimanche: 00:00 - 23:59""",
+            ),
+            (
+                "Mo 10:00-12:00,12:30-15:00; Tu-Fr 08:00-12:00,12:30-15:00;"
+                " Sa 08:00-12:00",
+                """lundi: 10:00 - 12:00; 12:30 - 15:00
+mardi: 08:00 - 12:00; 12:30 - 15:00
+mercredi: 08:00 - 12:00; 12:30 - 15:00
+jeudi: 08:00 - 12:00; 12:30 - 15:00
+vendredi: 08:00 - 12:00; 12:30 - 15:00
+samedi: 08:00 - 12:00
+dimanche: Fermé""",
+            ),
         ],
     )
     def test_convert_opening_hours(self, input_value, expected_output):

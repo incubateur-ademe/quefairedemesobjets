@@ -52,6 +52,11 @@ with DAG(
             },
             {
                 "origin": "horaires_douverture",
+                "transformation": "clean_horaires_osm",
+                "destination": "horaires_osm",
+            },
+            {
+                "origin": "horaires_osm",
                 "transformation": "convert_opening_hours",
                 "destination": "horaires_description",
             },
