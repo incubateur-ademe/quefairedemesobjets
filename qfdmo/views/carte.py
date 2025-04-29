@@ -4,10 +4,54 @@ from django.db.models import Q
 from django.utils.functional import cached_property
 from django.views.generic import DetailView
 
+from qfdmo.forms import CarteForm
 from qfdmo.models import CarteConfig
-from qfdmo.views.adresses import CarteSearchActeursView
+from qfdmo.views.adresses import SearchActeursView
 
 logger = logging.getLogger(__name__)
+
+
+class CarteSearchActeursView(SearchActeursView):
+    is_carte = True
+    template_name = "qfdmo/carte.html"
+    form_class = CarteForm
+
+    def get_initial(self, *args, **kwargs):
+        initial = super().get_initial(*args, **kwargs)
+        action_displayed = self._set_action_displayed()
+        grouped_action_choices = self._get_grouped_action_choices(action_displayed)
+        actions_to_select = self._get_selected_action()
+        initial["grouped_action"] = self._grouped_action_from(
+            grouped_action_choices, actions_to_select
+        )
+        # TODO : refacto forms, merge with grouped_action field
+        initial["legend_grouped_action"] = initial["grouped_action"]
+
+        initial["action_list"] = "|".join(
+            [a for ga in initial["grouped_action"] for a in ga.split("|")]
+        )
+        return initial
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(is_carte=True, map_container_id="carte")
+        return context
+
+    def _get_selected_action_ids(self):
+        return [a.id for a in self._get_selected_action()]
+
+
+class ProductCarteView(CarteSearchActeursView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        carte_config, _ = CarteConfig.objects.get_or_create(
+            slug="product", no_branding=True
+        )
+        context.update(
+            carte_config=carte_config,
+            map_container_id=self.request.GET.get("map_container_id", "carte"),
+        )
+        return context
 
 
 class CustomCarteView(DetailView, CarteSearchActeursView):

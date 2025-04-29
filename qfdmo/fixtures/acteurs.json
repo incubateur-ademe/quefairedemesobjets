@@ -1,46 +1,327 @@
 [
-   {
-      "model":"qfdmo.displayedacteur",
-      "pk":"000e0603-8060-42b0-a216-84636214ad99",
-      "fields":{
-         "nom":"Ressourcerie des Biscottes",
-         "description":null,
-         "acteur_type_id": 666,
-         "adresse":null,
-         "adresse_complement":null,
-         "code_postal":null,
-         "ville":null,
-         "url":null,
-         "email":null,
-         "location":"SRID=4326;POINT (2.349014 48.864716)",
-         "telephone":null,
-         "nom_commercial":"Ressourcerie des Biscottes",
-         "nom_officiel":null,
-         "siret":null,
-         "siren":null,
-         "source":null,
-         "identifiant_externe":null,
-         "statut":"ACTIF",
-         "naf_principal":null,
-         "commentaires":null,
-         "cree_le":"2024-03-05T12:39:35.142Z",
-         "modifie_le":"2024-03-05T12:39:35.142Z",
-         "horaires_osm":null,
-         "horaires_description":null,
-         "public_accueilli":null,
-         "reprise":null,
-         "exclusivite_de_reprisereparation":null,
-         "uniquement_sur_rdv":null,
-         "action_principale":null,
-         "uuid":"234f7MjdMpye3aEpJbqHNZ",
-         "labels":[
-
-         ],
-         "acteur_services":[
+{
+    "model": "qfdmo.displayedacteur",
+    "fields": {
+        "cree_le": "2025-04-03T17:02:22.853Z",
+        "modifie_le": "2025-05-19T12:02:14.948Z",
+        "nom": "ASSOCIATION CAP RESSOURCERIE",
+        "description": "",
+        "acteur_type": [
+            "ess"
+        ],
+        "adresse": "11 ZA DE MANE LENN",
+        "adresse_complement": "",
+        "code_postal": "56950",
+        "ville": "Crach",
+        "url": "https://www.cap-ressourcerie.com/",
+        "email": "capressourcerie@gmail.com",
+        "location": "SRID=4326;POINT (-2.9957401 47.6061646)",
+        "telephone": "06 58 60 37 11",
+        "nom_commercial": "Cap Ressourcerie",
+        "nom_officiel": "",
+        "siren": "832845978",
+        "siret": "83284597800028",
+        "siret_is_closed": null,
+        "source": null,
+        "identifiant_externe": "",
+        "statut": "ACTIF",
+        "naf_principal": "38.11Z",
+        "commentaires": "",
+        "horaires_osm": "",
+        "horaires_description": "mercredi 10h00-18h00  samedi 10h00-18h00",
+        "public_accueilli": "Particuliers",
+        "reprise": "",
+        "exclusivite_de_reprisereparation": false,
+        "uniquement_sur_rdv": false,
+        "action_principale": null,
+        "uuid": "aDcrby2bqxAZFM3yYCRTue",
+        "labels": [
+            7
+        ],
+        "acteur_services": [
             [
-               "Collecte par une structure spécialisée"
+                "recyclerie"
+            ],
+            [
+                "structure_de_collecte"
             ]
-         ]
-      }
-   }
+        ],
+        "sources": [
+            [
+                "sinoe"
+            ],
+            [
+                "ecomaison"
+            ],
+            [
+                "ecologic"
+            ],
+            [
+                "refashion"
+            ],
+            [
+                "ecosystem"
+            ]
+        ]
+    }
+},
+{
+    "model": "qfdmo.displayedacteur",
+    "fields": {
+        "cree_le": "2023-10-25T10:09:12.529Z",
+        "modifie_le": "2024-07-18T10:30:47.593Z",
+        "nom": "Antiquites Du Poulbenn",
+        "description": "",
+        "acteur_type": [
+            "artisan"
+        ],
+        "adresse": "LE POULBEN",
+        "adresse_complement": "",
+        "code_postal": "56950",
+        "ville": "CRACH",
+        "url": "",
+        "email": "",
+        "location": "SRID=4326;POINT (-2.983594 47.65361)",
+        "telephone": "",
+        "nom_commercial": "",
+        "nom_officiel": "",
+        "siren": "",
+        "siret": "30968373800053",
+        "siret_is_closed": null,
+        "source": [
+            "lvao"
+        ],
+        "identifiant_externe": "152575",
+        "statut": "ACTIF",
+        "naf_principal": "31.09B",
+        "commentaires": "[{\"message\":\"source changee le 18-07-2024. Ancienne source CMA non-reparActeur. Nouvelle source : LVAO.\"}]",
+        "horaires_osm": "",
+        "horaires_description": "",
+        "public_accueilli": "",
+        "reprise": "",
+        "exclusivite_de_reprisereparation": null,
+        "uniquement_sur_rdv": null,
+        "action_principale": null,
+        "uuid": "3kQK86DEWA3ZrcirdzzBez",
+        "labels": [],
+        "acteur_services": [
+            [
+                "service_de_reparation"
+            ]
+        ],
+        "sources": [
+            [
+                "lvao"
+            ]
+        ]
+    }
+},
+{
+    "model": "qfdmo.displayedacteur",
+    "fields": {
+        "cree_le": "2025-01-29T17:20:38.499Z",
+        "modifie_le": "2025-01-30T19:37:18.919Z",
+        "nom": "Lycée Benjamin Franklin - Ressourcerie Green Socks",
+        "description": "Possibilité de déposer des vêtements à l'accueil, pour la friperie interne au lycée",
+        "acteur_type": [
+            "collectivite"
+        ],
+        "adresse": "1 RUE DE LA FORET",
+        "adresse_complement": "",
+        "code_postal": "56400",
+        "ville": "AURAY",
+        "url": "",
+        "email": "",
+        "location": "SRID=4326;POINT (-2.980237 47.671608)",
+        "telephone": "",
+        "nom_commercial": "",
+        "nom_officiel": "",
+        "siren": "",
+        "siret": "19561534900014",
+        "siret_is_closed": null,
+        "source": [
+            "communautelvao"
+        ],
+        "identifiant_externe": "VBOFDJDBOCTW",
+        "statut": "ACTIF",
+        "naf_principal": "",
+        "commentaires": "",
+        "horaires_osm": "",
+        "horaires_description": "",
+        "public_accueilli": "",
+        "reprise": "",
+        "exclusivite_de_reprisereparation": null,
+        "uniquement_sur_rdv": null,
+        "action_principale": null,
+        "uuid": "8bHaabXYXXTSvoVghXY2VC",
+        "labels": [],
+        "acteur_services": [
+            [
+                "recyclerie"
+            ]
+        ],
+        "sources": [
+            [
+                "communautelvao"
+            ]
+        ]
+    }
+},
+{
+    "model": "qfdmo.displayedacteur",
+    "fields": {
+        "cree_le": "2024-10-23T14:18:16.868Z",
+        "modifie_le": "2024-12-12T09:52:42.187Z",
+        "nom": "ASSISTANCE FORMATION EQUIPEMENT 56.COM (AFE56.COM)",
+        "description": "",
+        "acteur_type": [
+            "commerce"
+        ],
+        "adresse": "24  RUE DU CAPITAINE BERTRAND",
+        "adresse_complement": "",
+        "code_postal": "56400",
+        "ville": "Auray",
+        "url": "",
+        "email": "",
+        "location": "SRID=4326;POINT (-2.993726 47.670387)",
+        "telephone": "",
+        "nom_commercial": "AFE56.COM - ORDIZEN",
+        "nom_officiel": "",
+        "siren": "750886699",
+        "siret": "75088669900016",
+        "siret_is_closed": null,
+        "source": [
+            "ocad3e"
+        ],
+        "identifiant_externe": "SGS-02069",
+        "statut": "ACTIF",
+        "naf_principal": "",
+        "commentaires": "",
+        "horaires_osm": "",
+        "horaires_description": "",
+        "public_accueilli": "Particuliers",
+        "reprise": "",
+        "exclusivite_de_reprisereparation": false,
+        "uniquement_sur_rdv": null,
+        "action_principale": null,
+        "uuid": "eYKxBYDMDoMXTr8iiw69Ek",
+        "labels": [
+            2
+        ],
+        "acteur_services": [
+            [
+                "service_de_reparation"
+            ]
+        ],
+        "sources": [
+            [
+                "ocad3e"
+            ]
+        ]
+    }
+},
+{
+    "model": "qfdmo.displayedacteur",
+    "fields": {
+        "cree_le": "2025-05-13T14:08:22.957Z",
+        "modifie_le": "2025-05-13T14:08:22.957Z",
+        "nom": "Le Relais Bretagne",
+        "description": "",
+        "acteur_type": [
+            "pav_public"
+        ],
+        "adresse": "boulevard Anne de Bretagne",
+        "adresse_complement": "",
+        "code_postal": "56400",
+        "ville": "Auray",
+        "url": "",
+        "email": "",
+        "location": "SRID=4326;POINT (-2.988191 47.663053)",
+        "telephone": "",
+        "nom_commercial": "",
+        "nom_officiel": "",
+        "siren": "333684124",
+        "siret": "33368412400014",
+        "siret_is_closed": null,
+        "source": [
+            "refashion"
+        ],
+        "identifiant_externe": "TLC-REFASHION-PAV-3445001",
+        "statut": "ACTIF",
+        "naf_principal": "",
+        "commentaires": "",
+        "horaires_osm": "",
+        "horaires_description": "",
+        "public_accueilli": "Particuliers",
+        "reprise": "",
+        "exclusivite_de_reprisereparation": false,
+        "uniquement_sur_rdv": false,
+        "action_principale": null,
+        "uuid": "cyRZyTLfJ3goDJop2foYWb",
+        "labels": [],
+        "acteur_services": [
+            [
+                "structure_de_collecte"
+            ]
+        ],
+        "sources": [
+            [
+                "refashion"
+            ]
+        ]
+    }
+},
+{
+    "model": "qfdmo.displayedacteur",
+    "fields": {
+        "cree_le": "2025-05-13T13:51:04.644Z",
+        "modifie_le": "2025-05-13T13:51:04.644Z",
+        "nom": "Entreprise Individuelle lucile hantrais",
+        "description": "",
+        "acteur_type": [
+            "artisan"
+        ],
+        "adresse": "61 Rue Georges Clémenceau",
+        "adresse_complement": "",
+        "code_postal": "56400",
+        "ville": "Auray",
+        "url": "https://www.rapid-couture.com/",
+        "email": "",
+        "location": "SRID=4326;POINT (-2.987113 47.66905)",
+        "telephone": "+33230919363",
+        "nom_commercial": "RAPID'COUTURE AURAY",
+        "nom_officiel": "",
+        "siren": "930357900",
+        "siret": "93035790000016",
+        "siret_is_closed": null,
+        "source": [
+            "refashion"
+        ],
+        "identifiant_externe": "TLC-REFASHION-REP-603665791852778329",
+        "statut": "ACTIF",
+        "naf_principal": "",
+        "commentaires": "",
+        "horaires_osm": "",
+        "horaires_description": "",
+        "public_accueilli": "Particuliers",
+        "reprise": "1 pour 0",
+        "exclusivite_de_reprisereparation": false,
+        "uniquement_sur_rdv": false,
+        "action_principale": null,
+        "uuid": "XSyppoQHLT37uafQ6kj5M7",
+        "labels": [
+            3
+        ],
+        "acteur_services": [
+            [
+                "service_de_reparation"
+            ]
+        ],
+        "sources": [
+            [
+                "refashion"
+            ]
+        ]
+    }
+}
 ]

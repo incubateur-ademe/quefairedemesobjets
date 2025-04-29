@@ -1,4 +1,4 @@
-<div class="fr-tabs fr-tabs--noborder">
+<div class="fr-tabs fr-tabs--noborder qf-h-full">
     <ul
         class="fr-tabs__list qfdmo"
         role="tablist"
@@ -7,11 +7,13 @@
         {% with text="Présentation",target="aboutPanel" %}
             {% include "qfdmo/acteur/tabs/_tab.html" %}
         {% endwith %}
+
         {% if object.labels_without_enseigne_display %}
             {% with text="Labels",target="labelsPanel" %}
                 {% include "qfdmo/acteur/tabs/_tab.html" %}
             {% endwith %}
         {% endif %}
+
         {% with text="Sources",target="sourcesPanel" %}
             {% include "qfdmo/acteur/tabs/_tab.html" %}
         {% endwith %}

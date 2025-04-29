@@ -6,7 +6,7 @@ module.exports = {
   content: [
     "jinja2/**/*.html",
     "templates/**/*.html",
-    "static/to_compile/**/*.{js,ts,svg}",
+    "static/to_compile/**/*.{js,ts,svg,css}",
     "./**/forms.py",
     "./dsfr_hacks/used_icons.js",
   ],
@@ -19,6 +19,7 @@ module.exports = {
     "sm:qf-min-w-[600px]",
     "sm:qf-w-[250px]",
     "sm:qf-w-[400px]",
+    "qf-top-3/4",
     "qf-scale-115",
     {
       pattern: new RegExp(`qf-(text|border|bg)-(${usedColors.join("|")})`),

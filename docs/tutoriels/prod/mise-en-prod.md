@@ -1,4 +1,5 @@
-# 🚀 Mise en production
+# 🚀 Mise en production - OBSOLETE, à mettre à jour
+
 
 1. Créer un tag depuis l'interface GitHub ou la ligne de commande
 ```

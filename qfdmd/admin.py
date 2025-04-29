@@ -3,7 +3,7 @@ from django_extensions.db.fields import ImproperlyConfigured
 from import_export import fields, resources
 from import_export.admin import ImportExportModelAdmin
 
-from qfdmd.models import CMSPage, Lien, Produit, Suggestion, Synonyme
+from qfdmd.models import Lien, Produit, Suggestion, Synonyme
 
 
 class LienResource(resources.ModelResource):
@@ -178,8 +178,3 @@ class SynonymeAdmin(
     list_filter = ["pin_on_homepage"]
     autocomplete_fields = ["produit"]
     fields_to_display_in_first_position = ["nom", "produit"]
-
-
-@admin.register(CMSPage)
-class CMSPageAdmin(admin.ModelAdmin):
-    readonly_fields = ["body", "search_description", "seo_title", "title", "slug"]

@@ -1,20 +1,28 @@
-{# Détail de l'adresse #}
-{# Barre visible en mobile uniquement #}
+{# Acteur details #}
+{# Handle visible only on mobile. It is used to drag the panel #}
 <span
-    class="qf-snap-start md:qf-hidden qf-block qf-rounded-full qf-w-12w qf-h-1v qf-bg-[#DFDFDF] qf-my-2w qf-mx-auto"
+    class="md:qf-hidden qf-block qf-rounded-full qf-w-12w qf-h-1v qf-bg-[#DFDFDF] qf-my-2w qf-mx-auto cursor-grab"
 ></span>
 {# Content #}
-<div class="qf-flex-grow qf-relative qf-snap-start">
+<div
+    class="qf-flex-grow qf-relative qf-overflow-auto qf-px-2w"
+    data-acteur-details-target="content"
+>
     {# Close button #}
     <span
         class="
         qf-cursor-pointer
+        qf-inline-flex
         fr-icon fr-icon-close-line
         qf-flex qf-justify-end
-        qf-absolute qf-top-0 qf-right-0
+        qf-sticky qf-left-full qf-top-0
+        qf-z-10
+        qf-bg-white qf-p-1v qf-rounded-full
         qf-text-blue-france-sun-113-625"
-        data-action="click->search-solution-form#hideActeurDetailsPanel"
+        data-action="click->acteur-details#hide"
     >
     </span>
-    <turbo-frame id="acteur-detail"></turbo-frame>
+    <turbo-frame
+    id="{{ map_container_id}}:acteur-detail"
+    data-acteur-details-target="frame"></turbo-frame>
 </div>

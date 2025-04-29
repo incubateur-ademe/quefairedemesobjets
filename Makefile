@@ -11,6 +11,7 @@ PYTEST := poetry run pytest
 DB_URL := postgres://qfdmo:qfdmo@localhost:6543/qfdmo# pragma: allowlist secret
 ASSISTANT_URL := quefairedemesdechets.ademe.local
 LVAO_URL := lvao.ademe.local
+FIXTURES_OPTIONS := --indent 4 --natural-foreign --natural-primary
 
 # Makefile config
 .PHONY: check
@@ -24,6 +25,10 @@ init-certs:
 	docker run -ti -v ./nginx-local-only/certs:/app/certs -w /app/certs --rm alpine/mkcert $(LVAO_URL) $(ASSISTANT_URL)
 
 
+.PHONY: init-playwright
+init-playwright:
+	npx playwright install --with-deps
+
 .PHONY: init-dev
 init-dev:
 	# git
@@ -35,7 +40,7 @@ init-dev:
 	make init-certs
 	# javascript
 	npm install
-	npx playwright install --with-deps
+	make init-playwright
 	# environment
 	cp .env.template .env
 	cp ./dags/.env.template ./dags/.env
@@ -43,6 +48,11 @@ init-dev:
 	make migrate
 	make createcachetable
 	make createsuperuser
+	make seed-database
+
+.PHONY: check-format
+check-format:
+	poetry run black --check --diff .
 
 .PHONY: fix
 fix:
@@ -67,6 +77,10 @@ run-all:
 migrate:
 	$(DJANGO_ADMIN) migrate
 
+.PHONY: shell
+shell:
+	$(DJANGO_ADMIN) shell
+
 .PHONY: makemigrations
 makemigrations:
 	$(DJANGO_ADMIN) makemigrations
@@ -86,7 +100,25 @@ createsuperuser:
 
 .PHONY: seed-database
 seed-database:
-	$(DJANGO_ADMIN) loaddata categories actions acteur_services acteur_types acteurs objets
+	$(DJANGO_ADMIN) loaddata categories labels sources actions produits acteur_services acteur_types objets synonymes suggestions
+
+.PHONY: generate-fixtures-acteurs
+generate-fixtures-acteurs:
+	$(DJANGO_ADMIN) dumpdata qfdmo.displayedacteur $(FIXTURES_OPTIONS) --pk "65791ef2-bb37-4569-b011-8cece03dcdcf","antiquites_du_poulbenn_152575_reparation","refashion_TLC-REFASHION-PAV-3445001","communautelvao_VBOFDJDBOCTW","refashion_TLC-REFASHION-REP-603665791852778329","ocad3e_SGS-02069" -o qfdmo/fixtures/acteurs.json # pragma: allowlist secret
+	$(DJANGO_ADMIN) dumpdata  qfdmo.displayedpropositionservice $(FIXTURES_OPTIONS) --pk 2163243,2163244,2163245,243160,435885,1699381,738371,738372,719100 -o qfdmo/fixtures/propositions_services.json
+
+.PHONY: generate-fixtures
+generate-fixtures:
+	$(DJANGO_ADMIN) dumpdata qfdmo.objet $(FIXTURES_OPTIONS) -o qfdmo/fixtures/objets.json
+	$(DJANGO_ADMIN) dumpdata qfdmo.categorieobjet qfdmo.souscategorieobjet $(FIXTURES_OPTIONS) -o qfdmo/fixtures/categories.json
+	$(DJANGO_ADMIN) dumpdata qfdmo.actiondirection qfdmo.groupeaction qfdmo.action $(FIXTURES_OPTIONS) -o qfdmo/fixtures/actions.json
+	$(DJANGO_ADMIN) dumpdata qfdmo.acteurtype $(FIXTURES_OPTIONS) -o qfdmo/fixtures/acteur_types.json
+	$(DJANGO_ADMIN) dumpdata qfdmo.acteurservice $(FIXTURES_OPTIONS) -o qfdmo/fixtures/acteur_services.json
+	$(DJANGO_ADMIN) dumpdata qfdmo.labelqualite $(FIXTURES_OPTIONS) -o qfdmo/fixtures/labels.json
+	$(DJANGO_ADMIN) dumpdata qfdmo.source $(FIXTURES_OPTIONS) -o qfdmo/fixtures/sources.json
+	$(DJANGO_ADMIN) dumpdata qfdmd.synonyme $(FIXTURES_OPTIONS) -o qfdmd/fixtures/synonymes.json
+	$(DJANGO_ADMIN) dumpdata qfdmd.produit $(FIXTURES_OPTIONS) -o qfdmd/fixtures/produits.json
+	$(DJANGO_ADMIN) dumpdata qfdmd.suggestion $(FIXTURES_OPTIONS) -o qfdmd/fixtures/suggestions.json
 
 .PHONY: clear-cache
 clear-cache:
@@ -101,10 +133,13 @@ npm-upgrade:
 unit-test:
 	$(PYTEST) ./unit_tests
 
+.PHONY: integration-test
+integration-test:
+	$(PYTEST) ./integration_tests
+
 .PHONY: e2e-test
 e2e-test:
 	npx playwright test --update-snapshots --ui
-	$(PYTEST) ./integration_tests
 
 .PHONY: a11y
 a11y:
@@ -156,7 +191,14 @@ db-restore:
 	make load-production-dump
 	make migrate
 
+.PHONY: db-restore-for-tests
+db-restore-for-tests:
+	make drop-schema-public
+	make create-schema-public
+	make migrate
+	make seed-database
+
 # Docs
 .PHONY: build-docs
 build-docs:
-		poetry run sphinx-build -b html -c docs docs _build
+	poetry run sphinx-build -b html -c docs docs _build
