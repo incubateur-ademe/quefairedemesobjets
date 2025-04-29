@@ -501,7 +501,11 @@ class SearchActeursView(
             libelle = ""
             if groupe.icon:
                 libelle = render_to_string(
-                    "forms/widgets/groupe_action_label.html", {"groupe_action": groupe}
+                    "forms/widgets/groupe_action_label.html",
+                    {
+                        "groupe_action": groupe,
+                        "libelle": groupe.get_libelle_from(groupe_displayed_actions),
+                    },
                 )
 
             code = "|".join([a.code for a in groupe_displayed_actions])
@@ -690,9 +694,9 @@ def acteur_detail(request, uuid):
     if latitude and longitude and not displayed_acteur.is_digital:
         context.update(
             itineraire_url="https://www.google.com/maps/dir/?api=1&origin="
-            f"{latitude},{ longitude }"
-            f"&destination={ displayed_acteur.latitude },"
-            f"{ displayed_acteur.longitude }&travelMode=WALKING"
+            f"{latitude},{longitude}"
+            f"&destination={displayed_acteur.latitude},"
+            f"{displayed_acteur.longitude}&travelMode=WALKING"
         )
 
     return render(request, "qfdmo/acteur.html", context)
