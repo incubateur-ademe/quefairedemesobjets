@@ -6,6 +6,7 @@ from utils.django import (
     django_model_queryset_to_sql,
     django_model_to_pandas_schema,
     django_setup_full,
+    get_model_fields,
 )
 
 django_setup_full()
@@ -96,3 +97,78 @@ def test_django_model_to_pandas_schema():
     assert df["code_postal"].tolist() == ["01000", "53000", "75000"]
     assert df["source_id"].tolist() == [1, 2, 3]
     assert df["acteur_type_id"].tolist() == [1, 2, 3]
+
+
+def test_get_model_fields():
+    from qfdmo.models import Acteur
+
+    fields = get_model_fields(Acteur, with_relationships=True, latlong=True)
+    assert set(fields) == {
+        "proposition_service_codes",
+        "cree_le",
+        "modifie_le",
+        "nom",
+        "description",
+        "identifiant_unique",
+        "acteur_type_code",
+        "adresse",
+        "adresse_complement",
+        "code_postal",
+        "ville",
+        "url",
+        "email",
+        "telephone",
+        "nom_commercial",
+        "nom_officiel",
+        "siren",
+        "siret",
+        "source_code",
+        "identifiant_externe",
+        "statut",
+        "naf_principal",
+        "commentaires",
+        "horaires_osm",
+        "horaires_description",
+        "public_accueilli",
+        "reprise",
+        "exclusivite_de_reprisereparation",
+        "uniquement_sur_rdv",
+        "action_principale_code",
+        "label_codes",
+        "acteur_service_codes",
+        "latitude",
+        "longitude",
+        "siret_is_closed",
+    }
+
+    fields = get_model_fields(Acteur, with_relationships=False, latlong=False)
+    assert set(fields) == {
+        "cree_le",
+        "modifie_le",
+        "nom",
+        "description",
+        "identifiant_unique",
+        "adresse",
+        "adresse_complement",
+        "code_postal",
+        "ville",
+        "url",
+        "email",
+        "telephone",
+        "nom_commercial",
+        "nom_officiel",
+        "siren",
+        "siret",
+        "identifiant_externe",
+        "statut",
+        "naf_principal",
+        "commentaires",
+        "horaires_osm",
+        "horaires_description",
+        "public_accueilli",
+        "reprise",
+        "exclusivite_de_reprisereparation",
+        "uniquement_sur_rdv",
+        "location",
+        "siret_is_closed",
+    }
