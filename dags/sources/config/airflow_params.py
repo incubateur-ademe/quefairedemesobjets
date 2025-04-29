@@ -7,6 +7,7 @@ from sources.tasks.transform.transform_column import (
     clean_acteur_type_code,
     clean_code_list,
     clean_code_postal,
+    clean_horaires_osm,
     clean_public_accueilli,
     clean_reprise,
     clean_siren,
@@ -33,6 +34,7 @@ from sources.tasks.transform.transform_df import (
     merge_and_clean_sous_categorie_codes,
     merge_sous_categories_columns,
 )
+
 from utils.django import django_setup_full
 
 PATH_NOMENCLARURE_DECHET = (
@@ -48,6 +50,7 @@ TRANSFORM_COLUMN_MAPPING = {
     "clean_acteur_type_code": clean_acteur_type_code,
     "clean_code_list": clean_code_list,
     "clean_code_postal": clean_code_postal,
+    "clean_horaires_osm": clean_horaires_osm,
     "clean_public_accueilli": clean_public_accueilli,
     "clean_reprise": clean_reprise,
     "clean_siren": clean_siren,
