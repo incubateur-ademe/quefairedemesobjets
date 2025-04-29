@@ -1,5 +1,5 @@
 {# Panel «Légende» affiché uniquement en mobile #}
-{% if carte_config and not carte_config.hide_legend %}
+{% if not carte_config or not carte_config.hide_legend %}
 <div class='fr-container qf-px-0 qf-absolute qf-inset-0 qf-font-black qf-z-[10010] qf-flex qf-flex-col qf-hidden'
      data-search-solution-form-target="legendMainPanel"
     data-testid="carte-legend-mobile"
