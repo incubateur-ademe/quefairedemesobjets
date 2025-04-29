@@ -136,9 +136,12 @@ class GroupeAction(CodeAsNaturalKeyModel):
         help_text="Icône du badge à choisir dans le <a href='https://www.systeme-de-design.gouv.fr/elements-d-interface/fondamentaux-techniques/icones' rel='noopener' target='_blank'>DSFR</a>",  # noqa E501
     )
 
+    def get_libelle_from(self, actions):
+        return ", ".join({a.libelle_groupe for a in actions}).capitalize()
+
     @property
     def libelle(self):
-        return ", ".join({a.libelle_groupe for a in self.actions.all()}).capitalize()
+        return self.get_libelle_from(self.actions.all())
 
 
 class Action(CodeAsNaturalKeyModel):
