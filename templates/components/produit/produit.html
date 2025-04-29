@@ -37,9 +37,11 @@
         <div id="mauvais-etat-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="mauvais-etat-tab" tabindex="0">
             {% include "./_detail.html" with content=mauvais_etat url_carte=produit.url_carte_mauvais_etat %}
         </div>
+        {% comment %}
         <div id="bon-etat-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="bon-etat-tab" tabindex="0">
             {% include "./_detail.html" with content=bon_etat url_carte=produit.url_carte_bon_etat %}
         </div>
+        {% endcomment %}
     </div>
 {% else %}
     <div>
