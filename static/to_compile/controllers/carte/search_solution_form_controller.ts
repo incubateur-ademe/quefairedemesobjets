@@ -1,8 +1,8 @@
 import { Controller } from "@hotwired/stimulus"
 import * as Turbo from "@hotwired/turbo"
-import { clearActivePinpoints, removeHash } from "./helpers"
+import { clearActivePinpoints, removeHash } from "../../js/helpers"
 
-export default class extends Controller<HTMLElement> {
+class SearchFormController extends Controller<HTMLElement> {
   #selectedOption: string = ""
   static targets = [
     "jai",
@@ -20,11 +20,8 @@ export default class extends Controller<HTMLElement> {
     "searchFormPanel",
     "addressesPanel",
     "backToSearchPanel",
-    "acteurDetailsPanel",
     "proposeAddressPanel",
     "headerAddressPanel",
-
-    "collapseDetailsButton",
 
     "sousCategoryObjetGroup",
     "sousCategoryObjetID",
@@ -66,14 +63,11 @@ export default class extends Controller<HTMLElement> {
   declare readonly searchFormPanelTarget: HTMLElement
   declare readonly addressesPanelTarget: HTMLElement
   declare readonly backToSearchPanelTarget: HTMLElement
-  declare readonly acteurDetailsPanelTarget: HTMLElement
   declare readonly proposeAddressPanelTarget: HTMLElement
   declare readonly headerAddressPanelTarget: HTMLElement
 
   declare readonly hasProposeAddressPanelTarget: boolean
   declare readonly hasHeaderAddressPanelTarget: boolean
-
-  declare readonly collapseDetailsButtonTarget: HTMLElement
 
   declare readonly sousCategoryObjetGroupTarget: HTMLElement
   declare readonly sousCategoryObjetIDTarget: HTMLInputElement
@@ -97,33 +91,14 @@ export default class extends Controller<HTMLElement> {
 
   declare readonly hasCarteTarget: boolean
 
-  static values = { isIframe: Boolean }
+  static values = { mapContainerId: String, isIframe: Boolean }
   declare readonly isIframeValue: boolean
+  declare readonly mapContainerIdValue: string
 
   connect() {
     this.displayActionList()
-    window.addEventListener("hashchange", this.#setActiveActeur.bind(this))
-    // Prevents the leaflet map to move when the user moves panel
-    this.acteurDetailsPanelTarget.addEventListener("touchmove", (event) =>
-      event.stopPropagation(),
-    )
-
-    if (!this.isIframeValue) {
-      this.scrollToContent()
-    }
   }
 
-  #setActiveActeur(event?: HashChangeEvent) {
-    const uuid = event
-      ? new URL(event.newURL).hash.substring(1)
-      : window.location.hash.substring(1)
-    if (uuid) {
-      this.displayActeur(uuid)
-      this.dispatch("captureInteraction")
-    } else {
-      this.hideActeurDetailsPanel()
-    }
-  }
 
   activeReparerFilters(activate: boolean = true) {
     // Carte mode
@@ -183,7 +158,6 @@ export default class extends Controller<HTMLElement> {
   }
 
   backToSearch() {
-    this.hideActeurDetailsPanel()
     this.#showSearchFormPanel()
     this.#hideAddressesPanel()
     this.scrollToContent()
@@ -193,59 +167,29 @@ export default class extends Controller<HTMLElement> {
     this.bboxTarget.value = JSON.stringify(event.detail)
   }
 
-  #showActeurDetailsPanel() {
-    if (this.acteurDetailsPanelTarget.ariaHidden !== "false") {
-      this.acteurDetailsPanelTarget.ariaHidden = "false"
-    }
-
-    this.acteurDetailsPanelTarget.dataset.exitAnimationEnded = "false"
-    if (window.matchMedia('screen and (max-width:768px)').matches) {
-      this.acteurDetailsPanelTarget.scrollIntoView()
-    }
-
-
-  }
-
-  hideActeurDetailsPanel() {
-    removeHash()
-    document
-      .querySelector("[aria-controls=acteurDetailsPanel][aria-expanded=true]")
-      ?.setAttribute("aria-expanded", "false")
-    this.acteurDetailsPanelTarget.ariaHidden = "true"
-    this.acteurDetailsPanelTarget.addEventListener(
-      "animationend",
-      () => {
-        this.acteurDetailsPanelTarget.dataset.exitAnimationEnded = "true"
-      },
-      { once: true },
-    )
-    clearActivePinpoints()
-  }
-
   displayDigitalActeur(event) {
     const uuid = event.currentTarget.dataset.uuid
     window.location.hash = uuid
-    document
-      .querySelector("[aria-controls='acteurDetailsPanel'][aria-expanded='true']")
-      ?.setAttribute("aria-expanded", "false")
     event.currentTarget.setAttribute("aria-expanded", "true")
-    this.#showActeurDetailsPanel()
   }
 
   displayActeur(uuid: string) {
+    this.dispatch("captureInteraction")
     const latitude = this.latitudeInputTarget.value
     const longitude = this.longitudeInputTarget.value
-
     const params = new URLSearchParams()
     params.set("direction", this.#selectedOption)
     params.set("latitude", latitude)
     params.set("longitude", longitude)
+    params.set("map_container_id", this.mapContainerIdValue)
+    let frame = `${this.mapContainerIdValue}:acteur-detail`
+
     if (this.hasCarteTarget) {
       params.set("carte", "1")
     }
+
     const acteurDetailPath = `/adresse_details/${uuid}?${params.toString()}`
-    Turbo.visit(acteurDetailPath, { frame: "acteur-detail" })
-    this.#showActeurDetailsPanel()
+    Turbo.visit(acteurDetailPath, { frame })
   }
 
   displayActionList() {
@@ -337,6 +281,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   checkAdresseErrorForm(): boolean {
+    // TODO: refacto forms, handle on django side
     let errorExists = false
     if (!this.latitudeInputTarget.value || !this.longitudeInputTarget.value) {
       this.adresseGroupTarget.classList.add("fr-input-group--error")
@@ -350,6 +295,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   #checkErrorForm(): boolean {
+    // TODO: refacto forms, handle on django side
     let errorExists = false
     if (this.checkSsCatObjetErrorForm()) errorExists ||= true
     if (this.checkAdresseErrorForm()) errorExists ||= true
@@ -425,24 +371,26 @@ export default class extends Controller<HTMLElement> {
     this.searchFormPanelTarget.classList.add("qf-h-0", "qf-invisible")
   }
 
-  advancedSubmit(event: Event) {
-    this.hideActeurDetailsPanel()
+  advancedSubmit(event?: Event) {
+    // Applies only in Formulaire alternative or in digital version.
     const withControls =
-      (event.target as HTMLElement).dataset.withControls?.toLowerCase() === "true"
+      (event?.target as HTMLElement).dataset.withControls?.toLowerCase() === "true"
     if (withControls) {
       if (this.#checkErrorForm()) return
     }
 
+    // Applies only in Formulaire alternative.
     const withoutZone =
-      (event.target as HTMLElement).dataset.withoutZone?.toLowerCase() === "true"
+      (event?.target as HTMLElement).dataset.withoutZone?.toLowerCase() === "true"
     if (withoutZone) {
       if (this.hasBboxTarget) {
         this.bboxTarget.value = ""
       }
     }
 
+    // Applies only in Formulaire alternative.
     const withDynamicFormPanel =
-      (event.target as HTMLElement).dataset.withDynamicFormPanel?.toLowerCase() ===
+      (event?.target as HTMLElement).dataset.withDynamicFormPanel?.toLowerCase() ===
       "true"
 
     if (withDynamicFormPanel) {
@@ -454,7 +402,6 @@ export default class extends Controller<HTMLElement> {
 
     this.#hideAdvancedFilters()
     this.hideLegend()
-
     let submitEvent = new Event("submit", { bubbles: true, cancelable: true })
     this.searchFormTarget.dispatchEvent(submitEvent)
   }
@@ -483,3 +430,5 @@ export default class extends Controller<HTMLElement> {
     )
   }
 }
+
+export default SearchFormController

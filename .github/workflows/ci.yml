@@ -41,15 +41,15 @@ jobs:
       - name: Install the project dependencies
         run: poetry sync --with dev,airflow --no-root
       - name: Run unit tests
-        run: poetry run pytest unit_tests
+        run: make unit-test
       - name: Run integration tests
-        run: poetry run pytest integration_tests
+        run: make integration-test
       - name: Run data tests
         run: poetry run pytest dags/tests
       # - name: Run data e2e tests
       #   run: poetry run pytest dags/e2e_tests
       - name: Check code formatting
-        run: poetry run black --check --diff .
+        run: make check-format
       - uses: astral-sh/ruff-action@eaf0ecdd668ceea36159ff9d91882c9795d89b49 # v3.4.0
       - name: Check for missing migrations
         run: poetry run python manage.py makemigrations --check --no-input --settings=core.test_settings
@@ -137,19 +137,19 @@ jobs:
 
       - name: Migrate database
         run: |
-          poetry run python manage.py createcachetable
-          poetry run python manage.py migrate
+          make createcachetable
+          make migrate
 
       - name: Populate database
         run: |
-          poetry run python manage.py loaddata actions acteur_services acteur_types categories objets produits synonymes
+          make seed-database
 
-      - name: Run serveur
+      - name: Run server
         run: |
           poetry run python manage.py runserver &
 
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
+        run: make init-playwright
 
       - name: Run Playwright tests
         run: npx playwright test --reporter=list --update-snapshots --shard=${{ matrix.shard }}

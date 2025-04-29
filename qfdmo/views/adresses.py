@@ -21,7 +21,7 @@ from django.views.generic.edit import FormView
 
 from core.jinja2_handler import distance_to_acteur
 from core.utils import get_direction
-from qfdmo.forms import CarteForm, FormulaireForm
+from qfdmo.forms import FormulaireForm
 from qfdmo.geo_api import bbox_from_list_of_geojson, retrieve_epci_geojson
 from qfdmo.leaflet import (
     center_from_leaflet_bbox,
@@ -46,6 +46,17 @@ from qfdmo.models.action import (
 logger = logging.getLogger(__name__)
 
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
+
+
+def generate_google_maps_itineraire_url(
+    latitude: float, longitude: float, displayed_acteur: DisplayedActeur
+) -> str:
+    return (
+        "https://www.google.com/maps/dir/?api=1&origin="
+        f"{latitude},{longitude}"
+        f"&destination={displayed_acteur.latitude},"
+        f"{displayed_acteur.longitude}&travelMode=WALKING"
+    )
 
 
 class DigitalMixin:
@@ -522,37 +533,6 @@ class SearchActeursView(
         ]
 
 
-# TODO: move in views/carte.py
-class CarteSearchActeursView(SearchActeursView):
-    is_carte = True
-    template_name = "qfdmo/carte.html"
-    form_class = CarteForm
-
-    def get_initial(self, *args, **kwargs):
-        initial = super().get_initial(*args, **kwargs)
-        action_displayed = self._set_action_displayed()
-        grouped_action_choices = self._get_grouped_action_choices(action_displayed)
-        actions_to_select = self._get_selected_action()
-        initial["grouped_action"] = self._grouped_action_from(
-            grouped_action_choices, actions_to_select
-        )
-        # TODO : refacto forms, merge with grouped_action field
-        initial["legend_grouped_action"] = initial["grouped_action"]
-
-        initial["action_list"] = "|".join(
-            [a for ga in initial["grouped_action"] for a in ga.split("|")]
-        )
-        return initial
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update(is_carte=True)
-        return context
-
-    def _get_selected_action_ids(self):
-        return [a.id for a in self._get_selected_action()]
-
-
 class FormulaireSearchActeursView(SearchActeursView):
     """Affiche le formulaire utilisé sur epargnonsnosressources.gouv.fr
     Cette vue est à considérer en mode maintenance uniquement et ne doit pas être
@@ -561,6 +541,11 @@ class FormulaireSearchActeursView(SearchActeursView):
     is_iframe = True
     template_name = "qfdmo/formulaire.html"
     form_class = FormulaireForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(map_container_id="formulaire")
+        return context
 
     def _get_selected_action_ids(self):
         # TODO: merge this method with the one from CarteSearchActeursView
@@ -689,14 +674,14 @@ def acteur_detail(request, uuid):
             displayed_acteur.sources.filter(afficher=True).count()
         ),
         "is_carte": "carte" in request.GET,
+        "map_container_id": request.GET.get("map_container_id", "carte"),
     }
 
     if latitude and longitude and not displayed_acteur.is_digital:
         context.update(
-            itineraire_url="https://www.google.com/maps/dir/?api=1&origin="
-            f"{latitude},{longitude}"
-            f"&destination={displayed_acteur.latitude},"
-            f"{displayed_acteur.longitude}&travelMode=WALKING"
+            itineraire_url=generate_google_maps_itineraire_url(
+                latitude, longitude, displayed_acteur
+            )
         )
 
     return render(request, "qfdmo/acteur.html", context)

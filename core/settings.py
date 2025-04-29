@@ -149,6 +149,12 @@ CACHES = {
 X_FRAME_OPTIONS = "ALLOWALL"
 
 if DEBUG:
+    # FIXME: A CSRF error can occur locally when using HTTPS.
+    # It is not clear yet what causes it, it might be http host headers
+    # being wrongly set when using nginx. The current workaround impacts
+    # only local development and can be considered harmless, but this
+    # might be nice to remove this setting someday.
+    CSRF_TRUSTED_ORIGINS = [config["BASE_URL"] for config in [ASSISTANT, LVAO]]
     INSTALLED_APPS.extend(["debug_toolbar", "django_browser_reload"])
     MEDIA_ROOT = "media"
     MEDIA_URL = "/media/"
@@ -441,6 +447,7 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = decouple.config(
 
 # Wagtail settings
 # ----------------
+SILENCED_SYSTEM_CHECKS = ["wagtailadmin.W002"]
 WAGTAIL_SITE_NAME = "Longue vie aux objets"
 WAGTAILADMIN_BASE_URL = BASE_URL
 INSTALLED_APPS.extend(

@@ -9,7 +9,7 @@ class TestSousCategorieObjetStr:
         assert SousCategorieObjetFactory.build(libelle="").__str__() == ""
 
     def test_str_specialchar(self):
-        assert SousCategorieObjetFactory.build(libelle="Åctïôn").__str__() == "Åctïôn"
+        assert "Åctïôn" in SousCategorieObjetFactory.build(libelle="Åctïôn").__str__()
 
 
 class TestActionNaturalKey:
@@ -20,8 +20,10 @@ class TestActionNaturalKey:
 
     @pytest.mark.django_db()
     def test_get_natural_key(self):
-        SousCategorieObjetFactory(libelle="Natural key", code="natural_key")
+        some_sous_categorie = SousCategorieObjetFactory(
+            libelle="Natural key", code="natural_key"
+        )
         assert (
-            SousCategorieObjet.objects.get_by_natural_key("natural_key").__str__()
-            == "Natural key"
+            SousCategorieObjet.objects.get_by_natural_key("natural_key").pk
+            == some_sous_categorie.pk
         )

@@ -1,8 +1,6 @@
 @import "npm:leaflet/dist/leaflet.css";
-
-@import "../css/base.css";
-@import "../css/leaflet-overrides.css";
-@import "../css/dsfr-overrides.css";
+@import "./leaflet-overrides.css";
+@import "./dsfr-overrides.css";
 
 @tailwind base;
 @tailwind components;
@@ -52,15 +50,18 @@ Style the autocomplete container:
 }
 
 .map-grid {
-  @apply qf-min-h-screen md:qf-grid qf-gap-0;
+  @apply max-md:qf-flex qf-flex-col;
+  @apply qf-overflow-hidden qf-h-full md:qf-grid qf-gap-0;
   @apply qf-grid-flow-row-dense;
   @apply qf-transition-[grid-template-columns] qf-ease-in qf-duration-200;
-  grid-template-columns: auto var(--sidebar-width);
-  grid-template-rows: var(--header-height) 1.5fr var(--footer-height);
-  grid-template-areas:
-    "header header"
-    "map detail"
-    "footer footer";
+  @media (min-width: 768px) {
+    grid-template-columns: auto var(--sidebar-width);
+    grid-template-rows: var(--header-height) 1.5fr var(--footer-height);
+    grid-template-areas:
+      "header header"
+      "map detail"
+      "footer footer";
+  }
 
   &:has(> aside[aria-hidden="false"]) {
     @apply qf-ease-out;
@@ -88,11 +89,28 @@ Style the autocomplete container:
   --footer-height: 0;
   --sidebar-width: 0;
   --header-height: 120px;
+  --footer-height: 0;
+  --base-header-height: 117px;
+  --legend-buttons-height: 40px;
+
+  /* keep max width value in sync with tailwind breakpoints config */
+  @media (min-width: 768px) {
+    --header-height: var(--base-header-height);
+  }
 }
 
 :root[data-legend-hidden] {
+  /* keep max width value in sync with tailwind breakpoints config */
   @media (max-width: 768px) {
-    --header-height: 72px;
+    --header-height: var(--base-header-height);
+  }
+}
+
+:root[data-no-branding] {
+  --base-header-height: 105px;
+  --header-height: var(--base-header-height);
+  @media (max-width: 1024px) {
+    --header-height: calc(var(--legend-buttons-height) + var(--base-header-height));
   }
 }
 

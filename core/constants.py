@@ -15,7 +15,9 @@ CARTE = {
     "partage": {
         "titre": "{NOM} : L’ADEME partage ses bonnes adresses",
         "corps": "J’ai trouvé une bonne adresse {NOM} grâce à l’ADEME : {URL}",
-    }
+    },
+    "ajouter_un_lieu": "Ajouter un lieu sur la carte",
+    "nouvelle_recherche_dans_cette_zone": "Nouvelle recherche dans cette zone",
 }
 
 ASSISTANT = {
@@ -43,4 +45,5 @@ ASSISTANT = {
         "lien": "https://www.ecologie.gouv.fr/info-tri",
         "texte_du_lien": "En savoir plus sur l’Info-tri",
     },
+    "nouvelle_recherche": "Nouvelle recherche",
 }

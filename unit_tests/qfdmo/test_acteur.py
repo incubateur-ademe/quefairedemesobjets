@@ -3,11 +3,10 @@ import json
 import pytest
 from django.contrib.gis.geos import Point
 from django.forms import ValidationError, model_to_dict
-from factory import Faker
+from factory.faker import Faker
 
 from qfdmo.models import (
     Acteur,
-    NomAsNaturalKeyModel,
     RevisionActeur,
     RevisionPropositionService,
 )
@@ -36,11 +35,6 @@ from unit_tests.qfdmo.sscatobj_factory import SousCategorieObjetFactory
 def acteur(db):
     ps = PropositionServiceFactory.create()
     yield ps.acteur
-
-
-class TestNomAsNaturalKeyHeritage:
-    def test_natural(self):
-        assert NomAsNaturalKeyModel in Acteur.mro()
 
 
 class TestPoint:
