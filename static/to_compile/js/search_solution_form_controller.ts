@@ -107,10 +107,6 @@ export default class extends Controller<HTMLElement> {
     this.acteurDetailsPanelTarget.addEventListener("touchmove", (event) =>
       event.stopPropagation(),
     )
-
-    if (!this.isIframeValue) {
-      this.scrollToContent()
-    }
   }
 
   #setActiveActeur(event?: HashChangeEvent) {
