@@ -6,6 +6,7 @@ from sources.tasks.transform.transform_column import (
     clean_acteur_type_code,
     clean_code_list,
     clean_code_postal,
+    clean_horaires_osm,
     clean_number,
     clean_public_accueilli,
     clean_reprise,
@@ -336,6 +337,24 @@ class TestCleanCodePostal:
     )
     def test_clean_code_postal(self, cp, expected_cp):
         assert clean_code_postal(cp, None) == expected_cp
+
+
+class TestCleanHorairesOsm:
+    @pytest.mark.parametrize(
+        "horaires_osm, expected_horaires_osm",
+        [
+            ("", ""),
+            ("12h30-15h30", "12:30-15:30"),
+            ("Mo-Fr 12h30-15h30,16h30-18h30", "Mo-Fr 12:30-15:30,16:30-18:30"),
+            (
+                "Mo-Fr 12h30-15h30,16h30-18h30 ; We 12h30-15h30",
+                "Mo-Fr 12:30-15:30,16:30-18:30 ; We 12:30-15:30",
+            ),
+            ("fake", ""),
+        ],
+    )
+    def test_clean_horaires_osm(self, horaires_osm, expected_horaires_osm):
+        assert clean_horaires_osm(horaires_osm, None) == expected_horaires_osm
 
 
 class TestCleanSousCategorieCodes:

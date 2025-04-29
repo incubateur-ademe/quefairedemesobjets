@@ -3,6 +3,7 @@ import re
 from typing import Any
 
 import pandas as pd
+from opening_hours import OpeningHours, ParserError
 from sources.config import shared_constants as constants
 from sources.tasks.airflow_logic.config_management import DAGConfig
 from sources.tasks.transform.opening_hours import interprete_opening_hours
@@ -172,7 +173,13 @@ def clean_horaires_osm(horaires_osm: str | None, _) -> str:
         return ""
     # sometimes, hours are writen HHhMM instead of HH:MM
     # replace h using regex
-    return re.sub(r"(\d{2})h(\d{2})", r"\1:\2", horaires_osm)
+    horaires_osm = re.sub(r"(\d{2})h(\d{2})", r"\1:\2", horaires_osm)
+    try:
+        OpeningHours(horaires_osm)
+    except ParserError as e:
+        logger.warning(f"Error parsing opening hours: {e}")
+        return ""
+    return horaires_osm
 
 
 def clean_code_list(codes: str | None, _) -> list[str]:
