@@ -134,7 +134,7 @@ class Produit(index.Indexed, AbstractBaseProduit):
 
     @cached_property
     def url_carte_bon_etat(self):
-        actions = "preter|louer|mettreenlocation|donner|echanger|revendre"
+        actions = "preter|mettreenlocation|donner|echanger|revendre"
         return self.get_url_carte(actions)
 
     @cached_property
