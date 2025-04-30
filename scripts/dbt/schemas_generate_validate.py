@@ -7,7 +7,7 @@ from pathlib import Path
 
 import yaml
 from rich import print
-from rich.prompt import Prompt
+from rich.prompt import Confirm, Prompt
 from rich.traceback import install
 from sqlalchemy import inspect
 
@@ -52,6 +52,7 @@ def dbt_manifest_to_models() -> list[dict]:
 
 def dbt_model_schema_process(engine, model: dict):
     """Generate, validate and update a dbt model schema"""
+    print(f"\n🤖 Processing {model['name']=}")
 
     # Get DB columns
     inspector = inspect(engine)
@@ -68,6 +69,8 @@ def dbt_model_schema_process(engine, model: dict):
     path_schemas = (
         DIR_DBT_MODELS / "/".join(model["path"].split("/")[:-1]) / "schema.yml"
     )
+    print("- SQL:", model["path"])
+    print("- Schema:", path_schemas.relative_to(DIR_ROOT))
     # TODO: below could be replaced with automation to create schema w/ template
     assert path_schemas.exists(), f"Schema manquant: {path_schemas}"
     if path_schemas.exists():
@@ -85,15 +88,30 @@ def dbt_model_schema_process(engine, model: dict):
 
 
 if __name__ == "__main__":
+    print("=" * 50 + "\nDBT schemas generation\n" + "=" * 50)
+    print(
+        (
+            "First do a 'dbt run' on whichever dbt models\n"
+            "you want to update so they exist in DB and\n"
+            "the script can compare vs. dbt schemas"
+        )
+    )
+    if not Confirm.ask("Continue?"):
+        raise SystemExit
+
     # Ensuring DB connection OK before doing anything else
     engine = django_conn_to_sqlalchemy_engine()
 
     # Getting (and optionally filtering) DBT models
-    ask = "dbt model name pattern (none=*)"
-    model_pattern = Prompt.ask(ask, default="base_ban")
+    ask = "\ndbt model name pattern (none=*)"
+    model_pattern = Prompt.ask(ask, default=None)
     models = dbt_manifest_to_models()
     if model_pattern:
         models = [x for x in models if re.search(model_pattern, x["name"])]
+    model_names = [x["name"] for x in models]
+    print(model_names)
+    if not Confirm.ask(f"Process above {len(model_names)} models?"):
+        raise SystemExit
 
     # Processing each model
     for model in models:
