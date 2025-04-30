@@ -32,5 +32,6 @@ class ChangeActeurUpdateData(ChangeActeurAbstract):
             )
         data = data_reconstruct(RevisionActeur, self.data)
         for key, value in data.items():
+            print(f"update_data: {key=} {value=}")
             setattr(acteur, key, value)
         acteur.save()

@@ -35,29 +35,24 @@ class ChangeActeurCreateAsChild(BaseModel):
         from qfdmo.models import Acteur, RevisionActeur
 
         # Ensure parent exists in RevisionActeur
-        parent = RevisionActeur.objects.get(pk=self.data["parent"])
+        if self.data["parent"]:
+            RevisionActeur.objects.get(pk=self.data["parent"])
 
         # Reconstruct data from RevisionActeur
         data = data_reconstruct(RevisionActeur, self.data)
 
+        # Consequence of mixing modification and presentation
+        # data in suggestions to have it visible in Django Admin
+        # FIXME: change Django Admin so it can show live acteur data
+        # and reduce pydantic data to only reflect changes to be made
+        if "identifiant_unique" in data:
+            del data["identifiant_unique"]
         # Create child in Acteur to hold data
         data_base = data.copy()
         del data_base["parent"]
         del data_base["parent_reason"]
-        # TODO: if we flatten our pydantic models, then we wouldn't
-        if "identifiant_unique" in data_base:
-            del data_base["identifiant_unique"]
-        Acteur.objects.create(
-            identifiant_unique=self.id,
-            **data_base,
-        )
+        Acteur.objects.create(identifiant_unique=self.id, **data_base)
 
         # Create child in RevisionActeur to hold reference to parent
-        RevisionActeur.objects.create(
-            identifiant_unique=self.id,
-            parent_reason=data["parent_reason"],
-            parent=parent,
-            statut="ACTIF",
-            source=data["source"],
-            acteur_type=data["acteur_type"],
-        )
+        print(f"Creating child in RevisionActeur: {data}")
+        RevisionActeur.objects.create(**data)

@@ -47,10 +47,11 @@ class TestChangeActeurCreateAsChild:
                 "nom": "my child1",
                 "source": source,
                 "acteur_type": atype,
-                "statut": "ACFIF",
+                "statut": "ACTIF",
                 "location": Point(1, 1),
                 "parent": parent,
                 "parent_reason": "test",
+                "identifiant_externe": "test_ext",
             },
         )
         change.apply()
@@ -61,12 +62,13 @@ class TestChangeActeurCreateAsChild:
         assert base.nom == "my child1"
         assert base.source.pk == source.pk
         assert base.acteur_type.pk == atype.pk
-        assert base.statut == "ACFIF"
+        assert base.statut == "ACTIF"
         assert base.location.x == 1
         assert base.location.y == 1
 
         # Acteur created in revision to hold the parent reference
-        revision = RevisionActeur.objects.get(pk="child1")
+        revision = RevisionActeur.objects.get(
+            pk=f"{source.code}_{base.identifiant_externe}"
+        )
         assert revision.parent.pk == parent.pk
         assert revision.parent_reason == "test"
-        assert not revision.nom
