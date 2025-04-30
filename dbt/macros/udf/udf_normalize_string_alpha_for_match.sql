@@ -9,8 +9,7 @@
     E.g. to test this function:
     SELECT udf_normalize_string_for_match(' Héllo-Wørld! Ça va? 123 ');
  */
-DROP FUNCTION IF EXISTS {{ target.schema }}.udf_normalize_string_for_match CASCADE;
-CREATE FUNCTION {{ target.schema }}.udf_normalize_string_for_match(input_text TEXT, remove_words_smaller_size INTEGER DEFAULT 2) RETURNS TEXT AS $$
+CREATE OR REPLACE FUNCTION {{ target.schema }}.udf_normalize_string_for_match(input_text TEXT, remove_words_smaller_size INTEGER DEFAULT 2) RETURNS TEXT AS $$
 DECLARE
     normalized TEXT;
     words TEXT[];

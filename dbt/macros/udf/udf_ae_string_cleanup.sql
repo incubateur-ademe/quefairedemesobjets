@@ -6,8 +6,7 @@
     to NULL for easier processing whenever we consider
     it to be empty.
 */
-DROP FUNCTION IF EXISTS {{ target.schema }}.udf_ae_string_cleanup CASCADE;
-CREATE FUNCTION {{ target.schema }}.udf_ae_string_cleanup(val TEXT)
+CREATE OR REPLACE FUNCTION {{ target.schema }}.udf_ae_string_cleanup(val TEXT)
 RETURNS TEXT AS $$
 BEGIN
     IF TRIM(val) = '' OR TRIM(val) = '[ND]' THEN
