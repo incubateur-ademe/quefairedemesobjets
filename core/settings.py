@@ -87,9 +87,14 @@ BASE_ALLOWED_HOSTS = [
     urlparse(config.get("BASE_URL")).hostname for config in [ASSISTANT, LVAO]
 ]
 
+# Exclude empty values
 ALLOWED_HOSTS = [
-    *BASE_ALLOWED_HOSTS,
-    *decouple.config("ALLOWED_HOSTS", default="", cast=str).split(","),
+    host
+    for host in [
+        *BASE_ALLOWED_HOSTS,
+        *decouple.config("ALLOWED_HOSTS", default="", cast=str).split(","),
+    ]
+    if host
 ]
 
 # Application definition
@@ -147,6 +152,7 @@ CACHES = {
 X_FRAME_OPTIONS = "ALLOWALL"
 
 if DEBUG:
+    CSRF_TRUSTED_ORIGINS = [config["BASE_URL"] for config in [ASSISTANT, LVAO]]
     INSTALLED_APPS.extend(["debug_toolbar", "django_browser_reload"])
     MEDIA_ROOT = "media"
     MEDIA_URL = "/media/"
