@@ -53,6 +53,21 @@ def django_setup_full() -> None:
     django.setup()
 
 
+def django_conn_to_sqlalchemy_engine(using="default"):
+    """Return a SQLAlchemy engine from a Django connection"""
+    from django.db import connections
+    from sqlalchemy import create_engine
+
+    conn = connections[using]
+    conn.ensure_connection()
+    db_settings = conn.settings_dict
+    url = (
+        f"postgresql://{db_settings['USER']}:{db_settings['PASSWORD']}@"
+        f"{db_settings['HOST']}:{db_settings['PORT']}/{db_settings['NAME']}"
+    )
+    return create_engine(url)
+
+
 def django_model_fields_get(model_class, include_properties=True) -> list[str]:
     """Returns fields from Django model matching certain criteria
     to help us:

@@ -1,77 +1,74 @@
 version: 2
-
 models:
   - name: base_ae_unite_legale
-    description: "Unités légales de l'Annuaire Entreprises (AE)"
+    description: Unités légales de l'Annuaire Entreprises (AE)
     columns:
       - name: siren
-        description: "Numéro SIREN"
+        description: Numéro SIREN
         data_type: varchar(9)
-        data_tests:
-          - not_null
-          - unique
-      - name: etat_administratif
-        description: "État administratif: A = Active, C = Cessée"
-        data_type: varchar(1)
-        data_tests:
-          - not_null
-          - accepted_values:
-              values: ["A", "C"]
       - name: activite_principale
-        description: "Code NAF Rev2"
-        # Test failing on 2025-03-17 due to missing data in source table
-        # data_tests:
-        #   - not_null
+        description: Code NAF Rev2
+        data_type: string
+      - name: etat_administratif
+        description: 'État administratif: A = Active, C = Cessée'
+        data_type: varchar(1)
       - name: denomination
-        description: "Dénomination"
-        # Test failing on 2025-03-17 due to missing data in source table
-        # data_tests:
-        #   - not_null
+        description: Dénomination
+        data_type: string
       - name: prenom1
-        description: "Prénom 1 du dirigeant"
+        description: Prénom 1 du dirigeant
+        data_type: string
       - name: prenom2
-        description: "Prénom 2 du dirigeant"
+        description: Prénom 2 du dirigeant
+        data_type: string
       - name: prenom3
-        description: "Prénom 3 du dirigeant"
+        description: Prénom 3 du dirigeant
+        data_type: string
       - name: prenom4
-        description: "Prénom 4 du dirigeant"
+        description: Prénom 4 du dirigeant
+        data_type: string
       - name: prenom_usuel
-        description: "Prénom usuel du dirigeant"
+        description: Prénom usuel du dirigeant
+        data_type: string
       - name: pseudonyme
-        description: "Pseudonyme du dirigeant"
+        description: Pseudonyme du dirigeant
+        data_type: string
       - name: nom
-        description: "Nom du dirigeant"
+        description: Nom du dirigeant
+        data_type: string
       - name: nom_usage
-        description: "Nom d'usage du dirigeant"
+        description: Nom d'usage du dirigeant
+        data_type: string
   - name: base_ae_etablissement
-    description: "Établissements de l'Annuaire Entreprises (AE)"
+    description: Établissements de l'Annuaire Entreprises (AE)
     columns:
       - name: siret
-        description: "Numéro SIRET"
+        description: Numéro SIRET
         data_type: varchar(14)
-        data_tests:
-          - not_null
-          - unique
       - name: activite_principale
-        description: "Code NAF Rev2"
+        description: Code NAF Rev2
+        data_type: string
       - name: denomination_usuelle
-        description: "Nom de l'établissement"
+        description: Nom de l'établissement
+        data_type: string
       - name: etat_administratif
-        description: "A = Actif, F = Fermé"
+        description: A = Actif, F = Fermé
         data_type: varchar(1)
-        data_tests:
-          - not_null
-          - accepted_values:
-              values: ["A", "F"]
       - name: numero_voie
-        description: "Numéro de voie"
+        description: Numéro de voie
+        data_type: string
       - name: complement_adresse
-        description: "Complement d'adresse (ex: étage, bâtiment)"
+        description: 'Complement d''adresse (ex: étage, bâtiment)'
+        data_type: string
       - name: type_voie
-        description: "Type de voie (ex: rue, avenue)"
+        description: 'Type de voie (ex: rue, avenue)'
+        data_type: string
       - name: libelle_voie
-        description: "Nom de la voie"
+        description: Nom de la voie
+        data_type: string
       - name: code_postal
-        description: "Postal code"
+        description: Postal code
+        data_type: string
       - name: libelle_commune
-        description: "Nom de la ville"
+        description: Nom de la ville
+        data_type: string

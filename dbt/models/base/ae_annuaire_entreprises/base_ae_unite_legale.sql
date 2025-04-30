@@ -8,7 +8,7 @@ Notes:
 {{
   config(
     materialized = 'view',
-    tags=['intermediate', 'ae', 'annuaire_entreprises', 'unite_legale'],
+    tags=['base', 'ae', 'annuaire_entreprises', 'unite_legale'],
   )
 }}
 
