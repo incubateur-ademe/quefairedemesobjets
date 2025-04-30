@@ -20,6 +20,10 @@ qf-z-0 {# The header in Formulaire needs to be under the main tag #}
 {% endblock form_modals %}
 
 {% block content_footer %}
+<footer
+    class="max-md:qf-fixed
+    qf-bottom-0 qf-left-0 qf-right-0"
+>
     <div
         class="qf-px-2w sm:qf-px-0 qf-duration-300 sm:qf-h-fit sm:qf-mr-1w qf-flex qf-flex-row-reverse
         group-data-[search-form-visible]:qf-hidden"
@@ -36,4 +40,5 @@ qf-z-0 {# The header in Formulaire needs to be under the main tag #}
     </div>
     {# Liens de pieds de page pour iframe #}
     {% include 'qfdmo/_addresses_partials/iframe_footer_links.html' %}
+</footer>
 {% endblock content_footer %}

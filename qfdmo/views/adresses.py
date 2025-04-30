@@ -21,7 +21,7 @@ from django.views.generic.edit import FormView
 
 from core.jinja2_handler import distance_to_acteur
 from core.utils import get_direction
-from qfdmo.forms import CarteForm, FormulaireForm
+from qfdmo.forms import FormulaireForm
 from qfdmo.geo_api import bbox_from_list_of_geojson, retrieve_epci_geojson
 from qfdmo.leaflet import (
     center_from_leaflet_bbox,
@@ -520,37 +520,6 @@ class SearchActeursView(
             for groupe_option in grouped_action_choices
             if set(groupe_option[0].split("|")) & set([a.code for a in action_list])
         ]
-
-
-# TODO: move in views/carte.py
-class CarteSearchActeursView(SearchActeursView):
-    is_carte = True
-    template_name = "qfdmo/carte.html"
-    form_class = CarteForm
-
-    def get_initial(self, *args, **kwargs):
-        initial = super().get_initial(*args, **kwargs)
-        action_displayed = self._set_action_displayed()
-        grouped_action_choices = self._get_grouped_action_choices(action_displayed)
-        actions_to_select = self._get_selected_action()
-        initial["grouped_action"] = self._grouped_action_from(
-            grouped_action_choices, actions_to_select
-        )
-        # TODO : refacto forms, merge with grouped_action field
-        initial["legend_grouped_action"] = initial["grouped_action"]
-
-        initial["action_list"] = "|".join(
-            [a for ga in initial["grouped_action"] for a in ga.split("|")]
-        )
-        return initial
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update(is_carte=True)
-        return context
-
-    def _get_selected_action_ids(self):
-        return [a.id for a in self._get_selected_action()]
 
 
 class FormulaireSearchActeursView(SearchActeursView):
