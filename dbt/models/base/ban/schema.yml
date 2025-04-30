@@ -1,0 +1,73 @@
+version: 2
+models:
+  # No tests for base BAN models as they take forever
+  # to run and we will have the same on int_
+  - name: base_ban_adresses
+    description: ''
+    columns:
+      - name: adresse
+        description: adresse
+        data_type: string
+      - name: adresse_numero
+        description: adresse_numero
+        data_type: string
+      - name: ville
+        description: ville
+        data_type: string
+      - name: ville_ancienne
+        description: ville_ancienne
+        data_type: string
+      - name: code_postal
+        description: code_postal
+        data_type: string
+      - name: code_departement
+        description: code_departement
+        data_type: string
+      - name: latitude
+        description: latitude
+        data_type: string
+      - name: longitude
+        description: longitude
+        data_type: string
+  - name: base_ban_lieux_dits
+    description: ''
+    columns:
+      - description: Identifiant
+        data_type: string
+        name: id
+      - name: nom_lieu_dit
+        description: nom_lieu_dit
+        data_type: string
+      - name: code_postal
+        description: code_postal
+        data_type: string
+      - name: code_insee
+        description: code_insee
+        data_type: string
+      - name: nom_commune
+        description: nom_commune
+        data_type: string
+      - name: code_insee_ancienne_commune
+        description: code_insee_ancienne_commune
+        data_type: string
+      - name: nom_ancienne_commune
+        description: nom_ancienne_commune
+        data_type: string
+      - name: x
+        description: x
+        data_type: string
+      - name: y
+        description: y
+        data_type: string
+      - name: lon
+        description: lon
+        data_type: string
+      - name: lat
+        description: lat
+        data_type: string
+      - name: source_position
+        description: source_position
+        data_type: string
+      - name: source_nom_voie
+        description: source_nom_voie
+        data_type: string
