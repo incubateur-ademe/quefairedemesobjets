@@ -140,12 +140,6 @@ def changes_prepare_closed_replaced(
         "id": row[COLS.ACTEUR_ID],
         "data": {
             "identifiant_unique": row[COLS.ACTEUR_ID],
-            "identifiant_externe": row[COLS.ACTEUR_ID_EXTERNE],
-            "parent_reason": (
-                f"SIRET {row[COLS.ACTEUR_SIRET]} "
-                f"détecté le {today} comme fermé dans AE, "
-                f"remplacé par SIRET {row[COLS.SUGGEST_SIRET]}"
-            ),
             "siret_is_closed": True,
             "statut": ActeurStatus.INACTIF,
         },
@@ -169,17 +163,23 @@ def changes_prepare_closed_replaced(
             "identifiant_unique": child_new_id,
             "identifiant_externe": row[COLS.ACTEUR_ID_EXTERNE],
             "source": row[COLS.ACTEUR_SOURCE_ID],
+            "acteur_type": row[COLS.ACTEUR_TYPE_ID],
             "parent": row[COLS.ACTEUR_PARENT_ID],
-            "parent_reason": (
-                f"Nouvel enfant pour conserver les données suite à: "
-                f"SIRET {row[COLS.ACTEUR_SIRET]} "
-                f"détecté le {today} comme fermé dans AE, "
-                f"remplacé par SIRET {row[COLS.SUGGEST_SIRET]}, "
-                "= même parent que l'ancien enfant"
-            ),
+            "latitude": row[COLS.ACTEUR_LATITUDE],
+            "longitude": row[COLS.ACTEUR_LONGITUDE],
             "statut": ActeurStatus.ACTIF,
+            "siret": row[COLS.SUGGEST_SIRET],
+            "siren": row[COLS.SUGGEST_SIRET][:9],
         },
     }
+    # We only give a reason for the parent if there is one
+    if row[COLS.ACTEUR_PARENT_ID]:
+        child_new["data"]["parent_reason"] = (
+            f"Nouvel enfant pour conserver les données suite à: "
+            f"SIRET {row[COLS.ACTEUR_SIRET]} "
+            f"détecté le {today} comme fermé dans AE, "
+            f"remplacé par SIRET {row[COLS.SUGGEST_SIRET]}"
+        )
     changes.append(
         changes_prepare(
             model=ChangeActeurCreateAsChild,
