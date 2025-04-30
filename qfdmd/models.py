@@ -116,27 +116,6 @@ class Produit(index.Indexed, AbstractBaseProduit):
             "sous_categorie_objet": sous_categorie.libelle,
         }
 
-    def get_url_carte(self, actions=None):
-        carte_settings = self.carte_settings
-        if actions:
-            carte_settings.update(
-                action_list=actions,
-                action_displayed=actions,
-            )
-        params = urlencode(carte_settings)
-        url = reverse("qfdmo:carte")
-        return f"{url}?{params}"
-
-    @cached_property
-    def url_carte_mauvais_etat(self):
-        actions = "reparer|trier"
-        return self.get_url_carte(actions)
-
-    @cached_property
-    def url_carte_bon_etat(self):
-        actions = "preter|louer|mettreenlocation|donner|echanger|revendre"
-        return self.get_url_carte(actions)
-
     @cached_property
     def en_savoir_plus(self):
         produit_liens = (
@@ -241,6 +220,27 @@ class Synonyme(AbstractBaseProduit):
     @property
     def url(self) -> str:
         return self.get_absolute_url()
+
+    def get_url_carte(self, actions=None):
+        carte_settings = self.produit.carte_settings
+        if actions:
+            carte_settings.update(
+                action_list=actions,
+                action_displayed=actions,
+            )
+        params = urlencode(carte_settings)
+        url = reverse("qfdmd:carte", args=[self.slug])
+        return f"{url}?{params}"
+
+    @cached_property
+    def url_carte_mauvais_etat(self):
+        actions = "reparer|trier"
+        return self.get_url_carte(actions)
+
+    @cached_property
+    def url_carte_bon_etat(self):
+        actions = "preter|louer|mettreenlocation|donner|echanger|revendre"
+        return self.get_url_carte(actions)
 
     @cached_property
     def bon_etat(self) -> str:

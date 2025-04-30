@@ -27,9 +27,7 @@
     >
         <section class="map-grid">
             <header
-                class="max-md:qf-sticky qf-top-0
-                {% block header_classes %}qf-z-40{% endblock header_classes %}
-                "
+                class="{% block header_classes %}qf-z-40{% endblock header_classes %}"
             >
                 <div
                     class="
@@ -56,7 +54,7 @@
                         data-search-solution-form-target="addressesPanel"
                         class="qf-relative qf-z-10
                             qf-flex qf-flex-col
-                            qf-h-svh qf-h-screen
+                            qf-h-full
                             max-md:qf-fixed
                             max-md:qf-top-header max-md:qf-bottom-footer
                             max-md:qf-left-0 max-md:qf-right-0
@@ -98,13 +96,8 @@
                 {% include "qfdmo/carte/panels/acteur_detail.html" %}
             </aside>
 
-            <footer
-                class="max-md:qf-fixed
-                qf-bottom-0 qf-left-0 qf-right-0"
-            >
             {% block content_footer %}
             {% endblock content_footer %}
-            </footer>
         </section>
 
         {% block form_modals %}
