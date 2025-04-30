@@ -9,7 +9,6 @@ from qfdmo.views import (
     google_verification,
 )
 from qfdmo.views.adresses import (
-    CarteSearchActeursView,
     FormulaireSearchActeursView,
     acteur_detail,
     acteur_detail_redirect,
@@ -18,7 +17,7 @@ from qfdmo.views.adresses import (
     solution_admin,
 )
 from qfdmo.views.auth import LVAOLoginView
-from qfdmo.views.carte import CustomCarteView
+from qfdmo.views.carte import CarteSearchActeursView, CustomCarteView
 from qfdmo.views.configurator import AdvancedConfiguratorView, ConfiguratorView
 
 urlpatterns = [
