@@ -4,12 +4,10 @@ contains people from Annuaire Entreprise (AE)
 """
 
 from airflow import DAG
-from enrich.config import (
-    COHORTS,
-    DBT,
-    TASKS,
-    EnrichActeursClosedConfig,
-)
+from enrich.config.cohorts import COHORTS
+from enrich.config.dbt import DBT
+from enrich.config.models import EnrichActeursClosedConfig
+from enrich.config.tasks import TASKS
 from enrich.tasks.airflow_logic.enrich_config_create_task import (
     enrich_config_create_task,
 )

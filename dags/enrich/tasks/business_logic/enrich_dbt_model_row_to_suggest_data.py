@@ -1,4 +1,4 @@
-from enrich.config import SUGGEST_PREFIX
+from enrich.config.columns import SUGGEST_PREFIX
 
 
 def dbt_model_row_to_suggest_data(row: dict) -> dict:

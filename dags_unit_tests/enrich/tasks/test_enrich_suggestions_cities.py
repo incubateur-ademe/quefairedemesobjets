@@ -1,6 +1,7 @@
 import pandas as pd
 import pytest
-from enrich.config import COHORTS, COLS, EnrichActeursVillesConfig
+from enrich.config.cohorts import COHORTS
+from enrich.config.columns import COLS
 from enrich.tasks.business_logic.enrich_dbt_model_read import df_filter
 from enrich.tasks.business_logic.enrich_dbt_model_to_suggestions import (
     enrich_dbt_model_to_suggestions,
@@ -12,6 +13,8 @@ class TestEnrichSuggestionsCities:
 
     @pytest.fixture
     def config(self):
+        from enrich.config.models import EnrichActeursVillesConfig
+
         return EnrichActeursVillesConfig(
             dry_run=False,
             filter_equals__acteur_statut="ACTIF",

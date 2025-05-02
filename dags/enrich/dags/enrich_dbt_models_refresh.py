@@ -6,7 +6,7 @@ from airflow import DAG
 from airflow.models.baseoperator import chain
 from airflow.operators.bash import BashOperator
 from airflow.utils.trigger_rule import TriggerRule
-from enrich.config import EnrichDbtModelsRefreshConfig
+from enrich.config.models import EnrichDbtModelsRefreshConfig
 from shared.config import CATCHUPS, SCHEDULES, START_DATES, config_to_airflow_params
 
 with DAG(

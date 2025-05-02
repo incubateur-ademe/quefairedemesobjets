@@ -5,7 +5,8 @@ import pandas as pd
 from cluster.tasks.business_logic.cluster_acteurs_parents_choose_new import (
     parent_id_generate,
 )
-from enrich.config import COHORTS, COLS
+from enrich.config.cohorts import COHORTS
+from enrich.config.columns import COLS
 from enrich.tasks.business_logic.enrich_dbt_model_row_to_suggest_data import (
     dbt_model_row_to_suggest_data,
 )

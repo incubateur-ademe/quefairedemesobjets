@@ -1,12 +1,10 @@
 """DAG to suggestion city corrections based on BAN data"""
 
 from airflow import DAG
-from enrich.config import (
-    COHORTS,
-    DBT,
-    TASKS,
-    EnrichActeursVillesConfig,
-)
+from enrich.config.cohorts import COHORTS
+from enrich.config.dbt import DBT
+from enrich.config.models import EnrichActeursVillesConfig
+from enrich.config.tasks import TASKS
 from enrich.tasks.airflow_logic.enrich_config_create_task import (
     enrich_config_create_task,
 )
