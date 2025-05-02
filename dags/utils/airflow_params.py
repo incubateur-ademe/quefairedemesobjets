@@ -15,6 +15,7 @@ django_setup_full()
 ID_PREFIX = "id="
 
 
+# TODO: legacy clustering, delete and use last function instead (values_display)
 def airflow_params_dropdown_from_mapping(mapping: dict[str, int]) -> list[str]:
     """Turns a {code:id} mapping into a list of "{code} (id={ID})
     strings to use in Airflow Params UI"""
@@ -24,23 +25,7 @@ def airflow_params_dropdown_from_mapping(mapping: dict[str, int]) -> list[str]:
     return list(f"{code} ({ID_PREFIX}{id})" for code, id in mapping.items())
 
 
-def airflow_params_dropdown_codes_to_ids(model_name: str) -> dict[str, str]:
-    """Returns a mapping of {code (id=id)} -> id so it can be used in Airflow Params UI:
-    - keys = used in Param.examples = what user sees/selects
-    - values = used in Param.values_display = converts selections back to ids"""
-    from qfdmo.models import ActeurType, Source
-
-    models = {
-        "Source": Source,
-        "ActeurType": ActeurType,
-    }
-    entries = models[model_name].objects.all()
-    return {
-        str(id): f"{code} ({ID_PREFIX}{id})"
-        for id, code in entries.values_list("id", "code")
-    }
-
-
+# TODO: legacy clustering, delete and use last function instead (values_display)
 def airflow_params_dropdown_selected_to_ids(
     mapping_ids_by_codes: dict[str, int],
     dropdown_selected: list[str],
@@ -62,3 +47,20 @@ def airflow_params_dropdown_selected_to_ids(
     if missing:
         raise ValueError(f"Codes non trouvés dans le mapping: {missing}")
     return [mapping_ids_by_codes[x] for x in codes]
+
+
+def airflow_params_dropdown_codes_to_ids(model_name: str) -> dict[str, str]:
+    """Returns a mapping of {code (id=id)} -> id so it can be used in Airflow Params UI:
+    - keys = used in Param.examples = what user sees/selects
+    - whole dict = used in Param.values_display = converts selections back to ids"""
+    from qfdmo.models import ActeurType, Source
+
+    models = {
+        "Source": Source,
+        "ActeurType": ActeurType,
+    }
+    entries = models[model_name].objects.all()
+    return {
+        str(id): f"{code} ({ID_PREFIX}{id})"
+        for id, code in entries.values_list("id", "code")
+    }
