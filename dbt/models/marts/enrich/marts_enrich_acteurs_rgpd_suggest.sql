@@ -34,6 +34,8 @@ WITH acteurs_with_siren AS (
 ), unite_matching_acteurs_on_siren AS (
 	SELECT
 		acteurs.id AS acteur_id,
+		acteurs.acteur_type_id AS acteur_type_id,
+		acteurs.source_id AS acteur_source_id,
 		acteurs.siren AS acteur_siren,
 		acteurs.noms_origine AS acteur_noms_origine,
 		acteurs.noms_normalises AS acteur_noms_normalises,

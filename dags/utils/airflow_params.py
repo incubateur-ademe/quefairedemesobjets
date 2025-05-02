@@ -1,53 +1,52 @@
-"""Utilitaires pour travailler avec les Params UI Airflow.
+"""Utilities to work with Airflow UI params.
 https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/params.html
+
+🔴 Beware of performance impact, see min_file_process_interval
+https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html#config-scheduler-min-file-process-interval
+https://airflow.apache.org/docs/apache-airflow/stable/best-practices.html#top-level-python-code
 """
 
 import re
+
+from utils.django import django_setup_full
+
+django_setup_full()
 
 ID_PREFIX = "id="
 
 
 def airflow_params_dropdown_from_mapping(mapping: dict[str, int]) -> list[str]:
-    """Transforme un mapping de codes à IDs en dropdowns pour Airflow
-    avec le format "{code} (id={ID})". L'inclusion des IDs est utile
-    pour:
-        - chercher par ID
-        - confirmer qu'on a bien sélectionné le bon code (parfois les codes
-            se ressemblent et les IDs enlèvent l'ambiguïté)
-
-    Args:
-        mapping (dict[str, int]): Mapping entre les codes et les IDs
-
-    Returns:
-        list[str]: Dropdowns pour Airflow
-    """
+    """Turns a {code:id} mapping into a list of "{code} (id={ID})
+    strings to use in Airflow Params UI"""
     ids = list(mapping.values())
     if len(ids) != len(set(ids)):
         raise ValueError("Mapping invalide avec des IDs en doublon")
     return list(f"{code} ({ID_PREFIX}{id})" for code, id in mapping.items())
 
 
+def airflow_params_dropdown_codes_to_ids(model_name: str) -> dict[str, str]:
+    """Returns a mapping of {code (id=id)} -> id so it can be used in Airflow Params UI:
+    - keys = used in Param.examples = what user sees/selects
+    - values = used in Param.values_display = converts selections back to ids"""
+    from qfdmo.models import ActeurType, Source
+
+    models = {
+        "Source": Source,
+        "ActeurType": ActeurType,
+    }
+    entries = models[model_name].objects.all()
+    return {
+        str(id): f"{code} ({ID_PREFIX}{id})"
+        for id, code in entries.values_list("id", "code")
+    }
+
+
 def airflow_params_dropdown_selected_to_ids(
     mapping_ids_by_codes: dict[str, int],
     dropdown_selected: list[str],
 ) -> list[int]:
-    """Récupère les IDs correspondants aux valeurs
-    sélectionnées dans un dropdown Params UI Airflow
-    "{code} (id={ID})" => extrait le {code} => trouve l'ID correspondant
-    via le mapping.
-
-    Ceci permet de vérifier que les valeurs sélectionnées sont valides
-    sans prendre le risque de faire confiance naïvement à l'ordonnencement
-    des valeurs dans le dropdown qu'on ne maitrise pas.
-
-    Args:
-        mapping_id_by_code (dict[str, int]): Mapping entre les codes et les IDs
-        dropdown_all (list[str]): Toutes les valeurs possibles du dropdown
-        dropdown_selected (list[str]): Valeurs sélectionnées dans le dropdown
-
-    Returns:
-        list[int]: IDs correspondant aux valeurs sélectionnées
-    """
+    """Retrieves IDs from selected dropdown values generated
+    via airflow_params_dropdown_from_mapping"""
     if not dropdown_selected:
         return []
     invalid = [x for x in dropdown_selected if ID_PREFIX not in x]
