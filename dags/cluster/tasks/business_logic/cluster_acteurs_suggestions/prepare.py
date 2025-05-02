@@ -17,7 +17,6 @@ def cluster_changes_get(cluster: pd.DataFrame) -> list[dict]:
         COL_CHANGE_ENTITY_TYPE,
         COL_CHANGE_MODEL_NAME,
         COL_CHANGE_MODEL_PARAMS,
-        COL_CHANGE_NAMESPACE,
         COL_CHANGE_ORDER,
         COL_CHANGE_REASON,
         SuggestionChange,
@@ -31,13 +30,16 @@ def cluster_changes_get(cluster: pd.DataFrame) -> list[dict]:
     )
     from qfdmo.models.acteur import RevisionActeur
 
+    # Building changes for each acteur in the cluster
     changes = []
     for _, row in cluster.iterrows():
+
+        # Common params
         row = row.to_dict()
         model_name = row[COL_CHANGE_MODEL_NAME]
-        # All acteur-related changes have an "identifiant_unique"
         model_params = {"id": row["identifiant_unique"]}
-        # Then params data depends on the type of changes
+
+        # Params specific to the type of change
         if model_name == ChangeActeurUpdateParentId.name():
             model_params["data"] = {"parent_id": row["parent_id"]}
         elif model_name in [
@@ -46,11 +48,9 @@ def cluster_changes_get(cluster: pd.DataFrame) -> list[dict]:
         ]:
             model_params["data"] = row[COL_PARENT_DATA_NEW]
         elif model_name == ChangeActeurVerifyRevision.name():
-            # no extra params to pass for this one
-            pass
+            pass  # no additional param, we just check presence
         elif model_name == ChangeActeurDeleteAsParent.name():
-            # to delete parents we already have their id
-            pass
+            pass  # no additional param, we just delete using id
         else:
             raise ValueError(f"Unexpected model_name: {model_name}")
 
@@ -60,21 +60,20 @@ def cluster_changes_get(cluster: pd.DataFrame) -> list[dict]:
 
         # Validation
         row[COL_CHANGE_MODEL_PARAMS] = model_params
-        change = {
-            x.replace(COL_CHANGE_NAMESPACE, ""): row[x]
-            for x in [
-                COL_CHANGE_ORDER,
-                COL_CHANGE_REASON,
-                COL_CHANGE_ENTITY_TYPE,
-                COL_CHANGE_MODEL_NAME,
-                COL_CHANGE_MODEL_PARAMS,
-            ]
-        }
         try:
+            change = {
+                "order": row[COL_CHANGE_ORDER],
+                "reason": row[COL_CHANGE_REASON],
+                "entity_type": row[COL_CHANGE_ENTITY_TYPE],
+                "model_name": row[COL_CHANGE_MODEL_NAME],
+                "model_params": row[COL_CHANGE_MODEL_PARAMS],
+            }
             SuggestionChange(**change)
         except Exception as e:
             log.preview("🔴 Broken change", change)
             raise e
+
+        # Appending
         changes.append(change)
     return changes
 
@@ -92,12 +91,10 @@ def cluster_acteurs_suggestions_prepare(
         # whenever we encounter issues
         try:
             changes = cluster_changes_get(cluster)
-            suggestion = {"cluster_id": cluster_id, "changes": changes}
-            cluster_id = suggestion["cluster_id"]
+            title = "📦 Cluster/dédup"
+            suggestion = {"title": title, "cluster_id": cluster_id, "changes": changes}
             df_changes = pd.DataFrame(suggestion["changes"])
-            log.preview_df_as_markdown(
-                f"Suggestion pour cluster_id={cluster_id}", df_changes
-            )
+            log.preview_df_as_markdown(f"Suggestion pour {cluster_id=}", df_changes)
             working.append(suggestion)
         except Exception:
             import traceback

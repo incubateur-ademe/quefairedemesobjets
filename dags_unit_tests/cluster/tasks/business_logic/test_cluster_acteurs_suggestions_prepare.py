@@ -142,10 +142,7 @@ class TestClusterActeursSuggestionsDisplay:
     def test_structure_and_type(self, working):
         assert isinstance(working, list)
         assert isinstance(working[0], dict)
-        assert list(working[0].keys()) == ["cluster_id", "changes"]
-        assert isinstance(working[0]["cluster_id"], str)
-        assert isinstance(working[0]["changes"], list)
-        assert isinstance(working[0]["changes"][0], dict)
+        assert list(working[0].keys()) == ["title", "cluster_id", "changes"]
 
     def test_one_suggestion_per_cluster(self, df_clusters, working):
         # 1 suggestion per cluster EXCEPT for failing c4

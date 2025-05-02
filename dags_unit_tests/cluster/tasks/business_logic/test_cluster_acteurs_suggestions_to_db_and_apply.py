@@ -320,7 +320,7 @@ class TestClusterActeursSuggestionsToDb:
         # Going through each suggestion to test its content
         cluster_ids_found = set()
         for s in suggestions_from_db:
-            cluster_id = s.suggestion["cluster_id"]
+            cluster_id = s.contexte["cluster_id"]
             changes = s.suggestion["changes"]
             cluster_ids_found.add(cluster_id)
 

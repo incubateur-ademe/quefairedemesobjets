@@ -2,7 +2,7 @@ import logging
 
 import pandas as pd
 from crawl.config.columns import COLS
-from crawl.config.constants import LABEL_SCENARIO, LABEL_URL_ORIGINE, LABEL_URL_PROPOSEE
+from crawl.config.constants import LABEL_URL_ORIGINE, LABEL_URL_PROPOSEE
 from utils import logging_utils as log
 from utils.dataframes import (
     df_col_assert_get_unique,
@@ -70,14 +70,11 @@ def suggestions_prepare(
         suggestions.append(
             {
                 "contexte": {
-                    LABEL_SCENARIO: row[COLS.COHORT],
                     LABEL_URL_ORIGINE: url_original,
                     LABEL_URL_PROPOSEE: url_proposed,
                 },
                 "suggestion": {
-                    "scenario": row[COLS.COHORT],
-                    "url_original": url_original,
-                    "url_proposed": url_proposed,
+                    "title": row[COLS.COHORT],
                     "changes": changes,
                 },
             }
@@ -86,9 +83,9 @@ def suggestions_prepare(
     logging.info(log.banner_string(f"🏁 Résultat pour {cohorte=}"))
     logger.info(f"Suggestion générées: {len(suggestions)}")
     for s in suggestions:
-        scenario = s["contexte"]["Scénario"]
+        title = s["suggestion"]["title"]
         url = s["contexte"][LABEL_URL_ORIGINE]
-        log.preview(f"{scenario}: {url=}", s)
+        log.preview(f"{title}: {url=}", s)
 
     return suggestions
 
@@ -99,14 +96,7 @@ def crawl_urls_suggestions_to_db(
     identifiant_action: str,
     identifiant_execution: str,
 ) -> None:
-    """Writing suggestions to DB
-
-    Args:
-        df_clusters (pd.DataFrame): clusters for metadata purposes
-        suggestions (list[dict]): suggestions, 1 per cluster
-        identifiant_action (str): ex: Airflow dag_id
-        identifiant_execution (str): ex: Airflow run_id
-    """
+    """Writing suggestions to DB"""
 
     logger.info(f"{identifiant_action=}")
     logger.info(f"{identifiant_execution=}")

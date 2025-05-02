@@ -11,6 +11,8 @@ from enrich.tasks.business_logic.enrich_dbt_model_row_to_suggest_data import (
 )
 from utils import logging_utils as log
 
+from data.models.changes.acteur_rgpd_anonymize import rgpd_data_get
+
 logger = logging.getLogger(__name__)
 
 
@@ -55,7 +57,12 @@ def changes_prepare_villes(row: dict) -> tuple[list[dict], dict]:
             entity_type="acteur_displayed",
         )
     )
-    contexte = {}  # changes are self-explanatory
+    contexte = {
+        "statut": row[COLS.ACTEUR_STATUT],
+        "adresse": row[COLS.ACTEUR_ADRESSE],
+        "ville": row[COLS.ACTEUR_VILLE],
+        "code_postal": row[COLS.ACTEUR_CODE_POSTAL],
+    }
     return changes, contexte
 
 
@@ -68,6 +75,7 @@ def changes_prepare_rgpd(
     changes = []
     model_params = {
         "id": row[COLS.ACTEUR_ID],
+        "data": rgpd_data_get(),
     }
     changes.append(
         changes_prepare(
@@ -96,7 +104,6 @@ def changes_prepare_closed_not_replaced(
     model_params = {
         "id": row[COLS.ACTEUR_ID],
         "data": {
-            "identifiant_unique": row[COLS.ACTEUR_ID],
             "statut": ActeurStatus.INACTIF,
             "siret": row[COLS.ACTEUR_SIRET],
             "siren": row[COLS.ACTEUR_SIRET][:9],
@@ -134,7 +141,6 @@ def changes_prepare_closed_replaced(
     # Parent
     parent_id = parent_id_generate([str(row[COLS.SUGGEST_SIRET])])
     parent_data = dbt_model_row_to_suggest_data(row)
-    parent_data["identifiant_unique"] = parent_id
     parent_data["source"] = None
     parent_data["statut"] = ActeurStatus.ACTIF
     params_parent = {
@@ -158,7 +164,6 @@ def changes_prepare_closed_replaced(
     child_new_id = f"{row[COLS.ACTEUR_ID]}_{row[COLS.ACTEUR_SIRET]}_{now}"
     params_child_new = params_parent.copy()
     params_child_new["id"] = child_new_id
-    params_child_new["data"]["identifiant_unique"] = child_new_id
     params_child_new["data"]["source"] = row[COLS.ACTEUR_SOURCE_ID]
     params_child_new["data"]["parent"] = parent_id
     params_child_new["data"]["parent_reason"] = (
@@ -180,7 +185,6 @@ def changes_prepare_closed_replaced(
     # Existing Child
     params_child_old = params_child_new.copy()
     params_child_old["id"] = row[COLS.ACTEUR_ID]
-    params_child_old["data"]["identifiant_unique"] = row[COLS.ACTEUR_ID]
     params_child_old["data"]["parent"] = parent_id
     params_child_old["data"]["parent_reason"] = (
         f"SIRET {row[COLS.ACTEUR_SIRET]} "

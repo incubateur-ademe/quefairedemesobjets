@@ -8,6 +8,62 @@
 
 {% block suggestion_details %}
 
+{# To dynamically display other info other than title/changes #}
+{% for key, value in suggestion.items %}
+    {% if key != "changes" and key != "title" %}
+        <p>{{ key }}: {% include "data/_partials/value_details.html" with key=key value=value %}</p>
+    {% endif %}
+{% endfor %}
+
 <h3 style="margin-top: 1.5em">🔢 {{ changes|length }} acteur(s) impacté(s):</h3>
-{% include "data/_partials/dicts_to_table.html" with data=changes %}
+<style>
+    .suggestion-changes-table {
+        width: 100%;
+        table-layout: fixed;
+    }
+    .suggestion-changes-table th, .suggestion-changes-table td {
+        text-align: left;
+        word-break: break-all;
+    }
+</style>
+<table class="suggestion-changes-table">
+    <colgroup>
+        <col style="width: 5%">
+        <col style="width: 10%">
+        <col style="width: 15%">
+        <col style="width: 30%">
+        <col style="width: 40%">
+    </colgroup>
+    <thead>
+        <tr>
+            {# SuggestionChange.order #}
+            <th>Ordre</th>
+            {# SuggestionChange.reason #}
+            <th>Raison</th>
+            {# SuggestionChange.model_name #}
+            <th>Modèle</th>
+            {% comment %}
+                SuggestionChange.entity_type is not displayed because it is the
+                because it is the model's job to determine
+                which acteur tables are to be updated
+                # TODO: remove entity_type from SuggestionChange
+            {% endcomment %}
+            {# SuggestionChange.model_params.id #}
+            <th>ID</th>
+            {# SuggestionChange.model_params.data #}
+            <th>Changements</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for change in changes %}
+    <tr>
+        <td>{{ change.order }}</td>
+        <td>{{ change.reason }}</td>
+        <td>{{ change.model_name }}</td>
+        <td>{% include "data/_partials/value_details.html" with key="id" value=change.model_params.id %}</td>
+        <td>{% include "data/_partials/value_details.html" with key="data" value=change.model_params.data %}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
 {% endblock suggestion_details %}

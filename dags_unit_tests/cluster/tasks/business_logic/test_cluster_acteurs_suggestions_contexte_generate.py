@@ -44,13 +44,7 @@ class TestSuggestionContexteGenerate:
     def test_working_structure(self, working, df_cluster):
         assert isinstance(working, dict)
         assert sorted(list(working.keys())) == sorted(
-            [
-                # By definition there is only 1 exact match
-                # per cluster
-                "exact_match",
-                # And multiple fuzzy entries
-                "fuzzy_details",
-            ]
+            ["cluster_id", "exact_match", "fuzzy_details"]
         )
         # Parent to be created should not be in fuzzy details
         assert len(working["fuzzy_details"]) == len(df_cluster) - 1
