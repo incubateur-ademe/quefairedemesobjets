@@ -18,17 +18,11 @@ def cluster_acteurs_suggestions_to_db(
     suggestions: list[dict],
     identifiant_action: str,
     identifiant_execution: str,
+    # For context purposes only
     cluster_fields_exact: list[str],
     cluster_fields_fuzzy: list[str],
 ) -> None:
-    """Writing suggestions to DB
-
-    Args:
-        df_clusters (pd.DataFrame): clusters for metadata purposes
-        suggestions (list[dict]): suggestions, 1 per cluster
-        identifiant_action (str): ex: Airflow dag_id
-        identifiant_execution (str): ex: Airflow run_id
-    """
+    """Writing suggestions to DB"""
 
     logger.info(f"{identifiant_action=}")
     logger.info(f"{identifiant_execution=}")
@@ -50,6 +44,10 @@ def cluster_acteurs_suggestions_to_db(
     cohorte.save()
 
     for sugg_dict in suggestions:
+        # TODO: refactor this DAG to generate suggestions & context
+        # at the same time like we do for latest DAGs (BAN, AE etc..)
+        # which would allow getting all data from context and not mismatch
+        # context & changes
         cluster_id = sugg_dict["cluster_id"]
         logging.info(f"suggestion {cluster_id=}")
         df_cluster = df_clusters[df_clusters["cluster_id"] == cluster_id]
@@ -62,10 +60,6 @@ def cluster_acteurs_suggestions_to_db(
         sugg_obj = Suggestion(
             suggestion_cohorte=cohorte,
             statut=SuggestionStatut.AVALIDER,
-            # FIXME:
-            # This is causing serialization issues due to certain values
-            # being of Django type (e.g. ActeurType)
-            # contexte=cluster.to_dict(orient="records"),
             contexte=suggestion_context_generate(
                 df_cluster=df_cluster,
                 cluster_fields_exact=cluster_fields_exact,

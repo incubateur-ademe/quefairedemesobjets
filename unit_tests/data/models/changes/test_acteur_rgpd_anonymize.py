@@ -45,11 +45,6 @@ class TestChangeActeurRgpdAnonymize:
     def test_name(self):
         assert ChangeActeurRgpdAnonymize.name() == "acteur_rgpd_anonymize"
 
-    def test_raise_if_data_provided(self):
-        change = ChangeActeurRgpdAnonymize(id="dummy", data={"nom": "dummy"})
-        with pytest.raises(ValueError, match="Pour RGPD ne pas fournir de data"):
-            change.apply()
-
     def test_raise_if_acteur_does_not_exist(self):
         change = ChangeActeurRgpdAnonymize(id="dummy")
         with pytest.raises(Acteur.DoesNotExist):

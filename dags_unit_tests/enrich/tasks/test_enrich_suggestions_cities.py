@@ -25,6 +25,8 @@ class TestEnrichSuggestionsCities:
                 COLS.SUGGEST_COHORT: [COHORTS.VILLES_NEW] * 3,
                 COLS.SUGGEST_VILLE: ["new town 1", "new town 2", "closed"],
                 COLS.ACTEUR_ID: ["new1", "new2", "closed 1"],
+                COLS.ACTEUR_ADRESSE: ["1 rue", "2 rue", "3 rue"],
+                COLS.ACTEUR_CODE_POSTAL: ["12345", "67890", "54321"],
                 COLS.ACTEUR_VILLE: ["old town 1", "old town 2", "closed"],
                 COLS.ACTEUR_STATUT: ["ACTIF", "ACTIF", "INACTIF"],
             }
@@ -38,6 +40,8 @@ class TestEnrichSuggestionsCities:
                 COLS.SUGGEST_COHORT: [COHORTS.VILLES_TYPO] * 3,
                 COLS.SUGGEST_VILLE: ["Paris", "Laval", "closed"],
                 COLS.ACTEUR_ID: ["typo1", "typo2", "closed 2"],
+                COLS.ACTEUR_ADRESSE: ["1 rue", "2 rue", "3 rue"],
+                COLS.ACTEUR_CODE_POSTAL: ["12345", "67890", "54321"],
                 COLS.ACTEUR_VILLE: ["Pâris", "Lâval", "closed"],
                 COLS.ACTEUR_STATUT: ["ACTIF", "ACTIF", "INACTIF"],
             }

@@ -14,10 +14,11 @@ def suggestion_context_generate(
     from data.models.change import COL_CHANGE_MODEL_NAME
     from data.models.changes import ChangeActeurCreateAsParent
 
-    clusters_cnt = df_cluster["cluster_id"].nunique()
-    if clusters_cnt != 1:
-        msg = f"We create contexte for 1 cluster at a time, got {clusters_cnt}"
+    cluster_ids = df_cluster["cluster_id"].unique()
+    if len(cluster_ids) != 1:
+        msg = f"We create contexte for 1 cluster at a time, got {cluster_ids=}"
         raise ValueError(msg)
+    cluster_id = cluster_ids[0]
 
     # Exclude parents-to-be-created as non-existing thus not part of clustering context
     df_cluster = df_cluster[
@@ -42,9 +43,10 @@ def suggestion_context_generate(
         log.preview("cluster problématique", df_cluster)
         raise ValueError(msg)
 
-    result = {}
-    result["exact_match"] = dict(zip(cluster_fields_exact, groups[0]))  # type: ignore
     cols = ["identifiant_unique"] + cluster_fields_fuzzy
-    result["fuzzy_details"] = df_cluster[cols].to_dict(orient="records")
+    context = {}
+    context["cluster_id"] = cluster_id
+    context["exact_match"] = dict(zip(cluster_fields_exact, groups[0]))  # type: ignore
+    context["fuzzy_details"] = df_cluster[cols].to_dict(orient="records")
 
-    return result
+    return context

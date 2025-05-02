@@ -7,6 +7,7 @@
 
 SELECT
   acteurs.identifiant_unique AS acteur_id,
+  acteurs.adresse AS acteur_adresse,
   acteurs.ville AS acteur_ville,
   acteurs.code_postal AS acteur_code_postal,
   acteurs.statut AS acteur_statut,

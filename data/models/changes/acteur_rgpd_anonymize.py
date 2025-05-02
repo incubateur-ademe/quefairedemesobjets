@@ -31,14 +31,22 @@ ACTEUR_FIELDS_TO_ANONYMIZE = {
 }
 
 
+def rgpd_data_get() -> dict:
+    """Generates data for RGPD anonymization which can't be
+    all static due to the comment field containing timestamp"""
+    data = ACTEUR_FIELDS_TO_ANONYMIZE.copy()
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%d à %H:%M:%S UTC")
+    comment = f"{VALUE_ANONYMIZED} via suggestion du {now}"
+    data["commentaires"] = comment
+    return data
+
+
 class ChangeActeurRgpdAnonymize(ChangeActeurAbstract):
     @classmethod
     def name(cls) -> str:
         return "acteur_rgpd_anonymize"
 
     def validate(self) -> list[Acteur | RevisionActeur]:
-        if self.data:
-            raise ValueError("Pour RGPD ne pas fournir de data, le modèle efface")
         # The parent should already exist in revision or base
         # and we return all its instances to overwrite them all
         instances = []
@@ -53,10 +61,13 @@ class ChangeActeurRgpdAnonymize(ChangeActeurAbstract):
         instances = self.validate()
         for instance in instances:
             # We anonymize the fields
-            for key, value in ACTEUR_FIELDS_TO_ANONYMIZE.items():
+            for key, value in self.data.items():
+                if key == "commentaires":
+                    continue
                 setattr(instance, key, value)
 
             # Special case for comments
-            now = datetime.now(timezone.utc).strftime("le %Y-%m-%d à %H:%M:%S UTC")
-            instance.commentaires_ajouter(f"{VALUE_ANONYMIZED} {now}")
+            # TODO: convert to JSONField and have generic append method
+            # in our Acteur model
+            instance.commentaires_ajouter(self.data["commentaires"])
             instance.save()
