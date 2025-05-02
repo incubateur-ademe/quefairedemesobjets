@@ -57,14 +57,20 @@ def cluster_acteurs_suggestions_to_db(
             msg = "Cluster vide = présent en suggestion mais plus dans df_clusters!!!"
             raise ValueError(msg)
 
+        # TODO: do the context + suggestion changes generation at once
+        # just like for latest DAGs (BAN, AE etc..) to avoid mismatch
+        # and hacks like the one below
+        contexte = suggestion_context_generate(
+            df_cluster=df_cluster,
+            cluster_fields_exact=cluster_fields_exact,
+            cluster_fields_fuzzy=cluster_fields_fuzzy,
+        )
+        if contexte is None:
+            continue
         sugg_obj = Suggestion(
             suggestion_cohorte=cohorte,
             statut=SuggestionStatut.AVALIDER,
-            contexte=suggestion_context_generate(
-                df_cluster=df_cluster,
-                cluster_fields_exact=cluster_fields_exact,
-                cluster_fields_fuzzy=cluster_fields_fuzzy,
-            ),
+            contexte=contexte,
             suggestion=sugg_dict,
         )
         log.preview(f"{cluster_id=} suggestion dict", sugg_dict)

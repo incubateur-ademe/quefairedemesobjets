@@ -5,7 +5,9 @@ import pytest
 from django.contrib.gis.geos import Point
 
 from data.models.changes.acteur_rgpd_anonymize import (
+    VALUE_ANONYMIZED,
     ChangeActeurRgpdAnonymize,
+    rgpd_data_get,
 )
 from qfdmo.models.acteur import Acteur, ActeurStatus, ActeurType, RevisionActeur
 
@@ -23,21 +25,9 @@ TEST_DATA = {
     "commentaires": "  ",
 }
 
-# Intentionally replicating & hardcoding the expected
-# changes to prevent accidental modification to model
-# without updating the tests
-CHANGE_ANON = "ANONYMISE POUR RAISON RGPD"
-CHANGES_EXPECTED = {
-    "nom": CHANGE_ANON,
-    "nom_officiel": CHANGE_ANON,
-    "nom_commercial": CHANGE_ANON,
-    "email": "",  # Consequence of allowing empty strings in DB
-    "telephone": CHANGE_ANON,
-    "adresse": CHANGE_ANON,
-    "adresse_complement": CHANGE_ANON,
-    "statut": ActeurStatus.INACTIF,
-}
-COMMENT_PATTERN = CHANGE_ANON + r" le \d{4}-\d{2}-\d{2} à \d{2}:\d{2}:\d{2} UTC"
+COMMENT_PATTERN = (
+    VALUE_ANONYMIZED + r" via suggestion du \d{4}-\d{2}-\d{2} à \d{2}:\d{2}:\d{2} UTC"
+)
 
 
 @pytest.mark.django_db
@@ -65,7 +55,8 @@ class TestChangeActeurRgpdAnonymize:
         # Since RGPD changes are to owerwrite consistently, we don't
         # pass any data to the model, only the ID of the acteur
         # and the model takes care of the rest
-        ChangeActeurRgpdAnonymize(id=id1).apply()
+        data_expected = rgpd_data_get()
+        ChangeActeurRgpdAnonymize(id=id1, data=data_expected).apply()
 
         # We check that no revision was created because we overwrite
         # hence don't want Revisions meants for versioning
@@ -73,8 +64,11 @@ class TestChangeActeurRgpdAnonymize:
 
         # We check that acteur in base was anonymized
         base = Acteur.objects.get(pk=id1)
-        for key, value in CHANGES_EXPECTED.items():
-            assert getattr(base, key) == value
+        for key, value in data_expected.items():
+            # dynamic, tested further below
+            if key == "commentaires":
+                continue
+            assert getattr(base, key) == value  # static
 
         # Comments
         comments = json.loads(base.commentaires)
@@ -94,7 +88,8 @@ class TestChangeActeurRgpdAnonymize:
         RevisionActeur.objects.create(**data)
 
         # Same remark as previous test on not having to pass data
-        ChangeActeurRgpdAnonymize(id=id2).apply()
+        data_expected = rgpd_data_get()
+        ChangeActeurRgpdAnonymize(id=id2, data=data_expected).apply()
 
         # In this case we check that all instances were anonymized
         instances = [
@@ -102,8 +97,11 @@ class TestChangeActeurRgpdAnonymize:
             RevisionActeur.objects.get(pk=id2),
         ]
         for instance in instances:
-            for key, value in CHANGES_EXPECTED.items():
-                assert getattr(instance, key) == value
+            for key, value in data_expected.items():
+                # dynamic, tested further below
+                if key == "commentaires":
+                    continue
+                assert getattr(instance, key) == value  # static
             assert instance.description == "🟠 not anonymized"
 
             # Comments

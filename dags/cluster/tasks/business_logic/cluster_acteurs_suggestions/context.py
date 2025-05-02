@@ -1,15 +1,19 @@
 """Generates the data stored in Suggestion.contexte field"""
 
+import logging
+
 import pandas as pd
 from cluster.config.constants import COL_PARENT_ID_BEFORE
 from utils import logging_utils as log
+
+logger = logging.getLogger(__name__)
 
 
 def suggestion_context_generate(
     df_cluster: pd.DataFrame,
     cluster_fields_exact: list[str],
     cluster_fields_fuzzy: list[str],
-) -> dict:
+) -> dict | None:
     """Generates a dict for use in Suggestion.contexte field"""
     from data.models.change import COL_CHANGE_MODEL_NAME
     from data.models.changes import ChangeActeurCreateAsParent
@@ -33,6 +37,14 @@ def suggestion_context_generate(
     # - above issue will naturally go away (because we will be forced to process them)
     # - TODO: we will need to make the below exclusion conditional on feature activation
     df_cluster = df_cluster[df_cluster[COL_PARENT_ID_BEFORE].isnull()]
+
+    # Can happen when DAG to refresh displayed acteurs wasn't ran:
+    # - we can have data in displayed but in reality underlying acteurs
+    # are not longer ACTIVE nor present (e.g. removed parents)
+    if df_cluster.empty:
+        msg = f"{cluster_id=} vide: bien rafraîchir les acteurs affichés"
+        logger.warning(msg)
+        return None
 
     # Ensuring we have 1 exact group:
     exacts = df_cluster.groupby(cluster_fields_exact)
