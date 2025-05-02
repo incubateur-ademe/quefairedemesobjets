@@ -7,7 +7,7 @@ from airflow.exceptions import AirflowSkipException
 from airflow.models.taskinstance import TaskInstance
 from airflow.operators.python import PythonOperator
 from airflow.utils.trigger_rule import TriggerRule
-from enrich.config import XCOMS, xcom_pull
+from enrich.config.xcoms import XCOMS, xcom_pull
 from enrich.tasks.business_logic.enrich_dbt_model_suggest import (
     enrich_dbt_model_suggest,
 )
