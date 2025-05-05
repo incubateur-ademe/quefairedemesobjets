@@ -1,12 +1,10 @@
 """DAG to anonymize QFDMO acteurs for RGPD"""
 
 from airflow import DAG
-from enrich.config import (
-    COHORTS,
-    DBT,
-    TASKS,
-    EnrichActeursRGPDConfig,
-)
+from enrich.config.cohorts import COHORTS
+from enrich.config.dbt import DBT
+from enrich.config.models import EnrichActeursRGPDConfig
+from enrich.config.tasks import TASKS
 from enrich.tasks.airflow_logic.enrich_config_create_task import (
     enrich_config_create_task,
 )

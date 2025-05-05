@@ -6,7 +6,8 @@ from cluster.tasks.business_logic.cluster_acteurs_parents_choose_new import (
     parent_id_generate,
 )
 from django.contrib.gis.geos import Point
-from enrich.config import COHORTS, COLS
+from enrich.config.cohorts import COHORTS
+from enrich.config.columns import COLS
 from enrich.tasks.business_logic.enrich_dbt_model_to_suggestions import (
     enrich_dbt_model_to_suggestions,
 )

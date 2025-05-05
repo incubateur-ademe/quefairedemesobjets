@@ -3,9 +3,12 @@
 import re
 from typing import Optional
 
-from pydantic import BaseModel, Field, computed_field
+from pydantic import BaseModel, Field, computed_field, field_validator
+from utils.airflow_params import airflow_params_dropdown_codes_to_ids
 
 SEPARATOR_FILTER_FIELD = "__"
+MAPPING_ACTEUR_TYPE = airflow_params_dropdown_codes_to_ids("ActeurType")
+MAPPING_SOURCE = airflow_params_dropdown_codes_to_ids("Source")
 
 
 def filters_get(model: BaseModel, prefix: str, operator: str) -> list[dict[str, str]]:
@@ -24,6 +27,8 @@ def filters_get(model: BaseModel, prefix: str, operator: str) -> list[dict[str, 
 
             # Skipping None if it's not exclitely is_null operator
             if value is None and operator != "is_null":
+                continue
+            if operator == "in" and value is None or len(value) == 0:
                 continue
 
             filters.append(
@@ -62,17 +67,43 @@ class EnrichBaseConfig(BaseModel):
         default=None,
         description="🔍 Filtre sur **acteur_statut**",
     )
+    filter_in__acteur_type_id: Optional[list[int]] = Field(
+        default=[],
+        description="🔍 Filtre sur **acteur_type**",
+        examples=list(MAPPING_ACTEUR_TYPE.keys()),  # type: ignore
+        json_schema_extra={
+            "values_display": MAPPING_ACTEUR_TYPE,  # type: ignore
+        },
+    )
 
-    def filters_contains(self) -> list[dict[str, str]]:
-        return filters_get(self, "filter_contains", "contains")
-
-    def filters_equals(self) -> list[dict[str, str]]:
-        return filters_get(self, "filter_equals", "equals")
+    filter_in__acteur_source_id: Optional[list[int]] = Field(
+        default=[],
+        description="🔍 Filtre sur **source**",
+        examples=list(MAPPING_SOURCE.keys()),  # type: ignore
+        json_schema_extra={
+            "values_display": MAPPING_SOURCE,  # type: ignore
+        },
+    )
 
     @computed_field
     @property
     def filters(self) -> list[dict[str, str]]:
-        return self.filters_contains() + self.filters_equals()
+        return (
+            filters_get(self, "filter_contains", "contains")
+            + filters_get(self, "filter_equals", "equals")
+            + filters_get(self, "filter_in", "in")
+        )
+
+    @field_validator("filter_in__acteur_type_id", mode="before")
+    def validate_filter_in_acteur_type_id(cls, v) -> list[int]:
+        # Due to Airflow Params dropdowns via dict values_display,
+        # values coming back from Airflow will be strings to convert back to int
+        return [int(x) for x in v] if v else []
+
+    @field_validator("filter_in__acteur_source_id", mode="before")
+    def validate_filter_in_acteur_source_id(cls, v) -> list[int]:
+        # Same as above
+        return [int(x) for x in v] if v else []
 
 
 class EnrichActeursClosedConfig(EnrichBaseConfig):

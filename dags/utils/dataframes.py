@@ -29,6 +29,9 @@ def df_filter(df: pd.DataFrame, filters: list[dict]) -> pd.DataFrame:
                 df = df[df[field] == value].copy()
             elif filter["operator"] == "contains":
                 df = df[df[field].str.contains(value, regex=True, case=False)].copy()
+            elif filter["operator"] == "in":
+                if value and len(value) > 0:
+                    df = df[df[field].isin(value)].copy()
             else:
                 raise NotImplementedError(f"{filter['operator']=} non implémenté")
 

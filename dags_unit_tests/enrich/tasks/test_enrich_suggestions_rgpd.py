@@ -1,6 +1,7 @@
 import pandas as pd
 import pytest
-from enrich.config import COHORTS, COLS
+from enrich.config.cohorts import COHORTS
+from enrich.config.columns import COLS
 from enrich.tasks.business_logic.enrich_dbt_model_to_suggestions import (
     enrich_dbt_model_to_suggestions,
 )

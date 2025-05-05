@@ -26,6 +26,8 @@ class MyModel(BaseModel):
     some_list: list[str] = Field(
         default=["foo", "bar"],
         description="SOME LIST",
+        examples=["foo", "bar", "baz"],
+        json_schema_extra={"values_display": {"foo": "My Foo"}},
     )
 
 
@@ -63,3 +65,11 @@ class TestConfigModelToAirflowParams:
         param = params["opt_string_changed"]
         assert param.value == "bar"
         assert param.schema["type"] == ["null", "string"]
+
+    def test_examples(self, params):
+        param = params["some_list"]
+        assert param.schema["examples"] == ["foo", "bar", "baz"]
+
+    def test_values_display(self, params):
+        param = params["some_list"]
+        assert param.schema["values_display"] == {"foo": "My Foo"}
