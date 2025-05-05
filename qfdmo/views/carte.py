@@ -41,10 +41,6 @@ class CarteSearchActeursView(SearchActeursView):
         return [a.id for a in self._get_selected_action()]
 
 
-class FutureCarteView(CarteSearchActeursView):
-    pass
-
-
 class CustomCarteView(DetailView, CarteSearchActeursView):
     model = CarteConfig
     context_object_name = "carte_config"
