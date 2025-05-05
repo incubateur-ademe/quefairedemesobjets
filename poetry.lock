@@ -4990,24 +4990,23 @@ files = [
 
 [[package]]
 name = "ptpython"
-version = "3.0.29"
+version = "3.0.30"
 description = "Python REPL build on top of prompt_toolkit"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 groups = ["dev"]
 files = [
-    {file = "ptpython-3.0.29-py2.py3-none-any.whl", hash = "sha256:65d75c4871859e4305a020c9b9e204366dceb4d08e0e2bd7b7511bd5e917a402"},
-    {file = "ptpython-3.0.29.tar.gz", hash = "sha256:b9d625183aef93a673fc32cbe1c1fcaf51412e7a4f19590521cdaccadf25186e"},
+    {file = "ptpython-3.0.30-py3-none-any.whl", hash = "sha256:bec3045f0285ac817c902ef98d6ece31d3e00a4604ef3fdde07d365c78bde23c"},
+    {file = "ptpython-3.0.30.tar.gz", hash = "sha256:51a07f9b8ebf8435a5aaeb22831cca4a52e87029771a2637df2763c79d3d8776"},
 ]
 
 [package.dependencies]
 appdirs = "*"
 jedi = ">=0.16.0"
-prompt-toolkit = ">=3.0.43,<3.1.0"
+prompt_toolkit = ">=3.0.43,<3.1.0"
 pygments = "*"
 
 [package.extras]
-all = ["black"]
 ptipython = ["ipython"]
 
 [[package]]
@@ -7401,4 +7400,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12,<3.13"
-content-hash = "946ae5e6f7da4b518bbf5f48a2ff09f2fcfefdd0ea86cb843d15ab1fadd7c971"
+content-hash = "2015f5cf8cef342cd49e5813c4775a7cb44f80ea7171bd674709b44a3c878870"
