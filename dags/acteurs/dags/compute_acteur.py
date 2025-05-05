@@ -130,10 +130,9 @@ with DAG(
             dag, "DisplayedPropositionService", "exposure_carte_propositionservice"
         )
     )
-    # The publication isn't handled by DBT yet
-    # replace_displayedacteur_table_task = replace_acteur_table_task(
-    #     dag, "qfdmo_displayed", "exposure_carte_"
-    # )
+    replace_displayedacteur_table_task = replace_acteur_table_task(
+        dag, "qfdmo_displayed", "exposure_carte_"
+    )
 
     check_model_table_vueacteur_task = check_model_table_consistency_task(
         dag, "VueActeur", "exposure_exhaustive_acteur"
@@ -170,7 +169,7 @@ with DAG(
         dbt_test_exposure_acteurs_carte
         >> check_model_table_displayedacteur_task
         >> check_model_table_displayedpropositionservice_task
-        # >> replace_displayedacteur_table_task
+        >> replace_displayedacteur_table_task
     )
 
     (
