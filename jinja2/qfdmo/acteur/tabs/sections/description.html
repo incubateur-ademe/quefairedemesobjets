@@ -5,5 +5,5 @@ Description
 {% endblock title %}
 
 {% block content %}
-{{ object.description|replace("\n", "<br>")|safe }}
+{{ object.description|nl2br }}
 {% endblock content %}

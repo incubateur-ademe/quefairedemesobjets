@@ -27,3 +27,10 @@ def valuetype(value):
 @register.filter(name="quote")
 def quote_filter(value):
     return quote(value)
+
+
+@register.filter(name="nl2br")
+def nl2br(value):
+    if value is None:
+        return ""
+    return mark_safe(value.replace("\n", "<br>"))
