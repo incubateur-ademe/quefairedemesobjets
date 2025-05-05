@@ -89,12 +89,8 @@ BASE_ALLOWED_HOSTS = [
 
 # Exclude empty values
 ALLOWED_HOSTS = [
-    host
-    for host in [
-        *BASE_ALLOWED_HOSTS,
-        *decouple.config("ALLOWED_HOSTS", default="", cast=str).split(","),
-    ]
-    if host
+    *BASE_ALLOWED_HOSTS,
+    *decouple.config("ALLOWED_HOSTS", default="", cast=str).split(","),
 ]
 
 # Application definition
