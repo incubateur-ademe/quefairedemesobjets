@@ -5,6 +5,7 @@ from airflow.operators.python import PythonOperator
 from sources.tasks.business_logic.db_write_type_action_suggestions import (
     db_write_type_action_suggestions,
 )
+
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -21,10 +22,26 @@ def db_write_type_action_suggestions_task(dag: DAG) -> PythonOperator:
 def db_write_type_action_suggestions_wrapper(**kwargs) -> None:
     dag_name = kwargs["dag"].dag_display_name or kwargs["dag"].dag_id
     run_id = kwargs["run_id"]
-    dfs_acteur = kwargs["ti"].xcom_pull(task_ids="db_data_prepare")
-    df_acteur_to_delete = dfs_acteur["df_acteur_to_delete"]
-    df_acteur_to_create = dfs_acteur["df_acteur_to_create"]
-    df_acteur_to_update = dfs_acteur["df_acteur_to_update"]
+    df_acteur_to_create = kwargs["ti"].xcom_pull(
+        task_ids="db_data_prepare", key="df_acteur_to_create"
+    )
+    df_acteur_to_delete = kwargs["ti"].xcom_pull(
+        task_ids="db_data_prepare", key="df_acteur_to_delete"
+    )
+    df_acteur_to_update = kwargs["ti"].xcom_pull(
+        task_ids="db_data_prepare", key="df_acteur_to_update"
+    )
+
+    metadata_to_create = kwargs["ti"].xcom_pull(
+        task_ids="db_data_prepare", key="metadata_to_create"
+    )
+    metadata_to_update = kwargs["ti"].xcom_pull(
+        task_ids="db_data_prepare", key="metadata_to_update"
+    )
+    metadata_to_delete = kwargs["ti"].xcom_pull(
+        task_ids="db_data_prepare", key="metadata_to_delete"
+    )
+
     metadata = kwargs["ti"].xcom_pull(task_ids="source_data_normalize", key="metadata")
     metadata_columns_updated = kwargs["ti"].xcom_pull(
         task_ids="keep_acteur_changed", key="metadata_columns_updated"
@@ -52,7 +69,11 @@ def db_write_type_action_suggestions_wrapper(**kwargs) -> None:
         df_acteur_to_create=df_acteur_to_create,
         df_acteur_to_delete=df_acteur_to_delete,
         df_acteur_to_update=df_acteur_to_update,
-        metadata_to_create=metadata,
-        metadata_to_update={**metadata, **metadata_columns_updated},
-        metadata_to_delete=metadata,
+        metadata_to_create={**metadata, **metadata_to_create},
+        metadata_to_update={
+            **metadata,
+            **metadata_to_update,
+            **metadata_columns_updated,
+        },
+        metadata_to_delete={**metadata, **metadata_to_delete},
     )

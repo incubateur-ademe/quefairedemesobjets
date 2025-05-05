@@ -4,6 +4,7 @@ import logging
 import numpy as np
 import pandas as pd
 from sources.config import shared_constants as constants
+
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -78,4 +79,13 @@ def db_data_prepare(
         "df_acteur_to_create": df_acteur_to_create,
         "df_acteur_to_update": df_acteur_to_update,
         "df_acteur_to_delete": df_acteur_to_delete,
+        "metadata_to_update": {
+            "nb acteur à mettre à jour": len(df_acteur_to_update),
+        },
+        "metadata_to_create": {
+            "nb acteur à créer": len(df_acteur_to_create),
+        },
+        "metadata_to_delete": {
+            "nb acteur à supprimer": len(df_acteur_to_delete),
+        },
     }

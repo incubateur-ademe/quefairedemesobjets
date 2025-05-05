@@ -4,7 +4,6 @@ import logging
 import pandas as pd
 import requests
 from shared.tasks.database_logic.db_manager import PostgresConnectionManager
-from sources.config import shared_constants as constants
 from sources.config.airflow_params import TRANSFORMATION_MAPPING
 from sources.tasks.airflow_logic.config_management import (
     DAGConfig,
@@ -141,10 +140,7 @@ def _remove_undesired_lines(
                 .sum()
             )
         )
-    if "public_accueilli" in df.columns:
-        metadata["nb acteurs filtrés car professionnels uniquement"] = str(
-            df["public_accueilli"].str.contains(constants.PUBLIC_PRO).sum()
-        )
+
     if "sous_categorie_codes" in df.columns:
         if (
             nb_empty_sous_categorie := df["sous_categorie_codes"]
