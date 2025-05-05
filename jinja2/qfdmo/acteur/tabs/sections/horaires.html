@@ -12,10 +12,10 @@ Horaires
     </p>
     {% endif %}
 
-    {% if object.uniquement_sur_rdv and object.horaires_description|safe %}
+    {% if object.uniquement_sur_rdv and object.horaires_description %}
         {% include "qfdmo/acteur/tabs/_separator.html" %}
     {% endif %}
 
-    {{ object.horaires_description|replace("\n", "<br>")|safe }}
+    {{ object.horaires_description|linebreaks|safe }}
 </div>
 {% endblock content %}

@@ -4,6 +4,7 @@ from django.conf import settings
 from django.http import HttpRequest
 from django.templatetags.static import static
 from django.urls import reverse
+from django.utils.html import linebreaks
 
 from core.templatetags.seo_tags import get_sharer_content
 from core.utils import get_direction
@@ -77,4 +78,5 @@ def environment(**options):
             ),
         }
     )
+    env.filters.update({"linebreaks": linebreaks})
     return env

@@ -5,5 +5,5 @@ Description
 {% endblock title %}
 
 {% block content %}
-{{ object.description }}
+{{ object.description|linebreaks|safe }}
 {% endblock content %}
