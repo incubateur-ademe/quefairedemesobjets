@@ -80,6 +80,8 @@ models:
         description: "Le fait que l'acteur est une révision"
         data_tests:
           - not_null
+      - name: siret_is_closed
+        description: "Information si on sait que le SIRET est fermé"
     config:
       materialized: table
   - name: int_acteur_acteur_services

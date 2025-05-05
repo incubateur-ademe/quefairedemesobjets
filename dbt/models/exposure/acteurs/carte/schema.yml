@@ -110,6 +110,9 @@ models:
       - name: statut
         description: "Le statut de l'acteur"
         data_type: varchar(255)
+      - name: siret_is_closed
+        description: "Information si on sait que le SIRET est fermé"
+        data_type: boolean
     config:
       contract:
         enforced: true
