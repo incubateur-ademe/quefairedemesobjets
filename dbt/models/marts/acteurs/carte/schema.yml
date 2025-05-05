@@ -74,6 +74,8 @@ models:
         description: "Le statut de l'acteur"
         data_tests:
           - not_null
+      - name: siret_is_closed
+        description: "Information si on sait que le SIRET est fermé"
     config:
       materialized: ephemeral
   - name: marts_carte_filtered_parentpropositionservice

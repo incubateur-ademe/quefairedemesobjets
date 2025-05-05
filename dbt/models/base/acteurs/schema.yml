@@ -71,6 +71,8 @@ models:
         description: "La date de création de l'acteur"
       - name: statut
         description: "Le statut de l'acteur"
+      - name: siret_is_closed
+        description: "Information si on sait que le SIRET est fermé"
   - name: base_acteur_acteur_services
     description: "Services des acteurs"
     columns:
@@ -224,6 +226,8 @@ models:
         description: "La date de création de l'acteur"
       - name: statut
         description: "Le statut de l'acteur"
+      - name: siret_is_closed
+        description: "Information si on sait que le SIRET est fermé"
   - name: base_revisionacteur_acteur_services
     description: "Services des acteurs"
     columns:

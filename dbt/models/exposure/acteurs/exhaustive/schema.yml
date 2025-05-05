@@ -116,6 +116,9 @@ models:
       - name: revision_existe
         description: "Le fait que l'acteur ait une révision"
         data_type: boolean
+      - name: siret_is_closed
+        description: "Information si on sait que le SIRET est fermé"
+        data_type: boolean
     config:
       contract:
         enforced: true

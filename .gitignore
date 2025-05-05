@@ -5,6 +5,7 @@ __pycache__
 .env
 .parcel-cache
 .venv
+.cursor
 *.bak
 *.swp
 local_iframe.html

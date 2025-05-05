@@ -30,7 +30,8 @@ SELECT DISTINCT efa.uuid,
     efa.action_principale_id,
     efa.modifie_le,
     efa.cree_le,
-    efa.statut
+    efa.statut,
+    efa.siret_is_closed
 FROM {{ ref(ephemeral_filtered_acteur) }} AS efa
 INNER JOIN {{ ref(propositionservice) }} AS cps
     ON efa.identifiant_unique = cps.acteur_id

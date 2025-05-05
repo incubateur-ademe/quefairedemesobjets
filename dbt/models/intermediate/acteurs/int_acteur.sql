@@ -31,6 +31,7 @@ SELECT
     COALESCE(ra.modifie_le, a.modifie_le) AS modifie_le,
     ra.parent_id AS parent_id,
     COALESCE(a.cree_le, ra.cree_le) AS cree_le,
+    COALESCE(ra.siret_is_closed, a.siret_is_closed) AS siret_is_closed,
     -- avec_revision est true si la table revisionacteur existe
     ra.identifiant_unique IS NOT NULL AS revision_existe
 FROM {{ ref('base_acteur') }} AS a
