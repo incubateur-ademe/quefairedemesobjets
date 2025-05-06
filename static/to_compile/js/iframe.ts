@@ -31,8 +31,7 @@ export function areWeInAnIframe() {
 function removeUnwantedElements() {
   const domain = new URL(document.referrer).hostname
   const domainIsInternal = domain === 'localhost' || domain.endsWith(".ademe.fr") || domain.endsWith(".ademe.dev")
-  const [weAreInAnIframe, _] = areWeInAnIframe()
-  if (domainIsInternal || weAreInAnIframe) {
+  if (domainIsInternal) {
     for (const elementToRemove of document.querySelectorAll("[data-remove-if-internal]")) {
       elementToRemove.remove()
     }
