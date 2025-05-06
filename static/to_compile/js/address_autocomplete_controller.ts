@@ -15,6 +15,11 @@ export default class extends AutocompleteController {
   declare readonly longitudeTarget: HTMLInputElement
   declare readonly displayErrorTarget: HTMLElement
 
+  initialize() {
+    super.initialize()
+    this.#fetchLocationFromSessionStorage()
+  }
+
   async searchToComplete(events: Event): Promise<void> {
     const inputTargetValue = this.inputTarget.value
     const val = this.addAccents(inputTargetValue)
@@ -83,13 +88,12 @@ export default class extends AutocompleteController {
 
       this.inputTarget.value =
         data.features[0].properties.label
-
       this.latitudeTarget.value =
         data.features[0].geometry.coordinates[1]
-
       this.longitudeTarget.value =
         data.features[0].geometry.coordinates[0]
 
+      this.#saveLocationInSessionStorage()
       this.#hideInputError()
       this.hideSpinner()
       this.dispatch("optionSelected")
@@ -99,6 +103,26 @@ export default class extends AutocompleteController {
       this.hideSpinner()
     }
 
+  }
+
+  #saveLocationInSessionStorage() {
+    sessionStorage.setItem("cityName", this.inputTarget.value)
+    sessionStorage.setItem("latitude", this.latitudeTarget.value)
+    sessionStorage.setItem("longitude", this.longitudeTarget.value)
+  }
+
+  #fetchLocationFromSessionStorage() {
+    const label = sessionStorage.getItem("cityName")
+    const latitude = sessionStorage.getItem("latitude")
+    const longitude = sessionStorage.getItem("longitude")
+
+
+    if (label && latitude && longitude) {
+      this.inputTarget.value = label
+      if (longitude) this.longitudeTarget.value = longitude
+      if (latitude) this.latitudeTarget.value = latitude
+      this.dispatch("optionSelected")
+    }
   }
 
   addOption(regexPattern: RegExp, option: any) {
