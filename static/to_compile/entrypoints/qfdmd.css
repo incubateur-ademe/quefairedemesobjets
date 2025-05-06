@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import "../css/carte.css";
+
 @layer base {
   p a {
     @apply qf-text-blue-france-sun-113-625;
@@ -143,4 +145,8 @@
 
 .fr-footer__logo {
   @apply qf-max-h-12w;
+}
+
+:root {
+  --header-height: 72px;
 }
