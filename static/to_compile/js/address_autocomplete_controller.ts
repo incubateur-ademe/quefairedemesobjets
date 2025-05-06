@@ -54,37 +54,8 @@ export default class extends AutocompleteController {
     if (longitude == "9999" && latitude == "9999" && "geolocation" in navigator) {
       this.displaySpinner()
       navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          try {
-            const response = await fetch(
-              `https://api-adresse.data.gouv.fr/reverse/?lon=${position.coords.longitude}&lat=${position.coords.latitude}`,
-            )
-            const data = response.json()
-            if (data.features.length == 0) {
-              this.geolocatisationRefused(
-                "Votre adresse n'a pas pu être déterminée. Vous pouvez ré-essayer ou saisir votre adresse manuellement",
-              )
-              return
-            }
-            this.inputTarget.value =
-              data.features[0].properties.label
-
-            this.latitudeTarget.value =
-              data.features[0].geometry.coordinates[1]
-
-            this.longitudeTarget.value =
-              data.features[0].geometry.coordinates[0]
-
-            this.#hideInputError()
-            this.hideSpinner()
-            this.dispatch("optionSelected")
-
-          } catch (error) {
-            console.error("error catched : ", error)
-            this.hideSpinner()
-          }
-        },
-        () => this.geolocatisationRefused(),
+        this.getAndStorePosition.bind(this),
+        () => this.geolocationRefused(),
       )
     } else if (!("geolocation" in navigator)) {
       console.error("geolocation is not available")
@@ -95,6 +66,39 @@ export default class extends AutocompleteController {
       this.dispatch("optionSelected")
     }
     this.hideAutocompleteList()
+  }
+
+  async getAndStorePosition(position: GeolocationPosition) {
+    try {
+      const response = await fetch(
+        `https://api-adresse.data.gouv.fr/reverse/?lon=${position.coords.longitude}&lat=${position.coords.latitude}`,
+      )
+      const data = await response.json()
+      if (data.features.length == 0) {
+        this.geolocationRefused(
+          "Votre adresse n'a pas pu être déterminée. Vous pouvez ré-essayer ou saisir votre adresse manuellement",
+        )
+        return
+      }
+
+      this.inputTarget.value =
+        data.features[0].properties.label
+
+      this.latitudeTarget.value =
+        data.features[0].geometry.coordinates[1]
+
+      this.longitudeTarget.value =
+        data.features[0].geometry.coordinates[0]
+
+      this.#hideInputError()
+      this.hideSpinner()
+      this.dispatch("optionSelected")
+
+    } catch (error) {
+      console.error("error catched : ", error)
+      this.hideSpinner()
+    }
+
   }
 
   addOption(regexPattern: RegExp, option: any) {
@@ -123,7 +127,7 @@ export default class extends AutocompleteController {
     return toSubmit
   }
 
-  geolocatisationRefused(message?: string) {
+  geolocationRefused(message?: string) {
     message = message || "La géolocalisation est inaccessible sur votre appareil"
     this.#displayInputError(message)
     this.inputTarget.value = ""
