@@ -1,4 +1,4 @@
-{% if not without_branding %}
+{% if not carte_config or not carte_config.no_branding %}
 <div
     class="qf-items-center qf-hidden md:qf-flex qf-flex-row"
     id="logo"
@@ -10,13 +10,13 @@
 
 {# Recherche adresse #}
 <div class="fr-my-1w qf-flex-grow qf-flex qf-flex-col
-    {% if not without_branding %}qf-px-2w md:qf-px-3w md:qf-pr-6w{% else %}qf-px-1v{% endif %}"
+    {% if not carte_config or not carte_config.no_branding %}qf-px-2w md:qf-px-3w md:qf-pr-6w{% else %}qf-px-1v{% endif %}"
 >
     {% include 'qfdmo/_addresses_partials/adresse_input_form.html' %}
 
     {% if not carte_config or not carte_config.hide_legend %}
     <div class="lg:qf-hidden fr-mt-1w qf-flex qf-justify-between">
-        {% if not without_branding %}
+        {% if not carte_config or not carte_config.no_branding %}
         <button
             class="fr-btn fr-btn--sm fr-btn--tertiary"
             type="button"
