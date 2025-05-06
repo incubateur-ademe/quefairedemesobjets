@@ -41,6 +41,13 @@ class CarteSearchActeursView(SearchActeursView):
         return [a.id for a in self._get_selected_action()]
 
 
+class ProductCarteView(CarteSearchActeursView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(is_carte=True, without_branding=True)
+        return context
+
+
 class CustomCarteView(DetailView, CarteSearchActeursView):
     model = CarteConfig
     context_object_name = "carte_config"
