@@ -221,13 +221,10 @@ class Synonyme(AbstractBaseProduit):
     def url(self) -> str:
         return self.get_absolute_url()
 
-    def get_url_carte(self, actions=None):
+    def get_url_carte(self, actions=None, id=None):
         carte_settings = self.produit.carte_settings
         if actions:
-            carte_settings.update(
-                action_list=actions,
-                action_displayed=actions,
-            )
+            carte_settings.update(action_list=actions, action_displayed=actions, id=id)
         params = urlencode(carte_settings)
         url = reverse("qfdmd:carte", args=[self.slug])
         return f"{url}?{params}"
@@ -235,12 +232,12 @@ class Synonyme(AbstractBaseProduit):
     @cached_property
     def url_carte_mauvais_etat(self):
         actions = "reparer|trier"
-        return self.get_url_carte(actions)
+        return self.get_url_carte(actions, "mauvais_etat")
 
     @cached_property
     def url_carte_bon_etat(self):
         actions = "preter|louer|mettreenlocation|donner|echanger|revendre"
-        return self.get_url_carte(actions)
+        return self.get_url_carte(actions, "bon_etat")
 
     @cached_property
     def bon_etat(self) -> str:
