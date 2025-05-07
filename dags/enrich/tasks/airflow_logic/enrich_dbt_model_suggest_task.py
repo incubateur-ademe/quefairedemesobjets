@@ -32,6 +32,7 @@ def task_info_get(task_id, df_xcom_key):
 def enrich_dbt_model_suggest_wrapper(
     task_id: str,
     cohort: str,
+    dbt_schema_name: str,
     dbt_model_name: str,
     ti: TaskInstance,
     dag: DAG,
@@ -44,6 +45,7 @@ def enrich_dbt_model_suggest_wrapper(
 
     # Processing
     suggestions_written = enrich_dbt_model_suggest(
+        dbt_schema_name=dbt_schema_name,
         dbt_model_name=dbt_model_name,
         filters=config.filters,
         cohort=cohort,
@@ -55,12 +57,16 @@ def enrich_dbt_model_suggest_wrapper(
 
 
 def enrich_dbt_model_suggest_task(
-    dag: DAG, task_id: str, cohort: str, dbt_model_name: str
+    dag: DAG,
+    task_id: str,
+    cohort: str,
+    dbt_schema_name: str,
+    dbt_model_name: str,
 ) -> PythonOperator:
     return PythonOperator(
         task_id=task_id,
         python_callable=enrich_dbt_model_suggest_wrapper,
-        op_args=[task_id, cohort, dbt_model_name],
+        op_args=[task_id, cohort, dbt_schema_name, dbt_model_name],
         dag=dag,
         doc_md=f"**Suggestions** pour la cohorte: **{cohort}**",
         trigger_rule=TriggerRule.ALL_DONE,

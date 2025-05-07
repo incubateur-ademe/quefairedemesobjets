@@ -5,9 +5,8 @@ import logging
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from clone.config import TASKS, XCOMS, CloneConfig, xcom_pull
-from clone.tasks.business_logic.clone_view_in_use_switch import (
-    clone_view_in_use_switch,
-)
+from clone.tasks.business_logic.clone_view_in_use_switch import clone_view_in_use_switch
+
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -35,6 +34,7 @@ def clone_view_in_use_switch_wrapper(ti) -> None:
     log.preview("Configuration", config.model_dump())
 
     clone_view_in_use_switch(
+        db_schema=config.db_schema,
         view_schema_file_path=config.view_schema_file_path,
         view_name=config.view_name,
         table_name=config.table_name,

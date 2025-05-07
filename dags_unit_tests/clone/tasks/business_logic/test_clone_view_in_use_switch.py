@@ -10,7 +10,8 @@ class TestSqlTablesCreation:
         sql = path.read_text()
         sql = sql.replace(r"{{view_name}}", "my_view")
         sql = sql.replace(r"{{table_name}}", "my_table")
+        sql = sql.replace(r"{{db_schema}}", "my_schema")
         assert "DROP TABLE" not in sql
-        assert "DROP VIEW IF EXISTS my_view CASCADE" in sql
-        assert "CREATE VIEW my_view" in sql
-        assert "FROM my_table" in sql
+        assert "DROP VIEW IF EXISTS my_schema.my_view CASCADE" in sql
+        assert "CREATE VIEW my_schema.my_view" in sql
+        assert "FROM my_schema.my_table" in sql

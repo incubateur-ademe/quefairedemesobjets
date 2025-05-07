@@ -20,7 +20,7 @@ WITH acteurs_with_siret AS (
 		siret AS acteur_siret,
 		LEFT(siret,9) AS acteur_siren,
         nom AS acteur_nom,
-        udf_normalize_string_for_match(nom) AS acteur_nom_normalise,
+        {{ target.schema }}.udf_normalize_string_for_match(nom) AS acteur_nom_normalise,
         commentaires AS acteur_commentaires,
         statut AS acteur_statut,
 		acteur_type_id,

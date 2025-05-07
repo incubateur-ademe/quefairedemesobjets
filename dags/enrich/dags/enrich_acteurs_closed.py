@@ -54,18 +54,21 @@ with DAG(
         dag,
         task_id=TASKS.ENRICH_CLOSED_SUGGESTIONS_NOT_REPLACED,
         cohort=COHORTS.CLOSED_NOT_REPLACED,
+        dbt_schema_name=DBT.SCHEMA,
         dbt_model_name=DBT.MARTS_ENRICH_AE_CLOSED_NOT_REPLACED,
     )
     suggest_other_siren = enrich_dbt_model_suggest_task(
         dag,
         task_id=TASKS.ENRICH_CLOSED_SUGGESTIONS_OTHER_SIREN,
         cohort=COHORTS.CLOSED_REP_OTHER_SIREN,
+        dbt_schema_name=DBT.SCHEMA,
         dbt_model_name=DBT.MARTS_ENRICH_AE_CLOSED_REPLACED_OTHER_SIREN,
     )
     suggest_same_siren = enrich_dbt_model_suggest_task(
         dag,
         task_id=TASKS.ENRICH_CLOSED_SUGGESTIONS_SAME_SIREN,
         cohort=COHORTS.CLOSED_REP_SAME_SIREN,
+        dbt_schema_name=DBT.SCHEMA,
         dbt_model_name=DBT.MARTS_ENRICH_AE_CLOSED_REPLACED_SAME_SIREN,
     )
 

@@ -33,4 +33,9 @@ tar --extract --verbose --file="${ARCHIVE_NAME}"
 for table in $(psql "${PREPROD_DATABASE_URL}" -t -c "SELECT \"tablename\" FROM pg_tables WHERE schemaname='public'"); do
      psql "${PREPROD_DATABASE_URL}" -c "DROP TABLE IF EXISTS \"${table}\" CASCADE;"
 done
-pg_restore --clean --no-acl --no-owner --no-privileges --dbname "${PREPROD_DATABASE_URL}" ${backup_file_name}
+
+psql --dbname "${PREPROD_DATABASE_URL}" -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+psql --dbname "${PREPROD_DATABASE_URL}" -c 'CREATE EXTENSION IF NOT EXISTS "unaccent";'
+psql --dbname "${PREPROD_DATABASE_URL}" -c 'CREATE EXTENSION IF NOT EXISTS "pg_trgm";'
+psql --dbname "${PREPROD_DATABASE_URL}" -c 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";'
+pg_restore --schema=public --clean --no-acl --no-owner --no-privileges --dbname "${PREPROD_DATABASE_URL}" ${backup_file_name}

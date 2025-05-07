@@ -28,6 +28,6 @@ AND (
 )
 /* BUT also a match somewhere */
 AND (
-  udf_normalize_string_for_match(acteurs.ville,3) = udf_normalize_string_for_match(ban.ville_ancienne,3)
-  OR udf_normalize_string_for_match(acteurs.ville,3) = udf_normalize_string_for_match(ban.ville,3)
+  {{ target.schema }}.udf_normalize_string_for_match(acteurs.ville,3) = {{ target.schema }}.udf_normalize_string_for_match(ban.ville_ancienne,3)
+  OR {{ target.schema }}.udf_normalize_string_for_match(acteurs.ville,3) = {{ target.schema }}.udf_normalize_string_for_match(ban.ville,3)
 )

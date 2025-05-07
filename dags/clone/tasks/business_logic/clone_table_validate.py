@@ -8,7 +8,9 @@ from utils import logging_utils as log
 logger = logging.getLogger(__name__)
 
 
-def clone_table_validate(table_kind: str, table_name: str, dry_run: bool) -> None:
+def clone_table_validate(
+    db_schema: str, table_kind: str, table_name: str, dry_run: bool
+) -> None:
     """Validate a table in the DB"""
 
     # Gathering SQL validation files
@@ -17,7 +19,11 @@ def clone_table_validate(table_kind: str, table_name: str, dry_run: bool) -> Non
 
     # Executing SQL validation files
     for sql_file in sql_files:
-        sql = sql_file.read_text().replace(r"{{table_name}}", table_name)
+        sql = (
+            sql_file.read_text()
+            .replace(r"{{table_name}}", table_name)
+            .replace(r"{{db_schema}}", db_schema)
+        )
         sql_name = sql_file.stem
         logger.info(f"🔵 {table_name}: {sql_name} en validation...")
         if dry_run:

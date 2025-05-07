@@ -25,9 +25,9 @@ WITH potential_replacements AS (
 		suggests.adresse AS suggest_adresse,
 
 		-- Matching
-		udf_columns_words_in_common_count(
+		{{ target.schema }}.udf_columns_words_in_common_count(
 			candidates.acteur_nom_normalise,
-			udf_normalize_string_for_match(suggests.nom)
+			{{ target.schema }}.udf_normalize_string_for_match(suggests.nom)
 		) AS noms_nombre_mots_commun,
 		ROW_NUMBER() OVER (
 			PARTITION BY candidates.acteur_siret
@@ -38,9 +38,9 @@ WITH potential_replacements AS (
 					ELSE 0
 				END DESC,
 				-- Then etablissements with more words in common
-				udf_columns_words_in_common_count(
+				{{ target.schema }}.udf_columns_words_in_common_count(
 					candidates.acteur_nom_normalise,
-					udf_normalize_string_for_match(suggests.nom)
+					{{ target.schema }}.udf_normalize_string_for_match(suggests.nom)
 				) DESC
 		) AS replacement_priority
 	/*
@@ -52,7 +52,7 @@ WITH potential_replacements AS (
 	ON suggests.naf = candidates.etab_naf
 	AND suggests.code_postal = candidates.etab_code_postal
 	AND suggests.adresse_numero = candidates.etab_adresse_numero
-	AND udf_normalize_string_for_match(suggests.adresse) = udf_normalize_string_for_match(candidates.etab_adresse)
+	AND {{ target.schema }}.udf_normalize_string_for_match(suggests.adresse) = {{ target.schema }}.udf_normalize_string_for_match(candidates.etab_adresse)
 	WHERE suggests.est_actif
 	-- Fields which must be non-NULL for a replacement to be considered
 	AND suggests.code_postal IS NOT NULL

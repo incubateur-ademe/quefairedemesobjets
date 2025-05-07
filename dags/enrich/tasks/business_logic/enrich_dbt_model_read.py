@@ -4,6 +4,7 @@ import logging
 
 import numpy as np
 import pandas as pd
+
 from utils.dataframes import df_filter
 from utils.django import django_setup_full
 
@@ -13,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 def enrich_dbt_model_read(
-    dbt_model_name: str, filters: list[dict] = []
+    dbt_schema_name: str, dbt_model_name: str, filters: list[dict] = []
 ) -> pd.DataFrame:
     """Reads necessary QFDMO acteurs and AE entries from DB"""
     from django.db import connection
@@ -22,7 +23,7 @@ def enrich_dbt_model_read(
 
     # Execute SQL query and get data
     with connection.cursor() as cursor:
-        cursor.execute(f"SELECT * FROM {dbt_model_name}")
+        cursor.execute(f"SELECT * FROM {dbt_schema_name}.{dbt_model_name}")
         columns = [col[0] for col in cursor.description]
         data = cursor.fetchall()
 

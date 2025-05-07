@@ -22,7 +22,7 @@ WITH acteurs_with_siren AS (
 			', , ',
 			'')
 		) AS noms_origine,
-		udf_normalize_string_for_match(CONCAT(nom || ' ' || nom_officiel || ' ' || nom_commercial)) AS noms_normalises,
+		{{ target.schema }}.udf_normalize_string_for_match(CONCAT(nom || ' ' || nom_officiel || ' ' || nom_commercial)) AS noms_normalises,
 		commentaires,
 		statut
 	FROM {{ source('enrich', 'qfdmo_vueacteur') }} AS acteurs
@@ -47,14 +47,14 @@ WITH acteurs_with_siren AS (
 		reduce data size and we will perform a more precise
 		post-match in Python
 		*/
-		udf_normalize_string_for_match(dirigeant_nom) AS unite_dirigeant_nom_normalise,
-		udf_normalize_string_for_match(dirigeant_nom_usage) AS unite_dirigeant_nom_usage_normalise,
-		udf_normalize_string_for_match(dirigeant_pseudonyme) AS unite_dirigeant_pseudonyme_normalise,
-		udf_normalize_string_for_match(dirigeant_prenom1) AS unite_dirigeant_prenom1_normalise,
-		udf_normalize_string_for_match(dirigeant_prenom2) AS unite_dirigeant_prenom2_normalise,
-		udf_normalize_string_for_match(dirigeant_prenom3) AS unite_dirigeant_prenom3_normalise,
-		udf_normalize_string_for_match(dirigeant_prenom4) AS unite_dirigeant_prenom4_normalise,
-		udf_columns_concat_unique_non_empty(
+		{{ target.schema }}.udf_normalize_string_for_match(dirigeant_nom) AS unite_dirigeant_nom_normalise,
+		{{ target.schema }}.udf_normalize_string_for_match(dirigeant_nom_usage) AS unite_dirigeant_nom_usage_normalise,
+		{{ target.schema }}.udf_normalize_string_for_match(dirigeant_pseudonyme) AS unite_dirigeant_pseudonyme_normalise,
+		{{ target.schema }}.udf_normalize_string_for_match(dirigeant_prenom1) AS unite_dirigeant_prenom1_normalise,
+		{{ target.schema }}.udf_normalize_string_for_match(dirigeant_prenom2) AS unite_dirigeant_prenom2_normalise,
+		{{ target.schema }}.udf_normalize_string_for_match(dirigeant_prenom3) AS unite_dirigeant_prenom3_normalise,
+		{{ target.schema }}.udf_normalize_string_for_match(dirigeant_prenom4) AS unite_dirigeant_prenom4_normalise,
+		{{ target.schema }}.udf_columns_concat_unique_non_empty(
 			dirigeant_nom,
 			dirigeant_nom_usage,
 			dirigeant_pseudonyme,
