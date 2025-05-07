@@ -124,7 +124,7 @@ def changes_prepare_closed_replaced(
     row: dict,
 ) -> tuple[list[dict], dict]:
     """Prepare suggestion changes for closed replaced cohorts"""
-    from data.models.changes import ChangeActeurCreateAsChild, ChangeActeurUpdateData
+    from data.models.changes import ChangeActeurCreateAsCopy, ChangeActeurUpdateData
     from qfdmo.models import ActeurStatus
 
     changes = []
@@ -136,7 +136,7 @@ def changes_prepare_closed_replaced(
 
     # Existing Child: must be updated BEFORE new child to prevent
     # conflict on same external ID having 2+ active children
-    child_old = {
+    old_acteur = {
         "id": row[COLS.ACTEUR_ID],
         "data": {
             "identifiant_unique": row[COLS.ACTEUR_ID],
@@ -147,7 +147,7 @@ def changes_prepare_closed_replaced(
     changes.append(
         changes_prepare(
             model=ChangeActeurUpdateData,
-            model_params=child_old,
+            model_params=old_acteur,
             order=1,
             reason="ancien enfant fermé",
             entity_type="acteur_displayed",
@@ -156,34 +156,33 @@ def changes_prepare_closed_replaced(
     # New child to hold the reference data as standalone
     # (since old child will be closed)
     now = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
-    child_new_id = f"{row[COLS.ACTEUR_ID]}_{row[COLS.ACTEUR_SIRET]}_{now}"
-    child_new = {
-        "id": child_new_id,
+    new_acteur_id = f"{row[COLS.ACTEUR_ID]}_{row[COLS.ACTEUR_SIRET]}_{now}"
+    new_acteur = {
+        "id": row[COLS.ACTEUR_ID],
         "data": {
-            "identifiant_unique": child_new_id,
-            "identifiant_externe": row[COLS.ACTEUR_ID_EXTERNE],
-            "source": row[COLS.ACTEUR_SOURCE_ID],
-            "acteur_type": row[COLS.ACTEUR_TYPE_ID],
-            "parent": row[COLS.ACTEUR_PARENT_ID],
-            "latitude": row[COLS.ACTEUR_LATITUDE],
-            "longitude": row[COLS.ACTEUR_LONGITUDE],
-            "statut": ActeurStatus.ACTIF,
+            "identifiant_unique": new_acteur_id,
+            # FIXME : all these fields will be inherited from the old acteur
+            # "identifiant_externe": row[COLS.ACTEUR_ID_EXTERNE],
+            # "source": row[COLS.ACTEUR_SOURCE_ID],
+            # "acteur_type": row[COLS.ACTEUR_TYPE_ID],
+            # "parent": row[COLS.ACTEUR_PARENT_ID],
+            # "latitude": row[COLS.ACTEUR_LATITUDE],
+            # "longitude": row[COLS.ACTEUR_LONGITUDE],
+            # "statut": ActeurStatus.ACTIF,
             "siret": row[COLS.SUGGEST_SIRET],
             "siren": row[COLS.SUGGEST_SIRET][:9],
+            "parent_reason": (  # FIXME : renommer parent_reason
+                "Nouvel enfant pour conserver les données suite à: "
+                f"SIRET {row[COLS.ACTEUR_SIRET]} "
+                f"détecté le {today} comme fermé dans AE, "
+                f"remplacé par SIRET {row[COLS.SUGGEST_SIRET]}"
+            ),
         },
     }
-    # We only give a reason for the parent if there is one
-    if row[COLS.ACTEUR_PARENT_ID]:
-        child_new["data"]["parent_reason"] = (
-            f"Nouvel enfant pour conserver les données suite à: "
-            f"SIRET {row[COLS.ACTEUR_SIRET]} "
-            f"détecté le {today} comme fermé dans AE, "
-            f"remplacé par SIRET {row[COLS.SUGGEST_SIRET]}"
-        )
     changes.append(
         changes_prepare(
-            model=ChangeActeurCreateAsChild,
-            model_params=child_new,
+            model=ChangeActeurCreateAsCopy,
+            model_params=new_acteur,
             order=2,
             reason="nouvel enfant pour conserver les données",
             entity_type="acteur_displayed",
@@ -246,7 +245,9 @@ def enrich_dbt_model_to_suggestions(
         row = dict(row)
 
         try:
-            changes, contexte = COHORTS_TO_PREPARE_CHANGES[cohort](row)
+            interpret_function = COHORTS_TO_PREPARE_CHANGES[cohort]
+            logger.info(f"Interprétation de {cohort=}")
+            changes, contexte = interpret_function(row)
             suggestion = {
                 "contexte": contexte,
                 "suggestion": {"title": cohort, "changes": changes},

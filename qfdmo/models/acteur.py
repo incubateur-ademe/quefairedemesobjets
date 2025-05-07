@@ -895,7 +895,14 @@ class RevisionActeur(BaseActeur):
         self.save()
         return revision_acteur_parent
 
-    def duplicate(self):
+    def duplicate(
+        self,
+        fields_to_reset={
+            "identifiant_unique": None,
+            "identifiant_externe": None,
+            "source": None,
+        },
+    ):
         if self.is_parent:
             raise Exception("Impossible de dupliquer un acteur parent")
 
@@ -903,11 +910,6 @@ class RevisionActeur(BaseActeur):
 
         acteur = Acteur.objects.get(identifiant_unique=self.identifiant_unique)
 
-        fields_to_reset = [
-            "identifiant_unique",
-            "identifiant_externe",
-            "source",
-        ]
         fields_to_ignore = [
             "labels",
             "acteur_services",
@@ -916,12 +918,12 @@ class RevisionActeur(BaseActeur):
             "parent_reason",
         ]
 
-        for field in fields_to_reset:
-            setattr(revision_acteur, field, None)
+        for field, value in fields_to_reset.items():
+            setattr(revision_acteur, field, value)
         for field in revision_acteur._meta.fields:
             if (
                 not getattr(revision_acteur, field.name)
-                and field.name not in fields_to_reset
+                and field.name not in fields_to_reset.keys()
                 and field.name not in fields_to_ignore
             ):
                 setattr(revision_acteur, field.name, getattr(acteur, field.name))

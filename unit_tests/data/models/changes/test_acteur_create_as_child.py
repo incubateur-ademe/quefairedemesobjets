@@ -35,7 +35,7 @@ class TestChangeActeurCreateAsChild:
         atype = ActeurTypeFactory(code="atype1")
         parent = RevisionActeur.objects.create(
             identifiant_unique="parent1",
-            source=source,
+            source=None,
             acteur_type=atype,
             statut="ACTIF",
             location=Point(1, 1),
@@ -57,8 +57,8 @@ class TestChangeActeurCreateAsChild:
         change.apply()
 
         # Acteur created in base to hold the core data
-        base = Acteur.objects.get(pk="child1")
-        assert base.identifiant_unique == "child1"
+        base = Acteur.objects.get(pk="source1_test_ext")
+        assert base.identifiant_unique == "source1_test_ext"
         assert base.nom == "my child1"
         assert base.source.pk == source.pk
         assert base.acteur_type.pk == atype.pk

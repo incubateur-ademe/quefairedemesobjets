@@ -10,12 +10,15 @@ class DBT:
 
     # Closed
     MARTS_ENRICH_AE_CLOSED_CANDIDATES: str = "marts_enrich_acteurs_closed_candidates"
+    # replace SIRET only
     MARTS_ENRICH_AE_CLOSED_REPLACED_SAME_SIREN: str = (
         "marts_enrich_acteurs_closed_suggest_replaced_same_siren"
     )
+    # replace SIREN and SIRET
     MARTS_ENRICH_AE_CLOSED_REPLACED_OTHER_SIREN: str = (
         "marts_enrich_acteurs_closed_suggest_replaced_other_siren"
     )
+    # inactive acteur, no new SIRET / SIREN found
     MARTS_ENRICH_AE_CLOSED_NOT_REPLACED: str = (
         "marts_enrich_acteurs_closed_suggest_not_replaced"
     )
