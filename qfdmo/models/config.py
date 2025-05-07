@@ -56,6 +56,13 @@ class CarteConfig(models.Model):
         help_text="Cocher cette case cache la légende affichée en bas à gauche de la "
         "carte en desktop et au dessus de celle-ci en mobile",
     )
+    no_branding = models.BooleanField(
+        verbose_name="Supprimer le branding",
+        default=False,
+        help_text="Supprime le logo dans l'entête de la carte ainsi que"
+        " le bouton Infos. Ce mode est utilisé essentiellement "
+        "pour la carte affichée dans l'assistant",
+    )
     slug = models.SlugField(
         unique=True,
         help_text="Le slug est utilisé pour générer l'url de carte, "

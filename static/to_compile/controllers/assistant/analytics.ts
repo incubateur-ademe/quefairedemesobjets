@@ -1,6 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 import { InteractionType as PosthogUIInteractionType, PosthogEventType } from "./types"
 import posthog from "posthog-js"
+import { areWeInAnIframe } from "../../iframe"
 
 type PersonProperties = {
   iframe: boolean
@@ -82,22 +83,9 @@ export default class extends Controller<HTMLElement> {
     // - If the iframe integration does not use our script
     // In all these cases, we still want to determine
     // whether the user browse inside an iframe or not.
-    try {
-      if (window.self !== window.top) {
-        this.personProperties.iframe = true
-        this.personProperties.iframeReferrer =
-          window.top?.location.href
-      }
-    } catch (e) {
-      // Unable to access window.top
-      // this might be due to cross-origin restrictions.
-      // Assuming it's inside an iframe.
-      this.personProperties.iframe = true
-    }
-
-    if (document.referrer && !document.referrer.includes(document.location.origin)) {
-      this.personProperties.iframe = true
-    }
+    const [weAreInAnIframe, referrer] = areWeInAnIframe()
+    this.personProperties.iframe = weAreInAnIframe
+    this.personProperties.iframeReferrer = referrer
   }
 
   async #captureUserConversionScore() {

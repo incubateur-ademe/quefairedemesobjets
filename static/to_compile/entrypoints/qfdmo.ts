@@ -1,15 +1,18 @@
+import "../styles/qfdmo.css"
+
 import "@gouvfr/dsfr/dist/dsfr.module.js"
 import { Application } from "@hotwired/stimulus"
 import * as Turbo from "@hotwired/turbo"
 
-import AddressAutocompleteController from "../js/address_autocomplete_controller"
-import AnalyticsController from "../js/analytics_controller"
-import CopyController from "../js/copy_controller"
-import GenericAutocompleteController from "../js/generic_autocomplete_controller"
-import MapController from "../js/map_controller"
-import ScrollController from "../js/scroll_controller"
-import SearchSolutionFormController from "../js/search_solution_form_controller"
-import SsCatObjectAutocompleteController from "../js/ss_cat_object_autocomplete_controller"
+import AnalyticsController from "../controllers/shared/analytics_controller"
+import CopyController from "../controllers/shared/copy_controller"
+import GenericAutocompleteController from "../controllers/shared/generic_autocomplete_controller"
+import ScrollController from "../controllers/shared/scroll_controller"
+
+import AddressAutocompleteController from "../controllers/carte/address_autocomplete_controller"
+import MapController from "../controllers/carte/map_controller"
+import SearchSolutionFormController from "../controllers/carte/search_solution_form_controller"
+import SsCatObjectAutocompleteController from "../controllers/carte/ss_cat_object_autocomplete_controller"
 
 import "../js/browser_check"
 import "../js/iframe"

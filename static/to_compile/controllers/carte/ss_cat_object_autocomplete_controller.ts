@@ -1,6 +1,6 @@
 import AutocompleteController from "./autocomplete_controller"
-import posthog from "./analytics"
 import { SSCatObject } from "./types"
+import posthog from "posthog-js"
 
 export default class extends AutocompleteController {
     controllerName: string = "ss-cat-object-autocomplete"
