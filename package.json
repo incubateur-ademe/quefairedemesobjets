@@ -9,8 +9,6 @@
         "e2e_test": " npx playwright test --update-snapshots"
     },
     "source": [
-        "static/to_compile/entrypoints/qfdmo.css",
-        "static/to_compile/entrypoints/qfdmo.ts",
         "static/to_compile/entrypoints/sw.ts",
         "static/to_compile/entrypoints/assistant/script-to-iframe.ts",
         "static/to_compile/entrypoints/admin-categorie-widget.ts",
