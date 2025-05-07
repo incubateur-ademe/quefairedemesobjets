@@ -1,5 +1,4 @@
 from .acteur_change_nothing_in_base import ChangeActeurNothingBase
-from .acteur_create_as_child import ChangeActeurCreateAsChild
 from .acteur_create_as_copy import ChangeActeurCreateAsCopy
 from .acteur_create_as_parent import ChangeActeurCreateAsParent
 from .acteur_delete_as_parent import ChangeActeurDeleteAsParent
@@ -12,7 +11,6 @@ from .sample_model_do_nothing import SampleModelDoNothing
 
 CHANGE_MODELS = {
     ChangeActeurUpdateData.name(): ChangeActeurUpdateData,
-    ChangeActeurCreateAsChild.name(): ChangeActeurCreateAsChild,
     ChangeActeurCreateAsCopy.name(): ChangeActeurCreateAsCopy,
     ChangeActeurCreateAsParent.name(): ChangeActeurCreateAsParent,
     ChangeActeurDeleteAsParent.name(): ChangeActeurDeleteAsParent,
