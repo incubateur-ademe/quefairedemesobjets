@@ -14,22 +14,22 @@ Notes:
 SELECT
 
 -- Codes
-udf_ae_string_cleanup(siret) AS siret,
-udf_ae_string_cleanup(activite_principale) AS activite_principale,
+warehouse.udf_ae_string_cleanup(siret) AS siret,
+warehouse.udf_ae_string_cleanup(activite_principale) AS activite_principale,
 
 -- Names
-udf_ae_string_cleanup(denomination_usuelle) AS denomination_usuelle,
+warehouse.udf_ae_string_cleanup(denomination_usuelle) AS denomination_usuelle,
 
 -- Status
-udf_ae_string_cleanup(etat_administratif) AS etat_administratif,
+warehouse.udf_ae_string_cleanup(etat_administratif) AS etat_administratif,
 
 -- Address
-udf_ae_string_cleanup(numero_voie) AS numero_voie,
-udf_ae_string_cleanup(complement_adresse) AS complement_adresse,
-udf_ae_string_cleanup(type_voie) AS type_voie,
-udf_ae_string_cleanup(libelle_voie) AS libelle_voie,
-udf_ae_string_cleanup(code_postal) AS code_postal,
-udf_ae_string_cleanup(libelle_commune) AS libelle_commune
+warehouse.udf_ae_string_cleanup(numero_voie) AS numero_voie,
+warehouse.udf_ae_string_cleanup(complement_adresse) AS complement_adresse,
+warehouse.udf_ae_string_cleanup(type_voie) AS type_voie,
+warehouse.udf_ae_string_cleanup(libelle_voie) AS libelle_voie,
+warehouse.udf_ae_string_cleanup(code_postal) AS code_postal,
+warehouse.udf_ae_string_cleanup(libelle_commune) AS libelle_commune
 
 FROM {{ source('ae', 'clone_ae_etablissement_in_use') }}
 -- Filtering out foreign establishments as our focus is France

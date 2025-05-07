@@ -15,24 +15,24 @@ Notes:
 SELECT
 
 -- Codes
-udf_ae_string_cleanup(siren) AS siren,
-udf_ae_string_cleanup(activite_principale) AS activite_principale,
+warehouse.udf_ae_string_cleanup(siren) AS siren,
+warehouse.udf_ae_string_cleanup(activite_principale) AS activite_principale,
 
 -- Status
-udf_ae_string_cleanup(etat_administratif) AS etat_administratif,
+warehouse.udf_ae_string_cleanup(etat_administratif) AS etat_administratif,
 
 -- Business names
-udf_ae_string_cleanup(denomination) AS denomination,
+warehouse.udf_ae_string_cleanup(denomination) AS denomination,
 
 -- Director's names
-udf_ae_string_cleanup(prenom1) AS prenom1,
-udf_ae_string_cleanup(prenom2) AS prenom2,
-udf_ae_string_cleanup(prenom3) AS prenom3,
-udf_ae_string_cleanup(prenom4) AS prenom4,
-udf_ae_string_cleanup(prenom_usuel) AS prenom_usuel,
-udf_ae_string_cleanup(pseudonyme) AS pseudonyme,
-udf_ae_string_cleanup(nom) AS nom,
-udf_ae_string_cleanup(nom_usage) AS nom_usage
+warehouse.udf_ae_string_cleanup(prenom1) AS prenom1,
+warehouse.udf_ae_string_cleanup(prenom2) AS prenom2,
+warehouse.udf_ae_string_cleanup(prenom3) AS prenom3,
+warehouse.udf_ae_string_cleanup(prenom4) AS prenom4,
+warehouse.udf_ae_string_cleanup(prenom_usuel) AS prenom_usuel,
+warehouse.udf_ae_string_cleanup(pseudonyme) AS pseudonyme,
+warehouse.udf_ae_string_cleanup(nom) AS nom,
+warehouse.udf_ae_string_cleanup(nom_usage) AS nom_usage
 
 FROM {{ source('ae', 'clone_ae_unite_legale_in_use') }}
 /* We can't do random sampling else we risk having

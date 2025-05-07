@@ -5,7 +5,7 @@ WITH acteurs_with_siret_matched AS (
 	SELECT
 	COUNT(*) AS nombre_acteurs
 	FROM qfdmo_displayedacteur AS acteurs
-	JOIN {{table_name}} AS etab
+	JOIN {{db_schema}}.{{table_name}} AS etab
 	ON etab.siret = acteurs.siret
 	WHERE acteurs.siret IS NOT NULL
 )

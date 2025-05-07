@@ -266,6 +266,7 @@ DATABASE_URL = decouple.config(
 )
 default_settings = dj_database_url.parse(DATABASE_URL)
 default_settings["ENGINE"] = "django.contrib.gis.db.backends.postgis"
+default_settings["OPTIONS"] = {"options": "-c search_path=public,warehouse"}
 
 # The readonly access is configured with fake access when DB_READONLY env
 # variable is not set.

@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 
 from pydantic import AnyUrl
+
 from utils import logging_utils as log
 from utils.cmd import cmd_run
 from utils.django import django_schema_create_and_check, django_setup_full
@@ -14,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 def command_psql_copy(
+    db_schema: str,
     table_name: str,
     delimiter: str,
 ) -> tuple[str, dict]:
@@ -24,7 +26,7 @@ def command_psql_copy(
     cmd_from = f'stdin WITH (FORMAT csv, HEADER true, DELIMITER "{delimiter}");'
     cmd = (
         f"psql -h {db['HOST']} -p {db['PORT']} -U {db['USER']} -d {db['NAME']} "
-        f"-c '\\copy {table_name} FROM {cmd_from}'"
+        f"-c '\\copy {db_schema}.{table_name} FROM {cmd_from}'"
     )
     env = {"PGPASSWORD": db["PASSWORD"]}
     return cmd, env
@@ -33,6 +35,7 @@ def command_psql_copy(
 def commands_stream_directly(
     data_endpoint: AnyUrl,
     delimiter: str,
+    db_schema: str,
     table_name: str,
 ) -> tuple[list[dict], dict]:
     """Commands to create table while streaming directly to DB (no disk)"""
@@ -40,7 +43,9 @@ def commands_stream_directly(
     cmds_create = []
     cmd_cleanup = {"cmd": "echo 'Pas de nettoyage requis en streaming'", "env": {}}
 
-    cmd_psql, env_psql = command_psql_copy(table_name=table_name, delimiter=delimiter)
+    cmd_psql, env_psql = command_psql_copy(
+        db_schema=db_schema, table_name=table_name, delimiter=delimiter
+    )
     cmds_create.append(
         {
             "cmd": (f"curl -s {data_endpoint} | " "zcat | " f"{cmd_psql}"),
@@ -56,6 +61,7 @@ def commands_download_to_disk_first(
     file_downloaded: str,
     file_unpacked: str,
     delimiter: str,
+    db_schema: str,
     table_name: str,
 ) -> tuple[list[dict], dict]:
     """Commands to create table while first dowloading to disk"""
@@ -90,7 +96,9 @@ def commands_download_to_disk_first(
     cmds_create = [{"cmd": cmd, "env": {}} for cmd in cmds_create]
 
     # Load into DB
-    cmd_psql, env_psql = command_psql_copy(table_name=table_name, delimiter=delimiter)
+    cmd_psql, env_psql = command_psql_copy(
+        db_schema=db_schema, table_name=table_name, delimiter=delimiter
+    )
     cmds_create.append(
         {
             "cmd": (f"cat {folder}/{file_unpacked} | " f"{cmd_psql}"),
@@ -133,6 +141,7 @@ def clone_table_create(
     file_downloaded: str,
     file_unpacked: str,
     delimiter: str,
+    db_schema: str,
     table_name: str,
     table_schema_file_path: Path,
     dry_run: bool,
@@ -143,7 +152,11 @@ def clone_table_create(
 
     try:
         # Create table schema to hold the data
-        sql = table_schema_file_path.read_text().replace(r"{{table_name}}", table_name)
+        sql = (
+            table_schema_file_path.read_text()
+            .replace(r"{{table_name}}", table_name)
+            .replace(r"{{db_schema}}", db_schema)
+        )
         django_schema_create_and_check(table_name, sql, dry_run=dry_run)
 
         # Get commands based on the create method
@@ -153,12 +166,14 @@ def clone_table_create(
                 file_downloaded=file_downloaded,
                 file_unpacked=file_unpacked,
                 delimiter=delimiter,
+                db_schema=db_schema,
                 table_name=table_name,
             )
         elif clone_method == "stream_directly":
             cmds_create, cmd_cleanup = commands_stream_directly(
                 data_endpoint=data_endpoint,
                 delimiter=delimiter,
+                db_schema=db_schema,
                 table_name=table_name,
             )
         else:
@@ -183,6 +198,6 @@ def clone_table_create(
         from django.db import connection
 
         logger.error(log.banner_string(f"❌ Erreur rencontrée: {e}"))
-        logger.error(f"On supprime la table {table_name} si créée")
+        logger.error(f"On supprime la table {db_schema}.{table_name} si créée")
         with connection.cursor() as cursor:
-            cursor.execute(f"DROP TABLE IF EXISTS {table_name};")
+            cursor.execute(f"DROP TABLE IF EXISTS {db_schema}.{table_name};")

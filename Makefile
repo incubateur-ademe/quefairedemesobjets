@@ -146,7 +146,7 @@ dump-production:
 .PHONY: load-production-dump
 load-production-dump:
 	@DUMP_FILE=$$(find tmpbackup -type f -name "*.pgsql" -print -quit); \
-	pg_restore -d "$(DB_URL)" --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
+	pg_restore -d "$(DB_URL)" --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
 	rm -rf tmpbackup
 
 .PHONY: db-restore
