@@ -29,6 +29,9 @@ export function areWeInAnIframe() {
 
 }
 function removeUnwantedElements() {
+  if (!document.referrer) {
+    return
+  }
   const domain = new URL(document.referrer).hostname
   const domainIsInternal = domain === 'localhost' || domain.endsWith(".ademe.fr") || domain.endsWith(".ademe.dev")
   if (domainIsInternal) {

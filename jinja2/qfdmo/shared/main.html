@@ -1,7 +1,7 @@
 {% extends base_template %}
 
 {% block content %}
-<turbo-frame id="mapContainer">
+<turbo-frame id="{% if map_container_id %}{{ map_container_id}}{% else %}mapContainer{% endif %}">
     {# Controleur général de gestion de la navigation et du formulaire #}
     <form
         id='search_form'
