@@ -8,8 +8,10 @@ django_setup_full()
 
 
 def replace_acteur_table(
-    prefix_django="qfdmo_displayed",
-    prefix_dbt="exposure_carte_",
+    schema_django: str,
+    prefix_django: str,
+    schema_dbt: str,
+    prefix_dbt: str,
     tables=[
         "acteur",
         "acteur_acteur_services",
@@ -26,6 +28,15 @@ def replace_acteur_table(
         cursor.execute("BEGIN")
         try:
             for table in tables:
+                logger.warning(
+                    f"Update schema of {prefix_dbt}{table} from {schema_dbt}"
+                    f" to {schema_django}"
+                )
+                cursor.execute(
+                    f"ALTER TABLE {schema_dbt}.{prefix_dbt}{table}"
+                    f" SET SCHEMA {schema_django}"
+                )
+
                 logger.warning(
                     f"Renaming {prefix_django}{table}"
                     f" to {prefix_django}{table}_to_remove"

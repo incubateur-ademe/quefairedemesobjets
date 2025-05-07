@@ -2,7 +2,7 @@ WITH acteurs_with_siren_matched AS (
 	SELECT
 	COUNT(*) AS nombre_acteurs
 	FROM qfdmo_displayedacteur AS acteurs
-	JOIN {{table_name}} AS unite
+	JOIN {{db_schema}}.{{table_name}} AS unite
 	ON unite.siren = acteurs.siren
 	WHERE acteurs.siren IS NOT NULL
 )

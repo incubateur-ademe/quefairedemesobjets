@@ -6,6 +6,7 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from clone.config import DIR_SQL_VALIDATION, TASKS, XCOMS, CloneConfig, xcom_pull
 from clone.tasks.business_logic.clone_table_validate import clone_table_validate
+
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -34,6 +35,7 @@ def clone_table_validate_wrapper(ti) -> None:
     log.preview("Configuration", config.model_dump())
 
     clone_table_validate(
+        db_schema=config.db_schema,
         table_kind=config.table_kind,
         table_name=config.table_name,
         dry_run=config.dry_run,

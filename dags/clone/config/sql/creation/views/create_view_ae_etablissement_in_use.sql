@@ -7,8 +7,8 @@ View to:
 */
 
 -- Need to drop as schema has changed
-DROP VIEW IF EXISTS {{view_name}} CASCADE;
-CREATE VIEW {{view_name}} AS (
+DROP VIEW IF EXISTS {{db_schema}}.{{view_name}} CASCADE;
+CREATE VIEW {{db_schema}}.{{view_name}} AS (
     SELECT
         "siren" AS siren,
         "nic" AS nic,
@@ -63,5 +63,5 @@ CREATE VIEW {{view_name}} AS (
         "activitePrincipaleEtablissement" AS activite_principale,
         "nomenclatureActivitePrincipaleEtablissement" AS nomenclature_activite_principale,
         "caractereEmployeurEtablissement" AS caractere_employeur
-    FROM {{table_name}}
+    FROM {{db_schema}}.{{table_name}}
 )
