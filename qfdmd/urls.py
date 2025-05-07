@@ -8,7 +8,6 @@ from qfdmd.views import (
     HomeView,
     SynonymeDetailView,
     get_assistant_script,
-    get_sw,
     search_view,
 )
 from qfdmo.views.carte import ProductCarteView
@@ -36,6 +35,5 @@ urlpatterns = [
     path("dechet/<slug:slug>/", SynonymeDetailView.as_view(), name="synonyme-detail"),
     path("dechet/<slug:slug>/carte/", ProductCarteView.as_view(), name="carte"),
     path("iframe.js", get_assistant_script, name="script"),
-    path("sw.js", get_sw, name="service-worker"),
     path("", HomeView.as_view(), name="home"),
 ]
