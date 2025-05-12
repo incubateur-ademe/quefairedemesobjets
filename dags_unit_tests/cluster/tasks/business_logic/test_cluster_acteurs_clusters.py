@@ -7,7 +7,6 @@ from cluster.tasks.business_logic.cluster_acteurs_clusters import (
     score_tuples_to_clusters,
     similarity_matrix_to_tuples,
 )
-from rich import print
 
 
 def df_clusters_to_dict(df: pd.DataFrame) -> dict[str, list[str]]:
@@ -169,11 +168,9 @@ class TestClusterActeursClusters:
             cluster_fields_fuzzy=["nom"],
             cluster_fuzzy_threshold=0.7,
         )
-        print(df_clusters.to_dict(orient="records"))
         assert df_clusters["cluster_id"].nunique() == 3
         assert len(df_clusters) == 6
         clusters = df_clusters_to_dict(df_clusters)
-        print(clusters)
         assert clusters == {
             "10000_nom_3": [
                 "id0",  # "centre commercial auchan"

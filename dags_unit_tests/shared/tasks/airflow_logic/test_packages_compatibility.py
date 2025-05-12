@@ -26,7 +26,7 @@ def test_pandas_read_sql_table():
      - mettre à jour ce teste pour qu'il fonctionne
      - mettre à jour les codes DAGs pour qu'ils fonctionnent également
     """
-    print(f"Pandas version: {pd.__version__}")
+    # print(f"Pandas version: {pd.__version__}")
     engine = create_engine("sqlite:///:memory:")
     engine.execute("CREATE TABLE my_table (id INT, name TEXT)")
     pd.read_sql_table("my_table", engine)

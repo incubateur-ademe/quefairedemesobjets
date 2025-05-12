@@ -790,7 +790,6 @@ class TestComputeLocation:
         result = compute_location(
             pd.Series({"latitude": latitude, "longitude": longitude}), None
         )
-        print(result["location"])
         assert result["location"] == expected_location
 
 

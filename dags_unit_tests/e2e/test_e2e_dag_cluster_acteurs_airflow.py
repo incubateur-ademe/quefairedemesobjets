@@ -4,7 +4,6 @@ to complete the pipeline entirely, but instead skips tasks as needed"""
 import pytest
 from airflow.utils.state import State
 from django.contrib.gis.geos import Point
-from rich import print
 
 from dags.cluster.config.tasks import TASKS
 from dags.shared.config import START_DATES
@@ -132,8 +131,6 @@ class TestClusterDedupSkipped:
 
         dag.test(execution_date=START_DATES.YESTERDAY, run_conf=conf)
         tis = dag.get_task_instances()
-        for ti in tis:
-            print(f"{ti.task_id}", f"{ti.state=}")
 
         # Tasks which should have completed successfully
         assert ti_get(tis, TASKS.CONFIG_CREATE).state == State.SUCCESS

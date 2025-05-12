@@ -17,6 +17,11 @@ class ChangeActeurUpdateStatut(ChangeActeurAbstract):
         if "statut" not in self.data:
             raise ValueError("No statut provided")
 
+        if self.data.keys() - {"statut", "siret_is_closed"}:
+            raise ValueError(
+                "Invalid data, only statut and siret_is_closed are allowed"
+            )
+
         if self.data["statut"] not in ActeurStatus.values:
             raise ValueError(f"Invalid statut: {self.data['statut']}")
 
@@ -29,4 +34,6 @@ class ChangeActeurUpdateStatut(ChangeActeurAbstract):
 
         for instance in instances:
             instance.statut = self.data["statut"]
+            if "siret_is_closed" in self.data:
+                instance.siret_is_closed = self.data["siret_is_closed"]
             instance.save()

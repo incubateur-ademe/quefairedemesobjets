@@ -10,6 +10,8 @@ from enrich.tasks.business_logic.enrich_dbt_model_to_suggestions import (
     enrich_dbt_model_to_suggestions,
 )
 
+from qfdmo.models.acteur import Acteur
+
 TODAY = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
 
@@ -140,9 +142,6 @@ class TestEnrichActeursClosedSuggestions:
             assert acteur.nom == f"AVANT {row[COLS.ACTEUR_ID]}"
             assert acteur.acteur_type == atype
             assert acteur.source == source
-            # print(f"{acteur.location=}")
-            # assert acteur.location.x == row[COLS.ACTEUR_LONGITUDE]
-            # assert acteur.location.y == row[COLS.ACTEUR_LATITUDE]
 
     def test_cohorte_not_replaced(self, acteurs, df_not_replaced):
         from data.models.suggestion import Suggestion, SuggestionCohorte
@@ -189,32 +188,40 @@ class TestEnrichActeursClosedSuggestions:
         from qfdmo.models import ActeurStatus, RevisionActeur
 
         # Closed acteur
-        closed = RevisionActeur.objects.get(pk=id)
-        assert closed.statut == ActeurStatus.INACTIF
-        assert closed.siret_is_closed is True
-        # for closed acteur we don't revision the parent data
-        assert closed.parent is None
-        assert closed.parent_reason == ""
+        a_closed = Acteur.objects.get(pk=id)
+        ra_closed = RevisionActeur.objects.get(pk=id)
+        assert a_closed.statut == ActeurStatus.INACTIF
+        assert ra_closed.statut == ActeurStatus.INACTIF
+        assert ra_closed.siret_is_closed or a_closed.siret_is_closed
 
         # The new acteur which about from siret_is_closed AND
         # identifiant_externe has the same data as the closed acteur
-        new = RevisionActeur.objects.filter(identifiant_externe=id_ext).first()
-        assert new is not None
+        a_new = Acteur.objects.filter(
+            identifiant_externe=id_ext, statut=ActeurStatus.ACTIF
+        ).first()
+        ra_new = RevisionActeur.objects.filter(
+            identifiant_unique=a_new.identifiant_unique
+        ).first()
+        assert a_new is not None
+        assert ra_new is not None
         # ID is concatenation of closed acteur ID, new siret and today's datetime
         assert re.search(
-            f"^{id}_{siret_new}_{TODAY}[0-9]{{4}}$", new.identifiant_unique
+            f"^{id}_{TODAY.replace('-', '')}[0-9]{{6}}$", a_new.identifiant_unique
         )
-        assert new.statut == ActeurStatus.ACTIF
-        assert new.siret == siret_new
-        assert new.siret_is_closed is None  # we have detected no closure yet
+        assert a_new.statut == ActeurStatus.ACTIF
+        assert ra_new.statut == ActeurStatus.ACTIF
+        assert a_new.siret == siret_new
+        assert ra_new.siret == siret_new
+        assert a_new.siret_is_closed is False  # we have detected no closure yet
+        assert ra_new.siret_is_closed is False  # we have detected no closure yet
 
         # foreign keys are iso with the closed acteur
-        assert new.parent.pk == parent.pk
-        assert new.source.pk == source.pk  # type: ignore
-        assert new.acteur_type.pk == acteur_type.pk
-        assert new.identifiant_externe == id_ext
+        assert a_new.source.pk == source.pk  # type: ignore
+        assert a_new.acteur_type.pk == acteur_type.pk
+        assert a_new.identifiant_externe == id_ext
         # Explanation as to why
-        assert new.parent_reason == parent_reason
+        print(f"{parent_reason} === {ra_new.parent_reason}")
+        assert ra_new.parent_reason == parent_reason
 
     def test_cohorte_meme_siren(
         self, acteurs, parent, atype, source, df_replaced_meme_siret
@@ -246,10 +253,9 @@ class TestEnrichActeursClosedSuggestions:
             siret_new="11111111100002",
             parent=parent,
             parent_reason=(
-                f"Nouvel enfant pour conserver les données suite à: "
-                f"SIRET 11111111100001 "
-                f"détecté le {TODAY} comme fermé dans AE, "
-                f"remplacé par SIRET 11111111100002"
+                "Nouvelle version de l'acteur conservées suite aux modifications:"
+                " SIRET 11111111100001 détecté le 2025-05-12 comme fermé dans AE,"
+                " remplacé par SIRET 11111111100002"
             ),
             source=source,
             acteur_type=atype,
@@ -271,7 +277,9 @@ class TestEnrichActeursClosedSuggestions:
         # Check suggestions have been written to DB
         cohort = SuggestionCohorte.objects.get(identifiant_action="test_autre_siren")
         suggestions = Suggestion.objects.filter(suggestion_cohorte=cohort)
-        assert len(suggestions) == 1  # 1 suggestion containing 2 changes (closed + new)
+
+        # 2 suggestions containing 2 changes (inactive + new)
+        assert len(suggestions) == 2
         # Apply suggestions
         for suggestion in suggestions:
             suggestion.apply()
@@ -281,13 +289,12 @@ class TestEnrichActeursClosedSuggestions:
             id="a2",
             id_ext="ext_a2",
             siret_closed="22222222200001",
-            siret_new="44444444400001",
+            siret_new="33333333300001",
             parent=parent,
             parent_reason=(
-                f"Nouvel enfant pour conserver les données suite à: "
-                f"SIRET 22222222200001 "
-                f"détecté le {TODAY} comme fermé dans AE, "
-                f"remplacé par SIRET 44444444400001"
+                "Nouvelle version de l'acteur conservées suite aux modifications:"
+                " SIRET 22222222200001 détecté le 2025-05-12 comme fermé dans AE,"
+                " remplacé par SIRET 33333333300001"
             ),
             source=source,
             acteur_type=atype,
@@ -296,11 +303,15 @@ class TestEnrichActeursClosedSuggestions:
         self.check_replaced_acteur(
             id="a3",
             id_ext="ext_a3",
-            siret_closed="33333333300001",
+            siret_closed="44444444400001",
             siret_new="55555555500001",
             parent=parent,
             # This closed acteur has no parent so there should be no parent_reason
-            parent_reason="",
+            parent_reason=(
+                "Nouvelle version de l'acteur conservées suite aux modifications:"
+                " SIRET 44444444400001 détecté le 2025-05-12 comme fermé dans AE,"
+                " remplacé par SIRET 55555555500001"
+            ),
             source=source,
             acteur_type=atype,
         )

@@ -139,7 +139,6 @@ def changes_prepare_closed_replaced(
     old_acteur = {
         "id": row[COLS.ACTEUR_ID],
         "data": {
-            "identifiant_unique": row[COLS.ACTEUR_ID],
             "siret_is_closed": True,
             "statut": ActeurStatus.INACTIF,
         },
@@ -164,6 +163,7 @@ def changes_prepare_closed_replaced(
             "statut": ActeurStatus.ACTIF,
             "siret": row[COLS.SUGGEST_SIRET],
             "siren": row[COLS.SUGGEST_SIRET][:9],
+            "siret_is_closed": False,
             "parent_reason": (  # FIXME : renommer parent_reason
                 "Nouvelle version de l'acteur conservées suite aux modifications: "
                 f"SIRET {row[COLS.ACTEUR_SIRET]} "
