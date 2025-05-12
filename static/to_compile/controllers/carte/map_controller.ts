@@ -26,7 +26,7 @@ export class Actor implements DisplayedActeur {
   }
 }
 
-export default class extends Controller<HTMLElement> {
+class MapController extends Controller<HTMLElement> {
   static targets = ["acteur", "searchInZoneButton", "bbox", "leafletContainer"]
   static values = {
     location: { type: Object, default: {} },
@@ -39,11 +39,15 @@ export default class extends Controller<HTMLElement> {
   declare readonly locationValue: object
 
   connect() {
+    console.log("MAP CONTROLLER", { locationValue: this.locationValue, targets: this.acteurTargets })
+    console.log(this.element.closest("#ou-l-apporter > turbo-frame"))
     const actorsMap = new SolutionMap({
       selector: this.leafletContainerTarget,
       location: this.locationValue,
       controller: this,
     })
+
+    console.log("MAP CONTROLLER", { actorsMap })
 
     const actors: Array<Actor> = this.acteurTargets
       .filter(({ textContent }) => textContent !== null)
@@ -52,6 +56,8 @@ export default class extends Controller<HTMLElement> {
         return new Actor(actorFields)
       })
       .filter((actor) => actor !== undefined)
+
+    console.log({ actors })
 
     if (this.hasBboxTarget && this.bboxTarget.value !== "") {
       const bbox = JSON.parse(this.bboxTarget.value)
@@ -81,3 +87,4 @@ export default class extends Controller<HTMLElement> {
     this.searchInZoneButtonTarget.classList.add("qf-hidden")
   }
 }
+export default MapController

@@ -57,7 +57,7 @@
                 tabindex="0"
             >
                 {% block form_result %}
-                    <turbo-frame id="addressesPanel"
+                    <div id="addressesPanel"
                         data-search-solution-form-target="addressesPanel"
                         class="qf-relative qf-z-10
                             qf-flex qf-flex-col
@@ -70,7 +70,7 @@
                         tabindex="0"
                     >
                         {% include 'qfdmo/shared/results.html' %}
-                    </turbo-frame>
+                    </div>
                 {% endblock form_result %}
 
                 {% block form_fields %}

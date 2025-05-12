@@ -68,6 +68,7 @@ export default class extends AutocompleteController {
       this.inputTarget.value = label
       if (longitude) this.longitudeTarget.value = longitude
       if (latitude) this.latitudeTarget.value = latitude
+      // Call outlet
       this.dispatch("optionSelected")
     }
     this.hideAutocompleteList()
@@ -96,6 +97,7 @@ export default class extends AutocompleteController {
       this.#saveLocationInSessionStorage()
       this.#hideInputError()
       this.hideSpinner()
+      // Call outlet
       this.dispatch("optionSelected")
 
     } catch (error) {
@@ -121,6 +123,7 @@ export default class extends AutocompleteController {
       this.inputTarget.value = label
       if (longitude) this.longitudeTarget.value = longitude
       if (latitude) this.latitudeTarget.value = latitude
+      // Call outlet
       this.dispatch("optionSelected")
     }
   }
@@ -129,10 +132,12 @@ export default class extends AutocompleteController {
     //option : this.#allAvailableOptions[i]
     /*create a DIV element for each matching element:*/
     let b = document.createElement("DIV")
+
     /*make the matching letters bold:*/
     const [data, longitude, latitude] = option.split("||")
     const newText = data.replace(regexPattern, "<strong>$&</strong>")
     b.innerHTML = newText
+
     // FIXME : better way to do this
     const input = document.createElement("input")
     input.setAttribute("type", "hidden")
