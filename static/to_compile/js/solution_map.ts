@@ -3,7 +3,7 @@ import pinBackgroundFillSvg from "bundle-text:../svg/pin-background-fill.svg"
 import pinBackgroundSvg from "bundle-text:../svg/pin-background.svg"
 import * as L from "leaflet"
 import { ACTIVE_PINPOINT_CLASSNAME, clearActivePinpoints } from "./helpers"
-import MapController from "./map_controller"
+import MapController from "../controllers/carte/map_controller"
 import type { DisplayedActeur, Location, LVAOMarker } from "./types"
 
 const DEFAULT_LOCATION: L.LatLngTuple = [46.227638, 2.213749]
@@ -20,15 +20,18 @@ export class SolutionMap {
   points: Array<Array<Number>>
 
   constructor({
+    selector,
     location,
     controller,
   }: {
+    selector: HTMLDivElement,
     location: Location
     controller: MapController
   }) {
     this.#location = location
     this.#controller = controller
-    this.map = L.map("map", {
+    console.log({ selector })
+    this.map = L.map(selector, {
       preferCanvas: true,
       zoomControl: false,
     })

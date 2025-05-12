@@ -1,8 +1,8 @@
 import { Controller } from "@hotwired/stimulus"
 import debounce from "lodash/debounce"
-import { removeHash } from "./helpers"
-import { SolutionMap } from "./solution_map"
-import { ActorLocation, DisplayedActeur } from "./types"
+import { removeHash } from "../../js/helpers"
+import { SolutionMap } from "../../js/solution_map"
+import { ActorLocation, DisplayedActeur } from "../../js/types"
 
 export class Actor implements DisplayedActeur {
   uuid: string
@@ -27,30 +27,32 @@ export class Actor implements DisplayedActeur {
 }
 
 export default class extends Controller<HTMLElement> {
-  static targets = ["acteur", "searchInZoneButton", "bbox"]
+  static targets = ["acteur", "searchInZoneButton", "bbox", "leafletContainer"]
   static values = {
     location: { type: Object, default: {} },
   }
   declare readonly acteurTargets: Array<HTMLScriptElement>
   declare readonly searchInZoneButtonTarget: HTMLButtonElement
   declare readonly bboxTarget: HTMLInputElement
+  declare readonly leafletContainerTarget: HTMLDivElement
   declare readonly hasBboxTarget: boolean
   declare readonly locationValue: object
 
   connect() {
     const actorsMap = new SolutionMap({
+      selector: this.leafletContainerTarget,
       location: this.locationValue,
       controller: this,
     })
-    //fixme : find how do not allow undefined from map
+
     const actors: Array<Actor> = this.acteurTargets
-      .map((actorTarget: HTMLScriptElement) => {
-        if (actorTarget.textContent !== null) {
-          const actorFields: DisplayedActeur = JSON.parse(actorTarget.textContent)
-          return new Actor(actorFields)
-        }
+      .filter(({ textContent }) => textContent !== null)
+      .map(({ textContent }) => {
+        const actorFields: DisplayedActeur = JSON.parse(textContent!)
+        return new Actor(actorFields)
       })
       .filter((actor) => actor !== undefined)
+
     if (this.hasBboxTarget && this.bboxTarget.value !== "") {
       const bbox = JSON.parse(this.bboxTarget.value)
       actorsMap.addActorMarkersToMap(actors, bbox)

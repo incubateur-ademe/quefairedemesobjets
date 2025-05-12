@@ -5,11 +5,11 @@ from core.views import static_file_content_from
 
 
 def get_carte_iframe_script(request):
-    return static_file_content_from("carte.js")
+    return static_file_content_from("embed/carte.js")
 
 
 def get_formulaire_iframe_script(request):
-    return static_file_content_from("iframe.js")
+    return static_file_content_from("embed/formulaire.js")
 
 
 def google_verification(request):

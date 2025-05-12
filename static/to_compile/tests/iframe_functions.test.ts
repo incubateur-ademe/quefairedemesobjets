@@ -1,4 +1,4 @@
-import { getIframeAttributesAndExtra } from "../entrypoints/iframe_functions";
+import { getIframeAttributesAndExtra } from "../js/iframe_functions";
 
 describe("getIframeAttributesAndExtra function tests", () => {
   let scriptTag: HTMLScriptElement;

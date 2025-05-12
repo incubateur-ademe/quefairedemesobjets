@@ -1,6 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import * as Turbo from "@hotwired/turbo"
-import { clearActivePinpoints, removeHash } from "./helpers"
+import { clearActivePinpoints, removeHash } from "../../js/helpers"
 
 export default class extends Controller<HTMLElement> {
   #selectedOption: string = ""
@@ -333,6 +333,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   checkAdresseErrorForm(): boolean {
+    // TODO: refacto forms, handle on django side
     let errorExists = false
     if (!this.latitudeInputTarget.value || !this.longitudeInputTarget.value) {
       this.adresseGroupTarget.classList.add("fr-input-group--error")
@@ -346,6 +347,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   #checkErrorForm(): boolean {
+    // TODO: refacto forms, handle on django side
     let errorExists = false
     if (this.checkSsCatObjetErrorForm()) errorExists ||= true
     if (this.checkAdresseErrorForm()) errorExists ||= true
