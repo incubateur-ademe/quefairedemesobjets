@@ -1,5 +1,7 @@
+@import "npm:leaflet/dist/leaflet.css";
 @import "./leaflet-overrides.css";
 @import "./dsfr-overrides.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

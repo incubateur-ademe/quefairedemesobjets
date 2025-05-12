@@ -30,7 +30,9 @@ export class SolutionMap {
   }) {
     this.#location = location
     this.#controller = controller
-    console.log({ selector })
+
+    console.log("INIT Leaflet Map Container", { selector })
+    console.log(selector.closest("#ou-l-apporter > turbo-frame"))
     this.map = L.map(selector, {
       preferCanvas: true,
       zoomControl: false,

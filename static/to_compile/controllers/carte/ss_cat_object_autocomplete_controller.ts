@@ -89,6 +89,7 @@ export default class extends AutocompleteController {
         })
 
         this.hideAutocompleteList()
+        // Call outlet
         this.dispatch("optionSelected")
     }
 

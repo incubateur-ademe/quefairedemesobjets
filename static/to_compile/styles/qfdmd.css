@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import "./carte.css";
-
 @layer base {
   p a {
     @apply qf-text-blue-france-sun-113-625;

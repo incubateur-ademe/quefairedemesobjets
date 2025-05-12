@@ -425,12 +425,15 @@ export default class extends Controller<HTMLElement> {
 
   advancedSubmit(event: Event) {
     this.hideActeurDetailsPanel()
+
+    // Applies only in Formulaire alternative or in digital version.
     const withControls =
       (event.target as HTMLElement).dataset.withControls?.toLowerCase() === "true"
     if (withControls) {
       if (this.#checkErrorForm()) return
     }
 
+    // Applies only in Formulaire alternative.
     const withoutZone =
       (event.target as HTMLElement).dataset.withoutZone?.toLowerCase() === "true"
     if (withoutZone) {
@@ -439,6 +442,7 @@ export default class extends Controller<HTMLElement> {
       }
     }
 
+    // Applies only in Formulaire alternative.
     const withDynamicFormPanel =
       (event.target as HTMLElement).dataset.withDynamicFormPanel?.toLowerCase() ===
       "true"

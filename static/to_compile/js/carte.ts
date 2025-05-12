@@ -1,7 +1,3 @@
-// The styles file is imported here so that Parcel can pick it up
-// in both qfdmo.ts and qfdmd.ts
-import "../styles/qfdmo.css"
-
 import { Application } from "@hotwired/stimulus"
 import * as Turbo from "@hotwired/turbo"
 
