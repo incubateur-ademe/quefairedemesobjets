@@ -638,6 +638,41 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
 
         self.save()
 
+    def instance_copy(
+        self,
+        overriden_fields={
+            "identifiant_unique": None,
+            "identifiant_externe": None,
+            "source": None,
+        },
+    ):
+        if isinstance(self, RevisionActeur) and self.is_parent:
+            raise Exception("Impossible de dupliquer un acteur parent")
+
+        if isinstance(self, RevisionActeur):
+            acteur = Acteur.objects.get(identifiant_unique=self.identifiant_unique)
+            acteur.instance_copy(overriden_fields=overriden_fields)
+
+        new_instance = deepcopy(self)
+
+        for field, value in overriden_fields.items():
+            setattr(new_instance, field, value)
+
+        new_instance.save()
+        new_instance.labels.set(self.labels.all())
+        new_instance.acteur_services.set(self.acteur_services.all())
+
+        # recreate proposition_services for the new revision_acteur
+        for proposition_service in self.proposition_services.all():
+            new_proposition_service = proposition_service.__class__.objects.create(
+                acteur=new_instance,
+                action=proposition_service.action,
+            )
+            new_proposition_service.sous_categories.set(
+                proposition_service.sous_categories.all()
+            )
+        return new_instance
+
 
 def clean_parent(parent):
     try:
@@ -933,11 +968,9 @@ class RevisionActeur(BaseActeur):
 
         # recreate proposition_services for the new revision_acteur
         for proposition_service in self.proposition_services.all():
-            revision_proposition_service = revision_proposition_service = (
-                RevisionPropositionService.objects.create(
-                    acteur=revision_acteur,
-                    action=proposition_service.action,
-                )
+            revision_proposition_service = RevisionPropositionService.objects.create(
+                acteur=revision_acteur,
+                action=proposition_service.action,
             )
             revision_proposition_service.sous_categories.set(
                 proposition_service.sous_categories.all()

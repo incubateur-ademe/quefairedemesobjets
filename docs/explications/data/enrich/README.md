@@ -19,9 +19,27 @@ Plusieurs étapes :
     * Cloner - BAN - Adresses
     * Cloner - BAN - Lieux-dits
 1. Préparation de la donnée (Airflow + DBT) :
+    * DBT - Rafraîchir les acteurs affichés
     * 🔄 Enrichir - Rafraîchir les modèles DBT
 1. Création des suggestions (Airflow + DBT) :
     * 🚪 Enrichir - Acteurs Fermés
+
+```mermaid
+graph LR
+    A[Cloner - AE - Etablissement]
+    B[Cloner - AE - Unite Legale]
+    C[Cloner - BAN - Adresses]
+    D[Cloner - BAN - Lieux-dits]
+    E[DBT - Rafraîchir les acteurs affichés]
+    F[🔄 Enrichir - Rafraîchir les modèles DBT]
+    G[🚪 Enrichir - Acteurs Fermés]
+    A --> F
+    B --> F
+    C --> F
+    D --> F
+    F --> G
+    E --> G
+```
 
 ## Script de cohérence
 

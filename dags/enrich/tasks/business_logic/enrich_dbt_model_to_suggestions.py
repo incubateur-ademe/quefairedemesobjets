@@ -124,7 +124,7 @@ def changes_prepare_closed_replaced(
     row: dict,
 ) -> tuple[list[dict], dict]:
     """Prepare suggestion changes for closed replaced cohorts"""
-    from data.models.changes import ChangeActeurCreateAsCopy, ChangeActeurUpdateData
+    from data.models.changes import ChangeActeurCreateAsCopy, ChangeActeurUpdateStatut
     from qfdmo.models import ActeurStatus
 
     changes = []
@@ -146,33 +146,26 @@ def changes_prepare_closed_replaced(
     }
     changes.append(
         changes_prepare(
-            model=ChangeActeurUpdateData,
+            model=ChangeActeurUpdateStatut,
             model_params=old_acteur,
             order=1,
-            reason="ancien enfant fermé",
+            reason="ancienne version de l'acteur inactive",
             entity_type="acteur_displayed",
         )
     )
     # New child to hold the reference data as standalone
     # (since old child will be closed)
     now = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
-    new_acteur_id = f"{row[COLS.ACTEUR_ID]}_{row[COLS.ACTEUR_SIRET]}_{now}"
+    new_acteur_id = f"{row[COLS.ACTEUR_ID]}_{now}"
     new_acteur = {
         "id": row[COLS.ACTEUR_ID],
         "data": {
             "identifiant_unique": new_acteur_id,
-            # FIXME : all these fields will be inherited from the old acteur
-            # "identifiant_externe": row[COLS.ACTEUR_ID_EXTERNE],
-            # "source": row[COLS.ACTEUR_SOURCE_ID],
-            # "acteur_type": row[COLS.ACTEUR_TYPE_ID],
-            # "parent": row[COLS.ACTEUR_PARENT_ID],
-            # "latitude": row[COLS.ACTEUR_LATITUDE],
-            # "longitude": row[COLS.ACTEUR_LONGITUDE],
-            # "statut": ActeurStatus.ACTIF,
+            "statut": ActeurStatus.ACTIF,
             "siret": row[COLS.SUGGEST_SIRET],
             "siren": row[COLS.SUGGEST_SIRET][:9],
             "parent_reason": (  # FIXME : renommer parent_reason
-                "Nouvel enfant pour conserver les données suite à: "
+                "Nouvelle version de l'acteur conservées suite aux modifications: "
                 f"SIRET {row[COLS.ACTEUR_SIRET]} "
                 f"détecté le {today} comme fermé dans AE, "
                 f"remplacé par SIRET {row[COLS.SUGGEST_SIRET]}"
