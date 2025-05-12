@@ -9,13 +9,12 @@
         "e2e_test": " npx playwright test --update-snapshots"
     },
     "source": [
-        "static/to_compile/entrypoints/sw.ts",
-        "static/to_compile/entrypoints/assistant/script-to-iframe.ts",
-        "static/to_compile/entrypoints/admin-categorie-widget.ts",
         "static/to_compile/entrypoints/qfdmd.ts",
-        "static/to_compile/entrypoints/qfdmd.css",
-        "static/to_compile/entrypoints/iframe.ts",
-        "static/to_compile/entrypoints/carte.ts",
+        "static/to_compile/entrypoints/qfdmo.ts",
+        "static/to_compile/entrypoints/embed/assistant.ts",
+        "static/to_compile/entrypoints/embed/formulaire.ts",
+        "static/to_compile/entrypoints/embed/carte.ts",
+        "static/to_compile/entrypoints/admin-categorie-widget.ts",
         "static/to_compile/entrypoints/admin-map-widget.ts"
     ],
     "targets": {

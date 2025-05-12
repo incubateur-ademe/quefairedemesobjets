@@ -20,11 +20,7 @@ logger = logging.getLogger(__name__)
 
 @cache_control(max_age=31536000)
 def get_assistant_script(request):
-    return static_file_content_from("assistant/script-to-iframe.js")
-
-
-def get_sw(request):
-    return static_file_content_from("sw.js")
+    return static_file_content_from("embed/assistant.js")
 
 
 def generate_iframe_script(request) -> str:
