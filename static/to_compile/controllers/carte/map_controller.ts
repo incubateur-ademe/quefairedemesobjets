@@ -39,15 +39,11 @@ class MapController extends Controller<HTMLElement> {
   declare readonly locationValue: object
 
   connect() {
-    console.log("MAP CONTROLLER", { locationValue: this.locationValue, targets: this.acteurTargets })
-    console.log(this.element.closest("#ou-l-apporter > turbo-frame"))
     const actorsMap = new SolutionMap({
       selector: this.leafletContainerTarget,
       location: this.locationValue,
       controller: this,
     })
-
-    console.log("MAP CONTROLLER", { actorsMap })
 
     const actors: Array<Actor> = this.acteurTargets
       .filter(({ textContent }) => textContent !== null)
@@ -56,8 +52,6 @@ class MapController extends Controller<HTMLElement> {
         return new Actor(actorFields)
       })
       .filter((actor) => actor !== undefined)
-
-    console.log({ actors })
 
     if (this.hasBboxTarget && this.bboxTarget.value !== "") {
       const bbox = JSON.parse(this.bboxTarget.value)
