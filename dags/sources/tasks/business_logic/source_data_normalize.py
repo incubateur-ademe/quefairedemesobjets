@@ -239,6 +239,22 @@ def source_data_normalize(
     # Merge and delete undesired lines
     df, metadata = _remove_undesired_lines(df, dag_config)
 
+    # deduplication_on_source_code
+    if dag_id == "eo-ocab":
+        df = df.assign(source_code=df["source_code"].str.split("|")).explode(
+            "source_code"
+        )
+        df["source_code"] = df["source_code"].apply(
+            lambda x: "ocab_" + x.strip().lower()
+        )
+        # Recalcule de l'identifiant unique
+        normalisation_function = get_transformation_function(
+            "clean_identifiant_unique", dag_config
+        )
+        df[["identifiant_unique"]] = df[["identifiant_externe", "source_code"]].apply(
+            normalisation_function, axis=1
+        )
+
     # Check that the dataframe has the expected columns
     expected_columns = dag_config.get_expected_columns()
 
