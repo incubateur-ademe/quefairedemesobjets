@@ -149,6 +149,10 @@ with DAG(
             "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
             "donnees-eo-ocab/lines?size=10000"
         ),
+        "oca": {
+            "prefix": "ocab",
+            "deduplication_source": True,
+        },
         "validate_address_with_ban": False,
         "product_mapping": get_mapping_config(),
     },
