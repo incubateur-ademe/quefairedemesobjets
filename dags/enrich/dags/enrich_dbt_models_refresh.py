@@ -42,11 +42,9 @@ with DAG(
     tasks = []
     for cmd in dag.params.get("dbt_models_refresh_commands", []):
         cmd = cmd.strip()
-        cmd_id = re.sub(r"__+", "_", re.sub(r"[^a-zA-Z0-9]+", "_", cmd))
-        cmd = "cd /opt/airflow/dbt/ && " + cmd
         if not cmd:
             continue
-        #        cmd += " --debug --threads 1"
+        cmd_id = re.sub(r"__+", "_", re.sub(r"[^a-zA-Z0-9]+", "_", cmd))
         logger.info(f"Create bash operator with command: {cmd}")
         tasks.append(
             BashOperator(

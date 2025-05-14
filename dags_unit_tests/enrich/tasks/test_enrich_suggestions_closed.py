@@ -246,6 +246,7 @@ class TestEnrichActeursClosedSuggestions:
             suggestion.apply()
 
         # Closed acteur
+        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         self.check_replaced_acteur(
             id="a1",
             id_ext="ext_a1",
@@ -253,8 +254,8 @@ class TestEnrichActeursClosedSuggestions:
             siret_new="11111111100002",
             parent=parent,
             parent_reason=(
-                "Nouvelle version de l'acteur conservées suite aux modifications:"
-                " SIRET 11111111100001 détecté le 2025-05-12 comme fermé dans AE,"
+                "Nouvelle version de l'acteur conservée suite aux modifications:"
+                f" SIRET 11111111100001 détecté le {today} comme fermé dans AE,"
                 " remplacé par SIRET 11111111100002"
             ),
             source=source,
@@ -285,6 +286,7 @@ class TestEnrichActeursClosedSuggestions:
             suggestion.apply()
 
         # Verify changes
+        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         self.check_replaced_acteur(
             id="a2",
             id_ext="ext_a2",
@@ -292,14 +294,15 @@ class TestEnrichActeursClosedSuggestions:
             siret_new="33333333300001",
             parent=parent,
             parent_reason=(
-                "Nouvelle version de l'acteur conservées suite aux modifications:"
-                " SIRET 22222222200001 détecté le 2025-05-12 comme fermé dans AE,"
+                "Nouvelle version de l'acteur conservée suite aux modifications:"
+                f" SIRET 22222222200001 détecté le {today} comme fermé dans AE,"
                 " remplacé par SIRET 33333333300001"
             ),
             source=source,
             acteur_type=atype,
         )
 
+        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         self.check_replaced_acteur(
             id="a3",
             id_ext="ext_a3",
@@ -308,8 +311,8 @@ class TestEnrichActeursClosedSuggestions:
             parent=parent,
             # This closed acteur has no parent so there should be no parent_reason
             parent_reason=(
-                "Nouvelle version de l'acteur conservées suite aux modifications:"
-                " SIRET 44444444400001 détecté le 2025-05-12 comme fermé dans AE,"
+                "Nouvelle version de l'acteur conservée suite aux modifications:"
+                f" SIRET 44444444400001 détecté le {today} comme fermé dans AE,"
                 " remplacé par SIRET 55555555500001"
             ),
             source=source,

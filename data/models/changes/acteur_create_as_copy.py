@@ -43,23 +43,6 @@ class ChangeActeurCreateAsCopy(BaseModel):
             )
             raise ValueError(msg)
 
-    def copy_acteur(
-        self,
-        overriden_fields={
-            "identifiant_unique": None,
-            "identifiant_externe": None,
-            "source": None,
-        },
-    ):
-        from qfdmo.models import Acteur
-
-        acteur_to_copy = Acteur.objects.get(pk=self.id)
-        revision_acteur_to_copy = acteur_to_copy.get_or_create_revision()
-
-        revision_acteur_to_copy.instance_copy(
-            revision_acteur_to_copy, overriden_fields=overriden_fields
-        )
-
     def apply(self):
         self.validate()
         from qfdmo.models import Acteur, ActeurStatus

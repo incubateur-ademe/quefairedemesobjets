@@ -57,11 +57,13 @@ run-airflow:
 
 .PHONY: run-django
 run-django:
-	docker compose --profile lvao up -d
-	honcho start -f Procfile.dev
+	docker compose --profile airflow down
+	docker compose --profile lvao down
+	honcho start -f Procfile.django.dev
 
 run-all:
-	docker compose --profile airflow up -d
+	docker compose --profile airflow down
+	docker compose --profile lvao down
 	honcho start -f Procfile.all.dev
 
 # Local django operations

@@ -164,8 +164,8 @@ def changes_prepare_closed_replaced(
             "siret": row[COLS.SUGGEST_SIRET],
             "siren": row[COLS.SUGGEST_SIRET][:9],
             "siret_is_closed": False,
-            "parent_reason": (  # FIXME : renommer parent_reason
-                "Nouvelle version de l'acteur conservées suite aux modifications: "
+            "parent_reason": (
+                "Nouvelle version de l'acteur conservée suite aux modifications: "
                 f"SIRET {row[COLS.ACTEUR_SIRET]} "
                 f"détecté le {today} comme fermé dans AE, "
                 f"remplacé par SIRET {row[COLS.SUGGEST_SIRET]}"
@@ -238,9 +238,9 @@ def enrich_dbt_model_to_suggestions(
         row = dict(row)
 
         try:
-            interpret_function = COHORTS_TO_PREPARE_CHANGES[cohort]
             logger.info(f"Interprétation de {cohort=}")
-            changes, contexte = interpret_function(row)
+            change_preparation_function = COHORTS_TO_PREPARE_CHANGES[cohort]
+            changes, contexte = change_preparation_function(row)
             suggestion = {
                 "contexte": contexte,
                 "suggestion": {"title": cohort, "changes": changes},
