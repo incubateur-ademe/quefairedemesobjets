@@ -215,7 +215,7 @@ class TestSourceDataNormalize:
                 "product_mapping": {"product1": "code1"},
             }
         )
-        df, metadata = source_data_normalize(
+        df, _ = source_data_normalize(
             dag_config=dag_config,
             df_acteur_from_source=pd.DataFrame(
                 {
@@ -235,6 +235,115 @@ class TestSourceDataNormalize:
                     "liste": [["fake nom"], ["fake nom"]],
                 }
             ).reset_index(drop=True),
+        )
+
+
+class TestDfApplyOCA:
+    """
+    Test de la fonction df_normalize_oca
+    """
+
+    @pytest.fixture
+    def dag_config_kwargs(self):
+        return {
+            "normalization_rules": [
+                {"keep": "identifiant_unique"},
+                {"keep": "nom"},
+                {"keep": "source_code"},
+                {"keep": "identifiant_externe"},
+            ],
+            "product_mapping": {},
+            "endpoint": "https://example.com/api",
+        }
+
+    @pytest.fixture
+    def df_acteur(self):
+        return pd.DataFrame(
+            {
+                "identifiant_unique": ["id1", "id2"],
+                "source_code": ["oca_1|oca_2", "oca_2"],
+                "identifiant_externe": ["ext1", "ext2"],
+                "nom": ["nom1", "nom2"],
+            }
+        )
+
+    def test_apply_oca_config(self, dag_config_kwargs, df_acteur):
+        dag_config_kwargs["oca"] = {"prefix": "ocatest", "deduplication_source": True}
+
+        df, _ = source_data_normalize(
+            df_acteur_from_source=df_acteur,
+            dag_config=DAGConfig.model_validate(dag_config_kwargs),
+            dag_id="dag_id",
+        )
+
+        expected_df = pd.DataFrame(
+            {
+                "identifiant_unique": [
+                    "ocatest_oca_1_ext1",
+                    "ocatest_oca_2_ext1",
+                    "ocatest_oca_2_ext2",
+                ],
+                "source_code": ["ocatest_oca_1", "ocatest_oca_2", "ocatest_oca_2"],
+                "identifiant_externe": ["ext1", "ext1", "ext2"],
+                "nom": ["nom1", "nom1", "nom2"],
+            }
+        )
+
+        pd.testing.assert_frame_equal(
+            df.reset_index(drop=True), expected_df.reset_index(drop=True)
+        )
+
+    def test_apply_oca_config_no_deduplication_source(
+        self, dag_config_kwargs, df_acteur
+    ):
+        dag_config_kwargs["oca"] = {"prefix": "ocatest"}
+
+        df, _ = source_data_normalize(
+            df_acteur_from_source=df_acteur,
+            dag_config=DAGConfig.model_validate(dag_config_kwargs),
+            dag_id="dag_id",
+        )
+
+        expected_df = pd.DataFrame(
+            {
+                "identifiant_unique": [
+                    "ocatest_oca_1|oca_2_ext1",
+                    "ocatest_oca_2_ext2",
+                ],
+                "source_code": ["ocatest_oca_1|oca_2", "ocatest_oca_2"],
+                "identifiant_externe": ["ext1", "ext2"],
+                "nom": ["nom1", "nom2"],
+            }
+        )
+
+        pd.testing.assert_frame_equal(
+            df.reset_index(drop=True), expected_df.reset_index(drop=True)
+        )
+
+    def test_apply_oca_config_no_prefix(self, dag_config_kwargs, df_acteur):
+        dag_config_kwargs["oca"] = {"deduplication_source": True}
+
+        df, _ = source_data_normalize(
+            df_acteur_from_source=df_acteur,
+            dag_config=DAGConfig.model_validate(dag_config_kwargs),
+            dag_id="dag_id",
+        )
+
+        expected_df = pd.DataFrame(
+            {
+                "identifiant_unique": [
+                    "oca_1_ext1",
+                    "oca_2_ext1",
+                    "oca_2_ext2",
+                ],
+                "source_code": ["oca_1", "oca_2", "oca_2"],
+                "identifiant_externe": ["ext1", "ext1", "ext2"],
+                "nom": ["nom1", "nom1", "nom2"],
+            }
+        )
+
+        pd.testing.assert_frame_equal(
+            df.reset_index(drop=True), expected_df.reset_index(drop=True)
         )
 
 
