@@ -34,7 +34,7 @@ def changes_prepare(
 
 def changes_prepare_villes(row: dict) -> tuple[list[dict], dict]:
     """Prepare suggestions for villes cohorts"""
-    from data.models.changes import ChangeActeurUpdateData
+    from data.models.changes import ChangeActeurUpdateRevision
 
     changes = []
     model_params = {
@@ -45,7 +45,7 @@ def changes_prepare_villes(row: dict) -> tuple[list[dict], dict]:
     }
     changes.append(
         changes_prepare(
-            model=ChangeActeurUpdateData,
+            model=ChangeActeurUpdateRevision,
             model_params=model_params,
             order=1,
             reason="On fait confiance à la BAN",
@@ -92,24 +92,26 @@ def changes_prepare_closed_not_replaced(
     row: dict,
 ) -> tuple[list[dict], dict]:
     """Prepare suggestions for closed not replaced cohorts"""
-    from data.models.changes import ChangeActeurUpdateData
+    from data.models.changes import ChangeActeurUpdateRevision
     from qfdmo.models import ActeurStatus
 
     changes = []
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     model_params = {
         "id": row[COLS.ACTEUR_ID],
         "data": {
             "statut": ActeurStatus.INACTIF,
-            "siret": row[COLS.ACTEUR_SIRET],
-            "siren": row[COLS.ACTEUR_SIRET][:9],
             "siret_is_closed": True,
-            "acteur_type": row[COLS.ACTEUR_TYPE_ID],
-            "source": row[COLS.ACTEUR_SOURCE_ID],
+            "parent_reason": (
+                f"Modifications de l'acteur le {today}: "
+                f"SIRET {row[COLS.ACTEUR_SIRET]} détecté comme fermé dans AE,"
+                " Pas de remplacement"
+            ),
         },
     }
     changes.append(
         changes_prepare(
-            model=ChangeActeurUpdateData,
+            model=ChangeActeurUpdateRevision,
             model_params=model_params,
             order=1,
             reason="SIRET & SIREN fermés, 0 remplacement trouvé",

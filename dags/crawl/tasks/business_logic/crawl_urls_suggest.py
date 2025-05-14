@@ -3,6 +3,7 @@ import logging
 import pandas as pd
 from crawl.config.columns import COLS
 from crawl.config.constants import LABEL_URL_ORIGINE, LABEL_URL_PROPOSEE
+
 from utils import logging_utils as log
 from utils.dataframes import (
     df_col_assert_get_unique,
@@ -39,7 +40,7 @@ def suggestions_prepare(
     - df_crawl_ok_diff = successful AND different = propose
     - df_crawl_fail = failed = propose None"""
     from data.models.change import SuggestionChange
-    from data.models.changes import ChangeActeurUpdateData
+    from data.models.changes import ChangeActeurUpdateRevision
 
     if df_none_or_empty(df):
         return []
@@ -54,7 +55,7 @@ def suggestions_prepare(
                 order=1,
                 reason=row[COLS.COHORT],
                 entity_type="acteur_displayed",
-                model_name=ChangeActeurUpdateData.name(),
+                model_name=ChangeActeurUpdateRevision.name(),
                 model_params={
                     "id": acteur[COLS.ID],
                     "data": {COLS.URL_DB: row[COLS.SUGGEST_VALUE]},

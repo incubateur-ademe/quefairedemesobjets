@@ -160,7 +160,11 @@ class TestEnrichActeursClosedSuggestions:
             closed = RevisionActeur.objects.get(pk=id)
             assert closed.statut == ActeurStatus.INACTIF
             assert closed.parent is None
-            assert closed.parent_reason == ""  # consequence of empty strings in DB
+            assert closed.parent_reason == (
+                f"Modifications de l'acteur le {TODAY}: "
+                f"SIRET {'00000000000001' if id == 'a01' else '00000000000002'} détecté"
+                " comme fermé dans AE, Pas de remplacement"
+            )
             assert closed.siret_is_closed is True
 
     def test_cohorte_meme_siren(self, acteurs, df_replaced_meme_siret):

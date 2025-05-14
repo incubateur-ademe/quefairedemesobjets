@@ -2,11 +2,11 @@ import pandas as pd
 import pytest
 from crawl.fixtures import acteurs_create, df_syntax_fail  # noqa
 from sources.config.shared_constants import EMPTY_ACTEUR_FIELD
-from utils import logging_utils as log
 
 from dags.crawl.config.cohorts import COHORTS
 from dags.crawl.config.columns import COLS
 from dags.crawl.tasks.business_logic.crawl_urls_suggest import suggestions_prepare
+from utils import logging_utils as log
 
 
 @pytest.mark.django_db
@@ -30,7 +30,6 @@ class TestCrawlUrlsSuggestionsPepare:
         pass
 
     def test_raise_if_acteurs_missing(self):
-        from qfdmo.models.acteur import Acteur
 
         df = pd.DataFrame(
             {
@@ -42,5 +41,5 @@ class TestCrawlUrlsSuggestionsPepare:
                 COLS.SUGGEST_VALUE: [EMPTY_ACTEUR_FIELD],
             }
         )
-        with pytest.raises(Acteur.DoesNotExist):
+        with pytest.raises(ValueError):
             suggestions_prepare(df=df)
