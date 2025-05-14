@@ -24,8 +24,8 @@ with DAG(
                 "destination": "nom",
             },
             {
-                "origin": "enseigne_commerciale",
-                "destination": "nom_commercial",
+                "origin": "consignes_dacces",
+                "destination": "description",
             },
             {
                 "origin": "longitudewgs84",
@@ -55,6 +55,11 @@ with DAG(
                 "origin": "produitsdechets_acceptes",
                 "transformation": "clean_sous_categorie_codes",
                 "destination": "sous_categorie_codes",
+            },
+            {
+                "origin": "horaires_douverture",
+                "transformation": "clean_horaires_osm",
+                "destination": "horaires_osm",
             },
             # 3. Ajout des colonnes avec une valeur par défaut
             {
@@ -95,9 +100,14 @@ with DAG(
                 "destination": ["adresse", "code_postal", "ville"],
             },
             {
+                "origin": ["telephone", "code_postal"],
+                "transformation": "clean_telephone",
+                "destination": ["telephone"],
+            },
+            {
                 "origin": [
-                    # "point_dapport_de_service_reparation",
-                    # "point_de_reparation",
+                    "point_dapport_de_service_reparation",
+                    "point_de_reparation",
                     "point_dapport_pour_reemploi",
                     "point_de_collecte_ou_de_reprise_des_dechets",
                 ],
@@ -106,8 +116,8 @@ with DAG(
             },
             {
                 "origin": [
-                    # "point_dapport_de_service_reparation",
-                    # "point_de_reparation",
+                    "point_dapport_de_service_reparation",
+                    "point_de_reparation",
                     "point_dapport_pour_reemploi",
                     "point_de_collecte_ou_de_reprise_des_dechets",
                 ],
@@ -131,6 +141,8 @@ with DAG(
             {"remove": "id_point_apport_ou_reparation"},
             {"remove": "point_de_collecte_ou_de_reprise_des_dechets"},
             {"remove": "point_dapport_pour_reemploi"},
+            {"remove": "point_de_reparation"},
+            {"remove": "point_dapport_de_service_reparation"},
             # 6. Colonnes à garder (rien à faire, utilisé pour le controle)
         ],
         "endpoint": (
