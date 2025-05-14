@@ -1,17 +1,18 @@
-import * as Turbo from "@hotwired/turbo"
-import { Application } from "@hotwired/stimulus"
+import "../styles/carte.css";
+import "../styles/qfdmd.css"
+
 import '@iframe-resizer/child'
 
-import SearchController from "../js/controllers/assistant/search"
-import BlinkController from "../js/controllers/assistant/blink"
-import AnalyticsController from "../js/controllers/assistant/analytics"
-import CopyController from "../js/copy_controller"
+// QFDMO
+import "../js/carte"
 
-window.stimulus = Application.start()
+// QFDMD
+import SearchController from "../controllers/assistant/search"
+import BlinkController from "../controllers/assistant/blink"
+import AnalyticsController from "../controllers/assistant/analytics"
+
 stimulus.debug = document.body.dataset.stimulusDebug
 stimulus.register("search", SearchController)
 stimulus.register("blink", BlinkController)
-stimulus.register("copy", CopyController)
 stimulus.register("analytics", AnalyticsController)
 
-Turbo.session.drive = false;

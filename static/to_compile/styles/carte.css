@@ -1,8 +1,6 @@
 @import "npm:leaflet/dist/leaflet.css";
-
-@import "../css/base.css";
-@import "../css/leaflet-overrides.css";
-@import "../css/dsfr-overrides.css";
+@import "./leaflet-overrides.css";
+@import "./dsfr-overrides.css";
 
 @tailwind base;
 @tailwind components;
@@ -88,9 +86,16 @@ Style the autocomplete container:
   --footer-height: 0;
   --sidebar-width: 0;
   --header-height: 120px;
+  --footer-height: 0;
+
+  /* keep max width value in sync with tailwind breakpoints config */
+  @media (min-width: 768px) {
+    --header-height: 72px;
+  }
 }
 
 :root[data-legend-hidden] {
+  /* keep max width value in sync with tailwind breakpoints config */
   @media (max-width: 768px) {
     --header-height: 72px;
   }
