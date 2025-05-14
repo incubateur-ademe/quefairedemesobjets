@@ -164,6 +164,10 @@ models:
           ref_table: qfdmo_source
           deferrable: true
           initially_deferred: true
+    tests:
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          min_value: 500000
+          max_value: 700000
   - name: exposure_exhaustive_propositionservice
     description: "Proposition Service model"
     columns:
@@ -214,6 +218,9 @@ models:
           combination_of_columns:
             - acteur_id
             - action_id
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          min_value: 500000
+          max_value: 700000
   - name: exposure_exhaustive_propositionservice_sous_categories
     description: "Proposition Service Sous Categories model"
     columns:
@@ -261,6 +268,8 @@ models:
           combination_of_columns:
             - vuepropositionservice_id
             - souscategorieobjet_id
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          min_value: 500000
   - name: exposure_exhaustive_acteur_acteur_services
     description: "Acteur Acteur Services model"
     columns:
@@ -308,6 +317,8 @@ models:
           combination_of_columns:
             - vueacteur_id
             - acteurservice_id
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          min_value: 500000
 
   - name: exposure_exhaustive_acteur_labels
     description: "Acteur Labels model"
@@ -357,6 +368,8 @@ models:
           combination_of_columns:
             - vueacteur_id
             - labelqualite_id
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          min_value: 1000
   - name: exposure_exhaustive_acteur_sources
     description: "Lien entre acteur de la exhaustive et sources"
     columns:
@@ -398,3 +411,6 @@ models:
           ref_columns: [id]
           ref_table: qfdmo_source
           deferrable: true
+    tests:
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          min_value: 1000
