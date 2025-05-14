@@ -124,63 +124,33 @@ def changes_prepare_closed_replaced(
     row: dict,
 ) -> tuple[list[dict], dict]:
     """Prepare suggestion changes for closed replaced cohorts"""
-    from data.models.changes import ChangeActeurCreateAsCopy, ChangeActeurUpdateStatut
-    from qfdmo.models import ActeurStatus
+    from data.models.changes import ChangeActeurUpdateRevision
 
     changes = []
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
-    # We don't create a parent because we decided it was
-    # not a good idea (1 parent for 1 child will only create
-    # complications for the clustering and no added value)
-
-    # Existing Child: must be updated BEFORE new child to prevent
-    # conflict on same external ID having 2+ active children
-    old_acteur = {
+    update_revision = {
         "id": row[COLS.ACTEUR_ID],
         "data": {
-            "siret_is_closed": True,
-            "statut": ActeurStatus.INACTIF,
-        },
-    }
-    changes.append(
-        changes_prepare(
-            model=ChangeActeurUpdateStatut,
-            model_params=old_acteur,
-            order=1,
-            reason="ancienne version de l'acteur inactive",
-            entity_type="acteur_displayed",
-        )
-    )
-    # New child to hold the reference data as standalone
-    # (since old child will be closed)
-    now = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
-    new_acteur_id = f"{row[COLS.ACTEUR_ID]}_{now}"
-    new_acteur = {
-        "id": row[COLS.ACTEUR_ID],
-        "data": {
-            "identifiant_unique": new_acteur_id,
-            "statut": ActeurStatus.ACTIF,
             "siret": row[COLS.SUGGEST_SIRET],
             "siren": row[COLS.SUGGEST_SIRET][:9],
             "siret_is_closed": False,
             "parent_reason": (
-                "Nouvelle version de l'acteur conservée suite aux modifications: "
-                f"SIRET {row[COLS.ACTEUR_SIRET]} "
-                f"détecté le {today} comme fermé dans AE, "
-                f"remplacé par SIRET {row[COLS.SUGGEST_SIRET]}"
+                f"Modifications de l'acteur le {today}: "
+                f"SIRET {row[COLS.ACTEUR_SIRET]} détecté comme fermé dans AE, "
+                f"remplacé par le SIRET {row[COLS.SUGGEST_SIRET]}"
             ),
         },
     }
-    changes.append(
+    changes = [
         changes_prepare(
-            model=ChangeActeurCreateAsCopy,
-            model_params=new_acteur,
-            order=2,
-            reason="nouvel enfant pour conserver les données",
+            model=ChangeActeurUpdateRevision,
+            model_params=update_revision,
+            order=1,
+            reason="Modification du SIRET",
             entity_type="acteur_displayed",
         )
-    )
+    ]
 
     contexte = {}  # changes are self-explanatory
     return changes, contexte
