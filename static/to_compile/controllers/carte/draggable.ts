@@ -17,8 +17,8 @@ export default class extends Controller<HTMLElement> {
     this.element.addEventListener("mousedown", this.#dragStart.bind(this))
     this.element.addEventListener('touchstart', this.#dragStart.bind(this));
 
-    window.addEventListener('mousemove', this.#dragMove.bind(this));
-    window.addEventListener('touchmove', this.#dragMove.bind(this));
+    this.element.addEventListener('mousemove', this.#dragMove.bind(this));
+    this.element.addEventListener('touchmove', this.#dragMove.bind(this));
 
     window.addEventListener('mouseup', this.#dragEnd.bind(this));
     window.addEventListener('touchend', this.#dragEnd.bind(this));
@@ -34,11 +34,14 @@ export default class extends Controller<HTMLElement> {
     return 0
   }
 
-  #dragStart(event: MouseEvent | TouchEvent) {
+  #dragStart(event: TouchEvent) {
+    event.preventDefault()
+
     this.isDragging = true;
-    const eventY = event?.y || event?.touches[0]
+    const eventY = event?.y || event?.touches[0].clientY
     this.startY = Math.abs(eventY)
     this.startTranslateY = this.#getPanelTranslateY()
+    this.element.style.transition = 'none';
   }
 
   #setTranslateY(value: number) {
@@ -46,9 +49,15 @@ export default class extends Controller<HTMLElement> {
   }
 
   #dragMove(event: MouseEvent | TouchEvent) {
+    event.preventDefault()
+
     if (!this.isDragging) return;
-    this.element.style.transition = 'none';
-    const eventY = event?.y || event?.touches[0]
+
+    // Prevent text selection the element being moved
+    event.preventDefault()
+    this.element.classList.add("qf-select-none")
+
+    const eventY = event?.y || event?.touches[0].clientY
     const pixelsDragged = this.startY - eventY
     const pixelsDraggedOffsetted = pixelsDragged + this.startTranslateY
     this.currentY = Math.min(pixelsDraggedOffsetted, this.panelHeight)
@@ -59,14 +68,29 @@ export default class extends Controller<HTMLElement> {
     if (!this.isDragging) return;
     this.isDragging = false;
     this.element.style.transition = this.initialTransition;
+    this.element.style.transition = 'transform ease 0.5s';
+    this.element.classList.remove("qf-select-none")
 
-    console.log(this.currentY, this.panelHeight, this.initialTranslateY)
+    // Define snap points (0 = fully open, 1 = fully closed)
+    const snapPoints = [0.2, 0.5, 1];
 
-    if (this.currentY > 0.6 * this.panelHeight) {
-      this.#setTranslateY(-1 * this.panelHeight);
+    // Current drag ratio
+    const ratio = this.currentY / this.panelHeight;
+
+    // Find closest snap point
+    let closest = snapPoints[0];
+    let minDiff = Math.abs(ratio - closest);
+    for (const point of snapPoints) {
+      const diff = Math.abs(ratio - point);
+      if (diff < minDiff) {
+        minDiff = diff;
+        closest = point;
+      }
     }
-    else {
-      this.#setTranslateY(-1 * this.initialTranslateY)
-    }
+
+    // Snap to the closest point
+    const snapY = -1 * closest * this.panelHeight;
+    this.#setTranslateY(snapY);
   }
+
 }
