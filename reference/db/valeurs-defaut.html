@@ -288,8 +288,12 @@
 <h1>Gestion de valeurs par défaut dans la base de données<a class="headerlink" href="#gestion-de-valeurs-par-defaut-dans-la-base-de-donnees" title="Lien vers cette rubrique">¶</a></h1>
 <section id="chaines-de-caracteres">
 <h2>Chaînes de caractères<a class="headerlink" href="#chaines-de-caracteres" title="Lien vers cette rubrique">¶</a></h2>
-<p><strong>Etat :</strong> ❓ À approuver</p>
 <p>Pour les champs de type string ne doivent pas être nullable, la valeur par défaut est une chaine vide comme indiqué dans la documentation de Django : <a class="reference external" href="https://docs.djangoproject.com/en/5.1/ref/models/fields/#field-options">https://docs.djangoproject.com/en/5.1/ref/models/fields/#field-options</a></p>
+</section>
+<section id="booleen">
+<h2>Booleen<a class="headerlink" href="#booleen" title="Lien vers cette rubrique">¶</a></h2>
+<p>Les booléens peuvent avoir une valeur nulle, cela signifie qu’on n’a pas l’information</p>
+<p>ex : uniquement_sur_rdv : True/False/None -&gt; Oui/Non/Nous n’avons pas l’information</p>
 </section>
 </section>
 
@@ -350,6 +354,7 @@
             <ul>
 <li><a class="reference internal" href="#">Gestion de valeurs par défaut dans la base de données</a><ul>
 <li><a class="reference internal" href="#chaines-de-caracteres">Chaînes de caractères</a></li>
+<li><a class="reference internal" href="#booleen">Booleen</a></li>
 </ul>
 </li>
 </ul>
