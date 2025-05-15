@@ -126,14 +126,13 @@ extract-dsfr:
 	$(PYTHON) ./dsfr_hacks/extract_used_colors.py
 	$(PYTHON) ./dsfr_hacks/extract_used_icons.py
 
-# Postgres database utilities: restore, drop database etc
-.PHONY: drop-db
-drop-db:
-	docker compose exec lvao-db dropdb -f -i -U qfdmo -e qfdmo
+.PHONY: drop-schema-public
+drop-schema-public:
+	docker compose exec lvao-db psql -U qfdmo -d qfdmo -c "DROP SCHEMA IF EXISTS public CASCADE;"
 
-.PHONY: create-db
-create-db:
-	docker compose exec lvao-db createdb -U qfdmo -e qfdmo
+.PHONY: create-schema-public
+create-schema-public:
+	docker compose exec lvao-db psql -U qfdmo -d qfdmo -c "CREATE SCHEMA IF NOT EXISTS public;"
 
 .PHONY: dump-production
 dump-production:
@@ -153,8 +152,8 @@ load-production-dump:
 
 .PHONY: db-restore
 db-restore:
-	make drop-db
-	make create-db
+	make drop-schema-public
+	make create-schema-public
 	make dump-production
 	make load-production-dump
 	make migrate

@@ -30,12 +30,7 @@ backup_file_name="$( tar --list --file="${ARCHIVE_NAME}" \
 tar --extract --verbose --file="${ARCHIVE_NAME}"
 
 # 8. Restore the data:
-for table in $(psql "${PREPROD_DATABASE_URL}" -t -c "SELECT \"tablename\" FROM pg_tables WHERE schemaname='public'"); do
-     psql "${PREPROD_DATABASE_URL}" -c "DROP TABLE IF EXISTS \"${table}\" CASCADE;"
-done
+psql "${PREPROD_DATABASE_URL}" -c "DROP SCHEMA IF EXISTS public CASCADE;"
+psql "${PREPROD_DATABASE_URL}" -c "CREATE SCHEMA IF NOT EXISTS public;"
 
-psql --dbname "${PREPROD_DATABASE_URL}" -c "CREATE EXTENSION IF NOT EXISTS postgis;"
-psql --dbname "${PREPROD_DATABASE_URL}" -c 'CREATE EXTENSION IF NOT EXISTS "unaccent";'
-psql --dbname "${PREPROD_DATABASE_URL}" -c 'CREATE EXTENSION IF NOT EXISTS "pg_trgm";'
-psql --dbname "${PREPROD_DATABASE_URL}" -c 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";'
 pg_restore --schema=public --clean --no-acl --no-owner --no-privileges --dbname "${PREPROD_DATABASE_URL}" ${backup_file_name}
