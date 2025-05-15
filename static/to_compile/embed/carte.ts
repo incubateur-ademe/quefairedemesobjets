@@ -1,7 +1,7 @@
 import {
     buildAndInsertIframeFrom,
     getIframeAttributesAndExtra,
-} from "../../js/iframe_functions"
+} from "../js/iframe_functions"
 
 const setupIframe = () => {
     // Add iFrame just after the script tag
