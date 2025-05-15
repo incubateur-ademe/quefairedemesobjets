@@ -2,8 +2,6 @@ from datetime import datetime
 
 import pytest
 from django.contrib.gis.geos import Point
-from rich import print
-from utils.data_serialize_reconstruct import data_serialize
 
 from data.models.changes.utils import data_reconstruct
 from qfdmo.models.acteur import RevisionActeur
@@ -12,6 +10,7 @@ from unit_tests.qfdmo.acteur_factory import (
     ActionFactory,
     SourceFactory,
 )
+from utils.data_serialize_reconstruct import data_serialize
 
 DATETIME = datetime(2023, 10, 1, 14, 30, 4)
 POINT = Point(1, 2)
@@ -53,7 +52,6 @@ class TestDataSerializeReconstruct:
         assert isinstance(data["cree_le"], str)
 
     def test_data_reconstructed_compatible_with_model(self, data_reconstructed):
-        print("test_data_is_compatible", data_reconstructed)
         rev = RevisionActeur(**data_reconstructed)
         rev.save()
         # FIXME: setting cree_le doesn't work the 1st time due

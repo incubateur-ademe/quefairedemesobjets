@@ -36,90 +36,70 @@ with DAG(
 ) as dag:
     dbt_run_base_acteurs = BashOperator(
         task_id="dbt_run_base_acteurs",
-        bash_command=("cd /opt/airflow/dbt/ && dbt run --models base.acteurs"),
+        bash_command=("dbt run --models base.acteurs"),
     )
     dbt_test_base_acteurs = BashOperator(
         task_id="dbt_test_base_acteurs",
-        bash_command=("cd /opt/airflow/dbt/ && dbt test --models base.acteurs"),
+        bash_command=("dbt test --models base.acteurs"),
     )
     dbt_run_intermediate_acteurs = BashOperator(
         task_id="dbt_run_intermediate_acteurs",
-        bash_command=("cd /opt/airflow/dbt/ && dbt run --models intermediate.acteurs"),
+        bash_command=("dbt run --models intermediate.acteurs"),
     )
     dbt_test_intermediate_acteurs = BashOperator(
         task_id="dbt_test_intermediate_acteurs",
-        bash_command=("cd /opt/airflow/dbt/ && dbt test --models intermediate.acteurs"),
+        bash_command=("dbt test --models intermediate.acteurs"),
     )
 
     dbt_run_marts_acteurs_exhaustive = BashOperator(
         task_id="dbt_run_marts_acteurs_exhaustive",
-        bash_command=(
-            "cd /opt/airflow/dbt/ && dbt run --models marts.acteurs.exhaustive"
-        ),
+        bash_command=("dbt run --models marts.acteurs.exhaustive"),
     )
     dbt_test_marts_acteurs_exhaustive = BashOperator(
         task_id="dbt_test_marts_acteurs_exhaustive",
-        bash_command=(
-            "cd /opt/airflow/dbt/ && dbt test --models marts.acteurs.exhaustive"
-        ),
+        bash_command=("dbt test --models marts.acteurs.exhaustive"),
     )
     dbt_run_exposure_acteurs_exhaustive = BashOperator(
         task_id="dbt_run_exposure_acteurs_exhaustive",
-        bash_command=(
-            "cd /opt/airflow/dbt/ && dbt run --models exposure.acteurs.exhaustive"
-        ),
+        bash_command=("dbt run --models exposure.acteurs.exhaustive"),
     )
     dbt_test_exposure_acteurs_exhaustive = BashOperator(
         task_id="dbt_test_exposure_acteurs_exhaustive",
-        bash_command=(
-            "cd /opt/airflow/dbt/ && dbt test --models exposure.acteurs.exhaustive"
-        ),
+        bash_command=("dbt test --models exposure.acteurs.exhaustive"),
     )
 
     dbt_run_marts_acteurs_carte = BashOperator(
         task_id="dbt_run_marts_acteurs_carte",
-        bash_command=("cd /opt/airflow/dbt/ && dbt run --models marts.acteurs.carte"),
+        bash_command=("dbt run --models marts.acteurs.carte"),
     )
     dbt_test_marts_acteurs_carte = BashOperator(
         task_id="dbt_test_marts_acteurs_carte",
-        bash_command=("cd /opt/airflow/dbt/ && dbt test --models marts.acteurs.carte"),
+        bash_command=("dbt test --models marts.acteurs.carte"),
     )
     dbt_run_exposure_acteurs_carte = BashOperator(
         task_id="dbt_run_exposure_acteurs_carte",
-        bash_command=(
-            "cd /opt/airflow/dbt/ && dbt run --models exposure.acteurs.carte"
-        ),
+        bash_command=("dbt run --models exposure.acteurs.carte"),
     )
     dbt_test_exposure_acteurs_carte = BashOperator(
         task_id="dbt_test_exposure_acteurs_carte",
-        bash_command=(
-            "cd /opt/airflow/dbt/ && dbt test --models exposure.acteurs.carte"
-        ),
+        bash_command=("dbt test --models exposure.acteurs.carte"),
     )
 
     dbt_run_marts_acteurs_opendata = BashOperator(
         task_id="dbt_run_marts_acteurs_opendata",
-        bash_command=(
-            "cd /opt/airflow/dbt/ && dbt run --models marts.acteurs.opendata"
-        ),
+        bash_command=("dbt run --models marts.acteurs.opendata"),
     )
     dbt_test_marts_acteurs_opendata = BashOperator(
         task_id="dbt_test_marts_acteurs_opendata",
-        bash_command=(
-            "cd /opt/airflow/dbt/ && dbt test --models marts.acteurs.opendata"
-        ),
+        bash_command=("dbt test --models marts.acteurs.opendata"),
     )
     dbt_run_exposure_acteurs_opendata = BashOperator(
         task_id="dbt_run_exposure_acteurs_opendata",
-        bash_command=(
-            "cd /opt/airflow/dbt/ && dbt run --models exposure.acteurs.opendata"
-        ),
+        bash_command=("dbt run --models exposure.acteurs.opendata"),
     )
     dbt_test_exposure_acteurs_opendata = BashOperator(
         task_id="dbt_test_exposure_acteurs_opendata",
-        bash_command=(
-            "cd /opt/airflow/dbt/ && dbt test --models exposure.acteurs.opendata"
-        ),
+        bash_command=("dbt test --models exposure.acteurs.opendata"),
     )
 
     check_model_table_displayedacteur_task = check_model_table_consistency_task(

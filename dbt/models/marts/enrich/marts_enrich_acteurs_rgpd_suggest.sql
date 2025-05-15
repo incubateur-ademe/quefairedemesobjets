@@ -25,12 +25,12 @@ WITH acteurs_with_siren AS (
 		udf_normalize_string_for_match(CONCAT(nom || ' ' || nom_officiel || ' ' || nom_commercial)) AS noms_normalises,
 		commentaires,
 		statut
-	FROM {{ ref('marts_carte_acteur') }}
+	FROM {{ source('enrich', 'qfdmo_vueacteur') }} AS acteurs
 	/*
 	We have normalization issues with our SIREN field in our DB
 	and we obtain better matching by reconstructing SIREN via SIRET
 	 */
-	WHERE siret IS NOT NULL AND siret != '' AND LENGTH(siret) = 14
+	WHERE siret IS NOT NULL AND siret != '' AND LENGTH(siret) = 14/*  AND (acteurs.source_id is null or acteurs.source_id in (45, 252)) */
 ), unite_matching_acteurs_on_siren AS (
 	SELECT
 		acteurs.id AS acteur_id,

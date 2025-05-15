@@ -1,5 +1,6 @@
 """DAG to refresh DBT models needed for enrich DAGs"""
 
+import logging
 import re
 
 from airflow import DAG
@@ -8,6 +9,8 @@ from airflow.operators.bash import BashOperator
 from airflow.utils.trigger_rule import TriggerRule
 from enrich.config.models import EnrichDbtModelsRefreshConfig
 from shared.config import CATCHUPS, SCHEDULES, START_DATES, config_to_airflow_params
+
+logger = logging.getLogger(__name__)
 
 with DAG(
     dag_id="enrich_dbt_models_refresh",
@@ -42,7 +45,7 @@ with DAG(
         if not cmd:
             continue
         cmd_id = re.sub(r"__+", "_", re.sub(r"[^a-zA-Z0-9]+", "_", cmd))
-        cmd += " --debug --threads 1"
+        logger.info(f"Create bash operator with command: {cmd}")
         tasks.append(
             BashOperator(
                 task_id=f"enrich_{cmd_id}",

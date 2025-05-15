@@ -1,5 +1,6 @@
 import pandas as pd
 import pytest
+
 from utils.django import (
     django_model_fields_get,
     django_model_queryset_generate,
@@ -59,7 +60,7 @@ def test_django_model_queryset_generate():
     )
 
     # Convert queryset to SQL string
-    sql = django_model_queryset_to_sql(queryset)
+    django_model_queryset_to_sql(queryset)
 
     # Expected SQL string (adjust to match your backend, structure may vary slightly)
     expected_sql = r"""
@@ -69,7 +70,6 @@ def test_django_model_queryset_generate():
         AND NOT ("adresse" IS NULL) AND NOT ("adresse" = ''))
         AND NOT (("siret" IS NOT NULL) OR ("siret" != ''))
         """
-    print(sql)
     # TODO: activer ce test une fois qu'on est content
     # avec le résultat final via Airflow
     # assert sql.strip() == expected_sql.strip()

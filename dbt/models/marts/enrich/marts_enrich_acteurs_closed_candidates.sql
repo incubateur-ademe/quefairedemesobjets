@@ -16,6 +16,7 @@ WITH acteurs_with_siret AS (
 	SELECT
 		-- Acteur columns
         identifiant_unique AS acteur_id,
+		identifiant_externe AS acteur_id_externe,
 		siret AS acteur_siret,
 		LEFT(siret,9) AS acteur_siren,
         nom AS acteur_nom,
@@ -27,10 +28,11 @@ WITH acteurs_with_siret AS (
 		adresse AS acteur_adresse,
 		code_postal AS acteur_code_postal,
 		ville AS acteur_ville,
-		location AS acteur_location
+		location AS acteur_location,
+		parent_id AS acteur_parent_id
 
-	FROM {{ ref('marts_carte_acteur') }}
-	WHERE siret IS NOT NULL AND siret != '' AND LENGTH(siret) = 14
+	FROM {{ source('enrich', 'qfdmo_vueacteur') }} AS acteurs
+	WHERE siret IS NOT NULL AND siret != '' AND LENGTH(siret) = 14/*  AND (acteurs.source_id is null or acteurs.source_id in (45, 252)) */
 ),
 /* Filtering on etab closed (NOT etab.est_actif) BUT
 not on unite closed (NOT unite_est_actif) because
@@ -39,6 +41,7 @@ etab_closed_candidates AS (
 SELECT
 	-- acteurs
 	acteurs.acteur_id,
+	acteurs.acteur_id_externe,
 	acteurs.acteur_siret,
 	acteurs.acteur_siren,
 	acteurs.acteur_type_id,
@@ -50,6 +53,7 @@ SELECT
 	acteurs.acteur_adresse,
 	acteurs.acteur_code_postal,
 	acteurs.acteur_ville,
+	acteurs.acteur_parent_id,
 	CASE WHEN acteurs.acteur_location IS NULL THEN NULL ELSE ST_X(acteurs.acteur_location) END AS acteur_longitude,
 	CASE WHEN acteurs.acteur_location IS NULL THEN NULL ELSE ST_Y(acteurs.acteur_location) END AS acteur_latitude,
 

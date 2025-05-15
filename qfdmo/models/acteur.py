@@ -638,6 +638,41 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
 
         self.save()
 
+    def instance_copy(
+        self,
+        overriden_fields={
+            "identifiant_unique": None,
+            "identifiant_externe": None,
+            "source": None,
+        },
+    ):
+        if isinstance(self, RevisionActeur) and self.is_parent:
+            raise Exception("Impossible de dupliquer un acteur parent")
+
+        if isinstance(self, RevisionActeur):
+            acteur = Acteur.objects.get(identifiant_unique=self.identifiant_unique)
+            acteur.instance_copy(overriden_fields=overriden_fields)
+
+        new_instance = deepcopy(self)
+
+        for field, value in overriden_fields.items():
+            setattr(new_instance, field, value)
+
+        new_instance.save()
+        new_instance.labels.set(self.labels.all())
+        new_instance.acteur_services.set(self.acteur_services.all())
+
+        # recreate proposition_services for the new revision_acteur
+        for proposition_service in self.proposition_services.all():
+            new_proposition_service = proposition_service.__class__.objects.create(
+                acteur=new_instance,
+                action=proposition_service.action,
+            )
+            new_proposition_service.sous_categories.set(
+                proposition_service.sous_categories.all()
+            )
+        return new_instance
+
 
 def clean_parent(parent):
     try:
@@ -895,7 +930,14 @@ class RevisionActeur(BaseActeur):
         self.save()
         return revision_acteur_parent
 
-    def duplicate(self):
+    def duplicate(
+        self,
+        fields_to_reset={
+            "identifiant_unique": None,
+            "identifiant_externe": None,
+            "source": None,
+        },
+    ):
         if self.is_parent:
             raise Exception("Impossible de dupliquer un acteur parent")
 
@@ -903,11 +945,6 @@ class RevisionActeur(BaseActeur):
 
         acteur = Acteur.objects.get(identifiant_unique=self.identifiant_unique)
 
-        fields_to_reset = [
-            "identifiant_unique",
-            "identifiant_externe",
-            "source",
-        ]
         fields_to_ignore = [
             "labels",
             "acteur_services",
@@ -916,12 +953,12 @@ class RevisionActeur(BaseActeur):
             "parent_reason",
         ]
 
-        for field in fields_to_reset:
-            setattr(revision_acteur, field, None)
+        for field, value in fields_to_reset.items():
+            setattr(revision_acteur, field, value)
         for field in revision_acteur._meta.fields:
             if (
                 not getattr(revision_acteur, field.name)
-                and field.name not in fields_to_reset
+                and field.name not in fields_to_reset.keys()
                 and field.name not in fields_to_ignore
             ):
                 setattr(revision_acteur, field.name, getattr(acteur, field.name))
@@ -931,11 +968,9 @@ class RevisionActeur(BaseActeur):
 
         # recreate proposition_services for the new revision_acteur
         for proposition_service in self.proposition_services.all():
-            revision_proposition_service = revision_proposition_service = (
-                RevisionPropositionService.objects.create(
-                    acteur=revision_acteur,
-                    action=proposition_service.action,
-                )
+            revision_proposition_service = RevisionPropositionService.objects.create(
+                acteur=revision_acteur,
+                action=proposition_service.action,
             )
             revision_proposition_service.sous_categories.set(
                 proposition_service.sous_categories.all()

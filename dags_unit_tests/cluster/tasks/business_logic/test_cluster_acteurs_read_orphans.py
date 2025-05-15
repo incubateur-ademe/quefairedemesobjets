@@ -160,10 +160,6 @@ class TestClusterActeursSelectionOrphans:
         """La dataframe correspondant au cas idéal
         de fonctionnement de la fonction"""
         df = ideal_scenario_apply_function[0]
-        # Pour faciliter le debug si besoin, bcp plus simple
-        # d'utiliser les dicts que du print df potentiellement
-        # tronqué
-        # print("contenu df_ideal", df.to_dict(orient="records"))
         return df
 
     @pytest.fixture

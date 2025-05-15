@@ -2,14 +2,19 @@ from datetime import datetime, timezone
 
 import pandas as pd
 import pytest
-from cluster.tasks.business_logic.cluster_acteurs_parents_choose_new import (
-    parent_id_generate,
-)
 from django.contrib.gis.geos import Point
 from enrich.config.cohorts import COHORTS
 from enrich.config.columns import COLS
 from enrich.tasks.business_logic.enrich_dbt_model_to_suggestions import (
     enrich_dbt_model_to_suggestions,
+)
+
+from data.models.suggestion import Suggestion, SuggestionCohorte
+from qfdmo.models.acteur import Acteur, ActeurStatus, RevisionActeur
+from unit_tests.qfdmo.acteur_factory import (
+    ActeurFactory,
+    ActeurTypeFactory,
+    SourceFactory,
 )
 
 TODAY = datetime.now(timezone.utc).strftime("%Y-%m-%d")
@@ -20,15 +25,11 @@ class TestEnrichActeursClosedSuggestions:
 
     @pytest.fixture
     def source(self):
-        from qfdmo.models import Source
-
-        return Source.objects.create(code="s1")
+        return SourceFactory(code="s1")
 
     @pytest.fixture
     def atype(self):
-        from qfdmo.models import ActeurType
-
-        return ActeurType.objects.create(code="at1")
+        return ActeurTypeFactory(code="at1")
 
     @pytest.fixture
     def df_not_replaced(self, atype, source):
@@ -36,6 +37,7 @@ class TestEnrichActeursClosedSuggestions:
             {
                 # Acteurs data
                 COLS.ACTEUR_ID: ["a01", "a02"],
+                COLS.ACTEUR_ID_EXTERNE: ["ext_a01", "ext_a02"],
                 COLS.ACTEUR_SIRET: ["00000000000001", "00000000000002"],
                 COLS.ACTEUR_NOM: ["AVANT a01", "AVANT a02"],
                 COLS.ACTEUR_TYPE_ID: [atype.pk, atype.pk],
@@ -50,6 +52,9 @@ class TestEnrichActeursClosedSuggestions:
             {
                 # Acteurs data
                 COLS.ACTEUR_ID: ["a1", "a2", "a3"],
+                COLS.ACTEUR_ID_EXTERNE: ["ext_a1", "ext_a2", "ext_a3"],
+                # We test 1 acteur of each cohort with a parent, and
+                # the case with no parent
                 COLS.ACTEUR_SIRET: [
                     "11111111100001",
                     "22222222200001",
@@ -105,18 +110,28 @@ class TestEnrichActeursClosedSuggestions:
     @pytest.fixture
     def acteurs(self, df_not_replaced, df_replaced, atype, source):
         # Creating acteurs as presence required to apply changes
-        from qfdmo.models import Acteur
 
         df_concat = pd.concat([df_not_replaced, df_replaced])
-        acteur_ids = df_concat[COLS.ACTEUR_ID].tolist()
-        for acteur_id in acteur_ids:
-            Acteur.objects.create(
-                identifiant_unique=acteur_id,
-                nom=f"AVANT {acteur_id}",
+        for _, row in df_concat.iterrows():
+            acteur = ActeurFactory(
+                identifiant_unique=row[COLS.ACTEUR_ID],
+                identifiant_externe=row[COLS.ACTEUR_ID_EXTERNE],
+                nom=f"AVANT {row[COLS.ACTEUR_ID]}",
+                siret=row[COLS.ACTEUR_SIRET],
+                siren=row[COLS.ACTEUR_SIRET][:9],
                 acteur_type=atype,
                 source=source,
-                location=Point(x=0, y=0),
+                location=Point(
+                    x=row[COLS.ACTEUR_LONGITUDE], y=row[COLS.ACTEUR_LATITUDE]
+                ),
             )
+            acteur.save()
+            # Check that acteur has been properly created
+            acteur = Acteur.objects.get(identifiant_unique=row[COLS.ACTEUR_ID])
+            assert acteur.identifiant_externe == row[COLS.ACTEUR_ID_EXTERNE]
+            assert acteur.nom == f"AVANT {row[COLS.ACTEUR_ID]}"
+            assert acteur.acteur_type == atype
+            assert acteur.source == source
 
     def test_cohorte_not_replaced(self, acteurs, df_not_replaced):
         from data.models.suggestion import Suggestion, SuggestionCohorte
@@ -139,23 +154,20 @@ class TestEnrichActeursClosedSuggestions:
         for suggestion in suggestions:
             suggestion.apply()
 
-        # Verify changes
-        # 2 revisions should be created but not parent
-        a01 = RevisionActeur.objects.get(pk="a01")
-        assert a01.statut == ActeurStatus.INACTIF
-        assert a01.parent is None
-        assert a01.parent_reason == ""  # consequence of empty strings in DB
-        assert a01.siret_is_closed is True
+        # Verify changes: both acteurs are closed with only relevant
+        # fields updated
+        for id in ["a01", "a02"]:
+            closed = RevisionActeur.objects.get(pk=id)
+            assert closed.statut == ActeurStatus.INACTIF
+            assert closed.parent is None
+            assert closed.parent_reason == (
+                f"Modifications de l'acteur le {TODAY}: "
+                f"SIRET {'00000000000001' if id == 'a01' else '00000000000002'} détecté"
+                " comme fermé dans AE, Pas de remplacement"
+            )
+            assert closed.siret_is_closed is True
 
-        a02 = RevisionActeur.objects.get(pk="a02")
-        assert a02.statut == ActeurStatus.INACTIF
-        assert a02.parent is None
-        assert a02.parent_reason == ""
-        assert a02.siret_is_closed is True
-
-    def test_cohorte_meme_siren(self, acteurs, atype, source, df_replaced_meme_siret):
-        from data.models.suggestion import Suggestion, SuggestionCohorte
-        from qfdmo.models import ActeurStatus, RevisionActeur
+    def test_cohorte_meme_siren(self, acteurs, df_replaced_meme_siret):
 
         # Write suggestions to DB
         enrich_dbt_model_to_suggestions(
@@ -174,36 +186,24 @@ class TestEnrichActeursClosedSuggestions:
         for suggestion in suggestions:
             suggestion.apply()
 
-        # Verify changes
-        # 1 parent should be created in revision with replacement data
-        # 1 child should be created in revision with status=INACT and parent_id pointing
-        parent_id = parent_id_generate(["11111111100002"])
-        parent = RevisionActeur.objects.get(pk=parent_id)
-        assert parent.pk == parent_id
-        assert parent.nom == "APRES a1"
-        assert parent.adresse == "Adresse1"
-        assert parent.code_postal == "12345"
-        assert parent.ville == "Ville1"
-        assert parent.naf_principal == "naf1"
-        assert parent.acteur_type == atype
-        assert parent.source is None
-        assert parent.location.x == 1
-        assert parent.location.y == 11
+        acteur = Acteur.objects.get(pk="a1")
+        assert acteur.statut == ActeurStatus.ACTIF
+        assert acteur.siret == "11111111100001"
+        assert acteur.siren == "111111111"
 
-        child = RevisionActeur.objects.get(pk="a1")
-        assert child.statut == ActeurStatus.INACTIF
-        assert child.parent == parent
-        assert child.parent_reason == (
-            f"SIRET 11111111100001 détecté le {TODAY} comme fermé dans AE, "
-            f"remplacé par SIRET 11111111100002"
+        revision = RevisionActeur.objects.get(pk="a1")
+        assert revision.statut == ActeurStatus.ACTIF
+        assert revision.siret == "11111111100002"
+        assert acteur.siren == "111111111"
+        assert revision.parent is None
+        assert revision.parent_reason == (
+            f"Modifications de l'acteur le {TODAY}: SIRET 11111111100001 détecté comme"
+            " fermé dans AE, remplacé par le SIRET 11111111100002"
         )
-        assert child.siret_is_closed is True
-        assert child.location.x == 1
-        assert child.location.y == 11
+        assert revision.siret_is_closed is False
 
     def test_cohorte_autre_siren(self, acteurs, df_replaced_autre_siret):
         from data.models.suggestion import Suggestion, SuggestionCohorte
-        from qfdmo.models import ActeurStatus, RevisionActeur
 
         # Write suggestions to DB
         enrich_dbt_model_to_suggestions(
@@ -216,52 +216,25 @@ class TestEnrichActeursClosedSuggestions:
         # Check suggestions have been written to DB
         cohort = SuggestionCohorte.objects.get(identifiant_action="test_autre_siren")
         suggestions = Suggestion.objects.filter(suggestion_cohorte=cohort)
-        assert len(suggestions) == 2  # (1 parent + 1 child) x 2 acteurs fermés
 
+        # 2 suggestions containing 2 changes (inactive + new)
+        assert len(suggestions) == 2
         # Apply suggestions
         for suggestion in suggestions:
             suggestion.apply()
 
-        # Verify changes
-        # 1 parent should be created in revision with replacement data
-        # 1 child should be created in revision with status=INACT and parent_id pointing
-        parent_id = parent_id_generate(["33333333300001"])
-        parent = RevisionActeur.objects.get(pk=parent_id)
-        assert parent.nom == "APRES a2"
-        assert parent.adresse == "Adresse2"
-        assert parent.code_postal == "67890"
-        assert parent.ville == "Ville2"
-        assert parent.naf_principal == "naf2"
-        assert parent.location.x == 2
-        assert parent.location.y == 22
+        acteur = Acteur.objects.get(pk="a2")
+        assert acteur.statut == ActeurStatus.ACTIF
+        assert acteur.siret == "22222222200001"
+        assert acteur.siren == "222222222"
 
-        child = RevisionActeur.objects.get(pk="a2")
-        assert child.statut == ActeurStatus.INACTIF
-        assert child.parent == parent
-        assert child.parent_reason == (
-            f"SIRET 22222222200001 détecté le {TODAY} comme fermé dans AE, "
-            f"remplacé par SIRET 33333333300001"
+        revision = RevisionActeur.objects.get(pk="a2")
+        assert revision.statut == ActeurStatus.ACTIF
+        assert revision.siret == "33333333300001"
+        assert revision.siren == "333333333"
+        assert revision.parent is None
+        assert revision.parent_reason == (
+            f"Modifications de l'acteur le {TODAY}: SIRET 22222222200001 détecté comme"
+            " fermé dans AE, remplacé par le SIRET 33333333300001"
         )
-        assert child.siret_is_closed is True
-        assert child.location.x == 2
-        assert child.location.y == 22
-
-        parent_id = parent_id_generate(["55555555500001"])
-        parent = RevisionActeur.objects.get(pk=parent_id)
-        assert parent.nom == "APRES a3"
-        assert parent.adresse == "Adresse3"
-        assert parent.code_postal == "12345"
-        assert parent.ville == "Ville3"
-        assert parent.naf_principal == "naf3"
-        assert parent.location.x == 3
-        assert parent.location.y == 33
-
-        child = RevisionActeur.objects.get(pk="a3")
-        assert child.statut == ActeurStatus.INACTIF
-        assert child.parent == parent
-        assert child.parent_reason == (
-            f"SIRET 44444444400001 détecté le {TODAY} comme fermé dans AE, "
-            f"remplacé par SIRET 55555555500001"
-        )
-        assert child.location.x == 3
-        assert child.location.y == 33
+        assert revision.siret_is_closed is False

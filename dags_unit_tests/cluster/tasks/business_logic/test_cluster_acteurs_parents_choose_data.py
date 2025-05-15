@@ -2,8 +2,6 @@ import numpy as np
 import pandas as pd
 import pytest
 from django.contrib.gis.geos import Point
-from rich import print
-from utils.django import django_setup_full
 
 from dags.cluster.config.constants import COL_PARENT_DATA_NEW
 from dags.cluster.tasks.business_logic.cluster_acteurs_parents_choose_data import (
@@ -11,6 +9,7 @@ from dags.cluster.tasks.business_logic.cluster_acteurs_parents_choose_data impor
     field_pick_value,
     parent_choose_data,
 )
+from utils.django import django_setup_full
 
 django_setup_full()
 
@@ -209,9 +208,7 @@ class TestClusterActeursParentsChooseData:
             ChangeActeurUpdateParentId.name()
         )
         df["cluster_id"] = "c1"
-        print("df_clusters_parent_create before drops", df.to_dict(orient="records"))
         df = df.drop_duplicates(subset=["identifiant_unique"], keep="first")
-        print("df_clusters_parent_create", df.to_dict(orient="records"))
         return df
 
     @pytest.fixture
@@ -261,7 +258,6 @@ class TestClusterActeursParentsChooseData:
         df_before = dfs[scenario]
 
         DisplayedActeur(**parent).save()
-        print("BEFORE", df_before.to_dict(orient="records"))
         df_after = cluster_acteurs_parents_choose_data(
             df_clusters=df_before,
             fields_to_include=["nom", "siret", "email"],
@@ -269,7 +265,6 @@ class TestClusterActeursParentsChooseData:
             prioritize_source_ids=[10, 20],
             keep_empty=EMPTY_IGNORE,
         )
-        print("AFTER", df_after.to_dict(orient="records"))
         filter_parent = df_after["identifiant_unique"] == "p1"
         parent_data = df_after[filter_parent][COL_PARENT_DATA_NEW].values[0]
         df_children = df_after[~filter_parent]
@@ -293,7 +288,6 @@ class TestClusterActeursParentsChooseData:
         df_before = df_clusters_parent_create
 
         DisplayedActeur(**parent).save()
-        print("BEFORE", df_before.to_dict(orient="records"))
         df_after = cluster_acteurs_parents_choose_data(
             df_clusters=df_before,
             fields_to_include=["nom", "siret", "email"],
@@ -301,7 +295,6 @@ class TestClusterActeursParentsChooseData:
             prioritize_source_ids=[10, 20],
             keep_empty=EMPTY_IGNORE,
         )
-        print("AFTER", df_after.to_dict(orient="records"))
         filter_parent = df_after["identifiant_unique"] == "p1"
         parent_data = df_after[filter_parent][COL_PARENT_DATA_NEW].values[0]
         df_children = df_after[~filter_parent]

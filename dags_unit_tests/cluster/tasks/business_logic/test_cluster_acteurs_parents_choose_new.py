@@ -22,7 +22,6 @@ from cluster.tasks.business_logic.cluster_acteurs_parents_choose_new import (
     cluster_acteurs_parents_choose_new,
     parent_id_generate,
 )
-from rich import print
 
 from data.models.change import (
     COL_CHANGE_ENTITY_TYPE,
@@ -150,7 +149,6 @@ class TestClusterActeursOneClusterChangesMark:
             ],
             ignore_index=True,
         )
-        print(f"{df=}")
         df = cluster_acteurs_one_cluster_parent_changes_mark(
             df, parent_id_new, CHANGE_CREATE, "Nouveau parent"
         )
@@ -259,7 +257,6 @@ class TestClusterActeursChooseAllParents:
         # On veut aucune valeur nan résultant des divers manipulations
         # On ne peut pas juste faire df.isna().any().any() car isna
         # inclut les None qu'on tolère
-        print(df_working.to_dict(orient="records"))
         df_nan = df_working.map(lambda x: 1 if pd.isna(x) and x is not None else 0)
         assert df_nan.values.sum() == 0
 

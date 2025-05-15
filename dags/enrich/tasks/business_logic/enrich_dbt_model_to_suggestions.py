@@ -2,17 +2,11 @@ import logging
 from datetime import datetime, timezone
 
 import pandas as pd
-from cluster.tasks.business_logic.cluster_acteurs_parents_choose_new import (
-    parent_id_generate,
-)
 from enrich.config.cohorts import COHORTS
 from enrich.config.columns import COLS
-from enrich.tasks.business_logic.enrich_dbt_model_row_to_suggest_data import (
-    dbt_model_row_to_suggest_data,
-)
-from utils import logging_utils as log
 
 from data.models.changes.acteur_rgpd_anonymize import rgpd_data_get
+from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +34,7 @@ def changes_prepare(
 
 def changes_prepare_villes(row: dict) -> tuple[list[dict], dict]:
     """Prepare suggestions for villes cohorts"""
-    from data.models.changes import ChangeActeurUpdateData
+    from data.models.changes import ChangeActeurUpdateRevision
 
     changes = []
     model_params = {
@@ -51,7 +45,7 @@ def changes_prepare_villes(row: dict) -> tuple[list[dict], dict]:
     }
     changes.append(
         changes_prepare(
-            model=ChangeActeurUpdateData,
+            model=ChangeActeurUpdateRevision,
             model_params=model_params,
             order=1,
             reason="On fait confiance à la BAN",
@@ -98,24 +92,26 @@ def changes_prepare_closed_not_replaced(
     row: dict,
 ) -> tuple[list[dict], dict]:
     """Prepare suggestions for closed not replaced cohorts"""
-    from data.models.changes import ChangeActeurUpdateData
+    from data.models.changes import ChangeActeurUpdateRevision
     from qfdmo.models import ActeurStatus
 
     changes = []
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     model_params = {
         "id": row[COLS.ACTEUR_ID],
         "data": {
             "statut": ActeurStatus.INACTIF,
-            "siret": row[COLS.ACTEUR_SIRET],
-            "siren": row[COLS.ACTEUR_SIRET][:9],
             "siret_is_closed": True,
-            "acteur_type": row[COLS.ACTEUR_TYPE_ID],
-            "source": row[COLS.ACTEUR_SOURCE_ID],
+            "parent_reason": (
+                f"Modifications de l'acteur le {today}: "
+                f"SIRET {row[COLS.ACTEUR_SIRET]} détecté comme fermé dans AE,"
+                " Pas de remplacement"
+            ),
         },
     }
     changes.append(
         changes_prepare(
-            model=ChangeActeurUpdateData,
+            model=ChangeActeurUpdateRevision,
             model_params=model_params,
             order=1,
             reason="SIRET & SIREN fermés, 0 remplacement trouvé",
@@ -130,79 +126,34 @@ def changes_prepare_closed_replaced(
     row: dict,
 ) -> tuple[list[dict], dict]:
     """Prepare suggestion changes for closed replaced cohorts"""
-    from data.models.changes import (
-        ChangeActeurCreateAsChild,
-        ChangeActeurCreateAsParent,
-        ChangeActeurUpdateData,
-    )
-    from qfdmo.models import ActeurStatus
+    from data.models.changes import ChangeActeurUpdateRevision
 
     changes = []
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    # Parent
-    parent_id = parent_id_generate([str(row[COLS.SUGGEST_SIRET])])
-    parent_data = dbt_model_row_to_suggest_data(row)
-    parent_data["source"] = None
-    parent_data["statut"] = ActeurStatus.ACTIF
-    params_parent = {
-        "id": parent_id,
-        "data": parent_data,
+
+    update_revision = {
+        "id": row[COLS.ACTEUR_ID],
+        "data": {
+            "siret": row[COLS.SUGGEST_SIRET],
+            "siren": row[COLS.SUGGEST_SIRET][:9],
+            "siret_is_closed": False,
+            "parent_reason": (
+                f"Modifications de l'acteur le {today}: "
+                f"SIRET {row[COLS.ACTEUR_SIRET]} détecté comme fermé dans AE, "
+                f"remplacé par le SIRET {row[COLS.SUGGEST_SIRET]}"
+            ),
+        },
     }
-    changes.append(
+    changes = [
         changes_prepare(
-            model=ChangeActeurCreateAsParent,
-            model_params=params_parent,
+            model=ChangeActeurUpdateRevision,
+            model_params=update_revision,
             order=1,
-            reason="besoin d'un parent pour rattaché acteur fermé",
+            reason="Modification du SIRET",
             entity_type="acteur_displayed",
         )
-    )
+    ]
 
-    # New child to hold the reference data as standalone
-    # as parents are surrogates (e.g. they can be deleted
-    # during clustering)
-    now = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
-    child_new_id = f"{row[COLS.ACTEUR_ID]}_{row[COLS.ACTEUR_SIRET]}_{now}"
-    params_child_new = params_parent.copy()
-    params_child_new["id"] = child_new_id
-    params_child_new["data"]["source"] = row[COLS.ACTEUR_SOURCE_ID]
-    params_child_new["data"]["parent"] = parent_id
-    params_child_new["data"]["parent_reason"] = (
-        f"Nouvel enfant pour conserver les données suite à: "
-        f"SIRET {row[COLS.ACTEUR_SIRET]} "
-        f"détecté le {today} comme fermé dans AE, "
-        f"remplacé par SIRET {row[COLS.SUGGEST_SIRET]}"
-    )
-    changes.append(
-        changes_prepare(
-            model=ChangeActeurCreateAsChild,
-            model_params=params_child_new,
-            order=2,
-            reason="besoin nouvel enfant pour conserver les données",
-            entity_type="acteur_displayed",
-        )
-    )
-
-    # Existing Child
-    params_child_old = params_child_new.copy()
-    params_child_old["id"] = row[COLS.ACTEUR_ID]
-    params_child_old["data"]["parent"] = parent_id
-    params_child_old["data"]["parent_reason"] = (
-        f"SIRET {row[COLS.ACTEUR_SIRET]} "
-        f"détecté le {today} comme fermé dans AE, "
-        f"remplacé par SIRET {row[COLS.SUGGEST_SIRET]}"
-    )
-    params_child_old["data"]["siret_is_closed"] = True
-    params_child_old["data"]["statut"] = ActeurStatus.INACTIF
-    changes.append(
-        changes_prepare(
-            model=ChangeActeurUpdateData,
-            model_params=params_child_old,
-            order=3,
-            reason="rattacher enfant fermé à un parent",
-            entity_type="acteur_displayed",
-        )
-    )
     contexte = {}  # changes are self-explanatory
     return changes, contexte
 
@@ -259,7 +210,9 @@ def enrich_dbt_model_to_suggestions(
         row = dict(row)
 
         try:
-            changes, contexte = COHORTS_TO_PREPARE_CHANGES[cohort](row)
+            logger.info(f"Interprétation de {cohort=}")
+            change_preparation_function = COHORTS_TO_PREPARE_CHANGES[cohort]
+            changes, contexte = change_preparation_function(row)
             suggestion = {
                 "contexte": contexte,
                 "suggestion": {"title": cohort, "changes": changes},

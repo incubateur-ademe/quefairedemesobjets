@@ -2,6 +2,7 @@ import logging
 
 from clone.config import DIR_SQL_VALIDATION
 from django.db import connection
+
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -23,7 +24,6 @@ def clone_table_validate(table_kind: str, table_name: str, dry_run: bool) -> Non
             logger.info("Mode dry-run, on ne valide pas")
             continue
         with connection.cursor() as cursor:
-
             # Running validation and getting results
             cursor.execute(sql)
             row = cursor.fetchone()
