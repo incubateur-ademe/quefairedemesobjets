@@ -57,8 +57,6 @@ run-airflow:
 
 .PHONY: run-django
 run-django:
-	docker compose --profile airflow down
-	docker compose --profile lvao down
 	honcho start -f Procfile.django.dev
 
 run-all:
