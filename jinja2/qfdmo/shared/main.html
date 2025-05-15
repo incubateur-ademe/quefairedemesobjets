@@ -88,22 +88,25 @@
                 md:qf-relative qf-z-30
                 aria-[hidden=false]:qf-flex qf-hidden qf-flex-col
                 {% if is_carte %}md:qf-h-[calc(100vh_-_120px)]{% else %}md:qf-h-[calc(100vh_-_250px)]{% endif %}
-                md:qf-overflow-auto
+                qf-overflow-auto
                 qf-bg-white
                 qf-px-2w
                 max-md:qf-fixed
                 max-md:qf-top-[80svh]
-                max-md:qf-top-3/4 max-md:qf-left-0 max-md:qf-right-0
+                max-md:qf-top-full max-md:qf-left-0 max-md:qf-right-0
+                max-md:-qf-translate-y-[120px]
                 max-md:qf-drop-shadow-[0_0_100px_rgba(0,0,0,0.3)]
                 max-md:qf-rounded-t-xl
+                max-md:transition-transform
                 aria-[hidden=true]:max-md:qf-animate-out
                 aria-[hidden=true]:max-md:qf-fade-out
                 aria-[hidden=true]:data-[exit-animation-ended=true]:qf-hidden
-                aria-[hidden=false]:max-md:qf-min-h-[calc(100vh_-_200px)]"
+                aria-[hidden=false]:max-md:qf-h-[80svh]"
             tabindex="0"
             id="acteurDetailsPanel"
             data-search-solution-form-target="acteurDetailsPanel"
             aria-hidden="true"
+            data-controller="draggable"
             >
                 {% include "qfdmo/carte/panels/acteur_detail.html" %}
             </aside>
