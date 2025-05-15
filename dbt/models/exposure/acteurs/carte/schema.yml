@@ -114,6 +114,11 @@ models:
         description: "Information si on sait que le SIRET est fermé"
         data_type: boolean
     config:
+      tags:
+        - exposure
+        - carte
+        - acteurs
+        - acteur
       contract:
         enforced: true
       materialized: table
@@ -158,6 +163,9 @@ models:
           ref_table: qfdmo_source
           deferrable: true
           initially_deferred: true
+    tests:
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          min_value: 350000
   - name: exposure_carte_propositionservice
     description: "Vue sur les propositions de service affichées sur la carte"
     columns:
@@ -178,6 +186,11 @@ models:
         tests:
           - not_null
     config:
+      tags:
+        - exposure
+        - carte
+        - acteurs
+        - propositionservice
       materialized: table
       contract:
         enforced: true
@@ -208,6 +221,8 @@ models:
           combination_of_columns:
             - acteur_id
             - action_id
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          min_value: 450000
   - name: exposure_carte_propositionservice_sous_categories
     description: "Vue sur les sous-catégories des propositions de service affichées sur la carte"
     columns:
@@ -227,6 +242,11 @@ models:
         tests:
           - not_null
     config:
+      tags:
+        - exposure
+        - carte
+        - acteurs
+        - propositionservice_sous_categories
       materialized: table
       contract:
         enforced: true
@@ -255,6 +275,8 @@ models:
           combination_of_columns:
             - displayedpropositionservice_id
             - souscategorieobjet_id
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          min_value: 1500000
   - name: exposure_carte_acteur_acteur_services
     description: "Lien entre acteur de la carte et acteur_services"
     columns:
@@ -274,6 +296,11 @@ models:
         tests:
           - not_null
     config:
+      tags:
+        - exposure
+        - carte
+        - acteurs
+        - acteur_acteur_services
       materialized: table
       contract:
         enforced: true
@@ -302,7 +329,8 @@ models:
           combination_of_columns:
             - displayedacteur_id
             - acteurservice_id
-
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          min_value: 400000
   - name: exposure_carte_acteur_labels
     description: "Lien entre acteur de la carte et labels"
     columns:
@@ -323,6 +351,11 @@ models:
         tests:
           - not_null
     config:
+      tags:
+        - exposure
+        - carte
+        - acteurs
+        - acteur_labels
       materialized: table
       contract:
         enforced: true
@@ -351,6 +384,8 @@ models:
           combination_of_columns:
             - displayedacteur_id
             - labelqualite_id
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          min_value: 20000
   - name: exposure_carte_acteur_sources
     description: "Lien entre acteur de la carte et sources"
     columns:
@@ -370,6 +405,11 @@ models:
         tests:
           - not_null
     config:
+      tags:
+        - exposure
+        - carte
+        - acteurs
+        - acteur_sources
       materialized: table
       contract:
         enforced: true
@@ -392,3 +432,6 @@ models:
           ref_columns: [id]
           ref_table: qfdmo_source
           deferrable: true
+    tests:
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          min_value: 400000
