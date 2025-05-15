@@ -5,4 +5,4 @@ SELECT
     END AS is_valid,
     COUNT(*) as debug_value
 FROM
-    {{table_name}};
+    {{db_schema}}.{{table_name}};

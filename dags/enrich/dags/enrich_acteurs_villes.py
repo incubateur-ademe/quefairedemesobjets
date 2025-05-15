@@ -48,12 +48,14 @@ with DAG(
         dag,
         task_id=TASKS.ENRICH_VILLES_TYPO,
         cohort=COHORTS.VILLES_TYPO,
+        dbt_schema_name=DBT.SCHEMA,
         dbt_model_name=DBT.MARTS_ENRICH_VILLES_TYPO,
     )
     suggest_new = enrich_dbt_model_suggest_task(
         dag,
         task_id=TASKS.ENRICH_VILLES_NEW,
         cohort=COHORTS.VILLES_NEW,
+        dbt_schema_name=DBT.SCHEMA,
         dbt_model_name=DBT.MARTS_ENRICH_VILLES_NEW,
     )
     config >> dbt_refresh  # type: ignore

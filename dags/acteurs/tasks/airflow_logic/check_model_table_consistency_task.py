@@ -8,6 +8,7 @@ from acteurs.tasks.business_logic.check_model_table_consistency import (
 from airflow import DAG
 from airflow.exceptions import AirflowFailException
 from airflow.operators.python import PythonOperator
+
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -30,7 +31,7 @@ def task_info_get(model_name, table_name):
 
 
 def check_model_table_consistency_wrapper(
-    ti, params, *, model_name: str, table_name: str
+    ti, params, *, django_app: str, model_name: str, db_schema: str, table_name: str
 ) -> None:
     # model_name = "DisplayedActeur"
     # table_name = "exposure_carte_acteur"
@@ -38,14 +39,23 @@ def check_model_table_consistency_wrapper(
 
     log.preview("Modèle Django", model_name)
     log.preview("Table", table_name)
-    if not check_model_table_consistency(model_name=model_name, table_name=table_name):
+    if not check_model_table_consistency(
+        django_app=django_app,
+        model_name=model_name,
+        db_schema=db_schema,
+        table_name=table_name,
+    ):
         raise AirflowFailException(
             f"le modèle {model_name} ne correspond pas à la table {table_name}"
         )
 
 
 def check_model_table_consistency_task(
-    dag: DAG, model_name: str, table_name: str
+    dag: DAG,
+    django_app: str,
+    model_name: str,
+    db_schema: str,
+    table_name: str,
 ) -> PythonOperator:
     task_name = f"check_{model_name}_vs_{table_name}_consistency"
     return PythonOperator(
@@ -53,7 +63,9 @@ def check_model_table_consistency_task(
         python_callable=check_model_table_consistency_wrapper,
         dag=dag,
         op_kwargs={
+            "django_app": django_app,
             "model_name": model_name,
+            "db_schema": db_schema,
             "table_name": table_name,
         },
     )

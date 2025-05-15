@@ -6,7 +6,7 @@ Notes:
 */
 {{
   config(
-    materialized = 'table',
+    materialized='table',
     tags=['intermediate', 'ae', 'annuaire_entreprises', 'etablissement'],
     indexes=[
       {'columns': ['siret'], 'unique': True},
@@ -15,7 +15,7 @@ Notes:
     ],
     post_hook=[
       "CREATE INDEX ON {{ this }}(adresse_numero) WHERE adresse_numero IS NOT NULL"
-    ]
+    ],
   )
 }}
 
@@ -48,7 +48,7 @@ SELECT
     END AS unite_est_actif,
 
     -- Addresse
-    udf_columns_concat_unique_non_empty(
+    {{ target.schema }}.udf_columns_concat_unique_non_empty(
       etab.numero_voie,
       etab.type_voie,
       etab.libelle_voie

@@ -5,7 +5,7 @@ from django.db import DEFAULT_DB_ALIAS, connections
 logger = logging.getLogger(__name__)
 
 
-def compare_model_vs_table(cls, table_name: str) -> bool:
+def compare_model_vs_table(cls, db_schema: str, table_name: str) -> bool:
 
     def are_fields_matched(db_type, model_type):
         logger.info(f"Comparing {db_type} with {model_type}")
@@ -26,8 +26,10 @@ def compare_model_vs_table(cls, table_name: str) -> bool:
     with connection.cursor() as cursor:
 
         table_info = connection.introspection.get_table_list(cursor)
+        for table in table_info:
+            logger.info(f"Table: {table}")
         if not any(table.name == table_name for table in table_info):
-            logger.error(f"La table {table_name} n'existe pas")
+            logger.error(f"La table {db_schema}.{table_name} n'existe pas")
             return False
 
         table_description = connection.introspection.get_table_description(
@@ -128,6 +130,8 @@ def compare_model_vs_table(cls, table_name: str) -> bool:
             through_model = field.remote_field.through
             through_table = through_model._meta.db_table
             through_table = through_table.replace(cls_table, table_name)
-            all_fields_match &= compare_model_vs_table(through_model, through_table)
+            all_fields_match &= compare_model_vs_table(
+                through_model, db_schema, through_table
+            )
 
         return all_fields_match

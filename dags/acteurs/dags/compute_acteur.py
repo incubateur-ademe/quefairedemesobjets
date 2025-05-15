@@ -103,11 +103,15 @@ with DAG(
     )
 
     check_model_table_displayedacteur_task = check_model_table_consistency_task(
-        dag, "DisplayedActeur", "exposure_carte_acteur"
+        dag, "qfdmo", "DisplayedActeur", "warehouse", "exposure_carte_acteur"
     )
     check_model_table_displayedpropositionservice_task = (
         check_model_table_consistency_task(
-            dag, "DisplayedPropositionService", "exposure_carte_propositionservice"
+            dag,
+            "qfdmo",
+            "DisplayedPropositionService",
+            "warehouse",
+            "exposure_carte_propositionservice",
         )
     )
     # The publication isn't handled by DBT yet
@@ -116,13 +120,17 @@ with DAG(
     # )
 
     check_model_table_vueacteur_task = check_model_table_consistency_task(
-        dag, "VueActeur", "exposure_exhaustive_acteur"
+        dag, "qfdmo", "VueActeur", "warehouse", "exposure_exhaustive_acteur"
     )
     check_model_table_vuepropositionservice_task = check_model_table_consistency_task(
-        dag, "VuePropositionService", "exposure_exhaustive_propositionservice"
+        dag,
+        "qfdmo",
+        "VuePropositionService",
+        "warehouse",
+        "exposure_exhaustive_propositionservice",
     )
     replace_vueacteur_table_task = replace_acteur_table_task(
-        dag, "qfdmo_vue", "exposure_exhaustive_"
+        dag, "public", "qfdmo_vue", "warehouse", "exposure_exhaustive_"
     )
 
     # Définir la séquence principale

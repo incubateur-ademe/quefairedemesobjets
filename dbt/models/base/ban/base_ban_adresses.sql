@@ -8,7 +8,7 @@
 SELECT
     /* Creating complete adresse to do lookups
     and compare vs. ours rep = ex: "bis" */
-    udf_columns_concat_unique_non_empty(numero,rep,nom_voie) AS adresse,
+    {{ target.schema }}.udf_columns_concat_unique_non_empty(numero,rep,nom_voie) AS adresse,
     /* Also keeping separate column for numero
     as it's a common suggestion filter */
     numero AS adresse_numero,

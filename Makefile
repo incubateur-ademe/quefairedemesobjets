@@ -126,14 +126,13 @@ extract-dsfr:
 	$(PYTHON) ./dsfr_hacks/extract_used_colors.py
 	$(PYTHON) ./dsfr_hacks/extract_used_icons.py
 
-# Postgres database utilities: restore, drop database etc
-.PHONY: drop-db
-drop-db:
-	docker compose exec lvao-db dropdb -f -i -U qfdmo -e qfdmo
+.PHONY: drop-schema-public
+drop-schema-public:
+	docker compose exec lvao-db psql -U qfdmo -d qfdmo -c "DROP SCHEMA IF EXISTS public CASCADE;"
 
-.PHONY: create-db
-create-db:
-	docker compose exec lvao-db createdb -U qfdmo -e qfdmo
+.PHONY: create-schema-public
+create-schema-public:
+	docker compose exec lvao-db psql -U qfdmo -d qfdmo -c "CREATE SCHEMA IF NOT EXISTS public;"
 
 .PHONY: dump-production
 dump-production:
@@ -141,16 +140,18 @@ dump-production:
 	scalingo --app quefairedemesobjets --addon postgresql backups-download --output tmpbackup/backup.tar.gz
 	tar xfz tmpbackup/backup.tar.gz --directory tmpbackup
 
+# We need to create extensions because they are not restored by pg_restore
 .PHONY: load-production-dump
 load-production-dump:
 	@DUMP_FILE=$$(find tmpbackup -type f -name "*.pgsql" -print -quit); \
-	pg_restore -d "$(DB_URL)" --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
+	psql -d "$(DB_URL)" -f scripts/sql/create_extensions.sql && \
+	pg_restore -d "$(DB_URL)" --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
 	rm -rf tmpbackup
 
 .PHONY: db-restore
 db-restore:
-	make drop-db
-	make create-db
+	make drop-schema-public
+	make create-schema-public
 	make dump-production
 	make load-production-dump
 	make migrate
