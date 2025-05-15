@@ -8,6 +8,9 @@
     {% else %}
     id="mapContainer"
     {% endif %}
+    {% if request.user.is_authenticated and DEBUG %}
+    data-turbo-action="advance"
+    {% endif %}
 >
     {# Controleur général de gestion de la navigation et du formulaire #}
     <form
@@ -15,7 +18,6 @@
         data-controller="search-solution-form"
         data-search-solution-form-target="searchForm"
         data-search-solution-form-is-iframe-value="{{ is_embedded }}"
-        data-turbo-frame="addressesPanel"
         data-action="map:displayActeur->search-solution-form#displayActeur
         map:updateBbox->search-solution-form#updateBboxInput
         search-solution-form:captureInteraction->analytics#captureInteractionWithMap
@@ -32,7 +34,7 @@
         action="/carte{% block action %}{% endblock %}"
         data-search-form-visible
     >
-        <section class="map-grid">
+        <section class="map-grid qf-overflow-hidden">
             <header
                 class="{% block header_classes %}qf-z-40{% endblock header_classes %}"
             >
@@ -50,8 +52,10 @@
                 class="
                 qf-flex
                 max-md:qf-h-main-svh
-                {# Is useful for digital view so that the users can scrol in the results #}
+                {% if is_digital %}
+                {# Is useful for digital view so that the users can scroll in the results #}
                 qf-overflow-auto
+                {% endif %}
                 qf-h-full
                 "
                 tabindex="0"
@@ -81,13 +85,15 @@
 
             {# Part of this tag' style is defined in qfdmo.css because it would have been a bit unreadable as tailwind classes #}
             <aside class="
-                qf-relative qf-z-30
+                md:qf-relative qf-z-30
                 aria-[hidden=false]:qf-flex qf-hidden qf-flex-col
                 {% if is_carte %}md:qf-h-[calc(100vh_-_120px)]{% else %}md:qf-h-[calc(100vh_-_250px)]{% endif %}
-                max-md:qf-snap-y md:qf-overflow-auto qf-scroll-mt-[65vh]
-                max-md:qf-snap-mandatory
+                md:qf-overflow-auto
                 qf-bg-white
                 qf-px-2w
+                max-md:qf-fixed
+                max-md:qf-top-[80svh]
+                max-md:qf-top-3/4 max-md:qf-left-0 max-md:qf-right-0
                 max-md:qf-drop-shadow-[0_0_100px_rgba(0,0,0,0.3)]
                 max-md:qf-rounded-t-xl
                 aria-[hidden=true]:max-md:qf-animate-out

@@ -50,7 +50,7 @@ Style the autocomplete container:
 }
 
 .map-grid {
-  @apply qf-min-h-screen md:qf-grid qf-gap-0;
+  @apply qf-overflow-hidden qf-min-h-screen md:qf-grid qf-gap-0;
   @apply qf-grid-flow-row-dense;
   @apply qf-transition-[grid-template-columns] qf-ease-in qf-duration-200;
   grid-template-columns: auto var(--sidebar-width);

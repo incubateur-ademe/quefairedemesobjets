@@ -1,10 +1,10 @@
 {# Détail de l'adresse #}
 {# Barre visible en mobile uniquement #}
 <span
-    class="qf-snap-start md:qf-hidden qf-block qf-rounded-full qf-w-12w qf-h-1v qf-bg-[#DFDFDF] qf-my-2w qf-mx-auto"
+    class="md:qf-hidden qf-block qf-rounded-full qf-w-12w qf-h-1v qf-bg-[#DFDFDF] qf-my-2w qf-mx-auto"
 ></span>
 {# Content #}
-<div class="qf-flex-grow qf-relative qf-snap-start">
+<div class="qf-flex-grow qf-relative">
     {# Close button #}
     <span
         class="
@@ -16,5 +16,7 @@
         data-action="click->search-solution-form#hideActeurDetailsPanel"
     >
     </span>
-    <turbo-frame id="acteur-detail"></turbo-frame>
+    <turbo-frame id="acteur-detail">
+    {# TODO: charger l'acteur ici #}
+    </turbo-frame>
 </div>
