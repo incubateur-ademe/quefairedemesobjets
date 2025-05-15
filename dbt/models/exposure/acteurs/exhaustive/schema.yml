@@ -120,6 +120,11 @@ models:
         description: "Information si on sait que le SIRET est fermé"
         data_type: boolean
     config:
+      tags:
+        - exposure
+        - exhaustive
+        - acteurs
+        - acteur
       contract:
         enforced: true
       materialized: table
@@ -166,8 +171,7 @@ models:
           initially_deferred: true
     tests:
       - dbt_expectations.expect_table_row_count_to_be_between:
-          min_value: 500000
-          max_value: 700000
+          min_value: 600000
   - name: exposure_exhaustive_propositionservice
     description: "Proposition Service model"
     columns:
@@ -188,6 +192,11 @@ models:
         tests:
           - not_null
     config:
+      tags:
+        - exposure
+        - exhaustive
+        - acteurs
+        - propositionservice
       materialized: table
       contract:
         enforced: true
@@ -219,8 +228,7 @@ models:
             - acteur_id
             - action_id
       - dbt_expectations.expect_table_row_count_to_be_between:
-          min_value: 500000
-          max_value: 700000
+          min_value: 600000
   - name: exposure_exhaustive_propositionservice_sous_categories
     description: "Proposition Service Sous Categories model"
     columns:
@@ -240,6 +248,11 @@ models:
         tests:
           - not_null
     config:
+      tags:
+        - exposure
+        - exhaustive
+        - acteurs
+        - propositionservice_sous_categories
       materialized: table
       contract:
         enforced: true
@@ -269,7 +282,7 @@ models:
             - vuepropositionservice_id
             - souscategorieobjet_id
       - dbt_expectations.expect_table_row_count_to_be_between:
-          min_value: 500000
+          min_value: 1800000
   - name: exposure_exhaustive_acteur_acteur_services
     description: "Acteur Acteur Services model"
     columns:
@@ -289,6 +302,11 @@ models:
         tests:
           - not_null
     config:
+      tags:
+        - exposure
+        - exhaustive
+        - acteurs
+        - acteur_acteur_services
       materialized: table
       contract:
         enforced: true
@@ -340,6 +358,11 @@ models:
         tests:
           - not_null
     config:
+      tags:
+        - exposure
+        - exhaustive
+        - acteurs
+        - acteur_labels
       materialized: table
       contract:
         enforced: true
@@ -369,7 +392,7 @@ models:
             - vueacteur_id
             - labelqualite_id
       - dbt_expectations.expect_table_row_count_to_be_between:
-          min_value: 1000
+          min_value: 30000
   - name: exposure_exhaustive_acteur_sources
     description: "Lien entre acteur de la exhaustive et sources"
     columns:
@@ -389,6 +412,11 @@ models:
         tests:
           - not_null
     config:
+      tags:
+        - exposure
+        - exhaustive
+        - acteurs
+        - acteur_sources
       materialized: table
       contract:
         enforced: true
@@ -413,4 +441,4 @@ models:
           deferrable: true
     tests:
       - dbt_expectations.expect_table_row_count_to_be_between:
-          min_value: 1000
+          min_value: 500000

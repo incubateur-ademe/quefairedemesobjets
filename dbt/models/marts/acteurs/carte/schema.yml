@@ -77,6 +77,11 @@ models:
       - name: siret_is_closed
         description: "Information si on sait que le SIRET est fermé"
     config:
+      tags:
+        - marts
+        - carte
+        - acteurs
+        - filtered_acteur
       materialized: ephemeral
   - name: marts_carte_filtered_parentpropositionservice
     description: "Table temporaire pour calculer les parents des propositions de service"
@@ -98,6 +103,11 @@ models:
         data_tests:
           - not_null
     config:
+      tags:
+        - marts
+        - carte
+        - acteurs
+        - filtered_parentpropositionservice
       materialized: ephemeral
   - name: marts_carte_filtered_propositionservice
     description: "Vue sur les propositions de service affichées sur la carte"
@@ -116,6 +126,11 @@ models:
         data_tests:
           - not_null
     config:
+      tags:
+        - marts
+        - carte
+        - acteurs
+        - filtered_propositionservice
       materialized: ephemeral
   - name: marts_carte_propositionservice
     description: "Vue sur les propositions de service affichées sur la carte"
@@ -134,6 +149,11 @@ models:
         data_tests:
           - not_null
     config:
+      tags:
+        - marts
+        - carte
+        - acteurs
+        - propositionservice
       materialized: table
       indexes:
         - columns: ['acteur_id', 'action_id']
@@ -178,6 +198,11 @@ models:
         data_tests:
           - not_null
     config:
+      tags:
+        - marts
+        - carte
+        - acteurs
+        - propositionservice_sous_categories
       materialized: table
       indexes:
         - columns: ['propositionservice_id', 'souscategorieobjet_id']
@@ -221,6 +246,11 @@ models:
         data_tests:
           - not_null
     config:
+      tags:
+        - marts
+        - carte
+        - acteurs
+        - acteur_acteur_services
       materialized: table
       indexes:
         - columns: ['acteur_id', 'acteurservice_id']
@@ -264,6 +294,11 @@ models:
         data_tests:
           - not_null
     config:
+      tags:
+        - marts
+        - carte
+        - acteurs
+        - acteur_labels
       materialized: table
       indexes:
         - columns: ['acteur_id', 'labelqualite_id']
@@ -307,6 +342,11 @@ models:
         data_tests:
           - not_null
     config:
+      tags:
+        - marts
+        - carte
+        - acteurs
+        - acteur_sources
       materialized: table
       indexes:
         - columns: ['acteur_id', 'source_id']
@@ -341,6 +381,11 @@ models:
           - not_null
           - unique
     config:
+      tags:
+        - marts
+        - carte
+        - acteurs
+        - acteur
       materialized: table
       indexes:
         - columns: ['modifie_le', 'identifiant_unique']
