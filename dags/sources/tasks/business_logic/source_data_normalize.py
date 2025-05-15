@@ -214,7 +214,7 @@ def _manage_oca_config(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
         df["source_code"] = df["source_code"].apply(
             lambda x: oca_prefix + "_" + x.strip().lower()
         )
-    # Recalcule de l'identifiant unique
+    # Recalcul de l'identifiant unique
     normalisation_function = get_transformation_function(
         "clean_identifiant_unique", dag_config
     )
