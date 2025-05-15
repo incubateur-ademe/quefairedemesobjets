@@ -140,13 +140,11 @@ dump-production:
 	scalingo --app quefairedemesobjets --addon postgresql backups-download --output tmpbackup/backup.tar.gz
 	tar xfz tmpbackup/backup.tar.gz --directory tmpbackup
 
+# We need to create extensions because they are not restored by pg_restore
 .PHONY: load-production-dump
 load-production-dump:
 	@DUMP_FILE=$$(find tmpbackup -type f -name "*.pgsql" -print -quit); \
-	psql -d "$(DB_URL)" -c "CREATE EXTENSION IF NOT EXISTS postgis;" && \
-	psql -d "$(DB_URL)" -c 'CREATE EXTENSION IF NOT EXISTS "unaccent";' && \
-	psql -d "$(DB_URL)" -c 'CREATE EXTENSION IF NOT EXISTS "pg_trgm";' && \
-	psql -d "$(DB_URL)" -c 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";' && \
+	psql -d "$(DB_URL)" -f scripts/sql/create_extensions.sql && \
 	pg_restore -d "$(DB_URL)" --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
 	rm -rf tmpbackup
 

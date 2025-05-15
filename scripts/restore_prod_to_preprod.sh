@@ -30,7 +30,12 @@ backup_file_name="$( tar --list --file="${ARCHIVE_NAME}" \
 tar --extract --verbose --file="${ARCHIVE_NAME}"
 
 # 8. Restore the data:
-psql "${PREPROD_DATABASE_URL}" -c "DROP SCHEMA IF EXISTS public CASCADE;"
-psql "${PREPROD_DATABASE_URL}" -c "CREATE SCHEMA IF NOT EXISTS public;"
+#   Drop and create the public schema
+psql -d "${PREPROD_DATABASE_URL}" -c "DROP SCHEMA IF EXISTS public CASCADE;"
+psql -d "${PREPROD_DATABASE_URL}" -c "CREATE SCHEMA IF NOT EXISTS public;"
 
+#   Create extensions because they are not restored by pg_restore
+psql -d "${PREPROD_DATABASE_URL}" -f scripts/sql/create_extensions.sql
+
+#   Restore the table, views and functions
 pg_restore --schema=public --clean --no-acl --no-owner --no-privileges --dbname "${PREPROD_DATABASE_URL}" ${backup_file_name}
