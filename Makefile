@@ -60,8 +60,6 @@ run-django:
 	honcho start -f Procfile.django.dev
 
 run-all:
-	docker compose --profile airflow down
-	docker compose --profile lvao down
 	honcho start -f Procfile.all.dev
 
 # Local django operations
