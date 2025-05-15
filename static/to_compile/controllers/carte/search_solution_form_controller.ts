@@ -103,16 +103,19 @@ export default class extends Controller<HTMLElement> {
   connect() {
     this.displayActionList()
     window.addEventListener("hashchange", this.#setActiveActeur.bind(this))
+    if (window.location.hash) {
+      this.#setActiveActeur(null)
+    }
     // Prevents the leaflet map to move when the user moves panel
     this.acteurDetailsPanelTarget.addEventListener("touchmove", (event) =>
       event.stopPropagation(),
     )
   }
 
-  #setActiveActeur(event?: HashChangeEvent) {
-    const uuid = event
-      ? new URL(event.newURL).hash.substring(1)
-      : window.location.hash.substring(1)
+  #setActiveActeur(event: HashChangeEvent | null) {
+    const location = event ? new URL(event.newURL) : window.location
+    const uuid = location.hash.substring(1)
+
     if (uuid) {
       this.displayActeur(uuid)
       this.dispatch("captureInteraction")

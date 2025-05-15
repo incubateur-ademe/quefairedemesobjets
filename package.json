@@ -11,6 +11,7 @@
     "source": [
         "static/to_compile/entrypoints/qfdmd.ts",
         "static/to_compile/entrypoints/qfdmo.ts",
+        "static/to_compile/styles/qfdmo.css",
         "static/to_compile/entrypoints/embed/assistant.ts",
         "static/to_compile/entrypoints/embed/formulaire.ts",
         "static/to_compile/entrypoints/embed/carte.ts",
