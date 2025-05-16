@@ -1,5 +1,6 @@
 import pandas as pd
 from cluster.config.constants import COL_PARENT_DATA_NEW
+
 from utils.django import django_setup_full
 
 django_setup_full()
@@ -15,7 +16,6 @@ def df_sort(
     different columns"""
 
     from data.models.change import (
-        COL_CHANGE_ENTITY_TYPE,
         COL_CHANGE_MODEL_NAME,
         COL_CHANGE_ORDER,
         COL_CHANGE_REASON,
@@ -24,7 +24,7 @@ def df_sort(
     # SORTING ROWS: by what makes clusters logical
     sort_rows = ["cluster_id", COL_CHANGE_ORDER]
     if cluster_fields_exact or cluster_fields_fuzzy:
-        sort_rows += [COL_CHANGE_ENTITY_TYPE, "source_code", "acteur_type_code"]
+        sort_rows += ["source_code", "acteur_type_code"]
     sort_rows += [x for x in cluster_fields_exact if x not in sort_rows]
     sort_rows += [x for x in cluster_fields_fuzzy if x not in sort_rows]
     sort_rows += [
@@ -41,7 +41,6 @@ def df_sort(
         "cluster_id",
         "identifiant_unique",
         "statut",
-        COL_CHANGE_ENTITY_TYPE,
         COL_CHANGE_MODEL_NAME,
         COL_CHANGE_REASON,
         COL_CHANGE_ORDER,

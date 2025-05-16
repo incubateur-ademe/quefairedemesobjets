@@ -16,7 +16,6 @@ def changes_prepare(
     model_params: dict,
     order: int,
     reason: str,
-    entity_type: str,
 ) -> dict:
     """Generic utility to prepare, validate and
     serialize 1 suggestion change for ANY suggestion types"""
@@ -26,7 +25,6 @@ def changes_prepare(
     return SuggestionChange(
         order=order,
         reason=reason,
-        entity_type=entity_type,
         model_name=model.name(),
         model_params=model_params,
     ).model_dump()
@@ -49,7 +47,6 @@ def changes_prepare_villes(row: dict) -> tuple[list[dict], dict]:
             model_params=model_params,
             order=1,
             reason="On fait confiance à la BAN",
-            entity_type="acteur_displayed",
         )
     )
     contexte = {
@@ -78,7 +75,6 @@ def changes_prepare_rgpd(
             model_params=model_params,
             order=1,
             reason="🕵 Anonymisation RGPD",
-            entity_type="acteur_displayed",
         )
     )
     contexte = {
@@ -115,7 +111,6 @@ def changes_prepare_closed_not_replaced(
             model_params=model_params,
             order=1,
             reason="SIRET & SIREN fermés, 0 remplacement trouvé",
-            entity_type="acteur_displayed",
         )
     )
     contexte = {}  # changes are self-explanatory
@@ -150,7 +145,6 @@ def changes_prepare_closed_replaced(
             model_params=update_revision,
             order=1,
             reason="Modification du SIRET",
-            entity_type="acteur_displayed",
         )
     ]
 

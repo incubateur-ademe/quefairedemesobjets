@@ -3,7 +3,6 @@ from cluster.tasks.business_logic.cluster_acteurs_read.children import (
     cluster_acteurs_read_children,
 )
 
-from data.models.change import COL_CHANGE_ENTITY_TYPE
 from unit_tests.qfdmo.acteur_factory import RevisionActeurFactory
 
 
@@ -35,4 +34,4 @@ class TestClusterActeursSelectionChildren:
         fields_to_include = ["nom", "parent", "nombre_enfants", "source_id"]
         df = cluster_acteurs_read_children(parent_ids, fields_to_include)
         assert df["nom"].tolist() == ["Enfant p1 a", "Enfant p2 a", "Enfant p2 b"]
-        assert df.columns.tolist() == fields_to_include + [COL_CHANGE_ENTITY_TYPE]
+        assert df.columns.tolist() == fields_to_include
