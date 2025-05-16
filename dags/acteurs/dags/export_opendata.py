@@ -29,6 +29,7 @@ with DAG(
         "Ce DAG export les acteurs disponibles en opendata précédemment générés dans la"
         " table `exposure_opendata_acteur` de la base de données."
     ),
+    tags=["compute", "export", "acteurs", "opendata", "s3"],
     params={
         "bucket_name": "lvao-opendata",
         "remote_dir": "acteurs" if ENVIRONMENT == "prod" else f"acteurs-{ENVIRONMENT}",

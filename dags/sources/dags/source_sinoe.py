@@ -18,7 +18,7 @@ with DAG(
     description=(
         "DAG pour télécharger, standardiser, et charger dans notre base la source SINOE"
     ),
-    tags=["source", "ademe", "sinoe", "déchèteries"],
+    tags=["source", "data.ademe.fr", "ademe", "sinoe", "déchetterie"],
     **default_params,
     params={
         "endpoint": (

@@ -27,7 +27,7 @@ with DAG(
         "retries": 0,
     },
     description=("Un DAG pour suggérer des corrections de villes"),
-    tags=["annuaire", "entreprises", "ae", "acteurs", "juridique"],
+    tags=["enrich", "annuaire-entreprises", "AE", "acteurs", "CP", "villes"],
     schedule=SCHEDULES.NONE,
     catchup=CATCHUPS.AWLAYS_FALSE,
     start_date=START_DATES.YESTERDAY,

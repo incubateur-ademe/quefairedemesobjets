@@ -26,6 +26,7 @@ dag = DAG(
     dag_display_name="Application des suggestions validées",
     default_args=default_args,
     description="traiter les suggestions à traiter",
+    tags=["compute", "suggestions", "apply", "acteurs"],
     schedule="*/5 * * * *",
     catchup=False,
     max_active_runs=1,

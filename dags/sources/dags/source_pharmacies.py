@@ -12,6 +12,7 @@ with DAG(
     dag_display_name="Source - PHARMACIES",
     default_args=default_args,
     description=("Téléchargement des pharmacies (Ordre National Des Pharmaciens)"),
+    tags=["source", "ordre.pharmacien.fr", "fédération", "pharmacies"],
     **default_params,
     params={
         "normalization_rules": [

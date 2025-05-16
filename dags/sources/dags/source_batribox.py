@@ -9,13 +9,13 @@ from sources.tasks.airflow_logic.operators import (
 
 with DAG(
     dag_id="eo-batribox",
-    dag_display_name="Source - SCRELEC",
+    dag_display_name="Source - BATRIBOX",
     default_args=default_args,
     description=(
-        "Injestion des données de l'éco-organisme SCRELEC à partir des données"
+        "Injestion des données de l'éco-organisme BATRIBOX à partir des données"
         " disponibles sur de Koumoul"
     ),
-    tags=["source", "ademe", "piles", "batteries", "accumulateurs"],
+    tags=["source", "data.pointsapport.ademe.fr", "eco-organisme", "batribox", "PA"],
     **default_params,
     params={
         "endpoint": (
@@ -41,11 +41,6 @@ with DAG(
                 "destination": "latitude",
             },
             # 2. Transformation des colonnes
-            {
-                "origin": "ecoorganisme",
-                "transformation": "strip_lower_string",
-                "destination": "source_code",
-            },
             {
                 "origin": "type_de_point_de_collecte",
                 "transformation": "clean_acteur_type_code",
@@ -80,6 +75,10 @@ with DAG(
             {
                 "column": "statut",
                 "value": constants.ACTEUR_ACTIF,
+            },
+            {
+                "column": "source_code",
+                "value": "batribox",
             },
             # 4. Transformation du dataframe
             {
@@ -141,21 +140,22 @@ with DAG(
                 "destination": ["proposition_service_codes"],
             },
             # 5. Supression des colonnes
+            {"remove": "_geopoint"},
             {"remove": "_i"},
             {"remove": "_id"},
-            {"remove": "_updatedAt"},
             {"remove": "_rand"},
-            {"remove": "_geopoint"},
-            {"remove": "filiere"},
             {"remove": "_score"},
+            {"remove": "_updatedAt"},
+            {"remove": "accessible"},
             {"remove": "adresse_format_ban"},
+            {"remove": "ecoorganisme"},
+            {"remove": "filiere"},
             {"remove": "id_point_apport_ou_reparation"},
-            {"remove": "point_de_collecte_ou_de_reprise_des_dechets"},
             {"remove": "labels_etou_bonus"},
             {"remove": "point_dapport_de_service_reparation"},
             {"remove": "point_dapport_pour_reemploi"},
+            {"remove": "point_de_collecte_ou_de_reprise_des_dechets"},
             {"remove": "point_de_reparation"},
-            {"remove": "accessible"},
             # 6. Colonnes à garder (rien à faire, utilisé pour le controle)
         ],
         "validate_address_with_ban": False,

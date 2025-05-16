@@ -15,6 +15,14 @@ with DAG(
         "A pipeline to fetch, process, and load to validate data into postgresql"
         " for EcoDDS dataset"
     ),
+    tags=[
+        "source",
+        "data.pointsapport.ademe.fr",
+        "eco-organisme",
+        "ecodds",
+        "ABJ",
+        "PCHIM",
+    ],
     **default_params,
     params={
         "normalization_rules": [

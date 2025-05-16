@@ -26,7 +26,7 @@ with DAG(
         "Un DAG pour rafraîchir les modèles DBT nécessaires"
         "à l'enrichissement des acteurs"
     ),
-    tags=["dbt", "models", "refresh", "enrich"],
+    tags=["enrich", "annuaire-entreprises", "AE", "BAN", "prepare", "DBT"],
     schedule=SCHEDULES.DAILY,
     catchup=CATCHUPS.AWLAYS_FALSE,
     start_date=START_DATES.YESTERDAY,

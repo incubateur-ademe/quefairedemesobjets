@@ -40,6 +40,7 @@ dag = DAG(
         " plusieurs sources en cumulant leur services, sources et propositions"
         " services."
     ),
+    tags=["compute", "acteurs", "carte", "deprecated"],
     max_active_runs=1,
     schedule=None,
 )

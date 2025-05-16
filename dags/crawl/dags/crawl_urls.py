@@ -50,7 +50,7 @@ with DAG(
     catchup=False,
     schedule_interval=None,
     description=("Un DAG pour parcourir des URLs et suggérer des corrections"),
-    tags=["crawl", "acteurs", "url", "suggestions"],
+    tags=["enrich", "crawl", "acteurs", "url", "suggestions"],
     params={
         "dry_run": Param(
             True,

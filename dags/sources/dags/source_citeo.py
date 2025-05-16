@@ -15,6 +15,7 @@ with DAG(
         "Injestion des données de l'éco-organisme CITEO à partir des données disponible"
         " sur de Koumoul"
     ),
+    tags=["source", "data.pointsapport.ademe.fr", "eco-organisme", "citeo", "EMPAP"],
     **default_params,
     params={
         "normalization_rules": [

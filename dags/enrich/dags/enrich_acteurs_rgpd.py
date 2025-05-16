@@ -27,7 +27,7 @@ with DAG(
         "retries": 0,
     },
     description=("Un DAG pour anonymiser les acteurs vs. RGPD"),
-    tags=["annuaire", "entreprises", "ae", "rgpd", "acteurs", "juridique"],
+    tags=["enrich", "annuaire-entreprises", "AE", "RGPD", "acteurs"],
     schedule=SCHEDULES.NONE,
     catchup=CATCHUPS.AWLAYS_FALSE,
     start_date=START_DATES.YESTERDAY,

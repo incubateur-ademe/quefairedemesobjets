@@ -14,6 +14,7 @@ with DAG(
     description=(
         "Un pipeline pour récupérer des données depuis un bucket S3 et les transformer"
     ),
+    tags=["source", "s3"],
     **default_params,
     params={
         "s3_connection_id": Param(
