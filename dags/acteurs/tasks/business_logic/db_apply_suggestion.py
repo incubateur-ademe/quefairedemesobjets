@@ -1,10 +1,10 @@
 import logging
 
-from django.db import transaction
-from sources.config import shared_constants as constants
-from suggestions.tasks.business_logic.db_check_suggestion_to_process import (
+from acteurs.tasks.business_logic.db_check_suggestion_to_process import (
     get_suggestions_toprocess,
 )
+from django.db import transaction
+from sources.config import shared_constants as constants
 
 logger = logging.getLogger(__name__)
 

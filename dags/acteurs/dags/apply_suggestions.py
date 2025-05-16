@@ -1,17 +1,17 @@
 from datetime import timedelta
 
 import pendulum
-from airflow.models import DAG
-from suggestions.tasks.airflow_logic.db_apply_suggestion_task import (
+from acteurs.tasks.airflow_logic.db_apply_suggestion_task import (
     db_apply_suggestion_task,
 )
-from suggestions.tasks.airflow_logic.db_check_suggestion_to_process_task import (
+from acteurs.tasks.airflow_logic.db_check_suggestion_to_process_task import (
     db_check_suggestion_to_process_task,
 )
-from suggestions.tasks.airflow_logic.launch_compute_task import (
+from acteurs.tasks.airflow_logic.launch_compute_task import (
     launch_compute_acteur_task,
     launch_compute_carte_acteur_task,
 )
+from airflow.models import DAG
 
 default_args = {
     "owner": "airflow",

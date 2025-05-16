@@ -1,4 +1,5 @@
 from sources.config import shared_constants as constants
+
 from utils.django import django_setup_full
 
 django_setup_full()
