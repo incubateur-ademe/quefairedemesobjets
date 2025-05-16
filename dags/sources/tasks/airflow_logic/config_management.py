@@ -43,6 +43,11 @@ class NormalizationColumnKeep(BaseModel):
     keep: str
 
 
+class OCAConfig(BaseModel):
+    prefix: str | None = None
+    deduplication_source: bool = False
+
+
 class DAGConfig(BaseModel):
     normalization_rules: list[
         Union[
@@ -62,6 +67,7 @@ class DAGConfig(BaseModel):
     product_mapping: dict
     source_code: Optional[str] = None
     validate_address_with_ban: bool = False
+    oca: OCAConfig | None = None
 
     @field_validator("endpoint")
     def validate_endpoint(cls, endpoint):
@@ -111,6 +117,22 @@ class DAGConfig(BaseModel):
         ]
         columns -= set(removed_columns)
         return columns
+
+    @property
+    def oca_deduplication_source(self) -> bool:
+        if self.oca is None:
+            return False
+        return bool(self.oca.deduplication_source)
+
+    @property
+    def is_oca(self) -> bool:
+        return bool(self.oca)
+
+    @property
+    def oca_prefix(self) -> str | None:
+        if self.oca is None:
+            return None
+        return self.oca.prefix
 
 
 # DEPRECATED

@@ -205,6 +205,25 @@ def _display_warning_about_missing_location(df: pd.DataFrame) -> None:
             log.preview("Acteurs sans localisation", df_acteur_sans_loc)
 
 
+def _manage_oca_config(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
+    if dag_config.oca_deduplication_source:
+        df = df.assign(source_code=df["source_code"].str.split("|")).explode(
+            "source_code"
+        )
+    if oca_prefix := dag_config.oca_prefix:
+        df["source_code"] = df["source_code"].apply(
+            lambda x: oca_prefix + "_" + x.strip().lower()
+        )
+    # Recalcul de l'identifiant unique
+    normalisation_function = get_transformation_function(
+        "clean_identifiant_unique", dag_config
+    )
+    df[["identifiant_unique"]] = df[["identifiant_externe", "source_code"]].apply(
+        normalisation_function, axis=1
+    )
+    return df
+
+
 def source_data_normalize(
     df_acteur_from_source: pd.DataFrame,
     dag_config: DAGConfig,
@@ -238,6 +257,10 @@ def source_data_normalize(
 
     # Merge and delete undesired lines
     df, metadata = _remove_undesired_lines(df, dag_config)
+
+    # deduplication_on_source_code
+    if dag_config.is_oca:
+        df = _manage_oca_config(df, dag_config)
 
     # Check that the dataframe has the expected columns
     expected_columns = dag_config.get_expected_columns()
