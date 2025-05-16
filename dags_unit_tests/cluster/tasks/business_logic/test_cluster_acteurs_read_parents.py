@@ -8,7 +8,6 @@ from cluster.tasks.business_logic.cluster_acteurs_read.parents import (
     cluster_acteurs_read_parents,
 )
 
-from data.models.change import COL_CHANGE_ENTITY_TYPE
 from qfdmo.models import DisplayedActeur
 from unit_tests.qfdmo.acteur_factory import ActeurTypeFactory, SourceFactory
 
@@ -92,15 +91,12 @@ class TestClusterActeursSelectionActeurTypeParents:
         )
 
     def test_df_columns(self, df_working):
-        # Requested columns + default COL_CHANGE_ENTITY_TYPE are
-        # returned
         assert sorted(df_working.columns.tolist()) == sorted(
             [
                 "identifiant_unique",
                 "statut",
                 "latitude",
                 "nom",
-                COL_CHANGE_ENTITY_TYPE,
             ]
         )
 

@@ -2,6 +2,7 @@ import logging
 
 import pandas as pd
 from cluster.config.constants import COL_PARENT_DATA_NEW
+
 from utils import logging_utils as log
 from utils.data_serialize_reconstruct import data_serialize
 from utils.django import django_setup_full
@@ -14,7 +15,6 @@ django_setup_full()
 def cluster_changes_get(cluster: pd.DataFrame) -> list[dict]:
     """Generate changes for 1 cluster suggestion"""
     from data.models.change import (
-        COL_CHANGE_ENTITY_TYPE,
         COL_CHANGE_MODEL_NAME,
         COL_CHANGE_MODEL_PARAMS,
         COL_CHANGE_ORDER,
@@ -64,7 +64,6 @@ def cluster_changes_get(cluster: pd.DataFrame) -> list[dict]:
             change = {
                 "order": row[COL_CHANGE_ORDER],
                 "reason": row[COL_CHANGE_REASON],
-                "entity_type": row[COL_CHANGE_ENTITY_TYPE],
                 "model_name": row[COL_CHANGE_MODEL_NAME],
                 "model_params": row[COL_CHANGE_MODEL_PARAMS],
             }

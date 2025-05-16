@@ -2,13 +2,11 @@ import pytest
 from pydantic import ValidationError
 
 from data.models.change import (
-    COL_CHANGE_ENTITY_TYPE,
     COL_CHANGE_MODEL_NAME,
     COL_CHANGE_MODEL_PARAMS,
     COL_CHANGE_NAMESPACE,
     COL_CHANGE_ORDER,
     COL_CHANGE_REASON,
-    ENTITY_ACTEUR_DISPLAYED,
     SuggestionChange,
 )
 from unit_tests.qfdmo.acteur_factory import RevisionActeurFactory
@@ -24,7 +22,6 @@ class TestSuggestionChange:
             SuggestionChange(
                 order=0,  # must be an integer >= 1
                 reason="because I want it to break",
-                entity_type=ENTITY_ACTEUR_DISPLAYED,
                 model_name="sample_model_do_nothing",
                 model_params={},
             )
@@ -34,21 +31,8 @@ class TestSuggestionChange:
             SuggestionChange(
                 order=1,
                 reason="because I want it to break",
-                entity_type=ENTITY_ACTEUR_DISPLAYED,
                 model_name="invalid_model_name",
                 model_params={},
-            )
-
-    def test_raise_if_entity_type_invalid(self):
-        with pytest.raises(ValidationError, match="Invalid entity_type"):
-            SuggestionChange(
-                order=1,
-                reason="because I want it to break",
-                entity_type="wrong entity type",
-                model_name="acteur_verify_presence_in_revision",
-                model_params={
-                    "FOO": "bar",
-                },
             )
 
     def test_raise_if_model_params_invalid(self):
@@ -56,7 +40,6 @@ class TestSuggestionChange:
             SuggestionChange(
                 order=1,
                 reason="because I want it to break",
-                entity_type=ENTITY_ACTEUR_DISPLAYED,
                 model_name="acteur_verify_presence_in_revision",
                 model_params={
                     "FOO": "bar",
@@ -68,7 +51,6 @@ class TestSuggestionChange:
         SuggestionChange(
             order=1,
             reason="because I want it to work",
-            entity_type=ENTITY_ACTEUR_DISPLAYED,
             model_name="acteur_verify_presence_in_revision",
             model_params={
                 "id": "acteur1",
@@ -81,7 +63,6 @@ class TestSuggestionChange:
             [
                 COL_CHANGE_ORDER,
                 COL_CHANGE_REASON,
-                COL_CHANGE_ENTITY_TYPE,
                 COL_CHANGE_MODEL_NAME,
                 COL_CHANGE_MODEL_PARAMS,
             ]
