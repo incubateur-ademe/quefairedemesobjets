@@ -92,6 +92,10 @@ ALLOWED_HOSTS = [
     *decouple.config("ALLOWED_HOSTS", default="", cast=str).split(","),
 ]
 
+CANONICAL_HOST = decouple.config(
+    "CANONICAL_HOST", default="quefairedemesobjets.ademe.fr", cast=str
+)
+
 # Application definition
 # ----------------------
 INSTALLED_APPS = [

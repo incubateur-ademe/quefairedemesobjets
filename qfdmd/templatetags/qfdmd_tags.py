@@ -5,6 +5,7 @@ from django import template
 from django.conf import settings
 from django.core.cache import cache
 from django.forms import FileField
+from django.http import HttpRequest
 from django.utils.safestring import mark_safe
 
 register = template.Library()
@@ -22,6 +23,18 @@ def patchwork() -> dict:
         .filter(pin_on_homepage=True)[:19]
     )
     return {"top": produits[:10], "left": produits[10:14], "right": produits[16:19]}
+
+
+@register.inclusion_tag("components/header/_canonical_url.html")
+def canonical_url(request: HttpRequest) -> dict:
+
+    path = request.build_absolute_uri(request.path)
+    canonical_path = (
+        path.replace(request.get_host(), settings.CANONICAL_HOST)
+        if settings.CANONICAL_HOST != request.get_host()
+        else None
+    )
+    return {"path": canonical_path}
 
 
 @register.simple_tag
