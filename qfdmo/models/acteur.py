@@ -891,10 +891,11 @@ class RevisionActeur(BaseActeur):
             for k, v in default_acteur_fields.items()
         }
 
+        # We need to be sure commerce exist for avoid unexpected tests failures
+        commerce, _ = ActeurType.objects.get_or_create(code="commerce")
         default_acteur_fields.update(
             {
-                "acteur_type": self.acteur_type
-                or ActeurType.objects.get(code="commerce"),
+                "acteur_type": self.acteur_type or commerce,
                 "source": self.source,
                 "action_principale": self.action_principale,
             }
