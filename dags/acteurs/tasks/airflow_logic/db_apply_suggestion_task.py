@@ -1,6 +1,6 @@
+from acteurs.tasks.business_logic.db_apply_suggestion import db_apply_suggestion
 from airflow.models import DAG
 from airflow.operators.python import PythonOperator
-from suggestions.tasks.business_logic.db_apply_suggestion import db_apply_suggestion
 
 
 def db_apply_suggestion_task(dag: DAG):
