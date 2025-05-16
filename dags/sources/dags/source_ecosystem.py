@@ -15,6 +15,7 @@ with DAG(
         "A pipeline to fetch, process, and load to validate data into postgresql"
         " for Ecosystem dataset"
     ),
+    tags=["source", "data.pointsapport.ademe.fr", "eco-organisme", "ecosystem", "EEE"],
     **default_params,
     params={
         "normalization_rules": [

@@ -25,7 +25,7 @@ with DAG(
     description=(
         "Clone la table 'lieux_dits' de la Base Adresse Nationale (BAN) dans notre DB"
     ),
-    tags=["clone", "ban", "adresses", "lieux_dits"],
+    tags=["enrich", "clone", "BAN", "lieux_dits"],
     params={
         "dry_run": Param(
             False,

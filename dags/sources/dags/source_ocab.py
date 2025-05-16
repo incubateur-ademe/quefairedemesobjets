@@ -15,6 +15,7 @@ with DAG(
         "A pipeline to fetch, process, and load to validate data into postgresql"
         " for OCAB dataset"
     ),
+    tags=["source", "data.pointsapport.ademe.fr", "oca", "ocab", "PMCB"],
     **default_params,
     params={
         "normalization_rules": [

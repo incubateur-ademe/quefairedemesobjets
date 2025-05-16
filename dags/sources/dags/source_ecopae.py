@@ -15,6 +15,7 @@ with DAG(
         "Injestion des données de l'éco-organisme ECOPAE à partir des données"
         " disponibles sur Koumoul"
     ),
+    tags=["source", "data.pointsapport.ademe.fr", "eco-organisme", "ecopae", "PCHIM"],
     **default_params,
     params={
         "normalization_rules": [

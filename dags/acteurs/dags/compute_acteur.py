@@ -31,6 +31,7 @@ with DAG(
         " (vue exhaustive des acteurs), par la carte (vue des acteurs affichés) et"
         " par l'export des acteurs en open-data."
     ),
+    tags=["compute", "acteurs", "admin", "carte", "opendata", "DBT"],
     schedule=SCHEDULES.DAILY,
     max_active_runs=1,
 ) as dag:

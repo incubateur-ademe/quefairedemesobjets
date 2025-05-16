@@ -15,6 +15,7 @@ with DAG(
         "A pipeline to fetch, process, and load to validate data into postgresql"
         " for CMA reparacteur dataset"
     ),
+    tags=["source", "data.artisanat.fr", "fédération", "cma", "reparacteur"],
     **default_params,
     params={
         "normalization_rules": [

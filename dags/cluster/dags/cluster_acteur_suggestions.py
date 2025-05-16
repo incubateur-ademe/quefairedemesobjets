@@ -7,6 +7,7 @@ from cluster.config.model import ClusterConfig
 from cluster.tasks.airflow_logic.chain_tasks import chain_tasks
 from cluster.ui import params_separators as UI_PARAMS_SEPARATORS
 from shared.config import CATCHUPS, SCHEDULES, START_DATES
+
 from utils.airflow_params import airflow_params_dropdown_from_mapping
 from utils.django import django_model_fields_get, django_setup_full
 
@@ -290,7 +291,7 @@ with DAG(
     catchup=CATCHUPS.AWLAYS_FALSE,
     schedule=SCHEDULES.NONE,
     description=("Un DAG pour générer des suggestions de clustering pour les acteurs"),
-    tags=["cluster", "acteurs", "suggestions"],
+    tags=["cluster", "acteurs", "suggestions", "clustering"],
     params=PARAMS,
 ) as dag:
     chain_tasks(dag)

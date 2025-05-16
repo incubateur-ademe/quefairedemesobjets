@@ -15,6 +15,7 @@ with DAG(
         "A pipeline to fetch, process, and load to validate data into postgresql"
         " for Corepile dataset"
     ),
+    tags=["source", "data.pointsapport.ademe.fr", "eco-organisme", "corepile", "PA"],
     **default_params,
     params={
         "normalization_rules": [
