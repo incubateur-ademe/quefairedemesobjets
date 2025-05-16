@@ -54,7 +54,6 @@ def suggestions_prepare(
             change = SuggestionChange(
                 order=1,
                 reason=row[COLS.COHORT],
-                entity_type="acteur_displayed",
                 model_name=ChangeActeurUpdateRevision.name(),
                 model_params={
                     "id": acteur[COLS.ID],

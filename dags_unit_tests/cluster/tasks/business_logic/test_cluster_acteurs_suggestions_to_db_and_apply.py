@@ -20,14 +20,9 @@ from cluster.tasks.business_logic.cluster_acteurs_suggestions.to_db import (
 )
 
 from data.models.change import (
-    COL_CHANGE_ENTITY_TYPE,
     COL_CHANGE_MODEL_NAME,
     COL_CHANGE_ORDER,
     COL_CHANGE_REASON,
-    ENTITY_ACTEUR_BASE,
-    ENTITY_ACTEUR_DISPLAYED,
-    ENTITY_ACTEUR_REVISION,
-    ENTITY_ACTEUR_TO_CREATE,
 )
 from data.models.suggestion import Suggestion, SuggestionCohorte
 from unit_tests.qfdmo.acteur_factory import (
@@ -38,10 +33,6 @@ from unit_tests.qfdmo.acteur_factory import (
 )
 
 # Shorthands for tests
-ENTITY_CREATE = ENTITY_ACTEUR_TO_CREATE
-ENTITY_DISPLAY = ENTITY_ACTEUR_DISPLAYED
-ENTITY_REVISION = ENTITY_ACTEUR_REVISION
-ENTITY_BASE = ENTITY_ACTEUR_BASE
 C1 = "cluster_1"
 C2 = "cluster_2"
 C3 = "cluster_3"
@@ -56,7 +47,6 @@ DATA_ACTEURS = [
         "nombre_enfants": 0,
         COL_PARENT_ID_BEFORE: None,
         COL_CHANGE_ORDER: O1,
-        COL_CHANGE_ENTITY_TYPE: ENTITY_CREATE,
         COL_CHANGE_MODEL_NAME: CHANGE_CREATE,
         COL_CHANGE_REASON: "r_create",
         COL_PARENT_DATA_NEW: {"nom": "new name c1pcreate"},
@@ -69,7 +59,6 @@ DATA_ACTEURS = [
         "nombre_enfants": 0,
         COL_PARENT_ID_BEFORE: None,
         COL_CHANGE_ORDER: O2,
-        COL_CHANGE_ENTITY_TYPE: ENTITY_DISPLAY,
         COL_CHANGE_MODEL_NAME: CHANGE_POINT,
         COL_CHANGE_REASON: "r_point",
         COL_PARENT_DATA_NEW: None,
@@ -83,7 +72,6 @@ DATA_ACTEURS = [
         "nombre_enfants": 1,
         COL_PARENT_ID_BEFORE: None,
         COL_CHANGE_ORDER: O1,
-        COL_CHANGE_ENTITY_TYPE: ENTITY_REVISION,
         COL_CHANGE_MODEL_NAME: CHANGE_KEEP,
         COL_CHANGE_REASON: "r_point",
         COL_PARENT_DATA_NEW: {"nom": "new name c2pkeep"},
@@ -96,7 +84,6 @@ DATA_ACTEURS = [
         "nombre_enfants": 0,
         COL_PARENT_ID_BEFORE: "c2pkeep",
         COL_CHANGE_ORDER: O2,
-        COL_CHANGE_ENTITY_TYPE: ENTITY_REVISION,
         COL_CHANGE_MODEL_NAME: CHANGE_NOTHING,
         COL_CHANGE_REASON: "r_point",
         COL_PARENT_DATA_NEW: {"parent_id": "c2pkeep"},
@@ -111,7 +98,6 @@ DATA_ACTEURS = [
         "nombre_enfants": 2,
         COL_PARENT_ID_BEFORE: None,
         COL_CHANGE_ORDER: O1,
-        COL_CHANGE_ENTITY_TYPE: ENTITY_DISPLAY,
         COL_CHANGE_MODEL_NAME: CHANGE_KEEP,
         COL_CHANGE_REASON: "r_create",
         COL_PARENT_DATA_NEW: {"nom": "new name c3pkeep"},
@@ -124,7 +110,6 @@ DATA_ACTEURS = [
         "nombre_enfants": 0,
         COL_PARENT_ID_BEFORE: "c3pkeep",
         COL_CHANGE_ORDER: O2,
-        COL_CHANGE_ENTITY_TYPE: ENTITY_REVISION,
         COL_CHANGE_MODEL_NAME: CHANGE_NOTHING,
         COL_CHANGE_REASON: "already good",
         COL_PARENT_DATA_NEW: None,
@@ -137,7 +122,6 @@ DATA_ACTEURS = [
         "nombre_enfants": 0,
         COL_PARENT_ID_BEFORE: "c3pkeep",
         COL_CHANGE_ORDER: O2,
-        COL_CHANGE_ENTITY_TYPE: ENTITY_REVISION,
         COL_CHANGE_MODEL_NAME: CHANGE_NOTHING,
         COL_CHANGE_REASON: "already good",
         COL_PARENT_DATA_NEW: None,
@@ -150,7 +134,6 @@ DATA_ACTEURS = [
         "nombre_enfants": 0,
         COL_PARENT_ID_BEFORE: "c3pdelete",
         COL_CHANGE_ORDER: O2,
-        COL_CHANGE_ENTITY_TYPE: ENTITY_REVISION,
         COL_CHANGE_MODEL_NAME: CHANGE_POINT,
         COL_CHANGE_REASON: "point to parent to keep",
         COL_PARENT_DATA_NEW: {"parent_id": "c3pkeep"},
@@ -170,7 +153,6 @@ DATA_ACTEURS = [
         "nombre_enfants": 0,
         COL_PARENT_ID_BEFORE: None,
         COL_CHANGE_ORDER: O2,
-        COL_CHANGE_ENTITY_TYPE: ENTITY_DISPLAY,
         COL_CHANGE_MODEL_NAME: CHANGE_POINT,
         COL_CHANGE_REASON: "point to parent to keep",
         COL_PARENT_DATA_NEW: None,
@@ -183,7 +165,6 @@ DATA_ACTEURS = [
         "nombre_enfants": 1,
         COL_PARENT_ID_BEFORE: None,
         COL_CHANGE_ORDER: O3,
-        COL_CHANGE_ENTITY_TYPE: ENTITY_DISPLAY,
         COL_CHANGE_MODEL_NAME: CHANGE_DELETE,
         COL_CHANGE_REASON: "parent to delete",
         COL_PARENT_DATA_NEW: None,

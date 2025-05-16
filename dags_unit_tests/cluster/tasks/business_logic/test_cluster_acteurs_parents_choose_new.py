@@ -24,11 +24,9 @@ from cluster.tasks.business_logic.cluster_acteurs_parents_choose_new import (
 )
 
 from data.models.change import (
-    COL_CHANGE_ENTITY_TYPE,
     COL_CHANGE_MODEL_NAME,
     COL_CHANGE_ORDER,
     COL_CHANGE_REASON,
-    ENTITY_ACTEUR_REVISION,
 )
 
 COLS_ASSERT = [
@@ -57,7 +55,6 @@ def df_no_parent() -> pd.DataFrame:
             "identifiant_unique": ["c0_a", "c0_b", "c0_c"],
             "parent_id": [None, None, None],
             "nombre_enfants": [0, 0, 0],
-            COL_CHANGE_ENTITY_TYPE: [ENTITY_ACTEUR_REVISION] * 3,
         }
     )
 
@@ -73,7 +70,6 @@ def df_one_parent() -> pd.DataFrame:
             # n'a pas de parent et est rattaché au cluster
             "parent_id": [None, None, "c1_b"],
             "nombre_enfants": [0, 1, 0],
-            COL_CHANGE_ENTITY_TYPE: [ENTITY_ACTEUR_REVISION] * 3,
         }
     )
 
@@ -88,7 +84,6 @@ def df_two_parents() -> pd.DataFrame:
             # a=2 enfants, b=1 enfant
             "parent_id": [None, None, "c2_b", "c2_a", "c2_a"],
             "nombre_enfants": [2, 1, 0, 0, 0],
-            COL_CHANGE_ENTITY_TYPE: [ENTITY_ACTEUR_REVISION] * 5,
         }
     )
 
