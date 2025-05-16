@@ -15,6 +15,7 @@ with DAG(
         "A pipeline to fetch, process, and load to validate data into postgresql"
         " for OCAD3E dataset"
     ),
+    tags=["source", "data.pointsapport.ademe.fr", "oca", "ocad3e", "EEE"],
     **default_params,
     params={
         "normalization_rules": [

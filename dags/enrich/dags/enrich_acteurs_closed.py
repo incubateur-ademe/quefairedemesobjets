@@ -33,7 +33,15 @@ with DAG(
         "Un DAG pour détécter et remplacer les acteurs fermés"
         "dans l'Annuaire Entreprises (AE)"
     ),
-    tags=["annuaire", "entreprises", "ae", "siren", "siret", "acteurs", "fermés"],
+    tags=[
+        "enrich",
+        "annuaire-entreprises",
+        "AE",
+        "siren",
+        "siret",
+        "acteurs",
+        "fermés",
+    ],
     schedule=SCHEDULES.NONE,
     catchup=CATCHUPS.AWLAYS_FALSE,
     start_date=START_DATES.YESTERDAY,

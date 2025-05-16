@@ -15,6 +15,14 @@ with DAG(
         "A pipeline to fetch, process, and load to validate data into postgresql"
         " for Valdelia dataset"
     ),
+    tags=[
+        "source",
+        "data.pointsapport.ademe.fr",
+        "eco-organisme",
+        "valdelia",
+        "EA",
+        "PMCB",
+    ],
     **default_params,
     params={
         "normalization_rules": [

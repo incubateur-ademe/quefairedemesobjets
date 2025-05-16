@@ -15,6 +15,7 @@ with DAG(
         "A pipeline to fetch, process, and load to validate data into postgresql"
         " for Pyreo dataset"
     ),
+    tags=["source", "data.pointsapport.ademe.fr", "eco-organisme", "pyreo", "PCHIM"],
     **default_params,
     params={
         "normalization_rules": [

@@ -9,13 +9,13 @@ from sources.tasks.airflow_logic.operators import (
 
 with DAG(
     dag_id="eo-batribox",
-    dag_display_name="Source - SCRELEC",
+    dag_display_name="Source - BATRIBOX",
     default_args=default_args,
     description=(
-        "Injestion des données de l'éco-organisme SCRELEC à partir des données"
+        "Injestion des données de l'éco-organisme BATRIBOX à partir des données"
         " disponibles sur de Koumoul"
     ),
-    tags=["source", "ademe", "piles", "batteries", "accumulateurs"],
+    tags=["source", "data.pointsapport.ademe.fr", "eco-organisme", "batribox", "PA"],
     **default_params,
     params={
         "endpoint": (
