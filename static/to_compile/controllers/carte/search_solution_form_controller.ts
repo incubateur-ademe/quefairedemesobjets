@@ -20,11 +20,8 @@ export default class extends Controller<HTMLElement> {
     "searchFormPanel",
     "addressesPanel",
     "backToSearchPanel",
-    "acteurDetailsPanel",
     "proposeAddressPanel",
     "headerAddressPanel",
-
-    "collapseDetailsButton",
 
     "sousCategoryObjetGroup",
     "sousCategoryObjetID",
@@ -66,14 +63,11 @@ export default class extends Controller<HTMLElement> {
   declare readonly searchFormPanelTarget: HTMLElement
   declare readonly addressesPanelTarget: HTMLElement
   declare readonly backToSearchPanelTarget: HTMLElement
-  declare readonly acteurDetailsPanelTarget: HTMLElement
   declare readonly proposeAddressPanelTarget: HTMLElement
   declare readonly headerAddressPanelTarget: HTMLElement
 
   declare readonly hasProposeAddressPanelTarget: boolean
   declare readonly hasHeaderAddressPanelTarget: boolean
-
-  declare readonly collapseDetailsButtonTarget: HTMLElement
 
   declare readonly sousCategoryObjetGroupTarget: HTMLElement
   declare readonly sousCategoryObjetIDTarget: HTMLInputElement
@@ -106,10 +100,6 @@ export default class extends Controller<HTMLElement> {
     if (window.location.hash) {
       this.#setActiveActeur(null)
     }
-    // Prevents the leaflet map to move when the user moves panel
-    this.acteurDetailsPanelTarget.addEventListener("touchmove", (event) =>
-      event.stopPropagation(),
-    )
   }
 
   #setActiveActeur(event: HashChangeEvent | null) {
@@ -119,8 +109,6 @@ export default class extends Controller<HTMLElement> {
     if (uuid) {
       this.displayActeur(uuid)
       this.dispatch("captureInteraction")
-    } else {
-      this.hideActeurDetailsPanel()
     }
   }
 
@@ -182,7 +170,6 @@ export default class extends Controller<HTMLElement> {
   }
 
   backToSearch() {
-    this.hideActeurDetailsPanel()
     this.#showSearchFormPanel()
     this.#hideAddressesPanel()
     this.scrollToContent()
@@ -192,43 +179,10 @@ export default class extends Controller<HTMLElement> {
     this.bboxTarget.value = JSON.stringify(event.detail)
   }
 
-  #showActeurDetailsPanel() {
-    if (this.acteurDetailsPanelTarget.ariaHidden !== "false") {
-      this.acteurDetailsPanelTarget.ariaHidden = "false"
-    }
-
-    this.acteurDetailsPanelTarget.dataset.exitAnimationEnded = "false"
-    if (window.matchMedia('screen and (max-width:768px)').matches) {
-      this.acteurDetailsPanelTarget.scrollIntoView()
-    }
-
-
-  }
-
-  hideActeurDetailsPanel() {
-    removeHash()
-    document
-      .querySelector("[aria-controls=acteurDetailsPanel][aria-expanded=true]")
-      ?.setAttribute("aria-expanded", "false")
-    this.acteurDetailsPanelTarget.ariaHidden = "true"
-    this.acteurDetailsPanelTarget.addEventListener(
-      "animationend",
-      () => {
-        this.acteurDetailsPanelTarget.dataset.exitAnimationEnded = "true"
-      },
-      { once: true },
-    )
-    clearActivePinpoints()
-  }
-
   displayDigitalActeur(event) {
     const uuid = event.currentTarget.dataset.uuid
     window.location.hash = uuid
-    document
-      .querySelector("[aria-controls='acteurDetailsPanel'][aria-expanded='true']")
-      ?.setAttribute("aria-expanded", "false")
     event.currentTarget.setAttribute("aria-expanded", "true")
-    this.#showActeurDetailsPanel()
   }
 
   displayActeur(uuid: string) {
@@ -244,7 +198,6 @@ export default class extends Controller<HTMLElement> {
     }
     const acteurDetailPath = `/adresse_details/${uuid}?${params.toString()}`
     Turbo.visit(acteurDetailPath, { frame: "acteur-detail" })
-    this.#showActeurDetailsPanel()
   }
 
   displayActionList() {
@@ -427,8 +380,6 @@ export default class extends Controller<HTMLElement> {
   }
 
   advancedSubmit(event: Event) {
-    this.hideActeurDetailsPanel()
-
     // Applies only in Formulaire alternative or in digital version.
     const withControls =
       (event.target as HTMLElement).dataset.withControls?.toLowerCase() === "true"

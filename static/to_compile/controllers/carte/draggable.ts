@@ -1,17 +1,18 @@
 import { Controller } from "@hotwired/stimulus"
+import { clearActivePinpoints, removeHash } from "../../js/helpers"
 
-export default class extends Controller<HTMLElement> {
+class ActeurController extends Controller<HTMLElement> {
   isDragging = false
   panelHeight: number
   startY: number
-  currentY: number
+  currentTranslateY: number
   startTranslateY = 0
   initialTranslateY: number
   initialTransition: string
+  declare readonly frameTarget: HTMLElement
 
   initialize() {
-    this.panelHeight = this.element.offsetHeight
-    this.initialTranslateY = this.#getPanelTranslateY()
+    this.initialTranslateY = this.#computePanelTranslateY()
     this.initialTransition = window.getComputedStyle(this.element).transition
 
     this.element.addEventListener("mousedown", this.#dragStart.bind(this))
@@ -24,33 +25,83 @@ export default class extends Controller<HTMLElement> {
     window.addEventListener('touchend', this.#dragEnd.bind(this));
   }
 
-  #getPanelTranslateY(): number {
+  #computePanelTranslateY(): number {
     const matrix = window.getComputedStyle(this.element).transform;
 
     if (matrix !== 'none') {
       return Math.abs(parseFloat(matrix.split(',')[5]));
     }
 
-    return 0
+    // TODO: remove hardcoded value
+    return 140
+  }
+
+  #show() {
+    if (this.element.ariaHidden !== "false") {
+      this.element.ariaHidden = "false"
+    }
+
+    this.element.dataset.exitAnimationEnded = "false"
+
+    if (window.matchMedia('screen and (max-width:768px)').matches) {
+      this.element.scrollIntoView()
+    }
+
+    this.panelHeight = this.element.offsetHeight
+  }
+
+  hide() {
+    removeHash()
+    this.element.ariaExpanded = "false"
+    this.element.ariaHidden = "true"
+    this.element.addEventListener(
+      "animationend",
+      () => {
+        this.element.dataset.exitAnimationEnded = "true"
+      },
+      { once: true },
+    )
+    clearActivePinpoints()
+    console.log("HIDE", this)
+    this.#setTranslateY(-1 * this.initialTranslateY)
+  }
+
+  refreshPanelOnNavigation(event) {
+    if (event.target.id === "acteur-detail") {
+      this.#show()
+    } else {
+      this.hide()
+    }
+  }
+
+  connect() {
+    // Prevents the leaflet map to move when the user moves panel
+    this.element.addEventListener("touchmove", (event) =>
+      event.stopPropagation(),
+    )
+    document.addEventListener("turbo:frame-load", this.refreshPanelOnNavigation.bind(this))
   }
 
   #dragStart(event: TouchEvent) {
-    event.preventDefault()
-
+    // event.preventDefault()
     this.isDragging = true;
     const eventY = event?.y || event?.touches[0].clientY
+    console.log({ eventY, event })
     this.startY = Math.abs(eventY)
-    this.startTranslateY = this.#getPanelTranslateY()
+    this.startTranslateY = this.#computePanelTranslateY()
     this.element.style.transition = 'none';
   }
 
   #setTranslateY(value: number) {
-    this.element.style.transform = `translateY(${value}px)`;
+    let nextValue = value
+    if (Math.abs(value) < this.initialTranslateY) {
+      nextValue = -1 * this.initialTranslateY
+    }
+
+    this.element.style.transform = `translateY(${nextValue}px)`;
   }
 
   #dragMove(event: MouseEvent | TouchEvent) {
-    event.preventDefault()
-
     if (!this.isDragging) return;
 
     // Prevent text selection the element being moved
@@ -60,8 +111,9 @@ export default class extends Controller<HTMLElement> {
     const eventY = event?.y || event?.touches[0].clientY
     const pixelsDragged = this.startY - eventY
     const pixelsDraggedOffsetted = pixelsDragged + this.startTranslateY
-    this.currentY = Math.min(pixelsDraggedOffsetted, this.panelHeight)
-    this.#setTranslateY(-1 * this.currentY);
+
+    this.currentTranslateY = Math.min(pixelsDraggedOffsetted, this.panelHeight)
+    this.#setTranslateY(-1 * this.currentTranslateY);
   }
 
   #dragEnd(event: MouseEvent | TouchEvent) {
@@ -75,7 +127,7 @@ export default class extends Controller<HTMLElement> {
     const snapPoints = [0.2, 0.5, 1];
 
     // Current drag ratio
-    const ratio = this.currentY / this.panelHeight;
+    const ratio = this.currentTranslateY / this.panelHeight;
 
     // Find closest snap point
     let closest = snapPoints[0];
@@ -92,5 +144,6 @@ export default class extends Controller<HTMLElement> {
     const snapY = -1 * closest * this.panelHeight;
     this.#setTranslateY(snapY);
   }
-
 }
+
+export default ActeurController
