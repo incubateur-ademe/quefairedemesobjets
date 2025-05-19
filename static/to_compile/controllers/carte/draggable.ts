@@ -34,6 +34,7 @@ class ActeurController extends Controller<HTMLElement> {
   }
 
   #show() {
+    this.element.style.transition = this.initialTransition;
     if (this.element.ariaHidden !== "false") {
       this.element.ariaHidden = "false"
     }
@@ -94,7 +95,6 @@ class ActeurController extends Controller<HTMLElement> {
     }
 
     this.element.style.transform = `translateY(${nextValue}px)`;
-    console.log("#setTranslate", nextValue)
   }
 
   #dragMove(event: MouseEvent | TouchEvent) {
