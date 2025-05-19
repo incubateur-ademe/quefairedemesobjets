@@ -21,7 +21,7 @@ On affiche l'iframe grâce à un script JS.
 
 Pour plus d'information sur les paramètres disponibles, voir [la page iframe dans REFERENCE](../../reference/iframe/iframe.md)
 
-Voir l'exemple d'integration de l'iframe « Longue vie aux objets » dans une page html : [iframe.html](./iframe.html)
+Voir l'exemple d'integration de l'iframe « Longue vie aux objets » dans une page html : [iframe.html](../../../iframe.html)
 
 ### Configurateur
 

@@ -1,5 +1,12 @@
 # 🎨 Frontend
 
+```{toctree}
+:hidden:
+
+routing-nginx-cache.md
+historique.md
+```
+
 Le projet dispose de deux frontend principaux
 - **Longue Vie Aux Objets** : https://lvao.ademe.fr
 - L'**assistant** : https://quefairedemesobjets.ademe.fr

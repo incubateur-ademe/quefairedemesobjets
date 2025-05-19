@@ -149,7 +149,7 @@ scalingo --region osc-fr1 --app quefairedemesobjets run --file backup_db.bak/Bas
 
 following message should be display in prompt:
 
-```txt
+```
 -----> Starting container one-off-1576  Done in 0.224 seconds
  Upload /Users/nicolasoudard/workspace/beta.gouv.fr/quefairedemesobjets/backup_db.bak/Base_20221218_Depart.csv to container.
 …

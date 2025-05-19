@@ -2,7 +2,7 @@
 
 Appliqué plus spécifiquement lors de la réorganisation des fichiers des dags d'ingestion des sources
 
-```txt
+```
 /dags                               -> A renommer
 |- config
 |- shared                           -> fichiers partagés par plusieurs sujets

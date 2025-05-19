@@ -1,4 +1,12 @@
-# Que faire de mes objets - Data Platform
+# 📊 Plateforme de données
+
+```{toctree}
+:hidden:
+
+ingestion-de-source.md
+flux-dbt.md
+flux-enrich.md
+```
 
 Ce projet contient l'environnement d'execution d'Airflow
 
@@ -32,9 +40,9 @@ Les répertoires s3 sont en cours de migration vers la plateforme Scaleway
 
 ### CI/CD
 
-la platefome Data est déployée en preprod à chaque mise à jour de la branche `main` sur Github (cf. [cd_preprod.yml](../../../.github/workflows/cd_preprod.yml))
+la platefome Data est déployée en preprod à chaque mise à jour de la branche `main` sur Github (cf. [cd.yml](../../../.github/workflows/cd.yml))
 
-Et en production à chaque depot de tag de version (cf. [cd_prod.yml](../../../.github/workflows/cd_prod.yml))
+Et en production à chaque depot de tag de version (cf. [cd_prod.yml](../../../.github/workflows/cd.yml))
 
 De la même manière que l'interface, cela permet de garder la cohérance entre l'application web et la plateforme data
 
@@ -50,7 +58,7 @@ Un exemple à adapter selon l'environnement est disponible sur le fichier [.env.
 
 Pour que les logs du scheduler soient stockés sur S3, les instances CleverCloud sont lancés avec les variables d'environnement:
 
-```txt
+```
 AIRFLOW__LOGGING__REMOTE_LOGGING=true
 AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER=s3://qfdmo-airflow-logs
 AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID=s3logs
