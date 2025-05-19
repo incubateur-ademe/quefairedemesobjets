@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from shared.tasks.business_logic import normalize
+
 from utils.django import (
     django_model_queryset_generate,
     django_model_queryset_to_df,
@@ -75,7 +76,6 @@ def cluster_acteurs_read_orphans(
     Returns:
         tuple[pd.DataFrame, str]: Le DataFrame des acteurs et la requête SQL utilisée
     """
-    from data.models.change import COL_CHANGE_ENTITY_TYPE, ENTITY_ACTEUR_DISPLAYED
     from qfdmo.models import ActeurType, Source
     from qfdmo.models.acteur import ActeurStatus
 
@@ -157,5 +157,4 @@ def cluster_acteurs_read_orphans(
     mapping_acteur_type_codes_by_ids = {x.id: x.code for x in ActeurType.objects.all()}
     df["source_code"] = df["source_id"].map(mapping_source_codes_by_ids)
     df["acteur_type_code"] = df["acteur_type_id"].map(mapping_acteur_type_codes_by_ids)
-    df[COL_CHANGE_ENTITY_TYPE] = ENTITY_ACTEUR_DISPLAYED
     return df, sql

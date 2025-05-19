@@ -6,14 +6,11 @@ import numpy as np
 import pandas as pd
 from cluster.config.constants import COL_PARENT_ID_BEFORE
 from cluster.tasks.business_logic.misc.df_sort import df_sort
-from utils.django import django_setup_full
 
 from data.models.change import (
-    COL_CHANGE_ENTITY_TYPE,
     COL_CHANGE_MODEL_NAME,
     COL_CHANGE_ORDER,
     COL_CHANGE_REASON,
-    ENTITY_ACTEUR_TO_CREATE,
 )
 from data.models.changes import (
     ChangeActeurCreateAsParent,
@@ -22,6 +19,7 @@ from data.models.changes import (
     ChangeActeurUpdateParentId,
     ChangeActeurVerifyRevision,
 )
+from utils.django import django_setup_full
 
 django_setup_full()
 
@@ -174,7 +172,6 @@ def cluster_acteurs_parents_choose_new(df_clusters: pd.DataFrame) -> pd.DataFram
                                 "parent_id": None,
                                 "cluster_id": cluster_id,
                                 "nombre_enfants": 0,
-                                COL_CHANGE_ENTITY_TYPE: ENTITY_ACTEUR_TO_CREATE,
                             }
                         ]
                     ),

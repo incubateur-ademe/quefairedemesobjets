@@ -52,28 +52,6 @@ COL_CHANGE_ORDER = f"{COL_CHANGE_NAMESPACE}order"
 COL_CHANGE_REASON = f"{COL_CHANGE_NAMESPACE}reason"
 COL_CHANGE_MODEL_NAME = f"{COL_CHANGE_NAMESPACE}model_name"
 COL_CHANGE_MODEL_PARAMS = f"{COL_CHANGE_NAMESPACE}model_params"
-COL_CHANGE_ENTITY_TYPE = f"{COL_CHANGE_NAMESPACE}entity_type"
-
-# -----------------------------
-# Entity types
-# -----------------------------
-# Defining entity types serves several purposes:
-# - ℹ️ Show useful info in both Airflow/Django UI
-#   (e.g. explain to métier whether we are working on an
-#    acteur that's in base or revision)
-# - ✅ Validate intention vs. reality (e.g. if we thought
-#    we were dealing with an acteur in base but are using
-#    methods for acteurs which must be in revision)
-ENTITY_ACTEUR_BASE = "acteur_base"
-ENTITY_ACTEUR_REVISION = "acteur_revision"
-ENTITY_ACTEUR_DISPLAYED = "acteur_displayed"
-ENTITY_ACTEUR_TO_CREATE = "acteur_to_create"
-ENTITY_TYPES = [
-    ENTITY_ACTEUR_BASE,
-    ENTITY_ACTEUR_REVISION,
-    ENTITY_ACTEUR_DISPLAYED,
-    ENTITY_ACTEUR_TO_CREATE,
-]
 
 
 class SuggestionChange(BaseModel):
@@ -87,9 +65,6 @@ class SuggestionChange(BaseModel):
     # Debug only, but we should provide a clear explanation
     # as to why we're doing a change
     reason: str = Field(min_length=5)
-    # The type of entity we're changing (notably needed in clustering
-    # as acteurs are scattered across 3 state tables)
-    entity_type: str
     # Name of the pydantic model we will use to make the change
     # Reference to change_models/{my_class}.py/{MyClass}.name()
     model_name: str
@@ -98,10 +73,6 @@ class SuggestionChange(BaseModel):
 
     @model_validator(mode="after")  # type: ignore
     def check_model(self) -> None:
-        entity_type = self.entity_type
-        if entity_type not in ENTITY_TYPES:
-            raise ValueError(f"Invalid {entity_type=}, must be in {ENTITY_TYPES=}")
-
         # name must be in the list of available models
         model_name = self.model_name
         if model_name not in MODEL_NAMES:
