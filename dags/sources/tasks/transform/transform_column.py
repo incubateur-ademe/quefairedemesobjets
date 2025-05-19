@@ -189,15 +189,22 @@ def clean_code_list(codes: str | None, _) -> list[str]:
 
 
 def clean_sous_categorie_codes(
-    sscat_list: str | None, dag_config: DAGConfig
+    sscat_list: str | list[str] | None, dag_config: DAGConfig
 ) -> list[str]:
     sous_categorie_codes = []
 
     if not sscat_list:
         return sous_categorie_codes
 
+    if isinstance(sscat_list, str):
+        sscat_list = sscat_list.split("|")
+    if not isinstance(sscat_list, list):
+        raise ValueError(
+            f"Type {type(sscat_list)} not supported while cleaning sous_categorie_codes"
+        )
+
     product_mapping = dag_config.product_mapping
-    for sscat in sscat_list.split("|"):
+    for sscat in sscat_list:
         sscat = sscat.strip().lower()
         if not sscat:
             continue

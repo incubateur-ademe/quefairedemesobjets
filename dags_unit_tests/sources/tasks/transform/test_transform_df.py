@@ -12,7 +12,6 @@ from sources.tasks.transform.transform_df import (
     clean_telephone,
     compute_location,
     get_latlng_from_geopoint,
-    merge_and_clean_sous_categorie_codes,
     merge_duplicates,
     merge_sous_categories_columns,
 )
@@ -733,27 +732,6 @@ class TestCleanLabelCodes:
         )
 
         assert result["label_codes"], ["ess", "label_et_bonus"]
-
-
-class TestMergeAndCleanSouscategorieCodes:
-    @pytest.mark.parametrize(
-        "row_data, expected_output",
-        [
-            ({"col1": "sscat1", "col2": "sscat2"}, ["mapped1", "mapped2"]),
-            ({"col1": "sscat1", "col2": "sscat1"}, ["mapped1"]),
-            ({"col1": None, "col2": "sscat2"}, ["mapped2"]),
-            ({"col1": "sscat1", "col2": None}, ["mapped1"]),
-            ({"col1": None, "col2": None}, []),
-        ],
-    )
-    def test_merge_and_clean_sous_categorie_codes(
-        self, row_data, expected_output, dag_config
-    ):
-        dag_config.product_mapping = {"sscat1": "mapped1", "sscat2": "mapped2"}
-
-        row = pd.Series(row_data)
-        result = merge_and_clean_sous_categorie_codes(row, dag_config)
-        assert sorted(result["sous_categorie_codes"]) == sorted(expected_output)
 
 
 class TestGetLatLngFromGeopoint:

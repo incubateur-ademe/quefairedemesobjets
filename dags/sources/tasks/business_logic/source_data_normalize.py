@@ -114,7 +114,7 @@ def _remove_columns(df: pd.DataFrame, dag_config: DAGConfig) -> pd.DataFrame:
     columns_to_remove = [
         t.remove
         for t in dag_config.normalization_rules
-        if isinstance(t, NormalizationColumnRemove)
+        if isinstance(t, NormalizationColumnRemove) and t.remove in df.columns
     ]
     return df.drop(columns=columns_to_remove)
 
@@ -142,11 +142,9 @@ def _remove_undesired_lines(
         )
 
     if "sous_categorie_codes" in df.columns:
-        if (
-            nb_empty_sous_categorie := df["sous_categorie_codes"]
-            .apply(lambda x: x.count([]))
-            .sum()
-        ):
+        if nb_empty_sous_categorie := len(
+            df[df["sous_categorie_codes"].apply(len) == 0]
+        ) + len(df[df["sous_categorie_codes"].isnull()]):
             metadata["nb acteurs filtrés car sans sous_categorie"] = str(
                 nb_empty_sous_categorie
             )

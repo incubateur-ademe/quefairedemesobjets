@@ -7,13 +7,13 @@ import requests
 from fuzzywuzzy import fuzz
 from shapely import wkb
 from shapely.geometry import Point
-from sources.tasks.airflow_logic.config_management import DAGConfig
 from sources.tasks.transform.transform_column import (
     clean_code_postal,
     clean_number,
     clean_siren,
     clean_siret,
 )
+
 from utils import logging_utils as log
 from utils.formatter import format_libelle_to_code
 
@@ -247,27 +247,6 @@ def clean_label_codes(row, dag_config):
 
     row["label_codes"] = label_codes
     return row[["label_codes"]]
-
-
-def merge_and_clean_sous_categorie_codes(
-    row: pd.Series, dag_config: DAGConfig
-) -> pd.Series:
-    categories = [row[col] for col in row.keys() if pd.notna(row[col]) and row[col]]
-    sous_categorie_codes = []
-    product_mapping = dag_config.product_mapping
-    for sscat in categories:
-        sscat = sscat.strip().lower()
-        sscat = product_mapping[sscat]
-        if isinstance(sscat, str):
-            sous_categorie_codes.append(sscat)
-        elif isinstance(sscat, list):
-            sous_categorie_codes.extend(sscat)
-        else:
-            raise ValueError(
-                f"Type {type(sscat)} not supported for sous_categorie_codes"
-            )
-    row["sous_categorie_codes"] = list(set(sous_categorie_codes))
-    return row[["sous_categorie_codes"]]
 
 
 def get_latlng_from_geopoint(row: pd.Series, _) -> pd.Series:

@@ -31,7 +31,6 @@ from sources.tasks.transform.transform_df import (
     clean_telephone,
     compute_location,
     get_latlng_from_geopoint,
-    merge_and_clean_sous_categorie_codes,
     merge_sous_categories_columns,
 )
 
@@ -75,7 +74,6 @@ TRANSFORM_DF_MAPPING = {
     "clean_telephone": clean_telephone,
     "compute_location": compute_location,
     "get_latlng_from_geopoint": get_latlng_from_geopoint,
-    "merge_and_clean_sous_categorie_codes": merge_and_clean_sous_categorie_codes,
     "merge_sous_categories_columns": merge_sous_categories_columns,
 }
 
