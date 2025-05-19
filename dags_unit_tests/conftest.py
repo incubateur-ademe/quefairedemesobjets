@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
+from django.core.management import call_command
 from faker import Faker
 
 from dags.sources.tasks.airflow_logic.config_management import DAGConfig
@@ -11,6 +12,21 @@ from dags.sources.tasks.airflow_logic.config_management import DAGConfig
 
 def pytest_configure(config):
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "dags"))
+
+
+@pytest.fixture(scope="session", autouse=True)
+def django_db_setup(django_db_setup, django_db_blocker):
+    """
+    Fixture qui charge les données de test une seule fois pour toute la session
+    et les conserve pendant l'exécution de tous les tests
+    """
+    with django_db_blocker.unblock():
+        # Charger les fixtures nécessaires
+        call_command("loaddata", "qfdmd/fixtures/produits.json")
+        call_command("loaddata", "qfdmo/fixtures/categories.json")
+        call_command("loaddata", "qfdmo/fixtures/actions.json")
+        call_command("loaddata", "qfdmo/fixtures/acteur_services.json")
+        call_command("loaddata", "qfdmo/fixtures/acteur_types.json")
 
 
 @pytest.fixture

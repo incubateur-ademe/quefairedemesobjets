@@ -1,326 +1,1088 @@
 [
-    {
-        "model": "qfdmo.categorieobjet",
-        "fields": {
-            "libelle": "électroménager",
-            "code": "electromenager"
-        }
-    },
-    {
-        "model": "qfdmo.categorieobjet",
-        "fields": {
-            "libelle": "livres et multimédia",
-            "code": "livres et multimedia"
-        }
-    },
-    {
-        "model": "qfdmo.categorieobjet",
-        "fields": {
-            "libelle": "équipements de loisir",
-            "code": "equipements de loisir"
-        }
-    },
-    {
-        "model": "qfdmo.categorieobjet",
-        "fields": {
-            "libelle": "bricolage et jardinage",
-            "code": "bricolage et jardinage"
-        }
-    },
-    {
-        "model": "qfdmo.categorieobjet",
-        "fields": {
-            "libelle": "mobilier et décoration",
-            "code": "mobilier et decoration"
-        }
-    },
-    {
-        "model": "qfdmo.categorieobjet",
-        "fields": {
-            "libelle": "produits divers",
-            "code": "produits divers"
-        }
-    },
-    {
-        "model": "qfdmo.categorieobjet",
-        "fields": {
-            "libelle": "bijou, montre et horlogerie",
-            "code": "bijou, montre et horlogerie"
-        }
-    },
-    {
-        "model": "qfdmo.categorieobjet",
-        "fields": {
-            "libelle": "image, son & Informatique",
-            "code": "image, son & Informatique"
-        }
-    },
-    {
-        "model": "qfdmo.categorieobjet",
-        "fields": {
-            "libelle": "livres & multimedia",
-            "code": "livres & multimedia"
-        }
-    },
-    {
-        "model": "qfdmo.categorieobjet",
-        "fields": {
-            "libelle": "bricolage & jardinage",
-            "code": "bricolage & jardinage"
-        }
-    },
-    {
-        "model": "qfdmo.categorieobjet",
-        "fields": {
-            "libelle": "vêtements & accessoires",
-            "code": "vetements & accessoires"
-        }
-    },
-    {
-        "model": "qfdmo.categorieobjet",
-        "fields": {
-            "libelle": "bijou, montre, horlogerie",
-            "code": "bijou, montre, horlogerie"
-        }
-    },
-    {
-        "model": "qfdmo.categorieobjet",
-        "fields": {
-            "libelle": "matériau de construction / du bâtiment réemployable",
-            "code": "materiau de construction / du batiment reemployable"
-        }
-    },
-    {
-        "model": "qfdmo.souscategorieobjet",
-        "fields": {
-            "libelle": "gros électroménager (réfrigérant)",
-            "categorie": ["electromenager"],
-            "code": "gros electromenager (refrigerant)"
-        }
-    },
-    {
-        "model": "qfdmo.souscategorieobjet",
-        "fields": {
-            "libelle": "gros électroménager (hors réfrigérant)",
-            "categorie": ["electromenager"],
-            "code": "gros electromenager (hors refrigerant)"
-        }
-    },
-    {
-        "model": "qfdmo.souscategorieobjet",
-        "fields": {
-            "libelle": "petit électroménager",
-            "categorie": ["electromenager"],
-            "code": "petit electromenager"
-        }
-    },
-    {
-        "model": "qfdmo.souscategorieobjet",
-        "fields": {
-            "libelle": "écran",
-            "categorie": ["image, son & Informatique"],
-            "code": "ecran"
-        }
-    },
-    {
-        "model": "qfdmo.souscategorieobjet",
-        "fields": {
-            "libelle": "matériel informatique",
-            "categorie": ["image, son & Informatique"],
-            "code": "materiel informatique"
-        }
-    },
-    {
-        "model": "qfdmo.souscategorieobjet",
-        "fields": {
-            "libelle": "matériel hifi et vidéo",
-            "categorie": ["image, son & Informatique"],
-            "code": "materiel hifi et video"
-        }
-    },
-    {
-        "model": "qfdmo.souscategorieobjet",
-        "fields": {
-            "libelle": "smartphone, tablette et console",
-            "categorie": ["image, son & Informatique"],
-            "code": "smartphone, tablette et console"
-        }
-    },
-    {
-        "model": "qfdmo.souscategorieobjet",
-        "fields": {
-            "libelle": "matériel photo et cinéma",
-            "categorie": ["image, son & Informatique"],
-            "code": "materiel photo et cinema"
-        }
-    },
-    {
-        "model": "qfdmo.souscategorieobjet",
-        "fields": {
-            "libelle": "autre équipement électronique",
-            "categorie": ["image, son & Informatique"],
-            "code": "autre equipement electronique"
-        }
-    },
-    {
-        "model": "qfdmo.souscategorieobjet",
-        "fields": {
-            "libelle": "CD, DVD et jeu vidéo",
-            "categorie": ["livres & multimedia"],
-            "code": "CD, DVD et jeu video"
-        }
-    },
-    {
-        "model": "qfdmo.souscategorieobjet",
-        "fields": {
-            "libelle": "livre",
-            "categorie": ["livres & multimedia"],
-            "code": "livre"
-        }
-    },
-    {
-        "model": "qfdmo.souscategorieobjet",
-        "fields": {
-            "libelle": "instrument de musique",
-            "categorie": ["equipements de loisir"],
-            "code": "instrument de musique"
-        }
-    },
-    {
-        "model": "qfdmo.souscategorieobjet",
-        "fields": {
-            "libelle": "outil de bricolage et jardinage",
-            "categorie": ["bricolage & jardinage"],
-            "code": "outil de bricolage et jardinage"
-        }
-    },
-    {
-        "model": "qfdmo.souscategorieobjet",
-        "fields": {
-            "libelle": "accessoire et meuble de jardin",
-            "categorie": ["equipements de loisir"],
-            "code": "accessoire et meuble de jardin"
-        }
-    },
-    {
-        "model": "qfdmo.souscategorieobjet",
-        "fields": {
-            "libelle": "meuble",
-            "categorie": ["mobilier et decoration"],
-            "code": "meuble"
-        }
-    },
-    {
-        "model": "qfdmo.souscategorieobjet",
-        "fields": {
-            "libelle": "décoration",
-            "categorie": ["mobilier et decoration"],
-            "code": "decoration"
-        }
-    },
-    {
-        "model": "qfdmo.souscategorieobjet",
-        "fields": {
-            "libelle": "luminaire",
-            "categorie": ["mobilier et decoration"],
-            "code": "luminaire"
-        }
-    },
-    {
-        "model": "qfdmo.souscategorieobjet",
-        "fields": {
-            "libelle": "vaisselle",
-            "categorie": ["mobilier et decoration"],
-            "code": "vaisselle"
-        }
-    },
-    {
-        "model": "qfdmo.souscategorieobjet",
-        "fields": {
-            "libelle": "linge de maison",
-            "categorie": ["vetements & accessoires"],
-            "code": "linge de maison"
-        }
-    },
-    {
-        "model": "qfdmo.souscategorieobjet",
-        "fields": {
-            "libelle": "puériculture",
-            "categorie": ["produits divers"],
-            "code": "puericulture"
-        }
-    },
-    {
-        "model": "qfdmo.souscategorieobjet",
-        "fields": {
-            "libelle": "jouet",
-            "categorie": ["equipements de loisir"],
-            "code": "jouet"
-        }
-    },
-    {
-        "model": "qfdmo.souscategorieobjet",
-        "fields": {
-            "libelle": "vêtement",
-            "categorie": ["vetements & accessoires"],
-            "code": "vetement"
-        }
-    },
-    {
-        "model": "qfdmo.souscategorieobjet",
-        "fields": {
-            "libelle": "maroquinerie",
-            "categorie": ["vetements & accessoires"],
-            "code": "maroquinerie"
-        }
-    },
-    {
-        "model": "qfdmo.souscategorieobjet",
-        "fields": {
-            "libelle": "chaussures",
-            "categorie": ["vetements & accessoires"],
-            "code": "chaussures",
-            "afficher": "True"
-        }
-    },
-    {
-        "model": "qfdmo.souscategorieobjet",
-        "fields": {
-            "libelle": "bijou et montre",
-            "categorie": ["bijou, montre, horlogerie"],
-            "code": "bijou et montre"
-        }
-    },
-    {
-        "model": "qfdmo.souscategorieobjet",
-        "fields": {
-            "libelle": "vélo",
-            "categorie": ["equipements de loisir"],
-            "code": "velo"
-        }
-    },
-    {
-        "model": "qfdmo.souscategorieobjet",
-        "fields": {
-            "libelle": "matériel de sport (hors vélo)",
-            "categorie": ["equipements de loisir"],
-            "code": "materiel de sport (hors velo)"
-        }
-    },
-    {
-        "model": "qfdmo.souscategorieobjet",
-        "fields": {
-            "libelle": "matériel médical",
-            "categorie": ["produits divers"],
-            "code": "materiel medical"
-        }
-    },
-    {
-        "model": "qfdmo.souscategorieobjet",
-        "fields": {
-            "libelle": "matériau du bâtiment réemployable",
-            "categorie": ["materiau de construction / du batiment reemployable"],
-            "code": "materiau du batiment reemployable"
-        }
+  {
+    "model": "qfdmo.categorieobjet",
+    "fields": {
+      "libelle": "électroménager",
+      "code": "electromenager"
     }
+  },
+  {
+    "model": "qfdmo.categorieobjet",
+    "fields": {
+      "libelle": "équipements de loisir",
+      "code": "equipements de loisir"
+    }
+  },
+  {
+    "model": "qfdmo.categorieobjet",
+    "fields": {
+      "libelle": "bricolage et jardinage",
+      "code": "bricolage et jardinage"
+    }
+  },
+  {
+    "model": "qfdmo.categorieobjet",
+    "fields": {
+      "libelle": "mobilier et décoration",
+      "code": "mobilier et decoration"
+    }
+  },
+  {
+    "model": "qfdmo.categorieobjet",
+    "fields": {
+      "libelle": "produits divers",
+      "code": "produits divers"
+    }
+  },
+  {
+    "model": "qfdmo.categorieobjet",
+    "fields": {
+      "libelle": "image, son & Informatique",
+      "code": "image, son & Informatique"
+    }
+  },
+  {
+    "model": "qfdmo.categorieobjet",
+    "fields": {
+      "libelle": "livres & multimedia",
+      "code": "livres & multimedia"
+    }
+  },
+  {
+    "model": "qfdmo.categorieobjet",
+    "fields": {
+      "libelle": "vêtements & accessoires",
+      "code": "vetements & accessoires"
+    }
+  },
+  {
+    "model": "qfdmo.categorieobjet",
+    "fields": {
+      "libelle": "bijou, montre, horlogerie",
+      "code": "bijou, montre, horlogerie"
+    }
+  },
+  {
+    "model": "qfdmo.categorieobjet",
+    "fields": {
+      "libelle": "matériau de construction / du bâtiment",
+      "code": "materiau de construction / du batiment"
+    }
+  },
+  {
+    "model": "qfdmo.categorieobjet",
+    "fields": {
+      "libelle": "Batteries & piles portables",
+      "code": "Batteries & piles portables"
+    }
+  },
+  {
+    "model": "qfdmo.categorieobjet",
+    "fields": {
+      "libelle": "Petits appareils extincteurs",
+      "code": "Petits appareils extincteurs"
+    }
+  },
+  {
+    "model": "qfdmo.categorieobjet",
+    "fields": {
+      "libelle": "PCHIM - DDS",
+      "code": "PCHIM - DDS"
+    }
+  },
+  {
+    "model": "qfdmo.categorieobjet",
+    "fields": {
+      "libelle": "Panneaux photovoltaïques",
+      "code": "Panneaux photovoltaïques"
+    }
+  },
+  {
+    "model": "qfdmo.categorieobjet",
+    "fields": {
+      "libelle": "Bateau",
+      "code": "Bateau"
+    }
+  },
+  {
+    "model": "qfdmo.categorieobjet",
+    "fields": {
+      "libelle": "Aides Techniques",
+      "code": "Aides Techniques"
+    }
+  },
+  {
+    "model": "qfdmo.categorieobjet",
+    "fields": {
+      "libelle": "Pneu",
+      "code": "Pneu"
+    }
+  },
+  {
+    "model": "qfdmo.categorieobjet",
+    "fields": {
+      "libelle": "Médicaments & DASRI",
+      "code": "Médicaments & DASRI"
+    }
+  },
+  {
+    "model": "qfdmo.categorieobjet",
+    "fields": {
+      "libelle": "JELS (Jouets, équipements de loisirs et de sport) - Mobilité électrique",
+      "code": "JELS_Mobilite_electrique"
+    }
+  },
+  {
+    "model": "qfdmo.categorieobjet",
+    "fields": {
+      "libelle": "Huiles Lubrifiantes",
+      "code": "Huiles_lubrifiantes"
+    }
+  },
+  {
+    "model": "qfdmo.categorieobjet",
+    "fields": {
+      "libelle": "Biodéchets et déchets verts",
+      "code": "biodechets"
+    }
+  },
+  {
+    "model": "qfdmo.categorieobjet",
+    "fields": {
+      "libelle": "Véhicule",
+      "code": "Vehicule"
+    }
+  },
+  {
+    "model": "qfdmo.categorieobjet",
+    "fields": {
+      "libelle": "Ordures ménagères",
+      "code": "ordures_menageres"
+    }
+  },
+  {
+    "model": "qfdmo.categorieobjet",
+    "fields": {
+      "libelle": "Emballages et Papiers Graphiques",
+      "code": "emballages_et_papiers_graphiques"
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Gros électroménager (réfrigérant)",
+      "categorie": ["electromenager"],
+      "code": "gros electromenager (refrigerant)",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [295]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Gros électroménager (hors réfrigérant)",
+      "categorie": ["electromenager"],
+      "code": "gros electromenager (hors refrigerant)",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [180, 95, 291, 350, 173, 365, 470]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Petit électroménager",
+      "categorie": ["electromenager"],
+      "code": "petit electromenager",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [
+        219, 471, 226, 100, 342, 1, 265, 322, 427, 145, 94, 25, 84, 459
+      ]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Écran",
+      "categorie": ["image, son & Informatique"],
+      "code": "ecran",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [475, 403]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Matériel informatique",
+      "categorie": ["image, son & Informatique"],
+      "code": "materiel informatique",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [469, 220, 414, 241]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Matériel hifi et vidéo",
+      "categorie": ["image, son & Informatique"],
+      "code": "materiel hifi et video",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [29, 184]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Smartphone, tablette et console",
+      "categorie": ["image, son & Informatique"],
+      "code": "smartphone, tablette et console",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [334, 229]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "matériel photo et cinéma",
+      "categorie": ["image, son & Informatique"],
+      "code": "materiel photo et cinema",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [18, 17]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Autre équipement électronique",
+      "categorie": ["image, son & Informatique"],
+      "code": "autre equipement electronique",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [177]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "CD, DVD et jeu vidéo",
+      "categorie": ["livres & multimedia"],
+      "code": "CD, DVD et jeu video",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [92, 193]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Livre",
+      "categorie": ["livres & multimedia"],
+      "code": "livre",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [208]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Instrument de musique",
+      "categorie": ["equipements de loisir"],
+      "code": "instrument de musique",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": []
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Outil de bricolage et jardinage",
+      "categorie": ["bricolage et jardinage"],
+      "code": "outil de bricolage et jardinage",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [244, 481, 479, 477, 468, 32, 346, 442, 478]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Accessoire et meuble de jardin",
+      "categorie": ["equipements de loisir"],
+      "code": "accessoire et meuble de jardin",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [32, 442]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Meuble",
+      "categorie": ["mobilier et decoration"],
+      "code": "meuble",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [464, 462, 461, 227, 329, 436, 225, 437, 458]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Décoration",
+      "categorie": ["mobilier et decoration"],
+      "code": "decoration",
+      "afficher": true,
+      "afficher_carte": false,
+      "qfdmd_produits": []
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Luminaire",
+      "categorie": ["mobilier et decoration"],
+      "code": "luminaire",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [198, 181]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Vaisselle",
+      "categorie": ["mobilier et decoration"],
+      "code": "vaisselle",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [483, 355, 434, 114, 354]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Linge de maison",
+      "categorie": ["vetements & accessoires"],
+      "code": "linge de maison",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [317, 203, 339]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Puériculture",
+      "categorie": ["produits divers"],
+      "code": "puericulture",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [445]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Jouet",
+      "categorie": ["equipements de loisir"],
+      "code": "jouet",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [474, 194]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Vêtement",
+      "categorie": ["vetements & accessoires"],
+      "code": "vetement",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [466, 192, 166, 364, 453, 398]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Maroquinerie",
+      "categorie": ["vetements & accessoires"],
+      "code": "maroquinerie",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [23, 428]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Chaussures",
+      "categorie": ["vetements & accessoires"],
+      "code": "chaussures",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [454, 96, 61]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Bijou et montre",
+      "categorie": ["bijou, montre, horlogerie"],
+      "code": "bijou et montre",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [44, 230]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Vélo",
+      "categorie": ["equipements de loisir"],
+      "code": "velo",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [472, 473]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Matériel de sport (hors vélo)",
+      "categorie": ["equipements de loisir"],
+      "code": "materiel de sport (hors velo)",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [369, 370, 467, 16, 373, 300, 372, 46, 109, 371, 67]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Matériel médical",
+      "categorie": ["Aides Techniques"],
+      "code": "materiel medical",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [452]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Matériau du bâtiment réemployable",
+      "categorie": ["materiau de construction / du batiment"],
+      "code": "materiau du batiment reemployable",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [488, 447]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Machines et appareils motorisés thermiques",
+      "categorie": ["bricolage et jardinage"],
+      "code": "Machines et appareils motorises thermiques",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [347]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Cartouches d'encre",
+      "categorie": ["electromenager"],
+      "code": "cartouches",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [89]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Batteries & piles portables",
+      "categorie": ["Batteries & piles portables"],
+      "code": "Batteries & piles portables",
+      "afficher": false,
+      "afficher_carte": true,
+      "qfdmd_produits": [39, 269, 268]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Petits appareils extincteurs",
+      "categorie": ["Petits appareils extincteurs"],
+      "code": "Petits appareils extincteurs",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [151]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Outillage du peintre usagé",
+      "categorie": ["PCHIM - DDS"],
+      "code": "ABJ_Outillage du peintre usagé",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [448]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Produits chimiques - Solvants",
+      "categorie": ["PCHIM - DDS"],
+      "code": "Produits chimiques - Solvants",
+      "afficher": false,
+      "afficher_carte": true,
+      "qfdmd_produits": [146, 3, 121, 147, 368, 324]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Déchets de produits chimiques",
+      "categorie": ["PCHIM - DDS"],
+      "code": "Déchets de produits chimiques",
+      "afficher": false,
+      "afficher_carte": true,
+      "qfdmd_produits": [239, 98, 134, 11, 15, 188, 363, 120, 6, 282, 325, 224, 137]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Déchets phytosanitaires ménagers - Produits chimiques",
+      "categorie": ["PCHIM - DDS"],
+      "code": "Déchets phytosanitaires ménagers - Produits chimiques",
+      "afficher": false,
+      "afficher_carte": true,
+      "qfdmd_produits": [296, 162, 138, 190, 286, 99, 14, 235, 264, 140, 141, 9]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Déchets de peintures, vernis, encres et colles - Produits chimiques",
+      "categorie": ["PCHIM - DDS"],
+      "code": "Déchets de peintures, vernis, encres et colles - Produits chimiques",
+      "afficher": false,
+      "afficher_carte": true,
+      "qfdmd_produits": [135, 297, 261, 139, 262, 104, 413, 360, 215, 267, 260]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Produits pyrotechniques",
+      "categorie": ["PCHIM - DDS"],
+      "code": "Produits pyrotechniques",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [419]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Déchets de produits chimiques basiques",
+      "categorie": ["PCHIM - DDS"],
+      "code": "Déchets de produits chimiques basiques",
+      "afficher": false,
+      "afficher_carte": true,
+      "qfdmd_produits": [8, 258, 284]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Déchets de produits chimiques acides",
+      "categorie": ["PCHIM - DDS"],
+      "code": "Déchets de produits chimiques acides",
+      "afficher": false,
+      "afficher_carte": true,
+      "qfdmd_produits": [4]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Panneaux photovoltaïques",
+      "categorie": ["Panneaux photovoltaïques"],
+      "code": "Panneaux photovoltaïques",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [422]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Décoration textile - Éléments d'ameublement",
+      "categorie": ["mobilier et decoration"],
+      "code": "Décoration textile - Éléments d'ameublement",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [424, 423]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Literie - Éléments d'ameublement",
+      "categorie": ["mobilier et decoration"],
+      "code": "Literie - Éléments d'ameublement",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [206]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Rembourrés d'assise ou de couchage - Éléments d'ameublement",
+      "categorie": ["mobilier et decoration"],
+      "code": "Rembourrés d'assise ou de couchage - Éléments d'ameublement",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [216, 408]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Sièges - Éléments d'ameublement",
+      "categorie": ["mobilier et decoration"],
+      "code": "Sièges - Éléments d'ameublement",
+      "afficher": true,
+      "afficher_carte": false,
+      "qfdmd_produits": []
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Bois (Matériaux du Bâtiment)",
+      "categorie": ["materiau de construction / du batiment"],
+      "code": "Bois - PMCB (produits et matériaux de construction du bâtiment)",
+      "afficher": false,
+      "afficher_carte": true,
+      "qfdmd_produits": [49, 50, 47, 232, 450]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Déchets dangereux du bâtiment",
+      "categorie": ["materiau de construction / du batiment"],
+      "code": "Déchets dangereux de PMCB (produits et matériaux de construction du bâtiment)",
+      "afficher": false,
+      "afficher_carte": true,
+      "qfdmd_produits": [10]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Huisseries (Bâtiment)",
+      "categorie": ["materiau de construction / du batiment"],
+      "code": "Huisseries (produits et matériaux de construction du bâtiment)",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [366, 426]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Laine de roche (Bâtiment)",
+      "categorie": ["materiau de construction / du batiment"],
+      "code": "Laine de roche (produits et matériaux de construction du bâtiment)",
+      "afficher": false,
+      "afficher_carte": true,
+      "qfdmd_produits": [440]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Laine de verre (Bâtiment)",
+      "categorie": ["materiau de construction / du batiment"],
+      "code": "Laine de verre (produits et matériaux de construction du bâtiment)",
+      "afficher": false,
+      "afficher_carte": true,
+      "qfdmd_produits": [197]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Mélange d’inertes (Bâtiment)",
+      "categorie": ["materiau de construction / du batiment"],
+      "code": "Mélange d’inertes (produits et matériaux de construction du bâtiment)",
+      "afficher": false,
+      "afficher_carte": true,
+      "qfdmd_produits": [485, 484, 19, 353, 119, 217, 178, 302, 266]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Métal (Matériaux du Bâtiment)",
+      "categorie": ["materiau de construction / du batiment"],
+      "code": "Métal - PMCB (produits et matériaux de construction du bâtiment)",
+      "afficher": false,
+      "afficher_carte": true,
+      "qfdmd_produits": [179, 150, 292, 272, 26, 156]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Plastiques (Matériaux du bâtiment)",
+      "categorie": ["materiau de construction / du batiment"],
+      "code": "Plastiques - PMCB (produits et matériaux de construction du bâtiment)",
+      "afficher": false,
+      "afficher_carte": true,
+      "qfdmd_produits": [486, 209, 290, 218, 238]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Plâtre (Bâtiment)",
+      "categorie": ["materiau de construction / du batiment"],
+      "code": "Plâtre - PMCB (produits et matériaux de construction du bâtiment)",
+      "afficher": false,
+      "afficher_carte": true,
+      "qfdmd_produits": [271]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Béton (Bâtiment)",
+      "categorie": ["materiau de construction / du batiment"],
+      "code": "Béton - PMCB (produits et matériaux de construction du bâtiment)",
+      "afficher": false,
+      "afficher_carte": true,
+      "qfdmd_produits": [41]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Membranes bitumineuses (Bâtiment)",
+      "categorie": ["materiau de construction / du batiment"],
+      "code": "Membranes bitumineuses - PMCB (produits et matériaux de construction du bâtiment)",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [444]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Bateau",
+      "categorie": ["Bateau"],
+      "code": "Bateau",
+      "afficher": false,
+      "afficher_carte": false,
+      "qfdmd_produits": []
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Lunettes de vue",
+      "categorie": ["Aides Techniques"],
+      "code": "lunettes_de_vue_aides_techniques",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [210]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Pneu",
+      "categorie": ["Pneu"],
+      "code": "Pneu",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [275]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Médicaments non utilisés",
+      "categorie": ["Médicaments & DASRI"],
+      "code": "medicaments",
+      "afficher": false,
+      "afficher_carte": true,
+      "qfdmd_produits": [222]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Autres PMCB (Produits de construction d'origine végétale, animale, ou autres déchets de PMCB non-séparables)",
+      "categorie": ["materiau de construction / du batiment"],
+      "code": "Autres PMCB",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [487]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Outil de bricolage et jardinage électrique",
+      "categorie": ["bricolage et jardinage"],
+      "code": "ABJ_electrique",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [345, 243]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "JELS (Jouets, équipements de loisirs et de sport) - Mobilité",
+      "categorie": ["JELS_Mobilite_electrique"],
+      "code": "JELS_Mobilite_electrique",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [367, 349, 435]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Huiles lubrifiantes",
+      "categorie": ["Huiles_lubrifiantes"],
+      "code": "Huiles_lubrifiantes",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [187, 43]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Ampoule",
+      "categorie": ["electromenager"],
+      "code": "ampoule",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [183, 103, 352, 410, 201, 13]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Biodéchets & déchets alimentaires",
+      "categorie": ["biodechets"],
+      "code": "biodechets",
+      "afficher": false,
+      "afficher_carte": false,
+      "qfdmd_produits": []
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Déchets verts",
+      "categorie": ["biodechets"],
+      "code": "dechets_verts",
+      "afficher": false,
+      "afficher_carte": true,
+      "qfdmd_produits": [270, 337, 221, 161, 311, 185, 336, 310, 153, 71, 127, 48]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Véhicule",
+      "categorie": ["Vehicule"],
+      "code": "Vehicule",
+      "afficher": false,
+      "afficher_carte": false,
+      "qfdmd_produits": []
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Encombrants ménagers divers",
+      "categorie": ["ordures_menageres"],
+      "code": "encombrants_menagers_divers",
+      "afficher": false,
+      "afficher_carte": true,
+      "qfdmd_produits": [
+        488, 2, 231, 263, 28, 165, 321, 130, 348, 172, 65, 31, 400, 287, 234, 362, 82,
+        142, 30, 278, 293, 460, 245, 233, 90
+      ]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Palette",
+      "categorie": ["ordures_menageres"],
+      "code": "palette",
+      "afficher": false,
+      "afficher_carte": false,
+      "qfdmd_produits": []
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Bouteille plastique",
+      "categorie": ["emballages_et_papiers_graphiques"],
+      "code": "bouteilles_plastique",
+      "afficher": false,
+      "afficher_carte": true,
+      "qfdmd_produits": [205, 320, 63, 66, 35, 132, 283]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Emballage en carton",
+      "categorie": ["emballages_et_papiers_graphiques"],
+      "code": "emballage_carton",
+      "afficher": false,
+      "afficher_carte": true,
+      "qfdmd_produits": [409, 54, 86, 34, 52, 87]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Emballage en plastique",
+      "categorie": ["emballages_et_papiers_graphiques"],
+      "code": "emballage_plastique",
+      "afficher": false,
+      "afficher_carte": false,
+      "qfdmd_produits": []
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Emballage en métal",
+      "categorie": ["emballages_et_papiers_graphiques"],
+      "code": "emballage_metal",
+      "afficher": false,
+      "afficher_carte": true,
+      "qfdmd_produits": [60, 81, 68, 36, 56]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Emballages ménagers multimatériaux",
+      "categorie": ["emballages_et_papiers_graphiques"],
+      "code": "autres_emballages_menagers",
+      "afficher": false,
+      "afficher_carte": true,
+      "qfdmd_produits": [280, 407, 157, 396, 37, 433, 305, 59, 174, 72, 457, 446, 110]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Papier graphique",
+      "categorie": ["emballages_et_papiers_graphiques"],
+      "code": "papiers_graphiques",
+      "afficher": false,
+      "afficher_carte": true,
+      "qfdmd_produits": [253, 252, 249, 255, 254]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Emballage en verre",
+      "categorie": ["emballages_et_papiers_graphiques"],
+      "code": "emballage_verre",
+      "afficher": false,
+      "afficher_carte": true,
+      "qfdmd_produits": [213, 69, 45, 411]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Batteries de voitures pour démarrage, éclairage & allumage (SLI)",
+      "categorie": ["Batteries & piles portables"],
+      "code": "batterie_de_voitures_pour_demarrage",
+      "afficher": false,
+      "afficher_carte": false,
+      "qfdmd_produits": []
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Batteries de moyens de transport Légers (MTL)",
+      "categorie": ["Batteries & piles portables"],
+      "code": "batteries_de_mtl",
+      "afficher": false,
+      "afficher_carte": false,
+      "qfdmd_produits": []
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Dispositifs Médicaux Perforants / Déchets d'Activités de Soins à Risque Infectieux (DASRI)",
+      "categorie": ["Médicaments & DASRI"],
+      "code": "dasri",
+      "afficher": false,
+      "afficher_carte": true,
+      "qfdmd_produits": [91, 123, 199, 5, 327, 196, 313, 443, 319, 314]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Instrument de musique électrique",
+      "categorie": ["electromenager"],
+      "code": "instrument_musique_electrique",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [191]
+    }
+  },
+  {
+    "model": "qfdmo.souscategorieobjet",
+    "fields": {
+      "libelle": "Bouchons en liège",
+      "categorie": ["emballages_et_papiers_graphiques"],
+      "code": "bouchonsenliege",
+      "afficher": true,
+      "afficher_carte": true,
+      "qfdmd_produits": [62]
+    }
+  }
 ]
