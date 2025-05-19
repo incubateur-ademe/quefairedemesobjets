@@ -7,14 +7,12 @@ class ActeurController extends Controller<HTMLElement> {
   startY: number
   currentTranslateY: number
   startTranslateY = 0
-  initialTranslateY: number
-  initialTransition: string
+  initialTranslateY = 140
+  initialTransition = 'transform ease 0.5s';
   declare readonly frameTarget: HTMLElement
 
   initialize() {
-    this.initialTranslateY = this.#computePanelTranslateY()
-    this.initialTransition = window.getComputedStyle(this.element).transition
-
+    this.element.style.transition = this.initialTransition;
     this.element.addEventListener("mousedown", this.#dragStart.bind(this))
     this.element.addEventListener('touchstart', this.#dragStart.bind(this));
 
@@ -32,8 +30,7 @@ class ActeurController extends Controller<HTMLElement> {
       return Math.abs(parseFloat(matrix.split(',')[5]));
     }
 
-    // TODO: remove hardcoded value
-    return 140
+    return this.initialTranslateY
   }
 
   #show() {
@@ -48,6 +45,7 @@ class ActeurController extends Controller<HTMLElement> {
     }
 
     this.panelHeight = this.element.offsetHeight
+    this.#setTranslateY(-1 * this.initialTranslateY)
   }
 
   hide() {
@@ -62,11 +60,10 @@ class ActeurController extends Controller<HTMLElement> {
       { once: true },
     )
     clearActivePinpoints()
-    console.log("HIDE", this)
     this.#setTranslateY(-1 * this.initialTranslateY)
   }
 
-  refreshPanelOnNavigation(event) {
+  #showHidePanelWhenTurboFrameLoad(event) {
     if (event.target.id === "acteur-detail") {
       this.#show()
     } else {
@@ -79,14 +76,12 @@ class ActeurController extends Controller<HTMLElement> {
     this.element.addEventListener("touchmove", (event) =>
       event.stopPropagation(),
     )
-    document.addEventListener("turbo:frame-load", this.refreshPanelOnNavigation.bind(this))
+    document.addEventListener("turbo:frame-load", this.#showHidePanelWhenTurboFrameLoad.bind(this))
   }
 
   #dragStart(event: TouchEvent) {
-    // event.preventDefault()
     this.isDragging = true;
     const eventY = event?.y || event?.touches[0].clientY
-    console.log({ eventY, event })
     this.startY = Math.abs(eventY)
     this.startTranslateY = this.#computePanelTranslateY()
     this.element.style.transition = 'none';
@@ -99,6 +94,7 @@ class ActeurController extends Controller<HTMLElement> {
     }
 
     this.element.style.transform = `translateY(${nextValue}px)`;
+    console.log("#setTranslate", nextValue)
   }
 
   #dragMove(event: MouseEvent | TouchEvent) {
@@ -120,7 +116,6 @@ class ActeurController extends Controller<HTMLElement> {
     if (!this.isDragging) return;
     this.isDragging = false;
     this.element.style.transition = this.initialTransition;
-    this.element.style.transition = 'transform ease 0.5s';
     this.element.classList.remove("qf-select-none")
 
     // Define snap points (0 = fully open, 1 = fully closed)
