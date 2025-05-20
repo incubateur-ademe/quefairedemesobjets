@@ -153,6 +153,32 @@ class TestSourceDataNormalize:
 
         assert "col_to_remove" not in df.columns
 
+    def test_source_data_normalize_normalization_remove_unknown_columns(self):
+        normalization_rules = [
+            {"keep": "identifiant_unique"},
+            {"remove": "col_to_remove"},
+            {"remove": "unknown_column"},
+        ]
+        dag_config_kwargs = {
+            "normalization_rules": normalization_rules,
+            "product_mapping": {},
+            "endpoint": "http://example.com/api",
+        }
+        TRANSFORMATION_MAPPING["test_fct"] = lambda x, y: "success"
+        df, metadata = source_data_normalize(
+            df_acteur_from_source=pd.DataFrame(
+                {
+                    "identifiant_unique": ["id"],
+                    "col_to_remove": ["fake remove"],
+                }
+            ),
+            dag_config=DAGConfig.model_validate(dag_config_kwargs),
+            dag_id="dag_id",
+        )
+        assert "identifiant_unique" in df.columns
+        assert "col_to_remove" not in df.columns
+        assert "unknown_column" not in df.columns
+
     def test_source_data_normalize_unhandles_column_raise(self):
         dag_config_kwargs = {
             "normalization_rules": NORMALIZATION_RULES,
