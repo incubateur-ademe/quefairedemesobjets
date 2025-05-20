@@ -1849,14 +1849,14 @@ sqlparse = ">=0.2"
 
 [[package]]
 name = "django-dsfr"
-version = "2.2.0"
+version = "2.4.0"
 description = "Integrate the French government Design System into a Django app"
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "django_dsfr-2.2.0-py3-none-any.whl", hash = "sha256:5d679dadf989dfa08e5a66a3591d843819713665b839247122f328aa5d87059f"},
-    {file = "django_dsfr-2.2.0.tar.gz", hash = "sha256:df572acc3adc08cf6a512b16f86a718a2c56ed5ab90a8784ed4a29b3d1daab00"},
+    {file = "django_dsfr-2.4.0-py3-none-any.whl", hash = "sha256:ba79b2a40fc23946fcccac66e2448cc7bda15a2dc35cec8fd51b85c96e21b80f"},
+    {file = "django_dsfr-2.4.0.tar.gz", hash = "sha256:7ed256f30da90a91c9fb6a72dab4994de3df3db37aa0f363f96c959a90acead6"},
 ]
 
 [package.dependencies]
@@ -7404,4 +7404,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12,<3.13"
-content-hash = "d48b0d9eb1f1700990764f641de2f5e0a93bd419ef0a966346f5f65ca8e03d38"
+content-hash = "4c34e80941e55c618f7c580242da7d5260dad2b143c5c5095cb95cd269448fd4"
