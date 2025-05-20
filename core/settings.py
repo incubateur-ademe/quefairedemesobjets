@@ -35,7 +35,7 @@ ASSISTANT = {
         cast=str,
     ).split(","),
     "BASE_URL": decouple.config(
-        "ASSISTANT_BASE_URL", default="https://quefairedemesdechets.ademe.local"
+        "ASSISTANT_BASE_URL", default="https://quefairedemesobjets.ademe.local"
     ),
     "POSTHOG_KEY": decouple.config(
         "ASSISTANT_POSTHOG_KEY",
@@ -86,11 +86,14 @@ BASE_URL = ASSISTANT.get("BASE_URL")
 BASE_ALLOWED_HOSTS = [
     urlparse(config.get("BASE_URL")).hostname for config in [ASSISTANT, LVAO]
 ]
+CANONICAL_HOST = urlparse(ASSISTANT.get("BASE_URL")).hostname
+
 
 ALLOWED_HOSTS = [
     *BASE_ALLOWED_HOSTS,
     *decouple.config("ALLOWED_HOSTS", default="", cast=str).split(","),
 ]
+
 
 # Application definition
 # ----------------------
