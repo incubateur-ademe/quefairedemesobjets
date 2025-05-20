@@ -2,6 +2,7 @@ from datetime import timedelta
 
 import pendulum
 from airflow import DAG
+from airflow.exceptions import AirflowSkipException  # noqa: F401
 from airflow.operators.python import PythonOperator
 from compute_acteurs.tasks.airflow_logic import (
     compute_acteur_services_task,
@@ -149,7 +150,28 @@ compute_acteur_services_task_instance = compute_acteur_services_task(dag)
 compute_labels_task_instance = compute_labels_task(dag)
 db_data_write_task_instance = db_data_write_task(dag)
 
+skip_because_deprecated = PythonOperator(
+    task_id="skip_because_deprecated",
+    python_callable=lambda: exec(
+        'raise AirflowSkipException("This task is deprecated")'
+    ),
+    dag=dag,
+    retries=read_retry_count,
+    retry_delay=read_retry_interval,
+)
 
+skip_because_deprecated >> [
+    load_acteur_acteur_services_task,
+    load_acteur_labels_task,
+    load_acteur_task,
+    load_propositionservice_sous_categories_task,
+    load_propositionservice_task,
+    load_revisionacteur_acteur_services_task,
+    load_revisionacteur_labels_task,
+    load_revisionacteur_task,
+    load_revisionpropositionservice_sous_categories_task,
+    load_revisionpropositionservice_task,
+]
 load_acteur_task >> compute_acteur_task_instance
 [
     load_propositionservice_task,
