@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django_extensions.db.fields import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured
 from import_export import fields, resources
 from import_export.admin import ImportExportModelAdmin
 
