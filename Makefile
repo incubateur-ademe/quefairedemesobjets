@@ -156,3 +156,7 @@ db-restore:
 	make load-production-dump
 	make migrate
 
+# Docs
+.PHONY: build-docs
+build-docs:
+		poetry run sphinx-build -b html -c docs docs _build
