@@ -43,7 +43,6 @@ ASSISTANT = {
         cast=str,
     ),
 }
-CANONICAL_HOST = ASSISTANT.get("BASE_URL").split("://")[1]
 
 # Carte settings
 # --------------
@@ -87,6 +86,8 @@ BASE_URL = ASSISTANT.get("BASE_URL")
 BASE_ALLOWED_HOSTS = [
     urlparse(config.get("BASE_URL")).hostname for config in [ASSISTANT, LVAO]
 ]
+CANONICAL_HOST = urlparse(ASSISTANT.get("BASE_URL")).hostname
+
 
 ALLOWED_HOSTS = [
     *BASE_ALLOWED_HOSTS,
