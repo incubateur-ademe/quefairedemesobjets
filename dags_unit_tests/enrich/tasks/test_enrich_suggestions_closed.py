@@ -40,6 +40,10 @@ class TestEnrichActeursClosedSuggestions:
                 COLS.ACTEUR_ID_EXTERNE: ["ext_a01", "ext_a02"],
                 COLS.ACTEUR_SIRET: ["00000000000001", "00000000000002"],
                 COLS.ACTEUR_NOM: ["AVANT a01", "AVANT a02"],
+                COLS.ACTEUR_STATUT: ["ACTIF", "ACTIF"],
+                COLS.ACTEUR_ADRESSE: ["1 rue Nantes", "2 rue Nantes"],
+                COLS.ACTEUR_CODE_POSTAL: ["35001", "35002"],
+                COLS.ACTEUR_VILLE: ["Rennes", "Rennes"],
                 COLS.ACTEUR_TYPE_ID: [atype.pk, atype.pk],
                 COLS.ACTEUR_SOURCE_ID: [source.pk, source.pk],
                 COLS.SUGGEST_COHORT: [COHORTS.CLOSED_NOT_REPLACED] * 2,
@@ -52,6 +56,11 @@ class TestEnrichActeursClosedSuggestions:
             {
                 # Acteurs data
                 COLS.ACTEUR_ID: ["a1", "a2", "a3"],
+                COLS.ACTEUR_NOM: ["nom 1", "nom 2", "nom 3"],
+                COLS.ACTEUR_STATUT: ["ACTIF", "ACTIF", "ACTIF"],
+                COLS.ACTEUR_ADRESSE: ["1 rue Nantes", "2 rue Nantes", "3 rue Nantes"],
+                COLS.ACTEUR_CODE_POSTAL: ["35001", "35002", "35003"],
+                COLS.ACTEUR_VILLE: ["Rennes", "Rennes", "Rennes"],
                 COLS.ACTEUR_ID_EXTERNE: ["ext_a1", "ext_a2", "ext_a3"],
                 # We test 1 acteur of each cohort with a parent, and
                 # the case with no parent
