@@ -84,6 +84,10 @@ class ProduitPage(Page):
         # Return None or an empty string if no consigne is found
         return None
 
+    @property
+    def family(self):
+        return FamilyPage.objects.ancestor_of(self).first()
+
     content_panels = Page.content_panels + [
         FieldPanel("produit"),
         FieldPanel("synonyme"),
