@@ -8,7 +8,10 @@ from airflow.models.baseoperator import chain
 from airflow.operators.bash import BashOperator
 from airflow.utils.trigger_rule import TriggerRule
 from enrich.config.models import EnrichDbtModelsRefreshConfig
-from shared.config import CATCHUPS, SCHEDULES, START_DATES, config_to_airflow_params
+from shared.config.catchups import CATCHUPS
+from shared.config.models import config_to_airflow_params
+from shared.config.schedules import SCHEDULES
+from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
 
 logger = logging.getLogger(__name__)

@@ -13,7 +13,9 @@ from airflow.operators.bash import BashOperator
 from airflow.utils.db import reflect_tables
 from airflow.utils.db_cleanup import _effective_table_names
 from airflow.utils.session import NEW_SESSION, provide_session
-from shared.config import CATCHUPS, SCHEDULES, START_DATES
+from shared.config.catchups import CATCHUPS
+from shared.config.schedules import SCHEDULES
+from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
 from sqlalchemy import func
 from sqlalchemy.orm import Session
