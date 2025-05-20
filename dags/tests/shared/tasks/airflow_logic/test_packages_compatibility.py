@@ -3,7 +3,7 @@ des packages utilisés par Airflow
 
 Contexte: au 2025-01-15 via PR1200 on est confronté au
 problème suivant:
-    🟢 les tests dags_unit_tests/ fonctionnent
+    🟢 les tests dags/tests/ fonctionnent
     🟢 la CI Github fonctionne
     🔴 Mais les DAGs échouent car pandas 2.2.3 casse la
     compatibilité avec notre Engine SQLAlchemy

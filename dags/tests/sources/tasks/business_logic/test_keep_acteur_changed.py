@@ -1,8 +1,8 @@
 import pandas as pd
 import pytest
-from utils import logging_utils as log
 
 from dags.sources.tasks.business_logic.keep_acteur_changed import keep_acteur_changed
+from utils import logging_utils as log
 
 
 @pytest.mark.parametrize(
