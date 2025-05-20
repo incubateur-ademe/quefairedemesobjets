@@ -78,10 +78,20 @@ def changes_prepare_rgpd(
         )
     )
     contexte = {
-        "statut": row[COLS.ACTEUR_STATUT],
         "noms d'origine": row[COLS.ACTEUR_NOMS_ORIGINE],
+        "statut": row[COLS.ACTEUR_STATUT],
     }
     return changes, contexte
+
+
+def _get_closed_row_contexte(row: dict) -> dict:
+    return {
+        "nom": row[COLS.ACTEUR_NOM],
+        "statut": row[COLS.ACTEUR_STATUT],
+        "adresse": row[COLS.ACTEUR_ADRESSE],
+        "code_postal": row[COLS.ACTEUR_CODE_POSTAL],
+        "ville": row[COLS.ACTEUR_VILLE],
+    }
 
 
 def changes_prepare_closed_not_replaced(
@@ -113,7 +123,7 @@ def changes_prepare_closed_not_replaced(
             reason="SIRET & SIREN fermés, 0 remplacement trouvé",
         )
     )
-    contexte = {}  # changes are self-explanatory
+    contexte = _get_closed_row_contexte(row)
     return changes, contexte
 
 
@@ -148,7 +158,7 @@ def changes_prepare_closed_replaced(
         )
     ]
 
-    contexte = {}  # changes are self-explanatory
+    contexte = _get_closed_row_contexte(row)
     return changes, contexte
 
 
