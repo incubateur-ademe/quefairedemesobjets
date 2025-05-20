@@ -25,6 +25,7 @@ from crawl.tasks.airflow_logic.crawl_urls_suggest_dns_fail_task import (
 from crawl.tasks.airflow_logic.crawl_urls_suggest_syntax_fail_task import (
     crawl_urls_suggest_syntax_fail_task,
 )
+from shared.config.tags import TAGS
 
 UI_PARAMS_SEPARATOR_SELECTION = r"""
 
@@ -50,7 +51,7 @@ with DAG(
     catchup=False,
     schedule_interval=None,
     description=("Un DAG pour parcourir des URLs et suggérer des corrections"),
-    tags=["enrich", "crawl", "acteurs", "url", "suggestions"],
+    tags=[TAGS.ENRICH, TAGS.CRAWL, TAGS.ACTEURS, TAGS.URL, TAGS.SUGGESTIONS],
     params={
         "dry_run": Param(
             True,

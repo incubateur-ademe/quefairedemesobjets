@@ -18,6 +18,7 @@ from enrich.tasks.airflow_logic.enrich_dbt_models_refresh_task import (
     enrich_dbt_models_refresh_task,
 )
 from shared.config import CATCHUPS, SCHEDULES, START_DATES, config_to_airflow_params
+from shared.config.tags import TAGS
 
 with DAG(
     dag_id="enrich_acteurs_closed",
@@ -34,13 +35,12 @@ with DAG(
         "dans l'Annuaire Entreprises (AE)"
     ),
     tags=[
-        "enrich",
-        "annuaire-entreprises",
-        "AE",
-        "siren",
-        "siret",
-        "acteurs",
-        "fermés",
+        TAGS.ENRICH,
+        TAGS.ANNAIRE_ENTREPRISE,
+        TAGS.SIREN,
+        TAGS.SIRET,
+        TAGS.ACTEURS,
+        TAGS.CLOSED,
     ],
     schedule=SCHEDULES.NONE,
     catchup=CATCHUPS.AWLAYS_FALSE,

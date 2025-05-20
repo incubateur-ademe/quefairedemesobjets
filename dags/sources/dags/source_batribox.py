@@ -1,4 +1,5 @@
 from airflow import DAG
+from shared.config.tags import TAGS
 from sources.config import shared_constants as constants
 from sources.config.airflow_params import get_mapping_config
 from sources.tasks.airflow_logic.operators import (
@@ -15,7 +16,13 @@ with DAG(
         "Injestion des données de l'éco-organisme BATRIBOX à partir des données"
         " disponibles sur de Koumoul"
     ),
-    tags=["source", "data.pointsapport.ademe.fr", "eco-organisme", "batribox", "PA"],
+    tags=[
+        TAGS.SOURCE,
+        TAGS.DATA_POINTSAPPORT_ADEME,
+        TAGS.ECO_ORGANISME,
+        TAGS.BATRIBOX,
+        TAGS.PA,
+    ],
     **default_params,
     params={
         "endpoint": (

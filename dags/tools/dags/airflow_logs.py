@@ -3,6 +3,8 @@ import logging
 import pendulum
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+from shared.config.tags import TAGS
+
 from utils.django import django_setup_full
 
 # Load Django environement to test Django and saving airflow logs to s3 storage are
@@ -27,7 +29,7 @@ def test_django_and_logs():
 with DAG(
     dag_id="test_logs_pushed_to_s3",
     dag_display_name="[TEST] Les logs Airflow sont enregistrés sur s3",
-    tags=["dev tools"],
+    tags=[TAGS.DEV_TOOLS],
     default_args=default_args,
     description=(
         """

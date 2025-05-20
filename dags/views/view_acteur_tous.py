@@ -6,6 +6,7 @@ import pendulum
 from airflow import DAG
 from airflow.decorators import task
 from airflow.providers.postgres.hooks.postgres import PostgresHook
+from shared.config.tags import TAGS
 
 logger = getLogger(__name__)
 
@@ -31,7 +32,7 @@ et des champs calculés (ex: is_parent)"""
 
 with DAG(
     dag_id="view_acteur_all",
-    tags=["view", "vue", "acteur", "displayed", "revision", "all", "tout", "sql"],
+    tags=[TAGS.VUE, TAGS.ACTEURS, TAGS.TOUT, TAGS.SQL],
     default_args=DEFAULT_ARGS,
     catchup=False,
     schedule=SCHEDULE,

@@ -1,4 +1,5 @@
 from airflow import DAG
+from shared.config.tags import TAGS
 from sources.config import shared_constants as constants
 from sources.config.airflow_params import (
     get_mapping_config,
@@ -18,7 +19,13 @@ with DAG(
     description=(
         "DAG pour télécharger, standardiser, et charger dans notre base la source SINOE"
     ),
-    tags=["source", "data.ademe.fr", "ademe", "sinoe", "déchetterie"],
+    tags=[
+        TAGS.SOURCE,
+        TAGS.DATA_ADEME,
+        TAGS.ADEME,
+        TAGS.SINOE,
+        TAGS.DECHETTERIE,
+    ],
     **default_params,
     params={
         "endpoint": (

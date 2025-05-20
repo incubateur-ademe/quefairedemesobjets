@@ -9,6 +9,7 @@ from airflow.operators.bash import BashOperator
 from airflow.utils.trigger_rule import TriggerRule
 from enrich.config.models import EnrichDbtModelsRefreshConfig
 from shared.config import CATCHUPS, SCHEDULES, START_DATES, config_to_airflow_params
+from shared.config.tags import TAGS
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,7 @@ with DAG(
         "Un DAG pour rafraîchir les modèles DBT nécessaires"
         "à l'enrichissement des acteurs"
     ),
-    tags=["enrich", "annuaire-entreprises", "AE", "BAN", "prepare", "DBT"],
+    tags=[TAGS.ENRICH, TAGS.ANNAIRE_ENTREPRISE, TAGS.BAN, TAGS.PREPARE, TAGS.DBT],
     schedule=SCHEDULES.DAILY,
     catchup=CATCHUPS.AWLAYS_FALSE,
     start_date=START_DATES.YESTERDAY,

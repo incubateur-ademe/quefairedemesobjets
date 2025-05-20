@@ -1,4 +1,5 @@
 from airflow import DAG
+from shared.config.tags import TAGS
 from sources.config import shared_constants as constants
 from sources.config.airflow_params import get_mapping_config
 from sources.tasks.airflow_logic.operators import (
@@ -12,7 +13,12 @@ with DAG(
     dag_display_name="Source - PHARMACIES",
     default_args=default_args,
     description=("Téléchargement des pharmacies (Ordre National Des Pharmaciens)"),
-    tags=["source", "ordre.pharmacien.fr", "fédération", "pharmacies"],
+    tags=[
+        TAGS.SOURCE,
+        TAGS.ORDRE_PHARMACIENS,
+        TAGS.FEDERATION,
+        TAGS.PHARMACIES,
+    ],
     **default_params,
     params={
         "normalization_rules": [

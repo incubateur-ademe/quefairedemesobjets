@@ -15,6 +15,7 @@ from enrich.tasks.airflow_logic.enrich_dbt_models_refresh_task import (
     enrich_dbt_models_refresh_task,
 )
 from shared.config import CATCHUPS, SCHEDULES, START_DATES, config_to_airflow_params
+from shared.config.tags import TAGS
 
 with DAG(
     dag_id="enrich_acteurs_rgpd",
@@ -27,7 +28,7 @@ with DAG(
         "retries": 0,
     },
     description=("Un DAG pour anonymiser les acteurs vs. RGPD"),
-    tags=["enrich", "annuaire-entreprises", "AE", "RGPD", "acteurs"],
+    tags=[TAGS.ENRICH, TAGS.ANNAIRE_ENTREPRISE, TAGS.RGPD, TAGS.ACTEURS],
     schedule=SCHEDULES.NONE,
     catchup=CATCHUPS.AWLAYS_FALSE,
     start_date=START_DATES.YESTERDAY,

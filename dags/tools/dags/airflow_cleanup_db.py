@@ -14,6 +14,7 @@ from airflow.utils.db import reflect_tables
 from airflow.utils.db_cleanup import _effective_table_names
 from airflow.utils.session import NEW_SESSION, provide_session
 from shared.config import CATCHUPS, SCHEDULES, START_DATES
+from shared.config.tags import TAGS
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -31,7 +32,15 @@ DAYS_TO_KEEP = 7
     is_paused_upon_creation=False,
     render_template_as_native_obj=True,
     max_active_tasks=1,
-    tags=["airflow", "maintenance", "nettoyage", "xcom", "cleanup", "db", "logs"],
+    tags=[
+        TAGS.AIRFLOW,
+        TAGS.MAINTENANCE,
+        TAGS.NETTOYAGE,
+        TAGS.XCOM,
+        TAGS.CLEANUP,
+        TAGS.DB,
+        TAGS.LOGS,
+    ],
     params={
         "dry_run": Param(
             # DAG is meant to run continuously hence the default is False

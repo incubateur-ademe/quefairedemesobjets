@@ -2,6 +2,7 @@ from datetime import timedelta
 
 import pendulum
 from airflow.models import DAG
+from shared.config.tags import TAGS
 from suggestions.tasks.airflow_logic.db_apply_suggestion_task import (
     db_apply_suggestion_task,
 )
@@ -26,7 +27,7 @@ dag = DAG(
     dag_display_name="Application des suggestions validées",
     default_args=default_args,
     description="traiter les suggestions à traiter",
-    tags=["compute", "suggestions", "apply", "acteurs"],
+    tags=[TAGS.COMPUTE, TAGS.SUGGESTIONS, TAGS.APPLY, TAGS.ACTEURS],
     schedule="*/5 * * * *",
     catchup=False,
     max_active_runs=1,

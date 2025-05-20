@@ -1,4 +1,5 @@
 from airflow import DAG
+from shared.config.tags import TAGS
 from sources.config import shared_constants as constants
 from sources.config.airflow_params import get_mapping_config
 from sources.tasks.airflow_logic.operators import (
@@ -16,12 +17,12 @@ with DAG(
         " for EcoDDS dataset"
     ),
     tags=[
-        "source",
-        "data.pointsapport.ademe.fr",
-        "eco-organisme",
-        "ecodds",
-        "ABJ",
-        "PCHIM",
+        TAGS.SOURCE,
+        TAGS.DATA_POINTSAPPORT_ADEME,
+        TAGS.ECO_ORGANISME,
+        TAGS.ECODDS,
+        TAGS.ABJ,
+        TAGS.PCHIM,
     ],
     **default_params,
     params={

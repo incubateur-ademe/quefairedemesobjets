@@ -1,5 +1,6 @@
 from airflow import DAG
 from airflow.models.param import Param
+from shared.config.tags import TAGS
 from sources.config.airflow_params import get_souscategorie_mapping_from_db
 from sources.tasks.airflow_logic.operators import (
     default_args,
@@ -14,7 +15,7 @@ with DAG(
     description=(
         "Un pipeline pour récupérer des données depuis un bucket S3 et les transformer"
     ),
-    tags=["source", "s3"],
+    tags=[TAGS.SOURCE, TAGS.S3],
     **default_params,
     params={
         "s3_connection_id": Param(

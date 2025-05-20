@@ -8,6 +8,7 @@ from airflow import DAG
 from airflow.models.param import Param
 from clone.tasks.airflow_logic.chain_tasks import chain_tasks
 from shared.config import CATCHUPS, SCHEDULES, START_DATES
+from shared.config.tags import TAGS
 
 with DAG(
     dag_id="clone_ae_etablissement",
@@ -25,7 +26,13 @@ with DAG(
     description=(
         "Clone la table 'etablissement' de l'Annuaire Entreprises (AE) dans notre DB"
     ),
-    tags=["enrich", "clone", "annuaire-entreprise", "AE", "etablissement", "siret"],
+    tags=[
+        TAGS.ENRICH,
+        TAGS.CLONE,
+        TAGS.ANNAIRE_ENTREPRISE,
+        TAGS.ETABLISSEMENT,
+        TAGS.SIRET,
+    ],
     params={
         "dry_run": Param(
             False,
