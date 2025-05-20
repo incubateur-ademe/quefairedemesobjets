@@ -6,6 +6,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import requests
+
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -34,7 +35,7 @@ def fetch_data_from_endpoint(endpoint, s3_connection_id):
         return fetch_dataset_from_s3(endpoint, s3_connection_id)
     elif "pointsapport.ademe.fr" in endpoint or "data.ademe.fr" in endpoint:
         return fetch_dataset_from_point_apport(endpoint)
-    elif "artisanat.fr" in endpoint:
+    elif "apiopendata.artisanat.fr" in endpoint:
         return fetch_dataset_from_artisanat(endpoint)
     elif "ordre.pharmacien.fr" in endpoint:
         return fetch_dataset_from_pharmacies(endpoint)
@@ -75,19 +76,19 @@ def fetch_dataset_from_point_apport(url):
 
 def fetch_dataset_from_artisanat(base_url):
     all_data = []
-    offset = 0
-    total_records = requests.get(base_url, params={"limit": 1, "offset": 0}).json()[
-        "total_count"
+    page = 0
+    page_size = 1000
+    total_entries = requests.get(base_url, params={"page": 1, "page_size": 1}).json()[
+        "total_entries"
     ]
-    records_per_request = 100
-    params = {"limit": records_per_request, "offset": 0}
-    while offset < total_records:
-        params.update({"offset": offset})
+    params = {"page": page, "page_size": page_size}
+    while page * page_size < total_entries:
+        page = page + 1
+        params.update({"page": page})
         response = requests.get(base_url, params=params)
         if response.status_code == 200:
             data = response.json()
-            all_data.extend(data["results"])
-            offset += records_per_request
+            all_data.extend(data["data"])
         else:
             response.raise_for_status()
 

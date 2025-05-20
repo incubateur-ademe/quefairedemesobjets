@@ -380,6 +380,11 @@ class TestCleanSousCategorieCodes:
                 ["mapped1", "mapped2"],
             ),
             (
+                ["sscat1", "sscat2", "sscat1"],  # works with a list
+                {"sscat1": "mapped1", "sscat2": "mapped2"},
+                ["mapped1", "mapped2"],
+            ),
+            (
                 "sscat1|sscat2",
                 {"sscat1": ["mapped1a", "mapped1b"], "sscat2": "mapped2"},
                 ["mapped1a", "mapped1b", "mapped2"],
