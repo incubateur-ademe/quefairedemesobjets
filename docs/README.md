@@ -17,7 +17,7 @@ Elle est répartie en 4 sections suivant la convention [DIATAXIS](https://diatax
 
 ![](https://diataxis.fr/_images/diataxis.png)
 
-Pour en savoir plus sur la construction de cette documentation, suivez le guide : [Guide de la documentation technique](./reference/901-documentation-technique.md)
+Pour en savoir plus sur la construction de cette documentation, suivez le guide : [Guide de la documentation technique](./reference/documentation-technique.md)
 
 ## Référence
 
@@ -52,19 +52,17 @@ Décrit les apprentissages pas à pas de l'utilisation des outils, par exemple
 - Mise en production
 …
 
-## Sommaire
+## Sommaire et quelques raccourcis
 
 - [🧐 REFERENCE](./reference/README.md)
-  - [Règles de codage](./reference/101-coding-guidelines.md)
-  - [Frontend](./reference/201-frontend.md)
-  - [Règle de codage de la base de données](./reference/301-db-guidelines.md)
-  - [Architecture des fichiers de code de la partie data](./reference/302-organisations-des-fichiers-data.md)
-  - [Guide de la docmentation technique](./reference/901-documentation-technique.md)
+  - [Règles de codage](./reference/coding/coding-guidelines.md)
+  - [Guide de la documentation technique](./reference/documentation-technique.md)
 
 - [❓ EXPLICATIONS](./explications/README.md)
-  - [Frontend](./explications/201-frontend.md)
+  - [Plateforme de données](./explications/data/README.md)
+  - [Frontend](./explications/frontend/README.md)
 
 - [🤔 COMMENT FAIRE ?](./comment-faire/README.md)
-  - [Commandes Django utiles](./comment-faire/101-commandes-django.md)
+  - [Commandes Django utiles](./comment-faire/django/commandes.md)
 
 - [🙌 TUTORIELS](./tutoriels/README.md)

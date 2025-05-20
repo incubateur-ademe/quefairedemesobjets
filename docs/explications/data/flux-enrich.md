@@ -26,19 +26,13 @@ Plusieurs étapes :
 
 ```mermaid
 graph LR
-    A[Cloner - AE - Etablissement]
-    B[Cloner - AE - Unite Legale]
-    C[Cloner - BAN - Adresses]
-    D[Cloner - BAN - Lieux-dits]
-    E[DBT - Rafraîchir les acteurs affichés]
-    F[🔄 Enrichir - Rafraîchir les modèles DBT]
-    G[🚪 Enrichir - Acteurs Fermés]
-    A --> F
-    B --> F
-    C --> F
-    D --> F
-    F --> G
-    E --> G
+    F[Enrichir - Rafraîchir DBT]
+    A[Cloner - AE - Etablissement] --> F
+    B[Cloner - AE - Unite Legale] --> F
+    C[Cloner - BAN - Adresses] --> F
+    D[Cloner - BAN - Lieux-dits] --> F
+    F --> G[Enrichir - Acteurs Fermes]
+    E[DBT - Rafraîchir les acteurs] --> G
 ```
 
 ## Script de cohérence

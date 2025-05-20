@@ -1,6 +1,6 @@
-# Guide de la docmentation technique
+# Guide de la documentation technique
 
-La documentation technique est entretenue dans le code, dans le dossier [docs](./)
+La documentation technique est entretenue dans le code, dans le dossier **docs** à la racine du projet
 
 Elle suit la convention [DIATAXIS](https://diataxis.fr) et met en application, tant que faire se peut, les guidelines de documentation définies par [Google](https://developers.google.com/style)
 

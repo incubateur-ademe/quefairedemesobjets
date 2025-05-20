@@ -14,4 +14,4 @@ Les extensions postgresql utilisées sont :
 - pg_trgm
 - uuid-ossp
 
-Celles-ci sont ré-installées lors de la restauration de la base de données car la suppression/restauration du schema public ne recrée pas ces extensions (cf. [./scripts/sql/create_extensions.sql](./scripts/sql/create_extensions.sql))
+Celles-ci sont ré-installées lors de la restauration de la base de données car la suppression/restauration du schema public ne recrée pas ces extensions (cf. [./scripts/sql/create_extensions.sql](../../../scripts/sql/create_extensions.sql))
