@@ -14,6 +14,9 @@ Notes:
 
 WITH acteurs_with_siren AS (
 	SELECT
+		identifiant_unique,
+		acteur_type_id,
+		source_id,
 		-- Extract SIREN from SIRET as we have SIREN issues in our DB
 		LEFT(siret,9) AS siren,
 		identifiant_unique AS id,
@@ -30,10 +33,10 @@ WITH acteurs_with_siren AS (
 	We have normalization issues with our SIREN field in our DB
 	and we obtain better matching by reconstructing SIREN via SIRET
 	 */
-	WHERE siret IS NOT NULL AND siret != '' AND LENGTH(siret) = 14/*  AND (acteurs.source_id is null or acteurs.source_id in (45, 252)) */
+	WHERE siret IS NOT NULL AND siret != '' AND LENGTH(siret) = 14
 ), unite_matching_acteurs_on_siren AS (
 	SELECT
-		acteurs.id AS acteur_id,
+		acteurs.identifiant_unique AS acteur_id,
 		acteurs.acteur_type_id AS acteur_type_id,
 		acteurs.source_id AS acteur_source_id,
 		acteurs.siren AS acteur_siren,

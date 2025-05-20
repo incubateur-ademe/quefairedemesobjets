@@ -19,7 +19,7 @@ SELECT
   ban.ville AS suggest_ville
 FROM {{ source('enrich', 'qfdmo_vueacteur') }} AS acteurs
 JOIN {{ ref('int_ban_villes') }} AS ban ON ban.code_postal = acteurs.code_postal
-WHERE acteurs.statut = 'ACTIF'/*  AND (acteurs.source_id is null or acteurs.source_id in (45, 252)) */
+WHERE acteurs.statut = 'ACTIF'
 AND acteurs.code_postal IS NOT NULL and acteurs.code_postal != '' and LENGTH(acteurs.code_postal) = 5
 /* Only suggest if 1 difference */
 AND (
