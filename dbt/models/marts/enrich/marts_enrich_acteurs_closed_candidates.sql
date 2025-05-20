@@ -32,7 +32,7 @@ WITH acteurs_with_siret AS (
 		parent_id AS acteur_parent_id
 
 	FROM {{ source('enrich', 'qfdmo_vueacteur') }} AS acteurs
-	WHERE siret IS NOT NULL AND siret != '' AND LENGTH(siret) = 14/*  AND (acteurs.source_id is null or acteurs.source_id in (45, 252)) */
+	WHERE siret IS NOT NULL AND siret != '' AND LENGTH(siret) = 14
 ),
 /* Filtering on etab closed (NOT etab.est_actif) BUT
 not on unite closed (NOT unite_est_actif) because
