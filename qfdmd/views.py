@@ -13,7 +13,7 @@ from django.views.generic import DetailView, FormView, ListView
 from core.notion import create_new_row_in_notion_table
 from core.views import static_file_content_from
 from qfdmd.forms import ContactForm, SearchForm
-from qfdmd.models import CMSPage, Suggestion, Synonyme
+from qfdmd.models import Suggestion, Synonyme
 
 logger = logging.getLogger(__name__)
 
@@ -116,7 +116,3 @@ class HomeView(AssistantBaseView, ListView):
 
 class SynonymeDetailView(AssistantBaseView, DetailView):
     model = Synonyme
-
-
-class CMSPageDetailView(AssistantBaseView, DetailView):
-    model = CMSPage

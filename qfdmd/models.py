@@ -1,23 +1,156 @@
 import logging
 from urllib.parse import urlencode
 
-import requests
-from django.conf import settings
 from django.contrib.gis.db import models
+from django.db.models import CheckConstraint, Q
 from django.db.models.functions import Now
 from django.template.loader import render_to_string
 from django.urls.base import reverse
 from django.utils.functional import cached_property
+from django.utils.translation import gettext_lazy as _
 from django_extensions.db.fields import AutoSlugField
-from wagtail.admin.panels import FieldPanel
-from wagtail.fields import StreamField
+from wagtail.admin.panels import FieldPanel, HelpPanel, ObjectList, TabbedInterface
+from wagtail.fields import RichTextField, StreamField
 from wagtail.images.blocks import ImageBlock
+from wagtail.models import Page
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
+
+from qfdmd.blocks import ConsigneBlock
 
 logger = logging.getLogger(__name__)
 
 
+@register_snippet
+class ReusableContent(models.Model):
+    title = models.CharField()
+    content = RichTextField()
+    panels = ["title", "content"]
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = "Contenu réutilisable"
+        verbose_name_plural = "Contenus réutilisable"
+
+
+class ProduitIndexPage(Page):
+    subpage_types = ["qfdmd.produitpage", "qfdmd.familypage"]
+
+    class Meta:
+        verbose_name = "Index des familles & produits"
+
+
+class ProduitPage(Page):
+    subpage_types = [
+        "qfdmd.synonymepage",
+    ]
+    parent_page_types = ["qfdmd.produitindexpage", "qfdmd.familypage"]
+    produit = models.ForeignKey(
+        "qfdmd.produit",
+        on_delete=models.SET_NULL,
+        related_name="produit_page",
+        blank=True,
+        null=True,
+    )
+    synonyme = models.ForeignKey(
+        "qfdmd.synonyme",
+        on_delete=models.SET_NULL,
+        related_name="produit_page",
+        blank=True,
+        null=True,
+    )
+
+    gender = models.CharField()
+    number = models.IntegerField()
+
+    consigne = StreamField(ConsigneBlock, blank=True)
+
+    @property
+    def compiled_consigne(self):
+        # Check the current page's consigne
+        if self.consigne:
+            return self.consigne
+
+        # Traverse up the parent pages
+        parent = self.get_parent()
+        while hasattr(parent, "consigne"):
+            if parent.consigne:
+                return parent.consigne
+            parent = parent.get_parent()
+
+        # Return None or an empty string if no consigne is found
+        return None
+
+    content_panels = Page.content_panels + [
+        FieldPanel("produit"),
+        FieldPanel("synonyme"),
+        FieldPanel("consigne"),
+    ]
+
+    config_panels = [FieldPanel("gender"), FieldPanel("number")]
+
+    edit_handler = TabbedInterface(
+        [
+            ObjectList(content_panels, heading=_("content")),
+            ObjectList(config_panels, heading=_("content")),
+            ObjectList(Page.promote_panels, heading="Promote"),
+            ObjectList(Page.settings_panels, heading="Settings"),
+        ]
+    )
+
+    def get_context(self, request, *args, **kwargs):
+        context = super().get_context(request, *args, **kwargs)
+        produit = self.produit
+        synonyme = self.synonyme
+
+        while context.get("object") is None:
+            if produit:
+                context["object"] = self
+            elif synonyme:
+                context["object"] = synonyme
+
+            # TODO: prevent attribute error here
+            produit = self.get_parent().produit
+            synonyme = self.get_parent().synonyme
+
+        return context
+
+    class Meta:
+        verbose_name = "Produit"
+        constraints = [
+            CheckConstraint(
+                condition=Q(produit__isnull=True) | Q(synonyme__isnull=True),
+                name="no_produit_and_synonyme_filled_in_parallel",
+            ),
+        ]
+
+
+class FamilyPage(ProduitPage):
+    subpage_types = ["qfdmd.produitpage"]
+
+    class Meta:
+        verbose_name = "Famille"
+
+
+class SynonymePage(Page):
+    parent_page_types = ["qfdmd.produitpage"]
+
+    class Meta:
+        verbose_name = "Synonyme de recherche"
+        verbose_name_plural = "Synonymes de recherche"
+
+    content_panels = [
+        HelpPanel(
+            "Cette page est un synonyme de recherche, si vous souhaitez modifier des"
+            " champs sur cette page il faut modifier la page parente."
+        )
+    ] + Page.content_panels
+
+
+# LEGACY MODELS
+# ==============
 class AbstractBaseProduit(models.Model):
     modifie_le = models.DateTimeField(auto_now=True, db_default=Now())
     # Le nom des champs conserve ici délibérément l'ancienne nomenclature,
@@ -77,7 +210,6 @@ class Produit(index.Indexed, AbstractBaseProduit):
     search_fields = [
         index.AutocompleteField("nom"),
         index.RelatedFields("synonymes", [index.SearchField("nom")]),
-        index.SearchField("synonyme__nom"),
         index.SearchField("id"),
     ]
 
@@ -178,6 +310,7 @@ class Produit(index.Indexed, AbstractBaseProduit):
         ]
 
 
+@register_snippet
 class Lien(models.Model):
     titre_du_lien = models.CharField(blank=True, unique=True, help_text="Titre du lien")
     url = models.URLField(blank=True, help_text="URL", max_length=300)
@@ -214,7 +347,8 @@ class ProduitLien(models.Model):
         unique_together = ("produit", "lien")  # Prevent duplicate relations
 
 
-class Synonyme(AbstractBaseProduit):
+@register_snippet
+class Synonyme(index.Indexed, AbstractBaseProduit):
     slug = AutoSlugField(populate_from=["nom"], max_length=255)
     nom = models.CharField(blank=True, unique=True, help_text="Nom du produit")
     produit = models.ForeignKey(
@@ -272,68 +406,14 @@ class Synonyme(AbstractBaseProduit):
     def __str__(self) -> str:
         return self.nom
 
+    search_fields = [
+        index.AutocompleteField("nom"),
+        index.SearchField("id"),
+    ]
+
 
 class Suggestion(models.Model):
     produit = models.OneToOneField(Synonyme, primary_key=True, on_delete=models.CASCADE)
 
     def __str__(self) -> str:
         return str(self.produit)
-
-
-class CMSPage(models.Model):
-    id = models.IntegerField(
-        primary_key=True,
-        help_text="Ce champ est le seul contribuable.<br>"
-        "Il correspond à l'ID de la page Wagtail.<br>"
-        "Tous les autres champs seront automatiquement contribués à l'enregistrement"
-        "de la page dans l'administration Django.",
-    )
-    body = models.JSONField(default=dict)
-    search_description = models.CharField(default="")
-    seo_title = models.CharField(default="")
-    title = models.CharField(default="")
-    slug = models.CharField(default="")
-    poids = models.IntegerField(
-        default=0,
-        help_text=(
-            "Ce champ détermine la position d'un élément dans la liste affichée.<br>"
-            "Les éléments avec un poids plus élevé apparaissent plus bas dans "
-            "la liste.<br>"
-            "Les éléments avec un poids plus faible apparaissent plus haut."
-        ),
-    )
-
-    def __str__(self):
-        return self.title
-
-    def save(self, *args, **kwargs):
-        fields_to_fetch_from_api_response = [
-            "body",
-            "title",
-        ]
-
-        fields_to_fetch_from_api_response_meta = [
-            "search_description",
-            "slug",
-            "seo_title",
-        ]
-
-        try:
-            wagtail_response = requests.get(
-                f"{settings.CMS.get('BASE_URL')}/api/v2/pages/{self.id}"
-            )
-            wagtail_response.raise_for_status()
-            wagtail_page_as_json = wagtail_response.json()
-
-            for field in fields_to_fetch_from_api_response:
-                if value := wagtail_page_as_json.get(field):
-                    setattr(self, field, value)
-
-            for field in fields_to_fetch_from_api_response_meta:
-                if value := wagtail_page_as_json["meta"].get(field):
-                    setattr(self, field, value)
-
-        except requests.exceptions.RequestException as exception:
-            logger.error(f"Error fetching data from CMS API: {exception}")
-
-        super().save(*args, **kwargs)
