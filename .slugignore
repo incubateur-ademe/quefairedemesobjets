@@ -1,6 +1,6 @@
 docs
 unit_tests
-dags_unit_tests
+dags/tests
 notebooks
 node_modules
 integration_tests

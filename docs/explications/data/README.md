@@ -16,7 +16,7 @@ Les fichiers qui concerne la plateforme data :
 - `./dags` répertoire dans lequels sont stockés tous les dags executés sur le cluster Airflow
 - `airflow-scheduler.Dockerfile` et `airflow-webserver.Dockerfile`, fichier de configuration docker executer dans tous les environnements
 - `docker-compose.yml` orchestre les dockers en envronnemnt de développement
-- `./dags_unit_tests` répertoire qui contient les tests des dags
+- `./dags/tests` répertoire qui contient les tests des dags
 
 ## Environnements
 

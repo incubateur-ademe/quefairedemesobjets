@@ -10,7 +10,7 @@ from dags.sources.tasks.airflow_logic.config_management import DAGConfig
 
 
 def pytest_configure(config):
-    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "dags"))
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "dags"))
 
 
 @pytest.fixture

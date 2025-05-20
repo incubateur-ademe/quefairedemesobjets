@@ -21,4 +21,4 @@ Appliqué plus spécifiquement lors de la réorganisation des fichiers des dags 
 |- utils                            -> utilitaire DÉPRÉCIÉ, à ranger dans l'arborescence ci-dessus
 ```
 
-les tests suivent la même architecture que le dossier dags dans le dossier dags_unit_tests.
+les tests suivent la même architecture que le dossier dags dans le dossier dags/tests.

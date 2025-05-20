@@ -1,4 +1,5 @@
 import pytest
+
 from utils.airflow_params import (
     airflow_params_dropdown_from_mapping,
     airflow_params_dropdown_selected_to_ids,
