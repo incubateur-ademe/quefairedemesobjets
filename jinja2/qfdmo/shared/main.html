@@ -3,7 +3,7 @@
 {% block content %}
 <turbo-frame
     {% if map_container_id %}
-    id="{{ map_container_id}}"
+    id="{{ map_container_id }}"
     loading="lazy"
     {% else %}
     id="mapContainer"
@@ -31,9 +31,12 @@
         qf-m-0
         qf-flex qf-flex-col qf-flex-auto
         qf-relative"
-        action="/carte{% block action %}{% endblock %}"
+        action="{% if carte %}carte{% endif %}"
         data-search-form-visible
     >
+        {% if map_container_id %}
+            <input type="hidden" name="map_container_id" value="{{ map_container_id}}">
+        {% endif %}
         <section class="map-grid qf-overflow-hidden">
             <header
                 class="{% block header_classes %}qf-z-40{% endblock header_classes %}"
