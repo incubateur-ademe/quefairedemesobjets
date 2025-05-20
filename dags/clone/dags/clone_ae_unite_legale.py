@@ -7,7 +7,9 @@ running into DB table name length limits.
 from airflow import DAG
 from airflow.models.param import Param
 from clone.tasks.airflow_logic.chain_tasks import chain_tasks
-from shared.config import CATCHUPS, SCHEDULES, START_DATES
+from shared.config.catchups import CATCHUPS
+from shared.config.schedules import SCHEDULES
+from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
 
 with DAG(
