@@ -71,7 +71,7 @@
         {% include "components/header/header.html" %}
         {% endblock header %}
 
-        <main class="fr-container qf-pb-7w">
+        <main class="{% block main_classes %}fr-container{% endblock %} qf-pb-7w">
             {% block main %}
             {% endblock main %}
         </main>

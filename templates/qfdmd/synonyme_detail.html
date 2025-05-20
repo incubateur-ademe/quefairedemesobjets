@@ -1,6 +1,8 @@
 {% extends "qfdmd/base.html" %}
 {% load static %}
 
+{% load dsfr_tags %}
+
 {% block analytics_action %}produitPageView{% endblock %}
 
 {% block title %}
@@ -12,16 +14,86 @@
 
 {% block meta_description %}{{ object.meta_description|default:block.super }}{% endblock %}
 
+{% if page.family %}
+{% block main_classes %}{% endblock %}
+{% endif %}
+
+
 {% block main %}
 {% with produit=object.produit %}
 {% with bon_etat=object.bon_etat %}
 {% with mauvais_etat=object.mauvais_etat %}
+{% with family=page.family %}
+
 <article
     class="qf-flex qf-flex-col
     qf-gap-2w max-lg:qf-pr-0 max-xl:qf-pr-6w"
 >
-    {% include "components/produit/produit.html" %}
+    {# TODO: extract in a component #}
+    <header class="qf-mt-3w md:qf-mt-5w qf-flex qf-flex-col qf-gap-2w {% if family %}qf-bg-green-menthe-975-75 qf-py-2w fr-container{% endif %}">
+        {% if family %}
+        <div class="qf-flex qf-flex-col">
+            <strong class="qf-text-3xl">Que faire de mon {{ page.title }}</strong>
+            Les recommandations ci-dessous sont celles de la catégorie :
+        </div>
+        <h1 class="qf-m-0 qf-text-5xl qf-text-green-menthe-main-548">
+            {{ family.title|capfirst }}
+        </h1>
+        <div class="qf-p-1w qf-rounded-md qf-border qf-border-green-menthe-main-548 qf-border-solid qf-bg-white qf-mr-auto">
+        {% include "components/produit/_infotri.html" %}
+        </div>
+
+        {% else %}
+        <h1 class="qf-m-0">
+            {{ object.nom|capfirst }}
+        </h1>
+        {% include "components/produit/_infotri.html" %}
+        {% endif %}
+    </header>
+    {% if bon_etat and mauvais_etat %}
+        <div class="fr-tabs">
+            <ul class="fr-tabs__list" role="tablist" aria-label="État du produit {{ produit }}">
+                <li role="presentation">
+                    <button
+                        id="mauvais-etat-tab"
+                        class="fr-tabs__tab fr-icon-thumb-down-line fr-tabs__tab--icon-left"
+                        tabindex="0"
+                        role="tab"
+                        aria-selected="true"
+                        aria-controls="mauvais-etat-panel"
+                    >
+                        Mauvais état
+                    </button>
+                </li>
+                <li role="presentation">
+                    <button
+                        id="bon-etat-tab"
+                        class="fr-tabs__tab fr-icon-thumb-up-line fr-tabs__tab--icon-left"
+                        tabindex="-1"
+                        role="tab"
+                        aria-selected="false"
+                        aria-controls="bon-etat-panel"
+                    >
+                        Bon état
+                    </button>
+                </li>
+            </ul>
+            <div id="mauvais-etat-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="mauvais-etat-tab" tabindex="0">
+                {% include "components/produit/_detail.html" with content=mauvais_etat url_carte=produit.url_carte_mauvais_etat %}
+            </div>
+            <div id="bon-etat-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="bon-etat-tab" tabindex="0">
+                {% include "components/produit/_detail.html" with content=bon_etat url_carte=produit.url_carte_bon_etat %}
+            </div>
+        </div>
+    {% else %}
+    <div class="{% if family %}fr-container{% endif %}">
+        {% include "components/produit/_detail.html" %}
+    </div>
+    {% endif %}
+
+    {% dsfr_accordion_group produit.content_display %}
 </article>
+{% endwith %}
 {% endwith %}
 {% endwith %}
 {% endwith %}

@@ -95,6 +95,7 @@ ALLOWED_HOSTS = [
     *BASE_ALLOWED_HOSTS,
     *decouple.config("ALLOWED_HOSTS", default="", cast=str).split(","),
 ]
+CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in ALLOWED_HOSTS]
 
 
 # Application definition
