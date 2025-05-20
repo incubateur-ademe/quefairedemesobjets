@@ -10,6 +10,7 @@ from acteurs.tasks.airflow_logic.replace_acteur_table_task import (
 from airflow import DAG
 from airflow.operators.bash import BashOperator
 from shared.config.schedules import SCHEDULES
+from shared.config.tags import TAGS
 
 default_args = {
     "owner": "airflow",
@@ -31,6 +32,7 @@ with DAG(
         " (vue exhaustive des acteurs), par la carte (vue des acteurs affichés) et"
         " par l'export des acteurs en open-data."
     ),
+    tags=[TAGS.COMPUTE, TAGS.ACTEURS, TAGS.CARTE, TAGS.OPENDATA, TAGS.DBT],
     schedule=SCHEDULES.DAILY,
     max_active_runs=1,
 ) as dag:

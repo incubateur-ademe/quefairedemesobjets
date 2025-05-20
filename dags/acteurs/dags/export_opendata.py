@@ -7,6 +7,7 @@ from acteurs.tasks.airflow_logic.export_opendata_csv_to_s3_task import (
 from airflow import DAG
 from decouple import config
 from shared.config.schedules import SCHEDULES
+from shared.config.tags import TAGS
 
 ENVIRONMENT = config("ENVIRONMENT", default="development")
 
@@ -29,6 +30,7 @@ with DAG(
         "Ce DAG export les acteurs disponibles en opendata précédemment générés dans la"
         " table `exposure_opendata_acteur` de la base de données."
     ),
+    tags=[TAGS.COMPUTE, TAGS.EXPORT, TAGS.ACTEURS, TAGS.OPENDATA, TAGS.S3],
     params={
         "bucket_name": "lvao-opendata",
         "remote_dir": "acteurs" if ENVIRONMENT == "prod" else f"acteurs-{ENVIRONMENT}",

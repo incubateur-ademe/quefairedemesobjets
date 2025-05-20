@@ -83,6 +83,10 @@ models:
       - name: siret_is_closed
         description: "Information si on sait que le SIRET est fermé"
     config:
+      tags:
+        - intermediate
+        - acteurs
+        - acteur
       materialized: table
   - name: int_acteur_acteur_services
     description: "Acteur Acteur Services model"
@@ -100,6 +104,10 @@ models:
         data_tests:
           - not_null
     config:
+      tags:
+        - intermediate
+        - acteurs
+        - acteur_acteur_services
       materialized: table
     tests:
       - dbt_utils.unique_combination_of_columns:
@@ -123,6 +131,10 @@ models:
         data_tests:
           - not_null
     config:
+      tags:
+        - intermediate
+        - acteurs
+        - acteur_labels
       materialized: table
     tests:
       - dbt_utils.unique_combination_of_columns:
@@ -152,6 +164,10 @@ models:
       - name: revision_existe
         description: "The revision_existe for this table"
     config:
+      tags:
+        - intermediate
+        - acteurs
+        - propositionservice
       materialized: table
     tests:
       - dbt_utils.unique_combination_of_columns:
@@ -174,6 +190,10 @@ models:
         data_tests:
           - not_null
     config:
+      tags:
+        - intermediate
+        - acteurs
+        - propositionservice_sous_categories
       materialized: table
     tests:
       - dbt_utils.unique_combination_of_columns:

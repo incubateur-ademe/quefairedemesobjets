@@ -14,6 +14,7 @@ from compute_acteurs.tasks.airflow_logic import (
     deduplicate_labels_task,
     deduplicate_propositionservices_task,
 )
+from shared.config.tags import TAGS
 from shared.tasks.database_logic.db_tasks import read_data_from_postgres
 
 default_args = {
@@ -40,6 +41,7 @@ dag = DAG(
         " plusieurs sources en cumulant leur services, sources et propositions"
         " services."
     ),
+    tags=[TAGS.COMPUTE, TAGS.ACTEURS, TAGS.CARTE, TAGS.DEPRECATED],
     max_active_runs=1,
     schedule=None,
 )

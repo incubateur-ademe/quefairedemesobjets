@@ -6,7 +6,7 @@ import pytest
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 
-from dags.shared.config import START_DATES
+from dags.shared.config.start_dates import START_DATES
 from dags_unit_tests.e2e.e2e_utils import airflow_init, ti_get
 
 airflow_init()
