@@ -35,7 +35,7 @@ ASSISTANT = {
         cast=str,
     ).split(","),
     "BASE_URL": decouple.config(
-        "ASSISTANT_BASE_URL", default="https://quefairedemesdechets.ademe.local"
+        "ASSISTANT_BASE_URL", default="https://quefairedemesobjets.ademe.local"
     ),
     "POSTHOG_KEY": decouple.config(
         "ASSISTANT_POSTHOG_KEY",
@@ -43,6 +43,7 @@ ASSISTANT = {
         cast=str,
     ),
 }
+CANONICAL_HOST = ASSISTANT.get("BASE_URL").split("://")[1]
 
 # Carte settings
 # --------------
@@ -92,9 +93,6 @@ ALLOWED_HOSTS = [
     *decouple.config("ALLOWED_HOSTS", default="", cast=str).split(","),
 ]
 
-CANONICAL_HOST = decouple.config(
-    "CANONICAL_HOST", default="quefairedemesobjets.ademe.fr", cast=str
-)
 
 # Application definition
 # ----------------------
