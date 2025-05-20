@@ -221,10 +221,19 @@ class Synonyme(AbstractBaseProduit):
     def url(self) -> str:
         return self.get_absolute_url()
 
-    def get_url_carte(self, actions=None, id=None):
+    def get_url_carte(self, actions=None, map_container_id=None):
         carte_settings = self.produit.carte_settings
         if actions:
-            carte_settings.update(action_list=actions, action_displayed=actions, id=id)
+            carte_settings.update(
+                action_list=actions,
+                action_displayed=actions,
+            )
+
+        if map_container_id:
+            carte_settings.update(
+                map_container_id=map_container_id,
+            )
+
         params = urlencode(carte_settings)
         url = reverse("qfdmd:carte", args=[self.slug])
         return f"{url}?{params}"
