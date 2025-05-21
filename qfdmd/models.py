@@ -75,11 +75,12 @@ class ProduitPage(Page):
             return self.consigne
 
         # Traverse up the parent pages
-        parent = self.get_parent()
-        while hasattr(parent, "consigne"):
-            if parent.consigne:
-                return parent.consigne
-            parent = parent.get_parent()
+        for ancestor in reversed(self.get_ancestors(inclusive=True)):
+            try:
+                if ancestor.specific.consigne:
+                    return ancestor.specific.consigne
+            except AttributeError:
+                pass
 
         # Return None or an empty string if no consigne is found
         return None
@@ -107,18 +108,28 @@ class ProduitPage(Page):
 
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)
-        produit = self.produit
-        synonyme = self.synonyme
+        context.update(is_synonyme=not (self.produit or self.synonyme))
 
-        while context.get("object") is None:
+        for ancestor in reversed(self.get_ancestors(inclusive=True)):
+            produit = ancestor.specific.produit
+            synonyme = ancestor.specific.synonyme
+
             if produit:
-                context["object"] = self
+                context.update(
+                    bon_etat=produit.bon_etat,
+                    mauvais_etat=produit.mauvais_etat,
+                    object=produit,
+                    produit=produit,
+                )
+                break
             elif synonyme:
-                context["object"] = synonyme
-
-            # TODO: prevent attribute error here
-            produit = self.get_parent().produit
-            synonyme = self.get_parent().synonyme
+                context.update(
+                    object=synonyme,
+                    produit=synonyme.produit,
+                    bon_etat=synonyme.bon_etat,
+                    mauvais_etat=synonyme.mauvais_etat,
+                )
+                break
 
         return context
 
@@ -183,6 +194,29 @@ class AbstractBaseProduit(NomAsNaturalKeyModel):
 
 @register_snippet
 class Produit(index.Indexed, AbstractBaseProduit):
+    @cached_property
+    def bon_etat(self) -> str:
+        if self.qu_est_ce_que_j_en_fais_bon_etat:
+            return self.qu_est_ce_que_j_en_fais_bon_etat
+        try:
+            return self.get_etats_descriptions()[1]
+        except (KeyError, TypeError):
+            return ""
+
+    @cached_property
+    def mauvais_etat(self) -> str:
+        if self.qu_est_ce_que_j_en_fais_mauvais_etat:
+            return self.qu_est_ce_que_j_en_fais_mauvais_etat
+        try:
+            return self.get_etats_descriptions()[0]
+        except (KeyError, TypeError):
+            return ""
+
+    id = models.IntegerField(
+        primary_key=True,
+        help_text="Correspond à l'identifiant ID défini dans les données "
+        "<i>Que Faire</i>.",
+    )
     nom = models.CharField(
         unique=True,
         verbose_name="Libellé",
@@ -202,7 +236,7 @@ class Produit(index.Indexed, AbstractBaseProduit):
     slug = models.CharField(blank=True, help_text="Slug - ne pas modifier")
     infotri = StreamField([("image", ImageBlock())], blank=True)
 
-    panels = [FieldPanel("infotri")]
+    # panels = [FieldPanel("infotri")]
 
     def __str__(self):
         return f"{self.pk} - {self.nom}"
