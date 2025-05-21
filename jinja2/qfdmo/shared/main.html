@@ -26,8 +26,9 @@
         ss-cat-object-autocomplete:optionSelected->search-solution-form#checkSsCatObjetErrorForm
         {% block form_controller_data_actions %}{% endblock form_controller_data_actions %}"
         class="
+        qf-rounded-lg qf-border qf-border-solid qf-border-grey-900
         qf-group
-        qf-h-full md:qf-overflow-hidden
+        qf-h-full qf-overflow-hidden
         qf-m-0
         qf-flex qf-flex-col qf-flex-auto
         qf-relative"
@@ -39,11 +40,12 @@
         {% endif %}
         <section class="map-grid">
             <header
-                class="{% block header_classes %}qf-z-40{% endblock header_classes %}"
+                {# The z-index below can impact the shadow over#}
+                class="{% block header_classes %}qf-z-30{% endblock header_classes %}
+                    qf-bg-white qf-border-solid qf-border-b-grey-900 qf-border-0 qf-shadow-lg qf-border-b"
             >
                 <div
                     class="
-                    qf-bg-white
                     qf-flex qf-flex-row sm:qf-items-center"
                 >
                 {% block form_header %}
