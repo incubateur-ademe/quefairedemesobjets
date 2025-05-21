@@ -32,8 +32,7 @@ jobs:
 
     - name: Build the documentation
       run: |
-        cd docs
-        poetry run make html
+        poetry run make build-docs
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4
