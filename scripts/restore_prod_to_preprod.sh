@@ -31,8 +31,10 @@ tar --extract --verbose --file="${ARCHIVE_NAME}"
 
 # 8. Restore the data:
 #   Drop and create the public schema
-psql -d "${PREPROD_DATABASE_URL}" -c "DROP SCHEMA IF EXISTS public CASCADE;"
 psql -d "${PREPROD_DATABASE_URL}" -c "CREATE SCHEMA IF NOT EXISTS public;"
+for table in $(psql "${PREPROD_DATABASE_URL}" -t -c "SELECT \"tablename\" FROM pg_tables WHERE schemaname='public'"); do
+     psql "${PREPROD_DATABASE_URL}" -c "DROP TABLE IF EXISTS \"${table}\" CASCADE;"
+done
 
 #   Create extensions because they are not restored by pg_restore
 psql -d "${PREPROD_DATABASE_URL}" -f scripts/sql/create_extensions.sql
