@@ -15,7 +15,8 @@ CARTE = {
     "partage": {
         "titre": "{NOM} : L’ADEME partage ses bonnes adresses",
         "corps": "J’ai trouvé une bonne adresse {NOM} grâce à l’ADEME : {URL}",
-    }
+    },
+    "ajouter_un_lieu": "Ajouter un lieu sur la carte",
 }
 
 ASSISTANT = {

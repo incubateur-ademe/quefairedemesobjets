@@ -23,6 +23,7 @@ class ActeurController extends Controller<HTMLElement> {
 
   initialize() {
     this.element.style.transition = this.initialTransition;
+    this.#setTranslateY(0)
     // this.element.style.height = `calc(100svh - 20%)`
     this.element.addEventListener("mousedown", this.#dragStart.bind(this))
     this.element.addEventListener('touchstart', this.#dragStart.bind(this));
@@ -53,10 +54,14 @@ class ActeurController extends Controller<HTMLElement> {
     this.element.dataset.exitAnimationEnded = "false"
     this.panelHeight = this.element.offsetHeight
 
-    if (this.hidden) {
-      this.#setTranslateY(-1 * this.initialTranslateY)
-    } else {
-      this.hidden = false
+    if (window.matchMedia('screen and (max-width:768px)').matches) {
+      this.element.scrollIntoView()
+
+      if (this.hidden) {
+        this.#setTranslateY(-1 * this.initialTranslateY)
+      } else {
+        this.hidden = false
+      }
     }
   }
 
@@ -101,12 +106,14 @@ class ActeurController extends Controller<HTMLElement> {
   }
 
   #setTranslateY(value: number) {
-    let nextValue = value
-    if (Math.abs(value) < this.initialTranslateY) {
-      nextValue = -1 * this.initialTranslateY
-    }
+    if (window.matchMedia('screen and (max-width:768px)').matches) {
+      let nextValue = value
+      if (Math.abs(value) < this.initialTranslateY) {
+        nextValue = -1 * this.initialTranslateY
+      }
 
-    this.element.style.transform = `translateY(${nextValue}px)`;
+      this.element.style.transform = `translateY(${nextValue}px)`;
+    }
   }
 
   #dragMove(event: MouseEvent | TouchEvent) {
@@ -156,7 +163,9 @@ class ActeurController extends Controller<HTMLElement> {
     const elementsAboveContentHeight = Math.abs(mapContainer.getBoundingClientRect().y - this.contentTarget.getBoundingClientRect().y)
     const currentPanelHeight = mapContainer.offsetHeight
     const nextContentHeight = currentPanelHeight - elementsAboveContentHeight - 50
+
     console.log({ nextContentHeight, currentPanelHeight, elementsAboveContentHeight, })
+
     this.contentTarget.style.maxHeight = `${nextContentHeight}px`
   }
 }

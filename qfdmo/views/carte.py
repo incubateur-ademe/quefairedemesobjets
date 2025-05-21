@@ -44,10 +44,11 @@ class CarteSearchActeursView(SearchActeursView):
 class ProductCarteView(CarteSearchActeursView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        print(f"{context.get('request')}")
-        # carte_config = CarteConfig(no_branding=True)
+        carte_config, _ = CarteConfig.objects.get_or_create(
+            slug="product", no_branding=True
+        )
         context.update(
-            # carte_config=carte_config,
+            carte_config=carte_config,
             map_container_id=self.request.GET.get("map_container_id"),
         )
         return context
