@@ -1,10 +1,17 @@
 {# Détail de l'adresse #}
-{# Barre visible en mobile uniquement #}
+{# Handle visible only on mobile. It is used to drag the panel #}
 <span
     class="md:qf-hidden qf-block qf-rounded-full qf-w-12w qf-h-1v qf-bg-[#DFDFDF] qf-my-2w qf-mx-auto cursor-grab"
 ></span>
 {# Content #}
-<div class="qf-flex-grow qf-relative">
+{#
+TODO: understand why overflow-hidden is needed here.
+It prevents the handle to be hidden by the div content
+#}
+<div
+    class="qf-flex-grow qf-relative qf-overflow-auto"
+    data-draggable-target="content"
+>
     {# Close button #}
     <span
         class="
@@ -16,5 +23,5 @@
         data-action="click->draggable#hide"
     >
     </span>
-    <turbo-frame id="acteur-detail"></turbo-frame>
+    <turbo-frame id="acteur-detail" data-draggable-target="frame"></turbo-frame>
 </div>

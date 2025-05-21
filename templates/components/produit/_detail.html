@@ -14,11 +14,11 @@
             id="{{ id }}"
             allow="geolocation; clipboard-write"
             class="
-            qf-overflow-scroll
+            qf-overflow-hidden
             max-md:qf-aspect-[9/20] qf-max-h-[90vh] md:qf-max-h-[90svh]
             md:qf-max-h-[90vh] md:qf-h-[50em] qf-w-full"
-            title="Carte Longue Vie Aux Objets - Où l'apporter"
-            src="{{ url_carte|default:produit.sous_categories.first.url_carte }}"></turbo-frame>
+            src="{{ url_carte|default:produit.sous_categories.first.url_carte }}">
+        </turbo-frame>
     </section>
     {% endif %}
 </div>

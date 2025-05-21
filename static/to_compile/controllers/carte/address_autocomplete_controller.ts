@@ -68,9 +68,10 @@ export default class extends AutocompleteController {
       this.inputTarget.value = label
       if (longitude) this.longitudeTarget.value = longitude
       if (latitude) this.latitudeTarget.value = latitude
-      // Call outlet
+      // TODO: Explore if better to call outlet instead of relying on events.
       this.dispatch("optionSelected")
     }
+    // this.#saveLocationInSessionStorage()
     this.hideAutocompleteList()
   }
 
@@ -94,7 +95,6 @@ export default class extends AutocompleteController {
       this.longitudeTarget.value =
         data.features[0].geometry.coordinates[0]
 
-      this.#saveLocationInSessionStorage()
       this.#hideInputError()
       this.hideSpinner()
       // Call outlet
@@ -117,7 +117,6 @@ export default class extends AutocompleteController {
     const label = sessionStorage.getItem("cityName")
     const latitude = sessionStorage.getItem("latitude")
     const longitude = sessionStorage.getItem("longitude")
-
 
     if (label && latitude && longitude) {
       this.inputTarget.value = label
