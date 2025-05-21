@@ -2,17 +2,28 @@ import { Controller } from "@hotwired/stimulus"
 import { clearActivePinpoints, removeHash } from "../../js/helpers"
 
 class ActeurController extends Controller<HTMLElement> {
+  static targets = ["content", "frame"]
   isDragging = false
   panelHeight: number
   startY: number
   currentTranslateY: number
+  hidden = true
   startTranslateY = 0
   initialTranslateY = 140
   initialTransition = 'transform ease 0.5s';
+  // snapPoints defines the area in percentage of the parent where the
+  // panel will adhere with magnetism.
+  // When the user drags the panel close to a snapPoint, the panel will
+  // stop at this point. This allows to control the panel's position precisely
+  // 0 = fully open, 1 = fully closed
+  snapPoints = [0.2, 0.5, 0.8];
+
+  declare readonly contentTarget: HTMLElement
   declare readonly frameTarget: HTMLElement
 
   initialize() {
     this.element.style.transition = this.initialTransition;
+    // this.element.style.height = `calc(100svh - 20%)`
     this.element.addEventListener("mousedown", this.#dragStart.bind(this))
     this.element.addEventListener('touchstart', this.#dragStart.bind(this));
 
@@ -40,13 +51,13 @@ class ActeurController extends Controller<HTMLElement> {
     }
 
     this.element.dataset.exitAnimationEnded = "false"
-
-    if (window.matchMedia('screen and (max-width:768px)').matches) {
-      this.element.scrollIntoView()
-    }
-
     this.panelHeight = this.element.offsetHeight
-    this.#setTranslateY(-1 * this.initialTranslateY)
+
+    if (this.hidden) {
+      this.#setTranslateY(-1 * this.initialTranslateY)
+    } else {
+      this.hidden = false
+    }
   }
 
   hide() {
@@ -62,6 +73,7 @@ class ActeurController extends Controller<HTMLElement> {
     )
     clearActivePinpoints()
     this.#setTranslateY(-1 * this.initialTranslateY)
+    this.hidden = true
   }
 
   #showHidePanelWhenTurboFrameLoad(event) {
@@ -118,16 +130,13 @@ class ActeurController extends Controller<HTMLElement> {
     this.element.style.transition = this.initialTransition;
     this.element.classList.remove("qf-select-none")
 
-    // Define snap points (0 = fully open, 1 = fully closed)
-    const snapPoints = [0.2, 0.5, 1];
-
     // Current drag ratio
     const ratio = this.currentTranslateY / this.panelHeight;
 
     // Find closest snap point
-    let closest = snapPoints[0];
+    let closest = this.snapPoints[0];
     let minDiff = Math.abs(ratio - closest);
-    for (const point of snapPoints) {
+    for (const point of this.snapPoints) {
       const diff = Math.abs(ratio - point);
       if (diff < minDiff) {
         minDiff = diff;
@@ -138,6 +147,17 @@ class ActeurController extends Controller<HTMLElement> {
     // Snap to the closest point
     const snapY = -1 * closest * this.panelHeight;
     this.#setTranslateY(snapY);
+    this.#resizeContent()
+    window.dispatchEvent(new Event("resize"))
+  }
+
+  #resizeContent() {
+    const mapContainer  = this.element.parentElement!
+    const elementsAboveContentHeight = Math.abs(mapContainer.getBoundingClientRect().y - this.contentTarget.getBoundingClientRect().y)
+    const currentPanelHeight = mapContainer.offsetHeight
+    const nextContentHeight = currentPanelHeight - elementsAboveContentHeight - 50
+    console.log({ nextContentHeight, currentPanelHeight, elementsAboveContentHeight, })
+    this.contentTarget.style.maxHeight = `${nextContentHeight}px`
   }
 }
 

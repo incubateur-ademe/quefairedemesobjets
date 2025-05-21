@@ -27,7 +27,7 @@
         {% block form_controller_data_actions %}{% endblock form_controller_data_actions %}"
         class="
         qf-group
-        qf-h-full qf-max-h-svh qf-max-h-screen md:qf-overflow-hidden
+        qf-h-full md:qf-overflow-hidden
         qf-m-0
         qf-flex qf-flex-col qf-flex-auto
         qf-relative"
@@ -37,7 +37,7 @@
         {% if map_container_id %}
             <input type="hidden" name="map_container_id" value="{{ map_container_id}}">
         {% endif %}
-        <section class="map-grid qf-overflow-hidden">
+        <section class="map-grid">
             <header
                 class="{% block header_classes %}qf-z-40{% endblock header_classes %}"
             >
@@ -94,16 +94,15 @@
                 qf-overflow-auto
                 qf-bg-white
                 qf-px-2w
-                max-md:qf-fixed
-                max-md:qf-top-[100svh]
+                max-md:qf-absolute
                 max-md:qf-top-full max-md:qf-left-0 max-md:qf-right-0
                 max-md:qf-drop-shadow-[0_0_100px_rgba(0,0,0,0.3)]
                 max-md:qf-rounded-t-xl
+                max-md:qf-h-full
                 max-md:transition-transform max-md:duration-500
                 aria-[hidden=true]:max-md:qf-animate-out
                 aria-[hidden=true]:max-md:qf-fade-out
-                aria-[hidden=true]:data-[exit-animation-ended=true]:qf-hidden
-                aria-[hidden=false]:max-md:qf-h-[80svh]"
+                aria-[hidden=true]:data-[exit-animation-ended=true]:qf-hidden"
             tabindex="0"
             id="acteurDetailsPanel"
             aria-hidden="true"
