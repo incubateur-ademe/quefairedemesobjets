@@ -6,7 +6,7 @@
 {% block analytics_action %}produitPageView{% endblock %}
 
 {% block title %}
-<title>{{ object.nom }} | {{ seo.title }}</title>
+<title>{{ page.title }} | {{ seo.title }}</title>
 {% endblock title %}
 
 {% block extra_js %}
@@ -14,15 +14,11 @@
 
 {% block meta_description %}{{ object.meta_description|default:block.super }}{% endblock %}
 
-{% if page.family %}
-{% block main_classes %}{% endblock %}
-{% endif %}
-
+{% block main_classes %}
+{% if not is_synonyme %}{{ block.super }}{% endif %}
+{% endblock main_classes %}
 
 {% block main %}
-{% with produit=object.produit %}
-{% with bon_etat=object.bon_etat %}
-{% with mauvais_etat=object.mauvais_etat %}
 {% with family=page.family %}
 
 <article
@@ -30,10 +26,10 @@
     qf-gap-2w max-lg:qf-pr-0 max-xl:qf-pr-6w"
 >
     {# TODO: extract in a component #}
-    <header class="qf-mt-3w md:qf-mt-5w qf-flex qf-flex-col qf-gap-2w {% if family %}qf-bg-green-menthe-975-75 qf-py-2w fr-container{% endif %}">
-        {% if family %}
+    <header class="qf-mt-3w md:qf-mt-5w qf-flex qf-flex-col qf-gap-2w {% if family and is_synonyme %}qf-bg-green-menthe-975-75 qf-py-2w fr-container{% endif %}">
+        {% if family and is_synonyme %}
         <div class="qf-flex qf-flex-col">
-            <strong class="qf-text-3xl">Que faire de mon {{ page.title }}</strong>
+            <strong class="qf-text-3xl">Que faire de {% if page.gender|lower == "f" %}ma{% else %}mon{% endif %} {{ page.title|lower }}</strong>
             Les recommandations ci-dessous sont celles de la catégorie :
         </div>
         <h1 class="qf-m-0 qf-text-5xl qf-text-green-menthe-main-548">
@@ -45,13 +41,13 @@
 
         {% else %}
         <h1 class="qf-m-0">
-            {{ object.nom|capfirst }}
+            {{ page.title|capfirst }}
         </h1>
         {% include "components/produit/_infotri.html" %}
         {% endif %}
     </header>
     {% if bon_etat and mauvais_etat %}
-        <div class="fr-tabs">
+        <div class="fr-tabs {% if is_synonyme %}fr-container qf-mx-auto{% endif %}">
             <ul class="fr-tabs__list" role="tablist" aria-label="État du produit {{ produit }}">
                 <li role="presentation">
                     <button
@@ -86,15 +82,13 @@
             </div>
         </div>
     {% else %}
-    <div class="{% if family %}fr-container{% endif %}">
-        {% include "components/produit/_detail.html" %}
+    <div class="{% if is_synonyme %}fr-container{% endif %}">
     </div>
     {% endif %}
 
+    <div class="{% if is_synonyme %}fr-container mx-auto{% endif %}">
     {% dsfr_accordion_group produit.content_display %}
+    </div>
 </article>
-{% endwith %}
-{% endwith %}
-{% endwith %}
 {% endwith %}
 {% endblock main %}

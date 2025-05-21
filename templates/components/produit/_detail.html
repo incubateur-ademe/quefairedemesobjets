@@ -6,7 +6,7 @@
             {{ page.compiled_consigne }}
         {% else %}
         <p class="qf-text-base md:qf-text-lg">
-            {{ content|default:produit.qu_est_ce_que_j_en_fais|safe }}
+            {{ content|safe }}
         </p>
         {% endif %}
     </section>
