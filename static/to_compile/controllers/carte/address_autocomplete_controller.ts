@@ -114,6 +114,10 @@ export default class extends AutocompleteController {
   }
 
   #fetchLocationFromSessionStorage() {
+    if (this.inputTarget.value || this.longitudeTarget.value || this.latitudeTarget.value) {
+      return
+    }
+
     const label = sessionStorage.getItem("cityName")
     const latitude = sessionStorage.getItem("latitude")
     const longitude = sessionStorage.getItem("longitude")
