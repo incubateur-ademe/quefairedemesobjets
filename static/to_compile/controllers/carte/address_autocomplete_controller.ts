@@ -71,7 +71,7 @@ export default class extends AutocompleteController {
       // TODO: Explore if better to call outlet instead of relying on events.
       this.dispatch("optionSelected")
     }
-    // this.#saveLocationInSessionStorage()
+    this.#saveLocationInSessionStorage()
     this.hideAutocompleteList()
   }
 

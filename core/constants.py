@@ -17,6 +17,7 @@ CARTE = {
         "corps": "J’ai trouvé une bonne adresse {NOM} grâce à l’ADEME : {URL}",
     },
     "ajouter_un_lieu": "Ajouter un lieu sur la carte",
+    "nouvelle_recherche_dans_cette_zone": "Nouvelle recherche dans cette zone",
 }
 
 ASSISTANT = {

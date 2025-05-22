@@ -23,7 +23,7 @@ class ActeurController extends Controller<HTMLElement> {
 
   initialize() {
     this.element.style.transition = this.initialTransition;
-    this.#setTranslateY(0)
+    // this.#setTranslateY(0)
     // this.element.style.height = `calc(100svh - 20%)`
     this.element.addEventListener("mousedown", this.#dragStart.bind(this))
     this.element.addEventListener('touchstart', this.#dragStart.bind(this));
@@ -55,7 +55,7 @@ class ActeurController extends Controller<HTMLElement> {
     this.panelHeight = this.element.offsetHeight
 
     if (window.matchMedia('screen and (max-width:768px)').matches) {
-      this.element.scrollIntoView()
+      // this.element.scrollIntoView()
 
       if (this.hidden) {
         this.#setTranslateY(-1 * this.initialTranslateY)
@@ -154,15 +154,19 @@ class ActeurController extends Controller<HTMLElement> {
     // Snap to the closest point
     const snapY = -1 * closest * this.panelHeight;
     this.#setTranslateY(snapY);
-    this.#resizeContent()
-    window.dispatchEvent(new Event("resize"))
+
+    this.element.addEventListener(
+      "transitionend",
+      this.#resizeContent.bind(this),
+      { once: true },
+    )
   }
 
   #resizeContent() {
-    const mapContainer  = this.element.parentElement!
-    const elementsAboveContentHeight = Math.abs(mapContainer.getBoundingClientRect().y - this.contentTarget.getBoundingClientRect().y)
+    const mapContainer = this.element.parentElement!
+    const elementsAboveContentHeight = Math.abs(mapContainer.getBoundingClientRect().top - this.contentTarget.getBoundingClientRect().top)
     const currentPanelHeight = mapContainer.offsetHeight
-    const nextContentHeight = currentPanelHeight - elementsAboveContentHeight - 50
+    const nextContentHeight = currentPanelHeight - elementsAboveContentHeight
 
     console.log({ nextContentHeight, currentPanelHeight, elementsAboveContentHeight, })
 
