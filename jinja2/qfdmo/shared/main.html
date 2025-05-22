@@ -38,7 +38,7 @@
         {% if map_container_id %}
             <input type="hidden" name="map_container_id" value="{{ map_container_id}}">
         {% endif %}
-        <section class="map-grid">
+        <section class="map-grid qf-relative">
             <header
                 {# The z-index below can impact the shadow over#}
                 class="{% block header_classes %}qf-z-30{% endblock header_classes %}
@@ -56,7 +56,6 @@
             <main
                 class="
                 qf-flex
-                max-md:qf-h-main-svh
                 {% if is_digital %}
                 {# Is useful for digital view so that the users can scroll in the results #}
                 qf-overflow-auto
@@ -91,13 +90,12 @@
             {# Part of this tag' style is defined in qfdmo.css because it would have been a bit unreadable as tailwind classes #}
             <aside class="
                 md:qf-relative qf-z-30
-                aria-[hidden=false]:qf-flex qf-hidden qf-flex-col
-                {% if is_carte %}md:qf-h-[calc(100vh_-_120px)]{% else %}md:qf-h-[calc(100vh_-_250px)]{% endif %}
+                aria-[hidden=false]:qf-block qf-hidden qf-flex-col
+                {% if not is_carte %}md:qf-h-[calc(100vh_-_250px)]{% endif %}
                 qf-overflow-auto
                 qf-bg-white
-                qf-px-2w
                 max-md:qf-absolute
-                max-md:qf-top-full max-md:qf-left-0 max-md:qf-right-0
+                max-md:qf-top-full max-md:qf-bottom-0 max-md:qf-left-0 max-md:qf-right-0
                 max-md:qf-drop-shadow-[0_0_100px_rgba(0,0,0,0.3)]
                 max-md:qf-rounded-t-xl
                 max-md:qf-h-full
@@ -108,7 +106,7 @@
             tabindex="0"
             id="acteurDetailsPanel"
             aria-hidden="true"
-            data-controller="draggable"
+            data-controller="acteur-details"
             >
                 {% include "qfdmo/carte/panels/acteur_detail.html" %}
             </aside>

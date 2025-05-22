@@ -10,7 +10,7 @@ import AddressAutocompleteController from "../controllers/carte/address_autocomp
 import MapController from "../controllers/carte/map_controller"
 import SearchSolutionFormController from "../controllers/carte/search_solution_form_controller"
 import SsCatObjectAutocompleteController from "../controllers/carte/ss_cat_object_autocomplete_controller"
-import DraggableController from "../controllers/carte/draggable"
+import ActeurDetailsController from "../controllers/carte/acteur_details"
 
 
 window.stimulus = Application.start()
@@ -22,6 +22,6 @@ stimulus.register("analytics", AnalyticsController)
 stimulus.register("autocomplete", GenericAutocompleteController)
 stimulus.register("copy", CopyController)
 stimulus.register("scroll", ScrollController)
-stimulus.register("draggable", DraggableController)
+stimulus.register("acteur-details", ActeurDetailsController)
 
 Turbo.session.drive = false

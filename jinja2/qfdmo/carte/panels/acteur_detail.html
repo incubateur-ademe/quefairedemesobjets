@@ -4,13 +4,9 @@
     class="md:qf-hidden qf-block qf-rounded-full qf-w-12w qf-h-1v qf-bg-[#DFDFDF] qf-my-2w qf-mx-auto cursor-grab"
 ></span>
 {# Content #}
-{#
-TODO: understand why overflow-hidden is needed here.
-It prevents the handle to be hidden by the div content
-#}
 <div
-    class="qf-flex-grow qf-relative qf-overflow-auto"
-    data-draggable-target="content"
+    class="qf-flex-grow qf-relative qf-overflow-auto qf-px-2w"
+    data-acteur-details-target="content"
 >
     {# Close button #}
     <span
@@ -21,11 +17,10 @@ It prevents the handle to be hidden by the div content
         qf-flex qf-justify-end
         qf-sticky qf-left-full qf-top-0
         qf-z-10
-        qf-mr-1w
         qf-bg-white qf-p-1v qf-rounded-full
         qf-text-blue-france-sun-113-625"
-        data-action="click->draggable#hide"
+        data-action="click->acteur-details#hide"
     >
     </span>
-    <turbo-frame id="acteur-detail" data-draggable-target="frame"></turbo-frame>
+    <turbo-frame id="acteur-detail" data-acteur-details-target="frame"></turbo-frame>
 </div>
