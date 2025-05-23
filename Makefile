@@ -128,11 +128,11 @@ extract-dsfr:
 
 .PHONY: drop-schema-public
 drop-schema-public:
-	docker compose exec lvao-db psql -U qfdmo -d qfdmo -c "DROP SCHEMA IF EXISTS public CASCADE;"
+	docker compose exec warehouse-db psql -U qfdmo -d qfdmo -c "DROP SCHEMA IF EXISTS public CASCADE;"
 
 .PHONY: create-schema-public
 create-schema-public:
-	docker compose exec lvao-db psql -U qfdmo -d qfdmo -c "CREATE SCHEMA IF NOT EXISTS public;"
+	docker compose exec warehouse-db psql -U qfdmo -d qfdmo -c "CREATE SCHEMA IF NOT EXISTS public;"
 
 .PHONY: dump-production
 dump-production:
