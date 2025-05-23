@@ -12,6 +12,7 @@ local_iframe.html
 
 # DB
 pgdata
+public-pgdata
 
 # JS
 static/collected

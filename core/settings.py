@@ -279,7 +279,7 @@ default_settings = {
 DB_READONLY = decouple.config(
     "DB_READONLY",
     cast=str,
-    default="postgres://fakeusername:fakepassword@postgres:5432/database",
+    default="postgres://qfdmo:qfdmo@localhost:8765/qfdmo_public",  # pragma: allowlist secret  # noqa: E501
 )
 readonly_settings = dj_database_url.parse(DB_READONLY)
 
@@ -287,6 +287,10 @@ DATABASES = {
     "default": default_settings,
     "readonly": readonly_settings,
 }
+
+# Database Router
+# --------------
+DATABASE_ROUTERS = ["core.db_router.DatabaseRouter"]
 
 CONN_HEALTH_CHECKS = True
 CONN_MAX_AGE = decouple.config("CONN_MAX_AGE", cast=int, default=0)
