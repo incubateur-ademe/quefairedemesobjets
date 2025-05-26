@@ -1,8 +1,13 @@
 {% extends base_template %}
 
 {% block content %}
+{% with map_container_id=request.GET.map_container_id %}
 <div class="fr-container qf-py-2w">
-    <turbo-frame id="acteur-detail">
+    <turbo-frame
+        {% if map_container_id %}id="acteur-detail:{{ map_container_id }}"
+        {% else %}id="acteur-detail"
+        {% endif %}
+    >
         <article>
             <header class="qf-mb-2w">
                 <div>
@@ -23,4 +28,5 @@
         </article>
     </turbo-frame>
 </div>
+{% endwith %}
 {% endblock content %}

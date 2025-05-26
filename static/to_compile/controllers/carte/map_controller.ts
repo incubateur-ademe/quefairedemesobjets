@@ -3,6 +3,7 @@ import debounce from "lodash/debounce"
 import { removeHash } from "../../js/helpers"
 import { SolutionMap } from "../../js/solution_map"
 import { ActorLocation, DisplayedActeur } from "../../js/types"
+import SearchFormController from "./search_solution_form_controller"
 
 export class Actor implements DisplayedActeur {
   uuid: string
@@ -79,6 +80,12 @@ class MapController extends Controller<HTMLElement> {
 
   hideSearchInZoneButton() {
     this.searchInZoneButtonTarget.classList.add("qf-hidden")
+  }
+
+  setActiveActeur(uuid: string) {
+    const solutionForm: SearchFormController = this.application.getControllerForElementAndIdentifier(
+      this.element.closest("#search_form")!, "search-solution-form") as SearchFormController
+    solutionForm.displayActeur(uuid)
   }
 }
 export default MapController

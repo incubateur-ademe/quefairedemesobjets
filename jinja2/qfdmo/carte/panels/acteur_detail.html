@@ -22,5 +22,5 @@
         data-action="click->acteur-details#hide"
     >
     </span>
-    <turbo-frame id="acteur-detail" data-acteur-details-target="frame"></turbo-frame>
+    <turbo-frame id="acteur-detail{% if request.GET.map_container_id %}:{{ request.GET.map_container_id}}{% endif %}" data-acteur-details-target="frame"></turbo-frame>
 </div>

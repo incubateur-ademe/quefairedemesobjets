@@ -9,3 +9,12 @@ def get_direction(request, is_carte=False):
     if direction not in [d["code"] for d in get_directions()]:
         direction = default_direction
     return direction
+
+
+def generate_google_maps_itineraire_url(latitude, longitude, displayed_acteur):
+    return (
+        "https://www.google.com/maps/dir/?api=1&origin="
+        f"{latitude},{longitude}"
+        f"&destination={displayed_acteur.latitude},"
+        f"{displayed_acteur.longitude}&travelMode=WALKING"
+    )

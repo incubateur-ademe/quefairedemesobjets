@@ -168,8 +168,6 @@ class ActeurController extends Controller<HTMLElement> {
     const currentPanelHeight = mapContainer.offsetHeight
     const nextContentHeight = currentPanelHeight - elementsAboveContentHeight
 
-    console.log({ nextContentHeight, currentPanelHeight, elementsAboveContentHeight, })
-
     this.contentTarget.style.maxHeight = `${nextContentHeight}px`
   }
 }

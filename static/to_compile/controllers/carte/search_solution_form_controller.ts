@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 import * as Turbo from "@hotwired/turbo"
 import { clearActivePinpoints, removeHash } from "../../js/helpers"
 
-export default class extends Controller<HTMLElement> {
+class SearchFormController extends Controller<HTMLElement> {
   #selectedOption: string = ""
   static targets = [
     "jai",
@@ -91,26 +91,14 @@ export default class extends Controller<HTMLElement> {
 
   declare readonly hasCarteTarget: boolean
 
-  static values = { isIframe: Boolean }
+  static values = { mapContainerId: String, isIframe: Boolean }
   declare readonly isIframeValue: boolean
+  declare readonly mapContainerIdValue: string
 
   connect() {
     this.displayActionList()
-    window.addEventListener("hashchange", this.#setActiveActeur.bind(this))
-    if (window.location.hash) {
-      this.#setActiveActeur(null)
-    }
   }
 
-  #setActiveActeur(event: HashChangeEvent | null) {
-    const location = event ? new URL(event.newURL) : window.location
-    const uuid = location.hash.substring(1)
-
-    if (uuid) {
-      this.displayActeur(uuid)
-      this.dispatch("captureInteraction")
-    }
-  }
 
   activeReparerFilters(activate: boolean = true) {
     // Carte mode
@@ -186,18 +174,26 @@ export default class extends Controller<HTMLElement> {
   }
 
   displayActeur(uuid: string) {
+    this.dispatch("captureInteraction")
     const latitude = this.latitudeInputTarget.value
     const longitude = this.longitudeInputTarget.value
-
     const params = new URLSearchParams()
     params.set("direction", this.#selectedOption)
     params.set("latitude", latitude)
     params.set("longitude", longitude)
+    let frame = "acteur-detail"
+
+    if (this.mapContainerIdValue !== "mapContainer") {
+      params.set("map_container_id", this.mapContainerIdValue)
+      frame += `:${this.mapContainerIdValue}`
+    }
+
     if (this.hasCarteTarget) {
       params.set("carte", "1")
     }
+
     const acteurDetailPath = `/adresse_details/${uuid}?${params.toString()}`
-    Turbo.visit(acteurDetailPath, { frame: "acteur-detail" })
+    Turbo.visit(acteurDetailPath, { frame })
   }
 
   displayActionList() {
@@ -439,3 +435,5 @@ export default class extends Controller<HTMLElement> {
     )
   }
 }
+
+export default SearchFormController

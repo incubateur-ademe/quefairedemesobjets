@@ -175,7 +175,7 @@ export class SolutionMap {
   #onClickMarker(event: L.LeafletEvent) {
     clearActivePinpoints()
     event.target._icon.classList.add(ACTIVE_PINPOINT_CLASSNAME)
-    window.location.hash = event.target._uuid
+    this.#controller.setActiveActeur(event.target._uuid)
   }
 
   #manageZoomControl() {

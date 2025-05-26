@@ -20,7 +20,7 @@ from django.views.decorators.http import require_GET
 from django.views.generic.edit import FormView
 
 from core.jinja2_handler import distance_to_acteur
-from core.utils import get_direction
+from core.utils import generate_google_maps_itineraire_url, get_direction
 from qfdmo.forms import FormulaireForm
 from qfdmo.geo_api import bbox_from_list_of_geojson, retrieve_epci_geojson
 from qfdmo.leaflet import (
@@ -662,10 +662,9 @@ def acteur_detail(request, uuid):
 
     if latitude and longitude and not displayed_acteur.is_digital:
         context.update(
-            itineraire_url="https://www.google.com/maps/dir/?api=1&origin="
-            f"{latitude},{longitude}"
-            f"&destination={displayed_acteur.latitude},"
-            f"{displayed_acteur.longitude}&travelMode=WALKING"
+            itineraire_url=generate_google_maps_itineraire_url(
+                latitude, longitude, displayed_acteur
+            )
         )
 
     return render(request, "qfdmo/acteur.html", context)
