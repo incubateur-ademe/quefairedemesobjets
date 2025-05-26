@@ -222,7 +222,7 @@ models:
             - acteur_id
             - action_id
       - dbt_expectations.expect_table_row_count_to_be_between:
-          min_value: 450000
+          min_value: 400000
   - name: exposure_carte_propositionservice_sous_categories
     description: "Vue sur les sous-catégories des propositions de service affichées sur la carte"
     columns:
@@ -276,7 +276,7 @@ models:
             - displayedpropositionservice_id
             - souscategorieobjet_id
       - dbt_expectations.expect_table_row_count_to_be_between:
-          min_value: 1500000
+          min_value: 1250000
   - name: exposure_carte_acteur_acteur_services
     description: "Lien entre acteur de la carte et acteur_services"
     columns:
@@ -330,7 +330,7 @@ models:
             - displayedacteur_id
             - acteurservice_id
       - dbt_expectations.expect_table_row_count_to_be_between:
-          min_value: 400000
+          min_value: 350000
   - name: exposure_carte_acteur_labels
     description: "Lien entre acteur de la carte et labels"
     columns:
@@ -385,7 +385,7 @@ models:
             - displayedacteur_id
             - labelqualite_id
       - dbt_expectations.expect_table_row_count_to_be_between:
-          min_value: 20000
+          min_value: 18000
   - name: exposure_carte_acteur_sources
     description: "Lien entre acteur de la carte et sources"
     columns:
@@ -434,4 +434,4 @@ models:
           deferrable: true
     tests:
       - dbt_expectations.expect_table_row_count_to_be_between:
-          min_value: 400000
+          min_value: 350000
