@@ -83,9 +83,12 @@ class ActeurController extends Controller<HTMLElement> {
   }
 
   #showHidePanelWhenTurboFrameLoad(event) {
-    const eventId = `acteur-detail:${this.mapContainerIdValue}`
-    console.log({ event, eventId})
-    if (event.target.id === eventId) {
+    let acteurDetailTurboFrameId = `acteur-detail`
+    if (!!this.mapContainerIdValue) {
+      acteurDetailTurboFrameId += `:${this.mapContainerIdValue}`
+    }
+
+    if (event.target.id === acteurDetailTurboFrameId) {
       this.#show()
     } else {
       // this.hide()
