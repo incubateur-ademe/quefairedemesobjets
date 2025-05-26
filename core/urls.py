@@ -49,7 +49,6 @@ sitemaps = {"items": PaginatedSitemap(info_dict, priority=1.0)}
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", api.urls),
-    path("explorer/", include("explorer.urls")),
     path("robots.txt", robots_txt),
     path(
         "sitemap.xml",
