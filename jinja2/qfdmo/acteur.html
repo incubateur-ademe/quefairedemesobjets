@@ -1,5 +1,38 @@
 {% extends base_template %}
 
+{% block page_title %}
+{{ object.libelle|title }} | {{ super() }}
+{% endblock page_title %}
+
+{% block json_ld %}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Place",
+    "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "{{ object.latitude}}",
+        "longitude": "{{ object.longitude }}"
+    },
+    {% if object.should_display_adresse %}
+    "address": {
+        "@type": "PostalAddress"
+        {% if object.ville %}
+        ,"addressLocality": "{{ object.ville }}"
+        {% endif %}
+        {% if object.adresse %}
+        ,"streetAddress": "{{ object.adresse }}"
+        {% endif %}
+        {% if object.code_postal %}
+        ,"postalCode": "{{ object.code_postal }}"
+        {% endif %}
+      },
+    {% endif %}
+    "name": "{{ object.libelle|title }}"
+}
+</script>
+{% endblock json_ld %}
+
 {% block content %}
 {% with map_container_id=request.GET.map_container_id %}
 <div class="fr-container qf-py-2w">
@@ -15,7 +48,7 @@
                         {% include "qfdmo/acteur/_labels.html" %}
                     {% endif %}
 
-                    <h3 class="qf-text-lg qf-m-0 qf-max-w-[90%]" data-testid="acteur-title">{{ object.libelle|title }}</h3>
+                    <{% if turbo %}h3{% else %}h1{% endif %} class="qf-text-lg qf-m-0 qf-max-w-[90%]" data-testid="acteur-title">{{ object.libelle|title }}</{% if turbo %}h3{% else %}h1{% endif %}>
                     <p class="qf-text-sm qf-m-0">
                         {{ object.acteur_services_display }} {{ distance }}
                     </p>
