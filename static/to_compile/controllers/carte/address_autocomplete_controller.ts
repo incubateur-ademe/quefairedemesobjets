@@ -44,7 +44,7 @@ export default class extends AutocompleteController {
     this.hideSpinner()
   }
 
-  selectOption(event: Event) {
+  async selectOption(event: Event) {
     let target = event.target as HTMLElement
 
     while (target && target.nodeName !== "DIV") {
@@ -70,10 +70,11 @@ export default class extends AutocompleteController {
       if (latitude) this.latitudeTarget.value = latitude
       // TODO: Explore if better to call outlet instead of relying on events.
       this.dispatch("optionSelected")
+      this.#saveLocationInSessionStorage()
     }
-    this.#saveLocationInSessionStorage()
     this.hideAutocompleteList()
   }
+
 
   async getAndStorePosition(position: GeolocationPosition) {
     try {
@@ -99,6 +100,8 @@ export default class extends AutocompleteController {
       this.hideSpinner()
       // Call outlet
       this.dispatch("optionSelected")
+      this.#saveLocationInSessionStorage()
+      console.log("getAndStorePosition", { position, data})
 
     } catch (error) {
       console.error("error catched : ", error)
@@ -108,6 +111,7 @@ export default class extends AutocompleteController {
   }
 
   #saveLocationInSessionStorage() {
+    console.log("#saveLocationInSessionStorage")
     sessionStorage.setItem("cityName", this.inputTarget.value)
     sessionStorage.setItem("latitude", this.latitudeTarget.value)
     sessionStorage.setItem("longitude", this.longitudeTarget.value)

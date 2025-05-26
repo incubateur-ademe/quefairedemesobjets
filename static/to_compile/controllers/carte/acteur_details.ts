@@ -1,8 +1,9 @@
 import { Controller } from "@hotwired/stimulus"
-import { clearActivePinpoints, removeHash } from "../../js/helpers"
+import { clearActivePinpoints } from "../../js/helpers"
 
 class ActeurController extends Controller<HTMLElement> {
   static targets = ["content", "frame"]
+  static values = { mapContainerId: String }
   isDragging = false
   panelHeight: number
   startY: number
@@ -18,6 +19,7 @@ class ActeurController extends Controller<HTMLElement> {
   // 0 = fully open, 1 = fully closed
   snapPoints = [0.2, 0.5, 0.8];
 
+  declare readonly mapContainerIdValue: string
   declare readonly contentTarget: HTMLElement
   declare readonly frameTarget: HTMLElement
 
@@ -66,7 +68,6 @@ class ActeurController extends Controller<HTMLElement> {
   }
 
   hide() {
-    removeHash()
     this.element.ariaExpanded = "false"
     this.element.ariaHidden = "true"
     this.element.addEventListener(
@@ -82,10 +83,12 @@ class ActeurController extends Controller<HTMLElement> {
   }
 
   #showHidePanelWhenTurboFrameLoad(event) {
-    if (event.target.id === "acteur-detail") {
+    const eventId = `acteur-detail:${this.mapContainerIdValue}`
+    console.log({ event, eventId})
+    if (event.target.id === eventId) {
       this.#show()
     } else {
-      this.hide()
+      // this.hide()
     }
   }
 

@@ -85,6 +85,7 @@ class MapController extends Controller<HTMLElement> {
   setActiveActeur(uuid: string) {
     const solutionForm: SearchFormController = this.application.getControllerForElementAndIdentifier(
       this.element.closest("#search_form")!, "search-solution-form") as SearchFormController
+    console.log("setActiveActeur", { uuid })
     solutionForm.displayActeur(uuid)
   }
 }

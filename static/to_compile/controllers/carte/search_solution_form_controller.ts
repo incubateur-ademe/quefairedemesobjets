@@ -193,6 +193,7 @@ class SearchFormController extends Controller<HTMLElement> {
     }
 
     const acteurDetailPath = `/adresse_details/${uuid}?${params.toString()}`
+    console.log("displayActeur", { uuid, frame, acteurDetailPath })
     Turbo.visit(acteurDetailPath, { frame })
   }
 
