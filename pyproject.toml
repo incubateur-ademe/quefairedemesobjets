@@ -87,7 +87,6 @@ django = "<=5.2.2" # cf. https://github.com/django/django/issues/16589
 django-extensions = "^4.1"
 django-import-export = {extras = ["xls", "xlsx"], version = "^4.3.3"}
 django-ninja = "^1.4.3"
-django-sql-explorer = "^5.3"
 django-storages = "^1.14.6"
 gunicorn = "^23.0.0"
 jinja2 = "^3.1.5"
