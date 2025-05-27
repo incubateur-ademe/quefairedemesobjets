@@ -49,6 +49,8 @@ class ActeurController extends Controller<HTMLElement> {
 
   #show() {
     this.element.style.transition = this.initialTransition;
+    // Reset scroll when jumping from a acteur detail to another.
+    this.element.scrollTo(0,0)
     if (this.element.ariaHidden !== "false") {
       this.element.ariaHidden = "false"
     }
