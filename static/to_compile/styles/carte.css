@@ -90,7 +90,7 @@ Style the autocomplete container:
   --sidebar-width: 0;
   --header-height: 120px;
   --footer-height: 0;
-  --base-header-height: 105px;
+  --base-header-height: 117px;
   --legend-buttons-height: 40px;
 
   /* keep max width value in sync with tailwind breakpoints config */
@@ -107,6 +107,7 @@ Style the autocomplete container:
 }
 
 :root[data-no-branding] {
+  --base-header-height: 105px;
   --header-height: var(--base-header-height);
   @media (max-width: 1024px) {
     --header-height: calc(var(--legend-buttons-height) + var(--base-header-height));

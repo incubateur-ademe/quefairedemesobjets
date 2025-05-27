@@ -21,14 +21,19 @@
         {% endif %}
 
         {% if request.GET.carte %}
-            <h3>LA CARTE</h3>
-            <script src="{{ lvao.BASE_URL }}/static/carte.js"
+            <h3>LA CARTE sans option</h3>
+            <script src="{{ assistant.BASE_URL }}/static/carte.js"></script>
+        {% elif request.GET.carte_with_defaults %}
+            <h3>LA CARTE avec des options par défaut</h3>
+            <script src="{{ assistant.BASE_URL }}/static/carte.js"
                     data-action_displayed="preter|emprunter|louer|mettreenlocation|reparer|donner|echanger|acheter|revendre"
                     data-max-width="800px"
                     data-height="720px"
-                    data-slug="cyclevia"
                     data-bounding_box="{&quot;southWest&quot;: {&quot;lat&quot;: 47.570401, &quot;lng&quot;: 1.597977}, &quot;northEast&quot;: {&quot;lat&quot;: 48.313697, &quot;lng&quot;: 3.059159}}">
             </script>
+        {% elif request.GET.carte_slug %}
+            <h3>LA CARTE - avec une config de carte (Cyclevia)</h3>
+            <script src="{{ assistant.BASE_URL }}/static/carte.js" data-slug="{{ request.GET.carte_slug }}"></script>
         {% else %}
             <h3>LE FORMULAIRE</h3>
             <script src="{{ lvao.BASE_URL }}/static/iframe.js"
