@@ -5,7 +5,7 @@ from django.test import override_settings
 
 from qfdmo.leaflet import compile_leaflet_bbox
 from qfdmo.models.acteur import ActeurStatus, DisplayedActeur, RevisionActeur
-from qfdmo.views.adresses import CarteSearchActeursView
+from qfdmo.views.carte import CarteSearchActeursView
 from unit_tests.core.test_utils import query_dict_from
 from unit_tests.qfdmo.acteur_factory import (
     ActeurFactory,
