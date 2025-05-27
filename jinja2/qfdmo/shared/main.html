@@ -29,7 +29,9 @@
         qf-flex qf-flex-col qf-flex-auto
         qf-relative"
         {# TODO: attempt to remove this conditionnal... #}
-        action="{% if carte and not carte_config %}carte{% endif %}"
+        {% if request.path != "/carte" %}
+        action="carte"
+        {% endif %}
         data-search-form-visible
         {% if map_container_id %}
         data-search-solution-form-map-container-id-value="{{ map_container_id }}"
