@@ -72,10 +72,10 @@ module.exports = {
       minWidth: ({ theme }) => ({ ...theme("spacing") }),
       keyframes: {
         blink: {
-          "0%": { opacity: 0},
-          "40%": { opacity: 1},
-          "60%": { opacity: 1},
-          "100%": { opacity: 0}
+          "0%": { opacity: 0 },
+          "40%": { opacity: 1 },
+          "60%": { opacity: 1 },
+          "100%": { opacity: 0 },
         },
         wave: {
           "0%": { transform: "rotate(0.0deg) scale3d(0.75, 0.75, 1) translateZ(0)" },

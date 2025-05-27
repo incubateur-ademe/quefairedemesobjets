@@ -1,11 +1,15 @@
 {% extends "data/_partials/suggestion_details.html" %}
+{% load custom_filters %}
 
 {% block suggestion_title %}Champs modifiés:{% endblock %}</h3>
 
 {% block suggestion_details %}
     <ul>
         {% for field, value in updated_fields.items %}
-            <li><strong>{{ field }}</strong> : <strike>{{ value.old }}</strike> {{ value.new }}</li>
+            <li>
+                <strong>{{ field }}</strong> :
+                {{ value.old|diff_display:value.new }}
+            </li>
         {% endfor %}
     </ul>
     {{ block.super }}
