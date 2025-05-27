@@ -1,6 +1,7 @@
 {# Recherche adresse #}
 <div data-search-solution-form-target="adresseGroup">
     <div data-controller='address-autocomplete'
+         data-address-autocomplete-search-solution-form-outlet="[data-controller='search-solution-form']"
          data-address-autocomplete-max-option-displayed-value=5
          data-address-autocomplete-is-ban-address-value='true'
          data-with-controls={{"false" if is_carte else "true"}}

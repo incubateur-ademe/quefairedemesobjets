@@ -1,4 +1,5 @@
 import AutocompleteController from "./autocomplete_controller"
+import SearchFormController from "./search_solution_form_controller"
 
 const SEPARATOR = "||"
 
@@ -11,6 +12,8 @@ export default class extends AutocompleteController {
     "latitude",
     "displayError",
   ])
+  static outlets = ["search-solution-form"]
+  declare readonly searchSolutionFormOutlets: Array<SearchFormController>
   declare readonly latitudeTarget: HTMLInputElement
   declare readonly longitudeTarget: HTMLInputElement
   declare readonly displayErrorTarget: HTMLElement
@@ -18,7 +21,11 @@ export default class extends AutocompleteController {
   initialize() {
     super.initialize()
     this.#fetchLocationFromSessionStorage()
+    const options = {
+      root: document
+    }
   }
+
 
   async searchToComplete(events: Event): Promise<void> {
     const inputTargetValue = this.inputTarget.value
@@ -68,8 +75,6 @@ export default class extends AutocompleteController {
       this.inputTarget.value = label
       if (longitude) this.longitudeTarget.value = longitude
       if (latitude) this.latitudeTarget.value = latitude
-      // TODO: Explore if better to call outlet instead of relying on events.
-      this.dispatch("optionSelected")
       this.#saveLocationInSessionStorage()
     }
     this.hideAutocompleteList()
@@ -99,7 +104,6 @@ export default class extends AutocompleteController {
       this.#hideInputError()
       this.hideSpinner()
       // Call outlet
-      this.dispatch("optionSelected")
       this.#saveLocationInSessionStorage()
 
     } catch (error) {
@@ -113,7 +117,12 @@ export default class extends AutocompleteController {
     sessionStorage.setItem("cityName", this.inputTarget.value)
     sessionStorage.setItem("latitude", this.latitudeTarget.value)
     sessionStorage.setItem("longitude", this.longitudeTarget.value)
+    this.searchSolutionFormOutlets.forEach(form => {
+      console.log({ form })
+      form.advancedSubmit()
+    })
   }
+
 
   #fetchLocationFromSessionStorage() {
     if (this.inputTarget.value || this.longitudeTarget.value || this.latitudeTarget.value) {
@@ -128,8 +137,10 @@ export default class extends AutocompleteController {
       this.inputTarget.value = label
       if (longitude) this.longitudeTarget.value = longitude
       if (latitude) this.latitudeTarget.value = latitude
-      // Call outlet
-      this.dispatch("optionSelected")
+      this.searchSolutionFormOutlets.forEach(form => {
+        console.log({ form })
+        form.advancedSubmit()
+      })
     }
   }
 

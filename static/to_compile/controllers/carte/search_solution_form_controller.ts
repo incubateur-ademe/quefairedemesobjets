@@ -375,17 +375,17 @@ class SearchFormController extends Controller<HTMLElement> {
     this.searchFormPanelTarget.classList.add("qf-h-0", "qf-invisible")
   }
 
-  advancedSubmit(event: Event) {
+  advancedSubmit(event?: Event) {
     // Applies only in Formulaire alternative or in digital version.
     const withControls =
-      (event.target as HTMLElement).dataset.withControls?.toLowerCase() === "true"
+      (event?.target as HTMLElement).dataset.withControls?.toLowerCase() === "true"
     if (withControls) {
       if (this.#checkErrorForm()) return
     }
 
     // Applies only in Formulaire alternative.
     const withoutZone =
-      (event.target as HTMLElement).dataset.withoutZone?.toLowerCase() === "true"
+      (event?.target as HTMLElement).dataset.withoutZone?.toLowerCase() === "true"
     if (withoutZone) {
       if (this.hasBboxTarget) {
         this.bboxTarget.value = ""
@@ -394,7 +394,7 @@ class SearchFormController extends Controller<HTMLElement> {
 
     // Applies only in Formulaire alternative.
     const withDynamicFormPanel =
-      (event.target as HTMLElement).dataset.withDynamicFormPanel?.toLowerCase() ===
+      (event?.target as HTMLElement).dataset.withDynamicFormPanel?.toLowerCase() ===
       "true"
 
     if (withDynamicFormPanel) {
@@ -407,8 +407,7 @@ class SearchFormController extends Controller<HTMLElement> {
     this.#hideAdvancedFilters()
     this.hideLegend()
 
-    let submitEvent = new Event("submit", { bubbles: true, cancelable: true })
-    this.searchFormTarget.dispatchEvent(submitEvent)
+    this.searchFormTarget.requestSubmit()
   }
 
   toggleAPropos() {

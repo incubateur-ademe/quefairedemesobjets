@@ -83,8 +83,6 @@ export function getIframeAttributesAndExtra(
     }
     urlParams.append(param, scriptTag.dataset[param]!)
   }
-    console.log("COUCOU", scriptTag.dataset)
-
 
   const iframeAttributes = compileIframeAttributes(
     BASE_URL,
