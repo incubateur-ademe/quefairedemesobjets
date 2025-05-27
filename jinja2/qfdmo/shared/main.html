@@ -7,6 +7,7 @@
     {% if request.user.is_authenticated and DEBUG %}
     data-turbo-action="advance"
     {% endif %}
+    data-name="{{ request.resolver_match.url_name }}"
 >
     {# Controleur général de gestion de la navigation et du formulaire #}
     <form
@@ -29,7 +30,7 @@
         qf-flex qf-flex-col qf-flex-auto
         qf-relative"
         {# TODO: attempt to remove this conditionnal... #}
-        {% if request.path != "/carte" %}
+        {% if request.resolver_match.namespace == "qfdmd" and request.resolver_match.url_name == "carte" %}
         action="carte"
         {% endif %}
         data-search-form-visible
