@@ -28,7 +28,7 @@
         qf-m-0
         qf-flex qf-flex-col qf-flex-auto
         qf-relative"
-        action="{% if carte %}carte{% endif %}"
+        action="{% if carte and not carte_config %}carte{% endif %}"
         data-search-form-visible
         {% if map_container_id %}
         data-search-solution-form-map-container-id-value="{{ map_container_id }}"
