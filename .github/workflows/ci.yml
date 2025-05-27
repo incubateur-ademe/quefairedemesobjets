@@ -48,7 +48,7 @@ jobs:
         run: poetry run pytest dags/tests
       - name: Check code formatting
         run: poetry run black --check --diff .
-      - uses: astral-sh/ruff-action@84f83ecf9e1e15d26b7984c7ec9cf73d39ffc946 # v3.3.1
+      - uses: astral-sh/ruff-action@eaf0ecdd668ceea36159ff9d91882c9795d89b49 # v3.4.0
       - name: Check for missing migrations
         run: poetry run python manage.py makemigrations --check --no-input --settings=core.test_settings
         env:
