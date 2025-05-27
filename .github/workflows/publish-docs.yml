@@ -35,7 +35,7 @@ jobs:
         poetry run make build-docs
 
     - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v4
+      uses: peaceiris/actions-gh-pages@e9c66a37f080288a11235e32cbe2dc5fb3a679cc # v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./_build/html  # Path to your built HTML files
+        publish_dir: ./_build  # Path to your built HTML files
