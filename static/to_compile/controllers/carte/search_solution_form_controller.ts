@@ -406,8 +406,8 @@ class SearchFormController extends Controller<HTMLElement> {
 
     this.#hideAdvancedFilters()
     this.hideLegend()
-
-    this.searchFormTarget.requestSubmit()
+    let submitEvent = new Event("submit", { bubbles: true, cancelable: true })
+    this.searchFormTarget.dispatchEvent(submitEvent)
   }
 
   toggleAPropos() {

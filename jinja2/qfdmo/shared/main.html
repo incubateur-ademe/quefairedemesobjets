@@ -11,7 +11,7 @@
 >
     {# Controleur général de gestion de la navigation et du formulaire #}
     <form
-        id='search_form'
+        id='search_form{% if map_container_id %}:{{ map_container_id }}{% endif %}'
         data-controller="search-solution-form"
         data-search-solution-form-target="searchForm"
         data-search-solution-form-is-iframe-value="{{ is_embedded }}"

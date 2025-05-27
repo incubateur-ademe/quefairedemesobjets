@@ -20,10 +20,27 @@ export default class extends AutocompleteController {
 
   initialize() {
     super.initialize()
-    this.#fetchLocationFromSessionStorage()
     const options = {
       root: document
     }
+  }
+
+  connect() {
+    this.#setupIntersectionObserver()
+  }
+
+  #setupIntersectionObserver() {
+    const intersectionCallback = (entries) => {
+      entries.forEach((entry) => {
+        this.#fetchLocationFromSessionStorage()
+      });
+    };
+
+    const observer = new IntersectionObserver(intersectionCallback, {
+      root: document
+    });
+
+    observer.observe(this.element);
   }
 
 
@@ -117,8 +134,8 @@ export default class extends AutocompleteController {
     sessionStorage.setItem("cityName", this.inputTarget.value)
     sessionStorage.setItem("latitude", this.latitudeTarget.value)
     sessionStorage.setItem("longitude", this.longitudeTarget.value)
+
     this.searchSolutionFormOutlets.forEach(form => {
-      console.log({ form })
       form.advancedSubmit()
     })
   }
@@ -133,13 +150,15 @@ export default class extends AutocompleteController {
     const latitude = sessionStorage.getItem("latitude")
     const longitude = sessionStorage.getItem("longitude")
 
-    if (label && latitude && longitude) {
+    if (label && latitude && longitude && (label != this.inputTarget.value
+      || latitude !== this.latitudeTarget.value
+      || longitude !== this.longitudeTarget.value)
+    ) {
       this.inputTarget.value = label
       if (longitude) this.longitudeTarget.value = longitude
       if (latitude) this.latitudeTarget.value = latitude
-      this.searchSolutionFormOutlets.forEach(form => {
-        console.log({ form })
-        form.advancedSubmit()
+      this.searchSolutionFormOutlets.forEach(controller => {
+        controller.advancedSubmit()
       })
     }
   }

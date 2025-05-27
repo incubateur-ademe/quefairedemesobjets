@@ -87,8 +87,12 @@ class MapController extends Controller<HTMLElement> {
   }
 
   setActiveActeur(uuid: string) {
+    // We do not use Stimulus outlets or events here so that the event does
+    // not dispatch to all controller's instances.
+    // This way, the selcted acteur won't open on Bon Etat and Mauvais Etat panels.
     const solutionForm: SearchFormController = this.application.getControllerForElementAndIdentifier(
-      this.element.closest("#search_form")!, "search-solution-form") as SearchFormController
+      this.element.closest("[data-controller='search-solution-form']")!, "search-solution-form") as SearchFormController
+
     solutionForm.displayActeur(uuid)
   }
 }
