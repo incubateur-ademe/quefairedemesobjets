@@ -75,17 +75,20 @@ class MapController extends Controller<HTMLElement> {
   }
 
   displaySearchInZoneButton() {
-    this.searchInZoneButtonTarget.classList.remove("qf-hidden")
+    if (this.searchInZoneButtonTarget) {
+      this.searchInZoneButtonTarget.classList.remove("qf-hidden")
+    }
   }
 
   hideSearchInZoneButton() {
-    this.searchInZoneButtonTarget.classList.add("qf-hidden")
+    if (this.searchInZoneButtonTarget) {
+      this.searchInZoneButtonTarget.classList.add("qf-hidden")
+    }
   }
 
   setActiveActeur(uuid: string) {
     const solutionForm: SearchFormController = this.application.getControllerForElementAndIdentifier(
       this.element.closest("#search_form")!, "search-solution-form") as SearchFormController
-    console.log("setActiveActeur", { uuid })
     solutionForm.displayActeur(uuid)
   }
 }

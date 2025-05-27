@@ -101,7 +101,6 @@ export default class extends AutocompleteController {
       // Call outlet
       this.dispatch("optionSelected")
       this.#saveLocationInSessionStorage()
-      console.log("getAndStorePosition", { position, data})
 
     } catch (error) {
       console.error("error catched : ", error)
@@ -111,7 +110,6 @@ export default class extends AutocompleteController {
   }
 
   #saveLocationInSessionStorage() {
-    console.log("#saveLocationInSessionStorage")
     sessionStorage.setItem("cityName", this.inputTarget.value)
     sessionStorage.setItem("latitude", this.latitudeTarget.value)
     sessionStorage.setItem("longitude", this.longitudeTarget.value)
@@ -173,7 +171,6 @@ export default class extends AutocompleteController {
   }
 
   #displayInputError(errorText: string): void {
-    console.error(errorText)
     this.inputTarget.classList.add("fr-input--error")
     this.inputTarget.parentElement.classList.add("fr-input-group--error")
     this.displayErrorTarget.innerHTML = errorText

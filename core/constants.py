@@ -45,4 +45,5 @@ ASSISTANT = {
         "lien": "https://www.ecologie.gouv.fr/info-tri",
         "texte_du_lien": "En savoir plus sur l’Info-tri",
     },
+    "nouvelle_recherche": "Nouvelle recherche",
 }
