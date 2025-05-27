@@ -34,7 +34,8 @@ MANDATORY_COLUMNS_AFTER_NORMALISATION = [
     "acteur_type_code",
     "statut",
 ]
-REGEX_BAN_SEPARATORS = r"\s,;"
+REGEX_BAN_SEPARATORS = r"\s,;-"
+STRIP_BAN = REGEX_BAN_SEPARATORS.replace("\\s", " ")
 
 
 def merge_duplicates(
@@ -385,16 +386,16 @@ def _address_details_extract(
     # Pattern pour capturer les codes postaux sans adresse
     pattern2 = re.compile(rf"(\d{{4,5}})[{REGEX_BAN_SEPARATORS}]*(.*)")
     if match := pattern1.search(address_str):
-        address = match.group(1).strip() if match.group(1) else ""
-        postal_code = match.group(2).strip() if match.group(2) else ""
-        city = match.group(3).strip() if match.group(3) else ""
+        address = match.group(1).strip(STRIP_BAN) if match.group(1) else ""
+        postal_code = match.group(2).strip(STRIP_BAN) if match.group(2) else ""
+        city = match.group(3).strip(STRIP_BAN) if match.group(3) else ""
     elif match := pattern2.search(address_str):
-        postal_code = match.group(1).strip() if match.group(1) else ""
-        city = match.group(2).strip() if match.group(2) else ""
+        postal_code = match.group(1).strip(STRIP_BAN) if match.group(1) else ""
+        city = match.group(2).strip(STRIP_BAN) if match.group(2) else ""
 
     if city:
         city = city.title()
-        city = city.replace("*", "").strip()
+        city = city.replace("*", "").strip(STRIP_BAN)
 
     # Ajouter un zéro si le code postal a quatre chiffres
     postal_code = clean_code_postal(postal_code, None)
