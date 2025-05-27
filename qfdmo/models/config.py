@@ -90,6 +90,19 @@ class CarteConfig(models.Model):
         blank=True,
     )
 
+    preview_title = models.CharField(
+        blank=True,
+        verbose_name="Titre de l'écran de prévisualisation",
+        help_text="Ce titre s'affiche avant que l'utilisateur n'ait fait une recherche "
+        "dans la carte",
+    )
+    preview_content = models.TextField(
+        blank=True,
+        verbose_name="Contenu de l'écran de prévisualisation",
+        help_text="Ce texte s'affiche avant que l'utilisateur n'ait fait une recherche "
+        "dans la carte",
+    )
+
     def get_absolute_url(self):
         return reverse("qfdmo:carte_custom", kwargs={"slug": self.slug})
 

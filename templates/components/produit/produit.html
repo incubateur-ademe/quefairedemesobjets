@@ -1,4 +1,4 @@
-{% load dsfr_tags %}
+{% load dsfr_tags wagtailcore_tags %}
 
 <header class="qf-mt-3w md:qf-mt-5w qf-flex qf-flex-col  qf-gap-2w">
     <h1 class="qf-m-0">
@@ -47,4 +47,16 @@
     </div>
 {% endif %}
 
-{% dsfr_accordion_group produit.content_display %}
+<div class="qf-flex qf-flex-col qf-gap-4w qf-mt-2w">
+{% for section in produit.content_display %}
+<div id="{{ section.id }}">
+    <h2>
+    {{ section.title }}
+    </h2>
+
+    <div>
+    {{ section.content|richtext }}
+    </div>
+</div>
+{% endfor %}
+</div>
