@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom"
 
 import { Application } from "@hotwired/stimulus"
-import SearchSolutionFormController from "../js/search_solution_form_controller"
+import SearchSolutionFormController from "../controllers/carte/search_solution_form_controller"
 
 describe("SearchSolutionFormController", () => {
     beforeEach(() => {
