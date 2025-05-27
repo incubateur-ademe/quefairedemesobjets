@@ -120,7 +120,6 @@ export default class extends AutocompleteController {
 
       this.#hideInputError()
       this.hideSpinner()
-      // Call outlet
       this.#saveLocationInSessionStorage()
 
     } catch (error) {
@@ -131,6 +130,7 @@ export default class extends AutocompleteController {
   }
 
   #saveLocationInSessionStorage() {
+    // P-e revoir ca
     sessionStorage.setItem("cityName", this.inputTarget.value)
     sessionStorage.setItem("latitude", this.latitudeTarget.value)
     sessionStorage.setItem("longitude", this.longitudeTarget.value)
