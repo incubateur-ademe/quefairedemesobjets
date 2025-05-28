@@ -38,7 +38,14 @@
 
     <body
         class="qf-flex qf-flex-col qf-h-svh qf-h-screen qf-overflow-hidden"
-        data-controller="analytics"
+        data-controller="state"
+        data-state-adresse-value=""
+        data-state-longitude-value=""
+        data-state-latitude-value=""
+        data-state-address-autocomplete-outlet="[data-controller='address-autocomplete']"
+        data-state-map-outlet="[data-controller='map']"
+        data-state-search-solution-form-outlet="[data-controller='search-solution-form']"
+        data-action="address-autocomplete:change->state#setLocation"
     >
         <main id="solutions" class="qf-h-full qf-overflow-auto qf-overscroll-none qf-scroll-smooth">
             <noscript>

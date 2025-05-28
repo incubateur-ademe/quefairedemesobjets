@@ -34,6 +34,7 @@ class MapController extends Controller<HTMLElement> {
   }
   declare readonly acteurTargets: Array<HTMLScriptElement>
   declare readonly searchInZoneButtonTarget: HTMLButtonElement
+  declare readonly hasSearchInZoneButtonTarget: boolean
   declare readonly bboxTarget: HTMLInputElement
   declare readonly leafletContainerTarget: HTMLDivElement
   declare readonly hasBboxTarget: boolean
@@ -75,13 +76,13 @@ class MapController extends Controller<HTMLElement> {
   }
 
   displaySearchInZoneButton() {
-    if (this.searchInZoneButtonTarget) {
+    if (this.hasSearchInZoneButtonTarget) {
       this.searchInZoneButtonTarget.classList.remove("qf-hidden")
     }
   }
 
   hideSearchInZoneButton() {
-    if (this.searchInZoneButtonTarget) {
+    if (this.hasSearchInZoneButtonTarget) {
       this.searchInZoneButtonTarget.classList.add("qf-hidden")
     }
   }

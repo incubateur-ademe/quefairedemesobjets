@@ -34,12 +34,9 @@
 {% endblock json_ld %}
 
 {% block content %}
-{% with map_container_id=request.GET.map_container_id %}
 <div class="fr-container qf-py-2w">
     <turbo-frame
-        {% if map_container_id %}id="acteur-detail:{{ map_container_id }}"
-        {% else %}id="acteur-detail"
-        {% endif %}
+        id="{{ map_container_id }}:acteur-detail"
     >
         <article>
             <header class="qf-mb-2w">
@@ -61,5 +58,4 @@
         </article>
     </turbo-frame>
 </div>
-{% endwith %}
 {% endblock content %}

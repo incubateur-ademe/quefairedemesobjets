@@ -531,6 +531,11 @@ class FormulaireSearchActeursView(SearchActeursView):
     template_name = "qfdmo/formulaire.html"
     form_class = FormulaireForm
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(map_container_id="formulaire")
+        return context
+
     def _get_selected_action_ids(self):
         # TODO: merge this method with the one from CarteSearchActeursView
         # and do not return a list of dict but a queryset instead
@@ -658,6 +663,7 @@ def acteur_detail(request, uuid):
             displayed_acteur.sources.filter(afficher=True).count()
         ),
         "is_carte": "carte" in request.GET,
+        "map_container_id": request.GET.get("map_container_id", "carte"),
     }
 
     if latitude and longitude and not displayed_acteur.is_digital:

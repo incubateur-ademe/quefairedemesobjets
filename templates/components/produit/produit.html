@@ -13,11 +13,11 @@
         <span>{{ ASSISTANT.nouvelle_recherche }}</span>
     </a>
     <h1 class="qf-m-0">
-
         {{ object.nom|capfirst }}
     </h1>
     {% include "components/produit/_infotri.html" %}
 </header>
+
 {% if bon_etat and mauvais_etat %}
     <div class="fr-tabs">
         <ul class="fr-tabs__list" role="tablist" aria-label="État du produit {{ produit }}">
@@ -55,7 +55,7 @@
     </div>
 {% else %}
     <div>
-        {% include "./_detail.html" %}
+        {% include "./_detail.html" with id="carte" %}
     </div>
 {% endif %}
 

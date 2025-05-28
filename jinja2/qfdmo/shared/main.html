@@ -2,8 +2,7 @@
 
 {% block content %}
 <turbo-frame
-    id="{{ map_container_id or 'mapContainer' }}"
-    loading="lazy"
+    id="{{ map_container_id }}"
     {% if request.user.is_authenticated and DEBUG %}
     data-turbo-action="advance"
     {% endif %}
@@ -11,7 +10,7 @@
 >
     {# Controleur général de gestion de la navigation et du formulaire #}
     <form
-        id='search_form{% if map_container_id %}:{{ map_container_id }}{% endif %}'
+        id='{{ map_container_id }}:search_form'
         data-controller="search-solution-form"
         data-search-solution-form-target="searchForm"
         data-search-solution-form-is-iframe-value="{{ is_embedded }}"
@@ -34,13 +33,9 @@
         action="carte"
         {% endif %}
         data-search-form-visible
-        {% if map_container_id %}
         data-search-solution-form-map-container-id-value="{{ map_container_id }}"
-        {% endif %}
     >
-        {% if map_container_id %}
-            <input type="hidden" name="map_container_id" value="{{ map_container_id or 'mapContainer' }}">
-        {% endif %}
+        <input type="hidden" name="map_container_id" value="{{ map_container_id }}">
         <section class="map-grid qf-relative">
             <header
                 {# The z-index below can impact the shadow over#}
@@ -110,9 +105,7 @@
             id="acteurDetailsPanel"
             aria-hidden="true"
             data-controller="acteur-details"
-            {% if map_container_id %}
             data-acteur-details-map-container-id-value="{{ map_container_id }}"
-            {% endif %}
             >
                 {% include "qfdmo/carte/panels/acteur_detail.html" %}
             </aside>

@@ -84,16 +84,11 @@ class ActeurController extends Controller<HTMLElement> {
     this.hidden = true
   }
 
-  #showHidePanelWhenTurboFrameLoad(event) {
-    let acteurDetailTurboFrameId = `acteur-detail`
-    if (!!this.mapContainerIdValue) {
-      acteurDetailTurboFrameId += `:${this.mapContainerIdValue}`
-    }
+  #showPanelWhenTurboFrameLoad(event) {
+    let acteurDetailTurboFrameId = `${this.mapContainerIdValue}:acteur-detail`
 
     if (event.target.id === acteurDetailTurboFrameId) {
       this.#show()
-    } else {
-      // this.hide()
     }
   }
 
@@ -102,7 +97,7 @@ class ActeurController extends Controller<HTMLElement> {
     this.element.addEventListener("touchmove", (event) =>
       event.stopPropagation(),
     )
-    document.addEventListener("turbo:frame-load", this.#showHidePanelWhenTurboFrameLoad.bind(this))
+    document.addEventListener("turbo:frame-load", this.#showPanelWhenTurboFrameLoad.bind(this))
   }
 
   #dragStart(event: TouchEvent) {

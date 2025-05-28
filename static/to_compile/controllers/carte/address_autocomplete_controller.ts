@@ -3,7 +3,7 @@ import SearchFormController from "./search_solution_form_controller"
 
 const SEPARATOR = "||"
 
-export default class extends AutocompleteController {
+class AdresseAutocompleteController extends AutocompleteController {
   controllerName: string = "address-autocomplete"
   allAvailableOptions: Array<string> = []
 
@@ -12,37 +12,10 @@ export default class extends AutocompleteController {
     "latitude",
     "displayError",
   ])
-  static outlets = ["search-solution-form"]
-  declare readonly searchSolutionFormOutlets: Array<SearchFormController>
+
   declare readonly latitudeTarget: HTMLInputElement
   declare readonly longitudeTarget: HTMLInputElement
   declare readonly displayErrorTarget: HTMLElement
-
-  initialize() {
-    super.initialize()
-    const options = {
-      root: document
-    }
-  }
-
-  connect() {
-    this.#setupIntersectionObserver()
-  }
-
-  #setupIntersectionObserver() {
-    const intersectionCallback = (entries) => {
-      entries.forEach((entry) => {
-        this.#fetchLocationFromSessionStorage()
-      });
-    };
-
-    const observer = new IntersectionObserver(intersectionCallback, {
-      root: document
-    });
-
-    observer.observe(this.element);
-  }
-
 
   async searchToComplete(events: Event): Promise<void> {
     const inputTargetValue = this.inputTarget.value
@@ -89,10 +62,9 @@ export default class extends AutocompleteController {
     } else if (!("geolocation" in navigator)) {
       console.error("geolocation is not available")
     } else {
-      this.inputTarget.value = label
-      if (longitude) this.longitudeTarget.value = longitude
-      if (latitude) this.latitudeTarget.value = latitude
-      this.#saveLocationInSessionStorage()
+      this.dispatchLocationToGlobalState(
+        label, latitude, longitude
+      )
     }
     this.hideAutocompleteList()
   }
@@ -111,57 +83,25 @@ export default class extends AutocompleteController {
         return
       }
 
-      this.inputTarget.value =
-        data.features[0].properties.label
-      this.latitudeTarget.value =
-        data.features[0].geometry.coordinates[1]
-      this.longitudeTarget.value =
+      this.dispatchLocationToGlobalState(
+        data.features[0].properties.label,
+        data.features[0].geometry.coordinates[1],
         data.features[0].geometry.coordinates[0]
+      )
 
       this.#hideInputError()
       this.hideSpinner()
-      this.#saveLocationInSessionStorage()
 
     } catch (error) {
       console.error("error catched : ", error)
       this.hideSpinner()
     }
-
   }
 
-  #saveLocationInSessionStorage() {
-    // P-e revoir ca
-    sessionStorage.setItem("cityName", this.inputTarget.value)
-    sessionStorage.setItem("latitude", this.latitudeTarget.value)
-    sessionStorage.setItem("longitude", this.longitudeTarget.value)
-
-    this.searchSolutionFormOutlets.forEach(form => {
-      form.advancedSubmit()
-    })
+  dispatchLocationToGlobalState(adresse: string, latitude: string, longitude: string) {
+    this.dispatch("change", { detail: { adresse, latitude, longitude } })
   }
 
-
-  #fetchLocationFromSessionStorage() {
-    if (this.inputTarget.value || this.longitudeTarget.value || this.latitudeTarget.value) {
-      return
-    }
-
-    const label = sessionStorage.getItem("cityName")
-    const latitude = sessionStorage.getItem("latitude")
-    const longitude = sessionStorage.getItem("longitude")
-
-    if (label && latitude && longitude && (label != this.inputTarget.value
-      || latitude !== this.latitudeTarget.value
-      || longitude !== this.longitudeTarget.value)
-    ) {
-      this.inputTarget.value = label
-      if (longitude) this.longitudeTarget.value = longitude
-      if (latitude) this.latitudeTarget.value = latitude
-      this.searchSolutionFormOutlets.forEach(controller => {
-        controller.advancedSubmit()
-      })
-    }
-  }
 
   addOption(regexPattern: RegExp, option: any) {
     //option : this.#allAvailableOptions[i]
@@ -238,3 +178,5 @@ export default class extends AutocompleteController {
       })
   }
 }
+
+export default AdresseAutocompleteController

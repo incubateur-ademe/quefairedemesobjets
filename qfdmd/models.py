@@ -239,6 +239,10 @@ class Synonyme(AbstractBaseProduit):
         return f"{url}?{params}"
 
     @cached_property
+    def url_carte(self):
+        return self.get_url_carte(None, "carte")
+
+    @cached_property
     def url_carte_mauvais_etat(self):
         actions = "reparer|trier"
         return self.get_url_carte(actions, "mauvais_etat")

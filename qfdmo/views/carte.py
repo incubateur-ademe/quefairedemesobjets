@@ -34,7 +34,7 @@ class CarteSearchActeursView(SearchActeursView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context.update(is_carte=True)
+        context.update(is_carte=True, map_container_id="carte")
         return context
 
     def _get_selected_action_ids(self):
@@ -49,7 +49,7 @@ class ProductCarteView(CarteSearchActeursView):
         )
         context.update(
             carte_config=carte_config,
-            map_container_id=self.request.GET.get("map_container_id"),
+            map_container_id=self.request.GET.get("map_container_id", "carte"),
         )
         return context
 

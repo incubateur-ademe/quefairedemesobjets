@@ -181,12 +181,8 @@ class SearchFormController extends Controller<HTMLElement> {
     params.set("direction", this.#selectedOption)
     params.set("latitude", latitude)
     params.set("longitude", longitude)
-    let frame = "acteur-detail"
-
-    if (!!this.mapContainerIdValue && this.mapContainerIdValue !== "mapContainer") {
-      params.set("map_container_id", this.mapContainerIdValue)
-      frame += `:${this.mapContainerIdValue}`
-    }
+    params.set("map_container_id", this.mapContainerIdValue)
+    let frame = `${this.mapContainerIdValue}:acteur-detail`
 
     if (this.hasCarteTarget) {
       params.set("carte", "1")
