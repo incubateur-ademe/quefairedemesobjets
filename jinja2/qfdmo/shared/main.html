@@ -1,15 +1,20 @@
 {% extends base_template %}
 
 {% block content %}
-<turbo-frame id="mapContainer">
+<turbo-frame
+    id="{{ map_container_id }}"
+    {% if request.user.is_authenticated and DEBUG %}
+    data-turbo-action="advance"
+    {% endif %}
+    data-name="{{ request.resolver_match.url_name }}"
+>
     {# Controleur général de gestion de la navigation et du formulaire #}
     <form
-        id='search_form'
+        id='{{ map_container_id }}:search_form'
         data-controller="search-solution-form"
         data-search-solution-form-target="searchForm"
         data-search-solution-form-is-iframe-value="{{ is_embedded }}"
-        data-turbo-frame="addressesPanel"
-        data-action="map:displayActeur->search-solution-form#displayActeur
+        data-action="
         map:updateBbox->search-solution-form#updateBboxInput
         search-solution-form:captureInteraction->analytics#captureInteractionWithMap
         address-autocomplete:formSubmit->search-solution-form#advancedSubmit
@@ -17,22 +22,28 @@
         ss-cat-object-autocomplete:optionSelected->search-solution-form#checkSsCatObjetErrorForm
         {% block form_controller_data_actions %}{% endblock form_controller_data_actions %}"
         class="
+        qf-rounded-lg qf-border qf-border-solid qf-border-grey-900
         qf-group
-        qf-h-full qf-max-h-svh qf-max-h-screen md:qf-overflow-hidden
+        qf-h-full qf-overflow-hidden
         qf-m-0
         qf-flex qf-flex-col qf-flex-auto
         qf-relative"
+        {# TODO: attempt to remove this conditionnal... #}
+        {% if request.resolver_match.namespace == "qfdmd" and request.resolver_match.url_name == "carte" %}
+        action="carte"
+        {% endif %}
         data-search-form-visible
+        data-search-solution-form-map-container-id-value="{{ map_container_id }}"
     >
-        <section class="map-grid">
+        <input type="hidden" name="map_container_id" value="{{ map_container_id }}">
+        <section class="map-grid qf-relative">
             <header
-                class="max-md:qf-sticky qf-top-0
-                {% block header_classes %}qf-z-40{% endblock header_classes %}
-                "
+                {# The z-index below can impact the shadow over#}
+                class="{% block header_classes %}qf-z-30{% endblock header_classes %}
+                    qf-bg-white qf-border-solid qf-border-b-grey-900 qf-border-0 qf-shadow-lg qf-border-b"
             >
                 <div
                     class="
-                    qf-bg-white
                     qf-flex qf-flex-row sm:qf-items-center"
                 >
                 {% block form_header %}
@@ -43,19 +54,21 @@
             <main
                 class="
                 qf-flex
-                max-md:qf-h-main-svh
-                {# Is useful for digital view so that the users can scrol in the results #}
+                {% if is_digital %}
+                {# Is useful for digital view so that the users can scroll in the results #}
                 qf-overflow-auto
+                {% endif %}
+                qf-h-full
                 "
                 tabindex="0"
             >
                 {% block form_result %}
-                    <turbo-frame id="addressesPanel"
+                    <div id="addressesPanel"
                         data-search-solution-form-target="addressesPanel"
                         class="qf-relative qf-z-10
                             qf-flex qf-flex-col
-                            max-md:qf-fixed
-                            max-md:qf-top-header max-md:qf-bottom-footer
+                            qf-h-full
+                            qf-w-full
                             max-md:qf-left-0 max-md:qf-right-0
                             data-[visible=true]:qf-flex-grow
                             data-[visible=false]:qf-invisible data-[visible=false]:qf-h-0"
@@ -63,7 +76,7 @@
                         tabindex="0"
                     >
                         {% include 'qfdmo/shared/results.html' %}
-                    </turbo-frame>
+                    </div>
                 {% endblock form_result %}
 
                 {% block form_fields %}
@@ -74,34 +87,31 @@
 
             {# Part of this tag' style is defined in qfdmo.css because it would have been a bit unreadable as tailwind classes #}
             <aside class="
-                qf-relative qf-z-30
-                aria-[hidden=false]:qf-flex qf-hidden qf-flex-col
-                {% if is_carte %}md:qf-h-[calc(100vh_-_120px)]{% else %}md:qf-h-[calc(100vh_-_250px)]{% endif %}
-                max-md:qf-snap-y md:qf-overflow-auto qf-scroll-mt-[65vh]
-                max-md:qf-snap-mandatory
+                md:qf-relative qf-z-30
+                aria-[hidden=false]:qf-block qf-hidden qf-flex-col
+                {% if not is_carte %}md:qf-h-[calc(100vh_-_250px)]{% endif %}
+                qf-overflow-auto
                 qf-bg-white
-                qf-px-2w
+                max-md:qf-absolute
+                max-md:qf-top-full max-md:qf-bottom-0 max-md:qf-left-0 max-md:qf-right-0
                 max-md:qf-drop-shadow-[0_0_100px_rgba(0,0,0,0.3)]
                 max-md:qf-rounded-t-xl
+                max-md:qf-h-full
+                max-md:transition-transform max-md:duration-500
                 aria-[hidden=true]:max-md:qf-animate-out
                 aria-[hidden=true]:max-md:qf-fade-out
-                aria-[hidden=true]:data-[exit-animation-ended=true]:qf-hidden
-                aria-[hidden=false]:max-md:qf-min-h-[calc(100vh_-_200px)]"
+                aria-[hidden=true]:data-[exit-animation-ended=true]:qf-hidden"
             tabindex="0"
             id="acteurDetailsPanel"
-            data-search-solution-form-target="acteurDetailsPanel"
             aria-hidden="true"
+            data-controller="acteur-details"
+            data-acteur-details-map-container-id-value="{{ map_container_id }}"
             >
                 {% include "qfdmo/carte/panels/acteur_detail.html" %}
             </aside>
 
-            <footer
-                class="max-md:qf-fixed
-                qf-bottom-0 qf-left-0 qf-right-0"
-            >
             {% block content_footer %}
             {% endblock content_footer %}
-            </footer>
         </section>
 
         {% block form_modals %}

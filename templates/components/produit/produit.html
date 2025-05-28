@@ -1,11 +1,23 @@
-{% load dsfr_tags %}
+{% load dsfr_tags wagtailcore_tags %}
 
-<header class="qf-mt-3w md:qf-mt-5w qf-flex qf-flex-col  qf-gap-2w">
+<header class="qf-mt-3w md:qf-mt-5w qf-flex qf-flex-col  qf-gap-3w">
+    <a
+        href="{% url 'qfdmd:home' %}"
+        class="qf-flex qf-gap-1v qf-justify-center qf-items-center
+        qf-text-green-menthe-sun-373-moon-652 qf-bg-none
+        md:qf-hidden qf-mr-auto"
+    >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12.6668 6.66589L12.6669 12.6658H11.3336L11.3335 7.99922L4.5523 7.99916L7.18548 10.6323L6.24264 11.5752L2 7.33249L6.24264 3.08984L7.18548 4.03266L4.55227 6.66582L12.6668 6.66589Z" fill="#37635F"/>
+        </svg>
+        <span>{{ ASSISTANT.nouvelle_recherche }}</span>
+    </a>
     <h1 class="qf-m-0">
         {{ object.nom|capfirst }}
     </h1>
     {% include "components/produit/_infotri.html" %}
 </header>
+
 {% if bon_etat and mauvais_etat %}
     <div class="fr-tabs">
         <ul class="fr-tabs__list" role="tablist" aria-label="État du produit {{ produit }}">
@@ -35,16 +47,28 @@
             </li>
         </ul>
         <div id="mauvais-etat-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="mauvais-etat-tab" tabindex="0">
-            {% include "./_detail.html" with content=mauvais_etat url_carte=produit.url_carte_mauvais_etat %}
+            {% include "./_detail.html" with content=mauvais_etat url_carte=object.url_carte_mauvais_etat id="mauvais_etat" %}
         </div>
         <div id="bon-etat-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="bon-etat-tab" tabindex="0">
-            {% include "./_detail.html" with content=bon_etat url_carte=produit.url_carte_bon_etat %}
+            {% include "./_detail.html" with content=bon_etat url_carte=object.url_carte_bon_etat id="bon_etat" %}
         </div>
     </div>
 {% else %}
     <div>
-        {% include "./_detail.html" %}
+        {% include "./_detail.html" with id="carte" %}
     </div>
 {% endif %}
 
-{% dsfr_accordion_group produit.content_display %}
+<div class="qf-flex qf-flex-col qf-gap-4w qf-mt-2w">
+{% for section in produit.content_display %}
+<div id="{{ section.id }}">
+    <h2>
+    {{ section.title }}
+    </h2>
+
+    <div>
+    {{ section.content|richtext }}
+    </div>
+</div>
+{% endfor %}
+</div>

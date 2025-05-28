@@ -37,6 +37,7 @@ from unidecode import unidecode
 
 from core.constants import DIGITAL_ACTEUR_CODE
 from core.models.mixin import TimestampedModel
+from core.utils import LazyEncoder
 from core.validators import EmptyEmailValidator
 from dags.sources.config.shared_constants import (
     EMPTY_ACTEUR_FIELD,
@@ -1084,6 +1085,37 @@ class DisplayedActeur(BaseActeur):
             for action in cached_action_instances
             if action.id in action_ids_to_display
         ]
+
+    @property
+    def json_ld(self):
+        data = {
+            "@context": "https://schema.org",
+            "@type": "Place",
+            "geo": {
+                "@type": "GeoCoordinates",
+                "latitude": self.latitude,
+                "longitude": self.longitude,
+            },
+            "name": self.libelle,
+        }
+        if self.should_display_adresse:
+            data.update(
+                address={
+                    "@type": "PostalAddress",
+                    "addressLocality": self.ville,
+                    "streetAddress": self.adresse,
+                    "postalCode": self.code_postal,
+                }
+            )
+
+        indent = settings.JSON_INDENT if settings.DEBUG else None
+        return json.dumps(
+            data,
+            ensure_ascii=False,
+            cls=LazyEncoder,
+            indent=indent,
+            sort_keys=True,
+        )
 
     def json_acteur_for_display(
         self,

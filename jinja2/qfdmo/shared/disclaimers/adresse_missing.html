@@ -13,10 +13,18 @@
     </picture>
     <div class="mx-auto qf-max-w-3xl qf-flex qf-flex-col qf-justify-center qf-text-center qf-items-center qf-relative qf-p-1w">
         <h3 class="qf-text-2xl sm:qf-text-4xl qf-text-center text-black qf-mb-2w">
-            Découvrez les lieux près de chez vous
-            pour donner une seconde vie à votre objet !
+            {% if carte_config and carte_config.preview_title %}
+                {{ carte_config.preview_title }}
+            {% else %}
+                Découvrez les lieux près de chez vous
+                pour donner une seconde vie à votre objet !
+            {% endif %}
         </h3>
         <p class="qf-max-w-xl qf-text-lg mx-auto qf-text-grey-50">
-            Saisissez une adresse et recherchez des établissements à proximité qui vous aideront à remettre votre objet en circulation.</p>
+            {% if carte_config and carte_config.preview_content %}
+                {{ carte_config.preview_content }}
+            {% else %}
+                Saisissez une adresse et recherchez des établissements à proximité qui vous aideront à remettre votre objet en circulation.</p>
+            {% endif %}
     </div>
 </div>

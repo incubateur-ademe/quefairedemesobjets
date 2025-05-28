@@ -58,7 +58,7 @@ test("Desktop | form is visible in the iframe", async ({ page }) => {
 });
 
 test("Desktop | iframe with 0px parent height displays correctly", async ({ page }) => {
-  await page.goto(`/test_iframe?carte=1`, { waitUntil: "networkidle" });
+  await page.goto(`/test_iframe?carte_with_defaults=1`, { waitUntil: "networkidle" });
   await expect(page).toHaveScreenshot("iframe.png");
 
   await page.goto(`/test_iframe?noheight=1&carte=1`, { waitUntil: "networkidle" });

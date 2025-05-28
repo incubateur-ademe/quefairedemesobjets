@@ -150,6 +150,7 @@ CACHES = {
 X_FRAME_OPTIONS = "ALLOWALL"
 
 if DEBUG:
+    CSRF_TRUSTED_ORIGINS = [config["BASE_URL"] for config in [ASSISTANT, LVAO]]
     INSTALLED_APPS.extend(["debug_toolbar", "django_browser_reload"])
     MEDIA_ROOT = "media"
     MEDIA_URL = "/media/"
