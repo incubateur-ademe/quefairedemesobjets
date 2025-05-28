@@ -20,7 +20,7 @@ from django.views.decorators.http import require_GET
 from django.views.generic.edit import FormView
 
 from core.jinja2_handler import distance_to_acteur
-from core.utils import generate_google_maps_itineraire_url, get_direction
+from core.utils import get_direction
 from qfdmo.forms import FormulaireForm
 from qfdmo.geo_api import bbox_from_list_of_geojson, retrieve_epci_geojson
 from qfdmo.leaflet import (
@@ -46,6 +46,17 @@ from qfdmo.models.action import (
 logger = logging.getLogger(__name__)
 
 BAN_API_URL = "https://api-adresse.data.gouv.fr/search/?q={}"
+
+
+def generate_google_maps_itineraire_url(
+    latitude: float, longitude: float, displayed_acteur: DisplayedActeur
+) -> str:
+    return (
+        "https://www.google.com/maps/dir/?api=1&origin="
+        f"{latitude},{longitude}"
+        f"&destination={displayed_acteur.latitude},"
+        f"{displayed_acteur.longitude}&travelMode=WALKING"
+    )
 
 
 class DigitalMixin:

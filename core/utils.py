@@ -3,7 +3,6 @@ from django.utils.encoding import force_str
 from django.utils.functional import Promise
 from wagtail.fields import DjangoJSONEncoder
 
-from qfdmo.models.acteur import DisplayedActeur
 from qfdmo.models.action import get_directions
 
 
@@ -13,17 +12,6 @@ def get_direction(request, is_carte=False):
     if direction not in [d["code"] for d in get_directions()]:
         direction = default_direction
     return direction
-
-
-def generate_google_maps_itineraire_url(
-    latitude: float, longitude: float, displayed_acteur: DisplayedActeur
-) -> str:
-    return (
-        "https://www.google.com/maps/dir/?api=1&origin="
-        f"{latitude},{longitude}"
-        f"&destination={displayed_acteur.latitude},"
-        f"{displayed_acteur.longitude}&travelMode=WALKING"
-    )
 
 
 class LazyEncoder(DjangoJSONEncoder):
