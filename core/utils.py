@@ -1,4 +1,7 @@
 from django.conf import settings
+from django.utils.encoding import force_str
+from django.utils.functional import Promise
+from wagtail.fields import DjangoJSONEncoder
 
 from qfdmo.models.action import get_directions
 
@@ -18,3 +21,16 @@ def generate_google_maps_itineraire_url(latitude, longitude, displayed_acteur):
         f"&destination={displayed_acteur.latitude},"
         f"{displayed_acteur.longitude}&travelMode=WALKING"
     )
+
+
+class LazyEncoder(DjangoJSONEncoder):
+    """
+    Force lazy strings to text
+
+    Inspired by https://github.com/hiimdoublej/django-json-ld/blob/master/django_json_ld/util.py
+    """
+
+    def default(self, obj):
+        if isinstance(obj, Promise):
+            return force_str(obj)
+        return super(LazyEncoder, self).default(obj)

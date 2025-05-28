@@ -25,8 +25,6 @@ class ActeurController extends Controller<HTMLElement> {
 
   initialize() {
     this.element.style.transition = this.initialTransition;
-    // this.#setTranslateY(0)
-    // this.element.style.height = `calc(100svh - 20%)`
     this.element.addEventListener("mousedown", this.#dragStart.bind(this))
     this.element.addEventListener('touchstart', this.#dragStart.bind(this));
 
@@ -59,8 +57,6 @@ class ActeurController extends Controller<HTMLElement> {
     this.panelHeight = this.element.offsetHeight
 
     if (window.matchMedia('screen and (max-width:768px)').matches) {
-      // this.element.scrollIntoView()
-
       if (this.hidden) {
         this.#setTranslateY(-1 * this.initialTranslateY)
       } else {

@@ -5,32 +5,7 @@
 {% endblock page_title %}
 
 {% block json_ld %}
-<script type="application/ld+json">
-{
-    "@context": "https://schema.org",
-    "@type": "Place",
-    "geo": {
-        "@type": "GeoCoordinates",
-        "latitude": "{{ object.latitude}}",
-        "longitude": "{{ object.longitude }}"
-    },
-    {% if object.should_display_adresse %}
-    "address": {
-        "@type": "PostalAddress"
-        {% if object.ville %}
-        ,"addressLocality": "{{ object.ville }}"
-        {% endif %}
-        {% if object.adresse %}
-        ,"streetAddress": "{{ object.adresse }}"
-        {% endif %}
-        {% if object.code_postal %}
-        ,"postalCode": "{{ object.code_postal }}"
-        {% endif %}
-      },
-    {% endif %}
-    "name": "{{ object.libelle|title }}"
-}
-</script>
+{{ object.json_ld }}
 {% endblock json_ld %}
 
 {% block content %}
@@ -45,6 +20,7 @@
                         {% include "qfdmo/acteur/_labels.html" %}
                     {% endif %}
 
+                    {# TODO: use an alternative template instead of a conditionnal inside the html tag #}
                     <{% if turbo %}h3{% else %}h1{% endif %} class="qf-text-lg qf-m-0 qf-max-w-[90%]" data-testid="acteur-title">{{ object.libelle|title }}</{% if turbo %}h3{% else %}h1{% endif %}>
                     <p class="qf-text-sm qf-m-0">
                         {{ object.acteur_services_display }} {{ distance }}
