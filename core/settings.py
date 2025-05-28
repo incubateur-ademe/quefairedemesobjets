@@ -89,7 +89,6 @@ BASE_ALLOWED_HOSTS = [
 CANONICAL_HOST = urlparse(ASSISTANT.get("BASE_URL")).hostname
 
 
-# Exclude empty values
 ALLOWED_HOSTS = [
     *BASE_ALLOWED_HOSTS,
     *decouple.config("ALLOWED_HOSTS", default="", cast=str).split(","),
