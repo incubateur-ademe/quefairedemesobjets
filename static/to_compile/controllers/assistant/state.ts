@@ -1,6 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
 import AdresseAutocompleteController from "../carte/address_autocomplete_controller"
-import MapController from "../carte/map_controller"
 import SearchFormController from "../carte/search_solution_form_controller"
 
 export default class extends Controller<HTMLElement> {
@@ -34,15 +33,21 @@ export default class extends Controller<HTMLElement> {
 
   locationValueChanged(value, previousValue) {
     if (value && previousValue) {
-      this.#persistInSessionStorageIfChanged(value.adresse, "adresse")
-      this.#persistInSessionStorageIfChanged(value.latitude, "latitude")
-      this.#persistInSessionStorageIfChanged(value.longitude, "longitude")
+      this.persistInSessionStorageIfChanged(value.adresse, "adresse")
+      this.persistInSessionStorageIfChanged(value.latitude, "latitude")
+      this.persistInSessionStorageIfChanged(value.longitude, "longitude")
     }
 
     for (const outlet of this.addressAutocompleteOutlets) {
-      outlet.inputTarget.value = value.adresse
-      outlet.latitudeTarget.value = value.latitude
-      outlet.longitudeTarget.value = value.longitude
+      if (value.adresse) {
+        outlet.inputTarget.value = value.adresse
+      }
+      if (value.latitude) {
+        outlet.latitudeTarget.value = value.latitude
+      }
+      if (value.longitude) {
+        outlet.longitudeTarget.value = value.longitude
+      }
     }
 
     for (const outlet of this.searchSolutionFormOutlets) {
@@ -50,7 +55,7 @@ export default class extends Controller<HTMLElement> {
     }
   }
 
-  #persistInSessionStorageIfChanged(value, key) {
+  persistInSessionStorageIfChanged(value, key) {
     if (value !== sessionStorage.getItem(key)) {
       sessionStorage.setItem(key, value)
     }

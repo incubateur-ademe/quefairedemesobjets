@@ -75,7 +75,7 @@
                             max-md:qf-left-0 max-md:qf-right-0
                             data-[visible=true]:qf-flex-grow
                             data-[visible=false]:qf-invisible data-[visible=false]:qf-h-0"
-                        data-visible={{"true" if is_carte else "false"}}
+                        data-visible="true"
                         tabindex="0"
                     >
                         {% include 'qfdmo/carte/results.html' %}
@@ -96,7 +96,6 @@
             <aside class="
                 md:qf-relative qf-z-30
                 aria-[hidden=false]:qf-block qf-hidden qf-flex-col
-                {% if not is_carte %}md:qf-h-[calc(100vh_-_250px)]{% endif %}
                 qf-overflow-auto
                 qf-bg-white
                 max-md:qf-absolute
