@@ -5,7 +5,7 @@
 {% endblock page_title %}
 
 {% block json_ld %}
-{{ object.json_ld }}
+<script type="application/ld+json">{{ object.json_ld|safe }}</script>
 {% endblock json_ld %}
 
 {% block content %}

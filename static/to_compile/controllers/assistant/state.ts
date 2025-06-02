@@ -40,14 +40,12 @@ export default class extends Controller<HTMLElement> {
     }
 
     for (const outlet of this.addressAutocompleteOutlets) {
-      console.log("fill form", { outlet })
       outlet.inputTarget.value = value.adresse
       outlet.latitudeTarget.value = value.latitude
       outlet.longitudeTarget.value = value.longitude
     }
 
     for (const outlet of this.searchSolutionFormOutlets) {
-      console.log("submit", { outlet })
       outlet.advancedSubmit()
     }
   }

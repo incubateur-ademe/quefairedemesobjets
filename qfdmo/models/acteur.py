@@ -1108,7 +1108,7 @@ class DisplayedActeur(BaseActeur):
                 }
             )
 
-        indent = settings.JSON_INDENT if settings.DEBUG else None
+        indent = 4 if settings.DEBUG else None
         return json.dumps(
             data,
             ensure_ascii=False,
