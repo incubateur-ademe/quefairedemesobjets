@@ -150,12 +150,6 @@ export class SolutionMap {
         points.push([actor.location.coordinates[1], actor.location.coordinates[0]])
       }
     }, this)
-    if (
-      this.#location.latitude !== undefined &&
-      this.#location.longitude !== undefined
-    ) {
-      points.push([this.#location.latitude, this.#location.longitude])
-    }
     this.fitBounds(points, bboxValue)
   }
 
