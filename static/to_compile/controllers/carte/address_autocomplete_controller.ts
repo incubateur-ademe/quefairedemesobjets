@@ -164,7 +164,10 @@ class AdresseAutocompleteController extends AutocompleteController {
         let labels = [["Autour de moi", 9999, 9999].join(SEPARATOR)].concat(
           data.features.map((feature: any) => {
             return [
-              feature.properties.label,
+              feature.properties.label.toLowerCase() ==
+              feature.properties.city.toLowerCase()
+                ? feature.properties.label + " - " + feature.properties.context
+                : feature.properties.label,
               feature.geometry.coordinates[1],
               feature.geometry.coordinates[0],
             ].join(SEPARATOR)
