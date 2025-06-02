@@ -86,7 +86,12 @@ createsuperuser:
 
 .PHONY: seed-database
 seed-database:
-	$(DJANGO_ADMIN) loaddata categories actions acteur_services acteur_types acteurs objets
+	$(DJANGO_ADMIN) loaddata categories actions acteur_services acteur_types acteurs objets synonymes produits
+
+.PHONY: generate-assistant-fixtures
+generate-assistant-fixtures:
+	$(DJANGO_ADMIN) dumpdata qfdmd.synonyme -o qfdmd/produits.json
+	$(DJANGO_ADMIN) dumpdata qfdmd.produit -o qfdmd/synonymes.json
 
 .PHONY: clear-cache
 clear-cache:
