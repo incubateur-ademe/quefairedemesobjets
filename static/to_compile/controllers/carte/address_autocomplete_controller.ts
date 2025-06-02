@@ -165,7 +165,10 @@ class AdresseAutocompleteController extends AutocompleteController {
           .slice(0, this.maxOptionDisplayedValue)
           .map((feature: any) => {
             return [
-              feature.properties.label,
+              feature.properties.label.toLowerCase() ==
+              feature.properties.city.toLowerCase()
+                ? feature.properties.label + " - " + feature.properties.context
+                : feature.properties.label,
               feature.geometry.coordinates[1],
               feature.geometry.coordinates[0],
             ].join(SEPARATOR)
