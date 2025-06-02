@@ -30,7 +30,8 @@ def export_opendata_csv_to_s3(export_opendata_config: ExportOpendataConfig):
                     "-d",
                     os.environ.get("POSTGRES_DB") or "",
                     "-c",
-                    f"COPY {export_opendata_config.opendata_table}"
+                    f"COPY {export_opendata_config.opendata_schema}."
+                    f"{export_opendata_config.opendata_table}"
                     " TO STDOUT WITH CSV HEADER",
                 ],
                 env={"PGPASSWORD": os.environ.get("POSTGRES_PASSWORD") or ""},
