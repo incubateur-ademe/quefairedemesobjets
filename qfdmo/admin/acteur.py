@@ -159,6 +159,7 @@ class BaseActeurAdmin(admin.GISModelAdmin):
         "code_postal",
         "ville",
         "adresse",
+        "statut",
         "modifie_le",
     )
     search_fields = [
@@ -821,6 +822,8 @@ class VueActeurLabelQualiteInline(NotMutableMixin, admin.StackedInline):
 class VueActeurAdmin(NotMutableMixin, BaseActeurAdmin):
     list_display = list(BaseActeurAdmin.list_display) + ["uuid"]
     search_fields = list(BaseActeurAdmin.search_fields) + ["uuid"]
+    change_form_template = "admin/acteur/change_form.html"
+
     inlines = [
         VuePropositionServiceInline,
         VueActeurLabelQualiteInline,
