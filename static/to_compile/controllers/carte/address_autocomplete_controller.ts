@@ -31,7 +31,7 @@ class AdresseAutocompleteController extends AutocompleteController {
     this.autocompleteList = this.createAutocompleteList()
     this.allAvailableOptions = data
     for (let i = 0; i < this.allAvailableOptions.length; i++) {
-      if (countResult >= this.maxOptionDisplayedValue) break
+      if (countResult >= this.maxOptionDisplayedValue + 1) break
       countResult++
       this.addOption(regexPattern, this.allAvailableOptions[i])
     }
@@ -161,15 +161,16 @@ class AdresseAutocompleteController extends AutocompleteController {
     return await fetch(`https://api-adresse.data.gouv.fr/search/?q=${value}`)
       .then((response) => response.json())
       .then((data) => {
-        let labels = [["Autour de moi", 9999, 9999].join(SEPARATOR)].concat(
-          data.features.map((feature: any) => {
+        let labels = data.features
+          .slice(0, this.maxOptionDisplayedValue)
+          .map((feature: any) => {
             return [
               feature.properties.label,
               feature.geometry.coordinates[1],
               feature.geometry.coordinates[0],
             ].join(SEPARATOR)
-          }),
-        )
+          })
+          .concat([["Autour de moi", 9999, 9999].join(SEPARATOR)])
         return labels
       })
       .catch((error) => {
