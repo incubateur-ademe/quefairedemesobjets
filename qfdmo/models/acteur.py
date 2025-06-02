@@ -1000,8 +1000,8 @@ Model to display all acteurs in admin
 class VueActeur(BaseActeur):
     class Meta:
         managed = False
-        verbose_name = "Vue sur l'acteur"
-        verbose_name_plural = "Vues sur tous les acteurs"
+        verbose_name = "ACTEUR de l'EC - Vue sur l'acteur"
+        verbose_name_plural = "ACTEURS de l'EC - Vues sur tous les acteurs"
 
     uuid = models.CharField(max_length=255, default=shortuuid.uuid, editable=False)
 
