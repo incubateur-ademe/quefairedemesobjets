@@ -31,11 +31,7 @@ def canonical_url(context: dict) -> dict:
     if "request" in context:
         request = context["request"]
         path = request.build_absolute_uri(request.path)
-        canonical_url = (
-            path.replace(request.get_host(), settings.CANONICAL_HOST)
-            if settings.CANONICAL_HOST != request.get_host()
-            else None
-        )
+        canonical_url = path.replace(request.get_host(), settings.CANONICAL_HOST)
 
     return {"canonical_url": canonical_url}
 
