@@ -45,11 +45,6 @@ class AbstractBaseProduit(NomAsNaturalKeyModel):
 
 @register_snippet
 class Produit(index.Indexed, AbstractBaseProduit):
-    id = models.AutoField(
-        primary_key=True,
-        help_text="Correspond à l'identifiant ID défini dans les données "
-        "<i>Que Faire</i>.",
-    )
     nom = models.CharField(
         unique=True,
         verbose_name="Libellé",
@@ -72,7 +67,7 @@ class Produit(index.Indexed, AbstractBaseProduit):
     panels = [FieldPanel("infotri")]
 
     def __str__(self):
-        return f"{self.id} - {self.nom}"
+        return f"{self.pk} - {self.nom}"
 
     search_fields = [
         index.AutocompleteField("nom"),

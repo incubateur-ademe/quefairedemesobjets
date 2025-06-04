@@ -1,5 +1,8 @@
+import json
+
 import pytest
 from bs4 import BeautifulSoup
+from django.contrib.gis.geos import Point
 
 from qfdmo.models.acteur import ActeurStatus
 from unit_tests.qfdmo.acteur_factory import (
@@ -214,3 +217,40 @@ class TestRedirects:
 
     def not_found_actor_do_not_raise_error(self, client):
         pass
+
+
+@pytest.mark.django_db
+class TestSEO:
+
+    @pytest.fixture
+    def adresse(self):
+        adresse = DisplayedActeurFactory(
+            adresse="1 rue Johnny Haliday",
+            ville="Groland",
+            code_postal="12345",
+            location=Point(1, 2),
+        )
+        return adresse
+
+    def test_has_h1(self, get_response, adresse):
+        response, soup = get_response(adresse.uuid)
+        all_h1_tags = soup.find_all("h1")
+        assert len(all_h1_tags) == 1, "Adresse detail page contains only one h1"
+        assert (
+            all_h1_tags[0].text.lower() == adresse.libelle.lower()
+        ), "H1 contains adresse libelle"
+
+    def test_json_ld(self, get_response, adresse):
+        response, soup = get_response(adresse.uuid)
+        structured_data = [
+            json.loads(x.string)
+            for x in soup.find_all("script", type="application/ld+json")
+        ]
+
+        assert len(structured_data) == 1
+        assert structured_data[0] == json.loads(adresse.json_ld)
+        assert structured_data[0]["address"]["addressLocality"] == "Groland"
+        assert structured_data[0]["address"]["streetAddress"] == "1 rue Johnny Haliday"
+        assert structured_data[0]["address"]["postalCode"] == "12345"
+        assert structured_data[0]["geo"]["latitude"] == 2.0
+        assert structured_data[0]["geo"]["longitude"] == 1.0
