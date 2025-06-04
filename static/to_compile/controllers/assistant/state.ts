@@ -43,16 +43,26 @@ export default class extends Controller<HTMLElement> {
       if (value.adresse && value.adresse !== outlet.inputTarget.value) {
         outlet.inputTarget.value = value.adresse
       }
-      if (value.latitude && outlet.latitudeTarget.value) {
+      if (value.latitude && outlet.latitudeTarget.value !== value.latitude) {
         outlet.latitudeTarget.value = value.latitude
       }
-      if (value.longitude && outlet.longitudeTarget.value) {
+      if (value.longitude && outlet.longitudeTarget.value !== value.longitude) {
         outlet.longitudeTarget.value = value.longitude
       }
     }
 
+    this.submit()
+  }
+
+  submit() {
     for (const outlet of this.searchSolutionFormOutlets) {
       outlet.advancedSubmit()
+    }
+  }
+
+  updateBbox(event) {
+    for (const outlet of this.searchSolutionFormOutlets) {
+      outlet.updateBboxInput(event)
     }
   }
 
