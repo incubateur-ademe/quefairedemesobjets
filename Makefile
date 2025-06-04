@@ -24,7 +24,6 @@ check:
 init-certs:
 	docker run -ti -v ./nginx-local-only/certs:/app/certs -w /app/certs --rm alpine/mkcert $(LVAO_URL) $(ASSISTANT_URL)
 
-
 .PHONY: init-playwright
 init-playwright:
 	npx playwright install --with-deps
@@ -58,7 +57,6 @@ check-format:
 fix:
 	poetry run ruff check . --fix
 	poetry run black --exclude=.venv .
-
 
 # Run development servers
 .PHONY: run-airflow
@@ -192,9 +190,9 @@ load-production-dump:
 
 .PHONY: db-restore
 db-restore:
+	make dump-production
 	make drop-schema-public
 	make create-schema-public
-	make dump-production
 	make load-production-dump
 	make migrate
 
