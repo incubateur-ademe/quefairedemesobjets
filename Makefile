@@ -8,6 +8,7 @@ endif
 PYTHON := poetry run python
 DJANGO_ADMIN := $(PYTHON) manage.py
 PYTEST := poetry run pytest
+HONCHO := poetry run honcho
 DB_URL := postgres://qfdmo:qfdmo@localhost:6543/qfdmo# pragma: allowlist secret
 ASSISTANT_URL := quefairedemesdechets.ademe.local
 LVAO_URL := lvao.ademe.local
@@ -57,10 +58,10 @@ run-airflow:
 
 .PHONY: run-django
 run-django:
-	honcho start -f Procfile.django.dev
+	$(HONCHO) start -f Procfile.django.dev
 
 run-all:
-	honcho start -f Procfile.all.dev
+	$(HONCHO) start -f Procfile.all.dev
 
 # Local django operations
 .PHONY: migrate
