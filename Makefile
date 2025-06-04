@@ -137,9 +137,14 @@ unit-test:
 integration-test:
 	$(PYTEST) ./integration_tests
 
+
+.PHONY: test-dags
+test-dags:
+	$(PYTEST) ./dags/tests
+
 .PHONY: e2e-test
 e2e-test:
-	npx playwright test --update-snapshots --ui
+	npx playwright test --update-snapshots
 
 .PHONY: a11y
 a11y:
@@ -153,6 +158,8 @@ js-test:
 test:
 	@make unit-test
 	@make e2e-test
+	@make integration-test
+	@make test-dags
 
 # DSFR
 .PHONY: extract-dsfr
