@@ -1,14 +1,14 @@
 import pandas as pd
 import shortuuid
 from sources.config import shared_constants as constants
+
 from utils.django import django_setup_full
 
 django_setup_full()
 
-from qfdmo.models.acteur import RevisionActeur  # noqa: E402
-
 
 def compute_acteur(df_acteur: pd.DataFrame, df_revisionacteur: pd.DataFrame):
+    from qfdmo.models.acteur import RevisionActeur
 
     # Collect parent_id among active revisionacteurs
     df_revisionacteur_parents = df_revisionacteur[
