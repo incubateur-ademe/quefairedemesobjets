@@ -1947,14 +1947,14 @@ taggit = ["django-taggit (>=3.1)"]
 
 [[package]]
 name = "django-ninja"
-version = "1.4.1"
+version = "1.4.3"
 description = "Django Ninja - Fast Django REST framework"
 optional = false
 python-versions = ">=3.7"
 groups = ["main"]
 files = [
-    {file = "django_ninja-1.4.1-py3-none-any.whl", hash = "sha256:a091aa69be6ba75a89c5043d35f99cf9bf4f5c26e1ac6783accf8eaa1f8cb12b"},
-    {file = "django_ninja-1.4.1.tar.gz", hash = "sha256:828a901abdc9c02cc89c9ab646cbafbc972c0a90919b16b37b3197d8d6094abb"},
+    {file = "django_ninja-1.4.3-py3-none-any.whl", hash = "sha256:f3204137a059437b95677049474220611f1cf9efedba9213556474b75168fa01"},
+    {file = "django_ninja-1.4.3.tar.gz", hash = "sha256:e46d477ca60c228d2a5eb3cc912094928ea830d364501f966661eeada67cb038"},
 ]
 
 [package.dependencies]
@@ -7404,4 +7404,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12,<3.13"
-content-hash = "df008090d32f97bc621bf089689c0b181982be0add6e84cd35bc30eb7d80078d"
+content-hash = "779e221d6f5c16693fdd765a13592b9ce046d0e431e61f76276abdf46daa08d1"
