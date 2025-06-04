@@ -596,24 +596,6 @@
 {
     "model": "qfdmd.synonyme",
     "fields": {
-        "modifie_le": "2025-01-20T14:28:06.988Z",
-        "qu_est_ce_que_j_en_fais_mauvais_etat": "",
-        "qu_est_ce_que_j_en_fais_bon_etat": "",
-        "comment_les_eviter": "",
-        "que_va_t_il_devenir": "",
-        "slug": "tout-venant",
-        "nom": "Tout venant",
-        "produit": [
-            "Gravats"
-        ],
-        "picto": "",
-        "pin_on_homepage": false,
-        "meta_description": ""
-    }
-},
-{
-    "model": "qfdmd.synonyme",
-    "fields": {
         "modifie_le": "2025-01-30T07:48:52.961Z",
         "qu_est_ce_que_j_en_fais_mauvais_etat": "",
         "qu_est_ce_que_j_en_fais_bon_etat": "",
@@ -8840,24 +8822,6 @@
 {
     "model": "qfdmd.synonyme",
     "fields": {
-        "modifie_le": "2025-01-28T20:18:03.077Z",
-        "qu_est_ce_que_j_en_fais_mauvais_etat": "",
-        "qu_est_ce_que_j_en_fais_bon_etat": "",
-        "comment_les_eviter": "",
-        "que_va_t_il_devenir": "",
-        "slug": "tuile",
-        "nom": "Tuile",
-        "produit": [
-            "Matériaux de construction"
-        ],
-        "picto": "",
-        "pin_on_homepage": false,
-        "meta_description": ""
-    }
-},
-{
-    "model": "qfdmd.synonyme",
-    "fields": {
         "modifie_le": "2025-01-28T20:18:03.098Z",
         "qu_est_ce_que_j_en_fais_mauvais_etat": "",
         "qu_est_ce_que_j_en_fais_bon_etat": "",
@@ -8867,24 +8831,6 @@
         "nom": "Matériaux de construction",
         "produit": [
             "Matériaux de construction"
-        ],
-        "picto": "",
-        "pin_on_homepage": false,
-        "meta_description": ""
-    }
-},
-{
-    "model": "qfdmd.synonyme",
-    "fields": {
-        "modifie_le": "2025-01-28T20:18:03.107Z",
-        "qu_est_ce_que_j_en_fais_mauvais_etat": "",
-        "qu_est_ce_que_j_en_fais_bon_etat": "",
-        "comment_les_eviter": "",
-        "que_va_t_il_devenir": "",
-        "slug": "pierres",
-        "nom": "Pierres",
-        "produit": [
-            "Pierres"
         ],
         "picto": "",
         "pin_on_homepage": false,
@@ -36002,13 +35948,13 @@
 {
     "model": "qfdmd.synonyme",
     "fields": {
-        "modifie_le": "2025-05-04T18:47:51.163Z",
+        "modifie_le": "2025-06-03T10:45:04.558Z",
         "qu_est_ce_que_j_en_fais_mauvais_etat": "",
         "qu_est_ce_que_j_en_fais_bon_etat": "",
         "comment_les_eviter": "",
         "que_va_t_il_devenir": "",
         "slug": "verre-plat-batiment",
-        "nom": "Verre plat (Bâtiment)",
+        "nom": "Verre plat (Bâtiment / BTP)",
         "produit": [
             "Vitre"
         ],
@@ -36020,13 +35966,13 @@
 {
     "model": "qfdmd.synonyme",
     "fields": {
-        "modifie_le": "2025-05-04T18:47:51.156Z",
+        "modifie_le": "2025-06-03T10:45:13.073Z",
         "qu_est_ce_que_j_en_fais_mauvais_etat": "",
         "qu_est_ce_que_j_en_fais_bon_etat": "",
         "comment_les_eviter": "",
         "que_va_t_il_devenir": "",
         "slug": "verres-plats-speciaux-batiment",
-        "nom": "Verres plats spéciaux (Bâtiment)",
+        "nom": "Verres plats spéciaux (Bâtiment / BTP)",
         "produit": [
             "Vitre"
         ],
@@ -36434,7 +36380,7 @@
 {
     "model": "qfdmd.synonyme",
     "fields": {
-        "modifie_le": "2025-05-04T18:47:51Z",
+        "modifie_le": "2025-05-04T18:47:51.000Z",
         "qu_est_ce_que_j_en_fais_mauvais_etat": "",
         "qu_est_ce_que_j_en_fais_bon_etat": "",
         "comment_les_eviter": "",
@@ -38738,7 +38684,7 @@
 {
     "model": "qfdmd.synonyme",
     "fields": {
-        "modifie_le": "2025-05-04T18:47:50.171Z",
+        "modifie_le": "2025-06-03T10:42:36.229Z",
         "qu_est_ce_que_j_en_fais_mauvais_etat": "",
         "qu_est_ce_que_j_en_fais_bon_etat": "",
         "comment_les_eviter": "",
@@ -38746,7 +38692,7 @@
         "slug": "lino",
         "nom": "Lino",
         "produit": [
-            "Matériaux du bâtiment en plastique"
+            "Linoléum & Fibre de verre (non-recyclables)"
         ],
         "picto": "",
         "pin_on_homepage": false,
@@ -38756,7 +38702,7 @@
 {
     "model": "qfdmd.synonyme",
     "fields": {
-        "modifie_le": "2025-05-04T18:47:50.165Z",
+        "modifie_le": "2025-06-03T10:42:46.936Z",
         "qu_est_ce_que_j_en_fais_mauvais_etat": "",
         "qu_est_ce_que_j_en_fais_bon_etat": "",
         "comment_les_eviter": "",
@@ -38764,7 +38710,7 @@
         "slug": "linoleum",
         "nom": "Linoléum",
         "produit": [
-            "Matériaux du bâtiment en plastique"
+            "Linoléum & Fibre de verre (non-recyclables)"
         ],
         "picto": "",
         "pin_on_homepage": false,
@@ -39053,6 +38999,96 @@
         "nom": "Magnet",
         "produit": [
             "Aimant"
+        ],
+        "picto": "",
+        "pin_on_homepage": false,
+        "meta_description": ""
+    }
+},
+{
+    "model": "qfdmd.synonyme",
+    "fields": {
+        "modifie_le": "2025-06-02T11:45:51.370Z",
+        "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+        "qu_est_ce_que_j_en_fais_bon_etat": "",
+        "comment_les_eviter": "",
+        "que_va_t_il_devenir": "",
+        "slug": "ticket-de-jeu-a-gratter",
+        "nom": "Ticket de jeu à gratter",
+        "produit": [
+            "Ticket (transport en commun)"
+        ],
+        "picto": "",
+        "pin_on_homepage": false,
+        "meta_description": ""
+    }
+},
+{
+    "model": "qfdmd.synonyme",
+    "fields": {
+        "modifie_le": "2025-06-03T07:33:29.624Z",
+        "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+        "qu_est_ce_que_j_en_fais_bon_etat": "",
+        "comment_les_eviter": "",
+        "que_va_t_il_devenir": "",
+        "slug": "bouteille-de-co2-pour-aquariophylie",
+        "nom": "Bouteille de CO2 pour aquariophylie",
+        "produit": [
+            "Bouteille de CO2 pour aquariophylie"
+        ],
+        "picto": "",
+        "pin_on_homepage": false,
+        "meta_description": ""
+    }
+},
+{
+    "model": "qfdmd.synonyme",
+    "fields": {
+        "modifie_le": "2025-06-03T10:42:24.637Z",
+        "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+        "qu_est_ce_que_j_en_fais_bon_etat": "",
+        "comment_les_eviter": "",
+        "que_va_t_il_devenir": "",
+        "slug": "dalles-en-caoutchouc",
+        "nom": "Dalles en caoutchouc",
+        "produit": [
+            "Linoléum & Fibre de verre (non-recyclables)"
+        ],
+        "picto": "",
+        "pin_on_homepage": false,
+        "meta_description": ""
+    }
+},
+{
+    "model": "qfdmd.synonyme",
+    "fields": {
+        "modifie_le": "2025-06-03T11:00:38.041Z",
+        "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+        "qu_est_ce_que_j_en_fais_bon_etat": "",
+        "comment_les_eviter": "",
+        "que_va_t_il_devenir": "",
+        "slug": "fibre-de-verre-batiment-btp",
+        "nom": "Fibre de verre (Bâtiment / BTP)",
+        "produit": [
+            "Linoléum & Fibre de verre (non-recyclables)"
+        ],
+        "picto": "",
+        "pin_on_homepage": false,
+        "meta_description": ""
+    }
+},
+{
+    "model": "qfdmd.synonyme",
+    "fields": {
+        "modifie_le": "2025-06-03T11:00:38.049Z",
+        "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+        "qu_est_ce_que_j_en_fais_bon_etat": "",
+        "comment_les_eviter": "",
+        "que_va_t_il_devenir": "",
+        "slug": "toile-de-verre-batiment-btp",
+        "nom": "Toile de verre (Bâtiment / BTP)",
+        "produit": [
+            "Linoléum & Fibre de verre (non-recyclables)"
         ],
         "picto": "",
         "pin_on_homepage": false,

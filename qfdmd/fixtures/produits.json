@@ -3460,11 +3460,11 @@
 {
     "model": "qfdmd.produit",
     "fields": {
-        "modifie_le": "2025-04-17T14:48:25.935Z",
+        "modifie_le": "2025-06-02T14:48:46.196Z",
         "qu_est_ce_que_j_en_fais_mauvais_etat": "",
         "qu_est_ce_que_j_en_fais_bon_etat": "",
         "comment_les_eviter": "Privilégiez des produits portant un logo environnemental qui peut vous garantir un produit composé à plus de 90 % de fibres recyclées. Achetez d'occasion. C'est une solution intéressante du point de vue environnemental puisqu'elle permet de limiter la mise au rebut et évite l'utilisation de matières premières, d'énergie, d'eau et de produits chimiques pour fabriquer du linge neuf.",
-        "que_va_t_il_devenir": "Si vous le déposez à un point de collecte, votre linge de maison, selon son état d'usure, entamera une nouvelle vie comme linge d'occasion ou en matière première (chiffon d'essuyage pour l'industrie, isolant...).<br/><br/>Du linge jeté à la poubelle suivra l'une des filières d'élimination des ordures ménagères. Il sera incinéré (avec le plus souvent récupération de chaleur pour produire de l'énergie) ou enfoui en installation de stockage de déchets.",
+        "que_va_t_il_devenir": "Si vous le déposez à un point de collecte, votre linge de maison, selon son état d'usure, entamera une nouvelle vie comme linge d'occasion ou en matière première (chiffon d'essuyage pour l'industrie, isolant...).<br/><br/>Du linge jeté à la poubelle (ce n'est <b>pas</b> conseillé !) suivra l'une des filières d'élimination des ordures ménagères. Il sera incinéré (avec le plus souvent récupération de chaleur pour produire de l'énergie) ou enfoui en installation de stockage de déchets.",
         "nom": "Linge de maison",
         "synonymes_existants": "Tablier / Draps / Serviette de bain / Taie d'oreiller / Parure de lit / Tour de lit / Gigoteuse / Alèse / Protège-matelas / Drap de plage / Peignoir / Tapis de bain / Nappe / Sous-nappe / Chemin de table / Set de table / Torchon / Panneau japonais / Mouchoir en tissu / Housse",
         "code": "LINGE",
@@ -3688,7 +3688,7 @@
 {
     "model": "qfdmd.produit",
     "fields": {
-        "modifie_le": "2025-04-28T14:18:53.162Z",
+        "modifie_le": "2025-06-03T10:33:02.894Z",
         "qu_est_ce_que_j_en_fais_mauvais_etat": "",
         "qu_est_ce_que_j_en_fais_bon_etat": "",
         "comment_les_eviter": "",
@@ -3697,7 +3697,7 @@
         "synonymes_existants": "Brique / Tuile / Baignoire en céramique / Receveur de douche en céramique / Lavabo en céramique / Évier en céramique",
         "code": "ADEME_BTP",
         "bdd": "sinoe",
-        "qu_est_ce_que_j_en_fais": "Les matériaux issus de chantiers de rénovation, démolition ou construction doivent être <b>triés par matières</b> afin d'être recyclés. Les recyclage est gratuit pour les matériaux triés, mais il peut être payant pour les déchets en mélange<br /><br />Faites enlever les matériaux par l'entrepreneur qui réalise vos travaux . Il les évacuera vers des plateformes dédiées (le recyclage est prise en charge, mais le transport peut rester à votre charge).<br /><br />Si vous faites les travaux vous-même et si les volumes sont limités, déposez ces déchets triés dans un des points de collecte de la carte ci-dessous.<br /><br />Si les quantités sont trop importantes, faites appel à une entreprise spécialisée.",
+        "qu_est_ce_que_j_en_fais": "Les matériaux issus de chantiers de rénovation, démolition ou construction doivent être <b>triés par matières</b> afin d'être recyclés. Le recyclage est gratuit pour les matériaux triés, mais il peut être payant pour les déchets en mélange<br /><br />Faites enlever les matériaux par l'entrepreneur qui réalise vos travaux . Il les évacuera vers des plateformes dédiées (le recyclage est pris en charge, mais le transport peut rester à votre charge).<br /><br />Si vous faites les travaux vous-même et si les volumes sont limités, déposez ces déchets triés dans un des points de collecte de la carte ci-dessous.<br /><br />Si les quantités sont trop importantes, faites appel à une entreprise spécialisée.",
         "nom_eco_organisme": "OCAB / Ecomaison / Ecominéro / Valdelia / Valobat",
         "filieres_rep": "Bâtiment",
         "slug": "Matériaux de construction",
@@ -4500,25 +4500,6 @@
         "filieres_rep": "Equipements électriques et électroniques",
         "slug": "Petit électroménager",
         "infotri": "[{\"id\": \"a46db357-f776-4700-a2b4-7b38e892071f\", \"type\": \"image\", \"value\": {\"image\": 347, \"alt_text\": null, \"decorative\": false}}]"
-    }
-},
-{
-    "model": "qfdmd.produit",
-    "fields": {
-        "modifie_le": "2025-04-17T13:09:22.438Z",
-        "qu_est_ce_que_j_en_fais_mauvais_etat": "",
-        "qu_est_ce_que_j_en_fais_bon_etat": "",
-        "comment_les_eviter": "",
-        "que_va_t_il_devenir": "Déposées en déchèterie, ou directement sur plate-forme de tri, les pierres seront valorisées comme matériaux de construction de Travaux Publics (remblais, assises routière...) ou dans le cadre de réaménagement de carrière. A défaut, elles seront éliminées en installation de stockage de déchets inertes.",
-        "nom": "Pierres",
-        "synonymes_existants": "",
-        "code": "ADEME_BTP",
-        "bdd": "ocad3e",
-        "qu_est_ce_que_j_en_fais": "Faites enlever les pierres par l'entrepreneur qui réalise vos travaux de rénovation. Il les évacuera vers des plateformes dédiées (en contrepartie d'une rémunération fixée lors du devis initial ou en fonction de la quantité évacuée).<br /><br />Déposez-les en déchèterie si vous réalisez des travaux vous-même et que la quantité de déchets à éliminer est limitée. Si les quantités sont trop importantes, faîtes appel à une entreprise spécialisée.",
-        "nom_eco_organisme": "OCAB",
-        "filieres_rep": "Bâtiment",
-        "slug": "Pierres",
-        "infotri": "[{\"id\": \"fee21c87-6435-4242-85cf-42264e47756c\", \"type\": \"image\", \"value\": {\"image\": 232, \"alt_text\": null, \"decorative\": false}}]"
     }
 },
 {
@@ -5816,7 +5797,7 @@
 {
     "model": "qfdmd.produit",
     "fields": {
-        "modifie_le": "2025-04-17T13:09:15.596Z",
+        "modifie_le": "2025-06-02T11:46:04.139Z",
         "qu_est_ce_que_j_en_fais_mauvais_etat": "",
         "qu_est_ce_que_j_en_fais_bon_etat": "",
         "comment_les_eviter": "Pour les tickets de transport en commun, si vous êtes un usager régulier, préférez les cartes d'abonnement (hebdomadaires, mensuelles ou annuelles) aux tickets. Dans certaines villes, un support rechargeable peut vous être proposé, évitant ainsi l'achat de tickets individuels.",
@@ -7298,7 +7279,7 @@
 {
     "model": "qfdmd.produit",
     "fields": {
-        "modifie_le": "2025-05-19T15:28:27.786Z",
+        "modifie_le": "2025-06-03T10:06:41.038Z",
         "qu_est_ce_que_j_en_fais_mauvais_etat": "",
         "qu_est_ce_que_j_en_fais_bon_etat": "",
         "comment_les_eviter": "Pour votre santé, la consommation de ce gaz comme gaz hilarant est à proscrire. <br/> \r\nLes risques immédiats : asphyxie par manque d’oxygène, perte de connaissance, brûlure par le froid du gaz expulsé, désorientation, vertiges, chutes...<br/> \r\nEt, en cas de consommations répétées, et à intervalles rapprochés et/ou à fortes doses, de sévères troubles neurologiques, hématologiques, psychiatriques ou cardiaques peuvent survenir.<br/> \r\nVous pouvez vous faire accompagner par <a href=\"https://www.drogues-info-service.fr/\" target=\"_blank\">Drogues info service</a> par chat ou par téléphone au : <a href=\"tel:+33800231313\">0 800 23 13 13</a>.",
@@ -7307,7 +7288,7 @@
         "synonymes_existants": "Cartouche pour siphon à chantilly / Bouteille de protoxyde d'azote / Cartouche de gaz hilarant / Bouteille de gaz hilarant",
         "code": "ADEME_METAL",
         "bdd": "sinoe",
-        "qu_est_ce_que_j_en_fais": "<b>Pour les petites cartouches</b>, comme celles des siphons de cuisine, déposez-les dans le bac, le sac ou le conteneur réservé au tri des papiers et des emballages. \r\n<br><br>\r\n<b>Pour les moyennes ou grandes bouteilles</b>, apportez-les en magasins ou en déchèterie. Elles représentent un risque d’explosion dans les centres de tri.",
+        "qu_est_ce_que_j_en_fais": "<b>Pour les petites cartouches vides</b>, comme celles des siphons de cuisine, déposez-les dans le bac, le sac ou le conteneur réservé au tri des papiers et des emballages. <b>Celles-ci doivent impérativement être totalement vides.</b>\r\n<br><br>\r\n<b>Pour les petites cartouches non-vidées ainsi que les moyennes ou grandes bouteilles</b>, apportez-les en magasins ou en déchèterie. Elles représentent un risque d’explosion dans les centres de tri.",
         "nom_eco_organisme": "Citeo / Léko",
         "filieres_rep": "Emballages ménagers",
         "slug": "Cartouche de protoxyde d'azote",
@@ -8014,6 +7995,44 @@
         "nom_eco_organisme": "",
         "filieres_rep": "",
         "slug": "",
+        "infotri": "[]"
+    }
+},
+{
+    "model": "qfdmd.produit",
+    "fields": {
+        "modifie_le": "2025-06-03T07:33:29.621Z",
+        "qu_est_ce_que_j_en_fais_mauvais_etat": "",
+        "qu_est_ce_que_j_en_fais_bon_etat": "",
+        "comment_les_eviter": "La plupart des sites propose des bouteilles de CO2 rechargeables. Ainsi, vous évitez la production de nouveaux déchets.",
+        "que_va_t_il_devenir": "",
+        "nom": "Bouteille de CO2 pour aquariophylie",
+        "synonymes_existants": "",
+        "code": "",
+        "bdd": "",
+        "qu_est_ce_que_j_en_fais": "Rapportez la bouteille dans <b>un point de vente</b>. <br><br>Si elle est complètement vide, et uniquement dans ce cas là, vous pouvez la mettre dans le bac, le sac ou le conteneur de collecte séparée. <br><br>À défaut, apportez-la en déchèterie, dans la zone dédiée aux contenants métalliques sous pression, en suivant les consignes des agents sur place.",
+        "nom_eco_organisme": "Citeo / Léko",
+        "filieres_rep": "Emballages ménagers",
+        "slug": "",
+        "infotri": "[]"
+    }
+},
+{
+    "model": "qfdmd.produit",
+    "fields": {
+        "modifie_le": "2025-06-03T11:00:38.038Z",
+        "qu_est_ce_que_j_en_fais_mauvais_etat": "Faites enlever les déchets par l'entrepreneur qui réalise vos travaux de rénovation. Il les évacuera vers des plateformes dédiées (le traitement est pris en charge, mais le transport peut rester à votre charge).<br /><br />Si vous faites les travaux vous-même et si les volumes sont limités, déposez ces déchets dans un des points de collecte de la carte ci-dessous.<br /><br />Si les quantités sont trop importantes, faites appel à une entreprise spécialisée.",
+        "qu_est_ce_que_j_en_fais_bon_etat": "Si les matériaux sont encore en bon état, remettez-les à une structure de réemploi. <br/><br/>",
+        "comment_les_eviter": "",
+        "que_va_t_il_devenir": "Remis à une structure de réemploi, vos matériaux poursuivent une seconde vie.<br/><br/>\r\nDéposés dans un point de collecte référencé, ils suivront l'une des filières des déchets non recyclable. Ils seront incinérés (avec le plus souvent récupération de chaleur) ou, à défaut, éliminés en installation de stockage de déchets non dangereux.",
+        "nom": "Linoléum & Fibre de verre (non-recyclables)",
+        "synonymes_existants": "",
+        "code": "ADEME_BTP",
+        "bdd": "",
+        "qu_est_ce_que_j_en_fais": "",
+        "nom_eco_organisme": "OCAB / Ecomaison / Valdelia / Valobat",
+        "filieres_rep": "Bâtiment",
+        "slug": "linoleum",
         "infotri": "[]"
     }
 }

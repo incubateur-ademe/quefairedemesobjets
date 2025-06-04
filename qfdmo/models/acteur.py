@@ -683,11 +683,11 @@ class BaseActeur(TimestampedModel):
                 random.choices(string.ascii_uppercase, k=12)
             )
 
-    def _generate_source_if_missing(self):
+    def generate_source_if_missing(self):
         if self.source is None:
             self.source = Source.objects.get_or_create(code=DEFAULT_SOURCE_CODE)[0]
 
-    def _generate_identifiant_unique_if_missing(self):
+    def generate_identifiant_unique_if_missing(self):
         if not self.identifiant_unique:
             source_stub = unidecode(self.source.code.lower()).replace(" ", "_")
             self.identifiant_unique = source_stub + "_" + str(self.identifiant_externe)
@@ -753,10 +753,8 @@ class Acteur(BaseActeur):
 
     def set_default_field_before_save(self):
         self._generate_identifiant_externe_if_missing()
-        # TODO: these two methods are called in BaseActeur.__init__
-        # We need to check if these calls are still needed.
-        self._generate_source_if_missing()
-        self._generate_identifiant_unique_if_missing()
+        self.generate_source_if_missing()
+        self.generate_identifiant_unique_if_missing()
 
 
 # TODO: améliorer ci-dessous avec un gestionnaire de cache
@@ -1041,11 +1039,6 @@ class VueActeur(BaseActeur):
 
 class DisplayedActeur(BaseActeur):
     objects = DisplayedActeurManager()
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._generate_source_if_missing()
-        self._generate_identifiant_unique_if_missing()
 
     def natural_key(self):
         return (self.uuid,)

@@ -624,10 +624,10 @@
         "afficher_carte": true,
         "qfdmd_produits": [
             [
-                "Serviette en tissu"
+                "Linge de maison"
             ],
             [
-                "Linge de maison"
+                "Serviette en tissu"
             ],
             [
                 "Textiles"
@@ -1400,6 +1400,9 @@
         "afficher_carte": true,
         "qfdmd_produits": [
             [
+                "Matériaux de construction"
+            ],
+            [
                 "Carrelage"
             ],
             [
@@ -1415,16 +1418,10 @@
                 "Equipements sanitaires en céramique"
             ],
             [
-                "Matériaux de construction"
-            ],
-            [
                 "Gravats"
             ],
             [
                 "Sable"
-            ],
-            [
-                "Pierres"
             ]
         ]
     }
@@ -1617,6 +1614,9 @@
         "afficher_carte": true,
         "qfdmd_produits": [
             [
+                "Linoléum & Fibre de verre (non-recyclables)"
+            ],
+            [
                 "Matériaux du bâtiment d'origine végétale ou animale"
             ]
         ]
@@ -1805,13 +1805,13 @@
         "afficher_carte": true,
         "qfdmd_produits": [
             [
+                "Cartouche ou bouteille de protoxyde d'azote"
+            ],
+            [
                 "Ruban de signalisation (Rubalise)"
             ],
             [
                 "Aimant"
-            ],
-            [
-                "Cartouche ou bouteille de protoxyde d'azote"
             ],
             [
                 "Remorque pour véhicule"
@@ -1995,6 +1995,9 @@
         "afficher": false,
         "afficher_carte": true,
         "qfdmd_produits": [
+            [
+                "Bouteille de CO2 pour aquariophylie"
+            ],
             [
                 "Bombe aérosol (vide)"
             ],
