@@ -3,7 +3,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("qfdmo", "0152_schema_warehouse"),
+        ("qfdmo", "0154_merge_20250604_1615"),
     ]
 
     operations = [
