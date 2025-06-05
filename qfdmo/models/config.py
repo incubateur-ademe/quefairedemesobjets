@@ -56,6 +56,13 @@ class CarteConfig(models.Model):
         help_text="Cocher cette case cache la légende affichée en bas à gauche de la "
         "carte en desktop et au dessus de celle-ci en mobile",
     )
+    no_branding = models.BooleanField(
+        verbose_name="Supprimer le branding",
+        default=False,
+        help_text="Supprime le logo dans l'entête de la carte ainsi que"
+        " le bouton Infos. Ce mode est utilisé essentiellement "
+        "pour la carte affichée dans l'assistant",
+    )
     slug = models.SlugField(
         unique=True,
         help_text="Le slug est utilisé pour générer l'url de carte, "
@@ -81,6 +88,19 @@ class CarteConfig(models.Model):
         help_text="Seules les sources sélectionnées s'afficheront sur la carte"
         "\nSi le champ n'est pas renseigné il sera ignoré",
         blank=True,
+    )
+
+    preview_title = models.CharField(
+        blank=True,
+        verbose_name="Titre de l'écran de prévisualisation",
+        help_text="Ce titre s'affiche avant que l'utilisateur n'ait fait une recherche "
+        "dans la carte",
+    )
+    preview_content = models.TextField(
+        blank=True,
+        verbose_name="Contenu de l'écran de prévisualisation",
+        help_text="Ce texte s'affiche avant que l'utilisateur n'ait fait une recherche "
+        "dans la carte",
     )
 
     def get_absolute_url(self):
