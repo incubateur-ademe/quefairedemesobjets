@@ -6,9 +6,9 @@ from airflow.utils.state import State
 from django.contrib.gis.geos import Point
 
 from dags.cluster.config.tasks import TASKS
+from dags.e2e_tests.e2e_utils import airflow_init, ti_get
 from dags.shared.config.start_dates import START_DATES
 from dags.tests.cluster.helpers.configs import CONF_BASE_DICT
-from dags.tests.e2e.e2e_utils import airflow_init, ti_get
 from unit_tests.qfdmo.acteur_factory import (
     ActeurTypeFactory,
     DisplayedActeur,
