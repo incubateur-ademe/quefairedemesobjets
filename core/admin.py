@@ -28,6 +28,19 @@ class NotEditableMixin:
         return False
 
 
+class NotSelfDeletableMixin(admin.ModelAdmin):
+    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
+        """
+        Allow delete instance only from cascade delete
+        """
+        return not (
+            request.resolver_match
+            and request.resolver_match.view_name.startswith(
+                f"admin:{self.model._meta.app_label}_{self.model._meta.model_name}_"
+            )
+        )
+
+
 class OnlyEditableMixin:
     def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
         return False

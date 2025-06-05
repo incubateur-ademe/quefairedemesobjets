@@ -3,7 +3,7 @@ import logging
 from django.contrib import admin, messages
 from django.utils.html import format_html
 
-from core.admin import NotEditableMixin
+from core.admin import NotEditableMixin, NotSelfDeletableMixin
 from data.models.suggestion import Suggestion, SuggestionCohorte, SuggestionStatut
 
 NB_SUGGESTIONS_DISPLAYED_WHEN_DELETING = 100
@@ -106,7 +106,7 @@ def mark_as_toproceed(self, request, queryset):
     )
 
 
-class SuggestionAdmin(admin.ModelAdmin):
+class SuggestionAdmin(NotSelfDeletableMixin, admin.ModelAdmin):
 
     class SuggestionCohorteFilter(admin.RelatedFieldListFilter):
         def field_choices(self, field, request, model_admin):
@@ -126,18 +126,6 @@ class SuggestionAdmin(admin.ModelAdmin):
         ("statut", admin.ChoicesFieldListFilter),
     ]
     actions = [mark_as_rejected, mark_as_toproceed]
-
-    def has_delete_permission(self, request, obj=None):
-        """
-        Allow delete Suggestion only from Cohorte deleting
-        """
-        if (
-            request.resolver_match
-            and request.resolver_match.view_name
-            == "admin:data_suggestioncohorte_changelist"
-        ):
-            return True
-        return False
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
