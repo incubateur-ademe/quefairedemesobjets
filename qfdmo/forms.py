@@ -112,10 +112,10 @@ class AddressesForm(forms.Form):
             }
         ),
         label=(
-            "Masquer les adresses qui réparent uniquement les produits de leurs marques"
+            "Masquer les lieux qui réparent uniquement les produits de leurs marques"
         ),
         help_text=(
-            "Les adresses ne réparant que les produits de leur propre marque"
+            "Les lieux ne réparant que les produits de leur propre marque"
             " n'apparaîtront pas si cette case est cochée."
             " (uniquement valable lorsque l'action « réparer » est sélectionnée)"
         ),
@@ -130,7 +130,7 @@ class AddressesForm(forms.Form):
                 "data-search-solution-form-target": "reparerFilter",
             }
         ),
-        label="Adresses labellisées Répar’Acteurs",
+        label="Lieux labellisés Répar’Acteurs",
         help_text=mark_safe(
             """Afficher uniquement les artisans labellisés
             (uniquement valable lorsque l'action « réparer » est sélectionnée).
@@ -158,9 +158,9 @@ class AddressesForm(forms.Form):
 
     ess = forms.BooleanField(
         widget=forms.CheckboxInput(attrs={"class": "fr-checkbox fr-m-1v"}),
-        label="Adresses de l'économie sociale et solidaire",
+        label="Lieux de l'économie sociale et solidaire",
         help_text=mark_safe(
-            "Afficher uniquement les adresses recensées comme relevant de l'économie"
+            "Afficher uniquement les lieux recensés comme relevant de l'économie"
             " sociale et solidaire. En savoir plus sur le site <a href="
             '"https://www.economie.gouv.fr/cedef/economie-sociale-et-solidaire"'
             ' target="_blank" rel="noreferrer" title="economie.gouv.fr - Nouvelle'
@@ -179,10 +179,10 @@ class AddressesForm(forms.Form):
         ),
         label=mark_safe(
             "<div><span class='fr-icon--sm fr-icon-percent-line'></span>"
-            "&nbsp;Adresses proposant le Bonus Réparation</div>"
+            "&nbsp;Lieux proposant le Bonus Réparation</div>"
         ),
         help_text=mark_safe(
-            "Afficher uniquement les adresses éligibles (uniquement valable lorsque l'"
+            "Afficher uniquement les lieux éligibles (uniquement valable lorsque l'"
             "action « réparer » est sélectionnée). En savoir plus sur le site <a href="
             '"https://quefairedemesdechets.ademe.fr/bonus-reparation" target="_blank"'
             ' rel="noreferrer" title="Bonus réparation - Nouvelle fenêtre">Bonus'
