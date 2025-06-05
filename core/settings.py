@@ -108,7 +108,6 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.gis",
     "django_extensions",
-    "explorer",
     "import_export",
     "widget_tweaks",
     "dsfr",
@@ -291,12 +290,6 @@ DATABASES = {
 CONN_HEALTH_CHECKS = True
 CONN_MAX_AGE = decouple.config("CONN_MAX_AGE", cast=int, default=0)
 
-
-# EXPLORER settings
-# -----------------
-# from https://django-sql-explorer.readthedocs.io/en/latest/install.html
-EXPLORER_CONNECTIONS = {"Default": "readonly"}
-EXPLORER_DEFAULT_CONNECTION = "readonly"
 
 # Password validation
 # -------------------

@@ -629,6 +629,22 @@ class TestCleanAdresse:
                     "ville": "Heyrieux",
                 },
             ),
+            (
+                "- 31660 avenue de Maurin, 34076 Montpellier",
+                {
+                    "adresse": "31660 avenue de Maurin",
+                    "code_postal": "34076",
+                    "ville": "Montpellier",
+                },
+            ),
+            (
+                "12 Av. du 14 Juillet 1789, 57180 Terville",
+                {
+                    "adresse": "12 Av. du 14 Juillet 1789",
+                    "code_postal": "57180",
+                    "ville": "Terville",
+                },
+            ),
         ],
     )
     def test_clean_adresse_without_ban(
