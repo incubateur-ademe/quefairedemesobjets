@@ -81,8 +81,9 @@ def _manage_suggestion_cohorte_statut(cohorte_ids: list[int]):
 @admin.action(description="REJETER les suggestions selectionnées")
 def mark_as_rejected(self, request, queryset):
     distinct_suggestion_cohorte_ids = queryset.values_list(
-        "suggestion_cohorte", flat=True
-    ).distinct()
+        "suggestion_cohorte_id", flat=True
+    )
+    distinct_suggestion_cohorte_ids = list(set(distinct_suggestion_cohorte_ids))
     queryset.update(statut=SuggestionStatut.REJETEE)
     _manage_suggestion_cohorte_statut(distinct_suggestion_cohorte_ids)
     self.message_user(
@@ -93,8 +94,9 @@ def mark_as_rejected(self, request, queryset):
 @admin.action(description="VALIDER les suggestions selectionnées")
 def mark_as_toproceed(self, request, queryset):
     distinct_suggestion_cohorte_ids = queryset.values_list(
-        "suggestion_cohorte", flat=True
-    ).distinct()
+        "suggestion_cohorte_id", flat=True
+    )
+    distinct_suggestion_cohorte_ids = list(set(distinct_suggestion_cohorte_ids))
     queryset.update(statut=SuggestionStatut.ATRAITER)
     _manage_suggestion_cohorte_statut(distinct_suggestion_cohorte_ids)
     self.message_user(
@@ -124,6 +126,18 @@ class SuggestionAdmin(admin.ModelAdmin):
         ("statut", admin.ChoicesFieldListFilter),
     ]
     actions = [mark_as_rejected, mark_as_toproceed]
+
+    def has_delete_permission(self, request, obj=None):
+        """
+        Allow delete Suggestion only from Cohorte deleting
+        """
+        if (
+            request.resolver_match
+            and request.resolver_match.view_name
+            == "admin:data_suggestioncohorte_changelist"
+        ):
+            return True
+        return False
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
