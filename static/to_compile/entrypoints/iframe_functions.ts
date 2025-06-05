@@ -43,11 +43,12 @@ export function buildAndInsertIframeFrom(
 
 export function getIframeAttributesAndExtra(
   scriptTag: HTMLScriptElement,
-  route: string,
+  baseRoute: string,
   options?: { maxWidth: string },
 ) {
   let maxWidth = options?.maxWidth || "100%"
   let height = "700px"
+  let route = baseRoute
   const BASE_URL = new URL(scriptTag.getAttribute("src")!).origin
   const urlParams = new URLSearchParams()
 
@@ -74,6 +75,10 @@ export function getIframeAttributesAndExtra(
     }
     if (param === "bounding_box") {
       urlParams.append(param, parseJSONDataset(scriptTag.dataset[param]!))
+      continue
+    }
+    if (param === "slug") {
+      route += `/${scriptTag.dataset[param]}`
       continue
     }
     urlParams.append(param, scriptTag.dataset[param]!)
