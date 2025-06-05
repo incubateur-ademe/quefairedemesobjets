@@ -1,8 +1,6 @@
 import logging
 from urllib.parse import urlencode
 
-import requests
-from django.conf import settings
 from django.contrib.gis.db import models
 from django.db.models.functions import Now
 from django.template.loader import render_to_string
@@ -15,10 +13,12 @@ from wagtail.images.blocks import ImageBlock
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
 
+from qfdmo.models.utils import NomAsNaturalKeyModel
+
 logger = logging.getLogger(__name__)
 
 
-class AbstractBaseProduit(models.Model):
+class AbstractBaseProduit(NomAsNaturalKeyModel):
     modifie_le = models.DateTimeField(auto_now=True, db_default=Now())
     # Le nom des champs conserve ici délibérément l'ancienne nomenclature,
     # car le travail sur le nommage n'a pas encore été effectué.
@@ -45,11 +45,6 @@ class AbstractBaseProduit(models.Model):
 
 @register_snippet
 class Produit(index.Indexed, AbstractBaseProduit):
-    id = models.IntegerField(
-        primary_key=True,
-        help_text="Correspond à l'identifiant ID défini dans les données "
-        "<i>Que Faire</i>.",
-    )
     nom = models.CharField(
         unique=True,
         verbose_name="Libellé",
@@ -72,12 +67,11 @@ class Produit(index.Indexed, AbstractBaseProduit):
     panels = [FieldPanel("infotri")]
 
     def __str__(self):
-        return f"{self.id} - {self.nom}"
+        return f"{self.pk} - {self.nom}"
 
     search_fields = [
         index.AutocompleteField("nom"),
         index.RelatedFields("synonymes", [index.SearchField("nom")]),
-        index.SearchField("synonyme__nom"),
         index.SearchField("id"),
     ]
 
@@ -115,27 +109,6 @@ class Produit(index.Indexed, AbstractBaseProduit):
             "sc_id": sous_categorie.id,
             "sous_categorie_objet": sous_categorie.libelle,
         }
-
-    def get_url_carte(self, actions=None):
-        carte_settings = self.carte_settings
-        if actions:
-            carte_settings.update(
-                action_list=actions,
-                action_displayed=actions,
-            )
-        params = urlencode(carte_settings)
-        url = reverse("qfdmo:carte")
-        return f"{url}?{params}"
-
-    @cached_property
-    def url_carte_mauvais_etat(self):
-        actions = "reparer|trier"
-        return self.get_url_carte(actions)
-
-    @cached_property
-    def url_carte_bon_etat(self):
-        actions = "preter|louer|mettreenlocation|donner|echanger|revendre"
-        return self.get_url_carte(actions)
 
     @cached_property
     def en_savoir_plus(self):
@@ -242,6 +215,37 @@ class Synonyme(AbstractBaseProduit):
     def url(self) -> str:
         return self.get_absolute_url()
 
+    def get_url_carte(self, actions=None, map_container_id=None):
+        carte_settings = self.produit.carte_settings
+        if actions:
+            carte_settings.update(
+                action_list=actions,
+                action_displayed=actions,
+            )
+
+        if map_container_id:
+            carte_settings.update(
+                map_container_id=map_container_id,
+            )
+
+        params = urlencode(carte_settings)
+        url = reverse("qfdmd:carte", args=[self.slug])
+        return f"{url}?{params}"
+
+    @cached_property
+    def url_carte(self):
+        return self.get_url_carte(None, "carte")
+
+    @cached_property
+    def url_carte_mauvais_etat(self):
+        actions = "reparer|trier"
+        return self.get_url_carte(actions, "mauvais_etat")
+
+    @cached_property
+    def url_carte_bon_etat(self):
+        actions = "preter|louer|mettreenlocation|donner|echanger|revendre"
+        return self.get_url_carte(actions, "bon_etat")
+
     @cached_property
     def bon_etat(self) -> str:
         if self.qu_est_ce_que_j_en_fais_bon_etat:
@@ -278,62 +282,3 @@ class Suggestion(models.Model):
 
     def __str__(self) -> str:
         return str(self.produit)
-
-
-class CMSPage(models.Model):
-    id = models.IntegerField(
-        primary_key=True,
-        help_text="Ce champ est le seul contribuable.<br>"
-        "Il correspond à l'ID de la page Wagtail.<br>"
-        "Tous les autres champs seront automatiquement contribués à l'enregistrement"
-        "de la page dans l'administration Django.",
-    )
-    body = models.JSONField(default=dict)
-    search_description = models.CharField(default="")
-    seo_title = models.CharField(default="")
-    title = models.CharField(default="")
-    slug = models.CharField(default="")
-    poids = models.IntegerField(
-        default=0,
-        help_text=(
-            "Ce champ détermine la position d'un élément dans la liste affichée.<br>"
-            "Les éléments avec un poids plus élevé apparaissent plus bas dans "
-            "la liste.<br>"
-            "Les éléments avec un poids plus faible apparaissent plus haut."
-        ),
-    )
-
-    def __str__(self):
-        return self.title
-
-    def save(self, *args, **kwargs):
-        fields_to_fetch_from_api_response = [
-            "body",
-            "title",
-        ]
-
-        fields_to_fetch_from_api_response_meta = [
-            "search_description",
-            "slug",
-            "seo_title",
-        ]
-
-        try:
-            wagtail_response = requests.get(
-                f"{settings.CMS.get('BASE_URL')}/api/v2/pages/{self.id}"
-            )
-            wagtail_response.raise_for_status()
-            wagtail_page_as_json = wagtail_response.json()
-
-            for field in fields_to_fetch_from_api_response:
-                if value := wagtail_page_as_json.get(field):
-                    setattr(self, field, value)
-
-            for field in fields_to_fetch_from_api_response_meta:
-                if value := wagtail_page_as_json["meta"].get(field):
-                    setattr(self, field, value)
-
-        except requests.exceptions.RequestException as exception:
-            logger.error(f"Error fetching data from CMS API: {exception}")
-
-        super().save(*args, **kwargs)

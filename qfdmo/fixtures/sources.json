@@ -1,0 +1,750 @@
+[
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "ADEME - Acteurs digitaux",
+        "code": "ademedigitaux",
+        "afficher": true,
+        "url": "https://www.ademe.fr/",
+        "logo_file": "logos/ademe_logo.jpeg",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Longue Vie Aux Objets",
+        "code": "lvao",
+        "afficher": true,
+        "url": "https://longuevieauxobjets.ademe.fr/",
+        "logo_file": "logos/Sans_titre_2.png",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "ADEME - Locations",
+        "code": "ademelocation",
+        "afficher": true,
+        "url": "https://www.ademe.fr/",
+        "logo_file": "logos/ademe_logo.jpeg",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "CMA - Chambre des métiers et de l'artisanat",
+        "code": "cmareparacteur",
+        "afficher": true,
+        "url": "https://www.artisanat.fr/",
+        "logo_file": "logos/Sans_titre_1.png",
+        "licence": "CC_BY_NC_SA"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "ADEME - Initiatives locales",
+        "code": "ademelocales",
+        "afficher": true,
+        "url": "https://www.ademe.fr/",
+        "logo_file": "logos/ademe_logo.jpeg",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "ADEME - SINOE",
+        "code": "sinoe",
+        "afficher": true,
+        "url": "https://www.sinoe.org/",
+        "logo_file": "logos/ademe_logo.jpeg",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "ADEME - Initiatives nationales",
+        "code": "ademenationales",
+        "afficher": true,
+        "url": "https://www.ademe.fr/",
+        "logo_file": "logos/ademe_logo.jpeg",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Bibliothèques - Ministère de la culture",
+        "code": "bibliotheques",
+        "afficher": true,
+        "url": "https://data.culture.gouv.fr/explore/dataset/adresses-des-bibliotheques-publiques/information/",
+        "logo_file": "logos/Sans_titre_1.jpg",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Association des Ludothèques Françaises",
+        "code": "ludotheques",
+        "afficher": true,
+        "url": "https://www.kananas.com/associationdesludothequesfrancaises",
+        "logo_file": "logos/ALF.jpeg",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Collectif Encore",
+        "code": "encore",
+        "afficher": true,
+        "url": "https://www.cadeausecondemain.fr/",
+        "logo_file": "logos/encore.png",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Recyclivre - Boîtes à lire",
+        "code": "recyclivrebal",
+        "afficher": true,
+        "url": "https://www.boite-a-lire.com/",
+        "logo_file": "logos/recyclivre.jpeg",
+        "licence": "NO_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "REFASHION",
+        "code": "refashion",
+        "afficher": true,
+        "url": "https://refashion.fr/citoyen/fr",
+        "logo_file": "logos/refashion.png",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Communauté Longue Vie Aux Objets",
+        "code": "communautelvao",
+        "afficher": true,
+        "url": "https://longuevieauxobjets.ademe.fr/",
+        "logo_file": "logos/Sans_titre_2.png",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Groupe Findis",
+        "code": "findis",
+        "afficher": true,
+        "url": "https://www.groupefindis.fr/",
+        "logo_file": "logos/Findis.png",
+        "licence": "NO_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "ECOMAISON",
+        "code": "ecomaison",
+        "afficher": true,
+        "url": "https://ecomaison.com/",
+        "logo_file": "logos/Logo_Ecomaison.png",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Réseau National des Ressourceries et Recycleries",
+        "code": "ressourceries",
+        "afficher": true,
+        "url": "https://ressourcerie.fr/",
+        "logo_file": "logos/Reseau_ressourceries_et_recycleries.jpeg",
+        "licence": "NO_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Fédération Envie",
+        "code": "envie",
+        "afficher": true,
+        "url": "https://www.envie.org/",
+        "logo_file": "logos/Sans_titre_2.jpg",
+        "licence": "NO_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "ADELPHE",
+        "code": "adelphe",
+        "afficher": false,
+        "url": null,
+        "logo_file": "",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "ALCOME",
+        "code": "alcome",
+        "afficher": false,
+        "url": null,
+        "logo_file": "",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "ALIAPUR",
+        "code": "aliapur",
+        "afficher": true,
+        "url": "https://aliapur.fr/",
+        "logo_file": "logos/aliapur.jpg",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "APER",
+        "code": "aper",
+        "afficher": false,
+        "url": null,
+        "logo_file": "",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "CITEO",
+        "code": "citeo",
+        "afficher": false,
+        "url": "https://on-ne-lache-rien.citeo.com/",
+        "logo_file": "logos/citeo_2.jpg",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "COREPILE - ECOSYSTEM",
+        "code": "corepile",
+        "afficher": true,
+        "url": "https://www.corepile.fr/",
+        "logo_file": "logos/corepile.jpg",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "CYCLAMED",
+        "code": "cyclamed",
+        "afficher": false,
+        "url": null,
+        "logo_file": "",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "CYCLEVIA",
+        "code": "cyclevia",
+        "afficher": true,
+        "url": "https://www.cyclevia.com/",
+        "logo_file": "logos/Sans_titre_1.jpg",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "DASTRI",
+        "code": "dastri",
+        "afficher": false,
+        "url": null,
+        "logo_file": "",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "ECODDS",
+        "code": "ecodds",
+        "afficher": true,
+        "url": "https://www.ecodds.com/",
+        "logo_file": "logos/Sans_titre_22.jpg",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "ECOLOGIC",
+        "code": "ecologic",
+        "afficher": true,
+        "url": "https://www.ecologic-france.com/",
+        "logo_file": "logos/ecologic.jpg",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "ECOMINERO",
+        "code": "ecominero",
+        "afficher": true,
+        "url": "https://www.ecominero.fr/",
+        "logo_file": "logos/ecominero.png",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "ECOSYSTEM",
+        "code": "ecosystem",
+        "afficher": true,
+        "url": "https://ecosystem.eco/",
+        "logo_file": "logos/ecosystem.jpg",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "GIE FRP",
+        "code": "giefrp",
+        "afficher": false,
+        "url": null,
+        "logo_file": "",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "LEKO",
+        "code": "leko",
+        "afficher": false,
+        "url": null,
+        "logo_file": "",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "PYREO",
+        "code": "pyreo",
+        "afficher": true,
+        "url": "https://www.pyreo.fr/",
+        "logo_file": "logos/pyreo.jpg",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Batribox",
+        "code": "batribox",
+        "afficher": true,
+        "url": "https://www.batribox.fr/",
+        "logo_file": "logos/batribox.jpg",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "SOREN",
+        "code": "soren",
+        "afficher": true,
+        "url": "https://www.soren.eco/",
+        "logo_file": "logos/soren.jpg",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "TYVAL",
+        "code": "tyval",
+        "afficher": false,
+        "url": null,
+        "logo_file": "",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "VALDELIA",
+        "code": "valdelia",
+        "afficher": true,
+        "url": "https://www.valdelia.org/",
+        "logo_file": "logos/valdelia.jpg",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "VALOBAT",
+        "code": "valobat",
+        "afficher": true,
+        "url": "http://www.valobat.fr",
+        "logo_file": "logos/valobat.png",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Collectivité Ambert Livradois Forez",
+        "code": "alv",
+        "afficher": true,
+        "url": "https://www.ambertlivradoisforez.fr/",
+        "logo_file": "logos/AmbertLivradoisForez.png",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Recyclivre - Point livres",
+        "code": "recyclivrepl",
+        "afficher": true,
+        "url": "https://www.point-livres.com/",
+        "logo_file": "logos/recyclivre.jpeg",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Origine Cycles",
+        "code": "originecycles",
+        "afficher": true,
+        "url": "https://www.origine-cycles.com/",
+        "logo_file": "logos/Origine.png",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "CartEco - ESS France",
+        "code": "carteco",
+        "afficher": true,
+        "url": "https://carteco-ess.org/",
+        "logo_file": "logos/essfrance-logo-carteco.png",
+        "licence": "NO_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "equipe",
+        "code": "equipe",
+        "afficher": false,
+        "url": null,
+        "logo_file": "",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Emmaüs Connect",
+        "code": "emmausconnect",
+        "afficher": true,
+        "url": "https://emmaus-connect.org/",
+        "logo_file": "logos/Sans_titre_6.jpg",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "RecylOptics",
+        "code": "recycloptics",
+        "afficher": true,
+        "url": "https://recycloptics.org/",
+        "logo_file": "logos/Logo_recycloptics_new-FT-1.png",
+        "licence": "NO_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Emmaüs Défi",
+        "code": "emmausdefi",
+        "afficher": true,
+        "url": "https://emmaus-defi.org/",
+        "logo_file": "logos/Emmaus_defi.png",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Lunettes de Zac",
+        "code": "lunettesdezac",
+        "afficher": true,
+        "url": "https://lunettesdezac.com/",
+        "logo_file": "logos/zac.jpg",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "CRAR Normandie",
+        "code": "crarnormandie",
+        "afficher": true,
+        "url": "https://www.crar-normandie.fr/",
+        "logo_file": "logos/crar.jpg",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Syvadec",
+        "code": "syvadec",
+        "afficher": true,
+        "url": "https://www.syvadec.fr/",
+        "logo_file": "logos/syvadec.jpg",
+        "licence": "NO_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Ville de Paris",
+        "code": "villedeparis",
+        "afficher": true,
+        "url": "https://www.paris.fr/",
+        "logo_file": "logos/paris.jpg",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Le REFER",
+        "code": "lerefer",
+        "afficher": true,
+        "url": "https://www.reemploi-idf.org/",
+        "logo_file": "logos/cropped-big-logo-REFER-72.png",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Ordre National Des Pharmaciens",
+        "code": "ordredespharmaciens",
+        "afficher": true,
+        "url": "https://www.ordre.pharmacien.fr/",
+        "logo_file": "logos/ordre_pharmaciens.jpg",
+        "licence": "NO_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Leroy Merlin",
+        "code": "leroymerlin",
+        "afficher": true,
+        "url": "https://leroymerlin.fr",
+        "logo_file": "logos/leroy_merlin.jpg",
+        "licence": "NO_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Ecologic & Ecosystem",
+        "code": "ocad3e",
+        "afficher": true,
+        "url": "https://www.label-qualirepar.fr/",
+        "logo_file": "logos/qualirepar.jpg",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "ADEME - SINOE - Déchèteries",
+        "code": "ademesinoedecheteries",
+        "afficher": true,
+        "url": "https://www.sinoe.org/",
+        "logo_file": "logos/Logo-Ademe-32.jpg",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "La Poste",
+        "code": "laposte",
+        "afficher": true,
+        "url": "https://laposte.fr/",
+        "logo_file": "logos/laposte.jpg",
+        "licence": "NO_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Orange",
+        "code": "orange",
+        "afficher": true,
+        "url": "https://collecte-mobile.orange.fr/notre-programme-deconomie-circulaire",
+        "logo_file": "logos/logo-orange.jpg",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "ECOPAE",
+        "code": "ecopae",
+        "afficher": true,
+        "url": "https://www.ecopae.fr/",
+        "logo_file": "logos/ECOPAE_LOGO_CMJN_1.png",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "",
+        "code": "deprecated_lvao",
+        "afficher": true,
+        "url": null,
+        "logo_file": "",
+        "licence": "NO_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Planète Liège - Fédération Française du Liège",
+        "code": "planeteliege",
+        "afficher": true,
+        "url": "https://planeteliege.com/",
+        "logo_file": "logos/planete_liege.jpg",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Adresse ajoutée de manière collaborative par la communauté UNIQUE",
+        "code": "uniqueapp",
+        "afficher": true,
+        "url": "http://www.unique-app.com/",
+        "logo_file": "logos/unique.jpg",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "Redeem Medical",
+        "code": "redeem_medical",
+        "afficher": true,
+        "url": "https://www.redeem-medical.fr/",
+        "logo_file": "logos/redeem_medical.png",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "OCAB - Valobat",
+        "code": "ocab_valobat",
+        "afficher": true,
+        "url": "https://www.valobat.fr/",
+        "logo_file": "logos/valobat.png",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "OCAB - Ecomaison",
+        "code": "ocab_ecomaison",
+        "afficher": true,
+        "url": "https://ecomaison.com/",
+        "logo_file": "logos/Logo_Ecomaison_1.png",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "OCAB - Valdelia",
+        "code": "ocab_valdelia",
+        "afficher": true,
+        "url": "https://www.valdelia.org/",
+        "logo_file": "logos/valdelia.jpg",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "OCAB - Ecominero",
+        "code": "ocab_ecominero",
+        "afficher": true,
+        "url": "https://www.ecominero.fr/",
+        "logo_file": "logos/ecominero.png",
+        "licence": "OPEN_LICENSE"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "CMA - Chambre des métiers et de l'artisanat",
+        "code": "cma_reparacteur",
+        "afficher": true,
+        "url": "https://www.artisanat.fr/",
+        "logo_file": "logos/cma.png",
+        "licence": "CC_BY_NC_SA"
+    }
+},
+{
+    "model": "qfdmo.source",
+    "fields": {
+        "libelle": "MRES Asso - Maison Régionale de l'Environnement et des Solidarités",
+        "code": "mres_asso",
+        "afficher": true,
+        "url": "https://mres-asso.org/",
+        "logo_file": "logos/siteon0.png",
+        "licence": "OPEN_LICENSE"
+    }
+}
+]

@@ -4,7 +4,7 @@
 <html
     lang="fr"
     class="qf-scroll-smooth"
-    {% if not is_carte %}data-formulaire{% endif %}
+    data-no-branding
 >
     <head>
         <meta charset="utf-8">
@@ -42,6 +42,14 @@
         class="qf-flex qf-flex-col qf-group"
         {% if STIMULUS_DEBUG %}data-stimulus-debug="true"{% endif %}
         {% block body_attrs %}{% endblock %}
+        data-controller="state"
+        data-state-adresse-value=""
+        data-state-longitude-value=""
+        data-state-latitude-value=""
+        data-state-map-outlet="[data-controller='map']"
+        data-state-address-autocomplete-outlet="[data-controller='address-autocomplete']"
+        data-state-search-solution-form-outlet="[data-controller='search-solution-form']"
+        data-action="address-autocomplete:change->state#setLocation"
     >
         {% if request.user.is_authenticated %}
         <div class="qf-bg-red-marianne-main-472 qf-text-white qf-text-center qf-w-screen qf-py-1v qf-text-xs">

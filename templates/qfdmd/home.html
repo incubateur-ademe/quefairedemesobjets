@@ -32,6 +32,7 @@
             {% with produit=suggestion.produit %}
             <li class="qf-list-none qf-p-0">
             <a
+                data-testid="suggestion"
                 class="qf-btn"
                 href="{% url 'qfdmd:synonyme-detail' slug=produit.slug %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}"
             >
