@@ -3,7 +3,7 @@ import logging
 from django.contrib import admin, messages
 from django.utils.html import format_html
 
-from core.admin import NotEditableMixin
+from core.admin import NotEditableMixin, NotSelfDeletableMixin
 from data.models.suggestion import Suggestion, SuggestionCohorte, SuggestionStatut
 
 NB_SUGGESTIONS_DISPLAYED_WHEN_DELETING = 100
@@ -81,8 +81,9 @@ def _manage_suggestion_cohorte_statut(cohorte_ids: list[int]):
 @admin.action(description="REJETER les suggestions selectionnées")
 def mark_as_rejected(self, request, queryset):
     distinct_suggestion_cohorte_ids = queryset.values_list(
-        "suggestion_cohorte", flat=True
-    ).distinct()
+        "suggestion_cohorte_id", flat=True
+    )
+    distinct_suggestion_cohorte_ids = list(set(distinct_suggestion_cohorte_ids))
     queryset.update(statut=SuggestionStatut.REJETEE)
     _manage_suggestion_cohorte_statut(distinct_suggestion_cohorte_ids)
     self.message_user(
@@ -93,8 +94,9 @@ def mark_as_rejected(self, request, queryset):
 @admin.action(description="VALIDER les suggestions selectionnées")
 def mark_as_toproceed(self, request, queryset):
     distinct_suggestion_cohorte_ids = queryset.values_list(
-        "suggestion_cohorte", flat=True
-    ).distinct()
+        "suggestion_cohorte_id", flat=True
+    )
+    distinct_suggestion_cohorte_ids = list(set(distinct_suggestion_cohorte_ids))
     queryset.update(statut=SuggestionStatut.ATRAITER)
     _manage_suggestion_cohorte_statut(distinct_suggestion_cohorte_ids)
     self.message_user(
@@ -104,7 +106,7 @@ def mark_as_toproceed(self, request, queryset):
     )
 
 
-class SuggestionAdmin(admin.ModelAdmin):
+class SuggestionAdmin(NotSelfDeletableMixin, admin.ModelAdmin):
 
     class SuggestionCohorteFilter(admin.RelatedFieldListFilter):
         def field_choices(self, field, request, model_admin):
