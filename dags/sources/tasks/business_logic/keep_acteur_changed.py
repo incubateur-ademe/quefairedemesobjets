@@ -1,9 +1,11 @@
 import logging
 from dataclasses import dataclass
 
+import numpy as np
 import pandas as pd
 from sources.tasks.airflow_logic.config_management import DAGConfig
 from sources.tasks.transform.transform_df import compute_identifiant_unique
+
 from utils.django import django_setup_full, get_model_fields
 
 logger = logging.getLogger(__name__)
@@ -60,6 +62,11 @@ class ActeurComparator:
                 is_updated = self._compare_proposition_services(source_val, db_val)
             elif isinstance(source_val, list) and isinstance(db_val, list):
                 is_updated = self._compare_lists(source_val, db_val)
+            elif isinstance(source_val, float) and isinstance(db_val, float):
+                if np.isnan(source_val) and np.isnan(db_val):
+                    is_updated = False
+                else:
+                    is_updated = source_val != db_val
             else:
                 is_updated = source_val != db_val
 
