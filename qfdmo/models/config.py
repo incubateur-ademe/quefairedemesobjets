@@ -1,6 +1,7 @@
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.urls import reverse
+from wagtail.snippets.models import register_snippet
 
 
 class GroupeActionConfig(models.Model):
@@ -48,6 +49,7 @@ class GroupeActionConfig(models.Model):
         unique_together = ["carte_config", "groupe_action", "acteur_type"]
 
 
+@register_snippet
 class CarteConfig(models.Model):
     nom = models.CharField(unique=True)
     hide_legend = models.BooleanField(
