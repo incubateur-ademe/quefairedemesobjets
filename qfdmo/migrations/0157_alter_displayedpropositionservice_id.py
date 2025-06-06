@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("qfdmo", "0153_alter_vueacteur_options"),
+        ("qfdmo", "0156_merge_20250605_1531"),
     ]
 
     operations = [
