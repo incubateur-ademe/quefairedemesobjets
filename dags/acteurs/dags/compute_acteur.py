@@ -26,7 +26,7 @@ default_args = {
 with DAG(
     "compute_acteurs",
     default_args=default_args,
-    dag_display_name="DBT - Rafraîchir les acteurs affichés",
+    dag_display_name="Acteurs affichés - Rafraîchir les acteurs affichés",
     description=(
         "Ce DAG construit les tables des acteurs utilisables par l'admin"
         " (vue exhaustive des acteurs), par la carte (vue des acteurs affichés) et"
@@ -116,10 +116,9 @@ with DAG(
             "exposure_carte_propositionservice",
         )
     )
-    # The publication isn't handled by DBT yet
-    # replace_displayedacteur_table_task = replace_acteur_table_task(
-    #     dag, "qfdmo_displayed", "exposure_carte_"
-    # )
+    replace_displayedacteur_table_task = replace_acteur_table_task(
+        dag, "public", "qfdmo_displayed", "warehouse", "exposure_carte_"
+    )
 
     check_model_table_vueacteur_task = check_model_table_consistency_task(
         dag, "qfdmo", "VueActeur", "warehouse", "exposure_exhaustive_acteur"
@@ -160,7 +159,7 @@ with DAG(
         dbt_test_exposure_acteurs_carte
         >> check_model_table_displayedacteur_task
         >> check_model_table_displayedpropositionservice_task
-        # >> replace_displayedacteur_table_task
+        >> replace_displayedacteur_table_task
     )
 
     (

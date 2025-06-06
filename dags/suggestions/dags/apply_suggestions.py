@@ -11,7 +11,6 @@ from suggestions.tasks.airflow_logic.db_check_suggestion_to_process_task import 
 )
 from suggestions.tasks.airflow_logic.launch_compute_task import (
     launch_compute_acteur_task,
-    launch_compute_carte_acteur_task,
 )
 
 default_args = {
@@ -24,7 +23,7 @@ default_args = {
 
 dag = DAG(
     dag_id="apply_suggestions",
-    dag_display_name="Application des suggestions validées",
+    dag_display_name="Acteurs - Application des suggestions validées",
     default_args=default_args,
     description="traiter les suggestions à traiter",
     tags=[TAGS.COMPUTE, TAGS.SUGGESTIONS, TAGS.APPLY, TAGS.ACTEURS],
@@ -37,6 +36,5 @@ dag = DAG(
 (
     db_check_suggestion_to_process_task(dag)
     >> db_apply_suggestion_task(dag)
-    >> launch_compute_carte_acteur_task(dag)
     >> launch_compute_acteur_task(dag)
 )
