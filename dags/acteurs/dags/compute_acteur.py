@@ -26,7 +26,7 @@ default_args = {
 with DAG(
     "compute_acteurs",
     default_args=default_args,
-    dag_display_name="DBT - Rafraîchir les acteurs affichés",
+    dag_display_name="Acteurs affichés - Rafraîchir les acteurs affichés",
     description=(
         "Ce DAG construit les tables des acteurs utilisables par l'admin"
         " (vue exhaustive des acteurs), par la carte (vue des acteurs affichés) et"

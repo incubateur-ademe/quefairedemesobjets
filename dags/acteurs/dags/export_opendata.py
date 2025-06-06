@@ -25,7 +25,7 @@ default_args = {
 with DAG(
     "export_opendata_dag",
     default_args=default_args,
-    dag_display_name="Exporter les Acteurs en Open-Data",
+    dag_display_name="Acteurs Open-Data - Exporter les Acteurs en Open-Data",
     description=(
         "Ce DAG export les acteurs disponibles en opendata précédemment générés dans la"
         " table `exposure_opendata_acteur` de la base de données."
