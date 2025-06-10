@@ -69,17 +69,15 @@ class CarteConfig(models.Model):
     slug = models.SlugField(
         unique=True,
         help_text=mark_safe(
-            (
-                "Le slug est utilisé pour générer l'url de carte, "
-                "par exemple: https://quefairedemesobjets.fr/carte/",
-                "<strong>cyclevia</strong><br>",
-                "Le slug est utilisé pour le script avec l'attribut",
-                " <code>data-slug</code>, ",
-                "par exemple : <br/>",
-                "<code>&lt;script ",
-                "src='https://quefairedemesobjets.ademe.fr/static/carte.js' ",
-                "data-slug='cyclevia'&gt;&lt;/script&gt;</code>",
-            )
+            "Le slug est utilisé pour générer l'url de carte, "
+            "par exemple: https://quefairedemesobjets.fr/carte/"
+            "<strong>cyclevia</strong><br>"
+            "Le slug est utilisé pour le script avec l'attribut"
+            " <code>data-slug</code>, "
+            "par exemple : <br/>"
+            "<code>&lt;script "
+            "src='https://quefairedemesobjets.ademe.fr/static/carte.js' "
+            "data-slug='cyclevia'&gt;&lt;/script&gt;</code>"
         ),
     )
     sous_categorie_objet = models.ManyToManyField(
