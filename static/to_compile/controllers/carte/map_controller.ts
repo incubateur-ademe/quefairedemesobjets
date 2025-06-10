@@ -28,7 +28,7 @@ export class Actor implements DisplayedActeur {
 }
 
 class MapController extends Controller<HTMLElement> {
-  static targets = ["acteur", "searchInZoneButton", "bbox", "leafletContainer"]
+  static targets = ["acteur", "searchInZoneButton", "bbox", "mapContainer"]
   static values = {
     location: { type: Object, default: {} },
   }
@@ -36,13 +36,13 @@ class MapController extends Controller<HTMLElement> {
   declare readonly searchInZoneButtonTarget: HTMLButtonElement
   declare readonly hasSearchInZoneButtonTarget: boolean
   declare readonly bboxTarget: HTMLInputElement
-  declare readonly leafletContainerTarget: HTMLDivElement
+  declare readonly mapContainerTarget: HTMLDivElement
   declare readonly hasBboxTarget: boolean
   declare readonly locationValue: object
 
   connect() {
     const actorsMap = new SolutionMap({
-      selector: this.leafletContainerTarget,
+      selector: this.mapContainerTarget,
       location: this.locationValue,
       controller: this,
     })

@@ -18,13 +18,6 @@ from unit_tests.qfdmd.qfdmod_factory import (
 
 # Fixtures
 # --------
-@pytest.fixture(scope="session")
-def django_db_setup(django_db_setup, django_db_blocker):
-    with django_db_blocker.unblock():
-        # call_command("loaddata", "produits", "synonymes",)
-        pass
-
-
 @pytest.fixture
 def get_response(client):
     @override_settings(

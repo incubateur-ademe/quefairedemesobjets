@@ -21,7 +21,7 @@ import StateController from "../controllers/assistant/state"
 
 window.stimulus = Application.start()
 
-stimulus.debug = true
+stimulus.debug = document.body.dataset.stimulusDebug
 stimulus.register("map", MapController)
 stimulus.register("ss-cat-object-autocomplete", SsCatObjectAutocompleteController)
 stimulus.register("address-autocomplete", AddressAutocompleteController)

@@ -210,7 +210,7 @@ def validate_opening_hours(value):
         )
 
 
-class LabelQualite(models.Model):
+class LabelQualite(CodeAsNaturalKeyModel):
     class Meta:
         verbose_name = "Label qualité"
         verbose_name_plural = "Labels qualité"
