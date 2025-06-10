@@ -13,7 +13,8 @@ export default class extends Controller<HTMLElement> {
 
   connect() {
     // Checker l'id de la turbo frame dans le callback
-    this.element.addEventListener("turbo:frame-load", this.fetchLocationFromSessionStorage.bind(this))
+    // this.element.addEventListener("turbo:frame-load", this.fetchLocationFromSessionStorage.bind(this))
+    this.fetchLocationFromSessionStorage()
   }
 
   fetchLocationFromSessionStorage() {
