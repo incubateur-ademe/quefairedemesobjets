@@ -100,7 +100,7 @@ createsuperuser:
 .PHONY: seed-database
 seed-database:
 	$(DJANGO_ADMIN) loaddata categories labels sources actions produits acteur_services acteur_types objets synonymes suggestions
-	$(DJANGO_ADMIN) loadacteurs acteurs
+	$(DJANGO_ADMIN) loadacteurs acteurs propositions_services
 
 .PHONY: generate-fixtures-acteurs
 generate-fixtures-acteurs:

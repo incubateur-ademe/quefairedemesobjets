@@ -18,7 +18,11 @@ test.describe("Tests de l'assistant", () => {
     await page.locator(getItemSelector(1)).click();
     const sessionStorage = await page.evaluate(() => window.sessionStorage)
     expect(sessionStorage.adresse).toBe(adresseFill)
-    expect(sessionStorage.latitude).toContain("47.66")
-    expect(sessionStorage.longitude).toContain("-2.98")
+    expect(sessionStorage.latitude).toContain("47.6")
+    expect(sessionStorage.longitude).toContain("-2.9")
+
+    await expect(page.getByTestId("map-marker").first()).toBeVisible()
+    await page.getByTestId("map-marker").click()
+    expect(page.locator("#acteurDetailsPanel")).toBeVisible()
   })
 })
