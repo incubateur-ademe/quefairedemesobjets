@@ -84,7 +84,7 @@ export class SolutionMap {
     */
     if (acteur?.iconFile) {
       return [
-        `<div data-animated class="qf-scale-75" data-testid="marker">`,
+        `<div data-animated class="qf-scale-75" data-testid="map-marker">`,
         `<img class="qf--translate-y-2/4" height="61" width="46" src="${acteur.iconFile}">`,
         `</div>`
       ].join("")
