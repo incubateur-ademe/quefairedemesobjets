@@ -1,28 +1,19 @@
 """
-We will use Acteur model to test NomAsNaturalKeyModel because we need a model in DB
+We will use Produit model to test NomAsNaturalKeyModel because we need a model in DB
 """
 
 import pytest
 
-from qfdmo.models import Acteur
-from unit_tests.qfdmo.acteur_factory import ActeurFactory
-
-
-class TestActionStr:
-    def test_str_blank(self):
-        assert ActeurFactory.build(nom="").__str__() == ""
-
-    def test_str_specialchar(self):
-        assert ActeurFactory.build(nom="Åctïôn").__str__() == "Åctïôn"
+from qfdmd.models import Produit
+from unit_tests.qfdmd.qfdmod_factory import ProduitFactory
 
 
 class TestActionNaturalKey:
     def test_natural_key(self):
-        assert ActeurFactory.build(nom="Natural key").natural_key() == ("Natural key",)
+        assert ProduitFactory.build(nom="Natural key").natural_key() == ("Natural key",)
 
     @pytest.mark.django_db()
     def test_get_natural_key(self):
-        ActeurFactory(nom="Natural key")
-        assert (
-            Acteur.objects.get_by_natural_key("Natural key").__str__() == "Natural key"
-        )
+        produit = ProduitFactory(nom="Natural key")
+        assert Produit.objects.get_by_natural_key("Natural key") is not None
+        assert Produit.objects.get_by_natural_key("Natural key").pk == produit.pk

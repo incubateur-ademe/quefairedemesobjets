@@ -1,8 +1,9 @@
 import { Controller } from "@hotwired/stimulus"
 import debounce from "lodash/debounce"
-import { removeHash } from "./helpers"
-import { SolutionMap } from "./solution_map"
-import { ActorLocation, DisplayedActeur } from "./types"
+import { removeHash } from "../../js/helpers"
+import { SolutionMap } from "../../js/solution_map"
+import { ActorLocation, DisplayedActeur } from "../../js/types"
+import SearchFormController from "./search_solution_form_controller"
 
 export class Actor implements DisplayedActeur {
   uuid: string
@@ -26,31 +27,34 @@ export class Actor implements DisplayedActeur {
   }
 }
 
-export default class extends Controller<HTMLElement> {
-  static targets = ["acteur", "searchInZoneButton", "bbox"]
+class MapController extends Controller<HTMLElement> {
+  static targets = ["acteur", "searchInZoneButton", "bbox", "mapContainer"]
   static values = {
     location: { type: Object, default: {} },
   }
   declare readonly acteurTargets: Array<HTMLScriptElement>
   declare readonly searchInZoneButtonTarget: HTMLButtonElement
+  declare readonly hasSearchInZoneButtonTarget: boolean
   declare readonly bboxTarget: HTMLInputElement
+  declare readonly mapContainerTarget: HTMLDivElement
   declare readonly hasBboxTarget: boolean
   declare readonly locationValue: object
 
   connect() {
     const actorsMap = new SolutionMap({
+      selector: this.mapContainerTarget,
       location: this.locationValue,
       controller: this,
     })
-    //fixme : find how do not allow undefined from map
+
     const actors: Array<Actor> = this.acteurTargets
-      .map((actorTarget: HTMLScriptElement) => {
-        if (actorTarget.textContent !== null) {
-          const actorFields: DisplayedActeur = JSON.parse(actorTarget.textContent)
-          return new Actor(actorFields)
-        }
+      .filter(({ textContent }) => textContent !== null)
+      .map(({ textContent }) => {
+        const actorFields: DisplayedActeur = JSON.parse(textContent!)
+        return new Actor(actorFields)
       })
       .filter((actor) => actor !== undefined)
+
     if (this.hasBboxTarget && this.bboxTarget.value !== "") {
       const bbox = JSON.parse(this.bboxTarget.value)
       actorsMap.addActorMarkersToMap(actors, bbox)
@@ -72,10 +76,25 @@ export default class extends Controller<HTMLElement> {
   }
 
   displaySearchInZoneButton() {
-    this.searchInZoneButtonTarget.classList.remove("qf-hidden")
+    if (this.hasSearchInZoneButtonTarget) {
+      this.searchInZoneButtonTarget.classList.remove("qf-hidden")
+    }
   }
 
   hideSearchInZoneButton() {
-    this.searchInZoneButtonTarget.classList.add("qf-hidden")
+    if (this.hasSearchInZoneButtonTarget) {
+      this.searchInZoneButtonTarget.classList.add("qf-hidden")
+    }
+  }
+
+  setActiveActeur(uuid: string) {
+    // We do not use Stimulus outlets or events here so that the event does
+    // not dispatch to all controller's instances.
+    // This way, the selcted acteur won't open on Bon Etat and Mauvais Etat panels.
+    const solutionForm: SearchFormController = this.application.getControllerForElementAndIdentifier(
+      this.element.closest("[data-controller='search-solution-form']")!, "search-solution-form") as SearchFormController
+
+    solutionForm.displayActeur(uuid)
   }
 }
+export default MapController

@@ -2,7 +2,6 @@ from django.conf import settings
 from django.urls import reverse
 
 from qfdmd.forms import SearchForm
-from qfdmd.models import CMSPage
 from qfdmd.views import SEARCH_VIEW_TEMPLATE_NAME, generate_iframe_script
 
 from . import constants
@@ -42,7 +41,6 @@ def global_context(request) -> dict:
 
     return {
         **base,
-        "footer_pages": CMSPage.objects.all(),
         "search_form": SearchForm(),
         "search_view_template_name": SEARCH_VIEW_TEMPLATE_NAME,
         "iframe_script": generate_iframe_script(request),

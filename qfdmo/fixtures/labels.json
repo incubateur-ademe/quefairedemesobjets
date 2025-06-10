@@ -1,0 +1,93 @@
+[
+{
+    "model": "qfdmo.labelqualite",
+    "pk": 1,
+    "fields": {
+        "libelle": "Labellisé Répar'Acteur",
+        "code": "reparacteur",
+        "afficher": true,
+        "bonus": false,
+        "type_enseigne": false,
+        "url": "https://www.artisanat.fr/annuaire-repar-acteurs",
+        "logo_file": "logos/logo_repar_acteurs.png"
+    }
+},
+{
+    "model": "qfdmo.labelqualite",
+    "pk": 2,
+    "fields": {
+        "libelle": "Labellisé Bonus Réparation QualiRépar",
+        "code": "qualirepar",
+        "afficher": true,
+        "bonus": true,
+        "type_enseigne": false,
+        "url": "https://www.label-qualirepar.fr/",
+        "logo_file": "logos/logo-qualirepar.png"
+    }
+},
+{
+    "model": "qfdmo.labelqualite",
+    "pk": 3,
+    "fields": {
+        "libelle": "Labellisé Bonus Réparation Re_fashion",
+        "code": "refashion",
+        "afficher": true,
+        "bonus": true,
+        "type_enseigne": false,
+        "url": "https://refashion.fr/citoyen/fr/bonus-reparation",
+        "logo_file": "logos/Refashion_32.png"
+    }
+},
+{
+    "model": "qfdmo.labelqualite",
+    "pk": 4,
+    "fields": {
+        "libelle": "Labellisé Bonus Réparation Ecomaison",
+        "code": "ecomaison",
+        "afficher": true,
+        "bonus": true,
+        "type_enseigne": false,
+        "url": "https://ecomaison.com/developper-reparation/",
+        "logo_file": "logos/ecomaison32.png"
+    }
+},
+{
+    "model": "qfdmo.labelqualite",
+    "pk": 5,
+    "fields": {
+        "libelle": "Labellisé Bonus Réparation Bonus Répar (Bricolage & Jardinage thermique)",
+        "code": "bonusrepar_ABJ_TH",
+        "afficher": true,
+        "bonus": true,
+        "type_enseigne": false,
+        "url": "https://www.ecologic-france.com/ecologic/filiere-abj/fonds-reparation-abjth.html",
+        "logo_file": "logos/BonusRepar32.png"
+    }
+},
+{
+    "model": "qfdmo.labelqualite",
+    "pk": 6,
+    "fields": {
+        "libelle": "Labellisé Bonus Réparation Bonus Répar (Sport & Cycle)",
+        "code": "BonusRepar_ASL",
+        "afficher": true,
+        "bonus": true,
+        "type_enseigne": false,
+        "url": "https://www.ecologic-france.com/ecologic/filiere-asl/fonds-reparation-asl.html",
+        "logo_file": "logos/BonusRepar_ASL.jpg"
+    }
+},
+{
+    "model": "qfdmo.labelqualite",
+    "pk": 7,
+    "fields": {
+        "libelle": "Enseigne de l'économie sociale et solidaire",
+        "code": "ess",
+        "afficher": true,
+        "bonus": false,
+        "type_enseigne": true,
+        "url": "https://www.economie.gouv.fr/cedef/economie-sociale-et-solidaire",
+        "logo_file": "logos/ess.png"
+    }
+}
+]

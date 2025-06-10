@@ -37,6 +37,7 @@ from unidecode import unidecode
 
 from core.constants import DIGITAL_ACTEUR_CODE
 from core.models.mixin import TimestampedModel
+from core.utils import LazyEncoder
 from core.validators import EmptyEmailValidator
 from dags.sources.config.shared_constants import (
     EMPTY_ACTEUR_FIELD,
@@ -52,8 +53,6 @@ from qfdmo.models.categorie_objet import SousCategorieObjet
 from qfdmo.models.config import CarteConfig, GroupeActionConfig
 from qfdmo.models.utils import (
     CodeAsNaturalKeyModel,
-    NomAsNaturalKeyManager,
-    NomAsNaturalKeyModel,
     string_remove_substring_via_normalization,
 )
 from qfdmo.validators import CodeValidator
@@ -211,7 +210,7 @@ def validate_opening_hours(value):
         )
 
 
-class LabelQualite(models.Model):
+class LabelQualite(CodeAsNaturalKeyModel):
     class Meta:
         verbose_name = "Label qualité"
         verbose_name_plural = "Labels qualité"
@@ -312,12 +311,17 @@ class DisplayedActeurQuerySet(models.QuerySet):
         )
 
 
-class DisplayedActeurManager(NomAsNaturalKeyManager):
+class DisplayedActeurManager(models.Manager):
     def get_queryset(self):
         return DisplayedActeurQuerySet(self.model, using=self._db)
 
+    def get_by_natural_key(self, uuid):
+        return self.get(
+            uuid=uuid,
+        )
 
-class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
+
+class BaseActeur(TimestampedModel):
     class Meta:
         abstract = True
 
@@ -673,6 +677,24 @@ class BaseActeur(TimestampedModel, NomAsNaturalKeyModel):
             )
         return new_instance
 
+    def _generate_identifiant_externe_if_missing(self):
+        if not self.identifiant_externe:
+            self.identifiant_externe = "".join(
+                random.choices(string.ascii_uppercase, k=12)
+            )
+
+    def generate_source_if_missing(self):
+        if self.source is None:
+            self.source = Source.objects.get_or_create(code=DEFAULT_SOURCE_CODE)[0]
+
+    def generate_identifiant_unique_if_missing(self):
+        if not self.identifiant_unique:
+            source_stub = unidecode(self.source.code.lower()).replace(" ", "_")
+            self.identifiant_unique = source_stub + "_" + str(self.identifiant_externe)
+
+    def __str__(self):
+        return self.nom
+
 
 def clean_parent(parent):
     try:
@@ -730,15 +752,9 @@ class Acteur(BaseActeur):
         return super().save(*args, **kwargs)
 
     def set_default_field_before_save(self):
-        if not self.identifiant_externe:
-            self.identifiant_externe = "".join(
-                random.choices(string.ascii_uppercase, k=12)
-            )
-        if self.source is None:
-            self.source = Source.objects.get_or_create(code=DEFAULT_SOURCE_CODE)[0]
-        if not self.identifiant_unique:
-            source_stub = unidecode(self.source.code.lower()).replace(" ", "_")
-            self.identifiant_unique = source_stub + "_" + str(self.identifiant_externe)
+        self._generate_identifiant_externe_if_missing()
+        self.generate_source_if_missing()
+        self.generate_identifiant_unique_if_missing()
 
 
 # TODO: améliorer ci-dessous avec un gestionnaire de cache
@@ -1024,6 +1040,9 @@ class VueActeur(BaseActeur):
 class DisplayedActeur(BaseActeur):
     objects = DisplayedActeurManager()
 
+    def natural_key(self):
+        return (self.uuid,)
+
     class Meta:
         verbose_name = "ACTEUR de l'EC - AFFICHÉ"
         verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ"
@@ -1084,6 +1103,37 @@ class DisplayedActeur(BaseActeur):
             for action in cached_action_instances
             if action.id in action_ids_to_display
         ]
+
+    @property
+    def json_ld(self):
+        data = {
+            "@context": "https://schema.org",
+            "@type": "Place",
+            "geo": {
+                "@type": "GeoCoordinates",
+                "latitude": self.latitude,
+                "longitude": self.longitude,
+            },
+            "name": self.libelle,
+        }
+        if self.should_display_adresse:
+            data.update(
+                address={
+                    "@type": "PostalAddress",
+                    "addressLocality": self.ville,
+                    "streetAddress": self.adresse,
+                    "postalCode": self.code_postal,
+                }
+            )
+
+        indent = 4 if settings.DEBUG else None
+        return json.dumps(
+            data,
+            ensure_ascii=False,
+            cls=LazyEncoder,
+            indent=indent,
+            sort_keys=True,
+        )
 
     def json_acteur_for_display(
         self,
@@ -1342,7 +1392,17 @@ class VuePropositionService(BasePropositionService):
     )
 
 
+class DisplayedPropositionServiceManager(models.Manager):
+    def get_by_natural_key(self, acteur, action):
+        return self.get(
+            acteur=acteur,
+            action=action,
+        )
+
+
 class DisplayedPropositionService(BasePropositionService):
+    objects = DisplayedPropositionServiceManager()
+
     class Meta:
         verbose_name = "Proposition de service - AFFICHÉ"
         verbose_name_plural = "Proposition de service - AFFICHÉ"
@@ -1354,6 +1414,12 @@ class DisplayedPropositionService(BasePropositionService):
         null=False,
         related_name="proposition_services",
     )
+
+    def natural_key(self) -> tuple[str, str]:
+        return (
+            self.acteur,
+            self.action,
+        )
 
 
 class DisplayedPropositionServiceTemp(BasePropositionService):

@@ -1,79 +1,79 @@
 [
-    {
-        "model": "qfdmo.acteurtype",
-        "fields": {
-            "code": "ess",
-            "libelle": "Association, entreprise de l'ESS"
-        }
-    },
-    {
-        "model": "qfdmo.acteurtype",
-        "fields": {
-            "code": "collectivite",
-            "libelle": "collectivité, établissement public"
-        }
-    },
-    {
-        "model": "qfdmo.acteurtype",
-        "fields": {
-            "code": "artisan",
-            "libelle": "artisan, commerce indépendant"
-        }
-    },
-    {
-        "model": "qfdmo.acteurtype",
-        "fields": {
-            "code": "commerce",
-            "libelle": "commerce"
-        }
-    },
-    {
-        "model": "qfdmo.acteurtype",
-        "fields": {
-            "code": "acteur_digital",
-            "libelle": "en ligne (web, mobile)"
-        }
-    },
-    {
-        "model": "qfdmo.acteurtype",
-        "fields": {
-            "code": "decheterie",
-            "libelle": "déchèterie"
-        }
-    },
-    {
-        "model": "qfdmo.acteurtype",
-        "fields": {
-            "code": "ets_sante",
-            "libelle": "établissement de santé"
-        }
-    },
-    {
-        "model": "qfdmo.acteurtype",
-        "fields": {
-            "code": "plateforme_inertes",
-            "libelle": "plateforme de valorisation des inertes"
-        }
-    },
-    {
-        "model": "qfdmo.acteurtype",
-        "fields": {
-            "code": "pav_public",
-            "libelle": "point d'apport volontaire public"
-        }
-    },
-    {
-        "model": "qfdmo.acteurtype",
-        "fields": {
-            "code": "pav_prive",
-            "libelle": "point d'apport volontaire privé"
-        }
-    },
-    {
-        "model": "qfdmo.acteurtype",
-        "fields": {
-            "code": "pav_ponctuel",
-            "libelle": "point d'apport volontaire ponctuel"
-        }
+{
+    "model": "qfdmo.acteurtype",
+    "fields": {
+        "code": "ess",
+        "libelle": "Association, entreprise de l'ESS"
     }
+},
+{
+    "model": "qfdmo.acteurtype",
+    "fields": {
+        "code": "collectivite",
+        "libelle": "collectivité, établissement public"
+    }
+},
+{
+    "model": "qfdmo.acteurtype",
+    "fields": {
+        "code": "artisan",
+        "libelle": "artisan, commerce indépendant"
+    }
+},
+{
+    "model": "qfdmo.acteurtype",
+    "fields": {
+        "code": "commerce",
+        "libelle": "commerce"
+    }
+},
+{
+    "model": "qfdmo.acteurtype",
+    "fields": {
+        "code": "acteur_digital",
+        "libelle": "en ligne (web, mobile)"
+    }
+},
+{
+    "model": "qfdmo.acteurtype",
+    "fields": {
+        "code": "decheterie",
+        "libelle": "déchèterie"
+    }
+},
+{
+    "model": "qfdmo.acteurtype",
+    "fields": {
+        "code": "ets_sante",
+        "libelle": "établissement de santé"
+    }
+},
+{
+    "model": "qfdmo.acteurtype",
+    "fields": {
+        "code": "plateforme_inertes",
+        "libelle": "plateforme de valorisation des inertes"
+    }
+},
+{
+    "model": "qfdmo.acteurtype",
+    "fields": {
+        "code": "pav_public",
+        "libelle": "point d'apport volontaire public"
+    }
+},
+{
+    "model": "qfdmo.acteurtype",
+    "fields": {
+        "code": "pav_prive",
+        "libelle": "point d'apport volontaire privé"
+    }
+},
+{
+    "model": "qfdmo.acteurtype",
+    "fields": {
+        "code": "pav_ponctuel",
+        "libelle": "point d'apport volontaire ponctuel"
+    }
+}
 ]

@@ -1,0 +1,17 @@
+[
+{
+    "model": "qfdmd.suggestion",
+    "pk": 78,
+    "fields": {}
+},
+{
+    "model": "qfdmd.suggestion",
+    "pk": 445,
+    "fields": {}
+},
+{
+    "model": "qfdmd.suggestion",
+    "pk": 1323,
+    "fields": {}
+}
+]
