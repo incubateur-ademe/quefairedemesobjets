@@ -20,7 +20,7 @@ test("Desktop | La carte s'affiche sur une fiche déchet/objet", async ({ page }
   expect(sessionStorage.latitude).toContain("47.6")
   expect(sessionStorage.longitude).toContain("-2.9")
 
-  await expect(page.getByTestId("map-marker").first()).toBeVisible()
-  await page.getByTestId("map-marker").click()
+  await expect(page.locator(".leaflet-marker-icon [data-animated]")).toBeVisible()
+  await page.locator(".leaflet-marker-icon [data-animated]").click()
   expect(page.locator("#acteurDetailsPanel")).toBeVisible()
 })
