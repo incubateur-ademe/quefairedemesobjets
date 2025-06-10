@@ -1,13 +1,24 @@
 import { expect, test } from "@playwright/test";
 import { hideDjangoToolbar, searchDummyAdresse } from "./helpers";
+function getItemSelector(index) {
+  return `#mauvais_etat #id_adresseautocomplete-list.autocomplete-items div:nth-of-type(${index})`
+}
 
 test.describe("Tests de l'assistant", () => {
-
   test("Desktop | La carte s'affiche sur une fiche déchet/objet", async ({ page }) => {
     // Navigate to the carte page
     await page.goto(`/dechet/lave-linge`, { waitUntil: "networkidle" });
     await hideDjangoToolbar(page)
-    await searchDummyAdresse(page)
-    await expect(page.getByTestId("carte-legend")).toBeVisible()
+    const inputSelector = "#mauvais_etat input#id_adresse"
+    const adresseFill = "Auray"
+    // Autour de moi
+    await page.locator(inputSelector).click();
+    await page.locator(inputSelector).fill(adresseFill);
+    expect(page.locator(getItemSelector(1)).innerText()).not.toBe("Autour de moi")
+    await page.locator(getItemSelector(1)).click();
+    const sessionStorage = await page.evaluate(() => window.sessionStorage)
+    expect(sessionStorage.adresse).toBe(adresseFill)
+    expect(sessionStorage.latitude).toContain("47.66")
+    expect(sessionStorage.longitude).toContain("-2.98")
   })
 })
