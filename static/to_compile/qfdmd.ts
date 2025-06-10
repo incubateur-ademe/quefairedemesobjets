@@ -10,8 +10,6 @@ import StateController from "./controllers/assistant/state"
 // QFDMO
 import "./js/carte"
 
-
-stimulus.debug = document.body.dataset.stimulusDebug
 stimulus.register("search", SearchController)
 stimulus.register("blink", BlinkController)
 stimulus.register("analytics", AnalyticsController)

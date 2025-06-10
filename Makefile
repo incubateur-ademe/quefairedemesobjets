@@ -148,6 +148,10 @@ test-dags:
 e2e-test:
 	npx playwright test --update-snapshots
 
+.PHONY: e2e-test-ui
+e2e-test-ui:
+	npx playwright test --update-snapshots --ui
+
 .PHONY: a11y
 a11y:
 	npx playwright test --reporter=list ./e2e_tests/accessibility.spec.ts
