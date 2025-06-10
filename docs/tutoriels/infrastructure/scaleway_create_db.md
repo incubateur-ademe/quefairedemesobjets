@@ -6,13 +6,13 @@
 
 ### Prérequis
 
-Prévenir le.a référent.e technique de l'ADEME de l'évolution de la stack pour éviter les surprises sur la facture
+Prévenir le·a référent·e technique de l'ADEME de l'évolution de la stack pour éviter les surprises sur la facture
 
-### Créer l'instance de base de données managées
+### Créer l'instance de base de données managée
 
 Dans la section `Databases` > `… PostgreSQL …`, Créer une nouvelle base de données. \
 Localiser la DB en France \
-Préférer une base de données cryptées \
+Préférer une base de données chiffrée \
 Choisir 15 K IOPS pour des besoins intensifs (data) et choisir le plan en fonction des besoins \
 Nommer la base de données selon la convention : [Conventions](../../reference/infrastructure/scaleway.md#conventions)
 

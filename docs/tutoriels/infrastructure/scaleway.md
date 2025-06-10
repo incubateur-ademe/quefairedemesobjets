@@ -11,4 +11,5 @@ Vous trouverez dans cette section quelques tutoriels pour la gestion de l'infras
 
 ## Prérequis
 
-Pour opérer ces tutoriels, vous devez avoir les droits d'administration des ressources sur l'organisation `Incubateur ADEME (Pathtech)` et le projet `longuevieauxobjets`
+Pour opérer ces tutoriels, vous devez avoir les droits d'administration des ressources sur l'organisation `Incubateur ADEME (Pathtech)` et le projet `longuevieauxobjets`.
+Pour obtenir les droits, il faut les demander au•à la référent•e technique de l'ADEME
