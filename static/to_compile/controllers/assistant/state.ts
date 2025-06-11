@@ -1,10 +1,11 @@
 import { Controller } from "@hotwired/stimulus"
 import AdresseAutocompleteController from "../carte/address_autocomplete_controller"
 import SearchFormController from "../carte/search_solution_form_controller"
+import isEmpty from "lodash/isEmpty"
 
 export default class extends Controller<HTMLElement> {
   static values = {
-    "location": Object
+    "location": Object,
   }
   static outlets = ["address-autocomplete", "search-solution-form"]
   declare addressAutocompleteOutlets: Array<AdresseAutocompleteController>
@@ -12,15 +13,15 @@ export default class extends Controller<HTMLElement> {
   declare locationValue: { adresse: string | null, latitude: string | null, longitude: string | null }
 
   connect() {
-    // Checker l'id de la turbo frame dans le callback
-    this.fetchLocationFromSessionStorage()
+    document.addEventListener("turbo:frame-load", this.fetchLocationFromSessionStorageOnFirstLoad.bind(this))
   }
 
-  addressAutocompleteOutletConnected(outlet) {
-    this.updateUIFromSessionStorage(outlet)
-  }
+  fetchLocationFromSessionStorageOnFirstLoad(event) {
+    if (!isEmpty(this.locationValue)) {
+      document.removeEventListener("turbo:frame-load", this.fetchLocationFromSessionStorageOnFirstLoad.bind(this))
+      return
+    }
 
-  fetchLocationFromSessionStorage() {
     const nextLocationValue = {
       "adresse": sessionStorage.getItem("adresse"),
       "latitude": sessionStorage.getItem("latitude"),
@@ -33,7 +34,11 @@ export default class extends Controller<HTMLElement> {
   }
 
   setLocation(event) {
-    this.locationValue = event.detail
+    const nextLocationValue = event.detail
+    const updatedLocationIsNotEmpty = !isEmpty(nextLocationValue)
+    if (updatedLocationIsNotEmpty) {
+      this.locationValue = nextLocationValue
+    }
   }
 
   locationValueChanged(value, previousValue) {
@@ -44,12 +49,11 @@ export default class extends Controller<HTMLElement> {
     }
 
     for (const outlet of this.addressAutocompleteOutlets) {
-      this.updateUIFromSessionStorage(outlet)
+      this.updateUIFromGlobalState(outlet)
     }
   }
 
-  updateUIFromSessionStorage(outlet) {
-    console.log("locationValueChanged", { outlet })
+  updateUIFromGlobalState(outlet) {
     const value = this.locationValue
     let touched = false
     if (value.adresse && value.adresse !== outlet.inputTarget.value) {
