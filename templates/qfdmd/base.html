@@ -96,5 +96,15 @@
             Identifiant PostHog : {{ assistant.POSTHOG_KEY }} | Score de conversion : <span id="posthog-banner-conversion-score"></span>
              </div>
         {% endif %}
+        {% if "debug" in request.GET %}
+            <ul class="qf-list-none qf-flex qf-gap-4w">
+                <li>
+                SHA : {{ VERSION }}
+                </li>
+                <li>
+                APP : {{ APP }}
+                </li>
+            </ul>
+        {% endif %}
     </body>
 </html>
