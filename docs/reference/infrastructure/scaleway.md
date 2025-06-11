@@ -1,5 +1,11 @@
 # Infrastructure Scaleway
 
+```{toctree}
+:hidden:
+
+provisioning.md
+```
+
 ## Conventions
 
 Toutes les ressouurces sur scaleway seront provisionnées dans l'organisation `Incubateur ADEME (Pathtech)` et le projet `longuevieauxobjets`

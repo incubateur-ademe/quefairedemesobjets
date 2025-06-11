@@ -1,0 +1,12 @@
+terraform {
+  backend "s3" {
+    endpoint                    = "s3.fr-par.scw.cloud"
+    bucket                     = "lvao-terraform-state"
+    key                        = "dev/terraform.tfstate"
+    region                     = "fr-par"
+    skip_credentials_validation = true
+    skip_region_validation     = true
+    access_key                 = var.access_key
+    secret_key                 = var.secret_key
+  }
+}
