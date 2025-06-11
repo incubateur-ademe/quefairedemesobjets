@@ -13,8 +13,11 @@ export default class extends Controller<HTMLElement> {
 
   connect() {
     // Checker l'id de la turbo frame dans le callback
-    // this.element.addEventListener("turbo:frame-load", this.fetchLocationFromSessionStorage.bind(this))
     this.fetchLocationFromSessionStorage()
+  }
+
+  addressAutocompleteOutletConnected(outlet) {
+    this.updateUIFromSessionStorage(outlet)
   }
 
   fetchLocationFromSessionStorage() {
@@ -41,18 +44,32 @@ export default class extends Controller<HTMLElement> {
     }
 
     for (const outlet of this.addressAutocompleteOutlets) {
-      if (value.adresse && value.adresse !== outlet.inputTarget.value) {
-        outlet.inputTarget.value = value.adresse
-      }
-      if (value.latitude && outlet.latitudeTarget.value !== value.latitude) {
-        outlet.latitudeTarget.value = value.latitude
-      }
-      if (value.longitude && outlet.longitudeTarget.value !== value.longitude) {
-        outlet.longitudeTarget.value = value.longitude
-      }
+      this.updateUIFromSessionStorage(outlet)
+    }
+  }
+
+  updateUIFromSessionStorage(outlet) {
+    console.log("locationValueChanged", { outlet })
+    const value = this.locationValue
+    let touched = false
+    if (value.adresse && value.adresse !== outlet.inputTarget.value) {
+      outlet.inputTarget.value = value.adresse
+      touched = true
     }
 
-    this.submit()
+    if (value.latitude && outlet.latitudeTarget.value !== value.latitude) {
+      outlet.latitudeTarget.value = value.latitude
+      touched = true
+    }
+
+    if (value.longitude && outlet.longitudeTarget.value !== value.longitude) {
+      outlet.longitudeTarget.value = value.longitude
+      touched = true
+    }
+
+    if (touched) {
+      this.submit()
+    }
   }
 
   submit() {
