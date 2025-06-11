@@ -16,6 +16,8 @@ def environment(request):
         "BLOCK_ROBOTS": settings.BLOCK_ROBOTS,
         "is_embedded": True,
         "turbo": request.headers.get("Turbo-Frame"),
+        "VERSION": settings.VERSION,
+        "APP": settings.APP,
     }
 
 
