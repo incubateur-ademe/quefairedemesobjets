@@ -19,6 +19,9 @@ updates:
         patterns:
           - "@parcel/*"
           - "parcel"
+      jest:
+        patterns:
+          - "*jest*"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
