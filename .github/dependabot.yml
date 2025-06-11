@@ -28,3 +28,9 @@ updates:
       interval: "weekly"
       day: "tuesday"
       time: "06:00" # UTC
+  - package-ecosystem: "terraform"
+    directory: "/infrastructure"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "06:00" # UTC
