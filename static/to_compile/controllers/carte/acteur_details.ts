@@ -10,14 +10,14 @@ class ActeurController extends Controller<HTMLElement> {
   currentTranslateY: number
   hidden = true
   startTranslateY = 0
-  initialTranslateY = 140
+  initialTranslateY = 200
   initialTransition = 'transform ease 0.5s';
   // snapPoints defines the area in percentage of the parent where the
   // panel will adhere with magnetism.
   // When the user drags the panel close to a snapPoint, the panel will
   // stop at this point. This allows to control the panel's position precisely
   // 0 = fully open, 1 = fully closed
-  snapPoints = [0.2, 0.5, 0.8];
+  snapPoints = [0.3, 0.5, 0.8];
 
   declare readonly mapContainerIdValue: string
   declare readonly contentTarget: HTMLElement
@@ -136,22 +136,21 @@ class ActeurController extends Controller<HTMLElement> {
     this.element.style.transition = this.initialTransition;
     this.element.classList.remove("qf-select-none")
 
-    // Current drag ratio
-    const ratio = this.currentTranslateY / this.panelHeight;
+    const currentDragRatio = this.currentTranslateY / this.panelHeight;
 
     // Find closest snap point
-    let closest = this.snapPoints[0];
-    let minDiff = Math.abs(ratio - closest);
-    for (const point of this.snapPoints) {
-      const diff = Math.abs(ratio - point);
+    let closestSnapPoint = this.snapPoints[0];
+    let minDiff = Math.abs(currentDragRatio - closestSnapPoint);
+    for (const snapPoint of this.snapPoints) {
+      const diff = Math.abs(currentDragRatio - snapPoint);
       if (diff < minDiff) {
         minDiff = diff;
-        closest = point;
+        closestSnapPoint = snapPoint;
       }
     }
 
     // Snap to the closest point
-    const snapY = -1 * closest * this.panelHeight;
+    const snapY = -1 * closestSnapPoint * this.panelHeight;
     this.#setTranslateY(snapY);
 
     this.element.addEventListener(
