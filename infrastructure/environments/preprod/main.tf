@@ -4,7 +4,8 @@ module "provider" {
 
 module "database" {
   source = "../../modules/database"
-  environment = "preprod"
+
+  environment = var.environment
   node_type   = "DB-PRO2-XXS"
   volume_size = 100
   db_password = var.db_password

@@ -1,15 +1,3 @@
-
-
-variable "node_type" {
-  description = "Type de nœud de la base de données"
-  type        = string
-}
-
-variable "volume_size" {
-  description = "Taille du volume en GB"
-  type        = number
-}
-
 ### Resources DB ###
 
 resource "scaleway_rdb_instance" "main" {
@@ -39,22 +27,4 @@ resource "scaleway_rdb_privilege" "main_privilege" {
   user_name     = var.db_username
   database_name = scaleway_rdb_database.main.name
   permission    = "all"
-}
-
-### Outputs ###
-
-output "db_instance_id" {
-  value = scaleway_rdb_instance.main.id
-}
-
-output "db_instance_name" {
-  value = scaleway_rdb_instance.main.name
-}
-
-output "db_instance_public_ip" {
-  value = scaleway_rdb_instance.main.endpoint_ip
-}
-
-output "db_instance_public_port" {
-  value = scaleway_rdb_instance.main.endpoint_port
 }

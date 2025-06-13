@@ -1,11 +1,19 @@
+variable "environment" {
+  description = "Environment"
+  type        = string
+  default     = "prod"
+}
+
 variable "access_key" {
   description = "Clé d'accès à Scaleway"
   type        = string
+  sensitive   = true
 }
 
 variable "secret_key" {
   description = "Secret d'accès à Scaleway"
   type        = string
+  sensitive   = true
 }
 
 variable "db_password" {

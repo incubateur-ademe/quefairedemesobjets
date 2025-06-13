@@ -24,3 +24,13 @@ variable "db_username" {
   type        = string
   default     = "qfdmo"
 }
+
+variable "node_type" {
+  description = "Type de nœud de la base de données"
+  type        = string
+}
+
+variable "volume_size" {
+  description = "Taille du volume en GB"
+  type        = number
+}

@@ -5,7 +5,7 @@ module "provider" {
 module "database" {
   source = "../../modules/database"
 
-  environment = "dev"
+  environment = var.environment
   node_type   = "DB-DEV-S"
   volume_size = 100
   db_password = var.db_password
