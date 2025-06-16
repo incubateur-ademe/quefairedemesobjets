@@ -4,14 +4,14 @@
 >
     <button
         class="fr-btn fr-btn--sm fr-btn--secondary-light fr-icon-share-line qf-rounded-full"
-        aria-describedby="shareTooltip"
+        aria-describedby="{{ map_container_id }}:shareTooltip"
         type="button"
         data-action="click -> analytics#captureInteractionWithSolutionDetails"
     >
         <span class="qf-sr-only">partager</span>
     </button>
 
-    <div class="fr-tooltip fr-placement" id="shareTooltip" role="tooltip" tabindex="1">
+    <div class="fr-tooltip fr-placement" id="{{ map_container_id }}:shareTooltip" role="tooltip" tabindex="1">
         <div class="fr-share" role="toolbar">
             <ul class="fr-btns-group">
                 <li>
