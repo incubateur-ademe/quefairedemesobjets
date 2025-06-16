@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 import { clearActivePinpoints } from "../../js/helpers"
 
 class ActeurController extends Controller<HTMLElement> {
-  static targets = ["content", "frame"]
+  static targets = ["actions", "content"]
   static values = { mapContainerId: String }
   isDragging = false
   panelHeight: number
@@ -21,6 +21,8 @@ class ActeurController extends Controller<HTMLElement> {
 
   declare readonly mapContainerIdValue: string
   declare readonly contentTarget: HTMLElement
+  declare readonly actionsTarget: HTMLElement
+  declare readonly hasActionsTarget: Function
 
   initialize() {
     this.element.style.transition = this.initialTransition;
@@ -32,6 +34,10 @@ class ActeurController extends Controller<HTMLElement> {
 
     window.addEventListener('mouseup', this.#dragEnd.bind(this));
     window.addEventListener('touchend', this.#dragEnd.bind(this));
+
+    if (this.hasActionsTarget) {
+      this.initialTranslateY = 20 + this.actionsTarget.getBoundingClientRect().bottom
+    }
   }
 
   #computePanelTranslateY(): number {

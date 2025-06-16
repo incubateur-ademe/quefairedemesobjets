@@ -14,9 +14,10 @@
             id="{{ id }}"
             allow="geolocation; clipboard-write"
             class="
-            qf-overflow-hidden
-            max-md:qf-aspect-[9/20] qf-max-h-[90vh] md:qf-max-h-[90svh]
-            md:qf-max-h-[90vh] md:qf-h-[50em] qf-w-full"
+            max-md:qf-aspect-[9/20]
+            max-md:qf-h-[90vh]
+            max-md:qf-h-[90svh]
+            md:qf-h-[50em] qf-w-full"
             src="{{ url_carte|default:produit.synonymes.first.url_carte }}">
         </turbo-frame>
     </section>
