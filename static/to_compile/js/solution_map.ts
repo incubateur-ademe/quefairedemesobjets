@@ -91,7 +91,17 @@ export class SolutionMap {
     }
 
     const markerHtmlStyles = `color: ${acteur?.couleur};`
-    const background = acteur?.fillBackground ? pinBackgroundFillSvg : pinBackgroundSvg
+    let background: string = acteur?.fillBackground ? pinBackgroundFillSvg : pinBackgroundSvg
+    if (background.includes("MASK_ID")) {
+      // When multiple leaflet maps are displayed in DSFR tabs, a bug occurs because pins mask share
+      // the same id : #a.
+      // This bug causes the mask to briefly appears then disappear, and the pin's border gets lost.
+      // The fix here is to hardcode a magical MASK_ID value for the id's value in the svg file, and
+      // replace it with the acteur's id. Therefore, we ensure the mask ids are always unique and
+      // this prevents the bug to occur.
+      background = background.replace(/MASK_ID/g, acteur?.uuid!)
+    }
+
     const cornerIcon = acteur?.bonus ? bonusIconSvg : ""
     const icon = acteur?.icon || "fr-icon-checkbox-circle-line"
     const markerIconClasses = `qf-absolute qf-top-[10] qf-left-[10.5] qf-margin-auto
