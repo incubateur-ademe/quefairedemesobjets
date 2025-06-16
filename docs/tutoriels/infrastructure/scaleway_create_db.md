@@ -19,7 +19,7 @@ Nommer la base de données selon la convention : [Conventions](../../reference/i
 ### Créer la base de données
 
 Dans l'onglet `Databases`, créer la base de données (ex: `qfdmo`) |
-Dans l'onglet `Users`, permettre aux utilisateur d'administrer la base de données
+Dans l'onglet `Users`, permettre aux utilisateurs postgresql d'administrer la base de données
 
 ### Tester l'accès à la base de données
 
