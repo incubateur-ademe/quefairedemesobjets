@@ -21,7 +21,6 @@ class ActeurController extends Controller<HTMLElement> {
 
   declare readonly mapContainerIdValue: string
   declare readonly contentTarget: HTMLElement
-  declare readonly frameTarget: HTMLElement
 
   initialize() {
     this.element.style.transition = this.initialTransition;
