@@ -7,7 +7,7 @@
 terraform {
   backend "s3" {
     endpoint                    = "s3.fr-par.scw.cloud"
-    bucket                     = "lvao-terraform-state"
+    bucket                     = "${var.prefix}-terraform-state"
     key                        = "${var.environment}/terraform.tfstate"
     region                     = "fr-par"
     skip_credentials_validation = true
