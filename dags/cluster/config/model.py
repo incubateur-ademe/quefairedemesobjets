@@ -2,6 +2,7 @@
 
 from cluster.config.constants import FIELDS_PROTECTED
 from pydantic import BaseModel, Field, field_validator, model_validator
+
 from utils.airflow_params import airflow_params_dropdown_selected_to_ids
 
 
@@ -50,6 +51,7 @@ class ClusterConfig(BaseModel):
     dedup_enrich_priority_sources: list[str]
     dedup_enrich_priority_source_ids: list[int]  # to calculate from above
     dedup_enrich_keep_empty: bool
+    dedup_enrich_keep_parent_data_by_default: bool
 
     # ---------------------------------------
     # Listings & Mappings
