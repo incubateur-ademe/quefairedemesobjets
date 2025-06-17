@@ -128,7 +128,15 @@ export class SolutionMap {
     bboxValue?: Array<Number>,
   ): void {
     const points: Array<Array<Number>> = []
+    const addedActors: Array<string> = []
     actors.forEach(function(actor: DisplayedActeur) {
+      if (addedActors.includes(actor.uuid)) {
+        // Ensure actors are not added twice on the map.
+        // This can happen and can causes visual glitches.
+        // ID of markers being duplicated, these are wrongly rendered
+        // without borders.
+        return
+      }
       if (actor.location) {
         const markerHtmlString = this.#generateMarkerHTMLStringFrom(actor)
         const actorMarker = L.divIcon({
@@ -157,6 +165,7 @@ export class SolutionMap {
           }
         })
         marker.addTo(this.map)
+        addedActors.push(actor.uuid)
         points.push([actor.location.coordinates[1], actor.location.coordinates[0]])
       }
     }, this)
