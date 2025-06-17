@@ -1,17 +1,14 @@
+// Styles
+// These are used by Parcel to generate a css file with
+// the same filename as the current .ts file.
+// If several .css files are imported here, they will generate
+// a single qfdmd.css file.
 import "./styles/qfdmd.css"
+
+// Third-party scripts
 import '@iframe-resizer/child'
 
-// QFDMD
-import SearchController from "./controllers/assistant/search"
-import BlinkController from "./controllers/assistant/blink"
-import AnalyticsController from "./controllers/assistant/analytics"
-import StateController from "./controllers/assistant/state"
-
-// QFDMO
+// Carte scripts.
+// They are used to generate the map on Produit / Déchet pages
+// This script is responsible for starting the Stimulus application
 import "./js/carte"
-
-stimulus.register("search", SearchController)
-stimulus.register("blink", BlinkController)
-stimulus.register("analytics", AnalyticsController)
-stimulus.register("state", StateController)
-

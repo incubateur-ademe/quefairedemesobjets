@@ -372,13 +372,6 @@ class SearchFormController extends Controller<HTMLElement> {
   }
 
   advancedSubmit(event?: Event) {
-    if (this.element.ariaBusy) {
-      // Ensure no parallel form submission can be triggered as this causes
-      // some issues with turbo.
-      // For example the aria-busy attribute can be wrongly updated if
-      // two successive submissions have been triggered.
-      // return
-    }
     // Applies only in Formulaire alternative or in digital version.
     const withControls =
       (event?.target as HTMLElement).dataset.withControls?.toLowerCase() === "true"
