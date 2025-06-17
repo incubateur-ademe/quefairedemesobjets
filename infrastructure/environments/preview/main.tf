@@ -19,14 +19,15 @@ provider "scaleway" {
 module "database" {
   source = "../../modules/database"
 
-  prefix      = var.prefix
-  environment = var.environment
-  tags        = var.tags
-  node_type   = "DB-DEV-S"
-  volume_size = 100
-  db_username = var.db_username
-  db_password = var.db_password
-  db_name     = var.db_name
-  project_id = var.project_id
+  prefix          = var.prefix
+  environment     = var.environment
+  tags            = var.tags
+  node_type       = "DB-DEV-S"
+  volume_size     = 100
+  db_username     = var.db_username
+  db_password     = var.db_password
+  db_name         = var.db_name
+  db_wh_name      = var.db_wh_name
+  project_id      = var.project_id
   organization_id = var.organization_id
 }
