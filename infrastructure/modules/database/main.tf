@@ -28,3 +28,15 @@ resource "scaleway_rdb_privilege" "main_privilege" {
   database_name = scaleway_rdb_database.main.name
   permission    = "all"
 }
+
+resource "scaleway_rdb_database" "warehouse" {
+  instance_id = scaleway_rdb_instance.main.id
+  name        = var.db_wh_name
+}
+
+resource "scaleway_rdb_privilege" "warehouse_privilege" {
+  instance_id   = scaleway_rdb_instance.main.id
+  user_name     = var.db_username
+  database_name = scaleway_rdb_database.warehouse.name
+  permission    = "all"
+}
