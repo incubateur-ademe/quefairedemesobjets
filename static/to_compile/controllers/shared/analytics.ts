@@ -88,7 +88,6 @@ export default class extends Controller<HTMLElement> {
   userConversionScoreValueChanged(value) {
     this.#captureUserConversionScore()
     this.#syncSessionStorageWithLocalConversionScore()
-    console.log("changed", value)
   }
 
 
@@ -100,11 +99,6 @@ export default class extends Controller<HTMLElement> {
       console.log(`${this.initialActionValue} is not a valid action value`)
       return
     }
-
-    console.log("set initial action value", {
-      t: this,
-      actionvalue: this.initialActionValue
-    })
 
     this.userConversionScoreValue = {
       ...this.userConversionScoreValue,
@@ -196,11 +190,6 @@ export default class extends Controller<HTMLElement> {
 
   #captureUIInteraction(userConversionKey: keyof UserConversionConfig, UIInteractionType: PosthogUIInteractionType) {
     const currentValue = this.userConversionScoreValue[userConversionKey] || 0
-    console.log("capture ui interaction", {
-      t: this.userConversionScoreValue,
-      [userConversionKey]: currentValue + this.userConversionScoreConfig[userConversionKey],
-
-    })
     this.userConversionScoreValue = {
       ...this.userConversionScoreValue,
       [userConversionKey]: currentValue + this.userConversionScoreConfig[userConversionKey],
