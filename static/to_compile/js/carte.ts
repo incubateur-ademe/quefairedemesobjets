@@ -14,7 +14,7 @@ import ActeurDetailsController from "../controllers/carte/acteur_details"
 // QFDMD
 import SearchController from "../controllers/assistant/search"
 import BlinkController from "../controllers/assistant/blink"
-import AnalyticsController from "../controllers/assistant/analytics"
+import AnalyticsController from "../controllers/shared/analytics"
 import StateController from "../controllers/assistant/state"
 
 window.stimulus = Application.start()
