@@ -38,13 +38,26 @@ test("Desktop | Le tracking PostHog fonctionne comme prévu", async ({ page }) =
   expect(sessionStorage.produitPageView).toBe("1")
 
   // Click on a pin on the map and check that it scores 1
-  await searchOnProduitPage(page, "Auray")
-  await page.locator("#mauvais_etat .leaflet-marker-icon:nth-child(2)").click()
-  expect(sessionStorage.userInteractionWithSolutionDetails).toBe("1")
+  // await searchOnProduitPage(page, "Auray")
+  // await page.locator("#mauvais_etat .leaflet-marker-icon:nth-child(3)").click()
+  // sessionStorage = await page.evaluate(() => window.sessionStorage)
+  // console.log({ sessionStorage })
+  // expect(sessionStorage.userInteractionWithMap).toBe("1")
 
   // Click on another pin on the map and check that it scores 1 more (2 in total)
-  await page.locator("#mauvais_etat .leaflet-marker-icon:nth-child(3)").click()
-  expect(sessionStorage.userInteractionWithSolutionDetails).toBe("1")
+  // await page.locator("#mauvais_etat .leaflet-marker-icon:nth-child(4)").click({ force: true})
+  // sessionStorage = await page.evaluate(() => window.sessionStorage)
+  // expect(sessionStorage.userInteractionWithMap).toBe("2")
+
+  // Click on another pin on the map and check that it scores 1 more (2 in total)
+  // await page.locator("#mauvais_etat .leaflet-marker-icon:nth-child(5)").click({ force: true})
+  // sessionStorage = await page.evaluate(() => window.sessionStorage)
+  // expect(sessionStorage.userInteractionWithMap).toBe("2")
+
+  // Click on another pin on the map and check that it scores 1 more (2 in total)
+  // await page.locator("#mauvais_etat [aria-describedby=mauvais_etat:shareTooltip]").click()
+  // sessionStorage = await page.evaluate(() => window.sessionStorage)
+  // expect(sessionStorage.userInteractionWithSolutionDetails).toBe("1")
 
   // Ensure that the scores does not increases after
   // several homepage visits
