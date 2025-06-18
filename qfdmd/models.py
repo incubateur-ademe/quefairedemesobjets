@@ -2,22 +2,178 @@ import logging
 from urllib.parse import urlencode
 
 from django.contrib.gis.db import models
+from django.db.models import CheckConstraint, Q
 from django.db.models.functions import Now
 from django.template.loader import render_to_string
 from django.urls.base import reverse
 from django.utils.functional import cached_property
+from django.utils.translation import gettext_lazy as _
 from django_extensions.db.fields import AutoSlugField
-from wagtail.admin.panels import FieldPanel
-from wagtail.fields import StreamField
+from wagtail.admin.panels import FieldPanel, HelpPanel, ObjectList, TabbedInterface
+from wagtail.fields import RichTextField, StreamField
 from wagtail.images.blocks import ImageBlock
+from wagtail.models import Page
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
 
 from qfdmo.models.utils import NomAsNaturalKeyModel
+from qfdmd.blocks import ConsigneBlock, TabsBlock
 
 logger = logging.getLogger(__name__)
 
 
+class CMSPage(models.Model):
+    pass
+
+@register_snippet
+class ReusableContent(models.Model):
+    title = models.CharField()
+    content = RichTextField()
+    panels = ["title", "content"]
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = "Contenu réutilisable"
+        verbose_name_plural = "Contenus réutilisable"
+
+
+class ProduitIndexPage(Page):
+    subpage_types = ["qfdmd.produitpage", "qfdmd.familypage"]
+
+    class Meta:
+        verbose_name = "Index des familles & produits"
+
+
+class ProduitPage(Page):
+    subpage_types = [
+        "qfdmd.synonymepage",
+    ]
+    parent_page_types = ["qfdmd.produitindexpage", "qfdmd.familypage"]
+    produit = models.ForeignKey(
+        "qfdmd.produit",
+        on_delete=models.SET_NULL,
+        related_name="produit_page",
+        blank=True,
+        null=True,
+    )
+    synonyme = models.ForeignKey(
+        "qfdmd.synonyme",
+        on_delete=models.SET_NULL,
+        related_name="produit_page",
+        blank=True,
+        null=True,
+    )
+
+    gender = models.CharField()
+    number = models.IntegerField()
+
+    consigne = StreamField(ConsigneBlock, blank=True)
+    tabs = StreamField(TabsBlock, blank=True)
+
+    @property
+    def compiled_consigne(self):
+        # Check the current page's consigne
+        if self.consigne:
+            return self.consigne
+
+        # Traverse up the parent pages
+        for ancestor in reversed(self.get_ancestors(inclusive=True)):
+            try:
+                if ancestor.specific.consigne:
+                    return ancestor.specific.consigne
+            except AttributeError:
+                pass
+
+        # Return None or an empty string if no consigne is found
+        return None
+
+    @property
+    def family(self):
+        return FamilyPage.objects.ancestor_of(self).first()
+
+    content_panels = Page.content_panels + [
+        # FieldPanel("produit"),
+        # FieldPanel("synonyme"),
+        FieldPanel("tabs"),
+        FieldPanel("consigne", heading="Bon état"),
+        FieldPanel("consigne", heading="Mauvais état / déchet"),
+    ]
+
+    config_panels = [FieldPanel("gender"), FieldPanel("number")]
+
+    edit_handler = TabbedInterface(
+        [
+            ObjectList(content_panels, heading="Contenu"),
+            ObjectList(config_panels, heading="Config"),
+            ObjectList(Page.promote_panels, heading="Promote"),
+            ObjectList(Page.settings_panels, heading="Settings"),
+        ]
+    )
+
+    def get_context(self, request, *args, **kwargs):
+        context = super().get_context(request, *args, **kwargs)
+        context.update(is_synonyme=not (self.produit or self.synonyme))
+        return context
+
+        # for ancestor in reversed(self.get_ancestors(inclusive=True)):
+        #     produit = ancestor.specific.produit
+        #     synonyme = ancestor.specific.synonyme
+
+        #     if produit:
+        #         context.update(
+        #             bon_etat=produit.bon_etat,
+        #             mauvais_etat=produit.mauvais_etat,
+        #             object=produit,
+        #             produit=produit,
+        #         )
+        #         break
+        #     elif synonyme:
+        #         context.update(
+        #             object=synonyme,
+        #             produit=synonyme.produit,
+        #             bon_etat=synonyme.bon_etat,
+        #             mauvais_etat=synonyme.mauvais_etat,
+        #         )
+        #         break
+
+        # return context
+
+    class Meta:
+        verbose_name = "Produit"
+        constraints = [
+            CheckConstraint(
+                condition=Q(produit__isnull=True) | Q(synonyme__isnull=True),
+                name="no_produit_and_synonyme_filled_in_parallel",
+            ),
+        ]
+
+
+class FamilyPage(ProduitPage):
+    subpage_types = ["qfdmd.produitpage"]
+
+    class Meta:
+        verbose_name = "Famille"
+
+
+class SynonymePage(Page):
+    parent_page_types = ["qfdmd.produitpage"]
+
+    class Meta:
+        verbose_name = "Synonyme de recherche"
+        verbose_name_plural = "Synonymes de recherche"
+
+    content_panels = [
+        HelpPanel(
+            "Cette page est un synonyme de recherche, si vous souhaitez modifier des"
+            " champs sur cette page il faut modifier la page parente."
+        )
+    ] + Page.content_panels
+
+
+# LEGACY MODELS
+# ==============
 class AbstractBaseProduit(NomAsNaturalKeyModel):
     modifie_le = models.DateTimeField(auto_now=True, db_default=Now())
     # Le nom des champs conserve ici délibérément l'ancienne nomenclature,
@@ -45,6 +201,29 @@ class AbstractBaseProduit(NomAsNaturalKeyModel):
 
 @register_snippet
 class Produit(index.Indexed, AbstractBaseProduit):
+    @cached_property
+    def bon_etat(self) -> str:
+        if self.qu_est_ce_que_j_en_fais_bon_etat:
+            return self.qu_est_ce_que_j_en_fais_bon_etat
+        try:
+            return self.get_etats_descriptions()[1]
+        except (KeyError, TypeError):
+            return ""
+
+    @cached_property
+    def mauvais_etat(self) -> str:
+        if self.qu_est_ce_que_j_en_fais_mauvais_etat:
+            return self.qu_est_ce_que_j_en_fais_mauvais_etat
+        try:
+            return self.get_etats_descriptions()[0]
+        except (KeyError, TypeError):
+            return ""
+
+    id = models.IntegerField(
+        primary_key=True,
+        help_text="Correspond à l'identifiant ID défini dans les données "
+        "<i>Que Faire</i>.",
+    )
     nom = models.CharField(
         unique=True,
         verbose_name="Libellé",
@@ -64,7 +243,7 @@ class Produit(index.Indexed, AbstractBaseProduit):
     slug = models.CharField(blank=True, help_text="Slug - ne pas modifier")
     infotri = StreamField([("image", ImageBlock())], blank=True)
 
-    panels = [FieldPanel("infotri")]
+    # panels = [FieldPanel("infotri")]
 
     def __str__(self):
         return f"{self.pk} - {self.nom}"
@@ -151,6 +330,7 @@ class Produit(index.Indexed, AbstractBaseProduit):
         ]
 
 
+@register_snippet
 class Lien(models.Model):
     titre_du_lien = models.CharField(blank=True, unique=True, help_text="Titre du lien")
     url = models.URLField(blank=True, help_text="URL", max_length=300)
@@ -187,7 +367,8 @@ class ProduitLien(models.Model):
         unique_together = ("produit", "lien")  # Prevent duplicate relations
 
 
-class Synonyme(AbstractBaseProduit):
+@register_snippet
+class Synonyme(index.Indexed, AbstractBaseProduit):
     slug = AutoSlugField(populate_from=["nom"], max_length=255)
     nom = models.CharField(blank=True, unique=True, help_text="Nom du produit")
     produit = models.ForeignKey(
@@ -275,6 +456,11 @@ class Synonyme(AbstractBaseProduit):
 
     def __str__(self) -> str:
         return self.nom
+
+    search_fields = [
+        index.AutocompleteField("nom"),
+        index.SearchField("id"),
+    ]
 
 
 class Suggestion(models.Model):
