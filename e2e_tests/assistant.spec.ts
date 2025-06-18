@@ -18,8 +18,8 @@ test("Desktop | La carte s'affiche sur une fiche déchet/objet", async ({ page }
   // Navigate to the carte page
   await page.goto(`/dechet/lave-linge`, { waitUntil: "networkidle" });
   await hideDjangoToolbar(page)
-  const sessionStorage = await page.evaluate(() => window.sessionStorage)
   await searchOnProduitPage(page, "Auray")
+  const sessionStorage = await page.evaluate(() => window.sessionStorage)
   expect(sessionStorage.adresse).toBe("Auray")
   expect(sessionStorage.latitude).toContain("47.6")
   expect(sessionStorage.longitude).toContain("-2.9")
