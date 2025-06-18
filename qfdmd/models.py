@@ -17,10 +17,13 @@ from wagtail.search import index
 from wagtail.snippets.models import register_snippet
 
 from qfdmo.models.utils import NomAsNaturalKeyModel
-from qfdmd.blocks import ConsigneBlock
+from qfdmd.blocks import ConsigneBlock, TabsBlock
 
 logger = logging.getLogger(__name__)
 
+
+class CMSPage(models.Model):
+    pass
 
 @register_snippet
 class ReusableContent(models.Model):
@@ -67,6 +70,7 @@ class ProduitPage(Page):
     number = models.IntegerField()
 
     consigne = StreamField(ConsigneBlock, blank=True)
+    tabs = StreamField(TabsBlock, blank=True)
 
     @property
     def compiled_consigne(self):
@@ -90,17 +94,19 @@ class ProduitPage(Page):
         return FamilyPage.objects.ancestor_of(self).first()
 
     content_panels = Page.content_panels + [
-        FieldPanel("produit"),
-        FieldPanel("synonyme"),
-        FieldPanel("consigne"),
+        # FieldPanel("produit"),
+        # FieldPanel("synonyme"),
+        FieldPanel("tabs"),
+        FieldPanel("consigne", heading="Bon état"),
+        FieldPanel("consigne", heading="Mauvais état / déchet"),
     ]
 
     config_panels = [FieldPanel("gender"), FieldPanel("number")]
 
     edit_handler = TabbedInterface(
         [
-            ObjectList(content_panels, heading=_("content")),
-            ObjectList(config_panels, heading=_("content")),
+            ObjectList(content_panels, heading="Contenu"),
+            ObjectList(config_panels, heading="Config"),
             ObjectList(Page.promote_panels, heading="Promote"),
             ObjectList(Page.settings_panels, heading="Settings"),
         ]
@@ -109,29 +115,30 @@ class ProduitPage(Page):
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)
         context.update(is_synonyme=not (self.produit or self.synonyme))
-
-        for ancestor in reversed(self.get_ancestors(inclusive=True)):
-            produit = ancestor.specific.produit
-            synonyme = ancestor.specific.synonyme
-
-            if produit:
-                context.update(
-                    bon_etat=produit.bon_etat,
-                    mauvais_etat=produit.mauvais_etat,
-                    object=produit,
-                    produit=produit,
-                )
-                break
-            elif synonyme:
-                context.update(
-                    object=synonyme,
-                    produit=synonyme.produit,
-                    bon_etat=synonyme.bon_etat,
-                    mauvais_etat=synonyme.mauvais_etat,
-                )
-                break
-
         return context
+
+        # for ancestor in reversed(self.get_ancestors(inclusive=True)):
+        #     produit = ancestor.specific.produit
+        #     synonyme = ancestor.specific.synonyme
+
+        #     if produit:
+        #         context.update(
+        #             bon_etat=produit.bon_etat,
+        #             mauvais_etat=produit.mauvais_etat,
+        #             object=produit,
+        #             produit=produit,
+        #         )
+        #         break
+        #     elif synonyme:
+        #         context.update(
+        #             object=synonyme,
+        #             produit=synonyme.produit,
+        #             bon_etat=synonyme.bon_etat,
+        #             mauvais_etat=synonyme.mauvais_etat,
+        #         )
+        #         break
+
+        # return context
 
     class Meta:
         verbose_name = "Produit"
