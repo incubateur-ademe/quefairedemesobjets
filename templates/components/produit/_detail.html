@@ -15,14 +15,12 @@
             max-md:qf-max-h-[90vh]
             max-md:qf-max-h-[90svh]
             md:qf-h-[50em]
-
+            qf-w-full
         ">
         <turbo-frame
             id="{{ id }}"
             allow="geolocation; clipboard-write"
-            class="
-                qf-h-full
-             qf-w-full"
+            class="qf-h-full qf-w-full"
             src="{{ url_carte|default:produit.synonymes.first.url_carte }}">
         </turbo-frame>
         </div>
