@@ -60,6 +60,7 @@ export default class extends Controller<HTMLElement> {
     homePageView: 1,
     produitPageView: 1,
     userInteractionWithMap: 1,
+    userInteractionWithSolutionDetails: 1,
   }
 
   initialize(): void {
@@ -134,10 +135,10 @@ export default class extends Controller<HTMLElement> {
     this.userConversionScoreValue = conversionScore
   }
 
-  #updateDebugInspectorUI(conversionScore: number) {
+  #updateDebugInspectorUI() {
     const posthogBannerConversionScore = document.querySelector("#posthog-banner-conversion-score")
     if (posthogBannerConversionScore) {
-      posthogBannerConversionScore.textContent = conversionScore.toString()
+      posthogBannerConversionScore.textContent = this.userConversionScoreValue.toString()
     }
   }
 
@@ -148,7 +149,7 @@ export default class extends Controller<HTMLElement> {
         conversionScore: this.userConversionScoreValue,
       },
     })
-    this.#updateDebugInspectorUI(conversionScore)
+    this.#updateDebugInspectorUI()
   }
 
   #setupIntersectionObserverEvents() {
@@ -171,17 +172,20 @@ export default class extends Controller<HTMLElement> {
     observer.observe(document.body)
   }
 
+  // TODO: type
   captureUIInteraction(UIInteractionType: PosthogUIInteractionType) {
-    posthog.capture("$set", {
-      ui_interaction_type: UIInteractionType,
-    })
+    const key = "userInteractionWithMap"
+    this.userConversionScoreValue = {
+      ...this.userConversionScoreValue,
+      [key]: this.userConversionScoreValue[key] + this.userConversionScoreConfig[key],
+    }
   }
 
   captureInteractionWithSolutionDetails() {
-    this.captureUIInteraction("solution_details")
+    this.captureUIInteraction("userInteractionWithMap")
   }
 
   captureInteractionWithMap() {
-    this.captureUIInteraction("map")
+    this.captureUIInteraction("userInteractionWithSolutionDetails")
   }
 }

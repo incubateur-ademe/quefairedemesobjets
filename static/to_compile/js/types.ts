@@ -27,7 +27,7 @@ export class SSCatObject {
   identifier: number
 }
 
-export type InteractionType = "map" | "solution_details"
+export type InteractionType = string
 export type PosthogEventType = "ui_interaction" | EventName
 
 export type LVAOMarker = Marker & {
