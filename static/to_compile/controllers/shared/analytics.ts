@@ -37,7 +37,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   static values = {
-    action: String,
+    initialAction: String,
     posthogDebug: Boolean,
     posthogKey: String,
     userAdmin: Boolean,
@@ -85,13 +85,10 @@ export default class extends Controller<HTMLElement> {
     }
   }
 
-  userConversionScoreValueChanged(value, previousValue) {
-    // TODO: compare values, use lodash ?
-    // if (value !== previousValue) {
+  userConversionScoreValueChanged(value) {
     this.#captureUserConversionScore()
     this.#syncSessionStorageWithLocalConversionScore()
     console.log("changed", value)
-    // }
   }
 
 
@@ -99,17 +96,27 @@ export default class extends Controller<HTMLElement> {
   // This value is read when initializing the controller, and set the default score.
   // For example, viewing the homepage or a Produit page scores 1 point.
   #setInitialActionValue() {
-    if (this.initialActionValue && this.userConversionScoreConfig[this.initialActionValue]) {
+    if (this.initialActionValue && !this.userConversionScoreConfig[this.initialActionValue]) {
       console.log(`${this.initialActionValue} is not a valid action value`)
       return
     }
 
-    this.userConversionScoreValue[this.initialActionValue] = this.userConversionScoreConfig[this.initialActionValue]
+    console.log("set initial action value", {
+      t: this,
+      actionvalue: this.initialActionValue
+    })
+
+    this.userConversionScoreValue = {
+      ...this.userConversionScoreValue,
+      [this.initialActionValue]: this.userConversionScoreConfig[this.initialActionValue]
+    }
   }
 
   #syncSessionStorageWithLocalConversionScore() {
     for (const key of Object.keys(this.userConversionScoreConfig)) {
-      sessionStorage.setItem(key, this.userConversionScoreConfig[this.initialActionValue])
+      if (this.userConversionScoreValue[key]) {
+        sessionStorage.setItem(key, this.userConversionScoreValue[key])
+      }
     }
   }
 
@@ -126,7 +133,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   // The iframe URL parameter is not always set :
-  // - After a navigaation (click on a link)
+  // - After a navigation (click on a link)
   // - If the iframe integration does not use our script
   // In all these cases, we still want to determine
   // whether the user browse inside an iframe or not.
@@ -140,11 +147,14 @@ export default class extends Controller<HTMLElement> {
     let conversionScore = {}
     for (const key of Object.keys(this.userConversionScoreConfig)) {
       if (sessionStorage.getItem(key)) {
-        conversionScore[key] = sessionStorage.getItem(key)
+        conversionScore[key] = parseInt(sessionStorage.getItem(key)!)
       }
     }
 
-    this.userConversionScoreValue = conversionScore
+    this.userConversionScoreValue = {
+      ...this.userConversionScoreValue,
+      ...conversionScore
+    }
   }
 
   #updateDebugInspectorUI() {
@@ -185,23 +195,28 @@ export default class extends Controller<HTMLElement> {
   }
 
   #captureUIInteraction(userConversionKey: keyof UserConversionConfig, UIInteractionType: PosthogUIInteractionType) {
-    const key = "userInteractionWithMap"
+    const currentValue = this.userConversionScoreValue[userConversionKey] || 0
+    console.log("capture ui interaction", {
+      t: this.userConversionScoreValue,
+      [userConversionKey]: currentValue + this.userConversionScoreConfig[userConversionKey],
+
+    })
     this.userConversionScoreValue = {
       ...this.userConversionScoreValue,
-      [key]: this.userConversionScoreValue[key] + this.userConversionScoreConfig[key],
+      [userConversionKey]: currentValue + this.userConversionScoreConfig[userConversionKey],
     }
 
     // This is the legacy approach to compute UI interactions on PostHog,
     // before conversionScord was used on the Carte.
     // This is kept here to not break things but might be removed in a near future (june 2025).
-    posthog.capture("ui_interaction", { "ui_interaction_type": "solution_details" })
+    posthog.capture("ui_interaction", { "ui_interaction_type": UIInteractionType })
   }
 
   captureInteractionWithSolutionDetails() {
-    this.#captureUIInteraction("userInteractionWithMap", "solution_details")
+    this.#captureUIInteraction("userInteractionWithSolutionDetails", "solution_details")
   }
 
   captureInteractionWithMap() {
-    this.#captureUIInteraction("userInteractionWithSolutionDetails", "map")
+    this.#captureUIInteraction("userInteractionWithMap", "map")
   }
 }
