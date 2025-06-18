@@ -84,7 +84,7 @@
                 data-analytics-user-email-value="{{ request.user.email }}"
                 data-analytics-user-admin-value="{{ request.user.is_superuser|lower }}"
             {% endif %}
-            data-analytics-action-value="{% block analytics_action %}{% endblock %}"
+            data-analytics-initial-action-value="{% block analytics_action %}{% endblock %}"
         ></script>
         {% if assistant.is_iframe and request.user.is_authenticated %}
             <div class="qf-bg-warning-425-625-hover qf-text-white qf-text-center qf-w-screen qf-py-1v qf-text-xs">
