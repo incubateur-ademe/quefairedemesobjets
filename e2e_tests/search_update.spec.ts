@@ -20,7 +20,7 @@ test("Recherche et modification d'une recherche", async ({ page }) => {
   await searchDummyAdresse(page)
 
   // Submit the search form
-  await page.locator("button[data-testid=formulairerechercher-adresses-submit]").click()
+  await page.locator("button[data-testid=formulaire-rechercher-adresses-submit]").click()
 
   // Expect the Proposer une adresse button to be visible
   await expect(page.getByTestId("formulaire-proposer-une-adresse")).toBeVisible()
