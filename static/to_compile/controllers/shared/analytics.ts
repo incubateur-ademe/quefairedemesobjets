@@ -108,7 +108,7 @@ export default class extends Controller<HTMLElement> {
 
   #syncSessionStorageWithLocalConversionScore() {
     for (const key of Object.keys(this.userConversionScoreConfig)) {
-      if (this.userConversionScoreValue[key]) {
+      if (key in this.userConversionScoreValue) {
         sessionStorage.setItem(key, this.userConversionScoreValue[key])
       }
     }

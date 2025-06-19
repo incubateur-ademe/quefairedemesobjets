@@ -34,7 +34,7 @@ test("Desktop | Le parcours carte du formulaire fonctionne", async ({ page }) =>
   await iframe.locator(inputSelector).fill("auray");
   await iframe.locator("#id_adresseautocomplete-list.autocomplete-items div:nth-child(2)").click()
 
-  // Submit
+  // Submit form
   await iframe?.getByTestId("rechercher-adresses-submit").click()
   await expect(iframe.locator(".leaflet-marker-icon")).toBeVisible()
 
