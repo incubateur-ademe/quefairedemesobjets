@@ -86,7 +86,7 @@ test("Desktop | Les acteurs digitaux sont visibles sur le formulaire", async ({ 
 
   // Digital acteurs
   await iframe?.locator("#id_digital_1").click({ force: true })
-  await iframe?.getByTestId("[aria-controls=acteurDetailsPanel]").first().click()
+  await iframe?.locator("[aria-controls=acteurDetailsPanel]").first().click()
   await expect(iframe?.locator("#acteurDetailsPanel")).toBeVisible()
 })
 
