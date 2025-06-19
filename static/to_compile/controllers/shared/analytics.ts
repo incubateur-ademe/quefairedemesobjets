@@ -65,7 +65,7 @@ export default class extends Controller<HTMLElement> {
   // Each action is listed in the object below with the format :
   // { action name : points added when action is triggered }
   userConversionScoreConfig: UserConversionConfig = {
-    homePageView: 1,
+    homePageView: 0,
     produitPageView: 1,
     userInteractionWithMap: 1,
     userInteractionWithSolutionDetails: 1,
