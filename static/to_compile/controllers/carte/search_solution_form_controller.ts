@@ -169,8 +169,8 @@ class SearchFormController extends Controller<HTMLElement> {
 
   displayDigitalActeur(event) {
     const uuid = event.currentTarget.dataset.uuid
-    window.location.hash = uuid
     event.currentTarget.setAttribute("aria-expanded", "true")
+    this.displayActeur(uuid)
   }
 
   displayActeur(uuid: string) {
