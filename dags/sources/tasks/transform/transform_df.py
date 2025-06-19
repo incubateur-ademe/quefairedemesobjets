@@ -50,10 +50,11 @@ def merge_duplicates(
             raise ValueError(f"Column {col} not found in DataFrame")
 
     df_duplicates = df[df.duplicated(group_column, keep=False)]
+    identifiant_uniques = df_duplicates["identifiant_unique"].unique()
     if df_duplicates.empty:
         logger.warning("No duplicate found")
         return df
-    log.preview(f"{len(df_duplicates)/2} duplicates found", df_duplicates)
+    log.preview(f"{len(identifiant_uniques)} duplicates found", identifiant_uniques)
 
     df_non_duplicates = df[~df.duplicated(group_column, keep=False)]
 
