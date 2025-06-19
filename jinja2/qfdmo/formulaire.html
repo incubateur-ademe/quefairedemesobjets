@@ -12,7 +12,7 @@ qf-bg-white
         data-controller="search-solution-form"
         data-search-solution-form-target="searchForm"
         data-search-solution-form-is-iframe-value="{{ is_embedded }}"
-        data-turbo-frame="{{map_container_id}}:addressesPanel"
+        data-turbo-frame="addressesPanel"
         data-action="map:displayActeur->search-solution-form#displayActeur
         map:updateBbox->search-solution-form#updateBboxInput
         search-solution-form:captureInteraction->analytics#captureInteractionWithMap
@@ -53,8 +53,8 @@ qf-bg-white
                 tabindex="0"
             >
                 {% block form_result %}
-                    <turbo-frame id="{{ map_container_id }}:addressesPanel"
-                        data-search-solution-form-target="{{ map_container_id }}:addressesPanel"
+                    <turbo-frame id="addressesPanel"
+                        data-search-solution-form-target="addressesPanel"
                         class="qf-relative qf-z-10
                             qf-flex qf-flex-col
                             max-md:qf-fixed
