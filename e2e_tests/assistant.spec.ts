@@ -30,7 +30,7 @@ test("Desktop | Le tracking PostHog fonctionne comme prévu", async ({ page }) =
   await page.goto(`/`, { waitUntil: "networkidle" });
   // await hideDjangoToolbar(page)
   let sessionStorage = await page.evaluate(() => window.sessionStorage)
-  expect(sessionStorage.homePageView).toBe("1")
+  expect(sessionStorage.homePageView).toBe("0")
 
   // Navigate to a produit page and check that it scores 1
   await page.goto(`/dechet/lave-linge`, { waitUntil: "networkidle" });

@@ -17,7 +17,7 @@ async function searchOnProduitPage(page, searchedAddress: string) {
 test("Desktop | Le parcours carte du formulaire fonctionne", async ({ page }) => {
   // Navigate to the carte page
   await page.goto(`/test_iframe`, { waitUntil: "networkidle" });
-  await hideDjangoToolbar(page)
+  // await hideDjangoToolbar(page)
   const sessionStorage = await page.evaluate(() => window.sessionStorage)
   const iframeElement = await page.$("#formulaire iframe");
   const iframe = await iframeElement?.contentFrame();
