@@ -62,6 +62,11 @@ logger = logging.getLogger(__name__)
 DEFAULT_SOURCE_CODE = "communautelvao"
 
 
+def generate_short_uuid():
+    """Wrapper function for shortuuid.uuid to avoid migration issues"""
+    return shortuuid.uuid()
+
+
 class ActeurService(CodeAsNaturalKeyModel):
     class Meta:
         ordering = ["libelle"]
@@ -1048,7 +1053,7 @@ class DisplayedActeur(BaseActeur):
         verbose_name_plural = "ACTEURS de l'EC - AFFICHÉ"
 
     uuid = models.CharField(
-        max_length=255, default=shortuuid.uuid, editable=False, db_index=True
+        max_length=255, default=generate_short_uuid, editable=False, db_index=True
     )
 
     # Table name qfdmo_displayedacteur_sources
@@ -1235,7 +1240,7 @@ class DisplayedActeur(BaseActeur):
 
 
 class DisplayedActeurTemp(BaseActeur):
-    uuid = models.CharField(max_length=255, default=shortuuid.uuid, editable=False)
+    uuid = models.CharField(max_length=255, default=generate_short_uuid, editable=False)
 
     labels = models.ManyToManyField(
         LabelQualite,
