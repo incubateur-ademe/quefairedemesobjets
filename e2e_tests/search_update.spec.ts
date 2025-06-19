@@ -2,7 +2,6 @@ import { expect, test } from "@playwright/test"
 import { hideDjangoToolbar, searchDummyAdresse, searchDummySousCategorieObjet } from "./helpers"
 
 test("Recherche et modification d'une recherche", async ({ page }) => {
-  test.slow()
   // Helper function to handle autocomplete inputs
 
   // Navigate to the formulaire page
@@ -21,7 +20,7 @@ test("Recherche et modification d'une recherche", async ({ page }) => {
   await searchDummyAdresse(page)
 
   // Submit the search form
-  await page.locator("button[data-testid=rechercher-adresses-submit]").click()
+  await page.locator("button[data-testid=formulairerechercher-adresses-submit]").click()
 
   // Expect the Proposer une adresse button to be visible
   await expect(page.getByTestId("formulaire-proposer-une-adresse")).toBeVisible()
