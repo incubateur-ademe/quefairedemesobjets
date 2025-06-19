@@ -162,10 +162,20 @@ export default class extends Controller<HTMLElement> {
     posthog.capture("$set", {
       $set: {
         ...this.personProperties,
-        conversionScore: this.userConversionScoreValue,
+        conversionScore: this.#computeConversionScoreFromActions(),
+        conversionActions: this.userConversionScoreValue,
       },
     })
     this.#updateDebugInspectorUI()
+  }
+
+  #computeConversionScoreFromActions() {
+    let score = 0
+    for (const value of Object.values(this.userConversionScoreValue)) {
+      // TODO: type
+      score += value as number
+    }
+    return score
   }
 
   #setupIntersectionObserver() {

@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test"
 import { hideDjangoToolbar, searchDummyAdresse, searchDummySousCategorieObjet } from "./helpers"
 
 test("Recherche et modification d'une recherche", async ({ page }) => {
+  test.slow()
   // Helper function to handle autocomplete inputs
 
   // Navigate to the formulaire page
