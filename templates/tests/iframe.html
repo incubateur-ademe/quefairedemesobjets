@@ -35,6 +35,7 @@
             <h3>LA CARTE - avec une config de carte (Cyclevia)</h3>
             <script src="{{ assistant.BASE_URL }}/static/carte.js" data-slug="{{ request.GET.carte_slug }}"></script>
         {% else %}
+        <div id="formulaire">
             <h3>LE FORMULAIRE</h3>
             <script src="{{ lvao.BASE_URL }}/static/iframe.js"
                     data-max_width="100%"
@@ -44,6 +45,7 @@
                     data-action_list="reparer|echanger|mettreenlocation|revendre"
                     data-iframe_attributes='{"loading":"lazy", "id" : "resize" }'
             ></script>
+            </div>
         {% endif %}
 
         {% if request.GET.noheight %}
