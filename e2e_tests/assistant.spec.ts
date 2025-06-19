@@ -38,26 +38,52 @@ test("Desktop | Le tracking PostHog fonctionne comme prévu", async ({ page }) =
   expect(sessionStorage.produitPageView).toBe("1")
 
   // Click on a pin on the map and check that it scores 1
-  // await searchOnProduitPage(page, "Auray")
-  // await page.locator("#mauvais_etat .leaflet-marker-icon:nth-child(3)").click()
-  // sessionStorage = await page.evaluate(() => window.sessionStorage)
-  // console.log({ sessionStorage })
-  // expect(sessionStorage.userInteractionWithMap).toBe("1")
+  await searchOnProduitPage(page, "Auray")
+  const markers = page.locator(".leaflet-marker-icon")
+  // Remove the home marker (red dot) that prevents Playwright from clicking other markers
+  await page.evaluate(() => {
+    document.querySelector('.leaflet-marker-icon.home-icon')?.remove()
+  });
+
+  // Ensure we have at least one marker, and let's click on a marker.
+  // The approach is feels cumbersome, this is because Playwright has a
+  // hard time clicking on leaflet markers.
+  // Hence the force option in click's method call.
+  await expect(markers?.nth(0)).toBeAttached()
+  const count = await markers?.count()
+  for (let i = 0; i < count; i++) {
+    const item = markers?.nth(i);
+
+    try {
+      await item!.click({ force: true, timeout: 100 });
+      break
+    } catch (e) {
+      console.log("cannot click", e)
+    }
+  }
+
+  sessionStorage = await page.evaluate(() => window.sessionStorage)
+  expect(sessionStorage.userInteractionWithMap).toBe("1")
 
   // Click on another pin on the map and check that it scores 1 more (2 in total)
-  // await page.locator("#mauvais_etat .leaflet-marker-icon:nth-child(4)").click({ force: true})
-  // sessionStorage = await page.evaluate(() => window.sessionStorage)
-  // expect(sessionStorage.userInteractionWithMap).toBe("2")
+  for (let i = 0; i < count; i++) {
+    const item = markers?.nth(i);
 
-  // Click on another pin on the map and check that it scores 1 more (2 in total)
-  // await page.locator("#mauvais_etat .leaflet-marker-icon:nth-child(5)").click({ force: true})
-  // sessionStorage = await page.evaluate(() => window.sessionStorage)
-  // expect(sessionStorage.userInteractionWithMap).toBe("2")
+    try {
+      await item!.click({ force: true, timeout: 100 });
+      break
+    } catch (e) {
+      console.log("cannot click", e)
+    }
+  }
 
-  // Click on another pin on the map and check that it scores 1 more (2 in total)
-  // await page.locator("#mauvais_etat [aria-describedby=mauvais_etat:shareTooltip]").click()
-  // sessionStorage = await page.evaluate(() => window.sessionStorage)
-  // expect(sessionStorage.userInteractionWithSolutionDetails).toBe("1")
+  sessionStorage = await page.evaluate(() => window.sessionStorage)
+  expect(sessionStorage.userInteractionWithMap).toBe("2")
+
+  // Click on share button in solution details
+  await page.locator("#mauvais_etat [aria-describedby=mauvais_etat:shareTooltip]").click()
+  sessionStorage = await page.evaluate(() => window.sessionStorage)
+  expect(sessionStorage.userInteractionWithSolutionDetails).toBe("1")
 
   // Ensure that the scores does not increases after
   // several homepage visits
