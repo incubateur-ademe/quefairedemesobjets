@@ -8,10 +8,17 @@ from pathlib import Path
 from acteurs.tasks.airflow_logic.config_management import ExportOpendataConfig
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 
+from utils.django import django_setup_full
+
 logger = logging.getLogger(__name__)
+
+django_setup_full()
 
 
 def export_opendata_csv_to_s3(export_opendata_config: ExportOpendataConfig):
+
+    from django.conf import settings
+
     with tempfile.TemporaryDirectory() as temp_dir:
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         filename = f"{timestamp}.csv"
@@ -21,17 +28,10 @@ def export_opendata_csv_to_s3(export_opendata_config: ExportOpendataConfig):
             subprocess.run(
                 [
                     "psql",
-                    "-h",
-                    os.environ.get("POSTGRES_HOST") or "",
-                    "-p",
-                    os.environ.get("POSTGRES_PORT") or "",
-                    "-U",
-                    os.environ.get("POSTGRES_USER") or "",
                     "-d",
-                    os.environ.get("POSTGRES_DB") or "",
+                    settings.DB_WAREHOUSE,
                     "-c",
-                    f"COPY {export_opendata_config.opendata_schema}."
-                    f"{export_opendata_config.opendata_table}"
+                    f"COPY {export_opendata_config.opendata_table}"
                     " TO STDOUT WITH CSV HEADER",
                 ],
                 env={"PGPASSWORD": os.environ.get("POSTGRES_PASSWORD") or ""},

@@ -2,12 +2,15 @@ version: 2
 
 sources:
   - name: qfdmo
-    schema: public
+    schema: qfdmo_public
     tables:
       - name : qfdmo_acteur
       - name : qfdmo_acteur_acteur_services
       - name : qfdmo_acteur_labels
       - name : qfdmo_acteurtype
+      - name : qfdmo_acteurservice
+      - name : qfdmo_action
+      - name : qfdmo_labelqualite
       - name : qfdmo_propositionservice
       - name : qfdmo_propositionservice_sous_categories
       - name : qfdmo_revisionacteur
@@ -16,3 +19,4 @@ sources:
       - name : qfdmo_revisionpropositionservice
       - name : qfdmo_revisionpropositionservice_sous_categories
       - name : qfdmo_source
+      - name : qfdmo_souscategorieobjet

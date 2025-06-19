@@ -36,24 +36,8 @@ clean-targets:
 models:
   +unlogged: true
   base:
-    schema: warehouse
     +materialized: view
   intermediate:
-    schema: warehouse
     +materialized: view
   marts:
     +materialized: table
-    exhaustive:
-      schema: warehouse
-    carte:
-      schema: warehouse
-    opendata:
-      schema: warehouse
-  exposure:
-    +materialized: table
-    exhaustive:
-      schema: warehouse
-    carte:
-      schema: warehouse
-    opendata:
-      schema: warehouse
