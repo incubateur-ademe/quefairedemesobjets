@@ -277,6 +277,7 @@ default_settings = {
     **dj_database_url.parse(DATABASE_URL),
     "ENGINE": "django.contrib.gis.db.backends.postgis",
     "OPTIONS": {"options": "-c search_path=public,warehouse"},
+    # FIXME : est-ce que Django à besoin d'avoir les 2 bases de données ?
 }
 
 # The readonly access is configured with fake access when DB_READONLY env
@@ -288,9 +289,20 @@ DB_READONLY = decouple.config(
 )
 readonly_settings = dj_database_url.parse(DB_READONLY)
 
+DB_WAREHOUSE = decouple.config(
+    "DB_WAREHOUSE",
+    cast=str,
+    default="postgis://qfdmo:qfdmo@localhost:6543/warehouse",  # pragma: allowlist secret  # noqa: E501
+)
+warehouse_settings = {
+    **dj_database_url.parse(DB_WAREHOUSE),
+    "ENGINE": "django.contrib.gis.db.backends.postgis",
+}
+
 DATABASES = {
     "default": default_settings,
     "readonly": readonly_settings,
+    "warehouse": warehouse_settings,
 }
 
 CONN_HEALTH_CHECKS = True

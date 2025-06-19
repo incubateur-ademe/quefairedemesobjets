@@ -7,7 +7,6 @@ def check_model_table_consistency(
     *,
     django_app: str,
     model_name: str,
-    db_schema: str,
     table_name: str,
 ) -> bool:
 
@@ -16,4 +15,4 @@ def check_model_table_consistency(
     from core.models.tools import compare_model_vs_table
 
     model_class = apps.get_model(django_app, model_name)
-    return compare_model_vs_table(model_class, db_schema, table_name)
+    return compare_model_vs_table(model_class, table_name)

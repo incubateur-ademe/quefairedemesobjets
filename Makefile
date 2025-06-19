@@ -45,6 +45,8 @@ init-dev:
 	cp .env.template .env
 	cp ./dags/.env.template ./dags/.env
 	# prepare django
+	psql -d "$(DB_URL)" -f scripts/sql/create_databases.sql
+	psql -d "$(DB_URL)" -f scripts/sql/create_extensions.sql
 	make migrate
 	make createcachetable
 	make createsuperuser
@@ -178,14 +180,12 @@ create-schema-public:
 
 .PHONY: dump-production
 dump-production:
-	mkdir -p tmpbackup
-	scalingo --app quefairedemesobjets --addon postgresql backups-download --output tmpbackup/backup.tar.gz
-	tar xfz tmpbackup/backup.tar.gz --directory tmpbackup
+	sh scripts/infrastructure/backup-db.sh
 
 # We need to create extensions because they are not restored by pg_restore
 .PHONY: load-production-dump
 load-production-dump:
-	@DUMP_FILE=$$(find tmpbackup -type f -name "*.pgsql" -print -quit); \
+	@DUMP_FILE=$$(find tmpbackup -type f -name "*.custom" -print -quit); \
 	psql -d "$(DB_URL)" -f scripts/sql/create_extensions.sql && \
 	pg_restore -d "$(DB_URL)" --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
 	rm -rf tmpbackup
