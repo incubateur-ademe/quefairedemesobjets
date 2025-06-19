@@ -1327,7 +1327,7 @@ class BasePropositionService(models.Model):
         )
 
     def __str__(self):
-        return f"{self.action.code}"
+        return self.action.code
 
 
 class PropositionService(BasePropositionService):
@@ -1393,10 +1393,10 @@ class VuePropositionService(BasePropositionService):
 
 
 class DisplayedPropositionServiceManager(models.Manager):
-    def get_by_natural_key(self, acteur, action):
+    def get_by_natural_key(self, acteur_natural_key, action_natural_key):
         return self.get(
-            acteur=acteur,
-            action=action,
+            acteur=DisplayedActeur.objects.get_by_natural_key(*acteur_natural_key),
+            action=Action.objects.get_by_natural_key(*action_natural_key),
         )
 
 
@@ -1415,11 +1415,10 @@ class DisplayedPropositionService(BasePropositionService):
         related_name="proposition_services",
     )
 
-    def natural_key(self) -> tuple[str, str]:
-        return (
-            self.acteur,
-            self.action,
-        )
+    def natural_key(self):
+        return (self.acteur.natural_key(), self.action.natural_key())
+
+    natural_key.dependencies = ["qfdmo.displayedacteur"]
 
 
 class DisplayedPropositionServiceTemp(BasePropositionService):

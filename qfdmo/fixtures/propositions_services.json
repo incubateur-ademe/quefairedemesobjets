@@ -3,62 +3,6 @@
     "model": "qfdmo.displayedpropositionservice",
     "fields": {
         "action": [
-            "reparer"
-        ],
-        "acteur": [
-            "eYKxBYDMDoMXTr8iiw69Ek"
-        ],
-        "sous_categories": [
-            [
-                "materiel informatique"
-            ],
-            [
-                "smartphone, tablette et console"
-            ]
-        ]
-    }
-},
-{
-    "model": "qfdmo.displayedpropositionservice",
-    "fields": {
-        "action": [
-            "reparer"
-        ],
-        "acteur": [
-            "GWgsph7L9nmK2cTZXZzVGQ"
-        ],
-        "sous_categories": [
-            [
-                "autre equipement electronique"
-            ],
-            [
-                "gros electromenager (hors refrigerant)"
-            ],
-            [
-                "gros electromenager (refrigerant)"
-            ],
-            [
-                "luminaire"
-            ],
-            [
-                "materiel hifi et video"
-            ],
-            [
-                "materiel informatique"
-            ],
-            [
-                "petit electromenager"
-            ],
-            [
-                "smartphone, tablette et console"
-            ]
-        ]
-    }
-},
-{
-    "model": "qfdmo.displayedpropositionservice",
-    "fields": {
-        "action": [
             "acheter"
         ],
         "acteur": [
