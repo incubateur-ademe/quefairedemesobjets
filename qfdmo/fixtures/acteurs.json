@@ -2,6 +2,62 @@
 {
     "model": "qfdmo.displayedacteur",
     "fields": {
+        "cree_le": "2025-03-07T15:20:09.495Z",
+        "modifie_le": "2025-03-07T15:20:09.495Z",
+        "nom": "Act Informatique",
+        "description": "",
+        "acteur_type": [
+            "artisan"
+        ],
+        "adresse": "69 BOULEVARD MARECHAL JUIN",
+        "adresse_complement": "",
+        "code_postal": "06800",
+        "ville": "CAGNES SUR MER",
+        "url": "",
+        "email": "",
+        "location": "SRID=4326;POINT (7.1514437 43.6560528)",
+        "telephone": "",
+        "nom_commercial": "NOVATEK",
+        "nom_officiel": "",
+        "siren": "794012518",
+        "siret": "79401251800013",
+        "siret_is_closed": null,
+        "source": null,
+        "identifiant_externe": "",
+        "statut": "ACTIF",
+        "naf_principal": "95.11Z",
+        "commentaires": "[{\"message\":\"source changee le 18-07-2024. Ancienne source CMA non-reparActeur. Nouvelle source : LVAO.\"}]",
+        "horaires_osm": "",
+        "horaires_description": "",
+        "public_accueilli": "Particuliers",
+        "reprise": "",
+        "exclusivite_de_reprisereparation": false,
+        "uniquement_sur_rdv": null,
+        "action_principale": null,
+        "uuid": "GWgsph7L9nmK2cTZXZzVGQ",
+        "labels": [
+            [
+                "qualirepar"
+            ]
+        ],
+        "acteur_services": [
+            [
+                "service_de_reparation"
+            ]
+        ],
+        "sources": [
+            [
+                "lvao"
+            ],
+            [
+                "ocad3e"
+            ]
+        ]
+    }
+},
+{
+    "model": "qfdmo.displayedacteur",
+    "fields": {
         "cree_le": "2025-04-03T17:02:22.853Z",
         "modifie_le": "2025-05-19T12:02:14.948Z",
         "nom": "ASSOCIATION CAP RESSOURCERIE",
