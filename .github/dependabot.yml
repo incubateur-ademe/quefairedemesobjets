@@ -19,8 +19,17 @@ updates:
         patterns:
           - "@parcel/*"
           - "parcel"
+      jest:
+        patterns:
+          - "*jest*"
   - package-ecosystem: "github-actions"
     directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "06:00" # UTC
+  - package-ecosystem: "terraform"
+    directory: "/infrastructure"
     schedule:
       interval: "weekly"
       day: "tuesday"
