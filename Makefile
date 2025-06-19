@@ -106,7 +106,7 @@ seed-database:
 
 .PHONY: generate-fixtures-acteurs
 generate-fixtures-acteurs:
-	$(DJANGO_ADMIN) dumpdata qfdmo.displayedacteur $(FIXTURES_OPTIONS) --pk "65791ef2-bb37-4569-b011-8cece03dcdcf","antiquites_du_poulbenn_152575_reparation","refashion_TLC-REFASHION-PAV-3445001","communautelvao_VBOFDJDBOCTW","refashion_TLC-REFASHION-REP-603665791852778329","ocad3e_SGS-02069" -o qfdmo/fixtures/acteurs.json # pragma: allowlist secret
+	$(DJANGO_ADMIN) dumpdata qfdmo.displayedacteur $(FIXTURES_OPTIONS) --pk "communautelvao_LWTYYUPBDMWM","65791ef2-bb37-4569-b011-8cece03dcdcf","antiquites_du_poulbenn_152575_reparation","refashion_TLC-REFASHION-PAV-3445001","communautelvao_VBOFDJDBOCTW","refashion_TLC-REFASHION-REP-603665791852778329","ocad3e_SGS-02069" -o qfdmo/fixtures/acteurs.json # pragma: allowlist secret
 	$(DJANGO_ADMIN) dumpdata qfdmo.displayedpropositionservice $(FIXTURES_OPTIONS) --pk 2163243,2163244,2163245,243160,435885,1699381,738371,738372,719100 -o qfdmo/fixtures/propositions_services.json
 
 .PHONY: generate-fixtures

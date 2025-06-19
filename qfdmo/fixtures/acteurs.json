@@ -36,7 +36,9 @@
         "action_principale": null,
         "uuid": "aDcrby2bqxAZFM3yYCRTue",
         "labels": [
-            7
+            [
+                "ess"
+            ]
         ],
         "acteur_services": [
             [
@@ -51,13 +53,13 @@
                 "sinoe"
             ],
             [
+                "refashion"
+            ],
+            [
                 "ecomaison"
             ],
             [
                 "ecologic"
-            ],
-            [
-                "refashion"
             ],
             [
                 "ecosystem"
@@ -112,6 +114,61 @@
         "sources": [
             [
                 "lvao"
+            ]
+        ]
+    }
+},
+{
+    "model": "qfdmo.displayedacteur",
+    "fields": {
+        "cree_le": "2024-07-31T20:20:01.566Z",
+        "modifie_le": "2024-07-31T20:20:01.599Z",
+        "nom": "Agir pour la Terre de nos Enfants",
+        "description": "Agir pour la terre de nos enfants est une association qui a pour but :\r\n\r\nInformer et sensibiliser les citoyens de tous les âges à la fragilité de notre environnement naturel.\r\n\r\nNourrir la réflexion de tous sur l’impact environnemental de nos comportements individuels et collectifs.\r\n\r\nMener des actions concrètes en faveur de l’environnement\r\n\r\nFavoriser le vivre-ensemble et créer du lien entre les citoyens.",
+        "acteur_type": [
+            "acteur_digital"
+        ],
+        "adresse": "140 RUE SAINT IRENEE",
+        "adresse_complement": "",
+        "code_postal": "01320",
+        "ville": "CHATILLON-LA-PALUD",
+        "url": "https://www.agirpourlaterredenosenfants.fr/loutilth%C3%A8que",
+        "email": "agirpourlaterredenosenfants@gmail.com",
+        "location": null,
+        "telephone": "",
+        "nom_commercial": "",
+        "nom_officiel": "",
+        "siren": "",
+        "siret": "92480254900015",
+        "siret_is_closed": null,
+        "source": [
+            "communautelvao"
+        ],
+        "identifiant_externe": "LWTYYUPBDMWM",
+        "statut": "ACTIF",
+        "naf_principal": "94.99Z",
+        "commentaires": "",
+        "horaires_osm": "",
+        "horaires_description": "",
+        "public_accueilli": "",
+        "reprise": "",
+        "exclusivite_de_reprisereparation": null,
+        "uniquement_sur_rdv": null,
+        "action_principale": null,
+        "uuid": "VBiu5he7rmPf4LpeowtxQ2",
+        "labels": [
+            [
+                "ess"
+            ]
+        ],
+        "acteur_services": [
+            [
+                "espace_de_partage"
+            ]
+        ],
+        "sources": [
+            [
+                "communautelvao"
             ]
         ]
     }
@@ -206,7 +263,9 @@
         "action_principale": null,
         "uuid": "eYKxBYDMDoMXTr8iiw69Ek",
         "labels": [
-            2
+            [
+                "qualirepar"
+            ]
         ],
         "acteur_services": [
             [
@@ -310,7 +369,9 @@
         "action_principale": null,
         "uuid": "XSyppoQHLT37uafQ6kj5M7",
         "labels": [
-            3
+            [
+                "refashion"
+            ]
         ],
         "acteur_services": [
             [

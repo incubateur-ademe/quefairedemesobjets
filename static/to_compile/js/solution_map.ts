@@ -50,7 +50,7 @@ export class SolutionMap {
       this.#location.longitude !== undefined
     ) {
       const homeIcon = L.divIcon({
-        className: "!qf-z-[10000]",
+        className: "!qf-z-[10000] home-icon",
         iconSize: [35, 35],
         html: this.#generateHomeHTMLString(),
       })

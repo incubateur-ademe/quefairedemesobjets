@@ -31,10 +31,7 @@ test("Desktop | Les acteurs sont visibles sur la carte du formulaire fonctionne"
 
   // Remove the home marker (red dot) that prevents Playwright from clicking other markers
   await page.evaluate(() => {
-    const element = document.querySelector('.leaflet-marker-icon');
-    if (element) {
-      element.remove();
-    }
+    document.querySelector('.leaflet-marker-icon.home-icon')?.remove()
   });
 
   // Ensure we have at least one marker, and let's click on a marker.
