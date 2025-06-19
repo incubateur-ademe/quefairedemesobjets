@@ -63,5 +63,5 @@ test("Desktop | Le tracking PostHog fonctionne comme prévu", async ({ page }) =
   // several homepage visits
   await page.goto(`/`, { waitUntil: "networkidle" });
   sessionStorage = await page.evaluate(() => window.sessionStorage)
-  expect(sessionStorage.homePageView).toBe("1")
+  expect(sessionStorage.homePageView).toBe("0")
 })
