@@ -95,7 +95,7 @@ export default class extends Controller<HTMLElement> {
   // This value is read when initializing the controller, and set the default score.
   // For example, viewing the homepage or a Produit page scores 1 point.
   #setInitialActionValue() {
-    if (this.initialActionValue && !this.userConversionScoreConfig[this.initialActionValue]) {
+    if (this.initialActionValue && !(this.initialActionValue in this.userConversionScoreConfig)) {
       console.log(`${this.initialActionValue} is not a valid action value`)
       return
     }
