@@ -31,7 +31,7 @@ def task_info_get(model_name, table_name):
 
 
 def check_model_table_consistency_wrapper(
-    ti, params, *, django_app: str, model_name: str, db_schema: str, table_name: str
+    ti, params, *, django_app: str, model_name: str, table_name: str
 ) -> None:
     # model_name = "DisplayedActeur"
     # table_name = "exposure_carte_acteur"
@@ -42,7 +42,6 @@ def check_model_table_consistency_wrapper(
     if not check_model_table_consistency(
         django_app=django_app,
         model_name=model_name,
-        db_schema=db_schema,
         table_name=table_name,
     ):
         raise AirflowFailException(
@@ -54,7 +53,6 @@ def check_model_table_consistency_task(
     dag: DAG,
     django_app: str,
     model_name: str,
-    db_schema: str,
     table_name: str,
 ) -> PythonOperator:
     task_name = f"check_{model_name}_vs_{table_name}_consistency"
@@ -65,7 +63,6 @@ def check_model_table_consistency_task(
         op_kwargs={
             "django_app": django_app,
             "model_name": model_name,
-            "db_schema": db_schema,
             "table_name": table_name,
         },
     )
