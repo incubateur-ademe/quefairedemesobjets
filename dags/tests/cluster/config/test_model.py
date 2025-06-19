@@ -29,6 +29,7 @@ class TestClusterConfigModel:
             "dedup_enrich_exclude_sources": ["source1 (id=1)"],
             "dedup_enrich_priority_sources": ["source1 (id=1)"],
             "dedup_enrich_keep_empty": False,
+            "dedup_enrich_keep_parent_data_by_default": True,
             "mapping_sources": {"source1": 1, "source2": 2, "source3": 3},
             "mapping_acteur_types": {"atype1": 1, "atype2": 2, "atype3": 3},
         }
