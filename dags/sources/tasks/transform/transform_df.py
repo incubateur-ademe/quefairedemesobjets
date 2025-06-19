@@ -195,9 +195,9 @@ def clean_adresse(row, dag_config):
         address, postal_code, city = _get_address(row["adresse_format_ban"])
     else:
         address, postal_code, city = _extract_details(row["adresse_format_ban"])
-    row["adresse"] = address
+    row["adresse"] = address.title()
     row["code_postal"] = postal_code
-    row["ville"] = city
+    row["ville"] = city.title()
     return row[["adresse", "code_postal", "ville"]]
 
 
