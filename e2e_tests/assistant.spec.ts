@@ -17,7 +17,7 @@ async function searchOnProduitPage(page, searchedAddress: string) {
 test("Desktop | La carte s'affiche sur une fiche déchet/objet", async ({ page }) => {
   // Navigate to the carte page
   await page.goto(`/dechet/lave-linge`, { waitUntil: "networkidle" });
-  await hideDjangoToolbar(page)
+  // await hideDjangoToolbar(page)
   await searchOnProduitPage(page, "Auray")
   const sessionStorage = await page.evaluate(() => window.sessionStorage)
   expect(sessionStorage.adresse).toBe("Auray")
@@ -28,7 +28,7 @@ test("Desktop | La carte s'affiche sur une fiche déchet/objet", async ({ page }
 test("Desktop | Le tracking PostHog fonctionne comme prévu", async ({ page }) => {
   // Check that homepage scores 1
   await page.goto(`/`, { waitUntil: "networkidle" });
-  await hideDjangoToolbar(page)
+  // await hideDjangoToolbar(page)
   let sessionStorage = await page.evaluate(() => window.sessionStorage)
   expect(sessionStorage.homePageView).toBe("1")
 
