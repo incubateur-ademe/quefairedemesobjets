@@ -5,8 +5,6 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class DBT:
-    SCHEMA: str = "warehouse"
-
     # RGPD
     MARTS_ENRICH_RGPD_SUGGESTIONS: str = "marts_enrich_acteurs_rgpd_suggest"
 
