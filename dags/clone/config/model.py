@@ -23,7 +23,6 @@ class CloneConfig(BaseModel):
     file_unpacked: str
     delimiter: str
     run_timestamp: str
-    db_schema: str = "warehouse"
 
     @computed_field
     @property

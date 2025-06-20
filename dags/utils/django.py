@@ -17,6 +17,8 @@ from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
 
+DJANGO_WH_CONNECTION_NAME = "warehouse"
+
 
 def django_add_to_sys_path() -> None:
     """
@@ -222,7 +224,7 @@ def django_model_queryset_to_df(query: Any, fields: list[str]) -> pd.DataFrame:
 
 def django_schema_create_and_check(schema_name: str, sql: str, dry_run=True) -> None:
     """Create a table in the DB from a schema"""
-    from django.db import connection
+    from django.db import connections
 
     # Creation
     logger.info(f"Création schema pour {schema_name=}: début")
@@ -230,11 +232,11 @@ def django_schema_create_and_check(schema_name: str, sql: str, dry_run=True) -> 
     if dry_run:
         logger.info("Mode dry-run, on ne crée pas le schema")
         return
-    with connection.cursor() as cursor:
+    with connections[DJANGO_WH_CONNECTION_NAME].cursor() as cursor:
         cursor.execute(sql)
 
     # Validation
-    tables_all = connection.introspection.table_names()
+    tables_all = connections[DJANGO_WH_CONNECTION_NAME].introspection.table_names()
     if schema_name not in tables_all:
         raise SystemError(f"Table pas crée malgré execution SQL OK: {schema_name}")
     logger.info(f"Création schema pour {schema_name=}: succès 🟢")

@@ -3,6 +3,6 @@ version: 2
 sources:
   - name: enrich
     description: "Enrich"
-    schema: public
+    schema: qfdmo_public
     tables:
       - name: qfdmo_vueacteur

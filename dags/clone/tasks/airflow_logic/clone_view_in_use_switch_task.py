@@ -34,7 +34,6 @@ def clone_view_in_use_switch_wrapper(ti) -> None:
     log.preview("Configuration", config.model_dump())
 
     clone_view_in_use_switch(
-        db_schema=config.db_schema,
         view_schema_file_path=config.view_schema_file_path,
         view_name=config.view_name,
         table_name=config.table_name,
