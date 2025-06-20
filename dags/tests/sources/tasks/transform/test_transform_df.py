@@ -576,7 +576,7 @@ class TestCleanAdresse:
             (
                 "123 Rue de Paris 75001 Paris",
                 {
-                    "adresse": "123 Rue de Paris",
+                    "adresse": "123 Rue De Paris",
                     "code_postal": "75001",
                     "ville": "Paris",
                 },
@@ -584,7 +584,7 @@ class TestCleanAdresse:
             (
                 " 123 Rue de Paris  75001  Paris ",
                 {
-                    "adresse": "123 Rue de Paris",
+                    "adresse": "123 Rue De Paris",
                     "code_postal": "75001",
                     "ville": "Paris",
                 },
@@ -600,7 +600,7 @@ class TestCleanAdresse:
             (
                 " 123 Rue de Paris 75001 Paris CEDEX 01123",
                 {
-                    "adresse": "123 Rue de Paris",
+                    "adresse": "123 Rue De Paris",
                     "code_postal": "75001",
                     "ville": "Paris",
                 },
@@ -608,7 +608,7 @@ class TestCleanAdresse:
             (
                 "Rue des Balmes,38540,HEYRIEUX",
                 {
-                    "adresse": "Rue des Balmes",
+                    "adresse": "Rue Des Balmes",
                     "code_postal": "38540",
                     "ville": "Heyrieux",
                 },
@@ -616,7 +616,7 @@ class TestCleanAdresse:
             (
                 "Rue des Balmes;38540;HEYRIEUX",
                 {
-                    "adresse": "Rue des Balmes",
+                    "adresse": "Rue Des Balmes",
                     "code_postal": "38540",
                     "ville": "Heyrieux",
                 },
@@ -624,7 +624,7 @@ class TestCleanAdresse:
             (
                 "Rue des Balmes - 38540 - HEYRIEUX",
                 {
-                    "adresse": "Rue des Balmes",
+                    "adresse": "Rue Des Balmes",
                     "code_postal": "38540",
                     "ville": "Heyrieux",
                 },
@@ -632,7 +632,7 @@ class TestCleanAdresse:
             (
                 "- 31660 avenue de Maurin, 34076 Montpellier",
                 {
-                    "adresse": "31660 avenue de Maurin",
+                    "adresse": "31660 Avenue De Maurin",
                     "code_postal": "34076",
                     "ville": "Montpellier",
                 },
@@ -640,7 +640,7 @@ class TestCleanAdresse:
             (
                 "12 Av. du 14 Juillet 1789, 57180 Terville",
                 {
-                    "adresse": "12 Av. du 14 Juillet 1789",
+                    "adresse": "12 Av. Du 14 Juillet 1789",
                     "code_postal": "57180",
                     "ville": "Terville",
                 },

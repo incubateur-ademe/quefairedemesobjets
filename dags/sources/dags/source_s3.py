@@ -93,17 +93,17 @@ with DAG(
             },
             {
                 "origin": "adresse",
-                "transformation": "strip_string",
+                "transformation": "strip_title_string",
                 "destination": "adresse",
             },
             {
                 "origin": "adresse_complement",
-                "transformation": "strip_string",
+                "transformation": "strip_title_string",
                 "destination": "adresse_complement",
             },
             {
                 "origin": "ville",
-                "transformation": "strip_string",
+                "transformation": "strip_title_string",
                 "destination": "ville",
             },
             {
