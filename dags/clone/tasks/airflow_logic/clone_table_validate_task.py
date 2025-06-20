@@ -35,7 +35,6 @@ def clone_table_validate_wrapper(ti) -> None:
     log.preview("Configuration", config.model_dump())
 
     clone_table_validate(
-        db_schema=config.db_schema,
         table_kind=config.table_kind,
         table_name=config.table_name,
         dry_run=config.dry_run,
