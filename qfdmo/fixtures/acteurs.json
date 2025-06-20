@@ -2,62 +2,6 @@
 {
     "model": "qfdmo.displayedacteur",
     "fields": {
-        "cree_le": "2025-03-07T15:20:09.495Z",
-        "modifie_le": "2025-03-07T15:20:09.495Z",
-        "nom": "Act Informatique",
-        "description": "",
-        "acteur_type": [
-            "artisan"
-        ],
-        "adresse": "69 BOULEVARD MARECHAL JUIN",
-        "adresse_complement": "",
-        "code_postal": "06800",
-        "ville": "CAGNES SUR MER",
-        "url": "",
-        "email": "",
-        "location": "SRID=4326;POINT (7.1514437 43.6560528)",
-        "telephone": "",
-        "nom_commercial": "NOVATEK",
-        "nom_officiel": "",
-        "siren": "794012518",
-        "siret": "79401251800013",
-        "siret_is_closed": null,
-        "source": null,
-        "identifiant_externe": "",
-        "statut": "ACTIF",
-        "naf_principal": "95.11Z",
-        "commentaires": "[{\"message\":\"source changee le 18-07-2024. Ancienne source CMA non-reparActeur. Nouvelle source : LVAO.\"}]",
-        "horaires_osm": "",
-        "horaires_description": "",
-        "public_accueilli": "Particuliers",
-        "reprise": "",
-        "exclusivite_de_reprisereparation": false,
-        "uniquement_sur_rdv": null,
-        "action_principale": null,
-        "uuid": "GWgsph7L9nmK2cTZXZzVGQ",
-        "labels": [
-            [
-                "qualirepar"
-            ]
-        ],
-        "acteur_services": [
-            [
-                "service_de_reparation"
-            ]
-        ],
-        "sources": [
-            [
-                "lvao"
-            ],
-            [
-                "ocad3e"
-            ]
-        ]
-    }
-},
-{
-    "model": "qfdmo.displayedacteur",
-    "fields": {
         "cree_le": "2025-04-03T17:02:22.853Z",
         "modifie_le": "2025-05-19T12:02:14.948Z",
         "nom": "ASSOCIATION CAP RESSOURCERIE",
@@ -92,9 +36,7 @@
         "action_principale": null,
         "uuid": "aDcrby2bqxAZFM3yYCRTue",
         "labels": [
-            [
-                "ess"
-            ]
+            7
         ],
         "acteur_services": [
             [
@@ -109,13 +51,13 @@
                 "sinoe"
             ],
             [
-                "refashion"
-            ],
-            [
                 "ecomaison"
             ],
             [
                 "ecologic"
+            ],
+            [
+                "refashion"
             ],
             [
                 "ecosystem"
@@ -170,61 +112,6 @@
         "sources": [
             [
                 "lvao"
-            ]
-        ]
-    }
-},
-{
-    "model": "qfdmo.displayedacteur",
-    "fields": {
-        "cree_le": "2024-07-31T20:20:01.566Z",
-        "modifie_le": "2024-07-31T20:20:01.599Z",
-        "nom": "Agir pour la Terre de nos Enfants",
-        "description": "Agir pour la terre de nos enfants est une association qui a pour but :\r\n\r\nInformer et sensibiliser les citoyens de tous les âges à la fragilité de notre environnement naturel.\r\n\r\nNourrir la réflexion de tous sur l’impact environnemental de nos comportements individuels et collectifs.\r\n\r\nMener des actions concrètes en faveur de l’environnement\r\n\r\nFavoriser le vivre-ensemble et créer du lien entre les citoyens.",
-        "acteur_type": [
-            "acteur_digital"
-        ],
-        "adresse": "140 RUE SAINT IRENEE",
-        "adresse_complement": "",
-        "code_postal": "01320",
-        "ville": "CHATILLON-LA-PALUD",
-        "url": "https://www.agirpourlaterredenosenfants.fr/loutilth%C3%A8que",
-        "email": "agirpourlaterredenosenfants@gmail.com",
-        "location": null,
-        "telephone": "",
-        "nom_commercial": "",
-        "nom_officiel": "",
-        "siren": "",
-        "siret": "92480254900015",
-        "siret_is_closed": null,
-        "source": [
-            "communautelvao"
-        ],
-        "identifiant_externe": "LWTYYUPBDMWM",
-        "statut": "ACTIF",
-        "naf_principal": "94.99Z",
-        "commentaires": "",
-        "horaires_osm": "",
-        "horaires_description": "",
-        "public_accueilli": "",
-        "reprise": "",
-        "exclusivite_de_reprisereparation": null,
-        "uniquement_sur_rdv": null,
-        "action_principale": null,
-        "uuid": "VBiu5he7rmPf4LpeowtxQ2",
-        "labels": [
-            [
-                "ess"
-            ]
-        ],
-        "acteur_services": [
-            [
-                "espace_de_partage"
-            ]
-        ],
-        "sources": [
-            [
-                "communautelvao"
             ]
         ]
     }
@@ -319,9 +206,7 @@
         "action_principale": null,
         "uuid": "eYKxBYDMDoMXTr8iiw69Ek",
         "labels": [
-            [
-                "qualirepar"
-            ]
+            2
         ],
         "acteur_services": [
             [
@@ -425,9 +310,7 @@
         "action_principale": null,
         "uuid": "XSyppoQHLT37uafQ6kj5M7",
         "labels": [
-            [
-                "refashion"
-            ]
+            3
         ],
         "acteur_services": [
             [
