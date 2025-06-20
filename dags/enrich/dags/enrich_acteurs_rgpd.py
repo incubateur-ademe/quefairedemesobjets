@@ -49,7 +49,6 @@ with DAG(
         dag,
         task_id=TASKS.ENRICH_RGPD_SUGGESTIONS,
         cohort=COHORTS.RGPD,
-        dbt_schema_name=DBT.SCHEMA,
         dbt_model_name=DBT.MARTS_ENRICH_RGPD_SUGGESTIONS,
     )
     config >> dbt_refresh >> suggest_rgpd  # type: ignore
