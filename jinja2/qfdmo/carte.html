@@ -30,7 +30,7 @@
         qf-relative"
         {# TODO: attempt to remove this conditionnal... #}
         {% if request.resolver_match.namespace == "qfdmd" and request.resolver_match.url_name == "carte" %}
-        action="carte"
+        action="carte/"
         {% endif %}
         data-search-form-visible
         data-search-solution-form-map-container-id-value="{{ map_container_id }}"
@@ -94,7 +94,7 @@
             {# Part of this tag' style is defined in qfdmo.css because it would have been a bit unreadable as tailwind classes #}
             <aside class="
                 md:qf-relative qf-z-30
-                aria-[hidden=false]:qf-block qf-hidden qf-flex-col
+                aria-[hidden=false]:qf-block qf-hidden
                 qf-overflow-auto
                 qf-bg-white
                 max-md:qf-absolute
