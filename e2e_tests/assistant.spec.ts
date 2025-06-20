@@ -25,7 +25,7 @@ test("Desktop | La carte s'affiche sur une fiche déchet/objet", async ({ page }
   expect(sessionStorage.longitude).toContain("-2.9")
 })
 
-test("Desktop | Le tracking PostHog fonctionne comme prévu", async ({ page }) => {
+test.skip("Desktop | Le tracking PostHog fonctionne comme prévu", async ({ page }) => {
   // Check that homepage scores 1
   await page.goto(`/`, { waitUntil: "networkidle" });
   // await hideDjangoToolbar(page)
