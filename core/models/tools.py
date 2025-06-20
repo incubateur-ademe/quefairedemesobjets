@@ -2,12 +2,12 @@ import logging
 
 from django.db import connections
 
+from utils.django import DJANGO_WH_CONNECTION_NAME
+
 logger = logging.getLogger(__name__)
 
 
-def compare_model_vs_table(
-    cls, table_name: str, connecton_name: str = "warehouse"
-) -> bool:
+def compare_model_vs_table(cls, table_name: str) -> bool:
 
     def are_fields_matched(db_type, model_type):
         logger.info(f"Comparing {db_type} with {model_type}")
@@ -24,7 +24,7 @@ def compare_model_vs_table(
             )
         )
 
-    connection = connections[connecton_name]
+    connection = connections[DJANGO_WH_CONNECTION_NAME]
 
     with connection.cursor() as cursor:
 
@@ -134,7 +134,8 @@ def compare_model_vs_table(
             through_table = through_model._meta.db_table
             through_table = through_table.replace(cls_table, table_name)
             all_fields_match &= compare_model_vs_table(
-                through_model, through_table, connecton_name
+                through_model,
+                through_table,
             )
 
         return all_fields_match

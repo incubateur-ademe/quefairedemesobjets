@@ -3,7 +3,7 @@ version: 2
 sources:
   - name: ae
     description: "Annuaire Entreprises (AE)"
-    schema: warehouse
+    schema: public
     tables:
       # Views pointing to timestamped tables
       # of the same name with "_{YYYYMMDDHHMMSS}"
