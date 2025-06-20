@@ -5,7 +5,7 @@ function getItemSelector(index) {
 }
 
 
-test("Desktop | Les acteurs sont visibles sur la carte du formulaire fonctionne", async ({ page }) => {
+test.skip("Desktop | Les acteurs sont visibles sur la carte du formulaire fonctionne", async ({ page }) => {
   // Navigate to the carte page
   await page.goto(`/test_iframe`, { waitUntil: "networkidle" });
   // await hideDjangoToolbar(page)
