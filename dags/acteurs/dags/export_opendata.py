@@ -35,7 +35,6 @@ with DAG(
         "bucket_name": "lvao-opendata",
         "remote_dir": "acteurs" if ENVIRONMENT == "prod" else f"acteurs-{ENVIRONMENT}",
         "s3_connection_id": "s3data",
-        "opendata_schema": "warehouse",
         "opendata_table": "exposure_opendata_acteur",
     },
     schedule=SCHEDULES.WEEKLY_AT_1AM,

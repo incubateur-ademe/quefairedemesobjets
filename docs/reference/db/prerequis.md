@@ -4,6 +4,13 @@
 
 On essayera autant que possible d'être à jour des versions majeur des base de données
 
+## Base de données
+
+On utilise 2 bases de données :
+
+* `qfdmo` : pour la webbapp
+* `warehouse` : pour le travail de data
+
 ## Extensions
 
 Les extensions postgresql utilisées sont :

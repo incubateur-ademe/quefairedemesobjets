@@ -40,6 +40,11 @@ variable "db_name" {
   type        = string
 }
 
+variable "wh_db_name" {
+  description = "Nom de la base de données warehouse"
+  type        = string
+}
+
 variable "node_type" {
   description = "Type de nœud de la base de données"
   type        = string

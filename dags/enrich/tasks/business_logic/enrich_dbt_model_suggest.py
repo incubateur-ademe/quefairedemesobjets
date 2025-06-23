@@ -9,7 +9,6 @@ logger = logging.getLogger(__name__)
 
 
 def enrich_dbt_model_suggest(
-    dbt_schema_name: str,
     dbt_model_name: str,
     filters: list[dict],
     cohort: str,
@@ -17,7 +16,7 @@ def enrich_dbt_model_suggest(
     dry_run: bool = True,
 ) -> bool:
     """Reads a DBT model and generates suggestions for it"""
-    df = enrich_dbt_model_read(dbt_schema_name, dbt_model_name, filters)
+    df = enrich_dbt_model_read(dbt_model_name, filters)
 
     if df.empty:
         logger.info(f"0 donnée pour {dbt_model_name=} avec filtres {filters}")

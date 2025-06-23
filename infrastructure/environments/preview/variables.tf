@@ -44,6 +44,12 @@ variable "db_name" {
   default     = "qfdmo"
 }
 
+variable "wh_db_name" {
+  description = "Nom de la base de données warehouse"
+  type        = string
+  default     = "warehouse"
+}
+
 variable "project_id" {
   description = "ID du projet Scaleway"
   type        = string

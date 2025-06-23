@@ -8,6 +8,8 @@
 - python 3.12
 - node 20
 - gdal (librairie nécessaire à l'utilisation de GeoDjango)
+- Installer et configurer le client Scaleway en suivant [les instructions de Scaleway](https://www.scaleway.com/en/docs/scaleway-cli/quickstart/)
+- Installer et configurer le client Scalingo eb suivant [les instructions de Salingo](https://doc.scalingo.com/platform/cli/start)
 
 Conseil: utiliser `asdf` pour la gestion des environnement virtuel `node` et `python`
 

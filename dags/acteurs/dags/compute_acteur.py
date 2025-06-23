@@ -105,33 +105,31 @@ with DAG(
     )
 
     check_model_table_displayedacteur_task = check_model_table_consistency_task(
-        dag, "qfdmo", "DisplayedActeur", "warehouse", "exposure_carte_acteur"
+        dag, "qfdmo", "DisplayedActeur", "exposure_carte_acteur"
     )
     check_model_table_displayedpropositionservice_task = (
         check_model_table_consistency_task(
             dag,
             "qfdmo",
             "DisplayedPropositionService",
-            "warehouse",
             "exposure_carte_propositionservice",
         )
     )
     replace_displayedacteur_table_task = replace_acteur_table_task(
-        dag, "public", "qfdmo_displayed", "warehouse", "exposure_carte_"
+        dag, "qfdmo_displayed", "exposure_carte_"
     )
 
     check_model_table_vueacteur_task = check_model_table_consistency_task(
-        dag, "qfdmo", "VueActeur", "warehouse", "exposure_exhaustive_acteur"
+        dag, "qfdmo", "VueActeur", "exposure_exhaustive_acteur"
     )
     check_model_table_vuepropositionservice_task = check_model_table_consistency_task(
         dag,
         "qfdmo",
         "VuePropositionService",
-        "warehouse",
         "exposure_exhaustive_propositionservice",
     )
     replace_vueacteur_table_task = replace_acteur_table_task(
-        dag, "public", "qfdmo_vue", "warehouse", "exposure_exhaustive_"
+        dag, "qfdmo_vue", "exposure_exhaustive_"
     )
 
     # Définir la séquence principale
