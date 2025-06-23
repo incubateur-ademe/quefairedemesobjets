@@ -5,7 +5,7 @@ from qfdmo.models import DisplayedActeur
 
 
 class Command(LoadDataCommand):
-    # TODO: document and explain comment this command
+    # TODO: document this command
     def save_obj(self, obj: DeserializedObject) -> bool:
         if isinstance(obj.object, DisplayedActeur):
             obj.object.generate_source_if_missing()
