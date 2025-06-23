@@ -196,7 +196,6 @@ load-production-dump:
 	@DUMP_FILE=$$(find tmpbackup -type f -name "*.custom" -print -quit); \
 	psql -d "$(DB_URL)" -f scripts/sql/create_extensions.sql && \
 	pg_restore -d "$(DB_URL)" --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
-	rm -rf tmpbackup
 
 .PHONY: db-restore
 db-restore:

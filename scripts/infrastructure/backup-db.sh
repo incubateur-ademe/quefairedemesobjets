@@ -2,10 +2,22 @@
 
 # Récupérer l'ID de l'instance
 INSTANCE_ID=$(scw rdb instance list | grep "lvao-preprod-db" | awk '{print $1}')
+TODAY=$(date +%Y%m%d)
+EXISTING_BACKUPS=$(scw rdb backup list instance-id=$INSTANCE_ID | grep "$TODAY")
 
 if [ -z "$INSTANCE_ID" ]; then
     echo "Instance lvao-preprod-db non trouvée"
     exit 1
+fi
+
+if [ -n "$EXISTING_BACKUPS" ]; then
+    echo "Un backup a déjà été effectué aujourd'hui :"
+    echo "$EXISTING_BACKUPS"
+    read -p "Voulez-vous continuer et créer un nouveau backup ? (o/n): " CONTINUE
+    if [[ "$CONTINUE" != "o" && "$CONTINUE" != "O" ]]; then
+        echo "Création de backup annulée. Utilisation du dernier backup existant"
+        exit 0
+    fi
 fi
 
 # Créer le backup
