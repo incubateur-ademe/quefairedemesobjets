@@ -2,13 +2,15 @@ import logging
 from typing import Any
 
 from django.conf import settings
+from django.contrib import messages
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control
 from django.views.decorators.vary import vary_on_headers
 from django.views.generic import DetailView, FormView, ListView
+from wagtail.models import Page
 
 from core.notion import create_new_row_in_notion_table
 from core.views import static_file_content_from
@@ -16,6 +18,29 @@ from qfdmd.forms import ContactForm, SearchForm
 from qfdmd.models import Suggestion, Synonyme
 
 logger = logging.getLogger(__name__)
+
+
+def legacy_migrate(request, id):
+    logger.info(f"Récupération des données salesforce pour la page {id}")
+
+    page = Page.objects.get(id=id).specific
+    if not page.produit and not page.synonyme:
+        # The check is done in the migrate() method as well,
+        # so it is not required to return right in this
+        # conditionnal block.
+        messages.warning(
+            request,
+            "La page n'a aucun produit ou synonyme rattaché."
+            "Aucune migration ne sera effectuée.",
+        )
+    else:
+        messages.info(
+            request,
+            f"La page a bien été migrée à partir de {page.produit or page.synonyme}",
+        )
+
+    page.migrate()
+    return redirect("wagtailadmin_pages:edit", id)
 
 
 @cache_control(max_age=31536000)

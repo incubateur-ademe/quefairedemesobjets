@@ -17,12 +17,3 @@ class ConsigneBlock(blocks.StreamBlock):
         template="blocks/reusable.html",
     )
     produit = ProductBlock()
-
-
-class TabBlock(blocks.StructBlock):
-    title = blocks.CharBlock()
-    content = ConsigneBlock()
-
-
-class TabsBlock(blocks.StreamBlock):
-    tab = TabBlock()

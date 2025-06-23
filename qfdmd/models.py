@@ -7,8 +7,8 @@ from django.db.models.functions import Now
 from django.template.loader import render_to_string
 from django.urls.base import reverse
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _
 from django_extensions.db.fields import AutoSlugField
+from sites_faciles.content_manager.blocks import STREAMFIELD_COMMON_BLOCKS
 from wagtail.admin.panels import FieldPanel, HelpPanel, ObjectList, TabbedInterface
 from wagtail.fields import RichTextField, StreamField
 from wagtail.images.blocks import ImageBlock
@@ -17,13 +17,16 @@ from wagtail.search import index
 from wagtail.snippets.models import register_snippet
 
 from qfdmo.models.utils import NomAsNaturalKeyModel
-from qfdmd.blocks import ConsigneBlock, TabsBlock
 
 logger = logging.getLogger(__name__)
 
 
+# DEPRECATED: this should be deleted in a future major release
+# This legacy model was used before we included sites faciles
+# in our wagtail project.
 class CMSPage(models.Model):
     pass
+
 
 @register_snippet
 class ReusableContent(models.Model):
@@ -66,11 +69,29 @@ class ProduitPage(Page):
         null=True,
     )
 
-    gender = models.CharField()
-    number = models.IntegerField()
+    gender = models.CharField("Genre", choices=[("m", "Masculin"), ("f", "Féminin")])
+    number = models.IntegerField("Nombre", choices=[(1, "singulier"), (2, "pluriel")])
 
-    consigne = StreamField(ConsigneBlock, blank=True)
-    tabs = StreamField(TabsBlock, blank=True)
+    body = StreamField(STREAMFIELD_COMMON_BLOCKS, blank=True)
+
+    def migrate(self):
+        if not self.produit and not self.synonyme:
+            return
+
+        tabs = []
+        if produit := self.produit:
+            if text := produit.mauvais_etat:
+                tabs.append(
+                    ("tabs", {"title": "Mauvais état", "content": [("text", text)]})
+                )
+
+            if text := produit.bon_etat:
+                tabs.append(
+                    ("tabs", {"title": "Bon état", "content": [("text", text)]})
+                )
+
+        self.body = [("tabs", tabs), *self.body]
+        self.save_revision()
 
     @property
     def compiled_consigne(self):
@@ -94,11 +115,22 @@ class ProduitPage(Page):
         return FamilyPage.objects.ancestor_of(self).first()
 
     content_panels = Page.content_panels + [
-        # FieldPanel("produit"),
-        # FieldPanel("synonyme"),
-        FieldPanel("tabs"),
-        FieldPanel("consigne", heading="Bon état"),
-        FieldPanel("consigne", heading="Mauvais état / déchet"),
+        FieldPanel("body"),
+    ]
+
+    migration_panels = [
+        HelpPanel(
+            content="Ces champs serviront à la migration d'un produit ou synonyme"
+            "vers la nouvelle approche. \n"
+            "Ces champs serviront à la migration d'un produit ou synonyme"
+            "vers la nouvelle approche. \n"
+            "1. Sélectionner un produit OU synonyme ci-dessous\n"
+            "2. Choisir l'action de peuplement sur le bouton vert en bas à gauche\n"
+            "3. Vérifier les champs après le rechargement de la page\n"
+            "4. Publier la page courante"
+        ),
+        FieldPanel("produit"),
+        FieldPanel("synonyme"),
     ]
 
     config_panels = [FieldPanel("gender"), FieldPanel("number")]
@@ -106,9 +138,10 @@ class ProduitPage(Page):
     edit_handler = TabbedInterface(
         [
             ObjectList(content_panels, heading="Contenu"),
-            ObjectList(config_panels, heading="Config"),
-            ObjectList(Page.promote_panels, heading="Promote"),
-            ObjectList(Page.settings_panels, heading="Settings"),
+            ObjectList(config_panels, heading="Configuration"),
+            ObjectList(migration_panels, heading="Migration"),
+            ObjectList(Page.promote_panels, heading="Promotion (SEO)"),
+            ObjectList(Page.settings_panels, heading="Paramètres"),
         ]
     )
 
@@ -251,7 +284,7 @@ class Produit(index.Indexed, AbstractBaseProduit):
     search_fields = [
         index.AutocompleteField("nom"),
         index.RelatedFields("synonymes", [index.SearchField("nom")]),
-        index.SearchField("id"),
+        index.AutocompleteField("id"),
     ]
 
     @cached_property
