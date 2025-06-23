@@ -126,29 +126,6 @@ class ProduitPage(Page):
         context.update(is_synonyme=not (self.produit or self.synonyme))
         return context
 
-        # for ancestor in reversed(self.get_ancestors(inclusive=True)):
-        #     produit = ancestor.specific.produit
-        #     synonyme = ancestor.specific.synonyme
-
-        #     if produit:
-        #         context.update(
-        #             bon_etat=produit.bon_etat,
-        #             mauvais_etat=produit.mauvais_etat,
-        #             object=produit,
-        #             produit=produit,
-        #         )
-        #         break
-        #     elif synonyme:
-        #         context.update(
-        #             object=synonyme,
-        #             produit=synonyme.produit,
-        #             bon_etat=synonyme.bon_etat,
-        #             mauvais_etat=synonyme.mauvais_etat,
-        #         )
-        #         break
-
-        # return context
-
     class Meta:
         verbose_name = "Produit"
         constraints = [
@@ -247,7 +224,7 @@ class Produit(index.Indexed, AbstractBaseProduit):
     slug = models.CharField(blank=True, help_text="Slug - ne pas modifier")
     infotri = StreamField([("image", ImageBlock())], blank=True)
 
-    # panels = [FieldPanel("infotri")]
+    panels = [FieldPanel("infotri")]
 
     def __str__(self):
         return f"{self.pk} - {self.nom}"
@@ -255,7 +232,7 @@ class Produit(index.Indexed, AbstractBaseProduit):
     search_fields = [
         index.AutocompleteField("nom"),
         index.RelatedFields("synonymes", [index.SearchField("nom")]),
-        index.AutocompleteField("id"),
+        index.SearchField("id"),
     ]
 
     @cached_property
