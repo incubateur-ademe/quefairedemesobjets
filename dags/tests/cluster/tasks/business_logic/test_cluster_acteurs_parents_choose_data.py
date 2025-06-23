@@ -240,7 +240,6 @@ class TestClusterActeursParentsChooseData:
         assert df.loc[df["identifiant_unique"] == "p1", "parent_data_new"].values[
             0
         ] == {"nom": "prio 1", "email": "email.acteur@source.3"}
-        # tester que tous les autres sont None
         assert (
             df.loc[df["identifiant_unique"] != "p1", "parent_data_new"].isnull().all()
-        )
+        ), "tester que tous les autres sont None"
