@@ -40,7 +40,7 @@ variable "db_name" {
   type        = string
 }
 
-variable "db_wh_name" {
+variable "wh_db_name" {
   description = "Nom de la base de données warehouse"
   type        = string
 }

@@ -74,13 +74,14 @@ def copy_table_with_pg_tools(table):
 
             pg_dump_cmd = [
                 "pg_dump",
-                "-Fc",  # Format custom
-                "-b",  # Include blobs
-                "-t",
-                table,  # Table spécifique
-                "-d",
+                "--format",
+                "custom",
+                "--large-objects",
+                "--table",
+                table,
+                "--dbname",
                 warehouse_connection,
-                "-f",
+                "--file",
                 dump_file_path,
             ]
 

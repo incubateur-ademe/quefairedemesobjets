@@ -27,7 +27,7 @@ module "database" {
   db_username     = var.db_username
   db_password     = var.db_password
   db_name         = var.db_name
-  db_wh_name      = var.db_wh_name
+  wh_db_name      = var.wh_db_name
   project_id      = var.project_id
   organization_id = var.organization_id
 }
