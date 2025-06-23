@@ -15,7 +15,7 @@ if [ -n "$EXISTING_BACKUPS" ]; then
     echo "$EXISTING_BACKUPS"
     read -p "Voulez-vous continuer et créer un nouveau backup ? (o/n): " CONTINUE
     if [[ "$CONTINUE" != "o" && "$CONTINUE" != "O" ]]; then
-        echo "Opération annulée."
+        echo "Création de backup annulée. Utilisation du dernier backup existant"
         exit 0
     fi
 fi
