@@ -10,7 +10,6 @@ django_setup_full()
 
 
 def switch_tables(cursor, prefix_django, prefix_dbt, tables):
-    # pg_dump -Fc -b -t MA_TABLE DB1|pg_restore -h localhost -d DB2
 
     logger.warning("Switch tables")
     logger.warning("Open a transaction")
@@ -68,9 +67,9 @@ def copy_table_with_pg_tools(table):
     warehouse_connection = settings.DB_WAREHOUSE
     qfdmo_connection = settings.DATABASE_URL
 
-    logger.warning(f"Copying table {table} using pg_dump/pg_restore")
+    logger.info(f"Copying table {table} using pg_dump/pg_restore")
     try:
-        with tempfile.NamedTemporaryFile(delete=False) as tmpfile:
+        with tempfile.NamedTemporaryFile() as tmpfile:
             dump_file_path = tmpfile.name
 
             pg_dump_cmd = [
