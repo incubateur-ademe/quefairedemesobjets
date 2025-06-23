@@ -32,14 +32,6 @@ with DAG(
                 "destination": "nom",
             },
             {
-                "origin": "enseigne_commerciale",
-                "destination": "nom_commercial",
-            },
-            {
-                "origin": "consignes_dacces",
-                "destination": "description",
-            },
-            {
                 "origin": "longitudewgs84",
                 "destination": "longitude",
             },
@@ -48,11 +40,6 @@ with DAG(
                 "destination": "latitude",
             },
             # 2. Transformation des colonnes
-            {
-                "origin": "site_web",
-                "transformation": "clean_url",
-                "destination": "url",
-            },
             {
                 "origin": "ecoorganisme",
                 "transformation": "strip_lower_string",
@@ -144,9 +131,6 @@ with DAG(
             },
             {
                 "origin": [
-                    "point_dapport_de_service_reparation",
-                    "point_de_reparation",
-                    "point_dapport_pour_reemploi",
                     "point_de_collecte_ou_de_reprise_des_dechets",
                 ],
                 "transformation": "clean_acteur_service_codes",
@@ -154,9 +138,6 @@ with DAG(
             },
             {
                 "origin": [
-                    "point_dapport_de_service_reparation",
-                    "point_de_reparation",
-                    "point_dapport_pour_reemploi",
                     "point_de_collecte_ou_de_reprise_des_dechets",
                 ],
                 "transformation": "clean_action_codes",
@@ -186,7 +167,6 @@ with DAG(
             {"remove": "service_a_domicile"},
             # 6. Colonnes à garder (rien à faire, utilisé pour le controle)
             {"keep": "email"},
-            {"keep": "adresse_complement"},
         ],
         "endpoint": (
             "https://data.pointsapport.ademe.fr/data-fair/api/v1/datasets/"
