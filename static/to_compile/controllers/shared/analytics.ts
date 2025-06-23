@@ -204,11 +204,6 @@ export default class extends Controller<HTMLElement> {
       ...this.userConversionScoreValue,
       [userConversionKey]: currentValue + this.userConversionScoreConfig[userConversionKey],
     }
-
-    // This is the legacy approach to compute UI interactions on PostHog,
-    // before conversionScord was used on the Carte.
-    // This is kept here to not break things but might be removed in a near future (june 2025).
-    posthog.capture("ui_interaction", { "ui_interaction_type": UIInteractionType })
   }
 
   captureInteractionWithSolutionDetails() {
