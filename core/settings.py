@@ -82,6 +82,8 @@ STIMULUS_DEBUG = decouple.config("STIMULUS_DEBUG", default=False, cast=bool)
 POSTHOG_DEBUG = decouple.config("POSTHOG_DEBUG", default=False, cast=bool)
 BLOCK_ROBOTS = decouple.config("BLOCK_ROBOTS", default=False, cast=bool)
 ENVIRONMENT = decouple.config("ENVIRONMENT", default="development", cast=str)
+VERSION = decouple.config("CONTAINER_VERSION", default="version", cast=str)
+APP = decouple.config("APP", default="local", cast=str)
 BASE_URL = ASSISTANT.get("BASE_URL")
 BASE_ALLOWED_HOSTS = [
     urlparse(config.get("BASE_URL")).hostname for config in [ASSISTANT, LVAO]

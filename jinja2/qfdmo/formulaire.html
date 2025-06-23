@@ -1,7 +1,9 @@
 {% extends base_template %}
 
+{% block body_classes %}qf-bg-white{% endblock body_classes %}
+
 {% block content %}
-<turbo-frame id="mapContainer">
+<turbo-frame id="mapContainer" class="qf-bg-white">
     {# Controleur général de gestion de la navigation et du formulaire #}
     <form
         id='search_form'
@@ -9,7 +11,7 @@
         data-search-solution-form-target="searchForm"
         data-search-solution-form-is-iframe-value="{{ is_embedded }}"
         data-turbo-frame="addressesPanel"
-        data-action="map:displayActeur->search-solution-form#displayActeur
+        data-action="
         map:updateBbox->search-solution-form#updateBboxInput
         search-solution-form:captureInteraction->analytics#captureInteractionWithMap
         address-autocomplete:formSubmit->search-solution-form#advancedSubmit
@@ -23,7 +25,9 @@
         qf-flex qf-flex-col qf-flex-auto
         qf-relative"
         data-search-form-visible
+        data-search-solution-form-map-container-id-value="{{ map_container_id }}"
     >
+        <input type="hidden" name="map_container_id" value="{{ map_container_id }}">
         <section class="map-grid">
             <header
                 class="max-md:qf-sticky qf-top-0 qf-z-0"
@@ -74,10 +78,11 @@
             {# Part of this tag' style is defined in qfdmo.css because it would have been a bit unreadable as tailwind classes #}
             <aside class="
                 qf-relative qf-z-30
-                aria-[hidden=false]:qf-flex qf-hidden qf-flex-col
+                aria-[hidden=false]:qf-block qf-hidden
+                qf-overflow-auto
                 md:qf-h-[calc(100vh_-_250px)]
-                max-md:qf-snap-y md:qf-overflow-auto qf-scroll-mt-[65vh]
-                max-md:qf-snap-mandatory
+                max-md:qf-absolute
+                max-md:qf-top-full max-md:qf-bottom-0 max-md:qf-left-0 max-md:qf-right-0
                 qf-bg-white
                 qf-px-2w
                 max-md:qf-drop-shadow-[0_0_100px_rgba(0,0,0,0.3)]
@@ -88,7 +93,9 @@
                 aria-[hidden=false]:max-md:qf-min-h-[calc(100vh_-_200px)]"
             tabindex="0"
             id="acteurDetailsPanel"
+            data-controller="acteur-details"
             data-search-solution-form-target="acteurDetailsPanel"
+            data-acteur-details-map-container-id-value="{{ map_container_id }}"
             aria-hidden="true"
             >
                 {% include "qfdmo/carte/panels/acteur_detail.html" %}

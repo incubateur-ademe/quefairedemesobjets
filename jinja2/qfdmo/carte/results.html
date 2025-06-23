@@ -26,10 +26,10 @@ They need to match the css variables used for .grid-map selector in qfdmo.css
     {% else %}
         {# Near by addresses#}
         {% if address_ok %}
-            {% include "qfdmo/carte/_search_in_zone.html" %}
+            {% include "qfdmo/shared/_search_in_zone.html" %}
         {% endif %}
         <div
-            data-map-target="leafletContainer"
+            data-map-target="mapContainer"
             class="qf-inset-0 qf-h-full qf-relative qf-z-0"
             data-action="map:captureInteraction->analytics#captureInteractionWithMap"
         >

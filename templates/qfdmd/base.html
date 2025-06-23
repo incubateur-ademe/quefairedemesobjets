@@ -42,13 +42,24 @@
         class="qf-flex qf-flex-col qf-group"
         {% if STIMULUS_DEBUG %}data-stimulus-debug="true"{% endif %}
         {% block body_attrs %}{% endblock %}
-        data-controller="state"
+        data-controller="state analytics"
+        {# State #}
         data-state-adresse-value=""
         data-state-longitude-value=""
         data-state-latitude-value=""
         data-state-map-outlet="[data-controller='map']"
         data-state-address-autocomplete-outlet="[data-controller='address-autocomplete']"
         data-state-search-solution-form-outlet="[data-controller='search-solution-form']"
+        {# Analytics #}
+        data-analytics-posthog-key-value="{{ assistant.POSTHOG_KEY }}"
+        data-analytics-posthog-debug-value="{{ POSTHOG_DEBUG|lower }}"
+        {% if request.user.is_authenticated %}
+            data-analytics-user-username-value="{{ request.user.username }}"
+            data-analytics-user-email-value="{{ request.user.email }}"
+            data-analytics-user-admin-value="{{ request.user.is_superuser|lower }}"
+        {% endif %}
+        data-analytics-initial-action-value="{% block analytics_action %}{% endblock %}"
+        {# Actions #}
         data-action="address-autocomplete:change->state#setLocation"
     >
         {% if request.user.is_authenticated %}
@@ -75,17 +86,6 @@
 
         {% dsfr_js %}
         <script type="module" src="{% static 'qfdmd.js' %}"></script>
-        <script
-            data-controller="analytics"
-            data-analytics-posthog-key-value="{{ assistant.POSTHOG_KEY }}"
-            data-analytics-posthog-debug-value="{{ POSTHOG_DEBUG|lower }}"
-            {% if request.user.is_authenticated %}
-                data-analytics-user-username-value="{{ request.user.username }}"
-                data-analytics-user-email-value="{{ request.user.email }}"
-                data-analytics-user-admin-value="{{ request.user.is_superuser|lower }}"
-            {% endif %}
-            data-analytics-action-value="{% block analytics_action %}{% endblock %}"
-        ></script>
         {% if assistant.is_iframe and request.user.is_authenticated %}
             <div class="qf-bg-warning-425-625-hover qf-text-white qf-text-center qf-w-screen qf-py-1v qf-text-xs">
             Le mode iframe de l'assistant est actif
@@ -95,6 +95,16 @@
             <div class="qf-bg-green-bourgeon-main-640 qf-text-white qf-text-center qf-w-screen qf-py-1v qf-text-xs">
             Identifiant PostHog : {{ assistant.POSTHOG_KEY }} | Score de conversion : <span id="posthog-banner-conversion-score"></span>
              </div>
+        {% endif %}
+        {% if "debug" in request.GET %}
+            <ul class="qf-list-none qf-flex qf-gap-4w">
+                <li>
+                SHA : {{ VERSION }}
+                </li>
+                <li>
+                APP : {{ APP }}
+                </li>
+            </ul>
         {% endif %}
     </body>
 </html>
