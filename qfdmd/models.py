@@ -7,6 +7,7 @@ from django.db.models.functions import Now
 from django.template.loader import render_to_string
 from django.urls.base import reverse
 from django.utils.functional import cached_property
+from django.utils.safestring import mark_safe
 from django_extensions.db.fields import AutoSlugField
 from sites_faciles.content_manager.blocks import STREAMFIELD_COMMON_BLOCKS
 from wagtail.admin.panels import FieldPanel, HelpPanel, ObjectList, TabbedInterface
@@ -96,14 +97,15 @@ class ProduitPage(Page):
 
     migration_panels = [
         HelpPanel(
-            content="Ces champs serviront à la migration d'un produit ou synonyme"
-            "vers la nouvelle approche. \n"
-            "Ces champs serviront à la migration d'un produit ou synonyme"
-            "vers la nouvelle approche. \n"
-            "1. Sélectionner un produit OU synonyme ci-dessous\n"
-            "2. Choisir l'action de peuplement sur le bouton vert en bas à gauche\n"
-            "3. Vérifier les champs après le rechargement de la page\n"
-            "4. Publier la page courante"
+            content=mark_safe(
+                "Ces champs serviront à la migration d'un produit ou synonyme"
+                "vers la nouvelle approche. <br/>"
+                "<ol><li>1. Sélectionner un produit OU synonyme ci-dessous</li>"
+                "<li>2. Choisir <b>Migrer les produits/synonymes</b> dans la liste en"
+                "cliquant sur le bouton vert en bas à gauche</li>"
+                "<li>3. Vérifier les champs après le rechargement de la page</li>"
+                "<li>4. Publier la page courante</li></ol>"
+            )
         ),
         FieldPanel("produit"),
         FieldPanel("synonyme"),
