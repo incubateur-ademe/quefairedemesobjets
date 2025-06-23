@@ -31,7 +31,7 @@ resource "scaleway_rdb_privilege" "main_privilege" {
 
 resource "scaleway_rdb_database" "warehouse" {
   instance_id = scaleway_rdb_instance.main.id
-  name        = var.db_wh_name
+  name        = var.wh_db_name
 }
 
 resource "scaleway_rdb_privilege" "warehouse_privilege" {
