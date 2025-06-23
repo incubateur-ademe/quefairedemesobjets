@@ -39,7 +39,7 @@ def legacy_migrate(request, id):
             f"La page a bien été migrée à partir de {page.produit or page.synonyme}",
         )
 
-    page.migrate()
+    page.build_streamfield_from_legacy_data()
     return redirect("wagtailadmin_pages:edit", id)
 
 

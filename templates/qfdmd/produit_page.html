@@ -1,1 +1,20 @@
-{% include "qfdmd/synonyme_detail.html" %}
+{% extends "qfdmd/synonyme_detail.html" %}
+
+{% load wagtailcore_tags %}
+
+{% block title %}
+<title>{{ page.title }} | {{ seo.title }}</title>
+{% endblock title %}
+
+{% block main_classes %}
+{% if not is_synonyme %}{{ block.super }}{% endif %}
+{% endblock main_classes %}
+
+{% block main %}
+<article
+    class="qf-flex qf-flex-col
+    qf-gap-2w max-lg:qf-pr-0 max-xl:qf-pr-6w"
+>
+  {{ page.body }}
+</article>
+{% endblock main %}

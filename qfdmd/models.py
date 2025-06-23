@@ -21,13 +21,6 @@ from qfdmo.models.utils import NomAsNaturalKeyModel
 logger = logging.getLogger(__name__)
 
 
-# DEPRECATED: this should be deleted in a future major release
-# This legacy model was used before we included sites faciles
-# in our wagtail project.
-class CMSPage(models.Model):
-    pass
-
-
 @register_snippet
 class ReusableContent(models.Model):
     title = models.CharField()
@@ -74,7 +67,7 @@ class ProduitPage(Page):
 
     body = StreamField(STREAMFIELD_COMMON_BLOCKS, blank=True)
 
-    def migrate(self):
+    def build_streamfield_from_legacy_data(self):
         if not self.produit and not self.synonyme:
             return
 
@@ -92,23 +85,6 @@ class ProduitPage(Page):
 
         self.body = [("tabs", tabs), *self.body]
         self.save_revision()
-
-    @property
-    def compiled_consigne(self):
-        # Check the current page's consigne
-        if self.consigne:
-            return self.consigne
-
-        # Traverse up the parent pages
-        for ancestor in reversed(self.get_ancestors(inclusive=True)):
-            try:
-                if ancestor.specific.consigne:
-                    return ancestor.specific.consigne
-            except AttributeError:
-                pass
-
-        # Return None or an empty string if no consigne is found
-        return None
 
     @property
     def family(self):
