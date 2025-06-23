@@ -66,14 +66,18 @@ class ProduitPage(Page):
     gender = models.CharField("Genre", choices=[("m", "Masculin"), ("f", "Féminin")])
     number = models.IntegerField("Nombre", choices=[(1, "singulier"), (2, "pluriel")])
 
-    body = StreamField(STREAMFIELD_COMMON_BLOCKS, blank=True)
+    infotri = StreamField([("image", ImageBlock())], blank=True)
+    body = StreamField(
+        STREAMFIELD_COMMON_BLOCKS, verbose_name="Corps de texte", blank=True
+    )
 
     def build_streamfield_from_legacy_data(self):
-        if not self.produit and not self.synonyme:
+        if not self.produit and not self.synonyme and not self.infotri:
+            # TODO: test
             return
 
-        tabs = []
         if produit := self.produit:
+            tabs = []
             if text := produit.mauvais_etat:
                 tabs.append(
                     ("tabs", {"title": "Mauvais état", "content": [("text", text)]})
@@ -84,7 +88,11 @@ class ProduitPage(Page):
                     ("tabs", {"title": "Bon état", "content": [("text", text)]})
                 )
 
-        self.body = [("tabs", tabs), *self.body]
+            if infotri := produit.infotri:
+                self.infotri = infotri
+
+            self.body = [("tabs", tabs), *self.body]
+
         self.save_revision()
 
     @property
@@ -92,6 +100,7 @@ class ProduitPage(Page):
         return FamilyPage.objects.ancestor_of(self).first()
 
     content_panels = Page.content_panels + [
+        FieldPanel("infotri"),
         FieldPanel("body"),
     ]
 

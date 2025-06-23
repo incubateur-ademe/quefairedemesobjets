@@ -15,7 +15,7 @@
     <h1 class="qf-m-0">
         {{ object.nom|capfirst }}
     </h1>
-    {% include "components/produit/_infotri.html" %}
+    {% include "components/produit/_infotri.html" with infotri=produit.infotri %}
 </header>
 
 {% if bon_etat and mauvais_etat %}

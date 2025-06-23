@@ -24,22 +24,19 @@ def legacy_migrate(request, id):
     logger.info(f"Récupération des données salesforce pour la page {id}")
 
     page = Page.objects.get(id=id).specific
-    if not page.produit and not page.synonyme:
-        # The check is done in the migrate() method as well,
-        # so it is not required to return right in this
-        # conditionnal block.
+    if not page.produit and not page.synonyme and not page.infotri:
         messages.warning(
             request,
             "La page n'a aucun produit ou synonyme rattaché."
             "Aucune migration ne sera effectuée.",
         )
     else:
+        page.build_streamfield_from_legacy_data()
         messages.info(
             request,
             f"La page a bien été migrée à partir de {page.produit or page.synonyme}",
         )
 
-    page.build_streamfield_from_legacy_data()
     return redirect("wagtailadmin_pages:edit", id)
 
 
