@@ -1,4 +1,4 @@
-{% load dsfr_tags qfdmd_tags static %}
+{% load dsfr_tags qfdmd_tags static wagtailuserbar %}
 
 <!DOCTYPE html>
 <html
@@ -62,6 +62,8 @@
         {# Actions #}
         data-action="address-autocomplete:change->state#setLocation"
     >
+        {% wagtailuserbar %}
+
         {% if request.user.is_authenticated %}
         <div class="qf-bg-red-marianne-main-472 qf-text-white qf-text-center qf-w-screen qf-py-1v qf-text-xs">
         Vous êtes bien authentifié, vos statistiques PostHog seront ignorées pour cette session | <a href="{% url 'admin:index' %}">accéder à l'administration</a>
@@ -71,7 +73,7 @@
         {% include "components/header/header.html" %}
         {% endblock header %}
 
-        <main class="fr-container qf-pb-7w">
+        <main class="{% block main_classes %}fr-container{% endblock %} qf-pb-7w">
             {% block main %}
             {% endblock main %}
         </main>

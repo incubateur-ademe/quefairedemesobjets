@@ -2,14 +2,18 @@ import logging
 from urllib.parse import urlencode
 
 from django.contrib.gis.db import models
+from django.db.models import CheckConstraint, Q
 from django.db.models.functions import Now
 from django.template.loader import render_to_string
 from django.urls.base import reverse
 from django.utils.functional import cached_property
+from django.utils.safestring import mark_safe
 from django_extensions.db.fields import AutoSlugField
-from wagtail.admin.panels import FieldPanel
-from wagtail.fields import StreamField
+from sites_faciles.content_manager.blocks import STREAMFIELD_COMMON_BLOCKS
+from wagtail.admin.panels import FieldPanel, HelpPanel, ObjectList, TabbedInterface
+from wagtail.fields import RichTextField, StreamField
 from wagtail.images.blocks import ImageBlock
+from wagtail.models import Page
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
 
@@ -18,6 +22,155 @@ from qfdmo.models.utils import NomAsNaturalKeyModel
 logger = logging.getLogger(__name__)
 
 
+@register_snippet
+class ReusableContent(models.Model):
+    title = models.CharField()
+    content = RichTextField()
+    panels = ["title", "content"]
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = "Contenu réutilisable"
+        verbose_name_plural = "Contenus réutilisable"
+
+
+class ProduitIndexPage(Page):
+    subpage_types = ["qfdmd.produitpage", "qfdmd.familypage"]
+
+    class Meta:
+        verbose_name = "Index des familles & produits"
+
+
+class ProduitPage(Page):
+    subpage_types = [
+        "qfdmd.synonymepage",
+    ]
+    parent_page_types = ["qfdmd.produitindexpage", "qfdmd.familypage"]
+    produit = models.ForeignKey(
+        "qfdmd.produit",
+        on_delete=models.SET_NULL,
+        related_name="produit_page",
+        blank=True,
+        null=True,
+    )
+    synonyme = models.ForeignKey(
+        "qfdmd.synonyme",
+        on_delete=models.SET_NULL,
+        related_name="produit_page",
+        blank=True,
+        null=True,
+    )
+
+    gender = models.CharField("Genre", choices=[("m", "Masculin"), ("f", "Féminin")])
+    number = models.IntegerField("Nombre", choices=[(1, "singulier"), (2, "pluriel")])
+
+    infotri = StreamField([("image", ImageBlock())], blank=True)
+    body = StreamField(
+        STREAMFIELD_COMMON_BLOCKS, verbose_name="Corps de texte", blank=True
+    )
+
+    def build_streamfield_from_legacy_data(self):
+        if not self.produit and not self.synonyme and not self.infotri:
+            # TODO: test
+            return
+
+        if produit := self.produit:
+            tabs = []
+            if text := produit.mauvais_etat:
+                tabs.append(
+                    ("tabs", {"title": "Mauvais état", "content": [("text", text)]})
+                )
+
+            if text := produit.bon_etat:
+                tabs.append(
+                    ("tabs", {"title": "Bon état", "content": [("text", text)]})
+                )
+
+            if infotri := produit.infotri:
+                self.infotri = infotri
+
+            self.body = [("tabs", tabs), *self.body]
+
+        self.save_revision()
+
+    @property
+    def family(self):
+        return FamilyPage.objects.ancestor_of(self).first()
+
+    content_panels = Page.content_panels + [
+        FieldPanel("infotri"),
+        FieldPanel("body"),
+    ]
+
+    migration_panels = [
+        HelpPanel(
+            content=mark_safe(
+                "Ces champs serviront à la migration d'un produit ou synonyme"
+                "vers la nouvelle approche. <br/>"
+                "<ol><li>1. Sélectionner un produit OU synonyme ci-dessous</li>"
+                "<li>2. Choisir <b>Migrer les produits/synonymes</b> dans la liste en"
+                "cliquant sur le bouton vert en bas à gauche</li>"
+                "<li>3. Vérifier les champs après le rechargement de la page</li>"
+                "<li>4. Publier la page courante</li></ol>"
+            )
+        ),
+        FieldPanel("produit"),
+        FieldPanel("synonyme"),
+    ]
+
+    config_panels = [FieldPanel("gender"), FieldPanel("number")]
+
+    edit_handler = TabbedInterface(
+        [
+            ObjectList(content_panels, heading="Contenu"),
+            ObjectList(config_panels, heading="Configuration"),
+            ObjectList(migration_panels, heading="Migration"),
+            ObjectList(Page.promote_panels, heading="Promotion (SEO)"),
+            ObjectList(Page.settings_panels, heading="Paramètres"),
+        ]
+    )
+
+    def get_context(self, request, *args, **kwargs):
+        context = super().get_context(request, *args, **kwargs)
+        context.update(is_synonyme=not (self.produit or self.synonyme))
+        return context
+
+    class Meta:
+        verbose_name = "Produit"
+        constraints = [
+            CheckConstraint(
+                condition=Q(produit__isnull=True) | Q(synonyme__isnull=True),
+                name="no_produit_and_synonyme_filled_in_parallel",
+            ),
+        ]
+
+
+class FamilyPage(ProduitPage):
+    subpage_types = ["qfdmd.produitpage"]
+
+    class Meta:
+        verbose_name = "Famille"
+
+
+class SynonymePage(Page):
+    parent_page_types = ["qfdmd.produitpage"]
+
+    class Meta:
+        verbose_name = "Synonyme de recherche"
+        verbose_name_plural = "Synonymes de recherche"
+
+    content_panels = [
+        HelpPanel(
+            "Cette page est un synonyme de recherche, si vous souhaitez modifier des"
+            " champs sur cette page il faut modifier la page parente."
+        )
+    ] + Page.content_panels
+
+
+# LEGACY MODELS
+# ==============
 class AbstractBaseProduit(NomAsNaturalKeyModel):
     modifie_le = models.DateTimeField(auto_now=True, db_default=Now())
     # Le nom des champs conserve ici délibérément l'ancienne nomenclature,
@@ -45,6 +198,24 @@ class AbstractBaseProduit(NomAsNaturalKeyModel):
 
 @register_snippet
 class Produit(index.Indexed, AbstractBaseProduit):
+    @cached_property
+    def bon_etat(self) -> str:
+        if self.qu_est_ce_que_j_en_fais_bon_etat:
+            return self.qu_est_ce_que_j_en_fais_bon_etat
+        try:
+            return self.get_etats_descriptions()[1]
+        except (KeyError, TypeError):
+            return ""
+
+    @cached_property
+    def mauvais_etat(self) -> str:
+        if self.qu_est_ce_que_j_en_fais_mauvais_etat:
+            return self.qu_est_ce_que_j_en_fais_mauvais_etat
+        try:
+            return self.get_etats_descriptions()[0]
+        except (KeyError, TypeError):
+            return ""
+
     nom = models.CharField(
         unique=True,
         verbose_name="Libellé",
@@ -151,6 +322,7 @@ class Produit(index.Indexed, AbstractBaseProduit):
         ]
 
 
+@register_snippet
 class Lien(models.Model):
     titre_du_lien = models.CharField(blank=True, unique=True, help_text="Titre du lien")
     url = models.URLField(blank=True, help_text="URL", max_length=300)
@@ -187,7 +359,8 @@ class ProduitLien(models.Model):
         unique_together = ("produit", "lien")  # Prevent duplicate relations
 
 
-class Synonyme(AbstractBaseProduit):
+@register_snippet
+class Synonyme(index.Indexed, AbstractBaseProduit):
     slug = AutoSlugField(populate_from=["nom"], max_length=255)
     nom = models.CharField(blank=True, unique=True, help_text="Nom du produit")
     produit = models.ForeignKey(
@@ -275,6 +448,11 @@ class Synonyme(AbstractBaseProduit):
 
     def __str__(self) -> str:
         return self.nom
+
+    search_fields = [
+        index.AutocompleteField("nom"),
+        index.SearchField("id"),
+    ]
 
 
 class Suggestion(models.Model):
