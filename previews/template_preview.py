@@ -4,8 +4,7 @@ from django.template.loader import render_to_string
 from django_lookbook.preview import LookbookPreview
 
 
-class PartialTemplatesPreview(LookbookPreview):
-
+class AssistantPreview(LookbookPreview):
     def header(self, **kwargs):
         """
         `includes/header.html` is a partial template, we can write preview for it in this way.
@@ -18,4 +17,4 @@ class PartialTemplatesPreview(LookbookPreview):
         """
         We can write template code directly
         """
-        return render_to_string("components/header/header.html")
+        return render_to_string("components/footer/footer.html")
