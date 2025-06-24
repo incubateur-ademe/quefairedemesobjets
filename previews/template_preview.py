@@ -1,3 +1,4 @@
+# Ignore line length recommandations from flake8
 # flake8: noqa: E501
 from django.template.loader import render_to_string
 from django_lookbook.preview import LookbookPreview
