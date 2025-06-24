@@ -899,6 +899,7 @@ class RevisionActeur(BaseActeur):
                 "parent",
                 "parent_reason",
                 "is_parent",
+                "location",
             ],
         )
 
@@ -913,6 +914,7 @@ class RevisionActeur(BaseActeur):
                 or ActeurType.objects.get(code="commerce"),
                 "source": self.source,
                 "action_principale": self.action_principale,
+                "location": self.location,
             }
         )
 
