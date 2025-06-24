@@ -51,6 +51,8 @@ fields_enrich_excluded_ui = [
     fields_enrich_excluded[i : i + 5] for i in range(0, len(fields_enrich_excluded), 5)
 ]
 
+exclus_string = "  \n".join([", ".join(chunck) for chunck in fields_enrich_excluded_ui])
+
 DAG_ID = "cluster_acteur_suggestions"
 PARAMS = {
     "dry_run": Param(
@@ -241,7 +243,7 @@ PARAMS = {
         sont exclus)
 
         Exclus:
-        {'  \n'.join([', '.join(chunck) for chunck in fields_enrich_excluded_ui])}
+        {exclus_string}
         """,
     ),
     "dedup_enrich_exclude_sources": Param(

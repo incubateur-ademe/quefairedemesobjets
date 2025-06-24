@@ -149,7 +149,7 @@ def main():
 
     # Table name
     print("\nTable name:")
-    table_name = f"test_schema_{re.sub(r"[ -]","_",csv_path.stem.lower())}"
+    table_name = f"test_schema_{re.sub(r'[ -]', '_', csv_path.stem.lower())}"
     table_name = Prompt.ask("Enter table name:", default=table_name)
     print(f"{table_name=}")
 
