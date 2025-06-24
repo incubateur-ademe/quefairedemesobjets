@@ -50,8 +50,8 @@ class Migration(migrations.Migration):
                 user '{settings.DATABASES['default']['USER']}',
                 password '{settings.DATABASES['default']['PASSWORD']}'
               );
-            CREATE SCHEMA IF NOT EXISTS qfdmo_public;
-            IMPORT FOREIGN SCHEMA public FROM SERVER qfdmo_server INTO qfdmo_public;
+            CREATE SCHEMA IF NOT EXISTS foreign_qfdmo_public;
+            IMPORT FOREIGN SCHEMA public FROM SERVER qfdmo_server INTO foreign_qfdmo_public;
             """,
             """
             DROP SERVER IF EXISTS qfdmo_server CASCADE;

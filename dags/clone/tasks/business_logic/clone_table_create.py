@@ -23,7 +23,7 @@ def command_psql_copy(
 
     db_dsn = settings.DB_WAREHOUSE
     cmd_from = f'stdin WITH (FORMAT csv, HEADER true, DELIMITER "{delimiter}");'
-    cmd = f"psql -d {db_dsn} " f"-c '\\copy {table_name} FROM {cmd_from}'"
+    cmd = f"psql -d '{db_dsn}' -c '\\copy {table_name} FROM {cmd_from}'"
     return cmd
 
 

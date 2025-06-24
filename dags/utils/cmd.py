@@ -16,7 +16,7 @@ def cmd_run(cmd: str, dry_run: bool = True, env: dict = {}) -> str | None:
     Useful to run low-level tasks (e.g. streaming a remove CSV
     into DB via psql) while keeping the logic in Python."""
     logger.info("")  # space out commands if several in a row
-    logger.info(f"💻 commande: {cmd}")
+    logger.info("💻 Lancement de la commande...")
     if dry_run:
         logger.info(f"💻 commande: {dry_run=}, pas executée")
         return None
