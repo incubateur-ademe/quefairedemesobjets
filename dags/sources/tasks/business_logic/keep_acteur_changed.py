@@ -108,7 +108,7 @@ def retrieve_identifiant_unique_from_existing_acteur(
     if not duplicates.empty:
         logger.warning(
             "Duplicated identifiant in df_acteur_from_db"
-            f" {duplicates["identifiant"].tolist()}"
+            f" {duplicates['identifiant'].tolist()}"
         )
         raise ValueError("Duplicated identifiant in df_acteur_from_db")
 

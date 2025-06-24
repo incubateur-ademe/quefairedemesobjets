@@ -22,6 +22,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from slugify import slugify
 from unidecode import unidecode
+
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -269,7 +270,7 @@ def cluster_acteurs_clusters(
 
     # Info
     logger.info(f"🟢 {len(clusters_size1)=}")
-    logger.info(f"🟢 {df_clusters["cluster_id"].nunique()=}")
-    logger.info(f"🟢 {df_clusters["identifiant_unique"].nunique()=}")
+    logger.info(f"🟢 {df_clusters['cluster_id'].nunique()=}")
+    logger.info(f"🟢 {df_clusters['identifiant_unique'].nunique()=}")
 
     return df_clusters
