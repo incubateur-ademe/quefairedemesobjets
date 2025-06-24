@@ -70,7 +70,19 @@ class ActeurController extends Controller<HTMLElement> {
         this.hidden = false
       }
     }
-    this.element.parentElement!.scrollIntoView({ behavior: "smooth" })
+
+    this.element.addEventListener("transitionend", () => {
+      if (window.innerWidth > 768) {
+        return
+      }
+
+      if (this.element.parentElement?.getBoundingClientRect().bottom > window.scrollY) {
+        this.element.parentElement!.scrollIntoView({
+          block: "end",
+          behavior: "smooth"
+        })
+      }
+    })
   }
 
   hide() {
