@@ -6,7 +6,7 @@ import { areWeInAnIframe } from "../../js/iframe"
 type PersonProperties = {
   iframe: boolean
   iframeReferrer?: string
-  fromScript?: boolean
+  iframeFromScript?: boolean
 }
 
 type UserConversionConfig = {
@@ -137,7 +137,7 @@ export default class extends Controller<HTMLElement> {
     this.personProperties.iframeReferrer = referrer
     const url = new URL(window.location.href)
     if (url.searchParams.has('s')) {
-      this.personProperties.fromScript = true
+      this.personProperties.iframeFromScript = true
     }
   }
 
