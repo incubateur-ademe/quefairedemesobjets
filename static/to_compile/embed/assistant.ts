@@ -6,11 +6,11 @@ const origin = new URL(script?.getAttribute("src")).origin
 
 function initScript() {
   const parts = [origin]
-  const options = { license: 'GPLv3' }
+  const iframeResizerOptions = { license: 'GPLv3' }
   if (slug) {
     parts.push("dechet", slug)
   }
-  parts.push("?iframe")
+  parts.push("?iframe&s=1")
   const src = parts.join("/")
 
   const iframe = document.createElement("iframe");
@@ -36,7 +36,7 @@ function initScript() {
 
   script.parentNode?.insertBefore(iframe, script);
   iframe.onload = () => {
-    iframeResize(options, iframe)
+    iframeResize(iframeResizerOptions, iframe)
   }
 }
 if (document.readyState === "loading") {

@@ -6,6 +6,7 @@ import { areWeInAnIframe } from "../../js/iframe"
 type PersonProperties = {
   iframe: boolean
   iframeReferrer?: string
+  fromScript?: boolean
 }
 
 type UserConversionConfig = {
@@ -13,7 +14,6 @@ type UserConversionConfig = {
   produitPageView: number
   userInteractionWithMap: number
   userInteractionWithSolutionDetails: number
-
 }
 
 export default class extends Controller<HTMLElement> {
@@ -135,6 +135,10 @@ export default class extends Controller<HTMLElement> {
     const [weAreInAnIframe, referrer] = areWeInAnIframe()
     this.personProperties.iframe = weAreInAnIframe
     this.personProperties.iframeReferrer = referrer
+    const url = new URL(window.location.href)
+    if (url.searchParams.has('s')) {
+      this.personProperties.fromScript = true
+    }
   }
 
   #computeConversionScoreFromSessionStorage() {
