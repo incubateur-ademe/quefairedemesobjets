@@ -18,6 +18,7 @@ from sources.tasks.transform.transform_column import (
     convert_opening_hours,
     strip_lower_string,
     strip_string,
+    strip_title_string,
 )
 from sources.tasks.transform.transform_df import (
     clean_acteur_service_codes,
@@ -60,6 +61,7 @@ TRANSFORM_COLUMN_MAPPING = {
     "convert_opening_hours": convert_opening_hours,
     "strip_lower_string": strip_lower_string,
     "strip_string": strip_string,
+    "strip_title_string": strip_title_string,
 }
 
 TRANSFORM_DF_MAPPING = {

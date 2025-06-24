@@ -18,6 +18,7 @@ frontend/tailwind.md
 frontend/parcel.md
 frontend/templates.md
 iframe/iframe.md
+infrastructure/scaleway.md
 security.md
 ```
 
