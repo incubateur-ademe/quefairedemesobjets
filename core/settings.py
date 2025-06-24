@@ -120,6 +120,7 @@ INSTALLED_APPS = [
     "qfdmo",
     "data",
     "corsheaders",
+    "django_lookbook",
 ]
 
 
@@ -508,3 +509,10 @@ MIDDLEWARE.extend(
         "wagtail.contrib.redirects.middleware.RedirectMiddleware",
     ]
 )
+
+# UI
+# ---
+LOOKBOOK = {
+    "preview_base": ["previews"],
+    "show_previews": DEBUG,
+}
