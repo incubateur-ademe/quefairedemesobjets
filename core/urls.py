@@ -83,6 +83,13 @@ if settings.DEBUG:
     )
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
+# Django Lookbook URLS
+urlpatterns.extend(
+    [
+        path("lookbook/", include("django_lookbook.urls")),  # new
+    ]
+)
+
 # Wagtail urls
 urlpatterns.extend(
     [
