@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 import { InteractionType as PosthogUIInteractionType, PosthogEventType } from "../../js/types"
 import posthog, { PostHogConfig } from "posthog-js"
 import { areWeInAnIframe } from "../../js/iframe"
-import { FROM_SCRIPT_PARAMETER as URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE } from "../../js/helpers"
+import { URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE } from "../../js/helpers"
 
 type PersonProperties = {
   iframe: boolean
