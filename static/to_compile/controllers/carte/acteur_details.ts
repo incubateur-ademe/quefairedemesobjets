@@ -72,10 +72,12 @@ class ActeurController extends Controller<HTMLElement> {
     }
 
     this.element.addEventListener("transitionend", () => {
-      this.element.parentElement!.scrollIntoView({
-        block: "end",
-        behavior: "smooth"
-      })
+      if (this.element.parentElement?.getBoundingClientRect().bottom > window.scrollY) {
+        this.element.parentElement!.scrollIntoView({
+          block: "end",
+          behavior: "smooth"
+        })
+      }
     })
   }
 
