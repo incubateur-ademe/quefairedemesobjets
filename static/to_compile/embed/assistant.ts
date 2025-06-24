@@ -1,8 +1,10 @@
 import iframeResize from '@iframe-resizer/parent'
+import { FROM_SCRIPT_PARAMETER } from '../js/helpers';
 
 const script = document.currentScript as HTMLScriptElement
 const slug = script?.dataset?.objet;
 const origin = new URL(script?.getAttribute("src")).origin
+
 
 function initScript() {
   const parts = [origin]
@@ -10,7 +12,7 @@ function initScript() {
   if (slug) {
     parts.push("dechet", slug)
   }
-  parts.push("?iframe&s=1")
+  parts.push(`?iframe&${FROM_SCRIPT_PARAMETER}=1`)
   const src = parts.join("/")
 
   const iframe = document.createElement("iframe");

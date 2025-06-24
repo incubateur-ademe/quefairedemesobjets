@@ -7,6 +7,7 @@ tests.
 */
 
 export const ACTIVE_PINPOINT_CLASSNAME = "active-pinpoint"
+export const FROM_SCRIPT_PARAMETER = "s"
 
 export function clearActivePinpoints() {
   document.querySelectorAll(`.${ACTIVE_PINPOINT_CLASSNAME}`).forEach((element) => {

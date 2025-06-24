@@ -2,6 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 import { InteractionType as PosthogUIInteractionType, PosthogEventType } from "../../js/types"
 import posthog, { PostHogConfig } from "posthog-js"
 import { areWeInAnIframe } from "../../js/iframe"
+import { FROM_SCRIPT_PARAMETER as URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE } from "../../js/helpers"
 
 type PersonProperties = {
   iframe: boolean
@@ -136,7 +137,7 @@ export default class extends Controller<HTMLElement> {
     this.personProperties.iframe = weAreInAnIframe
     this.personProperties.iframeReferrer = referrer
     const url = new URL(window.location.href)
-    if (url.searchParams.has('s')) {
+    if (url.searchParams.has(URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE)) {
       this.personProperties.iframeFromScript = true
     }
   }
