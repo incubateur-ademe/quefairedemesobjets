@@ -18,7 +18,6 @@ from sources.tasks.transform.transform_column import (
     convert_opening_hours,
     strip_lower_string,
     strip_string,
-    strip_title_string,
 )
 
 
@@ -200,23 +199,6 @@ class TestStripString:
     )
     def test_strip_string(self, input, output):
         assert strip_string(input, None) == output
-
-
-class TestStripTitleString:
-
-    @pytest.mark.parametrize(
-        "input, output",
-        [
-            (None, ""),
-            (pd.NA, ""),
-            (np.nan, ""),
-            (" ", ""),
-            (75001, "75001"),
-            (" adresse postale ", "Adresse Postale"),
-        ],
-    )
-    def test_strip_title_string(self, input, output):
-        assert strip_title_string(input, None) == output
 
 
 class TestStriplowerString:
