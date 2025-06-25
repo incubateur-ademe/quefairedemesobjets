@@ -1,7 +1,7 @@
 {% extends base_template %}
 
 {% block page_title %}
-{{ object.libelle }} | {{ super() }}
+{{ object.libelle|title }} | {{ super() }}
 {% endblock page_title %}
 
 {% block json_ld %}

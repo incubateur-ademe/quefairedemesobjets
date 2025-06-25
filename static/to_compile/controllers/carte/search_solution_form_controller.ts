@@ -1,6 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
 import * as Turbo from "@hotwired/turbo"
-import { clearActivePinpoints, removeHash } from "../../js/helpers"
 
 class SearchFormController extends Controller<HTMLElement> {
   #selectedOption: string = ""
@@ -99,7 +98,6 @@ class SearchFormController extends Controller<HTMLElement> {
     this.displayActionList()
   }
 
-
   activeReparerFilters(activate: boolean = true) {
     // Carte mode
     this.activeReparerFiltersCarte()
@@ -161,6 +159,10 @@ class SearchFormController extends Controller<HTMLElement> {
     this.#showSearchFormPanel()
     this.#hideAddressesPanel()
     this.scrollToContent()
+  }
+
+  resetBboxInput() {
+    this.bboxTarget.value = ""
   }
 
   updateBboxInput(event) {
