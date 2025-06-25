@@ -36,7 +36,7 @@ with DAG(
             },
             {
                 "origin": "Adresse",
-                "transformation": "strip_title_string",
+                "transformation": "strip_string",
                 "destination": "adresse",
             },
             {
@@ -46,7 +46,7 @@ with DAG(
             },
             {
                 "origin": "Commune",
-                "transformation": "strip_title_string",
+                "transformation": "strip_string",
                 "destination": "ville",
             },
             {

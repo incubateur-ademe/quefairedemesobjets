@@ -7,7 +7,7 @@ Adresse
 {% block content %}
 <address class="qf-not-italic">
     {% if object.adresse %}
-        {{ object.adresse }}<br>
+        {{ object.adresse|title }}<br>
     {% endif %}
 
     {% if object.adresse_complement %}
@@ -19,7 +19,7 @@ Adresse
     {% endif %}
 
     {% if object.ville %}
-        {{ object.ville }}
+        {{ object.ville|title }}
     {% endif %}
 </address>
 

@@ -92,10 +92,6 @@ def strip_string(value: str | None, _) -> str:
     return str(value).strip() if not pd.isna(value) and value else ""
 
 
-def strip_title_string(value: str | None, _) -> str:
-    return str(value).strip().title() if not pd.isna(value) and value else ""
-
-
 def strip_lower_string(value: str | None, _) -> str:
     return str(value).strip().lower() if not pd.isna(value) and value else ""
 
