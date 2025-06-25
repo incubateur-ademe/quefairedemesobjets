@@ -1,5 +1,8 @@
 import { Controller } from "@hotwired/stimulus"
-import { InteractionType as PosthogUIInteractionType, PosthogEventType } from "../../js/types"
+import {
+  InteractionType as PosthogUIInteractionType,
+  PosthogEventType,
+} from "../../js/types"
 import posthog, { PostHogConfig } from "posthog-js"
 import { areWeInAnIframe } from "../../js/iframe"
 import { URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE } from "../../js/helpers"
@@ -34,7 +37,7 @@ export default class extends Controller<HTMLElement> {
   declare userConversionScoreValue
 
   personProperties: PersonProperties = {
-    iframe: false
+    iframe: false,
   }
 
   static values = {
@@ -53,7 +56,7 @@ export default class extends Controller<HTMLElement> {
     api_host: "https://eu.posthog.com",
     autocapture: false,
     capture_pageview: false,
-    person_profiles: 'always',
+    person_profiles: "always",
     persistence: "memory",
   }
 
@@ -91,19 +94,22 @@ export default class extends Controller<HTMLElement> {
     this.#syncSessionStorageWithLocalConversionScore()
   }
 
-
   // An initial action can be set in the template, as a Stimulus Value.
   // This value is read when initializing the controller, and set the default score.
   // For example, viewing the homepage or a Produit page scores 1 point.
   #setInitialActionValue() {
-    if (this.initialActionValue && !(this.initialActionValue in this.userConversionScoreConfig)) {
+    if (
+      this.initialActionValue &&
+      !(this.initialActionValue in this.userConversionScoreConfig)
+    ) {
       console.log(`${this.initialActionValue} is not a valid action value`)
       return
     }
 
     this.userConversionScoreValue = {
       ...this.userConversionScoreValue,
-      [this.initialActionValue]: this.userConversionScoreConfig[this.initialActionValue]
+      [this.initialActionValue]:
+        this.userConversionScoreConfig[this.initialActionValue],
     }
   }
 
@@ -152,14 +158,17 @@ export default class extends Controller<HTMLElement> {
 
     this.userConversionScoreValue = {
       ...this.userConversionScoreValue,
-      ...conversionScore
+      ...conversionScore,
     }
   }
 
   #updateDebugInspectorUI() {
-    const posthogBannerConversionScore = document.querySelector("#posthog-banner-conversion-score")
+    const posthogBannerConversionScore = document.querySelector(
+      "#posthog-banner-conversion-score",
+    )
     if (posthogBannerConversionScore) {
-      posthogBannerConversionScore.textContent = this.userConversionScoreValue.toString()
+      posthogBannerConversionScore.textContent =
+        this.userConversionScoreValue.toString()
     }
   }
 
@@ -196,18 +205,22 @@ export default class extends Controller<HTMLElement> {
       },
       {
         root: null,
-        threshold: this.intersectionObserverThreshold,  // Trigger when at least 10% of the page is visible
+        threshold: this.intersectionObserverThreshold, // Trigger when at least 10% of the page is visible
       },
     )
 
     observer.observe(document.body)
   }
 
-  #captureUIInteraction(userConversionKey: keyof UserConversionConfig, UIInteractionType: PosthogUIInteractionType) {
+  #captureUIInteraction(
+    userConversionKey: keyof UserConversionConfig,
+    UIInteractionType: PosthogUIInteractionType,
+  ) {
     const currentValue = this.userConversionScoreValue[userConversionKey] || 0
     this.userConversionScoreValue = {
       ...this.userConversionScoreValue,
-      [userConversionKey]: currentValue + this.userConversionScoreConfig[userConversionKey],
+      [userConversionKey]:
+        currentValue + this.userConversionScoreConfig[userConversionKey],
     }
   }
 

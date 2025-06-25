@@ -3,7 +3,7 @@ function compileIframeAttributes(
   urlParams: URLSearchParams,
   maxWidth: string,
   height: string,
-  route: string
+  route: string,
 ): { [Property in keyof HTMLIFrameElement]?: unknown } {
   return {
     src: `${baseUrl}/${route}?${urlParams.toString()}`,
@@ -89,7 +89,7 @@ export function getIframeAttributesAndExtra(
     urlParams,
     maxWidth,
     height,
-    route
+    route,
   )
   return [iframeAttributes, iframeExtraAttributes]
 }

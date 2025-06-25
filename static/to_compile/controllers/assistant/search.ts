@@ -16,24 +16,28 @@ export default class extends Controller<HTMLFormElement> {
   }
 
   clear() {
-    for (const inputElement of this.formTarget.querySelectorAll("input")){
-      inputElement.value =''
+    for (const inputElement of this.formTarget.querySelectorAll("input")) {
+      inputElement.value = ""
       this.submitForm()
     }
   }
 
   #move(direction: "up" | "down") {
-    const searchResultAlreadyFocused = document.querySelector<HTMLAnchorElement>("#search-results > a:focus")
-    let elementToFocus = document.querySelector<HTMLAnchorElement>("#search-results > a")
+    const searchResultAlreadyFocused = document.querySelector<HTMLAnchorElement>(
+      "#search-results > a:focus",
+    )
+    let elementToFocus =
+      document.querySelector<HTMLAnchorElement>("#search-results > a")
 
     if (searchResultAlreadyFocused) {
-      searchResultAlreadyFocused.blur();
+      searchResultAlreadyFocused.blur()
 
       if (direction == "up" && searchResultAlreadyFocused.previousElementSibling) {
-        elementToFocus = searchResultAlreadyFocused.previousElementSibling as HTMLAnchorElement
-      }
-      else if (searchResultAlreadyFocused.nextElementSibling) {
-        elementToFocus = searchResultAlreadyFocused.nextElementSibling as HTMLAnchorElement
+        elementToFocus =
+          searchResultAlreadyFocused.previousElementSibling as HTMLAnchorElement
+      } else if (searchResultAlreadyFocused.nextElementSibling) {
+        elementToFocus =
+          searchResultAlreadyFocused.nextElementSibling as HTMLAnchorElement
       }
     }
     elementToFocus?.focus()

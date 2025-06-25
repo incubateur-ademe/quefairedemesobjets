@@ -71,7 +71,7 @@ jobs:
           npm ci
           npm run build
       - name: Check code formatting
-        run: npm run lint
+        run: npm run format:check
       - name: Run tests
         run: npm run test
 

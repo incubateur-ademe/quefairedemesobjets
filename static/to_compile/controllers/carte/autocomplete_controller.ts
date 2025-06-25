@@ -148,8 +148,10 @@ export default abstract class extends Controller<HTMLElement> {
     if (!optionDiv) return false
     /*start by removing the "active" class on all items:*/
     this.#removeActive(optionDiv)
-    if (this.currentFocusedOptionIndexValue >= optionDiv.length) this.currentFocusedOptionIndexValue = 0
-    if (this.currentFocusedOptionIndexValue < 0) this.currentFocusedOptionIndexValue = optionDiv.length - 1
+    if (this.currentFocusedOptionIndexValue >= optionDiv.length)
+      this.currentFocusedOptionIndexValue = 0
+    if (this.currentFocusedOptionIndexValue < 0)
+      this.currentFocusedOptionIndexValue = optionDiv.length - 1
     /*add class "autocomplete-active":*/
     optionDiv[this.currentFocusedOptionIndexValue].classList.add("autocomplete-active")
   }
@@ -177,18 +179,18 @@ export default abstract class extends Controller<HTMLElement> {
 
   createAutocompleteList() {
     /*create a DIV element that will contain the items (values):*/
-     const autocompleteDivWrapper = document.createElement("DIV")
-     autocompleteDivWrapper.setAttribute("id", this.inputTarget.id + "autocomplete-list")
-     autocompleteDivWrapper.classList.add("autocomplete-items")
+    const autocompleteDivWrapper = document.createElement("DIV")
+    autocompleteDivWrapper.setAttribute("id", this.inputTarget.id + "autocomplete-list")
+    autocompleteDivWrapper.classList.add("autocomplete-items")
 
-     const inputTargetWidth = this.inputTarget.offsetWidth
-     autocompleteDivWrapper.classList.add("qf-w-full")
-     autocompleteDivWrapper.style.width = `${inputTargetWidth}px`
+    const inputTargetWidth = this.inputTarget.offsetWidth
+    autocompleteDivWrapper.classList.add("qf-w-full")
+    autocompleteDivWrapper.style.width = `${inputTargetWidth}px`
 
-     /*append the DIV element as a child of the autocomplete container:*/
-     this.inputTarget.after(autocompleteDivWrapper)
-     return autocompleteDivWrapper
-   }
+    /*append the DIV element as a child of the autocomplete container:*/
+    this.inputTarget.after(autocompleteDivWrapper)
+    return autocompleteDivWrapper
+  }
 
   #removeActive(optionDiv: HTMLCollectionOf<HTMLElement>) {
     for (var i = 0; i < optionDiv.length; i++) {
@@ -199,7 +201,6 @@ export default abstract class extends Controller<HTMLElement> {
   async #getOptionCallback(value: string): Promise<string[]> {
     // Implement this method in your controller
     return []
-
   }
 
   displaySpinner(): void {

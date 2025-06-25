@@ -89,7 +89,12 @@ export default class extends Controller<HTMLElement> {
 
   #generateSelectedItem(value: string): HTMLButtonElement {
     const selectedItem = document.createElement("button")
-    const classes = ["qf-whitespace-nowrap", "fr-tag", "fr-tag--icon-left", "fr-icon-close-line"]
+    const classes = [
+      "qf-whitespace-nowrap",
+      "fr-tag",
+      "fr-tag--icon-left",
+      "fr-icon-close-line",
+    ]
     selectedItem.classList.add(...classes)
     selectedItem.textContent = value
     selectedItem.dataset.action = "autocomplete#removeItem"
