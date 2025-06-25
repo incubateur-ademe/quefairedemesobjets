@@ -39,8 +39,7 @@
         <section class="map-grid qf-relative">
             <header
                 {# The z-index below can impact the shadow over#}
-                class="{% block header_classes %}qf-z-20{% endblock header_classes %}
-                    qf-bg-white qf-shadow-lg"
+                class="{% block header_classes %}qf-z-20{% endblock header_classes %} qf-bg-white qf-shadow-lg"
             >
                 <div
                     class="
@@ -95,7 +94,8 @@
             <aside class="
                 md:qf-relative qf-z-20
                 aria-[hidden=false]:qf-block qf-hidden
-                qf-overflow-auto
+                md:qf-overflow-auto
+                max-md:qf-overflow-visible
                 qf-bg-white
                 max-md:qf-absolute
                 max-md:qf-top-full max-md:qf-bottom-0 max-md:qf-left-0 max-md:qf-right-0
