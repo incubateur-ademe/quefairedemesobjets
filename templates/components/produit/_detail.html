@@ -12,7 +12,12 @@
         <h2 class="qf-mb-0">Où l'apporter ?</h2>
         <div class="
             max-md:qf-aspect-[9/20]
-            qf-h-[90vh]
+            {% comment %}
+            For an odd reason, 90vh does not play well with leaflet here so we use percents instead.
+            This is less reliable as this does not guarantee that the maps takes 90% of the viewport height
+            but is enough in most cases.
+            {% endcomment %}}
+            qf-h-[90%]
             md:qf-max-h-[50em]
             qf-w-full
         ">
