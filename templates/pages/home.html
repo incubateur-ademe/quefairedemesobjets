@@ -1,0 +1,31 @@
+{% extends "qfdmd/base.html" %}
+{% load dsfr_tags suggestions_tags %}
+
+{% block header %}
+{% include "components/header/header_home.html" %}
+{% endblock header %}
+
+{% block analytics_action %}homePageView{% endblock %}
+
+{% block body_attrs %}data-home{% endblock %}
+
+{% block main %}
+<div class="qf-flex qf-flex-col qf-gap-5w">
+    {# search + patchwork #}
+    <div class="qf-w-full qf-max-w-3xl qf-m-auto qf-relative qf-pb-6w">
+        <div class="qf-absolute qf-left-0 qf-right-0 qf-top-0">
+            {% include "components/search/view.html" with big=True %}
+        </div>
+    </div>
+
+    {# suggestion #}
+    {% include "components/suggestions/suggestions.html" with suggestions=object_list|as_tuple %}
+    {% with heading=ASSISTANT.faites_decouvrir_ce_site %}
+        {% include "snippets/share_and_embed.html" %}
+    {% endwith %}
+
+    <div class="qf-max-w-3xl qf-mx-auto">
+        {% dsfr_accordion accordion %}
+    </div>
+</div>
+{% endblock main %}

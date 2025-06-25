@@ -1,0 +1,20 @@
+<div class= "qf-max-w-2xl qf-mx-auto qf-text-center">
+    {% if heading %}
+    <h2 class="qf-text-lg">
+    {{ heading }}
+    </h2>
+    {% endif %}
+
+    <ul
+        class="qf-flex qf-gap-x-2w qf-gap-y-3w
+        qf-leading-[3]
+        qf-flex-wrap qf-items-center qf-justify-center "
+    >
+        <li class="qf-list-none qf-p-0">
+        {% include "modals/embed.html" with button_extra_classes="fr-btn--secondary fr-btn--icon-left fr-icon fr-icon-share-line" %}
+        </li>
+        <li class="qf-list-none qf-p-0">
+        {% include "modals/share.html" with button_extra_classes="fr-btn--tertiary fr-btn--icon-left fr-icon fr-icon-code-s-slash-line" %}
+        </li>
+    </ul>
+</div>
