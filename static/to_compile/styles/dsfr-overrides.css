@@ -1,4 +1,3 @@
-
 .fr-enlarge-link a::before {
   position: relative !important;
 }
@@ -112,6 +111,29 @@
 /*
 DSFR customization for tabs
 */
+
+.fr-tabs--noborder-mobile {
+  &:before,
+  & {
+    @apply max-md:qf-shadow-none;
+  }
+
+  .fr-tabs__list {
+    @apply max-md:qf-p-0;
+  }
+
+  .fr-tabs__panel {
+    @apply max-md:qf-py-1w max-md:qf-px-0;
+  }
+
+  .fr-tabs__list {
+    @apply max-md:qf-space-x-1w max-md:qf-min-h-min;
+  }
+
+  .fr-tabs__tab {
+    @apply max-md:qf-m-0;
+  }
+}
 
 .fr-tabs--noborder {
   &:before,
