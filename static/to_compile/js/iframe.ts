@@ -11,8 +11,7 @@ export function areWeInAnIframe() {
   try {
     if (window.self !== window.top) {
       weAreInAnIframe = true
-      referrer =
-        window.top?.location.href
+      referrer = window.top?.location.href
     }
   } catch (e) {
     // Unable to access window.top
@@ -26,19 +25,23 @@ export function areWeInAnIframe() {
   }
 
   return [weAreInAnIframe, referrer]
-
 }
 function removeUnwantedElements() {
   if (!document.referrer) {
     return
   }
   const domain = new URL(document.referrer).hostname
-  const domainIsInternal = domain === 'localhost' || domain.endsWith(".ademe.fr") || domain.endsWith(".ademe.dev")
+  const domainIsInternal =
+    domain === "localhost" ||
+    domain.endsWith(".ademe.fr") ||
+    domain.endsWith(".ademe.dev")
   if (domainIsInternal) {
-    for (const elementToRemove of document.querySelectorAll("[data-remove-if-internal]")) {
+    for (const elementToRemove of document.querySelectorAll(
+      "[data-remove-if-internal]",
+    )) {
       elementToRemove.remove()
     }
   }
 }
-window.addEventListener("DOMContentLoaded", removeUnwantedElements);
+window.addEventListener("DOMContentLoaded", removeUnwantedElements)
 document.addEventListener("turbo:frame-load", removeUnwantedElements)

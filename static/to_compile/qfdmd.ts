@@ -6,7 +6,7 @@
 import "./styles/qfdmd.css"
 
 // Third-party scripts
-import '@iframe-resizer/child'
+import "@iframe-resizer/child"
 
 // Carte scripts.
 // They are used to generate the map on Produit / Déchet pages

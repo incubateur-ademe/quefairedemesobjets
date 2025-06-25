@@ -1,18 +1,18 @@
-import { getIframeAttributesAndExtra } from "../js/iframe_functions";
+import { getIframeAttributesAndExtra } from "../js/iframe_functions"
 
 describe("getIframeAttributesAndExtra function tests", () => {
-  let scriptTag: HTMLScriptElement;
+  let scriptTag: HTMLScriptElement
 
   // Helper function to set dataset attributes
   const setScriptDataset = (attributes: { [key: string]: string }) => {
     Object.entries(attributes).forEach(([key, value]) => {
-      scriptTag.dataset[key] = value;
-    });
-  };
+      scriptTag.dataset[key] = value
+    })
+  }
 
   // Reusable function for asserting iframe attributes
   const assertIframeAttributes = (iframeAttributes: any, expectedSrc: string) => {
-    expect(iframeAttributes.src).toBe(expectedSrc);
+    expect(iframeAttributes.src).toBe(expectedSrc)
     expect(iframeAttributes).toStrictEqual({
       allow: "geolocation; clipboard-write",
       allowFullscreen: true,
@@ -22,13 +22,13 @@ describe("getIframeAttributesAndExtra function tests", () => {
       src: expectedSrc,
       style: "overflow: hidden; max-width: 100%; width: 100%; height: 700px;",
       title: "Longue vie aux objets",
-    });
-  };
+    })
+  }
 
   beforeEach(() => {
-    scriptTag = document.createElement("script");
-    scriptTag.src = "https://example.com/script.js";
-  });
+    scriptTag = document.createElement("script")
+    scriptTag.src = "https://example.com/script.js"
+  })
 
   test.each([
     {
@@ -46,7 +46,8 @@ describe("getIframeAttributesAndExtra function tests", () => {
     {
       description: "with a single EPCI code",
       dataset: {
-        action_list: "acheter|revendre|preter|emprunter|louer|mettreenlocation|donner|echanger|reparer",
+        action_list:
+          "acheter|revendre|preter|emprunter|louer|mettreenlocation|donner|echanger|reparer",
         epci_codes: "200073146",
         limit: "71",
       },
@@ -57,7 +58,8 @@ describe("getIframeAttributesAndExtra function tests", () => {
     {
       description: "with multiple EPCI codes",
       dataset: {
-        action_list: "acheter|revendre|preter|emprunter|louer|mettreenlocation|donner|echanger|reparer",
+        action_list:
+          "acheter|revendre|preter|emprunter|louer|mettreenlocation|donner|echanger|reparer",
         epci_codes: "200073146,200040442,245804497",
         limit: "71",
       },
@@ -69,14 +71,15 @@ describe("getIframeAttributesAndExtra function tests", () => {
     "should generate correct iframe attributes $description",
     ({ dataset, route, expectedSrc }) => {
       // These are tests...any seems acceptable but we might want to type this at some point.
-      setScriptDataset(dataset as any);
+      setScriptDataset(dataset as any)
 
       const [iframeAttributes, iframeExtraAttributes] = getIframeAttributesAndExtra(
-        scriptTag, route
-      );
+        scriptTag,
+        route,
+      )
 
-      assertIframeAttributes(iframeAttributes, expectedSrc);
-      expect(iframeExtraAttributes).toBeDefined();
-    }
-  );
-});
+      assertIframeAttributes(iframeAttributes, expectedSrc)
+      expect(iframeExtraAttributes).toBeDefined()
+    },
+  )
+})

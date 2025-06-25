@@ -62,13 +62,10 @@ class AdresseAutocompleteController extends AutocompleteController {
     } else if (!("geolocation" in navigator)) {
       console.error("geolocation is not available")
     } else {
-      this.dispatchLocationToGlobalState(
-        label, latitude, longitude
-      )
+      this.dispatchLocationToGlobalState(label, latitude, longitude)
     }
     this.hideAutocompleteList()
   }
-
 
   async getAndStorePosition(position: GeolocationPosition) {
     try {
@@ -86,12 +83,11 @@ class AdresseAutocompleteController extends AutocompleteController {
       this.dispatchLocationToGlobalState(
         data.features[0].properties.label,
         data.features[0].geometry.coordinates[1],
-        data.features[0].geometry.coordinates[0]
+        data.features[0].geometry.coordinates[0],
       )
 
       this.#hideInputError()
       this.hideSpinner()
-
     } catch (error) {
       console.error("error catched : ", error)
       this.hideSpinner()
@@ -101,7 +97,6 @@ class AdresseAutocompleteController extends AutocompleteController {
   dispatchLocationToGlobalState(adresse: string, latitude: string, longitude: string) {
     this.dispatch("change", { detail: { adresse, latitude, longitude } })
   }
-
 
   addOption(regexPattern: RegExp, option: any) {
     //option : this.#allAvailableOptions[i]

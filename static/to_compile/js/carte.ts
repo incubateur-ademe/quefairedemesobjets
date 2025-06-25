@@ -33,7 +33,6 @@ stimulus.register("blink", BlinkController)
 stimulus.register("analytics", AnalyticsController)
 stimulus.register("state", StateController)
 
-
 Turbo.session.drive = false
 
 document.addEventListener("DOMContentLoaded", () => {

@@ -24,7 +24,7 @@ export class SolutionMap {
     location,
     controller,
   }: {
-    selector: HTMLDivElement,
+    selector: HTMLDivElement
     location: Location
     controller: MapController
   }) {
@@ -86,12 +86,14 @@ export class SolutionMap {
       return [
         `<div data-animated class="qf-scale-75">`,
         `<img class="qf--translate-y-2/4" height="61" width="46" src="${acteur.iconFile}">`,
-        `</div>`
+        `</div>`,
       ].join("")
     }
 
     const markerHtmlStyles = `color: ${acteur?.couleur};`
-    let background: string = acteur?.fillBackground ? pinBackgroundFillSvg : pinBackgroundSvg
+    let background: string = acteur?.fillBackground
+      ? pinBackgroundFillSvg
+      : pinBackgroundSvg
     if (background.includes("MASK_ID")) {
       // When multiple leaflet maps are displayed in DSFR tabs, a bug occurs because pins mask share
       // the same id : #a.
@@ -129,7 +131,7 @@ export class SolutionMap {
   ): void {
     const points: Array<Array<Number>> = []
     const addedActors: Array<string> = []
-    actors.forEach(function(actor: DisplayedActeur) {
+    actors.forEach(function (actor: DisplayedActeur) {
       if (addedActors.includes(actor.uuid)) {
         // Ensure actors are not added twice on the map.
         // This can happen and can causes visual glitches.
