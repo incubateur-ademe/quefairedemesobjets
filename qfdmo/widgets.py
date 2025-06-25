@@ -1,3 +1,4 @@
+import shortuuid
 from django import forms
 from django.contrib.gis import forms as gis_forms
 from django.forms import widgets
@@ -53,6 +54,27 @@ class SegmentedControlSelect(forms.RadioSelect):
 class DSFRCheckboxSelectMultiple(forms.CheckboxSelectMultiple):
     template_name = "forms/widgets/dsfr_checkbox_select.html"
     option_template_name = "forms/widgets/dsfr_checkbox_option.html"
+
+    # TODO: refacto forms
+    # The method below has been written to bypass a limitation of the
+    # current django forms implementation in SearchActeursView.
+    # As this view manually set initial values based on hardcoded strings
+    # and query params, this view does not support prefix.
+    #
+    # To prevent addressing a potentially breaking refactoring, we generate
+    # a unique ID on the fly that we render in the forms so that several forms
+    # with the same field present on the page works as expected.
+    # https://docs.djangoproject.com/en/5.2/ref/forms/api/#django.forms.Form.prefix
+    #
+    # Once SearchActeursView supports prefix, this method could be dropped.
+    def get_context(self, name, value, attrs):
+        if attrs is None:
+            attrs = {}
+
+        attrs["id"] = f"{shortuuid.uuid()}-{name}"
+
+        context = super().get_context(name, value, attrs)
+        return context
 
 
 class CustomOSMWidget(gis_forms.BaseGeometryWidget):
