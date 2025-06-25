@@ -1,0 +1,52 @@
+{% extends "qfdmd/base.html" %}
+{% load static %}
+
+{% block analytics_action %}produitPageView{% endblock %}
+
+{% block title %}
+<title>{{ object.nom }} | {{ seo.title }}</title>
+{% endblock title %}
+
+{% block extra_js %}
+{% endblock extra_js %}
+
+{% block meta_description %}{{ object.meta_description|default:block.super }}{% endblock %}
+
+{% block main %}
+{% with produit=object.produit %}
+{% with bon_etat=object.bon_etat %}
+{% with mauvais_etat=object.mauvais_etat %}
+<article
+    class="qf-flex qf-flex-col md:qf-grid md:qf-grid-cols-[minmax(200px,1fr)] md:qf-grid-rows-[auto] md:qf-gap-4
+    qf-auto-rows-min qf-auto-cols-min
+    qf-gap-6w max-lg:qf-pr-0 max-xl:qf-pr-6w
+    qf-pt-3w md:qf-pt-5w"
+>
+    <header class="
+    md:qf-row-start-1 md:qf-col-start-1
+    max-md:qf-order-1
+    qf-flex qf-flex-col qf-gap-3w">
+        <a
+            href="{% url 'qfdmd:home' %}"
+            class="qf-flex qf-gap-1v qf-justify-center qf-items-center
+            qf-text-green-menthe-sun-373-moon-652 qf-bg-none
+            md:qf-hidden qf-mr-auto"
+        >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12.6668 6.66589L12.6669 12.6658H11.3336L11.3335 7.99922L4.5523 7.99916L7.18548 10.6323L6.24264 11.5752L2 7.33249L6.24264 3.08984L7.18548 4.03266L4.55227 6.66582L12.6668 6.66589Z" fill="#37635F"/>
+            </svg>
+            <span>{{ ASSISTANT.nouvelle_recherche }}</span>
+        </a>
+        <h1 class="qf-m-0">
+            {{ object.nom|capfirst }}
+        </h1>
+        {% include "components/produit/_infotri.html" with infotri=produit.infotri %}
+    </header>
+
+    {% include "snippets/share_and_embed.html" with extra_classes="max-md:qf-order-last md:qf-min-w-[17rem] md:qf-row-start-1 md:qf-col-start-2" %}
+    {% include "components/produit/produit.html" with extra_classes="max-md:qf-order-2 md:qf-row-start-2 md:qf-col-span-2" %}
+</article>
+{% endwith %}
+{% endwith %}
+{% endwith %}
+{% endblock main %}

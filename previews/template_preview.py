@@ -50,6 +50,10 @@ class PagesPreview(LookbookPreview):
         }
         return render_to_string("pages/home.html", context)
 
+    def produit(self, **kwargs):
+        context = {"object": Synonyme.objects.first()}
+        return render_to_string("pages/produit.html", context)
+
 
 class SnippetsPreview(LookbookPreview):
     def header(self, **kwargs):
