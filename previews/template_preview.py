@@ -3,8 +3,55 @@
 from django.template.loader import render_to_string
 from django_lookbook.preview import LookbookPreview
 
+from qfdmd.models import Suggestion, Synonyme
 
-class AssistantPreview(LookbookPreview):
+
+class ComponentsPreview(LookbookPreview):
+    def button(self, **kwargs):
+        context = {"href": "google.fr", "text": "test"}
+        return render_to_string("components/button.html", context)
+
+    def code(self, **kwargs):
+        context = {
+            "script": '<script src="https://quefairedemesdechets.ademe.local/iframe.js"></script>'
+        }
+        return render_to_string("components/code/code.html", context)
+
+
+class ModalsPreview(LookbookPreview):
+    def embed(self, **kwargs):
+        context = {"script": "<code>coucou</code>"}
+        return render_to_string("modals/embed.html", context)
+
+    def share(self, **kwargs):
+        return render_to_string("modals/share.html")
+
+
+class PagesPreview(LookbookPreview):
+    def home(self, **kwargs):
+        context = {
+            "object_list": [
+                Suggestion(produit=Synonyme.objects.first()),
+                Suggestion(produit=Synonyme.objects.last()),
+            ],
+            "accordion": {
+                "id": "professionels",
+                "title": "Je suis un professionnel",
+                "content": "Actuellement, l’ensemble des recommandations ne concerne "
+                "que les particuliers. Pour des informations à destination des "
+                "professionnels, veuillez consulter le site "
+                "<a href='https://economie-circulaire.ademe.fr/dechets-activites-economiques'"
+                "target='_blank' rel='noreferrer' "
+                "title='Économie Circulaire ADEME - Nouvelle fenêtre'>"
+                "https://economie-circulaire.ademe.fr/dechets-activites-economiques"
+                "</a>.",
+            },
+            "ASSISTANT": {"faites_decouvrir_ce_site": "Faites découvrir ce site !"},
+        }
+        return render_to_string("pages/home.html", context)
+
+
+class SnippetsPreview(LookbookPreview):
     def header(self, **kwargs):
         """
         `includes/header.html` is a partial template, we can write preview for it in this way.
@@ -14,7 +61,15 @@ class AssistantPreview(LookbookPreview):
         return render_to_string("components/header/header.html")
 
     def footer(self, **kwargs):
-        """
-        We can write template code directly
-        """
         return render_to_string("components/footer/footer.html")
+
+    def suggestions(self, **kwargs):
+        context = {
+            "heading": "Coucou",
+            "suggestions": [("coucou", "google.fr"), ("youpi", "google.fr")],
+        }
+        return render_to_string("components/suggestions/suggestions.html", context)
+
+    def share_and_embed(self, **kwargs):
+        context = {"heading": "Faites découvrir ce site"}
+        return render_to_string("snippets/share_and_embed.html", context)

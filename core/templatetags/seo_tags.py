@@ -15,7 +15,7 @@ def get_sharer_content(request, object, social_network=None):
     Once jinja will be removed from the project, this can be merged in
     share_url function below
     """
-    if not request.META:
+    if not request or not request.META:
         return {}
 
     carte = request.META.get("HTTP_HOST") not in settings.ASSISTANT["HOSTS"]
@@ -74,6 +74,6 @@ def configure_sharer(context):
         object = context.get("object").produit
     except AttributeError:
         object = None
-    request = context["request"]
+    request = context.get("request")
     context["sharer"] = get_sharer_content(request, object)
     return ""
