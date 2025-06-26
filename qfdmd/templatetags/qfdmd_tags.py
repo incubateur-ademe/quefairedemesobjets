@@ -12,8 +12,8 @@ register = template.Library()
 logger = logging.getLogger(__name__)
 
 
-@register.inclusion_tag("components/patchwork/patchwork.html", takes_context=True)
-def patchwork(context) -> dict:
+@register.inclusion_tag("components/patchwork/patchwork.html")
+def patchwork() -> dict:
     from qfdmd.models import Synonyme
 
     produits = (
@@ -21,19 +21,14 @@ def patchwork(context) -> dict:
         .exclude(picto=None)
         .filter(pin_on_homepage=True)[:19]
     )
-    return {
-        "request": context.get("request"),
-        "top": produits[:10],
-        "left": produits[10:14],
-        "right": produits[16:19],
-    }
+    return {"top": produits[:10], "left": produits[10:14], "right": produits[16:19]}
 
 
 @register.inclusion_tag("seo/_canonical_url.html", takes_context=True)
 def canonical_url(context: dict) -> dict:
     canonical_url = None
 
-    if request := context.get("request"):
+    if "request" in context:
         request = context["request"]
         path = request.build_absolute_uri(request.path)
         canonical_url = path.replace(request.get_host(), settings.CANONICAL_HOST)

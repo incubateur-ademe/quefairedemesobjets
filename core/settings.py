@@ -258,7 +258,6 @@ TEMPLATES = [
             ],
             "builtins": [
                 "core.templatetags.iframe_tags",
-                "core.templatetags.querystring_tag",
             ],
         },
     },
