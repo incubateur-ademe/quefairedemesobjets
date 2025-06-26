@@ -256,7 +256,10 @@ TEMPLATES = [
                 "sites_faciles.content_manager.context_processors.skiplinks",
                 "sites_faciles.content_manager.context_processors.mega_menus",
             ],
-            "builtins": ["core.templatetags.iframe_tags"],
+            "builtins": [
+                "core.templatetags.iframe_tags",
+                "core.templatetags.querystring_tag",
+            ],
         },
     },
 ]
