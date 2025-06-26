@@ -116,4 +116,5 @@ class HomeView(AssistantBaseView, ListView):
 
 
 class SynonymeDetailView(AssistantBaseView, DetailView):
+    template_name = "pages/produit.html"
     model = Synonyme
