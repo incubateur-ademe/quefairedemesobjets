@@ -20,8 +20,15 @@ class ComponentsPreview(LookbookPreview):
 
 class ModalsPreview(LookbookPreview):
     def embed(self, **kwargs):
-        context = {"script": "<code>coucou</code>"}
-        return render_to_string("modals/embed.html", context)
+        """
+        # Modal de partage
+        La modal ci-dessous ne contient pas de code car celle-ci est
+        générée via le contexte et un template tag.
+
+        ## TODO
+        - [ ] Générer un contexte fake dans Django Lookbook
+        """
+        return render_to_string("modals/embed.html")
 
     def share(self, **kwargs):
         return render_to_string("modals/share.html")
