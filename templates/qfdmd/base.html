@@ -70,11 +70,10 @@
         Vous êtes bien authentifié, vos statistiques PostHog seront ignorées pour cette session | <a href="{% url 'admin:index' %}">accéder à l'administration</a>
         </div>
         {% endif %}
-        {% if not assistant.is_iframe %}
-            {% block header %}
-            {% include "components/header/header.html" %}
-            {% endblock header %}
-        {% endif %}
+
+        {% block header %}
+        {% include "components/header/header.html" %}
+        {% endblock header %}
 
         {% block pre_main %}
         {% endblock pre_main %}

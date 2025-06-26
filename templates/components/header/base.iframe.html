@@ -1,0 +1,15 @@
+{% if not assistant.is_home %}
+<header role="banner" class="qf-filter-none fr-header">
+  <div class="fr-header__body">
+    <div class="fr-container">
+      <div class="fr-header__body-row">
+{% block brand %}
+{% endblock brand %}
+
+{% block header_search %}
+{% endblock header_search %}
+</div>
+</div>
+</div>
+</header>
+{% endif %}
