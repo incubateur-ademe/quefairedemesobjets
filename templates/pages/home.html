@@ -1,16 +1,16 @@
 {% extends "qfdmd/base.html" %}
-{% load dsfr_tags suggestions_tags %}
+{% load dsfr_tags qfdmd_tags suggestions_tags %}
 
-{% block header %}
-{% include "components/header/header_home.html" %}
-{% endblock header %}
+{% block pre_main %}
+<div class="fr-container">
+{% patchwork %}
+</div>
+{% endblock pre_main %}
 
 {% block analytics_action %}homePageView{% endblock %}
 
-{% block body_attrs %}data-home{% endblock %}
-
 {% block main %}
-<div class="qf-flex qf-flex-col qf-gap-5w">
+<div data-home class="qf-group qf-flex qf-flex-col qf-gap-5w">
     {# search + patchwork #}
     <div class="qf-w-full qf-max-w-3xl qf-m-auto qf-relative qf-pb-6w">
         <div class="qf-absolute qf-left-0 qf-right-0 qf-top-0">

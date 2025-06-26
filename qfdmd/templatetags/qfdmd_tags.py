@@ -28,7 +28,7 @@ def patchwork() -> dict:
 def canonical_url(context: dict) -> dict:
     canonical_url = None
 
-    if "request" in context:
+    if request := context.get("request"):
         request = context["request"]
         path = request.build_absolute_uri(request.path)
         canonical_url = path.replace(request.get_host(), settings.CANONICAL_HOST)
