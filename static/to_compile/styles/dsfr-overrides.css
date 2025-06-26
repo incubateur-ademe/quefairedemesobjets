@@ -191,3 +191,7 @@ DSFR customization for tabs
 .fr-input[type="range"] {
   box-shadow: none;
 }
+
+.fr-header__service {
+  @apply qf-hidden;
+}

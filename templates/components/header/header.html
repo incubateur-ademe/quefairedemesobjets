@@ -5,15 +5,31 @@
     <div
         class="qf-w-[320px]
         qf-ml-auto
-        max-md:qf-hidden"
+        qf-relative
+        -qf-top-3w
+        max-lg:qf-hidden qf-text-left"
     >
+        <div class="qf-absolute qf-left-0 qf-right-0 my-auto">
         {% include "components/search/view.html" %}
+        </div>
     </div>
 {% endblock header_search %}
 
 {% block brand %}
+<a href="/" title="Accueil — {{ SITE_CONFIG.site_title }}">
 {% include "components/logo/animated.html" %}
+</a>
 {% endblock brand %}
+
+{% block operator_logo %}
+<a href="/" title="Accueil — {{ SITE_CONFIG.site_title }}">
+<img
+    src="{% static 'assistant/bloc-marque.svg' %}"
+    class="max-md:qf-max-w-[220px]"
+    alt="Bloc-marque Ademe & République française"
+>
+</a>
+{% endblock operator_logo %}
 
 {% block header_tools_links %}
 {% endblock header_tools_links %}
@@ -24,15 +40,6 @@
 {% block service_tagline %}
 {% endblock service_tagline %}
 
-{% block operator_logo %}
-<img
-    src="{% static 'assistant/bloc-marque.svg' %}"
-    class="max-md:qf-max-w-[220px]"
-    alt="Bloc-marque Ademe & République française"
->
-{% endblock operator_logo %}
-
 {% block main_menu %}
-
 {% flat_menu handle="header_assistant" template="components/header/header_menu.html" %}
 {% endblock main_menu %}
