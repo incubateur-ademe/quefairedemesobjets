@@ -45,17 +45,17 @@ def get_assistant_script(request):
     return static_file_content_from("embed/assistant.js")
 
 
-SEARCH_VIEW_TEMPLATE_NAME = "components/search/view.html"
-
-
 def search_view(request) -> HttpResponse:
     form = SearchForm(request.GET)
     context = {}
-    template_name = SEARCH_VIEW_TEMPLATE_NAME
+    template_name = "components/search/view.html"
+    logger.error(request.GET)
 
     if form.is_valid():
         form.search()
-        context.update(search_form=form)
+        context.update(
+            search_form=form,
+        )
 
     return render(request, template_name, context=context)
 
