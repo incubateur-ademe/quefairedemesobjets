@@ -1,4 +1,5 @@
-{% extends "dsfr/header.html" %}
+{% extends request.GET|iframe:"components/header/base.html" %}
+
 {% load menu_tags static %}
 
 {% block header_search %}
