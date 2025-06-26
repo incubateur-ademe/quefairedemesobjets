@@ -47,9 +47,8 @@ def get_assistant_script(request):
 
 def search_view(request) -> HttpResponse:
     form = SearchForm(request.GET)
-    context = {}
+    context = {"is_iframe": "iframe" in request.GET}
     template_name = "components/search/view.html"
-    logger.error(request.GET)
 
     if form.is_valid():
         form.search()
