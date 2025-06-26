@@ -957,7 +957,7 @@ class TestDisplayedActeurFormUrls:
         displayed_acteur.ville = "Paris"
 
         assert displayed_acteur.suggestion_form_url == (
-            "/proposer-une-modification/?Nom=Palais+de+l%27%C3%89lys%C3%A9e"
+            "/proposer-une-modification?Nom=Palais+de+l%27%C3%89lys%C3%A9e"
             "&Ville=Paris"
             "&Adresse=55+rue+du+Faubourg+Saint-Honor%C3%A9"
         )
