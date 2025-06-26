@@ -3,10 +3,11 @@ from django import template
 register = template.Library()
 
 
-@register.filter(is_safe=False)
-def iframe(querydict, templates_path):
-    if_iframe, if_standalone = templates_path.split(",")
+@register.filter
+def iframe(querydict, template_path):
+    alternative_path = template_path.replace("html", "iframe.html")
 
     if "iframe" in querydict:
-        return if_iframe
-    return if_standalone
+        return alternative_path
+
+    return template_path
