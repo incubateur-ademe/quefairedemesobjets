@@ -31,10 +31,15 @@ from unit_tests.qfdmo.action_factory import (
 from unit_tests.qfdmo.sscatobj_factory import SousCategorieObjetFactory
 
 
-@pytest.fixture()
+@pytest.fixture
 def acteur(db):
     ps = PropositionServiceFactory.create()
     yield ps.acteur
+
+
+@pytest.fixture
+def displayed_acteur(db):
+    return DisplayedActeurFactory()
 
 
 class TestPoint:
@@ -556,10 +561,6 @@ class TestRevisionActeurRemoveParentWithoutChildren:
 
 @pytest.mark.django_db
 class TestActeurService:
-    @pytest.fixture
-    def displayed_acteur(self):
-        return DisplayedActeurFactory()
-
     def test_acteur_services_basic(self, displayed_acteur):
         displayed_acteur.acteur_services.add(
             ActeurServiceFactory(libelle="Par un professionnel")
@@ -946,6 +947,19 @@ class TestDisplayedActeurJsonActeurForDisplay:
         assert acteur_for_display["icon"] == "icon-actionjai2", (
             "The pinpoint of action_principale is displayed if multiple"
             " actions match the map's sous categorie filter"
+        )
+
+
+class TestDisplayedActeurFormUrls:
+    def test_suggestion_form_url(self, displayed_acteur):
+        displayed_acteur.nom = "Palais de l'Élysée"
+        displayed_acteur.adresse = "55 rue du Faubourg Saint-Honoré"
+        displayed_acteur.ville = "Paris"
+
+        assert displayed_acteur.suggestion_form_url == (
+            "/proposer-une-modification/?Nom=Palais+de+l%27%C3%89lys%C3%A9e"
+            "&Ville=Paris"
+            "&Adresse=55+rue+du+Faubourg+Saint-Honor%C3%A9"
         )
 
 

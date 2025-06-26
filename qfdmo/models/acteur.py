@@ -6,6 +6,7 @@ import string
 import uuid
 from copy import deepcopy
 from typing import Any, List, cast
+from urllib.parse import urlencode
 
 import opening_hours
 import orjson
@@ -1065,6 +1066,16 @@ class DisplayedActeur(BaseActeur):
         return reverse(
             "admin:qfdmo_displayedacteur_change", args=[quote(self.identifiant_unique)]
         )
+
+    @cached_property
+    def suggestion_form_url(self):
+        query_params = {
+            "Nom": self.nom,
+            "Ville": self.ville,
+            "Adresse": self.adresse,
+        }
+        querystring = urlencode(query_params)
+        return f"{reverse('qfdmo:update-suggestion-form')}?{querystring}"
 
     # La propriété au sein du Displayed se base sur Revision
     # car c'est la seule façon de récupérer les enfants (n'existe pas
