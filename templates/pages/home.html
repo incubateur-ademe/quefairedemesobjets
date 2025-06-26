@@ -1,8 +1,10 @@
 {% extends "qfdmd/base.html" %}
-{% load dsfr_tags suggestions_tags %}
+{% load dsfr_tags qfdmd_tags suggestions_tags %}
 
 {% block pre_main %}
-{% include "components/header/header_home.html" %}
+<div class="fr-container">
+{% patchwork %}
+</div>
 {% endblock pre_main %}
 
 {% block analytics_action %}homePageView{% endblock %}
