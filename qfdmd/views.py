@@ -110,7 +110,7 @@ class AssistantBaseView:
 @method_decorator(cache_control(max_age=60 * 15), name="dispatch")
 @method_decorator(vary_on_headers("logged-in", "iframe"), name="dispatch")
 class HomeView(AssistantBaseView, ListView):
-    template_name = "qfdmd/home.html"
+    template_name = "pages/home.html"
     model = Suggestion
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
@@ -133,4 +133,5 @@ class HomeView(AssistantBaseView, ListView):
 
 
 class SynonymeDetailView(AssistantBaseView, DetailView):
+    template_name = "pages/produit.html"
     model = Synonyme
