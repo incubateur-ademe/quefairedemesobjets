@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # Récupérer l'ID de l'instance
-INSTANCE_ID=$(scw rdb instance list | grep "lvao-preprod-db" | awk '{print $1}')
+INSTANCE_ID=$(scw rdb instance list | grep "lvao-prod-db" | awk '{print $1}')
 TODAY=$(date +%Y%m%d)
 EXISTING_BACKUPS=$(scw rdb backup list instance-id=$INSTANCE_ID | grep "$TODAY")
 
 if [ -z "$INSTANCE_ID" ]; then
-    echo "Instance lvao-preprod-db non trouvée"
+    echo "Instance lvao-prod-db non trouvée"
     exit 1
 fi
 
