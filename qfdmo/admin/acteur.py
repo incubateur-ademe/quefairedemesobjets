@@ -10,7 +10,7 @@ from django.contrib.gis.geos import Point
 from django.contrib.postgres.lookups import Unaccent
 from django.db.models import Subquery
 from django.db.models.functions import Lower
-from django.forms import CharField
+from django.forms import CharField, ValidationError
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.utils.html import format_html
@@ -368,8 +368,27 @@ class RevisionActeurParentAdmin(admin.ModelAdmin):
         )
 
 
+class CustomRevisionActeurForm(forms.ModelForm):
+    """
+    ActeurRevision ModelForm is override to add a custom validation on the field 'nom'
+    on creation only because 'nom' is used to initiate Acteur object.
+    On update, the field can be empty to use the Acteur 'nom' field
+    """
+
+    class Meta:
+        model = RevisionActeur
+        fields = "__all__"
+
+    def clean_nom(self):
+        nom = self.cleaned_data.get("nom")
+        if self.instance.pk is None and nom:
+            raise ValidationError("Le nom est obligatoire")
+        return nom
+
+
 class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin):
     change_form_template = "admin/revision_acteur/change_form.html"
+    form = CustomRevisionActeurForm
     gis_widget = CustomOSMWidget
     inlines = []
     save_as = False
