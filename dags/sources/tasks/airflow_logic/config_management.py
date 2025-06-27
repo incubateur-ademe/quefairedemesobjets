@@ -68,6 +68,7 @@ class DAGConfig(BaseModel):
     source_code: Optional[str] = None
     validate_address_with_ban: bool = False
     oca: OCAConfig | None = None
+    returnable_objects: bool = False
 
     @field_validator("endpoint")
     def validate_endpoint(cls, endpoint):

@@ -1,4 +1,5 @@
 from airflow import DAG
+from airflow.models.param import Param
 from shared.config.tags import TAGS
 from sources.config import shared_constants as constants
 from sources.config.airflow_params import get_mapping_config
@@ -144,6 +145,21 @@ with DAG(
         ),
         "validate_address_with_ban": False,
         "product_mapping": get_mapping_config(),
+        "returnable_objects": Param(
+            True,
+            type="boolean",
+            description_md=r"""
+            Si la source de données gère des points d'apport de contenants consignés,
+            alors ce paramètre doit être activé
+            Les points d'apport pour ré-emploi sont alors considérés comme des points
+            d'apport de contenant retournable.
+            On y associera alors le geste `rapporter`.
+
+            Si ce paramètre est inactif, alors les points d'apport pour ré-emploi sont
+            considérés comme des lieux pour donner (ex : des Bennes à vêtements).
+            On y associera alors le geste `donner`.
+            """,
+        ),
     },
 ) as dag:
     eo_task_chain(dag)
