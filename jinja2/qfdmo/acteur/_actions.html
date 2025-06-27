@@ -21,5 +21,7 @@
     {% endif %}
 
     {% include "qfdmo/acteur/_action_share.html" %}
-
+    {% with text="Modifier",icon="fr-icon-ball-pen-fill",url=object.suggestion_form_url,extra_classes="fr-btn--secondary-light" %}
+        {% include "qfdmo/acteur/_action.html" %}
+    {% endwith %}
 </div>

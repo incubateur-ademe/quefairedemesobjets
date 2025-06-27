@@ -79,7 +79,7 @@ class DisplayedActeurFactory(Factory):
         model = DisplayedActeur
 
     identifiant_unique = factory.fuzzy.FuzzyText(length=10)
-    nom = Faker("word")
+    nom = Faker("company")
     location = Point(3, 3)
     acteur_type = SubFactory(ActeurTypeFactory)
     source = SubFactory(SourceFactory)
