@@ -2,6 +2,7 @@ import pandas as pd
 import pytest
 from sources.tasks.transform.transform_df import (
     _parse_float,
+    clean_acteur_service_codes,
     clean_action_codes,
     clean_adresse,
     clean_identifiant_externe,
@@ -695,20 +696,26 @@ class TestCleanActeurserviceCodes:
             ),
         ],
     )
-    def clean_acteur_service_codes(self, row_columns, expected_action_codes):
-        result = clean_action_codes(pd.Series(row_columns), None)
-        assert result["action_codes"] == expected_action_codes
+    def test_clean_acteur_service_codes(
+        self, row_columns, expected_acteur_service_codes
+    ):
+        result = clean_acteur_service_codes(pd.Series(row_columns), None)
+        assert result["acteur_service_codes"] == expected_acteur_service_codes
 
 
 class TestCleanActionCodes:
     @pytest.mark.parametrize(
-        "row_columns, expected_action_codes",
+        "row_columns, expected_action_codes, expected_action_codes_returnable_objects",
         [
-            ({}, []),
-            ({"point_dapport_de_service_reparation": True}, ["reparer"]),
-            ({"point_de_reparation": True}, ["reparer"]),
-            ({"point_dapport_pour_reemploi": True}, ["donner"]),
-            ({"point_de_collecte_ou_de_reprise_des_dechets": True}, ["trier"]),
+            ({}, [], []),
+            ({"point_dapport_de_service_reparation": True}, ["reparer"], ["reparer"]),
+            ({"point_de_reparation": True}, ["reparer"], ["reparer"]),
+            ({"point_dapport_pour_reemploi": True}, ["donner"], ["rapporter"]),
+            (
+                {"point_de_collecte_ou_de_reprise_des_dechets": True},
+                ["trier"],
+                ["trier"],
+            ),
             (
                 {
                     "point_dapport_de_service_reparation": True,
@@ -717,12 +724,23 @@ class TestCleanActionCodes:
                     "point_de_collecte_ou_de_reprise_des_dechets": True,
                 },
                 ["reparer", "donner", "trier"],
+                ["reparer", "rapporter", "trier"],
             ),
         ],
     )
-    def test_clean_action_codes(self, row_columns, expected_action_codes):
-        result = clean_action_codes(pd.Series(row_columns), None)
+    def test_clean_action_codes(
+        self,
+        row_columns,
+        expected_action_codes,
+        expected_action_codes_returnable_objects,
+        dag_config,
+    ):
+        dag_config.returnable_objects = False
+        result = clean_action_codes(pd.Series(row_columns), dag_config)
         assert result["action_codes"] == expected_action_codes
+        dag_config.returnable_objects = True
+        result = clean_action_codes(pd.Series(row_columns), dag_config)
+        assert result["action_codes"] == expected_action_codes_returnable_objects
 
 
 class TestCleanLabelCodes:
