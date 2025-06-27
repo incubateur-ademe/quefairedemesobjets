@@ -143,9 +143,9 @@ export default class extends Controller<HTMLElement> {
     this.personProperties.iframe = weAreInAnIframe
     this.personProperties.iframeReferrer = referrer
     const url = new URL(window.location.href)
-    if (url.searchParams.has(URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE)) {
-      this.personProperties.iframeFromScript = true
-    }
+    this.personProperties.iframeFromScript = url.searchParams.has(
+      URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE,
+    )
   }
 
   #computeConversionScoreFromSessionStorage() {
