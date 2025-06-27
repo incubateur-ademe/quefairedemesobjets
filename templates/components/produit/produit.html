@@ -1,74 +1,59 @@
 {% load dsfr_tags wagtailcore_tags %}
 
-<header class="qf-mt-3w md:qf-mt-5w qf-flex qf-flex-col  qf-gap-3w">
-    <a
-        href="{% url 'qfdmd:home' %}"
-        class="qf-flex qf-gap-1v qf-justify-center qf-items-center
-        qf-text-green-menthe-sun-373-moon-652 qf-bg-none
-        md:qf-hidden qf-mr-auto"
-    >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12.6668 6.66589L12.6669 12.6658H11.3336L11.3335 7.99922L4.5523 7.99916L7.18548 10.6323L6.24264 11.5752L2 7.33249L6.24264 3.08984L7.18548 4.03266L4.55227 6.66582L12.6668 6.66589Z" fill="#37635F"/>
-        </svg>
-        <span>{{ ASSISTANT.nouvelle_recherche }}</span>
-    </a>
-    <h1 class="qf-m-0">
-        {{ object.nom|capfirst }}
-    </h1>
-    {% include "components/produit/_infotri.html" with infotri=produit.infotri %}
-</header>
-
-{% if bon_etat and mauvais_etat %}
-    <div class="fr-tabs fr-tabs--noborder-mobile">
-        <ul class="fr-tabs__list" role="tablist" aria-label="État du produit {{ produit }}">
-            <li role="presentation">
-                <button
-                    id="mauvais-etat-tab"
-                    class="fr-tabs__tab fr-icon-thumb-down-line fr-tabs__tab--icon-left"
-                    tabindex="0"
-                    role="tab"
-                    aria-selected="true"
-                    aria-controls="mauvais-etat-panel"
-                >
-                    Mauvais état
-                </button>
-            </li>
-            <li role="presentation">
-                <button
-                    id="bon-etat-tab"
-                    class="fr-tabs__tab fr-icon-thumb-up-line fr-tabs__tab--icon-left"
-                    tabindex="-1"
-                    role="tab"
-                    aria-selected="false"
-                    aria-controls="bon-etat-panel"
-                >
-                    Bon état
-                </button>
-            </li>
-        </ul>
-        <div id="mauvais-etat-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="mauvais-etat-tab" tabindex="0">
-            {% include "./_detail.html" with content=mauvais_etat url_carte=object.url_carte_mauvais_etat id="mauvais_etat" %}
+{# TODO: check spacing #}
+<div class="qf-flex qf-flex-col qf-gap-2 {{ extra_classes }}">
+    {% if bon_etat and mauvais_etat %}
+        <div class="fr-tabs fr-tabs--noborder-mobile">
+            <ul class="fr-tabs__list" role="tablist" aria-label="État du produit {{ produit }}">
+                <li role="presentation">
+                    <button
+                        id="mauvais-etat-tab"
+                        class="fr-tabs__tab fr-icon-thumb-down-line fr-tabs__tab--icon-left"
+                        tabindex="0"
+                        role="tab"
+                        aria-selected="true"
+                        aria-controls="mauvais-etat-panel"
+                    >
+                        Mauvais état
+                    </button>
+                </li>
+                <li role="presentation">
+                    <button
+                        id="bon-etat-tab"
+                        class="fr-tabs__tab fr-icon-thumb-up-line fr-tabs__tab--icon-left"
+                        tabindex="-1"
+                        role="tab"
+                        aria-selected="false"
+                        aria-controls="bon-etat-panel"
+                    >
+                        Bon état
+                    </button>
+                </li>
+            </ul>
+            <div id="mauvais-etat-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="mauvais-etat-tab" tabindex="0">
+                {% include "./_detail.html" with content=mauvais_etat url_carte=object.url_carte_mauvais_etat id="mauvais_etat" %}
+            </div>
+            <div id="bon-etat-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="bon-etat-tab" tabindex="0">
+                {% include "./_detail.html" with content=bon_etat url_carte=object.url_carte_bon_etat id="bon_etat" %}
+            </div>
         </div>
-        <div id="bon-etat-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="bon-etat-tab" tabindex="0">
-            {% include "./_detail.html" with content=bon_etat url_carte=object.url_carte_bon_etat id="bon_etat" %}
+    {% else %}
+        <div>
+            {% include "./_detail.html" with id="carte" %}
+        </div>
+    {% endif %}
+
+    <div class="qf-flex qf-flex-col qf-gap-4w qf-mt-2w">
+    {% for section in produit.content_display %}
+    <div id="{{ section.id }}">
+        <h2>
+        {{ section.title }}
+        </h2>
+
+        <div>
+        {{ section.content|richtext }}
         </div>
     </div>
-{% else %}
-    <div>
-        {% include "./_detail.html" with id="carte" %}
+    {% endfor %}
     </div>
-{% endif %}
-
-<div class="qf-flex qf-flex-col qf-gap-4w qf-mt-2w">
-{% for section in produit.content_display %}
-<div id="{{ section.id }}">
-    <h2>
-    {{ section.title }}
-    </h2>
-
-    <div>
-    {{ section.content|richtext }}
-    </div>
-</div>
-{% endfor %}
 </div>
