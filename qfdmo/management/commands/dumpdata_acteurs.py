@@ -24,6 +24,7 @@ class Command(BaseCommand):
         call_command(
             "dumpdata",
             "qfdmo.displayedacteur",
+            indent=2,
             pks=pks,
             output="qfdmo/fixtures/acteurs.json",
         )
@@ -33,6 +34,7 @@ class Command(BaseCommand):
         call_command(
             "dumpdata",
             "qfdmo.displayedpropositionservice",
+            indent=2,
             pks=ps_pks,
             output="qfdmo/fixtures/propositions_services.json",
         )
