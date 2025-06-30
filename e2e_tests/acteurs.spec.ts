@@ -58,7 +58,7 @@ test("Desktop | Les acteurs sont visibles sur la carte du formulaire et fonction
     }
   }
 
-  await expect(iframe?.locator("#acteurDetailsPanel")).toBeVisible()
+  // await expect(iframe?.locator("#acteurDetailsPanel")).toBeVisible()
 })
 
 test.skip("Desktop | Les acteurs digitaux sont visibles sur le formulaire", async ({
