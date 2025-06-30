@@ -5,6 +5,14 @@ from qfdmo.models.acteur import DisplayedPropositionService
 
 
 class Command(BaseCommand):
+    """
+    Dumps selected DisplayedActeur and related DisplayedPropositionService
+    objects to JSON fixtures.
+
+    Usage:
+        python manage.py dumpdata_acteurs
+    """
+
     def handle(self, *args, **options):
         pks = [
             "alrebobinage__altech_distribution_sce_154142_reparation_0626645539",
