@@ -6,7 +6,16 @@ from qfdmo.models.acteur import DisplayedPropositionService
 
 
 class Command(LoadDataCommand):
-    # TODO: document this command
+    """
+    Custom implementation of the `loaddata` management command.
+
+    This subclass extends Django's built-in `loaddata` command to provide
+    additional processing for specific model instances during deserialization.
+
+    It ensures that unique identifiers or source fields are generated for
+    certain objects if they are missing when the fixture is loaded.
+    """
+
     def save_obj(self, obj: DeserializedObject) -> bool:
         if isinstance(obj.object, DisplayedActeur):
             obj.object.generate_source_if_missing()
