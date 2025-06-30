@@ -7,6 +7,7 @@ import requests
 from fuzzywuzzy import fuzz
 from shapely import wkb
 from shapely.geometry import Point
+from sources.tasks.airflow_logic.config_management import DAGConfig
 from sources.tasks.transform.transform_column import (
     clean_code_postal,
     clean_number,
@@ -213,12 +214,15 @@ def clean_acteur_service_codes(row, _):
     return row[["acteur_service_codes"]]
 
 
-def clean_action_codes(row, _):
+def clean_action_codes(row, dag_config: DAGConfig):
     action_codes = []
     if row.get("point_dapport_de_service_reparation") or row.get("point_de_reparation"):
         action_codes.append("reparer")
     if row.get("point_dapport_pour_reemploi"):
-        action_codes.append("donner")
+        if dag_config.returnable_objects:
+            action_codes.append("rapporter")
+        else:
+            action_codes.append("donner")
     if row.get("point_de_collecte_ou_de_reprise_des_dechets"):
         action_codes.append("trier")
     row["action_codes"] = action_codes
