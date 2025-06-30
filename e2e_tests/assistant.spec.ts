@@ -82,7 +82,7 @@ test("Desktop | Le tracking PostHog fonctionne comme prévu", async ({ page }) =
 
   // Click on share button in solution details
   await page
-    .locator("#mauvais_etat [aria-describedby=mauvais_etat:shareTooltip]")
+    .locator("#mauvais_etat [aria-describedby='mauvais_etat:shareTooltip']")
     .click()
   sessionStorage = await page.evaluate(() => window.sessionStorage)
   expect(sessionStorage.userInteractionWithSolutionDetails).toBe("1")
