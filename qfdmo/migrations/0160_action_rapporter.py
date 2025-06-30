@@ -7,39 +7,43 @@ def create_action_rapporter(apps, schema_editor):
     Action = apps.get_model("qfdmo", "Action")
     GroupeAction = apps.get_model("qfdmo", "GroupeAction")
     ActionDirection = apps.get_model("qfdmo", "ActionDirection")
-    groupe_action_donner_echanger = GroupeAction.objects.get(code="donner_echanger")
-    groupe_action_donner_echanger.code = "donner_echanger_rapporter"
-    groupe_action_donner_echanger.save()
-    action = Action.objects.create(
-        code="rapporter",
-        libelle="rapporter",
-        libelle_groupe="Je rapporte",
-        order=10,
-        description="Rapporter ses contenants réutilisables",
-        afficher=False,
-        couleur="#cab300",
-        icon="fr-icon-arrow-up-down-line",
-        groupe_action=groupe_action_donner_echanger,
-    )
-    action_direction_jai = ActionDirection.objects.get(code="jai")
-    action.directions.add(action_direction_jai)
-    action_trier = Action.objects.get(code="trier")
-    action_trier.order = 11
-    action_trier.save()
+    groupe_action_donner_echanger = GroupeAction.objects.filter(
+        code="donner_echanger"
+    ).first()
+    if groupe_action_donner_echanger:
+        groupe_action_donner_echanger.code = "donner_echanger_rapporter"
+        groupe_action_donner_echanger.save()
+        action = Action.objects.create(
+            code="rapporter",
+            libelle="rapporter",
+            libelle_groupe="Je rapporte",
+            order=10,
+            description="Rapporter ses contenants réutilisables",
+            afficher=False,
+            couleur="#cab300",
+            icon="fr-icon-arrow-up-down-line",
+            groupe_action=groupe_action_donner_echanger,
+        )
+        action_direction_jai = ActionDirection.objects.get(code="jai")
+        action.directions.add(action_direction_jai)
+        action_trier = Action.objects.get(code="trier")
+        action_trier.order = 11
+        action_trier.save()
 
 
 def remove_action_rapporter(apps, schema_editor):
     Action = apps.get_model("qfdmo", "Action")
     Action.objects.filter(code="rapporter").delete()
     GroupeAction = apps.get_model("qfdmo", "GroupeAction")
-    groupe_action_donner_echanger = GroupeAction.objects.get(
+    groupe_action_donner_echanger = GroupeAction.objects.filter(
         code="donner_echanger_rapporter"
-    )
-    groupe_action_donner_echanger.code = "donner_echanger"
-    groupe_action_donner_echanger.save()
-    action_trier = Action.objects.get(code="trier")
-    action_trier.order = 10
-    action_trier.save()
+    ).first()
+    if groupe_action_donner_echanger:
+        groupe_action_donner_echanger.code = "donner_echanger"
+        groupe_action_donner_echanger.save()
+        action_trier = Action.objects.get(code="trier")
+        action_trier.order = 10
+        action_trier.save()
 
 
 class Migration(migrations.Migration):
