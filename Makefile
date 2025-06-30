@@ -102,7 +102,7 @@ createsuperuser:
 .PHONY: seed-database
 seed-database:
 	$(DJANGO_ADMIN) loaddata categories labels sources actions produits acteur_services acteur_types objets synonymes suggestions
-	$(DJANGO_ADMIN) loadacteurs acteurs proposition_services
+	$(DJANGO_ADMIN) loaddata_with_computed_fields acteurs proposition_services
 
 FIXTURES_ACTEURS_PKS = "communautelvao_LWTYYUPBDMWM","6554f1bb-82d2-567f-8453-eec5405e5b5d","65791ef2-bb37-4569-b011-8cece03dcdcf","antiquites_du_poulbenn_152575_reparation","refashion_TLC-REFASHION-PAV-3445001","communautelvao_VBOFDJDBOCTW","refashion_TLC-REFASHION-REP-603665791852778329","ocad3e_SGS-02069" # pragma: allowlist secret
 .PHONY: generate-fixtures-acteurs
