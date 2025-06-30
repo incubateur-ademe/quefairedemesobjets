@@ -144,8 +144,8 @@ integration-test:
 	$(PYTEST) ./integration_tests
 
 
-.PHONY: test-dags
-test-dags:
+.PHONY: dags-test
+dags-test:
 	$(PYTEST) ./dags/tests
 
 .PHONY: e2e-test
@@ -169,7 +169,7 @@ test:
 	@make unit-test
 	@make e2e-test
 	@make integration-test
-	@make test-dags
+	@make dags-test
 
 # DSFR
 .PHONY: extract-dsfr

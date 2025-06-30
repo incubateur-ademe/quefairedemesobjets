@@ -65,22 +65,22 @@ class TestInitialValue:
             "direction": None,
             "action_displayed": (
                 "preter|emprunter|louer|mettreenlocation|reparer|donner|echanger"
-                "|acheter|revendre|trier"
+                "|acheter|revendre|rapporter|trier"
             ),
             "action_list": (
-                "reparer|donner|echanger|preter|emprunter|louer|mettreenlocation|"
+                "reparer|donner|echanger|rapporter|preter|emprunter|louer|mettreenlocation|"
                 "acheter|revendre|trier"
             ),
             "grouped_action": [
                 "reparer",
-                "donner|echanger",
+                "donner|echanger|rapporter",
                 "preter|emprunter|louer|mettreenlocation",
                 "acheter|revendre",
                 "trier",
             ],
             "legend_grouped_action": [
                 "reparer",
-                "donner|echanger",
+                "donner|echanger|rapporter",
                 "preter|emprunter|louer|mettreenlocation",
                 "acheter|revendre",
                 "trier",
