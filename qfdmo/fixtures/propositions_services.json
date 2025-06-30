@@ -1,529 +1,492 @@
 [
-{
+  {
     "model": "qfdmo.displayedpropositionservice",
     "fields": {
-        "action": [
-            "reparer"
+      "action": [
+        "trier"
+      ],
+      "acteur": [
+        "aDcrby2bqxAZFM3yYCRTue"
+      ],
+      "sous_categories": [
+        [
+          "autre equipement electronique"
         ],
-        "acteur": [
-            "GWgsph7L9nmK2cTZXZzVGQ"
+        [
+          "chaussures"
         ],
-        "sous_categories": [
-            [
-                "autre equipement electronique"
-            ],
-            [
-                "gros electromenager (hors refrigerant)"
-            ],
-            [
-                "gros electromenager (refrigerant)"
-            ],
-            [
-                "luminaire"
-            ],
-            [
-                "materiel hifi et video"
-            ],
-            [
-                "materiel informatique"
-            ],
-            [
-                "petit electromenager"
-            ],
-            [
-                "smartphone, tablette et console"
-            ]
+        [
+          "gros electromenager (hors refrigerant)"
+        ],
+        [
+          "gros electromenager (refrigerant)"
+        ],
+        [
+          "JELS_Mobilite_electrique"
+        ],
+        [
+          "linge de maison"
+        ],
+        [
+          "luminaire"
+        ],
+        [
+          "materiel de sport (hors velo)"
+        ],
+        [
+          "materiel hifi et video"
+        ],
+        [
+          "materiel informatique"
+        ],
+        [
+          "ABJ_electrique"
+        ],
+        [
+          "petit electromenager"
+        ],
+        [
+          "velo"
+        ],
+        [
+          "vetement"
+        ],
+        [
+          "materiel photo et cinema"
+        ],
+        [
+          "ecran"
         ]
+      ]
     }
-},
-{
+  },
+  {
     "model": "qfdmo.displayedpropositionservice",
     "fields": {
-        "action": [
-            "trier"
+      "action": [
+        "acheter"
+      ],
+      "acteur": [
+        "aDcrby2bqxAZFM3yYCRTue"
+      ],
+      "sous_categories": [
+        [
+          "accessoire et meuble de jardin"
         ],
-        "acteur": [
-            "aDcrby2bqxAZFM3yYCRTue"
+        [
+          "autre equipement electronique"
         ],
-        "sous_categories": [
-            [
-                "autre equipement electronique"
-            ],
-            [
-                "chaussures"
-            ],
-            [
-                "gros electromenager (hors refrigerant)"
-            ],
-            [
-                "gros electromenager (refrigerant)"
-            ],
-            [
-                "JELS_Mobilite_electrique"
-            ],
-            [
-                "linge de maison"
-            ],
-            [
-                "luminaire"
-            ],
-            [
-                "materiel de sport (hors velo)"
-            ],
-            [
-                "materiel hifi et video"
-            ],
-            [
-                "materiel informatique"
-            ],
-            [
-                "ABJ_electrique"
-            ],
-            [
-                "petit electromenager"
-            ],
-            [
-                "velo"
-            ],
-            [
-                "vetement"
-            ],
-            [
-                "materiel photo et cinema"
-            ],
-            [
-                "ecran"
-            ]
+        [
+          "CD, DVD et jeu video"
+        ],
+        [
+          "chaussures"
+        ],
+        [
+          "decoration"
+        ],
+        [
+          "Décoration textile - Éléments d'ameublement"
+        ],
+        [
+          "gros electromenager (hors refrigerant)"
+        ],
+        [
+          "gros electromenager (refrigerant)"
+        ],
+        [
+          "jouet"
+        ],
+        [
+          "linge de maison"
+        ],
+        [
+          "Literie - Éléments d'ameublement"
+        ],
+        [
+          "livre"
+        ],
+        [
+          "luminaire"
+        ],
+        [
+          "maroquinerie"
+        ],
+        [
+          "materiel hifi et video"
+        ],
+        [
+          "materiel informatique"
+        ],
+        [
+          "meuble"
+        ],
+        [
+          "outil de bricolage et jardinage"
+        ],
+        [
+          "ABJ_electrique"
+        ],
+        [
+          "petit electromenager"
+        ],
+        [
+          "puericulture"
+        ],
+        [
+          "Sièges - Éléments d'ameublement"
+        ],
+        [
+          "smartphone, tablette et console"
+        ],
+        [
+          "vaisselle"
+        ],
+        [
+          "velo"
+        ],
+        [
+          "vetement"
+        ],
+        [
+          "materiel photo et cinema"
+        ],
+        [
+          "ecran"
         ]
+      ]
     }
-},
-{
+  },
+  {
     "model": "qfdmo.displayedpropositionservice",
     "fields": {
-        "action": [
-            "acheter"
+      "action": [
+        "donner"
+      ],
+      "acteur": [
+        "aDcrby2bqxAZFM3yYCRTue"
+      ],
+      "sous_categories": [
+        [
+          "accessoire et meuble de jardin"
         ],
-        "acteur": [
-            "aDcrby2bqxAZFM3yYCRTue"
+        [
+          "autre equipement electronique"
         ],
-        "sous_categories": [
-            [
-                "accessoire et meuble de jardin"
-            ],
-            [
-                "autre equipement electronique"
-            ],
-            [
-                "CD, DVD et jeu video"
-            ],
-            [
-                "chaussures"
-            ],
-            [
-                "decoration"
-            ],
-            [
-                "Décoration textile - Éléments d'ameublement"
-            ],
-            [
-                "gros electromenager (hors refrigerant)"
-            ],
-            [
-                "gros electromenager (refrigerant)"
-            ],
-            [
-                "jouet"
-            ],
-            [
-                "linge de maison"
-            ],
-            [
-                "Literie - Éléments d'ameublement"
-            ],
-            [
-                "livre"
-            ],
-            [
-                "luminaire"
-            ],
-            [
-                "maroquinerie"
-            ],
-            [
-                "materiel hifi et video"
-            ],
-            [
-                "materiel informatique"
-            ],
-            [
-                "meuble"
-            ],
-            [
-                "outil de bricolage et jardinage"
-            ],
-            [
-                "ABJ_electrique"
-            ],
-            [
-                "petit electromenager"
-            ],
-            [
-                "puericulture"
-            ],
-            [
-                "Sièges - Éléments d'ameublement"
-            ],
-            [
-                "smartphone, tablette et console"
-            ],
-            [
-                "vaisselle"
-            ],
-            [
-                "velo"
-            ],
-            [
-                "vetement"
-            ],
-            [
-                "materiel photo et cinema"
-            ],
-            [
-                "ecran"
-            ]
+        [
+          "bijou et montre"
+        ],
+        [
+          "CD, DVD et jeu video"
+        ],
+        [
+          "chaussures"
+        ],
+        [
+          "decoration"
+        ],
+        [
+          "Décoration textile - Éléments d'ameublement"
+        ],
+        [
+          "gros electromenager (hors refrigerant)"
+        ],
+        [
+          "gros electromenager (refrigerant)"
+        ],
+        [
+          "JELS_Mobilite_electrique"
+        ],
+        [
+          "jouet"
+        ],
+        [
+          "linge de maison"
+        ],
+        [
+          "Literie - Éléments d'ameublement"
+        ],
+        [
+          "livre"
+        ],
+        [
+          "luminaire"
+        ],
+        [
+          "Machines et appareils motorises thermiques"
+        ],
+        [
+          "maroquinerie"
+        ],
+        [
+          "materiel de sport (hors velo)"
+        ],
+        [
+          "materiel hifi et video"
+        ],
+        [
+          "materiel informatique"
+        ],
+        [
+          "meuble"
+        ],
+        [
+          "outil de bricolage et jardinage"
+        ],
+        [
+          "ABJ_electrique"
+        ],
+        [
+          "Panneaux photovoltaïques"
+        ],
+        [
+          "petit electromenager"
+        ],
+        [
+          "puericulture"
+        ],
+        [
+          "Rembourrés d'assise ou de couchage - Éléments d'ameublement"
+        ],
+        [
+          "Sièges - Éléments d'ameublement"
+        ],
+        [
+          "smartphone, tablette et console"
+        ],
+        [
+          "vaisselle"
+        ],
+        [
+          "velo"
+        ],
+        [
+          "vetement"
+        ],
+        [
+          "materiel photo et cinema"
+        ],
+        [
+          "ecran"
         ]
+      ]
     }
-},
-{
+  },
+  {
     "model": "qfdmo.displayedpropositionservice",
     "fields": {
-        "action": [
-            "donner"
+      "action": [
+        "reparer"
+      ],
+      "acteur": [
+        "eYKxBYDMDoMXTr8iiw69Ek"
+      ],
+      "sous_categories": [
+        [
+          "materiel informatique"
         ],
-        "acteur": [
-            "aDcrby2bqxAZFM3yYCRTue"
-        ],
-        "sous_categories": [
-            [
-                "accessoire et meuble de jardin"
-            ],
-            [
-                "autre equipement electronique"
-            ],
-            [
-                "bijou et montre"
-            ],
-            [
-                "CD, DVD et jeu video"
-            ],
-            [
-                "chaussures"
-            ],
-            [
-                "decoration"
-            ],
-            [
-                "Décoration textile - Éléments d'ameublement"
-            ],
-            [
-                "gros electromenager (hors refrigerant)"
-            ],
-            [
-                "gros electromenager (refrigerant)"
-            ],
-            [
-                "JELS_Mobilite_electrique"
-            ],
-            [
-                "jouet"
-            ],
-            [
-                "linge de maison"
-            ],
-            [
-                "Literie - Éléments d'ameublement"
-            ],
-            [
-                "livre"
-            ],
-            [
-                "luminaire"
-            ],
-            [
-                "Machines et appareils motorises thermiques"
-            ],
-            [
-                "maroquinerie"
-            ],
-            [
-                "materiel de sport (hors velo)"
-            ],
-            [
-                "materiel hifi et video"
-            ],
-            [
-                "materiel informatique"
-            ],
-            [
-                "meuble"
-            ],
-            [
-                "outil de bricolage et jardinage"
-            ],
-            [
-                "ABJ_electrique"
-            ],
-            [
-                "Panneaux photovoltaïques"
-            ],
-            [
-                "petit electromenager"
-            ],
-            [
-                "puericulture"
-            ],
-            [
-                "Rembourrés d'assise ou de couchage - Éléments d'ameublement"
-            ],
-            [
-                "Sièges - Éléments d'ameublement"
-            ],
-            [
-                "smartphone, tablette et console"
-            ],
-            [
-                "vaisselle"
-            ],
-            [
-                "velo"
-            ],
-            [
-                "vetement"
-            ],
-            [
-                "materiel photo et cinema"
-            ],
-            [
-                "ecran"
-            ]
+        [
+          "smartphone, tablette et console"
         ]
+      ]
     }
-},
-{
+  },
+  {
     "model": "qfdmo.displayedpropositionservice",
     "fields": {
-        "action": [
-            "reparer"
-        ],
-        "acteur": [
-            "eYKxBYDMDoMXTr8iiw69Ek"
-        ],
-        "sous_categories": [
-            [
-                "materiel informatique"
-            ],
-            [
-                "smartphone, tablette et console"
-            ]
+      "action": [
+        "reparer"
+      ],
+      "acteur": [
+        "XSyppoQHLT37uafQ6kj5M7"
+      ],
+      "sous_categories": [
+        [
+          "vetement"
         ]
+      ]
     }
-},
-{
+  },
+  {
     "model": "qfdmo.displayedpropositionservice",
     "fields": {
-        "action": [
-            "reparer"
+      "action": [
+        "donner"
+      ],
+      "acteur": [
+        "cyRZyTLfJ3goDJop2foYWb"
+      ],
+      "sous_categories": [
+        [
+          "chaussures"
         ],
-        "acteur": [
-            "XSyppoQHLT37uafQ6kj5M7"
+        [
+          "linge de maison"
         ],
-        "sous_categories": [
-            [
-                "vetement"
-            ]
+        [
+          "vetement"
         ]
+      ]
     }
-},
-{
+  },
+  {
     "model": "qfdmo.displayedpropositionservice",
     "fields": {
-        "action": [
-            "donner"
+      "action": [
+        "trier"
+      ],
+      "acteur": [
+        "cyRZyTLfJ3goDJop2foYWb"
+      ],
+      "sous_categories": [
+        [
+          "chaussures"
         ],
-        "acteur": [
-            "cyRZyTLfJ3goDJop2foYWb"
+        [
+          "linge de maison"
         ],
-        "sous_categories": [
-            [
-                "chaussures"
-            ],
-            [
-                "linge de maison"
-            ],
-            [
-                "vetement"
-            ]
+        [
+          "vetement"
         ]
+      ]
     }
-},
-{
+  },
+  {
     "model": "qfdmo.displayedpropositionservice",
     "fields": {
-        "action": [
-            "trier"
+      "action": [
+        "louer"
+      ],
+      "acteur": [
+        "NVhnuuKmw7gTKEoDBjd7bT"
+      ],
+      "sous_categories": [
+        [
+          "outil de bricolage et jardinage"
         ],
-        "acteur": [
-            "cyRZyTLfJ3goDJop2foYWb"
-        ],
-        "sous_categories": [
-            [
-                "chaussures"
-            ],
-            [
-                "linge de maison"
-            ],
-            [
-                "vetement"
-            ]
+        [
+          "ABJ_electrique"
         ]
+      ]
     }
-},
-{
+  },
+  {
     "model": "qfdmo.displayedpropositionservice",
     "fields": {
-        "action": [
-            "louer"
+      "action": [
+        "reparer"
+      ],
+      "acteur": [
+        "3kQK86DEWA3ZrcirdzzBez"
+      ],
+      "sous_categories": [
+        [
+          "decoration"
         ],
-        "acteur": [
-            "NVhnuuKmw7gTKEoDBjd7bT"
+        [
+          "jouet"
         ],
-        "sous_categories": [
-            [
-                "outil de bricolage et jardinage"
-            ],
-            [
-                "ABJ_electrique"
-            ]
+        [
+          "Literie - Éléments d'ameublement"
+        ],
+        [
+          "luminaire"
+        ],
+        [
+          "meuble"
+        ],
+        [
+          "puericulture"
+        ],
+        [
+          "Sièges - Éléments d'ameublement"
         ]
+      ]
     }
-},
-{
+  },
+  {
     "model": "qfdmo.displayedpropositionservice",
     "fields": {
-        "action": [
-            "reparer"
+      "action": [
+        "reparer"
+      ],
+      "acteur": [
+        "EWDLqqJRavXraEwoVJEQbL"
+      ],
+      "sous_categories": [
+        [
+          "outil de bricolage et jardinage"
         ],
-        "acteur": [
-            "3kQK86DEWA3ZrcirdzzBez"
-        ],
-        "sous_categories": [
-            [
-                "decoration"
-            ],
-            [
-                "jouet"
-            ],
-            [
-                "Literie - Éléments d'ameublement"
-            ],
-            [
-                "luminaire"
-            ],
-            [
-                "meuble"
-            ],
-            [
-                "puericulture"
-            ],
-            [
-                "Sièges - Éléments d'ameublement"
-            ]
+        [
+          "ABJ_electrique"
         ]
+      ]
     }
-},
-{
+  },
+  {
     "model": "qfdmo.displayedpropositionservice",
     "fields": {
-        "action": [
-            "reparer"
+      "action": [
+        "preter"
+      ],
+      "acteur": [
+        "VBiu5he7rmPf4LpeowtxQ2"
+      ],
+      "sous_categories": [
+        [
+          "Machines et appareils motorises thermiques"
         ],
-        "acteur": [
-            "EWDLqqJRavXraEwoVJEQbL"
+        [
+          "outil de bricolage et jardinage"
         ],
-        "sous_categories": [
-            [
-                "outil de bricolage et jardinage"
-            ],
-            [
-                "ABJ_electrique"
-            ]
+        [
+          "ABJ_electrique"
+        ],
+        [
+          "petit electromenager"
         ]
+      ]
     }
-},
-{
+  },
+  {
     "model": "qfdmo.displayedpropositionservice",
     "fields": {
-        "action": [
-            "preter"
+      "action": [
+        "emprunter"
+      ],
+      "acteur": [
+        "VBiu5he7rmPf4LpeowtxQ2"
+      ],
+      "sous_categories": [
+        [
+          "Machines et appareils motorises thermiques"
         ],
-        "acteur": [
-            "VBiu5he7rmPf4LpeowtxQ2"
+        [
+          "outil de bricolage et jardinage"
         ],
-        "sous_categories": [
-            [
-                "Machines et appareils motorises thermiques"
-            ],
-            [
-                "outil de bricolage et jardinage"
-            ],
-            [
-                "ABJ_electrique"
-            ],
-            [
-                "petit electromenager"
-            ]
+        [
+          "ABJ_electrique"
+        ],
+        [
+          "petit electromenager"
         ]
+      ]
     }
-},
-{
+  },
+  {
     "model": "qfdmo.displayedpropositionservice",
     "fields": {
-        "action": [
-            "emprunter"
-        ],
-        "acteur": [
-            "VBiu5he7rmPf4LpeowtxQ2"
-        ],
-        "sous_categories": [
-            [
-                "Machines et appareils motorises thermiques"
-            ],
-            [
-                "outil de bricolage et jardinage"
-            ],
-            [
-                "ABJ_electrique"
-            ],
-            [
-                "petit electromenager"
-            ]
+      "action": [
+        "donner"
+      ],
+      "acteur": [
+        "8bHaabXYXXTSvoVghXY2VC"
+      ],
+      "sous_categories": [
+        [
+          "vetement"
         ]
+      ]
     }
-},
-{
-    "model": "qfdmo.displayedpropositionservice",
-    "fields": {
-        "action": [
-            "donner"
-        ],
-        "acteur": [
-            "8bHaabXYXXTSvoVghXY2VC"
-        ],
-        "sous_categories": [
-            [
-                "vetement"
-            ]
-        ]
-    }
-}
+  }
 ]
