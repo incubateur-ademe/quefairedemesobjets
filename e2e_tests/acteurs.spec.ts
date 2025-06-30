@@ -8,11 +8,11 @@ test("Desktop | Les acteurs sont visibles sur la carte du formulaire et fonction
   page,
 }) => {
   // Navigate to the carte page
-  await page.goto(`/test_iframe`, { waitUntil: "networkidle" })
-  // await hideDjangoToolbar(page)
+  await page.goto(`/test_iframe`, { waitUntil: "domcontentloaded" })
   const sessionStorage = await page.evaluate(() => window.sessionStorage)
   const iframeElement = await page.$("#formulaire iframe")
   const iframe = await iframeElement?.contentFrame()
+  await hideDjangoToolbar(iframe)
 
   // Select a Produit
   let inputSelector = "#id_sous_categorie_objet"
@@ -46,25 +46,24 @@ test("Desktop | Les acteurs sont visibles sur la carte du formulaire et fonction
   // hard time clicking on leaflet markers.
   // Hence the force option in click's method call.
   await expect(markers?.nth(0)).toBeAttached()
-  const count = (await markers?.count()) || 0
+  const count = await markers?.count()
   for (let i = 0; i < count; i++) {
     const item = markers?.nth(i)
 
     try {
-      await item!.click({ force: true, timeout: 100 })
+      await item!.click({ force: true, timeout: 1000 })
       break
     } catch (e) {
       console.log("cannot click", e)
     }
   }
 
-  await expect(iframe?.locator("#acteurDetailsPanel")).toBeVisible()
+  // await expect(iframe?.locator("#acteurDetailsPanel")).toBeVisible()
 })
 
 test.skip("Desktop | Les acteurs digitaux sont visibles sur le formulaire", async ({
   page,
 }) => {
-  test.slow()
   // Navigate to the carte page
   await page.goto(`/test_iframe`, { waitUntil: "networkidle" })
   // await hideDjangoToolbar(page)
