@@ -4,7 +4,7 @@ function getItemSelector(index) {
   return `#mauvais_etat #id_adresseautocomplete-list.autocomplete-items div:nth-of-type(${index})`
 }
 
-test("Desktop | Les acteurs sont visibles sur la carte du formulaire fonctionne", async ({
+test("Desktop | Les acteurs sont visibles sur la carte du formulaire et fonctionnent", async ({
   page,
 }) => {
   // Navigate to the carte page
@@ -34,13 +34,13 @@ test("Desktop | Les acteurs sont visibles sur la carte du formulaire fonctionne"
 
   // Submit form
   await iframe?.getByTestId("formulaire-rechercher-adresses-submit").click()
-  const markers = iframe?.locator(".leaflet-marker-icon")
 
   // Remove the home marker (red dot) that prevents Playwright from clicking other markers
   await page.evaluate(() => {
     document.querySelector(".leaflet-marker-icon.home-icon")?.remove()
   })
 
+  const markers = iframe?.locator(".leaflet-marker-icon")
   // Ensure we have at least one marker, and let's click on a marker.
   // The approach is feels cumbersome, this is because Playwright has a
   // hard time clicking on leaflet markers.
