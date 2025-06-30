@@ -24,17 +24,26 @@ class Command(BaseCommand):
         call_command(
             "dumpdata",
             "qfdmo.displayedacteur",
-            indent=2,
+            indent=4,
             pks=pks,
+            natural_foreign=True,
+            natural_primary=True,
             output="qfdmo/fixtures/acteurs.json",
         )
-        ps_pks = DisplayedPropositionService.objects.filter(
-            acteur__pk__in=pks
-        ).values_list("pk", flat=True)
+        ps_pks = ",".join(
+            list(
+                DisplayedPropositionService.objects.filter(
+                    acteur__pk__in=pks
+                ).values_list("pk", flat=True)
+            )
+        )
+
         call_command(
             "dumpdata",
             "qfdmo.displayedpropositionservice",
-            indent=2,
+            indent=4,
+            natural_foreign=True,
+            natural_primary=True,
             pks=ps_pks,
             output="qfdmo/fixtures/propositions_services.json",
         )
