@@ -10,11 +10,11 @@
         "artisan"
       ],
       "adresse": "69 Boulevard Marechal Juin",
-      "adresse_complement": null,
+      "adresse_complement": "",
       "code_postal": "06800",
       "ville": "Cagnes Sur Mer",
-      "url": null,
-      "email": null,
+      "url": "",
+      "email": "",
       "location": "SRID=4326;POINT (7.1514437 43.6560528)",
       "telephone": null,
       "nom_commercial": "NOVATEK",
@@ -66,7 +66,7 @@
         "ess"
       ],
       "adresse": "11 Za De Mane Lenn",
-      "adresse_complement": null,
+      "adresse_complement": "",
       "code_postal": "56950",
       "ville": "Crach",
       "url": "https://www.cap-ressourcerie.com/",
