@@ -51,7 +51,7 @@ test("Desktop | Les acteurs sont visibles sur la carte du formulaire et fonction
     const item = markers?.nth(i)
 
     try {
-      await item!.click({ force: true, timeout: 1000 })
+      await item!.click()
       break
     } catch (e) {
       console.log("cannot click", e)
