@@ -18,6 +18,7 @@ groupe_action_couleur_mapping: List[List[str]] = [
     ["trier", "purple-glycine-975-75", "purple-glycine-main-494"],
     ["vendre_acheter", "brown-cafe-creme-950-100", "brown-cafe-creme-main-782"],
     ["emprunter_preter_louer", "pink-tuile-975-75", "pink-tuile-main-556"],
+    ["donner_echanger_rapporter", "blue-cumulus-975-75", "blue-cumulus-main-526"],
     ["donner_echanger", "blue-cumulus-975-75", "blue-cumulus-main-526"],
     ["reparer", "green-menthe-975-75", "green-menthe-main-548"],
 ]

@@ -5,11 +5,13 @@ from django.db import migrations
 
 def create_action_rapporter(apps, schema_editor):
     Action = apps.get_model("qfdmo", "Action")
-    GroupeAction = apps.get_model("qfdmo", "GroupeAction")
     ActionDirection = apps.get_model("qfdmo", "ActionDirection")
-    groupe_action_donner_echanger = GroupeAction.objects.get(code="donner_echanger")
-    groupe_action_donner_echanger.code = "donner_echanger_rapporter"
-    groupe_action_donner_echanger.save()
+    GroupeAction = apps.get_model("qfdmo", "GroupeAction")
+    # Prevent this update from failing if the groupe action already exists with the
+    # appropriate code in the database
+    GroupeAction.objects.filter("donner_echanger").update(
+        code="donner_echanger_rapporter"
+    )
     action = Action.objects.create(
         code="rapporter",
         libelle="rapporter",
@@ -19,7 +21,7 @@ def create_action_rapporter(apps, schema_editor):
         afficher=False,
         couleur="#cab300",
         icon="fr-icon-arrow-up-down-line",
-        groupe_action=groupe_action_donner_echanger,
+        groupe_action__code="donner_echanger_rapporter",
     )
     action_direction_jai = ActionDirection.objects.get(code="jai")
     action.directions.add(action_direction_jai)
@@ -32,11 +34,10 @@ def remove_action_rapporter(apps, schema_editor):
     Action = apps.get_model("qfdmo", "Action")
     Action.objects.filter(code="rapporter").delete()
     GroupeAction = apps.get_model("qfdmo", "GroupeAction")
-    groupe_action_donner_echanger = GroupeAction.objects.get(
-        code="donner_echanger_rapporter"
+
+    GroupeAction.objects.filter(code="donner_echanger_rapporter").update(
+        code="donner_echanger"
     )
-    groupe_action_donner_echanger.code = "donner_echanger"
-    groupe_action_donner_echanger.save()
     action_trier = Action.objects.get(code="trier")
     action_trier.order = 10
     action_trier.save()
