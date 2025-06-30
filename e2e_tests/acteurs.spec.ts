@@ -29,7 +29,7 @@ test("Desktop | Les acteurs sont visibles sur la carte du formulaire fonctionne"
   await iframe.locator(inputSelector).click()
   await iframe.locator(inputSelector).fill("auray")
   await iframe
-    .locator("#id_adresseautocomplete-list.autocomplete-items div:nth-child(2)")
+    .locator("#id_adresseautocomplete-list.autocomplete-items div:nth-child(1)")
     .click()
 
   // Submit form
@@ -87,7 +87,7 @@ test("Desktop | Les acteurs digitaux sont visibles sur le formulaire", async ({
   await iframe.locator(inputSelector).click()
   await iframe.locator(inputSelector).fill("auray")
   await iframe
-    .locator("#id_adresseautocomplete-list.autocomplete-items div:nth-child(2)")
+    .locator("#id_adresseautocomplete-list.autocomplete-items div:nth-child(1)")
     .click()
 
   // Submit form
