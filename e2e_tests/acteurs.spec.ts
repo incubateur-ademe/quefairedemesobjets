@@ -40,7 +40,7 @@ test("Desktop | Les acteurs sont visibles sur la carte du formulaire et fonction
     document.querySelector(".leaflet-marker-icon.home-icon")?.remove()
   })
 
-  const markers = iframe?.locator(".leaflet-marker-icon")
+  const markers = iframe?.locator(".leaflet-marker-icon svg")
   // Ensure we have at least one marker, and let's click on a marker.
   // The approach is feels cumbersome, this is because Playwright has a
   // hard time clicking on leaflet markers.
@@ -58,7 +58,7 @@ test("Desktop | Les acteurs sont visibles sur la carte du formulaire et fonction
     }
   }
 
-  // await expect(iframe?.locator("#acteurDetailsPanel")).toBeVisible()
+  await expect(iframe?.locator("#acteurDetailsPanel")).toBeVisible()
 })
 
 test.skip("Desktop | Les acteurs digitaux sont visibles sur le formulaire", async ({
