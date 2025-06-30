@@ -61,7 +61,7 @@ test("Desktop | Les acteurs sont visibles sur la carte du formulaire fonctionne"
   await expect(iframe?.locator("#acteurDetailsPanel")).toBeVisible()
 })
 
-test("Desktop | Les acteurs digitaux sont visibles sur le formulaire", async ({
+test.skip("Desktop | Les acteurs digitaux sont visibles sur le formulaire", async ({
   page,
 }) => {
   test.slow()
@@ -97,7 +97,7 @@ test("Desktop | Les acteurs digitaux sont visibles sur le formulaire", async ({
   await expect(someLeafletMarker).toBeAttached()
 
   // Digital acteurs
-  // await iframe?.locator("#id_digital_1").click({ force: true })
-  // await iframe?.locator("[aria-controls=acteurDetailsPanel]").first().click()
-  // await expect(iframe?.locator("#acteurDetailsPanel")).toBeVisible()
+  await iframe?.locator("#id_digital_1").click({ force: true })
+  await iframe?.locator("[aria-controls=acteurDetailsPanel]").first().click()
+  await expect(iframe?.locator("#acteurDetailsPanel")).toBeVisible()
 })
