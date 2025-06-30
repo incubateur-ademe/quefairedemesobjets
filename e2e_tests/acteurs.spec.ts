@@ -96,7 +96,7 @@ test.skip("Desktop | Les acteurs digitaux sont visibles sur le formulaire", asyn
   await expect(someLeafletMarker).toBeAttached()
 
   // Digital acteurs
-  // await iframe?.locator("#id_digital_1").click({ force: true })
-  // await iframe?.locator("[aria-controls=acteurDetailsPanel]").first().click()
-  // await expect(iframe?.locator("#acteurDetailsPanel")).toBeVisible()
+  await iframe?.locator("#id_digital_1").click({ force: true })
+  await iframe?.locator("[aria-controls=acteurDetailsPanel]").first().click()
+  await expect(iframe?.locator("#acteurDetailsPanel")).toBeVisible()
 })
