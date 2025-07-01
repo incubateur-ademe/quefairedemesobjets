@@ -34,7 +34,9 @@ export default class extends Controller<HTMLElement> {
   configureIframeSpecificUI() {
     if (sessionStorage.getItem("iframe")) {
       this.iframeValue = true
+    }
 
+    if (this.iframeValue) {
       document.querySelectorAll<HTMLLinkElement>('a[href^="/"]').forEach((link) => {
         const url = new URL(link.href, window.location.origin)
         url.searchParams.set("iframe", "1")
