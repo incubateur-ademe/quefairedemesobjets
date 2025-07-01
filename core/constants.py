@@ -47,4 +47,5 @@ ASSISTANT = {
         "texte_du_lien": "En savoir plus sur l’Info-tri",
     },
     "nouvelle_recherche": "Nouvelle recherche",
+    "faites_decouvrir_ce_site": "Faites découvrir ce site !",
 }
