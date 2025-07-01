@@ -2,7 +2,7 @@
 {% load seo_tags %}
 
 {% block button_text %}
-Partager à vos proches
+{{ button_text|default:"Partager à vos proches" }}
 {% endblock button_text %}
 
 {% block modal_title %}
