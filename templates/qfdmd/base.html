@@ -48,6 +48,9 @@
         data-state-adresse-value=""
         data-state-longitude-value=""
         data-state-latitude-value=""
+        {% if "iframe" in request.GET %}
+        data-state-iframe-value="true"
+        {% endif %}
         data-state-map-outlet="[data-controller='map']"
         data-state-address-autocomplete-outlet="[data-controller='address-autocomplete']"
         data-state-search-solution-form-outlet="[data-controller='search-solution-form']"
@@ -70,11 +73,10 @@
         Vous êtes bien authentifié, vos statistiques PostHog seront ignorées pour cette session | <a href="{% url 'admin:index' %}">accéder à l'administration</a>
         </div>
         {% endif %}
-        {% if not assistant.is_iframe %}
-            {% block header %}
-            {% include "components/header/header.html" %}
-            {% endblock header %}
-        {% endif %}
+
+        {% block header %}
+        {% include "components/header/header.html" %}
+        {% endblock header %}
 
         {% block pre_main %}
         {% endblock pre_main %}
