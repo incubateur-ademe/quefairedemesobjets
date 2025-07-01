@@ -2,7 +2,9 @@
 {% load menu_tags %}
 
 {% block footer_links %}
+{% if request %}
 {% flat_menu handle="footer_assistant" template="components/footer/footer-menu.html" %}
+{% endif %}
 
 {% endblock footer_links %}
 {% load static %}

@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control
 from django.views.decorators.vary import vary_on_headers
@@ -43,23 +43,6 @@ def legacy_migrate(request, id):
 @cache_control(max_age=31536000)
 def get_assistant_script(request):
     return static_file_content_from("embed/assistant.js")
-
-
-def generate_iframe_script(request) -> str:
-    """Generates a <script> tag used to embed Assistant website."""
-    script_parts = ["<script"]
-    if (
-        request
-        and request.resolver_match
-        and request.resolver_match.view_name == "qfdmd:synonyme-detail"
-    ):
-        produit_slug = request.resolver_match.kwargs["slug"]
-        script_parts.append(f'data-objet="{produit_slug}"')
-
-    script_parts.append(
-        f'src="{settings.ASSISTANT["BASE_URL"]}{reverse("qfdmd:script")}"></script>'
-    )
-    return " ".join(script_parts)
 
 
 SEARCH_VIEW_TEMPLATE_NAME = "components/search/view.html"
@@ -110,7 +93,7 @@ class AssistantBaseView:
 @method_decorator(cache_control(max_age=60 * 15), name="dispatch")
 @method_decorator(vary_on_headers("logged-in", "iframe"), name="dispatch")
 class HomeView(AssistantBaseView, ListView):
-    template_name = "qfdmd/home.html"
+    template_name = "pages/home.html"
     model = Suggestion
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
@@ -133,4 +116,5 @@ class HomeView(AssistantBaseView, ListView):
 
 
 class SynonymeDetailView(AssistantBaseView, DetailView):
+    template_name = "pages/produit.html"
     model = Synonyme

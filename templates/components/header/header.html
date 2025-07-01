@@ -1,32 +1,62 @@
-{% load static %}
-<header class="qf-flex qf-flex-col fr-container qf-relative">
-    <div class="qf-flex qf-justify-between qf-pt-3w">
-        <a
-            class="qf-bg-none qf-flex qf-gap-2w"
-            data-testid="header-logo-link"
-            href="{% url 'home' %}"
-            title="Que faire de mes Objets ou Déchets ? - Page d'accueil"
-        >
-            <img
-                src="{% static 'assistant/bloc-marque.svg' %}"
-                class="max-md:qf-max-w-[220px]"
-                alt="Bloc-marque Ademe & République française"
-            >
-            {% if not assistant.is_home %}
-                {% include "components/logo/animated.html" %}
-            {% endif %}
-        </a>
+{% extends request.GET|iframe:"components/header/base.html" %}
 
-        {% block header_search %}
-        <div
-            class="qf-absolute qf-right-2w qf-w-[320px] qf-z-20
-            max-md:qf-hidden"
-        >
-            {% include search_view_template_name %}
+{% load menu_tags static %}
+
+{% block header_search %}
+    <div
+        class="qf-w-[320px]
+        qf-ml-auto
+        qf-relative
+        -qf-top-3w
+        max-lg:qf-hidden qf-text-left"
+    >
+        <div class="qf-absolute qf-left-0 qf-right-0 my-auto">
+        {% include "components/search/view.html" %}
         </div>
-        {% endblock header_search %}
     </div>
+{% endblock header_search %}
 
-    {% block header_post %}
-    {% endblock header_post %}
-</header>
+{% block burger_menu %}
+  <div class="fr-header__navbar">
+    <a class="fr-btn--search fr-btn" href="/">
+        Recherche
+    </a>
+
+    <button class="fr-btn--menu fr-btn"
+            data-fr-opened="false"
+            aria-controls="fr-menu-mobile"
+            id="fr-btn-menu-mobile"
+            title="Menu">
+            Menu
+    </button>
+  </div>
+{% endblock burger_menu %}
+
+{% block brand %}
+<a href="/" title="Accueil — {{ SITE_CONFIG.site_title }}">
+{% include "components/logo/animated.html" %}
+</a>
+{% endblock brand %}
+
+{% block operator_logo %}
+<a href="/" title="Accueil — {{ SITE_CONFIG.site_title }}">
+<img
+    src="{% static 'assistant/bloc-marque.svg' %}"
+    class="max-md:qf-max-w-[220px]"
+    alt="Bloc-marque Ademe & République française"
+>
+</a>
+{% endblock operator_logo %}
+
+{% block header_tools_links %}
+{% endblock header_tools_links %}
+
+{% block service_title %}
+{% endblock service_title %}
+
+{% block service_tagline %}
+{% endblock service_tagline %}
+
+{% block main_menu %}
+{% main_menu max_levels=1 template="components/header/header_menu.html" %}
+{% endblock main_menu %}

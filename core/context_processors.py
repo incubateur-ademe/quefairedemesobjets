@@ -2,7 +2,6 @@ from django.conf import settings
 from django.urls import reverse
 
 from qfdmd.forms import SearchForm
-from qfdmd.views import SEARCH_VIEW_TEMPLATE_NAME, generate_iframe_script
 
 from . import constants
 
@@ -29,8 +28,7 @@ def global_context(request) -> dict:
     base = {
         "assistant": {
             "is_home": request.path == reverse("home"),
-            "is_iframe": request.COOKIES.get("iframe") == "1"
-            or "iframe" in request.GET,
+            "is_iframe": "iframe" in request.GET,
             "POSTHOG_KEY": settings.ASSISTANT["POSTHOG_KEY"],
             "MATOMO_ID": settings.ASSISTANT["MATOMO_ID"],
             "BASE_URL": settings.ASSISTANT["BASE_URL"],
@@ -44,7 +42,5 @@ def global_context(request) -> dict:
     return {
         **base,
         "search_form": SearchForm(),
-        "search_view_template_name": SEARCH_VIEW_TEMPLATE_NAME,
-        "iframe_script": generate_iframe_script(request),
         **constants.ASSISTANT,
     }

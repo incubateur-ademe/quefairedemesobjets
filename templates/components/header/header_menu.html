@@ -1,0 +1,38 @@
+{% load i18n %}
+
+ <div class="fr-header__menu fr-modal"
+         id="fr-menu-mobile"
+         aria-labelledby="fr-btn-menu-mobile">
+      <div class="fr-container">
+        <button class="fr-btn--close fr-btn" aria-controls="fr-menu-mobile">
+          {% translate "Close" %}
+        </button>
+        <div class="fr-header__menu-links">
+        </div>
+        {% translate "Main menu" as main_menu_label %}
+        <nav role="navigation"
+             class="fr-nav"
+             id="fr-navigation"
+             aria-label="{{ main_menu_label }}">
+          <ul class="fr-nav__list">
+            {% for item in menu_items %}
+            <li class="fr-nav__item">
+              <a class="fr-nav__link" href="{{ item.href }}">
+                {{ item.text }}
+              </a>
+            </li>
+            {% endfor %}
+            <li class="fr-nav__item">
+              <button
+                  class="fr-nav__link"
+                  data-fr-opened="false"
+                  aria-controls="fr-modal-{{ contact_modal_id }}"
+                  aria-labelledby="sidebar-action-{{ contact_modal_id }}"
+              >
+                Contactez-nous
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>

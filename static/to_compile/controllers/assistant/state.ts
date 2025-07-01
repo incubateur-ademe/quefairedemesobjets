@@ -6,6 +6,7 @@ import SearchFormController from "../carte/search_solution_form_controller"
 export default class extends Controller<HTMLElement> {
   static values = {
     location: Object,
+    iframe: Boolean,
   }
   static outlets = ["address-autocomplete", "search-solution-form"]
   declare addressAutocompleteOutlets: Array<AdresseAutocompleteController>
@@ -15,12 +16,34 @@ export default class extends Controller<HTMLElement> {
     latitude: string | null
     longitude: string | null
   }
+  declare iframeValue: boolean
 
   connect() {
-    document.addEventListener(
-      "turbo:frame-load",
-      this.fetchLocationFromSessionStorageOnFirstLoad.bind(this),
-    )
+    document.addEventListener("turbo:frame-load", this.#initRecurringEvents.bind(this))
+  }
+
+  #initRecurringEvents(event) {
+    /**
+    These methods must be called every time we add elements to the dom through a turbo-frame
+    so that all new DOM nodes get updated.
+    */
+    this.fetchLocationFromSessionStorageOnFirstLoad(event)
+    this.configureIframeSpecificUI()
+  }
+
+  configureIframeSpecificUI() {
+    if (sessionStorage.getItem("iframe") === "true") {
+      this.iframeValue = true
+    }
+
+    if (this.iframeValue) {
+      document.querySelectorAll<HTMLLinkElement>('a[href^="/"]').forEach((link) => {
+        const url = new URL(link.href, window.location.origin)
+        url.searchParams.set("iframe", "1")
+        link.href = url.toString()
+      })
+      sessionStorage.setItem("iframe", "true")
+    }
   }
 
   fetchLocationFromSessionStorageOnFirstLoad(event) {

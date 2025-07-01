@@ -85,6 +85,7 @@ ENVIRONMENT = decouple.config("ENVIRONMENT", default="development", cast=str)
 VERSION = decouple.config("CONTAINER_VERSION", default="version", cast=str)
 APP = decouple.config("APP", default="local", cast=str)
 BASE_URL = ASSISTANT.get("BASE_URL")
+
 BASE_ALLOWED_HOSTS = [
     urlparse(config.get("BASE_URL")).hostname for config in [ASSISTANT, LVAO]
 ]
@@ -120,6 +121,7 @@ INSTALLED_APPS = [
     "qfdmo",
     "data",
     "corsheaders",
+    "django_lookbook",
 ]
 
 
@@ -253,6 +255,9 @@ TEMPLATES = [
                 "wagtailmenus.context_processors.wagtailmenus",
                 "sites_faciles.content_manager.context_processors.skiplinks",
                 "sites_faciles.content_manager.context_processors.mega_menus",
+            ],
+            "builtins": [
+                "core.templatetags.iframe_tags",
             ],
         },
     },
@@ -508,3 +513,10 @@ MIDDLEWARE.extend(
         "wagtail.contrib.redirects.middleware.RedirectMiddleware",
     ]
 )
+
+# UI
+# ---
+LOOKBOOK = {
+    "preview_base": ["previews"],
+    "show_previews": DEBUG,
+}
