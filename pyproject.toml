@@ -96,7 +96,7 @@ pillow = "^11.2.1"
 psycopg2 = "^2.9.10"
 python-decouple = "^3.8"
 requests = "^2.32.4"
-sentry-sdk = "^2.30.0"
+sentry-sdk = "^2.32.0"
 shortuuid = "^1.0.13"
 tqdm = "^4.67.1"
 unidecode = "^1.4.0"
@@ -124,7 +124,7 @@ pytest = "^8.4.1"
 pytest-django = "^4.9.0"
 pytest-dotenv = "^0.5.2"
 pytest-mock = "^3.14.1"
-ruff = "^0.12.0"
+ruff = "^0.12.1"
 shapely = "^2.1.1" # notebook
 
 [tool.poetry.group.docs.dependencies]
