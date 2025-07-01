@@ -381,7 +381,7 @@ class CustomRevisionActeurForm(forms.ModelForm):
 
     def clean_nom(self):
         nom = self.cleaned_data.get("nom")
-        if self.instance.pk is None and nom:
+        if not self.instance.pk and not nom:
             raise ValidationError("Le nom est obligatoire")
         return nom
 
@@ -439,11 +439,53 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
     def get_form(
         self, request: Any, obj: Any | None = None, change: bool = False, **kwargs: Any
     ) -> Any:
+
+        def _get_siret_siren_help_text(obj, acteur=None):
+            siret = obj.siret or (acteur and acteur.siret) or None
+            if siret:
+                siren = obj.siren or (acteur and acteur.siren) or siret[:9]
+                return (
+                    '<br>ENTREPRISE : <a href="https://'
+                    f'annuaire-entreprises.data.gouv.fr/entreprise/{siren}"'
+                    ' target="_blank" rel="noreferrer">'
+                    f"https://annuaire-entreprises.data.gouv.fr/entreprise/{siren}"
+                    '</a><br>ETABLISSEMENT : <a href="https://'
+                    f'annuaire-entreprises.data.gouv.fr/etablissement/{siret}"'
+                    ' target="_blank" rel="noreferrer">'
+                    "https://annuaire-entreprises.data.gouv.fr/etablissement/"
+                    f"{siret}</a>"
+                )
+            return ""
+
+        def _get_address_help_text(obj, acteur=None):
+            google_adresse = [
+                obj.nom_commercial
+                or (acteur and acteur.nom_commercial)
+                or obj.nom
+                or (acteur and acteur.nom)
+                or "",
+                obj.adresse or (acteur and acteur.adresse) or "",
+                obj.adresse_complement or (acteur and acteur.adresse_complement) or "",
+                obj.code_postal or (acteur and acteur.code_postal) or "",
+                obj.ville or (acteur and acteur.ville) or "",
+            ]
+            google_adresse = [g.strip() for g in google_adresse if g and g.strip()]
+            return (
+                '<br><a href="https://google.com/maps/search/'
+                f'{"+".join(google_adresse)}" target="_blank"'
+                ' rel="noreferrer">Voir l\'adresse sur Google Maps</a>'
+            )
+
         """
         Display Acteur fields value as help_text
         """
         revision_acteur_form = super().get_form(request, obj, change, **kwargs)
         if obj and obj.is_parent:
+            for field_name, form_field in revision_acteur_form.base_fields.items():
+                if field_name == "siret":
+                    form_field.help_text += _get_siret_siren_help_text(obj)
+                if field_name == "ville" and form_field:
+                    form_field.help_text += _get_address_help_text(obj)
             return revision_acteur_form
         if obj and obj.identifiant_unique:
             acteur = Acteur.objects.get(identifiant_unique=obj.identifiant_unique)
@@ -475,41 +517,10 @@ class RevisionActeurAdmin(import_export_admin.ImportExportMixin, BaseActeurAdmin
                         f"document.getElementById('id_{field_name}').value = ''"
                         '">reset</button>'
                     )
-                if field_name == "siret" and (
-                    siret := obj.siret or acteur.siret
-                ):  # and siret is not null
-                    siren = obj.siren or siret[:9]
-                    form_field.help_text += (
-                        '<br>ENTREPRISE : <a href="https://'
-                        f'annuaire-entreprises.data.gouv.fr/entreprise/{siren}"'
-                        ' target="_blank" rel="noreferrer">'
-                        f"https://annuaire-entreprises.data.gouv.fr/entreprise/{siren}"
-                        '</a><br>ETABLISSEMENT : <a href="https://'
-                        f'annuaire-entreprises.data.gouv.fr/etablissement/{siret}"'
-                        ' target="_blank" rel="noreferrer">'
-                        "https://annuaire-entreprises.data.gouv.fr/etablissement/"
-                        f"{siret}</a>"
-                    )
-                if field_name == "ville" and form_field:  # ville  est pas null
-                    google_adresse = [
-                        obj.nom_commercial
-                        or acteur.nom_commercial
-                        or obj.nom
-                        or acteur.nom
-                        or "",
-                        obj.adresse or acteur.adresse,
-                        obj.adresse_complement or acteur.adresse_complement,
-                        obj.code_postal or acteur.code_postal,
-                        obj.ville or acteur.ville,
-                    ]
-                    google_adresse = [
-                        g.strip() for g in google_adresse if g and g.strip()
-                    ]
-                    form_field.help_text += (
-                        '<br><a href="https://google.com/maps/search/'
-                        f'{"+".join(google_adresse)}" target="_blank"'
-                        ' rel="noreferrer">Voir l\'adresse sur Google Maps</a>'
-                    )
+                if field_name == "siret":
+                    form_field.help_text += _get_siret_siren_help_text(obj, acteur)
+                if field_name == "ville" and form_field:
+                    form_field.help_text += _get_address_help_text(obj, acteur)
 
         return revision_acteur_form
 
