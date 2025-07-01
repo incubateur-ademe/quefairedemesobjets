@@ -17,6 +17,12 @@ class ComponentsPreview(LookbookPreview):
         }
         return render_to_string("components/code/code.html", context)
 
+    def logo_animated(self, **kwargs):
+        return render_to_string("components/logo/animated.html")
+
+    def logo_homepage(self, **kwargs):
+        return render_to_string("components/logo/homepage.html")
+
 
 class ModalsPreview(LookbookPreview):
     def embed(self, **kwargs):
@@ -37,6 +43,7 @@ class ModalsPreview(LookbookPreview):
 class PagesPreview(LookbookPreview):
     def home(self, **kwargs):
         context = {
+            "request": None,
             "object_list": [
                 Suggestion(produit=Synonyme.objects.first()),
                 Suggestion(produit=Synonyme.objects.last()),
@@ -69,7 +76,8 @@ class SnippetsPreview(LookbookPreview):
 
         **Markdown syntax is supported in docstring**
         """
-        return render_to_string("components/header/header.html")
+        context = {"request": None}
+        return render_to_string("components/header/header.html", context)
 
     def footer(self, **kwargs):
         return render_to_string("components/footer/footer.html")

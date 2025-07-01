@@ -28,8 +28,7 @@ def global_context(request) -> dict:
     base = {
         "assistant": {
             "is_home": request.path == reverse("home"),
-            "is_iframe": request.COOKIES.get("iframe") == "1"
-            or "iframe" in request.GET,
+            "is_iframe": "iframe" in request.GET,
             "POSTHOG_KEY": settings.ASSISTANT["POSTHOG_KEY"],
             "MATOMO_ID": settings.ASSISTANT["MATOMO_ID"],
             "BASE_URL": settings.ASSISTANT["BASE_URL"],
