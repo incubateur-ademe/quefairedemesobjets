@@ -1,54 +1,56 @@
-import { AxeBuilder } from "@axe-core/playwright";
-import { expect } from "@playwright/test";
+import { AxeBuilder } from "@axe-core/playwright"
+import { expect } from "@playwright/test"
 import { test } from "./config"
 
 // Shared variables
-const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
-const IFRAME_SELECTOR = "iframe";
+const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]
+const IFRAME_SELECTOR = "iframe"
 
 test.describe("WCAG Compliance Tests", () => {
   test("Formulaire iFrame | Desktop", async ({ page }) => {
-    await page.goto(`/test_iframe`, { waitUntil: "networkidle" });
+    await page.goto(`/test_iframe`, { waitUntil: "domcontentloaded" })
 
     const accessibilityScanResults = await new AxeBuilder({ page })
       .include(IFRAME_SELECTOR) // Restrict scan to the iframe
       .withTags(WCAG_TAGS)
-      .analyze();
+      .analyze()
 
-    expect(accessibilityScanResults.violations).toEqual([]);
-  });
+    expect(accessibilityScanResults.violations).toEqual([])
+  })
 
   test("Carte iFrame | Desktop", async ({ page }) => {
-    await page.goto(`/test_iframe?carte`, { waitUntil: "networkidle" });
+    await page.goto(`/test_iframe?carte`, { waitUntil: "domcontentloaded" })
 
     const accessibilityScanResults = await new AxeBuilder({ page })
       .include(IFRAME_SELECTOR) // Restrict scan to the iframe
       .withTags(WCAG_TAGS)
-      .analyze();
+      .analyze()
 
-    expect(accessibilityScanResults.violations).toEqual([]);
-  });
+    expect(accessibilityScanResults.violations).toEqual([])
+  })
 
-  test("Assistant Homepage | Desktop", async ({ page,assistantUrl }) => {
+  test("Assistant Homepage | Desktop", async ({ page, assistantUrl }) => {
     // TODO: Update the route for production
-    await page.goto(`${assistantUrl}/`, { waitUntil: "networkidle" });
+    await page.goto(`${assistantUrl}/`, { waitUntil: "domcontentloaded" })
 
     const accessibilityScanResults = await new AxeBuilder({ page })
       .exclude("[data-disable-axe]")
       .withTags(WCAG_TAGS)
-      .analyze();
+      .analyze()
 
-    expect(accessibilityScanResults.violations).toEqual([]);
-  });
+    expect(accessibilityScanResults.violations).toEqual([])
+  })
 
   test("Assistant Detail Page | Desktop", async ({ page, assistantUrl }) => {
-    await page.goto(`${assistantUrl}/dechet/smartphone`, { waitUntil: "networkidle" });
+    await page.goto(`${assistantUrl}/dechet/smartphone`, {
+      waitUntil: "domcontentloaded",
+    })
 
     const accessibilityScanResults = await new AxeBuilder({ page })
       .exclude("[data-disable-axe]")
       .withTags(WCAG_TAGS)
-      .analyze();
+      .analyze()
 
-    expect(accessibilityScanResults.violations).toEqual([]);
-  });
-});
+    expect(accessibilityScanResults.violations).toEqual([])
+  })
+})
