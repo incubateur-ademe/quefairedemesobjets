@@ -19,17 +19,22 @@ export default class extends Controller<HTMLElement> {
   declare iframeValue: boolean
 
   connect() {
-    document.addEventListener(
-      "turbo:frame-load",
-      this.fetchLocationFromSessionStorageOnFirstLoad.bind(this),
-    )
-    if (sessionStorage.getItem("iframe")) {
-      this.iframeValue = true
-    }
+    document.addEventListener("turbo:frame-load", this.#initRecurringEvents.bind(this))
   }
 
-  iframeValueChanged() {
-    if (this.iframeValue) {
+  #initRecurringEvents(event) {
+    /**
+    These methods must be called every time we add elements to the dom through a turbo-frame
+    so that all new DOM nodes get updated.
+    */
+    this.fetchLocationFromSessionStorageOnFirstLoad(event)
+    this.configureIframeSpecificUI()
+  }
+
+  configureIframeSpecificUI() {
+    if (sessionStorage.getItem("iframe")) {
+      this.iframeValue = true
+
       document.querySelectorAll<HTMLLinkElement>('a[href^="/"]').forEach((link) => {
         const url = new URL(link.href, window.location.origin)
         url.searchParams.set("iframe", "1")
