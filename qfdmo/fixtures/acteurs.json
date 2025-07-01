@@ -2,14 +2,70 @@
 {
     "model": "qfdmo.displayedacteur",
     "fields": {
+        "cree_le": "2025-03-07T15:20:09.495Z",
+        "modifie_le": "2025-06-24T21:56:52.555Z",
+        "nom": "Act Informatique",
+        "description": "",
+        "acteur_type": [
+            "artisan"
+        ],
+        "adresse": "69 Boulevard Marechal Juin",
+        "adresse_complement": "",
+        "code_postal": "06800",
+        "ville": "Cagnes Sur Mer",
+        "url": "",
+        "email": "",
+        "location": "SRID=4326;POINT (7.1514437 43.6560528)",
+        "telephone": "",
+        "nom_commercial": "NOVATEK",
+        "nom_officiel": "",
+        "siren": "794012518",
+        "siret": "79401251800013",
+        "siret_is_closed": null,
+        "source": null,
+        "identifiant_externe": "",
+        "statut": "ACTIF",
+        "naf_principal": "95.11Z",
+        "commentaires": "[{\"message\":\"source changee le 18-07-2024. Ancienne source CMA non-reparActeur. Nouvelle source : LVAO.\"}]",
+        "horaires_osm": "",
+        "horaires_description": "",
+        "public_accueilli": "Particuliers",
+        "reprise": "",
+        "exclusivite_de_reprisereparation": false,
+        "uniquement_sur_rdv": null,
+        "action_principale": null,
+        "uuid": "GWgsph7L9nmK2cTZXZzVGQ",
+        "labels": [
+            [
+                "qualirepar"
+            ]
+        ],
+        "acteur_services": [
+            [
+                "service_de_reparation"
+            ]
+        ],
+        "sources": [
+            [
+                "ocad3e"
+            ],
+            [
+                "lvao"
+            ]
+        ]
+    }
+},
+{
+    "model": "qfdmo.displayedacteur",
+    "fields": {
         "cree_le": "2025-04-03T17:02:22.853Z",
-        "modifie_le": "2025-05-19T12:02:14.948Z",
+        "modifie_le": "2025-06-24T21:25:48.940Z",
         "nom": "ASSOCIATION CAP RESSOURCERIE",
         "description": "",
         "acteur_type": [
             "ess"
         ],
-        "adresse": "11 ZA DE MANE LENN",
+        "adresse": "11 Za De Mane Lenn",
         "adresse_complement": "",
         "code_postal": "56950",
         "ville": "Crach",
@@ -36,7 +92,9 @@
         "action_principale": null,
         "uuid": "aDcrby2bqxAZFM3yYCRTue",
         "labels": [
-            7
+            [
+                "ess"
+            ]
         ],
         "acteur_services": [
             [
@@ -48,19 +106,70 @@
         ],
         "sources": [
             [
-                "sinoe"
-            ],
-            [
-                "ecomaison"
+                "ecosystem"
             ],
             [
                 "ecologic"
             ],
             [
+                "ecomaison"
+            ],
+            [
                 "refashion"
             ],
             [
-                "ecosystem"
+                "sinoe"
+            ]
+        ]
+    }
+},
+{
+    "model": "qfdmo.displayedacteur",
+    "fields": {
+        "cree_le": "2023-10-25T10:09:12.529Z",
+        "modifie_le": "2024-07-18T10:30:47.593Z",
+        "nom": "Alre-Bobinage - Altech Distribution Sce",
+        "description": "",
+        "acteur_type": [
+            "artisan"
+        ],
+        "adresse": "Rue Louis Bleriot",
+        "adresse_complement": "",
+        "code_postal": "56400",
+        "ville": "Auray",
+        "url": "",
+        "email": "alre-bobinage@wanadoo.fr",
+        "location": "SRID=4326;POINT (-3.012808 47.663279)",
+        "telephone": "06 26 64 55 39",
+        "nom_commercial": "",
+        "nom_officiel": "",
+        "siren": "",
+        "siret": "44477180200014",
+        "siret_is_closed": null,
+        "source": [
+            "lvao"
+        ],
+        "identifiant_externe": "154142",
+        "statut": "ACTIF",
+        "naf_principal": "33.14Z",
+        "commentaires": "[{\"message\":\"source changee le 18-07-2024. Ancienne source CMA non-reparActeur. Nouvelle source : LVAO.\"}]",
+        "horaires_osm": "",
+        "horaires_description": "",
+        "public_accueilli": "",
+        "reprise": "",
+        "exclusivite_de_reprisereparation": null,
+        "uniquement_sur_rdv": null,
+        "action_principale": null,
+        "uuid": "EWDLqqJRavXraEwoVJEQbL",
+        "labels": [],
+        "acteur_services": [
+            [
+                "service_de_reparation"
+            ]
+        ],
+        "sources": [
+            [
+                "lvao"
             ]
         ]
     }
@@ -75,10 +184,10 @@
         "acteur_type": [
             "artisan"
         ],
-        "adresse": "LE POULBEN",
+        "adresse": "Le Poulben",
         "adresse_complement": "",
         "code_postal": "56950",
-        "ville": "CRACH",
+        "ville": "Crach",
         "url": "",
         "email": "",
         "location": "SRID=4326;POINT (-2.983594 47.65361)",
@@ -119,17 +228,72 @@
 {
     "model": "qfdmo.displayedacteur",
     "fields": {
+        "cree_le": "2024-07-31T20:20:01.566Z",
+        "modifie_le": "2025-06-24T21:25:52.904Z",
+        "nom": "Agir pour la Terre de nos Enfants",
+        "description": "Agir pour la terre de nos enfants est une association qui a pour but :\r\n\r\nInformer et sensibiliser les citoyens de tous les âges à la fragilité de notre environnement naturel.\r\n\r\nNourrir la réflexion de tous sur l’impact environnemental de nos comportements individuels et collectifs.\r\n\r\nMener des actions concrètes en faveur de l’environnement\r\n\r\nFavoriser le vivre-ensemble et créer du lien entre les citoyens.",
+        "acteur_type": [
+            "acteur_digital"
+        ],
+        "adresse": "140 Rue Saint Irenee",
+        "adresse_complement": "",
+        "code_postal": "01320",
+        "ville": "Chatillon-La-Palud",
+        "url": "https://www.agirpourlaterredenosenfants.fr/loutilth%C3%A8que",
+        "email": "agirpourlaterredenosenfants@gmail.com",
+        "location": null,
+        "telephone": "",
+        "nom_commercial": "",
+        "nom_officiel": "",
+        "siren": "",
+        "siret": "92480254900015",
+        "siret_is_closed": null,
+        "source": [
+            "communautelvao"
+        ],
+        "identifiant_externe": "LWTYYUPBDMWM",
+        "statut": "ACTIF",
+        "naf_principal": "94.99Z",
+        "commentaires": "",
+        "horaires_osm": "",
+        "horaires_description": "",
+        "public_accueilli": "",
+        "reprise": "",
+        "exclusivite_de_reprisereparation": null,
+        "uniquement_sur_rdv": null,
+        "action_principale": null,
+        "uuid": "VBiu5he7rmPf4LpeowtxQ2",
+        "labels": [
+            [
+                "ess"
+            ]
+        ],
+        "acteur_services": [
+            [
+                "espace_de_partage"
+            ]
+        ],
+        "sources": [
+            [
+                "communautelvao"
+            ]
+        ]
+    }
+},
+{
+    "model": "qfdmo.displayedacteur",
+    "fields": {
         "cree_le": "2025-01-29T17:20:38.499Z",
-        "modifie_le": "2025-01-30T19:37:18.919Z",
+        "modifie_le": "2025-06-24T21:37:26.276Z",
         "nom": "Lycée Benjamin Franklin - Ressourcerie Green Socks",
         "description": "Possibilité de déposer des vêtements à l'accueil, pour la friperie interne au lycée",
         "acteur_type": [
             "collectivite"
         ],
-        "adresse": "1 RUE DE LA FORET",
+        "adresse": "1 Rue De La Foret",
         "adresse_complement": "",
         "code_postal": "56400",
-        "ville": "AURAY",
+        "ville": "Auray",
         "url": "",
         "email": "",
         "location": "SRID=4326;POINT (-2.980237 47.671608)",
@@ -170,14 +334,65 @@
 {
     "model": "qfdmo.displayedacteur",
     "fields": {
+        "cree_le": "2023-10-25T10:09:12.529Z",
+        "modifie_le": "2023-11-24T10:11:06.989Z",
+        "nom": "Locarmor",
+        "description": "",
+        "acteur_type": [
+            "commerce"
+        ],
+        "adresse": "Zi Du Moustoir",
+        "adresse_complement": "",
+        "code_postal": "56950",
+        "ville": "Crach",
+        "url": "https://www.locarmor.bzh/",
+        "email": "contact@locarmor.com",
+        "location": "SRID=4326;POINT (-3.0017 47.617)",
+        "telephone": "",
+        "nom_commercial": "",
+        "nom_officiel": "",
+        "siren": "",
+        "siret": "37708044500176",
+        "siret_is_closed": null,
+        "source": [
+            "ademelocation"
+        ],
+        "identifiant_externe": "658",
+        "statut": "ACTIF",
+        "naf_principal": "77.32Z",
+        "commentaires": "",
+        "horaires_osm": "",
+        "horaires_description": "",
+        "public_accueilli": "",
+        "reprise": "",
+        "exclusivite_de_reprisereparation": null,
+        "uniquement_sur_rdv": null,
+        "action_principale": null,
+        "uuid": "NVhnuuKmw7gTKEoDBjd7bT",
+        "labels": [],
+        "acteur_services": [
+            [
+                "location_professionnel"
+            ]
+        ],
+        "sources": [
+            [
+                "ademelocation"
+            ]
+        ]
+    }
+},
+{
+    "model": "qfdmo.displayedacteur",
+    "fields": {
         "cree_le": "2024-10-23T14:18:16.868Z",
-        "modifie_le": "2024-12-12T09:52:42.187Z",
+        "modifie_le": "2025-06-24T20:42:18.076Z",
         "nom": "ASSISTANCE FORMATION EQUIPEMENT 56.COM (AFE56.COM)",
         "description": "",
         "acteur_type": [
             "commerce"
         ],
-        "adresse": "24  RUE DU CAPITAINE BERTRAND",
+        "adresse": "24  Rue Du Capitaine Bertrand",
         "adresse_complement": "",
         "code_postal": "56400",
         "ville": "Auray",
@@ -206,7 +421,9 @@
         "action_principale": null,
         "uuid": "eYKxBYDMDoMXTr8iiw69Ek",
         "labels": [
-            2
+            [
+                "qualirepar"
+            ]
         ],
         "acteur_services": [
             [
@@ -224,13 +441,13 @@
     "model": "qfdmo.displayedacteur",
     "fields": {
         "cree_le": "2025-05-13T14:08:22.957Z",
-        "modifie_le": "2025-05-13T14:08:22.957Z",
+        "modifie_le": "2025-06-24T14:51:33.477Z",
         "nom": "Le Relais Bretagne",
         "description": "",
         "acteur_type": [
             "pav_public"
         ],
-        "adresse": "boulevard Anne de Bretagne",
+        "adresse": "Boulevard Anne De Bretagne",
         "adresse_complement": "",
         "code_postal": "56400",
         "ville": "Auray",
@@ -310,7 +527,9 @@
         "action_principale": null,
         "uuid": "XSyppoQHLT37uafQ6kj5M7",
         "labels": [
-            3
+            [
+                "refashion"
+            ]
         ],
         "acteur_services": [
             [
