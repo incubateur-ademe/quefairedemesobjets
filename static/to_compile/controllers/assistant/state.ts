@@ -32,7 +32,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   configureIframeSpecificUI() {
-    if (sessionStorage.getItem("iframe")) {
+    if (sessionStorage.getItem("iframe") === "true") {
       this.iframeValue = true
     }
 
