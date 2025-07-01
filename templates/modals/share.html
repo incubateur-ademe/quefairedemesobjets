@@ -1,12 +1,8 @@
-{% extends "../action.html" %}
+{% extends "./base.html" %}
 {% load seo_tags %}
 
-{% block icon %}
-{% include "./icon.html" %}
-{% endblock icon %}
-
 {% block button_text %}
-Partager
+{{ button_text|default:"Partager à vos proches" }}
 {% endblock button_text %}
 
 {% block modal_title %}
