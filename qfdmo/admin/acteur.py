@@ -381,7 +381,7 @@ class CustomRevisionActeurForm(forms.ModelForm):
 
     def clean_nom(self):
         nom = self.cleaned_data.get("nom")
-        if self.instance.pk is None and nom:
+        if not self.instance.pk and not nom:
             raise ValidationError("Le nom est obligatoire")
         return nom
 
