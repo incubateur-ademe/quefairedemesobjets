@@ -16,7 +16,7 @@ async function searchOnProduitPage(page, searchedAddress: string) {
 
 test("Desktop | La carte s'affiche sur une fiche déchet/objet", async ({ page }) => {
   // Navigate to the carte page
-  await page.goto(`/dechet/lave-linge`, { waitUntil: "networkidle" })
+  await page.goto(`/dechet/lave-linge`, { waitUntil: "domcontentloaded" })
   // await hideDjangoToolbar(page)
   await searchOnProduitPage(page, "Auray")
   const sessionStorage = await page.evaluate(() => window.sessionStorage)
@@ -27,23 +27,23 @@ test("Desktop | La carte s'affiche sur une fiche déchet/objet", async ({ page }
 
 test("Desktop | Le tracking PostHog fonctionne comme prévu", async ({ page }) => {
   // Check that homepage scores 1
-  await page.goto(`/`, { waitUntil: "networkidle" })
+  await page.goto(`/`, { waitUntil: "domcontentloaded" })
   // await hideDjangoToolbar(page)
   let sessionStorage = await page.evaluate(() => window.sessionStorage)
   expect(sessionStorage.homePageView).toBe("0")
 
   // Navigate to a produit page and check that it scores 1
-  await page.goto(`/dechet/lave-linge`, { waitUntil: "networkidle" })
+  await page.goto(`/dechet/lave-linge`, { waitUntil: "domcontentloaded" })
   sessionStorage = await page.evaluate(() => window.sessionStorage)
   expect(sessionStorage.produitPageView).toBe("1")
 
   // Click on a pin on the map and check that it scores 1
   await searchOnProduitPage(page, "Auray")
-  const markers = page.locator(".leaflet-marker-icon")
   // Remove the home marker (red dot) that prevents Playwright from clicking other markers
   await page.evaluate(() => {
     document.querySelector(".leaflet-marker-icon.home-icon")?.remove()
   })
+  const markers = page.locator(".leaflet-marker-icon")
 
   // Ensure we have at least one marker, and let's click on a marker.
   // The approach is feels cumbersome, this is because Playwright has a
@@ -89,7 +89,7 @@ test("Desktop | Le tracking PostHog fonctionne comme prévu", async ({ page }) =
 
   // Ensure that the scores does not increases after
   // several homepage visits
-  await page.goto(`/`, { waitUntil: "networkidle" })
+  await page.goto(`/`, { waitUntil: "domcontentloaded" })
   sessionStorage = await page.evaluate(() => window.sessionStorage)
   expect(sessionStorage.homePageView).toBe("0")
 })
