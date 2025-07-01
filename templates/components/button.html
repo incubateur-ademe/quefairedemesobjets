@@ -1,0 +1,10 @@
+{# Django DSFR does not provides a link that looks like a button #}
+<a
+  {% if testid %}
+  data-testid="{{ testid }}"
+  {% endif %}
+  class="fr-btn fr-btn--secondary {{ class }}"
+  href="{{ href }}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}"
+>
+    {{ text }}
+</a>
