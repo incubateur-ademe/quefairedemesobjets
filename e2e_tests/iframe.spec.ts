@@ -53,18 +53,33 @@ test("Desktop | legacy iframe urls still work", async ({ page }) => {
   )
 })
 
+// test("Desktop | form is visible in the iframe", async ({ page }) => {
+//   await page.goto(`/test_iframe`, { waitUntil: "domcontentloaded" })
+
+//   const iframeElement = page.locator("iframe")
+//   const iframe = iframeElement?.contentFrame()
+//   const form = iframe?.locator("#search_form")
+//   expect(form).not.toBeNull()
+
+//   const formHeight = await iframe?.$eval(
+//     "[data-testid='form-content']",
+//     (el) => el.offsetHeight,
+//   )
+//   expect(formHeight).toBeGreaterThan(600)
+// })
 test("Desktop | form is visible in the iframe", async ({ page }) => {
   await page.goto(`/test_iframe`, { waitUntil: "domcontentloaded" })
 
-  const iframeElement = await page.$("iframe")
-  const iframe = await iframeElement?.contentFrame()
-  const form = await iframe?.$("#search_form")
-  expect(form).not.toBeNull()
+  const iframeElement = page.frameLocator("iframe")
 
-  const formHeight = await iframe?.$eval(
-    "[data-testid='form-content']",
-    (el) => el.offsetHeight,
-  )
+  // Check if the form exists
+  const form = iframeElement.locator("#search_form")
+  await expect(form).toBeVisible()
+
+  // Check form height
+  const formHeight = await iframeElement
+    .locator("[data-testid='form-content']")
+    .evaluate((el) => el.offsetHeight)
   expect(formHeight).toBeGreaterThan(600)
 })
 
