@@ -48,6 +48,10 @@ test.describe("WCAG Compliance Tests", () => {
 
     const accessibilityScanResults = await new AxeBuilder({ page })
       .exclude("[data-disable-axe]")
+      // ImpactCO2 iframe does not load during e2e tests, it is safe
+      // to exclude it usually includes a title and is a valid <iframe>
+      // tag.
+      .exclude('iframe[src*="impactco2.fr"]')
       .withTags(WCAG_TAGS)
       .analyze()
 
