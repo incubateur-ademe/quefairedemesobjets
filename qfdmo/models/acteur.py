@@ -1428,6 +1428,19 @@ class DisplayedPropositionService(BasePropositionService):
         related_name="proposition_services",
     )
 
+    def generate_id_if_missing(self) -> None:
+        """
+        Generate and set the ID for this DisplayedPropositionService instance
+        if it is missing.
+
+        This method is intended for use in contexts where the instance is created
+        outside of the normal dbt clustering process, such as when loading fixtures
+        for tests. It ensures that the ID is correctly initialized,
+        mimicking the logic used during clustering.
+        """
+        if not self.id:
+            self.id = uuid.uuid4()
+
     def natural_key(self):
         return (self.acteur.natural_key(), self.action.natural_key())
 
