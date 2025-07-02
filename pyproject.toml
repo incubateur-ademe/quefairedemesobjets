@@ -106,7 +106,7 @@ django-cors-headers = "^4.6.0"
 django-colorfield = "^0.14.0"
 django-dsfr = "^2.4.0"
 rapidfuzz = "^3.13.0"
-sites-faciles-experiment = "^0.0.10"
+sites-faciles-experiment = "^2.0.0rc2"
 diff-match-patch = "^20241021"
 django-lookbook = "^1.0.2"
 
