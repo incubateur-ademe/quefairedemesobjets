@@ -70,7 +70,7 @@ test("Desktop | legacy iframe urls still work", async ({ page }) => {
 test("Desktop | form is visible in the iframe", async ({ page }) => {
   await page.goto(`/test_iframe`, { waitUntil: "domcontentloaded" })
 
-  const iframeElement = page.frameLocator("iframe")
+  const iframeElement = page.frameLocator("iframe[title='Longue vie aux objets']")
 
   // Check if the form exists
   const form = iframeElement.locator("#search_form")
