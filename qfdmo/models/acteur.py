@@ -260,11 +260,15 @@ class DisplayedActeurQuerySet(models.QuerySet):
         return self.annotate(bonus=Exists(bonus_label_qualite))
 
     def digital(self):
-        return (
+        pks = (
             self.filter(acteur_type__code=DIGITAL_ACTEUR_CODE)
             .annotate(min_action_order=Min("proposition_services__action__order"))
+            .values("min_action_order", "pk")
             .order_by("min_action_order", "?")
+            .values_list("pk", flat=True)
         )
+        ordered_pks = {id_: index for index, id_ in enumerate(pks)}
+        return list(self.filter(pk__in=pks)).sort(key=lambda x: ordered_pks[x.pk])
 
     def physical(self):
         return self.exclude(acteur_type__code=DIGITAL_ACTEUR_CODE)
