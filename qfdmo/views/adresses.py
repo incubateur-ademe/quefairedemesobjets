@@ -217,7 +217,7 @@ class SearchActeursView(
         acteurs = self._acteurs_from_sous_categorie_objet_and_actions()
 
         if self.get_data_from_request_or_bounded_form("digital") == "1":
-            acteurs = acteurs.digital()[:100]
+            acteurs = acteurs.digital()
         else:
             bbox, acteurs = self._bbox_and_acteurs_from_location_or_epci(acteurs)
             acteurs = acteurs[: self._get_max_displayed_acteurs()]
