@@ -1,11 +1,15 @@
 import { expect, test } from "@playwright/test"
-import { hideDjangoToolbar, searchDummyAdresse, searchDummySousCategorieObjet } from "./helpers"
+import {
+  hideDjangoToolbar,
+  searchDummyAdresse,
+  searchDummySousCategorieObjet,
+} from "./helpers"
 
 test("Recherche et modification d'une recherche", async ({ page }) => {
   // Helper function to handle autocomplete inputs
 
   // Navigate to the formulaire page
-  await page.goto(`/formulaire`, { waitUntil: "networkidle" })
+  await page.goto(`/formulaire`, { waitUntil: "domcontentloaded" })
 
   // Hide the Django debug toolbar
   await hideDjangoToolbar(page)
@@ -20,7 +24,9 @@ test("Recherche et modification d'une recherche", async ({ page }) => {
   await searchDummyAdresse(page)
 
   // Submit the search form
-  await page.locator("button[data-testid=formulaire-rechercher-adresses-submit]").click()
+  await page
+    .locator("button[data-testid=formulaire-rechercher-adresses-submit]")
+    .click()
 
   // Expect the Proposer une adresse button to be visible
   await expect(page.getByTestId("formulaire-proposer-une-adresse")).toBeVisible()
