@@ -1,6 +1,3 @@
-from urllib.parse import parse_qs, urlparse
-
-
 class AssistantMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
@@ -47,14 +44,8 @@ class AssistantMiddleware:
         request, we set the iframe value in sessionStorage.
         """
         is_in_iframe_mode = False
-        if "iframe" in request.GET:
-            is_in_iframe_mode = "iframe" in request.GET
-        else:
-            referer = request.META.get("HTTP_REFERER", "")
-            if referer:
-                parsed = urlparse(referer)
-                query = parse_qs(parsed.query)
-                is_in_iframe_mode = "iframe" in query
+        if request.headers.get("Sec-Fetch-Dest") == "iframe":
+            is_in_iframe_mode = True
 
         request.iframe = is_in_iframe_mode
 
