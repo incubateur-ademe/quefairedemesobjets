@@ -101,7 +101,7 @@ createsuperuser:
 
 .PHONY: seed-database
 seed-database:
-	$(DJANGO_ADMIN) loaddata categories labels sources actions produits acteur_services acteur_types objets synonymes suggestions
+	$(DJANGO_ADMIN) loaddata_with_computed_fields categories labels sources actions produits acteur_services acteur_types objets synonymes suggestions
 	$(DJANGO_ADMIN) loaddata_with_computed_fields acteurs propositions_services
 
 .PHONY: createsuperuser-example

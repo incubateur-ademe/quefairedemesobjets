@@ -221,6 +221,7 @@ class Produit(index.Indexed, AbstractBaseProduit):
         help_text="Correspond à l'identifiant ID défini dans les données "
         "<i>Que Faire</i>.",
     )
+
     nom = models.CharField(
         unique=True,
         verbose_name="Libellé",
