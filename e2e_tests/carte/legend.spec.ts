@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test"
-import { hideDjangoToolbar, searchDummyAdresse } from "./helpers"
+import { hideDjangoToolbar, searchDummyAdresse } from "../helpers"
 
 test("Desktop | La carte affiche la légende après une recherche", async ({ page }) => {
   // Navigate to the carte page
