@@ -104,6 +104,11 @@ seed-database:
 	$(DJANGO_ADMIN) loaddata categories labels sources actions produits acteur_services acteur_types objets synonymes suggestions
 	$(DJANGO_ADMIN) loaddata_with_computed_fields acteurs propositions_services
 
+.PHONY: createsuperuser-example
+createsuperuser-example:
+	@echo "Creating Django superuser..."
+	$(DJANGO_ADMIN) shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admin', password='admin')"
+
 .PHONY: generate-fixtures-acteurs
 generate-fixtures-acteurs:
 	$(DJANGO_ADMIN) dumpdata_acteurs
