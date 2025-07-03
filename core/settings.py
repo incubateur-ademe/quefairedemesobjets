@@ -174,13 +174,17 @@ if DEBUG:
 with suppress(ModuleNotFoundError):
     from debug_toolbar.settings import CONFIG_DEFAULTS
 
+    def show_toolbar_callback(request):
+        path_is_not_excluded = not any(p in request.path for p in patterns_to_exclude)
+        # view_is_not_in_iframe_mode = "iframe" not in request.GET
+        return path_is_not_excluded
+
     patterns_to_exclude = [
         "/test_iframe",
+        "/lookbook",
     ]
     DEBUG_TOOLBAR_CONFIG = {
-        "SHOW_TOOLBAR_CALLBACK": lambda request: not any(
-            p in request.path for p in patterns_to_exclude
-        ),
+        "SHOW_TOOLBAR_CALLBACK": show_toolbar_callback,
         "HIDE_IN_STACKTRACES": CONFIG_DEFAULTS["HIDE_IN_STACKTRACES"] + ("sentry_sdk",),
     }
 
@@ -518,5 +522,5 @@ MIDDLEWARE.extend(
 # ---
 LOOKBOOK = {
     "preview_base": ["previews"],
-    "show_previews": DEBUG,
+    "show_previews": decouple.config("SHOE_PREVIEWS", default=True, cast=bool),
 }

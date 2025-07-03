@@ -1,5 +1,6 @@
 import { expect } from "@playwright/test"
 import { test } from "./config"
+import { hideDjangoToolbar } from "./helpers"
 
 test("Desktop | iframe formulaire is loaded with correct parameters", async ({
   page,
@@ -116,7 +117,7 @@ test("Desktop | iframe cannot read the referrer when referrerPolicy is set to no
   expect(referrer).toBe("")
 })
 
-test("iframe can read the referrer when referrerPolicy is not set", async ({
+test("Desktop | iframe can read the referrer when referrerPolicy is not set", async ({
   page,
   assistantUrl,
 }) => {
@@ -134,6 +135,34 @@ test("iframe can read the referrer when referrerPolicy is not set", async ({
 
   // Assert that the referrer is set and not undefined
   expect(referrer).toBe(`${assistantUrl}/test_iframe?carte=1`)
+})
+
+test("Desktop | Test that internal links in iframe mode all lead to an iframe page", async ({
+  page,
+  assistantUrl,
+}) => {
+  test.slow()
+  // Starting URL - change this to your site's starting point
+  await page.goto(`${assistantUrl}?iframe=1`, { waitUntil: "domcontentloaded" })
+  await hideDjangoToolbar(page)
+
+  for (let i = 0; i < 50; i++) {
+    // Check that header.fr-header is NOT present
+    await expect(page.locator("body")).toHaveAttribute(
+      "data-state-iframe-value",
+      "true",
+    )
+
+    // Find all internal links on the page (href starting with the same origin)
+    const links = page.locator(`a[href^="${assistantUrl}"]`)
+
+    // Pick a random internal link to click
+    const count = await links.count()
+    const randomLink = links.nth(Math.floor(Math.random() * count))
+    if (await randomLink.isVisible()) {
+      await randomLink.click()
+    }
+  }
 })
 
 // Need to be run locally with nginx running

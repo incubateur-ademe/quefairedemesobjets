@@ -1,11 +1,11 @@
 <div class="qf-bg-grey-1000-50-hover qf-py-9w">
-    {% if assistant.is_iframe %}
+    {% if iframe %}
         {% include "./_embedded.html" %}
     {% else %}
         {% include "./_standalone.html" %}
     {% endif %}
 </div>
 
-{% if not assistant.is_iframe %}
+{% if not iframe %}
     {% include "./_dsfr_footer.html" %}
 {% endif %}

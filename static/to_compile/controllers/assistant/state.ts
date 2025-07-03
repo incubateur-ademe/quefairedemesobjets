@@ -19,7 +19,7 @@ export default class extends Controller<HTMLElement> {
   declare iframeValue: boolean
 
   connect() {
-    document.addEventListener("turbo:frame-load", this.#initRecurringEvents.bind(this))
+    document.addEventListener("turbo:load", this.#initRecurringEvents.bind(this))
   }
 
   #initRecurringEvents(event) {
@@ -34,6 +34,14 @@ export default class extends Controller<HTMLElement> {
   configureIframeSpecificUI() {
     if (sessionStorage.getItem("iframe") === "true") {
       this.iframeValue = true
+      const url = new URL(window.location.href)
+      const params = url.searchParams
+
+      if (!params.has("iframe")) {
+        params.set("iframe", "1")
+        url.search = params.toString()
+        window.location.href = url.toString()
+      }
     }
 
     if (this.iframeValue) {
