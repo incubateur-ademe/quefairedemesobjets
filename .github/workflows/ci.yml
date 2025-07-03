@@ -144,6 +144,10 @@ jobs:
         run: |
           make seed-database
 
+      - name: Init django admin superuser
+        run: |
+          make createsuperuser-example
+
       - name: Run server
         run: |
           poetry run python manage.py runserver &

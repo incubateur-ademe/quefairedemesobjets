@@ -3,7 +3,7 @@ import {
   hideDjangoToolbar,
   searchDummyAdresse,
   searchDummySousCategorieObjet,
-} from "./helpers"
+} from "../helpers"
 
 test("Recherche et modification d'une recherche", async ({ page }) => {
   // Helper function to handle autocomplete inputs

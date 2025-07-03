@@ -35,7 +35,7 @@ def displayed_acteur():
 def django_db_setup(django_db_setup, django_db_blocker):
     with django_db_blocker.unblock():
         call_command(
-            "loaddata",
+            "loaddata_with_computed_fields",
             "produits",
             "categories",
             "actions",
