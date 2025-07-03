@@ -129,7 +129,6 @@ test("Desktop | iframe can read the referrer when referrerPolicy is not set", as
   const iframeElement = await page.$("iframe[data-testid='assistant']")
   const iframe = await iframeElement?.contentFrame()
   expect(iframe).not.toBeNull()
-  hideDjangoToolbar(iframe)
 
   // Evaluate the referrer inside the iframe
   const referrer = await iframe!.evaluate(() => document.referrer)
