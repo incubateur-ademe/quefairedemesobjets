@@ -9,7 +9,6 @@ from django.urls.base import reverse
 from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
 from django_extensions.db.fields import AutoSlugField
-from sites_faciles.content_manager.blocks import STREAMFIELD_COMMON_BLOCKS
 from wagtail.admin.panels import FieldPanel, HelpPanel, ObjectList, TabbedInterface
 from wagtail.fields import RichTextField, StreamField
 from wagtail.images.blocks import ImageBlock
@@ -17,6 +16,7 @@ from wagtail.models import Page
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
 
+from qfdmd.blocks import STREAMFIELD_COMMON_BLOCKS
 from qfdmo.models.utils import NomAsNaturalKeyModel
 
 logger = logging.getLogger(__name__)
@@ -63,35 +63,54 @@ class ProduitPage(Page):
         null=True,
     )
 
-    gender = models.CharField("Genre", choices=[("m", "Masculin"), ("f", "Féminin")])
-    number = models.IntegerField("Nombre", choices=[(1, "singulier"), (2, "pluriel")])
+    genre = models.CharField("Genre", choices=[("m", "Masculin"), ("f", "Féminin")])
+    nombre = models.IntegerField("Nombre", choices=[(1, "singulier"), (2, "pluriel")])
+    usage_unique = models.BooleanField(
+        "À usage unique",
+        default=False,
+    )
 
     infotri = StreamField([("image", ImageBlock())], blank=True)
     body = StreamField(
         STREAMFIELD_COMMON_BLOCKS, verbose_name="Corps de texte", blank=True
     )
+    commentaire = RichTextField(blank=True)
 
     def build_streamfield_from_legacy_data(self):
         if not self.produit and not self.synonyme and not self.infotri:
             # TODO: test
             return
 
-        if produit := self.produit:
+        legacy_produit_or_synonyme = None
+        infotri = None
+        if self.produit:
+            legacy_produit_or_synonyme = self.produit
+            infotri = self.produit.infotri
+
+        if self.synonyme:
+            legacy_produit_or_synonyme = self.synonyme
+            infotri = self.synonyme.produit.infotri
+
+        if infotri is not None:
+            self.infotri = [
+                ("image", {"image": block.value, "decorative": True})
+                for block in infotri
+            ]
+
+        if legacy_produit_or_synonyme is not None:
             tabs = []
-            if text := produit.mauvais_etat:
+            if text := legacy_produit_or_synonyme.mauvais_etat:
                 tabs.append(
                     ("tabs", {"title": "Mauvais état", "content": [("text", text)]})
                 )
 
-            if text := produit.bon_etat:
+            if text := legacy_produit_or_synonyme.bon_etat:
                 tabs.append(
                     ("tabs", {"title": "Bon état", "content": [("text", text)]})
                 )
 
-            if infotri := produit.infotri:
-                self.infotri = infotri
-
-            self.body = [("tabs", tabs), *self.body]
+            if len(tabs) > 0:
+                self.body = [("tabs", tabs), *self.body]
 
         self.save_revision()
 
@@ -118,9 +137,14 @@ class ProduitPage(Page):
         ),
         FieldPanel("produit"),
         FieldPanel("synonyme"),
+        FieldPanel("commentaire"),
     ]
 
-    config_panels = [FieldPanel("gender"), FieldPanel("number")]
+    config_panels = [
+        FieldPanel("genre"),
+        FieldPanel("nombre"),
+        FieldPanel("usage_unique"),
+    ]
 
     edit_handler = TabbedInterface(
         [
@@ -148,14 +172,14 @@ class ProduitPage(Page):
 
 
 class FamilyPage(ProduitPage):
-    subpage_types = ["qfdmd.produitpage"]
+    subpage_types = ["qfdmd.produitpage", "qfdmd.synonymepage"]
 
     class Meta:
         verbose_name = "Famille"
 
 
 class SynonymePage(Page):
-    parent_page_types = ["qfdmd.produitpage"]
+    parent_page_types = ["qfdmd.produitpage", "qfdmd.familypage"]
 
     class Meta:
         verbose_name = "Synonyme de recherche"

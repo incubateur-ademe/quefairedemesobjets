@@ -21,8 +21,6 @@ logger = logging.getLogger(__name__)
 
 
 def legacy_migrate(request, id):
-    logger.info(f"Récupération des données salesforce pour la page {id}")
-
     page = Page.objects.get(id=id).specific
     if not page.produit and not page.synonyme and not page.infotri:
         messages.warning(
