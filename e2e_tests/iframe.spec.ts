@@ -144,22 +144,17 @@ test("Desktop | iFrame mode persists across navigation", async ({
 }) => {
   test.slow()
   // Starting URL - change this to your site's starting point
-  await page.goto(`/lookbook/inspect/iframe/assistant/`, { waitUntil: "networkidle" })
-  const iframeElement = page.locator(
-    "iframe[title='Écran | Que Faire de mes objets & déchets']",
-  )
-  const iframe = iframeElement?.contentFrame()
-  expect(iframe).not.toBeNull()
+  await page.goto(`${assistantUrl}/?iframe`, { waitUntil: "domcontentloaded" })
+  expect(page).not.toBeNull()
 
   for (let i = 0; i < 50; i++) {
-    // Check that header.fr-header is NOT present
-    await expect(iframe.locator("body")).toHaveAttribute(
+    await expect(page.locator("body")).toHaveAttribute(
       "data-state-iframe-value",
       "true",
     )
 
     // Find all internal links on the page (href starting with the same origin)
-    const links = iframe.locator(`a[href^="${assistantUrl}"]`)
+    const links = page.locator(`a[href^="${assistantUrl}"]`)
 
     // Pick a random internal link to click
     const count = await links.count()
