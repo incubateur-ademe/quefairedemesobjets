@@ -129,6 +129,7 @@ test("Desktop | iframe can read the referrer when referrerPolicy is not set", as
   const iframeElement = await page.$("iframe[data-testid='assistant']")
   const iframe = await iframeElement?.contentFrame()
   expect(iframe).not.toBeNull()
+  hideDjangoToolbar(iframe)
 
   // Evaluate the referrer inside the iframe
   const referrer = await iframe!.evaluate(() => document.referrer)
@@ -137,24 +138,28 @@ test("Desktop | iframe can read the referrer when referrerPolicy is not set", as
   expect(referrer).toBe(`${assistantUrl}/test_iframe?carte=1`)
 })
 
-test("Desktop | Test that internal links in iframe mode all lead to an iframe page", async ({
+test("Desktop | iFrame mode persists across navigation", async ({
   page,
   assistantUrl,
 }) => {
   test.slow()
   // Starting URL - change this to your site's starting point
-  await page.goto(`${assistantUrl}?iframe=1`, { waitUntil: "domcontentloaded" })
-  await hideDjangoToolbar(page)
+  await page.goto(`/lookbook/inspect/iframe/assistant/`, { waitUntil: "networkidle" })
+  const iframeElement = page.locator(
+    "iframe[title='Écran | Que Faire de mes objets & déchets']",
+  )
+  const iframe = iframeElement?.contentFrame()
+  expect(iframe).not.toBeNull()
 
   for (let i = 0; i < 50; i++) {
     // Check that header.fr-header is NOT present
-    await expect(page.locator("body")).toHaveAttribute(
+    await expect(iframe.locator("body")).toHaveAttribute(
       "data-state-iframe-value",
       "true",
     )
 
     // Find all internal links on the page (href starting with the same origin)
-    const links = page.locator(`a[href^="${assistantUrl}"]`)
+    const links = iframe.locator(`a[href^="${assistantUrl}"]`)
 
     // Pick a random internal link to click
     const count = await links.count()
@@ -164,23 +169,3 @@ test("Desktop | Test that internal links in iframe mode all lead to an iframe pa
     }
   }
 })
-
-// Need to be run locally with nginx running
-// test("Desktop | iframe mode is kept during navigation", async ({ browser, page, carteUrl, assistantUrl }) => {
-//   await page.goto(`/dechet/chaussures?iframe`, { waitUntil: "domcontentloaded" });
-//   page.getByTestId("header-logo-link").click()
-//   await expect(page).toHaveURL(`${assistantUrl}`)
-//   expect(await page.$("body > footer")).toBeFalsy()
-//   await page.close()
-
-//   const newPage = await browser.newPage()
-//   await newPage.goto(`/dechet/chaussures`, { waitUntil: "networkidle" });
-//   expect(browser.contexts)
-//   expect(await newPage.$("body > footer")).toBeTruthy()
-//   await newPage.close()
-//   const yetAnotherPage = await browser.newPage()
-//   await yetAnotherPage.goto(`/dechet/chaussures?iframe`, { waitUntil: "networkidle" });
-//   await yetAnotherPage.goto(`/`, { waitUntil: "networkidle" });
-//   await yetAnotherPage.goto(`/dechet/chaussures`, { waitUntil: "networkidle" });
-//   expect(await yetAnotherPage.$("body > footer")).not.toBeTruthy()
-// });

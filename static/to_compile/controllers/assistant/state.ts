@@ -31,22 +31,6 @@ export default class extends Controller<HTMLElement> {
     this.configureIframeSpecificUI()
   }
 
-  configureIframeSpecificUI() {
-    if (sessionStorage.getItem("iframe") === "true") {
-      this.iframeValue = true
-      this.#redirectIfIframeMisconfigured()
-    }
-
-    if (this.iframeValue) {
-      document.querySelectorAll<HTMLLinkElement>('a[href^="/"]').forEach((link) => {
-        const url = new URL(link.href, window.location.origin)
-        url.searchParams.set("iframe", "1")
-        link.href = url.toString()
-      })
-      sessionStorage.setItem("iframe", "true")
-    }
-  }
-
   #redirectIfIframeMisconfigured() {
     /**
     In some situation, the sessionStorage read a true value for iframe whereas
@@ -61,6 +45,22 @@ export default class extends Controller<HTMLElement> {
       params.set("iframe", "1")
       url.search = params.toString()
       window.location.href = url.toString()
+    }
+  }
+
+  configureIframeSpecificUI() {
+    if (sessionStorage.getItem("iframe") === "true") {
+      this.iframeValue = true
+      this.#redirectIfIframeMisconfigured()
+    }
+
+    if (this.iframeValue) {
+      document.querySelectorAll<HTMLLinkElement>('a[href^="/"]').forEach((link) => {
+        const url = new URL(link.href, window.location.origin)
+        url.searchParams.set("iframe", "1")
+        link.href = url.toString()
+      })
+      sessionStorage.setItem("iframe", "true")
     }
   }
 

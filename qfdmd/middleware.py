@@ -47,6 +47,9 @@ class AssistantMiddleware:
         if request.headers.get("Sec-Fetch-Dest") == "iframe":
             is_in_iframe_mode = True
 
+        if "iframe" in request.GET:
+            is_in_iframe_mode = True
+
         request.iframe = is_in_iframe_mode
 
     def _persist_iframe_in_headers(self, request, response):

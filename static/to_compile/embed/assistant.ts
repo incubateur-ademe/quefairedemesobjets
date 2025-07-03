@@ -11,7 +11,7 @@ function initScript() {
   if (slug) {
     parts.push("dechet", slug)
   }
-  parts.push(`?${URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE}=1`)
+  parts.push(`?iframe&${URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE}=1`)
   const src = parts.join("/")
 
   const iframe = document.createElement("iframe")
