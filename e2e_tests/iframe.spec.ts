@@ -2,7 +2,7 @@ import { expect } from "@playwright/test"
 import { test } from "./config"
 import { hideDjangoToolbar } from "./helpers"
 
-test("Desktop | iframe formulaire is loaded with correct parameters", async ({
+test("iframe formulaire is loaded with correct parameters", async ({
   page,
   carteUrl,
 }) => {
@@ -37,7 +37,7 @@ test("Desktop | iframe formulaire is loaded with correct parameters", async ({
   expect(title).toBe("Longue vie aux objets")
 })
 
-test("Desktop | legacy iframe urls still work", async ({ page }) => {
+test("legacy iframe urls still work", async ({ page }) => {
   await page.goto(
     `/formulaire?direction=jai&first_dir=jai&action_list=reparer%7Cechanger%7Cmettreenlocation%7Crevendre`,
     { waitUntil: "domcontentloaded" },
@@ -68,7 +68,7 @@ test("Desktop | legacy iframe urls still work", async ({ page }) => {
 //   )
 //   expect(formHeight).toBeGreaterThan(600)
 // })
-test("Desktop | form is visible in the iframe", async ({ page }) => {
+test("form is visible in the iframe", async ({ page }) => {
   await page.goto(`/test_iframe`, { waitUntil: "domcontentloaded" })
 
   const iframeElement = page.frameLocator("iframe[title='Longue vie aux objets']")
@@ -84,7 +84,7 @@ test("Desktop | form is visible in the iframe", async ({ page }) => {
   expect(formHeight).toBeGreaterThan(600)
 })
 
-test("Desktop | iframe with 0px parent height displays correctly", async ({ page }) => {
+test("iframe with 0px parent height displays correctly", async ({ page }) => {
   await page.goto(`/test_iframe?carte_with_defaults=1`, {
     waitUntil: "domcontentloaded",
   })
@@ -100,7 +100,7 @@ test("Desktop | iframe with 0px parent height displays correctly", async ({ page
   await expect(page).toHaveScreenshot("iframe.png")
 })
 
-test("Desktop | iframe cannot read the referrer when referrerPolicy is set to no-referrer", async ({
+test("iframe cannot read the referrer when referrerPolicy is set to no-referrer", async ({
   page,
 }) => {
   await page.goto(`/test_iframe?carte=1&noreferrer`, { waitUntil: "domcontentloaded" })
@@ -117,7 +117,7 @@ test("Desktop | iframe cannot read the referrer when referrerPolicy is set to no
   expect(referrer).toBe("")
 })
 
-test("Desktop | iframe can read the referrer when referrerPolicy is not set", async ({
+test("iframe can read the referrer when referrerPolicy is not set", async ({
   page,
   assistantUrl,
 }) => {
@@ -137,10 +137,7 @@ test("Desktop | iframe can read the referrer when referrerPolicy is not set", as
   expect(referrer).toBe(`${assistantUrl}/test_iframe?carte=1`)
 })
 
-test("Desktop | iFrame mode persists across navigation", async ({
-  page,
-  assistantUrl,
-}) => {
+test("iFrame mode persists across navigation", async ({ page, assistantUrl }) => {
   test.slow()
   // Starting URL - change this to your site's starting point
   await page.goto(`${assistantUrl}/?iframe`, { waitUntil: "domcontentloaded" })
