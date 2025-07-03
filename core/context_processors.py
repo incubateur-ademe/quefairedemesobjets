@@ -26,9 +26,9 @@ def content(request):
 
 def global_context(request) -> dict:
     base = {
+        "iframe": getattr(request, "iframe", False),
         "assistant": {
             "is_home": request.path == reverse("home"),
-            "is_iframe": "iframe" in request.GET,
             "POSTHOG_KEY": settings.ASSISTANT["POSTHOG_KEY"],
             "MATOMO_ID": settings.ASSISTANT["MATOMO_ID"],
             "BASE_URL": settings.ASSISTANT["BASE_URL"],

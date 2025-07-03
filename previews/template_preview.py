@@ -1,5 +1,7 @@
 # Ignore line length recommandations from flake8
 # flake8: noqa: E501
+from django.conf import settings
+from django.template import Context, Template
 from django.template.loader import render_to_string
 from django_lookbook.preview import LookbookPreview
 
@@ -92,3 +94,69 @@ class SnippetsPreview(LookbookPreview):
     def share_and_embed(self, **kwargs):
         context = {"heading": "Faites découvrir ce site"}
         return render_to_string("snippets/share_and_embed.html", context)
+
+
+class IframePreview(LookbookPreview):
+    def carte(self, **kwargs):
+        template = Template(
+            f"""
+            <script src="{settings.ASSISTANT["BASE_URL"]}/static/carte.js"></script>
+            """,
+        )
+        return template.render(Context({}))
+
+    def carte_sur_mesure(self, **kwargs):
+        template = Template(
+            f"""
+            <script src="{settings.ASSISTANT["BASE_URL"]}/static/carte.js" data-slug="cyclevia"></script>
+            """,
+        )
+
+        return template.render(Context({}))
+
+    def carte_preconfiguree(self, **kwargs):
+        template = Template(
+            f"<script src='{settings.ASSISTANT['BASE_URL']}/static/carte.js'"
+            """data-action_displayed="preter|emprunter|louer|mettreenlocation|reparer|donner|echanger|acheter|revendre"
+            data-max-width="800px"
+            data-height="720px"
+            data-bounding_box="{&quot;southWest&quot;: {&quot;lat&quot;: 47.570401, &quot;lng&quot;: 1.597977}, &quot;northEast&quot;: {&quot;lat&quot;: 48.313697, &quot;lng&quot;: 3.059159}}"
+            ></script>
+            """
+        )
+
+        return template.render(Context({}))
+
+    def formulaire(self, **kwargs):
+        template = Template(
+            f"<script src='{settings.LVAO['BASE_URL']}/static/iframe.js'"
+            """
+                data-max_width="100%"
+                data-height="720px"
+                data-direction="jai"
+                data-first_dir="jai"
+                data-action_list="reparer|echanger|mettreenlocation|revendre"
+                data-iframe_attributes='{"loading":"lazy", "id" : "resize" }'>
+                </script>
+            """
+        )
+
+        return template.render(Context({}))
+
+    def assistant(self, **kwargs):
+        template = Template(
+            f"""
+        <script src="{settings.ASSISTANT["BASE_URL"]}/iframe.js" data-testid='assistant'></script>
+        """
+        )
+
+        return template.render(Context({}))
+
+    def assistant_without_referrer(self, **kwargs):
+        template = Template(
+            f"""
+        <script src="{settings.ASSISTANT["BASE_URL"]}/iframe.js" data-debug-referrer data-testid='assistant'></script>
+        """
+        )
+
+        return template.render(Context({}))

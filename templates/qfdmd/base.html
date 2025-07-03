@@ -48,9 +48,7 @@
         data-state-adresse-value=""
         data-state-longitude-value=""
         data-state-latitude-value=""
-        {% if "iframe" in request.GET %}
-        data-state-iframe-value="true"
-        {% endif %}
+        data-state-iframe-value="{{ request.iframe|yesno:'true,false' }}"
         data-state-map-outlet="[data-controller='map']"
         data-state-address-autocomplete-outlet="[data-controller='address-autocomplete']"
         data-state-search-solution-form-outlet="[data-controller='search-solution-form']"
@@ -121,7 +119,7 @@
 
         {% dsfr_js %}
         <script type="module" src="{% static 'qfdmd.js' %}"></script>
-        {% if assistant.is_iframe and request.user.is_authenticated %}
+        {% if iframe and request.user.is_authenticated %}
             <div class="qf-bg-warning-425-625-hover qf-text-white qf-text-center qf-w-screen qf-py-1v qf-text-xs">
             Le mode iframe de l'assistant est actif
             </div>

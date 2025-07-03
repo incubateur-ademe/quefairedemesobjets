@@ -1,4 +1,4 @@
-{% extends request.GET|iframe:"components/header/base.html" %}
+{% extends request.iframe|yesno:"components/header/base.iframe.html,components/header/base.html" %}
 
 {% load menu_tags static %}
 

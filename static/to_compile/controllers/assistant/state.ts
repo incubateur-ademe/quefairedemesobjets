@@ -19,7 +19,7 @@ export default class extends Controller<HTMLElement> {
   declare iframeValue: boolean
 
   connect() {
-    document.addEventListener("turbo:frame-load", this.#initRecurringEvents.bind(this))
+    document.addEventListener("turbo:load", this.#initRecurringEvents.bind(this))
   }
 
   #initRecurringEvents(event) {
@@ -31,9 +31,27 @@ export default class extends Controller<HTMLElement> {
     this.configureIframeSpecificUI()
   }
 
+  #redirectIfIframeMisconfigured() {
+    /**
+    In some situation, the sessionStorage read a true value for iframe whereas
+    the url does not contain the iframe param.
+    The cause is yet unclear, but as fallback we detect this situation and redirect
+    the user dynamically to the correct location, with iframe in the querystring.
+    */
+    const url = new URL(window.location.href)
+    const params = url.searchParams
+
+    if (!params.has("iframe")) {
+      params.set("iframe", "1")
+      url.search = params.toString()
+      window.location.href = url.toString()
+    }
+  }
+
   configureIframeSpecificUI() {
     if (sessionStorage.getItem("iframe") === "true") {
       this.iframeValue = true
+      this.#redirectIfIframeMisconfigured()
     }
 
     if (this.iframeValue) {
