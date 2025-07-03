@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test"
-import dotenv from 'dotenv';
-import path from 'path'
+import dotenv from "dotenv"
+import path from "path"
 
 /**
  * Read environment variables from file.
@@ -12,7 +12,7 @@ import path from 'path'
  * See https://playwright.dev/docs/test-configuration.
  */
 
-dotenv.config({ path: path.resolve(__dirname, '.env') });
+dotenv.config({ path: path.resolve(__dirname, ".env") })
 
 export default defineConfig({
   testDir: "./e2e_tests",
@@ -37,18 +37,18 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
-      grepInvert: /Mobile/,
+      grepInvert: /@mobile/,
       use: {
         ...devices["Desktop Chrome"],
         launchOptions: {
-          args: ['--ignore-certificate-errors']
-        }
+          args: ["--ignore-certificate-errors"],
+        },
       },
-
     },
     {
       name: "Mobile Safari",
-      grepInvert: /Desktop/,
+      grepInvert: /@desktop/,
+      grep: /@mobile|@responsive/,
       use: {
         ...devices["iPhone 12"],
       },

@@ -7,7 +7,7 @@ const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]
 const IFRAME_SELECTOR = "iframe"
 
 test.describe("WCAG Compliance Tests", () => {
-  test("Formulaire iFrame | Desktop", async ({ page }) => {
+  test("Formulaire iFrame", async ({ page }) => {
     await page.goto(`/test_iframe`, { waitUntil: "domcontentloaded" })
 
     const accessibilityScanResults = await new AxeBuilder({ page })
@@ -18,7 +18,7 @@ test.describe("WCAG Compliance Tests", () => {
     expect(accessibilityScanResults.violations).toEqual([])
   })
 
-  test("Carte iFrame | Desktop", async ({ page }) => {
+  test("Carte iFrame", async ({ page }) => {
     await page.goto(`/test_iframe?carte`, { waitUntil: "domcontentloaded" })
 
     const accessibilityScanResults = await new AxeBuilder({ page })
@@ -29,7 +29,7 @@ test.describe("WCAG Compliance Tests", () => {
     expect(accessibilityScanResults.violations).toEqual([])
   })
 
-  test("Assistant Homepage | Desktop", async ({ page, assistantUrl }) => {
+  test("Assistant Homepage", async ({ page, assistantUrl }) => {
     // TODO: Update the route for production
     await page.goto(`${assistantUrl}/`, { waitUntil: "domcontentloaded" })
 
@@ -41,7 +41,7 @@ test.describe("WCAG Compliance Tests", () => {
     expect(accessibilityScanResults.violations).toEqual([])
   })
 
-  test("Assistant Detail Page | Desktop", async ({ page, assistantUrl }) => {
+  test("Assistant Detail Page", async ({ page, assistantUrl }) => {
     await page.goto(`${assistantUrl}/dechet/smartphone`, {
       waitUntil: "domcontentloaded",
     })

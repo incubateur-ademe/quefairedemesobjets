@@ -25,6 +25,14 @@ class ComponentsPreview(LookbookPreview):
     def logo_homepage(self, **kwargs):
         return render_to_string("components/logo/homepage.html")
 
+    def produit_heading(self, **kwargs):
+        context = {"title": "Coucou !"}
+        return render_to_string("components/produit/heading.html", context)
+
+    def produit_heading_family(self, **kwargs):
+        context = {"title": "Coucou !"}
+        return render_to_string("components/produit/heading_family.html", context)
+
 
 class ModalsPreview(LookbookPreview):
     def embed(self, **kwargs):

@@ -240,6 +240,12 @@ class Produit(index.Indexed, AbstractBaseProduit):
         except (KeyError, TypeError):
             return ""
 
+    id = models.IntegerField(
+        primary_key=True,
+        help_text="Correspond à l'identifiant ID défini dans les données "
+        "<i>Que Faire</i>.",
+    )
+
     nom = models.CharField(
         unique=True,
         verbose_name="Libellé",
