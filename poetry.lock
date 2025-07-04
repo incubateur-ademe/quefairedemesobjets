@@ -993,7 +993,7 @@ version = "1.17.1"
 description = "Foreign Function Interface for Python calling C code."
 optional = false
 python-versions = ">=3.8"
-groups = ["airflow"]
+groups = ["main", "airflow"]
 markers = "platform_python_implementation != \"PyPy\""
 files = [
     {file = "cffi-1.17.1-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:df8b1c11f177bc2313ec4b2d46baec87a5f3e71fc8b45dab2ee7cae86d9aba14"},
@@ -1326,7 +1326,7 @@ version = "45.0.4"
 description = "cryptography is a package which provides cryptographic recipes and primitives to Python developers."
 optional = false
 python-versions = "!=3.9.0,!=3.9.1,>=3.7"
-groups = ["airflow"]
+groups = ["main", "airflow"]
 files = [
     {file = "cryptography-45.0.4-cp311-abi3-macosx_10_9_universal2.whl", hash = "sha256:425a9a6ac2823ee6e46a76a21a4e8342d8fa5c01e08b823c1f19a8b74f096069"},
     {file = "cryptography-45.0.4-cp311-abi3-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:680806cf63baa0039b920f4976f5f31b10e772de42f16310a6839d9f21a26b0d"},
@@ -1976,21 +1976,6 @@ Django = "*"
 testing = ["django-modelcluster"]
 
 [[package]]
-name = "django-sass-processor"
-version = "1.4.2"
-description = "SASS processor to compile SCSS files into *.css, while rendering, or offline."
-optional = false
-python-versions = "*"
-groups = ["main"]
-files = [
-    {file = "django_sass_processor-1.4.2-py3-none-any.whl", hash = "sha256:604b00b19f7bbccfb838f766a284257bad3bb4ec3012f0770a1415913783bacc"},
-    {file = "django_sass_processor-1.4.2.tar.gz", hash = "sha256:59c1028b5a5bd0158a0ea92ac5d538e5d89eb547e910a45e334d9c7b3b814b18"},
-]
-
-[package.extras]
-management-command = ["django-compressor (>=2.4)"]
-
-[[package]]
 name = "django-storages"
 version = "1.14.6"
 description = "Support for many storage backends in Django"
@@ -2056,14 +2041,14 @@ typing-extensions = "*"
 
 [[package]]
 name = "django-taggit"
-version = "5.0.1"
+version = "6.1.0"
 description = "django-taggit is a reusable Django application for simple tagging."
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "django-taggit-5.0.1.tar.gz", hash = "sha256:edcd7db1e0f35c304e082a2f631ddac2e16ef5296029524eb792af7430cab4cc"},
-    {file = "django_taggit-5.0.1-py3-none-any.whl", hash = "sha256:a0ca8a28b03c4b26c2630fd762cb76ec39b5e41abf727a7b66f897a625c5e647"},
+    {file = "django_taggit-6.1.0-py3-none-any.whl", hash = "sha256:ab776264bbc76cb3d7e49e1bf9054962457831bd21c3a42db9138b41956e4cf0"},
+    {file = "django_taggit-6.1.0.tar.gz", hash = "sha256:c4d1199e6df34125dd36db5eb0efe545b254dec3980ce5dd80e6bab3e78757c3"},
 ]
 
 [package.dependencies]
@@ -2071,14 +2056,14 @@ Django = ">=4.1"
 
 [[package]]
 name = "django-tasks"
-version = "0.6.1"
+version = "0.7.0"
 description = "An implementation and backport of background workers and tasks in Django"
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "django_tasks-0.6.1-py3-none-any.whl", hash = "sha256:b3648e28bdcda809cb7831f3aff98aa46c327025447c462b8943cce9dfbb0281"},
-    {file = "django_tasks-0.6.1.tar.gz", hash = "sha256:4086e7eb9e965f79c4ac76f5c3690ec3bf41c461585237b71b4bde729ced9826"},
+    {file = "django_tasks-0.7.0-py3-none-any.whl", hash = "sha256:8a8d64f2dc6e29ac2f45092d90e2dd82dc1dca100dfe3a4f2ce1209db99f3527"},
+    {file = "django_tasks-0.7.0.tar.gz", hash = "sha256:499f80d1a051566443cfa88a300d8b03435af7fc5708cad4d8da6d285614f739"},
 ]
 
 [package.dependencies]
@@ -2087,9 +2072,10 @@ django-stubs-ext = "*"
 typing_extensions = "*"
 
 [package.extras]
-dev = ["coverage", "dj-database-url", "django-stubs[compatible-mypy]", "ruff"]
+dev = ["coverage", "dj-database-url", "django-stubs[compatible-mypy]", "django-tasks[rq]", "fakeredis", "ruff"]
 mysql = ["mysqlclient"]
 postgres = ["psycopg[binary]"]
+rq = ["django-rq", "rq_scheduler"]
 
 [[package]]
 name = "django-treebeard"
@@ -2250,7 +2236,7 @@ version = "37.4.0"
 description = "Faker is a Python package that generates fake data for you."
 optional = false
 python-versions = ">=3.9"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "faker-37.4.0-py3-none-any.whl", hash = "sha256:cb81c09ebe06c32a10971d1bbdb264bb0e22b59af59548f011ac4809556ce533"},
     {file = "faker-37.4.0.tar.gz", hash = "sha256:7f69d579588c23d5ce671f3fa872654ede0e67047820255f43a4aa1925b89780"},
@@ -3001,19 +2987,22 @@ zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
 name = "icalendar"
-version = "5.0.13"
+version = "6.3.1"
 description = "iCalendar parser/generator"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "icalendar-5.0.13-py3-none-any.whl", hash = "sha256:5ded5415e2e1edef5ab230024a75878a7a81d518a3b1ae4f34bf20b173c84dc2"},
-    {file = "icalendar-5.0.13.tar.gz", hash = "sha256:92799fde8cce0b61daa8383593836d1e19136e504fa1671f471f98be9b029706"},
+    {file = "icalendar-6.3.1-py3-none-any.whl", hash = "sha256:7ea1d1b212df685353f74cdc6ec9646bf42fa557d1746ea645ce8779fdfbecdd"},
+    {file = "icalendar-6.3.1.tar.gz", hash = "sha256:a697ce7b678072941e519f2745704fc29d78ef92a2dc53d9108ba6a04aeba466"},
 ]
 
 [package.dependencies]
 python-dateutil = "*"
-pytz = "*"
+tzdata = "*"
+
+[package.extras]
+test = ["coverage", "hypothesis", "pytest", "pytz"]
 
 [[package]]
 name = "identify"
@@ -3195,6 +3184,24 @@ files = [
 ]
 
 [[package]]
+name = "josepy"
+version = "2.0.0"
+description = "JOSE protocol implementation in Python"
+optional = false
+python-versions = "<4.0,>=3.9"
+groups = ["main"]
+files = [
+    {file = "josepy-2.0.0-py3-none-any.whl", hash = "sha256:eb50ec564b1b186b860c7738769274b97b19b5b831239669c0f3d5c86b62a4c0"},
+    {file = "josepy-2.0.0.tar.gz", hash = "sha256:e7d7acd2fe77435cda76092abe4950bb47b597243a8fb733088615fa6de9ec40"},
+]
+
+[package.dependencies]
+cryptography = ">=1.5"
+
+[package.extras]
+docs = ["sphinx (>=4.3.0)", "sphinx-rtd-theme (>=1.0)"]
+
+[[package]]
 name = "jsonschema"
 version = "4.24.0"
 description = "An implementation of JSON Schema validation for Python"
@@ -3288,22 +3295,6 @@ files = [
 
 [package.extras]
 test = ["cssselect (>=0.9.1)", "lxml (>=3.6.0)", "pytest", "pytest-cov"]
-
-[[package]]
-name = "libsass"
-version = "0.23.0"
-description = "Sass for Python: A straightforward binding of libsass for Python."
-optional = false
-python-versions = ">=3.8"
-groups = ["main"]
-files = [
-    {file = "libsass-0.23.0-cp38-abi3-macosx_11_0_x86_64.whl", hash = "sha256:34cae047cbbfc4ffa832a61cbb110f3c95f5471c6170c842d3fed161e40814dc"},
-    {file = "libsass-0.23.0-cp38-abi3-macosx_14_0_arm64.whl", hash = "sha256:ea97d1b45cdc2fc3590cb9d7b60f1d8915d3ce17a98c1f2d4dd47ee0d9c68ce6"},
-    {file = "libsass-0.23.0-cp38-abi3-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:4a218406d605f325d234e4678bd57126a66a88841cb95bee2caeafdc6f138306"},
-    {file = "libsass-0.23.0-cp38-abi3-win32.whl", hash = "sha256:31e86d92a5c7a551df844b72d83fc2b5e50abc6fbbb31e296f7bebd6489ed1b4"},
-    {file = "libsass-0.23.0-cp38-abi3-win_amd64.whl", hash = "sha256:a2ec85d819f353cbe807432d7275d653710d12b08ec7ef61c124a580a8352f3c"},
-    {file = "libsass-0.23.0.tar.gz", hash = "sha256:6f209955ede26684e76912caf329f4ccb57e4a043fd77fe0e7348dd9574f1880"},
-]
 
 [[package]]
 name = "limits"
@@ -3645,6 +3636,24 @@ files = [
     {file = "more_itertools-10.7.0-py3-none-any.whl", hash = "sha256:d43980384673cb07d2f7d2d918c616b30c659c089ee23953f601d6609c67510e"},
     {file = "more_itertools-10.7.0.tar.gz", hash = "sha256:9fddd5403be01a94b204faadcff459ec3568cf110265d3c54323e1e866ad29d3"},
 ]
+
+[[package]]
+name = "mozilla-django-oidc"
+version = "4.0.1"
+description = "A lightweight authentication and access management library for integration with OpenID Connect enabled authentication services."
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "mozilla-django-oidc-4.0.1.tar.gz", hash = "sha256:4ff8c64069e3e05c539cecf9345e73225a99641a25e13b7a5f933ec897b58918"},
+    {file = "mozilla_django_oidc-4.0.1-py2.py3-none-any.whl", hash = "sha256:04ef58759be69f22cdc402d082480aaebf193466cad385dc9e4f8df2a0b187ca"},
+]
+
+[package.dependencies]
+cryptography = "*"
+Django = ">=3.2"
+josepy = "*"
+requests = "*"
 
 [[package]]
 name = "msgpack"
@@ -4871,7 +4880,7 @@ version = "2.9.10"
 description = "psycopg2 - Python-PostgreSQL Database Adapter"
 optional = false
 python-versions = ">=3.8"
-groups = ["airflow"]
+groups = ["main", "airflow"]
 files = [
     {file = "psycopg2-binary-2.9.10.tar.gz", hash = "sha256:4b3df0e6990aa98acda57d983942eff13d824135fe2250e6522edaa782a06de2"},
     {file = "psycopg2_binary-2.9.10-cp310-cp310-macosx_12_0_x86_64.whl", hash = "sha256:0ea8e3d0ae83564f2fc554955d327fa081d065c8ca5cc6d2abb643e2c9c1200f"},
@@ -4970,7 +4979,7 @@ version = "2.22"
 description = "C parser in Python"
 optional = false
 python-versions = ">=3.8"
-groups = ["airflow"]
+groups = ["main", "airflow"]
 markers = "platform_python_implementation != \"PyPy\""
 files = [
     {file = "pycparser-2.22-py3-none-any.whl", hash = "sha256:c3702b6d3dd8c7abc1afa565d7e63d53a1d0bd86cdc24edd75470f4de499cfcc"},
@@ -5380,7 +5389,7 @@ version = "2025.2"
 description = "World timezone definitions, modern and historical"
 optional = false
 python-versions = "*"
-groups = ["main", "airflow"]
+groups = ["airflow"]
 files = [
     {file = "pytz-2025.2-py2.py3-none-any.whl", hash = "sha256:5ddf76296dd8c44c26eb8f4b6f35488f3ccbf6fbbd7adee0b7262d43f0ec2f00"},
     {file = "pytz-2025.2.tar.gz", hash = "sha256:360b9e3dbb49a209c21ad61809c7fb453643e048b38924c765813546746e81c3"},
@@ -5869,6 +5878,31 @@ files = [
 ]
 
 [[package]]
+name = "rust-just"
+version = "1.41.0"
+description = "🤖 Just a command runner"
+optional = false
+python-versions = ">=3.7"
+groups = ["main"]
+files = [
+    {file = "rust_just-1.41.0-py3-none-macosx_10_12_x86_64.whl", hash = "sha256:fad854559adf8b7922a2802aa51b53539cb63146fb5fe5caebb4880a89f02de6"},
+    {file = "rust_just-1.41.0-py3-none-macosx_11_0_arm64.whl", hash = "sha256:ae8b649315bdd7e892b530a9fd5ee5052cdfd1def8abf65de45e300456955ada"},
+    {file = "rust_just-1.41.0-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:93e9cf3bb7578a3b6535739c39f10a9a55e50f155d2a96ed57ceafbf20654bf1"},
+    {file = "rust_just-1.41.0-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:c82f7ba8fcffe22de2bd4a7dcdb8070a4d458a20b1db7ed396a5467576dc8957"},
+    {file = "rust_just-1.41.0-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:f077ab3ed32f87989dbb62d7ac4612fed8008a6a3082c2901e2ac5ecf8afbdf7"},
+    {file = "rust_just-1.41.0-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:0d19fcd36875a966fae79d8aea57b7cf0d575546b6e4ea8dcb82c2738f55b323"},
+    {file = "rust_just-1.41.0-py3-none-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:16a54ea91238fced3e2162c44a681e9d321124742877ec32709f63cf8cf56b53"},
+    {file = "rust_just-1.41.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c125004d31082c3b02631bad62be7b3e2e67f473724ac088c711b84a28634b27"},
+    {file = "rust_just-1.41.0-py3-none-musllinux_1_2_aarch64.whl", hash = "sha256:fa052e1508a7467032cc420cc16715f34efcb22d6321356b08f35ec214a57af4"},
+    {file = "rust_just-1.41.0-py3-none-musllinux_1_2_armv7l.whl", hash = "sha256:9a24c32fface7fff71c56a889278116e49752c280378cbb55e994261dcc7d36a"},
+    {file = "rust_just-1.41.0-py3-none-musllinux_1_2_i686.whl", hash = "sha256:bc06081981d9970b43d3d1433c0bbcffc2432fbdb2be1f5e6ba1c4c39d4e5c7d"},
+    {file = "rust_just-1.41.0-py3-none-musllinux_1_2_x86_64.whl", hash = "sha256:52ff4c3a07deac15e2caf4025a247f7c63ea2efc331c84282e0c3c13e1ac833c"},
+    {file = "rust_just-1.41.0-py3-none-win32.whl", hash = "sha256:a871fe679c5406f98b85aeda79ef1667a76e3121f5d9793553e3daa44dbed9eb"},
+    {file = "rust_just-1.41.0-py3-none-win_amd64.whl", hash = "sha256:f2e1cfe47ba6a1bb5f9a142efd616bbfd669800756fce0db4a75cf4083994b5a"},
+    {file = "rust_just-1.41.0.tar.gz", hash = "sha256:b3118945bb2669bf182a3cc1d56cf5c4042ba2419c25e4aa47efe02039098ffa"},
+]
+
+[[package]]
 name = "s3transfer"
 version = "0.10.4"
 description = "An Amazon S3 Transfer Manager"
@@ -6228,34 +6262,39 @@ files = [
 
 [[package]]
 name = "sites-faciles-experiment"
-version = "0.0.10"
+version = "2.0.0rc3"
 description = "Gestionnaire de contenu permettant de créer et gérer un site internet basé sur le Système de design de l’État, accessible et responsive"
 optional = false
-python-versions = "<4.0,>=3.10"
+python-versions = "<4.0,>=3.11"
 groups = ["main"]
 files = [
-    {file = "sites_faciles_experiment-0.0.10-py3-none-any.whl", hash = "sha256:9da504f479172093d6c5ddf3e3b171b2f0a37ac89f67f365827e21f41cf6bcef"},
-    {file = "sites_faciles_experiment-0.0.10.tar.gz", hash = "sha256:85c10d543d1b5369809688f96fedeaa9f7ca5506d3d85d16bf61c807d0bcb84e"},
+    {file = "sites_faciles_experiment-2.0.0rc3-py3-none-any.whl", hash = "sha256:39c9284c8fc5199b0796512b20f60954eee32a80b52a393a9b604fad9f2c988a"},
+    {file = "sites_faciles_experiment-2.0.0rc3.tar.gz", hash = "sha256:64fd2d9298d943b1f8443a3a2a21d58799d71d44e14fb026c085f05df5c6c4bf"},
 ]
 
 [package.dependencies]
-beautifulsoup4 = ">=4.12.3,<5.0.0"
+beautifulsoup4 = ">=4.13.4"
 boto3 = "1.35.99"
-dj-static = ">=0.0.6,<1.0.0"
-django = ">=5.1.4,<6.0.0"
-django-dsfr = ">=2.1.0,<3.0.0"
-django-sass-processor = ">=1.3,<2.0"
-django-storages = {version = ">=1.14.2,<2.0.0", extras = ["s3"]}
-django-taggit = ">=5.0.1,<6.0.0"
-icalendar = ">=5.0.13,<6.0.0"
-libsass = ">=0.22.0,<1.0.0"
-python-dotenv = ">=1.0.0,<2.0.0"
-unidecode = ">=1.3.8,<2.0.0"
-wagtail = ">=6.1,<7.0"
-wagtail-localize = ">=1.9,<2.0"
-wagtail-markdown = ">=0.11.1,<1.0.0"
-wagtail-modeladmin = ">=2.0.0,<3.0.0"
-wagtailmenus = ">=4.0,<5.0"
+dj-database-url = ">=3.0.0"
+dj-static = ">=0.0.6"
+django = ">=5.2.3"
+django-dsfr = ">=2.4.0"
+django-storages = {version = ">=1.14.6", extras = ["s3"]}
+django-taggit = ">=6.1.0"
+faker = ">=37.4.0"
+gunicorn = ">=23.0.0"
+icalendar = ">=6.3.1"
+mozilla-django-oidc = ">=4.0.1"
+psycopg2-binary = ">=2.9.10"
+python-dotenv = ">=1.1.0"
+rust-just = ">=1.40.0"
+unidecode = ">=1.4.0"
+wagtail = ">=7.0.1"
+wagtail-honeypot = ">=1.2.0"
+wagtail-localize = ">=1.12.1"
+wagtail-markdown = ">=0.12.1"
+wagtail-modeladmin = ">=2.2.0"
+wagtailmenus = ">=4.0.3"
 
 [[package]]
 name = "six"
@@ -6833,7 +6872,6 @@ files = [
     {file = "tzdata-2025.2-py2.py3-none-any.whl", hash = "sha256:1a403fada01ff9221ca8044d701868fa132215d84beb92242d9acd2147f667a8"},
     {file = "tzdata-2025.2.tar.gz", hash = "sha256:b60a638fcc0daffadf82fe0f57e53d06bdec2f36c4df66280ae79bce6bd6f2b9"},
 ]
-markers = {main = "sys_platform == \"win32\""}
 
 [[package]]
 name = "uc-micro-py"
@@ -6922,25 +6960,25 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 
 [[package]]
 name = "wagtail"
-version = "6.4.2"
+version = "7.0.1"
 description = "A Django content management system."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "wagtail-6.4.2-py3-none-any.whl", hash = "sha256:1ceff33a6edae02668d8cd08ea77fc7c1d9835986cb1b75a8fa1b353535ddd90"},
-    {file = "wagtail-6.4.2.tar.gz", hash = "sha256:fcf39430e5fb856674c0cfa3cda67591b44214cc5a99c9308019140eb26ddb42"},
+    {file = "wagtail-7.0.1-py3-none-any.whl", hash = "sha256:92439c50a919826a4ce8c85bdaf3ed0e436d29598bb2954b4fca5f312b969666"},
+    {file = "wagtail-7.0.1.tar.gz", hash = "sha256:cfc5c37738f98cae380a15252f5676604f6c61554bef1a3791e34de1e703beec"},
 ]
 
 [package.dependencies]
 anyascii = ">=0.1.5"
 beautifulsoup4 = ">=4.8,<5"
-Django = ">=4.2,<6.0"
+Django = ">=4.2"
 django-filter = ">=23.3"
 django-modelcluster = ">=6.2.1,<7.0"
 django-permissionedforms = ">=0.1,<1.0"
 django-taggit = ">=5.0,<7"
-django-tasks = ">=0.6.1,<0.7"
+django-tasks = ">=0.7,<0.8"
 django-treebeard = ">=4.5.1,<5.0"
 djangorestframework = ">=3.15.1,<4.0"
 draftjs_exporter = ">=2.1.5,<6.0"
@@ -6953,7 +6991,25 @@ Willow = {version = ">=1.10.0,<2", extras = ["heif"]}
 
 [package.extras]
 docs = ["Sphinx (>=7.3)", "myst_parser (==2.0.0)", "pyenchant (>=3.1.1,<4)", "sphinx-autobuild (>=0.6.0)", "sphinx-wagtail-theme (==6.5.0)", "sphinxcontrib-spelling (>=7,<8)"]
-testing = ["Jinja2 (>=3.0,<3.2)", "azure-mgmt-cdn (>=12.0,<13.0)", "azure-mgmt-frontdoor (>=1.0,<1.1)", "boto3 (>=1.28,<2)", "coverage (>=3.7.0)", "curlylint (==0.13.1)", "django-pattern-library (>=0.7)", "djhtml (==3.0.6)", "doc8 (==0.8.1)", "factory-boy (>=3.2)", "freezegun (>=0.3.8)", "polib (>=1.1,<2.0)", "python-dateutil (>=2.7)", "ruff (==0.1.5)", "semgrep (==1.40.0)", "tblib (>=2.0,<3.0)"]
+testing = ["Jinja2 (>=3.0,<3.2)", "azure-mgmt-cdn (>=12.0,<13.0)", "azure-mgmt-frontdoor (>=1.0,<1.1)", "boto3 (>=1.28,<2)", "coverage (>=3.7.0)", "curlylint (==0.13.1)", "django-pattern-library (>=0.7)", "djhtml (==3.0.6)", "doc8 (==1.1.2)", "factory-boy (>=3.2)", "freezegun (>=0.3.8)", "polib (>=1.1,<2.0)", "python-dateutil (>=2.7)", "ruff (==0.9.6)", "semgrep (==1.40.0)", "tblib (>=2.0,<3.0)"]
+
+[[package]]
+name = "wagtail-honeypot"
+version = "1.2.0"
+description = "Add optional honeypot protection to your Wagtail forms."
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "wagtail_honeypot-1.2.0-py3-none-any.whl", hash = "sha256:19683ec6f62d1a9ff1086bf387dcab35679f95efc31a1bb7bebb3490861337d2"},
+    {file = "wagtail_honeypot-1.2.0.tar.gz", hash = "sha256:9d5fb3af8c2803bc1e6ce8651d474c65bbc7048ab8d3db3c858b9adedc6ec064"},
+]
+
+[package.dependencies]
+Wagtail = ">=5.1"
+
+[package.extras]
+development = ["black (==24.4.2)", "django-upgrade", "flake8 (==7.1.0)", "isort (==5.13.2)", "pyupgrade"]
 
 [[package]]
 name = "wagtail-localize"
@@ -7417,4 +7473,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12,<3.13"
-content-hash = "e6be247f1724f44982b91b735ed9be5ed613c3ae0e11a79d3d433085f0087009"
+content-hash = "eec6561bd4007a0e652d63ccdf7e431a962ef3dca1e1baffed24f14250255606"
