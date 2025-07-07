@@ -23,6 +23,8 @@
             {% include "components/produit/heading.html" with title=page.title infotri=page.infotri %}
         {% endblock main_heading %}
 
+<div class="qf-flex qf-flex-col">
       {% include "sites_faciles_content_manager/blocks/blocks_stream.html" with stream=page.body %}
+    </div>
 </article>
 {% endblock main %}
