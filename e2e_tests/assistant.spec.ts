@@ -25,6 +25,13 @@ test("La carte s'affiche sur une fiche déchet/objet", async ({ page }) => {
   expect(sessionStorage.longitude).toContain("-2.9")
 })
 
+test("Le lien infotri est bien défini", async ({ page }) => {
+  // Navigate to the carte page
+  await page.goto(`/dechet/lave-linge`, { waitUntil: "domcontentloaded" })
+  await page.getByTestId("infotri-link").click()
+  await page.waitForURL("https://www.ecologie.gouv.fr/info-tri")
+})
+
 test("Le tracking PostHog fonctionne comme prévu", async ({ page }) => {
   // Check that homepage scores 1
   await page.goto(`/`, { waitUntil: "domcontentloaded" })
