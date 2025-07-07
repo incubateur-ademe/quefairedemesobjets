@@ -28,8 +28,8 @@ test("La carte s'affiche sur une fiche déchet/objet", async ({ page }) => {
 test("Le lien infotri est bien défini", async ({ page }) => {
   // Navigate to the carte page
   await page.goto(`/dechet/lave-linge`, { waitUntil: "domcontentloaded" })
-  await page.getByTestId("infotri-link").click()
-  await page.waitForURL("https://www.ecologie.gouv.fr/info-tri")
+  const href = await page.getByTestId("infotri-link").getAttribute("href")
+  expect(href).toBe("https://www.ecologie.gouv.fr/info-tri")
 })
 
 test("Le tracking PostHog fonctionne comme prévu", async ({ page }) => {
