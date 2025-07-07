@@ -3,17 +3,26 @@ import { URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE } from "../js/helpers"
 
 const script = document.currentScript as HTMLScriptElement
 const slug = script?.dataset?.objet
+const epci = script?.dataset?.epci
 const origin = new URL(script?.getAttribute("src")).origin
 
 function initScript() {
   const parts = [origin]
   const iframeResizerOptions = { license: "GPLv3" }
+
   if (slug) {
     parts.push("dechet", slug)
   }
-  parts.push(`?iframe&${URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE}=1`)
-  const src = parts.join("/")
 
+  const searchParams = new URLSearchParams()
+  if (epci) {
+    searchParams.set("epci", epci)
+  }
+
+  console.log({ epci })
+  searchParams.set("iframe", "")
+  searchParams.set(URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE, "1")
+  const src = `${parts.join("/")}?${searchParams.toString()}`
   const iframe = document.createElement("iframe")
   const iframeAttributes = {
     src,
@@ -31,6 +40,7 @@ function initScript() {
   if (debugReferrer) {
     iframeAttributes.referrerPolicy = "no-referrer"
   }
+
   for (var key in iframeAttributes) {
     iframe.setAttribute(key, iframeAttributes[key])
   }

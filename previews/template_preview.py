@@ -160,6 +160,15 @@ class IframePreview(LookbookPreview):
 
         return template.render(Context({}))
 
+    def assistant_with_epci(self, **kwargs):
+        template = Template(
+            f"""
+        <script src="{settings.ASSISTANT["BASE_URL"]}/iframe.js" data-epci="200043123" data-objet="lave-linge"></script>
+        """
+        )
+
+        return template.render(Context({}))
+
     def assistant_without_referrer(self, **kwargs):
         template = Template(
             f"""
