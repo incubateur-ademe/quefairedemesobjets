@@ -19,11 +19,12 @@
     qf-gap-6w max-lg:qf-pr-0 max-xl:qf-pr-6w
     qf-pt-3w md:qf-pt-5w"
 >
-        {% block main_heading %}
-            {% include "components/produit/heading.html" with title=page.title infotri=page.infotri %}
-        {% endblock main_heading %}
+    {% block main_heading %}
+        {% include "components/produit/heading.html" with title=page.title infotri=page.infotri %}
+    {% endblock main_heading %}
 
-<div class="qf-flex qf-flex-col">
+    <div class="qf-flex qf-flex-col max-md:qf-order-2 md:qf-row-start-2 md:qf-col-span-2">
+
       {% include "sites_faciles_content_manager/blocks/blocks_stream.html" with stream=page.body %}
     </div>
 </article>
