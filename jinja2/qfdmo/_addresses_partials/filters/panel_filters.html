@@ -19,7 +19,7 @@
 </button>
 {% endblock modal_header %}
 
-{% block modal_title %}Filtres avancés{% endblock modal_title %}
+{% block modal_title %}Filtres avancés{% endblock %}
 
 {% block modal_content %}
 {% include 'qfdmo/_addresses_partials/filters/_labels_filters.html' %}
@@ -47,7 +47,7 @@
         type="button"
         data-action="click -> search-solution-form#advancedSubmit"
         data-without-zone="false"
-        data-with-controls={{"false" if is_carte else "true"}}
+        data-with-controls={{ "false" if is_carte else "true" }}
         data-toggle-advanced-filters="true"
     >
         Appliquer

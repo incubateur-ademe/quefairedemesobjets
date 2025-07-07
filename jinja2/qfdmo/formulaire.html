@@ -1,6 +1,6 @@
 {% extends base_template %}
 
-{% block body_classes %}qf-bg-white{% endblock body_classes %}
+{% block body_classes %}qf-bg-white{% endblock %}
 
 {% block content %}
 <turbo-frame id="mapContainer" class="qf-bg-white">
@@ -17,7 +17,7 @@
         address-autocomplete:formSubmit->search-solution-form#advancedSubmit
         ss-cat-object-autocomplete:formSubmit->search-solution-form#advancedSubmit
         ss-cat-object-autocomplete:optionSelected->search-solution-form#checkSsCatObjetErrorForm
-        {% block form_controller_data_actions %}{% endblock form_controller_data_actions %}"
+        {% block form_controller_data_actions %}{% endblock %}"
         class="
         qf-group
         qf-h-full qf-max-h-svh qf-max-h-screen md:qf-overflow-hidden

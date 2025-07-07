@@ -2,12 +2,12 @@
 
 {% block modal_title %}
 Filtres
-{% endblock %}
+{% endblock modal_title %}
 
 {% block modal_content %}
     <input
-        id="{{ form.direction.id_for_label}}"
-        name="{{ form.direction.html_name}}"
+        id="{{ form.direction.id_for_label }}"
+        name="{{ form.direction.html_name }}"
         value="{{ form.direction.value() or '' }}"
         type="hidden"
         data-search-solution-form-target="direction"

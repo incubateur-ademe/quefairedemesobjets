@@ -13,23 +13,23 @@
         <meta name="robots" content="{% block robots %}index, follow{% endblock %}">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-        {#Meta for linkedin#}
+        {# Meta for linkedin #}
         <meta prefix="og: http://ogp.me/ns#" property="og:title" content="{% block shared_page_title %}Longue vie aux objets{% endblock %}">
         <meta prefix="og: http://ogp.me/ns#" property="og:description" content="{% block shared_page_description %}"Longue vie aux objets", startup d'état de l'ADEME, propose des outils numériques gratuits de sensibilisation au tri et à la consommation responsable qui valorisent les acteurs de l’économie circulaire sur chaque territoire{% endblock %}">
         <meta prefix="og: http://ogp.me/ns#" property="og:image" content="{% block shared_page_image %}{{ request.scheme }}://{{ request.get_host() }}{{ static('lvao-homepage.jpg') }}{% endblock %}">
 
-        {#Title and desc#}
+        {# Title and desc #}
         <title>{% block page_title %}Longue vie aux objets{% endblock %}</title>
         <meta name="description" content="{% block page_description %}Donnons une nouvelle vie aux objets{% endblock %}">
 
-        {#Favicon#}
+        {# Favicon #}
         <link rel="shortcut icon" href="{{ static('favicon-16x16.png') }}" type="image/x-icon">{# 16×16 #}
 
-        {#Css#}
+        {# Css #}
         <link rel="stylesheet" href="{{ static('qfdmo.css') }}">
         {% block css_extras %}{% endblock %}
 
-        {#Js#}
+        {# Js #}
         <script src="{{ static('qfdmo.js') }}"></script>
         {% block javascript_extras %}{% endblock %}
 
@@ -66,7 +66,7 @@
             {% block content %}{% endblock %}
         </main>
 
-        {% block modals %}{% endblock modals %}
+        {% block modals %}{% endblock %}
         {% block js %}
             {% if is_embedded %}
                 <script
