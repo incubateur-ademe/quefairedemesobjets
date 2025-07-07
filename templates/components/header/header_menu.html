@@ -17,7 +17,7 @@
           <ul class="fr-nav__list">
             {% for item in menu_items %}
             <li class="fr-nav__item">
-              <a class="fr-nav__link" href="{{ item.href }}">
+              <a class="fr-nav__link" href="{{ item.href }}" {% if request.path|urlencode == item.href %}aria-current="true"{% endif %}>
                 {{ item.text }}
               </a>
             </li>
