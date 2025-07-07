@@ -1,6 +1,5 @@
 {% extends base_template %}
 
-
 {% block content %}
 <turbo-frame
     id="{{ map_container_id }}"
@@ -38,8 +37,8 @@
         <input type="hidden" name="map_container_id" value="{{ map_container_id }}">
         <section class="map-grid qf-relative">
             <header
-                {# The z-index below can impact the shadow over#}
-                class="{% block header_classes %}qf-z-20{% endblock header_classes %} qf-bg-white qf-shadow-lg"
+                {# The z-index below can impact the shadow over #}
+                class="{% block header_classes %}qf-z-20{% endblock %} qf-bg-white qf-shadow-lg"
             >
                 <div
                     class="

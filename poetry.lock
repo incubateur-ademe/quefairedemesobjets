@@ -1707,6 +1707,28 @@ files = [
 static3 = "*"
 
 [[package]]
+name = "djade"
+version = "1.4.0"
+description = "A Django template formatter."
+optional = false
+python-versions = ">=3.9"
+groups = ["dev"]
+files = [
+    {file = "djade-1.4.0-py3-none-macosx_10_12_x86_64.whl", hash = "sha256:0e5b962993e229459167a6615cdc7f3d7801832647d45817e3339b128576bf2c"},
+    {file = "djade-1.4.0-py3-none-macosx_11_0_arm64.whl", hash = "sha256:0e71c3f2a0c0aed9a67261f44e4bfd7a606c36d3d53ad042aa3cd2b9152bec39"},
+    {file = "djade-1.4.0-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:b732cf9b955f48b1aa484f5a8bdb0dc756cc6f5ac2159662e093e4b297cca8fe"},
+    {file = "djade-1.4.0-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:13e5e2809d0d0e86518f958c71ecac14e29abff2d963e3137522d84104c19579"},
+    {file = "djade-1.4.0-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:e878ab0270ff1fdb2fcaea2bc364f71e5ac4a2893242761a0a244ccdfb3b27b8"},
+    {file = "djade-1.4.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a89f692b8ee46532db4f68a6e56de032581fcfb66961f83fe6282d89570ad4f7"},
+    {file = "djade-1.4.0-py3-none-musllinux_1_1_aarch64.whl", hash = "sha256:94aa91460348ab3e25edd81ac7555843885f8dcf68741d075c8a66af4b70c0f6"},
+    {file = "djade-1.4.0-py3-none-musllinux_1_1_x86_64.whl", hash = "sha256:9179b61af120c7a138074e1546d876c262c8f33f710bc408811e0eae21066e52"},
+    {file = "djade-1.4.0-py3-none-win32.whl", hash = "sha256:62160a16325c6dfb4b52191e9283790745c213127f7abeeb47619a3b0c7cbd77"},
+    {file = "djade-1.4.0-py3-none-win_amd64.whl", hash = "sha256:17d163342f7a892083a70aeb950b5f4a9ae09b443e3c24302a7159937581ea6f"},
+    {file = "djade-1.4.0-py3-none-win_arm64.whl", hash = "sha256:039a3de56f81d8b76722d86768cc1ab87e57c115dc3f131461a2e6d03d820cd1"},
+    {file = "djade-1.4.0.tar.gz", hash = "sha256:e8e88032a1297c7687ea763b0ad1e2f2aa7b9bcdecc6ac25bc717bb611f87c42"},
+]
+
+[[package]]
 name = "django"
 version = "5.2.3"
 description = "A high-level Python web framework that encourages rapid development and clean, pragmatic design."
@@ -7417,4 +7439,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12,<3.13"
-content-hash = "e6be247f1724f44982b91b735ed9be5ed613c3ae0e11a79d3d433085f0087009"
+content-hash = "b0af6c8cf1903be52d9ddec7e3cc01fba4cb731a664692b89240b7d7a3f30726"
