@@ -19,7 +19,6 @@ function initScript() {
     searchParams.set("epci", epci)
   }
 
-  console.log({ epci })
   searchParams.set("iframe", "")
   searchParams.set(URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE, "1")
   const src = `${parts.join("/")}?${searchParams.toString()}`
