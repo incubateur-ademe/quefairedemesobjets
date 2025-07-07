@@ -23,10 +23,13 @@ logger = logging.getLogger(__name__)
 
 
 @register_snippet
-class ReusableContent(models.Model):
+class ReusableContent(index.Indexed, models.Model):
     title = models.CharField()
     content = RichTextField()
     panels = ["title", "content"]
+    search_fields = [
+        index.AutocompleteField("title"),
+    ]
 
     def __str__(self):
         return self.title
