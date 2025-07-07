@@ -25,7 +25,7 @@
             id="{{ id }}"
             allow="geolocation; clipboard-write"
             class="qf-h-full qf-w-full"
-            src="{{ url_carte|default:produit.synonymes.first.url_carte }}{% if epci in request.GET %}&epci_codes={{ request.GET.epci }}{% endif %}">
+            src="{{ url_carte|default:produit.synonymes.first.url_carte }}{% if request.GET.epci %}&epci_codes={{ request.GET.epci }}{% endif %}">
         </turbo-frame>
         </div>
     </section>
