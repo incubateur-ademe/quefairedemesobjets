@@ -1,3 +1,3 @@
-{% load wagtailcore_tags %}
+{% load qfdmd_tags %}
 
-{{ value.content|richtext }}
+{{ value.content|richtext_with_objet:page }}

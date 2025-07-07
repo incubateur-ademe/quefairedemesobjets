@@ -6,10 +6,20 @@ from django.conf import settings
 from django.core.cache import cache
 from django.forms import FileField
 from django.utils.safestring import mark_safe
+from wagtail.templatetags.wagtailcore_tags import richtext
 
 register = template.Library()
 
 logger = logging.getLogger(__name__)
+
+
+@register.filter
+def richtext_with_objet(reusable_content, page):
+    """
+    TODO: docstring
+    """
+    return richtext(reusable_content)
+    # .replace("<objet>", page.title))
 
 
 @register.inclusion_tag("components/patchwork/patchwork.html")
