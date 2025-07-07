@@ -6,9 +6,11 @@
 <title>{{ page.title }} | {{ seo.title }}</title>
 {% endblock title %}
 
+{% comment %}
 {% block main_classes %}
 {% if not is_synonyme %}{{ block.super }}{% endif %}
 {% endblock main_classes %}
+{% endcomment %}
 
 {% block main %}
 <article
@@ -17,10 +19,9 @@
     qf-gap-6w max-lg:qf-pr-0 max-xl:qf-pr-6w
     qf-pt-3w md:qf-pt-5w"
 >
-    {% block main_heading %}
-        {% include "./heading.html" with title=page.title infotri=page.infotri %}
-        {% include "snippets/share_and_embed_produit.html" with extra_classes="max-md:qf-order-last md:qf-min-w-[17rem] md:qf-row-start-1 md:qf-col-start-2" %}
-    {% endblock main_heading %}
+        {% block main_heading %}
+            {% include "components/produit/heading.html" with title=page.title infotri=page.infotri %}
+        {% endblock main_heading %}
 
       {% include "sites_faciles_content_manager/blocks/blocks_stream.html" with stream=page.body %}
 </article>
