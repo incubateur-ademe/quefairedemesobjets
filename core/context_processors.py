@@ -39,8 +39,12 @@ def global_context(request) -> dict:
     if request.META.get("HTTP_HOST") not in settings.ASSISTANT["HOSTS"]:
         return base
 
+    search_form = SearchForm(prefix="header")
+    home_search_form = SearchForm(prefix="home")
+
     return {
         **base,
-        "search_form": SearchForm(),
+        "search_form": search_form,
+        "home_search_form": home_search_form,
         **constants.ASSISTANT,
     }

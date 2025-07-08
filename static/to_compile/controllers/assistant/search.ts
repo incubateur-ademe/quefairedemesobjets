@@ -1,8 +1,10 @@
 import { Controller } from "@hotwired/stimulus"
+import { ClickOutsideController } from "stimulus-use"
 
-export default class extends Controller<HTMLFormElement> {
+export default class extends ClickOutsideController {
   declare readonly formTarget: HTMLFormElement
-  static targets = ["form"]
+  declare readonly resultsTarget: HTMLElement
+  static targets = ["form", "results"]
 
   submitForm() {
     this.formTarget.requestSubmit()
@@ -23,11 +25,9 @@ export default class extends Controller<HTMLFormElement> {
   }
 
   #move(direction: "up" | "down") {
-    const searchResultAlreadyFocused = document.querySelector<HTMLAnchorElement>(
-      "#search-results > a:focus",
-    )
-    let elementToFocus =
-      document.querySelector<HTMLAnchorElement>("#search-results > a")
+    const searchResultAlreadyFocused =
+      this.resultsTarget.querySelector<HTMLAnchorElement>("a:focus")
+    let elementToFocus = this.resultsTarget.querySelector<HTMLAnchorElement>("a")
 
     if (searchResultAlreadyFocused) {
       searchResultAlreadyFocused.blur()
