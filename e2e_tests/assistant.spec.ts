@@ -46,18 +46,41 @@ test(
   async ({ page }) => {
     // Navigate to the carte page
     await page.goto(`/`, { waitUntil: "domcontentloaded" })
+    await hideDjangoToolbar(page)
+
     await page.locator("#id_home-input").click()
-    await page.locator("#id_home-input").fill("lave")
-    expect(await page.locator("#home:search-results a").count()).toBeGreaterThan(0)
+    await page.locator("#id_home-input").pressSequentially("lave")
+    // We expect at least on search result
+    await page.waitForResponse(
+      (response) =>
+        response.url().includes("/assistant/recherche") && response.status() === 200,
+    )
+    expect(page.locator("#home [data-search-target=results] a").first()).toBeAttached()
 
     await page.locator("#id_header-input").click()
-    expect(await page.locator("#home:search-results a").count()).toBe(0)
-    await page.locator("#id_header-input").fill("lave")
-    expect(await page.locator("#header:search-results a").count()).toBeGreaterThan(0)
+    await page.waitForResponse(
+      (response) =>
+        response.url().includes("/assistant/recherche") && response.status() === 200,
+    )
+    expect(
+      page.locator("#home [data-search-target=results] a").first(),
+    ).not.toBeAttached()
+    await page.locator("#id_header-input").pressSequentially("lave")
+    expect(
+      page.locator("#header [data-search-target=results] a").first(),
+    ).toBeAttached()
 
     await page.locator("#id_home-input").click()
-    expect(await page.locator("#home:search-results a").count()).toBe(0)
-    expect(await page.locator("#header:search-results a").count()).toBe(0)
+    await page.waitForResponse(
+      (response) =>
+        response.url().includes("/assistant/recherche") && response.status() === 200,
+    )
+    expect(
+      page.locator("#home [data-search-target=results] a").first(),
+    ).not.toBeAttached()
+    expect(
+      page.locator("#header [data-search-target=results] a").first(),
+    ).not.toBeAttached()
   },
 )
 
