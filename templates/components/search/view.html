@@ -1,5 +1,5 @@
-{% with frame_id=search_form.prefix %}
-<turbo-frame id="{{ frame_id }}">
+{% with id=search_form.id.value %}
+<turbo-frame id="{{ id }}">
     <div
         data-controller="search"
         data-action="
@@ -18,7 +18,7 @@
     >
         <form
             data-search-target="form"
-            data-turbo-frame="{{ frame_id }}:search-results"
+            data-turbo-frame="{{ id }}:search-results"
             action="{% url 'qfdmd:search' %}"
             class="qf-pl-4w {# should match the svg icon width #}
             qf-flex qf-flex-row-reverse qf-relative
@@ -27,10 +27,6 @@
             qf-content-center
             "
         >
-            {% if frame_id %}
-                <input name="prefix" value="{{ frame_id }}" type="hidden">
-            {% endif %}
-
             {% for field in search_form %}
                 {{ field }}
             {% endfor %}
@@ -50,7 +46,7 @@
         </form>
 
         <turbo-frame
-            id="{{ frame_id }}:search-results"
+            id="{{ id }}:search-results"
             data-search-target="results"
             class="qf-flex qf-flex-col"
         >

@@ -19,14 +19,9 @@ class SearchInput(forms.TextInput):
 
 
 class SearchForm(DsfrBaseForm):
+    id = forms.CharField(required=False, widget=forms.HiddenInput())
     input = forms.CharField(
         help_text="Entrez un objet ou un déchet", required=False, widget=SearchInput
-    )
-    iframe = forms.BooleanField(
-        required=False,
-        help_text="Ce champ sert uniquement à faire persister le mode iframe d'une page"
-        "à une recherche",
-        widget=forms.HiddenInput,
     )
 
     def search(self) -> dict[str, str]:

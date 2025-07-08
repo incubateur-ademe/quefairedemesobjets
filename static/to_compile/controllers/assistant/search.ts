@@ -11,14 +11,14 @@ export default class extends ClickOutsideController {
   }
 
   submitFirstItem() {
-    const firstResult = document.querySelector<HTMLAnchorElement>("#search-results > a")
+    const firstResult = this.resultsTarget.querySelector<HTMLAnchorElement>("a")
     if (firstResult) {
       firstResult.click()
     }
   }
 
   clear() {
-    for (const inputElement of this.formTarget.querySelectorAll("input")) {
+    for (const inputElement of this.formTarget.querySelectorAll("input[type=text]")) {
       inputElement.value = ""
       this.submitForm()
     }
