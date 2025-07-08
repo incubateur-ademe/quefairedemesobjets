@@ -23,7 +23,7 @@ module "database" {
   environment     = var.environment
   tags            = var.tags
   node_type       = "DB-PRO2-XXS"
-  volume_size     = 300
+  volume_size     = 200
   db_username     = var.db_username
   db_password     = var.db_password
   db_name         = var.db_name
