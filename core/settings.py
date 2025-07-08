@@ -281,7 +281,7 @@ DATABASE_URL = decouple.config(
     default="postgis://qfdmo:qfdmo@localhost:6543/qfdmo",  # pragma: allowlist secret  # noqa: E501
 )
 
-default_settings = {
+DEFAULT_DATABASE_SETTINGS = {
     **dj_database_url.parse(DATABASE_URL),
     "ENGINE": "django.contrib.gis.db.backends.postgis",
     "OPTIONS": {"options": "-c search_path=public,warehouse"},
@@ -295,22 +295,22 @@ DB_READONLY = decouple.config(
     cast=str,
     default="postgres://fakeusername:fakepassword@postgres:5432/database",
 )
-readonly_settings = dj_database_url.parse(DB_READONLY)
+READONLY_DATABASE_SETTINGS = dj_database_url.parse(DB_READONLY)
 
 DB_WAREHOUSE = decouple.config(
     "DB_WAREHOUSE",
     cast=str,
     default="postgis://qfdmo:qfdmo@localhost:6543/warehouse",  # pragma: allowlist secret  # noqa: E501
 )
-warehouse_settings = {
+WAREHOUSE_DATABASE_SETTINGS = {
     **dj_database_url.parse(DB_WAREHOUSE),
     "ENGINE": "django.contrib.gis.db.backends.postgis",
 }
 
 DATABASES = {
-    "default": default_settings,
-    "readonly": readonly_settings,
-    "warehouse": warehouse_settings,
+    "default": DEFAULT_DATABASE_SETTINGS,
+    "readonly": READONLY_DATABASE_SETTINGS,
+    "warehouse": WAREHOUSE_DATABASE_SETTINGS,
 }
 
 CONN_HEALTH_CHECKS = True
