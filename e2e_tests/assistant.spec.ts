@@ -62,10 +62,13 @@ test(
       (response) =>
         response.url().includes("/assistant/recherche") && response.status() === 200,
     )
-    expect(
-      page.locator("#home [data-search-target=results] a").first(),
-    ).not.toBeAttached()
+    expect(page.locator("#home [data-search-target=results] a")).toHaveCount(0)
     await page.locator("#id_header-input").pressSequentially("lave")
+    await page.waitForResponse(
+      (response) =>
+        response.url().includes("/assistant/recherche") && response.status() === 200,
+    )
+    expect(page.locator("#home [data-search-target=results] a")).toHaveCount(0)
     expect(
       page.locator("#header [data-search-target=results] a").first(),
     ).toBeAttached()
@@ -75,12 +78,8 @@ test(
       (response) =>
         response.url().includes("/assistant/recherche") && response.status() === 200,
     )
-    expect(
-      page.locator("#home [data-search-target=results] a").first(),
-    ).not.toBeAttached()
-    expect(
-      page.locator("#header [data-search-target=results] a").first(),
-    ).not.toBeAttached()
+    expect(page.locator("#home [data-search-target=results] a")).toHaveCount(0)
+    expect(page.locator("#header [data-search-target=results] a")).toHaveCount(0)
   },
 )
 
