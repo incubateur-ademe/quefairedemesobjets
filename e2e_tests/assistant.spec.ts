@@ -32,6 +32,35 @@ test("Le lien infotri est bien défini", async ({ page }) => {
   expect(href).toBe("https://www.ecologie.gouv.fr/info-tri")
 })
 
+test(
+  "Les deux recherches en page d'accueil fonctionnent",
+  {
+    annotation: [
+      {
+        type: "issue",
+        description:
+          "https://www.notion.so/accelerateur-transition-ecologique-ademe/Assistant-Probl-me-sur-la-double-recherche-en-page-d-accueil-22a6523d57d78057981df59c74704cf9?source=copy_link",
+      },
+    ],
+  },
+  async ({ page }) => {
+    // Navigate to the carte page
+    await page.goto(`/`, { waitUntil: "domcontentloaded" })
+    await page.locator("#id_home-input").click()
+    await page.locator("#id_home-input").fill("lave")
+    expect(await page.locator("#home:search-results a").count()).toBeGreaterThan(0)
+
+    await page.locator("#id_header-input").click()
+    expect(await page.locator("#home:search-results a").count()).toBe(0)
+    await page.locator("#id_header-input").fill("lave")
+    expect(await page.locator("#header:search-results a").count()).toBeGreaterThan(0)
+
+    await page.locator("#id_home-input").click()
+    expect(await page.locator("#home:search-results a").count()).toBe(0)
+    expect(await page.locator("#header:search-results a").count()).toBe(0)
+  },
+)
+
 test("Le tracking PostHog fonctionne comme prévu", async ({ page }) => {
   // Check that homepage scores 1
   await page.goto(`/`, { waitUntil: "domcontentloaded" })
