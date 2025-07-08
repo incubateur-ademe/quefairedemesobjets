@@ -10,15 +10,13 @@ django_setup_full()
 
 
 def switch_tables(cursor, prefix_django, prefix_dbt, tables):
-
     logger.warning("Switch tables")
     logger.warning("Open a transaction")
     cursor.execute("BEGIN")
     try:
         for table in tables:
             logger.warning(
-                f"Renaming {prefix_django}{table}"
-                f" to {prefix_django}{table}_to_remove"
+                f"Renaming {prefix_django}{table} to {prefix_django}{table}_to_remove"
             )
             cursor.execute(
                 f"ALTER TABLE IF EXISTS {prefix_django}{table}"
@@ -26,11 +24,11 @@ def switch_tables(cursor, prefix_django, prefix_dbt, tables):
             )
             logger.warning(f"Renaming {prefix_dbt}{table} to {prefix_django}{table}")
             cursor.execute(
-                f"ALTER TABLE {prefix_dbt}{table} RENAME TO" f" {prefix_django}{table}"
+                f"ALTER TABLE {prefix_dbt}{table} RENAME TO {prefix_django}{table}"
             )
             logger.warning(f"Removing {prefix_django}{table}_to_remove")
             cursor.execute(
-                f"DROP TABLE IF EXISTS" f" {prefix_django}{table}_to_remove CASCADE"
+                f"DROP TABLE IF EXISTS {prefix_django}{table}_to_remove CASCADE"
             )
         logger.warning("Commit the transaction")
         cursor.execute("COMMIT")
@@ -54,11 +52,88 @@ def replace_acteur_table(
 ):
     from django.db import DEFAULT_DB_ALIAS, connections
 
-    for table in tables:
-        copy_table_with_pg_tools(f"{prefix_dbt}{table}")
-
     with connections[DEFAULT_DB_ALIAS].cursor() as cursor:
+        copy_table_with_fdw(cursor, prefix_dbt, tables)
         switch_tables(cursor, prefix_django, prefix_dbt, tables)
+
+
+def get_warehouse_connection_info():
+    from django.conf import settings
+
+    warehouse = settings.DATABASES["warehouse"]
+    return {
+        "WAREHOUSE_HOST": warehouse.get("HOST", "localhost"),
+        "WAREHOUSE_PORT": warehouse.get("PORT", "5432"),
+        "WAREHOUSE_DB": warehouse["NAME"],
+        "WAREHOUSE_USER": warehouse["USER"],
+        "WAREHOUSE_PASSWORD": warehouse["PASSWORD"],
+    }
+
+
+def copy_table_with_fdw(cursor, prefix, tables):
+    from django.conf import settings
+
+    info = get_warehouse_connection_info()
+
+    try:
+        # Step 1: Enable FDW
+        cursor.execute("CREATE EXTENSION IF NOT EXISTS postgres_fdw;")
+
+        # Step 2: Drop/recreate FDW server
+        cursor.execute("DROP SERVER IF EXISTS warehouse_fdw CASCADE;")
+        cursor.execute(
+            f"""
+            CREATE SERVER warehouse_fdw
+            FOREIGN DATA WRAPPER postgres_fdw
+            OPTIONS (
+                host '{settings.WAREHOUSE_HOST}',
+                dbname '{settings.WAREHOUSE_DB}',
+                port '{settings.WAREHOUSE_PORT}'
+            );
+        """
+        )
+
+        # Step 3: Create user mapping
+        cursor.execute(
+            f"""
+            CREATE USER MAPPING FOR CURRENT_USER
+            SERVER warehouse_fdw
+            OPTIONS (
+                user '{info["WAREHOUSE_USER"]}',
+                password '{info["WAREHOUSE_PASSWORD"]}'
+            );
+        """
+        )
+
+        # Step 4: Import the table into a foreign schema
+        prefixed_tables = [f"{prefix}{table}" for table in tables]
+        limit_to_clause = ", ".join(prefixed_tables)
+        cursor.execute(
+            f"""
+            IMPORT FOREIGN SCHEMA public
+            LIMIT TO ({limit_to_clause})
+            FROM SERVER warehouse_fdw
+            INTO warehouse_import;
+        """
+        )
+
+        # Step 5: Copy each table
+        for table in tables:
+            logger.info(f"Copying table '{table}'...")
+            cursor.execute(f"DELETE FROM {table};")
+            cursor.execute(
+                f"""
+                INSERT INTO {table}
+                SELECT * FROM warehouse_import.{table};
+            """
+            )
+            logger.info(f"Finished copying table '{table}'.")
+
+        logger.info("All tables copied successfully using FDW.")
+
+    except Exception as e:
+        logger.error(f"Error copying table {tables} via FDW: {e}")
+        raise
 
 
 def copy_table_with_pg_tools(table):
