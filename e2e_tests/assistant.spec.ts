@@ -32,6 +32,57 @@ test("Le lien infotri est bien défini", async ({ page }) => {
   expect(href).toBe("https://www.ecologie.gouv.fr/info-tri")
 })
 
+test(
+  "Les deux recherches en page d'accueil fonctionnent",
+  {
+    annotation: [
+      {
+        type: "issue",
+        description:
+          "https://www.notion.so/accelerateur-transition-ecologique-ademe/Assistant-Probl-me-sur-la-double-recherche-en-page-d-accueil-22a6523d57d78057981df59c74704cf9?source=copy_link",
+      },
+    ],
+  },
+  async ({ page }) => {
+    // Navigate to the carte page
+    await page.goto(`/`, { waitUntil: "domcontentloaded" })
+    await hideDjangoToolbar(page)
+
+    await page.locator("#id_home-input").click()
+    await page.locator("#id_home-input").pressSequentially("lave")
+    // We expect at least on search result
+    await page.waitForResponse(
+      (response) =>
+        response.url().includes("/assistant/recherche") && response.status() === 200,
+    )
+    expect(page.locator("#home [data-search-target=results] a").first()).toBeAttached()
+
+    await page.locator("#id_header-input").click()
+    await page.waitForResponse(
+      (response) =>
+        response.url().includes("/assistant/recherche") && response.status() === 200,
+    )
+    expect(page.locator("#home [data-search-target=results] a")).toHaveCount(0)
+    await page.locator("#id_header-input").pressSequentially("lave")
+    await page.waitForResponse(
+      (response) =>
+        response.url().includes("/assistant/recherche") && response.status() === 200,
+    )
+    expect(page.locator("#home [data-search-target=results] a")).toHaveCount(0)
+    expect(
+      page.locator("#header [data-search-target=results] a").first(),
+    ).toBeAttached()
+
+    await page.locator("#id_home-input").click()
+    await page.waitForResponse(
+      (response) =>
+        response.url().includes("/assistant/recherche") && response.status() === 200,
+    )
+    expect(page.locator("#home [data-search-target=results] a")).toHaveCount(0)
+    expect(page.locator("#header [data-search-target=results] a")).toHaveCount(0)
+  },
+)
+
 test("Le tracking PostHog fonctionne comme prévu", async ({ page }) => {
   // Check that homepage scores 1
   await page.goto(`/`, { waitUntil: "domcontentloaded" })

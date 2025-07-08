@@ -1,7 +1,9 @@
-<turbo-frame id="search">
+{% with id=search_form.id.value %}
+<turbo-frame id="{{ id }}">
     <div
         data-controller="search"
         data-action="
+            search:click:outside->search#clear:prevent
             keydown.esc->search#clear:prevent
             keydown.up->search#up:prevent
             keydown.down->search#down:prevent"
@@ -16,7 +18,7 @@
     >
         <form
             data-search-target="form"
-            data-turbo-frame="{{ id|default:'search-results' }}"
+            data-turbo-frame="{{ id }}:search-results"
             action="{% url 'qfdmd:search' %}"
             class="qf-pl-4w {# should match the svg icon width #}
             qf-flex qf-flex-row-reverse qf-relative
@@ -25,7 +27,6 @@
             qf-content-center
             "
         >
-
             {% for field in search_form %}
                 {{ field }}
             {% endfor %}
@@ -45,7 +46,8 @@
         </form>
 
         <turbo-frame
-            id="search-results"
+            id="{{ id }}:search-results"
+            data-search-target="results"
             class="qf-flex qf-flex-col"
         >
             {% if search_form.results %}
@@ -56,3 +58,4 @@
         </turbo-frame>
     </div>
 </turbo-frame>
+{% endwith %}

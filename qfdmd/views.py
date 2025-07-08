@@ -47,8 +47,16 @@ SEARCH_VIEW_TEMPLATE_NAME = "components/search/view.html"
 
 
 def search_view(request) -> HttpResponse:
-    form = SearchForm(request.GET)
-    context = {}
+    prefix_key = next(
+        (key for key in request.GET.dict().keys() if key.endswith("-id")), ""
+    )
+    form_kwargs = {}
+
+    if prefix := request.GET[prefix_key]:
+        form_kwargs.update(prefix=prefix, initial={"id": prefix})
+
+    form = SearchForm(request.GET, **form_kwargs)
+    context = {"prefix": form_kwargs, "prefix_key": prefix_key}
     template_name = SEARCH_VIEW_TEMPLATE_NAME
 
     if form.is_valid():
