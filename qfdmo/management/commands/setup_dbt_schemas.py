@@ -1,17 +1,11 @@
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from django.db import connection
+from django.db import connections
 
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        db_port = (
-            5432
-            if settings.ENVIRONMENT == "development"
-            else settings.DATABASES["default"]["PORT"]
-        )
-
-        with connection.cursor() as cursor:
+        with connections["warehouse"].cursor() as cursor:
             # flake8: noqa: E501
             sql = f"""
                 CREATE EXTENSION IF NOT EXISTS postgis;
@@ -21,11 +15,10 @@ class Command(BaseCommand):
                 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
                 CREATE EXTENSION IF NOT EXISTS postgres_fdw;
                 DROP SERVER IF EXISTS qfdmo_server CASCADE;
-                CREATE EXTENSION IF NOT EXISTS postgres_fdw;
                 CREATE SERVER qfdmo_server FOREIGN DATA WRAPPER postgres_fdw
                   OPTIONS (
-                    host '{settings.DATABASES["default"]["HOST"]}',
-                    port '{db_port}',
+                    host 'localhost',
+                    port '5432',
                     dbname '{settings.DATABASES["default"]["NAME"]}'
                   );
                 CREATE USER MAPPING FOR CURRENT_USER SERVER qfdmo_server
@@ -37,4 +30,5 @@ class Command(BaseCommand):
                 IMPORT FOREIGN SCHEMA public FROM SERVER qfdmo_server INTO foreign_qfdmo_public;
                 DROP SERVER IF EXISTS qfdmo_server CASCADE;
                 """
+
             cursor.execute(sql)
