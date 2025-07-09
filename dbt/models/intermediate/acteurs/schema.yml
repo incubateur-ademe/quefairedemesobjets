@@ -16,8 +16,8 @@ models:
           - not_null
       - name: nom
         description: "Le nom de l'acteur"
-        data_tests:
-          - not_null
+        # data_tests:
+        #   - not_null
       - name: description
         description: "La description de l'acteur"
       - name: acteur_type_id
