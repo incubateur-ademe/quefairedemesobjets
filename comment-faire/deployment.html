@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Recherche" href="../search.html" /><link rel="next" title="DevOps, déploiement, opérations" href="deployment.html" /><link rel="prev" title="🤔 COMMENT FAIRE" href="README.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Recherche" href="../search.html" /><link rel="next" title="Commandes Django utiles" href="django/commandes.html" /><link rel="prev" title="☎️ 3615 jaidesproblemes" href="troubleshooting.html" />
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2024.08.06 -->
-        <title>☎️ 3615 jaidesproblemes - Documentation Longue Vie Aux Objets</title>
+        <title>DevOps, déploiement, opérations - Documentation Longue Vie Aux Objets</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
@@ -200,8 +200,8 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul class="current">
 <li class="toctree-l1 current has-children"><a class="reference internal" href="README.html">🤔 COMMENT FAIRE</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of 🤔 COMMENT FAIRE</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">☎️ 3615 jaidesproblemes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="deployment.html">DevOps, déploiement, opérations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="troubleshooting.html">☎️ 3615 jaidesproblemes</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">DevOps, déploiement, opérations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="django/commandes.html">Commandes Django utiles</a></li>
 <li class="toctree-l2"><a class="reference internal" href="django/update-ext-id.html">Mettre à jour les identifiants externe</a></li>
 </ul>
@@ -267,7 +267,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../_sources/comment-faire/troubleshooting.md.txt" title="View this page">
+  <a class="muted-link" href="../_sources/comment-faire/deployment.md.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -287,164 +287,122 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="jaidesproblemes">
-<h1>☎️ 3615 jaidesproblemes<a class="headerlink" href="#jaidesproblemes" title="Lien vers cette rubrique">¶</a></h1>
-<p>Une liste de solutions à des situations fréquentes qui peuvent se produire en local, en staging, en prod…</p>
-<section id="git">
-<h2>git<a class="headerlink" href="#git" title="Lien vers cette rubrique">¶</a></h2>
-<section id="en-cas-de-conflits-sur-secrets-baseline">
-<h3>En cas de conflits sur <code class="docutils literal notranslate"><span class="pre">.secrets.baseline</span></code><a class="headerlink" href="#en-cas-de-conflits-sur-secrets-baseline" title="Lien vers cette rubrique">¶</a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># installer detect-secrets s&#39;il n&#39;est pas présent dans l&#39;environnement virtuel</span>
-<span class="c1"># ou en local</span>
-poetry<span class="w"> </span>add<span class="w"> </span>detect-secrets
-<span class="c1"># re-générer .secrets.baseline</span>
-poetry<span class="w"> </span>run<span class="w"> </span>detect-secrets<span class="w"> </span>scan<span class="w"> </span>&gt;<span class="w"> </span>.secrets.baseline
-<span class="c1"># ajout au rebase en cours</span>
-git<span class="w"> </span>add<span class="w"> </span>.secrets.baseline
-<span class="c1"># continuer le rebase si aucun autre conflit n&#39;est présent</span>
-git<span class="w"> </span>rebase<span class="w"> </span>--continue
-</pre></div>
-</div>
-</section>
-<section id="en-cas-de-conflits-sur-poetry-lock">
-<h3>En cas de conflits sur <code class="docutils literal notranslate"><span class="pre">poetry.lock</span></code><a class="headerlink" href="#en-cas-de-conflits-sur-poetry-lock" title="Lien vers cette rubrique">¶</a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># ou avec poetry</span>
-rm<span class="w"> </span>poetry.lock
-poetry<span class="w"> </span>lock
-git<span class="w"> </span>add<span class="w"> </span>poetry.lock
-
-<span class="c1"># si c&#39;est pendant un rebase...</span>
-git<span class="w"> </span>rebase<span class="w"> </span>--continue
-</pre></div>
-</div>
-</section>
-</section>
-<section id="mise-en-place-du-poste-developpeur">
-<h2>Mise en place du poste developpeur<a class="headerlink" href="#mise-en-place-du-poste-developpeur" title="Lien vers cette rubrique">¶</a></h2>
-<section id="je-n-arrive-pas-a-acceder-a-l-interface-via-une-url-local">
-<h3>Je n’arrive pas a accéder à l’interface via une url *.local<a class="headerlink" href="#je-n-arrive-pas-a-acceder-a-l-interface-via-une-url-local" title="Lien vers cette rubrique">¶</a></h3>
-<p>L’interface sur un poste développeur doit-être accessible via les URLs:</p>
+          <section id="devops-deploiement-operations">
+<h1>DevOps, déploiement, opérations<a class="headerlink" href="#devops-deploiement-operations" title="Lien vers cette rubrique">¶</a></h1>
+<section id="deploiement-de-la-plateforme-airflow-hors-cd">
+<h2>Déploiement de la plateforme Airflow hors CD<a class="headerlink" href="#deploiement-de-la-plateforme-airflow-hors-cd" title="Lien vers cette rubrique">¶</a></h2>
+<p>La plateforme Data est déploié automatiquement par le processus de <code class="docutils literal notranslate"><span class="pre">Continuous</span> <span class="pre">Deployment</span></code>. Cependant, il est possibel d’avoir besoin de « forcer » un déploiement.</p>
+<section id="procedure-de-deploiement">
+<h3>Procédure de déploiement<a class="headerlink" href="#procedure-de-deploiement" title="Lien vers cette rubrique">¶</a></h3>
+<section id="prerequis">
+<h4>Prérequis<a class="headerlink" href="#prerequis" title="Lien vers cette rubrique">¶</a></h4>
 <ul class="simple">
-<li><p>http://quefairedemesdechets.ademe.local/</p></li>
-<li><p>http://quefairedemesobjets.ademe.local/</p></li>
-<li><p>http://lvao.ademe.local/ : redirigé vers le site institutionnel</p></li>
+<li><p>configururer sa clé ssh dans l’interface de clevercloud (cf. doc clevercloud)</p></li>
+<li><p>configurer un « remote repository » pour <code class="docutils literal notranslate"><span class="pre">airflow-webserver</span></code> pour ce repository et pour chaque environnemnt</p></li>
+<li><p>configurer un « remote repository » pour <code class="docutils literal notranslate"><span class="pre">airflow-scheduler</span></code> pour ce repository et pour chaque environnemnt</p></li>
+<li><p>pousser le code souhaité sur la branch master des 2 repository</p></li>
 </ul>
-<p>Si tel n’est pas le cas, voici quelques configuration à vérifier</p>
-<section id="etc-hosts">
-<h4>/etc/hosts<a class="headerlink" href="#etc-hosts" title="Lien vers cette rubrique">¶</a></h4>
-<p>Dans la configuration <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code>, vérifier la présence des lignes</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">127.0.0.1</span>       <span class="n">lvao</span><span class="o">.</span><span class="n">ademe</span><span class="o">.</span><span class="n">local</span>
-<span class="mf">127.0.0.1</span>       <span class="n">quefairedemesdechets</span><span class="o">.</span><span class="n">ademe</span><span class="o">.</span><span class="n">local</span>
-<span class="mf">127.0.0.1</span>       <span class="n">quefairedemesobjets</span><span class="o">.</span><span class="n">ademe</span><span class="o">.</span><span class="n">local</span>
+</section>
+<section id="en-preprod">
+<h4>en PREPROD<a class="headerlink" href="#en-preprod" title="Lien vers cette rubrique">¶</a></h4>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>remote<span class="w"> </span>add<span class="w"> </span>preprod-airflow-scheduler<span class="w"> </span>git+ssh://git@push-n3-par-clevercloud-customers.services.clever-cloud.com/app_3d1f7d89-d7f0-433a-ac01-c663d4729143.git
+git<span class="w"> </span>remote<span class="w"> </span>add<span class="w"> </span>preprod-airflow-webserver<span class="w"> </span>git+ssh://git@push-n3-par-clevercloud-customers.services.clever-cloud.com/app_d3c229bf-be85-4dbd-aca2-c8df1c6166de.git
+git<span class="w"> </span>push<span class="w"> </span>preprod-airflow-scheduler<span class="w"> </span>mabranch:master
+git<span class="w"> </span>push<span class="w"> </span>preprod-airflow-webserver<span class="w"> </span>mabranch:master
 </pre></div>
 </div>
 </section>
-<section id="verifier-la-presence-des-certificats-ssl">
-<h4>Vérifier la présence des certificats ssl<a class="headerlink" href="#verifier-la-presence-des-certificats-ssl" title="Lien vers cette rubrique">¶</a></h4>
-<p>Si les certificats ne sont pas présents, les logs du serveur nginx affichent une erreur type</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lvao</span><span class="o">-</span><span class="n">proxy</span><span class="o">-</span><span class="mi">1</span>  <span class="o">|</span> <span class="mi">2025</span><span class="o">/</span><span class="mi">05</span><span class="o">/</span><span class="mi">20</span> <span class="mi">10</span><span class="p">:</span><span class="mi">47</span><span class="p">:</span><span class="mi">25</span> <span class="p">[</span><span class="n">emerg</span><span class="p">]</span> <span class="mi">1</span><span class="c1">#1: cannot load certificate &quot;/etc/nginx/ssl/lvao.ademe.local+1.pem&quot;: BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/nginx/ssl/lvao.ademe.local+1.pem, r) error:10000080:BIO routines::no such file)</span>
-</pre></div>
-</div>
-<p>Dans ce cas, (re-)générer les certificats</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">init</span><span class="o">-</span><span class="n">certs</span>
+<section id="en-prod">
+<h4>en PROD<a class="headerlink" href="#en-prod" title="Lien vers cette rubrique">¶</a></h4>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>remote<span class="w"> </span>add<span class="w"> </span>prod-airflow-scheduler<span class="w"> </span>git+ssh://git@push-n3-par-clevercloud-customers.services.clever-cloud.com/app_fda5d606-44d9-485f-a1b4-1f7007bc3bec.git
+git<span class="w"> </span>remote<span class="w"> </span>add<span class="w"> </span>prod-airflow-webserver<span class="w"> </span>git+ssh://git@push-n3-par-clevercloud-customers.services.clever-cloud.com/app_efd2802a-1773-48e0-987e-7a6dffb929d1.git
+git<span class="w"> </span>push<span class="w"> </span>prod-airflow-scheduler<span class="w"> </span>mabranch:master
+git<span class="w"> </span>push<span class="w"> </span>prod-airflow-webserver<span class="w"> </span>mabranch:master
 </pre></div>
 </div>
 </section>
-<section id="env">
-<h4>.env<a class="headerlink" href="#env" title="Lien vers cette rubrique">¶</a></h4>
-<p>Enfin, vérifier les variables d’environnement en prenant exemple sur le fichier <code class="docutils literal notranslate"><span class="pre">.env.template</span></code></p>
 </section>
 </section>
-</section>
-<section id="stack-data-airflow-dbt">
-<h2>Stack data, airflow, dbt<a class="headerlink" href="#stack-data-airflow-dbt" title="Lien vers cette rubrique">¶</a></h2>
-<p>En local, il peut s’avérer complexe de développer sur la stack data, du fait du volume de données, mais aussi de l’enchaînement de tâches dans les DAGs.</p>
-<section id="visualiser-les-logs-d-un-dag-en-echec">
-<h3>Visualiser les logs d’un DAG en échec<a class="headerlink" href="#visualiser-les-logs-d-un-dag-en-echec" title="Lien vers cette rubrique">¶</a></h3>
-<p>Si un dag échoue, il peut être utile de visualiser ses logs.
-Pour ce faire,</p>
-<ol class="arabic simple">
-<li><p>cliquer sur la tâche échouée (<code class="docutils literal notranslate"><span class="pre">failed</span></code>)</p></li>
-<li><p>cliquer dans l’onglet <code class="docutils literal notranslate"><span class="pre">Logs</span></code></p></li>
-<li><p>cliquer sur <code class="docutils literal notranslate"><span class="pre">see</span> <span class="pre">more</span></code>
-<img alt="./_medias/troubleshooting-1.png" src="../_images/comment-faire" /></p></li>
-</ol>
-<p>Cela va amener à une vue détaillée des logs du DAG échuoée</p>
-</section>
-<section id="rejouer-une-tache-dbt-d-un-dag">
-<h3>Rejouer une tâche <code class="docutils literal notranslate"><span class="pre">dbt</span></code> d’un DAG<a class="headerlink" href="#rejouer-une-tache-dbt-d-un-dag" title="Lien vers cette rubrique">¶</a></h3>
-<p>DBT est utilisé pour transformer les données en base de données.
-En visualisant les logs d’une tâche en échec, on peut retrouver la commande <code class="docutils literal notranslate"><span class="pre">dbt</span></code> utilisée pour executer cette tâche. En général cela se situe tout en haut des logs</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>[2025-07-09, 06:53:26 UTC] {local_task_job_runner.py:123} ▶ Pre task execution logs
-[2025-07-09, 06:53:26 UTC] {subprocess.py:78} INFO - Tmp dir root location: /tmp
-[2025-07-09, 06:53:26 UTC] {subprocess.py:88} INFO - Running command: [&#39;/usr/bin/bash&#39;, &#39;-c&#39;, &#39;dbt run --models intermediate.acteurs&#39;]
-[2025-07-09, 06:53:26 UTC] {subprocess.py:99} INFO - Output:
-[2025-07-09, 06:53:28 UTC] {subprocess.py:106} INFO - 06:53:28  Running with dbt=1.10.2
-</pre></div>
-</div>
-<p>Ici, <code class="docutils literal notranslate"><span class="pre">dbt</span> <span class="pre">run</span> <span class="pre">--models</span> <span class="pre">intermediate.acteurs</span></code></p>
-<p>En supposant que vous avez une stack airflow en local, vous pouvez recopier cette commande dans le conteneur <code class="docutils literal notranslate"><span class="pre">airflow-scheduler</span></code> :</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># depuis la racine du repo, où le fichier docker-compose.yml se situe</span>
-docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>airflow-scheduler<span class="w"> </span>dbt<span class="w"> </span>run<span class="w"> </span>--models<span class="w"> </span>intermediate.acteurs
-</pre></div>
-</div>
-<p>Ainsi, vous pouvez désormais effectuer toutes les modifications de code souhaitées dans vos modèles avant de rejouer cette tâche.</p>
+<section id="deploiement-sur-scalingo">
+<h2>Déploiement sur Scalingo<a class="headerlink" href="#deploiement-sur-scalingo" title="Lien vers cette rubrique">¶</a></h2>
+<p>Nous avons besoin d’installer GDAL comme c’est expliqué dans la doc suivante : <a class="reference external" href="https://techilearned.com/configure-geodjango-in-scalingo/">https://techilearned.com/configure-geodjango-in-scalingo/</a> cf. <a class="reference external" href="https://doc.scalingo.com/platform/app/app-with-gdal">https://doc.scalingo.com/platform/app/app-with-gdal</a></p>
+<p>le code est déployé en preprod lors de la mise à jour de la branche main</p>
+<p>et en production quand il est tagué avec en respectant le format de version semantique vX.Y.Z</p>
+<section id="deploiement-du-code-de-l-interface">
+<h3>Déploiement du code de l’interface<a class="headerlink" href="#deploiement-du-code-de-l-interface" title="Lien vers cette rubrique">¶</a></h3>
+<p>le code de l’interface est déployé sur le repo git de scalingo à conditions que les tests soit passés avec succès via Github</p>
 </section>
 </section>
-<section id="creer-un-utilisateur-sur-airflow-sans-acces-a-la-ui">
-<h2>Créer un utilisateur sur Airflow sans accès à la UI<a class="headerlink" href="#creer-un-utilisateur-sur-airflow-sans-acces-a-la-ui" title="Lien vers cette rubrique">¶</a></h2>
-<p>Il est possible de créer un user directement depuis <code class="docutils literal notranslate"><span class="pre">psql</span></code>, pour ce faire</p>
-<ol class="arabic simple">
-<li><p>Générer un mot de passe en utilisant <code class="docutils literal notranslate"><span class="pre">werkzeug</span></code> utilisé par Airflow</p></li>
-</ol>
-<div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="c1"># Depuis un shell python, par exemple poetry run python</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">werkzeug.security</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate_password_hash</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">generate_password_hash</span><span class="p">(</span><span class="s1">&#39;your_password&#39;</span><span class="p">))</span>
-<span class="c1"># Retourne une string ressemblant à pbkdf2:sha256:260000$abc123$...</span>
+<section id="deploiement-sur-clevercloud">
+<h2>Déploiement sur CleverCloud<a class="headerlink" href="#deploiement-sur-clevercloud" title="Lien vers cette rubrique">¶</a></h2>
+<!-- TODO data plateforme -->
+</section>
+<section id="deploiment-sur-scaleway">
+<h2>Deploiment sur Scaleway<a class="headerlink" href="#deploiment-sur-scaleway" title="Lien vers cette rubrique">¶</a></h2>
+<!-- TODO s3 et bientôt plus ? -->
+</section>
+<section id="acceder-a-un-shell-en-production">
+<h2>Accéder à un shell en production<a class="headerlink" href="#acceder-a-un-shell-en-production" title="Lien vers cette rubrique">¶</a></h2>
+<p>Pour executer une commande en production, il faut au préalable se connection au shell via le CLI Scalingo.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://doc.scalingo.com/platform/cli/start">Installer le CLI</a></p></li>
+</ul>
+<p>Ensuite il est possible d’ouvrir un shell (ici bash) dans le worker Scalingo.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>scalingo<span class="w"> </span>run<span class="w"> </span>--app<span class="w"> </span>quefairedemesobjets<span class="w"> </span>bash
 </pre></div>
 </div>
-<ol class="arabic simple" start="2">
-<li><p>Insérer le nouvel utilisateur dans la table <code class="docutils literal notranslate"><span class="pre">ab_user</span></code></p></li>
-</ol>
-<p>Récupérer la commande de connexion depuis le dashboard Clever Cloud (dans notre cas):</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>psql<span class="w"> </span>-h<span class="w"> </span>databae_host_name<span class="w"> </span>-p<span class="w"> </span><span class="m">5432</span><span class="w"> </span>-U<span class="w"> </span>user<span class="w"> </span>-d<span class="w"> </span>airflow_database<span class="sb">`</span>
+<p>L’intégralité des commandes possibles n’est pas documentée ici, elle l’est dans la <a class="reference external" href="https://docs.djangoproject.com/en/dev/ref/django-admin/#django-admin-and-manage-py">documentation officielle de Django</a></p>
+<p>L’ensemble des commandes documentées ci-après peut être lancée soit depuis un environnement local, soit depuis un shell en production ou pré-production.</p>
+</section>
+<section id="rollback-revenir-a-une-version-precedente-de-l-application-deployee">
+<h2>Rollback: Revenir à une version précédente de l’application déployée<a class="headerlink" href="#rollback-revenir-a-une-version-precedente-de-l-application-deployee" title="Lien vers cette rubrique">¶</a></h2>
+<p>Dans le cas d’une catastrophe en production, il est parfois nécessaire de revenir à la version précédente.
+Suivez les étapes ci-dessous pour revenir à la version précédente</p>
+<section id="rollback-des-interfaces">
+<h3>Rollback des interfaces<a class="headerlink" href="#rollback-des-interfaces" title="Lien vers cette rubrique">¶</a></h3>
+<section id="id1">
+<h4>Prérequis<a class="headerlink" href="#id1" title="Lien vers cette rubrique">¶</a></h4>
+<ul class="simple">
+<li><p>Prévenir l’équipe du problème de prod et du rollback à venir sur Mattermost</p></li>
+<li><p>Voir avec l’administrateur des données (Christian) si des modifications récentes sont à sauvegarder avant la restauration de la base de données</p></li>
+<li><p>Tester la procédure de rollback ci-dessous en preprod avant de l’appliquer en production</p></li>
+</ul>
+</section>
+<section id="rollback-du-code">
+<h4>Rollback du code<a class="headerlink" href="#rollback-du-code" title="Lien vers cette rubrique">¶</a></h4>
+<ul class="simple">
+<li><p>Vérifier le tag de version précédente sur la <a class="reference external" href="https://github.com/incubateur-ademe/quefairedemesobjets/releases">page des releases github</a></p></li>
+<li><p>Pousser le tag de la version précédente en production</p></li>
+</ul>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>remote<span class="w"> </span>add<span class="w"> </span>prod-interface<span class="w"> </span>git@ssh.osc-fr1.scalingo.com:quefairedemesobjets.git
+git<span class="w"> </span>push<span class="w"> </span>-f<span class="w"> </span>prod-interface<span class="w"> </span>&lt;TAG&gt;:master
 </pre></div>
 </div>
-<p>Executer le <code class="docutils literal notranslate"><span class="pre">SQL</span></code> ci-dessous</p>
-<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">ab_user</span><span class="w"> </span><span class="p">(</span>
-<span class="w">    </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">first_name</span><span class="p">,</span><span class="w"> </span><span class="n">last_name</span><span class="p">,</span><span class="w"> </span><span class="n">username</span><span class="p">,</span><span class="w"> </span><span class="n">password</span><span class="p">,</span><span class="w"> </span><span class="n">email</span><span class="p">,</span><span class="w"> </span><span class="n">active</span>
-<span class="p">)</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span>
-<span class="w">    </span><span class="mi">1000</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Admin&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;User&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;admin&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;pbkdf2:sha256:260000$abc123$...&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;admin@example.com&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">true</span>
-<span class="p">);</span>
+</section>
+<section id="base-de-donnees">
+<h4>Base de données<a class="headerlink" href="#base-de-donnees" title="Lien vers cette rubrique">¶</a></h4>
+<p>Restaurer la base de données avec la sauvegarde souhaitée (géréralement, la sauvegarde juste avant l’incident)</p>
+<ul class="simple">
+<li><p>Copier de la sauvegarde de la base de données localement à partir de l”<a class="reference external" href="https://dashboard.scalingo.com/apps/osc-fr1/quefairedemesobjets/db/postgresql/backups/list">interface Scalingo</a></p></li>
+<li><p>Déclarer les variables d’environnements ci-dessous et éxécuter la commande de restauration</p></li>
+</ul>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nv">DUMP_FILE</span><span class="o">=</span>20241216001128_quefairedem_5084.tar.gz
+<span class="nv">DATABASE_URL</span><span class="o">=</span>&lt;Copie<span class="w"> </span>from<span class="w"> </span>scalingo<span class="w"> </span>env<span class="w"> </span>variable<span class="w"> </span>SCALINGO_POSTGRESQL_URL&gt;
+<span class="k">for</span><span class="w"> </span>table<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>psql<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">DATABASE_URL</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>-t<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;SELECT \&quot;tablename\&quot; FROM pg_tables WHERE schemaname=&#39;public&#39;&quot;</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">     </span>psql<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">DATABASE_URL</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;DROP TABLE IF EXISTS \&quot;</span><span class="si">${</span><span class="nv">table</span><span class="si">}</span><span class="s2">\&quot; CASCADE;&quot;</span>
+<span class="k">done</span>
+pg_restore<span class="w"> </span>-d<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">DATABASE_URL</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>--clean<span class="w"> </span>--no-acl<span class="w"> </span>--no-owner<span class="w"> </span>--no-privileges<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">DUMP_FILE</span><span class="si">}</span><span class="s2">&quot;</span>
 </pre></div>
 </div>
-<p>À noter : assurez vous que 1000 n’est pas déjà utilisé. Il est possible de récupérer l’ID le plus haut avec la commande</p>
-<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">SELECT</span><span class="w"> </span><span class="k">MAX</span><span class="p">(</span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">ab_user</span><span class="p">;</span>
-</pre></div>
-</div>
-<ol class="arabic simple" start="3">
-<li><p>Assigner le rôle <code class="docutils literal notranslate"><span class="pre">Admin</span></code></p></li>
-</ol>
-<p>Commencez par trouver l’ID du rôle <code class="docutils literal notranslate"><span class="pre">Admin</span></code></p>
-<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">SELECT</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">ab_role</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;Admin&#39;</span><span class="p">;</span>
-</pre></div>
-</div>
-<p>En supposant que l’ID soit <code class="docutils literal notranslate"><span class="pre">1</span></code>, l’insérer dans la table de lien</p>
-<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">ab_user_role</span><span class="w"> </span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="n">role_id</span><span class="p">)</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
-</pre></div>
-</div>
-<p>BONUS : avec un accès au CLI Airflow, c’est quand même beaucoup plus simple :</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>airflow<span class="w"> </span>users<span class="w"> </span>create<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--username<span class="w"> </span>admin<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--firstname<span class="w"> </span>Admin<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--lastname<span class="w"> </span>User<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--role<span class="w"> </span>Admin<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--email<span class="w"> </span>admin@example.com<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--password<span class="w"> </span>your_password
-</pre></div>
-</div>
-<p>Malheureusement on a pas d’accès shell actuellement sur nos instances déployées dans Clever cloud…</p>
+<p><em>TODO: refaire un script de restauration de la base de données plus simple à utiliser avec des input et tout et tout</em></p>
+</section>
+<section id="verifier-que-la-restauration-est-effective">
+<h4>Vérifier que la restauration est effective<a class="headerlink" href="#verifier-que-la-restauration-est-effective" title="Lien vers cette rubrique">¶</a></h4>
+<p>Accéder à la carte et jouer avec : <a class="reference external" href="https://lvao.ademe.fr/carte">La carte</a>
+Accéder au formulaire et joue avec : <a class="reference external" href="https://lvao.ademe.fr/formulaire">Le formulaire</a>
+Accéder à l’administration Django et vérifier les données qui ont été restaurée : <a class="reference external" href="https://lvao.ademe.fr/admin">Admin</a></p>
+</section>
+</section>
 </section>
 </section>
 
@@ -453,23 +411,23 @@ docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">ex
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="deployment.html">
+          <a class="next-page" href="django/commandes.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">DevOps, déploiement, opérations</div>
+                <div class="title">Commandes Django utiles</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="README.html">
+          <a class="prev-page" href="troubleshooting.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">🤔 COMMENT FAIRE</div>
+                <div class="title">☎️ 3615 jaidesproblemes</div>
                 
               </div>
             </a>
@@ -503,27 +461,33 @@ docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">ex
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">☎️ 3615 jaidesproblemes</a><ul>
-<li><a class="reference internal" href="#git">git</a><ul>
-<li><a class="reference internal" href="#en-cas-de-conflits-sur-secrets-baseline">En cas de conflits sur <code class="docutils literal notranslate"><span class="pre">.secrets.baseline</span></code></a></li>
-<li><a class="reference internal" href="#en-cas-de-conflits-sur-poetry-lock">En cas de conflits sur <code class="docutils literal notranslate"><span class="pre">poetry.lock</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#mise-en-place-du-poste-developpeur">Mise en place du poste developpeur</a><ul>
-<li><a class="reference internal" href="#je-n-arrive-pas-a-acceder-a-l-interface-via-une-url-local">Je n’arrive pas a accéder à l’interface via une url *.local</a><ul>
-<li><a class="reference internal" href="#etc-hosts">/etc/hosts</a></li>
-<li><a class="reference internal" href="#verifier-la-presence-des-certificats-ssl">Vérifier la présence des certificats ssl</a></li>
-<li><a class="reference internal" href="#env">.env</a></li>
+<li><a class="reference internal" href="#">DevOps, déploiement, opérations</a><ul>
+<li><a class="reference internal" href="#deploiement-de-la-plateforme-airflow-hors-cd">Déploiement de la plateforme Airflow hors CD</a><ul>
+<li><a class="reference internal" href="#procedure-de-deploiement">Procédure de déploiement</a><ul>
+<li><a class="reference internal" href="#prerequis">Prérequis</a></li>
+<li><a class="reference internal" href="#en-preprod">en PREPROD</a></li>
+<li><a class="reference internal" href="#en-prod">en PROD</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a class="reference internal" href="#stack-data-airflow-dbt">Stack data, airflow, dbt</a><ul>
-<li><a class="reference internal" href="#visualiser-les-logs-d-un-dag-en-echec">Visualiser les logs d’un DAG en échec</a></li>
-<li><a class="reference internal" href="#rejouer-une-tache-dbt-d-un-dag">Rejouer une tâche <code class="docutils literal notranslate"><span class="pre">dbt</span></code> d’un DAG</a></li>
+<li><a class="reference internal" href="#deploiement-sur-scalingo">Déploiement sur Scalingo</a><ul>
+<li><a class="reference internal" href="#deploiement-du-code-de-l-interface">Déploiement du code de l’interface</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#creer-un-utilisateur-sur-airflow-sans-acces-a-la-ui">Créer un utilisateur sur Airflow sans accès à la UI</a></li>
+<li><a class="reference internal" href="#deploiement-sur-clevercloud">Déploiement sur CleverCloud</a></li>
+<li><a class="reference internal" href="#deploiment-sur-scaleway">Deploiment sur Scaleway</a></li>
+<li><a class="reference internal" href="#acceder-a-un-shell-en-production">Accéder à un shell en production</a></li>
+<li><a class="reference internal" href="#rollback-revenir-a-une-version-precedente-de-l-application-deployee">Rollback: Revenir à une version précédente de l’application déployée</a><ul>
+<li><a class="reference internal" href="#rollback-des-interfaces">Rollback des interfaces</a><ul>
+<li><a class="reference internal" href="#id1">Prérequis</a></li>
+<li><a class="reference internal" href="#rollback-du-code">Rollback du code</a></li>
+<li><a class="reference internal" href="#base-de-donnees">Base de données</a></li>
+<li><a class="reference internal" href="#verifier-que-la-restauration-est-effective">Vérifier que la restauration est effective</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
