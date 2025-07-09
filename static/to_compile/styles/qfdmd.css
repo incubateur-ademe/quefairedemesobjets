@@ -167,13 +167,13 @@
     }
 
     .icon {
+      @apply max-md:qf-scale-[0.65];
       a {
         &:hover {
           @apply md:qf-scale-[1.1];
         }
 
         @apply qf-origin-center qf-transition-transform !qf-bg-none qf-inline-flex;
-        @apply max-md:qf-scale-[0.65];
 
         &:active {
           background-color: transparent;
