@@ -2,6 +2,7 @@ import logging
 import subprocess
 import tempfile
 
+from typing_extensions import deprecated
 from utils.django import django_setup_full
 
 logger = logging.getLogger(__name__)
@@ -10,15 +11,13 @@ django_setup_full()
 
 
 def switch_tables(cursor, prefix_django, prefix_dbt, tables):
-
     logger.warning("Switch tables")
     logger.warning("Open a transaction")
     cursor.execute("BEGIN")
     try:
         for table in tables:
             logger.warning(
-                f"Renaming {prefix_django}{table}"
-                f" to {prefix_django}{table}_to_remove"
+                f"Renaming {prefix_django}{table} to {prefix_django}{table}_to_remove"
             )
             cursor.execute(
                 f"ALTER TABLE IF EXISTS {prefix_django}{table}"
@@ -26,11 +25,11 @@ def switch_tables(cursor, prefix_django, prefix_dbt, tables):
             )
             logger.warning(f"Renaming {prefix_dbt}{table} to {prefix_django}{table}")
             cursor.execute(
-                f"ALTER TABLE {prefix_dbt}{table} RENAME TO" f" {prefix_django}{table}"
+                f"ALTER TABLE {prefix_dbt}{table} RENAME TO {prefix_django}{table}"
             )
             logger.warning(f"Removing {prefix_django}{table}_to_remove")
             cursor.execute(
-                f"DROP TABLE IF EXISTS" f" {prefix_django}{table}_to_remove CASCADE"
+                f"DROP TABLE IF EXISTS {prefix_django}{table}_to_remove CASCADE"
             )
         logger.warning("Commit the transaction")
         cursor.execute("COMMIT")
@@ -52,15 +51,114 @@ def replace_acteur_table(
         "propositionservice_sous_categories",
     ],
 ):
-    from django.db import DEFAULT_DB_ALIAS, connections
+    from django.db import connection
 
-    for table in tables:
-        copy_table_with_pg_tools(f"{prefix_dbt}{table}")
-
-    with connections[DEFAULT_DB_ALIAS].cursor() as cursor:
+    with connection.cursor() as cursor:
+        copy_table_with_fdw(cursor, prefix_dbt, tables)
         switch_tables(cursor, prefix_django, prefix_dbt, tables)
 
 
+def get_warehouse_connection_info():
+    from django.conf import settings
+
+    warehouse = settings.DATABASES["warehouse"]
+    return {
+        "HOST": warehouse.get("HOST", "localhost"),
+        "PORT": warehouse.get("PORT", "5432"),
+        "DB": warehouse["NAME"],
+        "USER": warehouse["USER"],
+        "PASSWORD": warehouse["PASSWORD"],
+    }
+
+
+def copy_table_with_fdw(cursor, prefix, tables):
+    warehouse = get_warehouse_connection_info()
+    logger.info("Copy table from warehouse into public")
+    logger.info(f"{tables=} {prefix=}")
+
+    try:
+        # Step 1: Enable FDW
+        cursor.execute("CREATE EXTENSION IF NOT EXISTS postgres_fdw;")
+
+        # Step 2: Drop/recreate FDW server
+        cursor.execute("DROP SERVER IF EXISTS warehouse_fdw CASCADE;")
+        cursor.execute(
+            f"""
+            CREATE SERVER warehouse_fdw
+            FOREIGN DATA WRAPPER postgres_fdw
+            OPTIONS (
+                host '{warehouse.get("HOST")}',
+                dbname '{warehouse.get("DB")}',
+                port '{warehouse.get("PORT")}'
+            );
+        """
+        )
+
+        # Step 3: Create user mapping
+        cursor.execute(
+            f"""
+            CREATE USER MAPPING FOR CURRENT_USER
+            SERVER warehouse_fdw
+            OPTIONS (
+                user '{warehouse["USER"]}',
+                password '{warehouse["PASSWORD"]}'
+            );
+        """
+        )
+
+        # Step 4: Import the table into a foreign schema
+        prefixed_tables = [f"{prefix}{table}" for table in tables]
+        limit_to_clause = ", ".join(prefixed_tables)
+        foreign_schema = "warehouse_import"
+        local_schema = "public"
+        logger.info("CREATE SCHEMA")
+        cursor.execute(
+            f"""
+            CREATE SCHEMA IF NOT EXISTS {foreign_schema};
+            """
+        )
+        logger.info("IMPORT FOREIGN SCHEMA")
+        cursor.execute(
+            f"""
+            IMPORT FOREIGN SCHEMA public
+            LIMIT TO ({limit_to_clause})
+            FROM SERVER warehouse_fdw
+            INTO {foreign_schema};
+        """
+        )
+
+        logger.info("COPY TABLES")
+        # Step 5: Copy each table
+        for table in prefixed_tables:
+            # Step 1: Drop local table if exists
+            cursor.execute(f'DROP TABLE IF EXISTS "{local_schema}"."{table}" CASCADE;')
+
+            # Step 2: Recreate the table using the FDW structure
+            cursor.execute(
+                f"""
+                CREATE TABLE "{local_schema}"."{table}" AS
+                SELECT * FROM "{foreign_schema}"."{table}";
+            """
+            )
+            logger.info(f"Successfully copied table {table} using FDW")
+
+        logger.warning(f"Dropping Schema {foreign_schema}")
+        # cursor.execute(
+        #     f"""
+        #     DROP SCHEMA {foreign_schema} CASCADE;
+        #     """
+        # )
+        logger.info("All tables copied successfully using FDW.")
+
+    except Exception as e:
+        logger.error(f"Error copying table {tables} via FDW: {e}")
+        raise
+
+
+@deprecated(
+    "Use copy_tables_using_fdw instead as using pg_dump/pg_restore"
+    "generates huge WAL files"
+)
 def copy_table_with_pg_tools(table):
     from django.conf import settings
 

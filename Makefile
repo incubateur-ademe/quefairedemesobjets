@@ -186,6 +186,10 @@ drop-schema-public:
 create-schema-public:
 	docker compose exec lvao-db psql -U qfdmo -d qfdmo -c "CREATE SCHEMA IF NOT EXISTS public;"
 
+.PHONY: psql
+psql:
+	docker compose exec lvao-db psql -U qfdmo -d qfdmo
+
 .PHONY: dump-production
 dump-production:
 	sh scripts/infrastructure/backup-db.sh
