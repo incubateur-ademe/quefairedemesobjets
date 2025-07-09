@@ -17,7 +17,7 @@
 
 @layer components {
   .patchwork {
-    @apply qf-grid qf-gap-y-[1.75rem] qf-pt-4w qf-relative;
+    @apply qf-grid md:qf-gap-y-[1.75rem] qf-pt-4w qf-relative;
     grid:
       ". item-1 . item-2 . item-3 item-4 . item-5 . item-6 item-7 . item-8 item-9 ." 1fr
       "item-10 . item-11 item-12 . item-13 . item-14 . item-15 . . item-16 item-17 . item-18" 1fr
@@ -89,31 +89,28 @@
     }
     .item-12 {
       grid-area: item-12;
-      @apply qf-translate-y-[.75rem];
-      @apply qf-translate-x-[1rem];
+      @apply md:qf-translate-y-[.75rem] md:qf-translate-x-[1rem];
     }
     .item-13 {
       grid-area: item-13;
-      @apply -qf-translate-y-[.5rem];
-      @apply qf-translate-x-[1rem];
+      @apply md:-qf-translate-y-[.5rem] md:qf-translate-x-[1rem];
     }
     .item-14 {
       grid-area: item-14;
-      @apply md:-qf-translate-y-[.5rem] max-md:qf-translate-x-[2rem] qf-translate-x-[1rem];
+      @apply md:-qf-translate-y-[.5rem] md:qf-translate-x-[1rem];
       @apply max-md:qf-block md:qf-hidden lg:qf-block;
     }
     .item-15 {
       grid-area: item-15;
-      @apply qf-translate-x-[1rem];
+      @apply md:qf-translate-x-[1rem];
     }
     .item-16 {
       grid-area: item-16;
-      @apply qf-translate-y-[2rem];
-      @apply qf-translate-x-[.5rem];
+      @apply md:qf-translate-y-[2rem] md:qf-translate-x-[.5rem];
     }
     .item-17 {
       grid-area: item-17;
-      @apply -qf-translate-y-[.5rem] qf-translate-x-[2rem];
+      @apply md:-qf-translate-y-[.5rem] md:qf-translate-x-[2rem];
     }
     .item-18 {
       grid-area: item-18;
@@ -123,47 +120,45 @@
     /* 3rd row, left */
     .item-19 {
       grid-area: item-19;
-      @apply -qf-translate-x-[2rem] -qf-translate-y-[1rem];
+      @apply md:-qf-translate-x-[2rem] md:-qf-translate-y-[1rem];
     }
     .item-20 {
       grid-area: item-20;
       @apply max-md:qf-block max-lg:qf-hidden;
-      @apply qf-translate-x-[2.5rem];
+      @apply md:qf-translate-x-[2.5rem];
     }
     /* 3rd row, right */
     .item-21 {
       grid-area: item-21;
       @apply max-lg:qf-hidden max-md:qf-block;
-      @apply qf-translate-x-[4rem];
+      @apply md:qf-translate-x-[4rem];
     }
     .item-22 {
       grid-area: item-22;
-      @apply qf-translate-x-[3rem] -qf-translate-y-[.25rem];
+      @apply md:qf-translate-x-[3rem] md:-qf-translate-y-[.25rem];
     }
 
     /* 4th row, left */
     .item-23 {
       grid-area: item-23;
-      @apply -qf-translate-y-[1rem] -qf-translate-x-[1rem];
+      @apply md:-qf-translate-y-[1rem] md:-qf-translate-x-[1rem];
     }
     .item-24 {
       grid-area: item-24;
-      @apply qf-translate-y-[.5rem] qf-translate-x-[2rem];
+      @apply md:qf-translate-y-[.5rem] md:qf-translate-x-[2rem];
     }
     .item-25 {
       grid-area: item-25;
-      @apply qf-translate-x-[1rem];
+      @apply md:qf-translate-x-[1rem];
     }
 
     /* 4th row, right */
     .item-26 {
       grid-area: item-26;
-      @apply max-md:qf-hidden;
     }
     .item-27 {
       grid-area: item-27;
-      @apply -qf-translate-y-[1rem] -qf-translate-x-[2rem];
-      @apply max-md:qf-hidden;
+      @apply md:-qf-translate-y-[1rem] md:-qf-translate-x-[2rem];
     }
     .item-28 {
       grid-area: item-28;
