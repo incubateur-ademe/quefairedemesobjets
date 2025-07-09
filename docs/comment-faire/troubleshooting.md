@@ -109,3 +109,69 @@ docker compose exec airflow-scheduler dbt run --models intermediate.acteurs
 ```
 
 Ainsi, vous pouvez désormais effectuer toutes les modifications de code souhaitées dans vos modèles avant de rejouer cette tâche.
+
+## Créer un utilisateur sur Airflow sans accès à la UI
+
+Il est possible de créer un user directement depuis `psql`, pour ce faire
+
+1. Générer un mot de passe en utilisant `werkzeug` utilisé par Airflow
+
+```py
+# Depuis un shell python, par exemple poetry run python
+from werkzeug.security import generate_password_hash
+
+print(generate_password_hash('your_password'))
+# Retourne une string ressemblant à pbkdf2:sha256:260000$abc123$...
+```
+
+2. Insérer le nouvel utilisateur dans la table `ab_user`
+
+Récupérer la commande de connexion depuis le dashboard Clever Cloud (dans notre cas):
+
+```sh
+psql -h databae_host_name -p 5432 -U user -d airflow_database`
+```
+
+Executer le `SQL` ci-dessous
+
+```sql
+INSERT INTO ab_user (
+    id, first_name, last_name, username, password, email, active
+) VALUES (
+    1000, 'Admin', 'User', 'admin', 'pbkdf2:sha256:260000$abc123$...', 'admin@example.com', true
+);
+```
+
+À noter : assurez vous que 1000 n'est pas déjà utilisé. Il est possible de récupérer l'ID le plus haut avec la commande
+
+```sql
+SELECT MAX(id) FROM ab_user;
+```
+
+3. Assigner le rôle `Admin`
+
+Commencez par trouver l'ID du rôle `Admin`
+
+```sql
+SELECT id FROM ab_role WHERE name = 'Admin';
+```
+
+En supposant que l'ID soit `1`, l'insérer dans la table de lien
+
+```sql
+INSERT INTO ab_user_role (user_id, role_id) VALUES (1000, 1);
+```
+
+BONUS : avec un accès au CLI Airflow, c'est quand même beaucoup plus simple :
+
+```sh
+airflow users create \
+    --username admin \
+    --firstname Admin \
+    --lastname User \
+    --role Admin \
+    --email admin@example.com \
+    --password your_password
+```
+
+Malheureusement on a pas d'accès shell actuellement sur nos instances déployées dans Clever cloud...
