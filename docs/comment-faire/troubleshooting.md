@@ -72,7 +72,7 @@ Enfin, vérifier les variables d'environnement en prenant exemple sur le fichier
 
 ## Stack data, airflow, dbt
 
-En local, il peut s'avérer complexe de développer sur la stack data, du fait du volume de données, mais aussi de l'enchaînement de tâches.
+En local, il peut s'avérer complexe de développer sur la stack data, du fait du volume de données, mais aussi de l'enchaînement de tâches dans les DAGs.
 
 ### Visualiser les logs d'un DAG en échec
 

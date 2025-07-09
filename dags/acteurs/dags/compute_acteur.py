@@ -22,6 +22,9 @@ default_args = {
     "retry_delay": timedelta(minutes=2),
 }
 
+dbt_run = "dbt run --models"
+dbt_test = "dbt test --resource-type model --select"
+
 
 with DAG(
     "compute_acteurs",
@@ -38,11 +41,11 @@ with DAG(
 ) as dag:
     dbt_run_base_acteurs = BashOperator(
         task_id="dbt_run_base_acteurs",
-        bash_command=("dbt run --models base.acteurs"),
+        bash_command=(f"{dbt_run} base.acteurs"),
     )
     dbt_test_base_acteurs = BashOperator(
         task_id="dbt_test_base_acteurs",
-        bash_command=("dbt test --models base.acteurs"),
+        bash_command=(f"{dbt_test} base.acteurs"),
     )
     dbt_run_intermediate_acteurs = BashOperator(
         task_id="dbt_run_intermediate_acteurs",
@@ -50,58 +53,58 @@ with DAG(
     )
     dbt_test_intermediate_acteurs = BashOperator(
         task_id="dbt_test_intermediate_acteurs",
-        bash_command=("dbt test --models intermediate.acteurs"),
+        bash_command=(f"{dbt_test} intermediate.acteurs"),
     )
 
     dbt_run_marts_acteurs_exhaustive = BashOperator(
         task_id="dbt_run_marts_acteurs_exhaustive",
-        bash_command=("dbt run --models marts.acteurs.exhaustive"),
+        bash_command=(f"{dbt_run} marts.acteurs.exhaustive"),
     )
     dbt_test_marts_acteurs_exhaustive = BashOperator(
         task_id="dbt_test_marts_acteurs_exhaustive",
-        bash_command=("dbt test --models marts.acteurs.exhaustive"),
+        bash_command=(f"{dbt_test} marts.acteurs.exhaustive"),
     )
     dbt_run_exposure_acteurs_exhaustive = BashOperator(
         task_id="dbt_run_exposure_acteurs_exhaustive",
-        bash_command=("dbt run --models exposure.acteurs.exhaustive"),
+        bash_command=(f"{dbt_run} exposure.acteurs.exhaustive"),
     )
     dbt_test_exposure_acteurs_exhaustive = BashOperator(
         task_id="dbt_test_exposure_acteurs_exhaustive",
-        bash_command=("dbt test --models exposure.acteurs.exhaustive"),
+        bash_command=(f"{dbt_test} exposure.acteurs.exhaustive"),
     )
 
     dbt_run_marts_acteurs_carte = BashOperator(
         task_id="dbt_run_marts_acteurs_carte",
-        bash_command=("dbt run --models marts.acteurs.carte"),
+        bash_command=(f"{dbt_run} marts.acteurs.carte"),
     )
     dbt_test_marts_acteurs_carte = BashOperator(
         task_id="dbt_test_marts_acteurs_carte",
-        bash_command=("dbt test --models marts.acteurs.carte"),
+        bash_command=(f"{dbt_test} marts.acteurs.carte"),
     )
     dbt_run_exposure_acteurs_carte = BashOperator(
         task_id="dbt_run_exposure_acteurs_carte",
-        bash_command=("dbt run --models exposure.acteurs.carte"),
+        bash_command=(f"{dbt_run} exposure.acteurs.carte"),
     )
     dbt_test_exposure_acteurs_carte = BashOperator(
         task_id="dbt_test_exposure_acteurs_carte",
-        bash_command=("dbt test --models exposure.acteurs.carte"),
+        bash_command=(f"{dbt_test} exposure.acteurs.carte"),
     )
 
     dbt_run_marts_acteurs_opendata = BashOperator(
         task_id="dbt_run_marts_acteurs_opendata",
-        bash_command=("dbt run --models marts.acteurs.opendata"),
+        bash_command=(f"{dbt_run} marts.acteurs.opendata"),
     )
     dbt_test_marts_acteurs_opendata = BashOperator(
         task_id="dbt_test_marts_acteurs_opendata",
-        bash_command=("dbt test --models marts.acteurs.opendata"),
+        bash_command=(f"{dbt_test} marts.acteurs.opendata"),
     )
     dbt_run_exposure_acteurs_opendata = BashOperator(
         task_id="dbt_run_exposure_acteurs_opendata",
-        bash_command=("dbt run --models exposure.acteurs.opendata"),
+        bash_command=(f"{dbt_run} exposure.acteurs.opendata"),
     )
     dbt_test_exposure_acteurs_opendata = BashOperator(
         task_id="dbt_test_exposure_acteurs_opendata",
-        bash_command=("dbt test --models exposure.acteurs.opendata"),
+        bash_command=(f"{dbt_test} exposure.acteurs.opendata"),
     )
 
     check_model_table_displayedacteur_task = check_model_table_consistency_task(

@@ -50,9 +50,9 @@ def replace_acteur_table(
         "propositionservice_sous_categories",
     ],
 ):
-    from django.db import DEFAULT_DB_ALIAS, connections
+    from django.db import connection
 
-    with connections[DEFAULT_DB_ALIAS].cursor() as cursor:
+    with connection.cursor() as cursor:
         copy_table_with_fdw(cursor, prefix_dbt, tables)
         switch_tables(cursor, prefix_django, prefix_dbt, tables)
 
@@ -62,18 +62,16 @@ def get_warehouse_connection_info():
 
     warehouse = settings.DATABASES["warehouse"]
     return {
-        "WAREHOUSE_HOST": warehouse.get("HOST", "localhost"),
-        "WAREHOUSE_PORT": warehouse.get("PORT", "5432"),
-        "WAREHOUSE_DB": warehouse["NAME"],
-        "WAREHOUSE_USER": warehouse["USER"],
-        "WAREHOUSE_PASSWORD": warehouse["PASSWORD"],
+        "HOST": warehouse.get("HOST", "localhost"),
+        "PORT": warehouse.get("PORT", "5432"),
+        "DB": warehouse["NAME"],
+        "USER": warehouse["USER"],
+        "PASSWORD": warehouse["PASSWORD"],
     }
 
 
 def copy_table_with_fdw(cursor, prefix, tables):
-    from django.conf import settings
-
-    info = get_warehouse_connection_info()
+    warehouse = get_warehouse_connection_info()
 
     try:
         # Step 1: Enable FDW
@@ -86,9 +84,9 @@ def copy_table_with_fdw(cursor, prefix, tables):
             CREATE SERVER warehouse_fdw
             FOREIGN DATA WRAPPER postgres_fdw
             OPTIONS (
-                host '{settings.WAREHOUSE_HOST}',
-                dbname '{settings.WAREHOUSE_DB}',
-                port '{settings.WAREHOUSE_PORT}'
+                host '{warehouse.get('HOST')}',
+                dbname '{warehouse.get('DB')}',
+                port '{warehouse.get('PORT')}'
             );
         """
         )
@@ -99,8 +97,8 @@ def copy_table_with_fdw(cursor, prefix, tables):
             CREATE USER MAPPING FOR CURRENT_USER
             SERVER warehouse_fdw
             OPTIONS (
-                user '{info["WAREHOUSE_USER"]}',
-                password '{info["WAREHOUSE_PASSWORD"]}'
+                user '{warehouse["USER"]}',
+                password '{warehouse["PASSWORD"]}'
             );
         """
         )
@@ -108,19 +106,26 @@ def copy_table_with_fdw(cursor, prefix, tables):
         # Step 4: Import the table into a foreign schema
         prefixed_tables = [f"{prefix}{table}" for table in tables]
         limit_to_clause = ", ".join(prefixed_tables)
+        tmp_schema = "warehouse_import"
+        cursor.execute(
+            f"""
+            CREATE SCHEMA {tmp_schema};
+            """
+        )
         cursor.execute(
             f"""
             IMPORT FOREIGN SCHEMA public
             LIMIT TO ({limit_to_clause})
             FROM SERVER warehouse_fdw
-            INTO warehouse_import;
+            INTO {tmp_schema};
         """
         )
 
         # Step 5: Copy each table
         for table in tables:
+            # logger.info(f"Deleting table '{table}'...")
+            # cursor.execute(f"DELETE FROM {table};")
             logger.info(f"Copying table '{table}'...")
-            cursor.execute(f"DELETE FROM {table};")
             cursor.execute(
                 f"""
                 INSERT INTO {table}
@@ -129,6 +134,11 @@ def copy_table_with_fdw(cursor, prefix, tables):
             )
             logger.info(f"Finished copying table '{table}'.")
 
+        cursor.execute(
+            f"""
+            DROP SCHEMA {tmp_schema};
+            """
+        )
         logger.info("All tables copied successfully using FDW.")
 
     except Exception as e:
