@@ -3,7 +3,7 @@
 ## Monitoring des bases de données
 
 Visualiser les métriques de la base de données en accedant à l'interface Grafana du projet :
-[https://6bef58ea-39e7-4fa5-8a55-dc3999fc62df.dashboard.cockpit.fr-par.scw.cloud/d/scw-rdb-postgresql-overview/rdb-postgresql-overview?orgId=1&refresh=5m]( https://6bef58ea-39e7-4fa5-8a55-dc3999fc62df.dashboard.cockpit.fr-par.scw.cloud/d/scw-rdb-postgresql-overview/rdb-postgresql-overview?orgId=1&refresh=5m)
+[https://6bef58ea-39e7-4fa5-8a55-dc3999fc62df.dashboard.cockpit.fr-par.scw.cloud/d/scw-rdb-postgresql-overview/rdb-postgresql-overview?orgId=1&refresh=5m](https://6bef58ea-39e7-4fa5-8a55-dc3999fc62df.dashboard.cockpit.fr-par.scw.cloud/d/scw-rdb-postgresql-overview/rdb-postgresql-overview?orgId=1&refresh=5m)
 
 ### Troubleshooting
 
