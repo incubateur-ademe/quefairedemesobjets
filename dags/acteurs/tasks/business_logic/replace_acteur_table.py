@@ -140,15 +140,14 @@ def copy_table_with_fdw(cursor, prefix, tables):
                 SELECT * FROM "{foreign_schema}"."{table}";
             """
             )
-
             logger.info(f"Successfully copied table {table} using FDW")
 
         logger.warning(f"Dropping Schema {foreign_schema}")
-        cursor.execute(
-            f"""
-            DROP SCHEMA {foreign_schema} CASCADE;
-            """
-        )
+        # cursor.execute(
+        #     f"""
+        #     DROP SCHEMA {foreign_schema} CASCADE;
+        #     """
+        # )
         logger.info("All tables copied successfully using FDW.")
 
     except Exception as e:
