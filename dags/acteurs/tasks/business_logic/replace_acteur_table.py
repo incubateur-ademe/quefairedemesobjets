@@ -2,6 +2,7 @@ import logging
 import subprocess
 import tempfile
 
+from typing_extensions import deprecated
 from utils.django import django_setup_full
 
 logger = logging.getLogger(__name__)
@@ -72,6 +73,8 @@ def get_warehouse_connection_info():
 
 def copy_table_with_fdw(cursor, prefix, tables):
     warehouse = get_warehouse_connection_info()
+    logger.info("Copy table from warehouse into public")
+    logger.info(f"{tables=} {prefix=}")
 
     try:
         # Step 1: Enable FDW
@@ -84,9 +87,9 @@ def copy_table_with_fdw(cursor, prefix, tables):
             CREATE SERVER warehouse_fdw
             FOREIGN DATA WRAPPER postgres_fdw
             OPTIONS (
-                host '{warehouse.get('HOST')}',
-                dbname '{warehouse.get('DB')}',
-                port '{warehouse.get('PORT')}'
+                host '{warehouse.get("HOST")}',
+                dbname '{warehouse.get("DB")}',
+                port '{warehouse.get("PORT")}'
             );
         """
         )
@@ -106,37 +109,44 @@ def copy_table_with_fdw(cursor, prefix, tables):
         # Step 4: Import the table into a foreign schema
         prefixed_tables = [f"{prefix}{table}" for table in tables]
         limit_to_clause = ", ".join(prefixed_tables)
-        tmp_schema = "warehouse_import"
+        foreign_schema = "warehouse_import"
+        local_schema = "public"
+        logger.info("CREATE SCHEMA")
         cursor.execute(
             f"""
-            CREATE SCHEMA {tmp_schema};
+            CREATE SCHEMA IF NOT EXISTS {foreign_schema};
             """
         )
+        logger.info("IMPORT FOREIGN SCHEMA")
         cursor.execute(
             f"""
             IMPORT FOREIGN SCHEMA public
             LIMIT TO ({limit_to_clause})
             FROM SERVER warehouse_fdw
-            INTO {tmp_schema};
+            INTO {foreign_schema};
         """
         )
 
+        logger.info("COPY TABLES")
         # Step 5: Copy each table
-        for table in tables:
-            # logger.info(f"Deleting table '{table}'...")
-            # cursor.execute(f"DELETE FROM {table};")
-            logger.info(f"Copying table '{table}'...")
+        for table in prefixed_tables:
+            # Step 1: Drop local table if exists
+            cursor.execute(f'DROP TABLE IF EXISTS "{local_schema}"."{table}" CASCADE;')
+
+            # Step 2: Recreate the table using the FDW structure
             cursor.execute(
                 f"""
-                INSERT INTO {table}
-                SELECT * FROM warehouse_import.{table};
+                CREATE TABLE "{local_schema}"."{table}" AS
+                SELECT * FROM "{foreign_schema}"."{table}";
             """
             )
-            logger.info(f"Finished copying table '{table}'.")
 
+            logger.info(f"Successfully copied table {table} using FDW")
+
+        logger.warning(f"Dropping Schema {foreign_schema}")
         cursor.execute(
             f"""
-            DROP SCHEMA {tmp_schema};
+            DROP SCHEMA {foreign_schema} CASCADE;
             """
         )
         logger.info("All tables copied successfully using FDW.")
@@ -146,6 +156,10 @@ def copy_table_with_fdw(cursor, prefix, tables):
         raise
 
 
+@deprecated(
+    "Use copy_tables_using_fdw instead as using pg_dump/pg_restore"
+    "generates huge WAL files"
+)
 def copy_table_with_pg_tools(table):
     from django.conf import settings
 
