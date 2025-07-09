@@ -133,6 +133,9 @@
 
     /* 4th row, left */
     .item-23 {
+      @apply max-md:qf-hidden;
+    }
+    .item-23 {
       grid-area: item-23;
       @apply -qf-translate-y-[1rem];
       @apply -qf-translate-x-[1rem];
@@ -162,6 +165,34 @@
       @apply qf-translate-x-[1rem];
     }
 
+    .item-20,
+    .item-21,
+    .item-12,
+    .item-2,
+    .item-25,
+    .item-26 {
+      @apply max-xl:qf-hidden;
+    }
+
+    .item-
+
+    /* .item-20, */
+    /* .item-24, */
+    /* .item-25, */
+    /* .item-26, */
+    /* .item-27, */
+    /* .item-2, */
+    /* .item-9, */
+    /* .item-16, */
+    /* .item-23, */
+    /* .item-22, */
+    /* .item-18, */
+    /* .item-12, */
+    /* .item-11, */
+    /* .item-28 { */
+    /* @apply max-lg:qf-hidden; */
+    /* } */
+
     .icon {
       a {
         &:hover {
@@ -174,6 +205,27 @@
           background-color: transparent;
         }
       }
+    }
+  }
+  @media (max-width: 1024px) {
+    .patchwork {
+      .item-2,
+      .item-2,
+      .item-3,
+      .item-4,
+      .item-5,
+      .item-6,
+      .item-7,
+      .item-8,
+      .item-9 {
+        @apply qf-hidden;
+      }
+      grid:
+      /* ". item-1 . item-2 . item-3 item-4 . item-5 . item-6 item-7 . item-8 item-9 ." 1fr */
+        "item-10 . item-11 item-12 . item-13 . item-14 . item-15 . . item-16 item-17 . item-18" 1fr
+        ". item-19 item-20 . logo logo logo logo logo logo logo logo item-21 . item-22 ." 1fr
+        "item-23 item-24 . item-25 . . . . . . . . item-26 . item-27 item-28" 1fr
+        / 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
     }
   }
   @media (max-width: 768px) {
