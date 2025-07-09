@@ -34,57 +34,58 @@
     .item-1 {
       grid-area: item-1;
       @apply -qf-translate-x-[1rem];
-      @apply max-lg:qf-hidden;
+      @apply max-xl:qf-hidden;
     }
     .item-2 {
       grid-area: item-2;
       @apply -qf-translate-x-[2rem];
-      @apply max-lg:qf-hidden;
+      @apply max-xl:qf-hidden;
     }
     .item-3 {
       grid-area: item-3;
       @apply -qf-translate-x-[3rem];
-      @apply max-lg:qf-hidden;
+      @apply max-xl:qf-hidden;
     }
     .item-4 {
       grid-area: item-4;
       @apply qf-translate-x-[1rem];
-      @apply max-lg:qf-hidden;
+      @apply max-xl:qf-hidden;
     }
     .item-5 {
       grid-area: item-5;
       @apply qf-translate-x-[1rem];
-      @apply max-lg:qf-hidden;
+      @apply max-xl:qf-hidden;
     }
     .item-6 {
       grid-area: item-6;
-      @apply max-lg:qf-hidden;
+      @apply max-xl:qf-hidden;
     }
     .item-7 {
       grid-area: item-7;
       @apply qf-translate-x-[2rem] qf-translate-y-[3rem];
-      @apply max-lg:qf-hidden;
+      @apply max-xl:qf-hidden;
     }
     .item-8 {
       grid-area: item-8;
       @apply -qf-translate-y-[0.25rem];
-      @apply max-lg:qf-hidden;
+      @apply max-xl:qf-hidden;
     }
     .item-9 {
       grid-area: item-9;
       @apply qf-translate-x-[3rem];
-      @apply max-lg:qf-hidden;
+      @apply max-xl:qf-hidden;
     }
 
     /* Second row */
     .item-10 {
       grid-area: item-10;
-      @apply max-lg:qf-hidden max-md:qf-block;
+      /* @apply max-lg:qf-hidden max-md:qf-block; */
     }
     .item-11 {
       grid-area: item-11;
       @apply xl:qf-translate-y-[0.25rem] xl:-qf-translate-x-[2rem];
-      @apply max-xl:-qf-translate-y-[2rem] max-xl:qf-translate-x-[3rem];
+      /* @apply max-xl:-qf-translate-y-[2rem] max-xl:qf-translate-x-[3rem]; */
+      @apply max-xl:qf-hidden max-lg:qf-block;
     }
     .item-12 {
       grid-area: item-12;
@@ -103,7 +104,7 @@
     }
     .item-15 {
       grid-area: item-15;
-      @apply qf-translate-x-[1rem] max-md:qf-hidden;
+      @apply qf-translate-x-[1rem];
     }
     .item-16 {
       grid-area: item-16;
@@ -113,42 +114,41 @@
     .item-17 {
       grid-area: item-17;
       @apply -qf-translate-y-[.5rem] qf-translate-x-[2rem];
-      @apply max-sm:qf-hidden;
     }
     .item-18 {
       grid-area: item-18;
-      @apply max-lg:qf-hidden;
+      /* @apply max-lg:qf-hidden; */
     }
 
     /* 3rd row, left */
     .item-19 {
       grid-area: item-19;
-      @apply -qf-translate-x-[2rem] -qf-translate-y-[1rem] max-md:qf-hidden;
+      @apply -qf-translate-x-[2rem] -qf-translate-y-[1rem];
     }
     .item-20 {
       grid-area: item-20;
+      @apply max-md:qf-block max-lg:qf-hidden;
       @apply qf-translate-x-[2.5rem];
     }
     /* 3rd row, right */
     .item-21 {
       grid-area: item-21;
+      @apply max-lg:qf-hidden max-md:qf-block;
       @apply qf-translate-x-[4rem];
     }
     .item-22 {
       grid-area: item-22;
-      @apply qf-translate-x-[3rem] -qf-translate-y-[.25rem] max-md:qf-hidden;
+      @apply qf-translate-x-[3rem] -qf-translate-y-[.25rem];
     }
 
     /* 4th row, left */
     .item-23 {
       grid-area: item-23;
       @apply -qf-translate-y-[1rem] -qf-translate-x-[1rem];
-      @apply max-md:qf-hidden;
     }
     .item-24 {
       grid-area: item-24;
       @apply qf-translate-y-[.5rem] qf-translate-x-[2rem];
-      @apply max-md:qf-hidden;
     }
     .item-25 {
       grid-area: item-25;
@@ -171,15 +171,6 @@
       @apply max-md:qf-hidden;
     }
 
-    .item-20,
-    .item-21,
-    .item-12,
-    .item-2,
-    .item-25,
-    .item-26 {
-      @apply max-xl:qf-hidden;
-    }
-
     .icon {
       a {
         &:hover {
@@ -187,7 +178,7 @@
         }
 
         @apply qf-origin-center qf-transition-transform !qf-bg-none qf-inline-flex;
-        @apply max-md:qf-scale-[0.5];
+        @apply max-md:qf-scale-[0.65];
 
         &:active {
           background-color: transparent;
@@ -195,7 +186,7 @@
       }
     }
   }
-  @media (max-width: 1024px) {
+  @media (max-width: 1280px) {
     .patchwork {
       /* Hide the first line */
       grid:
@@ -207,15 +198,26 @@
     }
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     .patchwork {
       /* Hide the last line */
       grid:
       /* ". item-1 . item-2 . item-3 item-4 . item-5 . item-6 item-7 . item-8 item-9 ." 1fr */
         "item-10 . item-11 item-12 . item-13 . item-14 . item-15 . . item-16 item-17 . item-18" 1fr
-        "logo logo logo logo logo logo logo logo logo logo logo logo logo logo logo logo" 1fr
-        /* "item-23 item-24 . item-25 . . . . . . . . item-26 . item-27 item-28" 1fr */
+        ". item-19 item-20 . logo logo logo logo logo logo logo logo item-21 . item-22 ." 1fr
+        "item-23 item-24 . item-25 . . . . . . . . item-26 . item-27 item-28" 1fr
         / 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    }
+  }
+  @media (max-width: 768px) {
+    .patchwork {
+      grid:
+        ". item-10 . item-11 . item-12 . item-13 ." 1fr
+        "item-14 . item-15 . item-16 . item-17 . item-18" 1fr
+        "logo logo logo logo logo logo logo logo logo" 1fr
+        "item-19 . item-20 . item-21 . item-22 . item-23" 1fr
+        ". item-24 . item-25 . item-26 . item-27 ." 1fr
+        / 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
     }
   }
   .qf-btn {
