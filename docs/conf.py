@@ -40,3 +40,6 @@ language = "fr"
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "furo"
+html_theme_options = {
+    "top_of_page_button": "edit",
+}
