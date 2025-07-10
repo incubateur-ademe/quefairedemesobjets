@@ -17,7 +17,7 @@
 
 @layer components {
   .patchwork {
-    @apply qf-grid md:qf-gap-y-[1.75rem] qf-pt-4w qf-relative;
+    @apply qf-grid md:qf-gap-y-[1.75rem] max-md:qf-pb-2w qf-pb-4w qf-pt-4w qf-relative;
     grid:
       ". item-1 . item-2 . item-3 item-4 . item-5 . item-6 item-7 . item-8 item-9 ." 1fr
       "item-10 . item-11 item-12 . item-13 . item-14 . item-15 . . item-16 item-17 . item-18" 1fr
@@ -27,7 +27,8 @@
 
     .logo {
       grid-area: logo;
-      @apply qf-pt-2w qf-flex qf-justify-center qf-items-center;
+      @apply max-md:qf-pt-1w max-md:qf-h-[5rem];
+      @apply md:qf-pt-2w qf-flex qf-justify-center qf-items-center;
     }
 
     /* First row */
@@ -167,7 +168,11 @@
     }
 
     .icon {
-      @apply max-md:qf-scale-[0.65];
+      @apply max-md:qf-w-[2rem] max-md:qf-h-[2rem];
+
+      svg {
+        @apply qf-w-full qf-h-full;
+      }
       a {
         &:hover {
           @apply md:qf-scale-[1.1];
@@ -207,11 +212,11 @@
   @media (max-width: 768px) {
     .patchwork {
       grid:
-        ". item-10 . item-11 . item-12 . item-13 ." 1fr
-        "item-14 . item-15 . item-16 . item-17 . item-18" 1fr
+        ". item-10 . item-11 . item-12 . item-13 ." 0.5fr
+        "item-14 . item-15 . item-16 . item-17 . item-18" 0.5fr
         "logo logo logo logo logo logo logo logo logo" 1fr
-        "item-19 . item-20 . item-21 . item-22 . item-23" 1fr
-        ". item-24 . item-25 . item-26 . item-27 ." 1fr
+        "item-19 . item-20 . item-21 . item-22 . item-23" 0.5fr
+        ". item-24 . item-25 . item-26 . item-27 ." 0.5fr
         / 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
     }
   }
