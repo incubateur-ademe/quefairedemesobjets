@@ -1,17 +1,8 @@
 {% load qfdmd_tags %}
-<div class="icon" data-testid="patchwork-icon">
+<div class="icon item-{{ forloop.counter }}" data-testid="patchwork-icon">
     <a
         href="{{ produit.url }}"
         title="Que faire de mon/ma {{ produit.nom }} ?"
-        style="
-        {% if alt %}
-        --random-x: {{ forloop.counter|divisibleby:2|yesno:'-5,-5' }};
-        --random-y: {{ forloop.revcounter|divisibleby:3|yesno:'5,-5' }};
-        {% else %}
-        --random-x: {{ forloop.counter|divisibleby:3|yesno:'-15,10' }};
-        --random-y: {{ forloop.revcounter|divisibleby:2|yesno:'10,-10' }};
-        {% endif %}
-        --random-rotate: {{ forloop.counter|divisibleby:3|yesno:'5,-5' }};"
     >
         {% render_file_content produit.picto %}
     </a>

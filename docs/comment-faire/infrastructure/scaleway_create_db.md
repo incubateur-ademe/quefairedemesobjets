@@ -49,9 +49,9 @@ pg_restore -d 'postgres://<user>:<password>@<host>:<port>/<database>?sslmode=req
 
 Pour chacune des instances de l'environnement, aller mettre à jour les variables d'environnement et redémarrer les instances:
 
-* webapp quefairedemesobjets
-* airflow-webserver
-* airflow-scheduler
-* metabase
+- webapp quefairedemesobjets
+- airflow-webserver
+- airflow-scheduler
+- metabase
 
 Tester et constater que la nouvelle base de données est utilsée
