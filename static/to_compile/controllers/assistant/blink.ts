@@ -15,15 +15,7 @@ export default class extends Controller<HTMLSpanElement> {
   }
 
   connect() {
-    const isReduced =
-      window.matchMedia(`(prefers-reduced-motion: reduce)`) === true ||
-      window.matchMedia(`(prefers-reduced-motion: reduce)`).matches === true
-
-    if (!!isReduced) {
-      this.element.textContent = this.words.join(" & ")
-    } else {
-      this.loopWords()
-    }
+    this.loopWords()
   }
 
   loopWords() {
