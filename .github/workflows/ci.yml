@@ -50,7 +50,7 @@ jobs:
       #   run: poetry run pytest dags/e2e_tests
       - name: Check code formatting
         run: make check-format
-      - uses: astral-sh/ruff-action@eaf0ecdd668ceea36159ff9d91882c9795d89b49 # v3.4.0
+      - uses: astral-sh/ruff-action@0c50076f12c38c3d0115b7b519b54a91cb9cf0ad # v3.5.0
       - name: Check for missing migrations
         run: poetry run python manage.py makemigrations --check --no-input --settings=core.test_settings
         env:
