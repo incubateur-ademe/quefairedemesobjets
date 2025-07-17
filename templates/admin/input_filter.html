@@ -1,0 +1,21 @@
+{% load i18n %}
+
+<h3>{% blocktranslate with filter_title=title %} By {{ filter_title }} {% endblocktranslate %}</h3>
+<ul>
+  <li>
+    <form method="GET" action="">
+        {% for k, v in all_choice.query_parts %}
+          <input type="hidden" name="{{ k }}" value="{{ v }}" />
+        {% endfor %}
+
+        <textarea
+          rows="5"
+          style="font-family: monospace; width: 100%;"
+           name="{{ spec.parameter_name }}">{{ spec.value|default_if_none:'' }}</textarea>
+        <button type="submit">filtrer</button>
+          {% if not all_choice.selected %}
+  <strong><a href="{{ all_choice.query_string }}">⨉ {% translate 'Remove' %}</a></strong>
+{% endif %}
+    </form>
+  </li>
+</ul>
