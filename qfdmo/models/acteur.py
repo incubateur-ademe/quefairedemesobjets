@@ -38,7 +38,6 @@ from unidecode import unidecode
 
 from core.constants import DIGITAL_ACTEUR_CODE
 from core.models.mixin import TimestampedModel
-from core.utils import LazyEncoder
 from core.validators import EmptyEmailValidator
 from dags.sources.config.shared_constants import (
     EMPTY_ACTEUR_FIELD,
@@ -1128,6 +1127,9 @@ class DisplayedActeur(BaseActeur):
 
     @property
     def json_ld(self):
+        # Prevent a circular dependency error
+        from core.utils import LazyEncoder
+
         data = {
             "@context": "https://schema.org",
             "@type": "Place",

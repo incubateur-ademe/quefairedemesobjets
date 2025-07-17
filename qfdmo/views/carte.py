@@ -4,7 +4,7 @@ from django.db.models import Q
 from django.utils.functional import cached_property
 from django.views.generic import DetailView
 
-from qfdmo.forms import CarteForm
+from qfdmo.forms import CarteForm, DisplayedActeursForm
 from qfdmo.models import CarteConfig
 from qfdmo.views.adresses import SearchActeursView
 
@@ -15,6 +15,13 @@ class CarteSearchActeursView(SearchActeursView):
     is_carte = True
     template_name = "qfdmo/carte.html"
     form_class = CarteForm
+    displayed_acteur_form: DisplayedActeursForm
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.displayed_acteur_form = DisplayedActeursForm(self.request.GET)
+        self.displayed_acteur_form.is_valid()
 
     def get_initial(self, *args, **kwargs):
         initial = super().get_initial(*args, **kwargs)
@@ -39,6 +46,9 @@ class CarteSearchActeursView(SearchActeursView):
 
     def _get_selected_action_ids(self):
         return [a.id for a in self._get_selected_action()]
+
+    def get_sous_categories(self):
+        return self.displayed_acteur_form.cleaned_data["sous_categories"]
 
 
 class ProductCarteView(CarteSearchActeursView):

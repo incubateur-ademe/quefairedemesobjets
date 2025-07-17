@@ -17,7 +17,7 @@ from django.utils.html import format_html
 from import_export import admin as import_export_admin
 from import_export import fields, resources, widgets
 
-from core.admin import CodeLibelleModelAdmin, NotMutableMixin
+from core.admin import BaseAdmin, CodeLibelleModelAdmin, NotMutableMixin
 from qfdmo.admin.widgets import CategorieChoiceWidget, SousCategorieChoiceWidget
 from qfdmo.models import (
     Acteur,
@@ -143,7 +143,7 @@ class BaseActeurForm(forms.ModelForm):
             self.fields["source"].queryset = Source.objects.all().order_by("libelle")
 
 
-class BaseActeurAdmin(admin.GISModelAdmin):
+class BaseActeurAdmin(admin.GISModelAdmin, BaseAdmin):
     form = BaseActeurForm
     gis_widget = CustomOSMWidget
     inlines = [
