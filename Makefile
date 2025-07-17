@@ -29,12 +29,6 @@ init-certs:
 init-playwright:
 	npx playwright install --with-deps
 
-.PHONY: init-db
-init-db:
-	# TODO: executer dans le conteneur docker directement
-	psql -d "$(DB_URL)" -f scripts/sql/create_databases.sql
-	psql -d "$(DB_URL)" -f scripts/sql/create_extensions.sql
-
 .PHONY: init-dev
 init-dev:
 	# git
@@ -51,7 +45,8 @@ init-dev:
 	cp .env.template .env
 	cp ./dags/.env.template ./dags/.env
 	# prepare django
-	make init-db
+	psql -d "$(DB_URL)" -f scripts/sql/create_databases.sql
+	psql -d "$(DB_URL)" -f scripts/sql/create_extensions.sql
 	make migrate
 	make createcachetable
 	make createsuperuser

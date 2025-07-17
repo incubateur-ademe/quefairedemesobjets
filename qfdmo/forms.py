@@ -6,7 +6,6 @@ from django.http import HttpRequest
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from dsfr.forms import DsfrBaseForm
-from typing_extensions import deprecated
 
 from qfdmo.fields import GroupeActionChoiceField
 from qfdmo.geo_api import epcis_from, formatted_epcis_as_list_of_tuple
@@ -27,13 +26,6 @@ from qfdmo.widgets import (
 )
 
 
-class DisplayedActeursForm(forms.Form):
-    sous_categories = forms.ModelMultipleChoiceField(
-        queryset=SousCategorieObjet.objects.filter(afficher=True)
-    )
-
-
-@deprecated("This form will be dropped soon in favor of DisplayedActeursForm")
 class AddressesForm(forms.Form):
     def load_choices(self, request: HttpRequest, **kwargs) -> None:
         if address_placeholder := request.GET.get("address_placeholder"):
@@ -510,7 +502,9 @@ class AdvancedConfiguratorForm(forms.Form):
     action_displayed = forms.MultipleChoiceField(
         widget=DSFRCheckboxSelectMultiple(
             attrs={
-                "class": ("fr-checkbox qf-inline-grid qf-grid-cols-4 qf-gap-4 qf-m-1w"),
+                "class": (
+                    "fr-checkbox qf-inline-grid qf-grid-cols-4 qf-gap-4" " qf-m-1w"
+                ),
             },
         ),
         choices=[],
@@ -536,7 +530,9 @@ class AdvancedConfiguratorForm(forms.Form):
     action_list = forms.MultipleChoiceField(
         widget=DSFRCheckboxSelectMultiple(
             attrs={
-                "class": ("fr-checkbox qf-inline-grid qf-grid-cols-4 qf-gap-4 qf-m-1w"),
+                "class": (
+                    "fr-checkbox qf-inline-grid qf-grid-cols-4 qf-gap-4" " qf-m-1w"
+                ),
             },
         ),
         choices=[],

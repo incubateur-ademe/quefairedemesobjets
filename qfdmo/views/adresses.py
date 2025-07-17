@@ -444,9 +444,9 @@ class SearchActeursView(
         if self.get_data_from_request_or_bounded_form("bonus"):
             filters &= Q(labels__bonus=True)
 
-        if sous_categorie_ids := self.get_sous_categories():
+        if sous_categorie_id := self.get_data_from_request_or_bounded_form("sc_id", 0):
             filters &= Q(
-                proposition_services__sous_categories__id__in=sous_categorie_ids,
+                proposition_services__sous_categories__id=sous_categorie_id,
             )
 
         actions_filters = Q()
@@ -471,9 +471,6 @@ class SearchActeursView(
         filters &= actions_filters
 
         return filters, excludes
-
-    def get_sous_categories(self):
-        return [self.get_data_from_request_or_bounded_form("sc_id", 0)]
 
     def get_cached_groupe_action_with_displayed_actions(self, action_displayed):
         # Cast needed because of the cache
