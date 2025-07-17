@@ -1,6 +1,9 @@
 from sites_faciles.content_manager.blocks import (
     STREAMFIELD_COMMON_BLOCKS as SITES_FACILES_BLOCKS,
 )
+from sites_faciles.content_manager.blocks import (
+    CommonStreamBlock,
+)
 from wagtail import blocks
 from wagtail.snippets.blocks import SnippetChooserBlock
 
@@ -20,6 +23,10 @@ class ConsigneBlock(blocks.StreamBlock):
         template="blocks/reusable.html",
     )
     produit = ProductBlock()
+
+
+class ExtendedCommonStreamBlock(CommonStreamBlock):
+    consigne = ConsigneBlock()
 
 
 STREAMFIELD_COMMON_BLOCKS = [

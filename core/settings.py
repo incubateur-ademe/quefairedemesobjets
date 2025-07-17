@@ -481,6 +481,13 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = decouple.config(
 SILENCED_SYSTEM_CHECKS = ["wagtailadmin.W002"]
 WAGTAIL_SITE_NAME = "Longue vie aux objets"
 WAGTAILADMIN_BASE_URL = BASE_URL
+WAGTAIL_SEARCH_BACKENDS = {
+    "default": {
+        "BACKEND": "wagtail.search.backends.database",
+        "SEARCH_CONFIG": "wagtail_french",
+    }
+}
+
 INSTALLED_APPS.extend(
     [
         # Sites faciles
