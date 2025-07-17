@@ -196,6 +196,20 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "filters": {"hide_staticfiles": {"()": "core.logging.SkipStaticFilter"}},
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
+            "style": "{",
+        },
+        "default": {
+            # exact format is not important, this is the minimum information
+            "format": "[%(asctime)s] [%(name)s] [%(levelname)s] : %(message)s",
+        },
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
+        },
+    },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
@@ -206,18 +220,15 @@ LOGGING = {
     "loggers": {
         "django": {
             "handlers": ["console"],
+            "propagate": True,
             "level": LOGLEVEL,
         },
         "qfdmo": {
             "handlers": ["console"],
             "level": LOGLEVEL,
         },
-    },
-    "formatters": {
-        "default": {
-            # exact format is not important, this is the minimum information
-            "format": "[%(asctime)s] [%(name)s] [%(levelname)s] : %(message)s",
-        },
+        "data": {"handlers": ["console"], "level": LOGLEVEL},
+        "qfdmd": {"handlers": ["console"], "level": LOGLEVEL},
     },
 }
 

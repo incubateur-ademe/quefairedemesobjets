@@ -3,7 +3,11 @@ import logging
 from django.contrib import admin, messages
 from django.utils.html import format_html
 
-from core.admin import NotEditableMixin, NotSelfDeletableMixin
+from core.admin import (
+    BaseAdmin,
+    NotEditableMixin,
+    NotSelfDeletableMixin,
+)
 from data.models.suggestion import Suggestion, SuggestionCohorte, SuggestionStatut
 
 NB_SUGGESTIONS_DISPLAYED_WHEN_DELETING = 100
@@ -106,8 +110,7 @@ def mark_as_toproceed(self, request, queryset):
     )
 
 
-class SuggestionAdmin(NotSelfDeletableMixin, admin.ModelAdmin):
-
+class SuggestionAdmin(NotSelfDeletableMixin, BaseAdmin):
     class SuggestionCohorteFilter(admin.RelatedFieldListFilter):
         def field_choices(self, field, request, model_admin):
             return field.get_choices(include_blank=False, ordering=("-cree_le",))
