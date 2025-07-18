@@ -71,6 +71,17 @@ class ProduitPage(Page):
         null=True,
     )
 
+    @cached_property
+    def famille(self):
+        if famille := self.get_ancestors().type(FamilyPage).first():
+            return famille
+        return famille
+
+    @cached_property
+    def compiled_body(self):
+        if not getattr(self, "body") and self.famille:
+            return self.famille.specific.body
+
     genre = models.CharField("Genre", choices=[("m", "Masculin"), ("f", "Féminin")])
     nombre = models.IntegerField("Nombre", choices=[(1, "singulier"), (2, "pluriel")])
     usage_unique = models.BooleanField(
