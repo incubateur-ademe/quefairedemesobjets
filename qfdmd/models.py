@@ -44,14 +44,28 @@ class ReusableContent(index.Indexed, models.Model):
         verbose_name_plural = "Contenus réutilisable"
 
 
-class ProduitIndexPage(Page):
+class CompiledFieldMixin:
+    @cached_property
+    def famille(self):
+        if famille := self.get_ancestors().type(FamilyPage).first():
+            return famille
+        return famille
+
+    @cached_property
+    def compiled_body(self):
+        if not getattr(self, "body") and self.famille:
+            return self.famille.specific.body
+        return self.body
+
+
+class ProduitIndexPage(Page, CompiledFieldMixin):
     subpage_types = ["qfdmd.produitpage", "qfdmd.familypage"]
 
     class Meta:
         verbose_name = "Index des familles & produits"
 
 
-class ProduitPage(Page):
+class ProduitPage(Page, CompiledFieldMixin):
     subpage_types = [
         "qfdmd.synonymepage",
     ]
@@ -70,18 +84,6 @@ class ProduitPage(Page):
         blank=True,
         null=True,
     )
-
-    @cached_property
-    def famille(self):
-        if famille := self.get_ancestors().type(FamilyPage).first():
-            return famille
-        return famille
-
-    @cached_property
-    def compiled_body(self):
-        if not getattr(self, "body") and self.famille:
-            return self.famille.specific.body
-        return self.body
 
     genre = models.CharField("Genre", choices=[("m", "Masculin"), ("f", "Féminin")])
     nombre = models.IntegerField("Nombre", choices=[(1, "singulier"), (2, "pluriel")])
