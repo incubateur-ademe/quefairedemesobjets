@@ -18,7 +18,8 @@ def richtext_with_objet(reusable_content, page):
     """
     TODO: docstring
     """
-    return richtext(reusable_content.replace("&lt;objet&gt;", page.title))
+    replacement = page.titre_phrase if page.titre_phrase else page.title
+    return richtext(reusable_content.replace("&lt;objet&gt;", replacement))
 
 
 @register.inclusion_tag("components/patchwork/patchwork.html")

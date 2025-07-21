@@ -1,6 +1,7 @@
 import logging
 from urllib.parse import urlencode
 
+import sites_faciles
 from django.contrib.gis.db import models
 from django.db.models import CheckConstraint, Q
 from django.db.models.functions import Now
@@ -16,8 +17,11 @@ from wagtail.models import Page
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
 
-from qfdmd.blocks import STREAMFIELD_COMMON_BLOCKS
+from qfdmd.blocks import STREAMFIELD_COMMON_BLOCKS, ExtendedCommonStreamBlock
 from qfdmo.models.utils import NomAsNaturalKeyModel
+
+sites_faciles.content_manager.blocks.CommonStreamBlock = ExtendedCommonStreamBlock
+
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +32,7 @@ class ReusableContent(index.Indexed, models.Model):
     content = RichTextField()
     panels = ["title", "content"]
     search_fields = [
+        index.SearchField("title"),
         index.AutocompleteField("title"),
     ]
 
@@ -66,11 +71,27 @@ class ProduitPage(Page):
         null=True,
     )
 
+    @cached_property
+    def famille(self):
+        if famille := self.get_ancestors().type(FamilyPage).first():
+            return famille
+        return famille
+
+    @cached_property
+    def compiled_body(self):
+        if not getattr(self, "body") and self.famille:
+            return self.famille.specific.body
+
     genre = models.CharField("Genre", choices=[("m", "Masculin"), ("f", "Féminin")])
     nombre = models.IntegerField("Nombre", choices=[(1, "singulier"), (2, "pluriel")])
     usage_unique = models.BooleanField(
         "À usage unique",
         default=False,
+    )
+    titre_phrase = models.CharField(
+        "Titre utilisé dans les phrases",
+        help_text="Ce titre sera utilisé dans les contenus réutilisables, "
+        "pour l'affichage du synonyme de recherche",
     )
 
     infotri = StreamField([("image", ImageBlock())], blank=True)
@@ -144,6 +165,7 @@ class ProduitPage(Page):
     ]
 
     config_panels = [
+        FieldPanel("titre_phrase"),
         FieldPanel("genre"),
         FieldPanel("nombre"),
         FieldPanel("usage_unique"),
