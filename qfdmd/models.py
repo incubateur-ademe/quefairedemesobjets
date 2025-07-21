@@ -81,6 +81,7 @@ class ProduitPage(Page):
     def compiled_body(self):
         if not getattr(self, "body") and self.famille:
             return self.famille.specific.body
+        return self.body
 
     genre = models.CharField("Genre", choices=[("m", "Masculin"), ("f", "Féminin")])
     nombre = models.IntegerField("Nombre", choices=[(1, "singulier"), (2, "pluriel")])
