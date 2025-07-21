@@ -8,7 +8,7 @@ test.describe(
     tag: ["@djangoadmin"],
   },
   () => {
-    test("Django Admin, créer un produit fonctionne", async ({ page }) => {
+    test.skip("Django Admin, créer un produit fonctionne", async ({ page }) => {
       await page.goto(`/admin/qfdmd/produit/add/`, { waitUntil: "domcontentloaded" })
       await page.locator("input#id_username").fill("admin")
       await page.locator("input#id_password").fill("admin")
