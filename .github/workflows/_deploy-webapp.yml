@@ -1,0 +1,22 @@
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+
+jobs:
+  deploy-django:
+    name: 🗺️ Carte & assistant
+    uses: ./.github/workflows/_deploy-on-scalingo.yml
+    secrets: inherit # pragma: allowlist secret`
+    with:
+      environment: ${{ inputs.environment }}
+      # Name of environment variable set in github environment
+      app_name_key: DJANGO_SCALINGO_APP_NAME
+
+# Address actions/missing-workflow-permissions rule in
+# code scanning alerts
+permissions:
+  contents: read
+

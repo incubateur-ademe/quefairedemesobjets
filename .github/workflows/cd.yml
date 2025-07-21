@@ -13,14 +13,21 @@ jobs:
     name: 🤖 CI
     uses: ./.github/workflows/ci.yml
 
-  preprod:
-    name: 🟠 Preprod
-    uses: ./.github/workflows/_cd-by-environment.yml
+  webapp:
+    name: 🟠 Webapp
+    uses: ./.github/workflows/_deploy-webapp.yml
     secrets: inherit # pragma: allowlist secret`
     needs: [ci]
     with:
       environment: preprod
 
+  airflow:
+    name: 🟠 Airflow
+    uses: ./.github/workflows/_deploy-airflow.yml
+    secrets: inherit # pragma: allowlist secret`
+    needs: [ci]
+    with:
+      environment: preprod
 
   # Common release-drafter configuration
   # From https://github.com/marketplace/actions/release-drafter
@@ -53,9 +60,9 @@ jobs:
           config-name: release-config.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    needs: [preprod]
+    needs: [webapp]
     if: ${{ !contains( github.ref_name, 'hotfix') }}
-    
+
   # Hotfix-only release draft update
   update_release_draft_for_hotfix:
     # Uncomment when anchor are supported in GitHub Actions
