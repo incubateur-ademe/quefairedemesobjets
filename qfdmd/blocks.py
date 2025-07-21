@@ -1,3 +1,5 @@
+from django.utils.translation import gettext_lazy as _
+from sites_faciles.content_manager import blocks as sites_faciles_blocks
 from sites_faciles.content_manager.blocks import (
     STREAMFIELD_COMMON_BLOCKS as SITES_FACILES_BLOCKS,
 )
@@ -15,21 +17,28 @@ class ProductBlock(blocks.StructBlock):
     produit = SnippetChooserBlock("qfdmd.produit", label="produit")
 
 
-class ConsigneBlock(blocks.StreamBlock):
-    paragraph = blocks.RichTextBlock(label="Texte libre")
+class ExtendedCommonStreamBlock(CommonStreamBlock):
     reusable = SnippetChooserBlock(
         "qfdmd.reusablecontent",
         label="Contenu réutilisable",
         template="blocks/reusable.html",
     )
-    produit = ProductBlock()
 
 
-class ExtendedCommonStreamBlock(CommonStreamBlock):
-    consigne = ConsigneBlock()
+class ColumnBlock(sites_faciles_blocks.ColumnBlock, ExtendedCommonStreamBlock):
+    pass
+
+
+class TabBlock(sites_faciles_blocks.TabBlock):
+    content = ColumnBlock(label=_("Content"))
+
+
+class TabsBlock(sites_faciles_blocks.TabsBlock):
+    tabs = TabBlock(label=_("Tab"), min_num=1, max_num=15)
 
 
 STREAMFIELD_COMMON_BLOCKS = [
+    *SITES_FACILES_BLOCKS,
     (
         "reusable",
         SnippetChooserBlock(
@@ -38,5 +47,5 @@ STREAMFIELD_COMMON_BLOCKS = [
             template="blocks/reusable.html",
         ),
     ),
-    *SITES_FACILES_BLOCKS,
+    ("tabs", TabsBlock(label=_("Tabs"), group=_("DSFR components"))),
 ]
