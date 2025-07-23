@@ -161,7 +161,7 @@ class QuerysetFilter(InputFilter):
         return queryset
 
 
-class BaseAdmin(admin.ModelAdmin):
+class QuerysetFilterAdmin(admin.ModelAdmin):
     """
     A base Django admin class that automatically adds a custom queryset filter
     to the list of filters in the admin interface.
