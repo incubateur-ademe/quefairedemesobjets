@@ -4,9 +4,9 @@ from django.contrib import admin, messages
 from django.utils.html import format_html
 
 from core.admin import (
-    BaseAdmin,
     NotEditableMixin,
     NotSelfDeletableMixin,
+    QuerysetFilterAdmin,
 )
 from data.models.suggestion import Suggestion, SuggestionCohorte, SuggestionStatut
 
@@ -110,7 +110,7 @@ def mark_as_toproceed(self, request, queryset):
     )
 
 
-class SuggestionAdmin(NotSelfDeletableMixin, BaseAdmin):
+class SuggestionAdmin(NotSelfDeletableMixin, QuerysetFilterAdmin):
     class SuggestionCohorteFilter(admin.RelatedFieldListFilter):
         def field_choices(self, field, request, model_admin):
             return field.get_choices(include_blank=False, ordering=("-cree_le",))
