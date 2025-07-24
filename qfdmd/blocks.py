@@ -37,8 +37,21 @@ class TabsBlock(sites_faciles_blocks.TabsBlock):
     tabs = TabBlock(label=_("Tab"), min_num=1, max_num=15)
 
 
+class Bonus(blocks.StaticBlock):
+    class Meta:
+        template = "blocks/bonus.html"
+        label = "Bonus réparation"
+
+
+class Override(blocks.StructBlock):
+    id = blocks.CharBlock()
+    content = ExtendedCommonStreamBlock()
+
+
 STREAMFIELD_COMMON_BLOCKS = [
     *SITES_FACILES_BLOCKS,
+    ("override", Override()),
+    ("bonus", Bonus()),
     (
         "reusable",
         SnippetChooserBlock(
