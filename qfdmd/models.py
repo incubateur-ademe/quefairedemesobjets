@@ -10,7 +10,13 @@ from django.urls.base import reverse
 from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
 from django_extensions.db.fields import AutoSlugField
-from wagtail.admin.panels import FieldPanel, HelpPanel, ObjectList, TabbedInterface
+from wagtail.admin.panels import (
+    FieldPanel,
+    HelpPanel,
+    MultiFieldPanel,
+    ObjectList,
+    TabbedInterface,
+)
 from wagtail.fields import RichTextField, StreamField
 from wagtail.images.blocks import ImageBlock
 from wagtail.models import Page
@@ -27,10 +33,30 @@ logger = logging.getLogger(__name__)
 
 
 @register_snippet
+class Bonus(index.Indexed, models.Model):
+    title = models.CharField(unique=True)
+    montant_min = models.IntegerField()
+    montant_max = models.IntegerField(null=True)
+
+    search_fields = [
+        index.SearchField("title"),
+        index.AutocompleteField("title"),
+    ]
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name_plural = "Bonus"
+        verbose_name = "Bonus"
+
+
+@register_snippet
 class ReusableContent(index.Indexed, models.Model):
-    title = models.CharField()
+    title = models.CharField(unique=True)
+    # Ajout un par genre / nombre
     content = RichTextField()
-    panels = ["title", "content"]
+    # panels = ["title", "content"]
     search_fields = [
         index.SearchField("title"),
         index.AutocompleteField("title"),
@@ -57,6 +83,16 @@ class CompiledFieldMixin:
             return self.famille.specific.body
         return self.body
 
+    @cached_property
+    def compiled_bonus(self):
+        if (
+            not getattr(self, "bonus")
+            and self.famille
+            and not getattr(self, "disable_bonus_inheritance")
+        ):
+            return self.famille.specific.bonus
+        return self.bonus
+
 
 class ProduitIndexPage(Page, CompiledFieldMixin):
     subpage_types = ["qfdmd.produitpage", "qfdmd.familypage"]
@@ -70,6 +106,16 @@ class ProduitPage(Page, CompiledFieldMixin):
         "qfdmd.synonymepage",
     ]
     parent_page_types = ["qfdmd.produitindexpage", "qfdmd.familypage"]
+    bonus = models.ForeignKey(
+        "qfdmd.bonus",
+        on_delete=models.SET_NULL,
+        related_name="produit_page",
+        blank=True,
+        null=True,
+    )
+    disable_bonus_inheritance = models.BooleanField(
+        "Désactiver l'héritage du bonus", default=False
+    )
     produit = models.ForeignKey(
         "qfdmd.produit",
         on_delete=models.SET_NULL,
@@ -168,9 +214,21 @@ class ProduitPage(Page, CompiledFieldMixin):
     ]
 
     config_panels = [
-        FieldPanel("titre_phrase"),
-        FieldPanel("genre"),
-        FieldPanel("nombre"),
+        MultiFieldPanel(
+            [
+                FieldPanel("titre_phrase"),
+                FieldPanel("genre"),
+                FieldPanel("nombre"),
+            ],
+            heading="Dynamisation des contenus",
+        ),
+        MultiFieldPanel(
+            [
+                FieldPanel("bonus"),
+                FieldPanel("disable_bonus_inheritance"),
+            ],
+            heading="Bonus",
+        ),
         FieldPanel("usage_unique"),
     ]
 
