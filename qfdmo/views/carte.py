@@ -15,15 +15,12 @@ class CarteSearchActeursView(SearchActeursView):
     is_carte = True
     template_name = "qfdmo/carte.html"
     form_class = CarteForm
-    displayed_acteur_form: DisplayedActeursForm
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.displayed_acteur_form = DisplayedActeursForm(self.request.GET)
-        self.displayed_acteur_form.is_valid()
-
     def get_initial(self, *args, **kwargs):
+
         initial = super().get_initial(*args, **kwargs)
         action_displayed = self._set_action_displayed()
         grouped_action_choices = self._get_grouped_action_choices(action_displayed)
@@ -40,15 +37,33 @@ class CarteSearchActeursView(SearchActeursView):
         return initial
 
     def get_context_data(self, **kwargs):
+        logger.info("get_context_data 🪏")
+        logger.info(f"{self.request.GET=}")
+        self.displayed_acteur_form = DisplayedActeursForm(self.request.GET)
+        if not self.displayed_acteur_form.is_valid():
+            logger.error(f"Form is valid {self.displayed_acteur_form=}")
+
         context = super().get_context_data(**kwargs)
-        context.update(is_carte=True, map_container_id="carte")
+        context.update(
+            is_carte=True,
+            map_container_id="carte",
+            displayed_acteur_form=self.displayed_acteur_form,
+        )
+
         return context
 
     def _get_selected_action_ids(self):
         return [a.id for a in self._get_selected_action()]
 
     def get_sous_categories(self):
-        return self.displayed_acteur_form.cleaned_data["sous_categories"]
+        logger.info("get_sous_categories 💣")
+        if sous_categories := self.displayed_acteur_form.cleaned_data.get(
+            "sous_categories"
+        ):
+            logger.info(f"{sous_categories=}")
+            return sous_categories.values_list("pk", flat=True)
+
+        return []
 
 
 class ProductCarteView(CarteSearchActeursView):

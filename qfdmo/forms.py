@@ -29,7 +29,10 @@ from qfdmo.widgets import (
 
 class DisplayedActeursForm(forms.Form):
     sous_categories = forms.ModelMultipleChoiceField(
-        queryset=SousCategorieObjet.objects.filter(afficher=True)
+        required=False,
+        initial=SousCategorieObjet.objects.none(),
+        queryset=SousCategorieObjet.objects.filter(afficher=True),
+        widget=forms.MultipleHiddenInput,
     )
 
 

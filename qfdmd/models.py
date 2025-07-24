@@ -344,7 +344,7 @@ class Produit(index.Indexed, AbstractBaseProduit):
         )
 
         settings_querydict.setlist(
-            "sous_categorie", sous_categories.values_list("id", flat=True)
+            "sous_categories", sous_categories.values_list("id", flat=True)
         )
 
         return settings_querydict
