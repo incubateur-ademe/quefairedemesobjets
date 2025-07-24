@@ -1,10 +1,10 @@
 import logging
-from urllib.parse import urlencode
 
 import sites_faciles
 from django.contrib.gis.db import models
 from django.db.models import CheckConstraint, Q
 from django.db.models.functions import Now
+from django.http import QueryDict
 from django.template.loader import render_to_string
 from django.urls.base import reverse
 from django.utils.functional import cached_property
@@ -327,17 +327,27 @@ class Produit(index.Indexed, AbstractBaseProduit):
     @property
     def carte_settings(self):
         # TODO : gérer plusieurs catégories ici
-        sous_categorie = self.sous_categories.filter(afficher_carte=True).first()
-        if not sous_categorie:
-            return {}
+        sous_categories = self.sous_categories.filter(afficher_carte=True).all()
+        settings_querydict = QueryDict(mutable=True)
 
-        return {
-            "direction": "jai",
-            "first_dir": "jai",
-            "limit": 25,
-            "sc_id": sous_categorie.id,
-            "sous_categorie_objet": sous_categorie.libelle,
-        }
+        if not sous_categories:
+            return settings_querydict
+
+        settings_querydict.update(
+            {
+                "direction": "jai",
+                "first_dir": "jai",
+                "limit": 25,
+                "sc_id": sous_categories.first().id,
+                "sous_categorie_objet": sous_categories.first().libelle,
+            }
+        )
+
+        settings_querydict.setlist(
+            "sous_categorie", sous_categories.values_list("id", flat=True)
+        )
+
+        return settings_querydict
 
     @cached_property
     def en_savoir_plus(self):
@@ -450,16 +460,21 @@ class Synonyme(index.Indexed, AbstractBaseProduit):
         carte_settings = self.produit.carte_settings
         if actions:
             carte_settings.update(
-                action_list=actions,
-                action_displayed=actions,
+                {
+                    "action_list": actions,
+                    "action_displayed": actions,
+                }
             )
 
         if map_container_id:
             carte_settings.update(
-                map_container_id=map_container_id,
+                {
+                    "map_container_id": map_container_id,
+                }
             )
 
-        params = urlencode(carte_settings)
+        params = carte_settings.urlencode()
+        logger.info(f"{params=}")
         url = reverse("qfdmd:carte", args=[self.slug])
         return f"{url}?{params}"
 
