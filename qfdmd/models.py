@@ -471,7 +471,6 @@ class Synonyme(index.Indexed, AbstractBaseProduit):
             )
 
         params = carte_settings.urlencode()
-        logger.info(f"{params=}")
         url = reverse("qfdmd:carte", args=[self.slug])
         return f"{url}?{params}"
 
