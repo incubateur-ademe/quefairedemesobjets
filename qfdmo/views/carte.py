@@ -4,7 +4,7 @@ from django.db.models import Q
 from django.utils.functional import cached_property
 from django.views.generic import DetailView
 
-from qfdmo.forms import CarteForm
+from qfdmo.forms import CarteForm, DisplayedActeursForm
 from qfdmo.models import CarteConfig
 from qfdmo.views.adresses import SearchActeursView
 
@@ -33,12 +33,30 @@ class CarteSearchActeursView(SearchActeursView):
         return initial
 
     def get_context_data(self, **kwargs):
+        self.displayed_acteur_form = DisplayedActeursForm(self.request.GET)
+
+        if not self.displayed_acteur_form.is_valid():
+            logger.error(f"Form is valid {self.displayed_acteur_form=}")
+
         context = super().get_context_data(**kwargs)
-        context.update(is_carte=True, map_container_id="carte")
+        context.update(
+            is_carte=True,
+            map_container_id="carte",
+            displayed_acteur_form=self.displayed_acteur_form,
+        )
+
         return context
 
     def _get_selected_action_ids(self):
         return [a.id for a in self._get_selected_action()]
+
+    def get_sous_categories(self):
+        if sous_categories := self.displayed_acteur_form.cleaned_data.get(
+            "sous_categories"
+        ):
+            return sous_categories.values_list("pk", flat=True)
+
+        return super().get_sous_categories()
 
 
 class ProductCarteView(CarteSearchActeursView):
@@ -57,11 +75,6 @@ class ProductCarteView(CarteSearchActeursView):
 class CustomCarteView(DetailView, CarteSearchActeursView):
     model = CarteConfig
     context_object_name = "carte_config"
-
-    def get_context_data(self, *args, **kwargs):
-        ctx = super().get_context_data(*args, **kwargs)
-
-        return ctx
 
     @cached_property
     def groupe_actions(self):
