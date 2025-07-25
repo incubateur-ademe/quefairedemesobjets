@@ -5,7 +5,7 @@ import re
 import string
 import uuid
 from copy import deepcopy
-from typing import Any, List, cast
+from typing import Any, cast
 from urllib.parse import urlencode
 
 import opening_hours
@@ -1103,16 +1103,16 @@ class DisplayedActeur(BaseActeur):
         return reverse("qfdmo:acteur-detail", args=[self.uuid])
 
     def acteur_actions(
-        self, direction=None, actions_codes=None, sous_categorie_id=None
+        self, direction=None, actions_codes=None, sous_categorie_ids=None
     ):
         pss = self.proposition_services.all()
         # Cast needed because of the cache
         cached_action_instances = cast(
-            List[Action], cache.get_or_set("_action_instances", get_action_instances)
+            list[Action], cache.get_or_set("_action_instances", get_action_instances)
         )
 
-        if sous_categorie_id:
-            pss = pss.filter(sous_categories__id__in=[sous_categorie_id])
+        if sous_categorie_ids:
+            pss = pss.filter(sous_categories__id__in=sous_categorie_ids)
         if direction:
             pss = pss.filter(action__directions__code__in=[direction])
         if actions_codes:
@@ -1166,14 +1166,20 @@ class DisplayedActeur(BaseActeur):
         carte: bool = False,
         carte_config: CarteConfig = None,
         sous_categorie_id: str | None = None,
+        displayed_acteur_form=None,
     ) -> str:
         # TODO: refacto jinja: once the shared/results.html template
         # will be migrated to django template, this method should
         # live in a template_tags instead.
+        sous_categorie_ids = [sous_categorie_id]
+
+        if sous_categories := displayed_acteur_form.cleaned_data.get("sous_categories"):
+            sous_categorie_ids = sous_categories.values_list("id", flat=True)
+
         actions = self.acteur_actions(
             direction=direction,
             actions_codes=action_list,
-            sous_categorie_id=sous_categorie_id,
+            sous_categorie_ids=sous_categorie_ids,
         )
 
         def sort_actions_by_action_principale_and_order(a):
