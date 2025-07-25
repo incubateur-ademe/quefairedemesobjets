@@ -82,7 +82,7 @@ package-mode = false
 python = "^3.12,<3.13"
 api-insee = "^1.6"
 boto3 = "<1.36"
-dj-database-url = "^3.0.0"
+dj-database-url = "^3.0.1"
 django = "<=5.2.4" # cf. https://github.com/django/django/issues/16589
 django-extensions = "^4.1"
 django-import-export = {extras = ["xls", "xlsx"], version = "^4.3.8"}
@@ -96,7 +96,7 @@ pillow = "^11.2.1"
 psycopg2 = "^2.9.10"
 python-decouple = "^3.8"
 requests = "^2.32.4"
-sentry-sdk = "^2.32.0"
+sentry-sdk = "^2.33.2"
 shortuuid = "^1.0.13"
 tqdm = "^4.67.1"
 unidecode = "^1.4.0"
