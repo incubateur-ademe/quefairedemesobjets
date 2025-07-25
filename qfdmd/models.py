@@ -326,7 +326,6 @@ class Produit(index.Indexed, AbstractBaseProduit):
 
     @property
     def carte_settings(self):
-        # TODO : gérer plusieurs catégories ici
         sous_categories = self.sous_categories.filter(afficher_carte=True).all()
         settings_querydict = QueryDict(mutable=True)
 
@@ -338,8 +337,6 @@ class Produit(index.Indexed, AbstractBaseProduit):
                 "direction": "jai",
                 "first_dir": "jai",
                 "limit": 25,
-                "sc_id": sous_categories.first().id,
-                "sous_categorie_objet": sous_categories.first().libelle,
             }
         )
 
