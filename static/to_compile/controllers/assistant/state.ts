@@ -114,17 +114,17 @@ export default class extends Controller<HTMLElement> {
   updateUIFromGlobalState(outlet) {
     const value = this.locationValue
     let touched = false
-    if (value.adresse && value.adresse !== outlet.inputTarget.value) {
+    if (value.adresse) {
       outlet.inputTarget.value = value.adresse
       touched = true
     }
 
-    if (value.latitude && outlet.latitudeTarget.value !== value.latitude) {
+    if (value.latitude) {
       outlet.latitudeTarget.value = value.latitude
       touched = true
     }
 
-    if (value.longitude && outlet.longitudeTarget.value !== value.longitude) {
+    if (value.longitude) {
       outlet.longitudeTarget.value = value.longitude
       touched = true
     }
