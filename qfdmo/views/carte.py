@@ -16,9 +16,6 @@ class CarteSearchActeursView(SearchActeursView):
     template_name = "qfdmo/carte.html"
     form_class = CarteForm
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     def get_initial(self, *args, **kwargs):
         initial = super().get_initial(*args, **kwargs)
         action_displayed = self._set_action_displayed()
@@ -37,6 +34,7 @@ class CarteSearchActeursView(SearchActeursView):
 
     def get_context_data(self, **kwargs):
         self.displayed_acteur_form = DisplayedActeursForm(self.request.GET)
+
         if not self.displayed_acteur_form.is_valid():
             logger.error(f"Form is valid {self.displayed_acteur_form=}")
 
@@ -58,7 +56,7 @@ class CarteSearchActeursView(SearchActeursView):
         ):
             return sous_categories.values_list("pk", flat=True)
 
-        return []
+    #     return super().get_sous_categories()
 
 
 class ProductCarteView(CarteSearchActeursView):
@@ -77,11 +75,6 @@ class ProductCarteView(CarteSearchActeursView):
 class CustomCarteView(DetailView, CarteSearchActeursView):
     model = CarteConfig
     context_object_name = "carte_config"
-
-    def get_context_data(self, *args, **kwargs):
-        ctx = super().get_context_data(*args, **kwargs)
-
-        return ctx
 
     @cached_property
     def groupe_actions(self):

@@ -105,25 +105,23 @@ class LegacyMethodsMixin:
 
     def get_sc_id(self, initial) -> str | None:
         return (
-            self.get_data_from_request_or_bounded_form("sc_id")
-            if initial["sous_categorie_objet"]
-            else None
+            self.request.GET.get("sc_id") if initial["sous_categorie_objet"] else None
         )
 
     def get_sous_categories_ids(self) -> list[int]:
         return [self.get_data_from_request_or_bounded_form("sc_id", 0)]
 
     def get_adresse(self) -> str:
-        return self.get_data_from_request_or_bounded_form("adresse")
+        return self.request.GET.get("adresse")
 
     def get_longitude(self) -> str:
-        return self.get_data_from_request_or_bounded_form("longitude")
+        return self.request.GET.get("longitude")
 
     def get_latitude(self) -> str:
-        return self.get_data_from_request_or_bounded_form("latitude")
+        return self.request.GET.get("latitude")
 
     def get_digital(self) -> str:
-        return self.get_data_from_request_or_bounded_form("digital", "0")
+        return self.request.GET.get("digital", "0")
 
     def get_data_from_request_or_bounded_form(self, key: str, default=None):
         """Temporary dummy method
@@ -248,8 +246,6 @@ class SearchActeursView(
         kwargs.update(
             # TODO: refacto forms : define a BooleanField carte on CarteAddressesForm
             carte=self.is_carte,
-            # TODO: refacto forms, return bounded form in template
-            # form=form,
             location="{}",
         )
 
