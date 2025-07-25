@@ -470,9 +470,6 @@ class TestRevisionActeurDuplicate:
         label2 = LabelQualiteFactory()
         revision_acteur.labels.add(label1)
         revision_acteur.labels.add(label2)
-
-        print(revision_acteur.labels.all())
-
         revision_acteur_duplicate = revision_acteur.duplicate()
 
         assert revision_acteur_duplicate.labels.count() == 2

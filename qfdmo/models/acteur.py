@@ -1112,7 +1112,6 @@ class DisplayedActeur(BaseActeur):
         )
 
         if sous_categorie_ids:
-            print(f"{sous_categorie_ids=}")
             pss = pss.filter(sous_categories__id__in=sous_categorie_ids)
         if direction:
             pss = pss.filter(action__directions__code__in=[direction])

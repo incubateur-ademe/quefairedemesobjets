@@ -109,7 +109,11 @@ class LegacyMethodsMixin:
         )
 
     def get_sous_categories_ids(self) -> list[int]:
-        return [self.get_data_from_request_or_bounded_form("sc_id", 0)]
+        sous_categorie = self.get_data_from_request_or_bounded_form("sc_id", 0)
+        if not sous_categorie:
+            return []
+
+        return [sous_categorie]
 
     def get_adresse(self) -> str:
         return self.request.GET.get("adresse")

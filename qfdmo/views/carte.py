@@ -56,7 +56,7 @@ class CarteSearchActeursView(SearchActeursView):
         ):
             return sous_categories.values_list("pk", flat=True)
 
-    #     return super().get_sous_categories()
+        return super().get_sous_categories()
 
 
 class ProductCarteView(CarteSearchActeursView):
