@@ -1112,6 +1112,7 @@ class DisplayedActeur(BaseActeur):
         )
 
         if sous_categorie_ids:
+            print(f"{sous_categorie_ids=}")
             pss = pss.filter(sous_categories__id__in=sous_categorie_ids)
         if direction:
             pss = pss.filter(action__directions__code__in=[direction])
@@ -1171,10 +1172,15 @@ class DisplayedActeur(BaseActeur):
         # TODO: refacto jinja: once the shared/results.html template
         # will be migrated to django template, this method should
         # live in a template_tags instead.
-        sous_categorie_ids = [sous_categorie_id]
+        sous_categorie_ids = []
 
-        if sous_categories := displayed_acteur_form.cleaned_data.get("sous_categories"):
+        if (
+            sous_categories := displayed_acteur_form
+            and displayed_acteur_form.cleaned_data.get("sous_categories")
+        ):
             sous_categorie_ids = sous_categories.values_list("id", flat=True)
+        elif sous_categorie_id:
+            sous_categorie_ids.append(sous_categorie_id)
 
         actions = self.acteur_actions(
             direction=direction,
